@@ -1,0 +1,55 @@
+name: shiftbell
+description: 교대근무자를 위한 자동 알람 관리 앱
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  path: ^1.8.3
+
+  numberpicker: ^2.1.2
+
+  # 알람 관련
+  flutter_local_notifications: ^17.0.0
+  # android_alarm_manager_plus: ^4.0.0
+  timezone: ^0.9.2
+  permission_handler: ^11.0.0
+  
+  # 로컬 저장소
+  shared_preferences: ^2.2.2
+  sqflite: ^2.3.0
+  path_provider: ^2.1.1
+  
+  # 상태 관리
+  provider: ^6.1.1
+  
+  # UI
+  intl: ^0.19.0
+  table_calendar: ^3.0.9
+  flutter_screenutil: ^5.9.0
+
+  # 유틸
+  uuid: ^4.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  # 에셋 (Phase 2에서 추가 예정)
+  # assets:
+  #   - assets/sounds/
+  #   - assets/images/
+
+# 앱 아이콘 (나중에 설정)
+# flutter_launcher_icons:
+#   android: true
+#   image_path: "assets/images/app_icon.png"

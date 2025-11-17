@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#DD000000"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <!-- 시계 아이콘 -->
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@android:drawable/ic_lock_idle_alarm"
+        android:tint="#FFFFFF"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- 현재 시간 -->
+    <TextView
+        android:id="@+id/timeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="09:30"
+        android:textSize="48sp"
+        android:textColor="#FFFFFF"
+        android:fontFamily="sans-serif-light"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- 버튼들 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+        
+        <!-- 끄기 버튼 -->
+        <Button
+            android:id="@+id/dismissButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="끄기"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:background="@android:color/holo_red_dark"
+            android:layout_marginEnd="8dp"/>
+        
+        <!-- 5분 후 버튼 -->
+        <Button
+            android:id="@+id/snoozeButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="5분 후"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:background="@android:color/holo_blue_dark"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+</LinearLayout>
