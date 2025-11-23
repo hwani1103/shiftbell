@@ -25,6 +25,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
                 // ⭐ Overlay가 울리고 있을 수 있으므로 종료 신호 발송
                 val dismissIntent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
+                    setPackage(context.packageName)  // Android 13+ RECEIVER_NOT_EXPORTED 대응
                     putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
                 }
                 context.sendBroadcast(dismissIntent)
@@ -43,6 +44,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
                 // ⭐ Overlay가 울리고 있을 수 있으므로 종료 신호 발송
                 val snoozeIntent = Intent(AlarmOverlayService.ACTION_SNOOZE_OVERLAY).apply {
+                    setPackage(context.packageName)  // Android 13+ RECEIVER_NOT_EXPORTED 대응
                     putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
                 }
                 context.sendBroadcast(snoozeIntent)

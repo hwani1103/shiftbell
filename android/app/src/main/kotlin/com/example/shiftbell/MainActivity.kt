@@ -182,6 +182,7 @@ override fun onNewIntent(intent: Intent) {
                 "dismissOverlay" -> {
                     val alarmId = call.argument<Int>("alarmId") ?: -1
                     val intent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
+                        setPackage(packageName)  // Android 13+ RECEIVER_NOT_EXPORTED 대응
                         putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
                     }
                     sendBroadcast(intent)
@@ -192,6 +193,7 @@ override fun onNewIntent(intent: Intent) {
                 "snoozeOverlay" -> {
                     val alarmId = call.argument<Int>("alarmId") ?: -1
                     val intent = Intent(AlarmOverlayService.ACTION_SNOOZE_OVERLAY).apply {
+                        setPackage(packageName)  // Android 13+ RECEIVER_NOT_EXPORTED 대응
                         putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
                     }
                     sendBroadcast(intent)
