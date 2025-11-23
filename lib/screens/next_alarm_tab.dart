@@ -118,8 +118,8 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   
   Future<void> _snoozeAlarm(int id, DateTime originalDate) async {
     try {
-      // ⭐ 수정: 현재 시간 기준 5분 후 (Native와 동일하게)
-      final newDate = DateTime.now().add(Duration(minutes: 5));
+      // 알람 예정 시간 기준 5분 후 (알람 울리기 전 미리 연장하는 기능)
+      final newDate = originalDate.add(Duration(minutes: 5));
 
       final alarms = await DatabaseService.instance.getAllAlarms();
       final alarm = alarms.firstWhere((a) => a.id == id);
