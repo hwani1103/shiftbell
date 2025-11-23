@@ -7,6 +7,8 @@ import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -23,22 +25,178 @@ class AlarmOverlayService : Service() {
     private var windowManager: WindowManager? = null
     private var overlayView: android.view.View? = null
     private var alarmId: Int = 0
+    private var alarmTimeStr: String = ""  // 알람 시간 저장
+    private var alarmLabel: String = "알람"  // 알람 라벨 저장
+    private var timeoutHandler: Handler? = null
+    private var timeoutRunnable: Runnable? = null
+    private var alarmDuration: Int = 1  // 기본 1분 (테스트용)
     
     override fun onBind(intent: Intent?): IBinder? = null
     
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         alarmId = intent?.getIntExtra("alarmId", 0) ?: 0
-        
+
         // Overlay 권한 체크
         if (!canDrawOverlays()) {
             Log.e("AlarmOverlayService", "Overlay 권한 없음!")
             stopSelf()
             return START_NOT_STICKY
         }
-        
+
+        // DB에서 알람 정보 조회
+        loadAlarmInfo()
+
         showOverlay()
-        
+        startTimeoutTimer()
+
         return START_NOT_STICKY
+    }
+
+    private fun loadAlarmInfo() {
+        try {
+            val dbHelper = DatabaseHelper.getInstance(applicationContext)
+            val db = dbHelper.readableDatabase
+
+            val cursor = db.query(
+                "alarms",
+                arrayOf("time", "shift_type", "alarm_type_id"),
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+
+            if (cursor.moveToFirst()) {
+                alarmTimeStr = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
+                alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
+
+                // alarm_type_id로 duration 조회
+                val typeCursor = db.query(
+                    "alarm_types",
+                    arrayOf("duration"),
+                    "id = ?",
+                    arrayOf(alarmTypeId.toString()),
+                    null, null, null
+                )
+
+                if (typeCursor.moveToFirst()) {
+                    alarmDuration = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("duration"))
+                }
+                typeCursor.close()
+            }
+            cursor.close()
+            db.close()
+
+            Log.d("AlarmOverlay", "✅ 알람 정보 로드: time=$alarmTimeStr, label=$alarmLabel, duration=${alarmDuration}분")
+        } catch (e: Exception) {
+            Log.e("AlarmOverlay", "❌ 알람 정보 로드 실패", e)
+        }
+    }
+
+    private fun startTimeoutTimer() {
+        timeoutHandler = Handler(Looper.getMainLooper())
+        timeoutRunnable = Runnable {
+            Log.d("AlarmOverlay", "⏰ 타임아웃: ${alarmDuration}분 경과")
+            timeoutAlarm()
+        }
+
+        timeoutHandler?.postDelayed(timeoutRunnable!!, (alarmDuration * 60 * 1000).toLong())
+        Log.d("AlarmOverlay", "⏱️ 타임아웃 타이머 시작: ${alarmDuration}분")
+    }
+
+    private fun cancelTimeoutTimer() {
+        timeoutRunnable?.let {
+            timeoutHandler?.removeCallbacks(it)
+        }
+        Log.d("AlarmOverlay", "⏱️ 타임아웃 타이머 취소")
+    }
+
+    private fun timeoutAlarm() {
+        Log.d("AlarmOverlay", "⏰ 알람 타임아웃 - 자동 종료")
+
+        // 알람 소리 중지
+        AlarmPlayer.getInstance(applicationContext).stopAlarm()
+
+        // DB에서 알람 삭제
+        try {
+            val dbHelper = DatabaseHelper.getInstance(applicationContext)
+            val db = dbHelper.writableDatabase
+            db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
+
+            // 알람 이력 업데이트
+            val values = android.content.ContentValues().apply {
+                put("dismiss_type", "timeout")
+            }
+            db.update(
+                "alarm_history",
+                values,
+                "alarm_id = ? AND dismiss_type = 'ringing'",
+                arrayOf(alarmId.toString())
+            )
+
+            db.close()
+            Log.d("AlarmOverlay", "✅ DB 알람 삭제 및 이력 업데이트: ID=$alarmId")
+        } catch (e: Exception) {
+            Log.e("AlarmOverlay", "❌ DB 작업 실패", e)
+        }
+
+        // shownNotifications에서 제거
+        AlarmGuardReceiver.removeShownNotification(alarmId)
+
+        // ⭐ Timeout Notification 표시 (삭제 대신 텍스트 변경)
+        showTimeoutNotification()
+
+        // 갱신 체크
+        AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
+
+        // AlarmGuardReceiver 트리거
+        val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
+        sendBroadcast(guardIntent)
+
+        // Overlay 제거
+        removeOverlay()
+
+        // 서비스 종료
+        stopSelf()
+    }
+
+    private fun showTimeoutNotification() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "twenty_min_channel",
+                "알람 사전 알림",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "알람 20분 전 알림"
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val openAppIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("openTab", 0)
+        }
+        val openAppPendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            openAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, "twenty_min_channel")
+            .setContentTitle("$alarmTimeStr 알람이 timeout되었습니다")
+            .setContentText(alarmLabel)
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .setContentIntent(openAppPendingIntent)
+            .build()
+
+        notificationManager.notify(8888, notification)
+        Log.d("AlarmOverlay", "📢 Timeout Notification 표시: $alarmTimeStr")
     }
     
     private fun canDrawOverlays(): Boolean {
@@ -101,6 +259,8 @@ class AlarmOverlayService : Service() {
     }
     
     private fun dismissAlarm() {
+    cancelTimeoutTimer()
+
     // 알람 소리 중지
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
     
@@ -161,6 +321,8 @@ class AlarmOverlayService : Service() {
 }
     
     private fun snoozeAlarm() {
+        cancelTimeoutTimer()
+
         // 알람 소리 중지
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
@@ -369,6 +531,7 @@ class AlarmOverlayService : Service() {
     
     override fun onDestroy() {
         super.onDestroy()
+        cancelTimeoutTimer()
         removeOverlay()
     }
 }

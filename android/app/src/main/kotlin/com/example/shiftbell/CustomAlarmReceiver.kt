@@ -167,17 +167,17 @@ override fun onReceive(context: Context, intent: Intent) {
             null, null, null
         )
         
-        var durationValue = 10  // 기본값
+        var durationValue = 1  // 기본값 (테스트용 1분)
         if (typeCursor.moveToFirst()) {
             durationValue = typeCursor.getInt(0)
         }
         typeCursor.close()
         db.close()
-        
+
         durationValue
     } catch (e: Exception) {
         Log.e("CustomAlarmReceiver", "duration 조회 실패", e)
-        10  // 에러 시 기본값
+        1  // 에러 시 기본값 (테스트용 1분)
     }
     
     val activityIntent = Intent(context, AlarmActivity::class.java).apply {
