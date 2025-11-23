@@ -190,13 +190,24 @@ private fun dismissAlarm() {
     }
     
     updateAlarmHistory(alarmId, "swiped")
-    
+
+    // ⭐ Notification 삭제 (alarmId + 20분전 Notification)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)
-    
-    // ⭐ 신규: 갱신 체크 (Native에서 직접!)
+    notificationManager.cancel(8888)
+    Log.d("AlarmActivity", "📢 Notification 삭제")
+
+    // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
+    AlarmGuardReceiver.removeShownNotification(alarmId)
+
+    // ⭐ 갱신 체크 (Native에서 직접!)
     AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
-    
+
+    // ⭐ AlarmGuardReceiver 트리거 (다음 알람 Notification 즉시 표시)
+    val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
+    sendBroadcast(guardIntent)
+    Log.d("AlarmActivity", "✅ AlarmGuardReceiver 트리거")
+
     goToHomeScreen()
     finish()
 }

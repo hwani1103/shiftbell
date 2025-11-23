@@ -137,6 +137,9 @@ class AlarmOverlayService : Service() {
     notificationManager.cancel(8888)
     Log.d("AlarmOverlay", "📢 Notification 삭제")
 
+    // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
+    AlarmGuardReceiver.removeShownNotification(alarmId)
+
     // ⭐ 갱신 체크
     AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
 

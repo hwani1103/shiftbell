@@ -63,11 +63,14 @@ class AlarmActionReceiver : BroadcastReceiver() {
         db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
         db.close()
         Log.d("AlarmAction", "✅ DB 알람 삭제 완료: ID=$alarmId")
-        
+
+        // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
+        AlarmGuardReceiver.removeShownNotification(alarmId)
+
         // ⭐ 수정: AlarmRefreshWorker → AlarmRefreshUtil
         AlarmRefreshUtil.checkAndTriggerRefresh(context)
         Log.d("AlarmAction", "✅ 갱신 체크 완료")
-        
+
         val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
         context.sendBroadcast(guardIntent)
         Log.d("AlarmAction", "✅ AlarmGuardReceiver 즉시 재실행")
