@@ -1,16 +1,21 @@
+// lib/services/database_service.dart
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:flutter/services.dart';
 import '../models/alarm_type.dart';
 import '../models/alarm.dart';
 import '../models/shift_schedule.dart';
 import '../models/alarm_template.dart';
 import 'dart:convert';
+import '../models/alarm_history.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
   DatabaseService._internal();
   
   static Database? _database;
+  static const platform = MethodChannel('com.example.shiftbell/alarm');
   
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -19,18 +24,38 @@ class DatabaseService {
   }
   
   Future<Database> _initDatabase() async {
-    String path = join(await getDatabasesPath(), 'shiftbell.db');
+    // ⭐ Device Protected 경로 사용
+    String path;
+    try {
+      final deviceProtectedPath = await platform.invokeMethod('getDeviceProtectedStoragePath');
+      path = deviceProtectedPath as String;
+      print('✅ Device Protected DB 경로: $path');
+    } catch (e) {
+      // Fallback: 일반 경로
+      path = join(await getDatabasesPath(), 'shiftbell.db');
+      print('⚠️ 일반 DB 경로 사용: $path');
+    }
     
     return await openDatabase(
       path,
-      version: 2,  // ⭐ 버전 업
+      version: 6,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
+      onOpen: (db) async {
+        var result = await db.rawQuery(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name='shift_schedule'"
+        );
+        
+        if (result.isEmpty) {
+          print('⚠️ 테이블 없음 - 재생성 중...');
+          await _onCreate(db, 4);
+          print('✅ 테이블 생성 완료');
+        }
+      },
     );
   }
-  
+
   Future<void> _onCreate(Database db, int version) async {
-    // alarm_types 테이블
     await db.execute('''
       CREATE TABLE alarm_types(
         id INTEGER PRIMARY KEY,
@@ -38,11 +63,11 @@ class DatabaseService {
         emoji TEXT NOT NULL,
         sound_file TEXT NOT NULL,
         volume REAL NOT NULL,
-        is_preset INTEGER NOT NULL
+        is_preset INTEGER NOT NULL,
+        duration INTEGER DEFAULT 10
       )
     ''');
     
-    // shift_schedule 테이블 (⭐ shift_colors 추가)
     await db.execute('''
       CREATE TABLE shift_schedule(
         id INTEGER PRIMARY KEY,
@@ -50,12 +75,13 @@ class DatabaseService {
         pattern TEXT,
         today_index INTEGER,
         shift_types TEXT NOT NULL,
+        active_shift_types TEXT,
         start_date TEXT,
-        shift_colors TEXT
+        shift_colors TEXT,
+        assigned_dates TEXT
       )
     ''');
 
-    // alarms 테이블
     await db.execute('''
       CREATE TABLE alarms(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -68,7 +94,41 @@ class DatabaseService {
       )
     ''');
     
-    // ⭐ shift_alarm_templates 테이블 (신규)
+    await db.execute('''
+      CREATE TABLE shift_alarm_templates(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        shift_type TEXT NOT NULL,
+        time TEXT NOT NULL,
+        alarm_type_id INTEGER NOT NULL
+      )
+    ''');
+
+    // ⭐ 신규: 알람 이력 테이블
+  await db.execute('''
+    CREATE TABLE alarm_history(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      alarm_id INTEGER NOT NULL,
+      scheduled_time TEXT NOT NULL,
+      scheduled_date TEXT NOT NULL,
+      actual_ring_time TEXT NOT NULL,
+      dismiss_type TEXT NOT NULL,
+      snooze_count INTEGER DEFAULT 0,
+      shift_type TEXT,
+      created_at TEXT NOT NULL
+    )
+  ''');
+    
+    for (var type in AlarmType.presets) {
+      await db.insert('alarm_types', type.toMap());
+    }
+    
+    print('✅ 데이터베이스 초기화 완료');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+  if (oldVersion < 2) {
+    await db.execute('ALTER TABLE shift_schedule ADD COLUMN shift_colors TEXT');
+    
     await db.execute('''
       CREATE TABLE shift_alarm_templates(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,35 +138,43 @@ class DatabaseService {
       )
     ''');
     
-    // 기본 알람 타입 3개 삽입
-    for (var type in AlarmType.presets) {
-      await db.insert('alarm_types', type.toMap());
-    }
-    
-    print('✅ 데이터베이스 초기화 완료');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v2)');
   }
   
-  // ⭐ 버전 업그레이드 (기존 DB에 컬럼/테이블 추가)
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      // shift_colors 컬럼 추가
-      await db.execute('ALTER TABLE shift_schedule ADD COLUMN shift_colors TEXT');
-      
-      // shift_alarm_templates 테이블 추가
-      await db.execute('''
-        CREATE TABLE shift_alarm_templates(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          shift_type TEXT NOT NULL,
-          time TEXT NOT NULL,
-          alarm_type_id INTEGER NOT NULL
-        )
-      ''');
-      
-      print('✅ DB 업그레이드 완료 (v$oldVersion → v$newVersion)');
-    }
+  if (oldVersion < 3) {
+    await db.execute('ALTER TABLE shift_schedule ADD COLUMN assigned_dates TEXT');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v3)');
   }
   
-  // === AlarmType CRUD ===
+  if (oldVersion < 4) {
+    await db.execute('ALTER TABLE shift_schedule ADD COLUMN active_shift_types TEXT');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v4)');
+  }
+
+  if (oldVersion < 5) {
+    await db.execute('''
+      CREATE TABLE alarm_history(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        alarm_id INTEGER NOT NULL,
+        scheduled_time TEXT NOT NULL,
+        scheduled_date TEXT NOT NULL,
+        actual_ring_time TEXT NOT NULL,
+        dismiss_type TEXT NOT NULL,
+        snooze_count INTEGER DEFAULT 0,
+        shift_type TEXT,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v5)');
+  }
+  
+  if (oldVersion < 6) {
+    await db.execute('ALTER TABLE alarm_types ADD COLUMN duration INTEGER DEFAULT 10');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v6)');
+  }
+} 
+  
+  // === 기존 메서드들 유지 ===
   
   Future<List<AlarmType>> getAllAlarmTypes() async {
     final db = await database;
@@ -138,8 +206,6 @@ class DatabaseService {
       whereArgs: [id],
     );
   }
-  
-  // === Alarm CRUD ===
   
   Future<int> insertAlarm(Alarm alarm) async {
     final db = await database;
@@ -239,8 +305,6 @@ class DatabaseService {
     print('🗑️ 모든 알람 삭제 완료');
   }
   
-  // === AlarmTemplate CRUD (⭐ 신규) ===
-  
   Future<int> insertAlarmTemplate({
     required String shiftType,
     required String time,
@@ -284,4 +348,62 @@ class DatabaseService {
     await db.delete('shift_alarm_templates');
     print('🗑️ 모든 알람 템플릿 삭제 완료');
   }
+
+  // ⭐ 신규: 알람 이력 조회
+Future<List<AlarmHistory>> getAlarmHistory({int limit = 50}) async {
+  final db = await database;
+  final maps = await db.query(
+    'alarm_history',
+    orderBy: 'created_at DESC',
+    limit: limit,
+  );
+  return maps.map((map) => AlarmHistory.fromMap(map)).toList();
+}
+
+// ⭐ 신규: 특정 날짜 이력 조회
+Future<List<AlarmHistory>> getAlarmHistoryByDate(DateTime date) async {
+  final db = await database;
+  final dateStr = date.toIso8601String().split('T')[0];
+  final maps = await db.query(
+    'alarm_history',
+    where: 'scheduled_date LIKE ?',
+    whereArgs: ['$dateStr%'],
+    orderBy: 'actual_ring_time DESC',
+  );
+  return maps.map((map) => AlarmHistory.fromMap(map)).toList();
+}
+
+// ⭐ 신규: 이력 통계
+Future<Map<String, dynamic>> getAlarmStatistics() async {
+  final db = await database;
+  
+  final total = Sqflite.firstIntValue(
+    await db.rawQuery('SELECT COUNT(*) FROM alarm_history')
+  ) ?? 0;
+  
+  final swiped = Sqflite.firstIntValue(
+    await db.rawQuery("SELECT COUNT(*) FROM alarm_history WHERE dismiss_type = 'swiped'")
+  ) ?? 0;
+  
+  final snoozed = Sqflite.firstIntValue(
+    await db.rawQuery("SELECT COUNT(*) FROM alarm_history WHERE dismiss_type = 'snoozed'")
+  ) ?? 0;
+  
+  final timeout = Sqflite.firstIntValue(
+    await db.rawQuery("SELECT COUNT(*) FROM alarm_history WHERE dismiss_type = 'timeout'")
+  ) ?? 0;
+  
+  final avgSnooze = Sqflite.firstIntValue(
+    await db.rawQuery('SELECT AVG(snooze_count) FROM alarm_history WHERE snooze_count > 0')
+  ) ?? 0;
+  
+  return {
+    'total': total,
+    'swiped': swiped,
+    'snoozed': snoozed,
+    'timeout': timeout,
+    'avgSnooze': avgSnooze,
+  };
+}
+
 }

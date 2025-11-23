@@ -14,6 +14,8 @@ dependencies:
 
   numberpicker: ^2.1.2
 
+  flutter_riverpod: ^2.4.9
+
   # 알람 관련
   flutter_local_notifications: ^17.0.0
   # android_alarm_manager_plus: ^4.0.0

@@ -5,15 +5,19 @@ import '../services/database_service.dart';
 import '../services/alarm_service.dart';
 import '../models/alarm.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/schedule_provider.dart';
+import '../providers/alarm_provider.dart';
+import '../services/alarm_refresh_helper.dart';
 
-class OnboardingScreen extends StatefulWidget {
+class OnboardingScreen extends ConsumerStatefulWidget {  // ⭐ 변경
   const OnboardingScreen({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();  // ⭐ 변경
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ 변경
   int _step = 0;
   bool? _isRegular;
   List<String> _pattern = [];
@@ -397,79 +401,81 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildPatternGrid({required bool isSelectable}) {
-    if (_pattern.isEmpty) {
-      return Center(
-        child: Text(
-          '패턴 없음',
-          style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-        ),
-      );
-    }
-
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 6,
-        crossAxisSpacing: 8.w,
-        mainAxisSpacing: 8.h,
-        childAspectRatio: 0.85,
+  if (_pattern.isEmpty) {
+    return Center(
+      child: Text(
+        '패턴 없음',
+        style: TextStyle(fontSize: 16.sp, color: Colors.grey),
       ),
-      itemCount: _pattern.length,
-      itemBuilder: (context, index) {
-        final isSelected = isSelectable && _todayIndex == index;
-        
-        return InkWell(
-          onTap: isSelectable
-              ? () {
-                  setState(() => _todayIndex = index);
-                }
-              : () {
-                  _removeFromPattern(index);
-                },
-          child: Container(
-            decoration: BoxDecoration(
-              color: isSelected ? Colors.blue : Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(
-                color: isSelected ? Colors.blue : Colors.grey,
-                width: 2,
-              ),
-            ),
-            child: Column(
-              children: [
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 4.w, top: 2.h),
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        color: isSelected ? Colors.white70 : Colors.grey.shade600,
-                      ),
-                    ),
-                  ),
-                ),
-                
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      _pattern[index],
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                        color: isSelected ? Colors.white : Colors.black,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
+
+  return GridView.builder(
+    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 6,  // ⭐ 6열 고정
+      crossAxisSpacing: 6.w,  // ⭐ 간격 살짝 줄임 (8.w → 6.w)
+      mainAxisSpacing: 6.h,   // ⭐ 간격 살짝 줄임 (8.h → 6.h)
+      childAspectRatio: 1.0, // ⭐ 거의 정사각형 (0.85 → 0.95)
+    ),
+    itemCount: _pattern.length,
+    itemBuilder: (context, index) {
+      final isSelected = isSelectable && _todayIndex == index;
+      
+      return InkWell(
+        onTap: isSelectable
+            ? () {
+                setState(() => _todayIndex = index);
+              }
+            : () {
+                _removeFromPattern(index);
+              },
+        child: Container(
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.blue : Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: isSelected ? Colors.blue : Colors.grey,
+              width: 2,
+            ),
+          ),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 4.w, top: 2.h),
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(
+                      fontSize: 9.sp,  // ⭐ 번호도 살짝 축소 (10.sp → 9.sp)
+                      color: isSelected ? Colors.white70 : Colors.grey.shade600,
+                    ),
+                  ),
+                ),
+              ),
+              
+              Expanded(
+                child: Center(
+                  child: Text(
+                    _pattern[index],
+                    style: TextStyle(
+                      fontSize: 11.sp,  // ⭐ 근무명 축소 (14.sp → 12.sp)
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,  // ⭐ 1줄 강제
+                    overflow: TextOverflow.ellipsis,  // ⭐ 넘치면 ... 처리
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
 
   void _deleteCustomShiftType(String name) {
     setState(() {
@@ -548,60 +554,59 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildMainAlarmSetup() {
-    // ⭐ 규칙적이면 _uniqueShifts, 불규칙이면 _selectedShifts
-    final shiftsToSetup = _isRegular == true ? _uniqueShifts : _selectedShifts;
-    
-    return Padding(
-      padding: EdgeInsets.all(24.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '근무별 고정 알람을 설정하세요',
-            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            '각 근무당 최대 3개까지 설정 가능',
-            style: TextStyle(fontSize: 14.sp, color: Colors.black),
-          ),
-          Text(
-            '설정 탭에서도 설정 / 수정이 가능합니다',
-            style: TextStyle(fontSize: 14.sp, color: Colors.black),
-          ),
-          SizedBox(height: 24.h),
-          
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 12.w,
-                mainAxisSpacing: 12.h,
-                childAspectRatio: 0.70,
-              ),
-              itemCount: shiftsToSetup.length,
-              itemBuilder: (context, index) {
-                final shift = shiftsToSetup[index];
-                final alarms = _shiftAlarms[shift] ?? [];
-                
-                return _buildShiftAlarmCard(shift, alarms);
-              },
+  final shiftsToSetup = _isRegular == true ? _uniqueShifts : _selectedShifts;
+  
+  return Padding(
+    padding: EdgeInsets.all(24.w),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '근무별 고정 알람을 설정하세요',
+          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          '각 근무당 최대 3개까지 설정 가능',
+          style: TextStyle(fontSize: 14.sp, color: Colors.black),
+        ),
+        Text(
+          '설정 탭에서도 설정 / 수정이 가능합니다',
+          style: TextStyle(fontSize: 14.sp, color: Colors.black),
+        ),
+        SizedBox(height: 24.h),
+        
+        Expanded(
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(  // ⭐ 변경
+              maxCrossAxisExtent: 120.w,  // ⭐ 변경
+              crossAxisSpacing: 12.w,
+              mainAxisSpacing: 12.h,
+              childAspectRatio: 0.70,
             ),
+            itemCount: shiftsToSetup.length,
+            itemBuilder: (context, index) {
+              final shift = shiftsToSetup[index];
+              final alarms = _shiftAlarms[shift] ?? [];
+              
+              return _buildShiftAlarmCard(shift, alarms);
+            },
           ),
-          
-          SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() => _step = _isRegular == true ? 5 : 4);
-              },
-              child: Text('다음'),
-            ),
+        ),
+        
+        SizedBox(height: 16.h),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              setState(() => _step = _isRegular == true ? 5 : 4);
+            },
+            child: Text('다음'),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildShiftAlarmCard(String shift, List<TimeOfDay> alarms) {
     return InkWell(
@@ -738,123 +743,161 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   // onboarding_screen.dart의 _generateShiftColors() 함수 수정
+// onboarding_screen.dart의 _generateShiftColors() 함수 전체 교체
 
 Map<String, int> _generateShiftColors() {
   final Map<String, int> colors = {};
   
-  // 1. 휴무 계열 → 빨강 고정
+  // 1. 휴무 계열 → 고정 빨강
   for (var shift in _allShiftTypes) {
     if (shift.contains('휴')) {
-      colors[shift] = 0;  // 빨강 = 0도
+      colors[shift] = 0xFFEF5350;  // ⭐ 고정 Red
     }
   }
   
-  // 2. 나머지 근무 → 랜덤 색상 할당
+  // 2. 나머지 근무 → 팔레트에서 순서대로 할당
   final nonRestShifts = _allShiftTypes.where((s) => !s.contains('휴')).toList();
   
-  // ⭐ 해시 기반으로 각 근무명마다 고유한 hue 생성
-  for (var shift in nonRestShifts) {
-    // 근무명을 해시값으로 변환 → 30~330도 범위로 매핑
-    final hash = shift.hashCode.abs();
-    final hue = 30 + (hash % 300);  // 30~329도 (빨강 제외)
-    colors[shift] = hue;
+  for (int i = 0; i < nonRestShifts.length && i < 8; i++) {
+    final shift = nonRestShifts[i];
+    final color = ShiftSchedule.shiftPalette[i % 8];  // ⭐ 팔레트 순환
+    colors[shift] = color.value;  // Color → int 변환
   }
   
   return colors;
 }
 
-  Future<void> _saveAndFinish() async {
-    // ⭐ 색상 생성
-    final shiftColors = _generateShiftColors();
+Future<void> _saveAlarmTemplates() async {
+  for (var entry in _shiftAlarms.entries) {
+    final shift = entry.key;
+    final times = entry.value;
     
-    final schedule = ShiftSchedule(
-      isRegular: _isRegular!,
-      pattern: _isRegular! ? _pattern : null,
-      todayIndex: _todayIndex,
-      shiftTypes: _allShiftTypes,
-      startDate: DateTime.now(),
-      shiftColors: shiftColors,  // ⭐ 추가
-    );
-
-    await DatabaseService.instance.saveShiftSchedule(schedule);
-
-    if (_isRegular!) {
-      // 규칙적: 30일치 알람 생성
-      await _generate30DaysAlarms(schedule);
-    } else {
-      // ⭐ 불규칙: 템플릿만 저장
-      await _saveAlarmTemplates();
+    for (var time in times) {
+      await DatabaseService.instance.insertAlarmTemplate(
+        shiftType: shift,
+        time: _formatTime(time),
+        alarmTypeId: 1,
+      );
     }
+  }
+  
+  print('✅ 알람 템플릿 저장 완료');
+}
 
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/home');
+ // onboarding_screen.dart의 _saveAndFinish() 수정
+
+// onboarding_screen.dart - _saveAndFinish()
+Future<void> _saveAndFinish() async {
+  final shiftColors = _generateShiftColors();
+  
+  List<String> activeShifts;
+  if (_isRegular!) {
+    activeShifts = _pattern.toSet().toList();
+  } else {
+    activeShifts = _selectedShifts;
+  }
+  
+  final schedule = ShiftSchedule(
+    isRegular: _isRegular!,
+    pattern: _isRegular! ? _pattern : null,
+    todayIndex: _todayIndex,
+    shiftTypes: _allShiftTypes,
+    activeShiftTypes: activeShifts,
+    startDate: DateTime.now(),
+    shiftColors: shiftColors,
+  );
+
+  await ref.read(scheduleProvider.notifier).saveSchedule(schedule);
+  await _saveAlarmTemplates();
+
+  if (_isRegular!) {
+    await _generate10DaysAlarms(schedule);
+  }
+await AlarmRefreshHelper.instance.markRefreshed();
+try {
+  final allAlarms = await DatabaseService.instance.getAllAlarms();
+  for (final alarm in allAlarms) {
+    if (alarm.id != null) {
+      await AlarmService().cancelAlarm(alarm.id!);
+    }
+  }
+  await DatabaseService.instance.deleteAllAlarms();
+  print('🗑️ 온보딩: 기존 알람 전체 삭제 완료');
+} catch (e) {
+  print('⚠️ 기존 알람 삭제 실패: $e');
+}
+
+if (_isRegular!) {
+  await _generate10DaysAlarms(schedule);
+}
+  // ⭐ 온보딩 완료 후 갱신 완료 표시!
+  await AlarmRefreshHelper.instance.markRefreshed();
+  print('✅ 온보딩 완료 - 갱신 완료 표시');
+
+  // AlarmNotifier 갱신
+  if (mounted) {
+    try {
+      await ref.read(alarmNotifierProvider.notifier).refresh();
+      print('✅ 온보딩 완료 - AlarmNotifier 갱신 완료');
+    } catch (e) {
+      print('❌ AlarmNotifier 갱신 실패: $e');
     }
   }
 
-  // ⭐ 불규칙: 템플릿 저장
-  Future<void> _saveAlarmTemplates() async {
-    for (var entry in _shiftAlarms.entries) {
-      final shift = entry.key;
-      final times = entry.value;
-      
-      for (var time in times) {
-        await DatabaseService.instance.insertAlarmTemplate(
-          shiftType: shift,
-          time: _formatTime(time),
-          alarmTypeId: 1,
-        );
-      }
-    }
-    
-    print('✅ 알람 템플릿 저장 완료');
+  if (mounted) {
+    Navigator.of(context).pushReplacementNamed('/home');
   }
+}
 
-  Future<void> _generate30DaysAlarms(ShiftSchedule schedule) async {
-    print('🔄 30일치 알람 생성 시작...');
+  // onboarding_screen.dart에서 수정
+
+Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
+  print('🔄 10일치 알람 생성 시작...');
+  
+  final List<Alarm> alarms = [];
+  final today = DateTime.now();
+  
+  for (var i = 0; i < 10; i++) {
+    final date = today.add(Duration(days: i));
+    final shiftType = schedule.getShiftForDate(date);
     
-    final List<Alarm> alarms = [];
-    final today = DateTime.now();
+    if (shiftType == '미설정') continue;
     
-    for (var i = 0; i < 30; i++) {
-      final date = today.add(Duration(days: i));
-      final shiftType = schedule.getShiftForDate(date);
+    final times = _shiftAlarms[shiftType] ?? [];
+    
+    for (var time in times) {
+      final alarmTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
       
-      // ⭐ '미설정'만 스킵 (휴무도 알람 가능)
-      if (shiftType == '미설정') continue;
+      if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) continue;
       
-      final times = _shiftAlarms[shiftType] ?? [];
+      final alarm = Alarm(
+        time: _formatTime(time),
+        date: alarmTime,
+        type: 'fixed',
+        alarmTypeId: 1,
+        shiftType: shiftType,
+      );
       
-      for (var time in times) {
-        final alarmTime = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          time.hour,
-          time.minute,
-        );
-        
-        if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) continue;
-        
-        final alarm = Alarm(
-          time: _formatTime(time),
-          date: alarmTime,
-          type: 'fixed',
-          alarmTypeId: 1,
-          shiftType: shiftType,
-        );
-        
-        alarms.add(alarm);
-      }
+      alarms.add(alarm);
     }
+  }
+  
+  if (alarms.isNotEmpty) {
+    // DB 저장
+    await DatabaseService.instance.insertAlarmsInBatch(alarms);
     
-    if (alarms.isNotEmpty) {
-      await DatabaseService.instance.insertAlarmsInBatch(alarms);
-      
-      for (var alarm in alarms) {
-        final id = alarm.date!.millisecondsSinceEpoch ~/ 1000;
-        
+    // ⭐ 변경: 저장된 알람 다시 읽어서 DB ID로 Native 등록
+    final savedAlarms = await DatabaseService.instance.getAllAlarms();
+    for (var alarm in savedAlarms) {
+      if (alarm.date != null && alarm.date!.isAfter(DateTime.now())) {
         await AlarmService().scheduleAlarm(
-          id: id,
+          id: alarm.id!,  // ⭐ DB ID 사용
           dateTime: alarm.date!,
           label: alarm.shiftType ?? '알람',
           soundType: 'loud',
@@ -862,8 +905,14 @@ Map<String, int> _generateShiftColors() {
       }
     }
     
-    print('✅ ${alarms.length}개 알람 생성 완료');
+    // ⭐ 삭제: refresh() 불필요
+    // if (mounted) {
+    //   ref.read(alarmNotifierProvider.notifier).refresh();
+    // }
   }
+  
+  print('✅ ${alarms.length}개 알람 생성 완료');
+}
 }
 
 // 알람 시간 설정 다이얼로그
@@ -1075,6 +1124,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                 
                 SizedBox(width: 16.w),
                 
+                // ⭐ 시간 NumberPicker 수정
                 NumberPicker(
                   value: _hour,
                   minValue: 1,
@@ -1082,7 +1132,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                   infiniteLoop: true,
                   haptics: true,
                   itemHeight: 50.h,
-                  itemWidth: 60.w,
+                  itemWidth: (60.w).clamp(50.0, 80.0),  // ⭐ 변경
                   axis: Axis.vertical,
                   textStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
                   selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
@@ -1106,6 +1156,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                 
                 Text(':', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold)),
                 
+                // ⭐ 분 NumberPicker 수정
                 NumberPicker(
                   value: _minute,
                   minValue: 0,
@@ -1114,7 +1165,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                   infiniteLoop: true,
                   haptics: true,
                   itemHeight: 50.h,
-                  itemWidth: 60.w,
+                  itemWidth: (60.w).clamp(50.0, 80.0),  // ⭐ 변경
                   axis: Axis.vertical,
                   textStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
                   selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),

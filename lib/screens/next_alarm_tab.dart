@@ -1,41 +1,35 @@
+// lib/screens/next_alarm_tab.dart
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import '../models/alarm.dart';
 import '../models/alarm_type.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/alarm_provider.dart';
 
-class NextAlarmTab extends StatefulWidget {
+
+class NextAlarmTab extends ConsumerStatefulWidget {
   const NextAlarmTab({super.key});
 
   @override
-  State<NextAlarmTab> createState() => _NextAlarmTabState();
+  ConsumerState<NextAlarmTab> createState() => _NextAlarmTabState();
 }
 
-class _NextAlarmTabState extends State<NextAlarmTab> {
-  Alarm? _nextAlarm;
-  AlarmType? _alarmType;
+class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   Timer? _countdownTimer;
-  String _timeUntilText = '';
+  static const platform = MethodChannel('com.example.shiftbell/alarm');
   
   @override
   void initState() {
     super.initState();
-    _loadNextAlarm();
     
-    // ⭐ 1분마다 카운트다운만 갱신
     _countdownTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (_nextAlarm != null && mounted) {
-        // 알람 시각이 지났으면 DB 다시 읽기
-        if (DateTime.now().isAfter(_nextAlarm!.date!)) {
-          _loadNextAlarm();
-        } else {
-          // 카운트다운만 갱신
-          setState(() {
-            _timeUntilText = _getTimeUntil(_nextAlarm!.date!);
-          });
-        }
+      if (mounted) {
+        setState(() {});
       }
     });
   }
@@ -46,33 +40,217 @@ class _NextAlarmTabState extends State<NextAlarmTab> {
     super.dispose();
   }
   
-  // ⭐ 외부에서 호출 가능하도록 public 메서드
-  Future<void> refresh() async {
-    await _loadNextAlarm();
+  String _getTimeUntil(DateTime alarmTime) {
+  final now = DateTime.now();
+  final diff = alarmTime.difference(now);
+  
+  // ⭐ 과거 알람 방어
+  if (diff.isNegative) {
+    return '곧';
   }
   
-  Future<void> _loadNextAlarm() async {
-    final alarms = await DatabaseService.instance.getNextAlarms(limit: 1);
-    
-    if (alarms.isEmpty) {
-      setState(() {
-        _nextAlarm = null;
-        _alarmType = null;
-        _timeUntilText = '';
-      });
-      return;
+  // ⭐ 핵심: 초 단위 올림 처리
+  // 21:00:01 ~ 21:00:59 → 1분으로 올림
+  final totalSeconds = diff.inSeconds;
+  final totalMinutes = (totalSeconds / 60).ceil();  // ⭐ ceil()로 올림!
+  
+  final hours = totalMinutes ~/ 60;
+  final minutes = totalMinutes % 60;
+  
+  if (hours > 0) {
+    // 1시간 이상
+    if (minutes > 0) {
+      return '${hours}시간 ${minutes}분 후에';
+    } else {
+      return '${hours}시간 후에';
     }
+  } else if (minutes > 0) {
+    // 1시간 미만
+    return '${minutes}분 후에';
+  } else {
+    return '곧';
+  }
+}
+  
+  String _getDateText(DateTime alarmDate) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(Duration(days: 1));
+    final alarmDay = DateTime(alarmDate.year, alarmDate.month, alarmDate.day);
     
-    final alarm = alarms.first;
-    final type = await DatabaseService.instance.getAlarmType(alarm.alarmTypeId);
-    
-    setState(() {
-      _nextAlarm = alarm;
-      _alarmType = type;
-      _timeUntilText = _getTimeUntil(alarm.date!);
-    });
+    if (alarmDay == today) {
+      return '오늘 (${alarmDate.month}/${alarmDate.day})';
+    } else if (alarmDay == tomorrow) {
+      return '내일 (${alarmDate.month}/${alarmDate.day})';
+    } else {
+      return '${alarmDate.month}/${alarmDate.day}';
+    }
   }
   
+  Future<void> _dismissAlarm(int id, DateTime? date) async {
+    await ref.read(alarmNotifierProvider.notifier).deleteAlarm(id, date);
+    // ⭐ 신규 추가
+  try {
+    await platform.invokeMethod('cancelNotification');
+    print('✅ Notification 삭제 완료');
+  } catch (e) {
+    print('⚠️ Notification 삭제 실패: $e');
+  }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('✅ 알람이 취소되었습니다'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+  
+  Future<void> _snoozeAlarm(int id, DateTime originalDate) async {
+    try {
+      final newDate = originalDate.add(Duration(minutes: 5));
+      
+      final alarms = await DatabaseService.instance.getAllAlarms();
+      final alarm = alarms.firstWhere((a) => a.id == id);
+      
+      final updatedAlarm = Alarm(
+        id: alarm.id,
+        time: '${newDate.hour.toString().padLeft(2, '0')}:${newDate.minute.toString().padLeft(2, '0')}',
+        date: newDate,
+        type: alarm.type,
+        alarmTypeId: alarm.alarmTypeId,
+        shiftType: alarm.shiftType,
+      );
+      
+      await DatabaseService.instance.updateAlarm(updatedAlarm);
+      
+      await AlarmService().cancelAlarm(id);
+      await AlarmService().scheduleAlarm(
+        id: id,
+        dateTime: newDate,
+        label: alarm.shiftType ?? '알람',
+        soundType: 'loud',
+      );
+      
+      await ref.read(alarmNotifierProvider.notifier).refresh();
+      
+      // ⭐ Notification 업데이트
+      try {
+        await platform.invokeMethod('updateNotification', {
+          'alarmId': id,
+          'newTime': updatedAlarm.time,
+          'label': alarm.shiftType ?? '알람',
+        });
+        print('✅ Notification 업데이트 완료: ${updatedAlarm.time}');
+      } catch (e) {
+        print('⚠️ Notification 업데이트 실패: $e');
+      }
+      
+      try {
+        await platform.invokeMethod('triggerGuardCheck');
+        print('✅ AlarmGuardReceiver 트리거 완료');
+      } catch (e) {
+        print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ 알람이 5분 연장되었습니다 (${updatedAlarm.time})'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ 5분 후 처리 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ 오류 발생: $e'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    final nextAlarmAsync = ref.watch(nextAlarmProvider);
+    
+    return nextAlarmAsync.when(
+      loading: () => Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      ),
+      error: (error, stack) => Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Text(
+            '에러 발생',
+            style: TextStyle(color: Colors.white, fontSize: 20.sp),
+          ),
+        ),
+      ),
+      data: (nextAlarm) {
+        return FutureBuilder<int>(
+          future: DatabaseService.instance.getAllAlarms().then((list) => list.length),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data == 0) {
+              return _buildNoAlarmScreen();
+            }
+            
+            if (nextAlarm == null) {
+              return _buildNoAlarmScreen();
+            }
+            
+            return _AlarmScreenWidget(
+              alarmId: nextAlarm.id!,
+              onDismiss: () => _dismissAlarm(nextAlarm.id!, nextAlarm.date),
+              onSnooze: () => _snoozeAlarm(nextAlarm.id!, nextAlarm.date!),
+            );
+          },
+        );
+      },
+    );
+  }
+  
+  Widget _buildNoAlarmScreen() {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('⏰', style: TextStyle(fontSize: 100.sp)),
+            SizedBox(height: 24.h),
+            Text(
+              '예정된 알람이 없습니다',
+              style: TextStyle(fontSize: 20.sp, color: Colors.white70),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AlarmScreenWidget extends ConsumerStatefulWidget {
+  final int alarmId;
+  final VoidCallback onDismiss;
+  final VoidCallback onSnooze;
+  
+  const _AlarmScreenWidget({
+    required this.alarmId,
+    required this.onDismiss,
+    required this.onSnooze,
+  });
+
+  @override
+  ConsumerState<_AlarmScreenWidget> createState() => _AlarmScreenWidgetState();
+}
+
+class _AlarmScreenWidgetState extends ConsumerState<_AlarmScreenWidget> {
   String _getTimeUntil(DateTime alarmTime) {
     final diff = alarmTime.difference(DateTime.now());
     
@@ -85,130 +263,221 @@ class _NextAlarmTabState extends State<NextAlarmTab> {
     }
   }
   
-  Future<void> _dismissAlarm() async {
-    if (_nextAlarm == null) return;
+  String _getDateText(DateTime alarmDate) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(Duration(days: 1));
+    final alarmDay = DateTime(alarmDate.year, alarmDate.month, alarmDate.day);
     
-    // DB에서 삭제
-    await DatabaseService.instance.deleteAlarm(_nextAlarm!.id!);
-    
-    // Native 알람 취소
-    await AlarmService().cancelAlarm(_nextAlarm!.id!);
-    
-    // 재로딩
-    _loadNextAlarm();
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('알람이 취소되었습니다')),
-      );
+    if (alarmDay == today) {
+      return '오늘 (${alarmDate.month}/${alarmDate.day})';
+    } else if (alarmDay == tomorrow) {
+      return '내일 (${alarmDate.month}/${alarmDate.day})';
+    } else {
+      return '${alarmDate.month}/${alarmDate.day}';
     }
   }
   
   @override
   Widget build(BuildContext context) {
-    if (_nextAlarm == null || _alarmType == null) {
-      return Scaffold(
+    final alarmsAsync = ref.watch(alarmNotifierProvider);
+    
+    return alarmsAsync.when(
+      loading: () => Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      ),
+      error: (error, stack) => Scaffold(
         backgroundColor: Colors.black,
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('⏰', style: TextStyle(fontSize: 100.sp)),
-              SizedBox(height: 24.h),
-              Text(
-                '예정된 알람이 없습니다',
-                style: TextStyle(fontSize: 20.sp, color: Colors.white70),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // 시간 (가장 크게)
-              Text(
-                _nextAlarm!.time,
-                style: TextStyle(
-                  fontSize: 96.sp,
-                  fontWeight: FontWeight.w300,
-                  color: Colors.white,
-                ),
-              ),
-              
-              SizedBox(height: 24.h),
-              
-              // 카운트다운 (⭐ _timeUntilText 사용)
-              Text(
-                '$_timeUntilText 알람이 울립니다',
-                style: TextStyle(fontSize: 20.sp, color: Colors.white70),
-              ),
-              
-              SizedBox(height: 64.h),
-              
-              // 알람 타입 정보
-              Container(
-                padding: EdgeInsets.all(32.w),
-                margin: EdgeInsets.symmetric(horizontal: 32.w),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      _alarmType!.emoji,
-                      style: TextStyle(fontSize: 64.sp),
-                    ),
-                    SizedBox(height: 16.h),
-                    Text(
-                      '소리: ${_alarmType!.volume > 0 ? "켜짐" : "꺼짐"}',
-                      style: TextStyle(fontSize: 16.sp, color: Colors.white70),
-                    ),
-                    Text(
-                      '진동: ${_alarmType!.soundFile == "vibrate" ? "켜짐" : "꺼짐"}',
-                      style: TextStyle(fontSize: 16.sp, color: Colors.white70),
-                    ),
-                    Text(
-                      '다시 알림: 5분 후 / 3회',
-                      style: TextStyle(fontSize: 16.sp, color: Colors.white70),
-                    ),
-                  ],
-                ),
-              ),
-              
-              SizedBox(height: 64.h),
-              
-              // 끄기 버튼
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 32.w),
-                child: ElevatedButton(
-                  onPressed: _dismissAlarm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    minimumSize: Size(double.infinity, 60.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
-                  child: Text(
-                    '끄기',
-                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
+          child: Text(
+            '에러 발생',
+            style: TextStyle(color: Colors.white, fontSize: 20.sp),
           ),
         ),
       ),
+      data: (alarms) {
+        return FutureBuilder<Alarm?>(
+          key: ValueKey('alarm_${widget.alarmId}_${alarms.length}_${DateTime.now().millisecondsSinceEpoch}'),
+          future: _loadAlarmFromDB(widget.alarmId),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Scaffold(
+                backgroundColor: Colors.black,
+                body: Center(child: CircularProgressIndicator(color: Colors.white)),
+              );
+            }
+            
+            final alarm = snapshot.data!;
+            final actualTime = alarm.date != null
+                ? '${alarm.date!.hour.toString().padLeft(2, '0')}:${alarm.date!.minute.toString().padLeft(2, '0')}'
+                : alarm.time;
+            return FutureBuilder<AlarmType?>(
+              future: DatabaseService.instance.getAlarmType(alarm.alarmTypeId),
+              builder: (context, alarmTypeSnapshot) {
+                if (!alarmTypeSnapshot.hasData) {
+                  return Scaffold(
+                    backgroundColor: Colors.black,
+                    body: Center(child: CircularProgressIndicator(color: Colors.white)),
+                  );
+                }
+                
+                final alarmType = alarmTypeSnapshot.data!;
+                final timeUntil = _getTimeUntil(alarm.date!);
+                final dateText = _getDateText(alarm.date!);
+                
+                return Scaffold(
+                  backgroundColor: Colors.black,
+                  body: SafeArea(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            dateText,
+                            style: TextStyle(
+                              fontSize: 24.sp,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          
+                          SizedBox(height: 8.h),
+                          
+                          Text(
+                            actualTime,
+                            style: TextStyle(
+                              fontSize: 72.sp,
+                              fontWeight: FontWeight.w300,
+                              color: Colors.white,
+                            ),
+                          ),
+                          
+                          SizedBox(height: 16.h),
+                          
+                          if (alarm.shiftType != null)
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade700,
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: Text(
+                                alarm.shiftType!,
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          
+                          SizedBox(height: 24.h),
+                          
+                          Text(
+                            '$timeUntil 알람이 울립니다',
+                            style: TextStyle(fontSize: 18.sp, color: Colors.white70),
+                          ),
+                          
+                          SizedBox(height: 32.h),
+                          
+                          Container(
+                            padding: EdgeInsets.all(24.w),
+                            margin: EdgeInsets.symmetric(horizontal: 32.w),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(20.r),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  alarmType.emoji,
+                                  style: TextStyle(fontSize: 48.sp),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  '소리: ${alarmType.volume > 0 ? "켜짐" : "꺼짐"}',
+                                  style: TextStyle(fontSize: 14.sp, color: Colors.white70),
+                                ),
+                                Text(
+                                  '진동: ${alarmType.soundFile == "vibrate" ? "켜짐" : "꺼짐"}',
+                                  style: TextStyle(fontSize: 14.sp, color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          SizedBox(height: 32.h),
+                          
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 32.w),
+                            child: ElevatedButton(
+                              onPressed: widget.onDismiss,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                                minimumSize: Size(double.infinity, 50.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                              ),
+                              child: Text(
+                                '끄기',
+                                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          
+                          SizedBox(height: 12.h),
+                          
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 32.w),
+                            child: OutlinedButton(
+                              onPressed: widget.onSnooze,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Colors.blue,
+                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                                minimumSize: Size(double.infinity, 50.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                side: BorderSide(color: Colors.blue, width: 2),
+                              ),
+                              child: Text(
+                                '5분 후',
+                                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
+  }
+  
+  Future<Alarm?> _loadAlarmFromDB(int alarmId) async {
+    try {
+      print('🔍 DB에서 알람 읽기: ID=$alarmId');
+      final allAlarms = await DatabaseService.instance.getAllAlarms();
+      
+      final alarm = allAlarms.firstWhere(
+        (a) => a.id == alarmId,
+        orElse: () => throw Exception('알람을 찾을 수 없습니다'),
+      );
+      
+      print('✅ DB 알람 로드: ${alarm.time} (${alarm.date})');
+      return alarm;
+    } catch (e) {
+      print('❌ DB 알람 로드 실패: $e');
+      rethrow;
+    }
   }
 }

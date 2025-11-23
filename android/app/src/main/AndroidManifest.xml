@@ -1,26 +1,20 @@
+<!-- android/app/src/main/AndroidManifest.xml -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     
-    <!-- 알람 권한 -->
+    <!-- 기존 권한들... -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    
-    <!-- 알림 권한 -->
+    <uses-permission android:name="android.permission.RECEIVE_LOCKED_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
-    
-    <!-- 진동 권한 -->
     <uses-permission android:name="android.permission.VIBRATE"/>
-    
-    <!-- 잠금 화면 해제 권한 -->
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
-    
-    <!-- Overlay 권한 ⭐ -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    
-    <!-- 포그라운드 서비스 (선택) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
 
@@ -30,30 +24,30 @@
         android:icon="@mipmap/ic_launcher"
         tools:replace="android:label">
         
-        <!-- 메인 Activity - ⭐ 두 줄 삭제 -->
-<activity
-    android:name=".MainActivity"
-    android:exported="true"
-    android:launchMode="singleTask"
-    android:taskAffinity="com.example.shiftbell.main"
-    android:theme="@style/LaunchTheme"
-    android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-    android:hardwareAccelerated="true"
-    android:windowSoftInputMode="adjustResize">
-    <!-- ⭐ showWhenLocked, turnScreenOn 삭제됨 -->
-    
-    <meta-data
-      android:name="io.flutter.embedding.android.NormalTheme"
-      android:resource="@style/NormalTheme"
-      />
-    
-    <intent-filter>
-        <action android:name="android.intent.action.MAIN"/>
-        <category android:name="android.intent.category.LAUNCHER"/>
-    </intent-filter>
-</activity>
+        <!-- MainActivity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.example.shiftbell.main"
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize"
+            android:directBootAware="true">
+            
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 
-        <!-- 전체 화면 알람 Activity -->
+        <!-- AlarmActivity -->
         <activity
             android:name=".AlarmActivity"
             android:exported="false"
@@ -65,28 +59,68 @@
             android:turnScreenOn="true"
             android:screenOrientation="portrait"
             android:noHistory="true"
-            android:finishOnTaskLaunch="true"/>
+            android:finishOnTaskLaunch="true"
+            android:directBootAware="true"/>
         
-        <!-- Overlay 알람 Service ⭐ -->
+        <!-- AlarmOverlayService -->
         <service
             android:name=".AlarmOverlayService"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false"
+            android:directBootAware="true"/>
+        
+        
 
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- 커스텀 알람 리시버 -->
+        <!-- CustomAlarmReceiver -->
         <receiver 
             android:name=".CustomAlarmReceiver"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false"
+            android:directBootAware="true"/>
         
+        <!-- DirectBootReceiver -->
+        <receiver
+            android:name=".DirectBootReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:directBootAware="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </receiver>
+        <!-- ⭐ 신규: AlarmRefreshReceiver 추가 -->
+    <receiver
+        android:name=".AlarmRefreshReceiver"
+        android:enabled="true"
+        android:exported="false"
+        android:directBootAware="true">
+        <intent-filter>
+            <action android:name="com.example.shiftbell.REFRESH_ALARMS"/>
+        </intent-filter>
+    </receiver>
+        
+        <!-- ⭐ AlarmGuardReceiver 신규 -->
+        <receiver
+            android:name=".AlarmGuardReceiver"
+            android:enabled="true"
+            android:exported="false"
+            android:directBootAware="true"/>
+        
+        <!-- ⭐ AlarmActionReceiver 신규 -->
+        <receiver
+            android:name=".AlarmActionReceiver"
+            android:enabled="true"
+            android:exported="false"
+            android:directBootAware="true"/>
 
     </application>
 
-    <!-- 배터리 최적화 제외 요청 쿼리 -->
     <queries>
         <intent>
             <action android:name="android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>

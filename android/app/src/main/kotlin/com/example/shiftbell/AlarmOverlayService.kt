@@ -98,15 +98,48 @@ class AlarmOverlayService : Service() {
     }
     
     private fun dismissAlarm() {
-        // 알람 소리 중지
-        AlarmPlayer.getInstance(applicationContext).stopAlarm()
+    // 알람 소리 중지
+    AlarmPlayer.getInstance(applicationContext).stopAlarm()
+    
+    // ⭐ DB 작업 통합 (한 번에 처리)
+    try {
+        val dbHelper = DatabaseHelper.getInstance(applicationContext)
+        val db = dbHelper.writableDatabase
         
-        // Overlay 제거
-        removeOverlay()
+        // 1. 알람 삭제
+        db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
+        Log.d("AlarmOverlay", "✅ DB 알람 삭제: ID=$alarmId")
         
-        // 서비스 종료
-        stopSelf()
+        // 2. 알람 이력 업데이트
+        val values = android.content.ContentValues().apply {
+            put("dismiss_type", "swiped")
+        }
+        db.update(
+            "alarm_history",
+            values,
+            "alarm_id = ? AND dismiss_type = 'ringing'",
+            arrayOf(alarmId.toString())
+        )
+        Log.d("AlarmOverlay", "✅ 알람 이력 업데이트: swiped")
+        
+        db.close()
+        
+    } catch (e: Exception) {
+        Log.e("AlarmOverlay", "❌ DB 작업 실패", e)
     }
+    
+    // Notification 삭제
+    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.cancel(alarmId)
+    notificationManager.cancel(8888)
+    Log.d("AlarmOverlay", "📢 Notification 삭제")
+    
+    // Overlay 제거
+    removeOverlay()
+    
+    // 서비스 종료
+    stopSelf()
+}
     
     private fun snoozeAlarm() {
         // 알람 소리 중지

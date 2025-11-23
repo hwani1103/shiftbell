@@ -5,6 +5,7 @@ class AlarmType {
   final String soundFile;
   final double volume;
   final bool isPreset;
+  final int duration;
 
   AlarmType({
     required this.id,
@@ -13,6 +14,7 @@ class AlarmType {
     required this.soundFile,
     required this.volume,
     required this.isPreset,
+    this.duration = 10,
   });
 
   // DB → 객체
@@ -24,6 +26,7 @@ class AlarmType {
       soundFile: map['sound_file'],
       volume: map['volume'],
       isPreset: map['is_preset'] == 1,
+      duration: map['duration'] ?? 10,
     );
   }
 
@@ -36,6 +39,7 @@ class AlarmType {
       'sound_file': soundFile,
       'volume': volume,
       'is_preset': isPreset ? 1 : 0,
+      'duration': duration,
     };
   }
 
@@ -48,6 +52,7 @@ class AlarmType {
       soundFile: 'loud',
       volume: 1.0,
       isPreset: true,
+      duration : 10,
     ),
     AlarmType(
       id: 2,
@@ -56,6 +61,7 @@ class AlarmType {
       soundFile: 'vibrate',
       volume: 0.0,
       isPreset: true,
+      duration : 10,
     ),
     AlarmType(
       id: 3,
@@ -64,6 +70,7 @@ class AlarmType {
       soundFile: 'silent',
       volume: 0.0,
       isPreset: true,
+      duration : 1,
     ),
   ];
 }

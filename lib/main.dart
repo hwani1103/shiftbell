@@ -1,36 +1,96 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'services/alarm_service.dart';
 import 'services/permission_service.dart';
 import 'services/database_service.dart';
+import 'services/alarm_refresh_service.dart';
 import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/shift_schedule.dart';
+import 'providers/alarm_provider.dart';  // ⭐ 추가!
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // 한글 로케일 초기화
   await initializeDateFormatting('ko_KR', null);
-  
-  // DB 초기화
   await DatabaseService.instance.database;
-  
-  // 서비스 초기화
   await AlarmService().initialize();
   
-   // 온보딩 체크
-  final schedule = await DatabaseService.instance.getShiftSchedule();
-
-  runApp(MyApp(showOnboarding: schedule == null));
+  ShiftSchedule? schedule;
+  try {
+    schedule = await DatabaseService.instance.getShiftSchedule();
+  } catch (e) {
+    print('⚠️ 스케줄 로드 실패 (첫 실행): $e');
+    schedule = null;
+  }
+  
+  runApp(
+    ProviderScope(
+      child: MyApp(showOnboarding: schedule == null),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final bool showOnboarding;
   
   const MyApp({super.key, required this.showOnboarding});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  static const platform = MethodChannel('com.example.shiftbell/alarm');
+  
+  @override
+  void initState() {
+    super.initState();
+    
+    // ⭐ 앱 라이프사이클 감지
+    WidgetsBinding.instance.addObserver(this);
+    
+    // Native에서 갱신 요청 수신
+    platform.setMethodCallHandler((call) async {
+      if (call.method == 'refreshAlarms') {
+        print('📢 Native로부터 갱신 요청 수신');
+        await AlarmRefreshService.instance.refreshIfNeeded();
+      }
+    });
+  }
+  
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+  
+  // ⭐ 앱이 포그라운드로 돌아올 때마다 체크
+  // main.dart - _MyAppState
+@override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  super.didChangeAppLifecycleState(state);
+  
+  if (state == AppLifecycleState.resumed) {
+    print('📱 앱 포그라운드 진입 - 갱신 체크');
+    AlarmRefreshService.instance.refreshIfNeeded();
+    
+    // ⭐ 추가: AlarmNotifier도 강제 갱신
+    if (mounted) {
+      try {
+        final container = ProviderScope.containerOf(context);
+        container.read(alarmNotifierProvider.notifier).refresh();
+        print('✅ AlarmNotifier 강제 갱신 완료');
+      } catch (e) {
+        print('❌ AlarmNotifier 갱신 실패: $e');
+      }
+    }
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +104,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData.light().copyWith(
             primaryColor: Colors.blue,
           ),
-          home: showOnboarding ? OnboardingScreen() : MainScreen(),
+          home: widget.showOnboarding ? OnboardingScreen() : MainScreen(),
           routes: {
             '/home': (context) => MainScreen(),
           },
@@ -63,12 +123,94 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
+  static const platform = MethodChannel('com.example.shiftbell/alarm');
   
   final _tabs = [
     NextAlarmTab(),
     CalendarTab(),
     SettingsTab(),
   ];
+  
+  // main.dart - _MainScreenState
+@override
+void initState() {
+  super.initState();
+  
+  _checkRefreshOnStart();
+  _scheduleGuardWakeup();
+  
+  // ⭐ Method Call Handler 등록
+  platform.setMethodCallHandler(_handleMethod);
+  
+  // ⭐ 추가: 화면 진입 시 AlarmNotifier 갱신
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (mounted) {
+      try {
+        final container = ProviderScope.containerOf(context);
+        container.read(alarmNotifierProvider.notifier).refresh();
+        print('✅ MainScreen 진입 - AlarmNotifier 갱신');
+      } catch (e) {
+        print('❌ AlarmNotifier 갱신 실패: $e');
+      }
+    }
+  });
+}
+
+  Future<void> _checkRefreshOnStart() async {
+    print('🚀 앱 시작 - 갱신 체크');
+    await AlarmRefreshService.instance.refreshIfNeeded();
+  }
+
+  Future<void> _scheduleGuardWakeup() async {
+    try {
+      // ⭐ 1. 즉시 실행 (20분 이내 알람 체크)
+      print('🔍 AlarmGuardReceiver 즉시 실행 시작');
+      await platform.invokeMethod('triggerGuardCheck');
+      print('✅ AlarmGuardReceiver 즉시 실행 완료');
+      
+      // ⭐ 2. 자정 예약
+      await platform.invokeMethod('scheduleGuardWakeup');
+      print('🛡️ 알람 감시 예약 완료');
+    } catch (e) {
+      print('❌ 감시 예약 실패: $e');
+    }
+  }
+  
+  // ⭐ Native에서 호출하는 메서드 처리
+  // main.dart - _MainScreenState
+Future<void> _handleMethod(MethodCall call) async {
+  print('📞 Method Call 수신: ${call.method}');
+  
+  if (call.method == 'refreshAlarms') {
+  print('🔄 알람 갱신 요청 - Provider 강제 새로고침');
+  if (mounted) {
+    try {
+      final container = ProviderScope.containerOf(context);
+      
+      // ⭐ 1. AlarmNotifier 강제 갱신
+      final notifier = container.read(alarmNotifierProvider.notifier);
+      await notifier.refresh();
+      print('✅ AlarmNotifier 새로고침 완료');
+      
+      // ⭐ 2. 상태를 강제로 다시 로드
+      await Future.delayed(Duration(milliseconds: 100));
+      await notifier.refresh();
+      print('✅ AlarmNotifier 2차 새로고침 완료');
+      
+    } catch (e) {
+      print('❌ Provider 새로고침 실패: $e');
+    }
+  }
+} else if (call.method == 'openTab') {
+    final tabIndex = call.arguments as int;
+    print('📱 탭 이동 요청: $tabIndex');
+    if (mounted) {
+      setState(() {
+        _currentIndex = tabIndex;
+      });
+    }
+  }
+}
   
   @override
   Widget build(BuildContext context) {
@@ -86,6 +228,8 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+
+// ... (AlarmTestScreen은 그대로 유지)
 
 class AlarmTestScreen extends StatefulWidget {
   const AlarmTestScreen({super.key});
@@ -276,7 +420,6 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 권한 상태
             Card(
               color: permissionsGranted && overlayPermissionGranted 
                   ? Colors.green.shade50 
@@ -346,7 +489,6 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
 
             SizedBox(height: 24.h),
 
-            // 알람 시간 선택
             Text(
               '알람 시간',
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
@@ -364,7 +506,6 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
 
             SizedBox(height: 24.h),
 
-            // 알람 타입 선택
             Text(
               '알람 타입',
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
@@ -392,7 +533,6 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
 
             SizedBox(height: 32.h),
 
-            // 알람 등록 버튼
             ElevatedButton.icon(
               onPressed: _scheduleAlarm,
               icon: const Icon(Icons.alarm_add),
@@ -406,7 +546,6 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
 
             SizedBox(height: 12.h),
 
-            // 5초 테스트 버튼
             OutlinedButton.icon(
               onPressed: _scheduleTestAlarm,
               icon: const Icon(Icons.science),
@@ -418,7 +557,6 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
 
             SizedBox(height: 12.h),
 
-            // 취소 버튼
             TextButton.icon(
               onPressed: _cancelAlarm,
               icon: const Icon(Icons.cancel),
