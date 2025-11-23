@@ -138,47 +138,8 @@ override fun onReceive(context: Context, intent: Intent) {
     }
     
     private fun showAlarmActivity(context: Context, id: Int, label: String) {
-    // ⭐ DB에서 alarm_type_id 조회 → duration 가져오기
-    val duration = try {
-        val dbHelper = DatabaseHelper.getInstance(context)
-        val db = dbHelper.readableDatabase
-        
-        // 1. alarms 테이블에서 alarm_type_id 조회
-        val alarmCursor = db.query(
-            "alarms",
-            arrayOf("alarm_type_id"),
-            "id = ?",
-            arrayOf(id.toString()),
-            null, null, null
-        )
-        
-        var alarmTypeId = 1  // 기본값
-        if (alarmCursor.moveToFirst()) {
-            alarmTypeId = alarmCursor.getInt(0)
-        }
-        alarmCursor.close()
-        
-        // 2. alarm_types 테이블에서 duration 조회
-        val typeCursor = db.query(
-            "alarm_types",
-            arrayOf("duration"),
-            "id = ?",
-            arrayOf(alarmTypeId.toString()),
-            null, null, null
-        )
-        
-        var durationValue = 1  // 기본값 (테스트용 1분)
-        if (typeCursor.moveToFirst()) {
-            durationValue = typeCursor.getInt(0)
-        }
-        typeCursor.close()
-        db.close()
-
-        durationValue
-    } catch (e: Exception) {
-        Log.e("CustomAlarmReceiver", "duration 조회 실패", e)
-        1  // 에러 시 기본값 (테스트용 1분)
-    }
+    // ⭐ 테스트용: 강제 1분 타임아웃 (나중에 사용자 설정으로 변경 예정)
+    val duration = 1
     
     val activityIntent = Intent(context, AlarmActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or 
