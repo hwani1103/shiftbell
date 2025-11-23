@@ -456,7 +456,7 @@ String _formatHistoryDate(DateTime date) {
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final yesterday = today.subtract(Duration(days: 1));
-  final targetDay = DateTime(date.year, date.month, date.year);
+  final targetDay = DateTime(date.year, date.month, date.day);
   
   if (targetDay == today) {
     return '오늘';
