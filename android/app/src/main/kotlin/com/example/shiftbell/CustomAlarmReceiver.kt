@@ -37,12 +37,6 @@ override fun onReceive(context: Context, intent: Intent) {
 
     Log.e("CustomAlarmReceiver", "ID: $id, Label: $label")
 
-    // ⭐ 알람 발생 시 기존 Notification 삭제 (Overlay와 충돌 방지)
-    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.cancel(8888)  // 20분 전 알림 삭제
-    notificationManager.cancel(id)    // 해당 알람 ID의 알림도 삭제
-    Log.e("CustomAlarmReceiver", "📢 기존 Notification 삭제")
-
     // ⭐ 신규: 알람 울릴 때 즉시 갱신 체크!
     AlarmRefreshUtil.checkAndTriggerRefresh(context)
     
