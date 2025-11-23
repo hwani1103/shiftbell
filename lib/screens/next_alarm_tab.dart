@@ -89,13 +89,23 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   
   Future<void> _dismissAlarm(int id, DateTime? date) async {
     await ref.read(alarmNotifierProvider.notifier).deleteAlarm(id, date);
-    // ⭐ 신규 추가
-  try {
-    await platform.invokeMethod('cancelNotification');
-    print('✅ Notification 삭제 완료');
-  } catch (e) {
-    print('⚠️ Notification 삭제 실패: $e');
-  }
+
+    // Notification 삭제
+    try {
+      await platform.invokeMethod('cancelNotification');
+      print('✅ Notification 삭제 완료');
+    } catch (e) {
+      print('⚠️ Notification 삭제 실패: $e');
+    }
+
+    // ⭐ AlarmGuardReceiver 트리거 → 다음 알람 Notification 표시
+    try {
+      await platform.invokeMethod('triggerGuardCheck');
+      print('✅ AlarmGuardReceiver 트리거 완료');
+    } catch (e) {
+      print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
+    }
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

@@ -810,27 +810,26 @@ Future<void> _saveAndFinish() async {
   await ref.read(scheduleProvider.notifier).saveSchedule(schedule);
   await _saveAlarmTemplates();
 
+  // ⭐ 기존 알람 전체 삭제 (Native + DB)
+  try {
+    final allAlarms = await DatabaseService.instance.getAllAlarms();
+    for (final alarm in allAlarms) {
+      if (alarm.id != null) {
+        await AlarmService().cancelAlarm(alarm.id!);
+      }
+    }
+    await DatabaseService.instance.deleteAllAlarms();
+    print('🗑️ 온보딩: 기존 알람 전체 삭제 완료');
+  } catch (e) {
+    print('⚠️ 기존 알람 삭제 실패: $e');
+  }
+
+  // ⭐ 10일치 알람 생성 (1회만!)
   if (_isRegular!) {
     await _generate10DaysAlarms(schedule);
   }
-await AlarmRefreshHelper.instance.markRefreshed();
-try {
-  final allAlarms = await DatabaseService.instance.getAllAlarms();
-  for (final alarm in allAlarms) {
-    if (alarm.id != null) {
-      await AlarmService().cancelAlarm(alarm.id!);
-    }
-  }
-  await DatabaseService.instance.deleteAllAlarms();
-  print('🗑️ 온보딩: 기존 알람 전체 삭제 완료');
-} catch (e) {
-  print('⚠️ 기존 알람 삭제 실패: $e');
-}
 
-if (_isRegular!) {
-  await _generate10DaysAlarms(schedule);
-}
-  // ⭐ 온보딩 완료 후 갱신 완료 표시!
+  // 갱신 완료 표시
   await AlarmRefreshHelper.instance.markRefreshed();
   print('✅ 온보딩 완료 - 갱신 완료 표시');
 
