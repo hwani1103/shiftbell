@@ -252,14 +252,36 @@ class _AlarmScreenWidget extends ConsumerStatefulWidget {
 
 class _AlarmScreenWidgetState extends ConsumerState<_AlarmScreenWidget> {
   String _getTimeUntil(DateTime alarmTime) {
-    final diff = alarmTime.difference(DateTime.now());
-    
-    if (diff.inHours > 0) {
-      return '${diff.inHours}시간 ${diff.inMinutes % 60}분 후에';
-    } else if (diff.inMinutes > 0) {
-      return '${diff.inMinutes}분 후에';
-    } else {
+    final now = DateTime.now();
+    final diff = alarmTime.difference(now);
+
+    // 과거 알람 방어
+    if (diff.isNegative) {
       return '곧';
+    }
+
+    // ⭐ 초 단위 올림 처리
+    // 20:45:00 ~ 20:45:59 → 5분 (알람 20:50 기준)
+    // 20:46:00 ~ 20:46:59 → 4분
+    final totalSeconds = diff.inSeconds;
+    final totalMinutes = (totalSeconds / 60).ceil();  // ceil()로 올림!
+
+    // 1분 이내 = "곧"
+    if (totalMinutes <= 1) {
+      return '곧';
+    }
+
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    if (hours > 0) {
+      if (minutes > 0) {
+        return '${hours}시간 ${minutes}분 후에';
+      } else {
+        return '${hours}시간 후에';
+      }
+    } else {
+      return '${minutes}분 후에';
     }
   }
   

@@ -15,6 +15,9 @@ import android.widget.TextView
 import java.text.SimpleDateFormat
 import java.util.*
 import android.util.Log
+import android.app.NotificationChannel
+import android.app.PendingIntent
+import androidx.core.app.NotificationCompat
 
 class AlarmOverlayService : Service() {
     private var windowManager: WindowManager? = null
@@ -239,6 +242,9 @@ class AlarmOverlayService : Service() {
                 val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
                 sendBroadcast(guardIntent)
 
+                // ⭐ 연장 Notification 표시
+                showUpdatedNotification(newTimestamp, timeStr, shiftType)
+
             } else {
                 cursor.close()
                 Log.e("AlarmOverlay", "❌ 알람 정보 없음: ID=$alarmId")
@@ -250,18 +256,88 @@ class AlarmOverlayService : Service() {
             Log.e("AlarmOverlay", "❌ 5분 후 재등록 실패", e)
         }
 
-        // Notification 삭제
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(alarmId)
-        notificationManager.cancel(8888)
-
         // Overlay 제거
         removeOverlay()
 
         // 서비스 종료
         stopSelf()
     }
-    
+
+    private fun showUpdatedNotification(newTimestamp: Long, newTimeStr: String, label: String) {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // 채널 생성 (Android O 이상)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "twenty_min_channel",
+                "알람 사전 알림",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "알람 20분 전 알림"
+                enableVibration(true)
+                setShowBadge(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // 앱 열기 Intent
+        val openAppIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("openTab", 0)
+        }
+        val openAppPendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            openAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // 끄기 액션
+        val cancelIntent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = "CANCEL_ALARM"
+            putExtra("alarmId", alarmId)
+            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
+            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
+        }
+        val cancelPendingIntent = PendingIntent.getBroadcast(
+            this,
+            alarmId + 10000,
+            cancelIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // 5분 후 액션
+        val extendIntent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = "EXTEND_ALARM"
+            putExtra("alarmId", alarmId)
+            putExtra("timestamp", newTimestamp)
+            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
+            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
+        }
+        val extendPendingIntent = PendingIntent.getBroadcast(
+            this,
+            alarmId + 20000,
+            extendIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, "twenty_min_channel")
+            .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
+            .setContentText(label)
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+            .setContentIntent(openAppPendingIntent)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
+            .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)
+            .build()
+
+        notificationManager.notify(8888, notification)
+        Log.d("AlarmOverlay", "📢 연장 Notification 표시: $newTimeStr")
+    }
+
     private fun removeOverlay() {
         if (overlayView != null) {
             windowManager?.removeView(overlayView)
