@@ -150,6 +150,9 @@ class AlarmOverlayService : Service() {
             cursor.close()
             db.close()
 
+            // ⭐ 테스트용: 강제로 1분 타임아웃 (나중에 제거)
+            alarmDuration = 1
+
             Log.d("AlarmOverlay", "✅ 알람 정보 로드: time=$alarmTimeStr, label=$alarmLabel, duration=${alarmDuration}분")
         } catch (e: Exception) {
             Log.e("AlarmOverlay", "❌ 알람 정보 로드 실패", e)
