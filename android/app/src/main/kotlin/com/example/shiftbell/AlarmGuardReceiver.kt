@@ -225,9 +225,10 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             .setContentTitle("잠시 후 알람이 울립니다 (${alarm.time})")
             .setContentText(alarm.shiftType)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_LOW)  // ⭐ 무음
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
+            .setSilent(true)  // ⭐ 소리/진동 없음
             .setContentIntent(openAppPendingIntent)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
             .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)
@@ -241,14 +242,16 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     private fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            
+
+            // ⭐ 무음 Notification: 소리/진동 없이 조용하게 표시
             val channel = NotificationChannel(
                 TWENTY_MIN_CHANNEL_ID,
                 "알람 사전 알림",
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
             ).apply {
                 description = "알람 20분 전 알림"
-                enableVibration(true)
+                enableVibration(false)
+                setSound(null, null)
                 setShowBadge(true)
             }
             notificationManager.createNotificationChannel(channel)

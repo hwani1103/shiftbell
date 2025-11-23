@@ -151,12 +151,15 @@ private fun showTimeoutNotification() {
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        // ⭐ 무음 Notification 채널
         val channel = NotificationChannel(
             "twenty_min_channel",
             "알람 사전 알림",
-            NotificationManager.IMPORTANCE_HIGH
+            NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
         ).apply {
             description = "알람 20분 전 알림"
+            enableVibration(false)
+            setSound(null, null)
         }
         notificationManager.createNotificationChannel(channel)
     }
@@ -176,9 +179,10 @@ private fun showTimeoutNotification() {
         .setContentTitle("$alarmTimeStr 알람이 timeout되었습니다")
         .setContentText(alarmLabel)
         .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setPriority(NotificationCompat.PRIORITY_LOW)  // ⭐ 무음
         .setCategory(NotificationCompat.CATEGORY_ALARM)
         .setAutoCancel(true)
+        .setSilent(true)  // ⭐ 소리/진동 없음
         .setContentIntent(openAppPendingIntent)
         .build()
 
@@ -407,13 +411,15 @@ private fun dismissAlarm() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // ⭐ 무음 Notification 채널
             val channel = NotificationChannel(
                 "twenty_min_channel",
                 "알람 사전 알림",
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
             ).apply {
                 description = "알람 20분 전 알림"
-                enableVibration(true)
+                enableVibration(false)
+                setSound(null, null)
                 setShowBadge(true)
             }
             notificationManager.createNotificationChannel(channel)
@@ -461,10 +467,10 @@ private fun dismissAlarm() {
             .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_LOW)  // ⭐ 무음
             .setCategory(androidx.core.app.NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
-            .setOnlyAlertOnce(true)
+            .setSilent(true)  // ⭐ 소리/진동 없음
             .setContentIntent(openAppPendingIntent)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
             .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)

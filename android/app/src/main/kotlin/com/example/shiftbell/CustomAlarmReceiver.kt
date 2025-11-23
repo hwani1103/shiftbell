@@ -232,25 +232,28 @@ override fun onReceive(context: Context, intent: Intent) {
         
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         
-        // 채널 생성
+        // ⭐ 채널 생성 (무음 - 알람 소리는 AlarmPlayer에서 재생)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "알람",
-                NotificationManager.IMPORTANCE_HIGH
+                NotificationManager.IMPORTANCE_HIGH  // fullScreenIntent를 위해 HIGH 유지
             ).apply {
                 description = "알람 알림"
+                enableVibration(false)
+                setSound(null, null)  // notification 자체는 무음
             }
             notificationManager.createNotificationChannel(channel)
         }
-        
+
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle("알람")
             .setContentText(label)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setFullScreenIntent(fullScreenPendingIntent, true)
+            .setSilent(true)  // ⭐ 소리/진동 없음 (알람 소리는 AlarmPlayer)
             .setAutoCancel(true)
             .build()
         
