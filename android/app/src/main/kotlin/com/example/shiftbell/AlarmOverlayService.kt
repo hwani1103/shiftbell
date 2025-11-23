@@ -245,6 +245,12 @@ class AlarmOverlayService : Service() {
                 // ⭐ 연장 Notification 표시
                 showUpdatedNotification(newTimestamp, timeStr, shiftType)
 
+                // ⭐ 앱 포그라운드로 가져와서 Flutter UI 즉시 갱신
+                val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+                launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                startActivity(launchIntent)
+                Log.d("AlarmOverlay", "✅ 앱 포그라운드 이동 → Flutter UI 갱신")
+
             } else {
                 cursor.close()
                 Log.e("AlarmOverlay", "❌ 알람 정보 없음: ID=$alarmId")
