@@ -136,10 +136,23 @@ class AlarmOverlayService : Service() {
     notificationManager.cancel(alarmId)
     notificationManager.cancel(8888)
     Log.d("AlarmOverlay", "📢 Notification 삭제")
-    
+
+    // ⭐ 갱신 체크
+    AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
+
+    // ⭐ AlarmGuardReceiver 재실행 (다음 알람 Notification 표시)
+    val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
+    sendBroadcast(guardIntent)
+
+    // ⭐ 앱 포그라운드로 가져와서 Flutter UI 즉시 갱신
+    val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+    launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    startActivity(launchIntent)
+    Log.d("AlarmOverlay", "✅ 앱 포그라운드 이동 → Flutter UI 갱신")
+
     // Overlay 제거
     removeOverlay()
-    
+
     // 서비스 종료
     stopSelf()
 }
