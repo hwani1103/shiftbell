@@ -2,8 +2,10 @@ package com.example.shiftbell
 
 import android.app.NotificationManager
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
@@ -22,6 +24,13 @@ import android.app.PendingIntent
 import androidx.core.app.NotificationCompat
 
 class AlarmOverlayService : Service() {
+
+    companion object {
+        const val ACTION_DISMISS_OVERLAY = "com.example.shiftbell.DISMISS_OVERLAY"
+        const val ACTION_SNOOZE_OVERLAY = "com.example.shiftbell.SNOOZE_OVERLAY"
+        const val EXTRA_ALARM_ID = "alarmId"
+    }
+
     private var windowManager: WindowManager? = null
     private var overlayView: android.view.View? = null
     private var alarmId: Int = 0
@@ -30,6 +39,30 @@ class AlarmOverlayService : Service() {
     private var timeoutHandler: Handler? = null
     private var timeoutRunnable: Runnable? = null
     private var alarmDuration: Int = 1  // 기본 1분 (테스트용)
+
+    // 외부에서 Overlay 종료/스누즈 신호를 받기 위한 BroadcastReceiver
+    private val overlayActionReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val targetAlarmId = intent.getIntExtra(EXTRA_ALARM_ID, -1)
+
+            // 현재 Overlay의 알람 ID와 일치하는 경우에만 처리
+            if (targetAlarmId != alarmId && targetAlarmId != -1) {
+                Log.d("AlarmOverlay", "⚠️ 다른 알람 ID 무시: target=$targetAlarmId, current=$alarmId")
+                return
+            }
+
+            when (intent.action) {
+                ACTION_DISMISS_OVERLAY -> {
+                    Log.d("AlarmOverlay", "📥 외부에서 DISMISS 신호 수신: ID=$alarmId")
+                    dismissAlarmFromExternal()
+                }
+                ACTION_SNOOZE_OVERLAY -> {
+                    Log.d("AlarmOverlay", "📥 외부에서 SNOOZE 신호 수신: ID=$alarmId")
+                    snoozeAlarmFromExternal()
+                }
+            }
+        }
+    }
     
     override fun onBind(intent: Intent?): IBinder? = null
     
@@ -43,6 +76,18 @@ class AlarmOverlayService : Service() {
             return START_NOT_STICKY
         }
 
+        // ⭐ 외부 종료 신호를 받기 위한 BroadcastReceiver 등록
+        val filter = IntentFilter().apply {
+            addAction(ACTION_DISMISS_OVERLAY)
+            addAction(ACTION_SNOOZE_OVERLAY)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(overlayActionReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(overlayActionReceiver, filter)
+        }
+        Log.d("AlarmOverlay", "📡 외부 신호 리시버 등록")
+
         // DB에서 알람 정보 조회
         loadAlarmInfo()
 
@@ -50,6 +95,24 @@ class AlarmOverlayService : Service() {
         startTimeoutTimer()
 
         return START_NOT_STICKY
+    }
+
+    // 외부에서 호출된 DISMISS (소리만 중지, DB 작업은 이미 외부에서 처리됨)
+    private fun dismissAlarmFromExternal() {
+        cancelTimeoutTimer()
+        AlarmPlayer.getInstance(applicationContext).stopAlarm()
+        removeOverlay()
+        stopSelf()
+        Log.d("AlarmOverlay", "✅ 외부 신호로 Overlay 종료")
+    }
+
+    // 외부에서 호출된 SNOOZE (소리만 중지, DB 작업은 이미 외부에서 처리됨)
+    private fun snoozeAlarmFromExternal() {
+        cancelTimeoutTimer()
+        AlarmPlayer.getInstance(applicationContext).stopAlarm()
+        removeOverlay()
+        stopSelf()
+        Log.d("AlarmOverlay", "✅ 외부 신호로 Overlay 종료 (스누즈)")
     }
 
     private fun loadAlarmInfo() {
@@ -532,6 +595,15 @@ class AlarmOverlayService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         cancelTimeoutTimer()
+
+        // ⭐ BroadcastReceiver 해제
+        try {
+            unregisterReceiver(overlayActionReceiver)
+            Log.d("AlarmOverlay", "📡 외부 신호 리시버 해제")
+        } catch (e: Exception) {
+            Log.e("AlarmOverlay", "리시버 해제 실패 (이미 해제됨)", e)
+        }
+
         removeOverlay()
     }
 }

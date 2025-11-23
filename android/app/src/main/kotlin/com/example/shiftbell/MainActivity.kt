@@ -178,6 +178,26 @@ override fun onNewIntent(intent: Intent) {
     Log.d("MainActivity", "📢 Notification 삭제 (ID: 8888)")
     result.success(null)
 }
+                // ⭐ Overlay 종료 (외부에서 알람 끄기)
+                "dismissOverlay" -> {
+                    val alarmId = call.argument<Int>("alarmId") ?: -1
+                    val intent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
+                        putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                    }
+                    sendBroadcast(intent)
+                    Log.d("MainActivity", "📡 Overlay DISMISS 브로드캐스트 발송: ID=$alarmId")
+                    result.success(null)
+                }
+                // ⭐ Overlay 스누즈 (외부에서 알람 5분 후)
+                "snoozeOverlay" -> {
+                    val alarmId = call.argument<Int>("alarmId") ?: -1
+                    val intent = Intent(AlarmOverlayService.ACTION_SNOOZE_OVERLAY).apply {
+                        putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                    }
+                    sendBroadcast(intent)
+                    Log.d("MainActivity", "📡 Overlay SNOOZE 브로드캐스트 발송: ID=$alarmId")
+                    result.success(null)
+                }
                 else -> result.notImplemented()
             }
         }

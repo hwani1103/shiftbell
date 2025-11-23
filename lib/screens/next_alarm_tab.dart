@@ -88,6 +88,14 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   }
   
   Future<void> _dismissAlarm(int id, DateTime? date) async {
+    // ⭐ Overlay가 울리고 있을 수 있으므로 먼저 종료 신호 발송
+    try {
+      await platform.invokeMethod('dismissOverlay', {'alarmId': id});
+      print('✅ Overlay 종료 신호 발송');
+    } catch (e) {
+      print('⚠️ Overlay 종료 신호 실패: $e');
+    }
+
     await ref.read(alarmNotifierProvider.notifier).deleteAlarm(id, date);
 
     // Notification 삭제
@@ -118,6 +126,14 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   
   Future<void> _snoozeAlarm(int id, DateTime originalDate) async {
     try {
+      // ⭐ Overlay가 울리고 있을 수 있으므로 먼저 종료 신호 발송
+      try {
+        await platform.invokeMethod('snoozeOverlay', {'alarmId': id});
+        print('✅ Overlay 스누즈 신호 발송');
+      } catch (e) {
+        print('⚠️ Overlay 스누즈 신호 실패: $e');
+      }
+
       // 알람 예정 시간 기준 5분 후 (알람 울리기 전 미리 연장하는 기능)
       final newDate = originalDate.add(Duration(minutes: 5));
 

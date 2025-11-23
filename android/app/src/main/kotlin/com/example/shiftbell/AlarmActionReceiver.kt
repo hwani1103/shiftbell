@@ -22,8 +22,16 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 Log.d("AlarmAction", "🗑️ 알람 취소: ID=$alarmId")
                 val label = intent.getStringExtra(CustomAlarmReceiver.EXTRA_LABEL) ?: "알람"
                 val soundType = intent.getStringExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE) ?: "loud"
+
+                // ⭐ Overlay가 울리고 있을 수 있으므로 종료 신호 발송
+                val dismissIntent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
+                    putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                }
+                context.sendBroadcast(dismissIntent)
+                Log.d("AlarmAction", "📡 Overlay DISMISS 브로드캐스트 발송")
+
                 cancelAlarm(context, alarmId, label, soundType)
-                
+
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(8888)
             }
@@ -32,6 +40,14 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 val label = intent.getStringExtra(CustomAlarmReceiver.EXTRA_LABEL) ?: "알람"
                 val soundType = intent.getStringExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE) ?: "loud"
                 Log.d("AlarmAction", "⏰ 알람 5분 연장: ID=$alarmId")
+
+                // ⭐ Overlay가 울리고 있을 수 있으므로 종료 신호 발송
+                val snoozeIntent = Intent(AlarmOverlayService.ACTION_SNOOZE_OVERLAY).apply {
+                    putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                }
+                context.sendBroadcast(snoozeIntent)
+                Log.d("AlarmAction", "📡 Overlay SNOOZE 브로드캐스트 발송")
+
                 extendAlarm(context, alarmId, timestamp, label, soundType)
             }
         }
