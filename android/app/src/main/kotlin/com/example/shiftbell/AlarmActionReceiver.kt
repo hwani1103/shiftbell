@@ -151,20 +151,24 @@ class AlarmActionReceiver : BroadcastReceiver() {
         db.close()
         
         Log.d("AlarmAction", "✅ DB 업데이트 완료: ID=$alarmId, time=$timeStr, date=$dateStr, rows=$rowsAffected")
-        
+
         // ⭐ 수정: AlarmRefreshWorker → AlarmRefreshUtil
         AlarmRefreshUtil.checkAndTriggerRefresh(context)
         Log.d("AlarmAction", "✅ 갱신 체크 완료")
-        
+
         val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
         context.sendBroadcast(guardIntent)
         Log.d("AlarmAction", "✅ AlarmGuardReceiver 즉시 재실행")
-        
+
+        // ⭐ Notification 업데이트 (연장되었습니다 표시)
+        showUpdatedNotification(context, alarmId, newTimestamp, timeStr, label, soundType)
+        Log.d("AlarmAction", "✅ Notification 업데이트 완료")
+
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         context.startActivity(launchIntent)
         Log.d("AlarmAction", "✅ 앱 포그라운드 이동")
-        
+
     } catch (e: Exception) {
         Log.e("AlarmAction", "❌ DB 업데이트 실패", e)
     }
