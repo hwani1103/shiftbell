@@ -956,9 +956,14 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                           ),
                         ),
                         onTap: () {
-                          setState(() => _selectedSoundId = sound['id']!);
+                          final newSoundId = sound['id']!;
+                          setState(() => _selectedSoundId = newSoundId);
                           setModalState(() {});
                           Navigator.pop(context);
+                          // 재생 중이면 새 소리로 자동 전환
+                          if (_isPlaying) {
+                            _playSound(newSoundId, type.volume);
+                          }
                         },
                       );
                     },
