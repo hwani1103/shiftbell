@@ -777,7 +777,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
 
   String _selectedSoundId = 'alarmbell1';
 
-  // 소리 미리듣기 재생
+  // 소리 미리듣기 재생 (중지 버튼 누를 때까지 반복)
   Future<void> _playSound(String soundId, double volume) async {
     await _audioPlayer.stop();
 
@@ -788,16 +788,9 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
 
     try {
       await _audioPlayer.setVolume(volume);
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);  // 반복 재생
       await _audioPlayer.play(AssetSource('sounds/${sound['file']}'));
       setState(() => _isPlaying = true);
-
-      // 3초 후 자동 정지
-      Future.delayed(Duration(seconds: 3), () {
-        if (mounted) {
-          _audioPlayer.stop();
-          setState(() => _isPlaying = false);
-        }
-      });
     } catch (e) {
       debugPrint('소리 재생 실패: $e');
       if (mounted) {
@@ -806,6 +799,12 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
         );
       }
     }
+  }
+
+  // 소리 정지
+  void _stopSound() {
+    _audioPlayer.stop();
+    setState(() => _isPlaying = false);
   }
 
   // 진동 테스트 (약 1초)
@@ -825,46 +824,62 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           child: Text('알람음', style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
         ),
         Expanded(
-          child: GestureDetector(
-            onTap: () => _showSoundPicker(type),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.music_note, size: 18.sp, color: Colors.orange),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: Text(
-                      _getSoundName(_selectedSoundId),
-                      style: TextStyle(fontSize: 13.sp),
+          child: Row(
+            children: [
+              // 알람음 선택 드롭다운
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _showSoundPicker(type),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.music_note, size: 18.sp, color: Colors.orange),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            _getSoundName(_selectedSoundId),
+                            style: TextStyle(fontSize: 13.sp),
+                          ),
+                        ),
+                        Icon(Icons.arrow_drop_down, color: Colors.grey),
+                      ],
                     ),
                   ),
-                  // 재생/정지 버튼
-                  GestureDetector(
-                    onTap: () {
-                      if (_isPlaying) {
-                        _audioPlayer.stop();
-                        setState(() => _isPlaying = false);
-                      } else {
-                        _playSound(_selectedSoundId, type.volume);
-                      }
-                    },
-                    child: Icon(
-                      _isPlaying ? Icons.stop_circle : Icons.play_circle,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              // 재생/정지 버튼
+              GestureDetector(
+                onTap: () {
+                  if (_isPlaying) {
+                    _stopSound();
+                  } else {
+                    _playSound(_selectedSoundId, type.volume);
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: _isPlaying ? Colors.red.shade50 : Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(
                       color: _isPlaying ? Colors.red : Colors.blue,
-                      size: 24.sp,
                     ),
                   ),
-                  SizedBox(width: 4.w),
-                  Icon(Icons.arrow_drop_down, color: Colors.grey),
-                ],
+                  child: Icon(
+                    _isPlaying ? Icons.stop : Icons.play_arrow,
+                    color: _isPlaying ? Colors.red : Colors.blue,
+                    size: 20.sp,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ],
@@ -882,60 +897,74 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,  // 스크롤 가능하게
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.5,  // 화면의 50% 높이
+          ),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: EdgeInsets.all(16.w),
-                child: Row(
-                  children: [
-                    Text(
-                      '알람음 선택',
-                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-                    ),
-                    Spacer(),
-                    IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () {
-                        _audioPlayer.stop();
-                        Navigator.pop(context);
-                      },
-                    ),
-                  ],
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 헤더
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  child: Row(
+                    children: [
+                      Text(
+                        '알람음 선택',
+                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                      ),
+                      Spacer(),
+                      IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Divider(height: 1),
-              ..._soundOptions.map((sound) => ListTile(
-                leading: Icon(
-                  _selectedSoundId == sound['id'] ? Icons.check_circle : Icons.circle_outlined,
-                  color: _selectedSoundId == sound['id'] ? Colors.orange : Colors.grey,
+                Divider(height: 1),
+                // 스크롤 가능한 목록
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _soundOptions.length,
+                    itemBuilder: (context, index) {
+                      final sound = _soundOptions[index];
+                      final isSelected = _selectedSoundId == sound['id'];
+                      return ListTile(
+                        leading: Icon(
+                          isSelected ? Icons.check_circle : Icons.circle_outlined,
+                          color: isSelected ? Colors.orange : Colors.grey,
+                        ),
+                        title: Text(
+                          sound['name']!,
+                          style: TextStyle(
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            color: isSelected ? Colors.orange.shade800 : Colors.black,
+                          ),
+                        ),
+                        onTap: () {
+                          setState(() => _selectedSoundId = sound['id']!);
+                          setModalState(() {});
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
                 ),
-                title: Text(sound['name']!),
-                trailing: IconButton(
-                  icon: Icon(Icons.play_circle_outline, color: Colors.blue),
-                  onPressed: () => _playSound(sound['id']!, type.volume),
-                ),
-                onTap: () {
-                  setState(() => _selectedSoundId = sound['id']!);
-                  setModalState(() {});
-                  _playSound(sound['id']!, type.volume);
-                },
-              )),
-              SizedBox(height: 20.h),
-            ],
+                SizedBox(height: 16.h),
+              ],
+            ),
           ),
         ),
       ),
-    ).then((_) {
-      _audioPlayer.stop();
-      setState(() => _isPlaying = false);
-    });
+    );
   }
 
   Widget _buildVibrationRow(AlarmType type) {
