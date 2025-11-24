@@ -16,7 +16,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
 ) {
     companion object {
         private const val DATABASE_NAME = "shiftbell.db"
-        private const val DATABASE_VERSION = 9  // Flutter와 동일하게 유지
+        private const val DATABASE_VERSION = 10  // Flutter와 동일하게 유지
         private const val TAG = "DatabaseHelper"
 
         @Volatile

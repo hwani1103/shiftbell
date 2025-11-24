@@ -52,7 +52,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 9,  // v9: 기본값 마이그레이션 재실행
+      version: 10,  // v10: sound_file 강제 업데이트
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -241,6 +241,34 @@ class DatabaseService {
     ''');
 
     print('✅ DB 업그레이드 완료 (v$oldVersion → v9): 진동/무음 기본값 재적용');
+  }
+
+  // v10: 소리 타입 sound_file 강제 업데이트 (loud → alarmbell1)
+  if (oldVersion < 10) {
+    await db.execute('''
+      UPDATE alarm_types SET
+        sound_file = 'alarmbell1',
+        volume = 0.7,
+        vibration_strength = 3,
+        duration = 3
+      WHERE id = 1
+    ''');
+
+    // 진동/무음도 재확인
+    await db.execute('''
+      UPDATE alarm_types SET
+        vibration_strength = 3,
+        duration = 3
+      WHERE id = 2
+    ''');
+
+    await db.execute('''
+      UPDATE alarm_types SET
+        duration = 3
+      WHERE id = 3
+    ''');
+
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v10): sound_file=alarmbell1 강제 적용');
   }
 } 
   
