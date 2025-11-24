@@ -59,12 +59,15 @@ class DatabaseService {
         var result = await db.rawQuery(
           "SELECT name FROM sqlite_master WHERE type='table' AND name='shift_schedule'"
         );
-        
+
         if (result.isEmpty) {
           print('⚠️ 테이블 없음 - 재생성 중...');
           await _onCreate(db, 4);
           print('✅ 테이블 생성 완료');
         }
+
+        // ⭐ 매번 실행: 프리셋 기본값 강제 적용 (마이그레이션 누락 대응)
+        await _ensurePresetDefaults(db);
       },
     );
   }
@@ -277,8 +280,58 @@ class DatabaseService {
     await db.execute("UPDATE alarm_types SET duration = 3 WHERE id = 3");
     print('✅ DB 업그레이드 완료 (v$oldVersion → v11): 진동/무음 기본값 최종 적용');
   }
-} 
-  
+}
+
+  // ⭐ 프리셋 기본값 강제 확인/수정 (앱 실행 시마다 호출)
+  Future<void> _ensurePresetDefaults(Database db) async {
+    try {
+      // alarm_types 테이블 존재 확인
+      var tableCheck = await db.rawQuery(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='alarm_types'"
+      );
+      if (tableCheck.isEmpty) return;
+
+      // 프리셋 데이터가 있는지 확인
+      var presetCheck = await db.rawQuery("SELECT COUNT(*) as cnt FROM alarm_types WHERE is_preset = 1");
+      int presetCount = Sqflite.firstIntValue(presetCheck) ?? 0;
+
+      if (presetCount == 0) {
+        print('⚠️ 프리셋 없음 - settings_tab에서 초기화 예정');
+        return;
+      }
+
+      // 기본값 강제 적용 (잘못된 값 수정)
+      // 소리(id=1): alarmbell1, 70%, 강하게, 3분
+      await db.execute('''
+        UPDATE alarm_types SET
+          sound_file = CASE WHEN sound_file = 'loud' OR sound_file = 'soft' THEN 'alarmbell1' ELSE sound_file END,
+          volume = CASE WHEN volume = 1.0 THEN 0.7 ELSE volume END,
+          vibration_strength = CASE WHEN vibration_strength = 2 THEN 3 ELSE vibration_strength END,
+          duration = CASE WHEN duration = 10 OR duration = 5 THEN 3 ELSE duration END
+        WHERE id = 1 AND is_preset = 1
+      ''');
+
+      // 진동(id=2): 강하게, 3분
+      await db.execute('''
+        UPDATE alarm_types SET
+          vibration_strength = CASE WHEN vibration_strength = 2 OR vibration_strength = 1 THEN 3 ELSE vibration_strength END,
+          duration = CASE WHEN duration = 10 OR duration = 5 THEN 3 ELSE duration END
+        WHERE id = 2 AND is_preset = 1
+      ''');
+
+      // 무음(id=3): 3분
+      await db.execute('''
+        UPDATE alarm_types SET
+          duration = CASE WHEN duration = 10 OR duration = 5 THEN 3 ELSE duration END
+        WHERE id = 3 AND is_preset = 1
+      ''');
+
+      print('✅ 프리셋 기본값 확인 완료');
+    } catch (e) {
+      print('⚠️ 프리셋 기본값 확인 중 오류: $e');
+    }
+  }
+
   // === 기존 메서드들 유지 ===
   
   Future<List<AlarmType>> getAllAlarmTypes() async {
