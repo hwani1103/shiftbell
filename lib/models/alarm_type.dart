@@ -47,8 +47,8 @@ class AlarmType {
     };
   }
 
-  // 타입 판별
-  bool get isSound => soundFile == 'loud';
+  // 타입 판별 (alarmbell로 시작하면 소리 타입)
+  bool get isSound => soundFile.startsWith('alarmbell');
   bool get isVibrate => soundFile == 'vibrate';
   bool get isSilent => soundFile == 'silent';
 
@@ -67,11 +67,11 @@ class AlarmType {
       id: 1,
       name: 'sound',
       emoji: '🔔',
-      soundFile: 'loud',
-      volume: 1.0,
-      vibrationStrength: 3,  // 소리는 진동 강하게
+      soundFile: 'alarmbell1',  // 기본 알람벨
+      volume: 0.7,  // 70%
+      vibrationStrength: 3,  // 강하게
       isPreset: true,
-      duration: 5,
+      duration: 3,  // 3분
     ),
     AlarmType(
       id: 2,
@@ -81,7 +81,7 @@ class AlarmType {
       volume: 0.0,
       vibrationStrength: 3,  // 강하게
       isPreset: true,
-      duration: 5,
+      duration: 3,  // 3분
     ),
     AlarmType(
       id: 3,
@@ -91,7 +91,7 @@ class AlarmType {
       volume: 0.0,
       vibrationStrength: 0,  // 없음
       isPreset: true,
-      duration: 5,
+      duration: 3,  // 3분
     ),
   ];
 }

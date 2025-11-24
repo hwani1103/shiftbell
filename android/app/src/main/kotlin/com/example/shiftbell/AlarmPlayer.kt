@@ -1,6 +1,7 @@
 package com.example.shiftbell
 
 import android.content.Context
+import android.content.res.AssetFileDescriptor
 import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
@@ -33,17 +34,23 @@ class AlarmPlayer(private val context: Context) {
     }
 
     // 새로운 메서드: DB에서 읽은 설정 적용
-    fun playAlarmWithSettings(soundType: String, volume: Float, vibrationStrength: Int) {
-        Log.d("AlarmPlayer", "알람 재생: $soundType, 음량: $volume, 진동: $vibrationStrength")
+    fun playAlarmWithSettings(soundFile: String, volume: Float, vibrationStrength: Int) {
+        Log.d("AlarmPlayer", "알람 재생: $soundFile, 음량: $volume, 진동: $vibrationStrength")
         stopAlarm() // 기존 알람 정지
 
-        when(soundType) {
-            "loud", "soft" -> {
-                playSound(volume)
+        when {
+            // alarmbell로 시작하면 커스텀 사운드 재생
+            soundFile.startsWith("alarmbell") -> {
+                playCustomSound(soundFile, volume)
                 playVibration(vibrationStrength)  // 소리 타입은 진동 항상 포함
             }
-            "vibrate" -> playVibration(vibrationStrength)
-            "silent" -> {} // 아무것도 안 함
+            // 기존 호환용 (loud, soft)
+            soundFile == "loud" || soundFile == "soft" -> {
+                playDefaultSound(volume)
+                playVibration(vibrationStrength)
+            }
+            soundFile == "vibrate" -> playVibration(vibrationStrength)
+            soundFile == "silent" -> {} // 아무것도 안 함
         }
     }
 
@@ -77,9 +84,9 @@ class AlarmPlayer(private val context: Context) {
                 null, null, null
             )
 
-            var soundFile = "loud"
-            var volume = 1.0f
-            var vibrationStrength = 2
+            var soundFile = "alarmbell1"  // 기본값: 알람벨1
+            var volume = 0.7f  // 기본값: 70%
+            var vibrationStrength = 3  // 기본값: 강하게
 
             if (typeCursor.moveToFirst()) {
                 soundFile = typeCursor.getString(typeCursor.getColumnIndexOrThrow("sound_file"))
@@ -94,11 +101,50 @@ class AlarmPlayer(private val context: Context) {
 
         } catch (e: Exception) {
             Log.e("AlarmPlayer", "DB 설정 읽기 실패, 기본값 사용", e)
-            playAlarm("loud")
+            playAlarmWithSettings("alarmbell1", 0.7f, 3)  // 기본값: 알람벨1, 70%, 강하게
         }
     }
 
-    private fun playSound(volume: Float) {
+    // Flutter assets에서 커스텀 사운드 재생
+    private fun playCustomSound(soundFile: String, volume: Float) {
+        try {
+            // Flutter assets 경로: flutter_assets/assets/sounds/alarmbell1.mp3
+            val assetPath = "flutter_assets/assets/sounds/${soundFile}.mp3"
+            Log.d("AlarmPlayer", "커스텀 사운드 로드: $assetPath")
+
+            val afd: AssetFileDescriptor = context.assets.openFd(assetPath)
+
+            mediaPlayer = MediaPlayer().apply {
+                setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
+                afd.close()
+
+                // 핵심: STREAM_ALARM 사용!
+                setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+
+                // 음량 설정 (DB에서 읽은 값)
+                setVolume(volume, volume)
+
+                isLooping = true
+                prepare()
+                start()
+            }
+
+            Log.d("AlarmPlayer", "커스텀 사운드 재생 시작: $soundFile, 음량 ${(volume * 100).toInt()}%")
+
+        } catch (e: Exception) {
+            Log.e("AlarmPlayer", "커스텀 사운드 재생 실패, 기본 알람 사용: ${e.message}", e)
+            // 실패 시 기본 알람 사운드로 폴백
+            playDefaultSound(volume)
+        }
+    }
+
+    // 시스템 기본 알람 사운드 재생
+    private fun playDefaultSound(volume: Float) {
         try {
             // 알람 소리 URI
             val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
@@ -122,10 +168,10 @@ class AlarmPlayer(private val context: Context) {
                 start()
             }
 
-            Log.d("AlarmPlayer", "소리 재생 시작: 음량 ${(volume * 100).toInt()}%")
+            Log.d("AlarmPlayer", "기본 알람 소리 재생 시작: 음량 ${(volume * 100).toInt()}%")
 
         } catch (e: Exception) {
-            Log.e("AlarmPlayer", "소리 재생 실패", e)
+            Log.e("AlarmPlayer", "기본 알람 소리 재생 실패", e)
         }
     }
 

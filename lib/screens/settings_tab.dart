@@ -9,7 +9,6 @@ import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../models/alarm_type.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -599,22 +598,6 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     if (_types.isEmpty) {
       _initPresets();
     }
-
-    // 저장된 알람음 불러오기
-    _loadSelectedSound();
-  }
-
-  Future<void> _loadSelectedSound() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('selected_alarm_sound') ?? 'alarmbell1';
-    setState(() {
-      _selectedSoundId = saved;
-    });
-  }
-
-  Future<void> _saveSelectedSound(String soundId) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('selected_alarm_sound', soundId);
   }
 
   @override
@@ -798,8 +781,6 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     {'id': 'alarmbell2', 'name': '알람벨 2', 'file': 'alarmbell2.mp3'},
   ];
 
-  String _selectedSoundId = 'alarmbell1';
-
   // 소리 미리듣기 재생 (중지 버튼 누를 때까지 반복)
   Future<void> _playSound(String soundId, double volume) async {
     await _audioPlayer.stop();
@@ -866,7 +847,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
-                            _getSoundName(_selectedSoundId),
+                            _getSoundName(type.soundFile),  // DB에서 읽은 값 사용
                             style: TextStyle(fontSize: 13.sp),
                           ),
                         ),
@@ -883,7 +864,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                   if (_isPlaying) {
                     _stopSound();
                   } else {
-                    _playSound(_selectedSoundId, type.volume);
+                    _playSound(type.soundFile, type.volume);  // DB에서 읽은 값 사용
                   }
                 },
                 child: Container(
@@ -959,7 +940,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                     itemCount: _soundOptions.length,
                     itemBuilder: (context, index) {
                       final sound = _soundOptions[index];
-                      final isSelected = _selectedSoundId == sound['id'];
+                      final isSelected = type.soundFile == sound['id'];
                       return ListTile(
                         leading: Icon(
                           isSelected ? Icons.check_circle : Icons.circle_outlined,
@@ -974,8 +955,17 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                         ),
                         onTap: () {
                           final newSoundId = sound['id']!;
-                          setState(() => _selectedSoundId = newSoundId);
-                          _saveSelectedSound(newSoundId);  // SharedPreferences에 저장
+                          // DB에 저장
+                          _updateType(AlarmType(
+                            id: type.id,
+                            name: type.name,
+                            emoji: type.emoji,
+                            soundFile: newSoundId,  // 새로운 사운드 파일명
+                            volume: type.volume,
+                            vibrationStrength: type.vibrationStrength,
+                            isPreset: type.isPreset,
+                            duration: type.duration,
+                          ));
                           setModalState(() {});
                           Navigator.pop(context);
                           // 재생 중이면 새 소리로 자동 전환
