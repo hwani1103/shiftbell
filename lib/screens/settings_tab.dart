@@ -293,15 +293,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.indigo.shade400, Colors.indigo.shade600],
+                    colors: [Colors.indigo.shade300, Colors.indigo.shade400],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(16.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.indigo.withOpacity(0.3),
-                      blurRadius: 8,
+                      color: Colors.indigo.withOpacity(0.2),
+                      blurRadius: 10,
                       offset: Offset(0, 4),
                     ),
                   ],
@@ -313,12 +313,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.calendar_month, color: Colors.white, size: 24.sp),
+                          Icon(Icons.calendar_month, color: Colors.white, size: 22.sp),
                           SizedBox(width: 8.w),
                           Text(
                             '교대 스케줄',
                             style: TextStyle(
-                              fontSize: 20.sp,
+                              fontSize: 18.sp,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -330,27 +330,33 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                         Text('설정 안 됨', style: TextStyle(color: Colors.white70))
                       else ...[
                         _buildInfoRow('근무 형태', schedule.isRegular ? '규칙적 교대' : '불규칙'),
-                        if (schedule.isRegular && schedule.pattern != null) ...[
-                          SizedBox(height: 12.h),
-                          _buildInfoRow('패턴', schedule.pattern!.join(' → ')),
-                        ],
+                        SizedBox(height: 10.h),
+                        if (schedule.isRegular && schedule.pattern != null)
+                          _buildInfoRow('패턴', schedule.pattern!.join(' → '))
+                        else
+                          _buildInfoRow('근무 종류', (schedule.activeShiftTypes ?? schedule.shiftTypes).join(', ')),
                       ],
-                      SizedBox(height: 20.h),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton.icon(
-                          onPressed: _resetSchedule,
-                          icon: Icon(Icons.refresh, color: Colors.white, size: 18.sp),
-                          label: Text(
-                            '스케줄 초기화',
-                            style: TextStyle(color: Colors.white, fontSize: 14.sp),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Colors.white54),
-                            padding: EdgeInsets.symmetric(vertical: 12.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
+                      SizedBox(height: 16.h),
+                      Divider(color: Colors.white24, height: 1),
+                      SizedBox(height: 16.h),
+                      InkWell(
+                        onTap: _resetSchedule,
+                        borderRadius: BorderRadius.circular(8.r),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.h),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.refresh, color: Colors.white70, size: 16.sp),
+                              SizedBox(width: 6.w),
+                              Text(
+                                '스케줄 초기화',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13.sp,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
