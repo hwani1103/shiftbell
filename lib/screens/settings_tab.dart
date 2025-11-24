@@ -6,6 +6,7 @@ import '../services/alarm_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
+import '../models/alarm_type.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -272,6 +273,24 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     }
   }
 
+  Future<void> _showAlarmTypeDialog() async {
+    final alarmTypes = await DatabaseService.instance.getAllAlarmTypes();
+
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _AlarmTypeSettingsSheet(
+        alarmTypes: alarmTypes,
+        onUpdate: () {
+          setState(() {});
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheduleAsync = ref.watch(scheduleProvider);
@@ -392,6 +411,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ),
 
               SizedBox(height: 16.h),
+
+              // 알람 타입 관리
+              ListTile(
+                leading: Icon(Icons.notifications_active, color: Colors.orange),
+                title: Text('알람 타입 관리'),
+                subtitle: Text('소리, 진동, 무음 설정'),
+                trailing: Icon(Icons.chevron_right),
+                onTap: _showAlarmTypeDialog,
+              ),
 
               // 등록된 알람
               ListTile(
@@ -531,6 +559,320 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           )).toList(),
         ),
       ],
+    );
+  }
+}
+
+// 알람 타입 설정 BottomSheet
+class _AlarmTypeSettingsSheet extends StatefulWidget {
+  final List<AlarmType> alarmTypes;
+  final VoidCallback onUpdate;
+
+  const _AlarmTypeSettingsSheet({
+    required this.alarmTypes,
+    required this.onUpdate,
+  });
+
+  @override
+  State<_AlarmTypeSettingsSheet> createState() => _AlarmTypeSettingsSheetState();
+}
+
+class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
+  late List<AlarmType> _types;
+
+  @override
+  void initState() {
+    super.initState();
+    _types = List.from(widget.alarmTypes);
+
+    // DB에 타입이 없으면 프리셋으로 초기화
+    if (_types.isEmpty) {
+      _initPresets();
+    }
+  }
+
+  Future<void> _initPresets() async {
+    for (var preset in AlarmType.presets) {
+      await DatabaseService.instance.insertAlarmType(preset);
+    }
+    final types = await DatabaseService.instance.getAllAlarmTypes();
+    setState(() {
+      _types = types;
+    });
+  }
+
+  Future<void> _updateType(AlarmType type) async {
+    final db = await DatabaseService.instance.database;
+    await db.update(
+      'alarm_types',
+      type.toMap(),
+      where: 'id = ?',
+      whereArgs: [type.id],
+    );
+
+    final types = await DatabaseService.instance.getAllAlarmTypes();
+    setState(() {
+      _types = types;
+    });
+    widget.onUpdate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      padding: EdgeInsets.all(20.w),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 헤더
+          Row(
+            children: [
+              Text(
+                '알람 타입 설정',
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Spacer(),
+              IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+
+          // 타입 목록
+          ..._types.map((type) => _buildTypeCard(type)).toList(),
+
+          SizedBox(height: 20.h),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeCard(AlarmType type) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 타입 헤더 (이모지 + 이름)
+          Row(
+            children: [
+              Text(type.emoji, style: TextStyle(fontSize: 28.sp)),
+              SizedBox(width: 12.w),
+              Text(
+                type.isSound ? '소리' : type.isVibrate ? '진동' : '무음',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (type.isSound)
+                Text(
+                  ' (진동 포함)',
+                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+
+          // 소리 타입: 음량 슬라이더
+          if (type.isSound) ...[
+            _buildSliderRow(
+              label: '음량',
+              value: type.volume,
+              onChanged: (v) => _updateType(AlarmType(
+                id: type.id,
+                name: type.name,
+                emoji: type.emoji,
+                soundFile: type.soundFile,
+                volume: v,
+                vibrationStrength: type.vibrationStrength,
+                isPreset: type.isPreset,
+                duration: type.duration,
+              )),
+              suffix: '${(type.volume * 100).round()}%',
+            ),
+            SizedBox(height: 8.h),
+          ],
+
+          // 진동 타입: 진동 세기
+          if (type.isVibrate) ...[
+            _buildVibrationRow(type),
+            SizedBox(height: 8.h),
+          ],
+
+          // 모든 타입: 지속 시간
+          _buildDurationRow(type),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSliderRow({
+    required String label,
+    required double value,
+    required ValueChanged<double> onChanged,
+    required String suffix,
+  }) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 50.w,
+          child: Text(label, style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
+        ),
+        Expanded(
+          child: Slider(
+            value: value,
+            min: 0.0,
+            max: 1.0,
+            divisions: 10,
+            onChanged: onChanged,
+          ),
+        ),
+        SizedBox(
+          width: 45.w,
+          child: Text(suffix, style: TextStyle(fontSize: 13.sp)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVibrationRow(AlarmType type) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 50.w,
+          child: Text('세기', style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
+        ),
+        Expanded(
+          child: Row(
+            children: [
+              _buildVibrationButton(type, 1, '약'),
+              SizedBox(width: 8.w),
+              _buildVibrationButton(type, 2, '중'),
+              SizedBox(width: 8.w),
+              _buildVibrationButton(type, 3, '강'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVibrationButton(AlarmType type, int strength, String label) {
+    final isSelected = type.vibrationStrength == strength;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _updateType(AlarmType(
+          id: type.id,
+          name: type.name,
+          emoji: type.emoji,
+          soundFile: type.soundFile,
+          volume: type.volume,
+          vibrationStrength: strength,
+          isPreset: type.isPreset,
+          duration: type.duration,
+        )),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 8.h),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.orange.shade100 : Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: isSelected ? Colors.orange : Colors.grey.shade300,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Colors.orange.shade800 : Colors.grey.shade700,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDurationRow(AlarmType type) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 50.w,
+          child: Text('시간', style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
+        ),
+        Expanded(
+          child: Row(
+            children: [
+              _buildDurationButton(type, 1),
+              SizedBox(width: 6.w),
+              _buildDurationButton(type, 3),
+              SizedBox(width: 6.w),
+              _buildDurationButton(type, 5),
+              SizedBox(width: 6.w),
+              _buildDurationButton(type, 10),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDurationButton(AlarmType type, int minutes) {
+    final isSelected = type.duration == minutes;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _updateType(AlarmType(
+          id: type.id,
+          name: type.name,
+          emoji: type.emoji,
+          soundFile: type.soundFile,
+          volume: type.volume,
+          vibrationStrength: type.vibrationStrength,
+          isPreset: type.isPreset,
+          duration: minutes,
+        )),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 8.h),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.blue.shade100 : Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: isSelected ? Colors.blue : Colors.grey.shade300,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              '${minutes}분',
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Colors.blue.shade800 : Colors.grey.shade700,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
