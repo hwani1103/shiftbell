@@ -13,14 +13,28 @@ import '../models/alarm_history.dart';
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
   DatabaseService._internal();
-  
+
   static Database? _database;
+  static bool _isInitializing = false;
   static const platform = MethodChannel('com.example.shiftbell/alarm');
-  
+
+  // ⭐ Race Condition 방지: 동시 초기화 요청 시 대기
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
+
+    // 이미 초기화 중이면 완료될 때까지 대기
+    while (_isInitializing) {
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (_database != null) return _database!;
+    }
+
+    _isInitializing = true;
+    try {
+      _database = await _initDatabase();
+      return _database!;
+    } finally {
+      _isInitializing = false;
+    }
   }
   
   Future<Database> _initDatabase() async {

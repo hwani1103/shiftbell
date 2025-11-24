@@ -55,7 +55,13 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
   Future<void> _showAlarmListDialog() async {
     final alarms = await DatabaseService.instance.getAllAlarms();
-    alarms.sort((a, b) => a.date!.compareTo(b.date!));
+    // ⭐ Null 체크 추가: date가 null인 알람은 맨 뒤로
+    alarms.sort((a, b) {
+      if (a.date == null && b.date == null) return 0;
+      if (a.date == null) return 1;
+      if (b.date == null) return -1;
+      return a.date!.compareTo(b.date!);
+    });
 
     final now = DateTime.now();
     final futureAlarms = alarms.where((a) => a.date != null && a.date!.isAfter(now)).toList();

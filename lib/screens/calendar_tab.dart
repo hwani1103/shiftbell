@@ -420,6 +420,9 @@ Widget build(BuildContext context) {
                     FutureBuilder<List<Alarm>>(
                       future: DatabaseService.instance.getAlarmsByDate(day),
                       builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return Text('오류', style: TextStyle(fontSize: 14.sp, color: Colors.red));
+                        }
                         if (!snapshot.hasData) {
                           return SizedBox(
                             height: 20.h,
@@ -427,7 +430,7 @@ Widget build(BuildContext context) {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           );
                         }
-                        
+
                         final fixedAlarms = snapshot.data!.where((a) => a.type == 'fixed').toList();
                         
                         if (fixedAlarms.isEmpty) {
