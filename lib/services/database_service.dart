@@ -406,4 +406,21 @@ Future<Map<String, dynamic>> getAlarmStatistics() async {
   };
 }
 
+// ⭐ 신규: 오래된 이력 삭제 (한 달 이상)
+Future<void> deleteOldHistory(DateTime beforeDate) async {
+  final db = await database;
+  final dateStr = beforeDate.toIso8601String();
+  await db.delete(
+    'alarm_history',
+    where: 'created_at < ?',
+    whereArgs: [dateStr],
+  );
+}
+
+// ⭐ 신규: 모든 이력 삭제
+Future<void> clearAlarmHistory() async {
+  final db = await database;
+  await db.delete('alarm_history');
+}
+
 }
