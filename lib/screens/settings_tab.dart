@@ -412,10 +412,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               SizedBox(height: 16.h),
 
-              // 알람 타입 관리
+              // 알람음 관리
               ListTile(
                 leading: Icon(Icons.notifications_active, color: Colors.orange),
-                title: Text('알람 타입 관리'),
+                title: Text('알람음 관리'),
                 subtitle: Text('소리, 진동, 무음 설정'),
                 trailing: Icon(Icons.chevron_right),
                 onTap: _showAlarmTypeDialog,
@@ -633,7 +633,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           Row(
             children: [
               Text(
-                '알람 타입 설정',
+                '알람음 설정',
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
@@ -690,8 +690,10 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           ),
           SizedBox(height: 12.h),
 
-          // 소리 타입: 음량 슬라이더
+          // 소리 타입: 음악 선택 + 음량 슬라이더
           if (type.isSound) ...[
+            _buildSoundSelectRow(type),
+            SizedBox(height: 12.h),
             _buildSliderRow(
               label: '음량',
               value: type.volume,
@@ -752,6 +754,118 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     );
   }
 
+  // 알람 사운드 목록 (나중에 파일 추가 예정)
+  static const List<Map<String, String>> _soundOptions = [
+    {'id': 'default', 'name': '기본 알람음'},
+    {'id': 'gentle', 'name': '부드러운 알람'},
+    {'id': 'classic', 'name': '클래식 벨'},
+    {'id': 'digital', 'name': '디지털 알람'},
+  ];
+
+  String _selectedSoundId = 'default';
+
+  Widget _buildSoundSelectRow(AlarmType type) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 50.w,
+          child: Text('알람음', style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
+        ),
+        Expanded(
+          child: GestureDetector(
+            onTap: () => _showSoundPicker(type),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.music_note, size: 18.sp, color: Colors.orange),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      _getSoundName(_selectedSoundId),
+                      style: TextStyle(fontSize: 13.sp),
+                    ),
+                  ),
+                  Icon(Icons.arrow_drop_down, color: Colors.grey),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getSoundName(String soundId) {
+    return _soundOptions.firstWhere(
+      (s) => s['id'] == soundId,
+      orElse: () => {'name': '기본 알람음'},
+    )['name']!;
+  }
+
+  void _showSoundPicker(AlarmType type) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Row(
+                children: [
+                  Text(
+                    '알람음 선택',
+                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                  ),
+                  Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            Divider(height: 1),
+            ..._soundOptions.map((sound) => ListTile(
+              leading: Icon(
+                _selectedSoundId == sound['id'] ? Icons.check_circle : Icons.circle_outlined,
+                color: _selectedSoundId == sound['id'] ? Colors.orange : Colors.grey,
+              ),
+              title: Text(sound['name']!),
+              trailing: IconButton(
+                icon: Icon(Icons.play_circle_outline, color: Colors.blue),
+                onPressed: () {
+                  // TODO: 미리듣기 기능 구현 예정
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('미리듣기: ${sound['name']}')),
+                  );
+                },
+              ),
+              onTap: () {
+                setState(() {
+                  _selectedSoundId = sound['id']!;
+                });
+                Navigator.pop(context);
+              },
+            )).toList(),
+            SizedBox(height: 20.h),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildVibrationRow(AlarmType type) {
     return Row(
       children: [
@@ -762,11 +876,9 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
         Expanded(
           child: Row(
             children: [
-              _buildVibrationButton(type, 1, '약'),
+              _buildVibrationButton(type, 1, '약하게'),
               SizedBox(width: 8.w),
-              _buildVibrationButton(type, 2, '중'),
-              SizedBox(width: 8.w),
-              _buildVibrationButton(type, 3, '강'),
+              _buildVibrationButton(type, 3, '강하게'),
             ],
           ),
         ),
@@ -824,12 +936,10 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           child: Row(
             children: [
               _buildDurationButton(type, 1),
-              SizedBox(width: 6.w),
+              SizedBox(width: 8.w),
               _buildDurationButton(type, 3),
-              SizedBox(width: 6.w),
+              SizedBox(width: 8.w),
               _buildDurationButton(type, 5),
-              SizedBox(width: 6.w),
-              _buildDurationButton(type, 10),
             ],
           ),
         ),

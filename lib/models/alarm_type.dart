@@ -16,7 +16,7 @@ class AlarmType {
     required this.volume,
     this.vibrationStrength = 2,  // 기본값: 중
     required this.isPreset,
-    this.duration = 10,
+    this.duration = 5,
   });
 
   // DB → 객체
@@ -55,9 +55,8 @@ class AlarmType {
   // 진동 세기 텍스트
   String get vibrationText {
     switch (vibrationStrength) {
-      case 1: return '약';
-      case 2: return '중';
-      case 3: return '강';
+      case 1: return '약하게';
+      case 3: return '강하게';
       default: return '없음';
     }
   }
@@ -70,9 +69,9 @@ class AlarmType {
       emoji: '🔔',
       soundFile: 'loud',
       volume: 1.0,
-      vibrationStrength: 2,  // 소리는 진동 항상 포함 (중)
+      vibrationStrength: 3,  // 소리는 진동 강하게
       isPreset: true,
-      duration: 10,
+      duration: 5,
     ),
     AlarmType(
       id: 2,
@@ -80,9 +79,9 @@ class AlarmType {
       emoji: '📳',
       soundFile: 'vibrate',
       volume: 0.0,
-      vibrationStrength: 2,  // 중
+      vibrationStrength: 3,  // 강하게
       isPreset: true,
-      duration: 10,
+      duration: 5,
     ),
     AlarmType(
       id: 3,
@@ -92,7 +91,7 @@ class AlarmType {
       volume: 0.0,
       vibrationStrength: 0,  // 없음
       isPreset: true,
-      duration: 10,
+      duration: 5,
     ),
   ];
 }

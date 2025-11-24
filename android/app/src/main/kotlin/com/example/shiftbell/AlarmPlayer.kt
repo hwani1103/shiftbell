@@ -137,20 +137,18 @@ class AlarmPlayer(private val context: Context) {
 
         vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
-        // 진동 세기에 따른 패턴 설정
+        // 진동 세기에 따른 패턴 설정 (1=약하게, 3=강하게)
         val pattern = when(strength) {
-            1 -> longArrayOf(0, 500, 1000, 500)   // 약: 짧은 진동
-            2 -> longArrayOf(0, 800, 500, 800)   // 중: 보통 진동
-            3 -> longArrayOf(0, 1000, 300, 1000) // 강: 긴 진동
+            1 -> longArrayOf(0, 500, 800, 500)   // 약하게: 짧은 진동
+            3 -> longArrayOf(0, 1000, 300, 1000) // 강하게: 긴 진동
             else -> longArrayOf(0, 800, 500, 800)
         }
 
         // 진동 세기 (amplitude)
         val amplitude = when(strength) {
-            1 -> 80   // 약
-            2 -> 150  // 중
-            3 -> 255  // 강 (최대)
-            else -> 150
+            1 -> 100  // 약하게
+            3 -> 255  // 강하게 (최대)
+            else -> 180
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
