@@ -261,7 +261,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     private fun getNextAlarmFromDB(context: Context): AlarmData? {
         return try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.readableDatabase
+            val db = dbHelper.getReadableDatabaseWithRetry() ?: return null  // ⭐ 재시도 로직 사용
             
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
