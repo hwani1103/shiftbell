@@ -52,7 +52,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 6,
+      version: 7,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -77,6 +77,7 @@ class DatabaseService {
         emoji TEXT NOT NULL,
         sound_file TEXT NOT NULL,
         volume REAL NOT NULL,
+        vibration_strength INTEGER DEFAULT 2,
         is_preset INTEGER NOT NULL,
         duration INTEGER DEFAULT 10
       )
@@ -185,6 +186,11 @@ class DatabaseService {
   if (oldVersion < 6) {
     await db.execute('ALTER TABLE alarm_types ADD COLUMN duration INTEGER DEFAULT 10');
     print('✅ DB 업그레이드 완료 (v$oldVersion → v6)');
+  }
+
+  if (oldVersion < 7) {
+    await db.execute('ALTER TABLE alarm_types ADD COLUMN vibration_strength INTEGER DEFAULT 2');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v7)');
   }
 } 
   
