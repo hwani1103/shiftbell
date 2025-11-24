@@ -16,7 +16,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
 ) {
     companion object {
         private const val DATABASE_NAME = "shiftbell.db"
-        private const val DATABASE_VERSION = 6
+        private const val DATABASE_VERSION = 7  // Flutter와 동일하게 유지
         private const val TAG = "DatabaseHelper"
 
         @Volatile
@@ -44,6 +44,11 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // Flutter에서 관리하므로 비워둠
+    }
+
+    override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        // Flutter가 이미 업그레이드한 DB를 Native에서 열 때 에러 방지
+        Log.w(TAG, "⚠️ DB 버전 다운그레이드 무시: $oldVersion → $newVersion")
     }
 
     // ⭐ WAL 모드 활성화 (동시 읽기/쓰기 허용)
