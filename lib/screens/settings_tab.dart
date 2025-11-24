@@ -272,7 +272,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('설정'),
+        title: Row(
+          children: [
+            Spacer(),
+            Padding(
+              padding: EdgeInsets.only(right: 16.w),
+              child: Text('설정'),
+            ),
+          ],
+        ),
       ),
       body: scheduleAsync.when(
         loading: () => Center(child: CircularProgressIndicator()),
@@ -282,42 +290,76 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             padding: EdgeInsets.all(16.w),
             children: [
               // 현재 스케줄 정보
-              Card(
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.indigo.shade400, Colors.indigo.shade600],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.indigo.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: Padding(
-                  padding: EdgeInsets.all(16.w),
+                  padding: EdgeInsets.all(20.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('교대 스케줄', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 12.h),
-                      if (schedule == null)
-                        Text('설정 안 됨', style: TextStyle(color: Colors.grey))
-                      else ...[
-                        Text('근무 형태: ${schedule.isRegular ? "규칙적" : "불규칙"}'),
-                        if (schedule.isRegular && schedule.pattern != null) ...[
-                          SizedBox(height: 8.h),
-                          Text('패턴: ${schedule.pattern!.join(", ")}'),
-                          Text('오늘 인덱스: ${schedule.todayIndex ?? "?"}'),
+                      Row(
+                        children: [
+                          Icon(Icons.calendar_month, color: Colors.white, size: 24.sp),
+                          SizedBox(width: 8.w),
+                          Text(
+                            '교대 스케줄',
+                            style: TextStyle(
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
                         ],
-                        SizedBox(height: 8.h),
-                        Text('근무 종류: ${(schedule.activeShiftTypes ?? schedule.shiftTypes).join(", ")}'),
+                      ),
+                      SizedBox(height: 16.h),
+                      if (schedule == null)
+                        Text('설정 안 됨', style: TextStyle(color: Colors.white70))
+                      else ...[
+                        _buildInfoRow('근무 형태', schedule.isRegular ? '규칙적 교대' : '불규칙'),
+                        if (schedule.isRegular && schedule.pattern != null) ...[
+                          SizedBox(height: 12.h),
+                          _buildInfoRow('패턴', schedule.pattern!.join(' → ')),
+                        ],
                       ],
+                      SizedBox(height: 20.h),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: _resetSchedule,
+                          icon: Icon(Icons.refresh, color: Colors.white, size: 18.sp),
+                          label: Text(
+                            '스케줄 초기화',
+                            style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.white54),
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
 
-              SizedBox(height: 16.h),
-
-              // 스케줄 초기화
-              ListTile(
-                leading: Icon(Icons.refresh, color: Colors.orange),
-                title: Text('교대 스케줄 초기화'),
-                subtitle: Text('온보딩으로 다시 설정'),
-                onTap: _resetSchedule,
-              ),
-
-              Divider(),
+              SizedBox(height: 24.h),
 
               // 등록된 알람
               ListTile(
@@ -376,6 +418,34 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 70.w,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: Colors.white70,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
