@@ -105,18 +105,29 @@ class AlarmPlayer(private val context: Context) {
         }
     }
 
-    // Flutter assets에서 커스텀 사운드 재생
+    // res/raw/에서 커스텀 사운드 재생 (flutter run 호환)
     private fun playCustomSound(soundFile: String, volume: Float) {
         try {
-            // Flutter assets 경로: flutter_assets/assets/sounds/alarmbell1.mp3
-            val assetPath = "flutter_assets/assets/sounds/${soundFile}.mp3"
-            Log.d("AlarmPlayer", "커스텀 사운드 로드: $assetPath")
+            // res/raw 리소스 ID 가져오기 (확장자 제외)
+            val resourceId = context.resources.getIdentifier(soundFile, "raw", context.packageName)
 
-            val afd: AssetFileDescriptor = context.assets.openFd(assetPath)
+            if (resourceId == 0) {
+                Log.e("AlarmPlayer", "리소스 못 찾음: res/raw/$soundFile.mp3")
+                playDefaultSound(volume)
+                return
+            }
+
+            // 시스템 알람 볼륨을 최대로 설정 (사용자 슬라이더가 실제 볼륨 제어)
+            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0)
+
+            // 리소스 URI 생성
+            val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/$resourceId")
+            Log.d("AlarmPlayer", "커스텀 사운드 로드: $soundUri")
 
             mediaPlayer = MediaPlayer().apply {
-                setDataSource(afd.fileDescriptor, afd.startOffset, afd.length)
-                afd.close()
+                setDataSource(context, soundUri)
 
                 // 핵심: STREAM_ALARM 사용!
                 setAudioAttributes(
@@ -126,7 +137,7 @@ class AlarmPlayer(private val context: Context) {
                         .build()
                 )
 
-                // 음량 설정 (DB에서 읽은 값)
+                // 음량 설정 (DB에서 읽은 값, 0.0~1.0이 실제 최대 볼륨 기준)
                 setVolume(volume, volume)
 
                 isLooping = true
@@ -146,6 +157,11 @@ class AlarmPlayer(private val context: Context) {
     // 시스템 기본 알람 사운드 재생
     private fun playDefaultSound(volume: Float) {
         try {
+            // 시스템 알람 볼륨을 최대로 설정 (사용자 슬라이더가 실제 볼륨 제어)
+            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0)
+
             // 알람 소리 URI
             val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
 
@@ -160,7 +176,7 @@ class AlarmPlayer(private val context: Context) {
                         .build()
                 )
 
-                // 음량 설정 (DB에서 읽은 값)
+                // 음량 설정 (DB에서 읽은 값, 0.0~1.0이 실제 최대 볼륨 기준)
                 setVolume(volume, volume)
 
                 isLooping = true
