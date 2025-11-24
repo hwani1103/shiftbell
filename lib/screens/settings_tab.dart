@@ -712,16 +712,22 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
             _buildSliderRow(
               label: '음량',
               value: type.volume,
-              onChanged: (v) => _updateType(AlarmType(
-                id: type.id,
-                name: type.name,
-                emoji: type.emoji,
-                soundFile: type.soundFile,
-                volume: v,
-                vibrationStrength: type.vibrationStrength,
-                isPreset: type.isPreset,
-                duration: type.duration,
-              )),
+              onChanged: (v) {
+                // 실시간 볼륨 적용
+                if (_isPlaying) {
+                  _audioPlayer.setVolume(v);
+                }
+                _updateType(AlarmType(
+                  id: type.id,
+                  name: type.name,
+                  emoji: type.emoji,
+                  soundFile: type.soundFile,
+                  volume: v,
+                  vibrationStrength: type.vibrationStrength,
+                  isPreset: type.isPreset,
+                  duration: type.duration,
+                ));
+              },
               suffix: '${(type.volume * 100).round()}%',
             ),
             SizedBox(height: 8.h),
