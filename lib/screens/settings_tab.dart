@@ -779,9 +779,62 @@ ListTile(
     try {
       await MethodChannel('com.example.shiftbell/alarm')
           .invokeMethod('triggerGuardCheck');
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('✅ AlarmGuardReceiver 실행됨')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ 실패: $e')),
+      );
+    }
+  },
+),
+
+// ⭐ Native 갱신 테스트 도구
+Divider(),
+Text('🔧 Native 갱신 테스트', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.red)),
+
+ListTile(
+  leading: Icon(Icons.refresh, color: Colors.red),
+  title: Text('Native 갱신 플래그 리셋'),
+  subtitle: Text('last_alarm_refresh를 0으로 (갱신 필요 상태)'),
+  onTap: () async {
+    try {
+      await MethodChannel('com.example.shiftbell/alarm')
+          .invokeMethod('resetNativeRefreshFlag');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('✅ Native 갱신 플래그 리셋 완료')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('❌ 실패: $e')),
+      );
+    }
+  },
+),
+
+ListTile(
+  leading: Icon(Icons.play_arrow, color: Colors.red),
+  title: Text('Native 갱신 강제 실행'),
+  subtitle: Text('리셋 후 AlarmRefreshReceiver 트리거'),
+  onTap: () async {
+    try {
+      final before = await DatabaseService.instance.getAllAlarms();
+
+      await MethodChannel('com.example.shiftbell/alarm')
+          .invokeMethod('forceNativeRefresh');
+
+      // 잠시 대기 후 결과 확인
+      await Future.delayed(Duration(seconds: 2));
+      final after = await DatabaseService.instance.getAllAlarms();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('✅ Native 갱신 완료: ${before.length}개 → ${after.length}개'),
+          duration: Duration(seconds: 3),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

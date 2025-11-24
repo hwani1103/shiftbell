@@ -160,6 +160,16 @@ override fun onNewIntent(intent: Intent) {
                     triggerMidnightCheck()
                     result.success(null)
                 }
+                // ⭐ 테스트용: Native last_alarm_refresh 리셋
+                "resetNativeRefreshFlag" -> {
+                    resetNativeRefreshFlag()
+                    result.success(null)
+                }
+                // ⭐ 테스트용: Native 갱신 강제 실행
+                "forceNativeRefresh" -> {
+                    forceNativeRefresh()
+                    result.success(null)
+                }
                 "triggerGuardCheck" -> {
                     triggerGuardCheck()
                     result.success(null)
@@ -243,6 +253,28 @@ override fun onNewIntent(intent: Intent) {
     private fun triggerMidnightCheck() {
         val intent = Intent(this, AlarmGuardReceiver::class.java)
         sendBroadcast(intent)
+    }
+
+    // ⭐ 테스트용: Native SharedPreferences의 last_alarm_refresh 리셋
+    private fun resetNativeRefreshFlag() {
+        val deviceContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            createDeviceProtectedStorageContext()
+        } else {
+            applicationContext
+        }
+        val prefs = deviceContext.getSharedPreferences("alarm_state", Context.MODE_PRIVATE)
+        prefs.edit().putLong("last_alarm_refresh", 0L).apply()
+        Log.d("MainActivity", "✅ Native last_alarm_refresh 리셋 완료")
+    }
+
+    // ⭐ 테스트용: Native 갱신 강제 실행 (리셋 후 트리거)
+    private fun forceNativeRefresh() {
+        resetNativeRefreshFlag()
+        val intent = Intent("com.example.shiftbell.REFRESH_ALARMS").apply {
+            setPackage(packageName)
+        }
+        sendBroadcast(intent)
+        Log.d("MainActivity", "✅ Native 갱신 강제 실행 완료")
     }
     
     private fun triggerGuardCheck() {
