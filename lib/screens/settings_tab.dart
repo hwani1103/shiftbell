@@ -20,8 +20,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('완전 초기화'),
-        content: Text('스케줄, 알람, 템플릿을 모두 삭제할까요?'),
+        title: Text('스케줄 초기화'),
+        content: Text('교대 스케줄과 알람을 모두 초기화할까요?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -29,7 +29,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('삭제', style: TextStyle(color: Colors.red)),
+            child: Text('초기화', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -326,6 +326,21 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                               color: Colors.indigo.shade700,
                             ),
                           ),
+                          Spacer(),
+                          // 스케줄 설정 버튼
+                          InkWell(
+                            onTap: () {
+                              // TODO: 스케줄 설정 화면으로 이동
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('스케줄 설정 (준비 중)')),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(8.r),
+                            child: Padding(
+                              padding: EdgeInsets.all(4.w),
+                              child: Icon(Icons.settings, color: Colors.indigo.shade400, size: 20.sp),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -336,14 +351,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                         children: [
                           if (schedule == null)
                             Text('설정 안 됨', style: TextStyle(color: Colors.grey))
-                          else ...[
-                            _buildScheduleInfoRow('근무 형태', schedule.isRegular ? '규칙적 교대' : '불규칙'),
-                            SizedBox(height: 8.h),
-                            if (schedule.isRegular && schedule.pattern != null)
-                              _buildScheduleInfoRow('패턴', schedule.pattern!.join(' → '))
-                            else
-                              _buildScheduleInfoRow('근무 종류', (schedule.activeShiftTypes ?? schedule.shiftTypes).join(', ')),
-                          ],
+                          else if (schedule.isRegular && schedule.pattern != null)
+                            _buildScheduleInfoRow('패턴', schedule.pattern!.join(' → '))
+                          else
+                            _buildScheduleInfoRow('근무', (schedule.activeShiftTypes ?? schedule.shiftTypes).join(', ')),
                         ],
                       ),
                     ),
