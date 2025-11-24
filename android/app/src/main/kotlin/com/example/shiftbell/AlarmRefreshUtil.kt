@@ -44,7 +44,9 @@ object AlarmRefreshUtil {
                 Log.d("AlarmRefreshUtil", "   현재: ${today.get(Calendar.YEAR)}-${today.get(Calendar.MONTH)+1}-${today.get(Calendar.DAY_OF_MONTH)}")
                 
                 // ⭐ AlarmRefreshReceiver 트리거!
-                val intent = Intent("com.example.shiftbell.REFRESH_ALARMS")
+                val intent = Intent("com.example.shiftbell.REFRESH_ALARMS").apply {
+                    setPackage(context.packageName)  // ⭐ 명시적 브로드캐스트 (안정성 향상)
+                }
                 context.sendBroadcast(intent)
                 
                 // ⭐ 갱신 완료 시각 저장
