@@ -348,13 +348,14 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                     Padding(
                       padding: EdgeInsets.all(16.w),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (schedule == null)
                             Text('설정 안 됨', style: TextStyle(color: Colors.grey))
                           else if (schedule.isRegular && schedule.pattern != null)
-                            _buildScheduleInfoRow('패턴', schedule.pattern!.join(' → '))
+                            _buildPatternRow(schedule.pattern!)
                           else
-                            _buildScheduleInfoRow('근무', (schedule.activeShiftTypes ?? schedule.shiftTypes).join(', ')),
+                            _buildShiftTypesRow((schedule.activeShiftTypes ?? schedule.shiftTypes)),
                         ],
                       ),
                     ),
@@ -452,29 +453,82 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     );
   }
 
-  Widget _buildScheduleInfoRow(String label, String value) {
-    return Row(
+  // 교대 패턴 표시 (규칙적)
+  Widget _buildPatternRow(List<String> pattern) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(
-          width: 70.w,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: Colors.grey.shade600,
-            ),
+        Text(
+          '교대 패턴',
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: Colors.grey.shade600,
           ),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.indigo.shade700,
-            ),
+        SizedBox(height: 8.h),
+        Wrap(
+          spacing: 4.w,
+          runSpacing: 6.h,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            for (int i = 0; i < pattern.length; i++) ...[
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: Colors.indigo.shade50,
+                  borderRadius: BorderRadius.circular(6.r),
+                  border: Border.all(color: Colors.indigo.shade200),
+                ),
+                child: Text(
+                  pattern[i],
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.indigo.shade700,
+                  ),
+                ),
+              ),
+              if (i < pattern.length - 1)
+                Icon(Icons.arrow_forward, size: 14.sp, color: Colors.grey.shade400),
+            ],
+          ],
+        ),
+      ],
+    );
+  }
+
+  // 근무명 표시 (불규칙)
+  Widget _buildShiftTypesRow(List<String> shiftTypes) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '근무명',
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: Colors.grey.shade600,
           ),
+        ),
+        SizedBox(height: 8.h),
+        Wrap(
+          spacing: 6.w,
+          runSpacing: 6.h,
+          children: shiftTypes.map((type) => Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: Colors.indigo.shade50,
+              borderRadius: BorderRadius.circular(6.r),
+              border: Border.all(color: Colors.indigo.shade200),
+            ),
+            child: Text(
+              type,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.indigo.shade700,
+              ),
+            ),
+          )).toList(),
         ),
       ],
     );
