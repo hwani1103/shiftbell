@@ -597,6 +597,9 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     // DB에 타입이 없으면 프리셋으로 초기화
     if (_types.isEmpty) {
       _initPresets();
+    } else {
+      // 프리셋 기본값 확인/수정 (백그라운드에서 실행, await 없음)
+      DatabaseService.instance.ensurePresetDefaults();
     }
   }
 
