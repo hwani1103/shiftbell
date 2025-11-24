@@ -84,8 +84,8 @@ override fun onReceive(context: Context, intent: Intent) {
         Log.e("CustomAlarmReceiver", "❌ 알람 이력 기록 실패", e)
     }
     
-    // 알람 재생
-    AlarmPlayer.getInstance(context.applicationContext).playAlarm(soundType)
+    // 알람 재생 (DB에서 설정 읽어서 적용)
+    AlarmPlayer.getInstance(context.applicationContext).playAlarmFromDB(id)
     
     // 화면 강제로 깨우기
     wakeUpScreen(context)
