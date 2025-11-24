@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/database_service.dart';
 import 'onboarding_screen.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../models/alarm_type.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -580,6 +582,13 @@ class _AlarmTypeSettingsSheet extends StatefulWidget {
 class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
   late List<AlarmType> _types;
 
+  // 오디오 플레이어
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isPlaying = false;
+
+  // 진동용 MethodChannel
+  static const platform = MethodChannel('com.example.shiftbell/alarm');
+
   @override
   void initState() {
     super.initState();
@@ -589,6 +598,12 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     if (_types.isEmpty) {
       _initPresets();
     }
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   Future<void> _initPresets() async {
@@ -754,15 +769,53 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     );
   }
 
-  // 알람 사운드 목록 (나중에 파일 추가 예정)
+  // 알람 사운드 목록 (파일명과 표시명)
   static const List<Map<String, String>> _soundOptions = [
-    {'id': 'default', 'name': '기본 알람음'},
-    {'id': 'gentle', 'name': '부드러운 알람'},
-    {'id': 'classic', 'name': '클래식 벨'},
-    {'id': 'digital', 'name': '디지털 알람'},
+    {'id': 'alarmbell1', 'name': '알람벨 1', 'file': 'alarmbell1.mp3'},
+    {'id': 'alarmbell2', 'name': '알람벨 2', 'file': 'alarmbell2.mp3'},
   ];
 
-  String _selectedSoundId = 'default';
+  String _selectedSoundId = 'alarmbell1';
+
+  // 소리 미리듣기 재생
+  Future<void> _playSound(String soundId, double volume) async {
+    await _audioPlayer.stop();
+
+    final sound = _soundOptions.firstWhere(
+      (s) => s['id'] == soundId,
+      orElse: () => _soundOptions.first,
+    );
+
+    try {
+      await _audioPlayer.setVolume(volume);
+      await _audioPlayer.play(AssetSource('sounds/${sound['file']}'));
+      setState(() => _isPlaying = true);
+
+      // 3초 후 자동 정지
+      Future.delayed(Duration(seconds: 3), () {
+        if (mounted) {
+          _audioPlayer.stop();
+          setState(() => _isPlaying = false);
+        }
+      });
+    } catch (e) {
+      debugPrint('소리 재생 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('알람음 파일을 찾을 수 없습니다')),
+        );
+      }
+    }
+  }
+
+  // 진동 테스트 (약 1초)
+  Future<void> _testVibration(int strength) async {
+    try {
+      await platform.invokeMethod('testVibration', {'strength': strength});
+    } catch (e) {
+      debugPrint('진동 테스트 실패: $e');
+    }
+  }
 
   Widget _buildSoundSelectRow(AlarmType type) {
     return Row(
@@ -791,6 +844,23 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                       style: TextStyle(fontSize: 13.sp),
                     ),
                   ),
+                  // 재생/정지 버튼
+                  GestureDetector(
+                    onTap: () {
+                      if (_isPlaying) {
+                        _audioPlayer.stop();
+                        setState(() => _isPlaying = false);
+                      } else {
+                        _playSound(_selectedSoundId, type.volume);
+                      }
+                    },
+                    child: Icon(
+                      _isPlaying ? Icons.stop_circle : Icons.play_circle,
+                      color: _isPlaying ? Colors.red : Colors.blue,
+                      size: 24.sp,
+                    ),
+                  ),
+                  SizedBox(width: 4.w),
                   Icon(Icons.arrow_drop_down, color: Colors.grey),
                 ],
               ),
@@ -804,7 +874,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
   String _getSoundName(String soundId) {
     return _soundOptions.firstWhere(
       (s) => s['id'] == soundId,
-      orElse: () => {'name': '기본 알람음'},
+      orElse: () => {'name': '알람벨 1'},
     )['name']!;
   }
 
@@ -812,58 +882,60 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: EdgeInsets.all(16.w),
-              child: Row(
-                children: [
-                  Text(
-                    '알람음 선택',
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-                  ),
-                  Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.close),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(16.w),
+                child: Row(
+                  children: [
+                    Text(
+                      '알람음 선택',
+                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                    ),
+                    Spacer(),
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        _audioPlayer.stop();
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Divider(height: 1),
-            ..._soundOptions.map((sound) => ListTile(
-              leading: Icon(
-                _selectedSoundId == sound['id'] ? Icons.check_circle : Icons.circle_outlined,
-                color: _selectedSoundId == sound['id'] ? Colors.orange : Colors.grey,
-              ),
-              title: Text(sound['name']!),
-              trailing: IconButton(
-                icon: Icon(Icons.play_circle_outline, color: Colors.blue),
-                onPressed: () {
-                  // TODO: 미리듣기 기능 구현 예정
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('미리듣기: ${sound['name']}')),
-                  );
+              Divider(height: 1),
+              ..._soundOptions.map((sound) => ListTile(
+                leading: Icon(
+                  _selectedSoundId == sound['id'] ? Icons.check_circle : Icons.circle_outlined,
+                  color: _selectedSoundId == sound['id'] ? Colors.orange : Colors.grey,
+                ),
+                title: Text(sound['name']!),
+                trailing: IconButton(
+                  icon: Icon(Icons.play_circle_outline, color: Colors.blue),
+                  onPressed: () => _playSound(sound['id']!, type.volume),
+                ),
+                onTap: () {
+                  setState(() => _selectedSoundId = sound['id']!);
+                  setModalState(() {});
+                  _playSound(sound['id']!, type.volume);
                 },
-              ),
-              onTap: () {
-                setState(() {
-                  _selectedSoundId = sound['id']!;
-                });
-                Navigator.pop(context);
-              },
-            )).toList(),
-            SizedBox(height: 20.h),
-          ],
+              )),
+              SizedBox(height: 20.h),
+            ],
+          ),
         ),
       ),
-    );
+    ).then((_) {
+      _audioPlayer.stop();
+      setState(() => _isPlaying = false);
+    });
   }
 
   Widget _buildVibrationRow(AlarmType type) {
@@ -890,16 +962,20 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     final isSelected = type.vibrationStrength == strength;
     return Expanded(
       child: GestureDetector(
-        onTap: () => _updateType(AlarmType(
-          id: type.id,
-          name: type.name,
-          emoji: type.emoji,
-          soundFile: type.soundFile,
-          volume: type.volume,
-          vibrationStrength: strength,
-          isPreset: type.isPreset,
-          duration: type.duration,
-        )),
+        onTap: () {
+          _updateType(AlarmType(
+            id: type.id,
+            name: type.name,
+            emoji: type.emoji,
+            soundFile: type.soundFile,
+            volume: type.volume,
+            vibrationStrength: strength,
+            isPreset: type.isPreset,
+            duration: type.duration,
+          ));
+          // 진동 미리보기 (1초)
+          _testVibration(strength);
+        },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(

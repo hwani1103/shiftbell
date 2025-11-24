@@ -38,7 +38,7 @@ class AlarmOverlayService : Service() {
     private var alarmLabel: String = "알람"  // 알람 라벨 저장
     private var timeoutHandler: Handler? = null
     private var timeoutRunnable: Runnable? = null
-    private var alarmDuration: Int = 1  // 기본 1분 (테스트용)
+    private var alarmDuration: Int = 5  // 기본 5분
 
     // 외부에서 Overlay 종료/스누즈 신호를 받기 위한 BroadcastReceiver
     private val overlayActionReceiver = object : BroadcastReceiver() {
@@ -149,9 +149,6 @@ class AlarmOverlayService : Service() {
             }
             cursor.close()
             db.close()
-
-            // ⭐ 테스트용: 강제로 1분 타임아웃 (나중에 제거)
-            alarmDuration = 1
 
             Log.d("AlarmOverlay", "✅ 알람 정보 로드: time=$alarmTimeStr, label=$alarmLabel, duration=${alarmDuration}분")
         } catch (e: Exception) {

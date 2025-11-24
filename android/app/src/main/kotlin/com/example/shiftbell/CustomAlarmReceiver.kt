@@ -138,18 +138,18 @@ override fun onReceive(context: Context, intent: Intent) {
     }
     
     private fun showAlarmActivity(context: Context, id: Int, label: String) {
-    // ⭐ 테스트용: 강제 1분 타임아웃 (나중에 사용자 설정으로 변경 예정)
-    val duration = 1
-    
+    // ⭐ DB에서 duration 읽기
+    val duration = getDurationFromDB(context, id)
+
     val activityIntent = Intent(context, AlarmActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or 
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or
                 Intent.FLAG_ACTIVITY_CLEAR_TASK or
                 Intent.FLAG_ACTIVITY_NO_USER_ACTION
         putExtra("alarmId", id)
         putExtra("label", label)
-        putExtra("alarmDuration", duration)  // ⭐ 신규
+        putExtra("alarmDuration", duration)
     }
-    
+
     try {
         context.startActivity(activityIntent)
         Log.e("CustomAlarmReceiver", "✅ AlarmActivity 시작 (duration=${duration}분)")
@@ -158,6 +158,51 @@ override fun onReceive(context: Context, intent: Intent) {
         showNotification(context, id, label)
     }
 }
+
+    // ⭐ DB에서 알람 타입의 duration 읽기
+    private fun getDurationFromDB(context: Context, alarmId: Int): Int {
+        try {
+            val dbHelper = DatabaseHelper.getInstance(context)
+            val db = dbHelper.readableDatabase
+
+            // 알람에서 alarm_type_id 조회
+            val alarmCursor = db.query(
+                "alarms",
+                arrayOf("alarm_type_id"),
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+
+            var alarmTypeId = 1  // 기본값
+            if (alarmCursor.moveToFirst()) {
+                alarmTypeId = alarmCursor.getInt(alarmCursor.getColumnIndexOrThrow("alarm_type_id"))
+            }
+            alarmCursor.close()
+
+            // alarm_types에서 duration 조회
+            val typeCursor = db.query(
+                "alarm_types",
+                arrayOf("duration"),
+                "id = ?",
+                arrayOf(alarmTypeId.toString()),
+                null, null, null
+            )
+
+            var duration = 5  // 기본값 5분
+            if (typeCursor.moveToFirst()) {
+                duration = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("duration"))
+            }
+            typeCursor.close()
+            db.close()
+
+            Log.d("CustomAlarmReceiver", "✅ DB duration: $duration 분")
+            return duration
+        } catch (e: Exception) {
+            Log.e("CustomAlarmReceiver", "❌ duration 조회 실패, 기본값 5분 사용", e)
+            return 5
+        }
+    }
     
     private fun showOverlayWindow(context: Context, id: Int, label: String) {
         Log.e("CustomAlarmReceiver", "✅ Overlay 표시 시작")

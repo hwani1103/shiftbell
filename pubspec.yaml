@@ -38,6 +38,9 @@ dependencies:
   # 유틸
   uuid: ^4.2.2
 
+  # 오디오 재생 (알람음 미리듣기)
+  audioplayers: ^5.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -45,11 +48,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  
-  # 에셋 (Phase 2에서 추가 예정)
-  # assets:
-  #   - assets/sounds/
-  #   - assets/images/
+
+  assets:
+    - assets/sounds/
 
 # 앱 아이콘 (나중에 설정)
 # flutter_launcher_icons:

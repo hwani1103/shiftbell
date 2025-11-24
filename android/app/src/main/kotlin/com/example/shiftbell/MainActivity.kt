@@ -210,6 +210,12 @@ override fun onNewIntent(intent: Intent) {
                     Log.d("MainActivity", "📡 Overlay SNOOZE 브로드캐스트 발송: ID=$alarmId")
                     result.success(null)
                 }
+                // ⭐ 진동 테스트 (설정 화면에서 미리보기)
+                "testVibration" -> {
+                    val strength = call.argument<Int>("strength") ?: 1
+                    testVibration(strength)
+                    result.success(null)
+                }
                 else -> result.notImplemented()
             }
         }
@@ -446,5 +452,36 @@ override fun onNewIntent(intent: Intent) {
         notificationManager.notify(8888, notification)
         
         Log.d("MainActivity", "📢 Notification 업데이트: $newTime")
+    }
+
+    // ⭐ 진동 테스트 (약 1초간)
+    private fun testVibration(strength: Int) {
+        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+
+        // 진동 패턴 (1초간)
+        val pattern = when(strength) {
+            1 -> longArrayOf(0, 500, 200, 300)   // 약하게: 짧은 진동
+            3 -> longArrayOf(0, 800, 200)        // 강하게: 긴 진동
+            else -> longArrayOf(0, 500)
+        }
+
+        // 진동 세기
+        val amplitude = when(strength) {
+            1 -> 100   // 약하게
+            3 -> 255   // 강하게 (최대)
+            else -> 150
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val amplitudes = pattern.map { if (it == 0L) 0 else amplitude }.toIntArray()
+            vibrator.vibrate(
+                android.os.VibrationEffect.createWaveform(pattern, amplitudes, -1)  // -1 = 반복 안함
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(pattern, -1)
+        }
+
+        Log.d("MainActivity", "🔔 진동 테스트: 세기=$strength")
     }
 }
