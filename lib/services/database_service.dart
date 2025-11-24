@@ -52,7 +52,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 8,  // v8: 기본값 마이그레이션
+      version: 9,  // v9: 기본값 마이그레이션 재실행
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -221,6 +221,26 @@ class DatabaseService {
     ''');
 
     print('✅ DB 업그레이드 완료 (v$oldVersion → v8): 기본값 마이그레이션');
+  }
+
+  // v9: 진동/무음 기본값 재적용 (강하게, 3분)
+  if (oldVersion < 9) {
+    // 진동 타입 (id=2): 강하게, 3분
+    await db.execute('''
+      UPDATE alarm_types SET
+        vibration_strength = 3,
+        duration = 3
+      WHERE id = 2
+    ''');
+
+    // 무음 타입 (id=3): 3분
+    await db.execute('''
+      UPDATE alarm_types SET
+        duration = 3
+      WHERE id = 3
+    ''');
+
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v9): 진동/무음 기본값 재적용');
   }
 } 
   
