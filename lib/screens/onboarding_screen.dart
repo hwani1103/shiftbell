@@ -10,6 +10,21 @@ import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../services/alarm_refresh_helper.dart';
 
+// 알람 설정 (시간 + 타입)
+class AlarmSetting {
+  final TimeOfDay time;
+  final int alarmTypeId;  // 1: 소리, 2: 진동, 3: 무음
+
+  AlarmSetting({required this.time, this.alarmTypeId = 1});
+
+  AlarmSetting copyWith({TimeOfDay? time, int? alarmTypeId}) {
+    return AlarmSetting(
+      time: time ?? this.time,
+      alarmTypeId: alarmTypeId ?? this.alarmTypeId,
+    );
+  }
+}
+
 class OnboardingScreen extends ConsumerStatefulWidget {  // ⭐ 변경
   const OnboardingScreen({super.key});
 
@@ -26,7 +41,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   List<String> _baseShiftTypes = ['주간', '야간', '오전', '오후', '휴무'];
   List<String> _customShiftTypes = [];
   List<String> get _allShiftTypes => [..._baseShiftTypes, ..._customShiftTypes];
-  Map<String, List<TimeOfDay>> _shiftAlarms = {};
+  Map<String, List<AlarmSetting>> _shiftAlarms = {};
   List<String> _selectedShifts = [];  // 불규칙용
 
   List<String> get _uniqueShifts {
@@ -608,7 +623,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   );
 }
 
-  Widget _buildShiftAlarmCard(String shift, List<TimeOfDay> alarms) {
+  Widget _buildShiftAlarmCard(String shift, List<AlarmSetting> alarms) {
     return InkWell(
       onTap: () => _showAlarmTimeDialog(shift),
       child: Container(
@@ -630,9 +645,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                 fontWeight: FontWeight.bold,
               ),
             ),
-            
+
             SizedBox(height: 12.h),
-            
+
             Expanded(
               child: Center(
                 child: alarms.isEmpty
@@ -645,14 +660,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                       )
                     : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: alarms.map((time) => Padding(
+                        children: alarms.map((alarm) => Padding(
                           padding: EdgeInsets.symmetric(vertical: 2.h),
-                          child: Text(
-                            _formatTime(time),
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _getAlarmTypeEmoji(alarm.alarmTypeId),
+                                style: TextStyle(fontSize: 12.sp),
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                _formatTime(alarm.time),
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
                         )).toList(),
                       ),
@@ -666,6 +692,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 
   String _formatTime(TimeOfDay time) {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _getAlarmTypeEmoji(int alarmTypeId) {
+    switch (alarmTypeId) {
+      case 1: return '🔔';  // 소리
+      case 2: return '📳';  // 진동
+      case 3: return '🔇';  // 무음
+      default: return '🔔';
+    }
   }
 
   void _showAlarmTimeDialog(String shift) {
@@ -770,17 +805,17 @@ Map<String, int> _generateShiftColors() {
 Future<void> _saveAlarmTemplates() async {
   for (var entry in _shiftAlarms.entries) {
     final shift = entry.key;
-    final times = entry.value;
-    
-    for (var time in times) {
+    final alarms = entry.value;
+
+    for (var alarm in alarms) {
       await DatabaseService.instance.insertAlarmTemplate(
         shiftType: shift,
-        time: _formatTime(time),
-        alarmTypeId: 1,
+        time: _formatTime(alarm.time),
+        alarmTypeId: alarm.alarmTypeId,  // 사용자가 선택한 타입
       );
     }
   }
-  
+
   print('✅ 알람 템플릿 저장 완료');
 }
 
@@ -852,37 +887,37 @@ Future<void> _saveAndFinish() async {
 
 Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
   print('🔄 10일치 알람 생성 시작...');
-  
+
   final List<Alarm> alarms = [];
   final today = DateTime.now();
-  
+
   for (var i = 0; i < 10; i++) {
     final date = today.add(Duration(days: i));
     final shiftType = schedule.getShiftForDate(date);
-    
+
     if (shiftType == '미설정') continue;
-    
-    final times = _shiftAlarms[shiftType] ?? [];
-    
-    for (var time in times) {
+
+    final alarmSettings = _shiftAlarms[shiftType] ?? [];
+
+    for (var setting in alarmSettings) {
       final alarmTime = DateTime(
         date.year,
         date.month,
         date.day,
-        time.hour,
-        time.minute,
+        setting.time.hour,
+        setting.time.minute,
       );
-      
+
       if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) continue;
-      
+
       final alarm = Alarm(
-        time: _formatTime(time),
+        time: _formatTime(setting.time),
         date: alarmTime,
         type: 'fixed',
-        alarmTypeId: 1,
+        alarmTypeId: setting.alarmTypeId,  // 사용자가 선택한 타입
         shiftType: shiftType,
       );
-      
+
       alarms.add(alarm);
     }
   }
@@ -917,8 +952,8 @@ Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
 // 알람 시간 설정 다이얼로그
 class _AlarmTimeDialog extends StatefulWidget {
   final String shift;
-  final List<TimeOfDay> initialAlarms;
-  final Function(List<TimeOfDay>) onSave;
+  final List<AlarmSetting> initialAlarms;
+  final Function(List<AlarmSetting>) onSave;
 
   const _AlarmTimeDialog({
     required this.shift,
@@ -931,7 +966,7 @@ class _AlarmTimeDialog extends StatefulWidget {
 }
 
 class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
-  late List<TimeOfDay> _alarms;
+  late List<AlarmSetting> _alarms;
 
   @override
   void initState() {
@@ -949,38 +984,71 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '근무일별 고정 알람을 3개까지 등록 가능합니다',
-              style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+              '고정 알람 3개까지 등록 가능',
+              style: TextStyle(fontSize: 13.sp, color: Colors.grey),
             ),
             SizedBox(height: 16.h),
-            
+
             ..._alarms.asMap().entries.map((entry) {
-              return ListTile(
-                leading: Icon(Icons.alarm),
-                title: Text(
-                  '${entry.value.hour.toString().padLeft(2, '0')}:${entry.value.minute.toString().padLeft(2, '0')}',
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+              final alarm = entry.value;
+              return Container(
+                margin: EdgeInsets.only(bottom: 12.h),
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.grey.shade300),
                 ),
-                trailing: IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () {
-                    setState(() {
-                      _alarms.removeAt(entry.key);
-                    });
-                  },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 시간 + 삭제 버튼
+                    Row(
+                      children: [
+                        Icon(Icons.alarm, size: 20.sp, color: Colors.blue),
+                        SizedBox(width: 8.w),
+                        Text(
+                          '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
+                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                        ),
+                        Spacer(),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red, size: 20.sp),
+                          onPressed: () {
+                            setState(() {
+                              _alarms.removeAt(entry.key);
+                            });
+                          },
+                          constraints: BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    // 알람 타입 선택 버튼들
+                    Row(
+                      children: [
+                        _buildTypeButton(entry.key, 1, '🔔', '소리'),
+                        SizedBox(width: 8.w),
+                        _buildTypeButton(entry.key, 2, '📳', '진동'),
+                        SizedBox(width: 8.w),
+                        _buildTypeButton(entry.key, 3, '🔇', '무음'),
+                      ],
+                    ),
+                  ],
                 ),
               );
             }),
-            
+
             SizedBox(height: 8.h),
-            
+
             if (_alarms.length < 3)
               OutlinedButton.icon(
                 onPressed: _addAlarm,
                 icon: Icon(Icons.add),
                 label: Text('알람 추가'),
                 style: OutlinedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 48.h),
+                  minimumSize: Size(double.infinity, 44.h),
                 ),
               ),
           ],
@@ -996,11 +1064,11 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
               ? null
               : () {
                   _alarms.sort((a, b) {
-                    final aMinutes = a.hour * 60 + a.minute;
-                    final bMinutes = b.hour * 60 + b.minute;
+                    final aMinutes = a.time.hour * 60 + a.time.minute;
+                    final bMinutes = b.time.hour * 60 + b.time.minute;
                     return aMinutes.compareTo(bMinutes);
                   });
-                  
+
                   widget.onSave(_alarms);
                   Navigator.pop(context);
                 },
@@ -1010,13 +1078,53 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
     );
   }
 
+  // 알람 타입 선택 버튼
+  Widget _buildTypeButton(int index, int typeId, String emoji, String label) {
+    final isSelected = _alarms[index].alarmTypeId == typeId;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _alarms[index] = _alarms[index].copyWith(alarmTypeId: typeId);
+          });
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 8.h),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.orange.shade50 : Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: isSelected ? Colors.orange : Colors.grey.shade300,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Text(emoji, style: TextStyle(fontSize: 16.sp)),
+              SizedBox(height: 2.h),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  color: isSelected ? Colors.orange.shade800 : Colors.grey.shade600,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _addAlarm() async {
     await showDialog(
       context: context,
       builder: (context) => _SamsungStyleTimePicker(
         onTimeSelected: (time) {
           setState(() {
-            _alarms.add(time);
+            // 기본값: 소리 (alarmTypeId = 1)
+            _alarms.add(AlarmSetting(time: time, alarmTypeId: 1));
           });
         },
       ),

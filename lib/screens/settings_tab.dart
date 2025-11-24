@@ -9,6 +9,7 @@ import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../models/alarm_type.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -598,6 +599,22 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     if (_types.isEmpty) {
       _initPresets();
     }
+
+    // 저장된 알람음 불러오기
+    _loadSelectedSound();
+  }
+
+  Future<void> _loadSelectedSound() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString('selected_alarm_sound') ?? 'alarmbell1';
+    setState(() {
+      _selectedSoundId = saved;
+    });
+  }
+
+  Future<void> _saveSelectedSound(String soundId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('selected_alarm_sound', soundId);
   }
 
   @override
@@ -958,6 +975,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                         onTap: () {
                           final newSoundId = sound['id']!;
                           setState(() => _selectedSoundId = newSoundId);
+                          _saveSelectedSound(newSoundId);  // SharedPreferences에 저장
                           setModalState(() {});
                           Navigator.pop(context);
                           // 재생 중이면 새 소리로 자동 전환
