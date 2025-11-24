@@ -52,7 +52,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 7,
+      version: 8,  // v8: 기본값 마이그레이션
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -191,6 +191,36 @@ class DatabaseService {
   if (oldVersion < 7) {
     await db.execute('ALTER TABLE alarm_types ADD COLUMN vibration_strength INTEGER DEFAULT 2');
     print('✅ DB 업그레이드 완료 (v$oldVersion → v7)');
+  }
+
+  // v8: 기본값 변경 (알람벨1, 70%, 강하게, 3분)
+  if (oldVersion < 8) {
+    // 소리 타입 (id=1): alarmbell1, 70%, 강하게, 3분
+    await db.execute('''
+      UPDATE alarm_types SET
+        sound_file = 'alarmbell1',
+        volume = 0.7,
+        vibration_strength = 3,
+        duration = 3
+      WHERE id = 1
+    ''');
+
+    // 진동 타입 (id=2): 강하게, 3분
+    await db.execute('''
+      UPDATE alarm_types SET
+        vibration_strength = 3,
+        duration = 3
+      WHERE id = 2
+    ''');
+
+    // 무음 타입 (id=3): 3분
+    await db.execute('''
+      UPDATE alarm_types SET
+        duration = 3
+      WHERE id = 3
+    ''');
+
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v8): 기본값 마이그레이션');
   }
 } 
   

@@ -47,8 +47,8 @@ class AlarmType {
     };
   }
 
-  // 타입 판별 (alarmbell로 시작하면 소리 타입)
-  bool get isSound => soundFile.startsWith('alarmbell');
+  // 타입 판별 (alarmbell 또는 기존 loud/soft도 소리 타입)
+  bool get isSound => soundFile.startsWith('alarmbell') || soundFile == 'loud' || soundFile == 'soft';
   bool get isVibrate => soundFile == 'vibrate';
   bool get isSilent => soundFile == 'silent';
 
