@@ -392,20 +392,29 @@ Widget build(BuildContext context) {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            // ⭐ 키보드 높이만큼 팝업 높이 조정
+            final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+            final adjustedHeight = keyboardHeight > 0
+                ? popupHeight - keyboardHeight + 60.h  // 키보드 올라올 때: 텍스트박스만 보이게
+                : popupHeight;
+
             return PopScope(
-              canPop: true,
-              onPopInvoked: (didPop) {
-                // ⭐ 뒤로가기 시 키보드 포커스 해제
-                if (didPop) {
+              canPop: false,  // ⭐ 직접 제어
+              onPopInvoked: (didPop) async {
+                if (!didPop) {
+                  // ⭐ 먼저 키보드 포커스 해제
                   FocusScope.of(context).unfocus();
+                  // 약간의 딜레이 후 팝업 닫기
+                  await Future.delayed(Duration(milliseconds: 100));
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
                 }
               },
-              child: Padding(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),  // ⭐ 키보드 올라올 때 전체 올리기
-                child: Container(
-                  height: popupHeight,
-                  padding: EdgeInsets.all(24.w),
-                  child: SingleChildScrollView(
+              child: Container(
+                height: adjustedHeight,
+                padding: EdgeInsets.all(24.w),
+                child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -513,59 +522,77 @@ Widget build(BuildContext context) {
                   SizedBox(height: 20.h),
 
                   // ⭐ 메모 입력창 (라벨과 같은 라인)
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text('메모 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: TextField(
-                          controller: memoController,
-                          maxLines: 1,
-                          scrollPhysics: BouncingScrollPhysics(),
-                          decoration: InputDecoration(
-                            hintText: '메모 입력',
-                            hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8.r),
-                              borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
-                            ),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final currentMemos = ref.watch(memoProvider)[dateStr] ?? [];
+                      final isFull = currentMemos.length >= 3;
+
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('메모 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                          SizedBox(width: 8.w),
+                          Expanded(
+                            child: isFull
+                                ? Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade200,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(color: Colors.grey.shade300),
+                                    ),
+                                    child: Text(
+                                      '메모는 3개만 등록 가능합니다',
+                                      style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+                                    ),
+                                  )
+                                : TextField(
+                                    controller: memoController,
+                                    maxLines: 1,
+                                    scrollPhysics: BouncingScrollPhysics(),
+                                    decoration: InputDecoration(
+                                      hintText: '메모 입력',
+                                      hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8.r),
+                                        borderSide: BorderSide(color: Colors.grey.shade300),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(8.r),
+                                        borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
+                                      ),
+                                    ),
+                                    style: TextStyle(fontSize: 14.sp),
+                                  ),
                           ),
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                      ),
-                      SizedBox(width: 6.w),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (memoController.text.trim().isEmpty) return;
+                          SizedBox(width: 6.w),
+                          ElevatedButton(
+                            onPressed: isFull
+                                ? null
+                                : () async {
+                                    if (memoController.text.trim().isEmpty) return;
 
-                          // ⭐ 키보드 내리기
-                          FocusScope.of(context).unfocus();
+                                    // ⭐ 키보드 내리기
+                                    FocusScope.of(context).unfocus();
 
-                          final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
-                          if (success) {
-                            memoController.clear();
-                            setState(() {});  // ⭐ 팝업 새로고침
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('메모는 최대 3개까지 가능합니다')),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue.shade600,
-                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-                          minimumSize: Size(0, 0),
-                        ),
-                        child: Text('저장', style: TextStyle(fontSize: 13.sp, color: Colors.white)),
-                      ),
-                    ],
+                                    final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
+                                    if (success) {
+                                      memoController.clear();
+                                      setState(() {});  // ⭐ 팝업 새로고침
+                                    }
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue.shade600,
+                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                              minimumSize: Size(0, 0),
+                            ),
+                            child: Text('저장', style: TextStyle(fontSize: 13.sp, color: Colors.white)),
+                          ),
+                        ],
+                      );
+                    },
                   ),
 
                   SizedBox(height: 12.h),
@@ -609,8 +636,7 @@ Widget build(BuildContext context) {
                 ],
               ),
             ),
-          ),
-              ),  // ⭐ PopScope child 닫기
+              ),  // ⭐ Container 닫기
             );
           },
         );
@@ -858,11 +884,13 @@ Widget build(BuildContext context) {
                       return;
                     }
 
+                    // ⭐ 메모 업데이트 (Provider가 자동으로 메인 팝업 갱신)
                     await ref.read(memoProvider.notifier).updateMemo(memo.id!, dateStr, editController.text.trim());
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();  // 메인 팝업도 닫기
-                    final schedule = ref.read(scheduleProvider).value;
-                    if (schedule != null) _showDayDetailPopup(day, schedule);  // 다시 열기
+
+                    // ⭐ 상세 팝업만 닫기 (메인 팝업은 Consumer로 자동 갱신됨)
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                    }
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade600),
                   child: Text('저장', style: TextStyle(color: Colors.white)),
@@ -891,11 +919,13 @@ Widget build(BuildContext context) {
                     );
 
                     if (confirm == true) {
+                      // ⭐ 메모 삭제 (Provider가 자동으로 메인 팝업 갱신)
                       await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
-                      Navigator.of(context).pop();
-                      Navigator.of(context).pop();  // 메인 팝업도 닫기
-                      final schedule = ref.read(scheduleProvider).value;
-                      if (schedule != null) _showDayDetailPopup(day, schedule);  // 다시 열기
+
+                      // ⭐ 상세 팝업만 닫기 (메인 팝업은 Consumer로 자동 갱신됨)
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                      }
                     }
                   },
                   child: Text('삭제', style: TextStyle(color: Colors.red.shade600)),
