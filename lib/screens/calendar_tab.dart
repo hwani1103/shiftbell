@@ -357,8 +357,38 @@ Widget build(BuildContext context) {
                     ),
                   ),
                 ),
-                Spacer(flex: 3),  // 아래쪽 공간 75% (메모 공간)
-                // TODO: 메모 기능 구현 시 Spacer 위에 추가
+                SizedBox(height: 2.h),  // 날짜와 메모 사이 간격
+                // ⭐ 메모 표시 (최대 3개)
+                Consumer(
+                  builder: (context, ref, child) {
+                    final dateStr = '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
+                    final memos = ref.watch(memoProvider)[dateStr] ?? [];
+
+                    if (memos.isEmpty) {
+                      return SizedBox.shrink();
+                    }
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: memos.take(3).map((memo) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 1.h, left: 2.w, right: 2.w),
+                          child: Text(
+                            memo.content,
+                            style: TextStyle(
+                              fontSize: 8.sp,
+                              color: Colors.grey.shade700,
+                              height: 1.1,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+                Spacer(flex: 1),  // 아래쪽 공간 (메모 하단 여백)
               ],
             ),
           ),
