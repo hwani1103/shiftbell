@@ -642,8 +642,10 @@ Widget build(BuildContext context) {
         );
       },
     ).then((_) {
-      // ⭐ 팝업 닫힐 때 컨트롤러 dispose
-      memoController.dispose();
+      // ⭐ 팝업이 완전히 닫힌 후 컨트롤러 dispose
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        memoController.dispose();
+      });
     });
   }
 
@@ -958,8 +960,10 @@ Widget build(BuildContext context) {
         ),
       ),
     ).then((_) {
-      // ⭐ 다이얼로그 닫힐 때 컨트롤러 dispose
-      editController.dispose();
+      // ⭐ 다이얼로그가 완전히 닫힌 후 컨트롤러 dispose
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        editController.dispose();
+      });
     });
   }
 }
