@@ -374,7 +374,7 @@ Widget build(BuildContext context) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 1.h, left: 2.w, right: 2.w),
                           child: Text(
-                            memo.content,
+                            memo.memoText,
                             style: TextStyle(
                               fontSize: 8.sp,
                               color: Colors.grey.shade700,
