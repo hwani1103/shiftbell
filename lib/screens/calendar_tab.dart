@@ -387,119 +387,80 @@ Widget build(BuildContext context) {
               ),
               SizedBox(height: 16.h),
 
-              // ⭐ 근무 정보: 패턴과 다르면 비교 표시, 같으면 단순 표시
-              if (isModified)
-                Row(
-                  children: [
-                    // 패턴 근무 (회색 + 취소선)
-                    Flexible(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: Colors.grey.shade400, width: 1.5),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '패턴',
-                              style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade600),
-                            ),
-                            Text(
-                              patternShift,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade700,
-                                decoration: TextDecoration.lineThrough,
-                                decorationThickness: 2,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+              // ⭐ 근무 정보: 통일된 형식으로 표시
+              Row(
+                children: [
+                  Text('근무 :', style: TextStyle(fontSize: 16.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                  SizedBox(width: 8.w),
+                  if (isModified) ...[
+                    // 기존 근무 (진한 회색, 비활성화 느낌)
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade400,
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(color: Colors.grey.shade600, width: 1.5),
+                      ),
+                      child: Text(
+                        patternShift,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
                         ),
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w),
-                      child: Icon(Icons.arrow_forward, color: Colors.grey.shade600, size: 20.sp),
+                      padding: EdgeInsets.symmetric(horizontal: 6.w),
+                      child: Icon(Icons.arrow_forward, color: Colors.grey.shade700, size: 18.sp),
                     ),
                     // 현재 근무 (원래 색상)
-                    Flexible(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                        decoration: BoxDecoration(
-                          color: _getShiftBackgroundColor(currentShift, schedule),
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(
-                            color: _getShiftTextColor(currentShift, schedule),
-                            width: 2,
-                          ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: _getShiftBackgroundColor(currentShift, schedule),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: _getShiftTextColor(currentShift, schedule),
+                          width: 2,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '현재',
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                color: _getShiftTextColor(currentShift, schedule).withOpacity(0.7),
-                              ),
-                            ),
-                            Text(
-                              currentShift,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                                color: _getShiftTextColor(currentShift, schedule),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                      ),
+                      child: Text(
+                        currentShift,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: _getShiftTextColor(currentShift, schedule),
                         ),
                       ),
                     ),
-                  ],
-                )
-              else
-                // 패턴과 동일한 경우 간단 표시
-                Row(
-                  children: [
-                    Text('근무:', style: TextStyle(fontSize: 16.sp, color: Colors.grey)),
-                    SizedBox(width: 8.w),
-                    Flexible(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                        decoration: BoxDecoration(
-                          color: _getShiftBackgroundColor(currentShift, schedule),
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(
-                            color: _getShiftTextColor(currentShift, schedule),
-                            width: 2,
-                          ),
+                  ] else
+                    // 패턴과 동일한 경우
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: _getShiftBackgroundColor(currentShift, schedule),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: _getShiftTextColor(currentShift, schedule),
+                          width: 2,
                         ),
-                        child: Text(
-                          currentShift,
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.bold,
-                            color: _getShiftTextColor(currentShift, schedule),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                      ),
+                      child: Text(
+                        currentShift,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: _getShiftTextColor(currentShift, schedule),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                ],
+              ),
 
               SizedBox(height: 16.h),
 
-              Text('고정 알람:', style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
+              Text('고정 알람 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
               SizedBox(height: 8.h),
               FutureBuilder<List<Alarm>>(
                 future: DatabaseService.instance.getAlarmsByDate(day),
@@ -543,53 +504,6 @@ Widget build(BuildContext context) {
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.blue.shade900,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                  );
-                },
-              ),
-
-              SizedBox(height: 16.h),
-
-              Text('커스텀 알람:', style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
-              SizedBox(height: 8.h),
-              FutureBuilder<List<Alarm>>(
-                future: DatabaseService.instance.getAlarmsByDate(day),
-                builder: (context, snapshot) {
-                  if (!snapshot.hasData) return SizedBox.shrink();
-
-                  final customAlarms = snapshot.data!.where((a) => a.type == 'custom').toList();
-
-                  if (customAlarms.isEmpty) {
-                    return Text('없음', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
-                  }
-
-                  return Wrap(
-                    spacing: 8.w,
-                    runSpacing: 8.h,
-                    children: customAlarms.map((alarm) {
-                      return Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
-                          borderRadius: BorderRadius.circular(8.r),
-                          border: Border.all(color: Colors.orange.shade200),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('📳', style: TextStyle(fontSize: 14.sp)),
-                            SizedBox(width: 4.w),
-                            Text(
-                              alarm.time,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange.shade900,
                               ),
                             ),
                           ],
