@@ -783,10 +783,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 Map<String, int> _generateShiftColors() {
   final Map<String, int> colors = {};
 
-  // 1. 휴무 계열 → 파스텔 핑크-레드
+  // 1. 휴무 계열 → 확실한 빨강 (파스텔이지만 진함)
   for (var shift in _allShiftTypes) {
     if (shift.contains('휴')) {
-      colors[shift] = 0xFFFFCDD2;  // ⭐ Pastel Red
+      colors[shift] = 0xFFEF9A9A;  // ⭐ Light Red (더 진함)
     }
   }
 

@@ -7,20 +7,20 @@ import 'package:flutter/material.dart';
 
 class ShiftSchedule {
 
-  // ⭐ 파스텔 팔레트 8색 (연한 배경 + 진한 텍스트)
+  // ⭐ 파스텔 팔레트 8색 (색상 명확히 구분)
   static final List<Color> shiftPalette = [
-    Color(0xFFBBDEFB), // Pastel Blue (연한 파랑)
-    Color(0xFFC8E6C9), // Pastel Green (연한 초록)
-    Color(0xFFB2EBF2), // Pastel Teal (연한 청록)
-    Color(0xFFD1C4E9), // Pastel Indigo (연한 남보라)
-    Color(0xFFB2DFDB), // Pastel Mint (연한 민트)
-    Color(0xFFE1BEE7), // Pastel Purple (연한 보라)
-    Color(0xFFF0F4C3), // Pastel Lime (연한 라임)
-    Color(0xFFD7CCC8), // Pastel Brown (연한 베이지)
+    Color(0xFFB3E5FC), // 하늘색 (Sky Blue)
+    Color(0xFFC5E1A5), // 연두색 (Lime Green)
+    Color(0xFFFFF9C4), // 노란색 (Sunny Yellow)
+    Color(0xFFFFE0B2), // 주황색 (Peach Orange)
+    Color(0xFFF8BBD0), // 분홍색 (Rose Pink)
+    Color(0xFFE1BEE7), // 보라색 (Lavender Purple)
+    Color(0xFFFFCCBC), // 코랄색 (Coral)
+    Color(0xFFD7CCC8), // 베이지색 (Warm Beige)
   ];
 
-  // ⭐ 휴무 고정 색상 (파스텔 핑크-레드)
-  static final Color offColor = Color(0xFFFFCDD2); // Pastel Red
+  // ⭐ 휴무 고정 색상 (파스텔이지만 확실한 빨강)
+  static final Color offColor = Color(0xFFEF9A9A); // Light Red (더 진함)
   
   // ⭐ 배경색 밝기 판단 (파스텔 톤용 기준 낮춤)
   static bool isBright(Color c) {
