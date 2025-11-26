@@ -410,48 +410,59 @@ Widget build(BuildContext context) {
                 child: Container(
                   height: popupHeight,
                   padding: EdgeInsets.all(24.w),
-                  child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                  Text(
-                    '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
-                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // ⭐ 근무 정보
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('근무 :', style: TextStyle(fontSize: 16.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
-                      SizedBox(width: 8.w),
-                      if (isModified) ...[
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('기존', style: TextStyle(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w500)),
-                            SizedBox(height: 4.h),
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade400,
-                                borderRadius: BorderRadius.circular(8.r),
-                                border: Border.all(color: Colors.grey.shade600, width: 1.5),
-                              ),
-                              child: Text(patternShift, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade800)),
+                      Text(
+                        '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
+                        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      // ⭐ 근무 정보
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('근무 :', style: TextStyle(fontSize: 16.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                          SizedBox(width: 8.w),
+                          if (isModified) ...[
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('기존', style: TextStyle(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w500)),
+                                SizedBox(height: 4.h),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade400,
+                                    borderRadius: BorderRadius.circular(8.r),
+                                    border: Border.all(color: Colors.grey.shade600, width: 1.5),
+                                  ),
+                                  child: Text(patternShift, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade800)),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 16.h),
-                          child: Icon(Icons.arrow_forward, color: Colors.grey.shade700, size: 18.sp),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('현재', style: TextStyle(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w500)),
-                            SizedBox(height: 4.h),
+                            Padding(
+                              padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 16.h),
+                              child: Icon(Icons.arrow_forward, color: Colors.grey.shade700, size: 18.sp),
+                            ),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text('현재', style: TextStyle(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w500)),
+                                SizedBox(height: 4.h),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                                  decoration: BoxDecoration(
+                                    color: _getShiftBackgroundColor(currentShift, schedule),
+                                    borderRadius: BorderRadius.circular(8.r),
+                                    border: Border.all(color: _getShiftTextColor(currentShift, schedule), width: 2),
+                                  ),
+                                  child: Text(currentShift, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: _getShiftTextColor(currentShift, schedule))),
+                                ),
+                              ],
+                            ),
+                          ] else
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                               decoration: BoxDecoration(
@@ -461,177 +472,168 @@ Widget build(BuildContext context) {
                               ),
                               child: Text(currentShift, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: _getShiftTextColor(currentShift, schedule))),
                             ),
-                          ],
-                        ),
-                      ] else
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                          decoration: BoxDecoration(
-                            color: _getShiftBackgroundColor(currentShift, schedule),
-                            borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(color: _getShiftTextColor(currentShift, schedule), width: 2),
+                        ],
+                      ),
+
+                      SizedBox(height: 16.h),
+
+                      // ⭐ 고정 알람
+                      Text('고정 알람 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                      SizedBox(height: 8.h),
+                      FutureBuilder<List<Alarm>>(
+                        future: DatabaseService.instance.getAlarmsByDate(day),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) return Text('오류', style: TextStyle(fontSize: 14.sp, color: Colors.red));
+                          if (!snapshot.hasData) return SizedBox(height: 20.h, width: 20.w, child: CircularProgressIndicator(strokeWidth: 2));
+
+                          final fixedAlarms = snapshot.data!.where((a) => a.type == 'fixed').toList();
+                          if (fixedAlarms.isEmpty) return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
+
+                          return Wrap(
+                            spacing: 8.w,
+                            runSpacing: 8.h,
+                            children: fixedAlarms.map((alarm) {
+                              return Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  border: Border.all(color: Colors.blue.shade200),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text('🔊', style: TextStyle(fontSize: 14.sp)),
+                                    SizedBox(width: 4.w),
+                                    Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.blue.shade900)),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
+                      ),
+
+                      SizedBox(height: 20.h),
+
+                      // ⭐ 메모 입력창 (라벨과 같은 라인)
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final currentMemos = ref.watch(memoProvider)[dateStr] ?? [];
+                          final isFull = currentMemos.length >= 3;
+
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text('메모 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: isFull
+                                    ? Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade200,
+                                          borderRadius: BorderRadius.circular(8.r),
+                                          border: Border.all(color: Colors.grey.shade300),
+                                        ),
+                                        child: Text(
+                                          '메모는 3개만 등록 가능합니다',
+                                          style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+                                        ),
+                                      )
+                                    : TextField(
+                                        controller: memoController,
+                                        maxLines: 1,
+                                        scrollPhysics: BouncingScrollPhysics(),
+                                        decoration: InputDecoration(
+                                          hintText: '메모 입력',
+                                          hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400),
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8.r),
+                                            borderSide: BorderSide(color: Colors.grey.shade300),
+                                          ),
+                                          focusedBorder: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(8.r),
+                                            borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
+                                          ),
+                                        ),
+                                        style: TextStyle(fontSize: 14.sp),
+                                      ),
+                              ),
+                              SizedBox(width: 6.w),
+                              ElevatedButton(
+                                onPressed: isFull
+                                    ? null
+                                    : () async {
+                                        if (memoController.text.trim().isEmpty) return;
+
+                                        // ⭐ 키보드 내리기
+                                        FocusScope.of(context).unfocus();
+
+                                        final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
+                                        if (success) {
+                                          memoController.clear();
+                                          setState(() {});  // ⭐ 팝업 새로고침
+                                        }
+                                      },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue.shade600,
+                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                                  minimumSize: Size(0, 0),
+                                ),
+                                child: Text('저장', style: TextStyle(fontSize: 13.sp, color: Colors.white)),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+
+                      SizedBox(height: 12.h),
+
+                      // ⭐ 메모 목록 (최대 3개, 스크롤 가능, 키보드에 가려도 됨)
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Consumer(
+                            builder: (context, ref, child) {
+                              final memos = ref.watch(memoProvider)[dateStr] ?? [];
+
+                              if (memos.isEmpty) {
+                                return SizedBox.shrink();
+                              }
+
+                              return Column(
+                                children: memos.map((memo) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      _showMemoDetailPopup(day, memo);
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      margin: EdgeInsets.only(bottom: 8.h),
+                                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade100,
+                                        borderRadius: BorderRadius.circular(8.r),
+                                        border: Border.all(color: Colors.grey.shade300),
+                                      ),
+                                      child: Text(
+                                        memo.memoText,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(fontSize: 14.sp, color: Colors.black87),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              );
+                            },
                           ),
-                          child: Text(currentShift, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: _getShiftTextColor(currentShift, schedule))),
                         ),
+                      ),
                     ],
                   ),
-
-                  SizedBox(height: 16.h),
-
-                  // ⭐ 고정 알람
-                  Text('고정 알람 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
-                  SizedBox(height: 8.h),
-                  FutureBuilder<List<Alarm>>(
-                    future: DatabaseService.instance.getAlarmsByDate(day),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) return Text('오류', style: TextStyle(fontSize: 14.sp, color: Colors.red));
-                      if (!snapshot.hasData) return SizedBox(height: 20.h, width: 20.w, child: CircularProgressIndicator(strokeWidth: 2));
-
-                      final fixedAlarms = snapshot.data!.where((a) => a.type == 'fixed').toList();
-                      if (fixedAlarms.isEmpty) return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
-
-                      return Wrap(
-                        spacing: 8.w,
-                        runSpacing: 8.h,
-                        children: fixedAlarms.map((alarm) {
-                          return Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                            decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
-                              borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(color: Colors.blue.shade200),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text('🔊', style: TextStyle(fontSize: 14.sp)),
-                                SizedBox(width: 4.w),
-                                Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.blue.shade900)),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      );
-                    },
-                  ),
-
-                  SizedBox(height: 20.h),
-
-                  // ⭐ 메모 입력창 (라벨과 같은 라인)
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final currentMemos = ref.watch(memoProvider)[dateStr] ?? [];
-                      final isFull = currentMemos.length >= 3;
-
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text('메모 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: isFull
-                                ? Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade200,
-                                      borderRadius: BorderRadius.circular(8.r),
-                                      border: Border.all(color: Colors.grey.shade300),
-                                    ),
-                                    child: Text(
-                                      '메모는 3개만 등록 가능합니다',
-                                      style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
-                                    ),
-                                  )
-                                : TextField(
-                                    controller: memoController,
-                                    maxLines: 1,
-                                    scrollPhysics: BouncingScrollPhysics(),
-                                    decoration: InputDecoration(
-                                      hintText: '메모 입력',
-                                      hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400),
-                                      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.r),
-                                        borderSide: BorderSide(color: Colors.grey.shade300),
-                                      ),
-                                      focusedBorder: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(8.r),
-                                        borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
-                                      ),
-                                    ),
-                                    style: TextStyle(fontSize: 14.sp),
-                                  ),
-                          ),
-                          SizedBox(width: 6.w),
-                          ElevatedButton(
-                            onPressed: isFull
-                                ? null
-                                : () async {
-                                    if (memoController.text.trim().isEmpty) return;
-
-                                    // ⭐ 키보드 내리기
-                                    FocusScope.of(context).unfocus();
-
-                                    final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
-                                    if (success) {
-                                      memoController.clear();
-                                      setState(() {});  // ⭐ 팝업 새로고침
-                                    }
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue.shade600,
-                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-                              minimumSize: Size(0, 0),
-                            ),
-                            child: Text('저장', style: TextStyle(fontSize: 13.sp, color: Colors.white)),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-
-                  SizedBox(height: 12.h),
-
-                  // ⭐ 메모 목록 (최대 3개)
-                  Consumer(
-                    builder: (context, ref, child) {
-                      final memos = ref.watch(memoProvider)[dateStr] ?? [];
-
-                      if (memos.isEmpty) {
-                        return SizedBox.shrink();  // ⭐ 빈 공간
-                      }
-
-                      return Column(
-                        children: memos.map((memo) {
-                          return GestureDetector(
-                            onTap: () {
-                              _showMemoDetailPopup(day, memo);
-                            },
-                            child: Container(
-                              width: double.infinity,
-                              margin: EdgeInsets.only(bottom: 8.h),
-                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(8.r),
-                                border: Border.all(color: Colors.grey.shade300),
-                              ),
-                              child: Text(
-                                memo.memoText,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(fontSize: 14.sp, color: Colors.black87),
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
                 ),  // ⭐ Container 닫기
               ),  // ⭐ Padding 닫기
             );
