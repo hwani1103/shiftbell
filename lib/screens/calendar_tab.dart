@@ -833,7 +833,8 @@ Widget build(BuildContext context) {
                     await ref.read(memoProvider.notifier).updateMemo(memo.id!, dateStr, editController.text.trim());
                     Navigator.of(context).pop();
                     Navigator.of(context).pop();  // 메인 팝업도 닫기
-                    _showDayDetailPopup(day, ref.read(scheduleProvider)!);  // 다시 열기
+                    final schedule = ref.read(scheduleProvider).value;
+                    if (schedule != null) _showDayDetailPopup(day, schedule);  // 다시 열기
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade600),
                   child: Text('저장', style: TextStyle(color: Colors.white)),
@@ -865,7 +866,8 @@ Widget build(BuildContext context) {
                       await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();  // 메인 팝업도 닫기
-                      _showDayDetailPopup(day, ref.read(scheduleProvider)!);  // 다시 열기
+                      final schedule = ref.read(scheduleProvider).value;
+                      if (schedule != null) _showDayDetailPopup(day, schedule);  // 다시 열기
                     }
                   },
                   child: Text('삭제', style: TextStyle(color: Colors.red.shade600)),
@@ -886,6 +888,4 @@ Widget build(BuildContext context) {
       ),
     );
   }
-
-}
 }
