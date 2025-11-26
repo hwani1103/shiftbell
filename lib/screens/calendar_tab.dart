@@ -270,30 +270,33 @@ Widget build(BuildContext context) {
   Widget _buildDateCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, {bool isSelected = false}) {
     final shiftText = schedule.getShiftForDate(day);
     final isSunday = day.weekday == DateTime.sunday;
-    
+
     Color dateColor;
     if (isSunday) {
       dateColor = isOutside ? Colors.red.withOpacity(0.3) : Colors.red;
     } else {
       dateColor = isOutside ? Colors.grey : Colors.black;
     }
-    
+
     return Container(
       decoration: BoxDecoration(
-        color: isSelected && _isMultiSelectMode 
-            ? Colors.blue.withOpacity(0.2) 
+        color: isSelected && _isMultiSelectMode
+            ? Colors.blue.withOpacity(0.2)
             : Colors.transparent,
+        // ⭐ 오늘 날짜는 파란색 테두리
+        border: isToday
+            ? Border.all(color: Colors.blue.shade700, width: 2.5)
+            : null,
       ),
-      padding: EdgeInsets.all(4.w),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // ⭐ 근무명 (맨 위에 붙임, padding 제거)
           if (shiftText.isNotEmpty && shiftText != '미설정')
             Container(
-              width: double.infinity,
               height: 18.h,
               decoration: BoxDecoration(
                 color: _getShiftBackgroundColor(shiftText, schedule),
-                borderRadius: BorderRadius.circular(2.r),
               ),
               child: Center(
                 child: Text(
@@ -310,44 +313,34 @@ Widget build(BuildContext context) {
             )
           else
             SizedBox(height: 18.h),
-          
+
+          // ⭐ 날짜 숫자 (상단 35% 지점에 배치)
+          Padding(
+            padding: EdgeInsets.only(top: 4.h),
+            child: Text(
+              '${day.day}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: dateColor,
+              ),
+            ),
+          ),
+
+          // ⭐ 메모 영역 (3줄 예약, 나중에 구현)
           Expanded(
-            child: Center(
-              child: isToday
-                  ? Container(
-                      constraints: BoxConstraints(
-                        minWidth: 26.w,
-                        minHeight: 26.w,
-                        maxWidth: 32.w,
-                        maxHeight: 32.w,
-                      ),
-                      padding: EdgeInsets.all(2.w),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade700,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            '${day.day}',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  : Text(
-                      '${day.day}',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: dateColor,
-                      ),
-                    ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 2.h),
+              child: Text(
+                '', // TODO: 메모 기능 구현 시 사용
+                style: TextStyle(
+                  fontSize: 7.sp,
+                  color: Colors.grey.shade600,
+                ),
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ),
         ],
