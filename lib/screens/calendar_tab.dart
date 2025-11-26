@@ -334,7 +334,6 @@ Widget build(BuildContext context) {
                   decoration: isToday
                       ? BoxDecoration(
                           color: Colors.blue.shade100,
-                          borderRadius: BorderRadius.circular(4.r),
                         )
                       : null,
                   child: Text(
