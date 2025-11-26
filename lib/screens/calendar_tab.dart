@@ -269,6 +269,14 @@ Widget build(BuildContext context) {
   
   Widget _buildDateCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, {bool isSelected = false}) {
     final shiftText = schedule.getShiftForDate(day);
+    final patternShift = schedule.getPatternShiftForDate(day);
+
+    // ⭐ 패턴과 다른 경우 표시 (패턴이 있고, 현재가 다르고, 둘 다 유효한 경우)
+    final isModified = patternShift.isNotEmpty &&
+                       shiftText.isNotEmpty &&
+                       shiftText != '미설정' &&
+                       patternShift != shiftText;
+
     final isSunday = day.weekday == DateTime.sunday;
 
     Color dateColor;
@@ -298,6 +306,14 @@ Widget build(BuildContext context) {
               height: 18.h,
               decoration: BoxDecoration(
                 color: _getShiftBackgroundColor(shiftText, schedule),
+                // ⭐ 패턴과 다른 경우 하단에 검정 줄 표시
+                border: isModified
+                    ? Border(bottom: BorderSide(color: Colors.black, width: 2))
+                    : null,
+                // ⭐ 대안: 좌측 세로 줄 (아래 주석 해제하고 위 border 주석 처리)
+                // border: isModified
+                //     ? Border(left: BorderSide(color: Colors.black, width: 3))
+                //     : null,
               ),
               child: Center(
                 child: Text(

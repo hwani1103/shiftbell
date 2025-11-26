@@ -93,12 +93,12 @@ class ShiftSchedule {
 
   String getShiftForDate(DateTime date) {
   final dateStr = date.toIso8601String().split('T')[0];
-  
+
   // ⭐ 먼저 예외 확인 (우선순위)
   if (assignedDates != null && assignedDates!.containsKey(dateStr)) {
     return assignedDates![dateStr]!;
   }
-  
+
   // 규칙적인 경우 패턴 계산
   if (isRegular) {
     if (pattern == null || todayIndex == null || startDate == null) {
@@ -107,7 +107,7 @@ class ShiftSchedule {
 
     final adjustedStartDate = DateTime(startDate!.year, startDate!.month, startDate!.day);
     final targetDate = DateTime(date.year, date.month, date.day);
-    
+
     final daysDiff = targetDate.difference(adjustedStartDate).inDays;
     final index = ((todayIndex! + daysDiff) % pattern!.length + pattern!.length) % pattern!.length;
     return pattern![index];
@@ -115,4 +115,18 @@ class ShiftSchedule {
     return '미설정';
   }
 }
+
+  // ⭐ 패턴상의 근무만 반환 (수동 할당 무시)
+  String getPatternShiftForDate(DateTime date) {
+    if (!isRegular || pattern == null || todayIndex == null || startDate == null) {
+      return '';
+    }
+
+    final adjustedStartDate = DateTime(startDate!.year, startDate!.month, startDate!.day);
+    final targetDate = DateTime(date.year, date.month, date.day);
+
+    final daysDiff = targetDate.difference(adjustedStartDate).inDays;
+    final index = ((todayIndex! + daysDiff) % pattern!.length + pattern!.length) % pattern!.length;
+    return pattern![index];
+  }
 }
