@@ -344,6 +344,7 @@ Widget build(BuildContext context) {
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: isToday ? Colors.blue.shade700 : dateColor,
+                      height: 1.0,
                     ),
                   ),
                 ),
