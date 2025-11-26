@@ -187,7 +187,7 @@ Widget build(BuildContext context) {
                           outsideTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey),
                           
                           todayDecoration: BoxDecoration(
-                            color: Color(0xFFFFF8DC),
+                            color: Colors.transparent,  // ⭐ 배경 제거, 날짜 숫자만 표시
                           ),
                           todayTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
                           
@@ -291,12 +291,8 @@ Widget build(BuildContext context) {
         color: isSelected && _isMultiSelectMode
             ? Colors.blue.withOpacity(0.2)
             : Colors.transparent,
-        // ⭐ 오늘 날짜는 검정 테두리 (얇게)
-        border: isToday
-            ? Border.all(color: Colors.black, width: 1.5)
-            : null,
       ),
-      padding: EdgeInsets.only(left: 2.w, right: 2.w, top: isToday ? 0.5.h : 2.h),  // ⭐ today는 border만큼 padding 보상
+      padding: EdgeInsets.only(left: 2.w, right: 2.w, top: 2.h),  // ⭐ 모든 날짜 동일한 padding
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -332,13 +328,26 @@ Widget build(BuildContext context) {
             child: Column(
               children: [
                 Spacer(flex: 1),  // 위쪽 공간 25%
-                Text(
-                  '${day.day}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: dateColor,
+                // ⭐ 오늘 날짜는 파란색 원형 테두리로 표시 (표준 방식)
+                Container(
+                  width: 28.w,
+                  height: 28.w,
+                  decoration: isToday
+                      ? BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.blue.shade700, width: 2),
+                        )
+                      : null,
+                  child: Center(
+                    child: Text(
+                      '${day.day}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: dateColor,
+                      ),
+                    ),
                   ),
                 ),
                 Spacer(flex: 3),  // 아래쪽 공간 75% (메모 공간)
