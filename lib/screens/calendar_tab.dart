@@ -641,12 +641,8 @@ Widget build(BuildContext context) {
           },
         );
       },
-    ).then((_) {
-      // ⭐ 팝업이 완전히 닫힌 후 컨트롤러 dispose
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        memoController.dispose();
-      });
-    });
+    );
+    // ⭐ dispose 제거: 팝업 닫힐 때 자동 가비지 컬렉션됨
   }
 
   String _getWeekday(DateTime date) {
@@ -959,11 +955,7 @@ Widget build(BuildContext context) {
           },
         ),
       ),
-    ).then((_) {
-      // ⭐ 다이얼로그가 완전히 닫힌 후 컨트롤러 dispose
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        editController.dispose();
-      });
-    });
+    );
+    // ⭐ dispose 제거: Dialog 닫힐 때 자동 가비지 컬렉션됨
   }
 }
