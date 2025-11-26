@@ -165,7 +165,7 @@ Widget build(BuildContext context) {
                         locale: 'ko_KR',
                         
                         headerVisible: false,
-                        rowHeight: (87.h).clamp(60.0, 90.0),  // ⭐ 70→73→78→83→87 (하단 여백 더 축소, 셀 확대)
+                        rowHeight: (90.h).clamp(60.0, 95.0),  // ⭐ 70→73→78→83→87→90 (하단 여백 최소화, 셀 확대)
 
                         daysOfWeekHeight: 28.h,  // ⭐ 45→28 (최소화)
                         daysOfWeekStyle: DaysOfWeekStyle(
@@ -315,11 +315,11 @@ Widget build(BuildContext context) {
           else
             SizedBox(height: 18.h),
 
-          // ⭐ 날짜 숫자 + 메모 영역 (세로 center 정렬)
+          // ⭐ 날짜 숫자 + 메모 영역 (center에서 약간 위로, 메모 공간 확보)
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                Spacer(flex: 2),  // 위쪽 공간 40%
                 Text(
                   '${day.day}',
                   textAlign: TextAlign.center,
@@ -329,7 +329,8 @@ Widget build(BuildContext context) {
                     color: dateColor,
                   ),
                 ),
-                // TODO: 메모 기능 구현 시 날짜 아래에 추가
+                Spacer(flex: 3),  // 아래쪽 공간 60% (메모 공간)
+                // TODO: 메모 기능 구현 시 Spacer 위에 추가
               ],
             ),
           ),
