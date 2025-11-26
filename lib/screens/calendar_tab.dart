@@ -306,14 +306,10 @@ Widget build(BuildContext context) {
               height: 18.h,
               decoration: BoxDecoration(
                 color: _getShiftBackgroundColor(shiftText, schedule),
-                // ⭐ 패턴과 다른 경우 하단에 검정 줄 표시
+                // ⭐ 패턴과 다른 경우 좌측에 검정 세로 줄 표시
                 border: isModified
-                    ? Border(bottom: BorderSide(color: Colors.black, width: 2))
+                    ? Border(left: BorderSide(color: Colors.black, width: 3))
                     : null,
-                // ⭐ 대안: 좌측 세로 줄 (아래 주석 해제하고 위 border 주석 처리)
-                // border: isModified
-                //     ? Border(left: BorderSide(color: Colors.black, width: 3))
-                //     : null,
               ),
               child: Center(
                 child: Text(
