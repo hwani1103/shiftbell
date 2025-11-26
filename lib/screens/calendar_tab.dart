@@ -328,26 +328,14 @@ Widget build(BuildContext context) {
             child: Column(
               children: [
                 Spacer(flex: 1),  // 위쪽 공간 25%
-                // ⭐ 오늘 날짜는 파란색 원형 테두리로 표시 (표준 방식)
-                Container(
-                  width: 28.w,
-                  height: 28.w,
-                  decoration: isToday
-                      ? BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: Colors.blue.shade700, width: 2),
-                        )
-                      : null,
-                  child: Center(
-                    child: Text(
-                      '${day.day}',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: dateColor,
-                      ),
-                    ),
+                // ⭐ 오늘 날짜는 파란색으로 표시
+                Text(
+                  '${day.day}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: isToday ? Colors.blue.shade700 : dateColor,
                   ),
                 ),
                 Spacer(flex: 3),  // 아래쪽 공간 75% (메모 공간)
