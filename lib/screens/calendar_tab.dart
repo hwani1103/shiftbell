@@ -328,15 +328,30 @@ Widget build(BuildContext context) {
             child: Column(
               children: [
                 Spacer(flex: 1),  // 위쪽 공간 25%
-                // ⭐ 오늘 날짜는 파란색으로 표시
-                Text(
-                  '${day.day}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: isToday ? Colors.blue.shade700 : dateColor,
-                  ),
+                // ⭐ 오늘 날짜는 하단 막대로 표시
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${day.day}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: isToday ? Colors.blue.shade700 : dateColor,
+                      ),
+                    ),
+                    if (isToday)
+                      Container(
+                        width: 20.w,
+                        height: 3.h,
+                        margin: EdgeInsets.only(top: 2.h),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade700,
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
+                  ],
                 ),
                 Spacer(flex: 3),  // 아래쪽 공간 75% (메모 공간)
                 // TODO: 메모 기능 구현 시 Spacer 위에 추가
