@@ -390,19 +390,14 @@ Widget build(BuildContext context) {
       context: context,
       isScrollControlled: true,
       builder: (context) {
-        final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
-
         return StatefulBuilder(
           builder: (context, setState) {
-            return Container(
-              height: popupHeight,
-              padding: EdgeInsets.only(
-                left: 24.w,
-                right: 24.w,
-                top: 24.h,
-                bottom: bottomPadding > 0 ? bottomPadding + 10.h : 24.h,  // ⭐ 키보드 올라올 때 패딩 조정
-              ),
-              child: SingleChildScrollView(
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),  // ⭐ 키보드 올라올 때 전체 올리기
+              child: Container(
+                height: popupHeight,
+                padding: EdgeInsets.all(24.w),
+                child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -541,6 +536,9 @@ Widget build(BuildContext context) {
                         onPressed: () async {
                           if (memoController.text.trim().isEmpty) return;
 
+                          // ⭐ 키보드 내리기
+                          FocusScope.of(context).unfocus();
+
                           final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
                           if (success) {
                             memoController.clear();
@@ -603,11 +601,12 @@ Widget build(BuildContext context) {
                 ],
               ),
             ),
-          );
-        },
-      );
+          ),
+        );
       },
-    ).then((_) {
+    );
+    },
+  ).then((_) {
       // ⭐ 팝업 닫힐 때 컨트롤러 dispose
       memoController.dispose();
     });
