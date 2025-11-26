@@ -362,248 +362,245 @@ Widget build(BuildContext context) {
   
   void _showDayDetailPopup(DateTime day, ShiftSchedule schedule) {
     final currentShift = schedule.getShiftForDate(day);
-    final displayShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
-    
+    final patternShift = schedule.getPatternShiftForDate(day);
+    final isModified = patternShift.isNotEmpty &&
+                       currentShift.isNotEmpty &&
+                       currentShift != '미설정' &&
+                       patternShift != currentShift;
+
     final screenHeight = MediaQuery.of(context).size.height;
-    final popupHeight = (screenHeight * 0.65).clamp(400.0, 600.0);
-    
+    final popupHeight = (screenHeight * 0.5).clamp(300.0, 450.0);
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) => Container(
         height: popupHeight,
         padding: EdgeInsets.all(24.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 4,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
+                style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16.h),
+
+              // ⭐ 근무 정보: 패턴과 다르면 비교 표시, 같으면 단순 표시
+              if (isModified)
+                Row(
                   children: [
-                    Text(
-                      '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
-                      style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                    // 패턴 근무 (회색 + 취소선)
+                    Flexible(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: Colors.grey.shade400, width: 1.5),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '패턴',
+                              style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade600),
+                            ),
+                            Text(
+                              patternShift,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade700,
+                                decoration: TextDecoration.lineThrough,
+                                decorationThickness: 2,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    SizedBox(height: 16.h),
-                    
-                    Row(
-                      children: [
-                        Text('현재:', style: TextStyle(fontSize: 16.sp, color: Colors.grey)),
-                        SizedBox(width: 8.w),
-                        Flexible(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                            decoration: BoxDecoration(
-                              color: _getShiftBackgroundColor(currentShift, schedule),
-                              borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(
-                                color: _getShiftTextColor(currentShift, schedule),
-                                width: 2,
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w),
+                      child: Icon(Icons.arrow_forward, color: Colors.grey.shade600, size: 20.sp),
+                    ),
+                    // 현재 근무 (원래 색상)
+                    Flexible(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                        decoration: BoxDecoration(
+                          color: _getShiftBackgroundColor(currentShift, schedule),
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(
+                            color: _getShiftTextColor(currentShift, schedule),
+                            width: 2,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '현재',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: _getShiftTextColor(currentShift, schedule).withOpacity(0.7),
                               ),
                             ),
-                            child: Text(
+                            Text(
                               currentShift,
                               style: TextStyle(
-                                fontSize: 18.sp,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
                                 color: _getShiftTextColor(currentShift, schedule),
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              else
+                // 패턴과 동일한 경우 간단 표시
+                Row(
+                  children: [
+                    Text('근무:', style: TextStyle(fontSize: 16.sp, color: Colors.grey)),
+                    SizedBox(width: 8.w),
+                    Flexible(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                        decoration: BoxDecoration(
+                          color: _getShiftBackgroundColor(currentShift, schedule),
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(
+                            color: _getShiftTextColor(currentShift, schedule),
+                            width: 2,
                           ),
                         ),
-                      ],
-                    ),
-                    
-                    SizedBox(height: 16.h),
-                    
-                    Text('고정 알람:', style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
-                    SizedBox(height: 8.h),
-                    FutureBuilder<List<Alarm>>(
-                      future: DatabaseService.instance.getAlarmsByDate(day),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return Text('오류', style: TextStyle(fontSize: 14.sp, color: Colors.red));
-                        }
-                        if (!snapshot.hasData) {
-                          return SizedBox(
-                            height: 20.h,
-                            width: 20.w,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          );
-                        }
-
-                        final fixedAlarms = snapshot.data!.where((a) => a.type == 'fixed').toList();
-                        
-                        if (fixedAlarms.isEmpty) {
-                          return Text('없음', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
-                        }
-                        
-                        return Wrap(
-                          spacing: 8.w,
-                          runSpacing: 8.h,
-                          children: fixedAlarms.map((alarm) {
-                            return Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(8.r),
-                                border: Border.all(color: Colors.blue.shade200),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('🔊', style: TextStyle(fontSize: 14.sp)),
-                                  SizedBox(width: 4.w),
-                                  Text(
-                                    alarm.time,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue.shade900,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                    ),
-                    
-                    SizedBox(height: 16.h),
-                    
-                    Text('커스텀 알람:', style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
-                    SizedBox(height: 8.h),
-                    FutureBuilder<List<Alarm>>(
-                      future: DatabaseService.instance.getAlarmsByDate(day),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return SizedBox.shrink();
-                        
-                        final customAlarms = snapshot.data!.where((a) => a.type == 'custom').toList();
-                        
-                        if (customAlarms.isEmpty) {
-                          return Text('없음', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
-                        }
-                        
-                        return Wrap(
-                          spacing: 8.w,
-                          runSpacing: 8.h,
-                          children: customAlarms.map((alarm) {
-                            return Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.shade50,
-                                borderRadius: BorderRadius.circular(8.r),
-                                border: Border.all(color: Colors.orange.shade200),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text('📳', style: TextStyle(fontSize: 14.sp)),
-                                  SizedBox(width: 4.w),
-                                  Text(
-                                    alarm.time,
-                                    style: TextStyle(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.orange.shade900,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
+                        child: Text(
+                          currentShift,
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: _getShiftTextColor(currentShift, schedule),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ),
-            
-            Divider(height: 24.h),
-            
-            Expanded(
-              flex: 6,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '근무일 변경',
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 12.h),
-                  
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 8.w,
-                        mainAxisSpacing: 8.h,
-                        childAspectRatio: 1.5,
-                      ),
-                      itemCount: displayShifts.length,
-                      itemBuilder: (context, index) {
-                        final shiftType = displayShifts[index];
-                        final isSelected = currentShift == shiftType;
-                        
-                        return ElevatedButton(
-                          onPressed: () async {
-                            Navigator.pop(context);
-                            
-                            // ⭐ scheduleProvider 사용
-                            await ref.read(scheduleProvider.notifier).changeShiftWithAlarms(day, shiftType);
-                            
-                            // ⭐ alarmNotifier 강제 갱신
-                            await ref.read(alarmNotifierProvider.notifier).refresh();
-                            
-                            // ⭐ AlarmGuardReceiver 트리거 (Notification 표시)
-                            try {
-                              await platform.invokeMethod('triggerGuardCheck');
-                              print('✅ AlarmGuardReceiver 트리거 완료');
-                            } catch (e) {
-                              print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
-                            }
-                            
-                            if (mounted) {
-                              setState(() {});
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isSelected 
-                                ? Colors.blue.shade700 
-                                : _getShiftBackgroundColor(shiftType, schedule),
-                            foregroundColor: isSelected 
-                                ? Colors.white 
-                                : _getShiftTextColor(shiftType, schedule),
-                            elevation: isSelected ? 4 : 1,
-                            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
-                          ),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              shiftType,
+
+              SizedBox(height: 16.h),
+
+              Text('고정 알람:', style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
+              SizedBox(height: 8.h),
+              FutureBuilder<List<Alarm>>(
+                future: DatabaseService.instance.getAlarmsByDate(day),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Text('오류', style: TextStyle(fontSize: 14.sp, color: Colors.red));
+                  }
+                  if (!snapshot.hasData) {
+                    return SizedBox(
+                      height: 20.h,
+                      width: 20.w,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    );
+                  }
+
+                  final fixedAlarms = snapshot.data!.where((a) => a.type == 'fixed').toList();
+
+                  if (fixedAlarms.isEmpty) {
+                    return Text('없음', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
+                  }
+
+                  return Wrap(
+                    spacing: 8.w,
+                    runSpacing: 8.h,
+                    children: fixedAlarms.map((alarm) {
+                      return Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: Colors.blue.shade200),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('🔊', style: TextStyle(fontSize: 14.sp)),
+                            SizedBox(width: 4.w),
+                            Text(
+                              alarm.time,
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.bold,
+                                color: Colors.blue.shade900,
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
               ),
-            ),
-          ],
+
+              SizedBox(height: 16.h),
+
+              Text('커스텀 알람:', style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
+              SizedBox(height: 8.h),
+              FutureBuilder<List<Alarm>>(
+                future: DatabaseService.instance.getAlarmsByDate(day),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return SizedBox.shrink();
+
+                  final customAlarms = snapshot.data!.where((a) => a.type == 'custom').toList();
+
+                  if (customAlarms.isEmpty) {
+                    return Text('없음', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
+                  }
+
+                  return Wrap(
+                    spacing: 8.w,
+                    runSpacing: 8.h,
+                    children: customAlarms.map((alarm) {
+                      return Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: Colors.orange.shade200),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('📳', style: TextStyle(fontSize: 14.sp)),
+                            SizedBox(width: 4.w),
+                            Text(
+                              alarm.time,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.orange.shade900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
