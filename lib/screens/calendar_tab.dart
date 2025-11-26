@@ -330,7 +330,7 @@ Widget build(BuildContext context) {
                 Spacer(flex: 1),  // 위쪽 공간 25%
                 // ⭐ 오늘 날짜는 slim한 배경으로 표시 (메모 공간 침범 없음)
                 Container(
-                  padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
+                  padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
                   decoration: isToday
                       ? BoxDecoration(
                           color: Colors.blue.shade100,
