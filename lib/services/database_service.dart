@@ -295,7 +295,7 @@ class DatabaseService {
   // v12: 날짜별 메모 테이블 추가
   if (oldVersion < 12) {
     await db.execute('''
-      CREATE TABLE date_memos(
+      CREATE TABLE IF NOT EXISTS date_memos(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         date TEXT NOT NULL,
         memo_text TEXT NOT NULL,
@@ -303,7 +303,7 @@ class DatabaseService {
         created_at TEXT NOT NULL
       )
     ''');
-    await db.execute('CREATE INDEX idx_date_memos_date ON date_memos(date)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_date_memos_date ON date_memos(date)');
     print('✅ DB 업그레이드 완료 (v$oldVersion → v12): date_memos 테이블 추가');
   }
 }
