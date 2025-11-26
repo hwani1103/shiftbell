@@ -401,13 +401,23 @@ Widget build(BuildContext context) {
                         borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(color: Colors.grey.shade600, width: 1.5),
                       ),
-                      child: Text(
-                        patternShift,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade800,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '기존',
+                            style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade700),
+                          ),
+                          Text(
+                            patternShift,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Padding(
@@ -425,13 +435,26 @@ Widget build(BuildContext context) {
                           width: 2,
                         ),
                       ),
-                      child: Text(
-                        currentShift,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: _getShiftTextColor(currentShift, schedule),
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '현재',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: _getShiftTextColor(currentShift, schedule).withOpacity(0.7),
+                            ),
+                          ),
+                          Text(
+                            currentShift,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: _getShiftTextColor(currentShift, schedule),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ] else
@@ -479,7 +502,7 @@ Widget build(BuildContext context) {
                   final fixedAlarms = snapshot.data!.where((a) => a.type == 'fixed').toList();
 
                   if (fixedAlarms.isEmpty) {
-                    return Text('없음', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
+                    return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
                   }
 
                   return Wrap(
