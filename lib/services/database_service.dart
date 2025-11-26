@@ -610,33 +610,35 @@ Future<void> clearAlarmHistory() async {
 Future<int?> createMemo(String date, String memoText) async {
   final db = await database;
 
-  // 해당 날짜의 메모 개수 확인
-  final count = Sqflite.firstIntValue(
-    await db.rawQuery(
-      'SELECT COUNT(*) FROM date_memos WHERE date = ?',
-      [date],
-    ),
-  ) ?? 0;
+  return await db.transaction((txn) async {
+    // 해당 날짜의 메모 개수 확인
+    final count = Sqflite.firstIntValue(
+      await txn.rawQuery(
+        'SELECT COUNT(*) FROM date_memos WHERE date = ?',
+        [date],
+      ),
+    ) ?? 0;
 
-  if (count >= 3) {
-    print('⚠️ 메모는 하루에 최대 3개까지만 가능합니다.');
-    return null;
-  }
+    if (count >= 3) {
+      print('⚠️ 메모는 하루에 최대 3개까지만 가능합니다.');
+      return null;
+    }
 
-  // 다음 order_index 계산 (0, 1, 2)
-  final maxOrder = Sqflite.firstIntValue(
-    await db.rawQuery(
-      'SELECT MAX(order_index) FROM date_memos WHERE date = ?',
-      [date],
-    ),
-  );
-  final nextOrder = (maxOrder ?? -1) + 1;
+    // 다음 order_index 계산 (0, 1, 2)
+    final maxOrder = Sqflite.firstIntValue(
+      await txn.rawQuery(
+        'SELECT MAX(order_index) FROM date_memos WHERE date = ?',
+        [date],
+      ),
+    );
+    final nextOrder = (maxOrder ?? -1) + 1;
 
-  return await db.insert('date_memos', {
-    'date': date,
-    'memo_text': memoText,
-    'order_index': nextOrder,
-    'created_at': DateTime.now().toIso8601String(),
+    return await txn.insert('date_memos', {
+      'date': date,
+      'memo_text': memoText,
+      'order_index': nextOrder,
+      'created_at': DateTime.now().toIso8601String(),
+    });
   });
 }
 
@@ -696,19 +698,18 @@ Future<int> updateMemo(int id, String memoText) async {
 Future<void> deleteMemo(int id) async {
   final db = await database;
 
-  // 삭제할 메모 정보 가져오기
-  final memoMaps = await db.query(
-    'date_memos',
-    where: 'id = ?',
-    whereArgs: [id],
-  );
-
-  if (memoMaps.isEmpty) return;
-
-  final memo = DateMemo.fromMap(memoMaps.first);
-
-  // 트랜잭션으로 삭제 + 재정렬
   await db.transaction((txn) async {
+    // 삭제할 메모 정보 가져오기
+    final memoMaps = await txn.query(
+      'date_memos',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (memoMaps.isEmpty) return;
+
+    final memo = DateMemo.fromMap(memoMaps.first);
+
     // 삭제
     await txn.delete(
       'date_memos',
