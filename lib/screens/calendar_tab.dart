@@ -395,7 +395,7 @@ Widget build(BuildContext context) {
             // ⭐ 키보드 높이의 일부만 padding으로 적용 (팝업이 조금만 올라가게)
             final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
             final paddingBottom = keyboardHeight > 0
-                ? (keyboardHeight * 0.15).clamp(0.0, 80.h).toDouble()  // 키보드 높이의 15%만 올리기 (최대 80.h)
+                ? (keyboardHeight * 0.2).clamp(0.0, 100.h).toDouble()  // 키보드 높이의 20%만 올리기 (최대 100.h)
                 : 0.0;
 
             return PopScope(
