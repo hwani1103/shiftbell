@@ -165,7 +165,7 @@ Widget build(BuildContext context) {
                         locale: 'ko_KR',
                         
                         headerVisible: false,
-                        rowHeight: (83.h).clamp(60.0, 90.0),  // ⭐ 70→73→78→83 (하단 여백 줄이고 셀 확대)
+                        rowHeight: (87.h).clamp(60.0, 90.0),  // ⭐ 70→73→78→83→87 (하단 여백 더 축소, 셀 확대)
 
                         daysOfWeekHeight: 28.h,  // ⭐ 45→28 (최소화)
                         daysOfWeekStyle: DaysOfWeekStyle(
@@ -315,33 +315,22 @@ Widget build(BuildContext context) {
           else
             SizedBox(height: 18.h),
 
-          // ⭐ 날짜 숫자 (center에 가깝게 배치)
-          Padding(
-            padding: EdgeInsets.only(top: 2.h),
-            child: Text(
-              '${day.day}',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: dateColor,
-              ),
-            ),
-          ),
-
-          // ⭐ 메모 영역 (3줄 예약, 나중에 구현)
+          // ⭐ 날짜 숫자 + 메모 영역 (세로 center 정렬)
           Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(top: 2.h, bottom: 2.h),
-              child: Text(
-                '', // TODO: 메모 기능 구현 시 사용
-                style: TextStyle(
-                  fontSize: 7.sp,
-                  color: Colors.grey.shade600,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '${day.day}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: dateColor,
+                  ),
                 ),
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-              ),
+                // TODO: 메모 기능 구현 시 날짜 아래에 추가
+              ],
             ),
           ),
         ],
