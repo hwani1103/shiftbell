@@ -392,11 +392,11 @@ Widget build(BuildContext context) {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            // ⭐ 키보드가 올라오면 팝업 높이를 줄여서 덜 올라가게
+            // ⭐ 키보드 높이의 일부만 padding으로 적용 (팝업이 조금만 올라가게)
             final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-            final adjustedHeight = keyboardHeight > 0
-                ? popupHeight - keyboardHeight + 120.h  // 메모 입력 영역만 키보드 위에
-                : popupHeight;
+            final paddingBottom = keyboardHeight > 0
+                ? (keyboardHeight * 0.15).clamp(0, 80.h)  // 키보드 높이의 15%만 올리기 (최대 80.h)
+                : 0.0;
 
             return PopScope(
               canPop: false,  // ⭐ 직접 제어
@@ -411,10 +411,12 @@ Widget build(BuildContext context) {
                   }
                 }
               },
-              child: Container(
-                height: adjustedHeight,
-                padding: EdgeInsets.all(24.w),
-                child: Column(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: paddingBottom),
+                child: Container(
+                  height: popupHeight,
+                  padding: EdgeInsets.all(24.w),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -639,7 +641,8 @@ Widget build(BuildContext context) {
                     ],
                   ),
                 ),  // ⭐ Container 닫기
-              );
+              ),  // ⭐ Padding 닫기
+            );
           },
         );
       },
