@@ -100,9 +100,9 @@ Widget build(BuildContext context) {
                 padding: EdgeInsets.symmetric(horizontal: 6.w),
                 child: Column(
                   children: [
-                    // ⭐ 헤더 영역 - 최소화 (30% 수준)
+                    // ⭐ 헤더 영역 - 최소화
                     SizedBox(
-                      height: 32.h,  // 60.h → 32.h (약 47% 감소, 28.h 절약)
+                      height: 48.h,  // 60.h → 32.h → 48.h (조정)
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),  // 12.h → 4.h
                         child: Row(
@@ -165,7 +165,7 @@ Widget build(BuildContext context) {
                         locale: 'ko_KR',
                         
                         headerVisible: false,
-                        rowHeight: (78.h).clamp(60.0, 85.0),  // ⭐ 70→73→78 (헤더 줄인 만큼 분배)
+                        rowHeight: (83.h).clamp(60.0, 90.0),  // ⭐ 70→73→78→83 (하단 여백 줄이고 셀 확대)
 
                         daysOfWeekHeight: 28.h,  // ⭐ 45→28 (최소화)
                         daysOfWeekStyle: DaysOfWeekStyle(
@@ -315,9 +315,9 @@ Widget build(BuildContext context) {
           else
             SizedBox(height: 18.h),
 
-          // ⭐ 날짜 숫자 (상단 35% 지점에 배치)
+          // ⭐ 날짜 숫자 (center에 가깝게 배치)
           Padding(
-            padding: EdgeInsets.only(top: 4.h),
+            padding: EdgeInsets.only(top: 2.h),
             child: Text(
               '${day.day}',
               textAlign: TextAlign.center,
