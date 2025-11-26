@@ -782,23 +782,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 
 Map<String, int> _generateShiftColors() {
   final Map<String, int> colors = {};
-  
-  // 1. 휴무 계열 → 고정 빨강
+
+  // 1. 휴무 계열 → 파스텔 핑크-레드
   for (var shift in _allShiftTypes) {
     if (shift.contains('휴')) {
-      colors[shift] = 0xFFEF5350;  // ⭐ 고정 Red
+      colors[shift] = 0xFFFFCDD2;  // ⭐ Pastel Red
     }
   }
-  
-  // 2. 나머지 근무 → 팔레트에서 순서대로 할당
+
+  // 2. 나머지 근무 → 파스텔 팔레트에서 순서대로 할당
   final nonRestShifts = _allShiftTypes.where((s) => !s.contains('휴')).toList();
-  
+
   for (int i = 0; i < nonRestShifts.length && i < 8; i++) {
     final shift = nonRestShifts[i];
-    final color = ShiftSchedule.shiftPalette[i % 8];  // ⭐ 팔레트 순환
+    final color = ShiftSchedule.shiftPalette[i % 8];  // ⭐ 파스텔 팔레트 순환
     colors[shift] = color.value;  // Color → int 변환
   }
-  
+
   return colors;
 }
 

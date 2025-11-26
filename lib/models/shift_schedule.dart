@@ -7,30 +7,32 @@ import 'package:flutter/material.dart';
 
 class ShiftSchedule {
 
-  // ⭐ 신규: 고정 팔레트 8색
+  // ⭐ 파스텔 팔레트 8색 (연한 배경 + 진한 텍스트)
   static final List<Color> shiftPalette = [
-    Color(0xFF42A5F5), // Blue (밝음)
-    Color(0xFF66BB6A), // Green (중간)
-    Color(0xFF26C6DA), // Teal (밝음)
-    Color(0xFF5C6BC0), // Indigo (어두움)
-    Color(0xFF00BCD4), // Cyan (밝음)
-    Color(0xFF7E57C2), // Deep Purple (중간)
-    Color(0xFF9CCC65), // Lime (밝음)
-    Color(0xFF8D6E63), // Brown (어두움)
+    Color(0xFFBBDEFB), // Pastel Blue (연한 파랑)
+    Color(0xFFC8E6C9), // Pastel Green (연한 초록)
+    Color(0xFFB2EBF2), // Pastel Teal (연한 청록)
+    Color(0xFFD1C4E9), // Pastel Indigo (연한 남보라)
+    Color(0xFFB2DFDB), // Pastel Mint (연한 민트)
+    Color(0xFFE1BEE7), // Pastel Purple (연한 보라)
+    Color(0xFFF0F4C3), // Pastel Lime (연한 라임)
+    Color(0xFFD7CCC8), // Pastel Brown (연한 베이지)
   ];
+
+  // ⭐ 휴무 고정 색상 (파스텔 핑크-레드)
+  static final Color offColor = Color(0xFFFFCDD2); // Pastel Red
   
-  // ⭐ 신규: 휴무 고정 색상
-  static final Color offColor = Color(0xFFEF5350); // Red 400
-  
-  // ⭐ 신규: 배경색 밝기 판단
+  // ⭐ 배경색 밝기 판단 (파스텔 톤용 기준 낮춤)
   static bool isBright(Color c) {
     final luminance = (c.red * 0.299 + c.green * 0.587 + c.blue * 0.114);
-    return luminance > 160;
+    return luminance > 150;  // 파스텔은 대부분 밝으므로 기준 낮춤
   }
-  
-  // ⭐ 신규: 자동 텍스트 색상 (배경에 따라)
+
+  // ⭐ 자동 텍스트 색상 (배경에 따라 대비 최적화)
   static Color getTextColor(Color bg) {
-    return isBright(bg) ? Colors.black : Colors.white;
+    return isBright(bg)
+        ? Color(0xFF212121)  // 진한 회색 (파스텔 배경에 잘 보임)
+        : Colors.white;
   }
 
   final int? id;
