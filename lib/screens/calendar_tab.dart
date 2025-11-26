@@ -403,9 +403,9 @@ Widget build(BuildContext context) {
                 bottom: bottomPadding > 0 ? bottomPadding + 10.h : 24.h,  // ⭐ 키보드 올라올 때 패딩 조정
               ),
               child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                   Text(
                     '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
                     style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
@@ -605,7 +605,8 @@ Widget build(BuildContext context) {
             ),
           );
         },
-      ),
+      );
+      },
     ).then((_) {
       // ⭐ 팝업 닫힐 때 컨트롤러 dispose
       memoController.dispose();
