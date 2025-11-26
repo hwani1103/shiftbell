@@ -398,18 +398,13 @@ Widget build(BuildContext context) {
                 ? (keyboardHeight * 0.2).clamp(0.0, 100.h).toDouble()  // 키보드 높이의 20%만 올리기 (최대 100.h)
                 : 0.0;
 
-            return PopScope(
-              canPop: false,  // ⭐ 직접 제어
-              onPopInvoked: (didPop) async {
-                if (!didPop) {
-                  // ⭐ 먼저 키보드 포커스 해제
-                  FocusScope.of(context).unfocus();
-                  // 약간의 딜레이 후 팝업 닫기
-                  await Future.delayed(Duration(milliseconds: 100));
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                  }
-                }
+            // ignore: deprecated_member_use
+            return WillPopScope(
+              onWillPop: () async {
+                // ⭐ 뒤로가기 시 키보드 포커스 해제
+                FocusScope.of(context).unfocus();
+                await Future.delayed(Duration(milliseconds: 150));
+                return true;
               },
               child: Padding(
                 padding: EdgeInsets.only(bottom: paddingBottom),
