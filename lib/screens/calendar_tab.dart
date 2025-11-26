@@ -807,9 +807,17 @@ Widget build(BuildContext context) {
 
     showDialog(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
+      // ignore: deprecated_member_use
+      builder: (context) => WillPopScope(
+        onWillPop: () async {
+          // ⭐ 뒤로가기 시 키보드 포커스 해제
+          FocusScope.of(context).unfocus();
+          await Future.delayed(Duration(milliseconds: 150));
+          return true;
+        },
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
             title: Text('메모 상세', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
             content: Container(
               width: double.maxFinite,
@@ -884,6 +892,10 @@ Widget build(BuildContext context) {
                       return;
                     }
 
+                    // ⭐ 키보드 포커스 해제
+                    FocusScope.of(context).unfocus();
+                    await Future.delayed(Duration(milliseconds: 100));
+
                     // ⭐ 메모 업데이트 (Provider가 자동으로 메인 팝업 갱신)
                     await ref.read(memoProvider.notifier).updateMemo(memo.id!, dateStr, editController.text.trim());
 
@@ -941,8 +953,9 @@ Widget build(BuildContext context) {
                 ),
               ],
             ],
-          );
-        },
+            );
+          },
+        ),
       ),
     ).then((_) {
       // ⭐ 다이얼로그 닫힐 때 컨트롤러 dispose
