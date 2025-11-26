@@ -392,12 +392,20 @@ Widget build(BuildContext context) {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),  // ⭐ 키보드 올라올 때 전체 올리기
-              child: Container(
-                height: popupHeight,
-                padding: EdgeInsets.all(24.w),
-                child: SingleChildScrollView(
+            return PopScope(
+              canPop: true,
+              onPopInvoked: (didPop) {
+                // ⭐ 뒤로가기 시 키보드 포커스 해제
+                if (didPop) {
+                  FocusScope.of(context).unfocus();
+                }
+              },
+              child: Padding(
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),  // ⭐ 키보드 올라올 때 전체 올리기
+                child: Container(
+                  height: popupHeight,
+                  padding: EdgeInsets.all(24.w),
+                  child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -602,11 +610,12 @@ Widget build(BuildContext context) {
               ),
             ),
           ),
+              ),  // ⭐ PopScope child 닫기
+            );
+          },
         );
       },
-    );
-    },
-  ).then((_) {
+    ).then((_) {
       // ⭐ 팝업 닫힐 때 컨트롤러 dispose
       memoController.dispose();
     });
@@ -767,14 +776,13 @@ Widget build(BuildContext context) {
   // ⭐ 메모 상세 팝업 (수정/삭제)
   void _showMemoDetailPopup(DateTime day, DateMemo memo) {
     final dateStr = day.toIso8601String().split('T')[0];
+    bool isEditing = false;  // ⭐ builder 밖으로 이동
+    final editController = TextEditingController(text: memo.memoText);  // ⭐ builder 밖으로 이동
 
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
-          bool isEditing = false;
-          final editController = TextEditingController(text: memo.memoText);
-
           return AlertDialog(
             title: Text('메모 상세', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
             content: Container(
@@ -906,6 +914,9 @@ Widget build(BuildContext context) {
           );
         },
       ),
-    );
+    ).then((_) {
+      // ⭐ 다이얼로그 닫힐 때 컨트롤러 dispose
+      editController.dispose();
+    });
   }
 }
