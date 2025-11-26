@@ -304,6 +304,7 @@ Widget build(BuildContext context) {
               height: 18.h,
               decoration: BoxDecoration(
                 color: _getShiftBackgroundColor(shiftText, schedule),
+                borderRadius: BorderRadius.circular(3.r),
                 // ⭐ 패턴과 다른 경우 좌측에 검정 세로 줄 표시
                 border: isModified
                     ? Border(left: BorderSide(color: Colors.black, width: 3))
@@ -336,6 +337,7 @@ Widget build(BuildContext context) {
                   decoration: isToday
                       ? BoxDecoration(
                           color: Colors.blue.shade100,
+                          borderRadius: BorderRadius.circular(3.r),
                         )
                       : null,
                   child: Text(
