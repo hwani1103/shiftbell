@@ -383,17 +383,26 @@ Widget build(BuildContext context) {
     // ⭐ 팝업 열기 전에 메모 로드
     ref.read(memoProvider.notifier).loadMemosForDate(dateStr);
 
+    // ⭐ TextEditingController를 밖에서 생성 (키보드 문제 해결)
+    final memoController = TextEditingController();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          final memoController = TextEditingController();
+      builder: (context) {
+        final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
 
-          return Container(
-            height: popupHeight,
-            padding: EdgeInsets.all(24.w),
-            child: SingleChildScrollView(
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              height: popupHeight,
+              padding: EdgeInsets.only(
+                left: 24.w,
+                right: 24.w,
+                top: 24.h,
+                bottom: bottomPadding > 0 ? bottomPadding + 10.h : 24.h,  // ⭐ 키보드 올라올 때 패딩 조정
+              ),
+              child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -500,20 +509,19 @@ Widget build(BuildContext context) {
 
                   SizedBox(height: 20.h),
 
-                  // ⭐ 메모 섹션
-                  Text('메모 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
-                  SizedBox(height: 8.h),
-
-                  // ⭐ 메모 입력창
+                  // ⭐ 메모 입력창 (라벨과 같은 라인)
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Text('메모 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                      SizedBox(width: 8.w),
                       Expanded(
                         child: TextField(
                           controller: memoController,
                           maxLines: 1,
                           scrollPhysics: BouncingScrollPhysics(),
                           decoration: InputDecoration(
-                            hintText: '메모 입력...',
+                            hintText: '메모 입력',
                             hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400),
                             contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                             border: OutlineInputBorder(
@@ -528,7 +536,7 @@ Widget build(BuildContext context) {
                           style: TextStyle(fontSize: 14.sp),
                         ),
                       ),
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 6.w),
                       ElevatedButton(
                         onPressed: () async {
                           if (memoController.text.trim().isEmpty) return;
@@ -545,10 +553,11 @@ Widget build(BuildContext context) {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue.shade600,
-                          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                          minimumSize: Size(0, 0),
                         ),
-                        child: Text('저장', style: TextStyle(fontSize: 14.sp, color: Colors.white)),
+                        child: Text('저장', style: TextStyle(fontSize: 13.sp, color: Colors.white)),
                       ),
                     ],
                   ),
@@ -561,7 +570,7 @@ Widget build(BuildContext context) {
                       final memos = ref.watch(memoProvider)[dateStr] ?? [];
 
                       if (memos.isEmpty) {
-                        return Text('(메모 없음)', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
+                        return SizedBox.shrink();  // ⭐ 빈 공간
                       }
 
                       return Column(
@@ -597,9 +606,12 @@ Widget build(BuildContext context) {
           );
         },
       ),
-    );
+    ).then((_) {
+      // ⭐ 팝업 닫힐 때 컨트롤러 dispose
+      memoController.dispose();
+    });
   }
-  
+
   String _getWeekday(DateTime date) {
     const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
     return weekdays[date.weekday - 1];
