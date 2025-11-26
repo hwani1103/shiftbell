@@ -165,12 +165,12 @@ Widget build(BuildContext context) {
                         locale: 'ko_KR',
                         
                         headerVisible: false,
-                        rowHeight: (70.h).clamp(60.0, 85.0),
-                        
-                        daysOfWeekHeight: 45.h,
+                        rowHeight: (73.h).clamp(60.0, 85.0),  // ⭐ 70→73 (요일 칸 줄인 만큼 분배)
+
+                        daysOfWeekHeight: 28.h,  // ⭐ 45→28 (최소화)
                         daysOfWeekStyle: DaysOfWeekStyle(
-                          weekdayStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black),
-                          weekendStyle: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black),
+                          weekdayStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
+                          weekendStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
                         ),
                         
                         calendarStyle: CalendarStyle(
@@ -283,12 +283,12 @@ Widget build(BuildContext context) {
         color: isSelected && _isMultiSelectMode
             ? Colors.blue.withOpacity(0.2)
             : Colors.transparent,
-        // ⭐ 오늘 날짜는 검정 테두리
+        // ⭐ 오늘 날짜는 검정 테두리 (얇게)
         border: isToday
-            ? Border.all(color: Colors.black, width: 2.5)
+            ? Border.all(color: Colors.black, width: 1.5)
             : null,
       ),
-      padding: EdgeInsets.symmetric(horizontal: 3.w),  // ⭐ 좌우 여백
+      padding: EdgeInsets.only(left: 2.w, right: 2.w, top: 2.h),  // ⭐ 상좌우 여백
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
