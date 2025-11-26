@@ -389,27 +389,31 @@ Widget build(BuildContext context) {
 
               // ⭐ 근무 정보: 통일된 형식으로 표시
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('근무 :', style: TextStyle(fontSize: 16.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                  Padding(
+                    padding: EdgeInsets.only(top: 18.h),
+                    child: Text('근무 :', style: TextStyle(fontSize: 16.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                  ),
                   SizedBox(width: 8.w),
                   if (isModified) ...[
-                    // 기존 근무 (진한 회색, 비활성화 느낌)
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade400,
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(color: Colors.grey.shade600, width: 1.5),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '기존',
-                            style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade700),
+                    // 기존 근무 (라벨 + 카드)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '기존',
+                          style: TextStyle(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w500),
+                        ),
+                        SizedBox(height: 4.h),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade400,
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(color: Colors.grey.shade600, width: 1.5),
                           ),
-                          Text(
+                          child: Text(
                             patternShift,
                             style: TextStyle(
                               fontSize: 16.sp,
@@ -417,36 +421,33 @@ Widget build(BuildContext context) {
                               color: Colors.grey.shade800,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 6.w),
+                      padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 18.h),
                       child: Icon(Icons.arrow_forward, color: Colors.grey.shade700, size: 18.sp),
                     ),
-                    // 현재 근무 (원래 색상)
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: _getShiftBackgroundColor(currentShift, schedule),
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(
-                          color: _getShiftTextColor(currentShift, schedule),
-                          width: 2,
+                    // 현재 근무 (라벨 + 카드)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '현재',
+                          style: TextStyle(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w500),
                         ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '현재',
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              color: _getShiftTextColor(currentShift, schedule).withOpacity(0.7),
+                        SizedBox(height: 4.h),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                          decoration: BoxDecoration(
+                            color: _getShiftBackgroundColor(currentShift, schedule),
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(
+                              color: _getShiftTextColor(currentShift, schedule),
+                              width: 2,
                             ),
                           ),
-                          Text(
+                          child: Text(
                             currentShift,
                             style: TextStyle(
                               fontSize: 16.sp,
@@ -454,8 +455,8 @@ Widget build(BuildContext context) {
                               color: _getShiftTextColor(currentShift, schedule),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ] else
                     // 패턴과 동일한 경우
