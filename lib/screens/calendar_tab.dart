@@ -304,7 +304,13 @@ Widget build(BuildContext context) {
               height: 18.h,
               decoration: BoxDecoration(
                 color: _getShiftBackgroundColor(shiftText, schedule),
-                borderRadius: BorderRadius.circular(3.r),
+                // ⭐ 패턴과 다른 경우 좌측만 각지게
+                borderRadius: isModified
+                    ? BorderRadius.only(
+                        topRight: Radius.circular(3.r),
+                        bottomRight: Radius.circular(3.r),
+                      )
+                    : BorderRadius.circular(3.r),
                 // ⭐ 패턴과 다른 경우 좌측에 검정 세로 줄 표시
                 border: isModified
                     ? Border(left: BorderSide(color: Colors.black, width: 3))
