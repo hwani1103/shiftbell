@@ -283,15 +283,16 @@ Widget build(BuildContext context) {
         color: isSelected && _isMultiSelectMode
             ? Colors.blue.withOpacity(0.2)
             : Colors.transparent,
-        // ⭐ 오늘 날짜는 파란색 테두리
+        // ⭐ 오늘 날짜는 검정 테두리
         border: isToday
-            ? Border.all(color: Colors.blue.shade700, width: 2.5)
+            ? Border.all(color: Colors.black, width: 2.5)
             : null,
       ),
+      padding: EdgeInsets.symmetric(horizontal: 3.w),  // ⭐ 좌우 여백
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ⭐ 근무명 (맨 위에 붙임, padding 제거)
+          // ⭐ 근무명 (맨 위에 붙임)
           if (shiftText.isNotEmpty && shiftText != '미설정')
             Container(
               height: 18.h,
@@ -331,7 +332,7 @@ Widget build(BuildContext context) {
           // ⭐ 메모 영역 (3줄 예약, 나중에 구현)
           Expanded(
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 2.h),
+              padding: EdgeInsets.only(top: 2.h, bottom: 2.h),
               child: Text(
                 '', // TODO: 메모 기능 구현 시 사용
                 style: TextStyle(
