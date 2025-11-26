@@ -288,7 +288,7 @@ Widget build(BuildContext context) {
             ? Border.all(color: Colors.black, width: 1.5)
             : null,
       ),
-      padding: EdgeInsets.only(left: 2.w, right: 2.w, top: 2.h),  // ⭐ 상좌우 여백
+      padding: EdgeInsets.only(left: 2.w, right: 2.w, top: isToday ? 0.5.h : 2.h),  // ⭐ today는 border만큼 padding 보상
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
