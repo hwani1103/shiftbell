@@ -7,20 +7,20 @@ import 'package:flutter/material.dart';
 
 class ShiftSchedule {
 
-  // ⭐ 파스텔 팔레트 8색 (색상 명확히 구분)
+  // ⭐ 파스텔 팔레트 8색 (명확히 구분)
   static final List<Color> shiftPalette = [
     Color(0xFFB3E5FC), // 하늘색 (Sky Blue)
-    Color(0xFFC5E1A5), // 연두색 (Lime Green)
+    Color(0xFFB2DFDB), // 민트색 (Mint Green)
     Color(0xFFFFF9C4), // 노란색 (Sunny Yellow)
     Color(0xFFFFE0B2), // 주황색 (Peach Orange)
-    Color(0xFFF8BBD0), // 분홍색 (Rose Pink)
+    Color(0xFFEEEEEE), // 회색 (Light Gray)
     Color(0xFFE1BEE7), // 보라색 (Lavender Purple)
     Color(0xFFFFCCBC), // 코랄색 (Coral)
     Color(0xFFD7CCC8), // 베이지색 (Warm Beige)
   ];
 
-  // ⭐ 휴무 고정 색상 (파스텔이지만 확실한 빨강)
-  static final Color offColor = Color(0xFFEF9A9A); // Light Red (더 진함)
+  // ⭐ 휴무 고정 색상 (명확한 빨강, 파스텔 아님)
+  static final Color offColor = Color(0xFFEF5350); // Red (진한 빨강)
   
   // ⭐ 배경색 밝기 판단 (파스텔 톤용 기준 낮춤)
   static bool isBright(Color c) {
