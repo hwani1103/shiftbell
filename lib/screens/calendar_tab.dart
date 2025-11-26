@@ -389,12 +389,9 @@ Widget build(BuildContext context) {
 
               // ⭐ 근무 정보: 통일된 형식으로 표시
               Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: EdgeInsets.only(top: 18.h),
-                    child: Text('근무 :', style: TextStyle(fontSize: 16.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
-                  ),
+                  Text('근무 :', style: TextStyle(fontSize: 16.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
                   SizedBox(width: 8.w),
                   if (isModified) ...[
                     // 기존 근무 (라벨 + 카드)
@@ -424,8 +421,9 @@ Widget build(BuildContext context) {
                         ),
                       ],
                     ),
+                    // 화살표 (라벨 제외, 카드만의 중간)
                     Padding(
-                      padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 18.h),
+                      padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 16.h),
                       child: Icon(Icons.arrow_forward, color: Colors.grey.shade700, size: 18.sp),
                     ),
                     // 현재 근무 (라벨 + 카드)
