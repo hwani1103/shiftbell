@@ -315,11 +315,11 @@ Widget build(BuildContext context) {
           else
             SizedBox(height: 18.h),
 
-          // ⭐ 날짜 숫자 + 메모 영역 (center에서 약간 위로, 메모 공간 확보)
+          // ⭐ 날짜 숫자 + 메모 영역 (날짜 위로, 메모 공간 확보)
           Expanded(
             child: Column(
               children: [
-                Spacer(flex: 2),  // 위쪽 공간 40%
+                Spacer(flex: 1),  // 위쪽 공간 25%
                 Text(
                   '${day.day}',
                   textAlign: TextAlign.center,
@@ -329,7 +329,7 @@ Widget build(BuildContext context) {
                     color: dateColor,
                   ),
                 ),
-                Spacer(flex: 3),  // 아래쪽 공간 60% (메모 공간)
+                Spacer(flex: 3),  // 아래쪽 공간 75% (메모 공간)
                 // TODO: 메모 기능 구현 시 Spacer 위에 추가
               ],
             ),
