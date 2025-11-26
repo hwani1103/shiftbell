@@ -100,11 +100,11 @@ Widget build(BuildContext context) {
                 padding: EdgeInsets.symmetric(horizontal: 6.w),
                 child: Column(
                   children: [
-                    // ⭐ 헤더 영역 - 고정 높이
+                    // ⭐ 헤더 영역 - 최소화 (30% 수준)
                     SizedBox(
-                      height: 60.h,
+                      height: 32.h,  // 60.h → 32.h (약 47% 감소, 28.h 절약)
                       child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h),
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),  // 12.h → 4.h
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -112,7 +112,7 @@ Widget build(BuildContext context) {
                                 ? Row(
                                     children: [
                                       IconButton(
-                                        icon: Icon(Icons.close),
+                                        icon: Icon(Icons.close, size: 20.sp),
                                         onPressed: _exitMultiSelectMode,
                                         padding: EdgeInsets.zero,
                                         constraints: BoxConstraints(),
@@ -120,13 +120,13 @@ Widget build(BuildContext context) {
                                       SizedBox(width: 8.w),
                                       Text(
                                         '${_selectedDates.length}개 선택',
-                                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                                       ),
                                     ],
                                   )
                                 : Text(
                                     '${_focusedDay.year}년 ${_focusedDay.month}월',
-                                    style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                                   ),
                             if (!_isMultiSelectMode)
                               GestureDetector(
@@ -139,7 +139,7 @@ Widget build(BuildContext context) {
                                 child: Text(
                                   'today',
                                   style: TextStyle(
-                                    fontSize: 14.sp,
+                                    fontSize: 13.sp,
                                     color: Colors.blue.shade700,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -165,7 +165,7 @@ Widget build(BuildContext context) {
                         locale: 'ko_KR',
                         
                         headerVisible: false,
-                        rowHeight: (73.h).clamp(60.0, 85.0),  // ⭐ 70→73 (요일 칸 줄인 만큼 분배)
+                        rowHeight: (78.h).clamp(60.0, 85.0),  // ⭐ 70→73→78 (헤더 줄인 만큼 분배)
 
                         daysOfWeekHeight: 28.h,  // ⭐ 45→28 (최소화)
                         daysOfWeekStyle: DaysOfWeekStyle(
