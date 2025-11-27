@@ -449,7 +449,7 @@ Widget build(BuildContext context) {
                        patternShift != currentShift;
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final popupHeight = screenHeight * 0.65;  // ⭐ 화면의 65%
+    final popupHeight = screenHeight * 0.68;  // ⭐ 화면의 68%
 
     final dateStr = day.toIso8601String().split('T')[0];
 
@@ -678,25 +678,48 @@ Widget build(BuildContext context) {
 
                               return Column(
                                 children: memos.map((memo) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      _showMemoDetailPopup(day, memo);
-                                    },
-                                    child: Container(
-                                      width: double.infinity,
-                                      margin: EdgeInsets.only(bottom: 8.h),
-                                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade100,
-                                        borderRadius: BorderRadius.circular(8.r),
-                                        border: Border.all(color: Colors.grey.shade300),
-                                      ),
-                                      child: Text(
-                                        memo.memoText,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(fontSize: 14.sp, color: Colors.black87),
-                                      ),
+                                  return Container(
+                                    width: double.infinity,
+                                    margin: EdgeInsets.only(bottom: 8.h),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(color: Colors.grey.shade300),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        // ⭐ 텍스트 영역 (탭하면 상세 팝업)
+                                        Expanded(
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              _showMemoDetailPopup(day, memo);
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                                              child: Text(
+                                                memo.memoText,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(fontSize: 14.sp, color: Colors.black87),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        // ⭐ 삭제 버튼 (바로 삭제)
+                                        GestureDetector(
+                                          onTap: () async {
+                                            await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                                            child: Icon(
+                                              Icons.close,
+                                              size: 18.sp,
+                                              color: Colors.grey.shade600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   );
                                 }).toList(),
