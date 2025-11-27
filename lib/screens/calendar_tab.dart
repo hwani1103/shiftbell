@@ -266,10 +266,16 @@ Widget build(BuildContext context) {
                     child: FloatingActionButton.extended(
                       onPressed: () => _showBulkAssignSheet(schedule),
                       icon: Icon(Icons.edit_calendar),
-                      label: Text('근무 일괄 할당'),
-                      backgroundColor: Colors.grey.shade200,  // ⭐ 진한 회색
-        foregroundColor: Colors.black,  // ⭐ 흰색 글씨
-        elevation : 3,
+                      label: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('근무 변경', style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text('탭하여 날짜 추가 선택', style: TextStyle(fontSize: 10.sp)),
+                        ],
+                      ),
+                      backgroundColor: Colors.grey.shade200,
+                      foregroundColor: Colors.black,
+                      elevation: 3,
                     ),
                   ),
                 ),
@@ -749,7 +755,7 @@ Widget build(BuildContext context) {
           // ⭐ 제목 텍스트 - 센터 정렬
           Center(
             child: Text(
-              '${_selectedDates.length}개 날짜에 할당할 근무',
+              '${_selectedDates.length}일 근무 변경',
               style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
             ),
           ),
