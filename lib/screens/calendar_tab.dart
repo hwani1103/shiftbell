@@ -73,7 +73,17 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
   @override
   void initState() {
     super.initState();
-    // _loadSchedule() 호출 삭제
+    // ⭐ 앱 시작 시 현재 달의 메모 로드
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadMemosForMonth(_focusedDay);
+    });
+  }
+
+  // ⭐ 특정 달의 메모 미리 로드
+  void _loadMemosForMonth(DateTime month) {
+    final firstDay = DateTime(month.year, month.month, 1);
+    final lastDay = DateTime(month.year, month.month + 1, 0);  // 해당 달의 마지막 날
+    ref.read(memoProvider.notifier).loadMemosForDateRange(firstDay, lastDay);
   }
   
   @override
@@ -237,6 +247,8 @@ Widget build(BuildContext context) {
                           setState(() {
                             _focusedDay = focusedDay;
                           });
+                          // ⭐ 새 달의 메모 로드
+                          _loadMemosForMonth(focusedDay);
                         },
                       ),
                     ),
@@ -332,33 +344,35 @@ Widget build(BuildContext context) {
           else
             SizedBox(height: 18.h),
 
-          // ⭐ 날짜 숫자 + 메모 영역 (날짜 위로, 메모 공간 확보)
+          // ⭐ 날짜 숫자 + 메모 영역 (날짜는 중앙, 메모는 아래부터)
           Expanded(
             child: Column(
               children: [
-                Spacer(flex: 1),  // 위쪽 공간 25%
-                // ⭐ 오늘 날짜는 배경으로 표시 (vertical padding 0)
-                Container(
-                  padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
-                  decoration: isToday
-                      ? BoxDecoration(
-                          color: Colors.blue.shade100,
-                          borderRadius: BorderRadius.circular(3.r),
-                        )
-                      : null,
-                  child: Text(
-                    '${day.day}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: isToday ? Colors.blue.shade700 : dateColor,
-                      height: 1.0,
+                // ⭐ 날짜 숫자 (남은 공간 중앙에 배치)
+                Expanded(
+                  child: Center(
+                    child: Container(
+                      padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
+                      decoration: isToday
+                          ? BoxDecoration(
+                              color: Colors.blue.shade100,
+                              borderRadius: BorderRadius.circular(3.r),
+                            )
+                          : null,
+                      child: Text(
+                        '${day.day}',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: isToday ? Colors.blue.shade700 : dateColor,
+                          height: 1.0,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                SizedBox(height: 2.h),  // 날짜와 메모 사이 간격
-                // ⭐ 메모 표시 (최대 3개)
+                // ⭐ 메모 표시 (아래부터 채움, 최대 3개)
                 Consumer(
                   builder: (context, ref, child) {
                     final dateStr = '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
@@ -369,6 +383,7 @@ Widget build(BuildContext context) {
                     }
 
                     return Column(
+                      mainAxisSize: MainAxisSize.min,  // ⭐ 메모 크기만큼만 차지
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: memos.take(3).map((memo) {
                         return Padding(
@@ -377,7 +392,7 @@ Widget build(BuildContext context) {
                             memo.memoText,
                             style: TextStyle(
                               fontSize: 8.sp,
-                              color: Colors.grey.shade700,
+                              color: Colors.black,  // ⭐ 진한 검정색
                               height: 1.1,
                             ),
                             maxLines: 1,
@@ -388,7 +403,6 @@ Widget build(BuildContext context) {
                     );
                   },
                 ),
-                Spacer(flex: 1),  // 아래쪽 공간 (메모 하단 여백)
               ],
             ),
           ),
