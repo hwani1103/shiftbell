@@ -473,10 +473,11 @@ override fun onNewIntent(intent: Intent) {
         stopPreviewSound()  // 기존 재생 중지
 
         try {
-            // 시스템 알람 볼륨을 최대로 설정 (실제 알람과 동일)
+            // ⭐ 시스템 알람 볼륨을 50%로 고정 (실제 알람과 동일하게)
             val audioManager = getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
             val maxVolume = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM)
-            audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, maxVolume, 0)
+            val halfVolume = maxVolume / 2
+            audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, halfVolume, 0)
 
             // res/raw 리소스 ID 가져오기
             val resourceId = resources.getIdentifier(soundFile, "raw", packageName)

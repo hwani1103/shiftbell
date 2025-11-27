@@ -117,10 +117,11 @@ class AlarmPlayer(private val context: Context) {
                 return
             }
 
-            // 시스템 알람 볼륨을 최대로 설정 (사용자 슬라이더가 실제 볼륨 제어)
+            // ⭐ 시스템 알람 볼륨을 50%로 고정 (너무 시끄럽지 않게)
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0)
+            val halfVolume = maxVolume / 2
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, halfVolume, 0)
 
             // 리소스 URI 생성
             val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/$resourceId")
@@ -157,10 +158,11 @@ class AlarmPlayer(private val context: Context) {
     // 시스템 기본 알람 사운드 재생
     private fun playDefaultSound(volume: Float) {
         try {
-            // 시스템 알람 볼륨을 최대로 설정 (사용자 슬라이더가 실제 볼륨 제어)
+            // ⭐ 시스템 알람 볼륨을 50%로 고정 (너무 시끄럽지 않게)
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
             val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, maxVolume, 0)
+            val halfVolume = maxVolume / 2
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, halfVolume, 0)
 
             // 알람 소리 URI
             val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
