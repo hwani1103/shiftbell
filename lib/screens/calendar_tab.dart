@@ -344,7 +344,7 @@ Widget build(BuildContext context) {
           else
             SizedBox(height: 18.h),
 
-          // ⭐ 날짜 숫자 + 메모 영역 (메모 개수에 따라 날짜 위치 조정)
+          // ⭐ 날짜 숫자 + 메모 영역 (Stack으로 독립 배치)
           Expanded(
             child: Consumer(
               builder: (context, ref, child) {
@@ -352,12 +352,13 @@ Widget build(BuildContext context) {
                 final memos = ref.watch(memoProvider)[dateStr] ?? [];
                 final memoCount = memos.length;
 
-                return Column(
+                return Stack(
                   children: [
-                    // ⭐ 날짜 숫자 (메모 개수에 따라 공간 조정: 0-2개는 넉넉히, 3개는 줄임)
-                    Expanded(
-                      flex: memoCount >= 3 ? 1 : 2,
-                      child: Center(
+                    // ⭐ 날짜 숫자 (0-2개: 중앙 고정, 3개: 약간 위로)
+                    Align(
+                      alignment: memoCount >= 3 ? Alignment.topCenter : Alignment.center,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: memoCount >= 3 ? 2.h : 0),
                         child: Container(
                           padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
                           decoration: isToday
@@ -379,34 +380,39 @@ Widget build(BuildContext context) {
                         ),
                       ),
                     ),
-                    // ⭐ 메모 표시 (아래부터 채움, 최대 3개, 표 스타일)
+                    // ⭐ 메모 표시 (하단 고정, 날짜와 독립)
                     if (memos.isNotEmpty)
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: memos.take(3).map((memo) {
-                          return Container(
-                            width: double.infinity,
-                            margin: EdgeInsets.only(bottom: 0.5.h),
-                            padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
-                              border: Border.all(color: Colors.grey.shade400, width: 0.3),
-                              borderRadius: BorderRadius.circular(2.r),
-                            ),
-                            child: Text(
-                              memo.memoText,
-                              textAlign: TextAlign.center,  // ⭐ 가로 중앙 정렬
-                              style: TextStyle(
-                                fontSize: 7.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.w500,
-                                height: 1.0,
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: memos.take(3).map((memo) {
+                            return Container(
+                              width: double.infinity,
+                              margin: EdgeInsets.only(bottom: 0.5.h),
+                              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                border: Border.all(color: Colors.grey.shade400, width: 0.3),
+                                borderRadius: BorderRadius.circular(2.r),
                               ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }).toList(),
+                              child: Text(
+                                memo.memoText,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 7.sp,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.0,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }).toList(),
+                        ),
                       ),
                   ],
                 );
