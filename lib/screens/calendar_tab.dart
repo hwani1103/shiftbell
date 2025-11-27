@@ -713,9 +713,9 @@ Widget build(BuildContext context) {
                                           child: Container(
                                             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
                                             child: Icon(
-                                              Icons.close,
+                                              Icons.delete,
                                               size: 18.sp,
-                                              color: Colors.grey.shade600,
+                                              color: Colors.red,
                                             ),
                                           ),
                                         ),
