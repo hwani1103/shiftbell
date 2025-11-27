@@ -468,7 +468,7 @@ Widget build(BuildContext context) {
             // ⭐ 키보드 높이의 일부만 padding으로 적용 (팝업이 조금만 올라가게)
             final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
             final paddingBottom = keyboardHeight > 0
-                ? (keyboardHeight * 0.2).clamp(0.0, 100.h).toDouble()  // 키보드 높이의 20%만 올리기 (최대 100.h)
+                ? (keyboardHeight * 0.28).clamp(0.0, 120.h).toDouble()  // 키보드 높이의 28%만 올리기 (최대 120.h)
                 : 0.0;
 
             // ignore: deprecated_member_use
