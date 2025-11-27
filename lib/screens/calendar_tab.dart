@@ -354,11 +354,11 @@ Widget build(BuildContext context) {
 
                 return Stack(
                   children: [
-                    // ⭐ 날짜 숫자 (0-2개: 중앙 고정, 3개: 약간 위로)
+                    // ⭐ 날짜 숫자 (항상 중앙, 3개일 때만 살짝 위로)
                     Align(
-                      alignment: memoCount >= 3 ? Alignment.topCenter : Alignment.center,
+                      alignment: Alignment.center,
                       child: Padding(
-                        padding: EdgeInsets.only(top: memoCount >= 3 ? 2.h : 0),
+                        padding: EdgeInsets.only(bottom: memoCount >= 3 ? 8.h : 0),  // 3개일 때 살짝만 위로
                         child: Container(
                           padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
                           decoration: isToday
@@ -402,7 +402,7 @@ Widget build(BuildContext context) {
                                 memo.memoText,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 7.sp,
+                                  fontSize: 8.sp,  // ⭐ 7 → 8 (살짝 크게)
                                   color: Colors.black,
                                   fontWeight: FontWeight.w500,
                                   height: 1.0,
