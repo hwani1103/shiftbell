@@ -344,66 +344,73 @@ Widget build(BuildContext context) {
           else
             SizedBox(height: 18.h),
 
-          // ⭐ 날짜 숫자 + 메모 영역 (날짜는 중앙, 메모는 아래부터)
+          // ⭐ 날짜 숫자 + 메모 영역 (메모 개수에 따라 날짜 위치 조정)
           Expanded(
-            child: Column(
-              children: [
-                // ⭐ 날짜 숫자 (남은 공간 중앙에 배치)
-                Expanded(
-                  child: Center(
-                    child: Container(
-                      padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
-                      decoration: isToday
-                          ? BoxDecoration(
-                              color: Colors.blue.shade100,
-                              borderRadius: BorderRadius.circular(3.r),
-                            )
-                          : null,
-                      child: Text(
-                        '${day.day}',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: isToday ? Colors.blue.shade700 : dateColor,
-                          height: 1.0,
+            child: Consumer(
+              builder: (context, ref, child) {
+                final dateStr = '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
+                final memos = ref.watch(memoProvider)[dateStr] ?? [];
+                final memoCount = memos.length;
+
+                return Column(
+                  children: [
+                    // ⭐ 날짜 숫자 (메모 개수에 따라 공간 조정: 0-2개는 넉넉히, 3개는 줄임)
+                    Expanded(
+                      flex: memoCount >= 3 ? 1 : 2,
+                      child: Center(
+                        child: Container(
+                          padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
+                          decoration: isToday
+                              ? BoxDecoration(
+                                  color: Colors.blue.shade100,
+                                  borderRadius: BorderRadius.circular(3.r),
+                                )
+                              : null,
+                          child: Text(
+                            '${day.day}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: isToday ? Colors.blue.shade700 : dateColor,
+                              height: 1.0,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-                // ⭐ 메모 표시 (아래부터 채움, 최대 3개)
-                Consumer(
-                  builder: (context, ref, child) {
-                    final dateStr = '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
-                    final memos = ref.watch(memoProvider)[dateStr] ?? [];
-
-                    if (memos.isEmpty) {
-                      return SizedBox.shrink();
-                    }
-
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,  // ⭐ 메모 크기만큼만 차지
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: memos.take(3).map((memo) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 1.h, left: 2.w, right: 2.w),
-                          child: Text(
-                            memo.memoText,
-                            style: TextStyle(
-                              fontSize: 8.sp,
-                              color: Colors.black,  // ⭐ 진한 검정색
-                              height: 1.1,
+                    // ⭐ 메모 표시 (아래부터 채움, 최대 3개, 표 스타일)
+                    if (memos.isNotEmpty)
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: memos.take(3).map((memo) {
+                          return Container(
+                            width: double.infinity,
+                            margin: EdgeInsets.only(bottom: 0.5.h),
+                            padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade200,
+                              border: Border.all(color: Colors.grey.shade400, width: 0.3),
+                              borderRadius: BorderRadius.circular(2.r),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        );
-                      }).toList(),
-                    );
-                  },
-                ),
-              ],
+                            child: Text(
+                              memo.memoText,
+                              textAlign: TextAlign.center,  // ⭐ 가로 중앙 정렬
+                              style: TextStyle(
+                                fontSize: 7.sp,
+                                color: Colors.black,
+                                fontWeight: FontWeight.w500,
+                                height: 1.0,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                  ],
+                );
+              },
             ),
           ),
         ],
