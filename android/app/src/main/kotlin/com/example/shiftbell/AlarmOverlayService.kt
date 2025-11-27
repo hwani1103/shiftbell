@@ -227,15 +227,16 @@ class AlarmOverlayService : Service() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // ⭐ 무음 Notification 채널
+            // ⭐ 스누즈/타임아웃 전용 채널 (드롭다운 버튼 없음)
             val channel = NotificationChannel(
-                "twenty_min_channel",
-                "알람 사전 알림",
-                NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
+                "snooze_result_channel",
+                "알람 결과 알림",
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "알람 20분 전 알림"
+                description = "알람 스누즈/타임아웃 결과"
                 enableVibration(false)
                 setSound(null, null)
+                setShowBadge(false)
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -251,18 +252,19 @@ class AlarmOverlayService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(this, "twenty_min_channel")
+        val notification = NotificationCompat.Builder(this, "snooze_result_channel")
             .setContentTitle("$alarmTimeStr 알람이 timeout되었습니다")
             .setContentText(alarmLabel)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_LOW)  // ⭐ 무음
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)  // ⭐ STATUS로 변경 (드롭다운 방지)
             .setAutoCancel(true)
-            .setSilent(true)  // ⭐ 소리/진동 없음
+            .setSilent(true)
+            .setOnlyAlertOnce(true)  // ⭐ 드롭다운 스누즈 방지
             .setContentIntent(openAppPendingIntent)
             .build()
 
-        notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
+        notificationManager.notify(8889, notification)
         Log.d("AlarmOverlay", "📢 Timeout Notification 표시: $alarmTimeStr")
     }
     
@@ -358,11 +360,12 @@ class AlarmOverlayService : Service() {
         Log.e("AlarmOverlay", "❌ DB 작업 실패", e)
     }
     
-    // Notification 삭제
+    // Notification 삭제 (8888: 20분전, 8889: 스누즈/타임아웃)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)
     notificationManager.cancel(8888)
-    Log.d("AlarmOverlay", "📢 Notification 삭제")
+    notificationManager.cancel(8889)
+    Log.d("AlarmOverlay", "📢 Notification 삭제 (8888, 8889)")
 
     // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
     AlarmGuardReceiver.removeShownNotification(alarmId)
@@ -520,22 +523,21 @@ class AlarmOverlayService : Service() {
     private fun showUpdatedNotification(newTimestamp: Long, newTimeStr: String, label: String) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // ⭐ 무음 Notification 채널
+        // ⭐ 스누즈/타임아웃 전용 채널
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "twenty_min_channel",
-                "알람 사전 알림",
-                NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
+                "snooze_result_channel",
+                "알람 결과 알림",
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "알람 20분 전 알림"
+                description = "알람 스누즈/타임아웃 결과"
                 enableVibration(false)
                 setSound(null, null)
-                setShowBadge(true)
+                setShowBadge(false)
             }
             notificationManager.createNotificationChannel(channel)
         }
 
-        // 앱 열기 Intent
         val openAppIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("openTab", 0)
@@ -547,19 +549,19 @@ class AlarmOverlayService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // ⭐ 스누즈 Notification은 정보만 표시 (버튼 없음)
-        val notification = NotificationCompat.Builder(this, "twenty_min_channel")
+        val notification = NotificationCompat.Builder(this, "snooze_result_channel")
             .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setAutoCancel(true)
             .setSilent(true)
+            .setOnlyAlertOnce(true)
             .setContentIntent(openAppPendingIntent)
             .build()
 
-        notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
+        notificationManager.notify(8889, notification)
         Log.d("AlarmOverlay", "📢 연장 Notification 표시: $newTimeStr")
     }
 

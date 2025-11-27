@@ -151,15 +151,16 @@ private fun showTimeoutNotification() {
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        // ⭐ 무음 Notification 채널
+        // ⭐ 스누즈/타임아웃 전용 채널
         val channel = NotificationChannel(
-            "twenty_min_channel",
-            "알람 사전 알림",
-            NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
+            "snooze_result_channel",
+            "알람 결과 알림",
+            NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = "알람 20분 전 알림"
+            description = "알람 스누즈/타임아웃 결과"
             enableVibration(false)
             setSound(null, null)
+            setShowBadge(false)
         }
         notificationManager.createNotificationChannel(channel)
     }
@@ -175,18 +176,19 @@ private fun showTimeoutNotification() {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
-    val notification = NotificationCompat.Builder(this, "twenty_min_channel")
+    val notification = NotificationCompat.Builder(this, "snooze_result_channel")
         .setContentTitle("$alarmTimeStr 알람이 timeout되었습니다")
         .setContentText(alarmLabel)
         .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-        .setPriority(NotificationCompat.PRIORITY_LOW)  // ⭐ 무음
-        .setCategory(NotificationCompat.CATEGORY_ALARM)
+        .setPriority(NotificationCompat.PRIORITY_LOW)
+        .setCategory(NotificationCompat.CATEGORY_STATUS)
         .setAutoCancel(true)
-        .setSilent(true)  // ⭐ 소리/진동 없음
+        .setSilent(true)
+        .setOnlyAlertOnce(true)
         .setContentIntent(openAppPendingIntent)
         .build()
 
-    notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
+    notificationManager.notify(8889, notification)
     Log.d("AlarmActivity", "📢 Timeout Notification 표시: $alarmTimeStr")
 }
     
@@ -271,11 +273,12 @@ private fun dismissAlarm() {
     
     updateAlarmHistory(alarmId, "swiped")
 
-    // ⭐ Notification 삭제 (alarmId + 20분전 Notification)
+    // ⭐ Notification 삭제 (alarmId + 8888: 20분전 + 8889: 스누즈/타임아웃)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)
     notificationManager.cancel(8888)
-    Log.d("AlarmActivity", "📢 Notification 삭제")
+    notificationManager.cancel(8889)
+    Log.d("AlarmActivity", "📢 Notification 삭제 (8888, 8889)")
 
     // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
     AlarmGuardReceiver.removeShownNotification(alarmId)
@@ -414,16 +417,16 @@ private fun dismissAlarm() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // ⭐ 무음 Notification 채널
+            // ⭐ 스누즈/타임아웃 전용 채널
             val channel = NotificationChannel(
-                "twenty_min_channel",
-                "알람 사전 알림",
-                NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
+                "snooze_result_channel",
+                "알람 결과 알림",
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "알람 20분 전 알림"
+                description = "알람 스누즈/타임아웃 결과"
                 enableVibration(false)
                 setSound(null, null)
-                setShowBadge(true)
+                setShowBadge(false)
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -439,19 +442,19 @@ private fun dismissAlarm() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // ⭐ 스누즈 Notification은 정보만 표시 (버튼 없음)
-        val notification = androidx.core.app.NotificationCompat.Builder(this, "twenty_min_channel")
+        val notification = androidx.core.app.NotificationCompat.Builder(this, "snooze_result_channel")
             .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setPriority(androidx.core.app.NotificationCompat.PRIORITY_LOW)
-            .setCategory(androidx.core.app.NotificationCompat.CATEGORY_ALARM)
+            .setCategory(androidx.core.app.NotificationCompat.CATEGORY_STATUS)
             .setAutoCancel(true)
             .setSilent(true)
+            .setOnlyAlertOnce(true)
             .setContentIntent(openAppPendingIntent)
             .build()
 
-        notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
+        notificationManager.notify(8889, notification)
         Log.d("AlarmActivity", "📢 연장 Notification 표시: $newTimeStr")
     }
     
@@ -511,20 +514,22 @@ private fun dismissAlarm() {
     // ⭐ 신규: Notification 업데이트 함수
     private fun updateNotification(alarmId: Int, newTime: String, label: String) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        
+
+        // ⭐ 스누즈 결과 전용 채널 (드롭다운 버튼 없음)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "twenty_min_channel",
-                "알람 사전 알림",
-                NotificationManager.IMPORTANCE_HIGH
+                "snooze_result_channel",
+                "알람 결과 알림",
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "알람 20분 전 알림"
-                enableVibration(true)
-                setShowBadge(true)
+                description = "알람 스누즈/타임아웃 결과"
+                enableVibration(false)
+                setSound(null, null)
+                setShowBadge(false)
             }
             notificationManager.createNotificationChannel(channel)
         }
-        
+
         val openAppIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("openTab", 0)
@@ -536,18 +541,19 @@ private fun dismissAlarm() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // ⭐ 스누즈 Notification은 정보만 표시 (버튼 없음)
-        val notification = NotificationCompat.Builder(this, "twenty_min_channel")
+        // ⭐ 스누즈 Notification은 정보만 표시 (버튼/드롭다운 없음)
+        val notification = NotificationCompat.Builder(this, "snooze_result_channel")
             .setContentTitle("알람이 $newTime 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setAutoCancel(true)
             .setSilent(true)
+            .setOnlyAlertOnce(true)
             .setContentIntent(openAppPendingIntent)
             .build()
-        
+
         notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
 
         Log.d("AlarmActivity", "📢 Notification 업데이트: $newTime")
