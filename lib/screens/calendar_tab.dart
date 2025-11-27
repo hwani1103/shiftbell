@@ -79,10 +79,10 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
     });
   }
 
-  // ⭐ 특정 달의 메모 미리 로드
+  // ⭐ 특정 달의 메모 미리 로드 (달력에 보이는 이전/다음 달 날짜 포함)
   void _loadMemosForMonth(DateTime month) {
-    final firstDay = DateTime(month.year, month.month, 1);
-    final lastDay = DateTime(month.year, month.month + 1, 0);  // 해당 달의 마지막 날
+    final firstDay = DateTime(month.year, month.month, 1).subtract(Duration(days: 7));
+    final lastDay = DateTime(month.year, month.month + 1, 0).add(Duration(days: 7));
     ref.read(memoProvider.notifier).loadMemosForDateRange(firstDay, lastDay);
   }
   
