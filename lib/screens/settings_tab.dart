@@ -467,6 +467,32 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 },
               ),
 
+              // ⭐ 테스트 알람 (5초 후)
+              ListTile(
+                leading: Icon(Icons.bug_report, color: Colors.green),
+                title: Text('테스트 알람 (5초 후)'),
+                subtitle: Text('알람 동작 테스트용'),
+                onTap: () async {
+                  try {
+                    await AlarmService().scheduleTestAlarm(
+                      label: '테스트 알람',
+                      soundType: 'loud',
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('⏰ 5초 후 알람이 울립니다!')),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('❌ 테스트 알람 실패: $e')),
+                      );
+                    }
+                  }
+                },
+              ),
+
               Divider(),
 
               // 알람 이력
