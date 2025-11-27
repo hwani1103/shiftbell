@@ -393,60 +393,17 @@ override fun onNewIntent(intent: Intent) {
             openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
-        val cancelIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = "CANCEL_ALARM"
-            putExtra("alarmId", alarmId)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-        }
-        val cancelPendingIntent = PendingIntent.getBroadcast(
-            this,
-            alarmId + 10000,
-            cancelIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        // ⭐ 새 timestamp 계산 (현재 시간 기준)
-        val timeParts = newTime.split(":")
-        val now = java.util.Calendar.getInstance()
-        val newTimestamp = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.HOUR_OF_DAY, timeParts[0].toInt())
-            set(java.util.Calendar.MINUTE, timeParts[1].toInt())
-            set(java.util.Calendar.SECOND, 0)
-            set(java.util.Calendar.MILLISECOND, 0)
-            
-            // 시간이 과거면 다음날로
-            if (timeInMillis < now.timeInMillis) {
-                add(java.util.Calendar.DAY_OF_MONTH, 1)
-            }
-        }.timeInMillis
-        
-        val extendIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = "EXTEND_ALARM"
-            putExtra("alarmId", alarmId)
-            putExtra("timestamp", newTimestamp)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-        }
-        val extendPendingIntent = PendingIntent.getBroadcast(
-            this,
-            alarmId + 20000,
-            extendIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
+
+        // ⭐ 스누즈 Notification은 정보만 표시 (버튼 없음)
         val notification = NotificationCompat.Builder(this, "twenty_min_channel")
             .setContentTitle("알람이 $newTime 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_LOW)  // ⭐ 무음
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setAutoCancel(true)
-            .setSilent(true)  // ⭐ 소리/진동 없음
+            .setSilent(true)
             .setContentIntent(openAppPendingIntent)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
-            .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)
             .build()
         
         notificationManager.notify(8888, notification)

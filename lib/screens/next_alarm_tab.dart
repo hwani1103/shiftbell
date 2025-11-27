@@ -124,83 +124,6 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
     }
   }
   
-  Future<void> _snoozeAlarm(int id, DateTime originalDate) async {
-    try {
-      // ⭐ Overlay가 울리고 있을 수 있으므로 먼저 종료 신호 발송
-      try {
-        await platform.invokeMethod('snoozeOverlay', {'alarmId': id});
-        print('✅ Overlay 스누즈 신호 발송');
-      } catch (e) {
-        print('⚠️ Overlay 스누즈 신호 실패: $e');
-      }
-
-      // 알람 예정 시간 기준 5분 후 (알람 울리기 전 미리 연장하는 기능)
-      final newDate = originalDate.add(Duration(minutes: 5));
-
-      final alarms = await DatabaseService.instance.getAllAlarms();
-      final alarm = alarms.firstWhere((a) => a.id == id);
-      
-      final updatedAlarm = Alarm(
-        id: alarm.id,
-        time: '${newDate.hour.toString().padLeft(2, '0')}:${newDate.minute.toString().padLeft(2, '0')}',
-        date: newDate,
-        type: alarm.type,
-        alarmTypeId: alarm.alarmTypeId,
-        shiftType: alarm.shiftType,
-      );
-      
-      await DatabaseService.instance.updateAlarm(updatedAlarm);
-      
-      await AlarmService().cancelAlarm(id);
-      await AlarmService().scheduleAlarm(
-        id: id,
-        dateTime: newDate,
-        label: alarm.shiftType ?? '알람',
-        soundType: 'loud',
-      );
-      
-      await ref.read(alarmNotifierProvider.notifier).refresh();
-      
-      // ⭐ Notification 업데이트
-      try {
-        await platform.invokeMethod('updateNotification', {
-          'alarmId': id,
-          'newTime': updatedAlarm.time,
-          'label': alarm.shiftType ?? '알람',
-        });
-        print('✅ Notification 업데이트 완료: ${updatedAlarm.time}');
-      } catch (e) {
-        print('⚠️ Notification 업데이트 실패: $e');
-      }
-      
-      try {
-        await platform.invokeMethod('triggerGuardCheck');
-        print('✅ AlarmGuardReceiver 트리거 완료');
-      } catch (e) {
-        print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
-      }
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('✅ 알람이 5분 연장되었습니다 (${updatedAlarm.time})'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    } catch (e) {
-      print('❌ 5분 후 처리 실패: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ 오류 발생: $e'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-  }
-  
   @override
   Widget build(BuildContext context) {
     final nextAlarmAsync = ref.watch(nextAlarmProvider);
@@ -234,7 +157,6 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
             return _AlarmScreenWidget(
               alarmId: nextAlarm.id!,
               onDismiss: () => _dismissAlarm(nextAlarm.id!, nextAlarm.date),
-              onSnooze: () => _snoozeAlarm(nextAlarm.id!, nextAlarm.date!),
             );
           },
         );
@@ -265,12 +187,10 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
 class _AlarmScreenWidget extends ConsumerStatefulWidget {
   final int alarmId;
   final VoidCallback onDismiss;
-  final VoidCallback onSnooze;
-  
+
   const _AlarmScreenWidget({
     required this.alarmId,
     required this.onDismiss,
-    required this.onSnooze,
   });
 
   @override
@@ -478,27 +398,6 @@ class _AlarmScreenWidgetState extends ConsumerState<_AlarmScreenWidget> {
                             ),
                           ),
                           
-                          SizedBox(height: 12.h),
-                          
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 32.w),
-                            child: OutlinedButton(
-                              onPressed: widget.onSnooze,
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.blue,
-                                padding: EdgeInsets.symmetric(vertical: 12.h),
-                                minimumSize: Size(double.infinity, 50.h),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r),
-                                ),
-                                side: BorderSide(color: Colors.blue, width: 2),
-                              ),
-                              child: Text(
-                                '5분 후',
-                                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
