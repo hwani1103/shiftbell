@@ -465,11 +465,10 @@ Widget build(BuildContext context) {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            // ⭐ 키보드 높이의 일부만 padding으로 적용 (팝업이 조금만 올라가게)
+            // ⭐ 키보드 감지 시 고정 패딩 적용 (점진적 변화 방지)
             final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-            final paddingBottom = keyboardHeight > 0
-                ? (keyboardHeight * 0.2).clamp(0.0, 100.h).toDouble()  // 키보드 높이의 20%만 올리기 (최대 100.h)
-                : 0.0;
+            final isKeyboardVisible = keyboardHeight > 50;  // 키보드 감지 임계값
+            final paddingBottom = isKeyboardVisible ? 60.h : 0.0;  // 고정 패딩
 
             // ignore: deprecated_member_use
             return WillPopScope(
