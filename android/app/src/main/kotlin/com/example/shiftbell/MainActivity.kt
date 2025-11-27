@@ -366,8 +366,13 @@ override fun onNewIntent(intent: Intent) {
                 pendingIntent
             )
         }
+
+        // ⭐ 알람 등록 후 AlarmGuardReceiver 즉시 트리거 (20분 이내면 Notification 표시)
+        val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
+        sendBroadcast(guardIntent)
+        Log.d("MainActivity", "✅ 알람 등록 완료: ID=$id, AlarmGuardReceiver 트리거")
     }
-    
+
     private fun cancelNativeAlarm(id: Int) {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, CustomAlarmReceiver::class.java).apply {
