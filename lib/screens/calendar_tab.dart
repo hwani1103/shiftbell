@@ -439,7 +439,7 @@ Widget build(BuildContext context) {
                        patternShift != currentShift;
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final popupHeight = (screenHeight * 0.7).clamp(400.0, 650.0);  // ⭐ 0.5 → 0.7
+    final popupHeight = screenHeight * 0.55;  // ⭐ 화면의 55% (메모 3개 기준 여백 최소화)
 
     final dateStr = day.toIso8601String().split('T')[0];
 
