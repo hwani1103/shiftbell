@@ -216,6 +216,24 @@ override fun onNewIntent(intent: Intent) {
                     testVibration(strength)
                     result.success(null)
                 }
+                // ⭐ 알람 음량 미리듣기 (STREAM_ALARM 사용)
+                "playPreviewSound" -> {
+                    val soundFile = call.argument<String>("soundFile") ?: "alarmbell1"
+                    val volume = call.argument<Double>("volume")?.toFloat() ?: 0.7f
+                    playPreviewSound(soundFile, volume)
+                    result.success(null)
+                }
+                // ⭐ 미리듣기 중지
+                "stopPreviewSound" -> {
+                    stopPreviewSound()
+                    result.success(null)
+                }
+                // ⭐ 미리듣기 볼륨 변경 (슬라이더 실시간 반영)
+                "updatePreviewVolume" -> {
+                    val volume = call.argument<Double>("volume")?.toFloat() ?: 0.7f
+                    updatePreviewVolume(volume)
+                    result.success(null)
+                }
                 else -> result.notImplemented()
             }
         }
@@ -440,5 +458,72 @@ override fun onNewIntent(intent: Intent) {
         }
 
         Log.d("MainActivity", "🔔 진동 테스트: 세기=$strength")
+    }
+
+    // ⭐ 미리듣기용 MediaPlayer
+    private var previewMediaPlayer: android.media.MediaPlayer? = null
+
+    // ⭐ 알람 음량 미리듣기 (STREAM_ALARM 사용 - 실제 알람과 동일)
+    private fun playPreviewSound(soundFile: String, volume: Float) {
+        stopPreviewSound()  // 기존 재생 중지
+
+        try {
+            // 시스템 알람 볼륨을 최대로 설정 (실제 알람과 동일)
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+            val maxVolume = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM)
+            audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, maxVolume, 0)
+
+            // res/raw 리소스 ID 가져오기
+            val resourceId = resources.getIdentifier(soundFile, "raw", packageName)
+
+            if (resourceId == 0) {
+                Log.e("MainActivity", "리소스 못 찾음: res/raw/$soundFile.mp3")
+                return
+            }
+
+            val soundUri = android.net.Uri.parse("android.resource://$packageName/$resourceId")
+
+            previewMediaPlayer = android.media.MediaPlayer().apply {
+                setDataSource(this@MainActivity, soundUri)
+
+                // 핵심: STREAM_ALARM 사용 (실제 알람과 동일)
+                setAudioAttributes(
+                    android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+
+                // 음량 설정 (슬라이더 값)
+                setVolume(volume, volume)
+
+                isLooping = false  // 미리듣기는 반복 안 함
+                prepare()
+                start()
+            }
+
+            Log.d("MainActivity", "🔊 미리듣기 재생: $soundFile, 음량 ${(volume * 100).toInt()}%")
+
+        } catch (e: Exception) {
+            Log.e("MainActivity", "❌ 미리듣기 재생 실패", e)
+        }
+    }
+
+    // ⭐ 미리듣기 중지
+    private fun stopPreviewSound() {
+        previewMediaPlayer?.apply {
+            if (isPlaying) {
+                stop()
+            }
+            release()
+        }
+        previewMediaPlayer = null
+        Log.d("MainActivity", "🔇 미리듣기 중지")
+    }
+
+    // ⭐ 미리듣기 볼륨 변경 (슬라이더 실시간 반영)
+    private fun updatePreviewVolume(volume: Float) {
+        previewMediaPlayer?.setVolume(volume, volume)
+        Log.d("MainActivity", "🔊 미리듣기 볼륨 변경: ${(volume * 100).toInt()}%")
     }
 }

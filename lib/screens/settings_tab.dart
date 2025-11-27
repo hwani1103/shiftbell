@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../models/alarm_type.dart';
-import 'package:audioplayers/audioplayers.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -608,11 +607,10 @@ class _AlarmTypeSettingsSheet extends StatefulWidget {
 class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
   late List<AlarmType> _types;
 
-  // 오디오 플레이어
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  // ⭐ Native 미리듣기 사용 (STREAM_ALARM)
   bool _isPlaying = false;
 
-  // 진동용 MethodChannel
+  // MethodChannel
   static const platform = MethodChannel('com.example.shiftbell/alarm');
 
   @override
@@ -631,7 +629,8 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    // ⭐ Native 미리듣기 중지
+    platform.invokeMethod('stopPreviewSound');
     super.dispose();
   }
 
@@ -742,9 +741,9 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               label: '음량',
               value: type.volume,
               onChanged: (v) {
-                // 실시간 볼륨 적용
+                // ⭐ 실시간 볼륨 적용 (Native STREAM_ALARM)
                 if (_isPlaying) {
-                  _audioPlayer.setVolume(v);
+                  platform.invokeMethod('updatePreviewVolume', {'volume': v});
                 }
                 _updateType(AlarmType(
                   id: type.id,
@@ -810,19 +809,13 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     {'id': 'alarmbell2', 'name': '알람벨 2', 'file': 'alarmbell2.mp3'},
   ];
 
-  // 소리 미리듣기 재생 (중지 버튼 누를 때까지 반복)
+  // ⭐ 소리 미리듣기 재생 (Native STREAM_ALARM 사용 - 실제 알람과 동일 음량)
   Future<void> _playSound(String soundId, double volume) async {
-    await _audioPlayer.stop();
-
-    final sound = _soundOptions.firstWhere(
-      (s) => s['id'] == soundId,
-      orElse: () => _soundOptions.first,
-    );
-
     try {
-      await _audioPlayer.setVolume(volume);
-      await _audioPlayer.setReleaseMode(ReleaseMode.loop);  // 반복 재생
-      await _audioPlayer.play(AssetSource('sounds/${sound['file']}'));
+      await platform.invokeMethod('playPreviewSound', {
+        'soundFile': soundId,
+        'volume': volume,
+      });
       setState(() => _isPlaying = true);
     } catch (e) {
       debugPrint('소리 재생 실패: $e');
@@ -834,9 +827,13 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     }
   }
 
-  // 소리 정지
-  void _stopSound() {
-    _audioPlayer.stop();
+  // ⭐ 소리 정지 (Native)
+  Future<void> _stopSound() async {
+    try {
+      await platform.invokeMethod('stopPreviewSound');
+    } catch (e) {
+      debugPrint('소리 정지 실패: $e');
+    }
     setState(() => _isPlaying = false);
   }
 

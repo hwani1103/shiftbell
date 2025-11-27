@@ -379,6 +379,9 @@ private fun dismissAlarm() {
                 // ⭐ 갱신 체크
                 AlarmRefreshUtil.checkAndTriggerRefresh(this)
 
+                // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
+                AlarmGuardReceiver.removeShownNotification(alarmId)
+
                 // ⭐ AlarmGuardReceiver 트리거
                 val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
                 sendBroadcast(guardIntent)

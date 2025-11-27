@@ -177,6 +177,9 @@ class AlarmActionReceiver : BroadcastReceiver() {
         AlarmRefreshUtil.checkAndTriggerRefresh(context)
         Log.d("AlarmAction", "✅ 갱신 체크 완료")
 
+        // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
+        AlarmGuardReceiver.removeShownNotification(alarmId)
+
         val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
         context.sendBroadcast(guardIntent)
         Log.d("AlarmAction", "✅ AlarmGuardReceiver 즉시 재실행")

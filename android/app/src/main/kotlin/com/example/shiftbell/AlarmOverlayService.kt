@@ -483,6 +483,9 @@ class AlarmOverlayService : Service() {
                 // 갱신 체크
                 AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
 
+                // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
+                AlarmGuardReceiver.removeShownNotification(alarmId)
+
                 // AlarmGuardReceiver 재실행
                 val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
                 sendBroadcast(guardIntent)
