@@ -449,7 +449,7 @@ Widget build(BuildContext context) {
                        patternShift != currentShift;
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final popupHeight = screenHeight * 0.58;  // ⭐ 화면의 58% (메모 3개와 여백 확보)
+    final popupHeight = screenHeight * 0.61;  // ⭐ 화면의 61%
 
     final dateStr = day.toIso8601String().split('T')[0];
 
