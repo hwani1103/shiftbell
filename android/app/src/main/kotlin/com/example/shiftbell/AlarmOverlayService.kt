@@ -262,7 +262,7 @@ class AlarmOverlayService : Service() {
             .setContentIntent(openAppPendingIntent)
             .build()
 
-        notificationManager.notify(8888, notification)
+        notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
         Log.d("AlarmOverlay", "📢 Timeout Notification 표시: $alarmTimeStr")
     }
     
@@ -556,7 +556,7 @@ class AlarmOverlayService : Service() {
             .setContentIntent(openAppPendingIntent)
             .build()
 
-        notificationManager.notify(8888, notification)
+        notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
         Log.d("AlarmOverlay", "📢 연장 Notification 표시: $newTimeStr")
     }
 

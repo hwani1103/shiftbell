@@ -186,7 +186,7 @@ private fun showTimeoutNotification() {
         .setContentIntent(openAppPendingIntent)
         .build()
 
-    notificationManager.notify(8888, notification)
+    notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
     Log.d("AlarmActivity", "📢 Timeout Notification 표시: $alarmTimeStr")
 }
     
@@ -448,7 +448,7 @@ private fun dismissAlarm() {
             .setContentIntent(openAppPendingIntent)
             .build()
 
-        notificationManager.notify(8888, notification)
+        notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
         Log.d("AlarmActivity", "📢 연장 Notification 표시: $newTimeStr")
     }
     
@@ -545,8 +545,8 @@ private fun dismissAlarm() {
             .setContentIntent(openAppPendingIntent)
             .build()
         
-        notificationManager.notify(8888, notification)
-        
+        notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
+
         Log.d("AlarmActivity", "📢 Notification 업데이트: $newTime")
     }
 }
