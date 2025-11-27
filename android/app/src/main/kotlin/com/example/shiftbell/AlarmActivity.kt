@@ -153,7 +153,7 @@ private fun showTimeoutNotification() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         // ⭐ 스누즈/타임아웃 전용 채널
         val channel = NotificationChannel(
-            "snooze_result_channel",
+            "alarm_result_channel_v2",
             "알람 결과 알림",
             NotificationManager.IMPORTANCE_LOW
         ).apply {
@@ -176,7 +176,7 @@ private fun showTimeoutNotification() {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
-    val notification = NotificationCompat.Builder(this, "snooze_result_channel")
+    val notification = NotificationCompat.Builder(this, "alarm_result_channel_v2")
         .setContentTitle("$alarmTimeStr 알람이 timeout되었습니다")
         .setContentText(alarmLabel)
         .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -419,7 +419,7 @@ private fun dismissAlarm() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // ⭐ 스누즈/타임아웃 전용 채널
             val channel = NotificationChannel(
-                "snooze_result_channel",
+                "alarm_result_channel_v2",
                 "알람 결과 알림",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
@@ -442,7 +442,7 @@ private fun dismissAlarm() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = androidx.core.app.NotificationCompat.Builder(this, "snooze_result_channel")
+        val notification = androidx.core.app.NotificationCompat.Builder(this, "alarm_result_channel_v2")
             .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -518,7 +518,7 @@ private fun dismissAlarm() {
         // ⭐ 스누즈 결과 전용 채널 (드롭다운 버튼 없음)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "snooze_result_channel",
+                "alarm_result_channel_v2",
                 "알람 결과 알림",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
@@ -542,7 +542,7 @@ private fun dismissAlarm() {
         )
 
         // ⭐ 스누즈 Notification은 정보만 표시 (버튼/드롭다운 없음)
-        val notification = NotificationCompat.Builder(this, "snooze_result_channel")
+        val notification = NotificationCompat.Builder(this, "alarm_result_channel_v2")
             .setContentTitle("알람이 $newTime 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)

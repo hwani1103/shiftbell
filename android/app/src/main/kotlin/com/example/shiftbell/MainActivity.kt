@@ -302,9 +302,9 @@ override fun onNewIntent(intent: Intent) {
     }
     
     private fun triggerGuardCheck() {
-        val intent = Intent(this, AlarmGuardReceiver::class.java)
-        sendBroadcast(intent)
-        Log.d("MainActivity", "✅ AlarmGuardReceiver 수동 트리거")
+        // ⭐ sendBroadcast 대신 직접 호출 (더 확실하게 동작)
+        AlarmGuardReceiver.triggerCheck(this)
+        Log.d("MainActivity", "✅ AlarmGuardReceiver 직접 트리거")
     }
     
     private fun getDeviceProtectedStoragePath(): String {
@@ -367,10 +367,9 @@ override fun onNewIntent(intent: Intent) {
             )
         }
 
-        // ⭐ 알람 등록 후 AlarmGuardReceiver 즉시 트리거 (20분 이내면 Notification 표시)
-        val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
-        sendBroadcast(guardIntent)
-        Log.d("MainActivity", "✅ 알람 등록 완료: ID=$id, AlarmGuardReceiver 트리거")
+        // ⭐ 알람 등록 후 AlarmGuardReceiver 직접 트리거 (20분 이내면 Notification 표시)
+        AlarmGuardReceiver.triggerCheck(this)
+        Log.d("MainActivity", "✅ 알람 등록 완료: ID=$id, AlarmGuardReceiver 직접 트리거")
     }
 
     private fun cancelNativeAlarm(id: Int) {
@@ -398,7 +397,7 @@ override fun onNewIntent(intent: Intent) {
         // ⭐ 스누즈 결과 전용 채널 (드롭다운 버튼 없음)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "snooze_result_channel",
+                "alarm_result_channel_v2",
                 "알람 결과 알림",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
@@ -422,7 +421,7 @@ override fun onNewIntent(intent: Intent) {
         )
 
         // ⭐ 스누즈 Notification은 정보만 표시 (버튼/드롭다운 없음)
-        val notification = NotificationCompat.Builder(this, "snooze_result_channel")
+        val notification = NotificationCompat.Builder(this, "alarm_result_channel_v2")
             .setContentTitle("알람이 $newTime 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)

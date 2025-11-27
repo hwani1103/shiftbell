@@ -16,12 +16,31 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     
     companion object {
         private const val TWENTY_MIN_NOTIFICATION_ID = 8888
-        private const val TWENTY_MIN_CHANNEL_ID = "twenty_min_channel"
+        private const val TWENTY_MIN_CHANNEL_ID = "alarm_pre_channel_v2"  // ⭐ 채널 ID 변경 (시스템 스누즈 제거)
         private val shownNotifications = mutableSetOf<Int>()
-        
+
         fun removeShownNotification(alarmId: Int) {
             shownNotifications.remove(alarmId)
             Log.d("AlarmGuardReceiver", "🗑️ Notification 이력 제거: ID=$alarmId")
+        }
+
+        // ⭐ 직접 호출용 정적 메서드 (sendBroadcast 없이도 동작)
+        fun triggerCheck(context: Context) {
+            Log.d("AlarmGuardReceiver", "⏰ 직접 트리거")
+
+            // 갱신 체크
+            AlarmRefreshUtil.checkAndTriggerRefresh(context)
+
+            // 다음 알람 체크
+            val instance = AlarmGuardReceiver()
+            val nextAlarm = instance.getNextAlarmFromDB(context)
+
+            if (nextAlarm != null) {
+                instance.checkAndNotify(context, nextAlarm)
+            }
+
+            // 다음 Wakeup 예약
+            instance.scheduleNextWakeup(context)
         }
     }
     
@@ -225,10 +244,11 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             .setContentTitle("잠시 후 알람이 울립니다 (${alarm.time})")
             .setContentText(alarm.shiftType)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_LOW)  // ⭐ 무음
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)  // ⭐ REMINDER로 변경 (시스템 스누즈 제거)
             .setAutoCancel(true)
-            .setSilent(true)  // ⭐ 소리/진동 없음
+            .setSilent(true)
+            .setOnlyAlertOnce(true)  // ⭐ 시스템 스누즈 버튼 제거
             .setContentIntent(openAppPendingIntent)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
             .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)

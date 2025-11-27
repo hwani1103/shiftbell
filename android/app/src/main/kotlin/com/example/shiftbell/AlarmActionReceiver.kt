@@ -213,7 +213,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
         // ⭐ 스누즈 결과 전용 채널 (드롭다운 버튼 없음)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "snooze_result_channel",
+                "alarm_result_channel_v2",
                 "알람 결과 알림",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
@@ -237,7 +237,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
         )
 
         // ⭐ 스누즈 Notification은 정보만 표시 (버튼/드롭다운 없음)
-        val notification = NotificationCompat.Builder(context, "snooze_result_channel")
+        val notification = NotificationCompat.Builder(context, "alarm_result_channel_v2")
             .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)

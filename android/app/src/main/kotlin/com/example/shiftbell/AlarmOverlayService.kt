@@ -229,7 +229,7 @@ class AlarmOverlayService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // ⭐ 스누즈/타임아웃 전용 채널 (드롭다운 버튼 없음)
             val channel = NotificationChannel(
-                "snooze_result_channel",
+                "alarm_result_channel_v2",
                 "알람 결과 알림",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
@@ -252,7 +252,7 @@ class AlarmOverlayService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(this, "snooze_result_channel")
+        val notification = NotificationCompat.Builder(this, "alarm_result_channel_v2")
             .setContentTitle("$alarmTimeStr 알람이 timeout되었습니다")
             .setContentText(alarmLabel)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -526,7 +526,7 @@ class AlarmOverlayService : Service() {
         // ⭐ 스누즈/타임아웃 전용 채널
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "snooze_result_channel",
+                "alarm_result_channel_v2",
                 "알람 결과 알림",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
@@ -549,7 +549,7 @@ class AlarmOverlayService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(this, "snooze_result_channel")
+        val notification = NotificationCompat.Builder(this, "alarm_result_channel_v2")
             .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
