@@ -963,36 +963,15 @@ Widget build(BuildContext context) {
                   child: Text('저장', style: TextStyle(color: Colors.white)),
                 ),
               ] else ...[
-                // ⭐ 보기 모드 버튼
+                // ⭐ 보기 모드 버튼 - 바로 삭제 (확인 팝업 제거)
                 TextButton(
                   onPressed: () async {
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('메모 삭제', style: TextStyle(fontSize: 18.sp)),
-                        content: Text('이 메모를 삭제하시겠습니까?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: Text('취소'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade600),
-                            child: Text('삭제', style: TextStyle(color: Colors.white)),
-                          ),
-                        ],
-                      ),
-                    );
+                    // ⭐ 메모 삭제 (Provider가 자동으로 메인 팝업 갱신)
+                    await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
 
-                    if (confirm == true) {
-                      // ⭐ 메모 삭제 (Provider가 자동으로 메인 팝업 갱신)
-                      await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
-
-                      // ⭐ 상세 팝업만 닫기 (메인 팝업은 Consumer로 자동 갱신됨)
-                      if (context.mounted) {
-                        Navigator.of(context).pop();
-                      }
+                    // ⭐ 상세 팝업만 닫기 (메인 팝업은 Consumer로 자동 갱신됨)
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
                     }
                   },
                   child: Text('삭제', style: TextStyle(color: Colors.red.shade600)),
