@@ -184,8 +184,9 @@ override fun onNewIntent(intent: Intent) {
                 // ⭐ 신규 추가
 "cancelNotification" -> {
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.cancel(8888)
-    Log.d("MainActivity", "📢 Notification 삭제 (ID: 8888)")
+    notificationManager.cancel(8888)  // 20분 전 알림
+    notificationManager.cancel(8889)  // 스누즈/타임아웃 알림
+    Log.d("MainActivity", "📢 Notification 삭제 (ID: 8888, 8889)")
     result.success(null)
 }
                 // ⭐ Overlay 종료 (외부에서 알람 끄기)
@@ -424,7 +425,7 @@ override fun onNewIntent(intent: Intent) {
         val notification = NotificationCompat.Builder(this, "alarm_result_channel_v2")
             .setContentTitle("알람이 $newTime 로 연장되었습니다")
             .setContentText(label)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setAutoCancel(true)

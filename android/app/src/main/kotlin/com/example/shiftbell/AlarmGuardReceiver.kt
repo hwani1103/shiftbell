@@ -243,7 +243,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, TWENTY_MIN_CHANNEL_ID)
             .setContentTitle("잠시 후 알람이 울립니다 (${alarm.time})")
             .setContentText(alarm.shiftType)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)  // ⭐ REMINDER로 변경 (시스템 스누즈 제거)
             .setAutoCancel(true)

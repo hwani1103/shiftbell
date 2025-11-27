@@ -240,7 +240,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, "alarm_result_channel_v2")
             .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
             .setContentText(label)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setAutoCancel(true)

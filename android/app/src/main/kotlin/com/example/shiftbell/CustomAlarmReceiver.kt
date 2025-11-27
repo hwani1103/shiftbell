@@ -23,7 +23,7 @@ class CustomAlarmReceiver : BroadcastReceiver() {
         const val EXTRA_SOUND_TYPE = "soundType"
         const val EXTRA_LABEL = "label"
         const val EXTRA_ID = "id"
-        const val CHANNEL_ID = "alarm_channel"
+        const val CHANNEL_ID = "alarm_channel_v2"  // ⭐ 채널 ID 변경 (삼성 시스템 스누즈 제거)
     }
     
     // CustomAlarmReceiver.kt - onReceive() 수정
@@ -247,11 +247,11 @@ override fun onReceive(context: Context, intent: Intent) {
         }
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle("알람")
             .setContentText(label)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setCategory(NotificationCompat.CATEGORY_CALL)  // ⭐ CALL 사용 (삼성 시스템 스누즈 방지, full-screen 지원)
             .setFullScreenIntent(fullScreenPendingIntent, true)
             .setSilent(true)  // ⭐ 소리/진동 없음 (알람 소리는 AlarmPlayer)
             .setAutoCancel(true)
