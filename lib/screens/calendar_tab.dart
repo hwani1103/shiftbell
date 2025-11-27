@@ -358,7 +358,7 @@ Widget build(BuildContext context) {
                     Align(
                       alignment: Alignment.center,
                       child: Padding(
-                        padding: EdgeInsets.only(bottom: memoCount >= 3 ? 8.h : 0),  // 3개일 때 살짝만 위로
+                        padding: EdgeInsets.only(bottom: memoCount >= 3 ? 12.h : 0),  // 3개일 때 조금 더 위로
                         child: Container(
                           padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
                           decoration: isToday
