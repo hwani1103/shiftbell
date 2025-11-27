@@ -13,7 +13,7 @@ class ShiftSchedule {
     Color(0xFFB2DFDB), // 민트색 (Mint Green)
     Color(0xFFFFF9C4), // 노란색 (Sunny Yellow)
     Color(0xFFFFE0B2), // 주황색 (Peach Orange)
-    Color(0xFFEEEEEE), // 회색 (Light Gray)
+    Color(0xFFCFD8DC), // 청회색 (Blue Grey) - 메모 배경과 구분
     Color(0xFFE1BEE7), // 보라색 (Lavender Purple)
     Color(0xFFFFCCBC), // 코랄색 (Coral)
     Color(0xFFD7CCC8), // 베이지색 (Warm Beige)

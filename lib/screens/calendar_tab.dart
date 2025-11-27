@@ -226,10 +226,15 @@ Widget build(BuildContext context) {
                         ),
                         
                         onDaySelected: (selectedDay, focusedDay) {
+                          // ⭐ 이전/다음 달 날짜는 탭 무시
+                          if (selectedDay.month != _focusedDay.month || selectedDay.year != _focusedDay.year) {
+                            return;
+                          }
+
                           setState(() {
                             _focusedDay = focusedDay;
                           });
-                          
+
                           if (_isMultiSelectMode) {
                             _toggleDateSelection(selectedDay);
                           } else {
@@ -238,6 +243,11 @@ Widget build(BuildContext context) {
                         },
                         
                         onDayLongPressed: (selectedDay, focusedDay) {
+                          // ⭐ 이전/다음 달 날짜는 길게 누르기 무시
+                          if (selectedDay.month != _focusedDay.month || selectedDay.year != _focusedDay.year) {
+                            return;
+                          }
+
                           if (!_isMultiSelectMode) {
                             _enterMultiSelectMode(selectedDay);
                           }
@@ -439,7 +449,7 @@ Widget build(BuildContext context) {
                        patternShift != currentShift;
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final popupHeight = screenHeight * 0.55;  // ⭐ 화면의 55% (메모 3개 기준 여백 최소화)
+    final popupHeight = screenHeight * 0.58;  // ⭐ 화면의 58% (메모 3개와 여백 확보)
 
     final dateStr = day.toIso8601String().split('T')[0];
 
@@ -732,6 +742,10 @@ Widget build(BuildContext context) {
     setState(() {
       if (_selectedDates.any((d) => isSameDay(d, date))) {
         _selectedDates.removeWhere((d) => isSameDay(d, date));
+        // ⭐ 0개가 되면 자동으로 일반 모드로 돌아가기
+        if (_selectedDates.isEmpty) {
+          _isMultiSelectMode = false;
+        }
       } else {
         _selectedDates.add(date);
       }
