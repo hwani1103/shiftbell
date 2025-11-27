@@ -358,7 +358,7 @@ Widget build(BuildContext context) {
                     Align(
                       alignment: Alignment.center,
                       child: Padding(
-                        padding: EdgeInsets.only(bottom: memoCount >= 3 ? 12.h : 0),  // 3개일 때 조금 더 위로
+                        padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),  // 3개일 때 위로
                         child: Container(
                           padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
                           decoration: isToday
@@ -385,7 +385,7 @@ Widget build(BuildContext context) {
                       Positioned(
                         left: 0,
                         right: 0,
-                        bottom: 0,
+                        bottom: 8.h,  // ⭐ 바닥에서 살짝 띄움
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: memos.take(3).map((memo) {
