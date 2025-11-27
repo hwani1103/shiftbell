@@ -385,7 +385,7 @@ Widget build(BuildContext context) {
                       Positioned(
                         left: 0,
                         right: 0,
-                        bottom: 8.h,  // ⭐ 바닥에서 살짝 띄움
+                        bottom: 1.5.h,  // ⭐ 바닥에서 살짝 띄움
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: memos.take(3).map((memo) {
