@@ -452,8 +452,218 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
             ),
 
             SizedBox(height: 10.h),
+
+            // ⭐ 전체 알람 보기 버튼
+            GestureDetector(
+              onTap: () => _showAllAlarmsSheet(context),
+              child: Text(
+                '등록된 모든 알람 보기',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: Colors.grey.shade600,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+
+            SizedBox(height: 10.h),
           ],
         ),
+      ),
+    );
+  }
+
+  // ⭐ 전체 알람 목록 바텀시트
+  void _showAllAlarmsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.85,
+          expand: false,
+          builder: (context, scrollController) {
+            return Consumer(
+              builder: (context, ref, child) {
+                final alarmsAsync = ref.watch(alarmNotifierProvider);
+
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 핸들
+                      Center(
+                        child: Container(
+                          width: 40.w,
+                          height: 4.h,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(2.r),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      // 제목
+                      Text(
+                        '등록된 알람',
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade800,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      // 알람 목록
+                      Expanded(
+                        child: alarmsAsync.when(
+                          loading: () => Center(child: CircularProgressIndicator()),
+                          error: (_, __) => Center(child: Text('오류 발생')),
+                          data: (alarms) {
+                            // 미래 알람만 필터링하고 시간순 정렬
+                            final now = DateTime.now();
+                            final futureAlarms = alarms
+                                .where((a) => a.date != null && a.date!.isAfter(now))
+                                .toList()
+                              ..sort((a, b) => a.date!.compareTo(b.date!));
+
+                            if (futureAlarms.isEmpty) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.alarm_off_rounded,
+                                      size: 48.sp,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                    SizedBox(height: 12.h),
+                                    Text(
+                                      '등록된 알람이 없습니다',
+                                      style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            return ListView.builder(
+                              controller: scrollController,
+                              itemCount: futureAlarms.length,
+                              itemBuilder: (context, index) {
+                                final alarm = futureAlarms[index];
+                                return _buildAlarmListItem(alarm, index == 0);
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ⭐ 알람 목록 아이템
+  Widget _buildAlarmListItem(Alarm alarm, bool isNext) {
+    final date = alarm.date!;
+    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    final dateStr = '${date.month}/${date.day} (${weekdays[date.weekday - 1]})';
+    final timeStr = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      decoration: BoxDecoration(
+        color: isNext ? Colors.indigo.shade50 : Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: isNext ? Colors.indigo.shade200 : Colors.grey.shade200,
+          width: isNext ? 1.5 : 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          // 시간
+          Container(
+            width: 70.w,
+            child: Text(
+              timeStr,
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+                color: isNext ? Colors.indigo.shade700 : Colors.grey.shade800,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+
+          // 날짜
+          Container(
+            width: 70.w,
+            child: Text(
+              dateStr,
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+
+          // 근무 타입
+          if (alarm.shiftType != null)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: isNext ? Colors.indigo.shade100 : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Text(
+                alarm.shiftType!,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isNext ? Colors.indigo.shade700 : Colors.grey.shade700,
+                ),
+              ),
+            ),
+
+          Spacer(),
+
+          // 다음 알람 표시
+          if (isNext)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+              decoration: BoxDecoration(
+                color: Colors.indigo.shade400,
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+              child: Text(
+                '다음',
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -844,14 +844,97 @@ Widget build(BuildContext context) {
             ],
           ),
           actions: [
+            // ⭐ 삭제 버튼
+            IconButton(
+              onPressed: () => _showDeleteAlarmConfirmation(alarm, parentSetState),
+              icon: Icon(Icons.delete, color: Colors.red, size: 22.sp),
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints(),
+            ),
+            Spacer(),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text('취소'),
             ),
           ],
+          actionsPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         );
       },
     );
+  }
+
+  // ⭐ 알람 삭제 확인 팝업
+  void _showDeleteAlarmConfirmation(Alarm alarm, StateSetter parentSetState) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            '알람 삭제',
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+          ),
+          content: Text(
+            '${alarm.time} 알람을 삭제하시겠습니까?',
+            style: TextStyle(fontSize: 14.sp),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('취소'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);  // 확인 팝업 닫기
+                Navigator.pop(context);  // 타입 선택 팝업 닫기
+                await _deleteAlarm(alarm);
+                parentSetState(() {});
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red.shade600,
+              ),
+              child: Text('삭제', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ⭐ 알람 삭제 (울리는 중이면 Overlay도 종료)
+  Future<void> _deleteAlarm(Alarm alarm) async {
+    try {
+      // 1. 울리는 중인 Overlay 종료
+      await platform.invokeMethod('dismissOverlay', {'alarmId': alarm.id});
+    } catch (e) {
+      print('⚠️ Overlay 종료 신호 실패: $e');
+    }
+
+    // 2. DB에서 알람 삭제 + Native 알람 취소
+    await ref.read(alarmNotifierProvider.notifier).deleteAlarm(alarm.id!, alarm.date);
+
+    // 3. Notification 취소
+    try {
+      await platform.invokeMethod('cancelNotification');
+    } catch (e) {
+      print('⚠️ Notification 삭제 실패: $e');
+    }
+
+    // 4. AlarmGuardReceiver 트리거 (다음 알람 Notification 표시)
+    try {
+      await platform.invokeMethod('triggerGuardCheck');
+    } catch (e) {
+      print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('알람이 삭제되었습니다'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+        ),
+      );
+    }
   }
 
   // ⭐ 알람 타입 옵션 버튼
