@@ -553,36 +553,62 @@ Widget build(BuildContext context) {
                       // ⭐ 고정 알람
                       Text('고정 알람 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
                       SizedBox(height: 8.h),
-                      FutureBuilder<List<Alarm>>(
-                        future: DatabaseService.instance.getAlarmsByDate(day),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasError) return Text('오류', style: TextStyle(fontSize: 14.sp, color: Colors.red));
-                          if (!snapshot.hasData) return SizedBox(height: 20.h, width: 20.w, child: CircularProgressIndicator(strokeWidth: 2));
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final alarmsAsync = ref.watch(alarmNotifierProvider);
 
-                          final fixedAlarms = snapshot.data!.where((a) => a.type == 'fixed').toList();
-                          if (fixedAlarms.isEmpty) return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
+                          return alarmsAsync.when(
+                            loading: () => SizedBox(height: 20.h, width: 20.w, child: CircularProgressIndicator(strokeWidth: 2)),
+                            error: (_, __) => Text('오류', style: TextStyle(fontSize: 14.sp, color: Colors.red)),
+                            data: (allAlarms) {
+                              final dayStr = day.toIso8601String().split('T')[0];
+                              final fixedAlarms = allAlarms
+                                  .where((a) => a.type == 'fixed' && a.date != null && a.date!.toIso8601String().startsWith(dayStr))
+                                  .toList();
 
-                          return Wrap(
-                            spacing: 8.w,
-                            runSpacing: 8.h,
-                            children: fixedAlarms.map((alarm) {
-                              return Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade50,
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  border: Border.all(color: Colors.blue.shade200),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text('🔊', style: TextStyle(fontSize: 14.sp)),
-                                    SizedBox(width: 4.w),
-                                    Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.blue.shade900)),
-                                  ],
-                                ),
+                              if (fixedAlarms.isEmpty) {
+                                return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
+                              }
+
+                              return Wrap(
+                                spacing: 8.w,
+                                runSpacing: 8.h,
+                                children: fixedAlarms.map((alarm) {
+                                  final typeInfo = _getAlarmTypeInfo(alarm.alarmTypeId);
+                                  return GestureDetector(
+                                    onTap: () => _showAlarmTypeSelectionPopup(alarm, setState),
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(8.r),
+                                        border: Border.all(color: Colors.blue.shade200),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(typeInfo['emoji']!, style: TextStyle(fontSize: 14.sp)),
+                                          SizedBox(width: 4.w),
+                                          Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.blue.shade900)),
+                                          SizedBox(width: 6.w),
+                                          Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue.shade100,
+                                              borderRadius: BorderRadius.circular(4.r),
+                                            ),
+                                            child: Text(
+                                              typeInfo['label']!,
+                                              style: TextStyle(fontSize: 10.sp, color: Colors.blue.shade700),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
                               );
-                            }).toList(),
+                            },
                           );
                         },
                       ),
@@ -744,7 +770,135 @@ Widget build(BuildContext context) {
     const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
     return weekdays[date.weekday - 1];
   }
-  
+
+  // ⭐ 알람 타입 정보 반환
+  Map<String, String> _getAlarmTypeInfo(int typeId) {
+    switch (typeId) {
+      case 1:
+        return {'emoji': '🔔', 'label': '소리+진동'};
+      case 2:
+        return {'emoji': '📳', 'label': '진동'};
+      case 3:
+        return {'emoji': '🔇', 'label': '무음'};
+      default:
+        return {'emoji': '🔔', 'label': '소리+진동'};
+    }
+  }
+
+  // ⭐ 알람 타입 선택 팝업
+  void _showAlarmTypeSelectionPopup(Alarm alarm, StateSetter parentSetState) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(
+            '알람 타입 선택',
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${alarm.time} 알람',
+                style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+              ),
+              SizedBox(height: 16.h),
+              Row(
+                children: [
+                  _buildAlarmTypeOption(
+                    typeId: 1,
+                    icon: Icons.volume_up_rounded,
+                    label: '소리+진동',
+                    isSelected: alarm.alarmTypeId == 1,
+                    onTap: () async {
+                      await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 1);
+                      Navigator.pop(context);
+                      parentSetState(() {});
+                    },
+                  ),
+                  SizedBox(width: 8.w),
+                  _buildAlarmTypeOption(
+                    typeId: 2,
+                    icon: Icons.vibration_rounded,
+                    label: '진동',
+                    isSelected: alarm.alarmTypeId == 2,
+                    onTap: () async {
+                      await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 2);
+                      Navigator.pop(context);
+                      parentSetState(() {});
+                    },
+                  ),
+                  SizedBox(width: 8.w),
+                  _buildAlarmTypeOption(
+                    typeId: 3,
+                    icon: Icons.notifications_off_rounded,
+                    label: '무음',
+                    isSelected: alarm.alarmTypeId == 3,
+                    onTap: () async {
+                      await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 3);
+                      Navigator.pop(context);
+                      parentSetState(() {});
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('취소'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ⭐ 알람 타입 옵션 버튼
+  Widget _buildAlarmTypeOption({
+    required int typeId,
+    required IconData icon,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 12.h),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.indigo.shade50 : Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: isSelected ? Colors.indigo.shade400 : Colors.grey.shade300,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                size: 24.sp,
+                color: isSelected ? Colors.indigo.shade500 : Colors.grey.shade400,
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected ? Colors.indigo.shade700 : Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _enterMultiSelectMode(DateTime firstDate) {
     setState(() {
       _isMultiSelectMode = true;

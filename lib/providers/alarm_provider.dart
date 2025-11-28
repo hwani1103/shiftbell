@@ -145,6 +145,25 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
     }
   }
 
+  // 알람 타입 업데이트
+  Future<void> updateAlarmType(int alarmId, int newTypeId) async {
+    try {
+      final db = await DatabaseService.instance.database;
+      await db.update(
+        'alarms',
+        {'alarm_type_id': newTypeId},
+        where: 'id = ?',
+        whereArgs: [alarmId],
+      );
+
+      await _loadAlarms();
+      print('✅ 알람 타입 변경 완료 (ID: $alarmId → 타입: $newTypeId)');
+    } catch (e) {
+      print('❌ 알람 타입 변경 실패: $e');
+      rethrow;
+    }
+  }
+
   // 수동 새로고침
   Future<void> refresh() async {
     await _loadAlarms();
