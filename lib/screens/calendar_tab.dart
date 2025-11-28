@@ -11,6 +11,7 @@ import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../providers/memo_provider.dart';
 import 'package:flutter/services.dart';
+import 'all_shifts_view.dart';
 
 // StatefulWidget → ConsumerStatefulWidget으로 변경
 class CalendarTab extends ConsumerStatefulWidget {  // ⭐ 변경
@@ -141,21 +142,59 @@ Widget build(BuildContext context) {
                                     style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                                   ),
                             if (!_isMultiSelectMode)
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _focusedDay = DateTime.now();
-                                    _selectedDay = null;
-                                  });
-                                },
-                                child: Text(
-                                  'today',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    color: Colors.blue.shade700,
-                                    fontWeight: FontWeight.w600,
+                              Row(
+                                children: [
+                                  // ⭐ 전체 근무표 버튼
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => AllShiftsView()),
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                      margin: EdgeInsets.only(right: 12.w),
+                                      decoration: BoxDecoration(
+                                        color: Colors.indigo.shade50,
+                                        borderRadius: BorderRadius.circular(6.r),
+                                        border: Border.all(color: Colors.indigo.shade200),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.groups, size: 16.sp, color: Colors.indigo),
+                                          SizedBox(width: 4.w),
+                                          Text(
+                                            '전체',
+                                            style: TextStyle(
+                                              fontSize: 12.sp,
+                                              color: Colors.indigo,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  // today 버튼
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _focusedDay = DateTime.now();
+                                        _selectedDay = null;
+                                      });
+                                    },
+                                    child: Text(
+                                      'today',
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        color: Colors.blue.shade700,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                           ],
                         ),
