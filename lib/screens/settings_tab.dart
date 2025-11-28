@@ -348,16 +348,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                               color: Colors.indigo.shade700,
                             ),
                           ),
-                          Spacer(),
-                          // 스케줄 설정 버튼
-                          InkWell(
-                            onTap: () => _showScheduleSettingsMenu(),
-                            borderRadius: BorderRadius.circular(8.r),
-                            child: Padding(
-                              padding: EdgeInsets.all(4.w),
-                              child: Icon(Icons.settings, color: Colors.indigo.shade400, size: 20.sp),
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -376,32 +366,68 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                         ],
                       ),
                     ),
-                    // 초기화 버튼
+                    // ⭐ 수정 | 초기화 버튼 나란히 배치
                     Divider(height: 1, color: Colors.indigo.shade100),
-                    InkWell(
-                      onTap: _resetSchedule,
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(10.r),
-                        bottomRight: Radius.circular(10.r),
-                      ),
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.refresh, color: Colors.red.shade400, size: 16.sp),
-                            SizedBox(width: 6.w),
-                            Text(
-                              '스케줄 초기화',
-                              style: TextStyle(
-                                color: Colors.red.shade400,
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w500,
+                    IntrinsicHeight(
+                      child: Row(
+                        children: [
+                          // 수정 버튼
+                          Expanded(
+                            child: InkWell(
+                              onTap: () => _showScheduleSettingsMenu(),
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(10.r),
+                              ),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.edit, color: Colors.indigo.shade400, size: 16.sp),
+                                    SizedBox(width: 6.w),
+                                    Text(
+                                      '수정',
+                                      style: TextStyle(
+                                        color: Colors.indigo.shade600,
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          // 구분선
+                          VerticalDivider(width: 1, color: Colors.indigo.shade100),
+                          // 초기화 버튼
+                          Expanded(
+                            child: InkWell(
+                              onTap: _resetSchedule,
+                              borderRadius: BorderRadius.only(
+                                bottomRight: Radius.circular(10.r),
+                              ),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.refresh, color: Colors.red.shade400, size: 16.sp),
+                                    SizedBox(width: 6.w),
+                                    Text(
+                                      '초기화',
+                                      style: TextStyle(
+                                        color: Colors.red.shade400,
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -1529,7 +1555,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : Padding(
+          : SingleChildScrollView(
               padding: EdgeInsets.all(16.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1543,24 +1569,25 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                     style: TextStyle(fontSize: 14.sp, color: Colors.grey),
                   ),
                   SizedBox(height: 16.h),
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: 120.w,
-                        crossAxisSpacing: 12.w,
-                        mainAxisSpacing: 12.h,
-                        childAspectRatio: 0.70,
-                      ),
-                      itemCount: widget.shiftTypes.length,
-                      itemBuilder: (context, index) {
-                        final shift = widget.shiftTypes[index];
-                        final alarms = _shiftAlarms[shift] ?? [];
-                        return _buildShiftAlarmCard(shift, alarms);
-                      },
+                  // ⭐ shrinkWrap으로 카드 크기에 맞게 조절
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                      maxCrossAxisExtent: 120.w,
+                      crossAxisSpacing: 12.w,
+                      mainAxisSpacing: 12.h,
+                      childAspectRatio: 0.70,
                     ),
+                    itemCount: widget.shiftTypes.length,
+                    itemBuilder: (context, index) {
+                      final shift = widget.shiftTypes[index];
+                      final alarms = _shiftAlarms[shift] ?? [];
+                      return _buildShiftAlarmCard(shift, alarms);
+                    },
                   ),
-                  // ⭐ 저장 버튼 (하단으로 이동)
-                  SizedBox(height: 16.h),
+                  // ⭐ 저장 버튼 (카드 바로 아래)
+                  SizedBox(height: 24.h),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -1571,6 +1598,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                       child: Text('저장', style: TextStyle(fontSize: 16.sp)),
                     ),
                   ),
+                  SizedBox(height: 16.h),
                 ],
               ),
             ),
@@ -1767,8 +1795,6 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                                   '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
                                   style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(width: 4.w),
-                                Icon(Icons.edit, size: 14.sp, color: Colors.grey),
                               ],
                             ),
                           ),

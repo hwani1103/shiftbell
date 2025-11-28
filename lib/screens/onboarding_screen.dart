@@ -1020,8 +1020,6 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                                   '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
                                   style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(width: 4.w),
-                                Icon(Icons.edit, size: 14.sp, color: Colors.grey),
                               ],
                             ),
                           ),
