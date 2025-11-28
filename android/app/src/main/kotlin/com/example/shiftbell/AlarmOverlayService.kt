@@ -251,7 +251,11 @@ class AlarmOverlayService : Service() {
         val now = Calendar.getInstance()
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         timeText?.text = timeFormat.format(now.time)
-        
+
+        // 근무 타입 설정
+        val shiftTypeText = overlayView?.findViewById<TextView>(R.id.shiftTypeText)
+        shiftTypeText?.text = alarmLabel
+
         // 끄기 버튼
         overlayView?.findViewById<Button>(R.id.dismissButton)?.setOnClickListener {
             dismissAlarm()

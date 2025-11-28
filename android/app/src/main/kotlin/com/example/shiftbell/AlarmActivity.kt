@@ -165,15 +165,19 @@ private fun timeoutAlarm() {
     
     private fun setupUI() {
         val timeText = findViewById<TextView>(R.id.timeText)
-        
+
         val now = Calendar.getInstance()
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         timeText.text = timeFormat.format(now.time)
-        
+
+        // 근무 타입 설정
+        val shiftTypeText = findViewById<TextView>(R.id.shiftTypeText)
+        shiftTypeText.text = alarmLabel
+
         findViewById<Button>(R.id.dismissButton).setOnClickListener {
             dismissAlarm()
         }
-        
+
         findViewById<Button>(R.id.snoozeButton).setOnClickListener {
             snoozeAlarm()
         }
