@@ -570,39 +570,38 @@ Widget build(BuildContext context) {
                                 return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
                               }
 
-                              return Wrap(
-                                spacing: 8.w,
-                                runSpacing: 8.h,
+                              return Row(
                                 children: fixedAlarms.map((alarm) {
                                   final typeInfo = _getAlarmTypeInfo(alarm.alarmTypeId);
-                                  return GestureDetector(
-                                    onTap: () => _showAlarmTypeSelectionPopup(alarm, setState),
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.shade50,
-                                        borderRadius: BorderRadius.circular(8.r),
-                                        border: Border.all(color: Colors.blue.shade200),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(typeInfo['emoji']!, style: TextStyle(fontSize: 14.sp)),
-                                          SizedBox(width: 4.w),
-                                          Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.blue.shade900)),
-                                          SizedBox(width: 6.w),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                                            decoration: BoxDecoration(
-                                              color: Colors.blue.shade100,
-                                              borderRadius: BorderRadius.circular(4.r),
+                                  return Expanded(
+                                    child: GestureDetector(
+                                      onTap: () => _showAlarmTypeSelectionPopup(alarm, setState),
+                                      child: Container(
+                                        margin: EdgeInsets.only(right: alarm != fixedAlarms.last ? 8.w : 0),
+                                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.shade50,
+                                          borderRadius: BorderRadius.circular(8.r),
+                                          border: Border.all(color: Colors.blue.shade200),
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(typeInfo['emoji']!, style: TextStyle(fontSize: 14.sp)),
+                                                SizedBox(width: 4.w),
+                                                Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.blue.shade900)),
+                                              ],
                                             ),
-                                            child: Text(
+                                            SizedBox(height: 4.h),
+                                            Text(
                                               typeInfo['label']!,
                                               style: TextStyle(fontSize: 10.sp, color: Colors.blue.shade700),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   );
