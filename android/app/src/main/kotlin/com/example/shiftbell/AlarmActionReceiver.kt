@@ -31,6 +31,16 @@ class AlarmActionReceiver : BroadcastReceiver() {
             }
             "CANCEL_ALARM" -> {
                 Log.d("AlarmAction", "🗑️ 알람 취소: ID=$alarmId")
+
+                // ⭐ DB에 알람이 있는지 먼저 확인 (삼성 "알림 다시 표시" 대응)
+                if (!isAlarmExistsInDB(context, alarmId)) {
+                    Log.d("AlarmAction", "⚠️ DB에 알람 없음 (이미 삭제됨) - notification만 닫기")
+                    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    notificationManager.cancel(8888)
+                    notificationManager.cancel(8889)
+                    return
+                }
+
                 val label = intent.getStringExtra(CustomAlarmReceiver.EXTRA_LABEL) ?: "알람"
                 val soundType = intent.getStringExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE) ?: "loud"
 
@@ -50,10 +60,20 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 notificationManager.cancel(8889)
             }
             "EXTEND_ALARM" -> {
+                Log.d("AlarmAction", "⏰ 알람 5분 연장: ID=$alarmId")
+
+                // ⭐ DB에 알람이 있는지 먼저 확인 (삼성 "알림 다시 표시" 대응)
+                if (!isAlarmExistsInDB(context, alarmId)) {
+                    Log.d("AlarmAction", "⚠️ DB에 알람 없음 (이미 삭제됨) - notification만 닫기")
+                    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    notificationManager.cancel(8888)
+                    notificationManager.cancel(8889)
+                    return
+                }
+
                 val timestamp = intent.getLongExtra("timestamp", 0L)
                 val label = intent.getStringExtra(CustomAlarmReceiver.EXTRA_LABEL) ?: "알람"
                 val soundType = intent.getStringExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE) ?: "loud"
-                Log.d("AlarmAction", "⏰ 알람 5분 연장: ID=$alarmId")
 
                 // ⭐ Overlay가 울리고 있을 수 있으므로 종료 신호 발송
                 val snoozeIntent = Intent(AlarmOverlayService.ACTION_SNOOZE_OVERLAY).apply {
@@ -297,5 +317,27 @@ class AlarmActionReceiver : BroadcastReceiver() {
         }
 
         Log.d("AlarmAction", "⏰ 30초 후 8889 삭제 예약")
+    }
+
+    // ⭐ DB에 알람이 존재하는지 확인 (삼성 "알림 다시 표시" 대응)
+    private fun isAlarmExistsInDB(context: Context, alarmId: Int): Boolean {
+        return try {
+            val dbHelper = DatabaseHelper.getInstance(context)
+            val db = dbHelper.readableDatabase
+            val cursor = db.query(
+                "alarms",
+                arrayOf("id"),
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+            val exists = cursor.count > 0
+            cursor.close()
+            db.close()
+            exists
+        } catch (e: Exception) {
+            Log.e("AlarmAction", "❌ DB 조회 실패", e)
+            false
+        }
     }
 }
