@@ -11,20 +11,23 @@ class AllShiftsView extends StatefulWidget {
 
 class _AllShiftsViewState extends State<AllShiftsView> {
   late DateTime _currentMonth;
-  int _pageIndex = 0; // 0: 1~15일, 1: 16~말일
+  int _pageIndex = 0; // 0: 1~8, 1: 9~15, 2: 16~23, 3: 24~말일
 
   // ⭐ 샘플 데이터 (나중에 실제 로직으로 교체)
   final List<String> _teams = ['A', 'B', 'C', 'D'];
 
-  // 각 조의 패턴 (주간→야간→휴무→휴무 순환)
-  final List<String> _shiftPattern = ['주간', '야간', '휴무', '휴무'];
+  // ⭐ 8일 주기 패턴: 주간주간 휴무휴무 야간야간 휴무휴무
+  final List<String> _shiftPattern = [
+    '주간주간', '주간주간', '휴무휴무', '휴무휴무',
+    '야간야간', '야간야간', '휴무휴무', '휴무휴무',
+  ];
 
-  // 각 조의 시작 오프셋 (A=0, B=1, C=2, D=3)
+  // 각 조의 시작 오프셋 (2일씩 차이)
   final Map<String, int> _teamOffsets = {
     'A': 0,
-    'B': 1,
-    'C': 2,
-    'D': 3,
+    'B': 2,
+    'C': 4,
+    'D': 6,
   };
 
   @override
@@ -41,7 +44,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
 
   // 해당 날짜에 해당 조의 근무 타입 계산
   String _getShiftForTeam(String team, DateTime date) {
-    // 기준일 (2025년 1월 1일이 A조 주간 시작이라고 가정)
+    // 기준일 (2025년 1월 1일이 A조 주간주간 첫째날이라고 가정)
     final baseDate = DateTime(2025, 1, 1);
     final daysDiff = date.difference(baseDate).inDays;
     final offset = _teamOffsets[team] ?? 0;
@@ -51,60 +54,57 @@ class _AllShiftsViewState extends State<AllShiftsView> {
 
   // 근무 타입별 배경색
   Color _getShiftColor(String shift) {
-    switch (shift) {
-      case '주간':
-        return Colors.blue.shade100;
-      case '야간':
-        return Colors.purple.shade100;
-      case '휴무':
-        return Colors.red.shade100;
-      default:
-        return Colors.grey.shade100;
+    if (shift.contains('주간')) {
+      return Colors.blue.shade100;
+    } else if (shift.contains('야간')) {
+      return Colors.purple.shade100;
+    } else if (shift.contains('휴무')) {
+      return Colors.red.shade100;
     }
+    return Colors.grey.shade100;
   }
 
   // 근무 타입별 텍스트 색상
   Color _getShiftTextColor(String shift) {
-    switch (shift) {
-      case '주간':
-        return Colors.blue.shade800;
-      case '야간':
-        return Colors.purple.shade800;
-      case '휴무':
-        return Colors.red.shade800;
-      default:
-        return Colors.grey.shade800;
+    if (shift.contains('주간')) {
+      return Colors.blue.shade800;
+    } else if (shift.contains('야간')) {
+      return Colors.purple.shade800;
+    } else if (shift.contains('휴무')) {
+      return Colors.red.shade800;
     }
+    return Colors.grey.shade800;
+  }
+
+  // 페이지별 날짜 범위 정보
+  List<Map<String, int>> _getPageRanges() {
+    final lastDay = DateTime(_currentMonth.year, _currentMonth.month + 1, 0).day;
+    return [
+      {'start': 1, 'end': 8},
+      {'start': 9, 'end': 15},
+      {'start': 16, 'end': 23},
+      {'start': 24, 'end': lastDay},
+    ];
   }
 
   // 현재 페이지의 날짜 범위 계산
   List<DateTime> _getDatesForCurrentPage() {
     final year = _currentMonth.year;
     final month = _currentMonth.month;
-    final lastDay = DateTime(year, month + 1, 0).day;
+    final ranges = _getPageRanges();
+    final range = ranges[_pageIndex];
 
     List<DateTime> dates = [];
-
-    if (_pageIndex == 0) {
-      // 1~15일
-      for (int i = 1; i <= 15; i++) {
-        dates.add(DateTime(year, month, i));
-      }
-    } else {
-      // 16~말일
-      for (int i = 16; i <= lastDay; i++) {
-        dates.add(DateTime(year, month, i));
-      }
+    for (int i = range['start']!; i <= range['end']!; i++) {
+      dates.add(DateTime(year, month, i));
     }
-
     return dates;
   }
 
   @override
   Widget build(BuildContext context) {
     final dates = _getDatesForCurrentPage();
-    final lastDay = DateTime(_currentMonth.year, _currentMonth.month + 1, 0).day;
-    final maxPages = lastDay > 15 ? 2 : 1;
+    final ranges = _getPageRanges();
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
@@ -161,16 +161,17 @@ class _AllShiftsViewState extends State<AllShiftsView> {
               ),
             ),
 
-            // ⭐ 페이지 인디케이터 (1~15 / 16~말일)
+            // ⭐ 페이지 인디케이터 (4분할)
             Container(
               padding: EdgeInsets.symmetric(vertical: 8.h),
               color: Colors.white,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildPageButton(0, '1~15일'),
-                  SizedBox(width: 12.w),
-                  if (maxPages > 1) _buildPageButton(1, '16~${lastDay}일'),
+                  for (int i = 0; i < ranges.length; i++) ...[
+                    if (i > 0) SizedBox(width: 8.w),
+                    _buildPageButton(i, '${ranges[i]['start']}~${ranges[i]['end']}'),
+                  ],
                 ],
               ),
             ),
@@ -181,7 +182,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.all(8.w),
+                  padding: EdgeInsets.all(12.w),
                   child: _buildShiftTable(dates),
                 ),
               ),
@@ -201,15 +202,15 @@ class _AllShiftsViewState extends State<AllShiftsView> {
         });
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
         decoration: BoxDecoration(
           color: isSelected ? Colors.indigo : Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(16.r),
         ),
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 13.sp,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: isSelected ? Colors.white : Colors.grey.shade700,
           ),
@@ -239,7 +240,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
             width: 0.5,
           ),
           columnWidths: {
-            0: FixedColumnWidth(40.w), // 조 이름 열
+            0: FixedColumnWidth(44.w), // 조 이름 열
             // 나머지는 균등 분배
             for (int i = 1; i <= dates.length; i++)
               i: FlexColumnWidth(1),
@@ -267,7 +268,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
 
   Widget _buildHeaderCell(String text) {
     return Container(
-      height: 44.h,
+      height: 50.h,
       alignment: Alignment.center,
       child: Text(
         text,
@@ -280,12 +281,11 @@ class _AllShiftsViewState extends State<AllShiftsView> {
   }
 
   Widget _buildDateHeaderCell(DateTime date) {
-    final isWeekend = date.weekday == 6 || date.weekday == 7;
     final isSaturday = date.weekday == 6;
     final isSunday = date.weekday == 7;
 
     return Container(
-      height: 44.h,
+      height: 50.h,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: isSunday
@@ -300,7 +300,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
           Text(
             '${date.day}',
             style: TextStyle(
-              fontSize: 13.sp,
+              fontSize: 15.sp,
               fontWeight: FontWeight.bold,
               color: isSunday
                   ? Colors.red
@@ -312,7 +312,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
           Text(
             _getWeekdayChar(date),
             style: TextStyle(
-              fontSize: 10.sp,
+              fontSize: 11.sp,
               color: isSunday
                   ? Colors.red.shade400
                   : isSaturday
@@ -330,7 +330,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
       children: [
         // 조 이름 셀
         Container(
-          height: 48.h,
+          height: 56.h,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: Colors.grey.shade50,
@@ -338,7 +338,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
           child: Text(
             '$team조',
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 15.sp,
               fontWeight: FontWeight.bold,
               color: Colors.indigo,
             ),
@@ -355,7 +355,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
 
   Widget _buildShiftCell(String shift) {
     return Container(
-      height: 48.h,
+      height: 56.h,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: _getShiftColor(shift),
@@ -363,7 +363,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
       child: Text(
         shift,
         style: TextStyle(
-          fontSize: 11.sp,
+          fontSize: 13.sp,
           fontWeight: FontWeight.w600,
           color: _getShiftTextColor(shift),
         ),
