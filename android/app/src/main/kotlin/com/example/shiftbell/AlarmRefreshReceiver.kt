@@ -119,7 +119,14 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
                 return
             }
             
-            val pattern = scheduleCursor.getString(scheduleCursor.getColumnIndexOrThrow("pattern")).split(",")
+            val patternStr = scheduleCursor.getString(scheduleCursor.getColumnIndexOrThrow("pattern"))
+            if (patternStr.isNullOrEmpty()) {
+                Log.d("AlarmRefresh", "⚠️ Pattern null/empty - 불규칙 스케줄로 간주, 스킵")
+                scheduleCursor.close()
+                db.close()
+                return
+            }
+            val pattern = patternStr.split(",")
             val todayIndex = scheduleCursor.getInt(scheduleCursor.getColumnIndexOrThrow("today_index"))
             val startDateStr = scheduleCursor.getString(scheduleCursor.getColumnIndexOrThrow("start_date"))
             scheduleCursor.close()

@@ -92,6 +92,9 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
   }
 }
 
+  // 6.5인치 기준 최대 너비 (Fold 7 펼친 상태 대응)
+  static const double maxContentWidth = 500.0;
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -104,6 +107,21 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
           theme: ThemeData.light().copyWith(
             primaryColor: Colors.blue,
           ),
+          // 모든 화면에 최대 너비 제한 적용
+          builder: (context, child) {
+            return Container(
+              color: Colors.grey.shade200,  // 넓은 화면에서 양옆 배경색
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: maxContentWidth),
+                  child: Container(
+                    color: Colors.white,  // 컨텐츠 영역 배경
+                    child: child,
+                  ),
+                ),
+              ),
+            );
+          },
           home: widget.showOnboarding ? OnboardingScreen() : MainScreen(),
           routes: {
             '/home': (context) => MainScreen(),

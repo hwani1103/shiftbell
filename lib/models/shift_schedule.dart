@@ -7,30 +7,32 @@ import 'package:flutter/material.dart';
 
 class ShiftSchedule {
 
-  // ⭐ 신규: 고정 팔레트 8색
+  // ⭐ 파스텔 팔레트 8색 (명확히 구분)
   static final List<Color> shiftPalette = [
-    Color(0xFF42A5F5), // Blue (밝음)
-    Color(0xFF66BB6A), // Green (중간)
-    Color(0xFF26C6DA), // Teal (밝음)
-    Color(0xFF5C6BC0), // Indigo (어두움)
-    Color(0xFF00BCD4), // Cyan (밝음)
-    Color(0xFF7E57C2), // Deep Purple (중간)
-    Color(0xFF9CCC65), // Lime (밝음)
-    Color(0xFF8D6E63), // Brown (어두움)
+    Color(0xFFB3E5FC), // 하늘색 (Sky Blue)
+    Color(0xFFB2DFDB), // 민트색 (Mint Green)
+    Color(0xFFFFF9C4), // 노란색 (Sunny Yellow)
+    Color(0xFFFFE0B2), // 주황색 (Peach Orange)
+    Color(0xFFCFD8DC), // 청회색 (Blue Grey) - 메모 배경과 구분
+    Color(0xFFE1BEE7), // 보라색 (Lavender Purple)
+    Color(0xFFFFCCBC), // 코랄색 (Coral)
+    Color(0xFFD7CCC8), // 베이지색 (Warm Beige)
   ];
+
+  // ⭐ 휴무 고정 색상 (명확한 빨강, 파스텔 아님)
+  static final Color offColor = Color(0xFFEF5350); // Red (진한 빨강)
   
-  // ⭐ 신규: 휴무 고정 색상
-  static final Color offColor = Color(0xFFEF5350); // Red 400
-  
-  // ⭐ 신규: 배경색 밝기 판단
+  // ⭐ 배경색 밝기 판단 (파스텔 톤용 기준 낮춤)
   static bool isBright(Color c) {
     final luminance = (c.red * 0.299 + c.green * 0.587 + c.blue * 0.114);
-    return luminance > 160;
+    return luminance > 150;  // 파스텔은 대부분 밝으므로 기준 낮춤
   }
-  
-  // ⭐ 신규: 자동 텍스트 색상 (배경에 따라)
+
+  // ⭐ 자동 텍스트 색상 (배경에 따라 대비 최적화)
   static Color getTextColor(Color bg) {
-    return isBright(bg) ? Colors.black : Colors.white;
+    return isBright(bg)
+        ? Color(0xFF212121)  // 진한 회색 (파스텔 배경에 잘 보임)
+        : Colors.white;
   }
 
   final int? id;
@@ -91,12 +93,12 @@ class ShiftSchedule {
 
   String getShiftForDate(DateTime date) {
   final dateStr = date.toIso8601String().split('T')[0];
-  
+
   // ⭐ 먼저 예외 확인 (우선순위)
   if (assignedDates != null && assignedDates!.containsKey(dateStr)) {
     return assignedDates![dateStr]!;
   }
-  
+
   // 규칙적인 경우 패턴 계산
   if (isRegular) {
     if (pattern == null || todayIndex == null || startDate == null) {
@@ -105,7 +107,7 @@ class ShiftSchedule {
 
     final adjustedStartDate = DateTime(startDate!.year, startDate!.month, startDate!.day);
     final targetDate = DateTime(date.year, date.month, date.day);
-    
+
     final daysDiff = targetDate.difference(adjustedStartDate).inDays;
     final index = ((todayIndex! + daysDiff) % pattern!.length + pattern!.length) % pattern!.length;
     return pattern![index];
@@ -113,4 +115,18 @@ class ShiftSchedule {
     return '미설정';
   }
 }
+
+  // ⭐ 패턴상의 근무만 반환 (수동 할당 무시)
+  String getPatternShiftForDate(DateTime date) {
+    if (!isRegular || pattern == null || todayIndex == null || startDate == null) {
+      return '';
+    }
+
+    final adjustedStartDate = DateTime(startDate!.year, startDate!.month, startDate!.day);
+    final targetDate = DateTime(date.year, date.month, date.day);
+
+    final daysDiff = targetDate.difference(adjustedStartDate).inDays;
+    final index = ((todayIndex! + daysDiff) % pattern!.length + pattern!.length) % pattern!.length;
+    return pattern![index];
+  }
 }

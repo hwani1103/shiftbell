@@ -21,17 +21,28 @@ class AlarmHistory {
     required this.createdAt,
   });
 
+  // 안전한 DateTime 파싱 (예외 시 현재 시각 반환)
+  static DateTime _parseDate(dynamic value) {
+    if (value == null) return DateTime.now();
+    try {
+      return DateTime.parse(value.toString());
+    } catch (e) {
+      print('⚠️ DateTime 파싱 실패: $value');
+      return DateTime.now();
+    }
+  }
+
   factory AlarmHistory.fromMap(Map<String, dynamic> map) {
     return AlarmHistory(
       id: map['id'],
-      alarmId: map['alarm_id'],
-      scheduledTime: map['scheduled_time'],
-      scheduledDate: DateTime.parse(map['scheduled_date']),
-      actualRingTime: DateTime.parse(map['actual_ring_time']),
-      dismissType: map['dismiss_type'],
+      alarmId: map['alarm_id'] ?? 0,
+      scheduledTime: map['scheduled_time'] ?? '',
+      scheduledDate: _parseDate(map['scheduled_date']),
+      actualRingTime: _parseDate(map['actual_ring_time']),
+      dismissType: map['dismiss_type'] ?? 'unknown',
       snoozeCount: map['snooze_count'] ?? 0,
       shiftType: map['shift_type'],
-      createdAt: DateTime.parse(map['created_at']),
+      createdAt: _parseDate(map['created_at']),
     );
   }
 

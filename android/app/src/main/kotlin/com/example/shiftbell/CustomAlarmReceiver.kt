@@ -23,20 +23,20 @@ class CustomAlarmReceiver : BroadcastReceiver() {
         const val EXTRA_SOUND_TYPE = "soundType"
         const val EXTRA_LABEL = "label"
         const val EXTRA_ID = "id"
-        const val CHANNEL_ID = "alarm_channel"
+        const val CHANNEL_ID = "shiftbell_alarm_v3"  // ⭐ 채널 ID 변경 + "알람" 키워드 제거
     }
     
     // CustomAlarmReceiver.kt - onReceive() 수정
 
 override fun onReceive(context: Context, intent: Intent) {
     Log.e("CustomAlarmReceiver", "========== 알람 수신! ==========")
-    
+
     val soundType = intent.getStringExtra(EXTRA_SOUND_TYPE) ?: "loud"
     val label = intent.getStringExtra(EXTRA_LABEL) ?: "알람"
     val id = intent.getIntExtra(EXTRA_ID, 0)
-    
+
     Log.e("CustomAlarmReceiver", "ID: $id, Label: $label")
-    
+
     // ⭐ 신규: 알람 울릴 때 즉시 갱신 체크!
     AlarmRefreshUtil.checkAndTriggerRefresh(context)
     
@@ -84,8 +84,8 @@ override fun onReceive(context: Context, intent: Intent) {
         Log.e("CustomAlarmReceiver", "❌ 알람 이력 기록 실패", e)
     }
     
-    // 알람 재생
-    AlarmPlayer.getInstance(context.applicationContext).playAlarm(soundType)
+    // 알람 재생 (DB에서 설정 읽어서 적용)
+    AlarmPlayer.getInstance(context.applicationContext).playAlarmFromDB(id)
     
     // 화면 강제로 깨우기
     wakeUpScreen(context)
@@ -138,57 +138,18 @@ override fun onReceive(context: Context, intent: Intent) {
     }
     
     private fun showAlarmActivity(context: Context, id: Int, label: String) {
-    // ⭐ DB에서 alarm_type_id 조회 → duration 가져오기
-    val duration = try {
-        val dbHelper = DatabaseHelper.getInstance(context)
-        val db = dbHelper.readableDatabase
-        
-        // 1. alarms 테이블에서 alarm_type_id 조회
-        val alarmCursor = db.query(
-            "alarms",
-            arrayOf("alarm_type_id"),
-            "id = ?",
-            arrayOf(id.toString()),
-            null, null, null
-        )
-        
-        var alarmTypeId = 1  // 기본값
-        if (alarmCursor.moveToFirst()) {
-            alarmTypeId = alarmCursor.getInt(0)
-        }
-        alarmCursor.close()
-        
-        // 2. alarm_types 테이블에서 duration 조회
-        val typeCursor = db.query(
-            "alarm_types",
-            arrayOf("duration"),
-            "id = ?",
-            arrayOf(alarmTypeId.toString()),
-            null, null, null
-        )
-        
-        var durationValue = 10  // 기본값
-        if (typeCursor.moveToFirst()) {
-            durationValue = typeCursor.getInt(0)
-        }
-        typeCursor.close()
-        db.close()
-        
-        durationValue
-    } catch (e: Exception) {
-        Log.e("CustomAlarmReceiver", "duration 조회 실패", e)
-        10  // 에러 시 기본값
-    }
-    
+    // ⭐ DB에서 duration 읽기
+    val duration = getDurationFromDB(context, id)
+
     val activityIntent = Intent(context, AlarmActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or 
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or
                 Intent.FLAG_ACTIVITY_CLEAR_TASK or
                 Intent.FLAG_ACTIVITY_NO_USER_ACTION
         putExtra("alarmId", id)
         putExtra("label", label)
-        putExtra("alarmDuration", duration)  // ⭐ 신규
+        putExtra("alarmDuration", duration)
     }
-    
+
     try {
         context.startActivity(activityIntent)
         Log.e("CustomAlarmReceiver", "✅ AlarmActivity 시작 (duration=${duration}분)")
@@ -197,6 +158,51 @@ override fun onReceive(context: Context, intent: Intent) {
         showNotification(context, id, label)
     }
 }
+
+    // ⭐ DB에서 알람 타입의 duration 읽기
+    private fun getDurationFromDB(context: Context, alarmId: Int): Int {
+        try {
+            val dbHelper = DatabaseHelper.getInstance(context)
+            val db = dbHelper.readableDatabase
+
+            // 알람에서 alarm_type_id 조회
+            val alarmCursor = db.query(
+                "alarms",
+                arrayOf("alarm_type_id"),
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+
+            var alarmTypeId = 1  // 기본값
+            if (alarmCursor.moveToFirst()) {
+                alarmTypeId = alarmCursor.getInt(alarmCursor.getColumnIndexOrThrow("alarm_type_id"))
+            }
+            alarmCursor.close()
+
+            // alarm_types에서 duration 조회
+            val typeCursor = db.query(
+                "alarm_types",
+                arrayOf("duration"),
+                "id = ?",
+                arrayOf(alarmTypeId.toString()),
+                null, null, null
+            )
+
+            var duration = 5  // 기본값 5분
+            if (typeCursor.moveToFirst()) {
+                duration = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("duration"))
+            }
+            typeCursor.close()
+            db.close()
+
+            Log.d("CustomAlarmReceiver", "✅ DB duration: $duration 분")
+            return duration
+        } catch (e: Exception) {
+            Log.e("CustomAlarmReceiver", "❌ duration 조회 실패, 기본값 5분 사용", e)
+            return 5
+        }
+    }
     
     private fun showOverlayWindow(context: Context, id: Int, label: String) {
         Log.e("CustomAlarmReceiver", "✅ Overlay 표시 시작")
@@ -226,29 +232,36 @@ override fun onReceive(context: Context, intent: Intent) {
         
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         
-        // 채널 생성
+        // ⭐ 채널 생성 (무음 - 소리는 AlarmPlayer에서 재생) - "알람" 키워드 제거
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "알람",
-                NotificationManager.IMPORTANCE_HIGH
+                "Shiftbell",  // ⭐ "알람" 제거 (삼성 시스템 스누즈 방지)
+                NotificationManager.IMPORTANCE_HIGH  // fullScreenIntent를 위해 HIGH 유지
             ).apply {
-                description = "알람 알림"
+                description = "근무 시간 알림"
+                enableVibration(false)
+                setSound(null, null)  // notification 자체는 무음
             }
             notificationManager.createNotificationChannel(channel)
         }
-        
+
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("알람")
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("Shiftbell")  // ⭐ "알람" 제거
             .setContentText(label)
-            .setPriority(NotificationCompat.PRIORITY_MAX)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_CALL)  // ⭐ CALL 사용 (삼성 시스템 스누즈 방지, full-screen 지원)
             .setFullScreenIntent(fullScreenPendingIntent, true)
+            .setSilent(true)  // ⭐ 소리/진동 없음 (알람 소리는 AlarmPlayer)
             .setAutoCancel(true)
+            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
+            .setGroupSummary(false)
+            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(label))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
             .build()
         
-        notificationManager.notify(id, notification)
+        notificationManager.notify(id + 100000, notification)  // ⭐ 8888/8889와 충돌 방지
         
         Log.e("CustomAlarmReceiver", "✅ Notification 표시")
     }

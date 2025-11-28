@@ -160,6 +160,16 @@ override fun onNewIntent(intent: Intent) {
                     triggerMidnightCheck()
                     result.success(null)
                 }
+                // ⭐ 테스트용: Native last_alarm_refresh 리셋
+                "resetNativeRefreshFlag" -> {
+                    resetNativeRefreshFlag()
+                    result.success(null)
+                }
+                // ⭐ 테스트용: Native 갱신 강제 실행
+                "forceNativeRefresh" -> {
+                    forceNativeRefresh()
+                    result.success(null)
+                }
                 "triggerGuardCheck" -> {
                     triggerGuardCheck()
                     result.success(null)
@@ -174,10 +184,57 @@ override fun onNewIntent(intent: Intent) {
                 // ⭐ 신규 추가
 "cancelNotification" -> {
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.cancel(8888)
-    Log.d("MainActivity", "📢 Notification 삭제 (ID: 8888)")
+    notificationManager.cancel(8888)  // 20분 전 알림
+    notificationManager.cancel(8889)  // 스누즈/타임아웃 알림
+    Log.d("MainActivity", "📢 Notification 삭제 (ID: 8888, 8889)")
     result.success(null)
 }
+                // ⭐ Overlay 종료 (외부에서 알람 끄기)
+                "dismissOverlay" -> {
+                    val alarmId = call.argument<Int>("alarmId") ?: -1
+                    val intent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
+                        setPackage(packageName)  // Android 13+ RECEIVER_NOT_EXPORTED 대응
+                        putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                    }
+                    sendBroadcast(intent)
+                    Log.d("MainActivity", "📡 Overlay DISMISS 브로드캐스트 발송: ID=$alarmId")
+                    result.success(null)
+                }
+                // ⭐ Overlay 스누즈 (외부에서 알람 5분 후)
+                "snoozeOverlay" -> {
+                    val alarmId = call.argument<Int>("alarmId") ?: -1
+                    val intent = Intent(AlarmOverlayService.ACTION_SNOOZE_OVERLAY).apply {
+                        setPackage(packageName)  // Android 13+ RECEIVER_NOT_EXPORTED 대응
+                        putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                    }
+                    sendBroadcast(intent)
+                    Log.d("MainActivity", "📡 Overlay SNOOZE 브로드캐스트 발송: ID=$alarmId")
+                    result.success(null)
+                }
+                // ⭐ 진동 테스트 (설정 화면에서 미리보기)
+                "testVibration" -> {
+                    val strength = call.argument<Int>("strength") ?: 1
+                    testVibration(strength)
+                    result.success(null)
+                }
+                // ⭐ 알람 음량 미리듣기 (STREAM_ALARM 사용)
+                "playPreviewSound" -> {
+                    val soundFile = call.argument<String>("soundFile") ?: "alarmbell1"
+                    val volume = call.argument<Double>("volume")?.toFloat() ?: 0.7f
+                    playPreviewSound(soundFile, volume)
+                    result.success(null)
+                }
+                // ⭐ 미리듣기 중지
+                "stopPreviewSound" -> {
+                    stopPreviewSound()
+                    result.success(null)
+                }
+                // ⭐ 미리듣기 볼륨 변경 (슬라이더 실시간 반영)
+                "updatePreviewVolume" -> {
+                    val volume = call.argument<Double>("volume")?.toFloat() ?: 0.7f
+                    updatePreviewVolume(volume)
+                    result.success(null)
+                }
                 else -> result.notImplemented()
             }
         }
@@ -222,11 +279,33 @@ override fun onNewIntent(intent: Intent) {
         val intent = Intent(this, AlarmGuardReceiver::class.java)
         sendBroadcast(intent)
     }
+
+    // ⭐ 테스트용: Native SharedPreferences의 last_alarm_refresh 리셋
+    private fun resetNativeRefreshFlag() {
+        val deviceContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            createDeviceProtectedStorageContext()
+        } else {
+            applicationContext
+        }
+        val prefs = deviceContext.getSharedPreferences("alarm_state", Context.MODE_PRIVATE)
+        prefs.edit().putLong("last_alarm_refresh", 0L).apply()
+        Log.d("MainActivity", "✅ Native last_alarm_refresh 리셋 완료")
+    }
+
+    // ⭐ 테스트용: Native 갱신 강제 실행 (리셋 후 트리거)
+    private fun forceNativeRefresh() {
+        resetNativeRefreshFlag()
+        val intent = Intent("com.example.shiftbell.REFRESH_ALARMS").apply {
+            setPackage(packageName)
+        }
+        sendBroadcast(intent)
+        Log.d("MainActivity", "✅ Native 갱신 강제 실행 완료")
+    }
     
     private fun triggerGuardCheck() {
-        val intent = Intent(this, AlarmGuardReceiver::class.java)
-        sendBroadcast(intent)
-        Log.d("MainActivity", "✅ AlarmGuardReceiver 수동 트리거")
+        // ⭐ sendBroadcast 대신 직접 호출 (더 확실하게 동작)
+        AlarmGuardReceiver.triggerCheck(this)
+        Log.d("MainActivity", "✅ AlarmGuardReceiver 직접 트리거")
     }
     
     private fun getDeviceProtectedStoragePath(): String {
@@ -288,8 +367,12 @@ override fun onNewIntent(intent: Intent) {
                 pendingIntent
             )
         }
+
+        // ⭐ 알람 등록 후 AlarmGuardReceiver 직접 트리거 (20분 이내면 Notification 표시)
+        AlarmGuardReceiver.triggerCheck(this)
+        Log.d("MainActivity", "✅ 알람 등록 완료: ID=$id, AlarmGuardReceiver 직접 트리거")
     }
-    
+
     private fun cancelNativeAlarm(id: Int) {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, CustomAlarmReceiver::class.java).apply {
@@ -302,25 +385,35 @@ override fun onNewIntent(intent: Intent) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         alarmManager.cancel(pendingIntent)
+
+        // ⭐ shownNotifications에서 제거 (같은 ID 재사용 시 notification 표시 위해)
+        AlarmGuardReceiver.removeShownNotification(id)
+        Log.d("MainActivity", "✅ 알람 취소 및 shownNotifications 제거: ID=$id")
     }
     
-    // ⭐ 신규: Notification 업데이트 함수
+    // ⭐ 신규: Notification 업데이트 함수 (Flutter에서 스누즈 시 호출)
     private fun updateExistingNotification(alarmId: Int, newTime: String, label: String) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        
+
+        // ⭐ 1단계: 기존 8888 삭제
+        notificationManager.cancel(8888)
+        Log.d("MainActivity", "🗑️ 8888 Notification 삭제")
+
+        // ⭐ 스누즈 결과 전용 채널 ("알람" 키워드 제거 - 삼성 시스템 스누즈 방지)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "twenty_min_channel",
-                "알람 사전 알림",
-                NotificationManager.IMPORTANCE_HIGH
+                "shiftbell_result_v3",
+                "결과 알림",
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "알람 20분 전 알림"
-                enableVibration(true)
-                setShowBadge(true)
+                description = "스누즈/타임아웃 결과"
+                enableVibration(false)
+                setSound(null, null)
+                setShowBadge(false)
             }
             notificationManager.createNotificationChannel(channel)
         }
-        
+
         val openAppIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("openTab", 0)
@@ -331,64 +424,158 @@ override fun onNewIntent(intent: Intent) {
             openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
-        val cancelIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = "CANCEL_ALARM"
-            putExtra("alarmId", alarmId)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-        }
-        val cancelPendingIntent = PendingIntent.getBroadcast(
-            this,
-            alarmId + 10000,
-            cancelIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        // ⭐ 새 timestamp 계산 (현재 시간 기준)
-        val timeParts = newTime.split(":")
-        val now = java.util.Calendar.getInstance()
-        val newTimestamp = java.util.Calendar.getInstance().apply {
-            set(java.util.Calendar.HOUR_OF_DAY, timeParts[0].toInt())
-            set(java.util.Calendar.MINUTE, timeParts[1].toInt())
-            set(java.util.Calendar.SECOND, 0)
-            set(java.util.Calendar.MILLISECOND, 0)
-            
-            // 시간이 과거면 다음날로
-            if (timeInMillis < now.timeInMillis) {
-                add(java.util.Calendar.DAY_OF_MONTH, 1)
-            }
-        }.timeInMillis
-        
-        val extendIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = "EXTEND_ALARM"
-            putExtra("alarmId", alarmId)
-            putExtra("timestamp", newTimestamp)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-        }
-        val extendPendingIntent = PendingIntent.getBroadcast(
-            this,
-            alarmId + 20000,
-            extendIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val notification = NotificationCompat.Builder(this, "twenty_min_channel")
-            .setContentTitle("알람이 $newTime 로 연장되었습니다")
+
+        // ⭐ 2단계: 8889 표시 (스누즈 결과)
+        val notification = NotificationCompat.Builder(this, "shiftbell_result_v3")
+            .setContentTitle("$newTime 로 연장되었습니다")
             .setContentText(label)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setAutoCancel(true)
+            .setSilent(true)
             .setOnlyAlertOnce(true)
+            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
+            .setGroupSummary(false)
+            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(label))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
             .setContentIntent(openAppPendingIntent)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
-            .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)
             .build()
-        
-        notificationManager.notify(8888, notification)
-        
-        Log.d("MainActivity", "📢 Notification 업데이트: $newTime")
+
+        notificationManager.notify(8889, notification)
+        Log.d("MainActivity", "📢 8889 Notification 표시: $newTime")
+
+        // ⭐ 3단계: 30초 후 8889 자동 삭제 예약
+        scheduleNotificationDeletion()
+
+        // ⭐ 4단계: 다음 알람의 8888 Notification 표시
+        AlarmGuardReceiver.triggerCheck(this)
+        Log.d("MainActivity", "✅ AlarmGuardReceiver.triggerCheck() → 다음 알람 8888 표시")
+    }
+
+    private fun scheduleNotificationDeletion() {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val deleteIntent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = AlarmActionReceiver.ACTION_DELETE_SNOOZE_NOTIFICATION
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            9999,  // 고정 requestCode (8889 삭제 전용)
+            deleteIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val deleteTime = System.currentTimeMillis() + 30_000  // 30초 후
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExact(AlarmManager.RTC, deleteTime, pendingIntent)
+        } else {
+            alarmManager.set(AlarmManager.RTC, deleteTime, pendingIntent)
+        }
+
+        Log.d("MainActivity", "⏰ 30초 후 8889 삭제 예약")
+    }
+
+    // ⭐ 진동 테스트 (약 1초간)
+    private fun testVibration(strength: Int) {
+        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+
+        // 진동 패턴 (1초간)
+        val pattern = when(strength) {
+            1 -> longArrayOf(0, 500, 200, 300)   // 약하게: 짧은 진동
+            3 -> longArrayOf(0, 800, 200)        // 강하게: 긴 진동
+            else -> longArrayOf(0, 500)
+        }
+
+        // 진동 세기
+        val amplitude = when(strength) {
+            1 -> 100   // 약하게
+            3 -> 255   // 강하게 (최대)
+            else -> 150
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val amplitudes = pattern.map { if (it == 0L) 0 else amplitude }.toIntArray()
+            vibrator.vibrate(
+                android.os.VibrationEffect.createWaveform(pattern, amplitudes, -1)  // -1 = 반복 안함
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(pattern, -1)
+        }
+
+        Log.d("MainActivity", "🔔 진동 테스트: 세기=$strength")
+    }
+
+    // ⭐ 미리듣기용 MediaPlayer
+    private var previewMediaPlayer: android.media.MediaPlayer? = null
+
+    // ⭐ 알람 음량 미리듣기 (STREAM_ALARM 사용 - 실제 알람과 동일)
+    private fun playPreviewSound(soundFile: String, volume: Float) {
+        stopPreviewSound()  // 기존 재생 중지
+
+        try {
+            // ⭐ 시스템 알람 볼륨을 50%로 고정 (실제 알람과 동일하게)
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+            val maxVolume = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM)
+            val halfVolume = maxVolume / 2
+            audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, halfVolume, 0)
+
+            // ⭐ 사운드 URI 결정 (default = 시스템 기본 알람음)
+            val soundUri = if (soundFile == "default") {
+                android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM)
+            } else {
+                // res/raw 리소스 ID 가져오기
+                val resourceId = resources.getIdentifier(soundFile, "raw", packageName)
+                if (resourceId == 0) {
+                    Log.e("MainActivity", "리소스 못 찾음: res/raw/$soundFile.mp3")
+                    return
+                }
+                android.net.Uri.parse("android.resource://$packageName/$resourceId")
+            }
+
+            previewMediaPlayer = android.media.MediaPlayer().apply {
+                setDataSource(this@MainActivity, soundUri)
+
+                // 핵심: STREAM_ALARM 사용 (실제 알람과 동일)
+                setAudioAttributes(
+                    android.media.AudioAttributes.Builder()
+                        .setUsage(android.media.AudioAttributes.USAGE_ALARM)
+                        .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+
+                // 음량 설정 (슬라이더 값)
+                setVolume(volume, volume)
+
+                isLooping = false  // 미리듣기는 반복 안 함
+                prepare()
+                start()
+            }
+
+            Log.d("MainActivity", "🔊 미리듣기 재생: $soundFile, 음량 ${(volume * 100).toInt()}%")
+
+        } catch (e: Exception) {
+            Log.e("MainActivity", "❌ 미리듣기 재생 실패", e)
+        }
+    }
+
+    // ⭐ 미리듣기 중지
+    private fun stopPreviewSound() {
+        previewMediaPlayer?.apply {
+            if (isPlaying) {
+                stop()
+            }
+            release()
+        }
+        previewMediaPlayer = null
+        Log.d("MainActivity", "🔇 미리듣기 중지")
+    }
+
+    // ⭐ 미리듣기 볼륨 변경 (슬라이더 실시간 반영)
+    private fun updatePreviewVolume(volume: Float) {
+        previewMediaPlayer?.setVolume(volume, volume)
+        Log.d("MainActivity", "🔊 미리듣기 볼륨 변경: ${(volume * 100).toInt()}%")
     }
 }

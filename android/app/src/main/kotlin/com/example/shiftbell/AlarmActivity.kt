@@ -32,29 +32,60 @@ import kotlin.math.abs
 
 class AlarmActivity : AppCompatActivity() {
     private var alarmId: Int = 0
-    private var alarmDuration: Int = 10
+    private var alarmDuration: Int = 1  // 기본 1분 (테스트용)
+    private var alarmTimeStr: String = ""  // 알람 시간 저장
+    private var alarmLabel: String = "알람"  // 알람 라벨 저장
     private lateinit var gestureDetector: GestureDetectorCompat
     private var timeoutHandler: Handler? = null
     private var timeoutRunnable: Runnable? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         alarmId = intent.getIntExtra("alarmId", 0)
-        alarmDuration = intent.getIntExtra("alarmDuration", 10)
-        
+        alarmDuration = intent.getIntExtra("alarmDuration", 1)  // 기본 1분 (테스트용)
+
         setupWindowFlags()
-        
+
+        // DB에서 알람 정보 로드
+        loadAlarmInfo()
+
         setContentView(R.layout.activity_alarm)
         setupUI()
-        
+
         gestureDetector = GestureDetectorCompat(this, SwipeGestureListener())
-        
+
         findViewById<ConstraintLayout>(R.id.rootLayout).setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
             true
         }
         startTimeoutTimer()
+    }
+
+    private fun loadAlarmInfo() {
+        try {
+            val dbHelper = DatabaseHelper.getInstance(applicationContext)
+            val db = dbHelper.readableDatabase
+
+            val cursor = db.query(
+                "alarms",
+                arrayOf("time", "shift_type"),
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+
+            if (cursor.moveToFirst()) {
+                alarmTimeStr = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
+                alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+            }
+            cursor.close()
+            db.close()
+
+            Log.d("AlarmActivity", "✅ 알람 정보 로드: time=$alarmTimeStr, label=$alarmLabel")
+        } catch (e: Exception) {
+            Log.e("AlarmActivity", "❌ 알람 정보 로드 실패", e)
+        }
     }
     
     private fun startTimeoutTimer() {
@@ -73,17 +104,17 @@ class AlarmActivity : AppCompatActivity() {
 
 private fun timeoutAlarm() {
     Log.d("AlarmActivity", "⏰ 알람 타임아웃 - 자동 종료")
-    
+
     // 알람 소리 중지
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
-    
-    // ⭐ DB에서 알람 삭제 (버그 수정!)
+
+    // ⭐ DB에서 알람 삭제
     try {
         val dbHelper = DatabaseHelper.getInstance(applicationContext)
         val db = dbHelper.writableDatabase
         val deleted = db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
         db.close()
-        
+
         Log.d("AlarmActivity", if (deleted > 0) {
             "✅ DB 알람 삭제: ID=$alarmId"
         } else {
@@ -92,24 +123,32 @@ private fun timeoutAlarm() {
     } catch (e: Exception) {
         Log.e("AlarmActivity", "❌ DB 삭제 실패", e)
     }
-    
+
     // 이력 업데이트
     updateAlarmHistory(alarmId, "timeout")
-    
-    // 알림 제거
+
+    // shownNotifications에서 제거
+    AlarmGuardReceiver.removeShownNotification(alarmId)
+
+    // ⭐ 8888 Notification 삭제 (타임아웃은 8889 안 보여줌)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.cancel(alarmId)
-    
-    // ⭐ 신규: 갱신 체크
+    notificationManager.cancel(8888)
+    Log.d("AlarmActivity", "🗑️ 8888 Notification 삭제 (타임아웃)")
+
+    // 갱신 체크
     AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
-    
+
+    // ⭐ 다음 알람의 8888 Notification 표시 (직접 호출)
+    AlarmGuardReceiver.triggerCheck(this)
+    Log.d("AlarmActivity", "✅ AlarmGuardReceiver.triggerCheck() → 다음 알람 8888 표시")
+
     // 홈 화면으로 이동
     goToHomeScreen()
-    
+
     // Activity 종료
     finish()
 }
-    
+
     private fun setupWindowFlags() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
@@ -126,15 +165,19 @@ private fun timeoutAlarm() {
     
     private fun setupUI() {
         val timeText = findViewById<TextView>(R.id.timeText)
-        
+
         val now = Calendar.getInstance()
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         timeText.text = timeFormat.format(now.time)
-        
+
+        // 근무 타입 설정
+        val shiftTypeText = findViewById<TextView>(R.id.shiftTypeText)
+        shiftTypeText.text = alarmLabel
+
         findViewById<Button>(R.id.dismissButton).setOnClickListener {
             dismissAlarm()
         }
-        
+
         findViewById<Button>(R.id.snoozeButton).setOnClickListener {
             snoozeAlarm()
         }
@@ -190,66 +233,143 @@ private fun dismissAlarm() {
     }
     
     updateAlarmHistory(alarmId, "swiped")
-    
+
+    // ⭐ Notification 삭제 (alarmId + 8888: 20분전 + 8889: 스누즈/타임아웃)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)
-    
-    // ⭐ 신규: 갱신 체크 (Native에서 직접!)
+    notificationManager.cancel(8888)
+    notificationManager.cancel(8889)
+    Log.d("AlarmActivity", "📢 Notification 삭제 (8888, 8889)")
+
+    // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
+    AlarmGuardReceiver.removeShownNotification(alarmId)
+
+    // ⭐ 갱신 체크 (Native에서 직접!)
     AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
-    
+
+    // ⭐ AlarmGuardReceiver 트리거 (다음 알람 Notification 즉시 표시)
+    val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
+    sendBroadcast(guardIntent)
+    Log.d("AlarmActivity", "✅ AlarmGuardReceiver 트리거")
+
     goToHomeScreen()
     finish()
 }
     
     private fun snoozeAlarm() {
         cancelTimeoutTimer()
-        
+
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
-        
+
         try {
-        val dbHelper = DatabaseHelper.getInstance(applicationContext)
-        val db = dbHelper.readableDatabase
-        
-        val cursor = db.query(
-            "alarms",
-            null,
-            "id = ?",
-            arrayOf(alarmId.toString()),
-            null, null, null
-        )
-        
-        if (cursor.moveToFirst()) {
-            val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
-            val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
-            cursor.close()
-            
-            // ... (중간 생략: 5분 후 시간 계산 및 DB 업데이트)
-            
-            // ⭐ 수정: AlarmRefreshWorker → AlarmRefreshUtil (284번째 줄 근처)
-            AlarmRefreshUtil.checkAndTriggerRefresh(this)
-            
-            val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
-            sendBroadcast(guardIntent)
-            
-        } else {
-            cursor.close()
-            Log.e("AlarmActivity", "❌ 알람 정보 없음: ID=$alarmId")
+            val dbHelper = DatabaseHelper.getInstance(applicationContext)
+            val db = dbHelper.readableDatabase
+
+            val cursor = db.query(
+                "alarms",
+                null,
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+
+            if (cursor.moveToFirst()) {
+                val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
+                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                cursor.close()
+
+                // ⭐ 5분 후 시간 계산
+                val newTimestamp = System.currentTimeMillis() + (5 * 60 * 1000)
+
+                // ⭐ 기존 알람 취소
+                val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val cancelIntent = Intent(this, CustomAlarmReceiver::class.java).apply {
+                    data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
+                }
+                val cancelPendingIntent = PendingIntent.getBroadcast(
+                    this,
+                    alarmId,
+                    cancelIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                alarmManager.cancel(cancelPendingIntent)
+                cancelPendingIntent.cancel()
+                Log.d("AlarmActivity", "✅ 기존 알람 취소: ID=$alarmId")
+
+                // ⭐ 새 알람 등록
+                val newIntent = Intent(this, CustomAlarmReceiver::class.java).apply {
+                    data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
+                    putExtra(CustomAlarmReceiver.EXTRA_ID, alarmId)
+                    putExtra(CustomAlarmReceiver.EXTRA_LABEL, shiftType)
+                    putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
+                }
+
+                val newPendingIntent = PendingIntent.getBroadcast(
+                    this,
+                    alarmId,
+                    newIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        newTimestamp,
+                        newPendingIntent
+                    )
+                } else {
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        newTimestamp,
+                        newPendingIntent
+                    )
+                }
+                Log.d("AlarmActivity", "✅ 5분 후 알람 등록: ID=$alarmId, 시각=${java.util.Date(newTimestamp)}")
+
+                // ⭐ DB 업데이트 (time, date 필드)
+                val writableDb = dbHelper.writableDatabase
+                val dateStr = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(newTimestamp))
+                val timeStr = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(newTimestamp))
+
+                val values = ContentValues().apply {
+                    put("date", dateStr)
+                    put("time", timeStr)
+                }
+                writableDb.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
+                Log.d("AlarmActivity", "✅ DB 업데이트: time=$timeStr, date=$dateStr")
+
+                writableDb.close()
+
+                // ⭐ 갱신 체크
+                AlarmRefreshUtil.checkAndTriggerRefresh(this)
+
+                // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
+                AlarmGuardReceiver.removeShownNotification(alarmId)
+
+                // ⭐ 연장 Notification 표시 (NotificationHelper 사용)
+                NotificationHelper.showUpdatedNotification(applicationContext, timeStr, shiftType)
+
+            } else {
+                cursor.close()
+                Log.e("AlarmActivity", "❌ 알람 정보 없음: ID=$alarmId")
+            }
+
+            db.close()
+        } catch (e: Exception) {
+            Log.e("AlarmActivity", "❌ 5분 후 재등록 실패", e)
         }
-        
-        db.close()
-    } catch (e: Exception) {
-        Log.e("AlarmActivity", "❌ 5분 후 재등록 실패", e)
+
+        updateAlarmHistory(alarmId, "snoozed", incrementSnooze = true)
+
+        // ⭐ 앱 포그라운드로 가져와서 Flutter UI 즉시 갱신
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        startActivity(launchIntent)
+        Log.d("AlarmActivity", "✅ 앱 포그라운드 이동 → Flutter UI 갱신")
+
+        finish()
     }
-    
-    updateAlarmHistory(alarmId, "snoozed", incrementSnooze = true)
-    
-    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.cancel(alarmId)
-    
-    goToHomeScreen()
-    finish()
-    }
-    
+
     private fun goToHomeScreen() {
         val homeIntent = Intent(Intent.ACTION_MAIN).apply {
             addCategory(Intent.CATEGORY_HOME)
@@ -301,91 +421,5 @@ private fun dismissAlarm() {
             timeoutHandler?.removeCallbacks(it)
         }
         Log.d("AlarmActivity", "⏱️ 타임아웃 타이머 취소")
-    }
-    
-    // ⭐ 신규: Notification 업데이트 함수
-    private fun updateNotification(alarmId: Int, newTime: String, label: String) {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "twenty_min_channel",
-                "알람 사전 알림",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "알람 20분 전 알림"
-                enableVibration(true)
-                setShowBadge(true)
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-        
-        val openAppIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("openTab", 0)
-        }
-        val openAppPendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            openAppIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val cancelIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = "CANCEL_ALARM"
-            putExtra("alarmId", alarmId)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-        }
-        val cancelPendingIntent = PendingIntent.getBroadcast(
-            this,
-            alarmId + 10000,
-            cancelIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val timeParts = newTime.split(":")
-        val now = Calendar.getInstance()
-        val newTimestamp = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
-            set(Calendar.MINUTE, timeParts[1].toInt())
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-            
-            if (timeInMillis < now.timeInMillis) {
-                add(Calendar.DAY_OF_MONTH, 1)
-            }
-        }.timeInMillis
-        
-        val extendIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = "EXTEND_ALARM"
-            putExtra("alarmId", alarmId)
-            putExtra("timestamp", newTimestamp)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-        }
-        val extendPendingIntent = PendingIntent.getBroadcast(
-            this,
-            alarmId + 20000,
-            extendIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val notification = NotificationCompat.Builder(this, "twenty_min_channel")
-            .setContentTitle("알람이 $newTime 로 연장되었습니다")
-            .setContentText(label)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setAutoCancel(true)
-            .setOnlyAlertOnce(true)
-            .setContentIntent(openAppPendingIntent)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
-            .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)
-            .build()
-        
-        notificationManager.notify(8888, notification)
-        
-        Log.d("AlarmActivity", "📢 Notification 업데이트: $newTime")
     }
 }

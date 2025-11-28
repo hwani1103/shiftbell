@@ -95,9 +95,12 @@ class DirectBootReceiver : BroadcastReceiver() {
     private fun saveBootTime(context: Context) {
         val prefs = context.getSharedPreferences("alarm_state", Context.MODE_PRIVATE)
         val bootTime = System.currentTimeMillis()
-        prefs.edit().putLong("last_boot_time", bootTime).apply()
-        
-        Log.d("DirectBoot", "📝 부팅 시각 저장: ${Date(bootTime)}")
+        prefs.edit()
+            .putLong("last_boot_time", bootTime)
+            .putLong("last_alarm_refresh", 0L)  // ⭐ 재부팅 시 갱신 플래그 리셋!
+            .apply()
+
+        Log.d("DirectBoot", "📝 부팅 시각 저장 & 갱신 플래그 리셋: ${Date(bootTime)}")
     }
     
     private fun getNextAlarmFromDB(context: Context): AlarmData? {

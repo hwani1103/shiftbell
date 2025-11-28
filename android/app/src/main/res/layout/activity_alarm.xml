@@ -1,54 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout 
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="#F5F5F5">
 
-    <!-- 시계 아이콘 -->
-    <ImageView
-        android:id="@+id/clockIcon"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:src="@android:drawable/ic_lock_idle_alarm"
-        android:tint="#FFFFFF"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.35"/>
-
-    <!-- 현재 시간 -->
-    <TextView
-        android:id="@+id/timeText"
-        android:layout_width="wrap_content"
+    <!-- 메인 알람 카드 -->
+    <LinearLayout
+        android:id="@+id/alarmCard"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="09:30"
-        android:textSize="64sp"
-        android:textColor="#FFFFFF"
-        android:fontFamily="sans-serif-light"
-        app:layout_constraintTop_toBottomOf="@id/clockIcon"
+        android:orientation="vertical"
+        android:background="@drawable/alarm_card_gradient"
+        android:padding="40dp"
+        android:gravity="center"
+        android:elevation="12dp"
+        android:layout_marginHorizontal="24dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/buttonContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        app:layout_constraintVertical_bias="0.45">
 
-    <!-- X 버튼 (스와이프 안내) -->
+        <!-- 알람 아이콘 -->
+        <ImageView
+            android:id="@+id/clockIcon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@android:drawable/ic_lock_idle_alarm"
+            android:tint="#FFFFFF"
+            android:alpha="0.9"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 현재 시간 -->
+        <TextView
+            android:id="@+id/timeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="09:30"
+            android:textSize="72sp"
+            android:textColor="#FFFFFF"
+            android:fontFamily="sans-serif-light"
+            android:letterSpacing="0.05"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- 근무 타입 뱃지 -->
+        <TextView
+            android:id="@+id/shiftTypeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="주간"
+            android:textSize="20sp"
+            android:textColor="#3949AB"
+            android:textStyle="bold"
+            android:background="@drawable/alarm_shift_badge"
+            android:paddingHorizontal="28dp"
+            android:paddingVertical="12dp"/>
+
+    </LinearLayout>
+
+    <!-- 스와이프 안내 -->
     <TextView
         android:id="@+id/swipeHint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="↔ 스와이프하여 끄기 ↕"
-        android:textSize="18sp"
-        android:textColor="#888888"
-        app:layout_constraintTop_toBottomOf="@id/timeText"
+        android:text="화면을 스와이프하여 끄기"
+        android:textSize="14sp"
+        android:textColor="#9E9E9E"
+        app:layout_constraintTop_toBottomOf="@id/alarmCard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="48dp"/>
+        android:layout_marginTop="24dp"/>
 
     <!-- 하단 버튼들 -->
     <LinearLayout
+        android:id="@+id/buttonContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -57,21 +85,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginBottom="48dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp">
-        
-        <!-- 닫기 버튼 -->
+        android:layout_marginHorizontal="24dp">
+
+        <!-- 알람 끄기 버튼 -->
         <Button
             android:id="@+id/dismissButton"
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_weight="1"
-            android:text="끄기"
-            android:textSize="18sp"
-            android:textColor="#FFFFFF"
-            android:background="@android:color/holo_red_dark"
+            android:text="알람 끄기"
+            android:textSize="16sp"
+            android:textColor="#EF5350"
+            android:textStyle="bold"
+            android:background="@drawable/alarm_button_dismiss"
             android:layout_marginEnd="8dp"/>
-        
+
         <!-- 5분 후 버튼 -->
         <Button
             android:id="@+id/snoozeButton"
@@ -79,9 +107,10 @@
             android:layout_height="60dp"
             android:layout_weight="1"
             android:text="5분 후"
-            android:textSize="18sp"
+            android:textSize="16sp"
             android:textColor="#FFFFFF"
-            android:background="@android:color/holo_blue_dark"
+            android:textStyle="bold"
+            android:background="@drawable/alarm_button_snooze"
             android:layout_marginStart="8dp"/>
     </LinearLayout>
 

@@ -6,6 +6,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
+import android.util.Log
 
 class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
     context,
@@ -15,11 +16,12 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
 ) {
     companion object {
         private const val DATABASE_NAME = "shiftbell.db"
-        private const val DATABASE_VERSION = 6
-        
+        private const val DATABASE_VERSION = 12  // Flutter와 동일하게 유지
+        private const val TAG = "DatabaseHelper"
+
         @Volatile
         private var INSTANCE: DatabaseHelper? = null
-        
+
         // ⭐ Device Protected Context 사용
         fun getInstance(context: Context): DatabaseHelper {
             return INSTANCE ?: synchronized(this) {
@@ -28,19 +30,66 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
                 } else {
                     context.applicationContext
                 }
-                
+
                 INSTANCE ?: DatabaseHelper(actualContext).also {
                     INSTANCE = it
                 }
             }
         }
     }
-    
+
     override fun onCreate(db: SQLiteDatabase) {
         // Flutter에서 관리하므로 비워둠
     }
-    
+
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // Flutter에서 관리하므로 비워둠
+    }
+
+    override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        // Flutter가 이미 업그레이드한 DB를 Native에서 열 때 에러 방지
+        Log.w(TAG, "⚠️ DB 버전 다운그레이드 무시: $oldVersion → $newVersion")
+    }
+
+    // ⭐ WAL 모드 활성화 (동시 읽기/쓰기 허용)
+    override fun onConfigure(db: SQLiteDatabase) {
+        super.onConfigure(db)
+        db.enableWriteAheadLogging()
+        Log.d(TAG, "✅ WAL 모드 활성화")
+    }
+
+    // ⭐ 재시도 로직이 포함된 안전한 DB 접근
+    fun getReadableDatabaseWithRetry(maxRetries: Int = 3): SQLiteDatabase? {
+        var retries = 0
+        while (retries < maxRetries) {
+            try {
+                return readableDatabase
+            } catch (e: Exception) {
+                retries++
+                Log.w(TAG, "⚠️ DB 읽기 시도 $retries/$maxRetries 실패: ${e.message}")
+                if (retries < maxRetries) {
+                    Thread.sleep(100L * retries)  // 100ms, 200ms, 300ms 대기
+                }
+            }
+        }
+        Log.e(TAG, "❌ DB 읽기 최종 실패")
+        return null
+    }
+
+    fun getWritableDatabaseWithRetry(maxRetries: Int = 3): SQLiteDatabase? {
+        var retries = 0
+        while (retries < maxRetries) {
+            try {
+                return writableDatabase
+            } catch (e: Exception) {
+                retries++
+                Log.w(TAG, "⚠️ DB 쓰기 시도 $retries/$maxRetries 실패: ${e.message}")
+                if (retries < maxRetries) {
+                    Thread.sleep(100L * retries)
+                }
+            }
+        }
+        Log.e(TAG, "❌ DB 쓰기 최종 실패")
+        return null
     }
 }

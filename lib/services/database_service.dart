@@ -9,18 +9,33 @@ import '../models/shift_schedule.dart';
 import '../models/alarm_template.dart';
 import 'dart:convert';
 import '../models/alarm_history.dart';
+import '../models/date_memo.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
   DatabaseService._internal();
-  
+
   static Database? _database;
+  static bool _isInitializing = false;
   static const platform = MethodChannel('com.example.shiftbell/alarm');
-  
+
+  // ⭐ Race Condition 방지: 동시 초기화 요청 시 대기
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDatabase();
-    return _database!;
+
+    // 이미 초기화 중이면 완료될 때까지 대기
+    while (_isInitializing) {
+      await Future.delayed(const Duration(milliseconds: 50));
+      if (_database != null) return _database!;
+    }
+
+    _isInitializing = true;
+    try {
+      _database = await _initDatabase();
+      return _database!;
+    } finally {
+      _isInitializing = false;
+    }
   }
   
   Future<Database> _initDatabase() async {
@@ -38,14 +53,14 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 6,
+      version: 12,  // v12: date_memos 테이블 추가
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
         var result = await db.rawQuery(
           "SELECT name FROM sqlite_master WHERE type='table' AND name='shift_schedule'"
         );
-        
+
         if (result.isEmpty) {
           print('⚠️ 테이블 없음 - 재생성 중...');
           await _onCreate(db, 4);
@@ -63,6 +78,7 @@ class DatabaseService {
         emoji TEXT NOT NULL,
         sound_file TEXT NOT NULL,
         volume REAL NOT NULL,
+        vibration_strength INTEGER DEFAULT 2,
         is_preset INTEGER NOT NULL,
         duration INTEGER DEFAULT 10
       )
@@ -117,11 +133,24 @@ class DatabaseService {
       created_at TEXT NOT NULL
     )
   ''');
-    
+
+    // ⭐ 신규: 날짜별 메모 테이블
+  await db.execute('''
+    CREATE TABLE date_memos(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      memo_text TEXT NOT NULL,
+      order_index INTEGER NOT NULL,
+      created_at TEXT NOT NULL
+    )
+  ''');
+
+  await db.execute('CREATE INDEX idx_date_memos_date ON date_memos(date)');
+
     for (var type in AlarmType.presets) {
       await db.insert('alarm_types', type.toMap());
     }
-    
+
     print('✅ 데이터베이스 초기화 완료');
   }
 
@@ -172,8 +201,160 @@ class DatabaseService {
     await db.execute('ALTER TABLE alarm_types ADD COLUMN duration INTEGER DEFAULT 10');
     print('✅ DB 업그레이드 완료 (v$oldVersion → v6)');
   }
-} 
-  
+
+  if (oldVersion < 7) {
+    await db.execute('ALTER TABLE alarm_types ADD COLUMN vibration_strength INTEGER DEFAULT 2');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v7)');
+  }
+
+  // v8: 기본값 변경 (알람벨1, 70%, 강하게, 3분)
+  if (oldVersion < 8) {
+    // 소리 타입 (id=1): alarmbell1, 70%, 강하게, 3분
+    await db.execute('''
+      UPDATE alarm_types SET
+        sound_file = 'alarmbell1',
+        volume = 0.7,
+        vibration_strength = 3,
+        duration = 3
+      WHERE id = 1
+    ''');
+
+    // 진동 타입 (id=2): 강하게, 3분
+    await db.execute('''
+      UPDATE alarm_types SET
+        vibration_strength = 3,
+        duration = 3
+      WHERE id = 2
+    ''');
+
+    // 무음 타입 (id=3): 3분
+    await db.execute('''
+      UPDATE alarm_types SET
+        duration = 3
+      WHERE id = 3
+    ''');
+
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v8): 기본값 마이그레이션');
+  }
+
+  // v9: 진동/무음 기본값 재적용 (강하게, 3분)
+  if (oldVersion < 9) {
+    // 진동 타입 (id=2): 강하게, 3분
+    await db.execute('''
+      UPDATE alarm_types SET
+        vibration_strength = 3,
+        duration = 3
+      WHERE id = 2
+    ''');
+
+    // 무음 타입 (id=3): 3분
+    await db.execute('''
+      UPDATE alarm_types SET
+        duration = 3
+      WHERE id = 3
+    ''');
+
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v9): 진동/무음 기본값 재적용');
+  }
+
+  // v10: 소리 타입 sound_file 강제 업데이트 (loud → alarmbell1)
+  if (oldVersion < 10) {
+    await db.execute('''
+      UPDATE alarm_types SET
+        sound_file = 'alarmbell1',
+        volume = 0.7,
+        vibration_strength = 3,
+        duration = 3
+      WHERE id = 1
+    ''');
+
+    // 진동/무음도 재확인
+    await db.execute('''
+      UPDATE alarm_types SET
+        vibration_strength = 3,
+        duration = 3
+      WHERE id = 2
+    ''');
+
+    await db.execute('''
+      UPDATE alarm_types SET
+        duration = 3
+      WHERE id = 3
+    ''');
+
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v10): sound_file=alarmbell1 강제 적용');
+  }
+
+  // v11: 진동/무음 기본값 최종 강제 적용
+  if (oldVersion < 11) {
+    await db.execute("UPDATE alarm_types SET vibration_strength = 3, duration = 3 WHERE id = 2");
+    await db.execute("UPDATE alarm_types SET duration = 3 WHERE id = 3");
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v11): 진동/무음 기본값 최종 적용');
+  }
+
+  // v12: 날짜별 메모 테이블 추가
+  if (oldVersion < 12) {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS date_memos(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        memo_text TEXT NOT NULL,
+        order_index INTEGER NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_date_memos_date ON date_memos(date)');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v12): date_memos 테이블 추가');
+  }
+}
+
+  // ⭐ 프리셋 기본값 강제 확인/수정 (settings_tab 초기화 시 호출)
+  Future<void> ensurePresetDefaults() async {
+    final db = await database;
+    try {
+      // 프리셋 데이터가 있는지 확인
+      var presetCheck = await db.rawQuery("SELECT COUNT(*) as cnt FROM alarm_types WHERE is_preset = 1");
+      int presetCount = Sqflite.firstIntValue(presetCheck) ?? 0;
+
+      if (presetCount == 0) {
+        print('⚠️ 프리셋 없음 - settings_tab에서 초기화 예정');
+        return;
+      }
+
+      // 단일 트랜잭션으로 모든 UPDATE 실행 (락 충돌 최소화)
+      await db.transaction((txn) async {
+        // 소리(id=1): alarmbell1, 70%, 강하게, 3분
+        await txn.execute('''
+          UPDATE alarm_types SET
+            sound_file = CASE WHEN sound_file = 'loud' OR sound_file = 'soft' THEN 'alarmbell1' ELSE sound_file END,
+            volume = CASE WHEN volume = 1.0 THEN 0.7 ELSE volume END,
+            vibration_strength = CASE WHEN vibration_strength = 2 THEN 3 ELSE vibration_strength END,
+            duration = CASE WHEN duration = 10 OR duration = 5 THEN 3 ELSE duration END
+          WHERE id = 1 AND is_preset = 1
+        ''');
+
+        // 진동(id=2): 강하게, 3분
+        await txn.execute('''
+          UPDATE alarm_types SET
+            vibration_strength = CASE WHEN vibration_strength = 2 OR vibration_strength = 1 THEN 3 ELSE vibration_strength END,
+            duration = CASE WHEN duration = 10 OR duration = 5 THEN 3 ELSE duration END
+          WHERE id = 2 AND is_preset = 1
+        ''');
+
+        // 무음(id=3): 3분
+        await txn.execute('''
+          UPDATE alarm_types SET
+            duration = CASE WHEN duration = 10 OR duration = 5 THEN 3 ELSE duration END
+          WHERE id = 3 AND is_preset = 1
+        ''');
+      });
+
+      print('✅ 프리셋 기본값 확인 완료');
+    } catch (e) {
+      print('⚠️ 프리셋 기본값 확인 중 오류: $e');
+    }
+  }
+
   // === 기존 메서드들 유지 ===
   
   Future<List<AlarmType>> getAllAlarmTypes() async {
@@ -404,6 +585,169 @@ Future<Map<String, dynamic>> getAlarmStatistics() async {
     'timeout': timeout,
     'avgSnooze': avgSnooze,
   };
+}
+
+// ⭐ 신규: 오래된 이력 삭제 (한 달 이상)
+Future<void> deleteOldHistory(DateTime beforeDate) async {
+  final db = await database;
+  final dateStr = beforeDate.toIso8601String();
+  await db.delete(
+    'alarm_history',
+    where: 'created_at < ?',
+    whereArgs: [dateStr],
+  );
+}
+
+// ⭐ 신규: 모든 이력 삭제
+Future<void> clearAlarmHistory() async {
+  final db = await database;
+  await db.delete('alarm_history');
+}
+
+// ===== 메모 관련 메서드 =====
+
+// ⭐ 메모 생성 (최대 3개 체크)
+Future<int?> createMemo(String date, String memoText) async {
+  final db = await database;
+
+  return await db.transaction((txn) async {
+    // 해당 날짜의 메모 개수 확인
+    final count = Sqflite.firstIntValue(
+      await txn.rawQuery(
+        'SELECT COUNT(*) FROM date_memos WHERE date = ?',
+        [date],
+      ),
+    ) ?? 0;
+
+    if (count >= 3) {
+      print('⚠️ 메모는 하루에 최대 3개까지만 가능합니다.');
+      return null;
+    }
+
+    // 다음 order_index 계산 (0, 1, 2)
+    final maxOrder = Sqflite.firstIntValue(
+      await txn.rawQuery(
+        'SELECT MAX(order_index) FROM date_memos WHERE date = ?',
+        [date],
+      ),
+    );
+    final nextOrder = (maxOrder ?? -1) + 1;
+
+    return await txn.insert('date_memos', {
+      'date': date,
+      'memo_text': memoText,
+      'order_index': nextOrder,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+  });
+}
+
+// ⭐ 특정 날짜의 모든 메모 조회 (order_index 순)
+Future<List<DateMemo>> getMemosForDate(String date) async {
+  final db = await database;
+  final maps = await db.query(
+    'date_memos',
+    where: 'date = ?',
+    whereArgs: [date],
+    orderBy: 'order_index ASC',
+  );
+  return maps.map((map) => DateMemo.fromMap(map)).toList();
+}
+
+// ⭐ 기간의 메모들 조회 (달력 표시용)
+Future<Map<String, List<DateMemo>>> getMemosForDateRange(
+  DateTime startDate,
+  DateTime endDate,
+) async {
+  final db = await database;
+  final startStr = startDate.toIso8601String().split('T')[0];
+  final endStr = endDate.toIso8601String().split('T')[0];
+
+  final maps = await db.query(
+    'date_memos',
+    where: 'date >= ? AND date <= ?',
+    whereArgs: [startStr, endStr],
+    orderBy: 'date ASC, order_index ASC',
+  );
+
+  // 날짜별로 그룹화
+  final Map<String, List<DateMemo>> result = {};
+  for (var map in maps) {
+    final memo = DateMemo.fromMap(map);
+    if (!result.containsKey(memo.date)) {
+      result[memo.date] = [];
+    }
+    result[memo.date]!.add(memo);
+  }
+
+  return result;
+}
+
+// ⭐ 메모 수정
+Future<int> updateMemo(int id, String memoText) async {
+  final db = await database;
+  return await db.update(
+    'date_memos',
+    {'memo_text': memoText},
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
+
+// ⭐ 메모 삭제 + order_index 재정렬
+Future<void> deleteMemo(int id) async {
+  final db = await database;
+
+  await db.transaction((txn) async {
+    // 삭제할 메모 정보 가져오기
+    final memoMaps = await txn.query(
+      'date_memos',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (memoMaps.isEmpty) return;
+
+    final memo = DateMemo.fromMap(memoMaps.first);
+
+    // 삭제
+    await txn.delete(
+      'date_memos',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    // 같은 날짜의 나머지 메모들의 order_index 재정렬
+    await txn.rawUpdate('''
+      UPDATE date_memos
+      SET order_index = order_index - 1
+      WHERE date = ? AND order_index > ?
+    ''', [memo.date, memo.orderIndex]);
+  });
+
+  print('✅ 메모 삭제 및 재정렬 완료');
+}
+
+// ⭐ 메모 순서 변경
+Future<void> reorderMemos(String date, List<int> memoIds) async {
+  if (memoIds.length > 3) {
+    print('⚠️ 메모는 최대 3개까지만 가능합니다.');
+    return;
+  }
+
+  final db = await database;
+  await db.transaction((txn) async {
+    for (int i = 0; i < memoIds.length; i++) {
+      await txn.update(
+        'date_memos',
+        {'order_index': i},
+        where: 'id = ? AND date = ?',
+        whereArgs: [memoIds[i], date],
+      );
+    }
+  });
+
+  print('✅ 메모 순서 변경 완료');
 }
 
 }

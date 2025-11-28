@@ -16,12 +16,31 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     
     companion object {
         private const val TWENTY_MIN_NOTIFICATION_ID = 8888
-        private const val TWENTY_MIN_CHANNEL_ID = "twenty_min_channel"
-        private val shownNotifications = mutableSetOf<Int>()
-        
+        private const val TWENTY_MIN_CHANNEL_ID = "shiftbell_pre_v3"  // ⭐ 채널 ID 변경 + "알람" 키워드 제거
+        private val shownNotifications = java.util.Collections.synchronizedSet(mutableSetOf<Int>())
+
         fun removeShownNotification(alarmId: Int) {
             shownNotifications.remove(alarmId)
             Log.d("AlarmGuardReceiver", "🗑️ Notification 이력 제거: ID=$alarmId")
+        }
+
+        // ⭐ 직접 호출용 정적 메서드 (sendBroadcast 없이도 동작)
+        fun triggerCheck(context: Context) {
+            Log.d("AlarmGuardReceiver", "⏰ 직접 트리거")
+
+            // 갱신 체크
+            AlarmRefreshUtil.checkAndTriggerRefresh(context)
+
+            // 다음 알람 체크
+            val instance = AlarmGuardReceiver()
+            val nextAlarm = instance.getNextAlarmFromDB(context)
+
+            if (nextAlarm != null) {
+                instance.checkAndNotify(context, nextAlarm)
+            }
+
+            // 다음 Wakeup 예약
+            instance.scheduleNextWakeup(context)
         }
     }
     
@@ -224,10 +243,16 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, TWENTY_MIN_CHANNEL_ID)
             .setContentTitle("잠시 후 알람이 울립니다 (${alarm.time})")
             .setContentText(alarm.shiftType)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)  // ⭐ STATUS 사용 (삼성 시스템 스누즈 완전 방지)
             .setAutoCancel(true)
+            .setSilent(true)
+            .setOnlyAlertOnce(true)  // ⭐ 시스템 스누즈 버튼 제거
+            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
+            .setGroupSummary(false)
+            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(alarm.shiftType))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
             .setContentIntent(openAppPendingIntent)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
             .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)
@@ -241,14 +266,16 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     private fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            
+
+            // ⭐ 무음 Notification: 소리/진동 없이 조용하게 표시
             val channel = NotificationChannel(
                 TWENTY_MIN_CHANNEL_ID,
-                "알람 사전 알림",
-                NotificationManager.IMPORTANCE_HIGH
+                "사전 알림",  // ⭐ "알람" 키워드 제거 (삼성 시스템 스누즈 방지)
+                NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
             ).apply {
-                description = "알람 20분 전 알림"
-                enableVibration(true)
+                description = "20분 전 사전 알림"
+                enableVibration(false)
+                setSound(null, null)
                 setShowBadge(true)
             }
             notificationManager.createNotificationChannel(channel)
@@ -256,16 +283,19 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     }
     
     private fun getNextAlarmFromDB(context: Context): AlarmData? {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         return try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.readableDatabase
-            
+            db = dbHelper.getReadableDatabaseWithRetry() ?: return null  // ⭐ 재시도 로직 사용
+
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
                 Locale.getDefault()
             ).format(Date())
-            
-            val cursor = db.query(
+
+            cursor = db.query(
                 "alarms",
                 null,
                 "date > ?",
@@ -275,32 +305,32 @@ class AlarmGuardReceiver : BroadcastReceiver() {
                 "date ASC",
                 "1"
             )
-            
+
             var alarm: AlarmData? = null
-            
+
             if (cursor.moveToFirst()) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
-                
+
                 val timestamp = SimpleDateFormat(
                     "yyyy-MM-dd'T'HH:mm:ss",
                     Locale.getDefault()
                 ).parse(dateStr)?.time
-                
+
                 if (timestamp != null) {
                     val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
                     alarm = AlarmData(id, timestamp, time, shiftType)
                 }
             }
-            
-            cursor.close()
-            db.close()
-            
+
             alarm
         } catch (e: Exception) {
             Log.e("AlarmGuardReceiver", "DB 읽기 실패", e)
             null
+        } finally {
+            cursor?.close()
+            db?.close()
         }
     }
     

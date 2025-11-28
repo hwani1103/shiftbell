@@ -103,30 +103,10 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     for (var date in dates) {
       final dateStr = date.toIso8601String().split('T')[0];
 
-      if (currentSchedule.isRegular) {
-        if (currentSchedule.pattern == null || 
-            currentSchedule.todayIndex == null || 
-            currentSchedule.startDate == null) {
-          continue;
-        }
-
-        final adjustedStartDate = DateTime(
-          currentSchedule.startDate!.year,
-          currentSchedule.startDate!.month,
-          currentSchedule.startDate!.day,
-        );
-        final targetDate = DateTime(date.year, date.month, date.day);
-        final daysDiff = targetDate.difference(adjustedStartDate).inDays;
-        final index = ((currentSchedule.todayIndex! + daysDiff) % 
-                      currentSchedule.pattern!.length + 
-                      currentSchedule.pattern!.length) % 
-                      currentSchedule.pattern!.length;
-
-        currentSchedule.pattern![index] = shiftType;
-      } else {
-        currentSchedule.assignedDates ??= {};
-        currentSchedule.assignedDates![dateStr] = shiftType;
-      }
+      // ⭐ 규칙적/불규칙 관계없이 assignedDates에 예외로 저장
+      // (패턴을 직접 수정하면 같은 인덱스의 모든 날짜가 바뀜)
+      currentSchedule.assignedDates ??= {};
+      currentSchedule.assignedDates![dateStr] = shiftType;
     }
 
     await updateSchedule(currentSchedule);

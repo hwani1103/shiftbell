@@ -14,24 +14,75 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 
 class AlarmActionReceiver : BroadcastReceiver() {
+
+    companion object {
+        const val ACTION_DELETE_SNOOZE_NOTIFICATION = "DELETE_SNOOZE_NOTIFICATION"
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         val alarmId = intent.getIntExtra("alarmId", 0)
-        
+
         when (intent.action) {
+            // ⭐ 30초 후 8889 자동 삭제
+            ACTION_DELETE_SNOOZE_NOTIFICATION -> {
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.cancel(8889)
+                Log.d("AlarmAction", "🗑️ 8889 Notification 자동 삭제 (30초 경과)")
+            }
             "CANCEL_ALARM" -> {
                 Log.d("AlarmAction", "🗑️ 알람 취소: ID=$alarmId")
+
+                // ⭐ DB에 알람이 있는지 먼저 확인 (삼성 "알림 다시 표시" 대응)
+                if (!isAlarmExistsInDB(context, alarmId)) {
+                    Log.d("AlarmAction", "⚠️ DB에 알람 없음 (이미 삭제됨) - notification만 닫기")
+                    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    notificationManager.cancel(8888)
+                    notificationManager.cancel(8889)
+                    return
+                }
+
                 val label = intent.getStringExtra(CustomAlarmReceiver.EXTRA_LABEL) ?: "알람"
                 val soundType = intent.getStringExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE) ?: "loud"
+
+                // ⭐ Overlay가 울리고 있을 수 있으므로 종료 신호 발송
+                val dismissIntent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
+                    setPackage(context.packageName)  // Android 13+ RECEIVER_NOT_EXPORTED 대응
+                    putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                }
+                context.sendBroadcast(dismissIntent)
+                Log.d("AlarmAction", "📡 Overlay DISMISS 브로드캐스트 발송")
+
                 cancelAlarm(context, alarmId, label, soundType)
-                
+
+                // Notification 삭제 (8888: 20분전, 8889: 스누즈/타임아웃)
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(8888)
+                notificationManager.cancel(8889)
             }
             "EXTEND_ALARM" -> {
+                Log.d("AlarmAction", "⏰ 알람 5분 연장: ID=$alarmId")
+
+                // ⭐ DB에 알람이 있는지 먼저 확인 (삼성 "알림 다시 표시" 대응)
+                if (!isAlarmExistsInDB(context, alarmId)) {
+                    Log.d("AlarmAction", "⚠️ DB에 알람 없음 (이미 삭제됨) - notification만 닫기")
+                    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    notificationManager.cancel(8888)
+                    notificationManager.cancel(8889)
+                    return
+                }
+
                 val timestamp = intent.getLongExtra("timestamp", 0L)
                 val label = intent.getStringExtra(CustomAlarmReceiver.EXTRA_LABEL) ?: "알람"
                 val soundType = intent.getStringExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE) ?: "loud"
-                Log.d("AlarmAction", "⏰ 알람 5분 연장: ID=$alarmId")
+
+                // ⭐ Overlay가 울리고 있을 수 있으므로 종료 신호 발송
+                val snoozeIntent = Intent(AlarmOverlayService.ACTION_SNOOZE_OVERLAY).apply {
+                    setPackage(context.packageName)  // Android 13+ RECEIVER_NOT_EXPORTED 대응
+                    putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                }
+                context.sendBroadcast(snoozeIntent)
+                Log.d("AlarmAction", "📡 Overlay SNOOZE 브로드캐스트 발송")
+
                 extendAlarm(context, alarmId, timestamp, label, soundType)
             }
         }
@@ -63,11 +114,14 @@ class AlarmActionReceiver : BroadcastReceiver() {
         db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
         db.close()
         Log.d("AlarmAction", "✅ DB 알람 삭제 완료: ID=$alarmId")
-        
+
+        // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
+        AlarmGuardReceiver.removeShownNotification(alarmId)
+
         // ⭐ 수정: AlarmRefreshWorker → AlarmRefreshUtil
         AlarmRefreshUtil.checkAndTriggerRefresh(context)
         Log.d("AlarmAction", "✅ 갱신 체크 완료")
-        
+
         val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
         context.sendBroadcast(guardIntent)
         Log.d("AlarmAction", "✅ AlarmGuardReceiver 즉시 재실행")
@@ -151,101 +205,54 @@ class AlarmActionReceiver : BroadcastReceiver() {
         db.close()
         
         Log.d("AlarmAction", "✅ DB 업데이트 완료: ID=$alarmId, time=$timeStr, date=$dateStr, rows=$rowsAffected")
-        
+
         // ⭐ 수정: AlarmRefreshWorker → AlarmRefreshUtil
         AlarmRefreshUtil.checkAndTriggerRefresh(context)
         Log.d("AlarmAction", "✅ 갱신 체크 완료")
-        
+
+        // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
+        AlarmGuardReceiver.removeShownNotification(alarmId)
+
         val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
         context.sendBroadcast(guardIntent)
         Log.d("AlarmAction", "✅ AlarmGuardReceiver 즉시 재실행")
-        
+
+        // ⭐ Notification 업데이트 (NotificationHelper 사용)
+        NotificationHelper.showUpdatedNotification(context, timeStr, label)
+        Log.d("AlarmAction", "✅ Notification 업데이트 완료")
+
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         context.startActivity(launchIntent)
         Log.d("AlarmAction", "✅ 앱 포그라운드 이동")
-        
+
     } catch (e: Exception) {
         Log.e("AlarmAction", "❌ DB 업데이트 실패", e)
     }
     }
     
-    private fun showUpdatedNotification(
-        context: Context,
-        alarmId: Int,
-        newTimestamp: Long,
-        newTimeStr: String,
-        label: String,
-        soundType: String
-    ) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "twenty_min_channel",
-                "알람 사전 알림",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "알람 20분 전 알림"
-                enableVibration(true)
-                setShowBadge(true)
-            }
-            notificationManager.createNotificationChannel(channel)
+    // ⭐ DB에 알람이 존재하는지 확인 (삼성 "알림 다시 표시" 대응)
+    private fun isAlarmExistsInDB(context: Context, alarmId: Int): Boolean {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
+        return try {
+            val dbHelper = DatabaseHelper.getInstance(context)
+            db = dbHelper.readableDatabase
+            cursor = db.query(
+                "alarms",
+                arrayOf("id"),
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+            cursor.count > 0
+        } catch (e: Exception) {
+            Log.e("AlarmAction", "❌ DB 조회 실패", e)
+            false
+        } finally {
+            cursor?.close()
+            db?.close()
         }
-        
-        val openAppIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("openTab", 0)
-        }
-        val openAppPendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            openAppIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val cancelIntent = Intent(context, AlarmActionReceiver::class.java).apply {
-            action = "CANCEL_ALARM"
-            putExtra("alarmId", alarmId)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, soundType)
-        }
-        val cancelPendingIntent = PendingIntent.getBroadcast(
-            context,
-            alarmId + 10000,
-            cancelIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val extendIntent = Intent(context, AlarmActionReceiver::class.java).apply {
-            action = "EXTEND_ALARM"
-            putExtra("alarmId", alarmId)
-            putExtra("timestamp", newTimestamp)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, soundType)
-        }
-        val extendPendingIntent = PendingIntent.getBroadcast(
-            context,
-            alarmId + 20000,
-            extendIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val notification = NotificationCompat.Builder(context, "twenty_min_channel")
-            .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
-            .setContentText(label)
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setAutoCancel(true)
-            .setOnlyAlertOnce(true)  // ⭐ 소리/진동 안 남
-            .setContentIntent(openAppPendingIntent)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
-            .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)
-            .build()
-        
-        notificationManager.notify(8888, notification)
-        
-        Log.d("AlarmAction", "📢 Notification 업데이트: $newTimeStr")
     }
 }
