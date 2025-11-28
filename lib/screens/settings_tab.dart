@@ -339,7 +339,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                           Icon(Icons.calendar_month, color: Colors.indigo, size: 20.sp),
                           SizedBox(width: 8.w),
                           Text(
-                            '교대 스케줄',
+                            '교대 근무 관리',
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.bold,
