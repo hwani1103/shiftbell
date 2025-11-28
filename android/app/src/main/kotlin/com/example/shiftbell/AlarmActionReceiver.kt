@@ -225,14 +225,14 @@ class AlarmActionReceiver : BroadcastReceiver() {
         notificationManager.cancel(8888)
         Log.d("AlarmAction", "🗑️ 8888 Notification 삭제")
 
-        // ⭐ 스누즈 결과 전용 채널 (드롭다운 버튼 없음)
+        // ⭐ 스누즈 결과 전용 채널 ("알람" 키워드 제거 - 삼성 시스템 스누즈 방지)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
-                "alarm_result_channel_v2",
-                "알람 결과 알림",
+                "shiftbell_result_v3",
+                "결과 알림",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "알람 스누즈/타임아웃 결과"
+                description = "스누즈/타임아웃 결과"
                 enableVibration(false)
                 setSound(null, null)
                 setShowBadge(false)
@@ -252,7 +252,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
         )
 
         // ⭐ 2단계: 8889 표시 (스누즈 결과)
-        val notification = NotificationCompat.Builder(context, "alarm_result_channel_v2")
+        val notification = NotificationCompat.Builder(context, "shiftbell_result_v3")
             .setContentTitle("$newTimeStr 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_dialog_info)

@@ -16,7 +16,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     
     companion object {
         private const val TWENTY_MIN_NOTIFICATION_ID = 8888
-        private const val TWENTY_MIN_CHANNEL_ID = "alarm_pre_channel_v2"  // ⭐ 채널 ID 변경 (시스템 스누즈 제거)
+        private const val TWENTY_MIN_CHANNEL_ID = "shiftbell_pre_v3"  // ⭐ 채널 ID 변경 + "알람" 키워드 제거
         private val shownNotifications = mutableSetOf<Int>()
 
         fun removeShownNotification(alarmId: Int) {
@@ -245,7 +245,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             .setContentText(alarm.shiftType)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_REMINDER)  // ⭐ REMINDER로 변경 (시스템 스누즈 제거)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)  // ⭐ STATUS 사용 (삼성 시스템 스누즈 완전 방지)
             .setAutoCancel(true)
             .setSilent(true)
             .setOnlyAlertOnce(true)  // ⭐ 시스템 스누즈 버튼 제거
@@ -266,10 +266,10 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // ⭐ 무음 Notification: 소리/진동 없이 조용하게 표시
             val channel = NotificationChannel(
                 TWENTY_MIN_CHANNEL_ID,
-                "알람 사전 알림",
+                "사전 알림",  // ⭐ "알람" 키워드 제거 (삼성 시스템 스누즈 방지)
                 NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
             ).apply {
-                description = "알람 20분 전 알림"
+                description = "20분 전 사전 알림"
                 enableVibration(false)
                 setSound(null, null)
                 setShowBadge(true)

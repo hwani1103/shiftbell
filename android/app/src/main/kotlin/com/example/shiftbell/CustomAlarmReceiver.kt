@@ -23,7 +23,7 @@ class CustomAlarmReceiver : BroadcastReceiver() {
         const val EXTRA_SOUND_TYPE = "soundType"
         const val EXTRA_LABEL = "label"
         const val EXTRA_ID = "id"
-        const val CHANNEL_ID = "alarm_channel_v2"  // ⭐ 채널 ID 변경 (삼성 시스템 스누즈 제거)
+        const val CHANNEL_ID = "shiftbell_alarm_v3"  // ⭐ 채널 ID 변경 + "알람" 키워드 제거
     }
     
     // CustomAlarmReceiver.kt - onReceive() 수정
@@ -232,14 +232,14 @@ override fun onReceive(context: Context, intent: Intent) {
         
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         
-        // ⭐ 채널 생성 (무음 - 알람 소리는 AlarmPlayer에서 재생)
+        // ⭐ 채널 생성 (무음 - 소리는 AlarmPlayer에서 재생) - "알람" 키워드 제거
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "알람",
+                "Shiftbell",  // ⭐ "알람" 제거 (삼성 시스템 스누즈 방지)
                 NotificationManager.IMPORTANCE_HIGH  // fullScreenIntent를 위해 HIGH 유지
             ).apply {
-                description = "알람 알림"
+                description = "근무 시간 알림"
                 enableVibration(false)
                 setSound(null, null)  // notification 자체는 무음
             }
@@ -248,7 +248,7 @@ override fun onReceive(context: Context, intent: Intent) {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("알람")
+            .setContentTitle("Shiftbell")  // ⭐ "알람" 제거
             .setContentText(label)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_CALL)  // ⭐ CALL 사용 (삼성 시스템 스누즈 방지, full-screen 지원)
