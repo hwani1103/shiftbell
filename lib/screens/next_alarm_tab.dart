@@ -461,7 +461,6 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                 style: TextStyle(
                   fontSize: 13.sp,
                   color: Colors.grey.shade600,
-                  decoration: TextDecoration.underline,
                 ),
               ),
             ),
@@ -599,28 +598,28 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
       ),
       child: Row(
         children: [
-          // 시간
-          Container(
-            width: 70.w,
-            child: Text(
-              timeStr,
-              style: TextStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
-                color: isNext ? Colors.indigo.shade700 : Colors.grey.shade800,
-              ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-
           // 날짜
           Container(
-            width: 70.w,
+            width: 75.w,
             child: Text(
               dateStr,
               style: TextStyle(
                 fontSize: 13.sp,
                 color: Colors.grey.shade600,
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+
+          // 시간
+          Container(
+            width: 60.w,
+            child: Text(
+              timeStr,
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: isNext ? Colors.indigo.shade700 : Colors.grey.shade800,
               ),
             ),
           ),
