@@ -845,11 +845,9 @@ Widget build(BuildContext context) {
           ),
           actions: [
             // ⭐ 삭제 버튼
-            IconButton(
+            TextButton(
               onPressed: () => _showDeleteAlarmConfirmation(alarm, parentSetState),
-              icon: Icon(Icons.delete, color: Colors.red, size: 22.sp),
-              padding: EdgeInsets.zero,
-              constraints: BoxConstraints(),
+              child: Text('삭제', style: TextStyle(color: Colors.red, fontSize: 14.sp)),
             ),
             Spacer(),
             TextButton(
@@ -857,7 +855,6 @@ Widget build(BuildContext context) {
               child: Text('취소'),
             ),
           ],
-          actionsPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         );
       },
     );
