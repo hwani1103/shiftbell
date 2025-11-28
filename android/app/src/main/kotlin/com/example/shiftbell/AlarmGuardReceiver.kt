@@ -249,6 +249,10 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             .setAutoCancel(true)
             .setSilent(true)
             .setOnlyAlertOnce(true)  // ⭐ 시스템 스누즈 버튼 제거
+            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
+            .setGroupSummary(false)
+            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(alarm.shiftType))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
             .setContentIntent(openAppPendingIntent)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
             .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)

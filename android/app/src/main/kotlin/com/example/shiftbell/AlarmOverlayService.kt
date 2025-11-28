@@ -516,6 +516,10 @@ class AlarmOverlayService : Service() {
             .setAutoCancel(true)
             .setSilent(true)
             .setOnlyAlertOnce(true)
+            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
+            .setGroupSummary(false)
+            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(label))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
             .setContentIntent(openAppPendingIntent)
             .build()
 

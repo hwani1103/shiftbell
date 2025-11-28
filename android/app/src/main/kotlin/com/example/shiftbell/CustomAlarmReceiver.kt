@@ -255,6 +255,10 @@ override fun onReceive(context: Context, intent: Intent) {
             .setFullScreenIntent(fullScreenPendingIntent, true)
             .setSilent(true)  // ⭐ 소리/진동 없음 (알람 소리는 AlarmPlayer)
             .setAutoCancel(true)
+            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
+            .setGroupSummary(false)
+            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(label))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
             .build()
         
         notificationManager.notify(id, notification)
