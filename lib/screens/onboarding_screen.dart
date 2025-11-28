@@ -1005,11 +1005,26 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                     // 시간 + 삭제 버튼
                     Row(
                       children: [
-                        Icon(Icons.alarm, size: 20.sp, color: Colors.blue),
-                        SizedBox(width: 8.w),
-                        Text(
-                          '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
-                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                        // ⭐ 시간 영역 탭하면 시간 수정
+                        InkWell(
+                          onTap: () => _editAlarmTime(entry.key),
+                          borderRadius: BorderRadius.circular(8.r),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.alarm, size: 20.sp, color: Colors.blue),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
+                                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 4.w),
+                                Icon(Icons.edit, size: 14.sp, color: Colors.grey),
+                              ],
+                            ),
+                          ),
                         ),
                         Spacer(),
                         IconButton(
@@ -1117,6 +1132,22 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
     );
   }
 
+  // ⭐ 알람 시간 수정
+  Future<void> _editAlarmTime(int index) async {
+    final currentAlarm = _alarms[index];
+    await showDialog(
+      context: context,
+      builder: (context) => _SamsungStyleTimePicker(
+        initialTime: currentAlarm.time,
+        onTimeSelected: (time) {
+          setState(() {
+            _alarms[index] = currentAlarm.copyWith(time: time);
+          });
+        },
+      ),
+    );
+  }
+
   Future<void> _addAlarm() async {
     await showDialog(
       context: context,
@@ -1134,8 +1165,12 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
 
 class _SamsungStyleTimePicker extends StatefulWidget {
   final Function(TimeOfDay) onTimeSelected;
+  final TimeOfDay? initialTime;  // ⭐ 초기 시간 (수정 시 사용)
 
-  const _SamsungStyleTimePicker({required this.onTimeSelected});
+  const _SamsungStyleTimePicker({
+    required this.onTimeSelected,
+    this.initialTime,
+  });
 
   @override
   State<_SamsungStyleTimePicker> createState() => _SamsungStyleTimePickerState();
@@ -1145,6 +1180,29 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
   bool _isAM = true;
   int _hour = 9;
   int _minute = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // ⭐ 초기 시간이 있으면 설정
+    if (widget.initialTime != null) {
+      final t = widget.initialTime!;
+      _minute = t.minute;
+      if (t.hour == 0) {
+        _isAM = true;
+        _hour = 12;
+      } else if (t.hour < 12) {
+        _isAM = true;
+        _hour = t.hour;
+      } else if (t.hour == 12) {
+        _isAM = false;
+        _hour = 12;
+      } else {
+        _isAM = false;
+        _hour = t.hour - 12;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

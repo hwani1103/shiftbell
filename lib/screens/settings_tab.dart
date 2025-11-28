@@ -1526,12 +1526,6 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('고정 알람 수정'),
-        actions: [
-          TextButton(
-            onPressed: _saveAndExit,
-            child: Text('저장', style: TextStyle(fontSize: 16.sp)),
-          ),
-        ],
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -1563,6 +1557,18 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                         final alarms = _shiftAlarms[shift] ?? [];
                         return _buildShiftAlarmCard(shift, alarms);
                       },
+                    ),
+                  ),
+                  // ⭐ 저장 버튼 (하단으로 이동)
+                  SizedBox(height: 16.h),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _saveAndExit,
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                      ),
+                      child: Text('저장', style: TextStyle(fontSize: 16.sp)),
                     ),
                   ),
                 ],
@@ -1746,11 +1752,26 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.alarm, size: 20.sp, color: Colors.blue),
-                        SizedBox(width: 8.w),
-                        Text(
-                          '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
-                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                        // ⭐ 시간 영역 탭하면 시간 수정
+                        InkWell(
+                          onTap: () => _editAlarmTime(entry.key),
+                          borderRadius: BorderRadius.circular(8.r),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.alarm, size: 20.sp, color: Colors.blue),
+                                SizedBox(width: 8.w),
+                                Text(
+                                  '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
+                                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(width: 4.w),
+                                Icon(Icons.edit, size: 14.sp, color: Colors.grey),
+                              ],
+                            ),
+                          ),
                         ),
                         Spacer(),
                         IconButton(
@@ -1854,6 +1875,22 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
     );
   }
 
+  // ⭐ 알람 시간 수정
+  Future<void> _editAlarmTime(int index) async {
+    final currentAlarm = _alarms[index];
+    await showDialog(
+      context: context,
+      builder: (context) => _SettingsTimePicker(
+        initialTime: currentAlarm.time,
+        onTimeSelected: (time) {
+          setState(() {
+            _alarms[index] = currentAlarm.copyWith(time: time);
+          });
+        },
+      ),
+    );
+  }
+
   Future<void> _addAlarm() async {
     await showDialog(
       context: context,
@@ -1873,8 +1910,12 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
 // ============================================================
 class _SettingsTimePicker extends StatefulWidget {
   final Function(TimeOfDay) onTimeSelected;
+  final TimeOfDay? initialTime;  // ⭐ 초기 시간 (수정 시 사용)
 
-  const _SettingsTimePicker({required this.onTimeSelected});
+  const _SettingsTimePicker({
+    required this.onTimeSelected,
+    this.initialTime,
+  });
 
   @override
   State<_SettingsTimePicker> createState() => _SettingsTimePickerState();
@@ -1884,6 +1925,29 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
   bool _isAM = true;
   int _hour = 9;
   int _minute = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // ⭐ 초기 시간이 있으면 설정
+    if (widget.initialTime != null) {
+      final t = widget.initialTime!;
+      _minute = t.minute;
+      if (t.hour == 0) {
+        _isAM = true;
+        _hour = 12;
+      } else if (t.hour < 12) {
+        _isAM = true;
+        _hour = t.hour;
+      } else if (t.hour == 12) {
+        _isAM = false;
+        _hour = 12;
+      } else {
+        _isAM = false;
+        _hour = t.hour - 12;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
