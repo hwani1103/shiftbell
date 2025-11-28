@@ -237,12 +237,12 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
             child: Column(
               children: [
-                SizedBox(height: 8.h),
+                SizedBox(height: 12.h),
 
                 // 메인 알람 카드
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 20.h),
+                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 22.h),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
@@ -265,7 +265,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                     children: [
                       // 날짜 라벨
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 5.h),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(20.r),
@@ -273,32 +273,32 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                         child: Text(
                           dateLabel,
                           style: TextStyle(
-                            fontSize: 13.sp,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                             color: Colors.white,
                           ),
                         ),
                       ),
 
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 14.h),
 
                       // 시간 표시
                       Text(
                         timeStr,
                         style: TextStyle(
-                          fontSize: 56.sp,
+                          fontSize: 60.sp,
                           fontWeight: FontWeight.w300,
                           color: Colors.white,
                           letterSpacing: 2,
                         ),
                       ),
 
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 14.h),
 
                       // 근무 타입 뱃지
                       if (alarm.shiftType != null)
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+                          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 9.h),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12.r),
@@ -306,7 +306,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                           child: Text(
                             alarm.shiftType!,
                             style: TextStyle(
-                              fontSize: 16.sp,
+                              fontSize: 17.sp,
                               fontWeight: FontWeight.bold,
                               color: Colors.indigo.shade600,
                             ),
@@ -316,17 +316,17 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                   ),
                 ),
 
-                SizedBox(height: 16.h),
+                SizedBox(height: 18.h),
 
                 // 남은 시간 카드
                 Container(
                   width: double.infinity,
-                  padding: EdgeInsets.all(16.w),
+                  padding: EdgeInsets.all(18.w),
                   decoration: BoxDecoration(
                     color: timeData['isImminent']
                         ? Colors.orange.shade50
                         : Colors.white,
-                    borderRadius: BorderRadius.circular(14.r),
+                    borderRadius: BorderRadius.circular(16.r),
                     border: Border.all(
                       color: timeData['isImminent']
                           ? Colors.orange.shade200
@@ -336,23 +336,23 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                   child: Row(
                     children: [
                       Container(
-                        width: 44.w,
-                        height: 44.w,
+                        width: 46.w,
+                        height: 46.w,
                         decoration: BoxDecoration(
                           color: timeData['isImminent']
                               ? Colors.orange.shade100
                               : Colors.indigo.shade50,
-                          borderRadius: BorderRadius.circular(10.r),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
                         child: Icon(
                           Icons.timer_outlined,
-                          size: 22.sp,
+                          size: 24.sp,
                           color: timeData['isImminent']
                               ? Colors.orange.shade600
                               : Colors.indigo.shade400,
                         ),
                       ),
-                      SizedBox(width: 14.w),
+                      SizedBox(width: 16.w),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,14 +360,14 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                             Text(
                               '알람까지',
                               style: TextStyle(
-                                fontSize: 12.sp,
+                                fontSize: 13.sp,
                                 color: Colors.grey.shade600,
                               ),
                             ),
                             Text(
                               timeData['text'],
                               style: TextStyle(
-                                fontSize: 18.sp,
+                                fontSize: 19.sp,
                                 fontWeight: FontWeight.bold,
                                 color: timeData['isImminent']
                                     ? Colors.orange.shade700
@@ -381,16 +381,16 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                   ),
                 ),
 
-                SizedBox(height: 12.h),
+                SizedBox(height: 14.h),
 
                 // 알람 설정 정보 카드
                 if (alarmType != null)
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.all(16.w),
+                    padding: EdgeInsets.all(18.w),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(14.r),
+                      borderRadius: BorderRadius.circular(16.r),
                       border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: Column(
@@ -399,12 +399,12 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                         Text(
                           '알람 설정',
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
                             color: Colors.grey.shade600,
                           ),
                         ),
-                        SizedBox(height: 12.h),
+                        SizedBox(height: 14.h),
                         Row(
                           children: [
                             _buildSettingItem(
@@ -450,7 +450,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red.shade400,
                       side: BorderSide(color: Colors.red.shade300, width: 1.5),
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      padding: EdgeInsets.symmetric(vertical: 13.h),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
@@ -458,7 +458,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                   ),
                 ),
 
-                SizedBox(height: 8.h),
+                SizedBox(height: 10.h),
               ],
             ),
           ),
@@ -475,30 +475,30 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
   }) {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 6.w),
+        padding: EdgeInsets.symmetric(vertical: 11.h, horizontal: 8.w),
         decoration: BoxDecoration(
           color: isEnabled ? Colors.indigo.shade50 : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(10.r),
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: Column(
           children: [
             Icon(
               icon,
-              size: 20.sp,
+              size: 21.sp,
               color: isEnabled ? Colors.indigo.shade400 : Colors.grey.shade400,
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: 5.h),
             Text(
               label,
               style: TextStyle(
-                fontSize: 10.sp,
+                fontSize: 11.sp,
                 color: Colors.grey.shade600,
               ),
             ),
             Text(
               value,
               style: TextStyle(
-                fontSize: 12.sp,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
                 color: isEnabled ? Colors.indigo.shade700 : Colors.grey.shade500,
               ),
