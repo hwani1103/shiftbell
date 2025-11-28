@@ -439,7 +439,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                   '등록된 모든 알람 보기',
                   style: TextStyle(
                     fontSize: 13.sp,
-                    color: Colors.grey.shade500,
+                    color: Colors.indigo.shade400,
                   ),
                 ),
               ),
