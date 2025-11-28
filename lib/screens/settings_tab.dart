@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../models/alarm_type.dart';
+import '../models/shift_schedule.dart';
+import 'package:numberpicker/numberpicker.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   const SettingsTab({super.key});
@@ -349,12 +351,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                           Spacer(),
                           // 스케줄 설정 버튼
                           InkWell(
-                            onTap: () {
-                              // TODO: 스케줄 설정 화면으로 이동
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('스케줄 설정 (준비 중)')),
-                              );
-                            },
+                            onTap: () => _showScheduleSettingsMenu(),
                             borderRadius: BorderRadius.circular(8.r),
                             child: Padding(
                               padding: EdgeInsets.all(4.w),
@@ -1098,6 +1095,256 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     );
   }
 
+  // ⭐ 스케줄 설정 메뉴 (바텀시트)
+  void _showScheduleSettingsMenu() {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40.w,
+                height: 4.h,
+                margin: EdgeInsets.only(bottom: 16.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.edit, color: Colors.blue),
+                title: Text('근무명 수정'),
+                subtitle: Text('근무 이름을 변경합니다'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEditShiftNamesDialog();
+                },
+              ),
+              Divider(height: 1),
+              ListTile(
+                leading: Icon(Icons.alarm, color: Colors.orange),
+                title: Text('고정 알람 수정'),
+                subtitle: Text('근무별 알람 시간을 변경합니다'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEditFixedAlarmsScreen();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ⭐ 근무명 수정 다이얼로그
+  void _showEditShiftNamesDialog() {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    final activeShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
+
+    showDialog(
+      context: context,
+      builder: (context) => _EditShiftNamesDialog(
+        shiftTypes: activeShifts,
+        onSave: (Map<String, String> renamedShifts) async {
+          await _applyShiftNameChanges(renamedShifts);
+        },
+      ),
+    );
+  }
+
+  // ⭐ 근무명 변경 적용
+  Future<void> _applyShiftNameChanges(Map<String, String> renamedShifts) async {
+    if (renamedShifts.isEmpty) return;
+
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    // 1. shiftTypes 업데이트
+    final newShiftTypes = schedule.shiftTypes.map((s) {
+      return renamedShifts[s] ?? s;
+    }).toList();
+
+    // 2. activeShiftTypes 업데이트
+    final newActiveShiftTypes = schedule.activeShiftTypes?.map((s) {
+      return renamedShifts[s] ?? s;
+    }).toList();
+
+    // 3. pattern 업데이트 (규칙적인 경우)
+    final newPattern = schedule.pattern?.map((s) {
+      return renamedShifts[s] ?? s;
+    }).toList();
+
+    // 4. shiftColors 업데이트
+    final newShiftColors = <String, int>{};
+    schedule.shiftColors?.forEach((key, value) {
+      final newKey = renamedShifts[key] ?? key;
+      newShiftColors[newKey] = value;
+    });
+
+    // 5. assignedDates 업데이트
+    final newAssignedDates = <String, String>{};
+    schedule.assignedDates?.forEach((date, shift) {
+      final newShift = renamedShifts[shift] ?? shift;
+      newAssignedDates[date] = newShift;
+    });
+
+    // 6. DB 업데이트
+    await DatabaseService.instance.updateShiftNames(renamedShifts);
+
+    // 7. Schedule 저장
+    final newSchedule = ShiftSchedule(
+      id: schedule.id,
+      isRegular: schedule.isRegular,
+      pattern: newPattern,
+      todayIndex: schedule.todayIndex,
+      shiftTypes: newShiftTypes,
+      activeShiftTypes: newActiveShiftTypes,
+      startDate: schedule.startDate,
+      shiftColors: newShiftColors,
+      assignedDates: newAssignedDates,
+    );
+
+    await ref.read(scheduleProvider.notifier).saveSchedule(newSchedule);
+    await ref.read(alarmNotifierProvider.notifier).refresh();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('근무명이 변경되었습니다'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // ⭐ 고정 알람 수정 화면
+  void _showEditFixedAlarmsScreen() {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    final activeShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => _EditFixedAlarmsScreen(
+          shiftTypes: activeShifts,
+          onSave: () async {
+            // 알람 재생성
+            await _regenerateAllAlarms();
+          },
+        ),
+      ),
+    );
+  }
+
+  // ⭐ 모든 알람 재생성
+  Future<void> _regenerateAllAlarms() async {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    // 1. 기존 알람 전체 삭제
+    final existingAlarms = await DatabaseService.instance.getAllAlarms();
+    for (var alarm in existingAlarms) {
+      if (alarm.id != null) {
+        await AlarmService().cancelAlarm(alarm.id!);
+      }
+    }
+    await DatabaseService.instance.deleteAllAlarms();
+
+    // 2. Notification 취소
+    try {
+      const platform = MethodChannel('com.example.shiftbell/alarm');
+      await platform.invokeMethod('cancelNotification');
+    } catch (e) {
+      print('⚠️ Notification 삭제 실패: $e');
+    }
+
+    // 3. 10일치 알람 재생성
+    await _generate10DaysAlarmsFromTemplates(schedule);
+
+    // 4. AlarmGuard 트리거
+    try {
+      const platform = MethodChannel('com.example.shiftbell/alarm');
+      await platform.invokeMethod('triggerGuardCheck');
+    } catch (e) {
+      print('⚠️ AlarmGuard 트리거 실패: $e');
+    }
+
+    // 5. Provider 갱신
+    await ref.read(alarmNotifierProvider.notifier).refresh();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('알람이 업데이트되었습니다'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // ⭐ 템플릿 기반 10일치 알람 생성
+  Future<void> _generate10DaysAlarmsFromTemplates(ShiftSchedule schedule) async {
+    final today = DateTime.now();
+    final db = await DatabaseService.instance.database;
+
+    for (var i = 0; i < 10; i++) {
+      final date = today.add(Duration(days: i));
+      final shiftType = schedule.getShiftForDate(date);
+
+      if (shiftType == '미설정') continue;
+
+      // 해당 근무의 템플릿 조회
+      final templates = await DatabaseService.instance.getAlarmTemplates(shiftType);
+
+      for (var template in templates) {
+        final timeParts = template.time.split(':');
+        final alarmTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          int.parse(timeParts[0]),
+          int.parse(timeParts[1]),
+        );
+
+        // 과거 시간이면 스킵
+        if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) continue;
+
+        // DB에 알람 저장
+        final alarmId = await db.insert('alarms', {
+          'time': template.time,
+          'date': alarmTime.toIso8601String(),
+          'type': 'fixed',
+          'alarm_type_id': template.alarmTypeId,
+          'shift_type': shiftType,
+        });
+
+        // Native 알람 등록
+        await AlarmService().scheduleAlarm(
+          id: alarmId,
+          dateTime: alarmTime,
+          label: shiftType,
+          soundType: 'loud',
+        );
+      }
+    }
+
+    print('✅ 10일치 알람 재생성 완료');
+  }
+
   Widget _buildDurationButton(AlarmType type, int minutes) {
     final isSelected = type.duration == minutes;
     return Expanded(
@@ -1132,6 +1379,682 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// ⭐ 근무명 수정 다이얼로그
+// ============================================================
+class _EditShiftNamesDialog extends StatefulWidget {
+  final List<String> shiftTypes;
+  final Function(Map<String, String>) onSave;
+
+  const _EditShiftNamesDialog({
+    required this.shiftTypes,
+    required this.onSave,
+  });
+
+  @override
+  State<_EditShiftNamesDialog> createState() => _EditShiftNamesDialogState();
+}
+
+class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
+  late Map<String, TextEditingController> _controllers;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = {};
+    for (var shift in widget.shiftTypes) {
+      _controllers[shift] = TextEditingController(text: shift);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('근무명 수정'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: widget.shiftTypes.map((shift) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.h),
+              child: TextField(
+                controller: _controllers[shift],
+                maxLength: 4,
+                decoration: InputDecoration(
+                  labelText: shift,
+                  counterText: '',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('취소'),
+        ),
+        TextButton(
+          onPressed: () {
+            final renamedShifts = <String, String>{};
+
+            for (var entry in _controllers.entries) {
+              final oldName = entry.key;
+              final newName = entry.value.text.trim();
+
+              if (newName.isNotEmpty && newName != oldName) {
+                renamedShifts[oldName] = newName;
+              }
+            }
+
+            Navigator.pop(context);
+            widget.onSave(renamedShifts);
+          },
+          child: Text('저장'),
+        ),
+      ],
+    );
+  }
+}
+
+// ============================================================
+// ⭐ 고정 알람 수정 화면 (새 페이지)
+// ============================================================
+class _EditFixedAlarmsScreen extends StatefulWidget {
+  final List<String> shiftTypes;
+  final VoidCallback onSave;
+
+  const _EditFixedAlarmsScreen({
+    required this.shiftTypes,
+    required this.onSave,
+  });
+
+  @override
+  State<_EditFixedAlarmsScreen> createState() => _EditFixedAlarmsScreenState();
+}
+
+class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
+  Map<String, List<AlarmSetting>> _shiftAlarms = {};
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentTemplates();
+  }
+
+  Future<void> _loadCurrentTemplates() async {
+    final Map<String, List<AlarmSetting>> loadedAlarms = {};
+
+    for (var shift in widget.shiftTypes) {
+      final templates = await DatabaseService.instance.getAlarmTemplates(shift);
+      loadedAlarms[shift] = templates.map((t) {
+        final parts = t.time.split(':');
+        return AlarmSetting(
+          time: TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1])),
+          alarmTypeId: t.alarmTypeId,
+        );
+      }).toList();
+    }
+
+    setState(() {
+      _shiftAlarms = loadedAlarms;
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('고정 알람 수정'),
+        actions: [
+          TextButton(
+            onPressed: _saveAndExit,
+            child: Text('저장', style: TextStyle(fontSize: 16.sp)),
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '근무별 고정 알람을 설정하세요',
+                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '각 근무당 최대 3개까지 설정 가능',
+                    style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                  ),
+                  SizedBox(height: 16.h),
+                  Expanded(
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: 120.w,
+                        crossAxisSpacing: 12.w,
+                        mainAxisSpacing: 12.h,
+                        childAspectRatio: 0.70,
+                      ),
+                      itemCount: widget.shiftTypes.length,
+                      itemBuilder: (context, index) {
+                        final shift = widget.shiftTypes[index];
+                        final alarms = _shiftAlarms[shift] ?? [];
+                        return _buildShiftAlarmCard(shift, alarms);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget _buildShiftAlarmCard(String shift, List<AlarmSetting> alarms) {
+    return InkWell(
+      onTap: () => _showAlarmEditDialog(shift),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: alarms.isEmpty ? Colors.red.shade300 : Colors.black,
+            width: 2,
+          ),
+        ),
+        padding: EdgeInsets.all(12.w),
+        child: Column(
+          children: [
+            Text(
+              shift,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Expanded(
+              child: Center(
+                child: alarms.isEmpty
+                    ? Text(
+                        '탭하여 설정',
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: Colors.grey,
+                        ),
+                      )
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: alarms.map((alarm) => Padding(
+                          padding: EdgeInsets.symmetric(vertical: 2.h),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _getAlarmTypeEmoji(alarm.alarmTypeId),
+                                style: TextStyle(fontSize: 12.sp),
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                _formatTime(alarm.time),
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )).toList(),
+                      ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(TimeOfDay time) {
+    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _getAlarmTypeEmoji(int alarmTypeId) {
+    switch (alarmTypeId) {
+      case 1: return '🔔';
+      case 2: return '📳';
+      case 3: return '🔇';
+      default: return '🔔';
+    }
+  }
+
+  void _showAlarmEditDialog(String shift) {
+    showDialog(
+      context: context,
+      builder: (context) => _ShiftAlarmEditDialog(
+        shift: shift,
+        initialAlarms: _shiftAlarms[shift] ?? [],
+        onSave: (alarms) {
+          setState(() {
+            _shiftAlarms[shift] = alarms;
+          });
+        },
+      ),
+    );
+  }
+
+  Future<void> _saveAndExit() async {
+    // 기존 템플릿 삭제 후 새로 저장
+    await DatabaseService.instance.deleteAllAlarmTemplates();
+
+    for (var entry in _shiftAlarms.entries) {
+      final shift = entry.key;
+      final alarms = entry.value;
+
+      for (var alarm in alarms) {
+        await DatabaseService.instance.insertAlarmTemplate(
+          shiftType: shift,
+          time: _formatTime(alarm.time),
+          alarmTypeId: alarm.alarmTypeId,
+        );
+      }
+    }
+
+    widget.onSave();
+
+    if (mounted) {
+      Navigator.pop(context);
+    }
+  }
+}
+
+// ============================================================
+// ⭐ 알람 설정 다이얼로그 (온보딩과 동일한 UI)
+// ============================================================
+class _ShiftAlarmEditDialog extends StatefulWidget {
+  final String shift;
+  final List<AlarmSetting> initialAlarms;
+  final Function(List<AlarmSetting>) onSave;
+
+  const _ShiftAlarmEditDialog({
+    required this.shift,
+    required this.initialAlarms,
+    required this.onSave,
+  });
+
+  @override
+  State<_ShiftAlarmEditDialog> createState() => _ShiftAlarmEditDialogState();
+}
+
+class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
+  late List<AlarmSetting> _alarms;
+
+  @override
+  void initState() {
+    super.initState();
+    _alarms = List.from(widget.initialAlarms);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('${widget.shift} 고정 알람'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '고정 알람 3개까지 등록 가능',
+              style: TextStyle(fontSize: 13.sp, color: Colors.grey),
+            ),
+            SizedBox(height: 16.h),
+
+            ..._alarms.asMap().entries.map((entry) {
+              final alarm = entry.value;
+              return Container(
+                margin: EdgeInsets.only(bottom: 12.h),
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.alarm, size: 20.sp, color: Colors.blue),
+                        SizedBox(width: 8.w),
+                        Text(
+                          '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
+                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                        ),
+                        Spacer(),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red, size: 20.sp),
+                          onPressed: () {
+                            setState(() {
+                              _alarms.removeAt(entry.key);
+                            });
+                          },
+                          constraints: BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    Row(
+                      children: [
+                        _buildTypeButton(entry.key, 1, '🔔', '소리'),
+                        SizedBox(width: 8.w),
+                        _buildTypeButton(entry.key, 2, '📳', '진동'),
+                        SizedBox(width: 8.w),
+                        _buildTypeButton(entry.key, 3, '🔇', '무음'),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
+
+            SizedBox(height: 8.h),
+
+            if (_alarms.length < 3)
+              OutlinedButton.icon(
+                onPressed: _addAlarm,
+                icon: Icon(Icons.add),
+                label: Text('알람 추가'),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 44.h),
+                ),
+              ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('취소'),
+        ),
+        TextButton(
+          onPressed: () {
+            _alarms.sort((a, b) {
+              final aMinutes = a.time.hour * 60 + a.time.minute;
+              final bMinutes = b.time.hour * 60 + b.time.minute;
+              return aMinutes.compareTo(bMinutes);
+            });
+
+            widget.onSave(_alarms);
+            Navigator.pop(context);
+          },
+          child: Text('저장'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTypeButton(int index, int typeId, String emoji, String label) {
+    final isSelected = _alarms[index].alarmTypeId == typeId;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _alarms[index] = _alarms[index].copyWith(alarmTypeId: typeId);
+          });
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 8.h),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.orange.shade50 : Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: isSelected ? Colors.orange : Colors.grey.shade300,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            children: [
+              Text(emoji, style: TextStyle(fontSize: 16.sp)),
+              SizedBox(height: 2.h),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  color: isSelected ? Colors.orange.shade800 : Colors.grey.shade600,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addAlarm() async {
+    await showDialog(
+      context: context,
+      builder: (context) => _SettingsTimePicker(
+        onTimeSelected: (time) {
+          setState(() {
+            _alarms.add(AlarmSetting(time: time, alarmTypeId: 1));
+          });
+        },
+      ),
+    );
+  }
+}
+
+// ============================================================
+// ⭐ 삼성 스타일 시간 선택기 (온보딩과 동일)
+// ============================================================
+class _SettingsTimePicker extends StatefulWidget {
+  final Function(TimeOfDay) onTimeSelected;
+
+  const _SettingsTimePicker({required this.onTimeSelected});
+
+  @override
+  State<_SettingsTimePicker> createState() => _SettingsTimePickerState();
+}
+
+class _SettingsTimePickerState extends State<_SettingsTimePicker> {
+  bool _isAM = true;
+  int _hour = 9;
+  int _minute = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      child: Container(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '시간 선택',
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 24.h),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isAM = true;
+                        });
+                      },
+                      child: Container(
+                        width: 50.w,
+                        height: 50.h,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: _isAM ? Colors.blue : Colors.grey.shade300,
+                            width: _isAM ? 2 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8.r),
+                          color: Colors.white,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '오전',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 8.h),
+
+                    GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isAM = false;
+                        });
+                      },
+                      child: Container(
+                        width: 50.w,
+                        height: 50.h,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: !_isAM ? Colors.blue : Colors.grey.shade300,
+                            width: !_isAM ? 2 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8.r),
+                          color: Colors.white,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '오후',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(width: 16.w),
+
+                NumberPicker(
+                  value: _hour,
+                  minValue: 1,
+                  maxValue: 12,
+                  infiniteLoop: true,
+                  haptics: true,
+                  itemHeight: 50.h,
+                  itemWidth: (60.w).clamp(50.0, 80.0),
+                  axis: Axis.vertical,
+                  textStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                  onChanged: (value) {
+                    setState(() {
+                      if (_hour == 11 && value == 12) {
+                        _isAM = !_isAM;
+                      } else if (_hour == 12 && value == 11) {
+                        _isAM = !_isAM;
+                      }
+                      _hour = value;
+                    });
+                  },
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: Colors.grey.shade300),
+                      bottom: BorderSide(color: Colors.grey.shade300),
+                    ),
+                  ),
+                ),
+
+                Text(':', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold)),
+
+                NumberPicker(
+                  value: _minute,
+                  minValue: 0,
+                  maxValue: 59,
+                  zeroPad: true,
+                  infiniteLoop: true,
+                  haptics: true,
+                  itemHeight: 50.h,
+                  itemWidth: (60.w).clamp(50.0, 80.0),
+                  axis: Axis.vertical,
+                  textStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                  onChanged: (value) {
+                    setState(() {
+                      _minute = value;
+                    });
+                  },
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: Colors.grey.shade300),
+                      bottom: BorderSide(color: Colors.grey.shade300),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 24.h),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('취소'),
+                ),
+                SizedBox(width: 8.w),
+                ElevatedButton(
+                  onPressed: () {
+                    int hour24;
+                    if (_isAM) {
+                      hour24 = _hour == 12 ? 0 : _hour;
+                    } else {
+                      hour24 = _hour == 12 ? 12 : _hour + 12;
+                    }
+
+                    widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute));
+                    Navigator.pop(context);
+                  },
+                  child: Text('확인'),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

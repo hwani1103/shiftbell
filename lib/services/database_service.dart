@@ -530,6 +530,44 @@ class DatabaseService {
     print('🗑️ 모든 알람 템플릿 삭제 완료');
   }
 
+  // ⭐ 근무명 변경 (알람, 템플릿, 이력 테이블 모두 업데이트)
+  Future<void> updateShiftNames(Map<String, String> renamedShifts) async {
+    if (renamedShifts.isEmpty) return;
+
+    final db = await database;
+
+    for (var entry in renamedShifts.entries) {
+      final oldName = entry.key;
+      final newName = entry.value;
+
+      // 1. alarms 테이블의 shift_type 업데이트
+      await db.update(
+        'alarms',
+        {'shift_type': newName},
+        where: 'shift_type = ?',
+        whereArgs: [oldName],
+      );
+
+      // 2. shift_alarm_templates 테이블의 shift_type 업데이트
+      await db.update(
+        'shift_alarm_templates',
+        {'shift_type': newName},
+        where: 'shift_type = ?',
+        whereArgs: [oldName],
+      );
+
+      // 3. alarm_history 테이블의 shift_type 업데이트
+      await db.update(
+        'alarm_history',
+        {'shift_type': newName},
+        where: 'shift_type = ?',
+        whereArgs: [oldName],
+      );
+
+      print('✅ 근무명 변경: $oldName → $newName');
+    }
+  }
+
   // ⭐ 신규: 알람 이력 조회
 Future<List<AlarmHistory>> getAlarmHistory({int limit = 50}) async {
   final db = await database;
