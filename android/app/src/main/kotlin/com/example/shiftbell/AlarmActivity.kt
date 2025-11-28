@@ -342,8 +342,8 @@ private fun dismissAlarm() {
                 // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
                 AlarmGuardReceiver.removeShownNotification(alarmId)
 
-                // ⭐ 연장 Notification 표시 (내부에서 8888 삭제, 8889 표시, 30초 후 삭제, triggerCheck 호출)
-                showUpdatedNotification(newTimestamp, timeStr, shiftType)
+                // ⭐ 연장 Notification 표시 (NotificationHelper 사용)
+                NotificationHelper.showUpdatedNotification(applicationContext, timeStr, shiftType)
 
             } else {
                 cursor.close()
@@ -366,91 +366,6 @@ private fun dismissAlarm() {
         finish()
     }
 
-    private fun showUpdatedNotification(newTimestamp: Long, newTimeStr: String, label: String) {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // ⭐ 1단계: 기존 8888 삭제
-        notificationManager.cancel(8888)
-        Log.d("AlarmActivity", "🗑️ 8888 Notification 삭제")
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // ⭐ 스누즈 결과 전용 채널 ("알람" 키워드 제거 - 삼성 시스템 스누즈 방지)
-            val channel = NotificationChannel(
-                "shiftbell_result_v3",
-                "결과 알림",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "스누즈/타임아웃 결과"
-                enableVibration(false)
-                setSound(null, null)
-                setShowBadge(false)
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val openAppIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("openTab", 0)
-        }
-        val openAppPendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            openAppIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // ⭐ 2단계: 8889 표시 (스누즈 결과)
-        val notification = androidx.core.app.NotificationCompat.Builder(this, "shiftbell_result_v3")
-            .setContentTitle("$newTimeStr 로 연장되었습니다")
-            .setContentText(label)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setPriority(androidx.core.app.NotificationCompat.PRIORITY_LOW)
-            .setCategory(androidx.core.app.NotificationCompat.CATEGORY_STATUS)
-            .setAutoCancel(true)
-            .setSilent(true)
-            .setOnlyAlertOnce(true)
-            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
-            .setGroupSummary(false)
-            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
-            .setStyle(androidx.core.app.NotificationCompat.BigTextStyle().bigText(label))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
-            .setContentIntent(openAppPendingIntent)
-            .build()
-
-        notificationManager.notify(8889, notification)
-        Log.d("AlarmActivity", "📢 8889 Notification 표시: $newTimeStr")
-
-        // ⭐ 3단계: 30초 후 8889 자동 삭제 예약
-        scheduleNotificationDeletion()
-
-        // ⭐ 4단계: 다음 알람의 8888 Notification 표시
-        AlarmGuardReceiver.triggerCheck(this)
-        Log.d("AlarmActivity", "✅ AlarmGuardReceiver.triggerCheck() → 다음 알람 8888 표시")
-    }
-
-    private fun scheduleNotificationDeletion() {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        val deleteIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = AlarmActionReceiver.ACTION_DELETE_SNOOZE_NOTIFICATION
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            9999,  // 고정 requestCode (8889 삭제 전용)
-            deleteIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val deleteTime = System.currentTimeMillis() + 30_000  // 30초 후
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExact(AlarmManager.RTC, deleteTime, pendingIntent)
-        } else {
-            alarmManager.set(AlarmManager.RTC, deleteTime, pendingIntent)
-        }
-
-        Log.d("AlarmActivity", "⏰ 30초 후 8889 삭제 예약")
-    }
-    
     private fun goToHomeScreen() {
         val homeIntent = Intent(Intent.ACTION_MAIN).apply {
             addCategory(Intent.CATEGORY_HOME)

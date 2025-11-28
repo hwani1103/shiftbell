@@ -17,7 +17,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     companion object {
         private const val TWENTY_MIN_NOTIFICATION_ID = 8888
         private const val TWENTY_MIN_CHANNEL_ID = "shiftbell_pre_v3"  // ⭐ 채널 ID 변경 + "알람" 키워드 제거
-        private val shownNotifications = mutableSetOf<Int>()
+        private val shownNotifications = java.util.Collections.synchronizedSet(mutableSetOf<Int>())
 
         fun removeShownNotification(alarmId: Int) {
             shownNotifications.remove(alarmId)
@@ -283,16 +283,19 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     }
     
     private fun getNextAlarmFromDB(context: Context): AlarmData? {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         return try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.getReadableDatabaseWithRetry() ?: return null  // ⭐ 재시도 로직 사용
-            
+            db = dbHelper.getReadableDatabaseWithRetry() ?: return null  // ⭐ 재시도 로직 사용
+
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
                 Locale.getDefault()
             ).format(Date())
-            
-            val cursor = db.query(
+
+            cursor = db.query(
                 "alarms",
                 null,
                 "date > ?",
@@ -302,32 +305,32 @@ class AlarmGuardReceiver : BroadcastReceiver() {
                 "date ASC",
                 "1"
             )
-            
+
             var alarm: AlarmData? = null
-            
+
             if (cursor.moveToFirst()) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
-                
+
                 val timestamp = SimpleDateFormat(
                     "yyyy-MM-dd'T'HH:mm:ss",
                     Locale.getDefault()
                 ).parse(dateStr)?.time
-                
+
                 if (timestamp != null) {
                     val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
                     alarm = AlarmData(id, timestamp, time, shiftType)
                 }
             }
-            
-            cursor.close()
-            db.close()
-            
+
             alarm
         } catch (e: Exception) {
             Log.e("AlarmGuardReceiver", "DB 읽기 실패", e)
             null
+        } finally {
+            cursor?.close()
+            db?.close()
         }
     }
     

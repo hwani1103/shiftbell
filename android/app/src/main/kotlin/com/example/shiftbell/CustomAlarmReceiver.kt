@@ -261,7 +261,7 @@ override fun onReceive(context: Context, intent: Intent) {
             .setStyle(NotificationCompat.BigTextStyle().bigText(label))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
             .build()
         
-        notificationManager.notify(id, notification)
+        notificationManager.notify(id + 100000, notification)  // ⭐ 8888/8889와 충돌 방지
         
         Log.e("CustomAlarmReceiver", "✅ Notification 표시")
     }

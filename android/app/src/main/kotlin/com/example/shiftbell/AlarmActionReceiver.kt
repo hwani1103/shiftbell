@@ -217,8 +217,8 @@ class AlarmActionReceiver : BroadcastReceiver() {
         context.sendBroadcast(guardIntent)
         Log.d("AlarmAction", "✅ AlarmGuardReceiver 즉시 재실행")
 
-        // ⭐ Notification 업데이트 (연장되었습니다 표시)
-        showUpdatedNotification(context, alarmId, newTimestamp, timeStr, label, soundType)
+        // ⭐ Notification 업데이트 (NotificationHelper 사용)
+        NotificationHelper.showUpdatedNotification(context, timeStr, label)
         Log.d("AlarmAction", "✅ Notification 업데이트 완료")
 
         val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
@@ -231,113 +231,28 @@ class AlarmActionReceiver : BroadcastReceiver() {
     }
     }
     
-    private fun showUpdatedNotification(
-        context: Context,
-        alarmId: Int,
-        newTimestamp: Long,
-        newTimeStr: String,
-        label: String,
-        soundType: String
-    ) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // ⭐ 1단계: 기존 8888 삭제
-        notificationManager.cancel(8888)
-        Log.d("AlarmAction", "🗑️ 8888 Notification 삭제")
-
-        // ⭐ 스누즈 결과 전용 채널 ("알람" 키워드 제거 - 삼성 시스템 스누즈 방지)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "shiftbell_result_v3",
-                "결과 알림",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "스누즈/타임아웃 결과"
-                enableVibration(false)
-                setSound(null, null)
-                setShowBadge(false)
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val openAppIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("openTab", 0)
-        }
-        val openAppPendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            openAppIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // ⭐ 2단계: 8889 표시 (스누즈 결과)
-        val notification = NotificationCompat.Builder(context, "shiftbell_result_v3")
-            .setContentTitle("$newTimeStr 로 연장되었습니다")
-            .setContentText(label)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_STATUS)
-            .setAutoCancel(true)
-            .setSilent(true)
-            .setOnlyAlertOnce(true)
-            .setContentIntent(openAppPendingIntent)
-            .build()
-
-        notificationManager.notify(8889, notification)
-        Log.d("AlarmAction", "📢 8889 Notification 표시: $newTimeStr")
-
-        // ⭐ 3단계: 30초 후 8889 자동 삭제 예약
-        scheduleNotificationDeletion(context)
-
-        // ⭐ 4단계: 다음 알람의 8888 Notification 표시 (있을 경우)
-        AlarmGuardReceiver.triggerCheck(context)
-        Log.d("AlarmAction", "✅ AlarmGuardReceiver.triggerCheck() 호출 → 다음 알람 8888 표시")
-    }
-
-    private fun scheduleNotificationDeletion(context: Context) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        val deleteIntent = Intent(context, AlarmActionReceiver::class.java).apply {
-            action = ACTION_DELETE_SNOOZE_NOTIFICATION
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            9999,  // 고정 requestCode (8889 삭제 전용)
-            deleteIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val deleteTime = System.currentTimeMillis() + 30_000  // 30초 후
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExact(AlarmManager.RTC, deleteTime, pendingIntent)
-        } else {
-            alarmManager.set(AlarmManager.RTC, deleteTime, pendingIntent)
-        }
-
-        Log.d("AlarmAction", "⏰ 30초 후 8889 삭제 예약")
-    }
-
     // ⭐ DB에 알람이 존재하는지 확인 (삼성 "알림 다시 표시" 대응)
     private fun isAlarmExistsInDB(context: Context, alarmId: Int): Boolean {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         return try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.readableDatabase
-            val cursor = db.query(
+            db = dbHelper.readableDatabase
+            cursor = db.query(
                 "alarms",
                 arrayOf("id"),
                 "id = ?",
                 arrayOf(alarmId.toString()),
                 null, null, null
             )
-            val exists = cursor.count > 0
-            cursor.close()
-            db.close()
-            exists
+            cursor.count > 0
         } catch (e: Exception) {
             Log.e("AlarmAction", "❌ DB 조회 실패", e)
             false
+        } finally {
+            cursor?.close()
+            db?.close()
         }
     }
 }

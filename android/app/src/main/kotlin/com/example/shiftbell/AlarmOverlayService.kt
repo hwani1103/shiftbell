@@ -116,11 +116,15 @@ class AlarmOverlayService : Service() {
     }
 
     private fun loadAlarmInfo() {
+        var cursor: android.database.Cursor? = null
+        var typeCursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            val db = dbHelper.readableDatabase
+            db = dbHelper.readableDatabase
 
-            val cursor = db.query(
+            cursor = db.query(
                 "alarms",
                 arrayOf("time", "shift_type", "alarm_type_id"),
                 "id = ?",
@@ -134,7 +138,7 @@ class AlarmOverlayService : Service() {
                 val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
 
                 // alarm_type_id로 duration 조회
-                val typeCursor = db.query(
+                typeCursor = db.query(
                     "alarm_types",
                     arrayOf("duration"),
                     "id = ?",
@@ -145,14 +149,15 @@ class AlarmOverlayService : Service() {
                 if (typeCursor.moveToFirst()) {
                     alarmDuration = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("duration"))
                 }
-                typeCursor.close()
             }
-            cursor.close()
-            db.close()
 
             Log.d("AlarmOverlay", "✅ 알람 정보 로드: time=$alarmTimeStr, label=$alarmLabel, duration=${alarmDuration}분")
         } catch (e: Exception) {
             Log.e("AlarmOverlay", "❌ 알람 정보 로드 실패", e)
+        } finally {
+            typeCursor?.close()
+            cursor?.close()
+            db?.close()
         }
     }
 
@@ -446,8 +451,8 @@ class AlarmOverlayService : Service() {
                 // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
                 AlarmGuardReceiver.removeShownNotification(alarmId)
 
-                // ⭐ 연장 Notification 표시 (내부에서 8888 삭제, 8889 표시, 30초 후 삭제, triggerCheck 호출)
-                showUpdatedNotification(newTimestamp, timeStr, shiftType)
+                // ⭐ 연장 Notification 표시 (NotificationHelper 사용)
+                NotificationHelper.showUpdatedNotification(applicationContext, timeStr, shiftType)
 
                 // ⭐ 앱 포그라운드로 가져와서 Flutter UI 즉시 갱신
                 val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
@@ -471,91 +476,6 @@ class AlarmOverlayService : Service() {
 
         // 서비스 종료
         stopSelf()
-    }
-
-    private fun showUpdatedNotification(newTimestamp: Long, newTimeStr: String, label: String) {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // ⭐ 1단계: 기존 8888 삭제
-        notificationManager.cancel(8888)
-        Log.d("AlarmOverlay", "🗑️ 8888 Notification 삭제")
-
-        // ⭐ 스누즈 결과 전용 채널 ("알람" 키워드 제거 - 삼성 시스템 스누즈 방지)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "shiftbell_result_v3",
-                "결과 알림",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "스누즈/타임아웃 결과"
-                enableVibration(false)
-                setSound(null, null)
-                setShowBadge(false)
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val openAppIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("openTab", 0)
-        }
-        val openAppPendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            openAppIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // ⭐ 2단계: 8889 표시 (스누즈 결과)
-        val notification = NotificationCompat.Builder(this, "shiftbell_result_v3")
-            .setContentTitle("$newTimeStr 로 연장되었습니다")
-            .setContentText(label)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_STATUS)
-            .setAutoCancel(true)
-            .setSilent(true)
-            .setOnlyAlertOnce(true)
-            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
-            .setGroupSummary(false)
-            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(label))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
-            .setContentIntent(openAppPendingIntent)
-            .build()
-
-        notificationManager.notify(8889, notification)
-        Log.d("AlarmOverlay", "📢 8889 Notification 표시: $newTimeStr")
-
-        // ⭐ 3단계: 30초 후 8889 자동 삭제 예약
-        scheduleNotificationDeletion()
-
-        // ⭐ 4단계: 다음 알람의 8888 Notification 표시
-        AlarmGuardReceiver.triggerCheck(this)
-        Log.d("AlarmOverlay", "✅ AlarmGuardReceiver.triggerCheck() → 다음 알람 8888 표시")
-    }
-
-    private fun scheduleNotificationDeletion() {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-
-        val deleteIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = AlarmActionReceiver.ACTION_DELETE_SNOOZE_NOTIFICATION
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            9999,  // 고정 requestCode (8889 삭제 전용)
-            deleteIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val deleteTime = System.currentTimeMillis() + 30_000  // 30초 후
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExact(android.app.AlarmManager.RTC, deleteTime, pendingIntent)
-        } else {
-            alarmManager.set(android.app.AlarmManager.RTC, deleteTime, pendingIntent)
-        }
-
-        Log.d("AlarmOverlay", "⏰ 30초 후 8889 삭제 예약")
     }
 
     private fun removeOverlay() {
