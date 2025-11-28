@@ -585,6 +585,256 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       ],
     );
   }
+
+  // ⭐ 스케줄 설정 메뉴 (바텀시트)
+  void _showScheduleSettingsMenu() {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40.w,
+                height: 4.h,
+                margin: EdgeInsets.only(bottom: 16.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              ListTile(
+                leading: Icon(Icons.edit, color: Colors.blue),
+                title: Text('근무명 수정'),
+                subtitle: Text('근무 이름을 변경합니다'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEditShiftNamesDialog();
+                },
+              ),
+              Divider(height: 1),
+              ListTile(
+                leading: Icon(Icons.alarm, color: Colors.orange),
+                title: Text('고정 알람 수정'),
+                subtitle: Text('근무별 알람 시간을 변경합니다'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEditFixedAlarmsScreen();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ⭐ 근무명 수정 다이얼로그
+  void _showEditShiftNamesDialog() {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    final activeShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
+
+    showDialog(
+      context: context,
+      builder: (context) => _EditShiftNamesDialog(
+        shiftTypes: activeShifts,
+        onSave: (Map<String, String> renamedShifts) async {
+          await _applyShiftNameChanges(renamedShifts);
+        },
+      ),
+    );
+  }
+
+  // ⭐ 근무명 변경 적용
+  Future<void> _applyShiftNameChanges(Map<String, String> renamedShifts) async {
+    if (renamedShifts.isEmpty) return;
+
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    // 1. shiftTypes 업데이트
+    final newShiftTypes = schedule.shiftTypes.map((s) {
+      return renamedShifts[s] ?? s;
+    }).toList();
+
+    // 2. activeShiftTypes 업데이트
+    final newActiveShiftTypes = schedule.activeShiftTypes?.map((s) {
+      return renamedShifts[s] ?? s;
+    }).toList();
+
+    // 3. pattern 업데이트 (규칙적인 경우)
+    final newPattern = schedule.pattern?.map((s) {
+      return renamedShifts[s] ?? s;
+    }).toList();
+
+    // 4. shiftColors 업데이트
+    final newShiftColors = <String, int>{};
+    schedule.shiftColors?.forEach((key, value) {
+      final newKey = renamedShifts[key] ?? key;
+      newShiftColors[newKey] = value;
+    });
+
+    // 5. assignedDates 업데이트
+    final newAssignedDates = <String, String>{};
+    schedule.assignedDates?.forEach((date, shift) {
+      final newShift = renamedShifts[shift] ?? shift;
+      newAssignedDates[date] = newShift;
+    });
+
+    // 6. DB 업데이트
+    await DatabaseService.instance.updateShiftNames(renamedShifts);
+
+    // 7. Schedule 저장
+    final newSchedule = ShiftSchedule(
+      id: schedule.id,
+      isRegular: schedule.isRegular,
+      pattern: newPattern,
+      todayIndex: schedule.todayIndex,
+      shiftTypes: newShiftTypes,
+      activeShiftTypes: newActiveShiftTypes,
+      startDate: schedule.startDate,
+      shiftColors: newShiftColors,
+      assignedDates: newAssignedDates,
+    );
+
+    await ref.read(scheduleProvider.notifier).saveSchedule(newSchedule);
+    await ref.read(alarmNotifierProvider.notifier).refresh();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('근무명이 변경되었습니다'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // ⭐ 고정 알람 수정 화면
+  void _showEditFixedAlarmsScreen() {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    final activeShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => _EditFixedAlarmsScreen(
+          shiftTypes: activeShifts,
+          onSave: () async {
+            // 알람 재생성
+            await _regenerateAllAlarms();
+          },
+        ),
+      ),
+    );
+  }
+
+  // ⭐ 모든 알람 재생성
+  Future<void> _regenerateAllAlarms() async {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    // 1. 기존 알람 전체 삭제
+    final existingAlarms = await DatabaseService.instance.getAllAlarms();
+    for (var alarm in existingAlarms) {
+      if (alarm.id != null) {
+        await AlarmService().cancelAlarm(alarm.id!);
+      }
+    }
+    await DatabaseService.instance.deleteAllAlarms();
+
+    // 2. Notification 취소
+    try {
+      const platform = MethodChannel('com.example.shiftbell/alarm');
+      await platform.invokeMethod('cancelNotification');
+    } catch (e) {
+      print('⚠️ Notification 삭제 실패: $e');
+    }
+
+    // 3. 10일치 알람 재생성
+    await _generate10DaysAlarmsFromTemplates(schedule);
+
+    // 4. AlarmGuard 트리거
+    try {
+      const platform = MethodChannel('com.example.shiftbell/alarm');
+      await platform.invokeMethod('triggerGuardCheck');
+    } catch (e) {
+      print('⚠️ AlarmGuard 트리거 실패: $e');
+    }
+
+    // 5. Provider 갱신
+    await ref.read(alarmNotifierProvider.notifier).refresh();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('알람이 업데이트되었습니다'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // ⭐ 템플릿 기반 10일치 알람 생성
+  Future<void> _generate10DaysAlarmsFromTemplates(ShiftSchedule schedule) async {
+    final today = DateTime.now();
+    final db = await DatabaseService.instance.database;
+
+    for (var i = 0; i < 10; i++) {
+      final date = today.add(Duration(days: i));
+      final shiftType = schedule.getShiftForDate(date);
+
+      if (shiftType == '미설정') continue;
+
+      // 해당 근무의 템플릿 조회
+      final templates = await DatabaseService.instance.getAlarmTemplates(shiftType);
+
+      for (var template in templates) {
+        final timeParts = template.time.split(':');
+        final alarmTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          int.parse(timeParts[0]),
+          int.parse(timeParts[1]),
+        );
+
+        // 과거 시간이면 스킵
+        if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) continue;
+
+        // DB에 알람 저장
+        final alarmId = await db.insert('alarms', {
+          'time': template.time,
+          'date': alarmTime.toIso8601String(),
+          'type': 'fixed',
+          'alarm_type_id': template.alarmTypeId,
+          'shift_type': shiftType,
+        });
+
+        // Native 알람 등록
+        await AlarmService().scheduleAlarm(
+          id: alarmId,
+          dateTime: alarmTime,
+          label: shiftType,
+          soundType: 'loud',
+        );
+      }
+    }
+
+    print('✅ 10일치 알람 재생성 완료');
+  }
 }
 
 // 알람 타입 설정 BottomSheet
@@ -1093,256 +1343,6 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
         ),
       ],
     );
-  }
-
-  // ⭐ 스케줄 설정 메뉴 (바텀시트)
-  void _showScheduleSettingsMenu() {
-    final schedule = ref.read(scheduleProvider).value;
-    if (schedule == null) return;
-
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40.w,
-                height: 4.h,
-                margin: EdgeInsets.only(bottom: 16.h),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.edit, color: Colors.blue),
-                title: Text('근무명 수정'),
-                subtitle: Text('근무 이름을 변경합니다'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showEditShiftNamesDialog();
-                },
-              ),
-              Divider(height: 1),
-              ListTile(
-                leading: Icon(Icons.alarm, color: Colors.orange),
-                title: Text('고정 알람 수정'),
-                subtitle: Text('근무별 알람 시간을 변경합니다'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showEditFixedAlarmsScreen();
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ⭐ 근무명 수정 다이얼로그
-  void _showEditShiftNamesDialog() {
-    final schedule = ref.read(scheduleProvider).value;
-    if (schedule == null) return;
-
-    final activeShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
-
-    showDialog(
-      context: context,
-      builder: (context) => _EditShiftNamesDialog(
-        shiftTypes: activeShifts,
-        onSave: (Map<String, String> renamedShifts) async {
-          await _applyShiftNameChanges(renamedShifts);
-        },
-      ),
-    );
-  }
-
-  // ⭐ 근무명 변경 적용
-  Future<void> _applyShiftNameChanges(Map<String, String> renamedShifts) async {
-    if (renamedShifts.isEmpty) return;
-
-    final schedule = ref.read(scheduleProvider).value;
-    if (schedule == null) return;
-
-    // 1. shiftTypes 업데이트
-    final newShiftTypes = schedule.shiftTypes.map((s) {
-      return renamedShifts[s] ?? s;
-    }).toList();
-
-    // 2. activeShiftTypes 업데이트
-    final newActiveShiftTypes = schedule.activeShiftTypes?.map((s) {
-      return renamedShifts[s] ?? s;
-    }).toList();
-
-    // 3. pattern 업데이트 (규칙적인 경우)
-    final newPattern = schedule.pattern?.map((s) {
-      return renamedShifts[s] ?? s;
-    }).toList();
-
-    // 4. shiftColors 업데이트
-    final newShiftColors = <String, int>{};
-    schedule.shiftColors?.forEach((key, value) {
-      final newKey = renamedShifts[key] ?? key;
-      newShiftColors[newKey] = value;
-    });
-
-    // 5. assignedDates 업데이트
-    final newAssignedDates = <String, String>{};
-    schedule.assignedDates?.forEach((date, shift) {
-      final newShift = renamedShifts[shift] ?? shift;
-      newAssignedDates[date] = newShift;
-    });
-
-    // 6. DB 업데이트
-    await DatabaseService.instance.updateShiftNames(renamedShifts);
-
-    // 7. Schedule 저장
-    final newSchedule = ShiftSchedule(
-      id: schedule.id,
-      isRegular: schedule.isRegular,
-      pattern: newPattern,
-      todayIndex: schedule.todayIndex,
-      shiftTypes: newShiftTypes,
-      activeShiftTypes: newActiveShiftTypes,
-      startDate: schedule.startDate,
-      shiftColors: newShiftColors,
-      assignedDates: newAssignedDates,
-    );
-
-    await ref.read(scheduleProvider.notifier).saveSchedule(newSchedule);
-    await ref.read(alarmNotifierProvider.notifier).refresh();
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('근무명이 변경되었습니다'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
-  // ⭐ 고정 알람 수정 화면
-  void _showEditFixedAlarmsScreen() {
-    final schedule = ref.read(scheduleProvider).value;
-    if (schedule == null) return;
-
-    final activeShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => _EditFixedAlarmsScreen(
-          shiftTypes: activeShifts,
-          onSave: () async {
-            // 알람 재생성
-            await _regenerateAllAlarms();
-          },
-        ),
-      ),
-    );
-  }
-
-  // ⭐ 모든 알람 재생성
-  Future<void> _regenerateAllAlarms() async {
-    final schedule = ref.read(scheduleProvider).value;
-    if (schedule == null) return;
-
-    // 1. 기존 알람 전체 삭제
-    final existingAlarms = await DatabaseService.instance.getAllAlarms();
-    for (var alarm in existingAlarms) {
-      if (alarm.id != null) {
-        await AlarmService().cancelAlarm(alarm.id!);
-      }
-    }
-    await DatabaseService.instance.deleteAllAlarms();
-
-    // 2. Notification 취소
-    try {
-      const platform = MethodChannel('com.example.shiftbell/alarm');
-      await platform.invokeMethod('cancelNotification');
-    } catch (e) {
-      print('⚠️ Notification 삭제 실패: $e');
-    }
-
-    // 3. 10일치 알람 재생성
-    await _generate10DaysAlarmsFromTemplates(schedule);
-
-    // 4. AlarmGuard 트리거
-    try {
-      const platform = MethodChannel('com.example.shiftbell/alarm');
-      await platform.invokeMethod('triggerGuardCheck');
-    } catch (e) {
-      print('⚠️ AlarmGuard 트리거 실패: $e');
-    }
-
-    // 5. Provider 갱신
-    await ref.read(alarmNotifierProvider.notifier).refresh();
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('알람이 업데이트되었습니다'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
-  // ⭐ 템플릿 기반 10일치 알람 생성
-  Future<void> _generate10DaysAlarmsFromTemplates(ShiftSchedule schedule) async {
-    final today = DateTime.now();
-    final db = await DatabaseService.instance.database;
-
-    for (var i = 0; i < 10; i++) {
-      final date = today.add(Duration(days: i));
-      final shiftType = schedule.getShiftForDate(date);
-
-      if (shiftType == '미설정') continue;
-
-      // 해당 근무의 템플릿 조회
-      final templates = await DatabaseService.instance.getAlarmTemplates(shiftType);
-
-      for (var template in templates) {
-        final timeParts = template.time.split(':');
-        final alarmTime = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          int.parse(timeParts[0]),
-          int.parse(timeParts[1]),
-        );
-
-        // 과거 시간이면 스킵
-        if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) continue;
-
-        // DB에 알람 저장
-        final alarmId = await db.insert('alarms', {
-          'time': template.time,
-          'date': alarmTime.toIso8601String(),
-          'type': 'fixed',
-          'alarm_type_id': template.alarmTypeId,
-          'shift_type': shiftType,
-        });
-
-        // Native 알람 등록
-        await AlarmService().scheduleAlarm(
-          id: alarmId,
-          dateTime: alarmTime,
-          label: shiftType,
-          soundType: 'loud',
-        );
-      }
-    }
-
-    print('✅ 10일치 알람 재생성 완료');
   }
 
   Widget _buildDurationButton(AlarmType type, int minutes) {
