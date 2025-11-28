@@ -805,6 +805,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
 
   // 알람 사운드 목록 (파일명과 표시명)
   static const List<Map<String, String>> _soundOptions = [
+    {'id': 'default', 'name': '기본알람음', 'file': 'default'},
     {'id': 'alarmbell1', 'name': '알람벨 1', 'file': 'alarmbell1.mp3'},
     {'id': 'alarmbell2', 'name': '알람벨 2', 'file': 'alarmbell2.mp3'},
   ];

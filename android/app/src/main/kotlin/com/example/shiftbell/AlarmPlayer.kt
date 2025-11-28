@@ -39,6 +39,11 @@ class AlarmPlayer(private val context: Context) {
         stopAlarm() // 기존 알람 정지
 
         when {
+            // 시스템 기본 알람음
+            soundFile == "default" -> {
+                playDefaultSound(volume)
+                playVibration(vibrationStrength)
+            }
             // alarmbell로 시작하면 커스텀 사운드 재생
             soundFile.startsWith("alarmbell") -> {
                 playCustomSound(soundFile, volume)

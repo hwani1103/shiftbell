@@ -522,15 +522,18 @@ override fun onNewIntent(intent: Intent) {
             val halfVolume = maxVolume / 2
             audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, halfVolume, 0)
 
-            // res/raw 리소스 ID 가져오기
-            val resourceId = resources.getIdentifier(soundFile, "raw", packageName)
-
-            if (resourceId == 0) {
-                Log.e("MainActivity", "리소스 못 찾음: res/raw/$soundFile.mp3")
-                return
+            // ⭐ 사운드 URI 결정 (default = 시스템 기본 알람음)
+            val soundUri = if (soundFile == "default") {
+                android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM)
+            } else {
+                // res/raw 리소스 ID 가져오기
+                val resourceId = resources.getIdentifier(soundFile, "raw", packageName)
+                if (resourceId == 0) {
+                    Log.e("MainActivity", "리소스 못 찾음: res/raw/$soundFile.mp3")
+                    return
+                }
+                android.net.Uri.parse("android.resource://$packageName/$resourceId")
             }
-
-            val soundUri = android.net.Uri.parse("android.resource://$packageName/$resourceId")
 
             previewMediaPlayer = android.media.MediaPlayer().apply {
                 setDataSource(this@MainActivity, soundUri)
