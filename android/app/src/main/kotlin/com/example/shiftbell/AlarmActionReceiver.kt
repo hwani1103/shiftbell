@@ -14,10 +14,21 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 
 class AlarmActionReceiver : BroadcastReceiver() {
+
+    companion object {
+        const val ACTION_DELETE_SNOOZE_NOTIFICATION = "DELETE_SNOOZE_NOTIFICATION"
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         val alarmId = intent.getIntExtra("alarmId", 0)
-        
+
         when (intent.action) {
+            // ⭐ 30초 후 8889 자동 삭제
+            ACTION_DELETE_SNOOZE_NOTIFICATION -> {
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.cancel(8889)
+                Log.d("AlarmAction", "🗑️ 8889 Notification 자동 삭제 (30초 경과)")
+            }
             "CANCEL_ALARM" -> {
                 Log.d("AlarmAction", "🗑️ 알람 취소: ID=$alarmId")
                 val label = intent.getStringExtra(CustomAlarmReceiver.EXTRA_LABEL) ?: "알람"
@@ -210,6 +221,10 @@ class AlarmActionReceiver : BroadcastReceiver() {
     ) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+        // ⭐ 1단계: 기존 8888 삭제
+        notificationManager.cancel(8888)
+        Log.d("AlarmAction", "🗑️ 8888 Notification 삭제")
+
         // ⭐ 스누즈 결과 전용 채널 (드롭다운 버튼 없음)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -236,9 +251,9 @@ class AlarmActionReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // ⭐ 스누즈 Notification은 정보만 표시 (버튼/드롭다운 없음)
+        // ⭐ 2단계: 8889 표시 (스누즈 결과)
         val notification = NotificationCompat.Builder(context, "alarm_result_channel_v2")
-            .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
+            .setContentTitle("$newTimeStr 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -249,8 +264,38 @@ class AlarmActionReceiver : BroadcastReceiver() {
             .setContentIntent(openAppPendingIntent)
             .build()
 
-        notificationManager.notify(8889, notification)  // ⭐ 8889: 스누즈/타임아웃 전용 (20분전 8888과 공존)
+        notificationManager.notify(8889, notification)
+        Log.d("AlarmAction", "📢 8889 Notification 표시: $newTimeStr")
 
-        Log.d("AlarmAction", "📢 Notification 업데이트: $newTimeStr")
+        // ⭐ 3단계: 30초 후 8889 자동 삭제 예약
+        scheduleNotificationDeletion(context)
+
+        // ⭐ 4단계: 다음 알람의 8888 Notification 표시 (있을 경우)
+        AlarmGuardReceiver.triggerCheck(context)
+        Log.d("AlarmAction", "✅ AlarmGuardReceiver.triggerCheck() 호출 → 다음 알람 8888 표시")
+    }
+
+    private fun scheduleNotificationDeletion(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val deleteIntent = Intent(context, AlarmActionReceiver::class.java).apply {
+            action = ACTION_DELETE_SNOOZE_NOTIFICATION
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            9999,  // 고정 requestCode (8889 삭제 전용)
+            deleteIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val deleteTime = System.currentTimeMillis() + 30_000  // 30초 후
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExact(AlarmManager.RTC, deleteTime, pendingIntent)
+        } else {
+            alarmManager.set(AlarmManager.RTC, deleteTime, pendingIntent)
+        }
+
+        Log.d("AlarmAction", "⏰ 30초 후 8889 삭제 예약")
     }
 }

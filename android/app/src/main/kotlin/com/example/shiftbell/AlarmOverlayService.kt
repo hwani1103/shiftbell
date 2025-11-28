@@ -206,15 +206,17 @@ class AlarmOverlayService : Service() {
         // shownNotifications에서 제거
         AlarmGuardReceiver.removeShownNotification(alarmId)
 
-        // ⭐ Timeout Notification 표시 (삭제 대신 텍스트 변경)
-        showTimeoutNotification()
+        // ⭐ 8888 Notification 삭제 (타임아웃은 8889 안 보여줌)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(8888)
+        Log.d("AlarmOverlay", "🗑️ 8888 Notification 삭제 (타임아웃)")
 
         // 갱신 체크
         AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
 
-        // AlarmGuardReceiver 트리거
-        val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
-        sendBroadcast(guardIntent)
+        // ⭐ 다음 알람의 8888 Notification 표시 (직접 호출)
+        AlarmGuardReceiver.triggerCheck(this)
+        Log.d("AlarmOverlay", "✅ AlarmGuardReceiver.triggerCheck() → 다음 알람 8888 표시")
 
         // Overlay 제거
         removeOverlay()
@@ -223,51 +225,6 @@ class AlarmOverlayService : Service() {
         stopSelf()
     }
 
-    private fun showTimeoutNotification() {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // ⭐ 스누즈/타임아웃 전용 채널 (드롭다운 버튼 없음)
-            val channel = NotificationChannel(
-                "alarm_result_channel_v2",
-                "알람 결과 알림",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "알람 스누즈/타임아웃 결과"
-                enableVibration(false)
-                setSound(null, null)
-                setShowBadge(false)
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val openAppIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("openTab", 0)
-        }
-        val openAppPendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            openAppIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification = NotificationCompat.Builder(this, "alarm_result_channel_v2")
-            .setContentTitle("$alarmTimeStr 알람이 timeout되었습니다")
-            .setContentText(alarmLabel)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_STATUS)  // ⭐ STATUS로 변경 (드롭다운 방지)
-            .setAutoCancel(true)
-            .setSilent(true)
-            .setOnlyAlertOnce(true)  // ⭐ 드롭다운 스누즈 방지
-            .setContentIntent(openAppPendingIntent)
-            .build()
-
-        notificationManager.notify(8889, notification)
-        Log.d("AlarmOverlay", "📢 Timeout Notification 표시: $alarmTimeStr")
-    }
-    
     private fun canDrawOverlays(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             android.provider.Settings.canDrawOverlays(this)
@@ -489,11 +446,7 @@ class AlarmOverlayService : Service() {
                 // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
                 AlarmGuardReceiver.removeShownNotification(alarmId)
 
-                // AlarmGuardReceiver 재실행
-                val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
-                sendBroadcast(guardIntent)
-
-                // ⭐ 연장 Notification 표시
+                // ⭐ 연장 Notification 표시 (내부에서 8888 삭제, 8889 표시, 30초 후 삭제, triggerCheck 호출)
                 showUpdatedNotification(newTimestamp, timeStr, shiftType)
 
                 // ⭐ 앱 포그라운드로 가져와서 Flutter UI 즉시 갱신
@@ -523,6 +476,10 @@ class AlarmOverlayService : Service() {
     private fun showUpdatedNotification(newTimestamp: Long, newTimeStr: String, label: String) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
+        // ⭐ 1단계: 기존 8888 삭제
+        notificationManager.cancel(8888)
+        Log.d("AlarmOverlay", "🗑️ 8888 Notification 삭제")
+
         // ⭐ 스누즈/타임아웃 전용 채널
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -549,8 +506,9 @@ class AlarmOverlayService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // ⭐ 2단계: 8889 표시 (스누즈 결과)
         val notification = NotificationCompat.Builder(this, "alarm_result_channel_v2")
-            .setContentTitle("알람이 $newTimeStr 로 연장되었습니다")
+            .setContentTitle("$newTimeStr 로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -562,7 +520,38 @@ class AlarmOverlayService : Service() {
             .build()
 
         notificationManager.notify(8889, notification)
-        Log.d("AlarmOverlay", "📢 연장 Notification 표시: $newTimeStr")
+        Log.d("AlarmOverlay", "📢 8889 Notification 표시: $newTimeStr")
+
+        // ⭐ 3단계: 30초 후 8889 자동 삭제 예약
+        scheduleNotificationDeletion()
+
+        // ⭐ 4단계: 다음 알람의 8888 Notification 표시
+        AlarmGuardReceiver.triggerCheck(this)
+        Log.d("AlarmOverlay", "✅ AlarmGuardReceiver.triggerCheck() → 다음 알람 8888 표시")
+    }
+
+    private fun scheduleNotificationDeletion() {
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+
+        val deleteIntent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = AlarmActionReceiver.ACTION_DELETE_SNOOZE_NOTIFICATION
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            9999,  // 고정 requestCode (8889 삭제 전용)
+            deleteIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val deleteTime = System.currentTimeMillis() + 30_000  // 30초 후
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExact(android.app.AlarmManager.RTC, deleteTime, pendingIntent)
+        } else {
+            alarmManager.set(android.app.AlarmManager.RTC, deleteTime, pendingIntent)
+        }
+
+        Log.d("AlarmOverlay", "⏰ 30초 후 8889 삭제 예약")
     }
 
     private fun removeOverlay() {
