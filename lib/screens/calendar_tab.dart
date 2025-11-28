@@ -449,7 +449,7 @@ Widget build(BuildContext context) {
                        patternShift != currentShift;
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final popupHeight = screenHeight * 0.68;  // ⭐ 화면의 68%
+    final popupHeight = screenHeight * 0.72;  // ⭐ 화면의 72%
 
     final dateStr = day.toIso8601String().split('T')[0];
 
