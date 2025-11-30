@@ -104,7 +104,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
               color: Colors.white,
               alignment: Alignment.center,
               child: Text(
-                '${year.toString().substring(2)}.${month.toString().padLeft(2, '0')}',
+                '$year년 $month월',
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
