@@ -2209,6 +2209,7 @@ class _AllTeamsSetupDialog extends StatefulWidget {
 
 class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
   final PageController _pageController = PageController();
+  final TextEditingController _teamInputController = TextEditingController();
   int _currentPage = 0;
 
   // 사용자 입력 데이터
@@ -2217,9 +2218,27 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
   Map<String, int> _teamOffsets = {}; // 예: {'A': 1, 'B': 2, 'C': 0, 'D': 3}
 
   @override
+  void initState() {
+    super.initState();
+    _teamInputController.addListener(_onTeamInputChanged);
+  }
+
+  @override
   void dispose() {
     _pageController.dispose();
+    _teamInputController.dispose();
     super.dispose();
+  }
+
+  void _onTeamInputChanged() {
+    final text = _teamInputController.text;
+    setState(() {
+      _teamNames = text
+          .split(RegExp(r'\s+')) // 공백으로 분리
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty && e.length == 1)
+          .toList();
+    });
   }
 
   void _nextPage() {
@@ -2377,14 +2396,13 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
     }
   }
 
-  // 패턴을 화살표와 함께 표시 (줄바꿈 직전에는 화살표 없음)
-  Widget _buildPatternWithArrows() {
-    List<Widget> items = [];
-
-    for (int i = 0; i < widget.pattern.length; i++) {
-      // 근무 카드 추가
-      items.add(
-        Container(
+  // 패턴 표시 (화살표 없이 단순 배치)
+  Widget _buildPatternCards() {
+    return Wrap(
+      spacing: 6.w,
+      runSpacing: 8.h,
+      children: widget.pattern.map((shift) {
+        return Container(
           padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -2392,124 +2410,100 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
             border: Border.all(color: Colors.purple.shade300),
           ),
           child: Text(
-            widget.pattern[i],
+            shift,
             style: TextStyle(
               fontSize: 11.sp,
               fontWeight: FontWeight.w600,
               color: Colors.purple.shade700,
             ),
           ),
-        ),
-      );
-
-      // 마지막 아이템이 아니면 화살표 추가
-      if (i < widget.pattern.length - 1) {
-        items.add(
-          Container(
-            height: 26.h, // 카드와 동일한 높이
-            alignment: Alignment.center,
-            padding: EdgeInsets.symmetric(horizontal: 4.w),
-            child: Icon(
-              Icons.arrow_forward,
-              size: 14.sp,
-              color: Colors.purple.shade400,
-            ),
-          ),
         );
-      }
-    }
-
-    return Wrap(
-      spacing: 2.w,
-      runSpacing: 8.h,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: items,
+      }).toList(),
     );
   }
 
   // 1단계: 교대 패턴 확인
   Widget _buildStep1_PatternConfirm() {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '1단계: 교대 패턴 확인',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.purple,
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '1단계: 교대 패턴 확인',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+            color: Colors.purple,
           ),
-          SizedBox(height: 8.h),
-          Text(
-            '현재 설정된 교대 패턴을 확인해주세요.',
-            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+        ),
+        SizedBox(height: 8.h),
+        Text(
+          '현재 설정된 교대 패턴을 확인해주세요.',
+          style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+        ),
+        SizedBox(height: 24.h),
+        Container(
+          width: double.infinity,
+          height: 200.h, // 고정 높이
+          padding: EdgeInsets.all(20.w),
+          decoration: BoxDecoration(
+            color: Colors.purple.shade50,
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: Colors.purple.shade200),
           ),
-          SizedBox(height: 24.h),
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(20.w),
-            decoration: BoxDecoration(
-              color: Colors.purple.shade50,
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: Colors.purple.shade200),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '교대 패턴',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.purple.shade900,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '교대 패턴',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.purple.shade900,
                 ),
-                SizedBox(height: 12.h),
-                _buildPatternWithArrows(),
-                SizedBox(height: 12.h),
-                Text(
-                  '총 ${widget.pattern.length}일 주기',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.purple.shade600,
-                  ),
+              ),
+              SizedBox(height: 12.h),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: _buildPatternCards(),
                 ),
-              ],
-            ),
-          ),
-          SizedBox(height: 24.h),
-          Container(
-            padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.info, color: Colors.blue, size: 20.sp),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: Text(
-                    '이 패턴을 기준으로 전체 조의 근무표를 작성합니다.',
-                    style: TextStyle(fontSize: 12.sp, color: Colors.blue.shade900),
-                  ),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                '총 ${widget.pattern.length}일 주기',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Colors.purple.shade600,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        SizedBox(height: 24.h),
+        Container(
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color: Colors.blue.shade50,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.info, color: Colors.blue, size: 20.sp),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(
+                  '이 패턴을 기준으로 전체 조의 근무표를 작성합니다.',
+                  style: TextStyle(fontSize: 12.sp, color: Colors.blue.shade900),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   // 2단계: 전체 조 구성 입력
   Widget _buildStep2_TeamNamesInput() {
-    TextEditingController _teamInputController = TextEditingController(
-      text: _teamNames.join(' '),
-    );
-
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2544,15 +2538,6 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                 borderSide: BorderSide(color: Colors.purple, width: 2),
               ),
             ),
-            onChanged: (value) {
-              setState(() {
-                _teamNames = value
-                    .split(RegExp(r'\s+')) // 하나 이상의 공백으로 분리
-                    .map((e) => e.trim())
-                    .where((e) => e.length == 1)
-                    .toList();
-              });
-            },
           ),
           SizedBox(height: 16.h),
           if (_teamNames.isNotEmpty)
