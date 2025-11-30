@@ -2377,6 +2377,53 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
     }
   }
 
+  // 패턴을 화살표와 함께 표시 (줄바꿈 직전에는 화살표 없음)
+  Widget _buildPatternWithArrows() {
+    List<Widget> items = [];
+
+    for (int i = 0; i < widget.pattern.length; i++) {
+      // 근무 카드 추가
+      items.add(
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(6.r),
+            border: Border.all(color: Colors.purple.shade300),
+          ),
+          child: Text(
+            widget.pattern[i],
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.purple.shade700,
+            ),
+          ),
+        ),
+      );
+
+      // 마지막 아이템이 아니면 화살표 추가
+      if (i < widget.pattern.length - 1) {
+        items.add(
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w),
+            child: Icon(
+              Icons.arrow_forward,
+              size: 16.sp,
+              color: Colors.purple.shade400,
+            ),
+          ),
+        );
+      }
+    }
+
+    return Wrap(
+      spacing: 4.w,
+      runSpacing: 8.h,
+      children: items,
+    );
+  }
+
   // 1단계: 교대 패턴 확인
   Widget _buildStep1_PatternConfirm() {
     return SingleChildScrollView(
@@ -2398,7 +2445,8 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
           ),
           SizedBox(height: 24.h),
           Container(
-            padding: EdgeInsets.all(16.w),
+            width: double.infinity,
+            padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
               color: Colors.purple.shade50,
               borderRadius: BorderRadius.circular(12.r),
@@ -2416,28 +2464,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                   ),
                 ),
                 SizedBox(height: 12.h),
-                Wrap(
-                  spacing: 8.w,
-                  runSpacing: 8.h,
-                  children: widget.pattern.map((shift) {
-                    return Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(color: Colors.purple.shade300),
-                      ),
-                      child: Text(
-                        shift,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.purple.shade700,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
+                _buildPatternWithArrows(),
                 SizedBox(height: 12.h),
                 Text(
                   '총 ${widget.pattern.length}일 주기',
@@ -2500,6 +2527,8 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
           SizedBox(height: 24.h),
           TextField(
             controller: _teamInputController,
+            keyboardType: TextInputType.text,
+            textInputAction: TextInputAction.done,
             decoration: InputDecoration(
               labelText: '조 이름 (예: A, B, C, D)',
               hintText: 'A, B, C, D',
