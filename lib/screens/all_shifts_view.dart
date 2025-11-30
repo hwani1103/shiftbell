@@ -96,11 +96,33 @@ class _AllShiftsViewState extends State<AllShiftsView> {
         foregroundColor: Colors.black,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(8.w),
-            child: _buildShiftTable(year, month, lastDay),
-          ),
+        child: Column(
+          children: [
+            // ⭐ 년월 표시 (중앙)
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 12.h),
+              color: Colors.white,
+              alignment: Alignment.center,
+              child: Text(
+                '${year.toString().substring(2)}.${month.toString().padLeft(2, '0')}',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            Divider(height: 1, color: Colors.grey.shade300),
+            // ⭐ 메인 테이블
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(8.w),
+                  child: _buildShiftTable(year, month, lastDay),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -127,24 +149,31 @@ class _AllShiftsViewState extends State<AllShiftsView> {
             width: 0.5,
           ),
           columnWidths: {
-            0: FixedColumnWidth(32.w), // 조 이름 열 너비
-            // 나머지 열들은 균등 분배
-            for (int i = 1; i <= 15; i++) i: FlexColumnWidth(1),
+            0: FixedColumnWidth(24.w), // 조 이름 열 너비 (축소)
+            // 나머지 열들은 균등 분배 (최대 11개: 21~31일)
+            for (int i = 1; i <= 11; i++) i: FlexColumnWidth(1),
           },
           children: [
-            // ⭐ 첫 번째 헤더 행: 25.11 | 1 | 2 | ... | 15
-            _buildDateHeaderRow(year, month, 1, 15, showYearMonth: true),
+            // ⭐ 첫 번째 헤더 행: 1 | 2 | ... | 10
+            _buildDateHeaderRow(year, month, 1, 10),
 
-            // ⭐ A~D조 1~15일 근무
+            // ⭐ A~D조 1~10일 근무
             for (var team in _teams)
-              _buildTeamRow(team, year, month, 1, 15),
+              _buildTeamRow(team, year, month, 1, 10),
 
-            // ⭐ 두 번째 헤더 행: "" | 16 | 17 | ... | 말일
-            _buildDateHeaderRow(year, month, 16, lastDay, showYearMonth: false),
+            // ⭐ 두 번째 헤더 행: 11 | 12 | ... | 20
+            _buildDateHeaderRow(year, month, 11, 20),
 
-            // ⭐ A~D조 16~말일 근무
+            // ⭐ A~D조 11~20일 근무
             for (var team in _teams)
-              _buildTeamRow(team, year, month, 16, lastDay),
+              _buildTeamRow(team, year, month, 11, 20),
+
+            // ⭐ 세 번째 헤더 행: 21 | 22 | ... | 말일
+            _buildDateHeaderRow(year, month, 21, lastDay),
+
+            // ⭐ A~D조 21~말일 근무
+            for (var team in _teams)
+              _buildTeamRow(team, year, month, 21, lastDay),
           ],
         ),
       ),
@@ -156,33 +185,25 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     int year,
     int month,
     int startDay,
-    int endDay, {
-    required bool showYearMonth,
-  }) {
+    int endDay,
+  ) {
+    // 현재 줄의 날짜 개수
+    final dayCount = endDay - startDay + 1;
+
     return TableRow(
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
       ),
       children: [
-        // 좌측 셀 (25.11 또는 빈칸)
+        // 좌측 빈 셀
         Container(
-          height: 40.h, // 헤더 행 높이
+          height: 44.h, // 헤더 행 높이
           alignment: Alignment.center,
-          child: showYearMonth
-              ? Text(
-                  '${year.toString().substring(2)}.${month.toString().padLeft(2, '0')}',
-                  style: TextStyle(
-                    fontSize: 9.sp, // 년월 텍스트
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                )
-              : null,
         ),
-        // 날짜 셀들 (1~15 또는 16~31)
+        // 날짜 셀들
         for (int day = startDay; day <= endDay; day++)
           Container(
-            height: 40.h, // 헤더 행 높이
+            height: 44.h, // 헤더 행 높이
             alignment: Alignment.center,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -190,7 +211,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
                 Text(
                   '$day',
                   style: TextStyle(
-                    fontSize: 9.sp, // 날짜 숫자
+                    fontSize: 11.sp, // 날짜 숫자 (더 크게)
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -199,12 +220,17 @@ class _AllShiftsViewState extends State<AllShiftsView> {
                 Text(
                   _getWeekdayChar(DateTime(year, month, day)),
                   style: TextStyle(
-                    fontSize: 8.sp, // 요일
+                    fontSize: 9.sp, // 요일 (더 크게)
                     color: Colors.grey.shade600,
                   ),
                 ),
               ],
             ),
+          ),
+        // 빈 셀 채우기 (11개 맞추기 위해)
+        for (int i = 0; i < 11 - dayCount; i++)
+          Container(
+            height: 44.h,
           ),
       ],
     );
@@ -218,11 +244,14 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     int startDay,
     int endDay,
   ) {
+    // 현재 줄의 날짜 개수
+    final dayCount = endDay - startDay + 1;
+
     return TableRow(
       children: [
         // 조 이름 셀
         Container(
-          height: 36.h, // 근무 행 높이
+          height: 42.h, // 근무 행 높이
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: Colors.grey.shade50,
@@ -239,6 +268,14 @@ class _AllShiftsViewState extends State<AllShiftsView> {
         // 각 날짜별 근무 셀
         for (int day = startDay; day <= endDay; day++)
           _buildShiftCell(team, DateTime(year, month, day)),
+        // 빈 셀 채우기 (11개 맞추기 위해)
+        for (int i = 0; i < 11 - dayCount; i++)
+          Container(
+            height: 42.h,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+            ),
+          ),
       ],
     );
   }
@@ -250,7 +287,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     final displayText = shift.length > 2 ? shift.substring(0, 2) : shift;
 
     return Container(
-      height: 36.h, // 근무 행 높이
+      height: 42.h, // 근무 행 높이
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: _getShiftColor(shift),
@@ -258,7 +295,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
       child: Text(
         displayText,
         style: TextStyle(
-          fontSize: 9.sp, // 근무명 텍스트
+          fontSize: 11.sp, // 근무명 텍스트 (더 크게)
           fontWeight: FontWeight.w600,
           color: _getShiftTextColor(shift),
         ),
