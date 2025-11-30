@@ -875,7 +875,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
   // ⭐ 전체 교대조 근무표 작성 다이얼로그
   Future<void> _showAllTeamsSetupDialog() async {
-    final schedule = await ref.read(scheduleProvider.notifier).getSchedule();
+    final schedule = ref.read(scheduleProvider).value;
 
     // 규칙적 근무자만 사용 가능
     if (schedule == null || !schedule.isRegular || schedule.pattern == null) {
