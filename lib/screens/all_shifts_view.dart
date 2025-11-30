@@ -56,10 +56,10 @@ class _AllShiftsViewState extends State<AllShiftsView> {
         _teams = savedTeams;
       }
 
-      // 저장된 오프셋 가져오기
-      final offsetsJson = prefs.getString('all_teams_offsets');
-      if (offsetsJson != null) {
-        final Map<String, dynamic> decoded = jsonDecode(offsetsJson);
+      // 저장된 인덱스 가져오기
+      final indicesJson = prefs.getString('all_teams_indices');
+      if (indicesJson != null) {
+        final Map<String, dynamic> decoded = jsonDecode(indicesJson);
         _teamOffsets = decoded.map((key, value) =>
           MapEntry(key, int.parse(value.toString()))
         );
@@ -67,7 +67,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
 
       print('✅ 전체 근무표 데이터 로드 완료:');
       print('  - 조 목록: $_teams');
-      print('  - 오프셋: $_teamOffsets');
+      print('  - 인덱스: $_teamOffsets');
     } catch (e) {
       print('⚠️ 데이터 로드 실패, 기본값 사용: $e');
     } finally {
