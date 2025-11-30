@@ -2385,7 +2385,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
       // 근무 카드 추가
       items.add(
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(6.r),
@@ -2394,7 +2394,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
           child: Text(
             widget.pattern[i],
             style: TextStyle(
-              fontSize: 12.sp,
+              fontSize: 11.sp,
               fontWeight: FontWeight.w600,
               color: Colors.purple.shade700,
             ),
@@ -2405,11 +2405,13 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
       // 마지막 아이템이 아니면 화살표 추가
       if (i < widget.pattern.length - 1) {
         items.add(
-          Padding(
+          Container(
+            height: 26.h, // 카드와 동일한 높이
+            alignment: Alignment.center,
             padding: EdgeInsets.symmetric(horizontal: 4.w),
             child: Icon(
               Icons.arrow_forward,
-              size: 16.sp,
+              size: 14.sp,
               color: Colors.purple.shade400,
             ),
           ),
@@ -2418,8 +2420,9 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
     }
 
     return Wrap(
-      spacing: 4.w,
+      spacing: 2.w,
       runSpacing: 8.h,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: items,
     );
   }
@@ -2504,7 +2507,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
   // 2단계: 전체 조 구성 입력
   Widget _buildStep2_TeamNamesInput() {
     TextEditingController _teamInputController = TextEditingController(
-      text: _teamNames.join(', '),
+      text: _teamNames.join(' '),
     );
 
     return SingleChildScrollView(
@@ -2521,7 +2524,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
           ),
           SizedBox(height: 8.h),
           Text(
-            '전체 교대조를 입력해주세요. (한 글자로만, 쉼표로 구분)',
+            '전체 교대조를 입력해주세요. (한 글자로만, 띄어쓰기로 구분)',
             style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
           ),
           SizedBox(height: 24.h),
@@ -2530,9 +2533,9 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.done,
             decoration: InputDecoration(
-              labelText: '조 이름 (예: A, B, C, D)',
-              hintText: 'A, B, C, D',
-              helperText: '한 글자로만 입력하고 쉼표로 구분해주세요',
+              labelText: '조 이름 (예: A B C D)',
+              hintText: 'A B C D',
+              helperText: '한 글자로만 입력하고 띄어쓰기로 구분해주세요',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
@@ -2544,7 +2547,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
             onChanged: (value) {
               setState(() {
                 _teamNames = value
-                    .split(',')
+                    .split(RegExp(r'\s+')) // 하나 이상의 공백으로 분리
                     .map((e) => e.trim())
                     .where((e) => e.length == 1)
                     .toList();
@@ -2600,7 +2603,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    '한 글자만 입력 가능합니다. (예: A, 가, 1)\n최소 2개 조 이상 입력해주세요.',
+                    '한 글자만 입력 가능합니다. (예: A 가 1)\n최소 2개 조 이상 입력해주세요.',
                     style: TextStyle(fontSize: 12.sp, color: Colors.orange.shade900),
                   ),
                 ),
