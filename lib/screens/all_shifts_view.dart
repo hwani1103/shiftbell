@@ -75,6 +75,12 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     return Colors.grey.shade800;
   }
 
+  // 해당 날짜의 요일 문자
+  String _getWeekdayChar(DateTime date) {
+    const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    return weekdays[date.weekday - 1];
+  }
+
   @override
   Widget build(BuildContext context) {
     final year = _currentMonth.year;
@@ -91,12 +97,9 @@ class _AllShiftsViewState extends State<AllShiftsView> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(12.w),
-              child: _buildShiftTable(year, month, lastDay),
-            ),
+          child: Padding(
+            padding: EdgeInsets.all(8.w),
+            child: _buildShiftTable(year, month, lastDay),
           ),
         ),
       ),
@@ -123,9 +126,10 @@ class _AllShiftsViewState extends State<AllShiftsView> {
             color: Colors.grey.shade300,
             width: 0.5,
           ),
-          defaultColumnWidth: FixedColumnWidth(36.w), // 날짜 셀 너비
           columnWidths: {
-            0: FixedColumnWidth(36.w), // 조 이름 열 너비
+            0: FixedColumnWidth(32.w), // 조 이름 열 너비
+            // 나머지 열들은 균등 분배
+            for (int i = 1; i <= 15; i++) i: FlexColumnWidth(1),
           },
           children: [
             // ⭐ 첫 번째 헤더 행: 25.11 | 1 | 2 | ... | 15
@@ -162,13 +166,13 @@ class _AllShiftsViewState extends State<AllShiftsView> {
       children: [
         // 좌측 셀 (25.11 또는 빈칸)
         Container(
-          height: 36.h, // 헤더 행 높이
+          height: 40.h, // 헤더 행 높이
           alignment: Alignment.center,
           child: showYearMonth
               ? Text(
                   '${year.toString().substring(2)}.${month.toString().padLeft(2, '0')}',
                   style: TextStyle(
-                    fontSize: 10.sp, // 년월 텍스트
+                    fontSize: 9.sp, // 년월 텍스트
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -178,15 +182,28 @@ class _AllShiftsViewState extends State<AllShiftsView> {
         // 날짜 셀들 (1~15 또는 16~31)
         for (int day = startDay; day <= endDay; day++)
           Container(
-            height: 36.h, // 헤더 행 높이
+            height: 40.h, // 헤더 행 높이
             alignment: Alignment.center,
-            child: Text(
-              '$day',
-              style: TextStyle(
-                fontSize: 10.sp, // 날짜 숫자
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$day',
+                  style: TextStyle(
+                    fontSize: 9.sp, // 날짜 숫자
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  _getWeekdayChar(DateTime(year, month, day)),
+                  style: TextStyle(
+                    fontSize: 8.sp, // 요일
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
             ),
           ),
       ],
@@ -205,7 +222,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
       children: [
         // 조 이름 셀
         Container(
-          height: 40.h, // 근무 행 높이
+          height: 36.h, // 근무 행 높이
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: Colors.grey.shade50,
@@ -213,7 +230,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
           child: Text(
             team,
             style: TextStyle(
-              fontSize: 11.sp, // 조 이름
+              fontSize: 10.sp, // 조 이름
               fontWeight: FontWeight.bold,
               color: Colors.indigo,
             ),
@@ -233,7 +250,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     final displayText = shift.length > 2 ? shift.substring(0, 2) : shift;
 
     return Container(
-      height: 40.h, // 근무 행 높이
+      height: 36.h, // 근무 행 높이
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: _getShiftColor(shift),
@@ -241,7 +258,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
       child: Text(
         displayText,
         style: TextStyle(
-          fontSize: 10.sp, // 근무명 텍스트
+          fontSize: 9.sp, // 근무명 텍스트
           fontWeight: FontWeight.w600,
           color: _getShiftTextColor(shift),
         ),
