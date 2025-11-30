@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// 전체 근무표 - 모든 조의 근무를 한눈에 보는 화면
 class AllShiftsView extends StatefulWidget {
@@ -11,9 +13,10 @@ class AllShiftsView extends StatefulWidget {
 
 class _AllShiftsViewState extends State<AllShiftsView> {
   late DateTime _currentMonth;
+  bool _isLoading = true;
 
-  // ⭐ 샘플 데이터 (나중에 실제 로직으로 교체)
-  final List<String> _teams = ['A', 'B', 'C', 'D'];
+  // ⭐ 저장된 데이터 또는 기본값
+  List<String> _teams = ['A', 'B', 'C', 'D'];
 
   // ⭐ 8일 주기 패턴: 주간-주간-휴무-휴무-야간-야간-휴무-휴무
   final List<String> _shiftPattern = [
@@ -27,8 +30,8 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     '휴무',
   ];
 
-  // 각 조의 시작 오프셋 (2일씩 차이)
-  final Map<String, int> _teamOffsets = {
+  // 각 조의 시작 오프셋
+  Map<String, int> _teamOffsets = {
     'A': 0,
     'B': 2,
     'C': 4,
@@ -39,6 +42,41 @@ class _AllShiftsViewState extends State<AllShiftsView> {
   void initState() {
     super.initState();
     _currentMonth = DateTime.now();
+    _loadTeamData();
+  }
+
+  // ⭐ SharedPreferences에서 팀 데이터 로드
+  Future<void> _loadTeamData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      // 저장된 조 이름 가져오기
+      final savedTeams = prefs.getStringList('all_teams_names');
+      if (savedTeams != null && savedTeams.isNotEmpty) {
+        _teams = savedTeams;
+      }
+
+      // 저장된 오프셋 가져오기
+      final offsetsJson = prefs.getString('all_teams_offsets');
+      if (offsetsJson != null) {
+        final Map<String, dynamic> decoded = jsonDecode(offsetsJson);
+        _teamOffsets = decoded.map((key, value) =>
+          MapEntry(key, int.parse(value.toString()))
+        );
+      }
+
+      print('✅ 전체 근무표 데이터 로드 완료:');
+      print('  - 조 목록: $_teams');
+      print('  - 오프셋: $_teamOffsets');
+    } catch (e) {
+      print('⚠️ 데이터 로드 실패, 기본값 사용: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   // 해당 날짜에 해당 조의 근무 타입 계산
@@ -95,34 +133,38 @@ class _AllShiftsViewState extends State<AllShiftsView> {
         elevation: 0,
         foregroundColor: Colors.black,
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ⭐ 년월 표시 (중앙)
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 12.h),
-              color: Colors.white,
-              alignment: Alignment.center,
-              child: Text(
-                '$year년 $month월',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : SafeArea(
+              child: Column(
+                children: [
+                  // ⭐ 년월 표시 (중앙)
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    color: Colors.white,
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$year년 $month월',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  Divider(height: 1, color: Colors.grey.shade300),
+                  // ⭐ 메인 테이블
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      child: _buildShiftTable(year, month, lastDay),
+                    ),
+                  ),
+                ],
               ),
             ),
-            Divider(height: 1, color: Colors.grey.shade300),
-            // ⭐ 메인 테이블
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                child: _buildShiftTable(year, month, lastDay),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

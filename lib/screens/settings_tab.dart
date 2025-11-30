@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/database_service.dart';
 import 'onboarding_screen.dart';
 import '../services/alarm_service.dart';
@@ -2832,8 +2834,21 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
   }
 
   Future<void> _complete() async {
-    // TODO: 전체 근무표 데이터를 SharedPreferences 또는 DB에 저장
-    // 데이터: _teamNames, _myTeam, _teamOffsets
+    // SharedPreferences에 전체 근무표 데이터 저장
+    final prefs = await SharedPreferences.getInstance();
+
+    // JSON 형태로 저장
+    await prefs.setStringList('all_teams_names', _teamNames);
+    await prefs.setString('all_teams_my_team', _myTeam ?? '');
+
+    // 오프셋을 JSON 문자열로 저장
+    final offsetsJson = _teamOffsets.map((key, value) => MapEntry(key, value.toString()));
+    await prefs.setString('all_teams_offsets', jsonEncode(offsetsJson));
+
+    print('✅ 전체 교대조 근무표 저장 완료:');
+    print('  - 조 목록: $_teamNames');
+    print('  - 본인 조: $_myTeam');
+    print('  - 오프셋: $_teamOffsets');
 
     if (!mounted) return;
 
