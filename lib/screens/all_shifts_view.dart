@@ -11,15 +11,15 @@ class AllShiftsView extends StatefulWidget {
 
 class _AllShiftsViewState extends State<AllShiftsView> {
   late DateTime _currentMonth;
-  int _pageIndex = 0; // 0: 1~8, 1: 9~15, 2: 16~23, 3: 24~말일
+  int _pageIndex = 0; // 0: 1~15, 1: 16~말일
 
   // ⭐ 샘플 데이터 (나중에 실제 로직으로 교체)
   final List<String> _teams = ['A', 'B', 'C', 'D'];
 
-  // ⭐ 8일 주기 패턴: 주간주간 휴무휴무 야간야간 휴무휴무
+  // ⭐ 8일 주기 패턴: 주간-주간-휴무-휴무-야간-야간-휴무-휴무
   final List<String> _shiftPattern = [
-    '주간주간', '주간주간', '휴무휴무', '휴무휴무',
-    '야간야간', '야간야간', '휴무휴무', '휴무휴무',
+    '주간', '주간', '휴무', '휴무',
+    '야간', '야간', '휴무', '휴무',
   ];
 
   // 각 조의 시작 오프셋 (2일씩 차이)
@@ -76,14 +76,12 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     return Colors.grey.shade800;
   }
 
-  // 페이지별 날짜 범위 정보
+  // 페이지별 날짜 범위 정보 (2페이지: 1~15일, 16~말일)
   List<Map<String, int>> _getPageRanges() {
     final lastDay = DateTime(_currentMonth.year, _currentMonth.month + 1, 0).day;
     return [
-      {'start': 1, 'end': 8},
-      {'start': 9, 'end': 15},
-      {'start': 16, 'end': 23},
-      {'start': 24, 'end': lastDay},
+      {'start': 1, 'end': 15},
+      {'start': 16, 'end': lastDay},
     ];
   }
 
@@ -336,9 +334,9 @@ class _AllShiftsViewState extends State<AllShiftsView> {
             color: Colors.grey.shade50,
           ),
           child: Text(
-            '$team조',
+            team,
             style: TextStyle(
-              fontSize: 15.sp,
+              fontSize: 13.sp,
               fontWeight: FontWeight.bold,
               color: Colors.indigo,
             ),
@@ -354,6 +352,9 @@ class _AllShiftsViewState extends State<AllShiftsView> {
   }
 
   Widget _buildShiftCell(String shift) {
+    // 근무명이 4자까지 허용되지만 전체 근무표에서는 앞 2자만 표시
+    final displayText = shift.length > 2 ? shift.substring(0, 2) : shift;
+
     return Container(
       height: 56.h,
       alignment: Alignment.center,
@@ -361,7 +362,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
         color: _getShiftColor(shift),
       ),
       child: Text(
-        shift,
+        displayText,
         style: TextStyle(
           fontSize: 13.sp,
           fontWeight: FontWeight.w600,
