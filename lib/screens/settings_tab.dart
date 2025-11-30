@@ -436,6 +436,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               SizedBox(height: 16.h),
 
+              // 전체 교대조 근무표 작성
+              ListTile(
+                leading: Icon(Icons.groups, color: Colors.purple),
+                title: Text('전체 교대조 근무표 작성'),
+                subtitle: Text('전체 조 구성 및 근무 패턴 설정'),
+                trailing: Icon(Icons.chevron_right),
+                onTap: _showAllTeamsSetupDialog,
+              ),
+
               // 알람음 관리
               ListTile(
                 leading: Icon(Icons.notifications_active, color: Colors.orange),
@@ -860,6 +869,41 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     }
 
     print('✅ 10일치 알람 재생성 완료');
+  }
+
+  // ⭐ 전체 교대조 근무표 작성 다이얼로그
+  Future<void> _showAllTeamsSetupDialog() async {
+    final schedule = await ref.read(scheduleProvider.notifier).getSchedule();
+
+    // 규칙적 근무자만 사용 가능
+    if (schedule == null || !schedule.isRegular || schedule.pattern == null) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('전체 교대조 근무표 작성'),
+          content: Text('이 기능은 규칙적 근무 패턴이 설정된 경우에만 사용할 수 있습니다.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('확인'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+
+    // 온보딩 스타일 다이얼로그 표시
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => _AllTeamsSetupDialog(
+        pattern: schedule.pattern!,
+      ),
+    );
   }
 }
 
@@ -2146,6 +2190,660 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ⭐ 전체 교대조 근무표 작성 다이얼로그
+class _AllTeamsSetupDialog extends StatefulWidget {
+  final List<String> pattern;
+
+  const _AllTeamsSetupDialog({required this.pattern});
+
+  @override
+  State<_AllTeamsSetupDialog> createState() => _AllTeamsSetupDialogState();
+}
+
+class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  // 사용자 입력 데이터
+  List<String> _teamNames = []; // 예: ['A', 'B', 'C', 'D']
+  String? _myTeam; // 예: 'C'
+  Map<String, int> _teamOffsets = {}; // 예: {'A': 1, 'B': 2, 'C': 0, 'D': 3}
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _nextPage() {
+    if (_currentPage < 3) {
+      _pageController.nextPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  void _previousPage() {
+    if (_currentPage > 0) {
+      _pageController.previousPage(
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+      child: Container(
+        height: 600.h,
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          children: [
+            // 헤더
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '전체 교대조 근무표 작성',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 16.h),
+
+            // 진행 상태 표시
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(4, (index) {
+                return Row(
+                  children: [
+                    Container(
+                      width: 30.w,
+                      height: 30.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: index <= _currentPage
+                            ? Colors.purple
+                            : Colors.grey.shade300,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${index + 1}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (index < 3)
+                      Container(
+                        width: 40.w,
+                        height: 2.h,
+                        color: index < _currentPage
+                            ? Colors.purple
+                            : Colors.grey.shade300,
+                      ),
+                  ],
+                );
+              }),
+            ),
+
+            SizedBox(height: 24.h),
+
+            // 페이지 내용
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: NeverScrollableScrollPhysics(),
+                onPageChanged: (page) {
+                  setState(() {
+                    _currentPage = page;
+                  });
+                },
+                children: [
+                  _buildStep1_PatternConfirm(),
+                  _buildStep2_TeamNamesInput(),
+                  _buildStep3_MyTeamSelect(),
+                  _buildStep4_OffsetInput(),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 16.h),
+
+            // 하단 버튼
+            Row(
+              children: [
+                if (_currentPage > 0)
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _previousPage,
+                      child: Text('이전'),
+                    ),
+                  ),
+                if (_currentPage > 0) SizedBox(width: 12.w),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _canProceed() ? (_currentPage < 3 ? _nextPage : _complete) : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.purple,
+                    ),
+                    child: Text(
+                      _currentPage < 3 ? '다음' : '완료',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  bool _canProceed() {
+    switch (_currentPage) {
+      case 0:
+        return true; // 패턴 확인만 하면 됨
+      case 1:
+        return _teamNames.length >= 2; // 최소 2개 조
+      case 2:
+        return _myTeam != null; // 본인 조 선택
+      case 3:
+        return _teamOffsets.length == _teamNames.length; // 모든 조의 오프셋 입력
+      default:
+        return false;
+    }
+  }
+
+  // 1단계: 교대 패턴 확인
+  Widget _buildStep1_PatternConfirm() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '1단계: 교대 패턴 확인',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            '현재 설정된 교대 패턴을 확인해주세요.',
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+          ),
+          SizedBox(height: 24.h),
+          Container(
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: Colors.purple.shade50,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: Colors.purple.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '교대 패턴',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.purple.shade900,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                Wrap(
+                  spacing: 8.w,
+                  runSpacing: 8.h,
+                  children: widget.pattern.map((shift) {
+                    return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(color: Colors.purple.shade300),
+                      ),
+                      child: Text(
+                        shift,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.purple.shade700,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  '총 ${widget.pattern.length}일 주기',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: Colors.purple.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 24.h),
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info, color: Colors.blue, size: 20.sp),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    '이 패턴을 기준으로 전체 조의 근무표를 작성합니다.',
+                    style: TextStyle(fontSize: 12.sp, color: Colors.blue.shade900),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 2단계: 전체 조 구성 입력
+  Widget _buildStep2_TeamNamesInput() {
+    TextEditingController _teamInputController = TextEditingController(
+      text: _teamNames.join(', '),
+    );
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '2단계: 전체 조 구성',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            '전체 교대조를 입력해주세요. (한 글자로만, 쉼표로 구분)',
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+          ),
+          SizedBox(height: 24.h),
+          TextField(
+            controller: _teamInputController,
+            decoration: InputDecoration(
+              labelText: '조 이름 (예: A, B, C, D)',
+              hintText: 'A, B, C, D',
+              helperText: '한 글자로만 입력하고 쉼표로 구분해주세요',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                borderSide: BorderSide(color: Colors.purple, width: 2),
+              ),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _teamNames = value
+                    .split(',')
+                    .map((e) => e.trim())
+                    .where((e) => e.length == 1)
+                    .toList();
+              });
+            },
+          ),
+          SizedBox(height: 16.h),
+          if (_teamNames.isNotEmpty)
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: Colors.green.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '입력된 조 (${_teamNames.length}개)',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green.shade900,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Wrap(
+                    spacing: 8.w,
+                    children: _teamNames.map((team) {
+                      return Chip(
+                        label: Text(
+                          '$team조',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        backgroundColor: Colors.white,
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+          SizedBox(height: 16.h),
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning, color: Colors.orange, size: 20.sp),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    '한 글자만 입력 가능합니다. (예: A, 가, 1)\n최소 2개 조 이상 입력해주세요.',
+                    style: TextStyle(fontSize: 12.sp, color: Colors.orange.shade900),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 3단계: 본인 조 선택
+  Widget _buildStep3_MyTeamSelect() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '3단계: 본인 조 선택',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            '본인이 속한 조를 선택해주세요.',
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+          ),
+          SizedBox(height: 24.h),
+          ...(_teamNames.map((team) {
+            final isSelected = _myTeam == team;
+            return Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _myTeam = team;
+                    // 본인 조는 오프셋 0으로 초기화
+                    _teamOffsets[team] = 0;
+                  });
+                },
+                borderRadius: BorderRadius.circular(12.r),
+                child: Container(
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.purple.shade50 : Colors.grey.shade50,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: isSelected ? Colors.purple : Colors.grey.shade300,
+                      width: isSelected ? 2 : 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isSelected ? Icons.check_circle : Icons.circle_outlined,
+                        color: isSelected ? Colors.purple : Colors.grey,
+                        size: 24.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        '$team조',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.purple.shade900 : Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList()),
+          SizedBox(height: 16.h),
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info, color: Colors.blue, size: 20.sp),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    '본인 조를 기준으로 다른 조들의 근무 시작일 차이를 입력합니다.',
+                    style: TextStyle(fontSize: 12.sp, color: Colors.blue.shade900),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 4단계: 각 조 오프셋 입력
+  Widget _buildStep4_OffsetInput() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '4단계: 각 조 시작일 차이',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          RichText(
+            text: TextSpan(
+              style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+              children: [
+                TextSpan(text: '각 조가 '),
+                TextSpan(
+                  text: '$_myTeam조',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.purple),
+                ),
+                TextSpan(text: '보다 며칠 뒤에 같은 근무를 시작하나요?'),
+              ],
+            ),
+          ),
+          SizedBox(height: 24.h),
+          ...(_teamNames.map((team) {
+            if (team == _myTeam) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: 12.h),
+                child: Container(
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: Colors.purple.shade50,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: Colors.purple.shade300),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        '$team조 (본인)',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple.shade900,
+                        ),
+                      ),
+                      Spacer(),
+                      Text(
+                        '기준 (0일)',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Colors.purple.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: Container(
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      '$team조',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Spacer(),
+                    Text(
+                      '+',
+                      style: TextStyle(fontSize: 16.sp),
+                    ),
+                    SizedBox(width: 8.w),
+                    Container(
+                      width: 80.w,
+                      child: TextField(
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        decoration: InputDecoration(
+                          hintText: '0',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h),
+                        ),
+                        onChanged: (value) {
+                          final offset = int.tryParse(value);
+                          if (offset != null) {
+                            setState(() {
+                              _teamOffsets[team] = offset;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      '일',
+                      style: TextStyle(fontSize: 16.sp),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList()),
+          SizedBox(height: 16.h),
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.lightbulb, color: Colors.blue, size: 20.sp),
+                    SizedBox(width: 8.w),
+                    Text(
+                      '예시',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade900,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  'C조가 1일에 주간 근무를 시작한다면:\n'
+                  '• A조가 2일에 주간 시작 → +1일\n'
+                  '• B조가 3일에 주간 시작 → +2일\n'
+                  '• D조가 4일에 주간 시작 → +3일',
+                  style: TextStyle(fontSize: 12.sp, color: Colors.blue.shade900, height: 1.5),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _complete() async {
+    // TODO: 전체 근무표 데이터를 SharedPreferences 또는 DB에 저장
+    // 데이터: _teamNames, _myTeam, _teamOffsets
+
+    if (!mounted) return;
+
+    Navigator.pop(context);
+
+    // 성공 메시지
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('전체 교대조 근무표가 설정되었습니다!'),
+        backgroundColor: Colors.green,
       ),
     );
   }
