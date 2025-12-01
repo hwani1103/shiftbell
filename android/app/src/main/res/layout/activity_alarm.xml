@@ -61,18 +61,61 @@
 
     </LinearLayout>
 
-    <!-- 스와이프 안내 -->
-    <TextView
-        android:id="@+id/swipeHint"
+    <!-- 스와이프 안내 영역 -->
+    <LinearLayout
+        android:id="@+id/swipeHintContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="화면을 스와이프하여 끄기"
-        android:textSize="14sp"
-        android:textColor="#9E9E9E"
+        android:orientation="vertical"
+        android:gravity="center"
         app:layout_constraintTop_toBottomOf="@id/alarmCard"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="24dp">
+
+        <!-- 스와이프 텍스트 -->
+        <TextView
+            android:id="@+id/swipeHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="화면을 스와이프하여 끄기"
+            android:textSize="14sp"
+            android:textColor="#9E9E9E"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- 스와이프 가이드 (좌우 화살표 + 원) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <!-- 왼쪽 화살표 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="◄"
+                android:textSize="20sp"
+                android:textColor="#BDBDBD"
+                android:alpha="0.6"/>
+
+            <!-- 중앙 원 -->
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="@drawable/swipe_guide_circle"/>
+
+            <!-- 오른쪽 화살표 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="►"
+                android:textSize="20sp"
+                android:textColor="#BDBDBD"
+                android:alpha="0.6"/>
+        </LinearLayout>
+    </LinearLayout>
 
     <!-- 하단 버튼들 -->
     <LinearLayout
@@ -84,7 +127,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="48dp"
+        android:layout_marginBottom="100dp"
         android:layout_marginHorizontal="24dp">
 
         <!-- 알람 끄기 버튼 -->

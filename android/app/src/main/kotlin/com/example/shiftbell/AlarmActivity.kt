@@ -150,17 +150,14 @@ private fun timeoutAlarm() {
 }
 
     private fun setupWindowFlags() {
+        // ⭐ 잠금 화면 위에 표시 (잠금을 해제하지 않음)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
             setShowWhenLocked(true)
             setTurnScreenOn(true)
-            // ⭐ 키가드 해제 (알람 Activity를 최상단에 유지)
-            val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-            keyguardManager.requestDismissKeyguard(this, null)
         } else {
             @Suppress("DEPRECATION")
             window.addFlags(
                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             )
@@ -256,7 +253,7 @@ private fun dismissAlarm() {
     sendBroadcast(guardIntent)
     Log.d("AlarmActivity", "✅ AlarmGuardReceiver 트리거")
 
-    goToHomeScreen()
+    // ⭐ finish()만 호출하면 잠금 화면으로 돌아감
     finish()
 }
     
@@ -365,12 +362,7 @@ private fun dismissAlarm() {
 
         updateAlarmHistory(alarmId, "snoozed", incrementSnooze = true)
 
-        // ⭐ 앱 포그라운드로 가져와서 Flutter UI 즉시 갱신
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-        launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        startActivity(launchIntent)
-        Log.d("AlarmActivity", "✅ 앱 포그라운드 이동 → Flutter UI 갱신")
-
+        // ⭐ finish()만 호출하면 잠금 화면으로 돌아감
         finish()
     }
 
@@ -385,18 +377,6 @@ private fun dismissAlarm() {
     override fun onBackPressed() {
         // ⭐ 뒤로가기 버튼 무시 (알람을 끄기 전까지 화면 유지)
         // 아무 동작도 하지 않음
-    }
-
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        // ⭐ 홈 버튼을 눌렀을 때 Activity를 다시 foreground로 가져옴
-        // 알람을 끄기 전까지는 다른 화면으로 이동하지 못하도록 함
-        val intent = Intent(this, AlarmActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            putExtra("alarmId", alarmId)
-            putExtra("alarmDuration", alarmDuration)
-        }
-        startActivity(intent)
     }
 
     override fun onDestroy() {
