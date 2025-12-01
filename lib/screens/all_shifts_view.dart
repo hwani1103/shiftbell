@@ -2,16 +2,19 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/schedule_provider.dart';
+import '../models/shift_schedule.dart';
 
 /// 전체 근무표 - 모든 조의 근무를 한눈에 보는 화면
-class AllShiftsView extends StatefulWidget {
+class AllShiftsView extends ConsumerStatefulWidget {
   const AllShiftsView({super.key});
 
   @override
-  State<AllShiftsView> createState() => _AllShiftsViewState();
+  ConsumerState<AllShiftsView> createState() => _AllShiftsViewState();
 }
 
-class _AllShiftsViewState extends State<AllShiftsView> {
+class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   late DateTime _currentMonth;
   bool _isLoading = true;
 
@@ -98,28 +101,31 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     return _shiftPattern[patternIndex];
   }
 
-  // 근무 타입별 배경색
-  Color _getShiftColor(String shift) {
-    if (shift.contains('주간')) {
-      return Colors.blue.shade100;
-    } else if (shift.contains('야간')) {
-      return Colors.purple.shade100;
-    } else if (shift.contains('휴무')) {
-      return Colors.red.shade100;
+  // 근무 타입별 배경색 (calendar_tab과 동일한 로직)
+  Color _getShiftColor(String shift, ShiftSchedule? schedule) {
+    if (shift.isEmpty) return Colors.grey.shade100;
+
+    final colorValue = schedule?.shiftColors?[shift];
+
+    if (colorValue != null) {
+      return Color(colorValue);
     }
+
     return Colors.grey.shade100;
   }
 
-  // 근무 타입별 텍스트 색상
-  Color _getShiftTextColor(String shift) {
-    if (shift.contains('주간')) {
-      return Colors.blue.shade800;
-    } else if (shift.contains('야간')) {
-      return Colors.purple.shade800;
-    } else if (shift.contains('휴무')) {
-      return Colors.red.shade800;
+  // 근무 타입별 텍스트 색상 (calendar_tab과 동일한 로직)
+  Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
+    if (shift.isEmpty) return Colors.grey.shade700;
+
+    final colorValue = schedule?.shiftColors?[shift];
+
+    if (colorValue != null) {
+      final bgColor = Color(colorValue);
+      return ShiftSchedule.getTextColor(bgColor);
     }
-    return Colors.grey.shade800;
+
+    return Colors.grey.shade700;
   }
 
   // 해당 날짜의 요일 문자
@@ -134,6 +140,9 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     final month = _currentMonth.month;
     final lastDay = DateTime(year, month + 1, 0).day;
 
+    // ⭐ schedule 가져오기
+    final scheduleAsync = ref.watch(scheduleProvider);
+
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
@@ -146,38 +155,42 @@ class _AllShiftsViewState extends State<AllShiftsView> {
           ? Center(
               child: CircularProgressIndicator(),
             )
-          : SafeArea(
-              child: Column(
-                children: [
-                  // ⭐ 년월 표시 (중앙)
-                  Container(
-                    padding: EdgeInsets.symmetric(vertical: 12.h),
-                    color: Colors.white,
-                    alignment: Alignment.center,
-                    child: Text(
-                      '$year년 $month월',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+          : scheduleAsync.when(
+              loading: () => Center(child: CircularProgressIndicator()),
+              error: (error, stack) => Center(child: Text('에러 발생: $error')),
+              data: (schedule) => SafeArea(
+                child: Column(
+                  children: [
+                    // ⭐ 년월 표시 (중앙)
+                    Container(
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      color: Colors.white,
+                      alignment: Alignment.center,
+                      child: Text(
+                        '$year년 $month월',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
                     ),
-                  ),
-                  Divider(height: 1, color: Colors.grey.shade300),
-                  // ⭐ 메인 테이블
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                      child: _buildShiftTable(year, month, lastDay),
+                    Divider(height: 1, color: Colors.grey.shade300),
+                    // ⭐ 메인 테이블
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                        child: _buildShiftTable(year, month, lastDay, schedule),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
     );
   }
 
-  Widget _buildShiftTable(int year, int month, int lastDay) {
+  Widget _buildShiftTable(int year, int month, int lastDay, ShiftSchedule? schedule) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -208,21 +221,21 @@ class _AllShiftsViewState extends State<AllShiftsView> {
 
             // ⭐ A~D조 1~11일 근무
             for (var team in _teams)
-              _buildTeamRow(team, year, month, 1, 11, maxColumns: 11),
+              _buildTeamRow(team, year, month, 1, 11, schedule, maxColumns: 11),
 
             // ⭐ 두 번째 헤더 행: 12 | 13 | ... | 22 (11개)
             _buildDateHeaderRow(year, month, 12, 22, maxColumns: 11),
 
             // ⭐ A~D조 12~22일 근무
             for (var team in _teams)
-              _buildTeamRow(team, year, month, 12, 22, maxColumns: 11),
+              _buildTeamRow(team, year, month, 12, 22, schedule, maxColumns: 11),
 
             // ⭐ 세 번째 헤더 행: 23 | 24 | ... | 31 (9개, 하드코딩)
             _buildDateHeaderRow(year, month, 23, 31, maxColumns: 11),
 
             // ⭐ A~D조 23~31일 근무
             for (var team in _teams)
-              _buildTeamRow(team, year, month, 23, 31, maxColumns: 11),
+              _buildTeamRow(team, year, month, 23, 31, schedule, maxColumns: 11),
           ],
         ),
       ),
@@ -255,13 +268,18 @@ class _AllShiftsViewState extends State<AllShiftsView> {
         for (int day = startDay; day <= endDay; day++)
           Builder(
             builder: (context) {
-              final isToday = year == today.year && month == today.month && day == today.day;
+              // ⭐ 오늘이면서 현재 보고 있는 달과 같을 때만 강조
+              final isToday = year == today.year &&
+                             month == today.month &&
+                             day == today.day &&
+                             _currentMonth.year == today.year &&
+                             _currentMonth.month == today.month;
               return Container(
                 height: 36.h, // 헤더 행 높이 (줄임)
                 alignment: Alignment.center,
                 decoration: isToday
                     ? BoxDecoration(
-                        color: Colors.purple.shade50,
+                        color: Colors.lightBlue.shade50,
                       )
                     : null,
                 child: Column(
@@ -272,7 +290,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
                       style: TextStyle(
                         fontSize: 10.sp, // 날짜 숫자
                         fontWeight: FontWeight.bold,
-                        color: isToday ? Colors.purple : Colors.black87,
+                        color: isToday ? Colors.lightBlue.shade700 : Colors.black87,
                       ),
                     ),
                     SizedBox(height: 1.h),
@@ -280,7 +298,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
                       _getWeekdayChar(DateTime(year, month, day > (DateTime(year, month + 1, 0).day) ? DateTime(year, month + 1, 0).day : day)),
                       style: TextStyle(
                         fontSize: 8.sp, // 요일
-                        color: isToday ? Colors.purple : Colors.grey.shade600,
+                        color: isToday ? Colors.lightBlue.shade700 : Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -303,7 +321,8 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     int year,
     int month,
     int startDay,
-    int endDay, {
+    int endDay,
+    ShiftSchedule? schedule, {
     required int maxColumns,
   }) {
     // 현재 줄의 날짜 개수
@@ -330,7 +349,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
         ),
         // 각 날짜별 근무 셀
         for (int day = startDay; day <= endDay; day++)
-          _buildShiftCell(team, DateTime(year, month, day > actualLastDay ? actualLastDay : day)),
+          _buildShiftCell(team, DateTime(year, month, day > actualLastDay ? actualLastDay : day), schedule),
         // 빈 셀 채우기 (maxColumns 맞추기 위해)
         for (int i = 0; i < maxColumns - dayCount; i++)
           Container(
@@ -344,7 +363,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
   }
 
   // 근무 셀 생성
-  Widget _buildShiftCell(String team, DateTime date) {
+  Widget _buildShiftCell(String team, DateTime date, ShiftSchedule? schedule) {
     final shift = _getShiftForTeam(team, date);
     // 근무명이 4자까지 허용되지만 전체 근무표에서는 앞 2자만 표시
     final displayText = shift.length > 2 ? shift.substring(0, 2) : shift;
@@ -353,14 +372,14 @@ class _AllShiftsViewState extends State<AllShiftsView> {
       height: 34.h, // 근무 행 높이 (줄임)
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: _getShiftColor(shift),
+        color: _getShiftColor(shift, schedule),
       ),
       child: Text(
         displayText,
         style: TextStyle(
           fontSize: 10.sp, // 근무명 텍스트
           fontWeight: FontWeight.w600,
-          color: _getShiftTextColor(shift),
+          color: _getShiftTextColor(shift, schedule),
         ),
       ),
     );

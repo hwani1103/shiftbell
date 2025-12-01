@@ -349,6 +349,11 @@ Widget build(BuildContext context) {
 
     final isSunday = day.weekday == DateTime.sunday;
 
+    // ⭐ 오늘이면서 현재 보고 있는 달과 같을 때만 강조
+    final shouldHighlightToday = isToday &&
+                                 _focusedDay.year == day.year &&
+                                 _focusedDay.month == day.month;
+
     Color dateColor;
     if (isSunday) {
       dateColor = isOutside ? Colors.red.withOpacity(0.3) : Colors.red;
@@ -416,10 +421,10 @@ Widget build(BuildContext context) {
                       child: Padding(
                         padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),  // 3개일 때 위로
                         child: Container(
-                          padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
-                          decoration: isToday
+                          padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
+                          decoration: shouldHighlightToday
                               ? BoxDecoration(
-                                  color: Colors.blue.shade100,
+                                  color: Colors.lightBlue.shade50,
                                   borderRadius: BorderRadius.circular(3.r),
                                 )
                               : null,
@@ -429,7 +434,7 @@ Widget build(BuildContext context) {
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              color: isToday ? Colors.blue.shade700 : dateColor,
+                              color: shouldHighlightToday ? Colors.lightBlue.shade700 : dateColor,
                               height: 1.0,
                             ),
                           ),
