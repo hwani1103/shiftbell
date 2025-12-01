@@ -2798,7 +2798,8 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
         SizedBox(height: 16.h),
 
         // 각 조별 인덱스 입력
-        Expanded(
+        Container(
+          height: 250.h,
           child: SingleChildScrollView(
             child: Column(
               children: _teamNames.map((team) {
