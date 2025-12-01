@@ -2901,11 +2901,10 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                 '• C조가 야간 첫날이면 → 5',
                 style: TextStyle(fontSize: 12.sp, color: Colors.blue.shade900, height: 1.5),
               ),
-              ],
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
