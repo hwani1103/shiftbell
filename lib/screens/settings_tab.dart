@@ -2255,6 +2255,9 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
   }
 
   void _nextPage() {
+    // 키보드 닫기
+    FocusScope.of(context).unfocus();
+
     if (_currentPage < 3) {
       _pageController.nextPage(
         duration: Duration(milliseconds: 300),
@@ -2264,6 +2267,9 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
   }
 
   void _previousPage() {
+    // 키보드 닫기
+    FocusScope.of(context).unfocus();
+
     if (_currentPage > 0) {
       _pageController.previousPage(
         duration: Duration(milliseconds: 300),

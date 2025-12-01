@@ -81,11 +81,20 @@ class _AllShiftsViewState extends State<AllShiftsView> {
 
   // 해당 날짜에 해당 조의 근무 타입 계산
   String _getShiftForTeam(String team, DateTime date) {
-    // 기준일 (2025년 1월 1일이 A조 주간 첫째날이라고 가정)
-    final baseDate = DateTime(2025, 1, 1);
-    final daysDiff = date.difference(baseDate).inDays;
-    final offset = _teamOffsets[team] ?? 0;
-    final patternIndex = (daysDiff + offset) % _shiftPattern.length;
+    // 오늘 날짜 기준
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final targetDate = DateTime(date.year, date.month, date.day);
+
+    // 오늘부터 대상 날짜까지의 일수 차이
+    final daysDiff = targetDate.difference(todayDate).inDays;
+
+    // 이 조의 오늘 인덱스 (1~8)
+    final todayIndex = _teamOffsets[team] ?? 1;
+
+    // 대상 날짜의 인덱스 계산: (오늘 인덱스 - 1 + 날짜차이) % 패턴길이
+    final patternIndex = ((todayIndex - 1 + daysDiff) % _shiftPattern.length + _shiftPattern.length) % _shiftPattern.length;
+
     return _shiftPattern[patternIndex];
   }
 
