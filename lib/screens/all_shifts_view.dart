@@ -19,27 +19,15 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   bool _isLoading = true;
   bool _isConfigured = false; // ⭐ 전체 교대조 근무표 설정 여부
 
-  // ⭐ 저장된 데이터 또는 기본값
+  // ⭐ 저장된 데이터
   List<String> _teams = ['A', 'B', 'C', 'D'];
 
-  // ⭐ 8일 주기 패턴: 주간-주간-휴무-휴무-야간-야간-휴무-휴무
-  final List<String> _shiftPattern = [
-    '주간',
-    '주간',
-    '휴무',
-    '휴무',
-    '야간',
-    '야간',
-    '휴무',
-    '휴무',
-  ];
-
-  // 각 조의 시작 오프셋
+  // ⭐ 각 조의 오늘 인덱스 (1~8)
   Map<String, int> _teamOffsets = {
-    'A': 0,
-    'B': 2,
-    'C': 4,
-    'D': 6,
+    'A': 1,
+    'B': 3,
+    'C': 5,
+    'D': 7,
   };
 
   @override
@@ -92,7 +80,9 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   }
 
   // 해당 날짜에 해당 조의 근무 타입 계산
-  String _getShiftForTeam(String team, DateTime date) {
+  String _getShiftForTeam(String team, DateTime date, List<String> pattern) {
+    if (pattern.isEmpty) return '';
+
     // 오늘 날짜 기준
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
@@ -105,9 +95,9 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
     final todayIndex = _teamOffsets[team] ?? 1;
 
     // 대상 날짜의 인덱스 계산: (오늘 인덱스 - 1 + 날짜차이) % 패턴길이
-    final patternIndex = ((todayIndex - 1 + daysDiff) % _shiftPattern.length + _shiftPattern.length) % _shiftPattern.length;
+    final patternIndex = ((todayIndex - 1 + daysDiff) % pattern.length + pattern.length) % pattern.length;
 
-    return _shiftPattern[patternIndex];
+    return pattern[patternIndex];
   }
 
   // 근무 타입별 배경색 (calendar_tab과 동일한 로직)
@@ -419,7 +409,9 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
 
   // 근무 셀 생성
   Widget _buildShiftCell(String team, DateTime date, ShiftSchedule? schedule) {
-    final shift = _getShiftForTeam(team, date);
+    // ⭐ schedule의 pattern 사용 (근무명 수정이 반영됨)
+    final pattern = schedule?.pattern ?? [];
+    final shift = _getShiftForTeam(team, date, pattern);
     // 근무명이 4자까지 허용되지만 전체 근무표에서는 앞 2자만 표시
     final displayText = shift.length > 2 ? shift.substring(0, 2) : shift;
 
