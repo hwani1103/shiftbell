@@ -2274,10 +2274,12 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
       child: Container(
-        height: 600.h,
+        height: screenHeight * 0.9, // 화면 높이의 90%
         padding: EdgeInsets.all(24.w),
         child: Column(
           children: [
@@ -2436,45 +2438,51 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
     );
   }
 
-  // 패턴 표시 (인덱스 포함)
+  // 패턴 표시 (표 형식)
   Widget _buildPatternCardsWithIndices() {
-    return Wrap(
-      spacing: 8.w,
-      runSpacing: 10.h,
-      children: List.generate(widget.pattern.length, (i) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 인덱스 번호 (위)
-            Text(
-              '${i + 1}',
-              style: TextStyle(
-                fontSize: 9.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.purple.shade600,
-              ),
-            ),
-            SizedBox(height: 3.h),
-            // 근무 카드 (아래, 약간 크게)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(6.r),
-                border: Border.all(color: Colors.purple.shade300),
-              ),
-              child: Text(
-                widget.pattern[i],
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.purple.shade700,
+    return Table(
+      border: TableBorder.all(color: Colors.purple.shade300, width: 1),
+      defaultColumnWidth: FlexColumnWidth(1),
+      children: [
+        // 첫 번째 줄: 인덱스
+        TableRow(
+          children: List.generate(widget.pattern.length, (i) {
+            return Container(
+              padding: EdgeInsets.symmetric(vertical: 8.h),
+              color: Colors.purple.shade50,
+              child: Center(
+                child: Text(
+                  '${i + 1}',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.purple.shade700,
+                  ),
                 ),
               ),
-            ),
-          ],
-        );
-      }),
+            );
+          }),
+        ),
+        // 두 번째 줄: 근무명
+        TableRow(
+          children: List.generate(widget.pattern.length, (i) {
+            return Container(
+              padding: EdgeInsets.symmetric(vertical: 8.h),
+              color: Colors.white,
+              child: Center(
+                child: Text(
+                  widget.pattern[i],
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 
@@ -2744,13 +2752,13 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
     );
   }
 
-  // 4단계: 각 조 오프셋 입력
+  // 4단계: 각 조 인덱스 입력
   Widget _buildStep4_OffsetInput() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '4단계: 오늘 각 조의 근무 위치',
+          '4단계: 오늘 각 조의 근무 설정',
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.bold,
@@ -2759,7 +2767,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
         ),
         SizedBox(height: 8.h),
         Text(
-          '오늘 각 조가 아래 패턴의 몇 번째 근무인지 입력해주세요.',
+          '오늘 각 조가 아래 패턴의 몇 번째 근무인지 선택해주세요.',
           style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
         ),
         SizedBox(height: 16.h),
@@ -2767,7 +2775,6 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
         // 패턴 인덱스 표시
         Container(
           width: double.infinity,
-          height: 140.h,
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: Colors.purple.shade50,
@@ -2778,19 +2785,15 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '교대 패턴 (번호 = 인덱스)',
+                '교대 패턴',
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.purple.shade900,
                 ),
               ),
-              SizedBox(height: 8.h),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: _buildPatternCardsWithIndices(),
-                ),
-              ),
+              SizedBox(height: 12.h),
+              _buildPatternCardsWithIndices(),
             ],
           ),
         ),
@@ -2798,9 +2801,9 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
         SizedBox(height: 16.h),
 
         // 각 조별 인덱스 입력
-        Container(
-          height: 250.h,
+        Expanded(
           child: SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
             child: Column(
               children: _teamNames.map((team) {
                 final selectedIndex = _teamIndices[team];
@@ -2830,8 +2833,11 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                           children: List.generate(widget.pattern.length, (i) {
                             final index = i + 1;
                             final isSelected = selectedIndex == index;
+                            final isUsedByOther = _teamIndices.entries
+                                .any((entry) => entry.key != team && entry.value == index);
+
                             return GestureDetector(
-                              onTap: () {
+                              onTap: isUsedByOther ? null : () {
                                 setState(() {
                                   _teamIndices[team] = index;
                                 });
@@ -2840,10 +2846,14 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                                 width: 40.w,
                                 height: 40.w,
                                 decoration: BoxDecoration(
-                                  color: isSelected ? Colors.purple : Colors.white,
+                                  color: isUsedByOther
+                                      ? Colors.grey.shade300
+                                      : (isSelected ? Colors.purple : Colors.white),
                                   borderRadius: BorderRadius.circular(8.r),
                                   border: Border.all(
-                                    color: isSelected ? Colors.purple : Colors.grey.shade400,
+                                    color: isUsedByOther
+                                        ? Colors.grey.shade400
+                                        : (isSelected ? Colors.purple : Colors.grey.shade400),
                                     width: isSelected ? 2 : 1,
                                   ),
                                 ),
@@ -2877,42 +2887,6 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                 );
               }).toList(),
             ),
-          ),
-        ),
-
-        SizedBox(height: 12.h),
-        Container(
-          padding: EdgeInsets.all(12.w),
-          decoration: BoxDecoration(
-            color: Colors.blue.shade50,
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.lightbulb, color: Colors.blue, size: 20.sp),
-                  SizedBox(width: 8.w),
-                  Text(
-                    '예시',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue.shade900,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                '오늘 기준:\n'
-                '• A조가 주간 첫날이면 → 1\n'
-                '• B조가 휴무 첫날이면 → 3\n'
-                '• C조가 야간 첫날이면 → 5',
-                style: TextStyle(fontSize: 12.sp, color: Colors.blue.shade900, height: 1.5),
-              ),
-            ],
           ),
         ),
       ],
