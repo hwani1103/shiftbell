@@ -896,6 +896,35 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       return;
     }
 
+    // 이미 작성된 근무표가 있는지 확인
+    final prefs = await SharedPreferences.getInstance();
+    final existingTeams = prefs.getStringList('all_teams_names');
+
+    if (existingTeams != null && existingTeams.isNotEmpty) {
+      if (!mounted) return;
+
+      // 확인 대화상자 표시
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('전체 교대조 근무표 작성'),
+          content: Text('이미 작성된 근무표가 있습니다.\n다시 작성하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text('다시 작성', style: TextStyle(color: Colors.purple)),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm != true) return;
+    }
+
     if (!mounted) return;
 
     // 온보딩 스타일 다이얼로그 표시
