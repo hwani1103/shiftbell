@@ -2439,14 +2439,25 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
   // 패턴 표시 (인덱스 포함)
   Widget _buildPatternCardsWithIndices() {
     return Wrap(
-      spacing: 6.w,
-      runSpacing: 8.h,
+      spacing: 8.w,
+      runSpacing: 10.h,
       children: List.generate(widget.pattern.length, (i) {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // 인덱스 번호 (위)
+            Text(
+              '${i + 1}',
+              style: TextStyle(
+                fontSize: 9.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.purple.shade600,
+              ),
+            ),
+            SizedBox(height: 3.h),
+            // 근무 카드 (아래, 약간 크게)
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(6.r),
@@ -2455,28 +2466,9 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
               child: Text(
                 widget.pattern[i],
                 style: TextStyle(
-                  fontSize: 11.sp,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.purple.shade700,
-                ),
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Container(
-              width: 24.w,
-              height: 24.w,
-              decoration: BoxDecoration(
-                color: Colors.purple.shade100,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  '${i + 1}',
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.purple.shade700,
-                  ),
                 ),
               ),
             ),
@@ -2810,6 +2802,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
           child: SingleChildScrollView(
             child: Column(
               children: _teamNames.map((team) {
+                final selectedIndex = _teamIndices[team];
                 return Padding(
                   padding: EdgeInsets.only(bottom: 12.h),
                   child: Container(
@@ -2819,46 +2812,63 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '$team조',
+                          '$team조 - 오늘 인덱스 선택',
                           style: TextStyle(
-                            fontSize: 16.sp,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Spacer(),
-                        Text(
-                          '오늘 인덱스:',
-                          style: TextStyle(fontSize: 14.sp),
-                        ),
-                        SizedBox(width: 8.w),
-                        Container(
-                          width: 60.w,
-                          child: TextField(
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
-                            decoration: InputDecoration(
-                              hintText: '1',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8.r),
-                              ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h),
-                            ),
-                            onChanged: (value) {
-                              final index = int.tryParse(value);
-                              if (index != null && index >= 1 && index <= widget.pattern.length) {
+                        SizedBox(height: 8.h),
+                        Wrap(
+                          spacing: 8.w,
+                          runSpacing: 8.h,
+                          children: List.generate(widget.pattern.length, (i) {
+                            final index = i + 1;
+                            final isSelected = selectedIndex == index;
+                            return GestureDetector(
+                              onTap: () {
                                 setState(() {
                                   _teamIndices[team] = index;
                                 });
-                              } else if (value.isEmpty) {
-                                setState(() {
-                                  _teamIndices.remove(team);
-                                });
-                              }
-                            },
-                          ),
+                              },
+                              child: Container(
+                                width: 40.w,
+                                height: 40.w,
+                                decoration: BoxDecoration(
+                                  color: isSelected ? Colors.purple : Colors.white,
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  border: Border.all(
+                                    color: isSelected ? Colors.purple : Colors.grey.shade400,
+                                    width: isSelected ? 2 : 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      '$index',
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: isSelected ? Colors.white : Colors.black,
+                                      ),
+                                    ),
+                                    Text(
+                                      widget.pattern[i],
+                                      style: TextStyle(
+                                        fontSize: 8.sp,
+                                        color: isSelected ? Colors.white : Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
                         ),
                       ],
                     ),
