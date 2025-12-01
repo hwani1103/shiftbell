@@ -261,8 +261,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
                 alignment: Alignment.center,
                 decoration: isToday
                     ? BoxDecoration(
-                        color: Colors.purple.shade100,
-                        border: Border.all(color: Colors.purple, width: 2),
+                        color: Colors.purple.shade50,
                       )
                     : null,
                 child: Column(
@@ -273,7 +272,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
                       style: TextStyle(
                         fontSize: 10.sp, // 날짜 숫자
                         fontWeight: FontWeight.bold,
-                        color: isToday ? Colors.purple.shade900 : Colors.black87,
+                        color: isToday ? Colors.purple : Colors.black87,
                       ),
                     ),
                     SizedBox(height: 1.h),
@@ -281,7 +280,7 @@ class _AllShiftsViewState extends State<AllShiftsView> {
                       _getWeekdayChar(DateTime(year, month, day > (DateTime(year, month + 1, 0).day) ? DateTime(year, month + 1, 0).day : day)),
                       style: TextStyle(
                         fontSize: 8.sp, // 요일
-                        color: isToday ? Colors.purple.shade700 : Colors.grey.shade600,
+                        color: isToday ? Colors.purple : Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -350,21 +349,17 @@ class _AllShiftsViewState extends State<AllShiftsView> {
     // 근무명이 4자까지 허용되지만 전체 근무표에서는 앞 2자만 표시
     final displayText = shift.length > 2 ? shift.substring(0, 2) : shift;
 
-    final today = DateTime.now();
-    final isToday = date.year == today.year && date.month == today.month && date.day == today.day;
-
     return Container(
       height: 34.h, // 근무 행 높이 (줄임)
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: _getShiftColor(shift),
-        border: isToday ? Border.all(color: Colors.purple, width: 2) : null,
       ),
       child: Text(
         displayText,
         style: TextStyle(
           fontSize: 10.sp, // 근무명 텍스트
-          fontWeight: isToday ? FontWeight.bold : FontWeight.w600,
+          fontWeight: FontWeight.w600,
           color: _getShiftTextColor(shift),
         ),
       ),

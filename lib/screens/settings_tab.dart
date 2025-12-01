@@ -2746,7 +2746,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    '본인 조를 기준으로 다른 조들의 근무 시작일 차이를 입력합니다.',
+                    '선택한 조를 기준으로 전체 근무표를 작성합니다.',
                     style: TextStyle(fontSize: 12.sp, color: Colors.blue.shade900),
                   ),
                 ),
@@ -2791,7 +2791,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '교대 패턴',
+                '교대 패턴 (숫자 = 인덱스)',
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
