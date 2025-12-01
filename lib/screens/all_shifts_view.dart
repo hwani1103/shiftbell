@@ -17,6 +17,7 @@ class AllShiftsView extends ConsumerStatefulWidget {
 class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   late DateTime _currentMonth;
   bool _isLoading = true;
+  bool _isConfigured = false; // ⭐ 전체 교대조 근무표 설정 여부
 
   // ⭐ 저장된 데이터 또는 기본값
   List<String> _teams = ['A', 'B', 'C', 'D'];
@@ -57,22 +58,30 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
       final savedTeams = prefs.getStringList('all_teams_names');
       if (savedTeams != null && savedTeams.isNotEmpty) {
         _teams = savedTeams;
+        _isConfigured = true; // ⭐ 설정된 상태
+      } else {
+        _isConfigured = false; // ⭐ 미설정 상태
       }
 
       // 저장된 인덱스 가져오기
-      final indicesJson = prefs.getString('all_teams_indices');
-      if (indicesJson != null) {
-        final Map<String, dynamic> decoded = jsonDecode(indicesJson);
-        _teamOffsets = decoded.map((key, value) =>
-          MapEntry(key, int.parse(value.toString()))
-        );
-      }
+      if (_isConfigured) {
+        final indicesJson = prefs.getString('all_teams_indices');
+        if (indicesJson != null) {
+          final Map<String, dynamic> decoded = jsonDecode(indicesJson);
+          _teamOffsets = decoded.map((key, value) =>
+            MapEntry(key, int.parse(value.toString()))
+          );
+        }
 
-      print('✅ 전체 근무표 데이터 로드 완료:');
-      print('  - 조 목록: $_teams');
-      print('  - 인덱스: $_teamOffsets');
+        print('✅ 전체 근무표 데이터 로드 완료:');
+        print('  - 조 목록: $_teams');
+        print('  - 인덱스: $_teamOffsets');
+      } else {
+        print('⚠️ 전체 교대조 근무표가 설정되지 않았습니다.');
+      }
     } catch (e) {
-      print('⚠️ 데이터 로드 실패, 기본값 사용: $e');
+      print('⚠️ 데이터 로드 실패: $e');
+      _isConfigured = false;
     } finally {
       if (mounted) {
         setState(() {
@@ -155,38 +164,84 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
           ? Center(
               child: CircularProgressIndicator(),
             )
-          : scheduleAsync.when(
-              loading: () => Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(child: Text('에러 발생: $error')),
-              data: (schedule) => SafeArea(
-                child: Column(
-                  children: [
-                    // ⭐ 년월 표시 (중앙)
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
-                      color: Colors.white,
-                      alignment: Alignment.center,
-                      child: Text(
-                        '$year년 $month월',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+          : !_isConfigured
+              ? Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24.w),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.groups_outlined,
+                          size: 80.sp,
+                          color: Colors.grey.shade400,
                         ),
-                      ),
+                        SizedBox(height: 24.h),
+                        Text(
+                          '전체 교대조 근무표가\n설정되지 않았습니다',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        Text(
+                          '설정 탭에서 전체 교대조 근무표를\n작성해주세요.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        SizedBox(height: 32.h),
+                        ElevatedButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.arrow_back),
+                          label: Text('돌아가기'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                          ),
+                        ),
+                      ],
                     ),
-                    Divider(height: 1, color: Colors.grey.shade300),
-                    // ⭐ 메인 테이블
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                        child: _buildShiftTable(year, month, lastDay, schedule),
-                      ),
+                  ),
+                )
+              : scheduleAsync.when(
+                  loading: () => Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => Center(child: Text('에러 발생: $error')),
+                  data: (schedule) => SafeArea(
+                    child: Column(
+                      children: [
+                        // ⭐ 년월 표시 (중앙)
+                        Container(
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                          color: Colors.white,
+                          alignment: Alignment.center,
+                          child: Text(
+                            '$year년 $month월',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        Divider(height: 1, color: Colors.grey.shade300),
+                        // ⭐ 메인 테이블
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                            child: _buildShiftTable(year, month, lastDay, schedule),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
     );
   }
 
