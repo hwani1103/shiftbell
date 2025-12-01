@@ -144,7 +144,7 @@ Widget build(BuildContext context) {
                             if (!_isMultiSelectMode)
                               Row(
                                 children: [
-                                  // ⭐ 전체 근무표 버튼
+                                  // ⭐ 전체근무표 버튼
                                   GestureDetector(
                                     onTap: () {
                                       Navigator.push(
@@ -153,31 +153,24 @@ Widget build(BuildContext context) {
                                       );
                                     },
                                     child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                                      margin: EdgeInsets.only(right: 12.w),
+                                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                                      margin: EdgeInsets.only(right: 8.w),
                                       decoration: BoxDecoration(
                                         color: Colors.indigo.shade50,
                                         borderRadius: BorderRadius.circular(6.r),
-                                        border: Border.all(color: Colors.indigo.shade200),
+                                        border: Border.all(color: Colors.indigo.shade200, width: 0.8),
                                       ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.groups, size: 16.sp, color: Colors.indigo),
-                                          SizedBox(width: 4.w),
-                                          Text(
-                                            '전체',
-                                            style: TextStyle(
-                                              fontSize: 12.sp,
-                                              color: Colors.indigo,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
+                                      child: Text(
+                                        '전체근무표',
+                                        style: TextStyle(
+                                          fontSize: 11.sp,
+                                          color: Colors.indigo.shade700,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                  // today 버튼
+                                  // ⭐ today 버튼
                                   GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -185,12 +178,20 @@ Widget build(BuildContext context) {
                                         _selectedDay = null;
                                       });
                                     },
-                                    child: Text(
-                                      'today',
-                                      style: TextStyle(
-                                        fontSize: 13.sp,
-                                        color: Colors.blue.shade700,
-                                        fontWeight: FontWeight.w600,
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(6.r),
+                                        border: Border.all(color: Colors.blue.shade200, width: 0.8),
+                                      ),
+                                      child: Text(
+                                        'today',
+                                        style: TextStyle(
+                                          fontSize: 11.sp,
+                                          color: Colors.blue.shade700,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
                                   ),
