@@ -2692,8 +2692,6 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                 onTap: () {
                   setState(() {
                     _myTeam = team;
-                    // 본인 조는 오프셋 0으로 초기화
-                    _teamOffsets[team] = 0;
                   });
                 },
                 borderRadius: BorderRadius.circular(12.r),
@@ -2902,7 +2900,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                 '• B조가 휴무 첫날이면 → 3\n'
                 '• C조가 야간 첫날이면 → 5',
                 style: TextStyle(fontSize: 12.sp, color: Colors.blue.shade900, height: 1.5),
-                ),
+              ),
               ],
             ),
           ),
