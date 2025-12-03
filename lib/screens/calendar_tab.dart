@@ -258,7 +258,9 @@ Widget build(BuildContext context) {
                             return _buildDateCell(day, false, true, schedule);
                           },
                           todayBuilder: (context, day, focusedDay) {
-                            return _buildDateCell(day, true, false, schedule);
+                            // ⭐ 오늘이 현재 보고 있는 달의 날짜인지 확인
+                            final isOutsideMonth = day.month != _focusedDay.month || day.year != _focusedDay.year;
+                            return _buildDateCell(day, true, isOutsideMonth, schedule);
                           },
                           selectedBuilder: (context, day, focusedDay) {
                             return _buildDateCell(day, isSameDay(day, DateTime.now()), false, schedule, isSelected: true);
