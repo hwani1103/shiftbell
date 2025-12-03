@@ -1,5 +1,6 @@
 package com.example.shiftbell
 
+import android.app.KeyguardManager
 import android.app.NotificationManager
 import android.app.Service
 import android.content.BroadcastReceiver
@@ -13,6 +14,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
@@ -39,6 +41,17 @@ class AlarmOverlayService : Service() {
     private var timeoutHandler: Handler? = null
     private var timeoutRunnable: Runnable? = null
     private var alarmDuration: Int = 5  // 기본 5분
+    private var isOverlayVisible: Boolean = false  // ⭐ Overlay 표시 상태
+
+    // ⭐ 잠금 해제 감지 BroadcastReceiver
+    private val unlockReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_USER_PRESENT) {
+                Log.d("AlarmOverlay", "🔓 잠금 해제 감지 → Overlay 표시")
+                showOverlayWindow()
+            }
+        }
+    }
 
     // 외부에서 Overlay 종료/스누즈 신호를 받기 위한 BroadcastReceiver
     private val overlayActionReceiver = object : BroadcastReceiver() {
@@ -76,6 +89,15 @@ class AlarmOverlayService : Service() {
             return START_NOT_STICKY
         }
 
+        // ⭐ 잠금 해제 감지 리시버 등록
+        val unlockFilter = IntentFilter(Intent.ACTION_USER_PRESENT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(unlockReceiver, unlockFilter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(unlockReceiver, unlockFilter)
+        }
+        Log.d("AlarmOverlay", "📡 잠금 해제 리시버 등록")
+
         // ⭐ 외부 종료 신호를 받기 위한 BroadcastReceiver 등록
         val filter = IntentFilter().apply {
             addAction(ACTION_DISMISS_OVERLAY)
@@ -91,7 +113,19 @@ class AlarmOverlayService : Service() {
         // DB에서 알람 정보 조회
         loadAlarmInfo()
 
-        showOverlay()
+        // ⭐ 잠금 상태 체크
+        val keyguardManager = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+        val isLocked = keyguardManager.isKeyguardLocked
+
+        if (isLocked) {
+            Log.d("AlarmOverlay", "🔒 잠금 상태 → Overlay 대기 (잠금 해제 시 표시)")
+            // Overlay 뷰는 생성하지만 표시하지 않음 (잠금 해제 시 표시)
+            prepareOverlay()
+        } else {
+            Log.d("AlarmOverlay", "🔓 잠금 해제 상태 → Overlay 즉시 표시")
+            showOverlay()
+        }
+
         startTimeoutTimer()
 
         return START_NOT_STICKY
@@ -238,14 +272,15 @@ class AlarmOverlayService : Service() {
         }
     }
     
-    private fun showOverlay() {
-        if (overlayView != null) return // 이미 표시 중
-        
+    // ⭐ Overlay View 준비 (생성만 하고 표시하지 않음)
+    private fun prepareOverlay() {
+        if (overlayView != null) return
+
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        
+
         // Overlay View 생성
         overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_alarm, null)
-        
+
         // 현재 시간 설정
         val timeText = overlayView?.findViewById<TextView>(R.id.timeText)
         val now = Calendar.getInstance()
@@ -260,13 +295,20 @@ class AlarmOverlayService : Service() {
         overlayView?.findViewById<Button>(R.id.dismissButton)?.setOnClickListener {
             dismissAlarm()
         }
-        
+
         // 5분 후 버튼
         overlayView?.findViewById<Button>(R.id.snoozeButton)?.setOnClickListener {
             snoozeAlarm()
         }
-        
-        // Overlay 파라미터 설정
+
+        Log.d("AlarmOverlay", "✅ Overlay View 준비 완료 (미표시)")
+    }
+
+    // ⭐ Overlay Window 표시 (windowManager에 추가)
+    private fun showOverlayWindow() {
+        if (isOverlayVisible) return
+        if (overlayView == null) prepareOverlay()
+
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -282,15 +324,22 @@ class AlarmOverlayService : Service() {
             WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
             PixelFormat.TRANSLUCENT
         )
-        
+
         // 상단에 위치
         params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
         params.y = 0
-        
+
         // 화면에 추가
         windowManager?.addView(overlayView, params)
-        
-        Log.d("AlarmOverlayService", "Overlay 표시 완료")
+        isOverlayVisible = true
+
+        Log.d("AlarmOverlay", "✅ Overlay Window 표시 완료")
+    }
+
+    // ⭐ Overlay 전체 표시 (View 생성 + Window 추가)
+    private fun showOverlay() {
+        prepareOverlay()
+        showOverlayWindow()
     }
     
     private fun dismissAlarm() {
@@ -483,9 +532,11 @@ class AlarmOverlayService : Service() {
     }
 
     private fun removeOverlay() {
-        if (overlayView != null) {
+        if (overlayView != null && isOverlayVisible) {
             windowManager?.removeView(overlayView)
             overlayView = null
+            isOverlayVisible = false
+            Log.d("AlarmOverlay", "✅ Overlay 제거 완료")
         }
     }
     
@@ -495,10 +546,17 @@ class AlarmOverlayService : Service() {
 
         // ⭐ BroadcastReceiver 해제
         try {
+            unregisterReceiver(unlockReceiver)
+            Log.d("AlarmOverlay", "📡 잠금 해제 리시버 해제")
+        } catch (e: Exception) {
+            Log.e("AlarmOverlay", "잠금 해제 리시버 해제 실패", e)
+        }
+
+        try {
             unregisterReceiver(overlayActionReceiver)
             Log.d("AlarmOverlay", "📡 외부 신호 리시버 해제")
         } catch (e: Exception) {
-            Log.e("AlarmOverlay", "리시버 해제 실패 (이미 해제됨)", e)
+            Log.e("AlarmOverlay", "외부 신호 리시버 해제 실패", e)
         }
 
         removeOverlay()
