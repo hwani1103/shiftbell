@@ -214,16 +214,19 @@ private fun timeoutAlarm() {
 
 private fun dismissAlarm() {
     cancelTimeoutTimer()
-    
+
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
-    
+
+    // ⭐ Overlay 서비스도 종료
+    stopOverlayService()
+
     // DB에서 알람 삭제
     try {
         val dbHelper = DatabaseHelper.getInstance(applicationContext)
         val db = dbHelper.writableDatabase
         val deleted = db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
         db.close()
-        
+
         Log.d("AlarmActivity", if (deleted > 0) {
             "✅ DB 알람 삭제: ID=$alarmId"
         } else {
@@ -232,7 +235,7 @@ private fun dismissAlarm() {
     } catch (e: Exception) {
         Log.e("AlarmActivity", "❌ DB 삭제 실패", e)
     }
-    
+
     updateAlarmHistory(alarmId, "swiped")
 
     // ⭐ Notification 삭제 (alarmId + 8888: 20분전 + 8889: 스누즈/타임아웃)
@@ -261,6 +264,9 @@ private fun dismissAlarm() {
         cancelTimeoutTimer()
 
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
+
+        // ⭐ Overlay 서비스도 종료
+        stopOverlayService()
 
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
@@ -373,7 +379,20 @@ private fun dismissAlarm() {
         }
         startActivity(homeIntent)
     }
-    
+
+    private fun stopOverlayService() {
+        try {
+            val serviceIntent = Intent(this, AlarmOverlayService::class.java).apply {
+                action = AlarmOverlayService.ACTION_DISMISS_OVERLAY
+                putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+            }
+            stopService(serviceIntent)
+            Log.d("AlarmActivity", "✅ Overlay 서비스 종료 요청")
+        } catch (e: Exception) {
+            Log.e("AlarmActivity", "❌ Overlay 서비스 종료 실패", e)
+        }
+    }
+
     override fun onBackPressed() {
         // ⭐ 뒤로가기 버튼 무시 (알람을 끄기 전까지 화면 유지)
         // 아무 동작도 하지 않음
