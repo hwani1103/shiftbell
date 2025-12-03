@@ -487,10 +487,7 @@ private fun dismissAlarm() {
         // Notification 생성
         val notification = NotificationCompat.Builder(this, "alarm_control")
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("🔔 알람 울림 중")
-            .setContentText("$alarmLabel - $alarmTimeStr")
-            .setStyle(NotificationCompat.BigTextStyle()
-                .bigText("$alarmLabel\n$alarmTimeStr\n\n알람이 울리고 있습니다. 아래 버튼으로 제어하거나 탭하여 화면으로 이동하세요."))
+            .setContentTitle("알람 울림 중")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setOngoing(true)  // ⭐ 스와이프로 지울 수 없게
