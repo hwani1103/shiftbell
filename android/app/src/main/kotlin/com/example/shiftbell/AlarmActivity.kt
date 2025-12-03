@@ -38,6 +38,17 @@ class AlarmActivity : AppCompatActivity() {
     private lateinit var gestureDetector: GestureDetectorCompat
     private var timeoutHandler: Handler? = null
     private var timeoutRunnable: Runnable? = null
+
+    // ⭐ Notification에서 Activity 종료 신호 수신
+    private val finishReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val targetAlarmId = intent.getIntExtra("alarmId", -1)
+            if (targetAlarmId == alarmId) {
+                Log.d("AlarmActivity", "📡 종료 신호 수신 → Activity 종료")
+                finish()
+            }
+        }
+    }
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +70,15 @@ class AlarmActivity : AppCompatActivity() {
             gestureDetector.onTouchEvent(event)
             true
         }
+
+        // ⭐ 종료 신호 리시버 등록
+        val filter = IntentFilter("FINISH_ALARM_ACTIVITY")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(finishReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(finishReceiver, filter)
+        }
+
         startTimeoutTimer()
     }
 
@@ -130,10 +150,11 @@ private fun timeoutAlarm() {
     // shownNotifications에서 제거
     AlarmGuardReceiver.removeShownNotification(alarmId)
 
-    // ⭐ 8888 Notification 삭제 (타임아웃은 8889 안 보여줌)
+    // ⭐ Notification 삭제 (7777: 제어, 8888: 20분전)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.cancel(7777)
     notificationManager.cancel(8888)
-    Log.d("AlarmActivity", "🗑️ 8888 Notification 삭제 (타임아웃)")
+    Log.d("AlarmActivity", "🗑️ Notification 삭제 (7777, 8888)")
 
     // 갱신 체크
     AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
@@ -244,12 +265,13 @@ private fun dismissAlarm() {
 
     updateAlarmHistory(alarmId, "swiped")
 
-    // ⭐ Notification 삭제 (alarmId + 8888: 20분전 + 8889: 스누즈/타임아웃)
+    // ⭐ Notification 삭제 (7777: 제어, 8888: 20분전, 8889: 스누즈/타임아웃)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)
+    notificationManager.cancel(7777)
     notificationManager.cancel(8888)
     notificationManager.cancel(8889)
-    Log.d("AlarmActivity", "📢 Notification 삭제 (8888, 8889)")
+    Log.d("AlarmActivity", "📢 Notification 삭제 (7777, 8888, 8889)")
 
     // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
     AlarmGuardReceiver.removeShownNotification(alarmId)
@@ -399,6 +421,87 @@ private fun dismissAlarm() {
         }
     }
 
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        // ⭐ 홈 버튼 눌렀을 때 → 알람 제어 Notification 표시
+        Log.d("AlarmActivity", "👋 홈 버튼 감지 → Notification 표시")
+        showAlarmControlNotification()
+    }
+
+    private fun showAlarmControlNotification() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // 채널 생성
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "alarm_control",
+                "알람 제어",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "울리는 알람을 제어할 수 있습니다"
+                setSound(null, null)
+                enableVibration(false)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Notification 탭 시 AlarmActivity 재시작
+        val activityIntent = Intent(this, AlarmActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("alarmId", alarmId)
+            putExtra("alarmDuration", alarmDuration)
+        }
+        val activityPendingIntent = PendingIntent.getActivity(
+            this,
+            alarmId,
+            activityIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // "알람 끄기" 버튼
+        val dismissIntent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = "DISMISS_FROM_NOTIFICATION"
+            putExtra("alarmId", alarmId)
+        }
+        val dismissPendingIntent = PendingIntent.getBroadcast(
+            this,
+            alarmId + 10000,
+            dismissIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // "5분 후" 버튼
+        val snoozeIntent = Intent(this, AlarmActionReceiver::class.java).apply {
+            action = "SNOOZE_FROM_NOTIFICATION"
+            putExtra("alarmId", alarmId)
+        }
+        val snoozePendingIntent = PendingIntent.getBroadcast(
+            this,
+            alarmId + 20000,
+            snoozeIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Notification 생성
+        val notification = NotificationCompat.Builder(this, "alarm_control")
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setContentTitle("🔔 알람 울림 중")
+            .setContentText("$alarmLabel - $alarmTimeStr")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("$alarmLabel\n$alarmTimeStr\n\n알람이 울리고 있습니다. 아래 버튼으로 제어하거나 탭하여 화면으로 이동하세요."))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setOngoing(true)  // ⭐ 스와이프로 지울 수 없게
+            .setAutoCancel(false)
+            .setContentIntent(activityPendingIntent)
+            .addAction(android.R.drawable.ic_delete, "알람 끄기", dismissPendingIntent)
+            .addAction(android.R.drawable.ic_media_play, "5분 후", snoozePendingIntent)
+            .build()
+
+        notificationManager.notify(7777, notification)
+        Log.d("AlarmActivity", "✅ 알람 제어 Notification 표시 (ID=7777)")
+    }
+
     override fun onBackPressed() {
         // ⭐ 뒤로가기 버튼 무시 (알람을 끄기 전까지 화면 유지)
         // 아무 동작도 하지 않음
@@ -407,6 +510,13 @@ private fun dismissAlarm() {
     override fun onDestroy() {
         super.onDestroy()
         cancelTimeoutTimer()
+
+        // ⭐ 종료 신호 리시버 해제
+        try {
+            unregisterReceiver(finishReceiver)
+        } catch (e: Exception) {
+            Log.e("AlarmActivity", "리시버 해제 실패", e)
+        }
     }
 
     private fun updateAlarmHistory(alarmId: Int, dismissType: String, incrementSnooze: Boolean = false) {

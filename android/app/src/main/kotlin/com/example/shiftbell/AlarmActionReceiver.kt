@@ -29,6 +29,52 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 notificationManager.cancel(8889)
                 Log.d("AlarmAction", "🗑️ 8889 Notification 자동 삭제 (30초 경과)")
             }
+            // ⭐ 홈 버튼 후 Notification에서 알람 끄기
+            "DISMISS_FROM_NOTIFICATION" -> {
+                Log.d("AlarmAction", "🔔 Notification에서 알람 끄기: ID=$alarmId")
+
+                // ⭐ AlarmActivity 종료
+                val finishIntent = Intent("FINISH_ALARM_ACTIVITY").apply {
+                    setPackage(context.packageName)
+                    putExtra("alarmId", alarmId)
+                }
+                context.sendBroadcast(finishIntent)
+
+                // 알람 소리 중지
+                AlarmPlayer.getInstance(context).stopAlarm()
+
+                // 알람 삭제
+                deleteAlarmFromDB(context, alarmId)
+
+                // 7777 Notification 삭제
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.cancel(7777)
+                notificationManager.cancel(8888)
+                notificationManager.cancel(8889)
+                Log.d("AlarmAction", "✅ Notification 삭제 완료")
+            }
+            // ⭐ 홈 버튼 후 Notification에서 5분 후
+            "SNOOZE_FROM_NOTIFICATION" -> {
+                Log.d("AlarmAction", "⏰ Notification에서 5분 후: ID=$alarmId")
+
+                // ⭐ AlarmActivity 종료
+                val finishIntent = Intent("FINISH_ALARM_ACTIVITY").apply {
+                    setPackage(context.packageName)
+                    putExtra("alarmId", alarmId)
+                }
+                context.sendBroadcast(finishIntent)
+
+                // 알람 소리 중지
+                AlarmPlayer.getInstance(context).stopAlarm()
+
+                // 5분 후 재등록
+                snoozeAlarmFromDB(context, alarmId)
+
+                // 7777 Notification 삭제
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.cancel(7777)
+                Log.d("AlarmAction", "✅ 7777 Notification 삭제 완료")
+            }
             "CANCEL_ALARM" -> {
                 Log.d("AlarmAction", "🗑️ 알람 취소: ID=$alarmId")
 
@@ -253,6 +299,137 @@ class AlarmActionReceiver : BroadcastReceiver() {
         } finally {
             cursor?.close()
             db?.close()
+        }
+    }
+
+    // ⭐ Notification에서 알람 삭제
+    private fun deleteAlarmFromDB(context: Context, alarmId: Int) {
+        try {
+            val dbHelper = DatabaseHelper.getInstance(context)
+            val db = dbHelper.writableDatabase
+            db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
+
+            // 이력 업데이트
+            val values = android.content.ContentValues().apply {
+                put("dismiss_type", "swiped")
+            }
+            db.update(
+                "alarm_history",
+                values,
+                "alarm_id = ? AND dismiss_type = 'ringing'",
+                arrayOf(alarmId.toString())
+            )
+
+            db.close()
+            Log.d("AlarmAction", "✅ DB 알람 삭제 완료")
+
+            AlarmGuardReceiver.removeShownNotification(alarmId)
+            AlarmRefreshUtil.checkAndTriggerRefresh(context)
+
+            val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
+            context.sendBroadcast(guardIntent)
+
+        } catch (e: Exception) {
+            Log.e("AlarmAction", "❌ DB 삭제 실패", e)
+        }
+    }
+
+    // ⭐ Notification에서 5분 후
+    private fun snoozeAlarmFromDB(context: Context, alarmId: Int) {
+        try {
+            val dbHelper = DatabaseHelper.getInstance(context)
+            val db = dbHelper.readableDatabase
+
+            val cursor = db.query(
+                "alarms",
+                null,
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+
+            if (cursor.moveToFirst()) {
+                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                cursor.close()
+
+                val newTimestamp = System.currentTimeMillis() + (5 * 60 * 1000)
+
+                // 기존 알람 취소
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val cancelIntent = Intent(context, CustomAlarmReceiver::class.java).apply {
+                    data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
+                }
+                val cancelPendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    alarmId,
+                    cancelIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                alarmManager.cancel(cancelPendingIntent)
+                cancelPendingIntent.cancel()
+
+                // 새 알람 등록
+                val newIntent = Intent(context, CustomAlarmReceiver::class.java).apply {
+                    data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
+                    putExtra(CustomAlarmReceiver.EXTRA_ID, alarmId)
+                    putExtra(CustomAlarmReceiver.EXTRA_LABEL, shiftType)
+                    putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
+                }
+
+                val newPendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    alarmId,
+                    newIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        newTimestamp,
+                        newPendingIntent
+                    )
+                } else {
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        newTimestamp,
+                        newPendingIntent
+                    )
+                }
+
+                // DB 업데이트
+                val writableDb = dbHelper.writableDatabase
+                val dateStr = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(newTimestamp))
+                val timeStr = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(newTimestamp))
+
+                val values = android.content.ContentValues().apply {
+                    put("date", dateStr)
+                    put("time", timeStr)
+                }
+                writableDb.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
+
+                // 이력 업데이트
+                writableDb.execSQL(
+                    "UPDATE alarm_history SET dismiss_type = 'snoozed', snooze_count = snooze_count + 1 WHERE alarm_id = ? AND dismiss_type = 'ringing'",
+                    arrayOf(alarmId)
+                )
+
+                writableDb.close()
+                Log.d("AlarmAction", "✅ 5분 후 재등록 완료")
+
+                AlarmGuardReceiver.removeShownNotification(alarmId)
+                AlarmRefreshUtil.checkAndTriggerRefresh(context)
+                NotificationHelper.showUpdatedNotification(context, timeStr, shiftType)
+
+            } else {
+                cursor.close()
+                Log.e("AlarmAction", "❌ 알람 정보 없음")
+            }
+
+            db.close()
+
+        } catch (e: Exception) {
+            Log.e("AlarmAction", "❌ 5분 후 재등록 실패", e)
         }
     }
 }

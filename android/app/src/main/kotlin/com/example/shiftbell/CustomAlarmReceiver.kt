@@ -98,14 +98,9 @@ override fun onReceive(context: Context, intent: Intent) {
     
     Handler(Looper.getMainLooper()).postDelayed({
         if (isLocked) {
-            Log.e("CustomAlarmReceiver", "✅ 잠금 상태 - AlarmActivity + Overlay 동시 실행")
-            // ⭐ 잠금화면 AlarmActivity 표시
+            Log.e("CustomAlarmReceiver", "✅ 잠금 상태 - AlarmActivity 표시")
+            // ⭐ 잠금화면 AlarmActivity만 표시 (홈 버튼 시 Notification으로 제어)
             showAlarmActivity(context, id, label)
-            // ⭐ 동시에 Overlay도 시작 (홈 버튼으로 벗어날 경우를 대비)
-            if (canDrawOverlays(context)) {
-                showOverlayWindow(context, id, label)
-                Log.e("CustomAlarmReceiver", "✅ Overlay도 함께 시작 (백업용)")
-            }
         } else {
             if (canDrawOverlays(context)) {
                 Log.e("CustomAlarmReceiver", "✅ 잠금 해제 - Overlay 표시")
