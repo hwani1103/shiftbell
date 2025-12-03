@@ -162,6 +162,12 @@ private fun timeoutAlarm() {
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             )
         }
+
+        // ⭐ 상태바 텍스트를 검정색으로 변경 (Light status bar)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility =
+                android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
     }
     
     private fun setupUI() {

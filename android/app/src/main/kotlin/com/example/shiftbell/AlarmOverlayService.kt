@@ -274,66 +274,95 @@ class AlarmOverlayService : Service() {
     
     // ⭐ Overlay View 준비 (생성만 하고 표시하지 않음)
     private fun prepareOverlay() {
-        if (overlayView != null) return
+        Log.d("AlarmOverlay", "🔧 prepareOverlay() 호출: overlayView=${overlayView != null}")
 
-        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
-
-        // Overlay View 생성
-        overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_alarm, null)
-
-        // 현재 시간 설정
-        val timeText = overlayView?.findViewById<TextView>(R.id.timeText)
-        val now = Calendar.getInstance()
-        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-        timeText?.text = timeFormat.format(now.time)
-
-        // 근무 타입 설정
-        val shiftTypeText = overlayView?.findViewById<TextView>(R.id.shiftTypeText)
-        shiftTypeText?.text = alarmLabel
-
-        // 끄기 버튼
-        overlayView?.findViewById<Button>(R.id.dismissButton)?.setOnClickListener {
-            dismissAlarm()
+        if (overlayView != null) {
+            Log.d("AlarmOverlay", "⚠️ overlayView 이미 존재 → 재사용")
+            return
         }
 
-        // 5분 후 버튼
-        overlayView?.findViewById<Button>(R.id.snoozeButton)?.setOnClickListener {
-            snoozeAlarm()
-        }
+        try {
+            windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
-        Log.d("AlarmOverlay", "✅ Overlay View 준비 완료 (미표시)")
+            // Overlay View 생성
+            overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_alarm, null)
+
+            // 현재 시간 설정
+            val timeText = overlayView?.findViewById<TextView>(R.id.timeText)
+            val now = Calendar.getInstance()
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            timeText?.text = timeFormat.format(now.time)
+
+            // 근무 타입 설정
+            val shiftTypeText = overlayView?.findViewById<TextView>(R.id.shiftTypeText)
+            shiftTypeText?.text = alarmLabel
+
+            // 끄기 버튼
+            overlayView?.findViewById<Button>(R.id.dismissButton)?.setOnClickListener {
+                Log.d("AlarmOverlay", "👆 끄기 버튼 클릭")
+                dismissAlarm()
+            }
+
+            // 5분 후 버튼
+            overlayView?.findViewById<Button>(R.id.snoozeButton)?.setOnClickListener {
+                Log.d("AlarmOverlay", "👆 5분 후 버튼 클릭")
+                snoozeAlarm()
+            }
+
+            Log.d("AlarmOverlay", "✅ Overlay View 준비 완료 (미표시)")
+        } catch (e: Exception) {
+            Log.e("AlarmOverlay", "❌ Overlay View 준비 실패", e)
+        }
     }
 
     // ⭐ Overlay Window 표시 (windowManager에 추가)
     private fun showOverlayWindow() {
-        if (isOverlayVisible) return
-        if (overlayView == null) prepareOverlay()
+        Log.d("AlarmOverlay", "🔔 showOverlayWindow() 호출: isOverlayVisible=$isOverlayVisible, overlayView=${overlayView != null}")
 
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            } else {
-                @Suppress("DEPRECATION")
-                WindowManager.LayoutParams.TYPE_PHONE
-            },
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
-            WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
-            PixelFormat.TRANSLUCENT
-        )
+        if (isOverlayVisible) {
+            Log.d("AlarmOverlay", "⚠️ 이미 표시 중 → 스킵")
+            return
+        }
 
-        // 상단에 위치
-        params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-        params.y = 0
+        if (overlayView == null) {
+            Log.d("AlarmOverlay", "🔧 overlayView가 null → prepareOverlay() 호출")
+            prepareOverlay()
+        }
 
-        // 화면에 추가
-        windowManager?.addView(overlayView, params)
-        isOverlayVisible = true
+        if (overlayView == null) {
+            Log.e("AlarmOverlay", "❌ prepareOverlay() 후에도 overlayView가 null!")
+            return
+        }
 
-        Log.d("AlarmOverlay", "✅ Overlay Window 표시 완료")
+        try {
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                } else {
+                    @Suppress("DEPRECATION")
+                    WindowManager.LayoutParams.TYPE_PHONE
+                },
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
+                PixelFormat.TRANSLUCENT
+            )
+
+            // 상단에 위치
+            params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
+            params.y = 0
+
+            // 화면에 추가
+            windowManager?.addView(overlayView, params)
+            isOverlayVisible = true
+
+            Log.d("AlarmOverlay", "✅ Overlay Window 표시 완료!")
+        } catch (e: Exception) {
+            Log.e("AlarmOverlay", "❌ Overlay Window 표시 실패", e)
+        }
     }
 
     // ⭐ Overlay 전체 표시 (View 생성 + Window 추가)
@@ -532,11 +561,18 @@ class AlarmOverlayService : Service() {
     }
 
     private fun removeOverlay() {
-        if (overlayView != null && isOverlayVisible) {
-            windowManager?.removeView(overlayView)
-            overlayView = null
-            isOverlayVisible = false
-            Log.d("AlarmOverlay", "✅ Overlay 제거 완료")
+        try {
+            if (overlayView != null) {
+                if (isOverlayVisible) {
+                    windowManager?.removeView(overlayView)
+                    Log.d("AlarmOverlay", "✅ Overlay Window 제거")
+                }
+                overlayView = null
+                isOverlayVisible = false
+                Log.d("AlarmOverlay", "✅ Overlay View 정리 완료")
+            }
+        } catch (e: Exception) {
+            Log.e("AlarmOverlay", "❌ Overlay 제거 실패", e)
         }
     }
     
