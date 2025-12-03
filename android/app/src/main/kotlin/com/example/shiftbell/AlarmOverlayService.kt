@@ -89,6 +89,9 @@ class AlarmOverlayService : Service() {
             return START_NOT_STICKY
         }
 
+        // ⭐ Foreground Service로 실행 (홈 버튼 눌러도 살아있도록)
+        startForegroundService()
+
         // ⭐ 잠금 해제 감지 리시버 등록
         val unlockFilter = IntentFilter(Intent.ACTION_USER_PRESENT)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -131,11 +134,43 @@ class AlarmOverlayService : Service() {
         return START_NOT_STICKY
     }
 
+    // ⭐ Foreground Service 시작
+    private fun startForegroundService() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // 채널 생성 (Android O+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "overlay_service",
+                "알람 표시",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "알람 화면 표시 중"
+                setSound(null, null)
+                enableVibration(false)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Foreground notification 생성
+        val notification = NotificationCompat.Builder(this, "overlay_service")
+            .setContentTitle("알람 울림")
+            .setContentText("$alarmLabel - $alarmTimeStr")
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setSilent(true)
+            .build()
+
+        startForeground(9999, notification)
+        Log.d("AlarmOverlay", "✅ Foreground Service 시작 (ID=9999)")
+    }
+
     // 외부에서 호출된 DISMISS (소리만 중지, DB 작업은 이미 외부에서 처리됨)
     private fun dismissAlarmFromExternal() {
         cancelTimeoutTimer()
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
         removeOverlay()
+        stopForeground(true)  // ⭐ Foreground 종료
         stopSelf()
         Log.d("AlarmOverlay", "✅ 외부 신호로 Overlay 종료")
     }
@@ -145,6 +180,7 @@ class AlarmOverlayService : Service() {
         cancelTimeoutTimer()
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
         removeOverlay()
+        stopForeground(true)  // ⭐ Foreground 종료
         stopSelf()
         Log.d("AlarmOverlay", "✅ 외부 신호로 Overlay 종료 (스누즈)")
     }
@@ -259,6 +295,9 @@ class AlarmOverlayService : Service() {
 
         // Overlay 제거
         removeOverlay()
+
+        // ⭐ Foreground 종료
+        stopForeground(true)
 
         // 서비스 종료
         stopSelf()
@@ -376,16 +415,16 @@ class AlarmOverlayService : Service() {
 
     // 알람 소리 중지
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
-    
+
     // ⭐ DB 작업 통합 (한 번에 처리)
     try {
         val dbHelper = DatabaseHelper.getInstance(applicationContext)
         val db = dbHelper.writableDatabase
-        
+
         // 1. 알람 삭제
         db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
         Log.d("AlarmOverlay", "✅ DB 알람 삭제: ID=$alarmId")
-        
+
         // 2. 알람 이력 업데이트
         val values = android.content.ContentValues().apply {
             put("dismiss_type", "swiped")
@@ -397,13 +436,13 @@ class AlarmOverlayService : Service() {
             arrayOf(alarmId.toString())
         )
         Log.d("AlarmOverlay", "✅ 알람 이력 업데이트: swiped")
-        
+
         db.close()
-        
+
     } catch (e: Exception) {
         Log.e("AlarmOverlay", "❌ DB 작업 실패", e)
     }
-    
+
     // Notification 삭제 (8888: 20분전, 8889: 스누즈/타임아웃)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)
@@ -429,6 +468,9 @@ class AlarmOverlayService : Service() {
 
     // Overlay 제거
     removeOverlay()
+
+    // ⭐ Foreground 종료
+    stopForeground(true)
 
     // 서비스 종료
     stopSelf()
@@ -555,6 +597,9 @@ class AlarmOverlayService : Service() {
 
         // Overlay 제거
         removeOverlay()
+
+        // ⭐ Foreground 종료
+        stopForeground(true)
 
         // 서비스 종료
         stopSelf()
