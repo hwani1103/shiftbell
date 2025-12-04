@@ -530,12 +530,6 @@ class DatabaseService {
       whereArgs: [id],
     );
   }
-  
-  Future<void> deleteAllAlarmTemplates() async {
-    final db = await database;
-    await db.delete('shift_alarm_templates');
-    print('🗑️ 모든 알람 템플릿 삭제 완료');
-  }
 
   // ⭐ 근무명 변경 (알람, 템플릿, 이력 테이블 모두 업데이트)
   Future<void> updateShiftNames(Map<String, String> renamedShifts) async {
