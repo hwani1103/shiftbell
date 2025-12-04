@@ -2341,7 +2341,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
             // 진행 상태 표시
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (index) {
+              children: List.generate(3, (index) {
                 return Row(
                   children: [
                     Container(
@@ -2364,9 +2364,9 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                         ),
                       ),
                     ),
-                    if (index < 3)
+                    if (index < 2)
                       Container(
-                        width: 40.w,
+                        width: 60.w,
                         height: 2.h,
                         color: index < _currentPage
                             ? Colors.purple
