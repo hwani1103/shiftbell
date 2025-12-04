@@ -435,11 +435,34 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
               alignment: Alignment.centerRight,
               child: GestureDetector(
                 onTap: () => _showAllAlarmsSheet(context),
-                child: Text(
-                  '등록된 모든 알람 보기',
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: Colors.indigo.shade400,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: Colors.indigo.shade50,
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(
+                      color: Colors.indigo.shade300,
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.list_alt_rounded,
+                        size: 16.sp,
+                        color: Colors.indigo.shade600,
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        '등록된 모든 알람 보기',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.indigo.shade600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

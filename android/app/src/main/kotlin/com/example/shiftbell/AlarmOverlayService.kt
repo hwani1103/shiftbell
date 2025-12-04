@@ -392,12 +392,6 @@ class AlarmOverlayService : Service() {
     val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
     sendBroadcast(guardIntent)
 
-    // ⭐ 앱 포그라운드로 가져와서 Flutter UI 즉시 갱신
-    val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-    launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-    startActivity(launchIntent)
-    Log.d("AlarmOverlay", "✅ 앱 포그라운드 이동 → Flutter UI 갱신")
-
     // Overlay 제거
     removeOverlay()
 
