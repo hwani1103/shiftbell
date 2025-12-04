@@ -486,7 +486,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   '모든 알람 완전 삭제',
                   style: TextStyle(color: Colors.red.shade700),
                 ),
-                subtitle: Text('등록된 모든 알람과 템플릿 삭제'),
+                subtitle: Text('등록된 모든 알람 삭제'),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () async {
                   final confirm = await showDialog<bool>(
@@ -508,7 +508,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                           SizedBox(height: 12.h),
                           Text('등록된 모든 알람이 삭제됩니다.'),
                           SizedBox(height: 8.h),
-                          Text('정상 이용을 위해서는 다시 알람을 생성해야 합니다.'),
+                          Text('앱 이용을 위해서는 알람을 다시 생성해야 합니다.'),
                         ],
                       ),
                       actions: [
