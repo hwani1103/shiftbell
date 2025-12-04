@@ -335,7 +335,6 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
               _buildTeamRow(team, year, month, 23, lastDay, schedule, maxColumns: 11),
           ],
         ),
-      ),
     );
   }
 
