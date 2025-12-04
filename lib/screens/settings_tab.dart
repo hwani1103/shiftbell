@@ -2392,8 +2392,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                 children: [
                   _buildStep1_PatternConfirm(),
                   _buildStep2_TeamNamesInput(),
-                  _buildStep3_MyTeamSelect(),
-                  _buildStep4_OffsetInput(),
+                  _buildStep3_OffsetInput(),
                 ],
               ),
             ),
@@ -2438,8 +2437,6 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
       case 1:
         return _teamNames.length >= 2; // 최소 2개 조
       case 2:
-        return _myTeam != null; // 본인 조 선택
-      case 3:
         return _teamIndices.length == _teamNames.length &&
                _teamIndices.values.every((idx) => idx >= 1 && idx <= widget.pattern.length);
       default:
@@ -2475,49 +2472,44 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
 
   // 패턴 표시 (표 형식)
   Widget _buildPatternCardsWithIndices() {
-    return Table(
-      border: TableBorder.all(color: Colors.purple.shade300, width: 1),
-      defaultColumnWidth: FlexColumnWidth(1),
-      children: [
-        // 첫 번째 줄: 인덱스
-        TableRow(
-          children: List.generate(widget.pattern.length, (i) {
-            return Container(
-              padding: EdgeInsets.symmetric(vertical: 8.h),
-              color: Colors.purple.shade50,
-              child: Center(
-                child: Text(
-                  '${i + 1}',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.purple.shade700,
-                  ),
+    return Wrap(
+      spacing: 6.w,
+      runSpacing: 8.h,
+      children: List.generate(widget.pattern.length, (i) {
+        return Container(
+          width: (MediaQuery.of(context).size.width - 80.w) / 10,
+          padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: Colors.grey.shade300, width: 1),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${i + 1}',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red.shade700,
                 ),
               ),
-            );
-          }),
-        ),
-        // 두 번째 줄: 근무명
-        TableRow(
-          children: List.generate(widget.pattern.length, (i) {
-            return Container(
-              padding: EdgeInsets.symmetric(vertical: 8.h),
-              color: Colors.white,
-              child: Center(
-                child: Text(
-                  widget.pattern[i],
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
+              SizedBox(height: 4.h),
+              Text(
+                widget.pattern[i],
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            );
-          }),
-        ),
-      ],
+            ],
+          ),
+        );
+      }),
     );
   }
 
@@ -2787,144 +2779,141 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
     );
   }
 
-  // 4단계: 각 조 인덱스 입력
-  Widget _buildStep4_OffsetInput() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '4단계: 오늘 각 조의 근무 설정',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.purple,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        Text(
-          '오늘 각 조가 아래 패턴의 몇 번째 근무인지 선택해주세요.',
-          style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
-        ),
-        SizedBox(height: 16.h),
-
-        // 패턴 인덱스 표시
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: Colors.purple.shade50,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: Colors.purple.shade200),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '교대 패턴 (숫자 = 인덱스)',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.purple.shade900,
-                ),
-              ),
-              SizedBox(height: 12.h),
-              _buildPatternCardsWithIndices(),
-            ],
-          ),
-        ),
-
-        SizedBox(height: 16.h),
-
-        // 각 조별 인덱스 입력
-        Expanded(
-          child: SingleChildScrollView(
-            physics: BouncingScrollPhysics(),
-            child: Column(
-              children: _teamNames.map((team) {
-                final selectedIndex = _teamIndices[team];
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 12.h),
-                  child: Container(
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '$team조 - 오늘 인덱스 선택',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Wrap(
-                          spacing: 8.w,
-                          runSpacing: 8.h,
-                          children: List.generate(widget.pattern.length, (i) {
-                            final index = i + 1;
-                            final isSelected = selectedIndex == index;
-                            final isUsedByOther = _teamIndices.entries
-                                .any((entry) => entry.key != team && entry.value == index);
-
-                            return GestureDetector(
-                              onTap: isUsedByOther ? null : () {
-                                setState(() {
-                                  _teamIndices[team] = index;
-                                });
-                              },
-                              child: Container(
-                                width: 40.w,
-                                height: 40.w,
-                                decoration: BoxDecoration(
-                                  color: isUsedByOther
-                                      ? Colors.grey.shade300
-                                      : (isSelected ? Colors.purple : Colors.white),
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  border: Border.all(
-                                    color: isUsedByOther
-                                        ? Colors.grey.shade400
-                                        : (isSelected ? Colors.purple : Colors.grey.shade400),
-                                    width: isSelected ? 2 : 1,
-                                  ),
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      '$index',
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: isSelected ? Colors.white : Colors.black,
-                                      ),
-                                    ),
-                                    Text(
-                                      widget.pattern[i],
-                                      style: TextStyle(
-                                        fontSize: 8.sp,
-                                        color: isSelected ? Colors.white : Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }).toList(),
+  // 3단계: 각 조 인덱스 입력
+  Widget _buildStep3_OffsetInput() {
+    return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '3단계: 오늘 각 조의 근무 설정',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple,
             ),
           ),
-        ),
-      ],
+          SizedBox(height: 8.h),
+          Text(
+            '오늘 각 조가 아래 패턴의 몇 번째 근무인지 선택해주세요.',
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+          ),
+          SizedBox(height: 16.h),
+
+          // 패턴 인덱스 표시
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: Colors.purple.shade50,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: Colors.purple.shade200),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '교대 패턴 (숫자 = 인덱스)',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.purple.shade900,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                _buildPatternCardsWithIndices(),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 16.h),
+
+          // 각 조별 인덱스 입력
+          ..._teamNames.map((team) {
+            final selectedIndex = _teamIndices[team];
+            return Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: Container(
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$team조 - 오늘 인덱스 선택',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Wrap(
+                      spacing: 8.w,
+                      runSpacing: 8.h,
+                      children: List.generate(widget.pattern.length, (i) {
+                        final index = i + 1;
+                        final isSelected = selectedIndex == index;
+                        final isUsedByOther = _teamIndices.entries
+                            .any((entry) => entry.key != team && entry.value == index);
+
+                        return GestureDetector(
+                          onTap: isUsedByOther ? null : () {
+                            setState(() {
+                              _teamIndices[team] = index;
+                            });
+                          },
+                          child: Container(
+                            width: 40.w,
+                            height: 40.w,
+                            decoration: BoxDecoration(
+                              color: isUsedByOther
+                                  ? Colors.grey.shade300
+                                  : (isSelected ? Colors.purple : Colors.white),
+                              borderRadius: BorderRadius.circular(8.r),
+                              border: Border.all(
+                                color: isUsedByOther
+                                    ? Colors.grey.shade400
+                                    : (isSelected ? Colors.purple : Colors.grey.shade400),
+                                width: isSelected ? 2 : 1,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  '$index',
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? Colors.white : Colors.red.shade700,
+                                  ),
+                                ),
+                                Text(
+                                  widget.pattern[i],
+                                  style: TextStyle(
+                                    fontSize: 8.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? Colors.white : Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ],
+      ),
     );
   }
 
