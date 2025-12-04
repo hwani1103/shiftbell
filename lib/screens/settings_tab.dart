@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/database_service.dart';
 import 'onboarding_screen.dart';
+import 'all_alarms_history_view.dart';
 import '../services/alarm_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
@@ -444,6 +445,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               SizedBox(height: 16.h),
 
+              // ⭐ Production 섹션
               // 전체 교대조 근무표 작성
               ListTile(
                 leading: Icon(Icons.groups, color: Colors.purple),
@@ -462,12 +464,61 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 onTap: _showAlarmTypeDialog,
               ),
 
-              // 등록된 알람
+              // 모든 알람 & 알람 이력
               ListTile(
-                leading: Icon(Icons.alarm, color: Colors.blue),
-                title: Text('등록된 알람'),
-                subtitle: Text('현재 등록된 알람 목록'),
-                onTap: _showAlarmListDialog,
+                leading: Icon(Icons.alarm_on, color: Colors.indigo),
+                title: Text('모든 알람 & 알람 이력'),
+                subtitle: Text('등록된 알람과 실행 이력 확인'),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AllAlarmsHistoryView()),
+                  );
+                },
+              ),
+
+              SizedBox(height: 24.h),
+              Divider(thickness: 2, color: Colors.grey.shade300),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+                child: Text(
+                  '테스트 도구',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ),
+              Divider(thickness: 2, color: Colors.grey.shade300),
+              SizedBox(height: 8.h),
+
+              // ⭐ 테스트 섹션
+              // 테스트 알람 (5초 후)
+              ListTile(
+                leading: Icon(Icons.bug_report, color: Colors.green),
+                title: Text('테스트 알람 (5초 후)'),
+                subtitle: Text('알람 동작 테스트용'),
+                onTap: () async {
+                  try {
+                    await AlarmService().scheduleTestAlarm(
+                      label: '테스트 알람',
+                      soundType: 'loud',
+                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('⏰ 5초 후 알람이 울립니다!')),
+                      );
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('❌ 테스트 알람 실패: $e')),
+                      );
+                    }
+                  }
+                },
               ),
 
               // 모든 알람 삭제
@@ -504,42 +555,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                     }
                   }
                 },
-              ),
-
-              // ⭐ 테스트 알람 (5초 후)
-              ListTile(
-                leading: Icon(Icons.bug_report, color: Colors.green),
-                title: Text('테스트 알람 (5초 후)'),
-                subtitle: Text('알람 동작 테스트용'),
-                onTap: () async {
-                  try {
-                    await AlarmService().scheduleTestAlarm(
-                      label: '테스트 알람',
-                      soundType: 'loud',
-                    );
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('⏰ 5초 후 알람이 울립니다!')),
-                      );
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('❌ 테스트 알람 실패: $e')),
-                      );
-                    }
-                  }
-                },
-              ),
-
-              Divider(),
-
-              // 알람 이력
-              ListTile(
-                leading: Icon(Icons.history, color: Colors.purple),
-                title: Text('알람 이력'),
-                subtitle: Text('지난 알람 기록 (30일)'),
-                onTap: _showAlarmHistoryDialog,
               ),
             ],
           );

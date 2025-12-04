@@ -592,6 +592,19 @@ Future<List<AlarmHistory>> getAlarmHistoryByDate(DateTime date) async {
   return maps.map((map) => AlarmHistory.fromMap(map)).toList();
 }
 
+// ⭐ 신규: 특정 알람 ID 이력 조회
+Future<List<AlarmHistory>> getAlarmHistoryByAlarmId(int alarmId) async {
+  final db = await database;
+  final maps = await db.query(
+    'alarm_history',
+    where: 'alarm_id = ?',
+    whereArgs: [alarmId],
+    orderBy: 'created_at DESC',
+    limit: 1, // 가장 최근 이력 1개만
+  );
+  return maps.map((map) => AlarmHistory.fromMap(map)).toList();
+}
+
 // ⭐ 신규: 이력 통계
 Future<Map<String, dynamic>> getAlarmStatistics() async {
   final db = await database;
