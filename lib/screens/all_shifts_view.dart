@@ -198,7 +198,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                           icon: Icon(Icons.arrow_back),
                           label: Text('돌아가기'),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple,
+                            backgroundColor: Colors.indigo,
                             foregroundColor: Colors.white,
                             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
                           ),
