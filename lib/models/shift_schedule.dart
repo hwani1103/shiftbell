@@ -9,13 +9,13 @@ class ShiftSchedule {
 
   // ⭐ 파스텔 팔레트 8색 (서로 구분되는 순서로 배치)
   static final List<Color> shiftPalette = [
-    Color(0xFFFFF9C4), // 1. 노란색 (Sunny Yellow) - 가장 밝고 눈에 띔
-    Color(0xFFE1BEE7), // 2. 보라색 (Lavender Purple) - 노란색과 대비
+    Color(0xFFB3E5FC), // 1. 하늘색 (Sky Blue) - 파랑 계열
+    Color(0xFFFFCCBC), // 2. 코랄색 (Coral) - 따뜻한 핑크/주황
     Color(0xFFB2DFDB), // 3. 민트색 (Mint Green) - 초록 계열
-    Color(0xFFFFCCBC), // 4. 코랄색 (Coral) - 따뜻한 핑크/주황
-    Color(0xFFB3E5FC), // 5. 하늘색 (Sky Blue) - 차가운 파랑
-    Color(0xFFFFE0B2), // 6. 주황색 (Peach Orange) - 코랄색과 비슷
-    Color(0xFFCFD8DC), // 7. 청회색 (Blue Grey) - 하늘색/민트색과 비슷
+    Color(0xFFE1BEE7), // 4. 보라색 (Lavender Purple) - 보라 계열
+    Color(0xFFFFF9C4), // 5. 노란색 (Sunny Yellow) - 밝은 노랑
+    Color(0xFFCFD8DC), // 6. 청회색 (Blue Grey) - 차분한 회색
+    Color(0xFFFFE0B2), // 7. 주황색 (Peach Orange) - 코랄색과 비슷
     Color(0xFFD7CCC8), // 8. 베이지색 (Warm Beige) - 중립 톤
   ];
 
