@@ -15,9 +15,13 @@ class AllShiftsView extends ConsumerStatefulWidget {
 }
 
 class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
+  late PageController _pageController;
   late DateTime _currentMonth;
   bool _isLoading = true;
   bool _isConfigured = false; // ⭐ 전체 교대조 근무표 설정 여부
+
+  // ⭐ PageView용 초기 인덱스 (과거 100년 ~ 미래 100년)
+  static const int _initialPage = 1200; // 100년 * 12개월
 
   // ⭐ 저장된 데이터
   List<String> _teams = ['A', 'B', 'C', 'D'];
@@ -34,7 +38,14 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   void initState() {
     super.initState();
     _currentMonth = DateTime.now();
+    _pageController = PageController(initialPage: _initialPage);
     _loadTeamData();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   // ⭐ SharedPreferences에서 팀 데이터 로드
@@ -135,10 +146,6 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
 
   @override
   Widget build(BuildContext context) {
-    final year = _currentMonth.year;
-    final month = _currentMonth.month;
-    final lastDay = DateTime(year, month + 1, 0).day;
-
     // ⭐ schedule 가져오기
     final scheduleAsync = ref.watch(scheduleProvider);
 
@@ -206,26 +213,73 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                   data: (schedule) => SafeArea(
                     child: Column(
                       children: [
-                        // ⭐ 년월 표시 (중앙)
+                        // ⭐ 년월 표시 (좌우 화살표 포함)
                         Container(
                           padding: EdgeInsets.symmetric(vertical: 12.h),
                           color: Colors.white,
-                          alignment: Alignment.center,
-                          child: Text(
-                            '$year년 $month월',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.chevron_left),
+                                onPressed: () {
+                                  _pageController.previousPage(
+                                    duration: Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                              ),
+                              Text(
+                                '${_currentMonth.year}년 ${_currentMonth.month}월',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.chevron_right),
+                                onPressed: () {
+                                  _pageController.nextPage(
+                                    duration: Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                              ),
+                            ],
                           ),
                         ),
                         Divider(height: 1, color: Colors.grey.shade300),
-                        // ⭐ 메인 테이블
+                        // ⭐ PageView로 여러 달 표시
                         Expanded(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                            child: _buildShiftTable(year, month, lastDay, schedule),
+                          child: PageView.builder(
+                            controller: _pageController,
+                            onPageChanged: (page) {
+                              final now = DateTime.now();
+                              final monthsDiff = page - _initialPage;
+                              setState(() {
+                                _currentMonth = DateTime(
+                                  now.year,
+                                  now.month + monthsDiff,
+                                );
+                              });
+                            },
+                            itemBuilder: (context, index) {
+                              final now = DateTime.now();
+                              final monthsDiff = index - _initialPage;
+                              final targetMonth = DateTime(
+                                now.year,
+                                now.month + monthsDiff,
+                              );
+                              final year = targetMonth.year;
+                              final month = targetMonth.month;
+                              final lastDay = DateTime(year, month + 1, 0).day;
+
+                              return Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                                child: _buildShiftTable(year, month, lastDay, schedule),
+                              );
+                            },
                           ),
                         ),
                       ],
