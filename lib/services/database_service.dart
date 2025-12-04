@@ -606,14 +606,24 @@ Future<List<AlarmHistory>> getAlarmHistoryByAlarmId(int alarmId) async {
   return maps.map((map) => AlarmHistory.fromMap(map)).toList();
 }
 
+// ⭐ 신규: 모든 알람 이력 조회 (날짜순 정렬)
+Future<List<AlarmHistory>> getAllAlarmHistory() async {
+  final db = await database;
+  final maps = await db.query(
+    'alarm_history',
+    orderBy: 'scheduled_date ASC, scheduled_time ASC, created_at DESC',
+  );
+  return maps.map((map) => AlarmHistory.fromMap(map)).toList();
+}
+
 // ⭐ 신규: 이력 통계
 Future<Map<String, dynamic>> getAlarmStatistics() async {
   final db = await database;
-  
+
   final total = Sqflite.firstIntValue(
     await db.rawQuery('SELECT COUNT(*) FROM alarm_history')
   ) ?? 0;
-  
+
   final swiped = Sqflite.firstIntValue(
     await db.rawQuery("SELECT COUNT(*) FROM alarm_history WHERE dismiss_type = 'swiped'")
   ) ?? 0;

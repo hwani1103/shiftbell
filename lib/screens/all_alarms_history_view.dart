@@ -12,9 +12,28 @@ class AllAlarmsHistoryView extends StatefulWidget {
   State<AllAlarmsHistoryView> createState() => _AllAlarmsHistoryViewState();
 }
 
+/// 알람 + 이력 통합 데이터 클래스
+class AlarmWithHistory {
+  final DateTime date;
+  final String time;
+  final String? shiftType;
+  final AlarmHistory? latestHistory;
+  final bool isFuture;
+
+  AlarmWithHistory({
+    required this.date,
+    required this.time,
+    this.shiftType,
+    this.latestHistory,
+    required this.isFuture,
+  });
+
+  // 유니크 키 생성 (날짜 + 시간)
+  String get uniqueKey => '${date.year}-${date.month}-${date.day}_$time';
+}
+
 class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
-  List<Alarm> _alarms = [];
-  Map<int, AlarmHistory?> _historyMap = {}; // alarmId -> history
+  List<AlarmWithHistory> _alarmsWithHistory = [];
   bool _isLoading = true;
 
   @override
@@ -29,28 +48,59 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
     });
 
     try {
-      // 모든 알람 가져오기 (날짜순 정렬)
-      final alarms = await DatabaseService.instance.getAllAlarms();
-      alarms.sort((a, b) {
-        if (a.date == null && b.date == null) return 0;
-        if (a.date == null) return 1;
-        if (b.date == null) return -1;
-        return a.date!.compareTo(b.date!);
-      });
+      final now = DateTime.now();
 
-      // 각 알람의 이력 가져오기
-      final Map<int, AlarmHistory?> historyMap = {};
-      for (var alarm in alarms) {
-        if (alarm.id != null) {
-          // 해당 알람의 가장 최근 이력 1개만 가져오기
-          final histories = await DatabaseService.instance.getAlarmHistoryByAlarmId(alarm.id!);
-          historyMap[alarm.id!] = histories.isNotEmpty ? histories.first : null;
+      // 1. 모든 알람 이력 가져오기
+      final allHistory = await DatabaseService.instance.getAllAlarmHistory();
+
+      // 2. 유니크 알람별로 그룹화 (날짜 + 시간 기준)
+      final Map<String, AlarmWithHistory> alarmMap = {};
+
+      for (var history in allHistory) {
+        final key = '${history.scheduledDate.year}-${history.scheduledDate.month}-${history.scheduledDate.day}_${history.scheduledTime}';
+
+        // 이미 존재하면 최신 이력으로 업데이트 (created_at DESC로 정렬되어 첫 번째가 최신)
+        if (!alarmMap.containsKey(key)) {
+          alarmMap[key] = AlarmWithHistory(
+            date: history.scheduledDate,
+            time: history.scheduledTime,
+            shiftType: history.shiftType,
+            latestHistory: history,
+            isFuture: history.scheduledDate.isAfter(DateTime(now.year, now.month, now.day)),
+          );
         }
       }
 
+      // 3. 미래 알람 가져오기 (아직 실행되지 않은 알람)
+      final futureAlarms = await DatabaseService.instance.getAllAlarms();
+
+      for (var alarm in futureAlarms) {
+        if (alarm.date != null) {
+          final key = '${alarm.date!.year}-${alarm.date!.month}-${alarm.date!.day}_${alarm.time ?? '00:00'}';
+
+          // 이미 이력이 있으면 건너뛰기 (이력이 우선)
+          if (!alarmMap.containsKey(key)) {
+            alarmMap[key] = AlarmWithHistory(
+              date: alarm.date!,
+              time: alarm.time ?? '00:00',
+              shiftType: alarm.shiftType,
+              latestHistory: null,
+              isFuture: alarm.date!.isAfter(DateTime(now.year, now.month, now.day)),
+            );
+          }
+        }
+      }
+
+      // 4. 날짜순 정렬
+      final sortedAlarms = alarmMap.values.toList();
+      sortedAlarms.sort((a, b) {
+        final dateCompare = a.date.compareTo(b.date);
+        if (dateCompare != 0) return dateCompare;
+        return a.time.compareTo(b.time);
+      });
+
       setState(() {
-        _alarms = alarms;
-        _historyMap = historyMap;
+        _alarmsWithHistory = sortedAlarms;
         _isLoading = false;
       });
     } catch (e) {
@@ -61,10 +111,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
     }
   }
 
-  String _formatDateTime(DateTime? date, String? time) {
-    if (date == null) return '날짜 없음';
-    final timeStr = time ?? '00:00';
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} $timeStr';
+  String _formatDateTime(DateTime date, String time) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} $time';
   }
 
   String _getHistoryText(AlarmHistory? history) {
@@ -74,14 +122,14 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       case 'swiped':
         return '알람 확인';
       case 'snoozed':
-        final count = history.snoozeCount ?? 0;
+        final count = history.snoozeCount;
         return count > 1 ? '알람 ${count}회 연장' : '알람 5분 연장';
       case 'timeout':
         return '알람 무응답';
       case 'ringing':
         return '울리는 중...';
       default:
-        return history.dismissType ?? '';
+        return history.dismissType;
     }
   }
 
@@ -114,7 +162,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : _alarms.isEmpty
+          : _alarmsWithHistory.isEmpty
               ? Center(
                   child: Padding(
                     padding: EdgeInsets.all(32.w),
@@ -140,14 +188,13 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                 )
               : ListView.builder(
                   padding: EdgeInsets.all(16.w),
-                  itemCount: _alarms.length,
+                  itemCount: _alarmsWithHistory.length,
                   itemBuilder: (context, index) {
-                    final alarm = _alarms[index];
-                    final history = alarm.id != null ? _historyMap[alarm.id!] : null;
+                    final alarmWithHistory = _alarmsWithHistory[index];
+                    final history = alarmWithHistory.latestHistory;
                     final historyText = _getHistoryText(history);
                     final historyColor = _getHistoryColor(history);
-                    final now = DateTime.now();
-                    final isFuture = alarm.date != null && alarm.date!.isAfter(now);
+                    final isFuture = alarmWithHistory.isFuture;
 
                     return Card(
                       margin: EdgeInsets.only(bottom: 12.h),
@@ -170,7 +217,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _formatDateTime(alarm.date, alarm.time),
+                                    _formatDateTime(alarmWithHistory.date, alarmWithHistory.time),
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
@@ -179,10 +226,10 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  if (alarm.shiftType != null) ...[
+                                  if (alarmWithHistory.shiftType != null) ...[
                                     SizedBox(height: 4.h),
                                     Text(
-                                      alarm.shiftType!,
+                                      alarmWithHistory.shiftType!,
                                       style: TextStyle(
                                         fontSize: 12.sp,
                                         color: Colors.grey.shade600,
