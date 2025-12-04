@@ -329,12 +329,12 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
             for (var team in _teams)
               _buildTeamRow(team, year, month, 12, 22, schedule, maxColumns: 11),
 
-            // ⭐ 세 번째 헤더 행: 23 | 24 | ... | 31 (9개, 하드코딩)
-            _buildDateHeaderRow(year, month, 23, 31, maxColumns: 11),
+            // ⭐ 세 번째 헤더 행: 23 | 24 | ... | lastDay (실제 마지막 날까지)
+            _buildDateHeaderRow(year, month, 23, lastDay, maxColumns: 11),
 
-            // ⭐ A~D조 23~31일 근무
+            // ⭐ A~D조 23~lastDay일 근무
             for (var team in _teams)
-              _buildTeamRow(team, year, month, 23, 31, schedule, maxColumns: 11),
+              _buildTeamRow(team, year, month, 23, lastDay, schedule, maxColumns: 11),
           ],
         ),
       ),
