@@ -2841,7 +2841,8 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                             });
                           },
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                            width: 50.w,
+                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 10.h),
                             decoration: BoxDecoration(
                               color: isUsedByOther
                                   ? Colors.grey.shade300
@@ -2854,13 +2855,30 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                                 width: isSelected ? 2 : 1,
                               ),
                             ),
-                            child: Text(
-                              shiftName,
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.bold,
-                                color: isSelected ? Colors.white : Colors.black,
-                              ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '$index',
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? Colors.white : Colors.red.shade700,
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  shiftName,
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected ? Colors.white : Colors.black,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                             ),
                           ),
                         );
