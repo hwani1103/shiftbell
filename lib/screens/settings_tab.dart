@@ -2287,7 +2287,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
     // 키보드 닫기
     FocusScope.of(context).unfocus();
 
-    if (_currentPage < 3) {
+    if (_currentPage < 2) {
       _pageController.nextPage(
         duration: Duration(milliseconds: 300),
         curve: Curves.easeInOut,
@@ -2412,12 +2412,12 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                 if (_currentPage > 0) SizedBox(width: 12.w),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: _canProceed() ? (_currentPage < 3 ? _nextPage : _complete) : null,
+                    onPressed: _canProceed() ? (_currentPage < 2 ? _nextPage : _complete) : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.purple,
                     ),
                     child: Text(
-                      _currentPage < 3 ? '다음' : '완료',
+                      _currentPage < 2 ? '다음' : '완료',
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -2779,7 +2779,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
     );
   }
 
-  // 3단계: 각 조 인덱스 입력
+  // 3단계: 각 조 근무 선택
   Widget _buildStep3_OffsetInput() {
     return SingleChildScrollView(
       physics: BouncingScrollPhysics(),
@@ -2796,40 +2796,12 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
           ),
           SizedBox(height: 8.h),
           Text(
-            '오늘 각 조가 아래 패턴의 몇 번째 근무인지 선택해주세요.',
+            '오늘 각 조가 교대근무 패턴의 어떤 근무인지 선택해주세요.',
             style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
           ),
           SizedBox(height: 16.h),
 
-          // 패턴 인덱스 표시
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: Colors.purple.shade50,
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: Colors.purple.shade200),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '교대 패턴 (숫자 = 인덱스)',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.purple.shade900,
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                _buildPatternCardsWithIndices(),
-              ],
-            ),
-          ),
-
-          SizedBox(height: 16.h),
-
-          // 각 조별 인덱스 입력
+          // 각 조별 근무 선택
           ..._teamNames.map((team) {
             final selectedIndex = _teamIndices[team];
             return Padding(
@@ -2845,18 +2817,19 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$team조 - 오늘 인덱스 선택',
+                      '$team조 - 오늘의 근무 선택',
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 8.h),
+                    SizedBox(height: 12.h),
                     Wrap(
                       spacing: 8.w,
                       runSpacing: 8.h,
                       children: List.generate(widget.pattern.length, (i) {
                         final index = i + 1;
+                        final shiftName = widget.pattern[i];
                         final isSelected = selectedIndex == index;
                         final isUsedByOther = _teamIndices.entries
                             .any((entry) => entry.key != team && entry.value == index);
@@ -2868,8 +2841,7 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                             });
                           },
                           child: Container(
-                            width: 40.w,
-                            height: 40.w,
+                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                             decoration: BoxDecoration(
                               color: isUsedByOther
                                   ? Colors.grey.shade300
@@ -2882,26 +2854,13 @@ class _AllTeamsSetupDialogState extends State<_AllTeamsSetupDialog> {
                                 width: isSelected ? 2 : 1,
                               ),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '$index',
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected ? Colors.white : Colors.red.shade700,
-                                  ),
-                                ),
-                                Text(
-                                  widget.pattern[i],
-                                  style: TextStyle(
-                                    fontSize: 8.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected ? Colors.white : Colors.black,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              shiftName,
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.bold,
+                                color: isSelected ? Colors.white : Colors.black,
+                              ),
                             ),
                           ),
                         );
