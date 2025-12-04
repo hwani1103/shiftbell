@@ -306,7 +306,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
         borderRadius: BorderRadius.circular(12.r),
         child: Table(
           border: TableBorder.all(
-            color: Colors.grey.shade300,
+            color: Colors.grey.shade500,
             width: 0.5,
           ),
           columnWidths: {
