@@ -485,7 +485,14 @@ class DatabaseService {
     await db.delete('alarms');
     print('🗑️ 모든 알람 삭제 완료');
   }
-  
+
+  // ⭐ 신규: 모든 알람 템플릿 삭제
+  Future<void> deleteAllAlarmTemplates() async {
+    final db = await database;
+    await db.delete('shift_alarm_templates');
+    print('🗑️ 모든 알람 템플릿 삭제 완료');
+  }
+
   Future<int> insertAlarmTemplate({
     required String shiftType,
     required String time,

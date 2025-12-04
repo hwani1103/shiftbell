@@ -129,18 +129,62 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
   Future<void> deleteAllAlarms() async {
     try {
       final alarms = await DatabaseService.instance.getAllAlarms();
-      
+
       for (var alarm in alarms) {
         await AlarmService().cancelAlarm(alarm.id!);
         print('✅ Native 알람 취소: DB ID ${alarm.id}');
       }
-      
+
       await DatabaseService.instance.deleteAllAlarms();
-      
+
       await _loadAlarms();
       print('🗑️ 모든 알람 삭제 완료');
     } catch (e) {
       print('❌ 알람 삭제 실패: $e');
+      rethrow;
+    }
+  }
+
+  // ⭐ Production용: 모든 알람 완전 삭제 (템플릿 포함)
+  Future<void> deleteAllAlarmsCompletely() async {
+    try {
+      // 1. 모든 알람 가져오기
+      final alarms = await DatabaseService.instance.getAllAlarms();
+
+      // 2. Native 알람 모두 취소
+      for (var alarm in alarms) {
+        if (alarm.id != null) {
+          await AlarmService().cancelAlarm(alarm.id!);
+          print('✅ Native 알람 취소: DB ID ${alarm.id}');
+        }
+      }
+
+      // 3. DB에서 모든 알람 삭제
+      await DatabaseService.instance.deleteAllAlarms();
+
+      // 4. ⭐ 모든 알람 템플릿 삭제 (갱신 방지)
+      await DatabaseService.instance.deleteAllAlarmTemplates();
+
+      // 5. Notification 모두 삭제
+      try {
+        await _platform.invokeMethod('cancelAllNotifications');
+        print('✅ 모든 Notification 삭제 완료');
+      } catch (e) {
+        print('⚠️ Notification 삭제 실패: $e');
+      }
+
+      // 6. AlarmGuardReceiver 취소
+      try {
+        await _platform.invokeMethod('cancelAlarmGuard');
+        print('✅ AlarmGuardReceiver 취소 완료');
+      } catch (e) {
+        print('⚠️ AlarmGuardReceiver 취소 실패: $e');
+      }
+
+      await _loadAlarms();
+      print('🗑️🔥 모든 알람 완전 삭제 완료 (템플릿 포함)');
+    } catch (e) {
+      print('❌ 알람 완전 삭제 실패: $e');
       rethrow;
     }
   }

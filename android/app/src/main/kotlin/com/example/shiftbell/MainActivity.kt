@@ -189,6 +189,28 @@ override fun onNewIntent(intent: Intent) {
     Log.d("MainActivity", "📢 Notification 삭제 (ID: 8888, 8889)")
     result.success(null)
 }
+                // ⭐ 모든 Notification 삭제
+                "cancelAllNotifications" -> {
+                    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    notificationManager.cancelAll()
+                    Log.d("MainActivity", "🗑️ 모든 Notification 삭제 완료")
+                    result.success(null)
+                }
+                // ⭐ AlarmGuardReceiver 취소
+                "cancelAlarmGuard" -> {
+                    val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    val intent = Intent(this, AlarmGuardReceiver::class.java)
+                    val pendingIntent = PendingIntent.getBroadcast(
+                        this,
+                        999999, // AlarmGuardReceiver의 고유 ID
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    alarmManager.cancel(pendingIntent)
+                    pendingIntent.cancel()
+                    Log.d("MainActivity", "🗑️ AlarmGuardReceiver 취소 완료")
+                    result.success(null)
+                }
                 // ⭐ Overlay 종료 (외부에서 알람 끄기)
                 "dismissOverlay" -> {
                     val alarmId = call.argument<Int>("alarmId") ?: -1

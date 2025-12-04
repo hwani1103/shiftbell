@@ -285,6 +285,24 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     }
   }
 
+  Widget _buildDeleteItem(String text) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4.h),
+      child: Row(
+        children: [
+          Icon(Icons.check_circle_outline, size: 16.sp, color: Colors.red.shade700),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _showAlarmTypeDialog() async {
     final alarmTypes = await DatabaseService.instance.getAllAlarmTypes();
 
@@ -476,6 +494,134 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                     MaterialPageRoute(builder: (context) => AllAlarmsHistoryView()),
                   );
                 },
+              ),
+
+              SizedBox(height: 16.h),
+
+              // ⭐ 모든 알람 완전 삭제 (위급 상황용)
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.red.shade300, width: 2),
+                ),
+                child: ListTile(
+                  leading: Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 32.sp),
+                  title: Text(
+                    '모든 알람 완전 삭제',
+                    style: TextStyle(
+                      color: Colors.red.shade900,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15.sp,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '⚠️ 위급 상황 전용: 모든 알람과 템플릿이 영구 삭제됩니다.\n정상 이용을 위해서는 다시 알람을 설정해야 합니다.',
+                    style: TextStyle(
+                      color: Colors.red.shade700,
+                      fontSize: 12.sp,
+                      height: 1.4,
+                    ),
+                  ),
+                  trailing: Icon(Icons.delete_forever, color: Colors.red.shade700, size: 28.sp),
+                  onTap: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        backgroundColor: Colors.red.shade50,
+                        title: Row(
+                          children: [
+                            Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 28.sp),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                '모든 알람 완전 삭제',
+                                style: TextStyle(color: Colors.red.shade900, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '이 작업은 되돌릴 수 없습니다!',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red.shade900,
+                              ),
+                            ),
+                            SizedBox(height: 12.h),
+                            Text(
+                              '다음 항목이 모두 삭제됩니다:',
+                              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+                            ),
+                            SizedBox(height: 8.h),
+                            _buildDeleteItem('📱 등록된 모든 알람 (DB + Native)'),
+                            _buildDeleteItem('🔔 모든 알람 Notification'),
+                            _buildDeleteItem('📋 모든 알람 템플릿'),
+                            _buildDeleteItem('⏰ 알람 갱신 프로세스 중단'),
+                            SizedBox(height: 12.h),
+                            Container(
+                              padding: EdgeInsets.all(12.w),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade50,
+                                borderRadius: BorderRadius.circular(8.r),
+                                border: Border.all(color: Colors.amber.shade300),
+                              ),
+                              child: Text(
+                                '⚠️ 정상 이용을 위해서는 다시 알람을 설정해야 합니다.',
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  color: Colors.amber.shade900,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text('취소'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red.shade700,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: Text('완전 삭제', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirm == true) {
+                      try {
+                        await ref.read(alarmNotifierProvider.notifier).deleteAllAlarmsCompletely();
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('🗑️🔥 모든 알람이 완전히 삭제되었습니다'),
+                              backgroundColor: Colors.red.shade700,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('❌ 삭제 실패: $e')),
+                          );
+                        }
+                      }
+                    }
+                  },
+                ),
               ),
 
               SizedBox(height: 24.h),

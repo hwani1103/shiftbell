@@ -111,13 +111,6 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: _loadData,
-            tooltip: '새로고침',
-          ),
-        ],
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
