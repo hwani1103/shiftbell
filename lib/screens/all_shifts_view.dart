@@ -302,13 +302,11 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12.r),
-        child: Table(
-          border: TableBorder.all(
-            color: Colors.grey.shade500,
-            width: 0.5,
-          ),
+      child: Table(
+        border: TableBorder.all(
+          color: Colors.grey.shade500,
+          width: 0.5,
+        ),
           columnWidths: {
             0: FixedColumnWidth(22.w), // 조 이름 열 너비 (더 축소)
             // 나머지 열들은 균등 분배 (최대 11개)
