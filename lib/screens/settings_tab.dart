@@ -27,7 +27,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('스케줄 초기화'),
-        content: Text('교대 스케줄과 알람을 모두 초기화할까요?'),
+        content: Text('교대 스케줄과 알람을 모두 초기화할까요?\n(전체 교대조 근무표도 초기화됩니다.)'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -50,6 +50,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       }
 
       await ref.read(scheduleProvider.notifier).resetSchedule();
+
+      // ⭐ 전체 교대조 근무표 데이터 초기화
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('all_teams_names');
+      await prefs.remove('all_teams_indices');
+      print('✅ 전체 교대조 근무표 데이터 초기화 완료');
 
       if (mounted) {
         Navigator.of(context).pushReplacement(
