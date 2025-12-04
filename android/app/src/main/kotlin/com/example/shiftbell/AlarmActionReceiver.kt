@@ -136,14 +136,14 @@ class AlarmActionReceiver : BroadcastReceiver() {
     
     private fun cancelAlarm(context: Context, alarmId: Int, label: String, soundType: String) {
     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    
+
     val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
         data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
         putExtra(CustomAlarmReceiver.EXTRA_ID, alarmId)
         putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
         putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, soundType)
     }
-    
+
     val pendingIntent = PendingIntent.getBroadcast(
         context,
         alarmId,
@@ -151,12 +151,56 @@ class AlarmActionReceiver : BroadcastReceiver() {
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
     alarmManager.cancel(pendingIntent)
-    
+
     Log.d("AlarmAction", "✅ Native 알람 취소 완료: ID=$alarmId")
-    
+
     try {
         val dbHelper = DatabaseHelper.getInstance(context)
         val db = dbHelper.writableDatabase
+
+        // ⭐ 알람 정보 읽어오기 (alarm_history에 기록하기 위해)
+        var scheduledDate = ""
+        var scheduledTime = ""
+        var shiftType = label
+
+        val cursor = db.query(
+            "alarms",
+            arrayOf("date", "time", "shift_type"),
+            "id = ?",
+            arrayOf(alarmId.toString()),
+            null, null, null
+        )
+
+        if (cursor.moveToFirst()) {
+            scheduledDate = cursor.getString(cursor.getColumnIndexOrThrow("date")) ?: ""
+            scheduledTime = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
+            shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: label
+        }
+        cursor.close()
+
+        // ⭐ alarm_history에 '알람 울기 전 취소' 기록 추가
+        if (scheduledDate.isNotEmpty()) {
+            val historyValues = android.content.ContentValues().apply {
+                put("alarm_id", alarmId)
+                put("scheduled_time", scheduledTime)
+                put("scheduled_date", scheduledDate)
+                put("actual_ring_time", java.text.SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss",
+                    java.util.Locale.getDefault()
+                ).format(java.util.Date()))
+                put("dismiss_type", "cancelled_before_ring")
+                put("snooze_count", 0)
+                put("shift_type", shiftType)
+                put("created_at", java.text.SimpleDateFormat(
+                    "yyyy-MM-dd'T'HH:mm:ss",
+                    java.util.Locale.getDefault()
+                ).format(java.util.Date()))
+            }
+            db.insert("alarm_history", null, historyValues)
+            Log.d("AlarmAction", "✅ alarm_history에 '알람 울기 전 취소' 기록 추가")
+        }
+
+        // ⭐ 알람 삭제
         db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
         db.close()
         Log.d("AlarmAction", "✅ DB 알람 삭제 완료: ID=$alarmId")
@@ -171,7 +215,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
         val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
         context.sendBroadcast(guardIntent)
         Log.d("AlarmAction", "✅ AlarmGuardReceiver 즉시 재실행")
-        
+
     } catch (e: Exception) {
         Log.e("AlarmAction", "❌ DB 삭제 실패", e)
     }
