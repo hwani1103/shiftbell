@@ -112,7 +112,16 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
   }
 
   String _formatDateTime(DateTime date, String time) {
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} $time';
+    // 요일 한글 변환
+    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    final weekday = weekdays[date.weekday - 1]; // weekday는 1(월)~7(일)
+
+    // YY/MM/DD (요일) 형식
+    final year = date.year.toString().substring(2); // 2025 -> 25
+    final month = date.month.toString().padLeft(2, '0');
+    final day = date.day.toString().padLeft(2, '0');
+
+    return '$year/$month/$day ($weekday) $time';
   }
 
   String _getHistoryText(AlarmHistory? history) {
