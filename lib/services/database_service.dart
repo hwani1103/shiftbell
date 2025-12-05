@@ -896,4 +896,16 @@ Future<void> deleteOldAlarmHistory() async {
   }
 }
 
+// ⭐ 테스트용: 모든 알람 이력 삭제
+Future<void> deleteAllAlarmHistory() async {
+  try {
+    final db = await database;
+    final deletedCount = await db.delete('alarm_history');
+    print('🗑️ 모든 알람 이력 ${deletedCount}개 삭제 완료 (테스트)');
+  } catch (e) {
+    print('⚠️ 알람 이력 전체 삭제 실패: $e');
+    rethrow;
+  }
+}
+
 }

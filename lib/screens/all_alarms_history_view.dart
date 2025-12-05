@@ -158,6 +158,64 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
     }
   }
 
+  Future<void> _deleteAllHistory() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('전체 이력 삭제'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '⚠️ 테스트 전용 기능',
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.red.shade700,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Text('모든 알람 이력이 삭제됩니다.'),
+            SizedBox(height: 8.h),
+            Text('이 작업은 되돌릴 수 없습니다.'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(
+              '삭제',
+              style: TextStyle(color: Colors.red.shade700),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await DatabaseService.instance.deleteAllAlarmHistory();
+        await _loadData();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('🗑️ 모든 알람 이력이 삭제되었습니다')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('❌ 이력 삭제 실패: $e')),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,6 +225,13 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.delete_sweep, color: Colors.red.shade700),
+            tooltip: '전체 이력 삭제 (테스트용)',
+            onPressed: _deleteAllHistory,
+          ),
+        ],
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
