@@ -113,12 +113,47 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   }
 
   Future<void> resetSchedule() async {
-    final db = await DatabaseService.instance.database;
-    await db.delete('shift_schedule');
-    await db.delete('alarms');
-    await db.delete('shift_alarm_templates');
-    
-    state = const AsyncValue.data(null);
+    try {
+      // 1. 모든 알람 가져오기
+      final alarms = await DatabaseService.instance.getAllAlarms();
+
+      // 2. Native 알람 모두 취소
+      for (var alarm in alarms) {
+        if (alarm.id != null) {
+          await AlarmService().cancelAlarm(alarm.id!);
+          print('✅ Native 알람 취소: DB ID ${alarm.id}');
+        }
+      }
+
+      // 3. 모든 Notification 삭제
+      const platform = MethodChannel('com.example.shiftbell/alarm');
+      try {
+        await platform.invokeMethod('cancelAllNotifications');
+        print('✅ 모든 Notification 삭제 완료');
+      } catch (e) {
+        print('⚠️ Notification 삭제 실패: $e');
+      }
+
+      // 4. AlarmGuardReceiver 취소
+      try {
+        await platform.invokeMethod('cancelAlarmGuard');
+        print('✅ AlarmGuardReceiver 취소 완료');
+      } catch (e) {
+        print('⚠️ AlarmGuardReceiver 취소 실패: $e');
+      }
+
+      // 5. DB 삭제
+      final db = await DatabaseService.instance.database;
+      await db.delete('shift_schedule');
+      await db.delete('alarms');
+      await db.delete('shift_alarm_templates');
+
+      state = const AsyncValue.data(null);
+      print('🗑️ 교대근무 초기화 완료');
+    } catch (e) {
+      print('❌ 교대근무 초기화 실패: $e');
+      rethrow;
+    }
   }
 
   Future<void> refresh() async {

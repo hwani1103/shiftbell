@@ -59,7 +59,15 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
     try {
       await DatabaseService.instance.deleteAlarm(id);
       await AlarmService().cancelAlarm(id);
-      
+
+      // ⭐ Notification 삭제 (8888, 8889)
+      try {
+        await _platform.invokeMethod('cancelNotification');
+        print('✅ Notification 삭제 완료 (8888, 8889)');
+      } catch (e) {
+        print('⚠️ Notification 삭제 실패: $e');
+      }
+
       await _loadAlarms();
       print('✅ 알람 삭제 완료 (ID: $id)');
     } catch (e) {
@@ -136,6 +144,14 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
       }
 
       await DatabaseService.instance.deleteAllAlarms();
+
+      // ⭐ 모든 Notification 삭제
+      try {
+        await _platform.invokeMethod('cancelAllNotifications');
+        print('✅ 모든 Notification 삭제 완료');
+      } catch (e) {
+        print('⚠️ Notification 삭제 실패: $e');
+      }
 
       await _loadAlarms();
       print('🗑️ 모든 알람 삭제 완료');
