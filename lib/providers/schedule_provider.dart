@@ -142,10 +142,11 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
         print('⚠️ AlarmGuardReceiver 취소 실패: $e');
       }
 
-      // 5. DB 삭제
+      // 5. DB 삭제 (알람은 이력 기록 후 삭제)
+      await DatabaseService.instance.deleteAllAlarms();  // ⭐ 이력에 'deleted_by_user' 기록
+
       final db = await DatabaseService.instance.database;
       await db.delete('shift_schedule');
-      await db.delete('alarms');
       await db.delete('shift_alarm_templates');
 
       state = const AsyncValue.data(null);
