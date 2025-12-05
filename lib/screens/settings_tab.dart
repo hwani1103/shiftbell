@@ -1250,6 +1250,11 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     {'id': 'default', 'name': '기본알람음', 'file': 'default'},
     {'id': 'alarmbell1', 'name': '알람벨 1', 'file': 'alarmbell1.mp3'},
     {'id': 'alarmbell2', 'name': '알람벨 2', 'file': 'alarmbell2.mp3'},
+    {'id': 'alarmbell3', 'name': '알람벨 3', 'file': 'alarmbell3.mp3'},
+    {'id': 'alarmbell4', 'name': '알람벨 4', 'file': 'alarmbell4.mp3'},
+    {'id': 'alarmbell5', 'name': '알람벨 5', 'file': 'alarmbell5.mp3'},
+    {'id': 'alarmbell6', 'name': '알람벨 6', 'file': 'alarmbell6.mp3'},
+    {'id': 'alarmbell7', 'name': '알람벨 7', 'file': 'alarmbell7.mp3'},
   ];
 
   // ⭐ 소리 미리듣기 재생 (Native STREAM_ALARM 사용 - 실제 알람과 동일 음량)
