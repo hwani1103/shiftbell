@@ -49,8 +49,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  assets:
-    - assets/sounds/
+  # assets:
+  #   - assets/sounds/  # 제거: res/raw만 사용
 
 # 앱 아이콘 (나중에 설정)
 # flutter_launcher_icons:
