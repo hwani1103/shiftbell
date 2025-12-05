@@ -14,26 +14,29 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
     
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("AlarmRefresh", "========== 자정 갱신 시작 ==========")
-        
+
         try {
             // 1. 스케줄 체크 (규칙적인지 확인)
             if (!isRegularSchedule(context)) {
                 Log.d("AlarmRefresh", "⏭️ 불규칙 스케줄 - 갱신 스킵")
                 return
             }
-            
+
             // 2. 기존 알람 전부 삭제
             deleteAllAlarms(context)
-            
+
             // 3. 10일치 알람 재생성
             generate10DaysAlarms(context)
-            
-            // 4. 갱신 완료 표시 (Flutter용)
+
+            // 4. ⭐ 10일 이상 지난 알람 이력 삭제
+            deleteOldAlarmHistory(context)
+
+            // 5. 갱신 완료 표시 (Flutter용)
             markRefreshed(context)
-            
-            // 5. Flutter UI 갱신 트리거 (앱 켜져있으면)
+
+            // 6. Flutter UI 갱신 트리거 (앱 켜져있으면)
             notifyFlutter(context)
-            
+
             Log.d("AlarmRefresh", "========== 자정 갱신 완료 ==========")
         } catch (e: Exception) {
             Log.e("AlarmRefresh", "========== 갱신 실패 ==========", e)
@@ -274,6 +277,34 @@ private fun markRefreshed(context: Context) {
             Log.d("AlarmRefresh", "📢 Flutter 갱신 트리거")
         } catch (e: Exception) {
             Log.e("AlarmRefresh", "Flutter 알림 실패", e)
+        }
+    }
+
+    // ⭐ 10일 이상 지난 알람 이력 삭제
+    private fun deleteOldAlarmHistory(context: Context) {
+        try {
+            val dbHelper = DatabaseHelper.getInstance(context)
+            val db = dbHelper.writableDatabase
+
+            // 10일 전 날짜 계산
+            val calendar = Calendar.getInstance()
+            calendar.add(Calendar.DAY_OF_YEAR, -10)
+            val cutoffDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(calendar.time)
+
+            // 10일 이상 지난 이력 삭제
+            val deletedCount = db.delete(
+                "alarm_history",
+                "created_at < ?",
+                arrayOf(cutoffDate)
+            )
+
+            db.close()
+
+            if (deletedCount > 0) {
+                Log.d("AlarmRefresh", "🗑️ 10일 이상 지난 알람 이력 ${deletedCount}개 삭제 완료")
+            }
+        } catch (e: Exception) {
+            Log.e("AlarmRefresh", "⚠️ 오래된 알람 이력 삭제 실패", e)
         }
     }
 }

@@ -872,4 +872,28 @@ Future<void> reorderMemos(String date, List<int> memoIds) async {
   print('✅ 메모 순서 변경 완료');
 }
 
+// ⭐ 10일 이상 지난 알람 이력 자동 삭제
+Future<void> deleteOldAlarmHistory() async {
+  try {
+    final db = await database;
+
+    // 10일 전 날짜 계산
+    final cutoffDate = DateTime.now().subtract(Duration(days: 10));
+    final cutoffDateStr = cutoffDate.toIso8601String();
+
+    // 10일 이상 지난 이력 삭제
+    final deletedCount = await db.delete(
+      'alarm_history',
+      where: 'created_at < ?',
+      whereArgs: [cutoffDateStr],
+    );
+
+    if (deletedCount > 0) {
+      print('🗑️ 10일 이상 지난 알람 이력 ${deletedCount}개 삭제 완료');
+    }
+  } catch (e) {
+    print('⚠️ 오래된 알람 이력 삭제 실패: $e');
+  }
+}
+
 }

@@ -19,7 +19,10 @@ void main() async {
   await initializeDateFormatting('ko_KR', null);
   await DatabaseService.instance.database;
   await AlarmService().initialize();
-  
+
+  // ⭐ 10일 이상 지난 알람 이력 자동 삭제
+  await DatabaseService.instance.deleteOldAlarmHistory();
+
   ShiftSchedule? schedule;
   try {
     schedule = await DatabaseService.instance.getShiftSchedule();
@@ -27,7 +30,7 @@ void main() async {
     print('⚠️ 스케줄 로드 실패 (첫 실행): $e');
     schedule = null;
   }
-  
+
   runApp(
     ProviderScope(
       child: MyApp(showOnboarding: schedule == null),
