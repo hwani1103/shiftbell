@@ -190,6 +190,9 @@ class AlarmOverlayService : Service() {
         // 알람 소리 중지
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
+        // ⭐ CRITICAL FIX: Native 알람 취소 (유령 알람 방지!)
+        cancelNativeAlarm()
+
         // DB에서 알람 삭제
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
@@ -216,10 +219,12 @@ class AlarmOverlayService : Service() {
         // shownNotifications에서 제거
         AlarmGuardReceiver.removeShownNotification(alarmId)
 
-        // ⭐ 8888 Notification 삭제 (타임아웃은 8889 안 보여줌)
+        // ⭐ Notification 삭제 (7777: 제어, 8888: 20분전, 8889: 스누즈/타임아웃)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(7777)
         notificationManager.cancel(8888)
-        Log.d("AlarmOverlay", "🗑️ 8888 Notification 삭제 (타임아웃)")
+        notificationManager.cancel(8889)
+        Log.d("AlarmOverlay", "🗑️ Notification 삭제 (7777, 8888, 8889)")
 
         // 갱신 체크
         AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
@@ -348,6 +353,9 @@ class AlarmOverlayService : Service() {
     // 알람 소리 중지
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
+    // ⭐ CRITICAL FIX: Native 알람 취소 (유령 알람 방지!)
+    cancelNativeAlarm()
+
     // ⭐ DB 작업 통합 (한 번에 처리)
     try {
         val dbHelper = DatabaseHelper.getInstance(applicationContext)
@@ -375,12 +383,13 @@ class AlarmOverlayService : Service() {
         Log.e("AlarmOverlay", "❌ DB 작업 실패", e)
     }
 
-    // Notification 삭제 (8888: 20분전, 8889: 스누즈/타임아웃)
+    // ⭐ Notification 삭제 (7777: 제어, 8888: 20분전, 8889: 스누즈/타임아웃)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)
+    notificationManager.cancel(7777)
     notificationManager.cancel(8888)
     notificationManager.cancel(8889)
-    Log.d("AlarmOverlay", "📢 Notification 삭제 (8888, 8889)")
+    Log.d("AlarmOverlay", "📢 Notification 삭제 (7777, 8888, 8889)")
 
     // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
     AlarmGuardReceiver.removeShownNotification(alarmId)
@@ -540,7 +549,28 @@ class AlarmOverlayService : Service() {
             Log.e("AlarmOverlay", "❌ Overlay 제거 실패", e)
         }
     }
-    
+
+    // ⭐ CRITICAL FIX: Native 알람 취소 (유령 알람 방지!)
+    private fun cancelNativeAlarm() {
+        try {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+            val intent = Intent(this, CustomAlarmReceiver::class.java).apply {
+                data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
+            }
+            val pendingIntent = android.app.PendingIntent.getBroadcast(
+                this,
+                alarmId,
+                intent,
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            )
+            alarmManager.cancel(pendingIntent)
+            pendingIntent.cancel()
+            Log.d("AlarmOverlay", "✅ Native 알람 취소: ID=$alarmId")
+        } catch (e: Exception) {
+            Log.e("AlarmOverlay", "❌ Native 알람 취소 실패", e)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         cancelTimeoutTimer()

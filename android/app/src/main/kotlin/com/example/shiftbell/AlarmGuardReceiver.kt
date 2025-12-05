@@ -24,6 +24,12 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             Log.d("AlarmGuardReceiver", "🗑️ Notification 이력 제거: ID=$alarmId")
         }
 
+        // ⭐ Flutter 경로에서 알람 삭제 시 전체 초기화 (유령 Notification 방지)
+        fun clearAllShownNotifications() {
+            shownNotifications.clear()
+            Log.d("AlarmGuardReceiver", "🗑️ shownNotifications 전체 초기화")
+        }
+
         // ⭐ 직접 호출용 정적 메서드 (sendBroadcast 없이도 동작)
         fun triggerCheck(context: Context) {
             Log.d("AlarmGuardReceiver", "⏰ 직접 트리거")

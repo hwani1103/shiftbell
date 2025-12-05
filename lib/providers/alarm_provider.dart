@@ -68,6 +68,14 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
         print('⚠️ Notification 삭제 실패: $e');
       }
 
+      // ⭐ CRITICAL FIX: shownNotifications 정리 (유령 Notification 방지)
+      try {
+        await _platform.invokeMethod('clearShownNotifications');
+        print('✅ shownNotifications 정리 완료');
+      } catch (e) {
+        print('⚠️ shownNotifications 정리 실패: $e');
+      }
+
       await _loadAlarms();
       print('✅ 알람 삭제 완료 (ID: $id)');
     } catch (e) {
@@ -153,6 +161,22 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
         print('⚠️ Notification 삭제 실패: $e');
       }
 
+      // ⭐ CRITICAL FIX: shownNotifications 정리 (유령 Notification 방지)
+      try {
+        await _platform.invokeMethod('clearShownNotifications');
+        print('✅ shownNotifications 정리 완료');
+      } catch (e) {
+        print('⚠️ shownNotifications 정리 실패: $e');
+      }
+
+      // ⭐ HIGH FIX: AlarmGuardReceiver 트리거 (다음 웨이크업 스케줄링)
+      try {
+        await _platform.invokeMethod('triggerGuardCheck');
+        print('✅ AlarmGuardReceiver 트리거 완료');
+      } catch (e) {
+        print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
+      }
+
       await _loadAlarms();
       print('🗑️ 모든 알람 삭제 완료');
     } catch (e) {
@@ -187,6 +211,14 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
         print('✅ 모든 Notification 삭제 완료');
       } catch (e) {
         print('⚠️ Notification 삭제 실패: $e');
+      }
+
+      // 5-1. ⭐ CRITICAL FIX: shownNotifications 정리 (유령 Notification 방지)
+      try {
+        await _platform.invokeMethod('clearShownNotifications');
+        print('✅ shownNotifications 정리 완료');
+      } catch (e) {
+        print('⚠️ shownNotifications 정리 실패: $e');
       }
 
       // 6. AlarmGuardReceiver 취소

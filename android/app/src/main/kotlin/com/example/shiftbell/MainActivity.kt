@@ -196,6 +196,12 @@ override fun onNewIntent(intent: Intent) {
                     Log.d("MainActivity", "🗑️ 모든 Notification 삭제 완료")
                     result.success(null)
                 }
+                // ⭐ shownNotifications 전체 초기화 (유령 Notification 방지)
+                "clearShownNotifications" -> {
+                    AlarmGuardReceiver.clearAllShownNotifications()
+                    Log.d("MainActivity", "🗑️ shownNotifications 전체 초기화 완료")
+                    result.success(null)
+                }
                 // ⭐ AlarmGuardReceiver 취소
                 "cancelAlarmGuard" -> {
                     val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager

@@ -134,6 +134,14 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
         print('⚠️ Notification 삭제 실패: $e');
       }
 
+      // 3-1. ⭐ CRITICAL FIX: shownNotifications 정리 (유령 Notification 방지)
+      try {
+        await platform.invokeMethod('clearShownNotifications');
+        print('✅ shownNotifications 정리 완료');
+      } catch (e) {
+        print('⚠️ shownNotifications 정리 실패: $e');
+      }
+
       // 4. AlarmGuardReceiver 취소
       try {
         await platform.invokeMethod('cancelAlarmGuard');

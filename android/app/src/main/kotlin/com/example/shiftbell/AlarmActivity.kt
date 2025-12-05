@@ -130,6 +130,9 @@ private fun timeoutAlarm() {
     // 알람 소리 중지
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
+    // ⭐ CRITICAL FIX: Native 알람 취소 (유령 알람 방지!)
+    cancelNativeAlarm()
+
     // ⭐ DB에서 알람 삭제
     try {
         val dbHelper = DatabaseHelper.getInstance(applicationContext)
@@ -152,11 +155,12 @@ private fun timeoutAlarm() {
     // shownNotifications에서 제거
     AlarmGuardReceiver.removeShownNotification(alarmId)
 
-    // ⭐ Notification 삭제 (7777: 제어, 8888: 20분전)
+    // ⭐ Notification 삭제 (7777: 제어, 8888: 20분전, 8889: 스누즈/타임아웃)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(7777)
     notificationManager.cancel(8888)
-    Log.d("AlarmActivity", "🗑️ Notification 삭제 (7777, 8888)")
+    notificationManager.cancel(8889)
+    Log.d("AlarmActivity", "🗑️ Notification 삭제 (7777, 8888, 8889)")
 
     // 갱신 체크
     AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
@@ -248,6 +252,9 @@ private fun dismissAlarm() {
 
     // ⭐ Overlay 서비스도 종료
     stopOverlayService()
+
+    // ⭐ CRITICAL FIX: Native 알람 취소 (유령 알람 방지!)
+    cancelNativeAlarm()
 
     // DB에서 알람 삭제
     try {
@@ -552,5 +559,26 @@ private fun dismissAlarm() {
             timeoutHandler?.removeCallbacks(it)
         }
         Log.d("AlarmActivity", "⏱️ 타임아웃 타이머 취소")
+    }
+
+    // ⭐ CRITICAL FIX: Native 알람 취소 (유령 알람 방지!)
+    private fun cancelNativeAlarm() {
+        try {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val intent = Intent(this, CustomAlarmReceiver::class.java).apply {
+                data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
+            }
+            val pendingIntent = PendingIntent.getBroadcast(
+                this,
+                alarmId,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            alarmManager.cancel(pendingIntent)
+            pendingIntent.cancel()
+            Log.d("AlarmActivity", "✅ Native 알람 취소: ID=$alarmId")
+        } catch (e: Exception) {
+            Log.e("AlarmActivity", "❌ Native 알람 취소 실패", e)
+        }
     }
 }
