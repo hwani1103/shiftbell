@@ -435,6 +435,41 @@ class DatabaseService {
   
   Future<int> deleteAlarm(int id) async {
     final db = await database;
+
+    // ⭐ 이력 기록: 알람 정보 먼저 읽기
+    try {
+      final alarmMaps = await db.query(
+        'alarms',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      if (alarmMaps.isNotEmpty) {
+        final alarmMap = alarmMaps.first;
+        final scheduledDate = alarmMap['date'] as String?;
+        final scheduledTime = alarmMap['time'] as String?;
+        final shiftType = alarmMap['shift_type'] as String?;
+
+        // alarm_history에 '사용자 삭제' 기록 추가
+        if (scheduledDate != null && scheduledTime != null) {
+          await db.insert('alarm_history', {
+            'alarm_id': id,
+            'scheduled_time': scheduledTime,
+            'scheduled_date': scheduledDate,
+            'actual_ring_time': DateTime.now().toIso8601String(),
+            'dismiss_type': 'deleted_by_user',
+            'snooze_count': 0,
+            'shift_type': shiftType,
+            'created_at': DateTime.now().toIso8601String(),
+          });
+          print('✅ alarm_history에 "사용자 삭제" 기록 추가: ID=$id');
+        }
+      }
+    } catch (e) {
+      print('⚠️ 알람 이력 기록 실패: $e');
+    }
+
+    // 알람 삭제
     return await db.delete(
       'alarms',
       where: 'id = ?',
@@ -482,6 +517,31 @@ class DatabaseService {
 
   Future<void> deleteAllAlarms() async {
     final db = await database;
+
+    // ⭐ 이력 기록: 모든 알람 정보 먼저 읽기
+    try {
+      final alarms = await getAllAlarms();
+
+      for (var alarm in alarms) {
+        if (alarm.id != null && alarm.date != null && alarm.time != null) {
+          await db.insert('alarm_history', {
+            'alarm_id': alarm.id!,
+            'scheduled_time': alarm.time!,
+            'scheduled_date': alarm.date!.toIso8601String(),
+            'actual_ring_time': DateTime.now().toIso8601String(),
+            'dismiss_type': 'deleted_by_user',
+            'snooze_count': 0,
+            'shift_type': alarm.shiftType,
+            'created_at': DateTime.now().toIso8601String(),
+          });
+        }
+      }
+      print('✅ ${alarms.length}개 알람 이력 기록 완료');
+    } catch (e) {
+      print('⚠️ 알람 이력 기록 실패: $e');
+    }
+
+    // 모든 알람 삭제
     await db.delete('alarms');
     print('🗑️ 모든 알람 삭제 완료');
   }

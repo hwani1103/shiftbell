@@ -130,6 +130,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         return '울리는 중...';
       case 'cancelled_before_ring':
         return '울기 전 제거';
+      case 'deleted_by_user':
+        return '알람 삭제됨';
       default:
         return history.dismissType;
     }
@@ -149,6 +151,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         return Colors.blue.shade600;
       case 'cancelled_before_ring':
         return Colors.purple.shade600;
+      case 'deleted_by_user':
+        return Colors.brown.shade600;
       default:
         return Colors.grey.shade600;
     }

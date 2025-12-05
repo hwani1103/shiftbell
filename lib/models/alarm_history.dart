@@ -58,6 +58,8 @@ class AlarmHistory {
         return '울리는 중...';
       case 'cancelled_before_ring':
         return '울기 전 제거';
+      case 'deleted_by_user':
+        return '사용자가 삭제';
       default:
         return dismissType;
     }
