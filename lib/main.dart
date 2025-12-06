@@ -10,9 +10,13 @@ import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
+import 'screens/splash_screen.dart';  // ⭐ 추가
+import 'screens/permission_intro_screen.dart';  // ⭐ 추가
+import 'widgets/permission_warning_banner.dart';  // ⭐ 추가
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';  // ⭐ 추가
 import '../models/shift_schedule.dart';
-import 'providers/alarm_provider.dart';  // ⭐ 추가!
+import 'providers/alarm_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,25 +27,15 @@ void main() async {
   // ⭐ 10일 이상 지난 알람 이력 자동 삭제
   await DatabaseService.instance.deleteOldAlarmHistory();
 
-  ShiftSchedule? schedule;
-  try {
-    schedule = await DatabaseService.instance.getShiftSchedule();
-  } catch (e) {
-    print('⚠️ 스케줄 로드 실패 (첫 실행): $e');
-    schedule = null;
-  }
-
   runApp(
-    ProviderScope(
-      child: MyApp(showOnboarding: schedule == null),
+    const ProviderScope(
+      child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  final bool showOnboarding;
-  
-  const MyApp({super.key, required this.showOnboarding});
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -125,9 +119,12 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
               ),
             );
           },
-          home: widget.showOnboarding ? OnboardingScreen() : MainScreen(),
+          home: const SplashScreen(),
           routes: {
-            '/home': (context) => MainScreen(),
+            '/splash': (context) => const SplashScreen(),
+            '/permission_intro': (context) => const PermissionIntroScreen(),
+            '/onboarding': (context) => const OnboardingScreen(),
+            '/home': (context) => const MainScreen(),
           },
         );
       },
@@ -236,7 +233,16 @@ Future<void> _handleMethod(MethodCall call) async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _tabs[_currentIndex],
+      body: Column(
+        children: [
+          // ⭐ 권한 경고 배너
+          const PermissionWarningBanner(),
+          // 탭 화면
+          Expanded(
+            child: _tabs[_currentIndex],
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
