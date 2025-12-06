@@ -45,45 +45,47 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
     
     // 규칙적 스케줄인지 확인
     private fun isRegularSchedule(context: Context): Boolean {
-        try {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
+        return try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.readableDatabase
-            
-            val cursor = db.query("shift_schedule", null, null, null, null, null, null, "1")
-            
+            db = dbHelper.readableDatabase
+
+            cursor = db.query("shift_schedule", null, null, null, null, null, null, "1")
+
             if (!cursor.moveToFirst()) {
-                cursor.close()
-                db.close()
                 return false
             }
-            
-            val isRegular = cursor.getInt(cursor.getColumnIndexOrThrow("is_regular")) == 1
-            cursor.close()
-            db.close()
-            
-            return isRegular
+
+            cursor.getInt(cursor.getColumnIndexOrThrow("is_regular")) == 1
         } catch (e: Exception) {
             Log.e("AlarmRefresh", "스케줄 조회 실패", e)
-            return false
+            false
+        } finally {
+            cursor?.close()
+            db?.close()
         }
     }
     
     // 기존 알람 전부 삭제
     private fun deleteAllAlarms(context: Context) {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.writableDatabase
-            
+            db = dbHelper.writableDatabase
+
             // DB에서 모든 알람 조회
-            val cursor = db.query("alarms", null, null, null, null, null, null)
+            cursor = db.query("alarms", null, null, null, null, null, null)
             val alarmIds = mutableListOf<Int>()
-            
+
             while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 alarmIds.add(id)
             }
-            cursor.close()
-            
+
             // Native 알람 취소
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             for (id in alarmIds) {
@@ -98,58 +100,59 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
                 )
                 alarmManager.cancel(pendingIntent)
             }
-            
+
             // DB에서 삭제
             db.delete("alarms", null, null)
-            db.close()
-            
+
             Log.d("AlarmRefresh", "🗑️ 기존 알람 ${alarmIds.size}개 삭제 완료")
         } catch (e: Exception) {
             Log.e("AlarmRefresh", "알람 삭제 실패", e)
+        } finally {
+            cursor?.close()
+            db?.close()
         }
     }
     
     // 10일치 알람 생성
     private fun generate10DaysAlarms(context: Context) {
+        var scheduleCursor: android.database.Cursor? = null
+        var templateCursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.writableDatabase
-            
+            db = dbHelper.writableDatabase
+
             // 1. 스케줄 조회
-            val scheduleCursor = db.query("shift_schedule", null, null, null, null, null, null, "1")
+            scheduleCursor = db.query("shift_schedule", null, null, null, null, null, null, "1")
             if (!scheduleCursor.moveToFirst()) {
-                scheduleCursor.close()
                 return
             }
-            
+
             val patternStr = scheduleCursor.getString(scheduleCursor.getColumnIndexOrThrow("pattern"))
             if (patternStr.isNullOrEmpty()) {
                 Log.d("AlarmRefresh", "⚠️ Pattern null/empty - 불규칙 스케줄로 간주, 스킵")
-                scheduleCursor.close()
-                db.close()
                 return
             }
             val pattern = patternStr.split(",")
             val todayIndex = scheduleCursor.getInt(scheduleCursor.getColumnIndexOrThrow("today_index"))
             val startDateStr = scheduleCursor.getString(scheduleCursor.getColumnIndexOrThrow("start_date"))
-            scheduleCursor.close()
-            
+
             // 2. 템플릿 조회
-            val templateCursor = db.query("shift_alarm_templates", null, null, null, null, null, null)
+            templateCursor = db.query("shift_alarm_templates", null, null, null, null, null, null)
             val templates = mutableMapOf<String, MutableList<Pair<String, Int>>>()
-            
+
             while (templateCursor.moveToNext()) {
                 val shiftType = templateCursor.getString(templateCursor.getColumnIndexOrThrow("shift_type"))
                 val time = templateCursor.getString(templateCursor.getColumnIndexOrThrow("time"))
                 val alarmTypeId = templateCursor.getInt(templateCursor.getColumnIndexOrThrow("alarm_type_id"))
-                
+
                 if (!templates.containsKey(shiftType)) {
                     templates[shiftType] = mutableListOf()
                 }
                 templates[shiftType]?.add(Pair(time, alarmTypeId))
             }
-            templateCursor.close()
-            
+
             // 3. 10일치 생성
             val today = Calendar.getInstance()
             val startDate = Calendar.getInstance().apply {
@@ -159,24 +162,24 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
             }
-            
+
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             var createdCount = 0
-            
+
             for (i in 0 until 10) {
                 val targetDate = Calendar.getInstance().apply {
                     timeInMillis = today.timeInMillis
                     add(Calendar.DAY_OF_MONTH, i)
                 }
-                
+
                 // 패턴에서 근무 종류 찾기
                 val daysDiff = ((targetDate.timeInMillis - startDate.timeInMillis) / (24 * 60 * 60 * 1000)).toInt()
                 val patternIndex = ((todayIndex + daysDiff) % pattern.size + pattern.size) % pattern.size
                 val shiftType = pattern[patternIndex]
-                
+
                 // 해당 근무의 알람 템플릿 찾기
                 val shiftTemplates = templates[shiftType] ?: continue
-                
+
                 for ((time, alarmTypeId) in shiftTemplates) {
                     val timeParts = time.split(":")
                     val alarmTime = Calendar.getInstance().apply {
@@ -186,12 +189,12 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
                         set(Calendar.SECOND, 0)
                         set(Calendar.MILLISECOND, 0)
                     }
-                    
+
                     // 과거 알람 스킵
                     if (alarmTime.timeInMillis < System.currentTimeMillis() - 60000) {
                         continue
                     }
-                    
+
                     // DB 저장
                     val values = android.content.ContentValues().apply {
                         put("time", time)
@@ -200,9 +203,9 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
                         put("alarm_type_id", alarmTypeId)
                         put("shift_type", shiftType)
                     }
-                    
+
                     val alarmId = db.insert("alarms", null, values).toInt()
-                    
+
                     // Native 알람 등록
                     val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
                         data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
@@ -210,14 +213,14 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
                         putExtra(CustomAlarmReceiver.EXTRA_LABEL, shiftType)
                         putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
                     }
-                    
+
                     val pendingIntent = PendingIntent.getBroadcast(
                         context,
                         alarmId,
                         intent,
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
-                    
+
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         alarmManager.setExactAndAllowWhileIdle(
                             AlarmManager.RTC_WAKEUP,
@@ -231,15 +234,18 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
                             pendingIntent
                         )
                     }
-                    
+
                     createdCount++
                 }
             }
-            
-            db.close()
+
             Log.d("AlarmRefresh", "✅ ${createdCount}개 알람 생성 완료")
         } catch (e: Exception) {
             Log.e("AlarmRefresh", "알람 생성 실패", e)
+        } finally {
+            templateCursor?.close()
+            scheduleCursor?.close()
+            db?.close()
         }
     }
     

@@ -104,18 +104,21 @@ class DirectBootReceiver : BroadcastReceiver() {
     }
     
     private fun getNextAlarmFromDB(context: Context): AlarmData? {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         return try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.readableDatabase
-            
+            db = dbHelper.readableDatabase
+
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
                 Locale.getDefault()
             ).format(Date())
-            
+
             Log.d("DirectBoot", "현재 시각: $now")
-            
-            val cursor = db.query(
+
+            cursor = db.query(
                 "alarms",
                 null,
                 "date > ?",
@@ -125,20 +128,20 @@ class DirectBootReceiver : BroadcastReceiver() {
                 "date ASC",
                 "1"
             )
-            
+
             var alarm: AlarmData? = null
-            
+
             if (cursor.moveToFirst()) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
                 val time = cursor.getString(cursor.getColumnIndexOrThrow("time"))
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
-                
+
                 val timestamp = SimpleDateFormat(
                     "yyyy-MM-dd'T'HH:mm:ss",
                     Locale.getDefault()
                 ).parse(dateStr)?.time
-                
+
                 if (timestamp != null) {
                     alarm = AlarmData(id, timestamp, time, shiftType)
                     Log.d("DirectBoot", "✅ 다음 알람 조회: $time ($shiftType)")
@@ -146,14 +149,14 @@ class DirectBootReceiver : BroadcastReceiver() {
             } else {
                 Log.d("DirectBoot", "⚠️ DB에 알람 없음")
             }
-            
-            cursor.close()
-            db.close()
-            
+
             alarm
         } catch (e: Exception) {
             Log.e("DirectBoot", "DB 읽기 실패", e)
             null
+        } finally {
+            cursor?.close()
+            db?.close()
         }
     }
     
@@ -169,6 +172,7 @@ class DirectBootReceiver : BroadcastReceiver() {
                 putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
                 putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
                 setPackage(context.packageName)
+                data = android.net.Uri.parse("shiftbell://alarm/$id")  // ⭐ PendingIntent 충돌 방지
             }
             
             val pendingIntent = PendingIntent.getBroadcast(

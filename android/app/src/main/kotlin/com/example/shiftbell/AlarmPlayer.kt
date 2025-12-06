@@ -122,12 +122,6 @@ class AlarmPlayer(private val context: Context) {
                 return
             }
 
-            // ⭐ 시스템 알람 볼륨을 50%로 고정 (너무 시끄럽지 않게)
-            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-            val halfVolume = maxVolume / 2
-            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, halfVolume, 0)
-
             // 리소스 URI 생성
             val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/$resourceId")
             Log.d("AlarmPlayer", "커스텀 사운드 로드: $soundUri")
@@ -163,12 +157,6 @@ class AlarmPlayer(private val context: Context) {
     // 시스템 기본 알람 사운드 재생
     private fun playDefaultSound(volume: Float) {
         try {
-            // ⭐ 시스템 알람 볼륨을 50%로 고정 (너무 시끄럽지 않게)
-            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-            val halfVolume = maxVolume / 2
-            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, halfVolume, 0)
-
             // 알람 소리 URI
             val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
 
@@ -236,16 +224,31 @@ class AlarmPlayer(private val context: Context) {
     fun stopAlarm() {
         Log.d("AlarmPlayer", "알람 중지")
 
-        mediaPlayer?.apply {
-            if (isPlaying) {
-                stop()
-                Log.d("AlarmPlayer", "소리 중지됨")
+        try {
+            mediaPlayer?.apply {
+                if (isPlaying) {
+                    stop()
+                    Log.d("AlarmPlayer", "소리 중지됨")
+                }
             }
-            release()
+        } catch (e: Exception) {
+            Log.e("AlarmPlayer", "MediaPlayer 중지 실패", e)
+        } finally {
+            // 예외 발생해도 반드시 release
+            try {
+                mediaPlayer?.release()
+            } catch (e: Exception) {
+                Log.e("AlarmPlayer", "MediaPlayer release 실패", e)
+            }
+            mediaPlayer = null
         }
-        mediaPlayer = null
 
-        vibrator?.cancel()
-        vibrator = null
+        try {
+            vibrator?.cancel()
+        } catch (e: Exception) {
+            Log.e("AlarmPlayer", "진동 중지 실패", e)
+        } finally {
+            vibrator = null
+        }
     }
 }

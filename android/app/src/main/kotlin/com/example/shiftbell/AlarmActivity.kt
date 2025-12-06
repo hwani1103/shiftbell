@@ -85,11 +85,14 @@ class AlarmActivity : AppCompatActivity() {
     }
 
     private fun loadAlarmInfo() {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            val db = dbHelper.readableDatabase
+            db = dbHelper.readableDatabase
 
-            val cursor = db.query(
+            cursor = db.query(
                 "alarms",
                 arrayOf("time", "shift_type"),
                 "id = ?",
@@ -101,12 +104,13 @@ class AlarmActivity : AppCompatActivity() {
                 alarmTimeStr = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
                 alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
             }
-            cursor.close()
-            db.close()
 
             Log.d("AlarmActivity", "✅ 알람 정보 로드: time=$alarmTimeStr, label=$alarmLabel")
         } catch (e: Exception) {
             Log.e("AlarmActivity", "❌ 알람 정보 로드 실패", e)
+        } finally {
+            cursor?.close()
+            db?.close()
         }
     }
     
@@ -305,11 +309,14 @@ private fun dismissAlarm() {
         // ⭐ Overlay 서비스도 종료
         stopOverlayService()
 
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            val db = dbHelper.readableDatabase
+            db = dbHelper.readableDatabase
 
-            val cursor = db.query(
+            cursor = db.query(
                 "alarms",
                 null,
                 "id = ?",
@@ -320,7 +327,6 @@ private fun dismissAlarm() {
             if (cursor.moveToFirst()) {
                 val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
-                cursor.close()
 
                 // ⭐ 5분 후 시간 계산
                 val newTimestamp = System.currentTimeMillis() + (5 * 60 * 1000)
@@ -394,13 +400,14 @@ private fun dismissAlarm() {
                 NotificationHelper.showUpdatedNotification(applicationContext, timeStr, shiftType)
 
             } else {
-                cursor.close()
                 Log.e("AlarmActivity", "❌ 알람 정보 없음: ID=$alarmId")
             }
 
-            db.close()
         } catch (e: Exception) {
             Log.e("AlarmActivity", "❌ 5분 후 재등록 실패", e)
+        } finally {
+            cursor?.close()
+            db?.close()
         }
 
         updateAlarmHistory(alarmId, "snoozed", incrementSnooze = true)

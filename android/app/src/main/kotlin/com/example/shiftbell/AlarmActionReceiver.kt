@@ -154,16 +154,19 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
     Log.d("AlarmAction", "✅ Native 알람 취소 완료: ID=$alarmId")
 
+    var cursor: android.database.Cursor? = null
+    var db: android.database.sqlite.SQLiteDatabase? = null
+
     try {
         val dbHelper = DatabaseHelper.getInstance(context)
-        val db = dbHelper.writableDatabase
+        db = dbHelper.writableDatabase
 
         // ⭐ 알람 정보 읽어오기 (alarm_history에 기록하기 위해)
         var scheduledDate = ""
         var scheduledTime = ""
         var shiftType = label
 
-        val cursor = db.query(
+        cursor = db.query(
             "alarms",
             arrayOf("date", "time", "shift_type"),
             "id = ?",
@@ -176,7 +179,6 @@ class AlarmActionReceiver : BroadcastReceiver() {
             scheduledTime = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
             shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: label
         }
-        cursor.close()
 
         // ⭐ alarm_history에 '알람 울기 전 취소' 기록 추가
         if (scheduledDate.isNotEmpty()) {
@@ -202,7 +204,6 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
         // ⭐ 알람 삭제
         db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
-        db.close()
         Log.d("AlarmAction", "✅ DB 알람 삭제 완료: ID=$alarmId")
 
         // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
@@ -218,6 +219,9 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
     } catch (e: Exception) {
         Log.e("AlarmAction", "❌ DB 삭제 실패", e)
+    } finally {
+        cursor?.close()
+        db?.close()
     }
 }
     
@@ -380,11 +384,14 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
     // ⭐ Notification에서 5분 후
     private fun snoozeAlarmFromDB(context: Context, alarmId: Int) {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.readableDatabase
+            db = dbHelper.readableDatabase
 
-            val cursor = db.query(
+            cursor = db.query(
                 "alarms",
                 null,
                 "id = ?",
@@ -394,7 +401,6 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
             if (cursor.moveToFirst()) {
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
-                cursor.close()
 
                 val newTimestamp = System.currentTimeMillis() + (5 * 60 * 1000)
 
@@ -466,14 +472,14 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 NotificationHelper.showUpdatedNotification(context, timeStr, shiftType)
 
             } else {
-                cursor.close()
                 Log.e("AlarmAction", "❌ 알람 정보 없음")
             }
 
-            db.close()
-
         } catch (e: Exception) {
             Log.e("AlarmAction", "❌ 5분 후 재등록 실패", e)
+        } finally {
+            cursor?.close()
+            db?.close()
         }
     }
 }

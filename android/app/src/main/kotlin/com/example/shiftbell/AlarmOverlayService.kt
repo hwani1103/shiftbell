@@ -414,12 +414,15 @@ class AlarmOverlayService : Service() {
         // 알람 소리 중지
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         // 5분 후 알람 재등록
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            val db = dbHelper.readableDatabase
+            db = dbHelper.readableDatabase
 
-            val cursor = db.query(
+            cursor = db.query(
                 "alarms",
                 null,
                 "id = ?",
@@ -430,7 +433,6 @@ class AlarmOverlayService : Service() {
             if (cursor.moveToFirst()) {
                 val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
-                cursor.close()
 
                 // 5분 후 시간 계산
                 val newTimestamp = System.currentTimeMillis() + (5 * 60 * 1000)
@@ -517,14 +519,14 @@ class AlarmOverlayService : Service() {
                 Log.d("AlarmOverlay", "✅ 앱 포그라운드 이동 → Flutter UI 갱신")
 
             } else {
-                cursor.close()
                 Log.e("AlarmOverlay", "❌ 알람 정보 없음: ID=$alarmId")
             }
 
-            db.close()
-
         } catch (e: Exception) {
             Log.e("AlarmOverlay", "❌ 5분 후 재등록 실패", e)
+        } finally {
+            cursor?.close()
+            db?.close()
         }
 
         // Overlay 제거
