@@ -833,9 +833,11 @@ Widget build(BuildContext context) {
 
   // ⭐ 알람 타입 선택 팝업
   void _showAlarmTypeSelectionPopup(Alarm alarm, StateSetter parentSetState) {
+    print('🔍 알람 타입 선택 팝업 열림 - alarm.id: ${alarm.id}, alarmTypeId: ${alarm.alarmTypeId}');
     showDialog(
       context: context,
       builder: (context) {
+        print('🏗️ AlertDialog 빌드 시작');
         return AlertDialog(
           title: Text(
             '알람 타입 선택',
@@ -894,13 +896,13 @@ Widget build(BuildContext context) {
               ],
             ),
           ),
+          actionsAlignment: MainAxisAlignment.spaceBetween,  // ⭐ Spacer() 대신 사용
           actions: [
             // ⭐ 삭제 버튼
             TextButton(
               onPressed: () => _showDeleteAlarmConfirmation(alarm, parentSetState),
               child: Text('삭제', style: TextStyle(color: Colors.red, fontSize: 14.sp)),
             ),
-            Spacer(),
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text('취소'),
@@ -993,6 +995,7 @@ Widget build(BuildContext context) {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    print('🎨 빌드: typeId=$typeId, label=$label, isSelected=$isSelected');
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
