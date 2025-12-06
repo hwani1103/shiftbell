@@ -227,6 +227,18 @@ class AlarmPlayer(private val context: Context) {
             return
         }
 
+        // ⭐ 기존 진동 먼저 취소
+        try {
+            vibrator?.cancel()
+            Log.d("AlarmPlayer", "기존 진동 취소됨")
+        } catch (e: Exception) {
+            Log.e("AlarmPlayer", "진동 취소 실패 (무시)", e)
+        }
+
+        // ⭐ 100ms 딜레이 (시스템이 cancel 처리할 시간)
+        Thread.sleep(100)
+
+        // ⭐ 새로운 Vibrator 인스턴스 생성
         vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
         // 진동 세기에 따른 패턴 설정 (1=약하게, 3=강하게)
