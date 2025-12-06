@@ -9,14 +9,29 @@ class PermissionWarningBanner extends StatefulWidget {
   State<PermissionWarningBanner> createState() => _PermissionWarningBannerState();
 }
 
-class _PermissionWarningBannerState extends State<PermissionWarningBanner> {
+class _PermissionWarningBannerState extends State<PermissionWarningBanner> with WidgetsBindingObserver {
   bool _showBanner = false;
   List<String> _missingPermissions = [];
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _checkPermissions();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 앱이 다시 활성화되면 권한 재확인
+    if (state == AppLifecycleState.resumed) {
+      _checkPermissions();
+    }
   }
 
   Future<void> _checkPermissions() async {
@@ -24,8 +39,7 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> {
 
     final missing = <String>[];
     if (!permissions['notification']!) missing.add('알림');
-    if (!permissions['exactAlarm']!) missing.add('정확한 알람');
-    if (!permissions['overlay']!) missing.add('화면 위 표시');
+    if (!permissions['overlay']!) missing.add('다른 앱 위에 표시');
 
     if (mounted) {
       setState(() {
@@ -88,10 +102,6 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> {
           TextButton(
             onPressed: () async {
               await PermissionService().openSettings();
-              // 설정에서 돌아왔을 때 재확인
-              Future.delayed(const Duration(milliseconds: 500), () {
-                _checkPermissions();
-              });
             },
             style: TextButton.styleFrom(
               backgroundColor: Colors.orange.shade700,

@@ -8,6 +8,7 @@ import '../models/alarm.dart';
 import '../models/shift_schedule.dart';
 import '../models/alarm_template.dart';
 import 'dart:convert';
+import 'dart:async';
 import '../models/alarm_history.dart';
 import '../models/date_memo.dart';
 
@@ -16,25 +17,26 @@ class DatabaseService {
   DatabaseService._internal();
 
   static Database? _database;
-  static bool _isInitializing = false;
+  static Completer<Database>? _initCompleter;
   static const platform = MethodChannel('com.example.shiftbell/alarm');
 
-  // ⭐ Race Condition 방지: 동시 초기화 요청 시 대기
+  // ⭐ HIGH-2 수정: Completer 패턴으로 Race Condition 완전 해결
   Future<Database> get database async {
     if (_database != null) return _database!;
 
-    // 이미 초기화 중이면 완료될 때까지 대기
-    while (_isInitializing) {
-      await Future.delayed(const Duration(milliseconds: 50));
-      if (_database != null) return _database!;
-    }
+    // 이미 초기화 중이면 같은 Future를 기다림
+    if (_initCompleter != null) return _initCompleter!.future;
 
-    _isInitializing = true;
+    _initCompleter = Completer<Database>();
     try {
       _database = await _initDatabase();
+      _initCompleter!.complete(_database!);
       return _database!;
+    } catch (e, stackTrace) {
+      _initCompleter!.completeError(e, stackTrace);
+      rethrow;
     } finally {
-      _isInitializing = false;
+      _initCompleter = null;
     }
   }
   

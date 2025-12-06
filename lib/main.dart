@@ -233,13 +233,16 @@ Future<void> _handleMethod(MethodCall call) async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Stack(
         children: [
-          // ⭐ 권한 경고 배너
-          const PermissionWarningBanner(),
           // 탭 화면
-          Expanded(
-            child: _tabs[_currentIndex],
+          _tabs[_currentIndex],
+          // ⭐ 권한 경고 배너 (하단에 오버레이)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: const PermissionWarningBanner(),
           ),
         ],
       ),
@@ -287,10 +290,9 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
   Future<void> _checkPermissions() async {
     final permissions = await PermissionService().checkPermissions();
     final overlayPermission = await AlarmService().checkOverlayPermission();
-    
+
     setState(() {
-      permissionsGranted = permissions['notification']! && 
-                          permissions['exactAlarm']!;
+      permissionsGranted = permissions['notification']!;
       overlayPermissionGranted = overlayPermission;
     });
   }

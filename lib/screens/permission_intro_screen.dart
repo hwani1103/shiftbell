@@ -41,38 +41,16 @@ class PermissionIntroScreen extends StatelessWidget {
                 icon: Icons.notifications_active,
                 iconColor: Colors.orange,
                 title: '알림',
-                description: '사전 알림 & 스누즈 안내',
-                required: true,
-              ),
-              SizedBox(height: 24.h),
-              _buildPermissionItem(
-                icon: Icons.alarm,
-                iconColor: Colors.blue,
-                title: '정확한 알람',
-                description: '정확한 시간에 알람 울림',
+                description: '알림은 오직 알람 발생을 위해서만 사용됩니다',
                 required: true,
               ),
               SizedBox(height: 24.h),
               _buildPermissionItem(
                 icon: Icons.phone_android,
                 iconColor: Colors.green,
-                title: '화면 위 표시',
-                description: '화면 해제 시 알람 팝업',
+                title: '다른 앱 위에 표시',
+                description: '핸드폰 사용 중 알람 발생시 알람을 인지하기 위해 필요합니다',
                 required: true,
-              ),
-              SizedBox(height: 32.h),
-
-              // 구분선
-              Divider(color: Colors.grey.shade300, thickness: 1),
-              SizedBox(height: 24.h),
-
-              // 선택 권한
-              _buildPermissionItem(
-                icon: Icons.battery_charging_full,
-                iconColor: Colors.purple,
-                title: '배터리 최적화 제외',
-                description: '안정적인 백그라운드 작동',
-                required: false,
               ),
 
               const Spacer(),
