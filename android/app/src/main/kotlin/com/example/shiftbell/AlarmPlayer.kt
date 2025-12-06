@@ -14,6 +14,7 @@ import android.util.Log
 class AlarmPlayer(private val context: Context) {
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
+    private var originalAlarmVolume: Int = -1  // ⭐ 원래 시스템 알람 볼륨 저장
 
     companion object {
         @Volatile
@@ -122,6 +123,17 @@ class AlarmPlayer(private val context: Context) {
                 return
             }
 
+            // ⭐ 원래 시스템 알람 볼륨 저장
+            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            originalAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+            Log.d("AlarmPlayer", "📊 원래 시스템 알람 볼륨 저장: $originalAlarmVolume")
+
+            // ⭐ 시스템 알람 볼륨을 50%로 임시 변경
+            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+            val halfVolume = maxVolume / 2
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, halfVolume, 0)
+            Log.d("AlarmPlayer", "🔊 시스템 알람 볼륨 임시 변경: $halfVolume (50%)")
+
             // 리소스 URI 생성
             val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/$resourceId")
             Log.d("AlarmPlayer", "커스텀 사운드 로드: $soundUri")
@@ -157,6 +169,17 @@ class AlarmPlayer(private val context: Context) {
     // 시스템 기본 알람 사운드 재생
     private fun playDefaultSound(volume: Float) {
         try {
+            // ⭐ 원래 시스템 알람 볼륨 저장
+            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            originalAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+            Log.d("AlarmPlayer", "📊 원래 시스템 알람 볼륨 저장: $originalAlarmVolume")
+
+            // ⭐ 시스템 알람 볼륨을 50%로 임시 변경
+            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
+            val halfVolume = maxVolume / 2
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, halfVolume, 0)
+            Log.d("AlarmPlayer", "🔊 시스템 알람 볼륨 임시 변경: $halfVolume (50%)")
+
             // 알람 소리 URI
             val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
 
@@ -249,6 +272,18 @@ class AlarmPlayer(private val context: Context) {
             Log.e("AlarmPlayer", "진동 중지 실패", e)
         } finally {
             vibrator = null
+        }
+
+        // ⭐ 시스템 알람 볼륨 복원
+        if (originalAlarmVolume != -1) {
+            try {
+                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                audioManager.setStreamVolume(AudioManager.STREAM_ALARM, originalAlarmVolume, 0)
+                Log.d("AlarmPlayer", "🔄 시스템 알람 볼륨 복원: $originalAlarmVolume")
+                originalAlarmVolume = -1  // 초기화
+            } catch (e: Exception) {
+                Log.e("AlarmPlayer", "❌ 볼륨 복원 실패", e)
+            }
         }
     }
 }

@@ -538,14 +538,22 @@ override fun onNewIntent(intent: Intent) {
 
     // ⭐ 미리듣기용 MediaPlayer
     private var previewMediaPlayer: android.media.MediaPlayer? = null
+    private var originalAlarmVolume: Int = -1  // ⭐ 원래 시스템 알람 볼륨 저장
 
     // ⭐ 알람 음량 미리듣기 (STREAM_ALARM 사용 - 실제 알람과 동일)
     private fun playPreviewSound(soundFile: String, volume: Float) {
         stopPreviewSound()  // 기존 재생 중지
 
         try {
-            // ⭐ 시스템 알람 볼륨을 50%로 고정 (실제 알람과 동일하게)
             val audioManager = getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+
+            // ⭐ 원래 시스템 알람 볼륨 저장 (처음 한 번만)
+            if (originalAlarmVolume == -1) {
+                originalAlarmVolume = audioManager.getStreamVolume(android.media.AudioManager.STREAM_ALARM)
+                Log.d("MainActivity", "📊 원래 시스템 알람 볼륨 저장: $originalAlarmVolume")
+            }
+
+            // ⭐ 시스템 알람 볼륨을 50%로 임시 변경 (미리듣기용)
             val maxVolume = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM)
             val halfVolume = maxVolume / 2
             audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, halfVolume, 0)
@@ -598,6 +606,19 @@ override fun onNewIntent(intent: Intent) {
             release()
         }
         previewMediaPlayer = null
+
+        // ⭐ 시스템 알람 볼륨 복원
+        if (originalAlarmVolume != -1) {
+            try {
+                val audioManager = getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
+                audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, originalAlarmVolume, 0)
+                Log.d("MainActivity", "🔄 시스템 알람 볼륨 복원: $originalAlarmVolume")
+                originalAlarmVolume = -1  // 초기화
+            } catch (e: Exception) {
+                Log.e("MainActivity", "❌ 볼륨 복원 실패", e)
+            }
+        }
+
         Log.d("MainActivity", "🔇 미리듣기 중지")
     }
 
