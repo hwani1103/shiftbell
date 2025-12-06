@@ -841,54 +841,58 @@ Widget build(BuildContext context) {
             '알람 타입 선택',
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${alarm.time} 알람',
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
-              ),
-              SizedBox(height: 16.h),
-              Row(
-                children: [
-                  _buildAlarmTypeOption(
-                    typeId: 1,
-                    icon: Icons.volume_up_rounded,
-                    label: '소리+진동',
-                    isSelected: alarm.alarmTypeId == 1,
-                    onTap: () async {
-                      await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 1);
-                      Navigator.pop(context);
-                      parentSetState(() {});
-                    },
-                  ),
-                  SizedBox(width: 8.w),
-                  _buildAlarmTypeOption(
-                    typeId: 2,
-                    icon: Icons.vibration_rounded,
-                    label: '진동',
-                    isSelected: alarm.alarmTypeId == 2,
-                    onTap: () async {
-                      await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 2);
-                      Navigator.pop(context);
-                      parentSetState(() {});
-                    },
-                  ),
-                  SizedBox(width: 8.w),
-                  _buildAlarmTypeOption(
-                    typeId: 3,
-                    icon: Icons.notifications_off_rounded,
-                    label: '무음',
-                    isSelected: alarm.alarmTypeId == 3,
-                    onTap: () async {
-                      await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 3);
-                      Navigator.pop(context);
-                      parentSetState(() {});
-                    },
-                  ),
-                ],
-              ),
-            ],
+          content: SizedBox(
+            width: double.maxFinite,  // ⭐ 명시적 width 지정
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  '${alarm.time} 알람',
+                  style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+                ),
+                SizedBox(height: 16.h),
+                Row(
+                  mainAxisSize: MainAxisSize.max,  // ⭐ 명시적 설정
+                  children: [
+                    _buildAlarmTypeOption(
+                      typeId: 1,
+                      icon: Icons.volume_up_rounded,
+                      label: '소리+진동',
+                      isSelected: alarm.alarmTypeId == 1,
+                      onTap: () async {
+                        await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 1);
+                        Navigator.pop(context);
+                        parentSetState(() {});
+                      },
+                    ),
+                    SizedBox(width: 8.w),
+                    _buildAlarmTypeOption(
+                      typeId: 2,
+                      icon: Icons.vibration_rounded,
+                      label: '진동',
+                      isSelected: alarm.alarmTypeId == 2,
+                      onTap: () async {
+                        await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 2);
+                        Navigator.pop(context);
+                        parentSetState(() {});
+                      },
+                    ),
+                    SizedBox(width: 8.w),
+                    _buildAlarmTypeOption(
+                      typeId: 3,
+                      icon: Icons.notifications_off_rounded,
+                      label: '무음',
+                      isSelected: alarm.alarmTypeId == 3,
+                      onTap: () async {
+                        await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 3);
+                        Navigator.pop(context);
+                        parentSetState(() {});
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           actions: [
             // ⭐ 삭제 버튼
