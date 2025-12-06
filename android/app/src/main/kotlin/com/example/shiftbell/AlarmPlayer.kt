@@ -38,7 +38,19 @@ class AlarmPlayer(private val context: Context) {
     fun playAlarmWithSettings(soundFile: String, volume: Float, vibrationStrength: Int) {
         Log.d("AlarmPlayer", "🔊 알람 재생 시작")
         Log.d("AlarmPlayer", "  soundFile=$soundFile, volume=$volume, vibrationStrength=$vibrationStrength")
-        stopAlarm() // 기존 알람 정지
+
+        // ⭐ MediaPlayer만 정리 (Vibrator는 playVibration()에서 처리)
+        try {
+            mediaPlayer?.apply {
+                if (isPlaying) {
+                    stop()
+                }
+                release()
+            }
+            mediaPlayer = null
+        } catch (e: Exception) {
+            Log.e("AlarmPlayer", "MediaPlayer 정리 실패", e)
+        }
 
         when {
             // 시스템 기본 알람음
@@ -230,16 +242,32 @@ class AlarmPlayer(private val context: Context) {
         // ⭐ 기존 진동 먼저 취소
         try {
             vibrator?.cancel()
+            vibrator = null
             Log.d("AlarmPlayer", "기존 진동 취소됨")
         } catch (e: Exception) {
             Log.e("AlarmPlayer", "진동 취소 실패 (무시)", e)
         }
 
-        // ⭐ 100ms 딜레이 (시스템이 cancel 처리할 시간)
-        Thread.sleep(100)
-
         // ⭐ 새로운 Vibrator 인스턴스 생성
         vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+        // ⭐ 진동 가능 여부 확인
+        val hasVibrator = vibrator?.hasVibrator() ?: false
+        val hasAmplitudeControl = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator?.hasAmplitudeControl() ?: false
+        } else {
+            false
+        }
+
+        Log.d("AlarmPlayer", "🔍 Vibrator 진단:")
+        Log.d("AlarmPlayer", "  - hasVibrator: $hasVibrator")
+        Log.d("AlarmPlayer", "  - hasAmplitudeControl: $hasAmplitudeControl")
+        Log.d("AlarmPlayer", "  - strength: $strength")
+
+        if (!hasVibrator) {
+            Log.e("AlarmPlayer", "❌ 기기에 진동 기능이 없음!")
+            return
+        }
 
         // 진동 세기에 따른 패턴 설정 (1=약하게, 3=강하게)
         val pattern = when(strength) {
@@ -255,17 +283,22 @@ class AlarmPlayer(private val context: Context) {
             else -> 180
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val amplitudes = intArrayOf(0, amplitude, 0, amplitude)
-            vibrator?.vibrate(
-                VibrationEffect.createWaveform(pattern, amplitudes, 0) // 0 = 반복
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator?.vibrate(pattern, 0)
-        }
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val amplitudes = intArrayOf(0, amplitude, 0, amplitude)
+                val effect = VibrationEffect.createWaveform(pattern, amplitudes, 0) // 0 = 반복
+                vibrator?.vibrate(effect)
+                Log.d("AlarmPlayer", "✅ vibrate() 호출 완료 (API 26+)")
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator?.vibrate(pattern, 0)
+                Log.d("AlarmPlayer", "✅ vibrate() 호출 완료 (Legacy)")
+            }
 
-        Log.d("AlarmPlayer", "진동 시작: 세기 $strength")
+            Log.d("AlarmPlayer", "진동 시작: 세기 $strength, 패턴=${pattern.contentToString()}")
+        } catch (e: Exception) {
+            Log.e("AlarmPlayer", "❌ 진동 시작 실패", e)
+        }
     }
 
     fun stopAlarm() {
