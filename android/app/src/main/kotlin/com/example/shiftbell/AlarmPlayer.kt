@@ -36,27 +36,39 @@ class AlarmPlayer(private val context: Context) {
 
     // 새로운 메서드: DB에서 읽은 설정 적용
     fun playAlarmWithSettings(soundFile: String, volume: Float, vibrationStrength: Int) {
-        Log.d("AlarmPlayer", "알람 재생: $soundFile, 음량: $volume, 진동: $vibrationStrength")
+        Log.d("AlarmPlayer", "🔊 알람 재생 시작")
+        Log.d("AlarmPlayer", "  soundFile=$soundFile, volume=$volume, vibrationStrength=$vibrationStrength")
         stopAlarm() // 기존 알람 정지
 
         when {
             // 시스템 기본 알람음
             soundFile == "default" -> {
+                Log.d("AlarmPlayer", "  타입: 기본 알람음 + 진동")
                 playDefaultSound(volume)
                 playVibration(vibrationStrength)
             }
             // alarmbell로 시작하면 커스텀 사운드 재생
             soundFile.startsWith("alarmbell") -> {
+                Log.d("AlarmPlayer", "  타입: 커스텀 사운드($soundFile) + 진동")
                 playCustomSound(soundFile, volume)
                 playVibration(vibrationStrength)  // 소리 타입은 진동 항상 포함
             }
             // 기존 호환용 (loud, soft)
             soundFile == "loud" || soundFile == "soft" -> {
+                Log.d("AlarmPlayer", "  타입: $soundFile + 진동")
                 playDefaultSound(volume)
                 playVibration(vibrationStrength)
             }
-            soundFile == "vibrate" -> playVibration(vibrationStrength)
-            soundFile == "silent" -> {} // 아무것도 안 함
+            soundFile == "vibrate" -> {
+                Log.d("AlarmPlayer", "  타입: 진동만 (세기=$vibrationStrength)")
+                playVibration(vibrationStrength)
+            }
+            soundFile == "silent" -> {
+                Log.d("AlarmPlayer", "  타입: 무음 (아무것도 안 함)")
+            }
+            else -> {
+                Log.e("AlarmPlayer", "  ❌ 알 수 없는 soundFile: $soundFile")
+            }
         }
     }
 

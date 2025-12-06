@@ -263,11 +263,9 @@ class AlarmOverlayService : Service() {
             // Overlay View 생성
             overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_alarm, null)
 
-            // 현재 시간 설정
+            // ⭐ 알람 설정 시간 표시 (현재 시간 아님!)
             val timeText = overlayView?.findViewById<TextView>(R.id.timeText)
-            val now = Calendar.getInstance()
-            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-            timeText?.text = timeFormat.format(now.time)
+            timeText?.text = alarmTimeStr
 
             // 근무 타입 설정
             val shiftTypeText = overlayView?.findViewById<TextView>(R.id.shiftTypeText)
