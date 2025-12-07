@@ -98,6 +98,14 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 context.sendBroadcast(dismissIntent)
                 Log.d("AlarmAction", "📡 Overlay DISMISS 브로드캐스트 발송")
 
+                // ⭐ AlarmActivity 종료 신호도 발송
+                val finishIntent = Intent("FINISH_ALARM_ACTIVITY").apply {
+                    setPackage(context.packageName)
+                    putExtra("alarmId", alarmId)
+                }
+                context.sendBroadcast(finishIntent)
+                Log.d("AlarmAction", "📡 AlarmActivity FINISH 브로드캐스트 발송")
+
                 cancelAlarm(context, alarmId, label, soundType)
 
                 // Notification 삭제 (8888: 20분전, 8889: 스누즈/타임아웃)

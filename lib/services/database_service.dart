@@ -520,32 +520,13 @@ class DatabaseService {
   Future<void> deleteAllAlarms() async {
     final db = await database;
 
-    // ⭐ 이력 기록: 모든 알람 정보 먼저 읽기
-    try {
-      final alarms = await getAllAlarms();
-
-      for (var alarm in alarms) {
-        if (alarm.id != null && alarm.date != null && alarm.time != null) {
-          await db.insert('alarm_history', {
-            'alarm_id': alarm.id!,
-            'scheduled_time': alarm.time!,
-            'scheduled_date': alarm.date!.toIso8601String(),
-            'actual_ring_time': DateTime.now().toIso8601String(),
-            'dismiss_type': 'deleted_by_user',
-            'snooze_count': 0,
-            'shift_type': alarm.shiftType,
-            'created_at': DateTime.now().toIso8601String(),
-          });
-        }
-      }
-      print('✅ ${alarms.length}개 알람 이력 기록 완료');
-    } catch (e) {
-      print('⚠️ 알람 이력 기록 실패: $e');
-    }
-
-    // 모든 알람 삭제
+    // ⭐ 모든 알람 삭제 + 관련 이력도 삭제
+    // (사용자는 DB 내부 동작을 알 필요 없음. 전체 삭제는 클린 스타트)
     await db.delete('alarms');
     print('🗑️ 모든 알람 삭제 완료');
+
+    await db.delete('alarm_history');
+    print('🗑️ 모든 알람 이력 삭제 완료');
   }
 
   // ⭐ 신규: 모든 알람 템플릿 삭제
