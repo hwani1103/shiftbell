@@ -299,13 +299,10 @@ private fun dismissAlarm() {
             "⚠️ DB 알람 없음: ID=$alarmId"
         })
 
-        db.close()
-
-        // 3. 이력 생성 (저장한 정보 사용)
+        // 3. 이력 생성 (저장한 정보 사용, 같은 DB 재사용)
         if (scheduledTime.isNotEmpty() && scheduledDate.isNotEmpty()) {
             val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
 
-            val historyDb = dbHelper.writableDatabase
             val historyValues = android.content.ContentValues().apply {
                 put("alarm_id", alarmId)
                 put("scheduled_time", scheduledTime)
@@ -317,8 +314,7 @@ private fun dismissAlarm() {
                 put("created_at", now)
             }
 
-            historyDb.insert("alarm_history", null, historyValues)
-            historyDb.close()
+            db.insert("alarm_history", null, historyValues)
             Log.d("AlarmActivity", "✅ 알람 이력 생성: ID=$alarmId, type=swiped")
         }
 
@@ -389,12 +385,33 @@ private fun dismissAlarm() {
                 val originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
                 val originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
 
-                // ⭐ 5분 후 시간 계산 + 스마트 시간 조정 (중복 방지)
+                // ⭐ HIGH FIX: 한 번에 모든 알람 시간 읽어서 메모리에서 충돌 체크 (DB 재연결 방지)
+                val existingAlarmTimes = mutableSetOf<Long>()
+                val alarmsCursor = db.query(
+                    "alarms",
+                    arrayOf("date"),
+                    "id != ?",
+                    arrayOf(alarmId.toString()),
+                    null, null, null
+                )
+
+                while (alarmsCursor.moveToNext()) {
+                    val dateStr = alarmsCursor.getString(alarmsCursor.getColumnIndexOrThrow("date"))
+                    try {
+                        val alarmDate = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).parse(dateStr)
+                        alarmDate?.let { existingAlarmTimes.add(it.time) }
+                    } catch (e: Exception) {
+                        // 파싱 실패 무시
+                    }
+                }
+                alarmsCursor.close()
+
+                // ⭐ 5분 후 시간 계산 + 스마트 시간 조정 (중복 방지, 메모리에서 체크)
                 var adjustedMinutes = 5
                 var newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
                 val maxAdjustment = 10  // 최대 10분
 
-                while (DatabaseHelper.getInstance(applicationContext).isTimeConflict(applicationContext, newTimestamp, alarmId) && adjustedMinutes < maxAdjustment) {
+                while (existingAlarmTimes.contains(newTimestamp) && adjustedMinutes < maxAdjustment) {
                     adjustedMinutes++
                     newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
                     Log.d("AlarmActivity", "⚠️ 시간 충돌 감지 → ${adjustedMinutes}분 후로 조정")
@@ -628,10 +645,11 @@ private fun dismissAlarm() {
     // ⭐ 변경: 이력 업데이트 → 이력 생성 (ringing 이력 없으므로)
     private fun createAlarmHistory(alarmId: Int, dismissType: String) {
         var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
 
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            val db = dbHelper.writableDatabase
+            db = dbHelper.writableDatabase
 
             // 알람 정보 조회
             cursor = db.query(
@@ -664,13 +682,11 @@ private fun dismissAlarm() {
                 db.insert("alarm_history", null, historyValues)
                 Log.d("AlarmActivity", "✅ 알람 이력 생성: ID=$alarmId, type=$dismissType")
             }
-
-            cursor?.close()
-            db.close()
         } catch (e: Exception) {
             Log.e("AlarmActivity", "❌ 이력 생성 실패", e)
         } finally {
             cursor?.close()
+            db?.close()  // ⭐ CRITICAL FIX: DB 리소스 누수 방지
         }
     }
 

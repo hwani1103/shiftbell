@@ -107,55 +107,79 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
 
   // 고정 알람 재생성 메서드
   Future<void> regenerateFixedAlarms(DateTime date, String shiftType) async {
+    int deleteCount = 0;
+    int createCount = 0;
+    int failCount = 0;
+
     try {
+      // 1단계: 기존 고정 알람 삭제 (개별 try-catch로 부분 실패 허용)
       final existingAlarms = await DatabaseService.instance.getAlarmsByDate(date);
       for (var alarm in existingAlarms) {
         if (alarm.type == 'fixed') {
-          await DatabaseService.instance.deleteAlarm(alarm.id!);
-          await AlarmService().cancelAlarm(alarm.id!);
+          try {
+            await DatabaseService.instance.deleteAlarm(alarm.id!);
+            await AlarmService().cancelAlarm(alarm.id!);
+            deleteCount++;
+          } catch (e) {
+            print('⚠️ 알람 삭제 실패 (ID: ${alarm.id}): $e');
+            failCount++;
+          }
         }
       }
-      
+
+      // 2단계: 새 알람 생성 (개별 try-catch로 부분 실패 허용)
       final templates = await DatabaseService.instance.getAlarmTemplates(shiftType);
       for (var template in templates) {
-        final timeParts = template.time.split(':');
-        final alarmTime = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          int.parse(timeParts[0]),
-          int.parse(timeParts[1]),
-        );
-        
-        if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
-          continue;
+        try {
+          final timeParts = template.time.split(':');
+          final alarmTime = DateTime(
+            date.year,
+            date.month,
+            date.day,
+            int.parse(timeParts[0]),
+            int.parse(timeParts[1]),
+          );
+
+          if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
+            continue;
+          }
+
+          final alarm = Alarm(
+            time: template.time,
+            date: alarmTime,
+            type: 'fixed',
+            alarmTypeId: template.alarmTypeId,
+            shiftType: shiftType,
+          );
+
+          final dbId = await DatabaseService.instance.insertAlarm(alarm);
+
+          await AlarmService().scheduleAlarm(
+            id: dbId,
+            dateTime: alarmTime,
+            label: shiftType,
+            soundType: 'loud',
+          );
+          createCount++;
+        } catch (e) {
+          print('⚠️ 알람 생성 실패 (time: ${template.time}): $e');
+          failCount++;
         }
-        
-        final alarm = Alarm(
-          time: template.time,
-          date: alarmTime,
-          type: 'fixed',
-          alarmTypeId: template.alarmTypeId,
-          shiftType: shiftType,
-        );
-        
-        final dbId = await DatabaseService.instance.insertAlarm(alarm);
-        
-        await AlarmService().scheduleAlarm(
-          id: dbId,
-          dateTime: alarmTime,
-          label: shiftType,
-          soundType: 'loud',
-        );
       }
-      
+
       await _loadAlarms();
-      print('✅ 고정 알람 재생성 완료: $shiftType');
+      print('✅ 고정 알람 재생성 완료: $shiftType (삭제: $deleteCount, 생성: $createCount, 실패: $failCount)');
+
       try {
         await _platform.invokeMethod('triggerGuardCheck');
         print('✅ AlarmProvider에서 AlarmGuardReceiver 트리거 완료');
       } catch (e) {
         print('⚠️ AlarmProvider에서 AlarmGuardReceiver 트리거 실패: $e');
+      }
+
+      // ⭐ HIGH FIX: 실패가 있으면 에러 발생
+      if (failCount > 0 && createCount == 0) {
+        throw Exception('알람 재생성 실패: 모든 알람 생성 실패 (실패: $failCount)');
       }
     } catch (e) {
       print('❌ 고정 알람 재생성 실패: $e');

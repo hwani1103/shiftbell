@@ -472,12 +472,33 @@ class AlarmOverlayService : Service() {
                 val originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
                 val originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
 
-                // ⭐ 5분 후 시간 계산 + 스마트 시간 조정 (중복 방지)
+                // ⭐ HIGH FIX: 한 번에 모든 알람 시간 읽어서 메모리에서 충돌 체크 (DB 재연결 방지)
+                val existingAlarmTimes = mutableSetOf<Long>()
+                val alarmsCursor = db.query(
+                    "alarms",
+                    arrayOf("date"),
+                    "id != ?",
+                    arrayOf(alarmId.toString()),
+                    null, null, null
+                )
+
+                while (alarmsCursor.moveToNext()) {
+                    val dateStr = alarmsCursor.getString(alarmsCursor.getColumnIndexOrThrow("date"))
+                    try {
+                        val alarmDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(dateStr)
+                        alarmDate?.let { existingAlarmTimes.add(it.time) }
+                    } catch (e: Exception) {
+                        // 파싱 실패 무시
+                    }
+                }
+                alarmsCursor.close()
+
+                // ⭐ 5분 후 시간 계산 + 스마트 시간 조정 (중복 방지, 메모리에서 체크)
                 var adjustedMinutes = 5
                 var newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
                 val maxAdjustment = 10  // 최대 10분
 
-                while (DatabaseHelper.getInstance(applicationContext).isTimeConflict(applicationContext, newTimestamp, alarmId) && adjustedMinutes < maxAdjustment) {
+                while (existingAlarmTimes.contains(newTimestamp) && adjustedMinutes < maxAdjustment) {
                     adjustedMinutes++
                     newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
                     Log.d("AlarmOverlay", "⚠️ 시간 충돌 감지 → ${adjustedMinutes}분 후로 조정")
