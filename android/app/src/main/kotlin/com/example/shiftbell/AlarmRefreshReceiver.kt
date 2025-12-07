@@ -18,7 +18,21 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
         try {
             // 1. 스케줄 체크 (규칙적인지 확인)
             if (!isRegularSchedule(context)) {
-                Log.d("AlarmRefresh", "⏭️ 불규칙 스케줄 - 갱신 스킵")
+                Log.d("AlarmRefresh", "⏭️ 불규칙 스케줄 - 기존 알람 재등록만 수행")
+
+                // ⭐ 불규칙 스케줄: DB에 있는 알람을 Native에 재등록
+                reRegisterExistingAlarms(context)
+
+                // 10일 이상 지난 알람 이력 삭제
+                deleteOldAlarmHistory(context)
+
+                // 갱신 완료 표시
+                markRefreshed(context)
+
+                // Flutter UI 갱신 트리거
+                notifyFlutter(context)
+
+                Log.d("AlarmRefresh", "========== 불규칙 스케줄 재등록 완료 ==========")
                 return
             }
 
@@ -311,6 +325,80 @@ private fun markRefreshed(context: Context) {
             }
         } catch (e: Exception) {
             Log.e("AlarmRefresh", "⚠️ 오래된 알람 이력 삭제 실패", e)
+        }
+    }
+
+    // ⭐ 불규칙 스케줄: DB에 있는 모든 알람을 Native에 재등록
+    private fun reRegisterExistingAlarms(context: Context) {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
+        try {
+            val dbHelper = DatabaseHelper.getInstance(context)
+            db = dbHelper.readableDatabase
+
+            // 현재 시각 이후의 모든 알람 조회
+            val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
+            cursor = db.query(
+                "alarms",
+                null,
+                "date > ?",
+                arrayOf(now),
+                null,
+                null,
+                "date ASC"
+            )
+
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            var reRegisteredCount = 0
+
+            while (cursor.moveToNext()) {
+                val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+                val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+
+                val timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(dateStr)?.time
+
+                if (timestamp != null && timestamp > System.currentTimeMillis()) {
+                    // Native 알람 재등록
+                    val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
+                        data = android.net.Uri.parse("shiftbell://alarm/$id")
+                        putExtra(CustomAlarmReceiver.EXTRA_ID, id)
+                        putExtra(CustomAlarmReceiver.EXTRA_LABEL, shiftType)
+                        putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
+                    }
+
+                    val pendingIntent = PendingIntent.getBroadcast(
+                        context,
+                        id,
+                        intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            timestamp,
+                            pendingIntent
+                        )
+                    } else {
+                        alarmManager.setExact(
+                            AlarmManager.RTC_WAKEUP,
+                            timestamp,
+                            pendingIntent
+                        )
+                    }
+
+                    reRegisteredCount++
+                }
+            }
+
+            Log.d("AlarmRefresh", "✅ 불규칙 스케줄 알람 ${reRegisteredCount}개 재등록 완료")
+        } catch (e: Exception) {
+            Log.e("AlarmRefresh", "❌ 알람 재등록 실패", e)
+        } finally {
+            cursor?.close()
+            db?.close()
         }
     }
 }
