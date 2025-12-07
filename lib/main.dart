@@ -47,17 +47,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    
+
     // ⭐ 앱 라이프사이클 감지
     WidgetsBinding.instance.addObserver(this);
-    
-    // Native에서 갱신 요청 수신
-    platform.setMethodCallHandler((call) async {
-      if (call.method == 'refreshAlarms') {
-        print('📢 Native로부터 갱신 요청 수신');
-        await AlarmRefreshService.instance.refreshIfNeeded();
-      }
-    });
+
+    // ⭐ MethodChannel handler는 MainScreen에서 등록 (중복 방지)
   }
   
   @override
@@ -194,32 +188,30 @@ void initState() {
     }
   }
   
-  // ⭐ Native에서 호출하는 메서드 처리
-  // main.dart - _MainScreenState
+  // ⭐ Native에서 호출하는 메서드 처리 (통합 버전)
 Future<void> _handleMethod(MethodCall call) async {
   print('📞 Method Call 수신: ${call.method}');
-  
+
   if (call.method == 'refreshAlarms') {
-  print('🔄 알람 갱신 요청 - Provider 강제 새로고침');
-  if (mounted) {
+    print('🔄 알람 갱신 요청 - 전체 갱신 시작');
+
     try {
-      final container = ProviderScope.containerOf(context);
-      
-      // ⭐ 1. AlarmNotifier 강제 갱신
-      final notifier = container.read(alarmNotifierProvider.notifier);
-      await notifier.refresh();
-      print('✅ AlarmNotifier 새로고침 완료');
-      
-      // ⭐ 2. 상태를 강제로 다시 로드
-      await Future.delayed(Duration(milliseconds: 100));
-      await notifier.refresh();
-      print('✅ AlarmNotifier 2차 새로고침 완료');
-      
+      // ⭐ 1. AlarmRefreshService 호출 (10일치 재생성)
+      await AlarmRefreshService.instance.refreshIfNeeded();
+      print('✅ AlarmRefreshService 완료 (10일치 재생성)');
+
+      // ⭐ 2. AlarmNotifier 갱신 (UI 업데이트)
+      if (mounted) {
+        final container = ProviderScope.containerOf(context);
+        await container.read(alarmNotifierProvider.notifier).refresh();
+        print('✅ AlarmNotifier 새로고침 완료');
+      }
+
     } catch (e) {
-      print('❌ Provider 새로고침 실패: $e');
+      print('❌ 갱신 실패: $e');
     }
-  }
-} else if (call.method == 'openTab') {
+
+  } else if (call.method == 'openTab') {
     final tabIndex = call.arguments as int;
     print('📱 탭 이동 요청: $tabIndex');
     if (mounted) {

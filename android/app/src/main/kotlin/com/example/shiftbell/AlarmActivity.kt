@@ -159,12 +159,14 @@ private fun timeoutAlarm() {
     // shownNotifications에서 제거
     AlarmGuardReceiver.removeShownNotification(alarmId)
 
-    // ⭐ Notification 삭제 (7777: 제어, 8888: 20분전, 8889: 스누즈/타임아웃)
+    // ⭐ HIGH FIX #6: Notification 삭제 (모든 관련 notification 정리)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.cancel(7777)
-    notificationManager.cancel(8888)
-    notificationManager.cancel(8889)
-    Log.d("AlarmActivity", "🗑️ Notification 삭제 (7777, 8888, 8889)")
+    notificationManager.cancel(alarmId)          // 알람 ID
+    notificationManager.cancel(alarmId + 100000) // Fallback notification
+    notificationManager.cancel(7777)             // 제어
+    notificationManager.cancel(8888)             // 20분 전
+    notificationManager.cancel(8889)             // 스누즈/타임아웃
+    Log.d("AlarmActivity", "🗑️ Notification 삭제 (alarmId, alarmId+100000, 7777, 8888, 8889)")
 
     // 갱신 체크
     AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
@@ -327,13 +329,14 @@ private fun dismissAlarm() {
         db?.close()
     }
 
-    // ⭐ Notification 삭제 (7777: 제어, 8888: 20분전, 8889: 스누즈/타임아웃)
+    // ⭐ HIGH FIX #8: Notification 삭제 (모든 관련 notification 정리)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.cancel(alarmId)
-    notificationManager.cancel(7777)
-    notificationManager.cancel(8888)
-    notificationManager.cancel(8889)
-    Log.d("AlarmActivity", "📢 Notification 삭제 (7777, 8888, 8889)")
+    notificationManager.cancel(alarmId)          // 알람 ID
+    notificationManager.cancel(alarmId + 100000) // Fallback notification
+    notificationManager.cancel(7777)             // 제어
+    notificationManager.cancel(8888)             // 20분 전
+    notificationManager.cancel(8889)             // 스누즈/타임아웃
+    Log.d("AlarmActivity", "🗑️ Notification 삭제 (alarmId, alarmId+100000, 7777, 8888, 8889)")
 
     // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
     AlarmGuardReceiver.removeShownNotification(alarmId)

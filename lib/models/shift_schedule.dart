@@ -58,22 +58,49 @@ class ShiftSchedule {
   });
 
   factory ShiftSchedule.fromMap(Map<String, dynamic> map) {
+    // ⭐ CRITICAL FIX #4-5: 예외 처리 추가 (DB 손상 시 앱 크래시 방지)
+    DateTime? parsedStartDate;
+    if (map['start_date'] != null) {
+      try {
+        parsedStartDate = DateTime.parse(map['start_date']);
+      } catch (e) {
+        print('❌ startDate 파싱 실패: ${map['start_date']}, error: $e');
+        parsedStartDate = null;
+      }
+    }
+
+    Map<String, int>? parsedShiftColors;
+    if (map['shift_colors'] != null) {
+      try {
+        parsedShiftColors = Map<String, int>.from(jsonDecode(map['shift_colors']));
+      } catch (e) {
+        print('❌ shiftColors 파싱 실패: ${map['shift_colors']}, error: $e');
+        parsedShiftColors = null;
+      }
+    }
+
+    Map<String, String>? parsedAssignedDates;
+    if (map['assigned_dates'] != null) {
+      try {
+        parsedAssignedDates = Map<String, String>.from(jsonDecode(map['assigned_dates']));
+      } catch (e) {
+        print('❌ assignedDates 파싱 실패: ${map['assigned_dates']}, error: $e');
+        parsedAssignedDates = null;
+      }
+    }
+
     return ShiftSchedule(
       id: map['id'],
       isRegular: map['is_regular'] == 1,
       pattern: map['pattern'] != null ? (map['pattern'] as String).split(',').toList() : null,
       todayIndex: map['today_index'],
       shiftTypes: (map['shift_types'] as String).split(','),
-      activeShiftTypes: map['active_shift_types'] != null  // ⭐ 추가
+      activeShiftTypes: map['active_shift_types'] != null
           ? (map['active_shift_types'] as String).split(',')
           : null,
-      startDate: map['start_date'] != null ? DateTime.parse(map['start_date']) : null,
-      shiftColors: map['shift_colors'] != null
-          ? Map<String, int>.from(jsonDecode(map['shift_colors']))
-          : null,
-      assignedDates: map['assigned_dates'] != null
-          ? Map<String, String>.from(jsonDecode(map['assigned_dates']))
-          : null,
+      startDate: parsedStartDate,
+      shiftColors: parsedShiftColors,
+      assignedDates: parsedAssignedDates,
     );
   }
 

@@ -169,8 +169,22 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
 
             // 3. 10일치 생성
             val today = Calendar.getInstance()
+
+            // ⭐ CRITICAL FIX #3: Null 안전성 처리
+            val parsedDate = try {
+                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(startDateStr)
+            } catch (e: Exception) {
+                Log.e("AlarmRefresh", "❌ startDate 파싱 실패: $startDateStr", e)
+                return  // 파싱 실패 시 알람 생성 중단
+            }
+
+            if (parsedDate == null) {
+                Log.e("AlarmRefresh", "❌ startDate가 null")
+                return
+            }
+
             val startDate = Calendar.getInstance().apply {
-                time = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(startDateStr)!!
+                time = parsedDate
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
                 set(Calendar.SECOND, 0)
@@ -218,7 +232,17 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
                         put("shift_type", shiftType)
                     }
 
-                    val alarmId = db.insert("alarms", null, values).toInt()
+                    // ⭐ CRITICAL FIX #2: Long to Int 안전 변환 (오버플로우 방지)
+                    val rowId = db.insert("alarms", null, values)
+                    if (rowId == -1L) {
+                        Log.e("AlarmRefresh", "❌ DB 삽입 실패")
+                        continue
+                    }
+                    if (rowId > Int.MAX_VALUE) {
+                        Log.e("AlarmRefresh", "❌ 알람 ID 오버플로우: $rowId (스킵)")
+                        continue
+                    }
+                    val alarmId = rowId.toInt()
 
                     // Native 알람 등록
                     val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
