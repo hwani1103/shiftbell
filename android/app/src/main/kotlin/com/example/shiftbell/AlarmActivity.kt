@@ -377,6 +377,10 @@ private fun dismissAlarm() {
                 val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
 
+                // ⭐ 원래 시간 저장 (이력 생성용)
+                val originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
+                val originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+
                 // ⭐ 5분 후 시간 계산
                 val newTimestamp = System.currentTimeMillis() + (5 * 60 * 1000)
 
@@ -437,6 +441,21 @@ private fun dismissAlarm() {
                 writableDb.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
                 Log.d("AlarmActivity", "✅ DB 업데이트: time=$timeStr, date=$dateStr")
 
+                // ⭐ 이력 생성 (원래 시간 사용!)
+                val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+                val historyValues = ContentValues().apply {
+                    put("alarm_id", alarmId)
+                    put("scheduled_time", originalTime)  // 원래 시간!
+                    put("scheduled_date", originalDate)  // 원래 날짜!
+                    put("actual_ring_time", now)
+                    put("dismiss_type", "snoozed")
+                    put("snooze_count", 0)
+                    put("shift_type", shiftType)
+                    put("created_at", now)
+                }
+                writableDb.insert("alarm_history", null, historyValues)
+                Log.d("AlarmActivity", "✅ 알람 이력 생성: ID=$alarmId, type=snoozed, 원래시간=$originalTime")
+
                 writableDb.close()
 
                 // ⭐ 갱신 체크
@@ -444,6 +463,11 @@ private fun dismissAlarm() {
 
                 // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
                 AlarmGuardReceiver.removeShownNotification(alarmId)
+
+                // ⭐ AlarmGuardReceiver 트리거 (다음 알람 Notification 즉시 표시)
+                val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
+                sendBroadcast(guardIntent)
+                Log.d("AlarmActivity", "✅ AlarmGuardReceiver 트리거")
 
                 // ⭐ 연장 Notification 표시 (NotificationHelper 사용)
                 NotificationHelper.showUpdatedNotification(applicationContext, timeStr, shiftType)
@@ -458,8 +482,6 @@ private fun dismissAlarm() {
             cursor?.close()
             db?.close()
         }
-
-        createAlarmHistory(alarmId, "snoozed")
 
         // ⭐ finish()만 호출하면 잠금 화면으로 돌아감
         finish()

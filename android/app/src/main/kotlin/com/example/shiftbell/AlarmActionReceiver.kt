@@ -468,6 +468,10 @@ class AlarmActionReceiver : BroadcastReceiver() {
             if (cursor.moveToFirst()) {
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
 
+                // ⭐ 원래 시간 저장 (이력 생성용)
+                val originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
+                val originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+
                 val newTimestamp = System.currentTimeMillis() + (5 * 60 * 1000)
 
                 // 기존 알람 취소
@@ -523,14 +527,33 @@ class AlarmActionReceiver : BroadcastReceiver() {
                     put("time", timeStr)
                 }
                 writableDb.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
-                writableDb.close()
-                Log.d("AlarmAction", "✅ 5분 후 재등록 완료")
+                Log.d("AlarmAction", "✅ DB 업데이트: time=$timeStr, date=$dateStr")
 
-                // 이력 생성
-                createAlarmHistory(context, alarmId, "snoozed")
+                // ⭐ 이력 생성 (원래 시간 사용!)
+                val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+                val historyValues = android.content.ContentValues().apply {
+                    put("alarm_id", alarmId)
+                    put("scheduled_time", originalTime)  // 원래 시간!
+                    put("scheduled_date", originalDate)  // 원래 날짜!
+                    put("actual_ring_time", now)
+                    put("dismiss_type", "snoozed")
+                    put("snooze_count", 0)
+                    put("shift_type", shiftType)
+                    put("created_at", now)
+                }
+                writableDb.insert("alarm_history", null, historyValues)
+                Log.d("AlarmAction", "✅ 알람 이력 생성: ID=$alarmId, type=snoozed, 원래시간=$originalTime")
+
+                writableDb.close()
 
                 AlarmGuardReceiver.removeShownNotification(alarmId)
                 AlarmRefreshUtil.checkAndTriggerRefresh(context)
+
+                // ⭐ AlarmGuardReceiver 트리거 (다음 알람 Notification 즉시 표시)
+                val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
+                context.sendBroadcast(guardIntent)
+                Log.d("AlarmAction", "✅ AlarmGuardReceiver 트리거")
+
                 NotificationHelper.showUpdatedNotification(context, timeStr, shiftType)
 
             } else {
