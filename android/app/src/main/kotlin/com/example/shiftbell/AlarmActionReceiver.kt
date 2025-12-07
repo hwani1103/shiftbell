@@ -255,7 +255,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
     private fun extendAlarm(context: Context, alarmId: Int, originalTimestamp: Long, label: String, soundType: String) {
         val newTimestamp = originalTimestamp + (5 * 60 * 1000)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        
+
         val cancelIntent = Intent(context, CustomAlarmReceiver::class.java).apply {
             data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
         }
@@ -268,21 +268,21 @@ class AlarmActionReceiver : BroadcastReceiver() {
         alarmManager.cancel(cancelPendingIntent)
         cancelPendingIntent.cancel()
         Log.d("AlarmAction", "✅ 기존 알람 취소: ID=$alarmId")
-        
+
         val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
             data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
             putExtra(CustomAlarmReceiver.EXTRA_ID, alarmId)
             putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
             putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, soundType)
         }
-        
+
         val pendingIntent = PendingIntent.getBroadcast(
             context,
             alarmId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             alarmManager.setExactAndAllowWhileIdle(
                 AlarmManager.RTC_WAKEUP,
@@ -296,60 +296,101 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 pendingIntent
             )
         }
-        
+
         Log.d("AlarmAction", "✅ 알람 5분 연장 완료: ID=$alarmId, 새 시각=${java.util.Date(newTimestamp)}")
-        
+
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         try {
-        val dbHelper = DatabaseHelper.getInstance(context)
-        val db = dbHelper.writableDatabase
-        
-        val calendar = java.util.Calendar.getInstance().apply {
-            timeInMillis = newTimestamp
+            val dbHelper = DatabaseHelper.getInstance(context)
+            db = dbHelper.writableDatabase
+
+            // ⭐ 원래 시간 먼저 읽어서 저장 (이력 생성용)
+            cursor = db.query(
+                "alarms",
+                arrayOf("time", "date", "shift_type"),
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+
+            var originalTime = ""
+            var originalDate = ""
+            var shiftType = label
+
+            if (cursor.moveToFirst()) {
+                originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
+                originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: label
+            }
+
+            cursor.close()
+
+            // DB 업데이트
+            val dateStr = java.text.SimpleDateFormat(
+                "yyyy-MM-dd'T'HH:mm:ss",
+                java.util.Locale.getDefault()
+            ).format(java.util.Date(newTimestamp))
+
+            val timeStr = java.text.SimpleDateFormat(
+                "HH:mm",
+                java.util.Locale.getDefault()
+            ).format(java.util.Date(newTimestamp))
+
+            val values = android.content.ContentValues().apply {
+                put("date", dateStr)
+                put("time", timeStr)
+            }
+
+            val rowsAffected = db.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
+            Log.d("AlarmAction", "✅ DB 업데이트 완료: ID=$alarmId, time=$timeStr, date=$dateStr, rows=$rowsAffected")
+
+            // ⭐ 이력 생성 (원래 시간 사용!)
+            if (originalTime.isNotEmpty() && originalDate.isNotEmpty()) {
+                val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+                val historyValues = android.content.ContentValues().apply {
+                    put("alarm_id", alarmId)
+                    put("scheduled_time", originalTime)  // 원래 시간!
+                    put("scheduled_date", originalDate)  // 원래 날짜!
+                    put("actual_ring_time", now)
+                    put("dismiss_type", "snoozed")
+                    put("snooze_count", 0)
+                    put("shift_type", shiftType)
+                    put("created_at", now)
+                }
+                db.insert("alarm_history", null, historyValues)
+                Log.d("AlarmAction", "✅ 알람 이력 생성: ID=$alarmId, type=snoozed, 원래시간=$originalTime")
+            }
+
+            db.close()
+
+            // ⭐ 수정: AlarmRefreshWorker → AlarmRefreshUtil
+            AlarmRefreshUtil.checkAndTriggerRefresh(context)
+            Log.d("AlarmAction", "✅ 갱신 체크 완료")
+
+            // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
+            AlarmGuardReceiver.removeShownNotification(alarmId)
+
+            val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
+            context.sendBroadcast(guardIntent)
+            Log.d("AlarmAction", "✅ AlarmGuardReceiver 즉시 재실행")
+
+            // ⭐ Notification 업데이트 (NotificationHelper 사용)
+            NotificationHelper.showUpdatedNotification(context, timeStr, label)
+            Log.d("AlarmAction", "✅ Notification 업데이트 완료")
+
+            val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+            launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            context.startActivity(launchIntent)
+            Log.d("AlarmAction", "✅ 앱 포그라운드 이동")
+
+        } catch (e: Exception) {
+            Log.e("AlarmAction", "❌ DB 업데이트 실패", e)
+        } finally {
+            cursor?.close()
+            db?.close()
         }
-        
-        val dateStr = java.text.SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss",
-            java.util.Locale.getDefault()
-        ).format(java.util.Date(newTimestamp))
-        
-        val timeStr = java.text.SimpleDateFormat(
-            "HH:mm",
-            java.util.Locale.getDefault()
-        ).format(java.util.Date(newTimestamp))
-        
-        val values = android.content.ContentValues().apply {
-            put("date", dateStr)
-            put("time", timeStr)
-        }
-        
-        val rowsAffected = db.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
-        db.close()
-        
-        Log.d("AlarmAction", "✅ DB 업데이트 완료: ID=$alarmId, time=$timeStr, date=$dateStr, rows=$rowsAffected")
-
-        // ⭐ 수정: AlarmRefreshWorker → AlarmRefreshUtil
-        AlarmRefreshUtil.checkAndTriggerRefresh(context)
-        Log.d("AlarmAction", "✅ 갱신 체크 완료")
-
-        // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
-        AlarmGuardReceiver.removeShownNotification(alarmId)
-
-        val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
-        context.sendBroadcast(guardIntent)
-        Log.d("AlarmAction", "✅ AlarmGuardReceiver 즉시 재실행")
-
-        // ⭐ Notification 업데이트 (NotificationHelper 사용)
-        NotificationHelper.showUpdatedNotification(context, timeStr, label)
-        Log.d("AlarmAction", "✅ Notification 업데이트 완료")
-
-        val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-        launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        context.startActivity(launchIntent)
-        Log.d("AlarmAction", "✅ 앱 포그라운드 이동")
-
-    } catch (e: Exception) {
-        Log.e("AlarmAction", "❌ DB 업데이트 실패", e)
-    }
     }
     
     // ⭐ DB에 알람이 존재하는지 확인 (삼성 "알림 다시 표시" 대응)
