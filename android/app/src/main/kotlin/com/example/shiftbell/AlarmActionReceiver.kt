@@ -267,7 +267,17 @@ class AlarmActionReceiver : BroadcastReceiver() {
     }
     
     private fun extendAlarm(context: Context, alarmId: Int, originalTimestamp: Long, label: String, soundType: String) {
-        val newTimestamp = originalTimestamp + (5 * 60 * 1000)
+        // ⭐ 5분 후 시간 계산 + 스마트 시간 조정 (중복 방지)
+        var adjustedMinutes = 5
+        var newTimestamp = originalTimestamp + (adjustedMinutes * 60 * 1000)
+        val maxAdjustment = 10  // 최대 10분
+
+        while (DatabaseHelper.getInstance(context).isTimeConflict(context, newTimestamp, alarmId) && adjustedMinutes < maxAdjustment) {
+            adjustedMinutes++
+            newTimestamp = originalTimestamp + (adjustedMinutes * 60 * 1000)
+            Log.d("AlarmAction", "⚠️ 시간 충돌 감지 (5분 후) → ${adjustedMinutes}분 후로 조정")
+        }
+
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         val cancelIntent = Intent(context, CustomAlarmReceiver::class.java).apply {
@@ -533,7 +543,16 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 val originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
                 val originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
 
-                val newTimestamp = System.currentTimeMillis() + (5 * 60 * 1000)
+                // ⭐ 5분 후 시간 계산 + 스마트 시간 조정 (중복 방지)
+                var adjustedMinutes = 5
+                var newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
+                val maxAdjustment = 10  // 최대 10분
+
+                while (DatabaseHelper.getInstance(context).isTimeConflict(context, newTimestamp, alarmId) && adjustedMinutes < maxAdjustment) {
+                    adjustedMinutes++
+                    newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
+                    Log.d("AlarmAction", "⚠️ 시간 충돌 감지 → ${adjustedMinutes}분 후로 조정")
+                }
 
                 // 기존 알람 취소
                 val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

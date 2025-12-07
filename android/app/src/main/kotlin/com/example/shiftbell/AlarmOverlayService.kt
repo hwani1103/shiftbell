@@ -469,8 +469,16 @@ class AlarmOverlayService : Service() {
                 val originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
                 val originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
 
-                // 5분 후 시간 계산
-                val newTimestamp = System.currentTimeMillis() + (5 * 60 * 1000)
+                // ⭐ 5분 후 시간 계산 + 스마트 시간 조정 (중복 방지)
+                var adjustedMinutes = 5
+                var newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
+                val maxAdjustment = 10  // 최대 10분
+
+                while (DatabaseHelper.getInstance(applicationContext).isTimeConflict(applicationContext, newTimestamp, alarmId) && adjustedMinutes < maxAdjustment) {
+                    adjustedMinutes++
+                    newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
+                    Log.d("AlarmOverlay", "⚠️ 시간 충돌 감지 → ${adjustedMinutes}분 후로 조정")
+                }
 
                 // 기존 알람 취소
                 val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager

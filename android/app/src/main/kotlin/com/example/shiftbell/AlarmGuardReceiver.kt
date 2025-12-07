@@ -308,7 +308,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
                 arrayOf(now),
                 null,
                 null,
-                "date ASC",
+                "date ASC, id ASC",  // ⭐ 동일 시각일 때 낮은 ID 우선
                 "1"
             )
 

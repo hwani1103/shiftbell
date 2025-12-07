@@ -92,4 +92,46 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
         Log.e(TAG, "❌ DB 쓰기 최종 실패")
         return null
     }
+
+    // ⭐ 중복 알람 체크: 동일한 시각에 다른 알람이 이미 등록되어 있는지 확인
+    fun isTimeConflict(context: Context, targetTimestamp: Long, excludeId: Int? = null): Boolean {
+        var cursor: android.database.Cursor? = null
+        var db: SQLiteDatabase? = null
+
+        return try {
+            val dbHelper = getInstance(context)
+            db = dbHelper.getReadableDatabaseWithRetry() ?: return false
+
+            val dateStr = java.text.SimpleDateFormat(
+                "yyyy-MM-dd'T'HH:mm:ss",
+                java.util.Locale.getDefault()
+            ).format(java.util.Date(targetTimestamp))
+
+            cursor = if (excludeId != null) {
+                db.query(
+                    "alarms",
+                    arrayOf("id"),
+                    "date = ? AND id != ?",
+                    arrayOf(dateStr, excludeId.toString()),
+                    null, null, null
+                )
+            } else {
+                db.query(
+                    "alarms",
+                    arrayOf("id"),
+                    "date = ?",
+                    arrayOf(dateStr),
+                    null, null, null
+                )
+            }
+
+            cursor.count > 0
+        } catch (e: Exception) {
+            Log.e(TAG, "⚠️ 시간 충돌 체크 실패", e)
+            false
+        } finally {
+            cursor?.close()
+            db?.close()
+        }
+    }
 }
