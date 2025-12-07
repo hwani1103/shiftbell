@@ -284,12 +284,33 @@ class AlarmPlayer(private val context: Context) {
         }
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // API 33+: VibrationAttributes 사용 (권장)
                 val amplitudes = intArrayOf(0, amplitude, 0, amplitude)
-                val effect = VibrationEffect.createWaveform(pattern, amplitudes, 0) // 0 = 반복
-                vibrator?.vibrate(effect)
-                Log.d("AlarmPlayer", "✅ vibrate() 호출 완료 (API 26+)")
+                val effect = VibrationEffect.createWaveform(pattern, amplitudes, 0)
+
+                val vibrationAttributes = android.os.VibrationAttributes.Builder()
+                    .setUsage(android.os.VibrationAttributes.USAGE_ALARM)
+                    .build()
+
+                vibrator?.vibrate(effect, vibrationAttributes)
+                Log.d("AlarmPlayer", "✅ vibrate() 호출 완료 (API 33+ VibrationAttributes)")
+
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // API 26-32: AudioAttributes 사용
+                val amplitudes = intArrayOf(0, amplitude, 0, amplitude)
+                val effect = VibrationEffect.createWaveform(pattern, amplitudes, 0)
+
+                val audioAttributes = AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+
+                vibrator?.vibrate(effect, audioAttributes)
+                Log.d("AlarmPlayer", "✅ vibrate() 호출 완료 (API 26+ AudioAttributes)")
+
             } else {
+                // API 25 이하: Deprecated 메서드
                 @Suppress("DEPRECATION")
                 vibrator?.vibrate(pattern, 0)
                 Log.d("AlarmPlayer", "✅ vibrate() 호출 완료 (Legacy)")
