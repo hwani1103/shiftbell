@@ -346,6 +346,11 @@ private fun dismissAlarm() {
     sendBroadcast(guardIntent)
     Log.d("AlarmActivity", "✅ AlarmGuardReceiver 트리거")
 
+    // ⭐ Flutter UI 갱신 트리거
+    val flutterIntent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+    sendBroadcast(flutterIntent)
+    Log.d("AlarmActivity", "📢 Flutter UI 갱신 브로드캐스트 전송")
+
     // ⭐ finish()만 호출하면 잠금 화면으로 돌아감
     finish()
 }
@@ -471,6 +476,11 @@ private fun dismissAlarm() {
 
                 // ⭐ 연장 Notification 표시 (NotificationHelper 사용)
                 NotificationHelper.showUpdatedNotification(applicationContext, timeStr, shiftType)
+
+                // ⭐ Flutter UI 갱신 트리거
+                val flutterIntent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+                sendBroadcast(flutterIntent)
+                Log.d("AlarmActivity", "📢 Flutter UI 갱신 브로드캐스트 전송")
 
             } else {
                 Log.e("AlarmActivity", "❌ 알람 정보 없음: ID=$alarmId")

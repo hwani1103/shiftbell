@@ -225,13 +225,6 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: Colors.black,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.delete_sweep, color: Colors.red.shade700),
-            tooltip: '전체 이력 삭제 (테스트용)',
-            onPressed: _deleteAllHistory,
-          ),
-        ],
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())

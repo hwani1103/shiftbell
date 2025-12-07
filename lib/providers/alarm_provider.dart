@@ -57,10 +57,31 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
 
   Future<void> deleteAlarm(int id, DateTime? date) async {
     try {
-      await DatabaseService.instance.deleteAlarm(id);
+      // ⭐ 알람이 울리는 중인지 확인
+      bool isRinging = false;
+      try {
+        isRinging = await _platform.invokeMethod('isAlarmRinging') ?? false;
+        print('📊 알람 상태: ${isRinging ? "울림 중" : "울리기 전"}');
+      } catch (e) {
+        print('⚠️ 알람 상태 확인 실패: $e');
+      }
+
+      // ⭐ 이력 타입 결정
+      final dismissType = isRinging ? 'swiped' : 'cancelled_before_ring';
+      await DatabaseService.instance.deleteAlarm(id, dismissType: dismissType);
       await AlarmService().cancelAlarm(id);
 
-      // ⭐ Notification 삭제 (8888, 8889)
+      // ⭐ 알람 울리는 중이면 소리 중지
+      if (isRinging) {
+        try {
+          await _platform.invokeMethod('stopAlarm');
+          print('✅ 알람 소리 중지');
+        } catch (e) {
+          print('⚠️ 알람 소리 중지 실패: $e');
+        }
+      }
+
+      // ⭐ Notification 삭제 (7777, 8888, 8889)
       try {
         await _platform.invokeMethod('cancelNotification');
         print('✅ Notification 삭제 완료 (8888, 8889)');
@@ -77,7 +98,7 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
       }
 
       await _loadAlarms();
-      print('✅ 알람 삭제 완료 (ID: $id)');
+      print('✅ 알람 삭제 완료 (ID: $id, 타입: $dismissType)');
     } catch (e) {
       print('❌ 알람 삭제 실패: $e');
       rethrow;

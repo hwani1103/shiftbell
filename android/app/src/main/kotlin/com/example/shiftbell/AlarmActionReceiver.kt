@@ -244,6 +244,9 @@ class AlarmActionReceiver : BroadcastReceiver() {
         context.sendBroadcast(guardIntent)
         Log.d("AlarmAction", "✅ AlarmGuardReceiver 즉시 재실행")
 
+        // ⭐ Flutter UI 갱신 트리거
+        notifyFlutterUI(context)
+
     } catch (e: Exception) {
         Log.e("AlarmAction", "❌ DB 삭제 실패", e)
     } finally {
@@ -251,6 +254,17 @@ class AlarmActionReceiver : BroadcastReceiver() {
         db?.close()
     }
 }
+
+    // ⭐ Flutter UI 갱신 브로드캐스트 전송
+    private fun notifyFlutterUI(context: Context) {
+        try {
+            val intent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+            context.sendBroadcast(intent)
+            Log.d("AlarmAction", "📢 Flutter UI 갱신 브로드캐스트 전송")
+        } catch (e: Exception) {
+            Log.e("AlarmAction", "⚠️ Flutter UI 갱신 브로드캐스트 실패", e)
+        }
+    }
     
     private fun extendAlarm(context: Context, alarmId: Int, originalTimestamp: Long, label: String, soundType: String) {
         val newTimestamp = originalTimestamp + (5 * 60 * 1000)
@@ -380,6 +394,9 @@ class AlarmActionReceiver : BroadcastReceiver() {
             NotificationHelper.showUpdatedNotification(context, timeStr, label)
             Log.d("AlarmAction", "✅ Notification 업데이트 완료")
 
+            // ⭐ Flutter UI 갱신 트리거
+            notifyFlutterUI(context)
+
             val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
             launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             context.startActivity(launchIntent)
@@ -480,6 +497,9 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
             val guardIntent = Intent(context, AlarmGuardReceiver::class.java)
             context.sendBroadcast(guardIntent)
+
+            // ⭐ Flutter UI 갱신 트리거
+            notifyFlutterUI(context)
 
         } catch (e: Exception) {
             Log.e("AlarmAction", "❌ DB 작업 실패", e)
@@ -596,6 +616,9 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 Log.d("AlarmAction", "✅ AlarmGuardReceiver 트리거")
 
                 NotificationHelper.showUpdatedNotification(context, timeStr, shiftType)
+
+                // ⭐ Flutter UI 갱신 트리거
+                notifyFlutterUI(context)
 
             } else {
                 Log.e("AlarmAction", "❌ 알람 정보 없음")

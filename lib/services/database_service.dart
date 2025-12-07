@@ -435,7 +435,7 @@ class DatabaseService {
     );
   }
   
-  Future<int> deleteAlarm(int id) async {
+  Future<int> deleteAlarm(int id, {String dismissType = 'cancelled_before_ring'}) async {
     final db = await database;
 
     // ⭐ 이력 기록: 알람 정보 먼저 읽기
@@ -452,19 +452,20 @@ class DatabaseService {
         final scheduledTime = alarmMap['time'] as String?;
         final shiftType = alarmMap['shift_type'] as String?;
 
-        // alarm_history에 '알람 제거' 기록 추가
+        // alarm_history에 이력 추가 (dismiss_type 파라미터 사용)
         if (scheduledDate != null && scheduledTime != null) {
           await db.insert('alarm_history', {
             'alarm_id': id,
             'scheduled_time': scheduledTime,
             'scheduled_date': scheduledDate,
             'actual_ring_time': DateTime.now().toIso8601String(),
-            'dismiss_type': 'cancelled_before_ring',
+            'dismiss_type': dismissType,  // ⭐ 파라미터 사용
             'snooze_count': 0,
             'shift_type': shiftType,
             'created_at': DateTime.now().toIso8601String(),
           });
-          print('✅ alarm_history에 "알람 제거" 기록 추가: ID=$id');
+          final historyText = dismissType == 'swiped' ? '알람 확인' : '알람 제거';
+          print('✅ alarm_history에 "$historyText" 기록 추가: ID=$id');
         }
       }
     } catch (e) {

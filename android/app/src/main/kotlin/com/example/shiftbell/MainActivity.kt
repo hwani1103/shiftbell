@@ -263,6 +263,11 @@ override fun onNewIntent(intent: Intent) {
                     updatePreviewVolume(volume)
                     result.success(null)
                 }
+                // ⭐ 알람이 울리는 중인지 확인
+                "isAlarmRinging" -> {
+                    val isRinging = AlarmPlayer.getInstance(applicationContext).isAlarmRinging()
+                    result.success(isRinging)
+                }
                 else -> result.notImplemented()
             }
         }
