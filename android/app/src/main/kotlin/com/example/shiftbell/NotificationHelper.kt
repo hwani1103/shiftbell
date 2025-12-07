@@ -72,7 +72,7 @@ object NotificationHelper {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setContentTitle("$newTimeStr 로 연장되었습니다")
             .setContentText(label)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)  // ⭐ 알람시계 아이콘
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setAutoCancel(true)
