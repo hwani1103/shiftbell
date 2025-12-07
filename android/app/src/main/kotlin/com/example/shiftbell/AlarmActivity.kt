@@ -453,6 +453,7 @@ private fun dismissAlarm() {
                 val values = ContentValues().apply {
                     put("date", dateStr)
                     put("time", timeStr)
+                    put("type", "snoozed")  // ⭐ CRITICAL FIX: 자정 갱신 시 삭제 방지
                 }
                 writableDb.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
                 Log.d("AlarmActivity", "✅ DB 업데이트: time=$timeStr, date=$dateStr")

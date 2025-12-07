@@ -222,6 +222,11 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
         ? '${alarm.date!.hour.toString().padLeft(2, '0')}:${alarm.date!.minute.toString().padLeft(2, '0')}'
         : alarm.time;
 
+    // ⭐ CRITICAL FIX: null 체크 추가
+    if (alarm.date == null) {
+      return SizedBox.shrink();
+    }
+
     final timeData = _getTimeUntilData(alarm.date!);
     final dateLabel = _getDateLabel(alarm.date!);
 
@@ -606,6 +611,11 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
   // ⭐ 알람 목록 아이템
   Widget _buildAlarmListItem(Alarm alarm, bool isNext) {
+    // ⭐ CRITICAL FIX: null 체크 추가
+    if (alarm.date == null) {
+      return SizedBox.shrink();
+    }
+
     final date = alarm.date!;
     final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
     final dateStr = '${date.month}/${date.day} (${weekdays[date.weekday - 1]})';

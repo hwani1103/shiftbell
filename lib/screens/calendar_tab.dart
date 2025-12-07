@@ -959,21 +959,34 @@ Widget build(BuildContext context) {
       print('⚠️ Overlay 종료 신호 실패: $e');
     }
 
-    // 2. DB에서 알람 삭제 + Native 알람 취소
-    await ref.read(alarmNotifierProvider.notifier).deleteAlarm(alarm.id!, alarm.date);
-
-    // 3. Notification 취소
     try {
-      await platform.invokeMethod('cancelNotification');
-    } catch (e) {
-      print('⚠️ Notification 삭제 실패: $e');
-    }
+      // 2. DB에서 알람 삭제 + Native 알람 취소
+      await ref.read(alarmNotifierProvider.notifier).deleteAlarm(alarm.id!, alarm.date);
 
-    // 4. AlarmGuardReceiver 트리거 (다음 알람 Notification 표시)
-    try {
-      await platform.invokeMethod('triggerGuardCheck');
+      // 3. Notification 취소
+      try {
+        await platform.invokeMethod('cancelNotification');
+      } catch (e) {
+        print('⚠️ Notification 삭제 실패: $e');
+      }
+
+      // 4. AlarmGuardReceiver 트리거 (다음 알람 Notification 표시)
+      try {
+        await platform.invokeMethod('triggerGuardCheck');
+      } catch (e) {
+        print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
+      }
     } catch (e) {
-      print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ 알람 삭제 실패: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      print('❌ _deleteAlarm 실패: $e');
+      rethrow;
     }
 
     if (mounted) {
@@ -1137,51 +1150,75 @@ Widget build(BuildContext context) {
   // ⭐ Provider 사용으로 변경
   Future<void> _bulkAssignShift(String shiftType, ShiftSchedule schedule) async {
     if (_selectedDates.isEmpty) return;
-    
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => Center(child: CircularProgressIndicator()),
     );
-    
-    // ⭐ Provider의 bulkAssignShift 사용
-    await ref.read(scheduleProvider.notifier).bulkAssignShift(
-      _selectedDates.toList(),
-      shiftType,
-    );
-    
-    // ⭐ 각 날짜의 고정 알람 재생성
-    for (var date in _selectedDates) {
-      await ref.read(alarmNotifierProvider.notifier).regenerateFixedAlarms(
-        date,
+
+    try {
+      // ⭐ Provider의 bulkAssignShift 사용
+      await ref.read(scheduleProvider.notifier).bulkAssignShift(
+        _selectedDates.toList(),
         shiftType,
       );
-    }
-    
-    Navigator.pop(context);
-    _exitMultiSelectMode();
-    
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('✅ 근무가 할당되었습니다')),
-      );
+
+      // ⭐ 각 날짜의 고정 알람 재생성
+      for (var date in _selectedDates) {
+        await ref.read(alarmNotifierProvider.notifier).regenerateFixedAlarms(
+          date,
+          shiftType,
+        );
+      }
+
+      Navigator.pop(context);
+      _exitMultiSelectMode();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('✅ 근무가 할당되었습니다')),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ 근무 할당 실패: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      print('❌ _bulkAssignShift 실패: $e');
     }
   }
   
   Future<void> _changeShift(DateTime date, String newShiftType, ShiftSchedule schedule) async {
-  await ref.read(scheduleProvider.notifier).changeShiftWithAlarms(date, newShiftType);
+    try {
+      await ref.read(scheduleProvider.notifier).changeShiftWithAlarms(date, newShiftType);
 
-  // ⭐ 알람 Provider도 수동 갱신
-  await ref.read(alarmNotifierProvider.notifier).refresh();
+      // ⭐ 알람 Provider도 수동 갱신
+      await ref.read(alarmNotifierProvider.notifier).refresh();
 
-  try {
-    await platform.invokeMethod('cancelNotification');
-    print('✅ Notification 삭제 완료 (근무일 변경)');
-  } catch (e) {
-    print('⚠️ Notification 삭제 실패: $e');
+      try {
+        await platform.invokeMethod('cancelNotification');
+        print('✅ Notification 삭제 완료 (근무일 변경)');
+      } catch (e) {
+        print('⚠️ Notification 삭제 실패: $e');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ 근무 변경 실패: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      print('❌ _changeShift 실패: $e');
+    }
   }
-
-}
 
   // ⭐ 메모 상세 팝업 (수정/삭제)
   void _showMemoDetailPopup(DateTime day, DateMemo memo) {

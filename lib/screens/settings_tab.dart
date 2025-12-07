@@ -129,6 +129,11 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                     itemCount: alarms.length,
                     itemBuilder: (context, index) {
                       final alarm = alarms[index];
+                      // ⭐ CRITICAL FIX: null 체크 추가
+                      if (alarm.date == null) {
+                        return SizedBox.shrink();
+                      }
+
                       final isPast = alarm.date!.isBefore(now);
                       final isToday = alarm.date!.year == now.year &&
                                      alarm.date!.month == now.month &&
