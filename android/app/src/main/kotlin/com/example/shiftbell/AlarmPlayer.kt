@@ -86,12 +86,16 @@ class AlarmPlayer(private val context: Context) {
 
     // DB에서 알람 타입 설정 읽어서 재생
     fun playAlarmFromDB(alarmId: Int) {
+        var alarmCursor: android.database.Cursor? = null
+        var typeCursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.readableDatabase
+            db = dbHelper.readableDatabase
 
             // 알람에서 alarm_type_id 조회
-            val alarmCursor = db.query(
+            alarmCursor = db.query(
                 "alarms",
                 arrayOf("alarm_type_id"),
                 "id = ?",
@@ -103,10 +107,9 @@ class AlarmPlayer(private val context: Context) {
             if (alarmCursor.moveToFirst()) {
                 alarmTypeId = alarmCursor.getInt(alarmCursor.getColumnIndexOrThrow("alarm_type_id"))
             }
-            alarmCursor.close()
 
             // alarm_types에서 설정 조회
-            val typeCursor = db.query(
+            typeCursor = db.query(
                 "alarm_types",
                 arrayOf("sound_file", "volume", "vibration_strength"),
                 "id = ?",
@@ -123,8 +126,6 @@ class AlarmPlayer(private val context: Context) {
                 volume = typeCursor.getFloat(typeCursor.getColumnIndexOrThrow("volume"))
                 vibrationStrength = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("vibration_strength"))
             }
-            typeCursor.close()
-            db.close()
 
             Log.d("AlarmPlayer", "DB 설정: soundFile=$soundFile, volume=$volume, vibration=$vibrationStrength")
             playAlarmWithSettings(soundFile, volume, vibrationStrength)
@@ -132,6 +133,10 @@ class AlarmPlayer(private val context: Context) {
         } catch (e: Exception) {
             Log.e("AlarmPlayer", "DB 설정 읽기 실패, 기본값 사용", e)
             playAlarmWithSettings("alarmbell1", 0.7f, 3)  // 기본값: 알람벨1, 70%, 강하게
+        } finally {
+            alarmCursor?.close()
+            typeCursor?.close()
+            db?.close()
         }
     }
 

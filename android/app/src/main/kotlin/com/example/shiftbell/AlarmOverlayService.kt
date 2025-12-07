@@ -190,7 +190,7 @@ class AlarmOverlayService : Service() {
         // 알람 소리 중지
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
-        // ⭐ CRITICAL FIX: Native 알람 취소 (유령 알람 방지!)
+        // ⭐ CRITICAL FIX: Native 알람 먼저 취소 (유령 알람 방지!)
         cancelNativeAlarm()
 
         // DB에서 알람 삭제
@@ -344,9 +344,6 @@ class AlarmOverlayService : Service() {
     // 알람 소리 중지
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
-    // ⭐ CRITICAL FIX: Native 알람 취소 (유령 알람 방지!)
-    cancelNativeAlarm()
-
     // ⭐ 알람 정보 먼저 읽어서 저장 (이력 생성용)
     var scheduledTime = ""
     var scheduledDate = ""
@@ -376,6 +373,9 @@ class AlarmOverlayService : Service() {
         }
 
         cursor.close()
+
+        // ⭐ CRITICAL FIX: Native 알람 먼저 취소 (유령 알람 방지!)
+        cancelNativeAlarm()
 
         // 2. 알람 삭제
         db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))

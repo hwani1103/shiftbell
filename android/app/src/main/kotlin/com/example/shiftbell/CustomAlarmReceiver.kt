@@ -121,12 +121,16 @@ override fun onReceive(context: Context, intent: Intent) {
 
     // ⭐ DB에서 알람 타입의 duration 읽기
     private fun getDurationFromDB(context: Context, alarmId: Int): Int {
+        var alarmCursor: android.database.Cursor? = null
+        var typeCursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.readableDatabase
+            db = dbHelper.readableDatabase
 
             // 알람에서 alarm_type_id 조회
-            val alarmCursor = db.query(
+            alarmCursor = db.query(
                 "alarms",
                 arrayOf("alarm_type_id"),
                 "id = ?",
@@ -138,10 +142,9 @@ override fun onReceive(context: Context, intent: Intent) {
             if (alarmCursor.moveToFirst()) {
                 alarmTypeId = alarmCursor.getInt(alarmCursor.getColumnIndexOrThrow("alarm_type_id"))
             }
-            alarmCursor.close()
 
             // alarm_types에서 duration 조회
-            val typeCursor = db.query(
+            typeCursor = db.query(
                 "alarm_types",
                 arrayOf("duration"),
                 "id = ?",
@@ -153,14 +156,16 @@ override fun onReceive(context: Context, intent: Intent) {
             if (typeCursor.moveToFirst()) {
                 duration = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("duration"))
             }
-            typeCursor.close()
-            db.close()
 
             Log.d("CustomAlarmReceiver", "✅ DB duration: $duration 분")
             return duration
         } catch (e: Exception) {
             Log.e("CustomAlarmReceiver", "❌ duration 조회 실패, 기본값 5분 사용", e)
             return 5
+        } finally {
+            alarmCursor?.close()
+            typeCursor?.close()
+            db?.close()
         }
     }
     

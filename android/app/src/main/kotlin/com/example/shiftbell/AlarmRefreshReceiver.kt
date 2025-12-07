@@ -82,7 +82,7 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
         }
     }
     
-    // 기존 알람 전부 삭제
+    // 기존 알람 전부 삭제 (스누즈 알람 보호)
     private fun deleteAllAlarms(context: Context) {
         var cursor: android.database.Cursor? = null
         var db: android.database.sqlite.SQLiteDatabase? = null
@@ -91,8 +91,14 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
             val dbHelper = DatabaseHelper.getInstance(context)
             db = dbHelper.writableDatabase
 
-            // DB에서 모든 알람 조회
-            cursor = db.query("alarms", null, null, null, null, null, null)
+            // ⭐ CRITICAL FIX: type='fixed'인 알람만 조회 (스누즈 알람 보호)
+            cursor = db.query(
+                "alarms",
+                null,
+                "type = ?",
+                arrayOf("fixed"),
+                null, null, null
+            )
             val alarmIds = mutableListOf<Int>()
 
             while (cursor.moveToNext()) {
@@ -115,10 +121,10 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
                 alarmManager.cancel(pendingIntent)
             }
 
-            // DB에서 삭제
-            db.delete("alarms", null, null)
+            // ⭐ CRITICAL FIX: type='fixed'인 알람만 삭제 (스누즈 알람 보호)
+            db.delete("alarms", "type = ?", arrayOf("fixed"))
 
-            Log.d("AlarmRefresh", "🗑️ 기존 알람 ${alarmIds.size}개 삭제 완료")
+            Log.d("AlarmRefresh", "🗑️ 고정 알람 ${alarmIds.size}개 삭제 완료 (스누즈 보호)")
         } catch (e: Exception) {
             Log.e("AlarmRefresh", "알람 삭제 실패", e)
         } finally {
