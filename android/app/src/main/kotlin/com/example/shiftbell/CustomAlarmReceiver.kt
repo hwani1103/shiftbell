@@ -39,51 +39,10 @@ override fun onReceive(context: Context, intent: Intent) {
 
     // ⭐ 신규: 알람 울릴 때 즉시 갱신 체크!
     AlarmRefreshUtil.checkAndTriggerRefresh(context)
-    
-    // ⭐ 알람 이력 기록
-    try {
-        val dbHelper = DatabaseHelper.getInstance(context)
-        val db = dbHelper.writableDatabase
-        var cursor: android.database.Cursor? = null
 
-        try {
-            cursor = db.query(
-                "alarms",
-                null,
-                "id = ?",
-                arrayOf(id.toString()),
-                null, null, null
-            )
+    // ⭐ ringing 이력 생성 제거 (사용자에게 무의미한 내부 상태)
+    // 실제 이력은 dismiss/snooze/timeout 시 생성됨
 
-            if (cursor.moveToFirst()) {
-                val scheduledTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
-                val scheduledDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
-                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
-
-                val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
-
-                val historyValues = ContentValues().apply {
-                    put("alarm_id", id)
-                    put("scheduled_time", scheduledTime)
-                    put("scheduled_date", scheduledDate)
-                    put("actual_ring_time", now)
-                    put("dismiss_type", "ringing")
-                    put("snooze_count", 0)
-                    put("shift_type", shiftType)
-                    put("created_at", now)
-                }
-
-                db.insert("alarm_history", null, historyValues)
-                Log.d("CustomAlarmReceiver", "✅ 알람 이력 기록: ID=$id")
-            }
-        } finally {
-            cursor?.close()
-            db.close()
-        }
-    } catch (e: Exception) {
-        Log.e("CustomAlarmReceiver", "❌ 알람 이력 기록 실패", e)
-    }
-    
     // 알람 재생 (DB에서 설정 읽어서 적용)
     AlarmPlayer.getInstance(context.applicationContext).playAlarmFromDB(id)
     

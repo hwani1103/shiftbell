@@ -49,17 +49,13 @@ class AlarmHistory {
   String get dismissTypeText {
     switch (dismissType) {
       case 'swiped':
-        return '스와이프로 끔';
+        return '알람 확인';
       case 'snoozed':
-        return '스누즈 ${snoozeCount}회';
+        return '5분 연장';
       case 'timeout':
-        return '자동 종료 (놓침)';
-      case 'ringing':
-        return '울리는 중...';
+        return '무응답';
       case 'cancelled_before_ring':
-        return '울기 전 제거';
-      case 'deleted_by_user':
-        return '사용자가 삭제';
+        return '알람 제거';
       default:
         return dismissType;
     }

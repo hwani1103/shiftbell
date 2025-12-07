@@ -131,16 +131,11 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       case 'swiped':
         return '알람 확인';
       case 'snoozed':
-        final count = history.snoozeCount;
-        return count > 1 ? '알람 ${count}회 연장' : '알람 5분 연장';
+        return '5분 연장';
       case 'timeout':
-        return '알람 무응답';
-      case 'ringing':
-        return '울리는 중...';
+        return '무응답';
       case 'cancelled_before_ring':
-        return '울기 전 제거';
-      case 'deleted_by_user':
-        return '알람 삭제됨';
+        return '알람 제거';
       default:
         return history.dismissType;
     }
@@ -156,12 +151,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         return Colors.orange.shade600;
       case 'timeout':
         return Colors.red.shade600;
-      case 'ringing':
-        return Colors.blue.shade600;
       case 'cancelled_before_ring':
         return Colors.purple.shade600;
-      case 'deleted_by_user':
-        return Colors.brown.shade600;
       default:
         return Colors.grey.shade600;
     }

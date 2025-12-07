@@ -356,20 +356,11 @@ class AlarmActionReceiver : BroadcastReceiver() {
             val dbHelper = DatabaseHelper.getInstance(context)
             val db = dbHelper.writableDatabase
             db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
-
-            // 이력 업데이트
-            val values = android.content.ContentValues().apply {
-                put("dismiss_type", "swiped")
-            }
-            db.update(
-                "alarm_history",
-                values,
-                "alarm_id = ? AND dismiss_type = 'ringing'",
-                arrayOf(alarmId.toString())
-            )
-
             db.close()
             Log.d("AlarmAction", "✅ DB 알람 삭제 완료")
+
+            // 이력 생성
+            createAlarmHistory(context, alarmId, "swiped")
 
             AlarmGuardReceiver.removeShownNotification(alarmId)
             AlarmRefreshUtil.checkAndTriggerRefresh(context)
@@ -457,15 +448,11 @@ class AlarmActionReceiver : BroadcastReceiver() {
                     put("time", timeStr)
                 }
                 writableDb.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
-
-                // 이력 업데이트
-                writableDb.execSQL(
-                    "UPDATE alarm_history SET dismiss_type = 'snoozed', snooze_count = snooze_count + 1 WHERE alarm_id = ? AND dismiss_type = 'ringing'",
-                    arrayOf(alarmId)
-                )
-
                 writableDb.close()
                 Log.d("AlarmAction", "✅ 5분 후 재등록 완료")
+
+                // 이력 생성
+                createAlarmHistory(context, alarmId, "snoozed")
 
                 AlarmGuardReceiver.removeShownNotification(alarmId)
                 AlarmRefreshUtil.checkAndTriggerRefresh(context)
@@ -480,6 +467,55 @@ class AlarmActionReceiver : BroadcastReceiver() {
         } finally {
             cursor?.close()
             db?.close()
+        }
+    }
+
+    // ⭐ 이력 생성 (ringing 이력 없으므로 새로 생성)
+    private fun createAlarmHistory(context: Context, alarmId: Int, dismissType: String) {
+        var cursor: android.database.Cursor? = null
+
+        try {
+            val dbHelper = DatabaseHelper.getInstance(context)
+            val db = dbHelper.writableDatabase
+
+            // 알람 정보 조회
+            cursor = db.query(
+                "alarms",
+                arrayOf("time", "date", "shift_type"),
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+
+            if (cursor.moveToFirst()) {
+                val scheduledTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
+                val scheduledDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+
+                val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+
+                // 새 이력 생성
+                val historyValues = android.content.ContentValues().apply {
+                    put("alarm_id", alarmId)
+                    put("scheduled_time", scheduledTime)
+                    put("scheduled_date", scheduledDate)
+                    put("actual_ring_time", now)
+                    put("dismiss_type", dismissType)
+                    put("snooze_count", 0)  // 항상 0
+                    put("shift_type", shiftType)
+                    put("created_at", now)
+                }
+
+                db.insert("alarm_history", null, historyValues)
+                Log.d("AlarmAction", "✅ 알람 이력 생성: ID=$alarmId, type=$dismissType")
+            }
+
+            cursor?.close()
+            db.close()
+        } catch (e: Exception) {
+            Log.e("AlarmAction", "❌ 이력 생성 실패", e)
+        } finally {
+            cursor?.close()
         }
     }
 }

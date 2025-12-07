@@ -153,8 +153,8 @@ private fun timeoutAlarm() {
         Log.e("AlarmActivity", "❌ DB 삭제 실패", e)
     }
 
-    // 이력 업데이트
-    updateAlarmHistory(alarmId, "timeout")
+    // 이력 생성
+    createAlarmHistory(alarmId, "timeout")
 
     // shownNotifications에서 제거
     AlarmGuardReceiver.removeShownNotification(alarmId)
@@ -275,7 +275,7 @@ private fun dismissAlarm() {
         Log.e("AlarmActivity", "❌ DB 삭제 실패", e)
     }
 
-    updateAlarmHistory(alarmId, "swiped")
+    createAlarmHistory(alarmId, "swiped")
 
     // ⭐ Notification 삭제 (7777: 제어, 8888: 20분전, 8889: 스누즈/타임아웃)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -409,7 +409,7 @@ private fun dismissAlarm() {
             db?.close()
         }
 
-        updateAlarmHistory(alarmId, "snoozed", incrementSnooze = true)
+        createAlarmHistory(alarmId, "snoozed")
 
         // ⭐ finish()만 호출하면 잠금 화면으로 돌아감
         finish()
@@ -531,32 +531,52 @@ private fun dismissAlarm() {
         }
     }
 
-    private fun updateAlarmHistory(alarmId: Int, dismissType: String, incrementSnooze: Boolean = false) {
+    // ⭐ 변경: 이력 업데이트 → 이력 생성 (ringing 이력 없으므로)
+    private fun createAlarmHistory(alarmId: Int, dismissType: String) {
+        var cursor: android.database.Cursor? = null
+
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
             val db = dbHelper.writableDatabase
-            
-            if (incrementSnooze) {
-                db.execSQL(
-                    "UPDATE alarm_history SET dismiss_type = ?, snooze_count = snooze_count + 1 WHERE alarm_id = ? AND dismiss_type = 'ringing'",
-                    arrayOf(dismissType, alarmId)
-                )
-            } else {
-                val values = ContentValues().apply {
+
+            // 알람 정보 조회
+            cursor = db.query(
+                "alarms",
+                arrayOf("time", "date", "shift_type"),
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+
+            if (cursor.moveToFirst()) {
+                val scheduledTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
+                val scheduledDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+
+                val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
+
+                // 새 이력 생성
+                val historyValues = ContentValues().apply {
+                    put("alarm_id", alarmId)
+                    put("scheduled_time", scheduledTime)
+                    put("scheduled_date", scheduledDate)
+                    put("actual_ring_time", now)
                     put("dismiss_type", dismissType)
+                    put("snooze_count", 0)  // 항상 0
+                    put("shift_type", shiftType)
+                    put("created_at", now)
                 }
-                db.update(
-                    "alarm_history",
-                    values,
-                    "alarm_id = ? AND dismiss_type = 'ringing'",
-                    arrayOf(alarmId.toString())
-                )
+
+                db.insert("alarm_history", null, historyValues)
+                Log.d("AlarmActivity", "✅ 알람 이력 생성: ID=$alarmId, type=$dismissType")
             }
-            
+
+            cursor?.close()
             db.close()
-            Log.d("AlarmActivity", "✅ 알람 이력 업데이트: ID=$alarmId, type=$dismissType")
         } catch (e: Exception) {
-            Log.e("AlarmActivity", "❌ 이력 업데이트 실패", e)
+            Log.e("AlarmActivity", "❌ 이력 생성 실패", e)
+        } finally {
+            cursor?.close()
         }
     }
 
