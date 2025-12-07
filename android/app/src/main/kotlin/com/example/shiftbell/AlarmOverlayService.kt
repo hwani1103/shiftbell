@@ -345,19 +345,69 @@ class AlarmOverlayService : Service() {
     // ⭐ CRITICAL FIX: Native 알람 취소 (유령 알람 방지!)
     cancelNativeAlarm()
 
-    // ⭐ DB 알람 삭제
+    // ⭐ 알람 정보 먼저 읽어서 저장 (이력 생성용)
+    var scheduledTime = ""
+    var scheduledDate = ""
+    var shiftType = ""
+
+    var cursor: android.database.Cursor? = null
+    var db: android.database.sqlite.SQLiteDatabase? = null
+
     try {
         val dbHelper = DatabaseHelper.getInstance(applicationContext)
-        val db = dbHelper.writableDatabase
-        db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
-        db.close()
-        Log.d("AlarmOverlay", "✅ DB 알람 삭제: ID=$alarmId")
-    } catch (e: Exception) {
-        Log.e("AlarmOverlay", "❌ DB 삭제 실패", e)
-    }
+        db = dbHelper.writableDatabase
 
-    // 이력 생성
-    createAlarmHistory(alarmId, "swiped")
+        // 1. 알람 정보 읽기
+        cursor = db.query(
+            "alarms",
+            arrayOf("time", "date", "shift_type"),
+            "id = ?",
+            arrayOf(alarmId.toString()),
+            null, null, null
+        )
+
+        if (cursor.moveToFirst()) {
+            scheduledTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
+            scheduledDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+            shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+            Log.d("AlarmOverlay", "✅ 알람 정보 읽기 완료: $scheduledDate $scheduledTime")
+        }
+
+        cursor.close()
+
+        // 2. 알람 삭제
+        db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
+        Log.d("AlarmOverlay", "✅ DB 알람 삭제: ID=$alarmId")
+
+        db.close()
+
+        // 3. 이력 생성 (저장한 정보 사용)
+        if (scheduledTime.isNotEmpty() && scheduledDate.isNotEmpty()) {
+            val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+
+            val historyDb = dbHelper.writableDatabase
+            val historyValues = android.content.ContentValues().apply {
+                put("alarm_id", alarmId)
+                put("scheduled_time", scheduledTime)
+                put("scheduled_date", scheduledDate)
+                put("actual_ring_time", now)
+                put("dismiss_type", "swiped")
+                put("snooze_count", 0)
+                put("shift_type", shiftType)
+                put("created_at", now)
+            }
+
+            historyDb.insert("alarm_history", null, historyValues)
+            historyDb.close()
+            Log.d("AlarmOverlay", "✅ 알람 이력 생성: ID=$alarmId, type=swiped")
+        }
+
+    } catch (e: Exception) {
+        Log.e("AlarmOverlay", "❌ DB 작업 실패", e)
+    } finally {
+        cursor?.close()
+        db?.close()
+    }
 
     // ⭐ Notification 삭제 (7777: 제어, 8888: 20분전, 8889: 스누즈/타임아웃)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

@@ -90,27 +90,41 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 val label = intent.getStringExtra(CustomAlarmReceiver.EXTRA_LABEL) ?: "알람"
                 val soundType = intent.getStringExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE) ?: "loud"
 
-                // ⭐ Overlay가 울리고 있을 수 있으므로 종료 신호 발송
-                val dismissIntent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
-                    setPackage(context.packageName)  // Android 13+ RECEIVER_NOT_EXPORTED 대응
-                    putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                // ⭐ 알람이 울리는 중인지 확인
+                val isRinging = AlarmPlayer.getInstance(context).isAlarmRinging()
+                Log.d("AlarmAction", "📊 알람 상태: ${if (isRinging) "울림 중" else "울리기 전"}")
+
+                if (isRinging) {
+                    // ⭐ 알람 울리는 중 → "알람 확인" (swiped) 이력 생성
+                    Log.d("AlarmAction", "🔔 알람 울리는 중 → 알람 확인 처리")
+
+                    // Overlay 종료 신호
+                    val dismissIntent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
+                        setPackage(context.packageName)
+                        putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                    }
+                    context.sendBroadcast(dismissIntent)
+
+                    // AlarmActivity 종료 신호
+                    val finishIntent = Intent("FINISH_ALARM_ACTIVITY").apply {
+                        setPackage(context.packageName)
+                        putExtra("alarmId", alarmId)
+                    }
+                    context.sendBroadcast(finishIntent)
+
+                    // 알람 소리 중지
+                    AlarmPlayer.getInstance(context).stopAlarm()
+
+                    // "알람 확인" 이력 생성
+                    deleteAlarmFromDB(context, alarmId)
+
+                } else {
+                    // ⭐ 알람 울리기 전 → "알람 제거" (cancelled_before_ring) 이력 생성
+                    Log.d("AlarmAction", "⏰ 알람 울리기 전 → 알람 제거 처리")
+
+                    // "알람 제거" 이력 생성
+                    cancelAlarm(context, alarmId, label, soundType)
                 }
-                context.sendBroadcast(dismissIntent)
-                Log.d("AlarmAction", "📡 Overlay DISMISS 브로드캐스트 발송")
-
-                // ⭐ AlarmActivity 종료 신호도 발송
-                val finishIntent = Intent("FINISH_ALARM_ACTIVITY").apply {
-                    setPackage(context.packageName)
-                    putExtra("alarmId", alarmId)
-                }
-                context.sendBroadcast(finishIntent)
-                Log.d("AlarmAction", "📡 AlarmActivity FINISH 브로드캐스트 발송")
-
-                // 알람 소리 중지
-                AlarmPlayer.getInstance(context).stopAlarm()
-
-                // ⭐ "알람 확인" 이력 생성 (알람이 울린 후 끈 것으로 기록)
-                deleteAlarmFromDB(context, alarmId)
 
                 // Notification 삭제 (7777: 알람 울림중, 8888: 20분전, 8889: 스누즈/타임아웃)
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -365,15 +379,60 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
     // ⭐ Notification에서 알람 삭제
     private fun deleteAlarmFromDB(context: Context, alarmId: Int) {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+
         try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            val db = dbHelper.writableDatabase
+            db = dbHelper.writableDatabase
+
+            // 1. 알람 정보 먼저 읽기
+            cursor = db.query(
+                "alarms",
+                arrayOf("time", "date", "shift_type"),
+                "id = ?",
+                arrayOf(alarmId.toString()),
+                null, null, null
+            )
+
+            var scheduledTime = ""
+            var scheduledDate = ""
+            var shiftType = ""
+
+            if (cursor.moveToFirst()) {
+                scheduledTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
+                scheduledDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+            }
+
+            cursor.close()
+
+            // 2. 알람 삭제
             db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
-            db.close()
             Log.d("AlarmAction", "✅ DB 알람 삭제 완료")
 
-            // 이력 생성
-            createAlarmHistory(context, alarmId, "swiped")
+            db.close()
+
+            // 3. 이력 생성 (저장한 정보 사용)
+            if (scheduledTime.isNotEmpty() && scheduledDate.isNotEmpty()) {
+                val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+
+                val historyDb = dbHelper.writableDatabase
+                val historyValues = android.content.ContentValues().apply {
+                    put("alarm_id", alarmId)
+                    put("scheduled_time", scheduledTime)
+                    put("scheduled_date", scheduledDate)
+                    put("actual_ring_time", now)
+                    put("dismiss_type", "swiped")
+                    put("snooze_count", 0)
+                    put("shift_type", shiftType)
+                    put("created_at", now)
+                }
+
+                historyDb.insert("alarm_history", null, historyValues)
+                historyDb.close()
+                Log.d("AlarmAction", "✅ 알람 이력 생성: ID=$alarmId, type=swiped")
+            }
 
             AlarmGuardReceiver.removeShownNotification(alarmId)
             AlarmRefreshUtil.checkAndTriggerRefresh(context)
@@ -382,7 +441,10 @@ class AlarmActionReceiver : BroadcastReceiver() {
             context.sendBroadcast(guardIntent)
 
         } catch (e: Exception) {
-            Log.e("AlarmAction", "❌ DB 삭제 실패", e)
+            Log.e("AlarmAction", "❌ DB 작업 실패", e)
+        } finally {
+            cursor?.close()
+            db?.close()
         }
     }
 

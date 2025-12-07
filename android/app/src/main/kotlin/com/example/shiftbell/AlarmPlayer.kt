@@ -322,6 +322,16 @@ class AlarmPlayer(private val context: Context) {
         }
     }
 
+    // ⭐ 알람이 재생 중인지 확인
+    fun isAlarmRinging(): Boolean {
+        return try {
+            mediaPlayer?.isPlaying ?: false
+        } catch (e: Exception) {
+            Log.e("AlarmPlayer", "isPlaying 확인 실패", e)
+            false
+        }
+    }
+
     fun stopAlarm() {
         Log.d("AlarmPlayer", "알람 중지")
 
