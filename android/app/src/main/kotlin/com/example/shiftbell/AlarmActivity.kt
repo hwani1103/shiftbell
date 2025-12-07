@@ -367,7 +367,7 @@ private fun dismissAlarm() {
 
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            db = dbHelper.readableDatabase
+            db = dbHelper.writableDatabase  // ⭐ HIGH FIX: 처음부터 writableDatabase 사용 (중복 방지)
 
             cursor = db.query(
                 "alarms",
@@ -395,16 +395,19 @@ private fun dismissAlarm() {
                     null, null, null
                 )
 
-                while (alarmsCursor.moveToNext()) {
-                    val dateStr = alarmsCursor.getString(alarmsCursor.getColumnIndexOrThrow("date"))
-                    try {
-                        val alarmDate = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).parse(dateStr)
-                        alarmDate?.let { existingAlarmTimes.add(it.time) }
-                    } catch (e: Exception) {
-                        // 파싱 실패 무시
+                try {
+                    while (alarmsCursor.moveToNext()) {
+                        val dateStr = alarmsCursor.getString(alarmsCursor.getColumnIndexOrThrow("date"))
+                        try {
+                            val alarmDate = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).parse(dateStr)
+                            alarmDate?.let { existingAlarmTimes.add(it.time) }
+                        } catch (e: Exception) {
+                            // 파싱 실패 무시
+                        }
                     }
+                } finally {
+                    alarmsCursor.close()  // ⭐ HIGH FIX: Cursor 리소스 누수 방지
                 }
-                alarmsCursor.close()
 
                 // ⭐ 5분 후 시간 계산 + 스마트 시간 조정 (중복 방지, 메모리에서 체크)
                 var adjustedMinutes = 5
@@ -463,7 +466,6 @@ private fun dismissAlarm() {
                 Log.d("AlarmActivity", "✅ 5분 후 알람 등록: ID=$alarmId, 시각=${java.util.Date(newTimestamp)}")
 
                 // ⭐ DB 업데이트 (time, date 필드)
-                val writableDb = dbHelper.writableDatabase
                 val dateStr = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(newTimestamp))
                 val timeStr = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault()).format(java.util.Date(newTimestamp))
 
@@ -472,7 +474,7 @@ private fun dismissAlarm() {
                     put("time", timeStr)
                     put("type", "snoozed")  // ⭐ CRITICAL FIX: 자정 갱신 시 삭제 방지
                 }
-                writableDb.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
+                db.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
                 Log.d("AlarmActivity", "✅ DB 업데이트: time=$timeStr, date=$dateStr")
 
                 // ⭐ 이력 생성 (원래 시간 사용!)
@@ -487,10 +489,8 @@ private fun dismissAlarm() {
                     put("shift_type", shiftType)
                     put("created_at", now)
                 }
-                writableDb.insert("alarm_history", null, historyValues)
+                db.insert("alarm_history", null, historyValues)
                 Log.d("AlarmActivity", "✅ 알람 이력 생성: ID=$alarmId, type=snoozed, 원래시간=$originalTime")
-
-                writableDb.close()
 
                 // ⭐ 갱신 체크
                 AlarmRefreshUtil.checkAndTriggerRefresh(this)
