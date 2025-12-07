@@ -808,8 +808,10 @@ Widget build(BuildContext context) {
           },
         );
       },
-    );
-    // ⭐ dispose 제거: 팝업 닫힐 때 자동 가비지 컬렉션됨
+    ).then((_) {
+      // ⭐ MEDIUM FIX: 팝업 닫힐 때 메모리 누수 방지
+      memoController.dispose();
+    });
   }
 
   String _getWeekday(DateTime date) {
@@ -1357,7 +1359,9 @@ Widget build(BuildContext context) {
           },
         ),
       ),
-    );
-    // ⭐ dispose 제거: Dialog 닫힐 때 자동 가비지 컬렉션됨
+    ).then((_) {
+      // ⭐ MEDIUM FIX: 팝업 닫힐 때 메모리 누수 방지
+      editController.dispose();
+    });
   }
 }
