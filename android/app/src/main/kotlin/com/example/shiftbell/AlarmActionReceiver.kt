@@ -106,10 +106,14 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 context.sendBroadcast(finishIntent)
                 Log.d("AlarmAction", "📡 AlarmActivity FINISH 브로드캐스트 발송")
 
+                // 알람 소리 중지
+                AlarmPlayer.getInstance(context).stopAlarm()
+
                 cancelAlarm(context, alarmId, label, soundType)
 
-                // Notification 삭제 (8888: 20분전, 8889: 스누즈/타임아웃)
+                // Notification 삭제 (7777: 알람 울림중, 8888: 20분전, 8889: 스누즈/타임아웃)
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.cancel(7777)
                 notificationManager.cancel(8888)
                 notificationManager.cancel(8889)
             }
