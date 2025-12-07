@@ -109,7 +109,8 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 // 알람 소리 중지
                 AlarmPlayer.getInstance(context).stopAlarm()
 
-                cancelAlarm(context, alarmId, label, soundType)
+                // ⭐ "알람 확인" 이력 생성 (알람이 울린 후 끈 것으로 기록)
+                deleteAlarmFromDB(context, alarmId)
 
                 // Notification 삭제 (7777: 알람 울림중, 8888: 20분전, 8889: 스누즈/타임아웃)
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
