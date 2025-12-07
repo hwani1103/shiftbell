@@ -427,6 +427,11 @@ class AlarmOverlayService : Service() {
     val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
     sendBroadcast(guardIntent)
 
+    // ⭐ Flutter UI 갱신 트리거
+    val flutterIntent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+    sendBroadcast(flutterIntent)
+    Log.d("AlarmOverlay", "📢 Flutter UI 갱신 브로드캐스트 전송")
+
     // Overlay 제거
     removeOverlay()
 
@@ -554,6 +559,11 @@ class AlarmOverlayService : Service() {
 
                 // ⭐ 연장 Notification 표시 (NotificationHelper 사용)
                 NotificationHelper.showUpdatedNotification(applicationContext, timeStr, shiftType)
+
+                // ⭐ Flutter UI 갱신 트리거
+                val flutterIntent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+                sendBroadcast(flutterIntent)
+                Log.d("AlarmOverlay", "📢 Flutter UI 갱신 브로드캐스트 전송")
 
                 // ⭐ 앱 포그라운드로 가져와서 Flutter UI 즉시 갱신
                 val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
