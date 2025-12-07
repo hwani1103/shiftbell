@@ -452,19 +452,19 @@ class DatabaseService {
         final scheduledTime = alarmMap['time'] as String?;
         final shiftType = alarmMap['shift_type'] as String?;
 
-        // alarm_history에 '사용자 삭제' 기록 추가
+        // alarm_history에 '알람 제거' 기록 추가
         if (scheduledDate != null && scheduledTime != null) {
           await db.insert('alarm_history', {
             'alarm_id': id,
             'scheduled_time': scheduledTime,
             'scheduled_date': scheduledDate,
             'actual_ring_time': DateTime.now().toIso8601String(),
-            'dismiss_type': 'deleted_by_user',
+            'dismiss_type': 'cancelled_before_ring',
             'snooze_count': 0,
             'shift_type': shiftType,
             'created_at': DateTime.now().toIso8601String(),
           });
-          print('✅ alarm_history에 "사용자 삭제" 기록 추가: ID=$id');
+          print('✅ alarm_history에 "알람 제거" 기록 추가: ID=$id');
         }
       }
     } catch (e) {

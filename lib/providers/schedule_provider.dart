@@ -151,7 +151,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       }
 
       // 5. DB 삭제 (알람은 이력 기록 후 삭제)
-      await DatabaseService.instance.deleteAllAlarms();  // ⭐ 이력에 'deleted_by_user' 기록
+      await DatabaseService.instance.deleteAllAlarms();  // ⭐ 전체 삭제는 이력 생성 없이 클린 스타트
 
       final db = await DatabaseService.instance.database;
       await db.delete('shift_schedule');
