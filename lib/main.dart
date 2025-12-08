@@ -637,86 +637,44 @@ class _InitialRouterState extends State<InitialRouter> {
 
   @override
   Widget build(BuildContext context) {
-    // 런치 페이지와 색상 반전 (BoxShadow 제거로 깜빡임 방지)
+    // 런치 페이지와 동일한 디자인 (깜빡임 완전 제거)
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF283593), // indigo.shade800
-            Color(0xFF3949AB), // indigo.shade600
-          ],
-        ),
-      ),
+      color: Colors.white,
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            // 로고 (런치 페이지와 정확히 같은 크기/위치, 색상만 반대)
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                // 배경 원
-                Container(
-                  width: 140,
-                  height: 140,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.1),
-                  ),
-                ),
-                // 중앙 흰색 시계
-                const Icon(
-                  Icons.schedule,
-                  size: 90,
-                  color: Colors.white,
-                ),
-                // 우측 상단 노란색 알람 뱃지 (BoxShadow 제거)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade400,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.notifications_active,
-                      size: 24,
-                      color: Colors.indigo,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 40),
-
-            // 앱 타이틀
-            const Text(
-              '교대시계',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: 1.5,
+            // 배경 원 (반투명 인디고)
+            Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF283593).withOpacity(0.1),
               ),
             ),
-
-            const SizedBox(height: 20),
-
-            // 설명 텍스트 (크게)
-            Text(
-              '교대 스케줄 생성 및 자동 알람 등록',
-              style: TextStyle(
-                fontSize: 17,
-                color: Colors.white.withOpacity(0.95),
-                fontWeight: FontWeight.w400,
-                letterSpacing: 0.3,
+            // 중앙 인디고 시계
+            const Icon(
+              Icons.schedule,
+              size: 90,
+              color: Color(0xFF283593), // indigo
+            ),
+            // 우측 상단 노란색 알람 뱃지
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade400,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.notifications_active,
+                  size: 24,
+                  color: Color(0xFF283593), // indigo
+                ),
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
