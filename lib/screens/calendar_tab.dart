@@ -809,8 +809,10 @@ Widget build(BuildContext context) {
         );
       },
     ).then((_) {
-      // ⭐ MEDIUM FIX: 팝업 닫힐 때 메모리 누수 방지
-      memoController.dispose();
+      // ⭐ MEDIUM FIX: 팝업 닫힐 때 메모리 누수 방지 (약간의 지연으로 rebuild 충돌 방지)
+      Future.delayed(const Duration(milliseconds: 100), () {
+        memoController.dispose();
+      });
     });
   }
 
