@@ -1138,7 +1138,41 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
       context: context,
       builder: (context) => _SamsungStyleTimePicker(
         initialTime: currentAlarm.time,
-        onTimeSelected: (time) {
+        onTimeSelected: (time) async {
+          // ⭐ 중복 체크 (자기 자신 제외)
+          final isDuplicate = _alarms.asMap().entries.any((entry) {
+            return entry.key != index &&
+                   entry.value.time.hour == time.hour &&
+                   entry.value.time.minute == time.minute;
+          });
+
+          if (isDuplicate) {
+            Navigator.pop(context);  // 시간 선택 Dialog 먼저 닫기
+            await showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                    SizedBox(width: 8),
+                    Text('중복 알람'),
+                  ],
+                ),
+                content: Text(
+                  '이미 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} 알람이 존재합니다.',
+                  style: TextStyle(fontSize: 16),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('확인', style: TextStyle(fontSize: 16)),
+                  ),
+                ],
+              ),
+            );
+            return;
+          }
+
           setState(() {
             _alarms[index] = currentAlarm.copyWith(time: time);
           });
@@ -1151,7 +1185,39 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
     await showDialog(
       context: context,
       builder: (context) => _SamsungStyleTimePicker(
-        onTimeSelected: (time) {
+        onTimeSelected: (time) async {
+          // ⭐ 중복 체크
+          final isDuplicate = _alarms.any((alarm) =>
+            alarm.time.hour == time.hour && alarm.time.minute == time.minute
+          );
+
+          if (isDuplicate) {
+            Navigator.pop(context);  // 시간 선택 Dialog 먼저 닫기
+            await showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Row(
+                  children: [
+                    Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                    SizedBox(width: 8),
+                    Text('중복 알람'),
+                  ],
+                ),
+                content: Text(
+                  '이미 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} 알람이 존재합니다.',
+                  style: TextStyle(fontSize: 16),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('확인', style: TextStyle(fontSize: 16)),
+                  ),
+                ],
+              ),
+            );
+            return;
+          }
+
           setState(() {
             // 기본값: 소리 (alarmTypeId = 1)
             _alarms.add(AlarmSetting(time: time, alarmTypeId: 1));
