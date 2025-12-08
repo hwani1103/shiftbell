@@ -1147,7 +1147,6 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           });
 
           if (isDuplicate) {
-            Navigator.pop(context);  // 시간 선택 Dialog 먼저 닫기
             await showDialog(
               context: context,
               builder: (context) => AlertDialog(
@@ -1192,7 +1191,6 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           );
 
           if (isDuplicate) {
-            Navigator.pop(context);  // 시간 선택 Dialog 먼저 닫기
             await showDialog(
               context: context,
               builder: (context) => AlertDialog(
@@ -1421,7 +1419,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                 ),
                 SizedBox(width: 8.w),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     int hour24;
                     if (_isAM) {
                       hour24 = _hour == 12 ? 0 : _hour;
@@ -1429,8 +1427,8 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                       hour24 = _hour == 12 ? 12 : _hour + 12;
                     }
 
-                    widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute));
-                    Navigator.pop(context);
+                    await widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute));
+                    if (mounted) Navigator.pop(context);
                   },
                   child: Text('확인'),
                 ),
