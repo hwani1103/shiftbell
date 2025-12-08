@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 런치 페이지용 인디고 시계 아이콘 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="140dp"
+    android:height="140dp"
+    android:viewportWidth="140"
+    android:viewportHeight="140">
+
+    <!-- 배경 원 (반투명 인디고) -->
+    <path
+        android:pathData="M70,70m-70,0a70,70 0,1 1,140 0a70,70 0,1 1,-140 0"
+        android:fillColor="#1A283593"/>
+
+    <!-- 중앙 시계 (인디고) -->
+    <group
+        android:translateX="32"
+        android:translateY="32">
+        <path
+            android:fillColor="#FF283593"
+            android:pathData="M38,2C22.53,2 10,14.53 10,30s12.53,28 28,28s28,-12.53 28,-28S53.47,2 38,2zM38,52c-12.13,0 -22,-9.87 -22,-22s9.87,-22 22,-22s22,9.87 22,22S50.13,52 38,52z"/>
+        <path
+            android:fillColor="#FF283593"
+            android:pathData="M39.5,16h-3v16l13.13,7.88l1.5,-2.46l-11.63,-6.92z"/>
+    </group>
+
+    <!-- 우측 상단 알람 뱃지 (노란색) -->
+    <circle
+        android:cx="106"
+        android:cy="34"
+        android:r="20"
+        android:fillColor="#FFFFC107"/>
+    <path
+        android:translateX="86"
+        android:translateY="14"
+        android:fillColor="#FF283593"
+        android:pathData="M20,38c1.1,0 2,-0.9 2,-2h-4C18,37.1 18.9,38 20,38zM26,30c0,-3.07 -1.64,-5.64 -4.5,-6.32V23c0,-0.83 -0.67,-1.5 -1.5,-1.5s-1.5,0.67 -1.5,1.5v0.68C15.63,24.36 14,26.92 14,30v5l-2,2v1h16v-1l-2,-2V30z"/>
+</vector>

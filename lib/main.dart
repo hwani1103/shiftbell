@@ -637,7 +637,7 @@ class _InitialRouterState extends State<InitialRouter> {
 
   @override
   Widget build(BuildContext context) {
-    // 앱 아이콘과 완전 동일 (원 + 시계 + 알람 뱃지)
+    // 런치 페이지와 정반대 색상 (인디고 배경 + 흰색 시계) + 텍스트
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -650,47 +650,92 @@ class _InitialRouterState extends State<InitialRouter> {
         ),
       ),
       child: Center(
-        child: Stack(
-          alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // 배경 원 (앱 아이콘과 동일)
-            Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
-              ),
-            ),
-            // 중앙 시계 아이콘
-            const Icon(
-              Icons.schedule,
-              size: 90,
-              color: Colors.white,
-            ),
-            // 우측 상단 알람 뱃지 (앱 아이콘과 동일)
-            Positioned(
-              right: 8,
-              top: 8,
-              child: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade400,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.amber.withOpacity(0.4),
-                      blurRadius: 8,
-                      spreadRadius: 2,
-                    ),
-                  ],
+            // 로고 (런치 페이지와 정확히 같은 크기/위치, 색상만 반대)
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                // 배경 원
+                Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.1),
+                  ),
                 ),
-                child: const Icon(
-                  Icons.notifications_active,
-                  size: 24,
+                // 중앙 흰색 시계
+                const Icon(
+                  Icons.schedule,
+                  size: 90,
                   color: Colors.white,
                 ),
+                // 우측 상단 노란색 알람 뱃지
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade400,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.amber.withOpacity(0.4),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.notifications_active,
+                      size: 24,
+                      color: Colors.indigo,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 48),
+
+            // 앱 타이틀
+            const Text(
+              '교대시계',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 2,
               ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 구분선
+            Container(
+              width: 60,
+              height: 3,
+              decoration: BoxDecoration(
+                color: Colors.amber.shade400,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // 설명 텍스트
+            Text(
+              '교대 스케줄 확인 및 자동 알람 생성',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white.withOpacity(0.9),
+                letterSpacing: 0.5,
+                fontWeight: FontWeight.w400,
+              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
