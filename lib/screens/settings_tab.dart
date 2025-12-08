@@ -2239,15 +2239,13 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
 
                 SizedBox(width: 16.w),
 
-                NumberPicker(
+                _TappableNumberPicker(
                   value: _hour,
                   minValue: 1,
                   maxValue: 12,
                   infiniteLoop: true,
-                  haptics: true,
                   itemHeight: 50.h,
                   itemWidth: (60.w).clamp(50.0, 80.0),
-                  axis: Axis.vertical,
                   textStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
                   selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
                   onChanged: (value) {
@@ -2270,16 +2268,14 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
 
                 Text(':', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold)),
 
-                NumberPicker(
+                _TappableNumberPicker(
                   value: _minute,
                   minValue: 0,
                   maxValue: 59,
                   zeroPad: true,
                   infiniteLoop: true,
-                  haptics: true,
                   itemHeight: 50.h,
                   itemWidth: (60.w).clamp(50.0, 80.0),
-                  axis: Axis.vertical,
                   textStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
                   selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
                   onChanged: (value) {
@@ -2324,6 +2320,133 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ⭐ 탭 가능한 NumberPicker (스와이프 + 탭 지원)
+class _TappableNumberPicker extends StatefulWidget {
+  final int value;
+  final int minValue;
+  final int maxValue;
+  final ValueChanged<int> onChanged;
+  final bool infiniteLoop;
+  final bool zeroPad;
+  final double itemHeight;
+  final double itemWidth;
+  final TextStyle? textStyle;
+  final TextStyle? selectedTextStyle;
+  final BoxDecoration? decoration;
+
+  const _TappableNumberPicker({
+    required this.value,
+    required this.minValue,
+    required this.maxValue,
+    required this.onChanged,
+    this.infiniteLoop = false,
+    this.zeroPad = false,
+    this.itemHeight = 50.0,
+    this.itemWidth = 60.0,
+    this.textStyle,
+    this.selectedTextStyle,
+    this.decoration,
+  });
+
+  @override
+  State<_TappableNumberPicker> createState() => _TappableNumberPickerState();
+}
+
+class _TappableNumberPickerState extends State<_TappableNumberPicker> {
+  late FixedExtentScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = FixedExtentScrollController(
+      initialItem: widget.value - widget.minValue,
+    );
+  }
+
+  @override
+  void didUpdateWidget(_TappableNumberPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _scrollController.jumpToItem(widget.value - widget.minValue);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  String _formatNumber(int value) {
+    if (widget.zeroPad) {
+      return value.toString().padLeft(2, '0');
+    }
+    return value.toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final itemCount = widget.maxValue - widget.minValue + 1;
+
+    return Container(
+      height: widget.itemHeight * 3,
+      width: widget.itemWidth,
+      decoration: widget.decoration,
+      child: ListWheelScrollView.useDelegate(
+        controller: _scrollController,
+        itemExtent: widget.itemHeight,
+        physics: const FixedExtentScrollPhysics(),
+        diameterRatio: 100,
+        perspective: 0.01,
+        onSelectedItemChanged: (index) {
+          final newValue = widget.minValue + index;
+          widget.onChanged(newValue);
+          HapticFeedback.selectionClick();
+        },
+        childDelegate: ListWheelChildBuilderDelegate(
+          builder: (context, index) {
+            final actualIndex = widget.infiniteLoop
+                ? index % itemCount
+                : index;
+
+            if (!widget.infiniteLoop && (index < 0 || index >= itemCount)) {
+              return null;
+            }
+
+            final value = widget.minValue + actualIndex;
+            final isSelected = value == widget.value;
+
+            return GestureDetector(
+              onTap: () {
+                // ⭐ 탭 시 해당 값으로 스크롤
+                final targetIndex = widget.infiniteLoop
+                    ? index
+                    : actualIndex;
+                _scrollController.animateToItem(
+                  targetIndex,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                );
+              },
+              child: Container(
+                height: widget.itemHeight,
+                alignment: Alignment.center,
+                child: Text(
+                  _formatNumber(value),
+                  style: isSelected
+                      ? (widget.selectedTextStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold))
+                      : (widget.textStyle ?? TextStyle(fontSize: 16.sp, color: Colors.grey)),
+                ),
+              ),
+            );
+          },
+          childCount: widget.infiniteLoop ? null : itemCount,
         ),
       ),
     );

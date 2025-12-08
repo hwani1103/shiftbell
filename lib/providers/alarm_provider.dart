@@ -129,8 +129,16 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
 
       // 2단계: 새 알람 생성 (개별 try-catch로 부분 실패 허용)
       final templates = await DatabaseService.instance.getAlarmTemplates(shiftType);
+      final createdTimes = <String>{};  // ⭐ 중복 시간 추적
+
       for (var template in templates) {
         try {
+          // ⭐ 중복 시간 체크
+          if (createdTimes.contains(template.time)) {
+            print('⚠️ 중복 시간 스킵: ${template.time} (근무: $shiftType, 날짜: ${date.toString().split(' ')[0]})');
+            continue;
+          }
+
           final timeParts = template.time.split(':');
           final alarmTime = DateTime(
             date.year,
@@ -160,6 +168,8 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
             label: shiftType,
             soundType: 'loud',
           );
+
+          createdTimes.add(template.time);  // ⭐ 생성된 시간 기록
           createCount++;
         } catch (e) {
           print('⚠️ 알람 생성 실패 (time: ${template.time}): $e');
