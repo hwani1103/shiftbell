@@ -637,11 +637,104 @@ class _InitialRouterState extends State<InitialRouter> {
 
   @override
   Widget build(BuildContext context) {
-    // 런치 스크린과 동일한 배경 (전환 시 깜빡임 방지)
-    return const Scaffold(
-      backgroundColor: Color(0xFF3049A0), // 인디고 중간 색상
-      body: Center(
-        child: SizedBox.shrink(), // 아무것도 표시하지 않음
+    // 런치 스크린처럼 예쁘게 꾸민 화면 (라우팅 중 표시)
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.indigo.shade800,
+              Colors.indigo.shade600,
+            ],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // 교대근무 시계 아이콘
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  // 배경 원
+                  Container(
+                    width: 140,
+                    height: 140,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withOpacity(0.1),
+                    ),
+                  ),
+                  // 중앙 메인 시계
+                  const Icon(
+                    Icons.schedule,
+                    size: 90,
+                    color: Colors.white,
+                  ),
+                  // 우측 상단 알람 아이콘
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade400,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.amber.withOpacity(0.4),
+                            blurRadius: 8,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.notifications_active,
+                        size: 24,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              // 앱 타이틀
+              const Text(
+                '교대시계',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 구분선
+              Container(
+                width: 60,
+                height: 3,
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade400,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // 설명 텍스트
+              Text(
+                '교대 스케줄 확인 및 자동 알람 생성',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Colors.white.withOpacity(0.9),
+                  letterSpacing: 0.5,
+                  fontWeight: FontWeight.w400,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
