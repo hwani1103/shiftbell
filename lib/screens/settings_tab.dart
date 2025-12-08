@@ -2389,10 +2389,15 @@ class _TappableNumberPicker extends StatelessWidget {
   });
 
   void _handleTapUp() {
-    // 위쪽 탭: 값 감소
+    // ⭐ 위쪽 탭: 값 감소 (한 칸만)
+    // infiniteLoop에서 경계값이면 탭 무시 (60칸 점프 방지)
+    if (infiniteLoop && value == minValue) {
+      return;
+    }
+
     int newValue = value - 1;
     if (newValue < minValue) {
-      newValue = infiniteLoop ? maxValue : minValue;
+      newValue = minValue;  // infiniteLoop여도 탭으로는 순환 안 함
     }
     if (newValue != value) {
       onChanged(newValue);
@@ -2400,10 +2405,15 @@ class _TappableNumberPicker extends StatelessWidget {
   }
 
   void _handleTapDown() {
-    // 아래쪽 탭: 값 증가
+    // ⭐ 아래쪽 탭: 값 증가 (한 칸만)
+    // infiniteLoop에서 경계값이면 탭 무시 (60칸 점프 방지)
+    if (infiniteLoop && value == maxValue) {
+      return;
+    }
+
     int newValue = value + 1;
     if (newValue > maxValue) {
-      newValue = infiniteLoop ? minValue : maxValue;
+      newValue = maxValue;  // infiniteLoop여도 탭으로는 순환 안 함
     }
     if (newValue != value) {
       onChanged(newValue);
