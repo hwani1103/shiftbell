@@ -39,8 +39,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _navigateToNextScreen() async {
-    // 1.5초 대기
-    await Future.delayed(const Duration(milliseconds: 1500));
+    // 2초 대기
+    await Future.delayed(const Duration(milliseconds: 2000));
 
     if (!mounted) return;
 
