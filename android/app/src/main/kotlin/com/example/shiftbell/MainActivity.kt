@@ -33,9 +33,12 @@ class MainActivity: FlutterActivity() {
     }
 }
     override fun onCreate(savedInstanceState: Bundle?) {
+        // ⭐ 윈도우 배경을 즉시 설정 (wallpaper 노출 방지)
+        window.setBackgroundDrawableResource(android.R.color.transparent)
+
         super.onCreate(savedInstanceState)
-        
-        // ⭐ BroadcastReceiver 등록
+
+        // ⭐ BroadcastReceiver 등록은 onResume으로 이동 예정
         val filter = IntentFilter("com.example.shiftbell.FLUTTER_REFRESH")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(refreshReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
@@ -43,9 +46,12 @@ class MainActivity: FlutterActivity() {
             registerReceiver(refreshReceiver, filter)
         }
         Log.d("MainActivity", "✅ RefreshReceiver 등록 완료")
-        
-        handleStopAlarmIntent(intent)
-        handleOpenTabIntent(intent)
+
+        // ⭐ Intent 처리는 나중에 (윈도우 표시 후)
+        window.decorView.post {
+            handleStopAlarmIntent(intent)
+            handleOpenTabIntent(intent)
+        }
     }
     
     override fun onDestroy() {
