@@ -24,10 +24,8 @@
     </group>
 
     <!-- 우측 상단 알람 뱃지 (노란색) -->
-    <circle
-        android:cx="106"
-        android:cy="34"
-        android:r="20"
+    <path
+        android:pathData="M106,34 m-20,0 a 20,20 0 1,0 40,0 a 20,20 0 1,0 -40,0"
         android:fillColor="#FFFFC107"/>
     <path
         android:translateX="86"
