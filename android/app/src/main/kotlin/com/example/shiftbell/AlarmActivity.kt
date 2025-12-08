@@ -522,6 +522,11 @@ private fun dismissAlarm() {
             db?.close()
         }
 
+        // ⭐ 유령 Notification 방지
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(7777)              // 알람 울림중
+        notificationManager.cancel(8888)              // 20분 전
+
         // ⭐ finish()만 호출하면 잠금 화면으로 돌아감
         finish()
     }

@@ -1,5 +1,6 @@
 // lib/services/alarm_refresh_service.dart
 
+import 'package:flutter/services.dart';
 import 'database_service.dart';
 import 'alarm_service.dart';
 import '../models/alarm.dart';
@@ -9,7 +10,8 @@ import 'alarm_refresh_helper.dart';
 class AlarmRefreshService {
   static final AlarmRefreshService instance = AlarmRefreshService._internal();
   AlarmRefreshService._internal();
-  
+
+  static const _platform = MethodChannel('com.example.shiftbell/alarm');
   bool _isRefreshing = false;
   
   /// 조건 체크 후 필요하면 갱신
@@ -72,7 +74,14 @@ class AlarmRefreshService {
   /// 30일치 알람 재생성
   Future<void> _refresh10DaysAlarms() async {  // 30 → 10
   print('🔄 10일치 알람 갱신 시작...');  // 로그 수정
-  
+
+  // 0. 20분 전 Notification 삭제 (유령 Notification 방지)
+  try {
+    await _platform.invokeMethod('cancelNotification');
+  } catch (e) {
+    print('⚠️ Notification 삭제 실패: $e');
+  }
+
   // 1. 기존 Native 알람 전부 취소
   final existingAlarms = await DatabaseService.instance.getAllAlarms();
   for (var alarm in existingAlarms) {
