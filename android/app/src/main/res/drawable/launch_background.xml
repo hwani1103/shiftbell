@@ -11,4 +11,11 @@
                 android:endColor="#FF3949AB" />
         </shape>
     </item>
+
+    <!-- 중앙 아이콘 -->
+    <item>
+        <bitmap
+            android:gravity="center"
+            android:src="@drawable/splash_icon" />
+    </item>
 </layer-list>
