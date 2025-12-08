@@ -6,8 +6,6 @@
         <item name="android:windowSplashScreenBackground">#FF283593</item>
         <!-- 아이콘 숨김 (투명하게) -->
         <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
-        <!-- 스플래시 지속 시간 최소화 -->
-        <item name="android:windowSplashScreenBehavior">icon_only</item>
     </style>
 
     <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
