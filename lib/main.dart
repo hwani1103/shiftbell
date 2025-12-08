@@ -637,10 +637,10 @@ class _InitialRouterState extends State<InitialRouter> {
 
   @override
   Widget build(BuildContext context) {
-    // 흰색 배경 + 텍스트만 (로고 제거)
-    return Container(
-      color: Colors.white,
-      child: Center(
+    // 흰색 배경 + 텍스트만 (노란 밑줄 제거)
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
