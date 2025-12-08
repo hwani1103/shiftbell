@@ -1377,8 +1377,8 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
   }
 }
 
-// ⭐ 탭 가능한 NumberPicker (스와이프 + 탭 지원)
-class _TappableNumberPicker extends StatefulWidget {
+// ⭐ 탭 가능한 NumberPicker Wrapper (스와이프 + 탭 지원)
+class _TappableNumberPicker extends StatelessWidget {
   final int value;
   final int minValue;
   final int maxValue;
@@ -1405,100 +1405,78 @@ class _TappableNumberPicker extends StatefulWidget {
     this.decoration,
   });
 
-  @override
-  State<_TappableNumberPicker> createState() => _TappableNumberPickerState();
-}
-
-class _TappableNumberPickerState extends State<_TappableNumberPicker> {
-  late FixedExtentScrollController _scrollController;
-
-  @override
-  void initState() {
-    super.initState();
-    _scrollController = FixedExtentScrollController(
-      initialItem: widget.value - widget.minValue,
-    );
-  }
-
-  @override
-  void didUpdateWidget(_TappableNumberPicker oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value) {
-      _scrollController.jumpToItem(widget.value - widget.minValue);
+  void _handleTapUp() {
+    // 위쪽 탭: 값 감소
+    int newValue = value - 1;
+    if (newValue < minValue) {
+      newValue = infiniteLoop ? maxValue : minValue;
+    }
+    if (newValue != value) {
+      onChanged(newValue);
     }
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  String _formatNumber(int value) {
-    if (widget.zeroPad) {
-      return value.toString().padLeft(2, '0');
+  void _handleTapDown() {
+    // 아래쪽 탭: 값 증가
+    int newValue = value + 1;
+    if (newValue > maxValue) {
+      newValue = infiniteLoop ? minValue : maxValue;
     }
-    return value.toString();
+    if (newValue != value) {
+      onChanged(newValue);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final itemCount = widget.maxValue - widget.minValue + 1;
+    return SizedBox(
+      height: itemHeight * 3,
+      width: itemWidth,
+      child: Stack(
+        children: [
+          // ⭐ 기존 NumberPicker (부드러운 스크롤)
+          NumberPicker(
+            value: value,
+            minValue: minValue,
+            maxValue: maxValue,
+            zeroPad: zeroPad,
+            infiniteLoop: infiniteLoop,
+            haptics: true,
+            itemHeight: itemHeight,
+            itemWidth: itemWidth,
+            axis: Axis.vertical,
+            textStyle: textStyle,
+            selectedTextStyle: selectedTextStyle,
+            onChanged: onChanged,
+            decoration: decoration,
+          ),
 
-    return Container(
-      height: widget.itemHeight * 3,
-      width: widget.itemWidth,
-      decoration: widget.decoration,
-      child: ListWheelScrollView.useDelegate(
-        controller: _scrollController,
-        itemExtent: widget.itemHeight,
-        physics: const FixedExtentScrollPhysics(),
-        diameterRatio: 100,
-        perspective: 0.01,
-        onSelectedItemChanged: (index) {
-          final newValue = widget.minValue + index;
-          widget.onChanged(newValue);
-          HapticFeedback.selectionClick();
-        },
-        childDelegate: ListWheelChildBuilderDelegate(
-          builder: (context, index) {
-            final actualIndex = widget.infiniteLoop
-                ? index % itemCount
-                : index;
+          // ⭐ 위쪽 탭 영역 (한 칸 위로)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: itemHeight,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _handleTapUp,
+              child: Container(color: Colors.transparent),
+            ),
+          ),
 
-            if (!widget.infiniteLoop && (index < 0 || index >= itemCount)) {
-              return null;
-            }
-
-            final value = widget.minValue + actualIndex;
-            final isSelected = value == widget.value;
-
-            return GestureDetector(
-              onTap: () {
-                // ⭐ 탭 시 해당 값으로 스크롤
-                final targetIndex = widget.infiniteLoop
-                    ? index
-                    : actualIndex;
-                _scrollController.animateToItem(
-                  targetIndex,
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
-                );
-              },
-              child: Container(
-                height: widget.itemHeight,
-                alignment: Alignment.center,
-                child: Text(
-                  _formatNumber(value),
-                  style: isSelected
-                      ? (widget.selectedTextStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold))
-                      : (widget.textStyle ?? TextStyle(fontSize: 16.sp, color: Colors.grey)),
-                ),
-              ),
-            );
-          },
-          childCount: widget.infiniteLoop ? null : itemCount,
-        ),
+          // ⭐ 아래쪽 탭 영역 (한 칸 아래로)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: itemHeight,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _handleTapDown,
+              child: Container(color: Colors.transparent),
+            ),
+          ),
+        ],
       ),
     );
   }
