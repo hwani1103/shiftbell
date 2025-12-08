@@ -19,6 +19,10 @@ import 'providers/alarm_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ⭐ 런치 스크린 유지 시간 증가 (1.5초 지연)
+  await Future.delayed(const Duration(milliseconds: 1500));
+
   await initializeDateFormatting('ko_KR', null);
   await DatabaseService.instance.database;
   await AlarmService().initialize();
