@@ -637,7 +637,7 @@ class _InitialRouterState extends State<InitialRouter> {
 
   @override
   Widget build(BuildContext context) {
-    // 런치 스크린과 완전 동일 (깜빡임 제거)
+    // 앱 아이콘과 완전 동일 (원 + 시계 + 알람 뱃지)
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -649,12 +649,50 @@ class _InitialRouterState extends State<InitialRouter> {
           ],
         ),
       ),
-      child: const Center(
-        // 런치 스크린과 동일한 시계 아이콘
-        child: Icon(
-          Icons.schedule,
-          size: 120,
-          color: Colors.white,
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // 배경 원 (앱 아이콘과 동일)
+            Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withOpacity(0.1),
+              ),
+            ),
+            // 중앙 시계 아이콘
+            const Icon(
+              Icons.schedule,
+              size: 90,
+              color: Colors.white,
+            ),
+            // 우측 상단 알람 뱃지 (앱 아이콘과 동일)
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade400,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.amber.withOpacity(0.4),
+                      blurRadius: 8,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.notifications_active,
+                  size: 24,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
