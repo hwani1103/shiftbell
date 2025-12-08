@@ -637,9 +637,48 @@ class _InitialRouterState extends State<InitialRouter> {
 
   @override
   Widget build(BuildContext context) {
-    // 스플래시 제거: 흰색 빈 화면만 (런치 페이지가 계속 보임)
+    // 흰색 배경 + 인디고 시계 아이콘 (2초 표시)
     return Container(
       color: Colors.white,
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // 배경 원
+            Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF283593).withOpacity(0.1),
+              ),
+            ),
+            // 인디고 시계
+            const Icon(
+              Icons.schedule,
+              size: 90,
+              color: Color(0xFF283593),
+            ),
+            // 노란색 알람 뱃지
+            Positioned(
+              right: 8,
+              top: 8,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade400,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.notifications_active,
+                  size: 24,
+                  color: Color(0xFF283593),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
