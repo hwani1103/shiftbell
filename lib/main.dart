@@ -10,11 +10,10 @@ import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
-import 'screens/splash_screen.dart';  // ⭐ 추가
-import 'screens/permission_intro_screen.dart';  // ⭐ 추가
-import 'widgets/permission_warning_banner.dart';  // ⭐ 추가
+import 'screens/permission_intro_screen.dart';
+import 'widgets/permission_warning_banner.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';  // ⭐ 추가
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/shift_schedule.dart';
 import 'providers/alarm_provider.dart';
 
@@ -113,9 +112,8 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
               ),
             );
           },
-          home: const SplashScreen(),
+          home: const InitialRouter(),
           routes: {
-            '/splash': (context) => const SplashScreen(),
             '/permission_intro': (context) => const PermissionIntroScreen(),
             '/onboarding': (context) => const OnboardingScreen(),
             '/home': (context) => const MainScreen(),
@@ -588,6 +586,62 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// 런치 스크린 이후 즉시 라우팅 (스플래시 화면 제거)
+class InitialRouter extends StatefulWidget {
+  const InitialRouter({super.key});
+
+  @override
+  State<InitialRouter> createState() => _InitialRouterState();
+}
+
+class _InitialRouterState extends State<InitialRouter> {
+  @override
+  void initState() {
+    super.initState();
+    _navigate();
+  }
+
+  Future<void> _navigate() async {
+    // 다음 프레임에서 네비게이션 실행
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+
+      // 1. 권한 요청 여부 확인
+      final prefs = await SharedPreferences.getInstance();
+      final permissionsRequested = prefs.getBool('permissions_requested') ?? false;
+
+      // 2. 스케줄 존재 여부 확인
+      final schedule = await DatabaseService.instance.getShiftSchedule();
+
+      // 3. 다음 화면 결정
+      String nextRoute;
+
+      if (!permissionsRequested) {
+        nextRoute = '/permission_intro';
+      } else if (schedule == null) {
+        nextRoute = '/onboarding';
+      } else {
+        nextRoute = '/home';
+      }
+
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed(nextRoute);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 런치 스크린과 동일한 배경 (전환 시 깜빡임 방지)
+    return const Scaffold(
+      backgroundColor: Color(0xFF3049A0), // 인디고 중간 색상
+      body: Center(
+        child: SizedBox.shrink(), // 아무것도 표시하지 않음
       ),
     );
   }
