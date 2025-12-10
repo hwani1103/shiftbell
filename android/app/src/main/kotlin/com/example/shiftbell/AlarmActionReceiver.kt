@@ -43,15 +43,25 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 // 알람 소리 중지
                 AlarmPlayer.getInstance(context).stopAlarm()
 
+                // ⭐ 이력 먼저 생성 (DB에 알람 있을 때!)
+                createAlarmHistory(context, alarmId, "swiped")
+
                 // 알람 삭제
                 deleteAlarmFromDB(context, alarmId)
 
-                // 7777 Notification 삭제
+                // Notification 삭제
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(7777)
                 notificationManager.cancel(8888)
                 notificationManager.cancel(8889)
                 Log.d("AlarmAction", "✅ Notification 삭제 완료")
+
+                // ⭐ shownNotifications 정리
+                AlarmGuardReceiver.removeShownNotification(alarmId)
+
+                // ⭐ 다음 알람의 8888 Notification 표시
+                AlarmGuardReceiver.triggerCheck(context)
+                Log.d("AlarmAction", "✅ triggerCheck() → 다음 알람 8888 표시")
             }
             // ⭐ 홈 버튼 후 Notification에서 5분 후
             "SNOOZE_FROM_NOTIFICATION" -> {
