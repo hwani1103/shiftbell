@@ -391,8 +391,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           SizedBox(height: 24.h),
           
           Text(
-            '전체 교대 패턴 순서대로 입력 - 최대 30일 \n ex) 주주휴휴야야휴휴',
+            '교대 패턴을 순서대로 입력해주세요 (최대 30일)',
             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            'ex) 주간, 주간, 휴무, 휴무, 야간, 야간, 휴무, 휴무 ...',
+            style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
+          ),
+          Text(
+            '(한번 더 탭하면 삭제됩니다)',
+            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500),
           ),
           SizedBox(height: 12.h),
           
@@ -778,26 +787,39 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     );
   }
 
-  // onboarding_screen.dart의 _generateShiftColors() 함수 수정
-// onboarding_screen.dart의 _generateShiftColors() 함수 전체 교체
-
+  // 근무명 색상 생성 - 실제 패턴 순서 기반
 Map<String, int> _generateShiftColors() {
   final Map<String, int> colors = {};
 
-  // 1. 휴무 계열 → 명확한 빨강 (파스텔 아님)
-  for (var shift in _allShiftTypes) {
+  // 실제 사용되는 근무명 목록 (패턴 등장 순서 유지)
+  List<String> usedShifts;
+  if (_isRegular == true) {
+    // 규칙적: 패턴에서 등장 순서대로
+    usedShifts = [];
+    for (var shift in _pattern) {
+      if (!usedShifts.contains(shift)) {
+        usedShifts.add(shift);
+      }
+    }
+  } else {
+    // 불규칙: 선택된 근무명 순서대로
+    usedShifts = _selectedShifts;
+  }
+
+  // 1. 휴무 계열 → 명확한 빨강
+  for (var shift in usedShifts) {
     if (shift.contains('휴')) {
-      colors[shift] = 0xFFEF5350;  // ⭐ Red (진한 빨강)
+      colors[shift] = 0xFFEF5350;
     }
   }
 
-  // 2. 나머지 근무 → 파스텔 팔레트에서 순서대로 할당
-  final nonRestShifts = _allShiftTypes.where((s) => !s.contains('휴')).toList();
+  // 2. 나머지 근무 → 파스텔 팔레트에서 패턴 등장 순서대로 할당
+  final nonRestShifts = usedShifts.where((s) => !s.contains('휴')).toList();
 
   for (int i = 0; i < nonRestShifts.length && i < 8; i++) {
     final shift = nonRestShifts[i];
-    final color = ShiftSchedule.shiftPalette[i % 8];  // ⭐ 파스텔 팔레트 순환
-    colors[shift] = color.value;  // Color → int 변환
+    final color = ShiftSchedule.shiftPalette[i % 8];
+    colors[shift] = color.value;
   }
 
   return colors;

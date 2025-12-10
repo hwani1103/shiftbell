@@ -107,11 +107,31 @@ Widget build(BuildContext context) {
       
       return Scaffold(
         body: SafeArea(
-          child: Stack(
-            children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6.w),
-                child: Column(
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragEnd: (details) {
+              // 스와이프 속도 기반으로 방향 판단
+              if (details.primaryVelocity != null) {
+                if (details.primaryVelocity! > 300) {
+                  // 오른쪽 스와이프 → 이전 달
+                  setState(() {
+                    _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - 1, 1);
+                  });
+                  _loadMemosForMonth(_focusedDay);
+                } else if (details.primaryVelocity! < -300) {
+                  // 왼쪽 스와이프 → 다음 달
+                  setState(() {
+                    _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + 1, 1);
+                  });
+                  _loadMemosForMonth(_focusedDay);
+                }
+              }
+            },
+            child: Stack(
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w),
+                  child: Column(
                   children: [
                     // ⭐ 헤더 영역 - 최소화
                     SizedBox(

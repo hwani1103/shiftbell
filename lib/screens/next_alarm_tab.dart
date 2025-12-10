@@ -681,23 +681,36 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
           Spacer(),
 
-          // 다음 알람 표시
-          if (isNext)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-              decoration: BoxDecoration(
-                color: Colors.indigo.shade400,
-                borderRadius: BorderRadius.circular(6.r),
-              ),
-              child: Text(
-                '다음',
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+          // 알람 타입 표시 (소리/진동/무음)
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+            decoration: BoxDecoration(
+              color: isNext ? Colors.indigo.shade400 : Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(6.r),
             ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  alarm.alarmTypeId == 1 ? Icons.volume_up :
+                  alarm.alarmTypeId == 2 ? Icons.vibration :
+                  Icons.volume_off,
+                  size: 12.sp,
+                  color: isNext ? Colors.white : Colors.grey.shade700,
+                ),
+                SizedBox(width: 4.w),
+                Text(
+                  alarm.alarmTypeId == 1 ? '소리' :
+                  alarm.alarmTypeId == 2 ? '진동' : '무음',
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                    color: isNext ? Colors.white : Colors.grey.shade700,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

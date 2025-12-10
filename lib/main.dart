@@ -226,28 +226,37 @@ Future<void> _handleMethod(MethodCall call) async {
   
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // 탭 화면
-          _tabs[_currentIndex],
-          // ⭐ 권한 경고 배너 (하단에 오버레이)
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: const PermissionWarningBanner(),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.alarm), label: '다음알람'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: '달력'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
-        ],
+    return PopScope(
+      canPop: _currentIndex == 1,  // 달력탭이면 앱 종료 허용
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _currentIndex != 1) {
+          // 달력탭이 아니면 달력탭으로 이동
+          setState(() => _currentIndex = 1);
+        }
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // 탭 화면
+            _tabs[_currentIndex],
+            // ⭐ 권한 경고 배너 (하단에 오버레이)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: const PermissionWarningBanner(),
+            ),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          onTap: (index) => setState(() => _currentIndex = index),
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.alarm), label: '다음알람'),
+            BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: '달력'),
+            BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
+          ],
+        ),
       ),
     );
   }
