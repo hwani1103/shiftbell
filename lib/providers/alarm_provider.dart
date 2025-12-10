@@ -66,9 +66,15 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
         print('⚠️ 알람 상태 확인 실패: $e');
       }
 
-      // ⭐ 이력 타입 결정
-      final dismissType = isRinging ? 'swiped' : 'cancelled_before_ring';
-      await DatabaseService.instance.deleteAlarm(id, dismissType: dismissType);
+      // ⭐ 이력 생성 정책:
+      // - 알람 울림 중 삭제 → 'swiped' (알람 확인) 이력 생성
+      // - 알람 울리기 전 삭제 (UI에서) → 이력 생성 안 함
+      //   (20분 전 notification "끄기"는 Native에서 별도 처리)
+      if (isRinging) {
+        await DatabaseService.instance.deleteAlarm(id, dismissType: 'swiped', createHistory: true);
+      } else {
+        await DatabaseService.instance.deleteAlarm(id, createHistory: false);
+      }
       await AlarmService().cancelAlarm(id);
 
       // ⭐ 알람 울리는 중이면 소리 중지
@@ -98,7 +104,7 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
       }
 
       await _loadAlarms();
-      print('✅ 알람 삭제 완료 (ID: $id, 타입: $dismissType)');
+      print('✅ 알람 삭제 완료 (ID: $id, 울림 중: $isRinging)');
     } catch (e) {
       print('❌ 알람 삭제 실패: $e');
       rethrow;
@@ -113,11 +119,12 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
 
     try {
       // 1단계: 기존 고정 알람 삭제 (개별 try-catch로 부분 실패 허용)
+      // ⭐ 재생성 삭제는 이력 생성 안 함
       final existingAlarms = await DatabaseService.instance.getAlarmsByDate(date);
       for (var alarm in existingAlarms) {
         if (alarm.type == 'fixed') {
           try {
-            await DatabaseService.instance.deleteAlarm(alarm.id!);
+            await DatabaseService.instance.deleteAlarm(alarm.id!, createHistory: false);
             await AlarmService().cancelAlarm(alarm.id!);
             deleteCount++;
           } catch (e) {

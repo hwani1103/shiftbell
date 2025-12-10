@@ -435,41 +435,48 @@ class DatabaseService {
     );
   }
   
-  Future<int> deleteAlarm(int id, {String dismissType = 'cancelled_before_ring'}) async {
+  /// 알람 삭제
+  /// [createHistory]: false면 이력 생성 없이 삭제만 (달력/다음알람탭에서 삭제 시)
+  /// [dismissType]: 이력 생성 시 사용 (swiped, cancelled_before_ring 등)
+  Future<int> deleteAlarm(int id, {String dismissType = 'cancelled_before_ring', bool createHistory = true}) async {
     final db = await database;
 
-    // ⭐ 이력 기록: 알람 정보 먼저 읽기
-    try {
-      final alarmMaps = await db.query(
-        'alarms',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+    // ⭐ 이력 기록: createHistory가 true일 때만
+    if (createHistory) {
+      try {
+        final alarmMaps = await db.query(
+          'alarms',
+          where: 'id = ?',
+          whereArgs: [id],
+        );
 
-      if (alarmMaps.isNotEmpty) {
-        final alarmMap = alarmMaps.first;
-        final scheduledDate = alarmMap['date'] as String?;
-        final scheduledTime = alarmMap['time'] as String?;
-        final shiftType = alarmMap['shift_type'] as String?;
+        if (alarmMaps.isNotEmpty) {
+          final alarmMap = alarmMaps.first;
+          final scheduledDate = alarmMap['date'] as String?;
+          final scheduledTime = alarmMap['time'] as String?;
+          final shiftType = alarmMap['shift_type'] as String?;
 
-        // alarm_history에 이력 추가 (dismiss_type 파라미터 사용)
-        if (scheduledDate != null && scheduledTime != null) {
-          await db.insert('alarm_history', {
-            'alarm_id': id,
-            'scheduled_time': scheduledTime,
-            'scheduled_date': scheduledDate,
-            'actual_ring_time': DateTime.now().toIso8601String(),
-            'dismiss_type': dismissType,  // ⭐ 파라미터 사용
-            'snooze_count': 0,
-            'shift_type': shiftType,
-            'created_at': DateTime.now().toIso8601String(),
-          });
-          final historyText = dismissType == 'swiped' ? '알람 확인' : '알람 제거';
-          print('✅ alarm_history에 "$historyText" 기록 추가: ID=$id');
+          // alarm_history에 이력 추가 (dismiss_type 파라미터 사용)
+          if (scheduledDate != null && scheduledTime != null) {
+            await db.insert('alarm_history', {
+              'alarm_id': id,
+              'scheduled_time': scheduledTime,
+              'scheduled_date': scheduledDate,
+              'actual_ring_time': DateTime.now().toIso8601String(),
+              'dismiss_type': dismissType,  // ⭐ 파라미터 사용
+              'snooze_count': 0,
+              'shift_type': shiftType,
+              'created_at': DateTime.now().toIso8601String(),
+            });
+            final historyText = dismissType == 'swiped' ? '알람 확인' : '알람 제거';
+            print('✅ alarm_history에 "$historyText" 기록 추가: ID=$id');
+          }
         }
+      } catch (e) {
+        print('⚠️ 알람 이력 기록 실패: $e');
       }
-    } catch (e) {
-      print('⚠️ 알람 이력 기록 실패: $e');
+    } else {
+      print('ℹ️ 알람 삭제 (이력 생성 안 함): ID=$id');
     }
 
     // 알람 삭제
