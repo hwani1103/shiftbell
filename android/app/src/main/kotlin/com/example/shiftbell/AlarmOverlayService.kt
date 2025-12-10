@@ -193,7 +193,10 @@ class AlarmOverlayService : Service() {
         // ⭐ CRITICAL FIX: Native 알람 먼저 취소 (유령 알람 방지!)
         cancelNativeAlarm()
 
-        // DB에서 알람 삭제
+        // ⭐ BUG FIX: 이력 먼저 생성 (DB에 알람 데이터가 있을 때!)
+        createAlarmHistory(alarmId, "timeout")
+
+        // DB에서 알람 삭제 (이력 생성 후!)
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
             val db = dbHelper.writableDatabase
@@ -203,9 +206,6 @@ class AlarmOverlayService : Service() {
         } catch (e: Exception) {
             Log.e("AlarmOverlay", "❌ DB 삭제 실패", e)
         }
-
-        // 이력 생성
-        createAlarmHistory(alarmId, "timeout")
 
         // shownNotifications에서 제거
         AlarmGuardReceiver.removeShownNotification(alarmId)
