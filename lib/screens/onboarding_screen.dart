@@ -397,11 +397,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           SizedBox(height: 4.h),
           Text(
             'ex) 주간, 주간, 휴무, 휴무, 야간, 야간, 휴무, 휴무 ...',
-            style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade800),
           ),
           Text(
             '(한번 더 탭하면 삭제됩니다)',
-            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500),
+            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700),
           ),
           SizedBox(height: 12.h),
           

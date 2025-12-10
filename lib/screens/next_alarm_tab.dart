@@ -683,10 +683,10 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
           // 알람 타입 표시 (소리/진동/무음)
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
             decoration: BoxDecoration(
               color: isNext ? Colors.indigo.shade400 : Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(6.r),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -695,15 +695,15 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                   alarm.alarmTypeId == 1 ? Icons.volume_up :
                   alarm.alarmTypeId == 2 ? Icons.vibration :
                   Icons.volume_off,
-                  size: 12.sp,
+                  size: 14.sp,
                   color: isNext ? Colors.white : Colors.grey.shade700,
                 ),
-                SizedBox(width: 4.w),
+                SizedBox(width: 5.w),
                 Text(
                   alarm.alarmTypeId == 1 ? '소리' :
                   alarm.alarmTypeId == 2 ? '진동' : '무음',
                   style: TextStyle(
-                    fontSize: 10.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                     color: isNext ? Colors.white : Colors.grey.shade700,
                   ),
