@@ -43,10 +43,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 // 알람 소리 중지
                 AlarmPlayer.getInstance(context).stopAlarm()
 
-                // ⭐ 이력 먼저 생성 (DB에 알람 있을 때!)
-                createAlarmHistory(context, alarmId, "swiped")
-
-                // 알람 삭제
+                // 알람 삭제 (deleteAlarmFromDB 내부에서 swiped 이력 생성)
                 deleteAlarmFromDB(context, alarmId)
 
                 // Notification 삭제
