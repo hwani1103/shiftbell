@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+  <!-- 배경 그라데이션 효과 (단색으로 대체) -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a237e"/>
+      <stop offset="100%" style="stop-color:#3949ab"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="500" fill="url(#bgGradient)"/>
+
+  <!-- 앱 아이콘 (왼쪽) -->
+  <g transform="translate(180, 150)">
+    <!-- 아이콘 배경 -->
+    <rect x="0" y="0" width="200" height="200" rx="40" fill="#3049A0"/>
+
+    <!-- 시계 -->
+    <g transform="translate(56, 56)">
+      <path fill="#FFFFFF" d="M44,4C24.12,4 8,20.12 8,40s16.12,36 36,36s36,-16.12 36,-36S63.88,4 44,4zM44,68c-15.46,0 -28,-12.54 -28,-28s12.54,-28 28,-28s28,12.54 28,28s-12.54,28 -28,28z"/>
+      <path fill="#FFFFFF" d="M46,24h-4v20l17.33,10.4l2,-3l-15.33,-9.2z"/>
+    </g>
+
+    <!-- 알람 뱃지 -->
+    <g transform="translate(130, 30)">
+      <circle cx="28" cy="28" r="28" fill="#FFC107"/>
+      <path fill="#283593" transform="translate(10, 10) scale(1.3)" d="M14,20c0.55,0 1,-0.45 1,-1h-2C13,19.55 13.45,20 14,20zM18,15c0,-2.47 -1.29,-4.54 -3.75,-5.1V9.25C14.25,8.84 13.91,8.5 13.5,8.5S12.75,8.84 12.75,9.25v0.65C10.29,10.46 9,12.53 9,15v4l-1.29,1.29C7.39,20.61 7.68,21 8.09,21h10.82c0.41,0 0.7,-0.39 0.38,-0.71L18,19V15z"/>
+    </g>
+  </g>
+
+  <!-- 앱 이름 -->
+  <text x="480" y="220" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#FFFFFF">교대시계</text>
+
+  <!-- 부제목 -->
+  <text x="480" y="290" font-family="Arial, sans-serif" font-size="32" fill="#B3E5FC">교대 근무자를 위한 스마트 알람</text>
+
+  <!-- 키워드 태그들 -->
+  <g transform="translate(480, 330)">
+    <rect x="0" y="0" width="140" height="40" rx="20" fill="rgba(255,255,255,0.2)"/>
+    <text x="70" y="27" font-family="Arial, sans-serif" font-size="18" fill="#FFFFFF" text-anchor="middle">🔔 정확한 알람</text>
+
+    <rect x="160" y="0" width="140" height="40" rx="20" fill="rgba(255,255,255,0.2)"/>
+    <text x="230" y="27" font-family="Arial, sans-serif" font-size="18" fill="#FFFFFF" text-anchor="middle">📅 패턴 설정</text>
+
+    <rect x="320" y="0" width="160" height="40" rx="20" fill="rgba(255,255,255,0.2)"/>
+    <text x="400" y="27" font-family="Arial, sans-serif" font-size="18" fill="#FFFFFF" text-anchor="middle">⏰ 10일 자동생성</text>
+  </g>
+</svg>
