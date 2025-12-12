@@ -638,17 +638,12 @@ private fun dismissAlarm() {
         super.onDestroy()
         cancelTimeoutTimer()
 
-        // ⭐ 백업: 7777만 정리 (비정상 종료 대비)
-        // 주의: 8888, 8889는 삭제하면 안 됨!
-        // - 8888: triggerCheck()가 스누즈/dismiss 후 새로 표시한 것
-        // - 8889: 스누즈 결과 notification (30초 후 자동 삭제됨)
-        try {
-            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.cancel(7777)
-            Log.d("AlarmActivity", "🗑️ onDestroy에서 Notification 정리 (7777)")
-        } catch (e: Exception) {
-            Log.e("AlarmActivity", "onDestroy Notification 정리 실패", e)
-        }
+        // ⭐ 주의: onDestroy()에서 Notification 삭제하면 안 됨!
+        // - noHistory="true" 때문에 홈 버튼 누르면 Activity가 바로 destroy됨
+        // - 이때 7777을 삭제하면 홈버튼 후 알람 제어 불가능해짐
+        // - dismiss/snooze/timeout에서 이미 7777 삭제하고 finish() 호출하므로 여기서 중복 삭제 불필요
+        // - 8888, 8889도 triggerCheck()가 새로 표시한 것이므로 삭제하면 안 됨
+        Log.d("AlarmActivity", "🗑️ onDestroy 호출됨 (Notification 삭제 안 함)")
 
         // ⭐ 종료 신호 리시버 해제
         try {
