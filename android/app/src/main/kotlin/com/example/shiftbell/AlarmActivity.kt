@@ -41,6 +41,9 @@ class AlarmActivity : AppCompatActivity() {
     private var timeoutHandler: Handler? = null
     private var timeoutRunnable: Runnable? = null
 
+    // ⭐ 의도적 종료 플래그 (timeout/dismiss/snooze 중에는 7777 생성 방지)
+    private var isIntentionalExit: Boolean = false
+
     // ⭐ Notification에서 Activity 종료 신호 수신
     private val finishReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -130,6 +133,9 @@ class AlarmActivity : AppCompatActivity() {
 
 private fun timeoutAlarm() {
     Log.d("AlarmActivity", "⏰ 알람 타임아웃 - 자동 종료")
+
+    // ⭐ 의도적 종료 플래그 설정 (onUserLeaveHint에서 7777 생성 방지)
+    isIntentionalExit = true
 
     // 알람 소리 중지
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
@@ -253,6 +259,9 @@ private fun timeoutAlarm() {
 private fun dismissAlarm() {
     cancelTimeoutTimer()
 
+    // ⭐ 의도적 종료 플래그 설정 (onUserLeaveHint에서 7777 생성 방지)
+    isIntentionalExit = true
+
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
     // ⭐ Overlay 서비스도 종료
@@ -356,6 +365,9 @@ private fun dismissAlarm() {
     
     private fun snoozeAlarm() {
         cancelTimeoutTimer()
+
+        // ⭐ 의도적 종료 플래그 설정 (onUserLeaveHint에서 7777 생성 방지)
+        isIntentionalExit = true
 
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
@@ -553,6 +565,11 @@ private fun dismissAlarm() {
 
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
+        // ⭐ 의도적 종료 중에는 7777 생성 안 함 (goToHomeScreen()이 이 함수를 트리거함)
+        if (isIntentionalExit) {
+            Log.d("AlarmActivity", "👋 의도적 종료 중 → Notification 생성 안 함")
+            return
+        }
         // ⭐ 홈 버튼 눌렀을 때 → 알람 제어 Notification 표시
         Log.d("AlarmActivity", "👋 홈 버튼 감지 → Notification 표시")
         showAlarmControlNotification()
