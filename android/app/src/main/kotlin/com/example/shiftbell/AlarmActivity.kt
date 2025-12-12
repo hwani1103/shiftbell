@@ -639,6 +639,17 @@ private fun dismissAlarm() {
         super.onDestroy()
         cancelTimeoutTimer()
 
+        // ⭐ 백업: Notification 정리 (비정상 종료 대비)
+        try {
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(7777)
+            notificationManager.cancel(8888)
+            notificationManager.cancel(8889)
+            Log.d("AlarmActivity", "🗑️ onDestroy에서 Notification 정리 (7777, 8888, 8889)")
+        } catch (e: Exception) {
+            Log.e("AlarmActivity", "onDestroy Notification 정리 실패", e)
+        }
+
         // ⭐ 종료 신호 리시버 해제
         try {
             unregisterReceiver(finishReceiver)
