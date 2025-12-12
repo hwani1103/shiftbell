@@ -67,7 +67,7 @@ class AlarmType {
       id: 1,
       name: 'sound',
       emoji: '🔔',
-      soundFile: 'alarmbell1',  // 기본 알람벨
+      soundFile: 'default',  // 시스템 기본 알람음
       volume: 0.7,  // 70%
       vibrationStrength: 3,  // 강하게
       isPreset: true,
