@@ -227,8 +227,8 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                         // ⭐ 전체 교대조 근무표 만들기 버튼
                         ElevatedButton.icon(
                           onPressed: () => _showAllTeamsSetupDialog(),
-                          icon: Icon(Icons.add_circle_outline),
-                          label: Text('전체 교대조 근무표 만들기'),
+                          icon: Icon(Icons.add_circle_outline, size: 22.sp),
+                          label: Text('전체 교대조 근무표 만들기', style: TextStyle(fontSize: 16.sp)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.purple,
                             foregroundColor: Colors.white,
@@ -238,7 +238,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                         SizedBox(height: 12.h),
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: Text('돌아가기', style: TextStyle(color: Colors.grey)),
+                          child: Text('돌아가기', style: TextStyle(color: Colors.grey, fontSize: 15.sp)),
                         ),
                       ],
                     ),
