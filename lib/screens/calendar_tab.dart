@@ -492,7 +492,7 @@ Widget build(BuildContext context) {
                                   height: 1.0,
                                 ),
                                 maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                overflow: TextOverflow.clip,  // ⭐ ellipsis → clip (더 많이 표시)
                               ),
                             );
                           }).toList(),
