@@ -640,12 +640,12 @@ private fun dismissAlarm() {
         cancelTimeoutTimer()
 
         // ⭐ 백업: Notification 정리 (비정상 종료 대비)
+        // 주의: 8889는 삭제하면 안 됨! (스누즈 결과 notification, 30초 후 자동 삭제됨)
         try {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(7777)
             notificationManager.cancel(8888)
-            notificationManager.cancel(8889)
-            Log.d("AlarmActivity", "🗑️ onDestroy에서 Notification 정리 (7777, 8888, 8889)")
+            Log.d("AlarmActivity", "🗑️ onDestroy에서 Notification 정리 (7777, 8888)")
         } catch (e: Exception) {
             Log.e("AlarmActivity", "onDestroy Notification 정리 실패", e)
         }
