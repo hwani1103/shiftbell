@@ -522,10 +522,9 @@ private fun dismissAlarm() {
             db?.close()
         }
 
-        // ⭐ 유령 Notification 방지
+        // ⭐ 7777만 삭제 (8888은 삭제하면 안 됨! triggerCheck()가 새로 표시한 것)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(7777)              // 알람 울림중
-        notificationManager.cancel(8888)              // 20분 전
 
         // ⭐ finish()만 호출하면 잠금 화면으로 돌아감
         finish()
@@ -639,13 +638,14 @@ private fun dismissAlarm() {
         super.onDestroy()
         cancelTimeoutTimer()
 
-        // ⭐ 백업: Notification 정리 (비정상 종료 대비)
-        // 주의: 8889는 삭제하면 안 됨! (스누즈 결과 notification, 30초 후 자동 삭제됨)
+        // ⭐ 백업: 7777만 정리 (비정상 종료 대비)
+        // 주의: 8888, 8889는 삭제하면 안 됨!
+        // - 8888: triggerCheck()가 스누즈/dismiss 후 새로 표시한 것
+        // - 8889: 스누즈 결과 notification (30초 후 자동 삭제됨)
         try {
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(7777)
-            notificationManager.cancel(8888)
-            Log.d("AlarmActivity", "🗑️ onDestroy에서 Notification 정리 (7777, 8888)")
+            Log.d("AlarmActivity", "🗑️ onDestroy에서 Notification 정리 (7777)")
         } catch (e: Exception) {
             Log.e("AlarmActivity", "onDestroy Notification 정리 실패", e)
         }
