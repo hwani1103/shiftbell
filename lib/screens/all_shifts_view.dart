@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../models/shift_schedule.dart';
+import 'all_teams_setup_dialog.dart';
 
 /// 전체 근무표 - 모든 조의 근무를 한눈에 보는 화면
 class AllShiftsView extends ConsumerStatefulWidget {
@@ -88,6 +89,45 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
         });
       }
     }
+  }
+
+  // ⭐ 전체 교대조 근무표 작성 다이얼로그 표시
+  Future<void> _showAllTeamsSetupDialog() async {
+    final schedule = ref.read(scheduleProvider).value;
+
+    // 규칙적 근무자만 사용 가능
+    if (schedule == null || !schedule.isRegular || schedule.pattern == null) {
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('전체 교대조 근무표 작성'),
+          content: Text('이 기능은 규칙적 근무 패턴이 설정된 경우에만 사용할 수 있습니다.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('확인'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+
+    // 다이얼로그 표시
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AllTeamsSetupDialog(
+        pattern: schedule.pattern!,
+        onComplete: () {
+          // ⭐ 완료 후 데이터 새로고침
+          _loadTeamData();
+        },
+      ),
+    );
   }
 
   // 해당 날짜에 해당 조의 근무 타입 계산
@@ -183,25 +223,22 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                             color: Colors.grey.shade700,
                           ),
                         ),
-                        SizedBox(height: 12.h),
-                        Text(
-                          '설정 탭에서 전체 교대조 근무표를\n작성해주세요.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            color: Colors.grey.shade600,
+                        SizedBox(height: 32.h),
+                        // ⭐ 전체 교대조 근무표 만들기 버튼
+                        ElevatedButton.icon(
+                          onPressed: () => _showAllTeamsSetupDialog(),
+                          icon: Icon(Icons.add_circle_outline),
+                          label: Text('전체 교대조 근무표 만들기'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 14.h),
                           ),
                         ),
-                        SizedBox(height: 32.h),
-                        ElevatedButton.icon(
+                        SizedBox(height: 12.h),
+                        TextButton(
                           onPressed: () => Navigator.pop(context),
-                          icon: Icon(Icons.arrow_back),
-                          label: Text('돌아가기'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.indigo,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-                          ),
+                          child: Text('돌아가기', style: TextStyle(color: Colors.grey)),
                         ),
                       ],
                     ),
