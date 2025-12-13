@@ -618,15 +618,16 @@ Widget build(BuildContext context) {
                             style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
                           ),
                           if (_getHolidayName(day) != null) ...[
-                            SizedBox(width: 10.w),
+                            Spacer(),  // ⭐ 날짜와 우측 사이 중앙 배치
                             Text(
                               _getHolidayName(day)!,
                               style: TextStyle(
                                 fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w500,  // ⭐ bold → w500 (얇게)
                                 color: Colors.red,
                               ),
                             ),
+                            Spacer(),  // ⭐ 중앙 배치용
                           ],
                         ],
                       ),
