@@ -200,7 +200,7 @@ class AlarmRefreshReceiver : BroadcastReceiver() {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             var createdCount = 0
 
-            for (i in 0 until 10) {
+            for (i in 0 until 2) {  // ⭐ 테스트용: 10 → 2
                 val targetDate = Calendar.getInstance().apply {
                     timeInMillis = today.timeInMillis
                     add(Calendar.DAY_OF_MONTH, i)
