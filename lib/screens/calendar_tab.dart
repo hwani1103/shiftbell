@@ -13,6 +13,58 @@ import '../providers/memo_provider.dart';
 import 'package:flutter/services.dart';
 import 'all_shifts_view.dart';
 
+// ⭐ 고정 공휴일 (매년 동일 - MM-DD)
+const Map<String, String> _fixedHolidays = {
+  '01-01': '신정',
+  '03-01': '삼일절',
+  '05-05': '어린이날',
+  '06-06': '현충일',
+  '08-15': '광복절',
+  '10-03': '개천절',
+  '10-09': '한글날',
+  '12-25': '크리스마스',
+};
+
+// ⭐ 음력/변동 공휴일 (연도별 하드코딩 - YYYY-MM-DD)
+const Map<String, String> _lunarHolidays = {
+  // 2025년
+  '2025-01-28': '설날 연휴',
+  '2025-01-29': '설날',
+  '2025-01-30': '설날 연휴',
+  '2025-03-03': '대체공휴일',  // 삼일절
+  '2025-05-06': '대체공휴일',  // 부처님오신날
+  '2025-10-05': '추석 연휴',
+  '2025-10-06': '추석',
+  '2025-10-07': '추석 연휴',
+  '2025-10-08': '대체공휴일',  // 추석
+  // 2026년
+  '2026-02-16': '설날 연휴',
+  '2026-02-17': '설날',
+  '2026-02-18': '설날 연휴',
+  '2026-03-02': '대체공휴일',  // 삼일절
+  '2026-05-24': '부처님오신날',
+  '2026-05-25': '대체공휴일',  // 부처님오신날
+  '2026-06-03': '지방선거',
+  '2026-08-17': '대체공휴일',  // 광복절
+  '2026-09-24': '추석 연휴',
+  '2026-09-25': '추석',
+  '2026-09-26': '추석 연휴',
+  '2026-10-05': '대체공휴일',  // 개천절
+};
+
+// 공휴일 여부 확인
+String? _getHolidayName(DateTime date) {
+  // 1. 고정 공휴일 체크 (매년 동일)
+  final fixedKey = '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  if (_fixedHolidays.containsKey(fixedKey)) {
+    return _fixedHolidays[fixedKey];
+  }
+
+  // 2. 음력/변동 공휴일 체크 (연도별)
+  final lunarKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  return _lunarHolidays[lunarKey];
+}
+
 // StatefulWidget → ConsumerStatefulWidget으로 변경
 class CalendarTab extends ConsumerStatefulWidget {  // ⭐ 변경
   const CalendarTab({super.key});
@@ -377,8 +429,10 @@ Widget build(BuildContext context) {
                                  _focusedDay.year == day.year &&
                                  _focusedDay.month == day.month;
 
+    final isHoliday = _getHolidayName(day) != null;  // ⭐ 공휴일 체크
+
     Color dateColor;
-    if (isSunday) {
+    if (isSunday || isHoliday) {  // ⭐ 일요일 또는 공휴일
       dateColor = isOutside ? Colors.red.withOpacity(0.3) : Colors.red;
     } else {
       dateColor = isOutside ? Colors.grey : Colors.black;
@@ -554,9 +608,27 @@ Widget build(BuildContext context) {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
-                        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                      // ⭐ 날짜 + 공휴일 이름
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
+                            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                          ),
+                          if (_getHolidayName(day) != null) ...[
+                            SizedBox(width: 10.w),
+                            Text(
+                              _getHolidayName(day)!,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       SizedBox(height: 16.h),
 
