@@ -505,6 +505,9 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
   // ⭐ 전체 알람 목록 바텀시트
   void _showAllAlarmsSheet(BuildContext context) {
+    // ⭐ 열기 전 최신 데이터 로드
+    ref.read(alarmNotifierProvider.notifier).refresh();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
