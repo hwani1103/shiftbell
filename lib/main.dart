@@ -177,14 +177,11 @@ void initState() {
 
   Future<void> _scheduleGuardWakeup() async {
     try {
-      // ⭐ 1. 즉시 실행 (20분 이내 알람 체크)
-      print('🔍 AlarmGuardReceiver 즉시 실행 시작');
+      // ⭐ triggerGuardCheck()가 내부에서 scheduleNextWakeup()도 호출함
+      // scheduleGuardWakeup()은 자정만 예약해서 20분전 예약을 덮어쓰는 버그 → 제거
+      print('🔍 AlarmGuardReceiver 트리거');
       await platform.invokeMethod('triggerGuardCheck');
-      print('✅ AlarmGuardReceiver 즉시 실행 완료');
-      
-      // ⭐ 2. 자정 예약
-      await platform.invokeMethod('scheduleGuardWakeup');
-      print('🛡️ 알람 감시 예약 완료');
+      print('✅ AlarmGuardReceiver 완료 (20분 전 예약 포함)');
     } catch (e) {
       print('❌ 감시 예약 실패: $e');
     }

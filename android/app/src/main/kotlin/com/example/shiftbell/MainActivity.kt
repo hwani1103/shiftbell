@@ -67,6 +67,8 @@ class MainActivity: FlutterActivity() {
     // ✅ 변경
 override fun onResume() {
     super.onResume()
+    // ⭐ 앱 복귀 시 20분 전 알림 체크 + 다음 wakeup 예약
+    AlarmGuardReceiver.triggerCheck(this)
     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
         methodChannel?.invokeMethod("refreshAlarms", null)
     }, 300)
