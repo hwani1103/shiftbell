@@ -537,6 +537,13 @@ class DatabaseService {
     print('🗑️ 모든 알람 이력 삭제 완료');
   }
 
+  // ⭐ 알람만 삭제 (이력은 유지) - 자동 갱신용
+  Future<void> deleteAllAlarmsOnly() async {
+    final db = await database;
+    await db.delete('alarms');
+    print('🗑️ 모든 알람 삭제 완료 (이력 유지)');
+  }
+
   // ⭐ 신규: 모든 알람 템플릿 삭제
   Future<void> deleteAllAlarmTemplates() async {
     final db = await database;

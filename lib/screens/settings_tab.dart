@@ -812,7 +812,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         await AlarmService().cancelAlarm(alarm.id!);
       }
     }
-    await DatabaseService.instance.deleteAllAlarms();
+    await DatabaseService.instance.deleteAllAlarmsOnly();  // ⭐ 이력은 유지!
 
     // 2. Notification 취소
     try {

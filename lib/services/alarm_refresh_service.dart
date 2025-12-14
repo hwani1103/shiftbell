@@ -90,8 +90,8 @@ class AlarmRefreshService {
     }
   }
   
-  // 2. DB 알람 전부 삭제
-  await DatabaseService.instance.deleteAllAlarms();
+  // 2. DB 알람 전부 삭제 (이력은 유지!)
+  await DatabaseService.instance.deleteAllAlarmsOnly();
   
   print('🗑️ 기존 알람 전부 삭제');
   
