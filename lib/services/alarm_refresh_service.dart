@@ -118,7 +118,7 @@ class AlarmRefreshService {
   final List<Alarm> newAlarms = [];
   final today = DateTime.now();
   
-  for (var i = 0; i < 2; i++) {  // ⭐ 테스트용: 10 → 2
+  for (var i = 0; i < 10; i++) {
     final date = today.add(Duration(days: i));
     final shiftType = schedule.getShiftForDate(date);
     
