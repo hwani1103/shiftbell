@@ -585,7 +585,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ListTile(
                 leading: Icon(Icons.privacy_tip_outlined, color: Colors.teal),
                 title: Text('개인정보처리방침'),
-                trailing: Icon(Icons.open_in_new, size: 18.sp),
+                trailing: Icon(Icons.chevron_right),
                 onTap: () => _openPrivacyPolicy(),
               ),
 
@@ -714,7 +714,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 4. 문의
 앱 관련 문의사항은 worms0905@gmail.com으로 연락해주세요.
 
-최종 수정일: 2024년 12월''',
+최종 수정일: 2025년 12월''',
             style: TextStyle(fontSize: 13.sp, height: 1.6),
           ),
         ),
