@@ -557,9 +557,174 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 },
               ),
 
+              SizedBox(height: 24.h),
+              Divider(),
+              SizedBox(height: 8.h),
+
+              // ⭐ 도움말 & 정보 섹션
+              Text(
+                '도움말 & 정보',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+              SizedBox(height: 8.h),
+
+              // 도움말
+              ListTile(
+                leading: Icon(Icons.help_outline, color: Colors.blue),
+                title: Text('도움말'),
+                subtitle: Text('앱 사용법 안내'),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () => _showHelpDialog(),
+              ),
+
+              // 개인정보처리방침
+              ListTile(
+                leading: Icon(Icons.privacy_tip_outlined, color: Colors.teal),
+                title: Text('개인정보처리방침'),
+                trailing: Icon(Icons.open_in_new, size: 18.sp),
+                onTap: () => _openPrivacyPolicy(),
+              ),
+
             ],
           );
         },
+      ),
+    );
+  }
+
+  // ⭐ 도움말 다이얼로그
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.help_outline, color: Colors.blue),
+            SizedBox(width: 8.w),
+            Text('도움말'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildHelpItem(
+                number: '1',
+                title: '근무 변경하기',
+                description: '달력에서 날짜를 길게 누르면 해당 날짜의 근무를 변경할 수 있습니다.\n\n'
+                    '• 불규칙 근무자: 원하는 날짜에 근무를 직접 할당\n'
+                    '• 규칙적 근무자: 특정 날짜만 다른 근무로 변경 가능\n\n'
+                    '근무 변경 시 알람도 자동으로 업데이트됩니다.',
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHelpItem({
+    required String number,
+    required String title,
+    required String description,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 24.w,
+              height: 24.w,
+              decoration: BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  number,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16.sp,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8.h),
+        Padding(
+          padding: EdgeInsets.only(left: 32.w),
+          child: Text(
+            description,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.grey.shade700,
+              height: 1.5,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ⭐ 개인정보처리방침 열기
+  void _openPrivacyPolicy() {
+    // TODO: 실제 URL로 변경
+    const url = 'https://YOUR_GITHUB_USERNAME.github.io/shiftbell-privacy/';
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('개인정보처리방침'),
+        content: SingleChildScrollView(
+          child: Text(
+            '''교대종 개인정보처리방침
+
+1. 수집하는 개인정보
+본 앱은 개인정보를 수집하지 않습니다. 모든 데이터(근무 스케줄, 알람 설정 등)는 사용자의 기기에만 저장되며, 외부 서버로 전송되지 않습니다.
+
+2. 앱 권한
+• 알람 권한: 설정된 시간에 알람을 울리기 위해 필요합니다.
+• 오버레이 권한: 잠금 해제 상태에서 알람 화면을 표시하기 위해 필요합니다.
+• 알림 권한: 사전 알림 및 알람 상태를 표시하기 위해 필요합니다.
+
+3. 데이터 저장
+모든 데이터는 기기 내부에만 저장됩니다. 앱을 삭제하면 모든 데이터가 함께 삭제됩니다.
+
+4. 문의
+앱 관련 문의사항은 [이메일 주소]로 연락해주세요.
+
+최종 수정일: 2024년 12월''',
+            style: TextStyle(fontSize: 13.sp, height: 1.6),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('닫기'),
+          ),
+        ],
       ),
     );
   }
