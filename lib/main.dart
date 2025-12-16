@@ -646,38 +646,9 @@ class _InitialRouterState extends State<InitialRouter> {
 
   @override
   Widget build(BuildContext context) {
-    // 흰색 배경 + 텍스트만 (노란 밑줄 제거)
-    return Scaffold(
+    // 런치 스크린과 동일한 빈 흰색 화면 (깜빡임 방지)
+    return const Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 앱 이름
-            const Text(
-              '교대시계',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF283593), // indigo
-                letterSpacing: 1.5,
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // 설명
-            const Text(
-              '교대 스케줄 생성 및 자동 알람 등록',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF283593), // indigo
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
