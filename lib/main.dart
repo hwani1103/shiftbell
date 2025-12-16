@@ -20,8 +20,8 @@ import 'providers/alarm_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ⭐ 런치 스크린 유지 시간 (제거됨)
-  // await Future.delayed(const Duration(milliseconds: 1000));
+  // ⭐ 런치 스크린 유지 시간 (0.5초)
+  await Future.delayed(const Duration(milliseconds: 500));
 
   await initializeDateFormatting('ko_KR', null);
   await DatabaseService.instance.database;
@@ -617,8 +617,8 @@ class _InitialRouterState extends State<InitialRouter> {
   }
 
   Future<void> _navigate() async {
-    // 대기 시간 제거됨
-    // await Future.delayed(const Duration(milliseconds: 1500));
+    // 0.8초 대기
+    await Future.delayed(const Duration(milliseconds: 800));
 
     if (!mounted) return;
 
