@@ -1,5 +1,7 @@
 import java.util.Properties
+import java.io.InputStreamReader
 import java.io.FileInputStream
+import java.nio.charset.Charset
 
 plugins {
     id("com.android.application")
@@ -7,11 +9,13 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// key.properties 로드
+// key.properties 로드 (BOM 제거)
 val keystorePropertiesFile = rootProject.file("key.properties")
 val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    InputStreamReader(FileInputStream(keystorePropertiesFile), Charsets.UTF_8).use { reader ->
+        keystoreProperties.load(reader)
+    }
 }
 
 android {
@@ -42,10 +46,10 @@ android {
     // ⭐ 릴리즈 서명 설정
     signingConfigs {
         create("release") {
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-            storeFile = file(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            storeFile = keystoreProperties.getProperty("storeFile")?.let { file(it) }
+            storePassword = keystoreProperties.getProperty("storePassword")
         }
     }
 
