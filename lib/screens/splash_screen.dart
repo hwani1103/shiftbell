@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     // 페이드인 애니메이션
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 
@@ -39,8 +39,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _navigateToNextScreen() async {
-    // 2초 대기
-    await Future.delayed(const Duration(milliseconds: 2000));
+    // 1.2초 대기
+    await Future.delayed(const Duration(milliseconds: 1200));
 
     if (!mounted) return;
 
