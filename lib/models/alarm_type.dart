@@ -16,7 +16,7 @@ class AlarmType {
     required this.volume,
     this.vibrationStrength = 2,  // 기본값: 중
     required this.isPreset,
-    this.duration = 5,
+    this.duration = 3,
   });
 
   // DB → 객체

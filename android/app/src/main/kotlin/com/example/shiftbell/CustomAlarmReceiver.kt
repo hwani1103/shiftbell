@@ -152,7 +152,7 @@ override fun onReceive(context: Context, intent: Intent) {
                 null, null, null
             )
 
-            var duration = 5  // 기본값 5분
+            var duration = 3  // 기본값 3분
             if (typeCursor.moveToFirst()) {
                 duration = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("duration"))
             }
@@ -160,8 +160,8 @@ override fun onReceive(context: Context, intent: Intent) {
             Log.d("CustomAlarmReceiver", "✅ DB duration: $duration 분")
             return duration
         } catch (e: Exception) {
-            Log.e("CustomAlarmReceiver", "❌ duration 조회 실패, 기본값 5분 사용", e)
-            return 5
+            Log.e("CustomAlarmReceiver", "❌ duration 조회 실패, 기본값 3분 사용", e)
+            return 3
         } finally {
             alarmCursor?.close()
             typeCursor?.close()

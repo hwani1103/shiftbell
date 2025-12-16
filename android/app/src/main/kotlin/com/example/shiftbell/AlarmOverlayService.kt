@@ -40,7 +40,7 @@ class AlarmOverlayService : Service() {
     private var alarmLabel: String = "알람"  // 알람 라벨 저장
     private var timeoutHandler: Handler? = null
     private var timeoutRunnable: Runnable? = null
-    private var alarmDuration: Int = 5  // 기본 5분
+    private var alarmDuration: Int = 3  // 기본 3분
     private var isOverlayVisible: Boolean = false  // ⭐ Overlay 표시 상태
 
     // 외부에서 Overlay 종료/스누즈 신호를 받기 위한 BroadcastReceiver
