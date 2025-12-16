@@ -34,7 +34,7 @@ import kotlin.math.abs
 
 class AlarmActivity : AppCompatActivity() {
     private var alarmId: Int = 0
-    private var alarmDuration: Int = 1  // 기본 1분 (테스트용)
+    private var alarmDuration: Int = 5  // 기본 5분
     private var alarmTimeStr: String = ""  // 알람 시간 저장
     private var alarmLabel: String = "알람"  // 알람 라벨 저장
     private lateinit var gestureDetector: GestureDetectorCompat
@@ -59,7 +59,7 @@ class AlarmActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         alarmId = intent.getIntExtra("alarmId", 0)
-        alarmDuration = intent.getIntExtra("alarmDuration", 1)  // 기본 1분 (테스트용)
+        alarmDuration = intent.getIntExtra("alarmDuration", 5)  // 기본 5분
 
         setupWindowFlags()
 
