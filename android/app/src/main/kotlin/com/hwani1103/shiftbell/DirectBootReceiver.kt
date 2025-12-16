@@ -1,6 +1,6 @@
 // android/app/src/main/kotlin/com/example/shiftbell/DirectBootReceiver.kt
 
-package com.example.shiftbell
+package com.hwani1103.shiftbell
 
 import android.app.AlarmManager
 import android.app.PendingIntent

@@ -1,6 +1,6 @@
 // android/app/src/main/kotlin/com/example/shiftbell/DatabaseHelper.kt
 
-package com.example.shiftbell
+package com.hwani1103.shiftbell
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase

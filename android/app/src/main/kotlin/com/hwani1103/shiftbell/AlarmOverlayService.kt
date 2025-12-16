@@ -1,4 +1,4 @@
-package com.example.shiftbell
+package com.hwani1103.shiftbell
 
 import android.app.KeyguardManager
 import android.app.NotificationManager
@@ -28,8 +28,8 @@ import androidx.core.app.NotificationCompat
 class AlarmOverlayService : Service() {
 
     companion object {
-        const val ACTION_DISMISS_OVERLAY = "com.example.shiftbell.DISMISS_OVERLAY"
-        const val ACTION_SNOOZE_OVERLAY = "com.example.shiftbell.SNOOZE_OVERLAY"
+        const val ACTION_DISMISS_OVERLAY = "com.hwani1103.shiftbell.DISMISS_OVERLAY"
+        const val ACTION_SNOOZE_OVERLAY = "com.hwani1103.shiftbell.SNOOZE_OVERLAY"
         const val EXTRA_ALARM_ID = "alarmId"
     }
 
@@ -427,7 +427,7 @@ class AlarmOverlayService : Service() {
     sendBroadcast(guardIntent)
 
     // ⭐ Flutter UI 갱신 트리거
-    val flutterIntent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+    val flutterIntent = Intent("com.hwani1103.shiftbell.FLUTTER_REFRESH")
     sendBroadcast(flutterIntent)
     Log.d("AlarmOverlay", "📢 Flutter UI 갱신 브로드캐스트 전송")
 
@@ -590,7 +590,7 @@ class AlarmOverlayService : Service() {
                 NotificationHelper.showUpdatedNotification(applicationContext, timeStr, shiftType)
 
                 // ⭐ Flutter UI 갱신 트리거
-                val flutterIntent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+                val flutterIntent = Intent("com.hwani1103.shiftbell.FLUTTER_REFRESH")
                 sendBroadcast(flutterIntent)
                 Log.d("AlarmOverlay", "📢 Flutter UI 갱신 브로드캐스트 전송")
 

@@ -52,7 +52,7 @@
             android:name=".AlarmActivity"
             android:exported="false"
             android:launchMode="singleTask"
-            android:taskAffinity="com.example.shiftbell.alarm"
+            android:taskAffinity="com.hwani1103.shiftbell.alarm"
             android:excludeFromRecents="true"
             android:theme="@style/Theme.AppCompat.NoActionBar"
             android:showWhenLocked="true"
@@ -101,7 +101,7 @@
         android:exported="false"
         android:directBootAware="true">
         <intent-filter>
-            <action android:name="com.example.shiftbell.REFRESH_ALARMS"/>
+            <action android:name="com.hwani1103.shiftbell.REFRESH_ALARMS"/>
         </intent-filter>
     </receiver>
         

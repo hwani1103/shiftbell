@@ -1,4 +1,4 @@
-package com.example.shiftbell
+package com.hwani1103.shiftbell
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -322,7 +322,7 @@ private fun markRefreshed(context: Context) {
     // Flutter에 갱신 알림 (앱 켜져있으면)
     private fun notifyFlutter(context: Context) {
         try {
-            val intent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+            val intent = Intent("com.hwani1103.shiftbell.FLUTTER_REFRESH")
             context.sendBroadcast(intent)
             Log.d("AlarmRefresh", "📢 Flutter 갱신 트리거")
         } catch (e: Exception) {

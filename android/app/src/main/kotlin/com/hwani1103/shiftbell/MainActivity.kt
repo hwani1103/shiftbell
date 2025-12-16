@@ -1,6 +1,6 @@
 // android/app/src/main/kotlin/com/example/shiftbell/MainActivity.kt
 
-package com.example.shiftbell
+package com.hwani1103.shiftbell
 
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -20,7 +20,7 @@ import androidx.core.app.NotificationCompat
 
 
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "com.example.shiftbell/alarm"
+    private val CHANNEL = "com.hwani1103.shiftbell/alarm"
     private var methodChannel: MethodChannel? = null
     
     // ⭐ 갱신 요청 수신용 Receiver
@@ -39,7 +39,7 @@ class MainActivity: FlutterActivity() {
         super.onCreate(savedInstanceState)
 
         // ⭐ BroadcastReceiver 등록은 onResume으로 이동 예정
-        val filter = IntentFilter("com.example.shiftbell.FLUTTER_REFRESH")
+        val filter = IntentFilter("com.hwani1103.shiftbell.FLUTTER_REFRESH")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(refreshReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
@@ -336,7 +336,7 @@ override fun onNewIntent(intent: Intent) {
     // ⭐ 테스트용: Native 갱신 강제 실행 (리셋 후 트리거)
     private fun forceNativeRefresh() {
         resetNativeRefreshFlag()
-        val intent = Intent("com.example.shiftbell.REFRESH_ALARMS").apply {
+        val intent = Intent("com.hwani1103.shiftbell.REFRESH_ALARMS").apply {
             setPackage(packageName)
         }
         sendBroadcast(intent)

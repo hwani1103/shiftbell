@@ -6,7 +6,7 @@ class AlarmService {
   factory AlarmService() => _instance;
   AlarmService._internal();
 
-  static const platform = MethodChannel('com.example.shiftbell/alarm');
+  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
 
   /// 알람 초기화
   Future<void> initialize() async {

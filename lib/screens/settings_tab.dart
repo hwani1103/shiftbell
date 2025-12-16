@@ -980,7 +980,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
     // 2. Notification 취소
     try {
-      const platform = MethodChannel('com.example.shiftbell/alarm');
+      const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
       await platform.invokeMethod('cancelNotification');
     } catch (e) {
       print('⚠️ Notification 삭제 실패: $e');
@@ -991,7 +991,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
     // 4. AlarmGuard 트리거
     try {
-      const platform = MethodChannel('com.example.shiftbell/alarm');
+      const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
       await platform.invokeMethod('triggerGuardCheck');
     } catch (e) {
       print('⚠️ AlarmGuard 트리거 실패: $e');
@@ -1145,7 +1145,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
   bool _isPlaying = false;
 
   // MethodChannel
-  static const platform = MethodChannel('com.example.shiftbell/alarm');
+  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
 
   @override
   void initState() {

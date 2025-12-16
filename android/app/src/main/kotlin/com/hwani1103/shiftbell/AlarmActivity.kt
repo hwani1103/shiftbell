@@ -1,6 +1,6 @@
 // android/app/src/main/kotlin/com/example/shiftbell/AlarmActivity.kt
 
-package com.example.shiftbell
+package com.hwani1103.shiftbell
 
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -355,7 +355,7 @@ private fun dismissAlarm() {
     Log.d("AlarmActivity", "✅ AlarmGuardReceiver 트리거")
 
     // ⭐ Flutter UI 갱신 트리거
-    val flutterIntent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+    val flutterIntent = Intent("com.hwani1103.shiftbell.FLUTTER_REFRESH")
     sendBroadcast(flutterIntent)
     Log.d("AlarmActivity", "📢 Flutter UI 갱신 브로드캐스트 전송")
 
@@ -519,7 +519,7 @@ private fun dismissAlarm() {
                 NotificationHelper.showUpdatedNotification(applicationContext, timeStr, shiftType)
 
                 // ⭐ Flutter UI 갱신 트리거
-                val flutterIntent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+                val flutterIntent = Intent("com.hwani1103.shiftbell.FLUTTER_REFRESH")
                 sendBroadcast(flutterIntent)
                 Log.d("AlarmActivity", "📢 Flutter UI 갱신 브로드캐스트 전송")
 

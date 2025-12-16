@@ -1,4 +1,4 @@
-package com.example.shiftbell
+package com.hwani1103.shiftbell
 
 import android.content.Context
 import android.content.res.AssetFileDescriptor

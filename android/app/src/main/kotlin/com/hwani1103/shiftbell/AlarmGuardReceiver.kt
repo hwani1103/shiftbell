@@ -1,6 +1,6 @@
 // AlarmGuardReceiver.kt
 
-package com.example.shiftbell
+package com.hwani1103.shiftbell
 
 import android.app.*
 import android.content.BroadcastReceiver

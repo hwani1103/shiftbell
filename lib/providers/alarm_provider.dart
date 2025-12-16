@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 // ⭐ 알람 관리 Provider (StateNotifier)
 class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
   // ⭐ MethodChannel 재사용 (매번 생성 방지)
-  static const _platform = MethodChannel('com.example.shiftbell/alarm');
+  static const _platform = MethodChannel('com.hwani1103.shiftbell/alarm');
 
   AlarmNotifier() : super(const AsyncValue.loading()) {
     _loadAlarms();

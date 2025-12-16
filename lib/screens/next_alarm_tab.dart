@@ -18,7 +18,7 @@ class NextAlarmTab extends ConsumerStatefulWidget {
 
 class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   Timer? _countdownTimer;
-  static const platform = MethodChannel('com.example.shiftbell/alarm');
+  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
 
   @override
   void initState() {

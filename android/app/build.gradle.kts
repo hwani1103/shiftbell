@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.shiftbell"
+    namespace = "com.hwani1103.shiftbell"
     compileSdk = 36
     ndkVersion = "27.0.12077973"
 
@@ -22,7 +22,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.shiftbell"
+        applicationId = "com.hwani1103.shiftbell"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = 1

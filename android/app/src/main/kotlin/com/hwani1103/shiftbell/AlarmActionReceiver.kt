@@ -1,6 +1,6 @@
 // android/app/src/main/kotlin/com/example/shiftbell/AlarmActionReceiver.kt
 
-package com.example.shiftbell
+package com.hwani1103.shiftbell
 
 import android.app.AlarmManager
 import android.app.NotificationChannel
@@ -265,7 +265,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
     // ⭐ Flutter UI 갱신 브로드캐스트 전송
     private fun notifyFlutterUI(context: Context) {
         try {
-            val intent = Intent("com.example.shiftbell.FLUTTER_REFRESH")
+            val intent = Intent("com.hwani1103.shiftbell.FLUTTER_REFRESH")
             context.sendBroadcast(intent)
             Log.d("AlarmAction", "📢 Flutter UI 갱신 브로드캐스트 전송")
         } catch (e: Exception) {

@@ -1,6 +1,6 @@
 // android/app/src/main/kotlin/com/example/shiftbell/AlarmRefreshUtil.kt
 
-package com.example.shiftbell
+package com.hwani1103.shiftbell
 
 import android.content.Context
 import android.content.Intent
@@ -57,7 +57,7 @@ object AlarmRefreshUtil {
                 }
 
                 // AlarmRefreshReceiver 트리거
-                val intent = Intent("com.example.shiftbell.REFRESH_ALARMS")
+                val intent = Intent("com.hwani1103.shiftbell.REFRESH_ALARMS")
                 context.sendBroadcast(intent)
 
                 // 갱신 완료 시각 & 부팅 시각 저장

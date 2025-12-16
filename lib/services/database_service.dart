@@ -18,7 +18,7 @@ class DatabaseService {
 
   static Database? _database;
   static Completer<Database>? _initCompleter;
-  static const platform = MethodChannel('com.example.shiftbell/alarm');
+  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
 
   // ⭐ HIGH-2 수정: Completer 패턴으로 Race Condition 완전 해결
   Future<Database> get database async {

@@ -45,7 +45,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  static const platform = MethodChannel('com.example.shiftbell/alarm');
+  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
   
   @override
   void initState() {
@@ -137,7 +137,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
-  static const platform = MethodChannel('com.example.shiftbell/alarm');
+  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
   
   final _tabs = [
     NextAlarmTab(),

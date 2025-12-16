@@ -126,7 +126,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       }
 
       // 3. 모든 Notification 삭제
-      const platform = MethodChannel('com.example.shiftbell/alarm');
+      const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
       try {
         await platform.invokeMethod('cancelAllNotifications');
         print('✅ 모든 Notification 삭제 완료');
@@ -278,7 +278,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   
   print('✅ 스케줄 + 알람 변경 완료');
   try {
-    await MethodChannel('com.example.shiftbell/alarm').invokeMethod('triggerGuardCheck');
+    await MethodChannel('com.hwani1103.shiftbell/alarm').invokeMethod('triggerGuardCheck');
     print('✅ Provider에서 AlarmGuardReceiver 트리거 완료');
   } catch (e) {
     print('⚠️ Provider에서 AlarmGuardReceiver 트리거 실패: $e');

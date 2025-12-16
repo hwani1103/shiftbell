@@ -74,7 +74,7 @@ class CalendarTab extends ConsumerStatefulWidget {  // ⭐ 변경
 }
 
 class _CalendarTabState extends ConsumerState<CalendarTab> {  // ⭐ 변경
-  static const platform = MethodChannel('com.example.shiftbell/alarm');  // ⭐ 추가
+  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');  // ⭐ 추가
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;

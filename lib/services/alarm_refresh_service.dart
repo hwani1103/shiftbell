@@ -11,7 +11,7 @@ class AlarmRefreshService {
   static final AlarmRefreshService instance = AlarmRefreshService._internal();
   AlarmRefreshService._internal();
 
-  static const _platform = MethodChannel('com.example.shiftbell/alarm');
+  static const _platform = MethodChannel('com.hwani1103.shiftbell/alarm');
   bool _isRefreshing = false;
   
   /// 조건 체크 후 필요하면 갱신
