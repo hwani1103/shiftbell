@@ -834,6 +834,19 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
+              // ⭐ 스케줄 변경 (규칙적 근무자만)
+              if (schedule.isRegular && schedule.pattern != null)
+                ListTile(
+                  leading: Icon(Icons.swap_horiz, color: Colors.green),
+                  title: Text('스케줄 변경'),
+                  subtitle: Text('조 변경 시 오늘 근무를 다시 설정합니다'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _showChangeScheduleDialog();
+                  },
+                ),
+              if (schedule.isRegular && schedule.pattern != null)
+                Divider(height: 1),
               ListTile(
                 leading: Icon(Icons.edit, color: Colors.blue),
                 title: Text('근무명 수정'),
@@ -858,6 +871,118 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         ),
       ),
     );
+  }
+
+  // ⭐ 스케줄 변경 다이얼로그 (조 변경 시 사용)
+  void _showChangeScheduleDialog() {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null || schedule.pattern == null) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => _ChangeScheduleDialog(
+        pattern: schedule.pattern!,
+        onConfirm: (selectedIndex) async {
+          await _applyScheduleChange(selectedIndex);
+        },
+      ),
+    );
+  }
+
+  // ⭐ 스케줄 변경 적용
+  Future<void> _applyScheduleChange(int selectedIndex) async {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    // 로딩 표시
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              ),
+              SizedBox(width: 12),
+              Text('스케줄 변경 중...'),
+            ],
+          ),
+          duration: Duration(seconds: 5),
+        ),
+      );
+    }
+
+    try {
+      // 1. 기존 알람 전체 삭제 (이력은 유지)
+      final existingAlarms = await DatabaseService.instance.getAllAlarms();
+      for (var alarm in existingAlarms) {
+        if (alarm.id != null) {
+          await AlarmService().cancelAlarm(alarm.id!);
+        }
+      }
+      await DatabaseService.instance.deleteAllAlarmsOnly();
+
+      // 2. Notification 취소
+      try {
+        const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+        await platform.invokeMethod('cancelNotification');
+      } catch (e) {
+        print('⚠️ Notification 삭제 실패: $e');
+      }
+
+      // 3. 스케줄 업데이트 (startDate = 오늘, todayIndex = 선택한 인덱스)
+      final newSchedule = ShiftSchedule(
+        id: schedule.id,
+        isRegular: schedule.isRegular,
+        pattern: schedule.pattern,
+        todayIndex: selectedIndex,
+        shiftTypes: schedule.shiftTypes,
+        activeShiftTypes: schedule.activeShiftTypes,
+        startDate: DateTime.now(),  // ⭐ 오늘로 변경
+        shiftColors: schedule.shiftColors,
+        assignedDates: {},  // ⭐ 수동 할당 초기화
+      );
+
+      await ref.read(scheduleProvider.notifier).saveSchedule(newSchedule);
+
+      // 4. 10일치 알람 재생성
+      await _generate10DaysAlarmsFromTemplates(newSchedule);
+
+      // 5. AlarmGuard 트리거
+      try {
+        const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+        await platform.invokeMethod('triggerGuardCheck');
+      } catch (e) {
+        print('⚠️ AlarmGuard 트리거 실패: $e');
+      }
+
+      // 6. Provider 갱신
+      await ref.read(alarmNotifierProvider.notifier).refresh();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('✅ 스케줄이 변경되었습니다'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      print('❌ 스케줄 변경 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ 스케줄 변경 실패: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   // ⭐ 근무명 수정 다이얼로그
@@ -2615,6 +2740,169 @@ class _TappableNumberPickerState extends State<_TappableNumberPicker> {
           childCount: widget.infiniteLoop ? null : _itemCount,
         ),
       ),
+    );
+  }
+}
+
+// ============================================================
+// ⭐ 스케줄 변경 다이얼로그 (온보딩 UI 재사용)
+// ============================================================
+class _ChangeScheduleDialog extends StatefulWidget {
+  final List<String> pattern;
+  final Function(int) onConfirm;
+
+  const _ChangeScheduleDialog({
+    required this.pattern,
+    required this.onConfirm,
+  });
+
+  @override
+  State<_ChangeScheduleDialog> createState() => _ChangeScheduleDialogState();
+}
+
+class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
+  int? _selectedIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final today = DateTime.now();
+    final dateText = '${today.month}/${today.day}';
+
+    return AlertDialog(
+      title: Row(
+        children: [
+          Icon(Icons.swap_horiz, color: Colors.green),
+          SizedBox(width: 8.w),
+          Text('스케줄 변경'),
+        ],
+      ),
+      content: Container(
+        width: double.maxFinite,
+        constraints: BoxConstraints(maxHeight: 450.h),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '오늘($dateText)은 어떤 근무인가요?',
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              '패턴에서 오늘 근무를 선택하세요',
+              style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
+            ),
+            SizedBox(height: 16.h),
+
+            // 패턴 그리드
+            Expanded(
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 6,
+                  crossAxisSpacing: 6.w,
+                  mainAxisSpacing: 6.h,
+                  childAspectRatio: 1.0,
+                ),
+                itemCount: widget.pattern.length,
+                itemBuilder: (context, index) {
+                  final isSelected = _selectedIndex == index;
+
+                  return InkWell(
+                    onTap: () {
+                      setState(() => _selectedIndex = index);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.green : Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: isSelected ? Colors.green.shade700 : Colors.grey.shade400,
+                          width: isSelected ? 2 : 1,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Align(
+                            alignment: Alignment.topLeft,
+                            child: Padding(
+                              padding: EdgeInsets.only(left: 4.w, top: 2.h),
+                              child: Text(
+                                '${index + 1}',
+                                style: TextStyle(
+                                  fontSize: 9.sp,
+                                  color: isSelected ? Colors.white70 : Colors.grey.shade600,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                widget.pattern[index],
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected ? Colors.white : Colors.black,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            SizedBox(height: 12.h),
+
+            // 안내 문구
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: Colors.amber.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.amber.shade700, size: 20.sp),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      '기존 알람이 삭제되고 새로운 스케줄로 10일치 알람이 생성됩니다.',
+                      style: TextStyle(fontSize: 12.sp, color: Colors.amber.shade800),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('취소'),
+        ),
+        ElevatedButton(
+          onPressed: _selectedIndex == null
+              ? null
+              : () {
+                  Navigator.pop(context);
+                  widget.onConfirm(_selectedIndex!);
+                },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+          ),
+          child: Text('변경'),
+        ),
+      ],
     );
   }
 }
