@@ -575,6 +575,9 @@ Widget build(BuildContext context) {
 
     final dateStr = day.toIso8601String().split('T')[0];
 
+    // ⭐ 팝업 열기 전에 알람 데이터 새로고침 (dismiss/snooze/timeout 후 최신 데이터 반영)
+    ref.invalidate(alarmNotifierProvider);
+
     // ⭐ 팝업 열기 전에 메모 로드
     ref.read(memoProvider.notifier).loadMemosForDate(dateStr);
 
