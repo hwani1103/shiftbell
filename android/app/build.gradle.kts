@@ -39,8 +39,8 @@ android {
         applicationId = "com.hwani1103.shiftbell"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
     }
 
     // ⭐ 릴리즈 서명 설정

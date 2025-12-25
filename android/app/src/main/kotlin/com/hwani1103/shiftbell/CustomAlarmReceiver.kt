@@ -40,6 +40,10 @@ override fun onReceive(context: Context, intent: Intent) {
     // ⭐ 신규: 알람 울릴 때 즉시 갱신 체크!
     AlarmRefreshUtil.checkAndTriggerRefresh(context)
 
+    // ⭐ 알람 울리면 20분 전 Notification 즉시 삭제 (Overlay/Activity에서만 제어하도록)
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    notificationManager.cancel(8888)
+
     // ⭐ ringing 이력 생성 제거 (사용자에게 무의미한 내부 상태)
     // 실제 이력은 dismiss/snooze/timeout 시 생성됨
 
