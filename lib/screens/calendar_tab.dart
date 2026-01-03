@@ -38,7 +38,6 @@ const Map<String, String> _lunarHolidays = {
   '2025-10-07': '추석',
   '2025-10-08': '대체공휴일',
   // 2026년
-  '2026-01-02': '테스트용',  // ⭐ 테스트용 (나중에 삭제)
   '2026-02-16': '설날',
   '2026-02-17': '설날',
   '2026-02-18': '설날',
@@ -553,40 +552,32 @@ Widget build(BuildContext context) {
                     // 오늘 + 일반날 = 인디고배경 + 흰텍스트
                     // 오늘 아닌 빨간날 = 빨간텍스트만
                     // 오늘 아닌 일반날 = 검정텍스트
-                    Builder(
-                      builder: (context) {
-                        // ⭐ 테스트용: 1/2도 오늘처럼 하이라이트 (나중에 삭제)
-                        final isTestToday = day.year == 2026 && day.month == 1 && day.day == 2;
-                        final showHighlight = shouldHighlightToday || isTestToday;
-
-                        return Align(
-                          alignment: Alignment.center,
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),
-                            child: Container(
-                              padding: showHighlight ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
-                              decoration: showHighlight
-                                  ? BoxDecoration(
-                                      color: (isSunday || isHoliday) ? Colors.lime.shade300 : Colors.indigo.shade500,
-                                      borderRadius: BorderRadius.circular(4.r),
-                                    )
-                                  : null,
-                              child: Text(
-                                '${day.day}',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: showHighlight
-                                      ? ((isSunday || isHoliday) ? Colors.red : Colors.white)
-                                      : dateColor,
-                                  height: 1.0,
-                                ),
-                              ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),
+                        child: Container(
+                          padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
+                          decoration: shouldHighlightToday
+                              ? BoxDecoration(
+                                  color: (isSunday || isHoliday) ? Colors.lime.shade300 : Colors.indigo.shade500,
+                                  borderRadius: BorderRadius.circular(4.r),
+                                )
+                              : null,
+                          child: Text(
+                            '${day.day}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: shouldHighlightToday
+                                  ? ((isSunday || isHoliday) ? Colors.red : Colors.white)
+                                  : dateColor,
+                              height: 1.0,
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
                     // ⭐ 메모 표시 (하단 고정, 날짜와 독립)
                     if (memos.isNotEmpty)
