@@ -277,8 +277,8 @@ Widget build(BuildContext context) {
                     // 달력
                     Expanded(
                       child: TableCalendar(
-                        firstDay: DateTime.now().subtract(const Duration(days: 365 * 3)),  // 3년 전
-                        lastDay: DateTime.now().add(const Duration(days: 365 * 3)),        // 3년 후
+                        firstDay: DateTime(DateTime.now().year - 3, 1, 1),   // 3년 전 1월 1일
+                        lastDay: DateTime(DateTime.now().year + 3, 12, 31),  // 3년 후 12월 31일
                         focusedDay: _focusedDay,
                         selectedDayPredicate: (day) {
                           if (_isMultiSelectMode) {
