@@ -242,7 +242,7 @@ Widget build(BuildContext context) {
                                       ),
                                     ),
                                   ),
-                                  // ⭐ today 버튼
+                                  // ⭐ today 버튼 (전체근무표와 동일 스타일)
                                   GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -253,15 +253,15 @@ Widget build(BuildContext context) {
                                     child: Container(
                                       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue.shade50,
+                                        color: Colors.indigo.shade50,
                                         borderRadius: BorderRadius.circular(6.r),
-                                        border: Border.all(color: Colors.blue.shade200, width: 0.8),
+                                        border: Border.all(color: Colors.indigo.shade200, width: 0.8),
                                       ),
                                       child: Text(
                                         'today',
                                         style: TextStyle(
                                           fontSize: 11.sp,
-                                          color: Colors.blue.shade700,
+                                          color: Colors.indigo.shade700,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -821,8 +821,10 @@ Widget build(BuildContext context) {
 
                                         final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
                                         if (success) {
-                                          memoController.clear();
-                                          setState(() {});  // ⭐ 팝업 새로고침
+                                          // ⭐ 메모 저장 성공 시 팝업 닫기 (달력에서 바로 확인)
+                                          if (context.mounted) {
+                                            Navigator.of(context).pop();
+                                          }
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
