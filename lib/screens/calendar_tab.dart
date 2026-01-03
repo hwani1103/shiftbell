@@ -524,10 +524,10 @@ Widget build(BuildContext context) {
                           padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
                           decoration: shouldHighlightToday
                               ? BoxDecoration(
-                                  // ⭐ 빨간날 오늘: 연한 노랑 배경, 일반 오늘: 빨간 배경
+                                  // ⭐ 빨간날 오늘: 연한 회색 배경, 일반 오늘: 빨간 배경
                                   color: (isSunday || isHoliday)
-                                      ? Colors.amber.shade100  // 빨간날 오늘은 연한 노랑 배경
-                                      : Colors.red,            // 일반 오늘은 빨간색 배경
+                                      ? Colors.grey.shade300  // 빨간날 오늘은 연한 회색 배경
+                                      : Colors.red,           // 일반 오늘은 빨간색 배경
                                   borderRadius: BorderRadius.circular(4.r),
                                 )
                               : null,
