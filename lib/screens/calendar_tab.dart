@@ -519,14 +519,14 @@ Widget build(BuildContext context) {
                     // ⭐ 테스트용: 2026년 1월 3,4,11,18,25일에 다른 배경색 적용
                     Builder(
                       builder: (context) {
-                        // 테스트용 배경색 (나중에 삭제)
+                        // 테스트용 배경색 (빨간 텍스트와 대비되는 밝은 색)
                         Color? testBgColor;
                         if (day.year == 2026 && day.month == 1) {
-                          if (day.day == 3) testBgColor = Colors.blueGrey.shade400;  // 연한 검정
-                          else if (day.day == 4) testBgColor = Colors.teal.shade200;  // 청록
-                          else if (day.day == 11) testBgColor = Colors.purple.shade200;  // 보라
-                          else if (day.day == 18) testBgColor = Colors.orange.shade200;  // 주황
-                          else if (day.day == 25) testBgColor = Colors.cyan.shade200;  // 하늘
+                          if (day.day == 3) testBgColor = Colors.yellow.shade300;       // 노랑 (진하게)
+                          else if (day.day == 4) testBgColor = Colors.lightGreen.shade200;  // 연두
+                          else if (day.day == 11) testBgColor = Colors.lightBlue.shade200;  // 하늘
+                          else if (day.day == 18) testBgColor = Colors.amber.shade300;      // 황금
+                          else if (day.day == 25) testBgColor = Colors.lime.shade300;       // 라임
                         }
                         final showHighlight = shouldHighlightToday || testBgColor != null;
                         final bgColor = testBgColor ?? ((isSunday || isHoliday) ? Colors.grey.shade300 : Colors.red);
