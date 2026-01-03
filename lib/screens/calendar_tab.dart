@@ -38,7 +38,6 @@ const Map<String, String> _lunarHolidays = {
   '2025-10-07': '추석 연휴',
   '2025-10-08': '대체공휴일',  // 추석
   // 2026년
-  '2026-01-03': '테스트용',  // ⭐ 테스트용 (나중에 삭제)
   '2026-02-16': '설날 연휴',
   '2026-02-17': '설날',
   '2026-02-18': '설날 연휴',
@@ -516,49 +515,36 @@ Widget build(BuildContext context) {
                         ),
                       ),
                     // ⭐ 날짜 숫자 (항상 중앙, 3개일 때만 살짝 위로)
-                    // ⭐ 테스트용: 2026년 1월 3,4,11,18,25일에 다른 배경색 적용
-                    Builder(
-                      builder: (context) {
-                        // 테스트용 배경색 (빨간 텍스트와 대비되는 밝은 색)
-                        Color? testBgColor;
-                        if (day.year == 2026 && day.month == 1) {
-                          if (day.day == 3) testBgColor = Colors.pink.shade200;         // 분홍
-                          else if (day.day == 4) testBgColor = Colors.indigo.shade100;    // 연인디고
-                          else if (day.day == 11) testBgColor = Colors.brown.shade200;    // 갈색
-                          else if (day.day == 18) testBgColor = Colors.green.shade200;    // 초록
-                          else if (day.day == 25) testBgColor = Colors.lime.shade300;     // 라임 (유지)
-                        }
-                        final showHighlight = shouldHighlightToday || testBgColor != null;
-                        final bgColor = testBgColor ?? ((isSunday || isHoliday) ? Colors.grey.shade300 : Colors.red);
-
-                        return Align(
-                          alignment: Alignment.center,
-                          child: Padding(
-                            padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),
-                            child: Container(
-                              padding: showHighlight ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
-                              decoration: showHighlight
-                                  ? BoxDecoration(
-                                      color: bgColor,
-                                      borderRadius: BorderRadius.circular(4.r),
-                                    )
-                                  : null,
-                              child: Text(
-                                '${day.day}',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: showHighlight
-                                      ? ((isSunday || isHoliday) ? Colors.red : Colors.white)
-                                      : dateColor,
-                                  height: 1.0,
-                                ),
-                              ),
+                    // 오늘 + 빨간날 = 라임배경 + 빨간텍스트
+                    // 오늘 + 일반날 = 빨간배경 + 흰텍스트
+                    // 오늘 아닌 빨간날 = 빨간텍스트만
+                    // 오늘 아닌 일반날 = 검정텍스트
+                    Align(
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),
+                        child: Container(
+                          padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
+                          decoration: shouldHighlightToday
+                              ? BoxDecoration(
+                                  color: (isSunday || isHoliday) ? Colors.lime.shade300 : Colors.red,
+                                  borderRadius: BorderRadius.circular(4.r),
+                                )
+                              : null,
+                          child: Text(
+                            '${day.day}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: shouldHighlightToday
+                                  ? ((isSunday || isHoliday) ? Colors.red : Colors.white)
+                                  : dateColor,
+                              height: 1.0,
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
                     // ⭐ 메모 표시 (하단 고정, 날짜와 독립)
                     if (memos.isNotEmpty)
