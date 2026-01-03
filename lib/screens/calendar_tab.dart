@@ -549,35 +549,93 @@ Widget build(BuildContext context) {
                       ),
                     // ⭐ 날짜 숫자 (항상 중앙, 3개일 때만 살짝 위로)
                     // 오늘 + 빨간날 = 라임배경 + 빨간텍스트
-                    // 오늘 + 일반날 = 빨간배경 + 흰텍스트
+                    // 오늘 + 일반날 = 테스트 중 (31가지 조합)
                     // 오늘 아닌 빨간날 = 빨간텍스트만
                     // 오늘 아닌 일반날 = 검정텍스트
-                    Align(
-                      alignment: Alignment.center,
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),
-                        child: Container(
-                          padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
-                          decoration: shouldHighlightToday
-                              ? BoxDecoration(
-                                  color: (isSunday || isHoliday) ? Colors.lime.shade300 : Colors.red,
-                                  borderRadius: BorderRadius.circular(4.r),
-                                )
-                              : null,
-                          child: Text(
-                            '${day.day}',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: shouldHighlightToday
-                                  ? ((isSunday || isHoliday) ? Colors.red : Colors.white)
-                                  : dateColor,
-                              height: 1.0,
+                    Builder(
+                      builder: (context) {
+                        // ⭐ 테스트용: 2026년 1월 1~31일 각각 다른 색상 조합
+                        Color? testBgColor;
+                        Color? testTextColor;
+                        if (day.year == 2026 && day.month == 1 && !(isSunday || isHoliday)) {
+                          switch (day.day) {
+                            // 인디고 계열 (1-10)
+                            case 1: testBgColor = Colors.indigo; testTextColor = Colors.white; break;
+                            case 2: testBgColor = Colors.indigo.shade700; testTextColor = Colors.white; break;
+                            case 3: testBgColor = Colors.indigo.shade500; testTextColor = Colors.white; break;
+                            case 5: testBgColor = Colors.indigo.shade400; testTextColor = Colors.white; break;
+                            case 6: testBgColor = Colors.indigo.shade300; testTextColor = Colors.indigo.shade900; break;
+                            case 7: testBgColor = Colors.indigo.shade900; testTextColor = Colors.white; break;
+                            case 8: testBgColor = Colors.indigo.shade800; testTextColor = Colors.amber; break;
+                            case 9: testBgColor = Colors.indigo; testTextColor = Colors.yellow; break;
+                            case 10: testBgColor = Colors.indigo.shade600; testTextColor = Colors.lime; break;
+                            // 블루 계열 (12-17)
+                            case 12: testBgColor = Colors.blue; testTextColor = Colors.white; break;
+                            case 13: testBgColor = Colors.blue.shade700; testTextColor = Colors.white; break;
+                            case 14: testBgColor = Colors.blue.shade800; testTextColor = Colors.yellow; break;
+                            case 15: testBgColor = Colors.blue.shade900; testTextColor = Colors.white; break;
+                            case 16: testBgColor = Colors.lightBlue; testTextColor = Colors.white; break;
+                            case 17: testBgColor = Colors.blueAccent; testTextColor = Colors.white; break;
+                            // 퍼플 계열 (19-24)
+                            case 19: testBgColor = Colors.deepPurple; testTextColor = Colors.white; break;
+                            case 20: testBgColor = Colors.deepPurple.shade700; testTextColor = Colors.white; break;
+                            case 21: testBgColor = Colors.purple; testTextColor = Colors.white; break;
+                            case 22: testBgColor = Colors.purple.shade700; testTextColor = Colors.yellow; break;
+                            case 23: testBgColor = Colors.deepPurple.shade400; testTextColor = Colors.white; break;
+                            case 24: testBgColor = Colors.purpleAccent; testTextColor = Colors.white; break;
+                            // 틸/시안 계열 (26-31)
+                            case 26: testBgColor = Colors.teal; testTextColor = Colors.white; break;
+                            case 27: testBgColor = Colors.teal.shade700; testTextColor = Colors.white; break;
+                            case 28: testBgColor = Colors.cyan.shade700; testTextColor = Colors.white; break;
+                            case 29: testBgColor = Colors.cyan.shade800; testTextColor = Colors.yellow; break;
+                            case 30: testBgColor = Colors.blueGrey.shade700; testTextColor = Colors.white; break;
+                            case 31: testBgColor = Colors.blueGrey.shade800; testTextColor = Colors.amber; break;
+                          }
+                        }
+
+                        // 최종 색상 결정
+                        final bool isTestDay = testBgColor != null;
+                        final bool showHighlight = shouldHighlightToday || isTestDay;
+
+                        Color bgColor;
+                        Color textColor;
+                        if (isTestDay) {
+                          bgColor = testBgColor!;
+                          textColor = testTextColor!;
+                        } else if (shouldHighlightToday) {
+                          bgColor = (isSunday || isHoliday) ? Colors.lime.shade300 : Colors.red;
+                          textColor = (isSunday || isHoliday) ? Colors.red : Colors.white;
+                        } else {
+                          bgColor = Colors.transparent;
+                          textColor = dateColor;
+                        }
+
+                        return Align(
+                          alignment: Alignment.center,
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),
+                            child: Container(
+                              padding: showHighlight ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
+                              decoration: showHighlight
+                                  ? BoxDecoration(
+                                      color: bgColor,
+                                      borderRadius: BorderRadius.circular(4.r),
+                                    )
+                                  : null,
+                              child: Text(
+                                '${day.day}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: showHighlight ? textColor : dateColor,
+                                  height: 1.0,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                     // ⭐ 메모 표시 (하단 고정, 날짜와 독립)
                     if (memos.isNotEmpty)
