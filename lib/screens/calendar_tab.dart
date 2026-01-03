@@ -516,36 +516,49 @@ Widget build(BuildContext context) {
                         ),
                       ),
                     // ⭐ 날짜 숫자 (항상 중앙, 3개일 때만 살짝 위로)
-                    Align(
-                      alignment: Alignment.center,
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),  // 3개일 때 위로
-                        child: Container(
-                          padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
-                          decoration: shouldHighlightToday
-                              ? BoxDecoration(
-                                  // ⭐ 빨간날 오늘: 연한 회색 배경, 일반 오늘: 빨간 배경
-                                  color: (isSunday || isHoliday)
-                                      ? Colors.grey.shade300  // 빨간날 오늘은 연한 회색 배경
-                                      : Colors.red,           // 일반 오늘은 빨간색 배경
-                                  borderRadius: BorderRadius.circular(4.r),
-                                )
-                              : null,
-                          child: Text(
-                            '${day.day}',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              // ⭐ 빨간날 오늘: 빨간 텍스트, 일반 오늘: 흰색 텍스트, 그외: dateColor
-                              color: shouldHighlightToday
-                                  ? ((isSunday || isHoliday) ? Colors.red : Colors.white)
-                                  : dateColor,
-                              height: 1.0,
+                    // ⭐ 테스트용: 2026년 1월 3,4,11,18,25일에 다른 배경색 적용
+                    Builder(
+                      builder: (context) {
+                        // 테스트용 배경색 (나중에 삭제)
+                        Color? testBgColor;
+                        if (day.year == 2026 && day.month == 1) {
+                          if (day.day == 3) testBgColor = Colors.blueGrey.shade400;  // 연한 검정
+                          else if (day.day == 4) testBgColor = Colors.teal.shade200;  // 청록
+                          else if (day.day == 11) testBgColor = Colors.purple.shade200;  // 보라
+                          else if (day.day == 18) testBgColor = Colors.orange.shade200;  // 주황
+                          else if (day.day == 25) testBgColor = Colors.cyan.shade200;  // 하늘
+                        }
+                        final showHighlight = shouldHighlightToday || testBgColor != null;
+                        final bgColor = testBgColor ?? ((isSunday || isHoliday) ? Colors.grey.shade300 : Colors.red);
+
+                        return Align(
+                          alignment: Alignment.center,
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),
+                            child: Container(
+                              padding: showHighlight ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
+                              decoration: showHighlight
+                                  ? BoxDecoration(
+                                      color: bgColor,
+                                      borderRadius: BorderRadius.circular(4.r),
+                                    )
+                                  : null,
+                              child: Text(
+                                '${day.day}',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: showHighlight
+                                      ? ((isSunday || isHoliday) ? Colors.red : Colors.white)
+                                      : dateColor,
+                                  height: 1.0,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                     // ⭐ 메모 표시 (하단 고정, 날짜와 독립)
                     if (memos.isNotEmpty)
