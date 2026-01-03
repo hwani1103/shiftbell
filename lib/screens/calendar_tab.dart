@@ -814,20 +814,19 @@ Widget build(BuildContext context) {
                               ElevatedButton(
                                 onPressed: isFull
                                     ? null
-                                    : () async {
+                                    : () {
                                         if (memoController.text.trim().isEmpty) return;
 
-                                        // ⭐ Navigator 미리 저장 (async 전에)
-                                        final navigator = Navigator.of(context);
+                                        final memoText = memoController.text.trim();
 
                                         // ⭐ 키보드 내리기
                                         FocusScope.of(context).unfocus();
 
-                                        final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
-                                        if (success) {
-                                          // ⭐ 저장된 navigator로 팝업 닫기
-                                          navigator.pop();
-                                        }
+                                        // ⭐ 먼저 팝업 닫기 (의존성 문제 회피)
+                                        Navigator.of(context).pop();
+
+                                        // ⭐ 팝업 닫힌 후 메모 저장 (달력이 provider 업데이트 받음)
+                                        ref.read(memoProvider.notifier).createMemo(dateStr, memoText);
                                       },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue.shade600,
