@@ -853,7 +853,7 @@ Widget build(BuildContext context) {
                               ElevatedButton(
                                 onPressed: isFull
                                     ? null
-                                    : () async {
+                                    : () {
                                         if (memoController.text.trim().isEmpty) return;
 
                                         // ⭐ 팝업 닫기 전에 필요한 것들 미리 저장
@@ -861,11 +861,13 @@ Widget build(BuildContext context) {
                                         final memoNotifier = ref.read(memoProvider.notifier);
                                         FocusScope.of(context).unfocus();
 
-                                        // ⭐ 팝업 먼저 닫기 (Consumer dispose 문제 회피)
+                                        // ⭐ 팝업 먼저 닫기
                                         navigator.pop();
 
-                                        // ⭐ 팝업 닫힌 후 메모 저장
-                                        await memoNotifier.createMemo(dateStr, memoText);
+                                        // ⭐ 팝업 완전히 닫힌 후 메모 저장 (300ms 대기)
+                                        Future.delayed(const Duration(milliseconds: 300), () {
+                                          memoNotifier.createMemo(dateStr, memoText);
+                                        });
                                       },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue.shade600,
