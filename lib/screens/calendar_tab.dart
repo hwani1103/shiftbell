@@ -821,13 +821,12 @@ Widget build(BuildContext context) {
                                         FocusScope.of(context).unfocus();
 
                                         final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
-                                        if (success) {
-                                          // ⭐ 메모 저장 성공 시 팝업 닫기 (프레임 완료 후 실행)
-                                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                                            if (context.mounted) {
-                                              Navigator.of(context).pop();
-                                            }
-                                          });
+                                        if (success && context.mounted) {
+                                          // ⭐ 메모 저장 성공 시 팝업 닫기 (약간의 딜레이로 위젯 정리 대기)
+                                          await Future.delayed(Duration(milliseconds: 50));
+                                          if (context.mounted) {
+                                            Navigator.of(context).pop();
+                                          }
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
