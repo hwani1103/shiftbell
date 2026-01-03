@@ -817,16 +817,16 @@ Widget build(BuildContext context) {
                                     : () async {
                                         if (memoController.text.trim().isEmpty) return;
 
+                                        // ⭐ Navigator 미리 저장 (async 전에)
+                                        final navigator = Navigator.of(context);
+
                                         // ⭐ 키보드 내리기
                                         FocusScope.of(context).unfocus();
 
                                         final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
-                                        if (success && context.mounted) {
-                                          // ⭐ 메모 저장 성공 시 팝업 닫기 (약간의 딜레이로 위젯 정리 대기)
-                                          await Future.delayed(Duration(milliseconds: 50));
-                                          if (context.mounted) {
-                                            Navigator.of(context).pop();
-                                          }
+                                        if (success) {
+                                          // ⭐ 저장된 navigator로 팝업 닫기
+                                          navigator.pop();
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
