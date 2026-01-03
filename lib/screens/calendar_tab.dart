@@ -821,10 +821,12 @@ Widget build(BuildContext context) {
 
                                         final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
                                         if (success) {
-                                          // ⭐ 메모 저장 성공 시 팝업 닫기 (달력에서 바로 확인)
-                                          if (context.mounted) {
-                                            Navigator.of(context).pop();
-                                          }
+                                          // ⭐ 메모 저장 성공 시 팝업 닫기 (프레임 완료 후 실행)
+                                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                                            if (context.mounted) {
+                                              Navigator.of(context).pop();
+                                            }
+                                          });
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
