@@ -422,7 +422,8 @@ Widget build(BuildContext context) {
                        shiftText != '미설정' &&
                        patternShift != shiftText;
 
-    final isSunday = day.weekday == DateTime.sunday;
+    // ⭐ 테스트용: 셋째주 일요일만 (15~21일 사이 일요일)
+    final isSunday = day.weekday == DateTime.sunday && day.day >= 15 && day.day <= 21;
 
     // ⭐ 오늘이면서 현재 보고 있는 달과 같을 때만 강조
     final shouldHighlightToday = isToday &&
@@ -503,7 +504,7 @@ Widget build(BuildContext context) {
                               ? BoxDecoration(
                                   // ⭐ 빨간날 오늘: 연한 노랑 배경, 일반 오늘: 빨간 배경
                                   color: (isSunday || isHoliday)
-                                      ? Colors.amber.shade100  // 빨간날은 연한 노랑 배경
+                                      ? Colors.amber.shade200  // 빨간날은 연한 노랑 배경 (더 진하게)
                                       : Colors.red,            // 일반 오늘은 빨간색 배경
                                   borderRadius: BorderRadius.circular(4.r),
                                 )
