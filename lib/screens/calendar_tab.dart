@@ -501,10 +501,10 @@ Widget build(BuildContext context) {
                           padding: (shouldHighlightToday || isSunday) ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
                           decoration: (shouldHighlightToday || isSunday)
                               ? BoxDecoration(
-                                  // ⭐ 오늘 or 빨간날: 빨간색 배경
+                                  // ⭐ 빨간날 오늘: 연한 분홍 배경, 일반 오늘: 빨간 배경
                                   color: (isSunday || isHoliday)
-                                      ? Colors.red.shade700  // 빨간날은 진한 빨간색
-                                      : Colors.red,          // 일반 오늘은 빨간색
+                                      ? Colors.red.shade50   // 빨간날은 연한 분홍 배경
+                                      : Colors.red,          // 일반 오늘은 빨간색 배경
                                   borderRadius: BorderRadius.circular(4.r),
                                 )
                               : null,
@@ -514,8 +514,10 @@ Widget build(BuildContext context) {
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              // ⭐ 오늘 or 일요일(테스트): 흰색 텍스트
-                              color: (shouldHighlightToday || isSunday) ? Colors.white : dateColor,
+                              // ⭐ 빨간날 오늘: 빨간 텍스트, 일반 오늘: 흰색 텍스트
+                              color: (shouldHighlightToday || isSunday)
+                                  ? ((isSunday || isHoliday) ? Colors.red : Colors.white)
+                                  : dateColor,
                               height: 1.0,
                             ),
                           ),
