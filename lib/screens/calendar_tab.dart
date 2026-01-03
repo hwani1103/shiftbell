@@ -482,6 +482,24 @@ Widget build(BuildContext context) {
           else
             SizedBox(height: 18.h),
 
+          // ⭐ 공휴일 이름 (근무 카드 바로 아래, 글자 수에 따라 크기 자동 조절)
+          if (_getHolidayName(day) != null)
+            Container(
+              height: 12.h,
+              padding: EdgeInsets.symmetric(horizontal: 1.w),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  _getHolidayName(day)!,
+                  style: TextStyle(
+                    fontSize: 9.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ),
+
           // ⭐ 날짜 숫자 + 메모 영역 (Stack으로 독립 배치)
           Expanded(
             child: Consumer(
@@ -617,28 +635,10 @@ Widget build(BuildContext context) {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ⭐ 날짜 + 공휴일 이름
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
-                            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
-                          ),
-                          if (_getHolidayName(day) != null) ...[
-                            Spacer(),  // ⭐ 날짜와 우측 사이 중앙 배치
-                            Text(
-                              _getHolidayName(day)!,
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w500,  // ⭐ bold → w500 (얇게)
-                                color: Colors.red,
-                              ),
-                            ),
-                            Spacer(),  // ⭐ 중앙 배치용
-                          ],
-                        ],
+                      // ⭐ 날짜
+                      Text(
+                        '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
+                        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 16.h),
 
