@@ -651,6 +651,9 @@ Widget build(BuildContext context) {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            // ⭐ Navigator를 Consumer 밖에서 미리 저장 (팝업 닫기용)
+            final navigator = Navigator.of(context);
+
             // ⭐ 키보드 감지 시 고정 패딩 적용 (점진적 변화 방지)
             final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
             final isKeyboardVisible = keyboardHeight > 50;  // 키보드 감지 임계값
@@ -853,14 +856,16 @@ Widget build(BuildContext context) {
                                     : () async {
                                         if (memoController.text.trim().isEmpty) return;
 
-                                        // ⭐ 키보드 내리기
+                                        // ⭐ 팝업 닫기 전에 필요한 것들 미리 저장
+                                        final memoText = memoController.text.trim();
+                                        final memoNotifier = ref.read(memoProvider.notifier);
                                         FocusScope.of(context).unfocus();
 
-                                        final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
-                                        if (success) {
-                                          memoController.clear();
-                                          setState(() {});  // ⭐ 팝업 새로고침
-                                        }
+                                        // ⭐ 팝업 먼저 닫기 (Consumer dispose 문제 회피)
+                                        navigator.pop();
+
+                                        // ⭐ 팝업 닫힌 후 메모 저장
+                                        await memoNotifier.createMemo(dateStr, memoText);
                                       },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue.shade600,
