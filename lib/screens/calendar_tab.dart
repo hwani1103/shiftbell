@@ -422,8 +422,7 @@ Widget build(BuildContext context) {
                        shiftText != '미설정' &&
                        patternShift != shiftText;
 
-    // ⭐ 테스트용: 셋째주 일요일만 (15~21일 사이 일요일)
-    final isSunday = day.weekday == DateTime.sunday && day.day >= 15 && day.day <= 21;
+    final isSunday = day.weekday == DateTime.sunday;
 
     // ⭐ 오늘이면서 현재 보고 있는 달과 같을 때만 강조
     final shouldHighlightToday = isToday &&
@@ -499,12 +498,12 @@ Widget build(BuildContext context) {
                       child: Padding(
                         padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),  // 3개일 때 위로
                         child: Container(
-                          padding: (shouldHighlightToday || isSunday) ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
-                          decoration: (shouldHighlightToday || isSunday)
+                          padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
+                          decoration: shouldHighlightToday
                               ? BoxDecoration(
                                   // ⭐ 빨간날 오늘: 연한 노랑 배경, 일반 오늘: 빨간 배경
                                   color: (isSunday || isHoliday)
-                                      ? Colors.amber.shade200  // 빨간날은 연한 노랑 배경 (더 진하게)
+                                      ? Colors.amber.shade100  // 빨간날 오늘은 연한 노랑 배경
                                       : Colors.red,            // 일반 오늘은 빨간색 배경
                                   borderRadius: BorderRadius.circular(4.r),
                                 )
@@ -515,8 +514,8 @@ Widget build(BuildContext context) {
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              // ⭐ 빨간날 오늘: 빨간 텍스트, 일반 오늘: 흰색 텍스트
-                              color: (shouldHighlightToday || isSunday)
+                              // ⭐ 빨간날 오늘: 빨간 텍스트, 일반 오늘: 흰색 텍스트, 그외: dateColor
+                              color: shouldHighlightToday
                                   ? ((isSunday || isHoliday) ? Colors.red : Colors.white)
                                   : dateColor,
                               height: 1.0,
@@ -814,19 +813,17 @@ Widget build(BuildContext context) {
                               ElevatedButton(
                                 onPressed: isFull
                                     ? null
-                                    : () {
+                                    : () async {
                                         if (memoController.text.trim().isEmpty) return;
-
-                                        final memoText = memoController.text.trim();
 
                                         // ⭐ 키보드 내리기
                                         FocusScope.of(context).unfocus();
 
-                                        // ⭐ 먼저 팝업 닫기 (의존성 문제 회피)
-                                        Navigator.of(context).pop();
-
-                                        // ⭐ 팝업 닫힌 후 메모 저장 (달력이 provider 업데이트 받음)
-                                        ref.read(memoProvider.notifier).createMemo(dateStr, memoText);
+                                        final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
+                                        if (success) {
+                                          memoController.clear();
+                                          setState(() {});  // ⭐ 팝업 새로고침
+                                        }
                                       },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue.shade600,
