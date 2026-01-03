@@ -38,6 +38,7 @@ const Map<String, String> _lunarHolidays = {
   '2025-10-07': '추석 연휴',
   '2025-10-08': '대체공휴일',  // 추석
   // 2026년
+  '2026-01-03': '테스트용',  // ⭐ 테스트용 (나중에 삭제)
   '2026-02-16': '설날 연휴',
   '2026-02-17': '설날',
   '2026-02-18': '설날 연휴',
@@ -482,25 +483,7 @@ Widget build(BuildContext context) {
           else
             SizedBox(height: 18.h),
 
-          // ⭐ 공휴일 이름 (근무 카드 바로 아래, 글자 수에 따라 크기 자동 조절)
-          if (_getHolidayName(day) != null)
-            Container(
-              height: 12.h,
-              padding: EdgeInsets.symmetric(horizontal: 1.w),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  _getHolidayName(day)!,
-                  style: TextStyle(
-                    fontSize: 9.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-            ),
-
-          // ⭐ 날짜 숫자 + 메모 영역 (Stack으로 독립 배치)
+          // ⭐ 날짜 숫자 + 공휴일 이름 + 메모 영역 (Stack으로 독립 배치)
           Expanded(
             child: Consumer(
               builder: (context, ref, child) {
@@ -510,6 +493,28 @@ Widget build(BuildContext context) {
 
                 return Stack(
                   children: [
+                    // ⭐ 공휴일 이름 (상단 고정, 글자 수에 따라 크기 자동 조절)
+                    if (_getHolidayName(day) != null)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 11.h,
+                          padding: EdgeInsets.symmetric(horizontal: 1.w),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              _getHolidayName(day)!,
+                              style: TextStyle(
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.red,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     // ⭐ 날짜 숫자 (항상 중앙, 3개일 때만 살짝 위로)
                     Align(
                       alignment: Alignment.center,
