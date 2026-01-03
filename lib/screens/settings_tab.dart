@@ -465,7 +465,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ListTile(
                 leading: Icon(Icons.notifications_active, color: Colors.orange),
                 title: Text('알람음 관리'),
-                subtitle: Text('소리, 진동, 무음 설정'),
+                subtitle: Text('소리+진동, 진동, 무음 설정'),
                 trailing: Icon(Icons.chevron_right),
                 onTap: _showAlarmTypeDialog,
               ),
@@ -1394,7 +1394,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               Text(type.emoji, style: TextStyle(fontSize: 28.sp)),
               SizedBox(width: 12.w),
               Text(
-                type.isSound ? '소리' : type.isVibrate ? '진동' : '무음',
+                type.isSound ? '소리+진동' : type.isVibrate ? '진동' : '무음',
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -2223,7 +2223,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                     SizedBox(height: 8.h),
                     Row(
                       children: [
-                        _buildTypeButton(entry.key, 1, '🔔', '소리'),
+                        _buildTypeButton(entry.key, 1, '🔔', '소리+진동'),
                         SizedBox(width: 8.w),
                         _buildTypeButton(entry.key, 2, '📳', '진동'),
                         SizedBox(width: 8.w),

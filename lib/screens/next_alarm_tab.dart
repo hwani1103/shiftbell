@@ -703,7 +703,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                 ),
                 SizedBox(width: 5.w),
                 Text(
-                  alarm.alarmTypeId == 1 ? '소리' :
+                  alarm.alarmTypeId == 1 ? '소리+진동' :
                   alarm.alarmTypeId == 2 ? '진동' : '무음',
                   style: TextStyle(
                     fontSize: 12.sp,

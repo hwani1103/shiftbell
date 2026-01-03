@@ -14,7 +14,7 @@ import '../services/alarm_refresh_helper.dart';
 // 알람 설정 (시간 + 타입)
 class AlarmSetting {
   final TimeOfDay time;
-  final int alarmTypeId;  // 1: 소리, 2: 진동, 3: 무음
+  final int alarmTypeId;  // 1: 소리+진동, 2: 진동, 3: 무음
 
   AlarmSetting({required this.time, this.alarmTypeId = 1});
 
@@ -706,7 +706,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 
   String _getAlarmTypeEmoji(int alarmTypeId) {
     switch (alarmTypeId) {
-      case 1: return '🔔';  // 소리
+      case 1: return '🔔';  // 소리+진동
       case 2: return '📳';  // 진동
       case 3: return '🔇';  // 무음
       default: return '🔔';
@@ -1064,7 +1064,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                     // 알람 타입 선택 버튼들
                     Row(
                       children: [
-                        _buildTypeButton(entry.key, 1, '🔔', '소리'),
+                        _buildTypeButton(entry.key, 1, '🔔', '소리+진동'),
                         SizedBox(width: 8.w),
                         _buildTypeButton(entry.key, 2, '📳', '진동'),
                         SizedBox(width: 8.w),
