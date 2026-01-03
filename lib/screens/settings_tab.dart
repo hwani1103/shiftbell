@@ -716,7 +716,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         title: Text('개인정보처리방침'),
         content: SingleChildScrollView(
           child: Text(
-            '''교대종 개인정보처리방침
+            '''교대시계 개인정보처리방침
 
 1. 수집하는 개인정보
 본 앱은 개인정보를 수집하지 않습니다. 모든 데이터(근무 스케줄, 알람 설정 등)는 사용자의 기기에만 저장되며, 외부 서버로 전송되지 않습니다.

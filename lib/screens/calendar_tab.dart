@@ -498,11 +498,14 @@ Widget build(BuildContext context) {
                       child: Padding(
                         padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),  // 3개일 때 위로
                         child: Container(
-                          padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w) : EdgeInsets.zero,
-                          decoration: shouldHighlightToday
+                          padding: (shouldHighlightToday || isSunday) ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
+                          decoration: (shouldHighlightToday || isSunday)
                               ? BoxDecoration(
-                                  color: Colors.lightBlue.shade50,
-                                  borderRadius: BorderRadius.circular(3.r),
+                                  // ⭐ 오늘 or 빨간날: 빨간색 배경
+                                  color: (isSunday || isHoliday)
+                                      ? Colors.red.shade700  // 빨간날은 진한 빨간색
+                                      : Colors.red,          // 일반 오늘은 빨간색
+                                  borderRadius: BorderRadius.circular(4.r),
                                 )
                               : null,
                           child: Text(
@@ -511,7 +514,8 @@ Widget build(BuildContext context) {
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              color: shouldHighlightToday ? Colors.lightBlue.shade700 : dateColor,
+                              // ⭐ 오늘 or 일요일(테스트): 흰색 텍스트
+                              color: (shouldHighlightToday || isSunday) ? Colors.white : dateColor,
                               height: 1.0,
                             ),
                           ),
