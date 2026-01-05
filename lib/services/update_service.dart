@@ -25,14 +25,18 @@ class UpdateService {
         if (availableVersion > notifiedVersion) {
           // 새 버전 알림 표시
           if (context.mounted) {
-            final shouldUpdate = await _showUpdateDialog(context);
+            final result = await _showUpdateDialog(context);
 
-            // 알림한 버전 저장 (다시 안 보이게)
-            await prefs.setInt(_notifiedVersionKey, availableVersion);
+            // ⭐ 버튼을 명확히 눌렀을 때만 저장 (백버튼/바깥터치 dismiss 제외)
+            // result: null = 백버튼/바깥터치, false = "나중에", true = "업데이트"
+            if (result != null) {
+              await prefs.setInt(_notifiedVersionKey, availableVersion);
 
-            if (shouldUpdate) {
-              await _openPlayStore();
+              if (result) {
+                await _openPlayStore();
+              }
             }
+            // result가 null이면 저장하지 않음 → 다음 실행 시 다시 표시
           }
         }
       }
@@ -43,10 +47,11 @@ class UpdateService {
   }
 
   /// 업데이트 안내 다이얼로그
-  static Future<bool> _showUpdateDialog(BuildContext context) async {
-    return await showDialog<bool>(
+  /// 반환값: null = dismiss(백버튼/바깥터치), false = "나중에", true = "업데이트"
+  static Future<bool?> _showUpdateDialog(BuildContext context) async {
+    return await showDialog<bool?>(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: true,  // 바깥 터치로 닫기 가능 (null 반환)
       builder: (context) => Dialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
@@ -122,7 +127,7 @@ class UpdateService {
                   // 나중에 버튼
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context, false),
+                      onPressed: () => Navigator.pop(context, false),  // 명확한 선택
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                         side: BorderSide(color: Colors.grey.shade400),
@@ -144,7 +149,7 @@ class UpdateService {
                   // 업데이트 버튼
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context, true),
+                      onPressed: () => Navigator.pop(context, true),  // 명확한 선택
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.indigo.shade600,
                         foregroundColor: Colors.white,
@@ -169,7 +174,7 @@ class UpdateService {
           ),
         ),
       ),
-    ) ?? false;
+    );
   }
 
   /// Play Store 열기
