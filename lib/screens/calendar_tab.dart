@@ -307,6 +307,18 @@ Widget build(BuildContext context) {
                       ),
                     ),
                     
+                    // ⭐ 디버그 출력 (나중에 삭제)
+                    Builder(
+                      builder: (context) {
+                        print('=== ScreenUtil Debug ===');
+                        print('1.h = ${1.h}');
+                        print('90.h = ${90.h}');
+                        print('568.h = ${568.h}');
+                        print('Screen height = ${MediaQuery.of(context).size.height}');
+                        print('========================');
+                        return const SizedBox.shrink();
+                      },
+                    ),
                     // 달력 (반응형 높이: 화면 대비 동일 비율 유지)
                     SizedBox(
                       height: 568.h,  // ⭐ 반응형 (요일 28 + 6행×90 = 568)
