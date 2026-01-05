@@ -322,7 +322,7 @@ Widget build(BuildContext context) {
                         locale: 'ko_KR',
                         
                         headerVisible: false,
-                        rowHeight: (90.h).clamp(60.0, 95.0),  // ⭐ 70→73→78→83→87→90 (하단 여백 최소화, 셀 확대)
+                        rowHeight: 70.0,  // ⭐ 테스트용 (극단적으로 작게)
 
                         daysOfWeekHeight: 28.h,  // ⭐ 45→28 (최소화)
                         daysOfWeekStyle: DaysOfWeekStyle(
