@@ -6,6 +6,7 @@ import 'services/alarm_service.dart';
 import 'services/permission_service.dart';
 import 'services/database_service.dart';
 import 'services/alarm_refresh_service.dart';
+import 'services/update_service.dart';
 import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
 import 'screens/onboarding_screen.dart';
@@ -167,6 +168,13 @@ void initState() {
         print('❌ AlarmNotifier 갱신 실패: $e');
       }
     }
+
+    // ⭐ 업데이트 체크 (2초 후 - UI 로딩 완료 후)
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        UpdateService.checkForUpdate(context);
+      }
+    });
   });
 }
 

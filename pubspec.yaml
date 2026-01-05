@@ -41,6 +41,10 @@ dependencies:
   # 오디오 재생 (알람음 미리듣기)
   audioplayers: ^5.2.1
 
+  # 앱 업데이트 체크
+  in_app_update: ^4.2.3
+  url_launcher: ^6.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/database_service.dart';
+import '../services/update_service.dart';
 import 'onboarding_screen.dart';
 import 'all_alarms_history_view.dart';
 import '../services/alarm_service.dart';
@@ -588,6 +590,49 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 trailing: Icon(Icons.chevron_right),
                 onTap: () => _openPrivacyPolicy(),
               ),
+
+              // ⭐ 디버그 섹션 (디버그 모드에서만 표시)
+              if (kDebugMode) ...[
+                SizedBox(height: 24.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  color: Colors.orange.shade50,
+                  child: Row(
+                    children: [
+                      Icon(Icons.bug_report, color: Colors.orange, size: 20.sp),
+                      SizedBox(width: 8.w),
+                      Text(
+                        '디버그 전용',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ListTile(
+                  leading: Icon(Icons.system_update, color: Colors.orange),
+                  title: Text('업데이트 다이얼로그 테스트'),
+                  subtitle: Text('알림 기록 초기화 후 다이얼로그 표시'),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () async {
+                    await UpdateService.resetNotifiedVersion();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('✅ 알림 기록 초기화됨. 앱을 다시 시작하거나 2초 후 표시됩니다.')),
+                      );
+                      // 바로 테스트
+                      Future.delayed(Duration(seconds: 1), () {
+                        if (context.mounted) {
+                          UpdateService.checkForUpdate(context);
+                        }
+                      });
+                    }
+                  },
+                ),
+              ],
 
             ],
           );
