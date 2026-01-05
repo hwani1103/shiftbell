@@ -307,12 +307,12 @@ Widget build(BuildContext context) {
                       ),
                     ),
                     
-                    // 달력 (반응형 높이: 셀 축소하여 하단 여백 확보)
+                    // 달력 (반응형 높이: 하단 AdMob 여백 확보)
                     SizedBox(
-                      height: 530.h,  // ⭐ 568 → 530 (여백 확보)
+                      height: 530.h,
                       child: TableCalendar(
-                        firstDay: DateTime(DateTime.now().year - 3, 1, 1),   // 3년 전 1월 1일
-                        lastDay: DateTime(DateTime.now().year + 3, 12, 31),  // 3년 후 12월 31일
+                        firstDay: DateTime(DateTime.now().year - 3, 1, 1),
+                        lastDay: DateTime(DateTime.now().year + 3, 12, 31),
                         focusedDay: _focusedDay,
                         selectedDayPredicate: (day) {
                           if (_isMultiSelectMode) {
@@ -323,9 +323,9 @@ Widget build(BuildContext context) {
                         locale: 'ko_KR',
 
                         headerVisible: false,
-                        rowHeight: 83.h,  // ⭐ 90 → 83 (셀 축소)
+                        rowHeight: 83.h,
 
-                        daysOfWeekHeight: 28.h,  // ⭐ 반응형
+                        daysOfWeekHeight: 28.h,
                         daysOfWeekStyle: DaysOfWeekStyle(
                           weekdayStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
                           weekendStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
@@ -407,18 +407,6 @@ Widget build(BuildContext context) {
                           });
                           // ⭐ 새 달의 메모 로드
                           _loadMemosForMonth(focusedDay);
-                        },
-                      ),
-                    ),
-                    // ⭐ 하단 여백 측정 (디버그용 - 나중에 삭제)
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          print('=== Bottom Margin Debug ===');
-                          print('하단 여백 = ${constraints.maxHeight} px');
-                          print('50px 이상? ${constraints.maxHeight >= 50 ? "✅ OK" : "❌ 부족"}');
-                          print('===========================');
-                          return const SizedBox.shrink();
                         },
                       ),
                     ),
