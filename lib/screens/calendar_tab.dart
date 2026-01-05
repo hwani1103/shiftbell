@@ -307,8 +307,9 @@ Widget build(BuildContext context) {
                       ),
                     ),
                     
-                    // 달력
-                    Expanded(
+                    // 달력 (고정 높이: 요일 28 + 6행×90 = 568)
+                    SizedBox(
+                      height: 568.0,
                       child: TableCalendar(
                         firstDay: DateTime(DateTime.now().year - 3, 1, 1),   // 3년 전 1월 1일
                         lastDay: DateTime(DateTime.now().year + 3, 12, 31),  // 3년 후 12월 31일
@@ -320,11 +321,11 @@ Widget build(BuildContext context) {
                           return isSameDay(_selectedDay, day);
                         },
                         locale: 'ko_KR',
-                        
-                        headerVisible: false,
-                        rowHeight: 70.0,  // ⭐ 테스트용 (극단적으로 작게)
 
-                        daysOfWeekHeight: 28.h,  // ⭐ 45→28 (최소화)
+                        headerVisible: false,
+                        rowHeight: 90.0,  // ⭐ 고정값 (S23 FE 기준)
+
+                        daysOfWeekHeight: 28.0,  // ⭐ 고정값
                         daysOfWeekStyle: DaysOfWeekStyle(
                           weekdayStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
                           weekendStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
