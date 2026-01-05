@@ -643,6 +643,9 @@ Widget build(BuildContext context) {
     // ⭐ 팝업 열기 전에 메모 로드
     ref.read(memoProvider.notifier).loadMemosForDate(dateStr);
 
+    // ⭐ 부모 위젯의 memoNotifier 저장 (팝업 닫혀도 유효함)
+    final parentMemoNotifier = ref.read(memoProvider.notifier);
+
     // ⭐ TextEditingController를 밖에서 생성 (키보드 문제 해결)
     final memoController = TextEditingController();
 
@@ -857,10 +860,11 @@ Widget build(BuildContext context) {
                                         // ⭐ 키보드 내리기
                                         FocusScope.of(context).unfocus();
 
-                                        final success = await ref.read(memoProvider.notifier).createMemo(dateStr, memoController.text.trim());
+                                        // ⭐ 부모 위젯의 notifier로 저장 (팝업 닫혀도 유효)
+                                        final success = await parentMemoNotifier.createMemo(dateStr, memoController.text.trim());
                                         if (success) {
-                                          memoController.clear();
-                                          setState(() {});  // ⭐ 팝업 새로고침
+                                          // ⭐ 저장 성공 시 팝업 닫기
+                                          Navigator.of(context).pop();
                                         }
                                       },
                                 style: ElevatedButton.styleFrom(
