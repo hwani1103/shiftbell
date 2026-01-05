@@ -951,24 +951,23 @@ Widget build(BuildContext context) {
       },
     ).then((result) {
       print('=== .then() 콜백 시작 ===');
-      print('result: $result');
-      print('result type: ${result.runtimeType}');
 
-      // ⭐ 메모 저장 (팝업 완전히 닫힌 후 - Consumer dispose 완료)
-      if (result != null && result is String && result.isNotEmpty) {
-        print('⏳ 메모 저장 시도...');
+      // ⭐ 팝업 애니메이션 완료 대기 (약 400ms)
+      // 애니메이션 중에는 Consumer들이 계속 rebuild됨
+      // 그래서 500ms 대기 후 저장 + dispose 순서로 처리
+      Future.delayed(const Duration(milliseconds: 500), () {
+        print('⏳ 500ms 지연 후 처리 시작');
 
-        // ⭐ 팝업 애니메이션 완료 대기 후 저장
-        Future.delayed(const Duration(milliseconds: 350), () {
-          print('⏳ 350ms 지연 후 저장 실행');
+        // ⭐ 메모 저장
+        if (result != null && result is String && result.isNotEmpty) {
+          print('⏳ 메모 저장 실행');
           ref.read(memoProvider.notifier).createMemo(dateStr, result);
           print('✅ 메모 저장 완료');
-        });
-      }
+        }
 
-      // ⭐ 메모리 누수 방지 (약간의 지연으로 rebuild 충돌 방지)
-      Future.delayed(const Duration(milliseconds: 100), () {
+        // ⭐ 컨트롤러 dispose (팝업 완전히 닫힌 후)
         memoController.dispose();
+        print('✅ 컨트롤러 dispose 완료');
       });
     });
   }
