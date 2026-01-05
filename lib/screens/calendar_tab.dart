@@ -805,7 +805,6 @@ Widget build(BuildContext context) {
                       // ⭐ 메모 입력창 (라벨과 같은 라인)
                       Consumer(
                         builder: (context, ref, child) {
-                          print('🔄 Consumer1 (입력창) 빌드됨');
                           final currentMemos = ref.watch(memoProvider)[dateStr] ?? [];
                           final isFull = currentMemos.length >= 3;
 
@@ -882,7 +881,6 @@ Widget build(BuildContext context) {
                         child: SingleChildScrollView(
                           child: Consumer(
                             builder: (context, ref, child) {
-                              print('🔄 Consumer2 (목록) 빌드됨');
                               final memos = ref.watch(memoProvider)[dateStr] ?? [];
 
                               if (memos.isEmpty) {
@@ -950,24 +948,15 @@ Widget build(BuildContext context) {
         );
       },
     ).then((result) {
-      print('=== .then() 콜백 시작 ===');
-
-      // ⭐ 팝업 애니메이션 완료 대기 (약 400ms)
-      // 애니메이션 중에는 Consumer들이 계속 rebuild됨
-      // 그래서 500ms 대기 후 저장 + dispose 순서로 처리
+      // ⭐ 팝업 애니메이션 완료 대기 후 저장 + dispose
       Future.delayed(const Duration(milliseconds: 500), () {
-        print('⏳ 500ms 지연 후 처리 시작');
-
         // ⭐ 메모 저장
         if (result != null && result is String && result.isNotEmpty) {
-          print('⏳ 메모 저장 실행');
           ref.read(memoProvider.notifier).createMemo(dateStr, result);
-          print('✅ 메모 저장 완료');
         }
 
-        // ⭐ 컨트롤러 dispose (팝업 완전히 닫힌 후)
+        // ⭐ 컨트롤러 dispose
         memoController.dispose();
-        print('✅ 컨트롤러 dispose 완료');
       });
     });
   }
