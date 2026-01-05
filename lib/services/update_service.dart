@@ -1,6 +1,5 @@
 // lib/services/update_service.dart
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:in_app_update/in_app_update.dart';
@@ -11,20 +10,9 @@ class UpdateService {
   static const String _notifiedVersionKey = 'notified_update_version';
   static const String _playStoreUrl = 'https://play.google.com/store/apps/details?id=com.hwani1103.shiftbell';
 
-  // ⭐ 디버그 모드: true로 설정하면 업데이트 다이얼로그 테스트 가능
-  static const bool _debugMode = true;  // TODO: 프로덕션 배포 전 false로 변경
-  static const int _debugFakeVersion = 99;  // 디버그용 가짜 새 버전
-
   /// 업데이트 체크 (버전당 1번만 알림)
   static Future<void> checkForUpdate(BuildContext context) async {
     try {
-      // 디버그 모드: 가짜 업데이트 시뮬레이션
-      if (_debugMode && kDebugMode) {
-        await _checkForUpdateDebug(context);
-        return;
-      }
-
-      // 프로덕션 모드: 실제 Play Store 체크
       final info = await InAppUpdate.checkForUpdate();
 
       if (info.updateAvailability == UpdateAvailability.updateAvailable) {
@@ -37,7 +25,7 @@ class UpdateService {
         if (availableVersion > notifiedVersion) {
           // 새 버전 알림 표시
           if (context.mounted) {
-            final shouldUpdate = await _showUpdateDialog(context, availableVersion);
+            final shouldUpdate = await _showUpdateDialog(context);
 
             // 알림한 버전 저장 (다시 안 보이게)
             await prefs.setInt(_notifiedVersionKey, availableVersion);
@@ -54,50 +42,8 @@ class UpdateService {
     }
   }
 
-  /// 디버그 모드: 가짜 업데이트 시뮬레이션
-  static Future<void> _checkForUpdateDebug(BuildContext context) async {
-    debugPrint('🧪 [DEBUG] 업데이트 체크 시뮬레이션');
-
-    final prefs = await SharedPreferences.getInstance();
-    final notifiedVersion = prefs.getInt(_notifiedVersionKey) ?? 0;
-
-    debugPrint('🧪 [DEBUG] 저장된 알림 버전: $notifiedVersion, 가짜 새 버전: $_debugFakeVersion');
-
-    if (_debugFakeVersion > notifiedVersion) {
-      if (context.mounted) {
-        final shouldUpdate = await _showUpdateDialog(context, _debugFakeVersion);
-
-        // 알림한 버전 저장
-        await prefs.setInt(_notifiedVersionKey, _debugFakeVersion);
-        debugPrint('🧪 [DEBUG] 알림 버전 저장: $_debugFakeVersion');
-
-        if (shouldUpdate) {
-          debugPrint('🧪 [DEBUG] Play Store 이동 (실제로는 이동하지 않음)');
-          // 디버그에서는 실제로 이동하지 않고 메시지만 표시
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('🧪 [DEBUG] Play Store로 이동합니다'),
-                duration: Duration(seconds: 2),
-              ),
-            );
-          }
-        }
-      }
-    } else {
-      debugPrint('🧪 [DEBUG] 이미 알림한 버전이므로 스킵');
-    }
-  }
-
-  /// 디버그용: 알림 기록 초기화 (테스트 반복용)
-  static Future<void> resetNotifiedVersion() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_notifiedVersionKey);
-    debugPrint('🧪 [DEBUG] 알림 버전 기록 초기화됨');
-  }
-
-  /// 업데이트 안내 다이얼로그 (앱 디자인 톤 적용)
-  static Future<bool> _showUpdateDialog(BuildContext context, int newVersion) async {
+  /// 업데이트 안내 다이얼로그
+  static Future<bool> _showUpdateDialog(BuildContext context) async {
     return await showDialog<bool>(
       context: context,
       barrierDismissible: true,
@@ -149,12 +95,23 @@ class UpdateService {
 
               // 설명
               Text(
-                '더 나은 교대종을 위해\n업데이트를 권장드려요.',
+                '더 나은 사용을 위해\n업데이트를 권장드려요.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.sp,
                   color: Colors.grey.shade700,
                   height: 1.5,
+                ),
+              ),
+              SizedBox(height: 8.h),
+
+              // 안내 문구
+              Text(
+                '(저장된 정보는 그대로 유지됩니다.)',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Colors.grey.shade500,
                 ),
               ),
               SizedBox(height: 24.h),
