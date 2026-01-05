@@ -643,9 +643,6 @@ Widget build(BuildContext context) {
     // ⭐ 팝업 열기 전에 메모 로드
     ref.read(memoProvider.notifier).loadMemosForDate(dateStr);
 
-    // ⭐ 부모 위젯의 memoNotifier 저장 (팝업 닫혀도 유효함)
-    final parentMemoNotifier = ref.read(memoProvider.notifier);
-
     // ⭐ TextEditingController를 밖에서 생성 (키보드 문제 해결)
     final memoController = TextEditingController();
 
@@ -854,18 +851,15 @@ Widget build(BuildContext context) {
                               ElevatedButton(
                                 onPressed: isFull
                                     ? null
-                                    : () async {
+                                    : () {
                                         if (memoController.text.trim().isEmpty) return;
 
                                         // ⭐ 키보드 내리기
                                         FocusScope.of(context).unfocus();
 
-                                        // ⭐ 부모 위젯의 notifier로 저장 (팝업 닫혀도 유효)
-                                        final success = await parentMemoNotifier.createMemo(dateStr, memoController.text.trim());
-                                        if (success) {
-                                          // ⭐ 저장 성공 시 팝업 닫기
-                                          Navigator.of(context).pop();
-                                        }
+                                        // ⭐ 메모 텍스트를 결과로 전달하며 팝업 닫기
+                                        // 실제 저장은 .then()에서 처리 (Consumer dispose 후)
+                                        Navigator.of(context).pop(memoController.text.trim());
                                       },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue.shade600,
@@ -953,8 +947,13 @@ Widget build(BuildContext context) {
           },
         );
       },
-    ).then((_) {
-      // ⭐ MEDIUM FIX: 팝업 닫힐 때 메모리 누수 방지 (약간의 지연으로 rebuild 충돌 방지)
+    ).then((result) {
+      // ⭐ 메모 저장 (팝업 완전히 닫힌 후 - Consumer dispose 완료)
+      if (result != null && result is String && result.isNotEmpty) {
+        ref.read(memoProvider.notifier).createMemo(dateStr, result);
+      }
+
+      // ⭐ 메모리 누수 방지 (약간의 지연으로 rebuild 충돌 방지)
       Future.delayed(const Duration(milliseconds: 100), () {
         memoController.dispose();
       });
