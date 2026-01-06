@@ -3082,9 +3082,18 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
   }
 
   void _showColorPicker(String shift) async {
+    // 현재 근무 제외한 다른 근무들의 색상 목록
+    final usedColors = _selectedColors.entries
+        .where((entry) => entry.key != shift)
+        .map((entry) => entry.value)
+        .toSet();
+
     final result = await showDialog<int>(
       context: context,
-      builder: (context) => _ColorPickerDialog(shiftName: shift),
+      builder: (context) => _ColorPickerDialog(
+        shiftName: shift,
+        usedColors: usedColors,
+      ),
     );
 
     if (result != null) {
@@ -3100,8 +3109,12 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
 // ============================================================
 class _ColorPickerDialog extends StatelessWidget {
   final String shiftName;
+  final Set<int> usedColors;
 
-  const _ColorPickerDialog({required this.shiftName});
+  const _ColorPickerDialog({
+    required this.shiftName,
+    required this.usedColors,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -3130,29 +3143,61 @@ class _ColorPickerDialog extends StatelessWidget {
           itemBuilder: (context, index) {
             final bgColor = colors[index];
             final textColor = ShiftSchedule.getTextColor(bgColor);
+            final isUsed = usedColors.contains(bgColor.value);
 
             return GestureDetector(
-              onTap: () => Navigator.pop(context, bgColor.value),
-              child: Container(
-                height: 18.h,
-                decoration: BoxDecoration(
-                  color: bgColor,
-                  borderRadius: BorderRadius.circular(3.r),
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                    width: 1,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    shiftName,
-                    style: TextStyle(
-                      fontSize: 9.sp,
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
+              onTap: () {
+                if (isUsed) {
+                  // 이미 사용 중인 색상이면 경고
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('이미 다른 근무에서 사용 중인 색상입니다'),
+                      behavior: SnackBarBehavior.floating,
+                      duration: Duration(seconds: 2),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                  );
+                } else {
+                  Navigator.pop(context, bgColor.value);
+                }
+              },
+              child: Opacity(
+                opacity: isUsed ? 0.3 : 1.0,  // 사용 중이면 반투명
+                child: Container(
+                  height: 18.h,
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    borderRadius: BorderRadius.circular(3.r),
+                    border: Border.all(
+                      color: isUsed ? Colors.red : Colors.grey.shade300,
+                      width: isUsed ? 2 : 1,
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Text(
+                          shiftName,
+                          style: TextStyle(
+                            fontSize: 9.sp,
+                            color: textColor,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      // 사용 중이면 X 아이콘 표시
+                      if (isUsed)
+                        Positioned(
+                          top: 2.h,
+                          right: 4.w,
+                          child: Icon(
+                            Icons.close,
+                            size: 12.sp,
+                            color: Colors.red,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),
