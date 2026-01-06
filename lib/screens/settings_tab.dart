@@ -875,6 +875,16 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ),
               Divider(height: 1),
               ListTile(
+                leading: Icon(Icons.palette, color: Colors.purple),
+                title: Text('근무명 색상 변경'),
+                subtitle: Text('근무별 색상을 변경합니다'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEditShiftColorsDialog();
+                },
+              ),
+              Divider(height: 1),
+              ListTile(
                 leading: Icon(Icons.alarm, color: Colors.orange),
                 title: Text('고정 알람 수정'),
                 subtitle: Text('근무별 알람 시간을 변경합니다'),
@@ -1079,6 +1089,57 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('근무명이 변경되었습니다'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // ⭐ 근무명 색상 변경 다이얼로그
+  void _showEditShiftColorsDialog() {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    final activeShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
+    final currentColors = schedule.shiftColors ?? {};
+
+    showDialog(
+      context: context,
+      builder: (context) => _EditShiftColorsDialog(
+        shiftTypes: activeShifts,
+        currentColors: currentColors,
+        onSave: (newColors) => _applyShiftColorChanges(newColors),
+      ),
+    );
+  }
+
+  // ⭐ 근무명 색상 변경 적용
+  Future<void> _applyShiftColorChanges(Map<String, int> newColors) async {
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+
+    // DB 업데이트
+    final updatedSchedule = ShiftSchedule(
+      id: schedule.id,
+      isRegular: schedule.isRegular,
+      pattern: schedule.pattern,
+      todayIndex: schedule.todayIndex,
+      shiftTypes: schedule.shiftTypes,
+      activeShiftTypes: schedule.activeShiftTypes,
+      startDate: schedule.startDate,
+      shiftColors: newColors,  // ← 색상만 변경
+      assignedDates: schedule.assignedDates,
+    );
+
+    await DatabaseService.instance.updateShiftSchedule(updatedSchedule);
+
+    // 화면 갱신
+    ref.invalidate(scheduleProvider);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('근무명 색상이 변경되었습니다'),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -2918,6 +2979,191 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
             foregroundColor: Colors.white,
           ),
           child: Text('변경'),
+        ),
+      ],
+    );
+  }
+}
+
+// ============================================================
+// ⭐ 근무명 색상 변경 다이얼로그
+// ============================================================
+class _EditShiftColorsDialog extends StatefulWidget {
+  final List<String> shiftTypes;
+  final Map<String, int> currentColors;
+  final Function(Map<String, int>) onSave;
+
+  const _EditShiftColorsDialog({
+    required this.shiftTypes,
+    required this.currentColors,
+    required this.onSave,
+  });
+
+  @override
+  State<_EditShiftColorsDialog> createState() => _EditShiftColorsDialogState();
+}
+
+class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
+  late Map<String, int> _selectedColors;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedColors = Map.from(widget.currentColors);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('근무명 색상 변경'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: widget.shiftTypes.length,
+          separatorBuilder: (context, index) => Divider(height: 1),
+          itemBuilder: (context, index) {
+            final shift = widget.shiftTypes[index];
+            final colorValue = _selectedColors[shift] ?? 0xFFCCCCCC;
+            final bgColor = Color(colorValue);
+            final textColor = ShiftSchedule.getTextColor(bgColor);
+
+            return ListTile(
+              contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              // 왼쪽: 현재 색상으로 미리보기 (달력 셀과 동일)
+              leading: Container(
+                width: 60.w,
+                height: 18.h,
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(3.r),
+                ),
+                child: Center(
+                  child: Text(
+                    shift,
+                    style: TextStyle(
+                      fontSize: 9.sp,
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              title: Text(
+                shift,
+                style: TextStyle(fontSize: 14.sp),
+              ),
+              trailing: Icon(Icons.chevron_right, size: 20.sp),
+              onTap: () => _showColorPicker(shift),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('취소'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            widget.onSave(_selectedColors);
+            Navigator.pop(context);
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            foregroundColor: Colors.white,
+          ),
+          child: Text('저장'),
+        ),
+      ],
+    );
+  }
+
+  void _showColorPicker(String shift) async {
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) => _ColorPickerDialog(shiftName: shift),
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedColors[shift] = result;
+      });
+    }
+  }
+}
+
+// ============================================================
+// ⭐ 색상 팔레트 선택 다이얼로그
+// ============================================================
+class _ColorPickerDialog extends StatelessWidget {
+  final String shiftName;
+
+  const _ColorPickerDialog({required this.shiftName});
+
+  @override
+  Widget build(BuildContext context) {
+    // 팔레트 8색 + 빨강(휴무용)
+    final colors = [
+      ...ShiftSchedule.shiftPalette,
+      ShiftSchedule.offColor,
+    ];
+
+    return AlertDialog(
+      title: Text(
+        '"$shiftName" 색상 선택',
+        style: TextStyle(fontSize: 16.sp),
+      ),
+      content: SizedBox(
+        width: 300.w,
+        height: 400.h,
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            mainAxisSpacing: 12.h,
+            crossAxisSpacing: 12.w,
+            childAspectRatio: 3,  // 가로로 긴 형태
+          ),
+          itemCount: colors.length,
+          itemBuilder: (context, index) {
+            final bgColor = colors[index];
+            final textColor = ShiftSchedule.getTextColor(bgColor);
+
+            return GestureDetector(
+              onTap: () => Navigator.pop(context, bgColor.value),
+              child: Container(
+                height: 18.h,
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(3.r),
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                    width: 1,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    shiftName,
+                    style: TextStyle(
+                      fontSize: 9.sp,
+                      color: textColor,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('취소'),
         ),
       ],
     );
