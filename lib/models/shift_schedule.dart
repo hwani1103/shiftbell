@@ -21,22 +21,22 @@ class ShiftSchedule {
     Color(0xFF388E3C), // 10. 진한 초록 (Green 700) - 어두운 초록 (흰 글씨)
     Color(0xFFF8BBD0), // 11. 연한 핑크 (Pink 100) - 밝은 핑크
     Color(0xFFDCE775), // 12. 라임 (Lime 300) - 연두색
-    Color(0xFFBCAAA4), // 13. 연한 갈색 (Brown 200) - 베이지 갈색
-    Color(0xFFB0BEC5), // 14. 연한 회색 (Blue Grey 200) - 밝은 회색
-    Color(0xFF80DEEA), // 15. 시안 (Cyan 200) - 청록색
+    Color(0xFFBCAAA4), // 13. 연한 갈색 (Brown 200) - 베이지 갈색 (흰 글씨)
+    Color(0xFFB0BEC5), // 14. 연한 회색 (Blue Grey 200) - 밝은 회색 (흰 글씨)
+    Color(0xFF80DEEA), // 15. 시안 (Cyan 200) - 청록색 (흰 글씨)
     Color(0xFF7B1FA2), // 16. 진한 보라 (Purple 700) - 어두운 보라 (흰 글씨)
     Color(0xFF00897B), // 17. 진한 청록 (Teal 600) - 어두운 청록 (흰 글씨)
-    Color(0xFF9CCC65), // 18. 올리브 (Light Green 400) - 올리브색
-    Color(0xFF9FA8DA), // 19. 인디고 (Indigo 200) - 연한 인디고
+    Color(0xFF9CCC65), // 18. 올리브 (Light Green 400) - 올리브색 (흰 글씨)
+    Color(0xFF9FA8DA), // 19. 인디고 (Indigo 200) - 연한 인디고 (흰 글씨)
   ];
 
   // ⭐ 휴무 고정 색상 (명확한 빨강, 파스텔 아님)
-  static final Color offColor = Color(0xFFEF5350); // Red (진한 빨강)
-  
-  // ⭐ 배경색 밝기 판단 (파스텔 톤용 기준 낮춤)
+  static final Color offColor = Color(0xFFEF5350); // Red (진한 빨강, 흰 글씨)
+
+  // ⭐ 배경색 밝기 판단 (최적 대비를 위해 보수적 기준 적용)
   static bool isBright(Color c) {
     final luminance = (c.red * 0.299 + c.green * 0.587 + c.blue * 0.114);
-    return luminance > 150;  // 파스텔은 대부분 밝으므로 기준 낮춤
+    return luminance > 200;  // 중간 톤 색상도 흰 글씨 사용하여 대비 강화
   }
 
   // ⭐ 자동 텍스트 색상 (배경에 따라 대비 최적화)
