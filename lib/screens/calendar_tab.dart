@@ -165,6 +165,33 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
     });
   }
 
+  // ⭐ 6번째 줄의 화요일(3번째 칸) 이후는 빈칸 처리
+  bool _shouldHideCell(DateTime day) {
+    // 현재 달의 1일
+    final firstDayOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
+
+    // 달력의 시작 날짜 (1일이 속한 주의 일요일)
+    // firstDayOfMonth.weekday: 월=1, 화=2, ..., 일=7
+    int daysFromSunday;
+    if (firstDayOfMonth.weekday == 7) {
+      daysFromSunday = 0; // 일요일이면 0
+    } else {
+      daysFromSunday = firstDayOfMonth.weekday; // 월=1, 화=2, ..., 토=6
+    }
+
+    final calendarStart = firstDayOfMonth.subtract(Duration(days: daysFromSunday));
+
+    // 현재 날짜가 달력 시작점으로부터 몇 번째 칸인지
+    final dayIndex = day.difference(calendarStart).inDays;
+
+    // row와 col 계산 (0-based)
+    final row = dayIndex ~/ 7;
+    final col = dayIndex % 7;
+
+    // 6번째 줄(row=5)의 3번째 칸(화요일, col=2) 이후
+    return row >= 5 && col >= 2;
+  }
+
   // ⭐ 특정 달의 메모 미리 로드 (달력에 보이는 이전/다음 달 날짜 포함)
   void _loadMemosForMonth(DateTime month) {
     final firstDay = DateTime(month.year, month.month, 1).subtract(Duration(days: 7));
@@ -323,6 +350,7 @@ Widget build(BuildContext context) {
                         locale: 'ko_KR',
 
                         headerVisible: false,
+                        sixWeekMonthsEnforced: true,  // ⭐ 항상 6줄로 고정
                         rowHeight: 83.h,
 
                         daysOfWeekHeight: 28.h,
@@ -358,17 +386,25 @@ Widget build(BuildContext context) {
                         
                         calendarBuilders: CalendarBuilders(
                           defaultBuilder: (context, day, focusedDay) {
+                            // ⭐ 6번째 줄 화요일 이후는 빈칸
+                            if (_shouldHideCell(day)) return SizedBox.shrink();
                             return _buildDateCell(day, false, false, schedule);
                           },
                           outsideBuilder: (context, day, focusedDay) {
+                            // ⭐ 6번째 줄 화요일 이후는 빈칸
+                            if (_shouldHideCell(day)) return SizedBox.shrink();
                             return _buildDateCell(day, false, true, schedule);
                           },
                           todayBuilder: (context, day, focusedDay) {
+                            // ⭐ 6번째 줄 화요일 이후는 빈칸
+                            if (_shouldHideCell(day)) return SizedBox.shrink();
                             // ⭐ 오늘이 현재 보고 있는 달의 날짜인지 확인
                             final isOutsideMonth = day.month != _focusedDay.month || day.year != _focusedDay.year;
                             return _buildDateCell(day, true, isOutsideMonth, schedule);
                           },
                           selectedBuilder: (context, day, focusedDay) {
+                            // ⭐ 6번째 줄 화요일 이후는 빈칸
+                            if (_shouldHideCell(day)) return SizedBox.shrink();
                             return _buildDateCell(day, isSameDay(day, DateTime.now()), false, schedule, isSelected: true);
                           },
                         ),
