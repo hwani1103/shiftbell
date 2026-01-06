@@ -412,7 +412,8 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                 alignment: Alignment.center,
                 decoration: isToday
                     ? BoxDecoration(
-                        color: Colors.lightBlue.shade50,
+                        color: Colors.indigo.shade500,  // 진한 인디고 배경
+                        borderRadius: BorderRadius.circular(4.r),  // 약간 둥글게
                       )
                     : null,
                 child: Column(
@@ -423,7 +424,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                       style: TextStyle(
                         fontSize: 10.sp, // 날짜 숫자
                         fontWeight: FontWeight.bold,
-                        color: isToday ? Colors.lightBlue.shade700 : Colors.black87,
+                        color: isToday ? Colors.white : Colors.black87,  // 흰색 글씨
                       ),
                     ),
                     SizedBox(height: 1.h),
@@ -431,7 +432,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                       _getWeekdayChar(DateTime(year, month, day > (DateTime(year, month + 1, 0).day) ? DateTime(year, month + 1, 0).day : day)),
                       style: TextStyle(
                         fontSize: 8.sp, // 요일
-                        color: isToday ? Colors.lightBlue.shade700 : Colors.grey.shade600,
+                        color: isToday ? Colors.white : Colors.grey.shade600,  // 흰색 글씨
                       ),
                     ),
                   ],

@@ -3118,7 +3118,7 @@ class _ColorPickerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 팔레트 15색 + 빨강(휴무용) = 총 16색
+    // 팔레트 19색 + 빨강(휴무용) = 총 20색
     final colors = [
       ...ShiftSchedule.shiftPalette,
       ShiftSchedule.offColor,

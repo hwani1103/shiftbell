@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 class ShiftSchedule {
 
-  // ⭐ 파스텔 팔레트 15색 (서로 구분되는 순서로 배치)
+  // ⭐ 파스텔 팔레트 19색 (서로 구분되는 순서로 배치)
   static final List<Color> shiftPalette = [
     Color(0xFFB3E5FC), // 1. 하늘색 (Sky Blue) - 밝은 파랑
     Color(0xFFCFD8DC), // 2. 청회색 (Blue Grey) - 차분한 회색
@@ -24,6 +24,10 @@ class ShiftSchedule {
     Color(0xFFBCAAA4), // 13. 연한 갈색 (Brown 200) - 베이지 갈색
     Color(0xFFB0BEC5), // 14. 연한 회색 (Blue Grey 200) - 밝은 회색
     Color(0xFF80DEEA), // 15. 시안 (Cyan 200) - 청록색
+    Color(0xFF7B1FA2), // 16. 진한 보라 (Purple 700) - 어두운 보라 (흰 글씨)
+    Color(0xFFE64A19), // 17. 진한 주황 (Deep Orange 700) - 어두운 주황 (흰 글씨)
+    Color(0xFF9CCC65), // 18. 올리브 (Light Green 400) - 올리브색
+    Color(0xFF9FA8DA), // 19. 인디고 (Indigo 200) - 연한 인디고
   ];
 
   // ⭐ 휴무 고정 색상 (명확한 빨강, 파스텔 아님)
