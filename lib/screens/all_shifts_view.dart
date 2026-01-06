@@ -413,7 +413,6 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                 decoration: isToday
                     ? BoxDecoration(
                         color: Colors.indigo.shade500,  // 진한 인디고 배경
-                        borderRadius: BorderRadius.circular(4.r),  // 약간 둥글게
                       )
                     : null,
                 child: Column(

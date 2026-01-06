@@ -25,7 +25,7 @@ class ShiftSchedule {
     Color(0xFFB0BEC5), // 14. 연한 회색 (Blue Grey 200) - 밝은 회색
     Color(0xFF80DEEA), // 15. 시안 (Cyan 200) - 청록색
     Color(0xFF7B1FA2), // 16. 진한 보라 (Purple 700) - 어두운 보라 (흰 글씨)
-    Color(0xFFE64A19), // 17. 진한 주황 (Deep Orange 700) - 어두운 주황 (흰 글씨)
+    Color(0xFF00897B), // 17. 진한 청록 (Teal 600) - 어두운 청록 (흰 글씨)
     Color(0xFF9CCC65), // 18. 올리브 (Light Green 400) - 올리브색
     Color(0xFF9FA8DA), // 19. 인디고 (Indigo 200) - 연한 인디고
   ];
