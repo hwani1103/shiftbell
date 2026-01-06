@@ -816,9 +816,9 @@ Map<String, int> _generateShiftColors() {
   // 2. 나머지 근무 → 파스텔 팔레트에서 패턴 등장 순서대로 할당
   final nonRestShifts = usedShifts.where((s) => !s.contains('휴')).toList();
 
-  for (int i = 0; i < nonRestShifts.length && i < 8; i++) {
+  for (int i = 0; i < nonRestShifts.length && i < 15; i++) {
     final shift = nonRestShifts[i];
-    final color = ShiftSchedule.shiftPalette[i % 8];
+    final color = ShiftSchedule.shiftPalette[i % 15];
     colors[shift] = color.value;
   }
 

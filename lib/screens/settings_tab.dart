@@ -3118,11 +3118,14 @@ class _ColorPickerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 팔레트 8색 + 빨강(휴무용)
+    // 팔레트 15색 + 빨강(휴무용) = 총 16색
     final colors = [
       ...ShiftSchedule.shiftPalette,
       ShiftSchedule.offColor,
     ];
+
+    // 반응형: 화면 크기에 따라 높이 조정 (최대 70%, 최소 300.h)
+    final dialogHeight = (MediaQuery.of(context).size.height * 0.7).clamp(300.h, 600.h);
 
     return AlertDialog(
       title: Text(
@@ -3131,7 +3134,7 @@ class _ColorPickerDialog extends StatelessWidget {
       ),
       content: SizedBox(
         width: 300.w,
-        height: 400.h,
+        height: dialogHeight,
         child: GridView.builder(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
