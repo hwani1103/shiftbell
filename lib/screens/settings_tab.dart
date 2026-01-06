@@ -3194,7 +3194,7 @@ class _ColorPickerDialog extends StatelessWidget {
                           child: Icon(
                             Icons.close,
                             size: 12.sp,
-                            color: Colors.red,
+                            color: textColor,  // 배경색에 따라 자동으로 대비색 사용
                           ),
                         ),
                     ],
