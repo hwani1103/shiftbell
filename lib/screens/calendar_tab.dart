@@ -165,10 +165,9 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
     });
   }
 
-  // ⭐ 6번째 줄이 필요한지 계산
-  bool _needsSixthRow() {
+  // ⭐ 6번째 줄 전체 숨김 (별도 렌더링)
+  bool _shouldHideCell(DateTime day) {
     final firstDayOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
-    final lastDayOfMonth = DateTime(_focusedDay.year, _focusedDay.month + 1, 0);
 
     int daysFromSunday;
     if (firstDayOfMonth.weekday == 7) {
@@ -178,11 +177,11 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
     }
 
     final calendarStart = firstDayOfMonth.subtract(Duration(days: daysFromSunday));
-    final dayIndexOfLastDay = lastDayOfMonth.difference(calendarStart).inDays;
-    final rowOfLastDay = dayIndexOfLastDay ~/ 7;
+    final dayIndex = day.difference(calendarStart).inDays;
+    final row = dayIndex ~/ 7;
 
-    // 마지막 날이 5번째 줄(row=5) 이상이면 6번째 줄 필요
-    return rowOfLastDay >= 5;
+    // 6번째 줄 전체 숨김
+    return row >= 5;
   }
 
   // ⭐ 6번째 줄의 특정 날짜 가져오기 (일요일=0, 월요일=1)
@@ -346,9 +345,9 @@ Widget build(BuildContext context) {
                       ),
                     ),
                     
-                    // ⭐ 달력 (동적 4~5줄, 6번째 줄은 별도 렌더링)
+                    // ⭐ 달력 5줄 (6줄 고정 구조, 6번째 줄만 숨김)
                     SizedBox(
-                      height: 530.h,
+                      height: 443.h,  // 28.h (요일) + 83.h * 5 (5줄)
                       child: TableCalendar(
                         firstDay: DateTime(DateTime.now().year - 3, 1, 1),
                         lastDay: DateTime(DateTime.now().year + 3, 12, 31),
@@ -362,7 +361,7 @@ Widget build(BuildContext context) {
                         locale: 'ko_KR',
 
                         headerVisible: false,
-                        sixWeekMonthsEnforced: false,  // ⭐ 동적 레이아웃 (4-5줄)
+                        sixWeekMonthsEnforced: true,  // ⭐ 6줄 고정
                         rowHeight: 83.h,
 
                         daysOfWeekHeight: 28.h,
@@ -398,17 +397,25 @@ Widget build(BuildContext context) {
                         
                         calendarBuilders: CalendarBuilders(
                           defaultBuilder: (context, day, focusedDay) {
+                            // ⭐ 6번째 줄 전체 숨김
+                            if (_shouldHideCell(day)) return SizedBox.shrink();
                             return _buildDateCell(day, false, false, schedule);
                           },
                           outsideBuilder: (context, day, focusedDay) {
+                            // ⭐ 6번째 줄 전체 숨김
+                            if (_shouldHideCell(day)) return SizedBox.shrink();
                             return _buildDateCell(day, false, true, schedule);
                           },
                           todayBuilder: (context, day, focusedDay) {
+                            // ⭐ 6번째 줄 전체 숨김
+                            if (_shouldHideCell(day)) return SizedBox.shrink();
                             // ⭐ 오늘이 현재 보고 있는 달의 날짜인지 확인
                             final isOutsideMonth = day.month != _focusedDay.month || day.year != _focusedDay.year;
                             return _buildDateCell(day, true, isOutsideMonth, schedule);
                           },
                           selectedBuilder: (context, day, focusedDay) {
+                            // ⭐ 6번째 줄 전체 숨김
+                            if (_shouldHideCell(day)) return SizedBox.shrink();
                             return _buildDateCell(day, isSameDay(day, DateTime.now()), false, schedule, isSelected: true);
                           },
                         ),
@@ -451,12 +458,11 @@ Widget build(BuildContext context) {
                       ),
                     ),
 
-                    // ⭐ 6번째 줄 2칸 (필요한 경우에만 렌더링)
-                    if (_needsSixthRow())
-                      SizedBox(
-                        height: 83.h,
-                        child: Row(
-                          children: [
+                    // ⭐ 6번째 줄 2칸 (무조건 렌더링)
+                    SizedBox(
+                      height: 83.h,
+                      child: Row(
+                        children: [
                           // 일요일 (0번 칸)
                           Expanded(
                             child: Builder(
