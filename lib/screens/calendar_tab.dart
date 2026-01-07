@@ -165,25 +165,6 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
     });
   }
 
-  // ⭐ 6번째 줄 전체 숨김 (별도 렌더링)
-  bool _shouldHideCell(DateTime day) {
-    final firstDayOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
-
-    int daysFromSunday;
-    if (firstDayOfMonth.weekday == 7) {
-      daysFromSunday = 0;
-    } else {
-      daysFromSunday = firstDayOfMonth.weekday;
-    }
-
-    final calendarStart = firstDayOfMonth.subtract(Duration(days: daysFromSunday));
-    final dayIndex = day.difference(calendarStart).inDays;
-    final row = dayIndex ~/ 7;
-
-    // 6번째 줄 전체 숨김
-    return row >= 5;
-  }
-
   // ⭐ 6번째 줄의 특정 날짜 가져오기 (일요일=0, 월요일=1)
   DateTime? _getSixthRowDate(int col) {
     final firstDayOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
@@ -345,116 +326,110 @@ Widget build(BuildContext context) {
                       ),
                     ),
                     
-                    // ⭐ 달력 5줄 (6줄 고정 구조, 6번째 줄만 숨김)
+                    // ⭐ 달력 5줄 고정 (6번째 줄은 아래 별도 Row)
                     SizedBox(
-                      height: 443.h,  // 28.h (요일) + 83.h * 5 (5줄)
-                      child: TableCalendar(
-                        firstDay: DateTime(DateTime.now().year - 3, 1, 1),
-                        lastDay: DateTime(DateTime.now().year + 3, 12, 31),
-                        focusedDay: _focusedDay,
-                        selectedDayPredicate: (day) {
-                          if (_isMultiSelectMode) {
-                            return _selectedDates.any((d) => isSameDay(d, day));
-                          }
-                          return isSameDay(_selectedDay, day);
-                        },
-                        locale: 'ko_KR',
+                      height: 443.h,  // 요일 28.h + 5줄 83.h * 5 = 443.h
+                      child: ClipRect(
+                        child: TableCalendar(
+                          firstDay: DateTime(DateTime.now().year - 3, 1, 1),
+                          lastDay: DateTime(DateTime.now().year + 3, 12, 31),
+                          focusedDay: _focusedDay,
+                          selectedDayPredicate: (day) {
+                            if (_isMultiSelectMode) {
+                              return _selectedDates.any((d) => isSameDay(d, day));
+                            }
+                            return isSameDay(_selectedDay, day);
+                          },
+                          locale: 'ko_KR',
 
-                        headerVisible: false,
-                        sixWeekMonthsEnforced: true,  // ⭐ 6줄 고정
-                        rowHeight: 83.h,
+                          headerVisible: false,
+                          sixWeekMonthsEnforced: true,  // ⭐ 항상 6줄 생성 (5줄만 보이도록 clip)
+                          rowHeight: 83.h,
 
-                        daysOfWeekHeight: 28.h,
-                        daysOfWeekStyle: DaysOfWeekStyle(
-                          weekdayStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
-                          weekendStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
-                        ),
-                        
-                        calendarStyle: CalendarStyle(
-                          cellMargin: EdgeInsets.all(0),
-                          cellPadding: EdgeInsets.all(0),
-                          
-                          tableBorder: TableBorder.all(
-                            color: Colors.black,
-                            width: 0.3,
+                          daysOfWeekHeight: 28.h,
+                          daysOfWeekStyle: DaysOfWeekStyle(
+                            weekdayStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
+                            weekendStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
                           ),
-                          
-                          defaultTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
-                          weekendTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
-                          outsideTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey),
-                          
-                          todayDecoration: BoxDecoration(
-                            color: Colors.transparent,  // ⭐ 배경 제거, 날짜 숫자만 표시
+
+                          calendarStyle: CalendarStyle(
+                            cellMargin: EdgeInsets.all(0),
+                            cellPadding: EdgeInsets.all(0),
+
+                            tableBorder: TableBorder.all(
+                              color: Colors.black,
+                              width: 0.3,
+                            ),
+
+                            defaultTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
+                            weekendTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
+                            outsideTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey),
+
+                            todayDecoration: BoxDecoration(
+                              color: Colors.transparent,  // ⭐ 배경 제거, 날짜 숫자만 표시
+                            ),
+                            todayTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
+
+                            selectedDecoration: BoxDecoration(
+                              color: Colors.blueAccent.withOpacity(_isMultiSelectMode ? 0.3 : 1.0),
+                              shape: BoxShape.circle,
+                            ),
+                            selectedTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white),
                           ),
-                          todayTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
-                          
-                          selectedDecoration: BoxDecoration(
-                            color: Colors.blueAccent.withOpacity(_isMultiSelectMode ? 0.3 : 1.0),
-                            shape: BoxShape.circle,
+
+                          calendarBuilders: CalendarBuilders(
+                            defaultBuilder: (context, day, focusedDay) {
+                              return _buildDateCell(day, false, false, schedule);
+                            },
+                            outsideBuilder: (context, day, focusedDay) {
+                              return _buildDateCell(day, false, true, schedule);
+                            },
+                            todayBuilder: (context, day, focusedDay) {
+                              // ⭐ 오늘이 현재 보고 있는 달의 날짜인지 확인
+                              final isOutsideMonth = day.month != _focusedDay.month || day.year != _focusedDay.year;
+                              return _buildDateCell(day, true, isOutsideMonth, schedule);
+                            },
+                            selectedBuilder: (context, day, focusedDay) {
+                              return _buildDateCell(day, isSameDay(day, DateTime.now()), false, schedule, isSelected: true);
+                            },
                           ),
-                          selectedTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white),
+
+                          onDaySelected: (selectedDay, focusedDay) {
+                            // ⭐ 이전/다음 달 날짜는 탭 무시
+                            if (selectedDay.month != _focusedDay.month || selectedDay.year != _focusedDay.year) {
+                              return;
+                            }
+
+                            setState(() {
+                              _focusedDay = focusedDay;
+                            });
+
+                            if (_isMultiSelectMode) {
+                              _toggleDateSelection(selectedDay);
+                            } else {
+                              _showDayDetailPopup(selectedDay, schedule);
+                            }
+                          },
+
+                          onDayLongPressed: (selectedDay, focusedDay) {
+                            // ⭐ 이전/다음 달 날짜는 길게 누르기 무시
+                            if (selectedDay.month != _focusedDay.month || selectedDay.year != _focusedDay.year) {
+                              return;
+                            }
+
+                            if (!_isMultiSelectMode) {
+                              _enterMultiSelectMode(selectedDay);
+                            }
+                          },
+
+                          onPageChanged: (focusedDay) {
+                            setState(() {
+                              _focusedDay = focusedDay;
+                            });
+                            // ⭐ 새 달의 메모 로드
+                            _loadMemosForMonth(focusedDay);
+                          },
                         ),
-                        
-                        calendarBuilders: CalendarBuilders(
-                          defaultBuilder: (context, day, focusedDay) {
-                            // ⭐ 6번째 줄 전체 숨김
-                            if (_shouldHideCell(day)) return SizedBox.shrink();
-                            return _buildDateCell(day, false, false, schedule);
-                          },
-                          outsideBuilder: (context, day, focusedDay) {
-                            // ⭐ 6번째 줄 전체 숨김
-                            if (_shouldHideCell(day)) return SizedBox.shrink();
-                            return _buildDateCell(day, false, true, schedule);
-                          },
-                          todayBuilder: (context, day, focusedDay) {
-                            // ⭐ 6번째 줄 전체 숨김
-                            if (_shouldHideCell(day)) return SizedBox.shrink();
-                            // ⭐ 오늘이 현재 보고 있는 달의 날짜인지 확인
-                            final isOutsideMonth = day.month != _focusedDay.month || day.year != _focusedDay.year;
-                            return _buildDateCell(day, true, isOutsideMonth, schedule);
-                          },
-                          selectedBuilder: (context, day, focusedDay) {
-                            // ⭐ 6번째 줄 전체 숨김
-                            if (_shouldHideCell(day)) return SizedBox.shrink();
-                            return _buildDateCell(day, isSameDay(day, DateTime.now()), false, schedule, isSelected: true);
-                          },
-                        ),
-                        
-                        onDaySelected: (selectedDay, focusedDay) {
-                          // ⭐ 이전/다음 달 날짜는 탭 무시
-                          if (selectedDay.month != _focusedDay.month || selectedDay.year != _focusedDay.year) {
-                            return;
-                          }
-
-                          setState(() {
-                            _focusedDay = focusedDay;
-                          });
-
-                          if (_isMultiSelectMode) {
-                            _toggleDateSelection(selectedDay);
-                          } else {
-                            _showDayDetailPopup(selectedDay, schedule);
-                          }
-                        },
-                        
-                        onDayLongPressed: (selectedDay, focusedDay) {
-                          // ⭐ 이전/다음 달 날짜는 길게 누르기 무시
-                          if (selectedDay.month != _focusedDay.month || selectedDay.year != _focusedDay.year) {
-                            return;
-                          }
-
-                          if (!_isMultiSelectMode) {
-                            _enterMultiSelectMode(selectedDay);
-                          }
-                        },
-                        
-                        onPageChanged: (focusedDay) {
-                          setState(() {
-                            _focusedDay = focusedDay;
-                          });
-                          // ⭐ 새 달의 메모 로드
-                          _loadMemosForMonth(focusedDay);
-                        },
                       ),
                     ),
 
