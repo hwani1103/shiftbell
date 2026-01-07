@@ -259,7 +259,7 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                       ],
                     ),
                     SizedBox(height: 16.h),
-                    // 월 선택 (그리드) - 탭하면 즉시 이동
+                    // 월 선택 (그리드) - 탭하면 즉시 이동, 모든 월 동일한 스타일
                     SizedBox(
                       height: 200.h,
                       child: GridView.builder(
@@ -273,7 +273,6 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                         itemCount: 12,
                         itemBuilder: (context, index) {
                           final month = index + 1;
-                          final isSelected = month == selectedMonth;
                           return GestureDetector(
                             // ⭐ 탭하면 즉시 이동
                             onTap: () {
@@ -285,11 +284,11 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: isSelected ? Colors.indigo.shade500 : Colors.grey.shade100,
+                                color: Colors.grey.shade100,
                                 borderRadius: BorderRadius.circular(8.r),
                                 border: Border.all(
-                                  color: isSelected ? Colors.indigo.shade700 : Colors.grey.shade300,
-                                  width: isSelected ? 2 : 1,
+                                  color: Colors.grey.shade300,
+                                  width: 1,
                                 ),
                               ),
                               child: Center(
@@ -297,8 +296,8 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                                   '$month월',
                                   style: TextStyle(
                                     fontSize: 14.sp,
-                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                    color: isSelected ? Colors.white : Colors.black,
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
