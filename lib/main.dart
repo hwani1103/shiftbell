@@ -633,8 +633,8 @@ class _InitialRouterState extends State<InitialRouter> {
   }
 
   Future<void> _navigate() async {
-    // ⭐ 0.1초 스플래시 유지 (런치 스크린과 동일한 화면)
-    await Future.delayed(const Duration(milliseconds: 100));
+    // ⭐ 0.05초 스플래시 유지 (런치 스크린과 동일한 화면)
+    await Future.delayed(const Duration(milliseconds: 50));
 
     if (!mounted) return;
 
