@@ -163,10 +163,13 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     // ⭐ Method Call Handler 등록
     platform.setMethodCallHandler(_handleMethod);
 
-    // ⭐ Provider 갱신 (백그라운드)
+    // ⭐ Provider 사전 로드 (첫 탭 전환 시 버벅임 방지)
     Future.microtask(() {
       final container = ProviderScope.containerOf(context);
+      // 알람 Provider 갱신
       container.read(alarmNotifierProvider.notifier).refresh();
+      // 스케줄 Provider 사전 로드 (CalendarTab, SettingsTab 첫 진입 시 loading 방지)
+      container.read(scheduleProvider);
     });
 
     // ⭐ 업데이트 체크 (2초 후 - UI 로딩 완료 후)
