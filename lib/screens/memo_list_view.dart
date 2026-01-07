@@ -71,6 +71,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
     final sortedYears = groupedMemos.keys.toList()..sort((a, b) => b.compareTo(a)); // 최근 연도 우선
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text('메모 모아보기', style: TextStyle(fontSize: 18.sp)),
         elevation: 1,
