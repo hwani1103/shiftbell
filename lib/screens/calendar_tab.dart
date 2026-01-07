@@ -249,9 +249,33 @@ Widget build(BuildContext context) {
                                       ),
                                     ],
                                   )
-                                : Text(
-                                    '${_focusedDay.year}년 ${_focusedDay.month}월',
-                                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                : GestureDetector(
+                                    // ⭐ 4번 기능: 헤더 빠른 스와이프 (월 고속 이동)
+                                    onHorizontalDragEnd: (details) {
+                                      if (details.primaryVelocity != null) {
+                                        // 속도 기반 이동 개월 수 계산 (최소 1개월, 최대 12개월)
+                                        final velocity = details.primaryVelocity!;
+                                        final months = (velocity.abs() / 1000).clamp(1.0, 12.0).round();
+
+                                        if (velocity > 300) {
+                                          // 좌→우: 이전 달로 이동
+                                          setState(() {
+                                            _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - months, 1);
+                                          });
+                                          _loadMemosForMonth(_focusedDay);
+                                        } else if (velocity < -300) {
+                                          // 우→좌: 다음 달로 이동
+                                          setState(() {
+                                            _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + months, 1);
+                                          });
+                                          _loadMemosForMonth(_focusedDay);
+                                        }
+                                      }
+                                    },
+                                    child: Text(
+                                      '${_focusedDay.year}년 ${_focusedDay.month}월',
+                                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                    ),
                                   ),
                             if (!_isMultiSelectMode)
                               Row(

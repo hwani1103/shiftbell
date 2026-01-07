@@ -16,7 +16,9 @@ import 'package:numberpicker/numberpicker.dart';
 import 'all_teams_setup_dialog.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
-  const SettingsTab({super.key});
+  final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
+
+  const SettingsTab({super.key, this.onSwipeToCalendar});
 
   @override
   ConsumerState<SettingsTab> createState() => _SettingsTabState();
@@ -313,19 +315,29 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
   Widget build(BuildContext context) {
     final scheduleAsync = ref.watch(scheduleProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Spacer(),
-            Padding(
-              padding: EdgeInsets.only(right: 16.w),
-              child: Text('설정'),
-            ),
-          ],
+    return GestureDetector(
+      // ⭐ 6번 기능: 좌→우 스와이프로 달력탭 이동
+      onHorizontalDragEnd: (details) {
+        if (widget.onSwipeToCalendar != null && details.primaryVelocity != null) {
+          // 좌→우 스와이프 (velocity > 0)
+          if (details.primaryVelocity! > 500) {
+            widget.onSwipeToCalendar!();
+          }
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Row(
+            children: [
+              Spacer(),
+              Padding(
+                padding: EdgeInsets.only(right: 16.w),
+                child: Text('설정'),
+              ),
+            ],
+          ),
         ),
-      ),
-      body: scheduleAsync.when(
+        body: scheduleAsync.when(
         loading: () => Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('에러 발생: $error')),
         data: (schedule) {
@@ -593,6 +605,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           );
         },
       ),
+      ),  // ⭐ GestureDetector child 닫기
     );
   }
 

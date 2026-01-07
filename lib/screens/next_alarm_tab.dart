@@ -10,7 +10,9 @@ import '../providers/alarm_provider.dart';
 
 
 class NextAlarmTab extends ConsumerStatefulWidget {
-  const NextAlarmTab({super.key});
+  final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
+
+  const NextAlarmTab({super.key, this.onSwipeToCalendar});
 
   @override
   ConsumerState<NextAlarmTab> createState() => _NextAlarmTabState();
@@ -70,22 +72,33 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   Widget build(BuildContext context) {
     final nextAlarmAsync = ref.watch(nextAlarmProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.grey.shade50,
-      body: nextAlarmAsync.when(
-        loading: () => Center(
-          child: CircularProgressIndicator(color: Colors.indigo),
-        ),
-        error: (error, stack) => _buildEmptyState(),
-        data: (nextAlarm) {
-          if (nextAlarm == null) {
-            return _buildEmptyState();
+    return GestureDetector(
+      // ⭐ 6번 기능: 우→좌 스와이프로 달력탭 이동
+      onHorizontalDragEnd: (details) {
+        if (widget.onSwipeToCalendar != null && details.primaryVelocity != null) {
+          // 우→좌 스와이프 (velocity < 0)
+          if (details.primaryVelocity! < -500) {
+            widget.onSwipeToCalendar!();
           }
-          return _AlarmDisplayWidget(
-            alarm: nextAlarm,
-            onDismiss: () => _dismissAlarm(nextAlarm.id!, nextAlarm.date),
-          );
-        },
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade50,
+        body: nextAlarmAsync.when(
+          loading: () => Center(
+            child: CircularProgressIndicator(color: Colors.indigo),
+          ),
+          error: (error, stack) => _buildEmptyState(),
+          data: (nextAlarm) {
+            if (nextAlarm == null) {
+              return _buildEmptyState();
+            }
+            return _AlarmDisplayWidget(
+              alarm: nextAlarm,
+              onDismiss: () => _dismissAlarm(nextAlarm.id!, nextAlarm.date),
+            );
+          },
+        ),
       ),
     );
   }

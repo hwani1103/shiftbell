@@ -129,41 +129,57 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
   }
 }
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends ConsumerStatefulWidget {  // ⭐ ConsumerStatefulWidget으로 변경
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  ConsumerState<MainScreen> createState() => _MainScreenState();  // ⭐ ConsumerState로 변경
 }
 
-class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 1;
+class _MainScreenState extends ConsumerState<MainScreen> {  // ⭐ ConsumerState로 변경
+  int _currentIndex = 1;  // ⭐ 기본값 (나중에 initState에서 변경됨)
   static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
-  
-  final _tabs = [
-    NextAlarmTab(),
-    CalendarTab(),
-    SettingsTab(),
-  ];
-  
+
+  late final List<Widget> _tabs;
+
   // main.dart - _MainScreenState
 @override
 void initState() {
   super.initState();
-  
+
+  // ⭐ 탭 생성 (callback 전달)
+  _tabs = [
+    NextAlarmTab(onSwipeToCalendar: () => _goToCalendar()),
+    CalendarTab(),
+    SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
+  ];
+
   _checkRefreshOnStart();
   _scheduleGuardWakeup();
-  
+
   // ⭐ Method Call Handler 등록
   platform.setMethodCallHandler(_handleMethod);
-  
-  // ⭐ 추가: 화면 진입 시 AlarmNotifier 갱신
+
+  // ⭐ 추가: 화면 진입 시 AlarmNotifier 갱신 + 초기 탭 결정
   WidgetsBinding.instance.addPostFrameCallback((_) {
     if (mounted) {
       try {
         final container = ProviderScope.containerOf(context);
         container.read(alarmNotifierProvider.notifier).refresh();
         print('✅ MainScreen 진입 - AlarmNotifier 갱신');
+
+        // ⭐ 5번 기능: 다음 알람 있으면 다음알람탭, 없으면 달력탭
+        final nextAlarmAsync = ref.read(nextAlarmProvider);
+        nextAlarmAsync.whenData((nextAlarm) {
+          if (nextAlarm != null) {
+            // 다음 알람 있음 → 다음알람탭
+            setState(() => _currentIndex = 0);
+            print('✅ 다음 알람 있음 → 다음알람탭 표시');
+          } else {
+            // 다음 알람 없음 → 달력탭 (기본값 1 유지)
+            print('✅ 다음 알람 없음 → 달력탭 표시');
+          }
+        });
       } catch (e) {
         print('❌ AlarmNotifier 갱신 실패: $e');
       }
@@ -177,6 +193,11 @@ void initState() {
     });
   });
 }
+
+  // ⭐ 6번 기능: 달력탭으로 이동
+  void _goToCalendar() {
+    setState(() => _currentIndex = 1);
+  }
 
   Future<void> _checkRefreshOnStart() async {
     print('🚀 앱 시작 - 갱신 체크');
