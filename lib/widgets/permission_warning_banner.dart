@@ -55,13 +55,15 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
       return const SizedBox.shrink();
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.orange.shade50,
+        color: colorScheme.tertiaryContainer,
         border: Border(
           bottom: BorderSide(
-            color: Colors.orange.shade200,
+            color: colorScheme.tertiary.withOpacity(0.3),
             width: 1,
           ),
         ),
@@ -71,7 +73,7 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
         children: [
           Icon(
             Icons.warning_amber_rounded,
-            color: Colors.orange.shade700,
+            color: colorScheme.tertiary,
             size: 24.sp,
           ),
           SizedBox(width: 12.w),
@@ -84,7 +86,7 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange.shade900,
+                    color: colorScheme.onTertiaryContainer,
                   ),
                 ),
                 SizedBox(height: 2.h),
@@ -92,7 +94,7 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
                   _missingPermissions.join(', '),
                   style: TextStyle(
                     fontSize: 12.sp,
-                    color: Colors.orange.shade700,
+                    color: colorScheme.onTertiaryContainer,
                   ),
                 ),
               ],
@@ -104,8 +106,8 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
               await PermissionService().openSettings();
             },
             style: TextButton.styleFrom(
-              backgroundColor: Colors.orange.shade700,
-              foregroundColor: Colors.white,
+              backgroundColor: colorScheme.tertiary,
+              foregroundColor: colorScheme.onTertiary,
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.r),

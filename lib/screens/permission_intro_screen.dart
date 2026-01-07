@@ -8,8 +8,10 @@ class PermissionIntroScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
@@ -22,7 +24,7 @@ class PermissionIntroScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 28.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 12.h),
@@ -30,7 +32,7 @@ class PermissionIntroScreen extends StatelessWidget {
                 '알람이 정확하게 울리려면\n아래 권한이 필요해요',
                 style: TextStyle(
                   fontSize: 16.sp,
-                  color: Colors.grey.shade600,
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),
@@ -38,14 +40,16 @@ class PermissionIntroScreen extends StatelessWidget {
 
               // 필수 권한 목록
               _buildPermissionItem(
+                context: context,
                 icon: Icons.notifications_active,
-                iconColor: Colors.orange,
+                iconColor: colorScheme.tertiary,
                 title: '알림',
                 description: '알림은 오직 알람 발생을 위해서만 사용됩니다',
                 required: true,
               ),
               SizedBox(height: 24.h),
               _buildPermissionItem(
+                context: context,
                 icon: Icons.phone_android,
                 iconColor: Colors.green,
                 title: '다른 앱 위에 표시',
@@ -62,7 +66,7 @@ class PermissionIntroScreen extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => _requestPermissions(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo,
+                    backgroundColor: colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
@@ -72,7 +76,7 @@ class PermissionIntroScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                 ),
@@ -87,7 +91,7 @@ class PermissionIntroScreen extends StatelessWidget {
                     '나중에 하기',
                     style: TextStyle(
                       fontSize: 16.sp,
-                      color: Colors.grey.shade600,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -100,12 +104,14 @@ class PermissionIntroScreen extends StatelessWidget {
   }
 
   Widget _buildPermissionItem({
+    required BuildContext context,
     required IconData icon,
     required Color iconColor,
     required String title,
     required String description,
     required bool required,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         Container(
@@ -133,7 +139,7 @@ class PermissionIntroScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   if (required) ...[
@@ -141,7 +147,7 @@ class PermissionIntroScreen extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                       decoration: BoxDecoration(
-                        color: Colors.red.shade50,
+                        color: colorScheme.errorContainer,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
@@ -149,7 +155,7 @@ class PermissionIntroScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red.shade700,
+                          color: colorScheme.onErrorContainer,
                         ),
                       ),
                     ),
@@ -158,7 +164,7 @@ class PermissionIntroScreen extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
+                        color: colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
@@ -166,7 +172,7 @@ class PermissionIntroScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade700,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -178,7 +184,7 @@ class PermissionIntroScreen extends StatelessWidget {
                 description,
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: Colors.grey.shade600,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -217,13 +223,14 @@ class PermissionIntroScreen extends StatelessWidget {
   }
 
   void _showPermissionWarning(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28.sp),
+            Icon(Icons.warning_amber_rounded, color: colorScheme.tertiary, size: 28.sp),
             SizedBox(width: 8.w),
             Flexible(
               child: Text(
@@ -246,7 +253,7 @@ class PermissionIntroScreen extends StatelessWidget {
               '설정에서 언제든지 권한을 허용할 수 있어요.',
               style: TextStyle(
                 fontSize: 13.sp,
-                color: Colors.grey.shade600,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -265,7 +272,7 @@ class PermissionIntroScreen extends StatelessWidget {
               _navigateToOnboarding(context);
             },
             style: TextButton.styleFrom(
-              foregroundColor: Colors.grey.shade600,
+              foregroundColor: colorScheme.onSurfaceVariant,
             ),
             child: const Text('계속 진행하기'),
           ),

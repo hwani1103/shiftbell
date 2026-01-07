@@ -49,6 +49,7 @@ class UpdateService {
   /// 업데이트 안내 다이얼로그
   /// 반환값: null = dismiss(백버튼/바깥터치), false = "나중에", true = "업데이트"
   static Future<bool?> _showUpdateDialog(BuildContext context) async {
+    final colorScheme = Theme.of(context).colorScheme;
     return await showDialog<bool?>(
       context: context,
       barrierDismissible: true,  // 바깥 터치로 닫기 가능 (null 반환)
@@ -64,8 +65,8 @@ class UpdateService {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Colors.indigo.shade50,
-                Colors.white,
+                colorScheme.primaryContainer,
+                colorScheme.surface,
               ],
             ),
           ),
@@ -76,13 +77,13 @@ class UpdateService {
               Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
-                  color: Colors.indigo.shade100,
+                  color: colorScheme.primaryContainer,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.system_update,
                   size: 40.sp,
-                  color: Colors.indigo.shade700,
+                  color: colorScheme.primary,
                 ),
               ),
               SizedBox(height: 20.h),
@@ -93,7 +94,7 @@ class UpdateService {
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.indigo.shade800,
+                  color: colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 12.h),
@@ -104,7 +105,7 @@ class UpdateService {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: Colors.grey.shade700,
+                  color: colorScheme.onSurfaceVariant,
                   height: 1.5,
                 ),
               ),
@@ -116,7 +117,7 @@ class UpdateService {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12.sp,
-                  color: Colors.grey.shade500,
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
                 ),
               ),
               SizedBox(height: 24.h),
@@ -130,7 +131,7 @@ class UpdateService {
                       onPressed: () => Navigator.pop(context, false),  // 명확한 선택
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 14.h),
-                        side: BorderSide(color: Colors.grey.shade400),
+                        side: BorderSide(color: colorScheme.outline),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.r),
                         ),
@@ -139,7 +140,7 @@ class UpdateService {
                         '나중에',
                         style: TextStyle(
                           fontSize: 14.sp,
-                          color: Colors.grey.shade600,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -151,8 +152,8 @@ class UpdateService {
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context, true),  // 명확한 선택
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.indigo.shade600,
-                        foregroundColor: Colors.white,
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                         elevation: 0,
                         shape: RoundedRectangleBorder(

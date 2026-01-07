@@ -67,14 +67,15 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final groupedMemos = _groupMemosByYearAndDate();
     final sortedYears = groupedMemos.keys.toList()..sort((a, b) => b.compareTo(a)); // 최근 연도 우선
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         title: Text('메모 모아보기', style: TextStyle(fontSize: 18.sp)),
         elevation: 1,
       ),
@@ -83,13 +84,13 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
           // 검색창
           Container(
             padding: EdgeInsets.all(16.w),
-            color: Colors.white,
+            color: colorScheme.surface,
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: '메모 검색...',
-                hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400),
-                prefixIcon: Icon(Icons.search, color: Colors.grey.shade600),
+                hintStyle: TextStyle(fontSize: 14.sp, color: colorScheme.outline),
+                prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
                         icon: Icon(Icons.clear, size: 20.sp),
@@ -104,14 +105,14 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                 contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
+                  borderSide: BorderSide(color: colorScheme.outline),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.indigo.shade400, width: 2),
+                  borderSide: BorderSide(color: colorScheme.primary, width: 2),
                 ),
                 filled: true,
-                fillColor: Colors.grey.shade50,
+                fillColor: colorScheme.surfaceVariant,
               ),
               onChanged: (value) {
                 setState(() {
@@ -129,11 +130,11 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.note_outlined, size: 64.sp, color: Colors.grey.shade300),
+                        Icon(Icons.note_outlined, size: 64.sp, color: colorScheme.outline),
                         SizedBox(height: 16.h),
                         Text(
                           _searchQuery.isNotEmpty ? '검색 결과가 없습니다' : '메모가 없습니다',
-                          style: TextStyle(fontSize: 16.sp, color: Colors.grey.shade600),
+                          style: TextStyle(fontSize: 16.sp, color: colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -159,9 +160,9 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                             margin: EdgeInsets.only(top: yearIndex == 0 ? 8.h : 24.h, bottom: 8.h),
                             decoration: BoxDecoration(
-                              color: Colors.indigo.shade50,
+                              color: colorScheme.primaryContainer,
                               border: Border(
-                                left: BorderSide(color: Colors.indigo.shade400, width: 4),
+                                left: BorderSide(color: colorScheme.primary, width: 4),
                               ),
                             ),
                             child: Text(
@@ -169,7 +170,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                               style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.indigo.shade700,
+                                color: colorScheme.primary,
                               ),
                             ),
                           ),
@@ -192,14 +193,14 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                                         style: TextStyle(
                                           fontSize: 14.sp,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.grey.shade700,
+                                          color: colorScheme.onSurfaceVariant,
                                         ),
                                       ),
                                       SizedBox(width: 8.w),
                                       Expanded(
                                         child: Container(
                                           height: 1,
-                                          color: Colors.grey.shade300,
+                                          color: colorScheme.outline,
                                         ),
                                       ),
                                     ],
@@ -212,12 +213,12 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                                     margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
                                     padding: EdgeInsets.all(12.w),
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: colorScheme.surface,
                                       borderRadius: BorderRadius.circular(8.r),
-                                      border: Border.all(color: Colors.grey.shade200),
+                                      border: Border.all(color: colorScheme.outline),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.03),
+                                          color: colorScheme.shadow.withOpacity(0.03),
                                           blurRadius: 4,
                                           offset: Offset(0, 2),
                                         ),
@@ -227,7 +228,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                                       memo.memoText,
                                       style: TextStyle(
                                         fontSize: 14.sp,
-                                        color: Colors.black87,
+                                        color: colorScheme.onSurface,
                                         height: 1.4,
                                       ),
                                     ),

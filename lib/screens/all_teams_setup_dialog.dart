@@ -92,6 +92,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
@@ -132,14 +133,16 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: index <= _currentPage
-                            ? Colors.purple
-                            : Colors.grey.shade300,
+                            ? colorScheme.primary
+                            : colorScheme.outline,
                       ),
                       child: Center(
                         child: Text(
                           '${index + 1}',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: index <= _currentPage
+                                ? colorScheme.onPrimary
+                                : colorScheme.onSurfaceVariant,
                             fontWeight: FontWeight.bold,
                             fontSize: 14.sp,
                           ),
@@ -151,8 +154,8 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                         width: 60.w,
                         height: 2.h,
                         color: index < _currentPage
-                            ? Colors.purple
-                            : Colors.grey.shade300,
+                            ? colorScheme.primary
+                            : colorScheme.outline,
                       ),
                   ],
                 );
@@ -196,11 +199,11 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                   child: ElevatedButton(
                     onPressed: _canProceed() ? (_currentPage < 2 ? _nextPage : _complete) : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.purple,
+                      backgroundColor: colorScheme.primary,
                     ),
                     child: Text(
                       _currentPage < 2 ? '다음' : '완료',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: colorScheme.onPrimary),
                     ),
                   ),
                 ),
@@ -227,7 +230,8 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
   }
 
   // 패턴 표시 (화살표 없이 단순 배치)
-  Widget _buildPatternCards() {
+  Widget _buildPatternCards(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Wrap(
       spacing: 6.w,
       runSpacing: 8.h,
@@ -235,16 +239,16 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(6.r),
-            border: Border.all(color: Colors.purple.shade300),
+            border: Border.all(color: colorScheme.primary.withOpacity(0.5)),
           ),
           child: Text(
             shift,
             style: TextStyle(
               fontSize: 11.sp,
               fontWeight: FontWeight.w600,
-              color: Colors.purple.shade700,
+              color: colorScheme.primary,
             ),
           ),
         );
@@ -254,6 +258,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
 
   // 1단계: 교대 패턴 확인
   Widget _buildStep1_PatternConfirm() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -262,13 +267,13 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.purple,
+            color: colorScheme.primary,
           ),
         ),
         SizedBox(height: 8.h),
         Text(
           '현재 설정된 교대 패턴을 확인해주세요.',
-          style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+          style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
         ),
         SizedBox(height: 24.h),
         Container(
@@ -276,9 +281,9 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
           height: 200.h, // 고정 높이
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
-            color: Colors.purple.shade50,
+            color: colorScheme.primaryContainer,
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: Colors.purple.shade200),
+            border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -288,13 +293,13 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.purple.shade900,
+                  color: colorScheme.onPrimaryContainer,
                 ),
               ),
               SizedBox(height: 12.h),
               Expanded(
                 child: SingleChildScrollView(
-                  child: _buildPatternCards(),
+                  child: _buildPatternCards(context),
                 ),
               ),
               SizedBox(height: 12.h),
@@ -302,7 +307,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                 '총 ${widget.pattern.length}일 주기',
                 style: TextStyle(
                   fontSize: 12.sp,
-                  color: Colors.purple.shade600,
+                  color: colorScheme.onPrimaryContainer,
                 ),
               ),
             ],
@@ -312,17 +317,17 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
         Container(
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
-            color: Colors.blue.shade50,
+            color: colorScheme.secondaryContainer,
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: Row(
             children: [
-              Icon(Icons.info, color: Colors.blue, size: 20.sp),
+              Icon(Icons.info, color: colorScheme.secondary, size: 20.sp),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
                   '이 패턴을 기준으로 전체 조의 근무표를 작성합니다.',
-                  style: TextStyle(fontSize: 12.sp, color: Colors.blue.shade900),
+                  style: TextStyle(fontSize: 12.sp, color: colorScheme.onSecondaryContainer),
                 ),
               ),
             ],
@@ -334,6 +339,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
 
   // 2단계: 전체 조 구성 입력
   Widget _buildStep2_TeamNamesInput() {
+    final colorScheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,13 +349,13 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.purple,
+              color: colorScheme.primary,
             ),
           ),
           SizedBox(height: 8.h),
           Text(
             '전체 교대조를 입력해주세요. (한 글자로만, 띄어쓰기로 구분)',
-            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 24.h),
           TextField(
@@ -365,7 +371,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
-                borderSide: BorderSide(color: Colors.purple, width: 2),
+                borderSide: BorderSide(color: colorScheme.primary, width: 2),
               ),
             ),
           ),
@@ -398,7 +404,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                           '$team조',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        backgroundColor: Colors.white,
+                        backgroundColor: colorScheme.surface,
                       );
                     }).toList(),
                   ),
@@ -409,17 +415,17 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
           Container(
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
-              color: Colors.orange.shade50,
+              color: colorScheme.tertiaryContainer,
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Row(
               children: [
-                Icon(Icons.warning, color: Colors.orange, size: 20.sp),
+                Icon(Icons.warning, color: colorScheme.tertiary, size: 20.sp),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
                     '한 글자만 입력 가능합니다.\n(예 : A, 가, 1)\n최소 2개 조 이상 입력해주세요.',
-                    style: TextStyle(fontSize: 12.sp, color: Colors.orange.shade900),
+                    style: TextStyle(fontSize: 12.sp, color: colorScheme.onTertiaryContainer),
                   ),
                 ),
               ],
@@ -432,6 +438,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
 
   // 3단계: 각 조 근무 선택
   Widget _buildStep3_OffsetInput() {
+    final colorScheme = Theme.of(context).colorScheme;
     return SingleChildScrollView(
       physics: BouncingScrollPhysics(),
       child: Column(
@@ -442,27 +449,28 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.purple,
+              color: colorScheme.primary,
             ),
           ),
           SizedBox(height: 8.h),
           Text(
             '오늘 각 조가 교대근무 패턴의 어떤 근무인지 선택해주세요.',
-            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+            style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 16.h),
 
           // 각 조별 근무 선택
           ..._teamNames.map((team) {
             final selectedIndex = _teamIndices[team];
+            final colorScheme = Theme.of(context).colorScheme;
             return Padding(
               padding: EdgeInsets.only(bottom: 12.h),
               child: Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -496,13 +504,13 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 10.h),
                             decoration: BoxDecoration(
                               color: isUsedByOther
-                                  ? Colors.grey.shade300
-                                  : (isSelected ? Colors.purple : Colors.white),
+                                  ? colorScheme.outline.withOpacity(0.3)
+                                  : (isSelected ? colorScheme.primary : colorScheme.surface),
                               borderRadius: BorderRadius.circular(8.r),
                               border: Border.all(
                                 color: isUsedByOther
-                                    ? Colors.grey.shade400
-                                    : (isSelected ? Colors.purple : Colors.grey.shade400),
+                                    ? colorScheme.outline
+                                    : (isSelected ? colorScheme.primary : colorScheme.outline),
                                 width: isSelected ? 2 : 1,
                               ),
                             ),
@@ -515,7 +523,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.bold,
-                                    color: isSelected ? Colors.white : Colors.red.shade700,
+                                    color: isSelected ? colorScheme.onPrimary : colorScheme.error,
                                   ),
                                 ),
                                 SizedBox(height: 4.h),
@@ -524,7 +532,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.bold,
-                                    color: isSelected ? Colors.white : Colors.black,
+                                    color: isSelected ? colorScheme.onPrimary : colorScheme.onSurface,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

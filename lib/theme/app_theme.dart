@@ -14,12 +14,17 @@ class AppTheme {
       onPrimary: Colors.white,
       secondary: Colors.blue.shade600,
       onSecondary: Colors.white,
+      tertiary: Colors.orange.shade600,
+      onTertiary: Colors.white,
       surface: Colors.white,
       onSurface: Colors.black,
+      surfaceVariant: Color(0xFFF5F5F5),  // grey.shade100 대체
+      onSurfaceVariant: Color(0xFF616161),  // grey.shade700 대체
       background: Colors.white,
       onBackground: Colors.black,
       error: Colors.red.shade700,
       onError: Colors.white,
+      outline: Color(0xFFE0E0E0),  // grey.shade300 대체 (테두리용)
     ),
 
     // AppBar
@@ -123,12 +128,17 @@ class AppTheme {
       onPrimary: Colors.black,
       secondary: Colors.blue.shade300,
       onSecondary: Colors.black,
+      tertiary: Colors.orange.shade400,
+      onTertiary: Colors.black,
       surface: Color(0xFF1A1A1A), // 어두운 회색 (카드/다이얼로그)
       onSurface: Colors.white,
+      surfaceVariant: Color(0xFF2A2A2A),  // 약간 더 밝은 회색
+      onSurfaceVariant: Color(0xFFB0B0B0),  // 밝은 회색 텍스트
       background: Color(0xFF000000), // 완전 검정
       onBackground: Colors.white,
       error: Colors.red.shade400,
       onError: Colors.black,
+      outline: Color(0xFF3A3A3A),  // 어두운 테두리
     ),
 
     // AppBar

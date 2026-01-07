@@ -152,8 +152,9 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   }
 
   // 근무 타입별 배경색 (calendar_tab과 동일한 로직)
-  Color _getShiftColor(String shift, ShiftSchedule? schedule) {
-    if (shift.isEmpty) return Colors.grey.shade100;
+  Color _getShiftColor(String shift, ShiftSchedule? schedule, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    if (shift.isEmpty) return colorScheme.surfaceVariant;
 
     final colorValue = schedule?.shiftColors?[shift];
 
@@ -161,12 +162,13 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
       return Color(colorValue);
     }
 
-    return Colors.grey.shade100;
+    return colorScheme.surfaceVariant;
   }
 
   // 근무 타입별 텍스트 색상 (calendar_tab과 동일한 로직)
-  Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
-    if (shift.isEmpty) return Colors.grey.shade700;
+  Color _getShiftTextColor(String shift, ShiftSchedule? schedule, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    if (shift.isEmpty) return colorScheme.onSurfaceVariant;
 
     final colorValue = schedule?.shiftColors?[shift];
 
@@ -175,7 +177,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
       return ShiftSchedule.getTextColor(bgColor);
     }
 
-    return Colors.grey.shade700;
+    return colorScheme.onSurfaceVariant;
   }
 
   // 해당 날짜의 요일 문자
@@ -188,14 +190,15 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   Widget build(BuildContext context) {
     // ⭐ schedule 가져오기
     final scheduleAsync = ref.watch(scheduleProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text('전체 근무표'),
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: colorScheme.onSurface,
       ),
       body: _isLoading
           ? Center(
@@ -211,7 +214,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                         Icon(
                           Icons.groups_outlined,
                           size: 80.sp,
-                          color: Colors.grey.shade400,
+                          color: colorScheme.outline,
                         ),
                         SizedBox(height: 24.h),
                         Text(
@@ -220,7 +223,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                           style: TextStyle(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey.shade700,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                         SizedBox(height: 32.h),
@@ -230,15 +233,15 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                           icon: Icon(Icons.add_circle_outline, size: 22.sp),
                           label: Text('전체 교대조 근무표 만들기', style: TextStyle(fontSize: 16.sp)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple,
-                            foregroundColor: Colors.white,
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
                             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 14.h),
                           ),
                         ),
                         SizedBox(height: 12.h),
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: Text('돌아가기', style: TextStyle(color: Colors.grey, fontSize: 15.sp)),
+                          child: Text('돌아가기', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 15.sp)),
                         ),
                       ],
                     ),
@@ -253,7 +256,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                         // ⭐ 년월 표시 (좌우 화살표 포함)
                         Container(
                           padding: EdgeInsets.symmetric(vertical: 12.h),
-                          color: Colors.white,
+                          color: colorScheme.surface,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -271,7 +274,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                                  color: colorScheme.onSurface,
                                 ),
                               ),
                               IconButton(
@@ -286,7 +289,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                             ],
                           ),
                         ),
-                        Divider(height: 1, color: Colors.grey.shade300),
+                        Divider(height: 1, color: colorScheme.outline),
                         // ⭐ PageView로 여러 달 표시
                         Expanded(
                           child: PageView.builder(
@@ -327,13 +330,14 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   }
 
   Widget _buildShiftTable(int year, int month, int lastDay, ShiftSchedule? schedule) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: colorScheme.shadow.withOpacity(0.1),
             blurRadius: 10,
             offset: Offset(0, 2),
           ),
@@ -341,7 +345,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
       ),
       child: Table(
         border: TableBorder.all(
-          color: Colors.grey.shade500,
+          color: colorScheme.outline,
           width: 0.5,
         ),
           columnWidths: {
@@ -386,10 +390,11 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
     // 현재 줄의 날짜 개수
     final dayCount = endDay - startDay + 1;
     final today = DateTime.now();
+    final colorScheme = Theme.of(context).colorScheme;
 
     return TableRow(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: colorScheme.surfaceVariant,
       ),
       children: [
         // 좌측 빈 셀
@@ -412,7 +417,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                 alignment: Alignment.center,
                 decoration: isToday
                     ? BoxDecoration(
-                        color: Colors.indigo.shade500,  // 진한 인디고 배경
+                        color: colorScheme.primary,  // 진한 인디고 배경
                       )
                     : null,
                 child: Column(
@@ -423,7 +428,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                       style: TextStyle(
                         fontSize: 10.sp, // 날짜 숫자
                         fontWeight: FontWeight.bold,
-                        color: isToday ? Colors.white : Colors.black87,  // 흰색 글씨
+                        color: isToday ? colorScheme.onPrimary : colorScheme.onSurface,  // 흰색 글씨
                       ),
                     ),
                     SizedBox(height: 1.h),
@@ -431,7 +436,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                       _getWeekdayChar(DateTime(year, month, day > (DateTime(year, month + 1, 0).day) ? DateTime(year, month + 1, 0).day : day)),
                       style: TextStyle(
                         fontSize: 8.sp, // 요일
-                        color: isToday ? Colors.white : Colors.grey.shade600,  // 흰색 글씨
+                        color: isToday ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,  // 흰색 글씨
                       ),
                     ),
                   ],
@@ -461,6 +466,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
     // 현재 줄의 날짜 개수
     final dayCount = endDay - startDay + 1;
     final actualLastDay = DateTime(year, month + 1, 0).day;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return TableRow(
       children: [
@@ -469,14 +475,14 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
           height: 34.h, // 근무 행 높이 (줄임)
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: Colors.grey.shade50,
+            color: colorScheme.surfaceVariant,
           ),
           child: Text(
             team,
             style: TextStyle(
               fontSize: 9.sp, // 조 이름 (줄임)
               fontWeight: FontWeight.bold,
-              color: Colors.indigo,
+              color: colorScheme.primary,
             ),
           ),
         ),
@@ -488,7 +494,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
           Container(
             height: 34.h,
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: colorScheme.surfaceVariant,
             ),
           ),
       ],
@@ -507,14 +513,14 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
       height: 34.h, // 근무 행 높이 (줄임)
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: _getShiftColor(shift, schedule),
+        color: _getShiftColor(shift, schedule, context),
       ),
       child: Text(
         displayText,
         style: TextStyle(
           fontSize: 10.sp, // 근무명 텍스트
           fontWeight: FontWeight.w600,
-          color: _getShiftTextColor(shift, schedule),
+          color: _getShiftTextColor(shift, schedule, context),
         ),
       ),
     );

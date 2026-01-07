@@ -179,13 +179,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                               width: 20.w,
                               height: 20.h,
                               decoration: BoxDecoration(
-                                color: Colors.red,
+                                color: Theme.of(context).colorScheme.error,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 Icons.close,
                                 size: 14.sp,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                               ),
                             ),
                           ),
@@ -205,7 +205,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                   icon: Icon(Icons.add),
                   label: Text('추가'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.blue,
+                    foregroundColor: Theme.of(context).colorScheme.secondary,
                   ),
                 ),
               ],
@@ -264,13 +264,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                               width: 20.w,
                               height: 20.h,
                               decoration: BoxDecoration(
-                                color: Colors.red,
+                                color: Theme.of(context).colorScheme.error,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 Icons.close,
                                 size: 14.sp,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                               ),
                             ),
                           ),
@@ -290,7 +290,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                   icon: Icon(Icons.add),
                   label: Text('추가'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.blue,
+                    foregroundColor: Theme.of(context).colorScheme.secondary,
                   ),
                 ),
               ],
@@ -343,8 +343,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                   });
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isSelected ? Colors.blue.shade700 : null,
-                  foregroundColor: isSelected ? Colors.white : null,
+                  backgroundColor: isSelected ? Theme.of(context).colorScheme.secondary : null,
+                  foregroundColor: isSelected ? Theme.of(context).colorScheme.onSecondary : null,
                   elevation: isSelected ? 2 : null,
                 ),
                 child: Text(name),
@@ -398,11 +398,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           SizedBox(height: 4.h),
           Text(
             'ex) 주간, 주간, 휴무, 휴무, 야간, 야간, 휴무, 휴무 ...',
-            style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade800),
+            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           Text(
             '(한번 더 탭하면 삭제됩니다)',
-            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700),
+            style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 12.h),
           
@@ -431,7 +431,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     return Center(
       child: Text(
         '패턴 없음',
-        style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+        style: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
   }
@@ -457,10 +457,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               },
         child: Container(
           decoration: BoxDecoration(
-            color: isSelected ? Colors.blue : Colors.grey.shade200,
+            color: isSelected ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
-              color: isSelected ? Colors.blue : Colors.grey,
+              color: isSelected ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.outline,
               width: 2,
             ),
           ),
@@ -474,12 +474,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     '${index + 1}',
                     style: TextStyle(
                       fontSize: 9.sp,  // ⭐ 번호도 살짝 축소 (10.sp → 9.sp)
-                      color: isSelected ? Colors.white70 : Colors.grey.shade600,
+                      color: isSelected ? Theme.of(context).colorScheme.onSecondary.withOpacity(0.7) : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ),
               ),
-              
+
               Expanded(
                 child: Center(
                   child: Text(
@@ -487,7 +487,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     style: TextStyle(
                       fontSize: 11.sp,  // ⭐ 근무명 축소 (14.sp → 12.sp)
                       fontWeight: FontWeight.bold,
-                      color: isSelected ? Colors.white : Colors.black,
+                      color: isSelected ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.onSurface,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 1,  // ⭐ 1줄 강제
@@ -593,11 +593,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         ),
         Text(
           '각 근무당 최대 3개까지 설정 가능',
-          style: TextStyle(fontSize: 14.sp, color: Colors.black),
+          style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
         ),
         Text(
           '설정 탭에서도 설정 / 수정이 가능합니다',
-          style: TextStyle(fontSize: 14.sp, color: Colors.black),
+          style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
         ),
         SizedBox(height: 24.h),
         
@@ -639,10 +639,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
       onTap: () => _showAlarmTimeDialog(shift),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: alarms.isEmpty ? Colors.red.shade300 : Colors.black,
+            color: alarms.isEmpty ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.onSurface,
             width: 2,
           ),
         ),
@@ -666,7 +666,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                         '탭하여 설정',
                         style: TextStyle(
                           fontSize: 11.sp,
-                          color: Colors.grey,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       )
                     : Column(
@@ -1014,7 +1014,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           children: [
             Text(
               '고정 알람 3개까지 등록 가능',
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey),
+              style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
 
@@ -1024,9 +1024,9 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                 margin: EdgeInsets.only(bottom: 12.h),
                 padding: EdgeInsets.all(12.w),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: Theme.of(context).colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: Theme.of(context).colorScheme.outline),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1043,7 +1043,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.alarm, size: 20.sp, color: Colors.blue),
+                                Icon(Icons.alarm, size: 20.sp, color: Theme.of(context).colorScheme.secondary),
                                 SizedBox(width: 8.w),
                                 Text(
                                   '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
@@ -1055,7 +1055,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                         ),
                         Spacer(),
                         IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red, size: 20.sp),
+                          icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 20.sp),
                           onPressed: () {
                             setState(() {
                               _alarms.removeAt(entry.key);
@@ -1133,10 +1133,10 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.orange.shade50 : Colors.white,
+            color: isSelected ? Theme.of(context).colorScheme.tertiaryContainer : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
-              color: isSelected ? Colors.orange : Colors.grey.shade300,
+              color: isSelected ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.outline,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -1148,7 +1148,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,
-                  color: isSelected ? Colors.orange.shade800 : Colors.grey.shade600,
+                  color: isSelected ? Theme.of(context).colorScheme.onTertiaryContainer : Theme.of(context).colorScheme.onSurfaceVariant,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -1180,7 +1180,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
               builder: (context) => AlertDialog(
                 title: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                    Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.tertiary, size: 28),
                     SizedBox(width: 8),
                     Text('중복 알람'),
                   ],
@@ -1224,7 +1224,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
               builder: (context) => AlertDialog(
                 title: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                    Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.tertiary, size: 28),
                     SizedBox(width: 8),
                     Text('중복 알람'),
                   ],
@@ -1325,11 +1325,11 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                         height: 50.h,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: _isAM ? Colors.blue : Colors.grey.shade300,
+                            color: _isAM ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.outline,
                             width: _isAM ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(8.r),
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                         ),
                         child: Center(
                           child: Text(
@@ -1337,7 +1337,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.normal,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -1357,11 +1357,11 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                         height: 50.h,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: !_isAM ? Colors.blue : Colors.grey.shade300,
+                            color: !_isAM ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.outline,
                             width: !_isAM ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(8.r),
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                         ),
                         child: Center(
                           child: Text(
@@ -1369,7 +1369,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.normal,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -1388,8 +1388,8 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                   infiniteLoop: true,
                   itemHeight: 50.h,
                   itemWidth: (60.w).clamp(50.0, 80.0),
-                  textStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
-                  selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                  textStyle: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
                   onChanged: (value) {
                     setState(() {
                       if (_hour == 11 && value == 12) {
@@ -1402,8 +1402,8 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                   },
                   decoration: BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: Colors.grey.shade300),
-                      bottom: BorderSide(color: Colors.grey.shade300),
+                      top: BorderSide(color: Theme.of(context).colorScheme.outline),
+                      bottom: BorderSide(color: Theme.of(context).colorScheme.outline),
                     ),
                   ),
                 ),
@@ -1419,8 +1419,8 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                   infiniteLoop: true,
                   itemHeight: 50.h,
                   itemWidth: (60.w).clamp(50.0, 80.0),
-                  textStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
-                  selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                  textStyle: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
                   onChanged: (value) {
                     setState(() {
                       _minute = value;
@@ -1428,8 +1428,8 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                   },
                   decoration: BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: Colors.grey.shade300),
-                      bottom: BorderSide(color: Colors.grey.shade300),
+                      top: BorderSide(color: Theme.of(context).colorScheme.outline),
+                      bottom: BorderSide(color: Theme.of(context).colorScheme.outline),
                     ),
                   ),
                 ),
@@ -1598,8 +1598,8 @@ class _TappableNumberPickerState extends State<_TappableNumberPicker> {
                 child: Text(
                   _formatNumber(value),
                   style: isSelected
-                      ? (widget.selectedTextStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold))
-                      : (widget.textStyle ?? TextStyle(fontSize: 16.sp, color: Colors.grey)),
+                      ? (widget.selectedTextStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface))
+                      : (widget.textStyle ?? TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ),
               ),
             );

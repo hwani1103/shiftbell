@@ -141,24 +141,26 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
     }
   }
 
-  Color _getHistoryColor(AlarmHistory? history) {
-    if (history == null) return Colors.grey.shade400;
+  Color _getHistoryColor(AlarmHistory? history, BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    if (history == null) return colorScheme.outline;
 
     switch (history.dismissType) {
       case 'swiped':
         return Colors.green.shade600;
       case 'snoozed':
-        return Colors.orange.shade600;
+        return colorScheme.tertiary;
       case 'timeout':
-        return Colors.red.shade600;
+        return colorScheme.error;
       case 'cancelled_before_ring':
-        return Colors.purple.shade600;
+        return colorScheme.primary;
       default:
-        return Colors.grey.shade600;
+        return colorScheme.onSurfaceVariant;
     }
   }
 
   Future<void> _deleteAllHistory() async {
+    final colorScheme = Theme.of(context).colorScheme;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -172,7 +174,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
               style: TextStyle(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.bold,
-                color: Colors.red.shade700,
+                color: colorScheme.error,
               ),
             ),
             SizedBox(height: 12.h),
@@ -190,7 +192,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               '삭제',
-              style: TextStyle(color: Colors.red.shade700),
+              style: TextStyle(color: colorScheme.error),
             ),
           ),
         ],
@@ -218,13 +220,15 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
         title: Text('모든 알람 & 알람 이력'),
-        backgroundColor: Colors.white,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
-        foregroundColor: Colors.black,
+        foregroundColor: colorScheme.onSurface,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -238,14 +242,14 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                         Icon(
                           Icons.alarm_off,
                           size: 64.sp,
-                          color: Colors.grey.shade400,
+                          color: colorScheme.outline,
                         ),
                         SizedBox(height: 16.h),
                         Text(
                           '등록된 알람이 없습니다',
                           style: TextStyle(
                             fontSize: 16.sp,
-                            color: Colors.grey.shade600,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
@@ -259,7 +263,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                     final alarmWithHistory = _alarmsWithHistory[index];
                     final history = alarmWithHistory.latestHistory;
                     final historyText = _getHistoryText(history);
-                    final historyColor = _getHistoryColor(history);
+                    final historyColor = _getHistoryColor(history, context);
                     final isFuture = alarmWithHistory.isFuture;
 
                     return Card(
@@ -268,7 +272,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
                         side: BorderSide(
-                          color: isFuture ? Colors.indigo.shade200 : Colors.grey.shade300,
+                          color: isFuture ? colorScheme.primary.withOpacity(0.3) : colorScheme.outline,
                           width: 1,
                         ),
                       ),
@@ -287,7 +291,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,
-                                      color: isFuture ? Colors.indigo.shade700 : Colors.black87,
+                                      color: isFuture ? colorScheme.primary : colorScheme.onSurface,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -298,7 +302,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                       alarmWithHistory.shiftType!,
                                       style: TextStyle(
                                         fontSize: 12.sp,
-                                        color: Colors.grey.shade600,
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -316,7 +320,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                       '-',
                                       style: TextStyle(
                                         fontSize: 13.sp,
-                                        color: Colors.grey.shade400,
+                                        color: colorScheme.outline,
                                       ),
                                       textAlign: TextAlign.right,
                                     )

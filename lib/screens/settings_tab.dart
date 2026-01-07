@@ -41,7 +41,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('초기화', style: TextStyle(color: Colors.red)),
+            child: Text('초기화', style: TextStyle(color: colorScheme.error)),
           ),
         ],
       ),
@@ -92,7 +92,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.alarm, color: Colors.blue),
+            Icon(Icons.alarm, color: colorScheme.secondary),
             SizedBox(width: 8.w),
             Text('등록된 알람'),
           ],
@@ -107,7 +107,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               Container(
                 padding: EdgeInsets.all(12.w),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
+                  color: colorScheme.secondary,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Row(
@@ -124,7 +124,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 Center(
                   child: Padding(
                     padding: EdgeInsets.all(32.h),
-                    child: Text('등록된 알람이 없습니다', style: TextStyle(color: Colors.grey)),
+                    child: Text('등록된 알람이 없습니다', style: TextStyle(color: colorScheme.onSurfaceVariant)),
                   ),
                 )
               else
@@ -186,7 +186,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.history, color: Colors.purple),
+            Icon(Icons.history, color: colorScheme.primary),
             SizedBox(width: 8.w),
             Text('알람 이력'),
           ],
@@ -198,7 +198,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             ? Center(
                 child: Padding(
                   padding: EdgeInsets.all(32.h),
-                  child: Text('알람 이력이 없습니다', style: TextStyle(color: Colors.grey)),
+                  child: Text('알람 이력이 없습니다', style: TextStyle(color: colorScheme.onSurfaceVariant)),
                 ),
               )
             : SingleChildScrollView(
@@ -230,7 +230,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   content: Text('모든 알람 이력을 삭제할까요?'),
                   actions: [
                     TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('취소')),
-                    TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('삭제', style: TextStyle(color: Colors.red))),
+                    TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('삭제', style: TextStyle(color: colorScheme.error))),
                   ],
                 ),
               );
@@ -242,7 +242,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 );
               }
             },
-            child: Text('전체 삭제', style: TextStyle(color: Colors.red)),
+            child: Text('전체 삭제', style: TextStyle(color: colorScheme.error)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -315,6 +315,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final scheduleAsync = ref.watch(scheduleProvider);
 
     return GestureDetector(
@@ -349,9 +350,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // 현재 스케줄 정보
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Colors.indigo.shade200, width: 1.5),
+                  border: Border.all(color: colorScheme.primary, width: 1.5),
                 ),
                 child: Column(
                   children: [
@@ -359,7 +360,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                       decoration: BoxDecoration(
-                        color: Colors.indigo.shade50,
+                        color: colorScheme.primary,
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(10.r),
                           topRight: Radius.circular(10.r),
@@ -367,14 +368,14 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.calendar_month, color: Colors.indigo, size: 20.sp),
+                          Icon(Icons.calendar_month, color: colorScheme.primary, size: 20.sp),
                           SizedBox(width: 8.w),
                           Text(
                             '교대 근무 관리',
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.bold,
-                              color: Colors.indigo.shade700,
+                              color: colorScheme.primary,
                             ),
                           ),
                         ],
@@ -387,7 +388,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (schedule == null)
-                            Text('설정 안 됨', style: TextStyle(color: Colors.grey))
+                            Text('설정 안 됨', style: TextStyle(color: colorScheme.onSurfaceVariant))
                           else if (schedule.isRegular && schedule.pattern != null)
                             _buildPatternRow(schedule.pattern!)
                           else
@@ -396,7 +397,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                       ),
                     ),
                     // ⭐ 수정 | 초기화 버튼 나란히 배치
-                    Divider(height: 1, color: Colors.indigo.shade100),
+                    Divider(height: 1, color: colorScheme.primary),
                     IntrinsicHeight(
                       child: Row(
                         children: [
@@ -412,12 +413,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.edit, color: Colors.indigo.shade400, size: 16.sp),
+                                    Icon(Icons.edit, color: colorScheme.primary, size: 16.sp),
                                     SizedBox(width: 6.w),
                                     Text(
                                       '수정',
                                       style: TextStyle(
-                                        color: Colors.indigo.shade600,
+                                        color: colorScheme.primary,
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -428,7 +429,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                             ),
                           ),
                           // 구분선
-                          VerticalDivider(width: 1, color: Colors.indigo.shade100),
+                          VerticalDivider(width: 1, color: colorScheme.primary),
                           // 초기화 버튼
                           Expanded(
                             child: InkWell(
@@ -441,12 +442,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.refresh, color: Colors.red.shade400, size: 16.sp),
+                                    Icon(Icons.refresh, color: colorScheme.error, size: 16.sp),
                                     SizedBox(width: 6.w),
                                     Text(
                                       '초기화',
                                       style: TextStyle(
-                                        color: Colors.red.shade400,
+                                        color: colorScheme.error,
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -469,7 +470,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // 전체 교대조 근무표 작성 (규칙적 근무자만 표시)
               if (schedule?.isRegular == true)
                 ListTile(
-                  leading: Icon(Icons.groups, color: Colors.purple),
+                  leading: Icon(Icons.groups, color: colorScheme.primary),
                   title: Text('전체 교대조 근무표 작성'),
                   subtitle: Text('전체 조 구성 및 근무 패턴 설정'),
                   trailing: Icon(Icons.chevron_right),
@@ -478,7 +479,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // 알람음 관리
               ListTile(
-                leading: Icon(Icons.notifications_active, color: Colors.orange),
+                leading: Icon(Icons.notifications_active, color: colorScheme.tertiary),
                 title: Text('알람음 관리'),
                 subtitle: Text('소리+진동, 진동, 무음 설정'),
                 trailing: Icon(Icons.chevron_right),
@@ -487,7 +488,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // 모든 알람 & 알람 이력
               ListTile(
-                leading: Icon(Icons.alarm_on, color: Colors.indigo),
+                leading: Icon(Icons.alarm_on, color: colorScheme.primary),
                 title: Text('모든 알람 & 알람 이력'),
                 subtitle: Text('등록된 알람과 실행 이력 확인'),
                 trailing: Icon(Icons.chevron_right),
@@ -502,10 +503,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // ⭐ 모든 알람 완전 삭제
               ListTile(
-                leading: Icon(Icons.delete_forever, color: Colors.red.shade700),
+                leading: Icon(Icons.delete_forever, color: colorScheme.error),
                 title: Text(
                   '모든 알람 완전 삭제',
-                  style: TextStyle(color: Colors.red.shade700),
+                  style: TextStyle(color: colorScheme.error),
                 ),
                 subtitle: Text('등록된 모든 알람 삭제'),
                 trailing: Icon(Icons.chevron_right),
@@ -523,7 +524,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                             style: TextStyle(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.bold,
-                              color: Colors.red.shade700,
+                              color: colorScheme.error,
                             ),
                           ),
                           SizedBox(height: 12.h),
@@ -541,7 +542,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                           onPressed: () => Navigator.pop(context, true),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red.shade700,
-                            foregroundColor: Colors.white,
+                            foregroundColor: colorScheme.onPrimary,
                           ),
                           child: Text('완전 삭제', style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
@@ -620,7 +621,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // 도움말
               ListTile(
-                leading: Icon(Icons.help_outline, color: Colors.blue),
+                leading: Icon(Icons.help_outline, color: colorScheme.secondary),
                 title: Text('도움말'),
                 subtitle: Text('앱 사용법 안내'),
                 trailing: Icon(Icons.chevron_right),
@@ -650,7 +651,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       builder: (context) => AlertDialog(
         title: Row(
           children: [
-            Icon(Icons.help_outline, color: Colors.blue),
+            Icon(Icons.help_outline, color: colorScheme.secondary),
             SizedBox(width: 8.w),
             Text('도움말'),
           ],
@@ -722,14 +723,14 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               width: 24.w,
               height: 24.w,
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: colorScheme.secondary,
                 shape: BoxShape.circle,
               ),
               child: Center(
                 child: Text(
                   number,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     fontWeight: FontWeight.bold,
                     fontSize: 14.sp,
                   ),
@@ -753,7 +754,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             description,
             style: TextStyle(
               fontSize: 14.sp,
-              color: Colors.grey.shade700,
+              color: colorScheme.onSurfaceVariant,
               height: 1.5,
             ),
           ),
@@ -811,7 +812,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           '교대 패턴',
           style: TextStyle(
             fontSize: 12.sp,
-            color: Colors.grey.shade600,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
         SizedBox(height: 8.h),
@@ -824,21 +825,21 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: Colors.indigo.shade50,
+                  color: colorScheme.primary,
                   borderRadius: BorderRadius.circular(6.r),
-                  border: Border.all(color: Colors.indigo.shade200),
+                  border: Border.all(color: colorScheme.primary),
                 ),
                 child: Text(
                   pattern[i],
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: Colors.indigo.shade700,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),
               if (i < pattern.length - 1)
-                Icon(Icons.arrow_forward, size: 14.sp, color: Colors.grey.shade400),
+                Icon(Icons.arrow_forward, size: 14.sp, color: colorScheme.onSurfaceVariant),
             ],
           ],
         ),
@@ -855,7 +856,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           '근무명',
           style: TextStyle(
             fontSize: 12.sp,
-            color: Colors.grey.shade600,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
         SizedBox(height: 8.h),
@@ -865,16 +866,16 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           children: shiftTypes.map((type) => Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: Colors.indigo.shade50,
+              color: colorScheme.primary,
               borderRadius: BorderRadius.circular(6.r),
-              border: Border.all(color: Colors.indigo.shade200),
+              border: Border.all(color: colorScheme.primary),
             ),
             child: Text(
               type,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.indigo.shade700,
+                color: colorScheme.primary,
               ),
             ),
           )).toList(),
@@ -904,7 +905,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 height: 4.h,
                 margin: EdgeInsets.only(bottom: 16.h),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colorScheme.outline,
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
@@ -922,7 +923,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               if (schedule.isRegular && schedule.pattern != null)
                 Divider(height: 1),
               ListTile(
-                leading: Icon(Icons.edit, color: Colors.blue),
+                leading: Icon(Icons.edit, color: colorScheme.secondary),
                 title: Text('근무명 수정'),
                 subtitle: Text('근무 이름을 변경합니다'),
                 onTap: () {
@@ -932,7 +933,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ),
               Divider(height: 1),
               ListTile(
-                leading: Icon(Icons.palette, color: Colors.purple),
+                leading: Icon(Icons.palette, color: colorScheme.primary),
                 title: Text('근무명 색상 변경'),
                 subtitle: Text('근무별 색상을 변경합니다'),
                 onTap: () {
@@ -942,7 +943,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ),
               Divider(height: 1),
               ListTile(
-                leading: Icon(Icons.alarm, color: Colors.orange),
+                leading: Icon(Icons.alarm, color: colorScheme.tertiary),
                 title: Text('고정 알람 수정'),
                 subtitle: Text('근무별 알람 시간을 변경합니다'),
                 onTap: () {
@@ -987,7 +988,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                child: CircularProgressIndicator(strokeWidth: 2, color: colorScheme.surface),
               ),
               SizedBox(width: 12),
               Text('스케줄 변경 중...'),
@@ -1362,7 +1363,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text('다시 작성', style: TextStyle(color: Colors.purple)),
+              child: Text('다시 작성', style: TextStyle(color: colorScheme.primary)),
             ),
           ],
         ),
@@ -1458,7 +1459,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       padding: EdgeInsets.all(20.w),
@@ -1499,9 +1500,9 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: colorScheme.surfaceVariant,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: colorScheme.outline),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1521,7 +1522,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               if (type.isSound)
                 Text(
                   ' (진동 포함)',
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
                 ),
             ],
           ),
@@ -1578,7 +1579,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       children: [
         SizedBox(
           width: 50.w,
-          child: Text(label, style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
+          child: Text(label, style: TextStyle(fontSize: 13.sp, color: colorScheme.onSurfaceVariant)),
         ),
         Expanded(
           child: Slider(
@@ -1651,7 +1652,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       children: [
         SizedBox(
           width: 50.w,
-          child: Text('알람음', style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
+          child: Text('알람음', style: TextStyle(fontSize: 13.sp, color: colorScheme.onSurfaceVariant)),
         ),
         Expanded(
           child: Row(
@@ -1663,13 +1664,13 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                   child: Container(
                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colorScheme.surface,
                       borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(color: Colors.grey.shade300),
+                      border: Border.all(color: colorScheme.outline),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.music_note, size: 18.sp, color: Colors.orange),
+                        Icon(Icons.music_note, size: 18.sp, color: colorScheme.tertiary),
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
@@ -1677,7 +1678,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                             style: TextStyle(fontSize: 13.sp),
                           ),
                         ),
-                        Icon(Icons.arrow_drop_down, color: Colors.grey),
+                        Icon(Icons.arrow_drop_down, color: colorScheme.onSurfaceVariant),
                       ],
                     ),
                   ),
@@ -1734,7 +1735,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
             maxHeight: MediaQuery.of(context).size.height * 0.5,  // 화면의 50% 높이
           ),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
           ),
           child: SafeArea(
@@ -1817,7 +1818,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       children: [
         SizedBox(
           width: 50.w,
-          child: Text('세기', style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
+          child: Text('세기', style: TextStyle(fontSize: 13.sp, color: colorScheme.onSurfaceVariant)),
         ),
         Expanded(
           child: Row(
@@ -1880,7 +1881,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       children: [
         SizedBox(
           width: 50.w,
-          child: Text('시간', style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade700)),
+          child: Text('시간', style: TextStyle(fontSize: 13.sp, color: colorScheme.onSurfaceVariant)),
         ),
         Expanded(
           child: Row(
@@ -2092,7 +2093,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                   ),
                   Text(
                     '각 근무당 최대 3개까지 설정 가능',
-                    style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                    style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
                   ),
                   SizedBox(height: 16.h),
                   // ⭐ shrinkWrap으로 카드 크기에 맞게 조절
@@ -2136,7 +2137,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
       onTap: () => _showAlarmEditDialog(shift),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: alarms.isEmpty ? Colors.red.shade300 : Colors.black,
@@ -2161,7 +2162,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                         '탭하여 설정',
                         style: TextStyle(
                           fontSize: 11.sp,
-                          color: Colors.grey,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       )
                     : Column(
@@ -2287,7 +2288,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
           children: [
             Text(
               '고정 알람 3개까지 등록 가능',
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey),
+              style: TextStyle(fontSize: 13.sp, color: colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
 
@@ -2297,9 +2298,9 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                 margin: EdgeInsets.only(bottom: 12.h),
                 padding: EdgeInsets.all(12.w),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: colorScheme.surfaceVariant,
                   borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: colorScheme.outline),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2315,7 +2316,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.alarm, size: 20.sp, color: Colors.blue),
+                                Icon(Icons.alarm, size: 20.sp, color: colorScheme.secondary),
                                 SizedBox(width: 8.w),
                                 Text(
                                   '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
@@ -2327,7 +2328,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                         ),
                         Spacer(),
                         IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red, size: 20.sp),
+                          icon: Icon(Icons.delete, color: colorScheme.error, size: 20.sp),
                           onPressed: () {
                             setState(() {
                               _alarms.removeAt(entry.key);
@@ -2448,7 +2449,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
               builder: (context) => AlertDialog(
                 title: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                    Icon(Icons.warning_amber_rounded, color: colorScheme.tertiary, size: 28),
                     SizedBox(width: 8),
                     Text('중복 알람'),
                   ],
@@ -2492,7 +2493,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
               builder: (context) => AlertDialog(
                 title: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                    Icon(Icons.warning_amber_rounded, color: colorScheme.tertiary, size: 28),
                     SizedBox(width: 8),
                     Text('중복 알람'),
                   ],
@@ -2599,7 +2600,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                             width: _isAM ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(8.r),
-                          color: Colors.white,
+                          color: colorScheme.surface,
                         ),
                         child: Center(
                           child: Text(
@@ -2631,7 +2632,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                             width: !_isAM ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(8.r),
-                          color: Colors.white,
+                          color: colorScheme.surface,
                         ),
                         child: Center(
                           child: Text(
@@ -2657,7 +2658,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                   infiniteLoop: true,
                   itemHeight: 50.h,
                   itemWidth: (60.w).clamp(50.0, 80.0),
-                  textStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  textStyle: TextStyle(fontSize: 16.sp, color: colorScheme.onSurfaceVariant),
                   selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
                   onChanged: (value) {
                     setState(() {
@@ -2671,8 +2672,8 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                   },
                   decoration: BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: Colors.grey.shade300),
-                      bottom: BorderSide(color: Colors.grey.shade300),
+                      top: BorderSide(color: colorScheme.outline),
+                      bottom: BorderSide(color: colorScheme.outline),
                     ),
                   ),
                 ),
@@ -2687,7 +2688,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                   infiniteLoop: true,
                   itemHeight: 50.h,
                   itemWidth: (60.w).clamp(50.0, 80.0),
-                  textStyle: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  textStyle: TextStyle(fontSize: 16.sp, color: colorScheme.onSurfaceVariant),
                   selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
                   onChanged: (value) {
                     setState(() {
@@ -2696,8 +2697,8 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                   },
                   decoration: BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: Colors.grey.shade300),
-                      bottom: BorderSide(color: Colors.grey.shade300),
+                      top: BorderSide(color: colorScheme.outline),
+                      bottom: BorderSide(color: colorScheme.outline),
                     ),
                   ),
                 ),
@@ -2867,7 +2868,7 @@ class _TappableNumberPickerState extends State<_TappableNumberPicker> {
                   _formatNumber(value),
                   style: isSelected
                       ? (widget.selectedTextStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold))
-                      : (widget.textStyle ?? TextStyle(fontSize: 16.sp, color: Colors.grey)),
+                      : (widget.textStyle ?? TextStyle(fontSize: 16.sp, color: colorScheme.onSurfaceVariant)),
                 ),
               ),
             );
@@ -2925,7 +2926,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
             SizedBox(height: 8.h),
             Text(
               '패턴에서 오늘 근무를 선택하세요',
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
+              style: TextStyle(fontSize: 13.sp, color: colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
 
@@ -3033,7 +3034,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
                 },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
+            foregroundColor: colorScheme.onPrimary,
           ),
           child: Text('변경'),
         ),
@@ -3130,7 +3131,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
-            foregroundColor: Colors.white,
+            foregroundColor: colorScheme.onPrimary,
           ),
           child: Text('저장'),
         ),

@@ -123,37 +123,39 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {  // ⭐ 변경
 
 Color _getShiftBackgroundColor(String shift, ShiftSchedule? schedule) {
   if (shift == '미설정' || shift.isEmpty) return Colors.transparent;
-  
+
   final colorValue = schedule?.shiftColors?[shift];
-  
+
   if (colorValue != null) {
     // ⭐ 휴무는 더 진한 빨강
     if (shift.contains('휴')) {
       return Color(colorValue);  // 0xFFEF5350 그대로 사용
     }
-    
+
     // ⭐ 나머지는 팔레트 색상 그대로
     return Color(colorValue);
   }
-  
-  return Colors.grey.shade100;
+
+  final colorScheme = Theme.of(context).colorScheme;
+  return colorScheme.surfaceVariant;
 }
 
   // calendar_tab.dart의 _getShiftTextColor() 함수 수정
 
 Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
   if (shift == '미설정' || shift.isEmpty) return Colors.transparent;
-  
+
   final colorValue = schedule?.shiftColors?[shift];
-  
+
   if (colorValue != null) {
     final bgColor = Color(colorValue);
-    
+
     // ⭐ 신규: 자동 계산
     return ShiftSchedule.getTextColor(bgColor);
   }
-  
-  return Colors.grey.shade700;
+
+  final colorScheme = Theme.of(context).colorScheme;
+  return colorScheme.onSurfaceVariant;
 }
 
   @override
@@ -284,10 +286,10 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
+                                color: Theme.of(context).colorScheme.surfaceVariant,
                                 borderRadius: BorderRadius.circular(8.r),
                                 border: Border.all(
-                                  color: Colors.grey.shade300,
+                                  color: Theme.of(context).colorScheme.outline,
                                   width: 1,
                                 ),
                               ),
@@ -297,7 +299,7 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.normal,
-                                    color: Colors.black,
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ),
@@ -378,7 +380,7 @@ Widget build(BuildContext context) {
                                           style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                                         ),
                                         SizedBox(width: 4.w),
-                                        Icon(Icons.arrow_drop_down, size: 24.sp, color: Colors.grey.shade700),
+                                        Icon(Icons.arrow_drop_down, size: 24.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                                       ],
                                     ),
                                   ),
@@ -398,15 +400,15 @@ Widget build(BuildContext context) {
                                         padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                                         margin: EdgeInsets.only(right: 8.w),
                                         decoration: BoxDecoration(
-                                          color: Colors.indigo.shade50,
+                                          color: Theme.of(context).colorScheme.primaryContainer,
                                           borderRadius: BorderRadius.circular(6.r),
-                                          border: Border.all(color: Colors.indigo.shade200, width: 0.8),
+                                          border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3), width: 0.8),
                                         ),
                                         child: Text(
                                           '전체근무표',
                                           style: TextStyle(
                                             fontSize: 11.sp,
-                                            color: Colors.indigo.shade700,
+                                            color: Theme.of(context).colorScheme.onPrimaryContainer,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -423,15 +425,15 @@ Widget build(BuildContext context) {
                                     child: Container(
                                       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                                       decoration: BoxDecoration(
-                                        color: Colors.indigo.shade50,
+                                        color: Theme.of(context).colorScheme.primaryContainer,
                                         borderRadius: BorderRadius.circular(6.r),
-                                        border: Border.all(color: Colors.indigo.shade200, width: 0.8),
+                                        border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3), width: 0.8),
                                       ),
                                       child: Text(
                                         'today',
                                         style: TextStyle(
                                           fontSize: 11.sp,
-                                          color: Colors.indigo.shade700,
+                                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -468,8 +470,8 @@ Widget build(BuildContext context) {
 
                       daysOfWeekHeight: 28.h,
                       daysOfWeekStyle: DaysOfWeekStyle(
-                        weekdayStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
-                        weekendStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black),
+                        weekdayStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+                        weekendStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
                       ),
 
                       calendarStyle: CalendarStyle(
@@ -477,24 +479,24 @@ Widget build(BuildContext context) {
                         cellPadding: EdgeInsets.all(0),
 
                         tableBorder: TableBorder.all(
-                          color: Colors.black,
+                          color: Theme.of(context).colorScheme.outline,
                           width: 0.3,
                         ),
 
-                        defaultTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
-                        weekendTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
-                        outsideTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.grey),
+                        defaultTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
+                        weekendTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
+                        outsideTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurfaceVariant),
 
                         todayDecoration: BoxDecoration(
                           color: Colors.transparent,  // ⭐ 배경 제거, 날짜 숫자만 표시
                         ),
-                        todayTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.black),
+                        todayTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
 
                         selectedDecoration: BoxDecoration(
-                          color: Colors.blueAccent.withOpacity(_isMultiSelectMode ? 0.3 : 1.0),
+                          color: Theme.of(context).colorScheme.secondary.withOpacity(_isMultiSelectMode ? 0.3 : 1.0),
                           shape: BoxShape.circle,
                         ),
-                        selectedTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white),
+                        selectedTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSecondary),
                       ),
 
                       calendarBuilders: CalendarBuilders(
@@ -595,8 +597,8 @@ Widget build(BuildContext context) {
                                   decoration: BoxDecoration(
                                     color: Theme.of(context).scaffoldBackgroundColor,
                                     border: Border(
-                                      top: BorderSide(color: Colors.black, width: 0.3),
-                                      left: BorderSide(color: Colors.black, width: 0.3),
+                                      top: BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.3),
+                                      left: BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.3),
                                     ),
                                   ),
                                 ),
@@ -627,8 +629,8 @@ Widget build(BuildContext context) {
                           Text('탭하여 날짜 추가 선택', style: TextStyle(fontSize: 10.sp)),
                         ],
                       ),
-                      backgroundColor: Colors.grey.shade200,
-                      foregroundColor: Colors.black,
+                      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
                       elevation: 3,
                     ),
                   ),
@@ -660,17 +662,22 @@ Widget build(BuildContext context) {
 
     final isHoliday = _getHolidayName(day) != null;  // ⭐ 공휴일 체크
 
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     Color dateColor;
     if (isSunday || isHoliday) {  // ⭐ 일요일 또는 공휴일
-      dateColor = isOutside ? Colors.red.withOpacity(0.3) : Colors.red;
+      dateColor = isOutside
+          ? (isDarkMode ? Colors.red.shade300.withOpacity(0.5) : Colors.red.withOpacity(0.3))
+          : (isDarkMode ? Colors.red.shade300 : Colors.red);
     } else {
-      dateColor = isOutside ? Colors.grey : Colors.black;
+      dateColor = isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : colorScheme.onSurface;
     }
 
     return Container(
       decoration: BoxDecoration(
         color: isSelected && _isMultiSelectMode
-            ? Colors.blue.withOpacity(0.2)
+            ? Theme.of(context).colorScheme.secondary.withOpacity(0.2)
             : Colors.transparent,
       ),
       padding: EdgeInsets.only(left: 2.w, right: 2.w, top: 2.h),  // ⭐ 모든 날짜 동일한 padding
@@ -692,7 +699,7 @@ Widget build(BuildContext context) {
                     : BorderRadius.circular(3.r),
                 // ⭐ 패턴과 다른 경우 좌측에 검정 세로 줄 표시
                 border: isModified
-                    ? Border(left: BorderSide(color: Colors.black, width: 3))
+                    ? Border(left: BorderSide(color: Theme.of(context).colorScheme.onSurface, width: 3))
                     : null,
               ),
               child: Center(
@@ -737,7 +744,9 @@ Widget build(BuildContext context) {
                               style: TextStyle(
                                 fontSize: 9.sp,
                                 fontWeight: FontWeight.w600,
-                                color: isOutside ? Colors.red.withOpacity(0.3) : Colors.red,
+                                color: isOutside
+                                    ? (isDarkMode ? Colors.red.shade300.withOpacity(0.5) : Colors.red.withOpacity(0.3))
+                                    : (isDarkMode ? Colors.red.shade300 : Colors.red),
                               ),
                             ),
                           ),
@@ -756,7 +765,7 @@ Widget build(BuildContext context) {
                           padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
                           decoration: shouldHighlightToday
                               ? BoxDecoration(
-                                  color: (isSunday || isHoliday) ? Colors.lime.shade300 : Colors.indigo.shade500,
+                                  color: (isSunday || isHoliday) ? Colors.lime.shade300 : Theme.of(context).colorScheme.primary,
                                   borderRadius: BorderRadius.circular(4.r),
                                 )
                               : null,
@@ -767,7 +776,7 @@ Widget build(BuildContext context) {
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: shouldHighlightToday
-                                  ? ((isSunday || isHoliday) ? Colors.red : Colors.white)
+                                  ? ((isSunday || isHoliday) ? (isDarkMode ? Colors.red.shade700 : Colors.red) : Theme.of(context).colorScheme.onPrimary)
                                   : dateColor,
                               height: 1.0,
                             ),
@@ -789,8 +798,8 @@ Widget build(BuildContext context) {
                               margin: EdgeInsets.only(bottom: 0.5.h),
                               padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
-                                border: Border.all(color: Colors.grey.shade400, width: 0.3),
+                                color: colorScheme.surfaceVariant,
+                                border: Border.all(color: colorScheme.outline, width: 0.3),
                                 borderRadius: BorderRadius.circular(2.r),
                               ),
                               child: Text(
@@ -798,7 +807,7 @@ Widget build(BuildContext context) {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 8.sp,  // ⭐ 7 → 8 (살짝 크게)
-                                  color: Colors.black,
+                                  color: colorScheme.onSurface,
                                   fontWeight: FontWeight.w500,
                                   height: 1.0,
                                 ),
@@ -879,33 +888,33 @@ Widget build(BuildContext context) {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text('근무 :', style: TextStyle(fontSize: 16.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                          Text('근무 :', style: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
                           SizedBox(width: 8.w),
                           if (isModified) ...[
                             Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text('기존', style: TextStyle(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w500)),
+                                Text('기존', style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
                                 SizedBox(height: 4.h),
                                 Container(
                                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                                   decoration: BoxDecoration(
-                                    color: Colors.grey.shade400,
+                                    color: Theme.of(context).colorScheme.surfaceVariant,
                                     borderRadius: BorderRadius.circular(8.r),
-                                    border: Border.all(color: Colors.grey.shade600, width: 1.5),
+                                    border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1.5),
                                   ),
-                                  child: Text(patternShift, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.grey.shade800)),
+                                  child: Text(patternShift, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurfaceVariant)),
                                 ),
                               ],
                             ),
                             Padding(
                               padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 16.h),
-                              child: Icon(Icons.arrow_forward, color: Colors.grey.shade700, size: 18.sp),
+                              child: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18.sp),
                             ),
                             Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text('현재', style: TextStyle(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w500)),
+                                Text('현재', style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
                                 SizedBox(height: 4.h),
                                 Container(
                                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
@@ -934,7 +943,7 @@ Widget build(BuildContext context) {
                       SizedBox(height: 16.h),
 
                       // ⭐ 고정 알람
-                      Text('고정 알람 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                      Text('고정 알람 :', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
                       SizedBox(height: 8.h),
                       Consumer(
                         builder: (context, ref, child) {
@@ -942,7 +951,7 @@ Widget build(BuildContext context) {
 
                           return alarmsAsync.when(
                             loading: () => SizedBox(height: 20.h, width: 20.w, child: CircularProgressIndicator(strokeWidth: 2)),
-                            error: (_, __) => Text('오류', style: TextStyle(fontSize: 14.sp, color: Colors.red)),
+                            error: (_, __) => Text('오류', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.error)),
                             data: (allAlarms) {
                               final dayStr = day.toIso8601String().split('T')[0];
                               final fixedAlarms = allAlarms
@@ -950,7 +959,7 @@ Widget build(BuildContext context) {
                                   .toList();
 
                               if (fixedAlarms.isEmpty) {
-                                return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Colors.grey));
+                                return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
                               }
 
                               return Row(
@@ -963,9 +972,9 @@ Widget build(BuildContext context) {
                                         margin: EdgeInsets.only(right: alarm != fixedAlarms.last ? 8.w : 0),
                                         padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
                                         decoration: BoxDecoration(
-                                          color: Colors.blue.shade50,
+                                          color: Theme.of(context).colorScheme.secondaryContainer,
                                           borderRadius: BorderRadius.circular(8.r),
-                                          border: Border.all(color: Colors.blue.shade200),
+                                          border: Border.all(color: Theme.of(context).colorScheme.secondary.withOpacity(0.3)),
                                         ),
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
@@ -975,13 +984,13 @@ Widget build(BuildContext context) {
                                               children: [
                                                 Text(typeInfo['emoji']!, style: TextStyle(fontSize: 14.sp)),
                                                 SizedBox(width: 4.w),
-                                                Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.blue.shade900)),
+                                                Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer)),
                                               ],
                                             ),
                                             SizedBox(height: 4.h),
                                             Text(
                                               typeInfo['label']!,
-                                              style: TextStyle(fontSize: 10.sp, color: Colors.blue.shade700),
+                                              style: TextStyle(fontSize: 10.sp, color: Theme.of(context).colorScheme.onSecondaryContainer),
                                             ),
                                           ],
                                         ),
@@ -1006,20 +1015,20 @@ Widget build(BuildContext context) {
                           return Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('메모 :', style: TextStyle(fontSize: 14.sp, color: Colors.black87, fontWeight: FontWeight.w600)),
+                              Text('메모 :', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
                               SizedBox(width: 8.w),
                               Expanded(
                                 child: isFull
                                     ? Container(
                                         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                                         decoration: BoxDecoration(
-                                          color: Colors.grey.shade200,
+                                          color: Theme.of(context).colorScheme.surfaceVariant,
                                           borderRadius: BorderRadius.circular(8.r),
-                                          border: Border.all(color: Colors.grey.shade300),
+                                          border: Border.all(color: Theme.of(context).colorScheme.outline),
                                         ),
                                         child: Text(
                                           '메모는 3개만 등록 가능합니다',
-                                          style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+                                          style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                                         ),
                                       )
                                     : TextField(
@@ -1028,15 +1037,15 @@ Widget build(BuildContext context) {
                                         scrollPhysics: BouncingScrollPhysics(),
                                         decoration: InputDecoration(
                                           hintText: '메모 입력',
-                                          hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400),
+                                          hintStyle: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6)),
                                           contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                                           border: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(8.r),
-                                            borderSide: BorderSide(color: Colors.grey.shade300),
+                                            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                                           ),
                                           focusedBorder: OutlineInputBorder(
                                             borderRadius: BorderRadius.circular(8.r),
-                                            borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
+                                            borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
                                           ),
                                         ),
                                         style: TextStyle(fontSize: 14.sp),
@@ -1057,12 +1066,12 @@ Widget build(BuildContext context) {
                                         Navigator.of(context).pop(memoController.text.trim());
                                       },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.blue.shade600,
+                                  backgroundColor: Theme.of(context).colorScheme.secondary,
                                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                                   minimumSize: Size(0, 0),
                                 ),
-                                child: Text('저장', style: TextStyle(fontSize: 13.sp, color: Colors.white)),
+                                child: Text('저장', style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSecondary)),
                               ),
                             ],
                           );
@@ -1088,9 +1097,9 @@ Widget build(BuildContext context) {
                                     width: double.infinity,
                                     margin: EdgeInsets.only(bottom: 8.h),
                                     decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
+                                      color: Theme.of(context).colorScheme.surfaceVariant,
                                       borderRadius: BorderRadius.circular(8.r),
-                                      border: Border.all(color: Colors.grey.shade300),
+                                      border: Border.all(color: Theme.of(context).colorScheme.outline),
                                     ),
                                     child: Row(
                                       children: [
@@ -1106,7 +1115,7 @@ Widget build(BuildContext context) {
                                                 memo.memoText,
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(fontSize: 14.sp, color: Colors.black87),
+                                                style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
                                               ),
                                             ),
                                           ),
@@ -1121,7 +1130,7 @@ Widget build(BuildContext context) {
                                             child: Icon(
                                               Icons.delete,
                                               size: 18.sp,
-                                              color: Colors.red,
+                                              color: Theme.of(context).colorScheme.error,
                                             ),
                                           ),
                                         ),
@@ -1194,7 +1203,7 @@ Widget build(BuildContext context) {
               children: [
                 Text(
                   '${alarm.time} 알람',
-                  style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+                  style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 SizedBox(height: 16.h),
                 Row(
@@ -1245,7 +1254,7 @@ Widget build(BuildContext context) {
             // ⭐ 삭제 버튼
             TextButton(
               onPressed: () => _showDeleteAlarmConfirmation(alarm, parentSetState),
-              child: Text('삭제', style: TextStyle(color: Colors.red, fontSize: 14.sp)),
+              child: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 14.sp)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -1284,9 +1293,9 @@ Widget build(BuildContext context) {
                 parentSetState(() {});
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.shade600,
+                backgroundColor: Theme.of(context).colorScheme.error,
               ),
-              child: Text('삭제', style: TextStyle(color: Colors.white)),
+              child: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
             ),
           ],
         );
@@ -1359,10 +1368,10 @@ Widget build(BuildContext context) {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12.h),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.indigo.shade50 : Colors.grey.shade50,
+            color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
-              color: isSelected ? Colors.indigo.shade400 : Colors.grey.shade300,
+              color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -1371,7 +1380,7 @@ Widget build(BuildContext context) {
               Icon(
                 icon,
                 size: 24.sp,
-                color: isSelected ? Colors.indigo.shade500 : Colors.grey.shade400,
+                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               SizedBox(height: 4.h),
               Text(
@@ -1379,7 +1388,7 @@ Widget build(BuildContext context) {
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.indigo.shade700 : Colors.grey.shade600,
+                  color: isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -1600,15 +1609,15 @@ Widget build(BuildContext context) {
                         textAlignVertical: TextAlignVertical.top,
                         decoration: InputDecoration(
                           hintText: '메모 내용...',
-                          hintStyle: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400),
+                          hintStyle: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6)),
                           contentPadding: EdgeInsets.all(12.w),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
+                            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
+                            borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
                           ),
                         ),
                         style: TextStyle(fontSize: 14.sp),
@@ -1622,13 +1631,13 @@ Widget build(BuildContext context) {
                           width: double.infinity,
                           padding: EdgeInsets.all(12.w),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
+                            color: Theme.of(context).colorScheme.surfaceVariant,
                             borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(color: Colors.grey.shade200),
+                            border: Border.all(color: Theme.of(context).colorScheme.outline),
                           ),
                           child: Text(
                             memo.memoText,
-                            style: TextStyle(fontSize: 14.sp, color: Colors.black87, height: 1.5),
+                            style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface, height: 1.5),
                           ),
                         ),
                       ),
@@ -1646,7 +1655,7 @@ Widget build(BuildContext context) {
                       editController.text = memo.memoText;
                     });
                   },
-                  child: Text('취소', style: TextStyle(color: Colors.grey.shade600)),
+                  child: Text('취소', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -1669,8 +1678,8 @@ Widget build(BuildContext context) {
                       Navigator.of(context).pop();
                     }
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade600),
-                  child: Text('저장', style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary),
+                  child: Text('저장', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
                 ),
               ] else ...[
                 // ⭐ 보기 모드 버튼 - 바로 삭제 (확인 팝업 제거)
@@ -1684,7 +1693,7 @@ Widget build(BuildContext context) {
                       Navigator.of(context).pop();
                     }
                   },
-                  child: Text('삭제', style: TextStyle(color: Colors.red.shade600)),
+                  child: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.error)),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -1692,8 +1701,8 @@ Widget build(BuildContext context) {
                       isEditing = true;
                     });
                   },
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade600),
-                  child: Text('수정', style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary),
+                  child: Text('수정', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
                 ),
               ],
             ],
