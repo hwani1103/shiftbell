@@ -902,11 +902,11 @@ Future<void> _saveAndFinish() async {
     }
   }
 
-  // ⭐ 초기 탭 결정 (알람 생성 후이므로 무조건 알람이 있음 -> 다음알람탭)
+  // ⭐ 온보딩 완료 후 무조건 달력탭으로 이동
   if (mounted) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => MainScreen(initialIndex: 0),  // 알람탭
+        builder: (context) => MainScreen(initialIndex: 1),  // 달력탭
       ),
     );
   }
