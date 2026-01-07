@@ -465,7 +465,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // ⭐ Production 섹션
               // 전체 교대조 근무표 작성 (규칙적 근무자만 표시)
-              if (schedule.isRegular)
+              if (schedule?.isRegular == true)
                 ListTile(
                   leading: Icon(Icons.groups, color: Colors.purple),
                   title: Text('전체 교대조 근무표 작성'),
