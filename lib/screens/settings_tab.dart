@@ -14,6 +14,7 @@ import '../models/alarm_type.dart';
 import '../models/shift_schedule.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'all_teams_setup_dialog.dart';
+import 'memo_list_view.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
@@ -570,19 +571,27 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 },
               ),
 
+              // ⭐ 구분선 (부가 기능 섹션)
               SizedBox(height: 24.h),
               Divider(),
-              SizedBox(height: 8.h),
 
-              // ⭐ 도움말 & 정보 섹션
-              Text(
-                '도움말 & 정보',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade600,
-                ),
+              // 메모 모아보기
+              ListTile(
+                leading: Icon(Icons.note_outlined, color: Colors.amber.shade700),
+                title: Text('메모 모아보기'),
+                subtitle: Text('전체 메모 확인 및 검색'),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MemoListView()),
+                  );
+                },
               ),
+
+              // ⭐ 구분선 (도움말 섹션)
+              SizedBox(height: 24.h),
+              Divider(),
               SizedBox(height: 8.h),
 
               // 도움말
