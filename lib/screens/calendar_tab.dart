@@ -461,13 +461,13 @@ Widget build(BuildContext context) {
                             Expanded(
                               flex: 5,
                               child: Container(
-                                margin: EdgeInsets.only(
-                                  top: 0.3,     // 상단 테두리 유지
-                                  left: 0.3,    // 좌측 테두리 유지
-                                  right: -0.3,  // 우측 테두리 덮음
-                                  bottom: -0.3, // 하단 테두리 덮음
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).scaffoldBackgroundColor,
+                                  border: Border(
+                                    top: BorderSide(color: Colors.black, width: 0.3),
+                                    left: BorderSide(color: Colors.black, width: 0.3),
+                                  ),
                                 ),
-                                color: Theme.of(context).scaffoldBackgroundColor,
                               ),
                             ),
                           ],
