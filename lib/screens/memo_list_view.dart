@@ -136,7 +136,10 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                     ),
                   )
                 : ListView.builder(
-                    padding: EdgeInsets.only(bottom: 16.h),
+                    // ⭐ 하단 네비게이션 바 영역 고려한 패딩
+                    padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).padding.bottom + 16.h,
+                    ),
                     itemCount: sortedYears.length,
                     itemBuilder: (context, yearIndex) {
                       final year = sortedYears[yearIndex];
