@@ -166,8 +166,8 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
   }
 
   // ⭐ 6번째 줄 여부 판단 (해당 날짜가 6번째 줄에 있는지)
-  bool _isSixthRow(DateTime day) {
-    final firstDayOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
+  bool _isSixthRow(DateTime day, DateTime focusedMonth) {
+    final firstDayOfMonth = DateTime(focusedMonth.year, focusedMonth.month, 1);
 
     int daysFromSunday;
     if (firstDayOfMonth.weekday == 7) {
@@ -184,8 +184,8 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
   }
 
   // ⭐ 6번째 줄 화~토(col 2~6) 여부 판단
-  bool _isSixthRowEmptyCell(DateTime day) {
-    if (!_isSixthRow(day)) return false;
+  bool _isSixthRowEmptyCell(DateTime day, DateTime focusedMonth) {
+    if (!_isSixthRow(day, focusedMonth)) return false;
 
     // 요일 체크: 화(2) ~ 토(6)
     final weekday = day.weekday;
@@ -368,21 +368,21 @@ Widget build(BuildContext context) {
                       calendarBuilders: CalendarBuilders(
                         defaultBuilder: (context, day, focusedDay) {
                           // ⭐ 6번째 줄 화~토는 빈 Container
-                          if (_isSixthRowEmptyCell(day)) {
+                          if (_isSixthRowEmptyCell(day, focusedDay)) {
                             return Container();
                           }
                           return _buildDateCell(day, false, false, schedule);
                         },
                         outsideBuilder: (context, day, focusedDay) {
                           // ⭐ 6번째 줄 화~토는 빈 Container
-                          if (_isSixthRowEmptyCell(day)) {
+                          if (_isSixthRowEmptyCell(day, focusedDay)) {
                             return Container();
                           }
                           return _buildDateCell(day, false, true, schedule);
                         },
                         todayBuilder: (context, day, focusedDay) {
                           // ⭐ 6번째 줄 화~토는 빈 Container
-                          if (_isSixthRowEmptyCell(day)) {
+                          if (_isSixthRowEmptyCell(day, focusedDay)) {
                             return Container();
                           }
                           final isOutsideMonth = day.month != _focusedDay.month || day.year != _focusedDay.year;
@@ -390,7 +390,7 @@ Widget build(BuildContext context) {
                         },
                         selectedBuilder: (context, day, focusedDay) {
                           // ⭐ 6번째 줄 화~토는 빈 Container
-                          if (_isSixthRowEmptyCell(day)) {
+                          if (_isSixthRowEmptyCell(day, focusedDay)) {
                             return Container();
                           }
                           return _buildDateCell(day, isSameDay(day, DateTime.now()), false, schedule, isSelected: true);
@@ -404,7 +404,7 @@ Widget build(BuildContext context) {
                         }
 
                         // ⭐ 6번째 줄 빈 칸은 탭 무시
-                        if (_isSixthRowEmptyCell(selectedDay)) {
+                        if (_isSixthRowEmptyCell(selectedDay, focusedDay)) {
                           return;
                         }
 
@@ -426,7 +426,7 @@ Widget build(BuildContext context) {
                         }
 
                         // ⭐ 6번째 줄 빈 칸은 길게 누르기 무시
-                        if (_isSixthRowEmptyCell(selectedDay)) {
+                        if (_isSixthRowEmptyCell(selectedDay, focusedDay)) {
                           return;
                         }
 
