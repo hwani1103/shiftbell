@@ -1457,6 +1457,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -1976,6 +1977,7 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
       title: Text('근무명 수정'),
       content: SingleChildScrollView(
@@ -2076,6 +2078,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
         title: Text('고정 알람 수정'),
@@ -2279,6 +2282,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
       title: Text('${widget.shift} 고정 알람'),
       content: SingleChildScrollView(
@@ -2568,6 +2572,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Dialog(
       child: Container(
         padding: EdgeInsets.all(24.w),
@@ -2835,6 +2840,7 @@ class _TappableNumberPickerState extends State<_TappableNumberPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       height: widget.itemHeight * 3,
       width: widget.itemWidth,
@@ -2901,6 +2907,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final today = DateTime.now();
     final dateText = '${today.month}/${today.day}';
 
@@ -3072,6 +3079,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
       title: Text('근무명 색상 변경'),
       content: SizedBox(
@@ -3176,6 +3184,7 @@ class _ColorPickerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     // 팔레트 19색 + 빨강(휴무용) = 총 20색
     final colors = [
       ...ShiftSchedule.shiftPalette,
