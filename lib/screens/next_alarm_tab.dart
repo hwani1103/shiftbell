@@ -85,9 +85,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
       child: Scaffold(
         backgroundColor: Colors.grey.shade50,
         body: nextAlarmAsync.when(
-          loading: () => Center(
-            child: CircularProgressIndicator(color: Colors.indigo),
-          ),
+          loading: () => const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
           error: (error, stack) => _buildEmptyState(),
           data: (nextAlarm) {
             if (nextAlarm == null) {

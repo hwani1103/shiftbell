@@ -322,8 +322,8 @@ Widget build(BuildContext context) {
   final scheduleAsync = ref.watch(scheduleProvider);
   
   return scheduleAsync.when(
-    loading: () => Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+    loading: () => const Scaffold(
+      body: SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
     ),
     error: (error, stack) => Scaffold(
       body: Center(child: Text('에러 발생: $error')),

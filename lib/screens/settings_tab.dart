@@ -338,7 +338,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           ),
         ),
         body: scheduleAsync.when(
-        loading: () => Center(child: CircularProgressIndicator()),
+        loading: () => const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
         error: (error, stack) => Center(child: Text('에러 발생: $error')),
         data: (schedule) {
           return ListView(
