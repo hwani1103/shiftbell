@@ -453,24 +453,26 @@ Widget build(BuildContext context) {
                         left: 6.w,
                         right: 6.w,
                         height: 83.h,
-                        child: Row(
-                          children: [
-                            // 일요일 + 월요일 칸 (비워둠)
-                            Expanded(flex: 2, child: SizedBox()),
-                            // 화~토 칸 (흰색으로 덮되 상단/좌측 테두리는 유지)
-                            Expanded(
-                              flex: 5,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).scaffoldBackgroundColor,
-                                  border: Border(
-                                    top: BorderSide(color: Colors.black, width: 0.3),
-                                    left: BorderSide(color: Colors.black, width: 0.3),
+                        child: IgnorePointer(  // ⭐ 제스처를 아래 TableCalendar로 전달
+                          child: Row(
+                            children: [
+                              // 일요일 + 월요일 칸 (비워둠)
+                              Expanded(flex: 2, child: SizedBox()),
+                              // 화~토 칸 (흰색으로 덮되 상단/좌측 테두리는 유지)
+                              Expanded(
+                                flex: 5,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).scaffoldBackgroundColor,
+                                    border: Border(
+                                      top: BorderSide(color: Colors.black, width: 0.3),
+                                      left: BorderSide(color: Colors.black, width: 0.3),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
