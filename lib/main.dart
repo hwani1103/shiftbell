@@ -18,6 +18,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/shift_schedule.dart';
 import 'providers/alarm_provider.dart';
 import 'providers/schedule_provider.dart';
+import 'providers/theme_provider.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,14 +41,14 @@ void main() async {
   );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  ConsumerState<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
   
   @override
@@ -93,6 +95,10 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
 
   @override
   Widget build(BuildContext context) {
+    // ⭐ 테마 상태 구독
+    final themeMode = ref.watch(themeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+
     return ScreenUtilInit(
       designSize: const Size(360, 780),
       minTextAdapt: true,
@@ -100,18 +106,19 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
       builder: (context, child) {
         return MaterialApp(
           title: '교대종',
-          theme: ThemeData.light().copyWith(
-            primaryColor: Colors.blue,
-          ),
+          // ⭐ 테마 적용
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
           // 모든 화면에 최대 너비 제한 적용
           builder: (context, child) {
             return Container(
-              color: Colors.grey.shade200,  // 넓은 화면에서 양옆 배경색
+              color: isDark ? Color(0xFF0A0A0A) : Colors.grey.shade200,  // 양옆 배경색 (다크모드 대응)
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: maxContentWidth),
                   child: Container(
-                    color: Colors.white,  // 컨텐츠 영역 배경
+                    color: isDark ? Color(0xFF000000) : Colors.white,  // 컨텐츠 영역 배경 (다크모드 대응)
                     child: child,
                   ),
                 ),

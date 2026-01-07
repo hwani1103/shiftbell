@@ -10,6 +10,7 @@ import '../services/alarm_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
+import '../providers/theme_provider.dart';
 import '../models/alarm_type.dart';
 import '../models/shift_schedule.dart';
 import 'package:numberpicker/numberpicker.dart';
@@ -574,6 +575,29 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // ⭐ 구분선 (부가 기능 섹션)
               SizedBox(height: 24.h),
               Divider(),
+
+              // 다크모드 토글
+              ListTile(
+                leading: Icon(
+                  ref.watch(themeProvider) == ThemeMode.dark
+                      ? Icons.dark_mode
+                      : Icons.light_mode,
+                  color: ref.watch(themeProvider) == ThemeMode.dark
+                      ? Colors.indigo.shade300
+                      : Colors.amber.shade700,
+                ),
+                title: Text('다크모드'),
+                subtitle: Text(
+                  ref.watch(themeProvider) == ThemeMode.dark ? '켜짐' : '꺼짐',
+                ),
+                trailing: Switch(
+                  value: ref.watch(themeProvider) == ThemeMode.dark,
+                  onChanged: (value) {
+                    ref.read(themeProvider.notifier).toggleTheme();
+                  },
+                  activeColor: Colors.lightBlue.shade400,
+                ),
+              ),
 
               // 메모 모아보기
               ListTile(
