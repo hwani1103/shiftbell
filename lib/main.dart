@@ -121,7 +121,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
           routes: {
             '/permission_intro': (context) => const PermissionIntroScreen(),
             '/onboarding': (context) => const OnboardingScreen(),
-            '/home': (context) => const MainScreen(),
+            // '/home' 경로는 제거 - InitialRouter에서 직접 MainScreen 생성
           },
         );
       },
@@ -129,79 +129,53 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
   }
 }
 
-class MainScreen extends ConsumerStatefulWidget {  // ⭐ ConsumerStatefulWidget으로 변경
-  const MainScreen({super.key});
+class MainScreen extends ConsumerStatefulWidget {
+  final int initialIndex;  // ⭐ 초기 탭 인덱스 받기
+  const MainScreen({super.key, required this.initialIndex});
 
   @override
-  ConsumerState<MainScreen> createState() => _MainScreenState();  // ⭐ ConsumerState로 변경
+  ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends ConsumerState<MainScreen> {  // ⭐ ConsumerState로 변경
-  int? _currentIndex;  // ⭐ null = 로딩 중
+class _MainScreenState extends ConsumerState<MainScreen> {
+  late int _currentIndex;  // ⭐ nullable 제거
   static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
 
   late final List<Widget> _tabs;
 
-  // main.dart - _MainScreenState
-@override
-void initState() {
-  super.initState();
+  @override
+  void initState() {
+    super.initState();
 
-  // ⭐ 탭 생성 (callback 전달)
-  _tabs = [
-    NextAlarmTab(onSwipeToCalendar: () => _goToCalendar()),
-    CalendarTab(),
-    SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
-  ];
+    // ⭐ 초기 탭 설정 (InitialRouter에서 결정한 값)
+    _currentIndex = widget.initialIndex;
 
-  _checkRefreshOnStart();
-  _scheduleGuardWakeup();
+    // ⭐ 탭 생성 (callback 전달)
+    _tabs = [
+      NextAlarmTab(onSwipeToCalendar: () => _goToCalendar()),
+      CalendarTab(),
+      SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
+    ];
 
-  // ⭐ Method Call Handler 등록
-  platform.setMethodCallHandler(_handleMethod);
+    _checkRefreshOnStart();
+    _scheduleGuardWakeup();
 
-  // ⭐ 5번 기능: 초기 탭 즉시 결정 (버벅임 제거)
-  _determineInitialTab();
+    // ⭐ Method Call Handler 등록
+    platform.setMethodCallHandler(_handleMethod);
 
-  // ⭐ 업데이트 체크 (2초 후 - UI 로딩 완료 후)
-  Future.delayed(const Duration(seconds: 2), () {
-    if (mounted) {
-      UpdateService.checkForUpdate(context);
-    }
-  });
-}
+    // ⭐ Provider 갱신 (백그라운드)
+    Future.microtask(() {
+      final container = ProviderScope.containerOf(context);
+      container.read(alarmNotifierProvider.notifier).refresh();
+    });
 
-Future<void> _determineInitialTab() async {
-  try {
-    // DB에서 직접 알람 읽기 (Provider 없이)
-    final db = await DatabaseService.instance.database;
-    final now = DateTime.now();
-    final result = await db.query(
-      'alarms',
-      where: 'date > ?',
-      whereArgs: [now.toIso8601String()],
-      limit: 1,
-    );
-
-    final hasFutureAlarm = result.isNotEmpty;
-
-    if (mounted) {
-      setState(() {
-        _currentIndex = hasFutureAlarm ? 0 : 1;  // 0: 다음알람, 1: 달력
-      });
-      print('✅ 초기 탭 결정: ${hasFutureAlarm ? "다음알람탭" : "달력탭"}');
-    }
-
-    // Provider 갱신은 별도로 (UI 블로킹 방지)
-    final container = ProviderScope.containerOf(context);
-    container.read(alarmNotifierProvider.notifier).refresh();
-  } catch (e) {
-    print('❌ 초기 탭 결정 실패: $e');
-    if (mounted) {
-      setState(() => _currentIndex = 1);  // 에러 시 달력탭
-    }
+    // ⭐ 업데이트 체크 (2초 후 - UI 로딩 완료 후)
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        UpdateService.checkForUpdate(context);
+      }
+    });
   }
-}
 
   // ⭐ 6번 기능: 달력탭으로 이동
   void _goToCalendar() {
@@ -261,13 +235,6 @@ Future<void> _handleMethod(MethodCall call) async {
   
   @override
   Widget build(BuildContext context) {
-    // ⭐ 로딩 중이면 100% 빈 화면 표시 (배경색만, 다크모드 대응)
-    if (_currentIndex == null) {
-      return Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      );
-    }
-
     return PopScope(
       canPop: _currentIndex == 1,  // 달력탭이면 앱 종료 허용
       onPopInvokedWithResult: (didPop, result) {
@@ -280,7 +247,7 @@ Future<void> _handleMethod(MethodCall call) async {
         body: Stack(
           children: [
             // 탭 화면
-            _tabs[_currentIndex!],
+            _tabs[_currentIndex],
             // ⭐ 권한 경고 배너 (하단에 오버레이)
             Positioned(
               bottom: 0,
@@ -291,7 +258,7 @@ Future<void> _handleMethod(MethodCall call) async {
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentIndex!,
+          currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.alarm), label: '다음알람'),
@@ -662,7 +629,8 @@ class _InitialRouterState extends State<InitialRouter> {
   }
 
   Future<void> _navigate() async {
-    // 스플래시 제거 - 바로 다음 화면으로
+    // ⭐ 0.2초 스플래시 유지 (런치 스크린과 동일한 화면)
+    await Future.delayed(const Duration(milliseconds: 200));
 
     if (!mounted) return;
 
@@ -674,18 +642,44 @@ class _InitialRouterState extends State<InitialRouter> {
     final schedule = await DatabaseService.instance.getShiftSchedule();
 
     // 3. 다음 화면 결정
-    String nextRoute;
-
     if (!permissionsRequested) {
-      nextRoute = '/permission_intro';
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/permission_intro');
+      }
     } else if (schedule == null) {
-      nextRoute = '/onboarding';
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/onboarding');
+      }
     } else {
-      nextRoute = '/home';
-    }
+      // ⭐ 홈 화면인 경우, 초기 탭 결정
+      int initialIndex = 1;  // 기본값: 달력탭
 
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed(nextRoute);
+      try {
+        // DB에서 미래 알람 확인
+        final db = await DatabaseService.instance.database;
+        final now = DateTime.now();
+        final result = await db.query(
+          'alarms',
+          where: 'date > ?',
+          whereArgs: [now.toIso8601String()],
+          limit: 1,
+        );
+
+        if (result.isNotEmpty) {
+          initialIndex = 0;  // 알람이 있으면 다음알람탭
+        }
+      } catch (e) {
+        print('❌ 초기 탭 결정 실패: $e');
+        // 에러 시 기본값(달력탭) 유지
+      }
+
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => MainScreen(initialIndex: initialIndex),
+          ),
+        );
+      }
     }
   }
 

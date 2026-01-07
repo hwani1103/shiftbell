@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../services/alarm_refresh_helper.dart';
+import '../main.dart';  // ⭐ MainScreen import
 
 // 알람 설정 (시간 + 타입)
 class AlarmSetting {
@@ -901,8 +902,13 @@ Future<void> _saveAndFinish() async {
     }
   }
 
+  // ⭐ 초기 탭 결정 (알람 생성 후이므로 무조건 알람이 있음 -> 다음알람탭)
   if (mounted) {
-    Navigator.of(context).pushReplacementNamed('/home');
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => MainScreen(initialIndex: 0),  // 알람탭
+      ),
+    );
   }
 }
 
