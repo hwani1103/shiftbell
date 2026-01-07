@@ -385,32 +385,33 @@ Widget build(BuildContext context) {
                             if (!_isMultiSelectMode)
                               Row(
                                 children: [
-                                  // ⭐ 전체근무표 버튼
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (context) => AllShiftsView()),
-                                      );
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                                      margin: EdgeInsets.only(right: 8.w),
-                                      decoration: BoxDecoration(
-                                        color: Colors.indigo.shade50,
-                                        borderRadius: BorderRadius.circular(6.r),
-                                        border: Border.all(color: Colors.indigo.shade200, width: 0.8),
-                                      ),
-                                      child: Text(
-                                        '전체근무표',
-                                        style: TextStyle(
-                                          fontSize: 11.sp,
-                                          color: Colors.indigo.shade700,
-                                          fontWeight: FontWeight.w600,
+                                  // ⭐ 전체근무표 버튼 (규칙적 근무자만 표시)
+                                  if (schedule.isRegular)
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => AllShiftsView()),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                                        margin: EdgeInsets.only(right: 8.w),
+                                        decoration: BoxDecoration(
+                                          color: Colors.indigo.shade50,
+                                          borderRadius: BorderRadius.circular(6.r),
+                                          border: Border.all(color: Colors.indigo.shade200, width: 0.8),
+                                        ),
+                                        child: Text(
+                                          '전체근무표',
+                                          style: TextStyle(
+                                            fontSize: 11.sp,
+                                            color: Colors.indigo.shade700,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
                                   // ⭐ today 버튼 (전체근무표와 동일 스타일)
                                   GestureDetector(
                                     onTap: () {

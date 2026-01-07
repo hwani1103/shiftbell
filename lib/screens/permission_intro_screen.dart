@@ -225,7 +225,12 @@ class PermissionIntroScreen extends StatelessWidget {
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28.sp),
             SizedBox(width: 8.w),
-            Text('일부 권한이 거부되었어요'),
+            Flexible(
+              child: Text(
+                '일부 권한이 거부되었어요',
+                style: TextStyle(fontSize: 16.sp),
+              ),
+            ),
           ],
         ),
         content: Column(

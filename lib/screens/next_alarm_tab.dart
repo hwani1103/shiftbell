@@ -194,14 +194,23 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     final minutes = totalMinutes % 60;
 
     String text;
-    if (hours > 0) {
-      if (minutes > 0) {
-        text = '${hours}시간 ${minutes}분 후';
+    // ⭐ 24시간 이상이면 일 단위로 표시
+    if (hours >= 24) {
+      final days = hours ~/ 24;
+      final remainingHours = hours % 24;
+      if (remainingHours > 0) {
+        text = '${days}일 ${remainingHours}시간 남았습니다';
       } else {
-        text = '${hours}시간 후';
+        text = '${days}일 남았습니다';
+      }
+    } else if (hours > 0) {
+      if (minutes > 0) {
+        text = '${hours}시간 ${minutes}분 남았습니다';
+      } else {
+        text = '${hours}시간 남았습니다';
       }
     } else {
-      text = '${minutes}분 후';
+      text = '${minutes}분 남았습니다';
     }
 
     return {

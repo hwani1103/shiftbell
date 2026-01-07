@@ -464,14 +464,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               SizedBox(height: 16.h),
 
               // ⭐ Production 섹션
-              // 전체 교대조 근무표 작성
-              ListTile(
-                leading: Icon(Icons.groups, color: Colors.purple),
-                title: Text('전체 교대조 근무표 작성'),
-                subtitle: Text('전체 조 구성 및 근무 패턴 설정'),
-                trailing: Icon(Icons.chevron_right),
-                onTap: _showAllTeamsSetupDialog,
-              ),
+              // 전체 교대조 근무표 작성 (규칙적 근무자만 표시)
+              if (schedule.isRegular)
+                ListTile(
+                  leading: Icon(Icons.groups, color: Colors.purple),
+                  title: Text('전체 교대조 근무표 작성'),
+                  subtitle: Text('전체 조 구성 및 근무 패턴 설정'),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: _showAllTeamsSetupDialog,
+                ),
 
               // 알람음 관리
               ListTile(

@@ -321,7 +321,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '실제 근무 패턴에 해당하는\n근무를 모두 선택해주세요',
+            '실제 근무 패턴에 포함되는\n근무명을 모두 선택해주세요',
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 24.h),
