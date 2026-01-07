@@ -116,10 +116,6 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {  // ⭐ 변경
   bool _isMultiSelectMode = false;
   Set<DateTime> _selectedDates = {};
 
-  // ⭐ 4번 기능: 헤더 슬라이더 드래그 상태
-  DateTime? _dragStartMonth;
-  double _dragOffset = 0;
-
   // _loadSchedule() 메서드 삭제 (Provider가 자동으로 관리)
   
   // 색상 메서드는 그대로 유지
@@ -202,7 +198,112 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
     final lastDay = DateTime(month.year, month.month + 1, 0).add(Duration(days: 7));
     ref.read(memoProvider.notifier).loadMemosForDateRange(firstDay, lastDay);
   }
-  
+
+  // ⭐ 4번 기능: 년/월 선택 다이얼로그
+  void _showMonthYearPicker() {
+    int selectedYear = _focusedDay.year;
+    int selectedMonth = _focusedDay.month;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('날짜 선택', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 년도 선택
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.chevron_left),
+                        onPressed: () => setState(() => selectedYear--),
+                      ),
+                      SizedBox(
+                        width: 100.w,
+                        child: Text(
+                          '$selectedYear년',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.chevron_right),
+                        onPressed: () => setState(() => selectedYear++),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.h),
+                  // 월 선택 (그리드)
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      mainAxisSpacing: 8.h,
+                      crossAxisSpacing: 8.w,
+                      childAspectRatio: 1.8,
+                    ),
+                    itemCount: 12,
+                    itemBuilder: (context, index) {
+                      final month = index + 1;
+                      final isSelected = month == selectedMonth;
+                      return GestureDetector(
+                        onTap: () => setState(() => selectedMonth = month),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isSelected ? Colors.indigo.shade500 : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(
+                              color: isSelected ? Colors.indigo.shade700 : Colors.grey.shade300,
+                              width: isSelected ? 2 : 1,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '$month월',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected ? Colors.white : Colors.black,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('취소'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    this.setState(() {
+                      _focusedDay = DateTime(selectedYear, selectedMonth, 1);
+                    });
+                    _loadMemosForMonth(_focusedDay);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.indigo.shade500,
+                  ),
+                  child: Text('이동', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
 Widget build(BuildContext context) {
   final scheduleAsync = ref.watch(scheduleProvider);
@@ -254,32 +355,18 @@ Widget build(BuildContext context) {
                                     ],
                                   )
                                 : GestureDetector(
-                                    // ⭐ 4번 기능: 헤더 슬라이더 (연속 드래그로 월 이동)
-                                    onHorizontalDragStart: (details) {
-                                      _dragStartMonth = _focusedDay;
-                                      _dragOffset = 0;
-                                    },
-                                    onHorizontalDragUpdate: (details) {
-                                      setState(() {
-                                        _dragOffset += details.delta.dx;
-                                        // 100픽셀당 1개월 이동 (빠르게 움직임)
-                                        final monthsDiff = (_dragOffset / 100).round();
-                                        _focusedDay = DateTime(
-                                          _dragStartMonth!.year,
-                                          _dragStartMonth!.month - monthsDiff,  // 우→좌 = -, 좌→우 = +
-                                          1,
-                                        );
-                                      });
-                                    },
-                                    onHorizontalDragEnd: (details) {
-                                      // 드래그 종료 시 메모 로드
-                                      _loadMemosForMonth(_focusedDay);
-                                      _dragStartMonth = null;
-                                      _dragOffset = 0;
-                                    },
-                                    child: Text(
-                                      '${_focusedDay.year}년 ${_focusedDay.month}월',
-                                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                    // ⭐ 4번 기능: 헤더 클릭으로 년/월 선택 다이얼로그
+                                    onTap: () => _showMonthYearPicker(),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '${_focusedDay.year}년 ${_focusedDay.month}월',
+                                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                        ),
+                                        SizedBox(width: 4.w),
+                                        Icon(Icons.arrow_drop_down, size: 24.sp, color: Colors.grey.shade700),
+                                      ],
                                     ),
                                   ),
                             if (!_isMultiSelectMode)

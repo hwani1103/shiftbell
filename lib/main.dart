@@ -137,7 +137,7 @@ class MainScreen extends ConsumerStatefulWidget {  // ⭐ ConsumerStatefulWidget
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {  // ⭐ ConsumerState로 변경
-  int _currentIndex = 1;  // ⭐ 기본값 (나중에 initState에서 변경됨)
+  int? _currentIndex;  // ⭐ null = 로딩 중
   static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
 
   late final List<Widget> _tabs;
@@ -160,46 +160,41 @@ void initState() {
   // ⭐ Method Call Handler 등록
   platform.setMethodCallHandler(_handleMethod);
 
-  // ⭐ 추가: 화면 진입 시 AlarmNotifier 갱신 + 초기 탭 결정
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
+  // ⭐ 5번 기능: 초기 탭 즉시 결정 (버벅임 제거)
+  _determineInitialTab();
+
+  // ⭐ 업데이트 체크 (2초 후 - UI 로딩 완료 후)
+  Future.delayed(const Duration(seconds: 2), () {
     if (mounted) {
-      try {
-        final container = ProviderScope.containerOf(context);
-        await container.read(alarmNotifierProvider.notifier).refresh();
-        print('✅ MainScreen 진입 - AlarmNotifier 갱신');
-
-        // ⭐ 5번 기능: 다음 알람 있으면 다음알람탭, 없으면 달력탭
-        // 갱신 후 잠시 대기 (Provider 업데이트 완료)
-        await Future.delayed(const Duration(milliseconds: 100));
-
-        if (mounted) {
-          final alarmsAsync = ref.read(alarmNotifierProvider);
-          alarmsAsync.whenData((alarms) {
-            final now = DateTime.now();
-            final hasFutureAlarm = alarms.any((a) => a.date != null && a.date!.isAfter(now));
-
-            if (hasFutureAlarm) {
-              // 다음 알람 있음 → 다음알람탭
-              setState(() => _currentIndex = 0);
-              print('✅ 다음 알람 있음 → 다음알람탭 표시');
-            } else {
-              // 다음 알람 없음 → 달력탭 (기본값 1 유지)
-              print('✅ 다음 알람 없음 → 달력탭 표시');
-            }
-          });
-        }
-      } catch (e) {
-        print('❌ AlarmNotifier 갱신 실패: $e');
-      }
+      UpdateService.checkForUpdate(context);
     }
+  });
+}
 
-    // ⭐ 업데이트 체크 (2초 후 - UI 로딩 완료 후)
-    Future.delayed(const Duration(seconds: 2), () {
+Future<void> _determineInitialTab() async {
+  try {
+    final container = ProviderScope.containerOf(context);
+    await container.read(alarmNotifierProvider.notifier).refresh();
+    print('✅ MainScreen 진입 - AlarmNotifier 갱신');
+
+    final alarmsAsync = ref.read(alarmNotifierProvider);
+    alarmsAsync.whenData((alarms) {
+      final now = DateTime.now();
+      final hasFutureAlarm = alarms.any((a) => a.date != null && a.date!.isAfter(now));
+
       if (mounted) {
-        UpdateService.checkForUpdate(context);
+        setState(() {
+          _currentIndex = hasFutureAlarm ? 0 : 1;  // 0: 다음알람, 1: 달력
+        });
+        print('✅ 초기 탭 결정: ${hasFutureAlarm ? "다음알람탭" : "달력탭"}');
       }
     });
-  });
+  } catch (e) {
+    print('❌ 초기 탭 결정 실패: $e');
+    if (mounted) {
+      setState(() => _currentIndex = 1);  // 에러 시 달력탭
+    }
+  }
 }
 
   // ⭐ 6번 기능: 달력탭으로 이동
@@ -260,6 +255,16 @@ Future<void> _handleMethod(MethodCall call) async {
   
   @override
   Widget build(BuildContext context) {
+    // ⭐ 로딩 중이면 빈 화면 표시 (버벅임 방지)
+    if (_currentIndex == null) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.indigo),
+        ),
+      );
+    }
+
     return PopScope(
       canPop: _currentIndex == 1,  // 달력탭이면 앱 종료 허용
       onPopInvokedWithResult: (didPop, result) {
@@ -272,7 +277,7 @@ Future<void> _handleMethod(MethodCall call) async {
         body: Stack(
           children: [
             // 탭 화면
-            _tabs[_currentIndex],
+            _tabs[_currentIndex!],
             // ⭐ 권한 경고 배너 (하단에 오버레이)
             Positioned(
               bottom: 0,
@@ -283,7 +288,7 @@ Future<void> _handleMethod(MethodCall call) async {
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentIndex,
+          currentIndex: _currentIndex!,
           onTap: (index) => setState(() => _currentIndex = index),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.alarm), label: '다음알람'),
