@@ -161,25 +161,33 @@ void initState() {
   platform.setMethodCallHandler(_handleMethod);
 
   // ⭐ 추가: 화면 진입 시 AlarmNotifier 갱신 + 초기 탭 결정
-  WidgetsBinding.instance.addPostFrameCallback((_) {
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
     if (mounted) {
       try {
         final container = ProviderScope.containerOf(context);
-        container.read(alarmNotifierProvider.notifier).refresh();
+        await container.read(alarmNotifierProvider.notifier).refresh();
         print('✅ MainScreen 진입 - AlarmNotifier 갱신');
 
         // ⭐ 5번 기능: 다음 알람 있으면 다음알람탭, 없으면 달력탭
-        final nextAlarmAsync = ref.read(nextAlarmProvider);
-        nextAlarmAsync.whenData((nextAlarm) {
-          if (nextAlarm != null) {
-            // 다음 알람 있음 → 다음알람탭
-            setState(() => _currentIndex = 0);
-            print('✅ 다음 알람 있음 → 다음알람탭 표시');
-          } else {
-            // 다음 알람 없음 → 달력탭 (기본값 1 유지)
-            print('✅ 다음 알람 없음 → 달력탭 표시');
-          }
-        });
+        // 갱신 후 잠시 대기 (Provider 업데이트 완료)
+        await Future.delayed(const Duration(milliseconds: 100));
+
+        if (mounted) {
+          final alarmsAsync = ref.read(alarmNotifierProvider);
+          alarmsAsync.whenData((alarms) {
+            final now = DateTime.now();
+            final hasFutureAlarm = alarms.any((a) => a.date != null && a.date!.isAfter(now));
+
+            if (hasFutureAlarm) {
+              // 다음 알람 있음 → 다음알람탭
+              setState(() => _currentIndex = 0);
+              print('✅ 다음 알람 있음 → 다음알람탭 표시');
+            } else {
+              // 다음 알람 없음 → 달력탭 (기본값 1 유지)
+              print('✅ 다음 알람 없음 → 달력탭 표시');
+            }
+          });
+        }
       } catch (e) {
         print('❌ AlarmNotifier 갱신 실패: $e');
       }

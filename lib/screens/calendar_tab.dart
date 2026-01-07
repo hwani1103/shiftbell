@@ -116,6 +116,10 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {  // ⭐ 변경
   bool _isMultiSelectMode = false;
   Set<DateTime> _selectedDates = {};
 
+  // ⭐ 4번 기능: 헤더 슬라이더 드래그 상태
+  DateTime? _dragStartMonth;
+  double _dragOffset = 0;
+
   // _loadSchedule() 메서드 삭제 (Provider가 자동으로 관리)
   
   // 색상 메서드는 그대로 유지
@@ -250,27 +254,28 @@ Widget build(BuildContext context) {
                                     ],
                                   )
                                 : GestureDetector(
-                                    // ⭐ 4번 기능: 헤더 빠른 스와이프 (월 고속 이동)
+                                    // ⭐ 4번 기능: 헤더 슬라이더 (연속 드래그로 월 이동)
+                                    onHorizontalDragStart: (details) {
+                                      _dragStartMonth = _focusedDay;
+                                      _dragOffset = 0;
+                                    },
+                                    onHorizontalDragUpdate: (details) {
+                                      setState(() {
+                                        _dragOffset += details.delta.dx;
+                                        // 100픽셀당 1개월 이동 (빠르게 움직임)
+                                        final monthsDiff = (_dragOffset / 100).round();
+                                        _focusedDay = DateTime(
+                                          _dragStartMonth!.year,
+                                          _dragStartMonth!.month - monthsDiff,  // 우→좌 = -, 좌→우 = +
+                                          1,
+                                        );
+                                      });
+                                    },
                                     onHorizontalDragEnd: (details) {
-                                      if (details.primaryVelocity != null) {
-                                        // 속도 기반 이동 개월 수 계산 (최소 1개월, 최대 12개월)
-                                        final velocity = details.primaryVelocity!;
-                                        final months = (velocity.abs() / 1000).clamp(1.0, 12.0).round();
-
-                                        if (velocity > 300) {
-                                          // 좌→우: 이전 달로 이동
-                                          setState(() {
-                                            _focusedDay = DateTime(_focusedDay.year, _focusedDay.month - months, 1);
-                                          });
-                                          _loadMemosForMonth(_focusedDay);
-                                        } else if (velocity < -300) {
-                                          // 우→좌: 다음 달로 이동
-                                          setState(() {
-                                            _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + months, 1);
-                                          });
-                                          _loadMemosForMonth(_focusedDay);
-                                        }
-                                      }
+                                      // 드래그 종료 시 메모 로드
+                                      _loadMemosForMonth(_focusedDay);
+                                      _dragStartMonth = null;
+                                      _dragOffset = 0;
                                     },
                                     child: Text(
                                       '${_focusedDay.year}년 ${_focusedDay.month}월',
