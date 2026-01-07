@@ -211,72 +211,77 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
           builder: (context, setState) {
             return AlertDialog(
               title: Text('날짜 선택', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 년도 선택
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.chevron_left),
-                        onPressed: () => setState(() => selectedYear--),
-                      ),
-                      SizedBox(
-                        width: 100.w,
-                        child: Text(
-                          '$selectedYear년',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // 년도 선택
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.chevron_left),
+                          onPressed: () => setState(() => selectedYear--),
                         ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.chevron_right),
-                        onPressed: () => setState(() => selectedYear++),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16.h),
-                  // 월 선택 (그리드)
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      mainAxisSpacing: 8.h,
-                      crossAxisSpacing: 8.w,
-                      childAspectRatio: 1.8,
-                    ),
-                    itemCount: 12,
-                    itemBuilder: (context, index) {
-                      final month = index + 1;
-                      final isSelected = month == selectedMonth;
-                      return GestureDetector(
-                        onTap: () => setState(() => selectedMonth = month),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isSelected ? Colors.indigo.shade500 : Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(
-                              color: isSelected ? Colors.indigo.shade700 : Colors.grey.shade300,
-                              width: isSelected ? 2 : 1,
-                            ),
+                        SizedBox(
+                          width: 100.w,
+                          child: Text(
+                            '$selectedYear년',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                           ),
-                          child: Center(
-                            child: Text(
-                              '$month월',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                                color: isSelected ? Colors.white : Colors.black,
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.chevron_right),
+                          onPressed: () => setState(() => selectedYear++),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+                    // 월 선택 (그리드) - 높이 명시
+                    SizedBox(
+                      height: 200.h,  // ⭐ 명시적 높이 (GridView shrinkWrap 에러 방지)
+                      child: GridView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 4,
+                          mainAxisSpacing: 8.h,
+                          crossAxisSpacing: 8.w,
+                          childAspectRatio: 1.8,
+                        ),
+                        itemCount: 12,
+                        itemBuilder: (context, index) {
+                          final month = index + 1;
+                          final isSelected = month == selectedMonth;
+                          return GestureDetector(
+                            onTap: () => setState(() => selectedMonth = month),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: isSelected ? Colors.indigo.shade500 : Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8.r),
+                                border: Border.all(
+                                  color: isSelected ? Colors.indigo.shade700 : Colors.grey.shade300,
+                                  width: isSelected ? 2 : 1,
+                                ),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '$month월',
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                    color: isSelected ? Colors.white : Colors.black,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(

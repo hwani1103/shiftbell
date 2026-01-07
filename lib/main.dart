@@ -173,22 +173,28 @@ void initState() {
 
 Future<void> _determineInitialTab() async {
   try {
+    // DB에서 직접 알람 읽기 (Provider 없이)
+    final db = await DatabaseService.instance.database;
+    final now = DateTime.now();
+    final result = await db.query(
+      'alarms',
+      where: 'date > ?',
+      whereArgs: [now.toIso8601String()],
+      limit: 1,
+    );
+
+    final hasFutureAlarm = result.isNotEmpty;
+
+    if (mounted) {
+      setState(() {
+        _currentIndex = hasFutureAlarm ? 0 : 1;  // 0: 다음알람, 1: 달력
+      });
+      print('✅ 초기 탭 결정: ${hasFutureAlarm ? "다음알람탭" : "달력탭"}');
+    }
+
+    // Provider 갱신은 별도로 (UI 블로킹 방지)
     final container = ProviderScope.containerOf(context);
-    await container.read(alarmNotifierProvider.notifier).refresh();
-    print('✅ MainScreen 진입 - AlarmNotifier 갱신');
-
-    final alarmsAsync = ref.read(alarmNotifierProvider);
-    alarmsAsync.whenData((alarms) {
-      final now = DateTime.now();
-      final hasFutureAlarm = alarms.any((a) => a.date != null && a.date!.isAfter(now));
-
-      if (mounted) {
-        setState(() {
-          _currentIndex = hasFutureAlarm ? 0 : 1;  // 0: 다음알람, 1: 달력
-        });
-        print('✅ 초기 탭 결정: ${hasFutureAlarm ? "다음알람탭" : "달력탭"}');
-      }
-    });
+    container.read(alarmNotifierProvider.notifier).refresh();
   } catch (e) {
     print('❌ 초기 탭 결정 실패: $e');
     if (mounted) {
