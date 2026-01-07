@@ -261,13 +261,11 @@ Future<void> _handleMethod(MethodCall call) async {
   
   @override
   Widget build(BuildContext context) {
-    // ⭐ 로딩 중이면 빈 화면 표시 (버벅임 방지)
+    // ⭐ 로딩 중이면 빈 화면 표시 (버벅임 방지, 다크모드 대응)
     if (_currentIndex == null) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.indigo),
-        ),
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: const SizedBox.shrink(),
       );
     }
 

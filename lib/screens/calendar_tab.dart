@@ -204,25 +204,43 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
     int selectedYear = _focusedDay.year;
     int selectedMonth = _focusedDay.month;
 
+    // ⭐ 달력 초기화 범위 확인 (3년 전후)
+    final minYear = DateTime.now().year - 3;
+    final maxYear = DateTime.now().year + 3;
+
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('날짜 선택', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+              // ⭐ 타이틀에 X 버튼 추가
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('날짜 선택', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+                  IconButton(
+                    icon: Icon(Icons.close, size: 24.sp),
+                    onPressed: () => Navigator.pop(context),
+                    padding: EdgeInsets.zero,
+                    constraints: BoxConstraints(),
+                  ),
+                ],
+              ),
               content: SizedBox(
                 width: double.maxFinite,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // 년도 선택
+                    // 년도 선택 (범위 제한)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         IconButton(
                           icon: Icon(Icons.chevron_left),
-                          onPressed: () => setState(() => selectedYear--),
+                          onPressed: selectedYear > minYear
+                              ? () => setState(() => selectedYear--)
+                              : null,
                         ),
                         SizedBox(
                           width: 100.w,
@@ -234,14 +252,16 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                         ),
                         IconButton(
                           icon: Icon(Icons.chevron_right),
-                          onPressed: () => setState(() => selectedYear++),
+                          onPressed: selectedYear < maxYear
+                              ? () => setState(() => selectedYear++)
+                              : null,
                         ),
                       ],
                     ),
                     SizedBox(height: 16.h),
-                    // 월 선택 (그리드) - 높이 명시
+                    // 월 선택 (그리드) - 탭하면 즉시 이동
                     SizedBox(
-                      height: 200.h,  // ⭐ 명시적 높이 (GridView shrinkWrap 에러 방지)
+                      height: 200.h,
                       child: GridView.builder(
                         physics: NeverScrollableScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -255,7 +275,14 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                           final month = index + 1;
                           final isSelected = month == selectedMonth;
                           return GestureDetector(
-                            onTap: () => setState(() => selectedMonth = month),
+                            // ⭐ 탭하면 즉시 이동
+                            onTap: () {
+                              this.setState(() {
+                                _focusedDay = DateTime(selectedYear, month, 1);
+                              });
+                              _loadMemosForMonth(_focusedDay);
+                              Navigator.pop(context);
+                            },
                             child: Container(
                               decoration: BoxDecoration(
                                 color: isSelected ? Colors.indigo.shade500 : Colors.grey.shade100,
@@ -283,25 +310,7 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                   ],
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('취소'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    this.setState(() {
-                      _focusedDay = DateTime(selectedYear, selectedMonth, 1);
-                    });
-                    _loadMemosForMonth(_focusedDay);
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.indigo.shade500,
-                  ),
-                  child: Text('이동', style: TextStyle(color: Colors.white)),
-                ),
-              ],
+              // ⭐ 액션 버튼 제거 (X 버튼으로 충분, 월 탭하면 즉시 이동)
             );
           },
         );
