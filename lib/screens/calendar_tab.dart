@@ -165,31 +165,42 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
     });
   }
 
-  // ⭐ 6번째 줄의 화요일(3번째 칸) 이후는 빈칸 처리
+  // ⭐ 6번째 줄 전체 숨김 (별도 렌더링)
   bool _shouldHideCell(DateTime day) {
-    // 현재 달의 1일
     final firstDayOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
 
-    // 달력의 시작 날짜 (1일이 속한 주의 일요일)
-    // firstDayOfMonth.weekday: 월=1, 화=2, ..., 일=7
     int daysFromSunday;
     if (firstDayOfMonth.weekday == 7) {
-      daysFromSunday = 0; // 일요일이면 0
+      daysFromSunday = 0;
     } else {
-      daysFromSunday = firstDayOfMonth.weekday; // 월=1, 화=2, ..., 토=6
+      daysFromSunday = firstDayOfMonth.weekday;
+    }
+
+    final calendarStart = firstDayOfMonth.subtract(Duration(days: daysFromSunday));
+    final dayIndex = day.difference(calendarStart).inDays;
+    final row = dayIndex ~/ 7;
+
+    // 6번째 줄 전체 숨김
+    return row >= 5;
+  }
+
+  // ⭐ 6번째 줄의 특정 날짜 가져오기 (일요일=0, 월요일=1)
+  DateTime? _getSixthRowDate(int col) {
+    final firstDayOfMonth = DateTime(_focusedDay.year, _focusedDay.month, 1);
+
+    int daysFromSunday;
+    if (firstDayOfMonth.weekday == 7) {
+      daysFromSunday = 0;
+    } else {
+      daysFromSunday = firstDayOfMonth.weekday;
     }
 
     final calendarStart = firstDayOfMonth.subtract(Duration(days: daysFromSunday));
 
-    // 현재 날짜가 달력 시작점으로부터 몇 번째 칸인지
-    final dayIndex = day.difference(calendarStart).inDays;
+    // 6번째 줄 시작 = 35일 후 (5주 * 7일)
+    final sixthRowStart = calendarStart.add(Duration(days: 35));
 
-    // row와 col 계산 (0-based)
-    final row = dayIndex ~/ 7;
-    final col = dayIndex % 7;
-
-    // 6번째 줄(row=5)의 3번째 칸(화요일, col=2) 이후
-    return row >= 5 && col >= 2;
+    return sixthRowStart.add(Duration(days: col));
   }
 
   // ⭐ 특정 달의 메모 미리 로드 (달력에 보이는 이전/다음 달 날짜 포함)
@@ -334,9 +345,9 @@ Widget build(BuildContext context) {
                       ),
                     ),
                     
-                    // 달력 (반응형 높이: 하단 AdMob 여백 확보)
+                    // ⭐ 달력 5줄 (6번째 줄은 아래 별도 렌더링)
                     SizedBox(
-                      height: 530.h,
+                      height: 443.h,  // 28.h (요일) + 83.h * 5 (5줄)
                       child: TableCalendar(
                         firstDay: DateTime(DateTime.now().year - 3, 1, 1),
                         lastDay: DateTime(DateTime.now().year + 3, 12, 31),
@@ -350,7 +361,7 @@ Widget build(BuildContext context) {
                         locale: 'ko_KR',
 
                         headerVisible: false,
-                        sixWeekMonthsEnforced: true,  // ⭐ 항상 6줄로 고정
+                        sixWeekMonthsEnforced: true,  // ⭐ 6줄 고정 (5줄만 표시하지만 구조 유지)
                         rowHeight: 83.h,
 
                         daysOfWeekHeight: 28.h,
@@ -444,6 +455,83 @@ Widget build(BuildContext context) {
                           // ⭐ 새 달의 메모 로드
                           _loadMemosForMonth(focusedDay);
                         },
+                      ),
+                    ),
+
+                    // ⭐ 6번째 줄 2칸 (일요일, 월요일만)
+                    SizedBox(
+                      height: 83.h,
+                      child: Row(
+                        children: [
+                          // 일요일 (0번 칸)
+                          Expanded(
+                            child: Builder(
+                              builder: (context) {
+                                final date = _getSixthRowDate(0);
+                                if (date == null) return Container();
+                                final isToday = isSameDay(date, DateTime.now());
+                                final isOutside = date.month != _focusedDay.month || date.year != _focusedDay.year;
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (!_isMultiSelectMode) {
+                                      _showDayDetailPopup(date, schedule);
+                                    } else {
+                                      _toggleDateSelection(date);
+                                    }
+                                  },
+                                  onLongPress: () {
+                                    if (!_isMultiSelectMode) {
+                                      _enterMultiSelectMode(date);
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.black, width: 0.3),
+                                    ),
+                                    child: _buildDateCell(date, isToday, isOutside, schedule),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          // 월요일 (1번 칸)
+                          Expanded(
+                            child: Builder(
+                              builder: (context) {
+                                final date = _getSixthRowDate(1);
+                                if (date == null) return Container();
+                                final isToday = isSameDay(date, DateTime.now());
+                                final isOutside = date.month != _focusedDay.month || date.year != _focusedDay.year;
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (!_isMultiSelectMode) {
+                                      _showDayDetailPopup(date, schedule);
+                                    } else {
+                                      _toggleDateSelection(date);
+                                    }
+                                  },
+                                  onLongPress: () {
+                                    if (!_isMultiSelectMode) {
+                                      _enterMultiSelectMode(date);
+                                    }
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.black, width: 0.3),
+                                    ),
+                                    child: _buildDateCell(date, isToday, isOutside, schedule),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          // 나머지 5칸은 빈 공간
+                          Expanded(child: Container()),
+                          Expanded(child: Container()),
+                          Expanded(child: Container()),
+                          Expanded(child: Container()),
+                          Expanded(child: Container()),
+                        ],
                       ),
                     ),
                   ],
