@@ -346,9 +346,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ‚≠ê Î
                   backgroundColor: isSelected ? Colors.blue.shade700 : null,
                   foregroundColor: isSelected ? Colors.white : null,
                   elevation: isSelected ? 2 : null,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                 ),
-                child: Text(name, style: TextStyle(fontSize: 14.sp)),
+                child: Text(name),
               );
             }).toList(),
           ),
