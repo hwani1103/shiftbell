@@ -557,42 +557,7 @@ Widget build(BuildContext context) {
       ),
     );
   }
-                  ],
-                ),
-              ),
-              
-              // 플로팅 버튼
-              if (_isMultiSelectMode && _selectedDates.isNotEmpty)
-                Positioned(
-                  bottom: 24.h,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: FloatingActionButton.extended(
-                      onPressed: () => _showBulkAssignSheet(schedule),
-                      icon: Icon(Icons.edit_calendar),
-                      label: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('근무 변경', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('탭하여 날짜 추가 선택', style: TextStyle(fontSize: 10.sp)),
-                        ],
-                      ),
-                      backgroundColor: Colors.grey.shade200,
-                      foregroundColor: Colors.black,
-                      elevation: 3,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  },
-  );
-}
-  
+
   Widget _buildDateCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, {bool isSelected = false}) {
     final shiftText = schedule.getShiftForDate(day);
     final patternShift = schedule.getPatternShiftForDate(day);
