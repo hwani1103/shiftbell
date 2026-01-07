@@ -73,6 +73,8 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         title: Text('메모 모아보기', style: TextStyle(fontSize: 18.sp)),
         elevation: 1,
       ),
