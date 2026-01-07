@@ -316,9 +316,11 @@ Widget build(BuildContext context) {
                   ),
 
                   // ⭐ 달력 (하나의 TableCalendar, 6줄 고정)
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w),
-                    child: TableCalendar(
+                  Stack(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 6.w),
+                        child: TableCalendar(
                       firstDay: DateTime(DateTime.now().year - 3, 1, 1),
                       lastDay: DateTime(DateTime.now().year + 3, 12, 31),
                       focusedDay: _focusedDay,
@@ -442,7 +444,36 @@ Widget build(BuildContext context) {
                         // ⭐ 새 달의 메모 로드
                         _loadMemosForMonth(focusedDay);
                       },
-                    ),
+                        ),
+                      ),
+
+                      // ⭐ 6번째 줄 화~토 테두리 제거 (흰색 덮개)
+                      Positioned(
+                        top: 28.h + 83.h * 5,  // 요일 헤더 + 5줄
+                        left: 6.w,
+                        right: 6.w,
+                        height: 83.h,
+                        child: Row(
+                          children: [
+                            // 일요일 + 월요일 칸 (비워둠)
+                            Expanded(flex: 2, child: SizedBox()),
+                            // 화~토 칸 (흰색으로 덮되 상단/좌측 테두리는 유지)
+                            Expanded(
+                              flex: 5,
+                              child: Container(
+                                margin: EdgeInsets.only(
+                                  top: 0.3,     // 상단 테두리 유지
+                                  left: 0.3,    // 좌측 테두리 유지
+                                  right: -0.3,  // 우측 테두리 덮음
+                                  bottom: -0.3, // 하단 테두리 덮음
+                                ),
+                                color: Theme.of(context).scaffoldBackgroundColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
