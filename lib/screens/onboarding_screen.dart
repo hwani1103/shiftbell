@@ -159,9 +159,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '근무 형태를 확인하세요\n없다면 추가 가능합니다 (7개까지, 4자 제한)',
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '근무 형태를 확인하세요\n없다면 추가 가능합니다',
+                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  '(7개까지 추가가능하며 4글자로 제한됩니다.)',
+                  style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+              ],
             ),
             SizedBox(height: 24.h),
             
@@ -244,9 +254,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '근무 형태를 확인하세요\n없다면 추가 가능합니다 (7개까지, 4자 제한)',
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '근무 형태를 확인하세요\n없다면 추가 가능합니다',
+                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  '(7개까지 추가가능하며 4글자로 제한됩니다.)',
+                  style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+              ],
             ),
             SizedBox(height: 24.h),
             
