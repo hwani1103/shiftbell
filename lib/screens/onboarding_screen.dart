@@ -52,22 +52,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Center(
-          child: Text('교대근무 스케줄 생성'),
+    return PopScope(
+      canPop: _step == 0,  // step 0에서만 앱 종료 허용
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _step > 0) {
+          // 앱이 종료되지 않았고 step > 0이면 이전 단계로
+          setState(() => _step--);
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Center(
+            child: Text('교대근무 스케줄 생성'),
+          ),
+          leading: _step > 0
+              ? IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () {
+                    setState(() => _step--);
+                  },
+                )
+              : SizedBox(width: 56.w),
         ),
-        leading: _step > 0
-            ? IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () {
-                  setState(() => _step--);
-                },
-              )
-            : SizedBox(width: 56.w),
-      ),
-      body: SafeArea(
-        child: _buildStep(),
+        body: SafeArea(
+          child: _buildStep(),
+        ),
       ),
     );
   }
@@ -151,7 +160,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '근무 형태를 확인하세요\n없다면 추가 가능합니다',
+              '근무 형태를 확인하세요\n없다면 추가 가능합니다 (7개까지, 4자 제한)',
               style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 24.h),
@@ -201,7 +210,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                 }),
                 
                 OutlinedButton.icon(
-                  onPressed: _customShiftTypes.length < 4 ? _showAddCustomDialog : null,
+                  onPressed: _customShiftTypes.length < 7 ? _showAddCustomDialog : null,
                   icon: Icon(Icons.add),
                   label: Text('추가'),
                   style: OutlinedButton.styleFrom(
@@ -236,7 +245,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '근무 형태를 확인하세요\n없다면 추가 가능합니다',
+              '근무 형태를 확인하세요\n없다면 추가 가능합니다 (7개까지, 4자 제한)',
               style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 24.h),
@@ -286,7 +295,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                 }),
                 
                 OutlinedButton.icon(
-                  onPressed: _customShiftTypes.length < 4 ? _showAddCustomDialog : null,
+                  onPressed: _customShiftTypes.length < 7 ? _showAddCustomDialog : null,
                   icon: Icon(Icons.add),
                   label: Text('추가'),
                   style: OutlinedButton.styleFrom(
