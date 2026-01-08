@@ -118,6 +118,17 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
     int failCount = 0;
 
     try {
+      // ⭐ 10일 이후 체크
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final targetDate = DateTime(date.year, date.month, date.day);
+      final daysDiff = targetDate.difference(today).inDays;
+
+      if (daysDiff >= 10) {
+        print('🔵 10일 이후 날짜라서 알람은 생성하지 않음 (날짜: ${date.toString().split(' ')[0]}, 근무: $shiftType)');
+        return;
+      }
+
       // 1단계: 기존 고정 알람 삭제 (개별 try-catch로 부분 실패 허용)
       // ⭐ 재생성 삭제는 이력 생성 안 함
       final existingAlarms = await DatabaseService.instance.getAlarmsByDate(date);
