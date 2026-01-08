@@ -479,8 +479,8 @@ Widget build(BuildContext context) {
                         cellPadding: EdgeInsets.all(0),
 
                         tableBorder: TableBorder.all(
-                          color: Theme.of(context).colorScheme.outline,
-                          width: 0.3,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
+                          width: 1.0,
                         ),
 
                         defaultTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
@@ -798,8 +798,15 @@ Widget build(BuildContext context) {
                               margin: EdgeInsets.only(bottom: 0.5.h),
                               padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
                               decoration: BoxDecoration(
-                                color: colorScheme.surfaceVariant,
-                                border: Border.all(color: colorScheme.outline, width: 0.3),
+                                color: isDarkMode
+                                  ? colorScheme.primary.withOpacity(0.3)
+                                  : colorScheme.surfaceVariant,
+                                border: Border.all(
+                                  color: isDarkMode
+                                    ? colorScheme.primary.withOpacity(0.5)
+                                    : colorScheme.outline,
+                                  width: 0.5
+                                ),
                                 borderRadius: BorderRadius.circular(2.r),
                               ),
                               child: Text(

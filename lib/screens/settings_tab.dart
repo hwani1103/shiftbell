@@ -834,7 +834,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
               ),
@@ -875,7 +875,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.primary,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
           )).toList(),
@@ -2613,7 +2613,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.normal,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -2645,7 +2645,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.normal,
-                              color: Colors.black,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),

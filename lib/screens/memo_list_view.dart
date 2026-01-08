@@ -170,7 +170,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                               style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
-                                color: colorScheme.primary,
+                                color: colorScheme.onPrimaryContainer,
                               ),
                             ),
                           ),

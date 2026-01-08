@@ -532,6 +532,8 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     // ⭐ 열기 전 최신 데이터 로드
     ref.read(alarmNotifierProvider.notifier).refresh();
 
+    if (!mounted) return;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

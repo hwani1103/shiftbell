@@ -124,9 +124,9 @@ class AppTheme {
 
     // Primary 색상 (밝은 색으로)
     colorScheme: ColorScheme.dark(
-      primary: Colors.lightBlue.shade400,
+      primary: Colors.lightBlue.shade300,
       onPrimary: Colors.black,
-      secondary: Colors.blue.shade300,
+      secondary: Colors.blue.shade200,
       onSecondary: Colors.black,
       tertiary: Colors.orange.shade400,
       onTertiary: Colors.black,
@@ -184,7 +184,7 @@ class AppTheme {
     // BottomNavigationBar
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Color(0xFF1A1A1A),
-      selectedItemColor: Colors.lightBlue.shade400,
+      selectedItemColor: Colors.lightBlue.shade300,
       unselectedItemColor: Colors.grey.shade500,
       elevation: 8,
     ),
@@ -199,7 +199,7 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.lightBlue.shade400, width: 2),
+        borderSide: BorderSide(color: Colors.lightBlue.shade300, width: 2),
       ),
       hintStyle: TextStyle(color: Colors.grey.shade600),
     ),
@@ -207,7 +207,7 @@ class AppTheme {
     // ElevatedButton
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.lightBlue.shade400,
+        backgroundColor: Colors.lightBlue.shade300,
         foregroundColor: Colors.black,
         elevation: 4,
         shape: RoundedRectangleBorder(
