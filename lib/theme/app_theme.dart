@@ -116,7 +116,7 @@ class AppTheme {
   );
 
   // ========================================
-  // 다크 테마 (완전 검정)
+  // 다크 테마 (푸른 밤하늘 인디고)
   // ========================================
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
@@ -130,20 +130,20 @@ class AppTheme {
       onSecondary: Colors.black,
       tertiary: Colors.orange.shade400,
       onTertiary: Colors.black,
-      surface: Color(0xFF1A1A1A), // 어두운 회색 (카드/다이얼로그)
+      surface: Color(0xFF121826), // 진한 인디고 (카드/다이얼로그)
       onSurface: Colors.white,
-      surfaceVariant: Color(0xFF2A2A2A),  // 약간 더 밝은 회색
+      surfaceVariant: Color(0xFF1A2332),  // 조금 밝은 인디고
       onSurfaceVariant: Color(0xFFB0B0B0),  // 밝은 회색 텍스트
-      background: Color(0xFF000000), // 완전 검정
+      background: Color(0xFF0A0E1A), // 진한 인디고 배경 (밤하늘)
       onBackground: Colors.white,
       error: Colors.red.shade400,
       onError: Colors.black,
-      outline: Color(0xFF3A3A3A),  // 어두운 테두리
+      outline: Color(0xFF2A3547),  // 인디고 테두리
     ),
 
     // AppBar
     appBarTheme: AppBarTheme(
-      backgroundColor: Color(0xFF000000),
+      backgroundColor: Color(0xFF0A0E1A),
       foregroundColor: Colors.white,
       elevation: 1,
       titleTextStyle: TextStyle(
@@ -155,21 +155,21 @@ class AppTheme {
     ),
 
     // Scaffold
-    scaffoldBackgroundColor: Color(0xFF000000),
+    scaffoldBackgroundColor: Color(0xFF0A0E1A),
 
     // Card
     cardTheme: CardThemeData(
-      color: Color(0xFF1A1A1A),
+      color: Color(0xFF121826),
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Color(0xFF2A2A2A), width: 1),
+        side: BorderSide(color: Color(0xFF1A2332), width: 1),
       ),
     ),
 
     // Dialog
     dialogTheme: DialogThemeData(
-      backgroundColor: Color(0xFF1A1A1A),
+      backgroundColor: Color(0xFF121826),
       titleTextStyle: TextStyle(
         color: Colors.white,
         fontSize: 20,
@@ -183,7 +183,7 @@ class AppTheme {
 
     // BottomNavigationBar
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: Color(0xFF1A1A1A),
+      backgroundColor: Color(0xFF121826),
       selectedItemColor: Colors.lightBlue.shade300,
       unselectedItemColor: Colors.grey.shade500,
       elevation: 8,
@@ -192,10 +192,10 @@ class AppTheme {
     // TextField
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Color(0xFF2A2A2A),
+      fillColor: Color(0xFF1A2332),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Color(0xFF3A3A3A)),
+        borderSide: BorderSide(color: Color(0xFF2A3547)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -218,13 +218,13 @@ class AppTheme {
 
     // ListTile
     listTileTheme: ListTileThemeData(
-      tileColor: Color(0xFF1A1A1A),
+      tileColor: Color(0xFF121826),
       textColor: Colors.white,
       iconColor: Colors.grey.shade400,
     ),
 
     // Divider
-    dividerColor: Color(0xFF2A2A2A),
+    dividerColor: Color(0xFF1A2332),
 
     // Icon
     iconTheme: IconThemeData(color: Colors.grey.shade400),
