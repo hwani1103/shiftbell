@@ -7,27 +7,28 @@ import 'package:flutter/material.dart';
 
 class ShiftSchedule {
 
-  // ⭐ 파스텔 팔레트 19색 (서로 구분되는 순서로 배치)
+  // ⭐ 개선된 팔레트 20색 (중복 제거, 신선한 색상 추가, 대비 최적화)
   static final List<Color> shiftPalette = [
     Color(0xFFB3E5FC), // 1. 하늘색 (Sky Blue) - 밝은 파랑
-    Color(0xFFCFD8DC), // 2. 청회색 (Blue Grey) - 차분한 회색
-    Color(0xFFD7CCC8), // 3. 베이지색 (Warm Beige) - 중립 톤
-    Color(0xFFB2DFDB), // 4. 민트색 (Mint Green) - 초록 계열
-    Color(0xFFE1BEE7), // 5. 보라색 (Lavender Purple) - 보라 계열
-    Color(0xFFFFF9C4), // 6. 노란색 (Sunny Yellow) - 밝은 노랑
-    Color(0xFFFFCCBC), // 7. 코랄색 (Coral) - 따뜻한 핑크/주황
-    Color(0xFFFFE0B2), // 8. 주황색 (Peach Orange) - 주황 계열
-    Color(0xFF1976D2), // 9. 진한 파랑 (Blue 700) - 어두운 파랑 (흰 글씨)
-    Color(0xFF388E3C), // 10. 진한 초록 (Green 700) - 어두운 초록 (흰 글씨)
-    Color(0xFFF8BBD0), // 11. 연한 핑크 (Pink 100) - 밝은 핑크
-    Color(0xFFDCE775), // 12. 라임 (Lime 300) - 연두색
-    Color(0xFFBCAAA4), // 13. 연한 갈색 (Brown 200) - 베이지 갈색 (흰 글씨)
-    Color(0xFFB0BEC5), // 14. 연한 회색 (Blue Grey 200) - 밝은 회색 (흰 글씨)
-    Color(0xFF80DEEA), // 15. 시안 (Cyan 200) - 청록색 (흰 글씨)
-    Color(0xFF7B1FA2), // 16. 진한 보라 (Purple 700) - 어두운 보라 (흰 글씨)
-    Color(0xFF00897B), // 17. 진한 청록 (Teal 600) - 어두운 청록 (흰 글씨)
-    Color(0xFF9CCC65), // 18. 올리브 (Light Green 400) - 올리브색 (흰 글씨)
-    Color(0xFF9FA8DA), // 19. 인디고 (Indigo 200) - 연한 인디고 (흰 글씨)
+    Color(0xFFD7CCC8), // 2. 베이지색 (Warm Beige) - 중립 톤
+    Color(0xFFB2DFDB), // 3. 민트색 (Mint Green) - 초록 계열
+    Color(0xFFE1BEE7), // 4. 연한 보라 (Lavender Purple) - 보라 계열
+    Color(0xFFFFF9C4), // 5. 노란색 (Sunny Yellow) - 밝은 노랑
+    Color(0xFFFFCCBC), // 6. 코랄색 (Coral) - 따뜻한 핑크/주황
+    Color(0xFFFFE0B2), // 7. 피치 주황 (Peach Orange) - 주황 계열
+    Color(0xFF1976D2), // 8. 진한 파랑 (Blue 700) - 어두운 파랑 (흰 글씨)
+    Color(0xFF388E3C), // 9. 진한 초록 (Green 700) - 어두운 초록 (흰 글씨)
+    Color(0xFFDCE775), // 10. 라임 (Lime 300) - 연두색
+    Color(0xFFB0BEC5), // 11. 연한 회색 (Blue Grey 200) - 밝은 회색 (흰 글씨)
+    Color(0xFF80DEEA), // 12. 시안 (Cyan 200) - 청록색 (흰 글씨)
+    Color(0xFF7B1FA2), // 13. 진한 보라 (Purple 700) - 어두운 보라 (흰 글씨)
+    Color(0xFF00897B), // 14. 진한 청록 (Teal 600) - 어두운 청록 (흰 글씨)
+    Color(0xFF9CCC65), // 15. 올리브 (Light Green 400) - 올리브색 (흰 글씨)
+    Color(0xFF9FA8DA), // 16. 연한 인디고 (Indigo 200) - 연한 인디고 (흰 글씨)
+    Color(0xFFFF6F00), // 17. 따뜻한 주황 (Orange 800) - 선명한 주황 (흰 글씨)
+    Color(0xFFEC407A), // 18. 생동감 핑크 (Pink 400) - 명확한 핑크 (흰 글씨)
+    Color(0xFF5C6BC0), // 19. 밝은 인디고 (Indigo 400) - 인디고 강화 (흰 글씨)
+    Color(0xFFAB47BC), // 20. 생동감 보라 (Purple 400) - 명확한 보라 (흰 글씨)
   ];
 
   // ⭐ 휴무 고정 색상 (명확한 빨강, 파스텔 아님)

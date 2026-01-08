@@ -912,7 +912,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // ⭐ 스케줄 변경 (규칙적 근무자만)
               if (schedule.isRegular && schedule.pattern != null)
                 ListTile(
-                  leading: Icon(Icons.swap_horiz, color: Colors.green),
+                  leading: Icon(Icons.swap_horiz, color: Theme.of(context).colorScheme.secondary),
                   title: Text('스케줄 변경'),
                   subtitle: Text('조 변경 시 오늘 근무를 다시 설정합니다'),
                   onTap: () {
@@ -933,7 +933,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ),
               Divider(height: 1),
               ListTile(
-                leading: Icon(Icons.palette, color: Theme.of(context).colorScheme.primary),
+                leading: Icon(Icons.palette, color: Theme.of(context).colorScheme.secondary),
                 title: Text('근무명 색상 변경'),
                 subtitle: Text('근무별 색상을 변경합니다'),
                 onTap: () {
@@ -943,7 +943,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ),
               Divider(height: 1),
               ListTile(
-                leading: Icon(Icons.alarm, color: Theme.of(context).colorScheme.tertiary),
+                leading: Icon(Icons.alarm, color: Theme.of(context).colorScheme.secondary),
                 title: Text('고정 알람 수정'),
                 subtitle: Text('근무별 알람 시간을 변경합니다'),
                 onTap: () {
@@ -2009,9 +2009,12 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(
+            foregroundColor: colorScheme.onSurfaceVariant,
+          ),
           child: Text('취소'),
         ),
-        TextButton(
+        ElevatedButton(
           onPressed: () {
             final renamedShifts = <String, String>{};
 
@@ -2027,6 +2030,10 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
             Navigator.pop(context);
             widget.onSave(renamedShifts);
           },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: colorScheme.secondary,
+            foregroundColor: colorScheme.onSecondary,
+          ),
           child: Text('저장'),
         ),
       ],
@@ -2127,6 +2134,8 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                     child: ElevatedButton(
                       onPressed: _saveAndExit,
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: colorScheme.secondary,
+                        foregroundColor: colorScheme.onSecondary,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                       ),
                       child: Text('저장', style: TextStyle(fontSize: 16.sp)),
@@ -2922,7 +2931,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.swap_horiz, color: Colors.green),
+          Icon(Icons.swap_horiz, color: colorScheme.secondary),
           SizedBox(width: 8.w),
           Text('스케줄 변경'),
         ],
@@ -2964,10 +2973,16 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
                     },
                     child: Container(
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.green : Colors.grey.shade200,
+                        // ⭐ 선택 안 됨: surfaceVariant, 선택됨: primary
+                        color: isSelected
+                            ? colorScheme.primary
+                            : colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(
-                          color: isSelected ? Colors.green.shade700 : Colors.grey.shade400,
+                          // ⭐ 선택 안 됨: outline, 선택됨: primary (진하게)
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.outline,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
@@ -2981,7 +2996,10 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
                                 '${index + 1}',
                                 style: TextStyle(
                                   fontSize: 9.sp,
-                                  color: isSelected ? Colors.white70 : Theme.of(context).colorScheme.onSurfaceVariant,
+                                  // ⭐ 선택됨: onPrimary, 선택 안 됨: onSurfaceVariant
+                                  color: isSelected
+                                      ? colorScheme.onPrimary.withOpacity(0.7)
+                                      : colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -2993,7 +3011,10 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.bold,
-                                  color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+                                  // ⭐ 선택됨: onPrimary, 선택 안 됨: onSurface (명확하게)
+                                  color: isSelected
+                                      ? colorScheme.onPrimary
+                                      : colorScheme.onSurface,
                                 ),
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
@@ -3038,6 +3059,9 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(
+            foregroundColor: colorScheme.onSurfaceVariant,
+          ),
           child: Text('취소'),
         ),
         ElevatedButton(
@@ -3048,8 +3072,8 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
                   widget.onConfirm(_selectedIndex!);
                 },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            backgroundColor: colorScheme.secondary,
+            foregroundColor: colorScheme.onSecondary,
           ),
           child: Text('변경'),
         ),
@@ -3138,6 +3162,9 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(
+            foregroundColor: colorScheme.onSurfaceVariant,
+          ),
           child: Text('취소'),
         ),
         ElevatedButton(
@@ -3146,8 +3173,8 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
             Navigator.pop(context);
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            backgroundColor: colorScheme.secondary,
+            foregroundColor: colorScheme.onSecondary,
           ),
           child: Text('저장'),
         ),
@@ -3286,6 +3313,9 @@ class _ColorPickerDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(
+            foregroundColor: colorScheme.onSurfaceVariant,
+          ),
           child: Text('취소'),
         ),
       ],
