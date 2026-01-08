@@ -114,12 +114,12 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
               // 모든 화면에 최대 너비 제한 적용
               builder: (context, child) {
                 return Container(
-                  color: isDark ? Color(0xFF060A14) : Colors.grey.shade200,  // 넓은 화면에서 양옆 배경색 (더 어두운 인디고)
+                  color: isDark ? Color(0xFF0A0E14) : Colors.grey.shade200,  // 넓은 화면에서 양옆 배경색
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: maxContentWidth),
                       child: Container(
-                        color: isDark ? Color(0xFF0A0E1A) : Colors.white,  // 컨텐츠 영역 배경 (진한 인디고 밤하늘)
+                        color: isDark ? Color(0xFF0F1419) : Colors.white,  // 컨텐츠 영역 배경 (세련된 인디고 그레이)
                         child: child,
                       ),
                     ),

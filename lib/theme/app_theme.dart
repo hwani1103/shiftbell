@@ -116,99 +116,99 @@ class AppTheme {
   );
 
   // ========================================
-  // 다크 테마 (푸른 밤하늘 인디고)
+  // 다크 테마 (세련된 인디고 그레이)
   // ========================================
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
 
-    // Primary 색상 (밝은 색으로)
+    // Primary 색상 (부드러운 인디고)
     colorScheme: ColorScheme.dark(
-      primary: Colors.lightBlue.shade300,
-      onPrimary: Colors.black,
-      secondary: Colors.blue.shade200,
-      onSecondary: Colors.black,
-      tertiary: Colors.orange.shade400,
-      onTertiary: Colors.black,
-      surface: Color(0xFF121826), // 진한 인디고 (카드/다이얼로그)
-      onSurface: Colors.white,
-      surfaceVariant: Color(0xFF1A2332),  // 조금 밝은 인디고
-      onSurfaceVariant: Color(0xFFB0B0B0),  // 밝은 회색 텍스트
-      background: Color(0xFF0A0E1A), // 진한 인디고 배경 (밤하늘)
-      onBackground: Colors.white,
-      error: Colors.red.shade400,
-      onError: Colors.black,
-      outline: Color(0xFF2A3547),  // 인디고 테두리
+      primary: Color(0xFF7C88E8),      // 채도 낮춘 밝은 인디고 (Material Indigo 300 기반)
+      onPrimary: Color(0xFF0F1419),    // 짙은 배경
+      secondary: Color(0xFF8FA3E8),    // 연한 인디고 블루
+      onSecondary: Color(0xFF0F1419),
+      tertiary: Color(0xFFFFAB91),     // 부드러운 주황 (기존보다 채도 낮춤)
+      onTertiary: Color(0xFF0F1419),
+      surface: Color(0xFF151B26),      // 진한 인디고 그레이 (카드/다이얼로그)
+      onSurface: Color(0xFFE8EAF0),    // 부드러운 흰색
+      surfaceVariant: Color(0xFF1E2633),  // 중간 인디고 그레이
+      onSurfaceVariant: Color(0xFFB8BCC8),  // 밝은 회색 텍스트
+      background: Color(0xFF0F1419),   // 아주 짙은 인디고 그레이 (기존보다 약간 밝음)
+      onBackground: Color(0xFFE8EAF0),
+      error: Color(0xFFEF9A9A),        // 부드러운 빨강
+      onError: Color(0xFF0F1419),
+      outline: Color(0xFF2E3A4D),      // 인디고 테두리 (더 명확한 구분)
     ),
 
     // AppBar
     appBarTheme: AppBarTheme(
-      backgroundColor: Color(0xFF0A0E1A),
-      foregroundColor: Colors.white,
+      backgroundColor: Color(0xFF0F1419),
+      foregroundColor: Color(0xFFE8EAF0),
       elevation: 1,
       titleTextStyle: TextStyle(
-        color: Colors.white,
+        color: Color(0xFFE8EAF0),
         fontSize: 18,
         fontWeight: FontWeight.w600,
       ),
-      iconTheme: IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: Color(0xFFE8EAF0)),
     ),
 
     // Scaffold
-    scaffoldBackgroundColor: Color(0xFF0A0E1A),
+    scaffoldBackgroundColor: Color(0xFF0F1419),
 
     // Card
     cardTheme: CardThemeData(
-      color: Color(0xFF121826),
+      color: Color(0xFF151B26),
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Color(0xFF1A2332), width: 1),
+        side: BorderSide(color: Color(0xFF1E2633), width: 1),
       ),
     ),
 
     // Dialog
     dialogTheme: DialogThemeData(
-      backgroundColor: Color(0xFF121826),
+      backgroundColor: Color(0xFF151B26),
       titleTextStyle: TextStyle(
-        color: Colors.white,
+        color: Color(0xFFE8EAF0),
         fontSize: 20,
         fontWeight: FontWeight.bold,
       ),
       contentTextStyle: TextStyle(
-        color: Colors.white70,
+        color: Color(0xFFB8BCC8),
         fontSize: 14,
       ),
     ),
 
     // BottomNavigationBar
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: Color(0xFF121826),
-      selectedItemColor: Colors.lightBlue.shade300,
-      unselectedItemColor: Colors.grey.shade500,
+      backgroundColor: Color(0xFF151B26),
+      selectedItemColor: Color(0xFF7C88E8),     // 부드러운 인디고
+      unselectedItemColor: Color(0xFF6B7280),   // 중성 회색
       elevation: 8,
     ),
 
     // TextField
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Color(0xFF1A2332),
+      fillColor: Color(0xFF1E2633),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Color(0xFF2A3547)),
+        borderSide: BorderSide(color: Color(0xFF2E3A4D)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.lightBlue.shade300, width: 2),
+        borderSide: BorderSide(color: Color(0xFF7C88E8), width: 2),
       ),
-      hintStyle: TextStyle(color: Colors.grey.shade600),
+      hintStyle: TextStyle(color: Color(0xFF6B7280)),
     ),
 
     // ElevatedButton
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.lightBlue.shade300,
-        foregroundColor: Colors.black,
+        backgroundColor: Color(0xFF7C88E8),      // 부드러운 인디고
+        foregroundColor: Color(0xFF0F1419),      // 짙은 배경색
         elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -218,15 +218,15 @@ class AppTheme {
 
     // ListTile
     listTileTheme: ListTileThemeData(
-      tileColor: Color(0xFF121826),
-      textColor: Colors.white,
-      iconColor: Colors.grey.shade400,
+      tileColor: Color(0xFF151B26),
+      textColor: Color(0xFFE8EAF0),
+      iconColor: Color(0xFF9CA3AF),
     ),
 
     // Divider
-    dividerColor: Color(0xFF1A2332),
+    dividerColor: Color(0xFF1E2633),
 
     // Icon
-    iconTheme: IconThemeData(color: Colors.grey.shade400),
+    iconTheme: IconThemeData(color: Color(0xFF9CA3AF)),
   );
 }
