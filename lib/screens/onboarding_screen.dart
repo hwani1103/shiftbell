@@ -168,7 +168,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '(7개까지 추가가능하며 4글자로 제한됩니다.)',
+                  '(7개까지 추가 가능하며 4글자로 제한됩니다.)',
                   style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ],
@@ -263,7 +263,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '(7개까지 추가가능하며 4글자로 제한됩니다.)',
+                  '(7개까지 추가 가능하며 4글자로 제한됩니다.)',
                   style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ],
@@ -627,8 +627,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         
         Expanded(
           child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(  // ⭐ 변경
-              maxCrossAxisExtent: 120.w,  // ⭐ 변경
+            physics: const AlwaysScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 120.w,
               crossAxisSpacing: 12.w,
               mainAxisSpacing: 12.h,
               childAspectRatio: 0.70,
@@ -637,7 +638,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             itemBuilder: (context, index) {
               final shift = shiftsToSetup[index];
               final alarms = _shiftAlarms[shift] ?? [];
-              
+
               return _buildShiftAlarmCard(shift, alarms);
             },
           ),
