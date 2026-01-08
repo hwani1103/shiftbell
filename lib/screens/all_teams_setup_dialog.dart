@@ -229,27 +229,59 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
     }
   }
 
-  // 패턴 표시 (화살표 없이 단순 배치)
+  // 패턴 표시 (스케줄 변경과 동일한 스타일)
   Widget _buildPatternCards(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Wrap(
       spacing: 6.w,
-      runSpacing: 8.h,
-      children: widget.pattern.map((shift) {
+      runSpacing: 6.h,
+      children: widget.pattern.asMap().entries.map((entry) {
+        final index = entry.key;
+        final shift = entry.value;
+
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+          width: 50.w,
+          height: 50.w,
           decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: BorderRadius.circular(6.r),
-            border: Border.all(color: colorScheme.primary.withOpacity(0.5)),
-          ),
-          child: Text(
-            shift,
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w600,
-              color: colorScheme.primary,
+            // ⭐ 스케줄 변경과 동일: surfaceVariant 배경
+            color: colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(
+              color: colorScheme.outline,
+              width: 1,
             ),
+          ),
+          child: Column(
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 4.w, top: 2.h),
+                  child: Text(
+                    '${index + 1}',
+                    style: TextStyle(
+                      fontSize: 9.sp,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    shift,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       }).toList(),
@@ -276,58 +308,44 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
           style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
         ),
         SizedBox(height: 24.h),
-        Container(
-          width: double.infinity,
-          height: 200.h, // 고정 높이
-          padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(
-            color: colorScheme.primaryContainer,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '교대 패턴',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onPrimaryContainer,
-                ),
+        // ⭐ 교대 패턴 (심플하게)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '교대 패턴 (총 ${widget.pattern.length}일 주기)',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurface,
               ),
-              SizedBox(height: 12.h),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: _buildPatternCards(context),
-                ),
+            ),
+            SizedBox(height: 12.h),
+            Container(
+              height: 150.h,
+              child: SingleChildScrollView(
+                child: _buildPatternCards(context),
               ),
-              SizedBox(height: 12.h),
-              Text(
-                '총 ${widget.pattern.length}일 주기',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: colorScheme.onPrimaryContainer,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
         SizedBox(height: 24.h),
+        // ⭐ 안내 문구 (스케줄 변경과 동일한 amber 톤)
         Container(
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
-            color: colorScheme.secondaryContainer,
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.amber.shade900.withOpacity(0.2) : Colors.amber.shade50,
             borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.amber.shade700 : Colors.amber.shade200),
           ),
           child: Row(
             children: [
-              Icon(Icons.info, color: colorScheme.secondary, size: 20.sp),
+              Icon(Icons.info_outline, color: Theme.of(context).brightness == Brightness.dark ? Colors.amber.shade400 : Colors.amber.shade700, size: 20.sp),
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
                   '이 패턴을 기준으로 전체 조의 근무표를 작성합니다.',
-                  style: TextStyle(fontSize: 12.sp, color: colorScheme.onSecondaryContainer),
+                  style: TextStyle(fontSize: 12.sp, color: Colors.amber.shade800),
                 ),
               ),
             ],
@@ -380,9 +398,9 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: Colors.green.shade50,
+                color: colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: Colors.green.shade200),
+                border: Border.all(color: colorScheme.outline),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,7 +410,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.green.shade900,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -412,20 +430,22 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
               ),
             ),
           SizedBox(height: 16.h),
+          // ⭐ 안내 문구 (스케줄 변경과 동일한 amber 톤)
           Container(
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
-              color: colorScheme.tertiaryContainer,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.amber.shade900.withOpacity(0.2) : Colors.amber.shade50,
               borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.amber.shade700 : Colors.amber.shade200),
             ),
             child: Row(
               children: [
-                Icon(Icons.warning, color: colorScheme.tertiary, size: 20.sp),
+                Icon(Icons.info_outline, color: Theme.of(context).brightness == Brightness.dark ? Colors.amber.shade400 : Colors.amber.shade700, size: 20.sp),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    '한 글자만 입력 가능합니다.\n(예 : A, 가, 1)\n최소 2개 조 이상 입력해주세요.',
-                    style: TextStyle(fontSize: 12.sp, color: colorScheme.onTertiaryContainer),
+                    '한 글자만 입력 가능합니다. (예: A, 가, 1)\n최소 2개 조 이상 입력해주세요.',
+                    style: TextStyle(fontSize: 12.sp, color: Colors.amber.shade800),
                   ),
                 ),
               ],
