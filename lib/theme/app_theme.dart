@@ -131,11 +131,11 @@ class AppTheme {
       tertiary: Color(0xFFFFC4B0),     // 밝은 코랄 주황
       onTertiary: Color(0xFF1A1F2E),
       surface: Color(0xFF242938),      // 밝은 인디고 그레이 (카드/다이얼로그)
-      onSurface: Color(0xFFECEEF5),    // 부드러운 흰색
+      onSurface: Color(0xFFF5F7FB),    // 인디고 틴트 off-white (주 텍스트)
       surfaceVariant: Color(0xFF2E3547),  // 중간 인디고 그레이 (더 밝게)
-      onSurfaceVariant: Color(0xFFC4C7D1),  // 밝은 회색 텍스트
+      onSurfaceVariant: Color(0xFFD8DBE5),  // 밝은 인디고 틴트 회색 (보조 텍스트)
       background: Color(0xFF1A1F2E),   // 밝은 인디고 그레이 배경
-      onBackground: Color(0xFFECEEF5),
+      onBackground: Color(0xFFF5F7FB), // 인디고 틴트 off-white
       error: Color(0xFFFFB4AB),        // 밝은 빨강
       onError: Color(0xFF1A1F2E),
       outline: Color(0xFF3E4A5D),      // 인디고 테두리 (명확하게)
@@ -144,14 +144,14 @@ class AppTheme {
     // AppBar
     appBarTheme: AppBarTheme(
       backgroundColor: Color(0xFF1A1F2E),
-      foregroundColor: Color(0xFFECEEF5),
+      foregroundColor: Color(0xFFF5F7FB),  // 인디고 틴트 off-white
       elevation: 1,
       titleTextStyle: TextStyle(
-        color: Color(0xFFECEEF5),
+        color: Color(0xFFF5F7FB),
         fontSize: 18,
         fontWeight: FontWeight.w600,
       ),
-      iconTheme: IconThemeData(color: Color(0xFFECEEF5)),
+      iconTheme: IconThemeData(color: Color(0xFFF5F7FB)),
     ),
 
     // Scaffold
@@ -171,12 +171,12 @@ class AppTheme {
     dialogTheme: DialogThemeData(
       backgroundColor: Color(0xFF242938),
       titleTextStyle: TextStyle(
-        color: Color(0xFFECEEF5),
+        color: Color(0xFFF5F7FB),  // 인디고 틴트 off-white
         fontSize: 20,
         fontWeight: FontWeight.bold,
       ),
       contentTextStyle: TextStyle(
-        color: Color(0xFFC4C7D1),
+        color: Color(0xFFD8DBE5),  // 밝은 인디고 틴트 회색
         fontSize: 14,
       ),
     ),
@@ -185,7 +185,7 @@ class AppTheme {
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Color(0xFF242938),
       selectedItemColor: Color(0xFF9AA5F5),     // 밝은 인디고
-      unselectedItemColor: Color(0xFF7C8596),   // 중성 회색
+      unselectedItemColor: Color(0xFF8A90A0),   // 중성 회색 (더 밝게)
       elevation: 8,
     ),
 
@@ -201,7 +201,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Color(0xFF9AA5F5), width: 2),
       ),
-      hintStyle: TextStyle(color: Color(0xFF7C8596)),
+      hintStyle: TextStyle(color: Color(0xFF8A90A0)),  // 더 밝게
     ),
 
     // ElevatedButton
@@ -219,14 +219,14 @@ class AppTheme {
     // ListTile
     listTileTheme: ListTileThemeData(
       tileColor: Color(0xFF242938),
-      textColor: Color(0xFFECEEF5),
-      iconColor: Color(0xFFA8ADB9),
+      textColor: Color(0xFFF5F7FB),  // 인디고 틴트 off-white
+      iconColor: Color(0xFFC8CEDA),  // 밝은 아이콘 색상
     ),
 
     // Divider
     dividerColor: Color(0xFF2E3547),
 
     // Icon
-    iconTheme: IconThemeData(color: Color(0xFFA8ADB9)),
+    iconTheme: IconThemeData(color: Color(0xFFC8CEDA)),  // 밝은 아이콘 색상
   );
 }
