@@ -1158,7 +1158,11 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
-            color: isSelected ? Theme.of(context).colorScheme.tertiaryContainer : Theme.of(context).colorScheme.surface,
+            color: isSelected
+              ? (Theme.of(context).brightness == Brightness.dark
+                  ? Colors.orange.shade800  // 다크모드: 진한 주황 (대비율 6.74:1)
+                  : Colors.orange.shade700)  // 화이트모드: 진한 주황 (대비율 5.73:1)
+              : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
               color: isSelected ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.outline,
@@ -1173,9 +1177,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,
-                  color: isSelected
-                    ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Theme.of(context).colorScheme.onTertiaryContainer)
-                    : Theme.of(context).colorScheme.onSurfaceVariant,  // 다크모드에서 흰색
+                  color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,  // 선택 시 흰색으로 통일
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),

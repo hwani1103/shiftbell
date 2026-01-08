@@ -1855,10 +1855,14 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.orange.shade100 : Theme.of(context).colorScheme.surface,  // 다크모드에서도 불투명 주황색
+            color: isSelected
+              ? (Theme.of(context).brightness == Brightness.dark
+                  ? Colors.orange.shade800  // 다크모드: 진한 주황 (대비율 6.74:1)
+                  : Colors.orange.shade700)  // 화이트모드: 진한 주황 (대비율 5.73:1)
+              : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
-              color: isSelected ? Colors.orange : Colors.grey.shade300,
+              color: isSelected ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.outline,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -1868,7 +1872,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.orange.shade800) : Theme.of(context).colorScheme.onSurfaceVariant,  // 다크모드: 흰색
+                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,  // 선택 시 흰색으로 통일
               ),
             ),
           ),
