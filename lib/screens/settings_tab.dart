@@ -368,14 +368,14 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.calendar_month, color: Theme.of(context).colorScheme.primary, size: 20.sp),
+                          Icon(Icons.calendar_month, color: Theme.of(context).colorScheme.onPrimary, size: 20.sp),
                           SizedBox(width: 8.w),
                           Text(
                             '교대 근무 관리',
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           ),
                         ],
