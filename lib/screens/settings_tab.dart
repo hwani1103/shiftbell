@@ -912,7 +912,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // ⭐ 스케줄 변경 (규칙적 근무자만)
               if (schedule.isRegular && schedule.pattern != null)
                 ListTile(
-                  leading: Icon(Icons.swap_horiz, color: Theme.of(context).colorScheme.secondary),
+                  leading: Icon(Icons.swap_horiz, color: Colors.teal.shade600),
                   title: Text('스케줄 변경'),
                   subtitle: Text('조 변경 시 오늘 근무를 다시 설정합니다'),
                   onTap: () {
@@ -923,7 +923,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               if (schedule.isRegular && schedule.pattern != null)
                 Divider(height: 1),
               ListTile(
-                leading: Icon(Icons.edit, color: Theme.of(context).colorScheme.secondary),
+                leading: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
                 title: Text('근무명 수정'),
                 subtitle: Text('근무 이름을 변경합니다'),
                 onTap: () {
@@ -933,7 +933,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ),
               Divider(height: 1),
               ListTile(
-                leading: Icon(Icons.palette, color: Theme.of(context).colorScheme.secondary),
+                leading: Icon(Icons.palette, color: Colors.purple.shade400),
                 title: Text('근무명 색상 변경'),
                 subtitle: Text('근무별 색상을 변경합니다'),
                 onTap: () {
@@ -943,7 +943,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ),
               Divider(height: 1),
               ListTile(
-                leading: Icon(Icons.alarm, color: Theme.of(context).colorScheme.secondary),
+                leading: Icon(Icons.alarm, color: Theme.of(context).colorScheme.tertiary),
                 title: Text('고정 알람 수정'),
                 subtitle: Text('근무별 알람 시간을 변경합니다'),
                 onTap: () {
@@ -1983,7 +1983,13 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
-      title: Text('근무명 수정'),
+      title: Row(
+        children: [
+          Icon(Icons.edit, color: colorScheme.primary),
+          SizedBox(width: 8.w),
+          Text('근무명 수정'),
+        ],
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -2092,7 +2098,13 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(
-        title: Text('고정 알람 수정'),
+        title: Row(
+          children: [
+            Icon(Icons.alarm, color: colorScheme.tertiary, size: 24.sp),
+            SizedBox(width: 8.w),
+            Text('고정 알람 수정'),
+          ],
+        ),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -2931,7 +2943,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
     return AlertDialog(
       title: Row(
         children: [
-          Icon(Icons.swap_horiz, color: colorScheme.secondary),
+          Icon(Icons.swap_horiz, color: Colors.teal.shade600),
           SizedBox(width: 8.w),
           Text('스케줄 변경'),
         ],
@@ -3113,7 +3125,13 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
-      title: Text('근무명 색상 변경'),
+      title: Row(
+        children: [
+          Icon(Icons.palette, color: Colors.purple.shade400),
+          SizedBox(width: 8.w),
+          Text('근무명 색상 변경'),
+        ],
+      ),
       content: SizedBox(
         width: double.maxFinite,
         child: ListView.separated(
