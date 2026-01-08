@@ -321,17 +321,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '실제 근무 패턴에 포함되는\n근무명을 모두 선택해주세요',
+            '실제 근무 패턴에 포함되는\n근무를 모두 선택해주세요',
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 24.h),
-          
+
           Wrap(
             spacing: 8.w,
             runSpacing: 8.h,
             children: _allShiftTypes.map((name) {
               final isSelected = _selectedShifts.contains(name);
-              
+
               return ElevatedButton(
                 onPressed: () {
                   setState(() {
@@ -343,9 +343,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                   });
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: isSelected ? Theme.of(context).colorScheme.secondary : null,
-                  foregroundColor: isSelected ? Theme.of(context).colorScheme.onSecondary : null,
-                  elevation: isSelected ? 2 : null,
+                  backgroundColor: isSelected
+                    ? Theme.of(context).colorScheme.secondary
+                    : Theme.of(context).colorScheme.surfaceVariant,  // 선택 전: 회색
+                  foregroundColor: isSelected
+                    ? Theme.of(context).colorScheme.onSecondary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,  // 선택 전: 회색 텍스트
+                  elevation: isSelected ? 2 : 0,
                 ),
                 child: Text(name),
               );
@@ -390,15 +394,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           ),
           
           SizedBox(height: 24.h),
-          
+
           Text(
-            '교대 패턴을 순서대로 입력해주세요 (최대 30일)',
+            '교대패턴을 순서대로 입력해주세요\n(최대 30일, 한번 더 탭하면 삭제됩니다.)',
             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            'ex) 주간, 주간, 휴무, 휴무, 야간, 야간, 휴무, 휴무 ...',
-            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           Text(
             '(한번 더 탭하면 삭제됩니다)',
@@ -596,7 +595,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
         ),
         Text(
-          '설정 탭에서도 설정 / 수정이 가능합니다',
+          '설정 탭에서도 추가 / 변경이 가능합니다',
           style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
         ),
         SizedBox(height: 24.h),
@@ -1148,7 +1147,9 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,
-                  color: isSelected ? Theme.of(context).colorScheme.onTertiaryContainer : Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: isSelected
+                    ? (Theme.of(context).brightness == Brightness.dark ? Colors.white : Theme.of(context).colorScheme.onTertiaryContainer)
+                    : Theme.of(context).colorScheme.onSurfaceVariant,  // 다크모드에서 흰색
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),

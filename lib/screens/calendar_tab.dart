@@ -479,7 +479,9 @@ Widget build(BuildContext context) {
                         cellPadding: EdgeInsets.all(0),
 
                         tableBorder: TableBorder.all(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
+                          color: isDarkMode
+                            ? Theme.of(context).colorScheme.onSurface.withOpacity(0.4)  // 다크모드: 더 밝게
+                            : Theme.of(context).colorScheme.onSurface.withOpacity(0.15),  // 화이트모드: 더 진하게
                           width: 1.0,
                         ),
 
