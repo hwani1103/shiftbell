@@ -531,12 +531,6 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
   void _showAllAlarmsSheet(BuildContext context) {
     if (!mounted) return;
 
-    // ⭐ 열기 전 최신 데이터 로드
-    ref.read(alarmNotifierProvider.notifier).refresh();
-
-    // refresh 후 다시 mounted 체크
-    if (!mounted) return;
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -544,6 +538,11 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       builder: (context) {
+        // ⭐ 여기서 refresh - 안전한 context에서 호출
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(alarmNotifierProvider.notifier).refresh();
+        });
+
         return DraggableScrollableSheet(
           initialChildSize: 0.6,
           minChildSize: 0.4,
