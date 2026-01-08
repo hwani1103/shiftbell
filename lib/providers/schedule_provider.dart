@@ -183,7 +183,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   
   await db.transaction((txn) async {
     final dateStr = date.toIso8601String().split('T')[0];
-    
+
     print('🔵 날짜: $dateStr, 새 근무: $newShiftType');
 
     // ⭐ 규칙적이든 불규칙이든 assignedDates에 예외로 저장
@@ -197,14 +197,23 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       whereArgs: [currentSchedule.id],
     );
 
+    // ⭐ 10일 이후 체크
+    final now = DateTime.now();
+    final daysDiff = date.difference(DateTime(now.year, now.month, now.day)).inDays;
+
+    if (daysDiff >= 10) {
+      print('🔵 10일 이후 날짜라서 알람은 생성하지 않음 (자정 갱신 시 자동 생성됨)');
+      return;  // assignedDates에만 저장하고 종료
+    }
+
     final existingAlarms = await txn.query(
       'alarms',
       where: 'date LIKE ? AND type = ?',
       whereArgs: ['${dateStr}%', 'fixed'],
     );
-    
+
     print('🔵 삭제할 알람: ${existingAlarms.length}개');
-    
+
     for (var alarmMap in existingAlarms) {
       final alarm = Alarm.fromMap(alarmMap);
       print('  - 삭제: ${alarm.time}');
@@ -217,13 +226,13 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       where: 'shift_type = ?',
       whereArgs: [newShiftType],
     );
-    
+
     print('🔵 템플릿 조회: ${templates.length}개 (근무: $newShiftType)');
-    
+
     for (var templateMap in templates) {
       final template = AlarmTemplate.fromMap(templateMap);
       print('  + 템플릿: ${template.time}');
-      
+
       final timeParts = template.time.split(':');
       final alarmTime = DateTime(
         date.year,
@@ -232,14 +241,14 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
         int.parse(timeParts[0]),
         int.parse(timeParts[1]),
       );
-      
+
       print('    알람 시간: $alarmTime, 현재: ${DateTime.now()}');
-      
+
       if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
         print('    ❌ 과거 시간이라 스킵');
         continue;
       }
-      
+
       final alarm = Alarm(
         time: template.time,
         date: alarmTime,
@@ -247,17 +256,17 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
         alarmTypeId: template.alarmTypeId,
         shiftType: newShiftType,
       );
-      
+
       final dbId = await txn.insert('alarms', alarm.toMap());
       print('    ✅ 알람 생성: ID $dbId');
-      
+
       scheduleData.add({
         'id': dbId,
         'dateTime': alarmTime,
         'label': newShiftType,
       });
     }
-    
+
     print('🔵 생성 예정 알람: ${scheduleData.length}개');
   });
 

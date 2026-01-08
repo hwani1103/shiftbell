@@ -967,46 +967,74 @@ Widget build(BuildContext context) {
                                   .where((a) => a.type == 'fixed' && a.date != null && a.date!.toIso8601String().startsWith(dayStr))
                                   .toList();
 
-                              if (fixedAlarms.isEmpty) {
-                                return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
-                              }
-
-                              return Row(
-                                children: fixedAlarms.map((alarm) {
-                                  final typeInfo = _getAlarmTypeInfo(alarm.alarmTypeId);
-                                  return Expanded(
-                                    child: GestureDetector(
-                                      onTap: () => _showAlarmTypeSelectionPopup(alarm, setState),
-                                      child: Container(
-                                        margin: EdgeInsets.only(right: alarm != fixedAlarms.last ? 8.w : 0),
-                                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-                                        decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.secondaryContainer,
-                                          borderRadius: BorderRadius.circular(8.r),
-                                          border: Border.all(color: Theme.of(context).colorScheme.secondary.withOpacity(0.3)),
-                                        ),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Text(typeInfo['emoji']!, style: TextStyle(fontSize: 14.sp)),
-                                                SizedBox(width: 4.w),
-                                                Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer)),
-                                              ],
-                                            ),
-                                            SizedBox(height: 4.h),
-                                            Text(
-                                              typeInfo['label']!,
-                                              style: TextStyle(fontSize: 10.sp, color: Theme.of(context).colorScheme.onSecondaryContainer),
-                                            ),
-                                          ],
+                              // ⭐ 1단계: 알람이 있으면 우선 표시 (최우선)
+                              if (fixedAlarms.isNotEmpty) {
+                                return Row(
+                                  children: fixedAlarms.map((alarm) {
+                                    final typeInfo = _getAlarmTypeInfo(alarm.alarmTypeId);
+                                    return Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => _showAlarmTypeSelectionPopup(alarm, setState),
+                                        child: Container(
+                                          margin: EdgeInsets.only(right: alarm != fixedAlarms.last ? 8.w : 0),
+                                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).colorScheme.secondaryContainer,
+                                            borderRadius: BorderRadius.circular(8.r),
+                                            border: Border.all(color: Theme.of(context).colorScheme.secondary.withOpacity(0.3)),
+                                          ),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  Text(typeInfo['emoji']!, style: TextStyle(fontSize: 14.sp)),
+                                                  SizedBox(width: 4.w),
+                                                  Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer)),
+                                                ],
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                typeInfo['label']!,
+                                                style: TextStyle(fontSize: 10.sp, color: Theme.of(context).colorScheme.onSecondaryContainer),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                }).toList(),
+                                    );
+                                  }).toList(),
+                                );
+                              }
+
+                              // ⭐ 2단계: 알람이 없으면 템플릿 조회
+                              final currentShift = schedule.getShiftForDate(day);
+                              return FutureBuilder<bool>(
+                                future: _checkHasTemplate(currentShift),
+                                builder: (context, snapshot) {
+                                  // 3단계: 템플릿이 없거나 로딩 중이면 (없음)
+                                  if (!snapshot.hasData || snapshot.data == false) {
+                                    return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
+                                  }
+
+                                  // 4단계: 템플릿은 있는데 알람이 없는 경우 → 10일 체크
+                                  final now = DateTime.now();
+                                  final today = DateTime(now.year, now.month, now.day);
+                                  final targetDate = DateTime(day.year, day.month, day.day);
+                                  final daysDiff = targetDate.difference(today).inDays;
+
+                                  // 5단계: 10일 이후면 안내 문구
+                                  if (daysDiff >= 10) {
+                                    return Text(
+                                      '10일 이내가 되면 자동 생성됩니다',
+                                      style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.tertiary, fontStyle: FontStyle.italic),
+                                    );
+                                  }
+
+                                  // 6단계: 10일 이내인데 알람이 없으면 (없음) - 버그 상황
+                                  return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
+                                },
                               );
                             },
                           );
@@ -1725,5 +1753,25 @@ Widget build(BuildContext context) {
         editController.dispose();
       });
     });
+  }
+
+  // ⭐ 특정 근무 타입의 템플릿 존재 여부 확인
+  Future<bool> _checkHasTemplate(String shiftType) async {
+    if (shiftType == '미설정' || shiftType.isEmpty) {
+      return false;
+    }
+
+    try {
+      final db = await DatabaseService.instance.database;
+      final templates = await db.query(
+        'shift_alarm_templates',
+        where: 'shift_type = ?',
+        whereArgs: [shiftType],
+      );
+      return templates.isNotEmpty;
+    } catch (e) {
+      print('⚠️ 템플릿 조회 실패: $e');
+      return false;
+    }
   }
 }
