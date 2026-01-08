@@ -124,6 +124,11 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {  // ⭐ 변경
 Color _getShiftBackgroundColor(String shift, ShiftSchedule? schedule) {
   if (shift == '미설정' || shift.isEmpty) return Colors.transparent;
 
+  // ⭐ "없음" 옵션 색상 (회색)
+  if (shift == '없음') {
+    return Theme.of(context).colorScheme.surfaceVariant;
+  }
+
   final colorValue = schedule?.shiftColors?[shift];
 
   if (colorValue != null) {
@@ -144,6 +149,11 @@ Color _getShiftBackgroundColor(String shift, ShiftSchedule? schedule) {
 
 Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
   if (shift == '미설정' || shift.isEmpty) return Colors.transparent;
+
+  // ⭐ "없음" 옵션 텍스트 색상
+  if (shift == '없음') {
+    return Theme.of(context).colorScheme.onSurfaceVariant;
+  }
 
   final colorValue = schedule?.shiftColors?[shift];
 
@@ -1465,10 +1475,15 @@ Widget build(BuildContext context) {
   }
   
   void _showBulkAssignSheet(ShiftSchedule schedule) {
-  final displayShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
+  // ⭐ 불규칙 근무인 경우 "없음" 옵션 추가
+  final baseShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
+  final displayShifts = schedule.isRegular
+    ? baseShifts
+    : [...baseShifts, '없음'];
+
   final screenWidth = MediaQuery.of(context).size.width;
   final screenHeight = MediaQuery.of(context).size.height;
-  
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -1541,6 +1556,9 @@ Widget build(BuildContext context) {
   Future<void> _bulkAssignShift(String shiftType, ShiftSchedule schedule) async {
     if (_selectedDates.isEmpty) return;
 
+    // ⭐ "없음"을 "미설정"으로 변환
+    final actualShiftType = shiftType == '없음' ? '미설정' : shiftType;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1551,15 +1569,17 @@ Widget build(BuildContext context) {
       // ⭐ Provider의 bulkAssignShift 사용
       await ref.read(scheduleProvider.notifier).bulkAssignShift(
         _selectedDates.toList(),
-        shiftType,
+        actualShiftType,
       );
 
-      // ⭐ 각 날짜의 고정 알람 재생성
-      for (var date in _selectedDates) {
-        await ref.read(alarmNotifierProvider.notifier).regenerateFixedAlarms(
-          date,
-          shiftType,
-        );
+      // ⭐ 각 날짜의 고정 알람 재생성 (미설정은 스킵)
+      if (actualShiftType != '미설정') {
+        for (var date in _selectedDates) {
+          await ref.read(alarmNotifierProvider.notifier).regenerateFixedAlarms(
+            date,
+            actualShiftType,
+          );
+        }
       }
 
       Navigator.pop(context);
