@@ -777,7 +777,10 @@ Widget build(BuildContext context) {
                           padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
                           decoration: shouldHighlightToday
                               ? BoxDecoration(
-                                  color: (isSunday || isHoliday) ? Colors.lime.shade300 : Theme.of(context).colorScheme.primary,
+                                  // ⭐ 다크모드 오늘 날짜 배경: 더 밝게
+                                  color: (isSunday || isHoliday)
+                                      ? (isDarkMode ? Colors.amber.shade300 : Colors.lime.shade300)  // 다크모드: 밝은 amber
+                                      : (isDarkMode ? Color(0xFFB4BFFF) : Theme.of(context).colorScheme.primary),  // 다크모드: 더 밝은 인디고
                                   borderRadius: BorderRadius.circular(4.r),
                                 )
                               : null,
@@ -787,8 +790,11 @@ Widget build(BuildContext context) {
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
+                              // ⭐ 다크모드 오늘 날짜 텍스트: 명확한 대비
                               color: shouldHighlightToday
-                                  ? ((isSunday || isHoliday) ? (isDarkMode ? Colors.red.shade700 : Colors.red) : Theme.of(context).colorScheme.onPrimary)
+                                  ? (isSunday || isHoliday)
+                                      ? (isDarkMode ? Colors.red.shade900 : Colors.red)  // 다크모드: 진한 빨강
+                                      : (isDarkMode ? Colors.white : Theme.of(context).colorScheme.onPrimary)  // 다크모드: 순백
                                   : dateColor,
                               height: 1.0,
                             ),
