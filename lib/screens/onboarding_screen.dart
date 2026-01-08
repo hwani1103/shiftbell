@@ -411,8 +411,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             '버튼을 탭해서 패턴을 완성해주세요',
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 24.h),
-          
+          SizedBox(height: 16.h),
+
           Wrap(
             spacing: 8.w,
             runSpacing: 8.h,
@@ -421,14 +421,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               child: Text(name),
             )).toList(),
           ),
-          
-          SizedBox(height: 24.h),
+
+          SizedBox(height: 16.h),
 
           Text(
             '(최대 30일, 한번 더 탭하면 삭제됩니다.)',
             style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
           
           Expanded(
             child: _buildPatternGrid(isSelectable: false),
