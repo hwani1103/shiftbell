@@ -425,12 +425,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           SizedBox(height: 24.h),
 
           Text(
-            '교대패턴을 순서대로 입력해주세요\n(최대 30일, 한번 더 탭하면 삭제됩니다.)',
-            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            '(한번 더 탭하면 삭제됩니다)',
-            style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            '(최대 30일, 한번 더 탭하면 삭제됩니다.)',
+            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 12.h),
           
