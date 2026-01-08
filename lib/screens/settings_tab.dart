@@ -151,7 +151,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontFamily: 'monospace',
-                            color: isPast ? Colors.grey : (isToday ? Colors.orange : Colors.black),
+                            color: isPast ? Colors.grey : (isToday ? Colors.orange : colorScheme.onSurface),
                             decoration: isPast ? TextDecoration.lineThrough : null,
                           ),
                         ),
@@ -584,7 +584,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                       ? Icons.dark_mode
                       : Icons.light_mode,
                   color: ref.watch(themeProvider) == ThemeMode.dark
-                      ? Colors.indigo.shade300
+                      ? colorScheme.primary
                       : Colors.amber.shade700,
                 ),
                 title: Text('다크모드'),
@@ -596,7 +596,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   onChanged: (value) {
                     ref.read(themeProvider.notifier).toggleTheme();
                   },
-                  activeColor: Colors.lightBlue.shade400,
+                  activeColor: colorScheme.primary,
                 ),
               ),
 
@@ -1698,7 +1698,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                 child: Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
-                    color: _isPlaying ? Colors.red.shade50 : Colors.blue.shade50,
+                    color: _isPlaying ? (isDark ? Colors.red.shade900.withOpacity(0.2) : Colors.red.shade50) : (isDark ? Colors.blue.shade900.withOpacity(0.2) : Colors.blue.shade50),
                     borderRadius: BorderRadius.circular(8.r),
                     border: Border.all(
                       color: _isPlaying ? Colors.red : Colors.blue,
@@ -1778,7 +1778,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                           sound['name']!,
                           style: TextStyle(
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected ? Colors.orange.shade800 : Colors.black,
+                            color: isSelected ? Colors.orange.shade800 : colorScheme.onSurface,
                           ),
                         ),
                         onTap: () {
@@ -1855,7 +1855,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.orange.shade100 : Colors.white,
+            color: isSelected ? (isDark ? colorScheme.primary.withOpacity(0.25) : Colors.orange.shade100) : colorScheme.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
               color: isSelected ? Colors.orange : Colors.grey.shade300,
@@ -1868,7 +1868,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? Colors.orange.shade800 : Colors.grey.shade700,
+                color: isSelected ? (isDark ? colorScheme.primary : Colors.orange.shade800) : colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -1916,7 +1916,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.blue.shade100 : Colors.white,
+            color: isSelected ? (isDark ? colorScheme.secondary.withOpacity(0.25) : Colors.blue.shade100) : colorScheme.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
               color: isSelected ? Colors.blue : Colors.grey.shade300,
@@ -1929,7 +1929,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? Colors.blue.shade800 : Colors.grey.shade700,
+                color: isSelected ? (isDark ? colorScheme.secondary : Colors.blue.shade800) : colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -2143,7 +2143,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
           color: Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: alarms.isEmpty ? Colors.red.shade300 : Colors.black,
+            color: alarms.isEmpty ? Colors.red.shade300 : colorScheme.onSurface,
             width: 2,
           ),
         ),
@@ -2406,7 +2406,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.orange.shade50 : Colors.white,
+            color: isSelected ? (isDark ? colorScheme.tertiary.withOpacity(0.2) : Colors.orange.shade50) : colorScheme.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
               color: isSelected ? Colors.orange : Colors.grey.shade300,
@@ -2421,7 +2421,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,
-                  color: isSelected ? Colors.orange.shade800 : Colors.grey.shade600,
+                  color: isSelected ? (isDark ? colorScheme.tertiary : Colors.orange.shade800) : colorScheme.onSurfaceVariant,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -2973,7 +2973,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
                                 '${index + 1}',
                                 style: TextStyle(
                                   fontSize: 9.sp,
-                                  color: isSelected ? Colors.white70 : Colors.grey.shade600,
+                                  color: isSelected ? Colors.white70 : colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -2985,7 +2985,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.bold,
-                                  color: isSelected ? Colors.white : Colors.black,
+                                  color: isSelected ? Colors.white : colorScheme.onSurface,
                                 ),
                                 textAlign: TextAlign.center,
                                 maxLines: 1,
@@ -3007,13 +3007,13 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: Colors.amber.shade50,
+                color: isDark ? Colors.amber.shade900.withOpacity(0.2) : Colors.amber.shade50,
                 borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(color: Colors.amber.shade200),
+                border: Border.all(color: isDark ? Colors.amber.shade700 : Colors.amber.shade200),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.amber.shade700, size: 20.sp),
+                  Icon(Icons.info_outline, color: isDark ? Colors.amber.shade400 : Colors.amber.shade700, size: 20.sp),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
@@ -3238,7 +3238,7 @@ class _ColorPickerDialog extends StatelessWidget {
                     color: bgColor,
                     borderRadius: BorderRadius.circular(3.r),
                     border: Border.all(
-                      color: isUsed ? Colors.red : Colors.grey.shade300,
+                      color: isUsed ? Colors.red : colorScheme.outline,
                       width: isUsed ? 2 : 1,
                     ),
                   ),
