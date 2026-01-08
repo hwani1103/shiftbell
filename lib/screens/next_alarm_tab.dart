@@ -529,9 +529,12 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
   // ⭐ 전체 알람 목록 바텀시트
   void _showAllAlarmsSheet(BuildContext context) {
+    if (!mounted) return;
+
     // ⭐ 열기 전 최신 데이터 로드
     ref.read(alarmNotifierProvider.notifier).refresh();
 
+    // refresh 후 다시 mounted 체크
     if (!mounted) return;
 
     showModalBottomSheet(
@@ -748,7 +751,9 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
   }
 
   Future<void> _onTypeSelected(int alarmId, int typeId) async {
+    if (!mounted) return;
     await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarmId, typeId);
+    if (!mounted) return;
   }
 
   Widget _buildTypeSelectButton({
