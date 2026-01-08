@@ -665,32 +665,11 @@ class _InitialRouterState extends State<InitialRouter> {
         Navigator.of(context).pushReplacementNamed('/onboarding');
       }
     } else {
-      // ⭐ 홈 화면인 경우, 초기 탭 결정
-      int initialIndex = 1;  // 기본값: 달력탭
-
-      try {
-        // DB에서 미래 알람 확인
-        final db = await DatabaseService.instance.database;
-        final now = DateTime.now();
-        final result = await db.query(
-          'alarms',
-          where: 'date > ?',
-          whereArgs: [now.toIso8601String()],
-          limit: 1,
-        );
-
-        if (result.isNotEmpty) {
-          initialIndex = 0;  // 알람이 있으면 다음알람탭
-        }
-      } catch (e) {
-        print('❌ 초기 탭 결정 실패: $e');
-        // 에러 시 기본값(달력탭) 유지
-      }
-
+      // ⭐ 홈 화면: 항상 달력탭으로 시작
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => MainScreen(initialIndex: initialIndex),
+            builder: (context) => MainScreen(initialIndex: 1),  // 달력탭 고정
           ),
         );
       }
