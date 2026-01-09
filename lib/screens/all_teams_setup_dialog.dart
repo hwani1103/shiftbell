@@ -372,7 +372,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
           ),
           SizedBox(height: 8.h),
           Text(
-            '전체 교대조를 입력해주세요. (한 글자로만, 띄어쓰기로 구분)',
+            '전체 교대조를 입력해주세요.\n(한 글자만, 띄어쓰기로 구분)',
             style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 24.h),
@@ -383,7 +383,6 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
             decoration: InputDecoration(
               labelText: '조 이름 (예: A B C D)',
               hintText: null,  // ⭐ 활성화 시 placeholder 안 보이게
-              helperText: '한 글자로만 입력하고 띄어쓰기로 구분해주세요',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
