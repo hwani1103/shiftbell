@@ -2153,7 +2153,8 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                       child: Text('저장', style: TextStyle(fontSize: 16.sp)),
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  // ⭐ SafeArea 확보 (홈 버튼 영역 고려)
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 16.h),
                 ],
               ),
             ),
