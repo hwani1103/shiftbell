@@ -443,7 +443,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    '한 글자만 입력 가능합니다. (예: A, 가, 1)\n최소 2개 조 이상 입력해주세요.',
+                    '한 글자만 입력 가능합니다.\n(예: A, 가, 1)\n최소 2개 조 이상 입력해주세요.',
                     style: TextStyle(fontSize: 12.sp, color: Colors.amber.shade800),
                   ),
                 ),
