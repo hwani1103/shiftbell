@@ -13,39 +13,33 @@ class UpdateService {
   /// 업데이트 체크 (버전당 1번만 알림)
   static Future<void> checkForUpdate(BuildContext context) async {
     try {
-      // ⭐⭐⭐ 테스트용: 항상 다이얼로그 표시 (다크모드 테스트) ⭐⭐⭐
-      if (context.mounted) {
-        await _showUpdateDialog(context);
+      final info = await InAppUpdate.checkForUpdate();
+
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        final availableVersion = info.availableVersionCode ?? 0;
+
+        // 이미 이 버전에 대해 알림했는지 체크
+        final prefs = await SharedPreferences.getInstance();
+        final notifiedVersion = prefs.getInt(_notifiedVersionKey) ?? 0;
+
+        if (availableVersion > notifiedVersion) {
+          // 새 버전 알림 표시
+          if (context.mounted) {
+            final result = await _showUpdateDialog(context);
+
+            // ⭐ 버튼을 명확히 눌렀을 때만 저장 (백버튼/바깥터치 dismiss 제외)
+            // result: null = 백버튼/바깥터치, false = "나중에", true = "업데이트"
+            if (result != null) {
+              await prefs.setInt(_notifiedVersionKey, availableVersion);
+
+              if (result) {
+                await _openPlayStore();
+              }
+            }
+            // result가 null이면 저장하지 않음 → 다음 실행 시 다시 표시
+          }
+        }
       }
-      return;
-      // ⭐⭐⭐ 원래 코드 (테스트 후 복원 필요) ⭐⭐⭐
-      // final info = await InAppUpdate.checkForUpdate();
-      //
-      // if (info.updateAvailability == UpdateAvailability.updateAvailable) {
-      //   final availableVersion = info.availableVersionCode ?? 0;
-      //
-      //   // 이미 이 버전에 대해 알림했는지 체크
-      //   final prefs = await SharedPreferences.getInstance();
-      //   final notifiedVersion = prefs.getInt(_notifiedVersionKey) ?? 0;
-      //
-      //   if (availableVersion > notifiedVersion) {
-      //     // 새 버전 알림 표시
-      //     if (context.mounted) {
-      //       final result = await _showUpdateDialog(context);
-      //
-      //       // ⭐ 버튼을 명확히 눌렀을 때만 저장 (백버튼/바깥터치 dismiss 제외)
-      //       // result: null = 백버튼/바깥터치, false = "나중에", true = "업데이트"
-      //       if (result != null) {
-      //         await prefs.setInt(_notifiedVersionKey, availableVersion);
-      //
-      //         if (result) {
-      //           await _openPlayStore();
-      //         }
-      //       }
-      //       // result가 null이면 저장하지 않음 → 다음 실행 시 다시 표시
-      //     }
-      //   }
-      // }
     } catch (e) {
       // 업데이트 체크 실패해도 앱 사용에는 문제 없음
       debugPrint('업데이트 체크 실패: $e');
