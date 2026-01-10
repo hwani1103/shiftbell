@@ -3,8 +3,42 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/permission_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PermissionIntroScreen extends StatelessWidget {
+class PermissionIntroScreen extends StatefulWidget {
   const PermissionIntroScreen({super.key});
+
+  @override
+  State<PermissionIntroScreen> createState() => _PermissionIntroScreenState();
+}
+
+class _PermissionIntroScreenState extends State<PermissionIntroScreen> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 앱이 포그라운드로 돌아올 때 권한 확인
+    if (state == AppLifecycleState.resumed) {
+      _checkPermissionsAndNavigate();
+    }
+  }
+
+  Future<void> _checkPermissionsAndNavigate() async {
+    final permissions = await PermissionService().checkPermissions();
+    final allGranted = permissions['notification']! && permissions['overlay']!;
+
+    if (allGranted && mounted) {
+      _navigateToOnboarding();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +98,7 @@ class PermissionIntroScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 56.h,
                 child: ElevatedButton(
-                  onPressed: () => _requestPermissions(context),
+                  onPressed: _requestPermissions,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colorScheme.primary,
                     shape: RoundedRectangleBorder(
@@ -86,7 +120,7 @@ class PermissionIntroScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 56.h,
                 child: TextButton(
-                  onPressed: () => _skipPermissions(context),
+                  onPressed: _skipPermissions,
                   child: Text(
                     '나중에 하기',
                     style: TextStyle(
@@ -194,11 +228,11 @@ class PermissionIntroScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _requestPermissions(BuildContext context) async {
+  Future<void> _requestPermissions() async {
     // 권한 요청
     final allGranted = await PermissionService().requestAllPermissions();
 
-    if (!context.mounted) return;
+    if (!mounted) return;
 
     // 권한 상태 저장
     final prefs = await SharedPreferences.getInstance();
@@ -206,23 +240,23 @@ class PermissionIntroScreen extends StatelessWidget {
 
     if (allGranted) {
       // 모두 허용 → 온보딩으로
-      _navigateToOnboarding(context);
+      _navigateToOnboarding();
     } else {
       // 일부 거부 → 경고 다이얼로그 표시
-      _showPermissionWarning(context);
+      _showPermissionWarning();
     }
   }
 
-  Future<void> _skipPermissions(BuildContext context) async {
+  Future<void> _skipPermissions() async {
     // 나중에 하기 → 경고 다이얼로그 표시
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('permissions_requested', true);
 
-    if (!context.mounted) return;
-    _showPermissionWarning(context);
+    if (!mounted) return;
+    _showPermissionWarning();
   }
 
-  void _showPermissionWarning(BuildContext context) {
+  void _showPermissionWarning() {
     final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
@@ -269,7 +303,7 @@ class PermissionIntroScreen extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _navigateToOnboarding(context);
+              _navigateToOnboarding();
             },
             style: TextButton.styleFrom(
               foregroundColor: colorScheme.onSurfaceVariant,
@@ -281,7 +315,7 @@ class PermissionIntroScreen extends StatelessWidget {
     );
   }
 
-  void _navigateToOnboarding(BuildContext context) {
+  void _navigateToOnboarding() {
     Navigator.of(context).pushReplacementNamed('/onboarding');
   }
 }
