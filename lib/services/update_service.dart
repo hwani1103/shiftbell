@@ -105,21 +105,12 @@ class UpdateService {
             SizedBox(height: 8.h),
 
             // 안내 문구
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: isDark
-                    ? colorScheme.primaryContainer.withOpacity(0.3)
-                    : colorScheme.primaryContainer.withOpacity(0.5),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Text(
-                '저장된 정보는 그대로 유지됩니다',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: colorScheme.onSurfaceVariant,
-                ),
+            Text(
+              '(저장된 정보는 그대로 유지됩니다)',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: colorScheme.onSurfaceVariant.withOpacity(0.7),
               ),
             ),
             SizedBox(height: 24.h),
