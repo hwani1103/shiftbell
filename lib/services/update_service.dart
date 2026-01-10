@@ -56,129 +56,124 @@ class UpdateService {
   /// 반환값: null = dismiss(백버튼/바깥터치), false = "나중에", true = "업데이트"
   static Future<bool?> _showUpdateDialog(BuildContext context) async {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return await showDialog<bool?>(
       context: context,
       barrierDismissible: true,  // 바깥 터치로 닫기 가능 (null 반환)
-      builder: (context) => Dialog(
+      builder: (context) => AlertDialog(
+        backgroundColor: colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
         ),
-        child: Container(
-          padding: EdgeInsets.all(24.w),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16.r),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                colorScheme.primaryContainer,
-                colorScheme.surface,
-              ],
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // 아이콘
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.system_update,
-                  size: 40.sp,
+        contentPadding: EdgeInsets.all(24.w),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // 타이틀
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.celebration,
+                  size: 24.sp,
                   color: colorScheme.primary,
                 ),
-              ),
-              SizedBox(height: 20.h),
-
-              // 타이틀
-              Text(
-                '새 버전이 있어요!',
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
+                SizedBox(width: 8.w),
+                Text(
+                  '새 버전이 있어요!',
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
-              ),
-              SizedBox(height: 12.h),
+              ],
+            ),
+            SizedBox(height: 20.h),
 
-              // 설명
-              Text(
-                '더 나은 사용을 위해\n업데이트를 권장드려요.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.5,
-                ),
+            // 설명
+            Text(
+              '더 나은 사용을 위해\n업데이트를 권장드려요.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: colorScheme.onSurfaceVariant,
+                height: 1.5,
               ),
-              SizedBox(height: 8.h),
+            ),
+            SizedBox(height: 8.h),
 
-              // 안내 문구
-              Text(
-                '(저장된 정보는 그대로 유지됩니다.)',
+            // 안내 문구
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? colorScheme.primaryContainer.withOpacity(0.3)
+                    : colorScheme.primaryContainer.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Text(
+                '저장된 정보는 그대로 유지됩니다',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 12.sp,
-                  color: colorScheme.onSurfaceVariant.withOpacity(0.7),
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
-              SizedBox(height: 24.h),
+            ),
+            SizedBox(height: 24.h),
 
-              // 버튼들
-              Row(
-                children: [
-                  // 나중에 버튼
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => Navigator.pop(context, false),  // 명확한 선택
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        side: BorderSide(color: colorScheme.outline),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
+            // 버튼들
+            Row(
+              children: [
+                // 나중에 버튼
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      side: BorderSide(color: colorScheme.outline),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
                       ),
-                      child: Text(
-                        '나중에',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                    ),
+                    child: Text(
+                      '나중에',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                ),
+                SizedBox(width: 12.w),
 
-                  // 업데이트 버튼
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context, true),  // 명확한 선택
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.primary,
-                        foregroundColor: colorScheme.onPrimary,
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
+                // 업데이트 버튼
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
                       ),
-                      child: Text(
-                        '업데이트',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    ),
+                    child: Text(
+                      '업데이트',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
