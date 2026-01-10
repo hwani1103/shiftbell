@@ -11,6 +11,8 @@ class PermissionIntroScreen extends StatefulWidget {
 }
 
 class _PermissionIntroScreenState extends State<PermissionIntroScreen> with WidgetsBindingObserver {
+  bool _isNavigating = false; // 중복 navigate 방지
+
   @override
   void initState() {
     super.initState();
@@ -26,12 +28,14 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // 앱이 포그라운드로 돌아올 때 권한 확인
-    if (state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed && !_isNavigating) {
       _checkPermissionsAndNavigate();
     }
   }
 
   Future<void> _checkPermissionsAndNavigate() async {
+    if (_isNavigating) return; // 이미 이동 중이면 무시
+
     final permissions = await PermissionService().checkPermissions();
     final allGranted = permissions['notification']! && permissions['overlay']!;
 
@@ -316,6 +320,8 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
   }
 
   void _navigateToOnboarding() {
+    if (_isNavigating) return; // 중복 방지
+    _isNavigating = true;
     Navigator.of(context).pushReplacementNamed('/onboarding');
   }
 }
