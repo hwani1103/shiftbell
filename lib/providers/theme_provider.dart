@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,18 +10,29 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
   }
 
   static const String _themeKey = 'theme_mode';
+  static const String _themeManuallySetKey = 'theme_manually_set';
 
   // 저장된 테마 로드
   Future<void> _loadTheme() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final themeModeString = prefs.getString(_themeKey);
+      final isManuallySet = prefs.getBool(_themeManuallySetKey) ?? false;
 
-      if (themeModeString != null) {
-        state = ThemeMode.values.firstWhere(
-          (mode) => mode.toString() == themeModeString,
-          orElse: () => ThemeMode.light,
-        );
+      if (isManuallySet) {
+        // 사용자가 한번이라도 변경했으면 저장된 값 사용
+        final themeModeString = prefs.getString(_themeKey);
+        if (themeModeString != null) {
+          state = ThemeMode.values.firstWhere(
+            (mode) => mode.toString() == themeModeString,
+            orElse: () => ThemeMode.light,
+          );
+          print('✅ 사용자 설정 테마 로드: $state');
+        }
+      } else {
+        // 첫 설치: 시스템 설정 따라감
+        final platformBrightness = PlatformDispatcher.instance.platformBrightness;
+        state = platformBrightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
+        print('✅ 시스템 설정 테마 로드: $state (시스템: $platformBrightness)');
       }
     } catch (e) {
       print('❌ 테마 로드 실패: $e');
@@ -33,7 +45,8 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_themeKey, mode.toString());
-      print('✅ 테마 저장: $mode');
+      await prefs.setBool(_themeManuallySetKey, true); // 수동 설정 플래그
+      print('✅ 테마 저장: $mode (수동 설정됨)');
     } catch (e) {
       print('❌ 테마 저장 실패: $e');
     }
