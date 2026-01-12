@@ -5,39 +5,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // 테마 모드 상태 관리
 class ThemeNotifier extends StateNotifier<ThemeMode> {
-  ThemeNotifier() : super(ThemeMode.light) {
-    _loadTheme();
+  // 기본 생성자 (앱 시작 시 사용 안 함, override로 대체)
+  ThemeNotifier() : super(ThemeMode.light);
+
+  // 초기 테마와 함께 생성 (깜빡임 방지)
+  ThemeNotifier.withInitialTheme(ThemeMode initialTheme) : super(initialTheme) {
+    print('✅ 초기 테마로 시작: $initialTheme');
   }
 
   static const String _themeKey = 'theme_mode';
   static const String _themeManuallySetKey = 'theme_manually_set';
-
-  // 저장된 테마 로드
-  Future<void> _loadTheme() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final isManuallySet = prefs.getBool(_themeManuallySetKey) ?? false;
-
-      if (isManuallySet) {
-        // 사용자가 한번이라도 변경했으면 저장된 값 사용
-        final themeModeString = prefs.getString(_themeKey);
-        if (themeModeString != null) {
-          state = ThemeMode.values.firstWhere(
-            (mode) => mode.toString() == themeModeString,
-            orElse: () => ThemeMode.light,
-          );
-          print('✅ 사용자 설정 테마 로드: $state');
-        }
-      } else {
-        // 첫 설치: 시스템 설정 따라감
-        final platformBrightness = PlatformDispatcher.instance.platformBrightness;
-        state = platformBrightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
-        print('✅ 시스템 설정 테마 로드: $state (시스템: $platformBrightness)');
-      }
-    } catch (e) {
-      print('❌ 테마 로드 실패: $e');
-    }
-  }
 
   // 테마 변경 및 저장
   Future<void> setThemeMode(ThemeMode mode) async {

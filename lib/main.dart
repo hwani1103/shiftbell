@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -34,11 +35,44 @@ void main() async {
   // ⭐ 10일 이상 지난 알람 이력 자동 삭제
   await DatabaseService.instance.deleteOldAlarmHistory();
 
+  // ⭐ 앱 시작 전에 테마 미리 로드 (깜빡임 방지)
+  final initialTheme = await _loadInitialTheme();
+
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    ProviderScope(
+      overrides: [
+        // 초기 테마를 미리 설정
+        themeProvider.overrideWith((ref) => ThemeNotifier.withInitialTheme(initialTheme)),
+      ],
+      child: const MyApp(),
     ),
   );
+}
+
+// 앱 시작 전에 테마 로드
+Future<ThemeMode> _loadInitialTheme() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final isManuallySet = prefs.getBool('theme_manually_set') ?? false;
+
+    if (isManuallySet) {
+      // 사용자가 설정한 테마
+      final themeModeString = prefs.getString('theme_mode');
+      if (themeModeString != null) {
+        return ThemeMode.values.firstWhere(
+          (mode) => mode.toString() == themeModeString,
+          orElse: () => ThemeMode.light,
+        );
+      }
+    }
+
+    // 시스템 테마 따라가기
+    final platformBrightness = PlatformDispatcher.instance.platformBrightness;
+    return platformBrightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
+  } catch (e) {
+    print('❌ 초기 테마 로드 실패: $e');
+    return ThemeMode.light;
+  }
 }
 
 class MyApp extends StatefulWidget {
