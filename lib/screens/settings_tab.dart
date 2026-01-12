@@ -786,8 +786,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 3. 데이터 저장
 모든 데이터는 기기 내부에만 저장됩니다. 앱을 삭제하면 모든 데이터가 함께 삭제됩니다.
 
-4. 문의
-앱 관련 문의사항 : https://lowvibe07.tistory.com/
+4.앱 관련 문의사항
+lowvibe07.tistory.com
 
 최종 수정일: 2025년 12월''',
             style: TextStyle(fontSize: 13.sp, height: 1.6),
