@@ -584,10 +584,16 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
     final indicesJson = _teamIndices.map((key, value) => MapEntry(key, value.toString()));
     await prefs.setString('all_teams_indices', jsonEncode(indicesJson));
 
+    // ⭐ CRITICAL FIX: 기준 날짜 저장 (패턴 밀림 방지)
+    final today = DateTime.now();
+    final referenceDate = DateTime(today.year, today.month, today.day);
+    await prefs.setString('all_teams_reference_date', referenceDate.toIso8601String());
+
     print('✅ 전체 교대조 근무표 저장 완료:');
     print('  - 조 목록: $_teamNames');
     print('  - 본인 조: $_myTeam');
     print('  - 인덱스: $_teamIndices');
+    print('  - 기준 날짜: ${referenceDate.toIso8601String()}');
 
     if (!mounted) return;
 

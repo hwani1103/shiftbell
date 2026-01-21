@@ -35,6 +35,9 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
     'D': 7,
   };
 
+  // ⭐ CRITICAL FIX: 기준 날짜 (패턴 밀림 방지)
+  DateTime? _referenceDate;
+
   @override
   void initState() {
     super.initState();
@@ -73,9 +76,24 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
           );
         }
 
+        // ⭐ CRITICAL FIX: 기준 날짜 로드
+        final referenceDateStr = prefs.getString('all_teams_reference_date');
+        if (referenceDateStr != null) {
+          try {
+            _referenceDate = DateTime.parse(referenceDateStr);
+          } catch (e) {
+            print('⚠️ 기준 날짜 파싱 실패: $e');
+            _referenceDate = DateTime.now(); // 폴백: 오늘
+          }
+        } else {
+          print('⚠️ 기준 날짜 없음 - 오늘로 설정 (이전 버전 호환)');
+          _referenceDate = DateTime.now();
+        }
+
         print('✅ 전체 근무표 데이터 로드 완료:');
         print('  - 조 목록: $_teams');
         print('  - 인덱스: $_teamOffsets');
+        print('  - 기준 날짜: ${_referenceDate?.toIso8601String()}');
       } else {
         print('⚠️ 전체 교대조 근무표가 설정되지 않았습니다.');
       }
@@ -134,18 +152,22 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   String _getShiftForTeam(String team, DateTime date, List<String> pattern) {
     if (pattern.isEmpty) return '';
 
-    // 오늘 날짜 기준
-    final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
+    // ⭐ CRITICAL FIX: 기준 날짜 사용 (설정 시점 날짜)
+    if (_referenceDate == null) {
+      print('⚠️ 기준 날짜 없음 - 빈 문자열 반환');
+      return '';
+    }
+
+    final referenceDate = DateTime(_referenceDate!.year, _referenceDate!.month, _referenceDate!.day);
     final targetDate = DateTime(date.year, date.month, date.day);
 
-    // 오늘부터 대상 날짜까지의 일수 차이
-    final daysDiff = targetDate.difference(todayDate).inDays;
+    // 기준 날짜부터 대상 날짜까지의 일수 차이
+    final daysDiff = targetDate.difference(referenceDate).inDays;
 
-    // 이 조의 오늘 인덱스 (1~8)
+    // 이 조의 기준 날짜 인덱스 (1~8)
     final todayIndex = _teamOffsets[team] ?? 1;
 
-    // 대상 날짜의 인덱스 계산: (오늘 인덱스 - 1 + 날짜차이) % 패턴길이
+    // 대상 날짜의 인덱스 계산: (기준 인덱스 - 1 + 날짜차이) % 패턴길이
     final patternIndex = ((todayIndex - 1 + daysDiff) % pattern.length + pattern.length) % pattern.length;
 
     return pattern[patternIndex];
