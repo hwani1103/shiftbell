@@ -27,16 +27,16 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   // ⭐ 저장된 데이터
   List<String> _teams = ['A', 'B', 'C', 'D'];
 
-  // ⭐ 각 조의 오늘 인덱스 (1~8)
+  // ⭐ 각 조의 오프셋 (패턴 시작점, 0~패턴길이-1)
   Map<String, int> _teamOffsets = {
-    'A': 1,
-    'B': 3,
-    'C': 5,
-    'D': 7,
+    'A': 0,
+    'B': 1,
+    'C': 2,
+    'D': 3,
   };
 
-  // ⭐ CRITICAL FIX: 기준 날짜 (패턴 밀림 방지)
-  DateTime? _referenceDate;
+  // ⭐ CRITICAL FIX: 절대 기준일 (고정, 저장 불필요)
+  static final DateTime _baseDate = DateTime(2024, 1, 1);
 
   @override
   void initState() {
@@ -66,34 +66,19 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
         _isConfigured = false; // ⭐ 미설정 상태
       }
 
-      // 저장된 인덱스 가져오기
+      // 저장된 오프셋 가져오기
       if (_isConfigured) {
-        final indicesJson = prefs.getString('all_teams_indices');
-        if (indicesJson != null) {
-          final Map<String, dynamic> decoded = jsonDecode(indicesJson);
+        final offsetsJson = prefs.getString('all_teams_offsets');
+        if (offsetsJson != null) {
+          final Map<String, dynamic> decoded = jsonDecode(offsetsJson);
           _teamOffsets = decoded.map((key, value) =>
             MapEntry(key, int.parse(value.toString()))
           );
         }
 
-        // ⭐ CRITICAL FIX: 기준 날짜 로드
-        final referenceDateStr = prefs.getString('all_teams_reference_date');
-        if (referenceDateStr != null) {
-          try {
-            _referenceDate = DateTime.parse(referenceDateStr);
-          } catch (e) {
-            print('⚠️ 기준 날짜 파싱 실패: $e');
-            _referenceDate = DateTime.now(); // 폴백: 오늘
-          }
-        } else {
-          print('⚠️ 기준 날짜 없음 - 오늘로 설정 (이전 버전 호환)');
-          _referenceDate = DateTime.now();
-        }
-
         print('✅ 전체 근무표 데이터 로드 완료:');
         print('  - 조 목록: $_teams');
-        print('  - 인덱스: $_teamOffsets');
-        print('  - 기준 날짜: ${_referenceDate?.toIso8601String()}');
+        print('  - 오프셋: $_teamOffsets');
       } else {
         print('⚠️ 전체 교대조 근무표가 설정되지 않았습니다.');
       }
@@ -152,23 +137,15 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
   String _getShiftForTeam(String team, DateTime date, List<String> pattern) {
     if (pattern.isEmpty) return '';
 
-    // ⭐ CRITICAL FIX: 기준 날짜 사용 (설정 시점 날짜)
-    if (_referenceDate == null) {
-      print('⚠️ 기준 날짜 없음 - 빈 문자열 반환');
-      return '';
-    }
-
-    final referenceDate = DateTime(_referenceDate!.year, _referenceDate!.month, _referenceDate!.day);
+    // ⭐ CRITICAL FIX: 절대 기준일부터 날짜 차이 계산 (간단 & 안전)
     final targetDate = DateTime(date.year, date.month, date.day);
+    final daysFromBase = targetDate.difference(_baseDate).inDays;
 
-    // 기준 날짜부터 대상 날짜까지의 일수 차이
-    final daysDiff = targetDate.difference(referenceDate).inDays;
+    // 이 조의 오프셋 (0~패턴길이-1)
+    final offset = _teamOffsets[team] ?? 0;
 
-    // 이 조의 기준 날짜 인덱스 (1~8)
-    final todayIndex = _teamOffsets[team] ?? 1;
-
-    // 대상 날짜의 인덱스 계산: (기준 인덱스 - 1 + 날짜차이) % 패턴길이
-    final patternIndex = ((todayIndex - 1 + daysDiff) % pattern.length + pattern.length) % pattern.length;
+    // 패턴 인덱스 계산
+    final patternIndex = (offset + daysFromBase) % pattern.length;
 
     return pattern[patternIndex];
   }

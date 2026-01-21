@@ -580,20 +580,30 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
     await prefs.setStringList('all_teams_names', _teamNames);
     await prefs.setString('all_teams_my_team', _myTeam ?? '');
 
-    // 인덱스를 JSON 문자열로 저장
-    final indicesJson = _teamIndices.map((key, value) => MapEntry(key, value.toString()));
-    await prefs.setString('all_teams_indices', jsonEncode(indicesJson));
-
-    // ⭐ CRITICAL FIX: 기준 날짜 저장 (패턴 밀림 방지)
+    // ⭐ SIMPLIFIED: 절대 기준 날짜 기반 오프셋 계산
+    final baseDate = DateTime(2024, 1, 1);  // 고정된 기준 날짜
     final today = DateTime.now();
-    final referenceDate = DateTime(today.year, today.month, today.day);
-    await prefs.setString('all_teams_reference_date', referenceDate.toIso8601String());
+    final setupDate = DateTime(today.year, today.month, today.day);
+    final daysFromBase = setupDate.difference(baseDate).inDays;
+
+    // 각 조의 오프셋 계산 (0-based)
+    final offsetsJson = _teamIndices.map((team, selectedIndex) {
+      // selectedIndex는 1~8 (사용자가 선택한 패턴 위치)
+      // 오늘의 패턴 인덱스: selectedIndex - 1 (0-based)
+      // 오프셋 계산: (패턴인덱스 - 기준일로부터 경과일수) % 패턴길이
+      final offset = ((selectedIndex - 1 - daysFromBase) % widget.pattern.length + widget.pattern.length) % widget.pattern.length;
+      return MapEntry(team, offset.toString());
+    });
+
+    await prefs.setString('all_teams_offsets', jsonEncode(offsetsJson));
 
     print('✅ 전체 교대조 근무표 저장 완료:');
     print('  - 조 목록: $_teamNames');
     print('  - 본인 조: $_myTeam');
-    print('  - 인덱스: $_teamIndices');
-    print('  - 기준 날짜: ${referenceDate.toIso8601String()}');
+    print('  - 선택 인덱스: $_teamIndices');
+    print('  - 계산된 오프셋: $offsetsJson');
+    print('  - 설정 날짜: ${setupDate.toIso8601String()}');
+    print('  - 기준일 경과: $daysFromBase일');
 
     if (!mounted) return;
 
