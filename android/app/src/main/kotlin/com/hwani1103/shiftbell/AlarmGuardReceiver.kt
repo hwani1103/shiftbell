@@ -37,32 +37,26 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // 갱신 체크
             AlarmRefreshUtil.checkAndTriggerRefresh(context)
 
-            // 다음 알람 체크
+            // 다음 알람 체크 + 8888 상태 갱신
             val instance = AlarmGuardReceiver()
             val nextAlarm = instance.getNextAlarmFromDB(context)
-
-            if (nextAlarm != null) {
-                instance.checkAndNotify(context, nextAlarm)
-            }
+            instance.updateTwentyMinuteNotification(context, nextAlarm)
 
             // 다음 Wakeup 예약
             instance.scheduleNextWakeup(context)
         }
     }
-    
+
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("AlarmGuardReceiver", "⏰ Wakeup 수신")
-        
+
         // ⭐ 신규: 갱신 체크 & 실행 (Native에서 직접!)
         AlarmRefreshUtil.checkAndTriggerRefresh(context)
-        
-        // 다음 알람 체크 (20분 이내면 Notification)
+
+        // 다음 알람 체크 + 8888 상태 갱신 (20분 이내면 표시, 아니면 정리)
         val nextAlarm = getNextAlarmFromDB(context)
-        
-        if (nextAlarm != null) {
-            checkAndNotify(context, nextAlarm)
-        }
-        
+        updateTwentyMinuteNotification(context, nextAlarm)
+
         // 다음 Wakeup 예약
         scheduleNextWakeup(context)
     }
@@ -127,27 +121,46 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         Log.d("AlarmGuardReceiver", "✅ 다음 Wakeup 예약: ${Date(wakeupTime)}")
     }
     
-    private fun checkAndNotify(context: Context, alarm: AlarmData) {
+    // ⭐ CRITICAL FIX: 8888(20분 전 알림)의 표시/유지/취소를 여기 한 곳에서만 결정함.
+    // 예전엔 AlarmActivity/Overlay의 끄기·타임아웃, Dart의 cancelNotification 등
+    // 여러 곳에서 "일단 8888 지우기"를 산발적으로 했는데, 8888은 특정 알람 전용이
+    // 아니라 "지금 시점에 20분 이내로 가장 가까운 알람"을 가리키는 공용 슬롯이라,
+    // 알람 A를 끄면서 8888을 지웠는데 그게 사실 알람 B(다른 가까운 알람)의 정당한
+    // 리마인더였던 경우 B의 리마인더가 통째로 사라지고 다시 안 뜨는 버그가 있었음
+    // (shownNotifications에 B가 이미 있다고 기록되어 있어서 재표시도 안 됐음).
+    // 이제 "지울지 말지"까지 이 함수가 매번 최신 상태 기준으로 다시 결정함.
+    private fun updateTwentyMinuteNotification(context: Context, alarm: AlarmData?) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (alarm == null) {
+            notificationManager.cancel(TWENTY_MIN_NOTIFICATION_ID)
+            return
+        }
+
         val now = System.currentTimeMillis()
         val timeUntil = alarm.timestamp - now
-        
-        if (timeUntil > 0 && timeUntil <= 20 * 60 * 1000) {
-            Log.d("AlarmGuardReceiver", "🔍 알람 20분 이내: ${alarm.time} (${alarm.shiftType})")
-            
-            if (!isAlarmScheduled(context, alarm.id)) {
-                Log.e("AlarmGuardReceiver", "❌ 알람 누락! 재등록")
-                reScheduleAlarm(context, alarm)
-            } else {
-                Log.d("AlarmGuardReceiver", "✅ 알람 정상")
-            }
-            
-            if (shownNotifications.contains(alarm.id)) {
-                Log.d("AlarmGuardReceiver", "⏭️ Notification 스킵 (이미 표시함)")
-            } else {
-                show20MinuteNotification(context, alarm)
-                shownNotifications.add(alarm.id)
-                Log.d("AlarmGuardReceiver", "✅ Notification 표시 (ID: ${alarm.id})")
-            }
+
+        if (timeUntil <= 0 || timeUntil > 20 * 60 * 1000) {
+            // 다음 알람이 아직 20분 밖이거나 이미 지났으면 지금 보여줄 게 없음
+            notificationManager.cancel(TWENTY_MIN_NOTIFICATION_ID)
+            return
+        }
+
+        Log.d("AlarmGuardReceiver", "🔍 알람 20분 이내: ${alarm.time} (${alarm.shiftType})")
+
+        if (!isAlarmScheduled(context, alarm.id)) {
+            Log.e("AlarmGuardReceiver", "❌ 알람 누락! 재등록")
+            reScheduleAlarm(context, alarm)
+        } else {
+            Log.d("AlarmGuardReceiver", "✅ 알람 정상")
+        }
+
+        if (shownNotifications.contains(alarm.id)) {
+            Log.d("AlarmGuardReceiver", "⏭️ Notification 스킵 (이미 표시함)")
+        } else {
+            show20MinuteNotification(context, alarm)
+            shownNotifications.add(alarm.id)
+            Log.d("AlarmGuardReceiver", "✅ Notification 표시 (ID: ${alarm.id})")
         }
     }
     
@@ -203,11 +216,14 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         }
     }
     
+    // ⭐ 정보 표시 전용 (탭하면 앱만 열림). 예전엔 여기에 끄기/5분후 버튼이 있었는데,
+    // 아직 울리지도 않은 알람을 제어하는 경로가 달력/다음알람 탭과 겹쳐서 버그가 잦았음.
+    // 실제 끄기/스누즈는 알람이 울리는 상태(AlarmActivity/Overlay, 필요시 7777 알림)에서만 가능함.
     private fun show20MinuteNotification(context: Context, alarm: AlarmData) {
         createNotificationChannel(context)
-        
+
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        
+
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("openTab", 0)
@@ -218,34 +234,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
-        val cancelIntent = Intent(context, AlarmActionReceiver::class.java).apply {
-            action = "CANCEL_ALARM"
-            putExtra("alarmId", alarm.id)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, alarm.shiftType)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-        }
-        val cancelPendingIntent = PendingIntent.getBroadcast(
-            context,
-            alarm.id + 10000,
-            cancelIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val extendIntent = Intent(context, AlarmActionReceiver::class.java).apply {
-            action = "EXTEND_ALARM"
-            putExtra("alarmId", alarm.id)
-            putExtra("timestamp", alarm.timestamp)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, alarm.shiftType)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-        }
-        val extendPendingIntent = PendingIntent.getBroadcast(
-            context,
-            alarm.id + 20000,
-            extendIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
+
         val notification = NotificationCompat.Builder(context, TWENTY_MIN_CHANNEL_ID)
             .setContentTitle("잠시 후 알람이 울립니다 (${alarm.time})")
             .setContentText(alarm.shiftType)
@@ -260,12 +249,10 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
             .setStyle(NotificationCompat.BigTextStyle().bigText(alarm.shiftType))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
             .setContentIntent(openAppPendingIntent)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "끄기", cancelPendingIntent)
-            .addAction(android.R.drawable.ic_menu_add, "5분 후", extendPendingIntent)
             .build()
-        
+
         notificationManager.notify(TWENTY_MIN_NOTIFICATION_ID, notification)
-        
+
         Log.d("AlarmGuardReceiver", "📢 20분 전 알림 표시: ${alarm.time}")
     }
     

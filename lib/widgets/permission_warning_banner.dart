@@ -40,6 +40,7 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
     final missing = <String>[];
     if (!permissions['notification']!) missing.add('알림');
     if (!permissions['overlay']!) missing.add('다른 앱 위에 표시');
+    if (!permissions['exactAlarm']!) missing.add('정확한 알람');
 
     if (mounted) {
       setState(() {

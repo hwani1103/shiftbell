@@ -6,10 +6,12 @@ import '../services/alarm_service.dart';
 import '../models/shift_schedule.dart';
 import '../models/alarm.dart';
 import '../models/date_memo.dart';
+import '../models/date_overtime.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../providers/memo_provider.dart';
+import '../providers/overtime_provider.dart';
 import 'package:flutter/services.dart';
 import 'all_shifts_view.dart';
 
@@ -209,6 +211,8 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
     final firstDay = DateTime(month.year, month.month, 1).subtract(Duration(days: 7));
     final lastDay = DateTime(month.year, month.month + 1, 0).add(Duration(days: 7));
     ref.read(memoProvider.notifier).loadMemosForDateRange(firstDay, lastDay);
+    // ⭐ 같은 범위로 OT도 같이 로드 (달력에 보이는 달 전체 커버)
+    ref.read(overtimeProvider.notifier).loadForRange(firstDay, lastDay);
   }
 
   // ⭐ 4번 기능: 년/월 선택 다이얼로그
@@ -591,32 +595,27 @@ Widget build(BuildContext context) {
                         ),
                       ),
 
-                      // ⭐ 6번째 줄 화~토 테두리 제거 (흰색 덮개)
+                      // ⭐ 6번째 줄 화~토 (원래 빈 공간이었던 곳) - 이번 달 누적 OT 카드.
+                      // 6번째 줄 전체 높이를 다 덮지 않고 맨 윗부분에만 얇게 붙임 - 달력
+                      // 세로선/격자는 다시 원래대로 다 살리고, 그 아래(빈 칸)는 그대로 노출.
                       Positioned(
                         top: 28.h + 83.h * 5,  // 요일 헤더 + 5줄
                         left: 6.w,
                         right: 6.w,
-                        height: 83.h,
-                        child: IgnorePointer(  // ⭐ 제스처를 아래 TableCalendar로 전달
-                          child: Row(
-                            children: [
-                              // 일요일 + 월요일 칸 (비워둠)
-                              Expanded(flex: 2, child: SizedBox()),
-                              // 화~토 칸 (흰색으로 덮되 상단/좌측 테두리는 유지)
-                              Expanded(
-                                flex: 5,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).scaffoldBackgroundColor,
-                                    border: Border(
-                                      top: BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.3),
-                                      left: BorderSide(color: Theme.of(context).colorScheme.outline, width: 0.3),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                        height: 48.h,
+                        child: Row(
+                          children: [
+                            // 일요일 + 월요일 칸 (다음 달 날짜 표시 - 제스처를 아래 TableCalendar로 전달)
+                            Expanded(
+                              flex: 2,
+                              child: IgnorePointer(child: SizedBox()),
+                            ),
+                            // 화~토 칸 - 월별 OT 누적 카드
+                            Expanded(
+                              flex: 5,
+                              child: _buildMonthlyOvertimeCard(),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -654,6 +653,307 @@ Widget build(BuildContext context) {
     },
   );
 }
+
+  // ⭐ 6번째 줄 빈 공간에 들어가는 "이번 달 누적 OT" 카드
+  Widget _buildMonthlyOvertimeCard() {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Consumer(
+      builder: (context, ref, child) {
+        ref.watch(overtimeProvider); // 값 바뀌면 다시 그리기 위한 구독
+        final notifier = ref.read(overtimeProvider.notifier);
+        final totalMinutes = notifier.getMonthTotal(_focusedDay.year, _focusedDay.month);
+        final hasOvertime = totalMinutes > 0;
+
+        // ⭐ 안쪽에 칸을 나누는 grid 느낌 없이, 5칸 전체를 감싸는 테두리 하나짜리
+        // 가로로 긴 직사각형 하나로. 이 영역에서도 좌우 스와이프로 월 이동 가능하게 함
+        // (탭하면 팝업, 스와이프하면 달력 자체를 스와이프한 것과 동일하게 월 이동).
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onHorizontalDragEnd: (details) {
+            final velocity = details.primaryVelocity;
+            if (velocity == null) return;
+            if (velocity < -300) {
+              _changeMonthBySwipe(1); // 왼쪽으로 스와이프 → 다음 달
+            } else if (velocity > 300) {
+              _changeMonthBySwipe(-1); // 오른쪽으로 스와이프 → 이전 달
+            }
+          },
+          onTap: hasOvertime ? _showMonthlyOvertimeSheet : null,
+          child: Container(
+            // ⭐ 배경을 불투명하게: 반투명(withOpacity)이면 아래 TableCalendar의
+            // 격자 테두리 선이 카드 밑으로 그대로 비쳐 보임 (세로줄이 무시된 채로
+            // 글씨만 그 위에 그려지는 것처럼 보이는 원인이었음)
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? colorScheme.surface
+                  : colorScheme.surfaceVariant,
+              border: Border.all(
+                color: colorScheme.outline.withOpacity(0.4),
+                width: 0.8,
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.schedule_rounded,
+                      size: 16.sp,
+                      // ⭐ outline은 배경과 대비가 너무 약해서(라이트/다크 모두) 잘 안 보였음.
+                      // 팝업의 "OT" 라벨과 같은 조합(onSurfaceVariant + 굵게)으로 통일.
+                      color: hasOvertime ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                    ),
+                    SizedBox(width: 6.w),
+                    Text(
+                      '이번 달 OT',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      hasOvertime ? formatOvertimeMinutes(totalMinutes) : '-',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                        color: hasOvertime ? colorScheme.onSurface : colorScheme.outline,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+                // ⭐ 아직 이번 달에 OT를 하나도 안 넣어본 사용자를 위한 안내문구.
+                // 하루라도 OT가 생기면(hasOvertime) 더 이상 필요 없으니 사라짐.
+                if (!hasOvertime) ...[
+                  SizedBox(height: 2.h),
+                  Text(
+                    '(해당 날짜를 탭하여 OT를 입력하세요)',
+                    style: TextStyle(fontSize: 9.sp, color: colorScheme.outline),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // ⭐ 이번 달 누적 OT 카드에서의 좌우 스와이프 → 달력 자체를 스와이프한 것과
+  // 동일하게 월 이동 (onPageChanged와 동일한 처리)
+  void _changeMonthBySwipe(int direction) {
+    final newMonth = DateTime(_focusedDay.year, _focusedDay.month + direction, 1);
+    setState(() {
+      _focusedDay = newMonth;
+    });
+    _loadMemosForMonth(newMonth);
+  }
+
+  // ⭐ 이번 달 OT 상세 목록 시트
+  void _showMonthlyOvertimeSheet() {
+    final year = _focusedDay.year;
+    final month = _focusedDay.month;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, child) {
+            ref.watch(overtimeProvider);
+            final notifier = ref.read(overtimeProvider.notifier);
+            final entries = notifier.getMonthEntries(year, month);
+            final totalMinutes = notifier.getMonthTotal(year, month);
+            final colorScheme = Theme.of(context).colorScheme;
+
+            return DraggableScrollableSheet(
+              initialChildSize: 0.55,
+              minChildSize: 0.3,
+              maxChildSize: 0.85,
+              expand: false,
+              builder: (context, scrollController) {
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 핸들
+                      Center(
+                        child: Container(
+                          width: 40.w,
+                          height: 4.h,
+                          decoration: BoxDecoration(
+                            color: colorScheme.outline,
+                            borderRadius: BorderRadius.circular(2.r),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      Text(
+                        '$year년 $month월 누적 OT',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        '총 ${formatOvertimeMinutes(totalMinutes)}',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      Expanded(
+                        child: entries.isEmpty
+                            ? Center(
+                                child: Text(
+                                  '등록된 OT가 없습니다',
+                                  style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
+                                ),
+                              )
+                            : ListView.separated(
+                                controller: scrollController,
+                                itemCount: entries.length,
+                                separatorBuilder: (_, __) => SizedBox(height: 8.h),
+                                itemBuilder: (context, index) {
+                                  final entry = entries[index];
+                                  final date = DateTime.parse(entry.key);
+                                  final weekdayStr = _getWeekday(date);
+
+                                  return Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.surfaceVariant.withOpacity(0.4),
+                                      borderRadius: BorderRadius.circular(10.r),
+                                      border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          '${date.month}월 ${date.day}일 ($weekdayStr)',
+                                          style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface),
+                                        ),
+                                        Spacer(),
+                                        Text(
+                                          formatOvertimeMinutes(entry.value),
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: colorScheme.primary,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ⭐ 달력 팝업 헤더에 들어가는 OT 30분 토글 컨트롤
+  Widget _buildOvertimeToggle(String dateStr) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Consumer(
+      builder: (context, ref, child) {
+        ref.watch(overtimeProvider);
+        final notifier = ref.read(overtimeProvider.notifier);
+        final minutes = notifier.getForDate(dateStr);
+        final hasOvertime = minutes > 0;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'OT',
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            SizedBox(height: 6.h),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  hasOvertime ? formatOvertimeMinutes(minutes) : '없음',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.bold,
+                    color: hasOvertime ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                _buildOvertimeStepButton(
+                  icon: Icons.remove_rounded,
+                  enabled: hasOvertime,
+                  onTap: () => notifier.adjust(dateStr, -30),
+                ),
+                SizedBox(width: 6.w),
+                _buildOvertimeStepButton(
+                  icon: Icons.add_rounded,
+                  enabled: true,
+                  onTap: () => notifier.adjust(dateStr, 30),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildOvertimeStepButton({
+    required IconData icon,
+    required bool enabled,
+    required VoidCallback onTap,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        width: 26.w,
+        height: 26.w,
+        decoration: BoxDecoration(
+          color: enabled ? colorScheme.secondaryContainer : colorScheme.surfaceVariant.withOpacity(0.5),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          size: 15.sp,
+          color: enabled ? colorScheme.onSecondaryContainer : colorScheme.outline,
+        ),
+      ),
+    );
+  }
 
   Widget _buildDateCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, {bool isSelected = false}) {
     final shiftText = schedule.getShiftForDate(day);
@@ -872,6 +1172,9 @@ Widget build(BuildContext context) {
     // ⭐ 팝업 열기 전에 메모 로드
     ref.read(memoProvider.notifier).loadMemosForDate(dateStr);
 
+    // ⭐ 팝업 열기 전에 OT 로드 (혹시 최신 상태가 아닐 수 있으니 재확인)
+    ref.read(overtimeProvider.notifier).loadForRange(day, day);
+
     // ⭐ TextEditingController를 밖에서 생성 (키보드 문제 해결)
     final memoController = TextEditingController();
 
@@ -902,10 +1205,17 @@ Widget build(BuildContext context) {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ⭐ 날짜
-                      Text(
-                        '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
-                        style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                      // ⭐ 날짜 + OT(추가근무) 컨트롤
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
+                            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                          ),
+                          Spacer(),
+                          _buildOvertimeToggle(dateStr),
+                        ],
                       ),
                       SizedBox(height: 16.h),
 

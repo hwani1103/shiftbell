@@ -417,7 +417,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             spacing: 8.w,
             runSpacing: 8.h,
             children: _allShiftTypes.map((name) => ElevatedButton(
-              onPressed: _pattern.length < 30 ? () => _addToPattern(name) : null,
+              onPressed: _pattern.length < 40 ? () => _addToPattern(name) : null,
               child: Text(name),
             )).toList(),
           ),
@@ -425,7 +425,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           SizedBox(height: 16.h),
 
           Text(
-            '(최대 30일, 한번 더 탭하면 삭제됩니다.)',
+            '(최대 40일, 한번 더 탭하면 삭제됩니다.)',
             style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 8.h),
@@ -592,7 +592,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   }
 
   void _addToPattern(String shift) {
-    if (_pattern.length < 30) {
+    if (_pattern.length < 40) {
       setState(() => _pattern.add(shift));
     }
   }

@@ -589,12 +589,21 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                           loading: () => Center(child: CircularProgressIndicator()),
                           error: (_, __) => Center(child: Text('오류 발생')),
                           data: (alarms) {
-                            // 미래 알람만 필터링하고 시간순 정렬
-                            final now = DateTime.now();
-                            final futureAlarms = alarms
-                                .where((a) => a.date != null && a.date!.isAfter(now))
-                                .toList()
-                              ..sort((a, b) => a.date!.compareTo(b.date!));
+                            // ⭐ 알람 수정 직후처럼 Native diff 갱신이 아직 끝나지 않은
+                            // 타이밍에 이 목록을 열면, 일시적으로 예상 못한 데이터 형태를
+                            // 만날 수 있음. 여기서 실패해도 목록 전체가 빈 화면으로 죽지
+                            // 않도록 개별 알람 단위로 방어함 (아래 itemBuilder도 동일).
+                            List<Alarm> futureAlarms;
+                            try {
+                              final now = DateTime.now();
+                              futureAlarms = alarms
+                                  .where((a) => a.date != null && a.date!.isAfter(now))
+                                  .toList()
+                                ..sort((a, b) => a.date!.compareTo(b.date!));
+                            } catch (e) {
+                              print('⚠️ 알람 목록 정렬 실패: $e');
+                              return Center(child: Text('알람 목록을 불러오지 못했습니다'));
+                            }
 
                             if (futureAlarms.isEmpty) {
                               return Center(
@@ -624,7 +633,12 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                               itemCount: futureAlarms.length,
                               itemBuilder: (context, index) {
                                 final alarm = futureAlarms[index];
-                                return _buildAlarmListItem(alarm, index == 0);
+                                try {
+                                  return _buildAlarmListItem(alarm, index == 0);
+                                } catch (e) {
+                                  print('⚠️ 알람 항목 렌더링 실패 (id=${alarm.id}): $e');
+                                  return const SizedBox.shrink();
+                                }
                               },
                             );
                           },

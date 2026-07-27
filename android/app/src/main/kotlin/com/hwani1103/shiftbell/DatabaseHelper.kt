@@ -16,7 +16,7 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
 ) {
     companion object {
         private const val DATABASE_NAME = "shiftbell.db"
-        private const val DATABASE_VERSION = 12  // Flutter와 동일하게 유지
+        private const val DATABASE_VERSION = 13  // Flutter와 동일하게 유지
         private const val TAG = "DatabaseHelper"
 
         @Volatile
@@ -94,14 +94,17 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
     }
 
     // ⭐ 중복 알람 체크: 동일한 시각에 다른 알람이 이미 등록되어 있는지 확인
-    fun isTimeConflict(context: Context, targetTimestamp: Long, excludeId: Int? = null): Boolean {
+    // ⭐ CRITICAL FIX: Context를 받아 내부적으로 커넥션을 열고 닫는 방식이었는데,
+    // DatabaseHelper가 싱글턴이라 이미 열려있는 커넥션(getWritableDatabase로 연 것)과
+    // 같은 커넥션을 공유함. 이 함수가 끝나면서 그 커넥션을 닫아버리면, 이 함수를
+    // "이미 DB를 열어둔 상태"에서 호출한 쪽(AlarmActionHelper.snooze 등)이 그 다음
+    // 작업(트랜잭션 등)을 이미 닫힌 커넥션으로 시도하다 예외가 나서 조용히 실패했음
+    // (스누즈를 눌러도 DB/이력이 하나도 안 남던 버그의 원인). 그래서 커넥션을 직접
+    // 열고 닫지 않고, 호출부가 이미 갖고 있는 db를 그대로 재사용하도록 바꿈.
+    fun isTimeConflict(db: SQLiteDatabase, targetTimestamp: Long, excludeId: Int? = null): Boolean {
         var cursor: android.database.Cursor? = null
-        var db: SQLiteDatabase? = null
 
         return try {
-            val dbHelper = getInstance(context)
-            db = dbHelper.getReadableDatabaseWithRetry() ?: return false
-
             val dateStr = java.text.SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
                 java.util.Locale.getDefault()
@@ -131,7 +134,6 @@ class DatabaseHelper private constructor(context: Context) : SQLiteOpenHelper(
             false
         } finally {
             cursor?.close()
-            db?.close()
         }
     }
 }

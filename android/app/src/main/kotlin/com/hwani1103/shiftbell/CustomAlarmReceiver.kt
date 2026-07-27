@@ -37,12 +37,22 @@ override fun onReceive(context: Context, intent: Intent) {
 
     Log.e("CustomAlarmReceiver", "ID: $id, Label: $label")
 
+    // ⭐ 안전장치: DB에 이 id의 알람이 더 이상 없으면(이미 취소/수정으로 삭제됨) 재생하지
+    // 않고 종료. AlarmManager에 등록된 PendingIntent가 어떤 이유로든 취소되지 않고 남아있는
+    // 경우(예: 설정에서 알람 시간 수정 시 옛 알람)에도, 최소한 실제로 울리는 것만큼은 막는
+    // 마지막 방어선. (진짜 원인은 diff 갱신 엔진의 cancelNativeAlarm이 담당하지만, 어떤
+    // 이유로든 새어나간 PendingIntent가 있어도 여기서 한 번 더 걸러짐)
+    if (!alarmExistsInDb(context, id)) {
+        Log.e("CustomAlarmReceiver", "⚠️ DB에 없는 알람(id=$id) - 재생 건너뜀 (이미 취소/수정됨)")
+        return
+    }
+
     // ⭐ 신규: 알람 울릴 때 즉시 갱신 체크!
     AlarmRefreshUtil.checkAndTriggerRefresh(context)
 
-    // ⭐ 알람 울리면 20분 전 Notification 즉시 삭제 (Overlay/Activity에서만 제어하도록)
-    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.cancel(8888)
+    // ⭐ 알람 울리면 20분 전 Notification 갱신 (이 알람은 더 이상 "다음 알람"이 아니므로
+    // AlarmGuardReceiver가 재계산 - 만약 15~30분 뒤 다른 알람이 있다면 그쪽 8888이 새로 표시됨)
+    AlarmGuardReceiver.triggerCheck(context)
 
     // ⭐ ringing 이력 생성 제거 (사용자에게 무의미한 내부 상태)
     // 실제 이력은 dismiss/snooze/timeout 시 생성됨
@@ -76,6 +86,23 @@ override fun onReceive(context: Context, intent: Intent) {
     }, 500)
 }
     
+    private fun alarmExistsInDb(context: Context, id: Int): Boolean {
+        var cursor: android.database.Cursor? = null
+        var db: android.database.sqlite.SQLiteDatabase? = null
+        return try {
+            val dbHelper = DatabaseHelper.getInstance(context)
+            db = dbHelper.readableDatabase
+            cursor = db.query("alarms", arrayOf("id"), "id = ?", arrayOf(id.toString()), null, null, null)
+            cursor.moveToFirst()
+        } catch (e: Exception) {
+            Log.e("CustomAlarmReceiver", "❌ 알람 존재 확인 실패 - 안전하게 재생 진행", e)
+            true  // 확인 자체가 실패하면 (기존 동작 유지 위해) 재생은 막지 않음
+        } finally {
+            cursor?.close()
+            db?.close()
+        }
+    }
+
     private fun wakeUpScreen(context: Context) {
         try {
             val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager

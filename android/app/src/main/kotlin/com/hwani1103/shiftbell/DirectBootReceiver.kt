@@ -28,11 +28,11 @@ class DirectBootReceiver : BroadcastReceiver() {
             } else {
                 context
             }
-            
+
             saveBootTime(deviceContext)
-            
+
+            // ⭐ 1단계: 가장 가까운 알람은 최대한 빨리 즉시 등록 (가장 빠른 안전장치)
             val nextAlarm = getNextAlarmFromDB(context)
-            
             if (nextAlarm != null) {
                 scheduleNativeAlarm(
                     context = context,
@@ -40,56 +40,28 @@ class DirectBootReceiver : BroadcastReceiver() {
                     timestamp = nextAlarm.timestamp,
                     label = nextAlarm.shiftType
                 )
-                
-                Log.e("DirectBoot", "✅ 긴급 알람 등록: ${nextAlarm.shiftType} ${nextAlarm.time}")
+                Log.e("DirectBoot", "✅ 긴급 알람 즉시 등록: ${nextAlarm.shiftType} ${nextAlarm.time}")
             } else {
                 Log.e("DirectBoot", "⚠️ 등록할 알람 없음")
             }
-            
-            // ⭐ AlarmGuardReceiver 예약
-            scheduleGuardWakeup(context)
-            
+
+            // ⭐ 2단계: CRITICAL FIX - 나머지 미래 알람도 전부 즉시 재등록.
+            // 예전엔 여기서 가장 가까운 알람 1개만 등록하고 나머지는 "다음 자정"까지
+            // 기다렸는데, 그러면 재부팅 당일에 알람이 2개 이상 남아있는 경우
+            // (예: 같은 날 출근 알람 + 다른 알람) 두 번째 알람은 자정 전까지
+            // AlarmManager에 전혀 등록되지 않은 상태로 방치되어 조용히 울리지 않을 수 있었음.
+            // AlarmRefreshEngine.refresh()가 재부팅 여부와 무관하게 즉시 전체 재조정하면서
+            // DB에 있는 모든 미래 알람을 다시 등록해줌.
+            AlarmRefreshEngine.refresh(context)
+
+            // ⭐ 3단계: Guard 하트비트 재가동 (다음 알람 20분 전 / 자정 중 더 이른 시점으로 예약)
+            // 예전의 자체 scheduleGuardWakeup()은 무조건 "다음 자정"만 예약해서 부정확했음.
+            AlarmGuardReceiver.triggerCheck(context)
+
             Log.e("DirectBoot", "========== DIRECT BOOT COMPLETE ==========")
         } catch (e: Exception) {
             Log.e("DirectBoot", "========== ERROR ==========", e)
         }
-    }
-    
-    private fun scheduleGuardWakeup(context: Context) {
-        val intent = Intent(context, AlarmGuardReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        
-        // 자정 예약
-        val midnight = Calendar.getInstance().apply {
-            add(Calendar.DAY_OF_MONTH, 1)
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }.timeInMillis
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                midnight,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                midnight,
-                pendingIntent
-            )
-        }
-        
-        Log.e("DirectBoot", "✅ AlarmGuardReceiver 예약 완료")
     }
     
     private fun saveBootTime(context: Context) {

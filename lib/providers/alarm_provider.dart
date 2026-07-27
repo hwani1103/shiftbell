@@ -66,14 +66,13 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
         print('⚠️ 알람 상태 확인 실패: $e');
       }
 
-      // ⭐ 이력 생성 정책:
-      // - 알람 울림 중 삭제 → 'swiped' (알람 확인) 이력 생성
-      // - 알람 울리기 전 삭제 (UI에서) → 이력 생성 안 함
-      //   (20분 전 notification "끄기"는 Native에서 별도 처리)
+      // ⭐ 이력 생성 정책: 삭제 사유와 무관하게 항상 이력을 남김 (절대 삭제되지 않아야 함)
+      // - 알람 울림 중 삭제 → 'swiped' (알람 확인)
+      // - 알람 울리기 전 삭제 (UI에서) → 'cancelled_before_ring' (알람 제거)
       if (isRinging) {
         await DatabaseService.instance.deleteAlarm(id, dismissType: 'swiped', createHistory: true);
       } else {
-        await DatabaseService.instance.deleteAlarm(id, createHistory: false);
+        await DatabaseService.instance.deleteAlarm(id, dismissType: 'cancelled_before_ring', createHistory: true);
       }
       await AlarmService().cancelAlarm(id);
 
@@ -130,12 +129,12 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
       }
 
       // 1단계: 기존 고정 알람 삭제 (개별 try-catch로 부분 실패 허용)
-      // ⭐ 재생성 삭제는 이력 생성 안 함
+      // ⭐ 근무 변경으로 알람이 무효화됐다는 이력을 남김 (삭제만 하고 끝내지 않음)
       final existingAlarms = await DatabaseService.instance.getAlarmsByDate(date);
       for (var alarm in existingAlarms) {
         if (alarm.type == 'fixed') {
           try {
-            await DatabaseService.instance.deleteAlarm(alarm.id!, createHistory: false);
+            await DatabaseService.instance.deleteAlarm(alarm.id!, dismissType: 'superseded', createHistory: true);
             await AlarmService().cancelAlarm(alarm.id!);
             deleteCount++;
           } catch (e) {
@@ -178,7 +177,7 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
             shiftType: shiftType,
           );
 
-          final dbId = await DatabaseService.instance.insertAlarm(alarm);
+          final dbId = await DatabaseService.instance.insertAlarm(alarm, source: 'auto');
 
           await AlarmService().scheduleAlarm(
             id: dbId,
@@ -211,49 +210,6 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
       }
     } catch (e) {
       print('❌ 고정 알람 재생성 실패: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> deleteAllAlarms() async {
-    try {
-      final alarms = await DatabaseService.instance.getAllAlarms();
-
-      for (var alarm in alarms) {
-        await AlarmService().cancelAlarm(alarm.id!);
-        print('✅ Native 알람 취소: DB ID ${alarm.id}');
-      }
-
-      await DatabaseService.instance.deleteAllAlarms();
-
-      // ⭐ 모든 Notification 삭제
-      try {
-        await _platform.invokeMethod('cancelAllNotifications');
-        print('✅ 모든 Notification 삭제 완료');
-      } catch (e) {
-        print('⚠️ Notification 삭제 실패: $e');
-      }
-
-      // ⭐ CRITICAL FIX: shownNotifications 정리 (유령 Notification 방지)
-      try {
-        await _platform.invokeMethod('clearShownNotifications');
-        print('✅ shownNotifications 정리 완료');
-      } catch (e) {
-        print('⚠️ shownNotifications 정리 실패: $e');
-      }
-
-      // ⭐ HIGH FIX: AlarmGuardReceiver 트리거 (다음 웨이크업 스케줄링)
-      try {
-        await _platform.invokeMethod('triggerGuardCheck');
-        print('✅ AlarmGuardReceiver 트리거 완료');
-      } catch (e) {
-        print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
-      }
-
-      await _loadAlarms();
-      print('🗑️ 모든 알람 삭제 완료');
-    } catch (e) {
-      print('❌ 알람 삭제 실패: $e');
       rethrow;
     }
   }

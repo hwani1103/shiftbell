@@ -151,7 +151,12 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       }
 
       // 5. DB 삭제 (알람은 이력 기록 후 삭제)
-      await DatabaseService.instance.deleteAllAlarms();  // ⭐ 전체 삭제는 이력 생성 없이 클린 스타트
+      await DatabaseService.instance.deleteAllAlarms();
+
+      // 5-1. ⭐ "초기화" 버튼을 누른 경우에 한해서만 이력/생성로그도 함께 삭제.
+      // (다른 모든 삭제 경로는 이력을 영구 보존하지만, 스케줄 자체를 완전히
+      // 새로 시작하는 이 경우는 예외 - 이전 근무 패턴의 이력이 남아있으면 혼란스러움)
+      await DatabaseService.instance.resetAllAlarmHistoryAndLog();
 
       final db = await DatabaseService.instance.database;
       await db.delete('shift_schedule');
@@ -218,6 +223,21 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       final alarm = Alarm.fromMap(alarmMap);
       print('  - 삭제: ${alarm.time}');
       cancelIds.add(alarm.id!);
+
+      // ⭐ 근무 변경으로 알람이 무효화됐다는 이력을 남김 (삭제만 하고 끝내지 않음)
+      if (alarm.date != null) {
+        await txn.insert('alarm_history', {
+          'alarm_id': alarm.id,
+          'scheduled_time': alarm.time,
+          'scheduled_date': alarm.date!.toIso8601String(),
+          'actual_ring_time': DateTime.now().toIso8601String(),
+          'dismiss_type': 'superseded',
+          'snooze_count': 0,
+          'shift_type': alarm.shiftType,
+          'created_at': DateTime.now().toIso8601String(),
+        });
+      }
+
       await txn.delete('alarms', where: 'id = ?', whereArgs: [alarm.id]);
     }
 
@@ -258,6 +278,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       );
 
       final dbId = await txn.insert('alarms', alarm.toMap());
+      await DatabaseService.instance.logAlarmCreation(txn, dbId, alarm, 'auto');
       print('    ✅ 알람 생성: ID $dbId');
 
       scheduleData.add({

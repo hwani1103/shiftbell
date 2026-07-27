@@ -1,6 +1,5 @@
 package com.hwani1103.shiftbell
 
-import android.app.KeyguardManager
 import android.app.NotificationManager
 import android.app.Service
 import android.content.BroadcastReceiver
@@ -18,12 +17,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
-import java.text.SimpleDateFormat
-import java.util.*
 import android.util.Log
-import android.app.NotificationChannel
-import android.app.PendingIntent
-import androidx.core.app.NotificationCompat
 
 class AlarmOverlayService : Service() {
 
@@ -190,41 +184,16 @@ class AlarmOverlayService : Service() {
         // 알람 소리 중지
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
-        // ⭐ CRITICAL FIX: Native 알람 먼저 취소 (유령 알람 방지!)
-        cancelNativeAlarm()
+        // ⭐ Native 알람 취소 + DB 삭제 + 이력 기록을 하나의 트랜잭션으로 (AlarmActionHelper)
+        AlarmActionHelper.timeout(applicationContext, alarmId)
 
-        // ⭐ BUG FIX: 이력 먼저 생성 (DB에 알람 데이터가 있을 때!)
-        createAlarmHistory(alarmId, "timeout")
-
-        // DB에서 알람 삭제 (이력 생성 후!)
-        try {
-            val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            val db = dbHelper.writableDatabase
-            db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
-            db.close()
-            Log.d("AlarmOverlay", "✅ DB 알람 삭제: ID=$alarmId")
-        } catch (e: Exception) {
-            Log.e("AlarmOverlay", "❌ DB 삭제 실패", e)
-        }
-
-        // shownNotifications에서 제거
-        AlarmGuardReceiver.removeShownNotification(alarmId)
-
-        // ⭐ HIGH FIX #7: Notification 삭제 (모든 관련 notification 정리)
+        // ⭐ 모든 관련 notification 정리 (8888은 AlarmGuardReceiver가 전담)
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(alarmId)          // 알람 ID
         notificationManager.cancel(alarmId + 100000) // Fallback notification
         notificationManager.cancel(7777)             // 제어
-        notificationManager.cancel(8888)             // 20분 전
         notificationManager.cancel(8889)             // 스누즈/타임아웃
-        Log.d("AlarmOverlay", "🗑️ Notification 삭제 (alarmId, alarmId+100000, 7777, 8888, 8889)")
-
-        // 갱신 체크
-        AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
-
-        // ⭐ 다음 알람의 8888 Notification 표시 (직접 호출)
-        AlarmGuardReceiver.triggerCheck(this)
-        Log.d("AlarmOverlay", "✅ AlarmGuardReceiver.triggerCheck() → 다음 알람 8888 표시")
+        Log.d("AlarmOverlay", "🗑️ Notification 삭제 (alarmId, alarmId+100000, 7777, 8889)")
 
         // Overlay 제거
         removeOverlay()
@@ -344,92 +313,16 @@ class AlarmOverlayService : Service() {
     // 알람 소리 중지
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
-    // ⭐ 알람 정보 먼저 읽어서 저장 (이력 생성용)
-    var scheduledTime = ""
-    var scheduledDate = ""
-    var shiftType = ""
+    // ⭐ Native 알람 취소 + DB 삭제 + 이력 기록을 하나의 트랜잭션으로 (AlarmActionHelper)
+    AlarmActionHelper.dismiss(applicationContext, alarmId, "swiped")
 
-    var cursor: android.database.Cursor? = null
-    var db: android.database.sqlite.SQLiteDatabase? = null
-
-    try {
-        val dbHelper = DatabaseHelper.getInstance(applicationContext)
-        db = dbHelper.writableDatabase
-
-        // 1. 알람 정보 읽기
-        cursor = db.query(
-            "alarms",
-            arrayOf("time", "date", "shift_type"),
-            "id = ?",
-            arrayOf(alarmId.toString()),
-            null, null, null
-        )
-
-        if (cursor.moveToFirst()) {
-            scheduledTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
-            scheduledDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
-            shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
-            Log.d("AlarmOverlay", "✅ 알람 정보 읽기 완료: $scheduledDate $scheduledTime")
-        }
-
-        cursor.close()
-
-        // ⭐ CRITICAL FIX: Native 알람 먼저 취소 (유령 알람 방지!)
-        cancelNativeAlarm()
-
-        // 2. 알람 삭제
-        db.delete("alarms", "id = ?", arrayOf(alarmId.toString()))
-        Log.d("AlarmOverlay", "✅ DB 알람 삭제: ID=$alarmId")
-
-        // 3. 이력 생성 (저장한 정보 사용, 같은 DB 재사용)
-        if (scheduledTime.isNotEmpty() && scheduledDate.isNotEmpty()) {
-            val now = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
-
-            val historyValues = android.content.ContentValues().apply {
-                put("alarm_id", alarmId)
-                put("scheduled_time", scheduledTime)
-                put("scheduled_date", scheduledDate)
-                put("actual_ring_time", now)
-                put("dismiss_type", "swiped")
-                put("snooze_count", 0)
-                put("shift_type", shiftType)
-                put("created_at", now)
-            }
-
-            db.insert("alarm_history", null, historyValues)
-            Log.d("AlarmOverlay", "✅ 알람 이력 생성: ID=$alarmId, type=swiped")
-        }
-
-    } catch (e: Exception) {
-        Log.e("AlarmOverlay", "❌ DB 작업 실패", e)
-    } finally {
-        cursor?.close()
-        db?.close()
-    }
-
-    // ⭐ HIGH FIX #8: Notification 삭제 (모든 관련 notification 정리)
+    // ⭐ 모든 관련 notification 정리 (8888은 AlarmGuardReceiver가 전담)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)          // 알람 ID
     notificationManager.cancel(alarmId + 100000) // Fallback notification
     notificationManager.cancel(7777)             // 제어
-    notificationManager.cancel(8888)             // 20분 전
     notificationManager.cancel(8889)             // 스누즈/타임아웃
-    Log.d("AlarmOverlay", "🗑️ Notification 삭제 (alarmId, alarmId+100000, 7777, 8888, 8889)")
-
-    // ⭐ shownNotifications에서 제거 (다음 알람 Notification 표시 위해)
-    AlarmGuardReceiver.removeShownNotification(alarmId)
-
-    // ⭐ 갱신 체크
-    AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
-
-    // ⭐ AlarmGuardReceiver 재실행 (다음 알람 Notification 표시)
-    val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
-    sendBroadcast(guardIntent)
-
-    // ⭐ Flutter UI 갱신 트리거
-    val flutterIntent = Intent("com.hwani1103.shiftbell.FLUTTER_REFRESH")
-    sendBroadcast(flutterIntent)
-    Log.d("AlarmOverlay", "📢 Flutter UI 갱신 브로드캐스트 전송")
+    Log.d("AlarmOverlay", "🗑️ Notification 삭제 (alarmId, alarmId+100000, 7777, 8889)")
 
     // Overlay 제거
     removeOverlay()
@@ -444,171 +337,16 @@ class AlarmOverlayService : Service() {
         // 알람 소리 중지
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
-        var cursor: android.database.Cursor? = null
-        var db: android.database.sqlite.SQLiteDatabase? = null
-
-        // 5분 후 알람 재등록
-        try {
-            val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            db = dbHelper.writableDatabase  // ⭐ HIGH FIX: 처음부터 writableDatabase 사용 (중복 방지)
-
-            cursor = db.query(
-                "alarms",
-                null,
-                "id = ?",
-                arrayOf(alarmId.toString()),
-                null, null, null
-            )
-
-            if (cursor.moveToFirst()) {
-                val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
-                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
-
-                // ⭐ 원래 시간 저장 (이력 생성용)
-                val originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
-                val originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
-
-                // ⭐ HIGH FIX: 한 번에 모든 알람 시간 읽어서 메모리에서 충돌 체크 (DB 재연결 방지)
-                val existingAlarmTimes = mutableSetOf<Long>()
-                val alarmsCursor = db.query(
-                    "alarms",
-                    arrayOf("date"),
-                    "id != ?",
-                    arrayOf(alarmId.toString()),
-                    null, null, null
-                )
-
-                try {
-                    while (alarmsCursor.moveToNext()) {
-                        val dateStr = alarmsCursor.getString(alarmsCursor.getColumnIndexOrThrow("date"))
-                        try {
-                            val alarmDate = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).parse(dateStr)
-                            alarmDate?.let { existingAlarmTimes.add(it.time) }
-                        } catch (e: Exception) {
-                            // 파싱 실패 무시
-                        }
-                    }
-                } finally {
-                    alarmsCursor.close()  // ⭐ HIGH FIX: Cursor 리소스 누수 방지
-                }
-
-                // ⭐ 5분 후 시간 계산 + 스마트 시간 조정 (중복 방지, 메모리에서 체크)
-                var adjustedMinutes = 5
-                var newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
-                val maxAdjustment = 10  // 최대 10분
-
-                while (existingAlarmTimes.contains(newTimestamp) && adjustedMinutes < maxAdjustment) {
-                    adjustedMinutes++
-                    newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
-                    Log.d("AlarmOverlay", "⚠️ 시간 충돌 감지 → ${adjustedMinutes}분 후로 조정")
-                }
-
-                // 기존 알람 취소
-                val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-                val cancelIntent = Intent(this, CustomAlarmReceiver::class.java).apply {
-                    data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
-                }
-                val cancelPendingIntent = android.app.PendingIntent.getBroadcast(
-                    this,
-                    alarmId,
-                    cancelIntent,
-                    android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
-                )
-                alarmManager.cancel(cancelPendingIntent)
-                cancelPendingIntent.cancel()
-                Log.d("AlarmOverlay", "✅ 기존 알람 취소: ID=$alarmId")
-
-                // 새 알람 등록
-                val newIntent = Intent(this, CustomAlarmReceiver::class.java).apply {
-                    data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
-                    putExtra(CustomAlarmReceiver.EXTRA_ID, alarmId)
-                    putExtra(CustomAlarmReceiver.EXTRA_LABEL, shiftType)
-                    putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-                }
-
-                val newPendingIntent = android.app.PendingIntent.getBroadcast(
-                    this,
-                    alarmId,
-                    newIntent,
-                    android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
-                )
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        android.app.AlarmManager.RTC_WAKEUP,
-                        newTimestamp,
-                        newPendingIntent
-                    )
-                } else {
-                    alarmManager.setExact(
-                        android.app.AlarmManager.RTC_WAKEUP,
-                        newTimestamp,
-                        newPendingIntent
-                    )
-                }
-                Log.d("AlarmOverlay", "✅ 5분 후 알람 등록: ID=$alarmId, 시각=${Date(newTimestamp)}")
-
-                // DB 업데이트 (time, date 필드)
-                val dateStr = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date(newTimestamp))
-                val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(newTimestamp))
-
-                val values = android.content.ContentValues().apply {
-                    put("date", dateStr)
-                    put("time", timeStr)
-                    put("type", "snoozed")  // ⭐ CRITICAL FIX: 자정 갱신 시 삭제 방지
-                }
-                db.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
-                Log.d("AlarmOverlay", "✅ DB 업데이트: time=$timeStr, date=$dateStr")
-
-                // ⭐ 이력 생성 (원래 시간 사용!)
-                val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
-                val historyValues = android.content.ContentValues().apply {
-                    put("alarm_id", alarmId)
-                    put("scheduled_time", originalTime)  // 원래 시간!
-                    put("scheduled_date", originalDate)  // 원래 날짜!
-                    put("actual_ring_time", now)
-                    put("dismiss_type", "snoozed")
-                    put("snooze_count", 0)
-                    put("shift_type", shiftType)
-                    put("created_at", now)
-                }
-                db.insert("alarm_history", null, historyValues)
-                Log.d("AlarmOverlay", "✅ 알람 이력 생성: ID=$alarmId, type=snoozed, 원래시간=$originalTime")
-
-                // 갱신 체크
-                AlarmRefreshUtil.checkAndTriggerRefresh(applicationContext)
-
-                // ⭐ shownNotifications에서 제거 (스누즈된 알람도 다시 Notification 표시 위해)
-                AlarmGuardReceiver.removeShownNotification(alarmId)
-
-                // ⭐ AlarmGuardReceiver 트리거 (다음 알람 Notification 즉시 표시)
-                val guardIntent = Intent(this, AlarmGuardReceiver::class.java)
-                sendBroadcast(guardIntent)
-                Log.d("AlarmOverlay", "✅ AlarmGuardReceiver 트리거")
-
-                // ⭐ 연장 Notification 표시 (NotificationHelper 사용)
-                NotificationHelper.showUpdatedNotification(applicationContext, timeStr, shiftType)
-
-                // ⭐ Flutter UI 갱신 트리거
-                val flutterIntent = Intent("com.hwani1103.shiftbell.FLUTTER_REFRESH")
-                sendBroadcast(flutterIntent)
-                Log.d("AlarmOverlay", "📢 Flutter UI 갱신 브로드캐스트 전송")
-
-                // ⭐ 앱 포그라운드로 가져와서 Flutter UI 즉시 갱신
-                val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-                launchIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                startActivity(launchIntent)
-                Log.d("AlarmOverlay", "✅ 앱 포그라운드 이동 → Flutter UI 갱신")
-
-            } else {
-                Log.e("AlarmOverlay", "❌ 알람 정보 없음: ID=$alarmId")
-            }
-
-        } catch (e: Exception) {
-            Log.e("AlarmOverlay", "❌ 5분 후 재등록 실패", e)
-        } finally {
-            cursor?.close()
-            db?.close()
+        // ⭐ 네이티브 알람 재등록 + DB 갱신 + 이력/생성로그 기록을 하나의 트랜잭션으로 (AlarmActionHelper)
+        // 끄기(dismissAlarm)와 동일하게, 앱을 강제로 앞으로 가져오지 않음 - 사용자가 보고 있던
+        // 화면(다른 앱 등)을 그대로 유지한 채 알람만 조용히 사라져야 함. Flutter UI는
+        // AlarmActionHelper.snooze 내부의 finishUp()이 브로드캐스트로 갱신 신호를 보내므로,
+        // 앱이 실행 중이면 포그라운드로 끌어오지 않아도 다음에 열었을 때 최신 상태로 보임.
+        val result = AlarmActionHelper.snooze(applicationContext, alarmId)
+        if (result != null) {
+            NotificationHelper.showUpdatedNotification(applicationContext, result.newTimeStr, result.shiftType)
+        } else {
+            Log.e("AlarmOverlay", "❌ 알람 정보 없음: ID=$alarmId")
         }
 
         // Overlay 제거
@@ -631,76 +369,6 @@ class AlarmOverlayService : Service() {
             }
         } catch (e: Exception) {
             Log.e("AlarmOverlay", "❌ Overlay 제거 실패", e)
-        }
-    }
-
-    // ⭐ CRITICAL FIX: Native 알람 취소 (유령 알람 방지!)
-    private fun cancelNativeAlarm() {
-        try {
-            val alarmManager = getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-            val intent = Intent(this, CustomAlarmReceiver::class.java).apply {
-                data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
-            }
-            val pendingIntent = android.app.PendingIntent.getBroadcast(
-                this,
-                alarmId,
-                intent,
-                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
-            )
-            alarmManager.cancel(pendingIntent)
-            pendingIntent.cancel()
-            Log.d("AlarmOverlay", "✅ Native 알람 취소: ID=$alarmId")
-        } catch (e: Exception) {
-            Log.e("AlarmOverlay", "❌ Native 알람 취소 실패", e)
-        }
-    }
-
-    // ⭐ 변경: 이력 업데이트 → 이력 생성 (ringing 이력 없으므로)
-    private fun createAlarmHistory(alarmId: Int, dismissType: String) {
-        var cursor: android.database.Cursor? = null
-        var db: android.database.sqlite.SQLiteDatabase? = null
-
-        try {
-            val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            db = dbHelper.writableDatabase
-
-            // 알람 정보 조회
-            cursor = db.query(
-                "alarms",
-                arrayOf("time", "date", "shift_type"),
-                "id = ?",
-                arrayOf(alarmId.toString()),
-                null, null, null
-            )
-
-            if (cursor.moveToFirst()) {
-                val scheduledTime = cursor.getString(cursor.getColumnIndexOrThrow("time"))
-                val scheduledDate = cursor.getString(cursor.getColumnIndexOrThrow("date"))
-                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
-
-                val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
-
-                // 새 이력 생성
-                val historyValues = android.content.ContentValues().apply {
-                    put("alarm_id", alarmId)
-                    put("scheduled_time", scheduledTime)
-                    put("scheduled_date", scheduledDate)
-                    put("actual_ring_time", now)
-                    put("dismiss_type", dismissType)
-                    put("snooze_count", 0)  // 항상 0
-                    put("shift_type", shiftType)
-                    put("created_at", now)
-                }
-
-                db.insert("alarm_history", null, historyValues)
-                Log.d("AlarmOverlay", "✅ 알람 이력 생성: ID=$alarmId, type=$dismissType")
-            }
-
-        } catch (e: Exception) {
-            Log.e("AlarmOverlay", "❌ 이력 생성 실패", e)
-        } finally {
-            cursor?.close()
-            db?.close()  // ⭐ CRITICAL FIX: DB 리소스 누수 방지
         }
     }
 

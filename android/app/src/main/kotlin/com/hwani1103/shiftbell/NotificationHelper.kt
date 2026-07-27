@@ -26,10 +26,9 @@ object NotificationHelper {
 
     /**
      * 스누즈 결과 Notification 표시 (8889)
-     * 1. 기존 8888 삭제
-     * 2. 8889 표시
-     * 3. 30초 후 자동 삭제 예약
-     * 4. AlarmGuardReceiver.triggerCheck() 호출
+     * 1. 8889 표시
+     * 2. 30초 후 자동 삭제 예약
+     * 3. AlarmGuardReceiver.triggerCheck() 호출 (8888은 그 안에서 전담 갱신됨)
      */
     fun showUpdatedNotification(
         context: Context,
@@ -38,9 +37,7 @@ object NotificationHelper {
     ) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // 1단계: 기존 8888 삭제
-        notificationManager.cancel(8888)
-        Log.d("NotificationHelper", "🗑️ 8888 Notification 삭제")
+        // ⭐ 8888은 AlarmGuardReceiver가 전담 (아래 triggerCheck가 재계산함) - 여기서 직접 cancel하지 않음
 
         // 채널 생성 ("알람" 키워드 제거 - 삼성 시스템 스누즈 방지)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

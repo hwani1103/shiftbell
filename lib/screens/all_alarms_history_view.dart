@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/database_service.dart';
-import '../models/alarm.dart';
 import '../models/alarm_history.dart';
 
-/// 모든 알람 & 알람 이력 - 등록된 알람과 실행 이력을 한눈에 보는 화면
+/// 알람 이력 - "사용자 의도상 생겼던 모든 알람"을 기록하는 화면.
+/// ⭐ 현재 alarms 테이블(살아있는 알람)과 대조하지 않음 - 살아있는 알람과 비교하면
+/// 알람이 수정/삭제되는 순간 화면에서도 같이 사라져서 "이게 원래 있었는지" 알 수가 없었음.
+/// 대신 alarm_creation_log(생성됐다는 사실, 영구 보존) + alarm_history(그 결과, 영구 보존)
+/// 두 개의 영구 로그 테이블만으로 구성함 - 어떤 알람이 지금 살아있는지와 무관하게, 한 번
+/// 생성됐던 알람은 여기서 절대 사라지지 않음.
 class AllAlarmsHistoryView extends StatefulWidget {
   const AllAlarmsHistoryView({super.key});
 
@@ -71,23 +75,34 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         }
       }
 
-      // 3. 미래 알람 가져오기 (아직 실행되지 않은 알람)
-      final futureAlarms = await DatabaseService.instance.getAllAlarms();
+      // 3. ⭐ 아직 결과(이력)가 없는 알람도 놓치지 않기 위해 생성 로그를 사용.
+      // 예전엔 여기서 "현재 등록된 알람"(alarms 테이블)을 읽었는데, 그러면 알람이
+      // 수정되거나 삭제되는 순간 화면에서도 같이 사라져서 "생성된 적은 있었다"는
+      // 사실 자체를 확인할 수 없었음. alarm_creation_log는 영구 보존되므로, 아직
+      // 결과가 없는(=아직 안 울렸거나 예정된) 알람도 계속 남아서 보임.
+      final creationLogs = await DatabaseService.instance.getAlarmCreationLog(limit: 5000);
 
-      for (var alarm in futureAlarms) {
-        if (alarm.date != null) {
-          final key = '${alarm.date!.year}-${alarm.date!.month}-${alarm.date!.day}_${alarm.time ?? '00:00'}';
+      for (var log in creationLogs) {
+        final dateRaw = log['scheduled_date'];
+        if (dateRaw == null) continue;
+        DateTime? date;
+        try {
+          date = DateTime.parse(dateRaw.toString());
+        } catch (e) {
+          continue;
+        }
+        final time = log['scheduled_time']?.toString() ?? '00:00';
+        final key = '${date.year}-${date.month}-${date.day}_$time';
 
-          // 이미 이력이 있으면 건너뛰기 (이력이 우선)
-          if (!alarmMap.containsKey(key)) {
-            alarmMap[key] = AlarmWithHistory(
-              date: alarm.date!,
-              time: alarm.time ?? '00:00',
-              shiftType: alarm.shiftType,
-              latestHistory: null,
-              isFuture: alarm.date!.isAfter(DateTime(now.year, now.month, now.day)),
-            );
-          }
+        // 이미 이력(결과)이 있으면 건너뛰기 (이력이 우선)
+        if (!alarmMap.containsKey(key)) {
+          alarmMap[key] = AlarmWithHistory(
+            date: date,
+            time: time,
+            shiftType: log['shift_type'] as String?,
+            latestHistory: null,
+            isFuture: date.isAfter(DateTime(now.year, now.month, now.day)),
+          );
         }
       }
 
@@ -136,14 +151,18 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         return '무응답';
       case 'cancelled_before_ring':
         return '알람 제거';
+      case 'superseded':
+        return '일정 변경';
       default:
-        return history.dismissType;
+        return '기타';
     }
   }
 
   Color _getHistoryColor(AlarmHistory? history, BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    if (history == null) return colorScheme.outline;
+    // ⭐ outline은 배지 배경(연한 틴트) 위 텍스트로 쓰기엔 라이트/다크 모두 대비가
+    // 너무 약함 - onSurfaceVariant로 통일 (다른 화면의 "비활성" 텍스트와 동일한 처방)
+    if (history == null) return colorScheme.onSurfaceVariant;
 
     switch (history.dismissType) {
       case 'swiped':
@@ -154,6 +173,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         return colorScheme.error;
       case 'cancelled_before_ring':
         return colorScheme.primary;
+      case 'superseded':
+        return colorScheme.onSurfaceVariant;
       default:
         return colorScheme.onSurfaceVariant;
     }
@@ -225,7 +246,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: Text('모든 알람 & 알람 이력'),
+        title: Text('알람 이력'),
         backgroundColor: colorScheme.surface,
         elevation: 0,
         foregroundColor: colorScheme.onSurface,
@@ -246,7 +267,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          '등록된 알람이 없습니다',
+                          '알람 이력이 없습니다',
                           style: TextStyle(
                             fontSize: 16.sp,
                             color: colorScheme.onSurfaceVariant,
@@ -257,7 +278,12 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                   ),
                 )
               : ListView.builder(
-                  padding: EdgeInsets.all(16.w),
+                  padding: EdgeInsets.fromLTRB(
+                    16.w,
+                    16.w,
+                    16.w,
+                    16.w + MediaQuery.of(context).padding.bottom,
+                  ),
                   itemCount: _alarmsWithHistory.length,
                   itemBuilder: (context, index) {
                     final alarmWithHistory = _alarmsWithHistory[index];
@@ -320,7 +346,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                       '-',
                                       style: TextStyle(
                                         fontSize: 13.sp,
-                                        color: colorScheme.outline,
+                                        fontWeight: FontWeight.w600,
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                       textAlign: TextAlign.right,
                                     )

@@ -6,6 +6,7 @@ import android.media.AudioAttributes
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.RingtoneManager
+import android.media.audiofx.LoudnessEnhancer
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.Build
@@ -14,6 +15,7 @@ import android.util.Log
 class AlarmPlayer(private val context: Context) {
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
+    private var loudnessEnhancer: LoudnessEnhancer? = null
     private var originalAlarmVolume: Int = -1  // ⭐ 원래 시스템 알람 볼륨 저장
 
     companion object {
@@ -48,6 +50,7 @@ class AlarmPlayer(private val context: Context) {
                 release()
             }
             mediaPlayer = null
+            releaseLoudnessEnhancer()
         } catch (e: Exception) {
             Log.e("AlarmPlayer", "MediaPlayer 정리 실패", e)
         }
@@ -178,12 +181,15 @@ class AlarmPlayer(private val context: Context) {
                         .build()
                 )
 
-                // 음량 설정 (DB에서 읽은 값, 0.0~1.0이 실제 최대 볼륨 기준)
-                setVolume(volume, volume)
+                // ⭐ 음량 calibration 적용 (sqrt 커브, 새 50%≈기존 70% 체감)
+                val calibrated = VolumeCalibration.linearGain(volume)
+                setVolume(calibrated, calibrated)
 
                 isLooping = true
                 prepare()
                 start()
+
+                applyLoudnessBoost(audioSessionId, volume)
             }
 
             Log.d("AlarmPlayer", "커스텀 사운드 재생 시작: $soundFile, 음량 ${(volume * 100).toInt()}%")
@@ -223,18 +229,46 @@ class AlarmPlayer(private val context: Context) {
                         .build()
                 )
 
-                // 음량 설정 (DB에서 읽은 값, 0.0~1.0이 실제 최대 볼륨 기준)
-                setVolume(volume, volume)
+                // ⭐ 음량 calibration 적용 (sqrt 커브, 새 50%≈기존 70% 체감)
+                val calibrated = VolumeCalibration.linearGain(volume)
+                setVolume(calibrated, calibrated)
 
                 isLooping = true
                 prepare()
                 start()
+
+                applyLoudnessBoost(audioSessionId, volume)
             }
 
             Log.d("AlarmPlayer", "기본 알람 소리 재생 시작: 음량 ${(volume * 100).toInt()}%")
 
         } catch (e: Exception) {
             Log.e("AlarmPlayer", "기본 알람 소리 재생 실패", e)
+        }
+    }
+
+    // ⭐ setVolume()은 1.0(유니티 게인)을 못 넘으므로, LoudnessEnhancer로 추가 부스트
+    private fun applyLoudnessBoost(audioSessionId: Int, sliderVolume: Float) {
+        try {
+            loudnessEnhancer?.release()
+            loudnessEnhancer = LoudnessEnhancer(audioSessionId).apply {
+                setTargetGain(VolumeCalibration.boostMillibels(sliderVolume))
+                enabled = true
+            }
+            Log.d("AlarmPlayer", "🔊 LoudnessEnhancer 적용: +${VolumeCalibration.boostMillibels(sliderVolume)}mB")
+        } catch (e: Exception) {
+            // 일부 기기는 LoudnessEnhancer 미지원 → 부스트 없이 정상 재생만 유지
+            Log.w("AlarmPlayer", "⚠️ LoudnessEnhancer 미지원/실패 (부스트 없이 재생)", e)
+        }
+    }
+
+    private fun releaseLoudnessEnhancer() {
+        try {
+            loudnessEnhancer?.release()
+        } catch (e: Exception) {
+            Log.e("AlarmPlayer", "LoudnessEnhancer 해제 실패", e)
+        } finally {
+            loudnessEnhancer = null
         }
     }
 
@@ -357,6 +391,7 @@ class AlarmPlayer(private val context: Context) {
                 Log.e("AlarmPlayer", "MediaPlayer release 실패", e)
             }
             mediaPlayer = null
+            releaseLoudnessEnhancer()
         }
 
         try {

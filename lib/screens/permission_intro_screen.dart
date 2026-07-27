@@ -37,7 +37,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
     if (_isNavigating) return; // 이미 이동 중이면 무시
 
     final permissions = await PermissionService().checkPermissions();
-    final allGranted = permissions['notification']! && permissions['overlay']!;
+    final allGranted = permissions['notification']! && permissions['overlay']! && permissions['exactAlarm']!;
 
     if (allGranted && mounted) {
       _navigateToOnboarding();
@@ -92,6 +92,15 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
                 iconColor: Colors.green,
                 title: '다른 앱 위에 표시',
                 description: '핸드폰 사용 중 알람 발생시 알람을 인지하기 위해 필요합니다',
+                required: true,
+              ),
+              SizedBox(height: 24.h),
+              _buildPermissionItem(
+                context: context,
+                icon: Icons.alarm_on,
+                iconColor: Colors.orange,
+                title: '정확한 알람',
+                description: '설정한 시각에 정확히 알람이 울리기 위해 필요합니다',
                 required: true,
               ),
 

@@ -164,6 +164,15 @@ override fun onNewIntent(intent: Intent) {
                     val hasPermission = checkOverlayPermission()
                     result.success(hasPermission)
                 }
+                // ⭐ 정확한 알람 권한 (Android 12+). 이게 꺼지면 알람이 정확한 시각에
+                // 예약이 안 될 수 있는데, 지금까지 앱이 이걸 아예 확인을 안 하고 있었음.
+                "checkExactAlarmPermission" -> {
+                    result.success(checkExactAlarmPermission())
+                }
+                "requestExactAlarmPermission" -> {
+                    requestExactAlarmPermission()
+                    result.success(null)
+                }
                 "triggerMidnightCheck" -> {
                     triggerMidnightCheck()
                     result.success(null)
@@ -182,19 +191,13 @@ override fun onNewIntent(intent: Intent) {
                     triggerGuardCheck()
                     result.success(null)
                 }
-                "updateNotification" -> {
-                    val alarmId = call.argument<Int>("alarmId") ?: 0
-                    val newTime = call.argument<String>("newTime") ?: ""
-                    val label = call.argument<String>("label") ?: "알람"
-                    updateExistingNotification(alarmId, newTime, label)
-                    result.success(null)
-                }
                 // ⭐ 신규 추가
 "cancelNotification" -> {
+    // ⭐ 8888은 AlarmGuardReceiver가 전담 (여기서 직접 cancel하지 않음 - 다른 알람의 8888을 잘못 지울 수 있음)
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.cancel(8888)  // 20분 전 알림
     notificationManager.cancel(8889)  // 스누즈/타임아웃 알림
-    Log.d("MainActivity", "📢 Notification 삭제 (ID: 8888, 8889)")
+    AlarmGuardReceiver.triggerCheck(this)
+    Log.d("MainActivity", "📢 Notification 삭제 (ID: 8889) + 8888 재계산")
     result.success(null)
 }
                 // ⭐ 모든 Notification 삭제
@@ -377,7 +380,32 @@ override fun onNewIntent(intent: Intent) {
             true
         }
     }
-    
+
+    // ⭐ 정확한 알람 권한 확인 (Android 12=API31 미만은 이 권한 개념 자체가 없어서 항상 true)
+    private fun checkExactAlarmPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmManager.canScheduleExactAlarms()
+        } else {
+            true
+        }
+    }
+
+    // ⭐ 정확한 알람 권한은 런타임 팝업이 없고, 시스템 설정 화면으로 보내는 것만 가능함
+    // (오버레이 권한이랑 똑같은 방식)
+    private fun requestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+                    data = android.net.Uri.parse("package:$packageName")
+                }
+                startActivity(intent)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "❌ 정확한 알람 설정 화면 열기 실패", e)
+            }
+        }
+    }
+
     private fun scheduleNativeAlarm(id: Int, timestamp: Long, label: String, soundType: String) {
         val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
         
@@ -432,92 +460,6 @@ override fun onNewIntent(intent: Intent) {
         Log.d("MainActivity", "✅ 알람 취소 및 shownNotifications 제거: ID=$id")
     }
     
-    // ⭐ 신규: Notification 업데이트 함수 (Flutter에서 스누즈 시 호출)
-    private fun updateExistingNotification(alarmId: Int, newTime: String, label: String) {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // ⭐ 1단계: 기존 8888 삭제
-        notificationManager.cancel(8888)
-        Log.d("MainActivity", "🗑️ 8888 Notification 삭제")
-
-        // ⭐ 스누즈 결과 전용 채널 ("알람" 키워드 제거 - 삼성 시스템 스누즈 방지)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "shiftbell_result_v3",
-                "결과 알림",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "스누즈/타임아웃 결과"
-                enableVibration(false)
-                setSound(null, null)
-                setShowBadge(false)
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val openAppIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("openTab", 0)
-        }
-        val openAppPendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            openAppIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // ⭐ 2단계: 8889 표시 (스누즈 결과)
-        val notification = NotificationCompat.Builder(this, "shiftbell_result_v3")
-            .setContentTitle("$newTime 로 연장되었습니다")
-            .setContentText(label)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_STATUS)
-            .setAutoCancel(true)
-            .setSilent(true)
-            .setOnlyAlertOnce(true)
-            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
-            .setGroupSummary(false)
-            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(label))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
-            .setContentIntent(openAppPendingIntent)
-            .build()
-
-        notificationManager.notify(8889, notification)
-        Log.d("MainActivity", "📢 8889 Notification 표시: $newTime")
-
-        // ⭐ 3단계: 30초 후 8889 자동 삭제 예약
-        scheduleNotificationDeletion()
-
-        // ⭐ 4단계: 다음 알람의 8888 Notification 표시
-        AlarmGuardReceiver.triggerCheck(this)
-        Log.d("MainActivity", "✅ AlarmGuardReceiver.triggerCheck() → 다음 알람 8888 표시")
-    }
-
-    private fun scheduleNotificationDeletion() {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        val deleteIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = AlarmActionReceiver.ACTION_DELETE_SNOOZE_NOTIFICATION
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            9999,  // 고정 requestCode (8889 삭제 전용)
-            deleteIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val deleteTime = System.currentTimeMillis() + 30_000  // 30초 후
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExact(AlarmManager.RTC, deleteTime, pendingIntent)
-        } else {
-            alarmManager.set(AlarmManager.RTC, deleteTime, pendingIntent)
-        }
-
-        Log.d("MainActivity", "⏰ 30초 후 8889 삭제 예약")
-    }
-
     // ⭐ 진동 테스트 (약 1초간)
     private fun testVibration(strength: Int) {
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
@@ -551,6 +493,7 @@ override fun onNewIntent(intent: Intent) {
 
     // ⭐ 미리듣기용 MediaPlayer
     private var previewMediaPlayer: android.media.MediaPlayer? = null
+    private var previewLoudnessEnhancer: android.media.audiofx.LoudnessEnhancer? = null
     private var originalAlarmVolume: Int = -1  // ⭐ 원래 시스템 알람 볼륨 저장
 
     // ⭐ 알람 음량 미리듣기 (STREAM_ALARM 사용 - 실제 알람과 동일)
@@ -595,18 +538,34 @@ override fun onNewIntent(intent: Intent) {
                         .build()
                 )
 
-                // 음량 설정 (슬라이더 값)
-                setVolume(volume, volume)
+                // ⭐ 실제 알람과 동일한 calibration 적용 (AlarmPlayer.kt와 동일한 커브)
+                val calibrated = VolumeCalibration.linearGain(volume)
+                setVolume(calibrated, calibrated)
 
                 isLooping = false  // 미리듣기는 반복 안 함
                 prepare()
                 start()
+
+                applyPreviewLoudnessBoost(audioSessionId, volume)
             }
 
             Log.d("MainActivity", "🔊 미리듣기 재생: $soundFile, 음량 ${(volume * 100).toInt()}%")
 
         } catch (e: Exception) {
             Log.e("MainActivity", "❌ 미리듣기 재생 실패", e)
+        }
+    }
+
+    // ⭐ 미리듣기용 LoudnessEnhancer 적용 (실제 알람과 동일 체감 음량)
+    private fun applyPreviewLoudnessBoost(audioSessionId: Int, sliderVolume: Float) {
+        try {
+            previewLoudnessEnhancer?.release()
+            previewLoudnessEnhancer = android.media.audiofx.LoudnessEnhancer(audioSessionId).apply {
+                setTargetGain(VolumeCalibration.boostMillibels(sliderVolume))
+                enabled = true
+            }
+        } catch (e: Exception) {
+            Log.w("MainActivity", "⚠️ 미리듣기 LoudnessEnhancer 미지원/실패", e)
         }
     }
 
@@ -619,6 +578,13 @@ override fun onNewIntent(intent: Intent) {
             release()
         }
         previewMediaPlayer = null
+        try {
+            previewLoudnessEnhancer?.release()
+        } catch (e: Exception) {
+            Log.e("MainActivity", "미리듣기 LoudnessEnhancer 해제 실패", e)
+        } finally {
+            previewLoudnessEnhancer = null
+        }
 
         // ⭐ 시스템 알람 볼륨 복원
         if (originalAlarmVolume != -1) {
@@ -637,7 +603,9 @@ override fun onNewIntent(intent: Intent) {
 
     // ⭐ 미리듣기 볼륨 변경 (슬라이더 실시간 반영)
     private fun updatePreviewVolume(volume: Float) {
-        previewMediaPlayer?.setVolume(volume, volume)
+        val calibrated = VolumeCalibration.linearGain(volume)
+        previewMediaPlayer?.setVolume(calibrated, calibrated)
+        previewMediaPlayer?.audioSessionId?.let { applyPreviewLoudnessBoost(it, volume) }
         Log.d("MainActivity", "🔊 미리듣기 볼륨 변경: ${(volume * 100).toInt()}%")
     }
 }

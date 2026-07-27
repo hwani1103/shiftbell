@@ -12,6 +12,7 @@ import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../providers/theme_provider.dart';
 import '../models/alarm_type.dart';
+import '../models/alarm.dart';
 import '../models/shift_schedule.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'all_teams_setup_dialog.dart';
@@ -172,87 +173,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     );
   }
 
-  Future<void> _showAlarmHistoryDialog() async {
-    final history = await DatabaseService.instance.getAlarmHistory(limit: 100);
-
-    // 한 달 이상 지난 이력 삭제
-    final oneMonthAgo = DateTime.now().subtract(Duration(days: 30));
-    await DatabaseService.instance.deleteOldHistory(oneMonthAgo);
-
-    if (!mounted) return;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.history, color: Theme.of(context).colorScheme.primary),
-            SizedBox(width: 8.w),
-            Text('알람 이력'),
-          ],
-        ),
-        content: Container(
-          width: double.maxFinite,
-          constraints: BoxConstraints(maxHeight: 500.h),
-          child: history.isEmpty
-            ? Center(
-                child: Padding(
-                  padding: EdgeInsets.all(32.h),
-                  child: Text('알람 이력이 없습니다', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                ),
-              )
-            : SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: history.map((item) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(vertical: 2.h),
-                      child: Text(
-                        '${_formatHistoryLine(item)}',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontFamily: 'monospace',
-                          color: _getTypeColor(item.dismissType),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: Text('이력 삭제'),
-                  content: Text('모든 알람 이력을 삭제할까요?'),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text('취소')),
-                    TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.error))),
-                  ],
-                ),
-              );
-              if (confirm == true) {
-                await DatabaseService.instance.clearAlarmHistory();
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('✅ 알람 이력 삭제 완료')),
-                );
-              }
-            },
-            child: Text('전체 삭제', style: TextStyle(color: Theme.of(context).colorScheme.error)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('닫기'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildCountItem(String label, int count, Color color) {
     return Column(
       children: [
@@ -264,35 +184,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  String _formatHistoryLine(dynamic item) {
-    final date = item.scheduledDate;
-    final time = item.scheduledTime;
-    final type = _getTypeText(item.dismissType);
-    final shift = item.shiftType ?? '';
-
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} $time $shift $type';
-  }
-
-  String _getTypeText(String type) {
-    switch (type) {
-      case 'swiped': return 'check';
-      case 'snoozed': return 'snooze';
-      case 'timeout': return 'timeout';
-      case 'ringing': return 'ringing';
-      default: return type;
-    }
-  }
-
-  Color _getTypeColor(String type) {
-    switch (type) {
-      case 'swiped': return Colors.green;
-      case 'snoozed': return Colors.orange;
-      case 'timeout': return Colors.red;
-      case 'ringing': return Colors.blue;
-      default: return Colors.grey;
-    }
   }
 
   Future<void> _showAlarmTypeDialog() async {
@@ -486,11 +377,11 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 onTap: _showAlarmTypeDialog,
               ),
 
-              // 모든 알람 & 알람 이력
+              // 알람 이력
               ListTile(
                 leading: Icon(Icons.alarm_on, color: Theme.of(context).colorScheme.primary),
-                title: Text('모든 알람 & 알람 이력'),
-                subtitle: Text('등록된 알람과 실행 이력 확인'),
+                title: Text('알람 이력'),
+                subtitle: Text('생성됐던 모든 알람과 그 결과 확인'),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
@@ -1000,24 +891,7 @@ lowvibe07.tistory.com
     }
 
     try {
-      // 1. 기존 알람 전체 삭제 (이력은 유지)
-      final existingAlarms = await DatabaseService.instance.getAllAlarms();
-      for (var alarm in existingAlarms) {
-        if (alarm.id != null) {
-          await AlarmService().cancelAlarm(alarm.id!);
-        }
-      }
-      await DatabaseService.instance.deleteAllAlarmsOnly();
-
-      // 2. Notification 취소
-      try {
-        const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
-        await platform.invokeMethod('cancelNotification');
-      } catch (e) {
-        print('⚠️ Notification 삭제 실패: $e');
-      }
-
-      // 3. 스케줄 업데이트 (startDate = 오늘, todayIndex = 선택한 인덱스)
+      // 1. 스케줄 업데이트 (startDate = 오늘, todayIndex = 선택한 인덱스)
       final newSchedule = ShiftSchedule(
         id: schedule.id,
         isRegular: schedule.isRegular,
@@ -1032,19 +906,35 @@ lowvibe07.tistory.com
 
       await ref.read(scheduleProvider.notifier).saveSchedule(newSchedule);
 
-      // 4. 10일치 알람 재생성
-      await _generate10DaysAlarmsFromTemplates(newSchedule);
-
-      // 5. AlarmGuard 트리거
+      // 2. ⭐ Dart에서 직접 전체 삭제 후 재생성하지 않고 Native의 diff 기반
+      // 갱신 엔진에 위임함. Dart가 직접 전체를 지우고 다시 만들면, 실제로는
+      // 안 바뀐 알람까지도 "일정 변경"으로 이력에 잘못 찍히는 문제가 있었음
+      // (Native 엔진은 실제로 달라진 것만 골라서 건드림).
+      const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
       try {
-        const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
-        await platform.invokeMethod('triggerGuardCheck');
+        await platform.invokeMethod('forceNativeRefresh');
       } catch (e) {
-        print('⚠️ AlarmGuard 트리거 실패: $e');
+        print('⚠️ Native 갱신 실패: $e');
       }
 
-      // 6. Provider 갱신
+      // 3. Notification 취소
+      try {
+        await platform.invokeMethod('cancelNotification');
+      } catch (e) {
+        print('⚠️ Notification 삭제 실패: $e');
+      }
+
+      // 4. Native가 비동기로 diff 갱신을 마칠 시간을 잠깐 기다린 후 UI 갱신
+      await Future.delayed(Duration(milliseconds: 800));
       await ref.read(alarmNotifierProvider.notifier).refresh();
+
+      // 5. diff 갱신이 끝난 "이후" 상태 기준으로 20분 전 알림(8888) 재계산
+      // (위 cancelNotification은 diff가 끝나기 전이라 낡은 상태로 계산될 수 있음)
+      try {
+        await platform.invokeMethod('triggerGuardCheck');
+      } catch (e) {
+        print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -1226,40 +1116,38 @@ lowvibe07.tistory.com
   }
 
   // ⭐ 모든 알람 재생성
+  // Dart에서 직접 전체 삭제 후 재생성하지 않고 Native의 diff 기반 갱신 엔진에
+  // 위임함 (안 바뀐 알람까지 "일정 변경"으로 이력에 잘못 찍히는 문제 방지).
   Future<void> _regenerateAllAlarms() async {
     final schedule = ref.read(scheduleProvider).value;
     if (schedule == null) return;
 
-    // 1. 기존 알람 전체 삭제
-    final existingAlarms = await DatabaseService.instance.getAllAlarms();
-    for (var alarm in existingAlarms) {
-      if (alarm.id != null) {
-        await AlarmService().cancelAlarm(alarm.id!);
-      }
+    const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+
+    // 1. Native diff 갱신 트리거
+    try {
+      await platform.invokeMethod('forceNativeRefresh');
+    } catch (e) {
+      print('⚠️ Native 갱신 실패: $e');
     }
-    await DatabaseService.instance.deleteAllAlarmsOnly();  // ⭐ 이력은 유지!
 
     // 2. Notification 취소
     try {
-      const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
       await platform.invokeMethod('cancelNotification');
     } catch (e) {
       print('⚠️ Notification 삭제 실패: $e');
     }
 
-    // 3. 10일치 알람 재생성
-    await _generate10DaysAlarmsFromTemplates(schedule);
+    // 3. Native가 비동기로 diff 갱신을 마칠 시간을 잠깐 기다린 후 UI 갱신
+    await Future.delayed(Duration(milliseconds: 800));
+    await ref.read(alarmNotifierProvider.notifier).refresh();
 
-    // 4. AlarmGuard 트리거
+    // 4. diff 갱신이 끝난 "이후" 상태 기준으로 20분 전 알림(8888) 재계산
     try {
-      const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
       await platform.invokeMethod('triggerGuardCheck');
     } catch (e) {
-      print('⚠️ AlarmGuard 트리거 실패: $e');
+      print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
     }
-
-    // 5. Provider 갱신
-    await ref.read(alarmNotifierProvider.notifier).refresh();
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1269,55 +1157,6 @@ lowvibe07.tistory.com
         ),
       );
     }
-  }
-
-  // ⭐ 템플릿 기반 10일치 알람 생성
-  Future<void> _generate10DaysAlarmsFromTemplates(ShiftSchedule schedule) async {
-    final today = DateTime.now();
-    final db = await DatabaseService.instance.database;
-
-    for (var i = 0; i < 10; i++) {
-      final date = today.add(Duration(days: i));
-      final shiftType = schedule.getShiftForDate(date);
-
-      if (shiftType == '미설정') continue;
-
-      // 해당 근무의 템플릿 조회
-      final templates = await DatabaseService.instance.getAlarmTemplates(shiftType);
-
-      for (var template in templates) {
-        final timeParts = template.time.split(':');
-        final alarmTime = DateTime(
-          date.year,
-          date.month,
-          date.day,
-          int.parse(timeParts[0]),
-          int.parse(timeParts[1]),
-        );
-
-        // 과거 시간이면 스킵
-        if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) continue;
-
-        // DB에 알람 저장
-        final alarmId = await db.insert('alarms', {
-          'time': template.time,
-          'date': alarmTime.toIso8601String(),
-          'type': 'fixed',
-          'alarm_type_id': template.alarmTypeId,
-          'shift_type': shiftType,
-        });
-
-        // Native 알람 등록
-        await AlarmService().scheduleAlarm(
-          id: alarmId,
-          dateTime: alarmTime,
-          label: shiftType,
-          soundType: 'loud',
-        );
-      }
-    }
-
-    print('✅ 10일치 알람 재생성 완료');
   }
 
   // ⭐ 전체 교대조 근무표 작성 다이얼로그
@@ -1416,10 +1255,11 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     // DB에 타입이 없으면 프리셋으로 초기화
     if (_types.isEmpty) {
       _initPresets();
-    } else {
-      // 프리셋 기본값 확인/수정 (백그라운드에서 실행, await 없음)
-      DatabaseService.instance.ensurePresetDefaults();
     }
+    // ⭐ 주의: 예전엔 여기서 ensurePresetDefaults()를 매번 호출해서
+    // 사용자가 볼륨을 정확히 100%(1.0)로 맞추면 다음에 이 화면을 열 때마다
+    // "마이그레이션 안 된 값"으로 오인되어 70%로 되돌아가는 버그가 있었음.
+    // 버전 마이그레이션(_onUpgrade v8~v11)이 이미 1회성으로 처리하므로 여기선 호출 안 함.
   }
 
   @override

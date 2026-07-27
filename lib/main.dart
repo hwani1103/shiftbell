@@ -6,7 +6,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'services/alarm_service.dart';
 import 'services/permission_service.dart';
 import 'services/database_service.dart';
-import 'services/alarm_refresh_service.dart';
 import 'services/update_service.dart';
 import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
@@ -25,15 +24,34 @@ import 'theme/app_theme.dart';  // ⭐ 다크모드 추가
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // ⭐ 릴리즈 빌드는 기본적으로 위젯 빌드 중 에러가 나면 그냥 빈 회색 박스만
+  // 보여주고 원인을 숨김 (디버그 빌드의 "빨간 에러 화면"과 다름). 그래서
+  // "가끔 화면이 백지로 보인다" 같은 문제의 실제 원인을 릴리즈에서는 알 수가
+  // 없었음 - 릴리즈에서도 어떤 에러인지 최소한 화면에 보이게 함.
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    // ⭐ context에 "어느 위젯을 빌드하다가" 났는지가 요약돼 있어서, 메시지만으로
+    // 재현 상황을 특정하기 어려운 버그(예: 특정 화면에서만 5초 이내에 재현) 리포트 시
+    // 훨씬 빨리 원인 파일/위젯을 좁힐 수 있음.
+    final contextSummary = details.context?.toDescription() ?? '';
+    return Container(
+      color: Colors.red.shade50,
+      padding: const EdgeInsets.all(8),
+      alignment: Alignment.center,
+      child: Text(
+        '⚠️ 화면 표시 오류\n${details.exceptionAsString()}'
+        '${contextSummary.isNotEmpty ? '\n($contextSummary)' : ''}',
+        style: const TextStyle(color: Colors.red, fontSize: 11),
+        textAlign: TextAlign.center,
+      ),
+    );
+  };
+
   // ⭐ 런치 스크린 유지 시간 (0.3초)
   await Future.delayed(const Duration(milliseconds: 300));
 
   await initializeDateFormatting('ko_KR', null);
   await DatabaseService.instance.database;
   await AlarmService().initialize();
-
-  // ⭐ 10일 이상 지난 알람 이력 자동 삭제
-  await DatabaseService.instance.deleteOldAlarmHistory();
 
   // ⭐ 앱 시작 전에 테마 미리 로드 (깜빡임 방지)
   final initialTheme = await _loadInitialTheme();
@@ -108,8 +126,10 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
   super.didChangeAppLifecycleState(state);
 
   if (state == AppLifecycleState.resumed) {
-    print('📱 앱 포그라운드 진입 - 갱신 체크');
-    AlarmRefreshService.instance.refreshIfNeeded();
+    // ⭐ Native MainActivity.onResume()이 이미 자체적으로 AlarmGuardReceiver.triggerCheck()를
+    // 호출해서 갱신 필요 여부를 판단/실행함 (Dart에서 또 트리거하면 중복이라 제거함).
+    // 여기서는 화면에 보여줄 데이터만 새로고침하면 됨.
+    print('📱 앱 포그라운드 진입 - UI 새로고침');
 
     // ⭐ 추가: AlarmNotifier도 강제 갱신
     if (mounted) {
@@ -202,7 +222,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
     ];
 
-    _checkRefreshOnStart();
+    // ⭐ _scheduleGuardWakeup()이 triggerGuardCheck를 호출해서 Native 갱신 판단/실행까지 함
+    // (예전엔 여기서 AlarmRefreshService도 따로 호출해서 Native와 중복 실행되는 문제가 있었음)
     _scheduleGuardWakeup();
 
     // ⭐ Method Call Handler 등록
@@ -230,11 +251,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     setState(() => _currentIndex = 1);
   }
 
-  Future<void> _checkRefreshOnStart() async {
-    print('🚀 앱 시작 - 갱신 체크');
-    await AlarmRefreshService.instance.refreshIfNeeded();
-  }
-
   Future<void> _scheduleGuardWakeup() async {
     try {
       // ⭐ triggerGuardCheck()가 내부에서 scheduleNextWakeup()도 호출함
@@ -252,22 +268,19 @@ Future<void> _handleMethod(MethodCall call) async {
   print('📞 Method Call 수신: ${call.method}');
 
   if (call.method == 'refreshAlarms') {
-    print('🔄 알람 갱신 요청 - 전체 갱신 시작');
+    // ⭐ Native가 이미 갱신(AlarmRefreshEngine)을 끝내고 나서 UI만 새로고침해달라고
+    // 보내는 신호임. 여기서 다시 갱신을 트리거하면 Native가 방금 한 일을 Dart가
+    // 또 반복하는 꼴이라 삭제/재등록 경쟁 상태가 생김 - 그래서 UI 갱신만 함.
+    print('🔄 Native 갱신 완료 신호 수신 - UI만 새로고침');
 
     try {
-      // ⭐ 1. AlarmRefreshService 호출 (10일치 재생성)
-      await AlarmRefreshService.instance.refreshIfNeeded();
-      print('✅ AlarmRefreshService 완료 (10일치 재생성)');
-
-      // ⭐ 2. AlarmNotifier 갱신 (UI 업데이트)
       if (mounted) {
         final container = ProviderScope.containerOf(context);
         await container.read(alarmNotifierProvider.notifier).refresh();
         print('✅ AlarmNotifier 새로고침 완료');
       }
-
     } catch (e) {
-      print('❌ 갱신 실패: $e');
+      print('❌ UI 새로고침 실패: $e');
     }
 
   } else if (call.method == 'openTab') {

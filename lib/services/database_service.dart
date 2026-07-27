@@ -55,7 +55,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 12,  // v12: date_memos 테이블 추가
+      version: 14,  // v14: date_overtime 테이블 추가 (OT 누적)
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -148,6 +148,35 @@ class DatabaseService {
   ''');
 
   await db.execute('CREATE INDEX idx_date_memos_date ON date_memos(date)');
+
+    // ⭐ 신규: 알람 생성 이력 원장 (append-only, 절대 UPDATE/DELETE 안 함)
+    // 알람이 생성되는 "그 순간"에 무조건 기록 → 나중에 alarms/alarm_history에서
+    // 뭔가 사라져도 "생성은 됐었다"는 사실 자체는 여기서 확인 가능
+    await db.execute('''
+      CREATE TABLE alarm_creation_log(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        alarm_id INTEGER NOT NULL,
+        scheduled_date TEXT NOT NULL,
+        scheduled_time TEXT NOT NULL,
+        shift_type TEXT,
+        alarm_type_id INTEGER,
+        source TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_creation_log_alarm_id ON alarm_creation_log(alarm_id)');
+    await db.execute('CREATE INDEX idx_creation_log_created_at ON alarm_creation_log(created_at)');
+
+    // ⭐ 신규: 날짜별 OT(추가근무) 누적 시간
+    await db.execute('''
+      CREATE TABLE date_overtime(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL UNIQUE,
+        minutes INTEGER NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX idx_date_overtime_date ON date_overtime(date)');
 
     for (var type in AlarmType.presets) {
       await db.insert('alarm_types', type.toMap());
@@ -308,54 +337,40 @@ class DatabaseService {
     await db.execute('CREATE INDEX IF NOT EXISTS idx_date_memos_date ON date_memos(date)');
     print('✅ DB 업그레이드 완료 (v$oldVersion → v12): date_memos 테이블 추가');
   }
-}
 
-  // ⭐ 프리셋 기본값 강제 확인/수정 (settings_tab 초기화 시 호출)
-  Future<void> ensurePresetDefaults() async {
-    final db = await database;
-    try {
-      // 프리셋 데이터가 있는지 확인
-      var presetCheck = await db.rawQuery("SELECT COUNT(*) as cnt FROM alarm_types WHERE is_preset = 1");
-      int presetCount = Sqflite.firstIntValue(presetCheck) ?? 0;
-
-      if (presetCount == 0) {
-        print('⚠️ 프리셋 없음 - settings_tab에서 초기화 예정');
-        return;
-      }
-
-      // 단일 트랜잭션으로 모든 UPDATE 실행 (락 충돌 최소화)
-      await db.transaction((txn) async {
-        // 소리(id=1): alarmbell1, 70%, 강하게, 3분
-        await txn.execute('''
-          UPDATE alarm_types SET
-            sound_file = CASE WHEN sound_file = 'loud' OR sound_file = 'soft' THEN 'alarmbell1' ELSE sound_file END,
-            volume = CASE WHEN volume = 1.0 THEN 0.7 ELSE volume END,
-            vibration_strength = CASE WHEN vibration_strength = 2 THEN 3 ELSE vibration_strength END,
-            duration = CASE WHEN duration = 10 OR duration = 5 THEN 3 ELSE duration END
-          WHERE id = 1 AND is_preset = 1
-        ''');
-
-        // 진동(id=2): 강하게, 3분
-        await txn.execute('''
-          UPDATE alarm_types SET
-            vibration_strength = CASE WHEN vibration_strength = 2 OR vibration_strength = 1 THEN 3 ELSE vibration_strength END,
-            duration = CASE WHEN duration = 10 OR duration = 5 THEN 3 ELSE duration END
-          WHERE id = 2 AND is_preset = 1
-        ''');
-
-        // 무음(id=3): 3분
-        await txn.execute('''
-          UPDATE alarm_types SET
-            duration = CASE WHEN duration = 10 OR duration = 5 THEN 3 ELSE duration END
-          WHERE id = 3 AND is_preset = 1
-        ''');
-      });
-
-      print('✅ 프리셋 기본값 확인 완료');
-    } catch (e) {
-      print('⚠️ 프리셋 기본값 확인 중 오류: $e');
-    }
+  // v13: 알람 생성 이력 원장 추가
+  if (oldVersion < 13) {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS alarm_creation_log(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        alarm_id INTEGER NOT NULL,
+        scheduled_date TEXT NOT NULL,
+        scheduled_time TEXT NOT NULL,
+        shift_type TEXT,
+        alarm_type_id INTEGER,
+        source TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_creation_log_alarm_id ON alarm_creation_log(alarm_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_creation_log_created_at ON alarm_creation_log(created_at)');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v13): alarm_creation_log 테이블 추가');
   }
+
+  // v14: 날짜별 OT(추가근무) 누적 시간 추가
+  if (oldVersion < 14) {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS date_overtime(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL UNIQUE,
+        minutes INTEGER NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_date_overtime_date ON date_overtime(date)');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v14): date_overtime 테이블 추가');
+  }
+}
 
   // === 기존 메서드들 유지 ===
   
@@ -390,11 +405,47 @@ class DatabaseService {
     );
   }
   
-  Future<int> insertAlarm(Alarm alarm) async {
+  Future<int> insertAlarm(Alarm alarm, {String source = 'manual'}) async {
     final db = await database;
-    return await db.insert('alarms', alarm.toMap());
+    return await db.transaction((txn) async {
+      final id = await txn.insert('alarms', alarm.toMap());
+      await logAlarmCreation(txn, id, alarm, source);
+      return id;
+    });
   }
-  
+
+  // ⭐ 알람 생성 이력 원장에 기록 (append-only). 알람을 삽입하는 모든 경로(달력 팝업의
+  // 날짜별 근무 변경 등 자체 트랜잭션을 여는 곳 포함)에서 재사용할 수 있게 public으로 노출.
+  // 호출부가 이미 트랜잭션 안에 있으므로 여기선 그냥 insert만 함.
+  Future<void> logAlarmCreation(DatabaseExecutor txn, int alarmId, Alarm alarm, String source) async {
+    if (alarm.date == null) return;
+    final dateStr = alarm.date!.toIso8601String();
+    await txn.insert('alarm_creation_log', {
+      'alarm_id': alarmId,
+      'scheduled_date': dateStr,
+      'scheduled_time': alarm.time,
+      'shift_type': alarm.shiftType,
+      'alarm_type_id': alarm.alarmTypeId,
+      'source': source,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+  }
+
+  // ⭐ 생성 이력 조회 (알람이 사라졌어도 "생성은 됐었는지" 확인용)
+  Future<List<Map<String, dynamic>>> getAlarmCreationLog({int limit = 200}) async {
+    final db = await database;
+    return db.query('alarm_creation_log', orderBy: 'created_at DESC', limit: limit);
+  }
+
+  Future<List<Map<String, dynamic>>> getCreationLogForAlarm(int alarmId) async {
+    final db = await database;
+    return db.query('alarm_creation_log', where: 'alarm_id = ?', whereArgs: [alarmId], orderBy: 'created_at DESC');
+  }
+
+  // ⭐ alarm_creation_log는 의도적으로 자동 삭제 로직이 없음.
+  // 알람이 나중에 어떤 이유로든(사용자 삭제/버그) 사라져도 "생성됐다는 사실"은
+  // 항상 남아있어야 한다는 요구사항이라 여기엔 cleanup 함수를 안 둠.
+
   Future<List<Alarm>> getAllAlarms() async {
     final db = await database;
     final maps = await db.query('alarms');
@@ -513,35 +564,85 @@ class DatabaseService {
     );
   }
 
-  Future<void> insertAlarmsInBatch(List<Alarm> alarms) async {
+  Future<void> insertAlarmsInBatch(List<Alarm> alarms, {String source = 'auto'}) async {
     final db = await database;
-    final batch = db.batch();
-    
-    for (var alarm in alarms) {
-      batch.insert('alarms', alarm.toMap());
-    }
-    
-    await batch.commit(noResult: true);
-    print('✅ ${alarms.length}개 알람 일괄 등록 완료');
+
+    await db.transaction((txn) async {
+      for (var alarm in alarms) {
+        final id = await txn.insert('alarms', alarm.toMap());
+        await logAlarmCreation(txn, id, alarm, source);
+      }
+    });
+
+    print('✅ ${alarms.length}개 알람 일괄 등록 완료 (생성 이력 기록됨)');
   }
 
+  // ⭐ 전체 초기화(설정 리셋/온보딩 재시작)에서도 이력은 절대 지우지 않음.
+  // 예전엔 "클린 스타트"라는 이유로 alarm_history까지 같이 지웠는데,
+  // 이력은 사용자 입장에서 "내가 알람을 놓쳤는지 안 놓쳤는지"를 증명하는
+  // 기록이라 스케줄을 초기화한다고 해서 같이 사라지면 안 됨.
+  // ⭐ deleteAllAlarmsOnly()와 동일하게, 지워지는 각 알람도 이력에 남김(superseded)
+  // - 나중에 "이 시점에 알람이 왜 사라졌지" 추적 가능해야 함.
   Future<void> deleteAllAlarms() async {
     final db = await database;
 
-    // ⭐ 모든 알람 삭제 + 관련 이력도 삭제
-    // (사용자는 DB 내부 동작을 알 필요 없음. 전체 삭제는 클린 스타트)
-    await db.delete('alarms');
-    print('🗑️ 모든 알람 삭제 완료');
+    await db.transaction((txn) async {
+      final toRemove = await txn.query('alarms');
+      final now = DateTime.now().toIso8601String();
 
-    await db.delete('alarm_history');
-    print('🗑️ 모든 알람 이력 삭제 완료');
+      for (final row in toRemove) {
+        final date = row['date'] as String?;
+        final time = row['time'] as String?;
+        if (date != null && time != null) {
+          await txn.insert('alarm_history', {
+            'alarm_id': row['id'],
+            'scheduled_time': time,
+            'scheduled_date': date,
+            'actual_ring_time': now,
+            'dismiss_type': 'superseded',
+            'snooze_count': 0,
+            'shift_type': row['shift_type'],
+            'created_at': now,
+          });
+        }
+      }
+
+      await txn.delete('alarms');
+    });
+
+    print('🗑️ 모든 알람 삭제 완료 (이력 기록 후 삭제)');
   }
 
-  // ⭐ 알람만 삭제 (이력은 유지) - 자동 갱신용
+  // ⭐ 자동 생성분(type='fixed')만 삭제 (이력은 유지, 스누즈 중인 알람은 절대 건드리지 않음)
+  // - 자동 갱신/패턴 변경 시 사용. 삭제되는 각 알람은 이력에 남김 (superseded)
   Future<void> deleteAllAlarmsOnly() async {
     final db = await database;
-    await db.delete('alarms');
-    print('🗑️ 모든 알람 삭제 완료 (이력 유지)');
+
+    await db.transaction((txn) async {
+      final toRemove = await txn.query('alarms', where: "type = ?", whereArgs: ['fixed']);
+      final now = DateTime.now().toIso8601String();
+
+      for (final row in toRemove) {
+        final date = row['date'] as String?;
+        final time = row['time'] as String?;
+        if (date != null && time != null) {
+          await txn.insert('alarm_history', {
+            'alarm_id': row['id'],
+            'scheduled_time': time,
+            'scheduled_date': date,
+            'actual_ring_time': now,
+            'dismiss_type': 'superseded',
+            'snooze_count': 0,
+            'shift_type': row['shift_type'],
+            'created_at': now,
+          });
+        }
+      }
+
+      await txn.delete('alarms', where: "type = ?", whereArgs: ['fixed']);
+    });
+
+    print('🗑️ 자동 생성 알람 삭제 완료 (스누즈 중인 알람 보호, 이력 유지)');
   }
 
   // ⭐ 신규: 모든 알람 템플릿 삭제
@@ -707,23 +808,6 @@ Future<Map<String, dynamic>> getAlarmStatistics() async {
   };
 }
 
-// ⭐ 신규: 오래된 이력 삭제 (한 달 이상)
-Future<void> deleteOldHistory(DateTime beforeDate) async {
-  final db = await database;
-  final dateStr = beforeDate.toIso8601String();
-  await db.delete(
-    'alarm_history',
-    where: 'created_at < ?',
-    whereArgs: [dateStr],
-  );
-}
-
-// ⭐ 신규: 모든 이력 삭제
-Future<void> clearAlarmHistory() async {
-  final db = await database;
-  await db.delete('alarm_history');
-}
-
 // ===== 메모 관련 메서드 =====
 
 // ⭐ 메모 생성 (최대 3개 체크)
@@ -870,28 +954,68 @@ Future<void> reorderMemos(String date, List<int> memoIds) async {
   print('✅ 메모 순서 변경 완료');
 }
 
-// ⭐ 10일 이상 지난 알람 이력 자동 삭제
-Future<void> deleteOldAlarmHistory() async {
-  try {
-    final db = await database;
+// ===== OT(추가근무) 관련 메서드 =====
 
-    // 10일 전 날짜 계산
-    final cutoffDate = DateTime.now().subtract(Duration(days: 10));
-    final cutoffDateStr = cutoffDate.toIso8601String();
+// ⭐ 특정 날짜의 OT를 30분 단위로 증감 (0 밑으로는 안 내려감, 0이 되면 row 자체를 지움)
+Future<int> adjustOvertime(String date, int deltaMinutes) async {
+  final db = await database;
+  return await db.transaction((txn) async {
+    final rows = await txn.query('date_overtime', where: 'date = ?', whereArgs: [date]);
+    final current = rows.isNotEmpty ? (rows.first['minutes'] as int) : 0;
+    final newTotal = (current + deltaMinutes).clamp(0, 24 * 60);
 
-    // 10일 이상 지난 이력 삭제
-    final deletedCount = await db.delete(
-      'alarm_history',
-      where: 'created_at < ?',
-      whereArgs: [cutoffDateStr],
-    );
-
-    if (deletedCount > 0) {
-      print('🗑️ 10일 이상 지난 알람 이력 ${deletedCount}개 삭제 완료');
+    if (newTotal <= 0) {
+      if (rows.isNotEmpty) {
+        await txn.delete('date_overtime', where: 'date = ?', whereArgs: [date]);
+      }
+    } else {
+      final now = DateTime.now().toIso8601String();
+      if (rows.isNotEmpty) {
+        await txn.update(
+          'date_overtime',
+          {'minutes': newTotal, 'updated_at': now},
+          where: 'date = ?',
+          whereArgs: [date],
+        );
+      } else {
+        await txn.insert('date_overtime', {
+          'date': date,
+          'minutes': newTotal,
+          'updated_at': now,
+        });
+      }
     }
-  } catch (e) {
-    print('⚠️ 오래된 알람 이력 삭제 실패: $e');
+
+    return newTotal;
+  });
+}
+
+// ⭐ 특정 날짜의 OT 조회 (없으면 0)
+Future<int> getOvertimeForDate(String date) async {
+  final db = await database;
+  final rows = await db.query('date_overtime', where: 'date = ?', whereArgs: [date]);
+  if (rows.isEmpty) return 0;
+  return rows.first['minutes'] as int;
+}
+
+// ⭐ 기간의 OT 전부 조회 (0인 날짜는 애초에 row가 없으므로 결과에 없음)
+Future<Map<String, int>> getOvertimeForRange(DateTime startDate, DateTime endDate) async {
+  final db = await database;
+  final startStr = startDate.toIso8601String().split('T')[0];
+  final endStr = endDate.toIso8601String().split('T')[0];
+
+  final rows = await db.query(
+    'date_overtime',
+    where: 'date >= ? AND date <= ?',
+    whereArgs: [startStr, endStr],
+    orderBy: 'date ASC',
+  );
+
+  final result = <String, int>{};
+  for (var row in rows) {
+    result[row['date'] as String] = row['minutes'] as int;
   }
+  return result;
 }
 
 // ⭐ 테스트용: 모든 알람 이력 삭제
@@ -904,6 +1028,19 @@ Future<void> deleteAllAlarmHistory() async {
     print('⚠️ 알람 이력 전체 삭제 실패: $e');
     rethrow;
   }
+}
+
+// ⭐ "설정 초기화" 전용 예외: 다른 모든 삭제 경로는 이력(alarm_history)과 생성
+// 로그(alarm_creation_log)를 영구 보존하지만, 사용자가 명시적으로 스케줄 자체를
+// 완전히 새로 시작하는 "초기화" 버튼을 누른 경우에는 이력도 함께 지움 - 새 스케줄로
+// 다시 시작하는데 이전 근무 패턴의 이력이 남아있으면 오히려 혼란스러움.
+Future<void> resetAllAlarmHistoryAndLog() async {
+  final db = await database;
+  await db.transaction((txn) async {
+    await txn.delete('alarm_history');
+    await txn.delete('alarm_creation_log');
+  });
+  print('🗑️ 알람 이력 + 생성 로그 전체 삭제 완료 (설정 초기화)');
 }
 
 }
