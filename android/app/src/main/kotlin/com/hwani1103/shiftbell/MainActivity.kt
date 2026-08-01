@@ -67,8 +67,17 @@ class MainActivity: FlutterActivity() {
     // ✅ 변경
 override fun onResume() {
     super.onResume()
-    // ⭐ 앱 복귀 시 20분 전 알림 체크 + 다음 wakeup 예약
-    AlarmGuardReceiver.triggerCheck(this)
+    // ⭐ CRITICAL FIX: triggerCheck()는 DB를 동기적으로(블로킹) 읽음. onResume()은
+    // 메인 스레드에서 실행되는데, 여기서 바로 부르면 - 특히 설치 직후 첫 실행처럼
+    // Dart(sqflite)가 같은 DB 파일을 동시에 처음 생성하고 있는 순간과 겹치면 -
+    // SQLite 락 경합으로 메인 스레드가 몇 초간 멈출 수 있음. 메인 스레드가 막히면
+    // Flutter 엔진의 첫 프레임 렌더링도 같이 막혀서, 스플래시(앱 로고) 화면에서
+    // 멈춘 것처럼 보임. 재실행 시 재현이 안 되는 이유: 그땐 DB가 이미 다 만들어져
+    // 있어서 경합 자체가 없음 - "설치 직후 딱 한 번만" 증상과 정확히 일치함.
+    // 20분 전 알림/다음 wakeup 예약은 UI 렌더링과 무관하니 백그라운드 스레드로 옮김.
+    Thread {
+        AlarmGuardReceiver.triggerCheck(this)
+    }.start()
     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
         methodChannel?.invokeMethod("refreshAlarms", null)
     }, 300)

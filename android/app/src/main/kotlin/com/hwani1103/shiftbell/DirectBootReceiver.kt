@@ -81,7 +81,8 @@ class DirectBootReceiver : BroadcastReceiver() {
 
         return try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            db = dbHelper.readableDatabase
+            // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고).
+            db = dbHelper.getReadableDatabaseWithRetry() ?: return null
 
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
@@ -127,8 +128,8 @@ class DirectBootReceiver : BroadcastReceiver() {
             Log.e("DirectBoot", "DB 읽기 실패", e)
             null
         } finally {
+            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
             cursor?.close()
-            db?.close()
         }
     }
     

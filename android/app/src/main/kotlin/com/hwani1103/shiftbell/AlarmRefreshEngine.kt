@@ -92,7 +92,13 @@ object AlarmRefreshEngine {
 
     private fun doRefresh(context: Context) {
         val dbHelper = DatabaseHelper.getInstance(context)
-        val db = dbHelper.writableDatabase
+        // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고) -
+        // 이 시점엔 스케줄도 없는 게 정상이라 "스케줄 없음"과 동일하게 처리.
+        val db = dbHelper.getWritableDatabaseWithRetry()
+        if (db == null) {
+            Log.d(TAG, "⚠️ DB 파일 없음 - 갱신 중단")
+            return
+        }
 
         try {
             val schedule = readSchedule(db)
@@ -164,6 +170,7 @@ object AlarmRefreshEngine {
             // 안 도는 알람들이 DB엔 있지만 실제로는 안 울리는 유령이 될 수 있었음.
             // AlarmManager 등록 자체는 DB를 안 건드리는 가벼운 작업이라 매번 다시 걸어도 무해함.
             var rearmedCount = 0
+            var rearmFailures = 0
             for (item in desired) {
                 val existingId = existingByKey[item.key()]?.id ?: continue  // toAdd는 위에서 이미 등록함
                 try {
@@ -171,15 +178,26 @@ object AlarmRefreshEngine {
                     rearmedCount++
                 } catch (e: Exception) {
                     Log.e(TAG, "❌ 기존 알람 재등록 실패: id=$existingId", e)
+                    rearmFailures++
                 }
             }
 
-            markRefreshed(context)
+            // ⭐ 재등록이 하나라도 실패했으면 "오늘 갱신 완료"로 표시하지 않음.
+            // markRefreshed()를 무조건 호출하면, 권한이 일시적으로 막혀서 재등록이
+            // 전부 실패해도 "오늘은 이미 갱신함" 플래그가 찍혀서 dateChanged 기반
+            // 재시도가 다음 날까지(최대 24시간) 막혀버림 - 그동안 실제로는 OS에
+            // 재등록 안 된 알람이 방치됨. 실패가 있으면 플래그를 남기지 않아서
+            // 다음 트리거(20분 뒤, 알람 울림, 앱 실행 등) 때 바로 재시도되게 함.
+            if (rearmFailures == 0) {
+                markRefreshed(context)
+            } else {
+                Log.e(TAG, "⚠️ 재등록 실패 ${rearmFailures}건 - '오늘 갱신 완료' 표시 안 함 (다음 트리거에 재시도)")
+            }
             notifyFlutter(context)
 
             Log.d(TAG, "✅ diff 갱신 완료: +${toAdd.size} -${toRemove.size} 재등록=$rearmedCount")
         } finally {
-            db.close()
+            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
         }
     }
 
@@ -276,6 +294,20 @@ object AlarmRefreshEngine {
         return result
     }
 
+    // ⭐ 순수 연/월/일만으로 계산하는 Julian Day Number - 시간대/서머타임과 완전히
+    // 무관해서, 두 날짜 사이의 "진짜 날짜 수 차이"를 항상 정확히 구할 수 있음
+    // (밀리초 차이를 24시간으로 나누는 방식은 DST가 있는 지역에서 하루가 23/25시간인
+    // 날을 지나면 틀어짐). Calendar.MONTH는 0-based라 +1 필요.
+    private fun julianDayNumber(cal: Calendar): Int {
+        val year = cal.get(Calendar.YEAR)
+        val month = cal.get(Calendar.MONTH) + 1
+        val day = cal.get(Calendar.DAY_OF_MONTH)
+        val a = (14 - month) / 12
+        val y = year + 4800 - a
+        val m = month + 12 * a - 3
+        return day + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100 + y / 400 - 32045
+    }
+
     // ⭐ Dart(밀리초 포함 "...T10:00:00.000")와 Kotlin(밀리초 없음 "...T10:00:00") 두 형식을
     // 전부 허용해서 파싱함. SimpleDateFormat.parse()는 패턴과 일치하는 접두부만 읽고 뒤에
     // 남는 문자(.000)는 무시하므로 하나의 포맷터로 두 형식 다 안전하게 처리 가능.
@@ -310,7 +342,13 @@ object AlarmRefreshEngine {
             // ⭐ 수동 지정 예외가 있으면 우선 적용 (달력 팝업에서 지정한 값)
             val shiftType = schedule.assignedDates[dayKey] ?: run {
                 if (schedule.pattern.isEmpty()) return@run "미설정"
-                val daysDiff = ((targetDate.timeInMillis - schedule.startDateMillis) / (24 * 60 * 60 * 1000)).toInt()
+                // ⭐ DST 안전한 일수 계산: 밀리초 차이를 86400000(24시간)으로 나누면,
+                // 시작일과 대상일 사이에 서머타임 전환일(하루가 23/25시간)이 껴있는
+                // 나라/시간대에서는 daysDiff가 정수가 아니게 되어 .toInt() 절삭 시
+                // 패턴 인덱스가 하루씩 밀릴 수 있음. 순수 연/월/일 기반 Julian Day
+                // Number로 계산하면 시간대/DST와 완전히 무관하게 항상 정확함.
+                val startCal = Calendar.getInstance().apply { timeInMillis = schedule.startDateMillis }
+                val daysDiff = julianDayNumber(targetDate) - julianDayNumber(startCal)
                 val idx = ((schedule.todayIndex + daysDiff) % schedule.pattern.size + schedule.pattern.size) % schedule.pattern.size
                 schedule.pattern[idx]
             }
@@ -329,7 +367,14 @@ object AlarmRefreshEngine {
                     set(Calendar.MILLISECOND, 0)
                 }
 
-                if (alarmCal.timeInMillis < now - 60_000) continue
+                // ⭐ CRITICAL FIX: readExistingFixedAlarms()는 "date > now"로 조회하는데
+                // 여기는 "now - 60초"까지 봐줬음 - 그래서 방금(60초 이내) 울린/지나간
+                // 알람이 desired엔 있는데 existing엔 없는 상태가 돼서 toAdd로 오인되고,
+                // 과거 timestamp로 재삽입+재예약(scheduleNativeAlarm)되어 즉시 다시
+                // 울려버릴 수 있었음. 방금 끄기/스누즈한 알람이 finishUp()의
+                // checkAndTriggerRefresh() 호출로 인해 몇 초 뒤 부활하는 경로였음.
+                // existing과 완전히 같은 기준(> now)으로 맞춤.
+                if (alarmCal.timeInMillis <= now) continue
 
                 result.add(
                     DesiredAlarm(

@@ -34,7 +34,15 @@ object AlarmActionHelper {
      */
     fun dismiss(context: Context, alarmId: Int, dismissType: String) {
         val dbHelper = DatabaseHelper.getInstance(context)
-        val db = dbHelper.writableDatabase
+        // ⭐ DB 파일이 없으면(=아직 스케줄 자체가 없음) Native가 만들면 안 됨 - DatabaseHelper.kt
+        // 상세 주석 참고. 이 시점엔 지울 알람도 없는 게 정상이라 그냥 취소만 하고 넘어감.
+        val db = dbHelper.getWritableDatabaseWithRetry()
+        if (db == null) {
+            Log.w(TAG, "⚠️ dismiss: DB 파일 없음 - Native 알람 취소만 수행")
+            cancelNativeAlarm(context, alarmId)
+            finishUp(context, alarmId)
+            return
+        }
 
         try {
             cancelNativeAlarm(context, alarmId)
@@ -63,9 +71,16 @@ object AlarmActionHelper {
             }
         } catch (e: Exception) {
             Log.e(TAG, "❌ dismiss 실패: alarmId=$alarmId", e)
-        } finally {
-            db.close()
         }
+        // ⭐ CRITICAL FIX: db.close() 제거. DatabaseHelper는 앱 전체에서 공유하는
+        // 싱글턴인데, getReadableDatabase()/getWritableDatabase()가 돌려주는 건
+        // "새로 연 연결"이 아니라 SQLiteOpenHelper가 내부적으로 캐싱해서 계속
+        // 재사용하는 공유 연결임. 이걸 매번 쓰고 나서 close()하면, 다른 스레드/
+        // 컴포넌트(AlarmGuardReceiver, MainActivity 등)가 동시에 그 연결을 쓰고
+        // 있거나 막 쓰려던 참이면 "이미 닫힌 객체" 예외나, 심하면 재오픈 도중
+        // 테이블이 일시적으로 안 보이는(no such table) 레이스가 생김 - 실제로
+        // logcat에서 이 정확한 예외를 확인함. SQLiteOpenHelper는 원래 앱 생명주기
+        // 동안 계속 열어두고 쓰도록 설계된 것이라 명시적으로 닫을 필요가 없음.
 
         finishUp(context, alarmId)
     }
@@ -73,7 +88,11 @@ object AlarmActionHelper {
     /** 알람을 N분 뒤로 미룸. 성공 시 새 시간 정보 반환, 실패(알람 없음 등)면 null */
     fun snooze(context: Context, alarmId: Int, minutes: Int = 5): SnoozeResult? {
         val dbHelper = DatabaseHelper.getInstance(context)
-        val db = dbHelper.writableDatabase
+        // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 - DatabaseHelper.kt 상세 주석 참고.
+        val db = dbHelper.getWritableDatabaseWithRetry() ?: run {
+            Log.e(TAG, "❌ snooze: DB 파일 없음 id=$alarmId")
+            return null
+        }
         var result: SnoozeResult? = null
 
         try {
@@ -137,9 +156,8 @@ object AlarmActionHelper {
             result = SnoozeResult(timeStr, shiftType)
         } catch (e: Exception) {
             Log.e(TAG, "❌ snooze 실패: alarmId=$alarmId", e)
-        } finally {
-            db.close()
         }
+        // ⭐ db.close() 제거 (dismiss()와 동일한 이유 - 위 주석 참고)
 
         if (result != null) {
             finishUp(context, alarmId)

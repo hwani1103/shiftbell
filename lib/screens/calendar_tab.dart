@@ -734,7 +734,11 @@ Widget build(BuildContext context) {
                   SizedBox(height: 2.h),
                   Text(
                     '(해당 날짜를 탭하여 OT를 입력하세요)',
-                    style: TextStyle(fontSize: 9.sp, color: colorScheme.outline),
+                    style: TextStyle(
+                      fontSize: 9.sp,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -887,41 +891,78 @@ Widget build(BuildContext context) {
         final minutes = notifier.getForDate(dateStr);
         final hasOvertime = minutes > 0;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+        // ⭐ 시간 텍스트는 버튼 두 줄(OT 라벨 제외) 사이 수직 중앙에, OT 라벨은 그
+        // 버튼 두 줄(폭이 서로 같음) 가로 중앙 위에 오도록 배치. 전체적으로 간격을
+        // 최대한 줄여서(6h→4h, 4h→2h) 버튼이 한 줄 늘어난 만큼 날짜 줄이 아래로
+        // 밀리는 걸 최소화함.
+        return Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'OT',
+              hasOvertime ? formatOvertimeMinutes(minutes) : '없음',
               style: TextStyle(
                 fontSize: 13.sp,
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.bold,
+                color: hasOvertime ? colorScheme.primary : colorScheme.onSurfaceVariant,
               ),
             ),
-            SizedBox(height: 6.h),
-            Row(
+            SizedBox(width: 8.w),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  hasOvertime ? formatOvertimeMinutes(minutes) : '없음',
+                  'OT',
                   style: TextStyle(
                     fontSize: 13.sp,
-                    fontWeight: FontWeight.bold,
-                    color: hasOvertime ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
-                SizedBox(width: 8.w),
-                _buildOvertimeStepButton(
-                  icon: Icons.remove_rounded,
-                  enabled: hasOvertime,
-                  onTap: () => notifier.adjust(dateStr, -30),
+                SizedBox(height: 4.h),
+                // 1시간 단위 (위, 큰 아이콘)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildOvertimeStepButton(
+                      icon: Icons.remove_rounded,
+                      enabled: hasOvertime,
+                      size: 26.w,
+                      iconSize: 20.sp,
+                      onTap: () => notifier.adjust(dateStr, -60),
+                    ),
+                    SizedBox(width: 6.w),
+                    _buildOvertimeStepButton(
+                      icon: Icons.add_rounded,
+                      enabled: true,
+                      size: 26.w,
+                      iconSize: 20.sp,
+                      onTap: () => notifier.adjust(dateStr, 60),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 6.w),
-                _buildOvertimeStepButton(
-                  icon: Icons.add_rounded,
-                  enabled: true,
-                  onTap: () => notifier.adjust(dateStr, 30),
+                SizedBox(height: 2.h),
+                // 30분 단위 (아래, 작은 아이콘)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildOvertimeStepButton(
+                      icon: Icons.remove_rounded,
+                      enabled: hasOvertime,
+                      size: 26.w,
+                      iconSize: 13.sp,
+                      onTap: () => notifier.adjust(dateStr, -30),
+                    ),
+                    SizedBox(width: 6.w),
+                    _buildOvertimeStepButton(
+                      icon: Icons.add_rounded,
+                      enabled: true,
+                      size: 26.w,
+                      iconSize: 13.sp,
+                      onTap: () => notifier.adjust(dateStr, 30),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -935,20 +976,22 @@ Widget build(BuildContext context) {
     required IconData icon,
     required bool enabled,
     required VoidCallback onTap,
+    required double size,
+    required double iconSize,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: enabled ? onTap : null,
       child: Container(
-        width: 26.w,
-        height: 26.w,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color: enabled ? colorScheme.secondaryContainer : colorScheme.surfaceVariant.withOpacity(0.5),
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
-          size: 15.sp,
+          size: iconSize,
           color: enabled ? colorScheme.onSecondaryContainer : colorScheme.outline,
         ),
       ),
@@ -1162,7 +1205,10 @@ Widget build(BuildContext context) {
                        patternShift != currentShift;
 
     final screenHeight = MediaQuery.of(context).size.height;
-    final popupHeight = screenHeight * 0.72;  // ⭐ 화면의 72%
+    // ⭐ 메모 3개가 다 찼을 때 맨 아래 여백이 많이 남아서 비율로 살짝 줄임.
+    // 키보드가 뜬 상태에서의 높이 조정은 아래 builder 안에서 별도로 계산함
+    // (그때만 화면-키보드 높이 기준으로 더 줄여서, 메모 입력창이 키보드 위에 보이게 함).
+    final basePopupHeight = screenHeight * 0.66;  // ⭐ 화면의 66% (기존 72%에서 축소)
 
     final dateStr = day.toIso8601String().split('T')[0];
 
@@ -1184,30 +1230,48 @@ Widget build(BuildContext context) {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            // ⭐ 키보드 감지 시 고정 패딩 적용 (점진적 변화 방지)
             final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
             final isKeyboardVisible = keyboardHeight > 50;  // 키보드 감지 임계값
-            final paddingBottom = isKeyboardVisible ? 60.h : 0.0;  // 고정 패딩
+
+            // ⭐ CRITICAL FIX: 실시간 측정(RenderBox+setState) 방식은 리빌드가
+            // 반복되면서 잔상/겹침 아티팩트가 생겨서 정적 계산으로 되돌림.
+            // 팝업 하단(메모 입력 줄보다 아래 - 메모 목록 + 여백)은 키보드에 가려도
+            // 상관없는 영역이라, 그 비율만큼은 밀 필요가 없음. 화면 크기에 비례한
+            // 값이라 기기가 달라져도 비율은 항상 같음.
+            final reservedBottom = basePopupHeight * 0.32;
+            final paddingBottom = isKeyboardVisible
+                ? (keyboardHeight - reservedBottom).clamp(0.0, keyboardHeight)
+                : 0.0;
 
             // ignore: deprecated_member_use
             return WillPopScope(
               onWillPop: () async {
-                // ⭐ 뒤로가기 시 키보드 포커스 해제
-                FocusScope.of(context).unfocus();
-                await Future.delayed(Duration(milliseconds: 150));
+                // ⭐ 키보드가 떠 있을 때만 포커스 해제 + 딜레이(닫히는 애니메이션과
+                // 겹치는 시각적 튐 방지). 키보드가 없는 대부분의 경우(그냥 보고 뒤로가기)
+                // 까지 무조건 150ms를 기다리게 해서 팝업이 매번 느리게 닫히는 것처럼
+                // 느껴졌음 - 그럴 필요가 없을 땐 바로 닫히게 함.
+                if (isKeyboardVisible) {
+                  FocusScope.of(context).unfocus();
+                  await Future.delayed(Duration(milliseconds: 150));
+                }
                 return true;
               },
               child: Padding(
                 padding: EdgeInsets.only(bottom: paddingBottom),
                 child: Container(
-                  height: popupHeight,
+                  height: basePopupHeight,
                   padding: EdgeInsets.all(24.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ⭐ 날짜 + OT(추가근무) 컨트롤
+                      // ⭐ 날짜 + OT(추가근무) 컨트롤. OT 쪽이 버튼 두 줄이라 날짜 텍스트보다
+                      // 키가 커서, start 정렬이면 날짜 텍스트 아래로 빈 공간이 남아 "근무 :"
+                      // 줄과 멀어 보임 - center로 바꿔서 그 여백을 흡수시킴.
+                      // (근무 변경으로 "기존→현재" 뱃지까지 늘어나면 OT 넣을 폭이 기기에
+                      // 따라 빠듯할 수 있어서 - 예: 3시간30분처럼 글자 길 때 - 다시 날짜 줄로
+                      // 되돌림. 이 줄은 항상 폭이 일정해서(뱃지 안 늘어남) 더 안전함.)
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
@@ -1217,7 +1281,7 @@ Widget build(BuildContext context) {
                           _buildOvertimeToggle(dateStr),
                         ],
                       ),
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 12.h),
 
                       // ⭐ 근무 정보
                       Row(
@@ -1344,11 +1408,10 @@ Widget build(BuildContext context) {
                                     return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
                                   }
 
-                                  // 4단계: 템플릿은 있는데 알람이 없는 경우 → 10일 체크
+                                  // 4단계: 템플릿은 있는데 알람이 없는 경우 → 10일 체크 (DST 안전)
                                   final now = DateTime.now();
-                                  final today = DateTime(now.year, now.month, now.day);
-                                  final targetDate = DateTime(day.year, day.month, day.day);
-                                  final daysDiff = targetDate.difference(today).inDays;
+                                  final daysDiff = julianDayNumber(day.year, day.month, day.day) -
+                                      julianDayNumber(now.year, now.month, now.day);
 
                                   // 5단계: 10일 이후면 안내 문구
                                   if (daysDiff >= 10) {
@@ -1419,14 +1482,16 @@ Widget build(BuildContext context) {
                                 onPressed: isFull
                                     ? null
                                     : () {
-                                        if (memoController.text.trim().isEmpty) return;
+                                        final text = memoController.text.trim();
+                                        if (text.isEmpty) return;
 
-                                        // ⭐ 키보드 내리기
+                                        // ⭐ 원래 동작: 팝업은 그대로 열어둔 채 메모만 추가해서
+                                        // 바로 아래 목록에 생기는 걸 보여줌. (예전엔 팝업을
+                                        // 통째로 닫고 그 결과값으로 메모를 저장했었는데, 그러면
+                                        // 저장할 때마다 팝업이 닫혀버려서 사용성이 나빠짐)
                                         FocusScope.of(context).unfocus();
-
-                                        // ⭐ 메모 텍스트를 결과로 전달하며 팝업 닫기
-                                        // 실제 저장은 .then()에서 처리 (Consumer dispose 후)
-                                        Navigator.of(context).pop(memoController.text.trim());
+                                        memoController.clear();
+                                        ref.read(memoProvider.notifier).createMemo(dateStr, text);
                                       },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -1514,17 +1579,10 @@ Widget build(BuildContext context) {
           },
         );
       },
-    ).then((result) {
-      // ⭐ 팝업 애니메이션 완료 대기 후 저장 + dispose
-      Future.delayed(const Duration(milliseconds: 500), () {
-        // ⭐ 메모 저장
-        if (result != null && result is String && result.isNotEmpty) {
-          ref.read(memoProvider.notifier).createMemo(dateStr, result);
-        }
-
-        // ⭐ 컨트롤러 dispose
-        memoController.dispose();
-      });
+    ).then((_) {
+      // ⭐ 메모 저장은 이제 입력창 "저장" 버튼에서 팝업을 안 닫고 바로 처리하므로,
+      // 여기서는 팝업이 실제로 닫힌 뒤 컨트롤러만 정리하면 됨.
+      memoController.dispose();
     });
   }
 

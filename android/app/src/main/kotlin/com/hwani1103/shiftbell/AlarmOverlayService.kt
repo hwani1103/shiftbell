@@ -121,9 +121,11 @@ class AlarmOverlayService : Service() {
 
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            db = dbHelper.readableDatabase
+            // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 - DatabaseHelper.kt 상세 주석 참고.
+            db = dbHelper.getReadableDatabaseWithRetry() ?: return
+            val database = db
 
-            cursor = db.query(
+            cursor = database.query(
                 "alarms",
                 arrayOf("time", "shift_type", "alarm_type_id"),
                 "id = ?",
@@ -137,7 +139,7 @@ class AlarmOverlayService : Service() {
                 val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
 
                 // alarm_type_id로 duration 조회
-                typeCursor = db.query(
+                typeCursor = database.query(
                     "alarm_types",
                     arrayOf("duration"),
                     "id = ?",
@@ -154,9 +156,9 @@ class AlarmOverlayService : Service() {
         } catch (e: Exception) {
             Log.e("AlarmOverlay", "❌ 알람 정보 로드 실패", e)
         } finally {
+            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
             typeCursor?.close()
             cursor?.close()
-            db?.close()
         }
     }
 

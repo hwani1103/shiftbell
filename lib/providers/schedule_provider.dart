@@ -75,16 +75,16 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
         return;
       }
 
-      final adjustedStartDate = DateTime(
-        currentSchedule.startDate!.year,
-        currentSchedule.startDate!.month,
-        currentSchedule.startDate!.day,
-      );
-      final targetDate = DateTime(date.year, date.month, date.day);
-      final daysDiff = targetDate.difference(adjustedStartDate).inDays;
-      final index = ((currentSchedule.todayIndex! + daysDiff) % 
-                    currentSchedule.pattern!.length + 
-                    currentSchedule.pattern!.length) % 
+      // ⭐ DST 안전한 일수 계산 (shift_schedule.dart의 julianDayNumber 참고)
+      final daysDiff = julianDayNumber(date.year, date.month, date.day) -
+          julianDayNumber(
+            currentSchedule.startDate!.year,
+            currentSchedule.startDate!.month,
+            currentSchedule.startDate!.day,
+          );
+      final index = ((currentSchedule.todayIndex! + daysDiff) %
+                    currentSchedule.pattern!.length +
+                    currentSchedule.pattern!.length) %
                     currentSchedule.pattern!.length;
 
       currentSchedule.pattern![index] = newShiftType;
@@ -202,9 +202,10 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       whereArgs: [currentSchedule.id],
     );
 
-    // ⭐ 10일 이후 체크
+    // ⭐ 10일 이후 체크 (DST 안전한 계산)
     final now = DateTime.now();
-    final daysDiff = date.difference(DateTime(now.year, now.month, now.day)).inDays;
+    final daysDiff = julianDayNumber(date.year, date.month, date.day) -
+        julianDayNumber(now.year, now.month, now.day);
 
     if (daysDiff >= 10) {
       print('🔵 10일 이후 날짜라서 알람은 생성하지 않음 (자정 갱신 시 자동 생성됨)');

@@ -106,12 +106,22 @@
         </intent-filter>
     </receiver>
         
-        <!-- ⭐ AlarmGuardReceiver 신규 -->
+        <!-- ⭐ AlarmGuardReceiver 신규.
+             TIME_SET/TIMEZONE_CHANGED는 OS만 보낼 수 있는 protected broadcast라
+             exported="false"여도 정상 수신됨 (서드파티 앱이 위조 불가). 시스템
+             시계/시간대가 바뀌어도 이미 예약된 알람은 "그 당시" 계산된 절대 시각
+             그대로 유지되므로, 다음 자정/20분전 트리거를 기다리지 않고 즉시
+             재계산하기 위해 추가함. -->
         <receiver
             android:name=".AlarmGuardReceiver"
             android:enabled="true"
             android:exported="false"
-            android:directBootAware="true"/>
+            android:directBootAware="true">
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET"/>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
+            </intent-filter>
+        </receiver>
         
         <!-- ⭐ AlarmActionReceiver 신규 -->
         <receiver

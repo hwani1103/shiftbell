@@ -138,8 +138,9 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
     if (pattern.isEmpty) return '';
 
     // ⭐ CRITICAL FIX: 절대 기준일부터 날짜 차이 계산 (간단 & 안전)
-    final targetDate = DateTime(date.year, date.month, date.day);
-    final daysFromBase = targetDate.difference(_baseDate).inDays;
+    // ⭐ DST 안전: julianDayNumber 사용 (shift_schedule.dart)
+    final daysFromBase = julianDayNumber(date.year, date.month, date.day) -
+        julianDayNumber(_baseDate.year, _baseDate.month, _baseDate.day);
 
     // 이 조의 오프셋 (0~패턴길이-1)
     final offset = _teamOffsets[team] ?? 0;

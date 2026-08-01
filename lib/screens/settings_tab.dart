@@ -2095,21 +2095,21 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
   }
 
   Future<void> _saveAndExit() async {
-    // 기존 템플릿 삭제 후 새로 저장
-    await DatabaseService.instance.deleteAllAlarmTemplates();
-
+    // ⭐ 삭제+재삽입을 하나의 트랜잭션으로 묶어서, Native 갱신 엔진이 그 사이에
+    // 끼어들어도 "일부만 지워진" 중간 상태를 절대 못 보게 함 (원인 불명이던
+    // "수정 전 알람이 그대로 같이 울리는" 버그의 유력한 경로 중 하나였음).
+    final templates = <Map<String, dynamic>>[];
     for (var entry in _shiftAlarms.entries) {
       final shift = entry.key;
-      final alarms = entry.value;
-
-      for (var alarm in alarms) {
-        await DatabaseService.instance.insertAlarmTemplate(
-          shiftType: shift,
-          time: _formatTime(alarm.time),
-          alarmTypeId: alarm.alarmTypeId,
-        );
+      for (var alarm in entry.value) {
+        templates.add({
+          'shift_type': shift,
+          'time': _formatTime(alarm.time),
+          'alarm_type_id': alarm.alarmTypeId,
+        });
       }
     }
+    await DatabaseService.instance.replaceAllAlarmTemplates(templates);
 
     widget.onSave();
 

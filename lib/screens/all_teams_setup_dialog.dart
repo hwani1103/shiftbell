@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../models/shift_schedule.dart';
 
 /// 전체 교대조 근무표 작성 다이얼로그
 class AllTeamsSetupDialog extends StatefulWidget {
@@ -581,10 +582,13 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
     await prefs.setString('all_teams_my_team', _myTeam ?? '');
 
     // ⭐ SIMPLIFIED: 절대 기준 날짜 기반 오프셋 계산
+    // ⭐ DST 안전: julianDayNumber 사용 (shift_schedule.dart) - 이 값이 SharedPreferences에
+    // 영구 저장되므로, 여기서 하루라도 틀어지면 이후 모든 팀 근무 조회가 계속 틀어짐
     final baseDate = DateTime(2024, 1, 1);  // 고정된 기준 날짜
     final today = DateTime.now();
     final setupDate = DateTime(today.year, today.month, today.day);
-    final daysFromBase = setupDate.difference(baseDate).inDays;
+    final daysFromBase = julianDayNumber(setupDate.year, setupDate.month, setupDate.day) -
+        julianDayNumber(baseDate.year, baseDate.month, baseDate.day);
 
     // 각 조의 오프셋 계산 (0-based)
     final offsetsJson = _teamIndices.map((team, selectedIndex) {

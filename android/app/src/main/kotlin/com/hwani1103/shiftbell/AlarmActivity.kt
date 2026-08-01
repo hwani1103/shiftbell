@@ -86,9 +86,11 @@ class AlarmActivity : AppCompatActivity() {
 
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
-            db = dbHelper.readableDatabase
+            // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 - DatabaseHelper.kt 상세 주석 참고.
+            db = dbHelper.getReadableDatabaseWithRetry() ?: return
+            val database = db
 
-            cursor = db.query(
+            cursor = database.query(
                 "alarms",
                 arrayOf("time", "shift_type"),
                 "id = ?",
@@ -105,8 +107,10 @@ class AlarmActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("AlarmActivity", "❌ 알람 정보 로드 실패", e)
         } finally {
+            // ⭐ db.close() 제거: DatabaseHelper는 앱 전체 공유 싱글턴이라 매번 닫으면
+            // 다른 컴포넌트와 동시 접근 시 "이미 닫힌 객체"/"no such table" 레이스가 생김
+            // (AlarmActionHelper.kt의 상세 주석 참고)
             cursor?.close()
-            db?.close()
         }
     }
     

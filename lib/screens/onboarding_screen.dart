@@ -9,7 +9,6 @@ import 'package:numberpicker/numberpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
-import '../services/alarm_refresh_helper.dart';
 import '../main.dart';  // ⭐ MainScreen import
 
 // 알람 설정 (시간 + 타입)
@@ -895,11 +894,20 @@ Future<void> _saveAndFinish() async {
   await _saveAlarmTemplates();
 
   // ⭐ 기존 알람 전체 삭제 (Native + DB)
+  // ⭐ CRITICAL FIX: 예전엔 cancelAlarm 하나만 실패해도(권한 문제 등) 예외가 전체를
+  // 끊고 나가서, 그 아래 deleteAllAlarms()가 아예 실행이 안 될 수 있었음 - 그러면
+  // DB에 예전 알람들이 그대로 남은 채로 새 10일치가 추가돼서, 옛 알람(다른 타입/
+  // 사운드로 설정됐던)과 새로 만든 알람이 섞여 울릴 수 있었음. 각 알람 취소를
+  // 개별로 방어해서, 무슨 일이 있어도 DB 삭제까지는 반드시 실행되게 함.
   try {
     final allAlarms = await DatabaseService.instance.getAllAlarms();
     for (final alarm in allAlarms) {
       if (alarm.id != null) {
-        await AlarmService().cancelAlarm(alarm.id!);
+        try {
+          await AlarmService().cancelAlarm(alarm.id!);
+        } catch (e) {
+          print('⚠️ 개별 알람 취소 실패 (ID: ${alarm.id}): $e');
+        }
       }
     }
     await DatabaseService.instance.deleteAllAlarms();
@@ -913,9 +921,6 @@ Future<void> _saveAndFinish() async {
     await _generate10DaysAlarms(schedule);
   }
 
-  // 갱신 완료 표시
-  await AlarmRefreshHelper.instance.markRefreshed();
-  print('✅ 온보딩 완료 - 갱신 완료 표시');
 
   // AlarmNotifier 갱신
   if (mounted) {
@@ -946,7 +951,11 @@ Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
   final today = DateTime.now();
 
   for (var i = 0; i < 10; i++) {
-    final date = today.add(Duration(days: i));
+    // ⭐ DST 안전: Duration(days: i) 더하기는 "정확히 24*i시간 뒤"라서, 자정 근처
+    // 시각에 서머타임 전환이 겹치면 원래 의도한 달력 날짜와 다른 날로 넘어갈 수
+    // 있음. DateTime(y, m, d+i)는 달의 일수를 넘어가도 알아서 정규화되면서
+    // 해당 달력 날짜의 로컬 자정을 정확히 가리킴.
+    final date = DateTime(today.year, today.month, today.day + i);
     final shiftType = schedule.getShiftForDate(date);
 
     if (shiftType == '미설정') continue;

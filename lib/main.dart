@@ -33,15 +33,27 @@ void main() async {
     // 재현 상황을 특정하기 어려운 버그(예: 특정 화면에서만 5초 이내에 재현) 리포트 시
     // 훨씬 빨리 원인 파일/위젯을 좁힐 수 있음.
     final contextSummary = details.context?.toDescription() ?? '';
+
+    // ⭐ 스택 트레이스에서 이 앱 코드(package:shiftbell/...)에 해당하는 줄만 몇 개
+    // 뽑아서 보여줌 - "Null check operator..." 같은 메시지만으로는 어느 파일/몇
+    // 번째 줄인지 알 수 없어서 원인 특정이 안 됐는데, 이게 있으면 바로 짚을 수 있음.
+    final appFrames = (details.stack?.toString().split('\n') ?? [])
+        .where((line) => line.contains('package:shiftbell/'))
+        .take(3)
+        .join('\n');
+
     return Container(
       color: Colors.red.shade50,
       padding: const EdgeInsets.all(8),
       alignment: Alignment.center,
-      child: Text(
-        '⚠️ 화면 표시 오류\n${details.exceptionAsString()}'
-        '${contextSummary.isNotEmpty ? '\n($contextSummary)' : ''}',
-        style: const TextStyle(color: Colors.red, fontSize: 11),
-        textAlign: TextAlign.center,
+      child: SingleChildScrollView(
+        child: Text(
+          '⚠️ 화면 표시 오류\n${details.exceptionAsString()}'
+          '${contextSummary.isNotEmpty ? '\n($contextSummary)' : ''}'
+          '${appFrames.isNotEmpty ? '\n\n$appFrames' : ''}',
+          style: const TextStyle(color: Colors.red, fontSize: 10),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   };
@@ -239,10 +251,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
 
     // ⭐ 업데이트 체크 (2초 후 - UI 로딩 완료 후)
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        UpdateService.checkForUpdate(context);
-      }
+    Future.delayed(const Duration(seconds: 2), () async {
+      if (!mounted) return;
+      // 이번 업데이트로 막 올라온 사용자에게 한 번만 보여주는 안내가 있으면 먼저 표시
+      await UpdateService.checkAndShowReleaseNote(context);
+      if (!mounted) return;
+      UpdateService.checkForUpdate(context);
     });
   }
 

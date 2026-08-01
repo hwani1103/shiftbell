@@ -5,6 +5,19 @@ import 'package:flutter/material.dart';
 
 // models/shift_schedule.dart
 
+// ⭐ 순수 연/월/일만으로 계산하는 Julian Day Number - 시간대/서머타임과 완전히
+// 무관해서 두 날짜 사이의 "진짜 날짜 수 차이"를 항상 정확히 구할 수 있음.
+// DateTime.difference(...).inDays는 두 시각의 절대적인(마이크로초) 차이를
+// 24시간 단위로 나누는 방식이라, 시작일~대상일 사이에 서머타임 전환일(하루가
+// 23/25시간)이 껴 있는 지역에서는 패턴 인덱스가 하루씩 밀릴 수 있음
+// (Native의 AlarmRefreshEngine.kt에도 동일한 계산을 동일한 방식으로 맞춰둠).
+int julianDayNumber(int year, int month, int day) {
+  final a = (14 - month) ~/ 12;
+  final y = year + 4800 - a;
+  final m = month + 12 * a - 3;
+  return day + (153 * m + 2) ~/ 5 + 365 * y + y ~/ 4 - y ~/ 100 + y ~/ 400 - 32045;
+}
+
 class ShiftSchedule {
 
   // ⭐ 개선된 팔레트 19색 (중복 제거, 신선한 색상 추가, 대비 최적화)
@@ -143,10 +156,8 @@ class ShiftSchedule {
       return '미설정';
     }
 
-    final adjustedStartDate = DateTime(startDate!.year, startDate!.month, startDate!.day);
-    final targetDate = DateTime(date.year, date.month, date.day);
-
-    final daysDiff = targetDate.difference(adjustedStartDate).inDays;
+    final daysDiff = julianDayNumber(date.year, date.month, date.day) -
+        julianDayNumber(startDate!.year, startDate!.month, startDate!.day);
     final index = ((todayIndex! + daysDiff) % pattern!.length + pattern!.length) % pattern!.length;
     return pattern![index];
   } else {
@@ -160,10 +171,8 @@ class ShiftSchedule {
       return '';
     }
 
-    final adjustedStartDate = DateTime(startDate!.year, startDate!.month, startDate!.day);
-    final targetDate = DateTime(date.year, date.month, date.day);
-
-    final daysDiff = targetDate.difference(adjustedStartDate).inDays;
+    final daysDiff = julianDayNumber(date.year, date.month, date.day) -
+        julianDayNumber(startDate!.year, startDate!.month, startDate!.day);
     final index = ((todayIndex! + daysDiff) % pattern!.length + pattern!.length) % pattern!.length;
     return pattern![index];
   }

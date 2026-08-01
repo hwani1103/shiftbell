@@ -72,9 +72,14 @@ class DatabaseService {
     );
   }
 
+  // ⭐ CRITICAL FIX: 모든 CREATE TABLE/INDEX에 IF NOT EXISTS를 붙여서 이 함수가 두 번
+  // 실행돼도(예: onOpen의 "테이블 없음 감지 시 재생성" 방어 로직이 호출할 때) 절대
+  // "테이블이 이미 존재함" 예외로 죽지 않게 함. 프리셋 삽입도 이미 있으면 무시하도록
+  // conflictAlgorithm.ignore 사용. 실제로 Native/Flutter DB 버전 불일치 레이스로 이
+  // 함수가 두 번 불려서 "table date_overtime already exists"로 앱이 죽은 적이 있었음.
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE alarm_types(
+      CREATE TABLE IF NOT EXISTS alarm_types(
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
         emoji TEXT NOT NULL,
@@ -87,7 +92,7 @@ class DatabaseService {
     ''');
     
     await db.execute('''
-      CREATE TABLE shift_schedule(
+      CREATE TABLE IF NOT EXISTS shift_schedule(
         id INTEGER PRIMARY KEY,
         is_regular INTEGER NOT NULL,
         pattern TEXT,
@@ -101,7 +106,7 @@ class DatabaseService {
     ''');
 
     await db.execute('''
-      CREATE TABLE alarms(
+      CREATE TABLE IF NOT EXISTS alarms(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         time TEXT NOT NULL,
         date TEXT,
@@ -113,7 +118,7 @@ class DatabaseService {
     ''');
     
     await db.execute('''
-      CREATE TABLE shift_alarm_templates(
+      CREATE TABLE IF NOT EXISTS shift_alarm_templates(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         shift_type TEXT NOT NULL,
         time TEXT NOT NULL,
@@ -123,7 +128,7 @@ class DatabaseService {
 
     // ⭐ 신규: 알람 이력 테이블
   await db.execute('''
-    CREATE TABLE alarm_history(
+    CREATE TABLE IF NOT EXISTS alarm_history(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       alarm_id INTEGER NOT NULL,
       scheduled_time TEXT NOT NULL,
@@ -138,7 +143,7 @@ class DatabaseService {
 
     // ⭐ 신규: 날짜별 메모 테이블
   await db.execute('''
-    CREATE TABLE date_memos(
+    CREATE TABLE IF NOT EXISTS date_memos(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       date TEXT NOT NULL,
       memo_text TEXT NOT NULL,
@@ -147,13 +152,13 @@ class DatabaseService {
     )
   ''');
 
-  await db.execute('CREATE INDEX idx_date_memos_date ON date_memos(date)');
+  await db.execute('CREATE INDEX IF NOT EXISTS idx_date_memos_date ON date_memos(date)');
 
     // ⭐ 신규: 알람 생성 이력 원장 (append-only, 절대 UPDATE/DELETE 안 함)
     // 알람이 생성되는 "그 순간"에 무조건 기록 → 나중에 alarms/alarm_history에서
     // 뭔가 사라져도 "생성은 됐었다"는 사실 자체는 여기서 확인 가능
     await db.execute('''
-      CREATE TABLE alarm_creation_log(
+      CREATE TABLE IF NOT EXISTS alarm_creation_log(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         alarm_id INTEGER NOT NULL,
         scheduled_date TEXT NOT NULL,
@@ -164,22 +169,22 @@ class DatabaseService {
         created_at TEXT NOT NULL
       )
     ''');
-    await db.execute('CREATE INDEX idx_creation_log_alarm_id ON alarm_creation_log(alarm_id)');
-    await db.execute('CREATE INDEX idx_creation_log_created_at ON alarm_creation_log(created_at)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_creation_log_alarm_id ON alarm_creation_log(alarm_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_creation_log_created_at ON alarm_creation_log(created_at)');
 
     // ⭐ 신규: 날짜별 OT(추가근무) 누적 시간
     await db.execute('''
-      CREATE TABLE date_overtime(
+      CREATE TABLE IF NOT EXISTS date_overtime(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         date TEXT NOT NULL UNIQUE,
         minutes INTEGER NOT NULL,
         updated_at TEXT NOT NULL
       )
     ''');
-    await db.execute('CREATE INDEX idx_date_overtime_date ON date_overtime(date)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_date_overtime_date ON date_overtime(date)');
 
     for (var type in AlarmType.presets) {
-      await db.insert('alarm_types', type.toMap());
+      await db.insert('alarm_types', type.toMap(), conflictAlgorithm: ConflictAlgorithm.ignore);
     }
 
     print('✅ 데이터베이스 초기화 완료');
@@ -662,6 +667,23 @@ class DatabaseService {
       'shift_type': shiftType,
       'time': time,
       'alarm_type_id': alarmTypeId,
+    });
+  }
+
+  // ⭐ "고정 알람 수정" 저장 전용: 전체 삭제 + 재삽입을 하나의 트랜잭션으로 묶음.
+  // 예전엔 deleteAllAlarmTemplates()와 각 insertAlarmTemplate() 호출이 전부
+  // 별개였는데, 그 사이(특히 알람이 여러 개라 반복 삽입이 오래 걸릴 때)에 Native
+  // 갱신 엔진이 하필 그 순간 끼어들면 "일부 근무만 템플릿이 텅 빈" 상태를 그대로
+  // 읽어서, 아직 안 지워진(옛) 알람을 엉뚱하게 재등록하거나 취소해버릴 수 있었음.
+  // 하나의 트랜잭션으로 묶으면 다른 커넥션(Native 포함)에서는 "삭제 전 전체" 또는
+  // "삭제+삽입 후 전체" 둘 중 하나만 보이고, 중간의 텅 빈 상태는 절대 보이지 않음.
+  Future<void> replaceAllAlarmTemplates(List<Map<String, dynamic>> templates) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.delete('shift_alarm_templates');
+      for (final t in templates) {
+        await txn.insert('shift_alarm_templates', t);
+      }
     });
   }
   

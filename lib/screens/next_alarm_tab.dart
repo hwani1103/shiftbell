@@ -20,6 +20,7 @@ class NextAlarmTab extends ConsumerStatefulWidget {
 
 class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   Timer? _countdownTimer;
+  Timer? _syncTimer;
   static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
 
   @override
@@ -28,11 +29,21 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
     _countdownTimer = Timer.periodic(const Duration(minutes: 1), (_) {
       if (mounted) setState(() {});
     });
+    // ⭐ 오버레이/잠금화면에서 알람을 끄기/스누즈하면 Native가 브로드캐스트로
+    // Flutter에 갱신 신호를 보내긴 하는데, 그 경로(브로드캐스트 → MethodChannel →
+    // Provider)가 여러 단계를 거치다 보니 타이밍에 따라 이 탭이 바로 못 따라갈 수
+    // 있음. 이 탭이 떠 있는 동안 짧은 주기로 직접 재조회해서, 브로드캐스트가
+    // 어떤 이유로 늦거나 씹혀도 몇 초 안에 실제 알람 상태(꺼짐/스누즈)와 항상
+    // 일치하게 만듦.
+    _syncTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (mounted) ref.read(alarmNotifierProvider.notifier).refresh();
+    });
   }
 
   @override
   void dispose() {
     _countdownTimer?.cancel();
+    _syncTimer?.cancel();
     super.dispose();
   }
 
@@ -95,6 +106,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
             return _AlarmDisplayWidget(
               alarm: nextAlarm,
               onDismiss: () => _dismissAlarm(nextAlarm.id!, nextAlarm.date),
+              onShowAllAlarms: () => _showAllAlarmsSheet(context),
             );
           },
         ),
@@ -146,15 +158,246 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
       ),
     );
   }
+
+  // ⭐ 전체 알람 목록 바텀시트.
+  // 원래 _AlarmDisplayWidgetState(다음 알람 카드)에 있었는데, 그 위젯은 refresh()가
+  // state를 loading으로 바꾸는 순간 NextAlarmTab이 SizedBox로 잠깐 바꿔치기해서
+  // 통째로 dispose됨 - 그런데 이 시트는 별개의 오버레이라 그대로 열려있다 보니, 죽은
+  // State의 context를 계속 쓰다가 "Null check operator used on a null value"
+  // (Theme.of(context) 내부)로 터졌음. 이 탭 자체(_NextAlarmTabState)는 알람
+  // 데이터가 바뀌어도 항상 같은 자리에서 계속 살아있는 안정적인 State라 여기로 옮김.
+  void _showAllAlarmsSheet(BuildContext context) {
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        // ⭐ 여기서 refresh - 안전한 context에서 호출
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(alarmNotifierProvider.notifier).refresh();
+        });
+
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.85,
+          expand: false,
+          builder: (context, scrollController) {
+            return Consumer(
+              builder: (context, ref, child) {
+                final alarmsAsync = ref.watch(alarmNotifierProvider);
+                final colorScheme = Theme.of(context).colorScheme;
+
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 핸들
+                      Center(
+                        child: Container(
+                          width: 40.w,
+                          height: 4.h,
+                          decoration: BoxDecoration(
+                            color: colorScheme.outline,
+                            borderRadius: BorderRadius.circular(2.r),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      // 제목
+                      Text(
+                        '등록된 알람',
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      // 알람 목록
+                      Expanded(
+                        child: alarmsAsync.when(
+                          loading: () => Center(child: CircularProgressIndicator()),
+                          error: (_, __) => Center(child: Text('오류 발생')),
+                          data: (alarms) {
+                            final now = DateTime.now();
+                            final futureAlarms = alarms
+                                .where((a) => a.date != null && a.date!.isAfter(now))
+                                .toList()
+                              ..sort((a, b) => a.date!.compareTo(b.date!));
+
+                            if (futureAlarms.isEmpty) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.alarm_off_rounded,
+                                      size: 48.sp,
+                                      color: colorScheme.outline,
+                                    ),
+                                    SizedBox(height: 12.h),
+                                    Text(
+                                      '등록된 알람이 없습니다',
+                                      style: TextStyle(
+                                        fontSize: 15.sp,
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            return ListView.builder(
+                              controller: scrollController,
+                              itemCount: futureAlarms.length,
+                              itemBuilder: (itemContext, index) {
+                                final alarm = futureAlarms[index];
+                                // ⭐ 이 itemBuilder가 제공하는 자기 자신의 context를 씀
+                                // (바깥 State의 context가 아니라, 이 목록 항목 자체의
+                                // context - 항목이 화면에 남아있는 한 항상 유효함).
+                                return _buildAlarmListItem(itemContext, alarm, index == 0);
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ⭐ 알람 목록 아이템 (context는 호출부의 itemBuilder가 준 것을 그대로 받아 씀)
+  Widget _buildAlarmListItem(BuildContext context, Alarm alarm, bool isNext) {
+    if (alarm.date == null) {
+      return SizedBox.shrink();
+    }
+
+    final date = alarm.date!;
+    final colorScheme = Theme.of(context).colorScheme;
+    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+    final dateStr = '${date.month}/${date.day} (${weekdays[date.weekday - 1]})';
+    final timeStr = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+      decoration: BoxDecoration(
+        color: isNext ? colorScheme.primary.withOpacity(0.1) : colorScheme.surface,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: isNext ? colorScheme.primary.withOpacity(0.3) : colorScheme.outline.withOpacity(0.3),
+          width: isNext ? 1.5 : 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          // 날짜
+          Container(
+            width: 75.w,
+            child: Text(
+              dateStr,
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+
+          // 시간
+          Container(
+            width: 60.w,
+            child: Text(
+              timeStr,
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: isNext ? colorScheme.primary : colorScheme.onSurface,
+              ),
+            ),
+          ),
+          SizedBox(width: 12.w),
+
+          // 근무 타입
+          if (alarm.shiftType != null)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: isNext ? colorScheme.primary.withOpacity(0.2) : colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Text(
+                alarm.shiftType!,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: isNext ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+
+          Spacer(),
+
+          // 알람 타입 표시 (소리/진동/무음)
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+            decoration: BoxDecoration(
+              color: isNext ? colorScheme.primary : colorScheme.outline,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  alarm.alarmTypeId == 1 ? Icons.volume_up :
+                  alarm.alarmTypeId == 2 ? Icons.vibration :
+                  Icons.volume_off,
+                  size: 14.sp,
+                  color: isNext ? colorScheme.surface : colorScheme.onSurface,
+                ),
+                SizedBox(width: 5.w),
+                Text(
+                  alarm.alarmTypeId == 1 ? '소리' :
+                  alarm.alarmTypeId == 2 ? '진동' : '무음',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: isNext ? colorScheme.surface : colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _AlarmDisplayWidget extends ConsumerStatefulWidget {
   final Alarm alarm;
   final VoidCallback onDismiss;
+  final VoidCallback onShowAllAlarms;
 
   const _AlarmDisplayWidget({
     required this.alarm,
     required this.onDismiss,
+    required this.onShowAllAlarms,
   });
 
   @override
@@ -463,7 +706,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
             Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
-                onTap: () => _showAllAlarmsSheet(context),
+                onTap: widget.onShowAllAlarms,
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                   decoration: BoxDecoration(
@@ -523,242 +766,6 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
             SizedBox(height: 12.h),
           ],
         ),
-      ),
-    );
-  }
-
-  // ⭐ 전체 알람 목록 바텀시트
-  void _showAllAlarmsSheet(BuildContext context) {
-    if (!mounted) return;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      builder: (context) {
-        // ⭐ 여기서 refresh - 안전한 context에서 호출
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(alarmNotifierProvider.notifier).refresh();
-        });
-
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.85,
-          expand: false,
-          builder: (context, scrollController) {
-            return Consumer(
-              builder: (context, ref, child) {
-                final alarmsAsync = ref.watch(alarmNotifierProvider);
-                final colorScheme = Theme.of(context).colorScheme;
-
-                return Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 핸들
-                      Center(
-                        child: Container(
-                          width: 40.w,
-                          height: 4.h,
-                          decoration: BoxDecoration(
-                            color: colorScheme.outline,
-                            borderRadius: BorderRadius.circular(2.r),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-
-                      // 제목
-                      Text(
-                        '등록된 알람',
-                        style: TextStyle(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
-
-                      // 알람 목록
-                      Expanded(
-                        child: alarmsAsync.when(
-                          loading: () => Center(child: CircularProgressIndicator()),
-                          error: (_, __) => Center(child: Text('오류 발생')),
-                          data: (alarms) {
-                            // ⭐ 알람 수정 직후처럼 Native diff 갱신이 아직 끝나지 않은
-                            // 타이밍에 이 목록을 열면, 일시적으로 예상 못한 데이터 형태를
-                            // 만날 수 있음. 여기서 실패해도 목록 전체가 빈 화면으로 죽지
-                            // 않도록 개별 알람 단위로 방어함 (아래 itemBuilder도 동일).
-                            List<Alarm> futureAlarms;
-                            try {
-                              final now = DateTime.now();
-                              futureAlarms = alarms
-                                  .where((a) => a.date != null && a.date!.isAfter(now))
-                                  .toList()
-                                ..sort((a, b) => a.date!.compareTo(b.date!));
-                            } catch (e) {
-                              print('⚠️ 알람 목록 정렬 실패: $e');
-                              return Center(child: Text('알람 목록을 불러오지 못했습니다'));
-                            }
-
-                            if (futureAlarms.isEmpty) {
-                              return Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.alarm_off_rounded,
-                                      size: 48.sp,
-                                      color: colorScheme.outline,
-                                    ),
-                                    SizedBox(height: 12.h),
-                                    Text(
-                                      '등록된 알람이 없습니다',
-                                      style: TextStyle(
-                                        fontSize: 15.sp,
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }
-
-                            return ListView.builder(
-                              controller: scrollController,
-                              itemCount: futureAlarms.length,
-                              itemBuilder: (context, index) {
-                                final alarm = futureAlarms[index];
-                                try {
-                                  return _buildAlarmListItem(alarm, index == 0);
-                                } catch (e) {
-                                  print('⚠️ 알람 항목 렌더링 실패 (id=${alarm.id}): $e');
-                                  return const SizedBox.shrink();
-                                }
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // ⭐ 알람 목록 아이템
-  Widget _buildAlarmListItem(Alarm alarm, bool isNext) {
-    // ⭐ CRITICAL FIX: null 체크 추가
-    if (alarm.date == null) {
-      return SizedBox.shrink();
-    }
-
-    final date = alarm.date!;
-    final colorScheme = Theme.of(context).colorScheme;
-    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-    final dateStr = '${date.month}/${date.day} (${weekdays[date.weekday - 1]})';
-    final timeStr = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-
-    return Container(
-      margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-      decoration: BoxDecoration(
-        color: isNext ? colorScheme.primary.withOpacity(0.1) : colorScheme.surface,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: isNext ? colorScheme.primary.withOpacity(0.3) : colorScheme.outline.withOpacity(0.3),
-          width: isNext ? 1.5 : 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          // 날짜
-          Container(
-            width: 75.w,
-            child: Text(
-              dateStr,
-              style: TextStyle(
-                fontSize: 13.sp,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          SizedBox(width: 8.w),
-
-          // 시간
-          Container(
-            width: 60.w,
-            child: Text(
-              timeStr,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-                color: isNext ? colorScheme.primary : colorScheme.onSurface,
-              ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-
-          // 근무 타입
-          if (alarm.shiftType != null)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: isNext ? colorScheme.primary.withOpacity(0.2) : colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Text(
-                alarm.shiftType!,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: isNext ? colorScheme.primary : colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-
-          Spacer(),
-
-          // 알람 타입 표시 (소리/진동/무음)
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-            decoration: BoxDecoration(
-              color: isNext ? colorScheme.primary : colorScheme.outline,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  alarm.alarmTypeId == 1 ? Icons.volume_up :
-                  alarm.alarmTypeId == 2 ? Icons.vibration :
-                  Icons.volume_off,
-                  size: 14.sp,
-                  color: isNext ? colorScheme.surface : colorScheme.onSurface,
-                ),
-                SizedBox(width: 5.w),
-                Text(
-                  alarm.alarmTypeId == 1 ? '소리' :
-                  alarm.alarmTypeId == 2 ? '진동' : '무음',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.bold,
-                    color: isNext ? colorScheme.surface : colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

@@ -1,7 +1,10 @@
 // lib/providers/alarm_provider.dart
 
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/alarm.dart';
+import '../models/alarm_template.dart';
+import '../models/shift_schedule.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
 import 'package:flutter/services.dart';
@@ -16,13 +19,36 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
     _loadAlarms();
   }
 
+  // ⭐ 겹쳐서 들어오는 refresh() 호출을 하나로 합침 (database getter와 동일한
+  // Completer 패턴). "등록된 모든 알람 보기" 시트를 빠르게 열고 닫기를 반복하면
+  // 열 때마다 _loadAlarms()가 새로 트리거되는데, 예전엔 각 호출이 독립적으로
+  // state=loading → state=data를 순서 보장 없이 덮어써서 화면이 순간적으로
+  // 빈 목록으로 보이는 경우가 있었음. 이미 로드 중이면 새로 또 시작하지 않고
+  // 진행 중인 걸 같이 기다리게 해서 이 경쟁을 없앰.
+  Completer<void>? _loadCompleter;
+
   Future<void> _loadAlarms() async {
-    state = const AsyncValue.loading();
+    if (_loadCompleter != null) {
+      return _loadCompleter!.future;
+    }
+    final completer = Completer<void>();
+    _loadCompleter = completer;
+
+    // ⭐ 이미 데이터가 있으면 loading으로 안 바꿈 - next_alarm_tab이 몇 초마다
+    // 자동으로 refresh()를 호출하는데, 매번 loading 상태를 거치면 화면이
+    // SizedBox(빈 화면)로 깜빡였다가 돌아오는 것처럼 보임. 최초 로드일 때만
+    // loading을 보여주고, 이후 재조회는 기존 데이터를 유지한 채 조용히 갱신.
+    if (state is! AsyncData) {
+      state = const AsyncValue.loading();
+    }
     try {
       final alarms = await DatabaseService.instance.getAllAlarms();
       state = AsyncValue.data(alarms);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
+    } finally {
+      _loadCompleter = null;
+      completer.complete();
     }
   }
 
@@ -117,42 +143,69 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
     int failCount = 0;
 
     try {
-      // ⭐ 10일 이후 체크
+      // ⭐ 10일 이후 체크 (DST 안전한 계산)
       final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final targetDate = DateTime(date.year, date.month, date.day);
-      final daysDiff = targetDate.difference(today).inDays;
+      final daysDiff = julianDayNumber(date.year, date.month, date.day) -
+          julianDayNumber(now.year, now.month, now.day);
 
       if (daysDiff >= 10) {
         print('🔵 10일 이후 날짜라서 알람은 생성하지 않음 (날짜: ${date.toString().split(' ')[0]}, 근무: $shiftType)');
         return;
       }
 
-      // 1단계: 기존 고정 알람 삭제 (개별 try-catch로 부분 실패 허용)
-      // ⭐ 근무 변경으로 알람이 무효화됐다는 이력을 남김 (삭제만 하고 끝내지 않음)
-      final existingAlarms = await DatabaseService.instance.getAlarmsByDate(date);
-      for (var alarm in existingAlarms) {
-        if (alarm.type == 'fixed') {
-          try {
-            await DatabaseService.instance.deleteAlarm(alarm.id!, dismissType: 'superseded', createHistory: true);
-            await AlarmService().cancelAlarm(alarm.id!);
-            deleteCount++;
-          } catch (e) {
-            print('⚠️ 알람 삭제 실패 (ID: ${alarm.id}): $e');
-            failCount++;
+      // ⭐ CRITICAL FIX: 삭제+재생성을 하나의 DB 트랜잭션으로 묶음. 예전엔 삭제와
+      // 생성이 각각 독립된 DB 호출이라, 그 사이에 이 날짜에 대해 "삭제됐지만 아직
+      // 새로 안 만들어진" 순간이 실제로 노출됐음 - 그 틈에 Native 갱신 엔진이나
+      // 다른 트리거가 끼어들면 이 날짜를 잘못 재계산할 수 있었음
+      // (settings_tab.dart의 템플릿 일괄 저장에서 고친 것과 동일한 원인/패턴).
+      // 네이티브 알람 취소/재등록은 OS 호출이라 트랜잭션 밖에서 순서대로 처리함.
+      final db = await DatabaseService.instance.database;
+      final dateStr = date.toIso8601String().split('T')[0];
+      List<int> cancelIds = [];
+      List<Map<String, dynamic>> scheduleData = [];
+
+      await db.transaction((txn) async {
+        // 1단계: 기존 고정 알람 삭제 + 이력 기록
+        final existingAlarms = await txn.query(
+          'alarms',
+          where: 'date LIKE ? AND type = ?',
+          whereArgs: ['$dateStr%', 'fixed'],
+        );
+
+        for (var alarmMap in existingAlarms) {
+          final alarm = Alarm.fromMap(alarmMap);
+          cancelIds.add(alarm.id!);
+
+          if (alarm.date != null) {
+            await txn.insert('alarm_history', {
+              'alarm_id': alarm.id,
+              'scheduled_time': alarm.time,
+              'scheduled_date': alarm.date!.toIso8601String(),
+              'actual_ring_time': DateTime.now().toIso8601String(),
+              'dismiss_type': 'superseded',
+              'snooze_count': 0,
+              'shift_type': alarm.shiftType,
+              'created_at': DateTime.now().toIso8601String(),
+            });
           }
+          await txn.delete('alarms', where: 'id = ?', whereArgs: [alarm.id]);
+          deleteCount++;
         }
-      }
 
-      // 2단계: 새 알람 생성 (개별 try-catch로 부분 실패 허용)
-      final templates = await DatabaseService.instance.getAlarmTemplates(shiftType);
-      final createdTimes = <String>{};  // ⭐ 중복 시간 추적
+        // 2단계: 새 알람 생성 (+ 생성 이력 기록)
+        final templateMaps = await txn.query(
+          'shift_alarm_templates',
+          where: 'shift_type = ?',
+          whereArgs: [shiftType],
+        );
+        final createdTimes = <String>{};  // ⭐ 중복 시간 추적
 
-      for (var template in templates) {
-        try {
+        for (var templateMap in templateMaps) {
+          final template = AlarmTemplate.fromMap(templateMap);
+
           // ⭐ 중복 시간 체크
           if (createdTimes.contains(template.time)) {
-            print('⚠️ 중복 시간 스킵: ${template.time} (근무: $shiftType, 날짜: ${date.toString().split(' ')[0]})');
+            print('⚠️ 중복 시간 스킵: ${template.time} (근무: $shiftType, 날짜: $dateStr)');
             continue;
           }
 
@@ -177,19 +230,33 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
             shiftType: shiftType,
           );
 
-          final dbId = await DatabaseService.instance.insertAlarm(alarm, source: 'auto');
+          final dbId = await txn.insert('alarms', alarm.toMap());
+          await DatabaseService.instance.logAlarmCreation(txn, dbId, alarm, 'auto');
 
+          scheduleData.add({'id': dbId, 'dateTime': alarmTime, 'label': shiftType});
+          createdTimes.add(template.time);
+          createCount++;
+        }
+      });
+
+      // 트랜잭션 커밋 후 네이티브 취소/재등록
+      for (var id in cancelIds) {
+        try {
+          await AlarmService().cancelAlarm(id);
+        } catch (e) {
+          print('⚠️ 네이티브 알람 취소 실패 (ID: $id): $e');
+        }
+      }
+      for (var data in scheduleData) {
+        try {
           await AlarmService().scheduleAlarm(
-            id: dbId,
-            dateTime: alarmTime,
-            label: shiftType,
+            id: data['id'],
+            dateTime: data['dateTime'],
+            label: data['label'],
             soundType: 'loud',
           );
-
-          createdTimes.add(template.time);  // ⭐ 생성된 시간 기록
-          createCount++;
         } catch (e) {
-          print('⚠️ 알람 생성 실패 (time: ${template.time}): $e');
+          print('⚠️ 네이티브 알람 등록 실패 (ID: ${data['id']}): $e');
           failCount++;
         }
       }

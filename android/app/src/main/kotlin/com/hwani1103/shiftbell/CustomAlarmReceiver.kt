@@ -91,15 +91,17 @@ override fun onReceive(context: Context, intent: Intent) {
         var db: android.database.sqlite.SQLiteDatabase? = null
         return try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            db = dbHelper.readableDatabase
+            // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고).
+            // 확인 자체가 불가능한 상황이므로 기존 예외 처리와 동일하게 재생을 막지 않음.
+            db = dbHelper.getReadableDatabaseWithRetry() ?: return true
             cursor = db.query("alarms", arrayOf("id"), "id = ?", arrayOf(id.toString()), null, null, null)
             cursor.moveToFirst()
         } catch (e: Exception) {
             Log.e("CustomAlarmReceiver", "❌ 알람 존재 확인 실패 - 안전하게 재생 진행", e)
             true  // 확인 자체가 실패하면 (기존 동작 유지 위해) 재생은 막지 않음
         } finally {
+            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
             cursor?.close()
-            db?.close()
         }
     }
 
@@ -158,10 +160,12 @@ override fun onReceive(context: Context, intent: Intent) {
 
         try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            db = dbHelper.readableDatabase
+            // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고).
+            db = dbHelper.getReadableDatabaseWithRetry() ?: return 3
+            val database = db
 
             // 알람에서 alarm_type_id 조회
-            alarmCursor = db.query(
+            alarmCursor = database.query(
                 "alarms",
                 arrayOf("alarm_type_id"),
                 "id = ?",
@@ -175,7 +179,7 @@ override fun onReceive(context: Context, intent: Intent) {
             }
 
             // alarm_types에서 duration 조회
-            typeCursor = db.query(
+            typeCursor = database.query(
                 "alarm_types",
                 arrayOf("duration"),
                 "id = ?",
@@ -194,9 +198,9 @@ override fun onReceive(context: Context, intent: Intent) {
             Log.e("CustomAlarmReceiver", "❌ duration 조회 실패, 기본값 3분 사용", e)
             return 3
         } finally {
+            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
             alarmCursor?.close()
             typeCursor?.close()
-            db?.close()
         }
     }
     

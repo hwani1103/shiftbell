@@ -95,10 +95,14 @@ class AlarmPlayer(private val context: Context) {
 
         try {
             val dbHelper = DatabaseHelper.getInstance(context)
-            db = dbHelper.readableDatabase
+            // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고) -
+            // 아래 catch와 동일한 fail-safe(진동만) 폴백을 타도록 예외로 전환.
+            db = dbHelper.getReadableDatabaseWithRetry()
+                ?: throw IllegalStateException("DB 파일 없음")
+            val database = db
 
             // 알람에서 alarm_type_id 조회
-            alarmCursor = db.query(
+            alarmCursor = database.query(
                 "alarms",
                 arrayOf("alarm_type_id"),
                 "id = ?",
@@ -112,7 +116,7 @@ class AlarmPlayer(private val context: Context) {
             }
 
             // alarm_types에서 설정 조회
-            typeCursor = db.query(
+            typeCursor = database.query(
                 "alarm_types",
                 arrayOf("sound_file", "volume", "vibration_strength"),
                 "id = ?",
@@ -120,26 +124,38 @@ class AlarmPlayer(private val context: Context) {
                 null, null, null
             )
 
-            var soundFile = "alarmbell1"  // 기본값: 알람벨1
-            var volume = 0.7f  // 기본값: 70%
-            var vibrationStrength = 3  // 기본값: 강하게
+            // ⭐ CRITICAL FIX: 예전엔 이 값을 못 찾으면 "alarmbell1, 70%, 강하게"로
+            // 폴백했음 - 즉, DB 조회가 실패하는 그 어떤 이유에서든 사용자가 설정한
+            // 것과 무관하게 "가장 시끄러운 쪽"으로 fail-open 되는 구조였음(무음으로
+            // 설정해도 이 경로를 타면 소리가 남). 실패 시엔 반대로 fail-safe하게
+            // (소리 없이 진동만) 가야 함 - 못 깨우는 것보다야 낫지만, 사용자가
+            // 전혀 의도하지 않은 소리로 갑자기 우는 것보다는 안전한 쪽.
+            var soundFile = "vibrate"
+            var volume = 0.0f
+            var vibrationStrength = 3
+            var usedFallback = true
 
             if (typeCursor.moveToFirst()) {
                 soundFile = typeCursor.getString(typeCursor.getColumnIndexOrThrow("sound_file"))
                 volume = typeCursor.getFloat(typeCursor.getColumnIndexOrThrow("volume"))
                 vibrationStrength = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("vibration_strength"))
+                usedFallback = false
             }
 
+            if (usedFallback) {
+                Log.w("AlarmPlayer", "⚠️ alarm_types에 id=$alarmTypeId 없음 - fail-safe 폴백(진동만) 사용. alarmId=$alarmId")
+            }
             Log.d("AlarmPlayer", "DB 설정: soundFile=$soundFile, volume=$volume, vibration=$vibrationStrength")
             playAlarmWithSettings(soundFile, volume, vibrationStrength)
 
         } catch (e: Exception) {
-            Log.e("AlarmPlayer", "DB 설정 읽기 실패, 기본값 사용", e)
-            playAlarmWithSettings("alarmbell1", 0.7f, 3)  // 기본값: 알람벨1, 70%, 강하게
+            Log.e("AlarmPlayer", "DB 설정 읽기 실패, fail-safe 폴백(진동만) 사용", e)
+            playAlarmWithSettings("vibrate", 0.0f, 3)
         } finally {
+            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고) - 이런 종류의
+            // "no such table" 예외가 바로 이 close() 남용 패턴 때문에 실제로 발생했었음
             alarmCursor?.close()
             typeCursor?.close()
-            db?.close()
         }
     }
 

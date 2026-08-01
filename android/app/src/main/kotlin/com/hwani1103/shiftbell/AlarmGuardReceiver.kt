@@ -48,10 +48,21 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("AlarmGuardReceiver", "⏰ Wakeup 수신")
+        Log.d("AlarmGuardReceiver", "⏰ Wakeup 수신 (action=${intent.action})")
 
-        // ⭐ 신규: 갱신 체크 & 실행 (Native에서 직접!)
-        AlarmRefreshUtil.checkAndTriggerRefresh(context)
+        if (intent.action == Intent.ACTION_TIME_CHANGED || intent.action == Intent.ACTION_TIMEZONE_CHANGED) {
+            // ⭐ 시계/시간대가 바뀌면 이미 예약된 알람들의 절대 시각이 전부 틀어질 수 있음.
+            // checkAndTriggerRefresh()는 "날짜가 바뀌었는지"만 보는데, 시간대만 바뀌고
+            // 날짜는 그대로인 경우(예: 인접 시간대로 이동)엔 갱신을 건너뛸 수 있어서
+            // 여기서는 그 판단을 거치지 않고 곧바로 전체 갱신을 강제 실행함
+            // (diff 엔진의 "안 바뀐 알람도 재등록" 로직이 새 시간대 기준으로 다시
+            // 계산된 절대 시각으로 OS 알람을 고쳐 씀).
+            Log.d("AlarmGuardReceiver", "🌐 시계/시간대 변경 감지 - 강제 전체 갱신")
+            AlarmRefreshEngine.refresh(context)
+        } else {
+            // ⭐ 신규: 갱신 체크 & 실행 (Native에서 직접!)
+            AlarmRefreshUtil.checkAndTriggerRefresh(context)
+        }
 
         // 다음 알람 체크 + 8888 상태 갱신 (20분 이내면 표시, 아니면 정리)
         val nextAlarm = getNextAlarmFromDB(context)
@@ -103,22 +114,37 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                wakeupTime,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                wakeupTime,
-                pendingIntent
-            )
+
+        // ⭐ 이 wakeup은 전체 갱신 체계의 심장박동 - 이게 예약에 실패하면 다음
+        // wakeup을 아무도 걸어주지 않아서 하트비트 자체가 영구히 멈춤(사용자가
+        // 직접 앱을 열거나 재부팅하기 전까지 10일치 알람이 더 이상 갱신되지 않음).
+        // "정확한 알람" 권한이 나중에 꺼지는 경우에도 최소한 하트비트만은 살아있게,
+        // 정확한 예약이 실패하면 권한이 필요 없는 부정확 예약으로라도 반드시 다음
+        // wakeup을 잡아둠 (하트비트가 살아있어야 권한이 복구됐는지도 계속 재확인 가능).
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    wakeupTime,
+                    pendingIntent
+                )
+            } else {
+                alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    wakeupTime,
+                    pendingIntent
+                )
+            }
+            Log.d("AlarmGuardReceiver", "✅ 다음 Wakeup 예약: ${Date(wakeupTime)}")
+        } catch (e: Exception) {
+            Log.e("AlarmGuardReceiver", "❌ 정확한 Wakeup 예약 실패 - 부정확 예약으로 폴백", e)
+            try {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, wakeupTime, pendingIntent)
+                Log.d("AlarmGuardReceiver", "✅ 부정확 Wakeup 예약 성공: ${Date(wakeupTime)}")
+            } catch (e2: Exception) {
+                Log.e("AlarmGuardReceiver", "❌ 부정확 Wakeup 예약마저 실패 - 하트비트 중단됨", e2)
+            }
         }
-        
-        Log.d("AlarmGuardReceiver", "✅ 다음 Wakeup 예약: ${Date(wakeupTime)}")
     }
     
     // ⭐ CRITICAL FIX: 8888(20분 전 알림)의 표시/유지/취소를 여기 한 곳에서만 결정함.
@@ -322,8 +348,9 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             Log.e("AlarmGuardReceiver", "DB 읽기 실패", e)
             null
         } finally {
+            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고) - 이 함수가
+            // 바로 "no such table" 레이스가 실제로 잡힌 곳이었음
             cursor?.close()
-            db?.close()
         }
     }
     
