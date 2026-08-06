@@ -61,6 +61,30 @@ class OvertimeNotifier extends StateNotifier<Map<String, int>> {
     return entries;
   }
 
+  // ⭐ 임의 기간(급여 산정일 기준 등, 달력 월과 안 맞아도 됨)의 OT 합계(분).
+  // 호출 전에 loadForRange(start, end)로 캐시가 그 기간을 덮고 있어야 정확함.
+  int getRangeTotal(DateTime start, DateTime end) {
+    var total = 0;
+    for (var d = DateTime(start.year, start.month, start.day);
+        !d.isAfter(DateTime(end.year, end.month, end.day));
+        d = d.add(const Duration(days: 1))) {
+      total += state[_dateKey(d)] ?? 0;
+    }
+    return total;
+  }
+
+  // ⭐ 임의 기간의 날짜별 OT 목록 (날짜 오름차순)
+  List<MapEntry<String, int>> getRangeEntries(DateTime start, DateTime end) {
+    final result = <MapEntry<String, int>>[];
+    for (var d = DateTime(start.year, start.month, start.day);
+        !d.isAfter(DateTime(end.year, end.month, end.day));
+        d = d.add(const Duration(days: 1))) {
+      final key = _dateKey(d);
+      if (state.containsKey(key)) result.add(MapEntry(key, state[key]!));
+    }
+    return result;
+  }
+
   void clear() {
     state = {};
   }

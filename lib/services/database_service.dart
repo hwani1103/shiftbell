@@ -55,7 +55,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 14,  // v14: date_overtime 테이블 추가 (OT 누적)
+      version: 15,  // v15: shift_schedule.shift_durations 컬럼 추가 (근무별 기본 근로시간)
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -101,7 +101,8 @@ class DatabaseService {
         active_shift_types TEXT,
         start_date TEXT,
         shift_colors TEXT,
-        assigned_dates TEXT
+        assigned_dates TEXT,
+        shift_durations TEXT
       )
     ''');
 
@@ -374,6 +375,18 @@ class DatabaseService {
     ''');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_date_overtime_date ON date_overtime(date)');
     print('✅ DB 업그레이드 완료 (v$oldVersion → v14): date_overtime 테이블 추가');
+  }
+
+  // v15: 근무별 기본 근로시간(shift_durations) 컬럼 추가
+  if (oldVersion < 15) {
+    try {
+      await db.execute('ALTER TABLE shift_schedule ADD COLUMN shift_durations TEXT');
+    } catch (e) {
+      // ⭐ IF NOT EXISTS가 없는 ALTER문이라, 혹시 이미 컬럼이 있으면(드문 재시도 등)
+      // 예외 대신 조용히 넘어가게 방어
+      print('⚠️ shift_durations 컬럼 추가 스킵(이미 존재 가능성): $e');
+    }
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v15): shift_schedule.shift_durations 컬럼 추가');
   }
 }
 

@@ -44,11 +44,19 @@ class AlarmGuardReceiver : BroadcastReceiver() {
 
             // 다음 Wakeup 예약
             instance.scheduleNextWakeup(context)
+
+            // ⭐ 홈 화면 위젯도 같이 갱신 (앱을 안 열어도 자정마다 "오늘" 위치와
+            // 3주 창이 넘어가게 함). 알람 갱신과 완전히 독립된 read-only 경로라
+            // 여기 추가해도 위의 알람 로직에는 아무 영향 없음 - 실패해도 무시.
+            CalendarWidgetProvider.requestUpdate(context)
         }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("AlarmGuardReceiver", "⏰ Wakeup 수신 (action=${intent.action})")
+
+        // ⭐ 이 브로드캐스트도 위젯 갱신의 하트비트 역할을 겸함 (자정/20분전마다 호출됨)
+        CalendarWidgetProvider.requestUpdate(context)
 
         if (intent.action == Intent.ACTION_TIME_CHANGED || intent.action == Intent.ACTION_TIMEZONE_CHANGED) {
             // ⭐ 시계/시간대가 바뀌면 이미 예약된 알람들의 절대 시각이 전부 틀어질 수 있음.

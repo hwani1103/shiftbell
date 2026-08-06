@@ -20,6 +20,7 @@ import 'providers/alarm_provider.dart';
 import 'providers/schedule_provider.dart';
 import 'providers/theme_provider.dart';  // ⭐ 다크모드 추가
 import 'theme/app_theme.dart';  // ⭐ 다크모드 추가
+import 'services/widget_refresh_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,6 +68,9 @@ void main() async {
 
   // ⭐ 앱 시작 전에 테마 미리 로드 (깜빡임 방지)
   final initialTheme = await _loadInitialTheme();
+  // ⭐ 위젯이 Native에만 따로 보관하는 테마값도 앱 시작 시점 기준으로 맞춰둠
+  // (수동으로 한 번도 안 바꾼 상태에서도 위젯이 시스템 설정을 정확히 따라가게)
+  WidgetRefreshService.pushTheme(initialTheme == ThemeMode.dark);
 
   runApp(
     ProviderScope(

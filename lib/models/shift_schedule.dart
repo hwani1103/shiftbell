@@ -21,26 +21,32 @@ int julianDayNumber(int year, int month, int day) {
 class ShiftSchedule {
 
   // ⭐ 개선된 팔레트 19색 (중복 제거, 신선한 색상 추가, 대비 최적화)
+  // ⭐ CRITICAL FIX: 색상들이 "계열별로 뭉쳐서" 나열돼있었음(하늘색→민트→...→시안이
+  // 전부 밝은 청록 계열이라 서로 멀리 떨어진 인덱스에서도 비슷해 보였음, 인디고 계열도
+  // 마찬가지). 자동 배정은 이 배열 순서 그대로 앞에서부터 채워나가는데, 근무 카드가
+  // 몇 개 안 되면(예: 3~5개) 바로 인접한 색상끼리 배정되기 쉬워서 특히 눈에 띄었음.
+  // 계열(파랑/초록/보라/노랑·주황/핑크/무채색)을 매번 바꿔가며 배치해서, 인덱스가
+  // 가까운(=먼저 자동 배정되는) 색상일수록 서로 최대한 달라 보이게 재배열함.
   static final List<Color> shiftPalette = [
     Color(0xFFB3E5FC), // 1. 하늘색 (Sky Blue) - 밝은 파랑
-    Color(0xFFD7CCC8), // 2. 베이지색 (Warm Beige) - 중립 톤
-    Color(0xFFB2DFDB), // 3. 민트색 (Mint Green) - 초록 계열
+    Color(0xFFFFCCBC), // 2. 코랄색 (Coral) - 따뜻한 핑크/주황
+    Color(0xFF388E3C), // 3. 진한 초록 (Green 700) - 어두운 초록 (흰 글씨)
     Color(0xFFE1BEE7), // 4. 연한 보라 (Lavender Purple) - 보라 계열
     Color(0xFFFFF9C4), // 5. 노란색 (Sunny Yellow) - 밝은 노랑
-    Color(0xFFFFCCBC), // 6. 코랄색 (Coral) - 따뜻한 핑크/주황
-    Color(0xFF1976D2), // 7. 진한 파랑 (Blue 700) - 어두운 파랑 (흰 글씨)
-    Color(0xFF388E3C), // 8. 진한 초록 (Green 700) - 어두운 초록 (흰 글씨)
-    Color(0xFFDCE775), // 9. 라임 (Lime 300) - 연두색
-    Color(0xFFB0BEC5), // 10. 연한 회색 (Blue Grey 200) - 밝은 회색 (흰 글씨)
-    Color(0xFF80DEEA), // 11. 시안 (Cyan 200) - 청록색 (흰 글씨)
-    Color(0xFF7B1FA2), // 12. 진한 보라 (Purple 700) - 어두운 보라 (흰 글씨)
-    Color(0xFF00897B), // 13. 진한 청록 (Teal 600) - 어두운 청록 (흰 글씨)
-    Color(0xFF9CCC65), // 14. 올리브 (Light Green 400) - 올리브색 (흰 글씨)
+    Color(0xFF1976D2), // 6. 진한 파랑 (Blue 700) - 어두운 파랑 (흰 글씨)
+    Color(0xFFDCE775), // 7. 라임 (Lime 300) - 연두색
+    Color(0xFFEC407A), // 8. 생동감 핑크 (Pink 400) - 명확한 핑크 (흰 글씨)
+    Color(0xFFB2DFDB), // 9. 민트색 (Mint Green) - 초록 계열
+    Color(0xFF7B1FA2), // 10. 진한 보라 (Purple 700) - 어두운 보라 (흰 글씨)
+    Color(0xFFD7CCC8), // 11. 베이지색 (Warm Beige) - 중립 톤
+    Color(0xFFFF6F00), // 12. 따뜻한 주황 (Orange 800) - 선명한 주황 (흰 글씨)
+    Color(0xFFB0BEC5), // 13. 연한 회색 (Blue Grey 200) - 밝은 회색 (흰 글씨)
+    Color(0xFF00897B), // 14. 진한 청록 (Teal 600) - 어두운 청록 (흰 글씨)
     Color(0xFF9FA8DA), // 15. 연한 인디고 (Indigo 200) - 연한 인디고 (흰 글씨)
-    Color(0xFFFF6F00), // 16. 따뜻한 주황 (Orange 800) - 선명한 주황 (흰 글씨)
-    Color(0xFFEC407A), // 17. 생동감 핑크 (Pink 400) - 명확한 핑크 (흰 글씨)
-    Color(0xFF5C6BC0), // 18. 밝은 인디고 (Indigo 400) - 인디고 강화 (흰 글씨)
-    Color(0xFFAB47BC), // 19. 생동감 보라 (Purple 400) - 명확한 보라 (흰 글씨)
+    Color(0xFF9CCC65), // 16. 올리브 (Light Green 400) - 올리브색 (흰 글씨)
+    Color(0xFF80DEEA), // 17. 시안 (Cyan 200) - 청록색 (흰 글씨)
+    Color(0xFFAB47BC), // 18. 생동감 보라 (Purple 400) - 명확한 보라 (흰 글씨)
+    Color(0xFF5C6BC0), // 19. 밝은 인디고 (Indigo 400) - 인디고 강화 (흰 글씨)
   ];
 
   // ⭐ 휴무 고정 색상 (명확한 빨강, 파스텔 아님)
@@ -68,6 +74,7 @@ class ShiftSchedule {
   final DateTime? startDate;
   final Map<String, int>? shiftColors;
   Map<String, String>? assignedDates;
+  final Map<String, int>? shiftDurations;  // ⭐ 근무명 -> 기본 근무시간(분)
 
   ShiftSchedule({
     this.id,
@@ -79,7 +86,22 @@ class ShiftSchedule {
     this.startDate,
     this.shiftColors,
     this.assignedDates,
+    this.shiftDurations,
   });
+
+  // ⭐ 근무명별 기본 근무시간(분) 조회. 사용자가 "근로시간 및 OT 설정"에서 직접
+  // 설정하기 전까지는 0분이 기본값 - 임의로 8시간을 가정해서 보여주면 사용자가
+  // 설정하지 않은 값이 실제 근로시간인 것처럼 오해할 수 있어서, 설정 전에는
+  // 아예 "근거 없음" 상태로 취급함 (달력탭 근로시간 팝업들이 이 상태를 감지해서
+  // 안내 문구를 보여줌).
+  int getDurationMinutes(String shiftName) {
+    return shiftDurations?[shiftName] ?? 0;
+  }
+
+  // ⭐ 근무카드 중 하나라도 근로시간이 설정돼 있는지. 전부 0분(=미설정)이면
+  // 근로시간을 누적할 근거가 없다는 뜻 - 달력탭의 "총 근로시간" 관련 팝업들이
+  // 이 상태를 감지해서 리스트 대신 설정 안내 문구를 보여줌.
+  bool get hasAnyWorkDuration => shiftTypes.any((s) => getDurationMinutes(s) > 0);
 
   factory ShiftSchedule.fromMap(Map<String, dynamic> map) {
     // ⭐ CRITICAL FIX #4-5: 예외 처리 추가 (DB 손상 시 앱 크래시 방지)
@@ -113,6 +135,16 @@ class ShiftSchedule {
       }
     }
 
+    Map<String, int>? parsedShiftDurations;
+    if (map['shift_durations'] != null) {
+      try {
+        parsedShiftDurations = Map<String, int>.from(jsonDecode(map['shift_durations']));
+      } catch (e) {
+        print('❌ shiftDurations 파싱 실패: ${map['shift_durations']}, error: $e');
+        parsedShiftDurations = null;
+      }
+    }
+
     return ShiftSchedule(
       id: map['id'],
       isRegular: map['is_regular'] == 1,
@@ -125,6 +157,7 @@ class ShiftSchedule {
       startDate: parsedStartDate,
       shiftColors: parsedShiftColors,
       assignedDates: parsedAssignedDates,
+      shiftDurations: parsedShiftDurations,
     );
   }
 
@@ -139,6 +172,7 @@ class ShiftSchedule {
       'start_date': startDate?.toIso8601String(),
       'shift_colors': shiftColors != null ? jsonEncode(shiftColors) : null,
       'assigned_dates': assignedDates != null ? jsonEncode(assignedDates) : null,
+      'shift_durations': shiftDurations != null ? jsonEncode(shiftDurations) : null,
     };
   }
 

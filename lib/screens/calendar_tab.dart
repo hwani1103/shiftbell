@@ -12,6 +12,8 @@ import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../providers/memo_provider.dart';
 import '../providers/overtime_provider.dart';
+import '../providers/work_hours_settings_provider.dart';
+import '../services/work_hours_calculator.dart';
 import 'package:flutter/services.dart';
 import 'all_shifts_view.dart';
 
@@ -595,14 +597,14 @@ Widget build(BuildContext context) {
                         ),
                       ),
 
-                      // ⭐ 6번째 줄 화~토 (원래 빈 공간이었던 곳) - 이번 달 누적 OT 카드.
-                      // 6번째 줄 전체 높이를 다 덮지 않고 맨 윗부분에만 얇게 붙임 - 달력
-                      // 세로선/격자는 다시 원래대로 다 살리고, 그 아래(빈 칸)는 그대로 노출.
+                      // ⭐ 6번째 줄 화~토 (원래 빈 공간이었던 곳) - 이번 달 OT / 주별
+                      // 근무시간 카드. 6번째 줄의 세로 공간 전체를 다 채움 (카드가
+                      // 불투명이라 달력 격자선이 비치는 문제가 없어 전체 높이 사용 가능).
                       Positioned(
                         top: 28.h + 83.h * 5,  // 요일 헤더 + 5줄
                         left: 6.w,
                         right: 6.w,
-                        height: 48.h,
+                        height: 83.h,
                         child: Row(
                           children: [
                             // 일요일 + 월요일 칸 (다음 달 날짜 표시 - 제스처를 아래 TableCalendar로 전달)
@@ -654,15 +656,18 @@ Widget build(BuildContext context) {
   );
 }
 
-  // ⭐ 6번째 줄 빈 공간에 들어가는 "이번 달 누적 OT" 카드
+  // ⭐ 6번째 줄 빈 공간에 들어가는 카드 - 위 절반 "이번 달 OT" / 아래 절반
+  // "주별 근무시간"으로 나눔 (각각 독립적으로 탭하면 다른 팝업이 뜸).
   Widget _buildMonthlyOvertimeCard() {
     final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Consumer(
       builder: (context, ref, child) {
         ref.watch(overtimeProvider); // 값 바뀌면 다시 그리기 위한 구독
-        final notifier = ref.read(overtimeProvider.notifier);
-        final totalMinutes = notifier.getMonthTotal(_focusedDay.year, _focusedDay.month);
+        final workSettings = ref.watch(workHoursSettingsProvider);
+        final period = workSettings.periodForMonth(_focusedDay);
+        final totalMinutes = ref.read(overtimeProvider.notifier).getRangeTotal(period.start, period.end);
         final hasOvertime = totalMinutes > 0;
 
         // ⭐ 안쪽에 칸을 나누는 grid 느낌 없이, 5칸 전체를 감싸는 테두리 하나짜리
@@ -679,70 +684,90 @@ Widget build(BuildContext context) {
               _changeMonthBySwipe(-1); // 오른쪽으로 스와이프 → 이전 달
             }
           },
-          onTap: hasOvertime ? _showMonthlyOvertimeSheet : null,
           child: Container(
             // ⭐ 배경을 불투명하게: 반투명(withOpacity)이면 아래 TableCalendar의
             // 격자 테두리 선이 카드 밑으로 그대로 비쳐 보임 (세로줄이 무시된 채로
             // 글씨만 그 위에 그려지는 것처럼 보이는 원인이었음)
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? colorScheme.surface
-                  : colorScheme.surfaceVariant,
+              color: isDark ? colorScheme.surface : colorScheme.surfaceVariant,
               border: Border.all(
                 color: colorScheme.outline.withOpacity(0.4),
                 width: 0.8,
               ),
             ),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.schedule_rounded,
-                      size: 16.sp,
-                      // ⭐ outline은 배경과 대비가 너무 약해서(라이트/다크 모두) 잘 안 보였음.
-                      // 팝업의 "OT" 라벨과 같은 조합(onSurfaceVariant + 굵게)으로 통일.
-                      color: hasOvertime ? colorScheme.primary : colorScheme.onSurfaceVariant,
-                    ),
-                    SizedBox(width: 6.w),
-                    Text(
-                      '이번 달 OT',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w600,
-                        color: colorScheme.onSurfaceVariant,
+                // ⭐ 위 절반: 이번 달 OT
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _showMonthlyOvertimeSheet(period),
+                    child: Container(
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '이번 달 OT',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              hasOvertime ? formatOvertimeMinutes(totalMinutes) : '(해당 날짜 탭하여 입력)',
+                              style: TextStyle(
+                                fontSize: hasOvertime ? 13.sp : 11.sp,
+                                fontWeight: hasOvertime ? FontWeight.bold : FontWeight.w600,
+                                color: hasOvertime ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+                              ),
+                              maxLines: 1,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    SizedBox(width: 8.w),
-                    Text(
-                      hasOvertime ? formatOvertimeMinutes(totalMinutes) : '-',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.bold,
-                        color: hasOvertime ? colorScheme.onSurface : colorScheme.outline,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-                // ⭐ 아직 이번 달에 OT를 하나도 안 넣어본 사용자를 위한 안내문구.
-                // 하루라도 OT가 생기면(hasOvertime) 더 이상 필요 없으니 사라짐.
-                if (!hasOvertime) ...[
-                  SizedBox(height: 2.h),
-                  Text(
-                    '(해당 날짜를 탭하여 OT를 입력하세요)',
-                    style: TextStyle(
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.w600,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
+                ),
+                // ⭐ 두 영역이 나뉘어있음을 시각적으로 인지되게 하는 구분선
+                Container(height: 1, color: colorScheme.outline.withOpacity(0.3)),
+                // ⭐ 아래 절반: 주별 근무시간 (색을 살짝 다르게 줘서 구분감을 한 번 더 줌)
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: _showWeeklyWorkHoursSheet,
+                    child: Container(
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      color: isDark
+                          ? colorScheme.surfaceVariant.withOpacity(0.25)
+                          : colorScheme.surface.withOpacity(0.5),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '주별 근무시간',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                fontWeight: FontWeight.w600,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            SizedBox(width: 4.w),
+                            Icon(Icons.chevron_right, size: 14.sp, color: colorScheme.onSurfaceVariant),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -761,10 +786,14 @@ Widget build(BuildContext context) {
     _loadMemosForMonth(newMonth);
   }
 
-  // ⭐ 이번 달 OT 상세 목록 시트
-  void _showMonthlyOvertimeSheet() {
-    final year = _focusedDay.year;
+  // ⭐ 이번 달 OT 상세 목록 시트 (기준 기간은 달력 월 기준일 수도, 급여일 기준일
+  // 수도 있음 - work_hours_settings_provider의 periodForMonth()가 결정)
+  void _showMonthlyOvertimeSheet(DateTimeRange period) {
     final month = _focusedDay.month;
+
+    // ⭐ 급여일 기준 기간은 달력에 보이는 달 범위보다 넓거나 다를 수 있어서
+    // 팝업을 열기 전에 그 기간을 명시적으로 로드해 캐시 누락을 방지함
+    ref.read(overtimeProvider.notifier).loadForRange(period.start, period.end);
 
     showModalBottomSheet(
       context: context,
@@ -776,10 +805,20 @@ Widget build(BuildContext context) {
         return Consumer(
           builder: (context, ref, child) {
             ref.watch(overtimeProvider);
+            final schedule = ref.watch(scheduleProvider).value;
             final notifier = ref.read(overtimeProvider.notifier);
-            final entries = notifier.getMonthEntries(year, month);
-            final totalMinutes = notifier.getMonthTotal(year, month);
+            final entries = notifier.getRangeEntries(period.start, period.end);
+            final totalMinutes = notifier.getRangeTotal(period.start, period.end);
+            final periodLabel = ref.watch(workHoursSettingsProvider).periodLabel(_focusedDay);
             final colorScheme = Theme.of(context).colorScheme;
+            final totalWorkMinutes = schedule == null
+                ? 0
+                : computeTotalWorkMinutes(
+                    schedule: schedule,
+                    start: period.start,
+                    end: period.end,
+                    otByDate: ref.watch(overtimeProvider),
+                  );
 
             return DraggableScrollableSheet(
               initialChildSize: 0.55,
@@ -806,14 +845,22 @@ Widget build(BuildContext context) {
                       SizedBox(height: 16.h),
 
                       Text(
-                        '$year년 $month월 누적 OT',
+                        '$month월 누적 OT',
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
                           color: colorScheme.onSurface,
                         ),
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 2.h),
+                      Text(
+                        '($periodLabel)',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
                       Text(
                         '총 ${formatOvertimeMinutes(totalMinutes)}',
                         style: TextStyle(
@@ -822,6 +869,27 @@ Widget build(BuildContext context) {
                           color: colorScheme.primary,
                         ),
                       ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        '* $month월 총 근로(예정) 시간 합산 : ${formatOvertimeMinutes(totalWorkMinutes)}',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      // ⭐ 근무카드에 근로시간이 하나도 설정 안 돼 있으면 위 합산은
+                      // 사실상 OT만 반영된 값 - 오해 없게 안내 문구를 추가함
+                      if (schedule != null && !schedule.hasAnyWorkDuration) ...[
+                        SizedBox(height: 2.h),
+                        Text(
+                          '(설정 탭에서 근무별 근로시간을 설정해주세요.)',
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                       SizedBox(height: 16.h),
 
                       Expanded(
@@ -863,6 +931,173 @@ Widget build(BuildContext context) {
                                             color: colorScheme.primary,
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // ⭐ 주별(항상 월~일) 누적 근무시간 시트. 급여 산정일 기준 설정과 무관하게
+  // 항상 달력 월요일~일요일 기준이며, OT와 근무일 변경(assignedDates)도 반영됨.
+  void _showWeeklyWorkHoursSheet() {
+    final month = _focusedDay.month;
+    final weeks = weeksCoveringMonth(_focusedDay);
+    final rangeStart = weeks.first.start;
+    final rangeEnd = weeks.last.end;
+
+    // ⭐ 이 시트가 보여주는 범위(월 앞뒤로 걸친 주 포함)를 명시적으로 로드
+    ref.read(overtimeProvider.notifier).loadForRange(rangeStart, rangeEnd);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final otByDate = ref.watch(overtimeProvider);
+            final schedule = ref.watch(scheduleProvider).value;
+            final colorScheme = Theme.of(context).colorScheme;
+
+            final summaries = schedule == null
+                ? <WeekWorkSummary>[]
+                : weeks
+                    .map((w) => computeWeekSummary(
+                          schedule: schedule,
+                          weekStart: w.start,
+                          weekEnd: w.end,
+                          otByDate: otByDate,
+                        ))
+                    .toList();
+
+            return DraggableScrollableSheet(
+              initialChildSize: 0.55,
+              minChildSize: 0.3,
+              maxChildSize: 0.85,
+              expand: false,
+              builder: (context, scrollController) {
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 핸들
+                      Center(
+                        child: Container(
+                          width: 40.w,
+                          height: 4.h,
+                          decoration: BoxDecoration(
+                            color: colorScheme.outline,
+                            borderRadius: BorderRadius.circular(2.r),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      Text(
+                        '$month월 주간 누적 근무(예정) 시간',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        '매주 월요일 ~ 일요일 기준 (OT 포함)',
+                        style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
+                      ),
+                      SizedBox(height: 16.h),
+
+                      Expanded(
+                        child: schedule == null
+                            ? Center(
+                                child: Text(
+                                  '근무 스케줄을 먼저 설정해주세요',
+                                  style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
+                                ),
+                              )
+                            // ⭐ 근무카드에 근로시간이 하나도 설정 안 돼 있으면 누적할
+                            // 근거가 없으므로 (전부 0시간) 리스트 대신 설정 안내만 보여줌
+                            : !schedule.hasAnyWorkDuration
+                            ? Center(
+                                child: Text(
+                                  '설정에서 근무별 근로시간을 지정해주세요.',
+                                  style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            : ListView.separated(
+                                controller: scrollController,
+                                itemCount: summaries.length,
+                                separatorBuilder: (_, __) => SizedBox(height: 8.h),
+                                itemBuilder: (context, index) {
+                                  final s = summaries[index];
+
+                                  // ⭐ "주간 2일, 야간 3일, ..." 형태로 근무명별 일수 나열
+                                  // (일수가 많은 순 → 이름 가나다순으로 안정적인 정렬)
+                                  final countEntries = s.shiftDayCounts.entries.toList()
+                                    ..sort((a, b) {
+                                      final byCount = b.value.compareTo(a.value);
+                                      return byCount != 0 ? byCount : a.key.compareTo(b.key);
+                                    });
+                                  final countsStr =
+                                      countEntries.map((e) => '${e.key} ${e.value}일').join(', ');
+                                  final otSuffix = s.otMinutes > 0
+                                      ? ', OT ${formatOvertimeMinutes(s.otMinutes)}'
+                                      : '';
+
+                                  return Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.surfaceVariant.withOpacity(0.4),
+                                      borderRadius: BorderRadius.circular(10.r),
+                                      border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Text(
+                                              '${s.start.month}/${s.start.day} ~ ${s.end.month}/${s.end.day}',
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w600,
+                                                color: colorScheme.onSurface,
+                                              ),
+                                            ),
+                                            Spacer(),
+                                            Text(
+                                              formatOvertimeMinutes(s.totalMinutes),
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: colorScheme.primary,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (countsStr.isNotEmpty) ...[
+                                          SizedBox(height: 4.h),
+                                          Text(
+                                            '$countsStr$otSuffix',
+                                            style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
+                                          ),
+                                        ],
                                       ],
                                     ),
                                   );
@@ -1849,8 +2084,11 @@ Widget build(BuildContext context) {
   }
   
   void _showBulkAssignSheet(ShiftSchedule schedule) {
+  // ⭐ CRITICAL FIX: activeShiftTypes(패턴에 실제로 쓰이는 근무만)로 제한하지 않고
+  // shiftTypes(온보딩에서 만든 모든 근무 카드)를 그대로 씀 - 패턴엔 없는 근무(예: 오전/
+  // 오후)도 날짜별 근무 변경(꾹 눌러서 변경)에서 선택 가능해야 함.
   // ⭐ 불규칙 근무인 경우 "없음" 옵션 추가
-  final baseShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
+  final baseShifts = schedule.shiftTypes;
   final displayShifts = schedule.isRegular
     ? baseShifts
     : [...baseShifts, '없음'];

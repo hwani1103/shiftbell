@@ -130,6 +130,21 @@
             android:exported="false"
             android:directBootAware="true"/>
 
+        <!-- ⭐ 홈 화면 캘린더 위젯. exported=true 필요(런처가 APPWIDGET_UPDATE를 보냄) -
+             표준 위젯 요구사항이고 커스텀 액션을 안 받으니 위조돼도 위험한 동작 없음. -->
+        <receiver
+            android:name=".CalendarWidgetProvider"
+            android:enabled="true"
+            android:exported="true"
+            android:label="교대시계 달력">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/calendar_widget_info"/>
+        </receiver>
+
     </application>
 
     <queries>

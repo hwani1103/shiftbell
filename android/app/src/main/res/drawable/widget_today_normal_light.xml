@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ⭐ "오늘" 날짜 숫자 강조 배경 (라이트, 평일/토요일) - 앱 라이트 테마 primary(인디고700)와 동일 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FF303F9F"/>
+    <corners android:radius="6dp"/>
+</shape>

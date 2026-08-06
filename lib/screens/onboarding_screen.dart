@@ -170,6 +170,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                   '(7개까지 추가 가능하며 4글자로 제한됩니다.)',
                   style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
+                SizedBox(height: 2.h),
+                Text(
+                  '근무 패턴에 포함되지 않더라도 사용 가능해요.',
+                  style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
               ],
             ),
             SizedBox(height: 24.h),
@@ -179,43 +184,37 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               runSpacing: 8.h,
               children: [
                 ..._allShiftTypes.map((name) {
-                  final isCustom = _customShiftTypes.contains(name);
-                  if (isCustom) {
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {},
-                          child: Text(name),
-                        ),
-                        Positioned(
-                          right: -4,
-                          top: -4,
-                          child: GestureDetector(
-                            onTap: () => _deleteCustomShiftType(name),
-                            child: Container(
-                              width: 20.w,
-                              height: 20.h,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.error,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.close,
-                                size: 14.sp,
-                                color: Theme.of(context).colorScheme.surface,
-                              ),
+                  // ⭐ 기본 카드(주간/야간/오전/오후/휴무)도 커스텀 카드와 동일하게
+                  // 삭제 가능하도록 X 버튼을 항상 표시함 (예전엔 커스텀 카드만 가능했음).
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {},
+                        child: Text(name),
+                      ),
+                      Positioned(
+                        right: -4,
+                        top: -4,
+                        child: GestureDetector(
+                          onTap: () => _deleteShiftType(name),
+                          child: Container(
+                            width: 20.w,
+                            height: 20.h,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.error,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 14.sp,
+                              color: Theme.of(context).colorScheme.surface,
                             ),
                           ),
                         ),
-                      ],
-                    );
-                  } else {
-                    return ElevatedButton(
-                      onPressed: () {},
-                      child: Text(name),
-                    );
-                  }
+                      ),
+                    ],
+                  );
                 }),
                 
                 OutlinedButton.icon(
@@ -265,6 +264,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                   '(7개까지 추가 가능하며 4글자로 제한됩니다.)',
                   style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
+                SizedBox(height: 2.h),
+                Text(
+                  '근무 패턴에 포함되지 않더라도 사용 가능해요.',
+                  style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
               ],
             ),
             SizedBox(height: 24.h),
@@ -274,43 +278,37 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               runSpacing: 8.h,
               children: [
                 ..._allShiftTypes.map((name) {
-                  final isCustom = _customShiftTypes.contains(name);
-                  if (isCustom) {
-                    return Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {},
-                          child: Text(name),
-                        ),
-                        Positioned(
-                          right: -4,
-                          top: -4,
-                          child: GestureDetector(
-                            onTap: () => _deleteCustomShiftType(name),
-                            child: Container(
-                              width: 20.w,
-                              height: 20.h,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.error,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.close,
-                                size: 14.sp,
-                                color: Theme.of(context).colorScheme.surface,
-                              ),
+                  // ⭐ 기본 카드(주간/야간/오전/오후/휴무)도 커스텀 카드와 동일하게
+                  // 삭제 가능하도록 X 버튼을 항상 표시함 (예전엔 커스텀 카드만 가능했음).
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {},
+                        child: Text(name),
+                      ),
+                      Positioned(
+                        right: -4,
+                        top: -4,
+                        child: GestureDetector(
+                          onTap: () => _deleteShiftType(name),
+                          child: Container(
+                            width: 20.w,
+                            height: 20.h,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.error,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 14.sp,
+                              color: Theme.of(context).colorScheme.surface,
                             ),
                           ),
                         ),
-                      ],
-                    );
-                  } else {
-                    return ElevatedButton(
-                      onPressed: () {},
-                      child: Text(name),
-                    );
-                  }
+                      ),
+                    ],
+                  );
                 }),
                 
                 OutlinedButton.icon(
@@ -526,10 +524,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   );
 }
 
-  void _deleteCustomShiftType(String name) {
+  // ⭐ 기본 카드(주간/야간/오전/오후/휴무)도 커스텀 카드와 동일하게 삭제 가능하도록
+  // 일반화함. 카드가 0개가 되면 다음 단계(패턴 구성/근무 선택) 자체가 불가능해지므로
+  // 최소 1개는 남기게 막음. 이 단계는 패턴 구성 전이라 보통 _pattern이 비어있지만,
+  // 혹시 몰라 방어적으로 같이 정리함.
+  void _deleteShiftType(String name) {
+    if (_allShiftTypes.length <= 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('최소 1개의 근무 형태는 있어야 합니다')),
+      );
+      return;
+    }
     setState(() {
+      _baseShiftTypes.remove(name);
       _customShiftTypes.remove(name);
       _pattern.removeWhere((shift) => shift == name);
+      _selectedShifts.remove(name);
     });
   }
 
@@ -603,7 +613,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   }
 
   Widget _buildMainAlarmSetup() {
-  final shiftsToSetup = _isRegular == true ? _uniqueShifts : _selectedShifts;
+  // ⭐ CRITICAL FIX: 패턴에 실제로 쓰인 근무(_uniqueShifts)만이 아니라 만들어둔 모든
+  // 카드(_allShiftTypes)에 대해 알람을 설정할 수 있게 함 - 패턴엔 없어도(예: 오전/오후)
+  // 나중에 달력에서 그날만 근무 변경할 때 알람이 바로 적용되려면 여기서 미리 설정
+  // 가능해야 함.
+  final shiftsToSetup = _isRegular == true ? _allShiftTypes : _selectedShifts;
   
   return Padding(
     padding: EdgeInsets.all(24.w),
@@ -816,7 +830,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 Map<String, int> _generateShiftColors() {
   final Map<String, int> colors = {};
 
-  // 실제 사용되는 근무명 목록 (패턴 등장 순서 유지)
+  // 실제 사용되는 근무명 목록 (패턴/선택 등장 순서 유지)
   List<String> usedShifts;
   if (_isRegular == true) {
     // 규칙적: 패턴에서 등장 순서대로
@@ -828,7 +842,18 @@ Map<String, int> _generateShiftColors() {
     }
   } else {
     // 불규칙: 선택된 근무명 순서대로
-    usedShifts = _selectedShifts;
+    usedShifts = [..._selectedShifts];
+  }
+
+  // ⭐ CRITICAL FIX: 패턴/선택에 안 쓰인 나머지 카드(예: 오전/오후)도 색상을 배정함.
+  // 이제 이런 카드도 고정 알람 설정이나 날짜별 근무 변경에서 선택 가능해졌는데,
+  // 색상이 없으면 화면에서 무난한 회색으로만 표시돼서 구분이 잘 안 됨. 패턴/선택에
+  // 쓰인 것들이 먼저 팔레트를 배정받고(기존 동작 그대로 유지), 나머지는 등장 순서
+  // 그대로 이어서 배정받음.
+  for (var shift in _allShiftTypes) {
+    if (!usedShifts.contains(shift)) {
+      usedShifts.add(shift);
+    }
   }
 
   // 1. 휴무 계열 → 명확한 빨강

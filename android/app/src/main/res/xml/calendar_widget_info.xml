@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ⭐ 홈 화면 캘린더 위젯 메타데이터. minWidth/minHeight는 "4x2" 셀 정도의 기본 크기 -
+     resizeMode를 both로 열어둬서 런처에서 늘리면 layout_weight 기반 셀들이 그만큼 커짐. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="180dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="3"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/calendar_widget"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:description="@string/calendar_widget_description"
+    android:previewLayout="@layout/calendar_widget" />

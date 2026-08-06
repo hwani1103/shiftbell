@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/widget_refresh_service.dart';
 
 // 테마 모드 상태 관리
 class ThemeNotifier extends StateNotifier<ThemeMode> {
@@ -27,6 +28,8 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
     } catch (e) {
       print('❌ 테마 저장 실패: $e');
     }
+    // ⭐ 홈 화면 위젯도 같은 테마로 즉시 갱신 (앱 재시작 없이)
+    WidgetRefreshService.pushTheme(mode == ThemeMode.dark);
   }
 
   // 다크모드 토글

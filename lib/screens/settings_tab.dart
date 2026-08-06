@@ -14,9 +14,10 @@ import '../providers/theme_provider.dart';
 import '../models/alarm_type.dart';
 import '../models/alarm.dart';
 import '../models/shift_schedule.dart';
-import 'package:numberpicker/numberpicker.dart';
 import 'all_teams_setup_dialog.dart';
 import 'memo_list_view.dart';
+import 'work_hours_settings_screen.dart';
+import '../widgets/tappable_number_picker.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
@@ -375,6 +376,20 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 subtitle: Text('소리+진동, 진동, 무음 설정'),
                 trailing: Icon(Icons.chevron_right),
                 onTap: _showAlarmTypeDialog,
+              ),
+
+              // ⭐ 근로시간 및 OT 설정
+              ListTile(
+                leading: Icon(Icons.work_history_outlined, color: Theme.of(context).colorScheme.tertiary),
+                title: Text('근로시간 및 OT 설정'),
+                subtitle: Text('근무별 근로시간, 월 근로시간 기준 기간'),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const WorkHoursSettingsScreen()),
+                  );
+                },
               ),
 
               // 알람 이력
@@ -902,6 +917,7 @@ lowvibe07.tistory.com
         startDate: DateTime.now(),  // ⭐ 오늘로 변경
         shiftColors: schedule.shiftColors,
         assignedDates: {},  // ⭐ 수동 할당 초기화
+        shiftDurations: schedule.shiftDurations,
       );
 
       await ref.read(scheduleProvider.notifier).saveSchedule(newSchedule);
@@ -1014,6 +1030,13 @@ lowvibe07.tistory.com
       newAssignedDates[date] = newShift;
     });
 
+    // 6. shiftDurations 업데이트 (근무명이 키라서 이것도 같이 옮겨줘야 함)
+    final newShiftDurations = <String, int>{};
+    schedule.shiftDurations?.forEach((key, value) {
+      final newKey = renamedShifts[key] ?? key;
+      newShiftDurations[newKey] = value;
+    });
+
     // 6. DB 업데이트
     await DatabaseService.instance.updateShiftNames(renamedShifts);
 
@@ -1028,6 +1051,7 @@ lowvibe07.tistory.com
       startDate: schedule.startDate,
       shiftColors: newShiftColors,
       assignedDates: newAssignedDates,
+      shiftDurations: newShiftDurations,
     );
 
     await ref.read(scheduleProvider.notifier).saveSchedule(newSchedule);
@@ -1048,7 +1072,9 @@ lowvibe07.tistory.com
     final schedule = ref.read(scheduleProvider).value;
     if (schedule == null) return;
 
-    final activeShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
+    // ⭐ CRITICAL FIX: 패턴에 없는 카드도 색상을 지정할 수 있어야 함 - 온보딩 때
+    // 자동으로 색이 안 배정됐던 기존 사용자도 여기서 직접 채울 수 있게.
+    final activeShifts = schedule.shiftTypes;
     final currentColors = schedule.shiftColors ?? {};
 
     showDialog(
@@ -1077,6 +1103,7 @@ lowvibe07.tistory.com
       startDate: schedule.startDate,
       shiftColors: newColors,  // ← 색상만 변경
       assignedDates: schedule.assignedDates,
+      shiftDurations: schedule.shiftDurations,
     );
 
     await DatabaseService.instance.updateShiftSchedule(updatedSchedule);
@@ -1099,7 +1126,12 @@ lowvibe07.tistory.com
     final schedule = ref.read(scheduleProvider).value;
     if (schedule == null) return;
 
-    final activeShifts = schedule.activeShiftTypes ?? schedule.shiftTypes;
+    // ⭐ CRITICAL FIX: activeShiftTypes(패턴에 실제로 쓰이는 근무만)로 제한하지 않고
+    // shiftTypes(온보딩에서 만든 모든 근무 카드)를 그대로 씀. 패턴에 안 쓰는 근무(예:
+    // 평소엔 주간/야간/휴무만 쓰지만 카드로는 오전/오후도 만들어둔 경우)도 고정 알람을
+    // 미리 설정해둘 수 있어야, 나중에 달력에서 그 날만 오전/오후로 근무 변경했을 때
+    // 알람이 제대로 생성됨.
+    final activeShifts = schedule.shiftTypes;
 
     Navigator.push(
       context,
@@ -2526,7 +2558,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
 
                 SizedBox(width: 16.w),
 
-                _TappableNumberPicker(
+                TappableNumberPicker(
                   value: _hour,
                   minValue: 1,
                   maxValue: 12,
@@ -2555,7 +2587,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
 
                 Text(':', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold)),
 
-                _TappableNumberPicker(
+                TappableNumberPicker(
                   value: _minute,
                   minValue: 0,
                   maxValue: 59,
@@ -2607,149 +2639,6 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// ⭐ 탭 가능한 NumberPicker (스와이프 + 즉시 탭 지원)
-class _TappableNumberPicker extends StatefulWidget {
-  final int value;
-  final int minValue;
-  final int maxValue;
-  final ValueChanged<int> onChanged;
-  final bool infiniteLoop;
-  final bool zeroPad;
-  final double itemHeight;
-  final double itemWidth;
-  final TextStyle? textStyle;
-  final TextStyle? selectedTextStyle;
-  final BoxDecoration? decoration;
-
-  const _TappableNumberPicker({
-    required this.value,
-    required this.minValue,
-    required this.maxValue,
-    required this.onChanged,
-    this.infiniteLoop = false,
-    this.zeroPad = false,
-    this.itemHeight = 50.0,
-    this.itemWidth = 60.0,
-    this.textStyle,
-    this.selectedTextStyle,
-    this.decoration,
-  });
-
-  @override
-  State<_TappableNumberPicker> createState() => _TappableNumberPickerState();
-}
-
-class _TappableNumberPickerState extends State<_TappableNumberPicker> {
-  late FixedExtentScrollController _controller;
-  static const int _infiniteOffset = 5000;
-
-  @override
-  void initState() {
-    super.initState();
-    final initialIndex = widget.value - widget.minValue;
-    _controller = FixedExtentScrollController(
-      initialItem: widget.infiniteLoop ? initialIndex + _infiniteOffset * _itemCount : initialIndex,
-    );
-  }
-
-  @override
-  void didUpdateWidget(_TappableNumberPicker oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.value != widget.value) {
-      final currentIndex = _controller.selectedItem;
-      final currentValue = _indexToValue(currentIndex);
-      if (currentValue != widget.value) {
-        final targetIndex = _valueToIndex(widget.value);
-        _controller.jumpToItem(targetIndex);
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  int get _itemCount => widget.maxValue - widget.minValue + 1;
-
-  int _indexToValue(int index) {
-    if (widget.infiniteLoop) {
-      final normalizedIndex = index % _itemCount;
-      return widget.minValue + normalizedIndex;
-    }
-    return widget.minValue + index;
-  }
-
-  int _valueToIndex(int value) {
-    final baseIndex = value - widget.minValue;
-    if (widget.infiniteLoop) {
-      final currentIndex = _controller.selectedItem;
-      final currentCycle = currentIndex ~/ _itemCount;
-      return baseIndex + currentCycle * _itemCount;
-    }
-    return baseIndex;
-  }
-
-  void _handleTap(int targetValue) {
-    final targetIndex = _valueToIndex(targetValue);
-    _controller.jumpToItem(targetIndex);  // ⭐ 즉시 점프 (애니메이션 없음)
-    HapticFeedback.selectionClick();
-    widget.onChanged(targetValue);
-  }
-
-  String _formatNumber(int value) {
-    return widget.zeroPad ? value.toString().padLeft(2, '0') : value.toString();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      height: widget.itemHeight * 3,
-      width: widget.itemWidth,
-      decoration: widget.decoration,
-      child: ListWheelScrollView.useDelegate(
-        controller: _controller,
-        itemExtent: widget.itemHeight,
-        physics: const FixedExtentScrollPhysics(),
-        diameterRatio: 1.2,
-        perspective: 0.003,
-        squeeze: 1.0,
-        onSelectedItemChanged: (index) {
-          final value = _indexToValue(index);
-          HapticFeedback.selectionClick();
-          widget.onChanged(value);
-        },
-        childDelegate: ListWheelChildBuilderDelegate(
-          builder: (context, index) {
-            if (!widget.infiniteLoop && (index < 0 || index >= _itemCount)) {
-              return null;
-            }
-
-            final value = _indexToValue(index);
-            final isSelected = value == widget.value;
-
-            return GestureDetector(
-              onTap: () => _handleTap(value),
-              behavior: HitTestBehavior.opaque,
-              child: Center(
-                child: Text(
-                  _formatNumber(value),
-                  style: isSelected
-                      ? (widget.selectedTextStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold))
-                      : (widget.textStyle ?? TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                ),
-              ),
-            );
-          },
-          childCount: widget.infiniteLoop ? null : _itemCount,
         ),
       ),
     );

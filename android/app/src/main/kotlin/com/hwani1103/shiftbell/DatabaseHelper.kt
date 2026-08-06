@@ -25,7 +25,7 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // (alarm_creation_log 테이블 생성 등)이 영구적으로 스킵될 수 있었음. 두 값이
         // 항상 일치해야 이런 무의미한 버전 찍힘 자체가 무해해짐(찍어봐야 같은 값).
         // ⚠️ Flutter DB 버전을 올릴 때마다 이 값도 반드시 같이 올릴 것.
-        private const val DATABASE_VERSION = 14
+        private const val DATABASE_VERSION = 15
         private const val TAG = "DatabaseHelper"
 
         @Volatile

@@ -7,6 +7,7 @@ import '../services/alarm_service.dart';
 import '../models/alarm_template.dart';
 import '../models/alarm.dart';
 import 'package:flutter/services.dart';
+import '../services/widget_refresh_service.dart';
 
 
 final scheduleProvider = StateNotifierProvider<ScheduleNotifier, AsyncValue<ShiftSchedule?>>((ref) {
@@ -43,9 +44,11 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       startDate: schedule.startDate,
       shiftColors: schedule.shiftColors,
       assignedDates: schedule.assignedDates,
+      shiftDurations: schedule.shiftDurations,
     );
-    
+
     state = AsyncValue.data(savedSchedule);
+    WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
   } catch (e, stack) {
     state = AsyncValue.error(e, stack);
     rethrow;
@@ -56,6 +59,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     try {
       await DatabaseService.instance.updateShiftSchedule(schedule);
       state = AsyncValue.data(schedule);
+      WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
       rethrow;
@@ -163,6 +167,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       await db.delete('shift_alarm_templates');
 
       state = const AsyncValue.data(null);
+      WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 초기화 반영
       print('🗑️ 교대근무 초기화 완료');
     } catch (e) {
       print('❌ 교대근무 초기화 실패: $e');
@@ -306,7 +311,8 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   }
 
   state = AsyncValue.data(currentSchedule);
-  
+  WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
+
   print('✅ 스케줄 + 알람 변경 완료');
   try {
     await MethodChannel('com.hwani1103.shiftbell/alarm').invokeMethod('triggerGuardCheck');

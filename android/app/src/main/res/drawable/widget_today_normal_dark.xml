@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ⭐ "오늘" 날짜 숫자 강조 배경 (다크, 평일/토요일) - 앱 다크 테마 primary와 동일 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FF9AA5F5"/>
+    <corners android:radius="6dp"/>
+</shape>
