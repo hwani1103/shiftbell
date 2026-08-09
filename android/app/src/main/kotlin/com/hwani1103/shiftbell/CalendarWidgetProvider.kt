@@ -165,6 +165,7 @@ class CalendarWidgetProvider : AppWidgetProvider() {
             val rowCount = if (isLarge) 6 else 3
             val views = RemoteViews(context.packageName, layoutRes)
             val isDark = isDarkMode(context)
+            val density = context.resources.displayMetrics.density
 
             views.setInt(
                 R.id.widget_panel, "setBackgroundResource",
@@ -215,6 +216,13 @@ class CalendarWidgetProvider : AppWidgetProvider() {
                 val daysSinceSunday = today.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
                 (today.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, -daysSinceSunday - 7) }
             }
+            val windowEnd = (windowStart.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, rowCount * 7 - 1) }
+
+            // ⭐ 달력탭처럼 날짜별 메모(최대 3개)도 같이 보여줌 - 위젯에 보이는 창 범위
+            // 전체(전주~다음주 또는 달력 6주)를 한 번에 읽어와서 셀 렌더링 때 재사용.
+            val memosByDate = CalendarWidgetScheduleResolver.readMemos(
+                context, dateKeyFor(windowStart), dateKeyFor(windowEnd)
+            )
 
             val cellPillIds = arrayOf(
                 intArrayOf(R.id.pill_0_0, R.id.pill_0_1, R.id.pill_0_2, R.id.pill_0_3, R.id.pill_0_4, R.id.pill_0_5, R.id.pill_0_6),
@@ -250,6 +258,47 @@ class CalendarWidgetProvider : AppWidgetProvider() {
                 intArrayOf(R.id.num_4_0, R.id.num_4_1, R.id.num_4_2, R.id.num_4_3, R.id.num_4_4, R.id.num_4_5, R.id.num_4_6),
                 intArrayOf(R.id.num_5_0, R.id.num_5_1, R.id.num_5_2, R.id.num_5_3, R.id.num_5_4, R.id.num_5_5, R.id.num_5_6)
             )
+            // ⭐ num_r_c를 감싸는 배경 없는 래퍼 - 메모 3개일 때 숫자를 위로 띄우는 여백을
+            // num_r_c 자신에게 주면(setViewPadding) 오늘 강조 배경(setBackgroundResource)이
+            // 패딩 전체를 덮어버려서 뱃지가 길쭉하게 늘어나 보이는 문제가 있었음. 배경 없는
+            // 이 래퍼에 여백을 주면 num_r_c는 항상 고정 크기(=배경도 항상 딱 맞는 뱃지
+            // 크기)를 유지한 채로 통째로 위/아래로만 이동함.
+            val cellNumWrapIds = arrayOf(
+                intArrayOf(R.id.numwrap_0_0, R.id.numwrap_0_1, R.id.numwrap_0_2, R.id.numwrap_0_3, R.id.numwrap_0_4, R.id.numwrap_0_5, R.id.numwrap_0_6),
+                intArrayOf(R.id.numwrap_1_0, R.id.numwrap_1_1, R.id.numwrap_1_2, R.id.numwrap_1_3, R.id.numwrap_1_4, R.id.numwrap_1_5, R.id.numwrap_1_6),
+                intArrayOf(R.id.numwrap_2_0, R.id.numwrap_2_1, R.id.numwrap_2_2, R.id.numwrap_2_3, R.id.numwrap_2_4, R.id.numwrap_2_5, R.id.numwrap_2_6),
+                intArrayOf(R.id.numwrap_3_0, R.id.numwrap_3_1, R.id.numwrap_3_2, R.id.numwrap_3_3, R.id.numwrap_3_4, R.id.numwrap_3_5, R.id.numwrap_3_6),
+                intArrayOf(R.id.numwrap_4_0, R.id.numwrap_4_1, R.id.numwrap_4_2, R.id.numwrap_4_3, R.id.numwrap_4_4, R.id.numwrap_4_5, R.id.numwrap_4_6),
+                intArrayOf(R.id.numwrap_5_0, R.id.numwrap_5_1, R.id.numwrap_5_2, R.id.numwrap_5_3, R.id.numwrap_5_4, R.id.numwrap_5_5, R.id.numwrap_5_6)
+            )
+            // ⭐ 셀당 메모 슬롯 최대 3개 (달력탭의 memos.take(3)과 동일). 각 슬롯은
+            // 해당 날짜에 그만큼 메모가 없으면 GONE 처리됨. [슬롯][행][열] 3중 배열.
+            val cellMemoIds = arrayOf(
+                arrayOf(
+                    intArrayOf(R.id.memo1_0_0, R.id.memo1_0_1, R.id.memo1_0_2, R.id.memo1_0_3, R.id.memo1_0_4, R.id.memo1_0_5, R.id.memo1_0_6),
+                    intArrayOf(R.id.memo1_1_0, R.id.memo1_1_1, R.id.memo1_1_2, R.id.memo1_1_3, R.id.memo1_1_4, R.id.memo1_1_5, R.id.memo1_1_6),
+                    intArrayOf(R.id.memo1_2_0, R.id.memo1_2_1, R.id.memo1_2_2, R.id.memo1_2_3, R.id.memo1_2_4, R.id.memo1_2_5, R.id.memo1_2_6),
+                    intArrayOf(R.id.memo1_3_0, R.id.memo1_3_1, R.id.memo1_3_2, R.id.memo1_3_3, R.id.memo1_3_4, R.id.memo1_3_5, R.id.memo1_3_6),
+                    intArrayOf(R.id.memo1_4_0, R.id.memo1_4_1, R.id.memo1_4_2, R.id.memo1_4_3, R.id.memo1_4_4, R.id.memo1_4_5, R.id.memo1_4_6),
+                    intArrayOf(R.id.memo1_5_0, R.id.memo1_5_1, R.id.memo1_5_2, R.id.memo1_5_3, R.id.memo1_5_4, R.id.memo1_5_5, R.id.memo1_5_6)
+                ),
+                arrayOf(
+                    intArrayOf(R.id.memo2_0_0, R.id.memo2_0_1, R.id.memo2_0_2, R.id.memo2_0_3, R.id.memo2_0_4, R.id.memo2_0_5, R.id.memo2_0_6),
+                    intArrayOf(R.id.memo2_1_0, R.id.memo2_1_1, R.id.memo2_1_2, R.id.memo2_1_3, R.id.memo2_1_4, R.id.memo2_1_5, R.id.memo2_1_6),
+                    intArrayOf(R.id.memo2_2_0, R.id.memo2_2_1, R.id.memo2_2_2, R.id.memo2_2_3, R.id.memo2_2_4, R.id.memo2_2_5, R.id.memo2_2_6),
+                    intArrayOf(R.id.memo2_3_0, R.id.memo2_3_1, R.id.memo2_3_2, R.id.memo2_3_3, R.id.memo2_3_4, R.id.memo2_3_5, R.id.memo2_3_6),
+                    intArrayOf(R.id.memo2_4_0, R.id.memo2_4_1, R.id.memo2_4_2, R.id.memo2_4_3, R.id.memo2_4_4, R.id.memo2_4_5, R.id.memo2_4_6),
+                    intArrayOf(R.id.memo2_5_0, R.id.memo2_5_1, R.id.memo2_5_2, R.id.memo2_5_3, R.id.memo2_5_4, R.id.memo2_5_5, R.id.memo2_5_6)
+                ),
+                arrayOf(
+                    intArrayOf(R.id.memo3_0_0, R.id.memo3_0_1, R.id.memo3_0_2, R.id.memo3_0_3, R.id.memo3_0_4, R.id.memo3_0_5, R.id.memo3_0_6),
+                    intArrayOf(R.id.memo3_1_0, R.id.memo3_1_1, R.id.memo3_1_2, R.id.memo3_1_3, R.id.memo3_1_4, R.id.memo3_1_5, R.id.memo3_1_6),
+                    intArrayOf(R.id.memo3_2_0, R.id.memo3_2_1, R.id.memo3_2_2, R.id.memo3_2_3, R.id.memo3_2_4, R.id.memo3_2_5, R.id.memo3_2_6),
+                    intArrayOf(R.id.memo3_3_0, R.id.memo3_3_1, R.id.memo3_3_2, R.id.memo3_3_3, R.id.memo3_3_4, R.id.memo3_3_5, R.id.memo3_3_6),
+                    intArrayOf(R.id.memo3_4_0, R.id.memo3_4_1, R.id.memo3_4_2, R.id.memo3_4_3, R.id.memo3_4_4, R.id.memo3_4_5, R.id.memo3_4_6),
+                    intArrayOf(R.id.memo3_5_0, R.id.memo3_5_1, R.id.memo3_5_2, R.id.memo3_5_3, R.id.memo3_5_4, R.id.memo3_5_5, R.id.memo3_5_6)
+                )
+            )
 
             val normalTextColor = Color.parseColor(if (isDark) DARK_TEXT_NORMAL else LIGHT_TEXT_NORMAL)
             val sundayTextColor = Color.parseColor(if (isDark) DARK_TEXT_SUNDAY else LIGHT_TEXT_SUNDAY)
@@ -260,6 +309,10 @@ class CalendarWidgetProvider : AppWidgetProvider() {
             val noShiftColor = Color.parseColor(if (isDark) DARK_NO_SHIFT_COLOR else LIGHT_NO_SHIFT_COLOR)
             val todayNormalBg = if (isDark) R.drawable.widget_today_normal_dark else R.drawable.widget_today_normal_light
             val todayHolidayBg = if (isDark) R.drawable.widget_today_holiday_dark else R.drawable.widget_today_holiday_light
+            // ⭐ 메모 박스 배경/글자색 - 달력탭 메모 박스와 동일 톤 (색상은 셀마다 다를 필요가
+            // 없어서 근무색 알약과 달리 정적 drawable 리소스 하나로 충분함)
+            val memoBg = if (isDark) R.drawable.widget_memo_bg_dark else R.drawable.widget_memo_bg_light
+            val memoTextColor = normalTextColor
 
             for (r in 0 until rowCount) {
                 for (c in 0..6) {
@@ -311,10 +364,38 @@ class CalendarWidgetProvider : AppWidgetProvider() {
                         }
                         views.setTextColor(cellNumIds[r][c], numColor)
                     }
+
+                    // ⭐ 메모 최대 3개 - 있는 만큼만 채우고 나머지 슬롯은 숨김
+                    val memos = memosByDate[dateKeyFor(cal)] ?: emptyList()
+                    for (slot in 0..2) {
+                        val memoId = cellMemoIds[slot][r][c]
+                        if (slot < memos.size) {
+                            views.setTextViewText(memoId, memos[slot])
+                            views.setInt(memoId, "setBackgroundResource", memoBg)
+                            views.setTextColor(memoId, memoTextColor)
+                            views.setViewVisibility(memoId, android.view.View.VISIBLE)
+                        } else {
+                            views.setViewVisibility(memoId, android.view.View.GONE)
+                        }
+                    }
+                    // ⭐ 달력탭과 동일하게 - 메모가 3개 꽉 차면 숫자를 위로 살짝 띄워서
+                    // 메모 박스 3줄과 안 겹치게 함 (calendar_tab.dart의
+                    // "memoCount >= 3 ? 20.h 아래 여백" 로직과 동일한 목적).
+                    // 배경 없는 래퍼(numwrap)에만 여백을 줘서 num_r_c 자신(=오늘 강조
+                    // 배경 포함)은 항상 고정 크기 뱃지를 유지한 채로 통째로 이동함.
+                    val numExtraBottomDp = if (memos.size >= 3) 30 else 0
+                    views.setViewPadding(cellNumWrapIds[r][c], 0, 0, 0, (numExtraBottomDp * density).toInt())
                 }
             }
 
             return views
+        }
+
+        // ⭐ Calendar → "yyyy-MM-dd" 문자열 (date_memos 테이블 키 형식과 동일)
+        private fun dateKeyFor(cal: Calendar): String {
+            return "%04d-%02d-%02d".format(
+                cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH)
+            )
         }
 
         private fun isSameDay(a: Calendar, b: Calendar): Boolean {

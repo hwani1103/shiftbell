@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ⭐ 위젯 메모 배경 (다크) - 원래 primary 30% 투명이었는데, "오늘" 배지
+     (widget_today_normal_dark, #FF9AA5F5)와 색상(hue)이 완전히 같은 채로
+     투명도만 다르다 보니 메모 3개 + 오늘 배지가 서로 가까이 붙는 상황에서
+     반투명 메모 배경이 바로 위 배지 색과 시각적으로 번져 보여 "배지가 메모를
+     가린다"는 느낌을 줌 (라이트 모드는 배지=남색, 메모=연회색이라 색이 확실히
+     달라서 이 문제가 없었음). surfaceVariant(#FF2E3547, app_theme.dart 다크
+     테마와 동일 톤)로 불투명하게 바꿔서 배지와 확실히 구분되게 함. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FF2E3547"/>
+    <corners android:radius="2dp"/>
+    <stroke android:width="0.5dp" android:color="#FF3D4560"/>
+</shape>

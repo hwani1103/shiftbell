@@ -12,8 +12,7 @@ enum MonthlyPeriodMode { calendar, payday }
 // ⭐ 회사마다 "기준일"을 기간의 어느 쪽으로 보는지가 다름 (예: 기준일 20일일 때)
 // - periodEnd: 기준일이 기간의 마지막 날 → 전월 21일 ~ 당월 20일
 // - periodStart: 기준일이 기간의 시작일 → 전월 20일 ~ 당월 19일
-// - bothInclusive: 기준일을 시작/끝 둘 다에 포함 → 전월 20일 ~ 당월 20일
-enum PaydayCutoffAnchor { periodEnd, periodStart, bothInclusive }
+enum PaydayCutoffAnchor { periodEnd, periodStart }
 
 class WorkHoursSettings {
   final MonthlyPeriodMode periodMode;
@@ -50,12 +49,11 @@ class WorkHoursSettings {
   }
 
   // ⭐ anchorMonth(연/월만 사용)를 "당월"로 보고, 이번 달 집계 기간을 계산함.
-  // 세 방식 모두 기간이 anchorMonth 안에서 "끝나는" 것으로 라벨링함 (급여명세서에
+  // 두 방식 모두 기간이 anchorMonth 안에서 "끝나는" 것으로 라벨링함 (급여명세서에
   // 찍히는 달 = 정산이 마무리되는 달이라는 관행에 맞춤).
   // - calendar 모드: 당월 1일 ~ 당월 말일 (기존 동작 그대로)
   // - periodEnd (기준일=마지막 날): 전월 (기준일+1)일 ~ 당월 기준일
   // - periodStart (기준일=시작일): 전월 기준일 ~ 당월 (기준일-1)일
-  // - bothInclusive (기준일을 양쪽 다 포함): 전월 기준일 ~ 당월 기준일
   // - 기준일이 그 달 실제 일수보다 크면(예: 31일인데 그 달이 30일까지) 그 달의
   //   마지막 날로 자동 보정됨 - 사용자가 "말일"을 따로 고를 필요 없음.
   DateTimeRange periodForMonth(DateTime anchorMonth) {
@@ -90,14 +88,6 @@ class WorkHoursSettings {
         final end = endDayRaw < 1
             ? DateTime(prevMonth.year, prevMonth.month, prevLastDay)  // 기준일이 1일이면 전달 말일까지
             : DateTime(currentMonth.year, currentMonth.month, endDayRaw);
-
-        return DateTimeRange(start: start, end: end);
-
-      case PaydayCutoffAnchor.bothInclusive:
-        final startDay = paydayCutoffDay.clamp(1, prevLastDay);
-        final start = DateTime(prevMonth.year, prevMonth.month, startDay);
-        final endDay = paydayCutoffDay.clamp(1, currentLastDay);
-        final end = DateTime(currentMonth.year, currentMonth.month, endDay);
 
         return DateTimeRange(start: start, end: end);
     }

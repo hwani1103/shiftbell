@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ⭐ 위젯 메모 배경 (라이트) - 달력탭 메모 박스(surfaceVariant + outline)와 동일 톤 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFF5F5F5"/>
+    <corners android:radius="2dp"/>
+    <stroke android:width="0.5dp" android:color="#FFE0E0E0"/>
+</shape>

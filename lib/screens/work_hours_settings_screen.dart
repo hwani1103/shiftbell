@@ -365,8 +365,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
   }
 
   // ⭐ 회사마다 "기준일"을 기간의 어느 쪽으로 보는지가 달라서 (예: 20일 기준 →
-  // "전월21~당월20" / "전월20~당월19" / "전월20~당월20") 세 방식 다 고를 수
-  // 있게 함. 텍스트가 길면 한 줄에 3개가 안 들어가서 짧은 워딩으로 정리함.
+  // "전월21~당월20" / "전월20~당월19") 두 방식 중 고를 수 있게 함.
   Widget _buildCutoffAnchorToggle(WorkHoursSettings settings) {
     return Row(
       children: [
@@ -377,20 +376,12 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
             onTap: () => ref.read(workHoursSettingsProvider.notifier).setCutoffAnchor(PaydayCutoffAnchor.periodStart),
           ),
         ),
-        SizedBox(width: 6.w),
+        SizedBox(width: 10.w),
         Expanded(
           child: _buildAnchorChip(
             label: '종료일 기준',
             selected: settings.cutoffAnchor == PaydayCutoffAnchor.periodEnd,
             onTap: () => ref.read(workHoursSettingsProvider.notifier).setCutoffAnchor(PaydayCutoffAnchor.periodEnd),
-          ),
-        ),
-        SizedBox(width: 6.w),
-        Expanded(
-          child: _buildAnchorChip(
-            label: '모두 포함',
-            selected: settings.cutoffAnchor == PaydayCutoffAnchor.bothInclusive,
-            onTap: () => ref.read(workHoursSettingsProvider.notifier).setCutoffAnchor(PaydayCutoffAnchor.bothInclusive),
           ),
         ),
       ],
@@ -419,7 +410,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 12.sp,
+              fontSize: 13.sp,
               fontWeight: FontWeight.w600,
               color: selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),

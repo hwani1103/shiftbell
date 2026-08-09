@@ -108,6 +108,35 @@ object CalendarWidgetScheduleResolver {
         return schedule.pattern[idx]
     }
 
+    // ⭐ [startKey, endKey]("yyyy-MM-dd") 범위의 메모를 날짜별로 읽음 (order_index 순 -
+    // 달력탭의 getMemosForDateRange()와 동일한 정렬). 표시는 호출부에서 최대 3개로 자름.
+    fun readMemos(context: Context, startKey: String, endKey: String): Map<String, List<String>> {
+        val db: SQLiteDatabase = try {
+            DatabaseHelper.getInstance(context).getReadableDatabaseWithRetry() ?: return emptyMap()
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ DB 열기 실패(메모)", e)
+            return emptyMap()
+        }
+
+        val result = mutableMapOf<String, MutableList<String>>()
+        try {
+            db.query(
+                "date_memos", arrayOf("date", "memo_text"),
+                "date >= ? AND date <= ?", arrayOf(startKey, endKey),
+                null, null, "date ASC, order_index ASC"
+            ).use { cursor ->
+                while (cursor.moveToNext()) {
+                    val date = cursor.getString(0) ?: continue
+                    val text = cursor.getString(1) ?: ""
+                    result.getOrPut(date) { mutableListOf() }.add(text)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ 메모 읽기 실패", e)
+        }
+        return result
+    }
+
     // ⭐ AlarmRefreshEngine.kt의 julianDayNumber()와 동일 (DST/시간대 무관하게 날짜 수 차이 계산)
     private fun julianDayNumber(cal: Calendar): Int {
         val year = cal.get(Calendar.YEAR)

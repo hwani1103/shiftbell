@@ -3,6 +3,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/date_memo.dart';
 import '../services/database_service.dart';
+import '../services/widget_refresh_service.dart';
 
 // ⭐ 메모 상태 관리 Provider
 class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
@@ -36,6 +37,7 @@ class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
 
     // 상태 갱신
     await loadMemosForDate(date);
+    WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신 (메모 표시)
     return true;
   }
 
@@ -49,6 +51,7 @@ class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
     await _db.updateMemo(id, memoText.trim());
     // 상태 갱신
     await loadMemosForDate(date);
+    WidgetRefreshService.refresh();
   }
 
   // ⭐ 메모 삭제
@@ -56,6 +59,7 @@ class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
     await _db.deleteMemo(id);
     // 상태 갱신
     await loadMemosForDate(date);
+    WidgetRefreshService.refresh();
   }
 
   // ⭐ 메모 순서 변경
@@ -63,6 +67,7 @@ class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
     await _db.reorderMemos(date, memoIds);
     // 상태 갱신
     await loadMemosForDate(date);
+    WidgetRefreshService.refresh();
   }
 
   // ⭐ 특정 날짜의 메모 가져오기 (캐시)

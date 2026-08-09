@@ -125,24 +125,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_0_0"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_0_0"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_0_0"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_0_0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_0_0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_0_0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -172,24 +215,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_0_1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_0_1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_0_1"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_0_1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_0_1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_0_1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -219,24 +305,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_0_2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_0_2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_0_2"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_0_2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_0_2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_0_2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -266,24 +395,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_0_3"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_0_3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_0_3"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_0_3"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_0_3"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_0_3"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -313,24 +485,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_0_4"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_0_4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_0_4"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_0_4"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_0_4"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_0_4"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -360,24 +575,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_0_5"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_0_5"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_0_5"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_0_5"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_0_5"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_0_5"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -407,24 +665,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_0_6"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_0_6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_0_6"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_0_6"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_0_6"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_0_6"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
             </LinearLayout>
             <LinearLayout
@@ -460,24 +761,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_1_0"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_1_0"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_1_0"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_1_0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_1_0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_1_0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -507,24 +851,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_1_1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_1_1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_1_1"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_1_1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_1_1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_1_1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -554,24 +941,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_1_2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_1_2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_1_2"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_1_2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_1_2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_1_2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -601,24 +1031,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_1_3"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_1_3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_1_3"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_1_3"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_1_3"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_1_3"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -648,24 +1121,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_1_4"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_1_4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_1_4"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_1_4"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_1_4"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_1_4"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -695,24 +1211,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_1_5"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_1_5"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_1_5"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_1_5"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_1_5"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_1_5"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -742,24 +1301,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_1_6"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_1_6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_1_6"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_1_6"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_1_6"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_1_6"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
             </LinearLayout>
             <LinearLayout
@@ -795,24 +1397,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_2_0"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_2_0"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_2_0"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_2_0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_2_0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_2_0"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -842,24 +1487,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_2_1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_2_1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_2_1"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_2_1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_2_1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_2_1"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -889,24 +1577,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_2_2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_2_2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_2_2"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_2_2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_2_2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_2_2"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -936,24 +1667,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_2_3"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_2_3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_2_3"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_2_3"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_2_3"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_2_3"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -983,24 +1757,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_2_4"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_2_4"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_2_4"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_2_4"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_2_4"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_2_4"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -1030,24 +1847,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_2_5"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_2_5"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_2_5"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_2_5"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_2_5"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_2_5"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -1077,24 +1937,67 @@
                             android:includeFontPadding="false"
                             android:ellipsize="end"/>
                     </FrameLayout>
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/num_2_6"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:textSize="15sp"
-                            android:includeFontPadding="false"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingTop="2dp"
-                            android:paddingBottom="2dp"/>
-                    </LinearLayout>
+                        android:layout_weight="1">
+                            <LinearLayout
+                                android:id="@+id/numwrap_2_6"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/num_2_6"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:gravity="center"
+                                        android:textSize="17sp"
+                                        android:includeFontPadding="false"
+                                        android:paddingLeft="5dp"
+                                        android:paddingRight="5dp"
+                                        android:paddingTop="2dp"
+                                        android:paddingBottom="2dp"/>
+                                </LinearLayout>
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="bottom"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:id="@+id/memo1_2_6"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo2_2_6"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginBottom="0.5dp"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                                <TextView
+                                    android:id="@+id/memo3_2_6"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/widget_memo_bg_light"
+                                    android:gravity="center"
+                                    android:textSize="9sp"
+                                    android:includeFontPadding="false"
+                                    android:maxLines="1"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
+                        </FrameLayout>
                 </LinearLayout>
             </LinearLayout>
     </LinearLayout>

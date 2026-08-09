@@ -11,6 +11,7 @@ import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
+import 'screens/calendar_theme_lab_screen.dart';  // ⭐ 테스트 전용: 달력 테마 비교 탭
 import 'screens/permission_intro_screen.dart';
 import 'widgets/permission_warning_banner.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -236,6 +237,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       NextAlarmTab(onSwipeToCalendar: () => _goToCalendar()),
       CalendarTab(),
       SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
+      const CalendarThemeLabScreen(),  // ⭐ 테스트 전용 탭 - 배포판에는 설정 안으로 들어갈 예정
     ];
 
     // ⭐ _scheduleGuardWakeup()이 triggerGuardCheck를 호출해서 Native 갱신 판단/실행까지 함
@@ -337,12 +339,15 @@ Future<void> _handleMethod(MethodCall call) async {
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.alarm), label: '다음알람'),
             BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: '달력'),
             BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
+            // ⭐ 테스트 전용 - 달력 테마 10개 비교. 배포판에서는 설정 화면 안으로 들어감.
+            BottomNavigationBarItem(icon: Icon(Icons.palette_outlined), label: '달력테마'),
           ],
         ),
       ),
