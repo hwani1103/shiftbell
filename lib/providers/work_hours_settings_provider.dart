@@ -19,22 +19,29 @@ class WorkHoursSettings {
   final MonthlyPeriodMode periodMode;
   final int paydayCutoffDay;  // 1~31. payday 모드에서만 사용
   final PaydayCutoffAnchor cutoffAnchor;
+  // ⭐ 달력에서 근무를 바꿔서(예: 휴무→주간) 원래 패턴보다 늘어난 시간을 "이번 달
+  // OT"에 자동으로 합산할지. 기본값 false(기존 동작 유지) - 근무 변경이 잦은
+  // 사람은 그걸 OT로 안 치고 싶을 수 있어서 명시적으로 켜야 적용됨.
+  final bool shiftChangeCountsAsOt;
 
   const WorkHoursSettings({
     this.periodMode = MonthlyPeriodMode.calendar,
     this.paydayCutoffDay = 25,
     this.cutoffAnchor = PaydayCutoffAnchor.periodEnd,
+    this.shiftChangeCountsAsOt = false,
   });
 
   WorkHoursSettings copyWith({
     MonthlyPeriodMode? periodMode,
     int? paydayCutoffDay,
     PaydayCutoffAnchor? cutoffAnchor,
+    bool? shiftChangeCountsAsOt,
   }) {
     return WorkHoursSettings(
       periodMode: periodMode ?? this.periodMode,
       paydayCutoffDay: paydayCutoffDay ?? this.paydayCutoffDay,
       cutoffAnchor: cutoffAnchor ?? this.cutoffAnchor,
+      shiftChangeCountsAsOt: shiftChangeCountsAsOt ?? this.shiftChangeCountsAsOt,
     );
   }
 
@@ -127,12 +134,14 @@ class WorkHoursSettingsNotifier extends StateNotifier<WorkHoursSettings> {
   static const _cutoffAnchorKey = 'work_hours_cutoff_anchor';
   // ⭐ 예전(3방식 도입 이전) bool 설정 키 - 남아있으면 값 승계해서 마이그레이션
   static const _legacyCutoffIsStartKey = 'work_hours_cutoff_is_period_start';
+  static const _shiftChangeAsOtKey = 'work_hours_shift_change_as_ot';
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     final modeStr = prefs.getString(_modeKey);
     final cutoff = prefs.getInt(_cutoffKey) ?? 25;
     final mode = modeStr == 'payday' ? MonthlyPeriodMode.payday : MonthlyPeriodMode.calendar;
+    final shiftChangeAsOt = prefs.getBool(_shiftChangeAsOtKey) ?? false;
 
     PaydayCutoffAnchor anchor;
     final anchorStr = prefs.getString(_cutoffAnchorKey);
@@ -147,7 +156,12 @@ class WorkHoursSettingsNotifier extends StateNotifier<WorkHoursSettings> {
       anchor = legacyIsStart == true ? PaydayCutoffAnchor.periodStart : PaydayCutoffAnchor.periodEnd;
     }
 
-    state = WorkHoursSettings(periodMode: mode, paydayCutoffDay: cutoff, cutoffAnchor: anchor);
+    state = WorkHoursSettings(
+      periodMode: mode,
+      paydayCutoffDay: cutoff,
+      cutoffAnchor: anchor,
+      shiftChangeCountsAsOt: shiftChangeAsOt,
+    );
   }
 
   Future<void> setPeriodMode(MonthlyPeriodMode mode) async {
@@ -166,6 +180,12 @@ class WorkHoursSettingsNotifier extends StateNotifier<WorkHoursSettings> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_cutoffAnchorKey, anchor.name);
     state = state.copyWith(cutoffAnchor: anchor);
+  }
+
+  Future<void> setShiftChangeCountsAsOt(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_shiftChangeAsOtKey, value);
+    state = state.copyWith(shiftChangeCountsAsOt: value);
   }
 }
 

@@ -66,6 +66,44 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     }
   }
 
+  // ⭐ 필드 대부분을 그대로 복사하면서 pattern/assignedDates만 새 값으로 바꾼
+  // "새" ShiftSchedule 인스턴스를 만듦. changeShift/bulkAssignShift/
+  // changeShiftWithAlarms가 전부 이걸 거쳐가도록 함 - 예전엔 이 세 함수가
+  // currentSchedule의 필드(assignedDates 맵 등)를 직접 mutate한 다음 그 "같은
+  // 객체 참조"를 그대로 state에 다시 넣었는데, ShiftSchedule에 operator==가
+  // 없어서 Riverpod이 "이전 state와 동일한 객체"로 보고 리스너 통지를 건너뛸 수
+  // 있었음 (근무 변경 직후 이번 달 OT 카드가 즉시 안 갱신되는 버그의 원인 중 하나).
+  // 매번 새 인스턴스를 만들면 이 문제가 원천적으로 사라짐.
+  ShiftSchedule _withPattern(ShiftSchedule s, List<String> pattern) {
+    return ShiftSchedule(
+      id: s.id,
+      isRegular: s.isRegular,
+      pattern: pattern,
+      todayIndex: s.todayIndex,
+      shiftTypes: s.shiftTypes,
+      activeShiftTypes: s.activeShiftTypes,
+      startDate: s.startDate,
+      shiftColors: s.shiftColors,
+      assignedDates: s.assignedDates,
+      shiftDurations: s.shiftDurations,
+    );
+  }
+
+  ShiftSchedule _withAssignedDates(ShiftSchedule s, Map<String, String> assignedDates) {
+    return ShiftSchedule(
+      id: s.id,
+      isRegular: s.isRegular,
+      pattern: s.pattern,
+      todayIndex: s.todayIndex,
+      shiftTypes: s.shiftTypes,
+      activeShiftTypes: s.activeShiftTypes,
+      startDate: s.startDate,
+      shiftColors: s.shiftColors,
+      assignedDates: assignedDates,
+      shiftDurations: s.shiftDurations,
+    );
+  }
+
   Future<void> changeShift(DateTime date, String newShiftType) async {
     final currentSchedule = state.value;
     if (currentSchedule == null) return;
@@ -73,8 +111,8 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     final dateStr = date.toIso8601String().split('T')[0];
 
     if (currentSchedule.isRegular) {
-      if (currentSchedule.pattern == null || 
-          currentSchedule.todayIndex == null || 
+      if (currentSchedule.pattern == null ||
+          currentSchedule.todayIndex == null ||
           currentSchedule.startDate == null) {
         return;
       }
@@ -91,29 +129,29 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
                     currentSchedule.pattern!.length) %
                     currentSchedule.pattern!.length;
 
-      currentSchedule.pattern![index] = newShiftType;
+      final newPattern = List<String>.from(currentSchedule.pattern!);
+      newPattern[index] = newShiftType;
+      await updateSchedule(_withPattern(currentSchedule, newPattern));
     } else {
-      currentSchedule.assignedDates ??= {};
-      currentSchedule.assignedDates![dateStr] = newShiftType;
+      final newAssignedDates = Map<String, String>.from(currentSchedule.assignedDates ?? {});
+      newAssignedDates[dateStr] = newShiftType;
+      await updateSchedule(_withAssignedDates(currentSchedule, newAssignedDates));
     }
-
-    await updateSchedule(currentSchedule);
   }
 
   Future<void> bulkAssignShift(List<DateTime> dates, String shiftType) async {
     final currentSchedule = state.value;
     if (currentSchedule == null) return;
 
+    // ⭐ 규칙적/불규칙 관계없이 assignedDates에 예외로 저장
+    // (패턴을 직접 수정하면 같은 인덱스의 모든 날짜가 바뀜)
+    final newAssignedDates = Map<String, String>.from(currentSchedule.assignedDates ?? {});
     for (var date in dates) {
       final dateStr = date.toIso8601String().split('T')[0];
-
-      // ⭐ 규칙적/불규칙 관계없이 assignedDates에 예외로 저장
-      // (패턴을 직접 수정하면 같은 인덱스의 모든 날짜가 바뀜)
-      currentSchedule.assignedDates ??= {};
-      currentSchedule.assignedDates![dateStr] = shiftType;
+      newAssignedDates[dateStr] = shiftType;
     }
 
-    await updateSchedule(currentSchedule);
+    await updateSchedule(_withAssignedDates(currentSchedule, newAssignedDates));
   }
 
   Future<void> resetSchedule() async {
@@ -187,24 +225,26 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   }
 
   final db = await DatabaseService.instance.database;
-  
+
+  // ⭐ currentSchedule을 직접 mutate하지 않고 새 assignedDates 맵을 만듦 - 아래
+  // state 갱신 시 "새 객체"를 넣어야 Riverpod이 변경을 확실히 통지함 (_withPattern
+  // 근처 주석 참고). DB에 쓰는 toMap()도 이 새 맵 기준으로 만들어야 일치함.
+  final newAssignedDates = Map<String, String>.from(currentSchedule.assignedDates ?? {});
+  final dateStr = date.toIso8601String().split('T')[0];
+  newAssignedDates[dateStr] = newShiftType;
+  final updatedSchedule = _withAssignedDates(currentSchedule, newAssignedDates);
+
   List<int> cancelIds = [];
   List<Map<String, dynamic>> scheduleData = [];
-  
+
   await db.transaction((txn) async {
-    final dateStr = date.toIso8601String().split('T')[0];
-
     print('🔵 날짜: $dateStr, 새 근무: $newShiftType');
-
-    // ⭐ 규칙적이든 불규칙이든 assignedDates에 예외로 저장
-    currentSchedule.assignedDates ??= {};
-    currentSchedule.assignedDates![dateStr] = newShiftType;
 
     await txn.update(
       'shift_schedule',
-      currentSchedule.toMap(),
+      updatedSchedule.toMap(),
       where: 'id = ?',
-      whereArgs: [currentSchedule.id],
+      whereArgs: [updatedSchedule.id],
     );
 
     // ⭐ 10일 이후 체크 (DST 안전한 계산)
@@ -310,7 +350,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     );
   }
 
-  state = AsyncValue.data(currentSchedule);
+  state = AsyncValue.data(updatedSchedule);
   WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
 
   print('✅ 스케줄 + 알람 변경 완료');

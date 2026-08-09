@@ -664,10 +664,21 @@ Widget build(BuildContext context) {
 
     return Consumer(
       builder: (context, ref, child) {
-        ref.watch(overtimeProvider); // 값 바뀌면 다시 그리기 위한 구독
+        final otByDate = ref.watch(overtimeProvider); // 값 바뀌면 다시 그리기 위한 구독
         final workSettings = ref.watch(workHoursSettingsProvider);
+        final schedule = ref.watch(scheduleProvider).value;
         final period = workSettings.periodForMonth(_focusedDay);
-        final totalMinutes = ref.read(overtimeProvider.notifier).getRangeTotal(period.start, period.end);
+        // ⭐ "이번 달 OT"는 수동 OT + (설정 켜져 있으면) 근무변경으로 늘어난 시간까지
+        // 합친 값 - 월별/주별 "총 근로시간" 계산과는 완전히 별개(그쪽은 안 바뀜).
+        final totalMinutes = schedule == null
+            ? 0
+            : computeOtDisplayTotal(computeOtDisplayEntries(
+                schedule: schedule,
+                start: period.start,
+                end: period.end,
+                manualOtByDate: otByDate,
+                countShiftChangeAsOt: workSettings.shiftChangeCountsAsOt,
+              ));
         final hasOvertime = totalMinutes > 0;
 
         // ⭐ 안쪽에 칸을 나누는 grid 느낌 없이, 5칸 전체를 감싸는 테두리 하나짜리
@@ -804,12 +815,23 @@ Widget build(BuildContext context) {
       builder: (context) {
         return Consumer(
           builder: (context, ref, child) {
-            ref.watch(overtimeProvider);
+            final otByDate = ref.watch(overtimeProvider);
             final schedule = ref.watch(scheduleProvider).value;
-            final notifier = ref.read(overtimeProvider.notifier);
-            final entries = notifier.getRangeEntries(period.start, period.end);
-            final totalMinutes = notifier.getRangeTotal(period.start, period.end);
-            final periodLabel = ref.watch(workHoursSettingsProvider).periodLabel(_focusedDay);
+            final workSettings = ref.watch(workHoursSettingsProvider);
+            // ⭐ "이번 달 OT" 목록/합계 = 수동 OT + (설정 켜져 있으면) 근무변경으로
+            // 늘어난 시간. "총 근로(예정) 시간 합산"(아래)은 이 값과 무관하게 항상
+            // 그대로(중복 합산 없음).
+            final entries = schedule == null
+                ? <OtDisplayEntry>[]
+                : computeOtDisplayEntries(
+                    schedule: schedule,
+                    start: period.start,
+                    end: period.end,
+                    manualOtByDate: otByDate,
+                    countShiftChangeAsOt: workSettings.shiftChangeCountsAsOt,
+                  );
+            final totalMinutes = computeOtDisplayTotal(entries);
+            final periodLabel = workSettings.periodLabel(_focusedDay);
             final colorScheme = Theme.of(context).colorScheme;
             final totalWorkMinutes = schedule == null
                 ? 0
@@ -817,7 +839,7 @@ Widget build(BuildContext context) {
                     schedule: schedule,
                     start: period.start,
                     end: period.end,
-                    otByDate: ref.watch(overtimeProvider),
+                    otByDate: otByDate,
                   );
 
             return DraggableScrollableSheet(
@@ -906,8 +928,19 @@ Widget build(BuildContext context) {
                                 separatorBuilder: (_, __) => SizedBox(height: 8.h),
                                 itemBuilder: (context, index) {
                                   final entry = entries[index];
-                                  final date = DateTime.parse(entry.key);
+                                  final date = entry.date;
                                   final weekdayStr = _getWeekday(date);
+
+                                  // ⭐ 근무변경으로 늘어난 시간이 있으면 "휴무 → 주간 (12시간)"
+                                  // 부제목 추가, 수동 OT까지 있으면 옆에 "OT 3시간"도 같이 표기
+                                  // (우측 총합은 항상 entry.totalMinutes = 이 둘의 합)
+                                  final hasManual = entry.hasImplied && entry.manualMinutes > 0;
+                                  final shiftChangeLabel = entry.hasImplied
+                                      ? '${entry.fromShift} → ${entry.toShift} (${formatOvertimeMinutes(entry.impliedMinutes)})${hasManual ? ',' : ''}'
+                                      : null;
+                                  final manualLabel = hasManual
+                                      ? '+ OT ${formatOvertimeMinutes(entry.manualMinutes)}'
+                                      : null;
 
                                   return Container(
                                     padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
@@ -916,21 +949,48 @@ Widget build(BuildContext context) {
                                       borderRadius: BorderRadius.circular(10.r),
                                       border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
                                     ),
-                                    child: Row(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          '${date.month}월 ${date.day}일 ($weekdayStr)',
-                                          style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              '${date.month}월 ${date.day}일 ($weekdayStr)',
+                                              style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface),
+                                            ),
+                                            Spacer(),
+                                            Text(
+                                              formatOvertimeMinutes(entry.totalMinutes),
+                                              style: TextStyle(
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: colorScheme.primary,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        Spacer(),
-                                        Text(
-                                          formatOvertimeMinutes(entry.value),
-                                          style: TextStyle(
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.bold,
-                                            color: colorScheme.primary,
+                                        if (shiftChangeLabel != null) ...[
+                                          SizedBox(height: 4.h),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                shiftChangeLabel,
+                                                style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
+                                              ),
+                                              if (manualLabel != null) ...[
+                                                SizedBox(width: 10.w),
+                                                Text(
+                                                  manualLabel,
+                                                  style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: colorScheme.onSurfaceVariant,
+                                                  ),
+                                                ),
+                                              ],
+                                            ],
                                           ),
-                                        ),
+                                        ],
                                       ],
                                     ),
                                   );
@@ -982,6 +1042,11 @@ Widget build(BuildContext context) {
                           otByDate: otByDate,
                         ))
                     .toList();
+            // ⭐ 여기 "OT 몇시간"은 수동 OT만 표시함(의도적) - 근무변경으로 늘어난
+            // 시간은 이미 위의 "주간 3일, 휴무 3일..." 근무별 일수 나열에 그 변경된
+            // 근무 그대로 반영되어 있어서, 여기에 또 더해서 보여주면 이중으로 잡힌
+            // 것처럼 보임 ("이번 달 OT" 목록/카드와는 다른 판단 - 거긴 근무별 일수
+            // 나열이 없어서 명시적으로 보여줘야 함).
 
             return DraggableScrollableSheet(
               initialChildSize: 0.55,

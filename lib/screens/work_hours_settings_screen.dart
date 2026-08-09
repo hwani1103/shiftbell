@@ -41,6 +41,33 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
               child: ListView(
                 padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 40.h),
                 children: [
+                // ⭐ 시인성 때문에 맨 위로 - 제목 줄 우측에 바로 스위치가 붙어있어서
+                // 이 화면에 들어오자마자 토글만 바로 켜고 나갈 수도 있음.
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '근무 변경 시 OT 처리',
+                        style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Switch(
+                      value: workSettings.shiftChangeCountsAsOt,
+                      onChanged: (v) => ref.read(workHoursSettingsProvider.notifier).setShiftChangeCountsAsOt(v),
+                      activeColor: colorScheme.primary,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  '달력에서 근무를 바꾸면(예: 휴무 → 주간), 원래 패턴보다 늘어난 시간을 "이번 달 OT"에 자동으로 더해서 보여줄지 정해요. 월별/주별 총 근로시간 자체는 이 설정과 무관하게 항상 동일해요.',
+                  style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
+                ),
+
+                SizedBox(height: 28.h),
+                Divider(color: colorScheme.outline.withOpacity(0.4)),
+                SizedBox(height: 20.h),
+
                 Text(
                   '근무별 기본 근로시간',
                   style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),

@@ -17,28 +17,36 @@ class UpdateService {
   // 다음 버전엔 이 내용을 다시 쓰고 싶지 않으면 _releaseNoteVersion을 빈 문자열로
   // 두면 됨 → 그러면 이 다이얼로그는 그냥 안 뜨고, 위의 "새 버전이 있어요" 안내만
   // 평소처럼 동작함.
-  // ⭐ CRITICAL FIX: '1.0.12'로 남겨두면 "이미 1.0.12를 써봤고 그때 이 안내를 본 사람"
-  // 한테만 안 뜨고, 신규 설치 사용자(Play Store에서 처음 까는 사람)나 1.0.11 이하에서
-  // 바로 건너뛰어 온 사용자한테는 여전히 뜸 - 온보딩 막 끝낸 신규 사용자한테 "알람
-  // 문제로 불편 겪으셨다면"이라는, 자기랑 무관한 문구가 뜨는 꼴. 이번 릴리즈는
-  // 아무한테도 안 뜨는 게 목표라 빈 문자열로 완전히 꺼둠.
-  static const String _releaseNoteVersion = '';
+  static const String _releaseNoteVersion = '1.0.16';
   static const String _releaseNoteTitle = '이번 업데이트는 꼭 확인해주세요';
   static const String _releaseNoteBody =
-      '알람이 제때 울리지 않거나 예상과 다르게 동작해서 불편을 겪으셨다면, '
-      '이번 업데이트에서 그런 문제들의 원인을 집중적으로 찾아 대폭 개선했습니다.\n'
-      '다시 한번 믿고 사용해주시면 정말 감사하겠습니다.\n\n'
-      '그리고 초과근무(OT) 시간을 달력에서 바로 기록하고 한눈에 확인할 수 있는 '
-      '기능도 새로 추가했어요.\n\n'
-      '(주변에 홍보도 많이 부탁드립니다!!)';
+      '이번 업데이트에서 아래 내용이 반영됐어요.\n\n'
+      '1. 알람 신뢰성 증가 (알람 삭제 버그 수정)\n'
+      '2. 달력 위젯 기능 추가\n'
+      '3. OT 관리 기능 추가\n'
+      '4. 월별 / 주별 근무시간 합산 기능 추가\n\n'
+      '(지속적인 업데이트를 통해 사용성을 개선하도록 하겠습니다. 주변에 많은 홍보 부탁드립니다!)';
   static const String _releaseNoteSeenKey = 'release_note_seen_version';
 
-  /// 업데이트 후 첫 실행 안내 (버전당 1번만, _releaseNoteVersion이 비어있으면 스킵)
+  /// 업데이트 후 첫 실행 안내 (버전당 1번만, _releaseNoteVersion이 비어있으면 스킵).
+  ///
+  /// ⭐ "기존 유저가 업데이트하고 나서"만 보여줘야 함(신규 설치 유저는 제외) - 판별
+  /// 기준으로 _notifiedVersionKey(아래 checkForUpdate가 씀)를 재사용함. 이 키는
+  /// "Play Store에 지금 깔린 것보다 최신 버전이 있다"는 인앱 업데이트 안내를 실제로
+  /// 본 적이 있을 때만 채워짐 - 방금 Play Store에서 최신 버전을 새로 설치한 사람은
+  /// 이미 최신이라 이 안내 자체를 볼 일이 없어서 항상 비어있음(0). 즉 "예전 버전을
+  /// 실제로 써본 적 있다"는 신뢰할 만한 증거로 재사용 가능함. (참고: 이 값은
+  /// checkForUpdate가 checkAndShowReleaseNote보다 먼저 호출된 "구버전 시절의 실행"에서
+  /// 이미 기록돼 있으므로, 방금 업데이트를 마치고 처음 켠 시점엔 이미 존재함)
   static Future<void> checkAndShowReleaseNote(BuildContext context) async {
     if (_releaseNoteVersion.isEmpty) return;
 
     try {
       final prefs = await SharedPreferences.getInstance();
+
+      final everNotifiedOfUpdate = (prefs.getInt(_notifiedVersionKey) ?? 0) > 0;
+      if (!everNotifiedOfUpdate) return;  // 신규 설치 유저로 추정 - 스킵
+
       final seenVersion = prefs.getString(_releaseNoteSeenKey);
       if (seenVersion == _releaseNoteVersion) return;
 
