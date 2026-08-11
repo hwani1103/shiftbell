@@ -55,7 +55,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 15,  // v15: shift_schedule.shift_durations 컬럼 추가 (근무별 기본 근로시간)
+      version: 16,  // v16: friends 테이블 추가 (친구 공유 코드 저장)
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -183,6 +183,18 @@ class DatabaseService {
       )
     ''');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_date_overtime_date ON date_overtime(date)');
+
+    // ⭐ 신규: 친구 공유 코드 저장 (근무패턴/근무변경/선택적 메모의 1회성 스냅샷)
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS friends(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        data_json TEXT NOT NULL,
+        has_memos INTEGER NOT NULL,
+        added_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
 
     for (var type in AlarmType.presets) {
       await db.insert('alarm_types', type.toMap(), conflictAlgorithm: ConflictAlgorithm.ignore);
@@ -387,6 +399,21 @@ class DatabaseService {
       print('⚠️ shift_durations 컬럼 추가 스킵(이미 존재 가능성): $e');
     }
     print('✅ DB 업그레이드 완료 (v$oldVersion → v15): shift_schedule.shift_durations 컬럼 추가');
+  }
+
+  // v16: 친구 공유 코드 저장 테이블 추가
+  if (oldVersion < 16) {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS friends(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        data_json TEXT NOT NULL,
+        has_memos INTEGER NOT NULL,
+        added_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v16): friends 테이블 추가');
   }
 }
 
@@ -1076,6 +1103,53 @@ Future<void> resetAllAlarmHistoryAndLog() async {
     await txn.delete('alarm_creation_log');
   });
   print('🗑️ 알람 이력 + 생성 로그 전체 삭제 완료 (설정 초기화)');
+}
+
+// ===== 친구 공유 관련 메서드 =====
+// ⭐ Firebase 없이 동작하는 1회성 스냅샷 저장소. 나중에 Firebase로 옮길 때도
+// FriendProvider가 이 메서드들 대신 Firestore 호출을 쓰도록만 바꾸면 되고,
+// data_json의 내용물(FriendScheduleData 포맷)은 그대로 재사용 가능함.
+
+Future<int> insertFriend({required String name, required String dataJson, required bool hasMemos}) async {
+  final db = await database;
+  final now = DateTime.now().toIso8601String();
+  return await db.insert('friends', {
+    'name': name,
+    'data_json': dataJson,
+    'has_memos': hasMemos ? 1 : 0,
+    'added_at': now,
+    'updated_at': now,
+  });
+}
+
+Future<List<Map<String, dynamic>>> getAllFriends() async {
+  final db = await database;
+  return db.query('friends', orderBy: 'name ASC');
+}
+
+Future<int> deleteFriend(int id) async {
+  final db = await database;
+  return await db.delete('friends', where: 'id = ?', whereArgs: [id]);
+}
+
+// ⭐ 친구가 새 코드를 보내왔을 때 스냅샷 갱신 (같은 친구 id 유지, 데이터만 교체)
+Future<int> updateFriendData(int id, {required String dataJson, required bool hasMemos}) async {
+  final db = await database;
+  return await db.update(
+    'friends',
+    {
+      'data_json': dataJson,
+      'has_memos': hasMemos ? 1 : 0,
+      'updated_at': DateTime.now().toIso8601String(),
+    },
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
+
+Future<int> renameFriend(int id, String name) async {
+  final db = await database;
+  return await db.update('friends', {'name': name}, where: 'id = ?', whereArgs: [id]);
 }
 
 }

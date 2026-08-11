@@ -17,6 +17,7 @@ import '../models/shift_schedule.dart';
 import 'all_teams_setup_dialog.dart';
 import 'memo_list_view.dart';
 import 'work_hours_settings_screen.dart';
+import 'friend_list_screen.dart';
 import '../widgets/tappable_number_picker.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
@@ -388,6 +389,21 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const WorkHoursSettingsScreen()),
+                  );
+                },
+              ),
+
+              // ⭐ 친구 공유 (베타) - 근무 패턴/근무변경/선택적 메모를 코드로
+              // 주고받아 서로의 달력을 조회. OT/근로시간/알람 설정은 공유 안 됨.
+              ListTile(
+                leading: Icon(Icons.people_outline, color: Theme.of(context).colorScheme.tertiary),
+                title: Text('친구 공유 (베타)'),
+                subtitle: Text('근무표 코드로 친구와 서로의 일정 확인'),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const FriendListScreen()),
                   );
                 },
               ),

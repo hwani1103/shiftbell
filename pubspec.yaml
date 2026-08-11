@@ -45,6 +45,9 @@ dependencies:
   in_app_update: ^4.2.3
   url_launcher: ^6.2.1
 
+  # ⭐ 친구 공유 - 카카오톡/SMS 등 OS 공유 시트로 바로 넘기기
+  share_plus: ^10.1.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
