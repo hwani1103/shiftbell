@@ -25,7 +25,16 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // (alarm_creation_log 테이블 생성 등)이 영구적으로 스킵될 수 있었음. 두 값이
         // 항상 일치해야 이런 무의미한 버전 찍힘 자체가 무해해짐(찍어봐야 같은 값).
         // ⚠️ Flutter DB 버전을 올릴 때마다 이 값도 반드시 같이 올릴 것.
-        private const val DATABASE_VERSION = 15
+        // ⭐ 2026-08-12: 친구공유 커밋(DB v16, friends 테이블 추가)에서 database_service.dart의
+        // version:은 16으로 올렸는데 이 값은 15로 남아있었음 - 정확히 위 주석이 경고하던
+        // 그 사고가 재발한 것. SQLiteOpenHelper의 onDowngrade는 오버라이드 안 하면 기본
+        // 구현이 예외를 던지는데(newVersion(15) < oldVersion(16)이면 "다운그레이드"로 판정),
+        // Flutter가 한 번이라도 먼저 열어서 DB 파일이 v16으로 올라간 뒤부턴 위젯(Native가
+        // DatabaseHelper로 여는 모든 경로)이 DB를 열 때마다 이 예외로 실패 → readSchedule()이
+        // catch해서 null 반환 → "근무 스케줄을 먼저 설정해주세요"가 스케줄 존재 여부와
+        // 무관하게 항상 뜸. 위젯이 "친구공유 버전 도입 즈음부터" 안 됐다는 사용자 증언과
+        // 정확히 일치함.
+        private const val DATABASE_VERSION = 16
         private const val TAG = "DatabaseHelper"
 
         @Volatile
