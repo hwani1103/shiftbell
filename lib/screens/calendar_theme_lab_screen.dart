@@ -30,7 +30,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'all_shifts_view.dart';
+import '../theme/app_theme.dart';
+import '../models/calendar_theme.dart';
 
 // ============================================================
 // ⭐ 공용 목업 데이터
@@ -59,15 +62,11 @@ _MockShift _mockShiftFor(DateTime d) {
   return _mockShifts[((days % 6) + 6) % 6];
 }
 
-// ⭐ 메모 1개/2개/3개 테스트용 (3개짜리엔 일부러 긴 문장 하나 섞음)
-// - 8/15는 일부러 메모 3개까지 채워서 "공휴일 라벨 + OT 배지 + 메모 3개"가
-//   한 셀에 전부 몰리는 최악의 케이스도 테마마다 확인함
-final Map<String, List<String>> _mockMemos = {
-  '2026-08-05': ['병원 예약'],
-  '2026-08-12': ['회식 7시', '월급날'],
-  '2026-08-15': ['태극기 게양', '가족 모임', '차례 준비물 미리 사두기'],
-  '2026-08-20': ['생일 축하', '약속 있음', '택배 도착 예정일 꼭 확인하기'],
-};
+// ⭐ "테마 미리보기(설정 탭 캐러셀 카드)에 메모가 보이는데 다 지우자 - 오늘
+// 표시랑 빨간날은 그대로 두고" - 미리보기가 실제 사용자 화면과 더 가깝게
+// 보이도록 목업 메모를 전부 비움. 공휴일(_mockHolidayKey 등)/오늘(_isToday)
+// 표시 로직은 이 맵과 무관해서 그대로 유지됨.
+final Map<String, List<String>> _mockMemos = {};
 
 // ⭐ 수동 OT 목업 (8/15는 광복절과 겹치게 해서 "같은 셀에 여러 배지" 케이스도 같이 확인)
 final Map<String, int> _mockOtMinutes = {
@@ -77,6 +76,25 @@ final Map<String, int> _mockOtMinutes = {
 
 const _mockHolidayKey = '2026-08-15';
 const _mockHolidayName = '광복절';
+
+// ⭐ 근무명 12개 + 라이트/다크 팔레트는 models/calendar_theme.dart로 이동함
+// (kMainShiftNames/kMainLightPalette/kMainDarkPalette) - calendar_tab.dart
+// (실제 메인 달력)도 똑같은 팔레트를 써야 해서 공용 위치로 옮겼고, 여기서는
+// 그 공용 상수를 그대로 씀(중복 정의 없이).
+final _mockLegendShifts = List.generate(
+  12, (i) => _MockShift(kMainShiftNames[i], kMainLightPalette[i], 0),
+);
+final _mockLegendShiftsDark = List.generate(
+  12, (i) => _MockShift(kMainShiftNames[i], kMainDarkPalette[i], 0),
+);
+
+// ⭐ 12개 팔레트를 요일처럼 순환시켜 "메인" 테마 목업 달력을 채움 -
+// _mockShiftFor(6종 순환)와 같은 방식, 팔레트만 다르게 받음.
+_MockShift _mainShiftFor(DateTime d, List<_MockShift> palette) {
+  final epoch = DateTime(2026, 1, 1);
+  final days = d.difference(epoch).inDays;
+  return palette[((days % palette.length) + palette.length) % palette.length];
+}
 
 String _dateKey(DateTime d) =>
     '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -160,45 +178,28 @@ const _weekdayEn1 = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 // ============================================================
 
 class CalendarThemeLabScreen extends StatefulWidget {
-  const CalendarThemeLabScreen({super.key});
+  // ⭐ 설정 탭의 테마 선택 캐러셀(calendar_theme_picker_screen.dart)이 이 화면을
+  // 그대로 재사용해서 미리보기 카드를 만듦 - 코드를 새로 만들지 않고 특정
+  // 테마 페이지에 바로 진입만 시키면 되므로 initialPage를 추가함.
+  final int initialPage;
+  const CalendarThemeLabScreen({super.key, this.initialPage = 0});
 
   @override
   State<CalendarThemeLabScreen> createState() => _CalendarThemeLabScreenState();
 }
 
 class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
-  final _pageController = PageController();
-  int _currentPage = 0;
+  late final _pageController = PageController(initialPage: widget.initialPage);
 
   final List<DateTime> _days = _augustGridDays();
   final List<_WeekSummary> _weeks = _mockWeekSummaries();
 
-  static const _themeCount = 10;
-
-  static const _themeTitles = [
-    '1번 · 미니멀 라인 < 확정완료',
-    '2번 · 머티리얼 카드형 < 확정완료',
-    '3번 · 애플 캘린더 스타일 (폐기 - 헤더 타이포만 2번에 이식됨)',
-    '4번 · 굵은 격자형 < 확정완료',
-    '5번 · 이니셜 뱃지형',
-    '6번 · 컬러 블록 배경형',
-    '7번 · 스플릿 셀형',
-    '8번 · 언더라인 미니멀형',
-    '9번 · 이벤트 칩형',
-    '10번 · 매거진 에디토리얼형',
-  ];
-  static const _themeComments = [
-    '요일당 얇은 선만, 근무는 하단 컬러바+1글자. 여백감 우선 (구글 캘린더 참고).',
-    '셀마다 살짝 뜬 카드+그림자. 근무는 상단 탭 색상, 메모는 카드 하단 점.',
-    '테두리 없이 숫자만. 오늘=꽉 찬 원. 근무는 숫자 아래 작은 컬러 바 (iOS 참고).',
-    '표처럼 두꺼운 격자. 근무명 전체 텍스트 뱃지. 정보량 최대·여백 최소.',
-    '숫자+색상 원형 뱃지(1글자)를 한 줄에 나란히. 범례 없이도 직관적, 오늘=캡슐 강조.',
-    '셀 배경 전체를 근무색 파스텔로. 대비색 텍스트. 가장 화려함.',
-    '셀을 좌/우 분할 - 왼쪽 컬러+1글자, 오른쪽 숫자. 국기 느낌의 대비.',
-    '배경·테두리 없이 숫자 아래 밑줄만 근무색. 메모가 제일 잘 보이는 극단형.',
-    '근무명을 가로 칩(구글 캘린더 이벤트칩)으로. 메모도 같은 톤 칩으로 쌓음.',
-    '요일 헤더에 색 바, 근무는 모서리 삼각 배지. 세리프 숫자로 잡지 느낌.',
-  ];
+  // ⭐ 테마 이름/설명 문구는 완전히 제거함("진짜 메인 달력에 쓸 정도로" 다듬는
+  // 단계라 화면에 그런 라벨이 있으면 안 됨) - 테마는 이제 내부적으로 숫자
+  // (0~8, CalendarThemeId)로만 구분됨. 설정 탭의 테마 선택 화면에서 쓰는
+  // "1번/2번/.../메인 화이트/메인 다크" 라벨은 lib/models/calendar_theme.dart
+  // 하나로 통합해서 정의함(여기서 다시 안 만듦 - 중복 방지).
+  static const _themeCount = 9;
 
   @override
   void dispose() {
@@ -208,91 +209,41 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ⭐ "진짜 메인 달력에 쓸 정도로" 다듬는 단계 - 테마 이름/설명을 보여주던
+    // 하단 고정 띠(원래는 나중에 광고 자리로 남겨두려던 곳)를 완전히 제거함.
+    // 테마는 이제 내부적으로 숫자(인덱스)로만 구분되고 화면엔 아무 라벨도 안
+    // 보임 - PageView가 화면 전체(SafeArea)를 그대로 씀. 그 띠가 없어졌으니
+    // bottom SafeArea도 이제 막을 이유가 없어서 true로 되돌림(제스처 네비
+    // 바에 캘린더 내용이 가리는 걸 방지).
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _themeCount,
-                onPageChanged: (i) => setState(() => _currentPage = i),
-                itemBuilder: (context, index) => _buildThemeBody(index),
-              ),
-            ),
-            _buildBottomStrip(),
-          ],
+        child: PageView.builder(
+          controller: _pageController,
+          itemCount: _themeCount,
+          itemBuilder: (context, index) => _buildThemeBody(index),
         ),
       ),
     );
   }
 
+  // ⭐ 이 index는 설정 탭 캐러셀(calendar_theme_picker_screen.dart)이
+  // kAllCalendarThemeIds(=CalendarThemeId.values)의 순서 그대로 넘겨줌 - 그
+  // 목록을 "메인·화이트/다크가 맨 앞"으로 재배치했으니 여기 매핑도 반드시
+  // 동일한 순서로 맞춰야 함(안 그러면 캐러셀 카드가 엉뚱한 테마를 보여줌).
   Widget _buildThemeBody(int index) {
     switch (index) {
-      case 0: return _theme1MinimalLine();
-      case 1: return _theme2MaterialCard();
-      case 2: return _theme3AppleStyle();
-      case 3: return _theme4BoldGrid();
-      case 4: return _theme5InitialBadge();
-      case 5: return _theme6ColorBlock();
-      case 6: return _theme7SplitCell();
-      case 7: return _theme8Underline();
-      case 8: return _theme9EventChip();
-      case 9: return _theme10Editorial();
+      case 0: return _themeMainWhite();
+      case 1: return _themeMainDark();
+      case 2: return _theme1MinimalLine();
+      case 3: return _theme2MaterialCard();
+      case 4: return _theme4BoldGrid();
+      case 5: return _theme5InitialBadge();
+      case 6: return _theme8Underline();
+      case 7: return _theme9EventChip();
+      case 8: return _theme10Editorial();
       default: return const SizedBox.shrink();
     }
-  }
-
-  // ⭐ 모든 테마 공통 고정 영역 - 테마 번호/코멘트 + 페이지 인디케이터.
-  // 나중에 광고가 들어갈 자리라 높이를 고정해두고 절대 이 영역 디자인은 안 건드림.
-  Widget _buildBottomStrip() {
-    return Container(
-      height: 68.h,
-      width: double.infinity,
-      color: const Color(0xFFF5F5F5),
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  _themeTitles[_currentPage],
-                  style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.black87),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  _themeComments[_currentPage],
-                  style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600, height: 1.3),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: 8.w),
-          Row(
-            children: List.generate(_themeCount, (i) {
-              final active = i == _currentPage;
-              return AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                margin: EdgeInsets.symmetric(horizontal: 1.5.w),
-                width: active ? 7.w : 4.w,
-                height: 4.w,
-                decoration: BoxDecoration(
-                  color: active ? Colors.indigo.shade600 : Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              );
-            }),
-          ),
-        ],
-      ),
-    );
   }
 
   // ⭐ "전체근무표"는 이미 완성된 실제 화면을 그대로 재사용 (테마와 무관한 별도 화면)
@@ -445,59 +396,64 @@ extension _Theme1 on _CalendarThemeLabScreenState {
         // 첫 행만 위쪽 패딩을 0으로 없애 밑줄에 딱 붙게 하고, 나머지 행 사이
         // 간격(비율)은 그대로 유지함.
         padding: EdgeInsets.only(top: isFirstRow ? 0 : 2.h, bottom: 2.h),
-        child: Column(
+        // ⭐ 9번과 같은 이유로 ClipRect를 미리 안전망으로 둠 - 이번에 간격을 다시
+        // 넓히면서 혹시라도 넘치더라도 에러 배너 없이 조용히 잘리게 함.
+        child: ClipRect(
+          child: Column(
           children: [
             // ⭐ 근무명을 맨 위로 - 숫자보다 근무가 먼저 눈에 들어와야 시인성이
             // 좋다는 피드백으로 순서 변경 (원래는 숫자→메모→[Spacer]→근무바 순이라
             // 근무 정보가 셀 맨 아래로 밀려서 한눈에 안 들어왔음 + Spacer가 근무바를
             // 셀 바닥까지 밀어붙여서 다음 줄과 거의 안 떨어져 보이던 문제도 같이
             // 해결됨 - 이제 근무바가 셀 "안쪽" 위에 붙어서 여백을 스스로 가짐).
-            if (!outside)
-              Container(
-                width: double.infinity,
-                height: 12.h,
-                // ⭐ 완전히 붙이니 너무 빡빡해 보인다는 피드백 - 살짝만 여백을 다시 둠
-                // (첫 행은 이 margin만큼만 뜨고, 나머지 행은 셀 패딩과 겹쳐 좀 더 뜸).
-                margin: EdgeInsets.only(top: 1.5.h),
-                color: shift.color.withOpacity(0.85),
-                alignment: Alignment.center,
-                // ⭐ 굳이 1글자로 줄일 이유가 없는 디자인이라는 피드백으로 4글자까지
-                // 그대로 노출 (목업 근무명이 전부 4글자 이하라 지금은 실질적으로
-                // 전체 이름이 다 보임 - 5글자 이상인 경우를 대비해 안전하게 자름).
-                child: Text(
-                  shift.name.length > 4 ? shift.name.substring(0, 4) : shift.name,
-                  style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              )
-            else
-              SizedBox(height: 13.5.h),
-            SizedBox(height: 2.h),
+            // ⭐ "이전/다음 달로 넘어가는 며칠에도 근무명이 나왔었는데 지금은
+            // 안 나온다"는 피드백 - 실제 메인 달력(_buildDateCell)도 outside
+            // 여부와 무관하게 배지를 항상 그대로(흐리지 않게) 보여주므로 동일하게
+            // 맞춤 - 날짜 숫자 쪽만 흐려지는 걸로 이미 "다른 달"이 구분됨.
             Container(
-              width: 20.w,
-              height: 20.w,
+              width: double.infinity,
+              height: 11.h,
+              // ⭐ 공휴일+메모3개 조합(8/15)에서 bottom overflow가 났음(RenderFlex) -
+              // "조금씩 줄여서" 요청대로 이 셀의 모든 세로 여백/크기를 전체적으로
+              // 소폭씩 다시 낮춤(badge 12h→11h, margin 1.5h→1h 등, 이하 동일 패턴).
+              margin: EdgeInsets.only(top: 1.h),
+              color: shift.color.withOpacity(0.85),
+              alignment: Alignment.center,
+              // ⭐ 굳이 1글자로 줄일 이유가 없는 디자인이라는 피드백으로 4글자까지
+              // 그대로 노출 (목업 근무명이 전부 4글자 이하라 지금은 실질적으로
+              // 전체 이름이 다 보임 - 5글자 이상인 경우를 대비해 안전하게 자름).
+              child: Text(
+                shift.name.length > 4 ? shift.name.substring(0, 4) : shift.name,
+                style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color)),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            SizedBox(height: 1.5.h),
+            Container(
+              width: 18.w,
+              height: 18.w,
               alignment: Alignment.center,
               decoration: today
                   ? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.indigo.shade400, width: 1.4))
                   : null,
-              child: Text('${day.day}', style: TextStyle(fontSize: 11.5.sp, fontWeight: today ? FontWeight.bold : FontWeight.w500, color: numColor)),
+              child: Text('${day.day}', style: TextStyle(fontSize: 11.sp, fontWeight: today ? FontWeight.bold : FontWeight.w500, color: numColor)),
             ),
             if (_isHoliday(day))
-              Text(_mockHolidayName, style: TextStyle(fontSize: 7.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-            // ⭐ 광복절 라벨과 메모 사이 여백을 조금 더 늘림(3h→3.5h, 우선순위 2번).
-            SizedBox(height: 3.5.h),
+              Text(_mockHolidayName, style: TextStyle(fontSize: 6.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.1), maxLines: 1, overflow: TextOverflow.ellipsis),
+            // ⭐ "좋아졌는데 아주 조금만 더" 피드백으로 한 번 더 살짝 키움
+            // (3.2h→3.8h) - ClipRect 안전망 있으니 부담 없이 조금 더 키움.
+            SizedBox(height: 3.8.h),
             // ⭐ 폰트 크기만으로는 잘 안 보인다는 피드백 - 문제는 크기보다 두께/대비였음
             // (기본 굵기 + grey.shade600은 이 작은 크기에서 획이 너무 가늘어 보임).
             // w600 정도로 살짝 굵게 + grey.shade700으로 한 톤 더 진하게 바꿔서 또렷하게 함.
-            // ⭐ 방금 늘린 메모 간격(1.5h)이 오히려 너무 벌어져서, 메모 3개가 꽉 찬
-            // 셀에서는 맨 아래 메모가 바로 아래 행의 근무명 바를 침범함 - 다시
-            // 좁혀서(1.5h→0.6h) 줄끼리는 살짝만 떨어지게 함.
+            // ⭐ 메모끼리 간격도 한 번 더 살짝 키움(0.8h→1.h).
             ...memos.take(3).toList().asMap().entries.map((e) => Padding(
-              padding: EdgeInsets.only(top: e.key == 0 ? 0 : 0.6.h, left: 1.w, right: 1.w),
-              child: Text(e.value, style: TextStyle(fontSize: 7.5.sp, color: Colors.grey.shade700, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+              padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.h, left: 1.w, right: 1.w),
+              child: Text(e.value, style: TextStyle(fontSize: 7.sp, color: Colors.grey.shade700, fontWeight: FontWeight.w600, height: 1.1), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
             )),
           ],
+          ),
         ),
       ),
     );
@@ -615,7 +571,16 @@ extension _Theme2 on _CalendarThemeLabScreenState {
             border: today ? Border.all(color: Colors.indigo.shade400, width: 1.4) : null,
             boxShadow: outside ? null : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 2, offset: const Offset(0, 1))],
           ),
-          child: Column(
+          // ⭐ 전반적 UI 견고성 점검(2026-08-12) 중 발견 - 이 테마는 확정완료
+          // 상태라 기존 튜닝값(간격/폰트)은 전혀 안 건드림. 다만 구조 자체는
+          // 1/9번이 overflow 났던 것과 동일한 패턴(고정 Column + Spacer, 안전망
+          // 없음)이라 순수 예방 차원으로 ClipRect만 추가함 - 지금까지 실기기로
+          // 확인된 모양엔 아무 영향 없고, 혹시 모를 극단 케이스에서만 조용히
+          // 클립되게 하는 보험. release 빌드는 overflow 경고 배너 자체가 안 떠서
+          // (디버그 전용 기능) 이런 안전망이 없으면 문제가 더 티 안 나게 새어
+          // 나올 수 있음.
+          child: ClipRect(
+            child: Column(
             children: [
               // ⭐ 색상만으로 근무를 구분하는 건 시인성이 안 좋다는 판단으로 채택
               // 불가 - 테마1처럼 근무명(최대 4글자)을 배경색 뱃지에 텍스트로 넣는
@@ -631,22 +596,21 @@ extension _Theme2 on _CalendarThemeLabScreenState {
               // ⭐ 완전히 붙이니 빡빡해 보인다는 피드백으로 살짝만 여백 다시 둠
               // (테마1과 동일 이유) - 다만 이 테마는 메모 3줄이 카드 밖으로
               // 넘치면 안 되는 제약이 더 타이트해서 테마1(1.5h)보다 작게 1h만 줌.
-              if (!outside)
-                Container(
-                  width: double.infinity,
-                  height: 12.h,
-                  margin: EdgeInsets.fromLTRB(4.w, 1.h, 4.w, 0),
-                  decoration: BoxDecoration(color: shift.color, borderRadius: BorderRadius.circular(3.r)),
-                  alignment: Alignment.center,
-                  child: Text(
-                    shift.name.length > 4 ? shift.name.substring(0, 4) : shift.name,
-                    style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color)),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )
-              else
-                SizedBox(height: 13.h),
+              // ⭐ outside(다른 달) 날짜도 배지를 그대로 보여줌 - 실제 메인 달력과
+              // 동일(outside 여부와 무관하게 배지는 항상 표시, 날짜 숫자만 흐림).
+              Container(
+                width: double.infinity,
+                height: 12.h,
+                margin: EdgeInsets.fromLTRB(4.w, 1.h, 4.w, 0),
+                decoration: BoxDecoration(color: shift.color, borderRadius: BorderRadius.circular(3.r)),
+                alignment: Alignment.center,
+                child: Text(
+                  shift.name.length > 4 ? shift.name.substring(0, 4) : shift.name,
+                  style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               SizedBox(height: 1.h),
               Text('${day.day}', style: TextStyle(
                 fontSize: 12.sp,
@@ -666,6 +630,7 @@ extension _Theme2 on _CalendarThemeLabScreenState {
               )),
               const Spacer(),
             ],
+            ),
           ),
         ),
       ),
@@ -726,104 +691,6 @@ extension _Theme2 on _CalendarThemeLabScreenState {
 }
 
 // ============================================================
-// ⭐ 테마 3 · 애플 캘린더 스타일
-// 테두리 없이 숫자만. 오늘=꽉 찬 원. 근무는 숫자 아래 작은 컬러 바.
-// ============================================================
-extension _Theme3 on _CalendarThemeLabScreenState {
-  Widget _theme3AppleStyle() {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 4.h),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text('8월', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w300, color: Colors.black87)),
-              SizedBox(width: 6.w),
-              Text('2026', style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade400)),
-              const Spacer(),
-              GestureDetector(onTap: _tapToday, child: Text('오늘', style: TextStyle(fontSize: 13.sp, color: Colors.red.shade400, fontWeight: FontWeight.w600))),
-              SizedBox(width: 14.w),
-              GestureDetector(onTap: _openAllShifts, child: Icon(Icons.list_alt_rounded, size: 20.sp, color: Colors.red.shade400)),
-            ],
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
-          child: Row(
-            children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(_weekdayEn1[i], style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade400))),
-            )),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w),
-            child: Column(
-              children: List.generate(6, (row) => Expanded(
-                child: Row(children: List.generate(7, (col) => Expanded(child: _theme3Cell(_days[row * 7 + col])))),
-              )),
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 10.h),
-          child: Row(
-            children: [
-              Expanded(child: Text('이번 달 OT  ${_formatMinutes(_mockMonthlyOtTotal)}', style: TextStyle(fontSize: 12.sp, color: Colors.black54))),
-              GestureDetector(
-                onTap: () => _showWeekSummarySheet(context, _weeks),
-                child: Text('주별 근무시간 보기', style: TextStyle(fontSize: 12.sp, color: Colors.red.shade400, fontWeight: FontWeight.w600)),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _theme3Cell(DateTime day) {
-    final outside = _isOutsideAugust(day);
-    final shift = _mockShiftFor(day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
-    final today = _isToday(day);
-    final red = _isRedDay(day);
-
-    return GestureDetector(
-      onTap: () => _tapDay(day),
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        children: [
-          SizedBox(height: 4.h),
-          Container(
-            width: 26.w,
-            height: 26.w,
-            alignment: Alignment.center,
-            decoration: today ? BoxDecoration(color: red ? Colors.red.shade400 : Colors.black87, shape: BoxShape.circle) : null,
-            child: Text(
-              '${day.day}',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: today ? FontWeight.bold : FontWeight.w400,
-                color: today ? Colors.white : (outside ? Colors.grey.shade300 : (red ? Colors.red.shade400 : Colors.black87)),
-              ),
-            ),
-          ),
-          if (!outside) ...[
-            SizedBox(height: 3.h),
-            Container(width: 18.w, height: 3.h, decoration: BoxDecoration(color: shift.color, borderRadius: BorderRadius.circular(1.5.r))),
-          ],
-          if (_isHoliday(day))
-            Text(_mockHolidayName, style: TextStyle(fontSize: 5.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-          SizedBox(height: 1.h),
-          ...memos.take(3).map((m) => Text(m, style: TextStyle(fontSize: 6.sp, color: Colors.grey.shade500), maxLines: 1, overflow: TextOverflow.ellipsis)),
-        ],
-      ),
-    );
-  }
-}
-
-// ============================================================
 // ⭐ 테마 4 · 굵은 격자형 (스프레드시트 느낌)
 // 두꺼운 격자선 + 근무명 전체 텍스트 뱃지. 정보량 최대, 여백 최소.
 // ============================================================
@@ -838,7 +705,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
             children: [
               Text('2026-08', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'monospace')),
               const Spacer(),
-              _gridHeaderBtn('전체표', _openAllShifts),
+              _gridHeaderBtn('전체근무표', _openAllShifts),
               SizedBox(width: 8.w),
               _gridHeaderBtn('TODAY', _tapToday),
             ],
@@ -865,7 +732,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
           child: Row(
             children: [
-              Text('OT ${_formatMinutes(_mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF263238))),
+              Text('이번 달 OT ${_formatMinutes(_mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF263238))),
               SizedBox(width: 14.w),
               GestureDetector(
                 onTap: () => _showWeekSummarySheet(context, _weeks),
@@ -915,14 +782,14 @@ extension _Theme4 on _CalendarThemeLabScreenState {
             ),
             // ⭐ 1·2번 근무명 뱃지(7.5sp)에 비해 유독 작아 보인다는 피드백으로
             // 6.5sp→7.5sp로 맞춤.
-            if (!outside)
-              Container(
-                margin: EdgeInsets.symmetric(vertical: 1.h),
-                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
-                width: double.infinity,
-                decoration: BoxDecoration(color: shift.color),
-                child: Text(shift.name, style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color)), maxLines: 1, overflow: TextOverflow.clip, textAlign: TextAlign.center),
-              ),
+            // ⭐ outside(다른 달) 날짜도 배지를 그대로 보여줌 - 메인 달력과 동일.
+            Container(
+              margin: EdgeInsets.symmetric(vertical: 1.h),
+              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+              width: double.infinity,
+              decoration: BoxDecoration(color: shift.color),
+              child: Text(shift.name, style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color)), maxLines: 1, overflow: TextOverflow.clip, textAlign: TextAlign.center),
+            ),
             // ⭐ 메모 3개일 때 셀 아래쪽에 빈 여백이 많이 남는다는 피드백 - 메모끼리
             // 간격은 지금 그대로 두고(요청대로), 폰트만 더 키워서 그 여백을 씀
             // (7sp→8.5sp).
@@ -967,7 +834,8 @@ extension _Theme5 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
           child: Row(
             children: [
-              Text('2026.08', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+              // ⭐ 9번과 같은 이유로 color 없이 두면 흰 배경에서 거의 안 보였음 - 명시.
+              Text('2026.08', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
               const Spacer(),
               _pillButton('전체근무표', Icons.table_chart_outlined, _openAllShifts),
               SizedBox(width: 6.w),
@@ -1014,10 +882,14 @@ extension _Theme5 on _CalendarThemeLabScreenState {
       child: Container(
         margin: EdgeInsets.all(1.5.w),
         padding: EdgeInsets.symmetric(vertical: 1.h),
-        // ⭐ 테두리가 아예 없어서 셀 경계가 안 보인다는 피드백 - 연한 회색
-        // 테두리를 둘러서 셀 영역이 어디까지인지 명확하게 함.
+        // ⭐ 오늘 표시 방식 변경 - 뱃지+숫자를 감싸는 캡슐 배경(색칠) 대신, 2번
+        // 테마와 동일하게 "셀 테두리에 색상 포인트"만 주는 방식으로 바꿈. 평소엔
+        // (테두리가 아예 없으면 셀 경계가 안 보인다는 예전 피드백대로) 연한 회색
+        // 테두리, 오늘만 2번과 동일한 인디고 색+두께로 교체.
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade200, width: 0.6),
+          border: today
+              ? Border.all(color: Colors.indigo.shade400, width: 1.4)
+              : Border.all(color: Colors.grey.shade200, width: 0.6),
           borderRadius: BorderRadius.circular(4.r),
         ),
         child: Column(
@@ -1026,27 +898,21 @@ extension _Theme5 on _CalendarThemeLabScreenState {
             // 테마1이 이미 검증받은 "근무(뱃지) 먼저, 숫자 나중" 위계를 그대로
             // 가져와 세로로 쌓음: 뱃지가 작은 아바타처럼 위에 오고, 숫자가 그
             // 아래 중앙에 옴 - 나란히 두는 것보다 한 쌍으로 훨씬 정돈되어 보임.
-            // 오늘은 이 둘을 감싸는 캡슐 배경으로 강조.
             // ⭐ 광복절+메모3개 조합에서 맨 아래 메모가 방금 추가한 테두리를
             // 넘어가던 문제 - 위쪽(뱃지·숫자·광복절 사이) 간격들을 줄여서
             // 메모가 들어갈 세로 공간을 확보함 (광복절을 숫자에 더 가깝게).
             Container(
               padding: EdgeInsets.symmetric(vertical: 1.h),
-              decoration: today
-                  ? BoxDecoration(color: red ? Colors.red.shade50 : Colors.indigo.shade50, borderRadius: BorderRadius.circular(10.r))
-                  : null,
               child: Column(
                 children: [
-                  if (!outside)
-                    Container(
-                      width: 14.w,
-                      height: 14.w,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(color: shift.color, shape: BoxShape.circle),
-                      child: Text(shift.name[0], style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color))),
-                    )
-                  else
-                    SizedBox(height: 14.w),
+                  // ⭐ outside(다른 달) 날짜도 이니셜 뱃지를 그대로 보여줌 - 메인 달력과 동일.
+                  Container(
+                    width: 14.w,
+                    height: 14.w,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(color: shift.color, shape: BoxShape.circle),
+                    child: Text(shift.name[0], style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color))),
+                  ),
                   SizedBox(height: 1.h),
                   Text('${day.day}', style: TextStyle(fontSize: 11.5.sp, fontWeight: today ? FontWeight.bold : FontWeight.w600, color: numColor)),
                 ],
@@ -1054,12 +920,13 @@ extension _Theme5 on _CalendarThemeLabScreenState {
             ),
             if (_isHoliday(day))
               Text(_mockHolidayName, style: TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.0), maxLines: 1, overflow: TextOverflow.ellipsis),
-            // ⭐ 셀 아래쪽에 여유 공간이 남는다는 피드백으로, 광복절-메모 간격(0.8h→1.2h)과
-            // 메모끼리 간격(0h→0.5h, 이전의 기본 줄간격보다는 좁게)을 다시 살짝 넓힘.
-            // 폰(미연결) 확인 전까지는 "이전"과 "타이트했던 지금"의 중간값으로 잡음.
+            // ⭐ 광복절-메모 간격(1.2h)은 실기기 확인 완료된 값이라 그대로 유지.
+            // 메모끼리 간격만 다시 넓힘(0.5h→2h) - 셀 아래쪽에 여백이 꽤 남는다는
+            // 피드백이라, 그 여유를 메모 사이 간격으로 옮겨서 3개가 붙어 보이던
+            // 문제를 완화함.
             SizedBox(height: 1.2.h),
             ...memos.take(3).toList().asMap().entries.map((e) => Padding(
-              padding: EdgeInsets.only(top: e.key == 0 ? 0 : 0.5.h),
+              padding: EdgeInsets.only(top: e.key == 0 ? 0 : 2.h),
               child: Text(e.value, style: TextStyle(fontSize: 7.sp, color: Colors.grey.shade600, fontWeight: FontWeight.w600, height: 1.0), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
             )),
           ],
@@ -1085,201 +952,6 @@ extension _Theme5 on _CalendarThemeLabScreenState {
 }
 
 // ============================================================
-// ⭐ 테마 6 · 컬러 블록 배경형
-// 셀 배경 전체를 근무색 파스텔로. 대비색 텍스트. 가장 화려하고 눈에 띔.
-// ============================================================
-extension _Theme6 on _CalendarThemeLabScreenState {
-  Widget _theme6ColorBlock() {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
-          child: Row(
-            children: [
-              Text('8월', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: Colors.black87)),
-              Text(' 2026', style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade500)),
-              const Spacer(),
-              _roundIconButton(Icons.grid_view_rounded, _openAllShifts),
-              SizedBox(width: 8.w),
-              _roundIconButton(Icons.today_rounded, _tapToday),
-            ],
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.w),
-          child: Row(
-            children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(_weekdayKr[i], style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
-            )),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 6.w),
-            child: Column(
-              children: List.generate(6, (row) => Expanded(
-                child: Row(children: List.generate(7, (col) => Expanded(child: _theme6Cell(_days[row * 7 + col])))),
-              )),
-            ),
-          ),
-        ),
-        _theme2OtCard(),
-        SizedBox(height: 8.h),
-      ],
-    );
-  }
-
-  Widget _theme6Cell(DateTime day) {
-    final outside = _isOutsideAugust(day);
-    final shift = _mockShiftFor(day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
-    final today = _isToday(day);
-    final red = _isRedDay(day);
-    final textColor = outside ? Colors.grey.shade400 : _autoTextColor(shift.color);
-
-    return GestureDetector(
-      onTap: () => _tapDay(day),
-      child: Container(
-        margin: EdgeInsets.all(1.5.w),
-        decoration: BoxDecoration(
-          color: outside ? Colors.grey.shade100 : shift.color.withOpacity(0.85),
-          borderRadius: BorderRadius.circular(7.r),
-          border: today ? Border.all(color: red ? Colors.red.shade700 : Colors.black87, width: 1.6) : null,
-        ),
-        padding: EdgeInsets.all(2.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${day.day}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: red && !outside ? Colors.red.shade900 : textColor)),
-            if (!outside)
-              Text(shift.name.length > 2 ? shift.name.substring(0, 2) : shift.name, style: TextStyle(fontSize: 7.sp, color: textColor.withOpacity(0.9)), maxLines: 1, overflow: TextOverflow.clip),
-            if (_isHoliday(day))
-              Text(_mockHolidayName, style: TextStyle(fontSize: 5.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-            const Spacer(),
-            ...memos.take(3).map((m) => Container(
-              margin: EdgeInsets.only(top: 1.h),
-              padding: EdgeInsets.symmetric(horizontal: 2.w),
-              decoration: BoxDecoration(color: Colors.white.withOpacity(0.85), borderRadius: BorderRadius.circular(2.r)),
-              child: Text(m, style: TextStyle(fontSize: 6.sp, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis),
-            )),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// ⭐ 테마 7 · 스플릿 셀형
-// 셀을 좌/우로 분할 - 왼쪽은 컬러+1글자, 오른쪽은 숫자. 국기 느낌의 대비.
-// ============================================================
-extension _Theme7 on _CalendarThemeLabScreenState {
-  Widget _theme7SplitCell() {
-    return Column(
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
-          child: Row(
-            children: [
-              Text('2026년 8월', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
-              const Spacer(),
-              _pillButton('전체근무표', Icons.table_chart_outlined, _openAllShifts),
-              SizedBox(width: 6.w),
-              _pillButton('오늘', Icons.adjust, _tapToday),
-            ],
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.w),
-          child: Row(
-            children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
-            )),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.w),
-            child: Column(
-              children: List.generate(6, (row) => Expanded(
-                child: Row(children: List.generate(7, (col) => Expanded(child: _theme7Cell(_days[row * 7 + col])))),
-              )),
-            ),
-          ),
-        ),
-        _theme1OtBar(),
-        SizedBox(height: 6.h),
-      ],
-    );
-  }
-
-  Widget _theme7Cell(DateTime day) {
-    final outside = _isOutsideAugust(day);
-    final shift = _mockShiftFor(day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
-    final today = _isToday(day);
-    final red = _isRedDay(day);
-
-    return GestureDetector(
-      onTap: () => _tapDay(day),
-      child: Container(
-        margin: EdgeInsets.all(1.5.w),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5.r),
-          border: today ? Border.all(color: Colors.black87, width: 1.4) : Border.all(color: Colors.grey.shade200),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    width: 14.w,
-                    color: outside ? Colors.grey.shade100 : shift.color,
-                    alignment: Alignment.center,
-                    child: outside ? null : Text(shift.name[0], style: TextStyle(fontSize: 8.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color))),
-                  ),
-                  Expanded(
-                    child: Container(
-                      color: Colors.white,
-                      alignment: Alignment.topCenter,
-                      padding: EdgeInsets.only(top: 2.h),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('${day.day}', style: TextStyle(
-                            fontSize: 11.sp,
-                            fontWeight: today ? FontWeight.bold : FontWeight.w500,
-                            color: outside ? Colors.grey.shade300 : (red ? Colors.red.shade400 : Colors.black87),
-                          )),
-                          if (_isHoliday(day))
-                            Text(_mockHolidayName, style: TextStyle(fontSize: 5.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            if (memos.isNotEmpty)
-              Container(
-                width: double.infinity,
-                color: Colors.grey.shade50,
-                padding: EdgeInsets.symmetric(horizontal: 2.w),
-                child: Column(
-                  children: memos.take(3).map((m) => Text(m, style: TextStyle(fontSize: 6.sp, color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis)).toList(),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
 // ⭐ 테마 8 · 언더라인 미니멀형
 // 배경·테두리 없이 숫자 아래 밑줄만 근무색. 메모가 가장 잘 보이는 극단형.
 // ============================================================
@@ -1297,7 +969,7 @@ extension _Theme8 on _CalendarThemeLabScreenState {
               const Spacer(),
               GestureDetector(onTap: _tapToday, child: Text('TODAY', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5))),
               SizedBox(width: 12.w),
-              GestureDetector(onTap: _openAllShifts, child: Text('전체표', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54))),
+              GestureDetector(onTap: _openAllShifts, child: Text('전체근무표', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54))),
             ],
           ),
         ),
@@ -1312,9 +984,25 @@ extension _Theme8 on _CalendarThemeLabScreenState {
         Expanded(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10.w),
+            // ⭐ 근무를 색상만으로 구분하는 테마라 어딘가에 "무슨 색=무슨 근무"
+            // 범례가 필연적으로 있어야 함 - 달력탭이 6번째 줄 화~토(항상 다음
+            // 달 스필오버라 실질적으로 빈 칸인 영역, _isSixthRowEmptyCell와
+            // 동일 조건)를 OT 카드로 재활용하는 것과 똑같은 자리에 범례를 둠.
+            // 일~월(2칸)은 실제 날짜(달력 구조상 6번째 줄에서 유일하게 항상
+            // 이번 달의 진짜 날짜일 수 있는 칸)라 그대로 두고, 화~토(5칸)만
+            // 하나로 합쳐서 범례에 씀 - Positioned로 겹쳐 그리는 대신 그 5칸
+            // 자체를 통째로 범례 위젯 하나로 바꿔치기하는 방식이라, 이 테마처럼
+            // 고정 rowHeight가 없는(Expanded로 화면 남는 공간을 나눠 쓰는)
+            // 구조에서도 픽셀 계산 없이 항상 정확히 한 줄 높이만큼만 씀.
             child: Column(
               children: List.generate(6, (row) => Expanded(
-                child: Row(children: List.generate(7, (col) => Expanded(child: _theme8Cell(_days[row * 7 + col])))),
+                child: Row(children: row == 5
+                    ? [
+                        Expanded(child: _theme8Cell(_days[35])),
+                        Expanded(child: _theme8Cell(_days[36])),
+                        Expanded(flex: 5, child: _theme8Legend()),
+                      ]
+                    : List.generate(7, (col) => Expanded(child: _theme8Cell(_days[row * 7 + col])))),
               )),
             ),
           ),
@@ -1323,9 +1011,9 @@ extension _Theme8 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.fromLTRB(18.w, 4.h, 18.w, 10.h),
           child: Row(
             children: [
-              Text('OT ${_formatMinutes(_mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, color: Colors.black54)),
+              Text('이번 달 OT ${_formatMinutes(_mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
               const Spacer(),
-              GestureDetector(onTap: () => _showWeekSummarySheet(context, _weeks), child: Text('주별 근무시간', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.black87, decoration: TextDecoration.underline))),
+              GestureDetector(onTap: () => _showWeekSummarySheet(context, _weeks), child: Text('주별 근무시간', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.black87))),
             ],
           ),
         ),
@@ -1343,7 +1031,11 @@ extension _Theme8 on _CalendarThemeLabScreenState {
     return GestureDetector(
       onTap: () => _tapDay(day),
       behavior: HitTestBehavior.opaque,
-      child: Column(
+      // ⭐ 견고성 점검 중 발견 - 이 테마는 애초에 메모 사이 간격조차 없는(꽉 붙는)
+      // 가장 타이트한 구조라 광복절+메모3개 조합에서 overflow 위험이 제일 큼.
+      // 보류 상태라 값 튜닝은 안 하고, ClipRect만 예방으로 걸어둠.
+      child: ClipRect(
+        child: Column(
         children: [
           SizedBox(height: 3.h),
           Text('${day.day}', style: TextStyle(
@@ -1353,14 +1045,76 @@ extension _Theme8 on _CalendarThemeLabScreenState {
             decoration: today ? TextDecoration.underline : null,
             decorationThickness: 2,
           )),
-          if (!outside)
-            Container(margin: EdgeInsets.symmetric(vertical: 2.h), width: 14.w, height: 2.h, color: shift.color)
-          else
-            SizedBox(height: 6.h),
+          // ⭐ "너무 작고 얇아서 구분이 안 된다"는 피드백으로 밑줄(14w×2h, 각짐)
+          // 대신 살짝 더 키운 둥근 사각형(22w×6h)으로 바꿨는데, "조금 더 얇게"
+          // 피드백으로 세로만 70%(6h→4.2h)로 줄임 - 가로(22w)는 그대로 유지.
+          // ⭐ outside(다른 달) 날짜도 색상 도형을 그대로 보여줌 - 8번은
+          // 범례로 근무를 구분하는 테마라 이름 텍스트 없이 색상 도형만 유지.
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 2.h),
+            width: 22.w,
+            height: 4.2.h,
+            decoration: BoxDecoration(color: shift.color, borderRadius: BorderRadius.circular(2.r)),
+          ),
           if (_isHoliday(day))
             Text(_mockHolidayName, style: TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
           ...memos.take(3).map((m) => Text(m, style: TextStyle(fontSize: 7.sp, color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis)),
         ],
+        ),
+      ),
+    );
+  }
+
+  // ⭐ 근무를 색상만으로 구분하는 테마라 어딘가에 범례가 필연적으로 필요함 -
+  // 근무 개수가 3개든 12개든(온보딩 상한: 기본5+커스텀7=최대12, 이름 4글자
+  // 제한 - onboarding_screen.dart 확인) 항상 4열 고정 그리드로 깔아서 정렬이
+  // 절대 안 어긋나게 함. 줄 수만 ceil(개수/4)로 자연스럽게 늘어남(1~3줄) -
+  // 아이템 폭 안에서 [스와치][간격][Expanded 텍스트+ellipsis] 구조라 이름이
+  // 길어져도 그 항목 안에서만 잘리고 옆 칸을 절대 침범 못함.
+  Widget _theme8Legend() {
+    const cols = 4;
+    final rows = (_mockLegendShifts.length / cols).ceil();
+    // ⭐ "뜬금없어 보인다"는 피드백으로 테두리를 둘러서 하나의 독립된 정보
+    // 영역임을 명확히 함 - 이 테마는 셀 자체엔 테두리가 없는(배경·테두리 없이
+    // 밑줄만 쓰는) 미니멀 컨셉이라, 범례는 옅은 회색 테두리 정도로만 최소한의
+    // 구분을 줌(달력 그리드처럼 진하게 두르지 않음).
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300, width: 0.7),
+        borderRadius: BorderRadius.circular(4.r),
+      ),
+      child: ClipRect(
+        child: Column(
+          children: List.generate(rows, (r) => Expanded(
+            child: Row(
+              children: List.generate(cols, (c) {
+                final i = r * cols + c;
+                if (i >= _mockLegendShifts.length) return const Expanded(child: SizedBox());
+                final s = _mockLegendShifts[i];
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 16.w,
+                          height: 5.h,
+                          decoration: BoxDecoration(color: s.color, borderRadius: BorderRadius.circular(2.r)),
+                        ),
+                        SizedBox(width: 3.w),
+                        Expanded(
+                          child: Text(s.name, style: TextStyle(fontSize: 7.sp, color: Colors.black87, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          )),
+        ),
       ),
     );
   }
@@ -1378,7 +1132,9 @@ extension _Theme9 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
           child: Row(
             children: [
-              Text('2026. 8', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+              // ⭐ color 없이 두면 앰비언트 텍스트 스타일에 묻혀서 흰 배경 위에서
+              // 거의 안 보이는 문제가 있었음 - 다른 테마 헤더들과 같은 black87로 명시.
+              Text('2026. 8', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
               const Spacer(),
               _pillButton('전체근무표', Icons.table_chart_outlined, _openAllShifts),
               SizedBox(width: 6.w),
@@ -1421,36 +1177,58 @@ extension _Theme9 on _CalendarThemeLabScreenState {
     return GestureDetector(
       onTap: () => _tapDay(day),
       behavior: HitTestBehavior.opaque,
+      // ⭐ 예전엔 셀마다 top border를 줘서 행 구분선처럼 보이게 했는데, 세로줄이
+      // 없어서(그리드가 아님) 애초에 격자를 흉내 낼 필요가 없었고, 칩이 5개(근무+
+      // 공휴일+메모3개)까지 쌓이는 날엔 마지막 메모가 바로 아래 줄을 침범해 보여서
+      // 아예 제거함 - 줄이 없으면 셀 높이를 살짝 넘어가도 훨씬 덜 거슬림.
+      // ⭐ 그런데 이건 순전히 시각적(paint)인 조치였을 뿐 - Column의 실제 세로
+      // 크기는 그대로였어서, 칩 5개(숫자원+근무+공휴일+메모3)가 쌓이는 8/15 셀은
+      // border를 지운 뒤에도 여전히 RenderFlex bottom-overflow 에러가 떴음(구분선이
+      // 없어서 "안 넘쳐 보였을" 뿐, 프레임워크는 여전히 넘친 걸 감지해서 에러 배너를
+      // 띄움). 그래서 border 제거와는 별개로 칩 크기/여백 자체를 줄여야 했음.
       child: Container(
-        decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey.shade100))),
-        padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 2.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 18.w,
-              height: 18.w,
-              alignment: Alignment.center,
-              margin: EdgeInsets.only(bottom: 2.h),
-              decoration: today ? BoxDecoration(color: red ? Colors.red.shade400 : Colors.indigo.shade400, shape: BoxShape.circle) : null,
-              child: Text('${day.day}', style: TextStyle(
-                fontSize: 10.5.sp,
-                fontWeight: today ? FontWeight.bold : FontWeight.w500,
-                color: today ? Colors.white : (outside ? Colors.grey.shade300 : (red ? Colors.red.shade400 : Colors.black87)),
-              )),
-            ),
-            if (!outside)
-              _chip(shift.name, shift.color, _autoTextColor(shift.color)),
-            if (_isHoliday(day))
-              Padding(
-                padding: EdgeInsets.only(top: 1.h),
-                child: _chip(_mockHolidayName, Colors.red.shade50, Colors.red.shade400),
+        padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.2.h),
+        // ⭐ 두 번째 시도까지도 계속 overflow가 나서(칩 5개 조합의 정확한 세로
+        // 크기를 실기기 없이 픽셀 단위로 맞히는 건 사실상 불가능) - 이번엔 값
+        // 다듬기와 별개로 ClipRect를 하드 백스톱으로 추가함. 셀 안에 실제로
+        // 안 들어가는 경우엔 (드물게, 광복절+메모3개처럼 극단적일 때만) 맨 아래
+        // 내용이 조용히 잘려나갈 뿐 - Flutter의 노란/검정 경고 줄무늬 배너 자체가
+        // 다시는 안 뜸. 이후 목업 데이터가 바뀌거나 폰트가 달라져도 안전함.
+        child: ClipRect(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 15.w,
+                height: 15.w,
+                alignment: Alignment.center,
+                margin: EdgeInsets.only(bottom: 1.2.h),
+                decoration: today ? BoxDecoration(color: red ? Colors.red.shade400 : Colors.indigo.shade400, shape: BoxShape.circle) : null,
+                child: Text('${day.day}', style: TextStyle(
+                  fontSize: 9.5.sp,
+                  fontWeight: today ? FontWeight.bold : FontWeight.w500,
+                  color: today ? Colors.white : (outside ? Colors.grey.shade300 : (red ? Colors.red.shade400 : Colors.black87)),
+                )),
               ),
-            ...memos.take(3).map((m) => Padding(
-              padding: EdgeInsets.only(top: 1.h),
-              child: _chip(m, Colors.grey.shade200, Colors.black87),
-            )),
-          ],
+              // ⭐ overflow는 ClipRect로 이미 안전망이 있으니, 이번엔 반대로 "너무
+              // 작아 보인다"는 피드백대로 칩(근무명/공휴일/메모3)을 다시 키움 -
+              // 날짜 숫자~근무명 시작 사이 여백(위 margin 1.2h)은 그대로 두고,
+              // 근무명부터 셀 바닥까지 영역만 최대한 채우게 _chip() 자체의
+              // 패딩/폰트와 칩 사이 간격을 키움. 그래도 안 들어가면 ClipRect가
+              // 조용히 잘라주므로 에러 배너 걱정 없이 크게 잡아도 됨.
+              // ⭐ outside(다른 달) 날짜도 근무명 칩을 그대로 보여줌 - 메인 달력과 동일.
+              _chip(shift.name, shift.color, _autoTextColor(shift.color)),
+              if (_isHoliday(day))
+                Padding(
+                  padding: EdgeInsets.only(top: 0.8.h),
+                  child: _chip(_mockHolidayName, Colors.red.shade50, Colors.red.shade400),
+                ),
+              ...memos.take(3).map((m) => Padding(
+                padding: EdgeInsets.only(top: 0.8.h),
+                child: _chip(m, Colors.grey.shade200, Colors.black87),
+              )),
+            ],
+          ),
         ),
       ),
     );
@@ -1459,10 +1237,14 @@ extension _Theme9 on _CalendarThemeLabScreenState {
   Widget _chip(String text, Color bg, Color fg) {
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.only(bottom: 0.5.h),
-      padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+      margin: EdgeInsets.only(bottom: 0.6.h),
+      padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.1.h),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(2.5.r)),
-      child: Text(text, style: TextStyle(fontSize: 6.sp, color: fg, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+      // ⭐ height 명시 - 기본 line-height는 폰트마다 달라 얼마나 줄여야 할지 예측이
+      // 안 됐음. 1.1로 고정해서 칩 5개가 쌓여도 계산 가능한 만큼만 차지하게 함.
+      // ⭐ "너무 작다"는 피드백으로 5.8sp→7.5sp, 패딩도 같이 키워서 셀 바닥까지
+      // 최대한 채움 - ClipRect가 안전망이라 커져서 못 들어가도 조용히 잘릴 뿐임.
+      child: Text(text, style: TextStyle(fontSize: 7.5.sp, color: fg, fontWeight: FontWeight.w600, height: 1.1), maxLines: 1, overflow: TextOverflow.ellipsis),
     );
   }
 }
@@ -1500,10 +1282,20 @@ extension _Theme10 on _CalendarThemeLabScreenState {
             ),
           )),
         ),
+        // ⭐ 8번과 동일한 이유/기법 - 6번째 줄 화~토(5칸, 항상 다음 달 스필오버라
+        // 실질적으로 비어있던 자리)를 통째로 범례로 바꿔치기함. Positioned 겹쳐
+        // 그리기 대신 그리드 셀 자체를 교체하는 방식이라 고정 rowHeight가 없는
+        // 이 구조에서도 픽셀 계산 없이 항상 정확히 한 줄만큼만 씀.
         Expanded(
           child: Column(
             children: List.generate(6, (row) => Expanded(
-              child: Row(children: List.generate(7, (col) => Expanded(child: _theme10Cell(_days[row * 7 + col])))),
+              child: Row(children: row == 5
+                  ? [
+                      Expanded(child: _theme10Cell(_days[35])),
+                      Expanded(child: _theme10Cell(_days[36])),
+                      Expanded(flex: 5, child: _theme10Legend()),
+                    ]
+                  : List.generate(7, (col) => Expanded(child: _theme10Cell(_days[row * 7 + col])))),
             )),
           ),
         ),
@@ -1539,15 +1331,16 @@ extension _Theme10 on _CalendarThemeLabScreenState {
         decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade200, width: 0.5)),
         child: Stack(
           children: [
-            if (!outside)
-              Positioned(
-                top: 0,
-                left: 0,
-                child: ClipPath(
-                  clipper: _CornerTriangleClipper(),
-                  child: Container(width: 16.w, height: 16.w, color: shift.color),
-                ),
+            // ⭐ outside(다른 달) 날짜도 삼각 배지를 그대로 보여줌 - 10번도
+            // 8번과 같은 범례 기반 테마라 이름 텍스트 없이 색상 도형만 유지.
+            Positioned(
+              top: 0,
+              left: 0,
+              child: ClipPath(
+                clipper: _CornerTriangleClipper(),
+                child: Container(width: 16.w, height: 16.w, color: shift.color),
               ),
+            ),
             Padding(
               padding: EdgeInsets.only(top: 3.h, right: 2.w),
               child: Align(
@@ -1561,19 +1354,85 @@ extension _Theme10 on _CalendarThemeLabScreenState {
                 )),
               ),
             ),
+            // ⭐ serif는 큰 글자(날짜 숫자, 헤더)에선 잡지 느낌을 살려주지만
+            // 공휴일/메모처럼 작은 글자에서는 획이 가늘어져 오히려 읽기
+            // 어려웠음 - 여기만 기본 서체로 되돌림.
+            // ⭐ 공휴일명을 메모 묶음에서 분리 - 날짜 숫자 바로 아래(우측 정렬,
+            // 같은 자리)에 따로 배치하고 글씨도 눈에 띄게 키움(5.5sp→7.5sp).
+            if (_isHoliday(day))
+              Positioned(
+                top: 18.h,
+                right: 2.w,
+                child: Text(_mockHolidayName, style: TextStyle(fontSize: 7.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            // ⭐ 메모는 공휴일과 분리된 채로 계속 하단 고정 - 폰트도 한 번 더
+            // 키움(6.8sp→7.5sp), 줄 간격도 넓힘(0.8h→1.2h).
+            // ⚠️ 이 영역은 Positioned(bottom-anchored)라 Column처럼 넘치면
+            // 에러가 나는 구조가 아니라 그냥 위로 계속 자람 - 너무 키우면 날짜
+            // 숫자와 겹칠 수 있어서(점검 결과 기록됨) 적당히만 키움.
             Positioned(
               left: 2.w,
               right: 2.w,
               bottom: 2.h,
               child: Column(
                 children: [
-                  if (_isHoliday(day))
-                    Text(_mockHolidayName, style: TextStyle(fontSize: 5.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, fontFamily: 'serif'), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  ...memos.take(3).map((m) => Text(m, style: TextStyle(fontSize: 6.sp, color: Colors.grey.shade600, fontFamily: 'serif'), maxLines: 1, overflow: TextOverflow.ellipsis)),
+                  ...memos.take(3).toList().asMap().entries.map((e) => Padding(
+                    padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.2.h),
+                    child: Text(e.value, style: TextStyle(fontSize: 7.5.sp, color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                  )),
                 ],
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // ⭐ 8번과 같은 이유(색상만으로는 근무 구분 불가)의 범례 - "삼각 배지를 셀에
+  // 보이는 그 크기 그대로(16w×16w, _CornerTriangleClipper 동일)에 근무명을
+  // 붙여서" 요청대로 구현. 마찬가지로 4열 고정 그리드라 3개든 12개든 정렬이
+  // 항상 맞고, 줄 수(ceil(개수/4))만 자연스럽게 늘어남.
+  Widget _theme10Legend() {
+    const cols = 4;
+    final rows = (_mockLegendShifts.length / cols).ceil();
+    // ⭐ "뜬금없어 보인다"는 피드백으로 테두리로 감쌈 - 이 테마는 셀마다 이미
+    // 옅은 회색 테두리(grey.shade200)가 있어서 그거랑 톤을 맞춤.
+    // ⭐ serif는 큰 제목("August"/날짜 숫자)엔 잡지 느낌을 살려주지만 이렇게
+    // 작은 크기(7sp)에서는 획이 가늘어져 읽기 어려움 - 메모/공휴일과 같은
+    // 이유로 여기도 serif를 뺌.
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+      decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade200, width: 0.7)),
+      child: ClipRect(
+        child: Column(
+          children: List.generate(rows, (r) => Expanded(
+            child: Row(
+              children: List.generate(cols, (c) {
+                final i = r * cols + c;
+                if (i >= _mockLegendShifts.length) return const Expanded(child: SizedBox());
+                final s = _mockLegendShifts[i];
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+                    child: Row(
+                      children: [
+                        ClipPath(
+                          clipper: _CornerTriangleClipper(),
+                          child: Container(width: 16.w, height: 16.w, color: s.color),
+                        ),
+                        SizedBox(width: 4.w),
+                        Expanded(
+                          child: Text(s.name, style: TextStyle(fontSize: 7.sp, color: Colors.black87, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          )),
         ),
       ),
     );
@@ -1623,4 +1482,302 @@ void _showWeekSummarySheet(BuildContext context, List<_WeekSummary> weeks) {
       );
     },
   );
+}
+
+// ============================================================
+// ⭐ 메인 · 화이트 / 메인 · 다크
+// 실제 프로덕션 calendar_tab.dart를 table_calendar로 그대로 재현함(구조는
+// "바꿀 필요 없음" 요청대로 그대로 - _buildDateCell의 근무 배지→숫자→공휴일/
+// 메모 순서, today 강조, 6번째 줄 화~토를 OT/주별근무시간 카드로 재활용하는
+// 기법까지 전부 동일). 유일한 차이는 팔레트: 근무명 색상 변경 기능이 삭제되고
+// "테마 선택"으로 대체되면서, 이 두 테마 자체가 앞으로 유일한 확정 팔레트가
+// 됨(_mainLightPalette/_mainDarkPalette, 위쪽 정의 참고).
+//
+// firstDay/lastDay를 8월로 고정해서(다른 테마들처럼 "2026년 8월 고정" 원칙
+// 유지) table_calendar가 다른 달로 스와이프해서 넘어가는 걸 애초에 막음 -
+// 그 달은 이 목업 데이터(_mockMemos 등)에 대응하는 날짜가 없어서 넘어가봐야
+// 의미가 없기 때문. Theme(data: AppTheme.lightTheme/darkTheme, ...)로 감싸서
+// 기기의 실제 시스템 다크모드 설정과 무관하게 이 페이지만 항상 그 테마로
+// 고정되게 함 - 두 미리보기를 나란히 스와이프해서 비교하려면 시스템 설정을
+// 안 따라가야 함.
+extension _ThemeMain on _CalendarThemeLabScreenState {
+  Widget _themeMainWhite() => _buildMainTheme(isDark: false);
+  Widget _themeMainDark() => _buildMainTheme(isDark: true);
+
+  Widget _buildMainTheme({required bool isDark}) {
+    final themeData = isDark ? AppTheme.darkTheme : AppTheme.lightTheme;
+    final palette = isDark ? _mockLegendShiftsDark : _mockLegendShifts;
+    final colorScheme = themeData.colorScheme;
+
+    return Theme(
+      data: themeData,
+      child: Container(
+        color: colorScheme.surface,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
+              child: Row(
+                children: [
+                  Text('2026년 8월', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
+                  const Spacer(),
+                  // ⭐ "원래 버튼 이미지가 있었는데 텍스트만 남았다"는 피드백 -
+                  // 진짜 달력탭(_buildCalendarHeader 부분)의 버튼 스타일을
+                  // 그대로 재현함: primaryContainer 배경 + 옅은 테두리의 알약형.
+                  _mainHeaderButton('전체근무표', colorScheme, _openAllShifts),
+                  SizedBox(width: 8.w),
+                  _mainHeaderButton('오늘', colorScheme, _tapToday),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 6.w),
+                    child: TableCalendar(
+                      // ⭐ 8월 안에서만 움직이게 고정(다른 테마들과 동일한 "2026년 8월
+                      // 고정" 원칙) - firstDay==lastDay 같은 달이라 스와이프해도
+                      // 페이지가 하나뿐이라 자연스럽게 다른 달로 못 넘어감.
+                      firstDay: DateTime(2026, 8, 1),
+                      lastDay: DateTime(2026, 8, 31),
+                      focusedDay: DateTime(2026, 8, 15),
+                      locale: 'ko_KR',
+                      headerVisible: false,
+                      sixWeekMonthsEnforced: true,
+                      rowHeight: 83.h,
+                      daysOfWeekHeight: 28.h,
+                      daysOfWeekStyle: DaysOfWeekStyle(
+                        weekdayStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
+                        weekendStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
+                      ),
+                      calendarStyle: CalendarStyle(
+                        cellMargin: EdgeInsets.zero,
+                        cellPadding: EdgeInsets.zero,
+                        tableBorder: TableBorder.all(
+                          color: isDark ? colorScheme.onSurface.withOpacity(0.4) : colorScheme.onSurface.withOpacity(0.15),
+                          width: 1.0,
+                        ),
+                      ),
+                      calendarBuilders: CalendarBuilders(
+                        defaultBuilder: (context, day, focusedDay) => _isMainSixthRowReclaimed(day) ? Container() : _mainCell(day, false, false, palette, colorScheme, isDark),
+                        outsideBuilder: (context, day, focusedDay) => _isMainSixthRowReclaimed(day) ? Container() : _mainCell(day, false, true, palette, colorScheme, isDark),
+                        todayBuilder: (context, day, focusedDay) => _isMainSixthRowReclaimed(day) ? Container() : _mainCell(day, true, false, palette, colorScheme, isDark),
+                      ),
+                      onDaySelected: (selectedDay, focusedDay) {
+                        if (_isMainSixthRowReclaimed(selectedDay)) return;
+                        _tapDay(selectedDay);
+                      },
+                    ),
+                  ),
+                  // ⭐ 6번째 줄 화~토(항상 다음 달 스필오버라 실질적으로 빈 칸) 재활용 -
+                  // 진짜 달력탭의 _buildMonthlyOvertimeCard()와 동일한 기법/구성
+                  // (불투명 카드 + 이번 달 OT / 주별 근무시간 반반).
+                  // ⭐ "테두리가 기존 그리드선이랑 겹쳐서 두 줄 같다"는 피드백으로
+                  // 카드 자체의 테두리(그리고 실수로 들어간 1px 왼쪽 margin)를
+                  // 없앰 - 아래 별도의 "6번째 줄 맨 밑 선"이 전체 폭에 한 줄만
+                  // 그어주므로 카드는 배경색만 깔면 충분함.
+                  Positioned(
+                    top: 28.h + 83.h * 5,
+                    left: 6.w,
+                    right: 6.w,
+                    height: 83.h,
+                    child: Row(
+                      children: [
+                        Expanded(flex: 2, child: IgnorePointer(child: SizedBox())),
+                        Expanded(
+                          flex: 5,
+                          child: Container(
+                            color: colorScheme.surface,
+                            child: Column(
+                              children: [
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('실제 채택 시 OT 상세 팝업으로 연결됩니다')),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                                      child: Row(
+                                        children: [
+                                          Text('이번 달 OT', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant)),
+                                          SizedBox(width: 6.w),
+                                          Text(_formatMinutes(_mockMonthlyOtTotal), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Container(height: 1, color: isDark ? colorScheme.onSurface.withOpacity(0.3) : colorScheme.onSurface.withOpacity(0.1)),
+                                Expanded(
+                                  child: InkWell(
+                                    onTap: () => _showWeekSummarySheet(context, _weeks),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 10.w),
+                                      child: Row(
+                                        children: [
+                                          Text('주별 근무시간', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant)),
+                                          const Spacer(),
+                                          Icon(Icons.chevron_right, size: 16.sp, color: colorScheme.onSurfaceVariant),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // ⭐ "6번째 줄 맨 밑 가로선이 없어졌다" 피드백 - table_calendar
+                  // 자체 테두리가 이 화면 높이에서 정확히 어디에 그려지는지는
+                  // 기기마다 미세하게 다를 수 있어서, 행 경계를 직접 계산해서
+                  // 명시적으로 한 줄 그어줌(전체 폭 - 화~토 칸뿐 아니라 일/월
+                  // 칸까지 포함) - table_calendar 렌더링에 의존하지 않는 확실한
+                  // 방법.
+                  Positioned(
+                    top: 28.h + 83.h * 6 - 1,
+                    left: 6.w,
+                    right: 6.w,
+                    height: 1,
+                    child: Container(color: isDark ? colorScheme.onSurface.withOpacity(0.4) : colorScheme.onSurface.withOpacity(0.15)),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 6.h),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ⭐ calendar_tab.dart의 전체근무표/today 버튼과 픽셀 단위로 동일한 스타일
+  // (primaryContainer 배경 알약 + primary 30% 테두리, 11sp w600 텍스트).
+  Widget _mainHeaderButton(String label, ColorScheme colorScheme, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+        decoration: BoxDecoration(
+          color: colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(6.r),
+          border: Border.all(color: colorScheme.primary.withOpacity(0.3), width: 0.8),
+        ),
+        child: Text(label, style: TextStyle(fontSize: 11.sp, color: colorScheme.onPrimaryContainer, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  // ⭐ 달력탭의 _isSixthRowEmptyCell과 동일한 조건(6번째 줄 화~토) - 다만
+  // table_calendar 콜백엔 "몇 번째 줄인지"가 안 넘어와서, 날짜 자체로 판별함:
+  // 8월 그리드의 6번째 줄은 8/30(일)~9/5(토)이므로 화(9/1)~토(9/5)가 대상.
+  bool _isMainSixthRowReclaimed(DateTime day) {
+    return day.year == 2026 && day.month == 9 && day.day >= 1 && day.day <= 5;
+  }
+
+  // ⭐ calendar_tab.dart의 _buildDateCell을 최대한 그대로 재현 - 근무 배지(맨
+  // 위) → 숫자(오늘=강조 배경, 공휴일 이름 숫자 위에 겹침) → 메모(최대 3,
+  // 하단 고정) 순서. friend_calendar_view.dart에서 이미 한 번 이 구조를
+  // Provider 없는 정적 데이터용으로 옮겨본 적이 있어서 그 패턴을 그대로 씀.
+  Widget _mainCell(DateTime day, bool isToday, bool isOutside, List<_MockShift> palette, ColorScheme colorScheme, bool isDark) {
+    final shift = _mainShiftFor(day, palette);
+    final memos = _mockMemos[_dateKey(day)] ?? [];
+    final isSunday = day.weekday == DateTime.sunday;
+    final holiday = _isHoliday(day) ? _mockHolidayName : null;
+    final red = isSunday || holiday != null;
+
+    final Color dateColor = red
+        ? (isOutside ? Colors.red.withOpacity(0.3) : (isDark ? Colors.red.shade300 : Colors.red))
+        : (isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : colorScheme.onSurface);
+
+    return Container(
+      padding: EdgeInsets.only(left: 2.w, right: 2.w, top: 2.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // ⭐ 실제 calendar_tab.dart의 _buildDateCell은 outside 여부와 무관하게
+          // 근무가 있으면 배지를 항상 보여줌(hasShift만 체크, isOutside는 날짜
+          // 숫자 색상에만 영향) - "이전/다음 달 며칠에도 근무명이 나왔었다"는
+          // 피드백과 정확히 일치하는 그 동작을 그대로 재현함.
+          Container(
+            height: 18.h,
+            decoration: BoxDecoration(color: shift.color, borderRadius: BorderRadius.circular(3.r)),
+            alignment: Alignment.center,
+            child: Text(
+              shift.name, style: TextStyle(fontSize: 9.sp, color: _autoTextColor(shift.color), fontWeight: FontWeight.bold),
+              maxLines: 1, overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Expanded(
+            child: Stack(
+              children: [
+                if (holiday != null)
+                  Positioned(
+                    top: 0, left: 0, right: 0,
+                    child: Container(
+                      height: 11.h,
+                      padding: EdgeInsets.symmetric(horizontal: 1.w),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(holiday, style: TextStyle(
+                          fontSize: 9.sp, fontWeight: FontWeight.w600,
+                          color: isOutside ? Colors.red.withOpacity(0.3) : (isDark ? Colors.red.shade300 : Colors.red),
+                        )),
+                      ),
+                    ),
+                  ),
+                Align(
+                  alignment: Alignment.center,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: memos.length >= 3 ? 20.h : 0),
+                    child: Container(
+                      padding: isToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
+                      decoration: isToday
+                          ? BoxDecoration(
+                              color: red ? (isDark ? Colors.amber.shade300 : Colors.lime.shade300) : (isDark ? const Color(0xFFB4BFFF) : colorScheme.primary),
+                              borderRadius: BorderRadius.circular(4.r),
+                            )
+                          : null,
+                      child: Text(
+                        '${day.day}', textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16.sp, fontWeight: FontWeight.w600, height: 1.0,
+                          color: isToday
+                              ? (red ? (isDark ? Colors.red.shade900 : Colors.red) : (isDark ? Colors.white : colorScheme.onPrimary))
+                              : dateColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                if (memos.isNotEmpty)
+                  Positioned(
+                    left: 0, right: 0, bottom: 1.5.h,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: memos.take(3).map((m) => Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.only(bottom: 0.5.h),
+                        padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                        decoration: BoxDecoration(
+                          color: isDark ? colorScheme.primary.withOpacity(0.3) : colorScheme.surfaceVariant,
+                          border: Border.all(color: isDark ? colorScheme.primary.withOpacity(0.5) : colorScheme.outline, width: 0.5),
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                        child: Text(m, textAlign: TextAlign.center, style: TextStyle(
+                          fontSize: 8.sp, color: colorScheme.onSurface, fontWeight: FontWeight.w500, height: 1.0,
+                        ), maxLines: 1, overflow: TextOverflow.clip),
+                      )).toList(),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

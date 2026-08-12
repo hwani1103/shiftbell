@@ -65,6 +65,19 @@ class FriendScheduleData {
     return memos![dateStr] ?? const [];
   }
 
+  // ⭐ ShiftSchedule.getPatternShiftForDate와 동일 - assignedDates(근무변경 예외) 무시하고
+  // 순수 패턴값만 반환. friend_calendar_view.dart가 이걸로 "패턴과 다른 날(근무변경됨)"
+  // 표시를 실제 달력탭과 같은 방식으로 재현함.
+  String getPatternShiftForDate(DateTime date) {
+    if (!isRegular || pattern == null || pattern!.isEmpty || todayIndex == null || startDate == null) {
+      return '';
+    }
+    final daysDiff = julianDayNumber(date.year, date.month, date.day) -
+        julianDayNumber(startDate!.year, startDate!.month, startDate!.day);
+    final index = ((todayIndex! + daysDiff) % pattern!.length + pattern!.length) % pattern!.length;
+    return pattern![index];
+  }
+
   Map<String, dynamic> toJson() => {
         'ownerName': ownerName,
         'isRegular': isRegular,

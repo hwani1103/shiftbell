@@ -10,13 +10,16 @@ import '../services/alarm_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
-import '../providers/theme_provider.dart';
+import '../providers/calendar_theme_provider.dart';
+import '../models/calendar_theme.dart';
 import '../models/alarm_type.dart';
 import '../models/alarm.dart';
+import '../constants/alarm_limits.dart';
 import '../models/shift_schedule.dart';
 import 'all_teams_setup_dialog.dart';
 import 'memo_list_view.dart';
 import 'work_hours_settings_screen.dart';
+import 'calendar_theme_picker_screen.dart';
 import 'friend_list_screen.dart';
 import '../widgets/tappable_number_picker.dart';
 
@@ -359,16 +362,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               SizedBox(height: 16.h),
 
-              // ⭐ Production 섹션
-              // 전체 교대조 근무표 작성 (규칙적 근무자만 표시)
-              if (schedule?.isRegular == true)
-                ListTile(
-                  leading: Icon(Icons.groups, color: Theme.of(context).colorScheme.primary),
-                  title: Text('전체 교대조 근무표 작성'),
-                  subtitle: Text('전체 조 구성 및 근무 패턴 설정'),
-                  trailing: Icon(Icons.chevron_right),
-                  onTap: _showAllTeamsSetupDialog,
-                ),
+              // ⭐ "전체 교대조 근무표 작성" 진입점 삭제 - 그 기능은 앞으로
+              // 메인 달력탭에서 직접 탭해서 설정하는 방식으로 옮길 예정(별도
+              // 작업). 지금은 여기 진입점만 없앰 - _showAllTeamsSetupDialog()
+              // 등 관련 함수/다이얼로그는 나중에 재사용할 수 있어 그대로 둠.
 
               // 알람음 관리
               ListTile(
@@ -379,11 +376,11 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 onTap: _showAlarmTypeDialog,
               ),
 
-              // ⭐ 근로시간 및 OT 설정
+              // ⭐ "근로"를 전부 "근무"로 통일 (탭 제목/부제 포함).
               ListTile(
                 leading: Icon(Icons.work_history_outlined, color: Theme.of(context).colorScheme.tertiary),
-                title: Text('근로시간 및 OT 설정'),
-                subtitle: Text('근무별 근로시간, 월 근로시간 기준 기간'),
+                title: Text('근무시간 및 OT 설정'),
+                subtitle: Text('근무별 근무시간, 월 근무시간 기준 기간'),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
@@ -393,8 +390,27 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 },
               ),
 
+              // ⭐ "달력 테마랑 친구 공유 순서를 바꿔서 달력 테마를 3번으로"
+              // 요청으로 순서 교체(달력 테마가 이제 3번째, 친구 공유가 4번째).
+              // ⭐ 다크모드 토글 삭제됨 - "다크모드"라는 전역 개념 자체가
+              // 없어지고 아래 "달력 테마" 선택(캐러셀)으로 완전히 흡수됨.
+              // 9개 테마 중 하나(메인·다크)를 고르면 그게 곧 다크 테마임.
+              // ⭐ "근무명 색상 변경"도 여기로 흡수됨 - 색상은 더 이상 개별
+              // 지정이 아니라 테마 선택 하나로 전부 결정됨.
+              ListTile(
+                leading: Icon(Icons.palette_outlined, color: Theme.of(context).colorScheme.primary),
+                title: Text('달력 테마'),
+                subtitle: Text(ref.watch(calendarThemeProvider).label),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (_) => CalendarThemePickerScreen(onApplied: widget.onSwipeToCalendar),
+                  ));
+                },
+              ),
+
               // ⭐ 친구 공유 (베타) - 근무 패턴/근무변경/선택적 메모를 코드로
-              // 주고받아 서로의 달력을 조회. OT/근로시간/알람 설정은 공유 안 됨.
+              // 주고받아 서로의 달력을 조회. OT/근무시간/알람 설정은 공유 안 됨.
               ListTile(
                 leading: Icon(Icons.people_outline, color: Theme.of(context).colorScheme.tertiary),
                 title: Text('친구 공유 (베타)'),
@@ -407,6 +423,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   );
                 },
               ),
+
+              // ⭐ 구분선 - "이력/데이터" 섹션
+              SizedBox(height: 24.h),
+              Divider(),
 
               // 알람 이력
               ListTile(
@@ -422,6 +442,19 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 },
               ),
 
+              // 메모 모아보기
+              ListTile(
+                leading: Icon(Icons.note_outlined, color: Colors.amber.shade700),
+                title: Text('메모 모아보기'),
+                subtitle: Text('전체 메모 확인 및 검색'),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MemoListView()),
+                  );
+                },
+              ),
 
               // ⭐ 모든 알람 완전 삭제
               ListTile(
@@ -492,47 +525,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                       }
                     }
                   }
-                },
-              ),
-
-              // ⭐ 구분선 (부가 기능 섹션)
-              SizedBox(height: 24.h),
-              Divider(),
-
-              // 다크모드 토글
-              ListTile(
-                leading: Icon(
-                  ref.watch(themeProvider) == ThemeMode.dark
-                      ? Icons.dark_mode
-                      : Icons.light_mode,
-                  color: ref.watch(themeProvider) == ThemeMode.dark
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.amber.shade700,
-                ),
-                title: Text('다크모드'),
-                subtitle: Text(
-                  ref.watch(themeProvider) == ThemeMode.dark ? '켜짐' : '꺼짐',
-                ),
-                trailing: Switch(
-                  value: ref.watch(themeProvider) == ThemeMode.dark,
-                  onChanged: (value) {
-                    ref.read(themeProvider.notifier).toggleTheme();
-                  },
-                  activeColor: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-
-              // 메모 모아보기
-              ListTile(
-                leading: Icon(Icons.note_outlined, color: Colors.amber.shade700),
-                title: Text('메모 모아보기'),
-                subtitle: Text('전체 메모 확인 및 검색'),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MemoListView()),
-                  );
                 },
               ),
 
@@ -853,16 +845,10 @@ lowvibe07.tistory.com
                   _showEditShiftNamesDialog();
                 },
               ),
-              Divider(height: 1),
-              ListTile(
-                leading: Icon(Icons.palette, color: Colors.purple.shade400),
-                title: Text('근무명 색상 변경'),
-                subtitle: Text('근무별 색상을 변경합니다'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showEditShiftColorsDialog();
-                },
-              ),
+              // ⭐ "근무명 색상 변경" 삭제됨 - 근무 색상은 이제 사용자가 개별
+              // 지정하는 게 아니라 "달력 테마" 선택(설정 탭 상단)이 통째로
+              // 정함. _showEditShiftColorsDialog()/_ColorPickerDialog는 더 이상
+              // 호출되지 않지만, 되돌릴 가능성을 고려해 정의 자체는 남겨둠.
               Divider(height: 1),
               ListTile(
                 leading: Icon(Icons.alarm, color: Theme.of(context).colorScheme.tertiary),
@@ -2006,7 +1992,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                     style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '각 근무당 최대 3개까지 설정 가능',
+                    '각 근무당 최대 $kMaxAlarmTemplatesPerShift개까지 설정 가능',
                     style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                   SizedBox(height: 16.h),
@@ -2073,17 +2059,22 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
             ),
             SizedBox(height: 12.h),
             Expanded(
-              child: Center(
-                child: alarms.isEmpty
-                    ? Text(
+              // ⭐ onboarding_screen.dart의 동일 카드와 같은 문제/같은 수정 - 알람이
+              // kMaxAlarmTemplatesPerShift(5)개까지 늘어나면 고정 높이 카드에서
+              // Center+Column(비스크롤)이 세로로 넘쳤음. 스크롤 가능하게 변경.
+              child: alarms.isEmpty
+                  ? Center(
+                      child: Text(
                         '탭하여 설정',
                         style: TextStyle(
                           fontSize: 11.sp,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: alarms.map((alarm) => Padding(
                           padding: EdgeInsets.symmetric(vertical: 2.h),
                           child: Row(
@@ -2106,7 +2097,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                           ),
                         )).toList(),
                       ),
-              ),
+                    ),
             ),
           ],
         ),
@@ -2205,7 +2196,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '고정 알람 3개까지 등록 가능',
+              '고정 알람 $kMaxAlarmTemplatesPerShift개까지 등록 가능',
               style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
@@ -2274,7 +2265,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
 
             SizedBox(height: 8.h),
 
-            if (_alarms.length < 3)
+            if (_alarms.length < kMaxAlarmTemplatesPerShift)
               OutlinedButton.icon(
                 onPressed: _addAlarm,
                 icon: Icon(Icons.add),

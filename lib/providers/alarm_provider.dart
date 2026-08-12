@@ -8,6 +8,7 @@ import '../models/shift_schedule.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
 import 'package:flutter/services.dart';
+import '../constants/alarm_limits.dart';
 
 
 // ⭐ 알람 관리 Provider (StateNotifier)
@@ -148,8 +149,8 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
       final daysDiff = julianDayNumber(date.year, date.month, date.day) -
           julianDayNumber(now.year, now.month, now.day);
 
-      if (daysDiff >= 10) {
-        print('🔵 10일 이후 날짜라서 알람은 생성하지 않음 (날짜: ${date.toString().split(' ')[0]}, 근무: $shiftType)');
+      if (daysDiff >= kAlarmRefreshWindowDays) {
+        print('🔵 ${kAlarmRefreshWindowDays}일 이후 날짜라서 알람은 생성하지 않음 (날짜: ${date.toString().split(' ')[0]}, 근무: $shiftType)');
         return;
       }
 

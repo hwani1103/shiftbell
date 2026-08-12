@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../main.dart';  // ⭐ MainScreen import
+import '../constants/alarm_limits.dart';
 
 // 알람 설정 (시간 + 타입)
 class AlarmSetting {
@@ -629,7 +630,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
         ),
         Text(
-          '각 근무당 최대 3개까지 설정 가능',
+          '각 근무당 최대 $kMaxAlarmTemplatesPerShift개까지 설정 가능',
           style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
         ),
         Text(
@@ -698,17 +699,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             SizedBox(height: 12.h),
 
             Expanded(
-              child: Center(
-                child: alarms.isEmpty
-                    ? Text(
+              // ⭐ 근무당 알람이 kMaxAlarmTemplatesPerShift(5)개까지 늘어나면서 이
+              // 카드는 GridView 셀이라 높이가 고정인데 Center+Column(비스크롤)이라
+              // 4~5개부턴 세로로 넘쳐서 렌더 오류가 났음(RenderFlex overflowed) -
+              // 스크롤 가능하게 바꿔서 몇 개든 안전하게 다 보이게 함.
+              child: alarms.isEmpty
+                  ? Center(
+                      child: Text(
                         '탭하여 설정',
                         style: TextStyle(
                           fontSize: 11.sp,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                      )
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      ),
+                    )
+                  : SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: alarms.map((alarm) => Padding(
                           padding: EdgeInsets.symmetric(vertical: 2.h),
                           child: Row(
@@ -731,7 +738,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                           ),
                         )).toList(),
                       ),
-              ),
+                    ),
             ),
           ],
         ),
@@ -975,7 +982,7 @@ Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
   final List<Alarm> alarms = [];
   final today = DateTime.now();
 
-  for (var i = 0; i < 10; i++) {
+  for (var i = 0; i < kAlarmRefreshWindowDays; i++) {
     // ⭐ DST 안전: Duration(days: i) 더하기는 "정확히 24*i시간 뒤"라서, 자정 근처
     // 시각에 서머타임 전환이 겹치면 원래 의도한 달력 날짜와 다른 날로 넘어갈 수
     // 있음. DateTime(y, m, d+i)는 달의 일수를 넘어가도 알아서 정규화되면서
@@ -1072,7 +1079,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '고정 알람 3개까지 등록 가능',
+              '고정 알람 $kMaxAlarmTemplatesPerShift개까지 등록 가능',
               style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
@@ -1143,7 +1150,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
 
             SizedBox(height: 8.h),
 
-            if (_alarms.length < 3)
+            if (_alarms.length < kMaxAlarmTemplatesPerShift)
               OutlinedButton.icon(
                 onPressed: _addAlarm,
                 icon: Icon(Icons.add),

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,7 +10,6 @@ import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
-import 'screens/calendar_theme_lab_screen.dart';  // ⭐ 테스트 전용: 달력 테마 비교 탭
 import 'screens/permission_intro_screen.dart';
 import 'widgets/permission_warning_banner.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,8 +17,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/shift_schedule.dart';
 import 'providers/alarm_provider.dart';
 import 'providers/schedule_provider.dart';
-import 'providers/theme_provider.dart';  // ⭐ 다크모드 추가
-import 'theme/app_theme.dart';  // ⭐ 다크모드 추가
+import 'providers/calendar_theme_provider.dart';
+import 'models/calendar_theme.dart';
+import 'theme/app_theme.dart';
 import 'services/widget_refresh_service.dart';
 
 void main() async {
@@ -67,47 +66,21 @@ void main() async {
   await DatabaseService.instance.database;
   await AlarmService().initialize();
 
-  // ⭐ 앱 시작 전에 테마 미리 로드 (깜빡임 방지)
-  final initialTheme = await _loadInitialTheme();
-  // ⭐ 위젯이 Native에만 따로 보관하는 테마값도 앱 시작 시점 기준으로 맞춰둠
-  // (수동으로 한 번도 안 바꾼 상태에서도 위젯이 시스템 설정을 정확히 따라가게)
-  WidgetRefreshService.pushTheme(initialTheme == ThemeMode.dark);
+  // ⭐ 앱 시작 전에 달력 테마 미리 로드 (깜빡임 방지) - 예전엔 "다크모드
+  // on/off"를 미리 읽었는데, 이제는 9개 달력 테마 중 뭐가 선택돼 있는지를
+  // 미리 읽음. 앱 전체 밝기는 항상 라이트 고정이고, 이 값은 오직 (1) 달력
+  // 탭 자체가 어떤 테마로 그려질지 (2) 시스템 상태표시줄 아이콘 밝기에만 씀.
+  final initialCalendarTheme = await CalendarThemeNotifier.loadInitial();
+  WidgetRefreshService.pushTheme(initialCalendarTheme.isDark);
 
   runApp(
     ProviderScope(
       overrides: [
-        // 초기 테마를 미리 설정
-        themeProvider.overrideWith((ref) => ThemeNotifier.withInitialTheme(initialTheme)),
+        calendarThemeProvider.overrideWith((ref) => CalendarThemeNotifier.withInitial(initialCalendarTheme)),
       ],
       child: const MyApp(),
     ),
   );
-}
-
-// 앱 시작 전에 테마 로드
-Future<ThemeMode> _loadInitialTheme() async {
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    final isManuallySet = prefs.getBool('theme_manually_set') ?? false;
-
-    if (isManuallySet) {
-      // 사용자가 설정한 테마
-      final themeModeString = prefs.getString('theme_mode');
-      if (themeModeString != null) {
-        return ThemeMode.values.firstWhere(
-          (mode) => mode.toString() == themeModeString,
-          orElse: () => ThemeMode.light,
-        );
-      }
-    }
-
-    // 시스템 테마 따라가기
-    final platformBrightness = PlatformDispatcher.instance.platformBrightness;
-    return platformBrightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light;
-  } catch (e) {
-    print('❌ 초기 테마 로드 실패: $e');
-    return ThemeMode.light;
-  }
 }
 
 class MyApp extends StatefulWidget {
@@ -174,35 +147,40 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
         // ⭐ MaterialApp만 Consumer로 감싸기 (MyApp rebuild 방지)
         return Consumer(
           builder: (context, ref, _) {
-            final themeMode = ref.watch(themeProvider);
-            final isDark = themeMode == ThemeMode.dark;
+            // ⭐ "다크모드"라는 전역 개념은 없앰 - 앱 자체는 항상 라이트로
+            // 고정(theme만 지정, darkTheme/themeMode 없음). 유일하게 선택된
+            // 달력 테마(9개 중 하나)가 다크(메인·다크)일 때만, 시스템
+            // 상태표시줄(시계/배터리/알림) 아이콘을 밝게 바꿔줌 - 그 외
+            // 앱 UI는 전부 라이트 그대로.
+            final isCalendarThemeDark = ref.watch(calendarThemeProvider).isDark;
 
-            return MaterialApp(
-              title: '교대종',
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
-              themeMode: themeMode,
-              // 모든 화면에 최대 너비 제한 적용
-              builder: (context, child) {
-                return Container(
-                  color: isDark ? Color(0xFF141824) : Colors.grey.shade200,  // 넓은 화면에서 양옆 배경색
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: maxContentWidth),
-                      child: Container(
-                        color: isDark ? Color(0xFF1A1F2E) : Colors.white,  // 컨텐츠 영역 배경 (밝은 인디고 그레이)
-                        child: child,
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: isCalendarThemeDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+              child: MaterialApp(
+                title: '교대종',
+                theme: AppTheme.lightTheme,
+                // 모든 화면에 최대 너비 제한 적용
+                builder: (context, child) {
+                  return Container(
+                    color: Colors.grey.shade200,  // 넓은 화면에서 양옆 배경색 - 항상 라이트
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: maxContentWidth),
+                        child: Container(
+                          color: Colors.white,  // 컨텐츠 영역 배경 - 항상 라이트
+                          child: child,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-              home: const InitialRouter(),
-              routes: {
-                '/permission_intro': (context) => const PermissionIntroScreen(),
-                '/onboarding': (context) => const OnboardingScreen(),
-                // '/home' 경로는 제거 - InitialRouter에서 직접 MainScreen 생성
-              },
+                  );
+                },
+                home: const InitialRouter(),
+                routes: {
+                  '/permission_intro': (context) => const PermissionIntroScreen(),
+                  '/onboarding': (context) => const OnboardingScreen(),
+                  // '/home' 경로는 제거 - InitialRouter에서 직접 MainScreen 생성
+                },
+              ),
             );
           },
         );
@@ -232,12 +210,30 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     // ⭐ 초기 탭 설정 (InitialRouter에서 결정한 값)
     _currentIndex = widget.initialIndex;
 
-    // ⭐ 탭 생성 (callback 전달)
+    // ⭐ 탭 생성 (callback 전달) - "달력테마" 탭은 제거함. 테마 실험은 다
+    // 끝났고 실제 선택 UI가 설정 탭 안으로 들어갔으니(테마 캐러셀 화면),
+    // 메인 탭 구성이 원래대로 3개로 되돌아옴.
+    //
+    // ⭐ CalendarTab만 Consumer+Theme로 한 겹 감쌈 - CalendarTab 내부의
+    // Theme.of(context) 호출들(_buildDateCell/_buildMonthlyOvertimeCard 등,
+    // this.context를 그대로 씀)이 선택된 달력 테마가 다크(메인·다크)일 때
+    // 실제로 다크 배색을 받게 하려면, CalendarTab "자기 자신"보다 위쪽
+    // 트리에서 Theme를 덮어써야 함 - CalendarTab의 build() 안에서 return값만
+    // Theme로 감싸면 this.context 기준 조회는 여전히 그 감싼 지점보다 위를
+    // 보게 되어 아무 효과가 없음(BuildContext는 위치 기반 조회라 이렇게
+    // 바깥에서 감싸는 게 유일하게 확실한 방법).
     _tabs = [
       NextAlarmTab(onSwipeToCalendar: () => _goToCalendar()),
-      CalendarTab(),
+      Consumer(
+        builder: (context, ref, _) {
+          final isDark = ref.watch(calendarThemeProvider).isDark;
+          return Theme(
+            data: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
+            child: CalendarTab(),
+          );
+        },
+      ),
       SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
-      const CalendarThemeLabScreen(),  // ⭐ 테스트 전용 탭 - 배포판에는 설정 안으로 들어갈 예정
     ];
 
     // ⭐ _scheduleGuardWakeup()이 triggerGuardCheck를 호출해서 Native 갱신 판단/실행까지 함
@@ -346,8 +342,6 @@ Future<void> _handleMethod(MethodCall call) async {
             BottomNavigationBarItem(icon: Icon(Icons.alarm), label: '다음알람'),
             BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: '달력'),
             BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
-            // ⭐ 테스트 전용 - 달력 테마 10개 비교. 배포판에서는 설정 화면 안으로 들어감.
-            BottomNavigationBarItem(icon: Icon(Icons.palette_outlined), label: '달력테마'),
           ],
         ),
       ),

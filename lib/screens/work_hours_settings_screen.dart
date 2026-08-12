@@ -1,8 +1,8 @@
 // lib/screens/work_hours_settings_screen.dart
 //
-// ⭐ 근로시간 및 OT 관련 설정 화면
-// 1. 근무 카드별 기본 근로시간 (1시간/30분 단위)
-// 2. 월별 총 근로시간을 합산할 기준 기간 (달력 월 vs 급여일 기준)
+// ⭐ 근무시간 및 OT 관련 설정 화면
+// 1. 근무 카드별 기본 근무시간 (1시간/30분 단위)
+// 2. 월별 총 근무시간을 합산할 기준 기간 (달력 월 vs 급여일 기준)
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -27,7 +27,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     final workSettings = ref.watch(workHoursSettingsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text('근로시간 및 OT 설정')),
+      appBar: AppBar(title: Text('근무시간 및 OT 설정')),
       body: schedule == null
           ? Center(
               child: Text(
@@ -60,7 +60,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '달력에서 근무를 바꾸면(예: 휴무 → 주간), 원래 패턴보다 늘어난 시간을 "이번 달 OT"에 자동으로 더해서 보여줄지 정해요. 월별/주별 총 근로시간 자체는 이 설정과 무관하게 항상 동일해요.',
+                  '달력에서 근무를 바꾸면(예: 휴무 → 주간), 원래 패턴보다 늘어난 시간을 "이번 달 OT"에 자동으로 더해서 보여줄지 정해요. 월별/주별 총 근무시간 자체는 이 설정과 무관하게 항상 동일해요.',
                   style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
                 ),
 
@@ -69,12 +69,12 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 SizedBox(height: 20.h),
 
                 Text(
-                  '근무별 기본 근로시간',
+                  '근무별 기본 근무시간',
                   style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '달력의 "이번 달 총 근로시간"과 "주별 근무시간"이 여기 값을 기준으로 계산돼요.',
+                  '달력의 "이번 달 총 근무시간"과 "주별 근무시간"이 여기 값을 기준으로 계산돼요.',
                   style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
                 ),
                 SizedBox(height: 16.h),
@@ -85,12 +85,12 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 SizedBox(height: 20.h),
 
                 Text(
-                  '월별 총 근로시간 기준 기간',
+                  '월별 총 근무시간 기준 기간',
                   style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '이번 달의 총 근로시간 및 OT 합산 기준을 정해요.',
+                  '이번 달의 총 근무시간 및 OT 합산 기준을 정해요.',
                   style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
                 ),
                 SizedBox(height: 12.h),
@@ -161,7 +161,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
   String _formatDuration(int minutes) {
     final h = minutes ~/ 60;
     final m = minutes % 60;
-    if (minutes == 0) return '0시간 (근로시간 미포함)';
+    if (minutes == 0) return '0시간 (근무시간 미포함)';
     if (m == 0) return '$h시간';
     return '$h시간 $m분';
   }
@@ -177,7 +177,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
           builder: (context, setDialogState) {
             final colorScheme = Theme.of(context).colorScheme;
             return AlertDialog(
-              title: Text('"$shift" 기본 근로시간'),
+              title: Text('"$shift" 기본 근무시간'),
               content: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,

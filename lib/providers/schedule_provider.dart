@@ -8,6 +8,7 @@ import '../models/alarm_template.dart';
 import '../models/alarm.dart';
 import 'package:flutter/services.dart';
 import '../services/widget_refresh_service.dart';
+import '../constants/alarm_limits.dart';
 
 
 final scheduleProvider = StateNotifierProvider<ScheduleNotifier, AsyncValue<ShiftSchedule?>>((ref) {
@@ -252,8 +253,8 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     final daysDiff = julianDayNumber(date.year, date.month, date.day) -
         julianDayNumber(now.year, now.month, now.day);
 
-    if (daysDiff >= 10) {
-      print('🔵 10일 이후 날짜라서 알람은 생성하지 않음 (자정 갱신 시 자동 생성됨)');
+    if (daysDiff >= kAlarmRefreshWindowDays) {
+      print('🔵 ${kAlarmRefreshWindowDays}일 이후 날짜라서 알람은 생성하지 않음 (자정 갱신 시 자동 생성됨)');
       return;  // assignedDates에만 저장하고 종료
     }
 

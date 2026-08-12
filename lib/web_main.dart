@@ -18,11 +18,17 @@
 // (해시 라우팅이라 정적 호스팅 어디에 올려도 새로고침 시 404가 안 남)
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'services/friend_share_service.dart';
 import 'screens/friend_calendar_view.dart';
 
-void main() {
+void main() async {
+  // ⭐ FriendCalendarView가 이제 table_calendar를 locale: 'ko_KR'로 쓰기 때문에
+  // (진짜 앱의 calendar_tab.dart와 동일) 날짜 심볼 데이터를 미리 초기화해야 함 -
+  // 안 하면 intl이 LocaleDataException을 던짐. main.dart와 동일한 초기화 패턴.
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('ko_KR', null);
   runApp(const ShiftBellWebViewApp());
 }
 
