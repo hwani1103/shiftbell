@@ -17,17 +17,8 @@ class WidgetRefreshService {
       print('⚠️ 위젯 갱신 요청 실패 (무시): $e');
     }
   }
-
-  // ⭐ 위젯은 앱의 Flutter SharedPreferences(theme_mode)를 직접 못 읽음 - 앱을
-  // 껐다 켜지 않아도 위젯이 즉시 라이트/다크를 따라가려면, 테마가 바뀔 때마다
-  // Native가 따로 보관하는 값을 명시적으로 갱신해줘야 함. (system Configuration의
-  // 다크모드 여부와 앱의 "수동으로 고른 테마"는 다른 개념이라 위젯이 OS 설정만
-  // 보면 앱에서 수동으로 바꾼 테마를 못 따라감 - 이게 실제로 겪은 버그였음)
-  static Future<void> pushTheme(bool isDark) async {
-    try {
-      await _platform.invokeMethod('setWidgetTheme', {'isDark': isDark});
-    } catch (e) {
-      print('⚠️ 위젯 테마 전달 실패 (무시): $e');
-    }
-  }
 }
+
+// ⭐ pushTheme()(위젯을 앱의 다크모드/9개 달력 테마에 맞춰 따라가게 하던 기능)는
+// 2026-08-13에 철회됨 - 위젯은 이제 항상 라이트(메인·화이트) 톤으로 고정.
+// CalendarWidgetProvider.kt 참고.

@@ -1,11 +1,11 @@
 {
-    "name": "shiftbell",
-    "short_name": "shiftbell",
+    "name": "교대시계 - 일정 공유",
+    "short_name": "교대시계",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "친구의 교대 근무 일정을 앱 없이 바로 확인하는 웹 뷰어",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

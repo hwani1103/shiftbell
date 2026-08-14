@@ -10,6 +10,7 @@ import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
+import 'screens/friend_list_screen.dart';
 import 'screens/permission_intro_screen.dart';
 import 'widgets/permission_warning_banner.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +21,7 @@ import 'providers/schedule_provider.dart';
 import 'providers/calendar_theme_provider.dart';
 import 'models/calendar_theme.dart';
 import 'theme/app_theme.dart';
-import 'services/widget_refresh_service.dart';
+import 'services/firebase_bootstrap.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,13 +66,15 @@ void main() async {
   await initializeDateFormatting('ko_KR', null);
   await DatabaseService.instance.database;
   await AlarmService().initialize();
+  // ⭐ 친구공유(Firestore) 초기화 - firebase_options.dart가 아직 플레이스홀더면
+  // 조용히 실패하고 친구공유 기능만 비활성화됨 (firebase_bootstrap.dart 참고).
+  await initFirebase();
 
   // ⭐ 앱 시작 전에 달력 테마 미리 로드 (깜빡임 방지) - 예전엔 "다크모드
   // on/off"를 미리 읽었는데, 이제는 9개 달력 테마 중 뭐가 선택돼 있는지를
   // 미리 읽음. 앱 전체 밝기는 항상 라이트 고정이고, 이 값은 오직 (1) 달력
   // 탭 자체가 어떤 테마로 그려질지 (2) 시스템 상태표시줄 아이콘 밝기에만 씀.
   final initialCalendarTheme = await CalendarThemeNotifier.loadInitial();
-  WidgetRefreshService.pushTheme(initialCalendarTheme.isDark);
 
   runApp(
     ProviderScope(
@@ -222,6 +225,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     // Theme로 감싸면 this.context 기준 조회는 여전히 그 감싼 지점보다 위를
     // 보게 되어 아무 효과가 없음(BuildContext는 위치 기반 조회라 이렇게
     // 바깥에서 감싸는 게 유일하게 확실한 방법).
+    // ⭐ "일정공유(구 친구공유)"를 설정 탭 안에 묻혀있던 항목에서 메인
+    // 바텀 네비게이션 4번째 탭으로 승격 - 다음알람(0)/달력(1)/일정공유(2)/설정(3).
+    // Native(Kotlin)에서 openTab으로 보내는 인덱스는 0(다음알람)/1(달력)뿐이라
+    // 이 순서 변경의 영향을 안 받음(AlarmGuardReceiver.kt/NotificationHelper.kt
+    // /CalendarWidgetProvider.kt 확인함).
     _tabs = [
       NextAlarmTab(onSwipeToCalendar: () => _goToCalendar()),
       Consumer(
@@ -233,6 +241,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           );
         },
       ),
+      const FriendListScreen(),
       SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
     ];
 
@@ -341,6 +350,7 @@ Future<void> _handleMethod(MethodCall call) async {
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.alarm), label: '다음알람'),
             BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: '달력'),
+            BottomNavigationBarItem(icon: Icon(Icons.people_outline), label: '일정공유'),
             BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
           ],
         ),

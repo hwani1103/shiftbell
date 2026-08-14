@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# FlutterFire CLI writes this, but google-services Gradle plugin is
+# intentionally not applied in this project (see 친구공유_v1_스펙.md) - unused
+android/app/google-services.json
+
+# firebase-tools hosting deploy cache
+.firebase/
+/android/.kotlin/

@@ -8,6 +8,7 @@ import '../models/alarm_template.dart';
 import '../models/alarm.dart';
 import 'package:flutter/services.dart';
 import '../services/widget_refresh_service.dart';
+import '../services/friend_sync_service.dart';
 import '../constants/alarm_limits.dart';
 
 
@@ -50,17 +51,29 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
 
     state = AsyncValue.data(savedSchedule);
     WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
+    FriendSyncService.instance.syncIfEnabled(savedSchedule);  // ⭐ 친구공유 중이면 Firestore도 갱신
   } catch (e, stack) {
     state = AsyncValue.error(e, stack);
     rethrow;
   }
 }
 
+  // ⭐ DB에는 이미 다른 곳(예: DatabaseService.renameShiftAtomic - 근무명 변경을 여러
+  // 테이블과 함께 하나의 트랜잭션으로 묶어야 해서 saveSchedule/updateSchedule을 못
+  // 씀)에서 저장이 끝난 스케줄을 Riverpod 상태에만 반영함 - DB에 다시 쓰지 않음(중복
+  // 쓰기 방지). 위젯 갱신/친구공유 동기화는 saveSchedule/updateSchedule과 동일하게 함.
+  void applyExternallyPersisted(ShiftSchedule schedule) {
+    state = AsyncValue.data(schedule);
+    WidgetRefreshService.refresh();
+    FriendSyncService.instance.syncIfEnabled(schedule);
+  }
+
   Future<void> updateSchedule(ShiftSchedule schedule) async {
     try {
       await DatabaseService.instance.updateShiftSchedule(schedule);
       state = AsyncValue.data(schedule);
       WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
+      FriendSyncService.instance.syncIfEnabled(schedule);  // ⭐ 친구공유 중이면 Firestore도 갱신
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
       rethrow;
@@ -353,6 +366,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
 
   state = AsyncValue.data(updatedSchedule);
   WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
+  FriendSyncService.instance.syncIfEnabled(updatedSchedule);  // ⭐ 친구공유 중이면 Firestore도 갱신
 
   print('✅ 스케줄 + 알람 변경 완료');
   try {

@@ -6,7 +6,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/calendar_theme.dart';
-import '../services/widget_refresh_service.dart';
 
 class CalendarThemeNotifier extends StateNotifier<CalendarThemeId> {
   CalendarThemeNotifier() : super(kDefaultCalendarThemeId);
@@ -23,11 +22,9 @@ class CalendarThemeNotifier extends StateNotifier<CalendarThemeId> {
     } catch (e) {
       print('❌ 달력 테마 저장 실패: $e');
     }
-    // ⭐ 위젯도 즉시 같은 테마(다크 여부)로 갱신 - 예전 theme_provider.dart의
-    // setThemeMode()가 하던 것과 동일한 역할. 위젯 자체가 9개 디자인을 전부
-    // 재현하진 못하지만(별도 후속 작업), 최소한 밝기(라이트/다크 배경·글자색)는
-    // 선택한 테마를 따라감.
-    WidgetRefreshService.pushTheme(id.isDark);
+    // ⭐ 위젯은 항상 라이트(메인·화이트) 고정이라(2026-08-13 결정, CalendarWidgetProvider.kt
+    // 참고) 여기서 위젯에 테마를 따로 안 알려줌 - 근무 데이터 자체가 바뀐 경우(근무변경 등)만
+    // WidgetRefreshService.refresh()로 다시 그리면 충분함(그건 schedule_provider.dart 쪽에서 함).
   }
 
   static Future<CalendarThemeId> loadInitial() async {

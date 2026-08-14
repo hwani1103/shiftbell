@@ -55,7 +55,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 16,  // v16: friends 테이블 추가 (친구 공유 코드 저장)
+      version: 17,  // v17: friends 테이블을 Firestore ownerId 기반으로 재설계 (친구공유_v1_스펙.md)
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -184,13 +184,15 @@ class DatabaseService {
     ''');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_date_overtime_date ON date_overtime(date)');
 
-    // ⭐ 신규: 친구 공유 코드 저장 (근무패턴/근무변경/선택적 메모의 1회성 스냅샷)
+    // ⭐ 친구 공유 - Firestore ownerId로 친구를 등록해두고, 마지막으로 성공 조회한
+    // 스케줄만 오프라인 대비용 캐시로 저장 (data_json은 nullable - fetch 전엔 없음).
+    // 친구공유_v1_스펙.md 참고.
     await db.execute('''
       CREATE TABLE IF NOT EXISTS friends(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
-        data_json TEXT NOT NULL,
-        has_memos INTEGER NOT NULL,
+        owner_id TEXT NOT NULL UNIQUE,
+        data_json TEXT,
         added_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       )
@@ -415,6 +417,25 @@ class DatabaseService {
     ''');
     print('✅ DB 업그레이드 완료 (v$oldVersion → v16): friends 테이블 추가');
   }
+
+  // v17: 친구공유 v1(Firestore) 전환 - friends 테이블을 owner_id 기반으로 재설계.
+  // ⭐ 아직 정식 출시 전 기능(베타 단계, 실사용자 스냅샷 데이터 없음)이라 기존
+  // data_json(전체 스냅샷)을 마이그레이션하지 않고 통째로 새로 만듦 - alarm_history
+  // 등과 달리 friends 테이블은 영구보존 대상이 아님([[history-permanence]] 무관).
+  if (oldVersion < 17) {
+    await db.execute('DROP TABLE IF EXISTS friends');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS friends(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        owner_id TEXT NOT NULL UNIQUE,
+        data_json TEXT,
+        added_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v17): friends 테이블을 Firestore ownerId 기반으로 재설계');
+  }
 }
 
   // === 기존 메서드들 유지 ===
@@ -534,53 +555,68 @@ class DatabaseService {
   /// 알람 삭제
   /// [createHistory]: false면 이력 생성 없이 삭제만 (달력/다음알람탭에서 삭제 시)
   /// [dismissType]: 이력 생성 시 사용 (swiped, cancelled_before_ring 등)
+  // ⭐ 이력 insert와 alarms delete를 하나의 트랜잭션으로 묶음 - 예전엔 두 개의
+  // 독립적인 await 호출이라, 그 사이(이력은 이미 기록됐는데 삭제는 아직 안 된)
+  // 아주 좁은 순간에 프로세스가 죽으면 "이력엔 취소됐다고 나오는데 alarms
+  // 테이블엔 그대로 남아있고, 네이티브 알람도 안 취소된" 상태가 될 수 있었음
+  // (그 알람이 실제로 다시 울릴 수 있음 - CustomAlarmReceiver의 "DB에 없으면
+  // 재생 안 함" 방어도 이 경우엔 못 걸러냄, DB에 여전히 있으니까). 트랜잭션으로
+  // 묶으면 크래시가 나도 SQLite가 전부 롤백해서 "취소 자체가 없었던 상태"로
+  // 돌아가므로 이 모순이 원천적으로 안 생김.
+  // ⭐ 이력 기록 실패 시(드묾) 동작은 그대로 유지 - catch에서 삼키고 삭제는
+  // 트랜잭션 안에서 계속 진행함(기존과 동일한 fail-open, 새로운 실패 모드 없음).
   Future<int> deleteAlarm(int id, {String dismissType = 'cancelled_before_ring', bool createHistory = true}) async {
     final db = await database;
+    late final int deletedCount;
 
-    // ⭐ 이력 기록: createHistory가 true일 때만
-    if (createHistory) {
-      try {
-        final alarmMaps = await db.query(
-          'alarms',
-          where: 'id = ?',
-          whereArgs: [id],
-        );
+    await db.transaction((txn) async {
+      // ⭐ 이력 기록: createHistory가 true일 때만
+      if (createHistory) {
+        try {
+          final alarmMaps = await txn.query(
+            'alarms',
+            where: 'id = ?',
+            whereArgs: [id],
+          );
 
-        if (alarmMaps.isNotEmpty) {
-          final alarmMap = alarmMaps.first;
-          final scheduledDate = alarmMap['date'] as String?;
-          final scheduledTime = alarmMap['time'] as String?;
-          final shiftType = alarmMap['shift_type'] as String?;
+          if (alarmMaps.isNotEmpty) {
+            final alarmMap = alarmMaps.first;
+            final scheduledDate = alarmMap['date'] as String?;
+            final scheduledTime = alarmMap['time'] as String?;
+            final shiftType = alarmMap['shift_type'] as String?;
 
-          // alarm_history에 이력 추가 (dismiss_type 파라미터 사용)
-          if (scheduledDate != null && scheduledTime != null) {
-            await db.insert('alarm_history', {
-              'alarm_id': id,
-              'scheduled_time': scheduledTime,
-              'scheduled_date': scheduledDate,
-              'actual_ring_time': DateTime.now().toIso8601String(),
-              'dismiss_type': dismissType,  // ⭐ 파라미터 사용
-              'snooze_count': 0,
-              'shift_type': shiftType,
-              'created_at': DateTime.now().toIso8601String(),
-            });
-            final historyText = dismissType == 'swiped' ? '알람 확인' : '알람 제거';
-            print('✅ alarm_history에 "$historyText" 기록 추가: ID=$id');
+            // alarm_history에 이력 추가 (dismiss_type 파라미터 사용)
+            if (scheduledDate != null && scheduledTime != null) {
+              await txn.insert('alarm_history', {
+                'alarm_id': id,
+                'scheduled_time': scheduledTime,
+                'scheduled_date': scheduledDate,
+                'actual_ring_time': DateTime.now().toIso8601String(),
+                'dismiss_type': dismissType,  // ⭐ 파라미터 사용
+                'snooze_count': 0,
+                'shift_type': shiftType,
+                'created_at': DateTime.now().toIso8601String(),
+              });
+              final historyText = dismissType == 'swiped' ? '알람 확인' : '알람 제거';
+              print('✅ alarm_history에 "$historyText" 기록 추가: ID=$id');
+            }
           }
+        } catch (e) {
+          print('⚠️ 알람 이력 기록 실패: $e');
         }
-      } catch (e) {
-        print('⚠️ 알람 이력 기록 실패: $e');
+      } else {
+        print('ℹ️ 알람 삭제 (이력 생성 안 함): ID=$id');
       }
-    } else {
-      print('ℹ️ 알람 삭제 (이력 생성 안 함): ID=$id');
-    }
 
-    // 알람 삭제
-    return await db.delete(
-      'alarms',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+      // 알람 삭제
+      deletedCount = await txn.delete(
+        'alarms',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    });
+
+    return deletedCount;
   }
   
   Future<int> saveShiftSchedule(ShiftSchedule schedule) async {
@@ -752,42 +788,72 @@ class DatabaseService {
     );
   }
 
-  // ⭐ 근무명 변경 (알람, 템플릿, 이력 테이블 모두 업데이트)
-  Future<void> updateShiftNames(Map<String, String> renamedShifts) async {
+  // ⭐ 근무명 변경 - alarms/shift_alarm_templates/alarm_history/alarm_creation_log
+  // 4개 테이블의 shift_type과 shift_schedule 행(패턴/색상/근무변경 등) 전부를 하나의
+  // 트랜잭션으로 묶어서 원자적으로 갱신함.
+  // ⭐ 예전엔 이 DB 갱신(구 updateShiftNames())과 scheduleProvider.saveSchedule()
+  // (별도 호출)이 서로 다른 시점에 실행돼서, 그 사이 크래시가 나면 "알람 테이블은
+  // 새 이름인데 스케줄 패턴은 옛 이름"인 모순된 상태가 될 수 있었음 - 이제 호출부
+  // (settings_tab.dart)가 이 메서드 하나만 부르면 됨.
+  // ⭐ alarm_creation_log도 이번에 추가함 - 예전엔 이 테이블만 빠져있어서, 근무명을
+  // 한 번이라도 바꾸면 영구 보존되는 생성 로그가 옛 이름으로 계속 남아 alarm_history
+  // (새 이름)와 대조가 안 맞는 문제가 있었음.
+  Future<void> renameShiftAtomic({
+    required Map<String, String> renamedShifts,
+    required ShiftSchedule newSchedule,
+  }) async {
     if (renamedShifts.isEmpty) return;
 
     final db = await database;
 
-    for (var entry in renamedShifts.entries) {
-      final oldName = entry.key;
-      final newName = entry.value;
+    await db.transaction((txn) async {
+      for (var entry in renamedShifts.entries) {
+        final oldName = entry.key;
+        final newName = entry.value;
 
-      // 1. alarms 테이블의 shift_type 업데이트
-      await db.update(
-        'alarms',
-        {'shift_type': newName},
-        where: 'shift_type = ?',
-        whereArgs: [oldName],
+        // 1. alarms 테이블의 shift_type 업데이트
+        await txn.update(
+          'alarms',
+          {'shift_type': newName},
+          where: 'shift_type = ?',
+          whereArgs: [oldName],
+        );
+
+        // 2. shift_alarm_templates 테이블의 shift_type 업데이트
+        await txn.update(
+          'shift_alarm_templates',
+          {'shift_type': newName},
+          where: 'shift_type = ?',
+          whereArgs: [oldName],
+        );
+
+        // 3. alarm_history 테이블의 shift_type 업데이트
+        await txn.update(
+          'alarm_history',
+          {'shift_type': newName},
+          where: 'shift_type = ?',
+          whereArgs: [oldName],
+        );
+
+        // 4. alarm_creation_log 테이블의 shift_type 업데이트 (영구 보존 로그 - 예전엔 빠져있었음)
+        await txn.update(
+          'alarm_creation_log',
+          {'shift_type': newName},
+          where: 'shift_type = ?',
+          whereArgs: [oldName],
+        );
+
+        print('✅ 근무명 변경(원자적): $oldName → $newName');
+      }
+
+      // 5. shift_schedule 행(패턴/근무명 목록/색상/근무변경/근로시간) 업데이트
+      await txn.update(
+        'shift_schedule',
+        newSchedule.toMap(),
+        where: 'id = ?',
+        whereArgs: [newSchedule.id],
       );
-
-      // 2. shift_alarm_templates 테이블의 shift_type 업데이트
-      await db.update(
-        'shift_alarm_templates',
-        {'shift_type': newName},
-        where: 'shift_type = ?',
-        whereArgs: [oldName],
-      );
-
-      // 3. alarm_history 테이블의 shift_type 업데이트
-      await db.update(
-        'alarm_history',
-        {'shift_type': newName},
-        where: 'shift_type = ?',
-        whereArgs: [oldName],
-      );
-
-      print('✅ 근무명 변경: $oldName → $newName');
-    }
+    });
   }
 
   // ⭐ 신규: 알람 이력 조회
@@ -1106,17 +1172,17 @@ Future<void> resetAllAlarmHistoryAndLog() async {
 }
 
 // ===== 친구 공유 관련 메서드 =====
-// ⭐ Firebase 없이 동작하는 1회성 스냅샷 저장소. 나중에 Firebase로 옮길 때도
-// FriendProvider가 이 메서드들 대신 Firestore 호출을 쓰도록만 바꾸면 되고,
-// data_json의 내용물(FriendScheduleData 포맷)은 그대로 재사용 가능함.
+// ⭐ 친구공유 v1(Firestore) - friends 테이블은 "누구를 등록했는지"(owner_id)와 마지막
+// 조회 결과 캐시(data_json, 오프라인 대비용)만 들고 있음. 실제 최신 데이터는 항상
+// FriendSyncService.fetchByOwnerId()로 Firestore에서 다시 받아옴 (friend_provider.dart 참고).
 
-Future<int> insertFriend({required String name, required String dataJson, required bool hasMemos}) async {
+Future<int> insertFriend({required String name, required String ownerId, String? dataJson}) async {
   final db = await database;
   final now = DateTime.now().toIso8601String();
   return await db.insert('friends', {
     'name': name,
+    'owner_id': ownerId,
     'data_json': dataJson,
-    'has_memos': hasMemos ? 1 : 0,
     'added_at': now,
     'updated_at': now,
   });
@@ -1132,14 +1198,13 @@ Future<int> deleteFriend(int id) async {
   return await db.delete('friends', where: 'id = ?', whereArgs: [id]);
 }
 
-// ⭐ 친구가 새 코드를 보내왔을 때 스냅샷 갱신 (같은 친구 id 유지, 데이터만 교체)
-Future<int> updateFriendData(int id, {required String dataJson, required bool hasMemos}) async {
+// ⭐ Firestore에서 새로 fetch한 결과로 캐시 갱신 (같은 친구 id 유지, 데이터만 교체)
+Future<int> updateFriendData(int id, {required String dataJson}) async {
   final db = await database;
   return await db.update(
     'friends',
     {
       'data_json': dataJson,
-      'has_memos': hasMemos ? 1 : 0,
       'updated_at': DateTime.now().toIso8601String(),
     },
     where: 'id = ?',

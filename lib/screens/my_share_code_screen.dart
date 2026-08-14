@@ -1,25 +1,25 @@
 // screens/my_share_code_screen.dart
 //
-// ⭐ "내 공유 코드 만들기" - 내 근무 패턴(+근무변경)과, 선택 시 메모까지 담아
-// 코드 하나로 압축해서 보여줌. 친구가 이 텍스트를 카카오톡 등으로 받아서
-// "친구 추가" 화면에 붙여넣으면 내 스케줄이 그 친구 앱에 그대로 들어감.
-// ⭐ 절대 포함 안 되는 것: OT, 근로시간(shiftDurations) 설정, 알람 설정 전부.
+// ⭐ "내 근무표 공유하기" - 친구공유 v1(Firestore). 예전엔 코드를 누를 때마다 그 순간의
+// 스냅샷을 새로 인코딩했는데, 이제 코드/링크는 Firestore 문서 ID를 가리키는 "영구 주소"라
+// 한 번만 발급하면 됨 - 이후 근무가 바뀌어도(근무변경 등) 코드는 그대로고, 그 코드를 열어본
+// 친구가 매번 최신 상태를 자동으로 받아봄. 그래서 화면도 "생성 버튼"이 아니라 "공유 시작 →
+// 공유 중" 상태 전환으로 단순화함.
+// ⭐ 절대 포함 안 되는 것: 메모, OT, 근로시간(shiftDurations) 설정, 알람 설정 전부.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
-import '../models/friend_schedule.dart';
-import '../providers/schedule_provider.dart';
-import '../services/database_service.dart';
 import '../services/friend_share_service.dart';
+import '../services/friend_sync_service.dart';
+import '../services/firebase_bootstrap.dart';
+import '../providers/schedule_provider.dart';
 
-// ⭐ 트랙1(웹) 배포 도메인 - 아직 실제로 호스팅한 적이 없어서 임시값임.
-// web/ 폴더(flutter build web -t lib/web_main.dart 결과물)를 Firebase
-// Hosting/Netlify/GitHub Pages 등에 올린 뒤, 실제 배정된 도메인으로 이 한
-// 줄만 바꾸면 아래 "웹에서 보기 링크"가 바로 진짜로 동작함.
-const String kWebViewBaseUrl = 'https://shiftbell-share.example.com';
+// ⭐ 트랙1(웹) 배포 도메인 - Firebase Hosting(shiftbell-29f31)에 실제 배포 완료
+// (2026-08-14, `firebase deploy --only hosting`). build/web을 다시 배포하려면
+// `flutter build web -t lib/web_main.dart` 후 같은 명령을 다시 실행하면 됨.
+const String kWebViewBaseUrl = 'https://shiftbell-29f31.web.app';
 
 class MyShareCodeScreen extends ConsumerStatefulWidget {
   const MyShareCodeScreen({super.key});
@@ -30,31 +30,69 @@ class MyShareCodeScreen extends ConsumerStatefulWidget {
 
 class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
   final _nameController = TextEditingController();
-  bool _includeMemos = false;
-  String? _generatedCode;
-  bool _generating = false;
+  final _nameFocusNode = FocusNode();
+  bool _loading = true;
+  bool _working = false;
+  bool _sharingEnabled = false;
+  String? _ownerId;
+  String? _savedName; // ⭐ Firestore에 마지막으로 반영된 이름 - 이름 변경 감지용
 
   @override
   void initState() {
     super.initState();
-    _loadSavedName();
+    _load();
+    // ⭐ 이름 입력란에서 포커스가 빠질 때(다른 곳 탭/키보드 닫기) 바뀐 이름을
+    // 자동 저장 - 이미 공유 중이면 별도 "저장" 버튼 없이도 바로 반영됨.
+    _nameFocusNode.addListener(() {
+      if (!_nameFocusNode.hasFocus) _maybeSaveName();
+    });
   }
 
-  Future<void> _loadSavedName() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString('friend_share_my_name');
-    if (saved != null && mounted) {
-      setState(() => _nameController.text = saved);
-    }
+  Future<void> _load() async {
+    final enabled = await FriendSyncService.instance.isSharingEnabled();
+    final savedName = await FriendSyncService.instance.savedMyName();
+    final ownerId = enabled ? await FriendSyncService.instance.getOrCreateOwnerId() : null;
+    if (!mounted) return;
+    setState(() {
+      _sharingEnabled = enabled;
+      _ownerId = ownerId;
+      _savedName = savedName;
+      _nameController.text = savedName ?? '';
+      _loading = false;
+    });
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _nameFocusNode.dispose();
     super.dispose();
   }
 
-  Future<void> _generate() async {
+  // ⭐ 이미 공유 중인 상태에서 이름만 바꿨을 때 - 코드/링크는 그대로 두고 표시 이름만
+  // Firestore에 반영. 공유 시작 전이면 그냥 다음 "공유 시작하기"에 쓰일 값이라 저장할
+  // 필요 없음(그때 _startSharing이 알아서 씀).
+  Future<void> _maybeSaveName() async {
+    if (!_sharingEnabled) return;
+    final name = _nameController.text.trim();
+    if (name.isEmpty || name == _savedName) return;
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) return;
+    final ok = await FriendSyncService.instance.updateMyName(newName: name, schedule: schedule);
+    if (!mounted) return;
+    if (ok) {
+      setState(() => _savedName = name);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('공유 이름을 변경했어요')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('이름 변경에 실패했어요. 네트워크를 확인해주세요')),
+      );
+    }
+  }
+
+  Future<void> _startSharing() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -62,193 +100,242 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
       );
       return;
     }
+    if (!firebaseReady) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('아직 친구공유 서버 연결 전이에요. 잠시 후 다시 시도해주세요')),
+      );
+      return;
+    }
 
-    setState(() => _generating = true);
+    final schedule = ref.read(scheduleProvider).value;
+    if (schedule == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('아직 근무 스케줄이 설정되지 않았어요')),
+      );
+      return;
+    }
+
+    setState(() => _working = true);
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('friend_share_my_name', name);
-
-      final schedule = ref.read(scheduleProvider).value;
-      if (schedule == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('아직 근무 스케줄이 설정되지 않았어요')),
-          );
-        }
+      final ownerId = await FriendSyncService.instance.startSharing(schedule: schedule, ownerName: name);
+      if (!mounted) return;
+      if (ownerId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('공유 시작에 실패했어요. 네트워크 연결을 확인하고 다시 시도해주세요')),
+        );
         return;
       }
-
-      Map<String, List<String>>? memos;
-      if (_includeMemos) {
-        // ⭐ 근래 메모 위주로 공유 (과거 30일 ~ 미래 120일) - 무제한으로 다
-        // 긁으면 코드가 너무 길어져서 붙여넣기가 번거로워짐.
-        final now = DateTime.now();
-        final memoMap = await DatabaseService.instance.getMemosForDateRange(
-          now.subtract(const Duration(days: 30)),
-          now.add(const Duration(days: 120)),
-        );
-        memos = memoMap.map((date, list) => MapEntry(date, list.map((m) => m.memoText).toList()));
-      }
-
-      final data = FriendScheduleData(
-        ownerName: name,
-        isRegular: schedule.isRegular,
-        pattern: schedule.pattern,
-        todayIndex: schedule.todayIndex,
-        startDate: schedule.startDate,
-        shiftColors: schedule.shiftColors ?? {},
-        assignedDates: schedule.assignedDates ?? {},
-        memos: memos,
-        exportedAt: DateTime.now(),
-      );
-
-      final code = FriendShareService.encode(data);
-      if (mounted) setState(() => _generatedCode = code);
+      setState(() {
+        _sharingEnabled = true;
+        _ownerId = ownerId;
+        _savedName = name;
+      });
     } finally {
-      if (mounted) setState(() => _generating = false);
+      if (mounted) setState(() => _working = false);
     }
   }
 
-  void _copyCode() {
-    if (_generatedCode == null) return;
-    Clipboard.setData(ClipboardData(text: _generatedCode!));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('복사했어요! 카카오톡 등으로 친구에게 붙여넣기 해주세요')),
+  Future<void> _stopSharing() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('공유 중지'),
+        content: const Text(
+          '공유를 중지하면 친구가 더 이상 내 근무표를 볼 수 없어요. 계속할까요?\n\n'
+          '(다시 공유하려면 이 화면에서 "공유 시작하기"를 다시 누르면 돼요 - 코드/링크는 그대로라 '
+          '친구가 새로 받을 필요 없이 다시 보이게 돼요)',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('중지')),
+        ],
+      ),
     );
+    if (confirm != true) return;
+
+    setState(() => _working = true);
+    try {
+      await FriendSyncService.instance.stopSharing();
+      if (!mounted) return;
+      setState(() {
+        _sharingEnabled = false;
+        _ownerId = null;
+      });
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
   }
 
-  // ⭐ 앱 미설치자(트랙1)용 - 코드를 URL 쿼리로 실은 웹 링크. 클릭만 하면
-  // 앱 설치 없이 바로 내 근무표를 볼 수 있음(FriendCalendarView 그대로 재사용).
-  String get _webViewLink => '$kWebViewBaseUrl/#/?code=$_generatedCode';
+  void _copy(String text, String message) {
+    Clipboard.setData(ClipboardData(text: text));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
 
-  // ⭐ OS 공유 시트(카카오톡/문자/기타 앱 선택)로 바로 넘김 - 코드 자체(앱
-  // 사용자용, 트랙2)와 웹 링크(비사용자용, 트랙1)를 한 메시지에 같이 담아서,
-  // 받는 사람이 앱이 있든 없든 알아서 원하는 방식으로 쓸 수 있게 함.
+  String get _code => FriendShareService.encodeOwnerId(_ownerId!);
+  String get _webViewLink => '$kWebViewBaseUrl/#/?code=$_code';
+
   void _shareCode() {
-    if (_generatedCode == null) return;
     final name = _nameController.text.trim();
     Share.share(
       '$name님의 근무표를 공유해요! 🗓️\n\n'
       '▶ 앱 없이 바로 보기: $_webViewLink\n\n'
-      '▶ 교대시계 앱 사용 중이면 "친구 추가"에 아래 코드를 붙여넣어주세요:\n$_generatedCode',
+      '▶ 교대시계 앱 사용 중이면 "친구 추가"에 아래 코드를 붙여넣어주세요:\n$_code\n\n'
+      '한 번만 열어도 되고, 나중에 다시 열면 그때그때 최신 근무표가 자동으로 보여요.',
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: Text('내 공유 코드 만들기', style: TextStyle(fontSize: 18.sp))),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('친구에게 보일 이름', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-            SizedBox(height: 6.h),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                hintText: '예: 김철수',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
-                contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-              ),
-              style: TextStyle(fontSize: 14.sp),
-            ),
-            SizedBox(height: 16.h),
-            Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: Row(
+      appBar: AppBar(title: Text('내 일정 공유하기', style: TextStyle(fontSize: 18.sp))),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: EdgeInsets.all(20.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.note_alt_outlined, size: 20.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  SizedBox(width: 10.w),
-                  Expanded(
-                    child: Text('메모도 같이 공유하기', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600)),
+                  // ⭐ 별도 라벨 없이 "친구에게 보일 이름을 적어주세요"를 필드
+                  // placeholder(hintText) 자체로 씀 - 비어있을 때만 보이고, 실제
+                  // 값(공유 중이면 저장된 이름)이 있으면 그 값이 표시됨.
+                  // 예전엔 공유 시작 후 이 필드가 비활성화돼서 이름을 못 바꿨음 -
+                  // 이제 언제든 편집 가능하고, 포커스를 빠져나가면(_maybeSaveName)
+                  // 공유 중일 땐 바로 Firestore에도 반영됨.
+                  TextField(
+                    controller: _nameController,
+                    focusNode: _nameFocusNode,
+                    decoration: InputDecoration(
+                      hintText: '친구에게 보일 이름을 적어주세요',
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                    ),
+                    style: TextStyle(fontSize: 14.sp),
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _maybeSaveName(),
                   ),
-                  Switch(
-                    value: _includeMemos,
-                    onChanged: (v) => setState(() => _includeMemos = v),
+                  SizedBox(height: 8.h),
+                  Text(
+                    '내 근무 스케줄과 근무 변경 사항이 공유됩니다.\n메모, OT, 근무시간, 알람 설정은 공유되지 않습니다.',
+                    style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
                   ),
+                  SizedBox(height: 24.h),
+                  if (!_sharingEnabled)
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _working ? null : _startSharing,
+                        style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14.h)),
+                        child: _working
+                            ? SizedBox(width: 18.w, height: 18.w, child: const CircularProgressIndicator(strokeWidth: 2))
+                            : Text('공유 시작하기', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                      ),
+                    )
+                  else if (_ownerId == null)
+                    // ⭐ 공유는 켜져 있는데 이번 로드에서 익명 로그인이 실패한 경우
+                    // (오프라인 등) - _ownerId!를 그대로 쓰면 크래시라 별도 안내로 방어.
+                    Container(
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.sync_problem, size: 18.sp, color: Theme.of(context).colorScheme.onErrorContainer),
+                          SizedBox(width: 8.w),
+                          Expanded(
+                            child: Text(
+                              '연결에 실패했어요. 네트워크 연결을 확인하고 화면을 다시 열어주세요',
+                              style: TextStyle(fontSize: 12.5.sp, color: Theme.of(context).colorScheme.onErrorContainer),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else ...[
+                    Text('내 공유 코드', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                    SizedBox(height: 8.h),
+                    _CopyBox(text: _code, monospace: true, onCopy: () => _copy(_code, '코드를 복사했어요')),
+                    SizedBox(height: 6.h),
+                    Text(
+                      '이 코드를 친구에게 보내고, 친구가 앱에서 "친구 추가"에 붙여넣으면 내 일정 공유가 완료돼요.',
+                      style: TextStyle(fontSize: 11.5.sp, color: colorScheme.onSurfaceVariant),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text('앱 설치 없이 내 일정 공유하기', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                    SizedBox(height: 8.h),
+                    _CopyBox(text: _webViewLink, onCopy: () => _copy(_webViewLink, '링크를 복사했어요')),
+                    SizedBox(height: 6.h),
+                    Text(
+                      '위 링크를 공유하면 앱 설치 없이 내 일정을 공유할 수 있어요.\n'
+                      '작업 표시줄의 화살표 버튼을 눌러 홈에서 바로가기 기능을 사용할 수 있습니다.',
+                      style: TextStyle(fontSize: 11.5.sp, color: colorScheme.onSurfaceVariant),
+                    ),
+                    SizedBox(height: 20.h),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _shareCode,
+                        icon: Icon(Icons.share, size: 18.sp),
+                        label: Text('공유하기', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14.h)),
+                      ),
+                    ),
+                    // ⭐ "공유 중지"를 공유하기 버튼과 더 떨어뜨리고(실수 클릭 방지),
+                    // 텍스트 링크가 아니라 빨간 배경의 진짜 버튼으로(공유하기와 같은
+                    // border radius) - "너무 밋밋해서 눈에 안 띈다"는 피드백.
+                    SizedBox(height: 20.h),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        onPressed: _working ? null : _stopSharing,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colorScheme.errorContainer,
+                          foregroundColor: colorScheme.onErrorContainer,
+                          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                          elevation: 0,
+                        ),
+                        child: Text('공유 중지', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
-            SizedBox(height: 6.h),
-            Text(
-              '근무 패턴과 근무변경 내역은 항상 공유됩니다. OT · 근로시간 설정 · 알람 설정은 절대 공유되지 않습니다.',
-              style: TextStyle(fontSize: 11.sp, color: Theme.of(context).colorScheme.outline),
+    );
+  }
+}
+
+class _CopyBox extends StatelessWidget {
+  final String text;
+  final bool monospace;
+  final VoidCallback onCopy;
+  const _CopyBox({required this.text, required this.onCopy, this.monospace = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).colorScheme.outline),
+              borderRadius: BorderRadius.circular(8.r),
+              color: Theme.of(context).colorScheme.surface,
             ),
-            SizedBox(height: 24.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _generating ? null : _generate,
-                style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14.h)),
-                child: _generating
-                    ? SizedBox(width: 18.w, height: 18.w, child: const CircularProgressIndicator(strokeWidth: 2))
-                    : Text('공유 코드 생성', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
-              ),
+            child: SelectableText(
+              text,
+              style: TextStyle(fontSize: 11.5.sp, fontFamily: monospace ? 'monospace' : null),
             ),
-            if (_generatedCode != null) ...[
-              SizedBox(height: 20.h),
-              Text('생성된 코드', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-              SizedBox(height: 8.h),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
-                  borderRadius: BorderRadius.circular(8.r),
-                  color: Theme.of(context).colorScheme.surface,
-                ),
-                child: SelectableText(_generatedCode!, style: TextStyle(fontSize: 11.sp, fontFamily: 'monospace')),
-              ),
-              SizedBox(height: 10.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _copyCode,
-                      icon: Icon(Icons.copy, size: 18.sp),
-                      label: Text('코드 복사', style: TextStyle(fontSize: 13.sp)),
-                      style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12.h)),
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _shareCode,
-                      icon: Icon(Icons.share, size: 18.sp),
-                      label: Text('공유하기', style: TextStyle(fontSize: 13.sp)),
-                      style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12.h)),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20.h),
-              Text('앱 없는 친구용 웹 링크', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-              SizedBox(height: 4.h),
-              Text(
-                '⚠️ 아직 실제 배포 전이라 지금은 예시 링크예요. web 폴더를 호스팅에 올린 뒤 실제 도메인으로 바뀌면 바로 동작합니다 (아래 최종 안내 참고).',
-                style: TextStyle(fontSize: 10.5.sp, color: Colors.orange.shade800),
-              ),
-              SizedBox(height: 8.h),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
-                  borderRadius: BorderRadius.circular(8.r),
-                  color: Theme.of(context).colorScheme.surface,
-                ),
-                child: SelectableText(_webViewLink, style: TextStyle(fontSize: 11.sp)),
-              ),
-            ],
-          ],
+          ),
         ),
-      ),
+        SizedBox(width: 8.w),
+        IconButton(onPressed: onCopy, icon: Icon(Icons.copy, size: 18.sp)),
+      ],
     );
   }
 }

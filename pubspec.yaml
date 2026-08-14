@@ -48,10 +48,27 @@ dependencies:
   # ⭐ 친구 공유 - 카카오톡/SMS 등 OS 공유 시트로 바로 넘기기
   share_plus: ^10.1.4
 
+  # ⭐ 친구 공유 v1 - Firestore 연동 (친구공유_v1_스펙.md 참고). firebase_options.dart는
+  # 아직 플레이스홀더 - `flutterfire configure` 실행 전까지는 Firebase.initializeApp()이
+  # 조용히 실패하고 친구공유 기능만 비활성화됨 (firebase_bootstrap.dart 참고, 다른 기능엔
+  # 영향 없음).
+  # ⭐ 2026-08-14: 3.x/5.x대는 firebase_core_web이 구식 JS interop(package:js)이라
+  # 최신 Flutter web 부트스트랩과 안 맞아 Firebase.initializeApp()이 웹에서
+  # "channel-error"로 조용히 실패했음(네이티브 앱은 영향 없음 - JS interop은 웹 전용
+  # 경로). firebase_core_web 3.x(dart:js_interop 재작성)로 넘어가는 4.x/6.x대로 업그레이드.
+  firebase_core: ^4.13.0
+  cloud_firestore: ^6.8.0
+  # ⭐ 로그인 화면 없이 "이 기기"를 구분하기 위한 익명 인증. Firestore 보안 규칙이
+  # "본인 문서만 write 가능"을 실제로 강제하려면(문서 ID를 안다고 해서 write까지
+  # 되면 안 됨 - 친구는 read만 해야 함) uid가 필요함. Spark 무료 플랜 포함,
+  # 사용자가 콘솔에서 "Anonymous" 로그인 방법만 켜주면 됨.
+  firebase_auth: ^6.5.7
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.3
 
 flutter:
   uses-material-design: true
@@ -59,7 +76,15 @@ flutter:
   # assets:
   #   - assets/sounds/  # 제거: res/raw만 사용
 
-# 앱 아이콘 (나중에 설정)
-# flutter_launcher_icons:
-#   android: true
-#   image_path: "assets/images/app_icon.png"
+# ⭐ 앱 아이콘 - 그동안 app_icon.svg(교대시계: 시계+알람벨, 레포 루트)만 있고 실제
+# 런처 아이콘엔 반영된 적이 없어서 안드로이드 기본 Flutter 로고가 그대로 떠 있었음
+# (디버그/릴리즈 여부와 무관 - 빌드 모드 문제가 아니라 애초에 아이콘 자체를 생성/적용한
+# 적이 없었던 것). 그 SVG를 1024x1024 PNG로 렌더링해서 assets/icon/에 넣고
+# flutter_launcher_icons로 전체 밀도 아이콘 + 적응형 아이콘(전경/배경)을 생성함.
+# `flutter pub run flutter_launcher_icons` 실행하면 android/app/src/main/res/mipmap-*/
+# 전체가 재생성됨 - 아이콘을 다시 바꾸고 싶으면 이 두 PNG만 교체하고 다시 실행하면 됨.
+flutter_launcher_icons:
+  android: "ic_launcher"
+  image_path: "assets/icon/app_icon.png"
+  adaptive_icon_background: "#3049A0"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"

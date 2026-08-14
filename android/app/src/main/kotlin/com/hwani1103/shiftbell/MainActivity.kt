@@ -293,14 +293,6 @@ override fun onNewIntent(intent: Intent) {
                     CalendarWidgetProvider.requestUpdate(applicationContext)
                     result.success(null)
                 }
-                // ⭐ 앱의 라이트/다크 테마(수동 설정 포함)를 위젯에도 반영. 위젯은
-                // Flutter의 SharedPreferences(theme_mode)를 직접 못 읽으므로, 테마가
-                // 바뀔 때마다 Flutter가 이 값을 명시적으로 넘겨줌.
-                "setWidgetTheme" -> {
-                    val isDark = call.argument<Boolean>("isDark") ?: false
-                    CalendarWidgetProvider.setThemeOverride(applicationContext, isDark)
-                    result.success(null)
-                }
                 else -> result.notImplemented()
             }
         }

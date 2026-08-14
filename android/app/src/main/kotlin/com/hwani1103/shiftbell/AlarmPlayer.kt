@@ -171,10 +171,18 @@ class AlarmPlayer(private val context: Context) {
                 return
             }
 
-            // ⭐ 원래 시스템 알람 볼륨 저장
+            // ⭐ 원래 시스템 알람 볼륨 저장 - 이미 저장된 값이 있으면(=다른 알람이 아직
+            // 재생 중이었는데 이 알람이 그걸 밀어내고 새로 시작하는 경우) 절대 덮어쓰지
+            // 않음. 안 그러면 그 "다른 알람"이 이미 50%로 낮춰둔 볼륨을 "원래 볼륨"으로
+            // 잘못 저장해버려서, 나중에 stopAlarm()이 "복원"해도 실제로는 50%에 영구히
+            // 고정되는 버그가 있었음 (근접한 시간에 알람이 두 개 이상 겹칠 때 재현됨).
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            originalAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
-            Log.d("AlarmPlayer", "📊 원래 시스템 알람 볼륨 저장: $originalAlarmVolume")
+            if (originalAlarmVolume == -1) {
+                originalAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+                Log.d("AlarmPlayer", "📊 원래 시스템 알람 볼륨 저장: $originalAlarmVolume")
+            } else {
+                Log.d("AlarmPlayer", "📊 이미 저장된 원래 볼륨 유지: $originalAlarmVolume (겹쳐 울리는 알람)")
+            }
 
             // ⭐ 시스템 알람 볼륨을 50%로 임시 변경
             val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
@@ -220,10 +228,15 @@ class AlarmPlayer(private val context: Context) {
     // 시스템 기본 알람 사운드 재생
     private fun playDefaultSound(volume: Float) {
         try {
-            // ⭐ 원래 시스템 알람 볼륨 저장
+            // ⭐ 원래 시스템 알람 볼륨 저장 - 이미 저장된 값이 있으면 덮어쓰지 않음
+            // (playCustomSound와 동일한 이유 - 겹쳐 울리는 알람의 볼륨 복원 버그 방지)
             val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            originalAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
-            Log.d("AlarmPlayer", "📊 원래 시스템 알람 볼륨 저장: $originalAlarmVolume")
+            if (originalAlarmVolume == -1) {
+                originalAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
+                Log.d("AlarmPlayer", "📊 원래 시스템 알람 볼륨 저장: $originalAlarmVolume")
+            } else {
+                Log.d("AlarmPlayer", "📊 이미 저장된 원래 볼륨 유지: $originalAlarmVolume (겹쳐 울리는 알람)")
+            }
 
             // ⭐ 시스템 알람 볼륨을 50%로 임시 변경
             val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)

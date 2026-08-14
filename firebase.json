@@ -1,0 +1,10 @@
+{
+  "flutter": {"platforms": {"dart": {"lib/firebase_options.dart": {"projectId": "shiftbell-29f31", "configurations": {"android": "1:52312015153:android:05c0a871247af532147010", "web": "1:52312015153:web:a73efa3a9ef88b09147010"}}}}},
+  "hosting": {
+    "public": "build/web",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {"source": "**", "destination": "/index.html"}
+    ]
+  }
+}

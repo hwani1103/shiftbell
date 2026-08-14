@@ -1,0 +1,32 @@
+// firestore.rules
+//
+// ⭐ 친구공유 v1 보안 규칙 (친구공유_v1_스펙.md 참고). Firebase 콘솔 → Firestore Database
+// → 규칙 탭에 그대로 붙여넣고 배포하면 됨. 사용자가 직접 해야 하는 일(친구공유_v1_스펙.md
+// "사용자가 직접 해야 할 일" 참고) 중 하나 - Claude가 대신 배포할 수 없음.
+//
+// ⭐ 설계:
+// - 문서 ID(ownerId) = Firebase 익명 인증(Anonymous Auth) uid. 콘솔의 Authentication →
+//   Sign-in method에서 "Anonymous"를 켜야 앱이 로그인할 수 있음(무료, Spark 포함).
+// - read(get): 문서 ID를 아는 사람이면 누구나 - 공유 코드/링크 자체가 "이 ID를 안다"는
+//   증거라 별도 인증 없이 열람 가능해야 함(앱 미설치 웹뷰어 방문자도 봐야 하므로).
+//   list는 아예 규칙을 정의하지 않아 기본값(거부)으로 남겨둠 - 전체 목록 열람 원천 차단.
+// - write: request.auth.uid가 문서 ID와 일치할 때만. 코드를 받은 친구도 문서 ID는
+//   알지만 자기 uid는 다르므로 절대 덮어쓸 수 없음 - "문서 ID = read용 열쇠,
+//   uid = write용 열쇠"로 역할이 분리됨.
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /friend_schedules/{ownerId} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if request.auth != null && request.auth.uid == ownerId;
+      allow delete: if request.auth != null && request.auth.uid == ownerId;
+    }
+
+    // ⭐ 그 외 모든 컬렉션은 기본 거부 - 이 앱은 friend_schedules 하나만 씀.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

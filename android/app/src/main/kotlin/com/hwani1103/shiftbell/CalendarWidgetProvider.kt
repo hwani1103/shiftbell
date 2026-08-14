@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -49,7 +48,10 @@ class CalendarWidgetProvider : AppWidgetProvider() {
         private const val TAG = "CalendarWidgetProvider"
         private const val LARGE_MODE_MIN_HEIGHT_DP = 400
 
-        // ⭐ 라이트 모드 색상 (app_theme.dart lightTheme과 동일한 값)
+        // ⭐ 위젯은 항상 라이트(메인·화이트) 톤 고정 - 앱 쪽 달력 테마(9종) 선택과 무관하게
+        // 위젯은 테마를 따라가지 않기로 결정함(2026-08-13, 9종 반영 시도 후 철회 - 위젯
+        // 전용 렌더링을 테마마다 다르게 유지보수하는 비용 대비 효과가 낮다고 판단). 다크모드도
+        // 마찬가지로 지원 안 함 - 값 하나(app_theme.dart lightTheme과 동일)로 고정.
         private const val LIGHT_TEXT_NORMAL = "#FF000000"
         private const val LIGHT_TEXT_SUNDAY = "#FFF44336"
         private const val LIGHT_TEXT_TODAY = "#FFFFFFFF"
@@ -60,18 +62,6 @@ class CalendarWidgetProvider : AppWidgetProvider() {
         // 반투명 처리 (calendar_tab.dart: onSurfaceVariant.withOpacity(0.5) / red.withOpacity(0.3))
         private const val LIGHT_TEXT_OUTSIDE = "#80616161"
         private const val LIGHT_TEXT_OUTSIDE_SUNDAY = "#4DF44336"
-
-        // ⭐ 다크 모드 색상 (app_theme.dart darkTheme과 동일한 값)
-        private const val DARK_TEXT_NORMAL = "#FFF5F7FB"
-        private const val DARK_TEXT_SUNDAY = "#FFE57373"
-        private const val DARK_TEXT_TODAY = "#FF1A1F2E"
-        private const val DARK_TEXT_TODAY_HOLIDAY = "#FFB71C1C"
-        private const val DARK_HEADER_TEXT = "#FFF5F7FB"
-        private const val DARK_NO_SHIFT_COLOR = "#FF2E3547"
-        // ⭐ 이번 달이 아닌 날짜 (calendar_tab.dart: onSurfaceVariant.withOpacity(0.5) /
-        // red.shade300.withOpacity(0.5))
-        private const val DARK_TEXT_OUTSIDE = "#80D8DBE5"
-        private const val DARK_TEXT_OUTSIDE_SUNDAY = "#80E57373"
 
         // ⭐ 근무색 배경 위 텍스트 자동 대비 색상 (shift_schedule.dart isBright/getTextColor와
         // 동일 공식 - 두 곳이 서로 다른 기준으로 계산하면 앱과 위젯에서 같은 색상인데
@@ -125,52 +115,13 @@ class CalendarWidgetProvider : AppWidgetProvider() {
             }
         }
 
-        private const val PREFS_NAME = "widget_state"
-        private const val KEY_IS_DARK = "is_dark_mode"
-        private const val KEY_IS_DARK_SET = "is_dark_mode_set"
-
-        // ⭐ Flutter가 테마를 바꿀 때마다 setWidgetTheme MethodChannel로 호출함
-        // (theme_provider.dart의 setThemeMode / main.dart의 앱 시작 시점 둘 다).
-        fun setThemeOverride(context: Context, isDark: Boolean) {
-            try {
-                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-                    .putBoolean(KEY_IS_DARK, isDark)
-                    .putBoolean(KEY_IS_DARK_SET, true)
-                    .apply()
-                requestUpdate(context)
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ 위젯 테마 저장 실패", e)
-            }
-        }
-
-        // ⭐ 앱이 명시적으로 알려준 테마(라이트/다크, 수동 설정 포함)가 있으면 그걸 그대로
-        // 따름. 아직 한 번도 전달받은 적 없으면(예: 이 기능 추가 전 이미 배치된 위젯을
-        // 최초 갱신하는 순간) 시스템 다크모드 설정으로 폴백함 - main.dart의
-        // "수동 설정 없으면 시스템 밝기 따라감" 로직과 동일한 우선순위.
-        private fun isDarkMode(context: Context): Boolean {
-            try {
-                val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-                if (prefs.getBoolean(KEY_IS_DARK_SET, false)) {
-                    return prefs.getBoolean(KEY_IS_DARK, false)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ 위젯 테마 읽기 실패 - 시스템 설정으로 폴백", e)
-            }
-            val flags = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            return flags == Configuration.UI_MODE_NIGHT_YES
-        }
-
         private fun buildRemoteViews(context: Context, isLarge: Boolean): RemoteViews {
             val layoutRes = if (isLarge) R.layout.calendar_widget_full else R.layout.calendar_widget
             val rowCount = if (isLarge) 6 else 3
             val views = RemoteViews(context.packageName, layoutRes)
-            val isDark = isDarkMode(context)
             val density = context.resources.displayMetrics.density
 
-            views.setInt(
-                R.id.widget_panel, "setBackgroundResource",
-                if (isDark) R.drawable.widget_panel_dark else R.drawable.widget_panel_light
-            )
+            views.setInt(R.id.widget_panel, "setBackgroundResource", R.drawable.widget_panel_light)
 
             // ⭐ 위젯 전체 탭 → 앱 실행, 달력 탭(index=1)으로 바로 이동
             val openAppIntent = Intent(context, MainActivity::class.java).apply {
@@ -193,7 +144,7 @@ class CalendarWidgetProvider : AppWidgetProvider() {
             views.setViewVisibility(R.id.empty_message, android.view.View.GONE)
             views.setViewVisibility(R.id.widget_content, android.view.View.VISIBLE)
 
-            val headerTextColor = Color.parseColor(if (isDark) DARK_HEADER_TEXT else LIGHT_HEADER_TEXT)
+            val headerTextColor = Color.parseColor(LIGHT_HEADER_TEXT)
             val headerIds = intArrayOf(R.id.hdr_0, R.id.hdr_1, R.id.hdr_2, R.id.hdr_3, R.id.hdr_4, R.id.hdr_5, R.id.hdr_6)
             for (c in 0..6) {
                 views.setTextViewText(headerIds[c], WEEKDAY_LABELS[c])
@@ -300,18 +251,18 @@ class CalendarWidgetProvider : AppWidgetProvider() {
                 )
             )
 
-            val normalTextColor = Color.parseColor(if (isDark) DARK_TEXT_NORMAL else LIGHT_TEXT_NORMAL)
-            val sundayTextColor = Color.parseColor(if (isDark) DARK_TEXT_SUNDAY else LIGHT_TEXT_SUNDAY)
-            val outsideTextColor = Color.parseColor(if (isDark) DARK_TEXT_OUTSIDE else LIGHT_TEXT_OUTSIDE)
-            val outsideSundayTextColor = Color.parseColor(if (isDark) DARK_TEXT_OUTSIDE_SUNDAY else LIGHT_TEXT_OUTSIDE_SUNDAY)
-            val todayTextColor = Color.parseColor(if (isDark) DARK_TEXT_TODAY else LIGHT_TEXT_TODAY)
-            val todayHolidayTextColor = Color.parseColor(if (isDark) DARK_TEXT_TODAY_HOLIDAY else LIGHT_TEXT_TODAY_HOLIDAY)
-            val noShiftColor = Color.parseColor(if (isDark) DARK_NO_SHIFT_COLOR else LIGHT_NO_SHIFT_COLOR)
-            val todayNormalBg = if (isDark) R.drawable.widget_today_normal_dark else R.drawable.widget_today_normal_light
-            val todayHolidayBg = if (isDark) R.drawable.widget_today_holiday_dark else R.drawable.widget_today_holiday_light
+            val normalTextColor = Color.parseColor(LIGHT_TEXT_NORMAL)
+            val sundayTextColor = Color.parseColor(LIGHT_TEXT_SUNDAY)
+            val outsideTextColor = Color.parseColor(LIGHT_TEXT_OUTSIDE)
+            val outsideSundayTextColor = Color.parseColor(LIGHT_TEXT_OUTSIDE_SUNDAY)
+            val todayTextColor = Color.parseColor(LIGHT_TEXT_TODAY)
+            val todayHolidayTextColor = Color.parseColor(LIGHT_TEXT_TODAY_HOLIDAY)
+            val noShiftColor = Color.parseColor(LIGHT_NO_SHIFT_COLOR)
+            val todayNormalBg = R.drawable.widget_today_normal_light
+            val todayHolidayBg = R.drawable.widget_today_holiday_light
             // ⭐ 메모 박스 배경/글자색 - 달력탭 메모 박스와 동일 톤 (색상은 셀마다 다를 필요가
             // 없어서 근무색 알약과 달리 정적 drawable 리소스 하나로 충분함)
-            val memoBg = if (isDark) R.drawable.widget_memo_bg_dark else R.drawable.widget_memo_bg_light
+            val memoBg = R.drawable.widget_memo_bg_light
             val memoTextColor = normalTextColor
 
             for (r in 0 until rowCount) {

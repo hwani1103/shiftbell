@@ -34,7 +34,9 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // catch해서 null 반환 → "근무 스케줄을 먼저 설정해주세요"가 스케줄 존재 여부와
         // 무관하게 항상 뜸. 위젯이 "친구공유 버전 도입 즈음부터" 안 됐다는 사용자 증언과
         // 정확히 일치함.
-        private const val DATABASE_VERSION = 16
+        // ⭐ 2026-08-13: 친구공유 v1(Firestore) 전환으로 friends 테이블 스키마가 바뀌면서
+        // database_service.dart의 version:이 17로 다시 올라감 - 같은 커밋에서 이 값도 같이 올림.
+        private const val DATABASE_VERSION = 17
         private const val TAG = "DatabaseHelper"
 
         @Volatile

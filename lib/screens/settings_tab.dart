@@ -20,7 +20,6 @@ import 'all_teams_setup_dialog.dart';
 import 'memo_list_view.dart';
 import 'work_hours_settings_screen.dart';
 import 'calendar_theme_picker_screen.dart';
-import 'friend_list_screen.dart';
 import '../widgets/tappable_number_picker.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
@@ -409,20 +408,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 },
               ),
 
-              // ⭐ 친구 공유 (베타) - 근무 패턴/근무변경/선택적 메모를 코드로
-              // 주고받아 서로의 달력을 조회. OT/근무시간/알람 설정은 공유 안 됨.
-              ListTile(
-                leading: Icon(Icons.people_outline, color: Theme.of(context).colorScheme.tertiary),
-                title: Text('친구 공유 (베타)'),
-                subtitle: Text('근무표 코드로 친구와 서로의 일정 확인'),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const FriendListScreen()),
-                  );
-                },
-              ),
+              // ⭐ 일정 공유(구 "친구 공유")는 메인 바텀 네비게이션 4번째 탭으로
+              // 승격돼서 여기서는 빠짐 (lib/main.dart 참고).
 
               // ⭐ 구분선 - "이력/데이터" 섹션
               SizedBox(height: 24.h),
@@ -1039,10 +1026,9 @@ lowvibe07.tistory.com
       newShiftDurations[newKey] = value;
     });
 
-    // 6. DB 업데이트
-    await DatabaseService.instance.updateShiftNames(renamedShifts);
-
-    // 7. Schedule 저장
+    // 6+7. DB 갱신(alarms/템플릿/이력/생성로그 4개 테이블 + shift_schedule 행)을
+    // 하나의 트랜잭션으로 묶어서 원자적으로 처리 - 크래시가 나도 "알람 테이블은 새
+    // 이름인데 스케줄 패턴은 옛 이름"인 모순된 상태가 안 생기게 함.
     final newSchedule = ShiftSchedule(
       id: schedule.id,
       isRegular: schedule.isRegular,
@@ -1056,7 +1042,11 @@ lowvibe07.tistory.com
       shiftDurations: newShiftDurations,
     );
 
-    await ref.read(scheduleProvider.notifier).saveSchedule(newSchedule);
+    await DatabaseService.instance.renameShiftAtomic(
+      renamedShifts: renamedShifts,
+      newSchedule: newSchedule,
+    );
+    ref.read(scheduleProvider.notifier).applyExternallyPersisted(newSchedule);
     await ref.read(alarmNotifierProvider.notifier).refresh();
 
     if (mounted) {
