@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import '../models/shift_schedule.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
@@ -11,6 +12,9 @@ import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../main.dart';  // ⭐ MainScreen import
 import '../constants/alarm_limits.dart';
+import '../constants/shift_name_limits.dart';
+import '../utils/shift_name_util.dart';
+import '../l10n/l10n_extensions.dart';
 
 // 알람 설정 (시간 + 타입)
 class AlarmSetting {
@@ -35,12 +39,16 @@ class OnboardingScreen extends ConsumerStatefulWidget {  // ⭐ 변경
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ 변경
+  // ⭐ 커스텀 근무 형태 최대 개수(예전엔 리터럴 7이 여러 곳에 흩어져 있었음).
+  static const int _maxCustomShiftTypes = 7;
+
   int _step = 0;
   bool? _isRegular;
   List<String> _pattern = [];
   int? _todayIndex;
-  
-  List<String> _baseShiftTypes = ['주간', '야간', '오전', '오후', '휴무'];
+
+  List<String> _baseShiftTypes = [];
+  bool _baseShiftTypesInitialized = false;
   List<String> _customShiftTypes = [];
   List<String> get _allShiftTypes => [..._baseShiftTypes, ..._customShiftTypes];
   Map<String, List<AlarmSetting>> _shiftAlarms = {};
@@ -48,6 +56,23 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 
   List<String> get _uniqueShifts {
     return _pattern.toSet().toList();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // ⭐ 기본 근무 카드(주간/야간/오전/오후/휴무)는 로케일에 맞는 이름으로 딱 한 번만
+    // 초기화함 - context가 필요해서 필드 선언 시점(build 이전)엔 만들 수 없음.
+    if (!_baseShiftTypesInitialized) {
+      _baseShiftTypesInitialized = true;
+      _baseShiftTypes = [
+        context.l10n.shiftDay,
+        context.l10n.shiftNight,
+        context.l10n.shiftMorning,
+        context.l10n.shiftAfternoon,
+        context.l10n.shiftDayOff,
+      ];
+    }
   }
 
   @override
@@ -63,7 +88,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
       child: Scaffold(
         appBar: AppBar(
           title: Center(
-            child: Text('교대근무 스케줄 생성'),
+            child: Text(context.l10n.onboardingCreateSchedule),
           ),
           leading: _step > 0
               ? IconButton(
@@ -107,7 +132,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            '고정적으로 순환하는\n교대 근무인가요?',
+            context.l10n.onboardingFixedPatternQuestion,
             style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
           ),
@@ -126,7 +151,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16.h),
               ),
-              child: Text('예 - 규칙적', style: TextStyle(fontSize: 18.sp)),
+              child: Text(context.l10n.onboardingYesRegular, style: TextStyle(fontSize: 18.sp)),
             ),
           ),
           SizedBox(height: 16.h),
@@ -144,7 +169,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16.h),
               ),
-              child: Text('아니요 - 불규칙', style: TextStyle(fontSize: 18.sp)),
+              child: Text(context.l10n.onboardingNoIrregular, style: TextStyle(fontSize: 18.sp)),
             ),
           ),
         ],
@@ -163,17 +188,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '근무 형태를 확인하세요\n없다면 추가 가능합니다',
+                  '${context.l10n.onboardingCheckShiftTypes}\n${context.l10n.onboardingAddIfMissing}',
                   style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '(7개까지 추가 가능하며 4글자로 제한됩니다.)',
+                  context.l10n.onboardingShiftLimitHint(_maxCustomShiftTypes, kMaxShiftNameLength),
                   style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  '근무 패턴에 포함되지 않더라도 사용 가능해요.',
+                  context.l10n.onboardingUsableEvenIfNotInPattern,
                   style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ],
@@ -219,9 +244,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                 }),
                 
                 OutlinedButton.icon(
-                  onPressed: _customShiftTypes.length < 7 ? _showAddCustomDialog : null,
+                  onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
                   icon: Icon(Icons.add),
-                  label: Text('추가'),
+                  label: Text(context.l10n.commonAdd),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.secondary,
                   ),
@@ -237,7 +262,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                 onPressed: () {
                   setState(() => _step = 2);
                 },
-                child: Text('다음'),
+                child: Text(context.l10n.commonNext),
               ),
             ),
           ],
@@ -257,17 +282,17 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '근무 형태를 확인하세요\n없다면 추가 가능합니다',
+                  '${context.l10n.onboardingCheckShiftTypes}\n${context.l10n.onboardingAddIfMissing}',
                   style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '(7개까지 추가 가능하며 4글자로 제한됩니다.)',
+                  context.l10n.onboardingShiftLimitHint(_maxCustomShiftTypes, kMaxShiftNameLength),
                   style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  '근무 패턴에 포함되지 않더라도 사용 가능해요.',
+                  context.l10n.onboardingUsableEvenIfNotInPattern,
                   style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ],
@@ -313,9 +338,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                 }),
                 
                 OutlinedButton.icon(
-                  onPressed: _customShiftTypes.length < 7 ? _showAddCustomDialog : null,
+                  onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
                   icon: Icon(Icons.add),
-                  label: Text('추가'),
+                  label: Text(context.l10n.commonAdd),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Theme.of(context).colorScheme.secondary,
                   ),
@@ -331,7 +356,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                 onPressed: () {
                   setState(() => _step = 2);
                 },
-                child: Text('다음'),
+                child: Text(context.l10n.commonNext),
               ),
             ),
           ],
@@ -348,7 +373,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '실제 근무 패턴에 포함되는\n근무를 모두 선택해주세요',
+            context.l10n.onboardingSelectAllInPattern,
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 24.h),
@@ -391,7 +416,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               onPressed: _selectedShifts.isEmpty ? null : () {
                 setState(() => _step = 3);
               },
-              child: Text('다음'),
+              child: Text(context.l10n.commonNext),
             ),
           ),
         ],
@@ -406,7 +431,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '버튼을 탭해서 패턴을 완성해주세요',
+            context.l10n.onboardingTapToCompletePattern,
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 16.h),
@@ -423,7 +448,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           SizedBox(height: 16.h),
 
           Text(
-            '(최대 40일, 한번 더 탭하면 삭제됩니다.)',
+            context.l10n.onboardingPatternHint,
             style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 8.h),
@@ -440,7 +465,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               onPressed: _pattern.isEmpty ? null : () {
                 setState(() => _step = 3);
               },
-              child: Text('다음'),
+              child: Text(context.l10n.commonNext),
             ),
           ),
         ],
@@ -452,7 +477,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   if (_pattern.isEmpty) {
     return Center(
       child: Text(
-        '패턴 없음',
+        context.l10n.onboardingNoPattern,
         style: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
       ),
     );
@@ -532,7 +557,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   void _deleteShiftType(String name) {
     if (_allShiftTypes.length <= 1) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('최소 1개의 근무 형태는 있어야 합니다')),
+        SnackBar(content: Text(context.l10n.onboardingNeedAtLeastOneShift)),
       );
       return;
     }
@@ -550,14 +575,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('근무명 추가'),
+        title: Text(context.l10n.onboardingAddShiftName),
         content: SingleChildScrollView(
           child: TextField(
             controller: controller,
-            maxLength: 4,
+            maxLength: kMaxShiftNameLength,
             autofocus: true,
             decoration: InputDecoration(
-              labelText: '근무명 (최대 4글자)',
+              labelText: context.l10n.onboardingShiftNameHint(kMaxShiftNameLength),
               counterText: '',
             ),
           ),
@@ -565,36 +590,36 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('취소'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () {
               final text = controller.text.trim();
               if (text.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('근무명을 입력해주세요')),
+                  SnackBar(content: Text(context.l10n.onboardingEnterShiftName)),
                 );
                 return;
               }
-              if (text.length > 4) {
+              if (text.length > kMaxShiftNameLength) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('4글자 이하로 입력해주세요')),
+                  SnackBar(content: Text(context.l10n.onboardingCharLimitError(kMaxShiftNameLength))),
                 );
                 return;
               }
               if (_allShiftTypes.contains(text)) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('이미 존재하는 근무명입니다')),
+                  SnackBar(content: Text(context.l10n.onboardingDuplicateShiftName)),
                 );
                 return;
               }
-              
+
               setState(() {
                 _customShiftTypes.add(text);
               });
               Navigator.pop(context);
             },
-            child: Text('추가'),
+            child: Text(context.l10n.commonAdd),
           ),
         ],
       ),
@@ -626,15 +651,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '근무별 고정 알람을 설정하세요',
+          context.l10n.onboardingSetFixedAlarmPerShift,
           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
         ),
         Text(
-          '각 근무당 최대 $kMaxAlarmTemplatesPerShift개까지 설정 가능',
+          context.l10n.onboardingMaxAlarmsPerShift(kMaxAlarmTemplatesPerShift),
           style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
         ),
         Text(
-          '설정 탭에서도 추가 / 변경이 가능합니다',
+          context.l10n.onboardingCanChangeInSettings,
           style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
         ),
         SizedBox(height: 24.h),
@@ -665,7 +690,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             onPressed: () {
               setState(() => _step = _isRegular == true ? 5 : 4);
             },
-            child: Text('다음'),
+            child: Text(context.l10n.commonNext),
           ),
         ),
       ],
@@ -706,7 +731,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               child: alarms.isEmpty
                   ? Center(
                       child: Text(
-                        '탭하여 설정',
+                        context.l10n.onboardingTapToSet,
                         style: TextStyle(
                           fontSize: 11.sp,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -776,15 +801,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 
   Widget _buildTodayIndexInput() {
     final today = DateTime.now();
-    final dateText = '${today.month}/${today.day}';
-    
+    final locale = Localizations.localeOf(context).toString();
+    final dateText = DateFormat.MMMd(locale).format(today);
+
     return Padding(
       padding: EdgeInsets.all(24.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '오늘($dateText)은 어떤 근무인가요?',
+            context.l10n.onboardingTodayShiftQuestion(dateText),
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 24.h),
@@ -800,7 +826,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               onPressed: _todayIndex == null ? null : () {
                 setState(() => _step = 4);
               },
-              child: Text('다음'),
+              child: Text(context.l10n.commonNext),
             ),
           ),
         ],
@@ -817,7 +843,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           Icon(Icons.check_circle, size: 100.sp, color: Colors.green),
           SizedBox(height: 24.h),
           Text(
-            '설정 완료!',
+            context.l10n.onboardingAllSet,
             style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 48.h),
@@ -825,7 +851,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _saveAndFinish,
-              child: Text('시작하기'),
+              child: Text(context.l10n.commonGetStarted),
             ),
           ),
         ],
@@ -865,13 +891,13 @@ Map<String, int> _generateShiftColors() {
 
   // 1. 휴무 계열 → 명확한 빨강
   for (var shift in usedShifts) {
-    if (shift.contains('휴')) {
+    if (isRestShiftName(shift)) {
       colors[shift] = 0xFFEF5350;
     }
   }
 
   // 2. 나머지 근무 → 파스텔 팔레트에서 패턴 등장 순서대로 할당
-  final nonRestShifts = usedShifts.where((s) => !s.contains('휴')).toList();
+  final nonRestShifts = usedShifts.where((s) => !isRestShiftName(s)).toList();
 
   for (int i = 0; i < nonRestShifts.length && i < 19; i++) {
     final shift = nonRestShifts[i];
@@ -990,7 +1016,7 @@ Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
     final date = DateTime(today.year, today.month, today.day + i);
     final shiftType = schedule.getShiftForDate(date);
 
-    if (shiftType == '미설정') continue;
+    if (shiftType == kUnsetShiftSentinel) continue;
 
     final alarmSettings = _shiftAlarms[shiftType] ?? [];
 
@@ -1028,7 +1054,7 @@ Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
         await AlarmService().scheduleAlarm(
           id: alarm.id!,  // ⭐ DB ID 사용
           dateTime: alarm.date!,
-          label: alarm.shiftType ?? '알람',
+          label: alarm.shiftType ?? context.l10n.alarmTitle,
           soundType: 'loud',
         );
       }
@@ -1072,14 +1098,14 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('${widget.shift} 고정 알람'),
+      title: Text(context.l10n.onboardingFixedAlarmDialogTitle(widget.shift)),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '고정 알람 $kMaxAlarmTemplatesPerShift개까지 등록 가능',
+              context.l10n.onboardingFixedAlarmMaxHint(kMaxAlarmTemplatesPerShift),
               style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
@@ -1136,11 +1162,11 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                     // 알람 타입 선택 버튼들
                     Row(
                       children: [
-                        _buildTypeButton(entry.key, 1, '🔔', '소리+진동'),
+                        _buildTypeButton(entry.key, 1, '🔔', context.l10n.alarmSoundVibration),
                         SizedBox(width: 8.w),
-                        _buildTypeButton(entry.key, 2, '📳', '진동'),
+                        _buildTypeButton(entry.key, 2, '📳', context.l10n.alarmVibration),
                         SizedBox(width: 8.w),
-                        _buildTypeButton(entry.key, 3, '🔇', '무음'),
+                        _buildTypeButton(entry.key, 3, '🔇', context.l10n.alarmSilent),
                       ],
                     ),
                   ],
@@ -1154,7 +1180,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
               OutlinedButton.icon(
                 onPressed: _addAlarm,
                 icon: Icon(Icons.add),
-                label: Text('알람 추가'),
+                label: Text(context.l10n.alarmAdd),
                 style: OutlinedButton.styleFrom(
                   minimumSize: Size(double.infinity, 44.h),
                 ),
@@ -1165,7 +1191,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('취소'),
+          child: Text(context.l10n.commonCancel),
         ),
         TextButton(
           onPressed: _alarms.isEmpty
@@ -1180,7 +1206,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                   widget.onSave(_alarms);
                   Navigator.pop(context);
                 },
-          child: Text('저장'),
+          child: Text(context.l10n.commonSave),
         ),
       ],
     );
@@ -1252,17 +1278,19 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                   children: [
                     Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.tertiary, size: 28),
                     SizedBox(width: 8),
-                    Text('중복 알람'),
+                    Text(context.l10n.alarmDuplicate),
                   ],
                 ),
                 content: Text(
-                  '이미 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} 알람이 존재합니다.',
+                  context.l10n.alarmAlreadyExistsAtTime(
+                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+                  ),
                   style: TextStyle(fontSize: 16),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text('확인', style: TextStyle(fontSize: 16)),
+                    child: Text(context.l10n.commonOk, style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),
@@ -1296,17 +1324,19 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                   children: [
                     Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.tertiary, size: 28),
                     SizedBox(width: 8),
-                    Text('중복 알람'),
+                    Text(context.l10n.alarmDuplicate),
                   ],
                 ),
                 content: Text(
-                  '이미 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} 알람이 존재합니다.',
+                  context.l10n.alarmAlreadyExistsAtTime(
+                    '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+                  ),
                   style: TextStyle(fontSize: 16),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text('확인', style: TextStyle(fontSize: 16)),
+                    child: Text(context.l10n.commonOk, style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),
@@ -1374,7 +1404,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '시간 선택',
+              context.l10n.commonSelectTime,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 24.h),
@@ -1403,7 +1433,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                         ),
                         child: Center(
                           child: Text(
-                            '오전',
+                            context.l10n.commonAm,
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.normal,
@@ -1413,7 +1443,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                         ),
                       ),
                     ),
-                    
+
                     SizedBox(height: 8.h),
                     
                     GestureDetector(
@@ -1435,7 +1465,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                         ),
                         child: Center(
                           child: Text(
-                            '오후',
+                            context.l10n.commonPm,
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.normal,
@@ -1513,7 +1543,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('취소'),
+                  child: Text(context.l10n.commonCancel),
                 ),
                 SizedBox(width: 8.w),
                 ElevatedButton(
@@ -1528,7 +1558,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                     await widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute));
                     if (mounted) Navigator.pop(context);
                   },
-                  child: Text('확인'),
+                  child: Text(context.l10n.commonOk),
                 ),
               ],
             ),

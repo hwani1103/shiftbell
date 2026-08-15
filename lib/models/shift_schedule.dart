@@ -11,6 +11,15 @@ import 'package:flutter/material.dart';
 // 24시간 단위로 나누는 방식이라, 시작일~대상일 사이에 서머타임 전환일(하루가
 // 23/25시간)이 껴 있는 지역에서는 패턴 인덱스가 하루씩 밀릴 수 있음
 // (Native의 AlarmRefreshEngine.kt에도 동일한 계산을 동일한 방식으로 맞춰둠).
+// ⭐ 영어 현지화: "스케줄이 아직 설정 안 됨"을 나타내는 내부 센티널 값. DB에
+// 저장되는 값이 아니라 getShiftForDate()/getPatternShiftForDate()가 계산 도중에
+// 반환하는 계산값이라, 이 문자열 자체를 바꿔도 기존 데이터 호환성 문제는 없음.
+// 다만 여러 파일(calendar_tab.dart/friend_schedule.dart/work_hours_calculator.dart
+// 등)이 이 리터럴을 직접 비교하고 있어서 값 자체는 그대로 두고 이름만 상수로
+// 뽑음 - UI에 실제로 보여줄 때는 이 값이 아니라 context.l10n.commonNotSet을
+// 쓰도록 각 화면에서 변환해서 표시함(센티널 자체가 화면에 그대로 노출되면 안 됨).
+const String kUnsetShiftSentinel = '미설정';
+
 int julianDayNumber(int year, int month, int day) {
   final a = (14 - month) ~/ 12;
   final y = year + 4800 - a;
@@ -187,7 +196,7 @@ class ShiftSchedule {
   // 규칙적인 경우 패턴 계산
   if (isRegular) {
     if (pattern == null || todayIndex == null || startDate == null) {
-      return '미설정';
+      return kUnsetShiftSentinel;
     }
 
     final daysDiff = julianDayNumber(date.year, date.month, date.day) -
@@ -195,7 +204,7 @@ class ShiftSchedule {
     final index = ((todayIndex! + daysDiff) % pattern!.length + pattern!.length) % pattern!.length;
     return pattern![index];
   } else {
-    return '미설정';
+    return kUnsetShiftSentinel;
   }
 }
 

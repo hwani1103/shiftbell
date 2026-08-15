@@ -9,7 +9,15 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
+
+  # ⭐ 영어 현지화(i18n) 인프라 - flutter_localizations(SDK) + intl + .arb +
+  # 자동 생성되는 AppLocalizations 클래스. lib/l10n/app_ko.arb, app_en.arb가
+  # 원본이고, `flutter gen-l10n`(또는 `flutter pub get`/`flutter run` 시 자동)이
+  # .dart_tool/flutter_gen/gen_l10n/app_localizations.dart를 생성함. l10n.yaml
+  # 참고. 교대시계_영어화_현지화_보고서_영문판.md에 전체 결정 사항 기록.
+  flutter_localizations:
+    sdk: flutter
+
   path: ^1.8.3
 
   numberpicker: ^2.1.2
@@ -31,7 +39,7 @@ dependencies:
   provider: ^6.1.1
   
   # UI
-  intl: ^0.19.0
+  intl: ^0.20.2
   table_calendar: ^3.0.9
   flutter_screenutil: ^5.9.0
 
@@ -72,6 +80,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # ⭐ l10n.yaml 설정에 따라 lib/l10n/app_*.arb → AppLocalizations 자동 생성
+  generate: true
 
   # assets:
   #   - assets/sounds/  # 제거: res/raw만 사용

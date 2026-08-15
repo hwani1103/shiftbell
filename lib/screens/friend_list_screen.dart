@@ -20,6 +20,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../providers/friend_provider.dart';
 import 'my_share_code_screen.dart';
 import 'friend_calendar_view.dart';
+import '../l10n/l10n_extensions.dart';
 
 class FriendListScreen extends ConsumerWidget {
   const FriendListScreen({super.key});
@@ -32,23 +33,23 @@ class FriendListScreen extends ConsumerWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('친구 추가', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+          title: Text(context.l10n.friendAdd, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('친구 이름 (선택 - 비우면 코드에 담긴 이름 사용)', style: TextStyle(fontSize: 12.sp)),
+              Text('${context.l10n.friendName} ${context.l10n.friendNameOptionalHint}', style: TextStyle(fontSize: 12.sp)),
               SizedBox(height: 6.h),
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
-                  hintText: '예: 박영희',
+                  hintText: context.l10n.friendNameHintExample,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
                   contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                 ),
               ),
               SizedBox(height: 14.h),
-              Text('친구가 보내준 공유 코드', style: TextStyle(fontSize: 12.sp)),
+              Text(context.l10n.friendShareCodeFromFriend, style: TextStyle(fontSize: 12.sp)),
               SizedBox(height: 6.h),
               TextField(
                 controller: codeController,
@@ -63,7 +64,7 @@ class FriendListScreen extends ConsumerWidget {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('취소')),
+            TextButton(onPressed: () => Navigator.pop(context), child: Text(context.l10n.commonCancel)),
             ElevatedButton(
               onPressed: () async {
                 final ok = await ref.read(friendProvider.notifier).addFriend(
@@ -73,11 +74,11 @@ class FriendListScreen extends ConsumerWidget {
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(ok ? '친구를 추가했어요' : '코드가 올바르지 않거나 이미 추가된 친구예요')),
+                    SnackBar(content: Text(ok ? context.l10n.friendAddedToast : context.l10n.friendInvalidCodeOrDuplicate)),
                   );
                 }
               },
-              child: const Text('추가'),
+              child: Text(context.l10n.commonAdd),
             ),
           ],
         );
@@ -103,19 +104,20 @@ class FriendListScreen extends ConsumerWidget {
     final latest = updatedList.isEmpty ? friend : updatedList.first;
     if (latest.data == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('근무표를 불러올 수 없어요. 네트워크 연결을 확인해주세요')),
+        SnackBar(content: Text(context.l10n.friendLoadFailedCheckNetwork)),
       );
       return;
     }
     if (!refreshed) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('최신 정보를 못 받아와서, 이전에 저장된 근무표를 보여드려요')),
+        SnackBar(content: Text(context.l10n.friendShowingCachedSchedule)),
       );
     }
     if (!context.mounted) return;
+    final displayName = latest.name.isEmpty ? context.l10n.friendDefaultDisplayName : latest.name;
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => FriendCalendarView(friendName: latest.name, data: latest.data!)),
+      MaterialPageRoute(builder: (_) => FriendCalendarView(friendName: displayName, data: latest.data!)),
     );
   }
 
@@ -126,10 +128,10 @@ class FriendListScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('일정 공유', style: TextStyle(fontSize: 18.sp)),
+        title: Text(context.l10n.friendShareTitle, style: TextStyle(fontSize: 18.sp)),
         actions: [
           IconButton(
-            tooltip: '새로고침',
+            tooltip: context.l10n.commonRefresh,
             icon: const Icon(Icons.refresh),
             onPressed: friends.isEmpty ? null : () => ref.read(friendProvider.notifier).refreshAll(),
           ),
@@ -145,24 +147,24 @@ class FriendListScreen extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyShareCodeScreen())),
                   icon: Icon(Icons.qr_code, size: 18.sp),
-                  label: Text('내 일정 공유하기', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                  label: Text(context.l10n.friendShareMyScheduleTitle, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                   style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12.h)),
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  '웹 링크를 통해 앱 설치 없이 내 일정을 공유하고,\n앱을 설치한 사람끼리는 공유 코드로 일정을 공유합니다.',
+                  context.l10n.friendShareChannelsExplainer,
                   style: TextStyle(fontSize: 12.5.sp, color: colorScheme.onSurfaceVariant),
                 ),
                 SizedBox(height: 16.h),
                 ElevatedButton.icon(
                   onPressed: () => _showAddFriendDialog(context, ref),
                   icon: Icon(Icons.person_add_alt, size: 18.sp),
-                  label: Text('친구 추가', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                  label: Text(context.l10n.friendAdd, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                   style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12.h)),
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  '친구가 보내준 공유 코드를 입력하세요\n언제든 친구의 일정을 확인할 수 있습니다.',
+                  '${context.l10n.friendEnterShareCode}\n${context.l10n.friendCanCheckAnytime}',
                   style: TextStyle(fontSize: 12.5.sp, color: colorScheme.onSurfaceVariant),
                 ),
               ],
@@ -173,7 +175,7 @@ class FriendListScreen extends ConsumerWidget {
           Expanded(
             child: friends.isEmpty
                 ? Center(
-                    child: Text('아직 추가한 친구가 없어요', style: TextStyle(fontSize: 14.sp, color: colorScheme.outline)),
+                    child: Text(context.l10n.friendNoneAddedYet, style: TextStyle(fontSize: 14.sp, color: colorScheme.outline)),
                   )
                 : RefreshIndicator(
                     onRefresh: () => ref.read(friendProvider.notifier).refreshAll(),
@@ -182,11 +184,12 @@ class FriendListScreen extends ConsumerWidget {
                       itemCount: friends.length,
                       itemBuilder: (context, index) {
                         final friend = friends[index];
+                        final displayName = friend.name.isEmpty ? context.l10n.friendDefaultDisplayName : friend.name;
                         return Card(
                           margin: EdgeInsets.symmetric(vertical: 4.h),
                           child: ListTile(
                             title: Text(
-                              '${friend.name}님의 교대 스케줄',
+                              context.l10n.friendScheduleOf(displayName),
                               style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
                             ),
                             trailing: IconButton(
@@ -195,11 +198,11 @@ class FriendListScreen extends ConsumerWidget {
                                 final confirm = await showDialog<bool>(
                                   context: context,
                                   builder: (context) => AlertDialog(
-                                    title: const Text('친구 삭제'),
-                                    content: Text('${friend.name}님을 목록에서 삭제할까요?'),
+                                    title: Text(context.l10n.friendRemove),
+                                    content: Text(context.l10n.friendRemoveConfirm(displayName)),
                                     actions: [
-                                      TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
-                                      TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('삭제')),
+                                      TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.commonCancel)),
+                                      TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.commonDelete)),
                                     ],
                                   ),
                                 );

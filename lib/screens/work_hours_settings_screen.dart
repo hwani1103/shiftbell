@@ -11,6 +11,7 @@ import '../models/shift_schedule.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/work_hours_settings_provider.dart';
 import '../widgets/tappable_number_picker.dart';
+import '../l10n/l10n_extensions.dart';
 
 class WorkHoursSettingsScreen extends ConsumerStatefulWidget {
   const WorkHoursSettingsScreen({super.key});
@@ -27,11 +28,11 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     final workSettings = ref.watch(workHoursSettingsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text('근무시간 및 OT 설정')),
+      appBar: AppBar(title: Text(context.l10n.settingsWorkHoursAndOt)),
       body: schedule == null
           ? Center(
               child: Text(
-                '근무 스케줄을 먼저 설정해주세요',
+                context.l10n.workHoursNoScheduleYet,
                 style: TextStyle(color: colorScheme.onSurfaceVariant),
               ),
             )
@@ -47,7 +48,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                   children: [
                     Expanded(
                       child: Text(
-                        '근무 변경 시 OT 처리',
+                        context.l10n.workHoursShiftChangeOtTitle,
                         style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -60,7 +61,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '달력에서 근무를 바꾸면(예: 휴무 → 주간), 원래 패턴보다 늘어난 시간을 "이번 달 OT"에 자동으로 더해서 보여줄지 정해요. 월별/주별 총 근무시간 자체는 이 설정과 무관하게 항상 동일해요.',
+                  context.l10n.workHoursShiftChangeOtDesc,
                   style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
                 ),
 
@@ -69,12 +70,12 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 SizedBox(height: 20.h),
 
                 Text(
-                  '근무별 기본 근무시간',
+                  context.l10n.settingsDefaultWorkHoursPerShift,
                   style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '달력의 "이번 달 총 근무시간"과 "주별 근무시간"이 여기 값을 기준으로 계산돼요.',
+                  context.l10n.workHoursDefaultDurationDesc,
                   style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
                 ),
                 SizedBox(height: 16.h),
@@ -85,27 +86,27 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 SizedBox(height: 20.h),
 
                 Text(
-                  '월별 총 근무시간 기준 기간',
+                  context.l10n.settingsMonthlyPeriodBasis,
                   style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '이번 달의 총 근무시간 및 OT 합산 기준을 정해요.',
+                  context.l10n.workHoursPeriodBasisDesc,
                   style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
                 ),
                 SizedBox(height: 12.h),
                 _buildPeriodModeOption(
                   mode: MonthlyPeriodMode.calendar,
                   current: workSettings.periodMode,
-                  title: '달력 월 기준',
-                  subtitle: '매월 1일 ~ 말일',
+                  title: context.l10n.settingsCalendarMonthBasis,
+                  subtitle: context.l10n.settingsCalendarMonthBasisDesc,
                 ),
                 SizedBox(height: 8.h),
                 _buildPeriodModeOption(
                   mode: MonthlyPeriodMode.payday,
                   current: workSettings.periodMode,
-                  title: '급여 산정일 기준',
-                  subtitle: '직접 정한 날짜를 기준으로 매달 합산',
+                  title: context.l10n.settingsPaydayBasis,
+                  subtitle: context.l10n.settingsPaydayBasisDesc,
                 ),
 
                 if (workSettings.periodMode == MonthlyPeriodMode.payday) ...[
@@ -161,9 +162,9 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
   String _formatDuration(int minutes) {
     final h = minutes ~/ 60;
     final m = minutes % 60;
-    if (minutes == 0) return '0시간 (근무시간 미포함)';
-    if (m == 0) return '$h시간';
-    return '$h시간 $m분';
+    if (minutes == 0) return context.l10n.workHoursDurationExcluded;
+    if (m == 0) return context.l10n.workHoursDurationHoursOnly(h);
+    return context.l10n.workHoursDurationHoursMinutes(h, m);
   }
 
   Future<void> _editDuration(ShiftSchedule schedule, String shift, int currentMinutes) async {
@@ -177,7 +178,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
           builder: (context, setDialogState) {
             final colorScheme = Theme.of(context).colorScheme;
             return AlertDialog(
-              title: Text('"$shift" 기본 근무시간'),
+              title: Text(context.l10n.workHoursEditDialogTitle(shift)),
               content: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -200,7 +201,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8.w),
-                    child: Text('시간', style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant)),
+                    child: Text(context.l10n.workHoursUnitHourLabel, style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant)),
                   ),
                   TappableNumberPicker(
                     value: minute,
@@ -221,18 +222,18 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                   ),
                   Padding(
                     padding: EdgeInsets.only(left: 8.w),
-                    child: Text('분', style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant)),
+                    child: Text(context.l10n.workHoursUnitMinuteLabel, style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant)),
                   ),
                 ],
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('취소'),
+                  child: Text(context.l10n.commonCancel),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context, hour * 60 + minute),
-                  child: Text('확인'),
+                  child: Text(context.l10n.commonOk),
                 ),
               ],
             );
@@ -334,7 +335,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
       ),
       child: Row(
         children: [
-          Text('매월', style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface)),
+          Text(context.l10n.workHoursCutoffDayPrefix, style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface)),
           // ⭐ "일"을 피커 바로 옆에 좁게 붙이지 않고, "매월"과 대칭되게 오른쪽
           // 끝에 독립적으로 배치 - 매월 [ 가운데 피커 ] 일, 형태로 균형 잡음.
           Expanded(
@@ -358,7 +359,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
               ),
             ),
           ),
-          Text('일', style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface)),
+          Text(context.l10n.workHoursCutoffDaySuffix, style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface)),
         ],
       ),
     );
@@ -371,7 +372,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
       children: [
         Expanded(
           child: _buildAnchorChip(
-            label: '시작일 기준',
+            label: context.l10n.settingsPeriodStartBasis,
             selected: settings.cutoffAnchor == PaydayCutoffAnchor.periodStart,
             onTap: () => ref.read(workHoursSettingsProvider.notifier).setCutoffAnchor(PaydayCutoffAnchor.periodStart),
           ),
@@ -379,7 +380,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
         SizedBox(width: 10.w),
         Expanded(
           child: _buildAnchorChip(
-            label: '종료일 기준',
+            label: context.l10n.settingsPeriodEndBasis,
             selected: settings.cutoffAnchor == PaydayCutoffAnchor.periodEnd,
             onTap: () => ref.read(workHoursSettingsProvider.notifier).setCutoffAnchor(PaydayCutoffAnchor.periodEnd),
           ),
@@ -437,7 +438,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
         borderRadius: BorderRadius.circular(10.r),
       ),
       child: Text(
-        '미리보기: 이번 달 기준 $range',
+        context.l10n.settingsPreviewThisMonth(range),
         style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: colorScheme.primary),
       ),
     );

@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../l10n/l10n_extensions.dart';
 
 class UpdateService {
   static const String _notifiedVersionKey = 'notified_update_version';
@@ -18,14 +19,6 @@ class UpdateService {
   // 두면 됨 → 그러면 이 다이얼로그는 그냥 안 뜨고, 위의 "새 버전이 있어요" 안내만
   // 평소처럼 동작함.
   static const String _releaseNoteVersion = '1.0.16';
-  static const String _releaseNoteTitle = '이번 업데이트는 꼭 확인해주세요';
-  static const String _releaseNoteBody =
-      '이번 업데이트에서 아래 내용이 반영됐어요.\n\n'
-      '1. 알람 신뢰성 증가 (알람 삭제 버그 수정)\n'
-      '2. 달력 위젯 기능 추가\n'
-      '3. OT 관리 기능 추가\n'
-      '4. 월별 / 주별 근무시간 합산 기능 추가\n\n'
-      '(지속적인 업데이트를 통해 사용성을 개선하도록 하겠습니다. 주변에 많은 홍보 부탁드립니다!)';
   static const String _releaseNoteSeenKey = 'release_note_seen_version';
 
   /// 업데이트 후 첫 실행 안내 (버전당 1번만, _releaseNoteVersion이 비어있으면 스킵).
@@ -87,7 +80,7 @@ class UpdateService {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    _releaseNoteTitle,
+                    context.l10n.updateReleaseNoteTitle,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 17.sp,
@@ -100,7 +93,7 @@ class UpdateService {
             ),
             SizedBox(height: 18.h),
             Text(
-              _releaseNoteBody,
+              context.l10n.updateReleaseNoteBody,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
@@ -123,7 +116,7 @@ class UpdateService {
                   ),
                 ),
                 child: Text(
-                  '확인했어요',
+                  context.l10n.commonGotIt,
                   style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -199,7 +192,7 @@ class UpdateService {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  '새 버전이 있어요!',
+                  context.l10n.updateNewVersionAvailable,
                   style: TextStyle(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
@@ -212,7 +205,7 @@ class UpdateService {
 
             // 설명
             Text(
-              '더 나은 사용을 위해\n업데이트를 권장드려요.',
+              context.l10n.updateRecommendMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
@@ -224,7 +217,7 @@ class UpdateService {
 
             // 안내 문구
             Text(
-              '(저장된 정보는 그대로 유지됩니다)',
+              context.l10n.updateDataPreservedHint,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 12.sp,
@@ -248,7 +241,7 @@ class UpdateService {
                       ),
                     ),
                     child: Text(
-                      '나중에',
+                      context.l10n.commonLater,
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: colorScheme.onSurfaceVariant,
@@ -272,7 +265,7 @@ class UpdateService {
                       ),
                     ),
                     child: Text(
-                      '업데이트',
+                      context.l10n.commonUpdate,
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,

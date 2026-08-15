@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/permission_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/l10n_extensions.dart';
 
 class PermissionIntroScreen extends StatefulWidget {
   const PermissionIntroScreen({super.key});
@@ -58,7 +59,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
             children: [
               // 헤더
               Text(
-                '교대시계 시작하기',
+                context.l10n.permissionGetStarted,
                 style: TextStyle(
                   fontSize: 28.sp,
                   fontWeight: FontWeight.bold,
@@ -67,7 +68,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
               ),
               SizedBox(height: 12.h),
               Text(
-                '알람이 정확하게 울리려면\n아래 권한이 필요해요',
+                context.l10n.permissionIntro,
                 style: TextStyle(
                   fontSize: 16.sp,
                   color: colorScheme.onSurfaceVariant,
@@ -81,8 +82,8 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
                 context: context,
                 icon: Icons.notifications_active,
                 iconColor: colorScheme.tertiary,
-                title: '알림',
-                description: '알림은 오직 알람 발생을 위해서만 사용됩니다',
+                title: context.l10n.permissionNotification,
+                description: context.l10n.permissionNotificationDesc,
                 required: true,
               ),
               SizedBox(height: 24.h),
@@ -90,8 +91,8 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
                 context: context,
                 icon: Icons.phone_android,
                 iconColor: Colors.green,
-                title: '다른 앱 위에 표시',
-                description: '핸드폰 사용 중 알람 발생시 알람을 인지하기 위해 필요합니다',
+                title: context.l10n.permissionOverlay,
+                description: context.l10n.permissionOverlayDesc,
                 required: true,
               ),
               SizedBox(height: 24.h),
@@ -99,8 +100,8 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
                 context: context,
                 icon: Icons.alarm_on,
                 iconColor: Colors.orange,
-                title: '정확한 알람',
-                description: '설정한 시각에 정확히 알람이 울리기 위해 필요합니다',
+                title: context.l10n.permissionExactAlarm,
+                description: context.l10n.permissionExactAlarmDesc,
                 required: true,
               ),
 
@@ -119,7 +120,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
                     ),
                   ),
                   child: Text(
-                    '권한 허용하기',
+                    context.l10n.permissionAllow,
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
@@ -135,7 +136,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
                 child: TextButton(
                   onPressed: _skipPermissions,
                   child: Text(
-                    '나중에 하기',
+                    context.l10n.commonNotNow,
                     style: TextStyle(
                       fontSize: 16.sp,
                       color: colorScheme.onSurfaceVariant,
@@ -198,7 +199,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
-                        '필수',
+                        context.l10n.permissionRequired,
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
@@ -215,7 +216,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
                         borderRadius: BorderRadius.circular(4.r),
                       ),
                       child: Text(
-                        '권장',
+                        context.l10n.permissionRecommended,
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.bold,
@@ -281,7 +282,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
             SizedBox(width: 8.w),
             Flexible(
               child: Text(
-                '일부 권한이 거부되었어요',
+                context.l10n.permissionSomeDenied,
                 style: TextStyle(fontSize: 16.sp),
               ),
             ),
@@ -292,12 +293,12 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '앱을 계속 사용할 수 있지만\n알람이 정확히 울리지 않을 수 있어요.',
+              context.l10n.permissionSomeDeniedDesc,
               style: TextStyle(fontSize: 14.sp, height: 1.5),
             ),
             SizedBox(height: 16.h),
             Text(
-              '설정에서 언제든지 권한을 허용할 수 있어요.',
+              context.l10n.permissionCanAllowLater,
               style: TextStyle(
                 fontSize: 13.sp,
                 color: colorScheme.onSurfaceVariant,
@@ -311,7 +312,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
               Navigator.of(context).pop();
               await PermissionService().openSettings();
             },
-            child: const Text('설정으로 이동'),
+            child: Text(context.l10n.commonGoToSettings),
           ),
           TextButton(
             onPressed: () {
@@ -321,7 +322,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
             style: TextButton.styleFrom(
               foregroundColor: colorScheme.onSurfaceVariant,
             ),
-            child: const Text('계속 진행하기'),
+            child: Text(context.l10n.commonContinue),
           ),
         ],
       ),

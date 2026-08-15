@@ -22,6 +22,9 @@ import 'providers/calendar_theme_provider.dart';
 import 'models/calendar_theme.dart';
 import 'theme/app_theme.dart';
 import 'services/firebase_bootstrap.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/generated/app_localizations.dart';
+import 'l10n/l10n_extensions.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,7 +66,11 @@ void main() async {
   // ⭐ 런치 스크린 유지 시간 (0.3초)
   await Future.delayed(const Duration(milliseconds: 300));
 
+  // ⭐ 영어 현지화: 이제 기기 로케일에 따라 ko_KR 또는 en_US 포맷터를 쓸 수 있어야
+  // 하므로, 둘 다 미리 초기화해둠(하나만 초기화된 상태에서 다른 로케일 포맷터를
+  // 쓰면 intl이 LocaleDataException을 던짐).
   await initializeDateFormatting('ko_KR', null);
+  await initializeDateFormatting('en_US', null);
   await DatabaseService.instance.database;
   await AlarmService().initialize();
   // ⭐ 친구공유(Firestore) 초기화 - firebase_options.dart가 아직 플레이스홀더면
@@ -160,7 +167,19 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
             return AnnotatedRegion<SystemUiOverlayStyle>(
               value: isCalendarThemeDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
               child: MaterialApp(
-                title: '교대종',
+                onGenerateTitle: (context) => context.l10n.appTitle,
+                // ⭐ 영어 현지화 인프라 - flutter_localizations(SDK) + 이 앱의
+                // AppLocalizations(lib/l10n/app_ko.arb, app_en.arb에서 생성).
+                // 기본은 기기 로케일을 그대로 따름(localeResolutionCallback 없음
+                // → Flutter가 supportedLocales 중 기기 로케일과 가장 잘 맞는 걸
+                // 자동 선택하고, 지원 안 하는 로케일이면 첫 번째=ko로 폴백).
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: AppLocalizations.supportedLocales,
                 theme: AppTheme.lightTheme,
                 // 모든 화면에 최대 너비 제한 적용
                 builder: (context, child) {
@@ -347,11 +366,11 @@ Future<void> _handleMethod(MethodCall call) async {
           type: BottomNavigationBarType.fixed,
           currentIndex: _currentIndex,
           onTap: (index) => setState(() => _currentIndex = index),
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.alarm), label: '다음알람'),
-            BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: '달력'),
-            BottomNavigationBarItem(icon: Icon(Icons.people_outline), label: '일정공유'),
-            BottomNavigationBarItem(icon: Icon(Icons.settings), label: '설정'),
+          items: [
+            BottomNavigationBarItem(icon: const Icon(Icons.alarm), label: context.l10n.navNextAlarm),
+            BottomNavigationBarItem(icon: const Icon(Icons.calendar_month), label: context.l10n.navCalendar),
+            BottomNavigationBarItem(icon: const Icon(Icons.people_outline), label: context.l10n.navFriendShare),
+            BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.l10n.navSettings),
           ],
         ),
       ),

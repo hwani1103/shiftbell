@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/memo_provider.dart';
 import '../models/date_memo.dart';
+import '../l10n/l10n_extensions.dart';
 
 class MemoListView extends ConsumerStatefulWidget {
   const MemoListView({super.key});
@@ -76,7 +77,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
       appBar: AppBar(
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
-        title: Text('메모 모아보기', style: TextStyle(fontSize: 18.sp)),
+        title: Text(context.l10n.calendarMemoAll, style: TextStyle(fontSize: 18.sp)),
         elevation: 1,
       ),
       body: Column(
@@ -88,7 +89,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: '메모 검색...',
+                hintText: '${context.l10n.calendarMemoSearch}...',
                 hintStyle: TextStyle(fontSize: 14.sp, color: colorScheme.outline),
                 prefixIcon: Icon(Icons.search, color: colorScheme.onSurfaceVariant),
                 suffixIcon: _searchQuery.isNotEmpty
@@ -133,7 +134,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                         Icon(Icons.note_outlined, size: 64.sp, color: colorScheme.outline),
                         SizedBox(height: 16.h),
                         Text(
-                          _searchQuery.isNotEmpty ? '검색 결과가 없습니다' : '메모가 없습니다',
+                          _searchQuery.isNotEmpty ? context.l10n.calendarSearchNoResults : context.l10n.calendarMemoNone,
                           style: TextStyle(fontSize: 16.sp, color: colorScheme.onSurfaceVariant),
                         ),
                       ],

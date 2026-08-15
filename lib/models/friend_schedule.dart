@@ -46,14 +46,14 @@ class FriendScheduleData {
 
     if (isRegular) {
       if (pattern == null || pattern!.isEmpty || todayIndex == null || startDate == null) {
-        return '미설정';
+        return kUnsetShiftSentinel;
       }
       final daysDiff = julianDayNumber(date.year, date.month, date.day) -
           julianDayNumber(startDate!.year, startDate!.month, startDate!.day);
       final index = ((todayIndex! + daysDiff) % pattern!.length + pattern!.length) % pattern!.length;
       return pattern![index];
     }
-    return '미설정';
+    return kUnsetShiftSentinel;
   }
 
   // ⭐ ShiftSchedule.getPatternShiftForDate와 동일 - assignedDates(근무변경 예외) 무시하고
@@ -82,7 +82,12 @@ class FriendScheduleData {
 
   factory FriendScheduleData.fromJson(Map<String, dynamic> json) {
     return FriendScheduleData(
-      ownerName: json['ownerName'] as String? ?? '친구',
+      // ⭐ 영어 현지화: 모델은 BuildContext가 없어서 언어별 기본값을 못 고름 - 정상
+      // 케이스라면 항상 채워져 있는 필드라(친구공유 시작 시 앱이 항상 씀) 여기선
+      // 빈 문자열로만 폴백하고, 실제로 화면에 보여줄 이름이 필요한 자리
+      // (friend_calendar_view.dart 등)에서 비어있으면 context.l10n.friendDefaultDisplayName로
+      // 대체함.
+      ownerName: (json['ownerName'] as String?)?.trim().isNotEmpty == true ? json['ownerName'] as String : '',
       isRegular: json['isRegular'] as bool? ?? false,
       pattern: (json['pattern'] as List?)?.map((e) => e.toString()).toList(),
       todayIndex: json['todayIndex'] as int?,

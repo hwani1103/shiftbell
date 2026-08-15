@@ -26,6 +26,9 @@ import 'services/friend_share_service.dart';
 import 'services/friend_sync_service.dart';
 import 'services/firebase_bootstrap.dart';
 import 'screens/friend_calendar_view.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/generated/app_localizations.dart';
+import 'l10n/l10n_extensions.dart';
 
 const _kLastOwnerIdStorageKey = 'shiftbell_last_owner_id';
 
@@ -35,6 +38,7 @@ void main() async {
   // 안 하면 intl이 LocaleDataException을 던짐. main.dart와 동일한 초기화 패턴.
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('ko_KR', null);
+  await initializeDateFormatting('en_US', null);
   // ⭐ 이 웹뷰어는 Firestore에서 남의 스케줄을 읽기만 함 - DB/MethodChannel 없이도
   // Firebase만 초기화하면 됨. 플레이스홀더 상태면 조용히 실패하고 아래 라우터가
   // "동기화 실패" 화면을 보여줌 (firebase_bootstrap.dart 참고).
@@ -52,8 +56,15 @@ class ShiftBellWebViewApp extends StatelessWidget {
       minTextAdapt: true,
       builder: (context, child) {
         return MaterialApp(
-          title: '교대시계 - 공유 달력 보기',
+          onGenerateTitle: (context) => '${context.l10n.appTitle} - ${context.l10n.friendShareTitle}',
           debugShowCheckedModeBanner: false,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
           home: const _WebViewRouter(),
         );
@@ -99,12 +110,12 @@ class _WebViewRouterState extends State<_WebViewRouter> {
       } catch (_) {
         // localStorage 접근 자체가 막힌 브라우저 설정 등 - 그냥 폴백 없이 진행.
       }
-      if (ownerId == null) return const _LoadResult.invalidLink('링크에 공유 코드가 없어요.');
+      if (ownerId == null) return _LoadResult.invalidLink(context.l10n.friendLinkMissingCode);
     }
 
     final data = await FriendSyncService.instance.fetchByOwnerId(ownerId);
     if (data == null) {
-      return const _LoadResult.invalidLink('근무표를 불러올 수 없어요. 링크가 오래됐거나, 상대방이 공유를 중지했거나, 네트워크 연결을 확인해주세요.');
+      return _LoadResult.invalidLink(context.l10n.friendLoadFailedDetailed);
     }
 
     try {
@@ -124,7 +135,7 @@ class _WebViewRouterState extends State<_WebViewRouter> {
         }
         final result = snapshot.data;
         if (result == null || result.data == null) {
-          return _InvalidLinkPage(reason: result?.reason ?? '알 수 없는 오류가 발생했어요.');
+          return _InvalidLinkPage(reason: result?.reason ?? context.l10n.friendUnknownError);
         }
         return FriendCalendarView(
           friendName: result.data!.ownerName,
@@ -159,7 +170,7 @@ class _InvalidLinkPage extends StatelessWidget {
             children: [
               Icon(Icons.link_off, size: 48.sp, color: Colors.grey),
               SizedBox(height: 16.h),
-              Text('불러올 수 없어요', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+              Text(context.l10n.friendCouldNotLoad, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
               SizedBox(height: 8.h),
               Text(reason, textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600)),
             ],

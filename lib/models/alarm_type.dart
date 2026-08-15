@@ -1,3 +1,6 @@
+import 'package:flutter/widgets.dart';
+import '../l10n/l10n_extensions.dart';
+
 class AlarmType {
   final int id;
   final String name;  // 내부 식별용 (UI에서는 이모지만 표시)
@@ -52,12 +55,14 @@ class AlarmType {
   bool get isVibrate => soundFile == 'vibrate';
   bool get isSilent => soundFile == 'silent';
 
-  // 진동 세기 텍스트
-  String get vibrationText {
+  // ⭐ 영어 현지화: Text('한국어') 하드코딩을 없애면서 이 getter도 이제
+  // BuildContext가 필요해짐(기존 vibrationText → vibrationLabel(context)로 개명,
+  // 호출부는 calendar_tab.dart/settings_tab.dart 등에서 함께 갱신함).
+  String vibrationLabel(BuildContext context) {
     switch (vibrationStrength) {
-      case 1: return '약하게';
-      case 3: return '강하게';
-      default: return '없음';
+      case 1: return context.l10n.alarmVibrationWeak;
+      case 3: return context.l10n.alarmVibrationStrong;
+      default: return context.l10n.commonNone;
     }
   }
 

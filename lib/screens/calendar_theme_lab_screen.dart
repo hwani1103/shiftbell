@@ -30,10 +30,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'all_shifts_view.dart';
-import '../theme/app_theme.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/calendar_theme.dart';
+import '../models/date_overtime.dart';
+import '../theme/app_theme.dart';
+import '../utils/weekday_util.dart';
 
 // ============================================================
 // ⭐ 공용 목업 데이터
@@ -46,20 +50,39 @@ class _MockShift {
   const _MockShift(this.name, this.color, this.durationMinutes);
 }
 
-const _mockShifts = <_MockShift>[
-  _MockShift('주간근무', Color(0xFF42A5F5), 8 * 60),
-  _MockShift('주간', Color(0xFF26C6DA), 8 * 60),
-  _MockShift('야간', Color(0xFF7E57C2), 12 * 60),
-  _MockShift('당직', Color(0xFFFF8A65), 24 * 60),
-  _MockShift('오프', Color(0xFF66BB6A), 0),
-  _MockShift('휴무', Color(0xFFEF5350), 0),
+// ⭐ 영어 현지화: 이름은 로케일에 따라 달라져야 해서(context 필요) 색상/시간
+// (로케일 무관)만 top-level에 남기고, 이름은 아래 _mockShiftNames(context)에서
+// 계산함. '주간근무'(맨 앞) 자리는 원래 "긴 이름 축약" 테스트용이라 다른
+// 이름보다 일부러 더 긴 문구를 씀(기존 근무명 키와 겹치지 않는 별도 키).
+const _mockShiftColors = <Color>[
+  Color(0xFF42A5F5),
+  Color(0xFF26C6DA),
+  Color(0xFF7E57C2),
+  Color(0xFFFF8A65),
+  Color(0xFF66BB6A),
+  Color(0xFFEF5350),
+];
+const _mockShiftDurations = <int>[8 * 60, 8 * 60, 12 * 60, 24 * 60, 0, 0];
+
+List<String> _mockShiftNames(BuildContext context) => [
+  context.l10n.themeLabMockDayShiftLong,
+  context.l10n.shiftDay,
+  context.l10n.shiftNight,
+  context.l10n.shiftOnCall,
+  context.l10n.shiftOff,
+  context.l10n.shiftDayOff,
 ];
 
-// ⭐ 6일 주기로 순환하는 목업 패턴 (앞뒤 스필오버 날짜도 동일하게 적용됨)
-_MockShift _mockShiftFor(DateTime d) {
+int _mockShiftIndexFor(DateTime d) {
   final epoch = DateTime(2026, 1, 1);
   final days = d.difference(epoch).inDays;
-  return _mockShifts[((days % 6) + 6) % 6];
+  return ((days % 6) + 6) % 6;
+}
+
+// ⭐ 6일 주기로 순환하는 목업 패턴 (앞뒤 스필오버 날짜도 동일하게 적용됨)
+_MockShift _mockShiftFor(BuildContext context, DateTime d) {
+  final i = _mockShiftIndexFor(d);
+  return _MockShift(_mockShiftNames(context)[i], _mockShiftColors[i], _mockShiftDurations[i]);
 }
 
 // ⭐ "테마 미리보기(설정 탭 캐러셀 카드)에 메모가 보이는데 다 지우자 - 오늘
@@ -77,16 +100,21 @@ final Map<String, int> _mockOtMinutes = {
 const _mockHolidayKey = '2026-08-15';
 const _mockHolidayName = '광복절';
 
+// ⭐ 영어 현지화: 공휴일 이름은 한국 고유 공휴일이라 영어 로케일에서는 표시
+// 안 하기로 결정됨(getHolidayName의 isKorean 규칙과 동일 - 2번 섹션 참고).
+// 이 목업 미리보기도 한국 로케일일 때만 뱃지를 보여주고, 아니면 숨김.
+String? _mockHolidayNameFor(BuildContext context, DateTime d) {
+  if (!_isHoliday(d)) return null;
+  final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+  return isKorean ? _mockHolidayName : null;
+}
+
 // ⭐ 근무명 12개 + 라이트/다크 팔레트는 models/calendar_theme.dart로 이동함
 // (kMainShiftNames/kMainLightPalette/kMainDarkPalette) - calendar_tab.dart
 // (실제 메인 달력)도 똑같은 팔레트를 써야 해서 공용 위치로 옮겼고, 여기서는
-// 그 공용 상수를 그대로 씀(중복 정의 없이).
-final _mockLegendShifts = List.generate(
-  12, (i) => _MockShift(kMainShiftNames[i], kMainLightPalette[i], 0),
-);
-final _mockLegendShiftsDark = List.generate(
-  12, (i) => _MockShift(kMainShiftNames[i], kMainDarkPalette[i], 0),
-);
+// 그 공용 상수를 그대로 씀(중복 정의 없이). 영어 현지화: kMainShiftNames가
+// mockShiftNames(BuildContext)로 바뀌어서(플레이북 3번 섹션) top-level에서 더
+// 이상 쓸 수 없음 - _CalendarThemeLabScreenState의 메서드로 옮김(아래 참고).
 
 // ⭐ 12개 팔레트를 요일처럼 순환시켜 "메인" 테마 목업 달력을 채움 -
 // _mockShiftFor(6종 순환)와 같은 방식, 팔레트만 다르게 받음.
@@ -145,10 +173,14 @@ List<_WeekSummary> _mockWeekSummaries() {
     int minutes = 0;
     final counts = <String, int>{};
     for (var d = start; !d.isAfter(end); d = d.add(const Duration(days: 1))) {
-      final shift = _mockShiftFor(d);
-      if (shift.durationMinutes > 0) {
-        minutes += shift.durationMinutes;
-        counts[shift.name] = (counts[shift.name] ?? 0) + 1;
+      // ⭐ 이 계산은 State 필드 초기화 시점(_weeks)에 실행되어 아직 context가
+      // 없으므로, 로케일에 따라 달라지는 근무명 대신 인덱스로만 집계함(counts는
+      // 화면에 표시되지 않는 값이라 키가 무엇이든 영향 없음).
+      final idx = _mockShiftIndexFor(d);
+      final duration = _mockShiftDurations[idx];
+      if (duration > 0) {
+        minutes += duration;
+        counts['shift$idx'] = (counts['shift$idx'] ?? 0) + 1;
       }
       minutes += _mockOtMinutes[_dateKey(d)] ?? 0;
     }
@@ -158,18 +190,14 @@ List<_WeekSummary> _mockWeekSummaries() {
   return weeks;
 }
 
-String _formatMinutes(int minutes) {
-  if (minutes <= 0) return '0시간';
-  final h = minutes ~/ 60;
-  final m = minutes % 60;
-  if (h > 0 && m > 0) return '$h시간 $m분';
-  if (h > 0) return '$h시간';
-  return '$m분';
-}
+// ⭐ 영어 현지화: 기존 로컬 포맷터 대신 공용 formatOvertimeMinutes(context, minutes)를
+// 재사용함(lib/models/date_overtime.dart, 플레이북 2번 섹션) - 중복 정의 제거.
 
 int get _mockMonthlyOtTotal => _mockOtMinutes.values.fold(0, (a, b) => a + b);
 
-const _weekdayKr = ['일', '월', '화', '수', '목', '금', '토'];
+// ⭐ 영어 현지화: _weekdayKr(로케일에 따라 바뀌어야 함)는 weekdayLabel(context, i)로
+// 대체되어 제거됨(플레이북 2/3번 섹션). _weekdayEn3/_weekdayEn1은 일부 테마가 항상
+// 영어 약자로 보이도록 의도한 디자인 선택이라 로케일과 무관하게 그대로 둠.
 const _weekdayEn3 = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const _weekdayEn1 = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -193,6 +221,16 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
 
   final List<DateTime> _days = _augustGridDays();
   final List<_WeekSummary> _weeks = _mockWeekSummaries();
+
+  // ⭐ 영어 현지화: kMainShiftNames가 mockShiftNames(BuildContext)로 바뀌면서
+  // top-level에서 더 이상 계산할 수 없어진 _mockLegendShifts/_mockLegendShiftsDark를
+  // State의 메서드로 옮김(플레이북 3번 섹션 지시대로) - build() 이후에만 호출됨.
+  List<_MockShift> _legendShifts(BuildContext context) => List.generate(
+    12, (i) => _MockShift(mockShiftNames(context)[i], kMainLightPalette[i], 0),
+  );
+  List<_MockShift> _legendShiftsDark(BuildContext context) => List.generate(
+    12, (i) => _MockShift(mockShiftNames(context)[i], kMainDarkPalette[i], 0),
+  );
 
   // ⭐ 테마 이름/설명 문구는 완전히 제거함("진짜 메인 달력에 쓸 정도로" 다듬는
   // 단계라 화면에 그런 라벨이 있으면 안 됨) - 테마는 이제 내부적으로 숫자
@@ -254,9 +292,9 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
   // ⭐ 이 프로토타입은 2026년 8월 고정이라 실제 "오늘로 이동"은 의미가 없어서 안내만 함
   void _tapToday() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('미리보기는 2026년 8월 고정 표시예요 (실제 채택 시 달력탭의 오늘 이동 로직을 그대로 사용합니다)'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(context.l10n.themeLabPreviewFixedMonthNotice),
+        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -265,9 +303,10 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
   // 보여주는 가벼운 미리보기 시트. 실제 근무변경/메모/OT 팝업은 달력탭에 이미 완성돼
   // 있고 여기서 안 건드렸으므로, 채택 후 실제 연결 시 그대로 재사용하면 됨.
   void _tapDay(DateTime day) {
-    final shift = _mockShiftFor(day);
+    final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final ot = _mockOtMinutes[_dateKey(day)] ?? 0;
+    final locale = Localizations.localeOf(context).toString();
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
@@ -279,29 +318,35 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                '${day.month}월 ${day.day}일 (${_weekdayKr[day.weekday % 7]}) 미리보기',
+                context.l10n.themeLabPreviewSheetTitle(
+                  DateFormat.MMMd(locale).format(day),
+                  weekdayLabel(context, day.weekday % 7),
+                ),
                 style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10.h),
               Row(children: [
                 Container(width: 10.w, height: 10.w, decoration: BoxDecoration(color: shift.color, shape: BoxShape.circle)),
                 SizedBox(width: 6.w),
-                Text('근무: ${shift.name}', style: TextStyle(fontSize: 14.sp)),
+                Text(context.l10n.themeLabPreviewShiftLabel(shift.name), style: TextStyle(fontSize: 14.sp)),
               ]),
               if (ot > 0) ...[
                 SizedBox(height: 4.h),
-                Text('OT: ${_formatMinutes(ot)}', style: TextStyle(fontSize: 13.sp, color: Colors.indigo)),
+                Text('OT: ${formatOvertimeMinutes(context, ot)}', style: TextStyle(fontSize: 13.sp, color: Colors.indigo)),
               ],
               if (memos.isNotEmpty) ...[
                 SizedBox(height: 4.h),
-                Text('메모 ${memos.length}개: ${memos.join(" / ")}', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700)),
+                Text(
+                  context.l10n.themeLabPreviewMemoCount(memos.length, memos.join(" / ")),
+                  style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700),
+                ),
               ],
               SizedBox(height: 14.h),
               Container(
                 padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8.r)),
                 child: Text(
-                  '이 테마가 채택되면 여기서 실제 근무 변경 · 메모 입력 · OT 입력 팝업(지금 달력탭과 동일)이 뜹니다.',
+                  context.l10n.themeLabPreviewSheetHint,
                   style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade600, height: 1.4),
                 ),
               ),
@@ -328,7 +373,7 @@ extension _Theme1 on _CalendarThemeLabScreenState {
             children: [
               Text('Aug 2026', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600, color: Colors.black87)),
               const Spacer(),
-              _thinTextButton('전체근무표', _openAllShifts),
+              _thinTextButton(context.l10n.shiftFullSchedule, _openAllShifts),
               SizedBox(width: 12.w),
               _thinTextButton('Today', _tapToday),
             ],
@@ -376,7 +421,7 @@ extension _Theme1 on _CalendarThemeLabScreenState {
 
   Widget _theme1Cell(DateTime day, bool isSunCol, {bool isFirstRow = false}) {
     final outside = _isOutsideAugust(day);
-    final shift = _mockShiftFor(day);
+    final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(day);
@@ -419,11 +464,11 @@ extension _Theme1 on _CalendarThemeLabScreenState {
               margin: EdgeInsets.only(top: 1.h),
               color: shift.color.withOpacity(0.85),
               alignment: Alignment.center,
-              // ⭐ 굳이 1글자로 줄일 이유가 없는 디자인이라는 피드백으로 4글자까지
-              // 그대로 노출 (목업 근무명이 전부 4글자 이하라 지금은 실질적으로
-              // 전체 이름이 다 보임 - 5글자 이상인 경우를 대비해 안전하게 자름).
+              // ⭐ 굳이 1글자로 줄일 이유가 없는 디자인이라는 피드백으로 전체 이름을
+              // 그대로 노출 (영어 현지화로 근무명 글자수 제한이 10글자로 늘어나면서
+              // 강제 substring 컷은 제거하고 ellipsis로 자연스럽게 잘리게 함).
               child: Text(
-                shift.name.length > 4 ? shift.name.substring(0, 4) : shift.name,
+                shift.name,
                 style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color)),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -439,8 +484,8 @@ extension _Theme1 on _CalendarThemeLabScreenState {
                   : null,
               child: Text('${day.day}', style: TextStyle(fontSize: 11.sp, fontWeight: today ? FontWeight.bold : FontWeight.w500, color: numColor)),
             ),
-            if (_isHoliday(day))
-              Text(_mockHolidayName, style: TextStyle(fontSize: 6.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.1), maxLines: 1, overflow: TextOverflow.ellipsis),
+            if (_mockHolidayNameFor(context, day) != null)
+              Text(_mockHolidayNameFor(context, day)!, style: TextStyle(fontSize: 6.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.1), maxLines: 1, overflow: TextOverflow.ellipsis),
             // ⭐ "좋아졌는데 아주 조금만 더" 피드백으로 한 번 더 살짝 키움
             // (3.2h→3.8h) - ClipRect 안전망 있으니 부담 없이 조금 더 키움.
             SizedBox(height: 3.8.h),
@@ -468,11 +513,11 @@ extension _Theme1 on _CalendarThemeLabScreenState {
         children: [
           Icon(Icons.access_time, size: 13.sp, color: Colors.indigo.shade300),
           SizedBox(width: 5.w),
-          Text('이번 달 OT ${_formatMinutes(_mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
+          Text('${context.l10n.shiftThisMonthOt} ${formatOvertimeMinutes(context, _mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
           const Spacer(),
           GestureDetector(
             onTap: () => _showWeekSummarySheet(context, _weeks),
-            child: Text('주별 근무시간 ›', style: TextStyle(fontSize: 11.sp, color: Colors.indigo.shade400, fontWeight: FontWeight.w600)),
+            child: Text('${context.l10n.shiftWeeklyWorkHours} ›', style: TextStyle(fontSize: 11.sp, color: Colors.indigo.shade400, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -508,7 +553,10 @@ extension _Theme2 on _CalendarThemeLabScreenState {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('8월', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w300, color: Colors.black87)),
+                    Text(
+                      DateFormat.MMMM(Localizations.localeOf(context).toString()).format(DateTime(2026, 8, 1)),
+                      style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w300, color: Colors.black87),
+                    ),
                     SizedBox(width: 6.w),
                     Padding(
                       padding: EdgeInsets.only(bottom: 2.h),
@@ -528,7 +576,7 @@ extension _Theme2 on _CalendarThemeLabScreenState {
             child: Row(
               children: List.generate(7, (i) => Expanded(
                 child: Center(
-                  child: Text(_weekdayKr[i], style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade700)),
+                  child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade700)),
                 ),
               )),
             ),
@@ -555,7 +603,7 @@ extension _Theme2 on _CalendarThemeLabScreenState {
 
   Widget _theme2Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
-    final shift = _mockShiftFor(day);
+    final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(day);
@@ -605,7 +653,7 @@ extension _Theme2 on _CalendarThemeLabScreenState {
                 decoration: BoxDecoration(color: shift.color, borderRadius: BorderRadius.circular(3.r)),
                 alignment: Alignment.center,
                 child: Text(
-                  shift.name.length > 4 ? shift.name.substring(0, 4) : shift.name,
+                  shift.name,
                   style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color)),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -617,8 +665,8 @@ extension _Theme2 on _CalendarThemeLabScreenState {
                 fontWeight: today ? FontWeight.bold : FontWeight.w700,
                 color: outside ? Colors.grey.shade300 : (red ? Colors.red.shade400 : Colors.black87),
               )),
-              if (_isHoliday(day))
-                Text(_mockHolidayName, style: TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.0), maxLines: 1, overflow: TextOverflow.ellipsis),
+              if (_mockHolidayNameFor(context, day) != null)
+                Text(_mockHolidayNameFor(context, day)!, style: TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.0), maxLines: 1, overflow: TextOverflow.ellipsis),
               // ⭐ 광복절-메모 간격 한 번 더 소폭 확대 (1.3h→1.8h) - "아주 조금만 더" 피드백.
               SizedBox(height: 1.8.h),
               // ⭐ 메모끼리 너무 붙어 보인다는 피드백(우선순위 1번, 최우선) - 줄
@@ -648,9 +696,9 @@ extension _Theme2 on _CalendarThemeLabScreenState {
       ),
       child: Row(
         children: [
-          _otChip('이번 달 OT', _formatMinutes(_mockMonthlyOtTotal), Colors.indigo),
+          _otChip(context.l10n.shiftThisMonthOt, formatOvertimeMinutes(context, _mockMonthlyOtTotal), Colors.indigo),
           SizedBox(width: 8.w),
-          _otChip('주별 근무시간', '보기', Colors.teal, onTap: () => _showWeekSummarySheet(context, _weeks)),
+          _otChip(context.l10n.shiftWeeklyWorkHours, context.l10n.commonView, Colors.teal, onTap: () => _showWeekSummarySheet(context, _weeks)),
         ],
       ),
     );
@@ -705,7 +753,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
             children: [
               Text('2026-08', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'monospace')),
               const Spacer(),
-              _gridHeaderBtn('전체근무표', _openAllShifts),
+              _gridHeaderBtn(context.l10n.shiftFullSchedule, _openAllShifts),
               SizedBox(width: 8.w),
               _gridHeaderBtn('TODAY', _tapToday),
             ],
@@ -732,11 +780,11 @@ extension _Theme4 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
           child: Row(
             children: [
-              Text('이번 달 OT ${_formatMinutes(_mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF263238))),
+              Text('${context.l10n.shiftThisMonthOt} ${formatOvertimeMinutes(context, _mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF263238))),
               SizedBox(width: 14.w),
               GestureDetector(
                 onTap: () => _showWeekSummarySheet(context, _weeks),
-                child: Text('주별 근무시간 ▸', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF00695C))),
+                child: Text('${context.l10n.shiftWeeklyWorkHours} ▸', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF00695C))),
               ),
             ],
           ),
@@ -747,7 +795,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
 
   Widget _theme4Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
-    final shift = _mockShiftFor(day);
+    final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(day);
@@ -774,9 +822,9 @@ extension _Theme4 on _CalendarThemeLabScreenState {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text('${day.day}', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: outside ? Colors.grey.shade400 : (red ? Colors.red.shade600 : const Color(0xFF263238)))),
-                if (_isHoliday(day))
+                if (_mockHolidayNameFor(context, day) != null)
                   Expanded(
-                    child: Text(_mockHolidayName, style: TextStyle(fontSize: 5.5.sp, color: Colors.red.shade600, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+                    child: Text(_mockHolidayNameFor(context, day)!, style: TextStyle(fontSize: 5.5.sp, color: Colors.red.shade600, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
                   ),
               ],
             ),
@@ -837,9 +885,9 @@ extension _Theme5 on _CalendarThemeLabScreenState {
               // ⭐ 9번과 같은 이유로 color 없이 두면 흰 배경에서 거의 안 보였음 - 명시.
               Text('2026.08', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
               const Spacer(),
-              _pillButton('전체근무표', Icons.table_chart_outlined, _openAllShifts),
+              _pillButton(context.l10n.shiftFullSchedule, Icons.table_chart_outlined, _openAllShifts),
               SizedBox(width: 6.w),
-              _pillButton('오늘', Icons.adjust, _tapToday),
+              _pillButton(context.l10n.commonToday, Icons.adjust, _tapToday),
             ],
           ),
         ),
@@ -847,7 +895,7 @@ extension _Theme5 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 8.w),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(_weekdayKr[i], style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
+              child: Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
             )),
           ),
         ),
@@ -870,7 +918,7 @@ extension _Theme5 on _CalendarThemeLabScreenState {
 
   Widget _theme5Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
-    final shift = _mockShiftFor(day);
+    final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(day);
@@ -918,8 +966,8 @@ extension _Theme5 on _CalendarThemeLabScreenState {
                 ],
               ),
             ),
-            if (_isHoliday(day))
-              Text(_mockHolidayName, style: TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.0), maxLines: 1, overflow: TextOverflow.ellipsis),
+            if (_mockHolidayNameFor(context, day) != null)
+              Text(_mockHolidayNameFor(context, day)!, style: TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.0), maxLines: 1, overflow: TextOverflow.ellipsis),
             // ⭐ 광복절-메모 간격(1.2h)은 실기기 확인 완료된 값이라 그대로 유지.
             // 메모끼리 간격만 다시 넓힘(0.5h→2h) - 셀 아래쪽에 여백이 꽤 남는다는
             // 피드백이라, 그 여유를 메모 사이 간격으로 옮겨서 3개가 붙어 보이던
@@ -969,7 +1017,7 @@ extension _Theme8 on _CalendarThemeLabScreenState {
               const Spacer(),
               GestureDetector(onTap: _tapToday, child: Text('TODAY', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5))),
               SizedBox(width: 12.w),
-              GestureDetector(onTap: _openAllShifts, child: Text('전체근무표', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54))),
+              GestureDetector(onTap: _openAllShifts, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54))),
             ],
           ),
         ),
@@ -1011,9 +1059,9 @@ extension _Theme8 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.fromLTRB(18.w, 4.h, 18.w, 10.h),
           child: Row(
             children: [
-              Text('이번 달 OT ${_formatMinutes(_mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
+              Text('${context.l10n.shiftThisMonthOt} ${formatOvertimeMinutes(context, _mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
               const Spacer(),
-              GestureDetector(onTap: () => _showWeekSummarySheet(context, _weeks), child: Text('주별 근무시간', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.black87))),
+              GestureDetector(onTap: () => _showWeekSummarySheet(context, _weeks), child: Text(context.l10n.shiftWeeklyWorkHours, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.black87))),
             ],
           ),
         ),
@@ -1023,7 +1071,7 @@ extension _Theme8 on _CalendarThemeLabScreenState {
 
   Widget _theme8Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
-    final shift = _mockShiftFor(day);
+    final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(day);
@@ -1056,8 +1104,8 @@ extension _Theme8 on _CalendarThemeLabScreenState {
             height: 4.2.h,
             decoration: BoxDecoration(color: shift.color, borderRadius: BorderRadius.circular(2.r)),
           ),
-          if (_isHoliday(day))
-            Text(_mockHolidayName, style: TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+          if (_mockHolidayNameFor(context, day) != null)
+            Text(_mockHolidayNameFor(context, day)!, style: TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
           ...memos.take(3).map((m) => Text(m, style: TextStyle(fontSize: 7.sp, color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis)),
         ],
         ),
@@ -1073,7 +1121,8 @@ extension _Theme8 on _CalendarThemeLabScreenState {
   // 길어져도 그 항목 안에서만 잘리고 옆 칸을 절대 침범 못함.
   Widget _theme8Legend() {
     const cols = 4;
-    final rows = (_mockLegendShifts.length / cols).ceil();
+    final legendShifts = _legendShifts(context);
+    final rows = (legendShifts.length / cols).ceil();
     // ⭐ "뜬금없어 보인다"는 피드백으로 테두리를 둘러서 하나의 독립된 정보
     // 영역임을 명확히 함 - 이 테마는 셀 자체엔 테두리가 없는(배경·테두리 없이
     // 밑줄만 쓰는) 미니멀 컨셉이라, 범례는 옅은 회색 테두리 정도로만 최소한의
@@ -1091,8 +1140,8 @@ extension _Theme8 on _CalendarThemeLabScreenState {
             child: Row(
               children: List.generate(cols, (c) {
                 final i = r * cols + c;
-                if (i >= _mockLegendShifts.length) return const Expanded(child: SizedBox());
-                final s = _mockLegendShifts[i];
+                if (i >= legendShifts.length) return const Expanded(child: SizedBox());
+                final s = legendShifts[i];
                 return Expanded(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
@@ -1136,9 +1185,9 @@ extension _Theme9 on _CalendarThemeLabScreenState {
               // 거의 안 보이는 문제가 있었음 - 다른 테마 헤더들과 같은 black87로 명시.
               Text('2026. 8', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
               const Spacer(),
-              _pillButton('전체근무표', Icons.table_chart_outlined, _openAllShifts),
+              _pillButton(context.l10n.shiftFullSchedule, Icons.table_chart_outlined, _openAllShifts),
               SizedBox(width: 6.w),
-              _pillButton('오늘', Icons.adjust, _tapToday),
+              _pillButton(context.l10n.commonToday, Icons.adjust, _tapToday),
             ],
           ),
         ),
@@ -1169,7 +1218,7 @@ extension _Theme9 on _CalendarThemeLabScreenState {
 
   Widget _theme9Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
-    final shift = _mockShiftFor(day);
+    final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(day);
@@ -1218,10 +1267,10 @@ extension _Theme9 on _CalendarThemeLabScreenState {
               // 조용히 잘라주므로 에러 배너 걱정 없이 크게 잡아도 됨.
               // ⭐ outside(다른 달) 날짜도 근무명 칩을 그대로 보여줌 - 메인 달력과 동일.
               _chip(shift.name, shift.color, _autoTextColor(shift.color)),
-              if (_isHoliday(day))
+              if (_mockHolidayNameFor(context, day) != null)
                 Padding(
                   padding: EdgeInsets.only(top: 0.8.h),
-                  child: _chip(_mockHolidayName, Colors.red.shade50, Colors.red.shade400),
+                  child: _chip(_mockHolidayNameFor(context, day)!, Colors.red.shade50, Colors.red.shade400),
                 ),
               ...memos.take(3).map((m) => Padding(
                 padding: EdgeInsets.only(top: 0.8.h),
@@ -1266,9 +1315,9 @@ extension _Theme10 on _CalendarThemeLabScreenState {
               SizedBox(width: 8.w),
               Padding(padding: EdgeInsets.only(bottom: 3.h), child: Text('2026', style: TextStyle(fontSize: 12.sp, fontFamily: 'serif', color: Colors.grey.shade500))),
               const Spacer(),
-              GestureDetector(onTap: _openAllShifts, child: Text('전체근무표', style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+              GestureDetector(onTap: _openAllShifts, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
               SizedBox(width: 10.w),
-              GestureDetector(onTap: _tapToday, child: Text('오늘', style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+              GestureDetector(onTap: _tapToday, child: Text(context.l10n.commonToday, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
             ],
           ),
         ),
@@ -1303,13 +1352,13 @@ extension _Theme10 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.fromLTRB(18.w, 6.h, 18.w, 10.h),
           child: Row(
             children: [
-              Text('이번 달 OT', style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade500, fontFamily: 'serif')),
+              Text(context.l10n.shiftThisMonthOt, style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade500, fontFamily: 'serif')),
               SizedBox(width: 4.w),
-              Text(_formatMinutes(_mockMonthlyOtTotal), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.brown.shade600, fontFamily: 'serif')),
+              Text(formatOvertimeMinutes(context, _mockMonthlyOtTotal), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.brown.shade600, fontFamily: 'serif')),
               const Spacer(),
               GestureDetector(
                 onTap: () => _showWeekSummarySheet(context, _weeks),
-                child: Text('주별 근무시간 →', style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, fontFamily: 'serif')),
+                child: Text('${context.l10n.shiftWeeklyWorkHours} →', style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, fontFamily: 'serif')),
               ),
             ],
           ),
@@ -1320,7 +1369,7 @@ extension _Theme10 on _CalendarThemeLabScreenState {
 
   Widget _theme10Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
-    final shift = _mockShiftFor(day);
+    final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(day);
@@ -1359,11 +1408,11 @@ extension _Theme10 on _CalendarThemeLabScreenState {
             // 어려웠음 - 여기만 기본 서체로 되돌림.
             // ⭐ 공휴일명을 메모 묶음에서 분리 - 날짜 숫자 바로 아래(우측 정렬,
             // 같은 자리)에 따로 배치하고 글씨도 눈에 띄게 키움(5.5sp→7.5sp).
-            if (_isHoliday(day))
+            if (_mockHolidayNameFor(context, day) != null)
               Positioned(
                 top: 18.h,
                 right: 2.w,
-                child: Text(_mockHolidayName, style: TextStyle(fontSize: 7.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
+                child: Text(_mockHolidayNameFor(context, day)!, style: TextStyle(fontSize: 7.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
               ),
             // ⭐ 메모는 공휴일과 분리된 채로 계속 하단 고정 - 폰트도 한 번 더
             // 키움(6.8sp→7.5sp), 줄 간격도 넓힘(0.8h→1.2h).
@@ -1395,7 +1444,8 @@ extension _Theme10 on _CalendarThemeLabScreenState {
   // 항상 맞고, 줄 수(ceil(개수/4))만 자연스럽게 늘어남.
   Widget _theme10Legend() {
     const cols = 4;
-    final rows = (_mockLegendShifts.length / cols).ceil();
+    final legendShifts = _legendShifts(context);
+    final rows = (legendShifts.length / cols).ceil();
     // ⭐ "뜬금없어 보인다"는 피드백으로 테두리로 감쌈 - 이 테마는 셀마다 이미
     // 옅은 회색 테두리(grey.shade200)가 있어서 그거랑 톤을 맞춤.
     // ⭐ serif는 큰 제목("August"/날짜 숫자)엔 잡지 느낌을 살려주지만 이렇게
@@ -1411,8 +1461,8 @@ extension _Theme10 on _CalendarThemeLabScreenState {
             child: Row(
               children: List.generate(cols, (c) {
                 final i = r * cols + c;
-                if (i >= _mockLegendShifts.length) return const Expanded(child: SizedBox());
-                final s = _mockLegendShifts[i];
+                if (i >= legendShifts.length) return const Expanded(child: SizedBox());
+                final s = legendShifts[i];
                 return Expanded(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
@@ -1465,7 +1515,7 @@ void _showWeekSummarySheet(BuildContext context, List<_WeekSummary> weeks) {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('8월 주별 근무(예정) 시간', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+            Text(context.l10n.shiftWeeklyWorkHours, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
             SizedBox(height: 10.h),
             ...weeks.map((w) => Padding(
               padding: EdgeInsets.symmetric(vertical: 4.h),
@@ -1473,7 +1523,7 @@ void _showWeekSummarySheet(BuildContext context, List<_WeekSummary> weeks) {
                 children: [
                   Text('${w.start.month}/${w.start.day} ~ ${w.end.month}/${w.end.day}', style: TextStyle(fontSize: 13.sp)),
                   const Spacer(),
-                  Text(_formatMinutes(w.totalMinutes), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.indigo)),
+                  Text(formatOvertimeMinutes(context, w.totalMinutes), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.indigo)),
                 ],
               ),
             )),
@@ -1506,7 +1556,7 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
 
   Widget _buildMainTheme({required bool isDark}) {
     final themeData = isDark ? AppTheme.darkTheme : AppTheme.lightTheme;
-    final palette = isDark ? _mockLegendShiftsDark : _mockLegendShifts;
+    final palette = isDark ? _legendShiftsDark(context) : _legendShifts(context);
     final colorScheme = themeData.colorScheme;
 
     return Theme(
@@ -1519,14 +1569,17 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
               padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
               child: Row(
                 children: [
-                  Text('2026년 8월', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface)),
+                  Text(
+                    DateFormat.yMMMM(Localizations.localeOf(context).toString()).format(DateTime(2026, 8, 1)),
+                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
+                  ),
                   const Spacer(),
                   // ⭐ "원래 버튼 이미지가 있었는데 텍스트만 남았다"는 피드백 -
                   // 진짜 달력탭(_buildCalendarHeader 부분)의 버튼 스타일을
                   // 그대로 재현함: primaryContainer 배경 + 옅은 테두리의 알약형.
-                  _mainHeaderButton('전체근무표', colorScheme, _openAllShifts),
+                  _mainHeaderButton(context.l10n.shiftFullSchedule, colorScheme, _openAllShifts),
                   SizedBox(width: 8.w),
-                  _mainHeaderButton('오늘', colorScheme, _tapToday),
+                  _mainHeaderButton(context.l10n.commonToday, colorScheme, _tapToday),
                 ],
               ),
             ),
@@ -1594,15 +1647,15 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
                                 Expanded(
                                   child: InkWell(
                                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('실제 채택 시 OT 상세 팝업으로 연결됩니다')),
+                                      SnackBar(content: Text(context.l10n.themeLabOtDetailNotice)),
                                     ),
                                     child: Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 10.w),
                                       child: Row(
                                         children: [
-                                          Text('이번 달 OT', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant)),
+                                          Text(context.l10n.shiftThisMonthOt, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant)),
                                           SizedBox(width: 6.w),
-                                          Text(_formatMinutes(_mockMonthlyOtTotal), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant)),
+                                          Text(formatOvertimeMinutes(context, _mockMonthlyOtTotal), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant)),
                                         ],
                                       ),
                                     ),
@@ -1616,7 +1669,7 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
                                       padding: EdgeInsets.symmetric(horizontal: 10.w),
                                       child: Row(
                                         children: [
-                                          Text('주별 근무시간', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant)),
+                                          Text(context.l10n.shiftWeeklyWorkHours, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant)),
                                           const Spacer(),
                                           Icon(Icons.chevron_right, size: 16.sp, color: colorScheme.onSurfaceVariant),
                                         ],
@@ -1686,7 +1739,7 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
     final shift = _mainShiftFor(day, palette);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final isSunday = day.weekday == DateTime.sunday;
-    final holiday = _isHoliday(day) ? _mockHolidayName : null;
+    final holiday = _mockHolidayNameFor(context, day);
     final red = isSunday || holiday != null;
 
     final Color dateColor = red

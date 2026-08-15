@@ -1,3 +1,6 @@
+import 'package:flutter/widgets.dart';
+import '../l10n/l10n_extensions.dart';
+
 class AlarmHistory {
   final int? id;
   final int alarmId;
@@ -46,16 +49,19 @@ class AlarmHistory {
     );
   }
 
-  String get dismissTypeText {
+  // ⭐ 영어 현지화: 기존 dismissTypeText(하드코딩 한국어) → BuildContext를 받는
+  // dismissLabel(context)로 개명. 호출부(all_alarms_history_view.dart 등)도 갱신.
+  String dismissLabel(BuildContext context) {
+    final l10n = context.l10n;
     switch (dismissType) {
       case 'swiped':
-        return '알람 확인';
+        return l10n.dismissAlarmConfirmed;
       case 'snoozed':
-        return '5분 연장';
+        return l10n.dismissSnoozed5Min;
       case 'timeout':
-        return '무응답';
+        return l10n.dismissNoResponse;
       case 'cancelled_before_ring':
-        return '알람 제거';
+        return l10n.dismissAlarmRemoved;
       default:
         return dismissType;
     }

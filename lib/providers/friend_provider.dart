@@ -62,7 +62,11 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
     if (existing.any((row) => row['owner_id'] == ownerId)) return false;
 
     final data = await FriendSyncService.instance.fetchByOwnerId(ownerId);
-    final name = displayName.trim().isNotEmpty ? displayName.trim() : (data?.ownerName ?? '친구');
+    // ⭐ 영어 현지화: 여기(Riverpod Notifier)는 BuildContext가 없어서 언어별 기본
+    // 문구를 고를 수 없음 - 빈 문자열로 저장해두고, 실제 화면에 표시할 때(예:
+    // friend_list_screen.dart)가 비어있으면 context.l10n.friendDefaultDisplayName로
+    // 대체함(friend_schedule.dart의 ownerName 처리와 동일한 패턴).
+    final name = displayName.trim().isNotEmpty ? displayName.trim() : (data?.ownerName ?? '');
 
     try {
       await _db.insertFriend(name: name, ownerId: ownerId, dataJson: data?.encodeToJsonString());

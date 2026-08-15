@@ -21,6 +21,8 @@ import 'memo_list_view.dart';
 import 'work_hours_settings_screen.dart';
 import 'calendar_theme_picker_screen.dart';
 import '../widgets/tappable_number_picker.dart';
+import '../l10n/l10n_extensions.dart';
+import '../constants/shift_name_limits.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
@@ -37,16 +39,16 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('스케줄 초기화'),
-        content: Text('교대 스케줄과 알람을 모두 초기화할까요?\n(전체 교대조 근무표도 초기화됩니다.)'),
+        title: Text(context.l10n.shiftResetSchedule),
+        content: Text(context.l10n.settingsResetScheduleConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('취소'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('초기화', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(context.l10n.commonReset, style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -99,7 +101,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           children: [
             Icon(Icons.alarm, color: Theme.of(context).colorScheme.secondary),
             SizedBox(width: 8.w),
-            Text('등록된 알람'),
+            Text(context.l10n.alarmRegistered),
           ],
         ),
         content: Container(
@@ -118,9 +120,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildCountItem('미래', futureAlarms.length, Colors.green),
-                    _buildCountItem('과거', pastAlarms.length, Colors.grey),
-                    _buildCountItem('전체', alarms.length, Colors.blue),
+                    _buildCountItem(context.l10n.alarmCountFuture, futureAlarms.length, Colors.green),
+                    _buildCountItem(context.l10n.alarmCountPast, pastAlarms.length, Colors.grey),
+                    _buildCountItem(context.l10n.alarmCountAll, alarms.length, Colors.blue),
                   ],
                 ),
               ),
@@ -129,7 +131,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 Center(
                   child: Padding(
                     padding: EdgeInsets.all(32.h),
-                    child: Text('등록된 알람이 없습니다', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                    child: Text(context.l10n.alarmNoneRegistered, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                   ),
                 )
               else
@@ -152,7 +154,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                       return Padding(
                         padding: EdgeInsets.symmetric(vertical: 2.h),
                         child: Text(
-                          '${_formatDate(alarm.date!)} ${alarm.shiftType ?? "알람"}${isToday ? " (오늘)" : ""}',
+                          '${_formatDate(alarm.date!)} ${alarm.shiftType ?? context.l10n.alarmTitle}${isToday ? " (${context.l10n.commonToday})" : ""}',
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontFamily: 'monospace',
@@ -170,7 +172,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('닫기'),
+            child: Text(context.l10n.commonClose),
           ),
         ],
       ),
@@ -230,14 +232,14 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               Spacer(),
               Padding(
                 padding: EdgeInsets.only(right: 16.w),
-                child: Text('설정'),
+                child: Text(context.l10n.navSettings),
               ),
             ],
           ),
         ),
         body: scheduleAsync.when(
         loading: () => const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
-        error: (error, stack) => Center(child: Text('에러 발생: $error')),
+        error: (error, stack) => Center(child: Text('${context.l10n.statusErrorOccurred}: $error')),
         data: (schedule) {
           return ListView(
             padding: EdgeInsets.all(16.w),
@@ -266,7 +268,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                           Icon(Icons.calendar_month, color: Theme.of(context).colorScheme.onPrimary, size: 20.sp),
                           SizedBox(width: 8.w),
                           Text(
-                            '교대 근무 관리',
+                            context.l10n.settingsShiftManagement,
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.bold,
@@ -283,7 +285,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (schedule == null)
-                            Text('설정 안 됨', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))
+                            Text(context.l10n.settingsNotSet, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))
                           else if (schedule.isRegular && schedule.pattern != null)
                             _buildPatternRow(schedule.pattern!)
                           else
@@ -311,7 +313,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                                     Icon(Icons.edit, color: Theme.of(context).colorScheme.primary, size: 16.sp),
                                     SizedBox(width: 6.w),
                                     Text(
-                                      '수정',
+                                      context.l10n.commonEdit,
                                       style: TextStyle(
                                         color: Theme.of(context).colorScheme.primary,
                                         fontSize: 13.sp,
@@ -340,7 +342,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                                     Icon(Icons.refresh, color: Theme.of(context).colorScheme.error, size: 16.sp),
                                     SizedBox(width: 6.w),
                                     Text(
-                                      '초기화',
+                                      context.l10n.commonReset,
                                       style: TextStyle(
                                         color: Theme.of(context).colorScheme.error,
                                         fontSize: 13.sp,
@@ -369,8 +371,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // 알람음 관리
               ListTile(
                 leading: Icon(Icons.notifications_active, color: Theme.of(context).colorScheme.tertiary),
-                title: Text('알람음 관리'),
-                subtitle: Text('소리+진동, 진동, 무음 설정'),
+                title: Text(context.l10n.alarmSoundManage),
+                subtitle: Text(context.l10n.settingsAlarmSoundManageDesc),
                 trailing: Icon(Icons.chevron_right),
                 onTap: _showAlarmTypeDialog,
               ),
@@ -378,8 +380,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // ⭐ "근로"를 전부 "근무"로 통일 (탭 제목/부제 포함).
               ListTile(
                 leading: Icon(Icons.work_history_outlined, color: Theme.of(context).colorScheme.tertiary),
-                title: Text('근무시간 및 OT 설정'),
-                subtitle: Text('근무별 근무시간, 월 근무시간 기준 기간'),
+                title: Text(context.l10n.settingsWorkHoursAndOt),
+                subtitle: Text(context.l10n.settingsWorkHoursAndOtDesc),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
@@ -398,8 +400,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // 지정이 아니라 테마 선택 하나로 전부 결정됨.
               ListTile(
                 leading: Icon(Icons.palette_outlined, color: Theme.of(context).colorScheme.primary),
-                title: Text('달력 테마'),
-                subtitle: Text(ref.watch(calendarThemeProvider).label),
+                title: Text(context.l10n.calendarTheme),
+                subtitle: Text(ref.watch(calendarThemeProvider).label(context)),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(
@@ -418,8 +420,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // 알람 이력
               ListTile(
                 leading: Icon(Icons.alarm_on, color: Theme.of(context).colorScheme.primary),
-                title: Text('알람 이력'),
-                subtitle: Text('생성됐던 모든 알람과 그 결과 확인'),
+                title: Text(context.l10n.alarmHistory),
+                subtitle: Text(context.l10n.settingsAlarmHistoryDesc),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
@@ -432,8 +434,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // 메모 모아보기
               ListTile(
                 leading: Icon(Icons.note_outlined, color: Colors.amber.shade700),
-                title: Text('메모 모아보기'),
-                subtitle: Text('전체 메모 확인 및 검색'),
+                title: Text(context.l10n.calendarMemoAll),
+                subtitle: Text(context.l10n.settingsMemoAllDesc),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
@@ -447,22 +449,22 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ListTile(
                 leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
                 title: Text(
-                  '모든 알람 완전 삭제',
+                  context.l10n.alarmDeleteAllPermanently,
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
-                subtitle: Text('등록된 모든 알람 삭제'),
+                subtitle: Text(context.l10n.settingsDeleteAllAlarmsDesc),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () async {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text('모든 알람 완전 삭제'),
+                      title: Text(context.l10n.alarmDeleteAllPermanently),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '이 작업은 되돌릴 수 없습니다.',
+                            context.l10n.settingsActionCannotBeUndone,
                             style: TextStyle(
                               fontSize: 15.sp,
                               fontWeight: FontWeight.bold,
@@ -470,15 +472,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                             ),
                           ),
                           SizedBox(height: 12.h),
-                          Text('등록된 모든 알람이 삭제됩니다.'),
+                          Text(context.l10n.settingsAllAlarmsWillBeDeleted),
                           SizedBox(height: 8.h),
-                          Text('앱 이용을 위해서는 알람을 다시 생성해야 합니다.'),
+                          Text(context.l10n.settingsMustRecreateAlarms),
                         ],
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: Text('취소'),
+                          child: Text(context.l10n.commonCancel),
                         ),
                         ElevatedButton(
                           onPressed: () => Navigator.pop(context, true),
@@ -486,7 +488,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                             backgroundColor: Colors.red.shade700,
                             foregroundColor: Theme.of(context).colorScheme.onPrimary,
                           ),
-                          child: Text('완전 삭제', style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: Text(context.l10n.commonDeletePermanently, style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
@@ -499,7 +501,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('🗑️ 모든 알람이 완전히 삭제되었습니다'),
+                            content: Text('🗑️ ${context.l10n.settingsAllAlarmsDeletedToast}'),
                             backgroundColor: Colors.red.shade700,
                           ),
                         );
@@ -507,7 +509,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                     } catch (e) {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('❌ 삭제 실패: $e')),
+                          SnackBar(content: Text('❌ ${context.l10n.statusDeleteFailed}: $e')),
                         );
                       }
                     }
@@ -523,8 +525,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // 도움말
               ListTile(
                 leading: Icon(Icons.help_outline, color: Theme.of(context).colorScheme.secondary),
-                title: Text('도움말'),
-                subtitle: Text('앱 사용법 안내'),
+                title: Text(context.l10n.settingsHelp),
+                subtitle: Text(context.l10n.settingsHelpDesc),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () => _showHelpDialog(),
               ),
@@ -532,7 +534,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // 개인정보처리방침
               ListTile(
                 leading: Icon(Icons.privacy_tip_outlined, color: Colors.teal),
-                title: Text('개인정보처리방침'),
+                title: Text(context.l10n.settingsPrivacyPolicy),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () => _openPrivacyPolicy(),
               ),
@@ -554,7 +556,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           children: [
             Icon(Icons.help_outline, color: Theme.of(context).colorScheme.secondary),
             SizedBox(width: 8.w),
-            Text('도움말'),
+            Text(context.l10n.settingsHelp),
           ],
         ),
         content: SingleChildScrollView(
@@ -564,38 +566,26 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             children: [
               _buildHelpItem(
                 number: '1',
-                title: '알람 갱신 주기',
-                description: '알람은 최초 등록 시 10일치가 한번에 생성됩니다.\n\n'
-                    '이후 매일 자정에 하루치가 자동으로 추가되어, 항상 10일치 알람이 유지됩니다.\n\n'
-                    '앱을 열지 않아도 백그라운드에서 자동 갱신됩니다.',
+                title: context.l10n.settingsHelpRefreshCycleTitle,
+                description: context.l10n.settingsHelpRefreshCycleDesc,
               ),
               SizedBox(height: 16.h),
               _buildHelpItem(
                 number: '2',
-                title: '달력에서 근무 변경하기',
-                description: '달력에서 날짜를 길게 누르면 해당 날짜의 근무를 변경할 수 있습니다.\n\n'
-                    '• 불규칙 근무자: 원하는 날짜에 근무를 직접 할당\n'
-                    '• 규칙적 근무자: 특정 날짜만 다른 근무로 변경 가능\n\n'
-                    '근무 변경 시 해당 날짜의 알람도 자동으로 업데이트됩니다.',
+                title: context.l10n.settingsHelpChangeShiftTitle,
+                description: context.l10n.settingsHelpChangeShiftDesc,
               ),
               SizedBox(height: 16.h),
               _buildHelpItem(
                 number: '3',
-                title: '근무 조 변경 시 적용방법',
-                description: '조가 바뀌어 전체 스케줄을 변경해야 할 때:\n\n'
-                    '설정 → 교대근무 관리 카드의 수정 버튼 → "스케줄 변경"을 선택합니다.\n\n'
-                    '바뀐 조 기준으로 오늘의 근무를 선택하면 전체 달력에 적용되고, 알람도 10일치가 새로 생성됩니다.\n\n'
-                    '※ 근무 패턴 자체가 바뀌는 경우(예: 3조2교대 → 4조3교대)에는 초기화가 필요하며, 이 경우 기존 알람은 전부 삭제됩니다.',
+                title: context.l10n.settingsHelpTeamChangeTitle,
+                description: context.l10n.settingsHelpTeamChangeDesc,
               ),
               SizedBox(height: 16.h),
               _buildHelpItem(
                 number: '4',
-                title: '데이터 저장 정보',
-                description: '앱에 저장되는 모든 데이터(알람, 메모, 교대 스케줄)는 사용자의 로컬 기기에만 저장됩니다.\n\n'
-                    '• 외부 서버로 전송되지 않으며, 사용자만 접근 가능합니다.\n'
-                    '• 앱 삭제 시 모든 데이터가 함께 삭제됩니다.\n'
-                    '• 앱 업데이트 시에는 데이터가 유지됩니다.\n\n'
-                    '백업 기능이 필요한 경우 별도로 데이터를 저장해 주세요.',
+                title: context.l10n.settingsHelpDataStorageTitle,
+                description: context.l10n.settingsHelpDataStorageDesc,
               ),
             ],
           ),
@@ -603,7 +593,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('확인'),
+            child: Text(context.l10n.commonOk),
           ),
         ],
       ),
@@ -672,32 +662,17 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('개인정보처리방침'),
+        title: Text(context.l10n.settingsPrivacyPolicy),
         content: SingleChildScrollView(
           child: Text(
-            '''교대시계 개인정보처리방침
-
-1. 수집하는 개인정보
-본 앱은 개인정보를 수집하지 않습니다. 모든 데이터(근무 스케줄, 알람 설정 등)는 사용자의 기기에만 저장되며, 외부 서버로 전송되지 않습니다.
-
-2. 앱 권한
-• 다른 앱 위에 표시 권한: 다른 앱 사용 중 알람 화면을 표시하기 위해 필요합니다.
-• 알림 권한: 사전 알림 및 알람 상태를 표시하기 위해 필요합니다.
-
-3. 데이터 저장
-모든 데이터는 기기 내부에만 저장됩니다. 앱을 삭제하면 모든 데이터가 함께 삭제됩니다.
-
-4.앱 관련 문의사항
-lowvibe07.tistory.com
-
-최종 수정일: 2025년 12월''',
+            context.l10n.settingsPrivacyPolicyBody,
             style: TextStyle(fontSize: 13.sp, height: 1.6),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('닫기'),
+            child: Text(context.l10n.commonClose),
           ),
         ],
       ),
@@ -710,7 +685,7 @@ lowvibe07.tistory.com
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '교대 패턴',
+          context.l10n.shiftPattern,
           style: TextStyle(
             fontSize: 12.sp,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -754,7 +729,7 @@ lowvibe07.tistory.com
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '근무명',
+          context.l10n.shiftName,
           style: TextStyle(
             fontSize: 12.sp,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -814,8 +789,8 @@ lowvibe07.tistory.com
               if (schedule.isRegular && schedule.pattern != null)
                 ListTile(
                   leading: Icon(Icons.swap_horiz, color: Colors.teal.shade600),
-                  title: Text('스케줄 변경'),
-                  subtitle: Text('조 변경 시 오늘 근무를 다시 설정합니다'),
+                  title: Text(context.l10n.shiftChangeSchedule),
+                  subtitle: Text(context.l10n.settingsChangeScheduleDesc),
                   onTap: () {
                     Navigator.pop(context);
                     _showChangeScheduleDialog();
@@ -825,8 +800,8 @@ lowvibe07.tistory.com
                 Divider(height: 1),
               ListTile(
                 leading: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
-                title: Text('근무명 수정'),
-                subtitle: Text('근무 이름을 변경합니다'),
+                title: Text(context.l10n.settingsEditShiftNameTitle),
+                subtitle: Text(context.l10n.settingsRenameShiftDesc),
                 onTap: () {
                   Navigator.pop(context);
                   _showEditShiftNamesDialog();
@@ -839,8 +814,8 @@ lowvibe07.tistory.com
               Divider(height: 1),
               ListTile(
                 leading: Icon(Icons.alarm, color: Theme.of(context).colorScheme.tertiary),
-                title: Text('고정 알람 수정'),
-                subtitle: Text('근무별 알람 시간을 변경합니다'),
+                title: Text(context.l10n.settingsEditFixedAlarmTitle),
+                subtitle: Text(context.l10n.settingsChangeAlarmTimeDesc),
                 onTap: () {
                   Navigator.pop(context);
                   _showEditFixedAlarmsScreen();
@@ -886,7 +861,7 @@ lowvibe07.tistory.com
                 child: CircularProgressIndicator(strokeWidth: 2, color: Theme.of(context).colorScheme.surface),
               ),
               SizedBox(width: 12),
-              Text('스케줄 변경 중...'),
+              Text(context.l10n.settingsScheduleChanging),
             ],
           ),
           duration: Duration(seconds: 5),
@@ -945,7 +920,7 @@ lowvibe07.tistory.com
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ 스케줄이 변경되었습니다'),
+            content: Text('✅ ${context.l10n.statusScheduleUpdated}'),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
@@ -957,7 +932,7 @@ lowvibe07.tistory.com
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ 스케줄 변경 실패: $e'),
+            content: Text('❌ ${context.l10n.settingsScheduleChangeFailedWithError(e.toString())}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -1052,7 +1027,7 @@ lowvibe07.tistory.com
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('근무명이 변경되었습니다'),
+          content: Text(context.l10n.statusShiftNameUpdated),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -1106,7 +1081,7 @@ lowvibe07.tistory.com
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('근무명 색상이 변경되었습니다'),
+          content: Text(context.l10n.statusShiftColorUpdated),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -1176,7 +1151,7 @@ lowvibe07.tistory.com
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('알람이 업데이트되었습니다'),
+          content: Text(context.l10n.alarmUpdatedToast),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -1193,12 +1168,12 @@ lowvibe07.tistory.com
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('전체 교대조 근무표 작성'),
-          content: Text('이 기능은 규칙적 근무 패턴이 설정된 경우에만 사용할 수 있습니다.'),
+          title: Text(context.l10n.settingsAllTeamsScheduleTitle),
+          content: Text(context.l10n.settingsAllTeamsRegularOnly),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('확인'),
+              child: Text(context.l10n.commonOk),
             ),
           ],
         ),
@@ -1217,16 +1192,16 @@ lowvibe07.tistory.com
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('전체 교대조 근무표 작성'),
-          content: Text('이미 작성된 근무표가 있습니다.\n다시 작성하시겠습니까?'),
+          title: Text(context.l10n.settingsAllTeamsScheduleTitle),
+          content: Text(context.l10n.statusScheduleExistsRewrite),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text('취소'),
+              child: Text(context.l10n.commonCancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: Text('다시 작성', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+              child: Text(context.l10n.commonRewrite, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
             ),
           ],
         ),
@@ -1336,7 +1311,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           Row(
             children: [
               Text(
-                '알람음 설정',
+                context.l10n.settingsAlarmSoundSettings,
                 style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
@@ -1378,7 +1353,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               Text(type.emoji, style: TextStyle(fontSize: 28.sp)),
               SizedBox(width: 12.w),
               Text(
-                type.isSound ? '소리+진동' : type.isVibrate ? '진동' : '무음',
+                type.isSound ? context.l10n.alarmSoundVibration : type.isVibrate ? context.l10n.alarmVibration : context.l10n.alarmSilent,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -1386,7 +1361,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               ),
               if (type.isSound)
                 Text(
-                  ' (진동 포함)',
+                  ' (${context.l10n.settingsIncludesVibration})',
                   style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
             ],
@@ -1398,7 +1373,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
             _buildSoundSelectRow(type),
             SizedBox(height: 12.h),
             _buildSliderRow(
-              label: '음량',
+              label: context.l10n.alarmVolume,
               value: type.volume,
               onChanged: (v) {
                 // ⭐ 실시간 볼륨 적용 (Native STREAM_ALARM)
@@ -1463,16 +1438,16 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     );
   }
 
-  // 알람 사운드 목록 (파일명과 표시명)
+  // 알람 사운드 목록 (파일명, id) - 표시명은 로케일에 맞게 _getSoundName(context, id)로 계산
   static const List<Map<String, String>> _soundOptions = [
-    {'id': 'default', 'name': '기본알람음', 'file': 'default'},
-    {'id': 'alarmbell1', 'name': '알람벨 1', 'file': 'alarmbell1.mp3'},
-    {'id': 'alarmbell2', 'name': '알람벨 2', 'file': 'alarmbell2.mp3'},
-    {'id': 'alarmbell3', 'name': '알람벨 3', 'file': 'alarmbell3.mp3'},
-    {'id': 'alarmbell4', 'name': '알람벨 4', 'file': 'alarmbell4.mp3'},
-    {'id': 'alarmbell5', 'name': '알람벨 5', 'file': 'alarmbell5.mp3'},
-    {'id': 'alarmbell6', 'name': '알람벨 6', 'file': 'alarmbell6.mp3'},
-    {'id': 'alarmbell7', 'name': '알람벨 7', 'file': 'alarmbell7.mp3'},
+    {'id': 'default', 'file': 'default'},
+    {'id': 'alarmbell1', 'file': 'alarmbell1.mp3'},
+    {'id': 'alarmbell2', 'file': 'alarmbell2.mp3'},
+    {'id': 'alarmbell3', 'file': 'alarmbell3.mp3'},
+    {'id': 'alarmbell4', 'file': 'alarmbell4.mp3'},
+    {'id': 'alarmbell5', 'file': 'alarmbell5.mp3'},
+    {'id': 'alarmbell6', 'file': 'alarmbell6.mp3'},
+    {'id': 'alarmbell7', 'file': 'alarmbell7.mp3'},
   ];
 
   // ⭐ 소리 미리듣기 재생 (Native STREAM_ALARM 사용 - 실제 알람과 동일 음량)
@@ -1487,7 +1462,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       debugPrint('소리 재생 실패: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('알람음 파일을 찾을 수 없습니다')),
+          SnackBar(content: Text(context.l10n.soundFileNotFound)),
         );
       }
     }
@@ -1517,7 +1492,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       children: [
         SizedBox(
           width: 50.w,
-          child: Text('알람음', style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          child: Text(context.l10n.alarmSound, style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ),
         Expanded(
           child: Row(
@@ -1539,7 +1514,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
-                            _getSoundName(type.soundFile),  // DB에서 읽은 값 사용
+                            _getSoundName(context, type.soundFile),  // DB에서 읽은 값 사용
                             style: TextStyle(fontSize: 13.sp),
                           ),
                         ),
@@ -1582,11 +1557,10 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     );
   }
 
-  String _getSoundName(String soundId) {
-    return _soundOptions.firstWhere(
-      (s) => s['id'] == soundId,
-      orElse: () => {'name': '알람벨 1'},
-    )['name']!;
+  String _getSoundName(BuildContext context, String soundId) {
+    if (soundId == 'default') return context.l10n.soundDefault;
+    final n = int.tryParse(soundId.replaceFirst('alarmbell', '')) ?? 1;
+    return context.l10n.soundBellN(n);
   }
 
   void _showSoundPicker(AlarmType type) {
@@ -1613,7 +1587,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                   child: Row(
                     children: [
                       Text(
-                        '알람음 선택',
+                        context.l10n.alarmSoundChoose,
                         style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                       ),
                       Spacer(),
@@ -1639,7 +1613,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                           color: isSelected ? Colors.orange : Colors.grey,
                         ),
                         title: Text(
-                          sound['name']!,
+                          _getSoundName(context, sound['id']!),
                           style: TextStyle(
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                             color: isSelected ? Colors.orange.shade800 : Theme.of(context).colorScheme.onSurface,
@@ -1683,14 +1657,14 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       children: [
         SizedBox(
           width: 50.w,
-          child: Text('세기', style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          child: Text(context.l10n.alarmIntensity, style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ),
         Expanded(
           child: Row(
             children: [
-              _buildVibrationButton(type, 1, '약하게'),
+              _buildVibrationButton(type, 1, context.l10n.alarmVibrationWeak),
               SizedBox(width: 8.w),
-              _buildVibrationButton(type, 3, '강하게'),
+              _buildVibrationButton(type, 3, context.l10n.alarmVibrationStrong),
             ],
           ),
         ),
@@ -1750,7 +1724,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       children: [
         SizedBox(
           width: 50.w,
-          child: Text('시간', style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          child: Text(context.l10n.alarmDuration, style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ),
         Expanded(
           child: Row(
@@ -1793,7 +1767,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           ),
           child: Center(
             child: Text(
-              '${minutes}분',
+              context.l10n.alarmDurationMinutes(minutes),
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -1851,7 +1825,7 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
         children: [
           Icon(Icons.edit, color: colorScheme.primary),
           SizedBox(width: 8.w),
-          Text('근무명 수정'),
+          Text(context.l10n.settingsEditShiftNameTitle),
         ],
       ),
       content: SingleChildScrollView(
@@ -1862,7 +1836,7 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
               padding: EdgeInsets.symmetric(vertical: 8.h),
               child: TextField(
                 controller: _controllers[shift],
-                maxLength: 4,
+                maxLength: kMaxShiftNameLength,
                 decoration: InputDecoration(
                   labelText: shift,
                   counterText: '',
@@ -1882,7 +1856,7 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
           style: TextButton.styleFrom(
             foregroundColor: colorScheme.onSurfaceVariant,
           ),
-          child: Text('취소'),
+          child: Text(context.l10n.commonCancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -1904,7 +1878,7 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
             backgroundColor: colorScheme.secondary,
             foregroundColor: colorScheme.onSecondary,
           ),
-          child: Text('저장'),
+          child: Text(context.l10n.commonSave),
         ),
       ],
     );
@@ -1966,7 +1940,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
           children: [
             Icon(Icons.alarm, color: colorScheme.tertiary, size: 24.sp),
             SizedBox(width: 8.w),
-            Text('고정 알람 수정'),
+            Text(context.l10n.settingsEditFixedAlarmTitle),
           ],
         ),
       ),
@@ -1978,11 +1952,11 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '근무별 고정 알람을 설정하세요',
+                    context.l10n.onboardingSetFixedAlarmPerShift,
                     style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '각 근무당 최대 $kMaxAlarmTemplatesPerShift개까지 설정 가능',
+                    context.l10n.onboardingMaxAlarmsPerShift(kMaxAlarmTemplatesPerShift),
                     style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                   SizedBox(height: 16.h),
@@ -2014,7 +1988,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                         foregroundColor: colorScheme.onSecondary,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                       ),
-                      child: Text('저장', style: TextStyle(fontSize: 16.sp)),
+                      child: Text(context.l10n.commonSave, style: TextStyle(fontSize: 16.sp)),
                     ),
                   ),
                   // ⭐ SafeArea 확보 (홈 버튼 영역 고려)
@@ -2055,7 +2029,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
               child: alarms.isEmpty
                   ? Center(
                       child: Text(
-                        '탭하여 설정',
+                        context.l10n.onboardingTapToSet,
                         style: TextStyle(
                           fontSize: 11.sp,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -2179,14 +2153,14 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
-      title: Text('${widget.shift} 고정 알람'),
+      title: Text(context.l10n.settingsShiftFixedAlarmTitle(widget.shift)),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '고정 알람 $kMaxAlarmTemplatesPerShift개까지 등록 가능',
+              context.l10n.settingsFixedAlarmRegisterLimit(kMaxAlarmTemplatesPerShift),
               style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
@@ -2241,11 +2215,11 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                     SizedBox(height: 8.h),
                     Row(
                       children: [
-                        _buildTypeButton(entry.key, 1, '🔔', '소리+진동'),
+                        _buildTypeButton(entry.key, 1, '🔔', context.l10n.alarmSoundVibration),
                         SizedBox(width: 8.w),
-                        _buildTypeButton(entry.key, 2, '📳', '진동'),
+                        _buildTypeButton(entry.key, 2, '📳', context.l10n.alarmVibration),
                         SizedBox(width: 8.w),
-                        _buildTypeButton(entry.key, 3, '🔇', '무음'),
+                        _buildTypeButton(entry.key, 3, '🔇', context.l10n.alarmSilent),
                       ],
                     ),
                   ],
@@ -2259,7 +2233,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
               OutlinedButton.icon(
                 onPressed: _addAlarm,
                 icon: Icon(Icons.add),
-                label: Text('알람 추가'),
+                label: Text(context.l10n.alarmAdd),
                 style: OutlinedButton.styleFrom(
                   minimumSize: Size(double.infinity, 44.h),
                 ),
@@ -2270,7 +2244,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('취소'),
+          child: Text(context.l10n.commonCancel),
         ),
         TextButton(
           onPressed: () {
@@ -2283,7 +2257,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
             widget.onSave(_alarms);
             Navigator.pop(context);
           },
-          child: Text('저장'),
+          child: Text(context.l10n.commonSave),
         ),
       ],
     );
@@ -2354,17 +2328,17 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                   children: [
                     Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.tertiary, size: 28),
                     SizedBox(width: 8),
-                    Text('중복 알람'),
+                    Text(context.l10n.alarmDuplicate),
                   ],
                 ),
                 content: Text(
-                  '이미 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} 알람이 존재합니다.',
+                  context.l10n.alarmAlreadyExistsAtTime('${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'),
                   style: TextStyle(fontSize: 16),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text('확인', style: TextStyle(fontSize: 16)),
+                    child: Text(context.l10n.commonOk, style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),
@@ -2398,17 +2372,17 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                   children: [
                     Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.tertiary, size: 28),
                     SizedBox(width: 8),
-                    Text('중복 알람'),
+                    Text(context.l10n.alarmDuplicate),
                   ],
                 ),
                 content: Text(
-                  '이미 ${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')} 알람이 존재합니다.',
+                  context.l10n.alarmAlreadyExistsAtTime('${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'),
                   style: TextStyle(fontSize: 16),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text('확인', style: TextStyle(fontSize: 16)),
+                    child: Text(context.l10n.commonOk, style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),
@@ -2479,7 +2453,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '시간 선택',
+              context.l10n.commonSelectTime,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 24.h),
@@ -2508,7 +2482,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                         ),
                         child: Center(
                           child: Text(
-                            '오전',
+                            context.l10n.commonAm,
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.normal,
@@ -2540,7 +2514,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                         ),
                         child: Center(
                           child: Text(
-                            '오후',
+                            context.l10n.commonPm,
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.normal,
@@ -2616,7 +2590,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
               children: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text('취소'),
+                  child: Text(context.l10n.commonCancel),
                 ),
                 SizedBox(width: 8.w),
                 ElevatedButton(
@@ -2631,7 +2605,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                     await widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute));
                     if (mounted) Navigator.pop(context);
                   },
-                  child: Text('확인'),
+                  child: Text(context.l10n.commonOk),
                 ),
               ],
             ),
@@ -2672,7 +2646,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
         children: [
           Icon(Icons.swap_horiz, color: Colors.teal.shade600),
           SizedBox(width: 8.w),
-          Text('스케줄 변경'),
+          Text(context.l10n.shiftChangeSchedule),
         ],
       ),
       content: Container(
@@ -2683,12 +2657,12 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '오늘($dateText)은 어떤 근무인가요?',
+              context.l10n.onboardingTodayShiftQuestion(dateText),
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8.h),
             Text(
-              '패턴에서 오늘 근무를 선택하세요',
+              context.l10n.settingsSelectTodayShiftFromPattern,
               style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
@@ -2785,7 +2759,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
-                      '기존 알람이 삭제되고 새로운 스케줄로 10일치 알람이 생성됩니다.',
+                      context.l10n.settingsScheduleChangeWarning,
                       style: TextStyle(fontSize: 12.sp, color: Colors.amber.shade800),
                     ),
                   ),
@@ -2801,7 +2775,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
           style: TextButton.styleFrom(
             foregroundColor: colorScheme.onSurfaceVariant,
           ),
-          child: Text('취소'),
+          child: Text(context.l10n.commonCancel),
         ),
         ElevatedButton(
           onPressed: _selectedIndex == null
@@ -2814,7 +2788,7 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
             backgroundColor: colorScheme.secondary,
             foregroundColor: colorScheme.onSecondary,
           ),
-          child: Text('변경'),
+          child: Text(context.l10n.commonChange),
         ),
       ],
     );
@@ -2856,7 +2830,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
         children: [
           Icon(Icons.palette, color: Colors.purple.shade400),
           SizedBox(width: 8.w),
-          Text('근무명 색상 변경'),
+          Text(context.l10n.settingsEditShiftColorTitle),
         ],
       ),
       content: SizedBox(
@@ -2910,7 +2884,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
           style: TextButton.styleFrom(
             foregroundColor: colorScheme.onSurfaceVariant,
           ),
-          child: Text('취소'),
+          child: Text(context.l10n.commonCancel),
         ),
         ElevatedButton(
           onPressed: () {
@@ -2921,7 +2895,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
             backgroundColor: colorScheme.secondary,
             foregroundColor: colorScheme.onSecondary,
           ),
-          child: Text('저장'),
+          child: Text(context.l10n.commonSave),
         ),
       ],
     );
@@ -2976,7 +2950,7 @@ class _ColorPickerDialog extends StatelessWidget {
 
     return AlertDialog(
       title: Text(
-        '"$shiftName" 색상 선택',
+        context.l10n.settingsColorPickerTitle(shiftName),
         style: TextStyle(fontSize: 16.sp),
       ),
       content: SizedBox(
@@ -3001,7 +2975,7 @@ class _ColorPickerDialog extends StatelessWidget {
                   // 이미 사용 중인 색상이면 경고
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('이미 다른 근무에서 사용 중인 색상입니다'),
+                      content: Text(context.l10n.statusColorAlreadyUsed),
                       behavior: SnackBarBehavior.floating,
                       duration: Duration(seconds: 2),
                     ),
@@ -3061,7 +3035,7 @@ class _ColorPickerDialog extends StatelessWidget {
           style: TextButton.styleFrom(
             foregroundColor: colorScheme.onSurfaceVariant,
           ),
-          child: Text('취소'),
+          child: Text(context.l10n.commonCancel),
         ),
       ],
     );

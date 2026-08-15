@@ -77,7 +77,11 @@ class FriendSyncService {
       if (!await isSharingEnabled()) return;
       final ownerId = await getOrCreateOwnerId();
       if (ownerId == null) return;
-      final name = await savedMyName() ?? '친구';
+      // ⭐ 영어 현지화: 백그라운드 동기화 경로라 BuildContext가 없음 - 정상 흐름이면
+      // "공유 시작하기"에서 이미 이름을 저장해뒀어야 해서 이 폴백은 사실상 방어용.
+      // 그래도 혹시 비어있으면 빈 문자열로 Firestore에 씀(friend_schedule.dart의
+      // ownerName 처리와 동일 - 보는 쪽 화면에서 friendDefaultDisplayName으로 대체).
+      final name = await savedMyName() ?? '';
       await _upsert(ownerId, schedule, name);
     } catch (e) {
       // ⭐ 오프라인/미설정 등으로 실패해도 스케줄 자체 저장(로컬 DB)은 이미 끝난 뒤라

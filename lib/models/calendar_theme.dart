@@ -1,6 +1,8 @@
 // lib/models/calendar_theme.dart
 //
 import 'package:flutter/material.dart';
+import '../l10n/l10n_extensions.dart';
+import '../utils/shift_name_util.dart';
 //
 // ⭐ 달력 테마 선택 시스템의 중심 모델. calendar_theme_lab_screen.dart에서
 // 실험하던 9개 후보(1/2/4/5/8/9/10번 + 메인·화이트/메인·다크)를 실제 선택
@@ -29,17 +31,21 @@ enum CalendarThemeId {
 extension CalendarThemeIdX on CalendarThemeId {
   // ⭐ "테마 번호 대신 각 테마에 어울리는 이름을 붙여달라"는 요청으로 실험
   // 단계 번호(1/2/4/5/8/9/10번)를 각 디자인 컨셉을 담은 이름으로 교체함.
-  String get label {
+  // ⭐ 영어 현지화: 기존 `label` getter(하드코딩 한국어)를 BuildContext를 받는
+  // 메서드로 바꿈 - 호출부(settings_tab.dart, calendar_theme_picker_screen.dart)도
+  // 함께 갱신함.
+  String label(BuildContext context) {
+    final l10n = context.l10n;
     switch (this) {
-      case CalendarThemeId.mainWhite: return '메인테마 - 화이트';
-      case CalendarThemeId.mainDark: return '메인테마 - 다크';
-      case CalendarThemeId.minimal: return '심플 라인';
-      case CalendarThemeId.materialCard: return '소프트 카드';
-      case CalendarThemeId.boldGrid: return '다크 그리드';
-      case CalendarThemeId.initialBadge: return '컬러 뱃지';
-      case CalendarThemeId.underline: return '미니멀 언더라인';
-      case CalendarThemeId.eventChip: return '이벤트 캘린더';
-      case CalendarThemeId.editorial: return '매거진';
+      case CalendarThemeId.mainWhite: return l10n.themeMainWhite;
+      case CalendarThemeId.mainDark: return l10n.themeMainDark;
+      case CalendarThemeId.minimal: return l10n.themeMinimal;
+      case CalendarThemeId.materialCard: return l10n.themeMaterialCard;
+      case CalendarThemeId.boldGrid: return l10n.themeBoldGrid;
+      case CalendarThemeId.initialBadge: return l10n.themeInitialBadge;
+      case CalendarThemeId.underline: return l10n.themeUnderline;
+      case CalendarThemeId.eventChip: return l10n.themeEventChip;
+      case CalendarThemeId.editorial: return l10n.themeEditorial;
     }
   }
 
@@ -65,9 +71,20 @@ const kAllCalendarThemeIds = CalendarThemeId.values;
 // 규칙(onboarding_screen.dart의 _generateShiftColors()와 동일한 원칙):
 // 1) 이름에 "휴"가 들어간 근무는 무조건 고정 빨강(kMainRestColor).
 // 2) 나머지는 생성 순서대로 배정, 인접한 순서끼리 색 계열이 안 겹치게 로테이션.
-const kMainShiftNames = [
-  '주간', '야간', '오전', '오후', '휴무', '당직', '연장', '대기', '재택', '출장', '교육', '특근',
-];
+// ⭐ 영어 현지화: 예전엔 이 상수 하나만 있었는데(calendar_theme_lab_screen.dart의
+// 테마 미리보기 캐러셀에서 "샘플 근무명"으로만 씀 - 실제 사용자 데이터가 아니라
+// 위치별(index) 팔레트 색상과 짝지어 보여주는 목업 텍스트라, 인덱스 4(=휴무)
+// 자리만 팔레트의 고정 빨강과 맞으면 되고 진짜 "휴" 감지 로직과는 무관함),
+// 로케일에 따라 다른 샘플을 보여주기 위해 함수로 바꿈. 순서/인덱스 의미(4번째 =
+// 휴무 자리)는 두 언어 리스트가 동일하게 유지해야 함(kMainLightPalette 등과
+// 위치로 짝지어짐).
+List<String> mockShiftNames(BuildContext context) {
+  final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+  if (isKorean) {
+    return const ['주간', '야간', '오전', '오후', '휴무', '당직', '연장', '대기', '재택', '출장', '교육', '특근'];
+  }
+  return const ['Day', 'Night', 'Morning', 'Afternoon', 'Off', 'On-Call', 'Extra', 'Standby', 'Remote', 'Travel', 'Training', 'Special'];
+}
 
 const kMainRestColor = Color(0xFFEF5350); // 휴무 고정 - 라이트/다크 공통
 
@@ -205,11 +222,15 @@ Map<String, Color> assignShiftColorsForTheme(List<String> shiftTypes, CalendarTh
 Map<String, Color> _assignFromPalette(List<String> shiftTypes, List<Color> palette, int rotation) {
   final colors = <String, Color>{};
 
+  // ⭐ 영어 현지화: 이 함수가 실제 사용자 스케줄(assignShiftColors/
+  // assignShiftColorsForTheme 경유)의 색상을 배정하는 실사용 경로라, 여기서
+  // '휴' 하드코딩만 남겨두면 영어로 "Off"/"Day Off" 등으로 입력한 근무명이
+  // 고정 빨강을 못 받는 실제 버그가 됨 - isRestShiftName()으로 교체.
   for (final shift in shiftTypes) {
-    if (shift.contains('휴')) colors[shift] = kMainRestColor;
+    if (isRestShiftName(shift)) colors[shift] = kMainRestColor;
   }
 
-  final nonRestShifts = shiftTypes.where((s) => !s.contains('휴')).toList();
+  final nonRestShifts = shiftTypes.where((s) => !isRestShiftName(s)).toList();
   // ⭐ 팔레트 자체가 이미 "휴무 자리"에 고정 빨강을 끼워 넣은 12칸짜리
   // 배열이라, 나머지 근무에 순서대로 배정할 땐 그 빨강 슬롯을 건너뛰어야 함 -
   // 안 그러면 근무 하나가 우연히 빨강을 받을 수 있음. rotation은 이 11칸짜리

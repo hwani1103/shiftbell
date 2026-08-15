@@ -274,7 +274,10 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
 
       // ⭐ HIGH FIX: 실패가 있으면 에러 발생
       if (failCount > 0 && createCount == 0) {
-        throw Exception('알람 재생성 실패: 모든 알람 생성 실패 (실패: $failCount)');
+        // ⭐ 영어 현지화: 이 메시지는 UI에 그대로 노출된 적 없음(호출부가 항상
+        // catch해서 자체 에러 문구를 보여줌) - 그래도 로그/크래시 리포트에서 읽는
+        // 사람 기준으로 개발자용 예외 메시지는 관례상 영어로 통일.
+        throw Exception('Failed to regenerate fixed alarms: all $failCount attempt(s) failed');
       }
     } catch (e) {
       print('❌ 고정 알람 재생성 실패: $e');

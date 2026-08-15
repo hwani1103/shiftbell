@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../l10n/l10n_extensions.dart';
 import '../services/permission_service.dart';
 
 class PermissionWarningBanner extends StatefulWidget {
@@ -37,12 +38,12 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
   Future<void> _checkPermissions() async {
     final permissions = await PermissionService().checkPermissions();
 
-    final missing = <String>[];
-    if (!permissions['notification']!) missing.add('알림');
-    if (!permissions['overlay']!) missing.add('다른 앱 위에 표시');
-    if (!permissions['exactAlarm']!) missing.add('정확한 알람');
-
     if (mounted) {
+      final missing = <String>[];
+      if (!permissions['notification']!) missing.add(context.l10n.permissionNotification);
+      if (!permissions['overlay']!) missing.add(context.l10n.permissionOverlay);
+      if (!permissions['exactAlarm']!) missing.add(context.l10n.permissionExactAlarm);
+
       setState(() {
         _missingPermissions = missing;
         _showBanner = missing.isNotEmpty;
@@ -83,7 +84,7 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '필수 권한 미허용',
+                  context.l10n.permissionRequiredNotGranted,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
@@ -115,7 +116,7 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
               ),
             ),
             child: Text(
-              '설정',
+              context.l10n.navSettings,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.bold,

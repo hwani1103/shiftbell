@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/database_service.dart';
 import '../models/alarm_history.dart';
+import '../l10n/l10n_extensions.dart';
+import '../utils/weekday_util.dart';
 
 /// 알람 이력 - "사용자 의도상 생겼던 모든 알람"을 기록하는 화면.
 /// ⭐ 현재 alarms 테이블(살아있는 알람)과 대조하지 않음 - 살아있는 알람과 비교하면
@@ -126,10 +128,9 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
     }
   }
 
-  String _formatDateTime(DateTime date, String time) {
-    // 요일 한글 변환
-    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-    final weekday = weekdays[date.weekday - 1]; // weekday는 1(월)~7(일)
+  String _formatDateTime(BuildContext context, DateTime date, String time) {
+    // 요일 라벨 (로케일 인식)
+    final weekday = weekdayLabel(context, weekdayIndexOf(date));
 
     // YY/MM/DD (요일) 형식
     final year = date.year.toString().substring(2); // 2025 -> 25
@@ -139,22 +140,22 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
     return '$year/$month/$day ($weekday) $time';
   }
 
-  String _getHistoryText(AlarmHistory? history) {
+  String _getHistoryText(AlarmHistory? history, BuildContext context) {
     if (history == null) return '';
 
+    // ⭐ dismissLabel(context)는 model 쪽 공용 API(swiped/snoozed/timeout/
+    // cancelled_before_ring만 커버) - 이 화면 전용 케이스(superseded/기타)는
+    // 여기서 별도로 로케일 처리.
     switch (history.dismissType) {
       case 'swiped':
-        return '알람 확인';
       case 'snoozed':
-        return '5분 연장';
       case 'timeout':
-        return '무응답';
       case 'cancelled_before_ring':
-        return '알람 제거';
+        return history.dismissLabel(context);
       case 'superseded':
-        return '일정 변경';
+        return context.l10n.alarmScheduleChanged;
       default:
-        return '기타';
+        return context.l10n.commonOther;
     }
   }
 
@@ -185,13 +186,13 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('전체 이력 삭제'),
+        title: Text(context.l10n.alarmHistoryDeleteAllTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '⚠️ 테스트 전용 기능',
+              context.l10n.alarmHistoryTestOnlyWarning,
               style: TextStyle(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.bold,
@@ -199,20 +200,20 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
               ),
             ),
             SizedBox(height: 12.h),
-            Text('모든 알람 이력이 삭제됩니다.'),
+            Text(context.l10n.alarmHistoryDeleteAllDesc),
             SizedBox(height: 8.h),
-            Text('이 작업은 되돌릴 수 없습니다.'),
+            Text(context.l10n.settingsActionCannotBeUndone),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('취소'),
+            child: Text(context.l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
-              '삭제',
+              context.l10n.commonDelete,
               style: TextStyle(color: colorScheme.error),
             ),
           ),
@@ -226,13 +227,13 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         await _loadData();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('🗑️ 모든 알람 이력이 삭제되었습니다')),
+            SnackBar(content: Text(context.l10n.alarmHistoryDeletedToast)),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('❌ 이력 삭제 실패: $e')),
+            SnackBar(content: Text(context.l10n.alarmHistoryDeleteFailed(e.toString()))),
           );
         }
       }
@@ -246,7 +247,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: Text('알람 이력'),
+        title: Text(context.l10n.alarmHistory),
         backgroundColor: colorScheme.surface,
         elevation: 0,
         foregroundColor: colorScheme.onSurface,
@@ -267,7 +268,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          '알람 이력이 없습니다',
+                          context.l10n.alarmHistoryEmpty,
                           style: TextStyle(
                             fontSize: 16.sp,
                             color: colorScheme.onSurfaceVariant,
@@ -288,7 +289,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                   itemBuilder: (context, index) {
                     final alarmWithHistory = _alarmsWithHistory[index];
                     final history = alarmWithHistory.latestHistory;
-                    final historyText = _getHistoryText(history);
+                    final historyText = _getHistoryText(history, context);
                     final historyColor = _getHistoryColor(history, context);
                     final isFuture = alarmWithHistory.isFuture;
 
@@ -313,7 +314,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _formatDateTime(alarmWithHistory.date, alarmWithHistory.time),
+                                    _formatDateTime(context, alarmWithHistory.date, alarmWithHistory.time),
                                     style: TextStyle(
                                       fontSize: 14.sp,
                                       fontWeight: FontWeight.bold,

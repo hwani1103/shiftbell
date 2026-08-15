@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:table_calendar/table_calendar.dart';
+// ⭐ intl 패키지도 자체 TextDirection을 export해서 material의 TextDirection과
+// 이름이 충돌함(_fitText의 TextPainter가 TextDirection.ltr을 쓰는데, 충돌 상태에서는
+// intl 쪽 TextDirection이 우선시돼 .ltr getter가 없다는 컴파일 에러가 남) - hide로
+// intl 쪽 TextDirection만 감춰서 material(dart:ui)의 TextDirection.ltr을 그대로 씀.
+import 'package:intl/intl.dart' hide TextDirection;
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
 import '../models/shift_schedule.dart';
@@ -17,6 +22,8 @@ import '../services/work_hours_calculator.dart';
 import 'package:flutter/services.dart';
 import 'all_shifts_view.dart';
 import '../utils/holiday_util.dart';
+import '../utils/weekday_util.dart';
+import '../l10n/l10n_extensions.dart';
 import '../constants/alarm_limits.dart';
 import '../models/calendar_theme.dart';
 import '../providers/calendar_theme_provider.dart';
@@ -24,12 +31,19 @@ import '../providers/calendar_theme_provider.dart';
 // ⭐ 공휴일 판정 로직은 utils/holiday_util.dart로 이동함 (friend_calendar_view.dart도
 // 똑같은 공휴일 표시가 필요해져서 공용화 - 두 파일 이름만 다르게 감싸서 기존 호출부
 // (_getHolidayName(...))는 하나도 안 건드림).
-String? _getHolidayName(DateTime date) => getHolidayName(date);
+// ⭐ 영어 현지화: 영어 로케일에서는 한국 고유 공휴일을 표시하지 않기로 결정됨
+// (holiday_util.dart의 isKorean 파라미터 참고) - 호출부에서 현재 로케일을 넘겨줌.
+String? _getHolidayName(DateTime date, BuildContext context) =>
+    getHolidayName(date, isKorean: Localizations.localeOf(context).languageCode == 'ko');
 
 // ⭐ 테마별 헤더/요일행 표기에 쓰는 공용 상수 - calendar_theme_lab_screen.dart의
 // 동명 상수(그 파일 안에서만 쓰이는 private const)와 값은 같지만 별도 파일이라
 // 충돌 없음.
-const List<String> _weekdayKr = ['일', '월', '화', '수', '목', '금', '토'];
+// ⭐ 영어 현지화: 예전엔 여기 _weekdayKr(일/월/화...) 배열이 따로 있었지만,
+// 로케일에 따라 바뀌어야 하는 요일 표시는 utils/weekday_util.dart의
+// weekdayLabel(context, i)로 통일됨(사용부 참고) - 이 배열은 삭제. 아래
+// _weekdayEn3/_weekdayEn1은 "그 테마 디자인 자체가 항상 영어 약자로 보이는"
+// 의도적 스타일이라 로케일과 무관하게 그대로 둠.
 const List<String> _weekdayEn3 = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const List<String> _weekdayEn1 = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const List<String> _monthEn3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -173,6 +187,10 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
     final minYear = DateTime.now().year - 3;
     final maxYear = DateTime.now().year + 3;
 
+    // ⭐ 영어 현지화: '$year년'/'$month월' 조립은 로케일에 따라 표기가 달라져야 함
+    final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+    final monthFormat = DateFormat.MMM(isKorean ? 'ko' : 'en');
+
     showDialog(
       context: context,
       builder: (context) {
@@ -183,7 +201,7 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('날짜 선택', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+                  Text(context.l10n.calendarSelectDate, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
                   IconButton(
                     icon: Icon(Icons.close, size: 24.sp),
                     onPressed: () => Navigator.pop(context),
@@ -210,7 +228,7 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                         SizedBox(
                           width: 100.w,
                           child: Text(
-                            '$selectedYear년',
+                            isKorean ? '$selectedYear년' : '$selectedYear',
                             textAlign: TextAlign.center,
                             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
                           ),
@@ -258,7 +276,7 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                               ),
                               child: Center(
                                 child: Text(
-                                  '$month월',
+                                  isKorean ? '$month월' : monthFormat.format(DateTime(selectedYear, month)),
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.normal,
@@ -291,12 +309,12 @@ Widget build(BuildContext context) {
       body: SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
     ),
     error: (error, stack) => Scaffold(
-      body: Center(child: Text('에러 발생: $error')),
+      body: Center(child: Text('${context.l10n.statusErrorOccurred}: $error')),
     ),
     data: (schedule) {
       if (schedule == null) {
         return Scaffold(
-          body: Center(child: Text('스케줄이 없습니다')),
+          body: Center(child: Text(context.l10n.statusNoSchedule)),
         );
       }
       final theme = ref.watch(calendarThemeProvider);
@@ -360,7 +378,7 @@ Widget build(BuildContext context) {
                                       ),
                                       SizedBox(width: 8.w),
                                       Text(
-                                        '${_selectedDates.length}개 선택',
+                                        context.l10n.calendarNSelected(_selectedDates.length),
                                         style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                                       ),
                                     ],
@@ -396,7 +414,7 @@ Widget build(BuildContext context) {
                         }
                         return isSameDay(_selectedDay, day);
                       },
-                      locale: 'ko_KR',
+                      locale: Localizations.localeOf(context).languageCode == 'ko' ? 'ko_KR' : 'en_US',
 
                       headerVisible: false,
                       sixWeekMonthsEnforced: true,  // ⭐ 항상 6줄 고정
@@ -601,8 +619,8 @@ Widget build(BuildContext context) {
                       label: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('근무 변경', style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text('탭하여 날짜 추가 선택', style: TextStyle(fontSize: 10.sp)),
+                          Text(context.l10n.shiftChange, style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text(context.l10n.calendarTapToAddMoreDates, style: TextStyle(fontSize: 10.sp)),
                         ],
                       ),
                       backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
@@ -687,7 +705,7 @@ Widget build(BuildContext context) {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '이번 달 OT',
+                              context.l10n.shiftThisMonthOt,
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w600,
@@ -696,7 +714,7 @@ Widget build(BuildContext context) {
                             ),
                             SizedBox(width: 8.w),
                             Text(
-                              hasOvertime ? formatOvertimeMinutes(totalMinutes) : '(해당 날짜 탭하여 입력)',
+                              hasOvertime ? formatOvertimeMinutes(context, totalMinutes) : context.l10n.calendarTapDateToEnter,
                               style: TextStyle(
                                 fontSize: hasOvertime ? 13.sp : 11.sp,
                                 fontWeight: hasOvertime ? FontWeight.bold : FontWeight.w600,
@@ -729,7 +747,7 @@ Widget build(BuildContext context) {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              '주별 근무시간',
+                              context.l10n.shiftWeeklyWorkHours,
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w600,
@@ -765,7 +783,8 @@ Widget build(BuildContext context) {
   // ⭐ 이번 달 OT 상세 목록 시트 (기준 기간은 달력 월 기준일 수도, 급여일 기준일
   // 수도 있음 - work_hours_settings_provider의 periodForMonth()가 결정)
   void _showMonthlyOvertimeSheet(DateTimeRange period) {
-    final month = _focusedDay.month;
+    // ⭐ 영어 현지화: '$month월' 조립 대신 로케일 인식 월 이름(예: "8월" / "August")
+    final monthLabel = DateFormat.MMMM(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(_focusedDay);
 
     // ⭐ 급여일 기준 기간은 달력에 보이는 달 범위보다 넓거나 다를 수 있어서
     // 팝업을 열기 전에 그 기간을 명시적으로 로드해 캐시 누락을 방지함
@@ -796,7 +815,7 @@ Widget build(BuildContext context) {
                     countShiftChangeAsOt: workSettings.shiftChangeCountsAsOt,
                   );
             final totalMinutes = computeOtDisplayTotal(entries);
-            final periodLabel = workSettings.periodLabel(_focusedDay);
+            final periodLabel = workSettings.periodLabel(_focusedDay, isKorean: Localizations.localeOf(context).languageCode == 'ko');
             final colorScheme = Theme.of(context).colorScheme;
             final totalWorkMinutes = schedule == null
                 ? 0
@@ -832,7 +851,7 @@ Widget build(BuildContext context) {
                       SizedBox(height: 16.h),
 
                       Text(
-                        '$month월 누적 OT',
+                        context.l10n.calendarMonthlyOtTitle(monthLabel),
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -849,7 +868,7 @@ Widget build(BuildContext context) {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        '총 ${formatOvertimeMinutes(totalMinutes)}',
+                        context.l10n.calendarOtTotal(formatOvertimeMinutes(context, totalMinutes)),
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
@@ -858,7 +877,7 @@ Widget build(BuildContext context) {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        '* $month월 총 근무(예정) 시간 합산 : ${formatOvertimeMinutes(totalWorkMinutes)}',
+                        context.l10n.calendarMonthlyWorkTotal(monthLabel, formatOvertimeMinutes(context, totalWorkMinutes)),
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
@@ -870,7 +889,7 @@ Widget build(BuildContext context) {
                       if (schedule != null && !schedule.hasAnyWorkDuration) ...[
                         SizedBox(height: 2.h),
                         Text(
-                          '(설정 탭에서 근무별 근무시간을 설정해주세요.)',
+                          context.l10n.calendarSetWorkHoursInSettingsHint,
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: colorScheme.onSurfaceVariant,
@@ -883,7 +902,7 @@ Widget build(BuildContext context) {
                         child: entries.isEmpty
                             ? Center(
                                 child: Text(
-                                  '등록된 OT가 없습니다',
+                                  context.l10n.calendarNoOtRegistered,
                                   style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
                                 ),
                               )
@@ -894,17 +913,17 @@ Widget build(BuildContext context) {
                                 itemBuilder: (context, index) {
                                   final entry = entries[index];
                                   final date = entry.date;
-                                  final weekdayStr = _getWeekday(date);
+                                  final weekdayStr = _getWeekday(date, context);
 
                                   // ⭐ 근무변경으로 늘어난 시간이 있으면 "휴무 → 주간 (12시간)"
                                   // 부제목 추가, 수동 OT까지 있으면 옆에 "OT 3시간"도 같이 표기
                                   // (우측 총합은 항상 entry.totalMinutes = 이 둘의 합)
                                   final hasManual = entry.hasImplied && entry.manualMinutes > 0;
                                   final shiftChangeLabel = entry.hasImplied
-                                      ? '${entry.fromShift} → ${entry.toShift} (${formatOvertimeMinutes(entry.impliedMinutes)})${hasManual ? ',' : ''}'
+                                      ? '${entry.fromShift} → ${entry.toShift} (${formatOvertimeMinutes(context, entry.impliedMinutes)})${hasManual ? ',' : ''}'
                                       : null;
                                   final manualLabel = hasManual
-                                      ? '+ OT ${formatOvertimeMinutes(entry.manualMinutes)}'
+                                      ? '+ OT ${formatOvertimeMinutes(context, entry.manualMinutes)}'
                                       : null;
 
                                   return Container(
@@ -920,12 +939,12 @@ Widget build(BuildContext context) {
                                         Row(
                                           children: [
                                             Text(
-                                              '${date.month}월 ${date.day}일 ($weekdayStr)',
+                                              '${DateFormat.MMMd(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(date)} ($weekdayStr)',
                                               style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface),
                                             ),
                                             Spacer(),
                                             Text(
-                                              formatOvertimeMinutes(entry.totalMinutes),
+                                              formatOvertimeMinutes(context, entry.totalMinutes),
                                               style: TextStyle(
                                                 fontSize: 14.sp,
                                                 fontWeight: FontWeight.bold,
@@ -976,7 +995,8 @@ Widget build(BuildContext context) {
   // ⭐ 주별(항상 월~일) 누적 근무시간 시트. 급여 산정일 기준 설정과 무관하게
   // 항상 달력 월요일~일요일 기준이며, OT와 근무일 변경(assignedDates)도 반영됨.
   void _showWeeklyWorkHoursSheet() {
-    final month = _focusedDay.month;
+    // ⭐ 영어 현지화: '$month월' 조립 대신 로케일 인식 월 이름
+    final monthLabel = DateFormat.MMMM(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(_focusedDay);
     final weeks = weeksCoveringMonth(_focusedDay);
     final rangeStart = weeks.first.start;
     final rangeEnd = weeks.last.end;
@@ -1038,7 +1058,7 @@ Widget build(BuildContext context) {
                       SizedBox(height: 16.h),
 
                       Text(
-                        '$month월 주간 누적 근무(예정) 시간',
+                        context.l10n.calendarWeeklyWorkHoursTitle(monthLabel),
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -1047,7 +1067,7 @@ Widget build(BuildContext context) {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        '매주 월요일 ~ 일요일 기준 (OT 포함)',
+                        context.l10n.calendarWeeklyBasisHint,
                         style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
                       ),
                       SizedBox(height: 16.h),
@@ -1056,7 +1076,7 @@ Widget build(BuildContext context) {
                         child: schedule == null
                             ? Center(
                                 child: Text(
-                                  '근무 스케줄을 먼저 설정해주세요',
+                                  context.l10n.calendarSetScheduleFirst,
                                   style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
                                 ),
                               )
@@ -1065,7 +1085,7 @@ Widget build(BuildContext context) {
                             : !schedule.hasAnyWorkDuration
                             ? Center(
                                 child: Text(
-                                  '설정에서 근무별 근무시간을 지정해주세요.',
+                                  context.l10n.calendarSpecifyWorkHoursInSettings,
                                   style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
                                   textAlign: TextAlign.center,
                                 ),
@@ -1085,9 +1105,9 @@ Widget build(BuildContext context) {
                                       return byCount != 0 ? byCount : a.key.compareTo(b.key);
                                     });
                                   final countsStr =
-                                      countEntries.map((e) => '${e.key} ${e.value}일').join(', ');
+                                      countEntries.map((e) => context.l10n.calendarShiftDayCount(e.key, e.value)).join(', ');
                                   final otSuffix = s.otMinutes > 0
-                                      ? ', OT ${formatOvertimeMinutes(s.otMinutes)}'
+                                      ? ', OT ${formatOvertimeMinutes(context, s.otMinutes)}'
                                       : '';
 
                                   return Container(
@@ -1112,7 +1132,7 @@ Widget build(BuildContext context) {
                                             ),
                                             Spacer(),
                                             Text(
-                                              formatOvertimeMinutes(s.totalMinutes),
+                                              formatOvertimeMinutes(context, s.totalMinutes),
                                               style: TextStyle(
                                                 fontSize: 14.sp,
                                                 fontWeight: FontWeight.bold,
@@ -1165,7 +1185,7 @@ Widget build(BuildContext context) {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              hasOvertime ? formatOvertimeMinutes(minutes) : '없음',
+              hasOvertime ? formatOvertimeMinutes(context, minutes) : context.l10n.commonNone,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.bold,
@@ -1360,6 +1380,10 @@ Widget build(BuildContext context) {
   Widget _buildThemedHeaderTitle(CalendarThemeId theme) {
     final y = _focusedDay.year;
     final m = _focusedDay.month;
+    // ⭐ 영어 현지화: '$m월'/'$y년 $m월' 같은 Korean-particle 조립은 로케일에
+    // 따라 표기가 달라져야 함 - materialCard/mainWhite/mainDark에서 사용.
+    final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+    final shortMonthLabel = DateFormat.MMM(isKorean ? 'ko' : 'en').format(_focusedDay);
     switch (theme) {
       case CalendarThemeId.minimal:
         return GestureDetector(onTap: _showMonthYearPicker, child: Text('${_monthEn3[m - 1]} $y', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600, color: Colors.black87)));
@@ -1367,7 +1391,7 @@ Widget build(BuildContext context) {
         return GestureDetector(
           onTap: _showMonthYearPicker,
           child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text('$m월', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w300, color: Colors.black87)),
+            Text(shortMonthLabel, style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w300, color: Colors.black87)),
             SizedBox(width: 6.w),
             Padding(padding: EdgeInsets.only(bottom: 2.h), child: Text('$y', style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade400))),
           ]),
@@ -1403,7 +1427,7 @@ Widget build(BuildContext context) {
         return GestureDetector(
           onTap: _showMonthYearPicker,
           child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Text('$y년 $m월', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+            Text(isKorean ? '$y년 $m월' : DateFormat.yMMMM('en').format(_focusedDay), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
             SizedBox(width: 4.w),
             Icon(Icons.arrow_drop_down, size: 24.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ]),
@@ -1420,7 +1444,7 @@ Widget build(BuildContext context) {
     switch (theme) {
       case CalendarThemeId.minimal:
         return Row(children: [
-          if (showAllShifts) ...[_thinTextButton('전체근무표', _openAllShiftsView), SizedBox(width: 12.w)],
+          if (showAllShifts) ...[_thinTextButton(context.l10n.shiftFullSchedule, _openAllShiftsView), SizedBox(width: 12.w)],
           _thinTextButton('Today', _jumpToToday),
         ]);
       case CalendarThemeId.materialCard:
@@ -1430,39 +1454,39 @@ Widget build(BuildContext context) {
         ]);
       case CalendarThemeId.boldGrid:
         return Row(children: [
-          if (showAllShifts) ...[_gridHeaderBtn('전체근무표', _openAllShiftsView), SizedBox(width: 8.w)],
+          if (showAllShifts) ...[_gridHeaderBtn(context.l10n.shiftFullSchedule, _openAllShiftsView), SizedBox(width: 8.w)],
           _gridHeaderBtn('TODAY', _jumpToToday),
         ]);
       case CalendarThemeId.initialBadge:
         return Row(children: [
-          if (showAllShifts) ...[_pillButton('전체근무표', Icons.table_chart_outlined, _openAllShiftsView), SizedBox(width: 6.w)],
-          _pillButton('오늘', Icons.adjust, _jumpToToday),
+          if (showAllShifts) ...[_pillButton(context.l10n.shiftFullSchedule, Icons.table_chart_outlined, _openAllShiftsView), SizedBox(width: 6.w)],
+          _pillButton(context.l10n.commonToday, Icons.adjust, _jumpToToday),
         ]);
       case CalendarThemeId.underline:
         return Row(children: [
           GestureDetector(onTap: _jumpToToday, child: Text('TODAY', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5))),
           if (showAllShifts) ...[
             SizedBox(width: 12.w),
-            GestureDetector(onTap: _openAllShiftsView, child: Text('전체근무표', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54))),
+            GestureDetector(onTap: _openAllShiftsView, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54))),
           ],
         ]);
       case CalendarThemeId.eventChip:
         return Row(children: [
-          if (showAllShifts) ...[_pillButton('전체근무표', Icons.table_chart_outlined, _openAllShiftsView), SizedBox(width: 6.w)],
-          _pillButton('오늘', Icons.adjust, _jumpToToday),
+          if (showAllShifts) ...[_pillButton(context.l10n.shiftFullSchedule, Icons.table_chart_outlined, _openAllShiftsView), SizedBox(width: 6.w)],
+          _pillButton(context.l10n.commonToday, Icons.adjust, _jumpToToday),
         ]);
       case CalendarThemeId.editorial:
         return Row(children: [
           if (showAllShifts) ...[
-            GestureDetector(onTap: _openAllShiftsView, child: Text('전체근무표', style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+            GestureDetector(onTap: _openAllShiftsView, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
             SizedBox(width: 10.w),
           ],
-          GestureDetector(onTap: _jumpToToday, child: Text('오늘', style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+          GestureDetector(onTap: _jumpToToday, child: Text(context.l10n.commonToday, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
         ]);
       case CalendarThemeId.mainWhite:
       case CalendarThemeId.mainDark:
         return Row(children: [
-          if (showAllShifts) ...[_mainHeaderButtonReal('전체근무표', _openAllShiftsView), SizedBox(width: 8.w)],
+          if (showAllShifts) ...[_mainHeaderButtonReal(context.l10n.shiftFullSchedule, _openAllShiftsView), SizedBox(width: 8.w)],
           _mainHeaderButtonReal('today', _jumpToToday),
         ]);
     }
@@ -1546,11 +1570,11 @@ Widget build(BuildContext context) {
           child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w600, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500)),
         );
       case CalendarThemeId.materialCard:
-        return Center(child: Text(_weekdayKr[i], style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade700)));
+        return Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade700)));
       case CalendarThemeId.boldGrid:
         return Container(color: const Color(0xFF37474F), alignment: Alignment.center, child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.redAccent.shade100 : Colors.white70)));
       case CalendarThemeId.initialBadge:
-        return Center(child: Text(_weekdayKr[i], style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500)));
+        return Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500)));
       case CalendarThemeId.underline:
         return Center(child: Text(_weekdayEn1[i], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade400)));
       case CalendarThemeId.eventChip:
@@ -1563,7 +1587,7 @@ Widget build(BuildContext context) {
         );
       case CalendarThemeId.mainWhite:
       case CalendarThemeId.mainDark:
-        return Center(child: Text(_weekdayKr[i], style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)));
+        return Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)));
     }
   }
 
@@ -1573,7 +1597,7 @@ Widget build(BuildContext context) {
   // (6번째 줄 카드에 이미 다 있음).
   Widget _buildThemedFooter(CalendarThemeId theme, ShiftSchedule schedule) {
     final summary = _monthlyOtSummary(schedule);
-    final otText = formatOvertimeMinutes(summary.totalMinutes);
+    final otText = formatOvertimeMinutes(context, summary.totalMinutes);
     switch (theme) {
       case CalendarThemeId.minimal:
       case CalendarThemeId.initialBadge:
@@ -1606,12 +1630,12 @@ Widget build(BuildContext context) {
           SizedBox(width: 5.w),
           GestureDetector(
             onTap: () => _showMonthlyOvertimeSheet(summary.period),
-            child: Text('이번 달 OT $otText', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
+            child: Text('${context.l10n.shiftThisMonthOt} $otText', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
           ),
           const Spacer(),
           GestureDetector(
             onTap: _showWeeklyWorkHoursSheet,
-            child: Text('주별 근무시간 ›', style: TextStyle(fontSize: 11.sp, color: primary, fontWeight: FontWeight.w600)),
+            child: Text('${context.l10n.shiftWeeklyWorkHours} ›', style: TextStyle(fontSize: 11.sp, color: primary, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -1633,9 +1657,9 @@ Widget build(BuildContext context) {
       // 합쳐버렸었음 - 원래 색 조합으로 복원.
       child: Row(
         children: [
-          _otChipReal('이번 달 OT', otText, () => _showMonthlyOvertimeSheet(summary.period), Colors.indigo),
+          _otChipReal(context.l10n.shiftThisMonthOt, otText, () => _showMonthlyOvertimeSheet(summary.period), Colors.indigo),
           SizedBox(width: 8.w),
-          _otChipReal('주별 근무시간', '보기', _showWeeklyWorkHoursSheet, Colors.teal),
+          _otChipReal(context.l10n.shiftWeeklyWorkHours, context.l10n.commonView, _showWeeklyWorkHoursSheet, Colors.teal),
         ],
       ),
     );
@@ -1668,12 +1692,12 @@ Widget build(BuildContext context) {
         children: [
           GestureDetector(
             onTap: () => _showMonthlyOvertimeSheet(summary.period),
-            child: Text('이번 달 OT $otText', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF263238))),
+            child: Text('${context.l10n.shiftThisMonthOt} $otText', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF263238))),
           ),
           SizedBox(width: 14.w),
           GestureDetector(
             onTap: _showWeeklyWorkHoursSheet,
-            child: Text('주별 근무시간 ▸', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF00695C))),
+            child: Text('${context.l10n.shiftWeeklyWorkHours} ▸', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF00695C))),
           ),
         ],
       ),
@@ -1689,7 +1713,7 @@ Widget build(BuildContext context) {
             onTap: () => _showMonthlyOvertimeSheet(summary.period),
             // ⭐ "OT 3시간 30분도 아주 약간만 더 진하게" - black54→black87.
             // ⭐ "OT만 쓰지 말고 다른 테마들처럼 이번 달 OT로 통일" 요청 반영.
-            child: Text('이번 달 OT $otText', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
+            child: Text('${context.l10n.shiftThisMonthOt} $otText', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
           ),
           const Spacer(),
           // ⭐ "오늘 표시 밑줄은 그대로 두되, 주별 근무시간의 밑줄은 없애자 -
@@ -1697,7 +1721,7 @@ Widget build(BuildContext context) {
           // black87)는 유지하고 밑줄만 제거.
           GestureDetector(
             onTap: _showWeeklyWorkHoursSheet,
-            child: Text('주별 근무시간', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+            child: Text(context.l10n.shiftWeeklyWorkHours, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
           ),
         ],
       ),
@@ -1713,7 +1737,7 @@ Widget build(BuildContext context) {
           GestureDetector(
             onTap: () => _showMonthlyOvertimeSheet(summary.period),
             child: Row(children: [
-              Text('이번 달 OT', style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600, fontFamily: 'serif')),
+              Text(context.l10n.shiftThisMonthOt, style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600, fontFamily: 'serif')),
               SizedBox(width: 4.w),
               Text(otText, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.brown.shade600, fontFamily: 'serif')),
             ]),
@@ -1721,7 +1745,7 @@ Widget build(BuildContext context) {
           const Spacer(),
           GestureDetector(
             onTap: _showWeeklyWorkHoursSheet,
-            child: Text('주별 근무시간 →', style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade500, fontFamily: 'serif')),
+            child: Text('${context.l10n.shiftWeeklyWorkHours} →', style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade500, fontFamily: 'serif')),
           ),
         ],
       ),
@@ -1824,7 +1848,7 @@ Widget build(BuildContext context) {
     final hasShift = shiftText.isNotEmpty && shiftText != '미설정';
     final shiftColor = hasShift ? _getShiftBackgroundColor(shiftText, schedule) : Colors.transparent;
     final shiftTextColor = hasShift ? _getShiftTextColor(shiftText, schedule) : Colors.transparent;
-    final holidayName = _getHolidayName(day);
+    final holidayName = _getHolidayName(day, context);
     final red = day.weekday == DateTime.sunday || holidayName != null;
     final dateStr = day.toIso8601String().split('T')[0];
     final memos = ref.watch(memoProvider)[dateStr]?.map((m) => m.memoText).toList() ?? const <String>[];
@@ -1892,7 +1916,12 @@ Widget build(BuildContext context) {
                 margin: EdgeInsets.only(top: isFirstRow ? 0 : 1.h),
                 color: d.shiftColor.withOpacity(0.85),
                 alignment: Alignment.center,
-                child: Text(d.shiftText.length > 4 ? d.shiftText.substring(0, 4) : d.shiftText,
+                // ⭐ 영어 현지화: 예전엔 4글자로 강제로 자르고 남는 글자는 그냥
+                // 버렸음(근무명 글자수 제한이 4였을 때는 어차피 딱 맞아서 티가
+                // 안 났음) - 이제 근무명이 최대 kMaxShiftNameLength(10)글자까지
+                // 가능해져서, 안 잘리는 부분까지 버리지 않고 이미 있던
+                // overflow:ellipsis(말줄임표)가 자연스럽게 나머지를 처리하게 둠.
+                child: Text(d.shiftText,
                     style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor),
                     maxLines: 1, overflow: TextOverflow.ellipsis),
               )
@@ -1942,7 +1971,9 @@ Widget build(BuildContext context) {
                   margin: EdgeInsets.fromLTRB(4.w, 1.h, 4.w, 0),
                   decoration: BoxDecoration(color: d.shiftColor, borderRadius: BorderRadius.circular(3.r)),
                   alignment: Alignment.center,
-                  child: Text(d.shiftText.length > 4 ? d.shiftText.substring(0, 4) : d.shiftText,
+                  // ⭐ 영어 현지화: 위 셀과 동일한 이유로 강제 4글자 컷 제거,
+                  // 기존 overflow:ellipsis에 맡김.
+                  child: Text(d.shiftText,
                       style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor),
                       maxLines: 1, overflow: TextOverflow.ellipsis),
                 )
@@ -2212,7 +2243,7 @@ Widget build(BuildContext context) {
                                  _focusedDay.year == day.year &&
                                  _focusedDay.month == day.month;
 
-    final isHoliday = _getHolidayName(day) != null;  // ⭐ 공휴일 체크
+    final isHoliday = _getHolidayName(day, context) != null;  // ⭐ 공휴일 체크
 
     final colorScheme = Theme.of(context).colorScheme;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
@@ -2281,7 +2312,7 @@ Widget build(BuildContext context) {
                 return Stack(
                   children: [
                     // ⭐ 공휴일 이름 (상단 고정, 글자 수에 따라 크기 자동 조절)
-                    if (_getHolidayName(day) != null)
+                    if (_getHolidayName(day, context) != null)
                       Positioned(
                         top: 0,
                         left: 0,
@@ -2292,7 +2323,7 @@ Widget build(BuildContext context) {
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Text(
-                              _getHolidayName(day)!,
+                              _getHolidayName(day, context)!,
                               style: TextStyle(
                                 fontSize: 9.sp,
                                 fontWeight: FontWeight.w600,
@@ -2471,7 +2502,7 @@ Widget build(BuildContext context) {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            '${day.month}월 ${day.day}일 (${_getWeekday(day)})',
+                            '${DateFormat.MMMd(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(day)} (${_getWeekday(day, context)})',
                             style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
                           ),
                           Spacer(),
@@ -2484,13 +2515,13 @@ Widget build(BuildContext context) {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text('근무 :', style: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
+                          Text(context.l10n.calendarShiftLabel, style: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
                           SizedBox(width: 8.w),
                           if (isModified) ...[
                             Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text('기존', style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
+                                Text(context.l10n.commonPrevious, style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
                                 SizedBox(height: 4.h),
                                 Container(
                                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
@@ -2510,7 +2541,7 @@ Widget build(BuildContext context) {
                             Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text('현재', style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
+                                Text(context.l10n.commonCurrent, style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
                                 SizedBox(height: 4.h),
                                 Container(
                                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
@@ -2539,7 +2570,7 @@ Widget build(BuildContext context) {
                       SizedBox(height: 16.h),
 
                       // ⭐ 고정 알람
-                      Text('고정 알람 :', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
+                      Text(context.l10n.calendarFixedAlarmLabel, style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
                       SizedBox(height: 8.h),
                       Consumer(
                         builder: (context, ref, child) {
@@ -2547,7 +2578,7 @@ Widget build(BuildContext context) {
 
                           return alarmsAsync.when(
                             loading: () => SizedBox(height: 20.h, width: 20.w, child: CircularProgressIndicator(strokeWidth: 2)),
-                            error: (_, __) => Text('오류', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.error)),
+                            error: (_, __) => Text(context.l10n.statusErrorOccurred, style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.error)),
                             data: (allAlarms) {
                               final dayStr = day.toIso8601String().split('T')[0];
                               final fixedAlarms = allAlarms
@@ -2611,7 +2642,7 @@ Widget build(BuildContext context) {
                                 builder: (context, snapshot) {
                                   // 3단계: 템플릿이 없거나 로딩 중이면 (없음)
                                   if (!snapshot.hasData || snapshot.data == false) {
-                                    return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
+                                    return Text('(${context.l10n.commonNone})', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
                                   }
 
                                   // 4단계: 템플릿은 있는데 알람이 없는 경우 → 10일 체크 (DST 안전)
@@ -2622,13 +2653,13 @@ Widget build(BuildContext context) {
                                   // 5단계: 10일 이후면 안내 문구
                                   if (daysDiff >= kAlarmRefreshWindowDays) {
                                     return Text(
-                                      '$kAlarmRefreshWindowDays일 이내가 되면 자동 생성됩니다',
+                                      context.l10n.calendarAutoGeneratedWithinDays(kAlarmRefreshWindowDays),
                                       style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.tertiary, fontStyle: FontStyle.italic),
                                     );
                                   }
 
                                   // 6단계: 10일 이내인데 알람이 없으면 (없음) - 버그 상황
-                                  return Text('(없음)', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
+                                  return Text('(${context.l10n.commonNone})', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
                                 },
                               );
                             },
@@ -2647,7 +2678,7 @@ Widget build(BuildContext context) {
                           return Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text('메모 :', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
+                              Text(context.l10n.calendarMemoColonLabel, style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
                               SizedBox(width: 8.w),
                               Expanded(
                                 child: isFull
@@ -2659,7 +2690,7 @@ Widget build(BuildContext context) {
                                           border: Border.all(color: Theme.of(context).colorScheme.outline),
                                         ),
                                         child: Text(
-                                          '메모는 3개만 등록 가능합니다',
+                                          context.l10n.statusMemoLimit(3),
                                           style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                                         ),
                                       )
@@ -2668,7 +2699,7 @@ Widget build(BuildContext context) {
                                         maxLines: 1,
                                         scrollPhysics: BouncingScrollPhysics(),
                                         decoration: InputDecoration(
-                                          hintText: '메모 입력',
+                                          hintText: context.l10n.calendarMemoEnter,
                                           hintStyle: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6)),
                                           contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                                           border: OutlineInputBorder(
@@ -2705,7 +2736,7 @@ Widget build(BuildContext context) {
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                                   minimumSize: Size(0, 0),
                                 ),
-                                child: Text('저장', style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSecondary)),
+                                child: Text(context.l10n.commonSave, style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSecondary)),
                               ),
                             ],
                           );
@@ -2792,22 +2823,21 @@ Widget build(BuildContext context) {
     });
   }
 
-  String _getWeekday(DateTime date) {
-    const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-    return weekdays[date.weekday - 1];
+  String _getWeekday(DateTime date, BuildContext context) {
+    return weekdayLabel(context, weekdayIndexOf(date));
   }
 
   // ⭐ 알람 타입 정보 반환
   Map<String, String> _getAlarmTypeInfo(int typeId) {
     switch (typeId) {
       case 1:
-        return {'emoji': '🔔', 'label': '소리+진동'};
+        return {'emoji': '🔔', 'label': context.l10n.alarmSoundVibration};
       case 2:
-        return {'emoji': '📳', 'label': '진동'};
+        return {'emoji': '📳', 'label': context.l10n.alarmVibration};
       case 3:
-        return {'emoji': '🔇', 'label': '무음'};
+        return {'emoji': '🔇', 'label': context.l10n.alarmSilent};
       default:
-        return {'emoji': '🔔', 'label': '소리+진동'};
+        return {'emoji': '🔔', 'label': context.l10n.alarmSoundVibration};
     }
   }
 
@@ -2820,7 +2850,7 @@ Widget build(BuildContext context) {
         print('🏗️ AlertDialog 빌드 시작');
         return AlertDialog(
           title: Text(
-            '알람 타입 선택',
+            context.l10n.calendarSelectAlarmType,
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
           content: SizedBox(
@@ -2829,7 +2859,7 @@ Widget build(BuildContext context) {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '${alarm.time} 알람',
+                  context.l10n.calendarAlarmAt(alarm.time),
                   style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 SizedBox(height: 16.h),
@@ -2839,7 +2869,7 @@ Widget build(BuildContext context) {
                     _buildAlarmTypeOption(
                       typeId: 1,
                       icon: Icons.volume_up_rounded,
-                      label: '소리+진동',
+                      label: context.l10n.alarmSoundVibration,
                       isSelected: alarm.alarmTypeId == 1,
                       onTap: () async {
                         await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 1);
@@ -2851,7 +2881,7 @@ Widget build(BuildContext context) {
                     _buildAlarmTypeOption(
                       typeId: 2,
                       icon: Icons.vibration_rounded,
-                      label: '진동',
+                      label: context.l10n.alarmVibration,
                       isSelected: alarm.alarmTypeId == 2,
                       onTap: () async {
                         await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 2);
@@ -2863,7 +2893,7 @@ Widget build(BuildContext context) {
                     _buildAlarmTypeOption(
                       typeId: 3,
                       icon: Icons.notifications_off_rounded,
-                      label: '무음',
+                      label: context.l10n.alarmSilent,
                       isSelected: alarm.alarmTypeId == 3,
                       onTap: () async {
                         await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 3);
@@ -2881,11 +2911,11 @@ Widget build(BuildContext context) {
             // ⭐ 삭제 버튼
             TextButton(
               onPressed: () => _showDeleteAlarmConfirmation(alarm, parentSetState),
-              child: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 14.sp)),
+              child: Text(context.l10n.commonDelete, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 14.sp)),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('취소'),
+              child: Text(context.l10n.commonCancel),
             ),
           ],
         );
@@ -2900,17 +2930,17 @@ Widget build(BuildContext context) {
       builder: (context) {
         return AlertDialog(
           title: Text(
-            '알람 삭제',
+            context.l10n.calendarDeleteAlarmTitle,
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
           content: Text(
-            '${alarm.time} 알람을 삭제하시겠습니까?',
+            context.l10n.calendarDeleteAlarmConfirm(alarm.time),
             style: TextStyle(fontSize: 14.sp),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('취소'),
+              child: Text(context.l10n.commonCancel),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -2922,7 +2952,7 @@ Widget build(BuildContext context) {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
-              child: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+              child: Text(context.l10n.commonDelete, style: TextStyle(color: Theme.of(context).colorScheme.onError)),
             ),
           ],
         );
@@ -2960,7 +2990,7 @@ Widget build(BuildContext context) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ 알람 삭제 실패: $e'),
+            content: Text('❌ ${context.l10n.calendarDeleteAlarmFailed}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -2972,7 +3002,7 @@ Widget build(BuildContext context) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('알람이 삭제되었습니다'),
+          content: Text(context.l10n.alarmDeletedToast),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
         ),
@@ -3079,7 +3109,7 @@ Widget build(BuildContext context) {
           // ⭐ 제목 텍스트 - 센터 정렬
           Center(
             child: Text(
-              '${_selectedDates.length}일 근무 변경',
+              context.l10n.calendarBulkChangeShiftTitle(_selectedDates.length),
               style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
             ),
           ),
@@ -3114,7 +3144,7 @@ Widget build(BuildContext context) {
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
                       child: Text(
-                        shiftType,
+                        shiftType == '없음' ? context.l10n.commonNone : shiftType,
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.bold,
@@ -3170,7 +3200,7 @@ Widget build(BuildContext context) {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ 근무가 할당되었습니다')),
+          SnackBar(content: Text('✅ ${context.l10n.statusShiftAssigned}')),
         );
       }
     } catch (e) {
@@ -3178,7 +3208,7 @@ Widget build(BuildContext context) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ 근무 할당 실패: $e'),
+            content: Text('❌ ${context.l10n.statusShiftAssignFailed}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -3204,7 +3234,7 @@ Widget build(BuildContext context) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ 근무 변경 실패: $e'),
+            content: Text('❌ ${context.l10n.statusShiftChangeFailed}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -3232,7 +3262,7 @@ Widget build(BuildContext context) {
         child: StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-            title: Text('메모 상세', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+            title: Text(context.l10n.calendarMemoDetailTitle, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
             content: Container(
               width: double.maxFinite,
               constraints: BoxConstraints(maxHeight: 300.h),
@@ -3248,7 +3278,7 @@ Widget build(BuildContext context) {
                         expands: true,
                         textAlignVertical: TextAlignVertical.top,
                         decoration: InputDecoration(
-                          hintText: '메모 내용...',
+                          hintText: context.l10n.calendarMemoContent,
                           hintStyle: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6)),
                           contentPadding: EdgeInsets.all(12.w),
                           border: OutlineInputBorder(
@@ -3295,13 +3325,13 @@ Widget build(BuildContext context) {
                       editController.text = memo.memoText;
                     });
                   },
-                  child: Text('취소', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                  child: Text(context.l10n.commonCancel, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     if (editController.text.trim().isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('메모 내용을 입력해주세요')),
+                        SnackBar(content: Text(context.l10n.statusEnterMemoContent)),
                       );
                       return;
                     }
@@ -3319,7 +3349,7 @@ Widget build(BuildContext context) {
                     }
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary),
-                  child: Text('저장', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
+                  child: Text(context.l10n.commonSave, style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
                 ),
               ] else ...[
                 // ⭐ 보기 모드 버튼 - 바로 삭제 (확인 팝업 제거)
@@ -3333,7 +3363,7 @@ Widget build(BuildContext context) {
                       Navigator.of(context).pop();
                     }
                   },
-                  child: Text('삭제', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                  child: Text(context.l10n.commonDelete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -3342,7 +3372,7 @@ Widget build(BuildContext context) {
                     });
                   },
                   style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary),
-                  child: Text('수정', style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
+                  child: Text(context.l10n.commonEdit, style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
                 ),
               ],
             ],

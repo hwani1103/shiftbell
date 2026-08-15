@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../models/shift_schedule.dart';
+import '../l10n/l10n_extensions.dart';
+import '../utils/weekday_util.dart';
 import 'all_teams_setup_dialog.dart';
 
 /// 전체 근무표 - 모든 조의 근무를 한눈에 보는 화면
@@ -104,12 +107,12 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('전체 교대조 근무표 작성'),
-          content: Text('이 기능은 규칙적 근무 패턴이 설정된 경우에만 사용할 수 있습니다.'),
+          title: Text(context.l10n.statusFullTeamScheduleTitle),
+          content: Text(context.l10n.settingsAllTeamsRegularOnly),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text('확인'),
+              child: Text(context.l10n.commonOk),
             ),
           ],
         ),
@@ -182,8 +185,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
 
   // 해당 날짜의 요일 문자
   String _getWeekdayChar(DateTime date) {
-    const weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-    return weekdays[date.weekday - 1];
+    return weekdayLabel(context, weekdayIndexOf(date), narrow: true);
   }
 
   @override
@@ -195,7 +197,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: Text('전체 근무표'),
+        title: Text(context.l10n.shiftFullSchedule),
         backgroundColor: colorScheme.surface,
         elevation: 0,
         foregroundColor: colorScheme.onSurface,
@@ -218,7 +220,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                         ),
                         SizedBox(height: 24.h),
                         Text(
-                          '전체 교대조 근무표가\n설정되지 않았습니다',
+                          context.l10n.allTeamsNotConfigured,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18.sp,
@@ -231,7 +233,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                         ElevatedButton.icon(
                           onPressed: () => _showAllTeamsSetupDialog(),
                           icon: Icon(Icons.add_circle_outline, size: 22.sp),
-                          label: Text('전체 교대조 근무표 만들기', style: TextStyle(fontSize: 16.sp)),
+                          label: Text(context.l10n.allTeamsCreateButton, style: TextStyle(fontSize: 16.sp)),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: colorScheme.primary,
                             foregroundColor: colorScheme.onPrimary,
@@ -241,7 +243,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                         SizedBox(height: 12.h),
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: Text('돌아가기', style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 15.sp)),
+                          child: Text(context.l10n.commonGoBack, style: TextStyle(color: colorScheme.onSurfaceVariant, fontSize: 15.sp)),
                         ),
                       ],
                     ),
@@ -249,7 +251,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                 )
               : scheduleAsync.when(
                   loading: () => Center(child: CircularProgressIndicator()),
-                  error: (error, stack) => Center(child: Text('에러 발생: $error')),
+                  error: (error, stack) => Center(child: Text(context.l10n.statusErrorWithDetail(error.toString()))),
                   data: (schedule) => SafeArea(
                     child: Column(
                       children: [
@@ -270,7 +272,7 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
                                 },
                               ),
                               Text(
-                                '${_currentMonth.year}년 ${_currentMonth.month}월',
+                                DateFormat.yMMMM(Localizations.localeOf(context).toString()).format(_currentMonth),
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.bold,
@@ -506,8 +508,11 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
     // ⭐ schedule의 pattern 사용 (근무명 수정이 반영됨)
     final pattern = schedule?.pattern ?? [];
     final shift = _getShiftForTeam(team, date, pattern);
-    // 근무명이 4자까지 허용되지만 전체 근무표에서는 앞 2자만 표시
-    final displayText = shift.length > 2 ? shift.substring(0, 2) : shift;
+    // ⭐ 영어 현지화: 근무명이 최대 kMaxShiftNameLength(10)글자까지 가능해지면서
+    // (예전엔 4글자 제한이라 앞 2자만 잘라도 웬만큼 알아볼 수 있었음), 이 셀은
+    // 전체 근무표(전체 조×전체 날짜) 그리드라 폭이 아주 좁아서 여전히 짧게
+    // 보여줘야 함 - 앞 3자 + 안 잘리는 짧은 이름은 그대로, overflow 보호만 추가.
+    final displayText = shift.length > 3 ? shift.substring(0, 3) : shift;
 
     return Container(
       height: 34.h, // 근무 행 높이 (줄임)
@@ -517,6 +522,8 @@ class _AllShiftsViewState extends ConsumerState<AllShiftsView> {
       ),
       child: Text(
         displayText,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: TextStyle(
           fontSize: 10.sp, // 근무명 텍스트
           fontWeight: FontWeight.w600,

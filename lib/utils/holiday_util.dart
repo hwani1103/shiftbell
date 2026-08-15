@@ -77,7 +77,18 @@ const Map<String, String> lunarHolidays = {
 };
 
 // 공휴일 여부 확인
-String? getHolidayName(DateTime date) {
+//
+// ⭐ 영어 현지화 결정(교대시계_영어화_현지화_보고서_영문판.md 2-6번 참고): 이 파일의
+// 공휴일 데이터는 전부 한국 고유 공휴일이고(신정~지방선거, 매년 손으로 갱신) 다른
+// 나라 공휴일 데이터셋은 없음. "번역"으로 해결 안 되는 항목이라 다국가 데이터셋을
+// 새로 구축하는 대신(작업량 큼 + 매년 유지보수 필요) 가장 간단하고 정직한 선택지
+// (보고서의 옵션 a)를 택함: 영어 로케일(ko가 아닌 모든 로케일)에서는 공휴일 표시
+// 기능 자체를 끔 - 한국 공휴일이 남의 달력에 빨갛게 뜨는 이상한 경험을 피함.
+// isKorean=false면 무조건 null을 반환해서, 호출부(calendar_tab.dart,
+// friend_calendar_view.dart)가 별도 분기 없이 그대로 써도 안전하게 함.
+String? getHolidayName(DateTime date, {required bool isKorean}) {
+  if (!isKorean) return null;
+
   // 1. 고정 공휴일 체크 (매년 동일)
   final fixedKey = '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   if (fixedHolidays.containsKey(fixedKey)) {

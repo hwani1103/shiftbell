@@ -7,6 +7,8 @@ import 'dart:async';
 import '../models/alarm.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/alarm_provider.dart';
+import '../l10n/l10n_extensions.dart';
+import '../utils/weekday_util.dart';
 
 
 class NextAlarmTab extends ConsumerStatefulWidget {
@@ -71,7 +73,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('알람이 취소되었습니다'),
+          content: Text(context.l10n.alarmCanceledToast),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
         ),
@@ -137,7 +139,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
             ),
             SizedBox(height: 24.h),
             Text(
-              '예정된 알람이 없습니다',
+              context.l10n.alarmNoneUpcoming,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w500,
@@ -146,7 +148,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
             ),
             SizedBox(height: 8.h),
             Text(
-              '달력에서 근무를 설정하면\n알람이 자동으로 생성됩니다',
+              context.l10n.alarmEmptyStateHint,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
@@ -212,7 +214,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
 
                       // 제목
                       Text(
-                        '등록된 알람',
+                        context.l10n.alarmRegistered,
                         style: TextStyle(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.bold,
@@ -225,7 +227,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                       Expanded(
                         child: alarmsAsync.when(
                           loading: () => Center(child: CircularProgressIndicator()),
-                          error: (_, __) => Center(child: Text('오류 발생')),
+                          error: (_, __) => Center(child: Text(context.l10n.statusErrorOccurred)),
                           data: (alarms) {
                             final now = DateTime.now();
                             final futureAlarms = alarms
@@ -245,7 +247,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                                     ),
                                     SizedBox(height: 12.h),
                                     Text(
-                                      '등록된 알람이 없습니다',
+                                      context.l10n.alarmNoneRegistered,
                                       style: TextStyle(
                                         fontSize: 15.sp,
                                         color: colorScheme.onSurfaceVariant,
@@ -289,8 +291,12 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
 
     final date = alarm.date!;
     final colorScheme = Theme.of(context).colorScheme;
-    final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-    final dateStr = '${date.month}/${date.day} (${weekdays[date.weekday - 1]})';
+    // ⭐ 영어 현지화 후속 수정: DateFormat.Md(locale)는 로케일에 따라 구분자가
+    // 달라짐(예: ko → "8. 15.", en → "8/15") - 한국어 사용자에게 기존에 없던
+    // 시각적 변화(점 구분자)가 새로 생기는 회귀였음. 순수 숫자 M/d 표기는 두
+    // 언어 다 같은 순서(월/일)라 로케일 분기 없이 고정 "8/15" 형식으로 통일함
+    // (work_hours_settings_provider.dart의 periodRangeShort와 동일한 판단).
+    final dateStr = '${date.month}/${date.day} (${weekdayLabel(context, weekdayIndexOf(date))})';
     final timeStr = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 
     return Container(
@@ -372,8 +378,8 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 ),
                 SizedBox(width: 5.w),
                 Text(
-                  alarm.alarmTypeId == 1 ? '소리' :
-                  alarm.alarmTypeId == 2 ? '진동' : '무음',
+                  alarm.alarmTypeId == 1 ? context.l10n.alarmSoundShort :
+                  alarm.alarmTypeId == 2 ? context.l10n.alarmVibration : context.l10n.alarmSilent,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
@@ -421,19 +427,19 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     super.dispose();
   }
 
-  Map<String, dynamic> _getTimeUntilData(DateTime alarmTime) {
+  Map<String, dynamic> _getTimeUntilData(BuildContext context, DateTime alarmTime) {
     final now = DateTime.now();
     final diff = alarmTime.difference(now);
 
     if (diff.isNegative) {
-      return {'text': '곧 울립니다', 'isImminent': true};
+      return {'text': context.l10n.alarmRingingSoon, 'isImminent': true};
     }
 
     final totalSeconds = diff.inSeconds;
     final totalMinutes = (totalSeconds / 60).ceil();
 
     if (totalMinutes <= 1) {
-      return {'text': '곧 울립니다', 'isImminent': true};
+      return {'text': context.l10n.alarmRingingSoon, 'isImminent': true};
     }
 
     final hours = totalMinutes ~/ 60;
@@ -445,18 +451,18 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
       final days = hours ~/ 24;
       final remainingHours = hours % 24;
       if (remainingHours > 0) {
-        text = '${days}일 ${remainingHours}시간 남았습니다';
+        text = context.l10n.alarmRemainingDaysHours(days, remainingHours);
       } else {
-        text = '${days}일 남았습니다';
+        text = context.l10n.alarmRemainingDays(days);
       }
     } else if (hours > 0) {
       if (minutes > 0) {
-        text = '${hours}시간 ${minutes}분 남았습니다';
+        text = context.l10n.alarmRemainingHoursMinutes(hours, minutes);
       } else {
-        text = '${hours}시간 남았습니다';
+        text = context.l10n.alarmRemainingHours(hours);
       }
     } else {
-      text = '${minutes}분 남았습니다';
+      text = context.l10n.alarmRemainingMinutes(minutes);
     }
 
     return {
@@ -465,19 +471,19 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     };
   }
 
-  String _getDateLabel(DateTime alarmDate) {
+  String _getDateLabel(BuildContext context, DateTime alarmDate) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(Duration(days: 1));
     final alarmDay = DateTime(alarmDate.year, alarmDate.month, alarmDate.day);
 
     if (alarmDay == today) {
-      return '오늘';
+      return context.l10n.commonToday;
     } else if (alarmDay == tomorrow) {
-      return '내일';
+      return context.l10n.commonTomorrow;
     } else {
-      final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-      return '${alarmDate.month}/${alarmDate.day} (${weekdays[alarmDate.weekday - 1]})';
+      // ⭐ 위 _buildAlarmListItem과 동일한 이유로 고정 숫자 M/d 형식 사용.
+      return '${alarmDate.month}/${alarmDate.day} (${weekdayLabel(context, weekdayIndexOf(alarmDate))})';
     }
   }
 
@@ -494,8 +500,8 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
       return SizedBox.shrink();
     }
 
-    final timeData = _getTimeUntilData(alarm.date!);
-    final dateLabel = _getDateLabel(alarm.date!);
+    final timeData = _getTimeUntilData(context, alarm.date!);
+    final dateLabel = _getDateLabel(context, alarm.date!);
 
     return SafeArea(
       child: Padding(
@@ -623,7 +629,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          '알람까지',
+                          context.l10n.alarmUntil,
                           style: TextStyle(
                             fontSize: 13.sp,
                             color: colorScheme.onSurfaceVariant,
@@ -661,7 +667,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '알람 타입',
+                    context.l10n.alarmType,
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
@@ -674,7 +680,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                       _buildTypeSelectButton(
                         typeId: 1,
                         icon: Icons.volume_up_rounded,
-                        label: '소리+진동',
+                        label: context.l10n.alarmSoundVibration,
                         isSelected: alarm.alarmTypeId == 1,
                         onTap: () => _onTypeSelected(alarm.id!, 1),
                       ),
@@ -682,7 +688,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                       _buildTypeSelectButton(
                         typeId: 2,
                         icon: Icons.vibration_rounded,
-                        label: '진동',
+                        label: context.l10n.alarmVibration,
                         isSelected: alarm.alarmTypeId == 2,
                         onTap: () => _onTypeSelected(alarm.id!, 2),
                       ),
@@ -690,7 +696,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                       _buildTypeSelectButton(
                         typeId: 3,
                         icon: Icons.notifications_off_rounded,
-                        label: '무음',
+                        label: context.l10n.alarmSilent,
                         isSelected: alarm.alarmTypeId == 3,
                         onTap: () => _onTypeSelected(alarm.id!, 3),
                       ),
@@ -727,7 +733,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        '등록된 모든 알람 보기',
+                        context.l10n.alarmViewAllRegistered,
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
@@ -749,7 +755,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                 onPressed: widget.onDismiss,
                 icon: Icon(Icons.alarm_off_rounded, size: 18.sp),
                 label: Text(
-                  '이 알람 끄기',
+                  context.l10n.alarmTurnOffThis,
                   style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
                 ),
                 style: OutlinedButton.styleFrom(

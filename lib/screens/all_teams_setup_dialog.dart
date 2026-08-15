@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/shift_schedule.dart';
+import '../l10n/l10n_extensions.dart';
 
 /// 전체 교대조 근무표 작성 다이얼로그
 class AllTeamsSetupDialog extends StatefulWidget {
@@ -107,7 +108,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '전체 교대조 근무표 작성',
+                  context.l10n.statusFullTeamScheduleTitle,
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
@@ -192,7 +193,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: _previousPage,
-                      child: Text('이전'),
+                      child: Text(context.l10n.commonBack),
                     ),
                   ),
                 if (_currentPage > 0) SizedBox(width: 12.w),
@@ -203,7 +204,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                       backgroundColor: colorScheme.primary,
                     ),
                     child: Text(
-                      _currentPage < 2 ? '다음' : '완료',
+                      _currentPage < 2 ? context.l10n.commonNext : context.l10n.commonDone,
                       style: TextStyle(color: colorScheme.onPrimary),
                     ),
                   ),
@@ -296,7 +297,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '1단계: 교대 패턴 확인',
+          context.l10n.statusStep1Title,
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.bold,
@@ -305,7 +306,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
         ),
         SizedBox(height: 8.h),
         Text(
-          '현재 설정된 교대 패턴을 확인해주세요.',
+          context.l10n.statusStep1Desc,
           style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
         ),
         SizedBox(height: 24.h),
@@ -314,7 +315,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '교대 패턴 (총 ${widget.pattern.length}일 주기)',
+              context.l10n.statusPatternDayCycle(widget.pattern.length),
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.bold,
@@ -345,7 +346,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
-                  '이 패턴을 기준으로 전체 조의 근무표를 작성합니다.',
+                  context.l10n.statusPatternBasisHint,
                   style: TextStyle(fontSize: 12.sp, color: Colors.amber.shade800),
                 ),
               ),
@@ -364,7 +365,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '2단계: 전체 조 구성',
+            context.l10n.statusStep2Title,
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
@@ -373,7 +374,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
           ),
           SizedBox(height: 8.h),
           Text(
-            '전체 교대조를 입력해주세요.\n(한 글자만, 띄어쓰기로 구분)',
+            '${context.l10n.statusEnterAllTeams}\n${context.l10n.statusOneCharPerTeamHint}',
             style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 24.h),
@@ -382,7 +383,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.done,
             decoration: InputDecoration(
-              labelText: '조 이름 (예: A B C D)',
+              labelText: context.l10n.statusTeamNamesHint,
               hintText: null,  // ⭐ 활성화 시 placeholder 안 보이게
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
@@ -406,7 +407,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '입력된 조 (${_teamNames.length}개)',
+                    context.l10n.statusTeamsEnteredCount(_teamNames.length),
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
@@ -419,7 +420,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                     children: _teamNames.map((team) {
                       return Chip(
                         label: Text(
-                          '$team조',
+                          context.l10n.statusTeamChipLabel(team),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         backgroundColor: colorScheme.surface,
@@ -444,7 +445,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    '한 글자만 입력 가능합니다.\n(예: A, 가, 1)\n최소 2개 조 이상 입력해주세요.',
+                    '${context.l10n.statusOneCharOnly}\n${context.l10n.statusTeamNameExampleHint}\n${context.l10n.statusMinTeamsHint}',
                     style: TextStyle(fontSize: 12.sp, color: Colors.amber.shade800),
                   ),
                 ),
@@ -465,7 +466,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '3단계: 오늘 각 조의 근무 설정',
+            context.l10n.statusStep3Title,
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
@@ -474,7 +475,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
           ),
           SizedBox(height: 8.h),
           Text(
-            '오늘 각 조가 교대근무 패턴의 어떤 근무인지 선택해주세요.',
+            context.l10n.statusSelectTodayShiftPerTeam,
             style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 16.h),
@@ -496,7 +497,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$team조 - 오늘의 근무 선택',
+                      context.l10n.statusSelectTodayShiftForTeam(team),
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
@@ -619,7 +620,7 @@ class _AllTeamsSetupDialogState extends State<AllTeamsSetupDialog> {
     // 성공 메시지
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('전체 교대조 근무표가 설정되었습니다!'),
+        content: Text(context.l10n.statusFullTeamScheduleSet),
         backgroundColor: Colors.green,
       ),
     );

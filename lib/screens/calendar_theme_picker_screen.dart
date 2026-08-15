@@ -14,6 +14,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../l10n/l10n_extensions.dart';
 import '../models/calendar_theme.dart';
 import '../models/shift_schedule.dart';
 import '../providers/calendar_theme_provider.dart';
@@ -59,7 +60,7 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
     final deviceSize = MediaQuery.sizeOf(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text('달력 테마', style: TextStyle(fontSize: 18.sp))),
+      appBar: AppBar(title: Text(context.l10n.calendarTheme, style: TextStyle(fontSize: 18.sp))),
       // ⭐ "적용 버튼이 SafeArea를 안 받아서 제스처 네비게이션 바에 가깝다"는
       // 피드백 - body 전체를 SafeArea로 감싸서 하단 버튼이 항상 안전영역
       // 안쪽에 오게 함.
@@ -68,12 +69,12 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
         children: [
           SizedBox(height: 12.h),
           Text(
-            kAllCalendarThemeIds[_previewIndex].label,
+            kAllCalendarThemeIds[_previewIndex].label(context),
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 4.h),
           Text(
-            '좌우로 넘겨서 골라보세요',
+            context.l10n.themeSwipeToChoose,
             style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           Expanded(
@@ -149,7 +150,9 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
                 },
                 style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14.h)),
                 child: Text(
-                  kAllCalendarThemeIds[_previewIndex] == selected ? '현재 적용된 테마' : '이 테마로 적용',
+                  kAllCalendarThemeIds[_previewIndex] == selected
+                      ? context.l10n.themeCurrentlyApplied
+                      : context.l10n.themeApplyThis,
                   style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
                 ),
               ),

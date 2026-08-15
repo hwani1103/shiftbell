@@ -18,9 +18,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 import '../models/friend_schedule.dart';
 import '../models/shift_schedule.dart';
 import '../utils/holiday_util.dart';
+import '../l10n/l10n_extensions.dart';
 
 class FriendCalendarView extends StatefulWidget {
   final String friendName;
@@ -71,8 +73,10 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
     final colorScheme = Theme.of(context).colorScheme;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
+    final displayName = widget.friendName.isEmpty ? context.l10n.friendDefaultDisplayName : widget.friendName;
+
     return Scaffold(
-      appBar: AppBar(title: Text('${widget.friendName}님의 교대 스케줄', style: TextStyle(fontSize: 17.sp))),
+      appBar: AppBar(title: Text(context.l10n.friendScheduleOf(displayName), style: TextStyle(fontSize: 17.sp))),
       // ⭐ 하단 SafeArea 없이 body를 바로 뒀더니 제스처 네비게이션 바/화면 하단
       // 곡면에 마지막 줄(6번째 주 또는 설치 유도 배너)이 잘리는 문제가 있었음 -
       // 실제 앱(main.dart 쪽 Scaffold들)은 전부 SafeArea 하위에서 그려지는데
@@ -92,7 +96,7 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
                   Expanded(
                     child: Center(
                       child: Text(
-                        '${_focusedDay.year}년 ${_focusedDay.month}월',
+                        DateFormat.yMMMM(Localizations.localeOf(context).toString()).format(_focusedDay),
                         style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -160,7 +164,7 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
       firstDay: DateTime(_today.year - 3, 1, 1),
       lastDay: DateTime(_today.year + 3, 12, 31),
       focusedDay: _focusedDay,
-      locale: 'ko_KR',
+      locale: Localizations.localeOf(context).languageCode == 'ko' ? 'ko_KR' : 'en_US',
       headerVisible: false,
       sixWeekMonthsEnforced: true,
       rowHeight: rowHeight,
@@ -203,12 +207,12 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     final shiftText = widget.data.getShiftForDate(day);
-    final hasShift = shiftText.isNotEmpty && shiftText != '미설정';
+    final hasShift = shiftText.isNotEmpty && shiftText != kUnsetShiftSentinel;
     final patternShift = widget.data.getPatternShiftForDate(day);
     final isModified = patternShift.isNotEmpty && hasShift && patternShift != shiftText;
 
     final isSunday = day.weekday == DateTime.sunday;
-    final holidayName = getHolidayName(day);
+    final holidayName = getHolidayName(day, isKorean: Localizations.localeOf(context).languageCode == 'ko');
     final isHoliday = holidayName != null;
 
     final shouldHighlightToday = isToday && _focusedDay.year == day.year && _focusedDay.month == day.month;
@@ -328,7 +332,7 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
       color: Colors.amber.shade100,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Text(
-        '홈 화면에서 바로 사용하려면 작업 표시줄의 설치 버튼을 눌러주세요.',
+        context.l10n.friendInstallForHomeScreen,
         style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade700, fontWeight: FontWeight.w600),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
@@ -351,7 +355,7 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
         children: [
           Expanded(
             child: Text(
-              '간편한 스케줄 등록 및 자동 알람 생성 앱',
+              context.l10n.friendWebAppTagline,
               style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onPrimaryContainer),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -361,7 +365,7 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
           ElevatedButton(
             onPressed: widget.onInstallTap,
             style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h)),
-            child: Text('앱 설치', style: TextStyle(fontSize: 12.sp)),
+            child: Text(context.l10n.friendInstallApp, style: TextStyle(fontSize: 12.sp)),
           ),
         ],
       ),

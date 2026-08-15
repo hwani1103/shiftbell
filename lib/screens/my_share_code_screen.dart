@@ -15,6 +15,7 @@ import '../services/friend_share_service.dart';
 import '../services/friend_sync_service.dart';
 import '../services/firebase_bootstrap.dart';
 import '../providers/schedule_provider.dart';
+import '../l10n/l10n_extensions.dart';
 
 // ⭐ 트랙1(웹) 배포 도메인 - Firebase Hosting(shiftbell-29f31)에 실제 배포 완료
 // (2026-08-14, `firebase deploy --only hosting`). build/web을 다시 배포하려면
@@ -83,11 +84,11 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
     if (ok) {
       setState(() => _savedName = name);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('공유 이름을 변경했어요')),
+        SnackBar(content: Text(context.l10n.friendDisplayNameUpdated)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이름 변경에 실패했어요. 네트워크를 확인해주세요')),
+        SnackBar(content: Text(context.l10n.friendDisplayNameUpdateFailed)),
       );
     }
   }
@@ -96,13 +97,13 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('친구에게 보일 내 이름을 입력해주세요')),
+        SnackBar(content: Text(context.l10n.friendEnterDisplayNameError)),
       );
       return;
     }
     if (!firebaseReady) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('아직 친구공유 서버 연결 전이에요. 잠시 후 다시 시도해주세요')),
+        SnackBar(content: Text(context.l10n.friendServerNotReady)),
       );
       return;
     }
@@ -110,7 +111,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
     final schedule = ref.read(scheduleProvider).value;
     if (schedule == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('아직 근무 스케줄이 설정되지 않았어요')),
+        SnackBar(content: Text(context.l10n.friendScheduleNotSet)),
       );
       return;
     }
@@ -121,7 +122,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
       if (!mounted) return;
       if (ownerId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('공유 시작에 실패했어요. 네트워크 연결을 확인하고 다시 시도해주세요')),
+          SnackBar(content: Text(context.l10n.friendStartSharingFailed)),
         );
         return;
       }
@@ -139,15 +140,13 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('공유 중지'),
-        content: const Text(
-          '공유를 중지하면 친구가 더 이상 내 근무표를 볼 수 없어요. 계속할까요?\n\n'
-          '(다시 공유하려면 이 화면에서 "공유 시작하기"를 다시 누르면 돼요 - 코드/링크는 그대로라 '
-          '친구가 새로 받을 필요 없이 다시 보이게 돼요)',
+        title: Text(context.l10n.friendStopSharing),
+        content: Text(
+          '${context.l10n.friendStopSharingConfirm}\n\n${context.l10n.friendRestartSharingHint}',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('중지')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.commonCancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.friendStopSharingAction)),
         ],
       ),
     );
@@ -176,19 +175,14 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
 
   void _shareCode() {
     final name = _nameController.text.trim();
-    Share.share(
-      '$name님의 근무표를 공유해요! 🗓️\n\n'
-      '▶ 앱 없이 바로 보기: $_webViewLink\n\n'
-      '▶ 교대시계 앱 사용 중이면 "친구 추가"에 아래 코드를 붙여넣어주세요:\n$_code\n\n'
-      '한 번만 열어도 되고, 나중에 다시 열면 그때그때 최신 근무표가 자동으로 보여요.',
-    );
+    Share.share(context.l10n.friendShareMessage(name, _webViewLink, _code));
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: Text('내 일정 공유하기', style: TextStyle(fontSize: 18.sp))),
+      appBar: AppBar(title: Text(context.l10n.friendShareMyScheduleTitle, style: TextStyle(fontSize: 18.sp))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -206,7 +200,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                     controller: _nameController,
                     focusNode: _nameFocusNode,
                     decoration: InputDecoration(
-                      hintText: '친구에게 보일 이름을 적어주세요',
+                      hintText: context.l10n.friendEnterDisplayName,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                     ),
@@ -216,7 +210,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                   ),
                   SizedBox(height: 8.h),
                   Text(
-                    '내 근무 스케줄과 근무 변경 사항이 공유됩니다.\n메모, OT, 근무시간, 알람 설정은 공유되지 않습니다.',
+                    '${context.l10n.friendShareIncludesSchedule}\n${context.l10n.friendShareExcludesExtras}',
                     style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
                   ),
                   SizedBox(height: 24.h),
@@ -228,7 +222,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                         style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14.h)),
                         child: _working
                             ? SizedBox(width: 18.w, height: 18.w, child: const CircularProgressIndicator(strokeWidth: 2))
-                            : Text('공유 시작하기', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                            : Text(context.l10n.friendStartSharing, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
                       ),
                     )
                   else if (_ownerId == null)
@@ -246,7 +240,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                           SizedBox(width: 8.w),
                           Expanded(
                             child: Text(
-                              '연결에 실패했어요. 네트워크 연결을 확인하고 화면을 다시 열어주세요',
+                              context.l10n.friendConnectionFailed,
                               style: TextStyle(fontSize: 12.5.sp, color: Theme.of(context).colorScheme.onErrorContainer),
                             ),
                           ),
@@ -254,22 +248,21 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                       ),
                     )
                   else ...[
-                    Text('내 공유 코드', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                    Text(context.l10n.friendMyShareCode, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                     SizedBox(height: 8.h),
-                    _CopyBox(text: _code, monospace: true, onCopy: () => _copy(_code, '코드를 복사했어요')),
+                    _CopyBox(text: _code, monospace: true, onCopy: () => _copy(_code, context.l10n.friendCodeCopied)),
                     SizedBox(height: 6.h),
                     Text(
-                      '이 코드를 친구에게 보내고, 친구가 앱에서 "친구 추가"에 붙여넣으면 내 일정 공유가 완료돼요.',
+                      context.l10n.friendShareCodeInstructions,
                       style: TextStyle(fontSize: 11.5.sp, color: colorScheme.onSurfaceVariant),
                     ),
                     SizedBox(height: 16.h),
-                    Text('앱 설치 없이 내 일정 공유하기', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                    Text(context.l10n.friendShareWithoutApp, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                     SizedBox(height: 8.h),
-                    _CopyBox(text: _webViewLink, onCopy: () => _copy(_webViewLink, '링크를 복사했어요')),
+                    _CopyBox(text: _webViewLink, onCopy: () => _copy(_webViewLink, context.l10n.friendLinkCopied)),
                     SizedBox(height: 6.h),
                     Text(
-                      '위 링크를 공유하면 앱 설치 없이 내 일정을 공유할 수 있어요.\n'
-                      '작업 표시줄의 화살표 버튼을 눌러 홈에서 바로가기 기능을 사용할 수 있습니다.',
+                      '${context.l10n.friendShareLinkHint}\n${context.l10n.friendInstallShortcutHint}',
                       style: TextStyle(fontSize: 11.5.sp, color: colorScheme.onSurfaceVariant),
                     ),
                     SizedBox(height: 20.h),
@@ -278,7 +271,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                       child: ElevatedButton.icon(
                         onPressed: _shareCode,
                         icon: Icon(Icons.share, size: 18.sp),
-                        label: Text('공유하기', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                        label: Text(context.l10n.commonShare, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
                         style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14.h)),
                       ),
                     ),
@@ -297,7 +290,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                           elevation: 0,
                         ),
-                        child: Text('공유 중지', style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600)),
+                        child: Text(context.l10n.friendStopSharing, style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600)),
                       ),
                     ),
                   ],

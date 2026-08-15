@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../l10n/l10n_extensions.dart';
 import '../services/database_service.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -142,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
                 // 앱 타이틀
                 Text(
-                  '교대시계',
+                  context.l10n.splashTitle,
                   style: TextStyle(
                     fontSize: 36.sp,
                     fontWeight: FontWeight.bold,
@@ -167,7 +168,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
                 // 설명 텍스트
                 Text(
-                  '교대 스케줄 확인 및 자동 알람 생성',
+                  context.l10n.splashTagline,
                   style: TextStyle(
                     fontSize: 15.sp,
                     color: Colors.white.withOpacity(0.9),
