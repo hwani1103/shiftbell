@@ -18,7 +18,7 @@ class UpdateService {
   // 다음 버전엔 이 내용을 다시 쓰고 싶지 않으면 _releaseNoteVersion을 빈 문자열로
   // 두면 됨 → 그러면 이 다이얼로그는 그냥 안 뜨고, 위의 "새 버전이 있어요" 안내만
   // 평소처럼 동작함.
-  static const String _releaseNoteVersion = '1.0.16';
+  static const String _releaseNoteVersion = '1.0.17';
   static const String _releaseNoteSeenKey = 'release_note_seen_version';
 
   /// 업데이트 후 첫 실행 안내 (버전당 1번만, _releaseNoteVersion이 비어있으면 스킵).

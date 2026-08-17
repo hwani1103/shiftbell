@@ -421,7 +421,7 @@
   "updateRecommendMessage": "We recommend updating\nfor the best experience.",
   "updateDataPreservedHint": "(Your saved data will be preserved)",
   "updateReleaseNoteTitle": "Please Check This Update",
-  "updateReleaseNoteBody": "Here's what's new in this update.\n\n1. Improved alarm reliability (fixed an alarm-deletion bug)\n2. Added calendar widget support\n3. Added OT (overtime) tracking\n4. Added monthly / weekly work-hour totals\n\n(We'll keep improving the app with regular updates — please help spread the word!)",
+  "updateReleaseNoteBody": "What's new\n\n1. Shift schedule sharing - You can now share your schedule with friends, or easily view theirs.\n2. New calendar themes for a more personalized look.\n3. Check memos right from the home screen widget.\n\nWe'll keep improving the app with regular updates. Please help spread the word!\n\nStay safe out there ^^",
 
   "allTeamsNotConfigured": "Full team schedule\nhasn't been set up yet",
   "allTeamsCreateButton": "Create Full Team Schedule",

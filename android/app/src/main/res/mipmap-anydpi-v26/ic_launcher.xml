@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
   <background android:drawable="@color/ic_launcher_background"/>
-  <foreground>
-      <inset
-          android:drawable="@drawable/ic_launcher_foreground"
-          android:inset="16%" />
-  </foreground>
+  <!-- ⭐ 2026-08-17: 원래 여기 있던 <inset inset="16%">를 제거함 - 손그림 벡터
+       아이콘(2025-12) 시절엔 그 그림 자체에 여백이 부족해서 inset으로 눌러줬던
+       거였는데, 8/15에 flutter_launcher_icons로 foreground PNG를 새로 만들면서
+       그 새 그림엔 이미 자체 여백(캔버스의 약 39~43%만 차지)이 들어있음. 옛
+       inset을 안 지우고 남겨둔 채라 여백이 이중으로 겹쳐서 아이콘이 원래보다
+       훨씬 작게(dev 실기기에서 prod 대비 약 70% 크기로) 보이던 원인이었음. -->
+  <foreground android:drawable="@drawable/ic_launcher_foreground"/>
 </adaptive-icon>
