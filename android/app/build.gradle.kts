@@ -39,8 +39,8 @@ android {
         applicationId = "com.hwani1103.shiftbell"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 18
-        versionName = "1.0.16"
+        versionCode = 19
+        versionName = "1.0.17"
     }
 
     // ⭐ 정식(prod) 앱과 테스트(dev) 앱을 같은 기기에 동시에 설치해둘 수 있게 분리함.
