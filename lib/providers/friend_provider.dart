@@ -89,8 +89,25 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
     return true;
   }
 
-  /// 친구 목록 전체 새로고침 - 목록 화면 진입 시/당겨서 새로고침 시 호출.
-  Future<void> refreshAll() async {
+  // ⭐ "새로고침" 버튼을 없애고 화면 진입마다 조용히 자동 새로고침하는 방식으로
+  // 바꾸면서 추가한 스로틀 - 예전 방식(수동 버튼/pull-to-refresh만)은 사용자가
+  // 안 누르면 안 갱신됐는데, 자동으로 바꾸면 반대로 "일정공유 탭을 자주 왔다갔다"
+  // 하는 사용자가 매번 전체 친구 수만큼 Firestore 읽기를 반복하게 됨 - 마지막
+  // 전체 새로고침이 이 시간 이내면 건너뜀.
+  static const _refreshAllThrottle = Duration(minutes: 2);
+  DateTime? _lastRefreshAllAt;
+
+  /// 친구 목록 전체 새로고침.
+  /// - [force]=false(기본, 화면 진입 시 자동 호출용): 마지막 전체 새로고침이
+  ///   [_refreshAllThrottle] 이내면 조용히 건너뜀(불필요한 반복 Firestore 읽기 방지).
+  /// - [force]=true(pull-to-refresh 등 사용자가 명시적으로 당겼을 때): 스로틀
+  ///   무시하고 무조건 새로 받아옴.
+  Future<void> refreshAll({bool force = false}) async {
+    if (!force && _lastRefreshAllAt != null &&
+        DateTime.now().difference(_lastRefreshAllAt!) < _refreshAllThrottle) {
+      return;
+    }
+    _lastRefreshAllAt = DateTime.now();
     for (final friend in state) {
       await refreshFriend(friend.id, friend.ownerId);
     }

@@ -1655,9 +1655,17 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
   Widget _buildVibrationRow(AlarmType type) {
     return Row(
       children: [
+        // ⭐ 영어 UI 레이아웃 수정: 원래 50.w 고정폭이 한국어("세기" 2글자)
+        // 기준이라 영어("Intensity" 9글자)에서 "Duratio"/"n"처럼 단어 중간이
+        // 줄바꿈됐음. 폭을 넉넉히 늘리고 혹시 몰라 줄바꿈 자체도 막음.
         SizedBox(
-          width: 50.w,
-          child: Text(context.l10n.alarmIntensity, style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          width: 78.w,
+          child: Text(
+            context.l10n.alarmIntensity,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
         ),
         Expanded(
           child: Row(
@@ -1722,9 +1730,16 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
   Widget _buildDurationRow(AlarmType type) {
     return Row(
       children: [
+        // ⭐ 영어 UI 레이아웃 수정: 위 _buildVibrationRow와 동일한 이유(영어
+        // "Duration"이 원래 50.w 고정폭에 안 맞아 줄바꿈됨).
         SizedBox(
-          width: 50.w,
-          child: Text(context.l10n.alarmDuration, style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          width: 78.w,
+          child: Text(
+            context.l10n.alarmDuration,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
         ),
         Expanded(
           child: Row(

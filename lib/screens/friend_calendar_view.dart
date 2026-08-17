@@ -31,6 +31,18 @@ class FriendCalendarView extends StatefulWidget {
   // "앱 설치하고 실시간으로 보기" 유도 배너를 하단에 추가로 보여줌. 앱 안(트랙2,
   // 친구 목록에서 열 때)에서는 이미 앱을 쓰고 있으니 당연히 안 보여줌.
   final bool showInstallPrompt;
+  // ⭐ 상단 배너의 "다른 브라우저로 열기" 안내 - 카카오톡 등 인앱 브라우저에는
+  // 애초에 주소창/설치 기능 자체가 없어서 안내 자체가 무의미해짐(web_main.dart의
+  // _isLikelyInAppBrowser 참고). 그런 곳에서는 false로 넘어와서 대신 "다른
+  // 브라우저로 열기" 안내를 보여줌.
+  final bool showPwaAddressBarHint;
+  // ⭐ 2026-08-17 추가 - 크롬의 beforeinstallprompt 이벤트가 잡혀서 "홈 화면에
+  // 바로가기 추가" 버튼을 바로 띄울 수 있는 상태인지(web_main.dart의
+  // deferredInstallPrompt 참고). true면 상단 배너에 안내 텍스트 대신 실제
+  // 동작하는 버튼을 보여줌 - "어디서 설치 버튼을 찾는지" 안내가 아니라 버튼
+  // 자체를 바로 제공하는 게 목표.
+  final bool showQuickInstallButton;
+  final VoidCallback? onQuickInstallTap;
   final VoidCallback? onInstallTap;
 
   const FriendCalendarView({
@@ -38,6 +50,9 @@ class FriendCalendarView extends StatefulWidget {
     required this.friendName,
     required this.data,
     this.showInstallPrompt = false,
+    this.showPwaAddressBarHint = true,
+    this.showQuickInstallButton = false,
+    this.onQuickInstallTap,
     this.onInstallTap,
   });
 
@@ -321,23 +336,66 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
     );
   }
 
-  // ⭐ 트랙1(웹)만 - PWA(홈 화면 설치) 안내. 원래 아이콘 + 2줄(설치 방법 + "안전하지
-  // 않은 앱" 경고 대처법)이었는데, 그만큼 아래 달력이 눌려서 작아진다는 피드백으로
-  // 아이콘 없애고 한 줄로 축소함 - "무시하고 설치" 설명은 뺐지만(공간 확보 우선),
-  // 이 경고 자체는 우리 쪽에서 못 없애는 Android/Play Protect 동작이라는 사실은
-  // 여전히 유효함(친구공유_v1_스펙.md 참고).
+  // ⭐ 트랙1(웹)만 - 상단 배너, 세 가지 상태 중 하나:
+  // 1) 인앱 브라우저(카카오톡 등) - "다른 브라우저로 열기" 안내(따라할 수 있는
+  //    실질적 조언).
+  // 2) 진짜 브라우저 + 크롬의 beforeinstallprompt를 잡아둔 상태(showQuickInstallButton) -
+  //    "어디서 설치하는지" 안내 대신, 바로 누르면 설치되는 버튼을 직접 보여줌
+  //    (web_main.dart의 deferredInstallPrompt/triggerInstallPrompt 참고).
+  // 3) 그 외(이벤트가 아직 안 왔거나 지원 안 하는 브라우저) - 확실하지 않은
+  //    안내를 굳이 보여주지 않고 배너 자체를 숨김(하단 "앱 설치" 버튼은 별개로
+  //    항상 남아있음).
   Widget _buildPwaInstallBanner(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: Colors.amber.shade100,
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      child: Text(
-        context.l10n.friendInstallForHomeScreen,
-        style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade700, fontWeight: FontWeight.w600),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-    );
+    final isInAppBrowser = !widget.showPwaAddressBarHint;
+    final textStyle = TextStyle(fontSize: 11.sp, color: Colors.brown.shade700, fontWeight: FontWeight.w600);
+
+    if (isInAppBrowser) {
+      return Container(
+        width: double.infinity,
+        color: Colors.amber.shade100,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        child: Text(
+          context.l10n.friendOpenInBrowserHint,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: textStyle,
+        ),
+      );
+    }
+
+    if (widget.showQuickInstallButton) {
+      return Container(
+        width: double.infinity,
+        color: Colors.amber.shade100,
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                context.l10n.friendQuickInstallHint,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: textStyle,
+              ),
+            ),
+            SizedBox(width: 8.w),
+            TextButton(
+              onPressed: widget.onQuickInstallTap,
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.brown.shade700,
+                foregroundColor: Colors.amber.shade100,
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(context.l10n.friendQuickInstallButton, style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   // ⭐ 웹→앱 설치 funnel의 2단계("더 편하게 보기" 유도). 3단계(딥링크로 설치 후
@@ -354,10 +412,13 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
       child: Row(
         children: [
           Expanded(
+            // ⭐ 영어 등 긴 언어에서 한 줄 말줄임표로는 "The easy way to log
+            // shifts and auto..."처럼 뒷부분이 아예 안 보였음 - 이 배너는 세로
+            // 공간에 여유가 있어서 2줄 줄바꿈으로 바꿔 전체 문구가 보이게 함.
             child: Text(
               context.l10n.friendWebAppTagline,
               style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onPrimaryContainer),
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ),

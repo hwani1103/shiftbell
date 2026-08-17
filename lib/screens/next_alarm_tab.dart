@@ -812,12 +812,32 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                 color: isSelected ? colorScheme.primary : colorScheme.outline,
               ),
               SizedBox(height: 6.h),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+              // ⭐ 영어 UI 레이아웃 수정: "Sound + Vibration"이 이 좁은(3등분)
+              // 버튼 폭에서 두 줄로 줄바꿈되면서 이 버튼이 포함된 Row 전체 높이가
+              // 늘어나고, 그만큼 아래 Spacer()가 흡수할 공간이 줄어들어 맨 아래
+              // "Turn Off This Alarm" 버튼이 하단 내비게이션 바에 거의 붙어보이는
+              // 문제가 있었음. 처음엔 한 줄+말줄임표("Sound + V...")로 급하게
+              // 막았는데, "소리+진동"이라는 의미(진동도 같이 울린다는 사실)가
+              // 잘려서 사용자가 오해할 수 있다는 지적으로 재수정 - 대신 세 버튼
+              // 라벨 자리를 전부 "2줄 높이"로 고정해서, 짧은 라벨("Vibration",
+              // "Silent")은 가운데 정렬로 1줄만 차지하고 긴 라벨("Sound +
+              // Vibration")은 잘리지 않고 2줄로 자연스럽게 줄바꿈되면서도, 세
+              // 버튼 높이가 항상 똑같이 유지되어 Row 전체 높이가 안 흔들림.
+              SizedBox(
+                height: 30.h,
+                child: Center(
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      height: 1.15,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                    ),
+                  ),
                 ),
               ),
             ],

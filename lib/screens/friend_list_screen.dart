@@ -22,8 +22,29 @@ import 'my_share_code_screen.dart';
 import 'friend_calendar_view.dart';
 import '../l10n/l10n_extensions.dart';
 
-class FriendListScreen extends ConsumerWidget {
+class FriendListScreen extends ConsumerStatefulWidget {
   const FriendListScreen({super.key});
+
+  @override
+  ConsumerState<FriendListScreen> createState() => _FriendListScreenState();
+}
+
+class _FriendListScreenState extends ConsumerState<FriendListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // ⭐ 상단 "새로고침" 버튼을 없애는 대신, 이 탭에 들어올 때마다(하단 네비게이션은
+    // 탭을 전환할 때 이전 탭 위젯을 버리고 새로 만드는 구조라 - main.dart의
+    // _tabs[_currentIndex] 참고 - 이 initState가 "탭 진입"마다 매번 실행됨) 조용히
+    // 백그라운드에서 전체 새로고침을 시도함. force:false라 마지막 새로고침이
+    // 2분 이내면 실제 네트워크 요청 없이 바로 리턴(friend_provider.dart 참고) -
+    // 그래서 탭을 빠르게 왔다갔다 해도 Firestore를 반복 호출하지 않음. 로딩 스피너/
+    // 토스트 없이 끝내고, 새 데이터가 오면 ref.watch가 알아서 목록을 다시 그림
+    // (이미 보이는 캐시 위에 조용히 최신값으로 갈아끼우는 방식).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(friendProvider.notifier).refreshAll();
+    });
+  }
 
   void _showAddFriendDialog(BuildContext context, WidgetRef ref) {
     final nameController = TextEditingController();
@@ -122,20 +143,16 @@ class FriendListScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final friends = ref.watch(friendProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.friendShareTitle, style: TextStyle(fontSize: 18.sp)),
-        actions: [
-          IconButton(
-            tooltip: context.l10n.commonRefresh,
-            icon: const Icon(Icons.refresh),
-            onPressed: friends.isEmpty ? null : () => ref.read(friendProvider.notifier).refreshAll(),
-          ),
-        ],
+        // ⭐ 상단 새로고침 버튼 삭제 - initState의 자동 새로고침 + 아래
+        // RefreshIndicator(당겨서 새로고침)로 충분하고, 버튼이 있으면 사용자가
+        // 습관적으로 눌러 불필요한 Firestore 읽기가 반복되기 쉬웠음.
       ),
       body: Column(
         children: [
@@ -178,7 +195,9 @@ class FriendListScreen extends ConsumerWidget {
                     child: Text(context.l10n.friendNoneAddedYet, style: TextStyle(fontSize: 14.sp, color: colorScheme.outline)),
                   )
                 : RefreshIndicator(
-                    onRefresh: () => ref.read(friendProvider.notifier).refreshAll(),
+                    // ⭐ 당겨서 새로고침은 사용자가 명시적으로 요청한 액션이라
+                    // force:true로 스로틀 무시하고 항상 새로 받아옴.
+                    onRefresh: () => ref.read(friendProvider.notifier).refreshAll(force: true),
                     child: ListView.builder(
                       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                       itemCount: friends.length,

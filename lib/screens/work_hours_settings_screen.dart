@@ -140,14 +140,24 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
             child: Row(
               children: [
                 Expanded(
+                  flex: 3,
                   child: Text(
                     shift,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurface),
                   ),
                 ),
-                Text(
-                  _formatDuration(minutes),
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: colorScheme.primary),
+                SizedBox(width: 8.w),
+                Flexible(
+                  flex: 2,
+                  child: Text(
+                    _formatDuration(minutes),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.right,
+                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: colorScheme.primary),
+                  ),
                 ),
                 SizedBox(width: 6.w),
                 Icon(Icons.chevron_right, size: 20.sp, color: colorScheme.onSurfaceVariant),
@@ -162,7 +172,12 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
   String _formatDuration(int minutes) {
     final h = minutes ~/ 60;
     final m = minutes % 60;
-    if (minutes == 0) return context.l10n.workHoursDurationExcluded;
+    // ⭐ 영어 UI 레이아웃 수정: 0분은 "설정 안 함" 의미인데(위 getDurationMinutes
+    // 주석 참고), 원래 workHoursDurationExcluded("0 hours (not counted as work
+    // time)")가 영어에서 너무 길어서 근무명 Expanded 영역을 밀어내 "Day"/
+    // "Morning" 같은 짧은 근무명까지 줄바꿈되는 원인이었음. 의미가 사실상 같은
+    // commonNotSet("Not Set"/"미설정")으로 교체 - 훨씬 짧아서 레이아웃도 안정됨.
+    if (minutes == 0) return context.l10n.commonNotSet;
     if (m == 0) return context.l10n.workHoursDurationHoursOnly(h);
     return context.l10n.workHoursDurationHoursMinutes(h, m);
   }

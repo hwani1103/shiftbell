@@ -18,6 +18,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  # ⭐ 웹뷰어(lib/web_main.dart) 전용 - URL을 해시(#/?code=...) 대신 일반 경로/쿼리
+  # (/?code=...)로 만들기 위해 씀(usePathUrlStrategy). 진짜 앱(main.dart)은 웹
+  # entry point를 아예 안 쓰니 영향 없음.
+  flutter_web_plugins:
+    sdk: flutter
+
   path: ^1.8.3
 
   numberpicker: ^2.1.2

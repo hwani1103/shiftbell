@@ -171,7 +171,19 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
   }
 
   String get _code => FriendShareService.encodeOwnerId(_ownerId!);
-  String get _webViewLink => '$kWebViewBaseUrl/#/?code=$_code';
+  // ⭐ 2026-08-16: 해시(#/?code=)에서 일반 쿼리(?code=)로 전환 - 메신저를 거치며
+  // 프래그먼트(#)가 유실되는 문제 대응(web_main.dart 상단 주석 참고). 이전에 이미
+  // 뿌려진 해시 형태 링크도 web_main.dart가 계속 읽을 수 있게 해뒀으니, 새로
+  // 만드는 링크만 이 형태로 바뀜.
+  //
+  // ⭐ 2026-08-17 추가 수정: 진짜 원인은 이거였음 - _code가 "SB2:xxxx-..."처럼
+  // 콜론(:)을 그대로 포함하는데, 그걸 URL 쿼리 값에 인코딩 없이 그냥 이어붙였음.
+  // 콜론은 URL 스킴 구분자로도 쓰이는 문자라, 카카오톡의 링크 인식/복사 로직이
+  // "?code=SB2:" 지점에서 혼란스러워하며 그 뒤(진짜 코드 값)를 통째로 잘라버리는
+  // 것으로 확인됨(실사용자 테스트로 재현: 카톡에서 탭하면 열리지만, 그 링크를
+  // 복사해서 다른 브라우저에 붙여넣으면 "https://.../"까지만 남고 code 자체가
+  // 사라짐). Uri.encodeQueryComponent로 콜론을 %3A로 이스케이프해서 원천 차단.
+  String get _webViewLink => '$kWebViewBaseUrl/?code=${Uri.encodeQueryComponent(_code)}';
 
   void _shareCode() {
     final name = _nameController.text.trim();
@@ -190,10 +202,19 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ⭐ 별도 라벨 없이 "친구에게 보일 이름을 적어주세요"를 필드
-                  // placeholder(hintText) 자체로 씀 - 비어있을 때만 보이고, 실제
-                  // 값(공유 중이면 저장된 이름)이 있으면 그 값이 표시됨.
-                  // 예전엔 공유 시작 후 이 필드가 비활성화돼서 이름을 못 바꿨음 -
+                  // ⭐ 순서 개편(2026-08-17): 뭐가 공유되는지 설명이 먼저 나오고,
+                  // 그 다음에 "친구에게 보여줄 이름" 섹션(다른 섹션들 - 내 공유
+                  // 코드/앱 설치 없이 공유하기 - 과 똑같이 굵은 제목 + 내용 구조로
+                  // 통일)이 오도록 재배치함. 예전엔 필드가 맨 위에 있고 설명이 그
+                  // 아래, 제목 없이 placeholder만 있었음.
+                  Text(
+                    '${context.l10n.friendShareIncludesSchedule}\n${context.l10n.friendShareExcludesExtras}',
+                    style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
+                  ),
+                  SizedBox(height: 20.h),
+                  Text(context.l10n.friendDisplayNameTitle, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                  SizedBox(height: 8.h),
+                  // ⭐ 예전엔 공유 시작 후 이 필드가 비활성화돼서 이름을 못 바꿨음 -
                   // 이제 언제든 편집 가능하고, 포커스를 빠져나가면(_maybeSaveName)
                   // 공유 중일 땐 바로 Firestore에도 반영됨.
                   TextField(
@@ -207,11 +228,6 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                     style: TextStyle(fontSize: 14.sp),
                     textInputAction: TextInputAction.done,
                     onSubmitted: (_) => _maybeSaveName(),
-                  ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    '${context.l10n.friendShareIncludesSchedule}\n${context.l10n.friendShareExcludesExtras}',
-                    style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
                   ),
                   SizedBox(height: 24.h),
                   if (!_sharingEnabled)
@@ -261,8 +277,11 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                     SizedBox(height: 8.h),
                     _CopyBox(text: _webViewLink, onCopy: () => _copy(_webViewLink, context.l10n.friendLinkCopied)),
                     SizedBox(height: 6.h),
+                    // ⭐ 설치 유도 문구(friendInstallShortcutHint)는 삭제 - 이제 웹
+                    // 링크 자체에서(카톡 등 인앱 브라우저면 삼성 인터넷으로 자동 이동
+                    // + 그 화면에서 안내) 보여주므로 여기서 중복 설명할 필요 없음.
                     Text(
-                      '${context.l10n.friendShareLinkHint}\n${context.l10n.friendInstallShortcutHint}',
+                      context.l10n.friendShareLinkHint,
                       style: TextStyle(fontSize: 11.5.sp, color: colorScheme.onSurfaceVariant),
                     ),
                     SizedBox(height: 20.h),
