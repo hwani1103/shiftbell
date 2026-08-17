@@ -332,7 +332,7 @@
   "friendLinkCopied": "Link copied",
   "friendShareMessage": "{name}'s shift schedule is shared! 🗓️\n\n▶ View without the app: {link}\n\n▶ If you use the Shiftbell app, paste this code into \"Add Friend\".\n\n{code}",
   "@friendShareMessage": {"placeholders": {"name": {"type": "String"}, "link": {"type": "String"}, "code": {"type": "String"}}},
-  "friendNameHintExample": "e.g. John",
+  "friendNameHintExample": "Enter friend's name",
   "friendShareChannelsExplainer": "Share a web link so others can view your schedule without installing the app, or use a share code between people who both have the app.",
 
   "permissionGetStarted": "Get Started with Shiftbell",
