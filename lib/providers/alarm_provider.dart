@@ -3,10 +3,10 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/alarm.dart';
-import '../models/alarm_template.dart';
 import '../models/shift_schedule.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
+import '../services/alarm_generation_service.dart';
 import 'package:flutter/services.dart';
 import '../constants/alarm_limits.dart';
 import '../constants/platform_channel.dart';
@@ -138,133 +138,69 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
     }
   }
 
-  // 고정 알람 재생성 메서드
-  Future<void> regenerateFixedAlarms(DateTime date, String shiftType) async {
-    int deleteCount = 0;
-    int createCount = 0;
-    int failCount = 0;
+  // ⭐ 고정 알람 재생성 - 근무가 배정된 날짜 하나가 바뀌면, "전날/당일/다음날"
+  // 오프셋 알람이 있을 수 있어서 영향을 받는 실제 알람 날짜는 [date-1, date, date+1]
+  // 세 개임(datesAffectedByShiftChange). 각 날짜는 alarm_generation_service.dart의
+  // computeDesiredFixedAlarmsForDate()로 그 날짜 기준 세 근무(전날/당일/다음날 배정)의
+  // 템플릿을 다시 계산해서 델타를 적용함 - 예전처럼 "이 날짜엔 이 근무 하나"가
+  // 아니라 [schedule]에서 매번 다시 읽으므로 shiftType 파라미터는 더 이상 필요 없음
+  // (calendar_tab.dart의 달력 일괄 배정에서 근무를 바꾼 "직후"의 schedule을 넘겨야 함).
+  Future<void> regenerateAlarmsAroundDate(DateTime date, ShiftSchedule schedule) async {
+    await regenerateAlarmsAroundDates([date], schedule);
+  }
 
+  // ⭐ 여러 날짜를 한꺼번에(일괄 배정) 바꿀 때 쓰는 버전 - 각 원본 날짜의 ±1일을
+  // 전부 합집합으로 모아서 겹치는 날짜를 중복 계산하지 않고 트랜잭션 하나로 처리함.
+  Future<void> regenerateAlarmsAroundDates(Iterable<DateTime> originDates, ShiftSchedule schedule) async {
     try {
-      // ⭐ 10일 이후 체크 (DST 안전한 계산)
-      final now = DateTime.now();
-      final daysDiff = julianDayNumber(date.year, date.month, date.day) -
-          julianDayNumber(now.year, now.month, now.day);
+      final db = await DatabaseService.instance.database;
 
-      if (daysDiff >= kAlarmRefreshWindowDays) {
-        print('🔵 ${kAlarmRefreshWindowDays}일 이후 날짜라서 알람은 생성하지 않음 (날짜: ${date.toString().split(' ')[0]}, 근무: $shiftType)');
+      // ⭐ 10일 창을 벗어나는 날짜는 스킵 (DST 안전한 계산) - 날짜별로 개별 판단.
+      final now = DateTime.now();
+      final targetDates = originDates
+          .expand((d) => datesAffectedByShiftChange(d))
+          .where((d) {
+            final daysDiff = julianDayNumber(d.year, d.month, d.day) -
+                julianDayNumber(now.year, now.month, now.day);
+            return daysDiff < kAlarmRefreshWindowDays;
+          })
+          .toSet();
+
+      if (targetDates.isEmpty) {
+        print('🔵 ${kAlarmRefreshWindowDays}일 창 밖 - 알람 재계산 스킵');
         return;
       }
 
-      // ⭐ CRITICAL FIX: 삭제+재생성을 하나의 DB 트랜잭션으로 묶음. 예전엔 삭제와
-      // 생성이 각각 독립된 DB 호출이라, 그 사이에 이 날짜에 대해 "삭제됐지만 아직
-      // 새로 안 만들어진" 순간이 실제로 노출됐음 - 그 틈에 Native 갱신 엔진이나
-      // 다른 트리거가 끼어들면 이 날짜를 잘못 재계산할 수 있었음
-      // (settings_tab.dart의 템플릿 일괄 저장에서 고친 것과 동일한 원인/패턴).
-      // 네이티브 알람 취소/재등록은 OS 호출이라 트랜잭션 밖에서 순서대로 처리함.
-      final db = await DatabaseService.instance.database;
-      final dateStr = date.toIso8601String().split('T')[0];
-      List<int> cancelIds = [];
-      List<Map<String, dynamic>> scheduleData = [];
+      final result = await regenerateFixedAlarmsForDates(
+        db: db,
+        schedule: schedule,
+        dates: targetDates,
+      );
 
-      await db.transaction((txn) async {
-        // 1단계: 기존 고정 알람 삭제 + 이력 기록
-        final existingAlarms = await txn.query(
-          'alarms',
-          where: 'date LIKE ? AND type = ?',
-          whereArgs: ['$dateStr%', 'fixed'],
-        );
-
-        for (var alarmMap in existingAlarms) {
-          final alarm = Alarm.fromMap(alarmMap);
-          cancelIds.add(alarm.id!);
-
-          if (alarm.date != null) {
-            await txn.insert('alarm_history', {
-              'alarm_id': alarm.id,
-              'scheduled_time': alarm.time,
-              'scheduled_date': alarm.date!.toIso8601String(),
-              'actual_ring_time': DateTime.now().toIso8601String(),
-              'dismiss_type': 'superseded',
-              'snooze_count': 0,
-              'shift_type': alarm.shiftType,
-              'created_at': DateTime.now().toIso8601String(),
-            });
-          }
-          await txn.delete('alarms', where: 'id = ?', whereArgs: [alarm.id]);
-          deleteCount++;
-        }
-
-        // 2단계: 새 알람 생성 (+ 생성 이력 기록)
-        final templateMaps = await txn.query(
-          'shift_alarm_templates',
-          where: 'shift_type = ?',
-          whereArgs: [shiftType],
-        );
-        final createdTimes = <String>{};  // ⭐ 중복 시간 추적
-
-        for (var templateMap in templateMaps) {
-          final template = AlarmTemplate.fromMap(templateMap);
-
-          // ⭐ 중복 시간 체크
-          if (createdTimes.contains(template.time)) {
-            print('⚠️ 중복 시간 스킵: ${template.time} (근무: $shiftType, 날짜: $dateStr)');
-            continue;
-          }
-
-          final timeParts = template.time.split(':');
-          final alarmTime = DateTime(
-            date.year,
-            date.month,
-            date.day,
-            int.parse(timeParts[0]),
-            int.parse(timeParts[1]),
-          );
-
-          if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
-            continue;
-          }
-
-          final alarm = Alarm(
-            time: template.time,
-            date: alarmTime,
-            type: 'fixed',
-            alarmTypeId: template.alarmTypeId,
-            shiftType: shiftType,
-          );
-
-          final dbId = await txn.insert('alarms', alarm.toMap());
-          await DatabaseService.instance.logAlarmCreation(txn, dbId, alarm, 'auto');
-
-          scheduleData.add({'id': dbId, 'dateTime': alarmTime, 'label': shiftType});
-          createdTimes.add(template.time);
-          createCount++;
-        }
-      });
-
-      // 트랜잭션 커밋 후 네이티브 취소/재등록
-      for (var id in cancelIds) {
+      int failCount = 0;
+      for (var id in result.cancelIds) {
         try {
           await AlarmService().cancelAlarm(id);
         } catch (e) {
           print('⚠️ 네이티브 알람 취소 실패 (ID: $id): $e');
         }
       }
-      for (var data in scheduleData) {
+      for (var s in result.scheduled) {
         try {
           await AlarmService().scheduleAlarm(
-            id: data['id'],
-            dateTime: data['dateTime'],
-            label: data['label'],
+            id: s.id,
+            dateTime: s.dateTime,
+            label: s.label,
             soundType: 'loud',
           );
         } catch (e) {
-          print('⚠️ 네이티브 알람 등록 실패 (ID: ${data['id']}): $e');
+          print('⚠️ 네이티브 알람 등록 실패 (ID: ${s.id}): $e');
           failCount++;
         }
       }
 
       await _loadAlarms();
-      print('✅ 고정 알람 재생성 완료: $shiftType (삭제: $deleteCount, 생성: $createCount, 실패: $failCount)');
+      print('✅ 고정 알람 재생성 완료: 대상 ${targetDates.length}일 (삭제: ${result.cancelIds.length}, 생성: ${result.scheduled.length}, 실패: $failCount)');
 
       try {
         await _platform.invokeMethod('triggerGuardCheck');
@@ -273,8 +209,7 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
         print('⚠️ AlarmProvider에서 AlarmGuardReceiver 트리거 실패: $e');
       }
 
-      // ⭐ HIGH FIX: 실패가 있으면 에러 발생
-      if (failCount > 0 && createCount == 0) {
+      if (failCount > 0 && result.scheduled.isEmpty) {
         // ⭐ 영어 현지화: 이 메시지는 UI에 그대로 노출된 적 없음(호출부가 항상
         // catch해서 자체 에러 문구를 보여줌) - 그래도 로그/크래시 리포트에서 읽는
         // 사람 기준으로 개발자용 예외 메시지는 관례상 영어로 통일.

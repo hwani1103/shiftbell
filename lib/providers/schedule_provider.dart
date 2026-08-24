@@ -4,8 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/shift_schedule.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
-import '../models/alarm_template.dart';
-import '../models/alarm.dart';
+import '../services/alarm_generation_service.dart';
 import 'package:flutter/services.dart';
 import '../constants/platform_channel.dart';
 import '../services/widget_refresh_service.dart';
@@ -235,6 +234,11 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     await _loadSchedule();
   }
 
+  // ⭐ 근무 변경 - 이 날짜만 바뀌어도 "전날/다음날" 오프셋 알람이 있을 수 있어서
+  // 실제로 재계산해야 하는 알람 날짜는 [date-1, date, date+1] 세 개임
+  // (alarm_generation_service.dart의 datesAffectedByShiftChange/
+  // regenerateFixedAlarmsForDates 공용 로직 - onboarding/달력 일괄배정과 동일한
+  // 계산식을 공유해야 Kotlin AlarmRefreshEngine.kt의 diff 갱신과도 어긋나지 않음).
   Future<void> changeShiftWithAlarms(DateTime date, String newShiftType) async {
   final currentSchedule = state.value;
   if (currentSchedule == null || currentSchedule.id == null) {
@@ -252,12 +256,21 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   newAssignedDates[dateStr] = newShiftType;
   final updatedSchedule = _withAssignedDates(currentSchedule, newAssignedDates);
 
-  List<int> cancelIds = [];
-  List<Map<String, dynamic>> scheduleData = [];
+  // ⭐ 영향받는 최대 3개 날짜([date-1, date, date+1])의 고정 알람 재계산 대상을
+  // 미리 계산(순수 계산, DB 불필요) - 10일 창을 벗어나는 날짜는 알아서 빠짐
+  // (자정 갱신 때 자동 생성).
+  final now = DateTime.now();
+  final targetDates = datesAffectedByShiftChange(date).where((d) {
+    final daysDiff = julianDayNumber(d.year, d.month, d.day) -
+        julianDayNumber(now.year, now.month, now.day);
+    return daysDiff < kAlarmRefreshWindowDays;
+  }).toSet();
 
+  // ⭐ 스케줄 저장 + 알람 재계산을 하나의 트랜잭션으로 묶음 - 둘 사이에 "스케줄은
+  // 이미 바뀌었는데 알람은 아직 옛 근무 기준"인 순간이 절대 노출되지 않게 함.
+  RegenerateAlarmsResult? result;
   await db.transaction((txn) async {
     print('🔵 날짜: $dateStr, 새 근무: $newShiftType');
-
     await txn.update(
       'shift_schedule',
       updatedSchedule.toMap(),
@@ -265,107 +278,30 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       whereArgs: [updatedSchedule.id],
     );
 
-    // ⭐ 10일 이후 체크 (DST 안전한 계산)
-    final now = DateTime.now();
-    final daysDiff = julianDayNumber(date.year, date.month, date.day) -
-        julianDayNumber(now.year, now.month, now.day);
-
-    if (daysDiff >= kAlarmRefreshWindowDays) {
-      print('🔵 ${kAlarmRefreshWindowDays}일 이후 날짜라서 알람은 생성하지 않음 (자정 갱신 시 자동 생성됨)');
-      return;  // assignedDates에만 저장하고 종료
-    }
-
-    final existingAlarms = await txn.query(
-      'alarms',
-      where: 'date LIKE ? AND type = ?',
-      whereArgs: ['${dateStr}%', 'fixed'],
-    );
-
-    print('🔵 삭제할 알람: ${existingAlarms.length}개');
-
-    for (var alarmMap in existingAlarms) {
-      final alarm = Alarm.fromMap(alarmMap);
-      print('  - 삭제: ${alarm.time}');
-      cancelIds.add(alarm.id!);
-
-      // ⭐ 근무 변경으로 알람이 무효화됐다는 이력을 남김 (삭제만 하고 끝내지 않음)
-      if (alarm.date != null) {
-        await txn.insert('alarm_history', {
-          'alarm_id': alarm.id,
-          'scheduled_time': alarm.time,
-          'scheduled_date': alarm.date!.toIso8601String(),
-          'actual_ring_time': DateTime.now().toIso8601String(),
-          'dismiss_type': 'superseded',
-          'snooze_count': 0,
-          'shift_type': alarm.shiftType,
-          'created_at': DateTime.now().toIso8601String(),
-        });
-      }
-
-      await txn.delete('alarms', where: 'id = ?', whereArgs: [alarm.id]);
-    }
-
-    final templates = await txn.query(
-      'shift_alarm_templates',
-      where: 'shift_type = ?',
-      whereArgs: [newShiftType],
-    );
-
-    print('🔵 템플릿 조회: ${templates.length}개 (근무: $newShiftType)');
-
-    for (var templateMap in templates) {
-      final template = AlarmTemplate.fromMap(templateMap);
-      print('  + 템플릿: ${template.time}');
-
-      final timeParts = template.time.split(':');
-      final alarmTime = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        int.parse(timeParts[0]),
-        int.parse(timeParts[1]),
+    if (targetDates.isNotEmpty) {
+      result = await regenerateFixedAlarmsForDatesTxn(
+        txn: txn,
+        schedule: updatedSchedule,
+        dates: targetDates,
       );
-
-      print('    알람 시간: $alarmTime, 현재: ${DateTime.now()}');
-
-      if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) {
-        print('    ❌ 과거 시간이라 스킵');
-        continue;
-      }
-
-      final alarm = Alarm(
-        time: template.time,
-        date: alarmTime,
-        type: 'fixed',
-        alarmTypeId: template.alarmTypeId,
-        shiftType: newShiftType,
-      );
-
-      final dbId = await txn.insert('alarms', alarm.toMap());
-      await DatabaseService.instance.logAlarmCreation(txn, dbId, alarm, 'auto');
-      print('    ✅ 알람 생성: ID $dbId');
-
-      scheduleData.add({
-        'id': dbId,
-        'dateTime': alarmTime,
-        'label': newShiftType,
-      });
     }
-
-    print('🔵 생성 예정 알람: ${scheduleData.length}개');
   });
 
-  for (var id in cancelIds) {
-    await AlarmService().cancelAlarm(id);
-  }
-  
-  for (var data in scheduleData) {
-    await AlarmService().scheduleAlarm(
-      id: data['id'],
-      dateTime: data['dateTime'],
-      label: data['label'],
-      soundType: 'loud',
-    );
+  if (result != null) {
+    for (var id in result!.cancelIds) {
+      await AlarmService().cancelAlarm(id);
+    }
+    for (var s in result!.scheduled) {
+      await AlarmService().scheduleAlarm(
+        id: s.id,
+        dateTime: s.dateTime,
+        label: s.label,
+        soundType: 'loud',
+      );
+    }
+    print('🔵 알람 재계산: 대상 ${targetDates.length}일 (삭제: ${result!.cancelIds.length}, 생성: ${result!.scheduled.length})');
+  } else {
+    print('🔵 ${kAlarmRefreshWindowDays}일 이후 날짜라서 알람은 생성하지 않음 (자정 갱신 시 자동 생성됨)');
   }
 
   state = AsyncValue.data(updatedSchedule);

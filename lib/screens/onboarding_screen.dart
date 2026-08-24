@@ -22,18 +22,24 @@ import '../theme/app_colors.dart';
 import '../widgets/app_shift_chip.dart';
 import '../widgets/word_safe_spans.dart';
 import '../widgets/app_button.dart';
+import '../widgets/app_second_button.dart';
+import '../widgets/day_offset_chip.dart';
+import '../constants/alarm_day_offset.dart';
+import '../services/alarm_generation_service.dart';
 
-// 알람 설정 (시간 + 타입)
+// 알람 설정 (시간 + 타입 + 전날/당일/다음날)
 class AlarmSetting {
   final TimeOfDay time;
   final int alarmTypeId;  // 1: 소리+진동, 2: 진동, 3: 무음
+  final int dayOffset;    // -1: 전날, 0: 당일(기본값), 1: 다음날
 
-  AlarmSetting({required this.time, this.alarmTypeId = 1});
+  AlarmSetting({required this.time, this.alarmTypeId = 1, this.dayOffset = kAlarmDaySame});
 
-  AlarmSetting copyWith({TimeOfDay? time, int? alarmTypeId}) {
+  AlarmSetting copyWith({TimeOfDay? time, int? alarmTypeId, int? dayOffset}) {
     return AlarmSetting(
       time: time ?? this.time,
       alarmTypeId: alarmTypeId ?? this.alarmTypeId,
+      dayOffset: dayOffset ?? this.dayOffset,
     );
   }
 }
@@ -261,13 +267,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     );
                   }),
 
-                  // ⭐ 2026-08-24 - 공용 버튼(AppButton)으로 다시 교체. 예전엔
-                  // Wrap 안에서 가로를 다 차지해버리는 버그가 있었는데(Container의
-                  // alignment가 루즈 제약에서도 최대 폭까지 확장해버리는 성질
-                  // 때문 - app_button.dart 클래스 주석 참고), 그 위젯 내부 구조를
-                  // 고쳐서 이제 SizedBox로 감싸지 않으면 내용물 크기만큼만 차지함 -
-                  // 지금처럼 Wrap 안에 그냥 놓으면 원래 크기 그대로 나옴.
-                  AppButton(
+                  // ⭐ 2026-08-25 - AppButton(메인 버튼)은 근무명 칩들 사이에서 너무
+                  // 무거워 보인다는 피드백으로 AppSecondButton(neutral - 빨강/초록이
+                  // 아닌 연한 메인색)으로 교체. Wrap 안에서 내용물 크기만큼만 차지하는
+                  // 성질은 AppSecondButton도 AppButton과 동일한 구조라 그대로 유지됨.
+                  AppSecondButton(
+                    variant: AppSecondButtonVariant.neutral,
                     onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -854,6 +859,7 @@ Future<void> _saveAlarmTemplates() async {
         shiftType: shift,
         time: _formatTime(alarm.time),
         alarmTypeId: alarm.alarmTypeId,  // 사용자가 선택한 타입
+        dayOffset: alarm.dayOffset,
       );
     }
   }
@@ -947,8 +953,15 @@ Future<void> _saveAndFinish() async {
 Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
   print('🔄 10일치 알람 생성 시작...');
 
+  // ⭐ alarm_generation_service.dart의 공용 계산 - 이 시점엔 _saveAlarmTemplates()가
+  // 이미 DB에 템플릿을 저장한 뒤라서(호출 순서는 _saveAndFinish() 참고) DB에서
+  // 다시 읽어옴. 날짜 D의 알람은 D 하루의 배정뿐 아니라 전날(D-1)/다음날(D+1)
+  // 배정의 "전날/다음날" 템플릿도 기여할 수 있으므로, 달력 탭/설정과 동일한
+  // computeDesiredFixedAlarmsForDate()를 그대로 재사용해야 함(달력 탭 규정과
+  // 어긋나면 안 됨 - 파일 상단 주석 참고).
   final List<Alarm> alarms = [];
   final today = DateTime.now();
+  final allTemplates = await DatabaseService.instance.getAllAlarmTemplates();
 
   for (var i = 0; i < kAlarmRefreshWindowDays; i++) {
     // ⭐ DST 안전: Duration(days: i) 더하기는 "정확히 24*i시간 뒤"라서, 자정 근처
@@ -956,35 +969,25 @@ Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
     // 있음. DateTime(y, m, d+i)는 달의 일수를 넘어가도 알아서 정규화되면서
     // 해당 달력 날짜의 로컬 자정을 정확히 가리킴.
     final date = DateTime(today.year, today.month, today.day + i);
-    final shiftType = schedule.getShiftForDate(date);
 
-    if (shiftType == kUnsetShiftSentinel) continue;
+    final desired = computeDesiredFixedAlarmsForDate(
+      date: date,
+      schedule: schedule,
+      allTemplates: allTemplates,
+    );
 
-    final alarmSettings = _shiftAlarms[shiftType] ?? [];
-
-    for (var setting in alarmSettings) {
-      final alarmTime = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        setting.time.hour,
-        setting.time.minute,
-      );
-
-      if (alarmTime.isBefore(DateTime.now().subtract(Duration(minutes: 1)))) continue;
-
-      final alarm = Alarm(
-        time: _formatTime(setting.time),
-        date: alarmTime,
+    for (final item in desired) {
+      alarms.add(Alarm(
+        time: item.time,
+        date: item.dateTime,
         type: 'fixed',
-        alarmTypeId: setting.alarmTypeId,  // 사용자가 선택한 타입
-        shiftType: shiftType,
-      );
-
-      alarms.add(alarm);
+        alarmTypeId: item.alarmTypeId,
+        shiftType: item.shiftType,
+        dayOffset: item.dayOffset,
+      ));
     }
   }
-  
+
   if (alarms.isNotEmpty) {
     // DB 저장
     await DatabaseService.instance.insertAlarmsInBatch(alarms);
@@ -1068,7 +1071,8 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                     // 시간 + 삭제 버튼
                     Row(
                       children: [
-                        // ⭐ 시간 영역 탭하면 시간 수정
+                        // ⭐ 시간 영역 탭하면 시간 수정 - 전날/당일/다음날 Chip을 시계
+                        // 아이콘 대신 놓아서("당일 09:00" 형태) 언제 울리는지 한눈에 보임.
                         InkWell(
                           onTap: () => _editAlarmTime(entry.key),
                           borderRadius: BorderRadius.circular(8.r),
@@ -1077,7 +1081,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.alarm, size: 20.sp, color: Theme.of(context).colorScheme.secondary),
+                                DayOffsetBadge(dayOffset: alarm.dayOffset),
                                 SizedBox(width: 8.w),
                                 Text(
                                   '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
@@ -1119,23 +1123,31 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
             SizedBox(height: 8.h),
 
             if (_alarms.length < kMaxAlarmTemplatesPerShift)
-              OutlinedButton.icon(
-                onPressed: _addAlarm,
-                icon: Icon(Icons.add),
-                label: Text(context.l10n.alarmAdd),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 44.h),
+              SizedBox(
+                width: double.infinity,
+                child: AppButton(
+                  onPressed: _addAlarm,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add, size: 16.sp),
+                      SizedBox(width: 4.w),
+                      Text(context.l10n.alarmAdd),
+                    ],
+                  ),
                 ),
               ),
           ],
         ),
       ),
       actions: [
-        TextButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.neutral,
           onPressed: () => Navigator.pop(context),
           child: Text(context.l10n.commonCancel),
         ),
-        TextButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.success,
           // ⭐ 2026-08-24 버그 수정 - 예전엔 _alarms.isEmpty일 때 저장 버튼이
           // 비활성화됐음. 알람을 3개→2개→1개→0개 순으로 지우다가 0개가 되는
           // 순간 저장이 막혀서 "알람 없음"으로 저장할 방법이 없었음(사용자 확인
@@ -1208,13 +1220,17 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
     await showDialog(
       context: context,
       builder: (context) => _SamsungStyleTimePicker(
+        shiftName: widget.shift,
         initialTime: currentAlarm.time,
-        onTimeSelected: (time) async {
-          // ⭐ 중복 체크 (자기 자신 제외)
+        initialDayOffset: currentAlarm.dayOffset,
+        onTimeSelected: (time, dayOffset) async {
+          // ⭐ 중복 체크 (자기 자신 제외) - 같은 시각이어도 전날/당일/다음날이 다르면
+          // 서로 다른 실제 날짜에 울리는 별개의 알람이라 중복이 아님.
           final isDuplicate = _alarms.asMap().entries.any((entry) {
             return entry.key != index &&
                    entry.value.time.hour == time.hour &&
-                   entry.value.time.minute == time.minute;
+                   entry.value.time.minute == time.minute &&
+                   entry.value.dayOffset == dayOffset;
           });
 
           if (isDuplicate) {
@@ -1246,7 +1262,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           }
 
           setState(() {
-            _alarms[index] = currentAlarm.copyWith(time: time);
+            _alarms[index] = currentAlarm.copyWith(time: time, dayOffset: dayOffset);
           });
         },
       ),
@@ -1257,10 +1273,11 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
     await showDialog(
       context: context,
       builder: (context) => _SamsungStyleTimePicker(
-        onTimeSelected: (time) async {
-          // ⭐ 중복 체크
+        shiftName: widget.shift,
+        onTimeSelected: (time, dayOffset) async {
+          // ⭐ 중복 체크 (시각 + 전날/당일/다음날이 모두 같을 때만 중복)
           final isDuplicate = _alarms.any((alarm) =>
-            alarm.time.hour == time.hour && alarm.time.minute == time.minute
+            alarm.time.hour == time.hour && alarm.time.minute == time.minute && alarm.dayOffset == dayOffset
           );
 
           if (isDuplicate) {
@@ -1293,7 +1310,7 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
 
           setState(() {
             // 기본값: 소리 (alarmTypeId = 1)
-            _alarms.add(AlarmSetting(time: time, alarmTypeId: 1));
+            _alarms.add(AlarmSetting(time: time, alarmTypeId: 1, dayOffset: dayOffset));
           });
         },
       ),
@@ -1302,12 +1319,16 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
 }
 
 class _SamsungStyleTimePicker extends StatefulWidget {
-  final Function(TimeOfDay) onTimeSelected;
+  final String shiftName;  // ⭐ 제목 왼쪽에 "{근무명} - 시간 선택"으로 표시
+  final Function(TimeOfDay, int dayOffset) onTimeSelected;
   final TimeOfDay? initialTime;  // ⭐ 초기 시간 (수정 시 사용)
+  final int initialDayOffset;    // ⭐ 초기 전날/당일/다음날 (기본값: 당일)
 
   const _SamsungStyleTimePicker({
+    required this.shiftName,
     required this.onTimeSelected,
     this.initialTime,
+    this.initialDayOffset = kAlarmDaySame,
   });
 
   @override
@@ -1318,10 +1339,12 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
   bool _isAM = true;
   int _hour = 9;
   int _minute = 0;
+  late int _dayOffset;
 
   @override
   void initState() {
     super.initState();
+    _dayOffset = widget.initialDayOffset;
     // ⭐ 초기 시간이 있으면 설정
     if (widget.initialTime != null) {
       final t = widget.initialTime!;
@@ -1350,12 +1373,21 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // ⭐ "{근무명} - 시간 선택" - 근무명이 왼쪽에 오도록
             Text(
-              context.l10n.commonSelectTime,
+              '${widget.shiftName} - ${context.l10n.commonSelectTime}',
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24.h),
-            
+            SizedBox(height: 16.h),
+
+            // ⭐ 전날/당일/다음날 - 시간 선택 바로 아래, AM/PM+시간 선택 위
+            DayOffsetSelector(
+              value: _dayOffset,
+              onChanged: (value) => setState(() => _dayOffset = value),
+            ),
+            SizedBox(height: 16.h),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1488,12 +1520,14 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
+                AppSecondButton(
+                  variant: AppSecondButtonVariant.neutral,
                   onPressed: () => Navigator.pop(context),
                   child: Text(context.l10n.commonCancel),
                 ),
                 SizedBox(width: 8.w),
-                ElevatedButton(
+                AppSecondButton(
+                  variant: AppSecondButtonVariant.success,
                   onPressed: () async {
                     int hour24;
                     if (_isAM) {
@@ -1502,7 +1536,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                       hour24 = _hour == 12 ? 12 : _hour + 12;
                     }
 
-                    await widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute));
+                    await widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute), _dayOffset);
                     if (mounted) Navigator.pop(context);
                   },
                   child: Text(context.l10n.commonOk),

@@ -48,6 +48,7 @@ object AlarmRefreshEngine {
         val time: String,
         val shiftType: String,
         val alarmTypeId: Int,
+        val dayOffset: Int,
         val timestamp: Long
     ) {
         // ⭐ CRITICAL FIX: 날짜 "문자열"이 아니라 실제 시각(timestamp)으로 매칭해야 함.
@@ -56,6 +57,9 @@ object AlarmRefreshEngine {
         // 문자열은 밀리초가 없는 "...T10:00:00" 형태라, 문자열로 비교하면 Dart에서 만든 알람은
         // 절대 일치하지 않아서 매번 "다른 알람"으로 오인되어 전부 삭제 후 재생성되고
         // (이력엔 전부 superseded로 찍힘) 재부팅 등으로 엔진이 한 번 돌 때마다 반복됐음.
+        // ⭐ dayOffset은 key에 안 넣음 - timestamp가 이미 오프셋이 반영된 실제 시각이라
+        // shiftType+alarmTypeId+timestamp만으로 충분히 유일함(offset이 달라져도 timestamp가
+        // 달라지므로 key 충돌이 안 남).
         fun key() = "$timestamp|$shiftType|$alarmTypeId"
     }
 
@@ -65,10 +69,14 @@ object AlarmRefreshEngine {
         val time: String,
         val shiftType: String,
         val alarmTypeId: Int,
+        val dayOffset: Int,
         val timestamp: Long
     ) {
         fun key() = "$timestamp|$shiftType|$alarmTypeId"
     }
+
+    // ⭐ shift_alarm_templates 한 행 - day_offset(-1/전날, 0/당일, 1/다음날) 포함.
+    private data class TemplateEntry(val time: String, val alarmTypeId: Int, val dayOffset: Int)
 
     fun refresh(context: Context) {
         // ⭐ owner를 호출마다 고유하게(UUID) 생성해야 함. 예전엔 "AlarmRefreshEngine"
@@ -135,7 +143,7 @@ object AlarmRefreshEngine {
             try {
                 for (item in toRemove) {
                     cancelNativeAlarm(context, alarmManager, item.id)
-                    insertHistory(db, item.id, item.dateStr, item.time, item.shiftType, "superseded")
+                    insertHistory(db, item.id, item.dateStr, item.time, item.shiftType, item.dayOffset, "superseded")
                     db.delete("alarms", "id = ?", arrayOf(item.id.toString()))
                 }
 
@@ -146,6 +154,7 @@ object AlarmRefreshEngine {
                         put("type", "fixed")
                         put("alarm_type_id", item.alarmTypeId)
                         put("shift_type", item.shiftType)
+                        put("day_offset", item.dayOffset)
                     }
                     val rowId = db.insert("alarms", null, values)
                     if (rowId == -1L || rowId > Int.MAX_VALUE) {
@@ -153,7 +162,7 @@ object AlarmRefreshEngine {
                         continue
                     }
                     val alarmId = rowId.toInt()
-                    insertCreationLog(db, alarmId, item.dateStr, item.time, item.shiftType, item.alarmTypeId, "auto")
+                    insertCreationLog(db, alarmId, item.dateStr, item.time, item.shiftType, item.alarmTypeId, item.dayOffset, "auto")
                     scheduleNativeAlarm(context, alarmManager, alarmId, item.timestamp, item.shiftType)
                 }
 
@@ -259,14 +268,16 @@ object AlarmRefreshEngine {
         }
     }
 
-    private fun readTemplates(db: SQLiteDatabase): Map<String, List<Pair<String, Int>>> {
-        val templates = mutableMapOf<String, MutableList<Pair<String, Int>>>()
+    private fun readTemplates(db: SQLiteDatabase): Map<String, List<TemplateEntry>> {
+        val templates = mutableMapOf<String, MutableList<TemplateEntry>>()
         db.query("shift_alarm_templates", null, null, null, null, null, null).use { cursor ->
+            val dayOffsetIdx = cursor.getColumnIndex("day_offset")  // ⭐ 구버전 DB엔 없을 수 있어 -1 체크
             while (cursor.moveToNext()) {
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
                 val time = cursor.getString(cursor.getColumnIndexOrThrow("time"))
                 val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
-                templates.getOrPut(shiftType) { mutableListOf() }.add(Pair(time, alarmTypeId))
+                val dayOffset = if (dayOffsetIdx >= 0) cursor.getInt(dayOffsetIdx) else 0
+                templates.getOrPut(shiftType) { mutableListOf() }.add(TemplateEntry(time, alarmTypeId, dayOffset))
             }
         }
         return templates
@@ -276,6 +287,7 @@ object AlarmRefreshEngine {
         val result = mutableListOf<ExistingAlarm>()
         val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
         db.query("alarms", null, "type = ? AND date > ?", arrayOf("fixed", now), null, null, null).use { cursor ->
+            val dayOffsetIdx = cursor.getColumnIndex("day_offset")
             while (cursor.moveToNext()) {
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date")) ?: continue
                 val timestamp = parseStoredDate(dateStr) ?: continue
@@ -286,6 +298,7 @@ object AlarmRefreshEngine {
                         time = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: continue,
                         shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "",
                         alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id")),
+                        dayOffset = if (dayOffsetIdx >= 0) cursor.getInt(dayOffsetIdx) else 0,
                         timestamp = timestamp
                     )
                 )
@@ -320,9 +333,34 @@ object AlarmRefreshEngine {
         }
     }
 
+    // ⭐ 특정 달력 날짜에 배정된 근무명을 계산 (수동 예외 우선 → 패턴 인덱스).
+    // computeDesiredAlarms()가 D-1/D/D+1 세 날짜 모두에 대해 이 함수를 호출함.
+    private fun resolveShiftType(schedule: ScheduleData, targetDate: Calendar, dayKeyFormat: SimpleDateFormat): String {
+        val dayKey = dayKeyFormat.format(targetDate.time)
+        return schedule.assignedDates[dayKey] ?: run {
+            if (schedule.pattern.isEmpty()) return@run "미설정"
+            // ⭐ DST 안전한 일수 계산: 밀리초 차이를 86400000(24시간)으로 나누면,
+            // 시작일과 대상일 사이에 서머타임 전환일(하루가 23/25시간)이 껴있는
+            // 나라/시간대에서는 daysDiff가 정수가 아니게 되어 .toInt() 절삭 시
+            // 패턴 인덱스가 하루씩 밀릴 수 있음. 순수 연/월/일 기반 Julian Day
+            // Number로 계산하면 시간대/DST와 완전히 무관하게 항상 정확함.
+            val startCal = Calendar.getInstance().apply { timeInMillis = schedule.startDateMillis }
+            val daysDiff = julianDayNumber(targetDate) - julianDayNumber(startCal)
+            val idx = ((schedule.todayIndex + daysDiff) % schedule.pattern.size + schedule.pattern.size) % schedule.pattern.size
+            schedule.pattern[idx]
+        }
+    }
+
+    // ⭐ 2026-08-25 - "전날/당일/다음날"(day_offset) 지원. 실제 알람이 울리는 날짜 D의
+    // 알람은 D 하루의 배정뿐 아니라 D+1에 배정된 근무의 "전날"(offset -1) 템플릿,
+    // D-1에 배정된 근무의 "다음날"(offset +1) 템플릿도 기여할 수 있음. Dart
+    // alarm_generation_service.dart의 computeDesiredFixedAlarmsForDate()와 정확히
+    // 동일한 알고리즘(우선순위: 당일 > 전날 기여 > 다음날 기여)을 유지해야 함 -
+    // 어긋나면 diff 갱신이 Dart가 방금 만든 알람을 "다르다"고 오판해서 불필요하게
+    // 지웠다 다시 만듦.
     private fun computeDesiredAlarms(
         schedule: ScheduleData,
-        templates: Map<String, List<Pair<String, Int>>>
+        templates: Map<String, List<TemplateEntry>>
     ): List<DesiredAlarm> {
         if (!schedule.isRegular) return emptyList()
 
@@ -332,60 +370,65 @@ object AlarmRefreshEngine {
         val dayKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val fullFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
 
+        fun dateAt(base: Calendar, dayDelta: Int): Calendar = Calendar.getInstance().apply {
+            timeInMillis = base.timeInMillis
+            add(Calendar.DAY_OF_MONTH, dayDelta)
+        }
+
         for (i in 0 until DAYS_AHEAD) {
-            val targetDate = Calendar.getInstance().apply {
-                timeInMillis = today.timeInMillis
-                add(Calendar.DAY_OF_MONTH, i)
-            }
-            val dayKey = dayKeyFormat.format(targetDate.time)
+            val targetDate = dateAt(today, i)  // 실제 알람이 울리는 날짜 D
 
-            // ⭐ 수동 지정 예외가 있으면 우선 적용 (달력 팝업에서 지정한 값)
-            val shiftType = schedule.assignedDates[dayKey] ?: run {
-                if (schedule.pattern.isEmpty()) return@run "미설정"
-                // ⭐ DST 안전한 일수 계산: 밀리초 차이를 86400000(24시간)으로 나누면,
-                // 시작일과 대상일 사이에 서머타임 전환일(하루가 23/25시간)이 껴있는
-                // 나라/시간대에서는 daysDiff가 정수가 아니게 되어 .toInt() 절삭 시
-                // 패턴 인덱스가 하루씩 밀릴 수 있음. 순수 연/월/일 기반 Julian Day
-                // Number로 계산하면 시간대/DST와 완전히 무관하게 항상 정확함.
-                val startCal = Calendar.getInstance().apply { timeInMillis = schedule.startDateMillis }
-                val daysDiff = julianDayNumber(targetDate) - julianDayNumber(startCal)
-                val idx = ((schedule.todayIndex + daysDiff) % schedule.pattern.size + schedule.pattern.size) % schedule.pattern.size
-                schedule.pattern[idx]
-            }
+            val sameDayShift = resolveShiftType(schedule, targetDate, dayKeyFormat)
+            val dayBeforeContributor = resolveShiftType(schedule, dateAt(targetDate, 1), dayKeyFormat)  // D+1의 "전날" 템플릿
+            val dayAfterContributor = resolveShiftType(schedule, dateAt(targetDate, -1), dayKeyFormat)  // D-1의 "다음날" 템플릿
 
-            if (shiftType == "미설정") continue
+            // ⭐ 같은 실제 시각에 여러 근무의 알람이 겹치면 물리적으로 하나만 울릴 수
+            // 있으므로, 이미 이 시각을 차지한 게 있으면 건너뜀 - "동일한 알람이 중복
+            // 생성되면 한 번만 울리게" 요구사항.
+            val byTime = LinkedHashMap<String, DesiredAlarm>()  // key = "HH:mm"
 
-            val shiftTemplates = templates[shiftType] ?: continue
-            for ((time, alarmTypeId) in shiftTemplates) {
-                val timeParts = time.split(":")
-                if (timeParts.size < 2) continue
-                val alarmCal = Calendar.getInstance().apply {
-                    timeInMillis = targetDate.timeInMillis
-                    set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
-                    set(Calendar.MINUTE, timeParts[1].toInt())
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
+            fun addFrom(shiftType: String, offset: Int) {
+                if (shiftType == "미설정") return
+                val shiftTemplates = templates[shiftType] ?: return
+                for (entry in shiftTemplates) {
+                    if (entry.dayOffset != offset) continue
+                    if (byTime.containsKey(entry.time)) continue
 
-                // ⭐ CRITICAL FIX: readExistingFixedAlarms()는 "date > now"로 조회하는데
-                // 여기는 "now - 60초"까지 봐줬음 - 그래서 방금(60초 이내) 울린/지나간
-                // 알람이 desired엔 있는데 existing엔 없는 상태가 돼서 toAdd로 오인되고,
-                // 과거 timestamp로 재삽입+재예약(scheduleNativeAlarm)되어 즉시 다시
-                // 울려버릴 수 있었음. 방금 끄기/스누즈한 알람이 finishUp()의
-                // checkAndTriggerRefresh() 호출로 인해 몇 초 뒤 부활하는 경로였음.
-                // existing과 완전히 같은 기준(> now)으로 맞춤.
-                if (alarmCal.timeInMillis <= now) continue
+                    val timeParts = entry.time.split(":")
+                    if (timeParts.size < 2) continue
+                    val alarmCal = Calendar.getInstance().apply {
+                        timeInMillis = targetDate.timeInMillis
+                        set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
+                        set(Calendar.MINUTE, timeParts[1].toInt())
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
 
-                result.add(
-                    DesiredAlarm(
+                    // ⭐ CRITICAL FIX: readExistingFixedAlarms()는 "date > now"로 조회하는데
+                    // 여기는 "now - 60초"까지 봐줬음 - 그래서 방금(60초 이내) 울린/지나간
+                    // 알람이 desired엔 있는데 existing엔 없는 상태가 돼서 toAdd로 오인되고,
+                    // 과거 timestamp로 재삽입+재예약(scheduleNativeAlarm)되어 즉시 다시
+                    // 울려버릴 수 있었음. 방금 끄기/스누즈한 알람이 finishUp()의
+                    // checkAndTriggerRefresh() 호출로 인해 몇 초 뒤 부활하는 경로였음.
+                    // existing과 완전히 같은 기준(> now)으로 맞춤.
+                    if (alarmCal.timeInMillis <= now) continue
+
+                    byTime[entry.time] = DesiredAlarm(
                         dateStr = fullFormat.format(alarmCal.time),
-                        time = time,
+                        time = entry.time,
                         shiftType = shiftType,
-                        alarmTypeId = alarmTypeId,
+                        alarmTypeId = entry.alarmTypeId,
+                        dayOffset = offset,
                         timestamp = alarmCal.timeInMillis
                     )
-                )
+                }
             }
+
+            addFrom(sameDayShift, 0)
+            addFrom(dayBeforeContributor, -1)
+            addFrom(dayAfterContributor, 1)
+
+            result.addAll(byTime.values)
         }
         return result
     }
@@ -419,7 +462,7 @@ object AlarmRefreshEngine {
         }
     }
 
-    private fun insertHistory(db: SQLiteDatabase, alarmId: Int, dateStr: String, time: String, shiftType: String, dismissType: String) {
+    private fun insertHistory(db: SQLiteDatabase, alarmId: Int, dateStr: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {
         val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
@@ -430,11 +473,12 @@ object AlarmRefreshEngine {
             put("snooze_count", 0)
             put("shift_type", shiftType)
             put("created_at", now)
+            put("day_offset", dayOffset)
         }
         db.insert("alarm_history", null, values)
     }
 
-    private fun insertCreationLog(db: SQLiteDatabase, alarmId: Int, dateStr: String, time: String, shiftType: String, alarmTypeId: Int, source: String) {
+    private fun insertCreationLog(db: SQLiteDatabase, alarmId: Int, dateStr: String, time: String, shiftType: String, alarmTypeId: Int, dayOffset: Int, source: String) {
         val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
@@ -444,6 +488,7 @@ object AlarmRefreshEngine {
             put("alarm_type_id", alarmTypeId)
             put("source", source)
             put("created_at", now)
+            put("day_offset", dayOffset)
         }
         db.insert("alarm_creation_log", null, values)
     }

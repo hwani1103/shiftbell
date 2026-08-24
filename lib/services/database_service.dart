@@ -55,7 +55,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 18,  // v18: shift_schedule.custom_shift_colors 추가 ("근무명 색상 변경" 기능 복원)
+      version: 19,  // v19: 알람 전날/당일/다음날(day_offset) 지원 - shift_alarm_templates/alarms/alarm_history/alarm_creation_log에 컬럼 추가
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -115,16 +115,18 @@ class DatabaseService {
         type TEXT NOT NULL,
         alarm_type_id INTEGER NOT NULL,
         shift_type TEXT,
+        day_offset INTEGER NOT NULL DEFAULT 0,
         FOREIGN KEY (alarm_type_id) REFERENCES alarm_types(id)
       )
     ''');
-    
+
     await db.execute('''
       CREATE TABLE IF NOT EXISTS shift_alarm_templates(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         shift_type TEXT NOT NULL,
         time TEXT NOT NULL,
-        alarm_type_id INTEGER NOT NULL
+        alarm_type_id INTEGER NOT NULL,
+        day_offset INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -139,7 +141,8 @@ class DatabaseService {
       dismiss_type TEXT NOT NULL,
       snooze_count INTEGER DEFAULT 0,
       shift_type TEXT,
-      created_at TEXT NOT NULL
+      created_at TEXT NOT NULL,
+      day_offset INTEGER NOT NULL DEFAULT 0
     )
   ''');
 
@@ -168,7 +171,8 @@ class DatabaseService {
         shift_type TEXT,
         alarm_type_id INTEGER,
         source TEXT NOT NULL,
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL,
+        day_offset INTEGER NOT NULL DEFAULT 0
       )
     ''');
     await db.execute('CREATE INDEX IF NOT EXISTS idx_creation_log_alarm_id ON alarm_creation_log(alarm_id)');
@@ -449,6 +453,27 @@ class DatabaseService {
     }
     print('✅ DB 업그레이드 완료 (v$oldVersion → v18): shift_schedule.custom_shift_colors 추가');
   }
+
+  // v19: 고정 알람에 "전날/당일/다음날" 지원 - 근무가 배정된 날짜 기준으로 -1/0/+1일
+  // 오프셋을 준 알람을 만들 수 있게 됨 (예: 야간 근무 전날 저녁 알람). 어떤 알람이
+  // 어느 오프셋으로 만들어졌는지는 이후 화면 표시(칩)/이력에도 그대로 필요해서
+  // 템플릿뿐 아니라 실제 alarms/alarm_history/alarm_creation_log에도 전부 저장함
+  // (근무가 바뀌어도 "그 알람은 원래 며칠 오프셋이었는지" 기록이 흔들리지 않게).
+  if (oldVersion < 19) {
+    for (final stmt in [
+      'ALTER TABLE shift_alarm_templates ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0',
+      'ALTER TABLE alarms ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0',
+      'ALTER TABLE alarm_history ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0',
+      'ALTER TABLE alarm_creation_log ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0',
+    ]) {
+      try {
+        await db.execute(stmt);
+      } catch (e) {
+        print('⚠️ day_offset 컬럼 추가 스킵(이미 존재 가능성): $stmt - $e');
+      }
+    }
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v19): 전날/당일/다음날(day_offset) 컬럼 추가');
+  }
 }
 
   // === 기존 메서드들 유지 ===
@@ -507,6 +532,7 @@ class DatabaseService {
       'alarm_type_id': alarm.alarmTypeId,
       'source': source,
       'created_at': DateTime.now().toIso8601String(),
+      'day_offset': alarm.dayOffset,
     });
   }
 
@@ -597,6 +623,7 @@ class DatabaseService {
             final scheduledDate = alarmMap['date'] as String?;
             final scheduledTime = alarmMap['time'] as String?;
             final shiftType = alarmMap['shift_type'] as String?;
+            final dayOffset = alarmMap['day_offset'] as int? ?? 0;
 
             // alarm_history에 이력 추가 (dismiss_type 파라미터 사용)
             if (scheduledDate != null && scheduledTime != null) {
@@ -609,6 +636,7 @@ class DatabaseService {
                 'snooze_count': 0,
                 'shift_type': shiftType,
                 'created_at': DateTime.now().toIso8601String(),
+                'day_offset': dayOffset,
               });
               final historyText = dismissType == 'swiped' ? '알람 확인' : '알람 제거';
               print('✅ alarm_history에 "$historyText" 기록 추가: ID=$id');
@@ -697,6 +725,7 @@ class DatabaseService {
             'snooze_count': 0,
             'shift_type': row['shift_type'],
             'created_at': now,
+            'day_offset': row['day_offset'] ?? 0,
           });
         }
       }
@@ -729,6 +758,7 @@ class DatabaseService {
             'snooze_count': 0,
             'shift_type': row['shift_type'],
             'created_at': now,
+            'day_offset': row['day_offset'] ?? 0,
           });
         }
       }
@@ -750,12 +780,14 @@ class DatabaseService {
     required String shiftType,
     required String time,
     required int alarmTypeId,
+    int dayOffset = 0,
   }) async {
     final db = await database;
     return await db.insert('shift_alarm_templates', {
       'shift_type': shiftType,
       'time': time,
       'alarm_type_id': alarmTypeId,
+      'day_offset': dayOffset,
     });
   }
 
@@ -1157,18 +1189,6 @@ Future<Map<String, int>> getOvertimeForRange(DateTime startDate, DateTime endDat
     result[row['date'] as String] = row['minutes'] as int;
   }
   return result;
-}
-
-// ⭐ 테스트용: 모든 알람 이력 삭제
-Future<void> deleteAllAlarmHistory() async {
-  try {
-    final db = await database;
-    final deletedCount = await db.delete('alarm_history');
-    print('🗑️ 모든 알람 이력 ${deletedCount}개 삭제 완료 (테스트)');
-  } catch (e) {
-    print('⚠️ 알람 이력 전체 삭제 실패: $e');
-    rethrow;
-  }
 }
 
 // ⭐ "설정 초기화" 전용 예외: 다른 모든 삭제 경로는 이력(alarm_history)과 생성

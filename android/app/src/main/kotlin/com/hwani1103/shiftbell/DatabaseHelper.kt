@@ -44,7 +44,7 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // isDatabaseReady()가 항상 false를 반환해 위젯이 스케줄 유무와 무관하게 영원히
         // "없음"으로 봤던 것. Flutter DB 버전 올릴 때 이 값도 반드시 같이 올릴 것 (재발
         // 방지책은 project_alarm_reliability_overhaul 메모리 참고).
-        private const val DATABASE_VERSION = 18
+        private const val DATABASE_VERSION = 19
         private const val TAG = "DatabaseHelper"
 
         @Volatile

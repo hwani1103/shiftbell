@@ -12,6 +12,10 @@ class AlarmHistory {
   final String? shiftType;
   final DateTime createdAt;
 
+  /// ⭐ alarm.dart의 dayOffset과 동일한 의미 - 이 이력이 남긴 알람이 원래 며칠
+  /// 오프셋(전날/당일/다음날)으로 만들어졌었는지. alarm_day_offset.dart 참고.
+  final int dayOffset;
+
   AlarmHistory({
     this.id,
     required this.alarmId,
@@ -22,6 +26,7 @@ class AlarmHistory {
     required this.snoozeCount,
     this.shiftType,
     required this.createdAt,
+    this.dayOffset = 0,
   });
 
   // 안전한 DateTime 파싱 (예외 시 현재 시각 반환)
@@ -46,6 +51,7 @@ class AlarmHistory {
       snoozeCount: map['snooze_count'] ?? 0,
       shiftType: map['shift_type'],
       createdAt: _parseDate(map['created_at']),
+      dayOffset: map['day_offset'] ?? 0,
     );
   }
 
