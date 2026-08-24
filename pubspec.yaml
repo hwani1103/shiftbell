@@ -82,6 +82,7 @@ dependencies:
   # 있어서 compileDevDebugKotlin이 실패함. Kotlin 버전을 올리면 알람 관련 네이티브
   # 코드 전체 빌드에 영향을 주므로, 대신 이 버전을 호환되는 5.1.0으로 고정함
   # (play-services-ads 23.0.0, Kotlin 2.1.0과 호환 확인됨).
+  # 재개 계획은 코틀린_버전업_계획.md 참고 - UI 작업 끝난 뒤 다시 올릴 것.
   google_mobile_ads: 5.1.0
 
 dev_dependencies:

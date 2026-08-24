@@ -320,28 +320,29 @@ Widget build(BuildContext context) {
       }
       final theme = ref.watch(calendarThemeProvider);
       final reclaimsSixthRow = _themeReclaimsSixthRow(theme);
-      final isMainTheme = theme == CalendarThemeId.mainWhite || theme == CalendarThemeId.mainDark;
 
       return Scaffold(
         body: SafeArea(
-          // ⭐⭐ "달력 테마 만들 때 가장 중요했던 전제 하나를 빼먹었다"는 지적 - lab에서
-          // 맨 아래(네비게이션 바로 위)를 "테마 번호+설명" 고정 높이 띠로 항상
-          // 남겨뒀던 건 나중에 애드몹 배너를 넣기 위해 일부러 비워둔 자리였는데,
-          // 그 띠를 없앨 때 "용도"(광고 자리 확보)까지 같이 잊고 실제 달력탭에선
-          // 그 공간을 전부 그리드로 덮어써버렸음. 메인·화이트/다크는 원래
-          // rowHeight(83.h)가 고정값이라 우연히 이 공간이 자동으로 남아있었을
-          // 뿐이고(별도로 챙긴 게 아니라 그냥 그 아래로 그릴 게 없어서 비어있던
-          // 것), 나머지 7개 테마는 LayoutBuilder로 "남는 공간을 전부" 채우게
-          // 고쳤던 게 오히려 이 자리까지 없애버린 원인이었음. 이제 바깥쪽에서
-          // LayoutBuilder로 SafeArea 전체 높이를 재서, 메인 테마가 자연스럽게
-          // 남기는 그 정확한 여백만큼을 모든 테마가 동일하게 확보하도록 함.
-          child: LayoutBuilder(
-            builder: (context, outerConstraints) {
-              // ⭐ 메인 테마의 고정 레이아웃(헤더 48.h + 요일 28.h + 6줄*83.h)을
-              // 기준으로 "그 외 남는 공간"을 계산 - 이게 바로 메인 테마가 항상
-              // 자연스럽게 비워두던 애드몹 자리의 정확한 높이. 화면이 유난히
-              // 작아 이 값이 음수가 나오는 극단적인 경우에만 0으로 방어.
-              final adSpaceHeight = (outerConstraints.maxHeight - 48.h - 28.h - 83.h * 6).clamp(0.0, double.infinity);
+          // ⭐⭐ 2026-08-24 - 애드몹 배너 자리 확보 방식을 재설계함. 예전엔 여기서
+          // "메인 테마가 고정 rowHeight(83.h)라 자연스럽게 남기는 여백"을 재서
+          // 그 크기만큼 다른 테마도 똑같이 비워두는 식이었는데(SizedBox(adSpaceHeight)),
+          // 이건 화면 "높이" 기준으로 계산한 여백이고, 실제 광고(AdMob 적응형 배너)
+          // 높이는 화면 "폭" 기준으로 SDK가 계산함 - 서로 다른 기준의 값이라 기기마다
+          // 우연히만 맞아떨어졌고, 안 맞으면 광고 위/아래에 뜬금없는 흰 여백이 생겼음.
+          //
+          // 이제는 이 위젯이 광고 높이를 아예 몰라도 됨 - main.dart에서 이미
+          // BottomNavigationBar 바로 위에 실제 광고 높이(AdService.bannerHeight)만큼을
+          // Column으로 미리 떼어내고, 그 "위"에 남는 공간만 Expanded로 이 탭에 줌
+          // (banner_ad_slot.dart 참고). 그래서 이 위젯이 할 일은 "받은 높이를
+          // 남김없이 다 쓰는" 것뿐 - 그러면 광고 자리를 뺀 나머지를 정확히 채우게
+          // 되고, 여백이 생길 수가 없음(산수상 남는 공간 자체가 없으므로).
+          // _themeRowHeight()가 이제 모든 테마(메인 포함)에서 "남는 높이를 6등분"하는
+          // 동일한 방식을 쓰도록 통일한 게 이 전제의 나머지 절반 - 예전엔 메인
+          // 테마만 83.h 고정값을 써서 그 아래 자기 몫의 남는 공간을 안 채우고 그냥
+          // 비워뒀었음(project_ot_calendar_card 메모리 참고 - OT카드는 "행 전체 높이"를
+          // 쓰는 게 조건이라 rowH 변수를 그대로 쓰는 이 구조는 그 조건을 그대로 만족함).
+          child: Builder(
+            builder: (context) {
               return Stack(
             children: [
               Container(
@@ -602,10 +603,9 @@ Widget build(BuildContext context) {
                   // (각 테마 실험판의 원래 디자인 그대로, 실제 데이터로).
                   if (_themeHasSeparateFooter(theme))
                     _buildThemedFooter(theme, schedule),
-                  // ⭐ 애드몹 자리 확보 - 메인 테마는 고정 rowHeight(83.h)라 이 공간이
-                  // 이미 자연스럽게 비어있으므로(SizedBox 안 넣어도 그냥 안 채워짐)
-                  // 여기서는 나머지 7개 테마에만 명시적으로 같은 높이만큼 비워줌.
-                  if (!isMainTheme) SizedBox(height: adSpaceHeight),
+                  // ⭐ 2026-08-24 - 예전엔 여기서 "메인 테마를 흉내낸 여백"을 명시적으로
+                  // 넣었었는데(위 Builder 진입부 주석 참고), 이제 모든 테마가 남는
+                  // 높이를 100% 채우도록 통일했으므로 더 채울 여백 자체가 없어져서 삭제함.
                 ],
                 ),
               ),
@@ -1314,13 +1314,25 @@ Widget build(BuildContext context) {
   // 실제 달력탭에서는 table_calendar가 rowHeight를 픽셀 고정값으로 미리
   // 알아야 해서 75.h라는 값 하나를 임의로 못박아 썼던 게 문제였음(테마마다
   // 헤더/푸터 실제 높이가 달라서 딱 맞을 수가 없음). 그래서 이제 감으로
-  // 고정하는 대신, build()에서 LayoutBuilder로 "헤더/푸터를 제외하고 실제로
-  // 남는 높이"를 직접 재서 6등분함 - lab의 Expanded와 정확히 같은 계산을
-  // 그대로 재현하는 것이라 헤더/푸터가 몇 픽셀이든 항상 6줄이 딱 맞게 꽉
-  // 채워짐(더 이상 "남는 빈 공간"이 생기지 않음). 메인 화이트/다크만 예외 -
-  // 이미 실기기에서 검증 끝난 고정 83.h 그대로 유지(건드리지 않음).
+  // 고정하는 대신, build()에서 "헤더/푸터를 제외하고 실제로 남는 높이"를
+  // 직접 재서 6등분함 - lab의 Expanded와 정확히 같은 계산을 그대로 재현하는
+  // 것이라 헤더/푸터가 몇 픽셀이든 항상 6줄이 딱 맞게 꽉 채워짐(더 이상
+  // "남는 빈 공간"이 생기지 않음).
+  //
+  // ⭐ 2026-08-24 - 메인 화이트/다크의 고정 83.h 예외를 없애고 이 통일된 방식에
+  // 합류시킴. 예전엔 "이미 실기기에서 검증 끝난 값이니 건드리지 않는다"는
+  // 이유로 일부러 안 건드렸었는데, 그 결과 메인 테마의 Expanded가 실제로 받는
+  // 높이보다 항상 조금(또는 화면에 따라 꽤) 적게만 그려서 그 아래가 빈
+  // 여백으로 남았음 - 이게 애드몹 배너 자리 위에 기기마다 크기가 다른 뜬금없는
+  // 흰 여백을 만드는 원인이었음(calendar_tab.dart의 build() 진입부 주석 참고).
+  // 이제 모든 테마가 "받은 높이를 남김없이 6등분"하는 같은 규칙을 쓰므로,
+  // 메인 테마도 다른 테마와 마찬가지로 광고 자리 바로 위까지 여백 없이
+  // 정확히 채워짐 - 그리고 이 값이 작아지든 커지든 사용자가 껐다 켜지 않아도
+  // 항상 실측값 기준이라 어떤 기기에서도 딱 맞음.
+  // (6번째 줄 OT 카드는 이 rowH 값을 그대로 재사용해 "행 전체 높이"를 쓰므로
+  // project_ot_calendar_card 메모리의 "48.h로 도로 줄이지 말 것" 조건은 그대로
+  // 유지됨 - 절대 픽셀값이 아니라 rowH 대비 비율 조건이라 영향 없음.)
   double _themeRowHeight(CalendarThemeId t, double availableHeight) {
-    if (t == CalendarThemeId.mainWhite || t == CalendarThemeId.mainDark) return 83.h;
     return (availableHeight - 28.h) / 6; // 28.h = daysOfWeekHeight
   }
 
