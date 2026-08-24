@@ -1,6 +1,6 @@
 # DB 스키마 변경 가이드
 
-현재 스키마 버전: **v18**
+현재 스키마 버전: **v19**
 
 이 앱은 **Flutter(sqflite)와 Kotlin(SQLiteOpenHelper)이 같은 SQLite 파일을 각자 연다**.
 그래서 스키마 변경이 다른 앱보다 까다롭고, 실제로 같은 실수가 세 번 재발해서
@@ -171,7 +171,7 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
 
 ---
 
-## 5. 현재 스키마 (v18)
+## 5. 현재 스키마 (v19)
 
 | 테이블 | 용도 |
 |---|---|
@@ -190,6 +190,9 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
 - **v16** — `friends` 테이블 추가 (친구공유)
 - **v17** — `friends`를 Firestore `ownerId` 기반으로 재설계
 - **v18** — `shift_schedule.custom_shift_colors` 추가 (근무명 색상 직접 지정)
+- **v19** — `shift_alarm_templates`/`alarms`/`alarm_history`/`alarm_creation_log`에
+  `day_offset`(INTEGER, 기본값 0) 추가 - 고정 알람을 근무 배정일 기준 전날(-1)/
+  당일(0)/다음날(+1)로 등록하는 기능
 
 ---
 

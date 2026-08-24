@@ -56,6 +56,10 @@ flutter build appbundle --release --flavor prod   # 스토어 배포용
 
 ### 알람
 - 규칙적/불규칙 근무 스케줄, 근무별 알람 템플릿 (근무당 최대 **5개** — `kMaxAlarmTemplatesPerShift`)
+- 알람은 근무 배정일 기준 **전날/당일/다음날**(`day_offset`, -1/0/1) 중 골라서 등록 가능
+  (예: 야간 근무 전날 저녁 알람). 같은 실제 시각에 다른 근무의 알람이 겹치면 물리적으로
+  하나만 등록됨(우선순위: 당일 > 전날 기여 > 다음날 기여) — 계산은
+  `lib/services/alarm_generation_service.dart` ↔ `AlarmRefreshEngine.kt`가 동일하게 유지
 - **10일치** 롤링 자동 생성/갱신 (`kAlarmRefreshWindowDays` ↔ Kotlin `DAYS_AHEAD`)
 - 잠금 화면(`AlarmActivity`) / 해제 상태(`AlarmOverlayService`) 분기 실행
 - 20분 전 사전 알림, 스누즈(5분), 타임아웃 자동 종료(지속시간은 **알람 타입별 DB 값**)
@@ -137,7 +141,7 @@ android/app/src/main/kotlin/com/hwani1103/shiftbell/
 
 | 값 | Kotlin | Dart |
 |----|--------|------|
-| DB 스키마 버전 | `DatabaseHelper.kt` `DATABASE_VERSION` (현재 **18**) | `database_service.dart` `version:` |
+| DB 스키마 버전 | `DatabaseHelper.kt` `DATABASE_VERSION` (현재 **19**) | `database_service.dart` `version:` |
 | 갱신 윈도우 일수 | `AlarmRefreshEngine.kt` `DAYS_AHEAD` (현재 **10**) | `alarm_limits.dart` `kAlarmRefreshWindowDays` |
 
 새로 이런 쌍이 생기면 `checkPair()` 호출을 하나 더 추가할 것.
@@ -175,7 +179,7 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
 
 ---
 
-## DB 스키마 (v18)
+## DB 스키마 (v19)
 
 `shift_schedule` · `shift_alarm_templates` · `alarms` · `alarm_types` ·
 `alarm_history` · `alarm_creation_log` · `date_memos` · `date_overtime` · `friends`
@@ -183,6 +187,10 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
 최근 변경:
 - v17 — `friends`를 Firestore `ownerId` 기반으로 재설계
 - v18 — `shift_schedule.custom_shift_colors` 추가 (근무명 색상 직접 지정)
+- v19 — `shift_alarm_templates`/`alarms`/`alarm_history`/`alarm_creation_log`에
+  `day_offset`(전날 -1 / 당일 0 / 다음날 +1) 추가. 알람 생성 계산은
+  `lib/services/alarm_generation_service.dart`(Dart)와
+  `AlarmRefreshEngine.kt`(Kotlin)가 동일한 알고리즘을 유지해야 함(파일 상단 주석 참고)
 
 ---
 

@@ -28,6 +28,8 @@ import '../l10n/l10n_extensions.dart';
 import '../constants/alarm_limits.dart';
 import '../models/calendar_theme.dart';
 import '../providers/calendar_theme_provider.dart';
+import '../widgets/app_second_button.dart';
+import '../widgets/day_offset_chip.dart';
 
 // ⭐ 공휴일 판정 로직은 utils/holiday_util.dart로 이동함 (friend_calendar_view.dart도
 // 똑같은 공휴일 표시가 필요해져서 공용화 - 두 파일 이름만 다르게 감싸서 기존 호출부
@@ -2901,9 +2903,25 @@ Widget build(BuildContext context) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  context.l10n.calendarAlarmAt(alarm.time),
-                  style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                // ⭐ "{time} 알람" 앞에 근무명 + 전날/당일/다음날 Chip을 추가 -
+                // "09:00 알람"만으로는 어느 근무의 알람인지, 언제 배정된 근무 기준인지
+                // 알 수 없었음. "주간"/"09:00 알람" 텍스트 스타일 자체는 그대로 유지.
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 6.w,
+                  runSpacing: 4.h,
+                  children: [
+                    if (alarm.shiftType != null && alarm.shiftType!.isNotEmpty)
+                      Text(
+                        alarm.shiftType!,
+                        style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      ),
+                    DayOffsetBadge(dayOffset: alarm.dayOffset),
+                    Text(
+                      context.l10n.calendarAlarmAt(alarm.time),
+                      style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 16.h),
                 Row(
@@ -2949,16 +2967,19 @@ Widget build(BuildContext context) {
               ],
             ),
           ),
-          actionsAlignment: MainAxisAlignment.spaceBetween,  // ⭐ Spacer() 대신 사용
+          // ⭐ 삭제/취소를 좌우로 떨어뜨리지 않고 우측에 나란히 배치(왼쪽=삭제,
+          // 오른쪽=확인) - 취소는 이 팝업엔 없음(탭하는 순간 이미 저장되는 구조라
+          // "취소"보다 "확인"이 더 알맞음, 클래스 주석 참고).
           actions: [
-            // ⭐ 삭제 버튼
-            TextButton(
+            AppSecondButton(
+              variant: AppSecondButtonVariant.danger,
               onPressed: () => _showDeleteAlarmConfirmation(alarm, parentSetState),
-              child: Text(context.l10n.commonDelete, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 14.sp)),
+              child: Text(context.l10n.commonDelete),
             ),
-            TextButton(
+            AppSecondButton(
+              variant: AppSecondButtonVariant.success,
               onPressed: () => Navigator.pop(context),
-              child: Text(context.l10n.commonCancel),
+              child: Text(context.l10n.commonOk),
             ),
           ],
         );
@@ -3228,12 +3249,15 @@ Widget build(BuildContext context) {
         actualShiftType,
       );
 
-      // ⭐ 각 날짜의 고정 알람 재생성 (미설정은 스킵)
+      // ⭐ 선택된 모든 날짜 ±1일(전날/다음날 알람이 있을 수 있어서)의 고정 알람을
+      // 한 번에 재생성 (미설정은 스킵). 방금 갱신된 schedule을 다시 읽어서 넘김 -
+      // bulkAssignShift가 이미 assignedDates를 저장했으므로 provider 상태가 최신임.
       if (actualShiftType != '미설정') {
-        for (var date in _selectedDates) {
-          await ref.read(alarmNotifierProvider.notifier).regenerateFixedAlarms(
-            date,
-            actualShiftType,
+        final updatedSchedule = ref.read(scheduleProvider).value;
+        if (updatedSchedule != null) {
+          await ref.read(alarmNotifierProvider.notifier).regenerateAlarmsAroundDates(
+            _selectedDates,
+            updatedSchedule,
           );
         }
       }

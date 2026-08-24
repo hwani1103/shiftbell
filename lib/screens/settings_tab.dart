@@ -22,6 +22,10 @@ import 'memo_list_view.dart';
 import 'work_hours_settings_screen.dart';
 import 'calendar_theme_picker_screen.dart';
 import '../widgets/tappable_number_picker.dart';
+import '../widgets/app_button.dart';
+import '../widgets/app_second_button.dart';
+import '../widgets/day_offset_chip.dart';
+import '../constants/alarm_day_offset.dart';
 import '../l10n/l10n_extensions.dart';
 import '../constants/shift_name_limits.dart';
 
@@ -43,13 +47,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         title: Text(context.l10n.shiftResetSchedule),
         content: Text(context.l10n.settingsResetScheduleConfirm),
         actions: [
-          TextButton(
+          AppSecondButton(
+            variant: AppSecondButtonVariant.neutral,
             onPressed: () => Navigator.pop(context, false),
             child: Text(context.l10n.commonCancel),
           ),
-          TextButton(
+          AppSecondButton(
+            variant: AppSecondButtonVariant.danger,
             onPressed: () => Navigator.pop(context, true),
-            child: Text(context.l10n.commonReset, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            child: Text(context.l10n.commonReset),
           ),
         ],
       ),
@@ -1974,6 +1980,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
         return AlarmSetting(
           time: TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1])),
           alarmTypeId: t.alarmTypeId,
+          dayOffset: t.dayOffset,
         );
       }).toList();
     }
@@ -2162,6 +2169,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
           'shift_type': shift,
           'time': _formatTime(alarm.time),
           'alarm_type_id': alarm.alarmTypeId,
+          'day_offset': alarm.dayOffset,
         });
       }
     }
@@ -2233,7 +2241,8 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                   children: [
                     Row(
                       children: [
-                        // ⭐ 시간 영역 탭하면 시간 수정
+                        // ⭐ 시간 영역 탭하면 시간 수정 - 전날/당일/다음날 Chip을 시계
+                        // 아이콘 대신 놓아서("당일 09:00" 형태) 언제 울리는지 한눈에 보임.
                         InkWell(
                           onTap: () => _editAlarmTime(entry.key),
                           borderRadius: BorderRadius.circular(8.r),
@@ -2242,7 +2251,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.alarm, size: 20.sp, color: Theme.of(context).colorScheme.secondary),
+                                DayOffsetBadge(dayOffset: alarm.dayOffset),
                                 SizedBox(width: 8.w),
                                 Text(
                                   '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
@@ -2283,23 +2292,31 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
             SizedBox(height: 8.h),
 
             if (_alarms.length < kMaxAlarmTemplatesPerShift)
-              OutlinedButton.icon(
-                onPressed: _addAlarm,
-                icon: Icon(Icons.add),
-                label: Text(context.l10n.alarmAdd),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: Size(double.infinity, 44.h),
+              SizedBox(
+                width: double.infinity,
+                child: AppButton(
+                  onPressed: _addAlarm,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add, size: 16.sp),
+                      SizedBox(width: 4.w),
+                      Text(context.l10n.alarmAdd),
+                    ],
+                  ),
                 ),
               ),
           ],
         ),
       ),
       actions: [
-        TextButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.neutral,
           onPressed: () => Navigator.pop(context),
           child: Text(context.l10n.commonCancel),
         ),
-        TextButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.success,
           onPressed: () {
             _alarms.sort((a, b) {
               final aMinutes = a.time.hour * 60 + a.time.minute;
@@ -2364,13 +2381,17 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
     await showDialog(
       context: context,
       builder: (context) => _SettingsTimePicker(
+        shiftName: widget.shift,
         initialTime: currentAlarm.time,
-        onTimeSelected: (time) async {
-          // ⭐ 중복 체크 (자기 자신 제외)
+        initialDayOffset: currentAlarm.dayOffset,
+        onTimeSelected: (time, dayOffset) async {
+          // ⭐ 중복 체크 (자기 자신 제외) - 같은 시각이어도 전날/당일/다음날이 다르면
+          // 서로 다른 실제 날짜에 울리는 별개의 알람이라 중복이 아님.
           final isDuplicate = _alarms.asMap().entries.any((entry) {
             return entry.key != index &&
                    entry.value.time.hour == time.hour &&
-                   entry.value.time.minute == time.minute;
+                   entry.value.time.minute == time.minute &&
+                   entry.value.dayOffset == dayOffset;
           });
 
           if (isDuplicate) {
@@ -2400,7 +2421,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
           }
 
           setState(() {
-            _alarms[index] = currentAlarm.copyWith(time: time);
+            _alarms[index] = currentAlarm.copyWith(time: time, dayOffset: dayOffset);
           });
         },
       ),
@@ -2411,10 +2432,11 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
     await showDialog(
       context: context,
       builder: (context) => _SettingsTimePicker(
-        onTimeSelected: (time) async {
-          // ⭐ 중복 체크
+        shiftName: widget.shift,
+        onTimeSelected: (time, dayOffset) async {
+          // ⭐ 중복 체크 (시각 + 전날/당일/다음날이 모두 같을 때만 중복)
           final isDuplicate = _alarms.any((alarm) =>
-            alarm.time.hour == time.hour && alarm.time.minute == time.minute
+            alarm.time.hour == time.hour && alarm.time.minute == time.minute && alarm.dayOffset == dayOffset
           );
 
           if (isDuplicate) {
@@ -2444,7 +2466,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
           }
 
           setState(() {
-            _alarms.add(AlarmSetting(time: time, alarmTypeId: 1));
+            _alarms.add(AlarmSetting(time: time, alarmTypeId: 1, dayOffset: dayOffset));
           });
         },
       ),
@@ -2456,12 +2478,16 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
 // ⭐ 삼성 스타일 시간 선택기 (온보딩과 동일)
 // ============================================================
 class _SettingsTimePicker extends StatefulWidget {
-  final Function(TimeOfDay) onTimeSelected;
+  final String shiftName;  // ⭐ 제목 왼쪽에 "{근무명} - 시간 선택"으로 표시
+  final Function(TimeOfDay, int dayOffset) onTimeSelected;
   final TimeOfDay? initialTime;  // ⭐ 초기 시간 (수정 시 사용)
+  final int initialDayOffset;    // ⭐ 초기 전날/당일/다음날 (기본값: 당일)
 
   const _SettingsTimePicker({
+    required this.shiftName,
     required this.onTimeSelected,
     this.initialTime,
+    this.initialDayOffset = kAlarmDaySame,
   });
 
   @override
@@ -2472,10 +2498,12 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
   bool _isAM = true;
   int _hour = 9;
   int _minute = 0;
+  late int _dayOffset;
 
   @override
   void initState() {
     super.initState();
+    _dayOffset = widget.initialDayOffset;
     // ⭐ 초기 시간이 있으면 설정
     if (widget.initialTime != null) {
       final t = widget.initialTime!;
@@ -2505,11 +2533,20 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // ⭐ "{근무명} - 시간 선택" - 근무명이 왼쪽에 오도록
             Text(
-              context.l10n.commonSelectTime,
+              '${widget.shiftName} - ${context.l10n.commonSelectTime}',
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
+
+            // ⭐ 전날/당일/다음날 - 시간 선택 바로 아래, AM/PM+시간 선택 위
+            DayOffsetSelector(
+              value: _dayOffset,
+              onChanged: (value) => setState(() => _dayOffset = value),
+            ),
+            SizedBox(height: 16.h),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -2641,12 +2678,14 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
+                AppSecondButton(
+                  variant: AppSecondButtonVariant.neutral,
                   onPressed: () => Navigator.pop(context),
                   child: Text(context.l10n.commonCancel),
                 ),
                 SizedBox(width: 8.w),
-                ElevatedButton(
+                AppSecondButton(
+                  variant: AppSecondButtonVariant.success,
                   onPressed: () async {
                     int hour24;
                     if (_isAM) {
@@ -2655,7 +2694,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                       hour24 = _hour == 12 ? 12 : _hour + 12;
                     }
 
-                    await widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute));
+                    await widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute), _dayOffset);
                     if (mounted) Navigator.pop(context);
                   },
                   child: Text(context.l10n.commonOk),

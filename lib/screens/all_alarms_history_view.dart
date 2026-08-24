@@ -4,6 +4,8 @@ import '../services/database_service.dart';
 import '../models/alarm_history.dart';
 import '../l10n/l10n_extensions.dart';
 import '../utils/weekday_util.dart';
+import '../widgets/app_second_button.dart';
+import '../widgets/day_offset_chip.dart';
 
 /// 알람 이력 - "사용자 의도상 생겼던 모든 알람"을 기록하는 화면.
 /// ⭐ 현재 alarms 테이블(살아있는 알람)과 대조하지 않음 - 살아있는 알람과 비교하면
@@ -25,6 +27,7 @@ class AlarmWithHistory {
   final String? shiftType;
   final AlarmHistory? latestHistory;
   final bool isFuture;
+  final int dayOffset;
 
   AlarmWithHistory({
     required this.date,
@@ -32,6 +35,7 @@ class AlarmWithHistory {
     this.shiftType,
     this.latestHistory,
     required this.isFuture,
+    this.dayOffset = 0,
   });
 
   // 유니크 키 생성 (날짜 + 시간)
@@ -73,6 +77,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
             shiftType: history.shiftType,
             latestHistory: history,
             isFuture: history.scheduledDate.isAfter(DateTime(now.year, now.month, now.day)),
+            dayOffset: history.dayOffset,
           );
         }
       }
@@ -104,6 +109,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
             shiftType: log['shift_type'] as String?,
             latestHistory: null,
             isFuture: date.isAfter(DateTime(now.year, now.month, now.day)),
+            dayOffset: (log['day_offset'] as int?) ?? 0,
           );
         }
       }
@@ -154,6 +160,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         return history.dismissLabel(context);
       case 'superseded':
         return context.l10n.alarmScheduleChanged;
+      case 'superseded_by_next_alarm':
+        return context.l10n.alarmSupersededByNextAlarm;
       default:
         return context.l10n.commonOther;
     }
@@ -176,6 +184,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         return colorScheme.primary;
       case 'superseded':
         return colorScheme.onSurfaceVariant;
+      case 'superseded_by_next_alarm':
+        return colorScheme.tertiary;
       default:
         return colorScheme.onSurfaceVariant;
     }
@@ -206,16 +216,15 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
           ],
         ),
         actions: [
-          TextButton(
+          AppSecondButton(
+            variant: AppSecondButtonVariant.neutral,
             onPressed: () => Navigator.pop(context, false),
             child: Text(context.l10n.commonCancel),
           ),
-          TextButton(
+          AppSecondButton(
+            variant: AppSecondButtonVariant.danger,
             onPressed: () => Navigator.pop(context, true),
-            child: Text(
-              context.l10n.commonDelete,
-              style: TextStyle(color: colorScheme.error),
-            ),
+            child: Text(context.l10n.commonDelete),
           ),
         ],
       ),
@@ -223,7 +232,14 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
 
     if (confirm == true) {
       try {
-        await DatabaseService.instance.deleteAllAlarmHistory();
+        // ⭐ schedule_provider.dart의 resetSchedule()이 이미 "설정 초기화" 때
+        // 이력+생성로그를 통째로 지우는 걸 유일한 예외로 승인받았음
+        // ([[feedback-history-permanence]]) - 이 화면의 "전체 이력 삭제" 버튼도
+        // 사용자가 확인창까지 거쳐 명시적으로 요청한 동일한 성격의 예외라 같은
+        // 함수를 재사용함. alarm_history만 지우던 이전 버전(deleteAllAlarmHistory,
+        // 테스트용으로 만들어졌던 것)은 alarm_creation_log가 그대로 남아서 이
+        // 화면이 다시 채워져 버렸었음 - 그 함수 대신 이걸 씀.
+        await DatabaseService.instance.resetAllAlarmHistoryAndLog();
         await _loadData();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -251,6 +267,23 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         backgroundColor: colorScheme.surface,
         elevation: 0,
         foregroundColor: colorScheme.onSurface,
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 12.w),
+            child: AppSecondButton(
+              variant: AppSecondButtonVariant.danger,
+              onPressed: _alarmsWithHistory.isEmpty ? null : _deleteAllHistory,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.delete_sweep_outlined, size: 16.sp),
+                  SizedBox(width: 4.w),
+                  Text(context.l10n.alarmHistoryDeleteAllTitle, style: TextStyle(fontSize: 13.sp)),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -325,14 +358,25 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                   ),
                                   if (alarmWithHistory.shiftType != null) ...[
                                     SizedBox(height: 4.h),
-                                    Text(
-                                      alarmWithHistory.shiftType!,
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        color: colorScheme.onSurfaceVariant,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                    // ⭐ 근무명 옆에 전날/당일/다음날 Chip - 같은 근무라도
+                                    // 어느 오프셋으로 만든 알람이었는지 이력에서 구분되게 함.
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            alarmWithHistory.shiftType!,
+                                            style: TextStyle(
+                                              fontSize: 12.sp,
+                                              color: colorScheme.onSurfaceVariant,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        SizedBox(width: 6.w),
+                                        DayOffsetBadge(dayOffset: alarmWithHistory.dayOffset),
+                                      ],
                                     ),
                                   ],
                                 ],
