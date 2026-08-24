@@ -19,29 +19,34 @@
 //    달력 탭만은 영향받지 않게 하기 위함.
 //
 // 이 두 곳 외의 모든 화면(온보딩/설정/알람화면/친구공유 등)은 이 파일의 색을 따름.
+//
+// ⭐ 2026-08-24 - 배경/메인색을 세이지 그린 계열에서 블루그레이/인디고 계열로
+// 교체함(사용자 직접 선정).
 
 import 'package:flutter/material.dart';
 
-/// 앱 전반의 배경색 - 은은한 세이지/민트 파스텔톤. 달력 탭은 제외(위 주석 참고).
-const Color kAppBackgroundPastel = Color(0xFFD2E6DF);
+/// 앱 전반의 배경색 - 은은한 블루그레이/인디고 파스텔톤.
+/// 달력 탭은 제외(위 주석 참고).
+const Color kAppBackgroundPastel = Color(0xFFD9E1EE);
 
 /// 배경색과 같은 색상 계열(Hue)에서 채도/명도만 낮춘 진한 메인 색상 - 버튼,
 /// 강조 텍스트, 선택 상태 등에 씀. 배경과 세트로 어울리도록 같은 계열로 골랐음
-/// (배경은 연한 세이지, 이건 짙은 포레스트 틸 - 서로 톤온톤 관계).
-const Color kAppMainAccent = Color(0xFF2D765D);
+/// (배경은 연한 블루그레이, 이건 짙은 인디고 블루 - 서로 톤온톤 관계).
+const Color kAppMainAccent = Color(0xFF465B86);
 
 /// 메인 색상 위에 흰 글씨가 아니라 살짝 어둡게 눌러 쓸 때(예: 버튼 눌림 상태)
 /// 참고용 - 필요할 때 추가로 씀.
-const Color kAppMainAccentDark = Color(0xFF20573F);
+const Color kAppMainAccentDark = Color(0xFF35476B);
 
 /// 카드/입력창 등 배경 위에 얹는 "표면" 색 - 순백 대신 배경 파스텔보다 살짝
 /// 밝은 톤을 써서 배경과 카드가 서로 구분되면서도 튀지 않게 함.
-const Color kAppSurface = Color(0xFFF3F8F6);
+const Color kAppSurface = Color(0xFFF2F5FA);
 
-/// 칩(근무명 태그 등)의 테두리색 - 파스텔 배경 위에서 또렷하게 대비되도록 검정
-/// 계열. 순수 블랙(#000000)보다 살짝 부드러운 톤으로 세련된 느낌을 냄.
-const Color kAppChipBorder = Color(0xFF1F2422);
+/// 칩(근무명 태그 등)의 테두리색 - 파스텔 배경 위에서 또렷하게 대비되도록
+/// 블루그레이 계열의 짙은 색상을 사용. 순수 블랙(#000000)보다 살짝 부드러운
+/// 톤으로 세련된 느낌을 냄.
+const Color kAppChipBorder = Color(0xFF252B35);
 
 /// 칩(근무명 태그 등)의 채움색 - 배경(kAppBackgroundPastel)보다 한 톤 밝은
 /// 화이트에 가까운 색이라 배경 위에서 카드처럼 살짝 떠 보임.
-const Color kAppChipFill = Color(0xFFEAF3F0);
+const Color kAppChipFill = Color(0xFFE9EEF6);

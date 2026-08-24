@@ -240,14 +240,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     );
                   }),
 
-                  // ⭐ "+추가"는 아직 버튼 디자인 개편 대상이 아님 - 기존 그대로 둠.
-                  OutlinedButton.icon(
+                  // ⭐ 2026-08-24 - 칩과 헷갈리지 않도록 "버튼"으로 명확히 구분함
+                  // (OutlinedButton → ElevatedButton, 테마의 기본 버튼 스타일 그대로).
+                  ElevatedButton.icon(
                     onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
-                    icon: Icon(Icons.add),
+                    icon: Icon(Icons.add, size: 18.sp),
                     label: Text(context.l10n.commonAdd),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.secondary,
-                    ),
                   ),
                 ],
               ),
@@ -435,12 +433,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           ),
           SizedBox(height: 16.h),
 
+          // ⭐ 2026-08-24 - 근무명 지정 화면(_buildShiftTypeCreation)과 같은
+          // 칩 디자인으로 통일. 아래 완성된 패턴을 보여주는 그리드
+          // (_buildPatternGrid)는 이번 범위 아님 - 그대로 둠.
           Wrap(
             spacing: 8.w,
             runSpacing: 8.h,
-            children: _allShiftTypes.map((name) => ElevatedButton(
-              onPressed: _pattern.length < 40 ? () => _addToPattern(name) : null,
-              child: Text(name),
+            children: _allShiftTypes.map((name) => AppShiftChip(
+              label: name,
+              enabled: _pattern.length < 40,
+              onTap: () => _addToPattern(name),
             )).toList(),
           ),
 
@@ -687,7 +689,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              setState(() => _step = _isRegular == true ? 5 : 4);
+              // ⭐ 2026-08-24 - 스텝 재번호(구 5→신4, 구4→신3) 때 이 삼항식 안의
+              // 값들을 놓쳤던 버그 수정. _buildStep()의 case 검색 정규식이
+              // "_step = <숫자>" 형태만 잡았는데 이 줄은 "_step = 조건 ? 5 : 4"라
+              // 안 걸렸음 - 그 결과 규칙적 플로우는 존재하지 않는 case 5로
+              // 가서 default(빈 Container)가 뜨고, 뒤로가기로 step4(완료 화면)에
+              // 도착해야 보이는 것처럼 보였던 것. 같은 함수(_buildMainAlarmSetup)를
+              // 규칙적(새 step3)/불규칙(새 step2) 양쪽이 공유해서 다음 스텝이
+              // 서로 다름 - 규칙적은 새 step4(_buildComplete 고정), 불규칙은
+              // 새 step3(case3의 삼항이 false일 때 _buildComplete).
+              setState(() => _step = _isRegular == true ? 4 : 3);
             },
             child: Text(context.l10n.commonNext),
           ),
