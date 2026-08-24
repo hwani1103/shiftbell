@@ -534,11 +534,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           ),
         ),
         actions: [
-          TextButton(
+          AppSecondButton(
+            variant: AppSecondButtonVariant.neutral,
             onPressed: () => Navigator.pop(context),
             child: Text(context.l10n.commonCancel),
           ),
-          TextButton(
+          AppSecondButton(
+            variant: AppSecondButtonVariant.success,
             onPressed: () {
               final text = controller.text.trim();
               if (text.isEmpty) {
@@ -565,7 +567,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               });
               Navigator.pop(context);
             },
-            child: Text(context.l10n.commonAdd),
+            // ⭐ 2026-08-25 - "추가"가 아니라 "확인"으로 - 요청 반영.
+            child: Text(context.l10n.commonOk),
           ),
         ],
       ),
