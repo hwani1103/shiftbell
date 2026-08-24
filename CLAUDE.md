@@ -1,196 +1,203 @@
-# Shiftbell 프로젝트 가이드
+# Shiftbell (교대시계) 프로젝트 가이드
 
-## 프로젝트 개요
-교대 근무자를 위한 알람 앱. Flutter + Kotlin Native로 구현.
+교대 근무자를 위한 알람/근무일정 앱. Flutter + Kotlin Native.
+Play Store 배포중 — **현재 운영 버전 `v1.0.22+24`** (태그 `v1.0.22` = `main`).
 
-### 핵심 기술 스택
-- **Frontend**: Flutter (Dart), Riverpod 상태 관리
-- **Backend**: Kotlin Native (Android)
-- **DB**: SQLite (sqflite) - Device Protected Storage 사용
-- **통신**: MethodChannel (`com.example.shiftbell/alarm`)
+> 이 문서는 2026-08-24 기준으로 실제 코드를 읽고 다시 작성했습니다.
+> 값(버전/개수/경로)을 인용하기 전에 실제 파일을 한 번 확인하세요.
 
 ---
 
-## 현재 구현 완료 (약 80%)
+## 브랜치 / 릴리스 규칙
 
-### 핵심 기능
-- 규칙적/불규칙 근무 스케줄 설정
-- 근무별 알람 템플릿 시스템
-- 10일치 알람 자동 생성 & 갱신
-- 알람 울림 (잠금 화면: AlarmActivity, 해제 상태: Overlay)
-- 20분 전 사전 알림 Notification
-- 알람 스누즈 (5분 연장)
-- 타임아웃 자동 종료
+| 브랜치 | 역할 |
+|--------|------|
+| `main` | **배포된 코드만.** 릴리스할 때만 dev에서 병합하고 `vX.Y.Z` 태그를 붙임 |
+| `dev` | 기본 작업 브랜치. 다음 버전 작업은 전부 여기서 |
 
-### Native 알람 동기화 시스템
-앱을 열지 않아도 알람이 계속 갱신됨:
+- 릴리스 절차: dev에서 버전 bump → 빌드/검증 → `main`에 병합 → `git tag -a vX.Y.Z` → push (태그도 같이 push)
+- **버전은 두 곳을 같이 올려야 함**: `pubspec.yaml`의 `version:`, `android/app/build.gradle.kts`의 `versionCode`/`versionName`
+- 자세한 배포 체크리스트: `업데이트_가이드.md`
 
-1. **AlarmGuardReceiver**: 자정 또는 알람 20분 전에 wakeup
-2. **AlarmRefreshUtil.checkAndTriggerRefresh()**: 날짜 변경 체크
-3. **AlarmRefreshReceiver**: 10일치 알람 재생성
-4. **DirectBootReceiver**: 재부팅 시 긴급 알람 1개 등록
+---
 
-### 주요 파일 구조
+## 기술 스택
+
+- **Flutter (Dart)** + **Riverpod** 상태 관리
+- **Kotlin Native (Android)** — 알람 실행, 홈 화면 위젯, 부팅/자정 갱신
+- **SQLite (sqflite)** — **Device Protected Storage**에 저장 (잠금 해제 전에도 알람이 동작해야 하므로)
+- **MethodChannel** — `com.hwani1103.shiftbell/alarm` (⚠️ `com.example`이 아님)
+  - 채널 이름은 `lib/constants/platform_channel.dart`의 `kAlarmChannel` **하나만** 사용할 것. 리터럴 문자열 금지
+- **Firebase** — Firestore만 사용 (Analytics/Messaging 등 없음)
+  - `friend_schedules` : 친구 근무표 공유 (익명 인증 `ownerId` 기반)
+  - `app_config` : 업데이트 안내용 원격 설정 (읽기 전용, 값은 콘솔에서 직접 수정)
+  - 규칙: `firestore.rules`
+- **i18n** — 한국어(원본) / 영어. `lib/l10n/app_ko.arb`(템플릿) + `app_en.arb`
+  - `lib/l10n/generated/`는 **생성물이라 커밋 대상 아님** (`.gitignore`, `l10n.yaml` 참고)
+  - 화면 코드에서는 `context.l10n.<key>` (`lib/l10n/l10n_extensions.dart`)
+
+### 빌드 flavor (dev / prod)
+
+정식 앱과 테스트 앱을 **한 기기에 동시에** 설치할 수 있게 분리되어 있음. dev는
+`applicationId`에 `.dev` 접미사가 붙어 완전히 다른 앱으로 취급되므로, DB/설정도
+분리되고 스토어 설치본을 절대 덮어쓰지 않음.
+
+```bash
+flutter install --release --flavor dev        # 테스트 설치
+flutter build appbundle --release --flavor prod   # 스토어 배포용
+```
+
+> ⚠️ **flavor 없이 `flutter run`/`install`을 돌리면** 서명이 달라 스토어 설치본이
+> "Uninstalling old version..."과 함께 **삭제**될 수 있음. 반드시 flavor를 지정할 것.
+
+---
+
+## 구현된 기능
+
+### 알람
+- 규칙적/불규칙 근무 스케줄, 근무별 알람 템플릿 (근무당 최대 **5개** — `kMaxAlarmTemplatesPerShift`)
+- **10일치** 롤링 자동 생성/갱신 (`kAlarmRefreshWindowDays` ↔ Kotlin `DAYS_AHEAD`)
+- 잠금 화면(`AlarmActivity`) / 해제 상태(`AlarmOverlayService`) 분기 실행
+- 20분 전 사전 알림, 스누즈(5분), 타임아웃 자동 종료(지속시간은 **알람 타입별 DB 값**)
+- 알람음 7종 + 제조사 시스템 알람음, 볼륨 보정(`VolumeCalibration.kt`)
+- 알람 이력/생성 로그 영구 보존 (`alarm_history`, `alarm_creation_log`)
+
+### 달력 / 근무
+- 달력 탭, 전체 근무표(`all_shifts_view`), 날짜별 근무 변경
+- **달력 테마 9종** (`lib/models/calendar_theme.dart`) — 앱과 홈 화면 위젯 양쪽에 반영
+- **근무명 색상 직접 지정** — 테마 디폴트 위에 사용자 오버라이드를 얹는 구조 (`effectiveShiftColors()`)
+- 날짜별 **메모**, **OT/특근** 기록, 근로시간·급여 산정(`work_hours_calculator.dart`)
+- 공휴일 표시 (`holiday_util.dart` / `CalendarWidgetHolidays.kt`)
+
+### 홈 화면 위젯
+`CalendarWidgetProvider.kt` — 달력 + 근무색 + 메모까지 표시. 앱의 테마 설정을 따라감.
+
+### 친구 공유
+- 내 공유 코드 발급(`my_share_code_screen`), 친구 근무표 열람(`friend_calendar_view`)
+- 웹 뷰어(`lib/web_main.dart` + `web/`) — 카카오톡 인앱 브라우저 대응 포함
+- 스펙: `친구공유_v1_스펙.md`
+
+### 업데이트 안내
+`update_service.dart` — Play In-App Update API를 **쓰지 않음**(새 버전 전파 지연 때문).
+Firestore `app_config`의 `latestVersionCode`를 앱이 직접 읽어 판단하고,
+`minSupportedVersionCode`로 강제 업데이트도 가능(기본 비활성).
+포그라운드 복귀 때마다 재체크하되 버전코드로 dedupe + 쿨다운.
+
+---
+
+## 파일 구조
+
 ```
 lib/
-├── models/
-│   ├── alarm.dart
-│   ├── alarm_history.dart
-│   ├── alarm_template.dart
-│   ├── alarm_type.dart
-│   └── shift_schedule.dart
-├── providers/
-│   ├── alarm_provider.dart
-│   └── schedule_provider.dart
-├── screens/
-│   ├── calendar_tab.dart
-│   ├── next_alarm_tab.dart
-│   ├── settings_tab.dart
-│   └── onboarding_screen.dart
-└── services/
-    ├── alarm_refresh_helper.dart
-    ├── alarm_refresh_service.dart
-    ├── alarm_service.dart
-    └── database_service.dart
+├── constants/     alarm_limits · platform_channel · shift_name_limits
+├── l10n/          app_ko.arb(템플릿) · app_en.arb · l10n_extensions
+│                  generated/ ← 생성물, 커밋 안 함
+├── models/        alarm · alarm_history · alarm_template · alarm_type
+│                  shift_schedule · calendar_theme · date_memo
+│                  date_overtime · friend_schedule
+├── providers/     alarm · schedule · calendar_theme · friend · memo
+│                  overtime · work_hours_settings
+├── screens/       splash · onboarding · permission_intro
+│                  calendar_tab · next_alarm_tab · settings_tab
+│                  all_shifts_view · all_alarms_history_view · memo_list_view
+│                  all_teams_setup_dialog · work_hours_settings_screen
+│                  calendar_theme_picker_screen · calendar_theme_lab_screen
+│                  friend_list_screen · friend_calendar_view · my_share_code_screen
+├── services/      alarm_service · alarm_refresh_service · database_service
+│                  permission_service · update_service · widget_refresh_service
+│                  firebase_bootstrap · friend_share_service · friend_sync_service
+│                  work_hours_calculator
+├── theme/ utils/ widgets/
+└── web_main.dart  친구공유 웹 뷰어 (Flutter Web 전용 엔트리)
 
-android/app/src/main/kotlin/com/example/shiftbell/
-├── MainActivity.kt
-├── AlarmActivity.kt (잠금 화면 알람)
-├── AlarmOverlayService.kt (해제 화면 알람)
-├── AlarmPlayer.kt (소리 재생)
-├── CustomAlarmReceiver.kt (알람 수신)
-├── AlarmGuardReceiver.kt (사전 알림 & 감시)
-├── AlarmRefreshReceiver.kt (10일치 재생성)
-├── AlarmRefreshUtil.kt (갱신 트리거)
-├── DirectBootReceiver.kt (재부팅 처리)
-├── AlarmActionReceiver.kt (Notification 버튼 액션)
-└── DatabaseHelper.kt (Native DB 접근)
+android/app/src/main/kotlin/com/hwani1103/shiftbell/
+├── MainActivity.kt                    MethodChannel 핸들러
+├── AlarmActivity.kt                   잠금 화면 알람
+├── AlarmOverlayService.kt             해제 상태 알람 오버레이
+├── AlarmPlayer.kt / VolumeCalibration.kt
+├── CustomAlarmReceiver.kt             알람 수신
+├── AlarmGuardReceiver.kt              사전 알림 & 자정 감시
+├── AlarmRefreshEngine.kt              ⭐ 10일치 갱신 본체 (DAYS_AHEAD)
+├── AlarmRefreshReceiver.kt / AlarmRefreshUtil.kt / RefreshLockManager.kt
+├── DirectBootReceiver.kt              재부팅 처리
+├── AlarmActionReceiver.kt / AlarmActionHelper.kt / NotificationHelper.kt
+├── DatabaseHelper.kt                  ⭐ Native DB 접근 (DATABASE_VERSION)
+└── CalendarWidget{Provider,ScheduleResolver,Holidays}.kt
 ```
 
 ---
 
-## 구현 예정 기능 (약 20%)
+## ⚠️ 반드시 지켜야 할 것
 
-### 1. 커스텀 알람 시스템 (우선순위: HIGH)
-**예상 작업량**: 4-5시간
+### 1. Dart ↔ Kotlin 상수 동기화 (빌드가 강제함)
 
-#### 구현 내용:
-- DB 테이블 추가: `custom_alarm_templates`
-- 설정 탭에 "커스텀 알람 관리" 섹션
-- 템플릿 최대 6개, 각각 이름/이모지/알람타입/시간 설정
-- 달력 팝업에서 날짜별로 커스텀 알람 할당 (하루 최대 3개)
-- 알람 생성 시 `type='custom'`으로 구분
+같은 값이 두 언어에 **각각 하드코딩**되어 있어 손으로 맞춰야 하는 쌍이 있음.
+이게 세 번 어긋나서 위젯/알람이 조용히 멈춘 전례가 있어, 이제 **값이 다르면 빌드가 실패**함
+(`android/app/build.gradle.kts`의 `checkDartKotlinSync`, 모든 variant의 preBuild가 의존).
 
-#### 왜 필요한가:
-- 잔업, 출장, 비정기 일정 대응
-- 경쟁 앱 대비 차별화 포인트
+| 값 | Kotlin | Dart |
+|----|--------|------|
+| DB 스키마 버전 | `DatabaseHelper.kt` `DATABASE_VERSION` (현재 **18**) | `database_service.dart` `version:` |
+| 갱신 윈도우 일수 | `AlarmRefreshEngine.kt` `DAYS_AHEAD` (현재 **10**) | `alarm_limits.dart` `kAlarmRefreshWindowDays` |
 
-### 2. 메모 기능 (우선순위: MEDIUM)
-**예상 작업량**: 2-3시간
+새로 이런 쌍이 생기면 `checkPair()` 호출을 하나 더 추가할 것.
 
-#### 구현 내용:
-- DB 테이블: `date_notes (date TEXT PRIMARY KEY, note TEXT)`
-- 달력 팝업에서 메모 입력란 추가
-- 메모 있는 날짜는 달력에 작은 아이콘 표시
+### 2. 알람 이력은 절대 자동 삭제 금지
+`alarm_history` / `alarm_creation_log`는 영구 보존 테이블. 정리 로직을 넣지 말 것.
 
-### 3. 알람 타입 확장 (우선순위: LOW)
-**예상 작업량**: 3-4시간
+### 3. Device Protected Storage
 
-#### 구현 내용:
-- 근무별 기본 알람 타입 지정
-- 달력에서 날짜마다 타입 변경 가능
-- 알람 타입별 지속 시간(duration) 사용자 설정
-
-### 4. 설정 탭 편의 기능 (우선순위: LOW)
-**예상 작업량**: 3-4시간
-
-#### 구현 내용:
-- 근무명 변경
-- 고정 알람 시간 수정 UI
-- 다시 알림(20분 전) 전역 on/off 토글
-- 근무 패턴 전체 변경 (온보딩 화면 재사용)
-- 규칙적 ↔ 불규칙 전환
-
----
-
-## 버그 현황
-
-### 수정 완료
-| 버그 | 위치 | 상태 |
-|------|------|------|
-| 날짜 계산 버그 (`date.year` 두 번 사용) | settings_tab.dart | FIXED |
-| Cursor 리소스 누수 | CustomAlarmReceiver.kt | FIXED |
-| 스누즈 미구현 | AlarmOverlayService.kt | FIXED |
-| 시간 계산 불일치 (ceil vs 다른 방식) | next_alarm_tab.dart | FIXED |
-| 재부팅 시 갱신 플래그 미리셋 | DirectBootReceiver.kt | FIXED |
-
-### 미수정 (LOW 우선순위)
-| 버그 | 위치 | 설명 | 우선순위 |
-|------|------|------|----------|
-| Race Condition | database_service.dart:20-24 | 동시 DB 초기화 가능 | MEDIUM |
-| MethodChannel 비효율 | alarm_provider.dart | 매번 새 채널 생성 | LOW |
-| DateTime.parse 예외 미처리 | alarm_history.dart:29-30 | try-catch 없음 | LOW |
-| 동시성 문제 | AlarmGuardReceiver.kt:20 | shownNotifications synchronized 안 됨 | LOW |
-| WakeLock 하드코딩 | CustomAlarmReceiver.kt:124 | 10초 고정 | LOW |
-| FutureBuilder 에러 처리 누락 | calendar_tab.dart:420-427 | hasError 체크 없음 | LOW |
-| 정렬 시 Null 체크 누락 | settings_tab.dart:58 | date! 강제 언래핑 | LOW |
-| 비효율적인 쿼리 | next_alarm_tab.dart:224 | COUNT 대신 getAllAlarms | LOW |
-
----
-
-## 테스트 체크리스트
-
-### 완료
-- [x] Notification ↔ Overlay 동기화
-- [x] next_alarm_tab 즉시 갱신
-- [x] 타임아웃 테스트 (현재 1분 하드코딩)
-- [x] 알람 이력 기록 & 표시
-
-### 미완료
-- [ ] 재부팅 후 알람 갱신 테스트
-- [ ] 앱 미실행 상태에서 자정 갱신 테스트
-- [ ] 커스텀 알람 시스템 (미구현)
-
----
-
-## 중요 참고사항
-
-### Device Protected Storage
 ```kotlin
-// Native (Kotlin)
 val deviceContext = context.createDeviceProtectedStorageContext()
 val prefs = deviceContext.getSharedPreferences("alarm_state", Context.MODE_PRIVATE)
 ```
 
 ```dart
-// Flutter
-final deviceProtectedPath = await platform.invokeMethod('getDeviceProtectedStoragePath');
+final path = await kAlarmChannel.invokeMethod('getDeviceProtectedStoragePath');
 ```
 
-Flutter SharedPreferences와 Native alarm_state는 **다른 경로**에 저장됨!
+Flutter의 `SharedPreferences`와 Native의 `alarm_state`는 **서로 다른 경로**임. 혼동 금지.
 
-### 테스트용 타임아웃 설정
-현재 1분 하드코딩 (나중에 사용자 설정으로 변경 필요):
-- `AlarmOverlayService.kt:154`: `alarmDuration = 1`
-- `CustomAlarmReceiver.kt:142`: `val duration = 1`
+### 4. DB 마이그레이션 순서
+Native(`DatabaseHelper.kt`)는 디스크 버전이 `DATABASE_VERSION`과 정확히 일치할 때만
+DB를 건드림 — Flutter가 마이그레이션을 끝내기 전에는 스킵. 스키마를 바꿀 땐
+Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
 
-### 알람 동기화 트리거 포인트
-1. 알람 울릴 때 (`CustomAlarmReceiver.onReceive`)
-2. 자정 (`AlarmGuardReceiver`)
-3. 알람 끌 때/스누즈 때 (`AlarmOverlayService.dismissAlarm/snoozeAlarm`)
-4. 앱 열 때 (`MainActivity.onCreate`)
+### 5. 알람 갱신 트리거 지점
+1. 알람이 울릴 때 (`CustomAlarmReceiver.onReceive`)
+2. 자정 / 알람 20분 전 (`AlarmGuardReceiver`)
+3. 알람 끄기·스누즈 (`AlarmOverlayService`)
+4. 앱 실행 (`MainActivity.onCreate`)
 
 ---
 
-## 개발 진행 방향 제안
+## DB 스키마 (v18)
 
-### Option 1: 빠른 출시
-현재 상태로 v1.0 출시 → 사용자 피드백 수집 → v1.1에서 커스텀 알람 추가
+`shift_schedule` · `shift_alarm_templates` · `alarms` · `alarm_types` ·
+`alarm_history` · `alarm_creation_log` · `date_memos` · `date_overtime` · `friends`
 
-### Option 2: 완성도 높은 출시
-커스텀 알람 시스템만 추가 (4-5시간) → v1.0 출시
+최근 변경:
+- v17 — `friends`를 Firestore `ownerId` 기반으로 재설계
+- v18 — `shift_schedule.custom_shift_colors` 추가 (근무명 색상 직접 지정)
 
-### 권장 순서
-1. 커스텀 알람 시스템 (차별화)
-2. 메모 기능 (사용성)
-3. 설정 탭 편의 기능 (장기 유저 만족도)
+---
+
+## 참고 문서
+
+| 파일 | 내용 |
+|------|------|
+| `업데이트_가이드.md` | 버전 올리고 배포하는 절차 |
+| `친구공유_v1_스펙.md` | 친구 공유 설계 (Firestore 구조 포함) |
+| `위젯_테마반영_스펙.md` | 홈 화면 위젯 테마 반영 규칙 |
+| `교대시계_영어화_현지화_보고서_영문판.md` | i18n 결정 사항 |
+| `코드_품질_검수_리포트_2026-08-14.md` | 검수 결과 (리뷰만, 수정은 별도) |
+| `TEST_CHECKLIST.md` | 수동 테스트 체크리스트 |
+
+---
+
+## 알려진 상태
+
+- `flutter analyze` — 에러 1건(`lib/web_main.dart`의 `dart:js_util`, **웹 빌드 전용**이라
+  모바일 빌드엔 영향 없음), 경고 0건, 나머지는 info 린트
+- 저장소 히스토리에 예전 logcat 덤프 86MB가 남아 있음(팩 16MB). 추적은 해제됨
+- 미검증: 홈 화면 위젯 테마 반영은 코드상 완성이지만 실기기 확인 이력 없음
