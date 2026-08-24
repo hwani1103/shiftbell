@@ -73,10 +73,20 @@ class AdService {
         return;
       }
 
-      // ⭐ 2026-08-25 - google_mobile_ads 9.x로 복귀(코틀린_버전업_계획.md 참고) -
-      // 예전 getAnchoredAdaptiveBannerAdSize는 이 버전에서 deprecated라 비-deprecated
-      // 대체 API로 교체함. 세로 고정 앱이라 orientation은 항상 portrait으로 고정해서 넘김.
-      final size = await AdSize.getLargeAnchoredAdaptiveBannerAdSizeWithOrientation(
+      // ⭐ 2026-08-25 - google_mobile_ads 9.x로 복귀하면서 처음엔 비-deprecated
+      // 대체 API(getLargeAnchoredAdaptiveBannerAdSizeWithOrientation)로 바꿨는데,
+      // "Large"는 이름 그대로 실제로 더 큰(최대 화면 높이의 15%까지) 배너 슬롯을
+      // 요청하는 별도 API였음 - 네이티브 채널 메서드명 자체가
+      // "AdSize#getLargeAnchoredAdaptiveBannerAdSize"로 예전과 다름. 그 결과 확보되는
+      // 자리(bannerHeight)만 커지고 실제 로드되는 테스트 배너 크리에이티브는 그대로라,
+      // 광고 위아래로 빈 여백이 생기고 그만큼 달력 영역이 줄어드는 회귀가 생겼음
+      // (사용자 확인). deprecated 표시는 있지만 네이티브 채널 메서드명이 예전
+      // "AdSize#getAnchoredAdaptiveBannerAdSize"와 완전히 동일해서(패키지 소스로
+      // 직접 확인) 예전과 정확히 같은(더 작은) 크기를 계산함 - 지금 이 앱엔 이 크기가
+      // 맞으므로 의도적으로 deprecated API를 계속 씀. 세로 고정 앱이라 orientation은
+      // 항상 portrait으로 고정해서 넘김.
+      // ignore: deprecated_member_use
+      final size = await AdSize.getAnchoredAdaptiveBannerAdSize(
         Orientation.portrait,
         widthDp,
       );
