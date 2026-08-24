@@ -73,10 +73,10 @@ class AdService {
         return;
       }
 
-      // ⭐ google_mobile_ads를 5.1.0으로 고정해서 씀(위 pubspec.yaml 주석 참고) -
-      // 이 버전엔 "Large" 변형이 없어서 기본 getAnchoredAdaptiveBannerAdSize를 씀.
-      // 세로 고정 앱이라 orientation은 항상 portrait으로 고정해서 넘김.
-      final size = await AdSize.getAnchoredAdaptiveBannerAdSize(
+      // ⭐ 2026-08-25 - google_mobile_ads 9.x로 복귀(코틀린_버전업_계획.md 참고) -
+      // 예전 getAnchoredAdaptiveBannerAdSize는 이 버전에서 deprecated라 비-deprecated
+      // 대체 API로 교체함. 세로 고정 앱이라 orientation은 항상 portrait으로 고정해서 넘김.
+      final size = await AdSize.getLargeAnchoredAdaptiveBannerAdSizeWithOrientation(
         Orientation.portrait,
         widthDp,
       );

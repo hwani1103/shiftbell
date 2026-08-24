@@ -31,8 +31,13 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+    // ⭐ 2026-08-25 - Kotlin 2.3.0부터 옛 kotlinOptions DSL이 에러로 처리됨
+    // ("Using 'jvmTarget: String' is an error. Please migrate to the
+    // compilerOptions DSL") - 새 DSL로 마이그레이션 (코틀린_버전업_계획.md 참고).
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        }
     }
 
     defaultConfig {
