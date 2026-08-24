@@ -77,7 +77,15 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
         int.parse(timeParts[1]),
       );
 
-      if (alarmTime.isBefore(effectiveNow.subtract(const Duration(minutes: 1)))) continue;
+      // ⭐ 2026-08-25 - 예전엔 "now - 1분"까지 봐주는 유예가 있었는데, 이 함수가
+      // (규모가 커진 regenerateFixedAlarmsForDatesTxn을 통해) 실제 delete 쿼리와
+      // 짝을 이루게 되면서 두 경계가 어긋나면 "막 울리기 시작한 알람이 지워지기만
+      // 하고 다시 안 만들어지는" 또는 반대로 "같은 알람이 중복으로 다시 만들어지는"
+      // 문제가 생길 수 있음이 드러남 - AlarmRefreshEngine.kt가 이미 겪고 고친
+      // 문제(readExistingFixedAlarms의 "> now"와 정확히 같은 기준으로 맞춤)와
+      // 동일한 종류라, 여기도 유예 없이 정확히 "> now"로 통일함(아래 delete
+      // 쿼리의 "date > ?" 경계와 반드시 같은 now를 써야 함).
+      if (!alarmTime.isAfter(effectiveNow)) continue;
 
       byTime[template.time] = PendingFixedAlarm(
         dateTime: alarmTime,
@@ -146,11 +154,23 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
     final dateStr = date.toIso8601String().split('T')[0];
 
     // 1단계: 이 날짜의 기존 고정 알람 삭제 + 이력 기록 (어떤 근무 소속이었든 전부 -
-    // 새로 계산되는 값이 그 자리를 대체함)
+    // 새로 계산되는 값이 그 자리를 대체함).
+    // ⭐ 2026-08-25 - CRITICAL FIX: "AND date > ?"(now)를 반드시 추가해야 함.
+    // 예전(이 함수 이전의 단일 날짜 버전들)엔 이 시간 경계가 없어서, 지금 막
+    // 울리고 있는(또는 방금 지나간) 알람도 "이 날짜의 알람"으로 걸려서 그냥
+    // 지워졌음. 아래 computeDesiredFixedAlarmsForDate()는 과거 시각을 절대 다시
+    // 만들지 않으므로(같은 now 기준 "> now"), 지워지기만 하고 재생성되지 않는
+    // 알람이 생김 - 그 알람이 정확히 지금 화면에 떠서 울리는 중이라면, DB 행이
+    // 사라진 채로 계속 울리다가 나중에 스누즈를 눌러도 AlarmActionHelper.snooze가
+    // "알람 정보 없음"으로 조용히 실패함(사용자는 스누즈했다고 생각하는데 실제로는
+    // 아무 것도 예약되지 않음). 이 날짜의 근무가 바뀌어서 알람이 무효화되더라도,
+    // 이미 지금 울리고 있는 알람은 그 자체로 "처리 중"인 사건이라 건드리지 않는
+    // 게 맞음 - 응답(끄기/스누즈/타임아웃)은 항상 AlarmActionHelper가 별도로
+    // 책임지므로 여기서 손댈 필요도 없음.
     final existingRows = await txn.query(
       'alarms',
-      where: 'date LIKE ? AND type = ?',
-      whereArgs: ['$dateStr%', 'fixed'],
+      where: 'date LIKE ? AND type = ? AND date > ?',
+      whereArgs: ['$dateStr%', 'fixed', now.toIso8601String()],
     );
     for (final row in existingRows) {
       final alarm = Alarm.fromMap(row);
