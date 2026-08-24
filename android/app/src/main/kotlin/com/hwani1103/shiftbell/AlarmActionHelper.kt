@@ -50,15 +50,17 @@ object AlarmActionHelper {
             db.beginTransaction()
             try {
                 db.query(
-                    "alarms", arrayOf("time", "date", "shift_type"),
+                    "alarms", arrayOf("time", "date", "shift_type", "day_offset"),
                     "id = ?", arrayOf(alarmId.toString()), null, null, null
                 ).use { cursor ->
                     if (cursor.moveToFirst()) {
                         val time = cursor.getString(cursor.getColumnIndexOrThrow("time"))
                         val date = cursor.getString(cursor.getColumnIndexOrThrow("date"))
                         val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: ""
+                        val dayOffsetIdx = cursor.getColumnIndex("day_offset")
+                        val dayOffset = if (dayOffsetIdx >= 0) cursor.getInt(dayOffsetIdx) else 0
                         if (time != null && date != null) {
-                            insertHistory(db, alarmId, date, time, shiftType, dismissType)
+                            insertHistory(db, alarmId, date, time, shiftType, dayOffset, dismissType)
                         }
                     } else {
                         Log.d(TAG, "⚠️ dismiss: DB에 알람 없음 (이미 삭제됨) id=$alarmId")
@@ -100,6 +102,7 @@ object AlarmActionHelper {
             var shiftType = "알람"
             var originalTime = ""
             var originalDate = ""
+            var dayOffset = 0
             var found = false
 
             db.query("alarms", null, "id = ?", arrayOf(alarmId.toString()), null, null, null).use { cursor ->
@@ -109,6 +112,8 @@ object AlarmActionHelper {
                     shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
                     originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
                     originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date")) ?: ""
+                    val dayOffsetIdx = cursor.getColumnIndex("day_offset")
+                    dayOffset = if (dayOffsetIdx >= 0) cursor.getInt(dayOffsetIdx) else 0
                 }
             }
 
@@ -143,10 +148,10 @@ object AlarmActionHelper {
                 db.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
 
                 if (originalTime.isNotEmpty() && originalDate.isNotEmpty()) {
-                    insertHistory(db, alarmId, originalDate, originalTime, shiftType, "snoozed")
+                    insertHistory(db, alarmId, originalDate, originalTime, shiftType, dayOffset, "snoozed")
                 }
                 // ⭐ 스누즈도 "새로 예약된 인스턴스"이므로 생성 이력 원장에 남김
-                insertCreationLog(db, alarmId, dateStr, timeStr, shiftType, alarmTypeId, "snoozed")
+                insertCreationLog(db, alarmId, dateStr, timeStr, shiftType, alarmTypeId, dayOffset, "snoozed")
 
                 db.setTransactionSuccessful()
             } finally {
@@ -167,7 +172,18 @@ object AlarmActionHelper {
 
     fun timeout(context: Context, alarmId: Int) = dismiss(context, alarmId, "timeout")
 
+    // ⭐ 2026-08-25 - 겹쳐 울리는 알람 대응. 이 알람이 아직 응답(끄기/스누즈/타임아웃)되기
+    // 전에 다음 알람이 도착해서 화면/소리를 넘겨받아야 하는 경우 CustomAlarmReceiver가
+    // 호출함 - dismiss()를 그대로 재사용하되(취소/삭제/이력 로직 전부 동일), dismissType만
+    // 구분해서 "사용자가 직접 끈 게 아니라 다음 알람에 밀려 자동 종료됐다"는 사실이
+    // 이력에 남게 함 (RingingAlarmTracker.kt 클래스 주석 참고).
+    fun supersede(context: Context, alarmId: Int) = dismiss(context, alarmId, "superseded_by_next_alarm")
+
     private fun finishUp(context: Context, alarmId: Int) {
+        // ⭐ 이 알람이 "지금 응답 대기 중"으로 기록된 그 알람이면 추적을 해제함 -
+        // 정상적으로 끄기/스누즈/타임아웃/supersede 전부 이 finishUp을 거치므로
+        // 여기 한 곳에서만 지워도 모든 경로가 커버됨.
+        RingingAlarmTracker.clearIfMatches(context, alarmId)
         AlarmGuardReceiver.removeShownNotification(alarmId)
         AlarmRefreshUtil.checkAndTriggerRefresh(context)
         context.sendBroadcast(Intent(context, AlarmGuardReceiver::class.java))
@@ -210,7 +226,7 @@ object AlarmActionHelper {
         }
     }
 
-    private fun insertHistory(db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dismissType: String) {
+    private fun insertHistory(db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {
         val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
@@ -221,11 +237,12 @@ object AlarmActionHelper {
             put("snooze_count", 0)
             put("shift_type", shiftType)
             put("created_at", now)
+            put("day_offset", dayOffset)
         }
         db.insert("alarm_history", null, values)
     }
 
-    private fun insertCreationLog(db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, alarmTypeId: Int, source: String) {
+    private fun insertCreationLog(db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, alarmTypeId: Int, dayOffset: Int, source: String) {
         val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
@@ -235,6 +252,7 @@ object AlarmActionHelper {
             put("alarm_type_id", alarmTypeId)
             put("source", source)
             put("created_at", now)
+            put("day_offset", dayOffset)
         }
         db.insert("alarm_creation_log", null, values)
     }

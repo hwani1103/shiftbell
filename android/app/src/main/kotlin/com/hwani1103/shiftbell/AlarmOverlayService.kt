@@ -61,10 +61,15 @@ class AlarmOverlayService : Service() {
         }
     }
     
+    // ⭐ 2026-08-25 - registerReceiver()를 onStartCommand()마다 다시 부르면(겹쳐 울리는
+    // 알람으로 같은 Service 인스턴스가 재사용될 때) 같은 리시버가 중복 등록돼서 신호 한
+    // 번에 onReceive가 여러 번 불릴 수 있었음 - Service 생애주기 동안 한 번만 등록.
+    private var isReceiverRegistered = false
+
     override fun onBind(intent: Intent?): IBinder? = null
-    
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        alarmId = intent?.getIntExtra("alarmId", 0) ?: 0
+        val newAlarmId = intent?.getIntExtra("alarmId", 0) ?: 0
 
         // Overlay 권한 체크
         if (!canDrawOverlays()) {
@@ -73,17 +78,34 @@ class AlarmOverlayService : Service() {
             return START_NOT_STICKY
         }
 
-        // ⭐ 외부 종료 신호를 받기 위한 BroadcastReceiver 등록
-        val filter = IntentFilter().apply {
-            addAction(ACTION_DISMISS_OVERLAY)
-            addAction(ACTION_SNOOZE_OVERLAY)
+        // ⭐ 외부 종료 신호를 받기 위한 BroadcastReceiver 등록 (한 번만)
+        if (!isReceiverRegistered) {
+            val filter = IntentFilter().apply {
+                addAction(ACTION_DISMISS_OVERLAY)
+                addAction(ACTION_SNOOZE_OVERLAY)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(overlayActionReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            } else {
+                registerReceiver(overlayActionReceiver, filter)
+            }
+            isReceiverRegistered = true
+            Log.d("AlarmOverlay", "📡 외부 신호 리시버 등록")
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(overlayActionReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(overlayActionReceiver, filter)
+
+        // ⭐ 2026-08-25 - 겹쳐 울리는 알람: 이미 다른 알람의 Overlay가 떠 있는 상태에서
+        // 새 알람이 도착한 경우. CustomAlarmReceiver.onReceive()가 이전 알람의 DB/이력은
+        // 이미 정리했지만(RingingAlarmTracker 참고), 이 Service는 같은 인스턴스가
+        // 재사용되면서 이전 알람의 View를 그대로 두고 alarmId 필드만 새 값으로
+        // 덮어썼었음 - prepareOverlay()가 "overlayView가 이미 있으면 재사용"하기
+        // 때문에 화면엔 옛 시간/근무명이 계속 보이는데 버튼은 새 알람 것에 연결되는
+        // 표시 불일치가 생겼음. 뷰를 통째로 제거해서 다시 그리게 함.
+        if (isOverlayVisible && alarmId != 0 && alarmId != newAlarmId) {
+            Log.d("AlarmOverlay", "⏰ 다른 알람($alarmId) 표시 중에 새 알람($newAlarmId) 도착 - Overlay 새로 그림")
+            removeOverlay()
         }
-        Log.d("AlarmOverlay", "📡 외부 신호 리시버 등록")
+
+        alarmId = newAlarmId
 
         // DB에서 알람 정보 조회
         loadAlarmInfo()
@@ -100,6 +122,12 @@ class AlarmOverlayService : Service() {
     private fun dismissAlarmFromExternal() {
         cancelTimeoutTimer()
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
+        // ⭐ 이 경로(예: Flutter 쪽 달력탭 알람 삭제)는 DB 삭제를 Dart의 sqflite
+        // 커넥션이 직접 처리해서 AlarmActionHelper.finishUp()을 안 거침 - 여기서
+        // 직접 지워야 다음 알람이 도착했을 때 이미 없는 이 알람을 "아직 응답 안 한
+        // 이전 알람"으로 오인해 supersede()를 불필요하게 시도하지 않음(시도해도
+        // 안전하긴 하지만, 여기서 바로 지우는 게 더 정확함).
+        RingingAlarmTracker.clearIfMatches(applicationContext, alarmId)
         removeOverlay()
         stopSelf()
         Log.d("AlarmOverlay", "✅ 외부 신호로 Overlay 종료")
@@ -108,6 +136,7 @@ class AlarmOverlayService : Service() {
     // 외부에서 호출된 SNOOZE (소리만 중지, DB 작업은 이미 외부에서 처리됨)
     private fun snoozeAlarmFromExternal() {
         cancelTimeoutTimer()
+        RingingAlarmTracker.clearIfMatches(applicationContext, alarmId)
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
         removeOverlay()
         stopSelf()
@@ -163,6 +192,14 @@ class AlarmOverlayService : Service() {
     }
 
     private fun startTimeoutTimer() {
+        // ⭐ 2026-08-25 - 겹쳐 울리는 알람 대응으로 onStartCommand()가 같은 Service
+        // 인스턴스에서 다시 호출될 수 있게 됨. 여기서 기존 타이머를 먼저 취소하지 않으면
+        // Handler/Runnable 필드만 새 걸로 덮어써질 뿐 이전에 postDelayed()로 이미
+        // 큐잉된 옛 타임아웃이 그대로 남아있어서(같은 메인 Looper 큐에 독립적으로
+        // 존재), 엉뚱한 시점에 (그 사이 바뀐) alarmId를 기준으로 timeoutAlarm()이
+        // 한 번 더 실행되는 이중 타임아웃이 생길 수 있었음.
+        cancelTimeoutTimer()
+
         timeoutHandler = Handler(Looper.getMainLooper())
         timeoutRunnable = Runnable {
             Log.d("AlarmOverlay", "⏰ 타임아웃: ${alarmDuration}분 경과")

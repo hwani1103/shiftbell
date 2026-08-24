@@ -47,6 +47,40 @@ override fun onReceive(context: Context, intent: Intent) {
         return
     }
 
+    // ⭐ 2026-08-25 - 겹쳐 울리는 알람 처리: 아직 응답(끄기/스누즈/타임아웃)되지 않은
+    // 이전 알람이 있으면, 이 새 알람이 화면/소리를 넘겨받기 전에 그 이전 알람을 먼저
+    // 깔끔하게 마무리함(이력 기록 + DB 삭제 + notification 정리). 안 그러면 화면은 옛
+    // 알람을 계속 보여주는데 버튼은 새 알람 id에 연결되는 불일치, 또는 DB에 영원히 안
+    // 지워지는 유령 행이 생길 수 있었음(RingingAlarmTracker.kt 클래스 주석 참고).
+    // 실제 소리는 이미 AlarmPlayer(싱글턴, 아래에서 재생)가 최신 알람 것 하나로 항상
+    // 자동 전환하므로 이 처리는 "화면/DB/이력을 소리와 일치시키는" 역할.
+    val previousRingingId = RingingAlarmTracker.getRingingAlarmId(context)
+    if (previousRingingId != null && previousRingingId != id) {
+        Log.e("CustomAlarmReceiver", "⏰ 이전 알람($previousRingingId)이 아직 응답 전인데 새 알람($id) 도착 - 이전 알람 자동 마무리")
+        AlarmActionHelper.supersede(context, previousRingingId)
+        try {
+            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            nm.cancel(previousRingingId)
+            nm.cancel(previousRingingId + 100000)
+            nm.cancel(7777)
+            nm.cancel(8889)
+        } catch (e: Exception) {
+            Log.e("CustomAlarmReceiver", "⚠️ 이전 알람 notification 정리 실패", e)
+        }
+        try {
+            // ⭐ 이전 알람이 잠금화면(AlarmActivity)에 떠 있었을 수도 있으니 확실히 닫음 -
+            // AlarmActivity.kt가 이미 등록해둔 FINISH_ALARM_ACTIVITY 리시버를 재사용.
+            val finishIntent = Intent("FINISH_ALARM_ACTIVITY").apply {
+                putExtra("alarmId", previousRingingId)
+                setPackage(context.packageName)
+            }
+            context.sendBroadcast(finishIntent)
+        } catch (e: Exception) {
+            Log.e("CustomAlarmReceiver", "⚠️ 이전 알람 화면 종료 신호 실패", e)
+        }
+    }
+    RingingAlarmTracker.setRingingAlarmId(context, id)
+
     // ⭐ 신규: 알람 울릴 때 즉시 갱신 체크!
     AlarmRefreshUtil.checkAndTriggerRefresh(context)
 
