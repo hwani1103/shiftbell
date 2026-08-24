@@ -176,6 +176,13 @@
   "onboardingShiftLimitHint": "(최대 {max}개까지 추가 가능하며 {chars}글자로 제한됩니다.)",
   "@onboardingShiftLimitHint": {"placeholders": {"max": {"type": "int"}, "chars": {"type": "int"}}},
   "onboardingUsableEvenIfNotInPattern": "근무 패턴에 포함되지 않더라도 사용 가능해요.",
+
+  "onboardingShiftNameTitle": "내 교대 패턴에 해당되는 근무명 지정",
+  "onboardingShiftNameSubHint": "(비정기적으로 발생되는 근무명도 포함할 수 있습니다.\n달력 해당날짜 길게 탭 - 근무 변경으로 사용 가능합니다.)",
+  "onboardingSwitchToIrregularPrefix": "(만약 교대 패턴이 규칙적이지 않다면, ",
+  "onboardingSwitchToIrregularLink": "여기",
+  "onboardingSwitchToIrregularSuffix": " 를 눌러주세요.)",
+
   "onboardingSelectAllInPattern": "실제 근무 패턴에 포함되는 근무를 모두 선택해주세요",
   "onboardingTapToCompletePattern": "버튼을 탭해서 패턴을 완성해주세요",
   "onboardingPatternHint": "(최대 40일, 한번 더 탭하면 삭제됩니다.)",

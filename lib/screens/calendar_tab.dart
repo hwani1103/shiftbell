@@ -306,15 +306,21 @@ Widget build(BuildContext context) {
   final scheduleAsync = ref.watch(scheduleProvider);
   
   return scheduleAsync.when(
+    // ⭐ 로딩/에러/스케줄없음 상태도 달력 탭 배경 예외(위 build() 안쪽 Scaffold
+    // 주석 참고)를 똑같이 적용 - 안 그러면 데이터 로드 전 짧은 순간 파스텔
+    // 배경이 깜빡였다가 흰색으로 바뀌는 게 보일 수 있음.
     loading: () => const Scaffold(
+      backgroundColor: Colors.white,
       body: SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
     ),
     error: (error, stack) => Scaffold(
+      backgroundColor: Colors.white,
       body: Center(child: Text('${context.l10n.statusErrorOccurred}: $error')),
     ),
     data: (schedule) {
       if (schedule == null) {
         return Scaffold(
+          backgroundColor: Colors.white,
           body: Center(child: Text(context.l10n.statusNoSchedule)),
         );
       }
@@ -322,6 +328,13 @@ Widget build(BuildContext context) {
       final reclaimsSixthRow = _themeReclaimsSixthRow(theme);
 
       return Scaffold(
+        // ⭐ 2026-08-24 - 앱 전역 배경을 파스텔톤(app_colors.dart의
+        // kAppBackgroundPastel)으로 바꾸면서, 달력 탭은 그 대상에서 명시적으로
+        // 제외함(9개 달력 테마 각자의 고유 배색을 그대로 유지하기 위해). 이
+        // Scaffold가 배경색을 직접 고정해두지 않으면 AppTheme.lightTheme의
+        // scaffoldBackgroundColor를 그대로 물려받아 파스텔톤이 되어버림 -
+        // 예전부터 달력 탭이 실제로 보여주던 흰색을 여기서 명시적으로 고정.
+        backgroundColor: Colors.white,
         body: SafeArea(
           // ⭐⭐ 2026-08-24 - 애드몹 배너 자리 확보 방식을 재설계함. 예전엔 여기서
           // "메인 테마가 고정 rowHeight(83.h)라 자연스럽게 남기는 여백"을 재서

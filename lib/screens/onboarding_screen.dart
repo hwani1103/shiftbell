@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +18,8 @@ import '../constants/alarm_limits.dart';
 import '../constants/shift_name_limits.dart';
 import '../utils/shift_name_util.dart';
 import '../l10n/l10n_extensions.dart';
+import '../theme/app_colors.dart';
+import '../widgets/app_shift_chip.dart';
 
 // 알람 설정 (시간 + 타입)
 class AlarmSetting {
@@ -45,7 +48,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   static const int _maxCustomShiftTypes = 7;
 
   int _step = 0;
-  bool? _isRegular;
+  // ⭐ 2026-08-24 - 예전엔 "고정적으로 순환하는 교대 근무인가요?" 선택 화면에서
+  // 사용자가 예/아니오를 고르기 전까지 null(미정)이었음. 그 선택 화면을 없애고
+  // "규칙적" 분기를 새 첫 화면으로 승격하면서, 기본값을 true로 바꿈 - "선택 안
+  // 함" 상태가 이제 존재하지 않음. 불규칙 경로는 첫 화면의 "여기" 링크로 진입.
+  bool? _isRegular = true;
   List<String> _pattern = [];
   int? _todayIndex;
 
@@ -55,6 +62,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   List<String> get _allShiftTypes => [..._baseShiftTypes, ..._customShiftTypes];
   Map<String, List<AlarmSetting>> _shiftAlarms = {};
   List<String> _selectedShifts = [];  // 불규칙용
+
+  // ⭐ 2026-08-24 - _buildShiftTypeCreation()의 "여기" 하이퍼링크(불규칙 전환)용.
+  // RichText의 TextSpan.recognizer는 State가 살아있는 동안 재사용해야 하는
+  // 객체라 build()마다 새로 만들지 않고 필드로 보관 - dispose()에서 해제함.
+  final TapGestureRecognizer _switchToIrregularRecognizer = TapGestureRecognizer();
 
   List<String> get _uniqueShifts {
     return _pattern.toSet().toList();
@@ -78,6 +90,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   }
 
   @override
+  void dispose() {
+    _switchToIrregularRecognizer.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: _step == 0,  // step 0에서만 앱 종료 허용
@@ -89,9 +107,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Center(
-            child: Text(context.l10n.onboardingCreateSchedule),
-          ),
+          // ⭐ 2026-08-24 - title을 Center()로 감쌌던 건 AppBarTheme에
+          // centerTitle이 없어서 안드로이드 기본값(false)이 적용되던 시절의
+          // 임시방편이었음 - leading 유무에 따라 타이틀 위치가 살짝 어긋나는
+          // 문제가 있었음(그 폭만큼 오른쪽으로 치우쳐 보임). 이제
+          // app_theme.dart의 AppBarTheme.centerTitle: true가 이걸 제대로
+          // 처리하므로(leading 폭과 무관하게 항상 화면 정중앙), 이 Center()는
+          // 더 이상 필요 없어 제거함 - 첫 화면(뒤로가기 없음)이든 그 이후
+          // 화면(뒤로가기 있음)이든 타이틀이 항상 같은 자리에 옴.
+          title: Text(context.l10n.onboardingCreateSchedule),
           leading: _step > 0
               ? IconButton(
                   icon: Icon(Icons.arrow_back),
@@ -99,7 +123,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     setState(() => _step--);
                   },
                 )
-              : SizedBox(width: 56.w),
+              : null,
         ),
         body: SafeArea(
           child: _buildStep(),
@@ -108,167 +132,140 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     );
   }
 
+  // ⭐ 2026-08-24 - "고정적으로 순환하는 교대 근무인가요?" 선택 화면(구 step 0)을
+  // 삭제하고, "예-규칙적"을 눌렀을 때 가던 화면(구 step 1의 규칙적 분기,
+  // _buildShiftTypeCreation)을 새 첫 화면으로 승격함. 그 선택 화면은 없어졌지만
+  // "불규칙" 경로 자체는 여전히 존재함 - _buildShiftTypeCreation() 안의 "여기"
+  // 링크(아래)를 누르면 _isRegular만 false로 바꿔서 같은 스텝(0) 안에서
+  // _buildShiftTypesInput()으로 즉시 전환됨(별도 스텝 이동 불필요 - _buildStep()의
+  // 삼항 분기가 이미 그렇게 되어 있음). 이에 맞춰 이후 모든 스텝 번호를 1씩
+  // 당김(구 1→신 0, 구 2→신 1, ... 구 5→신 4) - _isRegular의 기본값도 nullable
+  // null에서 true로 바꿔서(필드 선언부 참고) "선택 안 함" 상태 자체가 없어짐.
   Widget _buildStep() {
     switch (_step) {
       case 0:
-        return _buildSelectType();
-      case 1:
         return _isRegular == true ? _buildShiftTypeCreation() : _buildShiftTypesInput();
-      case 2:
+      case 1:
         return _isRegular == true ? _buildPatternInput() : _buildSelectShiftsForAlarm();
-      case 3:
+      case 2:
         return _isRegular == true ? _buildTodayIndexInput() : _buildMainAlarmSetup();
-      case 4:
+      case 3:
         return _isRegular == true ? _buildMainAlarmSetup() : _buildComplete();
-      case 5:
+      case 4:
         return _buildComplete();
       default:
         return Container();
     }
   }
 
-  Widget _buildSelectType() {
-    return Padding(
-      padding: EdgeInsets.all(24.w),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            context.l10n.onboardingFixedPatternQuestion,
-            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 48.h),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _isRegular = true;
-                  _step = 1;
-                  _shiftAlarms.clear();  // ⭐ 초기화
-                  _selectedShifts.clear();
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-              ),
-              child: Text(context.l10n.onboardingYesRegular, style: TextStyle(fontSize: 18.sp)),
-            ),
-          ),
-          SizedBox(height: 16.h),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _isRegular = false;
-                  _step = 1;
-                  _shiftAlarms.clear();  // ⭐ 초기화
-                  _selectedShifts.clear();
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-              ),
-              child: Text(context.l10n.onboardingNoIrregular, style: TextStyle(fontSize: 18.sp)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
+  // ⭐ 2026-08-24 - 온보딩 새 첫 화면(구 step1 규칙적 분기가 승격됨). 텍스트/칩
+  // 디자인/레이아웃을 전면 개편함:
+  // - 문구를 "내 교대 패턴에 해당되는 근무명 지정" + 부연설명 2줄 + "여기" 링크로
+  //   교체(onboardingShiftNameTitle/SubHint/SwitchToIrregular* - app_ko.arb 참고).
+  //   기존 글자수 제한 안내(onboardingShiftLimitHint)는 이 화면에서 더 이상
+  //   보여주지 않음 - _showAddCustomDialog()의 입력창 자체에 maxLength가 걸려
+  //   있어 실제 제약은 그대로 유지됨.
+  // - 근무명 태그를 ElevatedButton 대신 AppShiftChip으로 교체(app_shift_chip.dart) -
+  //   버튼과 시각적으로 구분되는 별도 디자인.
+  // - 레이아웃을 _buildPatternInput()과 동일한 구조(Expanded로 남는 공간을
+  //   스크롤 영역에 주고, "다음" 버튼은 그 아래 고정)로 바꿔서, 칩 개수가
+  //   적을 때도 "다음" 버튼이 항상 화면 맨 아래(다른 온보딩 화면과 같은 위치)에
+  //   오도록 함 - 예전엔 SingleChildScrollView 하나로 전체를 감싸서 콘텐츠
+  //   양에 따라 버튼 위치가 위아래로 들쭉날쭉했음.
   Widget _buildShiftTypeCreation() {
     return Padding(
       padding: EdgeInsets.all(24.w),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.onboardingShiftNameTitle,
+            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            context.l10n.onboardingShiftNameSubHint,
+            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
+          SizedBox(height: 4.h),
+          // ⭐ "여기"만 다른 스타일(강조색+밑줄)로 탭 가능하게 하는 인라인 링크.
+          // 나머지 문장과 같은 문단 안에서 "여기"만 눌러야 해서 Text.rich +
+          // TapGestureRecognizer 조합을 씀 - 별도 버튼으로 빼면 문장이 끊겨
+          // 부자연스러움.
+          Text.rich(
+            TextSpan(
+              style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
               children: [
-                Text(
-                  '${context.l10n.onboardingCheckShiftTypes}\n${context.l10n.onboardingAddIfMissing}',
-                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  context.l10n.onboardingShiftLimitHint(_maxCustomShiftTypes, kMaxShiftNameLength),
-                  style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  context.l10n.onboardingUsableEvenIfNotInPattern,
-                  style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                ),
-              ],
-            ),
-            SizedBox(height: 24.h),
-            
-            Wrap(
-              spacing: 8.w,
-              runSpacing: 8.h,
-              children: [
-                ..._allShiftTypes.map((name) {
-                  // ⭐ 기본 카드(주간/야간/오전/오후/휴무)도 커스텀 카드와 동일하게
-                  // 삭제 가능하도록 X 버튼을 항상 표시함 (예전엔 커스텀 카드만 가능했음).
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {},
-                        child: Text(name),
-                      ),
-                      Positioned(
-                        right: -4,
-                        top: -4,
-                        child: GestureDetector(
-                          onTap: () => _deleteShiftType(name),
-                          child: Container(
-                            width: 20.w,
-                            height: 20.h,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.error,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              size: 14.sp,
-                              color: Theme.of(context).colorScheme.surface,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-                
-                OutlinedButton.icon(
-                  onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
-                  icon: Icon(Icons.add),
-                  label: Text(context.l10n.commonAdd),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.secondary,
+                TextSpan(text: context.l10n.onboardingSwitchToIrregularPrefix),
+                TextSpan(
+                  text: context.l10n.onboardingSwitchToIrregularLink,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    color: kAppMainAccent,
+                    decoration: TextDecoration.underline,
+                    decorationColor: kAppMainAccent,
                   ),
+                  recognizer: (_switchToIrregularRecognizer
+                    ..onTap = () {
+                      // ⭐ 구 step0 선택 화면의 "아니오" 버튼과 동일한 동작
+                      // (_isRegular=false + 상태 초기화) - _step은 그대로 0에
+                      // 둔 채로 바꾸기만 하면 _buildStep()의 삼항 분기가 즉시
+                      // _buildShiftTypesInput()으로 전환해줌(별도 화면 이동 불필요).
+                      setState(() {
+                        _isRegular = false;
+                        _shiftAlarms.clear();
+                        _selectedShifts.clear();
+                      });
+                    }),
                 ),
+                TextSpan(text: context.l10n.onboardingSwitchToIrregularSuffix),
               ],
             ),
-            
-            SizedBox(height: 48.h),
-            
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  setState(() => _step = 2);
-                },
-                child: Text(context.l10n.commonNext),
+          ),
+          SizedBox(height: 24.h),
+
+          Expanded(
+            child: SingleChildScrollView(
+              child: Wrap(
+                spacing: 8.w,
+                runSpacing: 8.h,
+                children: [
+                  ..._allShiftTypes.map((name) {
+                    // ⭐ 기본 카드(주간/야간/오전/오후/휴무)도 커스텀 카드와 동일하게
+                    // 삭제 가능하도록 X 버튼을 항상 표시함 (예전엔 커스텀 카드만 가능했음).
+                    return AppShiftChip(
+                      label: name,
+                      onDelete: () => _deleteShiftType(name),
+                    );
+                  }),
+
+                  // ⭐ "+추가"는 아직 버튼 디자인 개편 대상이 아님 - 기존 그대로 둠.
+                  OutlinedButton.icon(
+                    onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
+                    icon: Icon(Icons.add),
+                    label: Text(context.l10n.commonAdd),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.secondary,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          SizedBox(height: 16.h),
+
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() => _step = 1);
+              },
+              child: Text(context.l10n.commonNext),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -356,7 +353,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  setState(() => _step = 2);
+                  setState(() => _step = 1);
                 },
                 child: Text(context.l10n.commonNext),
               ),
@@ -416,7 +413,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _selectedShifts.isEmpty ? null : () {
-                setState(() => _step = 3);
+                setState(() => _step = 2);
               },
               child: Text(context.l10n.commonNext),
             ),
@@ -465,7 +462,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _pattern.isEmpty ? null : () {
-                setState(() => _step = 3);
+                setState(() => _step = 2);
               },
               child: Text(context.l10n.commonNext),
             ),
@@ -826,7 +823,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             width: double.infinity,
             child: ElevatedButton(
               onPressed: _todayIndex == null ? null : () {
-                setState(() => _step = 4);
+                setState(() => _step = 3);
               },
               child: Text(context.l10n.commonNext),
             ),

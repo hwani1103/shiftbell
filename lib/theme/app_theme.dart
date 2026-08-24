@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'app_colors.dart';
 
 class AppTheme {
   // ========================================
-  // 라이트 테마 (기본)
+  // 라이트 테마 (기본) - 앱 전체 톤. 새 색이 필요하면 app_colors.dart에 먼저
+  // 추가하고 여기서 가져다 쓸 것. 달력 탭은 여기 안 따름(calendar_tab.dart의
+  // Scaffold가 배경색을 직접 고정함 - app_colors.dart 상단 주석 참고).
   // ========================================
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
@@ -10,17 +13,17 @@ class AppTheme {
 
     // Primary 색상
     colorScheme: ColorScheme.light(
-      primary: Colors.indigo.shade700,
+      primary: kAppMainAccent,
       onPrimary: Colors.white,
-      secondary: Colors.blue.shade600,
+      secondary: kAppMainAccent,
       onSecondary: Colors.white,
       tertiary: Colors.orange.shade600,
       onTertiary: Colors.white,
-      surface: Colors.white,
+      surface: kAppSurface,
       onSurface: Colors.black,
       surfaceVariant: Color(0xFFF5F5F5),  // grey.shade100 대체
       onSurfaceVariant: Color(0xFF616161),  // grey.shade700 대체
-      background: Colors.white,
+      background: kAppBackgroundPastel,
       onBackground: Colors.black,
       error: Colors.red.shade700,
       onError: Colors.white,
@@ -29,9 +32,15 @@ class AppTheme {
 
     // AppBar
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.white,
+      backgroundColor: kAppBackgroundPastel,
       foregroundColor: Colors.black,
-      elevation: 1,
+      elevation: 0,
+      // ⭐ centerTitle 미지정 시 안드로이드 기본값은 false라, leading(뒤로가기
+      // 아이콘/빈 SizedBox)이 있으면 타이틀이 화면 정중앙이 아니라 leading
+      // 폭만큼 오른쪽으로 치우쳐 보임(Text를 Center로 감싸는 것만으론 안 고쳐짐 -
+      // Center는 title에게 배정된 영역 "안에서만" 중앙 정렬함). true로 고정해서
+      // leading 유무와 무관하게 항상 화면 정중앙에 오도록 함.
+      centerTitle: true,
       titleTextStyle: TextStyle(
         color: Colors.black,
         fontSize: 18,
@@ -41,21 +50,21 @@ class AppTheme {
     ),
 
     // Scaffold
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: kAppBackgroundPastel,
 
     // Card
     cardTheme: CardThemeData(
-      color: Colors.white,
-      elevation: 2,
+      color: kAppSurface,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: Colors.grey.shade200, width: 1),
+        side: BorderSide(color: Colors.black.withValues(alpha: 0.08), width: 1),
       ),
     ),
 
     // Dialog
     dialogTheme: DialogThemeData(
-      backgroundColor: Colors.white,
+      backgroundColor: kAppSurface,
       titleTextStyle: TextStyle(
         color: Colors.black,
         fontSize: 20,
@@ -69,8 +78,8 @@ class AppTheme {
 
     // BottomNavigationBar
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: Colors.white,
-      selectedItemColor: Colors.indigo.shade700,
+      backgroundColor: kAppSurface,
+      selectedItemColor: kAppMainAccent,
       unselectedItemColor: Colors.grey.shade600,
       elevation: 8,
     ),
@@ -78,23 +87,24 @@ class AppTheme {
     // TextField
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.grey.shade50,
+      fillColor: kAppSurface,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: Colors.grey.shade300),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: Colors.indigo.shade400, width: 2),
+        borderSide: BorderSide(color: kAppMainAccent, width: 2),
       ),
     ),
 
-    // ElevatedButton
+    // ElevatedButton - 이 앱의 "기본 버튼". 칩(근무명 태그 등)은 별도
+    // 컴포넌트(app_shift_chip.dart)를 씀 - 버튼과 칩은 서로 다른 디자인 언어.
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.indigo.shade700,
+        backgroundColor: kAppMainAccent,
         foregroundColor: Colors.white,
-        elevation: 2,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -103,7 +113,7 @@ class AppTheme {
 
     // ListTile
     listTileTheme: ListTileThemeData(
-      tileColor: Colors.white,
+      tileColor: kAppSurface,
       textColor: Colors.black,
       iconColor: Colors.grey.shade700,
     ),
