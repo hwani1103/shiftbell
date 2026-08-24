@@ -13,6 +13,7 @@ import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
 import 'screens/friend_list_screen.dart';
 import 'screens/permission_intro_screen.dart';
+import 'screens/ui_theme_lab_screen.dart';
 import 'widgets/permission_warning_banner.dart';
 import 'widgets/banner_ad_slot.dart';
 import 'services/ad_service.dart';
@@ -298,6 +299,11 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
       ),
       FriendListScreen(onSwipeToCalendar: () => _goToCalendar()),
       SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
+      // ⭐ 2026-08-25 - "UI 테마" 임시 디자인 비교 탭. 맨 뒤(index 4)에 추가해서
+      // 기존 0~3번 인덱스(Native의 openTab 등이 참조)를 절대 안 건드림 -
+      // ui_theme_lab_screen.dart 클래스 주석 참고. 방향이 정해지면 이 탭 자체를
+      // 통째로 제거할 예정.
+      const UiThemeLabScreen(),
     ];
 
     // ⭐ _scheduleGuardWakeup()이 triggerGuardCheck를 호출해서 Native 갱신 판단/실행까지 함
@@ -454,6 +460,8 @@ Future<void> _handleMethod(MethodCall call) async {
             BottomNavigationBarItem(icon: const Icon(Icons.calendar_month), label: context.l10n.navCalendar),
             BottomNavigationBarItem(icon: const Icon(Icons.people_outline), label: context.l10n.navFriendShare),
             BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.l10n.navSettings),
+            // ⭐ 임시 탭(위 _tabs 주석 참고) - l10n 없이 직접 문자열.
+            const BottomNavigationBarItem(icon: Icon(Icons.palette_outlined), label: 'UI 테마'),
           ],
         ),
       ),
