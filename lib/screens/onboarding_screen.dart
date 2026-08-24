@@ -257,18 +257,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     );
                   }),
 
-                  // ⭐ 2026-08-24 - 칩과 헷갈리지 않도록 "버튼"으로 명확히 구분함.
-                  // 공용 버튼(AppButton)으로 통일 - icon+label을 Row로 직접 구성.
-                  AppButton(
+                  // ⭐ 2026-08-24 - AppButton(공용 CTA 버튼)으로 바꿨다가 되돌림 -
+                  // AppButton은 폭이 넓은 "화면 전체 CTA" 용도로 만든 거라 Wrap
+                  // 안에서 칩들과 나란히 놓이면 가로를 다 차지해버림("메인
+                  // 버튼으로 하니까 가로를 다 잡아먹어서 보기 별로다"). 칩과
+                  // 헷갈리지 않게 "버튼"으로 구분하는 목적은 이거 하나로 충분해서
+                  // ElevatedButton.icon으로 원상복구.
+                  ElevatedButton.icon(
                     onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.add, size: 18.sp),
-                        SizedBox(width: 4.w),
-                        Text(context.l10n.commonAdd),
-                      ],
-                    ),
+                    icon: Icon(Icons.add, size: 18.sp),
+                    label: Text(context.l10n.commonAdd),
                   ),
                 ],
               ),
