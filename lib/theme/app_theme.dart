@@ -50,12 +50,16 @@ class AppTheme {
     ),
 
     // Scaffold
-    // ⭐ 2026-08-24 - 단색(kAppBackgroundPastel)에서 투명으로 바꿈. 실제 배경은
-    // 이제 main.dart의 MaterialApp.builder가 그리는 그라데이션임 - 여기가
-    // 불투명하면 그 그라데이션을 가려버림. 달력 탭은 자기 Scaffold에
-    // backgroundColor를 직접 불투명하게 고정해서 이 투명 처리와 무관하게
-    // 항상 흰 배경을 유지함(calendar_tab.dart 참고).
-    scaffoldBackgroundColor: Colors.transparent,
+    // ⭐ 2026-08-24 - 파스텔(kAppBackgroundPastel) → 투명(그라데이션 실험) →
+    // 흰색 순으로 바뀜. 그라데이션은 InitialRouter(로딩 게이트, 네이티브
+    // 스플래시와 맞추려 항상 불투명 흰색)에서 다음 화면으로 넘어갈 때 "가려져
+    // 있던 배경이 드러나는" 깜빡임을 만들어서 보류하고 흰색으로 고정함 - 그럼
+    // InitialRouter와 그 다음 화면들의 배경이 완전히 같아서 애초에 드러날
+    // "다른 배경"이 없어짐. 달력 탭은 자기 Scaffold에 backgroundColor를 직접
+    // 고정해서 이 값과 무관하게 항상 흰 배경(calendar_tab.dart 참고 - 지금은
+    // 결과적으로 같은 흰색이지만, 이 값이 나중에 다시 바뀌어도 달력 탭은 안
+    // 흔들리도록 여전히 독립적으로 고정해둠).
+    scaffoldBackgroundColor: Colors.white,
 
     // Card
     cardTheme: CardThemeData(

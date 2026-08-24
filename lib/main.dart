@@ -24,7 +24,6 @@ import 'providers/schedule_provider.dart';
 import 'providers/calendar_theme_provider.dart';
 import 'models/calendar_theme.dart';
 import 'theme/app_theme.dart';
-import 'theme/app_colors.dart';
 import 'services/firebase_bootstrap.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -200,6 +199,14 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
                 // 가리지 않고 그대로 비쳐 보임. 달력 탭만 예외 - CalendarTab이
                 // 자기 Scaffold에 Colors.white를 직접 불투명하게 고정해뒀으므로
                 // (calendar_tab.dart 참고) 이 그라데이션의 영향을 안 받음.
+                // ⭐ 2026-08-24 - 그라데이션 시도(kAppBackgroundGradientTop/Bottom,
+                // app_colors.dart에 값은 남겨둠)를 보류하고 흰색 고정으로 되돌림 -
+                // InitialRouter(로딩 게이트)가 네이티브 스플래시와 맞추려고 항상
+                // 불투명 흰색인데, 그 뒤에 그라데이션이 깔려 있으면 다음 화면으로
+                // 넘어가는 순간 "가려져 있던 그라데이션이 드러나는" 깜빡임이
+                // 생김 - 전환 애니메이션을 없애도(main.dart의 _instantRoute)
+                // 여전히 보인다는 피드백을 받아서, 아예 같은 흰색으로 통일해
+                // 이 깜빡임의 근본 원인 자체를 없앰.
                 builder: (context, child) {
                   return Container(
                     color: Colors.grey.shade200,  // 넓은 화면에서 양옆 배경색 - 항상 라이트
@@ -207,13 +214,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: maxContentWidth),
                         child: Container(
-                          decoration: const BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                              colors: [kAppBackgroundGradientTop, kAppBackgroundGradientBottom],
-                            ),
-                          ),
+                          color: Colors.white,  // 컨텐츠 영역 배경 - 항상 라이트
                           child: child,
                         ),
                       ),
@@ -402,11 +403,10 @@ Future<void> _handleMethod(MethodCall call) async {
         }
       },
       child: Scaffold(
-        // ⭐ 2026-08-24 - AppTheme.lightTheme.scaffoldBackgroundColor를 투명으로
-        // 바꿔뒀지만 static 필드라 hot reload로는 재평가 안 됨(hot restart/재실행
-        // 때만 초기화) - Scaffold 인스턴스에도 직접 명시해서 hot reload 중에도
-        // 항상 투명하게 나오도록 함(app_theme.dart 참고).
-        backgroundColor: Colors.transparent,
+        // ⭐ 2026-08-24 - AppTheme.lightTheme.scaffoldBackgroundColor(현재 흰색)와
+        // 같은 값을 여기 인스턴스에도 직접 명시함(hot reload에도 안전하게 -
+        // onboarding_screen.dart의 같은 패턴 참고).
+        backgroundColor: Colors.white,
         // ⭐ 2026-08-24 추가 - 배너 광고 자리(BannerAdSlot)를 탭 화면 바깥,
         // BottomNavigationBar 바로 위에 둠. Column으로 감싸서 "탭 컨텐츠(Expanded)
         // + 광고 슬롯" 순서로 쌓았고, 광고 슬롯은 Offstage로 감싸 달력 탭(index 1)일

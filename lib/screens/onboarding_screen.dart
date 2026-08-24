@@ -108,13 +108,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         }
       },
       child: Scaffold(
-        // ⭐ 2026-08-24 - AppTheme.lightTheme.scaffoldBackgroundColor를 투명으로
-        // 바꿔뒀지만(app_theme.dart), 그건 static 필드라 hot reload로는 다시
-        // 평가되지 않음(hot restart/재실행 때만 초기화됨) - 개발 중 hot reload로
-        // 확인하다가 "그라데이션이 아예 안 보인다"로 헷갈리기 쉬움. 여기서
-        // Scaffold 인스턴스에 직접 명시해두면 build()가 다시 불릴 때마다 항상
-        // 새로 평가되므로 hot reload에서도 확실히 투명하게 나옴.
-        backgroundColor: Colors.transparent,
+        // ⭐ 2026-08-24 - AppTheme.lightTheme.scaffoldBackgroundColor(현재 흰색)와
+        // 같은 값을 여기 인스턴스에도 직접 명시함 - 그건 static 필드라 hot
+        // reload로는 재평가 안 되므로(hot restart/재실행 때만 초기화), 개발 중
+        // 배경 톤을 바꿔가며 확인할 때 여기 명시해두면 build()가 다시 불릴
+        // 때마다 항상 최신 값으로 나옴.
+        backgroundColor: Colors.white,
         appBar: AppBar(
           // ⭐ 2026-08-24 - title을 Center()로 감쌌던 건 AppBarTheme에
           // centerTitle이 없어서 안드로이드 기본값(false)이 적용되던 시절의
