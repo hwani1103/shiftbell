@@ -2004,57 +2004,61 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
           ],
         ),
       ),
+      // ⭐ 2026-08-25 - "저장" 버튼을 카드 바로 아래(스크롤 콘텐츠 안)가 아니라
+      // 화면 맨 아래에 고정하고, 색상만 다른 ElevatedButton 대신 앱 공용 메인
+      // 버튼(AppButton)으로 교체 - 온보딩의 "다음"/"완료" 버튼과 같은 위치·같은
+      // 디자인 언어로 통일함(Column + Expanded(스크롤 영역) + 하단 고정 버튼).
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.onboardingSetFixedAlarmPerShift,
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    context.l10n.onboardingMaxAlarmsPerShift(kMaxAlarmTemplatesPerShift),
-                    style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  ),
-                  SizedBox(height: 16.h),
-                  // ⭐ shrinkWrap으로 카드 크기에 맞게 조절
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 120.w,
-                      crossAxisSpacing: 12.w,
-                      mainAxisSpacing: 12.h,
-                      childAspectRatio: 0.70,
+          : Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(16.w, 16.w, 16.w, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          context.l10n.onboardingSetFixedAlarmPerShift,
+                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          context.l10n.onboardingMaxAlarmsPerShift(kMaxAlarmTemplatesPerShift),
+                          style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        ),
+                        SizedBox(height: 16.h),
+                        // ⭐ shrinkWrap으로 카드 크기에 맞게 조절
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 120.w,
+                            crossAxisSpacing: 12.w,
+                            mainAxisSpacing: 12.h,
+                            childAspectRatio: 0.70,
+                          ),
+                          itemCount: widget.shiftTypes.length,
+                          itemBuilder: (context, index) {
+                            final shift = widget.shiftTypes[index];
+                            final alarms = _shiftAlarms[shift] ?? [];
+                            return _buildShiftAlarmCard(shift, alarms);
+                          },
+                        ),
+                      ],
                     ),
-                    itemCount: widget.shiftTypes.length,
-                    itemBuilder: (context, index) {
-                      final shift = widget.shiftTypes[index];
-                      final alarms = _shiftAlarms[shift] ?? [];
-                      return _buildShiftAlarmCard(shift, alarms);
-                    },
                   ),
-                  // ⭐ 저장 버튼 (카드 바로 아래)
-                  SizedBox(height: 24.h),
-                  SizedBox(
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, MediaQuery.of(context).padding.bottom + 16.h),
+                  child: SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
+                    child: AppButton(
                       onPressed: _saveAndExit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.secondary,
-                        foregroundColor: colorScheme.onSecondary,
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                      ),
-                      child: Text(context.l10n.commonSave, style: TextStyle(fontSize: 16.sp)),
+                      child: Text(context.l10n.commonSave),
                     ),
                   ),
-                  // ⭐ SafeArea 확보 (홈 버튼 영역 고려)
-                  SizedBox(height: MediaQuery.of(context).padding.bottom + 16.h),
-                ],
-              ),
+                ),
+              ],
             ),
     );
   }
@@ -2291,45 +2295,63 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
 
             SizedBox(height: 8.h),
 
-            if (_alarms.length < kMaxAlarmTemplatesPerShift)
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(
-                  onPressed: _addAlarm,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add, size: 16.sp),
-                      SizedBox(width: 4.w),
-                      Text(context.l10n.alarmAdd),
+            // ⭐ 2026-08-25 - "알람 추가" 버튼을 아래 취소/저장 버튼 묶음과 정확히
+            // 같은 폭으로 맞춤(온보딩의 동일한 다이얼로그와 같은 이유/구조 -
+            // _AlarmTimeDialog 쪽 주석 참고).
+            Align(
+              alignment: Alignment.centerRight,
+              child: IntrinsicWidth(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_alarms.length < kMaxAlarmTemplatesPerShift) ...[
+                      AppButton(
+                        onPressed: _addAlarm,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add, size: 16.sp),
+                            SizedBox(width: 4.w),
+                            Text(context.l10n.alarmAdd),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
                     ],
-                  ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        AppSecondButton(
+                          variant: AppSecondButtonVariant.neutral,
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(context.l10n.commonCancel),
+                        ),
+                        SizedBox(width: 8.w),
+                        AppSecondButton(
+                          variant: AppSecondButtonVariant.success,
+                          onPressed: () {
+                            _alarms.sort((a, b) {
+                              final aMinutes = a.time.hour * 60 + a.time.minute;
+                              final bMinutes = b.time.hour * 60 + b.time.minute;
+                              return aMinutes.compareTo(bMinutes);
+                            });
+
+                            widget.onSave(_alarms);
+                            Navigator.pop(context);
+                          },
+                          child: Text(context.l10n.commonSave),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
+            ),
           ],
         ),
       ),
-      actions: [
-        AppSecondButton(
-          variant: AppSecondButtonVariant.neutral,
-          onPressed: () => Navigator.pop(context),
-          child: Text(context.l10n.commonCancel),
-        ),
-        AppSecondButton(
-          variant: AppSecondButtonVariant.success,
-          onPressed: () {
-            _alarms.sort((a, b) {
-              final aMinutes = a.time.hour * 60 + a.time.minute;
-              final bMinutes = b.time.hour * 60 + b.time.minute;
-              return aMinutes.compareTo(bMinutes);
-            });
-
-            widget.onSave(_alarms);
-            Navigator.pop(context);
-          },
-          child: Text(context.l10n.commonSave),
-        ),
-      ],
     );
   }
 

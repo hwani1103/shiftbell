@@ -2905,21 +2905,28 @@ Widget build(BuildContext context) {
               children: [
                 // ⭐ "{time} 알람" 앞에 근무명 + 전날/당일/다음날 Chip을 추가 -
                 // "09:00 알람"만으로는 어느 근무의 알람인지, 언제 배정된 근무 기준인지
-                // 알 수 없었음. "주간"/"09:00 알람" 텍스트 스타일 자체는 그대로 유지.
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  spacing: 6.w,
-                  runSpacing: 4.h,
+                // 알 수 없었음.
+                // ⭐ 2026-08-25 - 글자가 너무 작고(14.sp) 연한 색(onSurfaceVariant)이라
+                // 잘 안 보인다는 피드백으로 키우고(17.sp) 진한 색(onSurface)으로,
+                // Wrap 대신 Row+중앙정렬로 "근무명 - Chip - 시간" 세 요소가 한 줄에
+                // 가지런히 보이게 함. Chip은 DayOffsetBadge(dense한 AppShiftChip
+                // 재사용)라 내용물 크기만큼만 차지해서 옆 텍스트와 잘 어울림.
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (alarm.shiftType != null && alarm.shiftType!.isNotEmpty)
+                    if (alarm.shiftType != null && alarm.shiftType!.isNotEmpty) ...[
                       Text(
                         alarm.shiftType!,
-                        style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
                       ),
+                      SizedBox(width: 8.w),
+                    ],
                     DayOffsetBadge(dayOffset: alarm.dayOffset),
+                    SizedBox(width: 8.w),
                     Text(
                       context.l10n.calendarAlarmAt(alarm.time),
-                      style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
                     ),
                   ],
                 ),
@@ -3083,13 +3090,22 @@ Widget build(BuildContext context) {
     required VoidCallback onTap,
   }) {
     print('🎨 빌드: typeId=$typeId, label=$label, isSelected=$isSelected');
+    // ⭐ 2026-08-25 버그 수정 - "선택된 옵션의 아이콘이 안 보인다"는 신고: 이 앱
+    // 테마(app_theme.dart)는 ColorScheme.light(primary: ...)만 지정하고
+    // primaryContainer를 따로 안 줘서, Flutter가 primaryContainer를 primary와
+    // 똑같은 색으로 채움(같은 문제를 work_hours_settings_screen.dart의
+    // _selectedBg() 주석이 이미 문서화해둠) - 그 결과 이 위젯은 "primary 아이콘
+    // 위에 primaryContainer(=같은 primary) 배경"이 되어 아이콘이 배경에
+    // 완전히 묻혔음. primaryContainer에 의존하지 않고, 이미 이 파일의
+    // 온보딩/설정 알람 타입 버튼(_buildTypeButton)이 쓰는 것과 동일한 "선택 시
+    // 진한 단색 배경 + 흰 아이콘/글씨" 조합으로 바꿔 대비를 항상 보장함.
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12.h),
           decoration: BoxDecoration(
-            color: isSelected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surfaceVariant,
+            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
               color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
@@ -3101,7 +3117,7 @@ Widget build(BuildContext context) {
               Icon(
                 icon,
                 size: 24.sp,
-                color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               SizedBox(height: 4.h),
               Text(
@@ -3109,7 +3125,7 @@ Widget build(BuildContext context) {
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Theme.of(context).colorScheme.onPrimaryContainer : Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

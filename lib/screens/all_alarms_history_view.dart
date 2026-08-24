@@ -267,51 +267,68 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         backgroundColor: colorScheme.surface,
         elevation: 0,
         foregroundColor: colorScheme.onSurface,
-        actions: [
+      ),
+      // ⭐ 2026-08-25 - "전체 삭제" 버튼을 AppBar actions(제목 옆, 크게)에서
+      // 제목 바로 다음 줄(본문 맨 위, 우측 정렬, 더 작게)로 내림 - 화면 제목에
+      // 비해 너무 크고 부담스럽다는 피드백. AppSecondButton의 compact 크기 +
+      // 작은 아이콘/글자로 눈에 띄되 튀지 않게 함.
+      body: Column(
+        children: [
           Padding(
-            padding: EdgeInsets.only(right: 12.w),
-            child: AppSecondButton(
-              variant: AppSecondButtonVariant.danger,
-              onPressed: _alarmsWithHistory.isEmpty ? null : _deleteAllHistory,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.delete_sweep_outlined, size: 16.sp),
-                  SizedBox(width: 4.w),
-                  Text(context.l10n.alarmHistoryDeleteAllTitle, style: TextStyle(fontSize: 13.sp)),
-                ],
-              ),
+            padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 4.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                AppSecondButton(
+                  variant: AppSecondButtonVariant.danger,
+                  compact: true,
+                  onPressed: _alarmsWithHistory.isEmpty ? null : _deleteAllHistory,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.delete_sweep_outlined, size: 13.sp),
+                      SizedBox(width: 3.w),
+                      Text(context.l10n.alarmHistoryDeleteAllTitle, style: TextStyle(fontSize: 12.sp)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
+          Expanded(child: _buildBody(context, colorScheme)),
         ],
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : _alarmsWithHistory.isEmpty
-              ? Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32.w),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.alarm_off,
-                          size: 64.sp,
-                          color: colorScheme.outline,
+    );
+  }
+
+  Widget _buildBody(BuildContext context, ColorScheme colorScheme) {
+    return _isLoading
+        ? Center(child: CircularProgressIndicator())
+        : _alarmsWithHistory.isEmpty
+            ? Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.alarm_off,
+                        size: 64.sp,
+                        color: colorScheme.outline,
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        context.l10n.alarmHistoryEmpty,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                        SizedBox(height: 16.h),
-                        Text(
-                          context.l10n.alarmHistoryEmpty,
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                )
-              : ListView.builder(
+                ),
+              )
+            : ListView.builder(
                   padding: EdgeInsets.fromLTRB(
                     16.w,
                     16.w,
@@ -421,7 +438,6 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                       ),
                     );
                   },
-                ),
-    );
+                );
   }
 }

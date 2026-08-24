@@ -21,6 +21,11 @@
 // 재사용 지점(2026-08-24 기준): 고정 알람 편집 다이얼로그의 취소/저장,
 // 달력 탭의 "알람 타입 선택" 팝업의 삭제/확인, 알람 이력 화면의 전체 삭제 확인,
 // 설정 탭의 스케줄 초기화 확인, 온보딩 첫 화면의 "+ 추가" 버튼.
+//
+// ⭐ 2026-08-25 - compact 파라미터 추가. 알람 이력 화면의 "이력 삭제" 버튼을
+// 화면 제목 바로 아래 줄에 작게 붙이는 용도로 필요해짐(원래 크기는 "너무
+// 크고 부담스럽다"는 피드백) - 패딩/글자/아이콘을 비례해서 줄인 버전.
+// 기본값 false면 기존 크기와 완전히 동일함.
 
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
@@ -33,11 +38,15 @@ class AppSecondButton extends StatelessWidget {
     required this.onPressed,
     required this.child,
     this.variant = AppSecondButtonVariant.neutral,
+    this.compact = false,
   });
 
   final VoidCallback? onPressed;
   final Widget child;
   final AppSecondButtonVariant variant;
+
+  /// true면 좁은 자리(화면 제목 옆 등)에 맞게 패딩/글자를 줄인 작은 버전.
+  final bool compact;
 
   bool get _enabled => onPressed != null;
 
@@ -87,7 +96,9 @@ class AppSecondButton extends StatelessWidget {
             splashColor: Colors.white.withValues(alpha: 0.18),
             highlightColor: Colors.white.withValues(alpha: 0.1),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              padding: compact
+                  ? const EdgeInsets.symmetric(horizontal: 10, vertical: 6)
+                  : const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -95,7 +106,7 @@ class AppSecondButton extends StatelessWidget {
                   DefaultTextStyle.merge(
                     style: TextStyle(
                       color: _enabled ? _textColor : const Color(0xFF6B7280),
-                      fontSize: 15,
+                      fontSize: compact ? 12 : 15,
                       fontWeight: FontWeight.w600,
                     ),
                     child: IconTheme.merge(

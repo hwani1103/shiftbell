@@ -1122,52 +1122,79 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
 
             SizedBox(height: 8.h),
 
-            if (_alarms.length < kMaxAlarmTemplatesPerShift)
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(
-                  onPressed: _addAlarm,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add, size: 16.sp),
-                      SizedBox(width: 4.w),
-                      Text(context.l10n.alarmAdd),
+            // ⭐ 2026-08-25 - "알람 추가" 버튼을 아래 취소/저장 버튼 묶음과 정확히
+            // 같은 폭으로 맞춤(왼쪽=취소의 왼쪽 끝, 오른쪽=저장의 오른쪽 끝) -
+            // 예전엔 다이얼로그 폭 전체(double.infinity)를 차지해서 아래 취소/저장
+            // 두 개 버튼보다 훨씬 넓어 보였음("시각적으로 과하다"는 피드백).
+            // AlertDialog의 actions 슬롯은 content와 좌우 여백이 달라 픽셀
+            // 단위로 맞추기 어려우므로, 취소/저장도 여기 content 쪽으로
+            // 옮겨서 같은 여백 안에 둠 - IntrinsicWidth가 두 위젯 중 더 넓은
+            // 쪽(보통 취소+저장 Row)의 자연스러운 폭을 계산하고,
+            // CrossAxisAlignment.stretch가 그 폭에 맞춰 "알람 추가" 버튼을
+            // 늘려서 정확히 같은 좌우 경계를 갖게 함.
+            Align(
+              alignment: Alignment.centerRight,
+              child: IntrinsicWidth(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (_alarms.length < kMaxAlarmTemplatesPerShift) ...[
+                      AppButton(
+                        onPressed: _addAlarm,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add, size: 16.sp),
+                            SizedBox(width: 4.w),
+                            Text(context.l10n.alarmAdd),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
                     ],
-                  ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        AppSecondButton(
+                          variant: AppSecondButtonVariant.neutral,
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(context.l10n.commonCancel),
+                        ),
+                        SizedBox(width: 8.w),
+                        AppSecondButton(
+                          variant: AppSecondButtonVariant.success,
+                          // ⭐ 2026-08-24 버그 수정 - 예전엔 _alarms.isEmpty일 때
+                          // 저장 버튼이 비활성화됐음. 알람을 3개→2개→1개→0개
+                          // 순으로 지우다가 0개가 되는 순간 저장이 막혀서 "알람
+                          // 없음"으로 저장할 방법이 없었음(사용자 확인 재현: 저장
+                          // 후 재진입해서 전부 삭제하려는 경우).
+                          // settings_tab.dart의 동일한 다이얼로그(고정 알람 수정)는
+                          // 애초에 이 가드가 없어서 항상 저장 가능했음 - 여기만
+                          // 어긋나 있던 것이라 그쪽과 동일하게 무조건 저장
+                          // 가능하도록 가드를 제거함.
+                          onPressed: () {
+                            _alarms.sort((a, b) {
+                              final aMinutes = a.time.hour * 60 + a.time.minute;
+                              final bMinutes = b.time.hour * 60 + b.time.minute;
+                              return aMinutes.compareTo(bMinutes);
+                            });
+
+                            widget.onSave(_alarms);
+                            Navigator.pop(context);
+                          },
+                          child: Text(context.l10n.commonSave),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
+            ),
           ],
         ),
       ),
-      actions: [
-        AppSecondButton(
-          variant: AppSecondButtonVariant.neutral,
-          onPressed: () => Navigator.pop(context),
-          child: Text(context.l10n.commonCancel),
-        ),
-        AppSecondButton(
-          variant: AppSecondButtonVariant.success,
-          // ⭐ 2026-08-24 버그 수정 - 예전엔 _alarms.isEmpty일 때 저장 버튼이
-          // 비활성화됐음. 알람을 3개→2개→1개→0개 순으로 지우다가 0개가 되는
-          // 순간 저장이 막혀서 "알람 없음"으로 저장할 방법이 없었음(사용자 확인
-          // 재현: 저장 후 재진입해서 전부 삭제하려는 경우). settings_tab.dart의
-          // 동일한 다이얼로그(고정 알람 수정)는 애초에 이 가드가 없어서 항상
-          // 저장 가능했음 - 여기만 어긋나 있던 것이라 그쪽과 동일하게 무조건
-          // 저장 가능하도록 가드를 제거함.
-          onPressed: () {
-            _alarms.sort((a, b) {
-              final aMinutes = a.time.hour * 60 + a.time.minute;
-              final bMinutes = b.time.hour * 60 + b.time.minute;
-              return aMinutes.compareTo(bMinutes);
-            });
-
-            widget.onSave(_alarms);
-            Navigator.pop(context);
-          },
-          child: Text(context.l10n.commonSave),
-        ),
-      ],
     );
   }
 

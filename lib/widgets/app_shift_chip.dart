@@ -16,12 +16,24 @@
 // 같은 칩 모양을 쓰기 위함. onDelete/onTap은 동시에 켤 필요가 없는 서로 다른
 // 화면의 용도라 하나의 위젯에서 둘 다 지원하되 실제로는 한쪽만 씀.
 //
+// ⭐ 2026-08-25 - day_offset_chip.dart(전날/당일/다음날)가 처음엔 이 칩을 안 쓰고
+// 따로 만들어졌었는데("선택됨"을 진하게 꽉 채운 배경으로 표시하다 보니 second
+// button과 구분이 안 된다"는 피드백), 그 대신 이 칩을 그대로 재사용하도록
+// 되돌리면서 selected/dense 두 파라미터를 추가함:
+//   - selected: 칩의 실루엣(두꺼운 테두리 + 옅은 채움)은 그대로 두고 테두리/
+//     텍스트 색만 메인색으로 바꿔서 "지금 골라진 것"을 표시함 - 배경을 진하게
+//     채우지 않으므로 버튼처럼 보이지 않음. 근무명 태그 등 기존 용도는 항상
+//     기본값(false)이라 시각적으로 전혀 안 바뀜.
+//   - dense: 근무명 태그보다 좁은 자리(전날/당일/다음날 칩 등)에 넣을 때 패딩/
+//     테두리/글자 크기를 비례해서 줄임. 기존 용도는 기본값(false)이라 그대로.
+//
 // 적용 범위(2026-08-24 기준): lib/screens/onboarding_screen.dart의
 // _buildShiftTypeCreation()(근무명 지정 화면, onDelete 용도)과
 // _buildPatternInput()(패턴 완성 화면 상단의 탭-추가 목록, onTap 용도).
 // _buildPatternInput() 안의 "이미 완성된 패턴" 그리드(_buildPatternGrid)는
 // 이번 범위 아님 - 그대로 둠. _buildShiftTypesInput()(불규칙 화면)의 동일한
-// 근무명 태그도 아직 이번 범위 아님(추후 적용 예정).
+// 근무명 태그도 아직 이번 범위 아님(추후 적용 예정). + day_offset_chip.dart
+// (전날/당일/다음날 선택·표시) 전체.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -34,6 +46,8 @@ class AppShiftChip extends StatelessWidget {
     this.onDelete,
     this.onTap,
     this.enabled = true,
+    this.selected = false,
+    this.dense = false,
   });
 
   final String label;
@@ -48,25 +62,50 @@ class AppShiftChip extends StatelessWidget {
   /// 같은 시각 효과를 재현) - onTap을 쓸 때만 의미 있음.
   final bool enabled;
 
+  /// "지금 골라진 것"을 표시(예: 전날/당일/다음날 중 선택된 하나) - 클래스
+  /// 주석 참고. 기본 false면 기존 근무명 태그와 완전히 동일하게 보임.
+  final bool selected;
+
+  /// 좁은 자리에 넣을 때 패딩/테두리/글자를 비례해서 줄임. 기본 false면 기존
+  /// 근무명 태그와 완전히 동일한 크기.
+  final bool dense;
+
   @override
   Widget build(BuildContext context) {
-    final radius = 16.r;
-    final borderColor = enabled ? kAppChipBorder : kAppChipBorder.withValues(alpha: 0.35);
-    final fillColor = enabled ? kAppChipFill : kAppChipFill.withValues(alpha: 0.6);
-    final textColor = enabled ? kAppChipBorder : kAppChipBorder.withValues(alpha: 0.45);
+    final radius = dense ? 10.r : 16.r;
+    final borderWidth = dense ? 1.6 : 3.0;
+
+    final Color borderColor;
+    final Color fillColor;
+    final Color textColor;
+    if (!enabled) {
+      borderColor = kAppChipBorder.withValues(alpha: 0.35);
+      fillColor = kAppChipFill.withValues(alpha: 0.6);
+      textColor = kAppChipBorder.withValues(alpha: 0.45);
+    } else if (selected) {
+      borderColor = kAppMainAccent;
+      fillColor = kAppMainAccent.withValues(alpha: 0.16);
+      textColor = kAppMainAccent;
+    } else {
+      borderColor = kAppChipBorder;
+      fillColor = kAppChipFill;
+      textColor = kAppChipBorder;
+    }
 
     final chipBody = Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
+      padding: dense
+          ? EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h)
+          : EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
       decoration: BoxDecoration(
         color: fillColor,
         borderRadius: BorderRadius.circular(radius),
-        // ⭐ 두꺼운 테두리(2.2) - 이 앱의 칩을 다른 앱과 구분 짓는 특색으로 삼기로 함.
-        border: Border.all(color: borderColor, width: 3.0),
+        // ⭐ 두꺼운 테두리 - 이 앱의 칩을 다른 앱과 구분 짓는 특색으로 삼기로 함.
+        border: Border.all(color: borderColor, width: borderWidth),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 14.sp,
+          fontSize: dense ? 12.sp : 14.sp,
           fontWeight: FontWeight.w600,
           color: textColor,
         ),
