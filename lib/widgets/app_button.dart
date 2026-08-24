@@ -60,7 +60,7 @@ class AppButton extends StatelessWidget {
 
   bool get _enabled => onPressed != null;
 
-  static const double _ringWidth = 4.0;  // ⭐ 3.0→4.0, "링을 아주 살짝만 더 두껍게"
+  static const double _ringWidth = 3.0;  // ⭐ 3.0→4.0, "링을 아주 살짝만 더 두껍게"
   static const _outerRadius = BorderRadius.all(Radius.circular(14));
   static const _innerRadius = BorderRadius.all(Radius.circular(11));
 

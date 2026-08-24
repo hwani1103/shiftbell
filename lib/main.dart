@@ -829,24 +829,46 @@ class _InitialRouterState extends State<InitialRouter> {
     final schedule = await DatabaseService.instance.getShiftSchedule();
 
     // 3. 다음 화면 결정
+    // ⭐ 2026-08-24 - 기본 MaterialPageRoute 전환(pushReplacementNamed 포함, 내부적으로
+    // 같은 애니메이션을 씀) 대신 즉시 전환(_instantRoute, 지속시간 0)을 씀.
+    // 이 화면(InitialRouter)은 "권한/스케줄 확인하는 동안 잠깐 뜨는 순수 로딩
+    // 게이트"라 애니메이션이 있는 화면 전환이 필요 없음 - 오히려 역효과가
+    // 있었음: 이 화면은 네이티브 스플래시와 맞추려고 일부러 불투명 흰색인데,
+    // 그 뒤에는 항상 앱의 그라데이션 배경이 깔려 있음(main.dart의
+    // MaterialApp.builder, 다음 화면들은 Scaffold가 투명이라 그게 비쳐 보임).
+    // 애니메이션이 있는 전환 중에는 두 화면이 겹쳐서 페이드되는데, 그 과정에서
+    // "가려져 있던 그라데이션이 애니메이션 중간에 갑자기 드러나는" 것처럼
+    // 보여서 "흰색이었다가 갑자기 확 바뀐다"는 어색한 깜빡임으로 느껴졌음.
+    // 지속시간 0으로 즉시 전환하면 중간 프레임이 아예 없어서 이 깜빡임 자체가
+    // 생길 수가 없음.
     if (!permissionsRequested) {
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/permission_intro');
+        Navigator.of(context).pushReplacement(_instantRoute(const PermissionIntroScreen()));
       }
     } else if (schedule == null) {
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/onboarding');
+        Navigator.of(context).pushReplacement(_instantRoute(const OnboardingScreen()));
       }
     } else {
       // ⭐ 홈 화면: 항상 달력탭으로 시작
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => MainScreen(initialIndex: 1),  // 달력탭 고정
-          ),
+          _instantRoute(MainScreen(initialIndex: 1)),  // 달력탭 고정
         );
       }
     }
+  }
+
+  // ⭐ 애니메이션 없이 즉시 전환하는 라우트. InitialRouter는 순수 로딩 게이트라
+  // 화면 전환 애니메이션이 필요 없고, 오히려 그 애니메이션 중간 프레임에서
+  // "가려져 있던 배경이 갑자기 드러나는" 어색한 깜빡임이 생겼음(위 _navigate()
+  // 주석 참고) - transitionDuration을 0으로 줘서 중간 프레임 자체를 없앰.
+  Route<void> _instantRoute(Widget page) {
+    return PageRouteBuilder<void>(
+      pageBuilder: (context, animation, secondaryAnimation) => page,
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+    );
   }
 
   @override
