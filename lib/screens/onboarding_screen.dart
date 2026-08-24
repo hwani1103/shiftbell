@@ -20,6 +20,7 @@ import '../utils/shift_name_util.dart';
 import '../l10n/l10n_extensions.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_shift_chip.dart';
+import '../widgets/word_safe_spans.dart';
 
 // 알람 설정 (시간 + 타입)
 class AlarmSetting {
@@ -183,24 +184,36 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 6.h),
-          Text(
-            context.l10n.onboardingShiftNameSubHint,
-            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          // ⭐ 2026-08-24 - "근무별 고정 알람을 설정하세요" 화면(_buildMainAlarmSetup)의
+          // 부연설명과 스타일을 맞춤(14.sp, onSurface, 굵기 없음 - 예전엔 13.sp에
+          // onSurfaceVariant라 서로 색·굵기가 달랐음) + 괄호 제거(그쪽 화면은
+          // 원래 괄호 없이 더 잘 보였음). wordSafeSpans()로 단어(공백 기준) 중간에서
+          // 줄바꿈되는 걸 막음 - "있습니다"가 "있습니\n다"처럼 잘리던 문제 수정.
+          Text.rich(
+            TextSpan(
+              children: wordSafeSpans(
+                context.l10n.onboardingShiftNameSubHint,
+                TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+              ),
+            ),
           ),
           SizedBox(height: 4.h),
           // ⭐ "여기"만 다른 스타일(강조색+밑줄)로 탭 가능하게 하는 인라인 링크.
           // 나머지 문장과 같은 문단 안에서 "여기"만 눌러야 해서 Text.rich +
           // TapGestureRecognizer 조합을 씀 - 별도 버튼으로 빼면 문장이 끊겨
-          // 부자연스러움.
+          // 부자연스러움. prefix/suffix도 위와 같은 이유로 wordSafeSpans() 사용 -
+          // "여기" 자체는 한 단어라 그대로 둠.
           Text.rich(
             TextSpan(
-              style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
               children: [
-                TextSpan(text: context.l10n.onboardingSwitchToIrregularPrefix),
+                ...wordSafeSpans(
+                  context.l10n.onboardingSwitchToIrregularPrefix,
+                  TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+                ),
                 TextSpan(
                   text: context.l10n.onboardingSwitchToIrregularLink,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
                     color: kAppMainAccent,
                     decoration: TextDecoration.underline,
@@ -219,7 +232,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                       });
                     }),
                 ),
-                TextSpan(text: context.l10n.onboardingSwitchToIrregularSuffix),
+                ...wordSafeSpans(
+                  context.l10n.onboardingSwitchToIrregularSuffix,
+                  TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+                ),
               ],
             ),
           ),
@@ -254,18 +270,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 
           SizedBox(height: 16.h),
 
+          // ⭐ 2026-08-24 - 이 버튼만 로컬로 키웠던 걸 되돌림("너무 크다" +
+          // 전환 시 순간적으로 bottom overflow가 뜨던 원인이었던 것으로 보임 -
+          // 이 화면은 이미 제목+부연설명+칩 영역+버튼으로 꽉 찬 구조라 버튼이
+          // 커진 만큼 남는 공간을 넘어섰던 것). 버튼 글자 크기는 화면마다 따로
+          // 손대지 않고 app_theme.dart의 공통 ElevatedButtonTheme 하나로만
+          // 관리함 - 다른 "다음" 버튼들과 동일하게 스타일 없이 기본값을 씀.
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
                 setState(() => _step = 1);
               },
-              // ⭐ 2026-08-24 - 기본 버튼 글자 크기(테마 기본값, 대략 14 수준)가
-              // 첫 화면의 "다음" 버튼치고 작다는 피드백으로 이 버튼만 키움.
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 14.h),
-                textStyle: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
-              ),
               child: Text(context.l10n.commonNext),
             ),
           ),
@@ -667,13 +683,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           context.l10n.onboardingSetFixedAlarmPerShift,
           style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
         ),
-        Text(
-          context.l10n.onboardingMaxAlarmsPerShift(kMaxAlarmTemplatesPerShift),
-          style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+        // ⭐ 2026-08-24 - 근무명 지정 화면(_buildShiftTypeCreation)의 부연설명을
+        // 이 화면 스타일에 맞추면서 같이 적용한 wordSafeSpans()를 여기도 동일하게
+        // 적용 - 이 화면이 스타일 기준이 됐으니 줄바꿈 안전성도 같이 맞춤.
+        Text.rich(
+          TextSpan(
+            children: wordSafeSpans(
+              context.l10n.onboardingMaxAlarmsPerShift(kMaxAlarmTemplatesPerShift),
+              TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+            ),
+          ),
         ),
-        Text(
-          context.l10n.onboardingCanChangeInSettings,
-          style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+        Text.rich(
+          TextSpan(
+            children: wordSafeSpans(
+              context.l10n.onboardingCanChangeInSettings,
+              TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+            ),
+          ),
         ),
         SizedBox(height: 24.h),
         

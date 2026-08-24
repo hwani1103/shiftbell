@@ -177,10 +177,10 @@
   "onboardingUsableEvenIfNotInPattern": "You can use these even if not part of your pattern.",
 
   "onboardingShiftNameTitle": "Name the shifts in your pattern",
-  "onboardingShiftNameSubHint": "(You can also add shift names that occur irregularly.\nLong-press a date on the calendar to change its shift.)",
-  "onboardingSwitchToIrregularPrefix": "(If your shift pattern isn't regular, tap ",
+  "onboardingShiftNameSubHint": "You can also add shift names that occur irregularly.\nLong-press a date on the calendar to change its shift.",
+  "onboardingSwitchToIrregularPrefix": "If your shift pattern isn't regular, tap ",
   "onboardingSwitchToIrregularLink": "here",
-  "onboardingSwitchToIrregularSuffix": ".)",
+  "onboardingSwitchToIrregularSuffix": ".",
 
   "onboardingSelectAllInPattern": "Select all shifts included in your actual pattern",
   "onboardingTapToCompletePattern": "Tap the buttons to complete your pattern",

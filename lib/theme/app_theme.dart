@@ -100,11 +100,17 @@ class AppTheme {
 
     // ElevatedButton - 이 앱의 "기본 버튼". 칩(근무명 태그 등)은 별도
     // 컴포넌트(app_shift_chip.dart)를 씀 - 버튼과 칩은 서로 다른 디자인 언어.
+    // ⭐ 2026-08-24 - 버튼 글자가 작다는 피드백. 처음엔 화면 하나(온보딩 첫
+    // 화면)에만 로컬로 크게 키웠다가("너무 크다") 되돌림 - 버튼은 이 공통
+    // 테마 하나로 관리하기로 했으므로 여기서 딱 1만큼만 키움(Material3 기본
+    // labelLarge가 14 → 15). 화면별로 각자 스타일을 얹지 말고 항상 이 기본
+    // ElevatedButton을 그대로 쓸 것 - 그래야 이 값 하나만 바꿔도 전체가 같이 바뀜.
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: kAppMainAccent,
         foregroundColor: Colors.white,
         elevation: 0,
+        textStyle: TextStyle(fontSize: 15),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
