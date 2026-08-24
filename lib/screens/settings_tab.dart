@@ -2312,23 +2312,25 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
 
             // ⭐ 2026-08-25 - "알람 추가"는 원래 크기(내용물만큼)로 가운데 정렬,
             // 담백한 세 번째 버튼 스타일(AppThirdButton) 사용 - 온보딩과 동일.
-            if (_alarms.length < kMaxAlarmTemplatesPerShift)
-              Center(
-                child: AppThirdButton(
-                  onPressed: _addAlarm,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add, size: 16.sp),
-                      SizedBox(width: 4.w),
-                      Text(context.l10n.alarmAdd),
-                    ],
-                  ),
+            // 최대 개수(5개)에 도달해도 숨기지 않고 비활성 상태로 계속 보여줌.
+            Center(
+              child: AppThirdButton(
+                onPressed: _alarms.length < kMaxAlarmTemplatesPerShift ? _addAlarm : null,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add, size: 16.sp),
+                    SizedBox(width: 4.w),
+                    Text(context.l10n.alarmAdd),
+                  ],
                 ),
               ),
+            ),
             SizedBox(height: 8.h),
             Row(
-              mainAxisSize: MainAxisSize.min,
+              // ⭐ 2026-08-25 버그 수정 - onboarding_screen.dart의 동일한 다이얼로그와
+              // 같은 이유(그쪽 주석 참고) - mainAxisSize.min을 빼야 end 정렬이 실제로
+              // 오른쪽 끝에 붙음.
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 AppSecondButton(

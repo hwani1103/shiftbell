@@ -1153,23 +1153,30 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
             // 정렬로 되돌림(취소/저장 폭에 맞춰 늘렸던 이전 버전은 "디자인적으로
             // 애매하다"는 피드백). 메인 버튼(AppButton)/second button 둘 다 이
             // 자리엔 과해서, 더 담백한 세 번째 스타일(AppThirdButton)을 새로 만들어 씀.
-            if (_alarms.length < kMaxAlarmTemplatesPerShift)
-              Center(
-                child: AppThirdButton(
-                  onPressed: _addAlarm,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add, size: 16.sp),
-                      SizedBox(width: 4.w),
-                      Text(context.l10n.alarmAdd),
-                    ],
-                  ),
+            // ⭐ 최대 개수(5개)에 도달해도 버튼을 숨기지 않고 비활성 상태로 계속
+            // 보여줌 - "몇 개까지 되면 더 못 만드는지" 자체가 눈에 보이는 게
+            // 나음(사라지면 "왜 없어졌지" 헷갈릴 수 있음).
+            Center(
+              child: AppThirdButton(
+                onPressed: _alarms.length < kMaxAlarmTemplatesPerShift ? _addAlarm : null,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.add, size: 16.sp),
+                    SizedBox(width: 4.w),
+                    Text(context.l10n.alarmAdd),
+                  ],
+                ),
                 ),
               ),
             SizedBox(height: 8.h),
             Row(
-              mainAxisSize: MainAxisSize.min,
+              // ⭐ 2026-08-25 버그 수정 - mainAxisSize.min이면 이 Row가 부모
+              // Column(crossAxisAlignment.start)의 왼쪽에 내용물 크기만큼만
+              // 붙어버려서, Row 내부의 mainAxisAlignment.end가 아무 효과가
+              // 없었음(끝까지 밀 "남는 공간" 자체가 없으므로). 기본값(max)으로
+              // 두면 Row가 가로폭 전체를 차지해서 end가 정상적으로 오른쪽 끝에
+              // 붙임.
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 AppSecondButton(

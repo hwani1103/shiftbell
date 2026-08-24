@@ -415,7 +415,9 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
         );
 
       case _Family.softPastel:
-        // 둥근 시계 + 우측 상단 알림 점 - 친근한 느낌.
+        // 둥근 시계 + 2시 방향의 작은 알림 배지 - 친근한 느낌.
+        // ⭐ 2026-08-25 - 배지가 빈 색점이라 "이게 뭘 뜻하는지" 안 읽혔음 - 그
+        // 안에 알람(종) 아이콘을 넣어서 "이 시계가 울린다"는 뜻을 분명히 함.
         return Stack(
           alignment: Alignment.center,
           children: [
@@ -424,9 +426,11 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
               top: g * 0.02,
               right: g * 0.02,
               child: Container(
-                width: g * 0.24,
-                height: g * 0.24,
+                width: g * 0.34,
+                height: g * 0.34,
+                alignment: Alignment.center,
                 decoration: BoxDecoration(color: s.secondary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
+                child: Icon(Icons.notifications_active_rounded, size: g * 0.2, color: Colors.white),
               ),
             ),
           ],
@@ -564,11 +568,17 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
       case _Family.boldBlocks:
         return _lockBoldBlocks(s);
       default:
-        return _lockGeneric(s);
+        return _lockCircularDial(s);
     }
   }
 
-  Widget _lockGeneric(_ConceptSpec s) {
+  // ⭐ 2026-08-25 - 1/4/6/9/10번(오로라/소프트 파스텔/글래스모피즘/라인 아트/
+  // 머티리얼 유)의 잠금화면 - "7번(다크 뉴모피즘)의 레이아웃이 제일 낫다"는
+  // 피드백으로, 각 콘셉트 고유의 톤(색/재질감)은 그대로 두고 7번의 구성(시간을
+  // 원형 다이얼 안에 표시 + 다이얼 아래 원형 버튼 두 개)만 가져와 입힘. 원의
+  // 장식(_dialDecoration)과 버튼(_iconCircleButton)은 이미 family별로 다르게
+  // 그려지므로 콘셉트 고유 정체성은 유지됨.
+  Widget _lockCircularDial(_ConceptSpec s) {
     final w = 280.w;
     final h = 580.h;
     return _phoneFrame(
@@ -582,16 +592,75 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
           children: [
             _statusPill(s, '알람'),
             const Spacer(flex: 2),
-            _bigTime(s, '07:30', big: true),
-            SizedBox(height: 12.h),
+            Container(
+              width: 200.w,
+              height: 200.w,
+              decoration: _dialDecoration(s),
+              alignment: Alignment.center,
+              child: _bigTime(s, '07:30', big: false),
+            ),
+            SizedBox(height: 16.h),
             _shiftLabel(s, '야간 근무'),
             const Spacer(flex: 3),
-            _actionButtons(s),
-            SizedBox(height: 20.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _labeledRoundButton(s, Icons.bedtime_rounded, '5분 후', filled: false),
+                SizedBox(width: 28.w),
+                _labeledRoundButton(s, Icons.close_rounded, '끄기', filled: true),
+              ],
+            ),
+            SizedBox(height: 18.h),
             _swipeHint(s),
           ],
         ),
       ),
+    );
+  }
+
+  /// 콘셉트별 톤을 입힌 원형 다이얼 장식 - _lockCircularDial 전용.
+  BoxDecoration _dialDecoration(_ConceptSpec s) {
+    switch (s.family) {
+      case _Family.aurora:
+        return BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: 0.07),
+          border: Border.all(color: s.secondary, width: 3),
+          boxShadow: [BoxShadow(color: s.primary.withValues(alpha: 0.6), blurRadius: 24, spreadRadius: 2)],
+        );
+      case _Family.glass:
+        return BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: 0.15),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 2),
+        );
+      case _Family.lineArt:
+        return BoxDecoration(shape: BoxShape.circle, color: s.bg, border: Border.all(color: s.primary, width: 2));
+      case _Family.materialYou:
+        return BoxDecoration(
+          shape: BoxShape.circle,
+          color: s.surface,
+          boxShadow: [BoxShadow(color: s.primary.withValues(alpha: 0.25), blurRadius: 16, offset: const Offset(0, 6))],
+        );
+      default: // softPastel 등
+        return BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          border: Border.all(color: s.primary, width: 3),
+          boxShadow: [BoxShadow(color: s.primary.withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6))],
+        );
+    }
+  }
+
+  /// 아이콘 원형 버튼 + 아래 작은 라벨 - _lockCircularDial의 끄기/스누즈 버튼.
+  Widget _labeledRoundButton(_ConceptSpec s, IconData icon, String label, {required bool filled}) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _iconCircleButton(s, icon, filled: filled),
+        SizedBox(height: 6.h),
+        Text(label, style: TextStyle(fontSize: 11.sp, color: s.onBg.withValues(alpha: 0.7))),
+      ],
     );
   }
 
@@ -812,7 +881,7 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _neumorphicRoundButton(s, Icons.snooze_rounded, '5분 후', filled: false),
+                _neumorphicRoundButton(s, Icons.bedtime_rounded, '5분 후', filled: false),
                 SizedBox(width: 28.w),
                 _neumorphicRoundButton(s, Icons.close_rounded, '끄기', filled: true),
               ],
@@ -1138,22 +1207,11 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
     );
   }
 
-  Widget _actionButtons(_ConceptSpec s) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Expanded(child: _pillButton(s, '5분 후', filled: false)),
-        SizedBox(width: 14.w),
-        Expanded(child: _pillButton(s, '끄기', filled: true)),
-      ],
-    );
-  }
-
   Widget _smallActionButtons(_ConceptSpec s) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _iconCircleButton(s, Icons.snooze_rounded, filled: false),
+        _iconCircleButton(s, Icons.bedtime_rounded, filled: false),
         SizedBox(width: 8.w),
         _iconCircleButton(s, Icons.close_rounded, filled: true),
       ],
