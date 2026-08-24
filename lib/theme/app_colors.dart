@@ -25,32 +25,79 @@
 
 import 'package:flutter/material.dart';
 
-/// 앱 전반의 배경색 - 은은한 블루그레이/인디고 파스텔톤.
+// /// 앱 전반의 배경색 - 은은한 블루그레이/인디고 파스텔톤.
+// /// 달력 탭은 제외(위 주석 참고).
+// const Color kAppBackgroundPastel = Color(0xFFD9E1EE);
+
+// /// 배경색과 같은 색상 계열(Hue)에서 채도/명도만 낮춘 진한 메인 색상 - 버튼,
+// /// 강조 텍스트, 선택 상태 등에 씀. 배경과 세트로 어울리도록 같은 계열로 골랐음
+// /// (배경은 연한 블루그레이, 이건 짙은 인디고 블루 - 서로 톤온톤 관계).
+// const Color kAppMainAccent = Color(0xFF465B86);
+
+// /// 메인 색상 위에 흰 글씨가 아니라 살짝 어둡게 눌러 쓸 때(예: 버튼 눌림 상태)
+// /// 참고용으로 만들었다가, 지금은 app_button.dart 그라데이션의 어두운 쪽 끝으로
+// /// 씀(검정 쪽으로 35% 블렌드 - "그라데이션이 약하다"는 피드백으로 진하게 키움).
+// const Color kAppMainAccentDark = Color(0xFF2E3B57);
+
+// /// 카드/입력창 등 배경 위에 얹는 "표면" 색 - 순백 대신 배경 파스텔보다 살짝
+// /// 밝은 톤을 써서 배경과 카드가 서로 구분되면서도 튀지 않게 함.
+// const Color kAppSurface = Color(0xFFF2F5FA);
+
+// /// 칩(근무명 태그 등)의 테두리색 - 파스텔 배경 위에서 또렷하게 대비되도록
+// /// 블루그레이 계열의 짙은 색상을 사용. 순수 블랙(#000000)보다 살짝 부드러운
+// /// 톤으로 세련된 느낌을 냄.
+// const Color kAppChipBorder = Color(0xFF252B35);
+
+// /// 칩(근무명 태그 등)의 채움색 - 배경(kAppBackgroundPastel)보다 한 톤 밝은
+// /// 화이트에 가까운 색이라 배경 위에서 카드처럼 살짝 떠 보임.
+// const Color kAppChipFill = Color(0xFFE9EEF6);
+
+// // ⭐ 2026-08-24 추가 - 배경/버튼이 단색이라 "딱딱하다"는 피드백으로 그라데이션용
+// // 색을 추가함. app_button.dart(공용 버튼)와 main.dart(앱 배경)에서 씀.
+// // ⭐ 2026-08-24 재조정 - 첫 시도가 "거의 안 보인다"는 피드백을 받아서, 아래
+// // 두 그라데이션(버튼/배경) 모두 양 끝 색 차이를 훨씬 크게 벌림.
+
+// /// kAppMainAccent보다 밝은 톤(흰색 쪽으로 60% 블렌드) - 버튼 그라데이션의 밝은
+// /// 쪽 끝에 씀. kAppMainAccentDark(어두운 쪽 끝, 검정 쪽 35% 블렌드)와 짝을 이룸 -
+// /// 25%→45%→60% 순으로 "대비가 더 잘 되게" 계속 밝은 쪽을 더 밝게 키워옴.
+// const Color kAppMainAccentLight = Color(0xFFB5BDCF);
+
+// /// 앱 배경 그라데이션의 위쪽(밝은) 끝 - kAppBackgroundPastel을 흰색 쪽으로 50%
+// /// 블렌드한 값. 처음엔 15%라 거의 안 보였음 - 훨씬 밝게 키움.
+// const Color kAppBackgroundGradientTop = Color(0xFFECF0F7);
+
+// /// 앱 배경 그라데이션의 아래쪽(짙은) 끝 - kAppBackgroundPastel을 kAppMainAccent
+// /// 쪽으로 28% 블렌드한 값. 처음엔 8%라 거의 안 보였음 - 뚜렷하게 짙어지도록 키움.
+// const Color kAppBackgroundGradientBottom = Color(0xFFB0BBD1);
+
+
+
+/// 앱 전반의 배경색 - 은은하고 화사한 밝은 파스텔 블루 계열.
 /// 달력 탭은 제외(위 주석 참고).
-const Color kAppBackgroundPastel = Color(0xFFD9E1EE);
+const Color kAppBackgroundPastel = Color(0xFFDCE8F8);
 
 /// 배경색과 같은 색상 계열(Hue)에서 채도/명도만 낮춘 진한 메인 색상 - 버튼,
 /// 강조 텍스트, 선택 상태 등에 씀. 배경과 세트로 어울리도록 같은 계열로 골랐음
-/// (배경은 연한 블루그레이, 이건 짙은 인디고 블루 - 서로 톤온톤 관계).
-const Color kAppMainAccent = Color(0xFF465B86);
+/// (배경은 밝은 파스텔 블루, 이건 짙고 깔끔한 블루 - 서로 톤온톤 관계).
+const Color kAppMainAccent = Color(0xFF3366B8);
 
 /// 메인 색상 위에 흰 글씨가 아니라 살짝 어둡게 눌러 쓸 때(예: 버튼 눌림 상태)
 /// 참고용으로 만들었다가, 지금은 app_button.dart 그라데이션의 어두운 쪽 끝으로
 /// 씀(검정 쪽으로 35% 블렌드 - "그라데이션이 약하다"는 피드백으로 진하게 키움).
-const Color kAppMainAccentDark = Color(0xFF2E3B57);
+const Color kAppMainAccentDark = Color(0xFF20437A);
 
 /// 카드/입력창 등 배경 위에 얹는 "표면" 색 - 순백 대신 배경 파스텔보다 살짝
 /// 밝은 톤을 써서 배경과 카드가 서로 구분되면서도 튀지 않게 함.
-const Color kAppSurface = Color(0xFFF2F5FA);
+const Color kAppSurface = Color(0xFFEEF3FC);
 
 /// 칩(근무명 태그 등)의 테두리색 - 파스텔 배경 위에서 또렷하게 대비되도록
-/// 블루그레이 계열의 짙은 색상을 사용. 순수 블랙(#000000)보다 살짝 부드러운
+/// 블루 계열의 짙은 색상을 사용. 순수 블랙(#000000)보다 살짝 부드러운
 /// 톤으로 세련된 느낌을 냄.
-const Color kAppChipBorder = Color(0xFF252B35);
+const Color kAppChipBorder = Color(0xFF1D3557);
 
 /// 칩(근무명 태그 등)의 채움색 - 배경(kAppBackgroundPastel)보다 한 톤 밝은
 /// 화이트에 가까운 색이라 배경 위에서 카드처럼 살짝 떠 보임.
-const Color kAppChipFill = Color(0xFFE9EEF6);
+const Color kAppChipFill = Color(0xFFEAF2FB);
 
 // ⭐ 2026-08-24 추가 - 배경/버튼이 단색이라 "딱딱하다"는 피드백으로 그라데이션용
 // 색을 추가함. app_button.dart(공용 버튼)와 main.dart(앱 배경)에서 씀.
@@ -60,12 +107,12 @@ const Color kAppChipFill = Color(0xFFE9EEF6);
 /// kAppMainAccent보다 밝은 톤(흰색 쪽으로 60% 블렌드) - 버튼 그라데이션의 밝은
 /// 쪽 끝에 씀. kAppMainAccentDark(어두운 쪽 끝, 검정 쪽 35% 블렌드)와 짝을 이룸 -
 /// 25%→45%→60% 순으로 "대비가 더 잘 되게" 계속 밝은 쪽을 더 밝게 키워옴.
-const Color kAppMainAccentLight = Color(0xFFB5BDCF);
+const Color kAppMainAccentLight = Color(0xFF9CBFF0);
 
 /// 앱 배경 그라데이션의 위쪽(밝은) 끝 - kAppBackgroundPastel을 흰색 쪽으로 50%
 /// 블렌드한 값. 처음엔 15%라 거의 안 보였음 - 훨씬 밝게 키움.
-const Color kAppBackgroundGradientTop = Color(0xFFECF0F7);
+const Color kAppBackgroundGradientTop = Color(0xFFEEF4FC);
 
 /// 앱 배경 그라데이션의 아래쪽(짙은) 끝 - kAppBackgroundPastel을 kAppMainAccent
 /// 쪽으로 28% 블렌드한 값. 처음엔 8%라 거의 안 보였음 - 뚜렷하게 짙어지도록 키움.
-const Color kAppBackgroundGradientBottom = Color(0xFFB0BBD1);
+const Color kAppBackgroundGradientBottom = Color(0xFFA6C5F0);

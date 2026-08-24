@@ -102,10 +102,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     return PopScope(
       canPop: _step == 0,  // step 0에서만 앱 종료 허용
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _step > 0) {
-          // 앱이 종료되지 않았고 step > 0이면 이전 단계로
-          setState(() => _step--);
-        }
+        if (!didPop) _goBack();
       },
       child: Scaffold(
         // ⭐ 2026-08-24 - AppTheme.lightTheme.scaffoldBackgroundColor(현재 흰색)와
@@ -127,9 +124,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           leading: _step > 0
               ? IconButton(
                   icon: Icon(Icons.arrow_back),
-                  onPressed: () {
-                    setState(() => _step--);
-                  },
+                  onPressed: _goBack,
                 )
               : null,
         ),
@@ -142,19 +137,42 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 
   // ⭐ 2026-08-24 - "고정적으로 순환하는 교대 근무인가요?" 선택 화면(구 step 0)을
   // 삭제하고, "예-규칙적"을 눌렀을 때 가던 화면(구 step 1의 규칙적 분기,
-  // _buildShiftTypeCreation)을 새 첫 화면으로 승격함. 그 선택 화면은 없어졌지만
-  // "불규칙" 경로 자체는 여전히 존재함 - _buildShiftTypeCreation() 안의 "여기"
-  // 링크(아래)를 누르면 _isRegular만 false로 바꿔서 같은 스텝(0) 안에서
-  // _buildShiftTypesInput()으로 즉시 전환됨(별도 스텝 이동 불필요 - _buildStep()의
-  // 삼항 분기가 이미 그렇게 되어 있음). 이에 맞춰 이후 모든 스텝 번호를 1씩
-  // 당김(구 1→신 0, 구 2→신 1, ... 구 5→신 4) - _isRegular의 기본값도 nullable
-  // null에서 true로 바꿔서(필드 선언부 참고) "선택 안 함" 상태 자체가 없어짐.
+  // _buildShiftTypeCreation)을 새 첫 화면으로 승격함. 이후 모든 스텝 번호를
+  // 1씩 당김(구 1→신 0, 구 2→신 1, ... 구 5→신 4) - _isRegular 기본값도
+  // null에서 true로.
+  //
+  // ⭐ 2026-08-24 재설계 - 불규칙 플로우 단순화. 근무명 지정(step0)은 규칙/불규칙
+  // 둘 다 똑같이 거치므로("어차피 불규칙으로 가도 근무명은 똑같이 설정해야
+  // 됨"), 둘째 화면("여기" 링크가 있는 _buildPatternInput, step1)에서 바로
+  // "근무별 고정 알람을 설정하세요"(_buildMainAlarmSetup, case2의 원래
+  // isRegular==false 슬롯)로 건너뛸 수 있게 함 - 옛 불규칙 전용 화면들
+  // (_buildShiftTypesInput, _buildSelectShiftsForAlarm)은 삭제함(더 이상 도달할
+  // 경로가 없었음).
+  //
+  // 동작 원리: "여기"를 누르면 isRegular=false + _selectedShifts=모든 근무명 +
+  // _step=2를 한 번에 설정함(_buildPatternInput() 참고) - case2가 원래부터
+  // isRegular==false일 때 _buildMainAlarmSetup()을 가리키므로 새 분기가 필요
+  // 없음. step0/1은 이제 isRegular와 무관하게 화면이 하나뿐이라 삼항을 없앰
+  // (이 경로들에서 isRegular가 false가 될 수 없어짐 - 아래 case 주석 참고).
+  // 뒤로가기(_goBack())는 "step1로 돌아오면 isRegular를 항상 true로 리셋"
+  // 하나의 규칙으로 전부 처리됨 - step2(알람설정, isRegular=false)에서 한 번
+  // 뒤로가면 여전히 그 화면을 다시 보여주고(자연스러운 "방금 그 화면"),
+  // 거기서 한 번 더 뒤로가야 step1(_buildPatternInput)에 도착하며 그 순간
+  // isRegular가 true로 리셋됨 - 근무명은 _allShiftTypes에 계속 그대로
+  // 남아있으므로(이 흐름 전체에서 건드리지 않음) 거기서 다시 규칙적 패턴을
+  // 이어서 만들 수도 있음.
   Widget _buildStep() {
     switch (_step) {
       case 0:
-        return _isRegular == true ? _buildShiftTypeCreation() : _buildShiftTypesInput();
+        // ⭐ step0에서 isRegular가 false일 수 있는 경로가 이제 없음("여기"는
+        // step1에서만 누를 수 있고, 그 즉시 step2로 건너뜀 - 아래 _buildStep()
+        // 클래스 주석과 _goBack() 참고) - 삼항 없이 이 화면 하나만.
+        return _buildShiftTypeCreation();
       case 1:
-        return _isRegular == true ? _buildPatternInput() : _buildSelectShiftsForAlarm();
+        // ⭐ 같은 이유로 step1도 isRegular와 무관하게 항상 이 화면 하나 -
+        // "여기"를 누르면 step이 곧장 2로 바뀌므로 step1에 머무른 채
+        // isRegular만 false가 되는 경우가 없음.
+        return _buildPatternInput();
       case 2:
         return _isRegular == true ? _buildTodayIndexInput() : _buildMainAlarmSetup();
       case 3:
@@ -164,6 +182,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
       default:
         return Container();
     }
+  }
+
+  // ⭐ 2026-08-24 - 뒤로가기 공통 처리(PopScope + AppBar 아이콘 둘 다 이걸 씀).
+  // step1(_buildPatternInput)로 "돌아오는" 모든 경로에서 isRegular를 true로
+  // 리셋함 - step1은 이제 항상 규칙적 화면 하나뿐이라, 거기 서 있는 동안은
+  // 항상 "다시 규칙 패턴을 이어 만들 수 있는" 상태여야 함(사용자 요구사항:
+  // "여기를 눌러 알람설정까지 갔다가 뒤로 나오면 다시 규칙 패턴으로 갈 수도
+  // 있어야 한다"). 그 뒤(step2/3)에서 알람설정 화면을 보고 있었다면(isRegular
+  // false) 그것도 이 리셋 한 번으로 자연스럽게 해소됨 - step2로 뒤로가면
+  // 여전히 isRegular==false라 case2가 알람설정 화면을 다시 보여주고(맞는
+  // 동작), 거기서 한 번 더 뒤로가면 step1에 도착하는 이 시점에 비로소 true로
+  // 리셋됨.
+  void _goBack() {
+    if (_step == 0) return;
+    setState(() {
+      _step--;
+      if (_step == 1) _isRegular = true;
+    });
   }
 
   // ⭐ 2026-08-24 - 온보딩 새 첫 화면(구 step1 규칙적 분기가 승격됨). 텍스트/칩
@@ -269,159 +305,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     );
   }
 
-  Widget _buildShiftTypesInput() {
-    return Padding(
-      padding: EdgeInsets.all(24.w),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${context.l10n.onboardingCheckShiftTypes}\n${context.l10n.onboardingAddIfMissing}',
-                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  context.l10n.onboardingShiftLimitHint(_maxCustomShiftTypes, kMaxShiftNameLength),
-                  style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                ),
-                SizedBox(height: 2.h),
-                Text(
-                  context.l10n.onboardingUsableEvenIfNotInPattern,
-                  style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                ),
-              ],
-            ),
-            SizedBox(height: 24.h),
-            
-            Wrap(
-              spacing: 8.w,
-              runSpacing: 8.h,
-              children: [
-                ..._allShiftTypes.map((name) {
-                  // ⭐ 기본 카드(주간/야간/오전/오후/휴무)도 커스텀 카드와 동일하게
-                  // 삭제 가능하도록 X 버튼을 항상 표시함 (예전엔 커스텀 카드만 가능했음).
-                  return Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {},
-                        child: Text(name),
-                      ),
-                      Positioned(
-                        right: -4,
-                        top: -4,
-                        child: GestureDetector(
-                          onTap: () => _deleteShiftType(name),
-                          child: Container(
-                            width: 20.w,
-                            height: 20.h,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.error,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.close,
-                              size: 14.sp,
-                              color: Theme.of(context).colorScheme.surface,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-                
-                OutlinedButton.icon(
-                  onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
-                  icon: Icon(Icons.add),
-                  label: Text(context.l10n.commonAdd),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Theme.of(context).colorScheme.secondary,
-                  ),
-                ),
-              ],
-            ),
-            
-            SizedBox(height: 48.h),
-            
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  setState(() => _step = 1);
-                },
-                child: Text(context.l10n.commonNext),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ⭐ 불규칙: 실제 사용할 근무 선택
-  Widget _buildSelectShiftsForAlarm() {
-    return Padding(
-      padding: EdgeInsets.all(24.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.onboardingSelectAllInPattern,
-            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 24.h),
-
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
-            children: _allShiftTypes.map((name) {
-              final isSelected = _selectedShifts.contains(name);
-
-              return ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    if (isSelected) {
-                      _selectedShifts.remove(name);
-                    } else {
-                      _selectedShifts.add(name);
-                    }
-                  });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isSelected
-                    ? Theme.of(context).colorScheme.secondary
-                    : Theme.of(context).colorScheme.surfaceVariant,  // 선택 전: 회색
-                  foregroundColor: isSelected
-                    ? Theme.of(context).colorScheme.onSecondary
-                    : Theme.of(context).colorScheme.onSurfaceVariant,  // 선택 전: 회색 텍스트
-                  elevation: isSelected ? 2 : 0,
-                ),
-                child: Text(name),
-              );
-            }).toList(),
-          ),
-          
-          Spacer(),
-          
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _selectedShifts.isEmpty ? null : () {
-                setState(() => _step = 2);
-              },
-              child: Text(context.l10n.commonNext),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
+  // ⭐ 2026-08-24 - _buildShiftTypesInput()(불규칙용 근무명 지정 화면 복제본)과
+  // _buildSelectShiftsForAlarm()(불규칙용 "실제 사용할 근무 선택" 화면)을
+  // 삭제함 - _buildStep()을 "여기" 지름길 방식으로 재설계하면서 이 두 화면에
+  // 도달하는 경로 자체가 완전히 사라짐(_isRegular가 false가 되는 시점이
+  // _step==1일 때뿐이라, _step==0이나 옛 case1의 그 위치에서 false가 되는
+  // 경우가 구조적으로 없음 - _buildStep()의 클래스 주석 참고). 근무명 지정은
+  // 이제 규칙/불규칙 상관없이 _buildShiftTypeCreation() 하나로 통일됨.
   Widget _buildPatternInput() {
     return Padding(
       padding: EdgeInsets.all(24.w),
@@ -433,13 +323,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 6.h),
-          // ⭐ 2026-08-24 - 첫 화면(_buildShiftTypeCreation)에 있던 "여기" 링크를
-          // 여기로 옮김 - 불규칙 플로우도 근무명 지정은 똑같이 거치므로, "패턴이
-          // 있는지"를 실제로 판단하는 이 화면에서 물어보는 게 맥락상 더 맞음.
-          // 스타일은 첫 화면의 부연설명과 동일(14.sp, onSurface, wordSafeSpans).
-          // "여기"를 누르면 어디로 보낼지는 아직 미정 - 일단 기존과 동일하게
-          // _isRegular만 false로 바꿈(_step은 그대로 1에 두면 _buildStep()의
-          // 삼항 분기가 즉시 _buildSelectShiftsForAlarm()으로 전환함).
+          // ⭐ 2026-08-24 - "여기" 링크: 불규칙 플로우 단순화. 규칙/불규칙 둘 다
+          // 근무명 지정(_buildShiftTypeCreation)은 이미 동일하게 거쳤으므로,
+          // 여기서 누르면 그 근무명들(_allShiftTypes)을 그대로 _selectedShifts에
+          // 담아 step을 2로 바로 건너뛰어 "근무별 고정 알람을 설정하세요"
+          // 화면으로 감(그 자리는 원래부터 불규칙용 슬롯이었음 - case2의
+          // isRegular==false 분기, 손 안 댐). _shiftAlarms는 일부러 안 지움 -
+          // "여기"를 눌렀다 뒤로 갔다를 반복해도 이미 설정한 알람이 안 사라지게.
+          // 뒤로가기 시 step1로 돌아오면 _goBack()이 isRegular를 다시 true로
+          // 되돌려 이 화면(패턴 입력)을 보여줌 - 거기서 다시 규칙 패턴을
+          // 이어 만들 수도 있음.
           Text.rich(
             TextSpan(
               children: [
@@ -460,8 +353,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     ..onTap = () {
                       setState(() {
                         _isRegular = false;
-                        _shiftAlarms.clear();
-                        _selectedShifts.clear();
+                        _selectedShifts = List.from(_allShiftTypes);
+                        _step = 2;
                       });
                     }),
                 ),
