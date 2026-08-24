@@ -56,17 +56,17 @@ class AppShiftChip extends StatelessWidget {
     final textColor = enabled ? kAppChipBorder : kAppChipBorder.withValues(alpha: 0.45);
 
     final chipBody = Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
       decoration: BoxDecoration(
         color: fillColor,
         borderRadius: BorderRadius.circular(radius),
         // ⭐ 두꺼운 테두리(2.2) - 이 앱의 칩을 다른 앱과 구분 짓는 특색으로 삼기로 함.
-        border: Border.all(color: borderColor, width: 2.2),
+        border: Border.all(color: borderColor, width: 3.0),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 15.sp,
+          fontSize: 14.sp,
           fontWeight: FontWeight.w600,
           color: textColor,
         ),
@@ -75,6 +75,9 @@ class AppShiftChip extends StatelessWidget {
 
     // onTap이 있으면 InkWell로 감싸 눌림 효과를 줌 - 칩의 둥근 모서리와
     // 잉크 이펙트 모양이 어긋나지 않도록 같은 radius를 씀.
+    // ⭐ 2026-08-24 - "탭했을 때 반응이 잘 안 느껴진다"는 피드백으로 splash/
+    // highlight 색을 기본값(테마의 옅은 회색) 대신 메인 색상 기반으로 명시함 -
+    // 파스텔 칩 배경 위에서 기본 리플이 너무 옅어서 눌림이 잘 안 보였음.
     final chip = onTap == null
         ? chipBody
         : Material(
@@ -82,6 +85,8 @@ class AppShiftChip extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(radius),
               onTap: enabled ? onTap : null,
+              splashColor: kAppMainAccent.withValues(alpha: 0.25),
+              highlightColor: kAppMainAccent.withValues(alpha: 0.15),
               child: chipBody,
             ),
           );

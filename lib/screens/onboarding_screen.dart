@@ -260,6 +260,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               onPressed: () {
                 setState(() => _step = 1);
               },
+              // ⭐ 2026-08-24 - 기본 버튼 글자 크기(테마 기본값, 대략 14 수준)가
+              // 첫 화면의 "다음" 버튼치고 작다는 피드백으로 이 버튼만 키움.
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 14.h),
+                textStyle: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
+              ),
               child: Text(context.l10n.commonNext),
             ),
           ),
@@ -494,8 +500,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     itemCount: _pattern.length,
     itemBuilder: (context, index) {
       final isSelected = isSelectable && _todayIndex == index;
-      
+
+      // ⭐ 2026-08-24 - "탭했을 때 반응이 잘 안 느껴진다"는 피드백으로 splash/
+      // highlight 색을 명시하고, Container의 radius(8.r)와 맞춘 borderRadius를
+      // InkWell에도 지정함(예전엔 없어서 리플이 각진 사각형으로 어긋나 보였음).
       return InkWell(
+        borderRadius: BorderRadius.circular(8.r),
+        splashColor: kAppMainAccent.withValues(alpha: 0.25),
+        highlightColor: kAppMainAccent.withValues(alpha: 0.15),
         onTap: isSelectable
             ? () {
                 setState(() => _todayIndex = index);
@@ -1174,18 +1186,23 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           child: Text(context.l10n.commonCancel),
         ),
         TextButton(
-          onPressed: _alarms.isEmpty
-              ? null
-              : () {
-                  _alarms.sort((a, b) {
-                    final aMinutes = a.time.hour * 60 + a.time.minute;
-                    final bMinutes = b.time.hour * 60 + b.time.minute;
-                    return aMinutes.compareTo(bMinutes);
-                  });
+          // ⭐ 2026-08-24 버그 수정 - 예전엔 _alarms.isEmpty일 때 저장 버튼이
+          // 비활성화됐음. 알람을 3개→2개→1개→0개 순으로 지우다가 0개가 되는
+          // 순간 저장이 막혀서 "알람 없음"으로 저장할 방법이 없었음(사용자 확인
+          // 재현: 저장 후 재진입해서 전부 삭제하려는 경우). settings_tab.dart의
+          // 동일한 다이얼로그(고정 알람 수정)는 애초에 이 가드가 없어서 항상
+          // 저장 가능했음 - 여기만 어긋나 있던 것이라 그쪽과 동일하게 무조건
+          // 저장 가능하도록 가드를 제거함.
+          onPressed: () {
+            _alarms.sort((a, b) {
+              final aMinutes = a.time.hour * 60 + a.time.minute;
+              final bMinutes = b.time.hour * 60 + b.time.minute;
+              return aMinutes.compareTo(bMinutes);
+            });
 
-                  widget.onSave(_alarms);
-                  Navigator.pop(context);
-                },
+            widget.onSave(_alarms);
+            Navigator.pop(context);
+          },
           child: Text(context.l10n.commonSave),
         ),
       ],
