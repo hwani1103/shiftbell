@@ -205,48 +205,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               ),
             ),
           ),
-          SizedBox(height: 4.h),
-          // ⭐ "여기"만 다른 스타일(강조색+밑줄)로 탭 가능하게 하는 인라인 링크.
-          // 나머지 문장과 같은 문단 안에서 "여기"만 눌러야 해서 Text.rich +
-          // TapGestureRecognizer 조합을 씀 - 별도 버튼으로 빼면 문장이 끊겨
-          // 부자연스러움. prefix/suffix도 위와 같은 이유로 wordSafeSpans() 사용 -
-          // "여기" 자체는 한 단어라 그대로 둠.
-          Text.rich(
-            TextSpan(
-              children: [
-                ...wordSafeSpans(
-                  context.l10n.onboardingSwitchToIrregularPrefix,
-                  TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
-                ),
-                TextSpan(
-                  text: context.l10n.onboardingSwitchToIrregularLink,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: kAppMainAccent,
-                    decoration: TextDecoration.underline,
-                    decorationColor: kAppMainAccent,
-                  ),
-                  recognizer: (_switchToIrregularRecognizer
-                    ..onTap = () {
-                      // ⭐ 구 step0 선택 화면의 "아니오" 버튼과 동일한 동작
-                      // (_isRegular=false + 상태 초기화) - _step은 그대로 0에
-                      // 둔 채로 바꾸기만 하면 _buildStep()의 삼항 분기가 즉시
-                      // _buildShiftTypesInput()으로 전환해줌(별도 화면 이동 불필요).
-                      setState(() {
-                        _isRegular = false;
-                        _shiftAlarms.clear();
-                        _selectedShifts.clear();
-                      });
-                    }),
-                ),
-                ...wordSafeSpans(
-                  context.l10n.onboardingSwitchToIrregularSuffix,
-                  TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
-                ),
-              ],
-            ),
-          ),
+          // ⭐ 2026-08-24 - "만약 규칙적이지 않다면 여기를 눌러주세요" 링크는
+          // 둘째 화면(_buildPatternInput, "버튼을 탭해서 패턴을 완성해주세요")
+          // 으로 옮김 - 불규칙 플로우도 근무명 지정은 똑같이 거쳐야 하니, "패턴이
+          // 있는지" 판단하는 맥락(둘째 화면)에서 물어보는 게 더 자연스러움.
           SizedBox(height: 24.h),
 
           Expanded(
@@ -275,8 +237,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.add, size: 18.sp),
-                        SizedBox(width: 4.w),
+                        Icon(Icons.add, size: 16.sp),
+                        SizedBox(width: 0.3.w),
                         Text(context.l10n.commonAdd),
                       ],
                     ),
@@ -470,6 +432,46 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           Text(
             context.l10n.onboardingTapToCompletePattern,
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 6.h),
+          // ⭐ 2026-08-24 - 첫 화면(_buildShiftTypeCreation)에 있던 "여기" 링크를
+          // 여기로 옮김 - 불규칙 플로우도 근무명 지정은 똑같이 거치므로, "패턴이
+          // 있는지"를 실제로 판단하는 이 화면에서 물어보는 게 맥락상 더 맞음.
+          // 스타일은 첫 화면의 부연설명과 동일(14.sp, onSurface, wordSafeSpans).
+          // "여기"를 누르면 어디로 보낼지는 아직 미정 - 일단 기존과 동일하게
+          // _isRegular만 false로 바꿈(_step은 그대로 1에 두면 _buildStep()의
+          // 삼항 분기가 즉시 _buildSelectShiftsForAlarm()으로 전환함).
+          Text.rich(
+            TextSpan(
+              children: [
+                ...wordSafeSpans(
+                  context.l10n.onboardingSwitchToIrregularPrefix,
+                  TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+                ),
+                TextSpan(
+                  text: context.l10n.onboardingSwitchToIrregularLink,
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                    color: kAppMainAccent,
+                    decoration: TextDecoration.underline,
+                    decorationColor: kAppMainAccent,
+                  ),
+                  recognizer: (_switchToIrregularRecognizer
+                    ..onTap = () {
+                      setState(() {
+                        _isRegular = false;
+                        _shiftAlarms.clear();
+                        _selectedShifts.clear();
+                      });
+                    }),
+                ),
+                ...wordSafeSpans(
+                  context.l10n.onboardingSwitchToIrregularSuffix,
+                  TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+                ),
+              ],
+            ),
           ),
           SizedBox(height: 16.h),
 

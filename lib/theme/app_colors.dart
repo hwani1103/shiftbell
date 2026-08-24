@@ -57,10 +57,10 @@ const Color kAppChipFill = Color(0xFFE9EEF6);
 // ⭐ 2026-08-24 재조정 - 첫 시도가 "거의 안 보인다"는 피드백을 받아서, 아래
 // 두 그라데이션(버튼/배경) 모두 양 끝 색 차이를 훨씬 크게 벌림.
 
-/// kAppMainAccent보다 밝은 톤(흰색 쪽으로 45% 블렌드) - 버튼 그라데이션의 밝은
+/// kAppMainAccent보다 밝은 톤(흰색 쪽으로 60% 블렌드) - 버튼 그라데이션의 밝은
 /// 쪽 끝에 씀. kAppMainAccentDark(어두운 쪽 끝, 검정 쪽 35% 블렌드)와 짝을 이룸 -
-/// 처음엔 25%/기본값이라 차이가 약했는데, 확실히 티가 나도록 범위를 넓힘.
-const Color kAppMainAccentLight = Color(0xFF99A5BC);
+/// 25%→45%→60% 순으로 "대비가 더 잘 되게" 계속 밝은 쪽을 더 밝게 키워옴.
+const Color kAppMainAccentLight = Color(0xFFB5BDCF);
 
 /// 앱 배경 그라데이션의 위쪽(밝은) 끝 - kAppBackgroundPastel을 흰색 쪽으로 50%
 /// 블렌드한 값. 처음엔 15%라 거의 안 보였음 - 훨씬 밝게 키움.
