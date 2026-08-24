@@ -31,6 +31,7 @@
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""
+            android:screenOrientation="portrait"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
@@ -144,6 +145,15 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/calendar_widget_info"/>
         </receiver>
+
+        <!-- ⭐ 2026-08-24 추가 - AdMob 앱 ID.
+             이 meta-data가 없으면 AdMob SDK가 앱 시작 시점에 의도적으로 크래시시킴.
+             지금 값은 구글이 공개한 "테스트 전용" 앱 ID로, 계정 없이 쓸 수 있음.
+             ⚠️ 실제 배포 전 본인 AdMob 앱 ID로 교체할 것
+             (lib/constants/ad_config.dart의 kBannerAdUnitId도 같이 교체). -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
 
     </application>
 

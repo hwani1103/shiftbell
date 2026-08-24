@@ -77,6 +77,12 @@ dependencies:
   # 되면 안 됨 - 친구는 read만 해야 함) uid가 필요함. Spark 무료 플랜 포함,
   # 사용자가 콘솔에서 "Anonymous" 로그인 방법만 켜주면 됨.
   firebase_auth: ^6.5.7
+  # ⭐ 2026-08-24: 9.x가 끌고 오는 네이티브 play-services-ads(25.4.0)가 이 프로젝트의
+  # Kotlin 컴파일러(android/settings.gradle.kts, 2.1.0)보다 최신 metadata로 컴파일돼
+  # 있어서 compileDevDebugKotlin이 실패함. Kotlin 버전을 올리면 알람 관련 네이티브
+  # 코드 전체 빌드에 영향을 주므로, 대신 이 버전을 호환되는 5.1.0으로 고정함
+  # (play-services-ads 23.0.0, Kotlin 2.1.0과 호환 확인됨).
+  google_mobile_ads: 5.1.0
 
 dev_dependencies:
   flutter_test:

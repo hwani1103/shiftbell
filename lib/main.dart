@@ -14,6 +14,8 @@ import 'screens/settings_tab.dart';
 import 'screens/friend_list_screen.dart';
 import 'screens/permission_intro_screen.dart';
 import 'widgets/permission_warning_banner.dart';
+import 'widgets/banner_ad_slot.dart';
+import 'services/ad_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/shift_schedule.dart';
@@ -82,6 +84,12 @@ void main() async {
   // on/off"를 미리 읽었는데, 이제는 9개 달력 테마 중 뭐가 선택돼 있는지를
   // 미리 읽음. 앱 전체 밝기는 항상 라이트 고정이고, 이 값은 오직 (1) 달력
   // 탭 자체가 어떤 테마로 그려질지 (2) 시스템 상태표시줄 아이콘 밝기에만 씀.
+  // ⭐ 광고 SDK 초기화 + 배너가 차지할 높이를 첫 프레임 전에 미리 확정해둠.
+  // 화면을 그리는 중에 높이를 구하면 "높이 모르는 프레임 → 아는 프레임"으로 한 번
+  // 튀는데, 그 튐을 막는 게 이 슬롯의 목적이라 여기서 미리 함.
+  // 실패해도 예외를 던지지 않고 fallback 높이로 넘어감 (ad_service.dart 참고).
+  await AdService.warmUp();
+
   final initialCalendarTheme = await CalendarThemeNotifier.loadInitial();
 
   runApp(
@@ -379,16 +387,41 @@ Future<void> _handleMethod(MethodCall call) async {
         }
       },
       child: Scaffold(
-        body: Stack(
+        // ⭐ 2026-08-24 추가 - 배너 광고 자리(BannerAdSlot)를 탭 화면 바깥,
+        // BottomNavigationBar 바로 위에 둠. Column으로 감싸서 "탭 컨텐츠(Expanded)
+        // + 광고 슬롯" 순서로 쌓았고, 광고 슬롯은 Offstage로 감싸 달력 탭(index 1)일
+        // 때만 자리를 차지하게 함.
+        //
+        // 왜 _tabs[_currentIndex]처럼 탭 안에 안 넣고 여기 두는가: 이 화면은
+        // IndexedStack이 아니라 `_tabs[_currentIndex]` 하나만 트리에 올리는 구조라,
+        // 탭을 옮기면 이전 탭 위젯이 통째로 dispose됨. 광고를 달력 탭 위젯 안에
+        // 넣으면 달력 탭을 떠났다 돌아올 때마다 BannerAd와 그 안드로이드 플랫폼
+        // 뷰가 매번 새로 생성돼서 (1) 탭 전환마다 버벅이고 (2) 광고가 매번 새로
+        // 요청됨. Offstage는 자식을 계속 mount된 채로 유지하면서(=BannerAd/플랫폼
+        // 뷰가 살아있음) 화면에서 크기·렌더링만 뺀다 - 그래서 탭을 몇 번을 오가도
+        // 광고는 앱 시작 시 딱 한 번만 로드되고, 달력 탭으로 돌아오면 다시
+        // "짠" 나타나기만 함(재생성 없음).
+        body: Column(
           children: [
-            // 탭 화면
-            _tabs[_currentIndex],
-            // ⭐ 권한 경고 배너 (하단에 오버레이)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: const PermissionWarningBanner(),
+            Expanded(
+              child: Stack(
+                children: [
+                  // 탭 화면
+                  _tabs[_currentIndex],
+                  // ⭐ 권한 경고 배너 (하단에 오버레이)
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: const PermissionWarningBanner(),
+                  ),
+                ],
+              ),
+            ),
+            // 달력 탭(index 1)에서만 자리를 차지함 - 다른 탭에선 높이 0.
+            Offstage(
+              offstage: _currentIndex != 1,
+              child: const BannerAdSlot(),
             ),
           ],
         ),
