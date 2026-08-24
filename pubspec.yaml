@@ -1,7 +1,7 @@
 name: shiftbell
 description: 교대근무자를 위한 자동 알람 관리 앱
 publish_to: 'none'
-version: 1.0.17+19
+version: 1.0.22+24
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -56,7 +56,7 @@ dependencies:
   audioplayers: ^5.2.1
 
   # 앱 업데이트 체크
-  in_app_update: ^4.2.3
+  package_info_plus: ^8.1.2
   url_launcher: ^6.2.1
 
   # ⭐ 친구 공유 - 카카오톡/SMS 등 OS 공유 시트로 바로 넘기기

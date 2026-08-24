@@ -2,7 +2,7 @@
 
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:flutter/services.dart';
+import '../constants/platform_channel.dart';
 import '../models/alarm_type.dart';
 import '../models/alarm.dart';
 import '../models/shift_schedule.dart';
@@ -18,7 +18,7 @@ class DatabaseService {
 
   static Database? _database;
   static Completer<Database>? _initCompleter;
-  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+  static const platform = kAlarmChannel;
 
   // ⭐ HIGH-2 수정: Completer 패턴으로 Race Condition 완전 해결
   Future<Database> get database async {
@@ -55,7 +55,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 17,  // v17: friends 테이블을 Firestore ownerId 기반으로 재설계 (친구공유_v1_스펙.md)
+      version: 18,  // v18: shift_schedule.custom_shift_colors 추가 ("근무명 색상 변경" 기능 복원)
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -101,6 +101,7 @@ class DatabaseService {
         active_shift_types TEXT,
         start_date TEXT,
         shift_colors TEXT,
+        custom_shift_colors TEXT,
         assigned_dates TEXT,
         shift_durations TEXT
       )
@@ -435,6 +436,18 @@ class DatabaseService {
       )
     ''');
     print('✅ DB 업그레이드 완료 (v$oldVersion → v17): friends 테이블을 Firestore ownerId 기반으로 재설계');
+  }
+
+  // v18: "근무명 색상 변경" 기능 복원 - 사용자가 직접 지정한(테마 무관 고정) 색상만
+  // 담는 별도 컬럼 추가. 기존 shift_colors는 계속 "테마 디폴트 + 이 오버라이드를 합친
+  // 최종 캐시" 역할(위젯/전체근무표용)로 남고, 이 컬럼이 진짜 오버라이드 원본.
+  if (oldVersion < 18) {
+    try {
+      await db.execute('ALTER TABLE shift_schedule ADD COLUMN custom_shift_colors TEXT');
+    } catch (e) {
+      print('⚠️ custom_shift_colors 컬럼 추가 스킵(이미 존재 가능성): $e');
+    }
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v18): shift_schedule.custom_shift_colors 추가');
   }
 }
 

@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../models/shift_schedule.dart';
+import '../models/calendar_theme.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
+import '../services/update_service.dart';
 import '../models/alarm.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -859,54 +861,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     );
   }
 
-  // 근무명 색상 생성 - 실제 패턴 순서 기반
-Map<String, int> _generateShiftColors() {
-  final Map<String, int> colors = {};
-
-  // 실제 사용되는 근무명 목록 (패턴/선택 등장 순서 유지)
-  List<String> usedShifts;
-  if (_isRegular == true) {
-    // 규칙적: 패턴에서 등장 순서대로
-    usedShifts = [];
-    for (var shift in _pattern) {
-      if (!usedShifts.contains(shift)) {
-        usedShifts.add(shift);
-      }
-    }
-  } else {
-    // 불규칙: 선택된 근무명 순서대로
-    usedShifts = [..._selectedShifts];
+  // ⭐ 근무명 색상 생성 - 2026-08-19부터 "근무명 색상 변경" 기능 복원과 함께
+  // 온보딩 전용 파스텔 팔레트 계산(패턴 등장 순서 기반)을 버리고, 실제 화면
+  // (calendar_tab.dart)이 쓰는 것과 동일한 effectiveShiftColors()로 통일함 - 그래야
+  // 온보딩 직후 위젯/전체근무표(shiftColors 캐시를 읽는 쪽)가 실제 달력 탭과 같은
+  // 색을 보여줌(온보딩 시점엔 아직 사용자가 색을 하나도 지정 안 했으니
+  // customColors는 없음 - 그래서 결과는 곧 kDefaultCalendarThemeId 디폴트 그대로).
+  // 순서는 shiftTypes(=_allShiftTypes, 아래서 그대로 넘김) 기준 - calendar_tab.dart도
+  // 항상 이 순서로 계산하므로 이렇게 맞춰야 이후 색이 안 어긋남.
+  Map<String, int> _generateShiftColors() {
+    return effectiveShiftColors(_allShiftTypes, kDefaultCalendarThemeId, null)
+        .map((name, color) => MapEntry(name, color.value));
   }
-
-  // ⭐ CRITICAL FIX: 패턴/선택에 안 쓰인 나머지 카드(예: 오전/오후)도 색상을 배정함.
-  // 이제 이런 카드도 고정 알람 설정이나 날짜별 근무 변경에서 선택 가능해졌는데,
-  // 색상이 없으면 화면에서 무난한 회색으로만 표시돼서 구분이 잘 안 됨. 패턴/선택에
-  // 쓰인 것들이 먼저 팔레트를 배정받고(기존 동작 그대로 유지), 나머지는 등장 순서
-  // 그대로 이어서 배정받음.
-  for (var shift in _allShiftTypes) {
-    if (!usedShifts.contains(shift)) {
-      usedShifts.add(shift);
-    }
-  }
-
-  // 1. 휴무 계열 → 명확한 빨강
-  for (var shift in usedShifts) {
-    if (isRestShiftName(shift)) {
-      colors[shift] = 0xFFEF5350;
-    }
-  }
-
-  // 2. 나머지 근무 → 파스텔 팔레트에서 패턴 등장 순서대로 할당
-  final nonRestShifts = usedShifts.where((s) => !isRestShiftName(s)).toList();
-
-  for (int i = 0; i < nonRestShifts.length && i < 19; i++) {
-    final shift = nonRestShifts[i];
-    final color = ShiftSchedule.shiftPalette[i % 19];
-    colors[shift] = color.value;
-  }
-
-  return colors;
-}
 
 Future<void> _saveAlarmTemplates() async {
   for (var entry in _shiftAlarms.entries) {
@@ -989,6 +955,12 @@ Future<void> _saveAndFinish() async {
       print('❌ AlarmNotifier 갱신 실패: $e');
     }
   }
+
+  // ⭐ "업데이트 후 첫 실행 안내가 기존 유저에게 안 뜬다" 버그 수정의 일부
+  // (update_service.dart의 markOnboardingBaselineVersion 주석 참고) - 지금
+  // 온보딩을 마치는 사람은 "방금 이 버전으로 막 시작한" 사람이니, 이 버전을
+  // 기준선으로 남겨서 나중에 릴리즈 노트가 신규 유저에게 잘못 뜨지 않게 함.
+  await UpdateService.markOnboardingBaselineVersion();
 
   // ⭐ 온보딩 완료 후 무조건 달력탭으로 이동
   if (mounted) {

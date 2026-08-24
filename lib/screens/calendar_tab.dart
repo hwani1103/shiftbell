@@ -20,6 +20,7 @@ import '../providers/overtime_provider.dart';
 import '../providers/work_hours_settings_provider.dart';
 import '../services/work_hours_calculator.dart';
 import 'package:flutter/services.dart';
+import '../constants/platform_channel.dart';
 import 'all_shifts_view.dart';
 import '../utils/holiday_util.dart';
 import '../utils/weekday_util.dart';
@@ -58,7 +59,7 @@ class CalendarTab extends ConsumerStatefulWidget {  // ⭐ 변경
 }
 
 class _CalendarTabState extends ConsumerState<CalendarTab> {  // ⭐ 변경
-  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');  // ⭐ 추가
+  static const platform = kAlarmChannel;  // ⭐ 추가
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -72,21 +73,21 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {  // ⭐ 변경
   // 색상 메서드는 그대로 유지
   // calendar_tab.dart의 _getShiftBackgroundColor() 함수 수정
 
-// ⭐ "근무명 색상 변경" 기능 삭제 - schedule.shiftColors(DB에 저장된 값)를
-// 더 이상 읽지 않고, 선택된 달력 테마의 확정 팔레트로 매번 계산함
-// (models/calendar_theme.dart의 assignShiftColors, onboarding_screen.dart의
-// _generateShiftColors()와 동일한 "휴무=고정 빨강, 나머지는 생성 순서대로
-// 팔레트 배정" 규칙). 테마가 라이트/다크 어느 쪽이든 같은 함수 하나로 처리됨 -
-// CalendarTab을 감싼 Theme(main.dart)가 이미 이 화면의 밝기를 결정해주므로,
-// 여기서는 Theme.of(context).brightness만 보고 팔레트를 고르면 됨.
+// ⭐ 선택된 달력 테마의 확정 팔레트로 근무 색상을 계산함(models/calendar_theme.dart의
+// assignShiftColorsForTheme - "휴무=고정 빨강, 나머지는 생성 순서대로 팔레트 배정"
+// 규칙). ref.watch라 테마가 바뀌면 색도 즉시 다시 계산됨.
 // ⭐ "비슷한 톤 테마끼리 근무 색상까지 똑같아서 차별점이 없다"는 지적으로
 // 테마별 전용 팔레트/로테이션(assignShiftColorsForTheme)을 쓰도록 변경 -
 // 예전엔 라이트/다크 두 팔레트만 있었지만 이제 테마마다(그룹별로) 다른
-// 팔레트/시작 순서를 씀. ref.watch라 테마가 바뀌면 색도 즉시 다시 계산됨.
+// 팔레트/시작 순서를 씀.
+// ⭐ 2026-08-19 "근무명 색상 변경" 기능 복원 - 여기서 테마 디폴트 위에
+// schedule.customShiftColors(사용자가 직접 고정한 색)를 덮어씀
+// (effectiveShiftColors 참고) - 이래야 사용자가 색을 지정한 근무는 테마를
+// 바꿔도 그 색 그대로 유지됨.
 Map<String, Color> _shiftColorMap(ShiftSchedule? schedule) {
   if (schedule == null) return {};
   final theme = ref.watch(calendarThemeProvider);
-  return assignShiftColorsForTheme(schedule.shiftTypes, theme);
+  return effectiveShiftColors(schedule.shiftTypes, theme, schedule.customShiftColors);
 }
 
 Color _getShiftBackgroundColor(String shift, ShiftSchedule? schedule) {
@@ -476,26 +477,29 @@ Widget build(BuildContext context) {
                           if (reclaimsSixthRow && _isSixthRowEmptyCell(day, focusedDay)) {
                             return Container();
                           }
-                          return _buildThemedCell(day, false, false, schedule);
+                          return _buildThemedCell(day, false, false, schedule, focusedDay);
                         },
                         outsideBuilder: (context, day, focusedDay) {
                           if (reclaimsSixthRow && _isSixthRowEmptyCell(day, focusedDay)) {
                             return Container();
                           }
-                          return _buildThemedCell(day, false, true, schedule);
+                          return _buildThemedCell(day, false, true, schedule, focusedDay);
                         },
                         todayBuilder: (context, day, focusedDay) {
                           if (reclaimsSixthRow && _isSixthRowEmptyCell(day, focusedDay)) {
                             return Container();
                           }
-                          final isOutsideMonth = day.month != _focusedDay.month || day.year != _focusedDay.year;
-                          return _buildThemedCell(day, true, isOutsideMonth, schedule);
+                          // ⭐ 위 _buildThemedCell 주석과 동일한 이유로, "오늘이 지금 이
+                          // 페이지 기준 바깥달 날짜인가"도 상태(_focusedDay)가 아니라 이
+                          // 콜백이 실제로 받은 focusedDay(그 페이지가 나타내는 달) 기준으로.
+                          final isOutsideMonth = day.month != focusedDay.month || day.year != focusedDay.year;
+                          return _buildThemedCell(day, true, isOutsideMonth, schedule, focusedDay);
                         },
                         selectedBuilder: (context, day, focusedDay) {
                           if (reclaimsSixthRow && _isSixthRowEmptyCell(day, focusedDay)) {
                             return Container();
                           }
-                          return _buildThemedCell(day, isSameDay(day, DateTime.now()), false, schedule, isSelected: true);
+                          return _buildThemedCell(day, isSameDay(day, DateTime.now()), false, schedule, focusedDay, isSelected: true);
                         },
                       ),
 
@@ -1809,13 +1813,23 @@ Widget build(BuildContext context) {
   // onDayLongPressed가 이 셀들을 감싸는 GestureDetector 없이도 그대로 처리함 -
   // _buildDateCell도 원래 그런 구조였음). 메인·화이트/다크는 이미 완성돼있던
   // _buildDateCell을 그대로 씀(아래에서 분기).
-  Widget _buildThemedCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, {bool isSelected = false}) {
+  // ⭐ 2026-08-20 버그 수정 - "심플 라인 테마에서 달력을 좌우로 스와이프하면 특정
+  // 셀들이 위아래로 틀어진다"는 신고로 발견. TableCalendar의 PageView는 부드러운
+  // 스와이프를 위해 좌우 인접 달(page)도 미리 빌드해두는데, 이때 각 빌더 콜백은
+  // "그 페이지가 실제로 나타내는 달"을 focusedDay 파라미터로 정확히 넘겨줌(페이지마다
+  // 다름) - 그런데 여기서 이 파라미터를 안 받고 버렸었고, _theme1Cell만 대신 위젯의
+  // _focusedDay 상태(스와이프 도중엔 아직 안 바뀐, "커밋된" 달만 가리킴)를 썼음.
+  // 그 결과 아직 포커스되지 않은(미리 빌드 중인) 인접 페이지의 셀들이 "엉뚱한 달"
+  // 기준으로 첫 줄 여부(_isFirstRow)를 판정해서, 스와이프 도중 위쪽 여백이 있다/없다가
+  // 뒤바뀌는 셀이 생겼던 것 - 스와이프가 끝나 상태가 갱신되면 다시 맞아 보여서 순간적인
+  // "틀어짐"으로만 보였음. 이제 각 빌더 콜백의 focusedDay를 그대로 전달받아 씀.
+  Widget _buildThemedCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, DateTime focusedDay, {bool isSelected = false}) {
     final theme = ref.watch(calendarThemeProvider);
     if (theme == CalendarThemeId.mainWhite || theme == CalendarThemeId.mainDark) {
       return _buildDateCell(day, isToday, isOutside, schedule, isSelected: isSelected);
     }
     final cell = switch (theme) {
-      CalendarThemeId.minimal => _theme1Cell(day, isToday, isOutside, schedule),
+      CalendarThemeId.minimal => _theme1Cell(day, isToday, isOutside, schedule, focusedDay),
       CalendarThemeId.materialCard => _theme2Cell(day, isToday, isOutside, schedule),
       CalendarThemeId.boldGrid => _theme4Cell(day, isToday, isOutside, schedule),
       CalendarThemeId.initialBadge => _theme5Cell(day, isToday, isOutside, schedule),
@@ -1892,7 +1906,11 @@ Widget build(BuildContext context) {
   }
 
   // ⭐ 1번 · 미니멀 라인 (calendar_theme_lab_screen.dart _theme1Cell 이식)
-  Widget _theme1Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
+  // ⭐ focusedDay는 위젯 상태(_focusedDay)가 아니라 이 셀을 그리는 TableCalendar
+  // 빌더 콜백이 실제로 받은 값을 그대로 받음 - _buildThemedCell의 주석 참고
+  // (스와이프 중 미리 빌드되는 인접 페이지에서 첫 줄 판정이 엉뚱한 달 기준으로
+  // 되던 버그 수정).
+  Widget _theme1Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, DateTime focusedDay) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
     final numColor = isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade400 : colorScheme.onSurface);
@@ -1902,7 +1920,7 @@ Widget build(BuildContext context) {
     // 위/아래 패딩이 서로 겹쳐서 자연스럽지만, 첫 줄만 위에 겹칠 "이전 행의
     // 아래쪽 패딩"이 없어서 그 틈이 붕 떠 보임) 그 조건을 이식할 때 빠뜨렸음 -
     // 첫 줄만 위쪽 패딩 0으로 복원.
-    final isFirstRow = _isFirstRow(day, _focusedDay);
+    final isFirstRow = _isFirstRow(day, focusedDay);
     return ClipRect(
       child: Container(
         decoration: BoxDecoration(border: Border(left: BorderSide(color: Colors.grey.shade200))),

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../constants/platform_channel.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/database_service.dart';
@@ -807,10 +808,20 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                   _showEditShiftNamesDialog();
                 },
               ),
-              // ⭐ "근무명 색상 변경" 삭제됨 - 근무 색상은 이제 사용자가 개별
-              // 지정하는 게 아니라 "달력 테마" 선택(설정 탭 상단)이 통째로
-              // 정함. _showEditShiftColorsDialog()/_ColorPickerDialog는 더 이상
-              // 호출되지 않지만, 되돌릴 가능성을 고려해 정의 자체는 남겨둠.
+              // ⭐ 2026-08-19 "근무명 색상 변경" 기능 복원 - "달력 테마" 선택은
+              // 여전히 근무별 디폴트 색을 정하지만, 여기서 사용자가 특정 근무의
+              // 색을 직접 바꾸면 그 근무는 테마를 바꿔도 그 색으로 고정됨
+              // (models/calendar_theme.dart의 effectiveShiftColors 참고).
+              Divider(height: 1),
+              ListTile(
+                leading: Icon(Icons.palette, color: Colors.purple.shade400),
+                title: Text(context.l10n.settingsEditShiftColorTitle),
+                subtitle: Text(context.l10n.settingsEditShiftColorDesc),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showEditShiftColorsDialog();
+                },
+              ),
               Divider(height: 1),
               ListTile(
                 leading: Icon(Icons.alarm, color: Theme.of(context).colorScheme.tertiary),
@@ -880,6 +891,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         activeShiftTypes: schedule.activeShiftTypes,
         startDate: DateTime.now(),  // ⭐ 오늘로 변경
         shiftColors: schedule.shiftColors,
+        customShiftColors: schedule.customShiftColors,
         assignedDates: {},  // ⭐ 수동 할당 초기화
         shiftDurations: schedule.shiftDurations,
       );
@@ -890,7 +902,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       // 갱신 엔진에 위임함. Dart가 직접 전체를 지우고 다시 만들면, 실제로는
       // 안 바뀐 알람까지도 "일정 변경"으로 이력에 잘못 찍히는 문제가 있었음
       // (Native 엔진은 실제로 달라진 것만 골라서 건드림).
-      const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+      const platform = kAlarmChannel;
       try {
         await platform.invokeMethod('forceNativeRefresh');
       } catch (e) {
@@ -980,12 +992,21 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       return renamedShifts[s] ?? s;
     }).toList();
 
-    // 4. shiftColors 업데이트
-    final newShiftColors = <String, int>{};
-    schedule.shiftColors?.forEach((key, value) {
+    // 4. customShiftColors 업데이트 (사용자가 직접 지정한 색 - 이름이 바뀌어도
+    // 그 근무를 계속 가리켜야 하므로 키만 새 이름으로 옮김, 값은 그대로 유지)
+    final newCustomShiftColors = <String, int>{};
+    schedule.customShiftColors?.forEach((key, value) {
       final newKey = renamedShifts[key] ?? key;
-      newShiftColors[newKey] = value;
+      newCustomShiftColors[newKey] = value;
     });
+
+    // 4-1. shiftColors(위젯/전체근무표용 캐시) 재계산 - 이름이 바뀐 키 기준으로
+    // 테마 디폴트 + 방금 옮긴 customShiftColors를 다시 합침.
+    final newShiftColors = effectiveShiftColors(
+      newShiftTypes,
+      ref.read(calendarThemeProvider),
+      newCustomShiftColors,
+    ).map((name, color) => MapEntry(name, color.value));
 
     // 5. assignedDates 업데이트
     final newAssignedDates = <String, String>{};
@@ -1013,6 +1034,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       activeShiftTypes: newActiveShiftTypes,
       startDate: schedule.startDate,
       shiftColors: newShiftColors,
+      customShiftColors: newCustomShiftColors,
       assignedDates: newAssignedDates,
       shiftDurations: newShiftDurations,
     );
@@ -1042,24 +1064,39 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     // ⭐ CRITICAL FIX: 패턴에 없는 카드도 색상을 지정할 수 있어야 함 - 온보딩 때
     // 자동으로 색이 안 배정됐던 기존 사용자도 여기서 직접 채울 수 있게.
     final activeShifts = schedule.shiftTypes;
-    final currentColors = schedule.shiftColors ?? {};
+    final theme = ref.read(calendarThemeProvider);
+    // ⭐ 2026-08-19 기능 복원 - 다이얼로그 미리보기는 "지금 실제로 보이는 색"
+    // (테마 디폴트 + 사용자 오버라이드를 합친 값)을 보여줘야 하지만, 저장은
+    // 사용자가 이번에 실제로 건드린 근무만 customShiftColors에 남겨야 함
+    // (안 건드린 근무는 계속 테마를 따라가야 하므로) - 그래서 두 맵을 따로 넘김.
+    final effectiveColors = effectiveShiftColors(activeShifts, theme, schedule.customShiftColors)
+        .map((name, color) => MapEntry(name, color.value));
+    final customColors = schedule.customShiftColors ?? {};
 
     showDialog(
       context: context,
       builder: (context) => _EditShiftColorsDialog(
         shiftTypes: activeShifts,
-        currentColors: currentColors,
-        onSave: (newColors) => _applyShiftColorChanges(newColors),
+        effectiveColors: effectiveColors,
+        customColors: customColors,
+        onSave: (newCustomColors) => _applyShiftColorChanges(newCustomColors),
       ),
     );
   }
 
-  // ⭐ 근무명 색상 변경 적용
-  Future<void> _applyShiftColorChanges(Map<String, int> newColors) async {
+  // ⭐ 근무명 색상 변경 적용. newCustomColors는 사용자가 이번 다이얼로그에서
+  // 실제로 지정한 오버라이드만 담김(안 건드린 근무는 안 들어있음) - 그래서 이후
+  // 테마를 바꿔도 여기 없는 근무는 계속 테마 디폴트를 따라감.
+  Future<void> _applyShiftColorChanges(Map<String, int> newCustomColors) async {
     final schedule = ref.read(scheduleProvider).value;
     if (schedule == null) return;
 
-    // DB 업데이트
+    final theme = ref.read(calendarThemeProvider);
+    // shiftColors(위젯/전체근무표용 캐시)는 테마 디폴트 + 방금 저장한
+    // 오버라이드를 합친 "최종" 값으로 재계산.
+    final effectiveColors = effectiveShiftColors(schedule.shiftTypes, theme, newCustomColors)
+        .map((name, color) => MapEntry(name, color.value));
+
     final updatedSchedule = ShiftSchedule(
       id: schedule.id,
       isRegular: schedule.isRegular,
@@ -1068,15 +1105,16 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       shiftTypes: schedule.shiftTypes,
       activeShiftTypes: schedule.activeShiftTypes,
       startDate: schedule.startDate,
-      shiftColors: newColors,  // ← 색상만 변경
+      shiftColors: effectiveColors,
+      customShiftColors: newCustomColors,
       assignedDates: schedule.assignedDates,
       shiftDurations: schedule.shiftDurations,
     );
 
-    await DatabaseService.instance.updateShiftSchedule(updatedSchedule);
-
-    // 화면 갱신
-    ref.invalidate(scheduleProvider);
+    // ⭐ DatabaseService 직접 호출 + ref.invalidate 대신 scheduleProvider.notifier를
+    // 거침 - 이래야 WidgetRefreshService.refresh()/FriendSyncService가 같이 불려서
+    // 홈 화면 위젯도 색 변경을 즉시 반영함(예전 코드엔 이게 빠져있었음).
+    await ref.read(scheduleProvider.notifier).updateSchedule(updatedSchedule);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -1121,7 +1159,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     final schedule = ref.read(scheduleProvider).value;
     if (schedule == null) return;
 
-    const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+    const platform = kAlarmChannel;
 
     // 1. Native diff 갱신 트리거
     try {
@@ -1244,7 +1282,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
   bool _isPlaying = false;
 
   // MethodChannel
-  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+  static const platform = kAlarmChannel;
 
   @override
   void initState() {
@@ -2815,12 +2853,19 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
 // ============================================================
 class _EditShiftColorsDialog extends StatefulWidget {
   final List<String> shiftTypes;
-  final Map<String, int> currentColors;
+  // ⭐ "지금 실제로 보이는 색"(테마 디폴트 + 기존 오버라이드) - 미리보기/중복
+  // 체크 전용. 그대로 저장하면 안 됨(그러면 안 건드린 근무까지 전부 오버라이드로
+  // 굳어버려서 테마를 안 따라가게 됨) - 저장은 아래 initialCustomColors 기반의
+  // _customColors만 씀.
+  final Map<String, int> effectiveColors;
+  // ⭐ 사용자가 예전에 실제로 지정해둔 오버라이드만(테마 디폴트는 제외).
+  final Map<String, int> customColors;
   final Function(Map<String, int>) onSave;
 
   const _EditShiftColorsDialog({
     required this.shiftTypes,
-    required this.currentColors,
+    required this.effectiveColors,
+    required this.customColors,
     required this.onSave,
   });
 
@@ -2829,12 +2874,14 @@ class _EditShiftColorsDialog extends StatefulWidget {
 }
 
 class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
-  late Map<String, int> _selectedColors;
+  late Map<String, int> _previewColors;  // 화면 표시용 (테마 디폴트 포함)
+  late Map<String, int> _customColors;   // 저장용 (사용자가 이번에 지정한 것만)
 
   @override
   void initState() {
     super.initState();
-    _selectedColors = Map.from(widget.currentColors);
+    _previewColors = Map.from(widget.effectiveColors);
+    _customColors = Map.from(widget.customColors);
   }
 
   @override
@@ -2856,7 +2903,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
           separatorBuilder: (context, index) => Divider(height: 1),
           itemBuilder: (context, index) {
             final shift = widget.shiftTypes[index];
-            final colorValue = _selectedColors[shift] ?? 0xFFCCCCCC;
+            final colorValue = _previewColors[shift] ?? 0xFFCCCCCC;
             final bgColor = Color(colorValue);
             final textColor = ShiftSchedule.getTextColor(bgColor);
 
@@ -2903,7 +2950,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            widget.onSave(_selectedColors);
+            widget.onSave(_customColors);
             Navigator.pop(context);
           },
           style: ElevatedButton.styleFrom(
@@ -2917,8 +2964,8 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
   }
 
   void _showColorPicker(String shift) async {
-    // 현재 근무 제외한 다른 근무들의 색상 목록
-    final usedColors = _selectedColors.entries
+    // 현재 근무 제외한 다른 근무들의 색상 목록 (지금 화면에 실제로 보이는 색 기준)
+    final usedColors = _previewColors.entries
         .where((entry) => entry.key != shift)
         .map((entry) => entry.value)
         .toSet();
@@ -2933,7 +2980,8 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
 
     if (result != null) {
       setState(() {
-        _selectedColors[shift] = result;
+        _previewColors[shift] = result;
+        _customColors[shift] = result;  // ⭐ 사용자가 직접 고른 순간 이 근무는 "고정"됨
       });
     }
   }
@@ -2954,7 +3002,7 @@ class _ColorPickerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    // 팔레트 19색 + 빨강(휴무용) = 총 20색
+    // 팔레트(테마 디폴트 색 포함, ShiftSchedule.shiftPalette 참고) + 빨강(휴무용)
     final colors = [
       ...ShiftSchedule.shiftPalette,
       ShiftSchedule.offColor,

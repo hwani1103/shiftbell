@@ -1,6 +1,6 @@
 // lib/services/alarm_refresh_service.dart
 
-import 'package:flutter/services.dart';
+import '../constants/platform_channel.dart';
 
 /// ⭐ 알람 자동 갱신 트리거 (실제 갱신 로직은 Native AlarmRefreshEngine이 유일하게 수행함)
 ///
@@ -16,7 +16,7 @@ class AlarmRefreshService {
   static final AlarmRefreshService instance = AlarmRefreshService._internal();
   AlarmRefreshService._internal();
 
-  static const _platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+  static const _platform = kAlarmChannel;
 
   /// 조건 체크 후 필요하면 갱신 (판단은 Native가 함, 중복 호출해도 안전)
   Future<void> refreshIfNeeded() async {

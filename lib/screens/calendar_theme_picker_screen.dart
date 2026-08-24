@@ -126,7 +126,13 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
                     // 위젯 캐시에도 동일하게 반영 - 라이트/다크 두 팔레트만 있던
                     // 시절의 assignShiftColors(isDark:)를 그대로 쓰면 위젯이
                     // 실제 앱과 다른(구버전) 색을 보여주게 됨.
-                    final newColors = assignShiftColorsForTheme(schedule.shiftTypes, themeId)
+                    // ⭐ 2026-08-19 "근무명 색상 변경" 기능 복원 - 예전엔 여기서
+                    // 테마 디폴트로 shiftColors를 통째로 덮어써서, 사용자가 직접
+                    // 지정한 색까지 테마를 바꿀 때마다 사라졌음. 이제
+                    // effectiveShiftColors()로 "테마 디폴트 위에 사용자 오버라이드
+                    // (customShiftColors)만 유지해서 합친" 값을 캐시에 써서, 사용자가
+                    // 지정한 근무만 테마가 바뀌어도 그 색 그대로 남게 함.
+                    final newColors = effectiveShiftColors(schedule.shiftTypes, themeId, schedule.customShiftColors)
                         .map((name, color) => MapEntry(name, color.value));
                     await ref.read(scheduleProvider.notifier).updateSchedule(ShiftSchedule(
                       id: schedule.id,
@@ -137,6 +143,7 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
                       activeShiftTypes: schedule.activeShiftTypes,
                       startDate: schedule.startDate,
                       shiftColors: newColors,
+                      customShiftColors: schedule.customShiftColors,
                       assignedDates: schedule.assignedDates,
                       shiftDurations: schedule.shiftDurations,
                     ));

@@ -1,12 +1,12 @@
-import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import '../constants/platform_channel.dart';
 
 class PermissionService {
   static final PermissionService _instance = PermissionService._internal();
   factory PermissionService() => _instance;
   PermissionService._internal();
 
-  static const _platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+  static const _platform = kAlarmChannel;
 
   /// 모든 필수 권한 요청
   Future<bool> requestAllPermissions() async {

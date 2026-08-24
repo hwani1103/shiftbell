@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'constants/platform_channel.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'services/alarm_service.dart';
@@ -101,7 +102,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+  static const platform = kAlarmChannel;
 
   @override
   void initState() {
@@ -219,15 +220,26 @@ class MainScreen extends ConsumerStatefulWidget {
   ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends ConsumerState<MainScreen> {
+// ⭐ 2026-08-20 "업데이트 있다는 안내가 안 뜬다" 신고로 발견 - 예전엔
+// UpdateService.checkForUpdate()가 MainScreen.initState()에서 딱 한 번만(즉 콜드
+// 스타트 1회) 불렸음. 근데 대부분의 사용자는 앱을 아예 껐다 켜기보다 "최근 앱"에서
+// 다시 열거나(백그라운드→포그라운드 재개) 화면만 켜서 보는 식으로 하루 종일 씀 -
+// initState는 프로세스가 살아있는 동안 재실행되지 않으므로, 콜드 스타트 시점에 아직
+// Play가 새 버전을 인지 못 했으면(배포 직후 전파 지연은 흔함) 그날 다시는 체크할
+// 기회가 없었음. WidgetsBindingObserver로 "앱이 포그라운드로 돌아올 때"마다 다시
+// 체크하도록 함 - UpdateService.checkForUpdate() 자체가 이미 "이 버전은 이미
+// 안내했다" 여부를 버전코드로 dedupe하므로 스팸 다이얼로그 걱정은 없고, 추가로
+// update_service.dart에 쿨다운을 둬서 Play Core 호출 자체도 너무 잦지 않게 함.
+class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObserver {
   late int _currentIndex;  // ⭐ nullable 제거
-  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+  static const platform = kAlarmChannel;
 
   late final List<Widget> _tabs;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     // ⭐ 초기 탭 설정 (InitialRouter에서 결정한 값)
     _currentIndex = widget.initialIndex;
@@ -260,7 +272,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           );
         },
       ),
-      const FriendListScreen(),
+      FriendListScreen(onSwipeToCalendar: () => _goToCalendar()),
       SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
     ];
 
@@ -288,6 +300,24 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       if (!mounted) return;
       UpdateService.checkForUpdate(context);
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // ⭐ 클래스 선언부 주석 참고 - 앱을 백그라운드에서 포그라운드로 복귀할 때마다
+  // 업데이트 여부를 다시 체크함(콜드 스타트 1회로는 배포 직후 전파 지연 구간을
+  // 영영 놓칠 수 있어서). 릴리즈 노트는 여기서 다시 안 부름 - 그건 "버전당 1회"
+  // 정책이라 이미 봤으면 checkAndShowReleaseNote 내부에서 알아서 스킵하지만,
+  // 굳이 앱을 복귀할 때마다 또 체크할 필요는 없어서 콜드 스타트 경로에만 남겨둠.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      UpdateService.checkForUpdate(context);
+    }
   }
 
   // ⭐ 6번 기능: 달력탭으로 이동

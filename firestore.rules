@@ -24,7 +24,19 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == ownerId;
     }
 
-    // ⭐ 그 외 모든 컬렉션은 기본 거부 - 이 앱은 friend_schedules 하나만 씀.
+    // ⭐ 2026-08-20 추가 - "새 버전이 있어요" 안내를 Play In-App Update API(전파 지연에
+    // 취약함) 대신 개발자가 직접 통제하는 원격 설정값으로 판단하기 위한 컬렉션
+    // (update_service.dart 참고). 앱이 켜질 때마다 인증 여부와 무관하게 누구나 읽을 수
+    // 있어야 하므로(익명 로그인은 친구공유를 실제로 쓸 때만 일어남) get을 열어두되,
+    // write는 클라이언트에서 절대 못 하게 막음 - 값은 Firebase 콘솔에서 개발자가 직접
+    // 수정함(문서 하나뿐이라 list도 열 필요 없음).
+    match /app_config/{document} {
+      allow get: if true;
+      allow list: if false;
+      allow write: if false;
+    }
+
+    // ⭐ 그 외 모든 컬렉션은 기본 거부 - 이 앱은 friend_schedules/app_config 두 개만 씀.
     match /{document=**} {
       allow read, write: if false;
     }

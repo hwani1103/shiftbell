@@ -271,6 +271,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
       activeShiftTypes: schedule.activeShiftTypes,
       startDate: schedule.startDate,
       shiftColors: schedule.shiftColors,
+      customShiftColors: schedule.customShiftColors,
       assignedDates: schedule.assignedDates,
       shiftDurations: newDurations,
     );

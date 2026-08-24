@@ -23,7 +23,14 @@ import 'friend_calendar_view.dart';
 import '../l10n/l10n_extensions.dart';
 
 class FriendListScreen extends ConsumerStatefulWidget {
-  const FriendListScreen({super.key});
+  // ⭐ 2026-08-19 "달력탭으로 가는 스와이프는 항상 일방향" 규칙(next_alarm_tab.dart/
+  // settings_tab.dart의 6번 기능 참고 - 달력탭 자체는 좌우 스와이프로 이전/다음달을
+  // 넘기므로, 다른 탭에서 달력탭으로 "들어오는" 스와이프만 살려두고 반대 방향은 절대
+  // 안 만듦)을 이 탭에도 적용. main.dart 탭 순서가 다음알람(0)/달력(1)/일정공유(2)/
+  // 설정(3)이라 일정공유는 설정과 같은 쪽(달력보다 뒤)에 있으므로, 설정탭과 동일하게
+  // 좌→우 스와이프 시 달력탭으로 이동.
+  final VoidCallback? onSwipeToCalendar;
+  const FriendListScreen({super.key, this.onSwipeToCalendar});
 
   @override
   ConsumerState<FriendListScreen> createState() => _FriendListScreenState();
@@ -147,7 +154,17 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
     final friends = ref.watch(friendProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Scaffold(
+    return GestureDetector(
+      // ⭐ 6번 기능: 좌→우 스와이프로 달력탭 이동 (settings_tab.dart와 동일한 방향/임계값)
+      onHorizontalDragEnd: (details) {
+        if (widget.onSwipeToCalendar != null && details.primaryVelocity != null) {
+          // 좌→우 스와이프 (velocity > 0)
+          if (details.primaryVelocity! > 500) {
+            widget.onSwipeToCalendar!();
+          }
+        }
+      },
+      child: Scaffold(
       appBar: AppBar(
         title: Text(context.l10n.friendShareTitle, style: TextStyle(fontSize: 18.sp)),
         // ⭐ 상단 새로고침 버튼 삭제 - initState의 자동 새로고침 + 아래
@@ -238,6 +255,7 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                   ),
           ),
         ],
+      ),
       ),
     );
   }

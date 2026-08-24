@@ -7,6 +7,7 @@ import '../services/alarm_service.dart';
 import '../models/alarm_template.dart';
 import '../models/alarm.dart';
 import 'package:flutter/services.dart';
+import '../constants/platform_channel.dart';
 import '../services/widget_refresh_service.dart';
 import '../services/friend_sync_service.dart';
 import '../constants/alarm_limits.dart';
@@ -45,6 +46,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       activeShiftTypes: schedule.activeShiftTypes,
       startDate: schedule.startDate,
       shiftColors: schedule.shiftColors,
+      customShiftColors: schedule.customShiftColors,
       assignedDates: schedule.assignedDates,
       shiftDurations: schedule.shiftDurations,
     );
@@ -98,6 +100,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       activeShiftTypes: s.activeShiftTypes,
       startDate: s.startDate,
       shiftColors: s.shiftColors,
+      customShiftColors: s.customShiftColors,
       assignedDates: s.assignedDates,
       shiftDurations: s.shiftDurations,
     );
@@ -113,6 +116,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       activeShiftTypes: s.activeShiftTypes,
       startDate: s.startDate,
       shiftColors: s.shiftColors,
+      customShiftColors: s.customShiftColors,
       assignedDates: assignedDates,
       shiftDurations: s.shiftDurations,
     );
@@ -182,7 +186,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       }
 
       // 3. 모든 Notification 삭제
-      const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+      const platform = kAlarmChannel;
       try {
         await platform.invokeMethod('cancelAllNotifications');
         print('✅ 모든 Notification 삭제 완료');
@@ -370,7 +374,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
 
   print('✅ 스케줄 + 알람 변경 완료');
   try {
-    await MethodChannel('com.hwani1103.shiftbell/alarm').invokeMethod('triggerGuardCheck');
+    await kAlarmChannel.invokeMethod('triggerGuardCheck');
     print('✅ Provider에서 AlarmGuardReceiver 트리거 완료');
   } catch (e) {
     print('⚠️ Provider에서 AlarmGuardReceiver 트리거 실패: $e');

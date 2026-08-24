@@ -36,7 +36,15 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // 정확히 일치함.
         // ⭐ 2026-08-13: 친구공유 v1(Firestore) 전환으로 friends 테이블 스키마가 바뀌면서
         // database_service.dart의 version:이 17로 다시 올라감 - 같은 커밋에서 이 값도 같이 올림.
-        private const val DATABASE_VERSION = 17
+        // ⭐ 2026-08-20: "근무명 색상 변경" 기능 복원(custom_shift_colors 컬럼 추가)으로
+        // database_service.dart의 version:이 18로 올라갔는데, 이 값을 같이 안 올려서 정확히
+        // 위 주석이 세 번째로 경고하던 그 사고가 또 재발함(2026-08-12, 이번이 두 번째
+        // 재발). "근무명 색상 변경 적용한 버전부터 위젯이 갑자기 안 됨(항상 '근무
+        // 스케줄을 먼저 설정해주세요') 증상으로 발견 - disk=18, native=17이라
+        // isDatabaseReady()가 항상 false를 반환해 위젯이 스케줄 유무와 무관하게 영원히
+        // "없음"으로 봤던 것. Flutter DB 버전 올릴 때 이 값도 반드시 같이 올릴 것 (재발
+        // 방지책은 project_alarm_reliability_overhaul 메모리 참고).
+        private const val DATABASE_VERSION = 18
         private const val TAG = "DatabaseHelper"
 
         @Volatile

@@ -5,10 +5,10 @@
 // 위젯"을 다시 그리라고 깨워주는 역할만 함. 실패해도 스케줄 저장 자체를 막으면
 // 안 되므로 항상 non-throwing - 위젯이 없거나 갱신이 실패해도 무시하고 넘어감
 // (다음 자정 하트비트 때 어차피 다시 그려짐, AlarmGuardReceiver.kt 참고).
-import 'package:flutter/services.dart';
+import '../constants/platform_channel.dart';
 
 class WidgetRefreshService {
-  static const _platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+  static const _platform = kAlarmChannel;
 
   static Future<void> refresh() async {
     try {

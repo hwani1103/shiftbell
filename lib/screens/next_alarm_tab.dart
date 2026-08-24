@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/alarm_provider.dart';
 import '../l10n/l10n_extensions.dart';
 import '../utils/weekday_util.dart';
+import '../constants/platform_channel.dart';
 
 
 class NextAlarmTab extends ConsumerStatefulWidget {
@@ -23,7 +24,7 @@ class NextAlarmTab extends ConsumerStatefulWidget {
 class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   Timer? _countdownTimer;
   Timer? _syncTimer;
-  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+  static const platform = kAlarmChannel;
 
   @override
   void initState() {

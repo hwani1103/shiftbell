@@ -1,4 +1,4 @@
-import 'package:flutter/services.dart';
+import '../constants/platform_channel.dart';
 
 @pragma('vm:entry-point')
 class AlarmService {
@@ -6,7 +6,7 @@ class AlarmService {
   factory AlarmService() => _instance;
   AlarmService._internal();
 
-  static const platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+  static const platform = kAlarmChannel;
 
   /// 알람 초기화
   Future<void> initialize() async {

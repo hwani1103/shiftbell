@@ -56,6 +56,27 @@ class ShiftSchedule {
     Color(0xFF80DEEA), // 17. 시안 (Cyan 200) - 청록색 (흰 글씨)
     Color(0xFFAB47BC), // 18. 생동감 보라 (Purple 400) - 명확한 보라 (흰 글씨)
     Color(0xFF5C6BC0), // 19. 밝은 인디고 (Indigo 400) - 인디고 강화 (흰 글씨)
+
+    // ⭐ 2026-08-19 "근무명 색상 변경" 기능 복원 + 달력 테마 시스템(calendar_theme.dart)
+    // 도입으로 추가된 9개 테마의 디폴트 색상들을 이 파레트에도 추가함(요청: "테마
+    // 디폴트 색상들도 파레트 옵션에 추가, 너무 비슷한 색은 빼고"). kMainLightPalette/
+    // kMainDarkPalette/kVividPalette/kBoldGridPalette 전체(38개, 휴무 고정색 제외 중복
+    // 다수)를 CIE76 ΔE(임계값 18 - "육안으로 뚜렷이 구별됨" 기준) 색상거리로 위 19색과
+    // 대조해 거른 결과 13개만 통과함(나머지는 위 19색 중 하나와 사실상 같은 색으로 판정).
+    // 스크립트: color_dedupe2.dart(스크래치패드, 재현 가능).
+    Color(0xFF6B6524), // 20. 다크 골드 (야간 테마 기본색)
+    Color(0xFF662F74), // 21. 퍼플 (오전 테마 기본색)
+    Color(0xFF36307E), // 22. 인디고 (당직 테마 기본색)
+    Color(0xFF25617E), // 23. 스틸 블루 (출장 테마 기본색)
+    Color(0xFF4DCB51), // 24. 그린 (특근 테마 기본색)
+    Color(0xFFD68C6A), // 25. 테라코타 (다크 테마 - 야간)
+    Color(0xFF8FB89A), // 26. 세이지 그린 (다크 테마 - 오전)
+    Color(0xFFD9AE6B), // 27. 소프트 앰버 (다크 테마 - 당직)
+    Color(0xFFA3AD72), // 28. 뮤트 올리브 (다크 테마 - 대기)
+    Color(0xFFC98A9C), // 29. 더스티 로즈 (다크 테마 - 재택)
+    Color(0xFFB4998A), // 30. 웜 타우프 (다크 테마 - 특근)
+    Color(0xFF37474F), // 31. 짙은 슬레이트 (굵은 격자 테마 - 다크톤 2)
+    Color(0xFF6D8CA6), // 32. 더스티 블루 (굵은 격자 테마 - 더스티 블루)
   ];
 
   // ⭐ 휴무 고정 색상 (명확한 빨강, 파스텔 아님)
@@ -81,7 +102,19 @@ class ShiftSchedule {
   final List<String> shiftTypes;  // 전체 근무 종류 (기본 5개 + 커스텀 4개)
   List<String>? activeShiftTypes;  // ⭐ 실제 사용 중인 근무 종류
   final DateTime? startDate;
+  // ⭐ "근무명 색상 변경" 기능 복원(2026-08-19) - shiftColors는 이제 "실제 표시되는
+  // 최종 색상"(테마 디폴트 + 아래 customShiftColors 오버라이드를 미리 합쳐둔 캐시)
+  // 역할만 함. Native 위젯(CalendarWidgetScheduleResolver.kt)과 all_shifts_view.dart가
+  // 이 값을 그대로 읽어 쓰므로, 이 필드는 테마가 바뀌거나 customShiftColors가 바뀔
+  // 때마다 매번 다시 계산해서 저장해야 함 (models/calendar_theme.dart의
+  // effectiveShiftColors() 참고). 실제 앱 화면(calendar_tab.dart)은 이 캐시를
+  // 읽지 않고 매번 라이브로 계산함 - 캐시는 오직 이 계산을 못 하는 Native 쪽을 위한 것.
   final Map<String, int>? shiftColors;
+  // ⭐ 사용자가 "근무명 색상 변경" 다이얼로그에서 직접 지정한 색상만 담는 맵(테마가
+  // 자동으로 배정한 디폴트 색은 여기 안 들어감). 여기 들어간 근무명은 테마를
+  // 몇 번을 바꿔도 이 색으로 고정됨 - effectiveShiftColors()가 테마 디폴트보다
+  // 항상 이 값을 우선함.
+  final Map<String, int>? customShiftColors;
   Map<String, String>? assignedDates;
   final Map<String, int>? shiftDurations;  // ⭐ 근무명 -> 기본 근무시간(분)
 
@@ -94,6 +127,7 @@ class ShiftSchedule {
     this.activeShiftTypes,  // ⭐ 추가
     this.startDate,
     this.shiftColors,
+    this.customShiftColors,
     this.assignedDates,
     this.shiftDurations,
   });
@@ -134,6 +168,16 @@ class ShiftSchedule {
       }
     }
 
+    Map<String, int>? parsedCustomShiftColors;
+    if (map['custom_shift_colors'] != null) {
+      try {
+        parsedCustomShiftColors = Map<String, int>.from(jsonDecode(map['custom_shift_colors']));
+      } catch (e) {
+        print('❌ customShiftColors 파싱 실패: ${map['custom_shift_colors']}, error: $e');
+        parsedCustomShiftColors = null;
+      }
+    }
+
     Map<String, String>? parsedAssignedDates;
     if (map['assigned_dates'] != null) {
       try {
@@ -165,6 +209,7 @@ class ShiftSchedule {
           : null,
       startDate: parsedStartDate,
       shiftColors: parsedShiftColors,
+      customShiftColors: parsedCustomShiftColors,
       assignedDates: parsedAssignedDates,
       shiftDurations: parsedShiftDurations,
     );
@@ -180,6 +225,7 @@ class ShiftSchedule {
       'active_shift_types': activeShiftTypes?.join(','),  // ⭐ 추가
       'start_date': startDate?.toIso8601String(),
       'shift_colors': shiftColors != null ? jsonEncode(shiftColors) : null,
+      'custom_shift_colors': customShiftColors != null ? jsonEncode(customShiftColors) : null,
       'assigned_dates': assignedDates != null ? jsonEncode(assignedDates) : null,
       'shift_durations': shiftDurations != null ? jsonEncode(shiftDurations) : null,
     };

@@ -6,8 +6,10 @@ import '../utils/shift_name_util.dart';
 //
 // ⭐ 달력 테마 선택 시스템의 중심 모델. calendar_theme_lab_screen.dart에서
 // 실험하던 9개 후보(1/2/4/5/8/9/10번 + 메인·화이트/메인·다크)를 실제 선택
-// 가능한 값으로 등록함. "근무명 색상 변경" 기능이 삭제되고 테마 선택으로
-// 완전히 대체되면서, 이 9개가 유일한 색상/디자인 소스가 됨.
+// 가능한 값으로 등록함. 이 9개가 근무별 "디폴트" 색상 소스임 - 다만
+// 2026-08-19에 "근무명 색상 변경" 기능이 복원되면서 더 이상 유일한 소스는
+// 아님. 사용자가 특정 근무의 색을 직접 지정하면(ShiftSchedule.customShiftColors)
+// 그 근무는 테마를 바꿔도 그 색으로 고정됨 - effectiveShiftColors() 참고.
 //
 // ⭐ id는 SharedPreferences에 영구 저장되는 키라 반드시 안정적이어야 함 -
 // enum.index(정수, 선언 순서가 바뀌면 저장된 값이 다른 테마를 가리키게 됨)
@@ -63,10 +65,9 @@ const kDefaultCalendarThemeId = CalendarThemeId.mainWhite;
 // ⭐ 캐러셀/위젯 등에서 순서대로 순회할 때 쓰는 고정 목록 (선언 순서 그대로).
 const kAllCalendarThemeIds = CalendarThemeId.values;
 
-// ⭐ "근무명 색상 변경" 기능 삭제 + 테마 선택으로 완전히 대체하는 작업의 확정
-// 팔레트. 원래 calendar_theme_lab_screen.dart 안에 있었는데, 실제 메인
-// 달력탭(calendar_tab.dart)도 똑같은 팔레트로 색을 매겨야 해서 공용 위치로
-// 옮김 - 두 군데서 각자 유지보수하면 나중에 색이 어긋날 수 있어서.
+// ⭐ 테마별 "디폴트" 근무 색상 팔레트. 원래 calendar_theme_lab_screen.dart 안에
+// 있었는데, 실제 메인 달력탭(calendar_tab.dart)도 똑같은 팔레트로 색을 매겨야 해서
+// 공용 위치로 옮김 - 두 군데서 각자 유지보수하면 나중에 색이 어긋날 수 있어서.
 //
 // 규칙(onboarding_screen.dart의 _generateShiftColors()와 동일한 원칙):
 // 1) 이름에 "휴"가 들어간 근무는 무조건 고정 빨강(kMainRestColor).
@@ -226,6 +227,27 @@ Map<String, Color> assignShiftColorsForTheme(List<String> shiftTypes, CalendarTh
     case CalendarThemeId.boldGrid:
       return _assignFromPalette(shiftTypes, kBoldGridPalette, 0);
   }
+}
+
+// ⭐ "근무명 색상 변경" 기능 복원(2026-08-19) - 실제로 화면/위젯에 표시돼야 하는
+// "최종" 근무 색상. 테마 디폴트(assignShiftColorsForTheme)를 기본으로 깔고, 사용자가
+// 근무명 색상 변경에서 직접 지정한 근무만 그 위에 덮어씀. customColors에 없는 근무는
+// 테마를 바꿀 때마다 그 테마의 디폴트를 그대로 따라가고, customColors에 있는 근무는
+// 테마가 몇 번을 바뀌어도 그 색 그대로 고정됨 - 이게 이 함수 하나로 표현됨.
+// 호출부: calendar_tab.dart(실제 달력 표시), calendar_theme_picker_screen.dart/
+// settings_tab.dart(테마 전환·색상 변경 시 위젯용 shiftColors 캐시 재계산).
+Map<String, Color> effectiveShiftColors(
+  List<String> shiftTypes,
+  CalendarThemeId theme,
+  Map<String, int>? customColors,
+) {
+  final result = assignShiftColorsForTheme(shiftTypes, theme);
+  if (customColors == null || customColors.isEmpty) return result;
+  for (final shift in shiftTypes) {
+    final override = customColors[shift];
+    if (override != null) result[shift] = Color(override);
+  }
+  return result;
 }
 
 Map<String, Color> _assignFromPalette(List<String> shiftTypes, List<Color> palette, int rotation) {

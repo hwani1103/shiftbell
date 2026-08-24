@@ -9,12 +9,13 @@ import '../services/database_service.dart';
 import '../services/alarm_service.dart';
 import 'package:flutter/services.dart';
 import '../constants/alarm_limits.dart';
+import '../constants/platform_channel.dart';
 
 
 // ⭐ 알람 관리 Provider (StateNotifier)
 class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
   // ⭐ MethodChannel 재사용 (매번 생성 방지)
-  static const _platform = MethodChannel('com.hwani1103.shiftbell/alarm');
+  static const _platform = kAlarmChannel;
 
   AlarmNotifier() : super(const AsyncValue.loading()) {
     _loadAlarms();
