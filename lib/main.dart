@@ -24,6 +24,7 @@ import 'providers/schedule_provider.dart';
 import 'providers/calendar_theme_provider.dart';
 import 'models/calendar_theme.dart';
 import 'theme/app_theme.dart';
+import 'theme/app_colors.dart';
 import 'services/firebase_bootstrap.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/app_localizations.dart';
@@ -191,6 +192,14 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
                 supportedLocales: AppLocalizations.supportedLocales,
                 theme: AppTheme.lightTheme,
                 // 모든 화면에 최대 너비 제한 적용
+                // ⭐ 2026-08-24 - 컨텐츠 영역 배경을 단색(Colors.white)에서 앱
+                // 톤에 맞춘 은은한 그라데이션으로 바꿈("배경이 단색이라 딱딱하다"는
+                // 피드백). 여기 한 곳만 바꾸면 앱 전체 배경이 다 같이 바뀜 -
+                // AppTheme.lightTheme의 scaffoldBackgroundColor를 투명으로 해뒀기
+                // 때문에(app_theme.dart 참고) 각 화면의 Scaffold가 이 그라데이션을
+                // 가리지 않고 그대로 비쳐 보임. 달력 탭만 예외 - CalendarTab이
+                // 자기 Scaffold에 Colors.white를 직접 불투명하게 고정해뒀으므로
+                // (calendar_tab.dart 참고) 이 그라데이션의 영향을 안 받음.
                 builder: (context, child) {
                   return Container(
                     color: Colors.grey.shade200,  // 넓은 화면에서 양옆 배경색 - 항상 라이트
@@ -198,7 +207,13 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: maxContentWidth),
                         child: Container(
-                          color: Colors.white,  // 컨텐츠 영역 배경 - 항상 라이트
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [kAppBackgroundGradientTop, kAppBackgroundGradientBottom],
+                            ),
+                          ),
                           child: child,
                         ),
                       ),

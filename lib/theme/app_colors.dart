@@ -50,3 +50,18 @@ const Color kAppChipBorder = Color(0xFF252B35);
 /// 칩(근무명 태그 등)의 채움색 - 배경(kAppBackgroundPastel)보다 한 톤 밝은
 /// 화이트에 가까운 색이라 배경 위에서 카드처럼 살짝 떠 보임.
 const Color kAppChipFill = Color(0xFFE9EEF6);
+
+// ⭐ 2026-08-24 추가 - 배경/버튼이 단색이라 "딱딱하다"는 피드백으로 그라데이션용
+// 색을 추가함. app_button.dart(공용 버튼)와 main.dart(앱 배경)에서 씀.
+
+/// kAppMainAccent보다 밝은 톤(흰색 쪽으로 25% 블렌드) - 버튼 그라데이션의 밝은
+/// 쪽 끝에 씀. kAppMainAccentDark(어두운 쪽 끝)와 짝을 이룸.
+const Color kAppMainAccentLight = Color(0xFF7484A4);
+
+/// 앱 배경 그라데이션의 위쪽(밝은) 끝 - kAppBackgroundPastel을 흰색 쪽으로
+/// 15% 블렌드한 값. 아주 은은해서 거의 단색처럼 보이되 미세한 입체감을 줌.
+const Color kAppBackgroundGradientTop = Color(0xFFE4E9F5);
+
+/// 앱 배경 그라데이션의 아래쪽(짙은) 끝 - kAppBackgroundPastel을 kAppMainAccent
+/// 쪽으로 8% 블렌드한 값. 메인 색상과 배경이 한 계열이라는 느낌을 살짝 더함.
+const Color kAppBackgroundGradientBottom = Color(0xFFCDD6E6);

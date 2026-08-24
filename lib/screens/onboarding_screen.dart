@@ -21,6 +21,7 @@ import '../l10n/l10n_extensions.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_shift_chip.dart';
 import '../widgets/word_safe_spans.dart';
+import '../widgets/app_button.dart';
 
 // 알람 설정 (시간 + 타입)
 class AlarmSetting {
@@ -256,12 +257,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     );
                   }),
 
-                  // ⭐ 2026-08-24 - 칩과 헷갈리지 않도록 "버튼"으로 명확히 구분함
-                  // (OutlinedButton → ElevatedButton, 테마의 기본 버튼 스타일 그대로).
-                  ElevatedButton.icon(
+                  // ⭐ 2026-08-24 - 칩과 헷갈리지 않도록 "버튼"으로 명확히 구분함.
+                  // 공용 버튼(AppButton)으로 통일 - icon+label을 Row로 직접 구성.
+                  AppButton(
                     onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
-                    icon: Icon(Icons.add, size: 18.sp),
-                    label: Text(context.l10n.commonAdd),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.add, size: 18.sp),
+                        SizedBox(width: 4.w),
+                        Text(context.l10n.commonAdd),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -278,7 +285,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           // 관리함 - 다른 "다음" 버튼들과 동일하게 스타일 없이 기본값을 씀.
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: AppButton(
               onPressed: () {
                 setState(() => _step = 1);
               },
@@ -484,7 +491,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: AppButton(
               onPressed: _pattern.isEmpty ? null : () {
                 setState(() => _step = 2);
               },
@@ -726,7 +733,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         SizedBox(height: 16.h),
         SizedBox(
           width: double.infinity,
-          child: ElevatedButton(
+          child: AppButton(
             onPressed: () {
               // ⭐ 2026-08-24 - 스텝 재번호(구 5→신4, 구4→신3) 때 이 삼항식 안의
               // 값들을 놓쳤던 버그 수정. _buildStep()의 case 검색 정규식이
@@ -871,7 +878,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           SizedBox(height: 16.h),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: AppButton(
               onPressed: _todayIndex == null ? null : () {
                 setState(() => _step = 3);
               },
@@ -883,22 +890,33 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     );
   }
 
+  // ⭐ 2026-08-24 - "시작하기" 버튼을 다른 온보딩 화면들과 같은 위치(화면 맨 아래)로
+  // 옮김 - 예전엔 아이콘+텍스트와 한 그룹으로 화면 중앙에 같이 떠 있었음. 아이콘+
+  // 제목은 Expanded+Center로 남는 공간 안에서 계속 중앙 정렬되고, 버튼만 그 아래
+  // 고정됨(다른 화면들의 Expanded 스크롤영역 + 하단 고정 버튼 구조와 동일).
   Widget _buildComplete() {
     return Padding(
       padding: EdgeInsets.all(24.w),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.check_circle, size: 100.sp, color: Colors.green),
-          SizedBox(height: 24.h),
-          Text(
-            context.l10n.onboardingAllSet,
-            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle, size: 100.sp, color: Colors.green),
+                  SizedBox(height: 24.h),
+                  Text(
+                    context.l10n.onboardingAllSet,
+                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
           ),
-          SizedBox(height: 48.h),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
+            child: AppButton(
               onPressed: _saveAndFinish,
               child: Text(context.l10n.commonGetStarted),
             ),
