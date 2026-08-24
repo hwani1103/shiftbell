@@ -39,8 +39,11 @@ String dayOffsetLabel(BuildContext context, int dayOffset) {
 }
 
 /// 전날/당일/다음날 중 하나를 고르는 토글 그룹. [value]/[onChanged]는 항상
-/// alarm_day_offset.dart의 -1/0/1을 씀. 세 칩을 가로 중앙에 자연스러운
-/// 크기로 배치함(다이얼로그 폭을 억지로 다 채우지 않음).
+/// alarm_day_offset.dart의 -1/0/1을 씀. 세 칩을 가로 중앙에 배치함(다이얼로그
+/// 폭을 억지로 다 채우지 않음).
+/// ⭐ 2026-08-25 - "너무 작다"는 피드백으로 dense를 뺌 - 근무명 태그와 완전히
+/// 같은 기본 크기(테두리 두께 포함)를 씀. dense였을 때 테두리가 더 얇아서
+/// "재사용한 게 맞는지" 헷갈렸던 것도 이걸로 같이 해결됨(이제 진짜 동일).
 class DayOffsetSelector extends StatelessWidget {
   const DayOffsetSelector({super.key, required this.value, required this.onChanged});
 
@@ -54,10 +57,9 @@ class DayOffsetSelector extends StatelessWidget {
       children: kAlarmDayOffsets.map((offset) {
         final isLast = offset == kAlarmDayOffsets.last;
         return Padding(
-          padding: EdgeInsets.only(right: isLast ? 0 : 8.w),
+          padding: EdgeInsets.only(right: isLast ? 0 : 10.w),
           child: AppShiftChip(
             label: dayOffsetLabel(context, offset),
-            dense: true,
             selected: value == offset,
             onTap: () => onChanged(offset),
           ),
@@ -67,19 +69,23 @@ class DayOffsetSelector extends StatelessWidget {
   }
 }
 
-/// 이미 정해진 전날/당일/다음날 값을 시간/근무명 텍스트 옆에 작게 붙여
-/// 보여주는 표시 전용 칩(탭 불가) - 근무명 태그와 같은 모양(AppShiftChip)을
-/// dense 크기로 재사용.
+/// 이미 정해진 전날/당일/다음날 값을 시간/근무명 텍스트 옆에 붙여 보여주는
+/// 표시 전용 칩(탭 불가) - 근무명 태그와 같은 모양(AppShiftChip)을 재사용.
 class DayOffsetBadge extends StatelessWidget {
-  const DayOffsetBadge({super.key, required this.dayOffset});
+  const DayOffsetBadge({super.key, required this.dayOffset, this.large = false});
 
   final int dayOffset;
+
+  /// ⭐ 2026-08-25 - 기본(false)은 시간 옆에 작게 붙는 배지용(dense) 크기.
+  /// 달력 팝업의 "알람 타입 선택"처럼 큰 글자(근무명/시간) 옆에 나란히 놓여서
+  /// 상대적으로 작아 보이는 자리는 true로 근무명 태그와 같은 기본 크기를 씀.
+  final bool large;
 
   @override
   Widget build(BuildContext context) {
     return AppShiftChip(
       label: dayOffsetLabel(context, dayOffset),
-      dense: true,
+      dense: !large,
     );
   }
 }

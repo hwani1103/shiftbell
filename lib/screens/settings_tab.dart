@@ -24,6 +24,7 @@ import 'calendar_theme_picker_screen.dart';
 import '../widgets/tappable_number_picker.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_second_button.dart';
+import '../widgets/app_third_button.dart';
 import '../widgets/day_offset_chip.dart';
 import '../constants/alarm_day_offset.dart';
 import '../l10n/l10n_extensions.dart';
@@ -2214,12 +2215,18 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
     _alarms = List.from(widget.initialAlarms);
   }
 
+  // ⭐ 2026-08-25 - 온보딩의 동일한 다이얼로그(_AlarmTimeDialog)와 같은 이유/구조 -
+  // 그쪽 클래스의 build() 주석 참고.
+  static const double _cardHeightEstimate = 118;
+
+  double _listMaxHeight() => (_cardHeightEstimate * 3).h;
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
       title: Text(context.l10n.settingsShiftFixedAlarmTitle(widget.shift)),
-      content: SingleChildScrollView(
+      content: SizedBox(
+        width: double.maxFinite,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -2230,124 +2237,121 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
             ),
             SizedBox(height: 16.h),
 
-            ..._alarms.asMap().entries.map((entry) {
-              final alarm = entry.value;
-              return Container(
-                margin: EdgeInsets.only(bottom: 12.h),
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
-                ),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: _listMaxHeight()),
+              child: SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        // ⭐ 시간 영역 탭하면 시간 수정 - 전날/당일/다음날 Chip을 시계
-                        // 아이콘 대신 놓아서("당일 09:00" 형태) 언제 울리는지 한눈에 보임.
-                        InkWell(
-                          onTap: () => _editAlarmTime(entry.key),
-                          borderRadius: BorderRadius.circular(8.r),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                DayOffsetBadge(dayOffset: alarm.dayOffset),
-                                SizedBox(width: 8.w),
-                                Text(
-                                  '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
-                                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Spacer(),
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 20.sp),
-                          onPressed: () {
-                            setState(() {
-                              _alarms.removeAt(entry.key);
-                            });
-                          },
-                          constraints: BoxConstraints(),
-                          padding: EdgeInsets.zero,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8.h),
-                    Row(
-                      children: [
-                        _buildTypeButton(entry.key, 1, '🔔', context.l10n.alarmSoundVibration),
-                        SizedBox(width: 8.w),
-                        _buildTypeButton(entry.key, 2, '📳', context.l10n.alarmVibration),
-                        SizedBox(width: 8.w),
-                        _buildTypeButton(entry.key, 3, '🔇', context.l10n.alarmSilent),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            }),
-
-            SizedBox(height: 8.h),
-
-            // ⭐ 2026-08-25 - "알람 추가" 버튼을 아래 취소/저장 버튼 묶음과 정확히
-            // 같은 폭으로 맞춤(온보딩의 동일한 다이얼로그와 같은 이유/구조 -
-            // _AlarmTimeDialog 쪽 주석 참고).
-            Align(
-              alignment: Alignment.centerRight,
-              child: IntrinsicWidth(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (_alarms.length < kMaxAlarmTemplatesPerShift) ...[
-                      AppButton(
-                        onPressed: _addAlarm,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, size: 16.sp),
-                            SizedBox(width: 4.w),
-                            Text(context.l10n.alarmAdd),
-                          ],
-                        ),
+                  mainAxisSize: MainAxisSize.min,
+                  children: _alarms.asMap().entries.map((entry) {
+                    final alarm = entry.value;
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 12.h),
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: Theme.of(context).colorScheme.outline),
                       ),
-                      SizedBox(height: 8.h),
-                    ],
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        AppSecondButton(
-                          variant: AppSecondButtonVariant.neutral,
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(context.l10n.commonCancel),
-                        ),
-                        SizedBox(width: 8.w),
-                        AppSecondButton(
-                          variant: AppSecondButtonVariant.success,
-                          onPressed: () {
-                            _alarms.sort((a, b) {
-                              final aMinutes = a.time.hour * 60 + a.time.minute;
-                              final bMinutes = b.time.hour * 60 + b.time.minute;
-                              return aMinutes.compareTo(bMinutes);
-                            });
-
-                            widget.onSave(_alarms);
-                            Navigator.pop(context);
-                          },
-                          child: Text(context.l10n.commonSave),
-                        ),
-                      ],
-                    ),
-                  ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              // ⭐ 시간 영역 탭하면 시간 수정 - 전날/당일/다음날 Chip을 시계
+                              // 아이콘 대신 놓아서("당일 09:00" 형태) 언제 울리는지 한눈에 보임.
+                              InkWell(
+                                onTap: () => _editAlarmTime(entry.key),
+                                borderRadius: BorderRadius.circular(8.r),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      DayOffsetBadge(dayOffset: alarm.dayOffset),
+                                      SizedBox(width: 8.w),
+                                      Text(
+                                        '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
+                                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Spacer(),
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 20.sp),
+                                onPressed: () {
+                                  setState(() {
+                                    _alarms.removeAt(entry.key);
+                                  });
+                                },
+                                constraints: BoxConstraints(),
+                                padding: EdgeInsets.zero,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.h),
+                          Row(
+                            children: [
+                              _buildTypeButton(entry.key, 1, '🔔', context.l10n.alarmSoundVibration),
+                              SizedBox(width: 8.w),
+                              _buildTypeButton(entry.key, 2, '📳', context.l10n.alarmVibration),
+                              SizedBox(width: 8.w),
+                              _buildTypeButton(entry.key, 3, '🔇', context.l10n.alarmSilent),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
+            ),
+
+            SizedBox(height: 16.h),
+
+            // ⭐ 2026-08-25 - "알람 추가"는 원래 크기(내용물만큼)로 가운데 정렬,
+            // 담백한 세 번째 버튼 스타일(AppThirdButton) 사용 - 온보딩과 동일.
+            if (_alarms.length < kMaxAlarmTemplatesPerShift)
+              Center(
+                child: AppThirdButton(
+                  onPressed: _addAlarm,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add, size: 16.sp),
+                      SizedBox(width: 4.w),
+                      Text(context.l10n.alarmAdd),
+                    ],
+                  ),
+                ),
+              ),
+            SizedBox(height: 8.h),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                AppSecondButton(
+                  variant: AppSecondButtonVariant.neutral,
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(context.l10n.commonCancel),
+                ),
+                SizedBox(width: 8.w),
+                AppSecondButton(
+                  variant: AppSecondButtonVariant.success,
+                  onPressed: () {
+                    _alarms.sort((a, b) {
+                      final aMinutes = a.time.hour * 60 + a.time.minute;
+                      final bMinutes = b.time.hour * 60 + b.time.minute;
+                      return aMinutes.compareTo(bMinutes);
+                    });
+
+                    widget.onSave(_alarms);
+                    Navigator.pop(context);
+                  },
+                  child: Text(context.l10n.commonSave),
+                ),
+              ],
             ),
           ],
         ),

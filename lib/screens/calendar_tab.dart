@@ -2922,7 +2922,7 @@ Widget build(BuildContext context) {
                       ),
                       SizedBox(width: 8.w),
                     ],
-                    DayOffsetBadge(dayOffset: alarm.dayOffset),
+                    DayOffsetBadge(dayOffset: alarm.dayOffset, large: true),
                     SizedBox(width: 8.w),
                     Text(
                       context.l10n.calendarAlarmAt(alarm.time),

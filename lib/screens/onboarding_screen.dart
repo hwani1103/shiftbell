@@ -23,6 +23,7 @@ import '../widgets/app_shift_chip.dart';
 import '../widgets/word_safe_spans.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_second_button.dart';
+import '../widgets/app_third_button.dart';
 import '../widgets/day_offset_chip.dart';
 import '../constants/alarm_day_offset.dart';
 import '../services/alarm_generation_service.dart';
@@ -1043,11 +1044,25 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
     _alarms = List.from(widget.initialAlarms);
   }
 
+  // ⭐ 2026-08-25 - 알람 카드 한 장의 대략적인 높이(마진 포함) - 아래
+  // _listMaxHeight()가 "몇 개까지는 스크롤 없이 자라다가" 판단할 때 씀.
+  static const double _cardHeightEstimate = 118;
+
+  double _listMaxHeight() => (_cardHeightEstimate * 3).h;
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(context.l10n.onboardingFixedAlarmDialogTitle(widget.shift)),
-      content: SingleChildScrollView(
+      // ⭐ 2026-08-25 - 예전엔 (힌트+목록+버튼) 전체를 하나의 SingleChildScrollView로
+      // 감싸서, 알람이 늘어나 다이얼로그가 화면 최대 높이에 닿으면 스크롤이 버튼까지
+      // 끌고 내려가 "취소/저장이 안 보이는" 문제가 있었음. 이제 목록 부분만
+      // ConstrainedBox(maxHeight)+SingleChildScrollView(shrinkWrap:true)로 감싸서:
+      // 알람이 적을 땐(~3개까지) 목록이 자기 크기만큼만 차지해 다이얼로그가 자연스럽게
+      // 자라고, 그 이상으로 늘어나면 목록 부분의 높이가 거기서 고정되며 그 안에서만
+      // 스크롤됨 - 버튼(추가/취소/저장)은 항상 그 아래, 항상 보이는 자리에 남음.
+      content: SizedBox(
+        width: double.maxFinite,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1058,142 +1073,135 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
             ),
             SizedBox(height: 16.h),
 
-            ..._alarms.asMap().entries.map((entry) {
-              final alarm = entry.value;
-              return Container(
-                margin: EdgeInsets.only(bottom: 12.h),
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Theme.of(context).colorScheme.outline),
-                ),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: _listMaxHeight()),
+              child: SingleChildScrollView(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 시간 + 삭제 버튼
-                    Row(
-                      children: [
-                        // ⭐ 시간 영역 탭하면 시간 수정 - 전날/당일/다음날 Chip을 시계
-                        // 아이콘 대신 놓아서("당일 09:00" 형태) 언제 울리는지 한눈에 보임.
-                        InkWell(
-                          onTap: () => _editAlarmTime(entry.key),
-                          borderRadius: BorderRadius.circular(8.r),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                DayOffsetBadge(dayOffset: alarm.dayOffset),
-                                SizedBox(width: 8.w),
-                                Text(
-                                  '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
-                                  style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Spacer(),
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 20.sp),
-                          onPressed: () {
-                            setState(() {
-                              _alarms.removeAt(entry.key);
-                            });
-                          },
-                          constraints: BoxConstraints(),
-                          padding: EdgeInsets.zero,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8.h),
-                    // 알람 타입 선택 버튼들
-                    Row(
-                      children: [
-                        _buildTypeButton(entry.key, 1, '🔔', context.l10n.alarmSoundVibration),
-                        SizedBox(width: 8.w),
-                        _buildTypeButton(entry.key, 2, '📳', context.l10n.alarmVibration),
-                        SizedBox(width: 8.w),
-                        _buildTypeButton(entry.key, 3, '🔇', context.l10n.alarmSilent),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            }),
-
-            SizedBox(height: 8.h),
-
-            // ⭐ 2026-08-25 - "알람 추가" 버튼을 아래 취소/저장 버튼 묶음과 정확히
-            // 같은 폭으로 맞춤(왼쪽=취소의 왼쪽 끝, 오른쪽=저장의 오른쪽 끝) -
-            // 예전엔 다이얼로그 폭 전체(double.infinity)를 차지해서 아래 취소/저장
-            // 두 개 버튼보다 훨씬 넓어 보였음("시각적으로 과하다"는 피드백).
-            // AlertDialog의 actions 슬롯은 content와 좌우 여백이 달라 픽셀
-            // 단위로 맞추기 어려우므로, 취소/저장도 여기 content 쪽으로
-            // 옮겨서 같은 여백 안에 둠 - IntrinsicWidth가 두 위젯 중 더 넓은
-            // 쪽(보통 취소+저장 Row)의 자연스러운 폭을 계산하고,
-            // CrossAxisAlignment.stretch가 그 폭에 맞춰 "알람 추가" 버튼을
-            // 늘려서 정확히 같은 좌우 경계를 갖게 함.
-            Align(
-              alignment: Alignment.centerRight,
-              child: IntrinsicWidth(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (_alarms.length < kMaxAlarmTemplatesPerShift) ...[
-                      AppButton(
-                        onPressed: _addAlarm,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, size: 16.sp),
-                            SizedBox(width: 4.w),
-                            Text(context.l10n.alarmAdd),
-                          ],
-                        ),
+                  mainAxisSize: MainAxisSize.min,
+                  children: _alarms.asMap().entries.map((entry) {
+                    final alarm = entry.value;
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 12.h),
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: Theme.of(context).colorScheme.outline),
                       ),
-                      SizedBox(height: 8.h),
-                    ],
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        AppSecondButton(
-                          variant: AppSecondButtonVariant.neutral,
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(context.l10n.commonCancel),
-                        ),
-                        SizedBox(width: 8.w),
-                        AppSecondButton(
-                          variant: AppSecondButtonVariant.success,
-                          // ⭐ 2026-08-24 버그 수정 - 예전엔 _alarms.isEmpty일 때
-                          // 저장 버튼이 비활성화됐음. 알람을 3개→2개→1개→0개
-                          // 순으로 지우다가 0개가 되는 순간 저장이 막혀서 "알람
-                          // 없음"으로 저장할 방법이 없었음(사용자 확인 재현: 저장
-                          // 후 재진입해서 전부 삭제하려는 경우).
-                          // settings_tab.dart의 동일한 다이얼로그(고정 알람 수정)는
-                          // 애초에 이 가드가 없어서 항상 저장 가능했음 - 여기만
-                          // 어긋나 있던 것이라 그쪽과 동일하게 무조건 저장
-                          // 가능하도록 가드를 제거함.
-                          onPressed: () {
-                            _alarms.sort((a, b) {
-                              final aMinutes = a.time.hour * 60 + a.time.minute;
-                              final bMinutes = b.time.hour * 60 + b.time.minute;
-                              return aMinutes.compareTo(bMinutes);
-                            });
-
-                            widget.onSave(_alarms);
-                            Navigator.pop(context);
-                          },
-                          child: Text(context.l10n.commonSave),
-                        ),
-                      ],
-                    ),
-                  ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 시간 + 삭제 버튼
+                          Row(
+                            children: [
+                              // ⭐ 시간 영역 탭하면 시간 수정 - 전날/당일/다음날 Chip을 시계
+                              // 아이콘 대신 놓아서("당일 09:00" 형태) 언제 울리는지 한눈에 보임.
+                              InkWell(
+                                onTap: () => _editAlarmTime(entry.key),
+                                borderRadius: BorderRadius.circular(8.r),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      DayOffsetBadge(dayOffset: alarm.dayOffset),
+                                      SizedBox(width: 8.w),
+                                      Text(
+                                        '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
+                                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Spacer(),
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 20.sp),
+                                onPressed: () {
+                                  setState(() {
+                                    _alarms.removeAt(entry.key);
+                                  });
+                                },
+                                constraints: BoxConstraints(),
+                                padding: EdgeInsets.zero,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.h),
+                          // 알람 타입 선택 버튼들
+                          Row(
+                            children: [
+                              _buildTypeButton(entry.key, 1, '🔔', context.l10n.alarmSoundVibration),
+                              SizedBox(width: 8.w),
+                              _buildTypeButton(entry.key, 2, '📳', context.l10n.alarmVibration),
+                              SizedBox(width: 8.w),
+                              _buildTypeButton(entry.key, 3, '🔇', context.l10n.alarmSilent),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
+            ),
+
+            // ⭐ 목록/버튼 사이 여백 - 너무 붙어 보인다는 피드백으로 8h→16h.
+            SizedBox(height: 16.h),
+
+            // ⭐ 2026-08-25 - "알람 추가"는 다시 원래 크기(내용물만큼)로, 가운데
+            // 정렬로 되돌림(취소/저장 폭에 맞춰 늘렸던 이전 버전은 "디자인적으로
+            // 애매하다"는 피드백). 메인 버튼(AppButton)/second button 둘 다 이
+            // 자리엔 과해서, 더 담백한 세 번째 스타일(AppThirdButton)을 새로 만들어 씀.
+            if (_alarms.length < kMaxAlarmTemplatesPerShift)
+              Center(
+                child: AppThirdButton(
+                  onPressed: _addAlarm,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.add, size: 16.sp),
+                      SizedBox(width: 4.w),
+                      Text(context.l10n.alarmAdd),
+                    ],
+                  ),
+                ),
+              ),
+            SizedBox(height: 8.h),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                AppSecondButton(
+                  variant: AppSecondButtonVariant.neutral,
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(context.l10n.commonCancel),
+                ),
+                SizedBox(width: 8.w),
+                AppSecondButton(
+                  variant: AppSecondButtonVariant.success,
+                  // ⭐ 2026-08-24 버그 수정 - 예전엔 _alarms.isEmpty일 때
+                  // 저장 버튼이 비활성화됐음. 알람을 3개→2개→1개→0개
+                  // 순으로 지우다가 0개가 되는 순간 저장이 막혀서 "알람
+                  // 없음"으로 저장할 방법이 없었음(사용자 확인 재현: 저장
+                  // 후 재진입해서 전부 삭제하려는 경우).
+                  // settings_tab.dart의 동일한 다이얼로그(고정 알람 수정)는
+                  // 애초에 이 가드가 없어서 항상 저장 가능했음 - 여기만
+                  // 어긋나 있던 것이라 그쪽과 동일하게 무조건 저장
+                  // 가능하도록 가드를 제거함.
+                  onPressed: () {
+                    _alarms.sort((a, b) {
+                      final aMinutes = a.time.hour * 60 + a.time.minute;
+                      final bMinutes = b.time.hour * 60 + b.time.minute;
+                      return aMinutes.compareTo(bMinutes);
+                    });
+
+                    widget.onSave(_alarms);
+                    Navigator.pop(context);
+                  },
+                  child: Text(context.l10n.commonSave),
+                ),
+              ],
             ),
           ],
         ),
