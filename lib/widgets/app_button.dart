@@ -1,22 +1,26 @@
 // lib/widgets/app_button.dart
 //
-// ⭐ 2026-08-24 추가 - 앱 공용 기본 버튼(주요 액션용, "다음"/"완료"/"시작하기" 등).
+// ⭐ 2026-08-24 추가 - 앱 공용 기본 버튼(주요 액션용, "다음"/"완료"/"시작하기"/
+// "+추가" 등).
 //
 // 기존엔 ElevatedButton + app_theme.dart의 ElevatedButtonTheme으로 단색 배경
-// 버튼을 썼는데, "단색이라 딱딱하다"는 피드백으로 그라데이션 + 흰 테두리 링 +
-// 톤이 들어간 은은한 그림자를 주는 이 위젯으로 교체함. Material의 ButtonStyle은
-// 배경에 단색만 지정 가능해서(그라데이션 불가) 테마 하나로는 이 효과를 낼 수
-// 없었음 - 그래서 커스텀 위젯으로 뺌.
+// 버튼을 썼는데, "단색이라 딱딱하다"는 피드백으로 그라데이션 + 링 + 톤이 들어간
+// 은은한 그림자를 주는 이 위젯으로 교체함. Material의 ButtonStyle은 배경에
+// 단색만 지정 가능해서(그라데이션 불가) 테마 하나로는 이 효과를 낼 수 없었음 -
+// 그래서 커스텀 위젯으로 뺌.
 //
 // API는 ElevatedButton과 거의 동일하게 맞춤(onPressed, child) - 기존
 // ElevatedButton(...) 호출부를 AppButton(...)으로 이름만 바꾸면 대부분 그대로
 // 동작함. onPressed가 null이면 ElevatedButton과 똑같이 흐리게 비활성 표시됨.
 //
-// 적용 범위(2026-08-24 기준): lib/screens/onboarding_screen.dart의 주요 액션
-// 버튼들("다음"/"완료"/"시작하기"). "+추가"는 이 버튼으로 바꿨다가 Wrap 안에서
-// 가로 전체를 차지해버려서("메인 버튼으로 하니까 가로를 다 잡아먹는다") 다시
-// ElevatedButton.icon으로 되돌림 - AppButton은 항상 SizedBox(width:
-// double.infinity)로 감싸 "화면 전체 폭 CTA" 용도로만 쓸 것.
+// ⭐ 크기가 스스로 결정되는 방식: 이 위젯 자체는 폭을 강제하지 않음(내용물
+// 크기만큼만 차지) - `SizedBox(width: double.infinity, child: AppButton(...))`로
+// 감싸면 그 폭에 맞게 늘어나 내용이 가운데 정렬되고("다음"/"완료" 같은 화면
+// 전체 CTA용), 그냥 Wrap 등에 다른 위젯과 나란히 놓으면 내용물 크기만큼만
+// 차지함("+추가" 같은 인라인 버튼용). 내부적으로 Row(mainAxisSize: min,
+// mainAxisAlignment: center)로 감싸서 처리 - Container의 alignment는 "루즈
+// 제약이어도 최대 폭까지 확장"하는 성질이 있어서 Wrap 안에서 의도치 않게
+// 가로를 다 차지해버렸던 적이 있음(2026-08-24, 되돌렸다가 이 방식으로 재수정).
 //
 // ⭐ 크기 값(padding/radius/fontSize)에 flutter_screenutil의 .w/.h/.r/.sp를
 // 일부러 안 씀 - app_theme.dart의 ElevatedButtonTheme(아직 안 바뀐 화면들이
@@ -25,16 +29,21 @@
 // 스케일되면 미세하게 크기가 어긋나 보임 - 전부 AppButton으로 옮겨간 뒤에
 // 필요하면 그때 같이 .sp로 통일할 것.
 //
-// ⭐ 2026-08-24 구조 재작성 - "둥근 버튼 뒤에 각진 연회색 사각형이 같이 보인다"는
-// 버그 신고. 원인: Material(color: Colors.transparent, borderRadius: ...)만으로는
-// Material3의 기본 표면 틴트/그림자 처리가 완전히 안 꺼져서, 버튼의 둥근 모서리
-// 밖으로 각진 Material 표면의 흔적이 살짝 비쳤던 것으로 보임. 지금은 그라데이션/
-// 테두리/그림자를 그리는 최상위 Container(일반 위젯, Material 아님)를 두고, 그
-// 안쪽에 ClipRRect로 완전히 둥글게 잘라낸 Material(type: transparency - "자기
-// 표면을 아예 그리지 않는" 전용 타입, canvas 타입의 기본 틴트/그림자 걱정 자체가
-// 없음)을 넣는 구조로 바꿈 - 바깥 Container 밖으로는 아무것도 안 그려지고,
-// 안쪽 Material은 애초에 아무것도 스스로 그리지 않으므로 각진 잔상이 생길
-// 여지가 구조적으로 없음.
+// ⭐ 구조 - "둥근 버튼 뒤에 각진 연회색 사각형이 같이 보인다"는 버그가 있었음.
+// 원인을 Flutter 소스(material.dart)에서 직접 확인함: Material에 borderRadius를
+// 주면(shape가 non-null이 되어) 빠른 경로(AnimatedPhysicalModel, 완전히
+// 투명 보장)를 안 타고 _MaterialInterior라는 다른 경로로 빠지는데, 그쪽은
+// color가 transparent여도 완전히 안 보인다는 보장이 없음. 지금은 그 문제를
+// 구조적으로 피함: 그라데이션/링/그림자는 전부 일반 Container(Material 아님)가
+// 그리고, 그 안쪽을 ClipRRect로 잘라낸 뒤에야 Material(type: transparency -
+// "자기 표면을 아예 안 그리는" 전용 타입, 이 문제 자체가 없음)을 넣음.
+//
+// ⭐ 링 디자인: 흰 반투명 테두리 하나였다가 "안 보인다"는 피드백으로, 버튼
+// 자체 그라데이션을 좌우 반전한 "그라데이션 링"으로 바꿈 - 버튼이 밝은 모서리는
+// 링이 어둡게, 버튼이 어두운 모서리는 링이 밝게 겹쳐서 모든 지점에서 버튼과
+// 링 사이에 대비가 생기게 함(단색 반투명보다 훨씬 잘 보임). 바깥쪽 Container가
+// 이 링 그라데이션을 그리고, 그만큼 안쪽으로 패딩을 줘서 링 두께를 만든 뒤
+// 그 안에 버튼 본체(원래 방향 그라데이션)를 얹는 2겹 구조.
 
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
@@ -51,34 +60,26 @@ class AppButton extends StatelessWidget {
 
   bool get _enabled => onPressed != null;
 
+  static const double _ringWidth = 3.0;
+  static const _outerRadius = BorderRadius.all(Radius.circular(14));
+  static const _innerRadius = BorderRadius.all(Radius.circular(11));
+
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(14);
-
+    // ⭐ 링(바깥) - 버튼 본체 그라데이션을 좌우 반전(begin/end를 서로 바꿈)해서
+    // 모든 지점에서 본체와 대비가 생기게 함.
     return Container(
+      padding: const EdgeInsets.all(_ringWidth),
       decoration: BoxDecoration(
-        borderRadius: radius,
-        // ⭐ "그라데이션이 약하다"는 피드백으로 양 끝 색 차이를 크게 벌림
-        // (kAppMainAccentLight/Dark 값 자체를 app_colors.dart에서 더 밝게/
-        // 어둡게 재조정함 - 여기서 두 색을 바꾼 게 아니라 그 값들을 키움).
+        borderRadius: _outerRadius,
         gradient: _enabled
             ? const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: Alignment.bottomRight,
+                end: Alignment.topLeft,
                 colors: [kAppMainAccentLight, kAppMainAccentDark],
               )
             : null,
-        // ⭐ 비활성 상태 - "노란빛이 돌아서 잘 안 보인다"는 피드백으로 채움/
-        // 테두리/글자색 전부 명도差가 뚜렷한 회색 계열로 다시 잡음(테두리가
-        // 아예 없었던 것도 원인 중 하나 - 배경과 거의 안 구분됐음).
-        color: _enabled ? null : const Color(0xFFDADFE6),
-        border: Border.all(
-          // ⭐ "링이 안 보인다"는 피드백으로 두께(1.2→2.4)와 불투명도(0.28→0.55)
-          // 둘 다 크게 키움 - 흰 테두리 링이 또렷하게 보여야 하는 포인트라
-          // 어중간하게 옅으면 있으나 마나임.
-          color: _enabled ? Colors.white.withValues(alpha: 0.55) : const Color(0xFF9AA3B0),
-          width: _enabled ? 2.4 : 1.4,
-        ),
+        color: _enabled ? null : const Color(0xFF9AA3B0),
         boxShadow: _enabled
             ? [
                 // ⭐ 그림자를 검정 대신 버튼 자체 색상 톤으로 - 최근 트렌드인
@@ -92,29 +93,47 @@ class AppButton extends StatelessWidget {
               ]
             : null,
       ),
-      child: ClipRRect(
-        borderRadius: radius,
-        child: Material(
-          // ⭐ transparency 타입 - Material이 자기 표면을 아예 그리지 않음
-          // (canvas 타입의 기본 틴트/그림자 자체가 없는 전용 모드). 위 주석의
-          // "각진 잔상" 버그를 구조적으로 막는 핵심.
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: onPressed,
-            splashColor: Colors.white.withValues(alpha: 0.18),
-            highlightColor: Colors.white.withValues(alpha: 0.1),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              alignment: Alignment.center,
-              child: DefaultTextStyle.merge(
-                style: TextStyle(
-                  color: _enabled ? Colors.white : const Color(0xFF6B7280),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-                child: IconTheme.merge(
-                  data: IconThemeData(color: _enabled ? Colors.white : const Color(0xFF6B7280)),
-                  child: child,
+      // ⭐ 본체(안쪽) - 원래 방향 그라데이션.
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: _innerRadius,
+          gradient: _enabled
+              ? const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [kAppMainAccentLight, kAppMainAccentDark],
+                )
+              : null,
+          color: _enabled ? null : const Color(0xFFDADFE6),
+        ),
+        child: ClipRRect(
+          borderRadius: _innerRadius,
+          child: Material(
+            // ⭐ transparency 타입 - Material이 자기 표면을 아예 그리지 않음.
+            // 위 클래스 주석의 "각진 잔상" 버그를 구조적으로 막는 핵심.
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: onPressed,
+              splashColor: Colors.white.withValues(alpha: 0.18),
+              highlightColor: Colors.white.withValues(alpha: 0.1),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    DefaultTextStyle.merge(
+                      style: TextStyle(
+                        color: _enabled ? Colors.white : const Color(0xFF6B7280),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      child: IconTheme.merge(
+                        data: IconThemeData(color: _enabled ? Colors.white : const Color(0xFF6B7280)),
+                        child: child,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

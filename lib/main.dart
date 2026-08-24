@@ -402,6 +402,11 @@ Future<void> _handleMethod(MethodCall call) async {
         }
       },
       child: Scaffold(
+        // ⭐ 2026-08-24 - AppTheme.lightTheme.scaffoldBackgroundColor를 투명으로
+        // 바꿔뒀지만 static 필드라 hot reload로는 재평가 안 됨(hot restart/재실행
+        // 때만 초기화) - Scaffold 인스턴스에도 직접 명시해서 hot reload 중에도
+        // 항상 투명하게 나오도록 함(app_theme.dart 참고).
+        backgroundColor: Colors.transparent,
         // ⭐ 2026-08-24 추가 - 배너 광고 자리(BannerAdSlot)를 탭 화면 바깥,
         // BottomNavigationBar 바로 위에 둠. Column으로 감싸서 "탭 컨텐츠(Expanded)
         // + 광고 슬롯" 순서로 쌓았고, 광고 슬롯은 Offstage로 감싸 달력 탭(index 1)일

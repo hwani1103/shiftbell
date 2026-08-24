@@ -108,6 +108,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         }
       },
       child: Scaffold(
+        // ⭐ 2026-08-24 - AppTheme.lightTheme.scaffoldBackgroundColor를 투명으로
+        // 바꿔뒀지만(app_theme.dart), 그건 static 필드라 hot reload로는 다시
+        // 평가되지 않음(hot restart/재실행 때만 초기화됨) - 개발 중 hot reload로
+        // 확인하다가 "그라데이션이 아예 안 보인다"로 헷갈리기 쉬움. 여기서
+        // Scaffold 인스턴스에 직접 명시해두면 build()가 다시 불릴 때마다 항상
+        // 새로 평가되므로 hot reload에서도 확실히 투명하게 나옴.
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
           // ⭐ 2026-08-24 - title을 Center()로 감쌌던 건 AppBarTheme에
           // centerTitle이 없어서 안드로이드 기본값(false)이 적용되던 시절의
@@ -257,16 +264,22 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     );
                   }),
 
-                  // ⭐ 2026-08-24 - AppButton(공용 CTA 버튼)으로 바꿨다가 되돌림 -
-                  // AppButton은 폭이 넓은 "화면 전체 CTA" 용도로 만든 거라 Wrap
-                  // 안에서 칩들과 나란히 놓이면 가로를 다 차지해버림("메인
-                  // 버튼으로 하니까 가로를 다 잡아먹어서 보기 별로다"). 칩과
-                  // 헷갈리지 않게 "버튼"으로 구분하는 목적은 이거 하나로 충분해서
-                  // ElevatedButton.icon으로 원상복구.
-                  ElevatedButton.icon(
+                  // ⭐ 2026-08-24 - 공용 버튼(AppButton)으로 다시 교체. 예전엔
+                  // Wrap 안에서 가로를 다 차지해버리는 버그가 있었는데(Container의
+                  // alignment가 루즈 제약에서도 최대 폭까지 확장해버리는 성질
+                  // 때문 - app_button.dart 클래스 주석 참고), 그 위젯 내부 구조를
+                  // 고쳐서 이제 SizedBox로 감싸지 않으면 내용물 크기만큼만 차지함 -
+                  // 지금처럼 Wrap 안에 그냥 놓으면 원래 크기 그대로 나옴.
+                  AppButton(
                     onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
-                    icon: Icon(Icons.add, size: 18.sp),
-                    label: Text(context.l10n.commonAdd),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.add, size: 18.sp),
+                        SizedBox(width: 4.w),
+                        Text(context.l10n.commonAdd),
+                      ],
+                    ),
                   ),
                 ],
               ),
