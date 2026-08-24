@@ -56,3 +56,15 @@ android/app/google-services.json
 # `flutter gen-l10n`(pub get/run/build 시 자동 실행, generate:true)이 매번 다시
 # 만들어내는 산출물이라 커밋 대상 아님. arb 파일만 원본으로 커밋함.
 /lib/l10n/generated/
+
+# ⭐ 2026-08-24 추가 - 디버깅용 logcat 덤프. alarm_log.txt / before_reboot.txt(29MB) /
+# reboot_log.txt(56MB) / filtered.txt / shiftbell_only.txt 다섯 개가 실수로 커밋되어
+# 저장소에 86MB(팩 16MB)를 차지하고 있었음 - 추적만 해제하고 로컬 파일은 그대로 둠
+# (과거 히스토리에는 남아 있음). 앞으로 같은 실수가 반복되지 않도록 패턴으로 막음.
+/alarm_log.txt
+/before_reboot.txt
+/reboot_log.txt
+/filtered.txt
+/shiftbell_only.txt
+*_log.txt
+logcat*.txt
