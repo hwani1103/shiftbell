@@ -7,6 +7,11 @@
      삭제(목업의 회색 배경은 "가짜 배경화면"일 뿐 카드 디자인이 아니었음).
      뷰 ID(timeText/shiftTypeText/dismissButton/snoozeButton)는 그대로 -
      AlarmOverlayService.kt의 findViewById 참조는 안 건드림. -->
+<!-- ⭐ 2026-08-25 4차 수정 - "예전보다 너무 조금만 내려와서 조작하기 안 좋다"는
+     피드백으로 전체적으로 큼직하게 키움(패딩/글자/원형 버튼 전부 확대) -
+     대략 96dp → 170dp 안팎. 화면의 70~75%까지는 아니지만(그러려면 이 카드
+     하나에 지금과는 다른 수준의 콘텐츠/여백이 필요해서 완전히 다른 디자인이
+     됨), 조작하기엔 확실히 넉넉해진 크기. 더 크게/작게 조정 필요하면 말해줄 것. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -15,9 +20,9 @@
     android:gravity="center_vertical"
     android:background="@drawable/overlay_card_gradient"
     android:elevation="8dp"
-    android:paddingHorizontal="18dp"
-    android:paddingTop="18dp"
-    android:paddingBottom="16dp">
+    android:paddingHorizontal="22dp"
+    android:paddingTop="36dp"
+    android:paddingBottom="32dp">
 
     <!-- 왼쪽: 시간 + 근무 뱃지 -->
     <LinearLayout
@@ -31,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="09:30"
-            android:textSize="30sp"
+            android:textSize="50sp"
             android:textColor="#3B2E7A"
             android:textStyle="bold"
             android:fontFamily="sans-serif-medium"
@@ -44,17 +49,17 @@
             android:id="@+id/shiftTypeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="12dp"
             android:text="주간"
-            android:textSize="12sp"
+            android:textSize="16sp"
             android:textColor="#3B2E7A"
             android:textStyle="bold"
             android:background="@drawable/overlay_shift_badge"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="5dp"/>
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"/>
     </LinearLayout>
 
-    <Space android:layout_width="8dp" android:layout_height="1dp"/>
+    <Space android:layout_width="10dp" android:layout_height="1dp"/>
 
     <!-- 오른쪽: 스누즈 + 끄기 (작은 원, 라벨 없음) -->
     <LinearLayout
@@ -64,15 +69,15 @@
         android:gravity="center_vertical">
 
         <FrameLayout
-            android:layout_width="40dp"
-            android:layout_height="40dp">
+            android:layout_width="68dp"
+            android:layout_height="68dp">
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:background="@drawable/alarm_snooze_circle"
                 android:text="+5m"
-                android:textSize="11sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="#3B2E7A"/>
             <Button
@@ -88,18 +93,18 @@
                 android:elevation="0dp"/>
         </FrameLayout>
 
-        <Space android:layout_width="8dp" android:layout_height="1dp"/>
+        <Space android:layout_width="12dp" android:layout_height="1dp"/>
 
         <FrameLayout
-            android:layout_width="40dp"
-            android:layout_height="40dp">
+            android:layout_width="68dp"
+            android:layout_height="68dp">
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/alarm_dismiss_circle"
                 android:src="@drawable/ic_close_white"
                 android:scaleType="center"
-                android:padding="11dp"/>
+                android:padding="18dp"/>
             <Button
                 android:id="@+id/dismissButton"
                 android:layout_width="match_parent"

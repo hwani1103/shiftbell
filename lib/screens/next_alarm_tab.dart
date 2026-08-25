@@ -104,12 +104,16 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         // ⭐ 2026-08-25 - "UI 테마" 탭에서 확정한 "오로라 페일" 그라데이션을 이
-        // 탭 배경 전체에 씀(아이콘/잠금화면/오버레이와 같은 톤).
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: kAppAlarmGradient),
-          ),
-          child: nextAlarmAsync.when(
+        // 탭 배경 전체에 씀(아이콘/잠금화면/오버레이와 같은 톤). SizedBox.expand로
+        // 명시적으로 꽉 채움 - 스크롤 콘텐츠가 화면보다 짧을 때 그 아래로 흰
+        // 배경(바깥 Scaffold 기본색)이 비쳐 보이던 문제 방지(광고 슬롯처럼
+        // 보였다는 피드백의 원인).
+        body: SizedBox.expand(
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: kAppAlarmGradient),
+            ),
+            child: nextAlarmAsync.when(
             loading: () => const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
             error: (error, stack) => _buildEmptyState(),
             data: (nextAlarm) {
@@ -122,6 +126,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 onShowAllAlarms: () => _showAllAlarmsSheet(context),
               );
             },
+            ),
           ),
         ),
       ),
@@ -515,18 +520,13 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     final timeData = _getTimeUntilData(context, alarm.date!);
     final dateLabel = _getDateLabel(context, alarm.date!);
 
-    // ⭐ 2026-08-25 3차 수정 - "UI 테마" 탭에서 확정한 레이아웃(_nextAlarmRing,
-    // gradientBg:true 버전)을 크기·구도·배치·색깔·버튼 타입까지 그대로 옮김
-    // (이전엔 링 윗부분만 옮기고 "남은 시간"/"알람 타입" 카드는 옛 디자인이
-    // 그대로 남아있던 반쪽짜리 이식이었음). 색 매핑: s.primary→colorScheme.
-    // primary(= kAppMainAccent, 확정 톤 primary와 동일값), s.secondary→
-    // kAppRingAccent, s.onSurface/s.onBg→kAppChipBorder(짙은 남색 - 알람화면/
-    // 아이콘과 동일 값), s.surface→흰색. 실제 화면이라 "임박" 상태(30분 이내)
-    // 색상 강조는 유지하되(목업엔 없던 실제 동작), 카드 크기/모양은 목업 그대로.
-    // 오버플로 방지용 SingleChildScrollView는 안전장치로 유지(정상 크기에선
-    // 스크롤이 필요 없어 시각적으로 완전히 동일).
+    // ⭐ 2026-08-25 4차 수정 - (1) 링 색은 "임박" 여부와 무관하게 항상
+    // kAppRingAccent 고정(전엔 임박 시 tertiary(주황)로 바뀌게 했는데, 이건
+    // 목업에 없던 임의 추가였음 - 목업의 링은 항상 고정색). "남은 시간" 카드의
+    // 아이콘/텍스트만 임박 시 강조색으로 바뀌는 건 실제 앱 원래 동작이라 유지.
+    // (2) 흰 여백을 아래로 밀어내려던 문제(SizedBox.expand로 해결, build()
+    // 상단 참고)로 확보된 공간에 맞춰 링/카드/버튼을 전체적으로 약 18% 키움.
     final isImminent = timeData['isImminent'] as bool;
-    final accentColor = isImminent ? colorScheme.tertiary : kAppRingAccent;
     final onCardColor = isImminent ? colorScheme.tertiary : kAppChipBorder;
     const typeIds = [1, 2, 3];
     final typeIcons = [Icons.volume_up_rounded, Icons.vibration_rounded, Icons.notifications_off_rounded];
@@ -534,37 +534,40 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(22.w, 28.h, 22.w, 24.h),
+        padding: EdgeInsets.fromLTRB(24.w, 32.h, 24.w, 28.h),
         child: Column(
           children: [
             Row(
               children: [
-                Text(context.l10n.alarmUpNext, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: kAppChipBorder)),
+                Text(context.l10n.alarmUpNext, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: kAppChipBorder)),
               ],
             ),
-            SizedBox(height: 22.h),
+            SizedBox(height: 24.h),
 
             // ⭐ "UI 테마" 탭에서 확정한 카운트다운 링. 알람 12시간 전부터
-            // 채워지기 시작해서 알람 시각에 정확히 100%가 됨(_CountdownRing
-            // 참고 - 화면을 보고 있는 동안 15초 간격으로 계속 조금씩 움직이고,
-            // 탭을 나갔다 들어와도 리셋되지 않음. progress는 항상 "지금 vs
-            // 알람 시각"의 순수 계산값이라 위젯이 언제 새로 만들어졌는지와 무관).
+            // 채워지기 시작해서 알람 시각에 근접함(=임박 표시). 알람이 실제로
+            // 울리기 전에는 절대 100%로 보이지 않도록 최대 96%까지만 채움
+            // (_CountdownRing 참고 - 12시간짜리 창의 마지막 1분은 수학적으로도
+            // 99.86%라 육안으로는 꽉 찬 것처럼 보였던 문제 수정). 화면을 보고
+            // 있는 동안 15초 간격으로 계속 조금씩 움직이고, 탭을 나갔다
+            // 들어와도 리셋되지 않음(progress는 항상 "지금 vs 알람 시각"의
+            // 순수 계산값이라 위젯이 언제 새로 만들어졌는지와 무관).
             SizedBox(
-              width: 202.w,
-              height: 202.w,
+              width: 238.w,
+              height: 238.w,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   _CountdownRing(
-                    size: 202.w,
-                    strokeWidth: 12.w,
+                    size: 238.w,
+                    strokeWidth: 14.w,
                     alarmTime: alarm.date!,
-                    color: accentColor,
+                    color: kAppRingAccent,
                     trackColor: kAppChipBorder.withOpacity(0.15),
                   ),
                   Container(
-                    width: 160.w,
-                    height: 160.w,
+                    width: 188.w,
+                    height: 188.w,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -575,12 +578,12 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 3.h),
+                          padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 4.h),
                           decoration: BoxDecoration(color: colorScheme.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(20.r)),
-                          child: Text(dateLabel, style: TextStyle(fontSize: 10.sp, color: colorScheme.primary, fontWeight: FontWeight.w700)),
+                          child: Text(dateLabel, style: TextStyle(fontSize: 12.sp, color: colorScheme.primary, fontWeight: FontWeight.w700)),
                         ),
-                        SizedBox(height: 6.h),
-                        Text(timeStr, style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, color: colorScheme.primary)),
+                        SizedBox(height: 7.h),
+                        Text(timeStr, style: TextStyle(fontSize: 33.sp, fontWeight: FontWeight.w800, color: colorScheme.primary)),
                       ],
                     ),
                   ),
@@ -588,16 +591,16 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
               ),
             ),
 
-            SizedBox(height: 14.h),
+            SizedBox(height: 16.h),
 
             if (alarm.shiftType != null)
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
-                child: Text(alarm.shiftType!, style: TextStyle(fontSize: 12.sp, color: kAppChipBorder, fontWeight: FontWeight.w600)),
+                child: Text(alarm.shiftType!, style: TextStyle(fontSize: 14.sp, color: kAppChipBorder, fontWeight: FontWeight.w600)),
               ),
 
-            SizedBox(height: 24.h),
+            SizedBox(height: 28.h),
 
             IntrinsicHeight(
               child: Row(
@@ -606,50 +609,50 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                   // 남은 시간 카드
                   Expanded(
                     child: Container(
-                      padding: EdgeInsets.all(14.w),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18.r)),
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.timer_outlined, size: 18.sp, color: accentColor),
-                          SizedBox(height: 8.h),
-                          Text(context.l10n.alarmUntil, style: TextStyle(fontSize: 10.sp, color: kAppChipBorder.withOpacity(0.6))),
+                          Icon(Icons.timer_outlined, size: 21.sp, color: onCardColor),
+                          SizedBox(height: 9.h),
+                          Text(context.l10n.alarmUntil, style: TextStyle(fontSize: 11.sp, color: kAppChipBorder.withOpacity(0.6))),
                           SizedBox(height: 2.h),
-                          Text(timeData['text'] as String, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: onCardColor)),
+                          Text(timeData['text'] as String, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: onCardColor)),
                         ],
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 14.w),
                   // 알람 타입 선택 카드
                   Expanded(
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18.r)),
+                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(3, (i) {
                           final selected = alarm.alarmTypeId == typeIds[i];
                           return Padding(
-                            padding: EdgeInsets.symmetric(vertical: 3.h),
+                            padding: EdgeInsets.symmetric(vertical: 4.h),
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
                               onTap: () => _onTypeSelected(alarm.id!, typeIds[i]),
                               child: Row(
                                 children: [
                                   Container(
-                                    width: 22.w,
-                                    height: 22.w,
+                                    width: 26.w,
+                                    height: 26.w,
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(color: selected ? colorScheme.primary : Colors.transparent, shape: BoxShape.circle),
-                                    child: Icon(typeIcons[i], size: 12.sp, color: selected ? Colors.white : kAppChipBorder.withOpacity(0.4)),
+                                    child: Icon(typeIcons[i], size: 14.sp, color: selected ? Colors.white : kAppChipBorder.withOpacity(0.4)),
                                   ),
-                                  SizedBox(width: 6.w),
+                                  SizedBox(width: 7.w),
                                   Expanded(
                                     child: Text(
                                       typeLabels[i],
-                                      style: TextStyle(fontSize: 10.sp, color: kAppChipBorder.withOpacity(selected ? 0.9 : 0.5), fontWeight: selected ? FontWeight.w700 : FontWeight.w400),
+                                      style: TextStyle(fontSize: 11.sp, color: kAppChipBorder.withOpacity(selected ? 0.9 : 0.5), fontWeight: selected ? FontWeight.w700 : FontWeight.w400),
                                     ),
                                   ),
                                 ],
@@ -664,7 +667,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
               ),
             ),
 
-            SizedBox(height: 22.h),
+            SizedBox(height: 26.h),
 
             SizedBox(
               width: double.infinity,
@@ -673,14 +676,14 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.list_rounded, size: 16),
-                    SizedBox(width: 6.w),
+                    const Icon(Icons.list_rounded, size: 18),
+                    SizedBox(width: 7.w),
                     Text(context.l10n.alarmViewAllRegistered),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 10.h),
+            SizedBox(height: 12.h),
             SizedBox(
               width: double.infinity,
               child: AppSecondButton(
@@ -689,8 +692,8 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.alarm_off_rounded, size: 16),
-                    SizedBox(width: 6.w),
+                    const Icon(Icons.alarm_off_rounded, size: 18),
+                    SizedBox(width: 7.w),
                     Text(context.l10n.alarmTurnOffThis),
                   ],
                 ),
@@ -754,12 +757,22 @@ class _CountdownRingState extends State<_CountdownRing> {
     super.dispose();
   }
 
+  // ⭐ 2026-08-25 - "알람이 울지도 않았는데 링이 꽉 차 보인다"는 피드백으로
+  // 확인한 결과: 수학적으로는 알람 시각 전엔 항상 progress<1.0이 맞았지만(예:
+  // 1분 전엔 99.86%), 12시간짜리 창 기준 0.14%는 두꺼운 링 선 두께보다도
+  // 작아서 육안으로는 이미 다 찬 것처럼 보였음. 그래서 알람이 실제로 울리기
+  // 전(remaining>0)에는 최대 96%까지만 채우도록 상한을 둠 - 남은 4%가 실제
+  // 화면에서 또렷하게 보이는 틈으로 남아서, "아직 안 울렸다"는 게 눈으로도
+  // 확실히 구분됨. 100%는 remaining<=0(=알람이 실제로 울린 순간)에만 나옴.
+  static const double _maxProgressBeforeRinging = 0.96;
+
   double get _progress {
     const window = Duration(hours: 12);
     final remaining = widget.alarmTime.difference(DateTime.now());
     if (remaining.isNegative) return 1.0;
     if (remaining >= window) return 0.0;
-    return 1.0 - (remaining.inSeconds / window.inSeconds);
+    final raw = 1.0 - (remaining.inSeconds / window.inSeconds);
+    return raw.clamp(0.0, _maxProgressBeforeRinging);
   }
 
   @override

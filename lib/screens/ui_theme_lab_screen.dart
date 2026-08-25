@@ -1,802 +1,250 @@
 // lib/screens/ui_theme_lab_screen.dart
 //
-// ⭐ 2026-08-25 추가 - "UI 테마" 탭. 지금 앱의 알람 화면(잠금화면/홈 화면 오버레이)과
-// 앱 아이콘 디자인이 마음에 안 든다는 요청으로, 실제로 갈아끼우기 전에 방향을
-// 먼저 눈으로 비교해보기 위한 임시 디자인 탐색 화면.
+// ⭐ 2026-08-25 4차 개정 - 앱 아이콘/알람화면/다음알람탭/메인 컬러 테마는 전부
+// "오로라 페일" → "17번"(네이비/골드/코랄) 확정을 거쳐 실제 반영 완료됨. 이제
+// 이 탭은 순수하게 "앱 아이콘 색상 후보를 실제 설치됐을 때와 100% 동일하게
+// 미리 보기"만 하는 임시 화면으로 좁힘.
 //
-// ⚠️ 이 화면은 순수하게 "그림"만 그림 - 스와이프로 끄기/스누즈/알람 재생 같은
-// 실제 동작은 전혀 안 붙어 있음(버튼을 눌러도 아무 일도 안 일어남). 마음에 드는
-// 번호가 정해지면 그 디자인을 AlarmActivity.kt/AlarmOverlayService.kt(실제 알람
-// 화면)와 앱 아이콘 리소스에 옮겨 적용하고 이 탭 자체는 삭제할 예정 - 그래서
-// l10n(app_ko.arb/app_en.arb) 라운드트립 없이 한국어 문자열을 직접 씀(임시
-// 화면이라는 걸 알고 하는 의도적 예외).
+// ⚠️ 왜 다시 만들었나: 처음 아이콘 색상 후보를 고를 때는 이 목업이 그냥
+// "정사각형 그림"이었는데, 실제로 설치해보니 완전히 다르게 보였음(적응형
+// 아이콘이 (1) flutter_launcher_icons가 자동으로 씌우는 16% 인셋, (2) 안드로이드
+// 자체가 108dp 캔버스 중 실제로는 중앙 66~72dp만 "확대 없이 그대로" 보여주는
+// 크롭, (3) 런처가 씌우는 마스크(원형 등) - 이 세 단계를 거치기 때문. 이번엔
+// 그 세 단계를 전부 그대로 시뮬레이션해서 그려서(assets/icon/gen_icon.py의
+// 실측 상수와 동일한 값을 씀), "여기서 고르면 실제로 그렇게 보인다"를 보장함.
 //
-// ⭐ 다섯 번째 개정(2026-08-25) - 잠금화면/오버레이에서 "오로라" 그라데이션과
-// +5m/끄기 버튼 색이 서로 비슷해 묻히는 문제를 계기로, 아예 4개 테마를 전부
-// "오로라 그라데이션 하나"의 명도/채도 단계별 변형(진하게→아주 밝게)으로
-// 통일함. 톤(보라~파랑~청록)은 그대로 두고 각 그라데이션 색을 25%/50%/75%씩
-// 흰색 쪽으로 섞어 4단계를 만듦 - 가장 밝은 4번은 그 위에 얹는 글씨/테두리
-// (controlColor)를 흰색 대신 짙은 남색으로 바꿔서 가독성을 지킴. 그리고
-// +5m/끄기 버튼 둘 다 배경과 구분되는 테두리(controlColor)를 추가해 어떤
-// 밝기에서도 버튼 경계가 보이게 함. 아이콘 색상 갤러리는 30개 → 3개(1번 테마
-// 아이콘 자체 + 팔레트 1번 + 팔레트 17번)로 정리. "다음 알람" 탭은 파스텔안
-// (원형 시계 모티프)을 최종 레이아웃으로 채택하고, 그 원을 애니메이션 카운트다운
-// 링(12시 방향에서 시작해 알람 시각에 가까워질수록 채워짐)으로 발전시킴 -
-// 실 데이터가 없는 목업이라 8초 주기로 무한 반복하는 데모 애니메이션으로 대체.
-// "오늘" 칩은 원 안, 시간 위로 이동. 테마별로 이 레이아웃을 그라데이션 배경
-// 버전과 배경 없는(플랫) 버전 두 가지로 각각 만들어 비교할 수 있게 함.
-// "전체 알람 보기"는 AppThirdButton, "이 알람 끄기"는 AppSecondButton(danger)
-// 컨셉을 그대로 씀.
+// 사용법: 마음에 드는 번호를 골라서 알려주면, assets/icon/gen_icon.py의
+// BG/HANDS/BELL_BG 상수를 그 후보 값으로 바꾸고 실제 아이콘에 반영함.
 
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../widgets/app_second_button.dart';
-import '../widgets/app_shift_chip.dart';
-import '../widgets/app_third_button.dart';
 
-class _ConceptSpec {
+/// 후보 하나 - 배경(단색 또는 그라데이션) / 시계 바늘 / 종 배지 색.
+class _IconCandidate {
   final int number;
   final String name;
-  final String tagline;
-  final List<Color> gradient; // 보라~파랑~청록, 테마마다 명도만 다름
-  final Color bg; // 그라데이션 없는(플랫) 버전에서 쓰는 단색 배경
-  final Color surface; // 카드/버튼 표면
-  final Color primary; // 주 강조색(뱃지 글자, 선택 아이콘 채움 등 - 밝기와 무관하게 항상 진하게 유지)
-  final Color secondary; // 보조 강조색(아이콘 배지, 카운트다운 링 채움색)
-  final Color onBg; // 배경(그라데이션/플랫 공통) 위 기본 글자색
-  final Color onSurface; // 표면(카드) 위 기본 글자색
-  final Color controlColor; // +5m/끄기 버튼의 테두리·글자색 - 배경과 항상 구분되게
-
-  const _ConceptSpec({
-    required this.number,
-    required this.name,
-    required this.tagline,
-    required this.gradient,
-    required this.bg,
-    required this.surface,
-    required this.primary,
-    required this.secondary,
-    required this.onBg,
-    required this.onSurface,
-    required this.controlColor,
-  });
-}
-
-const List<_ConceptSpec> _conceptSpecs = [
-  _ConceptSpec(
-    number: 1,
-    name: '오로라 · 진하게',
-    tagline: '가장 진한 톤(원안). 텍스트/테두리는 흰색.',
-    gradient: [Color(0xFF6A3DE8), Color(0xFF3D7BF5), Color(0xFF00D9C7)],
-    bg: Color(0xFF1B1035),
-    surface: Color(0x22FFFFFF),
-    primary: Color(0xFF7C4DFF),
-    secondary: Color(0xFF00E5C7),
-    onBg: Colors.white,
-    onSurface: Colors.white,
-    controlColor: Colors.white,
-  ),
-  _ConceptSpec(
-    number: 2,
-    name: '오로라 · 라이트',
-    tagline: '한 단계 밝게(원 그라데이션의 25% 화이트 믹스). 텍스트/테두리는 흰색.',
-    gradient: [Color(0xFF8F6DEE), Color(0xFF6D9CF7), Color(0xFF40E2D5)],
-    bg: Color(0xFF3D2E7D),
-    surface: Color(0x38FFFFFF),
-    primary: Color(0xFF7C4DFF),
-    secondary: Color(0xFF10C9BB),
-    onBg: Colors.white,
-    onSurface: Colors.white,
-    controlColor: Colors.white,
-  ),
-  _ConceptSpec(
-    number: 3,
-    name: '오로라 · 소프트',
-    tagline: '더 밝게(50% 화이트 믹스). 텍스트는 흰색 유지하되 살짝 그림자를 더함.',
-    gradient: [Color(0xFFB49EF3), Color(0xFF9EBDFA), Color(0xFF80ECE3)],
-    bg: Color(0xFF8A76E8),
-    surface: Color(0x66FFFFFF),
-    primary: Color(0xFF6A4FD9),
-    secondary: Color(0xFF0F9C90),
-    onBg: Colors.white,
-    onSurface: Colors.white,
-    controlColor: Colors.white,
-  ),
-  _ConceptSpec(
-    number: 4,
-    name: '오로라 · 페일',
-    tagline: '가장 밝게(75% 화이트 믹스). 흰 글씨가 안 보여서 텍스트/테두리를 짙은 남색으로 전환.',
-    gradient: [Color(0xFFDACEF9), Color(0xFFCEDEFC), Color(0xFFBFF5F1)],
-    bg: Color(0xFFEEE9FD),
-    surface: Colors.white,
-    primary: Color(0xFF6A4FD9),
-    secondary: Color(0xFF0F9C90),
-    onBg: Color(0xFF3B2E7A),
-    onSurface: Color(0xFF3B2E7A),
-    controlColor: Color(0xFF3B2E7A),
-  ),
-];
-
-/// 알람 타입 3종(소리+진동/진동/무음) - 다음 알람 탭 목업 전체에서 공용으로 씀.
-const List<String> _alarmTypeLabels = ['소리+진동', '진동', '무음'];
-const List<IconData> _alarmTypeIcons = [
-  Icons.volume_up_rounded,
-  Icons.vibration_rounded,
-  Icons.notifications_off_rounded,
-];
-
-/// ⭐ 5번 슬롯(아이콘 색상 후보) 항목 하나. 30개 갤러리에서 후보 3개로 정리:
-/// (1) 1번 테마 아이콘 자체(그라데이션), (2)(3) 원래 30개 팔레트 중 1번/17번.
-class _IconPalette {
-  final int number;
-  final String label;
-  final Color bg;
+  final Color? bg;
   final List<Color>? gradient;
-  final Color clock;
+  final Color hands;
   final Color bell;
-  final Color bellBorder;
-  const _IconPalette({
-    required this.number,
-    required this.label,
-    required this.bg,
-    this.gradient,
-    required this.clock,
-    required this.bell,
-    this.bellBorder = Colors.white,
-  });
+  const _IconCandidate({required this.number, required this.name, this.bg, this.gradient, required this.hands, required this.bell});
 }
 
-const List<_IconPalette> _iconPalettes = [
-  _IconPalette(
-    number: 1,
-    label: '1번 테마 아이콘 (그라데이션)',
-    bg: Color(0xFF1B1035),
-    gradient: [Color(0xFF6A3DE8), Color(0xFF3D7BF5), Color(0xFF00D9C7)],
-    clock: Colors.white,
-    bell: Color(0xFF00E5C7),
-  ),
-  _IconPalette(
-    number: 2,
-    label: '팔레트 1 - 인디고/화이트/앰버',
-    bg: Color(0xFF3F51B5),
-    clock: Colors.white,
-    bell: Color(0xFFFFC107),
-  ),
-  _IconPalette(
-    number: 3,
-    label: '팔레트 17 - 네이비/골드/코랄',
-    bg: Color(0xFF1A237E),
-    clock: Color(0xFFFFD700),
-    bell: Color(0xFFFF7043),
-    bellBorder: Colors.white,
-  ),
+// ⭐ 1~3번 = 지난번에 마지막까지 남았던 3개 후보(그대로 부활). 4~23번 = 새로 추가.
+// 시계 얼굴은 항상 흰색 고정, 바늘/종만 후보마다 다름(assets/icon/gen_icon.py와
+// 동일한 기하 구조 - 4시 정각, 종은 시계 테두리에 살짝 겹침).
+const List<_IconCandidate> _candidates = [
+  _IconCandidate(number: 1, name: '오로라 그라데이션(부활)', gradient: [Color(0xFF6A3DE8), Color(0xFF3D7BF5), Color(0xFF00D9C7)], hands: Colors.white, bell: Color(0xFF00E5C7)),
+  _IconCandidate(number: 2, name: '인디고 · 화이트 · 앰버(부활)', bg: Color(0xFF3F51B5), hands: Colors.white, bell: Color(0xFFFFC107)),
+  _IconCandidate(number: 3, name: '네이비 · 골드 · 코랄(현재 적용중, 부활)', bg: Color(0xFF1A237E), hands: Color(0xFFFFD700), bell: Color(0xFFFF7043)),
+
+  _IconCandidate(number: 4, name: '틸 · 화이트 · 코랄', bg: Color(0xFF00695C), hands: Colors.white, bell: Color(0xFFFF7043)),
+  _IconCandidate(number: 5, name: '포레스트그린 · 화이트 · 앰버', bg: Color(0xFF1B5E20), hands: Colors.white, bell: Color(0xFFFFC107)),
+  _IconCandidate(number: 6, name: '버건디 · 화이트 · 골드', bg: Color(0xFF880E4F), hands: Colors.white, bell: Color(0xFFFFCA28)),
+  _IconCandidate(number: 7, name: '오션블루 · 화이트 · 코랄', bg: Color(0xFF0277BD), hands: Colors.white, bell: Color(0xFFFF8A65)),
+  _IconCandidate(number: 8, name: '딥바이올렛 · 화이트 · 아쿠아', bg: Color(0xFF4527A0), hands: Colors.white, bell: Color(0xFF26C6DA)),
+  _IconCandidate(number: 9, name: '차콜 · 틸 · 코랄', bg: Color(0xFF263238), hands: Color(0xFF26A69A), bell: Color(0xFFFF7043)),
+  _IconCandidate(number: 10, name: '번트오렌지 · 화이트 · 딥틸', bg: Color(0xFFE65100), hands: Colors.white, bell: Color(0xFF00796B)),
+  _IconCandidate(number: 11, name: '플럼 · 골드 · 민트', bg: Color(0xFF6A1B9A), hands: Color(0xFFFFD54F), bell: Color(0xFF4DD0E1)),
+  _IconCandidate(number: 12, name: '올리브 · 다크브라운 · 코랄', bg: Color(0xFF827717), hands: Color(0xFF4E342E), bell: Color(0xFFFF7043)),
+  _IconCandidate(number: 13, name: '스카이블루 · 네이비 · 앰버', bg: Color(0xFF0288D1), hands: Color(0xFF0D47A1), bell: Color(0xFFFFB300)),
+  _IconCandidate(number: 14, name: '러스트 · 화이트 · 탠', bg: Color(0xFFBF360C), hands: Colors.white, bell: Color(0xFFFFB74D)),
+  _IconCandidate(number: 15, name: '딥인디고 · 화이트 · 핑크', bg: Color(0xFF283593), hands: Colors.white, bell: Color(0xFFFF80AB)),
+  _IconCandidate(number: 16, name: '에메랄드 · 화이트 · 살몬', bg: Color(0xFF00897B), hands: Colors.white, bell: Color(0xFFFF8A80)),
+  _IconCandidate(number: 17, name: '마룬 · 화이트 · 골드', bg: Color(0xFFB71C1C), hands: Colors.white, bell: Color(0xFFFFC107)),
+  _IconCandidate(number: 18, name: '코발트 · 화이트 · 오렌지', bg: Color(0xFF1565C0), hands: Colors.white, bell: Color(0xFFFF9800)),
+  _IconCandidate(number: 19, name: '에스프레소 · 크림 · 앰버', bg: Color(0xFF4E342E), hands: Color(0xFFFFE0B2), bell: Color(0xFFFFC107)),
+  _IconCandidate(number: 20, name: '사파이어 · 골드 · 코랄', bg: Color(0xFF01579B), hands: Color(0xFFFFD700), bell: Color(0xFFFF7043)),
+  _IconCandidate(number: 21, name: '자수정 · 화이트 · 라임', bg: Color(0xFF7B1FA2), hands: Colors.white, bell: Color(0xFFC0CA33)),
+  _IconCandidate(number: 22, name: '딥로즈 · 화이트 · 스카이', bg: Color(0xFFAD1457), hands: Colors.white, bell: Color(0xFF4FC3F7)),
+  _IconCandidate(number: 23, name: '잉크블루 · 화이트 · 선플라워', bg: Color(0xFF0D47A1), hands: Colors.white, bell: Color(0xFFFFEB3B)),
 ];
 
-class UiThemeLabScreen extends StatefulWidget {
+class UiThemeLabScreen extends StatelessWidget {
   const UiThemeLabScreen({super.key});
 
   @override
-  State<UiThemeLabScreen> createState() => _UiThemeLabScreenState();
-}
-
-class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
-  int _selected = 1; // 1..4 = 밝기 단계, 5 = 아이콘 색상 후보
-
-  @override
   Widget build(BuildContext context) {
-    final isGallery = _selected == 5;
-    final spec = isGallery ? null : _conceptSpecs.firstWhere((s) => s.number == _selected);
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('UI 테마 (임시 - 디자인 비교용)'),
-      ),
+      appBar: AppBar(title: const Text('앱 아이콘 색상 후보 (실제 렌더링)')),
       body: Column(
         children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
-            child: SizedBox(
-              height: 44.h,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                separatorBuilder: (_, __) => SizedBox(width: 8.w),
-                itemBuilder: (context, index) {
-                  final n = index + 1;
-                  return AppShiftChip(
-                    label: n == 5 ? '아이콘' : '$n',
-                    selected: n == _selected,
-                    onTap: () => setState(() => _selected = n),
-                  );
-                },
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isGallery ? '5. 아이콘 색상 후보' : '${spec!.number}. ${spec.name}',
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    isGallery ? '30개 중 추린 후보 3개.' : spec!.tagline,
-                    style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  ),
-                ],
-              ),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16.w),
+            color: Colors.grey.shade100,
+            child: Text(
+              '이 그림은 실제 안드로이드 적응형 아이콘 파이프라인(16% 인셋 → 108dp 중 '
+              '중앙 70dp만 확대 없이 노출 → 원형 마스크)을 그대로 재현한 결과예요. '
+              '여기서 보이는 대로 실제 홈 화면에도 나타나요. 마음에 드는 번호를 알려주세요.',
+              style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700, height: 1.4),
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(20.w),
-              child: isGallery ? _buildIconGallery() : _buildThemeSections(spec!),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildThemeSections(_ConceptSpec spec) {
-    return Column(
-      children: [
-        _sectionLabel('앱 아이콘'),
-        SizedBox(height: 12.h),
-        _buildIcon(spec),
-        SizedBox(height: 32.h),
-        _sectionLabel('잠금화면 알람'),
-        SizedBox(height: 12.h),
-        _buildLockScreen(spec),
-        SizedBox(height: 32.h),
-        _sectionLabel('홈 화면(해제 상태) 알람'),
-        SizedBox(height: 12.h),
-        _buildOverlay(spec),
-        SizedBox(height: 32.h),
-        _sectionLabel('다음 알람 탭 - 그라데이션 버전'),
-        SizedBox(height: 12.h),
-        _nextAlarmRing(spec, gradientBg: true),
-        SizedBox(height: 32.h),
-        _sectionLabel('다음 알람 탭 - 그라데이션 없는(플랫) 버전'),
-        SizedBox(height: 12.h),
-        _nextAlarmRing(spec, gradientBg: false),
-        SizedBox(height: 24.h),
-      ],
-    );
-  }
-
-  Widget _sectionLabel(String text) {
-    return Text(text, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: Colors.grey.shade600));
-  }
-
-  // ============================================================
-  // 5번 슬롯 - 아이콘 색상 후보 3개
-  // ============================================================
-  Widget _buildIconGallery() {
-    return Wrap(
-      spacing: 24.w,
-      runSpacing: 24.h,
-      children: _iconPalettes.map((p) {
-        return SizedBox(
-          width: 92.w,
-          child: Column(
-            children: [
-              _iconGraphic(bg: p.bg, gradient: p.gradient, clockColor: p.clock, bellColor: p.bell, bellBorderColor: p.bellBorder, size: 88.w),
-              SizedBox(height: 8.h),
-              Text('${p.number}', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: Colors.grey.shade700)),
-              SizedBox(height: 2.h),
-              Text(p.label, textAlign: TextAlign.center, style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600)),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  // ============================================================
-  // 앱 아이콘 / 아이콘 갤러리 공용 - 둥근 사각 + 시계 + 2시 방향 알림 배지.
-  // gradient가 있으면 그라데이션, 없으면 bg 단색.
-  // ============================================================
-  Widget _iconGraphic({
-    Color? bg,
-    List<Color>? gradient,
-    required Color clockColor,
-    required Color bellColor,
-    required Color bellBorderColor,
-    required double size,
-  }) {
-    final borderWidth = (size / 104 * 2.4).clamp(1.2, 3.0);
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(size * 0.23),
-        color: gradient == null ? bg : null,
-        gradient: gradient != null ? LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: gradient) : null,
-        boxShadow: [BoxShadow(color: (bg ?? gradient!.first).withValues(alpha: 0.4), blurRadius: size * 0.17, offset: Offset(0, size * 0.08))],
-      ),
-      alignment: Alignment.center,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Icon(Icons.watch_later_rounded, size: size * 0.66, color: clockColor),
-          Positioned(
-            top: size * 0.01,
-            right: size * 0.01,
-            child: Container(
-              width: size * 0.24,
-              height: size * 0.24,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(color: bellColor, shape: BoxShape.circle, border: Border.all(color: bellBorderColor, width: borderWidth)),
-              child: Icon(Icons.notifications_active_rounded, size: size * 0.135, color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildIcon(_ConceptSpec s) {
-    return _iconGraphic(
-      bg: s.bg,
-      gradient: s.gradient,
-      clockColor: s.controlColor,
-      bellColor: s.secondary,
-      bellBorderColor: s.controlColor,
-      size: 104.w,
-    );
-  }
-
-  // ============================================================
-  // 잠금화면 알람 - 전 테마 공통 레이아웃(원형 다이얼 + 원형 버튼 2개), 색상만 다름.
-  // ============================================================
-  Widget _buildLockScreen(_ConceptSpec s) {
-    final w = 280.w;
-    final h = 580.h;
-    return _phoneFrame(
-      width: w,
-      height: h,
-      bg: s.bg,
-      gradient: s.gradient,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(20.w, 40.h, 20.w, 28.h),
-        child: Column(
-          children: [
-            Text('알람', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: s.onBg.withValues(alpha: 0.7), letterSpacing: 2)),
-            const Spacer(flex: 2),
-            Container(
-              width: 200.w,
-              height: 200.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                border: Border.all(color: s.primary, width: 3),
-                boxShadow: [BoxShadow(color: s.primary.withValues(alpha: 0.3), blurRadius: 16, offset: const Offset(0, 6))],
+            child: GridView.builder(
+              padding: EdgeInsets.all(16.w),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                mainAxisSpacing: 22.h,
+                crossAxisSpacing: 12.w,
+                childAspectRatio: 0.72,
               ),
-              alignment: Alignment.center,
-              child: Text('07:30', style: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.w800, color: s.primary)),
-            ),
-            SizedBox(height: 16.h),
-            _shiftLabel(s, '야간 근무'),
-            const Spacer(flex: 3),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _snoozeButton(s, dense: false),
-                SizedBox(width: 28.w),
-                _labeledRoundButton(s, Icons.close_rounded, '끄기', filled: true),
-              ],
-            ),
-            SizedBox(height: 18.h),
-            Column(
-              children: [
-                Icon(Icons.keyboard_double_arrow_up_rounded, size: 18.sp, color: s.onBg.withValues(alpha: 0.5)),
-                SizedBox(height: 2.h),
-                Text('위로 스와이프해서 끄기', style: TextStyle(fontSize: 11.sp, color: s.onBg.withValues(alpha: 0.5))),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // 홈 화면(해제 상태) 오버레이 알람 - 전 테마 공통 레이아웃, 색상만 다름.
-  // ============================================================
-  Widget _buildOverlay(_ConceptSpec s) {
-    final w = 280.w;
-    final h = 340.h;
-
-    return Container(
-      width: w,
-      height: h,
-      decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(28.r)),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: Padding(
-              padding: EdgeInsets.only(top: 140.h, left: 20.w, right: 20.w),
-              child: Wrap(
-                spacing: 18.w,
-                runSpacing: 18.h,
-                children: List.generate(
-                  8,
-                  (i) => Container(width: 40.w, height: 40.w, decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(10.r))),
-                ),
-              ),
-            ),
-          ),
-          Positioned(top: 0, left: 0, right: 0, child: _overlayCard(s)),
-        ],
-      ),
-    );
-  }
-
-  Widget _overlayCard(_ConceptSpec s) {
-    final deco = BoxDecoration(
-      gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: s.gradient),
-      borderRadius: BorderRadius.vertical(bottom: Radius.circular(24.r)),
-      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 14, offset: const Offset(0, 6))],
-    );
-    return Container(
-      decoration: deco,
-      padding: EdgeInsets.fromLTRB(18.w, 18.h, 18.w, 16.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '07:30',
-                  style: TextStyle(
-                    fontSize: 30.sp,
-                    fontWeight: FontWeight.w800,
-                    color: s.onBg,
-                    shadows: const [Shadow(color: Colors.black26, blurRadius: 4, offset: Offset(0, 1))],
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                _shiftLabel(s, '야간 근무'),
-              ],
-            ),
-          ),
-          SizedBox(width: 8.w),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _snoozeButton(s, dense: true),
-              SizedBox(width: 8.w),
-              _iconCircleButton(s, Icons.close_rounded, filled: true),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ============================================================
-  // 다음 알람 탭 - 파스텔안(원형 시계 모티프)을 최종 레이아웃으로 채택하고,
-  // 원을 애니메이션 카운트다운 링으로 발전시킴. gradientBg로 그라데이션/플랫
-  // 두 버전을 같은 레이아웃에서 만들어냄.
-  // ============================================================
-  Widget _nextAlarmRing(_ConceptSpec s, {required bool gradientBg}) {
-    return _phoneFrame(
-      width: 280.w,
-      height: 600.h,
-      bg: s.bg,
-      gradient: gradientBg ? s.gradient : null,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(22.w, 28.h, 22.w, 24.h),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Text('다음 근무 알람', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: s.onBg)),
-              ],
-            ),
-            SizedBox(height: 22.h),
-            SizedBox(
-              width: 202.w,
-              height: 202.w,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  _CountdownRing(size: 202.w, strokeWidth: 12.w, color: s.secondary, trackColor: s.onBg.withValues(alpha: 0.15)),
-                  Container(
-                    width: 160.w,
-                    height: 160.w,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.18), blurRadius: 14, offset: const Offset(0, 6))],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 3.h),
-                          decoration: BoxDecoration(color: s.primary.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(20.r)),
-                          child: Text('오늘', style: TextStyle(fontSize: 10.sp, color: s.primary, fontWeight: FontWeight.w700)),
-                        ),
-                        SizedBox(height: 6.h),
-                        Text('07:30', style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, color: s.primary)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 14.h),
-            _shiftLabel(s, '야간 근무'),
-            SizedBox(height: 24.h),
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(14.w),
-                      decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(18.r)),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.timer_outlined, size: 18.sp, color: s.secondary),
-                          SizedBox(height: 8.h),
-                          Text('알람까지', style: TextStyle(fontSize: 10.sp, color: s.onSurface.withValues(alpha: 0.6))),
-                          SizedBox(height: 2.h),
-                          Text('2시간 30분', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: s.onSurface)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
-                      decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(18.r)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(3, (i) {
-                          final selected = i == 0;
-                          return Padding(
-                            padding: EdgeInsets.symmetric(vertical: 3.h),
-                            child: Row(
-                              children: [
-                                Container(
-                                  width: 22.w,
-                                  height: 22.w,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(color: selected ? s.primary : Colors.transparent, shape: BoxShape.circle),
-                                  child: Icon(_alarmTypeIcons[i], size: 12.sp, color: selected ? Colors.white : s.onSurface.withValues(alpha: 0.4)),
-                                ),
-                                SizedBox(width: 6.w),
-                                Expanded(
-                                  child: Text(
-                                    _alarmTypeLabels[i],
-                                    style: TextStyle(fontSize: 10.sp, color: s.onSurface.withValues(alpha: selected ? 0.9 : 0.5), fontWeight: selected ? FontWeight.w700 : FontWeight.w400),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 22.h),
-            SizedBox(
-              width: double.infinity,
-              child: AppThirdButton(
-                onPressed: () {},
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+              itemCount: _candidates.length,
+              itemBuilder: (context, index) {
+                final c = _candidates[index];
+                return Column(
                   children: [
-                    const Icon(Icons.list_rounded, size: 16),
-                    SizedBox(width: 6.w),
-                    const Text('전체 알람 보기'),
+                    _AdaptiveIconPreview(candidate: c, size: 84.w),
+                    SizedBox(height: 8.h),
+                    Text('${c.number}', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Colors.grey.shade800)),
+                    SizedBox(height: 2.h),
+                    Text(c.name, textAlign: TextAlign.center, style: TextStyle(fontSize: 9.5.sp, color: Colors.grey.shade600), maxLines: 2, overflow: TextOverflow.ellipsis),
                   ],
-                ),
-              ),
+                );
+              },
             ),
-            SizedBox(height: 10.h),
-            SizedBox(
-              width: double.infinity,
-              child: AppSecondButton(
-                variant: AppSecondButtonVariant.danger,
-                onPressed: () {},
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.alarm_off_rounded, size: 16),
-                    SizedBox(width: 6.w),
-                    const Text('이 알람 끄기'),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
-    );
-  }
-
-  // ============================================================
-  // 공용 조각들
-  // ============================================================
-
-  Widget _phoneFrame({required double width, required double height, required Color bg, List<Color>? gradient, required Widget child}) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: gradient == null ? bg : null,
-        gradient: gradient != null ? LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: gradient) : null,
-        borderRadius: BorderRadius.circular(36.r),
-        border: Border.all(color: Colors.black87, width: 8),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 18, offset: const Offset(0, 10))],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: child,
-    );
-  }
-
-  Widget _shiftLabel(_ConceptSpec s, String label) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
-      decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(20.r)),
-      child: Text(label, style: TextStyle(fontSize: 12.sp, color: s.onSurface, fontWeight: FontWeight.w600)),
-    );
-  }
-
-  Widget _iconCircleButton(_ConceptSpec s, IconData icon, {required bool filled}) {
-    final bg = filled ? s.primary : s.surface;
-    final fg = filled ? Colors.white : s.onSurface;
-    return Container(
-      width: 40.w,
-      height: 40.w,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: bg, shape: BoxShape.circle, border: filled ? Border.all(color: s.controlColor, width: 1.6) : null),
-      child: Icon(icon, size: 20.sp, color: fg),
-    );
-  }
-
-  Widget _labeledRoundButton(_ConceptSpec s, IconData icon, String label, {required bool filled}) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 56.w,
-          height: 56.w,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(color: filled ? s.primary : s.surface, shape: BoxShape.circle, border: filled ? Border.all(color: s.controlColor, width: 1.8) : null),
-          child: Icon(icon, size: 22.sp, color: filled ? Colors.white : s.onSurface),
-        ),
-        SizedBox(height: 6.h),
-        Text(label, style: TextStyle(fontSize: 11.sp, color: s.onBg.withValues(alpha: 0.7))),
-      ],
-    );
-  }
-
-  /// ⭐ "5분 후" 스누즈 버튼 - "+5m" 텍스트. 배경(그라데이션)과 버튼 색(원래
-  /// s.primary 톤)이 서로 비슷해 묻히는 문제가 있었어서, 테두리/글자를 항상
-  /// s.controlColor(배경과 대비되게 미리 정해둔 색 - 흰색 또는 짙은 남색)로
-  /// 씀. dense=true면 오버레이(작은 원형, 라벨 없음)용, false면 잠금화면(큰
-  /// 원형 + 아래 "5분 후" 라벨 - 옆의 끄기 버튼과 구조를 맞춤)용.
-  Widget _snoozeButton(_ConceptSpec s, {required bool dense}) {
-    final size = dense ? 40.w : 56.w;
-    final circle = Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(color: s.surface, shape: BoxShape.circle, border: Border.all(color: s.controlColor, width: 1.6)),
-      child: Text('+5m', style: TextStyle(fontSize: dense ? 11.sp : 15.sp, fontWeight: FontWeight.w800, color: s.controlColor)),
-    );
-    if (dense) return circle;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        circle,
-        SizedBox(height: 6.h),
-        Text('5분 후', style: TextStyle(fontSize: 11.sp, color: s.onBg.withValues(alpha: 0.7))),
-      ],
     );
   }
 }
 
-/// ⭐ "다음 알람" 탭 원형 카운트다운 링 - 12시 방향에서 시작해 시계 방향으로
-/// 채워지며, 다시 12시 방향에 가까워질수록(=원이 거의 다 찼을수록) 알람이
-/// 임박했다는 뜻. 실제 알람 데이터가 없는 순수 디자인 목업이라 "지금부터
-/// 남은 시간까지"를 진짜로 계산하는 대신, 그 컨셉을 계속 보여주기 위해 8초
-/// 주기로 0→1을 무한 반복하는 데모 애니메이션을 씀 - 실제 화면에 적용할 때는
-/// 이 진행률(progress)에 "(now - 알람등록시각) / (알람시각 - 알람등록시각)"
-/// 같은 실계산 값을 넣기만 하면 됨.
-class _CountdownRing extends StatefulWidget {
-  const _CountdownRing({required this.size, required this.strokeWidth, required this.color, required this.trackColor});
+/// 실제 적응형 아이콘 렌더링을 시뮬레이션하는 원형 미리보기.
+/// assets/icon/gen_icon.py의 상수(ADAPTIVE_AUTO_INSET=0.16,
+/// ADAPTIVE_VISIBLE_WINDOW_DP=70, CANVAS_DP=108, ADAPTIVE_TARGET_FINAL_RATIO=0.59로
+/// 역산되는 source 비율)와 완전히 동일한 값을 씀 - 숫자가 어긋나면 이 미리보기도
+/// 다시 "실제와 다르게" 보이게 되므로, 저 파일의 상수를 바꾸면 여기도 같이 바꿀 것.
+class _AdaptiveIconPreview extends StatelessWidget {
+  const _AdaptiveIconPreview({required this.candidate, required this.size});
 
+  final _IconCandidate candidate;
   final double size;
-  final double strokeWidth;
-  final Color color;
-  final Color trackColor;
-
-  @override
-  State<_CountdownRing> createState() => _CountdownRingState();
-}
-
-class _CountdownRingState extends State<_CountdownRing> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 8))..repeat();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        return CustomPaint(
-          size: Size(widget.size, widget.size),
-          painter: _RingPainter(progress: _controller.value, color: widget.color, trackColor: widget.trackColor, strokeWidth: widget.strokeWidth),
-        );
-      },
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 6, offset: const Offset(0, 3))]),
+      child: CustomPaint(
+        size: Size(size, size),
+        painter: _AdaptiveIconPainter(candidate: candidate),
+      ),
     );
   }
 }
 
-class _RingPainter extends CustomPainter {
-  _RingPainter({required this.progress, required this.color, required this.trackColor, required this.strokeWidth});
+class _AdaptiveIconPainter extends CustomPainter {
+  _AdaptiveIconPainter({required this.candidate});
+  final _IconCandidate candidate;
 
-  final double progress; // 0..1
-  final Color color;
-  final Color trackColor;
-  final double strokeWidth;
+  // gen_icon.py와 동일한 상수.
+  static const double _autoInset = 0.16; // <inset android:inset="16%"/>
+  static const double _canvasDp = 108.0;
+  static const double _visibleWindowDp = 70.0; // 실제로 확대 없이 보이는 영역
+  static const double _adaptiveTargetFinalRatio = 0.59;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
-    final radius = (size.shortestSide - strokeWidth) / 2;
+    // size = "실제로 눈에 보이는" 원형 아이콘 크기(위젯 크기 그대로).
+    final visible = size.width;
+    // 이 visible 크기가 108dp 캔버스 중 70dp에 해당하므로, 전체 108dp 캔버스를
+    // 재구성한 크기(S)를 역산함.
+    final s = visible / (_visibleWindowDp / _canvasDp);
+    final cropOffset = (s - visible) / 2;
 
-    final trackPaint = Paint()
-      ..color = trackColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
-      ..strokeCap = StrokeCap.round;
-    canvas.drawCircle(center, radius, trackPaint);
+    canvas.save();
+    canvas.clipPath(Path()..addOval(Rect.fromLTWH(0, 0, visible, visible)));
+    canvas.translate(-cropOffset, -cropOffset);
 
-    final fillPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = strokeWidth
+    // 1) 배경 - 108dp 캔버스 전체를 채움(인셋 영향 없음, 배경 레이어는 그대로).
+    final bgPaint = Paint();
+    final bgRect = Rect.fromLTWH(0, 0, s, s);
+    if (candidate.gradient != null) {
+      bgPaint.shader = LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: candidate.gradient!).createShader(bgRect);
+    } else {
+      bgPaint.color = candidate.bg!;
+    }
+    canvas.drawRect(bgRect, bgPaint);
+
+    // 2) 전경(시계+종) - source 비율로 그린 뒤, <inset 16%> 시뮬레이션으로
+    // 전체를 68% 크기로 중앙 축소.
+    final sourceRatio = _adaptiveTargetFinalRatio / ((1 - 2 * _autoInset) * (_canvasDp / _visibleWindowDp));
+    canvas.save();
+    canvas.translate(s / 2, s / 2);
+    canvas.scale(1 - 2 * _autoInset);
+    canvas.translate(-s / 2, -s / 2);
+    _drawForeground(canvas, s, sourceRatio, candidate.hands, candidate.bell);
+    canvas.restore();
+
+    canvas.restore();
+  }
+
+  void _drawForeground(Canvas canvas, double s, double faceDRatio, Color hands, Color bell) {
+    final cx = s / 2, cy = s / 2;
+    final r = s * faceDRatio / 2;
+
+    // 시계 얼굴(흰 원)
+    canvas.drawCircle(Offset(cx, cy), r, Paint()..color = Colors.white);
+
+    // 바늘 - 4시 정각(시침=4, 분침=12). gen_icon.py draw_clock_hands와 동일.
+    final hourLen = r * 0.42;
+    final minuteLen = r * 0.62;
+    final hourAng = (-90 + 4 * 30) * math.pi / 180;
+    final minuteAng = (-90 + 0) * math.pi / 180;
+    final handPaint = Paint()
+      ..color = hands
       ..strokeCap = StrokeCap.round;
-    final sweep = 2 * math.pi * progress;
-    // -pi/2 = 12시 방향에서 시작, 시계 방향으로 sweep만큼 채움.
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), -math.pi / 2, sweep, false, fillPaint);
+    canvas.drawLine(Offset(cx, cy), Offset(cx + hourLen * math.cos(hourAng), cy + hourLen * math.sin(hourAng)), handPaint..strokeWidth = math.max(r * 0.11, 2));
+    canvas.drawLine(Offset(cx, cy), Offset(cx + minuteLen * math.cos(minuteAng), cy + minuteLen * math.sin(minuteAng)), handPaint..strokeWidth = math.max(r * 0.08, 1.5));
+    canvas.drawCircle(Offset(cx, cy), math.max(r * 0.07, 1.5), Paint()..color = hands);
+    // 테두리 링
+    canvas.drawCircle(Offset(cx, cy), r, Paint()
+      ..color = hands
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = math.max(r * 0.035, 1));
+
+    // 종 배지 - 원 테두리에 살짝 겹치도록(반지름의 95%, 2시 방향=-45°).
+    final badgeR = r * 0.30;
+    const overlapK = 0.95;
+    final bx = cx + r * overlapK * math.cos(-45 * math.pi / 180);
+    final by = cy + r * overlapK * math.sin(-45 * math.pi / 180);
+    final borderW = math.max(badgeR * 0.14, 1.0);
+    canvas.drawCircle(Offset(bx, by), badgeR + borderW, Paint()..color = Colors.white);
+    canvas.drawCircle(Offset(bx, by), badgeR, Paint()..color = bell);
+    _drawBell(canvas, bx, by, badgeR * 0.62, Colors.white);
+  }
+
+  void _drawBell(Canvas canvas, double cx, double cy, double s, Color color) {
+    final paint = Paint()..color = color;
+    final bodyTop = cy - s * 0.55;
+    final bodyBottom = cy + s * 0.30;
+    final domeW = s * 0.62;
+    final baseW = s * 0.90;
+
+    // 돔(위쪽 반원)
+    canvas.drawArc(Rect.fromCenter(center: Offset(cx, bodyTop), width: domeW, height: domeW), math.pi, math.pi, true, paint);
+    // 몸통(사다리꼴)
+    final body = Path()
+      ..moveTo(cx - domeW / 2, bodyTop)
+      ..lineTo(cx + domeW / 2, bodyTop)
+      ..lineTo(cx + baseW / 2, bodyBottom)
+      ..lineTo(cx - baseW / 2, bodyBottom)
+      ..close();
+    canvas.drawPath(body, paint);
+    // 받침(아래쪽 반원)
+    canvas.drawArc(Rect.fromCenter(center: Offset(cx, bodyBottom), width: baseW, height: s * 0.20), 0, math.pi, true, paint);
+    // 손잡이
+    final knobR = s * 0.07;
+    canvas.drawCircle(Offset(cx, bodyTop - domeW / 2), knobR, paint);
+    // 추
+    final clapR = s * 0.11;
+    canvas.drawCircle(Offset(cx, bodyBottom + s * 0.14), clapR, paint);
   }
 
   @override
-  bool shouldRepaint(covariant _RingPainter oldDelegate) => oldDelegate.progress != progress || oldDelegate.color != color || oldDelegate.trackColor != trackColor;
+  bool shouldRepaint(covariant _AdaptiveIconPainter oldDelegate) => oldDelegate.candidate != candidate;
 }
