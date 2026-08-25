@@ -124,30 +124,30 @@ class _IconPalette {
 const List<_IconPalette> _iconPalettes = [
   _IconPalette(1, Color(0xFF3F51B5), Colors.white, Color(0xFFFFC107)),
   _IconPalette(2, Color(0xFF00695C), Colors.white, Color(0xFFFF7043)),
-  _IconPalette(3, Color(0xFF1A237E), Color(0xFF90CAF9), Colors.white),
+  _IconPalette(3, Color(0xFF1A237E), Color(0xFF90CAF9), Color(0xFFFFC107)),
   _IconPalette(4, Color(0xFF263238), Colors.white, Color(0xFF26A69A)),
   _IconPalette(5, Color(0xFF5E35B1), Colors.white, Color(0xFFFFD54F)),
   _IconPalette(6, Color(0xFF2E7D32), Colors.white, Color(0xFFFFAB91)),
   _IconPalette(7, Color(0xFFE65100), Colors.white, Color(0xFF00796B)),
-  _IconPalette(8, Color(0xFF455A64), Color(0xFFFFF176), Colors.white),
+  _IconPalette(8, Color(0xFF455A64), Color(0xFFFFF176), Color(0xFFFF7043)),
   _IconPalette(9, Color(0xFF880E4F), Colors.white, Color(0xFFFFCA28)),
   _IconPalette(10, Color(0xFF0277BD), Colors.white, Color(0xFFFF8A65)),
-  _IconPalette(11, Color(0xFF6A1B9A), Color(0xFFCE93D8), Colors.white),
-  _IconPalette(12, Color(0xFF827717), Color(0xFFFFF9C4), Colors.white),
-  _IconPalette(13, Color(0xFF0288D1), Color(0xFF0D47A1), Colors.white),
+  _IconPalette(11, Color(0xFF6A1B9A), Color(0xFFCE93D8), Color(0xFFFFD54F)),
+  _IconPalette(12, Color(0xFF827717), Color(0xFFFFF9C4), Color(0xFFEF6C00)),
+  _IconPalette(13, Color(0xFF0288D1), Color(0xFF0D47A1), Color(0xFFFFB300)),
   _IconPalette(14, Color(0xFFBF360C), Colors.white, Color(0xFFFFE0B2)),
   _IconPalette(15, Color(0xFF4527A0), Colors.white, Color(0xFF4DD0E1)),
   _IconPalette(16, Color(0xFF00897B), Colors.white, Color(0xFFFF8A80)),
-  _IconPalette(17, Color(0xFF1A237E), Color(0xFFFFD700), Colors.white),
+  _IconPalette(17, Color(0xFF1A237E), Color(0xFFFFD700), Color(0xFFFF7043)),
   _IconPalette(18, Color(0xFFFF7043), Colors.white, Color(0xFF1565C0)),
   _IconPalette(19, Color(0xFF37474F), Colors.white, Color(0xFFC0CA33)),
   _IconPalette(20, Color(0xFFAD1457), Colors.white, Color(0xFF80CBC4)),
   _IconPalette(21, Color(0xFF376DA8), Colors.white, Color(0xFFFF9800)),
-  _IconPalette(22, Color(0xFF4A148C), Color(0xFFF48FB1), Colors.white),
+  _IconPalette(22, Color(0xFF4A148C), Color(0xFFF48FB1), Color(0xFFFFD54F)),
   _IconPalette(23, Color(0xFF1B5E20), Colors.white, Color(0xFFFDD835)),
   _IconPalette(24, Color(0xFFD84315), Colors.white, Color(0xFF00838F)),
   _IconPalette(25, Color(0xFF283593), Colors.white, Color(0xFFFF80AB)),
-  _IconPalette(26, Color(0xFF4E342E), Color(0xFFFFF3E0), Colors.white),
+  _IconPalette(26, Color(0xFF4E342E), Color(0xFFFFF3E0), Color(0xFFFFAB40)),
   _IconPalette(27, Color(0xFF01579B), Colors.white, Color(0xFFFFB300)),
   _IconPalette(28, Color(0xFF7B1FA2), Colors.white, Color(0xFFAEEA00)),
   _IconPalette(29, Color(0xFFC2185B), Colors.white, Color(0xFF4FC3F7)),
@@ -296,16 +296,16 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Icon(Icons.watch_later_rounded, size: size * 0.52, color: clockColor),
+          Icon(Icons.watch_later_rounded, size: size * 0.66, color: clockColor),
           Positioned(
-            top: size * 0.02,
-            right: size * 0.02,
+            top: size * 0.01,
+            right: size * 0.01,
             child: Container(
-              width: size * 0.19,
-              height: size * 0.19,
+              width: size * 0.24,
+              height: size * 0.24,
               alignment: Alignment.center,
               decoration: BoxDecoration(color: bellColor, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: borderWidth)),
-              child: Icon(Icons.notifications_active_rounded, size: size * 0.11, color: Colors.white),
+              child: Icon(Icons.notifications_active_rounded, size: size * 0.135, color: Colors.white),
             ),
           ),
         ],
@@ -336,16 +336,16 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Icon(Icons.watch_later_rounded, size: size * 0.52, color: Colors.white),
+          Icon(Icons.watch_later_rounded, size: size * 0.66, color: Colors.white),
           Positioned(
-            top: size * 0.02,
-            right: size * 0.02,
+            top: size * 0.01,
+            right: size * 0.01,
             child: Container(
-              width: size * 0.19,
-              height: size * 0.19,
+              width: size * 0.24,
+              height: size * 0.24,
               alignment: Alignment.center,
-              decoration: BoxDecoration(color: s.secondary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-              child: Icon(Icons.notifications_active_rounded, size: size * 0.11, color: Colors.white),
+              decoration: BoxDecoration(color: s.secondary, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2.4)),
+              child: Icon(Icons.notifications_active_rounded, size: size * 0.135, color: Colors.white),
             ),
           ),
         ],
@@ -497,56 +497,72 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
   }
 
   /// 1. 오로라 - 웨어러블 앱 느낌의 "히어로 카드 + 원형 스탯" 구성.
+  ///
+  /// ⭐ 2차 개정 - (1) 히어로 카드 상단 모서리를 프레임 바깥 모서리(36.r)와 맞춰서
+  /// 부자연스럽게 잘려 보이던 문제 해결(하단만 카드 자체 라운드 30.r 유지).
+  /// (2) 콘텐츠 사이에 있던 큰 Spacer() 하나를 없애고 고정 간격으로 바꿔서,
+  /// 링 아래로 뜬 넓은 빈 공간(여백 과다 지적) 대신 상단부터 아래까지 고르게 채움.
   Widget _nextAlarmAurora(_ConceptSpec s) {
     return _phoneFrame(
       width: 280.w,
-      height: 640.h,
+      height: 600.h,
       bg: s.bg,
       child: Column(
         children: [
           Container(
             width: double.infinity,
-            padding: EdgeInsets.fromLTRB(22.w, 24.h, 22.w, 26.h),
+            padding: EdgeInsets.fromLTRB(22.w, 28.h, 22.w, 30.h),
             decoration: BoxDecoration(
               gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: s.gradient ?? [s.primary, s.primary]),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(28.r)),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(36.r),
+                topRight: Radius.circular(36.r),
+                bottomLeft: Radius.circular(30.r),
+                bottomRight: Radius.circular(30.r),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(20.r)),
-                  child: Text('오늘', style: TextStyle(fontSize: 11.sp, color: Colors.white, fontWeight: FontWeight.w600)),
+                Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.18), borderRadius: BorderRadius.circular(20.r)),
+                      child: Text('오늘', style: TextStyle(fontSize: 11.sp, color: Colors.white, fontWeight: FontWeight.w600)),
+                    ),
+                    const Spacer(),
+                    Icon(Icons.auto_awesome_rounded, size: 16.sp, color: Colors.white.withValues(alpha: 0.5)),
+                  ],
                 ),
-                SizedBox(height: 14.h),
-                Text('07:30', style: TextStyle(fontSize: 46.sp, fontWeight: FontWeight.w300, color: Colors.white)),
+                SizedBox(height: 16.h),
+                Text('07:30', style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w300, color: Colors.white)),
                 SizedBox(height: 10.h),
                 _shiftLabel(s, '야간 근무'),
               ],
             ),
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: 26.h),
           Container(
-            width: 128.w,
-            height: 128.w,
+            width: 148.w,
+            height: 148.w,
             alignment: Alignment.center,
-            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: s.secondary, width: 4), color: s.surface),
+            decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: s.secondary, width: 5), color: s.surface),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.hourglass_bottom_rounded, size: 18.sp, color: s.secondary),
-                SizedBox(height: 4.h),
-                Text('2시간 30분', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: s.onBg)),
+                Icon(Icons.hourglass_bottom_rounded, size: 20.sp, color: s.secondary),
+                SizedBox(height: 6.h),
+                Text('2시간 30분', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: s.onBg)),
                 Text('남음', style: TextStyle(fontSize: 10.sp, color: s.onBg.withValues(alpha: 0.6))),
               ],
             ),
           ),
-          SizedBox(height: 6.h),
+          SizedBox(height: 10.h),
           Text('임박하면 이 링이 강조색으로 바뀜', style: TextStyle(fontSize: 10.sp, color: s.onBg.withValues(alpha: 0.4))),
-          const Spacer(),
+          SizedBox(height: 28.h),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            padding: EdgeInsets.symmetric(horizontal: 22.w),
             child: Container(
               padding: EdgeInsets.all(4.w),
               decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(18.r)),
@@ -556,19 +572,19 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
                   return Expanded(
                     child: Container(
                       margin: EdgeInsets.symmetric(horizontal: 2.w),
-                      padding: EdgeInsets.symmetric(vertical: 8.h),
+                      padding: EdgeInsets.symmetric(vertical: 10.h),
                       decoration: BoxDecoration(color: selected ? s.primary : Colors.transparent, borderRadius: BorderRadius.circular(14.r)),
                       alignment: Alignment.center,
-                      child: Icon(_alarmTypeIcons[i], size: 16.sp, color: selected ? Colors.white : s.onBg.withValues(alpha: 0.5)),
+                      child: Icon(_alarmTypeIcons[i], size: 17.sp, color: selected ? Colors.white : s.onBg.withValues(alpha: 0.5)),
                     ),
                   );
                 }),
               ),
             ),
           ),
-          SizedBox(height: 18.h),
+          SizedBox(height: 24.h),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            padding: EdgeInsets.symmetric(horizontal: 22.w),
             child: Row(
               children: [
                 Expanded(
@@ -576,7 +592,7 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
                     onPressed: () {},
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: s.onBg.withValues(alpha: 0.3)),
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      padding: EdgeInsets.symmetric(vertical: 13.h),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                     ),
                     icon: Icon(Icons.list_rounded, size: 16.sp, color: s.onBg),
@@ -590,7 +606,7 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFE5484D),
-                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      padding: EdgeInsets.symmetric(vertical: 13.h),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                     ),
                     icon: const Icon(Icons.alarm_off_rounded, size: 16, color: Colors.white),
@@ -600,20 +616,27 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
               ],
             ),
           ),
-          SizedBox(height: 22.h),
         ],
       ),
     );
   }
 
   /// 2. 소프트 파스텔 - 잠금화면과 같은 "원형 시계판" 모티프 + 대시보드 타일 2개.
+  ///
+  /// ⭐ 2차 개정 - 필요한 요소(남은 시간/알람 타입 카드)가 화면에 아예 안 보이던
+  /// 버그 수정. 원인: 두 카드를 감싸는 Row에 crossAxisAlignment.stretch를 썼는데,
+  /// 이 Row의 부모(Column)가 이 Row에게 "느슨한(불확정) 최대 높이"를 넘겨서 -
+  /// Row가 자기 높이를 "부모가 허용하는 남은 공간 전체"로 잡아버림(수백 px으로
+  /// 부풀어오름) → 카드가 비정상적으로 커지면서 그 아래 있던 버튼들이 프레임
+  /// 바깥으로 밀려나 잘려 보이지 않게 됨. IntrinsicHeight로 감싸서 Row의 높이를
+  /// "자식 카드들이 실제로 필요로 하는 높이"로 한정시켜 해결.
   Widget _nextAlarmPastel(_ConceptSpec s) {
     return _phoneFrame(
       width: 280.w,
-      height: 640.h,
+      height: 600.h,
       bg: s.bg,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(22.w, 26.h, 22.w, 22.h),
+        padding: EdgeInsets.fromLTRB(22.w, 28.h, 22.w, 24.h),
         child: Column(
           children: [
             Row(
@@ -627,10 +650,10 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 22.h),
+            SizedBox(height: 24.h),
             Container(
-              width: 176.w,
-              height: 176.w,
+              width: 172.w,
+              height: 172.w,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -640,64 +663,68 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
               ),
               child: Center(child: Text('07:30', style: TextStyle(fontSize: 32.sp, fontWeight: FontWeight.w800, color: s.primary))),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 14.h),
             _shiftLabel(s, '야간 근무'),
-            SizedBox(height: 22.h),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(14.w),
-                    decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(18.r)),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.timer_outlined, size: 18.sp, color: s.secondary),
-                        SizedBox(height: 8.h),
-                        Text('알람까지', style: TextStyle(fontSize: 10.sp, color: s.onBg.withValues(alpha: 0.6))),
-                        SizedBox(height: 2.h),
-                        Text('2시간 30분', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: s.onBg)),
-                      ],
+            SizedBox(height: 26.h),
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(14.w),
+                      decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(18.r)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.timer_outlined, size: 18.sp, color: s.secondary),
+                          SizedBox(height: 8.h),
+                          Text('알람까지', style: TextStyle(fontSize: 10.sp, color: s.onBg.withValues(alpha: 0.6))),
+                          SizedBox(height: 2.h),
+                          Text('2시간 30분', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: s.onBg)),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(10.w),
-                    decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(18.r)),
-                    child: Column(
-                      children: List.generate(3, (i) {
-                        final selected = i == 0;
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 3.h),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 22.w,
-                                height: 22.w,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(color: selected ? s.primary : Colors.transparent, shape: BoxShape.circle),
-                                child: Icon(_alarmTypeIcons[i], size: 12.sp, color: selected ? Colors.white : s.onBg.withValues(alpha: 0.4)),
-                              ),
-                              SizedBox(width: 6.w),
-                              Expanded(
-                                child: Text(
-                                  _alarmTypeLabels[i],
-                                  style: TextStyle(fontSize: 10.sp, color: s.onBg.withValues(alpha: selected ? 0.9 : 0.5), fontWeight: selected ? FontWeight.w700 : FontWeight.w400),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
+                      decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(18.r)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(3, (i) {
+                          final selected = i == 0;
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 3.h),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 22.w,
+                                  height: 22.w,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(color: selected ? s.primary : Colors.transparent, shape: BoxShape.circle),
+                                  child: Icon(_alarmTypeIcons[i], size: 12.sp, color: selected ? Colors.white : s.onBg.withValues(alpha: 0.4)),
                                 ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
+                                SizedBox(width: 6.w),
+                                Expanded(
+                                  child: Text(
+                                    _alarmTypeLabels[i],
+                                    style: TextStyle(fontSize: 10.sp, color: s.onBg.withValues(alpha: selected ? 0.9 : 0.5), fontWeight: selected ? FontWeight.w700 : FontWeight.w400),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const Spacer(),
+            SizedBox(height: 26.h),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
@@ -732,32 +759,36 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
   }
 
   /// 3. 글래스모피즘 - 반투명 상태 배너 + 유리 히어로 카드 + 유리 세그먼트.
+  ///
+  /// ⭐ 2차 개정 - 버튼 앞에 있던 큰 Spacer()를 없애고, 대신 카드들 자체(패딩/
+  /// 글자 크기)를 조금씩 키워서 프레임을 고르게 채우도록 함.
   Widget _nextAlarmGlass(_ConceptSpec s) {
     return _phoneFrame(
       width: 280.w,
-      height: 640.h,
+      height: 600.h,
       bg: s.bg,
       gradient: s.gradient,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(20.w, 26.h, 20.w, 22.h),
+        padding: EdgeInsets.fromLTRB(20.w, 28.h, 20.w, 24.h),
         child: Column(
           children: [
             Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
               decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(16.r), border: Border.all(color: Colors.white.withValues(alpha: 0.4))),
               child: Row(
                 children: [
                   Icon(Icons.timer_outlined, size: 16.sp, color: Colors.white),
                   SizedBox(width: 8.w),
                   Expanded(child: Text('2시간 30분 후 알람', style: TextStyle(fontSize: 12.sp, color: Colors.white, fontWeight: FontWeight.w600))),
+                  Icon(Icons.chevron_right_rounded, size: 16.sp, color: Colors.white.withValues(alpha: 0.6)),
                 ],
               ),
             ),
-            SizedBox(height: 18.h),
+            SizedBox(height: 32.h),
             Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 26.h, horizontal: 20.w),
+              padding: EdgeInsets.symmetric(vertical: 44.h, horizontal: 20.w),
               decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(26.r), border: Border.all(color: Colors.white.withValues(alpha: 0.4))),
               child: Column(
                 children: [
@@ -766,14 +797,14 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
                     decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.25), borderRadius: BorderRadius.circular(20.r)),
                     child: Text('오늘', style: TextStyle(fontSize: 11.sp, color: Colors.white)),
                   ),
-                  SizedBox(height: 14.h),
-                  Text('07:30', style: TextStyle(fontSize: 42.sp, fontWeight: FontWeight.w300, color: Colors.white)),
-                  SizedBox(height: 10.h),
+                  SizedBox(height: 16.h),
+                  Text('07:30', style: TextStyle(fontSize: 50.sp, fontWeight: FontWeight.w300, color: Colors.white)),
+                  SizedBox(height: 12.h),
                   _shiftLabel(s, '야간 근무'),
                 ],
               ),
             ),
-            SizedBox(height: 18.h),
+            SizedBox(height: 32.h),
             Container(
               padding: EdgeInsets.all(4.w),
               decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(18.r), border: Border.all(color: Colors.white.withValues(alpha: 0.4))),
@@ -783,14 +814,14 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
                   return Expanded(
                     child: Container(
                       margin: EdgeInsets.symmetric(horizontal: 2.w),
-                      padding: EdgeInsets.symmetric(vertical: 9.h),
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
                       decoration: BoxDecoration(color: selected ? Colors.white.withValues(alpha: 0.3) : Colors.transparent, borderRadius: BorderRadius.circular(14.r)),
                       alignment: Alignment.center,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(_alarmTypeIcons[i], size: 15.sp, color: Colors.white),
-                          SizedBox(height: 3.h),
+                          Icon(_alarmTypeIcons[i], size: 16.sp, color: Colors.white),
+                          SizedBox(height: 4.h),
                           Text(_alarmTypeLabels[i], style: TextStyle(fontSize: 9.sp, color: Colors.white.withValues(alpha: selected ? 1 : 0.6))),
                         ],
                       ),
@@ -799,12 +830,12 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
                 }),
               ),
             ),
-            const Spacer(),
+            SizedBox(height: 32.h),
             Row(
               children: [
                 Expanded(
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    padding: EdgeInsets.symmetric(vertical: 17.h),
                     decoration: BoxDecoration(color: s.surface, borderRadius: BorderRadius.circular(16.r), border: Border.all(color: Colors.white.withValues(alpha: 0.4))),
                     alignment: Alignment.center,
                     child: Icon(Icons.list_rounded, size: 18.sp, color: Colors.white),
@@ -814,7 +845,7 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
                 Expanded(
                   flex: 3,
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                    padding: EdgeInsets.symmetric(vertical: 17.h),
                     decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.85), borderRadius: BorderRadius.circular(16.r)),
                     alignment: Alignment.center,
                     child: Text('이 알람 끄기', style: TextStyle(fontSize: 12.sp, color: const Color(0xFFC0392B), fontWeight: FontWeight.w800)),
@@ -829,10 +860,16 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
   }
 
   /// 4. 라인 아트 - 카드/채움 없이 얇은 선과 여백만으로 구성한 에디토리얼 리스트.
+  ///
+  /// ⭐ 2차 개정 - 하단 "전체 알람 보기/이 알람 끄기"를 Spacer로 화면 맨 아래에
+  /// 고정하는 구조는 그대로 유지(실제 next_alarm_tab.dart도 끄기 버튼이 화면
+  /// 하단에 고정돼 있고, 미니멀 에디토리얼 스타일과도 잘 맞음). 다만 프레임
+  /// 높이를 살짝 낮추고 시간 글자를 조금 키워 위쪽 콘텐츠와 하단 버튼 사이
+  /// 빈 공간이 과하지 않도록 조정.
   Widget _nextAlarmLineArt(_ConceptSpec s) {
     return _phoneFrame(
       width: 280.w,
-      height: 640.h,
+      height: 560.h,
       bg: s.bg,
       child: Padding(
         padding: EdgeInsets.fromLTRB(24.w, 30.h, 24.w, 24.h),
@@ -845,7 +882,7 @@ class _UiThemeLabScreenState extends State<UiThemeLabScreen> {
               child: Text('오늘', style: TextStyle(fontSize: 11.sp, color: s.onBg.withValues(alpha: 0.6))),
             ),
             SizedBox(height: 14.h),
-            Text('07:30', style: TextStyle(fontSize: 48.sp, fontWeight: FontWeight.w200, color: s.onBg)),
+            Text('07:30', style: TextStyle(fontSize: 52.sp, fontWeight: FontWeight.w200, color: s.onBg)),
             SizedBox(height: 10.h),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
