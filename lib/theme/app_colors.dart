@@ -151,6 +151,14 @@ const List<Color> kAppAlarmGradient = [Color(0xFFDACEF9), Color(0xFFCEDEFC), Col
 /// 소프트" 티어). "다음 알람" 탭의 파도 배경(_WaveGradientBackground)에서 사용.
 const List<Color> kAppWaveGradientColors = [Color(0xFFB49EF3), Color(0xFF9EBDFA), Color(0xFF80ECE3)];
 
+/// ⭐ 2026-08-25 추가 - kAppWaveGradientColors 3색의 평균 톤. "다음 알람" 탭
+/// Scaffold의 backgroundColor로 씀(예전엔 Colors.transparent) - 파도 배경
+/// 위젯이 무슨 이유로든 그 프레임에 아직 안 그려졌을 때(리빌드 중간 등) 뒤에
+/// 있는 앱 루트의 흰 배경이 그대로 비쳐서 "하얗게 깜빡"이는 것처럼 보이던
+/// 문제의 안전장치 - 이 색이 항상 깔려있으면 최악의 경우에도 흰 배경이
+/// 아니라 파도 배경과 톤이 비슷한 색만 살짝 비치게 됨.
+const Color kAppWaveGradientFallback = Color(0xFF9BC2F0);
+
 /// "다음 알람" 탭의 카운트다운 링 채움색 - 네온 민트. UI 테마 탭에서 "1번(진한
 /// 오로라) 테마의 링 색보다는 살짝 덜 밝고, 원래 쓰던 톤보다는 밝게" 요청으로
 /// 튜닝한 값 - 0xFF0F9C90(원래 톤)과 0xFF00E5C7(1번 테마 링 색)을 7:3(1번 쪽으로

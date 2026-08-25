@@ -27,22 +27,26 @@ class NextAlarmTab extends ConsumerStatefulWidget {
 }
 
 class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
-  Timer? _countdownTimer;
   Timer? _syncTimer;
   static const platform = kAlarmChannel;
 
   @override
   void initState() {
     super.initState();
-    _countdownTimer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (mounted) setState(() {});
-    });
+    // ⭐ 2026-08-25 - 예전엔 여기 60초마다 setState()해서 탭 전체(_WaveGradientBackground
+    // 포함)를 다시 그리는 _countdownTimer가 따로 있었음 - 근데 "남은 시간" 텍스트는
+    // _AlarmDisplayWidgetState가, 카운트다운 링은 _CountdownRing이 이미 각자 자기
+    // 타이머로 알아서 갱신하고 있어서 완전히 중복이었고, 오히려 이 탭 레벨
+    // setState()가 매분 파도 배경까지 통째로 재구성시키는(=깜빡임 재보고의
+    // 유력한 원인) 부작용만 있었음. 그래서 제거 - "남은 시간"류 텍스트 갱신은
+        // 전부 그 텍스트를 실제로 그리는 좁은 범위의 위젯이 알아서 책임지도록 함.
     // ⭐ 오버레이/잠금화면에서 알람을 끄기/스누즈하면 Native가 브로드캐스트로
     // Flutter에 갱신 신호를 보내긴 하는데, 그 경로(브로드캐스트 → MethodChannel →
     // Provider)가 여러 단계를 거치다 보니 타이밍에 따라 이 탭이 바로 못 따라갈 수
     // 있음. 이 탭이 떠 있는 동안 짧은 주기로 직접 재조회해서, 브로드캐스트가
     // 어떤 이유로 늦거나 씹혀도 몇 초 안에 실제 알람 상태(꺼짐/스누즈)와 항상
-    // 일치하게 만듦.
+    // 일치하게 만듦. alarm_provider.dart의 값 비교(listEquals) 덕분에 실제로
+    // 아무것도 안 바뀐 대부분의 호출은 이제 화면을 다시 그리지 않고 조용히 끝남.
     _syncTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (mounted) ref.read(alarmNotifierProvider.notifier).refresh();
     });
@@ -50,7 +54,6 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
 
   @override
   void dispose() {
-    _countdownTimer?.cancel();
     _syncTimer?.cancel();
     super.dispose();
   }
@@ -102,7 +105,15 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.transparent,
+        // ⭐ 2026-08-25 - Colors.transparent → kAppWaveGradientFallback으로 변경.
+        // 화면이 불규칙하게 "하얗게 깜빡인다"는 재보고 - 원인은 위 _NextAlarmTabState의
+        // 중복 60초 전체 리빌드 타이머(제거함, initState 참고)로 보이지만, 그거랑
+        // 별개로 최소한의 안전장치를 걸어둠: Scaffold 배경이 투명이면 그 뒤 앱 루트의
+        // 흰 배경(main.dart)이 그대로 비치니, 무슨 이유로든 파도 배경이 그 프레임에
+        // 아직 안 그려진 경우 "하얀 화면"처럼 보일 수 있음. 파도 그라데이션과 톤이
+        // 비슷한 색을 기본값으로 깔아두면 최악의 경우에도 흰색이 아니라 비슷한
+        // 색만 살짝 비쳐서 훨씬 덜 튐.
+        backgroundColor: kAppWaveGradientFallback,
         // ⭐ 2026-08-25 - 정적 그라데이션 대신 잠금화면/오버레이(WaveGradientView.kt)와
         // 동일한 "각도가 계속 회전하는" 파도 애니메이션을 Flutter 쪽에도 이식.
         // 네이티브는 커스텀 View.onDraw()에서 매 프레임 LinearGradient(Shader)를
@@ -433,9 +444,50 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
-      if (mounted) setState(() {});
+    _scheduleNextTick();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AlarmDisplayWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // ⭐ "다음 알람" 자체가 바뀌면(예: 지금 알람을 끄고 그다음 알람으로 넘어감)
+    // 새 알람 기준으로 다시 스케줄 - 예전 알람 기준 간격이 새 알람엔 안 맞을 수 있음.
+    if (oldWidget.alarm.date != widget.alarm.date) {
+      _scheduleNextTick();
+    }
+  }
+
+  // ⭐ 2026-08-25 추가 - "남은 시간" 텍스트를 고정 1분 간격 대신, 알람까지 남은
+  // 시간에 맞춰 간격을 스스로 조절하는 "스마트" 재갱신으로 바꿈. 1일 넘게 남은
+  // 알람을 분 단위로 다시 그릴 필요는 없고("1일 후" 표시는 몇 시간 동안 그대로임),
+  // 반대로 임박했을 땐 더 촘촘하게 갱신되는 게 자연스러움 - Timer.periodic(고정
+  // 간격) 대신 매번 다음 간격을 다시 계산해서 Timer(...)를 새로 거는 자기 재스케줄
+  // 방식(self-rescheduling). setState()는 이 위젯 하나만 다시 그리므로(부모
+  // NextAlarmTab이나 파도 배경까지 재구성되지 않음) 예전에 상위 탭 레벨 60초
+  // 타이머가 매분 화면 전체를 다시 그리던 것과 달리 화면 깜빡임 걱정도 없음.
+  void _scheduleNextTick() {
+    _timer?.cancel();
+    final alarmDate = widget.alarm.date;
+    if (alarmDate == null) return;
+    final remaining = alarmDate.difference(DateTime.now());
+    _timer = Timer(_adaptiveTickInterval(remaining), () {
+      if (mounted) {
+        setState(() {});
+        _scheduleNextTick();
+      }
     });
+  }
+
+  static Duration _adaptiveTickInterval(Duration remaining) {
+    if (remaining.isNegative || remaining.inMinutes < 2) {
+      return const Duration(seconds: 15); // 임박 - 촘촘하게
+    } else if (remaining.inHours < 1) {
+      return const Duration(minutes: 1); // 분 단위 표시가 바뀔 수 있는 구간
+    } else if (remaining.inHours < 24) {
+      return const Duration(minutes: 5); // 시간 단위 표시 - 5분이면 충분
+    } else {
+      return const Duration(minutes: 30); // "N일 후" - 아주 가끔만 갱신
+    }
   }
 
   @override
