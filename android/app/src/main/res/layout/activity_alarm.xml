@@ -1,50 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ⭐ 2026-08-25 - "UI 테마" 탭에서 검토/확정한 "오로라 페일" 톤으로 전면
+     교체(앱 아이콘/다음알람탭과 동일한 그라데이션+색상). 뷰 ID(timeText/
+     shiftTypeText/dismissButton/snoozeButton/rootLayout)는 전부 그대로 -
+     AlarmActivity.kt의 findViewById 참조·클릭 리스너·스와이프 제스처 로직은
+     하나도 안 건드림, 순수 시각 요소만 교체. -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@drawable/alarm_gradient_bg">
 
-    <!-- 메인 알람 카드 -->
+    <!-- 알람 라벨 + 원형 시계 + 근무 뱃지 -->
     <LinearLayout
         android:id="@+id/alarmCard"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/alarm_card_gradient"
-        android:padding="40dp"
         android:gravity="center"
-        android:elevation="12dp"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="80dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/swipeHintContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.25">
+        app:layout_constraintVertical_bias="0.22">
 
-        <!-- 알람 아이콘 -->
-        <ImageView
-            android:id="@+id/clockIcon"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@android:drawable/ic_lock_idle_alarm"
-            android:tint="#FFFFFF"
-            android:alpha="0.9"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- 현재 시간 -->
+        <!-- 알람 라벨 -->
         <TextView
-            android:id="@+id/timeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="알람"
+            android:textSize="14sp"
+            android:textColor="#3B2E7A"
+            android:textStyle="bold"
+            android:letterSpacing="0.2"
+            android:layout_marginBottom="28dp"/>
+
+        <!-- 원형 시계 -->
+        <TextView
+            android:id="@+id/timeText"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:gravity="center"
+            android:background="@drawable/alarm_time_circle"
+            android:elevation="6dp"
             android:text="09:30"
-            android:textSize="72sp"
-            android:textColor="#FFFFFF"
-            android:fontFamily="sans-serif-light"
-            android:letterSpacing="0.05"
+            android:textSize="42sp"
+            android:textColor="#6A4FD9"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
             android:layout_marginBottom="20dp"/>
 
         <!-- 근무 타입 뱃지 -->
@@ -53,12 +59,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="주간"
-            android:textSize="20sp"
-            android:textColor="#3949AB"
+            android:textSize="17sp"
+            android:textColor="#3B2E7A"
             android:textStyle="bold"
             android:background="@drawable/alarm_shift_badge"
-            android:paddingHorizontal="28dp"
-            android:paddingVertical="12dp"/>
+            android:elevation="3dp"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="10dp"/>
 
     </LinearLayout>
 
@@ -81,7 +88,7 @@
             android:layout_height="wrap_content"
             android:text="화면을 스와이프하여 끄기"
             android:textSize="18sp"
-            android:textColor="#000000"
+            android:textColor="#3B2E7A"
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
@@ -98,7 +105,7 @@
                 android:layout_height="wrap_content"
                 android:text="◄"
                 android:textSize="32sp"
-                android:textColor="#757575"/>
+                android:textColor="#8C7FC7"/>
 
             <!-- 중앙 원 -->
             <View
@@ -113,7 +120,7 @@
                 android:layout_height="wrap_content"
                 android:text="►"
                 android:textSize="32sp"
-                android:textColor="#757575"/>
+                android:textColor="#8C7FC7"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -130,7 +137,7 @@
         android:layout_marginBottom="100dp"
         android:layout_marginHorizontal="24dp">
 
-        <!-- 알람 끄기 버튼 -->
+        <!-- 알람 끄기 버튼 (주 액션 - 채운 보라) -->
         <Button
             android:id="@+id/dismissButton"
             android:layout_width="0dp"
@@ -138,12 +145,12 @@
             android:layout_weight="1"
             android:text="알람 끄기"
             android:textSize="16sp"
-            android:textColor="#EF5350"
+            android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:background="@drawable/alarm_button_dismiss"
             android:layout_marginEnd="8dp"/>
 
-        <!-- 5분 후 버튼 -->
+        <!-- 5분 후 버튼 (보조 액션 - 흰 배경 + 테두리) -->
         <Button
             android:id="@+id/snoozeButton"
             android:layout_width="0dp"
@@ -151,7 +158,7 @@
             android:layout_weight="1"
             android:text="5분 후"
             android:textSize="16sp"
-            android:textColor="#FFFFFF"
+            android:textColor="#3B2E7A"
             android:textStyle="bold"
             android:background="@drawable/alarm_button_snooze"
             android:layout_marginStart="8dp"/>

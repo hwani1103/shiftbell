@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 잠금화면 알람("오로라 페일") 배경 - 라벤더(topLeft) → 스카이 → 민트
+     (bottomRight) 3단 그라데이션. angle=315는 Android GradientDrawable
+     기준 "시작점 좌상단 → 끝점 우하단" 방향(0=좌→우, 90=하→상, 45단위 회전) -
+     Flutter의 LinearGradient(begin: topLeft, end: bottomRight)와 동일한
+     방향이 되도록 계산한 값. 아이콘/다음알람탭과 같은 색. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <gradient
+        android:startColor="#DACEF9"
+        android:centerColor="#CEDEFC"
+        android:endColor="#BFF5F1"
+        android:angle="315"/>
+</shape>

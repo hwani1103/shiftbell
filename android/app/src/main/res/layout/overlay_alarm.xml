@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ⭐ 2026-08-25 - "UI 테마" 탭에서 확정한 "오로라 페일" 톤으로 교체(잠금화면/
+     아이콘과 동일). 뷰 ID(timeText/shiftTypeText/dismissButton/snoozeButton)는
+     그대로 - AlarmOverlayService.kt의 findViewById 참조는 안 건드림. -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -7,7 +10,7 @@
     android:background="@drawable/overlay_background"
     android:padding="20dp">
 
-    <!-- 메인 알람 카드 (indigo 그라데이션) -->
+    <!-- 메인 알람 카드 (오로라 페일 그라데이션) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,25 +19,21 @@
         android:padding="24dp"
         android:gravity="center">
 
-        <!-- 알람 아이콘 -->
-        <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@android:drawable/ic_lock_idle_alarm"
-            android:tint="#FFFFFF"
-            android:alpha="0.9"
-            android:layout_marginBottom="8dp"/>
-
         <!-- 현재 시간 -->
         <TextView
             android:id="@+id/timeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="09:30"
-            android:textSize="56sp"
-            android:textColor="#FFFFFF"
-            android:fontFamily="sans-serif-light"
-            android:letterSpacing="0.05"
+            android:textSize="52sp"
+            android:textColor="#3B2E7A"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.02"
+            android:shadowColor="#40000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="3"
             android:layout_marginBottom="12dp"/>
 
         <!-- 근무 타입 뱃지 -->
@@ -44,7 +43,7 @@
             android:layout_height="wrap_content"
             android:text="주간"
             android:textSize="16sp"
-            android:textColor="#3949AB"
+            android:textColor="#3B2E7A"
             android:textStyle="bold"
             android:background="@drawable/overlay_shift_badge"
             android:paddingHorizontal="20dp"
@@ -60,7 +59,7 @@
         android:gravity="center"
         android:layout_marginTop="16dp">
 
-        <!-- 끄기 버튼 (빨간 테두리) -->
+        <!-- 끄기 버튼 (주 액션 - 채운 보라) -->
         <Button
             android:id="@+id/dismissButton"
             android:layout_width="0dp"
@@ -68,12 +67,12 @@
             android:layout_weight="1"
             android:text="알람 끄기"
             android:textSize="15sp"
-            android:textColor="#EF5350"
+            android:textColor="#FFFFFF"
             android:textStyle="bold"
             android:background="@drawable/overlay_button_dismiss"
             android:layout_marginEnd="8dp"/>
 
-        <!-- 5분 후 버튼 (indigo) -->
+        <!-- 5분 후 버튼 (보조 액션 - 흰 배경 + 테두리) -->
         <Button
             android:id="@+id/snoozeButton"
             android:layout_width="0dp"
@@ -81,7 +80,7 @@
             android:layout_weight="1"
             android:text="5분 후"
             android:textSize="15sp"
-            android:textColor="#FFFFFF"
+            android:textColor="#3B2E7A"
             android:textStyle="bold"
             android:background="@drawable/overlay_button_snooze"
             android:layout_marginStart="8dp"/>

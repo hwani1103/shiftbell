@@ -1,15 +1,20 @@
 // lib/screens/next_alarm_tab.dart
 
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'dart:async';
 import '../models/alarm.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/alarm_provider.dart';
 import '../l10n/l10n_extensions.dart';
 import '../utils/weekday_util.dart';
 import '../constants/platform_channel.dart';
+import '../theme/app_colors.dart';
+import '../widgets/app_second_button.dart';
+import '../widgets/app_third_button.dart';
 
 
 class NextAlarmTab extends ConsumerStatefulWidget {
@@ -85,7 +90,6 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   @override
   Widget build(BuildContext context) {
     final nextAlarmAsync = ref.watch(nextAlarmProvider);
-    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       // ⭐ 6번 기능: 우→좌 스와이프로 달력탭 이동
@@ -98,20 +102,27 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
         }
       },
       child: Scaffold(
-        backgroundColor: colorScheme.surfaceVariant,
-        body: nextAlarmAsync.when(
-          loading: () => const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
-          error: (error, stack) => _buildEmptyState(),
-          data: (nextAlarm) {
-            if (nextAlarm == null) {
-              return _buildEmptyState();
-            }
-            return _AlarmDisplayWidget(
-              alarm: nextAlarm,
-              onDismiss: () => _dismissAlarm(nextAlarm.id!, nextAlarm.date),
-              onShowAllAlarms: () => _showAllAlarmsSheet(context),
-            );
-          },
+        backgroundColor: Colors.transparent,
+        // ⭐ 2026-08-25 - "UI 테마" 탭에서 확정한 "오로라 페일" 그라데이션을 이
+        // 탭 배경 전체에 씀(아이콘/잠금화면/오버레이와 같은 톤).
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: kAppAlarmGradient),
+          ),
+          child: nextAlarmAsync.when(
+            loading: () => const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
+            error: (error, stack) => _buildEmptyState(),
+            data: (nextAlarm) {
+              if (nextAlarm == null) {
+                return _buildEmptyState();
+              }
+              return _AlarmDisplayWidget(
+                alarm: nextAlarm,
+                onDismiss: () => _dismissAlarm(nextAlarm.id!, nextAlarm.date),
+                onShowAllAlarms: () => _showAllAlarmsSheet(context),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -472,6 +483,19 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     };
   }
 
+  /// 카운트다운 링 진행률(0..1). 알람 12시간 전까지는 0(빈 링) - 그 안으로
+  /// 들어오면 서서히 채워지기 시작해서 알람 시각에 정확히 1(완전히 채워짐 =
+  /// 임박)이 됨. 창(window)을 12시간으로 잡은 건 교대근무 알람이 보통 전날
+  /// 저녁~당일 새벽 사이에 맞춰지는 걸 감안한 값 - 그보다 훨씬 먼 알람은 계속
+  /// 빈 링으로 있다가, 반나절 안쪽부터 "다가오고 있다"는 느낌을 주기 시작함.
+  double _ringProgress(DateTime alarmTime) {
+    const window = Duration(hours: 12);
+    final remaining = alarmTime.difference(DateTime.now());
+    if (remaining.isNegative) return 1.0;
+    if (remaining >= window) return 0.0;
+    return 1.0 - (remaining.inSeconds / window.inSeconds);
+  }
+
   String _getDateLabel(BuildContext context, DateTime alarmDate) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -509,84 +533,74 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
         child: Column(
           children: [
-            SizedBox(height: 12.h),
+            SizedBox(height: 8.h),
 
-            // 메인 알람 카드
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 22.h),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    colorScheme.primary,
-                    colorScheme.primary.withOpacity(0.8),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(24.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: colorScheme.primary.withOpacity(0.3),
-                    blurRadius: 20,
-                    offset: Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
+            Text(
+              context.l10n.alarmUpNext,
+              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: colorScheme.onSurface),
+            ),
+
+            SizedBox(height: 18.h),
+
+            // ⭐ 2026-08-25 - "UI 테마" 탭에서 확정한 카운트다운 링 디자인. 알람
+            // 시각 12시간 전부터 링이 채워지기 시작해서, 알람 시각에 완전히
+            // 채워짐(=임박 표시). 값이 바뀔 때마다 부드럽게 이어서 애니메이션됨
+            // (_CountdownRing 참고).
+            SizedBox(
+              width: 202.w,
+              height: 202.w,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  // 날짜 라벨
+                  _CountdownRing(
+                    size: 202.w,
+                    strokeWidth: 12.w,
+                    progress: _ringProgress(alarm.date!),
+                    color: kAppRingAccent,
+                    trackColor: colorScheme.onSurface.withOpacity(0.12),
+                  ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                    width: 160.w,
+                    height: 160.w,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: colorScheme.surface.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20.r),
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.18), blurRadius: 14, offset: const Offset(0, 6))],
                     ),
-                    child: Text(
-                      dateLabel,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color: colorScheme.surface,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 14.h),
-
-                  // 시간 표시
-                  Text(
-                    timeStr,
-                    style: TextStyle(
-                      fontSize: 60.sp,
-                      fontWeight: FontWeight.w300,
-                      color: colorScheme.surface,
-                      letterSpacing: 2,
-                    ),
-                  ),
-
-                  SizedBox(height: 14.h),
-
-                  // 근무 타입 뱃지
-                  if (alarm.shiftType != null)
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 9.h),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Text(
-                        alarm.shiftType!,
-                        style: TextStyle(
-                          fontSize: 17.sp,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                          decoration: BoxDecoration(color: colorScheme.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(20.r)),
+                          child: Text(dateLabel, style: TextStyle(fontSize: 11.sp, color: colorScheme.primary, fontWeight: FontWeight.w700)),
                         ),
-                      ),
+                        SizedBox(height: 6.h),
+                        Text(timeStr, style: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.w800, color: colorScheme.primary)),
+                      ],
                     ),
+                  ),
                 ],
               ),
             ),
+
+            SizedBox(height: 14.h),
+
+            // 근무 타입 뱃지
+            if (alarm.shiftType != null)
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20.r),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 3))],
+                ),
+                child: Text(
+                  alarm.shiftType!,
+                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: colorScheme.primary),
+                ),
+              ),
 
             SizedBox(height: 18.h),
 
@@ -709,63 +723,40 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
             SizedBox(height: 12.h),
 
-            // ⭐ 전체 알람 보기 버튼 (알람 타입 카드 아래, 우측 정렬)
+            // ⭐ 전체 알람 보기 버튼 (알람 타입 카드 아래, 우측 정렬) - "UI 테마"
+            // 탭에서 확정한 AppThirdButton 컨셉으로 교체.
             Align(
               alignment: Alignment.centerRight,
-              child: GestureDetector(
-                onTap: widget.onShowAllAlarms,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    color: colorScheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                      color: colorScheme.primary.withOpacity(0.5),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.list_alt_rounded,
-                        size: 16.sp,
-                        color: colorScheme.primary,
-                      ),
-                      SizedBox(width: 6.w),
-                      Text(
-                        context.l10n.alarmViewAllRegistered,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
+              child: AppThirdButton(
+                compact: true,
+                onPressed: widget.onShowAllAlarms,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.list_alt_rounded, size: 16),
+                    SizedBox(width: 6.w),
+                    Text(context.l10n.alarmViewAllRegistered),
+                  ],
                 ),
               ),
             ),
 
             Spacer(),
 
-            // 알람 취소 버튼
+            // 알람 취소 버튼 - "UI 테마" 탭에서 확정한 AppSecondButton(danger)
+            // 컨셉으로 교체.
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
+              child: AppSecondButton(
+                variant: AppSecondButtonVariant.danger,
                 onPressed: widget.onDismiss,
-                icon: Icon(Icons.alarm_off_rounded, size: 18.sp),
-                label: Text(
-                  context.l10n.alarmTurnOffThis,
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: colorScheme.error,
-                  side: BorderSide(color: colorScheme.error.withOpacity(0.5), width: 1.5),
-                  padding: EdgeInsets.symmetric(vertical: 13.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.alarm_off_rounded, size: 18),
+                    SizedBox(width: 8.w),
+                    Text(context.l10n.alarmTurnOffThis),
+                  ],
                 ),
               ),
             ),
@@ -847,4 +838,66 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
       ),
     );
   }
+}
+
+/// ⭐ 카운트다운 링. progress(0..1)가 바뀔 때마다 마지막 값에서 새 값으로
+/// 부드럽게 이어서 애니메이션됨(TweenAnimationBuilder가 알아서 처리 - end만
+/// 계속 갱신하면 매번 새 애니메이션을 만들지 않고 현재 값에서 이어 감).
+class _CountdownRing extends StatelessWidget {
+  const _CountdownRing({required this.size, required this.strokeWidth, required this.progress, required this.color, required this.trackColor});
+
+  final double size;
+  final double strokeWidth;
+  final double progress;
+  final Color color;
+  final Color trackColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: progress),
+      duration: const Duration(milliseconds: 700),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, _) {
+        return CustomPaint(
+          size: Size(size, size),
+          painter: _RingPainter(progress: value, color: color, trackColor: trackColor, strokeWidth: strokeWidth),
+        );
+      },
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  _RingPainter({required this.progress, required this.color, required this.trackColor, required this.strokeWidth});
+
+  final double progress; // 0..1
+  final Color color;
+  final Color trackColor;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = (size.shortestSide - strokeWidth) / 2;
+
+    final trackPaint = Paint()
+      ..color = trackColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(center, radius, trackPaint);
+
+    final fillPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    final sweep = 2 * math.pi * progress;
+    // -pi/2 = 12시 방향에서 시작, 시계 방향으로 sweep만큼 채움.
+    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), -math.pi / 2, sweep, false, fillPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _RingPainter oldDelegate) => oldDelegate.progress != progress || oldDelegate.color != color || oldDelegate.trackColor != trackColor;
 }

@@ -96,15 +96,17 @@ flutter:
   # assets:
   #   - assets/sounds/  # 제거: res/raw만 사용
 
-# ⭐ 앱 아이콘 - 그동안 app_icon.svg(교대시계: 시계+알람벨, 레포 루트)만 있고 실제
-# 런처 아이콘엔 반영된 적이 없어서 안드로이드 기본 Flutter 로고가 그대로 떠 있었음
-# (디버그/릴리즈 여부와 무관 - 빌드 모드 문제가 아니라 애초에 아이콘 자체를 생성/적용한
-# 적이 없었던 것). 그 SVG를 1024x1024 PNG로 렌더링해서 assets/icon/에 넣고
-# flutter_launcher_icons로 전체 밀도 아이콘 + 적응형 아이콘(전경/배경)을 생성함.
+# ⭐ 앱 아이콘 - 2026-08-25 "UI 테마" 탭에서 검토한 "오로라 페일" 톤으로 확정
+# (라벤더~스카이~민트 그라데이션 + 흰 시계 얼굴 + 짙은 남색 바늘 + 앰버 알림
+# 배지). assets/icon/gen_icon.py로 3장을 생성함 - app_icon.png(레거시, 배경
+# 포함) / app_icon_foreground.png(적응형 아이콘 전경, 투명 배경) /
+# app_icon_background.png(적응형 아이콘 배경, 그라데이션 단독). 배경이
+# 그라데이션이라 단색 hex 대신 이미지 경로를 씀(flutter_launcher_icons가
+# adaptive_icon_background에 이미지 경로도 지원).
 # `flutter pub run flutter_launcher_icons` 실행하면 android/app/src/main/res/mipmap-*/
-# 전체가 재생성됨 - 아이콘을 다시 바꾸고 싶으면 이 두 PNG만 교체하고 다시 실행하면 됨.
+# 전체가 재생성됨 - 아이콘을 다시 바꾸고 싶으면 이 세 PNG를 다시 만들고 재실행하면 됨.
 flutter_launcher_icons:
   android: "ic_launcher"
   image_path: "assets/icon/app_icon.png"
-  adaptive_icon_background: "#3049A0"
+  adaptive_icon_background: "assets/icon/app_icon_background.png"
   adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
