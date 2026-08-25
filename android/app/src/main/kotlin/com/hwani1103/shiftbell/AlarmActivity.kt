@@ -33,6 +33,7 @@ class AlarmActivity : AppCompatActivity() {
     private lateinit var gestureDetector: GestureDetectorCompat
     private var timeoutHandler: Handler? = null
     private var timeoutRunnable: Runnable? = null
+    private var swipeHintAnimator: android.animation.Animator? = null
 
     // ⭐ 의도적 종료 플래그 (timeout/dismiss/snooze 중에는 7777 생성 방지)
     private var isIntentionalExit: Boolean = false
@@ -197,6 +198,31 @@ private fun timeoutAlarm() {
 
         findViewById<Button>(R.id.snoozeButton).setOnClickListener {
             snoozeAlarm()
+        }
+
+        startSwipeHintAnimation()
+    }
+
+    // ⭐ "위로 스와이프해서 끄기" 안내가 위로 살짝 올라갔다가 아래로 뚝
+    // 떨어지길 반복하는 힌트 애니메이션. Keyframe으로 구간을 나눔:
+    // 0~55% 구간(감속 보간)에서 위로 14dp 올라갔다가, 55~62%의 짧은 구간에서
+    // 원위치로 뚝 떨어지고, 62~100%는 그 자리에서 잠깐 멈췄다가 반복.
+    private fun startSwipeHintAnimation() {
+        val hintView = findViewById<android.view.View>(R.id.swipeHintContainer) ?: return
+        val riseDistance = -14f * resources.displayMetrics.density
+
+        val kf0 = android.animation.Keyframe.ofFloat(0f, 0f)
+        val kf1 = android.animation.Keyframe.ofFloat(0.55f, riseDistance).apply {
+            interpolator = android.view.animation.DecelerateInterpolator()
+        }
+        val kf2 = android.animation.Keyframe.ofFloat(0.62f, 0f)
+        val kf3 = android.animation.Keyframe.ofFloat(1f, 0f)
+        val pvh = android.animation.PropertyValuesHolder.ofKeyframe("translationY", kf0, kf1, kf2, kf3)
+
+        swipeHintAnimator = android.animation.ObjectAnimator.ofPropertyValuesHolder(hintView, pvh).apply {
+            duration = 1400L
+            repeatCount = android.animation.ObjectAnimator.INFINITE
+            start()
         }
     }
     
@@ -392,6 +418,8 @@ private fun dismissAlarm() {
     override fun onDestroy() {
         super.onDestroy()
         cancelTimeoutTimer()
+        swipeHintAnimator?.cancel()
+        swipeHintAnimator = null
 
         // ⭐ 주의: onDestroy()에서 Notification 삭제하면 안 됨!
         // - noHistory="true" 때문에 홈 버튼 누르면 Activity가 바로 destroy됨

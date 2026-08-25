@@ -78,6 +78,29 @@ override fun onReceive(context: Context, intent: Intent) {
         } catch (e: Exception) {
             Log.e("CustomAlarmReceiver", "⚠️ 이전 알람 화면 종료 신호 실패", e)
         }
+        try {
+            // ⭐ 2026-08-25 - 이전 알람이 오버레이(AlarmOverlayService)로 떠 있었을
+            // 수도 있음. 버그 재현: A(오버레이, 해제 상태) 응답 안 하고 잠금 →
+            // B가 잠금 상태로 도착 → 위 두 처리(DB/알림/FINISH_ALARM_ACTIVITY)는
+            // 실행되지만 AlarmOverlayService는 그대로 살아있음(자기 alarmId가
+            // 낡았다는 걸 알 방법이 onStartCommand()뿐인데, B는 잠금 상태라
+            // showAlarmActivity()로 가서 그 Service의 onStartCommand가 아예 다시
+            // 안 불림) - 그 결과 이미 표시된 오버레이 창이 새로 뜬 AlarmActivity
+            // 위에 그대로 남아 있어서(오버레이 창은 항상 일반 Activity보다 위
+            // 레이어), 사용자 입장에선 잠금화면인데 옛 오버레이가 먼저 보이고
+            // 그걸 꺼야 뒤에 있던 진짜(B) 잠금화면 알람이 드러나는 것처럼 보임.
+            // AlarmOverlayService가 이미 갖고 있는 "외부 종료 신호" 경로
+            // (ACTION_DISMISS_OVERLAY, Flutter 쪽 알람 삭제용으로 만들어졌던 것)를
+            // 그대로 재사용해서 확실히 정리 - 오버레이가 안 떠 있으면 리시버가
+            // 없어서 그냥 무시되니 항상 보내도 안전함.
+            val dismissOverlayIntent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
+                putExtra(AlarmOverlayService.EXTRA_ALARM_ID, previousRingingId)
+                setPackage(context.packageName)
+            }
+            context.sendBroadcast(dismissOverlayIntent)
+        } catch (e: Exception) {
+            Log.e("CustomAlarmReceiver", "⚠️ 이전 알람 오버레이 종료 신호 실패", e)
+        }
     }
     RingingAlarmTracker.setRingingAlarmId(context, id)
 

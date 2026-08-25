@@ -6,6 +6,10 @@
 # `dart run flutter_launcher_icons`로 실제 android/app/src/main/res/mipmap-*/
 # 아이콘에 반영. 색만 바꾸고 싶으면 아래 BG/HANDS/BELL_BG 상수만 고치면 됨.
 #
+# ⭐ 2026-08-25 4차 개정 - 최종 확정(네이비/골드/코랄). 종 배지 원 크기(badge_r)는
+# 그대로 두고, 그 안의 종 글자(글리프) 자체만 키워달라는 요청으로 draw_bell
+# 호출 시 크기 배율을 0.62 → 0.76으로 올림(배지 원 대비 종이 꽉 차 보이게).
+#
 # ⭐ 2026-08-25 3차 개정 - "오로라 페일"(그라데이션) 대신 예전 팔레트 후보 중
 # "17번"(네이비/골드/코랄, 채도가 더 쨍함)으로 최종 교체. 배경이 이제 단색이라
 # 그라데이션 계산이 필요 없어졌고, adaptive_icon_background도 이미지 대신
@@ -128,7 +132,7 @@ def build(with_background: bool, out_path: str):
     border_w = max(6, int(badge_r * 0.14))
     draw.ellipse([bx-badge_r-border_w, by-badge_r-border_w, bx+badge_r+border_w, by+badge_r+border_w], fill=WHITE)
     draw.ellipse([bx-badge_r, by-badge_r, bx+badge_r, by+badge_r], fill=BELL_BG)
-    draw_bell(draw, bx, by, badge_r*0.62, WHITE)
+    draw_bell(draw, bx, by, badge_r*0.76, WHITE)
 
     img.save(out_path)
     print("saved", out_path, img.size, "face_d_ratio=%.3f" % face_d_ratio)

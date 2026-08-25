@@ -26,6 +26,7 @@ import android.graphics.Path
 import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
+import android.view.View.MeasureSpec
 import android.view.animation.LinearInterpolator
 import kotlin.math.cos
 import kotlin.math.hypot
@@ -36,12 +37,16 @@ class WaveGradientView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
 ) : View(context, attrs) {
 
-    // "오로라 페일" 그라데이션(라벤더 → 스카이 → 민트)과 동일한 색 -
-    // alarm_gradient_bg.xml/overlay_card_gradient.xml과 같은 값.
+    // ⭐ 2026-08-25 2차 수정 - "움직임이 잘 안 보인다"는 피드백으로 정적
+    // 배경(라벤더~스카이~민트, 흰색 쪽으로 75% 블렌드)보다 채도를 더 살린
+    // 버전으로 교체(같은 색상군에서 50% 블렌드 단계 - "UI 테마" 탭에서
+    // "오로라 소프트" 단계로 실험했던 값과 동일). 애니메이션 전용이라 이
+    // 색으로 바뀌어도 정적 아이콘/배경 쪽 색상 값(alarm_gradient_bg.xml 등,
+    // 더는 안 쓰이지만)과는 무관함.
     private val gradientColors = intArrayOf(
-        0xFFDACEF9.toInt(),
-        0xFFCEDEFC.toInt(),
-        0xFFBFF5F1.toInt(),
+        0xFFB49EF3.toInt(),
+        0xFF9EBDFA.toInt(),
+        0xFF80ECE3.toInt(),
     )
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val bottomCornerRadiusPx: Float
@@ -57,13 +62,32 @@ class WaveGradientView @JvmOverloads constructor(
         setWillNotDraw(false)
     }
 
+    // ⭐ 이 View는 스스로 "내용에 맞는 크기"가 없어서(그냥 배경을 채워 그릴
+    // 뿐), match_parent로 쓰이면서 부모가 wrap_content인 경우(오버레이의
+    // FrameLayout처럼) 기본 View.onMeasure()의 getDefaultSize()가 AT_MOST로
+    // 주어진 상한(=화면 높이)을 그대로 "내 크기"로 보고해버려서, 그 값이
+    // 부모의 wrap_content 계산을 오염시켜 오버레이가 화면 전체 높이만큼
+    // 부풀어 오르는 버그가 있었음("화면의 80%를 차지한다" 피드백의 원인).
+    // 대응: EXACTLY로 주어진 경우에만 그 크기를 그대로 쓰고, AT_MOST/
+    // UNSPECIFIED일 때는 0을 보고해서 첫 번째 측정 패스에서 형제 뷰(실제
+    // 콘텐츠)의 크기 계산을 오염시키지 않게 함 - FrameLayout은 match_parent
+    // 자식을 부모의 최종 확정 크기로 한 번 더(EXACTLY로) 재측정해주므로,
+    // 최종 레이아웃에서는 정상적으로 부모를 꽉 채움. 잠금화면(루트가 이미
+    // match_parent인 ConstraintLayout)에서는 애초에 EXACTLY만 들어오므로
+    // 이 분기가 영향을 주지 않음.
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val w = if (MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY) MeasureSpec.getSize(widthMeasureSpec) else 0
+        val h = if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.EXACTLY) MeasureSpec.getSize(heightMeasureSpec) else 0
+        setMeasuredDimension(w, h)
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         if (animator == null) {
-            // ⭐ 360도를 18초에 걸쳐 한 바퀴 도는 "적당한 속도" - 너무 빠르면
-            // 알람 화면치고 산만하고, 너무 느리면 움직이는 게 거의 안 보임.
+            // ⭐ 360도를 13초에 걸쳐 한 바퀴("조금 더 빠르게" 피드백으로
+            // 18초 → 13초).
             animator = ValueAnimator.ofFloat(315f, 315f + 360f).apply {
-                duration = 18_000L
+                duration = 13_000L
                 repeatCount = ValueAnimator.INFINITE
                 interpolator = LinearInterpolator()
                 addUpdateListener {
