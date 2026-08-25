@@ -529,7 +529,15 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     final dateLabel = _getDateLabel(context, alarm.date!);
 
     return SafeArea(
-      child: Padding(
+      // ⭐ 2026-08-25 2차 수정 - 실기기에서 하단 오버플로 발생 확인. 원인: 링
+      // 크기(202.w)를 "UI 테마" 탭의 280.w 목업 프레임 안에서 튜닝한 값을 그대로
+      // 가져왔는데, 그 프레임은 목업용 장식일 뿐이고 .w 자체는 실제 화면 폭
+      // 기준으로 스케일되는 절대 단위라 실제 화면에서는 옛 히어로 카드보다 약
+      // 80dp 더 큰 높이를 요구하게 됐음(Spacer 하나로 버티는 고정 레이아웃이라
+      // 여유가 없었음). 대응: (1) 링을 실제 화면에 맞는 크기로 축소, (2)
+      // Spacer 기반 고정 레이아웃 대신 SingleChildScrollView로 감싸서, 폰트
+      // 크기 설정이나 화면 크기가 다른 기기에서도 절대 안 잘리게 함.
+      child: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
         child: Column(
           children: [
@@ -540,28 +548,28 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
               style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: colorScheme.onSurface),
             ),
 
-            SizedBox(height: 18.h),
+            SizedBox(height: 16.h),
 
-            // ⭐ 2026-08-25 - "UI 테마" 탭에서 확정한 카운트다운 링 디자인. 알람
-            // 시각 12시간 전부터 링이 채워지기 시작해서, 알람 시각에 완전히
-            // 채워짐(=임박 표시). 값이 바뀔 때마다 부드럽게 이어서 애니메이션됨
-            // (_CountdownRing 참고).
+            // ⭐ "UI 테마" 탭에서 확정한 카운트다운 링 디자인. 알람 시각 12시간
+            // 전부터 링이 채워지기 시작해서, 알람 시각에 완전히 채워짐(=임박
+            // 표시). 값이 바뀔 때마다 부드럽게 이어서 애니메이션됨(_CountdownRing
+            // 참고).
             SizedBox(
-              width: 202.w,
-              height: 202.w,
+              width: 150.w,
+              height: 150.w,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   _CountdownRing(
-                    size: 202.w,
-                    strokeWidth: 12.w,
+                    size: 150.w,
+                    strokeWidth: 10.w,
                     progress: _ringProgress(alarm.date!),
                     color: kAppRingAccent,
                     trackColor: colorScheme.onSurface.withOpacity(0.12),
                   ),
                   Container(
-                    width: 160.w,
-                    height: 160.w,
+                    width: 114.w,
+                    height: 114.w,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -572,12 +580,12 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                           decoration: BoxDecoration(color: colorScheme.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(20.r)),
-                          child: Text(dateLabel, style: TextStyle(fontSize: 11.sp, color: colorScheme.primary, fontWeight: FontWeight.w700)),
+                          child: Text(dateLabel, style: TextStyle(fontSize: 9.sp, color: colorScheme.primary, fontWeight: FontWeight.w700)),
                         ),
-                        SizedBox(height: 6.h),
-                        Text(timeStr, style: TextStyle(fontSize: 30.sp, fontWeight: FontWeight.w800, color: colorScheme.primary)),
+                        SizedBox(height: 4.h),
+                        Text(timeStr, style: TextStyle(fontSize: 21.sp, fontWeight: FontWeight.w800, color: colorScheme.primary)),
                       ],
                     ),
                   ),
@@ -585,7 +593,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
               ),
             ),
 
-            SizedBox(height: 14.h),
+            SizedBox(height: 12.h),
 
             // 근무 타입 뱃지
             if (alarm.shiftType != null)
@@ -741,7 +749,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
               ),
             ),
 
-            Spacer(),
+            SizedBox(height: 20.h),
 
             // 알람 취소 버튼 - "UI 테마" 탭에서 확정한 AppSecondButton(danger)
             // 컨셉으로 교체.
