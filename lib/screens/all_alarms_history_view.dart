@@ -272,31 +272,40 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       // 제목 바로 다음 줄(본문 맨 위, 우측 정렬, 더 작게)로 내림 - 화면 제목에
       // 비해 너무 크고 부담스럽다는 피드백. AppSecondButton의 compact 크기 +
       // 작은 아이콘/글자로 눈에 띄되 튀지 않게 함.
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 4.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                AppSecondButton(
-                  variant: AppSecondButtonVariant.danger,
-                  compact: true,
-                  onPressed: _alarmsWithHistory.isEmpty ? null : _deleteAllHistory,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.delete_sweep_outlined, size: 13.sp),
-                      SizedBox(width: 3.w),
-                      Text(context.l10n.alarmHistoryDeleteAllTitle, style: TextStyle(fontSize: 12.sp)),
-                    ],
+      //
+      // ⭐ 2026-08-25 - body를 SafeArea로 감쌈. 예전엔 ListView 콘텐츠 끝에만
+      // MediaQuery.padding.bottom을 수동으로 더해서, "끝까지 스크롤했을 때"는
+      // 여백이 맞았지만 뷰포트 자체는 화면 맨 밑까지 그대로라 - 스크롤 중간에
+      // 화면 맨 아래에 걸리는 카드는 네비게이션 바 밑에 깔려서 그려지고 있었음.
+      // SafeArea는 뷰포트 자체를 줄여주므로 이 문제를 근본적으로 해결함.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 4.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AppSecondButton(
+                    variant: AppSecondButtonVariant.danger,
+                    compact: true,
+                    onPressed: _alarmsWithHistory.isEmpty ? null : _deleteAllHistory,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.delete_sweep_outlined, size: 13.sp),
+                        SizedBox(width: 3.w),
+                        Text(context.l10n.alarmHistoryDeleteAllTitle, style: TextStyle(fontSize: 12.sp)),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Expanded(child: _buildBody(context, colorScheme)),
-        ],
+            Expanded(child: _buildBody(context, colorScheme)),
+          ],
+        ),
       ),
     );
   }
@@ -329,12 +338,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                 ),
               )
             : ListView.builder(
-                  padding: EdgeInsets.fromLTRB(
-                    16.w,
-                    16.w,
-                    16.w,
-                    16.w + MediaQuery.of(context).padding.bottom,
-                  ),
+                  padding: EdgeInsets.all(16.w),
                   itemCount: _alarmsWithHistory.length,
                   itemBuilder: (context, index) {
                     final alarmWithHistory = _alarmsWithHistory[index];

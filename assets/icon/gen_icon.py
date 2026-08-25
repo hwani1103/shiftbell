@@ -1,21 +1,27 @@
 # -*- coding: utf-8 -*-
 #
-# 앱 아이콘 생성 스크립트. Pillow(PIL)만 있으면 됨(pip install pillow). 저장소
+# 앱 아이콘 생성 스크립트. Pillow + numpy 필요(pip install pillow numpy). 저장소
 # 루트에서 `python assets/icon/gen_icon.py` 실행하면 app_icon.png /
-# app_icon_foreground.png 두 장이 이 폴더에 갱신됨 - 그 다음
-# `dart run flutter_launcher_icons`로 실제 android/app/src/main/res/mipmap-*/
-# 아이콘에 반영. 색만 바꾸고 싶으면 아래 BG/HANDS/BELL_BG 상수만 고치면 됨.
+# app_icon_foreground.png / app_icon_background.png 세 장이 이 폴더에 갱신됨 -
+# 그 다음 `dart run flutter_launcher_icons`로 실제 android/app/src/main/res/mipmap-*/
+# 아이콘에 반영. 색만 바꾸고 싶으면 아래 BG_STOPS/HANDS/BELL_BG 상수만 고치면 됨.
+#
+# ⭐ 2026-08-25 5차 개정 - "2번"(인디고·앰버) 팔레트로 재교체 + 그라데이션 배경
+# 부활. 배경: 인디고에서 시작해 좀 더 밝은 "오로라"색(블루→틴트 청록)으로 끝나는
+# 대각선(좌상→우하) 그라데이션(1번 후보 스타일 참고, 시작색만 인디고로 고정).
+# 종 배지 색은 앰버(#FFC107) 대신 3/4번과 같은 코랄(#FF7043)로 변경. 배경이
+# 다시 그라데이션이라 pubspec.yaml의 adaptive_icon_background도 hex 대신
+# app_icon_background.png 이미지 경로로 되돌림 - flutter_launcher_icons 실행 전에
+# pubspec.yaml도 같이 확인할 것.
 #
 # ⭐ 2026-08-25 4차 개정 - 최종 확정(네이비/골드/코랄). 종 배지 원 크기(badge_r)는
 # 그대로 두고, 그 안의 종 글자(글리프) 자체만 키워달라는 요청으로 draw_bell
 # 호출 시 크기 배율을 0.62 → 0.76으로 올림(배지 원 대비 종이 꽉 차 보이게).
+# 이 비율은 이번 개정에서도 그대로 유지.
 #
 # ⭐ 2026-08-25 3차 개정 - "오로라 페일"(그라데이션) 대신 예전 팔레트 후보 중
-# "17번"(네이비/골드/코랄, 채도가 더 쨍함)으로 최종 교체. 배경이 이제 단색이라
-# 그라데이션 계산이 필요 없어졌고, adaptive_icon_background도 이미지 대신
-# pubspec.yaml에 hex 값을 직접 씀. 크기는 "살짝만" 키워달라는 요청으로 레거시
-# 0.58→0.62, 적응형 목표 비율 0.55→0.59로 소폭 상향(2차 개정에서 정리한
-# 적응형 아이콘 인셋+크롭 계산식은 그대로 재사용).
+# "17번"(네이비/골드/코랄, 채도가 더 쨍함)으로 교체했던 라운드. 배경이 단색이라
+# 그라데이션 계산이 필요 없어져서 그때 한 번 제거했던 걸 이번에 다시 부활시킴.
 #
 # ⭐ 2026-08-25 2차 개정 - 적응형 아이콘 크기 계산을 두 번 잘못 짚었던 경위:
 # 처음엔 flutter_launcher_icons가 자동으로 씌우는 <inset 16%>만 보상하려다
@@ -28,14 +34,20 @@
 # 이 공식으로 목표 비율을 역산해서 source_비율을 구함(아래 build() 참고).
 
 from PIL import Image, ImageDraw
+import numpy as np
 import math
 
 SIZE = 1024
 
-# 확정된 아이콘 색상 - "17번" 팔레트(네이비/골드/코랄)
-BG = (0x1A, 0x23, 0x7E)    # 네이비 (배경, 단색)
-HANDS = (0xFF, 0xD7, 0x00) # 골드 (시계 바늘)
-BELL_BG = (0xFF, 0x70, 0x43) # 코랄 (종 배지 배경)
+# 확정된 아이콘 색상 - "2번"(인디고·앰버) 팔레트를 그라데이션+코랄 종으로 변형.
+# 배경: 인디고(시작) → 살짝 밝은 오로라 블루 → 밝은 청록(끝) 대각선 그라데이션.
+BG_STOPS = [
+    (0x3F, 0x51, 0xB5),  # 인디고 (좌상단, 시작색)
+    (0x3D, 0x7B, 0xF5),  # 블루 (중간)
+    (0x1D, 0xE1, 0xC7),  # 밝은 청록/오로라 (우하단, 끝색)
+]
+HANDS = (0x1A, 0x23, 0x7E)   # 다크 네이비 (시계 바늘 - 흰 시계판 위 대비용)
+BELL_BG = (0xFF, 0x70, 0x43) # 코랄 (종 배지 배경, 3/4번과 동일)
 WHITE = (0xFF, 0xFF, 0xFF)
 
 # flutter_launcher_icons가 적응형 아이콘 foreground에 자동으로 씌우는 인셋 비율.
@@ -50,7 +62,7 @@ ADAPTIVE_VISIBLE_WINDOW_DP = 70.0
 CANVAS_DP = 108.0
 
 # 레거시(배경 포함) 아이콘의 시계 지름 비율(인셋/크롭 영향 없이 그린 그대로
-# 보임) / 적응형 foreground의 최종 화면 노출 목표 비율("살짝 더 크게" 반영).
+# 보임) / 적응형 foreground의 최종 화면 노출 목표 비율.
 LEGACY_FACE_RATIO = 0.62
 ADAPTIVE_TARGET_FINAL_RATIO = 0.59
 
@@ -59,6 +71,28 @@ def rounded_mask(w, h, radius):
     d = ImageDraw.Draw(mask)
     d.rounded_rectangle([0, 0, w-1, h-1], radius=radius, fill=255)
     return mask
+
+def make_gradient(w, h, stops):
+    # 좌상단(0,0) → 우하단(w,h) 대각선 방향 다단(multi-stop) 그라데이션.
+    # Flutter 쪽 정적 배경(Alignment.topLeft → bottomRight)과 동일한 방향이라
+    # 나중에 Flutter에서 회전 애니메이션의 시작 각도를 맞출 때도 기준이 됨.
+    xs = np.linspace(0.0, 1.0, w)
+    ys = np.linspace(0.0, 1.0, h)
+    xv, yv = np.meshgrid(xs, ys)
+    t = (xv + yv) / 2.0  # 0=좌상단, 1=우하단
+
+    stops_arr = np.array(stops, dtype=np.float64)
+    n = len(stops_arr) - 1
+    seg = np.clip(t * n, 0.0, n - 1e-9)
+    idx = seg.astype(int)
+    frac = (seg - idx)[..., None]
+    c0 = stops_arr[idx]
+    c1 = stops_arr[idx + 1]
+    rgb = c0 + (c1 - c0) * frac
+    rgb = np.clip(rgb, 0, 255).astype(np.uint8)
+    alpha = np.full((h, w, 1), 255, dtype=np.uint8)
+    arr = np.concatenate([rgb, alpha], axis=-1)
+    return Image.fromarray(arr, "RGBA")
 
 def draw_clock_hands(draw, cx, cy, r, color):
     # 4시 정각: 시침(짧고 두꺼움)은 "4" 방향, 분침(길고 얇음)은 "12" 방향.
@@ -104,20 +138,8 @@ def draw_bell(draw, cx, cy, s, color):
     clap_r = s*0.11
     draw.ellipse([cx-clap_r, body_bottom+s*0.14-clap_r, cx+clap_r, body_bottom+s*0.14+clap_r], fill=color)
 
-def build(with_background: bool, out_path: str):
-    img = Image.new("RGBA", (SIZE, SIZE), (0,0,0,0))
-    if with_background:
-        mask = rounded_mask(SIZE, SIZE, int(SIZE*0.23))
-        solid = Image.new("RGBA", (SIZE, SIZE), BG + (255,))
-        img.paste(solid, (0,0), mask)
-
+def draw_face_and_bell(img, face_d_ratio):
     draw = ImageDraw.Draw(img)
-
-    if with_background:
-        face_d_ratio = LEGACY_FACE_RATIO
-    else:
-        visible_scale_up = CANVAS_DP / ADAPTIVE_VISIBLE_WINDOW_DP  # ≈1.54
-        face_d_ratio = ADAPTIVE_TARGET_FINAL_RATIO / ((1 - 2 * ADAPTIVE_AUTO_INSET) * visible_scale_up)
     cx, cy = SIZE/2, SIZE/2
     r = SIZE * face_d_ratio / 2
     draw.ellipse([cx-r, cy-r, cx+r, cy+r], fill=WHITE)
@@ -134,9 +156,34 @@ def build(with_background: bool, out_path: str):
     draw.ellipse([bx-badge_r, by-badge_r, bx+badge_r, by+badge_r], fill=BELL_BG)
     draw_bell(draw, bx, by, badge_r*0.76, WHITE)
 
+def build_legacy(out_path: str):
+    # 배경 있는 레거시 아이콘 - 그라데이션 + 둥근 사각 마스크 + 시계/종.
+    gradient = make_gradient(SIZE, SIZE, BG_STOPS)
+    mask = rounded_mask(SIZE, SIZE, int(SIZE*0.23))
+    img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+    img.paste(gradient, (0, 0), mask)
+    draw_face_and_bell(img, LEGACY_FACE_RATIO)
+    img.save(out_path)
+    print("saved", out_path, img.size, "face_d_ratio=%.3f" % LEGACY_FACE_RATIO)
+
+def build_adaptive_foreground(out_path: str):
+    # 적응형 아이콘 전경 - 배경 없이 시계/종만(투명), 배경은 별도 레이어.
+    visible_scale_up = CANVAS_DP / ADAPTIVE_VISIBLE_WINDOW_DP  # ≈1.54
+    face_d_ratio = ADAPTIVE_TARGET_FINAL_RATIO / ((1 - 2 * ADAPTIVE_AUTO_INSET) * visible_scale_up)
+    img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
+    draw_face_and_bell(img, face_d_ratio)
     img.save(out_path)
     print("saved", out_path, img.size, "face_d_ratio=%.3f" % face_d_ratio)
 
-build(True, "assets/icon/app_icon.png")             # 레거시(배경 포함) 아이콘
-build(False, "assets/icon/app_icon_foreground.png") # 적응형 아이콘 전경(투명 배경)
-print("배경은 단색이라 pubspec.yaml의 adaptive_icon_background에 hex(#1A237E)로 직접 지정함 - PNG 불필요.")
+def build_adaptive_background(out_path: str):
+    # 적응형 아이콘 배경 레이어 - 마스크/둥근모서리 없이 그라데이션 전체 채움
+    # (마스크는 OS가 알아서 씌움). flutter_launcher_icons의
+    # adaptive_icon_background 옵션에 이 경로를 그대로 지정.
+    gradient = make_gradient(SIZE, SIZE, BG_STOPS).convert("RGB")
+    gradient.save(out_path)
+    print("saved", out_path, gradient.size)
+
+build_legacy("assets/icon/app_icon.png")
+build_adaptive_foreground("assets/icon/app_icon_foreground.png")
+build_adaptive_background("assets/icon/app_icon_background.png")
+print("배경이 다시 그라데이션 이미지라 pubspec.yaml의 adaptive_icon_background를 hex가 아니라 assets/icon/app_icon_background.png 경로로 지정해야 함.")

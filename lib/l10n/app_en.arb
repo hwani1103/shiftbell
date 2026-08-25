@@ -106,7 +106,7 @@
   "@alarmRemainingHoursMinutes": {"placeholders": {"hours": {"type": "int"}, "minutes": {"type": "int"}}},
   "alarmRemainingMinutes": "{minutes, plural, =1{1 minute} other{{minutes} minutes}}",
   "@alarmRemainingMinutes": {"placeholders": {"minutes": {"type": "int"}}},
-  "alarmUpNext": "Next Shift Alarm",
+  "alarmUpNext": "Next Alarm",
   "alarmNoneUpcoming": "No Upcoming Alarms",
   "alarmNoneRegistered": "No Alarms Registered",
   "alarmEmptyStateHint": "Set your shift schedule in the Settings tab\nand assign alarms to create them automatically",

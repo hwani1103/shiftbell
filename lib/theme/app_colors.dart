@@ -134,7 +134,14 @@ const Color kAppBackgroundGradientBottom = Color(0xFFC2B7EF);
 
 // ⭐ 2026-08-25 추가 - "다음 알람" 탭 전용. 아이콘/알람화면과 같은 "오로라 페일"
 // 그라데이션을 탭 배경에도 그대로 씀(라벤더~스카이~민트, topLeft→bottomRight).
+// 정적 배경으로만 쓰이던 값이라 지금은 미사용 - 대비를 높인 kAppWaveGradientColors로
+// 대체되었으나(파도 애니메이션), 혹시 모를 참고용으로 남겨둠.
 const List<Color> kAppAlarmGradient = [Color(0xFFDACEF9), Color(0xFFCEDEFC), Color(0xFFBFF5F1)];
+
+/// ⭐ 2026-08-25 추가 - 잠금화면/오버레이 알람(WaveGradientView.kt)과 동일한 팔레트.
+/// kAppAlarmGradient보다 채도를 높여 각도 회전 애니메이션이 눈에 띄게 함("오로라
+/// 소프트" 티어). "다음 알람" 탭의 파도 배경(_WaveGradientBackground)에서 사용.
+const List<Color> kAppWaveGradientColors = [Color(0xFFB49EF3), Color(0xFF9EBDFA), Color(0xFF80ECE3)];
 
 /// "다음 알람" 탭의 카운트다운 링 채움색 - 네온 민트. UI 테마 탭에서 "1번(진한
 /// 오로라) 테마의 링 색보다는 살짝 덜 밝고, 원래 쓰던 톤보다는 밝게" 요청으로

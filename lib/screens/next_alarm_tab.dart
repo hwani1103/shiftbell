@@ -103,16 +103,16 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        // ⭐ 2026-08-25 - "UI 테마" 탭에서 확정한 "오로라 페일" 그라데이션을 이
-        // 탭 배경 전체에 씀(아이콘/잠금화면/오버레이와 같은 톤). SizedBox.expand로
-        // 명시적으로 꽉 채움 - 스크롤 콘텐츠가 화면보다 짧을 때 그 아래로 흰
-        // 배경(바깥 Scaffold 기본색)이 비쳐 보이던 문제 방지(광고 슬롯처럼
-        // 보였다는 피드백의 원인).
+        // ⭐ 2026-08-25 - 정적 그라데이션 대신 잠금화면/오버레이(WaveGradientView.kt)와
+        // 동일한 "각도가 계속 회전하는" 파도 애니메이션을 Flutter 쪽에도 이식.
+        // 네이티브는 커스텀 View.onDraw()에서 매 프레임 LinearGradient(Shader)를
+        // 다시 그리는 방식이지만, Flutter는 AnimationController + Alignment 회전으로
+        // 같은 효과를 냄(13초 주기, 대비를 높인 동일 팔레트 - kAppWaveGradientColors).
+        // SizedBox.expand로 명시적으로 꽉 채움 - 스크롤 콘텐츠가 화면보다 짧을 때
+        // 그 아래로 흰 배경(바깥 Scaffold 기본색)이 비쳐 보이던 문제 방지(광고
+        // 슬롯처럼 보였다는 피드백의 원인).
         body: SizedBox.expand(
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: kAppAlarmGradient),
-            ),
+          child: _WaveGradientBackground(
             child: nextAlarmAsync.when(
             loading: () => const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
             error: (error, stack) => _buildEmptyState(),
@@ -533,13 +533,17 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     final typeLabels = [context.l10n.alarmSoundVibration, context.l10n.alarmVibration, context.l10n.alarmSilent];
 
     return SafeArea(
-      child: SingleChildScrollView(
-        // ⭐ 2026-08-25 - 콘텐츠가 화면에 다 들어가는 정상 크기에서도 안드로이드
-        // 기본 스트레치 오버스크롤 효과 때문에 "끄기" 버튼 아래로 살짝 더
-        // 당겨지는 것처럼 보였음(실제로 스크롤할 내용이 없는데도). 오버플로
-        // 안전장치(SingleChildScrollView 자체)는 유지하되, 물리 효과를
-        // ClampingScrollPhysics로 바꿔서 여유 공간이 없을 땐 그 "당겨지는" 느낌
-        // 자체가 안 생기게 함 - 실제로 넘치는 경우엔 여전히 정상적으로 스크롤됨.
+      // ⭐ 2026-08-25 재수정 - 지난번 physics만 ClampingScrollPhysics로 바꾼
+      // 걸로는 안 고쳐졌음. 원인 재확인: Material3(useMaterial3: true, app_theme.dart)
+      // 기본 ScrollBehavior는 StretchingOverscrollIndicator를 physics와 별개로
+      // 씌움 - 이건 "스크롤 위치가 튕기는" 물리 동작이 아니라 "콘텐츠 자체가
+      // 당겨지는 것처럼 늘어나 보이는" 시각 데코레이션이라 physics를 바꿔도 안
+      // 없어짐. ScrollConfiguration으로 overscroll indicator 자체를 꺼야
+      // 실제로 사라짐 - 실제 콘텐츠가 뷰포트보다 큰 경우엔 physics가 여전히
+      // 정상 스크롤을 허용하므로 오버플로 안전장치는 그대로 유지됨.
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
+        child: SingleChildScrollView(
         physics: const ClampingScrollPhysics(),
         padding: EdgeInsets.fromLTRB(24.w, 32.h, 24.w, 28.h),
         child: Column(
@@ -708,6 +712,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
             ),
           ],
         ),
+        ),
       ),
     );
   }
@@ -823,4 +828,62 @@ class _RingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _RingPainter oldDelegate) => oldDelegate.progress != progress || oldDelegate.color != color || oldDelegate.trackColor != trackColor;
+}
+
+// ⭐ 2026-08-25 추가 - 잠금화면/오버레이(WaveGradientView.kt)와 같은 "각도가
+// 계속 회전하는" 그라데이션 배경을 Flutter 쪽에 이식. 네이티브는 커스텀
+// View.onDraw()에서 매 프레임 LinearGradient(Shader)를 다시 만드는 방식이지만,
+// Flutter는 그런 저수준 API가 없으므로 AnimationController로 각도값만 계속
+// 갱신하고 Container의 LinearGradient(begin/end Alignment)를 매 프레임 다시
+// 계산해서 그림 - 시각적으로는 동일한 "천천히 회전하는 대각선 그라데이션" 효과.
+// AnimatedBuilder의 child(=실제 알람 콘텐츠)는 애니메이션 값과 무관하므로 매
+// 프레임 재사용됨(재빌드 안 됨) - 배경 그라데이션 Container만 매 프레임 다시 그림.
+class _WaveGradientBackground extends StatefulWidget {
+  final Widget child;
+  const _WaveGradientBackground({required this.child});
+
+  @override
+  State<_WaveGradientBackground> createState() => _WaveGradientBackgroundState();
+}
+
+class _WaveGradientBackgroundState extends State<_WaveGradientBackground> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    // 네이티브(WaveGradientView.kt)와 동일한 13초 회전 주기.
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 13))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      child: widget.child,
+      builder: (context, child) {
+        // 시작 방향은 기존 정적 배경과 동일한 topLeft→bottomRight(=45°)에서
+        // 출발해서 한 바퀴(360°)씩 계속 회전.
+        final angle = math.pi / 4 + 2 * math.pi * _controller.value;
+        final dx = math.cos(angle);
+        final dy = math.sin(angle);
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment(-dx, -dy),
+              end: Alignment(dx, dy),
+              colors: kAppWaveGradientColors,
+            ),
+          ),
+          child: child,
+        );
+      },
+    );
+  }
 }

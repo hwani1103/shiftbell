@@ -253,9 +253,14 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
             padding: EdgeInsets.all(16.w),
             children: [
               // 현재 스케줄 정보
+              // ⭐ 2026-08-25 - 카드 배경(연보라 kAppSurface)을 흰색으로 바꿈.
+              // "교대근무관리" 이름표(헤더, colorScheme.primary)와 근무명
+              // 뱃지들(_buildPatternRow/_buildShiftTypesRow, colorScheme.primary)만
+              // 색을 유지하고 나머지 불필요한 연보라 배경은 전부 흰색으로
+              // 통일해달라는 요청 - 이 헤더는 별도 Container라 그대로 유지됨.
               Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(color: Theme.of(context).colorScheme.primary, width: 1.5),
                 ),
@@ -378,6 +383,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // 알람음 관리
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.notifications_active, color: Theme.of(context).colorScheme.tertiary),
                 title: Text(context.l10n.alarmSoundManage),
                 subtitle: Text(context.l10n.settingsAlarmSoundManageDesc),
@@ -387,6 +393,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // ⭐ "근로"를 전부 "근무"로 통일 (탭 제목/부제 포함).
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.work_history_outlined, color: Theme.of(context).colorScheme.tertiary),
                 title: Text(context.l10n.settingsWorkHoursAndOt),
                 subtitle: Text(context.l10n.settingsWorkHoursAndOtDesc),
@@ -407,6 +414,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // ⭐ "근무명 색상 변경"도 여기로 흡수됨 - 색상은 더 이상 개별
               // 지정이 아니라 테마 선택 하나로 전부 결정됨.
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.palette_outlined, color: Theme.of(context).colorScheme.primary),
                 title: Text(context.l10n.calendarTheme),
                 subtitle: Text(ref.watch(calendarThemeProvider).label(context)),
@@ -427,6 +435,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // 알람 이력
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.alarm_on, color: Theme.of(context).colorScheme.primary),
                 title: Text(context.l10n.alarmHistory),
                 subtitle: Text(context.l10n.settingsAlarmHistoryDesc),
@@ -441,6 +450,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // 메모 모아보기
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.note_outlined, color: Colors.amber.shade700),
                 title: Text(context.l10n.calendarMemoAll),
                 subtitle: Text(context.l10n.settingsMemoAllDesc),
@@ -455,6 +465,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // ⭐ 모든 알람 완전 삭제
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
                 title: Text(
                   context.l10n.alarmDeleteAllPermanently,
@@ -532,6 +543,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // 도움말
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.help_outline, color: Theme.of(context).colorScheme.secondary),
                 title: Text(context.l10n.settingsHelp),
                 subtitle: Text(context.l10n.settingsHelpDesc),
@@ -541,6 +553,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               // 개인정보처리방침
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.privacy_tip_outlined, color: Colors.teal),
                 title: Text(context.l10n.settingsPrivacyPolicy),
                 trailing: Icon(Icons.chevron_right),
@@ -796,6 +809,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // ⭐ 스케줄 변경 (규칙적 근무자만)
               if (schedule.isRegular && schedule.pattern != null)
                 ListTile(
+                  tileColor: Colors.white,
                   leading: Icon(Icons.swap_horiz, color: Colors.teal.shade600),
                   title: Text(context.l10n.shiftChangeSchedule),
                   subtitle: Text(context.l10n.settingsChangeScheduleDesc),
@@ -807,6 +821,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               if (schedule.isRegular && schedule.pattern != null)
                 Divider(height: 1),
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
                 title: Text(context.l10n.settingsEditShiftNameTitle),
                 subtitle: Text(context.l10n.settingsRenameShiftDesc),
@@ -821,6 +836,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // (models/calendar_theme.dart의 effectiveShiftColors 참고).
               Divider(height: 1),
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.palette, color: Colors.purple.shade400),
                 title: Text(context.l10n.settingsEditShiftColorTitle),
                 subtitle: Text(context.l10n.settingsEditShiftColorDesc),
@@ -831,6 +847,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               ),
               Divider(height: 1),
               ListTile(
+                tileColor: Colors.white,
                 leading: Icon(Icons.alarm, color: Theme.of(context).colorScheme.tertiary),
                 title: Text(context.l10n.settingsEditFixedAlarmTitle),
                 subtitle: Text(context.l10n.settingsChangeAlarmTimeDesc),

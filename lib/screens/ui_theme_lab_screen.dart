@@ -52,11 +52,11 @@ class _IconCandidate {
 
 // ⭐ 1~3번 = 지난번 마지막까지 남았던 3개 후보(부활). 1,2번은 흰 바늘이 얼굴과
 // 겹쳐 안 보이던 버그가 있어서 바늘 색만 짙게 고침(배경/종은 그대로).
-// 3번(네이비·골드·코랄)은 실제로 적용 중인 디자인이라 완전히 그대로 유지.
+// 2번(인디고·그라데이션·코랄)은 실제로 적용 중인 디자인이라 완전히 그대로 유지.
 const List<_IconCandidate> _candidates = [
   _IconCandidate(number: 1, name: '오로라 그라데이션', gradient: [Color(0xFF6A3DE8), Color(0xFF3D7BF5), Color(0xFF00D9C7)], hands: Color(0xFF1A1A3D), bell: Color(0xFF00E5C7)),
-  _IconCandidate(number: 2, name: '인디고·앰버', bg: Color(0xFF3F51B5), hands: Color(0xFF1A237E), bell: Color(0xFFFFC107)),
-  _IconCandidate(number: 3, name: '네이비·골드·코랄(현재 적용중)', bg: Color(0xFF1A237E), hands: Color(0xFFFFD700), bell: Color(0xFFFF7043)),
+  _IconCandidate(number: 2, name: '인디고·오로라·코랄(현재 적용중)', gradient: [Color(0xFF3F51B5), Color(0xFF3D7BF5), Color(0xFF1DE1C7)], hands: Color(0xFF1A237E), bell: Color(0xFFFF7043)),
+  _IconCandidate(number: 3, name: '네이비·골드·코랄', bg: Color(0xFF1A237E), hands: Color(0xFFFFD700), bell: Color(0xFFFF7043)),
 
   _IconCandidate(number: 4, name: '틸·코랄', bg: Color(0xFF00695C), hands: Color(0xFF0D2B4E), bell: Color(0xFFFF7043)),
   _IconCandidate(number: 5, name: '포레스트그린·앰버', bg: Color(0xFF1B5E20), hands: Color(0xFF3E2723), bell: Color(0xFFFFC107)),

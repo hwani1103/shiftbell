@@ -31,8 +31,13 @@ class AppTheme {
     ),
 
     // AppBar
+    // ⭐ 2026-08-25 - kAppBackgroundPastel(연보라)에서 흰색으로 통일. 달력 탭은
+    // 이미 자기 Scaffold/AppBar를 Colors.white로 직접 고정해뒀는데(calendar_tab.dart),
+    // 이 전역 기본값만 연보라라 설정/일정공유 등 나머지 탭 상단(상태바+AppBar
+    // 영역)만 달력 탭과 다르게 보였음 - "다 흰색으로 통일해달라" 요청으로 여기
+    // 한 곳만 바꿔서 달력 탭을 뺀 모든 화면이 한 번에 흰색이 되도록 함.
     appBarTheme: AppBarTheme(
-      backgroundColor: kAppBackgroundPastel,
+      backgroundColor: Colors.white,
       foregroundColor: Colors.black,
       elevation: 0,
       // ⭐ centerTitle 미지정 시 안드로이드 기본값은 false라, leading(뒤로가기
