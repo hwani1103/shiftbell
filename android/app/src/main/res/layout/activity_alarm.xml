@@ -32,16 +32,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintVertical_bias="0.1">
 
-        <!-- 알람 라벨 - 주간 칩과 동일한 크기로 -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="알람"
-            android:textSize="20sp"
-            android:textColor="#3B2E7A"
-            android:textStyle="bold"
-            android:letterSpacing="0.2"
-            android:layout_marginBottom="28dp"/>
+        <!-- ⭐ 2026-08-25 - "알람" 라벨 텍스트 제거함(원 위에 굳이 필요 없다는
+             피드백) - 이 TextView는 id가 없어 AlarmActivity.kt에서 참조하는
+             곳이 없었음, 안전하게 삭제. -->
 
         <!-- 원형 시계 - 숫자(42sp)는 그대로, 원 자체만 키움 -->
         <TextView

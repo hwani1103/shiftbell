@@ -36,13 +36,18 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
+            <!-- ⭐ 2026-08-25 - 파도 그라데이션 배경 위에서 짙은 보라(#3B2E7A)
+                 숫자가 시인성이 떨어진다는 피드백으로 흰색으로 변경(잠금화면은
+                 흰 원 배경 위라 그대로 두면 되지만, 여긴 배경이 그라데이션 자체라
+                 대비가 약했음). 그림자는 유지 - 그라데이션 밝은 구간(청록 쪽)에서도
+                 흰 글자가 묻히지 않게 하는 안전장치. -->
             <TextView
                 android:id="@+id/timeText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="09:30"
                 android:textSize="50sp"
-                android:textColor="#3B2E7A"
+                android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium"
                 android:shadowColor="#40000000"
