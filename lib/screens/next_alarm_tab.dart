@@ -479,10 +479,12 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
   }
 
   static Duration _adaptiveTickInterval(Duration remaining) {
-    if (remaining.isNegative || remaining.inMinutes < 2) {
-      return const Duration(seconds: 15); // 임박 - 촘촘하게
-    } else if (remaining.inHours < 1) {
-      return const Duration(minutes: 1); // 분 단위 표시가 바뀔 수 있는 구간
+    // ⭐ 2026-08-25 재조정 - "1시간 미만이어도 30초 이내에는 바뀌어야지" 요청.
+    // 순수 로컬 setState(DB/네트워크 재조회 전혀 없음, alarm.date는 이미 갖고
+    // 있는 값)라 15초 간격 비용은 무시할 만한 수준 - "임박(2분 미만)"과
+    // "1시간 미만" 구간을 합쳐서 둘 다 15초로 통일.
+    if (remaining.isNegative || remaining.inHours < 1) {
+      return const Duration(seconds: 15); // 분 단위 표시가 바뀔 수 있는 구간 - 촘촘하게
     } else if (remaining.inHours < 24) {
       return const Duration(minutes: 5); // 시간 단위 표시 - 5분이면 충분
     } else {
