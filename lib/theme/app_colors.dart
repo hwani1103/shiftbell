@@ -90,47 +90,55 @@ import 'package:flutter/material.dart';
 // const Color kAppBackgroundGradientTop = Color(0xFFEEF4FC);
 // const Color kAppBackgroundGradientBottom = Color(0xFFA6C5F0);
 
-/// 배경색과 같은 색상 계열(Hue)에서 채도/명도만 낮춘 진한 메인 색상 - 버튼,
-/// 강조 텍스트, 선택 상태 등에 씀. "UI 테마" 탭에서 확정한 앱 아이콘/알람화면의
-/// "오로라 페일" primary와 완전히 동일한 값 - 앱 전체가 그 하나의 톤을 공유함.
-const Color kAppMainAccent = Color(0xFF6A4FD9);
+// ⭐ 2026-08-25 재조정 - 메인 테마색을 보라(#6A4FD9)에서 앱 아이콘 톤(인디고→블루
+// 그라데이션)에 맞춘 블루·인디고 계열로 교체함. "메인 컬러가 꼭 보라일 필요는
+// 없다, 아이콘 색 톤에 맞추자"는 요청 - 아이콘(assets/icon/gen_icon.py)의
+// BG_STOPS 시작색(인디고 #4850BC)과 중간색(블루 #4474F1)을 50:50으로 섞은 값을
+// 새 kAppMainAccent로 삼고, 그 아래 파생색들은 전부 이전과 동일한 블렌드 비율
+// 공식으로 재계산함(비율 자체는 안 바꿈 - 기준색만 교체). 아이콘 끝쪽 청록/오로라
+// 색까지는 안 가져옴 - 버튼/텍스트로 쓰기엔 너무 밝고 대비가 약해서 인디고~블루
+// 구간만 대표색으로 씀.
 
-/// 앱 전반의 배경색 - kAppMainAccent를 흰색 쪽으로 82% 블렌드한 라벤더 파스텔.
+/// 배경색과 같은 색상 계열(Hue)에서 채도/명도만 낮춘 진한 메인 색상 - 버튼,
+/// 강조 텍스트, 선택 상태 등에 씀. 앱 아이콘 그라데이션의 인디고~블루 중간톤.
+const Color kAppMainAccent = Color(0xFF4662D6);
+
+/// 앱 전반의 배경색 - kAppMainAccent를 흰색 쪽으로 82% 블렌드한 파스텔.
 /// 달력 탭은 제외(위 주석 참고).
-const Color kAppBackgroundPastel = Color(0xFFE4DFF8);
+const Color kAppBackgroundPastel = Color(0xFFDEE3F8);
 
 /// 메인 색상 위에 흰 글씨가 아니라 살짝 어둡게 눌러 쓸 때(예: 버튼 눌림 상태)
 /// 참고용으로 만들었다가, 지금은 app_button.dart 그라데이션의 어두운 쪽 끝으로
 /// 씀(검정 쪽으로 35% 블렌드).
-const Color kAppMainAccentDark = Color(0xFF45338D);
+const Color kAppMainAccentDark = Color(0xFF2E408B);
 
 /// 카드/입력창 등 배경 위에 얹는 "표면" 색 - kAppBackgroundPastel을 흰색 쪽으로
 /// 50% 블렌드해서 배경과 카드가 서로 구분되면서도 튀지 않게 함.
-const Color kAppSurface = Color(0xFFF2EFFC);
+const Color kAppSurface = Color(0xFFEEF1FC);
 
-/// 칩(근무명 태그 등)의 테두리색 - "오로라 페일" 알람화면/아이콘에서 글씨·테두리
-/// 색(controlColor)으로 이미 쓰고 있는 짙은 남색과 완전히 동일한 값. 파스텔
-/// 배경 위에서 또렷하게 대비되면서, 알람화면과 같은 색이라 통일감이 생김.
-const Color kAppChipBorder = Color(0xFF3B2E7A);
+/// 칩(근무명 태그 등)의 테두리색 - kAppMainAccent를 검정 쪽으로 45% 블렌드한
+/// 짙은 남색. 파스텔 배경 위에서 또렷하게 대비되도록 kAppMainAccentDark(35%
+/// 블렌드)보다 한 단계 더 어둡게 잡음.
+const Color kAppChipBorder = Color(0xFF263676);
 
 /// 칩(근무명 태그 등)의 채움색 - 배경(kAppBackgroundPastel)보다 한 톤 밝은
 /// 화이트에 가까운 색이라 배경 위에서 카드처럼 살짝 떠 보임.
-const Color kAppChipFill = Color(0xFFEDEAFA);
+const Color kAppChipFill = Color(0xFFE8EBFA);
 
 // ⭐ 2026-08-24 추가 - 배경/버튼이 단색이라 "딱딱하다"는 피드백으로 그라데이션용
 // 색을 추가함. app_button.dart(공용 버튼)와 main.dart(앱 배경)에서 씀.
 
 /// kAppMainAccent보다 밝은 톤(흰색 쪽으로 60% 블렌드) - 버튼 그라데이션의 밝은
 /// 쪽 끝에 씀. kAppMainAccentDark(어두운 쪽 끝, 검정 쪽 35% 블렌드)와 짝을 이룸.
-const Color kAppMainAccentLight = Color(0xFFC3B9F0);
+const Color kAppMainAccentLight = Color(0xFFB5C0EF);
 
 /// 앱 배경 그라데이션의 위쪽(밝은) 끝 - kAppBackgroundPastel을 흰색 쪽으로 50%
 /// 블렌드한 값.
-const Color kAppBackgroundGradientTop = Color(0xFFF3F0FD);
+const Color kAppBackgroundGradientTop = Color(0xFFEEF1FC);
 
 /// 앱 배경 그라데이션의 아래쪽(짙은) 끝 - kAppBackgroundPastel을 kAppMainAccent
 /// 쪽으로 28% 블렌드한 값.
-const Color kAppBackgroundGradientBottom = Color(0xFFC2B7EF);
+const Color kAppBackgroundGradientBottom = Color(0xFFB3BFEE);
 
 // ⭐ 2026-08-25 추가 - "다음 알람" 탭 전용. 아이콘/알람화면과 같은 "오로라 페일"
 // 그라데이션을 탭 배경에도 그대로 씀(라벤더~스카이~민트, topLeft→bottomRight).

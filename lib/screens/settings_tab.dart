@@ -788,6 +788,11 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
     showModalBottomSheet(
       context: context,
+      // ⭐ 2026-08-25 - backgroundColor 미지정 시 기본값이 colorScheme.surface
+      // (연보라 kAppSurface)라 안의 ListTile들은 흰색으로 바꿔도 그 위/아래
+      // 여백(드래그 핸들 위, 마지막 항목 아래)은 계속 연보라로 보였음 - 시트
+      // 자체 배경을 흰색으로 지정해서 해결.
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),

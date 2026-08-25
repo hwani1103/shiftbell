@@ -13,7 +13,6 @@ import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
 import 'screens/friend_list_screen.dart';
 import 'screens/permission_intro_screen.dart';
-import 'screens/ui_theme_lab_screen.dart'; // ⭐ 2026-08-25 - 아이콘 색상 후보 재검토용으로 임시 재활성화
 import 'widgets/permission_warning_banner.dart';
 import 'widgets/banner_ad_slot.dart';
 import 'services/ad_service.dart';
@@ -299,12 +298,10 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
       ),
       FriendListScreen(onSwipeToCalendar: () => _goToCalendar()),
       SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
-      // ⭐ 2026-08-25 - 아이콘 색상 후보를 다시 검토하기 위해 임시로 재활성화.
-      // 나머지(잠금화면/오버레이/다음알람탭/메인 컬러 테마)는 이미 확정 반영
-      // 완료된 상태 - 이 탭은 이제 순수하게 "실제 적응형 아이콘 렌더링과
-      // 100% 동일한 아이콘 색상 후보 갤러리" 역할만 함(ui_theme_lab_screen.dart
-      // 참고). 최종 색상이 정해지면 다시 주석 처리할 것.
-      const UiThemeLabScreen(),
+      // ⭐ 2026-08-25 - 아이콘 색상이 최종 확정되어(2번 변형: 인디고·오로라
+      // 그라데이션·코랄) 임시 아이콘 픽커 탭 제거함. ui_theme_lab_screen.dart
+      // 파일 자체는 나중에 다시 후보를 검토할 일이 생기면 재사용할 수 있어
+      // 지우지 않고 남겨둠 - 필요하면 이 자리에 다시 추가하면 됨.
     ];
 
     // ⭐ _scheduleGuardWakeup()이 triggerGuardCheck를 호출해서 Native 갱신 판단/실행까지 함
@@ -461,8 +458,6 @@ Future<void> _handleMethod(MethodCall call) async {
             BottomNavigationBarItem(icon: const Icon(Icons.calendar_month), label: context.l10n.navCalendar),
             BottomNavigationBarItem(icon: const Icon(Icons.people_outline), label: context.l10n.navFriendShare),
             BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.l10n.navSettings),
-            // ⭐ 임시 재활성화(위 _tabs 주석 참고) - l10n 없이 직접 문자열.
-            const BottomNavigationBarItem(icon: Icon(Icons.palette_outlined), label: '아이콘'),
           ],
         ),
       ),
