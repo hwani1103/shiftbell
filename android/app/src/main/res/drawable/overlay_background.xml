@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- 그라데이션 카드를 감싸는 바깥 프레임(20dp 여백만큼 보임) - 흰색으로
-     교체(기존 회색 #F5F5F5는 예전 indigo 카드 배경과 맞춘 톤이었음). -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <solid android:color="#FFFFFF"/>
-    <corners android:radius="24dp"/>
-</shape>

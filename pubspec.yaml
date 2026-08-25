@@ -96,17 +96,16 @@ flutter:
   # assets:
   #   - assets/sounds/  # 제거: res/raw만 사용
 
-# ⭐ 앱 아이콘 - 2026-08-25 "UI 테마" 탭에서 검토한 "오로라 페일" 톤으로 확정
-# (라벤더~스카이~민트 그라데이션 + 흰 시계 얼굴 + 짙은 남색 바늘 + 앰버 알림
-# 배지). assets/icon/gen_icon.py로 3장을 생성함 - app_icon.png(레거시, 배경
-# 포함) / app_icon_foreground.png(적응형 아이콘 전경, 투명 배경) /
-# app_icon_background.png(적응형 아이콘 배경, 그라데이션 단독). 배경이
-# 그라데이션이라 단색 hex 대신 이미지 경로를 씀(flutter_launcher_icons가
-# adaptive_icon_background에 이미지 경로도 지원).
-# `flutter pub run flutter_launcher_icons` 실행하면 android/app/src/main/res/mipmap-*/
-# 전체가 재생성됨 - 아이콘을 다시 바꾸고 싶으면 이 세 PNG를 다시 만들고 재실행하면 됨.
+# ⭐ 앱 아이콘 - 2026-08-25 3차 개정, "17번" 팔레트(네이비/골드/코랄, 배경
+# 단색)로 최종 확정. assets/icon/gen_icon.py로 2장을 생성함 -
+# app_icon.png(레거시, 배경 포함) / app_icon_foreground.png(적응형 아이콘
+# 전경, 투명 배경). 배경이 이제 단색이라 adaptive_icon_background는 hex로
+# 직접 지정(이미지 경로 불필요 - 예전 그라데이션판의 app_icon_background.png는
+# 삭제함).
+# `dart run flutter_launcher_icons` 실행하면 android/app/src/main/res/mipmap-*/
+# 전체가 재생성됨 - 아이콘을 다시 바꾸고 싶으면 이 두 PNG를 다시 만들고 재실행하면 됨.
 flutter_launcher_icons:
   android: "ic_launcher"
   image_path: "assets/icon/app_icon.png"
-  adaptive_icon_background: "assets/icon/app_icon_background.png"
+  adaptive_icon_background: "#1A237E"
   adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"

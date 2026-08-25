@@ -1,51 +1,38 @@
 # -*- coding: utf-8 -*-
 #
-# 앱 아이콘("오로라 페일" 확정 디자인) 생성 스크립트. Pillow(PIL)만 있으면 됨
-# (pip install pillow). 저장소 루트에서 `python assets/icon/gen_icon.py` 실행하면
-# app_icon.png / app_icon_foreground.png / app_icon_background.png 세 장이
-# 이 폴더에 갱신됨 - 그 다음 `dart run flutter_launcher_icons`로 실제
-# android/app/src/main/res/mipmap-*/ 아이콘에 반영. 색만 바꾸고 싶으면 아래
-# GRAD/HANDS/BELL_BG 상수만 고치면 됨.
+# 앱 아이콘 생성 스크립트. Pillow(PIL)만 있으면 됨(pip install pillow). 저장소
+# 루트에서 `python assets/icon/gen_icon.py` 실행하면 app_icon.png /
+# app_icon_foreground.png 두 장이 이 폴더에 갱신됨 - 그 다음
+# `dart run flutter_launcher_icons`로 실제 android/app/src/main/res/mipmap-*/
+# 아이콘에 반영. 색만 바꾸고 싶으면 아래 BG/HANDS/BELL_BG 상수만 고치면 됨.
 #
-# ⭐ 2026-08-25 2차 개정 - 실기기 설치 후 "샘플이랑 완전 딴판"이라는 피드백으로
-# 원인 조사한 결과: flutter_launcher_icons가 적응형 아이콘 foreground를 생성할
-# 때 android/.../mipmap-anydpi-v26/ic_launcher.xml에 자동으로
-# <inset android:inset="16%"/>를 씌움(=68% 크기로 축소) - 이걸 보상하려고
-# foreground 지름 비율을 0.60→0.80으로 키웠는데, 그 결과 "이제 시계가 아이콘의
-# 90%를 차지한다"는 정반대 피드백을 받음. 원인: 인셋 보상 계산에서 안드로이드
-# 적응형 아이콘의 두 번째 단계를 빠뜨림 - 108dp 캔버스 중 실제로 화면에 보이는
-# 건 중앙 66~72dp뿐이고(나머지 18dp 안팎은 마스킹용 여백), 이 보이는 영역이
-# "확대 없이 그대로" 최종 아이콘이 됨(공식 문서: "crop without scaling"). 즉
-# 내 그림이 108dp 캔버스에서 차지하는 비율이 아니라, 그 중 실제로 보이는
-# 66~72dp 영역에서 차지하는 비율이 최종 크기가 됨 - 108/70(대략 중간값)≈1.54배
-# 만큼 한 번 더 "확대돼 보이는" 효과가 생기는데 이걸 빠뜨리고 오히려 반대
-# 방향(더 키우는 쪽)으로 보정해서 이중으로 커져버린 것.
+# ⭐ 2026-08-25 3차 개정 - "오로라 페일"(그라데이션) 대신 예전 팔레트 후보 중
+# "17번"(네이비/골드/코랄, 채도가 더 쨍함)으로 최종 교체. 배경이 이제 단색이라
+# 그라데이션 계산이 필요 없어졌고, adaptive_icon_background도 이미지 대신
+# pubspec.yaml에 hex 값을 직접 씀. 크기는 "살짝만" 키워달라는 요청으로 레거시
+# 0.58→0.62, 적응형 목표 비율 0.55→0.59로 소폭 상향(2차 개정에서 정리한
+# 적응형 아이콘 인셋+크롭 계산식은 그대로 재사용).
 #
-# 최종 공식: 실제_보이는_비율 ≈ source_비율 × (1-2×인셋) × (108/약70)
-# 실기기 관찰값(source=0.80 → 실제 약 0.90)으로 역산한 계수(≈1.05~1.1)와
-# 공식 문서 수치(66~72dp)가 서로 잘 맞음 - 이 계수를 써서 다시 계산:
-#   1. foreground(적응형): 최종 0.55를 목표로 역산 → source ≈ 0.55/1.06 ≈ 0.52
-#      (처음 값 0.60에 더 가까움 - 애초에 "인셋 때문에 작아 보인다"는 첫 진단
-#      자체가 틀렸었고, 실제 문제는 아래 3번 종 위치였던 것으로 결론)
-#   2. 레거시(배경 포함) 아이콘: 인셋/크롭 영향이 없어 그대로 보이므로 0.58 유지.
-#   3. 종 배지를 시계 원 모서리에서 멀리 띄우지 말고, 원 테두리에 약간
-#      겹치도록(overlap) 위치를 원 중심 기준 반지름의 95% 지점에 배치 -
-#      "하나의 배지"처럼 보이게 함. 배지 크기도 시계 지름의 30%로 통일(예전엔
-#      절대 크기라 배율이 안 맞았음).
-#   4. 시계 바늘을 "4시 정각"(시침=4, 분침=12) 방향으로 변경.
-#   5. 색상 자체는 직접 렌더링해서 재확인함(라벤더~스카이~민트 그라데이션 /
-#      흰 시계 얼굴 / 짙은 남색 바늘 / 앰버 종배지+흰 테두리) - 문제 없음, 유지.
+# ⭐ 2026-08-25 2차 개정 - 적응형 아이콘 크기 계산을 두 번 잘못 짚었던 경위:
+# 처음엔 flutter_launcher_icons가 자동으로 씌우는 <inset 16%>만 보상하려다
+# (0.60→0.80) 실기기에서 시계가 아이콘의 90%를 차지하는 반대 방향 실수가 남.
+# 원인: 108dp 캔버스 중 실제로 화면에 보이는 건 중앙 66~72dp뿐이고, 이 영역이
+# "확대 없이 그대로" 최종 아이콘이 됨(공식 문서: "crop without scaling") -
+# 즉 108/70(대략 중간값)≈1.54배만큼 상대적으로 더 커 보이는 효과가 이미
+# 있는데 그걸 빠뜨리고 반대로 보정해서 이중으로 커진 것. 최종 공식:
+#   실제_보이는_비율 ≈ source_비율 × (1 - 2×인셋) × (108/약70)
+# 이 공식으로 목표 비율을 역산해서 source_비율을 구함(아래 build() 참고).
 
 from PIL import Image, ImageDraw
 import math
 
 SIZE = 1024
 
-# 확정된 "오로라 페일" 아이콘 색상
-GRAD = [(0xDA,0xCE,0xF9), (0xCE,0xDE,0xFC), (0xBF,0xF5,0xF1)]  # 라벤더 -> 스카이 -> 민트
-HANDS = (0x3B,0x2E,0x7A)   # 짙은 남색 (시계 바늘)
-BELL_BG = (0xEF,0x6C,0x00) # 앰버/오렌지 (종 배지 배경)
-WHITE = (0xFF,0xFF,0xFF)
+# 확정된 아이콘 색상 - "17번" 팔레트(네이비/골드/코랄)
+BG = (0x1A, 0x23, 0x7E)    # 네이비 (배경, 단색)
+HANDS = (0xFF, 0xD7, 0x00) # 골드 (시계 바늘)
+BELL_BG = (0xFF, 0x70, 0x43) # 코랄 (종 배지 배경)
+WHITE = (0xFF, 0xFF, 0xFF)
 
 # flutter_launcher_icons가 적응형 아이콘 foreground에 자동으로 씌우는 인셋 비율.
 # mipmap-anydpi-v26/ic_launcher.xml의 <inset android:inset="..."/> 값과 반드시
@@ -58,24 +45,10 @@ ADAPTIVE_AUTO_INSET = 0.16
 ADAPTIVE_VISIBLE_WINDOW_DP = 70.0
 CANVAS_DP = 108.0
 
-def lerp(a, b, t):
-    return tuple(round(a[i] + (b[i]-a[i])*t) for i in range(3))
-
-def grad_color(t):
-    t = max(0.0, min(1.0, t))
-    if t <= 0.5:
-        return lerp(GRAD[0], GRAD[1], t/0.5)
-    else:
-        return lerp(GRAD[1], GRAD[2], (t-0.5)/0.5)
-
-def make_gradient(w, h):
-    img = Image.new("RGB", (w, h))
-    px = img.load()
-    for y in range(h):
-        for x in range(w):
-            t = (x/w + y/h) / 2.0
-            px[x, y] = grad_color(t)
-    return img
+# 레거시(배경 포함) 아이콘의 시계 지름 비율(인셋/크롭 영향 없이 그린 그대로
+# 보임) / 적응형 foreground의 최종 화면 노출 목표 비율("살짝 더 크게" 반영).
+LEGACY_FACE_RATIO = 0.62
+ADAPTIVE_TARGET_FINAL_RATIO = 0.59
 
 def rounded_mask(w, h, radius):
     mask = Image.new("L", (w, h), 0)
@@ -130,24 +103,17 @@ def draw_bell(draw, cx, cy, s, color):
 def build(with_background: bool, out_path: str):
     img = Image.new("RGBA", (SIZE, SIZE), (0,0,0,0))
     if with_background:
-        grad = make_gradient(SIZE, SIZE).convert("RGBA")
         mask = rounded_mask(SIZE, SIZE, int(SIZE*0.23))
-        img.paste(grad, (0,0), mask)
+        solid = Image.new("RGBA", (SIZE, SIZE), BG + (255,))
+        img.paste(solid, (0,0), mask)
 
     draw = ImageDraw.Draw(img)
 
-    # 시계 얼굴(흰 원) - 캔버스 대비 지름 비율.
-    # - 레거시(배경 포함) 아이콘: 인셋/크롭 영향이 없어 그린 그대로 보임. 0.58.
-    # - 적응형 foreground: 최종 화면에 보이는 비율이 레거시와 비슷해지도록
-    #   (목표 0.55) 역산 - 인셋(16%×2)으로 한 번 줄고, "108dp 중 실제 보이는
-    #   70dp 영역이 확대 없이 그대로 최종 아이콘이 되는" 단계에서 상대적으로
-    #   한 번 더 커 보이므로, 그 두 단계를 거꾸로 계산해서 source 비율을 구함.
-    TARGET_FINAL_RATIO = 0.55
     if with_background:
-        face_d_ratio = 0.58
+        face_d_ratio = LEGACY_FACE_RATIO
     else:
         visible_scale_up = CANVAS_DP / ADAPTIVE_VISIBLE_WINDOW_DP  # ≈1.54
-        face_d_ratio = TARGET_FINAL_RATIO / ((1 - 2 * ADAPTIVE_AUTO_INSET) * visible_scale_up)  # ≈0.52
+        face_d_ratio = ADAPTIVE_TARGET_FINAL_RATIO / ((1 - 2 * ADAPTIVE_AUTO_INSET) * visible_scale_up)
     cx, cy = SIZE/2, SIZE/2
     r = SIZE * face_d_ratio / 2
     draw.ellipse([cx-r, cy-r, cx+r, cy+r], fill=WHITE)
@@ -169,8 +135,4 @@ def build(with_background: bool, out_path: str):
 
 build(True, "assets/icon/app_icon.png")             # 레거시(배경 포함) 아이콘
 build(False, "assets/icon/app_icon_foreground.png") # 적응형 아이콘 전경(투명 배경)
-
-# 적응형 아이콘 배경 레이어(그라데이션 단독, 불투명)
-bg_only = make_gradient(SIZE, SIZE)
-bg_only.save("assets/icon/app_icon_background.png")
-print("saved assets/icon/app_icon_background.png", bg_only.size)
+print("배경은 단색이라 pubspec.yaml의 adaptive_icon_background에 hex(#1A237E)로 직접 지정함 - PNG 불필요.")

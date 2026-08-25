@@ -483,19 +483,6 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     };
   }
 
-  /// 카운트다운 링 진행률(0..1). 알람 12시간 전까지는 0(빈 링) - 그 안으로
-  /// 들어오면 서서히 채워지기 시작해서 알람 시각에 정확히 1(완전히 채워짐 =
-  /// 임박)이 됨. 창(window)을 12시간으로 잡은 건 교대근무 알람이 보통 전날
-  /// 저녁~당일 새벽 사이에 맞춰지는 걸 감안한 값 - 그보다 훨씬 먼 알람은 계속
-  /// 빈 링으로 있다가, 반나절 안쪽부터 "다가오고 있다"는 느낌을 주기 시작함.
-  double _ringProgress(DateTime alarmTime) {
-    const window = Duration(hours: 12);
-    final remaining = alarmTime.difference(DateTime.now());
-    if (remaining.isNegative) return 1.0;
-    if (remaining >= window) return 0.0;
-    return 1.0 - (remaining.inSeconds / window.inSeconds);
-  }
-
   String _getDateLabel(BuildContext context, DateTime alarmDate) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -528,48 +515,56 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     final timeData = _getTimeUntilData(context, alarm.date!);
     final dateLabel = _getDateLabel(context, alarm.date!);
 
+    // ⭐ 2026-08-25 3차 수정 - "UI 테마" 탭에서 확정한 레이아웃(_nextAlarmRing,
+    // gradientBg:true 버전)을 크기·구도·배치·색깔·버튼 타입까지 그대로 옮김
+    // (이전엔 링 윗부분만 옮기고 "남은 시간"/"알람 타입" 카드는 옛 디자인이
+    // 그대로 남아있던 반쪽짜리 이식이었음). 색 매핑: s.primary→colorScheme.
+    // primary(= kAppMainAccent, 확정 톤 primary와 동일값), s.secondary→
+    // kAppRingAccent, s.onSurface/s.onBg→kAppChipBorder(짙은 남색 - 알람화면/
+    // 아이콘과 동일 값), s.surface→흰색. 실제 화면이라 "임박" 상태(30분 이내)
+    // 색상 강조는 유지하되(목업엔 없던 실제 동작), 카드 크기/모양은 목업 그대로.
+    // 오버플로 방지용 SingleChildScrollView는 안전장치로 유지(정상 크기에선
+    // 스크롤이 필요 없어 시각적으로 완전히 동일).
+    final isImminent = timeData['isImminent'] as bool;
+    final accentColor = isImminent ? colorScheme.tertiary : kAppRingAccent;
+    final onCardColor = isImminent ? colorScheme.tertiary : kAppChipBorder;
+    const typeIds = [1, 2, 3];
+    final typeIcons = [Icons.volume_up_rounded, Icons.vibration_rounded, Icons.notifications_off_rounded];
+    final typeLabels = [context.l10n.alarmSoundVibration, context.l10n.alarmVibration, context.l10n.alarmSilent];
+
     return SafeArea(
-      // ⭐ 2026-08-25 2차 수정 - 실기기에서 하단 오버플로 발생 확인. 원인: 링
-      // 크기(202.w)를 "UI 테마" 탭의 280.w 목업 프레임 안에서 튜닝한 값을 그대로
-      // 가져왔는데, 그 프레임은 목업용 장식일 뿐이고 .w 자체는 실제 화면 폭
-      // 기준으로 스케일되는 절대 단위라 실제 화면에서는 옛 히어로 카드보다 약
-      // 80dp 더 큰 높이를 요구하게 됐음(Spacer 하나로 버티는 고정 레이아웃이라
-      // 여유가 없었음). 대응: (1) 링을 실제 화면에 맞는 크기로 축소, (2)
-      // Spacer 기반 고정 레이아웃 대신 SingleChildScrollView로 감싸서, 폰트
-      // 크기 설정이나 화면 크기가 다른 기기에서도 절대 안 잘리게 함.
       child: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+        padding: EdgeInsets.fromLTRB(22.w, 28.h, 22.w, 24.h),
         child: Column(
           children: [
-            SizedBox(height: 8.h),
-
-            Text(
-              context.l10n.alarmUpNext,
-              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: colorScheme.onSurface),
+            Row(
+              children: [
+                Text(context.l10n.alarmUpNext, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: kAppChipBorder)),
+              ],
             ),
+            SizedBox(height: 22.h),
 
-            SizedBox(height: 16.h),
-
-            // ⭐ "UI 테마" 탭에서 확정한 카운트다운 링 디자인. 알람 시각 12시간
-            // 전부터 링이 채워지기 시작해서, 알람 시각에 완전히 채워짐(=임박
-            // 표시). 값이 바뀔 때마다 부드럽게 이어서 애니메이션됨(_CountdownRing
-            // 참고).
+            // ⭐ "UI 테마" 탭에서 확정한 카운트다운 링. 알람 12시간 전부터
+            // 채워지기 시작해서 알람 시각에 정확히 100%가 됨(_CountdownRing
+            // 참고 - 화면을 보고 있는 동안 15초 간격으로 계속 조금씩 움직이고,
+            // 탭을 나갔다 들어와도 리셋되지 않음. progress는 항상 "지금 vs
+            // 알람 시각"의 순수 계산값이라 위젯이 언제 새로 만들어졌는지와 무관).
             SizedBox(
-              width: 150.w,
-              height: 150.w,
+              width: 202.w,
+              height: 202.w,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
                   _CountdownRing(
-                    size: 150.w,
-                    strokeWidth: 10.w,
-                    progress: _ringProgress(alarm.date!),
-                    color: kAppRingAccent,
-                    trackColor: colorScheme.onSurface.withOpacity(0.12),
+                    size: 202.w,
+                    strokeWidth: 12.w,
+                    alarmTime: alarm.date!,
+                    color: accentColor,
+                    trackColor: kAppChipBorder.withOpacity(0.15),
                   ),
                   Container(
-                    width: 114.w,
-                    height: 114.w,
+                    width: 160.w,
+                    height: 160.w,
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -580,94 +575,12 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                          padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 3.h),
                           decoration: BoxDecoration(color: colorScheme.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(20.r)),
-                          child: Text(dateLabel, style: TextStyle(fontSize: 9.sp, color: colorScheme.primary, fontWeight: FontWeight.w700)),
+                          child: Text(dateLabel, style: TextStyle(fontSize: 10.sp, color: colorScheme.primary, fontWeight: FontWeight.w700)),
                         ),
-                        SizedBox(height: 4.h),
-                        Text(timeStr, style: TextStyle(fontSize: 21.sp, fontWeight: FontWeight.w800, color: colorScheme.primary)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 12.h),
-
-            // 근무 타입 뱃지
-            if (alarm.shiftType != null)
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20.r),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8, offset: const Offset(0, 3))],
-                ),
-                child: Text(
-                  alarm.shiftType!,
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: colorScheme.primary),
-                ),
-              ),
-
-            SizedBox(height: 18.h),
-
-            // 남은 시간 카드
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(18.w),
-              decoration: BoxDecoration(
-                color: timeData['isImminent']
-                    ? colorScheme.tertiary.withOpacity(0.1)
-                    : colorScheme.surface,
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(
-                  color: timeData['isImminent']
-                      ? colorScheme.tertiary.withOpacity(0.3)
-                      : colorScheme.outline.withOpacity(0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 46.w,
-                    height: 46.w,
-                    decoration: BoxDecoration(
-                      color: timeData['isImminent']
-                          ? colorScheme.tertiary.withOpacity(0.2)
-                          : colorScheme.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Icon(
-                      Icons.timer_outlined,
-                      size: 24.sp,
-                      color: timeData['isImminent']
-                          ? colorScheme.tertiary
-                          : colorScheme.primary,
-                    ),
-                  ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.l10n.alarmUntil,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            color: colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        Text(
-                          timeData['text'],
-                          style: TextStyle(
-                            fontSize: 19.sp,
-                            fontWeight: FontWeight.bold,
-                            color: timeData['isImminent']
-                                ? colorScheme.tertiary
-                                : colorScheme.onSurface,
-                          ),
-                        ),
+                        SizedBox(height: 6.h),
+                        Text(timeStr, style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.w800, color: colorScheme.primary)),
                       ],
                     ),
                   ),
@@ -677,82 +590,97 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
             SizedBox(height: 14.h),
 
-            // 알람 타입 선택 카드
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(18.w),
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
+            if (alarm.shiftType != null)
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
+                child: Text(alarm.shiftType!, style: TextStyle(fontSize: 12.sp, color: kAppChipBorder, fontWeight: FontWeight.w600)),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+
+            SizedBox(height: 24.h),
+
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    context.l10n.alarmType,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurfaceVariant,
+                  // 남은 시간 카드
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.all(14.w),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18.r)),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.timer_outlined, size: 18.sp, color: accentColor),
+                          SizedBox(height: 8.h),
+                          Text(context.l10n.alarmUntil, style: TextStyle(fontSize: 10.sp, color: kAppChipBorder.withOpacity(0.6))),
+                          SizedBox(height: 2.h),
+                          Text(timeData['text'] as String, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: onCardColor)),
+                        ],
+                      ),
                     ),
                   ),
-                  SizedBox(height: 14.h),
-                  Row(
-                    children: [
-                      _buildTypeSelectButton(
-                        typeId: 1,
-                        icon: Icons.volume_up_rounded,
-                        label: context.l10n.alarmSoundVibration,
-                        isSelected: alarm.alarmTypeId == 1,
-                        onTap: () => _onTypeSelected(alarm.id!, 1),
+                  SizedBox(width: 12.w),
+                  // 알람 타입 선택 카드
+                  Expanded(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18.r)),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(3, (i) {
+                          final selected = alarm.alarmTypeId == typeIds[i];
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 3.h),
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _onTypeSelected(alarm.id!, typeIds[i]),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 22.w,
+                                    height: 22.w,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(color: selected ? colorScheme.primary : Colors.transparent, shape: BoxShape.circle),
+                                    child: Icon(typeIcons[i], size: 12.sp, color: selected ? Colors.white : kAppChipBorder.withOpacity(0.4)),
+                                  ),
+                                  SizedBox(width: 6.w),
+                                  Expanded(
+                                    child: Text(
+                                      typeLabels[i],
+                                      style: TextStyle(fontSize: 10.sp, color: kAppChipBorder.withOpacity(selected ? 0.9 : 0.5), fontWeight: selected ? FontWeight.w700 : FontWeight.w400),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
                       ),
-                      SizedBox(width: 10.w),
-                      _buildTypeSelectButton(
-                        typeId: 2,
-                        icon: Icons.vibration_rounded,
-                        label: context.l10n.alarmVibration,
-                        isSelected: alarm.alarmTypeId == 2,
-                        onTap: () => _onTypeSelected(alarm.id!, 2),
-                      ),
-                      SizedBox(width: 10.w),
-                      _buildTypeSelectButton(
-                        typeId: 3,
-                        icon: Icons.notifications_off_rounded,
-                        label: context.l10n.alarmSilent,
-                        isSelected: alarm.alarmTypeId == 3,
-                        onTap: () => _onTypeSelected(alarm.id!, 3),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ),
 
-            SizedBox(height: 12.h),
+            SizedBox(height: 22.h),
 
-            // ⭐ 전체 알람 보기 버튼 (알람 타입 카드 아래, 우측 정렬) - "UI 테마"
-            // 탭에서 확정한 AppThirdButton 컨셉으로 교체.
-            Align(
-              alignment: Alignment.centerRight,
+            SizedBox(
+              width: double.infinity,
               child: AppThirdButton(
-                compact: true,
                 onPressed: widget.onShowAllAlarms,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.list_alt_rounded, size: 16),
+                    const Icon(Icons.list_rounded, size: 16),
                     SizedBox(width: 6.w),
                     Text(context.l10n.alarmViewAllRegistered),
                   ],
                 ),
               ),
             ),
-
-            SizedBox(height: 20.h),
-
-            // 알람 취소 버튼 - "UI 테마" 탭에서 확정한 AppSecondButton(danger)
-            // 컨셉으로 교체.
+            SizedBox(height: 10.h),
             SizedBox(
               width: double.infinity,
               child: AppSecondButton(
@@ -761,15 +689,13 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.alarm_off_rounded, size: 18),
-                    SizedBox(width: 8.w),
+                    const Icon(Icons.alarm_off_rounded, size: 16),
+                    SizedBox(width: 6.w),
                     Text(context.l10n.alarmTurnOffThis),
                   ],
                 ),
               ),
             ),
-
-            SizedBox(height: 12.h),
           ],
         ),
       ),
@@ -782,96 +708,65 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     if (!mounted) return;
   }
 
-  Widget _buildTypeSelectButton({
-    required int typeId,
-    required IconData icon,
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
-          decoration: BoxDecoration(
-            color: isSelected ? colorScheme.primary.withOpacity(0.1) : colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(
-              color: isSelected ? colorScheme.primary : colorScheme.outline,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                size: 24.sp,
-                color: isSelected ? colorScheme.primary : colorScheme.outline,
-              ),
-              SizedBox(height: 6.h),
-              // ⭐ 영어 UI 레이아웃 수정: "Sound + Vibration"이 이 좁은(3등분)
-              // 버튼 폭에서 두 줄로 줄바꿈되면서 이 버튼이 포함된 Row 전체 높이가
-              // 늘어나고, 그만큼 아래 Spacer()가 흡수할 공간이 줄어들어 맨 아래
-              // "Turn Off This Alarm" 버튼이 하단 내비게이션 바에 거의 붙어보이는
-              // 문제가 있었음. 처음엔 한 줄+말줄임표("Sound + V...")로 급하게
-              // 막았는데, "소리+진동"이라는 의미(진동도 같이 울린다는 사실)가
-              // 잘려서 사용자가 오해할 수 있다는 지적으로 재수정 - 대신 세 버튼
-              // 라벨 자리를 전부 "2줄 높이"로 고정해서, 짧은 라벨("Vibration",
-              // "Silent")은 가운데 정렬로 1줄만 차지하고 긴 라벨("Sound +
-              // Vibration")은 잘리지 않고 2줄로 자연스럽게 줄바꿈되면서도, 세
-              // 버튼 높이가 항상 똑같이 유지되어 Row 전체 높이가 안 흔들림.
-              SizedBox(
-                height: 30.h,
-                child: Center(
-                  child: Text(
-                    label,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      height: 1.15,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  // ⭐ 2026-08-25 - 옛 3버튼 큰 카드 디자인은 "UI 테마" 탭에서 확정한 컴팩트
+  // 원형 아이콘 리스트(알람 타입 카드 안에 인라인)로 교체되며 삭제함
+  // (build() 참고).
 }
 
-/// ⭐ 카운트다운 링. progress(0..1)가 바뀔 때마다 마지막 값에서 새 값으로
-/// 부드럽게 이어서 애니메이션됨(TweenAnimationBuilder가 알아서 처리 - end만
-/// 계속 갱신하면 매번 새 애니메이션을 만들지 않고 현재 값에서 이어 감).
-class _CountdownRing extends StatelessWidget {
-  const _CountdownRing({required this.size, required this.strokeWidth, required this.progress, required this.color, required this.trackColor});
+/// ⭐ 카운트다운 링 - 알람 시각 12시간 전을 0%, 알람 시각을 정확히 100%로 놓고
+/// 진행률을 "지금 시각 vs 알람 시각" 둘만으로 순수 계산함(위젯이 언제
+/// mount됐는지와 전혀 무관). 그래서:
+///   - 다음 알람 탭을 나갔다 다시 들어와도 절대 0%로 리셋되지 않음(진행률
+///     계산이 마운트 시점에 기대지 않으므로).
+///   - 알람이 실제로 울리기 전(now < alarmTime)에는 remaining이 항상 양수라
+///     progress가 수학적으로 절대 1.0에 도달하지 않음 - 1.0은 딱 그 순간에만.
+/// 화면을 보고 있는 동안 "자연히 계속 조금씩" 움직이는 것처럼 보이게 하려고
+/// 15초마다 다시 그림. 링이 12시간에 걸쳐 채워지는 속도를 감안하면 15초
+/// 간격도 눈으로는 완전히 매끄럽게 보이고, 화면이 켜져 있는 몇 시간 내내
+/// 매 프레임(60fps)을 다시 그리는 것보다 배터리 부담이 훨씬 적음.
+class _CountdownRing extends StatefulWidget {
+  const _CountdownRing({required this.size, required this.strokeWidth, required this.alarmTime, required this.color, required this.trackColor});
 
   final double size;
   final double strokeWidth;
-  final double progress;
+  final DateTime alarmTime;
   final Color color;
   final Color trackColor;
 
   @override
+  State<_CountdownRing> createState() => _CountdownRingState();
+}
+
+class _CountdownRingState extends State<_CountdownRing> {
+  Timer? _tickTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _tickTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tickTimer?.cancel();
+    super.dispose();
+  }
+
+  double get _progress {
+    const window = Duration(hours: 12);
+    final remaining = widget.alarmTime.difference(DateTime.now());
+    if (remaining.isNegative) return 1.0;
+    if (remaining >= window) return 0.0;
+    return 1.0 - (remaining.inSeconds / window.inSeconds);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: progress),
-      duration: const Duration(milliseconds: 700),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, _) {
-        return CustomPaint(
-          size: Size(size, size),
-          painter: _RingPainter(progress: value, color: color, trackColor: trackColor, strokeWidth: strokeWidth),
-        );
-      },
+    return CustomPaint(
+      size: Size(widget.size, widget.size),
+      painter: _RingPainter(progress: _progress, color: widget.color, trackColor: widget.trackColor, strokeWidth: widget.strokeWidth),
     );
   }
 }
