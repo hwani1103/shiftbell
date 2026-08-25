@@ -896,7 +896,7 @@ class _WaveGradientBackgroundState extends State<_WaveGradientBackground> with S
 // "왜 굳이 내려가지?"로 느껴짐 - maxScrollExtent가 _tinyOverflowThreshold보다
 // 작으면 드래그 자체를 무시해서 그 미세한 여분을 진짜 오버플로가 아닌 것처럼
 // 처리함. 그보다 큰 진짜 오버플로(작은 화면 기기 등)는 평소처럼 정상 스크롤됨.
-const double _tinyOverflowThreshold = 12.0;
+const double _tinyOverflowThreshold = 24.0;
 
 class _NoTinyOverflowScrollPhysics extends ClampingScrollPhysics {
   const _NoTinyOverflowScrollPhysics({super.parent});

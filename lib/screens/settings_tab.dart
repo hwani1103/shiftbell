@@ -1972,7 +1972,11 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
 // ============================================================
 class _EditFixedAlarmsScreen extends StatefulWidget {
   final List<String> shiftTypes;
-  final VoidCallback onSave;
+  // ⭐ 2026-08-25 - VoidCallback(void Function())에서 Future<void> Function()로
+  // 변경. VoidCallback으로 선언돼 있으면 async 콜백을 넘겨도 호출부(_saveAndExit)
+  // 에서 반환 타입이 void로 보여서 await이 안 먹힘(컴파일 에러) - _saveAndExit가
+  // 실제로 이 콜백(=알람 재생성 완료)을 기다렸다가 화면을 닫아야 해서 타입을 바꿈.
+  final Future<void> Function() onSave;
 
   const _EditFixedAlarmsScreen({
     required this.shiftTypes,
@@ -2202,7 +2206,16 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
     }
     await DatabaseService.instance.replaceAllAlarmTemplates(templates);
 
-    widget.onSave();
+    // ⭐ 2026-08-25 - await 누락 수정. widget.onSave()(=_regenerateAllAlarms(),
+    // 네이티브 diff 갱신 트리거 + 800ms 대기 + Flutter Provider 재조회까지
+    // 포함)를 기다리지 않고 바로 화면을 닫으면, 저장 직후(특히 알람이 0개였던
+    // 상태에서) 사용자가 곧바로 "다음 알람" 탭으로 이동했을 때 아직 생성이
+    // 안 끝나서 잠깐 "예정된 알람 없음"으로 보일 수 있었음(다음알람탭 자체의
+    // 4초 폴링으로 결국엔 채워지긴 하지만, 그 몇 초 사이엔 진짜로 비어있었음).
+    // await을 붙여서 이 화면이 닫히는 시점엔 이미 최신 알람이 Provider에 반영돼
+    // 있도록 보장 - "저장" 버튼이 그만큼(최대 800ms+α) 살짝 늦게 닫히지만,
+    // 그 대신 뒤 화면에서 빈 상태를 볼 가능성이 사라짐.
+    await widget.onSave();
 
     if (mounted) {
       Navigator.pop(context);

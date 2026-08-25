@@ -1,6 +1,7 @@
 // lib/providers/alarm_provider.dart
 
 import 'dart:async';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/alarm.dart';
 import '../models/shift_schedule.dart';
@@ -45,6 +46,17 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
     }
     try {
       final alarms = await DatabaseService.instance.getAllAlarms();
+      // ⭐ 2026-08-25 추가 - next_alarm_tab.dart가 4초마다 자동으로 refresh()를
+      // 호출하는데, DB에서 새로 읽어온 리스트는 내용이 완전히 같아도 항상
+      // "다른 객체"라(Alarm.== 추가 전 기준) state를 매번 새로 대입하면
+      // Riverpod이 "바뀌었다"고 보고 구독 중인 화면(다음알람탭 등)을 실제로는
+      // 아무 변화가 없는데도 매번 다시 빌드시켰음(불필요한 리빌드 → 미세한
+      // 레이아웃 흔들림/깜빡임의 원인 중 하나로 의심됨). 내용이 같으면(Alarm.==
+      // 기준) state를 아예 건드리지 않아 리빌드 자체가 안 일어나게 함.
+      final current = state;
+      if (current is AsyncData<List<Alarm>> && listEquals(current.value, alarms)) {
+        return;
+      }
       state = AsyncValue.data(alarms);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
