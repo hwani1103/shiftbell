@@ -534,6 +534,13 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
     return SafeArea(
       child: SingleChildScrollView(
+        // ⭐ 2026-08-25 - 콘텐츠가 화면에 다 들어가는 정상 크기에서도 안드로이드
+        // 기본 스트레치 오버스크롤 효과 때문에 "끄기" 버튼 아래로 살짝 더
+        // 당겨지는 것처럼 보였음(실제로 스크롤할 내용이 없는데도). 오버플로
+        // 안전장치(SingleChildScrollView 자체)는 유지하되, 물리 효과를
+        // ClampingScrollPhysics로 바꿔서 여유 공간이 없을 땐 그 "당겨지는" 느낌
+        // 자체가 안 생기게 함 - 실제로 넘치는 경우엔 여전히 정상적으로 스크롤됨.
+        physics: const ClampingScrollPhysics(),
         padding: EdgeInsets.fromLTRB(24.w, 32.h, 24.w, 28.h),
         child: Column(
           children: [

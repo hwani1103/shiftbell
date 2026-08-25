@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- ⭐ 2026-08-25 - "UI 테마" 탭에서 검토/확정한 "오로라 페일" 톤으로 전면
-     교체(앱 아이콘/다음알람탭과 동일한 그라데이션+색상). 뷰 ID(timeText/
+<!-- ⭐ 2026-08-25 6차 수정 - 사용자가 직접 지정한 크기/위치 조정 + 배경을
+     WaveGradientView(파도치는 그라데이션 애니메이션)로 교체. 뷰 ID(timeText/
      shiftTypeText/dismissButton/snoozeButton/rootLayout)는 전부 그대로 -
      AlarmActivity.kt의 findViewById 참조·클릭 리스너·스와이프 제스처 로직은
      하나도 안 건드림, 순수 시각 요소만 교체. -->
@@ -9,8 +9,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/alarm_gradient_bg">
+    android:layout_height="match_parent">
+
+    <!-- ⭐ 알람이 울리는 동안(=이 화면이 떠있는 동안) 그라데이션이 천천히
+         회전하는 배경. 정적 alarm_gradient_bg 대신 씀 - WaveGradientView.kt 참고. -->
+    <com.hwani1103.shiftbell.WaveGradientView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <!-- 알람 라벨 + 원형 시계 + 근무 뱃지 -->
     <LinearLayout
@@ -32,17 +37,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="알람"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:textColor="#3B2E7A"
             android:textStyle="bold"
             android:letterSpacing="0.2"
             android:layout_marginBottom="28dp"/>
 
-        <!-- 원형 시계 -->
+        <!-- 원형 시계 - 숫자(42sp)는 그대로, 원 자체만 키움 -->
         <TextView
             android:id="@+id/timeText"
-            android:layout_width="220dp"
-            android:layout_height="220dp"
+            android:layout_width="252dp"
+            android:layout_height="252dp"
             android:gravity="center"
             android:background="@drawable/alarm_time_circle"
             android:elevation="6dp"
@@ -53,27 +58,23 @@
             android:fontFamily="sans-serif-medium"
             android:layout_marginBottom="20dp"/>
 
-        <!-- 근무 타입 뱃지 -->
+        <!-- 근무 타입 뱃지 - 살짝 키우고, 그림자(elevation) 제거 -->
         <TextView
             android:id="@+id/shiftTypeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="주간"
-            android:textSize="17sp"
+            android:textSize="19sp"
             android:textColor="#3B2E7A"
             android:textStyle="bold"
             android:background="@drawable/alarm_shift_badge"
-            android:elevation="3dp"
-            android:paddingHorizontal="24dp"
-            android:paddingVertical="10dp"/>
+            android:paddingHorizontal="30dp"
+            android:paddingVertical="13dp"/>
 
     </LinearLayout>
 
-    <!-- 스와이프 안내 영역 - ⭐ 2026-08-25 5차 수정: "UI 테마" 탭 확정
-         _buildLockScreen과 텍스트/아이콘이 다르던 버그 수정(좌우 화살표+원
-         구조와 "화면을 스와이프하여 끄기"는 리디자인 전 옛 문구/디자인이
-         그대로 남아있던 것 - 이중 위 화살표 아이콘 하나 + 작은 안내 문구
-         "위로 스와이프해서 끄기"가 확정안임). -->
+    <!-- 스와이프 안내 영역 - alarmCard와 buttonContainer 사이 공간에서 65%
+         지점(=화면 중앙보다 약간 아래)에 오도록 배치. 글자/아이콘 크게. -->
     <LinearLayout
         android:id="@+id/swipeHintContainer"
         android:layout_width="wrap_content"
@@ -81,30 +82,31 @@
         android:orientation="vertical"
         android:gravity="center"
         app:layout_constraintTop_toBottomOf="@id/alarmCard"
+        app:layout_constraintBottom_toTopOf="@id/buttonContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp">
+        app:layout_constraintVertical_bias="0.65">
 
         <ImageView
-            android:layout_width="18dp"
-            android:layout_height="18dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:src="@drawable/ic_double_arrow_up"/>
 
         <TextView
             android:id="@+id/swipeHint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="4dp"
             android:text="위로 스와이프해서 끄기"
-            android:textSize="11sp"
+            android:textSize="16sp"
             android:textColor="#803B2E7A"/>
     </LinearLayout>
 
-    <!-- 하단 버튼들 - "UI 테마" 탭 확정 레이아웃 그대로: 원형 버튼 + 아래 라벨
-         (사각 필 버튼이 아님). 순서도 동일(스누즈 먼저, 끄기 나중 - 왼쪽→오른쪽).
-         Button은 findViewById<Button>(Kotlin)이 요구하는 타입이라 그대로 유지하되,
-         시각적으로는 투명하게 비우고 그 아래 진짜 원형+라벨 뷰를 겹쳐서 그림
-         (Button = 탭 영역만 담당, 클릭 리스너/로직은 AlarmActivity.kt 그대로). -->
+    <!-- 하단 버튼들 - 원형 버튼 + 아래 라벨. 순서: 스누즈 먼저, 끄기 나중
+         (왼쪽→오른쪽). Button은 findViewById<Button>(Kotlin)이 요구하는
+         타입이라 그대로 유지하되, 시각적으로는 투명하게 비우고 그 아래 진짜
+         원형+라벨 뷰를 겹쳐서 그림(Button = 탭 영역만 담당, 클릭 리스너/로직은
+         AlarmActivity.kt 그대로). -->
     <LinearLayout
         android:id="@+id/buttonContainer"
         android:layout_width="wrap_content"
@@ -114,12 +116,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="100dp">
+        android:layout_marginBottom="90dp">
 
         <!-- 5분 후 -->
         <FrameLayout
-            android:layout_width="76dp"
-            android:layout_height="88dp">
+            android:layout_width="88dp"
+            android:layout_height="104dp">
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -129,12 +131,12 @@
                 android:clickable="false"
                 android:focusable="false">
                 <TextView
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
                     android:gravity="center"
                     android:background="@drawable/alarm_snooze_circle"
                     android:text="+5m"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="#3B2E7A"/>
                 <TextView
@@ -142,7 +144,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:text="5분 후"
-                    android:textSize="11sp"
+                    android:textSize="16sp"
                     android:textColor="#B33B2E7A"/>
             </LinearLayout>
             <Button
@@ -162,8 +164,8 @@
 
         <!-- 끄기 -->
         <FrameLayout
-            android:layout_width="76dp"
-            android:layout_height="88dp">
+            android:layout_width="88dp"
+            android:layout_height="104dp">
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -173,18 +175,18 @@
                 android:clickable="false"
                 android:focusable="false">
                 <ImageView
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
                     android:background="@drawable/alarm_dismiss_circle"
                     android:src="@drawable/ic_close_white"
                     android:scaleType="center"
-                    android:padding="17dp"/>
+                    android:padding="19dp"/>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:text="끄기"
-                    android:textSize="11sp"
+                    android:textSize="16sp"
                     android:textColor="#B33B2E7A"/>
             </LinearLayout>
             <Button

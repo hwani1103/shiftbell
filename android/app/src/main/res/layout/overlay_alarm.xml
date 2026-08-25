@@ -1,122 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- ⭐ 2026-08-25 3차 수정 - "UI 테마" 탭에서 확정한 _overlayCard 구조 그대로:
-     카드 하나(그라데이션, 화면 맨 위에 딱 붙음 - AlarmOverlayService.kt의
-     gravity=TOP/y=0/width=MATCH_PARENT 확인함)에 [시간+뱃지(왼쪽, 세로로 쌓임)]
-     와 [스누즈+끄기 작은 원(오른쪽, 라벨 없음)]이 한 Row로 나란히 들어감 -
-     예전처럼 카드 아래에 별도 버튼 줄이 있는 구조가 아님. 바깥 흰 프레임도
-     삭제(목업의 회색 배경은 "가짜 배경화면"일 뿐 카드 디자인이 아니었음).
+<!-- ⭐ 2026-08-25 5차 수정 - 배경을 WaveGradientView(파도치는 그라데이션
+     애니메이션)로 교체. 카드 아래쪽 모서리만 둥근 모양은 유지해야 해서
+     bottomCornerRadius=24dp로 지정(예전 overlay_card_gradient.xml과 같은 값).
+     FrameLayout으로 감싸서 WaveGradientView(배경, match_parent)와 실제 콘텐츠
+     LinearLayout(그 위, wrap_content 높이 그대로)을 겹침 - wrap_content
+     부모 안에서 match_parent 자식은 형제가 확정한 최종 크기를 그대로 따라가는
+     표준 안드로이드 동작이라 별도 계산 없이 카드 크기에 맞춰짐.
      뷰 ID(timeText/shiftTypeText/dismissButton/snoozeButton)는 그대로 -
      AlarmOverlayService.kt의 findViewById 참조는 안 건드림. -->
-<!-- ⭐ 2026-08-25 4차 수정 - "예전보다 너무 조금만 내려와서 조작하기 안 좋다"는
-     피드백으로 전체적으로 큼직하게 키움(패딩/글자/원형 버튼 전부 확대) -
-     대략 96dp → 170dp 안팎. 화면의 70~75%까지는 아니지만(그러려면 이 카드
-     하나에 지금과는 다른 수준의 콘텐츠/여백이 필요해서 완전히 다른 디자인이
-     됨), 조작하기엔 확실히 넉넉해진 크기. 더 크게/작게 조정 필요하면 말해줄 것. -->
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center_vertical"
-    android:background="@drawable/overlay_card_gradient"
-    android:elevation="8dp"
-    android:paddingHorizontal="22dp"
-    android:paddingTop="36dp"
-    android:paddingBottom="32dp">
+    android:layout_height="wrap_content">
 
-    <!-- 왼쪽: 시간 + 근무 뱃지 -->
+    <com.hwani1103.shiftbell.WaveGradientView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:bottomCornerRadius="24dp"/>
+
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/timeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="09:30"
-            android:textSize="50sp"
-            android:textColor="#3B2E7A"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium"
-            android:shadowColor="#40000000"
-            android:shadowDx="0"
-            android:shadowDy="1"
-            android:shadowRadius="3"/>
-
-        <TextView
-            android:id="@+id/shiftTypeText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="주간"
-            android:textSize="16sp"
-            android:textColor="#3B2E7A"
-            android:textStyle="bold"
-            android:background="@drawable/overlay_shift_badge"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"/>
-    </LinearLayout>
-
-    <Space android:layout_width="10dp" android:layout_height="1dp"/>
-
-    <!-- 오른쪽: 스누즈 + 끄기 (작은 원, 라벨 없음) -->
-    <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:elevation="8dp"
+        android:paddingHorizontal="22dp"
+        android:paddingTop="36dp"
+        android:paddingBottom="32dp">
 
-        <FrameLayout
-            android:layout_width="68dp"
-            android:layout_height="68dp">
+        <!-- 왼쪽: 시간 + 근무 뱃지 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:background="@drawable/alarm_snooze_circle"
-                android:text="+5m"
-                android:textSize="16sp"
+                android:id="@+id/timeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="09:30"
+                android:textSize="50sp"
+                android:textColor="#3B2E7A"
                 android:textStyle="bold"
-                android:textColor="#3B2E7A"/>
-            <Button
-                android:id="@+id/snoozeButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="0dp"
-                android:text=""
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:stateListAnimator="@null"
-                android:elevation="0dp"/>
-        </FrameLayout>
+                android:fontFamily="sans-serif-medium"
+                android:shadowColor="#40000000"
+                android:shadowDx="0"
+                android:shadowDy="1"
+                android:shadowRadius="3"/>
 
-        <Space android:layout_width="12dp" android:layout_height="1dp"/>
+            <TextView
+                android:id="@+id/shiftTypeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="주간"
+                android:textSize="16sp"
+                android:textColor="#3B2E7A"
+                android:textStyle="bold"
+                android:background="@drawable/overlay_shift_badge"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"/>
+        </LinearLayout>
 
-        <FrameLayout
-            android:layout_width="68dp"
-            android:layout_height="68dp">
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/alarm_dismiss_circle"
-                android:src="@drawable/ic_close_white"
-                android:scaleType="center"
-                android:padding="18dp"/>
-            <Button
-                android:id="@+id/dismissButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="0dp"
-                android:text=""
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:stateListAnimator="@null"
-                android:elevation="0dp"/>
-        </FrameLayout>
+        <Space android:layout_width="10dp" android:layout_height="1dp"/>
+
+        <!-- 오른쪽: 스누즈 + 끄기 (작은 원, 라벨 없음) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <FrameLayout
+                android:layout_width="68dp"
+                android:layout_height="68dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:background="@drawable/alarm_snooze_circle"
+                    android:text="+5m"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#3B2E7A"/>
+                <Button
+                    android:id="@+id/snoozeButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
+                    android:text=""
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:stateListAnimator="@null"
+                    android:elevation="0dp"/>
+            </FrameLayout>
+
+            <Space android:layout_width="12dp" android:layout_height="1dp"/>
+
+            <FrameLayout
+                android:layout_width="68dp"
+                android:layout_height="68dp">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/alarm_dismiss_circle"
+                    android:src="@drawable/ic_close_white"
+                    android:scaleType="center"
+                    android:padding="18dp"/>
+                <Button
+                    android:id="@+id/dismissButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
+                    android:text=""
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:stateListAnimator="@null"
+                    android:elevation="0dp"/>
+            </FrameLayout>
+        </LinearLayout>
+
     </LinearLayout>
-
-</LinearLayout>
+</FrameLayout>

@@ -201,8 +201,12 @@ private fun timeoutAlarm() {
     }
     
     private inner class SwipeGestureListener : GestureDetector.SimpleOnGestureListener() {
-        private val SWIPE_THRESHOLD = 100
-        private val SWIPE_VELOCITY_THRESHOLD = 100
+        // ⭐ 2026-08-25 - "살짝 스치기만 해도 꺼진다"는 피드백으로 상향(기존
+        // 100/100은 사실상 아무 움직임에나 반응할 만큼 낮았음). 그렇다고 화면을
+        // 거의 다 가로지를 만큼 길게 만들진 않고, "확실히 의도한 스와이프"만
+        // 인식하는 정도로 3~4배 올림.
+        private val SWIPE_THRESHOLD = 300
+        private val SWIPE_VELOCITY_THRESHOLD = 400
         
         override fun onFling(
             e1: MotionEvent?,
