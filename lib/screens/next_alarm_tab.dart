@@ -533,18 +533,19 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     final typeLabels = [context.l10n.alarmSoundVibration, context.l10n.alarmVibration, context.l10n.alarmSilent];
 
     return SafeArea(
-      // ⭐ 2026-08-25 재수정 - 지난번 physics만 ClampingScrollPhysics로 바꾼
-      // 걸로는 안 고쳐졌음. 원인 재확인: Material3(useMaterial3: true, app_theme.dart)
-      // 기본 ScrollBehavior는 StretchingOverscrollIndicator를 physics와 별개로
-      // 씌움 - 이건 "스크롤 위치가 튕기는" 물리 동작이 아니라 "콘텐츠 자체가
-      // 당겨지는 것처럼 늘어나 보이는" 시각 데코레이션이라 physics를 바꿔도 안
-      // 없어짐. ScrollConfiguration으로 overscroll indicator 자체를 꺼야
-      // 실제로 사라짐 - 실제 콘텐츠가 뷰포트보다 큰 경우엔 physics가 여전히
-      // 정상 스크롤을 허용하므로 오버플로 안전장치는 그대로 유지됨.
+      // ⭐ 2026-08-25 3차 수정 - ScrollConfiguration(overscroll:false)로 Material3
+      // 스트레치 데코레이션은 없앴는데도 "여전히 아주 살짝 당겨진다"는 재보고를
+      // 받음. 남은 원인: 콘텐츠 실제 높이가 뷰포트보다 미세하게(기기별로 몇 px)
+      // 더 커서 physics 입장에선 "진짜 오버플로"라 ClampingScrollPhysics가 정상
+      // 동작한 것 - 눈에 안 보일 만큼 작은 여분이라 사용자한텐 "굳이 안 내려가도
+      // 되는데 내려가지는" 것처럼 느껴짐. _NoTinyOverflowScrollPhysics로 그
+      // maxScrollExtent가 아주 작을 때(_tinyOverflowThreshold 미만)는 드래그 자체를
+      // 씹어서 진짜 못 내려가게 하고, 그보다 큰 진짜 오버플로(작은 화면 기기 등)는
+      // 그대로 정상 스크롤되게 함 - 안전장치는 유지.
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
         child: SingleChildScrollView(
-        physics: const ClampingScrollPhysics(),
+        physics: const _NoTinyOverflowScrollPhysics(),
         padding: EdgeInsets.fromLTRB(24.w, 32.h, 24.w, 28.h),
         child: Column(
           children: [
@@ -885,5 +886,29 @@ class _WaveGradientBackgroundState extends State<_WaveGradientBackground> with S
         );
       },
     );
+  }
+}
+
+// ⭐ 2026-08-25 추가 - "실제로는 몇 px 남는데 스크롤이 가능은 한" 미세 오버플로를
+// 아예 못 내려가게 막는 커스텀 physics. ClampingScrollPhysics 자체는 정상
+// 동작이지만(뷰포트보다 콘텐츠가 조금이라도 크면 스크롤을 허용하는 게 맞는
+// 동작), 그 "조금"이 사용자 눈엔 안 보일 만큼 작을 때도 그대로 허용되다 보니
+// "왜 굳이 내려가지?"로 느껴짐 - maxScrollExtent가 _tinyOverflowThreshold보다
+// 작으면 드래그 자체를 무시해서 그 미세한 여분을 진짜 오버플로가 아닌 것처럼
+// 처리함. 그보다 큰 진짜 오버플로(작은 화면 기기 등)는 평소처럼 정상 스크롤됨.
+const double _tinyOverflowThreshold = 12.0;
+
+class _NoTinyOverflowScrollPhysics extends ClampingScrollPhysics {
+  const _NoTinyOverflowScrollPhysics({super.parent});
+
+  @override
+  _NoTinyOverflowScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return _NoTinyOverflowScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  bool shouldAcceptUserOffset(ScrollMetrics position) {
+    if (position.maxScrollExtent <= _tinyOverflowThreshold) return false;
+    return super.shouldAcceptUserOffset(position);
   }
 }

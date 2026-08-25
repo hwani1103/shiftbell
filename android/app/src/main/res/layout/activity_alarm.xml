@@ -25,31 +25,34 @@
         android:orientation="vertical"
         android:gravity="center"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="48dp"
+        android:layout_marginTop="40dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/swipeHintContainer"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0.1">
+        app:layout_constraintVertical_bias="0.06">
 
         <!-- ⭐ 2026-08-25 - "알람" 라벨 텍스트 제거함(원 위에 굳이 필요 없다는
              피드백) - 이 TextView는 id가 없어 AlarmActivity.kt에서 참조하는
-             곳이 없었음, 안전하게 삭제. -->
+             곳이 없었음, 안전하게 삭제. 라벨이 사라져 생긴 여유만큼 원/숫자를
+             더 키우고(276dp/46sp), 위로도 살짝 올림(marginTop 48→40dp,
+             bias 0.1→0.06). -->
 
-        <!-- 원형 시계 - 숫자(42sp)는 그대로, 원 자체만 키움 -->
+        <!-- 원형 시계 - 라벨 제거로 생긴 여유만큼 원/숫자 확대, 배지와의
+             간격도 더 띄움 -->
         <TextView
             android:id="@+id/timeText"
-            android:layout_width="252dp"
-            android:layout_height="252dp"
+            android:layout_width="276dp"
+            android:layout_height="276dp"
             android:gravity="center"
             android:background="@drawable/alarm_time_circle"
             android:elevation="6dp"
             android:text="09:30"
-            android:textSize="42sp"
+            android:textSize="46sp"
             android:textColor="#6A4FD9"
             android:textStyle="bold"
             android:fontFamily="sans-serif-medium"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginBottom="32dp"/>
 
         <!-- 근무 타입 뱃지 - 살짝 키우고, 그림자(elevation) 제거 -->
         <TextView
