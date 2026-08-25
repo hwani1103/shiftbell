@@ -24,9 +24,25 @@
 //   E(바늘 강조) - 바늘을 굵고 길게, 종은 작게, 테두리 있음
 
 import 'dart:math' as math;
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+// ⭐ 2026-08-25 6차 개정 - "진짜 맞는지 확인해보게" 요청으로, 실제 설치되는
+// 적응형 아이콘 전경 PNG(assets/icon/app_icon_foreground.png - gen_icon.py가
+// 생성해서 flutter_launcher_icons가 그대로 mipmap에 심는 바로 그 파일)를
+// 다시 그리지 않고 이미지 그대로 불러와서, 다른 후보들과 완전히 동일한
+// 인셋/크롭/마스크 파이프라인에 태워 맨 앞에 기준으로 놓음. 나머지 23개
+// 후보는 이미 처음부터 이 파이프라인과 똑같은 상수·크기를 쓰고 있었으므로,
+// 이 기준 타일과 비교해서 맞으면 나머지도 전부 맞다고 보면 됨.
+const double _adaptiveAutoInset = 0.16; // <inset android:inset="16%"/>
+const double _adaptiveCanvasDp = 108.0;
+const double _adaptiveVisibleWindowDp = 70.0; // 실제로 확대 없이 보이는 영역
+const double _adaptiveTargetFinalRatio = 0.59;
+const Color _shippedBg = Color(0xFF1A237E); // pubspec.yaml adaptive_icon_background와 동일
 
 enum _Style { classic, minimal, bold, bellFocus, handFocus }
 
@@ -118,9 +134,21 @@ class UiThemeLabScreen extends StatelessWidget {
                 crossAxisSpacing: 10.w,
                 mainAxisExtent: 128.h,
               ),
-              itemCount: _candidates.length,
+              itemCount: _candidates.length + 1, // +1 = 맨 앞 "실제 설치 아이콘" 기준 타일
               itemBuilder: (context, index) {
-                final c = _candidates[index];
+                if (index == 0) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _RealIconPreview(size: 76.w),
+                      SizedBox(height: 8.h),
+                      Text('기준', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800, color: Colors.red.shade700)),
+                      SizedBox(height: 2.h),
+                      Text('실제 설치 아이콘', textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 9.sp, color: Colors.red.shade400, fontWeight: FontWeight.w600)),
+                    ],
+                  );
+                }
+                final c = _candidates[index - 1];
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -169,16 +197,10 @@ class _AdaptiveIconPainter extends CustomPainter {
   _AdaptiveIconPainter({required this.candidate});
   final _IconCandidate candidate;
 
-  // gen_icon.py와 동일한 상수.
-  static const double _autoInset = 0.16; // <inset android:inset="16%"/>
-  static const double _canvasDp = 108.0;
-  static const double _visibleWindowDp = 70.0; // 실제로 확대 없이 보이는 영역
-  static const double _adaptiveTargetFinalRatio = 0.59;
-
   @override
   void paint(Canvas canvas, Size size) {
     final visible = size.width;
-    final s = visible / (_visibleWindowDp / _canvasDp);
+    final s = visible / (_adaptiveVisibleWindowDp / _adaptiveCanvasDp);
     final cropOffset = (s - visible) / 2;
 
     canvas.save();
@@ -196,10 +218,10 @@ class _AdaptiveIconPainter extends CustomPainter {
     canvas.drawRect(bgRect, bgPaint);
 
     // 2) 전경(시계+종) - <inset 16%> 시뮬레이션으로 전체를 68% 크기로 중앙 축소.
-    final sourceRatio = _adaptiveTargetFinalRatio / ((1 - 2 * _autoInset) * (_canvasDp / _visibleWindowDp));
+    final sourceRatio = _adaptiveTargetFinalRatio / ((1 - 2 * _adaptiveAutoInset) * (_adaptiveCanvasDp / _adaptiveVisibleWindowDp));
     canvas.save();
     canvas.translate(s / 2, s / 2);
-    canvas.scale(1 - 2 * _autoInset);
+    canvas.scale(1 - 2 * _adaptiveAutoInset);
     canvas.translate(-s / 2, -s / 2);
     _drawForeground(canvas, s, sourceRatio, candidate.hands, candidate.bell, _styleSpecs[candidate.style]!);
     canvas.restore();
@@ -266,4 +288,82 @@ class _AdaptiveIconPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _AdaptiveIconPainter oldDelegate) => oldDelegate.candidate != candidate;
+}
+
+/// ⭐ "실제 설치 아이콘" 기준 타일 - 다시 그리지 않고 실제 PNG 자산
+/// (assets/icon/app_icon_foreground.png)을 그대로 불러와서, 나머지 후보와
+/// 완전히 동일한 인셋/크롭/마스크 파이프라인에 태움. 배경은 pubspec.yaml의
+/// adaptive_icon_background(#1A237E)와 같은 값을 씀.
+class _RealIconPreview extends StatefulWidget {
+  const _RealIconPreview({required this.size});
+  final double size;
+
+  @override
+  State<_RealIconPreview> createState() => _RealIconPreviewState();
+}
+
+class _RealIconPreviewState extends State<_RealIconPreview> {
+  ui.Image? _image;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final data = await rootBundle.load('assets/icon/app_icon_foreground.png');
+    final bytes = Uint8List.view(data.buffer, data.offsetInBytes, data.lengthInBytes);
+    final image = await decodeImageFromList(bytes);
+    if (mounted) setState(() => _image = image);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: widget.size,
+      height: widget.size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.red.shade400, width: 2),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 6, offset: const Offset(0, 3))],
+      ),
+      child: _image == null
+          ? const SizedBox.shrink()
+          : CustomPaint(
+              size: Size(widget.size, widget.size),
+              painter: _RealIconPainter(image: _image!),
+            ),
+    );
+  }
+}
+
+class _RealIconPainter extends CustomPainter {
+  _RealIconPainter({required this.image});
+  final ui.Image image;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final visible = size.width;
+    final s = visible / (_adaptiveVisibleWindowDp / _adaptiveCanvasDp);
+    final cropOffset = (s - visible) / 2;
+
+    canvas.save();
+    canvas.clipPath(Path()..addOval(Rect.fromLTWH(0, 0, visible, visible)));
+    canvas.translate(-cropOffset, -cropOffset);
+
+    canvas.drawRect(Rect.fromLTWH(0, 0, s, s), Paint()..color = _shippedBg);
+
+    // <inset 16%> 그대로: 전경 PNG를 68% 크기로 중앙에 축소해서 그림.
+    final fgSize = s * (1 - 2 * _adaptiveAutoInset);
+    final fgOffset = (s - fgSize) / 2;
+    final srcRect = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+    final dstRect = Rect.fromLTWH(fgOffset, fgOffset, fgSize, fgSize);
+    canvas.drawImageRect(image, srcRect, dstRect, Paint()..filterQuality = FilterQuality.high);
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _RealIconPainter oldDelegate) => oldDelegate.image != image;
 }

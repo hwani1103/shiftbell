@@ -69,7 +69,11 @@
 
     </LinearLayout>
 
-    <!-- 스와이프 안내 영역 -->
+    <!-- 스와이프 안내 영역 - ⭐ 2026-08-25 5차 수정: "UI 테마" 탭 확정
+         _buildLockScreen과 텍스트/아이콘이 다르던 버그 수정(좌우 화살표+원
+         구조와 "화면을 스와이프하여 끄기"는 리디자인 전 옛 문구/디자인이
+         그대로 남아있던 것 - 이중 위 화살표 아이콘 하나 + 작은 안내 문구
+         "위로 스와이프해서 끄기"가 확정안임). -->
     <LinearLayout
         android:id="@+id/swipeHintContainer"
         android:layout_width="wrap_content"
@@ -81,47 +85,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp">
 
-        <!-- 스와이프 텍스트 -->
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_double_arrow_up"/>
+
         <TextView
             android:id="@+id/swipeHint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="화면을 스와이프하여 끄기"
-            android:textSize="18sp"
-            android:textColor="#3B2E7A"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- 스와이프 가이드 (좌우 화살표 + 원) -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-            <!-- 왼쪽 화살표 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="◄"
-                android:textSize="32sp"
-                android:textColor="#8C7FC7"/>
-
-            <!-- 중앙 원 -->
-            <View
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_marginHorizontal="12dp"
-                android:background="@drawable/swipe_guide_circle"/>
-
-            <!-- 오른쪽 화살표 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="►"
-                android:textSize="32sp"
-                android:textColor="#8C7FC7"/>
-        </LinearLayout>
+            android:layout_marginTop="2dp"
+            android:text="위로 스와이프해서 끄기"
+            android:textSize="11sp"
+            android:textColor="#803B2E7A"/>
     </LinearLayout>
 
     <!-- 하단 버튼들 - "UI 테마" 탭 확정 레이아웃 그대로: 원형 버튼 + 아래 라벨

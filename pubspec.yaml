@@ -96,6 +96,13 @@ flutter:
   # assets:
   #   - assets/sounds/  # 제거: res/raw만 사용
 
+  # ⭐ 2026-08-25 - 아이콘 픽커(ui_theme_lab_screen.dart)에서 "실제로 설치된
+  # 아이콘"을 그대로 불러와 기준 삼아 보여주기 위해 등록. 아이콘을 다시 바꿀
+  # 때 assets/icon/gen_icon.py로 재생성하면 이 자산도 자동으로 최신 걸 가리킴
+  # (파일 경로가 그대로라서 - 임시 화면 다 쓰고 나면 이 항목도 같이 지울 것).
+  assets:
+    - assets/icon/app_icon_foreground.png
+
 # ⭐ 앱 아이콘 - 2026-08-25 3차 개정, "17번" 팔레트(네이비/골드/코랄, 배경
 # 단색)로 최종 확정. assets/icon/gen_icon.py로 2장을 생성함 -
 # app_icon.png(레거시, 배경 포함) / app_icon_foreground.png(적응형 아이콘

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "위로 스와이프해서 끄기" 안내용 이중 위 화살표(Flutter
+     Icons.keyboard_double_arrow_up_rounded 자리) - 짙은 남색 50% 알파로
+     색을 미리 구워둠(UI 테마 탭 확정안: s.onBg.withValues(alpha: 0.5)). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:pathData="M4,12 L12,5 L20,12"
+        android:strokeColor="#803B2E7A"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"/>
+    <path
+        android:pathData="M4,19 L12,12 L20,19"
+        android:strokeColor="#803B2E7A"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"/>
+</vector>
