@@ -30,15 +30,22 @@
 - Lucide (`lucide-icons/lucide`, ISC License) — https://github.com/lucide-icons/lucide
 - 2026-08-27, 위 저장소 `main` 브랜치에서 그대로 다운로드. 수정 없음.
 
-## 적용 방법 (다른 세션용 메모)
+## 적용 방법 (2026-08-27 업데이트 - 렌더링 확인 완료)
 
-이 프로젝트는 아직 SVG 렌더링 패키지(`flutter_svg` 등)를 쓰고 있지 않음.
-적용할 때 선택지:
-1. `flutter_svg` 추가 후 `SvgPicture.asset('assets/icons/memo_category/work.svg', colorFilter: ...)`
-2. 아이콘 폰트로 변환(예: `fantasticon`) 후 `IconData`로 사용 — 기존 Material 아이콘 쓰는
-   방식과 동일하게 맞추고 싶으면 이쪽
-3. PNG로 사전 래스터화 — 색 커스터마이징이 필요 없다면 가장 단순
+`flutter_svg`(`^2.0.10+1`)를 `pubspec.yaml`에 추가하고 `assets/icons/memo_category/`도
+자산으로 등록해뒀음. 실제 사용 예:
 
-`pubspec.yaml`의 `flutter: assets:`에 `assets/icons/memo_category/` 등록은 아직
-안 해뒀음(이 커밋 시점에 다른 세션이 `pubspec.yaml`을 동시에 수정 중이라 충돌 방지
-차 건드리지 않음) — 적용하는 쪽에서 등록 + 위 1번 또는 2번 처리를 같이 해줄 것.
+```dart
+SvgPicture.asset(
+  'assets/icons/memo_category/work.svg',
+  colorFilter: const ColorFilter.mode(kAppMainAccent, BlendMode.srcIn), // currentColor stroke라 색이 그대로 먹음
+)
+```
+
+카테고리 키/라벨/자산 경로 매핑은 `lib/screens/memo_category_icon_lab_screen.dart`의
+`kMemoCategoryIcons` 상수를 그대로 가져다 쓰면 됨(이 파일은 10종을 그리드로 렌더링해
+보여주는 임시 확인용 화면 — 실제 device의 dev flavor 빌드로 렌더링 확인 완료,
+`work.svg`부터 `etc.svg`까지 전부 정상 표시됨). 어디에도 라우팅은 안 돼 있어서
+확인하려면 `main.dart`의 `home:`을 잠깐 `MemoCategoryIconLabScreen()`으로 바꿔서
+실행하면 됨(확인 후 반드시 되돌릴 것) — 카테고리 아이콘이 실제 화면(일정관리 등)에
+적용되고 나면 이 화면 파일은 지워도 됨.
