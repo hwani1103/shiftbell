@@ -632,7 +632,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
         widgets.add(Positioned(
           top: _edgePadding + _slotTops[entry.key] + offset,
           left: rowLeft,
-          right: 16.w,
+          right: (16 * 7 / 8).w,
           height: h,
           child: _ScheduleRow(
             block: block,
@@ -742,7 +742,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
     // ⭐ 2026-08-27 - "인디케이터(화살표)가 시간보다 약간 위를 가리킨다"는
     // 피드백으로 +3.h만큼 아래로 미세조정. 실기기로 다시 확인하며 필요하면
     // 더 조정할 수 있음.
-    return _edgePadding + _slotTops[_displaySlot] - scrollOffset + 3.h;
+    return _edgePadding + _slotTops[_displaySlot] - scrollOffset + (3 * 7 / 8).h;
   }
 
   bool get _isDragging => _dragContentY != null;
@@ -752,7 +752,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // 멤버는 클래스가 아니라 파일=라이브러리 단위라 같은 파일 안이면
   // _AxisIndicator._iconSize처럼 밖에서도 그대로 접근 가능함.)
   double get _idleIndicatorLeft =>
-      _axisX - _AxisIndicator._idleIconSize / 2 - 10.w;
+      _axisX - _AxisIndicator._idleIconSize / 2 - (10 * 7 / 8).w;
 
   // ⭐ 숫자/눈금이 이제 축 왼쪽으로 옮겨가서, 인디케이터(활성 상태)는 축
   // 오른쪽에 거의 맞닿을 정도로 붙여도 더 이상 숫자를 가리지 않음(요청).
@@ -763,7 +763,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // 바꾸면 됨(부리 꼭짓점은 그대로 axisX에 고정된 채, 아이콘만 그만큼 더
   // 밀려남) - 간격 상수를 두 곳에 따로 두면 화면 배율에 따라 어긋나므로
   // 일부러 한 곳(_AxisIndicator)에만 둠.
-  double get _activeIndicatorLeft => _axisX - 10.w;
+  double get _activeIndicatorLeft => _axisX - (10 * 7 / 8).w;
 
   // ⭐ 콘텐츠 좌표계("scrollOffset과 같은 기준"의 절대 위치)에서, 지금 화면
   // 정중앙에 있는 위치. edgePadding이 뷰포트 절반보다 작아진 뒤로는
@@ -917,7 +917,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
         // 일정을 새로 만들 때 "움직인" 인디케이터와 겹치는 건 상관없음
         // (요청), 가만히 있는 기본 위치와만 안 겹치면 됨. 평소 인디케이터가
         // 작아진 만큼(44→36) 간격도 줄임 - 다만 너무 붙지는 않게(요청) 58→46.
-        final rowLeft = _axisX + 26.w;
+        final rowLeft = _axisX + (26 * 7 / 8).w;
 
         if (!_jumpedToInitial && isLoaded) {
           _jumpedToInitial = true;
@@ -978,8 +978,8 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                           boxShadow: [
                             BoxShadow(
                               color: kAppMainAccent.withValues(alpha: 0.2),
-                              blurRadius: 4.r,
-                              spreadRadius: 0.3.r,
+                              blurRadius: (4 * 7 / 8).r,
+                              spreadRadius: (0.3 * 7 / 8).r,
                             ),
                           ],
                         ),
@@ -999,7 +999,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                         left: 0,
                         // ⭐ 2026-08-27 - "너무 붙었다"는 후속 피드백으로 축과의
                         // 간격을 4.w→10.w로 다시 살짝 벌림.
-                        width: _axisX - 10.w,
+                        width: _axisX - (10 * 7 / 8).w,
                         height: _hourTickBoxHeight,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -1058,7 +1058,8 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                 child: Container(
                   color: Colors.transparent,
                   padding: EdgeInsets.symmetric(
-                      vertical: _indicatorVerticalPadding, horizontal: 10.w),
+                      vertical: _indicatorVerticalPadding,
+                      horizontal: (10 * 7 / 8).w),
                   child: _AxisIndicator(showBeak: _isDragging),
                 ),
               ),
@@ -1202,10 +1203,14 @@ class _ScheduleRow extends StatelessWidget {
   // 파일=라이브러리라 접근 가능).
   // ⭐ 첫 줄~내용 줄 사이 간격을 6.h→2.h로 줄임(요청: "시간이랑 너무 멀리
   // 떨어져있다") - _buildBody()의 SizedBox와 반드시 같이 맞출 것.
+  // ⭐ 2026-08-27 - "raw 값 그대로면 기기별 화면 차이를 못 맞춘다"는 지적으로
+  // 이 파일의 축 좌표계 전체가 따르는 표준 스케일 보정(N*7/8 → .h/.w/.r,
+  // _TimeAxisPickerState 상단 주석 참고)에 맞춤 - safety도 원래 raw(12.0,
+  // 스케일 아예 없었음)였던 걸 같이 고침.
   static double get heightForStyle {
     final iconD = _TimeAxisPickerState._iconDiameter;
-    const safety = 12.0; // 폰트별 줄높이 편차 대비 여유분
-    return iconD + 2.h + 26.h + iconD / 2 + safety;
+    final safety = (12 * 7 / 8).h; // 폰트별 줄높이 편차 대비 여유분
+    return iconD + (2 * 7 / 8).h + (26 * 7 / 8).h + iconD / 2 + safety;
   }
 
   String get _categoryAsset => _kScheduleCategoryIcons[
@@ -1221,7 +1226,8 @@ class _ScheduleRow extends StatelessWidget {
   double _iconBgHeight(double diameter) {
     final duration = block.durationMinutes;
     if (duration == null || duration <= 60) return diameter;
-    final fullSpan = diameter + 2.h + 26.h + 8.h;
+    final fullSpan =
+        diameter + (2 * 7 / 8).h + (26 * 7 / 8).h + (8 * 7 / 8).h;
     if (duration <= 120) {
       return diameter + (fullSpan - diameter) * 0.55;
     }
@@ -1299,7 +1305,7 @@ class _ScheduleRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _icon(iconDiameter),
-        SizedBox(width: 10.w),
+        SizedBox(width: (10 * 7 / 8).w),
         Flexible(
           child: Text(
             timeLabel,
@@ -1324,21 +1330,21 @@ class _ScheduleRow extends StatelessWidget {
       children: [
         _firstLine(),
         // ⭐ 6.h→2.h(요청: "시간이랑 너무 멀리 떨어져있다") - heightForStyle의
-        // "iconD + 2.h + ..."와 반드시 같은 값으로 맞출 것.
-        SizedBox(height: 2.h),
+        // "iconD + (2*7/8).h + ..."와 반드시 같은 값으로 맞출 것.
+        SizedBox(height: (2 * 7 / 8).h),
         Padding(
-          padding: EdgeInsets.only(left: iconDiameter + 10.w),
+          padding: EdgeInsets.only(left: iconDiameter + (10 * 7 / 8).w),
           child: IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Container(
-                  width: 3.w,
+                  width: (3 * 7 / 8).w,
                   decoration: BoxDecoration(
                       color: block.color,
-                      borderRadius: BorderRadius.circular(2.r)),
+                      borderRadius: BorderRadius.circular((2 * 7 / 8).r)),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: (8 * 7 / 8).w),
                 Expanded(
                   child: Text(block.content,
                       maxLines: 1,
