@@ -1512,8 +1512,22 @@ class _ScheduleRow extends StatelessWidget {
   // fontWeight를 w500→w700으로 올림. 폰트는 5번(주아체) 고정.
   // ⭐ 2026-08-27(2차) - color 기본값을 고정 kAppChipBorder 대신
   // contentTextColor(배경색에 따라 유동)로.
-  TextStyle _contentStyle({double size = 14, Color? color}) => GoogleFonts.jua(
-      fontSize: size.sp, fontWeight: FontWeight.w700, color: color ?? contentTextColor);
+  // ⭐ 2026-08-27(6차) - "글자끼리 좌우 간격이 너무 붙는다"는 재확인 피드백의
+  // 진짜 원인을 찾음: 주아체(Jua)는 Google Fonts에 굵기가 딱 하나(Regular
+  // 400)만 있는 폰트라, 여기서 fontWeight: w700을 요청하면 실제 볼드
+  // 글리프가 없어서 Flutter/Skia가 "가짜 볼드"(선을 억지로 두껍게 그리는
+  // synthesized/faux bold)를 적용함 - 이게 글자 사이 여백을 갉아먹어서
+  // 좁아 보이게 만든 것(간격 수치 자체가 줄어든 게 아니라, 두꺼워진 획이
+  // 옆 글자의 여백을 침범하는 착시+실제 침범이 섞인 문제). 폰트 자체의
+  // 원래 굵기(w400, "볼드"를 요청 안 함)로 되돌려서 가짜 볼드를 아예 안
+  // 만들게 함 - 주아체는 원래 획이 두꺼운 손글씨체라 w400이어도 이미
+  // "진한" 느낌은 충분함. 혹시 몰라 요청대로 크기도 살짝 키우고(14→15)
+  // letterSpacing도 아주 조금 더 줌(0→0.4) - 이중 안전장치.
+  TextStyle _contentStyle({double size = 15, Color? color}) => GoogleFonts.jua(
+      fontSize: size.sp,
+      fontWeight: FontWeight.w400,
+      letterSpacing: 0.4,
+      color: color ?? contentTextColor);
 
   // ⭐ 2026-08-27 - 세로축 시간 숫자와 스타일 통일(요청: "세로축의 숫자랑
   // 일정에 생성되는 숫자랑 크기+색깔+텍스트 스타일을 전부 맞추자"). 폰트=
@@ -1566,39 +1580,41 @@ class _ScheduleRow extends StatelessWidget {
 
   // ⭐ 2026-08-27 - 렌더링 스타일 3번(밑줄/왼쪽 세로 막대 강조)으로 확정,
   // 나머지 7종은 코드째로 삭제(요청).
-  // ⭐ 2026-08-27(5차) - "내용 텍스트가 뭔가 더 딱딱 붙는 느낌"이라는
-  // 피드백 - 실제로 폰트를 바꾼 적은 없고(GoogleFonts.jua 그대로), 2차에서
-  // "조금만 더 위로" 요청으로 SizedBox 2→1 + Transform.translate(-2) 음수
-  // 겹침까지 같이 넣었던 게 누적되어 첫 줄과 너무 가까워진 게 그 "붙는
-  // 느낌"의 실체로 보임 - Transform.translate 겹침은 제거하고 간격을 다시
-  // 2로 되돌림(6→2→1+겹침 이었던 걸 2로 정리).
+  // ⭐ 2026-08-27(6차) - 5차에서 "딱딱 붙는 느낌"을 세로 간격 문제로 오판해서
+  // 여기(첫 줄~내용 줄 사이 세로 간격)를 원복했었는데, 실제 원인은 세로
+  // 간격이 아니라 내용 텍스트 자체의 글자 간(가로) 간격이었음(_contentStyle
+  // 참고 - 가짜 볼드 문제). 세로 간격은 "아까가 딱 좋았다"는 재확인으로
+  // 다시 좁힘(2→1 + Transform.translate(-2) 겹침, 2차 상태 그대로 복원).
   Widget _buildBody() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         _firstLine(),
-        SizedBox(height: (2 * 7 / 8).h),
-        Padding(
-          padding: EdgeInsets.only(left: iconDiameter + (10 * 7 / 8).w),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  width: (3 * 7 / 8).w,
-                  decoration: BoxDecoration(
-                      color: block.color,
-                      borderRadius: BorderRadius.circular((2 * 7 / 8).r)),
-                ),
-                SizedBox(width: (8 * 7 / 8).w),
-                Expanded(
-                  child: Text(block.content,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: _contentStyle()),
-                ),
-              ],
+        SizedBox(height: (1 * 7 / 8).h),
+        Transform.translate(
+          offset: Offset(0, -(2 * 7 / 8).h),
+          child: Padding(
+            padding: EdgeInsets.only(left: iconDiameter + (10 * 7 / 8).w),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    width: (3 * 7 / 8).w,
+                    decoration: BoxDecoration(
+                        color: block.color,
+                        borderRadius: BorderRadius.circular((2 * 7 / 8).r)),
+                  ),
+                  SizedBox(width: (8 * 7 / 8).w),
+                  Expanded(
+                    child: Text(block.content,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _contentStyle()),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
