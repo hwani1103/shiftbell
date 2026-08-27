@@ -48,6 +48,14 @@ dependencies:
   intl: ^0.20.2
   table_calendar: ^3.0.9
   flutter_screenutil: ^5.9.0
+  # ⭐ 2026-08-27 - 메모 자동분류 카테고리 아이콘(assets/icons/memo_category/,
+  # Lucide SVG 10종)을 그리기 위해 추가. currentColor stroke라 SvgPicture의
+  # colorFilter로 앱 색을 그대로 입힐 수 있음.
+  flutter_svg: ^2.0.10+1
+  # ⭐ 2026-08-26 - 일정관리 탭 세로 시간축 숫자 폰트용("너무 딱딱하다" 피드백).
+  # 폰트 파일을 pubspec에 등록하는 대신 런타임에 받아와 캐싱함 - 이 화면
+  # 하나에서만 쓰므로 앱 전체 기본 폰트에는 영향 없음.
+  google_fonts: ^6.2.1
 
   # 유틸
   uuid: ^4.2.2
@@ -102,6 +110,11 @@ flutter:
   # (파일 경로가 그대로라서 - 임시 화면 다 쓰고 나면 이 항목도 같이 지울 것).
   assets:
     - assets/icon/app_icon_foreground.png
+    - assets/icon/app_icon.png
+    # ⭐ 2026-08-27 - 메모 자동분류(ml/, 메모_자동분류_ML_계획.md) Phase 5용 카테고리
+    # 아이콘 10종. Lucide(오픈소스, ISC License) 라인 아이콘 그대로. 매핑/출처는
+    # assets/icons/memo_category/README.md 참고.
+    - assets/icons/memo_category/
 
 # ⭐ 앱 아이콘 - 2026-08-25 5차 개정, "2번"(인디고·앰버) 팔레트를 그라데이션
 # 배경(인디고→오로라 청록) + 코랄 종 배지로 변형해 최종 확정. assets/icon/gen_icon.py로
