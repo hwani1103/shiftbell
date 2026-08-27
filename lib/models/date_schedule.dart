@@ -33,7 +33,11 @@ class DateSchedule {
   final String date; // 'YYYY-MM-DD'
   final String content;
   final int startMinutes;
-  final int durationMinutes;
+  // ⭐ 2026-08-27 - null 허용으로 변경(요청: "몇 시간 할지는 안 정해도 되게").
+  // DB(date_schedules.duration_minutes)는 여전히 NOT NULL이라 스키마 변경 없이
+  // 0을 "미정" sentinel로 씀(0분짜리 실제 프리셋은 없어서 안전) - fromMap/toMap
+  // 참고. 0은 절대 실제 소요시간으로 쓰지 말 것.
+  final int? durationMinutes;
   final Color color;
   // ⭐ _kScheduleCategoryIcons(schedule_management_tab.dart) 인덱스(0-based),
   // 내용 렌더 스타일(1~8), 내용 폰트(1~5).
@@ -65,12 +69,16 @@ class DateSchedule {
     this.updatedAt,
   });
 
+  // ⭐ durationMinutes는 nullable이라 "안 건드림"과 "명시적으로 null로
+  // 지움"을 구분해야 함 - clearDuration:true를 넘기면 durationMinutes 인자를
+  // 무시하고 null로 지운다(소요시간 미정으로 되돌리는 경로용).
   DateSchedule copyWith({
     int? id,
     String? date,
     String? content,
     int? startMinutes,
     int? durationMinutes,
+    bool clearDuration = false,
     Color? color,
     int? iconIndex,
     int? styleIndex,
@@ -85,7 +93,8 @@ class DateSchedule {
       date: date ?? this.date,
       content: content ?? this.content,
       startMinutes: startMinutes ?? this.startMinutes,
-      durationMinutes: durationMinutes ?? this.durationMinutes,
+      durationMinutes:
+          clearDuration ? null : (durationMinutes ?? this.durationMinutes),
       color: color ?? this.color,
       iconIndex: iconIndex ?? this.iconIndex,
       styleIndex: styleIndex ?? this.styleIndex,
@@ -99,12 +108,13 @@ class DateSchedule {
 
   factory DateSchedule.fromMap(Map<String, dynamic> map) {
     final colorIndex = (map['color_index'] as int?) ?? 0;
+    final rawDuration = map['duration_minutes'] as int? ?? 0;
     return DateSchedule(
       id: map['id'] as int?,
       date: map['date'] as String,
       content: map['content'] as String,
       startMinutes: map['start_minutes'] as int,
-      durationMinutes: map['duration_minutes'] as int,
+      durationMinutes: rawDuration == 0 ? null : rawDuration,
       color: kScheduleBlockColors[colorIndex % kScheduleBlockColors.length],
       iconIndex: (map['icon_index'] as int?) ?? 0,
       styleIndex: (map['style_index'] as int?) ?? 1,
@@ -124,7 +134,7 @@ class DateSchedule {
       'date': date,
       'content': content,
       'start_minutes': startMinutes,
-      'duration_minutes': durationMinutes,
+      'duration_minutes': durationMinutes ?? 0,
       'color_index': colorIndex,
       'icon_index': iconIndex,
       'style_index': styleIndex,

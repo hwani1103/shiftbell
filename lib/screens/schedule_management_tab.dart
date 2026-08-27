@@ -36,6 +36,7 @@ import '../models/date_schedule.dart';
 import '../models/shift_schedule.dart';
 import '../providers/calendar_theme_provider.dart';
 import '../providers/date_schedule_provider.dart';
+import '../providers/schedule_background_provider.dart';
 import '../providers/schedule_provider.dart';
 import '../services/memo_category_classifier.dart';
 import '../theme/app_colors.dart';
@@ -124,6 +125,10 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
     final locale = _intlLocale(context);
     final dateLabel = DateFormat.yMMMMEEEEd(locale).format(_selectedDate);
     final dateKey = _selectedDate.toIso8601String().split('T')[0];
+    // ⭐ 2026-08-27 - 일정관리 설정(톱니바퀴)에서 고르는 배경색. 지금은
+    // Scaffold 배경만 바꿈(헤더/날짜스트립은 각자 불투명한 흰 배경을 그대로
+    // 갖고 있어서 당장은 안 바뀜 - 요청대로 "일단 배경만" 적용, 나머지는 다음에).
+    final bgColor = kScheduleBackgroundColors[ref.watch(scheduleBackgroundProvider)];
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -135,7 +140,7 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFBFF),
+        backgroundColor: bgColor,
         body: Column(
           children: [
             _buildHeader(dateLabel, selectedShiftName, selectedHasShift,
@@ -197,6 +202,8 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
 
   // ⭐ "그냥 숫자만" - 요일 라벨 없이 날짜 숫자만. 편집모드 토글이 없어져서
   // 다시 전체 폭을 다 씀(트레일링 아이콘 자리 없앰).
+  // ⭐ 2026-08-27 - 맨 끝에 날짜 칩과 동일한 크기의 톱니바퀴 칩을 하나 추가함
+  // (요청) - 일정관리 전용 설정 화면(지금은 배경색 선택만) 진입점.
   Widget _buildDateStrip(int daysInMonth) {
     return Container(
       color: Colors.white,
@@ -205,9 +212,26 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
         controller: _dateStripController,
         scrollDirection: Axis.horizontal,
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-        itemCount: daysInMonth,
+        itemCount: daysInMonth + 1,
         separatorBuilder: (_, __) => SizedBox(width: _dateChipGap.w),
         itemBuilder: (context, index) {
+          if (index == daysInMonth) {
+            return GestureDetector(
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => const _ScheduleSettingsScreen())),
+              child: Container(
+                width: _dateChipWidth.w,
+                height: _dateChipHeight.h,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F6FC),
+                  borderRadius: BorderRadius.circular(11.r),
+                ),
+                child: Icon(Icons.settings,
+                    size: 16.sp, color: kAppChipBorder.withValues(alpha: 0.7)),
+              ),
+            );
+          }
           final date =
               DateTime(_selectedDate.year, _selectedDate.month, index + 1);
           final isSelected = date.day == _selectedDate.day;
@@ -433,13 +457,10 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // 여백만 둠 - 그 대신 아주 처음/끝 슬롯 근처에서는 인디케이터가 화면
   // 정중앙이 아니라 그 여백만큼 치우친 채로 멈출 수 있음(트레이드오프).
   static double get _edgePadding => (48 * 7 / 8).h;
-  // ⭐ 세로축 선의 두께 + 정각/30분 눈금 두께 - 전부 원형/선 두께처럼
-  // 가로세로 구분 없는 값이라 .r로 통일. 각 눈금의 Positioned top 오프셋이
-  // "-두께/2"로 이 값에서 직접 파생되므로, 여기 값만 바꾸면 중앙 정렬이
-  // 항상 그대로 유지됨.
+  // ⭐ 세로축 선의 두께 - 원형/선 두께처럼 가로세로 구분 없는 값이라 .r로 통일.
+  // ⭐ 2026-08-27 - 정각/30분 눈금(짧은 선) 자체는 삭제함(요청) - 숫자만 남김.
+  // 눈금 두께 상수(_hourTickThickness/_halfTickThickness)도 같이 제거.
   static double get _axisLineWidth => (4 * 7 / 8).r;
-  static double get _hourTickThickness => (3 * 7 / 8).r;
-  static double get _halfTickThickness => (2.5 * 7 / 8).r;
 
   final ScrollController _controller = ScrollController();
   double _initialMinutes = 0; // 최초 진입 시 중앙에 놓일 시각(현재 시각)
@@ -482,7 +503,9 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   @override
   void initState() {
     super.initState();
-    _initialMinutes = _computeInitialCenterMinutes();
+    // ⭐ _initialMinutes는 이 날짜 데이터가 실제로 로드된 뒤 build()에서
+    // 계산함(아래 build()의 isLoaded 참고) - 여기서 미리 계산하면 아직 빈
+    // 상태인 _blocks를 보고 "일정 없음"으로 잘못 판단하게 됨.
     // ⭐ 이 위젯은 날짜가 바뀌면 key: ValueKey(dateKey) 덕분에 통째로 새로
     // 마운트되므로(부모 build() 참고), initState에서 한 번만 로드하면 됨.
     // 이미 로드된 날짜면 DateScheduleNotifier.loadForDate가 알아서 스킵함.
@@ -496,16 +519,20 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // 후" 시각(예: 주간 09~18시 근무면 18시 근처, 야간 22~08시 근무면 09~12시
   // 사이)을 반환하도록 이 함수 안쪽 분기만 늘리면 됨 - 호출부(initState)는
   // 안 건드려도 됨.
+  // ⭐ 2026-08-27 - "다른 탭에서 들어오면 기본 9시, 그 날 일정이 있으면 가장
+  // 먼저 시작하는 일정 쪽" 요청으로 전면 교체. hasShiftToday/현재시각 기준
+  // 분기는 없앰(값이 흔들리면 "인디케이터가 왜 매번 다른 데를 가리키냐"는
+  // 혼란을 줄 수 있어서, 이제 순수하게 "그 날 일정 유무"만 기준으로 함).
   double _computeInitialCenterMinutes() {
-    final hasEmptyState = !widget.hasShiftToday && _blocks.isEmpty;
-    if (hasEmptyState) {
-      // TODO(근무시간 입력 기능 붙을 때): widget.hasShiftToday 대신 그날의
-      // 실제 근무 유형 + 근무별 근무시간 설정을 받아서, 주간/야간 등 유형별로
-      // "근무 후" 시각을 반환하도록 분기 추가.
-      return 9 * 60; // 09:00
+    if (_blocks.isNotEmpty) {
+      final earliest =
+          _blocks.map((b) => b.startMinutes).reduce((a, b) => a < b ? a : b);
+      return earliest.toDouble();
     }
-    final now = DateTime.now();
-    return (now.hour * 60 + now.minute).toDouble();
+    // TODO(근무시간 입력 기능 붙을 때): widget.hasShiftToday를 활용해서 그날의
+    // 실제 근무 유형 + 근무별 근무시간 설정을 받아서, 주간/야간 등 유형별로
+    // "근무 후" 시각을 반환하도록 분기 추가(지금은 항상 09:00 고정).
+    return 9 * 60; // 09:00
   }
 
   @override
@@ -515,25 +542,15 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
     super.dispose();
   }
 
-  String _formatMinutes(num minutes) {
-    final total = minutes.round().clamp(0, _slotCount * 30);
-    final h = (total ~/ 60) % 24;
-    final m = total % 60;
-    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
-  }
-
-  // ⭐ "00:00 ~ 03:00 (3시간)"처럼 범위 + 소요시간을 한 줄로. 소요시간 포맷은
-  // 이미 있던 _durationPresetLabel(프리셋 칩 라벨)을 그대로 재사용함.
-  String _timeRangeLabel(DateSchedule block) {
-    final start = _formatMinutes(block.startMinutes);
-    final end = _formatMinutes(block.startMinutes + block.durationMinutes);
-    return '$start ~ $end (${_durationPresetLabel(block.durationMinutes)})';
-  }
+  // ⭐ 2026-08-27 - AM/PM 표기로 교체(요청) - _scheduleTimeLabel(전역 함수)로
+  // 이식. 소요시간 없는 일정("10:00 AM"만 표시)도 이 함수가 처리함.
+  String _timeRangeLabel(DateSchedule block) =>
+      _scheduleTimeLabel(block.startMinutes, block.durationMinutes);
 
   // ⭐ "정확히 동일한 시간 범위"의 일정은 중복 생성을 막음 - 그런 경우는
   // 기존 일정에 내용을 같이 적으면 되니까. [exclude]는 수정 시 자기 자신은
   // 비교 대상에서 빼기 위함.
-  bool _hasDuplicateRange(int start, int duration, {DateSchedule? exclude}) {
+  bool _hasDuplicateRange(int start, int? duration, {DateSchedule? exclude}) {
     return _blocks.any((b) =>
         !identical(b, exclude) &&
         b.startMinutes == start &&
@@ -848,8 +865,14 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
 
   @override
   Widget build(BuildContext context) {
-    _blocks =
-        ref.watch(dateScheduleProvider)[widget.dateKey] ?? const [];
+    final providerState = ref.watch(dateScheduleProvider);
+    // ⭐ 2026-08-27 - DB 로드는 비동기라, initState 시점엔 이 날짜 데이터가
+    // 아직 없음(빈 리스트와 "아직 안 불러옴"을 구분해야 함 - 안 그러면
+    // "가장 먼저 시작하는 일정으로 초기 위치" 기능이 로드 전에 빈 리스트로
+    // 잘못 판단해서 항상 09:00으로 점프해버림). containsKey로 "실제로 이
+    // 날짜를 로드했는지"를 확인하고, 로드된 뒤 딱 한 번만 점프함.
+    final isLoaded = providerState.containsKey(widget.dateKey);
+    _blocks = providerState[widget.dateKey] ?? const [];
     return LayoutBuilder(
       builder: (context, constraints) {
         _viewportHeight = constraints.maxHeight;
@@ -862,8 +885,9 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
         // 작아진 만큼(44→36) 간격도 줄임 - 다만 너무 붙지는 않게(요청) 58→46.
         final rowLeft = _axisX + 26.w;
 
-        if (!_jumpedToInitial) {
+        if (!_jumpedToInitial && isLoaded) {
           _jumpedToInitial = true;
+          _initialMinutes = _computeInitialCenterMinutes();
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!_controller.hasClients) return;
             final slot = (_initialMinutes ~/ 30).clamp(0, _slotCount - 1);
@@ -921,18 +945,19 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                         ),
                       ),
                     ),
-                    // ⭐ 정각 눈금 + 숫자 - 요청대로 축 왼쪽으로 옮김(시간이
-                    // 왼쪽, 축은 그 오른쪽). 눈금 끝도 둥글게. 색상을 메인
-                    // 색상 계열로 통일하고, 숫자는 딱딱한 기본 서체 대신
-                    // 더 둥글둥글한 서체(Quicksand)로 바꿈("너무 딱딱하다"
-                    // 피드백).
+                    // ⭐ 2026-08-27 - 정각/30분 눈금(짧은 선) 전부 삭제 요청 -
+                    // 숫자만 남기고, 그만큼 폰트를 살짝 키우고 축에 더 붙임
+                    // (눈금이 없어져서 숫자 오른쪽 끝이 자연히 축에 닿음).
+                    // 인디케이터가 각 정각/30분에 자석처럼 붙는 동작 자체는
+                    // 그대로 유지됨(_snapToNearestSlot 등 - 눈금은 시각적
+                    // 표시일 뿐 스냅 로직과 무관).
                     for (int hour = 0; hour <= 24; hour++)
                       Positioned(
                         top: _edgePadding +
                             _slotTops[(hour * 2).clamp(0, _slotCount)] -
                             _hourTickBoxHeight / 2,
                         left: 0,
-                        width: _axisX,
+                        width: _axisX - 4.w,
                         height: _hourTickBoxHeight,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -940,37 +965,11 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                             Text(
                               (hour % 24).toString().padLeft(2, '0'),
                               style: GoogleFonts.quicksand(
-                                  fontSize: 16.sp,
+                                  fontSize: 19.sp,
                                   fontWeight: FontWeight.w700,
                                   color: kAppMainAccent),
                             ),
-                            SizedBox(width: 8.w),
-                            Container(
-                              width: 18.w,
-                              height: _hourTickThickness,
-                              decoration: BoxDecoration(
-                                  color: kAppMainAccent.withValues(alpha: 0.7),
-                                  borderRadius: BorderRadius.circular(
-                                      _hourTickThickness / 2)),
-                            ),
                           ],
-                        ),
-                      ),
-                    // 30분 눈금 - 숫자 없이 짧은 선만, 축 왼쪽에 끝이 닿게(둥근 끝).
-                    // 정각 눈금보다 옅은 톤으로 둬서 위계(정각> 30분)를 줌.
-                    for (int slot = 1; slot < _slotCount; slot += 2)
-                      Positioned(
-                        top: _edgePadding +
-                            _slotTops[slot] -
-                            _halfTickThickness / 2,
-                        left: _axisX - 14.w,
-                        child: Container(
-                          width: 14.w,
-                          height: _halfTickThickness,
-                          decoration: BoxDecoration(
-                              color: kAppMainAccent.withValues(alpha: 0.28),
-                              borderRadius: BorderRadius.circular(
-                                  _halfTickThickness / 2)),
                         ),
                       ),
                     // ⭐ 일정들 - 시작 슬롯 기준으로 아이콘+내용 한 줄씩. 같은
@@ -1181,16 +1180,58 @@ class _ScheduleRow extends StatelessWidget {
           block.iconIndex.clamp(0, _kScheduleCategoryIcons.length - 1)]
       .$3;
 
+  // ⭐ 2026-08-27 - 아이콘 배경 3단계(요청):
+  //  1) 1시간 이내(또는 시간 미정) - 지금처럼 정원
+  //  2) 1~2시간 - 원을 아래로 살짝 늘림
+  //  3) 2시간 초과 - "아이콘 윗 라인 ~ 내용 텍스트가 적히는 가로선"까지 전부.
+  // heightForStyle(1)의 구성요소(iconD + 6.h + 26.h + ...)에서 마지막
+  // "iconD/2 + safety"는 다음 줄과의 여유분이라 이 계산엔 안 씀 - 그래야
+  // 정확히 "내용 텍스트 줄"까지만 닿고 다음 일정과는 안 겹침.
+  double _iconBgHeight(double diameter) {
+    final duration = block.durationMinutes;
+    if (duration == null || duration <= 60) return diameter;
+    final fullSpan = diameter + 6.h + 26.h;
+    if (duration <= 120) {
+      return diameter + (fullSpan - diameter) * 0.55;
+    }
+    return fullSpan;
+  }
+
+  // ⭐ Stack + 레이아웃 전용 SizedBox(diameter×diameter) 트릭 - 실제 배경(pill)은
+  // Positioned(top:0)으로 그 위에 겹쳐 그리고 Clip.none으로 아래로 넘치게 둠.
+  // 이렇게 하면 배경이 아무리 길어져도 Row/Column의 "크기 계산"에는 항상
+  // diameter만 반영돼서, 시간 라벨·내용 텍스트 위치가 전혀 안 흔들림(요청:
+  // "시간이랑 내용은 일단 위치 그대로 지키고").
   Widget _icon(double diameter) {
-    return Container(
-      width: diameter,
-      height: diameter,
-      decoration: BoxDecoration(color: block.color, shape: BoxShape.circle),
-      padding: EdgeInsets.all(diameter * 0.24),
-      child: SvgPicture.asset(
-        _categoryAsset,
-        colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-      ),
+    final bgHeight = _iconBgHeight(diameter);
+    final glyphSize = diameter * 0.52;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        SizedBox(width: diameter, height: diameter),
+        Positioned(
+          top: 0,
+          left: 0,
+          child: Container(
+            width: diameter,
+            height: bgHeight,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: block.color,
+              borderRadius: BorderRadius.circular(diameter / 2),
+            ),
+            child: SizedBox(
+              width: glyphSize,
+              height: glyphSize,
+              child: SvgPicture.asset(
+                _categoryAsset,
+                colorFilter:
+                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1228,9 +1269,11 @@ class _ScheduleRow extends StatelessWidget {
     }
   }
 
-  // ⭐ 아이콘 + 시간 말풍선 한 줄 - 모든 스타일이 공유하는 "첫 줄" 조각.
-  // Row.crossAxisAlignment.center에 맡겨두면 텍스트/말풍선이 항상 아이콘
-  // 정중앙에 자동으로 맞춰짐(수치 튜닝 불필요).
+  // ⭐ 아이콘 + 시간 텍스트 한 줄 - 모든 스타일이 공유하는 "첫 줄" 조각.
+  // Row.crossAxisAlignment.center에 맡겨두면 텍스트가 항상 아이콘 정중앙에
+  // 자동으로 맞춰짐(수치 튜닝 불필요).
+  // ⭐ 2026-08-27 - 시간 표시의 타원형 배경(말풍선)을 삭제(요청) - 그냥
+  // 일정 색(block.color)의 텍스트로만 표시.
   Widget _iconAndTimeBubbleRow() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -1238,21 +1281,14 @@ class _ScheduleRow extends StatelessWidget {
         _icon(iconDiameter),
         SizedBox(width: 10.w),
         Flexible(
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-            decoration: BoxDecoration(
-              color: block.color,
-              borderRadius: BorderRadius.circular(14.r),
-            ),
-            child: Text(
-              timeLabel,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white),
-            ),
+          child: Text(
+            timeLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: block.color),
           ),
         ),
       ],
@@ -1592,6 +1628,39 @@ String _durationPresetLabel(int minutes) {
   return m == 0 ? '$h시간' : '$h시간 $m분';
 }
 
+// ⭐ 2026-08-27 - 12시간제(AM/PM) 변환. 자정=12:00 AM, 정오=12:00 PM.
+(String hhmm, String period) _to12Hour(int totalMinutes) {
+  final h24 = (totalMinutes ~/ 60) % 24;
+  final m = totalMinutes % 60;
+  final period = h24 < 12 ? 'AM' : 'PM';
+  var h12 = h24 % 12;
+  if (h12 == 0) h12 = 12;
+  return (
+    '${h12.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}',
+    period,
+  );
+}
+
+// ⭐ 2026-08-27 - 시간 표시 전면 개편(요청):
+//  - "~" 대신 "-"
+//  - AM/PM 표기 - 시작/끝이 같은 오전·오후면 끝에 한 번만("10:00 - 11:00 AM"),
+//    다르면 각각("10:00 AM - 01:00 PM")
+//  - 소요시간이 없으면(요청: "몇 시간 할지는 안 정해도 되게") 시작 시각만
+//    ("10:00 AM") - 범위/소요시간 괄호 없음.
+String _scheduleTimeLabel(int startMinutes, int? durationMinutes) {
+  final (startHHMM, startPeriod) = _to12Hour(startMinutes);
+  if (durationMinutes == null) {
+    return '$startHHMM $startPeriod';
+  }
+  final endTotal = (startMinutes + durationMinutes).clamp(0, 24 * 60);
+  final (endHHMM, endPeriod) = _to12Hour(endTotal);
+  final durationLabel = _durationPresetLabel(durationMinutes);
+  if (startPeriod == endPeriod) {
+    return '$startHHMM - $endHHMM $endPeriod ( $durationLabel )';
+  }
+  return '$startHHMM $startPeriod - $endHHMM $endPeriod ( $durationLabel )';
+}
+
 class _CreateBlockSheet extends StatefulWidget {
   final int startMinutes;
   // ⭐ null이면 새로 만드는 중, 값이 있으면 그 일정을 수정하는 중(제목/내용/
@@ -1610,7 +1679,10 @@ class _CreateBlockSheet extends StatefulWidget {
 class _CreateBlockSheetState extends State<_CreateBlockSheet> {
   late final _contentController =
       TextEditingController(text: widget.existing?.content ?? '');
-  late int _selectedDuration = widget.existing?.durationMinutes ?? 30;
+  // ⭐ 2026-08-27 - null 허용(요청: "몇 시간 할지는 안 정해도 되게") - null이면
+  // "시작 시각만" 표시(_scheduleTimeLabel 참고). 새 일정 기본값은 기존과 동일한
+  // 30분(UI는 나중에 다듬을 예정, 지금은 토글만 추가).
+  late int? _selectedDuration = widget.existing?.durationMinutes ?? 30;
   // ⭐ 스타일(1~8)/폰트(1~5)/아이콘(0~9) 실험용 선택 - 요청: "번호로 지정할
   // 수 있게 팝업에 해놔줘, 순서대로가 아니라 내가 골라서 테스트하게".
   late int _selectedStyle = widget.existing?.styleIndex ?? 1;
@@ -1630,12 +1702,6 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
   void dispose() {
     _contentController.dispose();
     super.dispose();
-  }
-
-  String _fmt(int minutes) {
-    final h = (minutes ~/ 60) % 24;
-    final m = minutes % 60;
-    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
   }
 
   // ⭐ 제목이 없어졌으니 이제 "내용"이 유일한 필수 입력.
@@ -1773,9 +1839,6 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final endMinutes =
-        (widget.startMinutes + _selectedDuration).clamp(0, 24 * 60);
-
     return Padding(
       padding:
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -1857,24 +1920,21 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                   children: [
                     Icon(Icons.schedule, size: 18.sp, color: kAppMainAccent),
                     SizedBox(width: 8.w),
-                    Text(
-                      '${_fmt(widget.startMinutes)} – ${_fmt(endMinutes)}',
-                      style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w800,
-                          color: kAppMainAccent),
-                    ),
-                    SizedBox(width: 8.w),
-                    Text('(${_durationPresetLabel(_selectedDuration)})',
+                    Flexible(
+                      child: Text(
+                        _scheduleTimeLabel(
+                            widget.startMinutes, _selectedDuration),
                         style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                            color: kAppMainAccent.withValues(alpha: 0.7))),
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: kAppMainAccent),
+                      ),
+                    ),
                   ],
                 ),
               ),
               SizedBox(height: 10.h),
-              Text('시작 시간 + 얼마나?',
+              Text('시작 시간 + 얼마나? (선택 안 하면 시작 시각만 표시돼요)',
                   style: TextStyle(
                       fontSize: 11.5.sp,
                       color: kAppChipBorder.withValues(alpha: 0.45))),
@@ -1883,6 +1943,32 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                 spacing: 8.w,
                 runSpacing: 8.h,
                 children: [
+                  // ⭐ 2026-08-27 - 소요시간 미정 토글(요청: "시간을 추가하고
+                  // 안하고는 사용자 선택으로"). UI는 나중에 다듬을 예정 -
+                  // 지금은 프리셋 칩과 같은 모양의 토글 하나만.
+                  GestureDetector(
+                    onTap: () => setState(() => _selectedDuration = null),
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                      decoration: BoxDecoration(
+                        color: _selectedDuration == null
+                            ? kAppMainAccent
+                            : const Color(0xFFF4F6FC),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '시간 미정',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w700,
+                          color: _selectedDuration == null
+                              ? Colors.white
+                              : kAppChipBorder.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ),
+                  ),
                   for (final preset in _kDurationPresets)
                     GestureDetector(
                       onTap: () => setState(() => _selectedDuration = preset),
@@ -1981,6 +2067,90 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================
+// ⭐ 2026-08-27 - 일정관리 전용 설정 화면. 날짜 스트립 맨 끝 톱니바퀴에서
+// 진입(요청). 지금은 배경색 선택 하나만 - 다른 옵션은 나중에 추가.
+// ============================================================
+
+class _ScheduleSettingsScreen extends ConsumerWidget {
+  const _ScheduleSettingsScreen();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedIndex = ref.watch(scheduleBackgroundProvider);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('일정관리 설정'),
+        backgroundColor: Colors.white,
+        foregroundColor: kAppChipBorder,
+        elevation: 0,
+      ),
+      backgroundColor: Colors.white,
+      body: Padding(
+        padding: EdgeInsets.all(20.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('배경화면',
+                style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w800,
+                    color: kAppChipBorder)),
+            SizedBox(height: 4.h),
+            Text(
+              '일정관리 탭의 배경색을 골라주세요(상태표시줄·광고·하단 탭바는 제외).',
+              style: TextStyle(
+                  fontSize: 12.sp, color: kAppChipBorder.withValues(alpha: 0.55)),
+            ),
+            SizedBox(height: 18.h),
+            Wrap(
+              spacing: 14.w,
+              runSpacing: 14.h,
+              children: [
+                for (int i = 0; i < kScheduleBackgroundColors.length; i++)
+                  GestureDetector(
+                    onTap: () => ref
+                        .read(scheduleBackgroundProvider.notifier)
+                        .setColorIndex(i),
+                    child: Container(
+                      width: 52.w,
+                      height: 52.w,
+                      decoration: BoxDecoration(
+                        color: kScheduleBackgroundColors[i],
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: i == selectedIndex
+                              ? kAppMainAccent
+                              : kAppChipBorder.withValues(alpha: 0.15),
+                          width: i == selectedIndex ? 3 : 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2)),
+                        ],
+                      ),
+                      child: i == selectedIndex
+                          ? Icon(Icons.check,
+                              color: kScheduleBackgroundColors[i]
+                                          .computeLuminance() >
+                                      0.5
+                                  ? Colors.black87
+                                  : Colors.white,
+                              size: 20.sp)
+                          : null,
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );
