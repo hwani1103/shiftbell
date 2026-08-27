@@ -41,6 +41,12 @@ import '../providers/schedule_provider.dart';
 import '../services/memo_category_classifier.dart';
 import '../theme/app_colors.dart';
 
+// ⭐ 2026-08-27 - 세로축 시간 숫자 + 일정의 시간 텍스트가 공유하는 색.
+// "하얀 배경 기준으로 시간 숫자는 약간 회색/옅은 검정" 요청 - 지금은 흰
+// 배경 전용 고정값이고, 배경색 설정(schedule_background_provider.dart)별
+// 대응은 다음에("그건 그때 해야겠다" - 사용자 확인).
+const Color kScheduleTimeNumberColor = Color(0xFF6B7280);
+
 class ScheduleManagementTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar;
   const ScheduleManagementTab({super.key, this.onSwipeToCalendar});
@@ -53,6 +59,13 @@ class ScheduleManagementTab extends ConsumerStatefulWidget {
 class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
   late DateTime _selectedDate;
   final ScrollController _dateStripController = ScrollController();
+  // ⭐ 2026-08-27 - 인디케이터를 드래그하는 동안은 이 화면 전체를 덮는
+  // onHorizontalDragEnd(달력 탭으로 스와이프)와 제스처 아레나에서 경합해서,
+  // 세로 드래그 중 살짝만 가로로 틀어져도 인디케이터 쪽이 취소돼버리는
+  // 문제가 있었음(요청: "세로축을 조금만 벗어나도 선택이 해제됨"). 드래그
+  // 활성 중엔 이 가로 스와이프 자체를 꺼서 경합을 없앰 - _TimeAxisPicker가
+  // onIndicatorDragActiveChanged로 알려줌.
+  bool _indicatorDragActive = false;
 
   static const double _dateChipWidth = 36;
   static const double _dateChipHeight = 34;
@@ -131,14 +144,17 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
     final bgColor = kScheduleBackgroundColors[ref.watch(scheduleBackgroundProvider)];
 
     return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        if (widget.onSwipeToCalendar != null &&
-            details.primaryVelocity != null) {
-          if (details.primaryVelocity! > 500) {
-            widget.onSwipeToCalendar!();
-          }
-        }
-      },
+      // ⭐ 인디케이터 드래그 중엔 null로 꺼서 경합 자체를 없앰(위 필드 주석 참고).
+      onHorizontalDragEnd: _indicatorDragActive
+          ? null
+          : (details) {
+              if (widget.onSwipeToCalendar != null &&
+                  details.primaryVelocity != null) {
+                if (details.primaryVelocity! > 500) {
+                  widget.onSwipeToCalendar!();
+                }
+              }
+            },
       child: Scaffold(
         backgroundColor: bgColor,
         body: Column(
@@ -151,6 +167,8 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
                 child: _TimeAxisPicker(
                     key: ValueKey(dateKey),
                     dateKey: dateKey,
+                    onIndicatorDragActiveChanged: (active) =>
+                        setState(() => _indicatorDragActive = active),
                     hasShiftToday: selectedHasShift)),
           ],
         ),
@@ -158,13 +176,19 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
     );
   }
 
+  // ⭐ 2026-08-27 - "배경색을 헤더(2026년 8월 27일...)까지 적용, 핸드폰
+  // 상태표시줄만 빼고" 요청 - 예전엔 이 Container 전체가 불투명 흰색이라
+  // SafeArea의 상단 패딩(상태표시줄 자리)까지 같이 흰색으로 덮여있었음.
+  // 이제 상태표시줄 자리만 정확히 그 높이(MediaQuery.padding.top)만큼
+  // 흰색으로 남기고, 헤더 본문(Row)은 배경을 안 칠해서 Scaffold의 배경색이
+  // 그대로 비침.
   Widget _buildHeader(
       String dateLabel, String shiftName, bool hasShift, Color? shiftColor) {
-    return Container(
-      color: Colors.white,
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
+    return Column(
+      children: [
+        Container(
+            height: MediaQuery.of(context).padding.top, color: Colors.white),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 10.h),
           child: Row(
             children: [
@@ -196,7 +220,7 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -373,8 +397,14 @@ class _TimeAxisPicker extends ConsumerStatefulWidget {
   // 부모가 key: ValueKey(dateKey)로 감싸서 넘기므로, 날짜가 바뀌면 이 위젯
   // 전체가 새로 마운트됨(스크롤 위치·드래그 상태도 자연스럽게 리셋).
   final String dateKey;
+  // ⭐ 2026-08-27 - 인디케이터 드래그 시작/종료를 부모에게 알림(가로 스와이프
+  // 경합 방지용 - _ScheduleManagementTabState 참고).
+  final ValueChanged<bool>? onIndicatorDragActiveChanged;
   const _TimeAxisPicker(
-      {super.key, required this.hasShiftToday, required this.dateKey});
+      {super.key,
+      required this.hasShiftToday,
+      required this.dateKey,
+      this.onIndicatorDragActiveChanged});
 
   @override
   ConsumerState<_TimeAxisPicker> createState() => _TimeAxisPickerState();
@@ -578,10 +608,9 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
       if (blocksHere == null || blocksHere.isEmpty) {
         height = _baseSlotHeight;
       } else {
-        double sum = 0;
-        for (final b in blocksHere) {
-          sum += _ScheduleRow.heightForStyle(b.styleIndex);
-        }
+        // ⭐ 2026-08-27 - 스타일이 이제 항상 고정이라 개수만큼 곱하면 됨
+        // (예전엔 일정마다 styleIndex가 달라서 하나씩 더했음).
+        final sum = blocksHere.length * _ScheduleRow.heightForStyle;
         height = sum > _baseSlotHeight ? sum : _baseSlotHeight;
       }
       cursor += height;
@@ -599,7 +628,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
     for (final entry in _grouped.entries) {
       double offset = 0;
       for (final block in entry.value) {
-        final h = _ScheduleRow.heightForStyle(block.styleIndex);
+        final h = _ScheduleRow.heightForStyle;
         widgets.add(Positioned(
           top: _edgePadding + _slotTops[entry.key] + offset,
           left: rowLeft,
@@ -710,7 +739,10 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   double get _indicatorScreenY {
     if (_dragContentY == null) return _viewportHeight / 2;
     final scrollOffset = _controller.hasClients ? _controller.offset : 0.0;
-    return _edgePadding + _slotTops[_displaySlot] - scrollOffset;
+    // ⭐ 2026-08-27 - "인디케이터(화살표)가 시간보다 약간 위를 가리킨다"는
+    // 피드백으로 +3.h만큼 아래로 미세조정. 실기기로 다시 확인하며 필요하면
+    // 더 조정할 수 있음.
+    return _edgePadding + _slotTops[_displaySlot] - scrollOffset + 3.h;
   }
 
   bool get _isDragging => _dragContentY != null;
@@ -768,6 +800,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
       _downContentY = _dragContentY;
       _hasMovedSinceDown = false;
     });
+    widget.onIndicatorDragActiveChanged?.call(true);
   }
 
   void _onIndicatorDragUpdate(DragUpdateDetails details) {
@@ -797,6 +830,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
     _edgeTimer?.cancel();
     _edgeTimer = null;
     if (_dragContentY == null) return;
+    widget.onIndicatorDragActiveChanged?.call(false);
     final moved = _hasMovedSinceDown;
     final slot = _displaySlot; // 리셋 전에 미리 계산해둠
     _downContentY = null;
@@ -924,22 +958,28 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                       width: _axisLineWidth,
                       child: Container(
                         decoration: BoxDecoration(
+                          // ⭐ 2026-08-27 - 끝단 알파를 0.25→0.6으로 올림
+                          // (요청: "맨 위/아래 00 부분만 세로축이 뿌옇게 보인다") -
+                          // 축 양끝이 정확히 00시/24시(=00) 라벨 위치와 겹쳐서,
+                          // 그 지점의 짙은 페이드(25%) + 그림자 블러가 합쳐져
+                          // 유독 흐릿하게 보였던 것으로 보임. 캡슐 느낌은
+                          // 남기되 그 정도로 옅어지진 않게 완화.
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              kAppMainAccent.withValues(alpha: 0.25),
-                              kAppMainAccent.withValues(alpha: 0.75),
-                              kAppMainAccent.withValues(alpha: 0.25),
+                              kAppMainAccent.withValues(alpha: 0.6),
+                              kAppMainAccent.withValues(alpha: 0.8),
+                              kAppMainAccent.withValues(alpha: 0.6),
                             ],
                           ),
                           borderRadius:
                               BorderRadius.circular(_axisLineWidth / 2),
                           boxShadow: [
                             BoxShadow(
-                              color: kAppMainAccent.withValues(alpha: 0.25),
-                              blurRadius: 6.r,
-                              spreadRadius: 0.5.r,
+                              color: kAppMainAccent.withValues(alpha: 0.2),
+                              blurRadius: 4.r,
+                              spreadRadius: 0.3.r,
                             ),
                           ],
                         ),
@@ -957,17 +997,22 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                             _slotTops[(hour * 2).clamp(0, _slotCount)] -
                             _hourTickBoxHeight / 2,
                         left: 0,
-                        width: _axisX - 4.w,
+                        // ⭐ 2026-08-27 - "너무 붙었다"는 후속 피드백으로 축과의
+                        // 간격을 4.w→10.w로 다시 살짝 벌림.
+                        width: _axisX - 10.w,
                         height: _hourTickBoxHeight,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Text(
                               (hour % 24).toString().padLeft(2, '0'),
+                              // ⭐ 2026-08-27 - 일정 시간 텍스트(_ScheduleRow.
+                              // _timeTextStyle)와 스타일 통일 요청 - 폰트/굵기는
+                              // 그대로(Quicksand w700), 색만 kScheduleTimeNumberColor로.
                               style: GoogleFonts.quicksand(
                                   fontSize: 19.sp,
                                   fontWeight: FontWeight.w700,
-                                  color: kAppMainAccent),
+                                  color: kScheduleTimeNumberColor),
                             ),
                           ],
                         ),
@@ -1151,29 +1196,16 @@ class _ScheduleRow extends StatelessWidget {
     required this.onTap,
   });
 
-  // ⭐ 스타일별로 실제 필요한 세로 공간. iconDiameter는 axisPicker와 동일한
-  // 스케일 getter를 그대로 참조함(같은 파일=라이브러리라 접근 가능).
-  static double heightForStyle(int style) {
+  // ⭐ 2026-08-27 - 렌더링 스타일 3번(밑줄 강조)으로 확정, 나머지 7종은
+  // 코드째로 삭제(요청: "팝업에서 선택하는 거 다 삭제, 코드상으로도 삭제").
+  // iconDiameter는 axisPicker와 동일한 스케일 getter를 그대로 참조함(같은
+  // 파일=라이브러리라 접근 가능).
+  // ⭐ 첫 줄~내용 줄 사이 간격을 6.h→2.h로 줄임(요청: "시간이랑 너무 멀리
+  // 떨어져있다") - _buildBody()의 SizedBox와 반드시 같이 맞출 것.
+  static double get heightForStyle {
     final iconD = _TimeAxisPickerState._iconDiameter;
     const safety = 12.0; // 폰트별 줄높이 편차 대비 여유분
-    switch (style) {
-      case 2: // 말풍선 2단
-        return iconD + 4.h + 30.h + iconD / 2 + safety;
-      case 3: // 밑줄 강조
-        return iconD + 6.h + 26.h + iconD / 2 + safety;
-      case 4: // 테두리 카드
-      case 5: // 연한 배경 카드
-        return iconD + 6.h + 46.h + iconD / 2 + safety;
-      case 6: // 통합 카드
-        return iconD / 2 + 78.h + iconD / 2 + safety;
-      case 7: // 시간 우측 정렬(한 줄)
-        return iconD + iconD / 2 + safety;
-      case 8: // 미니멀(말풍선 없이)
-        return iconD + 6.h + 26.h + iconD / 2 + safety;
-      case 1: // 기본
-      default:
-        return iconD + 6.h + 26.h + iconD / 2 + safety;
-    }
+    return iconD + 2.h + 26.h + iconD / 2 + safety;
   }
 
   String get _categoryAsset => _kScheduleCategoryIcons[
@@ -1183,14 +1215,13 @@ class _ScheduleRow extends StatelessWidget {
   // ⭐ 2026-08-27 - 아이콘 배경 3단계(요청):
   //  1) 1시간 이내(또는 시간 미정) - 지금처럼 정원
   //  2) 1~2시간 - 원을 아래로 살짝 늘림
-  //  3) 2시간 초과 - "아이콘 윗 라인 ~ 내용 텍스트가 적히는 가로선"까지 전부.
-  // heightForStyle(1)의 구성요소(iconD + 6.h + 26.h + ...)에서 마지막
-  // "iconD/2 + safety"는 다음 줄과의 여유분이라 이 계산엔 안 씀 - 그래야
-  // 정확히 "내용 텍스트 줄"까지만 닿고 다음 일정과는 안 겹침.
+  //  3) 2시간 초과 - 스타일 3번의 세로 막대(밑줄)가 끝나는 라인까지 전부.
+  // "약간 더 길게 해서 세로 막대기 끝과 맞춰라"는 후속 요청으로 +8.h만큼
+  // 더 얹음 - 실기기로 다시 확인하며 미세조정할 수 있음.
   double _iconBgHeight(double diameter) {
     final duration = block.durationMinutes;
     if (duration == null || duration <= 60) return diameter;
-    final fullSpan = diameter + 6.h + 26.h;
+    final fullSpan = diameter + 2.h + 26.h + 8.h;
     if (duration <= 120) {
       return diameter + (fullSpan - diameter) * 0.55;
     }
@@ -1235,46 +1266,35 @@ class _ScheduleRow extends StatelessWidget {
     );
   }
 
-  TextStyle _contentStyle({double size = 14, Color? color}) =>
-      _contentFontStyle(block.fontIndex,
-          fontSize: size.sp, color: color ?? kAppChipBorder);
+  // ⭐ 2026-08-27 - 내용 텍스트는 "진한 검정색 bold체" 느낌으로(요청) -
+  // fontWeight를 w500→w700으로 올림. 폰트는 5번(주아체) 고정.
+  TextStyle _contentStyle({double size = 14, Color? color}) => GoogleFonts.jua(
+      fontSize: size.sp, fontWeight: FontWeight.w700, color: color ?? kAppChipBorder);
 
+  // ⭐ 2026-08-27 - 세로축 시간 숫자와 스타일 통일(요청: "세로축의 숫자랑
+  // 일정에 생성되는 숫자랑 크기+색깔+텍스트 스타일을 전부 맞추자"). 폰트=
+  // Quicksand w700(축과 동일), 크기는 축(19sp)보다 작고 예전 값(13sp)보다는
+  // 큼(16sp), 색은 kScheduleTimeNumberColor(옅은 회색 - 흰 배경 기준. 배경색별
+  // 대응은 다음에).
+  TextStyle get _timeTextStyle => GoogleFonts.quicksand(
+      fontSize: 16.sp, fontWeight: FontWeight.w700, color: kScheduleTimeNumberColor);
+
+  // ⭐ 2026-08-27 - "아이콘/시간/그 사이 공간을 탭해도 편집모드로" 요청 -
+  // HitTestBehavior.opaque로 GestureDetector 자기 영역(Positioned가 준 전체
+  // 칸) 안이면 자식이 안 그린 빈 공간이라도 전부 탭을 잡음(기본값
+  // deferToChild는 실제로 뭔가 그려진 픽셀 위에서만 반응해서, 아이콘과 내용
+  // 사이 여백을 탭하면 안 먹혔던 것).
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: _buildStyle(context),
+      child: _buildBody(),
     );
   }
 
-  Widget _buildStyle(BuildContext context) {
-    switch (block.styleIndex) {
-      case 2:
-        return _style2BubblePair();
-      case 3:
-        return _style3Underline();
-      case 4:
-        return _style4Outlined();
-      case 5:
-        return _style5SoftCard();
-      case 6:
-        return _style6UnifiedCard();
-      case 7:
-        return _style7RightTime();
-      case 8:
-        return _style8Minimal();
-      case 1:
-      default:
-        return _style1Baseline();
-    }
-  }
-
-  // ⭐ 아이콘 + 시간 텍스트 한 줄 - 모든 스타일이 공유하는 "첫 줄" 조각.
-  // Row.crossAxisAlignment.center에 맡겨두면 텍스트가 항상 아이콘 정중앙에
-  // 자동으로 맞춰짐(수치 튜닝 불필요).
-  // ⭐ 2026-08-27 - 시간 표시의 타원형 배경(말풍선)을 삭제(요청) - 그냥
-  // 일정 색(block.color)의 텍스트로만 표시.
-  Widget _iconAndTimeBubbleRow() {
+  // ⭐ 아이콘 + 시간 텍스트 한 줄.
+  Widget _iconAndTimeRow() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -1285,10 +1305,7 @@ class _ScheduleRow extends StatelessWidget {
             timeLabel,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                color: block.color),
+            style: _timeTextStyle,
           ),
         ),
       ],
@@ -1296,63 +1313,19 @@ class _ScheduleRow extends StatelessWidget {
   }
 
   Widget _firstLine() => Transform.translate(
-      offset: Offset(0, -iconDiameter / 2), child: _iconAndTimeBubbleRow());
+      offset: Offset(0, -iconDiameter / 2), child: _iconAndTimeRow());
 
-  // ⭐ 스타일 1 - 기본. 시간 말풍선 아래 내용을 그냥 검정 텍스트로.
-  Widget _style1Baseline() {
+  // ⭐ 2026-08-27 - 렌더링 스타일 3번(밑줄/왼쪽 세로 막대 강조)으로 확정,
+  // 나머지 7종은 코드째로 삭제(요청).
+  Widget _buildBody() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         _firstLine(),
-        SizedBox(height: 6.h),
-        Padding(
-          padding: EdgeInsets.only(left: iconDiameter + 10.w),
-          child: Text(block.content,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: _contentStyle()),
-        ),
-      ],
-    );
-  }
-
-  // ⭐ 스타일 2 - 말풍선 2단. 시간 말풍선 아래에 더 얇고 더 넓은(오른쪽까지)
-  // 말풍선을 하나 더 두고 그 안에 내용(시간보다 작은 글씨)을 담음.
-  Widget _style2BubblePair() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _firstLine(),
-        SizedBox(height: 4.h),
-        Padding(
-          padding: EdgeInsets.only(left: iconDiameter + 10.w),
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
-            decoration: BoxDecoration(
-              color: block.color,
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Text(block.content,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: _contentStyle(size: 12, color: Colors.white)),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ⭐ 스타일 3 - 밑줄(왼쪽 세로 바) 강조. 인용구처럼 왼쪽에 색 막대를 세움.
-  Widget _style3Underline() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _firstLine(),
-        SizedBox(height: 6.h),
+        // ⭐ 6.h→2.h(요청: "시간이랑 너무 멀리 떨어져있다") - heightForStyle의
+        // "iconD + 2.h + ..."와 반드시 같은 값으로 맞출 것.
+        SizedBox(height: 2.h),
         Padding(
           padding: EdgeInsets.only(left: iconDiameter + 10.w),
           child: IntrinsicHeight(
@@ -1375,174 +1348,6 @@ class _ScheduleRow extends StatelessWidget {
               ],
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  // ⭐ 스타일 4 - 테두리만 있는 카드(배경 없음, 아이콘 색 테두리).
-  Widget _style4Outlined() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _firstLine(),
-        SizedBox(height: 6.h),
-        Padding(
-          padding: EdgeInsets.only(left: iconDiameter + 10.w),
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              border: Border.all(color: block.color.withValues(alpha: 0.6)),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Text(block.content,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: _contentStyle()),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ⭐ 스타일 5 - 연한 배경 카드(아이콘 색의 옅은 틴트로 채움).
-  Widget _style5SoftCard() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _firstLine(),
-        SizedBox(height: 6.h),
-        Padding(
-          padding: EdgeInsets.only(left: iconDiameter + 10.w),
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: block.color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Text(block.content,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: _contentStyle()),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // ⭐ 스타일 6 - 통합 카드. 시간+내용을 하나의 큰(옅은 색) 카드에 함께
-  // 담고, 아이콘은 카드 왼쪽 위 모서리에 살짝 걸치듯 배치(뱃지 느낌).
-  // 정밀한 세로 여백 계산이 필요한 스타일 - heightForStyle(6)과 반드시
-  // 같은 수치(iconD/2 시작, 78.h짜리 카드)를 써야 다음 일정과 안 겹침.
-  Widget _style6UnifiedCard() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Padding(
-          padding: EdgeInsets.only(top: iconDiameter / 2),
-          child: Container(
-            width: double.infinity,
-            margin: EdgeInsets.only(left: iconDiameter / 2 + 8.w),
-            padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 12.h),
-            decoration: BoxDecoration(
-              color: block.color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: block.color.withValues(alpha: 0.35)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(timeLabel,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w800,
-                        color: block.color)),
-                SizedBox(height: 4.h),
-                Text(block.content,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: _contentStyle()),
-              ],
-            ),
-          ),
-        ),
-        Positioned(top: 0, left: 0, child: _icon(iconDiameter)),
-      ],
-    );
-  }
-
-  // ⭐ 스타일 7 - 시간을 오른쪽 끝의 작은 칩으로 밀어내고, 내용이 첫 줄
-  // 전체 너비를 차지함(내용이 주인공, 시간은 보조 정보). 내용이 아래에
-  // 따로 있지 않고 이 한 줄로 끝나는 유일한 스타일.
-  Widget _style7RightTime() {
-    return Transform.translate(
-      offset: Offset(0, -iconDiameter / 2),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _icon(iconDiameter),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Text(block.content,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: _contentStyle(size: 15)),
-          ),
-          SizedBox(width: 8.w),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
-            decoration: BoxDecoration(
-                color: block.color, borderRadius: BorderRadius.circular(999)),
-            child: Text(timeLabel,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ⭐ 스타일 8 - 미니멀. 말풍선 없이 시간도 그냥 색 텍스트로(더 조용한 느낌).
-  Widget _style8Minimal() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Transform.translate(
-          offset: Offset(0, -iconDiameter / 2),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _icon(iconDiameter),
-              SizedBox(width: 10.w),
-              Text(timeLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w700,
-                      color: block.color)),
-            ],
-          ),
-        ),
-        SizedBox(height: 6.h),
-        Padding(
-          padding: EdgeInsets.only(left: iconDiameter + 10.w),
-          child: Text(block.content,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: _contentStyle()),
         ),
       ],
     );
@@ -1575,43 +1380,9 @@ const List<(String key, String label, String asset)> _kScheduleCategoryIcons = [
   ('etc', '기타', 'assets/icons/memo_category/etc.svg'),
 ];
 
-// ⭐ 내용 텍스트 폰트 5종(요청: "한글 폰트 좀 예쁜거 몇개 받아봐, 5개정도") -
-// google_fonts 패키지로 런타임에 받아옴(축 숫자에 쓴 Quicksand와 같은 방식).
-// 전부 한글을 지원하는 구글 폰트 중 결이 서로 다른 것들로 골랐음: 1은 무난한
-// 기본값, 2~5는 손글씨/포스터/펜글씨/동글동글 등 뚜렷하게 다른 인상.
-const List<String> _kContentFontNames = [
-  '고운돋움',
-  '개구쟁이',
-  '도현체',
-  '나눔펜',
-  '주아체',
-];
-
-TextStyle _contentFontStyle(
-  int fontIndex, {
-  required double fontSize,
-  FontWeight fontWeight = FontWeight.w500,
-  required Color color,
-}) {
-  switch (fontIndex) {
-    case 2:
-      return GoogleFonts.gaegu(
-          fontSize: fontSize, fontWeight: fontWeight, color: color);
-    case 3:
-      return GoogleFonts.doHyeon(
-          fontSize: fontSize, fontWeight: fontWeight, color: color);
-    case 4:
-      return GoogleFonts.nanumPenScript(
-          fontSize: fontSize, fontWeight: fontWeight, color: color);
-    case 5:
-      return GoogleFonts.jua(
-          fontSize: fontSize, fontWeight: fontWeight, color: color);
-    case 1:
-    default:
-      return GoogleFonts.gowunDodum(
-          fontSize: fontSize, fontWeight: fontWeight, color: color);
-  }
-}
+// ⭐ 2026-08-27 - 글씨체 5종(고운돋움/개구쟁이/도현체/나눔펜/주아체) 실험을
+// 접고 5번(주아체)으로 확정하면서 이 함수/목록 삭제(요청: "코드상으로도
+// 삭제"). 이제 _ScheduleRow._contentStyle()이 GoogleFonts.jua를 직접 씀.
 
 // ⭐ 소요시간 프리셋 - "10분/15분/20분/30분/45분/1시간/2시간/4시간/5시간" 요청.
 // 자유 입력 대신 프리셋 칩으로 고른 이유: 어차피 시작 시간도 30분 단위로
@@ -1683,17 +1454,9 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
   // "시작 시각만" 표시(_scheduleTimeLabel 참고). 새 일정 기본값은 기존과 동일한
   // 30분(UI는 나중에 다듬을 예정, 지금은 토글만 추가).
   late int? _selectedDuration = widget.existing?.durationMinutes ?? 30;
-  // ⭐ 스타일(1~8)/폰트(1~5)/아이콘(0~9) 실험용 선택 - 요청: "번호로 지정할
-  // 수 있게 팝업에 해놔줘, 순서대로가 아니라 내가 골라서 테스트하게".
-  late int _selectedStyle = widget.existing?.styleIndex ?? 1;
-  late int _selectedFont = widget.existing?.fontIndex ?? 1;
-  late int _selectedIcon = widget.existing?.iconIndex ?? 0;
-  // ⭐ Phase 5(메모_자동분류_ML_계획.md) - 사용자가 아이콘을 직접 고르지 않고
-  // 저장하면, 내용 텍스트로 자동분류(MemoCategoryClassifier)해서 아이콘을
-  // 대신 골라줌. 기존 일정을 수정할 땐(이미 아이콘이 있었으므로) 다시 자동
-  // 배정하지 않고 그 값을 "수동 선택"으로 취급 - 사용자가 실제로 아이콘
-  // 칩을 탭하면 그때부터 항상 수동 우선.
-  late bool _iconManuallySet = widget.existing != null;
+  // ⭐ 2026-08-27 - 스타일/폰트/아이콘 선택 팝업 전부 삭제(요청: "팝업 간소화,
+  // 스타일 3번·글씨체 5번으로 확정"). 아이콘은 이제 항상 자동분류만 씀 -
+  // _iconManuallySet 같은 "수동 우선" 개념 자체가 없어짐(고를 UI가 없으니까).
   bool _autoClassifying = false;
 
   bool get _isEditing => widget.existing != null;
@@ -1707,118 +1470,28 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
   // ⭐ 제목이 없어졌으니 이제 "내용"이 유일한 필수 입력.
   bool get _isValid => _contentController.text.trim().isNotEmpty;
 
-  // ⭐ 스타일/폰트 선택용 - 그냥 숫자 원형 칩(1~count). "순서대로 자동
-  // 배정"이 아니라 직접 골라서 테스트하기 편하게(요청).
-  Widget _numberChips(int count, int selected, ValueChanged<int> onSelect) {
-    return Wrap(
-      spacing: 8.w,
-      runSpacing: 8.h,
-      children: [
-        for (int i = 1; i <= count; i++)
-          GestureDetector(
-            onTap: () => onSelect(i),
-            child: Container(
-              width: 34.w,
-              height: 34.w,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: selected == i ? kAppMainAccent : const Color(0xFFF4F6FC),
-                shape: BoxShape.circle,
-              ),
-              child: Text(
-                '$i',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w800,
-                  color: selected == i
-                      ? Colors.white
-                      : kAppChipBorder.withValues(alpha: 0.6),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  // ⭐ 카테고리 아이콘 선택용 - 실제 아이콘 모양 + 번호(1~10)를 같이 보여줌.
-  Widget _iconChips() {
-    return Wrap(
-      spacing: 10.w,
-      runSpacing: 10.h,
-      children: [
-        for (int i = 0; i < _kScheduleCategoryIcons.length; i++)
-          GestureDetector(
-            onTap: () => setState(() {
-              _selectedIcon = i;
-              _iconManuallySet = true;
-            }),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40.w,
-                  height: 40.w,
-                  decoration: BoxDecoration(
-                    color: _selectedIcon == i
-                        ? kAppMainAccent
-                        : const Color(0xFFF4F6FC),
-                    shape: BoxShape.circle,
-                  ),
-                  padding: EdgeInsets.all(10.w),
-                  child: SvgPicture.asset(
-                    _kScheduleCategoryIcons[i].$3,
-                    colorFilter: ColorFilter.mode(
-                      _selectedIcon == i
-                          ? Colors.white
-                          : kAppChipBorder.withValues(alpha: 0.55),
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 3.h),
-                Text('${i + 1}',
-                    style: TextStyle(
-                        fontSize: 10.sp,
-                        color: kAppChipBorder.withValues(alpha: 0.5))),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
-
-  // ⭐ Phase 5 - 저장 버튼 핸들러. 아이콘을 직접 안 골랐으면(_iconManuallySet
-  // false) 내용 텍스트를 MemoCategoryClassifier로 분류해서 그 카테고리의
-  // 아이콘 인덱스를 대신 씀. 분류에 실패(모델 로드 전 등)하면 조용히 기본값
-  // (0=업무)으로 저장 - 아이콘 자동배정은 편의 기능이라 이것 때문에 저장
-  // 자체가 막히면 안 됨.
+  // ⭐ 2026-08-27 - 저장 버튼 핸들러. 아이콘 선택 팝업이 없어졌으므로 항상
+  // 내용 텍스트로 자동분류(MemoCategoryClassifier)함 - 분류에 실패(모델 로드
+  // 전 등)하면 조용히 기본값(0=업무)으로 저장, 이것 때문에 저장 자체가
+  // 막히면 안 됨.
   Future<void> _handleSave() async {
-    var iconIndex = _selectedIcon;
-    // ⭐ 재학습용 신호(메모_자동분류_ML_계획.md Phase 5) - 이번에 새로 자동분류
-    // 안 했으면(=아이콘을 직접 만졌거나 그냥 다른 필드만 수정) 기존 예측값을
-    // 그대로 들고 감. isUserCorrected는 아래에서 "최종 아이콘 != 예측 카테고리"로
-    // 계산하므로, 수정 중에 아이콘을 바꾸면 자동으로 "정정함"이 잡힘.
-    var predictedCategory = widget.existing?.predictedCategory;
-    if (!_iconManuallySet) {
-      setState(() => _autoClassifying = true);
-      try {
-        await MemoCategoryClassifier.instance.ensureLoaded();
-        final prediction = MemoCategoryClassifier.instance
-            .classify(_contentController.text.trim());
-        predictedCategory = prediction.categoryKey;
-        final matched = _kScheduleCategoryIcons
-            .indexWhere((e) => e.$1 == prediction.categoryKey);
-        if (matched != -1) iconIndex = matched;
-      } catch (e) {
-        debugPrint('⚠️ 카테고리 자동분류 실패(기본 아이콘으로 저장): $e');
-      } finally {
-        if (mounted) setState(() => _autoClassifying = false);
-      }
+    var iconIndex = 0;
+    String? predictedCategory;
+    setState(() => _autoClassifying = true);
+    try {
+      await MemoCategoryClassifier.instance.ensureLoaded();
+      final prediction = MemoCategoryClassifier.instance
+          .classify(_contentController.text.trim());
+      predictedCategory = prediction.categoryKey;
+      final matched = _kScheduleCategoryIcons
+          .indexWhere((e) => e.$1 == prediction.categoryKey);
+      if (matched != -1) iconIndex = matched;
+    } catch (e) {
+      debugPrint('⚠️ 카테고리 자동분류 실패(기본 아이콘으로 저장): $e');
+    } finally {
+      if (mounted) setState(() => _autoClassifying = false);
     }
     if (!mounted) return;
-    final finalCategoryKey =
-        _kScheduleCategoryIcons[iconIndex.clamp(0, _kScheduleCategoryIcons.length - 1)].$1;
     Navigator.pop(
       context,
       DateSchedule(
@@ -1826,12 +1499,12 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
         content: _contentController.text.trim(),
         startMinutes: widget.startMinutes,
         durationMinutes: _selectedDuration,
-        styleIndex: _selectedStyle,
-        fontIndex: _selectedFont,
+        styleIndex: 3, // ⭐ 스타일 3번(밑줄 강조)으로 확정(요청) - 더 이상 선택 안 함
+        fontIndex: 5, // ⭐ 글씨체 5번(주아체)으로 확정(요청)
         iconIndex: iconIndex,
         predictedCategory: predictedCategory,
-        isUserCorrected:
-            predictedCategory != null && predictedCategory != finalCategoryKey,
+        // ⭐ 수동 선택 자체가 없어져서 "정정" 개념이 성립 안 함 - 항상 false.
+        isUserCorrected: false,
         createdAt: '', // 위와 동일 - 호출부가 덮어씀
       ),
     );
@@ -1995,44 +1668,17 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                     ),
                 ],
               ),
-              SizedBox(height: 22.h),
-              // ⭐ 실험용 - 렌더링 스타일 1~8번 (_ScheduleRow 참고).
-              Text('스타일 (1~8, 실험용)',
-                  style: TextStyle(
-                      fontSize: 11.5.sp,
-                      color: kAppChipBorder.withValues(alpha: 0.45))),
-              SizedBox(height: 8.h),
-              _numberChips(
-                  8, _selectedStyle, (v) => setState(() => _selectedStyle = v)),
-              SizedBox(height: 18.h),
-              // ⭐ 실험용 - 내용 텍스트 폰트 1~5번.
-              Text('글씨체 (1~5, 실험용)',
-                  style: TextStyle(
-                      fontSize: 11.5.sp,
-                      color: kAppChipBorder.withValues(alpha: 0.45))),
-              SizedBox(height: 8.h),
-              _numberChips(
-                  5, _selectedFont, (v) => setState(() => _selectedFont = v)),
-              SizedBox(height: 4.h),
+              SizedBox(height: 12.h),
+              // ⭐ 2026-08-27 - 스타일/글씨체/아이콘 선택 팝업 전부 삭제(요청:
+              // "팝업 간소화" - 스타일 3번·글씨체 5번 고정, 아이콘은 항상
+              // 내용으로 자동분류). 안내 문구 하나만 남김.
               Text(
-                '$_selectedFont번: ${_kContentFontNames[_selectedFont - 1]} - ${_contentController.text.isEmpty ? "미리보기 텍스트" : _contentController.text}',
-                style: _contentFontStyle(_selectedFont,
-                    fontSize: 14.sp, color: kAppChipBorder),
-              ),
-              SizedBox(height: 18.h),
-              // ⭐ 카테고리 아이콘 - 지금 색칠된 원 자리에 이 아이콘이 흰색으로
-              // 들어감(요청).
-              // ⭐ Phase 5 - 아이콘을 직접 안 고르면 내용으로 자동 판단해서
-              // 붙여줌(고르면 항상 그 선택이 우선).
-              Text(
-                _iconManuallySet ? '아이콘' : '아이콘 (직접 안 고르면 내용으로 자동 판단해요)',
+                '아이콘은 내용으로 자동 판단해서 붙여요.',
                 style: TextStyle(
                     fontSize: 11.5.sp,
                     color: kAppChipBorder.withValues(alpha: 0.45)),
               ),
-              SizedBox(height: 8.h),
-              _iconChips(),
-              SizedBox(height: 28.h),
+              SizedBox(height: 16.h),
               Row(
                 children: [
                   Expanded(
