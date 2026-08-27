@@ -703,9 +703,20 @@ class DatabaseService {
   // 예전엔 "클린 스타트"라는 이유로 alarm_history까지 같이 지웠는데,
   // 이력은 사용자 입장에서 "내가 알람을 놓쳤는지 안 놓쳤는지"를 증명하는
   // 기록이라 스케줄을 초기화한다고 해서 같이 사라지면 안 됨.
-  // ⭐ deleteAllAlarmsOnly()와 동일하게, 지워지는 각 알람도 이력에 남김(superseded)
-  // - 나중에 "이 시점에 알람이 왜 사라졌지" 추적 가능해야 함.
-  Future<void> deleteAllAlarms() async {
+  // ⭐ deleteAllAlarmsOnly()와 동일하게, 지워지는 각 알람도 이력에 남김 -
+  // 나중에 "이 시점에 알람이 왜 사라졌지" 추적 가능해야 함.
+  //
+  // ⭐ 2026-08-25 - [dismissType] 파라미터 추가. 이 함수의 호출부가 서로 다른
+  // 의미를 가짐:
+  //   - schedule_provider.dart(스케줄 초기화)/onboarding_screen.dart(온보딩
+  //     재설정): 여기서 남긴 이력도 곧바로 resetAllAlarmHistoryAndLog()로
+  //     지워지거나(스케줄 초기화), 실제로 새 스케줄로 "대체"되는 경우라
+  //     기본값 'superseded'(일정 변경)가 맞음.
+  //   - alarm_provider.dart의 deleteAllAlarmsCompletely()(설정 탭의 "모든
+  //     알람 완전 삭제"): 대체 스케줄 없이 그냥 지우는 것이므로 'superseded'로
+  //     남으면 "일정 변경"이라고 오해를 줌 - 이 호출부만 'cancelled_before_ring'
+  //     (알람 제거)을 넘겨서 씀.
+  Future<void> deleteAllAlarms({String dismissType = 'superseded'}) async {
     final db = await database;
 
     await db.transaction((txn) async {
@@ -721,7 +732,7 @@ class DatabaseService {
             'scheduled_time': time,
             'scheduled_date': date,
             'actual_ring_time': now,
-            'dismiss_type': 'superseded',
+            'dismiss_type': dismissType,
             'snooze_count': 0,
             'shift_type': row['shift_type'],
             'created_at': now,

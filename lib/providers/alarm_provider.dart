@@ -248,7 +248,10 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
       }
 
       // 3. DB에서 모든 알람 삭제
-      await DatabaseService.instance.deleteAllAlarms();
+      // ⭐ 대체 스케줄 없이 그냥 지우는 것이므로 이력에 "일정 변경"이 아니라
+      // "알람 제거"로 남도록 dismissType을 명시함 (database_service.dart
+      // deleteAllAlarms() 주석 참고).
+      await DatabaseService.instance.deleteAllAlarms(dismissType: 'cancelled_before_ring');
 
       // 4. ⭐ 모든 알람 템플릿 삭제 (갱신 방지)
       await DatabaseService.instance.deleteAllAlarmTemplates();

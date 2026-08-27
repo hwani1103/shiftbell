@@ -18,6 +18,7 @@ import '../models/alarm.dart';
 import '../constants/alarm_limits.dart';
 import '../models/shift_schedule.dart';
 import 'all_teams_setup_dialog.dart';
+import 'friend_list_screen.dart';
 import 'memo_list_view.dart';
 import 'work_hours_settings_screen.dart';
 import 'calendar_theme_picker_screen.dart';
@@ -26,6 +27,7 @@ import '../widgets/app_button.dart';
 import '../widgets/app_second_button.dart';
 import '../widgets/app_third_button.dart';
 import '../widgets/day_offset_chip.dart';
+import '../widgets/app_shift_chip.dart';
 import '../constants/alarm_day_offset.dart';
 import '../l10n/l10n_extensions.dart';
 import '../constants/shift_name_limits.dart';
@@ -240,7 +242,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               Spacer(),
               Padding(
                 padding: EdgeInsets.only(right: 16.w),
-                child: Text(context.l10n.navSettings),
+                child: Text(
+                  context.l10n.navSettings,
+                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
+                ),
               ),
             ],
           ),
@@ -326,7 +331,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                                     Icon(Icons.edit, color: Theme.of(context).colorScheme.primary, size: 16.sp),
                                     SizedBox(width: 6.w),
                                     Text(
-                                      context.l10n.commonEdit,
+                                      context.l10n.settingsShiftManagementEditButton,
                                       style: TextStyle(
                                         color: Theme.of(context).colorScheme.primary,
                                         fontSize: 13.sp,
@@ -355,7 +360,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                                     Icon(Icons.refresh, color: Theme.of(context).colorScheme.error, size: 16.sp),
                                     SizedBox(width: 6.w),
                                     Text(
-                                      context.l10n.commonReset,
+                                      context.l10n.shiftResetSchedule,
                                       style: TextStyle(
                                         color: Theme.of(context).colorScheme.error,
                                         fontSize: 13.sp,
@@ -426,8 +431,24 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 },
               ),
 
-              // ⭐ 일정 공유(구 "친구 공유")는 메인 바텀 네비게이션 4번째 탭으로
-              // 승격돼서 여기서는 빠짐 (lib/main.dart 참고).
+              // ⭐ 2026-08-25 - 메인 바텀 네비게이션 4번째 탭 자리를 "일정관리"
+              // (신규, Structured 스타일 레이아웃 실험)가 대신 차지하게 되면서,
+              // 일정 공유(구 "친구 공유")는 다시 설정 탭 진입점으로 돌아옴.
+              // 탭에서 눌렀을 때와 정확히 같은 화면(FriendListScreen)을 그대로
+              // push - 스와이프-달력이동 콜백은 탭 전용 기능이라 여기선 안 넘김.
+              ListTile(
+                tileColor: Colors.white,
+                leading: Icon(Icons.people_outline, color: Theme.of(context).colorScheme.primary),
+                title: Text(context.l10n.friendShareTitle),
+                subtitle: Text(context.l10n.settingsFriendShareDesc),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const FriendListScreen()),
+                  );
+                },
+              ),
 
               // ⭐ 구분선 - "이력/데이터" 섹션
               SizedBox(height: 24.h),
@@ -497,17 +518,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                         ],
                       ),
                       actions: [
-                        TextButton(
+                        AppSecondButton(
+                          variant: AppSecondButtonVariant.neutral,
                           onPressed: () => Navigator.pop(context, false),
                           child: Text(context.l10n.commonCancel),
                         ),
-                        ElevatedButton(
+                        AppSecondButton(
+                          variant: AppSecondButtonVariant.danger,
                           onPressed: () => Navigator.pop(context, true),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red.shade700,
-                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                          child: Text(context.l10n.commonDeletePermanently, style: TextStyle(fontWeight: FontWeight.bold)),
+                          child: Text(context.l10n.commonDeletePermanently),
                         ),
                       ],
                     ),
@@ -612,7 +631,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           ),
         ),
         actions: [
-          TextButton(
+          AppSecondButton(
+            variant: AppSecondButtonVariant.success,
             onPressed: () => Navigator.pop(context),
             child: Text(context.l10n.commonOk),
           ),
@@ -691,9 +711,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           ),
         ),
         actions: [
-          TextButton(
+          AppSecondButton(
+            variant: AppSecondButtonVariant.success,
             onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.commonClose),
+            child: Text(context.l10n.commonOk),
           ),
         ],
       ),
@@ -719,22 +740,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             for (int i = 0; i < pattern.length; i++) ...[
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: BorderRadius.circular(6.r),
-                  border: Border.all(color: Theme.of(context).colorScheme.primary),
-                ),
-                child: Text(
-                  pattern[i],
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onPrimary,
-                  ),
-                ),
-              ),
+              AppShiftChip(label: pattern[i], dense: true),
               if (i < pattern.length - 1)
                 Icon(Icons.arrow_forward, size: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
             ],
@@ -760,22 +766,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         Wrap(
           spacing: 6.w,
           runSpacing: 6.h,
-          children: shiftTypes.map((type) => Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-              borderRadius: BorderRadius.circular(6.r),
-              border: Border.all(color: Theme.of(context).colorScheme.primary),
-            ),
-            child: Text(
-              type,
-              style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-          )).toList(),
+          children: shiftTypes.map((type) => AppShiftChip(label: type, dense: true)).toList(),
         ),
       ],
     );
@@ -1933,14 +1924,13 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.neutral,
           onPressed: () => Navigator.pop(context),
-          style: TextButton.styleFrom(
-            foregroundColor: colorScheme.onSurfaceVariant,
-          ),
           child: Text(context.l10n.commonCancel),
         ),
-        ElevatedButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.success,
           onPressed: () {
             final renamedShifts = <String, String>{};
 
@@ -1956,10 +1946,6 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
             Navigator.pop(context);
             widget.onSave(renamedShifts);
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.secondary,
-            foregroundColor: colorScheme.onSecondary,
-          ),
           child: Text(context.l10n.commonSave),
         ),
       ],
@@ -2925,25 +2911,20 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.neutral,
           onPressed: () => Navigator.pop(context),
-          style: TextButton.styleFrom(
-            foregroundColor: colorScheme.onSurfaceVariant,
-          ),
           child: Text(context.l10n.commonCancel),
         ),
-        ElevatedButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.success,
           onPressed: _selectedIndex == null
               ? null
               : () {
                   Navigator.pop(context);
                   widget.onConfirm(_selectedIndex!);
                 },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.secondary,
-            foregroundColor: colorScheme.onSecondary,
-          ),
-          child: Text(context.l10n.commonChange),
+          child: Text(context.l10n.commonSave),
         ),
       ],
     );
@@ -2988,7 +2969,6 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return AlertDialog(
       title: Row(
         children: [
@@ -3043,22 +3023,17 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.neutral,
           onPressed: () => Navigator.pop(context),
-          style: TextButton.styleFrom(
-            foregroundColor: colorScheme.onSurfaceVariant,
-          ),
           child: Text(context.l10n.commonCancel),
         ),
-        ElevatedButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.success,
           onPressed: () {
             widget.onSave(_customColors);
             Navigator.pop(context);
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: colorScheme.secondary,
-            foregroundColor: colorScheme.onSecondary,
-          ),
           child: Text(context.l10n.commonSave),
         ),
       ],
@@ -3103,7 +3078,6 @@ class _ColorPickerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     // 팔레트(테마 디폴트 색 포함, ShiftSchedule.shiftPalette 참고) + 빨강(휴무용)
     final colors = [
       ...ShiftSchedule.shiftPalette,
@@ -3195,11 +3169,9 @@ class _ColorPickerDialog extends StatelessWidget {
         ),
       ),
       actions: [
-        TextButton(
+        AppSecondButton(
+          variant: AppSecondButtonVariant.neutral,
           onPressed: () => Navigator.pop(context),
-          style: TextButton.styleFrom(
-            foregroundColor: colorScheme.onSurfaceVariant,
-          ),
           child: Text(context.l10n.commonCancel),
         ),
       ],

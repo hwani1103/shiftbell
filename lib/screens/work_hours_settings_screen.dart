@@ -21,6 +21,29 @@ class WorkHoursSettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScreen> {
+  // ⭐ 2026-08-25 - "급여 산정일 기준"을 고르면 그 아래로 날짜 피커 등 추가
+  // 콘텐츠가 펼쳐지는데, 화면 아래쪽이라 스크롤하지 않으면 안 보임 - 골라도
+  // 뭐가 바뀌었는지 못 보고 지나치기 쉬웠음. 그 옵션을 고른 직후 자동으로 맨
+  // 아래까지 스크롤해서 펼쳐진 내용이 바로 눈에 들어오게 함.
+  final _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToBottomNextFrame() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -40,6 +63,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
           // 가려지는 문제 방지 - SafeArea로 감싸고 리스트 맨 아래 여백도 추가.
           : SafeArea(
               child: ListView(
+                controller: _scrollController,
                 padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 40.h),
                 children: [
                 // ⭐ 시인성 때문에 맨 위로 - 제목 줄 우측에 바로 스위치가 붙어있어서
@@ -304,7 +328,14 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
       borderRadius: BorderRadius.circular(12.r),
       child: InkWell(
         borderRadius: BorderRadius.circular(12.r),
-        onTap: () => ref.read(workHoursSettingsProvider.notifier).setPeriodMode(mode),
+        onTap: () async {
+          await ref.read(workHoursSettingsProvider.notifier).setPeriodMode(mode);
+          // ⭐ "급여 산정일 기준"을 고르면 그 아래로 날짜 피커 등이 새로 펼쳐짐 -
+          // 스크롤 안 하면 화면 밖이라 안 보이므로 고른 직후 맨 아래로 스크롤.
+          if (mode == MonthlyPeriodMode.payday) {
+            _scrollToBottomNextFrame();
+          }
+        },
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
           decoration: BoxDecoration(

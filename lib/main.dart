@@ -11,7 +11,7 @@ import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
-import 'screens/friend_list_screen.dart';
+import 'screens/schedule_management_tab.dart';
 import 'screens/permission_intro_screen.dart';
 import 'widgets/permission_warning_banner.dart';
 import 'widgets/banner_ad_slot.dart';
@@ -281,7 +281,11 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
     // 보게 되어 아무 효과가 없음(BuildContext는 위치 기반 조회라 이렇게
     // 바깥에서 감싸는 게 유일하게 확실한 방법).
     // ⭐ "일정공유(구 친구공유)"를 설정 탭 안에 묻혀있던 항목에서 메인
-    // 바텀 네비게이션 4번째 탭으로 승격 - 다음알람(0)/달력(1)/일정공유(2)/설정(3).
+    // 바텀 네비게이션 4번째 탭으로 승격했었으나(다음알람(0)/달력(1)/일정공유(2)/설정(3)),
+    // 2026-08-25 - 그 자리를 "일정관리"(신규, Structured 스타일 레이아웃 실험,
+    // schedule_management_tab.dart)가 대신 차지하도록 교체함. 일정공유는 다시
+    // 설정 탭의 진입점(ListTile)으로 옮김(settings_tab.dart 참고) - 탭에서
+    // 눌렀을 때와 동일한 FriendListScreen을 그대로 push함.
     // Native(Kotlin)에서 openTab으로 보내는 인덱스는 0(다음알람)/1(달력)뿐이라
     // 이 순서 변경의 영향을 안 받음(AlarmGuardReceiver.kt/NotificationHelper.kt
     // /CalendarWidgetProvider.kt 확인함).
@@ -296,7 +300,7 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
           );
         },
       ),
-      FriendListScreen(onSwipeToCalendar: () => _goToCalendar()),
+      ScheduleManagementTab(onSwipeToCalendar: () => _goToCalendar()),
       SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
       // ⭐ 2026-08-25 - 아이콘 색상이 최종 확정되어(2번 변형: 인디고·오로라
       // 그라데이션·코랄) 임시 아이콘 픽커 탭 제거함. ui_theme_lab_screen.dart
@@ -442,9 +446,11 @@ Future<void> _handleMethod(MethodCall call) async {
                 ],
               ),
             ),
-            // 달력 탭(index 1)에서만 자리를 차지함 - 다른 탭에선 높이 0.
+            // ⭐ 2026-08-25 - 달력 탭(index 1)뿐 아니라 일정관리 탭(index 2)에서도
+            // 항상 자리를 차지하도록 확장 - "일정관리도 광고를 고정으로 보여주자"
+            // 요청. 다른 탭에선 여전히 높이 0.
             Offstage(
-              offstage: _currentIndex != 1,
+              offstage: _currentIndex != 1 && _currentIndex != 2,
               child: const BannerAdSlot(),
             ),
           ],
@@ -456,7 +462,7 @@ Future<void> _handleMethod(MethodCall call) async {
           items: [
             BottomNavigationBarItem(icon: const Icon(Icons.alarm), label: context.l10n.navNextAlarm),
             BottomNavigationBarItem(icon: const Icon(Icons.calendar_month), label: context.l10n.navCalendar),
-            BottomNavigationBarItem(icon: const Icon(Icons.people_outline), label: context.l10n.navFriendShare),
+            BottomNavigationBarItem(icon: const Icon(Icons.event_note_outlined), label: context.l10n.navScheduleManagement),
             BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.l10n.navSettings),
           ],
         ),
