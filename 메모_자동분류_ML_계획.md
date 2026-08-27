@@ -199,30 +199,44 @@
   softmax→margin 폴백)를 `lib/services/memo_category_classifier.dart`로 그대로
   이식. TFLite 등 런타임 의존성 없이 순수 Dart(char_wb n-gram 직접 구현).
 - `test/memo_category_classifier_test.dart`로 `ml/predict.py` 실제 출력값과
-  1:1 대조하는 14개 테스트 작성(키워드 하드매핑 4종 + "동창회" 오탐 방지 확인 +
-  ML 분류 6종 + 경계 케이스) — 전부 통과.
-- **DB 스키마 변경 불필요했음** — Phase 4 착수 전 예상과 달리, 실제 첫 적용처가
-  된 `schedule_management_tab.dart`(일정관리 탭, 2026-08-25 신설)는 아직 어떤
-  영구 저장소에도 연결 안 된 화면 로컬 `State`(`_blocks`)만 씀. 그래서
-  `predicted_category`/`confidence`/`is_user_corrected` 컬럼 추가는 **아직 안 함**
-  — 일정관리가 실제 영구 저장(추정: `date_memos` 확장, [[메모_일정기능_설계메모]]
-  참고)으로 바뀌는 시점에 같이 설계할 것. 그 시점엔 `DB_스키마_변경_가이드.md`
-  절차를 반드시 따르고, **`메모_일정기능_설계메모.md`가 계획 중인 `start_time`/
-  `end_time` 컬럼 추가와 시점이 겹칠 가능성이 높으니 한 버전에 같이 넣는 걸
-  권장**(버전 두 번 올리는 것보다 안전 — DB_스키마_변경_가이드.md의 3회 재발
-  사고 패턴 참고).
+  1:1 대조하는 19개 테스트 작성 — 전부 통과.
+- **2026-08-27 추가 - 하이브리드 하드매핑 확장(짧은 단어 오분류 대응)**:
+  실측(`운동`/`독서`/`병원`/`쇼핑`/`휴식` 등 24개 단일 단어 테스트)에서 6개
+  (25%)가 '기타'로 빠지는 걸 확인 - `ml/keyword_router.py`에
+  `ACTIVITY_PREFIX_KEYWORDS`(공부/독서→공부, 병원→병원·건강관리, 출장→업무,
+  식사/외식→식사, 여가→여가/휴식) + `ACTIVITY_CONTAINS_KEYWORDS`(쇼핑→쇼핑,
+  "온라인쇼핑" 같은 복합어 대응) 추가. 이걸로 "공부하러가기", "병원가야됨" 같은
+  동사결합형과 "병원", "쇼핑" 같은 카테고리 이름 그 자체가 모두 하드매핑됨.
+  `ml/check_keyword_regressions.py`(신규)로 전체 라벨 데이터(5,464개) 검증 -
+  baseline(하드매핑 히트 1182건, 정답 1037) 대비 hits +86, 정답 +83, 오답 +3만
+  늘어남(순증 +80). "업무"/"휴식"은 단독 키워드로 넣었다가 실측에서 충돌 다수
+  발견해서 뺐음("은행 업무"→기타인데 강제로 업무, "헌혈 후 휴식"→건강관리인데
+  강제로 여가 등 - 수영/헬스처럼 맥락에 따라 갈리는 유형으로 재분류). "독서"는
+  "모임" 신호가 같이 있으면 하드매핑을 보류하도록(`ACTIVITY_DEFER_MARKERS`)
+  추가 - 실측 데이터에서 "독서모임"이 사교로 분류된 경우가 더 많았음. 부수적으로
+  가족 존칭 접미사("님"/"어른"/"댁") 인식 버그도 같이 고침("장모님"이 가족
+  하드매핑에 안 걸리던 것). Dart 쪽(`memo_category_classifier.dart`)도 동일하게
+  포팅, 테스트 5개 추가(총 19개).
+- **DB 스키마 변경함(v20)** — 착수 시점엔 `schedule_management_tab.dart`가 영구
+  저장이 없어서 불필요하다고 판단했으나, 같은 날 사용자가 "일정관리도 실제
+  DB에 저장"을 요청해서 `date_schedules` 테이블을 신설(v19→v20, 한 버전에
+  통합). `predicted_category`/`is_user_corrected` 컬럼도 이때 같이 넣음 - 아래
+  Phase 5 참고. `메모_일정기능_설계메모.md`가 계획 중인 `start_time`/`end_time`
+  확장은 이 테이블에 아직 없음 - 그 기능 착수 시 이 테이블에 컬럼을 추가하는
+  형태가 될 것(테이블 자체는 이미 있으니 새 버전 하나로 끝남).
 
-### Phase 5 — UI 연동 ✅ 완료 (2026-08-27, 축소된 형태)
+### Phase 5 — UI 연동 ✅ 완료 (2026-08-27)
 - **적용 화면**: 원래 계획은 `date_memos`(달력 탭 메모)였으나, 실제로는
   `schedule_management_tab.dart`(일정관리 탭)의 일정 생성 시트에 연결함 —
   사용자가 아이콘을 직접 안 고르고 저장하면 내용 텍스트로 자동분류해서
   `_kScheduleCategoryIcons` 중 하나를 대신 골라줌(`_CreateBlockSheetState.
   _handleSave`). 아이콘을 직접 고르면 항상 그 선택이 우선.
 - **"사용자가 항상 카테고리 수정 가능"**: 만족함 — 아이콘 칩을 언제든 다시 탭해서
-  바꿀 수 있음(생성 시점/수정 시점 둘 다). 단, **재학습용 "수정 로그 캡처"는
-  구현 안 함** — 지금 이 화면 자체가 영구 저장이 없어서 캡처할 대상(저장된
-  레코드)이 없음. 영구 저장이 붙는 시점에 `is_user_corrected` 같은 플래그와
-  함께 다시 설계할 것(위 Phase 4 DB 항목과 동일 시점).
+  바꿀 수 있음(생성 시점/수정 시점 둘 다).
+- **재학습용 "수정 로그 캡처"도 구현함** — `date_schedules.predicted_category`
+  (분류기가 처음 제안한 카테고리 키, 사용자가 처음부터 직접 고르면 null)와
+  `is_user_corrected`(최종 아이콘이 그 예측과 다르면 true)로 기록. UI엔 아직
+  안 보여줌(내부 데이터만) - Phase 7 재개 시 이 필드로 오분류 패턴을 분석하면 됨.
 - 모델 로드는 `main.dart`에서 앱 시작 시 `await` 없이 미리 시작해둠(약 2.28MB
   JSON, 첫 프레임을 막지 않음) — 실제 분류 시점에 안 끝났으면 그쪽에서 다시
   `ensureLoaded()`를 await해서 안전하게 기다림.
@@ -238,8 +252,8 @@
 - 사용자 수정 데이터 누적 → 오분류 패턴 분석 → hard example 추가 → 재학습.
 - 실사용 메모를 학습에 쓰려면 opt-in 동의 + 익명화 UI 필요
   (이 앱은 지금까지 Analytics도 안 쓸 만큼 외부 전송에 보수적 — 그 기조에 맞출 것).
-- Phase 5에서 "수정 로그 캡처"를 안 넣었으므로, Phase 7 착수 전에 그 캡처 구조부터
-  먼저 넣어야 함(위 Phase 5 참고) — 순서가 바뀌면 그 사이의 사용자 피드백을 영영 못 얻음.
+- Phase 5에서 "수정 로그 캡처"(`predicted_category`/`is_user_corrected`)를 이미
+  넣어뒀으므로(2026-08-27 갱신), Phase 7 재개 시 바로 그 데이터를 분석하면 됨.
 
 ---
 
@@ -318,10 +332,11 @@
 | export 검증 스크립트 | `ml/verify_export.py` (재학습/재export 때마다 재실행) | ✅ |
 | 모델(Dart용 JSON) | `assets/ml/memo_category_model.json` (~2.28MB, pubspec 자산 등록됨) | ✅ |
 | 추론 엔진(Dart) | `lib/services/memo_category_classifier.dart` | ✅ |
-| Dart 테스트 | `test/memo_category_classifier_test.dart` (predict.py 실제 출력과 대조, 14개) | ✅ |
+| Dart 테스트 | `test/memo_category_classifier_test.dart` (predict.py 실제 출력과 대조, 19개) | ✅ |
+| 활동 키워드 하드매핑 회귀 검사 | `ml/check_keyword_regressions.py` (전체 라벨 데이터 5,464개) | ✅ |
 | 화면(적용처) | `lib/screens/schedule_management_tab.dart`(`_CreateBlockSheetState._handleSave`) | ✅ |
-| 모델(DB 컬럼) | `date_memos`에 카테고리 컬럼 추가 | ⬜ 보류 — 일정관리가 영구 저장으로 바뀔 때 같이 (위 Phase 4 참고) |
-| 수정 로그 캡처(재학습용) | 미정 | ⬜ 보류 — 위와 동일 시점, Phase 7 착수 전 필수 |
+| DB 테이블 | `date_schedules`(v20) — `lib/models/date_schedule.dart`, `lib/providers/date_schedule_provider.dart` | ✅ |
+| 수정 로그 캡처(재학습용) | `date_schedules.predicted_category`/`is_user_corrected` | ✅ (UI 노출은 아직 안 함) |
 
 ---
 

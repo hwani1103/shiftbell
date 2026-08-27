@@ -27,6 +27,12 @@ _COMMON_PARTICLES = [
     "가", "이", "은", "는", "을", "를", "의", "에게", "한테", "께",
     "랑", "이랑", "와", "과", "도", "만", "까지", "부터", "께서",
     "인데", "이고", "이지만", "라도", "이라도", "야", "아",
+    # ⭐ 2026-08-27 - 존칭 접미사. "장모"+"님"="장모님", "장인"+"어른"="장인어른",
+    # "처남"+"댁"="처남댁"처럼 인척 호칭 뒤에 자연스럽게 붙는데, 이게 없어서
+    # "장인어른 병원 모시고 가기"류가 가족 하드매핑에 안 걸리고 활동
+    # 하드매핑(병원)으로 새 사람이 가버리는 걸 실측(check_keyword_regressions.py)
+    # 으로 발견해서 추가함.
+    "님", "어른", "댁",
 ]
 
 IMMEDIATE_FAMILY = [
@@ -81,8 +87,49 @@ SPORTS_KEYWORDS = [
     "야구", "줄넘기", "크로스핏",
 ]
 # "골프공"처럼 운동 이름 + 공(볼)이 마사지 도구 등 완전히 다른 용도로 쓰이는
-# 경우를 걸러낸다("족저근막염 마사지용 골프공" 같은 실사용 사례로 발견).
+# 경우를 걸러낸다("족저근막위염 마사지용 골프공" 같은 실사용 사례로 발견).
 SPORTS_FALSE_POSITIVES = ["골프공", "테니스공", "야구공", "축구공", "탁구공"]
+
+# ⭐ 2026-08-27 - "짧은 단어/구가 기타로 자주 빠진다" 실측(사용자 제보 +
+# predict.py로 직접 확인) 후 추가한 범용 활동 키워드 하드매핑. SPORTS_KEYWORDS와
+# 같은 원칙: 카테고리 이름 자체이거나 그와 거의 동의어라 "강도/맥락에 따라
+# 다른 카테고리로 갈릴 여지가 사실상 없는" 것만 넣는다(수영/요가/헬스/등산을
+# SPORTS_KEYWORDS에서 뺀 이유와 같은 기준 - ML이 이미 배운 뉘앙스를 덮어쓰면
+# 안 됨). 매칭은 SPORTS_KEYWORDS와 동일하게 접두어(prefix) - "공부하러가기",
+# "병원가야됨"처럼 조사 없이 동사가 바로 붙는 패턴을 잡기 위함.
+#
+# ⚠️ 후보를 넓게 잡아서 ml/check_keyword_regressions.py로 전체 라벨 데이터
+# (5,464개)에 실측 검증한 뒤, 실제로 충돌이 난 것들은 뺐다(당구/볼링을 뺀
+# 것과 같은 원칙 - "명확해 보이는 키워드도 실측 없이 하드매핑하면 안 됨"):
+#   - "업무" 자체는 제외함 - "은행 업무"(개인 용무, 기타), "업무 관련 자격증"
+#     (공부), "업무와 무관한"(부정 문맥을 못 읽고 그대로 강제) 등에서 6번
+#     틀림. "출장"은 이런 다의성이 없어서 유지.
+#   - "휴식"도 제외함 - "헌혈 후 휴식", "안대로 눈 휴식"처럼 치료/관리
+#     목적의 휴식이 병원·건강관리로 가야 하는데 여가로 강제됨(2번 다 틀림) -
+#     수영/헬스처럼 목적에 따라 갈리는 유형으로 판단, ML에 맡김. "여가"는
+#     이런 충돌이 없어서 유지.
+#   - "병원"은 그대로 유지 - "부모님 병원 모시고 가기"류는 가족 하드매핑이
+#     먼저 걸려서(route()의 우선순위 캐스케이드) 이 키워드까지 안 옴, 실측
+#     충돌 0건.
+ACTIVITY_PREFIX_KEYWORDS = {
+    "공부": ["공부", "독서"],
+    "병원·건강관리": ["병원"],
+    "업무": ["출장"],
+    "식사": ["식사", "외식"],
+    "여가/휴식": ["여가"],
+}
+# "독서"는 "독서 모임/독서모임"처럼 실제로는 사람을 만나는 모임(사교)을
+# 가리키는 경우가 실측 데이터에서 더 많이 나와서("모임"이 같이 있으면 방향이
+# 뒤집힘, ml/check_keyword_regressions.py로 확인) - "모임" 신호가 있으면
+# 활동 하드매핑 전체를 보류하고 ML 판단에 맡긴다.
+ACTIVITY_DEFER_MARKERS = ["모임"]
+# "쇼핑"은 "온라인쇼핑"처럼 다른 단어 뒤에 붙는 복합어로도 흔히 쓰여서
+# contains(부분일치)로 잡는다 - "가족"을 IMMEDIATE_FAMILY_CONTAINS로 따로
+# 처리한 것과 같은 이유(외래어 단독 형태라 다른 무관한 단어와 충돌할
+# 위험이 낮음).
+ACTIVITY_CONTAINS_KEYWORDS = {
+    "쇼핑": ["쇼핑"],
+}
 
 
 def _tokens(text):
@@ -139,5 +186,13 @@ def route(text):
     sports_hit = _prefix_matched(tokens, SPORTS_KEYWORDS) or _contains_matched(text, SPORTS_KEYWORDS)
     if sports_hit and not _contains_matched(text, SPORTS_FALSE_POSITIVES):
         return "운동", "tier3_sports"
+
+    if not _contains_matched(text, ACTIVITY_DEFER_MARKERS):
+        for label, keywords in ACTIVITY_PREFIX_KEYWORDS.items():
+            if _prefix_matched(tokens, keywords):
+                return label, "tier4_activity"
+        for label, keywords in ACTIVITY_CONTAINS_KEYWORDS.items():
+            if _contains_matched(text, keywords):
+                return label, "tier4_activity"
 
     return None, None

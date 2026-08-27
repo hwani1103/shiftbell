@@ -52,11 +52,45 @@ void main() {
       final r = classifier.classify('동창회 모임 나가기');
       expect(r.method, isNot(contains('tier')));
     });
+
+    test('인척 존칭("장모님")도 가족으로 잡힌다', () {
+      // "장모"+"님" - _kCommonParticles에 '님' 추가한 것 확인.
+      final r = classifier.classify('장모님 병원 진료 동행하기');
+      expect(r.categoryKey, 'family');
+    });
+  });
+
+  group('활동 키워드 하드매핑(tier4, 2026-08-27 추가)', () {
+    test('짧은 동사 결합형도 접두어 매칭으로 잡힌다', () {
+      expect(classifier.classify('공부하러가기').categoryKey, 'study');
+      expect(classifier.classify('병원가야됨').categoryKey, 'health');
+      expect(classifier.classify('출장가기').categoryKey, 'work');
+    });
+
+    test('카테고리 이름 그 자체(복합어 포함)도 정확히 잡힌다', () {
+      expect(classifier.classify('독서').categoryKey, 'study');
+      expect(classifier.classify('쇼핑').categoryKey, 'shopping');
+      expect(classifier.classify('온라인쇼핑').categoryKey, 'shopping');
+      expect(classifier.classify('식사').categoryKey, 'meal');
+    });
+
+    test('"모임"이 같이 있으면 활동 하드매핑을 보류하고 ML에 맡긴다', () {
+      // "독서모임"은 실측 데이터에서 사교로 분류된 경우가 더 많았음
+      // (ml/check_keyword_regressions.py) - 공부로 강제하면 안 됨.
+      final r = classifier.classify('동네 독서모임 정기 뒷풀이');
+      expect(r.method, isNot('tier4_activity'));
+    });
+
+    test('이미 있던 스포츠 하드매핑은 그대로 유지된다', () {
+      final r = classifier.classify('골프치러가기');
+      expect(r.categoryKey, 'exercise');
+      expect(r.method, 'tier3_sports');
+    });
   });
 
   group('ML 모델(TF-IDF + LogisticRegression)', () {
-    test('병원 진료 예약 -> 병원·건강관리', () {
-      final r = classifier.classify('병원 진료 예약');
+    test('진료 예약하기 -> 병원·건강관리 (하드매핑 안 걸림)', () {
+      final r = classifier.classify('진료 예약하기');
       expect(r.categoryKey, 'health');
       expect(r.method, 'ml');
     });
@@ -79,9 +113,10 @@ void main() {
       expect(r.method, 'ml');
     });
 
-    test('자격증 시험 공부 -> 공부 (margin이 커서 확신도 높음)', () {
-      final r = classifier.classify('자격증 시험 공부');
+    test('자격증 시험 접수 -> 공부 (margin이 커서 확신도 높음, 하드매핑 안 걸림)', () {
+      final r = classifier.classify('자격증 시험 접수');
       expect(r.categoryKey, 'study');
+      expect(r.method, 'ml');
       expect(r.confidence, greaterThan(0.9));
     });
 

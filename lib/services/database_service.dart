@@ -11,6 +11,7 @@ import 'dart:convert';
 import 'dart:async';
 import '../models/alarm_history.dart';
 import '../models/date_memo.dart';
+import '../models/date_schedule.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
@@ -55,7 +56,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 19,  // v19: 알람 전날/당일/다음날(day_offset) 지원 - shift_alarm_templates/alarms/alarm_history/alarm_creation_log에 컬럼 추가
+      version: 20,  // v20: date_schedules 테이블 추가 (일정관리 탭 영구 저장 + 메모 자동분류 카테고리 필드)
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -158,6 +159,30 @@ class DatabaseService {
   ''');
 
   await db.execute('CREATE INDEX IF NOT EXISTS idx_date_memos_date ON date_memos(date)');
+
+    // ⭐ 신규(v20): 일정관리 탭 - date_memos(달력 탭 메모)와는 완전히 별개로
+    // CRUD하는 테이블. 메모_자동분류_ML_계획.md Phase 5의 카테고리 자동배정
+    // 결과를 predicted_category/is_user_corrected로 같이 기록함(v1부터 캡처
+    // 구조를 넣어야 나중에 재학습용 피드백을 놓치지 않음 - 그 계획서 참고).
+  await db.execute('''
+    CREATE TABLE IF NOT EXISTS date_schedules(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date TEXT NOT NULL,
+      content TEXT NOT NULL,
+      start_minutes INTEGER NOT NULL,
+      duration_minutes INTEGER NOT NULL,
+      color_index INTEGER NOT NULL DEFAULT 0,
+      icon_index INTEGER NOT NULL DEFAULT 0,
+      style_index INTEGER NOT NULL DEFAULT 1,
+      font_index INTEGER NOT NULL DEFAULT 1,
+      predicted_category TEXT,
+      is_user_corrected INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      updated_at TEXT
+    )
+  ''');
+
+  await db.execute('CREATE INDEX IF NOT EXISTS idx_date_schedules_date ON date_schedules(date)');
 
     // ⭐ 신규: 알람 생성 이력 원장 (append-only, 절대 UPDATE/DELETE 안 함)
     // 알람이 생성되는 "그 순간"에 무조건 기록 → 나중에 alarms/alarm_history에서
@@ -473,6 +498,36 @@ class DatabaseService {
       }
     }
     print('✅ DB 업그레이드 완료 (v$oldVersion → v19): 전날/당일/다음날(day_offset) 컬럼 추가');
+  }
+
+  // ⭐ v20 - 일정관리 탭 영구 저장용 date_schedules 테이블 신설. 기존
+  // date_memos/다른 테이블은 전혀 안 건드림 - 완전히 새 테이블이라 여기서도
+  // CREATE TABLE IF NOT EXISTS(신규 설치처럼 동작)면 충분함.
+  if (oldVersion < 20) {
+    try {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS date_schedules(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          date TEXT NOT NULL,
+          content TEXT NOT NULL,
+          start_minutes INTEGER NOT NULL,
+          duration_minutes INTEGER NOT NULL,
+          color_index INTEGER NOT NULL DEFAULT 0,
+          icon_index INTEGER NOT NULL DEFAULT 0,
+          style_index INTEGER NOT NULL DEFAULT 1,
+          font_index INTEGER NOT NULL DEFAULT 1,
+          predicted_category TEXT,
+          is_user_corrected INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL,
+          updated_at TEXT
+        )
+      ''');
+      await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_date_schedules_date ON date_schedules(date)');
+    } catch (e) {
+      print('⚠️ date_schedules 생성 스킵(이미 존재 가능성): $e');
+    }
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v20): date_schedules 테이블 추가');
   }
 }
 
@@ -1259,6 +1314,48 @@ Future<int> updateFriendData(int id, {required String dataJson}) async {
 Future<int> renameFriend(int id, String name) async {
   final db = await database;
   return await db.update('friends', {'name': name}, where: 'id = ?', whereArgs: [id]);
+}
+
+// ===== 일정관리(스케줄) 관련 메서드 =====
+// ⭐ date_memos(메모)와는 완전히 별개 테이블/CRUD. schedule_management_tab.dart
+// 전용 - 메모_자동분류_ML_계획.md "Phase 4~5 완료 기록" 참고.
+
+Future<DateSchedule> createSchedule(DateSchedule schedule) async {
+  final db = await database;
+  final now = DateTime.now().toIso8601String();
+  final map = schedule.copyWith(createdAt: now).toMap()..remove('id');
+  final id = await db.insert('date_schedules', map);
+  return schedule.copyWith(id: id, createdAt: now);
+}
+
+Future<List<DateSchedule>> getSchedulesForDate(String date) async {
+  final db = await database;
+  final maps = await db.query(
+    'date_schedules',
+    where: 'date = ?',
+    whereArgs: [date],
+    orderBy: 'start_minutes ASC',
+  );
+  return maps.map((map) => DateSchedule.fromMap(map)).toList();
+}
+
+Future<int> updateSchedule(DateSchedule schedule) async {
+  assert(schedule.id != null, 'updateSchedule은 이미 저장된(id 있는) 일정만 받음');
+  final db = await database;
+  final map = schedule
+      .copyWith(updatedAt: DateTime.now().toIso8601String())
+      .toMap();
+  return await db.update(
+    'date_schedules',
+    map,
+    where: 'id = ?',
+    whereArgs: [schedule.id],
+  );
+}
+
+Future<int> deleteSchedule(int id) async {
+  final db = await database;
+  return await db.delete('date_schedules', where: 'id = ?', whereArgs: [id]);
 }
 
 }

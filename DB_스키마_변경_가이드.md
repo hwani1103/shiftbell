@@ -1,6 +1,6 @@
 # DB 스키마 변경 가이드
 
-현재 스키마 버전: **v19**
+현재 스키마 버전: **v20**
 
 이 앱은 **Flutter(sqflite)와 Kotlin(SQLiteOpenHelper)이 같은 SQLite 파일을 각자 연다**.
 그래서 스키마 변경이 다른 앱보다 까다롭고, 실제로 같은 실수가 세 번 재발해서
@@ -171,7 +171,7 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
 
 ---
 
-## 5. 현재 스키마 (v19)
+## 5. 현재 스키마 (v20)
 
 | 테이블 | 용도 |
 |---|---|
@@ -181,7 +181,8 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
 | `alarm_types` | 알람 타입 프리셋 (소리/볼륨/진동/지속시간) |
 | `alarm_history` | 알람 이력 — **영구 보존, 자동 삭제 금지** |
 | `alarm_creation_log` | 알람 생성 로그 — **영구 보존, 자동 삭제 금지** |
-| `date_memos` | 날짜별 메모 |
+| `date_memos` | 날짜별 메모(달력 탭) |
+| `date_schedules` | 일정관리 탭 전용 (v20 신규 - `date_memos`와 완전히 별개 CRUD) |
 | `date_overtime` | 날짜별 OT/특근 |
 | `friends` | 친구 공유 (v17에서 Firestore `ownerId` 기반으로 재설계) |
 
@@ -193,6 +194,11 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
 - **v19** — `shift_alarm_templates`/`alarms`/`alarm_history`/`alarm_creation_log`에
   `day_offset`(INTEGER, 기본값 0) 추가 - 고정 알람을 근무 배정일 기준 전날(-1)/
   당일(0)/다음날(+1)로 등록하는 기능
+- **v20** — `date_schedules` 테이블 신설(일정관리 탭 영구 저장). Native는 이
+  테이블을 아직 안 읽음(위젯에 일정 표시 기능 없음) - 그래도 `DATABASE_VERSION`은
+  반드시 같이 올림(§2 "Native가 안 쓰니까 안 올려도 된다"는 착각 참고).
+  `predicted_category`/`is_user_corrected` 컬럼은 메모_자동분류_ML_계획.md
+  Phase 5의 카테고리 자동배정 결과 기록용.
 
 ---
 

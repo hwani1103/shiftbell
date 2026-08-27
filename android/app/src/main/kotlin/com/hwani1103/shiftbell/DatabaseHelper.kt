@@ -44,7 +44,12 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // isDatabaseReady()가 항상 false를 반환해 위젯이 스케줄 유무와 무관하게 영원히
         // "없음"으로 봤던 것. Flutter DB 버전 올릴 때 이 값도 반드시 같이 올릴 것 (재발
         // 방지책은 project_alarm_reliability_overhaul 메모리 참고).
-        private const val DATABASE_VERSION = 19
+        // ⭐ 2026-08-27 - 일정관리 탭 영구 저장(date_schedules 테이블 신설)으로
+        // database_service.dart의 version:이 20으로 올라가서 같이 올림. Native는 이
+        // 테이블을 아직 안 읽지만(위젯에 일정 표시 기능 없음), 그래도 반드시 같이
+        // 올려야 함 - "Native가 새 컬럼/테이블을 안 쓰니까 안 올려도 된다"가 정확히
+        // 세 번 재발했던 그 착각임 (DB_스키마_변경_가이드.md 참고).
+        private const val DATABASE_VERSION = 20
         private const val TAG = "DatabaseHelper"
 
         @Volatile

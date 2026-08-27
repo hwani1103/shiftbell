@@ -76,6 +76,15 @@ flutter build appbundle --release --flavor prod   # 스토어 배포용
 ### 홈 화면 위젯
 `CalendarWidgetProvider.kt` — 달력 + 근무색 + 메모까지 표시. 앱의 테마 설정을 따라감.
 
+### 일정관리 탭 / 메모·일정 카테고리 자동분류
+- `schedule_management_tab.dart` — 세로 시간축에서 시각을 골라 일정 생성/수정.
+  `date_schedules` 테이블(v20, `date_memos`와 완전히 별개)에 영구 저장
+- 일정 생성 시 아이콘을 직접 안 고르면 내용 텍스트로 자동분류해서 카테고리
+  아이콘을 대신 배정(`MemoCategoryClassifier`, 키워드 하드매핑 + 온디바이스
+  TF-IDF/LogisticRegression, `assets/ml/memo_category_model.json`) — 직접 고르면
+  항상 그 선택이 우선. 모델 학습/재export는 `ml/`(Python) 참고
+- 상세: `메모_자동분류_ML_계획.md`(Phase 0~5 완료, Phase 6~7 보류)
+
 ### 친구 공유
 - 내 공유 코드 발급(`my_share_code_screen`), 친구 근무표 열람(`friend_calendar_view`)
 - 웹 뷰어(`lib/web_main.dart` + `web/`) — 카카오톡 인앱 브라우저 대응 포함
@@ -141,7 +150,7 @@ android/app/src/main/kotlin/com/hwani1103/shiftbell/
 
 | 값 | Kotlin | Dart |
 |----|--------|------|
-| DB 스키마 버전 | `DatabaseHelper.kt` `DATABASE_VERSION` (현재 **19**) | `database_service.dart` `version:` |
+| DB 스키마 버전 | `DatabaseHelper.kt` `DATABASE_VERSION` (현재 **20**) | `database_service.dart` `version:` |
 | 갱신 윈도우 일수 | `AlarmRefreshEngine.kt` `DAYS_AHEAD` (현재 **10**) | `alarm_limits.dart` `kAlarmRefreshWindowDays` |
 
 새로 이런 쌍이 생기면 `checkPair()` 호출을 하나 더 추가할 것.
@@ -179,10 +188,11 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
 
 ---
 
-## DB 스키마 (v19)
+## DB 스키마 (v20)
 
 `shift_schedule` · `shift_alarm_templates` · `alarms` · `alarm_types` ·
-`alarm_history` · `alarm_creation_log` · `date_memos` · `date_overtime` · `friends`
+`alarm_history` · `alarm_creation_log` · `date_memos` · `date_schedules` ·
+`date_overtime` · `friends`
 
 최근 변경:
 - v17 — `friends`를 Firestore `ownerId` 기반으로 재설계
@@ -191,6 +201,10 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
   `day_offset`(전날 -1 / 당일 0 / 다음날 +1) 추가. 알람 생성 계산은
   `lib/services/alarm_generation_service.dart`(Dart)와
   `AlarmRefreshEngine.kt`(Kotlin)가 동일한 알고리즘을 유지해야 함(파일 상단 주석 참고)
+- v20 — `date_schedules` 테이블 신설. 일정관리 탭(`schedule_management_tab.dart`)
+  전용 CRUD — `date_memos`(달력 탭 메모)와는 완전히 별개. 메모 자동분류
+  (`lib/services/memo_category_classifier.dart`, 메모_자동분류_ML_계획.md Phase 4~5)의
+  카테고리 자동배정 결과를 `predicted_category`/`is_user_corrected`로 같이 기록
 
 ---
 
@@ -205,6 +219,8 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
 | `교대시계_영어화_현지화_보고서_영문판.md` | i18n 결정 사항 |
 | `코드_품질_검수_리포트_2026-08-14.md` | 검수 결과 (리뷰만, 수정은 별도) |
 | `TEST_CHECKLIST.md` | 수동 테스트 체크리스트 |
+| `메모_자동분류_ML_계획.md` | 온디바이스 메모/일정 카테고리 자동분류(`ml/`, TF-IDF+LogReg). Phase 4~5 완료 |
+| `메모_일정기능_설계메모.md` | 일정관리 탭 시간 필드 확장 설계(미착수) — `date_schedules`(v20) 컬럼 추가 계획 시 참고 |
 
 ---
 

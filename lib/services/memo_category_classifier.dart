@@ -213,6 +213,8 @@ const List<String> _kCommonParticles = [
   '가', '이', '은', '는', '을', '를', '의', '에게', '한테', '께',
   '랑', '이랑', '와', '과', '도', '만', '까지', '부터', '께서',
   '인데', '이고', '이지만', '라도', '이라도', '야', '아',
+  // ⭐ 2026-08-27 - 존칭 접미사("장모"+"님"="장모님" 등). ml/keyword_router.py 참고.
+  '님', '어른', '댁',
 ];
 
 const List<String> _kImmediateFamily = [
@@ -252,6 +254,27 @@ const List<String> _kSportsKeywords = [
 const List<String> _kSportsFalsePositives = [
   '골프공', '테니스공', '야구공', '축구공', '탁구공',
 ];
+
+// ⭐ 2026-08-27 - 짧은 단어/구가 '기타'로 자주 빠지는 문제 실측 후 추가.
+// ml/keyword_router.py의 ACTIVITY_PREFIX_KEYWORDS와 동일 - "업무"/"휴식"은
+// 전체 라벨 데이터(5,464개) 검증에서 충돌이 나서 뺐음(ml/check_keyword_
+// regressions.py, 주석 참고). 바뀌면 두 파일 다 같이 고칠 것.
+const Map<String, List<String>> _kActivityPrefixKeywords = {
+  'study': ['공부', '독서'],
+  'health': ['병원'],
+  'work': ['출장'],
+  'meal': ['식사', '외식'],
+  'leisure': ['여가'],
+};
+
+// "쇼핑"은 "온라인쇼핑"처럼 복합어로도 흔히 쓰여서 contains로 잡음.
+const Map<String, List<String>> _kActivityContainsKeywords = {
+  'shopping': ['쇼핑'],
+};
+
+// "독서 모임"류처럼 실제로는 사람을 만나는 게 핵심인 경우가 더 많아서(실측),
+// "모임" 신호가 있으면 활동 하드매핑 전체를 보류하고 ML 판단에 맡김.
+const List<String> _kActivityDeferMarkers = ['모임'];
 
 abstract final class _MemoKeywordRouter {
   static List<String> _tokens(String text) => text
@@ -327,6 +350,19 @@ abstract final class _MemoKeywordRouter {
         _anyContainsMatched(text, _kSportsKeywords);
     if (sportsHit && !_anyContainsMatched(text, _kSportsFalsePositives)) {
       return ('exercise', 'tier3_sports');
+    }
+
+    if (!_anyContainsMatched(text, _kActivityDeferMarkers)) {
+      for (final entry in _kActivityPrefixKeywords.entries) {
+        if (_anyPrefixMatched(tokens, entry.value)) {
+          return (entry.key, 'tier4_activity');
+        }
+      }
+      for (final entry in _kActivityContainsKeywords.entries) {
+        if (_anyContainsMatched(text, entry.value)) {
+          return (entry.key, 'tier4_activity');
+        }
+      }
     }
 
     return null;

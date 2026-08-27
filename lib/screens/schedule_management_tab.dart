@@ -32,8 +32,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart' hide TextDirection;
 import '../models/calendar_theme.dart';
+import '../models/date_schedule.dart';
 import '../models/shift_schedule.dart';
 import '../providers/calendar_theme_provider.dart';
+import '../providers/date_schedule_provider.dart';
 import '../providers/schedule_provider.dart';
 import '../services/memo_category_classifier.dart';
 import '../theme/app_colors.dart';
@@ -121,6 +123,7 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
 
     final locale = _intlLocale(context);
     final dateLabel = DateFormat.yMMMMEEEEd(locale).format(_selectedDate);
+    final dateKey = _selectedDate.toIso8601String().split('T')[0];
 
     return GestureDetector(
       onHorizontalDragEnd: (details) {
@@ -139,7 +142,11 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
                 selectedShiftColor),
             _buildDateStrip(daysInMonth),
             Container(height: 1, color: kAppChipBorder.withValues(alpha: 0.08)),
-            Expanded(child: _TimeAxisPicker(hasShiftToday: selectedHasShift)),
+            Expanded(
+                child: _TimeAxisPicker(
+                    key: ValueKey(dateKey),
+                    dateKey: dateKey,
+                    hasShiftToday: selectedHasShift)),
           ],
         ),
       ),
@@ -333,18 +340,23 @@ class _ShiftPill extends StatelessWidget {
 //    scrollOffset을 슬롯 위치로 읽고 쓸 수 있음.
 // ============================================================
 
-class _TimeAxisPicker extends StatefulWidget {
+class _TimeAxisPicker extends ConsumerStatefulWidget {
   // ⭐ "오늘 근무 조건이 아예 없고(=근무 미배정) 만들어둔 일정도 없는" 완전
   // 빈 상태를 판정하기 위해 부모가 이미 계산해둔 값을 그대로 받음 - 아래
   // _computeInitialCenterMinutes의 확장 포인트 참고.
   final bool hasShiftToday;
-  const _TimeAxisPicker({required this.hasShiftToday});
+  // ⭐ 2026-08-27 - date_schedules 영구 저장(DB v20) 연동용. 'YYYY-MM-DD'.
+  // 부모가 key: ValueKey(dateKey)로 감싸서 넘기므로, 날짜가 바뀌면 이 위젯
+  // 전체가 새로 마운트됨(스크롤 위치·드래그 상태도 자연스럽게 리셋).
+  final String dateKey;
+  const _TimeAxisPicker(
+      {super.key, required this.hasShiftToday, required this.dateKey});
 
   @override
-  State<_TimeAxisPicker> createState() => _TimeAxisPickerState();
+  ConsumerState<_TimeAxisPicker> createState() => _TimeAxisPickerState();
 }
 
-class _TimeAxisPickerState extends State<_TimeAxisPicker> {
+class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // ⭐⭐ 2026-08-26 - "픽셀 단위로 박아놔도 되냐, 기기별 편차는?" 피드백으로
   // 전체 리팩터. 이 축 내부 기하 값들은 전부 raw(스케일 없음)로 박혀 있었음
   // - 지금 기기(1080×2340, override density 420)에서 눈으로 맞춘 값들이라
@@ -433,9 +445,10 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
   double _initialMinutes = 0; // 최초 진입 시 중앙에 놓일 시각(현재 시각)
   bool _jumpedToInitial = false;
 
-  // ⭐ 실제로 만들어진 일정들(세션 한정 메모리 상태, DB 아님).
-  final List<_ScheduleBlock> _blocks = [];
-  int _colorCursor = 0; // 새 일정마다 순서대로 다른 색 배정
+  // ⭐ 2026-08-27 - date_schedules 테이블(DB v20)에서 영구 저장으로 전환.
+  // build()마다 dateScheduleProvider를 watch해서 최신값으로 갱신함(아래
+  // build() 참고) - 여기 초기값은 그 갱신 전까지의 플레이스홀더일 뿐.
+  List<DateSchedule> _blocks = const [];
 
   // ⭐ 인디케이터 드래그 상태 - null이면 평소(축 정중앙 고정) 상태.
   // 콘텐츠 좌표계(= _slotTops와 같은 기준, 스크롤 offset과 비교 가능한 값)의
@@ -463,13 +476,17 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
 
   // ⭐ 매 build마다 다시 계산됨(_recomputeLayout) - 일정이 추가/삭제되면
   // 슬롯 높이가 바뀌므로. 제스처 콜백(build 밖)에서도 참조해야 해서 필드로 캐싱.
-  Map<int, List<_ScheduleBlock>> _grouped = {};
+  Map<int, List<DateSchedule>> _grouped = {};
   List<double> _slotTops = List<double>.filled(_slotCount + 1, 0);
 
   @override
   void initState() {
     super.initState();
     _initialMinutes = _computeInitialCenterMinutes();
+    // ⭐ 이 위젯은 날짜가 바뀌면 key: ValueKey(dateKey) 덕분에 통째로 새로
+    // 마운트되므로(부모 build() 참고), initState에서 한 번만 로드하면 됨.
+    // 이미 로드된 날짜면 DateScheduleNotifier.loadForDate가 알아서 스킵함.
+    ref.read(dateScheduleProvider.notifier).loadForDate(widget.dateKey);
   }
 
   // ⭐ 확장 포인트 - "처음 렌더링될 때 축 중앙에 뭘 보여줄지" 결정 지점을
@@ -507,7 +524,7 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
 
   // ⭐ "00:00 ~ 03:00 (3시간)"처럼 범위 + 소요시간을 한 줄로. 소요시간 포맷은
   // 이미 있던 _durationPresetLabel(프리셋 칩 라벨)을 그대로 재사용함.
-  String _timeRangeLabel(_ScheduleBlock block) {
+  String _timeRangeLabel(DateSchedule block) {
     final start = _formatMinutes(block.startMinutes);
     final end = _formatMinutes(block.startMinutes + block.durationMinutes);
     return '$start ~ $end (${_durationPresetLabel(block.durationMinutes)})';
@@ -516,7 +533,7 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
   // ⭐ "정확히 동일한 시간 범위"의 일정은 중복 생성을 막음 - 그런 경우는
   // 기존 일정에 내용을 같이 적으면 되니까. [exclude]는 수정 시 자기 자신은
   // 비교 대상에서 빼기 위함.
-  bool _hasDuplicateRange(int start, int duration, {_ScheduleBlock? exclude}) {
+  bool _hasDuplicateRange(int start, int duration, {DateSchedule? exclude}) {
     return _blocks.any((b) =>
         !identical(b, exclude) &&
         b.startMinutes == start &&
@@ -530,7 +547,7 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
   // 그 슬롯에 쌓인 일정들의 실제 스타일별 높이를 하나씩 더함 - 그래야 스타일이
   // 서로 다른 일정 두 개가 같은 슬롯에 있어도 안 겹침.
   void _recomputeLayout() {
-    final grouped = <int, List<_ScheduleBlock>>{};
+    final grouped = <int, List<DateSchedule>>{};
     for (final b in _blocks) {
       final slot = (b.startMinutes ~/ 30).clamp(0, _slotCount - 1);
       grouped.putIfAbsent(slot, () => []).add(b);
@@ -576,15 +593,6 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
             timeLabel: _timeRangeLabel(block),
             iconDiameter: _iconDiameter,
             onTap: () => _openEditSheet(block),
-            // ⭐ 이 카드 위에서 드래그를 시작해도 인디케이터가 반응하도록
-            // 같은 콜백을 그대로 넘김 - onTap과 한 GestureDetector 안에서
-            // 경쟁하니까(제스처 아레나), 살짝 스치듯 탭하면 onTap이, 확실히
-            // 위아래로 움직이면 이 드래그가 이김. 카드 영역 안에서만 영향
-            // 있고 빈 공간 스크롤은 안 건드림.
-            onIndicatorDragDown: _onIndicatorDragDown,
-            onIndicatorDragUpdate: _onIndicatorDragUpdate,
-            onIndicatorDragEnd: _onIndicatorDragEnd,
-            onIndicatorDragCancel: _onIndicatorDragCancel,
           ),
         ));
         offset += h;
@@ -603,7 +611,7 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
   }
 
   Future<void> _openCreateSheet(int startMinutes) async {
-    final raw = await showModalBottomSheet<_ScheduleBlock>(
+    final raw = await showModalBottomSheet<DateSchedule>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -617,17 +625,25 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
       );
       return;
     }
-    setState(() {
-      _blocks.add(raw.copyWith(
-          color: _kBlockColors[_colorCursor++ % _kBlockColors.length]));
-    });
+    // ⭐ 2026-08-27 - _colorCursor(세션 한정 카운터) 대신 현재 저장된 개수로
+    // 색을 정함 - date_schedules가 영구 저장이라 앱을 껐다 켜도 같은 규칙으로
+    // 계속 순환하게.
+    final color =
+        kScheduleBlockColors[_blocks.length % kScheduleBlockColors.length];
+    await ref.read(dateScheduleProvider.notifier).create(
+          raw.copyWith(
+            date: widget.dateKey,
+            color: color,
+            createdAt: DateTime.now().toIso8601String(),
+          ),
+        );
   }
 
   // ⭐ 기존 일정을 탭하면 - 같은 시트를 "수정 모드"로 열어서 저장/삭제 가능하게
   // 함. 시작 시간은 인디케이터 전용 개념이라 여기선 안 바꿈(제목/내용/
   // 소요시간만 수정 가능) - 시작 시간을 바꾸고 싶으면 삭제 후 다시 만드는
   // 흐름을 일단 씀. 색은 그대로 유지.
-  Future<void> _openEditSheet(_ScheduleBlock block) async {
+  Future<void> _openEditSheet(DateSchedule block) async {
     final result = await showModalBottomSheet<Object>(
       context: context,
       isScrollControlled: true,
@@ -636,7 +652,7 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
           _CreateBlockSheet(startMinutes: block.startMinutes, existing: block),
     );
     if (!mounted || result == null) return;
-    if (result is _ScheduleBlock &&
+    if (result is DateSchedule &&
         _hasDuplicateRange(result.startMinutes, result.durationMinutes,
             exclude: block)) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -645,14 +661,17 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
       );
       return;
     }
-    setState(() {
-      if (result == _CreateBlockSheet.deleteSignal) {
-        _blocks.remove(block);
-      } else if (result is _ScheduleBlock) {
-        final index = _blocks.indexOf(block);
-        if (index != -1) _blocks[index] = result.copyWith(color: block.color);
-      }
-    });
+    final notifier = ref.read(dateScheduleProvider.notifier);
+    if (result == _CreateBlockSheet.deleteSignal) {
+      await notifier.delete(block);
+    } else if (result is DateSchedule) {
+      await notifier.update(result.copyWith(
+        id: block.id,
+        date: block.date,
+        color: block.color,
+        createdAt: block.createdAt,
+      ));
+    }
   }
 
   // ⭐ 지금 손가락이 실제로 가리키는(가려버리는) 슬롯 - 표시/생성 둘 다
@@ -829,6 +848,8 @@ class _TimeAxisPickerState extends State<_TimeAxisPicker> {
 
   @override
   Widget build(BuildContext context) {
+    _blocks =
+        ref.watch(dateScheduleProvider)[widget.dateKey] ?? const [];
     return LayoutBuilder(
       builder: (context, constraints) {
         _viewportHeight = constraints.maxHeight;
@@ -1114,27 +1135,22 @@ class _LeftBeakPainter extends CustomPainter {
 //     쓰기 때문에(_TimeAxisPickerState._recomputeLayout 참고), 여기서
 //     과소평가하면 다음 일정의 아이콘/줄과 겹침(예전 버그).
 class _ScheduleRow extends StatelessWidget {
-  final _ScheduleBlock block;
+  final DateSchedule block;
   final String timeLabel;
   final double iconDiameter;
   final VoidCallback onTap;
-  // ⭐ 이 카드 위에서 드래그를 시작해도 인디케이터가 반응하도록 부모의
-  // 콜백을 그대로 받아 같은 GestureDetector에 얹어둠 - onTap과 한
-  // GestureDetector 안에서 경쟁하니(제스처 아레나), 살짝 스치듯 탭하면
-  // onTap이, 확실히 위아래로 움직이면 드래그가 이김.
-  final GestureDragDownCallback onIndicatorDragDown;
-  final GestureDragUpdateCallback onIndicatorDragUpdate;
-  final GestureDragEndCallback onIndicatorDragEnd;
-  final VoidCallback onIndicatorDragCancel;
-  const _ScheduleRow(
-      {required this.block,
-      required this.timeLabel,
-      required this.iconDiameter,
-      required this.onTap,
-      required this.onIndicatorDragDown,
-      required this.onIndicatorDragUpdate,
-      required this.onIndicatorDragEnd,
-      required this.onIndicatorDragCancel});
+  // ⭐ 2026-08-27 - 예전엔 이 카드 위 드래그도 인디케이터에 얹어서 생성모드로
+  // 새 나갔는데("이미 생성된 일정을 눌러도 인디케이터가 우측으로 빠지면서
+  // 생성모드로 감" 버그 리포트) - 완전히 제거함. 이제 이 카드는 onTap(편집
+  // 모드 진입)만 반응하고, 세로 드래그는 아예 안 받아서(GestureDetector에
+  // 등록을 안 함) 제스처 아레나에서 자동으로 부모 스크롤뷰가 가져감 - "카드
+  // 위에서 드래그하면 그냥 스크롤됨" 요청과도 맞음.
+  const _ScheduleRow({
+    required this.block,
+    required this.timeLabel,
+    required this.iconDiameter,
+    required this.onTap,
+  });
 
   // ⭐ 스타일별로 실제 필요한 세로 공간. iconDiameter는 axisPicker와 동일한
   // 스케일 getter를 그대로 참조함(같은 파일=라이브러리라 접근 가능).
@@ -1186,10 +1202,6 @@ class _ScheduleRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      onVerticalDragDown: onIndicatorDragDown,
-      onVerticalDragUpdate: onIndicatorDragUpdate,
-      onVerticalDragEnd: onIndicatorDragEnd,
-      onVerticalDragCancel: onIndicatorDragCancel,
       child: _buildStyle(context),
     );
   }
@@ -1506,49 +1518,9 @@ class _ScheduleRow extends StatelessWidget {
 // 소요시간을 정함.
 // ============================================================
 
-class _ScheduleBlock {
-  // ⭐ "제목+내용" 구조에서 "내용만" 구조로 단순화(요청).
-  final String content;
-  final int startMinutes;
-  final int durationMinutes;
-  // ⭐ 아이콘 색 - 새 일정마다 순서대로 다르게 배정됨(_TimeAxisPickerState의
-  // _colorCursor 참고).
-  final Color color;
-  // ⭐ 스타일 실험용(요청: "팝업에서 1~8번 지정할 수 있게") - _kScheduleCategoryIcons
-  // 인덱스(0-based, 0~9), 내용 렌더 스타일(1~8), 내용 폰트(1~5).
-  final int iconIndex;
-  final int styleIndex;
-  final int fontIndex;
-
-  const _ScheduleBlock({
-    required this.content,
-    required this.startMinutes,
-    required this.durationMinutes,
-    this.color = kAppMainAccent,
-    this.iconIndex = 0,
-    this.styleIndex = 1,
-    this.fontIndex = 1,
-  });
-
-  _ScheduleBlock copyWith({
-    String? content,
-    int? durationMinutes,
-    Color? color,
-    int? iconIndex,
-    int? styleIndex,
-    int? fontIndex,
-  }) {
-    return _ScheduleBlock(
-      content: content ?? this.content,
-      startMinutes: startMinutes,
-      durationMinutes: durationMinutes ?? this.durationMinutes,
-      color: color ?? this.color,
-      iconIndex: iconIndex ?? this.iconIndex,
-      styleIndex: styleIndex ?? this.styleIndex,
-      fontIndex: fontIndex ?? this.fontIndex,
-    );
-  }
-}
+// ⭐ 2026-08-27 - 예전엔 여기 화면 로컬 DateSchedule 클래스가 있었는데,
+// date_schedules 영구 저장(DB v20)으로 전환하며 lib/models/date_schedule.dart로
+// 옮김(그 파일이 kScheduleBlockColors도 같이 들고 있음). 이 화면은 그걸 import해서 씀.
 
 // ⭐ 카테고리 아이콘 10종 - assets/icons/memo_category/README.md의 매핑과
 // 동일(memo_category_icon_lab_screen.dart의 kMemoCategoryIcons도 같은
@@ -1605,19 +1577,6 @@ TextStyle _contentFontStyle(
   }
 }
 
-// ⭐ 일정 아이콘 색 팔레트 - 새 일정을 만들 때마다 순서대로 하나씩 돌아가며
-// 배정됨(_colorCursor).
-const List<Color> _kBlockColors = [
-  Color(0xFF4FC3F7),
-  Color(0xFFFFA726),
-  Color(0xFF81C784),
-  Color(0xFF9575CD),
-  Color(0xFFE57373),
-  Color(0xFF4DB6AC),
-  Color(0xFFF06292),
-  Color(0xFF7986CB),
-];
-
 // ⭐ 소요시간 프리셋 - "10분/15분/20분/30분/45분/1시간/2시간/4시간/5시간" 요청.
 // 자유 입력 대신 프리셋 칩으로 고른 이유: 어차피 시작 시간도 30분 단위로
 // 스냅해서 고르는 화면인데, 종료 시간까지 분 단위로 세밀하게 입력받으면
@@ -1637,11 +1596,11 @@ class _CreateBlockSheet extends StatefulWidget {
   final int startMinutes;
   // ⭐ null이면 새로 만드는 중, 값이 있으면 그 일정을 수정하는 중(제목/내용/
   // 소요시간만 - 시작 시간은 인디케이터 전용이라 여기선 고정).
-  final _ScheduleBlock? existing;
+  final DateSchedule? existing;
   const _CreateBlockSheet({required this.startMinutes, this.existing});
 
   // ⭐ Navigator.pop(context, deleteSignal)로 "삭제를 눌렀다"를 알림 - 저장
-  // 결과(_ScheduleBlock)와 구분해야 해서 별도 sentinel 값을 씀.
+  // 결과(DateSchedule)와 구분해야 해서 별도 sentinel 값을 씀.
   static const Object deleteSignal = '__delete__';
 
   @override
@@ -1770,12 +1729,18 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
   // 자체가 막히면 안 됨.
   Future<void> _handleSave() async {
     var iconIndex = _selectedIcon;
+    // ⭐ 재학습용 신호(메모_자동분류_ML_계획.md Phase 5) - 이번에 새로 자동분류
+    // 안 했으면(=아이콘을 직접 만졌거나 그냥 다른 필드만 수정) 기존 예측값을
+    // 그대로 들고 감. isUserCorrected는 아래에서 "최종 아이콘 != 예측 카테고리"로
+    // 계산하므로, 수정 중에 아이콘을 바꾸면 자동으로 "정정함"이 잡힘.
+    var predictedCategory = widget.existing?.predictedCategory;
     if (!_iconManuallySet) {
       setState(() => _autoClassifying = true);
       try {
         await MemoCategoryClassifier.instance.ensureLoaded();
         final prediction = MemoCategoryClassifier.instance
             .classify(_contentController.text.trim());
+        predictedCategory = prediction.categoryKey;
         final matched = _kScheduleCategoryIcons
             .indexWhere((e) => e.$1 == prediction.categoryKey);
         if (matched != -1) iconIndex = matched;
@@ -1786,15 +1751,22 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
       }
     }
     if (!mounted) return;
+    final finalCategoryKey =
+        _kScheduleCategoryIcons[iconIndex.clamp(0, _kScheduleCategoryIcons.length - 1)].$1;
     Navigator.pop(
       context,
-      _ScheduleBlock(
+      DateSchedule(
+        date: '', // _openCreateSheet/_openEditSheet가 실제 날짜로 덮어씀
         content: _contentController.text.trim(),
         startMinutes: widget.startMinutes,
         durationMinutes: _selectedDuration,
         styleIndex: _selectedStyle,
         fontIndex: _selectedFont,
         iconIndex: iconIndex,
+        predictedCategory: predictedCategory,
+        isUserCorrected:
+            predictedCategory != null && predictedCategory != finalCategoryKey,
+        createdAt: '', // 위와 동일 - 호출부가 덮어씀
       ),
     );
   }
