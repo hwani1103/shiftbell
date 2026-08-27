@@ -550,23 +550,19 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
 
   static double get _edgeMargin => (56 * 7 / 8).h; // 이 안쪽으로 들어오면 가장자리로 간주
   static const Duration _edgeScrollInterval = Duration(milliseconds: 220);
-  // ⭐ 인디케이터 래퍼(Container)의 상하 패딩. _indicatorWrapperHeight(아래)가
-  // 이 값과 아이콘 크기로부터 "계산되어야" 실제 렌더 높이와 항상 정확히
-  // 일치함 - 패딩만 스케일되고 높이 상수는 고정값이면(예전 버그) 화면
-  // 배율에 따라 인디케이터가 화살표가 가리키는 지점과 미세하게 어긋남
-  // (그게 정각/30분 눈금 비대칭 버그의 원인 중 하나였음 - 이제 그 위험을
-  // 아예 없애기 위해 패딩과 아이콘 크기 둘 다 같은 축(.h/.r)으로 스케일함).
-  static double get _indicatorVerticalPadding => (14 * 7 / 8).h;
-  // ⭐ 평소(안 만질 때)엔 작게, 탭해서 활성화되면 그보다 크게 - 크기 차이가
-  // 나므로 래퍼 높이도 상태에 따라 달라져야 함(아래 getter 참고).
-  double get _indicatorWrapperHeight =>
-      (_isDragging
-          ? _AxisIndicator._activeIconSize
-          : _AxisIndicator._idleIconSize) +
-      _indicatorVerticalPadding * 2;
   // ⭐ 숫자/눈금을 축 왼쪽으로 옮기면서(요청) 그만큼 왼쪽 여백이 더 필요해짐
   // (숫자 텍스트 + 눈금이 들어갈 자리) - 26→58로 늘림.
+  // 🔧 튜닝 포인트 1: 세로축(선+숫자열) 전체를 좌우로 옮기려면 이 숫자(58)를
+  // 줄이면 왼쪽으로, 늘리면 오른쪽으로 감 - _axisX가 이 값 그대로임(아래
+  // build()의 `_axisX = _axisLeftMargin;`).
   static double get _axisLeftMargin => (58 * 7 / 8).w;
+  // ⭐ 2026-08-27(3차) - "인디케이터를 우측 하단 고정 버튼으로" 요청으로
+  // 신설 - 축을 더 이상 안 따라다니니 화면 우측 하단 한 자리에 이 마진만큼
+  // 떨어뜨려 고정함. 광고 배너는 이 위젯(Expanded 안 LayoutBuilder)의 바깥
+  // (부모 Scaffold의 별도 슬롯)이라 _viewportHeight 자체가 이미 광고 위까지만
+  // 이라, bottom 마진만 줘도 자동으로 광고보다 위에 옴.
+  static double get _fabRightMargin => (16 * 7 / 8).w;
+  static double get _fabBottomMargin => (16 * 7 / 8).h;
   // ⭐ 정각 눈금(숫자+선) 한 칸의 "고정" 높이 - 이 값으로 Positioned에 실제
   // height를 줘서 Row를 정확히 이 높이만큼 강제로 차지하게 만듦. 예전엔
   // Row의 높이를 텍스트 폰트 크기로 눈대중해서 "-9"라는 추정값으로 중앙
@@ -856,40 +852,16 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   int get _displaySlot =>
       (_rawDragSlot - _activeDisplayOffsetSlots).clamp(0, _slotCount - 1);
 
-  // ⭐ 인디케이터가 지금 가리키는 화면 Y:
-  //  - 평소(안 만질 때): 항상 뷰포트 정중앙.
-  //  - 누르는 즉시(요청: "누르면 시각에 가서 붙는 구조"): 움직이기 전이라도
-  //    바로 _displaySlot 위치로 스냅해서 보여줌 - "탭 직후 아직 안 움직인
-  //    상태"와 "그 자리에서 손을 떼면 취소되는지"는 완전히 별개 판정
-  //    (_hasMovedSinceDown, onPointerUp에서만 봄)이라 여기선 신경 안 씀.
+  // ⭐ 2026-08-27(3차) - 인디케이터가 우측 하단 고정 버튼으로 바뀌면서, 이
+  // 값은 더 이상 "인디케이터를 화면 어디에 그릴지"가 아니라 순수하게
+  // "지금 선택된 슬롯(_displaySlot)이 뷰포트 가장자리에 가까운지"를
+  // _checkEdgeScroll에서 판정하는 용도로만 남음 - 드래그 중 축을 자동으로
+  // 더 스크롤할지 결정하는 계산이라 여전히 필요함.
   double get _indicatorScreenY {
     if (_dragContentY == null) return _viewportHeight / 2;
     final scrollOffset = _controller.hasClients ? _controller.offset : 0.0;
-    // ⭐ 2026-08-27 - "인디케이터(화살표)가 시간보다 약간 위를 가리킨다"는
-    // 피드백으로 +3.h만큼 아래로 미세조정. 실기기로 다시 확인하며 필요하면
-    // 더 조정할 수 있음.
     return _edgePadding + _slotTops[_displaySlot] - scrollOffset + (3 * 7 / 8).h;
   }
-
-  bool get _isDragging => _dragContentY != null;
-
-  // ⭐ 평소(안 만질 때) - 화살표 없는 동그라미가 축 정중앙에 오도록. 래퍼에
-  // GestureDetector용 좌우 패딩(10.w)이 있어서 그만큼 보정함. (참고: private
-  // 멤버는 클래스가 아니라 파일=라이브러리 단위라 같은 파일 안이면
-  // _AxisIndicator._iconSize처럼 밖에서도 그대로 접근 가능함.)
-  double get _idleIndicatorLeft =>
-      _axisX - _AxisIndicator._idleIconSize / 2 - (10 * 7 / 8).w;
-
-  // ⭐ 숫자/눈금이 이제 축 왼쪽으로 옮겨가서, 인디케이터(활성 상태)는 축
-  // 오른쪽에 거의 맞닿을 정도로 붙여도 더 이상 숫자를 가리지 않음(요청).
-  // ⭐ 이 값은 항상 고정(-10.w, 컨테이너 좌우 패딩 보정용)임 - 화살표
-  // 끝(부리 꼭짓점)이 이 좌표계의 로컬 x=0에 그려지므로, 여기에 패딩(10.w)만
-  // 다시 더하면 항상 정확히 축 선(_axisX)에 맞닿음. "아이콘을 축에서 더
-  // 떨어뜨리고 화살표를 더 길게"는 _AxisIndicator._activeBeakLength 하나만
-  // 바꾸면 됨(부리 꼭짓점은 그대로 axisX에 고정된 채, 아이콘만 그만큼 더
-  // 밀려남) - 간격 상수를 두 곳에 따로 두면 화면 배율에 따라 어긋나므로
-  // 일부러 한 곳(_AxisIndicator)에만 둠.
-  double get _activeIndicatorLeft => _axisX - (10 * 7 / 8).w;
 
   // ⭐ 콘텐츠 좌표계("scrollOffset과 같은 기준"의 절대 위치)에서, 지금 화면
   // 정중앙에 있는 위치. edgePadding이 뷰포트 절반보다 작아진 뒤로는
@@ -1195,40 +1167,33 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                 ),
               ),
             ),
-            // ⭐ 인디케이터 - 평소엔 화살표 없는 동그라미로 축 정중앙에 떠서
-            // 스크롤을 따라감. 손을 대는 즉시(onVerticalDragDown) 시간 숫자
-            // 바로 오른쪽으로 옮겨오면서 "왼쪽을 가리키는 부리" 모양으로 바뀜.
-            // 그대로 움직이지 않고 손을 떼면 그냥 취소(_hasMovedSinceDown),
-            // 위/아래로 움직인 뒤 떼면 그 시각으로 일정 생성 시트가 뜸.
-            //
-            // ⭐ 2026-08-27 - 히트테스트 영역을 화면 전체로 넓혔다가(일정
-            // 카드 위에서 드래그가 안 먹는 버그 대응) 바로 원복함 - 그렇게
-            // 하니 "인디케이터 아닌 곳에서 스크롤하려 해도 인디케이터가
-            // 반응한다"는 새 버그가 생겼음(onVerticalDragDown이 화면 아무
-            // 데나 손을 대는 순간 무조건 먼저 불려서, 배경 스크롤과 매번
-            // 아레나 경합이 붙어버림 - 축 전체를 덮는 방식 자체가 "빈
-            // 공간에서의 순수 스크롤"과 구조적으로 충돌함). 그래서 인디케이터
-            // 자체의 히트테스트 영역은 다시 아이콘 크기로 되돌리고, "일정
-            // 카드 위에서도 드래그가 되게" 하는 부분은 각 _ScheduleRow의
-            // GestureDetector에 같은 콜백을 같이 달아주는 방식으로 대신함
-            // (아래 _buildScheduleRowWidgets에 인디케이터 콜백을 넘겨줌) -
-            // 그러면 "일정 카드 위"에서만 영향이 있고, 나머지 빈 공간의
-            // 스크롤은 예전처럼 전혀 안 건드림.
+            // ⭐ 2026-08-27(3차) - "인디케이터를 세로축이 아니라 우측 하단에
+            // 고정으로 박아줘" 요청으로 축 옆을 따라다니던 인디케이터를
+            // 완전히 걷어내고, 화면 우측 하단에 고정된 원형 버튼(플로팅) 하나로
+            // 대체함 - 그만큼 축 옆 공간을 다른 용도(숫자/아이콘열을 더
+            // 왼쪽으로 붙이는 등)로 쓸 수 있게 됨. 동작 자체는 요청대로 예전과
+            // 완전히 동일: 이 버튼을 누르는 순간(onVerticalDragDown) 지금
+            // 보고 있는 축 뷰포트의 정중앙에 가까운 시각으로 선택이 시작되고
+            // (_unshiftedCenterPosition → _realYToUniformY), 위/아래로 끌면
+            // 그 시각이 바뀌고, 손을 떼면 그 시각으로 일정 생성 시트가 뜸
+            // (_onIndicatorDragDown/Update/End/Cancel - 로직은 그대로, 이
+            // 버튼이 호출하는 콜백만 바뀜). 다만 이 버튼이 축과 완전히
+            // 분리되어 있어서, 예전처럼 "드래그 중 지금 몇 시가 선택됐는지"를
+            // 축 위에서 실시간으로 보여주는 시각적 마커는 이제 없음(요청:
+            // "그것만 해줘" - 그 외 UX는 사용자가 직접 다듬을 예정).
+            // 히트테스트 영역이 이 버튼 하나로 고정돼서, 예전에 있던
+            // "일정 카드 위에서도 드래그가 되게 하려고 각 _ScheduleRow에
+            // 같은 콜백을 같이 달아주던" 우회도 더 이상 의미가 없어짐 -
+            // 다만 그 배선을 걷어내는 건 이번 요청 범위 밖이라 그대로 둠.
             Positioned(
-              top: _indicatorScreenY - _indicatorWrapperHeight / 2,
-              left: _isDragging ? _activeIndicatorLeft : _idleIndicatorLeft,
+              right: _fabRightMargin,
+              bottom: _fabBottomMargin,
               child: GestureDetector(
                 onVerticalDragDown: _onIndicatorDragDown,
                 onVerticalDragUpdate: _onIndicatorDragUpdate,
                 onVerticalDragEnd: _onIndicatorDragEnd,
                 onVerticalDragCancel: _onIndicatorDragCancel,
-                child: Container(
-                  color: Colors.transparent,
-                  padding: EdgeInsets.symmetric(
-                      vertical: _indicatorVerticalPadding,
-                      horizontal: (10 * 7 / 8).w),
-                  child: _AxisIndicator(showBeak: _isDragging),
-                ),
+                child: const _AxisIndicator(),
               ),
             ),
           ],
@@ -1238,34 +1203,25 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   }
 }
 
-// ⭐ 인디케이터 - 평소(showBeak=false)엔 화살표 없는 작은 동그라미, 드래그 중
-// (showBeak=true)엔 그보다 살짝 큰 동그라미 + 왼쪽을 가리키는 부리가 붙은
-// 모양으로 바뀜(요청: 평소엔 더 작게, 탭되면 더 크게 + 화살표도 비례해서
-// 더 크고 길게). 흰 테두리 링은 없음(요청: "내 앱 아이콘에도 그거 없다").
+// ⭐ 2026-08-27(3차) - "인디케이터를 세로축이 아니라 우측 하단에 고정으로
+// 박아줘" 요청으로 축을 따라다니던 인디케이터(평소엔 작은 동그라미, 드래그
+// 중엔 부리 달린 큰 동그라미)를 완전히 걷어내고, 항상 고정 위치·고정
+// 크기(예전 "활성" 크기)로만 뜨는 단순 원형 버튼으로 바꿈. 더 이상 축 옆에
+// 붙어서 축 선을 가리킬 필요가 없어져서 부리(beak)도 통째로 삭제함(요청:
+// "코드상으로도 삭제" 관례 그대로 따름) - 아래에 있던 idle/active 크기
+// 분기, _LeftBeakPainter 전부 제거.
 class _AxisIndicator extends StatelessWidget {
-  final bool showBeak;
-  const _AxisIndicator({required this.showBeak});
+  const _AxisIndicator();
 
-  // ⭐ 평소엔 작게(44→36→28), 탭해서 활성화되면 그보다 크게(44→50). 원형
-  // 크기라 가로세로 구분 없는 .r로 스케일(리팩터, 2026-08-26 - 이 파일
-  // 상단 _TimeAxisPickerState 주석 참고).
-  static double get _idleIconSize => (28 * 7 / 8).r;
-  static double get _activeIconSize => (50 * 7 / 8).r;
-  // ⭐ 화살표(부리) 길이 = 축 선~아이콘 사이 간격. 부리 꼭짓점은 항상 이
-  // 위젯의 로컬 x=0에 그려지고, 이 위젯 자체가 축 선에서 패딩만큼만
-  // 떨어진 자리에 고정되므로(_TimeAxisPickerState._activeIndicatorLeft),
-  // 이 값을 키우면 꼭짓점은 축에 그대로 붙은 채 아이콘만 더 멀리 밀려남.
-  // 16→10 - "아이콘이 아직도 축에서 너무 멀다"는 피드백으로 다시 줄임(손가락이
-  // 숫자를 가리는 문제는 이제 _activeDisplayOffsetSlots로 따로 해결하므로,
-  // 굳이 멀리 안 띄워도 됨). ⭐ 10→4로 더 줄였다가 원복함 - 그건 이 화살표가
-  // 아니라 일정 목록의 아이콘(rowLeft)을 축에 붙여달라는 요청이었음.
-  static double get _activeBeakLength => (10 * 7 / 8).r;
-  static double get _activeBeakHeight => (16 * 7 / 8).r;
+  // ⭐ 예전 "활성(탭됨)" 크기 그대로 - 요청: "지금 탭했을 때만큼의 크기로
+  // 키운다음에" 고정.
+  static double get _iconSize => (50 * 7 / 8).r;
 
-  Widget _icon(double size) {
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      width: size,
-      height: size,
+      width: _iconSize,
+      height: _iconSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: [
@@ -1275,65 +1231,20 @@ class _AxisIndicator extends StatelessWidget {
               offset: const Offset(0, 2))
         ],
       ),
+      // ⭐ 2026-08-27(3차) - "인디케이터가 가까이서 보면 자글자글하다"는
+      // 피드백 - 원본(assets/icon/app_icon.png)은 1024×1024라 해상도 자체는
+      // 충분한데, Flutter Image의 기본 FilterQuality(low, 단순 bilinear)로
+      // 이렇게 큰 비율(1024px → ~44dp)을 축소하면 세밀한 선(아이콘 내부
+      // 디테일)이 밀리언스 없이 계단져 보임 - FilterQuality.high로 올려서
+      // 축소 시 밉맵 품질 보간을 쓰게 함.
       child: const ClipOval(
         child: Image(
-            image: AssetImage('assets/icon/app_icon.png'), fit: BoxFit.cover),
+            image: AssetImage('assets/icon/app_icon.png'),
+            fit: BoxFit.cover,
+            filterQuality: FilterQuality.high),
       ),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!showBeak) {
-      return SizedBox(
-          width: _idleIconSize,
-          height: _idleIconSize,
-          child: _icon(_idleIconSize));
-    }
-    return SizedBox(
-      width: _activeIconSize + _activeBeakLength,
-      height: _activeIconSize,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // ⭐ 부리 끝(왼쪽 꼭짓점)이 정확히 x=0(=이 위젯의 왼쪽 끝)에 오고,
-          // 이 위젯 자체가 축 선에서 정확히 _activeBeakLength만큼 떨어진
-          // 자리에 놓이므로(_activeIndicatorLeft), 부리 끝은 항상 축 선에
-          // 정확히 맞닿음.
-          Positioned(
-            left: 0,
-            top: _activeIconSize / 2 - _activeBeakHeight / 2,
-            child: CustomPaint(
-              size: Size(_activeBeakLength, _activeBeakHeight),
-              painter: const _LeftBeakPainter(color: kAppMainAccent),
-            ),
-          ),
-          Positioned(
-              left: _activeBeakLength, top: 0, child: _icon(_activeIconSize)),
-        ],
-      ),
-    );
-  }
-}
-
-class _LeftBeakPainter extends CustomPainter {
-  final Color color;
-  const _LeftBeakPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = Path()
-      ..moveTo(0, size.height / 2)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width, size.height)
-      ..close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _LeftBeakPainter oldDelegate) =>
-      oldDelegate.color != color;
 }
 
 // ⭐ 일정 한 줄 - "내용"만 있는 구조(제목 없앰, 요청)로, 렌더링 스타일을
@@ -1598,11 +1509,14 @@ const List<(String key, String label, String asset)> _kScheduleCategoryIcons = [
 // 흔한 길이(짧은 휴식~긴 근무 블록)를 그대로 나열한 것도 이 목록의 근거.
 const List<int> _kDurationPresets = [10, 15, 20, 30, 45, 60, 120, 240, 300];
 
+// ⭐ 2026-08-27(3차) - "1시간 30분"처럼 한글 단위를 쓰면 나중에 30분 단위
+// 조정까지 들어갔을 때("1시간 30분" 같은 조합) 레이아웃을 너무 많이 먹어서
+// "h"/"m" 표기로 교체(요청) - 예: "30m", "1h", "1h 30m".
 String _durationPresetLabel(int minutes) {
-  if (minutes < 60) return '$minutes분';
+  if (minutes < 60) return '${minutes}m';
   final h = minutes ~/ 60;
   final m = minutes % 60;
-  return m == 0 ? '$h시간' : '$h시간 $m분';
+  return m == 0 ? '${h}h' : '${h}h ${m}m';
 }
 
 // ⭐ 2026-08-27 - 12시간제(AM/PM) 변환. 자정=12:00 AM, 정오=12:00 PM.
