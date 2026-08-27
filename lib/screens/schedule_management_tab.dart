@@ -41,11 +41,93 @@ import '../providers/schedule_provider.dart';
 import '../services/memo_category_classifier.dart';
 import '../theme/app_colors.dart';
 
-// ⭐ 2026-08-27 - 세로축 시간 숫자 + 일정의 시간 텍스트가 공유하는 색.
-// "하얀 배경 기준으로 시간 숫자는 약간 회색/옅은 검정" 요청 - 지금은 흰
-// 배경 전용 고정값이고, 배경색 설정(schedule_background_provider.dart)별
-// 대응은 다음에("그건 그때 해야겠다" - 사용자 확인).
-const Color kScheduleTimeNumberColor = Color(0xFF6B7280);
+// ⭐ 2026-08-27(2차) - "배경색 설정을 만들면 그거 따라서 텍스트/영역 색도
+// 전부 유동적으로" 요청으로, 예전엔 흰 배경 전용 고정값이었던
+// kScheduleTimeNumberColor를 이 클래스로 대체함. 선택된 배경 하나로부터
+// 헤더/날짜스트립/칩/시간텍스트/내용텍스트 색을 전부 계산해서 뽑아냄 -
+// 10개 프리셋마다 색을 일일이 하드코딩하지 않고, 밝기(luminance) 기준으로
+// 일관되게 파생시키는 방식(그래야 나중에 배경 프리셋이 늘어나도 자동으로
+// 대응됨). 예외(요청): 근무명 칩(_ShiftPill)과 그 안의 색깔 점은 이 스킴과
+// 무관하게 항상 고정 - 여기서 만든 색은 그 두 곳엔 아예 안 씀.
+class _ScheduleColorScheme {
+  final Color mainBg; // 일정 타임라인 영역 + 날짜칩/설정칩의 배경(선택한 색 그대로)
+  final Color headerBg; // 헤더(연월일)~날짜스트립 영역 배경(mainBg와 톤만 다름)
+  final Color headerText; // 헤더 텍스트/아이콘(연월일, ◀▶, 날짜숫자, 톱니바퀴)
+  final Color chipBorder; // 날짜칩/설정칩 테두리
+  final Color chipShadowDark; // 칩의 살짝 튀어나온 입체감(3·6시 방향) - 그림자쪽
+  final Color chipShadowLight; // 칩의 입체감 - 반대쪽 하이라이트
+  final Color timeText; // 축 시간 숫자 + 일정의 시작~끝 시간 텍스트(연한 대비)
+  final Color contentText; // 일정 내용 텍스트(진한 대비)
+
+  const _ScheduleColorScheme({
+    required this.mainBg,
+    required this.headerBg,
+    required this.headerText,
+    required this.chipBorder,
+    required this.chipShadowDark,
+    required this.chipShadowLight,
+    required this.timeText,
+    required this.contentText,
+  });
+
+  factory _ScheduleColorScheme.of(Color bg) {
+    final isDark = bg.computeLuminance() < 0.5;
+    final headerBg = isDark
+        ? Color.lerp(bg, Colors.white, 0.16)!
+        : Color.lerp(bg, Colors.black, 0.045)!;
+    final headerText = isDark
+        ? Color.lerp(Colors.white, Colors.black, 0.10)!
+        : Color.lerp(Colors.black, Colors.white, 0.22)!;
+    final chipBorder = isDark
+        ? Colors.white.withValues(alpha: 0.18)
+        : Colors.black.withValues(alpha: 0.12);
+    final chipShadowDark = isDark
+        ? Colors.black.withValues(alpha: 0.5)
+        : Colors.black.withValues(alpha: 0.18);
+    final chipShadowLight = isDark
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.white.withValues(alpha: 0.7);
+    final timeText = isDark
+        ? Color.lerp(Colors.white, bg, 0.30)!
+        : Color.lerp(Colors.black, bg, 0.40)!;
+    final contentText = isDark
+        ? Color.lerp(Colors.white, bg, 0.06)!
+        : Color.lerp(Colors.black, bg, 0.06)!;
+    return _ScheduleColorScheme(
+      mainBg: bg,
+      headerBg: headerBg,
+      headerText: headerText,
+      chipBorder: chipBorder,
+      chipShadowDark: chipShadowDark,
+      chipShadowLight: chipShadowLight,
+      timeText: timeText,
+      contentText: contentText,
+    );
+  }
+}
+
+// ⭐ 날짜칩/설정칩 공용 데코레이션 - "두 칩은 디자인적으로 100% 동일해야
+// 함" 요청이라 아예 함수 하나로 묶어서 두 군데서 부르는 값이 절대 어긋날 수
+// 없게 함. 테두리 + 살짝 튀어나온(3·6시 방향 오프셋 그림자) 입체감을 줌.
+BoxDecoration _scheduleChipDecoration(_ScheduleColorScheme scheme) {
+  return BoxDecoration(
+    color: scheme.mainBg,
+    borderRadius: BorderRadius.circular(11.r),
+    border: Border.all(color: scheme.chipBorder, width: 1),
+    boxShadow: [
+      BoxShadow(
+        color: scheme.chipShadowDark,
+        offset: Offset((1.3 * 7 / 8).w, (1.3 * 7 / 8).h),
+        blurRadius: (1.5 * 7 / 8).r,
+      ),
+      BoxShadow(
+        color: scheme.chipShadowLight,
+        offset: Offset(-(1 * 7 / 8).w, -(1 * 7 / 8).h),
+        blurRadius: (1 * 7 / 8).r,
+      ),
+    ],
+  );
+}
 
 class ScheduleManagementTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar;
@@ -138,10 +220,11 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
     final locale = _intlLocale(context);
     final dateLabel = DateFormat.yMMMMEEEEd(locale).format(_selectedDate);
     final dateKey = _selectedDate.toIso8601String().split('T')[0];
-    // ⭐ 2026-08-27 - 일정관리 설정(톱니바퀴)에서 고르는 배경색. 지금은
-    // Scaffold 배경만 바꿈(헤더/날짜스트립은 각자 불투명한 흰 배경을 그대로
-    // 갖고 있어서 당장은 안 바뀜 - 요청대로 "일단 배경만" 적용, 나머지는 다음에).
-    final bgColor = kScheduleBackgroundColors[ref.watch(scheduleBackgroundProvider)];
+    // ⭐ 2026-08-27(2차) - "근무 칩/점 빼고는 전부 배경에 따라 유동적으로"
+    // 요청으로 헤더/날짜스트립도 이 스킴을 받아서 색을 맞춤(_buildHeader/
+    // _buildDateStrip에 scheme로 넘김) - 더 이상 "일단 배경만" 단계가 아님.
+    final scheme = _ScheduleColorScheme.of(
+        kScheduleBackgroundColors[ref.watch(scheduleBackgroundProvider)]);
 
     return GestureDetector(
       // ⭐ 인디케이터 드래그 중엔 null로 꺼서 경합 자체를 없앰(위 필드 주석 참고).
@@ -156,12 +239,12 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
               }
             },
       child: Scaffold(
-        backgroundColor: bgColor,
+        backgroundColor: scheme.mainBg,
         body: Column(
           children: [
             _buildHeader(dateLabel, selectedShiftName, selectedHasShift,
-                selectedShiftColor),
-            _buildDateStrip(daysInMonth),
+                selectedShiftColor, scheme),
+            _buildDateStrip(daysInMonth, scheme),
             Container(height: 1, color: kAppChipBorder.withValues(alpha: 0.08)),
             Expanded(
                 child: _TimeAxisPicker(
@@ -180,20 +263,26 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
   // 상태표시줄만 빼고" 요청 - 예전엔 이 Container 전체가 불투명 흰색이라
   // SafeArea의 상단 패딩(상태표시줄 자리)까지 같이 흰색으로 덮여있었음.
   // 이제 상태표시줄 자리만 정확히 그 높이(MediaQuery.padding.top)만큼
-  // 흰색으로 남기고, 헤더 본문(Row)은 배경을 안 칠해서 Scaffold의 배경색이
-  // 그대로 비침.
-  Widget _buildHeader(
-      String dateLabel, String shiftName, bool hasShift, Color? shiftColor) {
+  // 흰색으로 남기고(요청대로 이 부분만 예외), 헤더 본문(Row)은
+  // scheme.headerBg로 칠함.
+  // ⭐ 2026-08-27(2차) - 텍스트/아이콘 색도 scheme.headerText로(요청: "검정색이
+  // 아니라 검정색보다 약간 연한 색깔로, 그 영역 배경에 대비되게"). 근무명
+  // 칩(_ShiftPill)은 예외라 scheme를 안 받고 그대로 둠.
+  Widget _buildHeader(String dateLabel, String shiftName, bool hasShift,
+      Color? shiftColor, _ScheduleColorScheme scheme) {
     return Column(
       children: [
         Container(
             height: MediaQuery.of(context).padding.top, color: Colors.white),
-        Padding(
+        Container(
+          color: scheme.headerBg,
           padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 10.h),
           child: Row(
             children: [
               _MonthNavButton(
-                  icon: Icons.chevron_left, onTap: () => _shiftMonth(-1)),
+                  icon: Icons.chevron_left,
+                  color: scheme.headerText,
+                  onTap: () => _shiftMonth(-1)),
               Expanded(
                 child: Center(
                   child: Wrap(
@@ -207,7 +296,7 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
                         style: TextStyle(
                             fontSize: 15.5.sp,
                             fontWeight: FontWeight.w700,
-                            color: kAppChipBorder),
+                            color: scheme.headerText),
                       ),
                       if (hasShift)
                         _ShiftPill(shiftName: shiftName, color: shiftColor),
@@ -216,7 +305,9 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
                 ),
               ),
               _MonthNavButton(
-                  icon: Icons.chevron_right, onTap: () => _shiftMonth(1)),
+                  icon: Icons.chevron_right,
+                  color: scheme.headerText,
+                  onTap: () => _shiftMonth(1)),
             ],
           ),
         ),
@@ -228,9 +319,14 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
   // 다시 전체 폭을 다 씀(트레일링 아이콘 자리 없앰).
   // ⭐ 2026-08-27 - 맨 끝에 날짜 칩과 동일한 크기의 톱니바퀴 칩을 하나 추가함
   // (요청) - 일정관리 전용 설정 화면(지금은 배경색 선택만) 진입점.
-  Widget _buildDateStrip(int daysInMonth) {
+  // ⭐ 2026-08-27(2차) - 컨테이너 배경 scheme.headerBg로, 날짜칩/설정칩은
+  // 공용 데코레이션(_scheduleChipDecoration)으로 통일(요청: "두 칩은
+  // 디자인적으로 100% 동일해야 함") - 배경은 scheme.mainBg(선택된 배경색
+  // 그대로), 텍스트/아이콘은 scheme.headerText(선택 안 된 상태 기준).
+  Widget _buildDateStrip(int daysInMonth, _ScheduleColorScheme scheme) {
+    final chipDecoration = _scheduleChipDecoration(scheme);
     return Container(
-      color: Colors.white,
+      color: scheme.headerBg,
       height: _dateChipHeight.h + 14.h,
       child: ListView.separated(
         controller: _dateStripController,
@@ -247,12 +343,9 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
                 width: _dateChipWidth.w,
                 height: _dateChipHeight.h,
                 alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4F6FC),
-                  borderRadius: BorderRadius.circular(11.r),
-                ),
+                decoration: chipDecoration,
                 child: Icon(Icons.settings,
-                    size: 16.sp, color: kAppChipBorder.withValues(alpha: 0.7)),
+                    size: 16.sp, color: scheme.headerText),
               ),
             );
           }
@@ -271,29 +364,30 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
               width: _dateChipWidth.w,
               height: _dateChipHeight.h,
               alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: isSelected ? kAppMainAccent : const Color(0xFFF4F6FC),
-                borderRadius: BorderRadius.circular(11.r),
-                boxShadow: isSelected
-                    ? [
+              decoration: isSelected
+                  ? BoxDecoration(
+                      color: kAppMainAccent,
+                      borderRadius: BorderRadius.circular(11.r),
+                      boxShadow: [
                         BoxShadow(
                             color: kAppMainAccent.withValues(alpha: 0.35),
                             blurRadius: 7,
                             offset: const Offset(0, 3))
-                      ]
-                    : null,
-                border: !isSelected && isToday
-                    ? Border.all(
-                        color: kAppMainAccent.withValues(alpha: 0.5),
-                        width: 1.3)
-                    : null,
-              ),
+                      ],
+                    )
+                  : chipDecoration.copyWith(
+                      border: isToday
+                          ? Border.all(
+                              color: kAppMainAccent.withValues(alpha: 0.5),
+                              width: 1.3)
+                          : chipDecoration.border,
+                    ),
               child: Text(
                 '${date.day}',
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : kAppChipBorder,
+                  color: isSelected ? Colors.white : scheme.headerText,
                 ),
               ),
             ),
@@ -306,8 +400,10 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
 
 class _MonthNavButton extends StatelessWidget {
   final IconData icon;
+  final Color color;
   final VoidCallback onTap;
-  const _MonthNavButton({required this.icon, required this.onTap});
+  const _MonthNavButton(
+      {required this.icon, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -319,8 +415,7 @@ class _MonthNavButton extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: EdgeInsets.all(8.w),
-          child: Icon(icon,
-              size: 22.sp, color: kAppChipBorder.withValues(alpha: 0.55)),
+          child: Icon(icon, size: 22.sp, color: color.withValues(alpha: 0.8)),
         ),
       ),
     );
@@ -502,19 +597,30 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   List<DateSchedule> _blocks = const [];
 
   // ⭐ 인디케이터 드래그 상태 - null이면 평소(축 정중앙 고정) 상태.
-  // 콘텐츠 좌표계(= _slotTops와 같은 기준, 스크롤 offset과 비교 가능한 값)의
-  // 절대 위치를 담음 - 드래그 중엔 배경 스크롤을 잠가두므로 화면 delta를
-  // 그대로 누적해도 콘텐츠 좌표 delta와 같음.
+  // ⭐ 2026-08-27(2차) - "일정이 있는 슬롯을 지날 때만 드래그가 더 뻑뻑하다"는
+  // 사용성 피드백으로 좌표계를 바꿈. 예전엔 이게 실제(가변 높이) _slotTops와
+  // 같은 좌표계라 손가락 delta를 그대로 누적했는데, 그러면 슬롯에 일정이
+  // 쌓여서 물리적으로 더 큰(=heightForStyle만큼 늘어난) 슬롯은 다음 슬롯
+  // 경계를 넘기까지 그만큼 더 드래그해야 했음. 이제 이 값은 "균일 슬롯
+  // 좌표계"(슬롯 1개 = 항상 _baseSlotHeight, 일정 유무와 무관)를 씀 -
+  // 그래서 어느 슬롯이든 정확히 _baseSlotHeight만큼만 손가락을 움직이면
+  // 다음 슬롯으로 넘어감. 화면에 실제로 그리는 위치(_indicatorScreenY)는
+  // 여전히 _slotTops(실제 가변 레이아웃)를 따로 참조하므로, "판정"과
+  // "렌더링"이 서로 다른 좌표계를 쓰게 분리된 것 - _realYToUniformY가 그
+  // 변환을 담당함.
   double? _dragContentY;
-  double? _downContentY; // 누른 순간의 콘텐츠 좌표 - "정말 움직였는지" 판정 기준점
+  double? _downContentY; // 누른 순간의 균일 좌표 - "정말 움직였는지" 판정 기준점
   bool _hasMovedSinceDown = false; // "탭만 하고 안 움직였으면 취소" 판정용
   Timer? _edgeTimer;
 
   // ⭐ 아주 작은 손떨림까지 "이동"으로 잡으면 그냥 탭했다 떼는 것도 취소가
-  // 안 됨(버그 재발) - 최소 이 정도(콘텐츠 좌표 기준)는 움직여야 "진짜
+  // 안 됨(버그 재발) - 최소 이 정도(균일 좌표 기준)는 움직여야 "진짜
   // 이동"으로 침. Flutter 제스처 인식기의 터치 슬롭에 기대지 않고 직접
   // 판정하는 이유는 위 Listener 관련 주석 참고.
-  static const double _moveThreshold = 6;
+  // ⭐ 2026-08-27(2차) - raw 6이 스케일 없이 박혀 있던 걸 발견해서(비교
+  // 대상인 _dragContentY delta는 전부 .h 스케일된 값이라 단위가 안 맞았음)
+  // 이 파일 전체가 따르는 (N*7/8) 컨벤션으로 맞춤.
+  static double get _moveThreshold => (6 * 7 / 8).h;
 
   // ⭐ 인디케이터를 누르면 손가락이 바로 그 시각의 숫자를 가려버림 - 그래서
   // 화면에 보이는 활성 인디케이터(+생성 시각)는 실제 드래그 위치보다 항상
@@ -623,7 +729,8 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // ⭐ 슬롯 안에 쌓인 일정들을 각자의 실제 스타일별 높이(heightForStyle)만큼
   // 누적된 offset에 배치함 - 스타일이 서로 다른 일정이 같은 슬롯에 섞여도
   // 절대 안 겹치는 이유가 이거임(고정 줄높이 대신 실제 필요 높이를 씀).
-  List<Widget> _buildScheduleRowWidgets(double rowLeft) {
+  List<Widget> _buildScheduleRowWidgets(
+      double rowLeft, _ScheduleColorScheme scheme) {
     final widgets = <Widget>[];
     for (final entry in _grouped.entries) {
       double offset = 0;
@@ -638,6 +745,8 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
             block: block,
             timeLabel: _timeRangeLabel(block),
             iconDiameter: _iconDiameter,
+            timeTextColor: scheme.timeText,
+            contentTextColor: scheme.contentText,
             onTap: () => _openEditSheet(block),
           ),
         ));
@@ -720,10 +829,27 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
     }
   }
 
+  // ⭐ 실제(가변 높이) 콘텐츠 좌표 하나를 "균일 슬롯 좌표"(슬롯 1개 =
+  // _baseSlotHeight)로 변환함 - 드래그를 시작하는 순간(_onIndicatorDragDown)
+  // "지금 화면 정중앙이 실제로 몇 번째 슬롯의 몇 %쯤인지"를 구해서, 그
+  // 이후로는 균일 좌표계에서만 델타를 누적하기 위한 최초 1회 변환.
+  double _realYToUniformY(double realY) {
+    final slot = _slotIndexAtContentY(realY).clamp(0, _slotCount - 1);
+    final segStart = _slotTops[slot];
+    final segEnd = _slotTops[slot + 1];
+    final segLen = segEnd - segStart;
+    final frac =
+        segLen > 0 ? ((realY - segStart) / segLen).clamp(0.0, 1.0) : 0.0;
+    return (slot + frac) * _baseSlotHeight;
+  }
+
   // ⭐ 지금 손가락이 실제로 가리키는(가려버리는) 슬롯 - 표시/생성 둘 다
-  // 이걸 그대로 안 쓰고 아래 _displaySlot(2칸 위)을 씀.
-  int get _rawDragSlot =>
-      _dragContentY == null ? -1 : _slotIndexAtContentY(_dragContentY!);
+  // 이걸 그대로 안 쓰고 아래 _displaySlot(2칸 위)을 씀. _dragContentY가 이제
+  // 균일 좌표계라 나눗셈 하나로 바로 슬롯이 나옴(선형 탐색이던
+  // _slotIndexAtContentY보다 오히려 더 간단해짐).
+  int get _rawDragSlot => _dragContentY == null
+      ? -1
+      : (_dragContentY! / _baseSlotHeight).floor().clamp(0, _slotCount - 1);
 
   // ⭐ 화면에 보이고, 실제로 생성되는 슬롯 - 손가락에 가려지지 않도록 항상
   // 실제 위치보다 2칸(1시간) 위.
@@ -796,7 +922,10 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // onEnd를 부르든 onCancel을 부르든 결과가 똑같아짐.
   void _onIndicatorDragDown(DragDownDetails details) {
     setState(() {
-      _dragContentY = _unshiftedCenterPosition();
+      // ⭐ 2026-08-27(2차) - 균일 슬롯 좌표계로 변환해서 저장(위
+      // _dragContentY 필드 주석 참고) - 이 최초 변환 이후로는 실제 레이아웃
+      // (_slotTops)을 전혀 안 쓰고 순수 델타 누적만으로 슬롯을 판정함.
+      _dragContentY = _realYToUniformY(_unshiftedCenterPosition());
       _downContentY = _dragContentY;
       _hasMovedSinceDown = false;
     });
@@ -806,8 +935,10 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   void _onIndicatorDragUpdate(DragUpdateDetails details) {
     if (_dragContentY == null) return;
     setState(() {
-      _dragContentY =
-          (_dragContentY! + details.delta.dy).clamp(0.0, _slotTops[_slotCount]);
+      // ⭐ 균일 좌표계라 최대값도 "슬롯 개수 × 균일 슬롯 높이"(실제 총
+      // 콘텐츠 높이 _slotTops[_slotCount]가 아님).
+      _dragContentY = (_dragContentY! + details.delta.dy)
+          .clamp(0.0, _slotCount * _baseSlotHeight);
       // ⭐ 최소 이동거리(_moveThreshold)를 넘었을 때만 "이동함"으로 판정 -
       // 미세한 손떨림 한 번에 바로 true가 되는 걸 막음(그러면 탭하자마자
       // 뗐을 때도 "이동함"으로 오판정돼서 취소가 아예 안 됨). 한 번
@@ -880,18 +1011,25 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
       _edgeTimer = null;
       return;
     }
-    final currentSlot = _slotIndexAtContentY(_dragContentY!);
+    // ⭐ 2026-08-27(2차) - currentSlot 판정은 균일 좌표계로.
+    final currentSlot =
+        (_dragContentY! / _baseSlotHeight).floor().clamp(0, _slotCount - 1);
     final targetSlot = (currentSlot + direction).clamp(0, _slotCount - 1);
     if (targetSlot == currentSlot) {
       _edgeTimer?.cancel();
       _edgeTimer = null;
       return;
     }
-    final delta = _slotTops[targetSlot] - _slotTops[currentSlot];
-    final newOffset = (_controller.offset + delta)
+    // ⭐ 실제 스크롤 이동량은 여전히 실제 레이아웃(_slotTops, 가변 높이)을
+    // 써야 화면에 보이는 축과 정확히 맞물림 - 균일 좌표계는 "몇 슬롯
+    // 지났는지" 판정에만 쓰고, 화면을 실제로 얼마나 스크롤할지는 별개.
+    final realDelta = _slotTops[targetSlot] - _slotTops[currentSlot];
+    final newOffset = (_controller.offset + realDelta)
         .clamp(0.0, _controller.position.maxScrollExtent);
     setState(() {
-      _dragContentY = _dragContentY! + delta;
+      // ⭐ 균일 좌표계에서 정확히 한 슬롯만큼 이동(edge-scroll 타이머 한
+      // 틱 = 슬롯 하나, 기존 "슬롯 단위로 드르륵" 의도 그대로).
+      _dragContentY = targetSlot * _baseSlotHeight;
       _hasMovedSinceDown = true;
     });
     _controller.jumpTo(newOffset);
@@ -907,6 +1045,11 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
     // 날짜를 로드했는지"를 확인하고, 로드된 뒤 딱 한 번만 점프함.
     final isLoaded = providerState.containsKey(widget.dateKey);
     _blocks = providerState[widget.dateKey] ?? const [];
+    // ⭐ 2026-08-27(2차) - 축 시간 숫자 + 일정 시간/내용 텍스트 색이 배경색에
+    // 따라 유동적으로 바뀌게(요청) - 부모(_ScheduleManagementTabState)와
+    // 똑같은 배경값을 그대로 다시 watch해서 계산함(단일 소스, 같은 함수).
+    final scheme = _ScheduleColorScheme.of(
+        kScheduleBackgroundColors[ref.watch(scheduleBackgroundProvider)]);
     return LayoutBuilder(
       builder: (context, constraints) {
         _viewportHeight = constraints.maxHeight;
@@ -976,10 +1119,16 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                           borderRadius:
                               BorderRadius.circular(_axisLineWidth / 2),
                           boxShadow: [
+                            // ⭐ 2026-08-27(2차) - "00 라벨이 여전히 뿌옇다"는
+                            // 재확인 - 이 glow의 블러가 정확히 축 선의
+                            // 위/아래 끝(=00/24시 라벨이 있는 자리)에서
+                            // 가장 넓게 번지기 때문으로 보여서, 블러 반경
+                            // 자체를 더 줄임(4→2, spread는 아예 0으로) -
+                            // 글로우 느낌은 옅게 남기되 라벨과 겹치는 번짐은
+                            // 최소화.
                             BoxShadow(
                               color: kAppMainAccent.withValues(alpha: 0.2),
-                              blurRadius: (4 * 7 / 8).r,
-                              spreadRadius: (0.3 * 7 / 8).r,
+                              blurRadius: (2 * 7 / 8).r,
                             ),
                           ],
                         ),
@@ -999,7 +1148,11 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                         left: 0,
                         // ⭐ 2026-08-27 - "너무 붙었다"는 후속 피드백으로 축과의
                         // 간격을 4.w→10.w로 다시 살짝 벌림.
-                        width: _axisX - (10 * 7 / 8).w,
+                        // ⭐ 2026-08-27(2차) - "조끔만 더 떨어뜨려줘" 재요청으로
+                        // 10→13. 늘어난 만큼 이 Positioned의 width가 줄어서,
+                        // Row(mainAxisAlignment.end)가 숫자를 그만큼 더 왼쪽에서
+                        // 오른쪽-정렬함(=축에서 더 멀어짐).
+                        width: _axisX - (13 * 7 / 8).w,
                         height: _hourTickBoxHeight,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
@@ -1008,11 +1161,25 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                               (hour % 24).toString().padLeft(2, '0'),
                               // ⭐ 2026-08-27 - 일정 시간 텍스트(_ScheduleRow.
                               // _timeTextStyle)와 스타일 통일 요청 - 폰트/굵기는
-                              // 그대로(Quicksand w700), 색만 kScheduleTimeNumberColor로.
+                              // 그대로(Quicksand w700), 색은 scheme.timeText로
+                              // (배경색별 유동).
+                              // ⭐ 2026-08-27(2차) - "00이 다른 숫자들보다 왼쪽에
+                              // 그려진다"는 재확인 피드백 - Row가 오른쪽 끝을
+                              // 기준으로 정렬하는 이상 이론상 텍스트 폭과
+                              // 무관하게 오른쪽 끝은 일치해야 하는데, 폰트가
+                              // "00"(0이 두 번 겹침)처럼 좌우 bearing이 비대칭인
+                              // 숫자 글리프를 자연 폭으로 그리면 미묘하게
+                              // 어긋나 보일 수 있음. fontFeatures로 모든 숫자를
+                              // 강제로 같은 폭(tabular figures)으로 그리게 하면
+                              // 이 클래스의 비대칭 자체가 사라짐 - 폰트가 이
+                              // 기능을 지원 안 해도 그냥 무시될 뿐이라 안전함.
                               style: GoogleFonts.quicksand(
                                   fontSize: 19.sp,
                                   fontWeight: FontWeight.w700,
-                                  color: kScheduleTimeNumberColor),
+                                  fontFeatures: const [
+                                    FontFeature.tabularFigures()
+                                  ],
+                                  color: scheme.timeText),
                             ),
                           ],
                         ),
@@ -1023,7 +1190,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                     // 필요한 높이가 달라서(_ScheduleRow.heightForStyle) 고정
                     // 간격이 아니라 각 일정의 실제 높이를 누적해서 배치함
                     // (_buildScheduleRowWidgets).
-                    ..._buildScheduleRowWidgets(rowLeft),
+                    ..._buildScheduleRowWidgets(rowLeft, scheme),
                   ],
                 ),
               ),
@@ -1183,6 +1350,12 @@ class _ScheduleRow extends StatelessWidget {
   final DateSchedule block;
   final String timeLabel;
   final double iconDiameter;
+  // ⭐ 2026-08-27(2차) - 배경색 설정에 따라 유동적으로 바뀌는 두 텍스트색
+  // (요청: "시간 숫자랑 내용 텍스트는 서로 다른 색상 규칙") - 이 위젯은
+  // ref에 접근할 수 없는 StatelessWidget이라, 계산은 부모
+  // (_TimeAxisPickerState.build())가 하고 값만 여기로 내려받음.
+  final Color timeTextColor;
+  final Color contentTextColor;
   final VoidCallback onTap;
   // ⭐ 2026-08-27 - 예전엔 이 카드 위 드래그도 인디케이터에 얹어서 생성모드로
   // 새 나갔는데("이미 생성된 일정을 눌러도 인디케이터가 우측으로 빠지면서
@@ -1194,6 +1367,8 @@ class _ScheduleRow extends StatelessWidget {
     required this.block,
     required this.timeLabel,
     required this.iconDiameter,
+    required this.timeTextColor,
+    required this.contentTextColor,
     required this.onTap,
   });
 
@@ -1221,18 +1396,30 @@ class _ScheduleRow extends StatelessWidget {
   //  1) 1시간 이내(또는 시간 미정) - 지금처럼 정원
   //  2) 1~2시간 - 원을 아래로 살짝 늘림
   //  3) 2시간 초과 - 스타일 3번의 세로 막대(밑줄)가 끝나는 라인까지 전부.
-  // "약간 더 길게 해서 세로 막대기 끝과 맞춰라"는 후속 요청으로 +8.h만큼
-  // 더 얹음 - 실기기로 다시 확인하며 미세조정할 수 있음.
+  // "약간 더 길게 해서 세로 막대기 끝과 맞춰라"는 요청으로 +8.h를 얹었다가,
+  // ⭐ 2026-08-27(2차) - "4시간짜리 도형이 살짝 더 커져도 될 것 같다"는 재요청으로
+  // +8→+16으로 한 번 더 키움(heightForStyle의 safety 여유분(12*7/8) 안에서
+  // 충분히 안전 - _ScheduleRow.heightForStyle 계산 참고).
   double _iconBgHeight(double diameter) {
     final duration = block.durationMinutes;
     if (duration == null || duration <= 60) return diameter;
     final fullSpan =
-        diameter + (2 * 7 / 8).h + (26 * 7 / 8).h + (8 * 7 / 8).h;
+        diameter + (2 * 7 / 8).h + (26 * 7 / 8).h + (16 * 7 / 8).h;
     if (duration <= 120) {
       return diameter + (fullSpan - diameter) * 0.55;
     }
     return fullSpan;
   }
+
+  // ⭐ 아이콘 자체를 살짝 아래로 눌러서(시각적 위치만, 레이아웃 크기는 그대로)
+  // 시간 텍스트와 나란히 보이게 하는 미세조정값.
+  // ⭐ 2026-08-27(2차) - "일정 아이콘이 시간보다 살짝 위에서 렌더링된다"는
+  // 재확인 피드백 - Row(crossAxisAlignment.center)는 아이콘/텍스트를 각자의
+  // "레이아웃 박스" 중심으로 맞추는데, 텍스트 박스는 폰트 자체의 여유
+  // 행간(디센더 자리 등)이 아이콘 원의 진짜 중심과 다르게 배분돼서 살짝
+  // 어긋나 보임 - 아이콘의 "그려지는 위치"만(레이아웃 폭/높이는 그대로,
+  // Stack+Clip.none 트릭이라 가능) 이 값만큼 아래로 밀어서 보정.
+  static double get _iconVisualNudgeDown => (2 * 7 / 8).h;
 
   // ⭐ Stack + 레이아웃 전용 SizedBox(diameter×diameter) 트릭 - 실제 배경(pill)은
   // Positioned(top:0)으로 그 위에 겹쳐 그리고 Clip.none으로 아래로 넘치게 둠.
@@ -1247,7 +1434,7 @@ class _ScheduleRow extends StatelessWidget {
       children: [
         SizedBox(width: diameter, height: diameter),
         Positioned(
-          top: 0,
+          top: _iconVisualNudgeDown,
           left: 0,
           child: Container(
             width: diameter,
@@ -1274,16 +1461,23 @@ class _ScheduleRow extends StatelessWidget {
 
   // ⭐ 2026-08-27 - 내용 텍스트는 "진한 검정색 bold체" 느낌으로(요청) -
   // fontWeight를 w500→w700으로 올림. 폰트는 5번(주아체) 고정.
+  // ⭐ 2026-08-27(2차) - color 기본값을 고정 kAppChipBorder 대신
+  // contentTextColor(배경색에 따라 유동)로.
   TextStyle _contentStyle({double size = 14, Color? color}) => GoogleFonts.jua(
-      fontSize: size.sp, fontWeight: FontWeight.w700, color: color ?? kAppChipBorder);
+      fontSize: size.sp, fontWeight: FontWeight.w700, color: color ?? contentTextColor);
 
   // ⭐ 2026-08-27 - 세로축 시간 숫자와 스타일 통일(요청: "세로축의 숫자랑
   // 일정에 생성되는 숫자랑 크기+색깔+텍스트 스타일을 전부 맞추자"). 폰트=
   // Quicksand w700(축과 동일), 크기는 축(19sp)보다 작고 예전 값(13sp)보다는
-  // 큼(16sp), 색은 kScheduleTimeNumberColor(옅은 회색 - 흰 배경 기준. 배경색별
-  // 대응은 다음에).
+  // 큼(16sp).
+  // ⭐ 2026-08-27(2차) - 색은 고정 kScheduleTimeNumberColor 대신
+  // timeTextColor(배경색에 따라 유동)로. tabularFigures도 축 숫자와
+  // 동일하게 적용(같은 스타일 통일 요청 연장선).
   TextStyle get _timeTextStyle => GoogleFonts.quicksand(
-      fontSize: 16.sp, fontWeight: FontWeight.w700, color: kScheduleTimeNumberColor);
+      fontSize: 16.sp,
+      fontWeight: FontWeight.w700,
+      fontFeatures: const [FontFeature.tabularFigures()],
+      color: timeTextColor);
 
   // ⭐ 2026-08-27 - "아이콘/시간/그 사이 공간을 탭해도 편집모드로" 요청 -
   // HitTestBehavior.opaque로 GestureDetector 자기 영역(Positioned가 준 전체
@@ -1323,35 +1517,41 @@ class _ScheduleRow extends StatelessWidget {
 
   // ⭐ 2026-08-27 - 렌더링 스타일 3번(밑줄/왼쪽 세로 막대 강조)으로 확정,
   // 나머지 7종은 코드째로 삭제(요청).
+  // ⭐ 2026-08-27(2차) - "내용 바(세로 막대)를 조금만 더 위로" 재요청 - 이미
+  // 6→2로 좁혀둔 SizedBox 간격만으론 더 줄일 여지가 별로 없어서(0에
+  // 가까워짐), Transform.translate로 살짝(음수) 겹쳐서 그만큼 더 당김.
+  // heightForStyle은 안 건드림 - safety 여유분(12*7/8)이 이 정도 겹침은
+  // 충분히 흡수함(_ScheduleRow.heightForStyle 주석 참고).
   Widget _buildBody() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         _firstLine(),
-        // ⭐ 6.h→2.h(요청: "시간이랑 너무 멀리 떨어져있다") - heightForStyle의
-        // "iconD + (2*7/8).h + ..."와 반드시 같은 값으로 맞출 것.
-        SizedBox(height: (2 * 7 / 8).h),
-        Padding(
-          padding: EdgeInsets.only(left: iconDiameter + (10 * 7 / 8).w),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  width: (3 * 7 / 8).w,
-                  decoration: BoxDecoration(
-                      color: block.color,
-                      borderRadius: BorderRadius.circular((2 * 7 / 8).r)),
-                ),
-                SizedBox(width: (8 * 7 / 8).w),
-                Expanded(
-                  child: Text(block.content,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: _contentStyle()),
-                ),
-              ],
+        SizedBox(height: (1 * 7 / 8).h),
+        Transform.translate(
+          offset: Offset(0, -(2 * 7 / 8).h),
+          child: Padding(
+            padding: EdgeInsets.only(left: iconDiameter + (10 * 7 / 8).w),
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    width: (3 * 7 / 8).w,
+                    decoration: BoxDecoration(
+                        color: block.color,
+                        borderRadius: BorderRadius.circular((2 * 7 / 8).r)),
+                  ),
+                  SizedBox(width: (8 * 7 / 8).w),
+                  Expanded(
+                    child: Text(block.content,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _contentStyle()),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1432,10 +1632,12 @@ String _scheduleTimeLabel(int startMinutes, int? durationMinutes) {
   final endTotal = (startMinutes + durationMinutes).clamp(0, 24 * 60);
   final (endHHMM, endPeriod) = _to12Hour(endTotal);
   final durationLabel = _durationPresetLabel(durationMinutes);
+  // ⭐ 2026-08-27(2차) - "-가 너무 짧다"는 요청으로 하이픈(-) 대신 더 긴
+  // 줄표(em dash, —)로 교체.
   if (startPeriod == endPeriod) {
-    return '$startHHMM - $endHHMM $endPeriod ( $durationLabel )';
+    return '$startHHMM — $endHHMM $endPeriod ( $durationLabel )';
   }
-  return '$startHHMM $startPeriod - $endHHMM $endPeriod ( $durationLabel )';
+  return '$startHHMM $startPeriod — $endHHMM $endPeriod ( $durationLabel )';
 }
 
 class _CreateBlockSheet extends StatefulWidget {
