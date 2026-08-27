@@ -555,14 +555,41 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // 🔧 튜닝 포인트 1: 세로축(선+숫자열) 전체를 좌우로 옮기려면 이 숫자(58)를
   // 줄이면 왼쪽으로, 늘리면 오른쪽으로 감 - _axisX가 이 값 그대로임(아래
   // build()의 `_axisX = _axisLeftMargin;`).
-  static double get _axisLeftMargin => (58 * 7 / 8).w;
-  // ⭐ 2026-08-27(3차) - "인디케이터를 우측 하단 고정 버튼으로" 요청으로
-  // 신설 - 축을 더 이상 안 따라다니니 화면 우측 하단 한 자리에 이 마진만큼
-  // 떨어뜨려 고정함. 광고 배너는 이 위젯(Expanded 안 LayoutBuilder)의 바깥
-  // (부모 Scaffold의 별도 슬롯)이라 _viewportHeight 자체가 이미 광고 위까지만
-  // 이라, bottom 마진만 줘도 자동으로 광고보다 위에 옴.
-  static double get _fabRightMargin => (16 * 7 / 8).w;
-  static double get _fabBottomMargin => (16 * 7 / 8).h;
+  static double get _axisLeftMargin => (48 * 7 / 8).w;
+  // ⭐ 2026-08-27(3차) - "인디케이터의 '평소(안 만질 때)' 위치만 우측
+  // 하단으로" 요청(4차에서 재정정 - 처음엔 통째로 고정 버튼화했다가, 원하는
+  // 건 "평소 위치만 이동, 누르면 예전처럼 축으로 이동해서 화살표 달고
+  // 드래그"였음을 확인함). 이 마진은 "평소" 상태일 때만 씀 - 드래그
+  // 시작하는 순간 다시 축 옆(활성 위치)으로 이동함(아래 _idleIndicatorTop/
+  // Left, _activeIndicatorLeft 참고).
+  // ⭐ 2026-08-27(5차) - "정확히 우측에서는 살짝 왼쪽으로" 재요청으로 여백을
+  // 늘림(16→24).
+  static double get _fabRightMargin => (24 * 7 / 8).w;
+  // ⭐ 2026-08-27(5차) - "수직 위치는 중간(50%)보다 살짝 아래(60~65%)"
+  // 요청으로 "아래쪽 고정 마진" 방식(_fabBottomMargin, 삭제됨) 대신 뷰포트
+  // 비율 기반으로 바꿈(_idleIndicatorTop 참고).
+  // ⭐ 2026-08-27(5차) - 인디케이터 "평소" 위치의 수직 비율(0=맨 위,
+  // 1=맨 아래) - "중간이 50%, 아래쪽이 100%라면 60~65% 지점" 요청으로 그
+  // 중간값(62.5%)을 씀.
+  static const double _idleIndicatorVerticalRatio = 0.625;
+  // ⭐ 인디케이터 래퍼(Container)의 상하 패딩. _indicatorWrapperHeight(아래)가
+  // 이 값과 아이콘 크기로부터 "계산되어야" 실제 렌더 높이와 항상 정확히
+  // 일치함 - 패딩만 스케일되고 높이 상수는 고정값이면(예전 버그) 화면
+  // 배율에 따라 인디케이터가 화살표가 가리키는 지점과 미세하게 어긋남.
+  static double get _indicatorVerticalPadding => (14 * 7 / 8).h;
+  static double get _indicatorHorizontalPadding => (10 * 7 / 8).w;
+  // ⭐ 평소(안 만질 때)엔 작게, 탭해서 활성화되면 그보다 크게 - 크기 차이가
+  // 나므로 래퍼 높이/너비도 상태에 따라 달라져야 함(아래 getter 참고).
+  double get _indicatorWrapperHeight =>
+      (_isDragging
+          ? _AxisIndicator._activeIconSize
+          : _AxisIndicator._idleIconSize) +
+      _indicatorVerticalPadding * 2;
+  double get _indicatorWrapperWidth =>
+      (_isDragging
+          ? _AxisIndicator._activeIconSize + _AxisIndicator._activeBeakLength
+          : _AxisIndicator._idleIconSize) +
+      _indicatorHorizontalPadding * 2;
   // ⭐ 정각 눈금(숫자+선) 한 칸의 "고정" 높이 - 이 값으로 Positioned에 실제
   // height를 줘서 Row를 정확히 이 높이만큼 강제로 차지하게 만듦. 예전엔
   // Row의 높이를 텍스트 폰트 크기로 눈대중해서 "-9"라는 추정값으로 중앙
@@ -572,6 +599,11 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // 고정해서 -H/2로 계산하면 텍스트 실제 높이와 무관하게 항상 정확히
   // slotTop이 중앙이 됨.
   static double get _hourTickBoxHeight => (24 * 7 / 8).h;
+  // ⭐ 2026-08-27(5차) - 축 시간 숫자를 "한 글자 = 고정 폭 칸"으로 그리기
+  // 위한 칸 폭(00 정렬 버그 수정, 아래 for(hour...) 루프 참고) - 지금
+  // 폰트 크기(17.sp) 기준으로 숫자 하나가 넉넉히 들어갈 정도로 여유 있게
+  // 잡음(칸이 좀 넓어도 가운데 정렬이라 다른 숫자와의 정렬엔 영향 없음).
+  static double get _hourDigitCellWidth => (13 * 7 / 8).w;
   // ⭐ "00 위/아래 여백이 너무 많다"는 피드백 - 예전엔 뷰포트 높이의 절반을
   // 위아래 여백으로 둬서(그래야 첫/마지막 슬롯도 정중앙까지 스크롤 가능)
   // 스크롤을 끝까지 하면 화면 절반이 빈 채로 남았음. 이제 고정된 작은
@@ -625,6 +657,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   static const int _activeDisplayOffsetSlots = 2;
 
   double _viewportHeight = 0;
+  double _viewportWidth = 0;
   double _axisX = 0;
 
   // ⭐ 매 build마다 다시 계산됨(_recomputeLayout) - 일정이 추가/삭제되면
@@ -852,15 +885,55 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   int get _displaySlot =>
       (_rawDragSlot - _activeDisplayOffsetSlots).clamp(0, _slotCount - 1);
 
-  // ⭐ 2026-08-27(3차) - 인디케이터가 우측 하단 고정 버튼으로 바뀌면서, 이
-  // 값은 더 이상 "인디케이터를 화면 어디에 그릴지"가 아니라 순수하게
-  // "지금 선택된 슬롯(_displaySlot)이 뷰포트 가장자리에 가까운지"를
-  // _checkEdgeScroll에서 판정하는 용도로만 남음 - 드래그 중 축을 자동으로
-  // 더 스크롤할지 결정하는 계산이라 여전히 필요함.
+  // ⭐ 2026-08-27(4차) - "평소엔 우측 하단, 누르는 순간 예전처럼 축으로
+  // 이동해서 화살표 달고 드래그" - 처음 도입한 "통째로 우측 하단 고정
+  // 버튼" 안은 폐기하고(요청: "오해가 있다, 그대로 원복해"), 대신 예전
+  // 온-axis 인디케이터 구조를 그대로 살리되 "평소(_dragContentY==null)"
+  // 위치만 우측 하단으로 바꿈. 드래그 중엔 여기서 계산한 축 위의 목표
+  // 슬롯 위치를 그대로 씀 - 예전과 100% 동일.
   double get _indicatorScreenY {
     if (_dragContentY == null) return _viewportHeight / 2;
     final scrollOffset = _controller.hasClients ? _controller.offset : 0.0;
     return _edgePadding + _slotTops[_displaySlot] - scrollOffset + (3 * 7 / 8).h;
+  }
+
+  bool get _isDragging => _dragContentY != null;
+
+  // ⭐ 평소(안 만질 때) - 화면 우측, 수직으로는 뷰포트의 62.5% 지점(요청,
+  // 2026-08-27 5차: "정확히 우측에서 살짝 왼쪽으로, 수직은 중간(50%)보다
+  // 살짝 아래(60~65%)") - _idleIndicatorVerticalRatio 참고. left는 래퍼의
+  // 오른쪽 바깥 여백이 _fabRightMargin이 되도록 뷰포트 폭에서 역산함
+  // (Positioned가 right/bottom을 top/left와 섞어 쓸 수 없는 구조라 - 활성
+  // 상태와 같은 top/left 기준을 씀).
+  double get _idleIndicatorTop =>
+      _viewportHeight * _idleIndicatorVerticalRatio -
+      _indicatorWrapperHeight / 2;
+  double get _idleIndicatorLeft =>
+      _viewportWidth - _fabRightMargin - _indicatorWrapperWidth;
+
+  // ⭐ 드래그 중(활성 상태) - 예전과 동일하게 축 옆에 거의 맞닿게.
+  double get _activeIndicatorLeft => _axisX - _indicatorHorizontalPadding;
+
+  // ⭐ 2026-08-27(5차) - "인디케이터를 축 위/아래 끝까지 드래그하면 화면
+  // 밖으로 아예 사라져서, 반대로 되돌리려면 손을 한참 움직여야 다시
+  // 반응하는 것처럼 느껴진다"는 버그 리포트 - 원인은 _indicatorScreenY가
+  // (edge-scroll 타이머가 따라잡기 전까지는) 뷰포트 범위를 벗어난 값을
+  // 그대로 반환할 수 있어서, 빠르게/길게 드래그하면 렌더링 위치가 화면
+  // 밖으로 나가버렸던 것 - _dragContentY 자체(=몇 번째 슬롯을 가리키는지)는
+  // 항상 정확했지만(그래서 반대로 드래그하면 "즉시" 값은 바뀜), 화면에 안
+  // 보이니 사용자 입장에선 "한참 반응이 없다"로 느껴짐.
+  // 여기서 "판정용" _indicatorScreenY는 그대로 두고(edge-scroll 로직이
+  // 계속 정상 동작해야 하므로), "렌더링용" top만 최대 10%까지만 화면
+  // 위/아래로 가려지게 clamp함 - 그 이상은 (edge-scroll이 계속 축을
+  // 스크롤해주는 동안) 인디케이터가 그 자리에 붙박인 채로 보임.
+  static const double _indicatorMaxHiddenFraction = 0.10;
+  double get _clampedActiveIndicatorTop {
+    final raw = _indicatorScreenY - _indicatorWrapperHeight / 2;
+    final minTop = -_indicatorWrapperHeight * _indicatorMaxHiddenFraction;
+    final maxTop = _viewportHeight -
+        _indicatorWrapperHeight * (1 - _indicatorMaxHiddenFraction);
+    if (minTop > maxTop) return raw; // 극단적으로 작은 뷰포트 방어
+    return raw.clamp(minTop, maxTop);
   }
 
   // ⭐ 콘텐츠 좌표계("scrollOffset과 같은 기준"의 절대 위치)에서, 지금 화면
@@ -1025,6 +1098,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
     return LayoutBuilder(
       builder: (context, constraints) {
         _viewportHeight = constraints.maxHeight;
+        _viewportWidth = constraints.maxWidth;
         _axisX = _axisLeftMargin;
         _recomputeLayout();
         final totalContentHeight = _slotTops[_slotCount] + _edgePadding * 2;
@@ -1032,7 +1106,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
         // 일정을 새로 만들 때 "움직인" 인디케이터와 겹치는 건 상관없음
         // (요청), 가만히 있는 기본 위치와만 안 겹치면 됨. 평소 인디케이터가
         // 작아진 만큼(44→36) 간격도 줄임 - 다만 너무 붙지는 않게(요청) 58→46.
-        final rowLeft = _axisX + (26 * 7 / 8).w;
+        final rowLeft = _axisX + (18 * 7 / 8).w;
 
         if (!_jumpedToInitial && isLoaded) {
           _jumpedToInitial = true;
@@ -1126,33 +1200,33 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                         // 오른쪽-정렬함(=축에서 더 멀어짐).
                         width: _axisX - (13 * 7 / 8).w,
                         height: _hourTickBoxHeight,
+                        // ⭐ 2026-08-27(5차) - "00이 01보다 왼쪽에 있다"는 재확인
+                        // 피드백 - fontFeatures(tabularFigures)로도 안 고쳐진
+                        // 걸 보면, 두 "0" 글리프가 폰트 자체의 커닝(kerning) 등
+                        // 이유로 실제 그려지는 잉크가 미묘하게 안쪽으로 붙어서
+                        // 시각적으로 좁아 보이는 것으로 추정됨(레이아웃 박스
+                        // 자체는 Row.end로 항상 오른쪽 끝이 맞음 - 그래서
+                        // "박스가 안 맞다"가 아니라 "글자가 그 박스 안에서 다르게
+                        // 그려진다"는 쪽). 폰트/커닝에 기대지 않고 아예 숫자
+                        // 하나하나를 고정 폭 칸에 가운데 정렬해서 그리는 방식으로
+                        // 바꿔서, "00"과 "01"이 무조건 픽셀 단위로 똑같은 폭을
+                        // 차지하게 강제함 - 이러면 폰트가 무슨 짓을 하든 상관없음.
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text(
-                              (hour % 24).toString().padLeft(2, '0'),
-                              // ⭐ 2026-08-27 - 일정 시간 텍스트(_ScheduleRow.
-                              // _timeTextStyle)와 스타일 통일 요청 - 폰트/굵기는
-                              // 그대로(Quicksand w700), 색은 scheme.timeText로
-                              // (배경색별 유동).
-                              // ⭐ 2026-08-27(2차) - "00이 다른 숫자들보다 왼쪽에
-                              // 그려진다"는 재확인 피드백 - Row가 오른쪽 끝을
-                              // 기준으로 정렬하는 이상 이론상 텍스트 폭과
-                              // 무관하게 오른쪽 끝은 일치해야 하는데, 폰트가
-                              // "00"(0이 두 번 겹침)처럼 좌우 bearing이 비대칭인
-                              // 숫자 글리프를 자연 폭으로 그리면 미묘하게
-                              // 어긋나 보일 수 있음. fontFeatures로 모든 숫자를
-                              // 강제로 같은 폭(tabular figures)으로 그리게 하면
-                              // 이 클래스의 비대칭 자체가 사라짐 - 폰트가 이
-                              // 기능을 지원 안 해도 그냥 무시될 뿐이라 안전함.
-                              style: GoogleFonts.quicksand(
-                                  fontSize: 19.sp,
-                                  fontWeight: FontWeight.w700,
-                                  fontFeatures: const [
-                                    FontFeature.tabularFigures()
-                                  ],
-                                  color: scheme.timeText),
-                            ),
+                            for (final digit
+                                in (hour % 24).toString().padLeft(2, '0').split(''))
+                              SizedBox(
+                                width: _hourDigitCellWidth,
+                                child: Text(
+                                  digit,
+                                  textAlign: TextAlign.center,
+                                  style: GoogleFonts.quicksand(
+                                      fontSize: 17.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: scheme.timeText),
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -1167,33 +1241,39 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                 ),
               ),
             ),
-            // ⭐ 2026-08-27(3차) - "인디케이터를 세로축이 아니라 우측 하단에
-            // 고정으로 박아줘" 요청으로 축 옆을 따라다니던 인디케이터를
-            // 완전히 걷어내고, 화면 우측 하단에 고정된 원형 버튼(플로팅) 하나로
-            // 대체함 - 그만큼 축 옆 공간을 다른 용도(숫자/아이콘열을 더
-            // 왼쪽으로 붙이는 등)로 쓸 수 있게 됨. 동작 자체는 요청대로 예전과
-            // 완전히 동일: 이 버튼을 누르는 순간(onVerticalDragDown) 지금
-            // 보고 있는 축 뷰포트의 정중앙에 가까운 시각으로 선택이 시작되고
-            // (_unshiftedCenterPosition → _realYToUniformY), 위/아래로 끌면
-            // 그 시각이 바뀌고, 손을 떼면 그 시각으로 일정 생성 시트가 뜸
-            // (_onIndicatorDragDown/Update/End/Cancel - 로직은 그대로, 이
-            // 버튼이 호출하는 콜백만 바뀜). 다만 이 버튼이 축과 완전히
-            // 분리되어 있어서, 예전처럼 "드래그 중 지금 몇 시가 선택됐는지"를
-            // 축 위에서 실시간으로 보여주는 시각적 마커는 이제 없음(요청:
-            // "그것만 해줘" - 그 외 UX는 사용자가 직접 다듬을 예정).
-            // 히트테스트 영역이 이 버튼 하나로 고정돼서, 예전에 있던
-            // "일정 카드 위에서도 드래그가 되게 하려고 각 _ScheduleRow에
-            // 같은 콜백을 같이 달아주던" 우회도 더 이상 의미가 없어짐 -
-            // 다만 그 배선을 걷어내는 건 이번 요청 범위 밖이라 그대로 둠.
+            // ⭐ 2026-08-27(4차) - "우측 하단 고정 버튼"은 인디케이터의
+            // "평소(안 만질 때)" 위치만 바꾼 것 - 요청 재확인: "탭하는 순간
+            // 그 인디케이터가 세로축으로 이동해야 해. 왼쪽에 화살표를 달고
+            // 말이야... 우측에서 그냥 저 버튼으로 인디케이터가 시간
+            // 드래그하는 건 예전이랑 똑같이 하게 하려고 한 거야." 그래서
+            // 예전 온-axis 인디케이터 구조(평소엔 작은 원, 드래그 중엔 부리
+            // 달린 큰 원이 축 옆에 붙어서 위/아래로 따라다님)를 그대로
+            // 되살리고, "평소" 위치(_dragContentY==null일 때)만 축 중앙이
+            // 아니라 우측 하단(_idleIndicatorTop/Left)으로 바뀜 - 누르는
+            // 순간(onVerticalDragDown) _isDragging이 true가 되면서 즉시
+            // top/left가 축 옆(_indicatorScreenY/_activeIndicatorLeft)으로
+            // 다시 계산됨. 같은 GestureDetector가 같은 손가락(포인터)을 계속
+            // 붙잡고 있는 상태라, 위젯이 화면 반대편으로 순간이동해도 Flutter가
+            // 이후 드래그 이벤트(Update/End/Cancel)를 정상적으로 계속
+            // 전달함(포인터 라우팅은 최초 히트테스트 이후로는 위치와 무관) -
+            // 예전에 idle↔active 두 위치를 오갈 때도 이미 검증된 메커니즘.
             Positioned(
-              right: _fabRightMargin,
-              bottom: _fabBottomMargin,
+              top: _isDragging
+                  ? _clampedActiveIndicatorTop
+                  : _idleIndicatorTop,
+              left: _isDragging ? _activeIndicatorLeft : _idleIndicatorLeft,
               child: GestureDetector(
                 onVerticalDragDown: _onIndicatorDragDown,
                 onVerticalDragUpdate: _onIndicatorDragUpdate,
                 onVerticalDragEnd: _onIndicatorDragEnd,
                 onVerticalDragCancel: _onIndicatorDragCancel,
-                child: const _AxisIndicator(),
+                child: Container(
+                  color: Colors.transparent,
+                  padding: EdgeInsets.symmetric(
+                      vertical: _indicatorVerticalPadding,
+                      horizontal: _indicatorHorizontalPadding),
+                  child: _AxisIndicator(showBeak: _isDragging),
+                ),
               ),
             ),
           ],
@@ -1203,25 +1283,30 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   }
 }
 
-// ⭐ 2026-08-27(3차) - "인디케이터를 세로축이 아니라 우측 하단에 고정으로
-// 박아줘" 요청으로 축을 따라다니던 인디케이터(평소엔 작은 동그라미, 드래그
-// 중엔 부리 달린 큰 동그라미)를 완전히 걷어내고, 항상 고정 위치·고정
-// 크기(예전 "활성" 크기)로만 뜨는 단순 원형 버튼으로 바꿈. 더 이상 축 옆에
-// 붙어서 축 선을 가리킬 필요가 없어져서 부리(beak)도 통째로 삭제함(요청:
-// "코드상으로도 삭제" 관례 그대로 따름) - 아래에 있던 idle/active 크기
-// 분기, _LeftBeakPainter 전부 제거.
+// ⭐ 인디케이터 - 평소(showBeak=false)엔 화살표 없는 작은 동그라미, 드래그 중
+// (showBeak=true)엔 그보다 살짝 큰 동그라미 + 왼쪽을 가리키는 부리가 붙은
+// 모양으로 바뀜. 흰 테두리 링은 없음(요청: "내 앱 아이콘에도 그거 없다").
 class _AxisIndicator extends StatelessWidget {
-  const _AxisIndicator();
+  final bool showBeak;
+  const _AxisIndicator({required this.showBeak});
 
-  // ⭐ 예전 "활성(탭됨)" 크기 그대로 - 요청: "지금 탭했을 때만큼의 크기로
-  // 키운다음에" 고정.
-  static double get _iconSize => (50 * 7 / 8).r;
+  // ⭐ 2026-08-27(5차) - "비활성 인디케이터도 활성이랑 동일하게" 요청을
+  // 재정정 - "그러지 말고 활성 크기의 80% 수준으로" - _activeIconSize에서
+  // 파생시켜서 둘이 항상 일정 비율을 유지하게 함(활성 크기를 나중에 또
+  // 바꿔도 비활성이 따로 어긋날 일이 없음).
+  static double get _activeIconSize => (50 * 7 / 8).r;
+  static double get _idleIconSize => _activeIconSize * 0.8;
+  // ⭐ 화살표(부리) 길이 = 축 선~아이콘 사이 간격. 부리 꼭짓점은 항상 이
+  // 위젯의 로컬 x=0에 그려지고, 이 위젯 자체가 축 선에서 패딩만큼만
+  // 떨어진 자리에 고정되므로(_TimeAxisPickerState._activeIndicatorLeft),
+  // 이 값을 키우면 꼭짓점은 축에 그대로 붙은 채 아이콘만 더 멀리 밀려남.
+  static double get _activeBeakLength => (10 * 7 / 8).r;
+  static double get _activeBeakHeight => (16 * 7 / 8).r;
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _icon(double size) {
     return Container(
-      width: _iconSize,
-      height: _iconSize,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: [
@@ -1245,6 +1330,59 @@ class _AxisIndicator extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!showBeak) {
+      return SizedBox(
+          width: _idleIconSize,
+          height: _idleIconSize,
+          child: _icon(_idleIconSize));
+    }
+    return SizedBox(
+      width: _activeIconSize + _activeBeakLength,
+      height: _activeIconSize,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // ⭐ 부리 끝(왼쪽 꼭짓점)이 정확히 x=0(=이 위젯의 왼쪽 끝)에 오고,
+          // 이 위젯 자체가 축 선에서 정확히 _activeBeakLength만큼 떨어진
+          // 자리에 놓이므로(_activeIndicatorLeft), 부리 끝은 항상 축 선에
+          // 정확히 맞닿음.
+          Positioned(
+            left: 0,
+            top: _activeIconSize / 2 - _activeBeakHeight / 2,
+            child: CustomPaint(
+              size: Size(_activeBeakLength, _activeBeakHeight),
+              painter: const _LeftBeakPainter(color: kAppMainAccent),
+            ),
+          ),
+          Positioned(
+              left: _activeBeakLength, top: 0, child: _icon(_activeIconSize)),
+        ],
+      ),
+    );
+  }
+}
+
+class _LeftBeakPainter extends CustomPainter {
+  final Color color;
+  const _LeftBeakPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    final path = Path()
+      ..moveTo(0, size.height / 2)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width, size.height)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _LeftBeakPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 // ⭐ 일정 한 줄 - "내용"만 있는 구조(제목 없앰, 요청)로, 렌더링 스타일을
@@ -1385,7 +1523,7 @@ class _ScheduleRow extends StatelessWidget {
   // timeTextColor(배경색에 따라 유동)로. tabularFigures도 축 숫자와
   // 동일하게 적용(같은 스타일 통일 요청 연장선).
   TextStyle get _timeTextStyle => GoogleFonts.quicksand(
-      fontSize: 16.sp,
+      fontSize: 14.sp,
       fontWeight: FontWeight.w700,
       fontFeatures: const [FontFeature.tabularFigures()],
       color: timeTextColor);
@@ -1428,41 +1566,39 @@ class _ScheduleRow extends StatelessWidget {
 
   // ⭐ 2026-08-27 - 렌더링 스타일 3번(밑줄/왼쪽 세로 막대 강조)으로 확정,
   // 나머지 7종은 코드째로 삭제(요청).
-  // ⭐ 2026-08-27(2차) - "내용 바(세로 막대)를 조금만 더 위로" 재요청 - 이미
-  // 6→2로 좁혀둔 SizedBox 간격만으론 더 줄일 여지가 별로 없어서(0에
-  // 가까워짐), Transform.translate로 살짝(음수) 겹쳐서 그만큼 더 당김.
-  // heightForStyle은 안 건드림 - safety 여유분(12*7/8)이 이 정도 겹침은
-  // 충분히 흡수함(_ScheduleRow.heightForStyle 주석 참고).
+  // ⭐ 2026-08-27(5차) - "내용 텍스트가 뭔가 더 딱딱 붙는 느낌"이라는
+  // 피드백 - 실제로 폰트를 바꾼 적은 없고(GoogleFonts.jua 그대로), 2차에서
+  // "조금만 더 위로" 요청으로 SizedBox 2→1 + Transform.translate(-2) 음수
+  // 겹침까지 같이 넣었던 게 누적되어 첫 줄과 너무 가까워진 게 그 "붙는
+  // 느낌"의 실체로 보임 - Transform.translate 겹침은 제거하고 간격을 다시
+  // 2로 되돌림(6→2→1+겹침 이었던 걸 2로 정리).
   Widget _buildBody() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         _firstLine(),
-        SizedBox(height: (1 * 7 / 8).h),
-        Transform.translate(
-          offset: Offset(0, -(2 * 7 / 8).h),
-          child: Padding(
-            padding: EdgeInsets.only(left: iconDiameter + (10 * 7 / 8).w),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    width: (3 * 7 / 8).w,
-                    decoration: BoxDecoration(
-                        color: block.color,
-                        borderRadius: BorderRadius.circular((2 * 7 / 8).r)),
-                  ),
-                  SizedBox(width: (8 * 7 / 8).w),
-                  Expanded(
-                    child: Text(block.content,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: _contentStyle()),
-                  ),
-                ],
-              ),
+        SizedBox(height: (2 * 7 / 8).h),
+        Padding(
+          padding: EdgeInsets.only(left: iconDiameter + (10 * 7 / 8).w),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  width: (3 * 7 / 8).w,
+                  decoration: BoxDecoration(
+                      color: block.color,
+                      borderRadius: BorderRadius.circular((2 * 7 / 8).r)),
+                ),
+                SizedBox(width: (8 * 7 / 8).w),
+                Expanded(
+                  child: Text(block.content,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _contentStyle()),
+                ),
+              ],
             ),
           ),
         ),
