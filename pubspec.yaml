@@ -115,6 +115,11 @@ flutter:
     # 아이콘 10종. Lucide(오픈소스, ISC License) 라인 아이콘 그대로. 매핑/출처는
     # assets/icons/memo_category/README.md 참고.
     - assets/icons/memo_category/
+    # ⭐ 2026-08-27 - Phase 4: 온디바이스 카테고리 분류 모델(TF-IDF+LogisticRegression,
+    # ml/export.py가 ml/models/pilot_v1.joblib에서 내보냄). lib/services/
+    # memo_category_classifier.dart가 로드함. 모델 재학습 시 ml/export.py 재실행하면
+    # 이 파일도 같이 갱신됨.
+    - assets/ml/memo_category_model.json
 
 # ⭐ 앱 아이콘 - 2026-08-25 5차 개정, "2번"(인디고·앰버) 팔레트를 그라데이션
 # 배경(인디고→오로라 청록) + 코랄 종 배지로 변형해 최종 확정. assets/icon/gen_icon.py로

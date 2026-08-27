@@ -35,6 +35,7 @@ import '../models/calendar_theme.dart';
 import '../models/shift_schedule.dart';
 import '../providers/calendar_theme_provider.dart';
 import '../providers/schedule_provider.dart';
+import '../services/memo_category_classifier.dart';
 import '../theme/app_colors.dart';
 
 class ScheduleManagementTab extends ConsumerStatefulWidget {
@@ -1656,6 +1657,13 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
   late int _selectedStyle = widget.existing?.styleIndex ?? 1;
   late int _selectedFont = widget.existing?.fontIndex ?? 1;
   late int _selectedIcon = widget.existing?.iconIndex ?? 0;
+  // ⭐ Phase 5(메모_자동분류_ML_계획.md) - 사용자가 아이콘을 직접 고르지 않고
+  // 저장하면, 내용 텍스트로 자동분류(MemoCategoryClassifier)해서 아이콘을
+  // 대신 골라줌. 기존 일정을 수정할 땐(이미 아이콘이 있었으므로) 다시 자동
+  // 배정하지 않고 그 값을 "수동 선택"으로 취급 - 사용자가 실제로 아이콘
+  // 칩을 탭하면 그때부터 항상 수동 우선.
+  late bool _iconManuallySet = widget.existing != null;
+  bool _autoClassifying = false;
 
   bool get _isEditing => widget.existing != null;
 
@@ -1716,7 +1724,10 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
       children: [
         for (int i = 0; i < _kScheduleCategoryIcons.length; i++)
           GestureDetector(
-            onTap: () => setState(() => _selectedIcon = i),
+            onTap: () => setState(() {
+              _selectedIcon = i;
+              _iconManuallySet = true;
+            }),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -1749,6 +1760,42 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
             ),
           ),
       ],
+    );
+  }
+
+  // ⭐ Phase 5 - 저장 버튼 핸들러. 아이콘을 직접 안 골랐으면(_iconManuallySet
+  // false) 내용 텍스트를 MemoCategoryClassifier로 분류해서 그 카테고리의
+  // 아이콘 인덱스를 대신 씀. 분류에 실패(모델 로드 전 등)하면 조용히 기본값
+  // (0=업무)으로 저장 - 아이콘 자동배정은 편의 기능이라 이것 때문에 저장
+  // 자체가 막히면 안 됨.
+  Future<void> _handleSave() async {
+    var iconIndex = _selectedIcon;
+    if (!_iconManuallySet) {
+      setState(() => _autoClassifying = true);
+      try {
+        await MemoCategoryClassifier.instance.ensureLoaded();
+        final prediction = MemoCategoryClassifier.instance
+            .classify(_contentController.text.trim());
+        final matched = _kScheduleCategoryIcons
+            .indexWhere((e) => e.$1 == prediction.categoryKey);
+        if (matched != -1) iconIndex = matched;
+      } catch (e) {
+        debugPrint('⚠️ 카테고리 자동분류 실패(기본 아이콘으로 저장): $e');
+      } finally {
+        if (mounted) setState(() => _autoClassifying = false);
+      }
+    }
+    if (!mounted) return;
+    Navigator.pop(
+      context,
+      _ScheduleBlock(
+        content: _contentController.text.trim(),
+        startMinutes: widget.startMinutes,
+        durationMinutes: _selectedDuration,
+        styleIndex: _selectedStyle,
+        fontIndex: _selectedFont,
+        iconIndex: iconIndex,
+      ),
     );
   }
 
@@ -1917,10 +1964,14 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
               SizedBox(height: 18.h),
               // ⭐ 카테고리 아이콘 - 지금 색칠된 원 자리에 이 아이콘이 흰색으로
               // 들어감(요청).
-              Text('아이콘',
-                  style: TextStyle(
-                      fontSize: 11.5.sp,
-                      color: kAppChipBorder.withValues(alpha: 0.45))),
+              // ⭐ Phase 5 - 아이콘을 직접 안 고르면 내용으로 자동 판단해서
+              // 붙여줌(고르면 항상 그 선택이 우선).
+              Text(
+                _iconManuallySet ? '아이콘' : '아이콘 (직접 안 고르면 내용으로 자동 판단해요)',
+                style: TextStyle(
+                    fontSize: 11.5.sp,
+                    color: kAppChipBorder.withValues(alpha: 0.45)),
+              ),
               SizedBox(height: 8.h),
               _iconChips(),
               SizedBox(height: 28.h),
@@ -1937,25 +1988,21 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _isValid
-                          ? () => Navigator.pop(
-                                context,
-                                _ScheduleBlock(
-                                  content: _contentController.text.trim(),
-                                  startMinutes: widget.startMinutes,
-                                  durationMinutes: _selectedDuration,
-                                  styleIndex: _selectedStyle,
-                                  fontIndex: _selectedFont,
-                                  iconIndex: _selectedIcon,
-                                ),
-                              )
-                          : null,
+                      onPressed:
+                          (_isValid && !_autoClassifying) ? _handleSave : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: kAppMainAccent,
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                       ),
-                      child: Text(_isEditing ? '저장' : '생성'),
+                      child: _autoClassifying
+                          ? SizedBox(
+                              width: 18.w,
+                              height: 18.w,
+                              child: const CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
+                            )
+                          : Text(_isEditing ? '저장' : '생성'),
                     ),
                   ),
                 ],

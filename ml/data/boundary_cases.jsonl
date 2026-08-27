@@ -1,0 +1,174 @@
+{"text": "가볍게 산책하면서 머리 식히기", "label": "여가/휴식", "confused_with": "운동", "rationale": "목적이 힐링/기분전환이고 강도·훈련 의도가 없음"}
+{"text": "땀날 정도로 걷고 오기", "label": "운동", "confused_with": "여가/휴식", "rationale": "땀날 정도라는 강도 표현으로 신체 단련 의도가 명시됨"}
+{"text": "자전거타고 동네 슬슬 한바퀴 돌기", "label": "여가/휴식", "confused_with": "운동", "rationale": "슬슬=캐주얼한 뉘앙스, 훈련 의도 없음"}
+{"text": "자전거로 강변 왕복 전력질주", "label": "운동", "confused_with": "여가/휴식", "rationale": "전력질주=명확한 운동 강도 표현"}
+{"text": "등산 가서 정상 찍고 오기", "label": "운동", "confused_with": "여가/휴식", "rationale": "정상 정복이라는 체력적 목표가 명시됨"}
+{"text": "산에 바람쐬러 살살 올라갔다 오기", "label": "여가/휴식", "confused_with": "운동", "rationale": "바람쐬러=힐링 목적, 살살=강도 낮음"}
+{"text": "수영장 가서 그냥 물놀이", "label": "여가/휴식", "confused_with": "운동", "rationale": "물놀이=놀이 목적, 훈련 의도 없음"}
+{"text": "수영장 가서 레인 왕복 20바퀴", "label": "운동", "confused_with": "여가/휴식", "rationale": "구체적 훈련량(20바퀴)이 명시되어 단련 목적임"}
+{"text": "사촌 결혼식 참석", "label": "가족", "confused_with": "약속/사교", "rationale": "만나는 대상이 친족(사촌)"}
+{"text": "친구 결혼식 참석", "label": "약속/사교", "confused_with": "가족", "rationale": "만나는 대상이 비친족(친구)"}
+{"text": "이모네 놀러가기", "label": "가족", "confused_with": "약속/사교", "rationale": "만나는 대상이 친족(이모)"}
+{"text": "이모 소개로 나온 사람 만나기", "label": "약속/사교", "confused_with": "가족", "rationale": "친족이 매개했지만 실제로 만나는 대상은 비친족"}
+{"text": "형이랑 술 한잔", "label": "가족", "confused_with": "약속/사교", "rationale": "만나는 대상이 형제"}
+{"text": "형 친구랑 술 한잔", "label": "약속/사교", "confused_with": "가족", "rationale": "형의 지인일 뿐 본인 기준 비친족"}
+{"text": "온가족 모여서 저녁식사", "label": "가족", "confused_with": "식사", "rationale": "핵심 대상이 가족 구성원 전체"}
+{"text": "친구 가족들이랑 다같이 저녁식사", "label": "약속/사교", "confused_with": "가족", "rationale": "자신의 가족이 아니라 친구 및 친구의 가족을 만나는 자리"}
+{"text": "혼자 오랜만에 맛집 가보기", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자=만남이 목적이 아니라 먹는 것 자체가 목적"}
+{"text": "맛집 갈 겸 친구 만나기", "label": "약속/사교", "confused_with": "식사", "rationale": "친구를 만나는 것이 문장의 핵심 목적어"}
+{"text": "저녁 뭐 먹을지 고민", "label": "식사", "confused_with": "약속/사교", "rationale": "먹는 것 자체에 대한 고민, 동행 언급 없음"}
+{"text": "저녁에 누구 만나서 뭐 먹을지 고민", "label": "약속/사교", "confused_with": "식사", "rationale": "만남이 먼저 언급되고 식사는 부수적"}
+{"text": "간단히 저녁 때우기", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자 끼니를 해결하는 뉘앙스"}
+{"text": "오랜만에 동창이랑 저녁 자리", "label": "약속/사교", "confused_with": "식사", "rationale": "동창을 만나는 것이 핵심, 저녁은 형식"}
+{"text": "회사 앞에서 혼밥", "label": "식사", "confused_with": "약속/사교", "rationale": "혼밥=동행 없음이 명시됨"}
+{"text": "부서 회식으로 저녁", "label": "약속/사교", "confused_with": "식사", "rationale": "구성원 모임이 핵심 목적, 식사는 형식(우선순위상 사교가 활동보다 위)"}
+{"text": "신입 교육자료 만들기", "label": "업무", "confused_with": "공부", "rationale": "회사 업무용 산출물 제작"}
+{"text": "자격증 강의자료 정리", "label": "공부", "confused_with": "업무", "rationale": "개인의 자격 취득이 목적인 학습 활동"}
+{"text": "사내 세미나 발표 준비", "label": "업무", "confused_with": "공부", "rationale": "회사 업무 보고 성격의 발표"}
+{"text": "대학원 세미나 발표 준비", "label": "공부", "confused_with": "업무", "rationale": "개인의 학업 활동"}
+{"text": "업무 관련 자격증 시험 접수", "label": "공부", "confused_with": "업무", "rationale": "시험 응시라는 개인 학습 행위 자체가 핵심"}
+{"text": "팀 워크숍 자료 준비", "label": "업무", "confused_with": "공부", "rationale": "회사 조직 단위 행사 준비"}
+{"text": "온라인 강의 듣고 업무에 적용하기", "label": "공부", "confused_with": "업무", "rationale": "강의 수강이라는 학습 행위가 핵심"}
+{"text": "사수한테 업무 배우기", "label": "업무", "confused_with": "공부", "rationale": "회사 내 실무 OJT, 개인 학습 목적이 아님"}
+{"text": "요즘 몸이 안좋아서 헬스 좀 줄이고 쉬어야겠다", "label": "여가/휴식", "confused_with": "병원·건강관리", "rationale": "운동을 쉬겠다는 휴식 의도, 진료·치료 행위가 없음"}
+{"text": "영양제 챙겨먹으면서 컨디션 관리", "label": "병원·건강관리", "confused_with": "여가/휴식", "rationale": "건강 관리 목적의 행위"}
+{"text": "요가 클래스 등록하고 몸 관리 시작", "label": "운동", "confused_with": "병원·건강관리", "rationale": "신체 단련이 목적, 치료 행위 아님"}
+{"text": "허리디스크 재활운동 받으러 가기", "label": "병원·건강관리", "confused_with": "운동", "rationale": "재활=치료 목적의 운동으로 병원·건강관리가 우선"}
+{"text": "친구랑 볼링치러 가기", "label": "약속/사교", "confused_with": "운동", "rationale": "볼링이라는 활동보다 친구를 만나는 것이 핵심 목적(우선순위상 사교가 활동특정형보다 위)"}
+{"text": "혼자 볼링장 가서 스코어 연습", "label": "운동", "confused_with": "약속/사교", "rationale": "동행 없이 훈련 목적으로 감"}
+{"text": "장모님 생신이라 처가 식구들이랑 저녁", "label": "가족", "confused_with": "약속/사교", "rationale": "처가 어른(친족) 대상 행사"}
+{"text": "친구 부모님이 차려주신 저녁 대접받기", "label": "약속/사교", "confused_with": "가족", "rationale": "자신의 친족이 아니라 친구 및 친구 가족을 만나는 자리"}
+{"text": "수영장 가서 그냥 물놀이하며 놀기", "label": "여가/휴식", "confused_with": "운동", "rationale": "놀이 목적, 훈련강도 표현 없음"}
+{"text": "수영 레인 왕복하며 기록 재기", "label": "운동", "confused_with": "여가/휴식", "rationale": "기록 측정=훈련 목적"}
+{"text": "공원에서 친구 없이 혼자 가볍게 산책만", "label": "여가/휴식", "confused_with": "운동", "rationale": "가볍게=강도 낮음, 힐링 목적"}
+{"text": "공원에서 인터벌로 전력질주 반복", "label": "운동", "confused_with": "여가/휴식", "rationale": "인터벌 훈련=명확한 운동"}
+{"text": "자전거 타고 카페 투어 다니기", "label": "여가/휴식", "confused_with": "운동", "rationale": "목적이 카페 나들이, 자전거는 이동수단"}
+{"text": "자전거로 업힐 훈련", "label": "운동", "confused_with": "여가/휴식", "rationale": "업힐 훈련=체력 단련 목적"}
+{"text": "요가원 가서 명상 위주 수업", "label": "여가/휴식", "confused_with": "운동", "rationale": "명상=힐링 목적이 강조됨"}
+{"text": "요가원 가서 근력 위주 수업", "label": "운동", "confused_with": "여가/휴식", "rationale": "근력=신체 단련 목적"}
+{"text": "등산로 입구에서 사진만 찍고 내려오기", "label": "여가/휴식", "confused_with": "운동", "rationale": "등산 완주 의도 없음, 나들이 성격"}
+{"text": "등산 완주하고 기록 갱신", "label": "운동", "confused_with": "여가/휴식", "rationale": "완주·기록=체력적 목표"}
+{"text": "헬스장 가서 사우나만 하고 오기", "label": "여가/휴식", "confused_with": "운동", "rationale": "실제 운동 안 하고 힐링만"}
+{"text": "헬스장 가서 1시간 웨이트", "label": "운동", "confused_with": "여가/휴식", "rationale": "구체적 웨이트 트레이닝"}
+{"text": "바닷가 가서 그냥 걷기만", "label": "여가/휴식", "confused_with": "운동", "rationale": "나들이 목적"}
+{"text": "바닷가에서 러닝 훈련", "label": "운동", "confused_with": "여가/휴식", "rationale": "러닝 훈련=단련 목적"}
+{"text": "캠핑장에서 가볍게 몸 풀기", "label": "여가/휴식", "confused_with": "운동", "rationale": "캠핑이 주 목적, 운동은 부수적"}
+{"text": "체육관 대관해서 팀 훈련", "label": "운동", "confused_with": "여가/휴식", "rationale": "훈련이라는 단어로 목적 명확"}
+{"text": "동네 한바퀴 산책 겸 바람쐬기", "label": "여가/휴식", "confused_with": "운동", "rationale": "바람쐬기=힐링 목적"}
+{"text": "동네 한바퀴 전력으로 뛰기", "label": "운동", "confused_with": "여가/휴식", "rationale": "전력=운동 강도 명시"}
+{"text": "혼자 조용히 저녁 먹기", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자=동행 없음"}
+{"text": "동료랑 저녁 먹으면서 얘기하기", "label": "약속/사교", "confused_with": "식사", "rationale": "동료와의 대화가 목적"}
+{"text": "배고파서 아무거나 시켜먹기", "label": "식사", "confused_with": "약속/사교", "rationale": "끼니 해결이 목적"}
+{"text": "친구 불러서 같이 저녁 먹기", "label": "약속/사교", "confused_with": "식사", "rationale": "친구를 부르는 것이 목적"}
+{"text": "혼자 여행지에서 맛집 탐방", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자=동행 없음, 맛집이 목적"}
+{"text": "동창이랑 맛집 탐방 겸 만남", "label": "약속/사교", "confused_with": "식사", "rationale": "동창 만남이 문장의 핵심"}
+{"text": "야식으로 라면 혼자 끓여먹기", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자=동행 없음"}
+{"text": "야식 먹으면서 친구랑 통화", "label": "약속/사교", "confused_with": "식사", "rationale": "친구와의 교류가 병행되는 핵심 활동"}
+{"text": "점심시간에 혼자 구내식당", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자"}
+{"text": "점심시간에 팀원들이랑 다 같이", "label": "약속/사교", "confused_with": "식사", "rationale": "팀원들과의 모임이 핵심"}
+{"text": "카페에서 혼자 브런치", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자"}
+{"text": "카페에서 친구 만나 브런치", "label": "약속/사교", "confused_with": "식사", "rationale": "친구 만남이 핵심"}
+{"text": "회사 회식 참석", "label": "약속/사교", "confused_with": "식사", "rationale": "조직 구성원 모임이 핵심(우선순위상 사교 우선)"}
+{"text": "집에서 혼자 저녁 차려먹기", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자"}
+{"text": "동네 이웃이랑 저녁 나눠먹기", "label": "약속/사교", "confused_with": "식사", "rationale": "이웃과의 만남이 목적"}
+{"text": "출출해서 혼자 편의점 밥", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자"}
+{"text": "친구 초대해서 집에서 저녁 대접", "label": "약속/사교", "confused_with": "식사", "rationale": "친구 초대가 핵심 목적"}
+{"text": "혼자 조용히 브런치 카페 가기", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자"}
+{"text": "업무 매뉴얼 숙지하기", "label": "업무", "confused_with": "공부", "rationale": "회사 업무 수행을 위한 것"}
+{"text": "자격증 시험 대비 문제집 풀기", "label": "공부", "confused_with": "업무", "rationale": "개인 학습 목적"}
+{"text": "신규 시스템 사내교육 참석", "label": "업무", "confused_with": "공부", "rationale": "회사가 주관하는 실무 교육"}
+{"text": "개인적으로 관심있는 온라인 강의 수강", "label": "공부", "confused_with": "업무", "rationale": "개인 학습 목적"}
+{"text": "부서 발표자료 데이터 정리", "label": "업무", "confused_with": "공부", "rationale": "회사 업무 산출물"}
+{"text": "대학원 수업 발표자료 준비", "label": "공부", "confused_with": "업무", "rationale": "학업 목적"}
+{"text": "업무보고서 작성법 교육 참석", "label": "업무", "confused_with": "공부", "rationale": "회사 주관 교육"}
+{"text": "이직 준비로 포트폴리오 정리", "label": "공부", "confused_with": "업무", "rationale": "개인의 이직·경력 개발 목적"}
+{"text": "회사 지정 온라인 컴플라이언스 교육 이수", "label": "업무", "confused_with": "공부", "rationale": "회사가 의무화한 교육"}
+{"text": "승진시험 준비 자료 정리", "label": "공부", "confused_with": "업무", "rationale": "개인 시험 준비"}
+{"text": "팀 프로젝트 산출물 정리해서 제출", "label": "업무", "confused_with": "공부", "rationale": "회사 업무 산출물"}
+{"text": "새로운 프로그래밍 언어 독학", "label": "공부", "confused_with": "업무", "rationale": "개인 학습"}
+{"text": "거래처 대응 매뉴얼 작성", "label": "업무", "confused_with": "공부", "rationale": "회사 업무 문서"}
+{"text": "다음 학기 등록금 마련 계획", "label": "공부", "confused_with": "업무", "rationale": "학업 관련 개인사"}
+{"text": "신규 입사자 교육 자료 만들기", "label": "업무", "confused_with": "공부", "rationale": "회사 업무(교육 담당자 입장)"}
+{"text": "자격증 실기시험 재도전 계획", "label": "공부", "confused_with": "업무", "rationale": "개인 자격 취득 목적"}
+{"text": "업무 관련 세미나 참석 후 보고서 제출", "label": "업무", "confused_with": "공부", "rationale": "회사 보고 의무가 핵심"}
+{"text": "장인어른 생신상 차리기", "label": "가족", "confused_with": "약속/사교", "rationale": "배우자의 부모=가족으로 간주"}
+{"text": "친구 장인어른 장례식 조문", "label": "약속/사교", "confused_with": "가족", "rationale": "친구의 가족일 뿐 본인 친족 아님"}
+{"text": "매형이랑 술 한잔", "label": "가족", "confused_with": "약속/사교", "rationale": "누나의 배우자=가족"}
+{"text": "매형 회사 동료랑 인사자리", "label": "약속/사교", "confused_with": "가족", "rationale": "매형의 지인일 뿐 비친족"}
+{"text": "며느리 될 사람 인사시키기", "label": "가족", "confused_with": "약속/사교", "rationale": "예비 가족 구성원과의 자리"}
+{"text": "아들 여자친구 처음 인사", "label": "가족", "confused_with": "약속/사교", "rationale": "아들 관련 가족 행사 성격"}
+{"text": "조카 담임선생님 상담", "label": "가족", "confused_with": "약속/사교", "rationale": "조카(친족) 관련 용무가 핵심"}
+{"text": "동생 친구들이랑 다같이 저녁", "label": "약속/사교", "confused_with": "가족", "rationale": "동생의 지인들, 본인 기준 비친족"}
+{"text": "큰아버지댁 제사 참석", "label": "가족", "confused_with": "약속/사교", "rationale": "친족 행사"}
+{"text": "친구 이모님댁 놀러가기", "label": "약속/사교", "confused_with": "가족", "rationale": "친구의 친척일 뿐 본인 가족 아님"}
+{"text": "처형네 아이 봐주기", "label": "가족", "confused_with": "약속/사교", "rationale": "배우자의 자매=가족"}
+{"text": "동서랑 아이들 데리고 나들이", "label": "가족", "confused_with": "약속/사교", "rationale": "동서=가족 관계"}
+{"text": "사돈댁 방문", "label": "가족", "confused_with": "약속/사교", "rationale": "친족 관계로 간주"}
+{"text": "친구 시댁 행사 대신 참석해주기", "label": "약속/사교", "confused_with": "가족", "rationale": "친구의 시댁일 뿐 본인 가족 아님"}
+{"text": "고모댁 방문", "label": "가족", "confused_with": "약속/사교", "rationale": "친족"}
+{"text": "직장동료 배우자 소개받는 자리", "label": "약속/사교", "confused_with": "가족", "rationale": "동료의 가족을 처음 만나는 사교 자리"}
+{"text": "부모님 건강검진 동행하기", "label": "가족", "confused_with": "쇼핑", "rationale": "동행/돌봄이 핵심"}
+{"text": "아이 학예회 참석하기", "label": "가족", "confused_with": "쇼핑", "rationale": "행사 참석이 핵심"}
+{"text": "부모님 댁 방문해서 안부 살피기", "label": "가족", "confused_with": "쇼핑", "rationale": "방문/돌봄이 핵심"}
+{"text": "부모님 모시고 병원 정기검진 다녀오기", "label": "가족", "confused_with": "쇼핑", "rationale": "동행이 핵심"}
+{"text": "아이 어린이집 학예회 참석하기", "label": "가족", "confused_with": "쇼핑", "rationale": "행사 참석"}
+{"text": "회사 사람들이랑 다같이 저녁", "label": "약속/사교", "confused_with": "식사", "rationale": "회사 구성원 모임이 핵심"}
+{"text": "팀 회식자리 참석", "label": "약속/사교", "confused_with": "식사", "rationale": "조직 모임이 핵심"}
+{"text": "부서 사람들이랑 회식", "label": "약속/사교", "confused_with": "식사", "rationale": "조직 모임이 핵심"}
+{"text": "동료들이랑 다 같이 저녁식사", "label": "약속/사교", "confused_with": "식사", "rationale": "동료 모임이 핵심"}
+{"text": "회식 자리에서 팀원들과 저녁", "label": "약속/사교", "confused_with": "식사", "rationale": "팀 모임이 핵심"}
+{"text": "혼자 조용히 저녁 식사하기", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자"}
+{"text": "동료 없이 혼자 점심 먹기", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자"}
+{"text": "회사 사람들과 점심 회동", "label": "약속/사교", "confused_with": "식사", "rationale": "모임이 핵심"}
+{"text": "누구 만날 필요 없이 혼자 저녁", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자"}
+{"text": "회식 겸 팀 회의 저녁자리", "label": "약속/사교", "confused_with": "식사", "rationale": "모임이 핵심"}
+{"text": "매형네 가족 모임 참석", "label": "가족", "confused_with": "약속/사교", "rationale": "매형=가족, 매형네 가족 모임=가족 행사"}
+{"text": "매형 지인 소개로 만난 사람", "label": "약속/사교", "confused_with": "가족", "rationale": "매형의 지인일 뿐 비친족"}
+{"text": "며느리 생일 챙겨주기", "label": "가족", "confused_with": "약속/사교", "rationale": "며느리=가족 구성원"}
+{"text": "며느리 친구들과의 모임 대신 참석", "label": "약속/사교", "confused_with": "가족", "rationale": "며느리의 지인들, 비친족"}
+{"text": "동서 생일 축하해주기", "label": "가족", "confused_with": "약속/사교", "rationale": "동서=가족"}
+{"text": "동서 친구 소개로 만난 사람", "label": "약속/사교", "confused_with": "가족", "rationale": "비친족"}
+{"text": "사돈어른 안부 전화 드리기", "label": "가족", "confused_with": "약속/사교", "rationale": "사돈=배우자 부모의 친족으로 가족 범주"}
+{"text": "사돈댁 지인 소개로 만난 사람", "label": "약속/사교", "confused_with": "가족", "rationale": "비친족"}
+{"text": "매형이랑 집안 일 상의하기", "label": "가족", "confused_with": "약속/사교", "rationale": "매형=가족, 집안일 상의는 가족 활동"}
+{"text": "매형 회사 워크숍 대신 참석", "label": "약속/사교", "confused_with": "가족", "rationale": "매형의 회사 행사, 매형의 지인들과 자리"}
+{"text": "자전거 타고 동네 여유롭게 한바퀴", "label": "여가/휴식", "confused_with": "운동", "rationale": "여유롭게=강도 낮음, 힐링 목적"}
+{"text": "자전거 타고 최대 속도로 질주", "label": "운동", "confused_with": "여가/휴식", "rationale": "최대 속도=운동 강도"}
+{"text": "수영장 가서 물장구치며 놀기", "label": "여가/휴식", "confused_with": "운동", "rationale": "놀이 목적"}
+{"text": "수영장 가서 정해진 거리 완주 훈련", "label": "운동", "confused_with": "여가/휴식", "rationale": "완주 훈련=단련 목적"}
+{"text": "가볍게 산책하며 스트레스 풀기", "label": "여가/휴식", "confused_with": "운동", "rationale": "스트레스 해소=힐링 목적"}
+{"text": "빠른 걸음으로 파워워킹하기", "label": "운동", "confused_with": "여가/휴식", "rationale": "파워워킹=운동 강도 명시"}
+{"text": "요가원 가서 편안하게 스트레칭만", "label": "여가/휴식", "confused_with": "운동", "rationale": "편안하게=강도 낮음"}
+{"text": "요가원 가서 고강도 클래스 수강", "label": "운동", "confused_with": "여가/휴식", "rationale": "고강도=단련 목적"}
+{"text": "등산 갔다가 경치만 구경하고 내려오기", "label": "여가/휴식", "confused_with": "운동", "rationale": "나들이 목적"}
+{"text": "등산 코스 완주 목표로 도전", "label": "운동", "confused_with": "여가/휴식", "rationale": "완주 목표=체력적 도전"}
+{"text": "부서 회식 겸 저녁식사 자리", "label": "약속/사교", "confused_with": "식사", "rationale": "부서 구성원 모임이 핵심, 식사는 형식"}
+{"text": "팀 전체 회식 참석하기", "label": "약속/사교", "confused_with": "식사", "rationale": "팀 모임이 핵심"}
+{"text": "회사 사람들과 함께하는 저녁식사", "label": "약속/사교", "confused_with": "식사", "rationale": "회사 구성원과의 모임이 핵심"}
+{"text": "혼자 먹는 회사 앞 저녁식사", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자=동행 없음"}
+{"text": "동료 없이 혼자 하는 저녁식사", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자"}
+{"text": "부서 세미나 발표자료 만들기", "label": "업무", "confused_with": "공부", "rationale": "회사 업무 산출물"}
+{"text": "회사 주관 세미나 참석 후 보고서 작성", "label": "업무", "confused_with": "공부", "rationale": "회사 업무 보고 의무"}
+{"text": "개인 관심사로 참석하는 세미나", "label": "공부", "confused_with": "업무", "rationale": "개인 학습 목적"}
+{"text": "대학원 세미나 발표자료 만들기", "label": "공부", "confused_with": "업무", "rationale": "학업 목적"}
+{"text": "회사 업무와 무관한 개인 세미나 참석", "label": "공부", "confused_with": "업무", "rationale": "개인 학습 목적"}
+{"text": "며느리와 함께 시장 나들이", "label": "가족", "confused_with": "약속/사교", "rationale": "며느리=가족 구성원"}
+{"text": "며느리 친구 결혼식 대신 참석", "label": "약속/사교", "confused_with": "가족", "rationale": "며느리의 지인 결혼식, 비친족"}
+{"text": "사위와 함께 골프 라운딩", "label": "가족", "confused_with": "약속/사교", "rationale": "사위=가족 구성원"}
+{"text": "사위 회사 동료들과의 회식 동석", "label": "약속/사교", "confused_with": "가족", "rationale": "사위의 회사 동료, 비친족"}
+{"text": "처제와 함께 카페 나들이", "label": "가족", "confused_with": "약속/사교", "rationale": "처제=가족 구성원"}
+{"text": "처제 친구들과의 모임 대신 참석", "label": "약속/사교", "confused_with": "가족", "rationale": "처제의 지인들, 비친족"}
+{"text": "수영장 가서 여유롭게 물놀이만", "label": "여가/휴식", "confused_with": "운동", "rationale": "여유롭게=강도 낮음, 놀이 목적"}
+{"text": "수영장 가서 접영 기록 갱신 훈련", "label": "운동", "confused_with": "여가/휴식", "rationale": "기록 갱신=훈련 목적"}
+{"text": "요가원 가서 쉬는 느낌으로 스트레칭", "label": "여가/휴식", "confused_with": "운동", "rationale": "쉬는 느낌=강도 낮음"}
+{"text": "요가원 가서 근력 위주 파워요가", "label": "운동", "confused_with": "여가/휴식", "rationale": "파워요가=단련 목적"}
+{"text": "아이 옷 예쁜거 골라서 사기", "label": "쇼핑", "confused_with": "가족", "rationale": "구매가 핵심 행위"}
+{"text": "아이 옷 물려받으러 형네 방문하기", "label": "가족", "confused_with": "쇼핑", "rationale": "구매가 아니라 가족 간 물려받기 방문"}
+{"text": "부모님 드릴 선물 여러개 구매하기", "label": "쇼핑", "confused_with": "가족", "rationale": "구매가 핵심"}
+{"text": "부모님과 함께 선물 고르러 나가기", "label": "가족", "confused_with": "쇼핑", "rationale": "함께 시간을 보내는 것이 핵심(동행)"}
+{"text": "혼자 저녁으로 국밥 사먹기", "label": "식사", "confused_with": "약속/사교", "rationale": "혼자"}
+{"text": "동료들과 다함께 국밥집 가기", "label": "약속/사교", "confused_with": "식사", "rationale": "동료 모임이 핵심"}
+{"text": "업무 자료 조사차 도서관 방문", "label": "업무", "confused_with": "공부", "rationale": "회사 업무 목적의 자료조사"}
+{"text": "개인 관심사로 도서관에서 책 읽기", "label": "공부", "confused_with": "업무", "rationale": "개인 학습 목적"}
+{"text": "형수님과 함께 마트 장보기", "label": "가족", "confused_with": "쇼핑", "rationale": "가족과 함께하는 활동이 핵심(단순 구매가 아닌 동행)"}
+{"text": "장보기 목록만 보고 혼자 마트가기", "label": "쇼핑", "confused_with": "가족", "rationale": "혼자 구매가 목적, 가족 동행 없음"}

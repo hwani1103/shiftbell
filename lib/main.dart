@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'constants/platform_channel.dart';
@@ -25,6 +26,7 @@ import 'providers/calendar_theme_provider.dart';
 import 'models/calendar_theme.dart';
 import 'theme/app_theme.dart';
 import 'services/firebase_bootstrap.dart';
+import 'services/memo_category_classifier.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'l10n/l10n_extensions.dart';
@@ -76,6 +78,11 @@ void main() async {
   await initializeDateFormatting('en_US', null);
   await DatabaseService.instance.database;
   await AlarmService().initialize();
+  // ⭐ Phase 4 - 메모/일정 카테고리 자동분류 모델(~2.2MB JSON) 미리 로드.
+  // await 안 함 - 첫 프레임을 이걸로 막을 이유가 없고, 실제 분류 시점(일정
+  // 생성 저장)에서 안 끝났으면 그쪽에서 ensureLoaded()를 다시 await해서
+  // 안전하게 기다림 (memo_category_classifier.dart 참고).
+  unawaited(MemoCategoryClassifier.instance.ensureLoaded());
   // ⭐ 친구공유(Firestore) 초기화 - firebase_options.dart가 아직 플레이스홀더면
   // 조용히 실패하고 친구공유 기능만 비활성화됨 (firebase_bootstrap.dart 참고).
   await initFirebase();

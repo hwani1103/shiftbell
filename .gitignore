@@ -68,3 +68,11 @@ android/app/google-services.json
 /shiftbell_only.txt
 *_log.txt
 logcat*.txt
+
+# ⭐ 2026-08-27 - 메모 자동분류 ML(메모_자동분류_ML_계획.md, ml/) - Python venv/캐시는
+# 절대 커밋 대상 아님(.venv만 270MB+). 학습 데이터/스크립트/joblib 모델은 커밋함
+# (ml/export.py로 assets/ml/memo_category_model.json을 재생성하는 데 필요한
+# 원본이라 재현성을 위해 남겨둠).
+ml/.venv/
+ml/__pycache__/
+__pycache__/
