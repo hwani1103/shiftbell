@@ -221,6 +221,7 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
 | `TEST_CHECKLIST.md` | 수동 테스트 체크리스트 |
 | `메모_자동분류_ML_계획.md` | 온디바이스 메모/일정 카테고리 자동분류(`ml/`, TF-IDF+LogReg). Phase 4~5 완료 |
 | `메모_일정기능_설계메모.md` | 일정관리 탭 시간 필드 확장 설계(미착수) — `date_schedules`(v20) 컬럼 추가 계획 시 참고 |
+| `일정관리탭_UI_스펙.md` | 일정관리 탭 UI 현재 상태(색상 스킴, 일정생성 flow — FAB+시간배지+스크롤 오버슛/calibration, 스와이프 내비게이션) — 코드 손대기 전 참고 |
 
 ---
 
