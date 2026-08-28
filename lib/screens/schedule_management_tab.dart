@@ -604,20 +604,24 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   // repeat()로 계속 돔, 비활성화되면 stop().
   late final AnimationController _pulseController;
 
-  // ⭐ 2026-08-28(2차) - "인디케이터 이동은 스크롤 추적(방식 1)만 남기고,
+  // ⭐ 2026-08-28(2차/3차) - "인디케이터 이동은 스크롤 추적(방식 1)만 남기고,
   // 화면이 물리적으로 더 스크롤 안 되는 축 양 끝에서도 인디케이터는 계속
   // 갈 수 있게" 요청으로 도입. 축 스크롤을 SingleChildScrollView의 기본
   // 드래그(ClampingScrollPhysics)에 맡기지 않고, 이 위젯이 직접
   // GestureDetector로 세로 드래그를 받아서 "가상 오프셋"을 계산함:
-  //  - _virtualOffset은 클램프하지 않은 채 계속 누적됨(드래그 델타를 그대로
-  //    뺄셈) - 화면에 실제로 적용하는 스크롤 오프셋은 이 값을
+  //  - _virtualOffset은 드래그 델타를 그대로 뺄셈해서 누적하되,
+  //    _virtualOffsetMin/Max(인디케이터가 슬롯 0/마지막 슬롯에 닿는 지점)로
+  //    클램프함 - 화면에 실제로 적용하는 스크롤 오프셋은 이 값을 다시
   //    [0, maxScrollExtent]로 클램프한 것(_onAxisDragUpdate의 jumpTo).
   //  - 화면이 이미 끝(0 또는 maxScrollExtent)에 닿아 있어도 _virtualOffset
-  //    자체는 계속 움직이므로("화면은 멈춰도 인디케이터는 계속 감"), 인디케이터
-  //    위치 계산(_centerContentY)은 항상 이 클램프 안 된 값을 기준으로 함.
+  //    자체는 (min/max 한도까지는) 계속 움직이므로("화면은 멈춰도 인디케이터는
+  //    계속 감"), 인디케이터 위치 계산(_centerContentY)은 항상 이 값을 기준으로 함.
   //  - 반대 방향으로 다시 드래그하면, 화면에 적용되는 클램프된 값이
-  //    [0, maxScrollExtent] 범위 안으로 돌아올 때까지는 안 움직임(=
-  //    "다시 calibration") - clamp() 자체가 이 동작을 공짜로 구현해줌.
+  //    [0, maxScrollExtent] 범위 안으로 돌아올 때까지는 화면은 안 움직임(=
+  //    "calibration 구간") - 다만 3차 수정으로 _virtualOffset 자체에도 상한을
+  //    둬서, 이 구간이 "슬롯 0/마지막 슬롯까지 도달하는 데 필요한 만큼"으로
+  //    항상 유한함 - 끝에서 몇 번을 더 밀어도 그 이상 늘어나지 않음(예전엔
+  //    무한정 쌓여서, 여러 번 밀수록 되돌리기가 점점 힘들어지는 버그였음).
   // 드래그 제스처가 끝나도 리셋하지 않음 - 다음 드래그가 이어서 정확히
   // 같은 지점부터 시작해야 하므로(안 그러면 손을 뗐다 다시 잡을 때 인디케이터가
   // 화면에 보이는 위치에서 갑자기 04시 등으로 튀어버림).
@@ -848,22 +852,41 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     return offset + _viewportHeight / 2 - _edgePadding;
   }
 
+  // ⭐ 2026-08-28(3차) - "끝에서 여러 번 계속 스크롤하면, 반대로 돌아올 때
+  // 그만큼 다시 스크롤해야 움직인다" 재확인 버그 리포트 - 원인은
+  // _virtualOffset을 완전히 무한정 누적시켰던 것(2차 구현). 인디케이터가
+  // 실제로 갈 수 있는 곳은 어차피 슬롯 0(00:00)~마지막 슬롯(23:30)까지가
+  // 전부인데, 그 이후로 계속 드래그해도 _virtualOffset이 한도 없이 계속
+  // 쌓여서 "빚"이 무한히 늘어났던 것 - 반대 방향으로 되돌릴 때 그 빚을 다
+  // 갚기 전까진 화면도 인디케이터도 안 움직이니, 여러 번 끝까지 밀면 밀수록
+  // 되돌리기가 점점 힘들어짐. _virtualOffset 자체를 "중심이 슬롯 0/마지막
+  // 슬롯에 정확히 오는 지점"까지만 움직이게 딱 그만큼만 클램프해서, 그
+  // 지점에 도달한 뒤로는 같은 방향으로 더 밀어도 전혀 안 쌓이게 함 - 그래서
+  // 반대로 돌리는 순간 항상 즉시 반응함(빚이 0 아니면 딱 그 지점에서
+  // 시작하는 것과 동일 - "몇 번을 더 밀었든" 결과가 똑같아짐).
+  double get _virtualOffsetMin => _edgePadding - _viewportHeight / 2;
+  double get _virtualOffsetMax =>
+      _slotTops[_slotCount - 1] + _edgePadding - _viewportHeight / 2;
+
   // ⭐ 2026-08-28(2차) - 축 스크롤 전체를 이 위젯이 직접 처리함(build()에서
   // SingleChildScrollView는 physics: NeverScrollableScrollPhysics로 사용자
   // 드래그를 안 받고, 대신 이 GestureDetector가 받음). 매 프레임:
-  //  1) _virtualOffset을 델타만큼 그대로(클램프 없이) 갱신.
-  //  2) 화면에 실제로 보여줄 오프셋은 그걸 [0, maxScrollExtent]로 클램프한
-  //     값 - jumpTo로 적용. 화면 끝에 닿으면 이 값은 더 이상 안 변하지만
-  //     _virtualOffset은 계속 변하므로 "화면은 멈춰도 인디케이터는 계속
-  //     간다"가 자동으로 됨. 반대로 되돌리면 _virtualOffset이 다시
-  //     [0, maxScrollExtent] 안으로 들어올 때까지는 클램프된 값(=화면)이
-  //     안 움직이므로 "calibration 구간"도 clamp() 하나로 공짜로 생김.
+  //  1) _virtualOffset을 델타만큼 갱신하되, 위 _virtualOffsetMin/Max로 클램프
+  //     (3차 - "무한정 쌓이는 빚" 방지, 그 이상은 이 값 자체가 안 움직임).
+  //  2) 화면에 실제로 보여줄 오프셋은 그걸 다시 [0, maxScrollExtent]로
+  //     클램프한 값 - jumpTo로 적용. 화면 끝에 닿아도 _virtualOffset은
+  //     (1)의 한도까지는 계속 움직이므로 "화면은 멈춰도 인디케이터는 계속
+  //     간다"가 됨. 반대로 되돌리면 _virtualOffset이 다시 [0, maxScrollExtent]
+  //     안으로 들어올 때까지만 화면이 안 움직임 - (1)에서 상한을 뒀으므로
+  //     이 구간은 항상 유한(최대 "슬롯 0/마지막 슬롯이 화면 중앙에 오기까지"
+  //     거리 하나뿐, 몇 번을 더 밀었든 늘어나지 않음).
   //  3) 활성 상태(_pickerActive)면 그 시점의 중심 슬롯을 다시 계산 -
   //     정수 슬롯이 바뀔 때만 setState해서 불필요한 리빌드를 피함
   //     (build()의 AnimatedPositioned가 "따라 따락" 계단식으로 보간해줌).
   void _onAxisDragUpdate(DragUpdateDetails details) {
     if (!_controller.hasClients) return;
-    _virtualOffset = (_virtualOffset ?? _controller.offset) - details.delta.dy;
+    final next = (_virtualOffset ?? _controller.offset) - details.delta.dy;
+    _virtualOffset = next.clamp(_virtualOffsetMin, _virtualOffsetMax);
     final maxExtent = _controller.position.maxScrollExtent;
     _controller.jumpTo(_virtualOffset!.clamp(0.0, maxExtent));
     if (_pickerActive) {
