@@ -297,7 +297,7 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
     // 이 순서 변경의 영향을 안 받음(AlarmGuardReceiver.kt/NotificationHelper.kt
     // /CalendarWidgetProvider.kt 확인함).
     _tabs = [
-      NextAlarmTab(onSwipeToCalendar: () => _goToCalendar()),
+      const NextAlarmTab(),
       Consumer(
         builder: (context, ref, _) {
           final isDark = ref.watch(calendarThemeProvider).isDark;
@@ -307,7 +307,7 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
           );
         },
       ),
-      ScheduleManagementTab(onSwipeToCalendar: () => _goToCalendar()),
+      const ScheduleManagementTab(),
       SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
       // ⭐ 2026-08-25 - 아이콘 색상이 최종 확정되어(2번 변형: 인디고·오로라
       // 그라데이션·코랄) 임시 아이콘 픽커 탭 제거함. ui_theme_lab_screen.dart

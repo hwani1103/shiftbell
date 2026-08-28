@@ -23,8 +23,6 @@
 //  - 지금 단계에선 "일정 목록/카드"는 아직 안 만듦 - 시간축 + 인디케이터 +
 //    확인 팝업까지만. 실제로 일정을 만들어 저장하는 건 다음 단계.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -130,8 +128,7 @@ BoxDecoration _scheduleChipDecoration(_ScheduleColorScheme scheme) {
 }
 
 class ScheduleManagementTab extends ConsumerStatefulWidget {
-  final VoidCallback? onSwipeToCalendar;
-  const ScheduleManagementTab({super.key, this.onSwipeToCalendar});
+  const ScheduleManagementTab({super.key});
 
   @override
   ConsumerState<ScheduleManagementTab> createState() =>
@@ -141,13 +138,6 @@ class ScheduleManagementTab extends ConsumerStatefulWidget {
 class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
   late DateTime _selectedDate;
   final ScrollController _dateStripController = ScrollController();
-  // ⭐ 2026-08-27 - 인디케이터를 드래그하는 동안은 이 화면 전체를 덮는
-  // onHorizontalDragEnd(달력 탭으로 스와이프)와 제스처 아레나에서 경합해서,
-  // 세로 드래그 중 살짝만 가로로 틀어져도 인디케이터 쪽이 취소돼버리는
-  // 문제가 있었음(요청: "세로축을 조금만 벗어나도 선택이 해제됨"). 드래그
-  // 활성 중엔 이 가로 스와이프 자체를 꺼서 경합을 없앰 - _TimeAxisPicker가
-  // onIndicatorDragActiveChanged로 알려줌.
-  bool _indicatorDragActive = false;
 
   static const double _dateChipWidth = 36;
   static const double _dateChipHeight = 34;
@@ -196,6 +186,19 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
         (_) => _scrollDateStripToSelected(animate: false));
   }
 
+  // ⭐ 2026-08-28 - "메인화면 좌우 스와이프하면 다음날/이전날로" 요청 - 예전엔
+  // 이 화면 전체를 덮는 GestureDetector가 가로 스와이프를 "달력탭으로 이동"에
+  // 썼는데(그마저도 우측 스와이프만 반응하고 좌측은 무반응이었음), 이제 그
+  // 기능 자체를 없애고 대신 날짜 이동으로 바꿈 - _shiftMonth와 동일한 패턴
+  // (달의 마지막 날 근처에서 델타를 더해도 DateTime이 알아서 다음 달로 넘어감).
+  void _shiftDay(int delta) {
+    setState(() {
+      _selectedDate = _selectedDate.add(Duration(days: delta));
+    });
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scrollDateStripToSelected(animate: false));
+  }
+
   String _intlLocale(BuildContext context) =>
       Localizations.localeOf(context).languageCode == 'ko' ? 'ko_KR' : 'en_US';
 
@@ -227,17 +230,19 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
         kScheduleBackgroundColors[ref.watch(scheduleBackgroundProvider)]);
 
     return GestureDetector(
-      // ⭐ 인디케이터 드래그 중엔 null로 꺼서 경합 자체를 없앰(위 필드 주석 참고).
-      onHorizontalDragEnd: _indicatorDragActive
-          ? null
-          : (details) {
-              if (widget.onSwipeToCalendar != null &&
-                  details.primaryVelocity != null) {
-                if (details.primaryVelocity! > 500) {
-                  widget.onSwipeToCalendar!();
-                }
-              }
-            },
+      // ⭐ 2026-08-28 - 좌우 스와이프 = 다음날/이전날 이동으로 교체(예전엔
+      // 달력탭으로 이동, 그마저도 우측 스와이프만 반응했음). 달 이동
+      // (calendar_tab.dart)과 동일한 부호 규칙: velocity<0(왼쪽으로 스와이프)
+      // → 다음날, velocity>0(오른쪽으로 스와이프) → 이전날.
+      onHorizontalDragEnd: (details) {
+        final velocity = details.primaryVelocity;
+        if (velocity == null) return;
+        if (velocity < -300) {
+          _shiftDay(1);
+        } else if (velocity > 300) {
+          _shiftDay(-1);
+        }
+      },
       child: Scaffold(
         backgroundColor: scheme.mainBg,
         body: Column(
@@ -250,8 +255,6 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
                 child: _TimeAxisPicker(
                     key: ValueKey(dateKey),
                     dateKey: dateKey,
-                    onIndicatorDragActiveChanged: (active) =>
-                        setState(() => _indicatorDragActive = active),
                     hasShiftToday: selectedHasShift)),
           ],
         ),
@@ -492,20 +495,15 @@ class _TimeAxisPicker extends ConsumerStatefulWidget {
   // 부모가 key: ValueKey(dateKey)로 감싸서 넘기므로, 날짜가 바뀌면 이 위젯
   // 전체가 새로 마운트됨(스크롤 위치·드래그 상태도 자연스럽게 리셋).
   final String dateKey;
-  // ⭐ 2026-08-27 - 인디케이터 드래그 시작/종료를 부모에게 알림(가로 스와이프
-  // 경합 방지용 - _ScheduleManagementTabState 참고).
-  final ValueChanged<bool>? onIndicatorDragActiveChanged;
   const _TimeAxisPicker(
-      {super.key,
-      required this.hasShiftToday,
-      required this.dateKey,
-      this.onIndicatorDragActiveChanged});
+      {super.key, required this.hasShiftToday, required this.dateKey});
 
   @override
   ConsumerState<_TimeAxisPicker> createState() => _TimeAxisPickerState();
 }
 
-class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
+class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
+    with SingleTickerProviderStateMixin {
   // ⭐⭐ 2026-08-26 - "픽셀 단위로 박아놔도 되냐, 기기별 편차는?" 피드백으로
   // 전체 리팩터. 이 축 내부 기하 값들은 전부 raw(스케일 없음)로 박혀 있었음
   // - 지금 기기(1080×2340, override density 420)에서 눈으로 맞춘 값들이라
@@ -529,17 +527,6 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   static const int _slotCount = 48; // 하루 = 30분 슬롯 48개
   static double get _baseSlotHeight => (30 * 7 / 8).h; // 일정이 없을 때 슬롯 높이
 
-  // ⭐ 인디케이터에서 손을 뗀 후 "새 일정" 시트가 뜨기까지의 딜레이 - 요청:
-  // "바로 팝업 나오지 말고 약간의 딜레이만 줘보자, 그 딜레이는 내가 조정할
-  // 수 있게". 이 숫자만 바꿔가면서(0, 50, 100, 150...) 핫리로드로 감 잡으면 됨.
-  static const Duration _createSheetOpenDelay = Duration(milliseconds: 100);
-  // ⭐ 인디케이터가 원래(축 중앙) 위치로 리셋되는 딜레이 - 항상
-  // _createSheetOpenDelay보다 더 길게 둬서, 팝업이 화면을 덮은 뒤에
-  // 리셋되게 함(요청: "손 떼는 순간 바로 중앙으로 스냅되는 게 보기 안
-  // 좋다"). 팝업 시트의 슬라이드-업 애니메이션 시간(기본 ~300ms)까지
-  // 감안해서 넉넉히 잡음 - 이 숫자도 필요하면 조정 가능.
-  static const Duration _indicatorResetDelay = Duration(milliseconds: 400);
-
   // ⭐ 텍스트를 전반적으로 키우면서(요청) 한 줄 안에 다 들어가도록 같이 키움
   // (44→56 / 30→36→40) - "어차피 긴 글은 안 쓸 것 같다"는 전제라 아이콘도
   // 같이 살짝 키움. 40: 인디케이터를 줄이면서 생긴 여유만큼 한 번 더 키움.
@@ -548,48 +535,29 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // "_rowHeight" 상수는 없앰 - 아이콘 지름만 여기 남음.
   static double get _iconDiameter => (40 * 7 / 8).r;
 
-  static double get _edgeMargin => (56 * 7 / 8).h; // 이 안쪽으로 들어오면 가장자리로 간주
-  static const Duration _edgeScrollInterval = Duration(milliseconds: 220);
+  // ⭐ 2026-08-28 - "탭으로 시간 직접 선택" 기능에서, 탭한 슬롯이 화면
+  // 위/아래 가장자리 이 정도 안쪽으로 들어오면 자동 스크롤을 트리거함
+  // (_autoScrollIfNeeded 참고). 예전 온-axis 드래그의 edge-scroll 마진과
+  // 같은 상수를 그대로 재사용.
+  static double get _edgeMargin => (56 * 7 / 8).h;
   // ⭐ 숫자/눈금을 축 왼쪽으로 옮기면서(요청) 그만큼 왼쪽 여백이 더 필요해짐
   // (숫자 텍스트 + 눈금이 들어갈 자리) - 26→58로 늘림.
   // 🔧 튜닝 포인트 1: 세로축(선+숫자열) 전체를 좌우로 옮기려면 이 숫자(58)를
   // 줄이면 왼쪽으로, 늘리면 오른쪽으로 감 - _axisX가 이 값 그대로임(아래
   // build()의 `_axisX = _axisLeftMargin;`).
   static double get _axisLeftMargin => (48 * 7 / 8).w;
-  // ⭐ 2026-08-27(3차) - "인디케이터의 '평소(안 만질 때)' 위치만 우측
-  // 하단으로" 요청(4차에서 재정정 - 처음엔 통째로 고정 버튼화했다가, 원하는
-  // 건 "평소 위치만 이동, 누르면 예전처럼 축으로 이동해서 화살표 달고
-  // 드래그"였음을 확인함). 이 마진은 "평소" 상태일 때만 씀 - 드래그
-  // 시작하는 순간 다시 축 옆(활성 위치)으로 이동함(아래 _idleIndicatorTop/
-  // Left, _activeIndicatorLeft 참고).
-  // ⭐ 2026-08-27(5차) - "정확히 우측에서는 살짝 왼쪽으로" 재요청으로 여백을
-  // 늘림(16→24).
+  // ⭐ 2026-08-28 - "일정생성 flow 개선" 전면 재작업으로 온-axis 드래그
+  // 인디케이터(부리 달린 원, _AxisIndicator/_LeftBeakPainter)를 완전히
+  // 폐기함(요청: "기존의 그 인디케이터는 안 쓰게 되는 거니까"). 대신:
+  //  - 우측 하단에 "항상 같은 자리에" 떠 있는 원형 버튼(_ScheduleFab)이
+  //    비활성/활성 두 상태만 가짐(위치는 안 바뀜) - 이 마진/비율 두 상수가
+  //    그 고정 위치를 정함.
+  //  - 시간 선택 자체는 축 위에 뜨는 사각형 배지 2개(_selectedSlot,
+  //    아래 build()의 "시간 선택 배지" 참고)로 표현하고, 스크롤 추적(방식 1)
+  //    또는 축 직접 탭(방식 2)으로만 움직임 - 더 이상 손가락으로 이 버튼
+  //    자체를 드래그하지 않음.
   static double get _fabRightMargin => (24 * 7 / 8).w;
-  // ⭐ 2026-08-27(5차) - "수직 위치는 중간(50%)보다 살짝 아래(60~65%)"
-  // 요청으로 "아래쪽 고정 마진" 방식(_fabBottomMargin, 삭제됨) 대신 뷰포트
-  // 비율 기반으로 바꿈(_idleIndicatorTop 참고).
-  // ⭐ 2026-08-27(5차) - 인디케이터 "평소" 위치의 수직 비율(0=맨 위,
-  // 1=맨 아래) - "중간이 50%, 아래쪽이 100%라면 60~65% 지점" 요청으로 그
-  // 중간값(62.5%)을 씀.
   static const double _idleIndicatorVerticalRatio = 0.625;
-  // ⭐ 인디케이터 래퍼(Container)의 상하 패딩. _indicatorWrapperHeight(아래)가
-  // 이 값과 아이콘 크기로부터 "계산되어야" 실제 렌더 높이와 항상 정확히
-  // 일치함 - 패딩만 스케일되고 높이 상수는 고정값이면(예전 버그) 화면
-  // 배율에 따라 인디케이터가 화살표가 가리키는 지점과 미세하게 어긋남.
-  static double get _indicatorVerticalPadding => (14 * 7 / 8).h;
-  static double get _indicatorHorizontalPadding => (10 * 7 / 8).w;
-  // ⭐ 평소(안 만질 때)엔 작게, 탭해서 활성화되면 그보다 크게 - 크기 차이가
-  // 나므로 래퍼 높이/너비도 상태에 따라 달라져야 함(아래 getter 참고).
-  double get _indicatorWrapperHeight =>
-      (_isDragging
-          ? _AxisIndicator._activeIconSize
-          : _AxisIndicator._idleIconSize) +
-      _indicatorVerticalPadding * 2;
-  double get _indicatorWrapperWidth =>
-      (_isDragging
-          ? _AxisIndicator._activeIconSize + _AxisIndicator._activeBeakLength
-          : _AxisIndicator._idleIconSize) +
-      _indicatorHorizontalPadding * 2;
   // ⭐ 정각 눈금(숫자+선) 한 칸의 "고정" 높이 - 이 값으로 Positioned에 실제
   // height를 줘서 Row를 정확히 이 높이만큼 강제로 차지하게 만듦. 예전엔
   // Row의 높이를 텍스트 폰트 크기로 눈대중해서 "-9"라는 추정값으로 중앙
@@ -604,6 +572,13 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // 폰트 크기(17.sp) 기준으로 숫자 하나가 넉넉히 들어갈 정도로 여유 있게
   // 잡음(칸이 좀 넓어도 가운데 정렬이라 다른 숫자와의 정렬엔 영향 없음).
   static double get _hourDigitCellWidth => (13 * 7 / 8).w;
+  // ⭐ 2026-08-28 - "일정생성 flow 개선" - 시간 선택 배지(축 숫자를 감싸는
+  // 사각형 + 그 우측의 "08:00 AM" 사각형) 크기/간격. 왼쪽 배지는 축 숫자
+  // 칸(_hourDigitCellWidth 2개)을 넉넉히 감싸는 정도, 높이는 정각 눈금
+  // 칸(_hourTickBoxHeight)보다 살짝 커서 사각형 티가 나게.
+  static double get _pickerBadgeHeight => (30 * 7 / 8).h;
+  static double get _pickerHourBadgeWidth => (44 * 7 / 8).w;
+  static double get _pickerBadgeGap => (6 * 7 / 8).w; // 축 선~배지 사이 간격
   // ⭐ "00 위/아래 여백이 너무 많다"는 피드백 - 예전엔 뷰포트 높이의 절반을
   // 위아래 여백으로 둬서(그래야 첫/마지막 슬롯도 정중앙까지 스크롤 가능)
   // 스크롤을 끝까지 하면 화면 절반이 빈 채로 남았음. 이제 고정된 작은
@@ -624,37 +599,16 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   // build() 참고) - 여기 초기값은 그 갱신 전까지의 플레이스홀더일 뿐.
   List<DateSchedule> _blocks = const [];
 
-  // ⭐ 인디케이터 드래그 상태 - null이면 평소(축 정중앙 고정) 상태.
-  // ⭐ 2026-08-27(2차) - "일정이 있는 슬롯을 지날 때만 드래그가 더 뻑뻑하다"는
-  // 사용성 피드백으로 좌표계를 바꿈. 예전엔 이게 실제(가변 높이) _slotTops와
-  // 같은 좌표계라 손가락 delta를 그대로 누적했는데, 그러면 슬롯에 일정이
-  // 쌓여서 물리적으로 더 큰(=heightForStyle만큼 늘어난) 슬롯은 다음 슬롯
-  // 경계를 넘기까지 그만큼 더 드래그해야 했음. 이제 이 값은 "균일 슬롯
-  // 좌표계"(슬롯 1개 = 항상 _baseSlotHeight, 일정 유무와 무관)를 씀 -
-  // 그래서 어느 슬롯이든 정확히 _baseSlotHeight만큼만 손가락을 움직이면
-  // 다음 슬롯으로 넘어감. 화면에 실제로 그리는 위치(_indicatorScreenY)는
-  // 여전히 _slotTops(실제 가변 레이아웃)를 따로 참조하므로, "판정"과
-  // "렌더링"이 서로 다른 좌표계를 쓰게 분리된 것 - _realYToUniformY가 그
-  // 변환을 담당함.
-  double? _dragContentY;
-  double? _downContentY; // 누른 순간의 균일 좌표 - "정말 움직였는지" 판정 기준점
-  bool _hasMovedSinceDown = false; // "탭만 하고 안 움직였으면 취소" 판정용
-  Timer? _edgeTimer;
-
-  // ⭐ 아주 작은 손떨림까지 "이동"으로 잡으면 그냥 탭했다 떼는 것도 취소가
-  // 안 됨(버그 재발) - 최소 이 정도(균일 좌표 기준)는 움직여야 "진짜
-  // 이동"으로 침. Flutter 제스처 인식기의 터치 슬롭에 기대지 않고 직접
-  // 판정하는 이유는 위 Listener 관련 주석 참고.
-  // ⭐ 2026-08-27(2차) - raw 6이 스케일 없이 박혀 있던 걸 발견해서(비교
-  // 대상인 _dragContentY delta는 전부 .h 스케일된 값이라 단위가 안 맞았음)
-  // 이 파일 전체가 따르는 (N*7/8) 컨벤션으로 맞춤.
-  static double get _moveThreshold => (6 * 7 / 8).h;
-
-  // ⭐ 인디케이터를 누르면 손가락이 바로 그 시각의 숫자를 가려버림 - 그래서
-  // 화면에 보이는 활성 인디케이터(+생성 시각)는 실제 드래그 위치보다 항상
-  // 2칸(=1시간) 위를 가리키게 함. 손가락은 여전히 "원래" 위치 근처에 있지만
-  // 눈에 보이는 마커/숫자는 그 위에 떠 있어서 안 가려짐.
-  static const int _activeDisplayOffsetSlots = 2;
+  // ⭐ 2026-08-28 - "일정생성 flow 개선" - 우측 하단 버튼(_ScheduleFab)이
+  // 활성 상태인지. false면 시간 선택 배지도 안 그리고, 스크롤/탭으로 시간을
+  // 옮기는 로직도 전부 꺼짐(_onScroll/_onAxisTapUp 참고) - 그냥 평소처럼
+  // 자유 탐색용 스크롤만 됨.
+  bool _pickerActive = false;
+  // ⭐ 활성 상태일 때 선택된 슬롯(30분 단위, 0~47) - null이면 비활성.
+  int? _selectedSlot;
+  // ⭐ 활성 버튼 둘레에 도는 "여기를 누르라"는 펄스 링 애니메이션 -
+  // repeat()로 계속 돔, 비활성화되면 stop().
+  late final AnimationController _pulseController;
 
   double _viewportHeight = 0;
   double _viewportWidth = 0;
@@ -668,6 +622,14 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   @override
   void initState() {
     super.initState();
+    _pulseController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1400));
+    // ⭐ 2026-08-28 - 방식 1(스크롤 추적) 구현 - 활성 상태에서 스크롤 오프셋이
+    // 바뀔 때마다 "지금 화면 정중앙에 가장 가까운 슬롯"을 다시 계산함
+    // (_onScroll). 정수 슬롯이 바뀔 때만 setState하므로 프레임마다 리빌드가
+    // 쌓이지 않음 - build()의 AnimatedPositioned가 그 변화를 "따라 따락"
+    // 계단식으로 보간해줌.
+    _controller.addListener(_onScroll);
     // ⭐ _initialMinutes는 이 날짜 데이터가 실제로 로드된 뒤 build()에서
     // 계산함(아래 build()의 isLoaded 참고) - 여기서 미리 계산하면 아직 빈
     // 상태인 _blocks를 보고 "일정 없음"으로 잘못 판단하게 됨.
@@ -702,8 +664,9 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
 
   @override
   void dispose() {
-    _edgeTimer?.cancel();
+    _controller.removeListener(_onScroll);
     _controller.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -785,15 +748,6 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
     return widgets;
   }
 
-  // ⭐ 콘텐츠 좌표(y, _slotTops와 같은 기준) → 그 위치가 속한 슬롯 인덱스.
-  // 슬롯이 48개뿐이라 이분 탐색 없이 선형 탐색으로 충분함.
-  int _slotIndexAtContentY(double y) {
-    for (int i = 0; i < _slotCount; i++) {
-      if (y < _slotTops[i + 1]) return i;
-    }
-    return _slotCount - 1;
-  }
-
   Future<void> _openCreateSheet(int startMinutes) async {
     final raw = await showModalBottomSheet<DateSchedule>(
       context: context,
@@ -858,226 +812,113 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
     }
   }
 
-  // ⭐ 실제(가변 높이) 콘텐츠 좌표 하나를 "균일 슬롯 좌표"(슬롯 1개 =
-  // _baseSlotHeight)로 변환함 - 드래그를 시작하는 순간(_onIndicatorDragDown)
-  // "지금 화면 정중앙이 실제로 몇 번째 슬롯의 몇 %쯤인지"를 구해서, 그
-  // 이후로는 균일 좌표계에서만 델타를 누적하기 위한 최초 1회 변환.
-  double _realYToUniformY(double realY) {
-    final slot = _slotIndexAtContentY(realY).clamp(0, _slotCount - 1);
-    final segStart = _slotTops[slot];
-    final segEnd = _slotTops[slot + 1];
-    final segLen = segEnd - segStart;
-    final frac =
-        segLen > 0 ? ((realY - segStart) / segLen).clamp(0.0, 1.0) : 0.0;
-    return (slot + frac) * _baseSlotHeight;
-  }
-
-  // ⭐ 지금 손가락이 실제로 가리키는(가려버리는) 슬롯 - 표시/생성 둘 다
-  // 이걸 그대로 안 쓰고 아래 _displaySlot(2칸 위)을 씀. _dragContentY가 이제
-  // 균일 좌표계라 나눗셈 하나로 바로 슬롯이 나옴(선형 탐색이던
-  // _slotIndexAtContentY보다 오히려 더 간단해짐).
-  int get _rawDragSlot => _dragContentY == null
-      ? -1
-      : (_dragContentY! / _baseSlotHeight).floor().clamp(0, _slotCount - 1);
-
-  // ⭐ 화면에 보이고, 실제로 생성되는 슬롯 - 손가락에 가려지지 않도록 항상
-  // 실제 위치보다 2칸(1시간) 위.
-  int get _displaySlot =>
-      (_rawDragSlot - _activeDisplayOffsetSlots).clamp(0, _slotCount - 1);
-
-  // ⭐ 2026-08-27(4차) - "평소엔 우측 하단, 누르는 순간 예전처럼 축으로
-  // 이동해서 화살표 달고 드래그" - 처음 도입한 "통째로 우측 하단 고정
-  // 버튼" 안은 폐기하고(요청: "오해가 있다, 그대로 원복해"), 대신 예전
-  // 온-axis 인디케이터 구조를 그대로 살리되 "평소(_dragContentY==null)"
-  // 위치만 우측 하단으로 바꿈. 드래그 중엔 여기서 계산한 축 위의 목표
-  // 슬롯 위치를 그대로 씀 - 예전과 100% 동일.
-  double get _indicatorScreenY {
-    if (_dragContentY == null) return _viewportHeight / 2;
-    final scrollOffset = _controller.hasClients ? _controller.offset : 0.0;
-    return _edgePadding + _slotTops[_displaySlot] - scrollOffset + (3 * 7 / 8).h;
-  }
-
-  bool get _isDragging => _dragContentY != null;
-
-  // ⭐ 평소(안 만질 때) - 화면 우측, 수직으로는 뷰포트의 62.5% 지점(요청,
-  // 2026-08-27 5차: "정확히 우측에서 살짝 왼쪽으로, 수직은 중간(50%)보다
-  // 살짝 아래(60~65%)") - _idleIndicatorVerticalRatio 참고. left는 래퍼의
-  // 오른쪽 바깥 여백이 _fabRightMargin이 되도록 뷰포트 폭에서 역산함
-  // (Positioned가 right/bottom을 top/left와 섞어 쓸 수 없는 구조라 - 활성
-  // 상태와 같은 top/left 기준을 씀).
-  double get _idleIndicatorTop =>
-      _viewportHeight * _idleIndicatorVerticalRatio -
-      _indicatorWrapperHeight / 2;
-  double get _idleIndicatorLeft =>
-      _viewportWidth - _fabRightMargin - _indicatorWrapperWidth;
-
-  // ⭐ 드래그 중(활성 상태) - 예전과 동일하게 축 옆에 거의 맞닿게.
-  double get _activeIndicatorLeft => _axisX - _indicatorHorizontalPadding;
-
-  // ⭐ 2026-08-27(5차) - "인디케이터를 축 위/아래 끝까지 드래그하면 화면
-  // 밖으로 아예 사라져서, 반대로 되돌리려면 손을 한참 움직여야 다시
-  // 반응하는 것처럼 느껴진다"는 버그 리포트 - 원인은 _indicatorScreenY가
-  // (edge-scroll 타이머가 따라잡기 전까지는) 뷰포트 범위를 벗어난 값을
-  // 그대로 반환할 수 있어서, 빠르게/길게 드래그하면 렌더링 위치가 화면
-  // 밖으로 나가버렸던 것 - _dragContentY 자체(=몇 번째 슬롯을 가리키는지)는
-  // 항상 정확했지만(그래서 반대로 드래그하면 "즉시" 값은 바뀜), 화면에 안
-  // 보이니 사용자 입장에선 "한참 반응이 없다"로 느껴짐.
-  // 여기서 "판정용" _indicatorScreenY는 그대로 두고(edge-scroll 로직이
-  // 계속 정상 동작해야 하므로), "렌더링용" top만 최대 10%까지만 화면
-  // 위/아래로 가려지게 clamp함 - 그 이상은 (edge-scroll이 계속 축을
-  // 스크롤해주는 동안) 인디케이터가 그 자리에 붙박인 채로 보임.
-  static const double _indicatorMaxHiddenFraction = 0.10;
-  double get _clampedActiveIndicatorTop {
-    final raw = _indicatorScreenY - _indicatorWrapperHeight / 2;
-    final minTop = -_indicatorWrapperHeight * _indicatorMaxHiddenFraction;
-    final maxTop = _viewportHeight -
-        _indicatorWrapperHeight * (1 - _indicatorMaxHiddenFraction);
-    if (minTop > maxTop) return raw; // 극단적으로 작은 뷰포트 방어
-    return raw.clamp(minTop, maxTop);
+  // ⭐ 콘텐츠 좌표(y, _slotTops와 같은 기준) → 가장 가까운 슬롯 "경계"
+  // 인덱스(=그 슬롯이 시작하는 시각). 슬롯이 48개뿐이라 선형 탐색으로 충분함.
+  // _slotIndexAtContentY(예전, "y가 속한 구간")와 달리 이건 "가장 가까운
+  // 점"을 찾음 - 30분 단위 시각 하나하나가 _slotTops의 각 원소와 정확히
+  // 대응되므로(_slotTops[i] = i*30분 지점의 화면 y좌표), 탭/스크롤 중심이
+  // 어느 시각에 가장 가까운지는 이렇게 구하는 게 맞음.
+  int _nearestSlotToContentY(double y) {
+    int best = 0;
+    double bestDist = double.infinity;
+    for (int i = 0; i <= _slotCount; i++) {
+      final dist = (y - _slotTops[i]).abs();
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = i;
+      }
+    }
+    return best.clamp(0, _slotCount - 1);
   }
 
   // ⭐ 콘텐츠 좌표계("scrollOffset과 같은 기준"의 절대 위치)에서, 지금 화면
-  // 정중앙에 있는 위치. edgePadding이 뷰포트 절반보다 작아진 뒤로는
-  // scrollOffset과 이 값이 더 이상 같지 않아서(예전엔 우연히 같았음) 항상
-  // 이 식으로 변환해야 함.
+  // 정중앙에 있는 위치.
   double _unshiftedCenterPosition() {
     final scrollOffset = _controller.hasClients ? _controller.offset : 0.0;
     return scrollOffset + _viewportHeight / 2 - _edgePadding;
   }
 
-  // ⭐ "탭 하자마자 바로" 활성 모드로 바뀌게 하려고 onVerticalDragStart(=
-  // 움직여야 발동) 대신 onVerticalDragDown(=손을 대는 즉시 발동)에서 상태를
-  // 채움.
-  //
-  // ⭐ 2026-08-27 - Listener → GestureDetector로 되돌림. 이유: "일정
-  // 아이콘/내용 위에서 드래그를 시작하면 인디케이터가 안 움직인다"는 버그
-  // - 원인은 인디케이터의 히트테스트 영역이 아이콘 하나 크기밖에 안 돼서,
-  // 그 영역 밖(이미 그려진 일정 위 등)에서 드래그를 시작하면 애초에 이
-  // 위젯이 손가락을 붙잡을 기회조차 없었던 것. 그래서 이제 인디케이터를
-  // 화면 전체를 덮는 투명 GestureDetector(HitTestBehavior.translucent)로
-  // 감싸서 어디를 눌러도 드래그를 시작할 수 있게 함 - translucent라 그
-  // 아래 일정 카드의 탭(수정)도 그대로 살아있음(제스처 아레나가 "많이
-  // 움직였으면 이 드래그가 이기고, 안 움직이고 뗐으면 카드의 탭이 이긴다"로
-  // 알아서 갈라줌 - Flutter의 표준 탭-vs-드래그 판정 방식).
-  // ⭐ GestureDetector로 돌아오면서 예전 "왕복 후 제자리 복귀 시 오취소"
-  // 버그가 재발할 수 있는 지점(onEnd 대신 onCancel이 불리는 경우)이 다시
-  // 생기는데, 그건 onEnd/onCancel을 완전히 같은 함수(_finishIndicatorDrag)로
-  // 몰아서 처리해 없앰 - "이동했는지"는 Flutter의 내부 판정이 아니라 우리가
-  // 직접 잰 스레숄드(_hasMovedSinceDown)로만 보므로, Flutter가 내부적으로
-  // onEnd를 부르든 onCancel을 부르든 결과가 똑같아짐.
-  void _onIndicatorDragDown(DragDownDetails details) {
-    setState(() {
-      // ⭐ 2026-08-27(2차) - 균일 슬롯 좌표계로 변환해서 저장(위
-      // _dragContentY 필드 주석 참고) - 이 최초 변환 이후로는 실제 레이아웃
-      // (_slotTops)을 전혀 안 쓰고 순수 델타 누적만으로 슬롯을 판정함.
-      _dragContentY = _realYToUniformY(_unshiftedCenterPosition());
-      _downContentY = _dragContentY;
-      _hasMovedSinceDown = false;
-    });
-    widget.onIndicatorDragActiveChanged?.call(true);
+  // ⭐ 2026-08-28 - 방식 1(스크롤 추적) - 활성 상태에서만 반응. 화면
+  // 정중앙에 가장 가까운 슬롯이 바뀔 때만 setState해서, 스크롤 프레임마다
+  // 리빌드가 쌓이지 않게 함(사용자에게는 "스크롤하면 배지가 30분 단위로
+  // 따라온다"로 보임 - 실제 프레임 단위 갱신이 아니라 슬롯 경계를 넘을
+  // 때만 갱신되는 것).
+  void _onScroll() {
+    if (!_pickerActive) return;
+    final slot = _nearestSlotToContentY(_unshiftedCenterPosition());
+    if (slot != _selectedSlot) {
+      setState(() => _selectedSlot = slot);
+    }
   }
 
-  void _onIndicatorDragUpdate(DragUpdateDetails details) {
-    if (_dragContentY == null) return;
-    setState(() {
-      // ⭐ 균일 좌표계라 최대값도 "슬롯 개수 × 균일 슬롯 높이"(실제 총
-      // 콘텐츠 높이 _slotTops[_slotCount]가 아님).
-      _dragContentY = (_dragContentY! + details.delta.dy)
-          .clamp(0.0, _slotCount * _baseSlotHeight);
-      // ⭐ 최소 이동거리(_moveThreshold)를 넘었을 때만 "이동함"으로 판정 -
-      // 미세한 손떨림 한 번에 바로 true가 되는 걸 막음(그러면 탭하자마자
-      // 뗐을 때도 "이동함"으로 오판정돼서 취소가 아예 안 됨). 한 번
-      // true가 되면 그 뒤로 원위치로 돌아와도 계속 true 유지(왕복 취소
-      // 버그 재발 방지, 이전 수정 그대로).
-      if (!_hasMovedSinceDown &&
-          _downContentY != null &&
-          (_dragContentY! - _downContentY!).abs() >= _moveThreshold) {
-        _hasMovedSinceDown = true;
-      }
-    });
-    _checkEdgeScroll();
+  // ⭐ 2026-08-28 - 방식 2(직접 탭) - 축 왼쪽 숫자 열을 탭하면 그 시각이
+  // 바로 선택됨. 사용자 확인: "그냥 드래그하고 항상 중앙에만 위치하는
+  // 방식(방식 1)으로는 화면이 무한정 스크롤되지 않아서 맨 위/아래 몇 개는
+  // 절대 선택할 수 없다 - 그래서 탭으로 직접 찍는 방식을 같이 준다". 이
+  // GestureDetector는 build()에서 이 위젯이 속한 스크롤 콘텐츠 Stack
+  // 좌표계(= _slotTops와 동일 기준)에 그대로 얹히므로, details.localPosition.dy
+  // 에서 _edgePadding만 빼면 바로 _slotTops와 비교 가능한 좌표가 됨.
+  void _onAxisTapUp(TapUpDetails details) {
+    if (!_pickerActive) return;
+    final contentY = details.localPosition.dy - _edgePadding;
+    final slot = _nearestSlotToContentY(contentY);
+    setState(() => _selectedSlot = slot);
+    _autoScrollIfNeeded(slot);
   }
 
-  void _onIndicatorDragEnd(DragEndDetails details) => _finishIndicatorDrag();
-  void _onIndicatorDragCancel() => _finishIndicatorDrag();
-
-  // ⭐ onEnd/onCancel 공용 종료 처리.
-  void _finishIndicatorDrag() {
-    _edgeTimer?.cancel();
-    _edgeTimer = null;
-    if (_dragContentY == null) return;
-    widget.onIndicatorDragActiveChanged?.call(false);
-    final moved = _hasMovedSinceDown;
-    final slot = _displaySlot; // 리셋 전에 미리 계산해둠
-    _downContentY = null;
-    if (!moved) {
-      // ⭐ 요청: "움직임 없이 바로 손을 떼면 일정 생성 없이 그냥 원래대로".
-      // 뜰 팝업이 없으니 바로 리셋해도 문제없음.
-      setState(() => _dragContentY = null);
-      return;
-    }
-    // ⭐ 요청: "손을 떼는 순간 바로 중앙으로 스냅되는 게 보기 안 좋다" - 그
-    // 자리에 그대로 있다가, 팝업이 화면을 덮고 난 뒤에야 원위치로 리셋함.
-    // 그래야 사용자 눈엔 "그 자리에서 그대로 팝업이 뜸"으로 보이고, 원래
-    // 위치로 돌아간 건 팝업을 닫았을 때만 드러남.
-    Future.delayed(_createSheetOpenDelay, () {
-      if (!mounted) return;
-      _openCreateSheet(slot * 30);
-    });
-    Future.delayed(_indicatorResetDelay, () {
-      if (!mounted) return;
-      setState(() => _dragContentY = null);
-    });
-  }
-
-  // ⭐ 인디케이터를 화면 위/아래 가장자리 쪽으로 계속 밀면, 슬롯 단위로
-  // "드르륵" 끊어서 계속 진행함 - 인디케이터 자신은 가장자리 근처에 머문 채,
-  // 축만 그만큼(슬롯 높이만큼, 슬롯마다 다를 수 있음) 넘어감.
-  void _checkEdgeScroll() {
-    if (_dragContentY == null || !_controller.hasClients) return;
-    final screenY = _indicatorScreenY;
-
-    int direction = 0;
-    if (screenY > _viewportHeight - _edgeMargin) direction = 1;
-    if (screenY < _edgeMargin) direction = -1;
-
-    if (direction == 0) {
-      _edgeTimer?.cancel();
-      _edgeTimer = null;
-      return;
-    }
-    _edgeTimer ??= Timer.periodic(
-        _edgeScrollInterval, (_) => _advanceEdgeScroll(direction));
-  }
-
-  void _advanceEdgeScroll(int direction) {
-    if (_dragContentY == null || !_controller.hasClients) {
-      _edgeTimer?.cancel();
-      _edgeTimer = null;
-      return;
-    }
-    // ⭐ 2026-08-27(2차) - currentSlot 판정은 균일 좌표계로.
-    final currentSlot =
-        (_dragContentY! / _baseSlotHeight).floor().clamp(0, _slotCount - 1);
-    final targetSlot = (currentSlot + direction).clamp(0, _slotCount - 1);
-    if (targetSlot == currentSlot) {
-      _edgeTimer?.cancel();
-      _edgeTimer = null;
-      return;
-    }
-    // ⭐ 실제 스크롤 이동량은 여전히 실제 레이아웃(_slotTops, 가변 높이)을
-    // 써야 화면에 보이는 축과 정확히 맞물림 - 균일 좌표계는 "몇 슬롯
-    // 지났는지" 판정에만 쓰고, 화면을 실제로 얼마나 스크롤할지는 별개.
-    final realDelta = _slotTops[targetSlot] - _slotTops[currentSlot];
-    final newOffset = (_controller.offset + realDelta)
+  // ⭐ 탭으로 고른 슬롯이 화면 가장자리(_edgeMargin 이내)에 너무 가까우면,
+  // 그 슬롯이 위/아래 어느 쪽에서 왔든 "네 번째 줄" 정도 위치로 오게
+  // 애니메이션 스크롤함 - 요청: "12시가 맨 마지막이라 탭하면, 세로축이
+  // 09~12 정도만 보이던 걸 09가 맨 위, 그 아래로 10 11 12가 보이게 화면이
+  // 따라 내려가야 함". 근처(중앙)에 이미 있으면 그냥 둠 - 탭할 때마다
+  // 화면이 흔들리는 게 아니라, "닿기 어려운 가장자리"에서만 도와주는 것.
+  static const double _tapAutoScrollTargetLine = 3.5; // "네 번째 줄" 정도
+  void _autoScrollIfNeeded(int slot) {
+    if (!_controller.hasClients) return;
+    final itemContentTop = _slotTops[slot];
+    final scrollOffset = _controller.offset;
+    final screenY = _edgePadding + itemContentTop - scrollOffset;
+    final nearTop = screenY < _edgeMargin;
+    final nearBottom = screenY > _viewportHeight - _edgeMargin;
+    if (!nearTop && !nearBottom) return;
+    final targetScreenY = _tapAutoScrollTargetLine * _baseSlotHeight;
+    final newOffset = (_edgePadding + itemContentTop - targetScreenY)
         .clamp(0.0, _controller.position.maxScrollExtent);
+    _controller.animateTo(newOffset,
+        duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+  }
+
+  // ⭐ 우측 하단 버튼(_ScheduleFab) 탭 - 비활성 상태면 활성화(현재 화면
+  // 정중앙에 가장 가까운 시각으로 배지가 즉시 나타남), 이미 활성 상태면
+  // 지금 선택된 시각으로 일정 생성 시트를 염. 시트가 닫히면(생성했든
+  // 취소했든) 항상 비활성 상태로 되돌림 - "시간 선택 → 시트" 한 사이클이
+  // 끝났으니 다음엔 다시 버튼을 눌러 새로 시작하게 함.
+  void _activatePicker() {
     setState(() {
-      // ⭐ 균일 좌표계에서 정확히 한 슬롯만큼 이동(edge-scroll 타이머 한
-      // 틱 = 슬롯 하나, 기존 "슬롯 단위로 드르륵" 의도 그대로).
-      _dragContentY = targetSlot * _baseSlotHeight;
-      _hasMovedSinceDown = true;
+      _pickerActive = true;
+      _selectedSlot = _nearestSlotToContentY(_unshiftedCenterPosition());
     });
-    _controller.jumpTo(newOffset);
+    _pulseController.repeat();
+  }
+
+  void _deactivatePicker() {
+    _pulseController.stop();
+    if (!mounted) return;
+    setState(() {
+      _pickerActive = false;
+      _selectedSlot = null;
+    });
+  }
+
+  Future<void> _onFabTap() async {
+    if (!_pickerActive) {
+      _activatePicker();
+      return;
+    }
+    final slot = _selectedSlot;
+    if (slot == null) return;
+    await _openCreateSheet(slot * 30);
+    _deactivatePicker();
   }
 
   @override
@@ -1122,14 +963,14 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
 
         return Stack(
           children: [
-            // ⭐ 배경 축 - 평소처럼 자유롭게 스크롤됨(순수 탐색용, 그 자체로는
-            // 아무 액션도 안 만듦). 인디케이터를 직접 드래그할 때만 배경
-            // 스크롤을 잠그고 대신 edge-scroll이 움직여줌.
+            // ⭐ 배경 축 - 항상 자유롭게 스크롤됨(순수 탐색용). 2026-08-28 -
+            // "일정생성 flow 개선"으로 손가락으로 직접 인디케이터를 끌던
+            // 방식(edge-scroll 포함)이 통째로 없어져서 스크롤을 잠글 이유가
+            // 더 이상 없음 - 활성 상태에서도 이 스크롤 자체가 방식 1(스크롤
+            // 추적)의 입력이 됨(_onScroll 참고).
             SingleChildScrollView(
               controller: _controller,
-              physics: _dragContentY == null
-                  ? const ClampingScrollPhysics()
-                  : const NeverScrollableScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
               child: SizedBox(
                 height: totalContentHeight,
                 width: double.infinity,
@@ -1180,6 +1021,23 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                         ),
                       ),
                     ),
+                    // ⭐ 2026-08-28 - 방식 2(직접 탭)의 히트테스트 영역 - 축
+                    // 왼쪽 숫자 열 전체(0~_axisX)를 덮는 투명 레이어. 활성
+                    // 상태일 때만 넣음(비활성일 땐 아예 이 위젯을 안 만들어서
+                    // 평소엔 탭이 그냥 스크롤 제스처로만 처리되게 함). 오른쪽
+                    // (일정 카드 영역)과는 겹치지 않으므로 그쪽 탭(수정 열기)
+                    // 과 경합할 일이 없음.
+                    if (_pickerActive)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        width: _axisX,
+                        height: totalContentHeight,
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTapUp: _onAxisTapUp,
+                        ),
+                      ),
                     // ⭐ 2026-08-27 - 정각/30분 눈금(짧은 선) 전부 삭제 요청 -
                     // 숫자만 남기고, 그만큼 폰트를 살짝 키우고 축에 더 붙임
                     // (눈금이 없어져서 숫자 오른쪽 끝이 자연히 축에 닿음).
@@ -1237,43 +1095,96 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
                     // 간격이 아니라 각 일정의 실제 높이를 누적해서 배치함
                     // (_buildScheduleRowWidgets).
                     ..._buildScheduleRowWidgets(rowLeft, scheme),
+                    // ⭐ 2026-08-28 - 시간 선택 배지 2개("일정생성 flow 개선"
+                    // 요청) - 왼쪽은 축 위의 시각(정각이면 숫자를 감싸고,
+                    // 30분이면 숫자 없이 그 사이에 존재), 오른쪽은
+                    // "08:00 AM" 형식의 시각 텍스트. 둘 다 배경색은 현재
+                    // 화면 배경(scheme.mainBg, _scheduleChipDecoration이
+                    // 이미 그 규칙을 구현해둠 - 날짜칩/톱니칩과 완전히 같은
+                    // 디자인 언어), 숫자는 기존 시간 숫자색(scheme.timeText)
+                    // 그대로. 스크롤 추적(방식 1)/탭(방식 2) 어느 쪽으로
+                    // 움직이든 이 Positioned가 _slotTops 좌표계 안에 있어서
+                    // (=콘텐츠와 함께 스크롤됨) 화면 밖 좌표 보정이 따로
+                    // 필요 없음 - AnimatedPositioned가 슬롯이 바뀔 때마다
+                    // "따라 따락" 계단식으로 보간해줌.
+                    if (_pickerActive && _selectedSlot != null) ...[
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 160),
+                        curve: Curves.easeOut,
+                        top: _edgePadding +
+                            _slotTops[_selectedSlot!] -
+                            _pickerBadgeHeight / 2,
+                        left: _axisX - _pickerBadgeGap - _pickerHourBadgeWidth,
+                        width: _pickerHourBadgeWidth,
+                        height: _pickerBadgeHeight,
+                        child: DecoratedBox(
+                          decoration: _scheduleChipDecoration(scheme),
+                          child: Center(
+                            child: _selectedSlot!.isEven
+                                ? Text(
+                                    ((_selectedSlot! ~/ 2) % 24)
+                                        .toString()
+                                        .padLeft(2, '0'),
+                                    style: GoogleFonts.quicksand(
+                                        fontSize: 17.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: scheme.timeText),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ),
+                      ),
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 160),
+                        curve: Curves.easeOut,
+                        top: _edgePadding +
+                            _slotTops[_selectedSlot!] -
+                            _pickerBadgeHeight / 2,
+                        left: _axisX + _pickerBadgeGap,
+                        height: _pickerBadgeHeight,
+                        child: DecoratedBox(
+                          decoration: _scheduleChipDecoration(scheme),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: (10 * 7 / 8).w),
+                            child: Center(
+                              child: Builder(builder: (context) {
+                                final (hhmm, period) =
+                                    _to12Hour(_selectedSlot! * 30);
+                                return Text('$hhmm $period',
+                                    style: GoogleFonts.quicksand(
+                                        fontSize: 17.sp,
+                                        fontWeight: FontWeight.w700,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures()
+                                        ],
+                                        color: scheme.timeText));
+                              }),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
             ),
-            // ⭐ 2026-08-27(4차) - "우측 하단 고정 버튼"은 인디케이터의
-            // "평소(안 만질 때)" 위치만 바꾼 것 - 요청 재확인: "탭하는 순간
-            // 그 인디케이터가 세로축으로 이동해야 해. 왼쪽에 화살표를 달고
-            // 말이야... 우측에서 그냥 저 버튼으로 인디케이터가 시간
-            // 드래그하는 건 예전이랑 똑같이 하게 하려고 한 거야." 그래서
-            // 예전 온-axis 인디케이터 구조(평소엔 작은 원, 드래그 중엔 부리
-            // 달린 큰 원이 축 옆에 붙어서 위/아래로 따라다님)를 그대로
-            // 되살리고, "평소" 위치(_dragContentY==null일 때)만 축 중앙이
-            // 아니라 우측 하단(_idleIndicatorTop/Left)으로 바뀜 - 누르는
-            // 순간(onVerticalDragDown) _isDragging이 true가 되면서 즉시
-            // top/left가 축 옆(_indicatorScreenY/_activeIndicatorLeft)으로
-            // 다시 계산됨. 같은 GestureDetector가 같은 손가락(포인터)을 계속
-            // 붙잡고 있는 상태라, 위젯이 화면 반대편으로 순간이동해도 Flutter가
-            // 이후 드래그 이벤트(Update/End/Cancel)를 정상적으로 계속
-            // 전달함(포인터 라우팅은 최초 히트테스트 이후로는 위치와 무관) -
-            // 예전에 idle↔active 두 위치를 오갈 때도 이미 검증된 메커니즘.
+            // ⭐ 2026-08-28 - "일정생성 flow 개선" 전면 재작업 - 우측 하단
+            // 버튼(_ScheduleFab)은 이제 위치가 항상 고정(비활성/활성 둘 다
+            // 이 자리)이고, 상태는 색(회색/원색) + 펄스 애니메이션으로만
+            // 표현함. 시간 선택 자체는 위 Stack 안의 배지 2개가 담당 -
+            // 이 버튼은 "활성화"와 "확정(시트 열기)" 두 액션의 토글일 뿐.
             Positioned(
-              top: _isDragging
-                  ? _clampedActiveIndicatorTop
-                  : _idleIndicatorTop,
-              left: _isDragging ? _activeIndicatorLeft : _idleIndicatorLeft,
-              child: GestureDetector(
-                onVerticalDragDown: _onIndicatorDragDown,
-                onVerticalDragUpdate: _onIndicatorDragUpdate,
-                onVerticalDragEnd: _onIndicatorDragEnd,
-                onVerticalDragCancel: _onIndicatorDragCancel,
-                child: Container(
-                  color: Colors.transparent,
-                  padding: EdgeInsets.symmetric(
-                      vertical: _indicatorVerticalPadding,
-                      horizontal: _indicatorHorizontalPadding),
-                  child: _AxisIndicator(showBeak: _isDragging),
-                ),
+              top: _viewportHeight * _idleIndicatorVerticalRatio -
+                  _ScheduleFab.wrapperSize / 2,
+              left: _viewportWidth -
+                  _fabRightMargin -
+                  _ScheduleFab.size -
+                  (_ScheduleFab.wrapperSize - _ScheduleFab.size) / 2,
+              child: _ScheduleFab(
+                active: _pickerActive,
+                pulse: _pulseController,
+                onTap: _onFabTap,
               ),
             ),
           ],
@@ -1283,106 +1194,110 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker> {
   }
 }
 
-// ⭐ 인디케이터 - 평소(showBeak=false)엔 화살표 없는 작은 동그라미, 드래그 중
-// (showBeak=true)엔 그보다 살짝 큰 동그라미 + 왼쪽을 가리키는 부리가 붙은
-// 모양으로 바뀜. 흰 테두리 링은 없음(요청: "내 앱 아이콘에도 그거 없다").
-class _AxisIndicator extends StatelessWidget {
-  final bool showBeak;
-  const _AxisIndicator({required this.showBeak});
+// ⭐ 2026-08-28 - "일정생성 flow 개선" 전면 재작업으로 온-axis 드래그
+// 인디케이터(부리 달린 원)를 완전히 대체하는 우측 하단 고정 버튼. 위치는
+// 항상 같고(_TimeAxisPickerState.build() 참고), 상태만 두 가지:
+//  - 비활성(active=false): 지금 아이콘을 흑백(그레이스케일) + 옅은 opacity +
+//    어두운 테두리로 "지금은 눌러야 시작하는 버튼"처럼 보이게 함.
+//  - 활성(active=true): 원색 그대로 + 둘레에 "여기를 누르라"는 펄스 링이
+//    계속 커지며 옅어지는 애니메이션(고전적인 레이더 핑 스타일) - 이미
+//    시간이 선택된 상태에서 "한 번 더 누르면 확정"이라는 걸 알려줌.
+class _ScheduleFab extends StatelessWidget {
+  final bool active;
+  final Animation<double> pulse;
+  final VoidCallback onTap;
+  const _ScheduleFab(
+      {required this.active, required this.pulse, required this.onTap});
 
-  // ⭐ 2026-08-27(5차) - "비활성 인디케이터도 활성이랑 동일하게" 요청을
-  // 재정정 - "그러지 말고 활성 크기의 80% 수준으로" - _activeIconSize에서
-  // 파생시켜서 둘이 항상 일정 비율을 유지하게 함(활성 크기를 나중에 또
-  // 바꿔도 비활성이 따로 어긋날 일이 없음).
-  static double get _activeIconSize => (50 * 7 / 8).r;
-  static double get _idleIconSize => _activeIconSize * 0.8;
-  // ⭐ 화살표(부리) 길이 = 축 선~아이콘 사이 간격. 부리 꼭짓점은 항상 이
-  // 위젯의 로컬 x=0에 그려지고, 이 위젯 자체가 축 선에서 패딩만큼만
-  // 떨어진 자리에 고정되므로(_TimeAxisPickerState._activeIndicatorLeft),
-  // 이 값을 키우면 꼭짓점은 축에 그대로 붙은 채 아이콘만 더 멀리 밀려남.
-  static double get _activeBeakLength => (10 * 7 / 8).r;
-  static double get _activeBeakHeight => (16 * 7 / 8).r;
+  static double get size => (50 * 7 / 8).r;
+  // ⭐ 펄스 링이 최대로 커졌을 때의 지름 - 이 위젯 전체의 레이아웃 크기는
+  // 항상 이 값으로 고정(펄스가 없는 비활성 상태에서도 동일)해서, 활성/
+  // 비활성을 오갈 때 위치가 흔들리지 않게 함(호출부가 아이콘 중심을
+  // 기준으로 역산해서 배치함 - _TimeAxisPickerState.build() 참고).
+  static double get wrapperSize => size * 1.55;
 
-  Widget _icon(double size) {
+  Widget _icon() {
+    final img = ClipOval(
+      child: Image(
+        image: const AssetImage('assets/icon/app_icon.png'),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        // ⭐ 2026-08-27(3차) - "가까이서 보면 자글자글하다"는 피드백 -
+        // 원본(1024×1024)을 이 작은 크기로 줄일 때 기본 FilterQuality(low)
+        // 대신 high를 써서 밉맵 보간이 되게 함.
+        filterQuality: FilterQuality.high,
+      ),
+    );
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
+        border: active
+            ? null
+            : Border.all(
+                color: Colors.black.withValues(alpha: 0.35),
+                width: (1.5 * 7 / 8).r),
         boxShadow: [
           BoxShadow(
               color: Colors.black.withValues(alpha: 0.28),
               blurRadius: 7,
-              offset: const Offset(0, 2))
+              offset: const Offset(0, 2)),
         ],
       ),
-      // ⭐ 2026-08-27(3차) - "인디케이터가 가까이서 보면 자글자글하다"는
-      // 피드백 - 원본(assets/icon/app_icon.png)은 1024×1024라 해상도 자체는
-      // 충분한데, Flutter Image의 기본 FilterQuality(low, 단순 bilinear)로
-      // 이렇게 큰 비율(1024px → ~44dp)을 축소하면 세밀한 선(아이콘 내부
-      // 디테일)이 밀리언스 없이 계단져 보임 - FilterQuality.high로 올려서
-      // 축소 시 밉맵 품질 보간을 쓰게 함.
-      child: const ClipOval(
-        child: Image(
-            image: AssetImage('assets/icon/app_icon.png'),
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.high),
-      ),
+      // ⭐ 비활성일 땐 표준 luminance 공식(0.2126R+0.7152G+0.0722B)으로 흑백
+      // 처리 + 살짝 투명하게 - "지금은 활성 상태가 아니다"가 한눈에 보이게.
+      child: active
+          ? img
+          : ColorFiltered(
+              colorFilter: const ColorFilter.matrix(<double>[
+                0.2126, 0.7152, 0.0722, 0, 0,
+                0.2126, 0.7152, 0.0722, 0, 0,
+                0.2126, 0.7152, 0.0722, 0, 0,
+                0, 0, 0, 1, 0,
+              ]),
+              child: Opacity(opacity: 0.75, child: img),
+            ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!showBeak) {
-      return SizedBox(
-          width: _idleIconSize,
-          height: _idleIconSize,
-          child: _icon(_idleIconSize));
-    }
-    return SizedBox(
-      width: _activeIconSize + _activeBeakLength,
-      height: _activeIconSize,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // ⭐ 부리 끝(왼쪽 꼭짓점)이 정확히 x=0(=이 위젯의 왼쪽 끝)에 오고,
-          // 이 위젯 자체가 축 선에서 정확히 _activeBeakLength만큼 떨어진
-          // 자리에 놓이므로(_activeIndicatorLeft), 부리 끝은 항상 축 선에
-          // 정확히 맞닿음.
-          Positioned(
-            left: 0,
-            top: _activeIconSize / 2 - _activeBeakHeight / 2,
-            child: CustomPaint(
-              size: Size(_activeBeakLength, _activeBeakHeight),
-              painter: const _LeftBeakPainter(color: kAppMainAccent),
-            ),
-          ),
-          Positioned(
-              left: _activeBeakLength, top: 0, child: _icon(_activeIconSize)),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: SizedBox(
+        width: wrapperSize,
+        height: wrapperSize,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (active)
+              AnimatedBuilder(
+                animation: pulse,
+                builder: (context, _) {
+                  final t = pulse.value; // 0(막 시작)→1(다 커지고 다 사라짐)
+                  final ringSize = size + (wrapperSize - size) * t;
+                  return Container(
+                    width: ringSize,
+                    height: ringSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color:
+                            kAppMainAccent.withValues(alpha: (1 - t) * 0.65),
+                        width: (2.5 * 7 / 8).r,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            _icon(),
+          ],
+        ),
       ),
     );
   }
-}
-
-class _LeftBeakPainter extends CustomPainter {
-  final Color color;
-  const _LeftBeakPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color;
-    final path = Path()
-      ..moveTo(0, size.height / 2)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width, size.height)
-      ..close();
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _LeftBeakPainter oldDelegate) =>
-      oldDelegate.color != color;
 }
 
 // ⭐ 일정 한 줄 - "내용"만 있는 구조(제목 없앰, 요청)로, 렌더링 스타일을

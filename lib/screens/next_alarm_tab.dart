@@ -18,9 +18,7 @@ import '../widgets/app_third_button.dart';
 
 
 class NextAlarmTab extends ConsumerStatefulWidget {
-  final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
-
-  const NextAlarmTab({super.key, this.onSwipeToCalendar});
+  const NextAlarmTab({super.key});
 
   @override
   ConsumerState<NextAlarmTab> createState() => _NextAlarmTabState();
@@ -94,17 +92,8 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   Widget build(BuildContext context) {
     final nextAlarmAsync = ref.watch(nextAlarmProvider);
 
-    return GestureDetector(
-      // ⭐ 6번 기능: 우→좌 스와이프로 달력탭 이동
-      onHorizontalDragEnd: (details) {
-        if (widget.onSwipeToCalendar != null && details.primaryVelocity != null) {
-          // 우→좌 스와이프 (velocity < 0)
-          if (details.primaryVelocity! < -500) {
-            widget.onSwipeToCalendar!();
-          }
-        }
-      },
-      child: Scaffold(
+    // ⭐ 2026-08-28 - 좌우 스와이프로 달력탭 이동하는 기능 제거(안 써서).
+    return Scaffold(
         // ⭐ 2026-08-25 - Colors.transparent → kAppWaveGradientFallback으로 변경.
         // 화면이 불규칙하게 "하얗게 깜빡인다"는 재보고 - 원인은 위 _NextAlarmTabState의
         // 중복 60초 전체 리빌드 타이머(제거함, initState 참고)로 보이지만, 그거랑
@@ -140,7 +129,6 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
             ),
           ),
         ),
-      ),
     );
   }
 

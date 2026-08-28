@@ -225,17 +225,11 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     final colorScheme = Theme.of(context).colorScheme;
     final scheduleAsync = ref.watch(scheduleProvider);
 
-    return GestureDetector(
-      // ⭐ 6번 기능: 좌→우 스와이프로 달력탭 이동
-      onHorizontalDragEnd: (details) {
-        if (widget.onSwipeToCalendar != null && details.primaryVelocity != null) {
-          // 좌→우 스와이프 (velocity > 0)
-          if (details.primaryVelocity! > 500) {
-            widget.onSwipeToCalendar!();
-          }
-        }
-      },
-      child: Scaffold(
+    // ⭐ 2026-08-28 - 좌우 스와이프로 달력탭 이동하는 기능 제거(안 써서).
+    // widget.onSwipeToCalendar 자체는 아래 "달력 테마" 진입 시
+    // CalendarThemePickerScreen(onApplied: ...)로 여전히 씀(테마 적용 후 달력탭으로
+    // 돌아가는 콜백) - 그쪽은 스와이프가 아니라 별개 기능이라 유지.
+    return Scaffold(
         appBar: AppBar(
           title: Row(
             children: [
@@ -583,7 +577,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           );
         },
       ),
-      ),  // ⭐ GestureDetector child 닫기
     );
   }
 
