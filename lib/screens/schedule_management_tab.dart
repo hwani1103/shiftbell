@@ -535,11 +535,6 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   // "_rowHeight" 상수는 없앰 - 아이콘 지름만 여기 남음.
   static double get _iconDiameter => (40 * 7 / 8).r;
 
-  // ⭐ 2026-08-28 - "탭으로 시간 직접 선택" 기능에서, 탭한 슬롯이 화면
-  // 위/아래 가장자리 이 정도 안쪽으로 들어오면 자동 스크롤을 트리거함
-  // (_autoScrollIfNeeded 참고). 예전 온-axis 드래그의 edge-scroll 마진과
-  // 같은 상수를 그대로 재사용.
-  static double get _edgeMargin => (56 * 7 / 8).h;
   // ⭐ 숫자/눈금을 축 왼쪽으로 옮기면서(요청) 그만큼 왼쪽 여백이 더 필요해짐
   // (숫자 텍스트 + 눈금이 들어갈 자리) - 26→58로 늘림.
   // 🔧 튜닝 포인트 1: 세로축(선+숫자열) 전체를 좌우로 옮기려면 이 숫자(58)를
@@ -600,15 +595,33 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   List<DateSchedule> _blocks = const [];
 
   // ⭐ 2026-08-28 - "일정생성 flow 개선" - 우측 하단 버튼(_ScheduleFab)이
-  // 활성 상태인지. false면 시간 선택 배지도 안 그리고, 스크롤/탭으로 시간을
-  // 옮기는 로직도 전부 꺼짐(_onScroll/_onAxisTapUp 참고) - 그냥 평소처럼
-  // 자유 탐색용 스크롤만 됨.
+  // 활성 상태인지. false면 시간 선택 배지도 안 그리고 슬롯 추적도 안 함
+  // (_onAxisDragUpdate 참고) - 그냥 평소처럼 자유 탐색용 스크롤만 됨.
   bool _pickerActive = false;
   // ⭐ 활성 상태일 때 선택된 슬롯(30분 단위, 0~47) - null이면 비활성.
   int? _selectedSlot;
   // ⭐ 활성 버튼 둘레에 도는 "여기를 누르라"는 펄스 링 애니메이션 -
   // repeat()로 계속 돔, 비활성화되면 stop().
   late final AnimationController _pulseController;
+
+  // ⭐ 2026-08-28(2차) - "인디케이터 이동은 스크롤 추적(방식 1)만 남기고,
+  // 화면이 물리적으로 더 스크롤 안 되는 축 양 끝에서도 인디케이터는 계속
+  // 갈 수 있게" 요청으로 도입. 축 스크롤을 SingleChildScrollView의 기본
+  // 드래그(ClampingScrollPhysics)에 맡기지 않고, 이 위젯이 직접
+  // GestureDetector로 세로 드래그를 받아서 "가상 오프셋"을 계산함:
+  //  - _virtualOffset은 클램프하지 않은 채 계속 누적됨(드래그 델타를 그대로
+  //    뺄셈) - 화면에 실제로 적용하는 스크롤 오프셋은 이 값을
+  //    [0, maxScrollExtent]로 클램프한 것(_onAxisDragUpdate의 jumpTo).
+  //  - 화면이 이미 끝(0 또는 maxScrollExtent)에 닿아 있어도 _virtualOffset
+  //    자체는 계속 움직이므로("화면은 멈춰도 인디케이터는 계속 감"), 인디케이터
+  //    위치 계산(_centerContentY)은 항상 이 클램프 안 된 값을 기준으로 함.
+  //  - 반대 방향으로 다시 드래그하면, 화면에 적용되는 클램프된 값이
+  //    [0, maxScrollExtent] 범위 안으로 돌아올 때까지는 안 움직임(=
+  //    "다시 calibration") - clamp() 자체가 이 동작을 공짜로 구현해줌.
+  // 드래그 제스처가 끝나도 리셋하지 않음 - 다음 드래그가 이어서 정확히
+  // 같은 지점부터 시작해야 하므로(안 그러면 손을 뗐다 다시 잡을 때 인디케이터가
+  // 화면에 보이는 위치에서 갑자기 04시 등으로 튀어버림).
+  double? _virtualOffset;
 
   double _viewportHeight = 0;
   double _viewportWidth = 0;
@@ -624,12 +637,6 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     super.initState();
     _pulseController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 1400));
-    // ⭐ 2026-08-28 - 방식 1(스크롤 추적) 구현 - 활성 상태에서 스크롤 오프셋이
-    // 바뀔 때마다 "지금 화면 정중앙에 가장 가까운 슬롯"을 다시 계산함
-    // (_onScroll). 정수 슬롯이 바뀔 때만 setState하므로 프레임마다 리빌드가
-    // 쌓이지 않음 - build()의 AnimatedPositioned가 그 변화를 "따라 따락"
-    // 계단식으로 보간해줌.
-    _controller.addListener(_onScroll);
     // ⭐ _initialMinutes는 이 날짜 데이터가 실제로 로드된 뒤 build()에서
     // 계산함(아래 build()의 isLoaded 참고) - 여기서 미리 계산하면 아직 빈
     // 상태인 _blocks를 보고 "일정 없음"으로 잘못 판단하게 됨.
@@ -664,7 +671,6 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
 
   @override
   void dispose() {
-    _controller.removeListener(_onScroll);
     _controller.dispose();
     _pulseController.dispose();
     super.dispose();
@@ -814,10 +820,11 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
 
   // ⭐ 콘텐츠 좌표(y, _slotTops와 같은 기준) → 가장 가까운 슬롯 "경계"
   // 인덱스(=그 슬롯이 시작하는 시각). 슬롯이 48개뿐이라 선형 탐색으로 충분함.
-  // _slotIndexAtContentY(예전, "y가 속한 구간")와 달리 이건 "가장 가까운
-  // 점"을 찾음 - 30분 단위 시각 하나하나가 _slotTops의 각 원소와 정확히
-  // 대응되므로(_slotTops[i] = i*30분 지점의 화면 y좌표), 탭/스크롤 중심이
-  // 어느 시각에 가장 가까운지는 이렇게 구하는 게 맞음.
+  // 30분 단위 시각 하나하나가 _slotTops의 각 원소와 정확히 대응되므로
+  // (_slotTops[i] = i*30분 지점의 화면 y좌표), 스크롤 중심이 어느 시각에
+  // 가장 가까운지는 이렇게 구하는 게 맞음. y가 범위 밖(먼 음수/큰 값)이어도
+  // 알아서 가장 가까운 끝(0 또는 _slotCount-1)을 돌려줌 - _virtualOffset이
+  // 화면 스크롤 한계 너머로 계속 누적될 때도 그대로 안전하게 동작함.
   int _nearestSlotToContentY(double y) {
     int best = 0;
     double bestDist = double.infinity;
@@ -832,60 +839,39 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   }
 
   // ⭐ 콘텐츠 좌표계("scrollOffset과 같은 기준"의 절대 위치)에서, 지금 화면
-  // 정중앙에 있는 위치.
-  double _unshiftedCenterPosition() {
-    final scrollOffset = _controller.hasClients ? _controller.offset : 0.0;
-    return scrollOffset + _viewportHeight / 2 - _edgePadding;
+  // 정중앙에 있는 위치 - _virtualOffset(클램프 안 됨)을 기준으로 계산하므로,
+  // 실제 화면 스크롤이 끝에 닿아 멈춰 있어도 이 값 자체는 계속 움직일 수
+  // 있음(위 _virtualOffset 필드 주석 참고).
+  double _centerContentY() {
+    final offset = _virtualOffset ??
+        (_controller.hasClients ? _controller.offset : 0.0);
+    return offset + _viewportHeight / 2 - _edgePadding;
   }
 
-  // ⭐ 2026-08-28 - 방식 1(스크롤 추적) - 활성 상태에서만 반응. 화면
-  // 정중앙에 가장 가까운 슬롯이 바뀔 때만 setState해서, 스크롤 프레임마다
-  // 리빌드가 쌓이지 않게 함(사용자에게는 "스크롤하면 배지가 30분 단위로
-  // 따라온다"로 보임 - 실제 프레임 단위 갱신이 아니라 슬롯 경계를 넘을
-  // 때만 갱신되는 것).
-  void _onScroll() {
-    if (!_pickerActive) return;
-    final slot = _nearestSlotToContentY(_unshiftedCenterPosition());
-    if (slot != _selectedSlot) {
-      setState(() => _selectedSlot = slot);
-    }
-  }
-
-  // ⭐ 2026-08-28 - 방식 2(직접 탭) - 축 왼쪽 숫자 열을 탭하면 그 시각이
-  // 바로 선택됨. 사용자 확인: "그냥 드래그하고 항상 중앙에만 위치하는
-  // 방식(방식 1)으로는 화면이 무한정 스크롤되지 않아서 맨 위/아래 몇 개는
-  // 절대 선택할 수 없다 - 그래서 탭으로 직접 찍는 방식을 같이 준다". 이
-  // GestureDetector는 build()에서 이 위젯이 속한 스크롤 콘텐츠 Stack
-  // 좌표계(= _slotTops와 동일 기준)에 그대로 얹히므로, details.localPosition.dy
-  // 에서 _edgePadding만 빼면 바로 _slotTops와 비교 가능한 좌표가 됨.
-  void _onAxisTapUp(TapUpDetails details) {
-    if (!_pickerActive) return;
-    final contentY = details.localPosition.dy - _edgePadding;
-    final slot = _nearestSlotToContentY(contentY);
-    setState(() => _selectedSlot = slot);
-    _autoScrollIfNeeded(slot);
-  }
-
-  // ⭐ 탭으로 고른 슬롯이 화면 가장자리(_edgeMargin 이내)에 너무 가까우면,
-  // 그 슬롯이 위/아래 어느 쪽에서 왔든 "네 번째 줄" 정도 위치로 오게
-  // 애니메이션 스크롤함 - 요청: "12시가 맨 마지막이라 탭하면, 세로축이
-  // 09~12 정도만 보이던 걸 09가 맨 위, 그 아래로 10 11 12가 보이게 화면이
-  // 따라 내려가야 함". 근처(중앙)에 이미 있으면 그냥 둠 - 탭할 때마다
-  // 화면이 흔들리는 게 아니라, "닿기 어려운 가장자리"에서만 도와주는 것.
-  static const double _tapAutoScrollTargetLine = 3.5; // "네 번째 줄" 정도
-  void _autoScrollIfNeeded(int slot) {
+  // ⭐ 2026-08-28(2차) - 축 스크롤 전체를 이 위젯이 직접 처리함(build()에서
+  // SingleChildScrollView는 physics: NeverScrollableScrollPhysics로 사용자
+  // 드래그를 안 받고, 대신 이 GestureDetector가 받음). 매 프레임:
+  //  1) _virtualOffset을 델타만큼 그대로(클램프 없이) 갱신.
+  //  2) 화면에 실제로 보여줄 오프셋은 그걸 [0, maxScrollExtent]로 클램프한
+  //     값 - jumpTo로 적용. 화면 끝에 닿으면 이 값은 더 이상 안 변하지만
+  //     _virtualOffset은 계속 변하므로 "화면은 멈춰도 인디케이터는 계속
+  //     간다"가 자동으로 됨. 반대로 되돌리면 _virtualOffset이 다시
+  //     [0, maxScrollExtent] 안으로 들어올 때까지는 클램프된 값(=화면)이
+  //     안 움직이므로 "calibration 구간"도 clamp() 하나로 공짜로 생김.
+  //  3) 활성 상태(_pickerActive)면 그 시점의 중심 슬롯을 다시 계산 -
+  //     정수 슬롯이 바뀔 때만 setState해서 불필요한 리빌드를 피함
+  //     (build()의 AnimatedPositioned가 "따라 따락" 계단식으로 보간해줌).
+  void _onAxisDragUpdate(DragUpdateDetails details) {
     if (!_controller.hasClients) return;
-    final itemContentTop = _slotTops[slot];
-    final scrollOffset = _controller.offset;
-    final screenY = _edgePadding + itemContentTop - scrollOffset;
-    final nearTop = screenY < _edgeMargin;
-    final nearBottom = screenY > _viewportHeight - _edgeMargin;
-    if (!nearTop && !nearBottom) return;
-    final targetScreenY = _tapAutoScrollTargetLine * _baseSlotHeight;
-    final newOffset = (_edgePadding + itemContentTop - targetScreenY)
-        .clamp(0.0, _controller.position.maxScrollExtent);
-    _controller.animateTo(newOffset,
-        duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+    _virtualOffset = (_virtualOffset ?? _controller.offset) - details.delta.dy;
+    final maxExtent = _controller.position.maxScrollExtent;
+    _controller.jumpTo(_virtualOffset!.clamp(0.0, maxExtent));
+    if (_pickerActive) {
+      final slot = _nearestSlotToContentY(_centerContentY());
+      if (slot != _selectedSlot) {
+        setState(() => _selectedSlot = slot);
+      }
+    }
   }
 
   // ⭐ 우측 하단 버튼(_ScheduleFab) 탭 - 비활성 상태면 활성화(현재 화면
@@ -896,7 +882,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   void _activatePicker() {
     setState(() {
       _pickerActive = true;
-      _selectedSlot = _nearestSlotToContentY(_unshiftedCenterPosition());
+      _selectedSlot = _nearestSlotToContentY(_centerContentY());
     });
     _pulseController.repeat();
   }
@@ -963,15 +949,20 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
 
         return Stack(
           children: [
-            // ⭐ 배경 축 - 항상 자유롭게 스크롤됨(순수 탐색용). 2026-08-28 -
-            // "일정생성 flow 개선"으로 손가락으로 직접 인디케이터를 끌던
-            // 방식(edge-scroll 포함)이 통째로 없어져서 스크롤을 잠글 이유가
-            // 더 이상 없음 - 활성 상태에서도 이 스크롤 자체가 방식 1(스크롤
-            // 추적)의 입력이 됨(_onScroll 참고).
-            SingleChildScrollView(
-              controller: _controller,
-              physics: const ClampingScrollPhysics(),
-              child: SizedBox(
+            // ⭐ 2026-08-28(2차) - 배경 축 스크롤을 SingleChildScrollView의
+            // 기본 드래그가 아니라 이 GestureDetector가 직접 받음(physics는
+            // 아래에서 NeverScrollable로 바꿈) - "화면이 끝까지 스크롤돼도
+            // 인디케이터는 계속 갈 수 있게" 하려면 클램프되지 않은 원시 드래그
+            // 델타가 필요한데, SingleChildScrollView 자체의 스크롤 오프셋은
+            // 이미 클램프된 값만 노출하기 때문(_onAxisDragUpdate/_virtualOffset
+            // 필드 주석 참고).
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onVerticalDragUpdate: _onAxisDragUpdate,
+              child: SingleChildScrollView(
+                controller: _controller,
+                physics: const NeverScrollableScrollPhysics(),
+                child: SizedBox(
                 height: totalContentHeight,
                 width: double.infinity,
                 child: Stack(
@@ -1021,23 +1012,6 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
                         ),
                       ),
                     ),
-                    // ⭐ 2026-08-28 - 방식 2(직접 탭)의 히트테스트 영역 - 축
-                    // 왼쪽 숫자 열 전체(0~_axisX)를 덮는 투명 레이어. 활성
-                    // 상태일 때만 넣음(비활성일 땐 아예 이 위젯을 안 만들어서
-                    // 평소엔 탭이 그냥 스크롤 제스처로만 처리되게 함). 오른쪽
-                    // (일정 카드 영역)과는 겹치지 않으므로 그쪽 탭(수정 열기)
-                    // 과 경합할 일이 없음.
-                    if (_pickerActive)
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        width: _axisX,
-                        height: totalContentHeight,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onTapUp: _onAxisTapUp,
-                        ),
-                      ),
                     // ⭐ 2026-08-27 - 정각/30분 눈금(짧은 선) 전부 삭제 요청 -
                     // 숫자만 남기고, 그만큼 폰트를 살짝 키우고 축에 더 붙임
                     // (눈금이 없어져서 숫자 오른쪽 끝이 자연히 축에 닿음).
@@ -1169,6 +1143,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
                 ),
               ),
             ),
+            ),
             // ⭐ 2026-08-28 - "일정생성 flow 개선" 전면 재작업 - 우측 하단
             // 버튼(_ScheduleFab)은 이제 위치가 항상 고정(비활성/활성 둘 다
             // 이 자리)이고, 상태는 색(회색/원색) + 펄스 애니메이션으로만
@@ -1262,6 +1237,29 @@ class _ScheduleFab extends StatelessWidget {
     );
   }
 
+  // ⭐ 2026-08-28(2차) - "펄스링이 너무 조용해서 활성 상태가 잘 안 느껴진다"는
+  // 재확인 - 링 하나짜리를 더 두껍고 진하게 바꾸는 것만으론 "지금 막 커지기
+  // 시작한 순간"에는 여전히 아이콘과 거의 겹쳐서 존재감이 약했음. 대신
+  // 위상(phase)이 반 박자 어긋난 링 2개를 동시에 돌려서, 항상 화면 어딘가엔
+  // "눈에 띄게 자란" 링이 최소 하나는 보이게 함(고전적 이중 레이더 핑) -
+  // 테두리 두께도 2.5→4로, 최대 알파도 0.65→0.85로 올림.
+  static const double _ringStrokeWidthRaw = 4;
+  static const double _ringMaxAlpha = 0.85;
+  Widget _ring(double t) {
+    final ringSize = size + (wrapperSize - size) * t;
+    return Container(
+      width: ringSize,
+      height: ringSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: kAppMainAccent.withValues(alpha: (1 - t) * _ringMaxAlpha),
+          width: (_ringStrokeWidthRaw * 7 / 8).r,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -1276,19 +1274,11 @@ class _ScheduleFab extends StatelessWidget {
               AnimatedBuilder(
                 animation: pulse,
                 builder: (context, _) {
-                  final t = pulse.value; // 0(막 시작)→1(다 커지고 다 사라짐)
-                  final ringSize = size + (wrapperSize - size) * t;
-                  return Container(
-                    width: ringSize,
-                    height: ringSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color:
-                            kAppMainAccent.withValues(alpha: (1 - t) * 0.65),
-                        width: (2.5 * 7 / 8).r,
-                      ),
-                    ),
+                  final t1 = pulse.value; // 0(막 시작)→1(다 커지고 다 사라짐)
+                  final t2 = (pulse.value + 0.5) % 1.0; // 반 박자 어긋난 두 번째 링
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [_ring(t1), _ring(t2)],
                   );
                 },
               ),
