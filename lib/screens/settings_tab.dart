@@ -17,11 +17,10 @@ import '../models/alarm_type.dart';
 import '../models/alarm.dart';
 import '../constants/alarm_limits.dart';
 import '../models/shift_schedule.dart';
-import 'all_teams_setup_dialog.dart';
-import 'friend_list_screen.dart';
 import 'memo_list_view.dart';
 import 'work_hours_settings_screen.dart';
 import 'calendar_theme_picker_screen.dart';
+import 'help_screen.dart';
 import '../widgets/tappable_number_picker.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_second_button.dart';
@@ -31,6 +30,11 @@ import '../widgets/app_shift_chip.dart';
 import '../constants/alarm_day_offset.dart';
 import '../l10n/l10n_extensions.dart';
 import '../constants/shift_name_limits.dart';
+import '../services/backup_watcher.dart';
+import '../services/backup_service.dart';
+import '../services/backup_storage_service.dart';
+import '../services/alarm_refresh_service.dart';
+import '../models/backup_payload.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
@@ -42,6 +46,158 @@ class SettingsTab extends ConsumerStatefulWidget {
 }
 
 class _SettingsTabState extends ConsumerState<SettingsTab> {
+  // ⭐ 사용자 데이터 백업("A번 요구사항") - 설정 탭 진입점(Layer 4). 저장/복구
+  // 로직 자체는 BackupWatcher(자동 트리거와 동일 코드 경로 - "지금 백업"도 그냥
+  // force:true로 그 함수를 부르는 것뿐)에 있고, 여기선 버튼 상태/마지막 백업
+  // 시각 표시만 관리함.
+  bool _isBackingUp = false;
+  DateTime? _lastBackupAt;
+  bool _isRestoringFromBackup = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLastBackupAt();
+  }
+
+  Future<void> _loadLastBackupAt() async {
+    final at = await BackupWatcher.instance.lastSavedAt();
+    if (mounted) setState(() => _lastBackupAt = at);
+  }
+
+  Future<void> _backupNow() async {
+    if (_isBackingUp) return;
+    setState(() => _isBackingUp = true);
+    final success = await BackupWatcher.instance.backupNow(force: true);
+    if (!mounted) return;
+    setState(() => _isBackingUp = false);
+    if (success) await _loadLastBackupAt();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(success
+            ? context.l10n.settingsDataBackupSuccessToast
+            : context.l10n.settingsDataBackupFailedToast),
+        // ⭐ 문구가 "앱 삭제해도 재설치 시 보관됨"까지 길어져서, 기본 4초보다
+        // 읽을 시간을 조금 더 줌.
+        duration: const Duration(seconds: 6),
+      ),
+    );
+  }
+
+  String _formatBackupDate(DateTime dt) {
+    final h = dt.hour.toString().padLeft(2, '0');
+    final m = dt.minute.toString().padLeft(2, '0');
+    return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')} $h:$m';
+  }
+
+  // ⭐ 2026-09-01 - "설정 탭에서도 다른 백업으로 불러올 수 있게" 추가 요청.
+  // 신규 설치 온보딩 경로(permission_intro_screen.dart의 _pickBackupManually)와
+  // 달리, 여기는 **이미 사용 중인 데이터가 있는 상태에서 통째로 덮어쓰는**
+  // 훨씬 위험한 동작이라 안내 다이얼로그를 두 단계로 나눔:
+  // 1) 파일 고르기 전 - 무슨 일이 일어나는지 + 어디서 파일을 찾는지 자세히 안내
+  // 2) 파일을 고르고 유효성 검증까지 끝난 후 - 그 백업의 저장 시각을 보여주고
+  //    마지막으로 한 번 더 확인
+  // restoreAll()은 force:true로 불러야 함(기본은 "스케줄이 이미 있으면 거부"라서).
+  // 복구 후엔 화면에 떠 있는 모든 provider/캐시를 일일이 무효화하는 대신
+  // 앱 프로세스를 통째로 재시작함(native "restartApp" - MainActivity.kt 참고)
+  // - 신규 설치 복구와 동일하게 "깨끗한 시작"을 보장하는 가장 안전한 방법.
+  Future<void> _restoreFromBackup() async {
+    if (_isRestoringFromBackup) return;
+
+    final proceed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.settingsRestoreFromBackupWarningTitle),
+        content: SingleChildScrollView(
+          child: Text(
+            context.l10n.settingsRestoreFromBackupWarningBody,
+            style: const TextStyle(height: 1.5),
+          ),
+        ),
+        actions: [
+          AppSecondButton(
+            variant: AppSecondButtonVariant.neutral,
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.commonCancel),
+          ),
+          AppSecondButton(
+            variant: AppSecondButtonVariant.danger,
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(context.l10n.settingsRestoreFromBackupPickButton),
+          ),
+        ],
+      ),
+    );
+    if (proceed != true) return;
+
+    final json = await BackupStorageService.instance.pickAndRead();
+    if (json == null) return; // 선택기에서 취소함 - 조용히 무시
+    if (!mounted) return;
+
+    BackupPayload? payload;
+    try {
+      payload = BackupPayload.decode(json);
+    } catch (e) {
+      payload = null;
+    }
+    if (payload == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.backupRestoreManualPickInvalidToast)),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.settingsRestoreFromBackupConfirmTitle),
+        content: Text(
+          context.l10n.settingsRestoreFromBackupConfirmBody(
+            _formatBackupDate(payload!.exportedAt),
+          ),
+        ),
+        actions: [
+          AppSecondButton(
+            variant: AppSecondButtonVariant.neutral,
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.commonCancel),
+          ),
+          AppSecondButton(
+            variant: AppSecondButtonVariant.danger,
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(context.l10n.settingsRestoreFromBackupConfirmButton),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _isRestoringFromBackup = true);
+    try {
+      await BackupService.instance.restoreAll(payload, force: true);
+      // ⭐ 네이티브 알람 갱신 엔진은 "하루 1번" 쿨다운이 있어서(AlarmRefreshUtil.
+      // checkAndTriggerRefresh), 이 화면에 도달했다는 건 이미 앱을 쓰던 중이라
+      // 오늘 한 번 갱신됐을 가능성이 높음 - 그 상태에서 restoreAll()로 DB
+      // 내용만 바꿔치기하면 네이티브가 그 변화를 못 알아채고 넘어갈 수 있음
+      // ("근무표/이력엔 반영됐는데 다음 알람만 한참 있다가 나타난다" 버그 원인).
+      // 재시작 전에 강제로 재생성시켜서 재시작 시점엔 이미 알람이 최신 상태이게 함.
+      await AlarmRefreshService.instance.forceRefresh();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.settingsRestoreFromBackupSuccessToast)),
+      );
+      // ⭐ 토스트를 잠깐 보여준 뒤 재시작 - 네이티브 쪽에도 300ms 지연이 한 번 더
+      // 있어서(MainActivity.kt) 총 지연은 그리 길지 않음.
+      await Future.delayed(const Duration(milliseconds: 600));
+      await kAlarmChannel.invokeMethod('restartApp');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isRestoringFromBackup = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.settingsRestoreFromBackupFailedToast)),
+      );
+    }
+  }
 
   Future<void> _resetSchedule() async {
     final confirm = await showDialog<bool>(
@@ -75,10 +231,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
       await ref.read(scheduleProvider.notifier).resetSchedule();
 
       // ⭐ 전체 교대조 근무표 데이터 초기화
+      // ⭐ 2026-09-05 - 'all_teams_indices'는 어디서도 안 쓰는 죽은 키였음(실제
+      // 저장 키는 all_teams_offsets) - 지워도 orphan으로 안 남게 실제 키로 교체.
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('all_teams_names');
-      await prefs.remove('all_teams_indices');
-      print('✅ 전체 교대조 근무표 데이터 초기화 완료');
+      await prefs.remove('all_teams_offsets');
+      await prefs.remove('all_teams_my_team');
 
       if (mounted) {
         Navigator.of(context).pushReplacement(
@@ -375,10 +533,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
 
               SizedBox(height: 16.h),
 
-              // ⭐ "전체 교대조 근무표 작성" 진입점 삭제 - 그 기능은 앞으로
-              // 메인 달력탭에서 직접 탭해서 설정하는 방식으로 옮길 예정(별도
-              // 작업). 지금은 여기 진입점만 없앰 - _showAllTeamsSetupDialog()
-              // 등 관련 함수/다이얼로그는 나중에 재사용할 수 있어 그대로 둠.
+              // ⭐ "전체 교대조 근무표 작성" 진입점은 여기 없음 - 전체근무표
+              // 화면(all_shifts_view.dart) 자체의 년월 표시줄 편집(✏️) 아이콘으로
+              // 이동함(2026-09-05, 편집까지 지원하는 화면으로 개편되면서 정리).
 
               // 알람음 관리
               ListTile(
@@ -409,7 +566,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // 요청으로 순서 교체(달력 테마가 이제 3번째, 친구 공유가 4번째).
               // ⭐ 다크모드 토글 삭제됨 - "다크모드"라는 전역 개념 자체가
               // 없어지고 아래 "달력 테마" 선택(캐러셀)으로 완전히 흡수됨.
-              // 9개 테마 중 하나(메인·다크)를 고르면 그게 곧 다크 테마임.
+              // 여러 테마 중 하나(메인·다크)를 고르면 그게 곧 다크 테마임(정확한
+              // 개수는 calendar_theme.dart의 CalendarThemeId 참고 - 여기서
+              // 숫자를 하드코딩하면 테마 추가할 때마다 또 어긋남).
               // ⭐ "근무명 색상 변경"도 여기로 흡수됨 - 색상은 더 이상 개별
               // 지정이 아니라 테마 선택 하나로 전부 결정됨.
               ListTile(
@@ -425,26 +584,20 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 },
               ),
 
-              // ⭐ 2026-08-25 - 메인 바텀 네비게이션 4번째 탭 자리를 "일정관리"
-              // (신규, Structured 스타일 레이아웃 실험)가 대신 차지하게 되면서,
-              // 일정 공유(구 "친구 공유")는 다시 설정 탭 진입점으로 돌아옴.
-              // 탭에서 눌렀을 때와 정확히 같은 화면(FriendListScreen)을 그대로
-              // push - 스와이프-달력이동 콜백은 탭 전용 기능이라 여기선 안 넘김.
-              ListTile(
-                tileColor: Colors.white,
-                leading: Icon(Icons.people_outline, color: Theme.of(context).colorScheme.primary),
-                title: Text(context.l10n.friendShareTitle),
-                subtitle: Text(context.l10n.settingsFriendShareDesc),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const FriendListScreen()),
-                  );
-                },
-              ),
+              // ⭐ 2026-09-05 - "설정에도 뭐가 너무 많은 게 좋은 건 아니다"는
+              // 요청으로 이 진입점을 없앰. 일정 공유(친구 공유)는 이제 달력
+              // 탭 헤더의 기존 "default" 친구 아이콘(모든 테마 공통,
+              // calendar_tab.dart의 _buildThemedHeaderButtons 참고) +
+              // 언더라인/매거진 테마의 6번째 줄 "일정 공유" 버튼으로 충분히
+              // 접근 가능 - 설정 탭에 중복 진입점을 두지 않음.
 
-              // ⭐ 구분선 - "이력/데이터" 섹션
+              // ⭐ 2026-09-05 - 항목 그룹 재정리("알람음 관리"/"근무시간 및 OT
+              // 설정"은 맨 위 고정 요청대로 위치 그대로, 그 아래부터 의미별로
+              // 묶음): 기록 보기(알람 이력/메모 모아보기 - 둘 다 과거 데이터를
+              // "조회"하는 화면이라 같은 그룹) → 데이터 백업(백업/복원 한 쌍) →
+              // 위험 구역(되돌릴 수 없는 파괴적 작업이라 백업과 분리된 자기
+              // 구역) → 도움말/정보. 그룹마다 구분선 하나씩.
+              // ⭐ 구분선 - "기록 보기" 섹션
               SizedBox(height: 24.h),
               Divider(),
 
@@ -478,7 +631,63 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 },
               ),
 
-              // ⭐ 모든 알람 완전 삭제
+              // ⭐ 구분선 - "데이터 백업" 섹션(백업/복원 한 쌍)
+              SizedBox(height: 24.h),
+              Divider(),
+
+              // ⭐ 사용자 데이터 백업("A번 요구사항") - 지금 기기(MediaStore)에
+              // 백업 하나를 저장. 자동 백업(BackupWatcher, main.dart 참고)도 같은
+              // 코드 경로를 쓰므로 여기 표시되는 "마지막 백업"은 수동/자동 구분
+              // 없이 항상 최신임.
+              ListTile(
+                tileColor: Colors.white,
+                leading: Icon(Icons.backup_outlined, color: Theme.of(context).colorScheme.primary),
+                title: Text(context.l10n.settingsDataBackupTitle),
+                subtitle: Text(
+                  _isBackingUp
+                      ? context.l10n.settingsDataBackupInProgress
+                      : (_lastBackupAt != null
+                          ? context.l10n.settingsDataBackupLastSavedAt(_formatBackupDate(_lastBackupAt!))
+                          : context.l10n.settingsDataBackupNeverSaved),
+                ),
+                trailing: _isBackingUp
+                    ? SizedBox(
+                        width: 20.w,
+                        height: 20.w,
+                        child: const CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(Icons.chevron_right),
+                onTap: _isBackingUp ? null : _backupNow,
+              ),
+
+              // ⭐ 2026-09-01 - "백업 데이터 불러오기" - 위 "데이터 백업"과 반대
+              // 방향(다른 백업 파일로 지금 데이터를 덮어씀). _restoreFromBackup()
+              // 주석 참고.
+              ListTile(
+                tileColor: Colors.white,
+                leading: Icon(Icons.settings_backup_restore, color: Theme.of(context).colorScheme.primary),
+                title: Text(context.l10n.settingsRestoreFromBackupTitle),
+                subtitle: Text(
+                  _isRestoringFromBackup
+                      ? context.l10n.settingsRestoreFromBackupInProgress
+                      : context.l10n.settingsRestoreFromBackupDesc,
+                ),
+                trailing: _isRestoringFromBackup
+                    ? SizedBox(
+                        width: 20.w,
+                        height: 20.w,
+                        child: const CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(Icons.chevron_right),
+                onTap: _isRestoringFromBackup ? null : _restoreFromBackup,
+              ),
+
+              // ⭐ 구분선 - "위험 구역"(되돌릴 수 없는 파괴적 작업이라 위
+              // 백업/복원 그룹과 분리된 자기 구역으로 뺌)
+              SizedBox(height: 24.h),
+              Divider(),
+
+              // 모든 알람 완전 삭제
               ListTile(
                 tileColor: Colors.white,
                 leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
@@ -561,7 +770,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 title: Text(context.l10n.settingsHelp),
                 subtitle: Text(context.l10n.settingsHelpDesc),
                 trailing: Icon(Icons.chevron_right),
-                onTap: () => _showHelpDialog(),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const HelpScreen()),
+                ),
               ),
 
               // 개인정보처리방침
@@ -577,114 +788,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
           );
         },
       ),
-    );
-  }
-
-  // ⭐ 도움말 다이얼로그
-  void _showHelpDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.help_outline, color: Theme.of(context).colorScheme.secondary),
-            SizedBox(width: 8.w),
-            Text(context.l10n.settingsHelp),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildHelpItem(
-                number: '1',
-                title: context.l10n.settingsHelpRefreshCycleTitle,
-                description: context.l10n.settingsHelpRefreshCycleDesc,
-              ),
-              SizedBox(height: 16.h),
-              _buildHelpItem(
-                number: '2',
-                title: context.l10n.settingsHelpChangeShiftTitle,
-                description: context.l10n.settingsHelpChangeShiftDesc,
-              ),
-              SizedBox(height: 16.h),
-              _buildHelpItem(
-                number: '3',
-                title: context.l10n.settingsHelpTeamChangeTitle,
-                description: context.l10n.settingsHelpTeamChangeDesc,
-              ),
-              SizedBox(height: 16.h),
-              _buildHelpItem(
-                number: '4',
-                title: context.l10n.settingsHelpDataStorageTitle,
-                description: context.l10n.settingsHelpDataStorageDesc,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          AppSecondButton(
-            variant: AppSecondButtonVariant.success,
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.commonOk),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHelpItem({
-    required String number,
-    required String title,
-    required String description,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 24.w,
-              height: 24.w,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  number,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.surface,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14.sp,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16.sp,
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 8.h),
-        Padding(
-          padding: EdgeInsets.only(left: 32.w),
-          child: Text(
-            description,
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              height: 1.5,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -1209,69 +1312,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     }
   }
 
-  // ⭐ 전체 교대조 근무표 작성 다이얼로그
-  Future<void> _showAllTeamsSetupDialog() async {
-    final schedule = ref.read(scheduleProvider).value;
-
-    // 규칙적 근무자만 사용 가능
-    if (schedule == null || !schedule.isRegular || schedule.pattern == null) {
-      if (!mounted) return;
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(context.l10n.settingsAllTeamsScheduleTitle),
-          content: Text(context.l10n.settingsAllTeamsRegularOnly),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(context.l10n.commonOk),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
-    // 이미 작성된 근무표가 있는지 확인
-    final prefs = await SharedPreferences.getInstance();
-    final existingTeams = prefs.getStringList('all_teams_names');
-
-    if (existingTeams != null && existingTeams.isNotEmpty) {
-      if (!mounted) return;
-
-      // 확인 대화상자 표시
-      final confirm = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(context.l10n.settingsAllTeamsScheduleTitle),
-          content: Text(context.l10n.statusScheduleExistsRewrite),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(context.l10n.commonCancel),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(context.l10n.commonRewrite, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
-            ),
-          ],
-        ),
-      );
-
-      if (confirm != true) return;
-    }
-
-    if (!mounted) return;
-
-    // 온보딩 스타일 다이얼로그 표시
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AllTeamsSetupDialog(
-        pattern: schedule.pattern!,
-      ),
-    );
-  }
 }
 
 // 알람 타입 설정 BottomSheet
@@ -1970,6 +2010,17 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
   Map<String, List<AlarmSetting>> _shiftAlarms = {};
   bool _isLoading = true;
 
+  // ⭐ 2026-08-31 - 저장 버튼 버그 수정 3종 세트.
+  // 1) 변경사항 유무 판단용 최초 로드 스냅샷("불러온 그대로 다시 저장" 방지) -
+  //    _hasChanges() 참고.
+  // 2) 저장 중 중복 탭 방지 플래그. widget.onSave()(=_regenerateAllAlarms())가
+  //    Native 갱신 대기용으로 일부러 800ms를 기다리는데, 그 사이 저장 버튼을
+  //    빠르게 두 번 누르면 _saveAndExit이 동시에 두 번 실행돼서(DB 트랜잭션
+  //    중복 실행 + Navigator.pop 중복 호출) 크래시가 날 수 있었음 - 저장 중엔
+  //    버튼 자체를 비활성화하고 스피너로 바꿔서 원천 차단함.
+  Map<String, List<AlarmSetting>> _initialShiftAlarms = {};
+  bool _isSaving = false;
+
   @override
   void initState() {
     super.initState();
@@ -1993,8 +2044,37 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
 
     setState(() {
       _shiftAlarms = loadedAlarms;
+      // ⭐ deep copy - _shiftAlarms의 각 List를 이후 수정해도(추가/삭제/변경)
+      // 이 스냅샷은 최초 로드 상태 그대로 남아야 "변경 여부" 비교가 정확함.
+      _initialShiftAlarms = {
+        for (final entry in loadedAlarms.entries) entry.key: List.of(entry.value)
+      };
       _isLoading = false;
     });
+  }
+
+  // ⭐ 근무명별 알람 목록을 "시각:타입:오프셋" 문자열로 정규화해서 비교 -
+  // 순서가 달라져도(예: 같은 알람들을 지웠다 같은 내용으로 다시 추가) 내용이
+  // 같으면 "변경 없음"으로 판단함.
+  bool _hasChanges() {
+    List<String> canonical(List<AlarmSetting> alarms) {
+      final list = alarms
+          .map((a) => '${a.time.hour}:${a.time.minute}:${a.alarmTypeId}:${a.dayOffset}')
+          .toList()
+        ..sort();
+      return list;
+    }
+
+    final shifts = {..._shiftAlarms.keys, ..._initialShiftAlarms.keys};
+    for (final shift in shifts) {
+      final current = canonical(_shiftAlarms[shift] ?? const []);
+      final initial = canonical(_initialShiftAlarms[shift] ?? const []);
+      if (current.length != initial.length) return true;
+      for (var i = 0; i < current.length; i++) {
+        if (current[i] != initial[i]) return true;
+      }
+    }
+    return false;
   }
 
   @override
@@ -2058,9 +2138,21 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                   padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, MediaQuery.of(context).padding.bottom + 16.h),
                   child: SizedBox(
                     width: double.infinity,
+                    // ⭐ 2026-08-31 - 저장 중(_isSaving)엔 버튼을 비활성화하고
+                    // 스피너로 바꿔서 연타로 인한 중복 실행/크래시를 막음
+                    // (_saveAndExit 주석 참고).
                     child: AppButton(
-                      onPressed: _saveAndExit,
-                      child: Text(context.l10n.commonSave),
+                      onPressed: _isSaving ? null : _saveAndExit,
+                      child: _isSaving
+                          ? SizedBox(
+                              width: 20.w,
+                              height: 20.w,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation(Colors.white),
+                              ),
+                            )
+                          : Text(context.l10n.commonSave),
                     ),
                   ),
                 ),
@@ -2168,33 +2260,56 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
   }
 
   Future<void> _saveAndExit() async {
-    // ⭐ 삭제+재삽입을 하나의 트랜잭션으로 묶어서, Native 갱신 엔진이 그 사이에
-    // 끼어들어도 "일부만 지워진" 중간 상태를 절대 못 보게 함 (원인 불명이던
-    // "수정 전 알람이 그대로 같이 울리는" 버그의 유력한 경로 중 하나였음).
-    final templates = <Map<String, dynamic>>[];
-    for (var entry in _shiftAlarms.entries) {
-      final shift = entry.key;
-      for (var alarm in entry.value) {
-        templates.add({
-          'shift_type': shift,
-          'time': _formatTime(alarm.time),
-          'alarm_type_id': alarm.alarmTypeId,
-          'day_offset': alarm.dayOffset,
-        });
-      }
-    }
-    await DatabaseService.instance.replaceAllAlarmTemplates(templates);
+    // ⭐ 2026-08-31 - 저장 버튼 연타 방지. 이미 저장 진행 중이면 완전히 무시 -
+    // 버튼도 저장 중엔 비활성화되지만(build() 참고), 그 사이에 들어온 탭
+    // 이벤트가 큐에 남아있다가 뒤늦게 도착하는 경우까지 이중 안전장치로 막음.
+    if (_isSaving) return;
 
-    // ⭐ 2026-08-25 - await 누락 수정. widget.onSave()(=_regenerateAllAlarms(),
-    // 네이티브 diff 갱신 트리거 + 800ms 대기 + Flutter Provider 재조회까지
-    // 포함)를 기다리지 않고 바로 화면을 닫으면, 저장 직후(특히 알람이 0개였던
-    // 상태에서) 사용자가 곧바로 "다음 알람" 탭으로 이동했을 때 아직 생성이
-    // 안 끝나서 잠깐 "예정된 알람 없음"으로 보일 수 있었음(다음알람탭 자체의
-    // 4초 폴링으로 결국엔 채워지긴 하지만, 그 몇 초 사이엔 진짜로 비어있었음).
-    // await을 붙여서 이 화면이 닫히는 시점엔 이미 최신 알람이 Provider에 반영돼
-    // 있도록 보장 - "저장" 버튼이 그만큼(최대 800ms+α) 살짝 늦게 닫히지만,
-    // 그 대신 뒤 화면에서 빈 상태를 볼 가능성이 사라짐.
-    await widget.onSave();
+    // ⭐ 2026-08-31 - 변경사항이 없으면 그냥 바로 닫는다. DB 재기록도, Native
+    // 갱신 트리거도, 800ms 대기도, "변경사항이 저장되었습니다" 토스트도 전부
+    // 스킵 - 아무것도 안 바뀌었는데 그런 걸 보여주면 사용자에게 거짓 신호를
+    // 주는 셈이라("바뀐 게 없는데 왜 저장됐다고 하지?").
+    if (!_hasChanges()) {
+      if (mounted) Navigator.pop(context);
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    try {
+      // ⭐ 삭제+재삽입을 하나의 트랜잭션으로 묶어서, Native 갱신 엔진이 그 사이에
+      // 끼어들어도 "일부만 지워진" 중간 상태를 절대 못 보게 함 (원인 불명이던
+      // "수정 전 알람이 그대로 같이 울리는" 버그의 유력한 경로 중 하나였음).
+      final templates = <Map<String, dynamic>>[];
+      for (var entry in _shiftAlarms.entries) {
+        final shift = entry.key;
+        for (var alarm in entry.value) {
+          templates.add({
+            'shift_type': shift,
+            'time': _formatTime(alarm.time),
+            'alarm_type_id': alarm.alarmTypeId,
+            'day_offset': alarm.dayOffset,
+          });
+        }
+      }
+      await DatabaseService.instance.replaceAllAlarmTemplates(templates);
+
+      // ⭐ 2026-08-25 - await 누락 수정. widget.onSave()(=_regenerateAllAlarms(),
+      // 네이티브 diff 갱신 트리거 + 800ms 대기 + Flutter Provider 재조회까지
+      // 포함)를 기다리지 않고 바로 화면을 닫으면, 저장 직후(특히 알람이 0개였던
+      // 상태에서) 사용자가 곧바로 "다음 알람" 탭으로 이동했을 때 아직 생성이
+      // 안 끝나서 잠깐 "예정된 알람 없음"으로 보일 수 있었음(다음알람탭 자체의
+      // 4초 폴링으로 결국엔 채워지긴 하지만, 그 몇 초 사이엔 진짜로 비어있었음).
+      // await을 붙여서 이 화면이 닫히는 시점엔 이미 최신 알람이 Provider에 반영돼
+      // 있도록 보장 - "저장" 버튼이 그만큼(최대 800ms+α) 살짝 늦게 닫히지만,
+      // 그 대신 뒤 화면에서 빈 상태를 볼 가능성이 사라짐.
+      await widget.onSave();
+    } finally {
+      // ⭐ 정상 흐름에선 이 직후 화면이 pop되면서 위젯이 dispose되지만, 혹시
+      // pop 전에 위젯이 이미 unmount됐거나 위 작업 중 예외가 났을 때를 대비해
+      // mounted 체크 후에만 상태를 되돌림.
+      if (mounted) setState(() => _isSaving = false);
+    }
 
     if (mounted) {
       Navigator.pop(context);

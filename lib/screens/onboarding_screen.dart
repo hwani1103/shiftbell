@@ -25,8 +25,12 @@ import '../widgets/app_button.dart';
 import '../widgets/app_second_button.dart';
 import '../widgets/app_third_button.dart';
 import '../widgets/day_offset_chip.dart';
+import '../widgets/onboarding_info_popups.dart';
 import '../constants/alarm_day_offset.dart';
 import '../services/alarm_generation_service.dart';
+import '../models/backup_payload.dart';
+import '../services/backup_storage_service.dart';
+import 'restore_backup_screen.dart';
 
 // 알람 설정 (시간 + 타입 + 전날/당일/다음날)
 class AlarmSetting {
@@ -81,6 +85,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     return _pattern.toSet().toList();
   }
 
+  // ⭐ 2026-09-05 - "앱을 처음 설치했을 때만" 1회 웰컴 팝업(사용자 요청).
+  // SharedPreferences 플래그로 평생 1회만 관리(onboarding_info_popups.dart 참고) -
+  // 이 화면 자체는 "설정 → 초기화" 후에도 다시 지나가지만, 그 초기화 로직이
+  // 이 플래그를 안 건드리므로 재설치 전까지는 다시 안 뜸.
+  bool _welcomePopupChecked = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -95,6 +105,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         context.l10n.shiftAfternoon,
         context.l10n.shiftDayOff,
       ];
+    }
+
+    if (!_welcomePopupChecked) {
+      _welcomePopupChecked = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) maybeShowWelcomePopup(context);
+      });
     }
   }
 
@@ -209,6 +226,46 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     });
   }
 
+  // ⭐ 2026-09-01 - "백업 데이터 불러오기" 온보딩 진입점. 원래
+  // permission_intro_screen.dart(권한 화면)에 있었는데, 근무 데이터를 실제로
+  // 입력하려는 이 시점(근무명 지정 화면)에서 물어보는 게 더 자연스럽다는
+  // 판단으로 옮김 - _buildShiftTypeCreation() 하단 UI 참고. 시스템 파일
+  // 선택기로 고른 파일이 유효한 백업이면 RestoreBackupScreen을 그대로 재사용
+  // (복구 로직/빈 백업 가드 전부 동일하게 적용됨).
+  Future<void> _pickBackupManually() async {
+    final json = await BackupStorageService.instance.pickAndRead();
+    if (json == null) return; // 선택기에서 취소함 - 조용히 무시
+
+    BackupPayload? payload;
+    try {
+      payload = BackupPayload.decode(json);
+    } catch (e) {
+      payload = null;
+    }
+
+    if (!mounted) return;
+    if (payload == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.backupRestoreManualPickInvalidToast)),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => RestoreBackupScreen(
+          payload: payload!,
+          // ⭐ 2026-09-01 - 백업_수면_컨디션_기능_검토_2026-09-01.md A1 수정.
+          // 이 진입 경로는 온보딩 1단계 도중(push)이라, 건너뛰기/빈 백업 실패
+          // 시 그냥 이 화면으로 되돌아가야(pop) 방금까지 입력해둔 근무명이
+          // 안 날아감 - RestoreBackupScreen 기본 동작(새 OnboardingScreen
+          // 생성)을 여기서만 덮어씀.
+          onCancel: () => Navigator.of(context).pop(),
+        ),
+      ),
+    );
+  }
+
   // ⭐ 2026-08-24 - 온보딩 새 첫 화면(구 step1 규칙적 분기가 승격됨). 텍스트/칩
   // 디자인/레이아웃을 전면 개편함:
   // - 문구를 "내 교대 패턴에 해당되는 근무명 지정" + 부연설명 2줄 + "여기" 링크로
@@ -289,7 +346,53 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             ),
           ),
 
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
+
+          // ⭐ 2026-09-01 - "백업 데이터 불러오기" 온보딩 진입점(_pickBackupManually
+          // 주석 참고) - "다음" 버튼 바로 위, 카드 형태로 다르게 디자인함(설정
+          // 탭/권한 화면의 아이콘+텍스트 링크 스타일과 구분). 근무명 칩들과
+          // 시각적으로 섞이지 않도록 테두리 박스로 감싸고, 경로 힌트는 작은
+          // 글씨로 박스 안에 같이 넣음.
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.history, size: 18.sp, color: Theme.of(context).colorScheme.primary),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.onboardingHasBackupTitle,
+                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        context.l10n.backupRestoreManualPickHint,
+                        style: TextStyle(
+                          fontSize: 10.5.sp,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                AppSecondButton(
+                  variant: AppSecondButtonVariant.neutral,
+                  onPressed: _pickBackupManually,
+                  child: Text(context.l10n.onboardingHasBackupLoadButton),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 12.h),
 
           // ⭐ 2026-08-24 - 이 버튼만 로컬로 키웠던 걸 되돌림("너무 크다" +
           // 전환 시 순간적으로 bottom overflow가 뜨던 원인이었던 것으로 보임 -
@@ -946,7 +1049,7 @@ Future<void> _saveAndFinish() async {
   if (mounted) {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => MainScreen(initialIndex: 1),  // 달력탭
+        builder: (context) => const MainScreen(initialIndex: kCalendarTabIndex),  // 달력탭
       ),
     );
   }

@@ -28,6 +28,13 @@ enum CalendarThemeId {
   underline,    // (구)8번 · 언더라인 미니멀형
   eventChip,    // (구)9번 · 이벤트 칩형
   editorial,    // (구)10번 · 매거진 에디토리얼형
+  // ⭐ 2026-09-01 신설 - enum.name으로 영구 저장되므로 반드시 끝에만 추가할 것
+  // (기존 9개 순서/이름은 절대 바꾸지 말 것 - 이미 저장된 사용자 선택값이
+  // 깨짐). 처음엔 A(노르딕)/B(다이어리) 두 개를 따로 만들었다가, "다이어리는
+  // 특별한 게 없다"는 판단으로 노르딕 하나만 남기고 그 위에 다이어리 톤을
+  // 살짝 얹어 이름을 다이어리로 바꿈 - 그래서 실사용 전이라 부담 없이 enum
+  // 값 자체를 diary 하나로 정리함(이전 nordic 값은 없음).
+  diary,        // 날짜|근무명 절반씩 나눈 상단 박스 + 아이보리 톤의 절제된 캘린더
 }
 
 extension CalendarThemeIdX on CalendarThemeId {
@@ -48,6 +55,7 @@ extension CalendarThemeIdX on CalendarThemeId {
       case CalendarThemeId.underline: return l10n.themeUnderline;
       case CalendarThemeId.eventChip: return l10n.themeEventChip;
       case CalendarThemeId.editorial: return l10n.themeEditorial;
+      case CalendarThemeId.diary: return l10n.themeDiary;
     }
   }
 
@@ -62,8 +70,26 @@ extension CalendarThemeIdX on CalendarThemeId {
 
 const kDefaultCalendarThemeId = CalendarThemeId.mainWhite;
 
-// ⭐ 캐러셀/위젯 등에서 순서대로 순회할 때 쓰는 고정 목록 (선언 순서 그대로).
-const kAllCalendarThemeIds = CalendarThemeId.values;
+// ⭐ 캐러셀/위젯 등에서 순서대로 순회할 때 쓰는 고정 목록. 2026-09-05 이전엔
+// CalendarThemeId.values(선언 순서 그대로)를 그냥 썼는데, "달력 테마 캐러셀
+// 순서를 재배치해달라"는 요청(다이어리를 4~5번째로, 범례가 필수인 언더라인/
+// 매거진을 맨 우측에 나란히)으로 이제 선언 순서와 별개의 전용 목록으로 뺌 -
+// 저장은 enum.name(문자열)이라 이 표시 순서를 바꿔도 기존 저장된 선택값엔
+// 전혀 영향 없음. ⚠️ calendar_theme_lab_screen.dart의 _buildThemeBody() 인덱스
+// 매핑이 이 목록 순서를 그대로 손으로 따라감 - 이 목록을 또 바꾸면 그 스위치도
+// 같이 고칠 것(안 그러면 캐러셀 카드가 엉뚱한 테마를 보여줌).
+const kAllCalendarThemeIds = [
+  CalendarThemeId.mainWhite,
+  CalendarThemeId.mainDark,
+  CalendarThemeId.minimal,
+  CalendarThemeId.materialCard,
+  CalendarThemeId.diary,
+  CalendarThemeId.boldGrid,
+  CalendarThemeId.initialBadge,
+  CalendarThemeId.eventChip,
+  CalendarThemeId.underline,
+  CalendarThemeId.editorial,
+];
 
 // ⭐ 테마별 "디폴트" 근무 색상 팔레트. 원래 calendar_theme_lab_screen.dart 안에
 // 있었는데, 실제 메인 달력탭(calendar_tab.dart)도 똑같은 팔레트로 색을 매겨야 해서
@@ -190,6 +216,28 @@ const kBoldGridPalette = [
   Color(0xFFBC8F8F), // 로지 브라운
 ];
 
+// ⭐ 다이어리 전용 팔레트 - 2026-09-01 신설(원래 "노르딕" 전용으로 만들었던
+// 것을 그대로 이어받음 - 처음엔 얇은 악센트 바 하나에만 쓰던 채도 낮은
+// "스칸디나비안" 톤이었는데, 재설계로 근무명 쪽 절반이 이 색으로 꽉 차는
+// 배지가 되면서(calendar_tab.dart의 _themeDiaryCell 참고) 이름도 다이어리로
+// 바뀜 - 그래도 톤 자체는 원색 대신 여전히 차분하게 눌러둠(쨍한 팔레트를
+// 쓰던 다른 9개 테마와 차별화되는 지점이라 유지). 로테이션 없이 항상 슬레이트
+// 블루부터 시작.
+const kDiaryPalette = [
+  Color(0xFF5B7C99), // 슬레이트 블루
+  Color(0xFFB8794F), // 테라코타
+  Color(0xFF6B8E6E), // 세이지 그린
+  Color(0xFF8B6F9E), // 더스티 플럼
+  kMainRestColor,     // 휴무 - 고정 빨강
+  Color(0xFFC2A24C), // 머스타드 오커
+  Color(0xFF4A6670), // 딥 틸그레이
+  Color(0xFFB98080), // 더스티 로즈
+  Color(0xFF7D8C4A), // 올리브 모스
+  Color(0xFF9B7653), // 웜 타우프
+  Color(0xFF5C6B8C), // 데님 블루그레이
+  Color(0xFFA6866B), // 카멜
+];
+
 // ⭐ 실제 스케줄의 근무 종류 목록(생성 순서 그대로, ShiftSchedule.shiftTypes)을
 // 받아서 "근무명 → 색상" 매핑을 만듦 - calendar_tab.dart가 (기존처럼 DB에
 // 저장된 schedule.shiftColors를 읽는 대신) 이 함수로 매번 계산해서 씀.
@@ -226,6 +274,9 @@ Map<String, Color> assignShiftColorsForTheme(List<String> shiftTypes, CalendarTh
     // ⭐ 4번 - 전용 팔레트(로테이션 없음, 항상 차콜부터 시작).
     case CalendarThemeId.boldGrid:
       return _assignFromPalette(shiftTypes, kBoldGridPalette, 0);
+    // ⭐ 2026-09-01 신설 - 전용 팔레트(로테이션 없음).
+    case CalendarThemeId.diary:
+      return _assignFromPalette(shiftTypes, kDiaryPalette, 0);
   }
 }
 

@@ -14,6 +14,21 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 
+// ⭐ 2026-08-31("D번 요구사항", 2차 수정) - 일정이 타임라인상 물리적으로 표시될
+// 30분 슬롯을 계산하는 순수 함수. 사용자 확인으로 정정된 규칙:
+//   그 시각의 "분"이 정확히 0이면 → 그 정각 자리(예: 10:00 정각만 "10시" 위치)
+//   그 외(1~59분, 5분 미세조정으로 나온 값 포함)면 → 같은 시간대의 30분 자리
+//   (예: 09:05~09:55는 전부 "9시 30분" 위치, 10:05~10:55는 전부 "10시 30분" 위치)
+// 이건 일정이 "어느 슬롯에서 생성 버튼을 눌렀는지"(앵커)와 무관하게 최종
+// startMinutes 값 하나만으로 정해지는 순수 계산값이라 DB에 별도로 저장하지
+// 않음(work_hours_calculator.dart가 근로시간 통계를 저장 안 하고 매번
+// 계산하는 것과 같은 원칙) - DateSchedule.slotMinutes가 이 함수를 그대로 씀.
+int computeSlotMinutes(int startMinutes) {
+  final hourStart = (startMinutes ~/ 60) * 60;
+  final minuteOfHour = startMinutes % 60;
+  return minuteOfHour == 0 ? hourStart : hourStart + 30;
+}
+
 /// 일정 아이콘 색 팔레트 - 새 일정마다 순서대로 하나씩 돌아가며 배정됨
 /// (schedule_management_tab.dart의 _colorCursor 참고). DB엔 이 리스트의
 /// index만 저장(color_index) - Color 자체는 저장/복원 시 이 리스트를 통해서만 오간다.
@@ -33,6 +48,10 @@ class DateSchedule {
   final String date; // 'YYYY-MM-DD'
   final String content;
   final int startMinutes;
+  // ⭐ 2026-08-31("D번") - 이 일정이 타임라인상 물리적으로 표시될 30분 슬롯.
+  // 저장 안 함 - startMinutes만으로 매번 계산되는 파생값(computeSlotMinutes
+  // 참고). schedule_management_tab.dart의 _recomputeLayout()이 그룹핑 키로 씀.
+  int get slotMinutes => computeSlotMinutes(startMinutes);
   // ⭐ 2026-08-27 - null 허용으로 변경(요청: "몇 시간 할지는 안 정해도 되게").
   // DB(date_schedules.duration_minutes)는 여전히 NOT NULL이라 스키마 변경 없이
   // 0을 "미정" sentinel로 씀(0분짜리 실제 프리셋은 없어서 안전) - fromMap/toMap

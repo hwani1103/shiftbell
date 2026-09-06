@@ -19,8 +19,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../providers/friend_provider.dart';
 import 'my_share_code_screen.dart';
-import 'friend_calendar_view.dart';
 import '../l10n/l10n_extensions.dart';
+import '../utils/friend_open_util.dart';
 
 class FriendListScreen extends ConsumerStatefulWidget {
   // ⭐ 2026-08-19 "달력탭으로 가는 스와이프는 항상 일방향" 규칙(next_alarm_tab.dart/
@@ -114,40 +114,12 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
     );
   }
 
-  // ⭐ 친구를 탭했을 때 - 캐시를 그대로 쓰지 않고 매번 Firestore에서 최신 스케줄을 다시
-  // 받아옴("구독처럼" 볼 때마다 최신을 보장). 로딩 중엔 잠깐 스피너만 띄우고(별도 화면
-  // 전환 없음), 끝나면 최신 데이터로 달력을 염 - 실패해도 캐시가 있으면 캐시로 열고,
-  // 캐시도 없으면 안내만 하고 끝냄(빈 화면 방지).
-  Future<void> _openFriend(BuildContext context, WidgetRef ref, FriendEntry friend) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(child: CircularProgressIndicator()),
-    );
-    final refreshed = await ref.read(friendProvider.notifier).refreshFriend(friend.id, friend.ownerId);
-    if (!context.mounted) return;
-    Navigator.pop(context); // 로딩 다이얼로그 닫기
-
-    final updatedList = ref.read(friendProvider).where((f) => f.id == friend.id);
-    final latest = updatedList.isEmpty ? friend : updatedList.first;
-    if (latest.data == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.friendLoadFailedCheckNetwork)),
-      );
-      return;
-    }
-    if (!refreshed) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.friendShowingCachedSchedule)),
-      );
-    }
-    if (!context.mounted) return;
-    final displayName = latest.name.isEmpty ? context.l10n.friendDefaultDisplayName : latest.name;
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => FriendCalendarView(friendName: displayName, data: latest.data!)),
-    );
-  }
+  // ⭐ 2026-09-05 - 이 로직(로딩 스피너 → Firestore 최신 갱신 → 실패 시 캐시로
+  // 대체 안내 → FriendCalendarView로 이동)을 메인 달력탭의 "친구 일정 바로가기"
+  // 버튼도 그대로 써야 해서 utils/friend_open_util.dart로 뺌 - 아래 호출부만
+  // 그대로 유지(동작 변경 없음).
+  Future<void> _openFriend(BuildContext context, WidgetRef ref, FriendEntry friend) =>
+      openFriendCalendar(context, ref, friend);
 
   @override
   Widget build(BuildContext context) {

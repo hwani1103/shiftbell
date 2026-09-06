@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/shift_schedule.dart';
+import '../models/shift_time_range.dart';
+import '../providers/condition_shift_time_provider.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/work_hours_settings_provider.dart';
 import '../widgets/tappable_number_picker.dart';
@@ -49,6 +51,12 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     final colorScheme = Theme.of(context).colorScheme;
     final schedule = ref.watch(scheduleProvider).value;
     final workSettings = ref.watch(workHoursSettingsProvider);
+    // ⭐ 2026-09-01 - "근무별 실제 근무시간"을 시간(분) 직접입력에서 출퇴근 시각
+    // 입력으로 바꾸면서, 컨디션 매니저가 쓰는 condition_shift_times도 같이 씀
+    // (shift_time_range.dart 참고 - 하나의 입력으로 두 데이터를 같이 채움).
+    // 컨디션 탭은 이 값이 하나라도 있어야 동작하므로, 이 화면이 이제 그 입력
+    // 지점이 됨(조건매니저_설계.md, 컨디션 탭 자체의 입력 UI는 삭제함).
+    final shiftTimes = ref.watch(conditionShiftTimeProvider).value ?? const <String, ShiftTimeRange>{};
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.settingsWorkHoursAndOt)),
@@ -103,7 +111,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                   style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
                 ),
                 SizedBox(height: 16.h),
-                ...schedule.shiftTypes.map((shift) => _buildDurationTile(schedule, shift)),
+                ...schedule.shiftTypes.map((shift) => _buildShiftTimeTile(schedule, shift, shiftTimes[shift])),
 
                 SizedBox(height: 28.h),
                 Divider(color: colorScheme.outline.withOpacity(0.4)),
@@ -147,50 +155,80 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     );
   }
 
-  Widget _buildDurationTile(ShiftSchedule schedule, String shift) {
+  // ⭐ 2026-09-01 - 예전엔 "근무당 N시간 M분"을 직접 입력받았는데(NumberPicker 2개
+  // 다이얼로그), 출퇴근 "시각"을 입력받는 걸로 바꿈 - 컨디션 탭이 회복시간/추천
+  // 수면시간대를 계산하려면 시각 자체가 필요한데, 그걸 이 화면에서 같이
+  // 받으면 사용자가 입력을 두 번 할 필요가 없음(ShiftTimeRange.durationMinutes가
+  // 자정 넘김까지 포함해서 시간을 자동 계산해줌 - shift_time_range.dart 참고).
+  // 저장은 두 곳에 동시에: condition_shift_times(컨디션 탭용, 시각 자체)와
+  // schedule.shiftDurations(기존 근로시간/OT 계산용, 계산된 분 단위 값) -
+  // 기존 소비자(work_hours_calculator.dart 등)는 여전히 shiftDurations만 읽으므로
+  // 한 줄도 안 건드림.
+  Widget _buildShiftTimeTile(ShiftSchedule schedule, String shift, ShiftTimeRange? range) {
     final colorScheme = Theme.of(context).colorScheme;
-    final minutes = schedule.getDurationMinutes(shift);
 
     return Container(
       margin: EdgeInsets.only(bottom: 8.h),
-      child: Material(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
         color: colorScheme.surfaceVariant.withOpacity(0.4),
         borderRadius: BorderRadius.circular(12.r),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12.r),
-          onTap: () => _editDuration(schedule, shift, minutes),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: Text(
-                    shift,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurface),
-                  ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  shift,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurface),
                 ),
-                SizedBox(width: 8.w),
-                Flexible(
-                  flex: 2,
-                  child: Text(
-                    _formatDuration(minutes),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.right,
-                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: colorScheme.primary),
-                  ),
-                ),
-                SizedBox(width: 6.w),
-                Icon(Icons.chevron_right, size: 20.sp, color: colorScheme.onSurfaceVariant),
-              ],
-            ),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                range == null ? context.l10n.commonNotSet : _formatDuration(range.durationMinutes),
+                maxLines: 1,
+                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: colorScheme.primary),
+              ),
+            ],
           ),
-        ),
+          SizedBox(height: 10.h),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => _pickShiftTime(schedule, shift, range, isStart: true),
+                  child: Text(
+                    '${context.l10n.workHoursShiftTimeClockIn} ${_fmtRangeTime(range?.startMinutes)}',
+                    style: TextStyle(fontSize: 12.5.sp),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => _pickShiftTime(schedule, shift, range, isStart: false),
+                  child: Text(
+                    '${context.l10n.workHoursShiftTimeClockOut} ${_fmtRangeTime(range?.endMinutes)}',
+                    style: TextStyle(fontSize: 12.5.sp),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
+  }
+
+  String _fmtRangeTime(int? minutes) {
+    if (minutes == null) return '--:--';
+    final h = (minutes ~/ 60) % 24;
+    final m = minutes % 60;
+    return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
   }
 
   String _formatDuration(int minutes) {
@@ -206,85 +244,30 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     return context.l10n.workHoursDurationHoursMinutes(h, m);
   }
 
-  Future<void> _editDuration(ShiftSchedule schedule, String shift, int currentMinutes) async {
-    int hour = (currentMinutes ~/ 60).clamp(0, 23);
-    int minute = (currentMinutes % 60) >= 30 ? 30 : 0;
+  Future<void> _pickShiftTime(
+    ShiftSchedule schedule,
+    String shift,
+    ShiftTimeRange? range, {
+    required bool isStart,
+  }) async {
+    final currentMinutes = range == null
+        ? (isStart ? 9 * 60 : 18 * 60)
+        : (isStart ? range.startMinutes : range.endMinutes);
+    final initial = TimeOfDay(hour: (currentMinutes ~/ 60) % 24, minute: currentMinutes % 60);
+    final picked = await showTimePicker(context: context, initialTime: initial);
+    if (picked == null) return;
 
-    final result = await showDialog<int>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            final colorScheme = Theme.of(context).colorScheme;
-            return AlertDialog(
-              title: Text(context.l10n.workHoursEditDialogTitle(shift)),
-              content: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TappableNumberPicker(
-                    value: hour,
-                    minValue: 0,
-                    maxValue: 23,
-                    itemHeight: 44.h,
-                    itemWidth: 56.w,
-                    textStyle: TextStyle(fontSize: 15.sp, color: colorScheme.onSurfaceVariant),
-                    selectedTextStyle: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: colorScheme.outline),
-                        bottom: BorderSide(color: colorScheme.outline),
-                      ),
-                    ),
-                    onChanged: (v) => setDialogState(() => hour = v),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w),
-                    child: Text(context.l10n.workHoursUnitHourLabel, style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant)),
-                  ),
-                  TappableNumberPicker(
-                    value: minute,
-                    minValue: 0,
-                    maxValue: 30,
-                    step: 30,
-                    itemHeight: 44.h,
-                    itemWidth: 56.w,
-                    textStyle: TextStyle(fontSize: 15.sp, color: colorScheme.onSurfaceVariant),
-                    selectedTextStyle: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: colorScheme.outline),
-                        bottom: BorderSide(color: colorScheme.outline),
-                      ),
-                    ),
-                    onChanged: (v) => setDialogState(() => minute = v),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 8.w),
-                    child: Text(context.l10n.workHoursUnitMinuteLabel, style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant)),
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(context.l10n.commonCancel),
-                ),
-                ElevatedButton(
-                  onPressed: () => Navigator.pop(context, hour * 60 + minute),
-                  child: Text(context.l10n.commonOk),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+    final newMinutes = picked.hour * 60 + picked.minute;
+    final startMinutes = isStart ? newMinutes : (range?.startMinutes ?? 9 * 60);
+    final endMinutes = isStart ? (range?.endMinutes ?? 18 * 60) : newMinutes;
+    final newRange = ShiftTimeRange(shiftName: shift, startMinutes: startMinutes, endMinutes: endMinutes);
 
-    if (result == null) return;
+    // 1) 컨디션 탭용 - 시각 자체
+    await ref.read(conditionShiftTimeProvider.notifier).save(shift, startMinutes, endMinutes);
 
+    // 2) 근로시간/OT 계산용(기존 소비자 변경 없음) - 시각에서 계산된 분 단위 값
     final newDurations = Map<String, int>.from(schedule.shiftDurations ?? {});
-    newDurations[shift] = result;
+    newDurations[shift] = newRange.durationMinutes;
 
     final newSchedule = ShiftSchedule(
       id: schedule.id,

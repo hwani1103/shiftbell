@@ -31,6 +31,10 @@ import '../providers/calendar_theme_provider.dart';
 import '../widgets/app_second_button.dart';
 import '../widgets/day_offset_chip.dart';
 import '../constants/alarm_day_offset.dart';
+import '../widgets/onboarding_info_popups.dart';
+import '../providers/friend_provider.dart';
+import 'friend_list_screen.dart';
+import '../utils/friend_open_util.dart';
 
 // ⭐ 공휴일 판정 로직은 utils/holiday_util.dart로 이동함 (friend_calendar_view.dart도
 // 똑같은 공휴일 표시가 필요해져서 공용화 - 두 파일 이름만 다르게 감싸서 기존 호출부
@@ -51,7 +55,23 @@ String? _getHolidayName(DateTime date, BuildContext context) =>
 const List<String> _weekdayEn3 = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const List<String> _weekdayEn1 = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const List<String> _monthEn3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const List<String> _monthEnFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+// ⭐ 다이어리 테마(CalendarThemeId.diary) 전용 포인트 컬러 - 헤더 점 장식/오늘
+// 표시/빨간날 텍스트 등 이 테마 안 여러 곳에서 공유해서 씀(_themeDiaryCell,
+// _buildThemedHeaderTitle 등). 근무색 자체는 kDiaryPalette(calendar_theme.dart)를
+// 따로 쓰고, 이 색은 "테마 톤"(따뜻한 앰버)만 담당.
+const Color _diaryAccent = Color(0xFFCB8A4E);
+
+// ⭐ 2026-09-01 - "빨간날(일요일/공휴일)이 오늘이면 원형 배지 안에서 숫자색이
+// 흰색으로 바뀌어 버려서 '빨간날'이라는 신호가 사라진다"는 지적 - 메인·화이트/
+// 다크가 이미 쓰던 해법(오늘 표시 원 배경만 빨간날 전용으로 바꾸고, 글자는
+// 계속 빨간색 유지)을 그대로 따라함. _diaryAccent(진한 앰버)는 빨간 글씨와
+// 색상환에서 너무 가깝고 명도도 비슷해 대비가 나빠서(둘 다 중간 톤의
+// 붉은기 도는 색) 원 배경 그대로 두고 글자만 빨간색으로 바꾸면 잘 안
+// 읽히므로, 오늘+빨간날 전용으로 훨씬 밝은 크림/골드 톤을 따로 둠(테마
+// 톤은 유지하되 빨간 글씨와 대비가 확실히 나는 밝기로) - 평소(오늘 아닌)
+// 빨간날 색이나 다른 날의 오늘 표시(_diaryAccent)는 전혀 안 건드림.
+const Color _diaryTodayRedBg = Color(0xFFFCE2B0);
 
 // StatefulWidget → ConsumerStatefulWidget으로 변경
 class CalendarTab extends ConsumerStatefulWidget {  // ⭐ 변경
@@ -124,6 +144,14 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
   final colorScheme = Theme.of(context).colorScheme;
   return colorScheme.onSurfaceVariant;
 }
+
+  // ⭐ 2026-09-05 - "불규칙 온보딩으로 맨 처음 메인 달력에 왔을 때" 1회 근무
+  // 배정 방법 안내 팝업(사용자 요청) - build()가 여러 번 도는 동안 중복으로
+  // 안 뜨게 막는 인메모리 가드. 실제 "평생 1회" 여부는
+  // onboarding_info_popups.dart의 SharedPreferences 플래그가 담당함(이건 그
+  // 비동기 저장이 끝나기 전에 같은 프레임에서 build가 다시 돌아 두 번 뜨는
+  // 것만 막는 보조 장치).
+  bool _shiftAssignTutorialChecked = false;
 
   @override
   void initState() {
@@ -307,28 +335,56 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
   @override
 Widget build(BuildContext context) {
   final scheduleAsync = ref.watch(scheduleProvider);
-  
+  // ⭐ 2026-09-01 버그 수정 - 메인테마·다크가 흰 배경으로 깨졌던 원인이 바로
+  // 아래 Scaffold들의 `backgroundColor: Colors.white` 하드코딩이었음. 2026-08-24에
+  // "파스텔 배경에서 달력 탭만 제외"하려고 추가된 값인데, 그 의도(파스텔 대신
+  // 흰색)만 담고 "메인·다크일 땐 흰색이 아니라 진한 남색이어야 한다"는 조건을
+  // 놓쳤음. main.dart가 CalendarTab 전체를 `Theme(data: isDark ?
+  // AppTheme.darkTheme : AppTheme.lightTheme)`로 감싸서 다크일 때 scaffoldBackgroundColor가
+  // 0xFF1A1F2E가 되도록 이미 설계돼 있었는데, 이 화면이 그 값을 무시하고 흰색을
+  // 직접 못박아버려서 이번 달 OT/주별근무시간 카드(별도 Container로 자기 배경을
+  // 직접 그림 - 그래서 유일하게 안 깨져 보였음)를 제외한 모든 배경이 흰색으로
+  // 보였던 것. calendarThemeProvider를 여기서 먼저 읽어(schedule 유무와 무관하게
+  // 항상 값이 있음) 로딩/에러/스케줄없음 상태까지 포함한 모든 Scaffold가
+  // 다크일 땐 0xFF1A1F2E(=AppTheme.darkTheme.scaffoldBackgroundColor와 동일한 값 -
+  // app_theme.dart 참고, 두 값이 다시 어긋나지 않게 항상 이 상수를 그대로 씀),
+  // 아니면 흰색을 쓰게 통일함.
+  final isDarkTheme = ref.watch(calendarThemeProvider).isDark;
+  final scaffoldBg = isDarkTheme ? const Color(0xFF1A1F2E) : Colors.white;
+
   return scheduleAsync.when(
     // ⭐ 로딩/에러/스케줄없음 상태도 달력 탭 배경 예외(위 build() 안쪽 Scaffold
     // 주석 참고)를 똑같이 적용 - 안 그러면 데이터 로드 전 짧은 순간 파스텔
-    // 배경이 깜빡였다가 흰색으로 바뀌는 게 보일 수 있음.
-    loading: () => const Scaffold(
-      backgroundColor: Colors.white,
-      body: SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
+    // 배경이 깜빡였다가 흰색/다크와 안 맞는 색으로 바뀌는 게 보일 수 있음.
+    loading: () => Scaffold(
+      backgroundColor: scaffoldBg,
+      body: const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
     ),
     error: (error, stack) => Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: scaffoldBg,
       body: Center(child: Text('${context.l10n.statusErrorOccurred}: $error')),
     ),
     data: (schedule) {
       if (schedule == null) {
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: scaffoldBg,
           body: Center(child: Text(context.l10n.statusNoSchedule)),
         );
       }
+
+      if (!_shiftAssignTutorialChecked) {
+        _shiftAssignTutorialChecked = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) maybeShowShiftAssignTutorial(context, isRegular: schedule.isRegular);
+        });
+      }
+
       final theme = ref.watch(calendarThemeProvider);
       final reclaimsSixthRow = _themeReclaimsSixthRow(theme);
+      // ⭐ 2026-09-05 - 6번째 줄 마지막 3칸(목/금/토)에 일정공유/전체 조 근무표/
+      // 오늘 버튼(다이어리 + 범례 없는 나머지 5개 테마, _themeReclaimsSixthRowButtons
+      // 참고). 목(일정공유)은 친구 유무와 무관하게 항상 표시(_openFriendShare 참고).
+      final reclaimsSixthRowButtons = _themeReclaimsSixthRowButtons(theme);
 
       return Scaffold(
         // ⭐ 2026-08-24 - 앱 전역 배경을 파스텔톤(app_colors.dart의
@@ -337,7 +393,9 @@ Widget build(BuildContext context) {
         // Scaffold가 배경색을 직접 고정해두지 않으면 AppTheme.lightTheme의
         // scaffoldBackgroundColor를 그대로 물려받아 파스텔톤이 되어버림 -
         // 예전부터 달력 탭이 실제로 보여주던 흰색을 여기서 명시적으로 고정.
-        backgroundColor: Colors.white,
+        // ⭐ 2026-09-01 - 위 isDarkTheme 계산 참고, 메인·다크에선 흰색 대신
+        // 0xFF1A1F2E를 씀(파일 상단 build() 진입부의 버그 수정 주석 참고).
+        backgroundColor: scaffoldBg,
         body: SafeArea(
           // ⭐⭐ 2026-08-24 - 애드몹 배너 자리 확보 방식을 재설계함. 예전엔 여기서
           // "메인 테마가 고정 rowHeight(83.h)라 자연스럽게 남기는 여백"을 재서
@@ -491,19 +549,28 @@ Widget build(BuildContext context) {
                         defaultBuilder: (context, day, focusedDay) {
                           // ⭐ 6번째 줄 화~토는 빈 Container (범례/OT 카드가 그 자리를
                           // 대신 차지하는 테마에서만 - 아래 reclaimsSixthRow 참고)
-                          if (reclaimsSixthRow && _isSixthRowEmptyCell(day, focusedDay)) {
+                          if (_isRowSixReclaimed(day, focusedDay,
+                              reclaimsSixthRow: reclaimsSixthRow,
+                              reclaimsSixthRowButtons: reclaimsSixthRowButtons,
+                              includeAllShiftsCol: schedule.isRegular)) {
                             return Container();
                           }
                           return _buildThemedCell(day, false, false, schedule, focusedDay);
                         },
                         outsideBuilder: (context, day, focusedDay) {
-                          if (reclaimsSixthRow && _isSixthRowEmptyCell(day, focusedDay)) {
+                          if (_isRowSixReclaimed(day, focusedDay,
+                              reclaimsSixthRow: reclaimsSixthRow,
+                              reclaimsSixthRowButtons: reclaimsSixthRowButtons,
+                              includeAllShiftsCol: schedule.isRegular)) {
                             return Container();
                           }
                           return _buildThemedCell(day, false, true, schedule, focusedDay);
                         },
                         todayBuilder: (context, day, focusedDay) {
-                          if (reclaimsSixthRow && _isSixthRowEmptyCell(day, focusedDay)) {
+                          if (_isRowSixReclaimed(day, focusedDay,
+                              reclaimsSixthRow: reclaimsSixthRow,
+                              reclaimsSixthRowButtons: reclaimsSixthRowButtons,
+                              includeAllShiftsCol: schedule.isRegular)) {
                             return Container();
                           }
                           // ⭐ 위 _buildThemedCell 주석과 동일한 이유로, "오늘이 지금 이
@@ -513,7 +580,10 @@ Widget build(BuildContext context) {
                           return _buildThemedCell(day, true, isOutsideMonth, schedule, focusedDay);
                         },
                         selectedBuilder: (context, day, focusedDay) {
-                          if (reclaimsSixthRow && _isSixthRowEmptyCell(day, focusedDay)) {
+                          if (_isRowSixReclaimed(day, focusedDay,
+                              reclaimsSixthRow: reclaimsSixthRow,
+                              reclaimsSixthRowButtons: reclaimsSixthRowButtons,
+                              includeAllShiftsCol: schedule.isRegular)) {
                             return Container();
                           }
                           return _buildThemedCell(day, isSameDay(day, DateTime.now()), false, schedule, focusedDay, isSelected: true);
@@ -527,7 +597,10 @@ Widget build(BuildContext context) {
                         }
 
                         // ⭐ 6번째 줄 빈 칸은 탭 무시 (범례/OT 카드가 있는 테마만)
-                        if (reclaimsSixthRow && _isSixthRowEmptyCell(selectedDay, focusedDay)) {
+                        if (_isRowSixReclaimed(selectedDay, focusedDay,
+                            reclaimsSixthRow: reclaimsSixthRow,
+                            reclaimsSixthRowButtons: reclaimsSixthRowButtons,
+                            includeAllShiftsCol: schedule.isRegular)) {
                           return;
                         }
 
@@ -549,7 +622,10 @@ Widget build(BuildContext context) {
                         }
 
                         // ⭐ 6번째 줄 빈 칸은 길게 누르기 무시 (범례/OT 카드가 있는 테마만)
-                        if (reclaimsSixthRow && _isSixthRowEmptyCell(selectedDay, focusedDay)) {
+                        if (_isRowSixReclaimed(selectedDay, focusedDay,
+                            reclaimsSixthRow: reclaimsSixthRow,
+                            reclaimsSixthRowButtons: reclaimsSixthRowButtons,
+                            includeAllShiftsCol: schedule.isRegular)) {
                           return;
                         }
 
@@ -572,6 +648,11 @@ Widget build(BuildContext context) {
                       // 테마(메인·화이트/다크 = OT/주별근무시간 카드, 8/10번 = 범례)만
                       // 그려줌. 나머지 7개 테마는 6번째 줄도 그냥 평범한 다음 달
                       // 스필오버 날짜로 실제로 보여줌(재활용 안 함 - reclaimsSixthRow=false).
+                      // ⭐ 2026-09-05 - 언더라인/매거진(범례 필수 2개 테마)은 화~토 5칸을
+                      // 범례가 다 쓰고 있어 6번째 줄에 일정공유 버튼을 넣을 자리가 없음 -
+                      // 이 두 테마는 대신 헤더(_buildThemedHeaderButtonsCore)의 전체조
+                      // 근무표 왼쪽에 일정공유 버튼을 넣음. 일/월 칸은 그대로 빈 채로
+                      // 제스처를 아래 TableCalendar로 전달(다른 재활용 테마와 동일).
                       if (reclaimsSixthRow)
                         Positioned(
                           top: 28.h + rowH * 5,  // 요일 헤더 + 5줄
@@ -581,7 +662,7 @@ Widget build(BuildContext context) {
                           child: Row(
                             children: [
                               // 일요일 + 월요일 칸 (다음 달 날짜 표시 - 제스처를 아래 TableCalendar로 전달)
-                              Expanded(
+                              const Expanded(
                                 flex: 2,
                                 child: IgnorePointer(child: SizedBox()),
                               ),
@@ -591,6 +672,65 @@ Widget build(BuildContext context) {
                                 child: (theme == CalendarThemeId.mainWhite || theme == CalendarThemeId.mainDark)
                                     ? _buildMonthlyOvertimeCard()
                                     : _buildThemedLegend(theme, schedule),
+                              ),
+                            ],
+                          ),
+                        ),
+                      // ⭐ 2026-09-05 - 6번째 줄 마지막 3칸(목/금/토)에 일정공유/전체 조
+                      // 근무표/오늘 버튼 고정 배치(_themeReclaimsSixthRowButtons 참고 -
+                      // 다이어리 + 범례 없는 나머지 5개 테마). 위 reclaimsSixthRow
+                      // 블록과 같은 세로 위치(top)를 쓰지만 서로 겹치는 테마가 없어
+                      // 동시에 그려질 일은 없음. 목(일정공유)은 친구 유무와 무관하게
+                      // 항상 그림 - 친구가 없으면 눌렀을 때 FriendListScreen의
+                      // "친구 추가" 빈 상태로 감(에러 아님).
+                      if (reclaimsSixthRowButtons)
+                        Positioned(
+                          top: 28.h + rowH * 5,
+                          left: 6.w,
+                          right: 6.w,
+                          height: rowH,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // 일~수 칸 (다음 달 날짜 표시 - 제스처를 아래 TableCalendar로 전달)
+                              const Expanded(
+                                flex: 4,
+                                child: IgnorePointer(child: SizedBox()),
+                              ),
+                              // 목 - 일정공유, 항상
+                              Expanded(
+                                child: _rowSixButton(
+                                  theme,
+                                  icon: Icons.people_alt_outlined,
+                                  label: context.l10n.friendShareTitle,
+                                  onTap: _openFriendShare,
+                                ),
+                              ),
+                              // 금 - 전체근무표, 규칙적 근무자만. ⭐ "전체 조 근무표"가
+                              // 한 줄엔 안 들어가 잘려 보여서, 자리가 좁은 이 칩에서만
+                              // 한국어 로케일 한정으로 "전체 조\n근무표" 두 줄로 직접
+                              // 끊음(공용 l10n 문자열 자체는 안 건드림 - 다른 테마
+                              // 버튼/AppBar 제목 등은 그대로 한 줄 문구).
+                              Expanded(
+                                child: schedule.isRegular
+                                    ? _rowSixButton(
+                                        theme,
+                                        icon: Icons.grid_view_rounded,
+                                        label: Localizations.localeOf(context).languageCode == 'ko'
+                                            ? '전체 조\n근무표'
+                                            : context.l10n.shiftFullSchedule,
+                                        onTap: _openAllShiftsView,
+                                      )
+                                    : const IgnorePointer(child: SizedBox()),
+                              ),
+                              // 토 - 오늘, 항상
+                              Expanded(
+                                child: _rowSixButton(
+                                  theme,
+                                  icon: Icons.today_rounded,
+                                  label: context.l10n.commonToday,
+                                  onTap: _jumpToToday,
+                                ),
                               ),
                             ],
                           ),
@@ -661,6 +801,11 @@ Widget build(BuildContext context) {
 
   // ⭐ 6번째 줄 빈 공간에 들어가는 카드 - 위 절반 "이번 달 OT" / 아래 절반
   // "주별 근무시간"으로 나눔 (각각 독립적으로 탭하면 다른 팝업이 뜸).
+  // 🔧 메인·화이트/메인·다크 전용(6번째 줄을 이 카드가 차지 - _themeReclaimsSixthRow
+  // 참고). 라벨/값 글자 크기는 아래 두 Text 블록(위 절반 "이번 달 OT", 아래
+  // 절반 "주별 근무시간")의 fontSize 각각 따로. 색은 항상 colorScheme.*만
+  // 참조하므로 다크에서 자동으로 다크 배색을 받음(이 함수는 2026-09-01 배경
+  // 버그와 무관 - 애초부터 하드코딩 색이 없었음).
   Widget _buildMonthlyOvertimeCard() {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -683,6 +828,9 @@ Widget build(BuildContext context) {
                 countShiftChangeAsOt: workSettings.shiftChangeCountsAsOt,
               ));
         final hasOvertime = totalMinutes > 0;
+        // ⭐ 2026-09-05 - "(해당 날짜 탭하여 입력)" 안내문구 삭제 요청. OT가 0이어도
+        // 그냥 0으로 포맷해서 보여줌(안내문 없이) - 다이어리 쪽 6번째 줄 버튼처럼
+        // 이 카드도 값 있음/없음 구분 없이 항상 실제 값을 보여주는 게 더 일관됨.
 
         // ⭐ 안쪽에 칸을 나누는 grid 느낌 없이, 5칸 전체를 감싸는 테두리 하나짜리
         // 가로로 긴 직사각형 하나로. 이 영역에서도 좌우 스와이프로 월 이동 가능하게 함
@@ -711,16 +859,23 @@ Widget build(BuildContext context) {
             ),
             child: Column(
               children: [
-                // ⭐ 위 절반: 이번 달 OT
+                // ⭐ 2026-09-05 - 세로 분할 50/50 → 30/30/40 재구성(요청: "이번 달
+                // OT랑 주별 근무시간이 60을 30/30으로 나눠 쓰고, 남는 40에 친구/전체
+                // 조 근무표/오늘 버튼을 다이어리와 같은 순서로"). 위 두 줄(OT/주별)은
+                // flex 3씩, 아래 버튼 줄이 flex 4.
                 Expanded(
+                  flex: 3,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () => _showMonthlyOvertimeSheet(period),
                     child: Container(
                       width: double.infinity,
-                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(left: 10.w),
+                      // ⭐ 가운데 정렬 → 왼쪽 정렬 요청
+                      alignment: Alignment.centerLeft,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -733,8 +888,9 @@ Widget build(BuildContext context) {
                               ),
                             ),
                             SizedBox(width: 8.w),
+                            // ⭐ "(해당 날짜 탭하여 입력)" 안내문 삭제 - 0이어도 그냥 값 표시
                             Text(
-                              hasOvertime ? formatOvertimeMinutes(context, totalMinutes) : context.l10n.calendarTapDateToEnter,
+                              formatOvertimeMinutes(context, totalMinutes),
                               style: TextStyle(
                                 fontSize: hasOvertime ? 13.sp : 11.sp,
                                 fontWeight: hasOvertime ? FontWeight.bold : FontWeight.w600,
@@ -752,17 +908,20 @@ Widget build(BuildContext context) {
                 Container(height: 1, color: colorScheme.outline.withOpacity(0.3)),
                 // ⭐ 아래 절반: 주별 근무시간 (색을 살짝 다르게 줘서 구분감을 한 번 더 줌)
                 Expanded(
+                  flex: 3,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: _showWeeklyWorkHoursSheet,
                     child: Container(
                       width: double.infinity,
-                      alignment: Alignment.center,
+                      padding: EdgeInsets.only(left: 10.w),
+                      alignment: Alignment.centerLeft,
                       color: isDark
                           ? colorScheme.surfaceVariant.withOpacity(0.25)
                           : colorScheme.surface.withOpacity(0.5),
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -780,6 +939,48 @@ Widget build(BuildContext context) {
                         ),
                       ),
                     ),
+                  ),
+                ),
+                Container(height: 1, color: colorScheme.outline.withOpacity(0.3)),
+                // ⭐ 2026-09-05 - 남는 40%에 일정공유/전체 조 근무표/오늘 진입 버튼
+                // (다이어리 6번째 줄 버튼과 같은 좌→우 순서: 화/수는 비우고
+                // 목=일정공유, 금=전체 조 근무표, 토=오늘 - 고정). 목(일정공유)은
+                // 친구 유무와 무관하게 항상 표시. 다이어리보다 세로 자리가 훨씬
+                // 좁아서(이 카드 전체 높이의 40%뿐) 라벨 없이 아이콘만 두되,
+                // colorScheme.primaryContainer/onPrimaryContainer를 그대로 써서
+                // 라이트/다크 양쪽에서 자동으로 대비되는 색을 얻음(이 카드가 이미
+                // 따르던 "색은 colorScheme만 참조" 원칙을 그대로 이어감 - 다이어리처럼
+                // 이 테마 전용 하드코딩 색을 새로 만들 필요 없음).
+                Expanded(
+                  flex: 4,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Expanded(flex: 2, child: SizedBox.shrink()),
+                      Expanded(
+                        child: _mainThemeRowSixButton(
+                          colorScheme: colorScheme,
+                          icon: Icons.people_alt_outlined,
+                          onTap: _openFriendShare,
+                        ),
+                      ),
+                      Expanded(
+                        child: (schedule?.isRegular ?? false)
+                            ? _mainThemeRowSixButton(
+                                colorScheme: colorScheme,
+                                icon: Icons.grid_view_rounded,
+                                onTap: _openAllShiftsView,
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                      Expanded(
+                        child: _mainThemeRowSixButton(
+                          colorScheme: colorScheme,
+                          icon: Icons.today_rounded,
+                          onTap: _jumpToToday,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -1313,6 +1514,113 @@ Widget build(BuildContext context) {
   // 테마에 맞게 다시 그려줌.
   // ============================================================
 
+  // ┌──────────────────────────────────────────────────────────────────┐
+  // │ ⭐ 2026-09-01 - "달력 테마 9종을 VS Code + 핫 리로드로 직접 손보고    │
+  // │ 싶다"는 요청으로 추가한 지도(찾아가기용) 주석. 테마 하나당 손댈 만한  │
+  // │ 코드가 여러 함수에 흩어져 있어서(헤더/요일/셀/푸터가 전부 별도       │
+  // │ 함수), 아래 표로 "이 테마 → 이 함수들" 을 한 번에 찾을 수 있게 함.   │
+  // │ 함수 안에서는 switch(theme)의 case 하나가 그 테마 담당 - 그 케이스   │
+  // │ 안에서 fontSize/color/padding/margin/Positioned 값만 바꾸면 됨.     │
+  // │ (테마 목록 자체는 lib/models/calendar_theme.dart의 CalendarThemeId, │
+  // │ 근무색 팔레트/로테이션도 그 파일 - 레이아웃과는 무관, 색상표만 있음) │
+  // │                                                                    │
+  // │ 【메인 · 화이트 / 메인 · 다크】 (CalendarThemeId.mainWhite/mainDark) │
+  // │  - 헤더 타이틀      : _buildThemedHeaderTitle() 의 mainWhite/       │
+  // │                       mainDark case (둘이 같은 case 블록 공유)      │
+  // │  - 요일(월화수..)   : _buildThemedDow() 의 mainWhite/mainDark case  │
+  // │  - 달력 격자선      : build() 안 tableBorder (mainWhite/mainDark만  │
+  // │                       table_calendar 기본 격자를 켬 - 나머지 7개는 │
+  // │                       각자 셀 안에서 직접 테두리를 그림)            │
+  // │  - 날짜 셀(1~5줄)   : _buildDateCell() ⭐ 유일하게 다른 함수 이름    │
+  // │                       (7개 실험 테마는 _theme*Cell, 이건 원래부터   │
+  // │                       있던 이름 그대로 씀) - 근무명/날짜숫자/공휴일/ │
+  // │                       메모가 전부 이 안에 있음                      │
+  // │  - 6번째 줄(OT카드) : _buildMonthlyOvertimeCard() - "이번 달 OT" /  │
+  // │                       "주별 근무시간" 위아래 2단 카드               │
+  // │  - 배경/다크 배색   : main.dart의 Theme(data: isDark ? darkTheme :  │
+  // │                       lightTheme) 래퍼 + 이 파일 build() 의         │
+  // │                       scaffoldBg(2026-09-01 버그 수정 참고) - 다크  │
+  // │                       배색 값 자체는 theme/app_theme.dart           │
+  // │                       darkTheme(ColorScheme)에서 바꿈, 여기서 직접  │
+  // │                       색을 하드코딩하지 않음(colorScheme.* 참조뿐)  │
+  // │  - 별도 푸터/범례 없음(6번째 줄이 이미 그 역할)                     │
+  // │                                                                    │
+  // │ 【1번 · 미니멀 라인】 (CalendarThemeId.minimal)                     │
+  // │  - 헤더/요일/푸터   : 각 함수의 minimal case                        │
+  // │  - 날짜 셀          : _theme1Cell()                                 │
+  // │                                                                    │
+  // │ 【2번 · 머티리얼 카드형】 (CalendarThemeId.materialCard)             │
+  // │  - 헤더/요일/푸터   : 각 함수의 materialCard case                    │
+  // │  - 날짜 셀          : _theme2Cell()                                 │
+  // │  - 페이지 전체 배경 : _themeBodyBackground() (이 테마만 옅은 회색)   │
+  // │                                                                    │
+  // │ 【4번 · 굵은 격자형】 (CalendarThemeId.boldGrid)                     │
+  // │  - 헤더/요일/푸터   : 각 함수의 boldGrid case                        │
+  // │  - 날짜 셀          : _theme4Cell()                                 │
+  // │  - 헤더 배경        : _themeHeaderBackground() (이 테마만 어두운     │
+  // │                       배경 - 흰 헤더 글씨가 안 보이던 버그 수정 흔적)│
+  // │                                                                    │
+  // │ 【5번 · 이니셜 뱃지형】 (CalendarThemeId.initialBadge)               │
+  // │  - 헤더/요일/푸터   : 각 함수의 initialBadge case                    │
+  // │  - 날짜 셀          : _theme5Cell()                                 │
+  // │                                                                    │
+  // │ 【8번 · 언더라인 미니멀형】 (CalendarThemeId.underline)              │
+  // │  - 헤더/요일/푸터   : 각 함수의 underline case                       │
+  // │  - 날짜 셀          : _theme8Cell()                                 │
+  // │  - 범례(6번째 줄)   : _buildThemedLegend() 의 underline case         │
+  // │                       (색상만으로 근무를 구분해서 범례 필수)         │
+  // │                                                                    │
+  // │ 【9번 · 이벤트 칩형】 (CalendarThemeId.eventChip)                    │
+  // │  - 헤더/요일/푸터   : 각 함수의 eventChip case                       │
+  // │  - 날짜 셀          : _theme9Cell() (+ 근무명/공휴일/메모가 전부     │
+  // │                       공용 알약(pill) 위젯 _themeChip()을 재사용)    │
+  // │                                                                    │
+  // │ 【10번 · 매거진 에디토리얼형】 (CalendarThemeId.editorial)           │
+  // │  - 헤더/요일/푸터   : 각 함수의 editorial case                       │
+  // │  - 날짜 셀          : _theme10Cell() (날짜/공휴일/메모를 전부 셀     │
+  // │                       우측 정렬 Positioned로 배치하는 게 이 테마만   │
+  // │                       가진 특징)                                    │
+  // │  - 범례(6번째 줄)   : _buildThemedLegend() 의 editorial case         │
+  // │                                                                    │
+  // │ 【다이어리】 (CalendarThemeId.diary, 2026-09-01 신설)                │
+  // │  - 헤더/요일/푸터   : 각 함수의 diary case (헤더엔 제목만, 전체근무표/  │
+  // │                       오늘/친구 버튼은 6번째 줄로 - 2026-09-05 실험,   │
+  // │                       _themeReclaimsSixthRowButtons/                │
+  // │                       _diaryRowSixButton() 참고. 푸터는              │
+  // │                       _themeDiaryFooter())                          │
+  // │  - 날짜 셀          : _themeDiaryCell() - 상단을 날짜|근무명 절반씩   │
+  // │                       나눈 박스(근무명 쪽만 배지처럼 색 채움) +       │
+  // │                       공휴일이 있으면 그 아래도 테두리로 한 번 더     │
+  // │                       구획, 메모 3개는 테두리 없이 자유롭게          │
+  // │  - 전용 팔레트      : kDiaryPalette(calendar_theme.dart) - 채도 낮춘  │
+  // │                       차분한 톤                                     │
+  // │                                                                    │
+  // │ 【1/2/4/5/9번(=6번째 줄을 안 쓰는 5개) 공용 OT 푸터】                │
+  // │  - 실제 그리는 함수 : _themeOtBar()(1/5/9 공유) /                    │
+  // │                       _theme2OtCardReal()+_otChipReal()(2번) /       │
+  // │                       _theme4FooterReal()(4번) - 어느 테마가 어느    │
+  // │                       함수를 쓰는지는 _buildThemedFooter()의 switch  │
+  // │                       참고. 8/10번은 위 범례가 이 자리를 대신 씀     │
+  // │                                                                    │
+  // │ 【메인 2개 제외 9개 테마(1/2/4/5/8/9/10 + A/B) 공용 유틸 - 손대면    │
+  // │ 9개 전부 영향】                                                     │
+  // │  - _themedCellData()  : 근무색/근무글씨색/일요일·공휴일 여부/메모    │
+  // │                         목록을 한 번에 계산 - 셀 함수들이 이 결과    │
+  // │                         (d.shiftText/d.red/d.holidayName/d.memos 등)│
+  // │                         를 그대로 받아 그리기만 함                  │
+  // │  - _fitText()         : 메모/공휴일 글자가 셀 폭을 넘기면 "..."     │
+  // │                         없이 딱 들어가는 데까지만 잘라서 그림 -      │
+  // │                         모든 테마의 메모/공휴일 텍스트가 이걸 씀     │
+  // │  - _isFirstRow()      : 1번(미니멀) 전용, 달력 첫 줄만 위쪽 패딩을   │
+  // │                         0으로 빼는 예외 처리                        │
+  // │                                                                    │
+  // │ 아래 각 함수 안에서, "근무명 크기/요일 크기/날짜 숫자 크기·위치/     │
+  // │ 빨간날(일요일·공휴일) 글씨크기·위치/메모 시작위치·간격·공휴일과의    │
+  // │ 간격" 같은 구체적인 지점은 코드에 🔧 표시로 바로 옆에 달아둠 -       │
+  // │ Ctrl+F로 "🔧"를 검색하면 테마 상관없이 조절 가능한 지점만 쭉 훑어볼  │
+  // │ 수 있음.                                                            │
+  // └──────────────────────────────────────────────────────────────────┘
+
   // ⭐ 6번째 줄(화~토 5칸)을 OT카드/범례로 재활용하는 테마 - 메인 화이트/다크는
   // OT+주별근무시간 카드, 8/10번은 범례(색상만으로 근무를 구분하는 테마라
   // 범례가 필수). 나머지 7개 테마는 재활용하지 않고 6번째 줄도 평범하게 다음
@@ -1320,6 +1628,64 @@ Widget build(BuildContext context) {
   bool _themeReclaimsSixthRow(CalendarThemeId t) =>
       t == CalendarThemeId.mainWhite || t == CalendarThemeId.mainDark ||
       t == CalendarThemeId.underline || t == CalendarThemeId.editorial;
+
+  // ⭐ 2026-09-05 - "전체근무표를 자주 보는데 진입 버튼이 위에 있어 번거롭다"는
+  // 피드백으로 만든 두 번째 재활용 방식. 위 _themeReclaimsSixthRow와 완전히
+  // 별개(서로 겹치는 테마 없음) - 6번째 줄 5칸을 통째로 카드 하나로 쓰는 게
+  // 아니라, 항상 다음 달 스필오버로 비어있던 마지막 3칸(목/금/토)만 헤더에
+  // 있던 일정공유(친구)/전체근무표/오늘 버튼으로 대체함(목/금/토는 고정 -
+  // 다른 배치로 바꾸지 말 것). 범례가 필수라 이 자리를 못 쓰는 언더라인/
+  // 매거진(_themeReclaimsSixthRow 참고, 이 두 테마는 대신 헤더에 일정공유
+  // 버튼을 추가함)만 제외하고 나머지 전부(다이어리/미니멀/머티리얼카드/
+  // 굵은격자/이니셜뱃지/이벤트칩) 적용함.
+  bool _themeReclaimsSixthRowButtons(CalendarThemeId t) =>
+      t == CalendarThemeId.diary ||
+      t == CalendarThemeId.minimal ||
+      t == CalendarThemeId.materialCard ||
+      t == CalendarThemeId.boldGrid ||
+      t == CalendarThemeId.initialBadge ||
+      t == CalendarThemeId.eventChip;
+
+  // ⭐ 위 두 "6번째 줄 재활용" 방식(_themeReclaimsSixthRow의 5칸 카드/범례,
+  // _themeReclaimsSixthRowButtons의 목/금/토 3칸 버튼)은 테마별로 서로 배타적이지만,
+  // day builder/탭 핸들러 여러 곳에서 "이 칸을 실제 날짜 대신 다른 걸로 대체해야
+  // 하는가"를 매번 두 조건 다 확인해야 해서 이 헬퍼로 한 번에 판정함.
+  bool _isRowSixReclaimed(
+    DateTime day,
+    DateTime focusedDay, {
+    required bool reclaimsSixthRow,
+    required bool reclaimsSixthRowButtons,
+    required bool includeAllShiftsCol,
+  }) {
+    if (reclaimsSixthRow && _isSixthRowEmptyCell(day, focusedDay)) return true;
+    if (reclaimsSixthRowButtons &&
+        _isSixthRowButtonCell(day, focusedDay, includeAllShiftsCol: includeAllShiftsCol)) {
+      return true;
+    }
+    return false;
+  }
+
+  // ⭐ 6번째 줄의 목(4)/금(5)/토(6) 3칸 여부 - _isSixthRowEmptyCell(화~토 5칸,
+  // OT카드/범례용)과는 대상 칸도 용도도 다른 별도 헬퍼. 토(오늘 버튼)는 항상,
+  // 금(전체근무표)은 규칙적 근무자일 때만, 목(일정공유)은 친구 유무와 무관하게
+  // 항상 - 나머지 조건은 호출부(build())가 인자로 넘겨줌.
+  bool _isSixthRowButtonCell(
+    DateTime day,
+    DateTime focusedMonth, {
+    required bool includeAllShiftsCol,
+  }) {
+    if (!_isSixthRow(day, focusedMonth)) return false;
+    switch (day.weekday) {
+      case 6: // 토 - 오늘 버튼, 항상
+        return true;
+      case 5: // 금 - 전체근무표, 규칙적 근무자만
+        return includeAllShiftsCol;
+      case 4: // 목 - 일정공유, 친구 유무와 무관하게 항상
+        return true;
+      default:
+        return false;
+    }
+  }
 
   // ⭐ "왜 5번만 이렇게 고생하냐, 다른 테마처럼 그리드에 맞게 미리 고정된
   // 적절한 크기로 만들어야지, lab에서 테스트한 디자인 그대로 100% 똑같이
@@ -1369,15 +1735,37 @@ Widget build(BuildContext context) {
   // 도드라져 보이게 함. 다른 테마는 전부 null(기존처럼 흰 배경 그대로).
   // ⭐ 고정색 0xFFE4E8F5가 "너무 부담스럽게 진하다"는 재지적 - 그 진한 고정색과
   // 그 이전 단계(연한 lerp) 딱 중간 톤으로 조정.
+  // ⭐ 2026-09-01 - "그래도 전체적으로 어둡다/애매하다"는 재지적으로 옅은
+  // 회색조 배경 자체를 없애고 흰색(=null, 다른 8개 테마와 동일)으로 되돌림 -
+  // 카드 구분은 각 셀의 그림자(boxShadow)와 둥근 모서리만으로 충분하다고
+  // 판단. 옅은 회색을 다시 쓰고 싶으면 아래 return을 다시 Color(0xFFF5F6FB)로.
   Color? _themeBodyBackground(BuildContext context, CalendarThemeId t) {
-    if (t != CalendarThemeId.materialCard) return null;
-    return const Color(0xFFF5F6FB); // "조금 더 연하게" 재지적 - EEF0F9보다 밝게
+    return null;
+  }
+
+  // ⭐ "일정공유"(친구) 버튼도 위 전체근무표/오늘과 같은 원칙 - 자리는 테마마다
+  // 다르지만(6번째 줄 목요일 칸 대부분, 언더라인/매거진만 헤더) 실제 동작은
+  // 항상 동일: 친구가 1명뿐이면 그 친구 달력으로 바로, 2명 이상이면 목록
+  // 화면으로. 친구가 하나도 없어도 항상 노출(누르면 FriendListScreen의
+  // "친구 추가" 빈 상태로 감 - 에러 아님).
+  void _openFriendShare() {
+    final friends = ref.read(friendProvider);
+    if (friends.length == 1) {
+      openFriendCalendar(context, ref, friends.first);
+    } else {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const FriendListScreen()));
+    }
   }
 
   // ⭐ "전체근무표"/"오늘" 버튼은 테마마다 디자인(위치/모양)만 다르고 실제
   // 동작은 항상 동일 - 진짜 이동 로직을 한 곳에 모아 모든 테마 헤더가 공유함.
   void _openAllShiftsView() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => AllShiftsView()));
+    // ⭐ 2026-09-05 - 버그 수정. 지금 보고 있던 달(_focusedDay)을 넘겨줘야
+    // 전체근무표도 그 달로 열림(예전엔 항상 오늘이 속한 달로만 열렸음).
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AllShiftsView(initialMonth: _focusedDay)),
+    );
   }
 
   void _jumpToToday() {
@@ -1409,6 +1797,10 @@ Widget build(BuildContext context) {
   // "8월 2026" / "2026-08" / "2026.08" / "AUGUST 2026" / "2026. 8" /
   // "August 2026" / "2026년 8월"). 탭하면 항상 동일하게 _showMonthYearPicker
   // (기존 년/월 선택 다이얼로그)를 씀 - 디자인만 다르고 동작은 그대로.
+  // 🔧 각 case 안의 Text style fontSize/color가 그 테마 헤더 타이틀 크기·색.
+  // 헤더 칸 자체의 세로 높이/여백은 이 함수가 아니라 build() 안 헤더
+  // SizedBox(height: 48.h)와 그 바깥 Padding(vertical: 4.h)이 결정함(모든
+  // 테마 공용 - 테마마다 따로 못 바꿈, 바꾸면 9개 전부 영향).
   Widget _buildThemedHeaderTitle(CalendarThemeId theme) {
     final y = _focusedDay.year;
     final m = _focusedDay.month;
@@ -1448,7 +1840,9 @@ Widget build(BuildContext context) {
         return GestureDetector(
           onTap: _showMonthYearPicker,
           child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(_monthEnFull[m - 1], style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w700, fontFamily: 'serif', color: Colors.black87)),
+            // ⭐ 2026-09-05 - "September"처럼 다 풀어 쓰면 공간이 부족해서 3글자
+            // 약어("Sep")로 - _monthEn3(minimal/underline과 공유).
+            Text(_monthEn3[m - 1], style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w700, fontFamily: 'serif', color: Colors.black87)),
             SizedBox(width: 8.w),
             // ⭐ "2026 등 텍스트를 아주 약간만 더 진하게" - shade500 → shade600.
             Padding(padding: EdgeInsets.only(bottom: 3.h), child: Text('$y', style: TextStyle(fontSize: 12.sp, fontFamily: 'serif', color: Colors.grey.shade600))),
@@ -1464,129 +1858,264 @@ Widget build(BuildContext context) {
             Icon(Icons.arrow_drop_down, size: 24.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ]),
         );
+      // ⭐ 2026-09-01 신설 - 다이어리(원래 유럽/애플풍 "노르딕"으로 만들었다가,
+      // "다이어리의 살짝 귀여운 느낌을 얹어서 하나로 합쳐달라"는 요청으로
+      // 재설계). 절제된 유럽풍 타이포(w500, 살짝 벌어진 자간)는 유지하되,
+      // 작은 원형 점 장식 하나로 "다이어리 첫 페이지" 느낌을 살짝 얹음 -
+      // 점 색은 이 테마의 포인트 컬러(_diaryAccent, 아래 셀 함수와 공유).
+      // 🔧 헤더 타이틀 크기: fontSize: 18.sp / 점 장식 크기: width/height: 7.w.
+      case CalendarThemeId.diary:
+        return GestureDetector(
+          onTap: _showMonthYearPicker,
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Container(width: 7.w, height: 7.w, margin: EdgeInsets.only(right: 7.w), decoration: BoxDecoration(color: _diaryAccent, shape: BoxShape.circle)),
+            Text(
+              isKorean ? '$y년 $m월' : DateFormat.yMMMM('en').format(_focusedDay),
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500, letterSpacing: 0.2, color: const Color(0xFF4A4038)),
+            ),
+          ]),
+        );
     }
+  }
+
+  // ⭐ 2026-09-05 - 예전엔 여기서 "친구가 있으면 헤더 버튼 끝에 아이콘 하나
+  // 자동으로 덧붙이기"를 했었는데, 이제 모든 테마가 일정공유(친구) 전용
+  // 자리를 각자 확실히 갖고 있음(대부분 6번째 줄 목요일 칸 -
+  // _themeReclaimsSixthRowButtons/_isSixthRowButtonCell 참고, 범례 필수인
+  // 언더라인/매거진만 예외로 아래 core의 헤더에 직접 넣음) - 그래서 이 자동
+  // 덧붙이기는 중복이라 없앰. 이 함수는 이제 core를 그대로 전달하는 얇은
+  // wrapper - 호출부(build())를 안 건드리려고 이름만 남겨둠.
+  Widget _buildThemedHeaderButtons(CalendarThemeId theme, ShiftSchedule schedule) {
+    return _buildThemedHeaderButtonsCore(theme, schedule);
   }
 
   // ⭐ 헤더 우측 "전체근무표"/"오늘" 버튼 - 규칙적 근무자만 전체근무표 노출
   // (기존 게이트 schedule.isRegular 그대로 유지). 버튼 모양은 테마마다
   // 완전히 다르지만(텍스트만/아이콘 버튼/알약형/텍스트+밑줄 등) onTap은
   // 항상 _openAllShiftsView/_jumpToToday로 동일.
-  Widget _buildThemedHeaderButtons(CalendarThemeId theme, ShiftSchedule schedule) {
+  // ⭐ 2026-09-05 - 전체근무표/오늘(+일정공유) 버튼을 헤더에서 완전히 빼고
+  // 6번째 줄 마지막 3칸(목/금/토)으로 내리는 리팩토링을 다이어리 외 나머지
+  // 테마로 확장함(_isSixthRowButtonCell/_themeReclaimsSixthRowButtons 참고,
+  // build()의 Positioned 블록에서 실제로 그려짐) - 헤더엔 제목만 남음. 범례가
+  // 필수라 6번째 줄에 자리가 없는 언더라인/매거진만 예외로, 기존 헤더 버튼을
+  // 유지한 채 일정공유 버튼만 그 헤더 안에 추가로 얹음(아래 case 참고).
+  Widget _buildThemedHeaderButtonsCore(CalendarThemeId theme, ShiftSchedule schedule) {
     final showAllShifts = schedule.isRegular;
     switch (theme) {
       case CalendarThemeId.minimal:
-        return Row(children: [
-          if (showAllShifts) ...[_thinTextButton(context.l10n.shiftFullSchedule, _openAllShiftsView), SizedBox(width: 12.w)],
-          _thinTextButton('Today', _jumpToToday),
-        ]);
       case CalendarThemeId.materialCard:
-        return Row(children: [
-          if (showAllShifts) ...[_roundIconButton(Icons.grid_view_rounded, _openAllShiftsView), SizedBox(width: 8.w)],
-          _roundIconButton(Icons.today_rounded, _jumpToToday),
-        ]);
       case CalendarThemeId.boldGrid:
-        return Row(children: [
-          if (showAllShifts) ...[_gridHeaderBtn(context.l10n.shiftFullSchedule, _openAllShiftsView), SizedBox(width: 8.w)],
-          _gridHeaderBtn('TODAY', _jumpToToday),
-        ]);
       case CalendarThemeId.initialBadge:
-        return Row(children: [
-          if (showAllShifts) ...[_pillButton(context.l10n.shiftFullSchedule, Icons.table_chart_outlined, _openAllShiftsView), SizedBox(width: 6.w)],
-          _pillButton(context.l10n.commonToday, Icons.adjust, _jumpToToday),
-        ]);
+      case CalendarThemeId.eventChip:
+      case CalendarThemeId.mainWhite:
+      case CalendarThemeId.mainDark:
+      case CalendarThemeId.diary:
+        return const SizedBox.shrink();
+      // ⭐ 2026-09-05 - 언더라인/매거진(범례 필수 2개 테마)은 6번째 줄이 범례로
+      // 꽉 차서 일정공유 버튼을 거기 못 넣음 - 대신 이 헤더의 전체근무표 버튼
+      // 왼쪽에 일정공유 버튼을 추가함(친구 유무와 무관하게 항상 노출 -
+      // _openFriendShare 참고).
       case CalendarThemeId.underline:
         return Row(children: [
           GestureDetector(onTap: _jumpToToday, child: Text('TODAY', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5))),
+          SizedBox(width: 12.w),
+          GestureDetector(onTap: _openFriendShare, child: Text(context.l10n.friendShareTitle, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5))),
           if (showAllShifts) ...[
             SizedBox(width: 12.w),
             GestureDetector(onTap: _openAllShiftsView, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54))),
           ],
         ]);
-      case CalendarThemeId.eventChip:
-        return Row(children: [
-          if (showAllShifts) ...[_pillButton(context.l10n.shiftFullSchedule, Icons.table_chart_outlined, _openAllShiftsView), SizedBox(width: 6.w)],
-          _pillButton(context.l10n.commonToday, Icons.adjust, _jumpToToday),
-        ]);
       case CalendarThemeId.editorial:
         return Row(children: [
+          GestureDetector(onTap: _openFriendShare, child: Text(context.l10n.friendShareTitle, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+          SizedBox(width: 10.w),
           if (showAllShifts) ...[
             GestureDetector(onTap: _openAllShiftsView, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
             SizedBox(width: 10.w),
           ],
           GestureDetector(onTap: _jumpToToday, child: Text(context.l10n.commonToday, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
         ]);
-      case CalendarThemeId.mainWhite:
-      case CalendarThemeId.mainDark:
-        return Row(children: [
-          if (showAllShifts) ...[_mainHeaderButtonReal(context.l10n.shiftFullSchedule, _openAllShiftsView), SizedBox(width: 8.w)],
-          _mainHeaderButtonReal('today', _jumpToToday),
-        ]);
     }
   }
 
-  Widget _thinTextButton(String label, VoidCallback onTap) {
-    return GestureDetector(onTap: onTap, child: Text(label, style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.w600)));
-  }
-
-  Widget _roundIconButton(IconData icon, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 30.w,
-        height: 30.w,
-        decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 3)]),
-        child: Icon(icon, size: 16.sp, color: Theme.of(context).colorScheme.primary),
-      ),
-    );
-  }
-
-  Widget _gridHeaderBtn(String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-        decoration: BoxDecoration(border: Border.all(color: Colors.white38), borderRadius: BorderRadius.circular(3.r)),
-        child: Text(label, style: TextStyle(fontSize: 9.5.sp, color: Colors.white, fontWeight: FontWeight.w600)),
-      ),
-    );
-  }
-
-  Widget _pillButton(String label, IconData icon, VoidCallback onTap) {
-    final primary = Theme.of(context).colorScheme.primary;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 5.h),
-        decoration: BoxDecoration(color: primary.withOpacity(0.08), borderRadius: BorderRadius.circular(20.r)),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 11.sp, color: primary),
-          SizedBox(width: 3.w),
-          Text(label, style: TextStyle(fontSize: 10.sp, color: primary, fontWeight: FontWeight.w600)),
-        ]),
-      ),
-    );
-  }
-
-  // ⭐ 기존 메인 헤더 버튼(전체근무표/today)이 build() 안에 인라인으로 있던 걸
-  // 그대로 함수로 옮김 - 스타일 1px도 안 바뀜(primaryContainer 배경 + primary
-  // 30% 테두리 알약형).
-  Widget _mainHeaderButtonReal(String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(6.r),
-          border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3), width: 0.8),
+  // ⭐ 다이어리 테마 전용 - 6번째 줄 목/금/토(일정공유/전체근무표/오늘) 버튼
+  // 공용 스타일. 따뜻한 웜톤, 이 칸 전체를 채우는 카드형(아이콘 위/라벨
+  // 아래) - "버튼 영역을 균일한 크기로" 요청대로 셋 다 같은 위젯을 재사용해서
+  // 자동으로 크기가 맞음. 이 테마 전용이라 다른 테마에서 재사용 안 함(다른
+  // 테마는 _themedRowSixButton 참고).
+  // ⭐ 2026-09-05 후속2 - "전체 조 근무표"가 "전체 조 근..."처럼 잘려 보인다는
+  // 지적 - 한 줄 제한을 풀고 2줄까지 허용함(가운데 정렬 + 줄바꿈). 아이콘도
+  // "조금씩 더 크게" 요청으로 15→17.sp.
+  Widget _diaryRowSixButton({required IconData icon, required String label, required VoidCallback onTap}) {
+    return Padding(
+      padding: EdgeInsets.all(3.w),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF0DE),
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(color: _diaryAccent.withOpacity(0.3)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 17.sp, color: const Color(0xFFB5651D)),
+              SizedBox(height: 2.h),
+              Text(
+                label,
+                style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFB5651D)),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
-        child: Text(label, style: TextStyle(fontSize: 11.sp, color: Theme.of(context).colorScheme.onPrimaryContainer, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  // ⭐ 2026-09-05 - 메인 화이트/다크 전용 6번째 줄 버튼(일정공유/전체 조
+  // 근무표/오늘). 다이어리(_diaryRowSixButton)와 같은 자리·같은 순서를 쓰지만, 이 두 테마는
+  // 이미 있는 이번 달 OT 카드(_buildMonthlyOvertimeCard) 안 남는 40% 영역에
+  // 얹는 거라 다이어리보다 세로 공간이 훨씬 좁음 - 라벨 없이 아이콘만 두고,
+  // 다이어리처럼 이 테마 전용 웜톤을 새로 만드는 대신 colorScheme.primaryContainer/
+  // onPrimaryContainer를 그대로 씀(라이트/다크 양쪽에서 자동으로 대비되는 색을
+  // 얻음 - 이 카드가 이미 따르던 "색은 colorScheme만 참조" 원칙 그대로).
+  Widget _mainThemeRowSixButton({
+    required ColorScheme colorScheme,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Padding(
+      padding: EdgeInsets.all(3.w),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          alignment: Alignment.center,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Icon(icon, size: 16.sp, color: colorScheme.onPrimaryContainer),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ⭐ 2026-09-05 - 6번째 줄 목/금/토 버튼 dispatch. 다이어리는 자기 전용 함수
+  // (_diaryRowSixButton, 웜톤)를 그대로 쓰고, 나머지 5개 테마는 아래
+  // _themedRowSixButton으로. 호출부(build())가 테마 분기를 직접 안 해도 되게
+  // 여기서 한 번에 처리함.
+  Widget _rowSixButton(CalendarThemeId theme, {required IconData icon, required String label, required VoidCallback onTap}) {
+    if (theme == CalendarThemeId.diary) return _diaryRowSixButton(icon: icon, label: label, onTap: onTap);
+    return _themedRowSixButton(theme, icon: icon, label: label, onTap: onTap);
+  }
+
+  // ⭐ 미니멀/머티리얼카드/굵은격자/이니셜뱃지/이벤트칩 5개 테마의 6번째 줄
+  // 버튼 - 아이콘은 기존 헤더 버튼과 동일한 걸 그대로 쓰고(호출부에서 넘겨줌),
+  // 자리가 넉넉해서(다이어리와 같은 칸 크기) 다이어리처럼 라벨도 아이콘 아래에
+  // 같이 넣음. 각 case의 배경/테두리/글자색은 그 테마가 기존에 헤더에서 쓰던
+  // 톤을 그대로 옮김(각각 옛 _thinTextButton/_roundIconButton/_gridHeaderBtn/
+  // _pillButton 자리를 대신함 - 그 함수들은 헤더 호출부가 없어져 지움).
+  Widget _themedRowSixButton(CalendarThemeId theme, {required IconData icon, required String label, required VoidCallback onTap}) {
+    late final Color bg;
+    late final Color fg;
+    late final BoxBorder? border;
+    late final double radius;
+    switch (theme) {
+      // ⭐ 2026-09-05 후속 - "스와이프 중 이 버튼들 위로 내용이 지나가 보인다"는
+      // 재신고 - RepaintBoundary로도 안 고쳐진 3개(미니멀/이니셜뱃지/이벤트칩)의
+      // 진짜 원인은 배경이 완전 투명(minimal)이거나 8%대 알파(initialBadge/
+      // eventChip)라 스와이프로 지나가는 내용이 그 옅은/없는 배경을 통해
+      // 그대로 비쳐 보였던 것(합성 순서 문제가 아니라 그냥 눈에 보임) -
+      // materialCard(흰 불투명)/boldGrid(네이비 불투명)는 이미 완전 불투명이라
+      // 문제가 없었음. 이 두 개도 완전 불투명 배경으로 다시 그림.
+      case CalendarThemeId.minimal:
+        bg = Colors.white; // 완전 불투명(예전 transparent에서 변경)
+        fg = Colors.grey.shade700;
+        border = Border.all(color: Colors.grey.shade300, width: 1);
+        radius = 6.r;
+        break;
+      case CalendarThemeId.materialCard:
+        bg = Colors.white;
+        fg = Theme.of(context).colorScheme.primary;
+        border = null;
+        radius = 10.r;
+        break;
+      case CalendarThemeId.boldGrid:
+        bg = const Color(0xFF263238);
+        fg = Colors.white;
+        border = Border.all(color: Colors.white38);
+        radius = 4.r;
+        break;
+      // ⭐ 2026-09-05 후속2 - "둘이 똑같이 primaryContainer 써서 무성의하다"는
+      // 지적 - 이 앱은 ColorScheme.fromSeed가 아니라 손으로 값을 채운
+      // ColorScheme(app_theme.dart)라, secondaryContainer/tertiaryContainer는
+      // 우리가 고른 색과 무관한 Flutter 기본값이라 못 씀(의미 없는 색이 나옴).
+      // 대신 각 테마가 이미 자기 셀 안에서 쓰던 고유 색을 그대로 버튼에도
+      // 이어감 - 이니셜뱃지는 "오늘" 표시에 이미 인디고를 쓰고 있고(원형 뱃지
+      // 모티프), 이벤트칩은 인디고를 이니셜뱃지가 이미 쓰므로 겹치지 않게
+      // 틸(teal)로 새로 지정(칩/알약 모티프에 어울리는 차분한 톤).
+      case CalendarThemeId.initialBadge:
+        bg = Colors.indigo.shade50;
+        fg = Colors.indigo.shade700;
+        border = null;
+        radius = 16.r; // 원형 뱃지 모티프 - 다른 테마보다 더 둥글게
+        break;
+      case CalendarThemeId.eventChip:
+        bg = Colors.teal.shade50;
+        fg = Colors.teal.shade700;
+        border = Border.all(color: Colors.teal.shade200, width: 0.8); // 칩 특유의 얇은 테두리
+        radius = 8.r; // 칩(pill) 모티프 - 완만하게만 둥글게
+        break;
+      default:
+        // 이 함수를 쓰지 않는 테마 - 방어적 fallback(호출될 일 없음).
+        bg = Colors.transparent;
+        fg = Colors.black87;
+        border = null;
+        radius = 0;
+    }
+    return Padding(
+      padding: EdgeInsets.all(3.w),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: radius > 0 ? BorderRadius.circular(radius) : null,
+            border: border,
+            boxShadow: theme == CalendarThemeId.materialCard
+                ? [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 3)]
+                : null,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16.sp, color: fg),
+              SizedBox(height: 2.h),
+              Text(label, style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w600, color: fg), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+            ],
+          ),
+        ),
       ),
     );
   }
 
   // ⭐ 요일 헤더 한 칸 - table_calendar의 dowBuilder로 완전히 테마별 위젯을
   // 그림(일/월/... vs Sun/Mon/... vs S/M/... 등 표기 자체가 테마마다 다름).
+  // 🔧 요일 글자 크기 = 각 case의 Text style fontSize. 요일 칸 자체의 세로
+  // 위치는 이 함수가 아니라 build()의 daysOfWeekHeight(28.h)가 칸 높이를
+  // 정하고, 그 안에서 Center/alignment로 가운데 고정 - 위아래로 옮기려면
+  // Center 대신 Align(alignment: Alignment(0, y))로 바꾸거나 Padding을 추가.
   Widget _buildThemedDow(CalendarThemeId theme, DateTime day) {
     final i = day.weekday % 7; // 일=0 ... 토=6 (Dart weekday: 월=1..일=7)
     switch (theme) {
@@ -1599,7 +2128,10 @@ Widget build(BuildContext context) {
         return Container(
           decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey.shade200))),
           alignment: Alignment.center,
-          child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w600, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500)),
+          // ⭐ 2026-09-01 - "요일(Mon/Tue) 글자색이 너무 연한 회색"이라는 지적으로
+          // grey.shade500 → grey.shade700로 한 단계 더 진하게(materialCard 테마의
+          // 요일 색과 동일한 톤).
+          child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w600, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade700)),
         );
       case CalendarThemeId.materialCard:
         return Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade700)));
@@ -1620,6 +2152,11 @@ Widget build(BuildContext context) {
       case CalendarThemeId.mainWhite:
       case CalendarThemeId.mainDark:
         return Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)));
+      // ⭐ 2026-09-01 신설 - 다이어리: 따뜻한 갈색 톤, 로케일 요일명 그대로
+      // (Sun/Mon 약자 대신 실제 요일명 - 딱딱한 캘린더 느낌보다 다이어리에
+      // 가깝게).
+      case CalendarThemeId.diary:
+        return Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: i == 0 ? const Color(0xFFD9534F) : const Color(0xFF8A6F5C))));
     }
   }
 
@@ -1646,7 +2183,38 @@ Widget build(BuildContext context) {
       case CalendarThemeId.mainWhite:
       case CalendarThemeId.mainDark:
         return const SizedBox.shrink();
+      case CalendarThemeId.diary:
+        return _themeDiaryFooter(summary, otText);
     }
+  }
+
+  // ⭐ 2026-09-01 신설 - 다이어리: 따뜻한 아이보리 카드 + 얇은 크림색 테두리.
+  // 🔧 "이번 달 OT" 글자 크기: fontSize: 11.sp / "주별 근무시간" 글자 크기: 아래
+  // GestureDetector 안 Text의 fontSize: 11.sp(각각 따로 조절 가능).
+  Widget _themeDiaryFooter(({int totalMinutes, DateTimeRange period}) summary, String otText) {
+    return Container(
+      margin: EdgeInsets.fromLTRB(12.w, 4.h, 12.w, 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF3E2),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: const Color(0xFFF0DFC8)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _showMonthlyOvertimeSheet(summary.period),
+              child: Text('${context.l10n.shiftThisMonthOt} $otText', style: TextStyle(fontSize: 11.sp, color: const Color(0xFFB5651D), fontWeight: FontWeight.w700)),
+            ),
+          ),
+          GestureDetector(
+            onTap: _showWeeklyWorkHoursSheet,
+            child: Text('${context.l10n.shiftWeeklyWorkHours} ›', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF8A6F5C), fontWeight: FontWeight.w600)),
+          ),
+        ],
+      ),
+    );
   }
 
   // ⭐ 1/5/9번이 공유하던 lab의 _theme1OtBar() 그대로.
@@ -1864,6 +2432,7 @@ Widget build(BuildContext context) {
       CalendarThemeId.underline => _theme8Cell(day, isToday, isOutside, schedule),
       CalendarThemeId.eventChip => _theme9Cell(day, isToday, isOutside, schedule),
       CalendarThemeId.editorial => _theme10Cell(day, isToday, isOutside, schedule),
+      CalendarThemeId.diary => _themeDiaryCell(day, isToday, isOutside, schedule),
       CalendarThemeId.mainWhite || CalendarThemeId.mainDark => throw StateError('unreachable'),
     };
     // ⭐ 7개 실험 테마 셀 함수들은 원래 다중 선택(길게 눌러 여러 날짜 선택) 기능이
@@ -1949,12 +2518,36 @@ Widget build(BuildContext context) {
     // 아래쪽 패딩"이 없어서 그 틈이 붕 떠 보임) 그 조건을 이식할 때 빠뜨렸음 -
     // 첫 줄만 위쪽 패딩 0으로 복원.
     final isFirstRow = _isFirstRow(day, focusedDay);
+    // ⭐ 2026-09-01 버그 수정 - "근무가 하나도 할당 안 된 날(불규칙 스케줄
+    // 초기 상태)에는 평범한 날 셀들이 우측으로 쏠리고, 빨간날 셀도 약간
+    // 흐트러져 보인다"는 지적의 원인 - table_calendar는 각 날짜 셀을 내부
+    // Stack(alignment: Alignment.bottomCenter, 기본 fit: StackFit.loose)에
+    // 넣는데, loose라서 Stack이 자기 자식(=이 함수가 반환하는 위젯)에게 "이
+    // 크기 이하로 알아서" 식의 느슨한 제약만 줌. 아래 Column은
+    // crossAxisAlignment 기본값(center)이라 폭을 스스로 안 채우고 "가장 넓은
+    // 자식" 만큼만 차지하는데, 근무명 배지(width: double.infinity)가 있을 땐
+    // 그게 제일 넓어서 우연히 셀 폭을 꽉 채웠던 것뿐 - 배지가 없는 날은 남은
+    // 자식들(날짜 숫자 18.w 박스, 빨간날/메모 텍스트)이 다 훨씬 좁아서 Column
+    // 전체가 좁게 쪼그라들고, 그 좁아진 박스가 Stack의 bottomCenter 정렬로
+    // 셀 안에서 가운데 정렬되면서 "왼쪽 테두리선(left border)이 실제 칸
+    // 경계보다 안쪽(오른쪽)으로 밀려 보이는" 현상이 생김(빨간날은 글자가
+    // 있어서 덜 좁아지니 덜 흐트러져 보였을 뿐, 원인은 동일). _theme5Cell이
+    // 이미 겪었던 것과 똑같은 문제라 거기 쓴 것과 동일한 해법 - 이 Container에
+    // width: double.infinity를 줘서 배지 유무와 무관하게 항상 셀 전체 폭을
+    // 강제로 차지하게 함(파일 상단 지도 주석 옆 "7개 실험 테마 공용 유틸"
+    // 참고 - 같은 클래스의 버그가 소프트카드(_theme2Cell)에도 있어서 같이
+    // 고침).
     return ClipRect(
       child: Container(
+        width: double.infinity,
         decoration: BoxDecoration(border: Border(left: BorderSide(color: Colors.grey.shade200))),
         padding: EdgeInsets.only(top: isFirstRow ? 0 : 2.h, bottom: 2.h),
         child: Column(
           children: [
+            // 🔧 근무명 배지 - 크기: height: 11.h(배지 높이) / fontSize: 7.5.sp(글자
+            // 크기). 근무명이 없는 날은 이 자리를 SizedBox(height: 12.h)로 대신
+            // 비워서 있는 날/없는 날 높이를 맞춤 - 배지 높이(11.h)만 바꾸면 이
+            // SizedBox 높이(12.h)도 같이 맞춰줘야 줄이 안 튐.
             if (d.hasShift)
               Container(
                 width: double.infinity,
@@ -1968,24 +2561,40 @@ Widget build(BuildContext context) {
                 // 가능해져서, 안 잘리는 부분까지 버리지 않고 이미 있던
                 // overflow:ellipsis(말줄임표)가 자연스럽게 나머지를 처리하게 둠.
                 child: Text(d.shiftText,
-                    style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor),
+                    style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor),
                     maxLines: 1, overflow: TextOverflow.ellipsis),
               )
             else
               SizedBox(height: 12.h),
-            SizedBox(height: 1.5.h),
+            // 🔧 근무명 배지 ↔ 날짜 숫자 사이 간격.
+            SizedBox(height: 0.3.h),
+            // 🔧 날짜 숫자 - 크기: fontSize: 11.sp / 위치: 18x18 정사각 박스 안에서
+            // alignment: Alignment.center로 항상 가운데(위아래로 옮기려면 이
+            // Container의 padding이나 width/height 자체를 조절).
             Container(
               width: 18.w,
               height: 18.w,
               alignment: Alignment.center,
               decoration: isToday ? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.indigo.shade400, width: 1.4)) : null,
-              child: Text('${day.day}', style: TextStyle(fontSize: 11.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w500, color: numColor)),
+              child: Text('${day.day}', style: TextStyle(fontSize: 10.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w500, color: numColor)),
             ),
+            // 🔧 빨간날(일요일/공휴일) 이름 - 크기: fontSize: 6.5.sp, 색:
+            // Colors.red.shade400. 위치는 Column 순서상 "날짜 숫자 바로 아래"로
+            // 고정(별도 좌표 없음) - 더 아래로 내리려면 위에 SizedBox를 하나
+            // 추가하거나, 날짜 숫자보다 위로 올리려면 이 if 블록 자체를 날짜
+            // Container보다 앞으로 옮기면 됨.
             if (d.holidayName != null)
-              _fitText(d.holidayName!, TextStyle(fontSize: 6.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.1)),
+              _fitText(d.holidayName!, TextStyle(fontSize: 7.7.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.1)),
+            // 🔧 메모 시작 위치(날짜/빨간날 ↔ 첫 메모 사이 간격) - 이 SizedBox
+            // 높이가 곧 "메모가 위에서 얼마나 아래서 시작하는가"임. 빨간날이 없는
+            // 날은 날짜 숫자 바로 아래가 이 간격이 되고, 빨간날이 있는 날은
+            // 빨간날 아래가 이 간격이 됨(둘이 공유하는 하나의 SizedBox).
             SizedBox(height: 3.8.h),
+            // 🔧 메모 목록 - 최대 3개(take(3)), 글자 크기: fontSize: 7.sp. 메모끼리
+            // 세로 간격은 Padding의 top: (첫 줄만 0, 나머지는 1.h) - 메모끼리
+            // 더 붙이려면 이 1.h를 줄이고, 더 띄우려면 키우면 됨.
             ...d.memos.take(3).toList().asMap().entries.map((e) => Padding(
-              padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.h, left: 1.w, right: 1.w),
+              padding: EdgeInsets.only(top: e.key == 0 ? 0 : 0.7.h, left: 1.w, right: 1.w),
               child: _fitText(e.value, TextStyle(fontSize: 7.sp, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600)),
             )),
           ],
@@ -2001,15 +2610,38 @@ Widget build(BuildContext context) {
     return ClipRect(
       child: Padding(
         padding: EdgeInsets.all(2.w),
+        // ⭐ 2026-09-01 버그 수정 - "근무가 할당 안 된 날은 카드 배경이 1일이면
+        // 좁은 세로줄, 10일이면 좀 더 넓은 세로줄처럼 내용 크기만큼만 그려진다.
+        // 근무가 있으면 100% 폭이 유지된다"는 지적의 원인 - _theme1Cell의 같은
+        // 날짜 위 버그 수정 주석 참고(동일한 근본 원인: table_calendar가 이
+        // 셀에게 loose 제약만 주는데, 이 Column도 crossAxisAlignment 기본값
+        // (center)이라 "가장 넓은 자식"만큼만 폭을 차지함 - 근무 배지(width:
+        // double.infinity)가 있을 때만 우연히 셀 폭을 꽉 채웠던 것). 카드
+        // 배경(color/border/boxShadow)이 이 Container의 decoration에 있으므로,
+        // 배지 유무와 무관하게 이 Container가 항상 셀 전체 폭을 차지하도록
+        // width: double.infinity를 추가.
         child: Container(
+          width: double.infinity,
           decoration: BoxDecoration(
-            color: isOutside ? colorScheme.surfaceVariant.withOpacity(0.3) : colorScheme.surface,
+            // ⭐ 2026-09-05 - "뿌옇게(투명도)는 이미 낮춰놨는데도 색 자체가
+            // 진하다"는 지적. 이전 값(colorScheme.surface.withOpacity(0.01))은
+            // kAppSurface(0xFFEEF1FC, 차가운 라벤더톤)를 1% 알파로 흰 배경 위에
+            // 얹는 방식이었는데, 수학적으로는 흰색과 거의 구분 안 가야 정상이지만
+            // 실기기에서는 그 미세한 파란기가 오히려 "탁하다"는 인상을 준 것으로
+            // 보임(알파 블렌딩 미세값보다, 색상 자체가 채도 있는 톤이라 그런 것 -
+            // 요청대로 알파를 더 낮추는 대신 아예 채도 없는 연회색 고정값으로
+            // 교체). 순백(스캐폴드 배경)보다는 한 톤 어둡게 구분되면서도 진해
+            // 보이지 않는 중립 연회색(#F1F2F6) 고정값 사용 - outside(다른 달)
+            // 셀 스타일은 그대로 둠.
+            color: isOutside ? colorScheme.surfaceVariant.withOpacity(0.15) : const Color(0xFFF1F2F6),
             borderRadius: BorderRadius.circular(6.r),
             border: isToday ? Border.all(color: Colors.indigo.shade400, width: 1.4) : null,
             boxShadow: isOutside ? null : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 2, offset: const Offset(0, 1))],
           ),
           child: Column(
             children: [
+              // 🔧 근무명 배지 - 크기: height: 12.h / fontSize: 7.5.sp. 없는 날은
+              // SizedBox(height: 13.h)로 자리를 대신 비움(높이를 바꾸면 이 값도 맞출 것).
               if (d.hasShift)
                 Container(
                   width: double.infinity,
@@ -2020,23 +2652,34 @@ Widget build(BuildContext context) {
                   // ⭐ 영어 현지화: 위 셀과 동일한 이유로 강제 4글자 컷 제거,
                   // 기존 overflow:ellipsis에 맡김.
                   child: Text(d.shiftText,
-                      style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor),
+                      style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor),
                       maxLines: 1, overflow: TextOverflow.ellipsis),
                 )
               else
                 SizedBox(height: 13.h),
+              // 🔧 근무명 배지 ↔ 날짜 숫자 간격.
               SizedBox(height: 1.h),
+              // 🔧 날짜 숫자 - 크기: fontSize: 12.sp. 이 테마는 날짜 숫자를 Container로
+              // 감싸지 않고 Column 안에 직접 두므로, 위아래 위치는 앞뒤 SizedBox
+              // 높이로만 조절 가능(별도 정렬 박스 없음).
               Text('${day.day}', style: TextStyle(
-                fontSize: 12.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w700,
+                fontSize: 11.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w700,
                 color: isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
               )),
+              // 🔧 빨간날 이름 - 크기: fontSize: 6.sp, 색: red.shade600. 위치는
+              // 날짜 숫자 바로 아래 고정(Column 순서).
               if (d.holidayName != null)
-                _fitText(d.holidayName!, TextStyle(fontSize: 6.sp, color: Colors.red.shade600, fontWeight: FontWeight.bold, height: 1.0)),
-              SizedBox(height: 1.8.h),
+                _fitText(d.holidayName!, TextStyle(fontSize: 7.sp, color: Colors.red.shade600, fontWeight: FontWeight.bold, height: 1.0)),
+              // 🔧 메모 시작 위치(날짜/빨간날 ↔ 첫 메모 간격) = 이 SizedBox 높이.
+              SizedBox(height: 3.5.h),
+              // 🔧 메모 목록 - 최대 3개, fontSize: 7.5.sp. 메모끼리 간격은 Padding
+              // top(첫 줄 0, 나머지 1.h).
               ...d.memos.take(3).toList().asMap().entries.map((e) => Padding(
-                padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.h),
-                child: _fitText(e.value, TextStyle(fontSize: 7.5.sp, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600, height: 1.0)),
+                padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.5.h),
+                child: _fitText(e.value, TextStyle(fontSize: 8.sp, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600, height: 1.0)),
               )),
+              // 🔧 이 Spacer가 있어서 이 테마는 메모가 적어도 아래로 안 쏠리고
+              // 카드 위쪽에 붙어 보임 - 없애면 세로 중앙 정렬처럼 바뀜.
               const Spacer(),
             ],
           ),
@@ -2053,31 +2696,53 @@ Widget build(BuildContext context) {
       child: Container(
         // ⭐ shade300→shade400으로 한 번 진하게 했는데 "아직도 더 진해야 할듯"
         // 이라는 재지적 - 두께는 그대로, 색만 한 단계 더(shade400→shade600).
+        // ⭐ 2026-09-01 - "이번 달 셀들이 다 진하게 보인다"는 지적 - 이번 달
+        // 평범한 날(오늘 아님)의 배경이 colorScheme.surface(=kAppSurface,
+        // app_colors.dart의 옅은 라벤더톤 0xFFEEF1FC)였는데, 이 테마는 굵은
+        // grey.shade600 격자선 + 어두운 헤더(_themeHeaderBackground 참고)와
+        // 같이 있다 보니 그 살짝 tinted된 흰색이 유독 탁하게 보였음 - 순수
+        // 흰색으로 교체(원래부터 이 값이었음, 이번에 처음 바뀌는 것 - "원래
+        // 이랬나"의 답은 "네, kAppSurface를 계속 이렇게 썼었음").
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade600, width: 0.6),
-          color: isOutside ? colorScheme.surfaceVariant.withOpacity(0.3) : (isToday ? const Color(0xFFFFF9C4) : colorScheme.surface),
+          color: isOutside ? colorScheme.surfaceVariant.withOpacity(0.3) : (isToday ? const Color(0xFFFFF9C4) : Colors.white),
         ),
         padding: EdgeInsets.all(2.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 🔧 이 테마는 날짜 숫자와 빨간날 이름이 같은 줄(Row)에 나란히 있는
+            // 게 특징 - 날짜 숫자 크기: fontSize: 10.sp(맨 위, 왼쪽 정렬).
+            // 빨간날 이름 크기: fontSize: 5.5.sp, 날짜 숫자 오른쪽에 이어서 표시
+            // (Expanded라 남는 폭을 다 씀 - 위치를 아래 줄로 내리려면 이 Row
+            // 밖으로 꺼내 별도 줄로 빼야 함).
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text('${day.day}', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade600 : colorScheme.onSurface))),
                 if (d.holidayName != null)
-                  Expanded(child: _fitText(d.holidayName!, TextStyle(fontSize: 5.5.sp, color: Colors.red.shade600, fontWeight: FontWeight.bold))),
+                  Expanded(child: _fitText(d.holidayName!, TextStyle(fontSize: 7.5.sp, color: Colors.red.shade600, fontWeight: FontWeight.bold))),
               ],
             ),
+            // 🔧 근무명 배지(날짜 줄 바로 아래) - 크기: fontSize: 7.5.sp, 위아래
+            // 여백은 margin vertical: 1.h. 근무 없는 날은 이 자리를 아예 안
+            // 그리므로(else 분기 없음) 그날 셀만 근무명 배지 높이만큼 짧아짐 -
+            // 다른 테마와 달리 높이를 맞추는 SizedBox가 없다는 점 주의.
             if (d.hasShift)
               Container(
-                margin: EdgeInsets.symmetric(vertical: 1.h),
-                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                margin: EdgeInsets.symmetric(vertical: 0.2.h),
+                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.2.h),
                 width: double.infinity,
                 decoration: BoxDecoration(color: d.shiftColor),
-                child: Text(d.shiftText, style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor), maxLines: 1, overflow: TextOverflow.clip, textAlign: TextAlign.center),
+                child: Text(d.shiftText, style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor), maxLines: 1, overflow: TextOverflow.clip, textAlign: TextAlign.center),
               ),
-            SizedBox(height: 1.h),
+            // 🔧 메모 시작 위치(근무명 배지 ↔ 첫 메모 간격) = 이 SizedBox 높이.
+            SizedBox(height: 4.0.h),
+            // 🔧 메모 목록 - 최대 3개, fontSize: 8.5.sp, 왼쪽 정렬("· "로 시작하는
+            // 불릿 스타일). _fitText가 줄바꿈 없이 한 줄로만 그리므로 메모끼리
+            // 간격은 Text 자체의 줄간격(fontSize와 line-height)에 좌우됨 - 다른
+            // 테마들처럼 별도 Padding top이 없어서, 메모 간격만 더 벌리려면
+            // 이 map을 Padding(top: ...)으로 감싸야 함.
             ...d.memos.take(3).map((m) => _fitText('· $m', TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant), textAlign: TextAlign.start)),
           ],
         ),
@@ -2127,25 +2792,36 @@ Widget build(BuildContext context) {
               padding: EdgeInsets.symmetric(vertical: 1.h),
               child: Column(
                 children: [
+                  // 🔧 근무명 "이니셜" 원형 뱃지(이 테마만 전체 이름이 아니라
+                  // d.shiftText[0] 한 글자만 씀) - 크기: width/height: 14.w(원
+                  // 지름) / fontSize: 7.5.sp(이니셜 글자). 없는 날은 SizedBox
+                  // (height: 14.w)로 자리를 대신 비움.
                   if (d.hasShift)
                     Container(
                       width: 14.w, height: 14.w, alignment: Alignment.center,
                       decoration: BoxDecoration(color: d.shiftColor, shape: BoxShape.circle),
-                      child: Text(d.shiftText[0], style: TextStyle(fontSize: 7.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor)),
+                      child: Text(d.shiftText[0], style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor)),
                     )
                   else
                     SizedBox(height: 14.w),
-                  SizedBox(height: 1.h),
-                  Text('${day.day}', style: TextStyle(fontSize: 11.5.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w600, color: numColor)),
+                  // 🔧 뱃지 ↔ 날짜 숫자 간격.
+                  SizedBox(height: 0.5.h),
+                  // 🔧 날짜 숫자 - 크기: fontSize: 11.5.sp.
+                  Text('${day.day}', style: TextStyle(fontSize: 10.5.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w600, color: numColor)),
                 ],
               ),
             ),
+            // 🔧 빨간날 이름 - 크기: fontSize: 6.sp, 날짜 숫자 바로 아래 고정.
             if (d.holidayName != null)
-              _fitText(d.holidayName!, TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.0)),
+              _fitText(d.holidayName!, TextStyle(fontSize: 7.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.0)),
+            // 🔧 메모 시작 위치 - 메모가 있을 때만 이 간격(1.2.h)이 붙음(메모가
+            // 없으면 이 SizedBox 자체가 안 생김 - if로 감싸져 있음).
             if (d.memos.isNotEmpty) SizedBox(height: 1.2.h),
+            // 🔧 메모 목록 - 최대 3개, fontSize: 7.sp. 메모끼리 간격은 Padding
+            // top(첫 줄 0, 나머지 2.h - 다른 테마보다 넓은 편).
             ...d.memos.take(3).toList().asMap().entries.map((e) => Padding(
-              padding: EdgeInsets.only(top: e.key == 0 ? 0 : 2.h),
-              child: _fitText(e.value, TextStyle(fontSize: 7.sp, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600, height: 1.0)),
+              padding: EdgeInsets.only(top: e.key == 0 ? 2 : 2.5.h),
+              child: _fitText(e.value, TextStyle(fontSize: 7.5.sp, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600, height: 1.0)),
             )),
           ],
         ),
@@ -2159,24 +2835,37 @@ Widget build(BuildContext context) {
   Widget _theme8Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
+    // 🔧 이 테마는 근무명 "글자"를 셀 안에 안 그림(색깔 막대만) - 근무 구분은
+    // 6번째 줄 범례(_buildThemedLegend의 underline case)가 대신함. 근무명
+    // 텍스트를 셀 안에도 넣고 싶으면 아래 막대 Container 안에 Text를 추가하면 됨.
     return ClipRect(
       child: Column(
         children: [
+          // 🔧 날짜 숫자 위쪽 여백(맨 위 시작 위치) = 이 SizedBox.
           SizedBox(height: 3.h),
+          // 🔧 날짜 숫자 - 크기: fontSize: 12.sp. 오늘이면 밑줄(underline)로 표시.
           Text('${day.day}', style: TextStyle(
             fontSize: 12.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w400,
             color: isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
             decoration: isToday ? TextDecoration.underline : null, decorationThickness: 2,
           )),
-          // ⭐ "근무명 뱃지를 세로로 아주 조금만 더 얇게" - 3.6.h → 3.0.h.
+          // 🔧 근무 색깔 막대(글자 없음) - 크기: width: 22.w, height: 3.0.h("근무명
+          // 뱃지를 세로로 아주 조금만 더 얇게" 요청으로 3.6.h→3.0.h로 줄어든
+          // 이력 있음). 위아래 여백: margin vertical: 2.h. 없는 날은 SizedBox
+          // (height: 7.0.h)로 자리를 대신 비움.
           if (d.hasShift)
             Container(margin: EdgeInsets.symmetric(vertical: 2.h), width: 22.w, height: 3.0.h,
                 decoration: BoxDecoration(color: d.shiftColor, borderRadius: BorderRadius.circular(2.r)))
           else
             SizedBox(height: 7.0.h),
+          // 🔧 빨간날 이름 - 크기: fontSize: 6.sp, 막대 바로 아래 고정. 별도
+          // 시작 간격 SizedBox가 없어서 막대 margin(2.h)이 곧 이 간격임.
           if (d.holidayName != null)
             _fitText(d.holidayName!, TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold)),
-          // ⭐ "메모가 너무 연하고 작다 - 키우고 진하게" - 7.sp→7.8.sp, onSurfaceVariant(연함)→grey.shade700.
+          // 🔧 메모 목록 - 최대 3개, fontSize: 7.8.sp("너무 연하고 작다"는
+          // 지적으로 7.sp→7.8.sp, 색도 onSurfaceVariant→grey.shade700로 진하게
+          // 바꾼 이력). 메모끼리 간격을 조절하는 별도 Padding이 없음 - 필요하면
+          // 이 map을 Padding(top: ...)으로 감싸서 추가.
           ...d.memos.take(3).map((m) => _fitText(m, TextStyle(fontSize: 7.8.sp, color: Colors.grey.shade700, fontWeight: FontWeight.w500))),
         ],
       ),
@@ -2184,27 +2873,54 @@ Widget build(BuildContext context) {
   }
 
   // ⭐ 9번 · 이벤트 칩형
+  // ⭐ 2026-09-01 - "나머지 3개(4/9/10번)도 같은 버그 있는지 훑어봐" 요청으로
+  // 점검 - 4번(굵은 격자형)과 10번(매거진 에디토리얼)은 구조상 이 버그가 없음:
+  // 4번은 맨 위 Row가 (내용과 무관하게) Flutter Row의 기본값(mainAxisSize.max)
+  // 때문에 항상 셀 전체 폭을 스스로 차지하고, 10번은 유일한 비-Positioned
+  // 자식(날짜 숫자를 감싼 Align)이 Align의 기본 동작(부모가 유한한 폭을 주면
+  // 그 폭을 꽉 채움) 때문에 항상 전체 폭을 차지함 - 결과적으로 근무/공휴일/
+  // 메모가 하나도 없어도 항상 셀 전체 폭이 유지됨. 이 9번(이벤트 칩형)만 진짜
+  // 버그가 있었음 - 근무/공휴일/메모가 "전부 다 없는 날"(불규칙 스케줄에서
+  // 근무를 아예 안 배정한 상태)에는 셀 안에 15x15 날짜 숫자 원 하나만 남는데,
+  // 그건 폭을 강제하지 않는 고정 크기 박스라 나머지 테마들과 같은 이유
+  // (table_calendar의 loose 제약 + Column 기본 crossAxisAlignment.center)로
+  // 셀 전체가 좁게 쪼그라들어 날짜 숫자 위치가 틀어짐. 아래 Container에
+  // width: double.infinity를 추가해 배지/칩 유무와 무관하게 항상 셀 전체 폭을
+  // 차지하도록 함(_theme1Cell/_theme2Cell 버그 수정과 동일한 처방).
   Widget _theme9Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
     return ClipRect(
       child: Container(
+        width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 1.2.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 🔧 날짜 숫자 - 크기: fontSize: 9.5.sp. 오늘이면 15x15 원형 배지
+            // (width/height: 15.w) 안에 흰 글씨로. 날짜 숫자 ↔ 근무명 칩 간격은
+            // 이 Container의 margin bottom: 1.2.h.
             Container(
               width: 15.w, height: 15.w, alignment: Alignment.center,
               margin: EdgeInsets.only(bottom: 1.2.h),
               decoration: isToday ? BoxDecoration(color: d.red ? Colors.red.shade400 : Colors.indigo.shade400, shape: BoxShape.circle) : null,
               child: Text('${day.day}', style: TextStyle(
-                fontSize: 9.5.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+                fontSize: 10.5.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
                 color: isToday ? Colors.white : (isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade400 : colorScheme.onSurface)),
               )),
             ),
+            // 🔧 이 테마는 근무명/빨간날/메모가 전부 같은 "칩(pill)" 모양
+            // (_themeChip 공용 위젯, 아래 정의)을 색만 바꿔서 재사용 - 글자
+            // 크기(7.5.sp)와 칩 모양(패딩/둥근 모서리)이 셋 다 동일함. 순서가
+            // 곧 화면 순서(근무명 → 빨간날 → 메모)이고, 칩끼리 간격은 각 칩의
+            // margin bottom(0.6.h, _themeChip 안) + 다음 칩 앞의 Padding top(0.8.h).
             if (d.hasShift) _themeChip(d.shiftText, d.shiftColor, d.shiftTextColor),
+            // 🔧 빨간날도 칩 형태(배경 red.shade50 / 글자 red.shade400) - 글자
+            // 크기는 _themeChip 공용값(7.5.sp)이라 근무명/메모와 따로 못 바꿈
+            // (따로 바꾸려면 _themeChip에 fontSize 파라미터를 추가해야 함).
             if (d.holidayName != null)
               Padding(padding: EdgeInsets.only(top: 0.8.h), child: _themeChip(d.holidayName!, Colors.red.shade50, Colors.red.shade400)),
+            // 🔧 메모 목록 - 최대 3개, 칩 사이 간격 = Padding top: 0.8.h.
             ...d.memos.take(3).map((m) => Padding(padding: EdgeInsets.only(top: 0.8.h), child: _themeChip(m, colorScheme.surfaceVariant, colorScheme.onSurface))),
           ],
         ),
@@ -2212,13 +2928,16 @@ Widget build(BuildContext context) {
     );
   }
 
+  // 🔧 근무명/빨간날/메모가 공유하는 칩 위젯 - 글자 크기: fontSize: 7.5.sp(전체
+  // 공통), 칩 자체 크기: padding horizontal 3.w/vertical 1.1.h, 모서리: 2.5.r,
+  // 칩 아래 간격: margin bottom 0.6.h.
   Widget _themeChip(String text, Color bg, Color fg) {
     return Container(
       width: double.infinity,
       margin: EdgeInsets.only(bottom: 0.6.h),
       padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.1.h),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(2.5.r)),
-      child: _fitText(text, TextStyle(fontSize: 7.5.sp, color: fg, fontWeight: FontWeight.w600, height: 1.1)),
+      child: _fitText(text, TextStyle(fontSize: 7.sp, color: fg, fontWeight: FontWeight.w600, height: 1.1)),
     );
   }
 
@@ -2229,15 +2948,24 @@ Widget build(BuildContext context) {
     // ⭐ "스크린샷보다 셀 테두리가 너무 진하다"는 지적으로 다른 테마들과 같은
     // 톤(grey.shade200)으로 낮춤. 메모 색도 "약간 더 진하게" - onSurfaceVariant
     // 대신 눈에 잘 띄는 고정 회색(grey.shade700)으로 교체.
+    // 🔧 이 테마는 다른 8개와 달리 Column으로 위에서부터 쌓지 않고 Stack +
+    // Positioned로 "절대 좌표"에 각 요소를 따로 박아둠 - 그래서 위치를 옮길
+    // 땐 Padding/SizedBox가 아니라 각 Positioned의 top/left/right/bottom 숫자를
+    // 직접 바꿔야 함.
     return Container(
       decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade200, width: 0.5)),
       child: Stack(
         children: [
+          // 🔧 근무 색 - 글자 없이 좌상단 삼각형 하나로만 표시. 크기: width/
+          // height: 16.w. 근무명 텍스트를 넣고 싶으면 이 삼각형 대신 다른
+          // 테마들처럼 Container+Text 배지로 바꿔야 함(지금 구조는 색만 표현).
           if (d.hasShift)
             Positioned(
               top: 0, left: 0,
               child: ClipPath(clipper: _CalendarTriangleClipper(), child: Container(width: 16.w, height: 16.w, color: d.shiftColor)),
             ),
+          // 🔧 날짜 숫자 - 크기: fontSize: 12.sp, 위치: 우측 상단 고정
+          // (Align.topRight), 셀 위쪽 여백: padding top: 3.h.
           Padding(
             padding: EdgeInsets.only(top: 3.h, right: 2.w),
             child: Align(
@@ -2253,11 +2981,18 @@ Widget build(BuildContext context) {
           // 지적으로 6.8.sp→7.3.sp. 공휴일명 Positioned에 left도 명시해서 폭을
           // 고정함(_fitText가 실제 셀 너비를 알아야 안전하게 잘라낼 수 있음 -
           // right만 있으면 폭이 무한대라 잘라낼 기준이 없었음).
+          // 🔧 빨간날 이름 - 크기: fontSize: 7.5.sp, 위치: 셀 상단에서 top: 18.h
+          // 고정 좌표(날짜 숫자를 따라가는 게 아니라 절대값 - 날짜 폰트 크기를
+          // 바꿔도 이 값은 자동으로 안 따라옴, 겹치면 이 숫자를 직접 조절할 것).
           if (d.holidayName != null)
             Positioned(
               top: 18.h, left: 2.w, right: 2.w,
               child: _fitText(d.holidayName!, TextStyle(fontSize: 7.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), textAlign: TextAlign.right),
             ),
+          // 🔧 메모 목록 - 이 테마만 "아래에서부터" 시작함(다른 8개는 위에서부터
+          // 쌓지만, 이건 Positioned에 top 없이 bottom: 2.h만 줘서 셀 바닥에서
+          // 2.h 띄운 자리에 붙이고 메모가 늘어나면 위쪽으로 자람). 최대 3개,
+          // fontSize: 7.3.sp, 메모끼리 간격은 Padding top(첫 줄 0, 나머지 1.2.h).
           Positioned(
             left: 2.w, right: 2.w, bottom: 2.h,
             child: Column(
@@ -2272,6 +3007,132 @@ Widget build(BuildContext context) {
     );
   }
 
+  // ⭐ 2026-09-01 재설계 - 원래 "노르딕"(악센트 바 하나로만 색 표현)과
+  // "다이어리"(아이보리 카드+알약 배지) 두 개를 따로 만들었다가, "다이어리는
+  // 특별한 게 없다, 노르딕 구조를 이렇게 바꿔서 다이어리 톤을 살짝 얹어 하나로
+  // 합쳐달라"는 요청으로 재설계. 구조 자체가 완전히 바뀜:
+  //  1) 셀 상단을 "날짜 | 근무명" 절반씩(세로 구분선)으로 나눈 박스 하나로
+  //     묶고, 그 박스 전체를 테두리로 감쌈(위/좌/우/아래 + 가운데 세로선).
+  //  2) 근무명 쪽 절반만 근무색으로 꽉 채움(뱃지처럼) - 날짜 쪽은 항상 흰
+  //     배경. 예전 "얇은 악센트 바"보다 근무 색이 훨씬 잘 보이게 됨.
+  //  3) 빨간날(공휴일)이 있으면 그 박스 바로 아래에 흰 배경+빨간 글씨 줄을
+  //     하나 더 붙이고, 그 줄에도 아래쪽 테두리를 그어서 "박스"를 한 칸 더
+  //     늘림(테두리 안=핵심 정보, 테두리 밖=메모라는 시각적 구분).
+  //  4) 메모 3개는 테두리 없이 자유롭게.
+  // "약간 귀여운 느낌"은 스칸디나비안 팔레트(kDiaryPalette, 채도는 낮게 유지)
+  // 위에 따뜻한 톤의 둥근 모서리(전체 셀 6.r)/오늘 표시(원형 배지, 각지지
+  // 않은 채움 스타일)/다이어리풍 헤더 점 장식/로케일 요일명으로만 살짝
+  // 얹음 - 팔레트 자체를 쨍하게 바꾸진 않음(다른 9개와 차별화되는 지점이라
+  // 유지, 시인성도 채도 낮은 톤이 더 안정적으로 나옴).
+  // 🔧 조절 지점:
+  //  - 셀 전체 테두리 색/두께/둥근 정도: 함수 맨 위 local const borderColor,
+  //    Border.all(width: 0.8), borderRadius circular(6.r) - 세 군데(상단 박스
+  //    아래 테두리/세로 구분선/공휴일 줄 아래 테두리) 전부 이 borderColor를
+  //    같이 씀, 하나만 바꾸면 나머지도 다 같이 바뀜.
+  //  - 상단 박스 높이: 내용(패딩 vertical 3.h + 폰트 크기)에 맞춰 자동 - 늘리려면
+  //    이 패딩(날짜 쪽/근무명 쪽 Container 둘 다 vertical: 3.h)을 키울 것
+  //  - 날짜 숫자 크기: fontSize: 11.sp / 오늘 표시: 16x16 원형 채움(_diaryAccent,
+  //    파일 상단 근처 top-level const) 안의 숫자는 fontSize: 9.5.sp
+  //  - 근무명 텍스트 크기: fontSize: 6.8.sp(절반 폭 안에 들어가야 해서 다른
+  //    테마보다 작게 잡음 - 셀이 큰 기기라면 키워도 됨)
+  //  - 빨간날 텍스트 크기: fontSize: 6.8.sp, 색: 0xFFC0392B(차분한 벽돌색)
+  //  - 메모 크기/간격: fontSize: 6.5.sp("– "로 시작하는 다이어리풍 대시 불릿),
+  //    Padding top(첫 줄 0, 나머지 0.7.h)
+  Widget _themeDiaryCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
+    final d = _themedCellData(day, schedule);
+    final colorScheme = Theme.of(context).colorScheme;
+    const borderColor = Color(0xFFE4D9C9); // 따뜻한 크림 라인(무채색 회색 대신)
+    final dateColor = isOutside
+        ? colorScheme.onSurfaceVariant.withOpacity(0.4)
+        : (d.red ? const Color(0xFFC0392B) : const Color(0xFF4A4038));
+    return ClipRect(
+      child: Container(
+        width: double.infinity,
+        margin: EdgeInsets.all(1.w),
+        clipBehavior: Clip.antiAlias, // 둥근 모서리 밖으로 안쪽 테두리선이 삐져나오지 않게
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: borderColor, width: 0.8),
+          borderRadius: BorderRadius.circular(6.r),
+        ),
+        child: Column(
+          children: [
+            // 🔧 상단 박스 - 날짜(왼쪽 절반) | 근무명(오른쪽 절반, 근무색 채움).
+            // IntrinsicHeight가 있어야 가운데 세로선(Container)이 Row의 실제
+            // 높이만큼 늘어남(Row가 스스로 높이를 정하는 상황이라 필요).
+            Container(
+              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: borderColor, width: 0.8))),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.symmetric(vertical: 2.h),
+                        // 🔧 오늘 표시(원형 배지) - 평소엔 _diaryAccent 배경 + 흰 글씨.
+                        // 빨간날이 오늘이면 배경만 _diaryTodayRedBg로 바꾸고 글자는
+                        // 계속 빨간색(dateColor의 빨간 값과 동일) - "빨간날" 신호를
+                        // 잃지 않기 위함(위 _diaryTodayRedBg 선언부 주석 참고).
+                        child: isToday
+                            ? Container(
+                                width: 16.w, height: 16.w, alignment: Alignment.center,
+                                decoration: BoxDecoration(color: d.red ? _diaryTodayRedBg : _diaryAccent, shape: BoxShape.circle),
+                                child: Text('${day.day}', style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: d.red ? const Color(0xFFC0392B) : Colors.white)),
+                              )
+                            : Text('${day.day}', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w600, color: dateColor)),
+                      ),
+                    ),
+                    const VerticalDivider(width: 0.8, thickness: 0.8, color: borderColor),
+                    Expanded(
+                      child: Container(
+                        color: d.hasShift ? d.shiftColor.withOpacity(0.85) : Colors.white,
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.symmetric(vertical: 3.h, horizontal: 1.w),
+                        child: d.hasShift
+                            ? Text(d.shiftText, style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor), maxLines: 1, overflow: TextOverflow.ellipsis)
+                            : const SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // 🔧 빨간날(공휴일) - 있을 때만, 흰 배경 + 빨간 글씨. 이 줄 자체도
+            // 아래쪽 테두리를 그어서 위 박스와 한 몸처럼 보이게 함.
+            if (d.holidayName != null)
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: borderColor, width: 0.8))),
+                padding: EdgeInsets.symmetric(vertical: 0.h),
+                child: _fitText(d.holidayName!, TextStyle(fontSize: 8.sp, color: const Color(0xFFC0392B), fontWeight: FontWeight.w700)),
+              ),
+            // 🔧 메모 3개 - 테두리 없음, 남는 공간을 채움(Expanded).
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 2.h),
+                child: Column(
+                  children: d.memos.take(3).toList().asMap().entries.map((e) => Padding(
+                    padding: EdgeInsets.only(top: e.key == 0 ? 0 : 0.7.h),
+                    child: _fitText('– ${e.value}', TextStyle(fontSize: 7.5.sp, color: const Color(0xFF1A1A1A), fontWeight: FontWeight.w600)),
+                  )).toList(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 🔧 메인·화이트/메인·다크(사용자 실기기 기본 테마) 날짜 셀 - 이 파일에서
+  // 가장 먼저 손보게 될 함수. 구조: Column[근무명 배지(위) / Expanded(Stack[
+  // 공휴일 이름(맨 위 고정) + 날짜 숫자(중앙) + 메모(맨 아래 고정, 최대 3개)])].
+  // 다크 배색은 이 함수 안에서 직접 하드코딩(isDarkMode 분기)하는 부분과
+  // colorScheme.*(=main.dart의 Theme(data: isDark? darkTheme:lightTheme) 래퍼가
+  // 내려주는 값, 실제 색상표는 theme/app_theme.dart)를 쓰는 부분이 섞여 있음 -
+  // "다크에서만 색이 이상하다" 싶으면 이 함수 안의 `isDarkMode ? ... : ...`
+  // 삼항연산자들부터 볼 것.
   Widget _buildDateCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, {bool isSelected = false}) {
     final shiftText = schedule.getShiftForDate(day);
     final patternShift = schedule.getPatternShiftForDate(day);
@@ -2313,7 +3174,9 @@ Widget build(BuildContext context) {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ⭐ 근무명 (맨 위에 붙임)
+          // 🔧 근무명 배지 - 크기: height: 18.h(배지 높이) / fontSize: 9.sp(글자
+          // 크기, 아래 Text). 근무 없는 날은 SizedBox(height: 18.h)로 자리를
+          // 대신 비움 - 배지 높이를 바꾸면 이 SizedBox도 같이 맞출 것.
           if (shiftText.isNotEmpty && shiftText != '미설정')
             Container(
               height: 18.h,
@@ -2357,7 +3220,13 @@ Widget build(BuildContext context) {
 
                 return Stack(
                   children: [
-                    // ⭐ 공휴일 이름 (상단 고정, 글자 수에 따라 크기 자동 조절)
+                    // 🔧 빨간날(공휴일) 이름 - 위치: 셀 맨 위 고정(top: 0, 날짜
+                    // 숫자와 무관 - Stack 안에서 독립적으로 배치되므로 날짜 폰트
+                    // 크기를 바꿔도 안 따라옴). 크기: height: 11.h(이 줄 자체
+                    // 높이) / fontSize: 9.sp인데 FittedBox(fit: scaleDown)로
+                    // 감싸져 있어서 글자가 길면 이 11.h 줄 안에 맞게 자동으로
+                    // 더 작게 줄어듦(9.sp는 "최대" 크기) - 아래로 옮기려면 top
+                    // 값을 늘리거나 이 Positioned 앞에 별도 여백을 추가.
                     if (_getHolidayName(day, context) != null)
                       Positioned(
                         top: 0,
@@ -2381,11 +3250,17 @@ Widget build(BuildContext context) {
                           ),
                         ),
                       ),
-                    // ⭐ 날짜 숫자 (항상 중앙, 3개일 때만 살짝 위로)
-                    // 오늘 + 빨간날 = 라임배경 + 빨간텍스트
-                    // 오늘 + 일반날 = 인디고배경 + 흰텍스트
-                    // 오늘 아닌 빨간날 = 빨간텍스트만
-                    // 오늘 아닌 일반날 = 검정텍스트
+                    // 🔧 날짜 숫자 - 크기: fontSize: 16.sp. 위치: 기본은 셀
+                    // 정중앙(Align.center)인데, 메모가 3개 꽉 찬 날만 Padding
+                    // (bottom: 20.h)으로 그만큼 위로 밀어서 메모 3줄과 안 겹치게
+                    // 함(memoCount >= 3 조건) - 이 20.h가 메모 한 줄 높이×3에
+                    // 맞춰진 값이라, 메모 폰트/줄간격을 바꾸면 이 숫자도 같이
+                    // 맞춰야 함. 오늘 날짜는 배경 pill(패딩 6.w/2.h + 둥근
+                    // 모서리 4.r)이 추가로 덧씌워짐. 색 조합(라이트/다크 각각):
+                    // 오늘+빨간날 = 라임/amber 배경 + 빨간텍스트
+                    // 오늘+일반날 = 인디고배경 + 흰텍스트
+                    // 오늘아님+빨간날 = 빨간텍스트만(배경 없음)
+                    // 오늘아님+일반날 = 검정텍스트(다크는 onSurface)
                     Align(
                       alignment: Alignment.center,
                       child: Padding(
@@ -2419,7 +3294,13 @@ Widget build(BuildContext context) {
                         ),
                       ),
                     ),
-                    // ⭐ 메모 표시 (하단 고정, 날짜와 독립)
+                    // 🔧 메모 - 위치: 셀 맨 아래 고정(bottom: 1.5.h, "메모가
+                    // 위/아래 중 어디서 시작하는가"의 답 = 아래에서부터, 날짜
+                    // 숫자와 무관하게 독립 배치). 최대 3개(take(3)), 글자 크기:
+                    // fontSize: 8.sp. 메모끼리 세로 간격 = 각 메모 Container의
+                    // margin bottom: 0.5.h. 메모 3개 꽉 찰 때만 위 날짜 숫자가
+                    // 20.h 위로 밀리는 로직과 세트(바로 위 Align 블록 참고) -
+                    // 메모 폰트/패딩을 키우면 그 20.h도 같이 늘려야 겹침이 없음.
                     if (memos.isNotEmpty)
                       Positioned(
                         left: 0,
@@ -2765,7 +3646,18 @@ Widget build(BuildContext context) {
                                       ),
                               ),
                               SizedBox(width: 6.w),
-                              ElevatedButton(
+                              // ⭐ 2026-08-28 - 앱 공용 second button으로 교체(요청: "우리
+                              // 앱의 second button 느낌으로") - 저장/확인 계열이라 success
+                              // (초록) variant.
+                              // ⭐ 2026-08-31 - compact(패딩 10/6, 폰트 12)로 교체했더니 "너무
+                              // 작다"는 피드백 - 이 리팩터 전에 실제로 쓰던 크기(패딩 12/10,
+                              // 폰트 13)로 되돌림(app_second_button.dart의 padding/fontSize
+                              // override 참고). compact 자체의 정의는 그대로라 알람 이력
+                              // 화면 등 다른 재사용처는 영향 없음.
+                              AppSecondButton(
+                                variant: AppSecondButtonVariant.success,
+                                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                                fontSize: 13.sp,
                                 onPressed: isFull
                                     ? null
                                     : () {
@@ -2780,13 +3672,7 @@ Widget build(BuildContext context) {
                                         memoController.clear();
                                         ref.read(memoProvider.notifier).createMemo(dateStr, text);
                                       },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Theme.of(context).colorScheme.secondary,
-                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-                                  minimumSize: Size(0, 0),
-                                ),
-                                child: Text(context.l10n.commonSave, style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSecondary)),
+                                child: Text(context.l10n.commonSave),
                               ),
                             ],
                           );
@@ -2806,50 +3692,80 @@ Widget build(BuildContext context) {
                                 return SizedBox.shrink();
                               }
 
+                              // ⭐ 2026-09-03 - 메모 모아보기(memo_list_view.dart) 재구성
+                              // 때 만든 카드 디자인(왼쪽 파란 포인트 바 + 흰 배경 + 그림자)을
+                              // 그대로 가져옴(요청) - 우측 빨간 휴지통 버튼은 그대로 유지.
                               return Column(
                                 children: memos.map((memo) {
-                                  return Container(
-                                    width: double.infinity,
-                                    margin: EdgeInsets.only(bottom: 8.h),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.surfaceVariant,
-                                      borderRadius: BorderRadius.circular(8.r),
-                                      border: Border.all(color: Theme.of(context).colorScheme.outline),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        // ⭐ 텍스트 영역 (탭하면 상세 팝업)
-                                        Expanded(
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              _showMemoDetailPopup(day, memo);
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                                              child: Text(
-                                                memo.memoText,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+                                  return Padding(
+                                    padding: EdgeInsets.only(bottom: 8.h),
+                                    child: Material(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(12.r),
+                                        onTap: () {
+                                          _showMemoDetailPopup(day, memo);
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(12.r),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Theme.of(context).colorScheme.shadow.withOpacity(0.04),
+                                                blurRadius: 6,
+                                                offset: const Offset(0, 2),
                                               ),
-                                            ),
+                                            ],
+                                          ),
+                                          child: Row(
+                                            // ⭐ 2026-09-03 버그수정 - crossAxisAlignment.stretch를
+                                            // 썼었는데, 이 Row가 SingleChildScrollView(높이 무제한) 안에
+                                            // 있어서 "부모 높이만큼 늘리기"가 무한대(infinity) 높이를
+                                            // 요구하게 되어 "BoxConstraints forces an infinite height"
+                                            // 런타임 예외로 이어짐(달력 셀 팝업이 메모 있는 날만 안 열리고
+                                            // 멈추던 원인 - 메모 모아보기 화면의 동일 카드는 minHeight
+                                            // 방식이라 이 문제가 없었음). start + 왼쪽 바에 minHeight를
+                                            // 줘서 같은 시각 효과를 안전하게 재현.
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                width: 4.w,
+                                                constraints: BoxConstraints(minHeight: 40.h),
+                                                decoration: BoxDecoration(
+                                                  color: Theme.of(context).colorScheme.primary,
+                                                  borderRadius: BorderRadius.horizontal(left: Radius.circular(12.r)),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: Padding(
+                                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                                                  child: Text(
+                                                    memo.memoText,
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+                                                  ),
+                                                ),
+                                              ),
+                                              // ⭐ 삭제 버튼 (바로 삭제) - 기존 그대로 유지
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                                                  child: Icon(
+                                                    Icons.delete,
+                                                    size: 18.sp,
+                                                    color: Theme.of(context).colorScheme.error,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        // ⭐ 삭제 버튼 (바로 삭제)
-                                        GestureDetector(
-                                          onTap: () async {
-                                            await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-                                            child: Icon(
-                                              Icons.delete,
-                                              size: 18.sp,
-                                              color: Theme.of(context).colorScheme.error,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
                                   );
                                 }).toList(),
@@ -3271,16 +4187,23 @@ Widget build(BuildContext context) {
       );
 
       // ⭐ 선택된 모든 날짜 ±1일(전날/다음날 알람이 있을 수 있어서)의 고정 알람을
-      // 한 번에 재생성 (미설정은 스킵). 방금 갱신된 schedule을 다시 읽어서 넘김 -
-      // bulkAssignShift가 이미 assignedDates를 저장했으므로 provider 상태가 최신임.
-      if (actualShiftType != '미설정') {
-        final updatedSchedule = ref.read(scheduleProvider).value;
-        if (updatedSchedule != null) {
-          await ref.read(alarmNotifierProvider.notifier).regenerateAlarmsAroundDates(
-            _selectedDates,
-            updatedSchedule,
-          );
-        }
+      // 한 번에 재생성. 방금 갱신된 schedule을 다시 읽어서 넘김 - bulkAssignShift가
+      // 이미 assignedDates를 저장했으므로 provider 상태가 최신임.
+      // ⭐ 2026-09-04 - CRITICAL FIX: "미설정(=근무 일괄 해제)"일 때만 이 호출을
+      // 스킵하던 조건을 제거함. regenerateAlarmsAroundDates/computeDesiredFixedAlarmsForDate는
+      // '미설정'을 만나면 그 날짜에 알람을 새로 안 만들 뿐, 기존 알람을 지우는
+      // 1단계(regenerateFixedAlarmsForDatesTxn의 delete)는 항상 실행됨 - 즉 이
+      // 호출을 스킵하면 "일괄 해제"가 정확히 필요로 하는 정리(전날/다음날 알람
+      // 포함, 이제 존재하지 않는 근무를 근거로 남아있던 알람 삭제)가 통째로 빠짐.
+      // 그 알람들은 다음 네이티브 갱신 트리거(자정/20분전/앱 재실행 등)가 올
+      // 때까지 실제 기기에 그대로 armed 상태로 남아있었음 - 단일 날짜 변경 경로
+      // (changeShiftWithAlarms)는 이 가드가 없어서 원래도 정상 동작했음.
+      final updatedSchedule = ref.read(scheduleProvider).value;
+      if (updatedSchedule != null) {
+        await ref.read(alarmNotifierProvider.notifier).regenerateAlarmsAroundDates(
+          _selectedDates,
+          updatedSchedule,
+        );
       }
 
       Navigator.pop(context);
@@ -3331,143 +4254,162 @@ Widget build(BuildContext context) {
     }
   }
 
-  // ⭐ 메모 상세 팝업 (수정/삭제)
+  // ⭐ 2026-09-03 - 메모 모아보기(memo_list_view.dart)에서 만든 바텀시트로 교체
+  // (요청: "메모 모아보기에서 메모 탭하면 삭제 수정 나오고... 그대로 반영해줘").
+  // 옛 AlertDialog와 기능은 동일(보기/수정/삭제)하되, 바텀시트 + SafeArea +
+  // AppSecondButton 톤으로 통일하고 상단에 날짜를 같이 보여줌. 편집 컨트롤러
+  // dispose를 100ms 지연시키는 것도 그대로 유지(기존 "MEDIUM FIX" 주석 참고 -
+  // 팝업이 실제로 닫히는 애니메이션/rebuild와 dispose 타이밍이 겹치면 문제가
+  // 있었던 이력이 있어 건드리지 않음).
   void _showMemoDetailPopup(DateTime day, DateMemo memo) {
     final dateStr = day.toIso8601String().split('T')[0];
-    bool isEditing = false;  // ⭐ builder 밖으로 이동
-    final editController = TextEditingController(text: memo.memoText);  // ⭐ builder 밖으로 이동
+    final editController = TextEditingController(text: memo.memoText);
+    bool isEditing = false;
 
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      // ignore: deprecated_member_use
-      builder: (context) => WillPopScope(
-        onWillPop: () async {
-          // ⭐ 뒤로가기 시 키보드 포커스 해제
-          FocusScope.of(context).unfocus();
-          await Future.delayed(Duration(milliseconds: 150));
-          return true;
-        },
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-            title: Text(context.l10n.calendarMemoDetailTitle, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
-            content: Container(
-              width: double.maxFinite,
-              constraints: BoxConstraints(maxHeight: 300.h),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isEditing)
-                    // ⭐ 수정 모드
-                    Expanded(
-                      child: TextField(
-                        controller: editController,
-                        maxLines: null,
-                        expands: true,
-                        textAlignVertical: TextAlignVertical.top,
-                        decoration: InputDecoration(
-                          hintText: context.l10n.calendarMemoContent,
-                          hintStyle: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6)),
-                          contentPadding: EdgeInsets.all(12.w),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                            borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) {
+            final colorScheme = Theme.of(sheetContext).colorScheme;
+            return Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(sheetContext).viewInsets.bottom),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 36.w,
+                          height: 4.h,
+                          margin: EdgeInsets.only(bottom: 16.h),
+                          decoration: BoxDecoration(
+                            color: colorScheme.outline,
+                            borderRadius: BorderRadius.circular(2.r),
                           ),
                         ),
-                        style: TextStyle(fontSize: 14.sp),
                       ),
-                    )
-                  else
-                    // ⭐ 보기 모드
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Container(
+                      Row(
+                        children: [
+                          Icon(Icons.event_note_rounded, size: 18.sp, color: colorScheme.primary),
+                          SizedBox(width: 6.w),
+                          Text(
+                            '${DateFormat.MMMd(Localizations.localeOf(sheetContext).languageCode == 'ko' ? 'ko' : 'en').format(day)} (${_getWeekday(day, sheetContext)})',
+                            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: colorScheme.primary),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      if (isEditing)
+                        TextField(
+                          controller: editController,
+                          autofocus: true,
+                          maxLines: 5,
+                          minLines: 2,
+                          decoration: InputDecoration(
+                            hintText: sheetContext.l10n.calendarMemoContent,
+                            contentPadding: EdgeInsets.all(12.w),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.r),
+                              borderSide: BorderSide(color: colorScheme.outline),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.r),
+                              borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                            ),
+                          ),
+                          style: TextStyle(fontSize: 14.sp),
+                        )
+                      else
+                        Container(
                           width: double.infinity,
-                          padding: EdgeInsets.all(12.w),
+                          padding: EdgeInsets.all(14.w),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
-                            borderRadius: BorderRadius.circular(8.r),
-                            border: Border.all(color: Theme.of(context).colorScheme.outline),
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(10.r),
                           ),
                           child: Text(
                             memo.memoText,
-                            style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface, height: 1.5),
+                            style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface, height: 1.5),
                           ),
                         ),
+                      SizedBox(height: 16.h),
+                      Row(
+                        children: [
+                          if (isEditing) ...[
+                            Expanded(
+                              child: AppSecondButton(
+                                variant: AppSecondButtonVariant.neutral,
+                                onPressed: () {
+                                  setSheetState(() {
+                                    isEditing = false;
+                                    editController.text = memo.memoText;
+                                  });
+                                },
+                                child: Text(sheetContext.l10n.commonCancel),
+                              ),
+                            ),
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: AppSecondButton(
+                                variant: AppSecondButtonVariant.success,
+                                onPressed: () async {
+                                  if (editController.text.trim().isEmpty) {
+                                    ScaffoldMessenger.of(sheetContext).showSnackBar(
+                                      SnackBar(content: Text(sheetContext.l10n.statusEnterMemoContent)),
+                                    );
+                                    return;
+                                  }
+                                  FocusScope.of(sheetContext).unfocus();
+                                  await ref.read(memoProvider.notifier).updateMemo(
+                                        memo.id!,
+                                        dateStr,
+                                        editController.text.trim(),
+                                      );
+                                  if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+                                },
+                                child: Text(sheetContext.l10n.commonSave),
+                              ),
+                            ),
+                          ] else ...[
+                            Expanded(
+                              child: AppSecondButton(
+                                variant: AppSecondButtonVariant.danger,
+                                onPressed: () async {
+                                  await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
+                                  if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+                                },
+                                child: Text(sheetContext.l10n.commonDelete),
+                              ),
+                            ),
+                            SizedBox(width: 10.w),
+                            Expanded(
+                              child: AppSecondButton(
+                                variant: AppSecondButtonVariant.primary,
+                                onPressed: () {
+                                  setSheetState(() => isEditing = true);
+                                },
+                                child: Text(sheetContext.l10n.commonEdit),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                    ),
-                ],
+                    ],
+                  ),
+                ),
               ),
-            ),
-            actions: [
-              if (isEditing) ...[
-                // ⭐ 수정 모드 버튼
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      isEditing = false;
-                      editController.text = memo.memoText;
-                    });
-                  },
-                  child: Text(context.l10n.commonCancel, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (editController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(context.l10n.statusEnterMemoContent)),
-                      );
-                      return;
-                    }
-
-                    // ⭐ 키보드 포커스 해제
-                    FocusScope.of(context).unfocus();
-                    await Future.delayed(Duration(milliseconds: 100));
-
-                    // ⭐ 메모 업데이트 (Provider가 자동으로 메인 팝업 갱신)
-                    await ref.read(memoProvider.notifier).updateMemo(memo.id!, dateStr, editController.text.trim());
-
-                    // ⭐ 상세 팝업만 닫기 (메인 팝업은 Consumer로 자동 갱신됨)
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary),
-                  child: Text(context.l10n.commonSave, style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
-                ),
-              ] else ...[
-                // ⭐ 보기 모드 버튼 - 바로 삭제 (확인 팝업 제거)
-                TextButton(
-                  onPressed: () async {
-                    // ⭐ 메모 삭제 (Provider가 자동으로 메인 팝업 갱신)
-                    await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
-
-                    // ⭐ 상세 팝업만 닫기 (메인 팝업은 Consumer로 자동 갱신됨)
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: Text(context.l10n.commonDelete, style: TextStyle(color: Theme.of(context).colorScheme.error)),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      isEditing = true;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary),
-                  child: Text(context.l10n.commonEdit, style: TextStyle(color: Theme.of(context).colorScheme.onSecondary)),
-                ),
-              ],
-            ],
             );
           },
-        ),
-      ),
+        );
+      },
     ).then((_) {
       // ⭐ MEDIUM FIX: 팝업 닫힐 때 메모리 누수 방지 (약간의 지연으로 rebuild 충돌 방지)
       Future.delayed(const Duration(milliseconds: 100), () {

@@ -77,6 +77,14 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
     setState(() => _focusedDay = DateTime(_focusedDay.year, _focusedDay.month + delta, 1));
   }
 
+  // M4에서 씀 - "마지막 동기화" 표시용 간단 포맷(백업 화면의 _formatDate와 동일 스타일).
+  String _formatSyncedAt(DateTime dt) {
+    final local = dt.toLocal();
+    final h = local.hour.toString().padLeft(2, '0');
+    final m = local.minute.toString().padLeft(2, '0');
+    return '${local.year}.${local.month.toString().padLeft(2, '0')}.${local.day.toString().padLeft(2, '0')} $h:$m';
+  }
+
   Color _shiftColor(String shiftName) {
     final v = widget.data.shiftColors[shiftName];
     if (v == null) return Colors.grey.shade300;
@@ -103,8 +111,21 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
             // 자체를 없애고(피드백: 뜬금없다) 그만큼 달력을 더 키움(아래 Padding/
             // Builder 쪽 targetCalendarHeight 비율 참고).
             if (widget.showInstallPrompt) _buildPwaInstallBanner(context),
+            // ⭐ 2026-09-04 - M4 수정(전체_코드_점검_리포트_2026-09-04.md). 상대가
+            // 재설치하면 새 익명 UID로 공유가 끊기지만(cross-device 과제라 이번엔
+            // 손 안 댐 - CLAUDE.md 참고), 그 경우 이 화면은 재설치 이전 시점에
+            // 멈춘 스냅샷을 에러 없이 계속 "최신"인 것처럼 보여줌. 근본 해결은
+            // 아니지만, 최소한 사용자가 데이터가 낡았을 가능성을 스스로 판단할 수
+            // 있게 Firestore 문서의 updatedAt을 화면에 노출.
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
+              padding: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 0),
+              child: Text(
+                context.l10n.friendLastSyncedAt(_formatSyncedAt(widget.data.updatedAt)),
+                style: TextStyle(fontSize: 11.5.sp, color: Colors.black45),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 4.h),
               child: Row(
                 children: [
                   IconButton(onPressed: () => _changeMonth(-1), icon: const Icon(Icons.chevron_left)),

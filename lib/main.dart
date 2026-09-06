@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'constants/platform_channel.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -12,17 +13,25 @@ import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
+import 'screens/onboarding_popup_lab_screen.dart';
 import 'screens/schedule_management_tab.dart';
+import 'screens/condition_tab.dart';
 import 'screens/permission_intro_screen.dart';
 import 'widgets/permission_warning_banner.dart';
 import 'widgets/banner_ad_slot.dart';
 import 'services/ad_service.dart';
+import 'services/backup_watcher.dart';
+import 'services/backup_storage_service.dart';
+import 'models/backup_payload.dart';
+import 'screens/restore_backup_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/shift_schedule.dart';
 import 'providers/alarm_provider.dart';
 import 'providers/schedule_provider.dart';
 import 'providers/calendar_theme_provider.dart';
+import 'providers/health_tip_provider.dart';
+import 'providers/sleep_condition_provider.dart';
 import 'models/calendar_theme.dart';
 import 'theme/app_theme.dart';
 import 'services/firebase_bootstrap.dart';
@@ -30,6 +39,15 @@ import 'services/memo_category_classifier.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'l10n/l10n_extensions.dart';
+
+// ⭐ 2026-09-04 - MainScreen 바텀 네비게이션에서 "달력탭"을 가리키는 인덱스.
+// 탭 순서(다음알람/일정관리/달력/컨디션/설정)가 바뀔 때마다 이 값 하나만
+// 맞추면 됨 - 이 파일 안(뒤로가기 이동/_goToCalendar/범위 밖 폴백)과
+// restore_backup_screen.dart/permission_intro_screen.dart/onboarding_screen.dart의
+// MainScreen(initialIndex:) 호출부, Kotlin CalendarWidgetProvider.kt의 openTab
+// 값이 전부 이 숫자를 그대로 써야 함(Kotlin 쪽은 언어가 달라 상수 공유가 안 되니
+// 직접 값(2)을 맞춰뒀음 - 여길 바꾸면 거기도 같이 바꿀 것).
+const int kCalendarTabIndex = 2;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,6 +101,14 @@ void main() async {
   // 생성 저장)에서 안 끝났으면 그쪽에서 ensureLoaded()를 다시 await해서
   // 안전하게 기다림 (memo_category_classifier.dart 참고).
   unawaited(MemoCategoryClassifier.instance.ensureLoaded());
+  // ⭐ 2026-09-01 - "일정 생성 직후 잠깐 기본 폰트로 보였다가 1초 뒤에 주아체로
+  // 바뀐다"는 피드백. schedule_management_tab.dart의 _ScheduleRow가 매번
+  // GoogleFonts.jua()를 직접 부르는데, google_fonts 패키지는 처음 쓰는 폰트를
+  // 그 시점에 비동기로 다운로드/캐싱하고 그동안 시스템 기본 폰트로 잠깐
+  // 대체 표시함(FOUT) - 위 MemoCategoryClassifier와 같은 패턴으로 앱 시작
+  // 시점에 미리 한 번 받아둬서, 실제로 일정 카드를 그릴 때는 이미 캐시돼
+  // 있게 함(마찬가지로 첫 프레임을 막지 않도록 await 안 함).
+  unawaited(GoogleFonts.pendingFonts([GoogleFonts.jua()]));
   // ⭐ 친구공유(Firestore) 초기화 - firebase_options.dart가 아직 플레이스홀더면
   // 조용히 실패하고 친구공유 기능만 비활성화됨 (firebase_bootstrap.dart 참고).
   await initFirebase();
@@ -157,6 +183,14 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
         print('❌ AlarmNotifier 갱신 실패: $e');
       }
     }
+  } else if (state == AppLifecycleState.paused) {
+    // ⭐ 사용자 데이터 백업("A번 요구사항") 자동 트리거(Layer 3) - 앱이
+    // 백그라운드로 전환되는 시점에만, 그것도 마지막 백업 이후 실제로 데이터가
+    // 바뀌었을 때만 조용히 백업함(BackupWatcher.backupNow 참고 - PRAGMA
+    // data_version으로 가볍게 확인). 알람/근무패턴 로직과 완전히 독립된
+    // read-only 판단 + 별개의 파일 쓰기라 기존 로직에 전혀 영향 없음 -
+    // await 없이 fire-and-forget(백그라운드 전환을 지연시키지 않음).
+    unawaited(BackupWatcher.instance.backupNow());
   }
 }
 
@@ -265,7 +299,16 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
   late int _currentIndex;  // ⭐ nullable 제거
   static const platform = kAlarmChannel;
 
-  late final List<Widget> _tabs;
+  late List<Widget> _tabs;
+
+  // ⭐ 2026-09-03 - "컨디션 탭은 아직 한국어 전용(문구/문장 생성 로직까지
+  // 전부 한국어)이라, 영어 사용자에게는 아예 안 보이게 해달라"는 요청.
+  // Localizations.localeOf(context)는 initState()에서 못 씀(InheritedWidget
+  // 구독이라 아직 안전하지 않음 - Flutter가 assert로 막음) - 그래서 탭 목록
+  // 구성 자체를 initState에서 didChangeDependencies로 옮김(로케일이 확정된
+  // 뒤 딱 한 번만 실행되도록 _tabsInitialized로 가드).
+  bool _tabsInitialized = false;
+  bool _showConditionTab = true;
 
   @override
   void initState() {
@@ -275,45 +318,8 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
     // ⭐ 초기 탭 설정 (InitialRouter에서 결정한 값)
     _currentIndex = widget.initialIndex;
 
-    // ⭐ 탭 생성 (callback 전달) - "달력테마" 탭은 제거함. 테마 실험은 다
-    // 끝났고 실제 선택 UI가 설정 탭 안으로 들어갔으니(테마 캐러셀 화면),
-    // 메인 탭 구성이 원래대로 3개로 되돌아옴.
-    //
-    // ⭐ CalendarTab만 Consumer+Theme로 한 겹 감쌈 - CalendarTab 내부의
-    // Theme.of(context) 호출들(_buildDateCell/_buildMonthlyOvertimeCard 등,
-    // this.context를 그대로 씀)이 선택된 달력 테마가 다크(메인·다크)일 때
-    // 실제로 다크 배색을 받게 하려면, CalendarTab "자기 자신"보다 위쪽
-    // 트리에서 Theme를 덮어써야 함 - CalendarTab의 build() 안에서 return값만
-    // Theme로 감싸면 this.context 기준 조회는 여전히 그 감싼 지점보다 위를
-    // 보게 되어 아무 효과가 없음(BuildContext는 위치 기반 조회라 이렇게
-    // 바깥에서 감싸는 게 유일하게 확실한 방법).
-    // ⭐ "일정공유(구 친구공유)"를 설정 탭 안에 묻혀있던 항목에서 메인
-    // 바텀 네비게이션 4번째 탭으로 승격했었으나(다음알람(0)/달력(1)/일정공유(2)/설정(3)),
-    // 2026-08-25 - 그 자리를 "일정관리"(신규, Structured 스타일 레이아웃 실험,
-    // schedule_management_tab.dart)가 대신 차지하도록 교체함. 일정공유는 다시
-    // 설정 탭의 진입점(ListTile)으로 옮김(settings_tab.dart 참고) - 탭에서
-    // 눌렀을 때와 동일한 FriendListScreen을 그대로 push함.
-    // Native(Kotlin)에서 openTab으로 보내는 인덱스는 0(다음알람)/1(달력)뿐이라
-    // 이 순서 변경의 영향을 안 받음(AlarmGuardReceiver.kt/NotificationHelper.kt
-    // /CalendarWidgetProvider.kt 확인함).
-    _tabs = [
-      const NextAlarmTab(),
-      Consumer(
-        builder: (context, ref, _) {
-          final isDark = ref.watch(calendarThemeProvider).isDark;
-          return Theme(
-            data: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
-            child: CalendarTab(),
-          );
-        },
-      ),
-      const ScheduleManagementTab(),
-      SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
-      // ⭐ 2026-08-25 - 아이콘 색상이 최종 확정되어(2번 변형: 인디고·오로라
-      // 그라데이션·코랄) 임시 아이콘 픽커 탭 제거함. ui_theme_lab_screen.dart
-      // 파일 자체는 나중에 다시 후보를 검토할 일이 생기면 재사용할 수 있어
-      // 지우지 않고 남겨둠 - 필요하면 이 자리에 다시 추가하면 됨.
-    ];
+    // ⭐ 탭 목록 구성/컨디션 Provider 프리웜은 로케일이 필요해서
+    // didChangeDependencies()로 옮김(아래 _setupTabsAndPrewarm 참고).
 
     // ⭐ _scheduleGuardWakeup()이 triggerGuardCheck를 호출해서 Native 갱신 판단/실행까지 함
     // (예전엔 여기서 AlarmRefreshService도 따로 호출해서 Native와 중복 실행되는 문제가 있었음)
@@ -342,6 +348,111 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_tabsInitialized) return; // ⭐ 최초 1회만 - 기존 late final 캐시 의도 유지
+    _tabsInitialized = true;
+    _setupTabsAndPrewarm();
+  }
+
+  // ⭐ 2026-09-03 - "컨디션 탭은 영어 버전에서 아예 안 보이게 해달라"는 요청
+  // (컨디션 매니저 UI/문구 생성 로직 전체가 아직 한국어 전용이라, 어설프게
+  // 반쯤 번역된 화면을 보여주는 것보다 나은 선택이라고 판단 - 사용자도 동의).
+  // Native(Kotlin)에서 openTab으로 보내는 인덱스는 0(다음알람)/kCalendarTabIndex(달력)
+  // 뿐이고, 온보딩/백업 화면의 MainScreen(initialIndex:) 호출도 전부 그 둘만 써서
+  // 컨디션 탭을 빼도 그 경로들은 전혀 영향받지 않음.
+  void _setupTabsAndPrewarm() {
+    _showConditionTab = Localizations.localeOf(context).languageCode == 'ko';
+
+    // ⭐ 탭 생성 (callback 전달) - "달력테마" 탭은 제거함. 테마 실험은 다
+    // 끝났고 실제 선택 UI가 설정 탭 안으로 들어갔으니(테마 캐러셀 화면),
+    // 메인 탭 구성이 원래대로 3개로 되돌아옴.
+    //
+    // ⭐ CalendarTab만 Consumer+Theme로 한 겹 감쌈 - CalendarTab 내부의
+    // Theme.of(context) 호출들(_buildDateCell/_buildMonthlyOvertimeCard 등,
+    // this.context를 그대로 씀)이 선택된 달력 테마가 다크(메인·다크)일 때
+    // 실제로 다크 배색을 받게 하려면, CalendarTab "자기 자신"보다 위쪽
+    // 트리에서 Theme를 덮어써야 함 - CalendarTab의 build() 안에서 return값만
+    // Theme로 감싸면 this.context 기준 조회는 여전히 그 감싼 지점보다 위를
+    // 보게 되어 아무 효과가 없음(BuildContext는 위치 기반 조회라 이렇게
+    // 바깥에서 감싸는 게 유일하게 확실한 방법).
+    // ⭐ "일정공유(구 친구공유)"를 설정 탭 안에 묻혀있던 항목에서 메인
+    // 바텀 네비게이션 4번째 탭으로 승격했었으나(다음알람(0)/달력(1)/일정공유(2)/설정(3)),
+    // 2026-08-25 - 그 자리를 "일정관리"(신규, Structured 스타일 레이아웃 실험,
+    // schedule_management_tab.dart)가 대신 차지하도록 교체함. 일정공유는 다시
+    // 설정 탭의 진입점(ListTile)으로 옮김(settings_tab.dart 참고) - 탭에서
+    // 눌렀을 때와 동일한 FriendListScreen을 그대로 push함.
+    // ⭐ 2026-09-04 - "달력을 가운데(탭 순서상 중앙)로" 요청으로 순서를
+    // 다음알람(0)/일정관리(1)/달력(2)/컨디션(3, ko만)/설정(4 또는 en은 3)으로
+    // 재배치함 - 달력 인덱스가 1→2로 바뀌어서 이 파일 안의 "달력탭"을 가리키던
+    // 모든 곳(PopScope의 canPop/뒤로가기 이동, _goToCalendar, 범위 밖 폴백)과
+    // MainScreen(initialIndex:) 호출부(restore_backup_screen.dart/
+    // permission_intro_screen.dart/onboarding_screen.dart), Kotlin
+    // CalendarWidgetProvider.kt의 openTab 값도 전부 같이 2로 맞춰 갱신함.
+    // 다음알람(0)은 그대로라 AlarmGuardReceiver.kt/NotificationHelper.kt가
+    // 보내는 openTab=0은 영향 없음.
+    _tabs = [
+      const NextAlarmTab(),
+      const ScheduleManagementTab(),
+      Consumer(
+        builder: (context, ref, _) {
+          final isDark = ref.watch(calendarThemeProvider).isDark;
+          return Theme(
+            data: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
+            child: CalendarTab(),
+          );
+        },
+      ),
+      // ⭐ 2026-08-31 - 컨디션 매니저 1차 버전(컨디션매니저_설계.md 참고).
+      // "일정관리 옆에 독립 탭으로" 요청대로 여기(달력 다음, 설정 이전)에
+      // 끼워 넣음. ⭐ 2026-09-03 - 영어 로케일이면 이 탭 자체를 목록에서
+      // 뺌(_showConditionTab).
+      if (_showConditionTab) const ConditionTab(),
+      // ⭐ 2026-09-01 후속13 - "컨디션 팁 실험실" 임시 개발용 탭(후속8에서 추가,
+      // 컨디션 매니저 추천 로직 리팩토링 전 검토용)은 검토 끝나서 삭제함
+      // (condition_tip_lab_screen.dart 파일 자체도 삭제).
+      SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
+      // ⭐ 2026-08-25 - 아이콘 색상이 최종 확정되어(2번 변형: 인디고·오로라
+      // 그라데이션·코랄) 임시 아이콘 픽커 탭 제거함. ui_theme_lab_screen.dart
+      // 파일 자체는 나중에 다시 후보를 검토할 일이 생기면 재사용할 수 있어
+      // 지우지 않고 남겨둠 - 필요하면 이 자리에 다시 추가하면 됨.
+      // ⭐ 2026-09-05 - 웰컴/근무배정 팝업 확인용 임시 lab 탭(사용자 요청).
+      // 맨 끝에 추가해서 kCalendarTabIndex(2)/openTab(0,2) 등 기존 인덱스는
+      // 전혀 안 건드림 - 확인 끝나면 이 한 줄만 지우면 됨.
+      const OnboardingPopupLabScreen(),
+    ];
+
+    // ⭐ 컨디션 탭을 뺀 영어 로케일이면 _currentIndex가 밀린 "설정" 자리를
+    // 가리키고 있을 수 있음(예: 알림 등에서 미리 3을 넘겼다거나) - 방어적으로
+    // 범위를 벗어나면 달력 탭(2)으로 되돌림.
+    if (_currentIndex >= _tabs.length) _currentIndex = kCalendarTabIndex;
+
+    // ⭐ 2026-09-01 후속14 - "컨디션 탭에 처음 들어가면 카드들이 텅 비어있다가
+    // 뒤늦게 나타난다"는 피드백. 원인: 이 화면이 IndexedStack이 아니라
+    // `_tabs[_currentIndex]` 하나만 트리에 올리는 구조라(위 주석 참고), 컨디션
+    // 탭은 사용자가 실제로 그 탭에 들어가기 전까진 위젯 자체가 아예 안 만들어짐
+    // - 그 탭 전용 Provider들(scheduleProvider 외엔 다른 탭이 안 건드리는
+    // conditionShiftTimeProvider/sleepRecordProvider, 그리고 FutureProvider인
+    // recentOvertimeMinutesProvider/healthTipsListProvider - 후자는 Firestore
+    // 네트워크 호출까지 있어 더 오래 걸림)가 그제서야 처음 생성되면서 DB
+    // 읽기/네트워크 요청이 "그 순간부터" 시작됨. 위젯을 실제로 안 띄우고도
+    // Provider 로딩만 미리 시작시킬 수 있어서(ref.read - watch와 달리 위젯을
+    // 구독시키지 않고 그냥 한 번 읽어서 생성만 트리거함), 앱 시작 시점에
+    // 컨디션 탭이 실제로 쓰는 최상위 Provider들을 미리 한 번 읽어서 로딩을
+    // 앞당김. 사용자가 다른 탭을 보는 동안 백그라운드에서 미리 끝나 있을
+    // 가능성이 높아짐(첫 진입 시 완전히 안 보인다는 보장은 아니지만 체감
+    // 지연은 크게 줄어듦).
+    // ⭐ 2026-09-03 - 영어 로케일(탭 자체가 안 보임)이면 이 프리웜도 그냥
+    // 낭비(불필요한 DB 읽기 + Firestore 네트워크 호출)라 같이 건너뜀.
+    if (_showConditionTab) {
+      ref.read(todayForecastProvider);
+      ref.read(conditionScoreProvider);
+      ref.read(todayHealthTipProvider);
+      ref.read(recentSleepDaySlotsProvider);
+    }
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -361,7 +472,7 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
 
   // ⭐ 6번 기능: 달력탭으로 이동
   void _goToCalendar() {
-    setState(() => _currentIndex = 1);
+    setState(() => _currentIndex = kCalendarTabIndex);
   }
 
   Future<void> _scheduleGuardWakeup() async {
@@ -410,11 +521,11 @@ Future<void> _handleMethod(MethodCall call) async {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: _currentIndex == 1,  // 달력탭이면 앱 종료 허용
+      canPop: _currentIndex == kCalendarTabIndex,  // 달력탭이면 앱 종료 허용
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _currentIndex != 1) {
+        if (!didPop && _currentIndex != kCalendarTabIndex) {
           // 달력탭이 아니면 달력탭으로 이동
-          setState(() => _currentIndex = 1);
+          setState(() => _currentIndex = kCalendarTabIndex);
         }
       },
       child: Scaffold(
@@ -453,11 +564,22 @@ Future<void> _handleMethod(MethodCall call) async {
                 ],
               ),
             ),
-            // ⭐ 2026-08-25 - 달력 탭(index 1)뿐 아니라 일정관리 탭(index 2)에서도
-            // 항상 자리를 차지하도록 확장 - "일정관리도 광고를 고정으로 보여주자"
-            // 요청. 다른 탭에선 여전히 높이 0.
+            // ⭐ 2026-08-25 - 일정관리 탭뿐 아니라 달력 탭에서도 항상 자리를
+            // 차지하도록 확장 - "일정관리도 광고를 고정으로 보여주자" 요청.
+            // 2026-09-01 후속14 - 컨디션 탭(index 3)도 동일하게 추가(사용자 요청 -
+            // "달력/일정관리와 똑같은 위치·로직으로"). 다른 탭에선 여전히 높이 0.
+            // ⭐ 2026-09-04 - 탭 순서를 다음알람/일정관리/달력/컨디션/설정으로
+            // 바꾸면서 일정관리·달력의 인덱스가 서로 맞바뀌었을 뿐(1,2 두 값은
+            // 그대로) 이 조건식 자체는 안 바뀜 - kCalendarTabIndex(=2)와 일정관리
+            // 인덱스(=1)를 그대로 씀.
+            // ⭐ 2026-09-03 - 영어 로케일이면 컨디션 탭이 빠져서 index 3이
+            // 설정 탭 자리가 됨 - 그 상태에서 index 3을 그대로 광고 대상에
+            // 넣으면 설정 탭에도 광고가 뜨는 버그가 생겨서 _showConditionTab을
+            // 반영해 조건을 분기함.
             Offstage(
-              offstage: _currentIndex != 1 && _currentIndex != 2,
+              offstage: _currentIndex != 1 &&
+                  _currentIndex != kCalendarTabIndex &&
+                  !(_showConditionTab && _currentIndex == 3),
               child: const BannerAdSlot(),
             ),
           ],
@@ -468,9 +590,19 @@ Future<void> _handleMethod(MethodCall call) async {
           onTap: (index) => setState(() => _currentIndex = index),
           items: [
             BottomNavigationBarItem(icon: const Icon(Icons.alarm), label: context.l10n.navNextAlarm),
-            BottomNavigationBarItem(icon: const Icon(Icons.calendar_month), label: context.l10n.navCalendar),
             BottomNavigationBarItem(icon: const Icon(Icons.event_note_outlined), label: context.l10n.navScheduleManagement),
+            BottomNavigationBarItem(icon: const Icon(Icons.calendar_month), label: context.l10n.navCalendar),
+            // ⭐ 2026-08-31 - 컨디션 매니저 1차 버전. 이 탭만 아직 l10n 키가 없어
+            // 한국어 문자열을 직접 씀(condition_tab.dart 상단 주석 참고).
+            // ⭐ 2026-09-03 - 영어 로케일이면 _tabs 목록과 마찬가지로 이 항목도
+            // 통째로 뺌(_showConditionTab) - 두 리스트 길이/순서가 항상 일치해야
+            // BottomNavigationBar의 currentIndex가 어긋나지 않음.
+            if (_showConditionTab)
+              const BottomNavigationBarItem(icon: Icon(Icons.self_improvement), label: '컨디션'),
             BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.l10n.navSettings),
+            // ⭐ 2026-09-05 - 웰컴/근무배정 팝업 확인용 임시 lab 탭(위 _tabs 주석
+            // 참고) - 확인 끝나면 이 한 줄도 같이 지울 것.
+            const BottomNavigationBarItem(icon: Icon(Icons.science_outlined), label: '팝업확인'),
           ],
         ),
       ),
@@ -863,14 +995,34 @@ class _InitialRouterState extends State<InitialRouter> {
         Navigator.of(context).pushReplacement(_instantRoute(const PermissionIntroScreen()));
       }
     } else if (schedule == null) {
-      if (mounted) {
+      // ⭐ 사용자 데이터 백업("A번 요구사항") - 스케줄이 아직 없다는 건 신규
+      // 설치(또는 초기화 직후)라는 뜻인데, 재설치라면 이 기기에 예전 백업
+      // 파일이 남아있을 수 있음(MediaStore는 앱을 지워도 파일이 안 지워짐 -
+      // backup_storage_service.dart 참고). 곧장 OnboardingScreen으로 보내기
+      // 전에 그 백업이 있는지만 가볍게 확인 - 있으면 복구 여부를 먼저 물어봄
+      // (RestoreBackupScreen), 없으면(대부분의 진짜 신규 설치) 기존과 동일하게
+      // 바로 OnboardingScreen.
+      final backupJson = await BackupStorageService.instance.read();
+      BackupPayload? payload;
+      if (backupJson != null) {
+        try {
+          payload = BackupPayload.decode(backupJson);
+        } catch (e) {
+          payload = null; // 손상된 백업 파일 - 조용히 무시하고 신규 설치처럼 진행
+        }
+      }
+      if (!mounted) return;
+      if (payload != null) {
+        Navigator.of(context)
+            .pushReplacement(_instantRoute(RestoreBackupScreen(payload: payload)));
+      } else {
         Navigator.of(context).pushReplacement(_instantRoute(const OnboardingScreen()));
       }
     } else {
       // ⭐ 홈 화면: 항상 달력탭으로 시작
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          _instantRoute(MainScreen(initialIndex: 1)),  // 달력탭 고정
+          _instantRoute(MainScreen(initialIndex: kCalendarTabIndex)),  // 달력탭 고정
         );
       }
     }

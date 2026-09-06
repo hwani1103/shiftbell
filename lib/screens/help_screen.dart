@@ -1,0 +1,512 @@
+// lib/screens/help_screen.dart
+//
+// ⭐ 2026-09-03 - 설정 탭 "도움말"을 4항목짜리 AlertDialog에서 전면 재작성.
+// 앱의 모든 주요 기능을 목차(섹션 → 항목)로 정리한 사용설명서 화면 - 전부
+// 스크롤 한 화면에 나열하면 너무 길어지므로, 이 화면에서는 "목차"만 보여주고
+// 항목을 탭하면 [HelpDetailScreen]으로 넘어가 그 항목 내용만 상세히 읽게 함.
+// 검색으로 항목 제목을 바로 필터링할 수도 있음.
+//
+// 콘텐츠(제목/본문) 자체는 전부 l10n(app_ko.arb/app_en.arb의 help* 키)에 있고,
+// 이 파일은 그 키들을 섹션/항목 구조로 묶어서 화면에 뿌리는 역할만 함 - 새
+// 항목을 추가하려면 ARB에 title/body 키 한 쌍을 추가하고 [_helpSections]에
+// [HelpTopic] 한 줄만 추가하면 됨.
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../l10n/generated/app_localizations.dart';
+import '../l10n/l10n_extensions.dart';
+import '../theme/app_colors.dart';
+
+typedef HelpTextOf = String Function(AppLocalizations l10n);
+
+class HelpTopic {
+  final HelpTextOf titleKey;
+  final HelpTextOf bodyKey;
+  const HelpTopic({required this.titleKey, required this.bodyKey});
+}
+
+class HelpSection {
+  final IconData icon;
+  final HelpTextOf titleKey;
+  final List<HelpTopic> topics;
+  const HelpSection({required this.icon, required this.titleKey, required this.topics});
+}
+
+// ⭐ 순서 = 사용자가 앱을 처음 접했을 때 흐름(시작하기 → 근무 관리 → 알람 →
+// 달력/위젯 → 일정관리 → 컨디션 → 수면 → 친구공유 → 백업 → 문제해결)을 그대로 따름.
+final List<HelpSection> _helpSections = [
+  HelpSection(
+    icon: Icons.rocket_launch_outlined,
+    titleKey: (l10n) => l10n.helpStartSectionTitle,
+    topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpStartOnboardingTitle,
+        bodyKey: (l10n) => l10n.helpStartOnboardingBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpStartScheduleTypesTitle,
+        bodyKey: (l10n) => l10n.helpStartScheduleTypesBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpStartChangeLanguageTitle,
+        bodyKey: (l10n) => l10n.helpStartChangeLanguageBody,
+      ),
+    ],
+  ),
+  HelpSection(
+    icon: Icons.badge_outlined,
+    titleKey: (l10n) => l10n.helpShiftSectionTitle,
+    topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpShiftIrregularAssignTitle,
+        bodyKey: (l10n) => l10n.helpShiftIrregularAssignBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpShiftChangeShiftTitle,
+        bodyKey: (l10n) => l10n.helpShiftChangeShiftBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpShiftShiftColorsTitle,
+        bodyKey: (l10n) => l10n.helpShiftShiftColorsBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpShiftAllShiftsTitle,
+        bodyKey: (l10n) => l10n.helpShiftAllShiftsBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpShiftTeamChangeTitle,
+        bodyKey: (l10n) => l10n.helpShiftTeamChangeBody,
+      ),
+    ],
+  ),
+  HelpSection(
+    icon: Icons.alarm_outlined,
+    titleKey: (l10n) => l10n.helpAlarmSectionTitle,
+    topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpAlarmTemplatesTitle,
+        bodyKey: (l10n) => l10n.helpAlarmTemplatesBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpAlarmDayOffsetTitle,
+        bodyKey: (l10n) => l10n.helpAlarmDayOffsetBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpAlarmPreAlertSnoozeTitle,
+        bodyKey: (l10n) => l10n.helpAlarmPreAlertSnoozeBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpAlarmSoundVolumeTitle,
+        bodyKey: (l10n) => l10n.helpAlarmSoundVolumeBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpAlarmAlarmNotRingingTitle,
+        bodyKey: (l10n) => l10n.helpAlarmAlarmNotRingingBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpAlarmAlarmHistoryTitle,
+        bodyKey: (l10n) => l10n.helpAlarmAlarmHistoryBody,
+      ),
+      // ⭐ 2026-09-04 - 전체_코드_점검_리포트_2026-09-04.md의 H2(알람 갱신
+      // 트랜잭션 중 OS 알람 호출) 항목은 코드 수정은 보류하기로 했지만, 사용자가
+      // 알아두면 스스로 대처 가능한 내용이라 도움말에만 추가.
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpAlarmPermissionToggleTitle,
+        bodyKey: (l10n) => l10n.helpAlarmPermissionToggleBody,
+      ),
+    ],
+  ),
+  HelpSection(
+    icon: Icons.calendar_month_outlined,
+    titleKey: (l10n) => l10n.helpCalendarSectionTitle,
+    topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpCalendarThemesTitle,
+        bodyKey: (l10n) => l10n.helpCalendarThemesBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpCalendarMemoTitle,
+        bodyKey: (l10n) => l10n.helpCalendarMemoBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpCalendarOtTitle,
+        bodyKey: (l10n) => l10n.helpCalendarOtBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpCalendarWorkHoursPayTitle,
+        bodyKey: (l10n) => l10n.helpCalendarWorkHoursPayBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpCalendarHomeWidgetTitle,
+        bodyKey: (l10n) => l10n.helpCalendarHomeWidgetBody,
+      ),
+    ],
+  ),
+  HelpSection(
+    icon: Icons.checklist_outlined,
+    titleKey: (l10n) => l10n.helpScheduleTabSectionTitle,
+    topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpScheduleTabWhatIsItTitle,
+        bodyKey: (l10n) => l10n.helpScheduleTabWhatIsItBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpScheduleTabCreateEditTitle,
+        bodyKey: (l10n) => l10n.helpScheduleTabCreateEditBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpScheduleTabAutoCategoryTitle,
+        bodyKey: (l10n) => l10n.helpScheduleTabAutoCategoryBody,
+      ),
+    ],
+  ),
+  HelpSection(
+    icon: Icons.self_improvement_outlined,
+    titleKey: (l10n) => l10n.helpConditionSectionTitle,
+    topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpConditionWhatIsItTitle,
+        bodyKey: (l10n) => l10n.helpConditionWhatIsItBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpConditionTodayForecastTitle,
+        bodyKey: (l10n) => l10n.helpConditionTodayForecastBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpConditionHowJudgedTitle,
+        bodyKey: (l10n) => l10n.helpConditionHowJudgedBody,
+      ),
+      // ⭐ 2026-09-04 v2 - 컨디션 판정 로직 개편(evidence 6종 판정 반영)에 맞춰
+      // 근거자료 12개 전체를 도움말 한곳에서 볼 수 있게 신설(사용자 요청).
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpConditionEvidenceListTitle,
+        bodyKey: (l10n) => l10n.helpConditionEvidenceListBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpConditionSetupNeededTitle,
+        bodyKey: (l10n) => l10n.helpConditionSetupNeededBody,
+      ),
+      // ⭐ 2026-09-04 - 전체_코드_점검_리포트_2026-09-04.md에서 발견한 ShiftTimeRange
+      // 동일 출퇴근시각 입력 시 24시간 근무로 계산되는 건(리스크 검토 후 코드는
+      // 손 안 대기로 함) 입력 화면에서 사용자가 그냥 피하면 되는 문제라 도움말로 안내.
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpConditionSameStartEndTitle,
+        bodyKey: (l10n) => l10n.helpConditionSameStartEndBody,
+      ),
+    ],
+  ),
+  HelpSection(
+    icon: Icons.bedtime_outlined,
+    titleKey: (l10n) => l10n.helpSleepSectionTitle,
+    topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpSleepWidgetTitle,
+        bodyKey: (l10n) => l10n.helpSleepWidgetBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpSleepAutoDetectTitle,
+        bodyKey: (l10n) => l10n.helpSleepAutoDetectBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpSleepMiniCalendarTitle,
+        bodyKey: (l10n) => l10n.helpSleepMiniCalendarBody,
+      ),
+    ],
+  ),
+  HelpSection(
+    icon: Icons.group_outlined,
+    titleKey: (l10n) => l10n.helpFriendSectionTitle,
+    topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpFriendWhatIsItTitle,
+        bodyKey: (l10n) => l10n.helpFriendWhatIsItBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpFriendShareCodeTitle,
+        bodyKey: (l10n) => l10n.helpFriendShareCodeBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpFriendViewFriendTitle,
+        bodyKey: (l10n) => l10n.helpFriendViewFriendBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpFriendReinstallNoteTitle,
+        bodyKey: (l10n) => l10n.helpFriendReinstallNoteBody,
+      ),
+    ],
+  ),
+  HelpSection(
+    icon: Icons.backup_outlined,
+    titleKey: (l10n) => l10n.helpBackupSectionTitle,
+    topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpBackupDataStorageTitle,
+        bodyKey: (l10n) => l10n.helpBackupDataStorageBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpBackupAutoBackupTitle,
+        bodyKey: (l10n) => l10n.helpBackupAutoBackupBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpBackupRestoreTitle,
+        bodyKey: (l10n) => l10n.helpBackupRestoreBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpBackupRestoreManualTitle,
+        bodyKey: (l10n) => l10n.helpBackupRestoreManualBody,
+      ),
+      // ⭐ 2026-09-04 - 전체_코드_점검_리포트_2026-09-04.md M10(복구 부분실패
+      // 격리 없음) 항목은 코드 수정은 보류하기로 했지만, 예방 차원에서 사용자가
+      // 알아두면 도움되는 내용이라 도움말에만 추가.
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpBackupRestoreOldBackupFailTitle,
+        bodyKey: (l10n) => l10n.helpBackupRestoreOldBackupFailBody,
+      ),
+    ],
+  ),
+  HelpSection(
+    icon: Icons.help_outline,
+    titleKey: (l10n) => l10n.helpTroubleshootSectionTitle,
+    topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpTroubleshootAlarmIssueTitle,
+        bodyKey: (l10n) => l10n.helpTroubleshootAlarmIssueBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpTroubleshootWidgetIssueTitle,
+        bodyKey: (l10n) => l10n.helpTroubleshootWidgetIssueBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpTroubleshootBackupFileMissingTitle,
+        bodyKey: (l10n) => l10n.helpTroubleshootBackupFileMissingBody,
+      ),
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpTroubleshootFriendDisconnectedTitle,
+        bodyKey: (l10n) => l10n.helpTroubleshootFriendDisconnectedBody,
+      ),
+    ],
+  ),
+];
+
+class HelpScreen extends StatefulWidget {
+  const HelpScreen({super.key});
+
+  @override
+  State<HelpScreen> createState() => _HelpScreenState();
+}
+
+class _HelpScreenState extends State<HelpScreen> {
+  final _searchController = TextEditingController();
+  String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final query = _query.trim().toLowerCase();
+
+    // 검색어가 있으면 섹션별로 제목이 매치하는 항목만 남기고, 매치가 하나도
+    // 없는 섹션은 통째로 숨긴다.
+    final visibleSections = query.isEmpty
+        ? _helpSections
+        : _helpSections
+            .map((s) {
+              final matched = s.topics
+                  .where((t) => t.titleKey(l10n).toLowerCase().contains(query))
+                  .toList();
+              return HelpSection(icon: s.icon, titleKey: s.titleKey, topics: matched);
+            })
+            .where((s) => s.topics.isNotEmpty)
+            .toList();
+
+    return Scaffold(
+      backgroundColor: kAppBackgroundPastel,
+      appBar: AppBar(
+        title: Text(l10n.settingsHelp),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0.5,
+      ),
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (v) => setState(() => _query = v),
+                decoration: InputDecoration(
+                  hintText: l10n.helpSearchHint,
+                  prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                  suffixIcon: _query.isEmpty
+                      ? null
+                      : IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          onPressed: () => setState(() {
+                            _searchController.clear();
+                            _query = '';
+                          }),
+                        ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 16.w),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: visibleSections.isEmpty
+                  ? Center(
+                      child: Text(
+                        l10n.helpEmptySearchResult,
+                        style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: EdgeInsets.only(bottom: 24.h),
+                      itemCount: visibleSections.length,
+                      itemBuilder: (context, i) => _SectionBlock(section: visibleSections[i]),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionBlock extends StatelessWidget {
+  final HelpSection section;
+  const _SectionBlock({required this.section});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(20.w, 20.h, 16.w, 8.h),
+          child: Row(
+            children: [
+              Icon(section.icon, size: 18.sp, color: kAppMainAccent),
+              SizedBox(width: 8.w),
+              Text(
+                section.titleKey(l10n),
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  color: kAppMainAccent,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 12.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14.r),
+          ),
+          child: Column(
+            children: [
+              for (var i = 0; i < section.topics.length; i++) ...[
+                if (i > 0) Divider(height: 1, indent: 16.w, endIndent: 16.w, color: Colors.grey.shade200),
+                _TopicTile(topic: section.topics[i]),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TopicTile extends StatelessWidget {
+  final HelpTopic topic;
+  const _TopicTile({required this.topic});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return InkWell(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => HelpDetailScreen(topic: topic)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                topic.titleKey(l10n),
+                style: TextStyle(fontSize: 14.5.sp, color: Colors.black87, height: 1.3),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Icon(Icons.chevron_right, size: 20.sp, color: Colors.grey.shade400),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 항목 하나의 상세 내용만 보여주는 화면 - 목차 화면에서 항목을 탭하면 옴.
+class HelpDetailScreen extends StatelessWidget {
+  final HelpTopic topic;
+  const HelpDetailScreen({super.key, required this.topic});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Scaffold(
+      backgroundColor: kAppBackgroundPastel,
+      appBar: AppBar(
+        title: Text(
+          topic.titleKey(l10n),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        elevation: 0.5,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20.w),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(20.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14.r),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                topic.titleKey(l10n),
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w700, color: Colors.black87),
+              ),
+              SizedBox(height: 14.h),
+              Text(
+                topic.bodyKey(l10n),
+                style: TextStyle(fontSize: 14.5.sp, color: Colors.black87, height: 1.6),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

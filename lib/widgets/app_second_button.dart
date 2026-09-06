@@ -26,11 +26,29 @@
 // 화면 제목 바로 아래 줄에 작게 붙이는 용도로 필요해짐(원래 크기는 "너무
 // 크고 부담스럽다"는 피드백) - 패딩/글자/아이콘을 비례해서 줄인 버전.
 // 기본값 false면 기존 크기와 완전히 동일함.
+//
+// ⭐ 2026-08-31 - padding/fontSize override 파라미터 추가. 달력 탭 메모
+// 입력창 옆 "저장" 버튼을 compact(패딩 10/6, 폰트 12 고정)로 바꿨더니 "너무
+// 작다"는 피드백 - 그렇다고 기본(비compact, 패딩 24/14, 폰트 15) 크기는 좁은
+// 텍스트필드 옆 자리에 비해 과함. compact의 정의 자체(다른 재사용처인 알람
+// 이력 화면 "이력 삭제" 버튼에 이미 씀)는 안 건드리고, 필요한 곳에서만 정확한
+// 중간 크기(이 리팩터 전 메모 저장 버튼이 실제로 쓰던 값: 패딩 12/10, 폰트
+// 13)를 지정할 수 있게 override를 추가함 - 지정 안 하면 기존 compact/기본
+// 프리셋 그대로라 다른 재사용처는 전혀 영향 없음.
 
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-enum AppSecondButtonVariant { danger, success, neutral }
+enum AppSecondButtonVariant {
+  danger,
+  success,
+  neutral,
+  // ⭐ 2026-09-01 - "생성/저장 버튼을 AppButton(메인 액션용 그라데이션)이 아니라
+  // 취소 버튼이랑 똑같은 모양에 색만 앱 컨셉(kAppMainAccent)으로" 요청
+  // (schedule_management_tab.dart의 일정생성 시트) - success(초록)/danger(빨강)
+  // 둘 다 앱 메인 색과 무관해서 새 variant 추가. 다른 variant처럼 흰 글씨.
+  primary,
+}
 
 class AppSecondButton extends StatelessWidget {
   const AppSecondButton({
@@ -39,6 +57,8 @@ class AppSecondButton extends StatelessWidget {
     required this.child,
     this.variant = AppSecondButtonVariant.neutral,
     this.compact = false,
+    this.padding,
+    this.fontSize,
   });
 
   final VoidCallback? onPressed;
@@ -47,6 +67,12 @@ class AppSecondButton extends StatelessWidget {
 
   /// true면 좁은 자리(화면 제목 옆 등)에 맞게 패딩/글자를 줄인 작은 버전.
   final bool compact;
+
+  /// 지정하면 compact 프리셋 대신 이 패딩을 씀(중간 크기 등 예외적인 자리용).
+  final EdgeInsetsGeometry? padding;
+
+  /// 지정하면 compact 프리셋 대신 이 글자 크기를 씀.
+  final double? fontSize;
 
   bool get _enabled => onPressed != null;
 
@@ -64,6 +90,8 @@ class AppSecondButton extends StatelessWidget {
         return const Color(0xFF2F9E5B);
       case AppSecondButtonVariant.neutral:
         return kAppMainAccentLight;
+      case AppSecondButtonVariant.primary:
+        return kAppMainAccent;
     }
   }
 
@@ -71,6 +99,7 @@ class AppSecondButton extends StatelessWidget {
     switch (variant) {
       case AppSecondButtonVariant.danger:
       case AppSecondButtonVariant.success:
+      case AppSecondButtonVariant.primary:
         return Colors.white;
       case AppSecondButtonVariant.neutral:
         return kAppChipBorder;
@@ -96,9 +125,10 @@ class AppSecondButton extends StatelessWidget {
             splashColor: Colors.white.withValues(alpha: 0.18),
             highlightColor: Colors.white.withValues(alpha: 0.1),
             child: Container(
-              padding: compact
-                  ? const EdgeInsets.symmetric(horizontal: 10, vertical: 6)
-                  : const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              padding: padding ??
+                  (compact
+                      ? const EdgeInsets.symmetric(horizontal: 10, vertical: 6)
+                      : const EdgeInsets.symmetric(horizontal: 24, vertical: 14)),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -106,7 +136,7 @@ class AppSecondButton extends StatelessWidget {
                   DefaultTextStyle.merge(
                     style: TextStyle(
                       color: _enabled ? _textColor : const Color(0xFF6B7280),
-                      fontSize: compact ? 12 : 15,
+                      fontSize: fontSize ?? (compact ? 12 : 15),
                       fontWeight: FontWeight.w600,
                     ),
                     child: IconTheme.merge(

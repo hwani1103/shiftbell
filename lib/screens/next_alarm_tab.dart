@@ -779,7 +779,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 ///   - 알람이 실제로 울리기 전(now < alarmTime)에는 remaining이 항상 양수라
 ///     progress가 수학적으로 절대 1.0에 도달하지 않음 - 1.0은 딱 그 순간에만.
 /// 화면을 보고 있는 동안 "자연히 계속 조금씩" 움직이는 것처럼 보이게 하려고
-/// 15초마다 다시 그림. 링이 12시간에 걸쳐 채워지는 속도를 감안하면 15초
+/// 15초마다 다시 그림. 링이 24시간에 걸쳐 채워지는 속도를 감안하면 15초
 /// 간격도 눈으로는 완전히 매끄럽게 보이고, 화면이 켜져 있는 몇 시간 내내
 /// 매 프레임(60fps)을 다시 그리는 것보다 배터리 부담이 훨씬 적음.
 class _CountdownRing extends StatefulWidget {
@@ -822,7 +822,10 @@ class _CountdownRingState extends State<_CountdownRing> {
   static const double _maxProgressBeforeRinging = 0.96;
 
   double get _progress {
-    const window = Duration(hours: 12);
+    // ⭐ 2026-09-01 - "24시간부터 링이 움직이게" 요청으로 12h → 24h. 비율
+    // 계산식(raw = 1 - remaining/window) 자체는 그대로라 창 길이만 늘어난
+    // 만큼 자동으로 더 천천히 채워짐(다른 값 손볼 필요 없음).
+    const window = Duration(hours: 24);
     final remaining = widget.alarmTime.difference(DateTime.now());
     if (remaining.isNegative) return 1.0;
     if (remaining >= window) return 0.0;

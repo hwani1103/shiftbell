@@ -43,6 +43,16 @@ import 'l10n/l10n_extensions.dart';
 
 const _kLastOwnerIdStorageKey = 'shiftbell_last_owner_id';
 
+/// M5에서 씀 - 홈 화면에 설치된 PWA를 아이콘으로 재실행했을 때만 true.
+/// 일반 브라우저 탭(공유/키오스크 환경 포함)에서는 항상 false.
+bool _isStandalonePwa() {
+  try {
+    return html.window.matchMedia('(display-mode: standalone)').matches;
+  } catch (_) {
+    return false;
+  }
+}
+
 // ⭐ 카카오톡/인스타그램/라인/네이버 등 "인앱 브라우저"(메신저 안에 내장된 미니
 // 웹뷰)는 주소창 자체가 없어서(또는 있어도 PWA 설치 아이콘을 지원 안 해서) 상단
 // "작업 표시줄의 설치 버튼을 눌러주세요" 안내가 실제로 따라할 수 없는 조언이 됨
@@ -245,10 +255,18 @@ class _WebViewRouterState extends State<_WebViewRouter> {
 
     if (ownerId == null) {
       // ⭐ 홈 화면 아이콘으로 재실행 등, URL에 code가 아예 없을 때만 폴백.
-      try {
-        ownerId = html.window.localStorage[_kLastOwnerIdStorageKey];
-      } catch (_) {
-        // localStorage 접근 자체가 막힌 브라우저 설정 등 - 그냥 폴백 없이 진행.
+      // ⭐ 2026-09-04 - M5 수정(전체_코드_점검_리포트_2026-09-04.md). 이 폴백은
+      // PWA를 홈 화면 아이콘으로 재실행할 때(manifest의 code 없는 start_url)만
+      // 필요한 건데, PWA standalone 모드인지 확인 없이 아무 방문(code 없이
+      // 그냥 루트로 들어온 일반 브라우저 방문 포함)에나 적용되고 있었음 - 공유/
+      // 키오스크 브라우저에서 A가 본 친구 근무표가 B에게도 그대로 뜨는 노출
+      // 경로였음. standalone 모드일 때만 폴백을 시도하도록 제한.
+      if (_isStandalonePwa()) {
+        try {
+          ownerId = html.window.localStorage[_kLastOwnerIdStorageKey];
+        } catch (_) {
+          // localStorage 접근 자체가 막힌 브라우저 설정 등 - 그냥 폴백 없이 진행.
+        }
       }
       if (ownerId == null) return _LoadResult.invalidLink(context.l10n.friendLinkMissingCode);
     }

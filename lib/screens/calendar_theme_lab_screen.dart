@@ -234,10 +234,11 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
 
   // ⭐ 테마 이름/설명 문구는 완전히 제거함("진짜 메인 달력에 쓸 정도로" 다듬는
   // 단계라 화면에 그런 라벨이 있으면 안 됨) - 테마는 이제 내부적으로 숫자
-  // (0~8, CalendarThemeId)로만 구분됨. 설정 탭의 테마 선택 화면에서 쓰는
+  // (0~9, CalendarThemeId)로만 구분됨. 설정 탭의 테마 선택 화면에서 쓰는
   // "1번/2번/.../메인 화이트/메인 다크" 라벨은 lib/models/calendar_theme.dart
   // 하나로 통합해서 정의함(여기서 다시 안 만듦 - 중복 방지).
-  static const _themeCount = 9;
+  // ⭐ 2026-09-01 - 다이어리 신설로 9 → 10.
+  static const _themeCount = 10;
 
   @override
   void dispose() {
@@ -266,20 +267,23 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
   }
 
   // ⭐ 이 index는 설정 탭 캐러셀(calendar_theme_picker_screen.dart)이
-  // kAllCalendarThemeIds(=CalendarThemeId.values)의 순서 그대로 넘겨줌 - 그
-  // 목록을 "메인·화이트/다크가 맨 앞"으로 재배치했으니 여기 매핑도 반드시
-  // 동일한 순서로 맞춰야 함(안 그러면 캐러셀 카드가 엉뚱한 테마를 보여줌).
+  // kAllCalendarThemeIds(calendar_theme.dart, CalendarThemeId.values와 별개의
+  // 전용 표시 순서 목록)의 순서 그대로 넘겨줌 - 그 목록 순서가 바뀔 때마다
+  // 여기 매핑도 반드시 동일한 순서로 맞춰야 함(안 그러면 캐러셀 카드가 엉뚱한
+  // 테마를 보여줌). 2026-09-05 - "다이어리를 4~5번째로, 범례 필수인 언더라인/
+  // 매거진을 맨 우측에 나란히" 요청으로 재배치.
   Widget _buildThemeBody(int index) {
     switch (index) {
       case 0: return _themeMainWhite();
       case 1: return _themeMainDark();
       case 2: return _theme1MinimalLine();
       case 3: return _theme2MaterialCard();
-      case 4: return _theme4BoldGrid();
-      case 5: return _theme5InitialBadge();
-      case 6: return _theme8Underline();
+      case 4: return _themeDiaryBody();
+      case 5: return _theme4BoldGrid();
+      case 6: return _theme5InitialBadge();
       case 7: return _theme9EventChip();
-      case 8: return _theme10Editorial();
+      case 8: return _theme8Underline();
+      case 9: return _theme10Editorial();
       default: return const SizedBox.shrink();
     }
   }
@@ -1828,6 +1832,171 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
                   ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// ⭐ 다이어리 (2026-09-01 재설계) - 실제 구현은 calendar_tab.dart의
+// _themeDiaryCell() 등 참고. 여기는 그 디자인을 목업 데이터로 재현한 미리보기
+// 전용 사본(설정 탭 테마 캐러셀 카드용) - 이 파일 상단 클래스 주석 참고.
+// 원래 "노르딕"/"다이어리" 둘로 나눠 만들었다가 노르딕 구조에 다이어리 톤을
+// 얹어 하나로 합침 - calendar_tab.dart 쪽을 수정했으면 여기도 같이 맞출 것
+// (안 그러면 미리보기와 실제 달력이 어긋나 보임).
+// ============================================================
+extension _ThemeDiary on _CalendarThemeLabScreenState {
+  Widget _themeDiaryBody() {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
+          child: Row(
+            children: [
+              Container(width: 7.w, height: 7.w, margin: EdgeInsets.only(right: 7.w), decoration: const BoxDecoration(color: Color(0xFFCB8A4E), shape: BoxShape.circle)),
+              Text('August 2026', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500, letterSpacing: 0.2, color: const Color(0xFF4A4038))),
+              const Spacer(),
+              _diaryHeaderBtn(context.l10n.shiftFullSchedule, _openAllShifts),
+              SizedBox(width: 8.w),
+              _diaryHeaderBtn('Today', _tapToday),
+            ],
+          ),
+        ),
+        SizedBox(height: 4.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.w),
+          child: Row(
+            children: List.generate(7, (i) => Expanded(
+              child: Center(
+                child: Text(
+                  weekdayLabel(context, i),
+                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: i == 0 ? const Color(0xFFD9534F) : const Color(0xFF8A6F5C)),
+                ),
+              ),
+            )),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
+            child: Column(
+              children: List.generate(6, (row) => Expanded(
+                child: Row(
+                  children: List.generate(7, (col) {
+                    final day = _days[row * 7 + col];
+                    return Expanded(child: _themeDiaryCell(day));
+                  }),
+                ),
+              )),
+            ),
+          ),
+        ),
+        _themeDiaryOtBar(),
+        SizedBox(height: 6.h),
+      ],
+    );
+  }
+
+  Widget _diaryHeaderBtn(String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 5.h),
+        decoration: BoxDecoration(color: const Color(0xFFFFF0DE), borderRadius: BorderRadius.circular(20.r)),
+        child: Text(label, style: TextStyle(fontSize: 10.sp, color: const Color(0xFFB5651D), fontWeight: FontWeight.w700)),
+      ),
+    );
+  }
+
+  // ⭐ calendar_tab.dart의 _themeDiaryCell()과 동일한 구조(날짜|근무명 절반씩
+  // 나눈 상단 박스 + 공휴일 있으면 그 아래도 테두리로 한 번 더 구획 + 메모는
+  // 테두리 없이) - 목업 데이터(_mockShiftFor 등)로만 재현.
+  Widget _themeDiaryCell(DateTime day) {
+    const borderColor = Color(0xFFE4D9C9);
+    final outside = _isOutsideAugust(day);
+    final shift = _mockShiftFor(context, day);
+    final today = _isToday(day);
+    final red = _isRedDay(day);
+    final holidayName = _mockHolidayNameFor(context, day);
+    final dateColor = outside ? Colors.grey.shade300 : (red ? const Color(0xFFC0392B) : const Color(0xFF4A4038));
+    return GestureDetector(
+      onTap: () => _tapDay(day),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: double.infinity,
+        margin: EdgeInsets.all(1.w),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: borderColor, width: 0.8),
+          borderRadius: BorderRadius.circular(6.r),
+        ),
+        child: Column(
+          children: [
+            Container(
+              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: borderColor, width: 0.8))),
+              child: IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.symmetric(vertical: 3.h),
+                        // 🔧 실제 구현(calendar_tab.dart의 _themeDiaryCell)과 동일 -
+                        // 빨간날이 오늘이면 배경만 밝은 크림톤(0xFFFCE2B0)으로 바꾸고
+                        // 글자는 계속 빨간색 유지(대비 문제로 흰 글씨를 안 씀).
+                        child: today
+                            ? Container(
+                                width: 16.w, height: 16.w, alignment: Alignment.center,
+                                decoration: BoxDecoration(color: red ? const Color(0xFFFCE2B0) : const Color(0xFFCB8A4E), shape: BoxShape.circle),
+                                child: Text('${day.day}', style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: red ? const Color(0xFFC0392B) : Colors.white)),
+                              )
+                            : Text('${day.day}', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: dateColor)),
+                      ),
+                    ),
+                    const VerticalDivider(width: 0.8, thickness: 0.8, color: borderColor),
+                    Expanded(
+                      child: Container(
+                        color: shift.color.withOpacity(0.85),
+                        alignment: Alignment.center,
+                        padding: EdgeInsets.symmetric(vertical: 3.h, horizontal: 1.w),
+                        child: Text(shift.name, style: TextStyle(fontSize: 6.8.sp, fontWeight: FontWeight.bold, color: _autoTextColor(shift.color)), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (holidayName != null)
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: borderColor, width: 0.8))),
+                padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                child: Text(holidayName, textAlign: TextAlign.center, style: TextStyle(fontSize: 6.8.sp, color: const Color(0xFFC0392B), fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            const Expanded(child: SizedBox.shrink()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _themeDiaryOtBar() {
+    return Container(
+      margin: EdgeInsets.fromLTRB(12.w, 4.h, 12.w, 0),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
+      decoration: BoxDecoration(color: const Color(0xFFFFF3E2), borderRadius: BorderRadius.circular(14.r), border: Border.all(color: const Color(0xFFF0DFC8))),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text('${context.l10n.shiftThisMonthOt} ${formatOvertimeMinutes(context, _mockMonthlyOtTotal)}', style: TextStyle(fontSize: 11.sp, color: const Color(0xFFB5651D), fontWeight: FontWeight.w700)),
+          ),
+          GestureDetector(
+            onTap: () => _showWeekSummarySheet(context, _weeks),
+            child: Text('${context.l10n.shiftWeeklyWorkHours} ›', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF8A6F5C), fontWeight: FontWeight.w600)),
           ),
         ],
       ),
