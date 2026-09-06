@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ⭐ 실제 수면 기록 위젯 메타데이터 - 캘린더 위젯(calendar_widget_info.xml)과 완전
+     별개. 2026-09-01 - "오늘: OO / 상태: OO" 두 줄 + 버튼 2개(수면/기상)를 담기
+     위해 기존 2x1(110x40dp) 최소 크기에서 3x2(180x110dp)로 키웠었는데, "빨리
+     써야 하는 위젯인데 너무 커졌다"는 후속 피드백으로 sleep_widget.xml의
+     padding/텍스트 크기를 전부 줄여서 다시 컴팩트하게 만들고 여기 값도 같이
+     낮춤(2x1과 3x2의 중간 - 2줄+버튼줄까지 담아야 해서 2x1까지는 못 줄임).
+     ⚠️ 실기기 미검증 - 런처마다 실제 그리드 셀 크기가 달라 정확히 몇x몇으로
+     보일지는 설치해서 확인 필요. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="150dp"
+    android:minHeight="72dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/sleep_widget"
+    android:resizeMode="none"
+    android:widgetCategory="home_screen"
+    android:description="@string/sleep_widget_description"
+    android:previewLayout="@layout/sleep_widget" />
