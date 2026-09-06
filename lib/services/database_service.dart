@@ -12,6 +12,8 @@ import 'dart:async';
 import '../models/alarm_history.dart';
 import '../models/date_memo.dart';
 import '../models/date_schedule.dart';
+import '../models/shift_time_range.dart';
+import '../models/sleep_record.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
@@ -56,7 +58,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 20,  // v20: date_schedules 테이블 추가 (일정관리 탭 영구 저장 + 메모 자동분류 카테고리 필드)
+      version: 22,  // v22: sleep_records/sleep_expected_bedtime 테이블 추가 (실제 수면 기록/자동 추정)
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -224,6 +226,51 @@ class DatabaseService {
         owner_id TEXT NOT NULL UNIQUE,
         data_json TEXT,
         added_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+
+    // ⭐ 신규(v21): 컨디션 매니저 - 근무명별 출퇴근 시각(자정 기준 분). 기존
+    // shift_schedule.shift_durations(분 단위 근로시간)와는 완전히 별개 -
+    // 컨디션매니저_설계.md 3장 참고. 알람/근무패턴 로직은 이 테이블을 전혀
+    // 읽지 않음.
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS condition_shift_times(
+        shift_name TEXT PRIMARY KEY,
+        start_minutes INTEGER NOT NULL,
+        end_minutes INTEGER NOT NULL,
+        updated_at TEXT NOT NULL
+      )
+    ''');
+
+    // ⭐ 신규(v22): 실제 수면 기록/자동 추정("C번 요구사항") - 수면기록_자동추정_설계.md
+    // 참고. end_time이 NULL이면 "진행 중"(수동 취침 중 또는 자동 감지 후보 진행 중)을
+    // 뜻함. 분류 라벨(주수면/낮잠/근무중수면)은 저장하지 않고 조회 시점에
+    // sleep_shift_relation.dart가 매번 계산 - 근무 스케줄이 바뀌어도 과거 기록의
+    // 분류가 자동으로 다시 맞게 계산됨. Native(SleepDetectionReceiver.kt)가 직접
+    // 이 테이블에 쓴다 - 알람/근무패턴 테이블과 전혀 무관.
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sleep_records(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        start_time TEXT NOT NULL,
+        end_time TEXT,
+        source TEXT NOT NULL,
+        status TEXT NOT NULL,
+        confidence TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_sleep_records_start ON sleep_records(start_time)');
+
+    // ⭐ v22에서 신설(근무별 평균 취침시각, 자동 수면감지 1순위 앵커 기준) -
+    // 2026-09-01에 그 입력 기능 자체를 사용자 요청으로 삭제하면서 이 테이블은
+    // 안 쓰는 빈 테이블로 남음(DB 마이그레이션 없이 스키마만 유지 - 위
+    // database_service.dart 상단 CRUD 삭제 주석 참고, 수면기록_자동추정_설계.md 12장).
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS sleep_expected_bedtime(
+        shift_key TEXT PRIMARY KEY,
+        bedtime_minutes INTEGER NOT NULL,
         updated_at TEXT NOT NULL
       )
     ''');
@@ -528,6 +575,57 @@ class DatabaseService {
       print('⚠️ date_schedules 생성 스킵(이미 존재 가능성): $e');
     }
     print('✅ DB 업그레이드 완료 (v$oldVersion → v20): date_schedules 테이블 추가');
+  }
+
+  // ⭐ v21 - 컨디션 매니저용 condition_shift_times 테이블 신설. 완전히 새
+  // 테이블이라 기존 테이블은 전혀 안 건드림 - CREATE TABLE IF NOT EXISTS면
+  // 충분함(컨디션매니저_설계.md 3장).
+  if (oldVersion < 21) {
+    try {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS condition_shift_times(
+          shift_name TEXT PRIMARY KEY,
+          start_minutes INTEGER NOT NULL,
+          end_minutes INTEGER NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      ''');
+    } catch (e) {
+      print('⚠️ condition_shift_times 생성 스킵(이미 존재 가능성): $e');
+    }
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v21): condition_shift_times 테이블 추가');
+  }
+
+  // ⭐ v22 - 실제 수면 기록/자동 추정("C번 요구사항") - sleep_records/
+  // sleep_expected_bedtime 테이블 신설. 완전히 새 테이블이라 기존 테이블은 전혀
+  // 안 건드림 - CREATE TABLE IF NOT EXISTS면 충분함(수면기록_자동추정_설계.md 1장).
+  if (oldVersion < 22) {
+    try {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS sleep_records(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          start_time TEXT NOT NULL,
+          end_time TEXT,
+          source TEXT NOT NULL,
+          status TEXT NOT NULL,
+          confidence TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT
+        )
+      ''');
+      await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_sleep_records_start ON sleep_records(start_time)');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS sleep_expected_bedtime(
+          shift_key TEXT PRIMARY KEY,
+          bedtime_minutes INTEGER NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      ''');
+    } catch (e) {
+      print('⚠️ sleep_records/sleep_expected_bedtime 생성 스킵(이미 존재 가능성): $e');
+    }
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v22): sleep_records/sleep_expected_bedtime 테이블 추가');
   }
 }
 
@@ -954,6 +1052,25 @@ class DatabaseService {
           whereArgs: [oldName],
         );
 
+        // 5. condition_shift_times(v21, shift_name이 PK) - 예전엔 빠져있어서
+        // rename 후 컨디션 매니저 출퇴근시각 입력이 고아로 남았음(M1,
+        // 전체_코드_점검_리포트_2026-09-04.md). newName 행이 이미 있으면(근무명
+        // 맞바꾸기 등) PK 충돌을 피하기 위해 먼저 지우고 oldName 값으로 대체.
+        final existingConditionTimes = await txn.query(
+          'condition_shift_times',
+          where: 'shift_name = ?',
+          whereArgs: [oldName],
+        );
+        if (existingConditionTimes.isNotEmpty) {
+          await txn.delete('condition_shift_times', where: 'shift_name = ?', whereArgs: [newName]);
+          await txn.update(
+            'condition_shift_times',
+            {'shift_name': newName},
+            where: 'shift_name = ?',
+            whereArgs: [oldName],
+          );
+        }
+
         print('✅ 근무명 변경(원자적): $oldName → $newName');
       }
 
@@ -1357,5 +1474,105 @@ Future<int> deleteSchedule(int id) async {
   final db = await database;
   return await db.delete('date_schedules', where: 'id = ?', whereArgs: [id]);
 }
+
+// ===== 컨디션 매니저 - 근무명별 출퇴근 시각(condition_shift_times) =====
+// ⭐ 컨디션매니저_설계.md 참고. 알람/근무패턴 로직은 이 메서드들을 전혀
+// 호출하지 않음 - condition_* 코드 전용.
+
+Future<Map<String, ShiftTimeRange>> getConditionShiftTimes() async {
+  final db = await database;
+  final rows = await db.query('condition_shift_times');
+  final result = <String, ShiftTimeRange>{};
+  for (final row in rows) {
+    final range = ShiftTimeRange.fromMap(row);
+    result[range.shiftName] = range;
+  }
+  return result;
+}
+
+Future<void> upsertConditionShiftTime(ShiftTimeRange range) async {
+  final db = await database;
+  await db.insert(
+    'condition_shift_times',
+    {
+      ...range.toMap(),
+      'updated_at': DateTime.now().toIso8601String(),
+    },
+    conflictAlgorithm: ConflictAlgorithm.replace,
+  );
+}
+
+Future<void> deleteConditionShiftTime(String shiftName) async {
+  final db = await database;
+  await db.delete('condition_shift_times', where: 'shift_name = ?', whereArgs: [shiftName]);
+}
+
+// ===== 실제 수면 기록/자동 추정 - sleep_records =====
+// ⭐ 수면기록_자동추정_설계.md 참고. Native(SleepDetectionReceiver.kt/
+// SleepWidgetActionReceiver.kt)도 같은 테이블에 직접 쓴다 - 알람/근무패턴 로직은
+// 이 메서드들을 전혀 호출하지 않음.
+
+/// start..end(둘 다 null 가능 - 지정 안 하면 무제한) 범위와 겹치는 수면 기록을
+/// 최신순으로 조회. 진행 중인 레코드(end_time IS NULL)는 항상 포함.
+Future<List<SleepRecord>> getSleepRecords({DateTime? since}) async {
+  final db = await database;
+  final rows = since != null
+      ? await db.query(
+          'sleep_records',
+          where: 'start_time >= ? OR end_time IS NULL',
+          whereArgs: [since.toIso8601String()],
+          orderBy: 'start_time DESC',
+        )
+      : await db.query('sleep_records', orderBy: 'start_time DESC');
+  return rows.map(SleepRecord.fromMap).toList();
+}
+
+/// PENDING_CONFIRMATION 상태(자동 감지, 아직 사용자 확인 전) 전체 조회.
+Future<List<SleepRecord>> getPendingSleepRecords() async {
+  final db = await database;
+  final rows = await db.query(
+    'sleep_records',
+    where: 'status = ?',
+    whereArgs: [sleepStatusToDb(SleepStatus.pendingConfirmation)],
+    orderBy: 'start_time DESC',
+  );
+  return rows.map(SleepRecord.fromMap).toList();
+}
+
+Future<int> insertSleepRecord(SleepRecord record) async {
+  final db = await database;
+  final now = DateTime.now().toIso8601String();
+  return await db.insert('sleep_records', {
+    ...record.toMap()..remove('id'),
+    'created_at': now,
+    'updated_at': now,
+  });
+}
+
+Future<void> updateSleepRecord(SleepRecord record) async {
+  assert(record.id != null, 'updateSleepRecord은 이미 저장된(id 있는) 기록만 받음');
+  final db = await database;
+  await db.update(
+    'sleep_records',
+    {
+      ...record.toMap(),
+      'updated_at': DateTime.now().toIso8601String(),
+    },
+    where: 'id = ?',
+    whereArgs: [record.id],
+  );
+}
+
+Future<void> deleteSleepRecord(int id) async {
+  final db = await database;
+  await db.delete('sleep_records', where: 'id = ?', whereArgs: [id]);
+}
+
+// ⭐ 2026-09-01 - "근무별 평균 취침 시각" 입력 기능 자체를 걷어내면서 이 CRUD도
+// 삭제(사용자 요청 - 자동감지 기준을 근무 일정 기반 회복구간 하나로 통일).
+// sleep_expected_bedtime 테이블 스키마는 남겨둠(빈 테이블, DB 마이그레이션 없이
+// 안전하게 놔둘 수 있음 - DB_스키마_변경_가이드.md 원칙상 실제로 걷어내려면
+// 버전을 올려야 하는데, 이 정도 죽은 테이블 하나 남기는 것보다 그 리스크가
+// 더 커서 보류. 필요해지면 그때 정식 마이그레이션으로 드롭).
 
 }

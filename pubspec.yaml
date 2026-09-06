@@ -112,8 +112,9 @@ flutter:
     - assets/icon/app_icon_foreground.png
     - assets/icon/app_icon.png
     # ⭐ 2026-08-27 - 메모 자동분류(ml/, 메모_자동분류_ML_계획.md) Phase 5용 카테고리
-    # 아이콘 10종. Lucide(오픈소스, ISC License) 라인 아이콘 그대로. 매핑/출처는
-    # assets/icons/memo_category/README.md 참고.
+    # 아이콘. Lucide(오픈소스, ISC License) 라인 아이콘 그대로. 매핑/출처는
+    # assets/icons/memo_category/README.md 참고. (2026-08-27 10종 -> 2026-09-01
+    # 카테고리 확장으로 17종 -> 2026-09-03 19종)
     - assets/icons/memo_category/
     # ⭐ 2026-08-27 - Phase 4: 온디바이스 카테고리 분류 모델(TF-IDF+LogisticRegression,
     # ml/export.py가 ml/models/pilot_v1.joblib에서 내보냄). lib/services/

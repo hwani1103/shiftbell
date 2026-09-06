@@ -2,16 +2,20 @@
 
 package com.hwani1103.shiftbell
 
+import android.app.Activity
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
+import android.content.ContentUris
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -22,7 +26,36 @@ import androidx.core.app.NotificationCompat
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.hwani1103.shiftbell/alarm"
     private var methodChannel: MethodChannel? = null
-    
+
+    // ⭐ 사용자 데이터 백업("A번 요구사항") - MediaStore에 항상 파일 하나만 유지
+    // (writeBackupFile/readBackupFile/cleanupOldBackupFiles 참고). 2026-09-01 - 파일명에
+    // 날짜를 넣어달라는 요청으로 "ShiftBell_Backup_YYMMDD.json" 형식으로 변경 -
+    // 파일관리자로 직접 열어봤을 때 언제 만든 백업인지 한눈에 보이게 하려는
+    // 목적이라, 매일 새 파일이 쌓이는 게 아니라 여전히 "파일 하나"만 유지하고
+    // 쓸 때마다 그날 날짜로 다시 이름 붙임. 정확한 이름은 매번 날짜가 바뀌므로
+    // 매칭/정리 로직은 전부 접두어(BACKUP_DISPLAY_NAME_PREFIX)로 함.
+    private val BACKUP_DISPLAY_NAME_PREFIX = "ShiftBell_Backup_"
+    private val BACKUP_RELATIVE_PATH = "Download/ShiftBell/"
+
+    private fun buildBackupDisplayName(): String {
+        val fmt = java.text.SimpleDateFormat("yyMMdd", java.util.Locale.US)
+        return "$BACKUP_DISPLAY_NAME_PREFIX${fmt.format(java.util.Date())}.json"
+    }
+
+    // ⭐ 2026-09-01 - "자동 탐지"(readBackupFile, selection 없이 전체 스캔)가
+    // 실기기에서 계속 실패해서 원인을 파봤더니, MediaStore에 저장된 그 행의
+    // `owner_package_name`이 NULL이었음(정상이면 이 앱 패키지명이 자동으로
+    // 찍혀야 함 - adb shell content query로 직접 확인). 그 값이 없으면 권한 없는
+    // 일반 앱의 쿼리는 "내가 만든 파일"로 인식을 못 해 결과에서 아예 빠짐 -
+    // 삼성 DownloadStorageProvider 쪽 버그/차이로 보임, 우리 쿼리 코드로는 고칠
+    // 수 없는 영역. 그래서 자동 탐지가 실패했을 때를 위해 시스템 파일 선택기
+    // (SAF, ACTION_OPEN_DOCUMENT)로 사용자가 직접 백업 파일을 고르는 경로를
+    // 추가함 - 이건 소유권 메타데이터에 의존하지 않고 사용자가 명시적으로
+    // 고른 파일에 대한 접근 권한을 그 자리에서 새로 받기 때문에 이 버그와
+    // 무관하게 항상 동작함.
+    private val REQUEST_CODE_PICK_BACKUP_FILE = 9081
+    private var pendingBackupPickResult: MethodChannel.Result? = null
+
     // ⭐ 갱신 요청 수신용 Receiver
     private val refreshReceiver = object : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -53,7 +86,31 @@ class MainActivity: FlutterActivity() {
             handleOpenTabIntent(intent)
         }
     }
-    
+
+    // ⭐ "pickBackupFile"(위 주석 참고)의 결과 수신 - 시스템 파일 선택기가 고른
+    // 파일을 읽어서 대기 중이던 MethodChannel.Result를 완료함.
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != REQUEST_CODE_PICK_BACKUP_FILE) return
+
+        val pending = pendingBackupPickResult
+        pendingBackupPickResult = null
+        val uri = data?.data
+        if (resultCode != Activity.RESULT_OK || uri == null) {
+            pending?.success(null) // 사용자가 취소함
+            return
+        }
+        try {
+            val content = contentResolver.openInputStream(uri)?.use { input ->
+                input.readBytes().toString(Charsets.UTF_8)
+            }
+            pending?.success(content)
+        } catch (e: Exception) {
+            Log.e("MainActivity", "❌ 수동 선택한 백업 파일 읽기 실패", e)
+            pending?.success(null)
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         try {
@@ -77,6 +134,14 @@ override fun onResume() {
     // 20분 전 알림/다음 wakeup 예약은 UI 렌더링과 무관하니 백그라운드 스레드로 옮김.
     Thread {
         AlarmGuardReceiver.triggerCheck(this)
+        // ⭐ 실제 수면 기록/자동 추정("C번 요구사항") - 앱을 열 때마다 수면 감지
+        // 예약이 최신 상태(스케줄/설정 변경 반영)인지 다시 확인. 알람 로직과 완전히
+        // 독립된 read-only 판단 + 별도 알람 예약이라 위 triggerCheck()에 영향 없음.
+        // 2026-09-01 - ensureScheduled(예약만)이 아니라 checkNow(즉시 판정 + 재예약)로
+        // 바꿔서, 앱을 여는 순간 진행 중이던 자동 감지 후보를 바로 종료(기상 시각
+        // 추정)하고 "OO시~OO시 수면한 것으로 추정됩니다" 카드를 곧바로 보여줄 수 있게 함
+        // - 예전엔 다음 20분 샘플링 알람이 울릴 때까지 "OO시부터 수면 중"으로 남아있었음.
+        SleepDetectionReceiver.checkNow(this)
     }.start()
     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
         methodChannel?.invokeMethod("refreshAlarms", null)
@@ -293,6 +358,99 @@ override fun onNewIntent(intent: Intent) {
                     CalendarWidgetProvider.requestUpdate(applicationContext)
                     result.success(null)
                 }
+                // ⭐ 실제 수면 기록 위젯 즉시 갱신 - Flutter에서 자동 감지 결과를
+                // 확인/수정/폐기하는 등 sleep_records를 직접 쓴 직후에 호출(refreshCalendarWidget과
+                // 동일 패턴). 위젯이 홈 화면에 없으면 SleepWidgetProvider.requestUpdate()
+                // 내부에서 조용히 아무 것도 안 함.
+                "refreshSleepWidget" -> {
+                    SleepWidgetProvider.requestUpdate(applicationContext)
+                    result.success(null)
+                }
+                // ⭐ 사용자 데이터 백업("A번 요구사항") - 기기 로컬 저장소(MediaStore
+                // Downloads/ShiftBell 폴더)에 백업 파일 하나를 쓰고/읽음. 클라우드도
+                // 로그인도 전혀 안 씀 - 백업복구_설계.md 참고. Android 10(Q) 미만은
+                // 스코프드 스토리지 이전이라 미지원(success=false로 응답).
+                "writeBackupFile" -> {
+                    val content = call.argument<String>("content")
+                    if (content == null) {
+                        result.success(false)
+                    } else {
+                        result.success(writeBackupFile(content))
+                    }
+                }
+                "readBackupFile" -> {
+                    result.success(readBackupFile())
+                }
+                // ⭐ 설정 탭 "백업 데이터 불러오기"(사용 중인 앱 위에 다른 백업을
+                // 덮어씀) 전용 - restoreAll()로 거의 모든 테이블을 한 번에 갈아
+                // 끼운 뒤에는, 이미 메모리에 떠 있는 모든 Riverpod provider/화면
+                // state/네이티브 캐시를 하나하나 무효화하는 것보다 프로세스를
+                // 통째로 다시 시작하는 게 훨씬 안전함(신규 설치 때 온보딩을 갓
+                // 통과한 것과 동일한 "깨끗한 시작" 상태를 그대로 재현) - CLAUDE.md에
+                // 정리된 "복원 직후 앱이 평소처럼 시작되면 알람 갱신 로직이 알아서
+                // 채운다"는 전제를 실제로 만족시키려면 진짜 재시작이 필요함.
+                // 표준 Flutter API로는 프로세스 재시작이 안 돼서 네이티브에서 처리:
+                // 런처 인텐트로 새 태스크를 띄우고 현재 프로세스를 강제 종료함.
+                "restartApp" -> {
+                    result.success(true)
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                        val restartIntent = packageManager.getLaunchIntentForPackage(packageName)
+                        restartIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        if (restartIntent != null) startActivity(restartIntent)
+                        Runtime.getRuntime().exit(0)
+                    }, 300)
+                }
+                // ⭐ 자동 탐지(readBackupFile) 실패 시 수동 대안 - 시스템 파일 선택기로
+                // 사용자가 직접 백업 파일을 고름(위 pendingBackupPickResult 주석 참고).
+                // 결과는 비동기라 여기서 바로 result.success를 안 부르고
+                // onActivityResult에서 완료함.
+                "pickBackupFile" -> {
+                    pendingBackupPickResult = result
+                    // ⭐ type을 "application/json"으로 좁혔더니 실기기에서 정작
+                    // 만든 백업 파일 자체가 선택기 목록/최근 항목에 안 뜨는 문제가
+                    // 있었음 - EXTRA_MIME_TYPES는 type이 "*/*"일 때만 유효한
+                    // 힌트로 동작하고, type을 구체적으로 지정하면 그 값과
+                    // 정확히 일치하는 파일만 보여주는데, 파일의 실제 등록된
+                    // MIME 타입이 기기/생성 경로에 따라 "application/json"과
+                    // 정확히 일치하지 않을 수 있음(예: 확장자만으로 다르게
+                    // 추정되는 경우). type을 "*/*"로 완전히 열어서 어떤 파일이든
+                    // 보이게 하고, 고른 파일이 실제 백업인지는 이후 JSON
+                    // 디코드로 검증함(permission_intro_screen.dart의
+                    // _pickBackupManually 참고) - 못 고를 위험보다 잘못 고를
+                    // 위험(바로 에러 토스트로 걸러짐)이 훨씬 안전함.
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "*/*"
+                    }
+                    // ⭐ 선택기의 기본 화면은 "최근" 탭인데, 이것도 MediaStore 인덱스
+                    // 기반이라 owner_package_name=NULL 버그의 영향을 그대로 받아
+                    // 우리 백업 파일이 안 보임(위 readBackupFile 주석의 그 버그와
+                    // 동일 원인). 유저가 직접 폴더를 찾아 들어가게 두지 않고,
+                    // AOSP 표준 ExternalStorageProvider의 문서 URI 규칙
+                    // ("primary:상대경로")으로 선택기가 Download/ShiftBell 폴더를
+                    // 곧장 열고 시작하게 힌트를 줌 - 이 경로는 MediaStore 쿼리를
+                    // 안 거치고 파일시스템을 직접 나열하는 뷰라 그 버그의 영향을
+                    // 안 받음. 일부 기기/런처가 이 힌트를 무시할 수 있어 실패해도
+                    // 조용히 기본 동작(선택기는 뜨되 최근 탭에서 시작)으로 진행함.
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        try {
+                            val initialUri = android.provider.DocumentsContract.buildDocumentUri(
+                                "com.android.externalstorage.documents",
+                                "primary:Download/ShiftBell"
+                            )
+                            intent.putExtra(android.provider.DocumentsContract.EXTRA_INITIAL_URI, initialUri)
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "⚠️ 선택기 시작 폴더 지정 실패(기본 동작으로 진행)", e)
+                        }
+                    }
+                    try {
+                        startActivityForResult(intent, REQUEST_CODE_PICK_BACKUP_FILE)
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "❌ 백업 파일 선택기 실행 실패", e)
+                        pendingBackupPickResult = null
+                        result.success(null)
+                    }
+                }
                 else -> result.notImplemented()
             }
         }
@@ -375,6 +533,176 @@ override fun onNewIntent(intent: Intent) {
         }
     }
     
+    // ⭐ 사용자 데이터 백업("A번 요구사항") - 이 앱 소유의 MediaStore 파일 하나로
+    // 관리. 파일명은 매번 그날 날짜로 다시 붙지만(buildBackupDisplayName), 새
+    // 파일을 성공적으로 쓴 뒤에 기존 걸 지워서(2026-09-04 순서 변경 - 아래 M3
+    // 주석 참고) "백업 = 파일 하나" 원칙은 그대로 지킴(백업복구_설계.md 8장).
+    // 클라우드/로그인 전혀 안 씀 - 기기 로컬 저장소만.
+    //
+    // Android 10(Q, API 29) 미만은 스코프드 스토리지 이전이라 MediaStore.Downloads
+    // 컬렉션 자체가 없음 - 이 기능은 그 버전 미만에서는 미지원으로 두고
+    // false/null을 반환함(Dart 쪽이 그에 맞는 안내를 보여줌). 이 앱의 minSdk(24)
+    // 대비 낮은 비중일 것으로 판단해 legacy(WRITE_EXTERNAL_STORAGE 권한 기반)
+    // 경로는 만들지 않음 - 필요해지면 그때 추가.
+    // ⭐ 2026-09-04 - M3 수정(전체_코드_점검_리포트_2026-09-04.md). 예전엔 "삭제
+    // 먼저 → 쓰기" 순서라, 쓰기가 실패하면(저장공간 부족, insert()가 null 반환,
+    // 쓰기 도중 예외 등) 옛 백업은 이미 지워지고 새 백업도 없는 "백업 전멸"
+    // 상태가 됐음(자동 백업 경로라 사용자에게 경고도 안 뜸). "쓰기 먼저 → 성공한
+    // 뒤에만 옛 것 삭제"로 순서를 바꿔서, 실패해도 최소한 기존 백업은 그대로
+    // 남게 함. 삭제 자체는 이 기기(삼성 등)에서 유일하게 신뢰할 수 있다고 이미
+    // 검증된 "기억해둔 URI 직접 삭제" 경로(옛 deleteBackupFile() 로직, 아래
+    // cleanupOldBackupFiles로 분리함)를 그대로 재사용함 - 새 URI를 기억하기 전에
+    // 옛 URI를 먼저 읽어만 둠.
+    private fun writeBackupFile(content: String): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return false
+        val prefs = getSharedPreferences("backup_prefs", Context.MODE_PRIVATE)
+        val previousUriStr = prefs.getString("last_backup_uri", null)
+
+        return try {
+            val resolver = contentResolver
+            val values = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, buildBackupDisplayName())
+                put(MediaStore.Downloads.MIME_TYPE, "application/json")
+                put(MediaStore.Downloads.RELATIVE_PATH, BACKUP_RELATIVE_PATH)
+            }
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                ?: return false
+            resolver.openOutputStream(uri)?.use { out ->
+                out.write(content.toByteArray(Charsets.UTF_8))
+            } ?: return false
+
+            // ⭐ 새 백업이 실제로 저장에 성공한 뒤에만: 다음 write() 때 지울 URI를
+            // 갱신하고, 옛 백업(방금 저장한 새 백업이 아니라 그 이전 것)을 지움.
+            prefs.edit().putString("last_backup_uri", uri.toString()).apply()
+            cleanupOldBackupFiles(resolver, previousUriStr, keepUri = uri)
+
+            Log.d("MainActivity", "✅ 백업 파일 저장 완료: $uri")
+            true
+        } catch (e: Exception) {
+            Log.e("MainActivity", "❌ 백업 파일 저장 실패", e)
+            false
+        }
+    }
+
+    // ⭐ 2026-09-01 - "백업했는데 재설치해도 복구 안내가 전혀 안 뜬다" 버그 조사.
+    // 처음엔 RELATIVE_PATH 정확 매칭 문제로 보고 DISPLAY_NAME LIKE로 바꿨는데,
+    // 실기기 logcat으로 확인해보니 그것도 아니었음 - **재설치 여부와 무관하게,
+    // 같은 프로세스 안에서 방금 쓴 파일조차 selection(LIKE 포함)을 건 쿼리로는
+    // 못 찾았고, delete도 매번 0건**이었음(그 결과 실제로 파일이 11개까지
+    // 쌓여있는 걸 확인함). 이 기기가 삼성(로그에 DownloadStorageProvider 등장)
+    // 이라 OEM 스토리지 프로바이더가 Downloads 컬렉션에 대한 selection(WHERE절)
+    // 처리를 AOSP와 다르게 하는 것으로 보임 - selection을 아예 안 쓰는 방식으로
+    // 완전히 우회함: 전체 목록을 selection 없이 가져와서 파일명은 코틀린에서
+    // 직접 비교하고, 삭제도 개별 row URI로(ContentUris.withAppendedId) 하나씩
+    // 지움 - 둘 다 selection/LIKE 없이 동작하는 가장 기본적인 경로라 OEM 프로바이더
+    // 차이를 탈 위험이 훨씬 적음. 이 앱이 만드는 백업 파일 개수는 항상 소수라
+    // 전체 목록을 가져오는 성능 부담도 없음.
+    private fun readBackupFile(): String? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
+        return try {
+            val resolver = contentResolver
+            val projection = arrayOf(MediaStore.Downloads._ID, MediaStore.Downloads.DISPLAY_NAME)
+            var bestId = -1L
+            var bestName = ""
+            var totalCount = 0
+            resolver.query(
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI, projection, null, null, null
+            )?.use { cursor ->
+                val idIdx = cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID)
+                val nameIdx = cursor.getColumnIndexOrThrow(MediaStore.Downloads.DISPLAY_NAME)
+                while (cursor.moveToNext()) {
+                    totalCount++
+                    val name = cursor.getString(nameIdx) ?: continue
+                    if (name.startsWith(BACKUP_DISPLAY_NAME_PREFIX)) {
+                        val id = cursor.getLong(idIdx)
+                        if (id > bestId) { bestId = id; bestName = name } // _ID가 큰 쪽 = 가장 최근 삽입
+                    }
+                }
+            }
+            Log.d("MainActivity", "🔍 Downloads 전체 ${totalCount}건 중 백업 후보: ${if (bestId >= 0) bestName else "없음"}")
+            if (bestId < 0) return null
+            val uri = ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, bestId)
+            Log.d("MainActivity", "✅ 백업 파일 발견: $uri")
+            resolver.openInputStream(uri)?.use { input ->
+                return input.readBytes().toString(Charsets.UTF_8)
+            }
+            null
+        } catch (e: Exception) {
+            Log.e("MainActivity", "❌ 백업 파일 읽기 실패", e)
+            null
+        }
+    }
+
+    // ⭐ 2026-09-01 - "백업을 여러 번 눌렀더니 shiftbell_backup (1).json,
+    // (2).json... 이 계속 쌓인다" 버그의 진짜 원인 - 아래 selection-없는
+    // 전체 스캔 방식도 이 기기에선 무용지물이었음: readBackupFile()에서 이미
+    // 확인했듯 이 기기는 우리 앱이 만든 행의 owner_package_name이 NULL로
+    // 남아서, 권한 없는 일반 앱 쿼리로는 **자기가 방금 쓴 파일조차 쿼리
+    // 결과에 안 잡힘**(전체 스캔이 매번 0건). 그래서 쿼리에 의존하지 않는
+    // 방법으로 바꿈: write 성공 시 그 URI를 SharedPreferences에 기억해뒀다가
+    // (writeBackupFile 참고), 다음 write 전에는 쿼리 없이 "기억해둔 그 URI"를
+    // 바로 지움 - 이건 쿼리가 아니라 이미 손에 쥔 URI에 대한 직접 삭제라
+    // owner_package_name 문제와 무관하게 항상 동작함. 이 방법은 "같은 설치
+    // 안에서 백업을 여러 번 누르는" 가장 흔한 중복 원인을 확실히 잡음.
+    // (남은 한계: 재설치로 SharedPreferences가 초기화되면 이전 설치가 남긴
+    // 파일은 기억을 못 해서 못 지움 - 아래 selection-없는 스캔을 보조로 계속
+    // 시도해두면 이 버그가 없는 다른 기기에서는 그것까지 정리됨)
+    // ⭐ 2026-09-04 - M3 수정으로 writeBackupFile()에서 분리됨(이름도
+    // deleteBackupFile → cleanupOldBackupFiles로 변경 - 이제 "쓰기 전 삭제"가
+    // 아니라 "새 백업([keepUri])이 이미 안전하게 저장된 뒤" 호출되는 순수 정리
+    // 작업이라, 여기서 뭔가 실패해도 다음 백업 때 다시 정리되므로 무해함(예전
+    // deleteBackupFile()과 동일한 2단계 전략을 그대로 유지 - 1) 기억해둔 "직전"
+    // URI 직접 삭제 2) 보조로 selection 없는 전체 스캔. 이 기종(삼성)의
+    // owner_package_name NULL 버그 우회 방법은 그대로 - 아래 주석 참고).
+    private fun cleanupOldBackupFiles(
+        resolver: android.content.ContentResolver,
+        previousUriStr: String?,
+        keepUri: android.net.Uri
+    ) {
+        var deleted = 0
+
+        // 1) 기억해둔 "직전" URI를 직접 지움 - 쿼리를 안 타서 owner_package_name
+        // 버그의 영향을 안 받는, 사실상 유일하게 이 기기에서 실제로 동작하는 경로.
+        if (previousUriStr != null && previousUriStr != keepUri.toString()) {
+            try {
+                deleted += resolver.delete(android.net.Uri.parse(previousUriStr), null, null)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "⚠️ 옛 백업 파일 삭제 실패(무시 - 다음 백업 때 재시도됨)", e)
+            }
+        }
+
+        // 2) selection 없는 전체 스캔 - 이 기기에선 매번 0건이지만, 이 버그가
+        // 없는 다른 기기(또는 재설치로 기억이 끊긴 이전 설치)에서는 여기서 나머지
+        // 잔여 파일까지 정리됨. 방금 쓴 새 백업([keepUri])은 반드시 제외.
+        try {
+            val keepId = try { ContentUris.parseId(keepUri) } catch (e: Exception) { -1L }
+            val idsToDelete = mutableListOf<Long>()
+            resolver.query(
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                arrayOf(MediaStore.Downloads._ID, MediaStore.Downloads.DISPLAY_NAME),
+                null, null, null
+            )?.use { cursor ->
+                val idIdx = cursor.getColumnIndexOrThrow(MediaStore.Downloads._ID)
+                val nameIdx = cursor.getColumnIndexOrThrow(MediaStore.Downloads.DISPLAY_NAME)
+                while (cursor.moveToNext()) {
+                    val name = cursor.getString(nameIdx) ?: continue
+                    val id = cursor.getLong(idIdx)
+                    if (name.startsWith(BACKUP_DISPLAY_NAME_PREFIX) && id != keepId) {
+                        idsToDelete.add(id)
+                    }
+                }
+            }
+            for (id in idsToDelete) {
+                val uri = ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, id)
+                deleted += resolver.delete(uri, null, null)
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "⚠️ 백업 파일 전체 스캔 삭제 실패(무시)", e)
+        }
+
+        Log.d("MainActivity", "🗑️ 기존 백업 파일 정리: 총 ${deleted}개 삭제")
+    }
+
     private fun requestOverlayPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!android.provider.Settings.canDrawOverlays(this)) {

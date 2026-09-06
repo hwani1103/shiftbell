@@ -185,8 +185,12 @@ class AlarmPlayer(private val context: Context) {
             }
 
             // ⭐ 시스템 알람 볼륨을 50%로 임시 변경
+            // ⭐ 2026-09-04 - LOW 항목 수정(전체_코드_점검_리포트_2026-09-04.md).
+            // 정수 나눗셈이라 최대볼륨 단계가 1인 기기(일부 저가형 단말)에서
+            // maxVolume/2 == 0이 되어 알람이 완전 무음으로 재생될 수 있었음 -
+            // 최소 1단계는 보장.
             val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-            val halfVolume = maxVolume / 2
+            val halfVolume = (maxVolume / 2).coerceAtLeast(1)
             audioManager.setStreamVolume(AudioManager.STREAM_ALARM, halfVolume, 0)
             Log.d("AlarmPlayer", "🔊 시스템 알람 볼륨 임시 변경: $halfVolume (50%)")
 
@@ -239,8 +243,12 @@ class AlarmPlayer(private val context: Context) {
             }
 
             // ⭐ 시스템 알람 볼륨을 50%로 임시 변경
+            // ⭐ 2026-09-04 - LOW 항목 수정(전체_코드_점검_리포트_2026-09-04.md).
+            // 정수 나눗셈이라 최대볼륨 단계가 1인 기기(일부 저가형 단말)에서
+            // maxVolume/2 == 0이 되어 알람이 완전 무음으로 재생될 수 있었음 -
+            // 최소 1단계는 보장.
             val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-            val halfVolume = maxVolume / 2
+            val halfVolume = (maxVolume / 2).coerceAtLeast(1)
             audioManager.setStreamVolume(AudioManager.STREAM_ALARM, halfVolume, 0)
             Log.d("AlarmPlayer", "🔊 시스템 알람 볼륨 임시 변경: $halfVolume (50%)")
 

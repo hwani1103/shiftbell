@@ -2,4 +2,6 @@
 <resources>
     <!-- ⭐ 홈 화면 위젯 목록(길게 눌러 위젯 추가)에 노출되는 설명 문구 -->
     <string name="calendar_widget_description">전주/이번주/다음주 근무 일정을 홈 화면에서 바로 볼 수 있어요.</string>
+    <!-- ⭐ 실제 수면 기록 위젯(캘린더 위젯과 별개) - 취침/기상 원터치 토글 -->
+    <string name="sleep_widget_description">버튼으로 취침/기상을 기록해요.</string>
 </resources>

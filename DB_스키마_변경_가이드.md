@@ -1,6 +1,6 @@
 # DB 스키마 변경 가이드
 
-현재 스키마 버전: **v20**
+현재 스키마 버전: **v22**
 
 이 앱은 **Flutter(sqflite)와 Kotlin(SQLiteOpenHelper)이 같은 SQLite 파일을 각자 연다**.
 그래서 스키마 변경이 다른 앱보다 까다롭고, 실제로 같은 실수가 세 번 재발해서
@@ -171,7 +171,7 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
 
 ---
 
-## 5. 현재 스키마 (v20)
+## 5. 현재 스키마 (v22)
 
 | 테이블 | 용도 |
 |---|---|
@@ -185,6 +185,9 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
 | `date_schedules` | 일정관리 탭 전용 (v20 신규 - `date_memos`와 완전히 별개 CRUD) |
 | `date_overtime` | 날짜별 OT/특근 |
 | `friends` | 친구 공유 (v17에서 Firestore `ownerId` 기반으로 재설계) |
+| `condition_shift_times` | 컨디션 매니저 전용(v21 신규) - 근무명별 출퇴근 시각. 알람/근무패턴 로직은 안 읽음 |
+| `sleep_records` | 실제 수면 기록/자동 추정 전용(v22 신규) - 수동/자동 감지된 수면 1건씩. Native(SleepDetectionReceiver.kt/SleepWidgetActionReceiver.kt)가 직접 읽고 씀 |
+| `sleep_expected_bedtime` | 실제 수면 기록 전용(v22 신규) - 근무별(또는 휴무) 평균 취침 시각. 자동 감지 트리거의 1순위 기준 |
 
 ### 최근 변경
 
@@ -199,6 +202,24 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
   반드시 같이 올림(§2 "Native가 안 쓰니까 안 올려도 된다"는 착각 참고).
   `predicted_category`/`is_user_corrected` 컬럼은 메모_자동분류_ML_계획.md
   Phase 5의 카테고리 자동배정 결과 기록용.
+- **v21** — `condition_shift_times` 테이블 신설(컨디션 매니저 1차 버전 -
+  컨디션매니저_설계.md 참고). 근무명별 출퇴근 시각(자정 기준 분)만 저장하는
+  완전히 새로운 테이블 - 기존 테이블은 0개 변경. Native는 이 테이블을 전혀
+  읽지 않음(컨디션 매니저는 Flutter 전용 기능)이지만, `DATABASE_VERSION`은
+  §2의 "Native가 안 쓰니까 안 올려도 된다"는 착각을 반복하지 않기 위해 반드시
+  같이 올렸음.
+- **v22** — `sleep_records`/`sleep_expected_bedtime` 테이블 신설(실제 수면 기록/
+  자동 추정 - 수면기록_자동추정_설계.md 참고). 이번엔 Native가 이 테이블들을
+  직접 읽고 쓴다(`SleepDetectionReceiver.kt`/`SleepWidgetActionReceiver.kt`/
+  `SleepScheduleResolver.kt`) - v20/v21과 달리 "Native 미사용" 케이스가 아님.
+- **(되돌려짐) v23 시도** — "D번 요구사항"(일정관리 탭 일정 생성 팝업 5분
+  미세조정)의 "물리적 표시 위치" 값을 처음엔 `date_schedules.slot_minutes`
+  컬럼으로 저장하려 했으나, 그 위치 규칙이 "정각(분=0)이면 그 정각, 그 외
+  (1~59분)엔 그 시간대의 30분 자리"라는 `start_minutes` 하나만으로 항상
+  계산 가능한 순수 파생값으로 정정됨(사용자 확인, 2026-08-31) - 저장할
+  이유가 없어져서 마이그레이션 자체를 되돌림(DB는 다시 v22). 계산은
+  `lib/models/date_schedule.dart`의 `computeSlotMinutes()` 참고 - work_hours_calculator.dart가
+  통계를 저장 안 하고 매번 계산하는 것과 같은 원칙.
 
 ---
 

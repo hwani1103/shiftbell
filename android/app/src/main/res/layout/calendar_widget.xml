@@ -6,6 +6,39 @@
     - 배경/오늘강조 색은 CalendarWidgetProvider.kt에서 라이트/다크 모드에 맞춰 런타임에 지정
     - 전체를 탭하면 앱(달력 탭)이 열림 - onClickPendingIntent가 widget_panel에 걸림
     - 위젯을 충분히 키우면 calendar_widget_full.xml(달력 월 전체, 6줄)로 자동 전환됨
+
+    ⭐ 2026-09-04 - 이 파일은 calendar_widget_info.xml의 android:previewLayout으로도
+    쓰임(런처의 "위젯 추가" 미리보기 화면). previewLayout은 RemoteViews로 값을 채우지
+    않고 이 XML을 있는 그대로 정적 렌더링하는데, hdr_N/num_R_C/pill_R_C/pillbg_R_C가
+    전부 android:text/android:background 없이 비어 있어서 미리보기가 빈 격자 칸만
+    보이는 문제가 있었음(수면 위젯(sleep_widget.xml)은 애초에 정적 기본값이 박혀 있어
+    문제없었음 - 그 패턴을 그대로 따름). 아래 각 요소에 채워 넣은 값(요일/날짜/근무
+    라벨·색)은 순수 미리보기용 가짜 데이터일 뿐 - onUpdate() 시점에 RemoteViews가
+    전부 실제 값으로 덮어써서 앱 실행 중에는 절대 안 보임. 메모 배지(memo1/2/3)는
+    기존처럼 visibility="gone" 그대로 둬서 미리보기에도 메모 없는 버전으로 나옴.
+
+    ⭐ 2026-09-04 후속 - 1차 버전은 pillbg_R_C 배경(인디고/퍼플/빨강 - 서로 톤이
+    비슷하고 전부 어두움)에 pill_R_C 텍스트 색을 안 채워서 어두운 배경에 어두운
+    기본 텍스트가 겹쳐 글씨가 안 보이는 문제가 있었음(사용자 리포트로 발견).
+    CalendarWidgetProvider.kt가 실제로 쓰는 색을 그대로 재사용해서 고침:
+    배경 3색은 앱 기본 테마(mainWhite)의 kMainLightPalette 실제 값(블루 #4771D1/
+    다크골드 #6B6524/고정빨강 #EF5350 - 서로 뚜렷이 다른 색상환대라 헷갈리지
+    않음), pill 텍스트는 위젯 런타임의 자동대비 공식(PILL_TEXT_DARK/LIGHT,
+    luminance 200 기준)대로 셋 다 흰색, 요일/날짜 숫자 텍스트는 위젯이 실제로
+    쓰는 검정(LIGHT_HEADER_TEXT/LIGHT_TEXT_NORMAL)으로 명시함 - "실제 앱에서
+    보일 색과 다른 미리보기"가 되지 않도록 전부 실제 상수값을 그대로 가져옴.
+
+    ⚠️ 2026-09-04 재후속(중요) - pillbg_R_C는 ImageView이고, 실제 런타임
+    (CalendarWidgetProvider.kt)은 이 자리에 색상 + 둥근 모서리를 직접 그린
+    비트맵을 `views.setImageViewBitmap(cellPillBgIds[r][c], bitmap)`로
+    앉힌다 - 이건 android:src 슬롯이지 android:background 슬롯이 아니다.
+    위 미리보기 색을 처음엔 실수로 android:background에 넣었는데,
+    RemoteViews는 지정 안 한 속성을 안 지우므로 실제 위젯에서도 그 배경이
+    "둥근 비트맵 뒤에 그대로 깔린 채" 같이 보여서 모서리가 안 둥글어 보이고
+    겹쳐 보이는 버그가 생겼음(사용자 리포트로 발견) - android:src로 바꿔서
+    해결함(런타임에 setImageViewBitmap이 이 자리를 정확히 덮어써서 미리보기
+    색은 앱 실행 중엔 안 보이고, 실제 둥근 비트맵만 보임). **이 파일을 다시
+    건드릴 땐 pillbg_R_C에 절대 android:background를 쓰지 말 것.**
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_panel"
@@ -42,6 +75,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:textSize="13sp"
+                android:text="월"
+                android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_1"
@@ -50,6 +85,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:textSize="13sp"
+                android:text="화"
+                android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_2"
@@ -58,6 +95,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:textSize="13sp"
+                android:text="수"
+                android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_3"
@@ -66,6 +105,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:textSize="13sp"
+                android:text="목"
+                android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_4"
@@ -74,6 +115,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:textSize="13sp"
+                android:text="금"
+                android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_5"
@@ -82,6 +125,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:textSize="13sp"
+                android:text="토"
+                android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_6"
@@ -90,6 +135,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:textSize="13sp"
+                android:text="일"
+                android:textColor="#FF000000"
                 android:textStyle="bold"/>
         </LinearLayout>
             <LinearLayout
@@ -113,6 +160,7 @@
                             android:id="@+id/pillbg_0_0"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF4771D1"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_0"
@@ -123,6 +171,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="주간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -145,6 +195,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="1"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -162,6 +214,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_0_0"
@@ -173,6 +226,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_0_0"
@@ -183,6 +237,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -203,6 +258,7 @@
                             android:id="@+id/pillbg_0_1"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF6B6524"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_1"
@@ -213,6 +269,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="야간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -235,6 +293,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="2"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -252,6 +312,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_0_1"
@@ -263,6 +324,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_0_1"
@@ -273,6 +335,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -293,6 +356,7 @@
                             android:id="@+id/pillbg_0_2"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FFEF5350"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_2"
@@ -303,6 +367,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="휴무"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -325,6 +391,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="3"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -342,6 +410,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_0_2"
@@ -353,6 +422,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_0_2"
@@ -363,6 +433,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -383,6 +454,7 @@
                             android:id="@+id/pillbg_0_3"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF4771D1"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_3"
@@ -393,6 +465,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="주간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -415,6 +489,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="4"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -432,6 +508,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_0_3"
@@ -443,6 +520,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_0_3"
@@ -453,6 +531,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -473,6 +552,7 @@
                             android:id="@+id/pillbg_0_4"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF6B6524"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_4"
@@ -483,6 +563,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="야간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -505,6 +587,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="5"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -522,6 +606,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_0_4"
@@ -533,6 +618,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_0_4"
@@ -543,6 +629,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -563,6 +650,7 @@
                             android:id="@+id/pillbg_0_5"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FFEF5350"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_5"
@@ -573,6 +661,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="휴무"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -595,6 +685,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="6"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -612,6 +704,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_0_5"
@@ -623,6 +716,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_0_5"
@@ -633,6 +727,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -653,6 +748,7 @@
                             android:id="@+id/pillbg_0_6"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF4771D1"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_6"
@@ -663,6 +759,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="주간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -685,6 +783,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="7"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -702,6 +802,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_0_6"
@@ -713,6 +814,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_0_6"
@@ -723,6 +825,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -749,6 +852,7 @@
                             android:id="@+id/pillbg_1_0"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF6B6524"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_0"
@@ -759,6 +863,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="야간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -781,6 +887,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="8"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -798,6 +906,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_1_0"
@@ -809,6 +918,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_1_0"
@@ -819,6 +929,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -839,6 +950,7 @@
                             android:id="@+id/pillbg_1_1"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FFEF5350"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_1"
@@ -849,6 +961,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="휴무"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -871,6 +985,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="9"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -888,6 +1004,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_1_1"
@@ -899,6 +1016,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_1_1"
@@ -909,6 +1027,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -929,6 +1048,7 @@
                             android:id="@+id/pillbg_1_2"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF4771D1"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_2"
@@ -939,6 +1059,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="주간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -961,6 +1083,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="10"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -978,6 +1102,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_1_2"
@@ -989,6 +1114,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_1_2"
@@ -999,6 +1125,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1019,6 +1146,7 @@
                             android:id="@+id/pillbg_1_3"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF6B6524"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_3"
@@ -1029,6 +1157,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="야간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1051,6 +1181,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="11"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1068,6 +1200,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_1_3"
@@ -1079,6 +1212,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_1_3"
@@ -1089,6 +1223,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1109,6 +1244,7 @@
                             android:id="@+id/pillbg_1_4"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FFEF5350"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_4"
@@ -1119,6 +1255,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="휴무"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1141,6 +1279,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="12"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1158,6 +1298,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_1_4"
@@ -1169,6 +1310,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_1_4"
@@ -1179,6 +1321,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1199,6 +1342,7 @@
                             android:id="@+id/pillbg_1_5"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF4771D1"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_5"
@@ -1209,6 +1353,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="주간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1231,6 +1377,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="13"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1248,6 +1396,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_1_5"
@@ -1259,6 +1408,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_1_5"
@@ -1269,6 +1419,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1289,6 +1440,7 @@
                             android:id="@+id/pillbg_1_6"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF6B6524"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_6"
@@ -1299,6 +1451,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="야간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1321,6 +1475,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="14"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1338,6 +1494,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_1_6"
@@ -1349,6 +1506,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_1_6"
@@ -1359,6 +1517,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1385,6 +1544,7 @@
                             android:id="@+id/pillbg_2_0"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FFEF5350"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_0"
@@ -1395,6 +1555,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="휴무"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1417,6 +1579,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="15"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1434,6 +1598,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_2_0"
@@ -1445,6 +1610,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_2_0"
@@ -1455,6 +1621,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1475,6 +1642,7 @@
                             android:id="@+id/pillbg_2_1"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF4771D1"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_1"
@@ -1485,6 +1653,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="주간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1507,6 +1677,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="16"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1524,6 +1696,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_2_1"
@@ -1535,6 +1708,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_2_1"
@@ -1545,6 +1719,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1565,6 +1740,7 @@
                             android:id="@+id/pillbg_2_2"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF6B6524"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_2"
@@ -1575,6 +1751,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="야간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1597,6 +1775,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="17"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1614,6 +1794,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_2_2"
@@ -1625,6 +1806,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_2_2"
@@ -1635,6 +1817,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1655,6 +1838,7 @@
                             android:id="@+id/pillbg_2_3"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FFEF5350"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_3"
@@ -1665,6 +1849,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="휴무"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1687,6 +1873,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="18"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1704,6 +1892,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_2_3"
@@ -1715,6 +1904,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_2_3"
@@ -1725,6 +1915,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1745,6 +1936,7 @@
                             android:id="@+id/pillbg_2_4"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF4771D1"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_4"
@@ -1755,6 +1947,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="주간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1777,6 +1971,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="19"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1794,6 +1990,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_2_4"
@@ -1805,6 +2002,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_2_4"
@@ -1815,6 +2013,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1835,6 +2034,7 @@
                             android:id="@+id/pillbg_2_5"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FF6B6524"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_5"
@@ -1845,6 +2045,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="야간"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1867,6 +2069,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="20"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1884,6 +2088,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_2_5"
@@ -1895,6 +2100,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_2_5"
@@ -1905,6 +2111,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>
@@ -1925,6 +2132,7 @@
                             android:id="@+id/pillbg_2_6"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:src="#FFEF5350"
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_6"
@@ -1935,6 +2143,8 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
+                            android:text="휴무"
+                            android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
                     <FrameLayout
@@ -1957,6 +2167,8 @@
                                         android:paddingLeft="5dp"
                                         android:paddingRight="5dp"
                                         android:paddingTop="2dp"
+                                        android:text="21"
+                                        android:textColor="#FF000000"
                                         android:paddingBottom="2dp"/>
                                 </LinearLayout>
                             <LinearLayout
@@ -1974,6 +2186,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo2_2_6"
@@ -1985,6 +2198,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                                 <TextView
                                     android:id="@+id/memo3_2_6"
@@ -1995,6 +2209,7 @@
                                     android:textSize="9sp"
                                     android:includeFontPadding="false"
                                     android:maxLines="1"
+                                    android:ellipsize="end"
                                     android:visibility="gone"/>
                             </LinearLayout>
                         </FrameLayout>

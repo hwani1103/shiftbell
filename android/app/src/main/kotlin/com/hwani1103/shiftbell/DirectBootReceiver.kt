@@ -58,6 +58,12 @@ class DirectBootReceiver : BroadcastReceiver() {
             // 예전의 자체 scheduleGuardWakeup()은 무조건 "다음 자정"만 예약해서 부정확했음.
             AlarmGuardReceiver.triggerCheck(context)
 
+            // ⭐ 4단계: 실제 수면 기록/자동 추정("C번 요구사항") 재예약. AlarmManager
+            // 알람은 재부팅하면 전부 사라지므로 이것도 반드시 다시 걸어야 함 - 알람
+            // 시스템 재등록과 완전히 독립된 별도 알람이라 위 단계들에 영향 없음.
+            // 2026-09-01 - checkNow로 바꿔 재부팅 직후에도 진행 중 후보가 있으면 즉시 판정.
+            SleepDetectionReceiver.checkNow(context)
+
             Log.e("DirectBoot", "========== DIRECT BOOT COMPLETE ==========")
         } catch (e: Exception) {
             Log.e("DirectBoot", "========== ERROR ==========", e)

@@ -49,7 +49,20 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // 테이블을 아직 안 읽지만(위젯에 일정 표시 기능 없음), 그래도 반드시 같이
         // 올려야 함 - "Native가 새 컬럼/테이블을 안 쓰니까 안 올려도 된다"가 정확히
         // 세 번 재발했던 그 착각임 (DB_스키마_변경_가이드.md 참고).
-        private const val DATABASE_VERSION = 20
+        // ⭐ 2026-08-31 - 컨디션 매니저(condition_shift_times 테이블 신설)로
+        // database_service.dart의 version:이 21로 올라가서 같이 올림. Native는 이
+        // 테이블을 전혀 안 읽음(컨디션 매니저는 Flutter 전용 기능) - 그래도 위와
+        // 동일한 이유로 반드시 같이 올림.
+        // ⭐ 2026-08-31(2차) - 실제 수면 기록/자동 추정(sleep_records/
+        // sleep_expected_bedtime 테이블 신설)으로 version:이 22로 올라가서 같이
+        // 올림. 이번엔 Native가 이 테이블들을 직접 읽고 쓴다(SleepDetectionReceiver.kt/
+        // SleepWidgetActionReceiver.kt) - 수면기록_자동추정_설계.md 참고.
+        // ⭐ 2026-08-31(3차) - "D번 요구사항"(일정관리 탭 일정 생성 팝업 5분
+        // 미세조정)에서 처음엔 date_schedules.slot_minutes 컬럼(v23)을 추가했으나,
+        // 그 값이 사용자 확인 결과 startMinutes만으로 매번 계산 가능한 순수
+        // 파생값으로 정정되어(date_schedule.dart의 computeSlotMinutes 참고)
+        // 저장할 필요 자체가 없어짐 - 그 마이그레이션을 되돌려서 다시 22.
+        private const val DATABASE_VERSION = 22
         private const val TAG = "DatabaseHelper"
 
         @Volatile

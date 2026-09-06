@@ -146,6 +146,41 @@
                 android:resource="@xml/calendar_widget_info"/>
         </receiver>
 
+        <!-- ⭐ 실제 수면 기록 위젯("C번 요구사항", 캘린더 위젯과 완전 별개).
+             exported=true 필요(런처가 APPWIDGET_UPDATE를 보냄) - 표준 위젯 요구사항. -->
+        <receiver
+            android:name=".SleepWidgetProvider"
+            android:enabled="true"
+            android:exported="true"
+            android:label="교대시계 수면기록">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/sleep_widget_info"/>
+        </receiver>
+
+        <!-- ⭐ 수면 위젯의 취침/기상 버튼 처리 - 앱 내부에서만 보내는 커스텀 액션이라
+             exported=false. 2026-09-01 - 토글 액션 1개 → 명시적 액션 2개(SLEEP/WAKE)로 재설계. -->
+        <receiver
+            android:name=".SleepWidgetActionReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.hwani1103.shiftbell.SLEEP_WIDGET_SLEEP"/>
+                <action android:name="com.hwani1103.shiftbell.SLEEP_WIDGET_WAKE"/>
+            </intent-filter>
+        </receiver>
+
+        <!-- ⭐ 실제 수면 기록 자동 추정 - SleepDetectionScheduler가 예약하는 정확한
+             알람 수신 전용. 앱 내부(AlarmManager)에서만 발생시키는 알람이라 exported=false. -->
+        <receiver
+            android:name=".SleepDetectionReceiver"
+            android:enabled="true"
+            android:exported="false"
+            android:directBootAware="true"/>
+
         <!-- ⭐ 2026-08-24 추가 - AdMob 앱 ID.
              이 meta-data가 없으면 AdMob SDK가 앱 시작 시점에 의도적으로 크래시시킴.
              지금 값은 구글이 공개한 "테스트 전용" 앱 ID로, 계정 없이 쓸 수 있음.

@@ -123,10 +123,12 @@ class CalendarWidgetProvider : AppWidgetProvider() {
 
             views.setInt(R.id.widget_panel, "setBackgroundResource", R.drawable.widget_panel_light)
 
-            // ⭐ 위젯 전체 탭 → 앱 실행, 달력 탭(index=1)으로 바로 이동
+            // ⭐ 위젯 전체 탭 → 앱 실행, 달력 탭으로 바로 이동. index는 Dart
+            // main.dart의 kCalendarTabIndex와 반드시 같은 값이어야 함(2026-09-04 -
+            // 탭 순서를 다음알람/일정관리/달력/컨디션/설정으로 바꾸면서 1→2로 변경).
             val openAppIntent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("openTab", 1)
+                putExtra("openTab", 2)
             }
             val pendingIntent = PendingIntent.getActivity(
                 context, 0, openAppIntent,

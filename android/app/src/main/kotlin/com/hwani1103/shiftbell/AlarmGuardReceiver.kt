@@ -49,6 +49,15 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // 3주 창이 넘어가게 함). 알람 갱신과 완전히 독립된 read-only 경로라
             // 여기 추가해도 위의 알람 로직에는 아무 영향 없음 - 실패해도 무시.
             CalendarWidgetProvider.requestUpdate(context)
+
+            // ⭐ 실제 수면 기록/자동 추정("C번 요구사항") - 이 하트비트에 편승해서
+            // 수면 감지 예약도 항상 최신 상태로 유지(앱을 며칠 안 열어도 안 끊기게).
+            // 위와 동일하게 완전히 독립된 read-only 판단 + 별도 알람 예약이라 알람
+            // 로직에 영향 없음. 2026-09-01 - ensureScheduled(예약만)이 아니라
+            // checkNow(그 자리에서 즉시 판정 + 재예약)로 바꿔서, 화면이 켜져 있는
+            // 이 시점에 진행 중이던 자동 감지 후보가 있으면 20분 알람을 기다리지
+            // 않고 바로 종료(기상 시각 추정)되게 함.
+            SleepDetectionReceiver.checkNow(context)
         }
     }
 
