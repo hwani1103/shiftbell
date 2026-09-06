@@ -43,7 +43,7 @@ def main():
     probs = pipeline.predict_proba(texts)
     classes = pipeline.named_steps["clf"].classes_
 
-    print("=== eval_holdout.jsonl (60개, 학습에 안 쓰인 독립 문체) 성능 ===")
+    print(f"=== eval_holdout.jsonl ({len(holdout)}개, 학습에 안 쓰인 독립 문체) 성능 ===")
     print(classification_report(labels, preds, zero_division=0))
 
     labels_sorted = sorted(set(labels))

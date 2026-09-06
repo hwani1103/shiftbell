@@ -1,8 +1,8 @@
 {"text": "가볍게 산책하면서 머리 식히기", "label": "여가/휴식", "confused_with": "운동", "rationale": "목적이 힐링/기분전환이고 강도·훈련 의도가 없음"}
 {"text": "땀날 정도로 걷고 오기", "label": "운동", "confused_with": "여가/휴식", "rationale": "땀날 정도라는 강도 표현으로 신체 단련 의도가 명시됨"}
-{"text": "자전거타고 동네 슬슬 한바퀴 돌기", "label": "여가/휴식", "confused_with": "운동", "rationale": "슬슬=캐주얼한 뉘앙스, 훈련 의도 없음"}
-{"text": "자전거로 강변 왕복 전력질주", "label": "운동", "confused_with": "여가/휴식", "rationale": "전력질주=명확한 운동 강도 표현"}
-{"text": "등산 가서 정상 찍고 오기", "label": "운동", "confused_with": "여가/휴식", "rationale": "정상 정복이라는 체력적 목표가 명시됨"}
+{"text": "자전거타고 동네 슬슬 한바퀴 돌기", "label": "자전거", "confused_with": "운동/여가·휴식(구 분류)", "rationale": "2026-09-03 - 자전거가 전용 카테고리로 승격되며 재해석: 등산/수영과 동일 원칙으로 강도·목적과 무관하게 실제로 타면 무조건 자전거(예전엔 운동↔여가 판단 대상이었음)"}
+{"text": "자전거로 강변 왕복 전력질주", "label": "자전거", "confused_with": "운동/여가·휴식(구 분류)", "rationale": "2026-09-03 - 위와 동일한 이유로 재해석(전력질주든 슬슬이든 자전거 카테고리로 수렴)"}
+{"text": "등산 가서 정상 찍고 오기", "label": "등산", "confused_with": "여가/휴식", "rationale": "정상 정복이라는 체력적 목표가 명시됨"}
 {"text": "산에 바람쐬러 살살 올라갔다 오기", "label": "여가/휴식", "confused_with": "운동", "rationale": "바람쐬러=힐링 목적, 살살=강도 낮음"}
 {"text": "수영장 가서 그냥 물놀이", "label": "여가/휴식", "confused_with": "운동", "rationale": "물놀이=놀이 목적, 훈련 의도 없음"}
 {"text": "수영장 가서 레인 왕복 20바퀴", "label": "운동", "confused_with": "여가/휴식", "rationale": "구체적 훈련량(20바퀴)이 명시되어 단련 목적임"}
@@ -32,26 +32,26 @@
 {"text": "사수한테 업무 배우기", "label": "업무", "confused_with": "공부", "rationale": "회사 내 실무 OJT, 개인 학습 목적이 아님"}
 {"text": "요즘 몸이 안좋아서 헬스 좀 줄이고 쉬어야겠다", "label": "여가/휴식", "confused_with": "병원·건강관리", "rationale": "운동을 쉬겠다는 휴식 의도, 진료·치료 행위가 없음"}
 {"text": "영양제 챙겨먹으면서 컨디션 관리", "label": "병원·건강관리", "confused_with": "여가/휴식", "rationale": "건강 관리 목적의 행위"}
-{"text": "요가 클래스 등록하고 몸 관리 시작", "label": "운동", "confused_with": "병원·건강관리", "rationale": "신체 단련이 목적, 치료 행위 아님"}
+{"text": "요가 클래스 등록하고 몸 관리 시작", "label": "요가/필라테스", "confused_with": "병원·건강관리", "rationale": "신체 단련이 목적, 치료 행위 아님"}
 {"text": "허리디스크 재활운동 받으러 가기", "label": "병원·건강관리", "confused_with": "운동", "rationale": "재활=치료 목적의 운동으로 병원·건강관리가 우선"}
 {"text": "친구랑 볼링치러 가기", "label": "약속/사교", "confused_with": "운동", "rationale": "볼링이라는 활동보다 친구를 만나는 것이 핵심 목적(우선순위상 사교가 활동특정형보다 위)"}
 {"text": "혼자 볼링장 가서 스코어 연습", "label": "운동", "confused_with": "약속/사교", "rationale": "동행 없이 훈련 목적으로 감"}
 {"text": "장모님 생신이라 처가 식구들이랑 저녁", "label": "가족", "confused_with": "약속/사교", "rationale": "처가 어른(친족) 대상 행사"}
 {"text": "친구 부모님이 차려주신 저녁 대접받기", "label": "약속/사교", "confused_with": "가족", "rationale": "자신의 친족이 아니라 친구 및 친구 가족을 만나는 자리"}
 {"text": "수영장 가서 그냥 물놀이하며 놀기", "label": "여가/휴식", "confused_with": "운동", "rationale": "놀이 목적, 훈련강도 표현 없음"}
-{"text": "수영 레인 왕복하며 기록 재기", "label": "운동", "confused_with": "여가/휴식", "rationale": "기록 측정=훈련 목적"}
+{"text": "수영 레인 왕복하며 기록 재기", "label": "수영", "confused_with": "여가/휴식", "rationale": "기록 측정=훈련 목적"}
 {"text": "공원에서 친구 없이 혼자 가볍게 산책만", "label": "여가/휴식", "confused_with": "운동", "rationale": "가볍게=강도 낮음, 힐링 목적"}
 {"text": "공원에서 인터벌로 전력질주 반복", "label": "운동", "confused_with": "여가/휴식", "rationale": "인터벌 훈련=명확한 운동"}
-{"text": "자전거 타고 카페 투어 다니기", "label": "여가/휴식", "confused_with": "운동", "rationale": "목적이 카페 나들이, 자전거는 이동수단"}
+{"text": "자전거 타고 카페 투어 다니기", "label": "자전거", "confused_with": "운동", "rationale": "목적이 카페 나들이, 자전거는 이동수단"}
 {"text": "자전거로 업힐 훈련", "label": "운동", "confused_with": "여가/휴식", "rationale": "업힐 훈련=체력 단련 목적"}
-{"text": "요가원 가서 명상 위주 수업", "label": "여가/휴식", "confused_with": "운동", "rationale": "명상=힐링 목적이 강조됨"}
-{"text": "요가원 가서 근력 위주 수업", "label": "운동", "confused_with": "여가/휴식", "rationale": "근력=신체 단련 목적"}
+{"text": "요가원 가서 명상 위주 수업", "label": "요가/필라테스", "confused_with": "운동/여가·휴식(구 분류)", "rationale": "2026-09-03 - 요가·필라테스가 전용 카테고리로 승격되며 재해석: 명상 위주든 근력 위주든 요가원에서 실제로 수업을 들었으면 무조건 요가/필라테스"}
+{"text": "요가원 가서 근력 위주 수업", "label": "요가/필라테스", "confused_with": "운동/여가·휴식(구 분류)", "rationale": "2026-09-03 - 위와 동일 - 강도 무관하게 요가/필라테스로 수렴"}
 {"text": "등산로 입구에서 사진만 찍고 내려오기", "label": "여가/휴식", "confused_with": "운동", "rationale": "등산 완주 의도 없음, 나들이 성격"}
-{"text": "등산 완주하고 기록 갱신", "label": "운동", "confused_with": "여가/휴식", "rationale": "완주·기록=체력적 목표"}
+{"text": "등산 완주하고 기록 갱신", "label": "등산", "confused_with": "여가/휴식", "rationale": "완주·기록=체력적 목표"}
 {"text": "헬스장 가서 사우나만 하고 오기", "label": "여가/휴식", "confused_with": "운동", "rationale": "실제 운동 안 하고 힐링만"}
 {"text": "헬스장 가서 1시간 웨이트", "label": "운동", "confused_with": "여가/휴식", "rationale": "구체적 웨이트 트레이닝"}
 {"text": "바닷가 가서 그냥 걷기만", "label": "여가/휴식", "confused_with": "운동", "rationale": "나들이 목적"}
-{"text": "바닷가에서 러닝 훈련", "label": "운동", "confused_with": "여가/휴식", "rationale": "러닝 훈련=단련 목적"}
+{"text": "바닷가에서 러닝 훈련", "label": "달리기", "confused_with": "여가/휴식", "rationale": "러닝 훈련=단련 목적"}
 {"text": "캠핑장에서 가볍게 몸 풀기", "label": "여가/휴식", "confused_with": "운동", "rationale": "캠핑이 주 목적, 운동은 부수적"}
 {"text": "체육관 대관해서 팀 훈련", "label": "운동", "confused_with": "여가/휴식", "rationale": "훈련이라는 단어로 목적 명확"}
 {"text": "동네 한바퀴 산책 겸 바람쐬기", "label": "여가/휴식", "confused_with": "운동", "rationale": "바람쐬기=힐링 목적"}
@@ -132,16 +132,16 @@
 {"text": "사돈댁 지인 소개로 만난 사람", "label": "약속/사교", "confused_with": "가족", "rationale": "비친족"}
 {"text": "매형이랑 집안 일 상의하기", "label": "가족", "confused_with": "약속/사교", "rationale": "매형=가족, 집안일 상의는 가족 활동"}
 {"text": "매형 회사 워크숍 대신 참석", "label": "약속/사교", "confused_with": "가족", "rationale": "매형의 회사 행사, 매형의 지인들과 자리"}
-{"text": "자전거 타고 동네 여유롭게 한바퀴", "label": "여가/휴식", "confused_with": "운동", "rationale": "여유롭게=강도 낮음, 힐링 목적"}
-{"text": "자전거 타고 최대 속도로 질주", "label": "운동", "confused_with": "여가/휴식", "rationale": "최대 속도=운동 강도"}
+{"text": "자전거 타고 동네 여유롭게 한바퀴", "label": "자전거", "confused_with": "운동", "rationale": "여유롭게=강도 낮음, 힐링 목적"}
+{"text": "자전거 타고 최대 속도로 질주", "label": "자전거", "confused_with": "여가/휴식", "rationale": "최대 속도=운동 강도"}
 {"text": "수영장 가서 물장구치며 놀기", "label": "여가/휴식", "confused_with": "운동", "rationale": "놀이 목적"}
 {"text": "수영장 가서 정해진 거리 완주 훈련", "label": "운동", "confused_with": "여가/휴식", "rationale": "완주 훈련=단련 목적"}
 {"text": "가볍게 산책하며 스트레스 풀기", "label": "여가/휴식", "confused_with": "운동", "rationale": "스트레스 해소=힐링 목적"}
 {"text": "빠른 걸음으로 파워워킹하기", "label": "운동", "confused_with": "여가/휴식", "rationale": "파워워킹=운동 강도 명시"}
-{"text": "요가원 가서 편안하게 스트레칭만", "label": "여가/휴식", "confused_with": "운동", "rationale": "편안하게=강도 낮음"}
-{"text": "요가원 가서 고강도 클래스 수강", "label": "운동", "confused_with": "여가/휴식", "rationale": "고강도=단련 목적"}
-{"text": "등산 갔다가 경치만 구경하고 내려오기", "label": "여가/휴식", "confused_with": "운동", "rationale": "나들이 목적"}
-{"text": "등산 코스 완주 목표로 도전", "label": "운동", "confused_with": "여가/휴식", "rationale": "완주 목표=체력적 도전"}
+{"text": "요가원 가서 편안하게 스트레칭만", "label": "요가/필라테스", "confused_with": "운동/여가·휴식(구 분류)", "rationale": "2026-09-03 - 스트레칭도 신설 카테고리에 포함 - 강도/목적 무관"}
+{"text": "요가원 가서 고강도 클래스 수강", "label": "요가/필라테스", "confused_with": "운동/여가·휴식(구 분류)", "rationale": "2026-09-03 - 위와 동일 - 강도 무관하게 요가/필라테스로 수렴"}
+{"text": "등산 갔다가 경치만 구경하고 내려오기", "label": "등산", "confused_with": "운동", "rationale": "나들이 목적"}
+{"text": "등산 코스 완주 목표로 도전", "label": "등산", "confused_with": "여가/휴식", "rationale": "완주 목표=체력적 도전"}
 {"text": "부서 회식 겸 저녁식사 자리", "label": "약속/사교", "confused_with": "식사", "rationale": "부서 구성원 모임이 핵심, 식사는 형식"}
 {"text": "팀 전체 회식 참석하기", "label": "약속/사교", "confused_with": "식사", "rationale": "팀 모임이 핵심"}
 {"text": "회사 사람들과 함께하는 저녁식사", "label": "약속/사교", "confused_with": "식사", "rationale": "회사 구성원과의 모임이 핵심"}
@@ -160,8 +160,8 @@
 {"text": "처제 친구들과의 모임 대신 참석", "label": "약속/사교", "confused_with": "가족", "rationale": "처제의 지인들, 비친족"}
 {"text": "수영장 가서 여유롭게 물놀이만", "label": "여가/휴식", "confused_with": "운동", "rationale": "여유롭게=강도 낮음, 놀이 목적"}
 {"text": "수영장 가서 접영 기록 갱신 훈련", "label": "운동", "confused_with": "여가/휴식", "rationale": "기록 갱신=훈련 목적"}
-{"text": "요가원 가서 쉬는 느낌으로 스트레칭", "label": "여가/휴식", "confused_with": "운동", "rationale": "쉬는 느낌=강도 낮음"}
-{"text": "요가원 가서 근력 위주 파워요가", "label": "운동", "confused_with": "여가/휴식", "rationale": "파워요가=단련 목적"}
+{"text": "요가원 가서 쉬는 느낌으로 스트레칭", "label": "요가/필라테스", "confused_with": "운동/여가·휴식(구 분류)", "rationale": "2026-09-03 - 스트레칭도 신설 카테고리에 포함 - 강도/목적 무관"}
+{"text": "요가원 가서 근력 위주 파워요가", "label": "요가/필라테스", "confused_with": "운동/여가·휴식(구 분류)", "rationale": "2026-09-03 - 위와 동일 - 강도 무관하게 요가/필라테스로 수렴"}
 {"text": "아이 옷 예쁜거 골라서 사기", "label": "쇼핑", "confused_with": "가족", "rationale": "구매가 핵심 행위"}
 {"text": "아이 옷 물려받으러 형네 방문하기", "label": "가족", "confused_with": "쇼핑", "rationale": "구매가 아니라 가족 간 물려받기 방문"}
 {"text": "부모님 드릴 선물 여러개 구매하기", "label": "쇼핑", "confused_with": "가족", "rationale": "구매가 핵심"}
@@ -172,3 +172,31 @@
 {"text": "개인 관심사로 도서관에서 책 읽기", "label": "공부", "confused_with": "업무", "rationale": "개인 학습 목적"}
 {"text": "형수님과 함께 마트 장보기", "label": "가족", "confused_with": "쇼핑", "rationale": "가족과 함께하는 활동이 핵심(단순 구매가 아닌 동행)"}
 {"text": "장보기 목록만 보고 혼자 마트가기", "label": "쇼핑", "confused_with": "가족", "rationale": "혼자 구매가 목적, 가족 동행 없음"}
+{"text": "친구랑 같이 영화보기로 약속잡기", "label": "약속/사교", "confused_with": "문화생활", "rationale": "영화 관람 자체보다 그 사람을 만나는 게 핵심(약속을 잡는 행위)"}
+{"text": "혼자 조조영화 보고 카페 가기", "label": "문화생활", "confused_with": "약속/사교", "rationale": "혼자 하는 활동이라 사람 만남 신호가 없음"}
+{"text": "동료들이랑 퇴근하고 영화 한편 보기", "label": "약속/사교", "confused_with": "문화생활", "rationale": "동료와 함께라는 사교 신호가 영화 관람보다 우선"}
+{"text": "집에서 좋아하는 영화 다시 보며 뒹굴기", "label": "문화생활", "confused_with": "여가/휴식", "rationale": "핵심 행동이 영화 감상이라 문화생활이 더 구체적"}
+{"text": "딱히 뭐 안 하고 소파에서 뒹굴거리기", "label": "여가/휴식", "confused_with": "문화생활", "rationale": "영화/공연 등 구체적 콘텐츠 언급이 없는 순수 휴식"}
+{"text": "동호회 사람들이랑 전시회 나들이 가기", "label": "약속/사교", "confused_with": "문화생활", "rationale": "동호회=사람 만남 신호가 전시 관람보다 우선(사교 tier가 먼저 걸림)"}
+{"text": "법인카드 사용내역 정산해서 보고하기", "label": "업무", "confused_with": "금융", "rationale": "회사 업무 처리라 개인 금융 용무가 아님"}
+{"text": "적금 들어놓은 거 만기 됐는지 확인하기", "label": "금융", "confused_with": "기타", "rationale": "구체적인 금융 상품(적금) 용무라 막연한 잡무보다 금융이 더 정확함"}
+{"text": "관리비 고지서 확인하고 납부하기", "label": "금융", "confused_with": "기타", "rationale": "공과금 성격의 납부 용무라 금융으로 분류"}
+{"text": "정수기 필터 교체 예약 문자 확인", "label": "기타", "confused_with": "집안일", "rationale": "직접 청소/빨래 등 집안일 행위가 아니라 단순 확인/예약 용무"}
+{"text": "청소기 필터 새로 주문하기", "label": "쇼핑", "confused_with": "집안일", "rationale": "구매가 핵심이라 실제 청소 행위(집안일)와는 다름"}
+{"text": "빨래바구니 꽉 차서 새로 하나 사기", "label": "쇼핑", "confused_with": "집안일", "rationale": "빨래를 하는 게 아니라 도구(바구니)를 사는 행위"}
+{"text": "본가 화장실 청소 도와드리기", "label": "가족", "confused_with": "집안일", "rationale": "본가(부모님 댁)에서 하는 일이라 가족 우선순위 규칙 적용"}
+{"text": "부모님 댁 대청소 도와드리기", "label": "가족", "confused_with": "집안일", "rationale": "부모님 댁이라는 가족 맥락이 청소 행위보다 우선"}
+{"text": "네일아트 자격증반 실기 수업 듣기", "label": "공부", "confused_with": "미용", "rationale": "자격증 취득이 목적이라 실제 네일 관리보다 공부가 더 맞음"}
+{"text": "미용사 자격증 필기시험 준비하기", "label": "공부", "confused_with": "미용", "rationale": "자격증 시험 준비가 핵심이라 미용 서비스 자체와는 다름"}
+{"text": "새 립스틱이랑 파운데이션 사러가기", "label": "쇼핑", "confused_with": "미용", "rationale": "화장품 구매가 핵심이라 미용실/네일샵 등 서비스 이용과는 다름"}
+{"text": "홈쇼핑에서 헤어드라이기 주문하기", "label": "쇼핑", "confused_with": "미용", "rationale": "미용 가전 구매라 실제 미용 서비스와는 다름"}
+{"text": "러닝화 사러 매장 들르기", "label": "쇼핑", "confused_with": "달리기", "rationale": "구매가 핵심이라 실제 달리기 행위와는 다름(장비 구매)"}
+{"text": "수영복이랑 물안경 새로 장만하기", "label": "쇼핑", "confused_with": "수영", "rationale": "수영용품 구매가 핵심이라 실제 수영 행위와는 다름"}
+{"text": "러닝크루 정모 끝나고 다같이 저녁", "label": "약속/사교", "confused_with": "달리기", "rationale": "정모(사람 모임) 뒤풀이가 핵심이라 달리기 자체가 아님"}
+{"text": "동호회 사람들이랑 계곡 트레킹 다녀오기", "label": "약속/사교", "confused_with": "등산", "rationale": "동호회=사람 만남 신호가 트레킹 자체보다 우선"}
+{"text": "수영 동호회 정기모임 참석하기", "label": "약속/사교", "confused_with": "수영", "rationale": "동호회 정기모임이라는 사교 신호가 명확함"}
+{"text": "헬스장에서 러닝머신 30분 뛰고 웨이트하기", "label": "운동", "confused_with": "달리기", "rationale": "웨이트 등 종합 운동 루틴의 일부라 달리기 단독 활동보다 포괄적 운동으로 분류"}
+{"text": "동네 목욕탕 온탕에서 물놀이하기", "label": "여가/휴식", "confused_with": "수영", "rationale": "수영이 아니라 목욕탕에서 쉬는 개념이라 여가에 가까움"}
+{"text": "가족들이랑 계곡 물놀이하며 쉬기", "label": "가족", "confused_with": "수영", "rationale": "가족과 함께라는 관계 맥락이 수영 행위보다 우선"}
+{"text": "회사 워크숍 경비 정산 처리하기", "label": "업무", "confused_with": "금융", "rationale": "회사 업무 처리(경비 정산)라 개인 금융 용무와는 결이 다름"}
+{"text": "등산스틱이랑 배낭 새로 사기", "label": "쇼핑", "confused_with": "등산", "rationale": "등산용품 구매가 핵심이라 실제 등산 행위와는 다름(복합명사라 하드매핑 안 걸림)"}

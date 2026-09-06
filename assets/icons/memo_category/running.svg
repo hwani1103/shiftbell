@@ -1,0 +1,20 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <!-- ⭐ 2026-09-01 후속 - "다른 아이콘들에 비해 사람 모양이 작아 보인다"는
+       피드백으로, 원본 Tabler 도형을 원래 bbox 중심(11,12) 기준 1.2배
+       확대해서 좌표를 직접 재계산함(획 두께는 stroke-width="2" 그대로 - 좌표만
+       키웠으므로 다른 아이콘과 두께 차이 없음). -->
+  <path d="M11.008 3.6a2.4 2.4 0 1 0 4.8 0a2.4 2.4 0 1 0 -4.8 0" />
+  <path d="M2.6 18l6 1.2l.9 -1.8" />
+  <path d="M15.8 22.8v-4.8l-4.8 -3.6l1.2 -7.2" />
+  <path d="M6.2 12v-3.6l6 -1.2l3.6 3.6l3.6 1.2" />
+</svg>

@@ -1,0 +1,20 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <!-- ⭐ 2026-09-03 - running.svg/swimming.svg와 동일한 이유("다른 아이콘보다
+       사람 모양이 작아 보인다")로, 원본 Tabler 도형을 원래 bbox 중심
+       (12,11.5) 기준 1.2배 확대해서 좌표를 직접 재계산함(획 두께는
+       stroke-width="2" 그대로 - 좌표만 키웠으므로 다른 아이콘과 두께 차이 없음). -->
+  <path d="M2.4 21.7h4.8l1.8 -3.6" />
+  <path d="M18 21.7l-1.2 -6h-6l1.2 -8.4" />
+  <path d="M2.4 9.7l4.8 -1.2l4.8 -1.2l4.8 1.8l4.8 1.8" />
+  <path d="M9.608 3.7a2.4 2.4 0 1 0 4.8 0a2.4 2.4 0 1 0 -4.8 0" />
+</svg>

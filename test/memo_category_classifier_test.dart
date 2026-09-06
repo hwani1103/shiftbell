@@ -88,6 +88,52 @@ void main() {
     });
   });
 
+  group('자전거/요가·필라테스 하드매핑(tier3b, 2026-09-03 신설)', () {
+    test('자전거/따릉이는 공백 있는 형태도, "타다" 활용형 붙여쓴 형태도 잡힌다', () {
+      expect(classifier.classify('자전거 타러 가기').categoryKey, 'cycling');
+      expect(classifier.classify('따릉이 타고 한강').categoryKey, 'cycling');
+      final r = classifier.classify('자전거타야됨');
+      expect(r.categoryKey, 'cycling');
+      expect(r.method, 'tier3b_cycling');
+    });
+
+    test('요가하러가기/필라테스 학원 고고/스트레칭 - 사용자 예시 문구가 그대로 잡힌다', () {
+      expect(classifier.classify('요가하러가기').categoryKey, 'yoga');
+      expect(classifier.classify('필라테스 학원 고고').categoryKey, 'yoga');
+      final r = classifier.classify('스트레칭');
+      expect(r.categoryKey, 'yoga');
+      expect(r.method, 'tier3b_yoga');
+    });
+
+    test('"필요가 있다"는 "요가"로 끝나도 요가로 오탐되지 않는다', () {
+      final r = classifier.classify('연차 미리 써야 할 필요가 있다');
+      expect(r.categoryKey, isNot('yoga'));
+    });
+
+    // ⭐ 2026-09-03 - 하드매핑은 "자전거 헬멧 사기"류를 tier3b_cycling으로
+    // 강제하지 않고 ML로 defer한다(이게 이 테스트의 핵심 확인 대상). 다만
+    // ML 자체가 최종적으로 '쇼핑'을 고르는지는 학습 데이터의 char n-gram
+    // 분포에 달려있어 완벽히 보장되진 않음(가족↔쇼핑의 PURCHASE_MARKERS
+    // 미해결 사례와 같은 성격의 한계 - ml/카테고리_가이드.md 참고) - 여기선
+    // "하드매핑이 무조건 자전거로 강제하지는 않는다"만 확인한다.
+    test('자전거 헬멧을 사기만 하는 문장은 하드매핑을 defer한다(tier3b_cycling 아님)', () {
+      final r = classifier.classify('자전거 헬멧 사기');
+      expect(r.method, isNot('tier3b_cycling'));
+    });
+
+    test('자전거 정비만 맡기는 문장(타는 동작 없음)은 기타로 분류된다', () {
+      final r = classifier.classify('자전거 브레이크 수리 맡기러 가기');
+      expect(r.method, isNot('tier3b_cycling'));
+      expect(r.categoryKey, 'etc');
+    });
+
+    test('구매 후 실제로 타면(콤보 문장) 자전거로 잡힌다', () {
+      final r = classifier.classify('자전거 안전장비 새로 사서 라이딩');
+      expect(r.categoryKey, 'cycling');
+      expect(r.method, 'tier3b_cycling');
+    });
+  });
+
   group('ML 모델(TF-IDF + LogisticRegression)', () {
     test('진료 예약하기 -> 병원·건강관리 (하드매핑 안 걸림)', () {
       final r = classifier.classify('진료 예약하기');
@@ -101,9 +147,17 @@ void main() {
       expect(r.method, 'ml');
     });
 
-    test('넷플릭스 보기 -> 여가/휴식', () {
+    // ⭐ 2026-09-03 - 원래 기대값은 'leisure'였으나, ml/eval_e2e.py로 실측해보니
+    // 학습 데이터 자체가 "넷플릭스" 관련 문장을 문화생활 18건 vs 여가/휴식 8건으로
+    // 갈라서 라벨링하고 있었음(예: "넷플릭스 정주행"이 양쪽 라벨에 다 존재) - 즉
+    // 하나로 정할 만큼 명확한 경계가 아니라는 뜻이라 하드매핑은 하지 않기로 함
+    // (ml/keyword_router.py의 "여가/휴식" ACTIVITY_PREFIX_KEYWORDS 주석 참고).
+    // 이 테스트는 "특정 카테고리가 맞다"가 아니라 데이터가 실제로 가리키는
+    // 다수결(문화생활)과 모델 예측이 일치하는지만 확인 - 데이터 정리로 다수결이
+    // 바뀌면 이 기대값도 같이 바뀌어야 함.
+    test('넷플릭스 보기 -> 문화생활(학습 데이터 다수결)', () {
       final r = classifier.classify('넷플릭스 보기');
-      expect(r.categoryKey, 'leisure');
+      expect(r.categoryKey, 'culture');
       expect(r.method, 'ml');
     });
 

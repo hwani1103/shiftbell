@@ -15,6 +15,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_colors.dart';
 
 /// assets/icons/memo_category/README.md의 매핑과 동일하게 유지할 것.
+/// ⭐ 2026-09-01 - 10종 -> 17종(7개 신설). 2026-09-03 - 17종 -> 19종(자전거/
+/// 요가·필라테스 신설). lib/screens/schedule_management_tab.dart의
+/// _kScheduleCategoryIcons도 같은 목록.
 const List<(String key, String label, String asset)> kMemoCategoryIcons = [
   ('work', '업무', 'assets/icons/memo_category/work.svg'),
   ('study', '공부', 'assets/icons/memo_category/study.svg'),
@@ -25,7 +28,28 @@ const List<(String key, String label, String asset)> kMemoCategoryIcons = [
   ('family', '가족', 'assets/icons/memo_category/family.svg'),
   ('shopping', '쇼핑', 'assets/icons/memo_category/shopping.svg'),
   ('leisure', '여가/휴식', 'assets/icons/memo_category/leisure.svg'),
-  ('etc', '기타', 'assets/icons/memo_category/etc.svg'),
+  ('running', '달리기', 'assets/icons/memo_category/running.svg'),
+  ('swimming', '수영', 'assets/icons/memo_category/swimming.svg'),
+  ('hiking', '등산', 'assets/icons/memo_category/hiking.svg'),
+  ('culture', '문화생활', 'assets/icons/memo_category/culture.svg'),
+  ('finance', '금융', 'assets/icons/memo_category/finance.svg'),
+  ('housework', '집안일', 'assets/icons/memo_category/housework.svg'),
+  ('beauty', '미용', 'assets/icons/memo_category/beauty.svg'),
+  ('cycling', '자전거', 'assets/icons/memo_category/cycling.svg'),
+  ('yoga', '요가/필라테스', 'assets/icons/memo_category/yoga.svg'),
+  // ⭐ 2026-09-01 - etc.svg를 순수 도형 10종(etc1~10)으로 교체 확정 - "기타"로
+  // 분류될 때마다 순서대로 순환 배정됨(schedule_management_tab.dart의
+  // _nextEtcIconIndex 참고). 이 화면은 그리기 확인용이라 10개 다 나열만 함.
+  ('etc', '기타', 'assets/icons/memo_category/etc1.svg'),
+  ('etc', '기타', 'assets/icons/memo_category/etc2.svg'),
+  ('etc', '기타', 'assets/icons/memo_category/etc3.svg'),
+  ('etc', '기타', 'assets/icons/memo_category/etc4.svg'),
+  ('etc', '기타', 'assets/icons/memo_category/etc5.svg'),
+  ('etc', '기타', 'assets/icons/memo_category/etc6.svg'),
+  ('etc', '기타', 'assets/icons/memo_category/etc7.svg'),
+  ('etc', '기타', 'assets/icons/memo_category/etc8.svg'),
+  ('etc', '기타', 'assets/icons/memo_category/etc9.svg'),
+  ('etc', '기타', 'assets/icons/memo_category/etc10.svg'),
 ];
 
 class MemoCategoryIconLabScreen extends StatelessWidget {
@@ -42,7 +66,7 @@ class MemoCategoryIconLabScreen extends StatelessWidget {
             padding: EdgeInsets.all(16.w),
             color: Colors.grey.shade100,
             child: Text(
-              'assets/icons/memo_category/의 SVG 10종을 flutter_svg로 그대로 그린 것. '
+              'assets/icons/memo_category/의 SVG 19종을 flutter_svg로 그대로 그린 것. '
               '색은 앱 메인 액센트(kAppMainAccent)로 tint. 실제 적용 화면(일정관리 등)에서는 '
               '카테고리별 다른 색을 쓸 수도 있음 - 이 화면은 "아이콘 모양 자체"만 확인하는 용도.',
               style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700, height: 1.4),

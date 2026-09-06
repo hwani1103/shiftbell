@@ -9,6 +9,9 @@
   2단계: 사람을 만난다는 명시적 표현(친구/동창/동료 등) -> 사교
   3단계: 명확하고 애매하지 않은 활동 키워드 -> 해당 카테고리
          (당구/볼링처럼 실제로 애매한 건 여기 넣지 않고 ML에 맡김)
+  3-b/3-c단계 (2026-09-01, 카테고리 10->17개 확장): 위와 같은 원칙으로 새
+         카테고리 7종(달리기/수영/등산/문화생활/금융/집안일/미용) 추가.
+         자세한 근거는 각 키워드 리스트 위 주석 참고.
   4단계: 위에 안 걸리면 None 반환 -> predict.py에서 ML 모델로 넘어감
 
 매칭 방식 (2026-08-26, 실사용 데이터 500개로 교차검증하며 수정):
@@ -33,7 +36,35 @@ _COMMON_PARTICLES = [
     # 하드매핑(병원)으로 새 사람이 가버리는 걸 실측(check_keyword_regressions.py)
     # 으로 발견해서 추가함.
     "님", "어른", "댁",
+    # ⭐ 2026-09-01(실사용 문장 테스트) - "청소나 가볍게 하기"류의 캐주얼한
+    # "~나"(or) 연결 조사가 없어서 CHORE_KEYWORDS 등이 못 잡던 걸 발견해서 추가.
+    "나", "이나",
 ]
+# ⭐ 2026-09-03 - "로"/"으로"는 일부러 안 넣는다. "소개로"(소개+로) 같은 흔한
+# 격조사를 잡으려고 시도했는데, "등산로"(하이킹 코스를 뜻하는 명사 자체, "등산"+
+# 조사"로"가 아님)/"조깅으로"(뒤에 오는 뉘앙스가 ML이 이미 "운동" vs "달리기"로
+# 잘 가르던 문맥)에서 실측 회귀가 발견됨(check_keyword_regressions.py) - "로"는
+# 흔한 명사 끝음절과도 겹쳐서 "펌"/"런"과 같은 이유로 위험 판정, 하드매핑에서
+# 뺌. "이모 소개로 나온 사람" 같은 케이스는 여전히 ML 판단에 맡긴다.
+
+
+def _particle_suffix_ok(rest):
+    """⭐ 2026-09-03 - rest가 알려진 조사들의 연쇄(0개 이상)로만 이루어져 있으면
+    True. 기존엔 rest 전체가 _COMMON_PARTICLES의 항목 '한 개'와 정확히 일치해야만
+    통과됐는데, 한국어는 조사가 여러 개 겹쳐 붙는 게 흔함("친구들과의" =
+    "들"(복수) + "과"(조사) + "의"(조사), "동료들과의"도 동일) - 이 경우 rest가
+    "과의"가 되는데 목록엔 "과"/"의"만 개별로 있어서 매칭에 실패, "친구"/"동료"
+    같은 명백한 지인 신호를 놓치는 실측 버그(boundary_cases.jsonl의 "며느리
+    친구들과의 모임"류)를 발견해서 재귀적으로 여러 조사를 계속 벗겨내도록 고침.
+    긴 조사부터 시도(짧은 조사가 긴 조사의 접두사인 케이스에서 잘못 잘리는 것
+    방지 - 예: "이랑"을 "이"+"랑"으로 잘못 나누면 다음 재귀에서 "랑"이 남는
+    문제가 생길 수 있음)."""
+    if rest == "":
+        return True
+    for p in sorted(_COMMON_PARTICLES, key=len, reverse=True):
+        if rest.startswith(p) and _particle_suffix_ok(rest[len(p):]):
+            return True
+    return False
 
 IMMEDIATE_FAMILY = [
     "엄마", "어머니", "아빠", "아버지", "아들", "딸", "남편", "아내", "배우자",
@@ -41,7 +72,11 @@ IMMEDIATE_FAMILY = [
 ]
 # "가족"은 "온가족/전가족"처럼 다른 어절 뒤에 붙는 복합어로도 자주 쓰여서
 # contains(부분일치)로 따로 잡는다. "가족"은 그 자체로 오탐 위험 낮음.
-IMMEDIATE_FAMILY_CONTAINS = ["가족"]
+# ⭐ 2026-09-01 - "본가"("부모님 댁"을 가리키는 말)도 같은 이유로 추가. 신설한
+# "집안일" 하드매핑이 "본가 OO 청소해드리기"류를 가족보다 먼저 채가는 걸
+# 실측으로 발견해서(가족 우선순위 규칙 위반) 여기 추가함 - "본가" 자체가
+# 무관한 단어와 충돌할 위험은 낮음.
+IMMEDIATE_FAMILY_CONTAINS = ["가족", "본가"]
 
 # "형/누나/언니/오빠/동생"은 일부러 뺐다 — 실사용 데이터에서 "친한 형",
 # "친한 동생"처럼 혈연이 아니라 친한 손위/손아래 사람을 부르는 호칭으로도
@@ -58,15 +93,19 @@ EXTENDED_FAMILY = [
 # "이 가족어가 사실은 '남의 가족'이다"라는 신호. 두 가지 방향 다 잡는다:
 #   - "매형 지인 소개로 만난 사람" (가족어 뒤에 지인 표시)
 #   - "친구 부모님", "직장동료 배우자" (가족어 앞에 남의 관계어)
+# ⭐ 2026-09-01(실사용 문장 테스트) - "팀원"도 "동료"와 동일 개념인데 빠져있어서
+# 추가("점심시간에 팀원들이랑 순대국밥집 가기"가 사교로 안 잡히던 걸 발견).
+# "동료"도 이미 소수(4/41) 식사 라벨과 충돌하는 걸 감안하면 같은 수준의
+# 트레이드오프 - 새로운 종류의 문제는 아님.
 ACQUAINTANCE_MARKERS = [
-    "친구", "동료", "지인", "소개", "동창", "직장동료", "회사동료",
+    "친구", "동료", "지인", "소개", "동창", "직장동료", "회사동료", "팀원",
 ]
 
 # "모임"은 뺐다 — "스터디 모임", "독서 모임"처럼 실제로는 공부/개인활동 쪽
 # 문맥에서도 흔히 쓰여서(실사용 데이터에서 확인), 사교로 강제로 보내면 오히려
 # 틀림. "정모/동호회"는 그 자체로 "사람 만나는 모임"이라는 뜻이 뚜렷해서 유지.
 SOCIAL_KEYWORDS = [
-    "친구", "동창", "동기", "선배", "후배", "동료", "지인", "정모", "동호회",
+    "친구", "동창", "동기", "선배", "후배", "동료", "지인", "정모", "동호회", "팀원",
 ]
 
 # "구매가 핵심이면 쇼핑" 규칙 (카테고리_가이드.md 쇼핑↔가족 항목).
@@ -81,14 +120,119 @@ PURCHASE_MARKERS = []
 # 수영/요가/헬스/등산/자전거처럼 강도·목적에 따라 여가/휴식과 갈리는 종목은
 # 일부러 뺐다 — ML이 그 뉘앙스를 이미 잘 배웠는데 하드매핑이 덮어쓰면 안 됨.
 # 당구/볼링도 같은 이유로 계속 제외.
+# ⭐ 2026-09-01(카테고리 확장) - "마라톤"은 RUNNING_KEYWORDS(달리기 전용 카테고리
+# 신설)로 옮김. 실측(5,464개)에서 "마라톤"이 낀 문장은 전부 운동보다 "달리기"
+# 자체를 가리켜서(마라톤 대회/장거리 러닝 등) 새 카테고리가 더 정확함.
 SPORTS_KEYWORDS = [
     "테니스", "골프", "라운딩", "탁구", "축구", "배드민턴", "스쿼시",
-    "클라이밍", "필라테스", "복싱", "웨이트", "마라톤", "농구", "배구",
+    "클라이밍", "복싱", "웨이트", "농구", "배구",
     "야구", "줄넘기", "크로스핏",
 ]
+# ⭐ 2026-09-03 - "필라테스"는 카테고리 확장(아래 "요가/필라테스" 신설)으로
+# 이 목록에서 빠짐(전용 카테고리로 승격).
 # "골프공"처럼 운동 이름 + 공(볼)이 마사지 도구 등 완전히 다른 용도로 쓰이는
 # 경우를 걸러낸다("족저근막위염 마사지용 골프공" 같은 실사용 사례로 발견).
 SPORTS_FALSE_POSITIVES = ["골프공", "테니스공", "야구공", "축구공", "탁구공"]
+
+# ⭐ 2026-09-01 - 카테고리 확장(10개 -> 17개). "운동" 아이콘(아령)이 달리기/수영/
+# 등산까지 뭉뚱그리는 게 별로라는 피드백으로 이 3개를 전용 카테고리로 분리함.
+# 실측(5,464개)에서 "등산"/"수영"/"조깅"/"러닝"이 낀 문장은 절대다수가 이미
+# "운동"으로 라벨돼 있었다(등산 33/45, 수영 37/42, 조깅 9/9, 러닝 26/31) -
+# 즉 기존에도 사실상 "운동"의 하위집합으로 취급되던 것을 이번에 독립시킨 것.
+# 나머지(사교/쇼핑/여가로 남은 것)는 "동호회 모임"/"등산용품 구매"처럼 다른
+# 신호가 더 강한 경우라 그대로 둔다(캐스케이드 순서상 사교 tier가 이미 먼저
+# 걸러줌).
+#
+# ⭐ 기존에 SPORTS_KEYWORDS가 수영/등산을 일부러 뺐던 이유("강도·목적에 따라
+# 여가/휴식과 갈림")는 이제 해소됐다 - 예전엔 "운동이냐 여가냐"라는 두 카테고리
+# 중 하나를 억지로 골라야 해서 위험했지만, 이제 전용 카테고리가 생겨서
+# "수영/등산이면 무조건 이 카테고리"로 확정해도 더 이상 오답이 아니다(강도/
+# 목적과 무관하게 물놀이든 진지한 훈련이든 전부 "수영" 카테고리 하나로 수렴).
+RUNNING_KEYWORDS = ["러닝", "달리기", "조깅", "런닝", "마라톤"]
+# ⭐ 2026-09-03 - "런"(한강런/새벽런 등)도 추가하려 했으나, check_keyword_regressions.py
+# 전체 검증에서 "오픈런"(매장 오픈 시간에 맞춰 줄서기, 달리기와 무관)과 충돌
+# 발견("오픈런하기"/"오픈런 조율"이 하드매핑 안 걸린 상태로 이미 학습 데이터에
+# 있었음) - anywhere=True라 "오픈런"의 "런"도 그대로 잡혀버림. "한강런"류는
+# 여전히 ML+margin 판단에 맡김(하드매핑 안 함).
+# "마리오카트 레이스 한판 달리기"처럼 게임 속 "달리기"(레이싱 게임)와 충돌 -
+# 실측으로 발견한 유일한 사례라 해당 게임 이름만 좁게 예외 처리.
+RUNNING_FALSE_POSITIVES = ["닌텐도"]
+SWIMMING_KEYWORDS = ["수영"]
+HIKING_KEYWORDS = ["등산", "트레킹", "산행", "둘레길", "등반"]
+# ⭐ 2026-09-01(실사용 문장 테스트) - "지리산 등반"처럼 산 이름 + "등반"이
+# 등산과 동의어로 흔히 쓰여서 추가했는데, "등반"은 "암벽등반"(실내 클라이밍,
+# 이미 SPORTS_KEYWORDS의 "클라이밍"이 커버하는 완전히 다른 종목)과도 겹쳐서
+# 그 복합어만 예외 처리.
+HIKING_FALSE_POSITIVES = ["암벽등반"]
+
+# ⭐ 2026-09-03 - 카테고리 확장(17 -> 19개). "자전거"와 "요가/필라테스"(스트레칭
+# 포함) 2종을 달리기/수영/등산과 같은 원리로 신설 - 강도·목적과 무관하게 이
+# 활동이면 무조건 이 카테고리(운동/여가 사이에서 억지로 고를 필요가 없어짐).
+# "필라테스"는 기존에 SPORTS_KEYWORDS(운동)에 있었으나 이번에 전용 카테고리로
+# 승격하며 거기서 제거함.
+CYCLING_KEYWORDS = ["자전거", "따릉이"]
+# "하늘자전거"(누워서 다리를 페달 돌리듯 움직이는 실내 운동 동작 - 실제
+# 자전거를 타는 게 아님)만 예외 처리. "자전거길"(산책로를 가리키는 명사)은
+# 뒤에 "길"이 붙어 있어 _verb_word_matched 자체가 이미 안 잡음(뒤가 조사도
+# "하다" 활용형도 아니라서) - 별도 예외 불필요.
+CYCLING_FALSE_POSITIVES = ["하늘자전거"]
+YOGA_KEYWORDS_ANYWHERE = ["필라테스", "스트레칭"]
+# ⚠️ "요가"만 anywhere=False(어절 맨 앞에서만 인정)로 별도 취급 -
+# anywhere=True로 켜면 "필요가 있다"(필요+가, 매우 흔한 조사 결합)의
+# "필요가"가 "요가"로 끝나는 바람에 오탐됨(BEAUTY_PREFIX_KEYWORDS의 "펌"과
+# 같은 이유 - 반드시 anywhere=False로 유지할 것).
+YOGA_KEYWORDS_PREFIX_ONLY = ["요가"]
+# ⭐ "자전거 헬멧 사기"/"요가 블록 구매하기"처럼 장비를 사는 문장, "자전거
+# 브레이크 수리 맡기러 가기"처럼 정비만 맡기는 문장에서 실측 충돌 발견 -
+# 러닝화/등산화와 달리 "자전거 헬멧"은 붙여쓰지 않고 띄어 써서 기존
+# _verb_word_matched의 복합어 방어(뒤에 명사가 이어지면 안 잡음)가 안 먹힘
+# ("자전거"가 그 자체로 독립된 어절이라 조건 없이 매칭됨). 이 문장들은 전부
+# "사거나 수리를 맡기고 끝날 뿐 실제로 타는 동작이 전혀 없다"는 공통점이 있어,
+# 이 신호가 있으면 이 tier 전체를 defer(ML에 맡김 - 실측상 대부분 쇼핑/기타로
+# 감). "~새로 사서 라이딩"/"~구매해서 연습"처럼 뒤에 다른 동작이 이어지는
+# 연결형("사서"/"구매해서")은 이 목록에 없어서 안 걸림 - 실제 콤보 문장은 전부
+# 그 형태로만 나타남(관찰 기반, ml/check_keyword_regressions.py로 검증).
+CYCLING_YOGA_PURCHASE_OR_REPAIR_MARKERS = [
+    "사기", "사주기", "구매하기", "구입하기", "주문하기", "장만하기", "수리", "맡기러",
+]
+
+# ⭐ 2026-09-01 - "문화생활"(영화/공연/전시 등) 신설. 실측에서 이 단어들이 낀
+# 문장은 절대다수가 "여가/휴식"이었다(영화 21건 중 17건, 뮤지컬 10/10, 공연
+# 3/3, 전시 13건 중 8건, 콘서트 4건 중 3건) - "여가/휴식" 아이콘(야자수)이 너무
+# 뭉뚱그린다는 같은 문제라 별도 카테고리로 분리. 나머지(사교로 남은 일부)는
+# "동료랑 영화보기"처럼 사람 만남이 더 강한 신호라 그대로 둠(사교 tier가 먼저
+# 걸러줌).
+CULTURE_KEYWORDS = ["영화", "콘서트", "공연", "전시", "뮤지컬", "연극", "페스티벌"]
+
+# ⭐ 2026-09-01 - "금융"(은행/보험/세금 등 행정성 용무) 신설. 이런 용무는
+# 마땅한 카테고리가 없어 "기타"로 자주 빠졌다(실측 "은행" 11건 중 7건이
+# 기타) - ACTIVITY_PREFIX_KEYWORDS의 "출장"(업무)/"병원"(건강) 같은 걸
+# 하나 더 늘리는 셈. "대출"은 "도서관에서 책 대출"과 겹쳐서 뺐다(당구/볼링과
+# 같은 이유로 ML에 맡김). "은행나무"(가로수)/"문제은행"(시험)은 prefix
+# 매칭(아래 route()에서 _prefix_matched 사용) 자체가 "은행"으로 시작하는
+# 어절만 잡으므로 저절로 안전함("문제은행"은 "문제"로 시작, "은행나무"만
+# 별도 예외 필요).
+FINANCE_KEYWORDS = ["은행", "환전", "적금", "예금", "연말정산", "공과금"]
+FINANCE_FALSE_POSITIVES = ["은행나무"]
+
+# ⭐ 2026-09-01 - "집안일"(청소/빨래/설거지/분리수거) 신설. 이것도 마땅한
+# 카테고리가 없어 "기타"/"쇼핑"으로 흩어져 있었다. 단, "청소기"/"청소용품"/
+# "빨래바구니"처럼 그 도구를 "사는" 문장(쇼핑이 맞음)과는 반드시 갈라야 해서
+# 일반 접두어 매칭 대신 전용 매처(_chore_word_matched, 아래)를 씀 - 어절이
+# 정확히 그 단어 자체이거나 "하다/해야/하고" 등 동사 활용형으로 이어질 때만
+# 잡고, "기"/"용"/"바구니"처럼 명사가 이어지는 경우(=도구/제품을 가리킴)는
+# 절대 안 잡음.
+CHORE_KEYWORDS = ["청소", "빨래", "설거지", "분리수거"]
+
+# ⭐ 2026-09-01 - "미용"(미용실/네일/염색 등 사람 대상 뷰티 케어) 신설.
+# ⚠️ 반려동물 관련 데이터에 "반려동물 미용"류가 많아서(실측 40건+) 절대
+# bare "미용"으로 하드매핑하면 안 됨 - 전부 구체적인 복합어(미용실/네일아트/
+# 네일샵/왁싱/염색/속눈썹)만 쓴다. "펌"은 "컨펌"/"펌프"와 충돌 위험이 있어
+# prefix 매칭(어절이 "펌"으로 시작)으로만 잡음(뒤에 조사/활용형이 붙는 경우만
+# 인정 - _word_matched와 동일 원리라 "컨펌"/"펌프형"은 애초에 "펌"으로
+# 시작하지 않아서 안전).
+BEAUTY_CONTAINS_KEYWORDS = ["미용실", "네일아트", "네일샵", "왁싱", "염색", "속눈썹"]
+BEAUTY_PREFIX_KEYWORDS = ["펌", "커트"]
 
 # ⭐ 2026-08-27 - "짧은 단어/구가 기타로 자주 빠진다" 실측(사용자 제보 +
 # predict.py로 직접 확인) 후 추가한 범용 활동 키워드 하드매핑. SPORTS_KEYWORDS와
@@ -112,11 +256,26 @@ SPORTS_FALSE_POSITIVES = ["골프공", "테니스공", "야구공", "축구공",
 #     먼저 걸려서(route()의 우선순위 캐스케이드) 이 키워드까지 안 옴, 실측
 #     충돌 0건.
 ACTIVITY_PREFIX_KEYWORDS = {
-    "공부": ["공부", "독서"],
+    # ⭐ 2026-09-01(실사용 문장 테스트) - "인강"(인터넷 강의 줄임말, 7/7 전부
+    # 공부로 일치)과 "강의"(41/43 공부 - 나머지 2건 "정신건강의학과"는 prefix
+    # 매칭이라 "정신건강의학과"가 "강의"로 시작하지 않아서 애초에 안 걸림,
+    # 충돌 아님) 추가.
+    # ⭐ 2026-09-03 - "코테"(코딩테스트 줄임말, "인강"과 같은 원리 - 다른 뜻으로
+    # 쓰일 여지가 사실상 없는 축약어)를 e2e 평가(eval_e2e.py)에서 발견해 추가.
+    "공부": ["공부", "독서", "인강", "강의", "코테"],
     "병원·건강관리": ["병원"],
     "업무": ["출장"],
     "식사": ["식사", "외식"],
-    "여가/휴식": ["여가"],
+    # ⭐ 2026-09-03 - "집콕"/"방탈출" 추가(check_keyword_regressions.py 전체
+    # 검증 통과, 충돌 0건). OTT 브랜드명(넷플릭스 등)과 "캠핑"도 처음엔 같이
+    # 추가해보려 했으나 전체 검증에서 실제 라벨 데이터와 충돌해서 뺐다:
+    #   - "넷플릭스"는 실측 데이터 자체가 갈려 있음(문화생활 18건 vs 여가/휴식
+    #     8건 - "넷플릭스 정주행"처럼 똑같은 표현도 양쪽에 다 있어서 하드매핑할
+    #     만큼 명확하지 않음, ML 판단에 맡김이 맞음).
+    #   - "캠핑"은 "캠핑용품/캠핑의자 주문·구매"처럼 장비 구매 문장과 충돌
+    #     (러닝화/등산화와 같은 "장비 구매는 쇼핑" 원칙 위반 - CHORE_KEYWORDS나
+    #     RUNNING_KEYWORDS처럼 별도 매처 없이 단순 prefix라 못 갈랐음).
+    "여가/휴식": ["여가", "집콕", "방탈출"],
 }
 # "독서"는 "독서 모임/독서모임"처럼 실제로는 사람을 만나는 모임(사교)을
 # 가리키는 경우가 실측 데이터에서 더 많이 나와서("모임"이 같이 있으면 방향이
@@ -130,6 +289,13 @@ ACTIVITY_DEFER_MARKERS = ["모임"]
 ACTIVITY_CONTAINS_KEYWORDS = {
     "쇼핑": ["쇼핑"],
 }
+
+# ⭐ 2026-09-06 - route()의 tier3d_eating_proposal 참고. "먹자"/"먹을래"/"먹으러"는
+# 뒤에 무슨 말이 오든(음식 이름, 아무것도 없음) 거의 항상 "같이 밥 먹자"는 뜻이라
+# contains(부분일치)로 넉넉하게 잡는다.
+EATING_PROPOSAL_KEYWORDS = ["먹자", "먹을래", "먹으러"]
+# "약 먹자"/"영양제 먹자"처럼 복용을 뜻하면 식사가 아니라 건강이 맞으므로 제외.
+EATING_PROPOSAL_MEDICATION_DEFER = ["약", "영양제", "유산균", "비타민", "오메가", "프로폴리스", "한약"]
 
 
 def _tokens(text):
@@ -147,7 +313,7 @@ def _word_matches_token(token, word):
         rest = rest[1:]
         if rest == "":
             return True
-    return rest in _COMMON_PARTICLES
+    return _particle_suffix_ok(rest)
 
 
 def _word_matched(tokens, keywords):
@@ -160,6 +326,60 @@ def _prefix_matched(tokens, keywords):
 
 def _contains_matched(text, keywords):
     return [kw for kw in keywords if kw in text]
+
+
+# ⭐ 2026-09-01(2차 - 어미/앞말 대응 점검) - 처음엔 "하"/"해" 두 어간만 인정했는데
+# "할거임"(할)/"했음"(했)/"한 적"(한) 같은 "하다" 활용형의 다른 어간을 놓치는 걸
+# 발견해서 5개로 늘림. "하기/하러가자/하자"는 "하" 어간, "해야됨"은 "해" 어간이라
+# 이미 커버됐었지만, "할거임"류(의지/예정형)는 어간 자체가 "할"로 바뀌어서
+# 별도로 추가해야 했음.
+_VERB_STEMS = ("하", "해", "할", "했", "한")
+
+# ⭐ 2026-09-03 - CYCLING_KEYWORDS 전용 확장 어간. "자전거"/"따릉이"는 "하다"가
+# 아니라 "타다"(타기/타며/타고/탄다/탈/탔)로 활용되는데, 기존 _VERB_STEMS엔
+# "하다" 계열만 있어서 "자전거타고"/"자전거타야됨"처럼 붙여 쓴 형태를 놓치는
+# 걸 발견함("자전거 타고"처럼 띄어 쓴 경우는 "자전거"가 그 자체로 독립 어절이라
+# 이미 잡혔음 - 붙여 쓴 경우만 문제). 이 확장을 전역 _VERB_STEMS에 바로
+# 추가하지 않은 이유: "청소타령"/"빨래타령"(잔소리를 뜻하는 관용구, 실제로
+# 청소/빨래를 하는 게 아님)처럼 "타"로 시작하는 무관한 실제 단어와 CHORE_
+# KEYWORDS 등 다른 anywhere=True 키워드가 충돌할 위험이 있어서 - CYCLING_
+# KEYWORDS("자전거"/"따릉이")는 그 자체로 뜻이 뚜렷해 이런 충돌 위험이 낮다고
+# 판단해 이 tier에만 좁게 적용함.
+_CYCLING_VERB_STEMS = _VERB_STEMS + ("타", "탄", "탈", "탔")
+
+
+def _verb_word_matches_token(token, word, anywhere=False, stems=_VERB_STEMS):
+    """word가 어절 안에 있고, 그 뒤가 (없음 | 조사 | "하다" 활용형 - 하/해/할/했/한
+    으로 시작)일 때만 True. "청소기"/"청소용"/"빨래바구니"(CHORE_KEYWORDS),
+    "펌프형"(BEAUTY_PREFIX_KEYWORDS)처럼 명사가 이어지는 경우(뒤가 활용형도
+    조사도 아님)는 절대 안 잡는다 - 단순 prefix 매칭(_prefix_matched)보다 엄격함.
+
+    anywhere=False(기본)면 word가 어절 맨 앞에 와야 함(_word_matches_token과
+    동일한 전제). anywhere=True면 "새벽러닝"/"주말등산"처럼 word 앞에 다른
+    말이 붙어 있어도(=word가 어절 어디에 있든) 인정 - RUNNING/SWIMMING/HIKING/
+    CHORE_KEYWORDS처럼 그 자체로 뜻이 뚜렷해 다른 단어 뒤에 붙어도 오탐 위험이
+    낮은 키워드에만 씀. BEAUTY_PREFIX_KEYWORDS의 "펌"은 "컨펌하기"(confirm,
+    전혀 무관)처럼 짧은 한 글자라 anywhere=True로 켜면 오탐이 생겨서 반드시
+    anywhere=False(기본값)로 유지할 것.
+
+    stems는 기본 _VERB_STEMS("하다" 계열) - CYCLING_KEYWORDS만 _CYCLING_VERB_
+    STEMS(위 주석 참고)를 넘겨서 "타다" 활용형도 인정하게 함."""
+    if anywhere:
+        idx = token.find(word)
+    else:
+        idx = 0 if token.startswith(word) else -1
+    if idx == -1:
+        return False
+    rest = token[idx + len(word):]
+    if rest == "":
+        return True
+    if rest[0] in stems:
+        return True
+    return _particle_suffix_ok(rest)
+
+
+def _verb_word_matched(tokens, keywords, anywhere=False, stems=_VERB_STEMS):
+    return [kw for tok in tokens for kw in keywords if _verb_word_matches_token(tok, kw, anywhere, stems)]
 
 
 def route(text):
@@ -186,6 +406,91 @@ def route(text):
     sports_hit = _prefix_matched(tokens, SPORTS_KEYWORDS) or _contains_matched(text, SPORTS_KEYWORDS)
     if sports_hit and not _contains_matched(text, SPORTS_FALSE_POSITIVES):
         return "운동", "tier3_sports"
+
+    # ⭐ 2026-09-01(실측 후 수정) - 신설 카테고리 3종(달리기/수영/등산)은 처음엔
+    # 일반 스포츠처럼 prefix+contains로 잡았다가, "러닝메이트랑 저녁"(사교인데
+    # "러닝메이트"가 "러닝"으로 시작해서 오분류), "러닝머신 매트 주문"/"등산화
+    # 밑창 갈기"(장비를 사는 쇼핑인데 "러닝"/"등산"으로 시작해서 오분류) 실측
+    # 충돌을 발견해서 CHORE_KEYWORDS와 같은 엄격한 매처(_verb_word_matched -
+    # 어절이 그 단어 자체이거나 조사/"하다"류 활용형으로 이어질 때만 인정,
+    # "메이트"/"머신"/"화"처럼 명사가 이어지면 안 잡음)로 바꿈.
+    #
+    # ⭐ 2026-09-01(2차) - anywhere=True로 켜서 "새벽러닝"/"주말등산"처럼 앞에
+    # 다른 말이 붙어 어절이 그 단어로 "시작하지는" 않는 경우도 잡게 함(원래는
+    # startswith만 인정해서 이런 흔한 시간표현+활동 붙임 표기를 놓쳤음) - 이
+    # 4개 키워드는 그 자체로 뜻이 뚜렷해서(러닝/수영/등산/청소 등) 다른 말
+    # 뒤에 붙어도 "컨펌"처럼 무관한 단어와 충돌할 위험이 낮다고 판단(BEAUTY_
+    # PREFIX_KEYWORDS의 "펌"과는 다름 - 그쪽은 한 글자라 anywhere 금지, 아래
+    # 주석 참고).
+    #
+    # ⭐ "산행"/"둘레길"이 "동호회"류 명시적 신호 없이 "OO클럽/모임 산행
+    # 뒷풀이"처럼 동호회 회식 맥락에서도 쓰이는 걸 발견해서, 이 3개 tier
+    # 한정으로 클럽/모임 신호가 있으면 통째로 defer(ML에 맡김) - 기존
+    # ACTIVITY_DEFER_MARKERS("모임")보다 넓은 범위(클럽/뒷풀이/신년회/송년회/
+    # 환영회도 "여럿이 모이는 자리"라는 같은 신호라 포함).
+    tier3b_social_defer = _contains_matched(
+        text, ["클럽", "모임", "뒷풀이", "신년회", "송년회", "환영회", "정모", "산악회"]
+    )
+    # ⭐ "자격증"(시험 준비가 핵심이라 공부가 더 맞음 - "네일아트 자격증 실기
+    # 연습" 실측 충돌로 발견, ACTIVITY_DEFER_MARKERS의 "모임"과 같은 원리)이
+    # 있으면 문화생활/금융/집안일/미용(tier3c)뿐 아니라 자전거/요가·필라테스
+    # (tier3b, 2026-09-03)에도 똑같이 적용 - "요가 지도자 자격증 과정" 같은
+    # 문장이 공부가 아니라 요가로 강제되는 걸 막기 위해 위로 옮김.
+    cert_defer = _contains_matched(text, ["자격증"])
+    if not tier3b_social_defer:
+        if _verb_word_matched(tokens, RUNNING_KEYWORDS, anywhere=True) and not _contains_matched(text, RUNNING_FALSE_POSITIVES):
+            return "달리기", "tier3b_running"
+        if _verb_word_matched(tokens, SWIMMING_KEYWORDS, anywhere=True):
+            return "수영", "tier3b_swimming"
+        if _verb_word_matched(tokens, HIKING_KEYWORDS, anywhere=True) and not _contains_matched(text, HIKING_FALSE_POSITIVES):
+            return "등산", "tier3b_hiking"
+
+        # ⭐ 2026-09-03 - 자전거/요가·필라테스(신설). cert_defer 또는 구매/수리
+        # 신호가 있으면 이 둘도 defer(위 주석 참고).
+        cycling_yoga_defer = cert_defer or _contains_matched(text, CYCLING_YOGA_PURCHASE_OR_REPAIR_MARKERS)
+        if not cycling_yoga_defer:
+            if (_verb_word_matched(tokens, CYCLING_KEYWORDS, anywhere=True, stems=_CYCLING_VERB_STEMS)
+                    and not _contains_matched(text, CYCLING_FALSE_POSITIVES)):
+                return "자전거", "tier3b_cycling"
+            if (_verb_word_matched(tokens, YOGA_KEYWORDS_ANYWHERE, anywhere=True)
+                    or _verb_word_matched(tokens, YOGA_KEYWORDS_PREFIX_ONLY)):
+                return "요가/필라테스", "tier3b_yoga"
+
+    # ⭐ 2026-09-01 - 신설 카테고리 4종(문화생활/금융/집안일/미용).
+    if not cert_defer and _contains_matched(text, CULTURE_KEYWORDS):
+        return "문화생활", "tier3c_culture"
+    # ⭐ "은행"은 contains가 아니라 prefix로 잡는다 - "문제은행"(시험 문제
+    # 은행, 금융과 무관)이 contains로는 걸려서 실측 충돌 발견. "대출"은
+    # "도서관 책 대출"과 겹쳐서 아예 뺌(당구/볼링과 같은 이유 - ML에 맡김).
+    if not cert_defer and _prefix_matched(tokens, FINANCE_KEYWORDS) and not _contains_matched(text, FINANCE_FALSE_POSITIVES):
+        return "금융", "tier3c_finance"
+    # ⭐ 2026-09-01(2차) - "주말청소"/"저녁설거지"처럼 앞에 다른 말이 붙는
+    # 경우도 잡게 anywhere=True (RUNNING/SWIMMING/HIKING과 같은 이유).
+    if not cert_defer and _verb_word_matched(tokens, CHORE_KEYWORDS, anywhere=True):
+        return "집안일", "tier3c_housework"
+    # ⭐ "펌"/"커트"는 "컨펌"/"펌프형"과 충돌 위험이 있어 단순 prefix가 아니라
+    # _verb_word_matched(조사/동사활용형 뒤따를 때만 인정)로 잡는다. anywhere는
+    # 반드시 기본값(False)으로 둘 것 - "컨펌하기"(confirm, "펌"이 뒤에 붙어
+    # anywhere였으면 오탐)가 실측으로 확인된 충돌이라 "펌"은 어절 맨 앞에서만
+    # 인정해야 함.
+    if not cert_defer and (_contains_matched(text, BEAUTY_CONTAINS_KEYWORDS) or _verb_word_matched(tokens, BEAUTY_PREFIX_KEYWORDS)):
+        return "미용", "tier3c_beauty"
+
+    # ⭐ 2026-09-06(실사용 신고) - "치킨 먹자"/"~~먹자"류의 구어체 제안형 식사
+    # 표현이 하드매핑에 전혀 안 걸려서(ACTIVITY_PREFIX_KEYWORDS의 "식사"/"외식"만
+    # 잡음) ML로 넘어갔는데, 학습데이터의 "식사" 라벨이 전부 "OO 시켜 먹기"류의
+    # 격식체+구체 메뉴 설명이라(예: "야식으로 치킨 시켜먹기") 이렇게 짧고
+    # 캐주얼한 문장은 학습 분포 밖이라 오분류가 잦았다(실측: "치킨 먹자"가
+    # 병원·건강관리로 감 - 짧은 문장이라 n-gram이 몇 개 안 남아서 우연한 상관에
+    # 취약함). "약 먹자"류(복용)와의 오탐을 막기 위해 복용 관련 단어가 같이
+    # 있으면 이 tier는 건너뛰고 ML(건강 쪽으로 이미 잘 학습됨)에 맡긴다.
+    # ⭐ "모임"이 같이 있으면(예: "동네 주민 모임에서 붕어빵 먹으러 가자고 연락
+    # 옴") 핵심이 식사가 아니라 그 모임(사교)이라 ACTIVITY_DEFER_MARKERS와
+    # 같은 원리로 defer(check_keyword_regressions.py 실측 검증으로 발견).
+    if (not _contains_matched(text, EATING_PROPOSAL_MEDICATION_DEFER)
+            and not _contains_matched(text, ACTIVITY_DEFER_MARKERS)
+            and _contains_matched(text, EATING_PROPOSAL_KEYWORDS)):
+        return "식사", "tier3d_eating_proposal"
 
     if not _contains_matched(text, ACTIVITY_DEFER_MARKERS):
         for label, keywords in ACTIVITY_PREFIX_KEYWORDS.items():
