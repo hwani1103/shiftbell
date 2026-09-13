@@ -73,9 +73,21 @@ class SleepWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.sleep_widget)
 
             val (shiftLabel, shiftColor) = shiftChip(context)
-            views.setImageViewBitmap(R.id.sleep_shift_chip_bg, roundedChipBitmap(shiftColor))
-            views.setTextViewText(R.id.sleep_shift_chip_text, shiftLabel)
-            views.setTextColor(R.id.sleep_shift_chip_text, chipTextColorFor(shiftColor))
+            views.setImageViewBitmap(
+                R.id.sleep_shift_chip_bg,
+                roundedChipBitmap(context, shiftColor, shiftLabel, chipTextColorFor(shiftColor))
+            )
+
+            // ⭐ 2026-09-13 - "컨디션 화면 사용하지 않기"로 그 탭을 숨기면, 이
+            // 위젯이 그 탭으로 들어가는 우회 경로가 되어버림(main.dart의
+            // DisableTabButton 주석 참고 - 사용자 지적). 탭이 꺼져 있으면
+            // 위젯 전체를 반투명(비활성 느낌)으로 바꾸고, 버튼도 눌러도
+            // 반응 없게 만들며, 상태 줄에 이유를 적어준다.
+            if (!isConditionTabEnabled(context)) {
+                renderDisabled(views)
+                return views
+            }
+            views.setFloat(R.id.sleep_widget_root, "setAlpha", 1f)
 
             val state = currentSleepingState(context)
             val (statusLabel, statusDuration) = statusValue(state)
@@ -96,7 +108,54 @@ class SleepWidgetProvider : AppWidgetProvider() {
 
             views.setOnClickPendingIntent(R.id.sleep_button_sleep, actionPendingIntent(context, ACTION_SLEEP, 1))
             views.setOnClickPendingIntent(R.id.sleep_button_wake, actionPendingIntent(context, ACTION_WAKE, 2))
+
+            // ⭐ 2026-09-07 - 수면/기상 버튼 이외 영역을 탭하면 앱이 컨디션 탭으로
+            // 바로 열리게(요청). 버튼 두 개가 이미 자기 영역에 각자
+            // setOnClickPendingIntent를 갖고 있어서, 루트에 별도로 걸어도
+            // RemoteViews가 알아서 "버튼 영역은 버튼 것, 나머지는 루트 것"으로
+            // 나눠 처리한다(자식 클릭 영역이 항상 우선). 컨디션 탭의 실제 인덱스는
+            // 로케일에 따라 달라져서(Dart main.dart의 _showConditionTab) 여기선
+            // 고정 숫자를 못 보내고, kOpenConditionTabSentinel과 값이 같은
+            // 음수(-2)를 보낸다 - Dart openTab 핸들러가 런타임에 진짜 인덱스로
+            // 바꾼다.
+            views.setOnClickPendingIntent(R.id.sleep_widget_root, openConditionTabPendingIntent(context))
             return views
+        }
+
+        // ⭐ Flutter shared_preferences 플러그인이 실제로 쓰는 그 파일/키를 그대로
+        // 읽음(파일명 "FlutterSharedPreferences", 키는 전부 "flutter." 접두사 -
+        // tab_visibility_provider.dart의 _kConditionTabEnabledKey와 반드시 같은
+        // 이름이어야 함). CLAUDE.md의 "Flutter SharedPreferences와 Native
+        // alarm_state(Device Protected)는 서로 다른 경로" 경고와는 별개 사안 -
+        // 이건 Device Protected가 필요 없는 일반 홈 화면 위젯이라 평범한
+        // SharedPreferences를 그대로 읽어도 됨(잠금 해제 전 알람처럼 반드시
+        // 동작해야 하는 경로가 아님).
+        private fun isConditionTabEnabled(context: Context): Boolean {
+            val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            return prefs.getBoolean("flutter.condition_tab_enabled", true)
+        }
+
+        private fun renderDisabled(views: RemoteViews) {
+            views.setFloat(R.id.sleep_widget_root, "setAlpha", 0.4f)
+            views.setTextViewText(R.id.sleep_status_value_text, "컨디션 탭")
+            views.setTextViewText(R.id.sleep_status_duration_text, "활성화 후 사용 가능")
+            views.setInt(R.id.sleep_button_sleep, "setBackgroundResource", R.drawable.sleep_widget_button_bg_inactive)
+            views.setInt(R.id.sleep_button_wake, "setBackgroundResource", R.drawable.sleep_widget_button_bg_inactive)
+            // ⭐ onClickPendingIntent를 아예 안 걸어서(버튼/루트 전부) 탭해도
+            // 반응이 없게 함 - RemoteViews는 매번 새로 만드므로 이전 갱신 때
+            // 걸어둔 PendingIntent가 남아있을 걱정 없음(buildRemoteViews는
+            // 항상 새 RemoteViews 인스턴스에서 시작).
+        }
+
+        private fun openConditionTabPendingIntent(context: Context): PendingIntent {
+            val intent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                putExtra("openTab", -2) // kOpenConditionTabSentinel(Dart main.dart)과 반드시 같은 값
+            }
+            return PendingIntent.getActivity(
+                context, 3, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
         }
 
         private fun actionPendingIntent(context: Context, action: String, requestCode: Int): PendingIntent {
@@ -125,16 +184,49 @@ class SleepWidgetProvider : AppWidgetProvider() {
             }
         }
 
-        // ⭐ 근무색 칩과 동일한 방식(달력 위젯의 roundedPillBitmap과 같은 패턴) -
-        // ImageView가 fitXY로 늘려 채우므로 작은 고정 크기로 그려도 문제 없음.
-        private fun roundedChipBitmap(color: Int): Bitmap {
-            val width = 100
-            val height = 50
-            val radius = 12f
+        // ⭐ 2026-09-13(2차) - 원래는 "고정 크기 배경 비트맵(ImageView, fitXY) +
+        // 별도 텍스트뷰(wrap_content)"를 겹쳐서 칩을 만들었는데(달력 위젯의
+        // roundedPillBitmap과 같은 패턴을 따라함), 달력 위젯과 달리 이 칩은
+        // 고정 폭 그리드 셀 안이 아니라 혼자 wrap_content로 떠 있어서 - 배경
+        // 뷰와 글자 뷰가 "따로" wrap_content 크기를 계산하다 보니 기기/런처에
+        // 따라 둘의 실제 크기가 어긋나 글자가 배경 밖으로 삐져나오거나(가로)
+        // 위아래로 안 맞는(세로) 문제가 실측 확인됨(에뮬레이터+실기기 여러 대).
+        // → 배경과 글자를 애초에 한 비트맵에 같이 그려서 "정렬이 어긋날 수
+        // 있는 두 개의 뷰" 자체를 없앰 - 이 비트맵 하나의 실제 크기가 곧
+        // ImageView의 wrap_content 크기가 되므로 항상 글자와 배경이 정확히
+        // 일치함. 상태 칩(statusValue)도 예전에 같은 종류의 문제(런처 캐싱)로
+        // 결국 칩 자체를 없앴던 전례가 있음(위 NEUTRAL_CHIP_COLOR 주석 참고) -
+        // 이번엔 칩을 없애는 대신 이 방식으로 구조적으로 해결함.
+        private fun roundedChipBitmap(context: Context, color: Int, text: String, textColor: Int): Bitmap {
+            val density = context.resources.displayMetrics.density
+            val textSizePx = 11f * context.resources.displayMetrics.scaledDensity
+            val paddingH = 8f * density
+            val paddingV = 2f * density
+            val radius = 6f * density
+
+            val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = textColor
+                this.textSize = textSizePx
+                this.isFakeBoldText = true
+                this.textAlign = Paint.Align.LEFT
+            }
+            val metrics = textPaint.fontMetrics
+            val textWidth = textPaint.measureText(text)
+            val width = (textWidth + paddingH * 2).toInt().coerceAtLeast(1)
+            val height = (metrics.descent - metrics.ascent + paddingV * 2).toInt().coerceAtLeast(1)
+
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            // ⭐ 위 크기를 전부 실제 기기 밀도(density) 기준 px로 계산했으므로,
+            // 이 비트맵의 density도 명시적으로 기기 밀도와 맞춰야 ImageView가
+            // wrap_content로 다시 확대/축소하지 않고 그린 그대로의 크기로 씀.
+            bitmap.density = context.resources.displayMetrics.densityDpi
             val canvas = Canvas(bitmap)
-            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color }
-            canvas.drawRoundRect(RectF(0f, 0f, width.toFloat(), height.toFloat()), radius, radius, paint)
+            val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color }
+            canvas.drawRoundRect(RectF(0f, 0f, width.toFloat(), height.toFloat()), radius, radius, bgPaint)
+            // ⭐ 텍스트를 세로 중앙에 정확히 배치 - baseline = 상단 여백 + 글자 자체의
+            // ascent 크기(음수라 빼줌). 가로는 왼쪽 여백만큼만 띄우면 됨(Align.LEFT).
+            val baseline = paddingV - metrics.ascent
+            canvas.drawText(text, paddingH, baseline, textPaint)
             return bitmap
         }
 

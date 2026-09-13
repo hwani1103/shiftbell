@@ -43,8 +43,19 @@ Future<void> openFriendCalendar(BuildContext context, WidgetRef ref, FriendEntry
   }
   if (!context.mounted) return;
   final displayName = latest.name.isEmpty ? context.l10n.friendDefaultDisplayName : latest.name;
+  // ⭐ 2026-09-11(사용자 요청) - 로딩은 이미 위 스피너 다이얼로그가 다 떠안고
+  // 있으니(Firestore 갱신까지 끝난 뒤에야 여기 도달), 정작 이 화면 전환은
+  // MaterialPageRoute 기본 애니메이션(Android는 확대+페이드로 서서히
+  // 나타나는 ZoomPageTransitionsBuilder) 때문에 "다 그려진 화면이 반투명하게
+  // 천천히 나타나는" 것처럼 보였음. 데이터는 이미 다 준비된 상태이니 전환
+  // 애니메이션 없이 바로 나타나는 게 자연스럽다고 판단해 duration 0인
+  // PageRouteBuilder로 바꿈(뒤로가기도 동일하게 즉시).
   Navigator.push(
     context,
-    MaterialPageRoute(builder: (_) => FriendCalendarView(friendName: displayName, data: latest.data!)),
+    PageRouteBuilder(
+      pageBuilder: (_, __, ___) => FriendCalendarView(friendName: displayName, data: latest.data!),
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+    ),
   );
 }

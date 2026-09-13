@@ -21,6 +21,7 @@ import 'memo_list_view.dart';
 import 'work_hours_settings_screen.dart';
 import 'calendar_theme_picker_screen.dart';
 import 'help_screen.dart';
+import 'privacy_policy_screen.dart';
 import '../widgets/tappable_number_picker.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_second_button.dart';
@@ -35,6 +36,9 @@ import '../services/backup_service.dart';
 import '../services/backup_storage_service.dart';
 import '../services/alarm_refresh_service.dart';
 import '../models/backup_payload.dart';
+import '../providers/tab_visibility_provider.dart';
+import '../services/schedule_notification_service.dart';
+import '../services/widget_refresh_service.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
@@ -45,7 +49,7 @@ class SettingsTab extends ConsumerStatefulWidget {
   ConsumerState<SettingsTab> createState() => _SettingsTabState();
 }
 
-class _SettingsTabState extends ConsumerState<SettingsTab> {
+class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingObserver {
   // ⭐ 사용자 데이터 백업("A번 요구사항") - 설정 탭 진입점(Layer 4). 저장/복구
   // 로직 자체는 BackupWatcher(자동 트리거와 동일 코드 경로 - "지금 백업"도 그냥
   // force:true로 그 함수를 부르는 것뿐)에 있고, 여기선 버튼 상태/마지막 백업
@@ -58,6 +62,28 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
   void initState() {
     super.initState();
     _loadLastBackupAt();
+    // ⭐ 2026-09-11(사용자 신고 - "자동백업이 안 되고 있는 것 같다") - 이 화면은
+    // MainScreen이 `_tabs[_currentIndex]`로 탭을 매번 새로 만드는 구조라(main.dart
+    // 참고) 다른 탭으로 갔다가 다시 오면 initState가 새로 돌아 항상 최신값을
+    // 보여주지만, "설정 탭을 보고 있는 채로 앱만 배경↔전경을 오간" 경우엔 이
+    // 위젯이 그대로 살아있어서 그 사이 자동 백업(main.dart의 didChangeAppLifecycleState)
+    // 이 갱신한 "마지막 백업" 시각을 못 따라감 - 실제로는 백업이 잘 되고 있는데도
+    // 화면만 안 바뀌어서 "안 되는 것 같다"로 보일 수 있었음. condition_tab.dart가
+    // sleepRecordProvider에 쓰는 것과 동일한 패턴으로 resume 시 다시 읽음.
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      _loadLastBackupAt();
+    }
   }
 
   Future<void> _loadLastBackupAt() async {
@@ -389,18 +415,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     // 돌아가는 콜백) - 그쪽은 스와이프가 아니라 별개 기능이라 유지.
     return Scaffold(
         appBar: AppBar(
-          title: Row(
-            children: [
-              Spacer(),
-              Padding(
-                padding: EdgeInsets.only(right: 16.w),
-                child: Text(
-                  context.l10n.navSettings,
-                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ],
-          ),
+          // ⭐ 2026-09-06(사용자 지적) - 컨디션 탭 등 다른 탭들은 전부 테마
+          // 기본값(centerTitle:true, 18px w600, app_theme.dart 참고)을 그대로
+          // 쓰는데 이 화면만 Row+Spacer로 오른쪽 정렬 + 20.sp 커스텀 크기를 써서
+          // 탭마다 제목 위치/크기가 달라 보였음 - 다른 탭과 동일하게 가운데
+          // 정렬·같은 크기가 되도록 커스텀 스타일을 걷어냄.
+          title: Text(context.l10n.navSettings),
         ),
         body: scheduleAsync.when(
         loading: () => const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
@@ -590,6 +610,41 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               // calendar_tab.dart의 _buildThemedHeaderButtons 참고) +
               // 언더라인/매거진 테마의 6번째 줄 "일정 공유" 버튼으로 충분히
               // 접근 가능 - 설정 탭에 중복 진입점을 두지 않음.
+
+              // ⭐ 2026-09-13 추가(사용자 요청) - 일정관리/컨디션 탭을 각 탭의
+              // "OO 화면 사용하지 않기" 버튼으로 껐을 때만 여기 나타나는 복원
+              // 진입점. 네비게이션에 이미 그 탭이 있으면(꺼져있지 않으면) 이
+              // 항목 자체가 안 보임 - "사용하기" 버튼과 실제 탭이 동시에
+              // 존재하지 않도록 하는 규칙(두 UI가 서로 배타적).
+              if (!ref.watch(scheduleTabEnabledProvider))
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(Icons.event_note_outlined, color: Theme.of(context).colorScheme.tertiary),
+                  title: const Text('일정관리 화면 사용하기'),
+                  subtitle: const Text('하단 탭에 일정관리 화면을 다시 표시합니다'),
+                  trailing: Icon(Icons.chevron_right),
+                  // ⭐ 2026-09-13 - 숨기는 동안 취소됐던 일정 알림들을 원래
+                  // 상태로 그대로 복원(main.dart의 DisableTabButton onConfirmed
+                  // 주석 참고 - 대칭 동작).
+                  onTap: () async {
+                    await ref.read(scheduleTabEnabledProvider.notifier).setEnabled(true);
+                    await ScheduleNotificationService.restoreAllForTabEnable();
+                  },
+                ),
+              if (!ref.watch(conditionTabEnabledProvider))
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(Icons.self_improvement, color: Theme.of(context).colorScheme.tertiary),
+                  title: const Text('컨디션 화면 사용하기'),
+                  subtitle: const Text('하단 탭에 컨디션 화면을 다시 표시합니다'),
+                  trailing: Icon(Icons.chevron_right),
+                  // ⭐ 2026-09-13 - 수면 위젯이 즉시 정상(비회색) 표시로
+                  // 돌아오도록 깨움 - 대칭 동작.
+                  onTap: () async {
+                    await ref.read(conditionTabEnabledProvider.notifier).setEnabled(true);
+                    await WidgetRefreshService.refresh();
+                  },
+                ),
 
               // ⭐ 2026-09-05 - 항목 그룹 재정리("알람음 관리"/"근무시간 및 OT
               // 설정"은 맨 위 고정 요청대로 위치 그대로, 그 아래부터 의미별로
@@ -781,38 +836,13 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 leading: Icon(Icons.privacy_tip_outlined, color: Colors.teal),
                 title: Text(context.l10n.settingsPrivacyPolicy),
                 trailing: Icon(Icons.chevron_right),
-                onTap: () => _openPrivacyPolicy(),
+                onTap: () => Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())),
               ),
 
             ],
           );
         },
-      ),
-    );
-  }
-
-  // ⭐ 개인정보처리방침 열기
-  void _openPrivacyPolicy() {
-    // TODO: 실제 URL로 변경
-    const url = 'https://YOUR_GITHUB_USERNAME.github.io/shiftbell-privacy/';
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.settingsPrivacyPolicy),
-        content: SingleChildScrollView(
-          child: Text(
-            context.l10n.settingsPrivacyPolicyBody,
-            style: TextStyle(fontSize: 13.sp, height: 1.6),
-          ),
-        ),
-        actions: [
-          AppSecondButton(
-            variant: AppSecondButtonVariant.success,
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.commonOk),
-          ),
-        ],
       ),
     );
   }
@@ -1044,13 +1074,31 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
         print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
       }
 
+      // ⭐ 2026-09-08 - "조가 바뀌어서 스케줄 변경을 썼는데 전체 근무표는 옛날
+      // 값 그대로 남는다"는 지적 반영. 전체 근무표(all_teams_*)는 완전히 별도
+      // 저장소라 이 함수가 안 건드리는데, "전체 근무표 설정" 화면은 열 때마다
+      // 로스터/다른 조 배정은 그대로 보존한 채 "내 조" 위치만 지금 스케줄
+      // 기준으로 새로 계산해서 보여주므로(all_shifts_view.dart의
+      // _openAllTeamsSetupScreen 참고) 다시 열어서 저장만 하면 됨 - 그래서
+      // "다시 만들라"가 아니라 "다시 저장해달라"는 짧은 안내만 조건부로 붙임
+      // (전체 근무표를 아예 안 쓰는 사람에게는 무의미한 안내라 설정된 경우만).
+      final hasAllTeamsSetup = (await SharedPreferences.getInstance())
+          .getStringList('all_teams_names')
+          ?.isNotEmpty ??
+          false;
+
       if (mounted) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ ${context.l10n.statusScheduleUpdated}'),
+            content: Text(
+              hasAllTeamsSetup
+                  ? '✅ ${context.l10n.statusScheduleUpdated} ${context.l10n.settingsScheduleChangedRedoAllTeamsHint}'
+                  : '✅ ${context.l10n.statusScheduleUpdated}',
+            ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
+            duration: hasAllTeamsSetup ? const Duration(seconds: 5) : const Duration(seconds: 4),
           ),
         );
       }

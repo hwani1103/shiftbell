@@ -181,6 +181,16 @@
             android:exported="false"
             android:directBootAware="true"/>
 
+        <!-- ⭐ 일정관리 탭 "일정에 맞춰서 알림받기" - ScheduleNotificationScheduler가
+             예약하는 정확한 알람 수신 전용. 앱 내부(AlarmManager)에서만 발생시키는
+             알람이라 exported=false. directBootAware - 재부팅 직후(DirectBootReceiver의
+             재예약)에도 그 예약이 실제로 울릴 수 있어야 함. -->
+        <receiver
+            android:name=".ScheduleNotificationReceiver"
+            android:enabled="true"
+            android:exported="false"
+            android:directBootAware="true"/>
+
         <!-- ⭐ 2026-08-24 추가 - AdMob 앱 ID.
              이 meta-data가 없으면 AdMob SDK가 앱 시작 시점에 의도적으로 크래시시킴.
              지금 값은 구글이 공개한 "테스트 전용" 앱 ID로, 계정 없이 쓸 수 있음.

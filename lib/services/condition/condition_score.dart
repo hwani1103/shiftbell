@@ -27,7 +27,15 @@ const int _wRecoveryMax = 20; // 회복시간(11시간 미만, EVIDENCE-002/003)
 const int _wLongShift = 10; // 오늘 근무 12시간 이상(EVIDENCE-004, Folkard&Lombardi 상대위험 +27%)
 const int _wExtendedStreak = 15; // 장시간근무 연속+짧은 회복(RULE_EXTENDED_STREAK_SHORT_BREAK, EVIDENCE-004+005)
 const int _wNightFrequency = 8; // 최근 5일 중 3일 이상 야간
-const int _wWorkStreak = 8; // 연속 근무일 5일 이상
+// ⭐ 2026-09-13 - "휴무 없이 한 달 내내 근무해도 겨우 -8점뿐이라 5일 연속과
+// 30일 연속이 점수상 구분이 안 된다"는 지적(사용자 실측 - 9시간×매일 근무,
+// 휴무 0일 패턴이 78점으로 나옴)으로 재설계. 기존 flat -8(5일 이상이면 며칠을
+// 넘겼든 똑같이 -8)을 "5일부터 기본 -8, 그 이후 5일마다 -4씩 추가"로 바꿔서
+// 스트릭이 길어질수록 계속 나빠지게 함 - _wWorkStreakExtraMax에서 상한.
+const int _wWorkStreak = 8; // 연속 근무일 5일 이상 - 기본값(그대로 유지)
+const int _wWorkStreakExtraStep = 4; // 5일 초과할 때마다 추가로 깎는 양
+const int _wWorkStreakExtraStep2Days = 5; // 위 추가 감점의 간격(일)
+const int _wWorkStreakExtraMax = 12; // 추가 감점 자체의 상한(총합 최대 8+12=20)
 const int _wHeavyOt = 6; // 최근 5일 누적 초과근무 8시간 이상(EVIDENCE-012)
 const int _wBackwardDirection = 5; // 역방향 교대(EVIDENCE-001 - 정방향이 상대적으로 유리하다고 보고됨)
 // ⭐ 2026-09-04 - 연속 야간근무(EVIDENCE-013, Folkard & Tucker 2003) - 3일째부터,
@@ -44,7 +52,27 @@ const int _wShiftWorkRotatingDay = 8; // 오늘은 주간이지만 스케줄 자
 // "몰라서 못 깎았다"가 점수상 구분이 안 됐던 것. 최근 [_kScoreWindowDays]일 중
 // 실제 수면 기록이 있는 비율이 낮을수록 이 감점이 커진다 - 데이터가 완전할
 // 때(비율 1.0)만 0.
+// ⭐ 2026-09-13 - 이 값(최대 6점)은 "기록이 듬성듬성함"(부분 누락)만 다루도록
+// 범위를 좁힘 - "기록이 아예 0건"(완전 공백)은 아래 _wSleepDataBlackout으로
+// 분리했음(이유는 그 상수 설명 참고). 그래서 이 축은 이제 ratio가 0보다 크고
+// 1보다 작을 때만(0 < ratio < 1) 적용되고, ratio==0(공백)일 땐 여기선 0.
 const int _wDataIncompleteMax = 6;
+// ⭐ 2026-09-13 - "수면 기록이 단 하루도 없다"는 "듬성듬성하다"와 질적으로
+// 다른 상태(비교 대상 자체가 없어 "괜찮은지 나쁜지조차 모른다")라 위
+// _wDataIncompleteMax의 비례식에 맡기면 최대 6점밖에 못 깎아 사실상 무시됨 -
+// 별도 "문제 축"(_kMaxProblemDeduction 상한 적용 대상)으로 분리해서, 스케줄
+// 자체가 이미 위험해 보이는 다른 요인들과 함께 누적되게 함(다른 요인이 없으면
+// 이 하나만으로 점수가 과하게 떨어지진 않지만, 위험 신호가 겹치는 상황에선
+// "그런데 수면 상태를 확인할 방법조차 없다"는 사실이 정확히 그만큼 더
+// 걱정스러운 상황으로 반영됨).
+const int _wSleepDataBlackout = 10;
+// ⭐ 2026-09-13 - "이 스케줄 자체가 애초에 쉬는 날을 안 두도록 짜여 있는가"
+// (shift_pattern_analyzer.dart의 patternHasNoRestDay - 스트릭이 쌓이는 걸
+// 기다릴 필요 없이 패턴 정의만 보고 즉시 판정됨). 위 _wWorkStreak*(오늘까지
+// 실제로 며칠째 못 쉬었는지, 시간이 지나야 커짐)과는 다른 축이라 별도로 더함 -
+// 새 스케줄을 등록한 "첫날"부터도 이 스케줄이 구조적으로 무리하다는 걸 바로
+// 반영하기 위함.
+const int _wNoRestPattern = 12;
 
 const int _kRecoveryThresholdMinutes = 11 * 60;
 // ⭐ 2026-09-05 - _kLongShiftThresholdMinutes(12*60)는 삭제함 - 장시간근무
@@ -219,7 +247,22 @@ ConditionScoreResult computeConditionScore({
 
   final consecutiveWorkDays = baseResult.consecutiveWorkDays;
   if (consecutiveWorkDays != null && consecutiveWorkDays >= _kWorkStreakThresholdDays) {
-    deductProblem('연속 근무일 김', _wWorkStreak);
+    // ⭐ 2026-09-13 - 5일 이상이면 기본 -8, 그 이후 5일마다 -4씩 추가(최대 +12,
+    // 총합 최대 20) - 위 _wWorkStreak* 상수 설명 참고. 예: 5~9일=-8, 10~14일=-12,
+    // 15~19일=-16, 20일 이상=-20.
+    final overDays = consecutiveWorkDays - _kWorkStreakThresholdDays;
+    final rawExtra = (overDays ~/ _wWorkStreakExtraStep2Days) * _wWorkStreakExtraStep;
+    final extra = rawExtra > _wWorkStreakExtraMax ? _wWorkStreakExtraMax : rawExtra;
+    final label = extra > 0 ? '연속 근무일 김(장기화)' : '연속 근무일 김';
+    deductProblem(label, _wWorkStreak + extra);
+  }
+
+  // ⭐ 2026-09-13 - "이 스케줄 자체가 애초에 쉬는 날이 없는가"(패턴 정의 자체를
+  // 즉시 확인 - 위 _wNoRestPattern 설명 참고). 위 연속근무일 항목과 함께 잡힐
+  // 때가 많지만(패턴에 휴무가 없으면 스트릭도 당연히 길어짐), 새로 등록한
+  // 스케줄이라 아직 스트릭이 안 쌓였어도 이건 즉시 잡힌다는 점에서 서로 보완적.
+  if (analyzer.patternHasNoRestDay == true) {
+    deductProblem('쉬는 날 없는 근무표', _wNoRestPattern);
   }
 
   if (otTotal >= 8 * 60) deductProblem('초과근무 누적', _wHeavyOt);
@@ -234,6 +277,15 @@ ConditionScoreResult computeConditionScore({
   if (avgRecentSleepMinutes != null && avgRecentSleepMinutes < _kSleepThresholdMinutes) {
     final shortfall = (_kSleepThresholdMinutes - avgRecentSleepMinutes).clamp(0, _kSleepThresholdMinutes.toDouble());
     deductProblem('수면 부족', (shortfall / _kSleepThresholdMinutes * _wSleepMax).round());
+  }
+
+  // 7-2. 수면 기록 완전 공백(위 _wSleepDataBlackout 설명 참고) - "부족한지조차
+  // 확인할 방법이 없다"는 것 자체를 다른 위험 요인들과 함께 누적되는 문제
+  // 축으로 다룸. 부분 누락(9번, 아래)과는 배타적 - 여기서 이미 다뤘으면 9번은
+  // 건드리지 않는다(중복 감점 방지).
+  final sleepFullyBlackedOut = recentSleepTrackedDays > 0 && recentSleepDaysWithData == 0;
+  if (sleepFullyBlackedOut) {
+    deductProblem('수면 기록 전무', _wSleepDataBlackout);
   }
 
   // 8. "교대근무 자체"의 기본 부담(설계값 - 특정 논문 수치 아님, 오늘이
@@ -257,7 +309,10 @@ ConditionScoreResult computeConditionScore({
   // 감점 - 이 비율이 1.0(완전)일 때만 0. recentSleepTrackedDays가 0이면(호출부가
   // 이 정보를 안 넘긴 경우 - 기존 테스트 등) 판단 근거 자체가 없으므로 이
   // 축은 건드리지 않음(기존 동작 그대로 유지).
-  if (recentSleepTrackedDays > 0) {
+  // ⭐ 2026-09-13 - "기록이 아예 0건"(ratio==0)인 경우는 위 7-2번(수면 기록
+  // 전무, 문제 축)이 이미 다뤘으므로 여기서는 제외(0 < ratio < 1, 즉 "듬성듬성"
+  // 케이스만) - 안 그러면 같은 사실을 baseline과 problem 두 축에서 중복 감점함.
+  if (recentSleepTrackedDays > 0 && !sleepFullyBlackedOut) {
     final ratio = (recentSleepDaysWithData / recentSleepTrackedDays).clamp(0.0, 1.0);
     if (ratio < 1.0) {
       deductBaseline('수면 기록 불완전', ((1.0 - ratio) * _wDataIncompleteMax).round());

@@ -47,10 +47,6 @@ final List<HelpSection> _helpSections = [
         titleKey: (l10n) => l10n.helpStartScheduleTypesTitle,
         bodyKey: (l10n) => l10n.helpStartScheduleTypesBody,
       ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpStartChangeLanguageTitle,
-        bodyKey: (l10n) => l10n.helpStartChangeLanguageBody,
-      ),
     ],
   ),
   HelpSection(
@@ -88,14 +84,6 @@ final List<HelpSection> _helpSections = [
         bodyKey: (l10n) => l10n.helpAlarmTemplatesBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpAlarmDayOffsetTitle,
-        bodyKey: (l10n) => l10n.helpAlarmDayOffsetBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpAlarmPreAlertSnoozeTitle,
-        bodyKey: (l10n) => l10n.helpAlarmPreAlertSnoozeBody,
-      ),
-      HelpTopic(
         titleKey: (l10n) => l10n.helpAlarmSoundVolumeTitle,
         bodyKey: (l10n) => l10n.helpAlarmSoundVolumeBody,
       ),
@@ -110,10 +98,6 @@ final List<HelpSection> _helpSections = [
       // ⭐ 2026-09-04 - 전체_코드_점검_리포트_2026-09-04.md의 H2(알람 갱신
       // 트랜잭션 중 OS 알람 호출) 항목은 코드 수정은 보류하기로 했지만, 사용자가
       // 알아두면 스스로 대처 가능한 내용이라 도움말에만 추가.
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpAlarmPermissionToggleTitle,
-        bodyKey: (l10n) => l10n.helpAlarmPermissionToggleBody,
-      ),
     ],
   ),
   HelpSection(
@@ -123,10 +107,6 @@ final List<HelpSection> _helpSections = [
       HelpTopic(
         titleKey: (l10n) => l10n.helpCalendarThemesTitle,
         bodyKey: (l10n) => l10n.helpCalendarThemesBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpCalendarMemoTitle,
-        bodyKey: (l10n) => l10n.helpCalendarMemoBody,
       ),
       HelpTopic(
         titleKey: (l10n) => l10n.helpCalendarOtTitle,
@@ -168,14 +148,6 @@ final List<HelpSection> _helpSections = [
         titleKey: (l10n) => l10n.helpConditionWhatIsItTitle,
         bodyKey: (l10n) => l10n.helpConditionWhatIsItBody,
       ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpConditionTodayForecastTitle,
-        bodyKey: (l10n) => l10n.helpConditionTodayForecastBody,
-      ),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpConditionHowJudgedTitle,
-        bodyKey: (l10n) => l10n.helpConditionHowJudgedBody,
-      ),
       // ⭐ 2026-09-04 v2 - 컨디션 판정 로직 개편(evidence 6종 판정 반영)에 맞춰
       // 근거자료 12개 전체를 도움말 한곳에서 볼 수 있게 신설(사용자 요청).
       HelpTopic(
@@ -185,13 +157,6 @@ final List<HelpSection> _helpSections = [
       HelpTopic(
         titleKey: (l10n) => l10n.helpConditionSetupNeededTitle,
         bodyKey: (l10n) => l10n.helpConditionSetupNeededBody,
-      ),
-      // ⭐ 2026-09-04 - 전체_코드_점검_리포트_2026-09-04.md에서 발견한 ShiftTimeRange
-      // 동일 출퇴근시각 입력 시 24시간 근무로 계산되는 건(리스크 검토 후 코드는
-      // 손 안 대기로 함) 입력 화면에서 사용자가 그냥 피하면 되는 문제라 도움말로 안내.
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpConditionSameStartEndTitle,
-        bodyKey: (l10n) => l10n.helpConditionSameStartEndBody,
       ),
     ],
   ),
@@ -271,6 +236,16 @@ final List<HelpSection> _helpSections = [
       HelpTopic(
         titleKey: (l10n) => l10n.helpTroubleshootAlarmIssueTitle,
         bodyKey: (l10n) => l10n.helpTroubleshootAlarmIssueBody,
+      ),
+      // ⭐ 2026-09-13 - 강제 종료 시 알람이 취소되는 OS 동작 + 그 이후 "다시
+      // 실행하기 전에 시각이 지난 알람은 복원 안 됨"이라는 타이밍 리스크를
+      // 정확히 안내(실기기/에뮬레이터 양쪽에서 실측 확인된 내용 - 세션 기록
+      // 참고). 코드 수정은 검토 후 보류함(AlarmRefreshUtil의 "오늘 이미
+      // 갱신됨" 중복 방지 로직을 건드리는 변경이라, 과거 이 영역에서 반복됐던
+      // 사고 이력을 고려해 위험도 대비 이득이 낮다고 판단) - 안내로 대체.
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpTroubleshootForceStopTitle,
+        bodyKey: (l10n) => l10n.helpTroubleshootForceStopBody,
       ),
       HelpTopic(
         titleKey: (l10n) => l10n.helpTroubleshootWidgetIssueTitle,

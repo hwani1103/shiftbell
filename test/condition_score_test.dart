@@ -145,6 +145,56 @@ void main() {
     expect(r.score, inInclusiveRange(38, 48));
   });
 
+  test('8. [2026-09-13 신규] 주간-야간 매일 교대(휴무 0일) + 9시간 근무 + 수면기록 전무 '
+      '- 실사용자 실측 재현(기존 78점 -> 수정 후 크게 낮아져야 함)', () {
+    // ⭐ 사용자가 실기기에서 재현한 시나리오: "주간"/"야간" 2가지 근무를 매일
+    // 번갈아 돌리는 패턴(휴무 슬롯이 아예 없음), 각 9시간, 수면 기록은 단
+    // 하루도 없음. 수정 전에는 78점(보통 등급)이 나와 "말이 안 된다"는 지적을
+    // 받음 - RULE_LONG_SHIFT(12h+)/RULE_EXTENDED_STREAK_SHORT_BREAK/연속
+    // 야간(매일 교대라 밤이 2일 연속으로 온 적이 없음)이 전부 안 걸리는,
+    // 기존 채점 모델의 사각지대였음. 이번 수정(비례 연속근무일 감점 +
+    // 패턴 자체의 무휴무 감지 + 수면기록 전무 감점)이 이 사각지대를 메우는지
+    // 검증.
+    const kDay9 = '주간';
+    const kNight9 = '야간';
+    const patternNoRest = [kDay9, kNight9]; // 휴무 슬롯 자체가 없음(2일 주기)
+    final shiftTimes9h = <String, ShiftTimeRange>{
+      kDay9: const ShiftTimeRange(shiftName: kDay9, startMinutes: 7 * 60, endMinutes: 16 * 60), // 07-16, 9h
+      kNight9: const ShiftTimeRange(shiftName: kNight9, startMinutes: 21 * 60, endMinutes: 6 * 60), // 21-06, 9h
+    };
+    final schedule = ShiftSchedule(
+      isRegular: true,
+      pattern: patternNoRest,
+      todayIndex: 0, // 오늘=주간
+      startDate: today.subtract(const Duration(days: 60)), // 두 달 전부터 계속(스트릭이 충분히 쌓이도록)
+      shiftTypes: const [kDay9, kNight9],
+    );
+    final analyzer = ShiftPatternAnalyzer(schedule: schedule, shiftTimes: shiftTimes9h);
+    final baseResult = ConditionRuleEngine(analyzer).evaluate(today);
+
+    // 사각지대였음을 함께 확인: 12h+/연속야간 계열 rule은 전혀 안 걸려야 함.
+    expect(baseResult.levelFindings.any((f) => f.ruleId == 'RULE_LONG_SHIFT'), isFalse);
+    expect(baseResult.levelFindings.any((f) => f.ruleId == 'RULE_EXTENDED_STREAK_SHORT_BREAK'), isFalse);
+    expect(baseResult.levelFindings.any((f) => f.ruleId == 'RULE_CONSECUTIVE_NIGHT_SHIFTS'), isFalse);
+    expect(analyzer.patternHasNoRestDay, isTrue);
+
+    final r = computeConditionScore(
+      baseResult: baseResult,
+      analyzer: analyzer,
+      today: today,
+      otMinutesByDate: const {},
+      avgRecentSleepMinutes: null, // 수면 기록 전무
+      isRotatingSchedule: true,
+      recentSleepTrackedDays: 7,
+      recentSleepDaysWithData: 0, // 전무
+    );
+    _printScore('8. 무휴무 매일교대 + 수면기록 전무', r);
+    // ⭐ 정확한 "정답"은 없지만(사용자가 조정할 축), 최소한 "보통"(72점) 밑,
+    // "주의가 필요한" 구간(64점 미만)까지는 내려가야 이 시나리오가 더 이상
+    // 사각지대가 아니라고 볼 수 있음.
+    expect(r.score, lessThan(64));
+  });
+
   test('7. 저강도(휴가 위주, 주 1회 근무) - 근무일 자체', () {
     const patternLight = [_kNight, _kOff, _kOff, _kOff, _kOff, _kOff, _kOff];
     final schedule = ShiftSchedule(

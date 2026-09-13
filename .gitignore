@@ -44,9 +44,12 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# FlutterFire CLI writes this, but google-services Gradle plugin is
-# intentionally not applied in this project (see 친구공유_v1_스펙.md) - unused
-android/app/google-services.json
+# ⭐ 2026-09-12 - Firebase Analytics 1단계(project_admin_analytics_plan 메모리)부터
+# google-services 플러그인을 실제로 적용하면서 이 파일이 빌드에 필수가 됨 -
+# 예전엔(친구공유_v1_스펙.md 당시) Auth/Firestore만 썼고 플러그인 자체를 안 붙여서
+# "FlutterFire CLI가 놔두고 가는 안 쓰는 파일"로 무시했었는데, 이제는 커밋해야 함
+# (API 키 자체는 비밀값이 아님 - lib/firebase_options.dart에 이미 같은 값이 커밋돼
+# 있고, 실제 접근 제어는 Firebase 보안 규칙/API 키 제한이 담당).
 
 # firebase-tools hosting deploy cache
 .firebase/
@@ -76,3 +79,13 @@ logcat*.txt
 ml/.venv/
 ml/__pycache__/
 __pycache__/
+
+# ⭐ 2026-09-13 - 위 logcat 덤프(86MB) 사고와 같은 종류의 재발 - 라운드 기반
+# 탐색적 테스트(테스트_계획_2026-09-12.md) 중 기기 스크린샷/UI 계층(uiautomator)
+# 덤프가 프로젝트 루트에 616개(116MB) 그대로 쌓여 있던 걸 커밋 직전에 발견함.
+# 루트에만 한정(하위 폴더의 실제 리소스 assets/**.png, android/**.xml 등은
+# 안 건드림) - 다음에 또 같은 실수로 커밋되지 않게 패턴으로 막음. 이미 쌓인
+# 파일 자체는 로컬에 그대로 뒀음(필요하면 직접 지울 것).
+/*.png
+/*.xml
+/alarm_dump.txt

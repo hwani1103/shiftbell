@@ -1,7 +1,7 @@
 # 메모 자동분류 카테고리 아이콘
 
-`ml/카테고리_가이드.md`의 19개 범주(기존 9개+기타, 2026-09-01에 7개 신설,
-2026-09-03에 2개 신설)에 대응하는 아이콘.
+`ml/카테고리_가이드.md`의 25개 범주(기존 9개+기타, 2026-09-01에 7개 신설,
+2026-09-03에 2개 신설, 2026-09-12에 6개 신설)에 대응하는 아이콘.
 [Lucide](https://lucide.dev) (ISC License, MIT 호환 오픈소스) 라인 스타일 아이콘 세트에서
 1:1로 매핑해 가져왔다 — 24x24, `stroke="currentColor"` 기반이라 Flutter에서
 `ColorFilter`/`SvgTheme` 등으로 색을 그대로 얹어 쓸 수 있음 (fill 없음, 배경 투명).
@@ -28,6 +28,12 @@
 | `beauty.svg` | 미용 | `scissors` |
 | `cycling.svg` | 자전거 | `bike` |
 | `yoga.svg` | 요가/필라테스(스트레칭 포함) | Tabler `yoga` ⚠️(좌표 1.2배 확대, 아래 참고) |
+| `racket_sports.svg` | 라켓 스포츠(테니스/배드민턴/탁구/스쿼시) | Tabler `ping-pong` |
+| `soccer.svg` | 축구 | Tabler `ball-football` |
+| `basketball.svg` | 농구 | Tabler `ball-basketball` |
+| `baseball.svg` | 야구 | Tabler `ball-baseball` |
+| `ball_sports.svg` | 구기종목(배구 등 - 전용 아이콘 없는 나머지 공 종목) | Tabler `ball-volleyball` |
+| `combat_sports.svg` | 입식 격투기(복싱/킥복싱/무에타이) | Tabler `karate` |
 | `etc1.svg`~`etc10.svg` | 기타(10종 순환) | `circle`/`square`/`triangle`/`diamond`/`hexagon`/`pentagon`/`octagon`/`star`/`shapes`/`asterisk` |
 
 ⭐ 2026-09-01 후속2 - "기타"는 원래 `etc.svg`(circle-ellipsis) 하나였는데,
@@ -36,8 +42,8 @@
 고정해서 쓰지 않고, `lib/screens/schedule_management_tab.dart`의
 `_nextEtcIconIndex()`가 "기타"로 분류될 때마다 1→2→…→10→1…순으로 순환
 배정한다(SharedPreferences에 누적 카운터 저장 - 다른 설정과 함께 백업/복구도
-자동으로 됨). 실제 카테고리로 맵핑된 나머지 16종은 이 순환과 무관하게 항상
-고정 아이콘 하나만 씀.
+자동으로 됨). 실제 카테고리로 맵핑된 나머지 24종(2026-09-12 기준)은 이
+순환과 무관하게 항상 고정 아이콘 하나만 씀.
 
 ⭐ 2026-09-01 - "운동" 아이콘(아령)이 달리기/수영/등산까지 뭉뚱그리는 게
 아쉽다는 피드백으로 이 3종을 전용 카테고리로 분리(테니스/골프/웨이트 등
@@ -89,6 +95,16 @@ Tabler 출처는 running/swimming 2종만 남음. **`running.svg`/`swimming.svg`
   - 2026-09-03, `yoga.svg` 추가(카테고리 확장, 자전거/요가·필라테스 신설).
     `outline/yoga.svg`를 태그 주석만 제거하고 running/swimming과 동일한 방식
     (원래 bbox 중심 기준 1.2배 확대)으로 좌표 재계산.
+  - 2026-09-12, 종목 세분화(카테고리 확장, 라켓 스포츠/축구/농구/야구/
+    구기종목/입식 격투기 신설)로 6종 추가: `outline/ping-pong.svg`(→
+    `racket_sports.svg`) · `outline/ball-football.svg`(→ `soccer.svg`) ·
+    `outline/ball-basketball.svg`(→ `basketball.svg`) ·
+    `outline/ball-baseball.svg`(→ `baseball.svg`) ·
+    `outline/ball-volleyball.svg`(→ `ball_sports.svg`) ·
+    `outline/karate.svg`(→ `combat_sports.svg`). 전부 태그 주석만 제거,
+    좌표 재계산 없이 그대로. Lucide에는 이 6종에 대응하는 구체적 스포츠
+    픽토그램이 없어서(전부 확인함 - `volleyball` 하나만 있고 나머지는
+    404) running/swimming/yoga와 같은 이유로 Tabler에서 가져옴.
 
 ## 적용 방법 (2026-08-27 업데이트 - 렌더링 확인 완료)
 

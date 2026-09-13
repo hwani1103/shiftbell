@@ -7,6 +7,11 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("dev.flutter.flutter-gradle-plugin")
+    // ⭐ 2026-09-12 - Firebase Analytics 1단계. android/settings.gradle.kts에서
+    // 버전 선언, 여기서 실제 적용. google-services.json(이 모듈 루트, prod/dev
+    // 패키지명 둘 다 등록돼 있음)을 읽어서 빌드 변형(flavor)별로 알맞은
+    // google_app_id를 리소스로 주입함.
+    id("com.google.gms.google-services")
 }
 
 // key.properties 로드 (BOM 제거)
@@ -44,8 +49,8 @@ android {
         applicationId = "com.hwani1103.shiftbell"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 24
-        versionName = "1.0.22"
+        versionCode = 25
+        versionName = "1.0.23"
     }
 
     // ⭐ 정식(prod) 앱과 테스트(dev) 앱을 같은 기기에 동시에 설치해둘 수 있게 분리함.
@@ -86,6 +91,18 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
     }
+
+    // ⭐ 2026-09-12 - 테스트_계획_2026-09-12.md B-2. 이 프로젝트 최초의 Kotlin
+    // 유닛테스트(android/app/src/test/kotlin/...) - Robolectric이 AndroidManifest.xml/
+    // 리소스를 읽어야 해서 isIncludeAndroidResources 필요. 실기기 계측 테스트
+    // (androidTest)가 아니라 JVM에서 도는 순수 유닛테스트라 에뮬레이터 없이도
+    // `./gradlew testDevDebugUnitTest`로 실행 가능.
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 flutter {
@@ -104,6 +121,18 @@ dependencies {
 
     // Material (선택)
     implementation("com.google.android.material:material:1.11.0")
+
+    // ⭐ 2026-09-12 - 테스트_계획_2026-09-12.md B-2, 이 프로젝트 최초의 Kotlin
+    // 테스트 인프라. JUnit4(Robolectric이 요구하는 러너 기반) + Robolectric(가짜
+    // Android 프레임워크 - 실제 SQLite/AlarmManager 흉내) + Mockito(scheduleNativeAlarm
+    // 등 특정 호출 지점만 가짜 동작으로 교체). androidx.test는 Robolectric이 내부적으로
+    // 요구하는 Instrumentation 계열 클래스(ApplicationProvider 등) 제공용.
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.test:core:1.6.1")
+    testImplementation("androidx.test.ext:junit:1.2.1")
+    testImplementation("org.mockito:mockito-core:5.14.2")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
 }
 
 // ⭐ 2026-08-20 추가 - Dart↔Kotlin "손으로 맞춰야 하는 상수" 빌드 타임 가드.

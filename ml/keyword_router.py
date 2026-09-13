@@ -123,16 +123,50 @@ PURCHASE_MARKERS = []
 # ⭐ 2026-09-01(카테고리 확장) - "마라톤"은 RUNNING_KEYWORDS(달리기 전용 카테고리
 # 신설)로 옮김. 실측(5,464개)에서 "마라톤"이 낀 문장은 전부 운동보다 "달리기"
 # 자체를 가리켜서(마라톤 대회/장거리 러닝 등) 새 카테고리가 더 정확함.
-SPORTS_KEYWORDS = [
-    "테니스", "골프", "라운딩", "탁구", "축구", "배드민턴", "스쿼시",
-    "클라이밍", "복싱", "웨이트", "농구", "배구",
-    "야구", "줄넘기", "크로스핏",
-]
+# ⭐ 2026-09-12 - 라켓 스포츠(테니스/배드민턴/탁구/스쿼시), 구기종목(축구/농구/
+# 야구/배구), 입식 격투기(복싱)를 각각 전용 카테고리로 분리(사용자 요청 -
+# "운동" 하나로 뭉뚱그려지던 종목별 아이콘을 원함). 남은 건 골프/라운딩/
+# 클라이밍/웨이트/줄넘기/크로스핏 - "헬스장 트레이닝" 성격의 종목만.
+SPORTS_KEYWORDS = ["골프", "라운딩", "클라이밍", "웨이트", "줄넘기", "크로스핏"]
 # ⭐ 2026-09-03 - "필라테스"는 카테고리 확장(아래 "요가/필라테스" 신설)으로
 # 이 목록에서 빠짐(전용 카테고리로 승격).
 # "골프공"처럼 운동 이름 + 공(볼)이 마사지 도구 등 완전히 다른 용도로 쓰이는
 # 경우를 걸러낸다("족저근막위염 마사지용 골프공" 같은 실사용 사례로 발견).
-SPORTS_FALSE_POSITIVES = ["골프공", "테니스공", "야구공", "축구공", "탁구공"]
+SPORTS_FALSE_POSITIVES = ["골프공"]
+
+# ⭐ 2026-09-12 - "PT받기"가 병원·건강관리로 오분류되던 문제 수정(사용자
+# 신고). bare "PT"만 보고 무조건 운동으로 보내면 "PT 자료 준비"/"PT 발표"
+# (PowerPoint 발표자료의 흔한 준말) 같은 업무 맥락과 충돌하므로, 개인
+# 트레이닝 맥락의 동반 신호가 있을 때만 인정하고 업무발표 신호가 있으면
+# 제외한다. 대소문자 구분 없이 매칭(route()에서 처리).
+PERSONAL_TRAINING_KEYWORDS = ["PT"]
+PERSONAL_TRAINING_CONTEXT_KEYWORDS = [
+    "받기", "받자", "받을", "받았", "등록", "수업", "예약", "트레이너", "헬스",
+]
+PERSONAL_TRAINING_FALSE_POSITIVES = [
+    "PT자료", "PT준비", "PT발표", "PT연습", "사업PT", "기업PT", "경쟁PT",
+]
+
+# ⭐ 2026-09-12 - 라켓 스포츠(테니스/배드민턴/탁구/스쿼시) 전용 카테고리
+# 신설. 전부 SPORTS_KEYWORDS에서 그대로 옮겨온 단어라 매칭 방식/오탐
+# 목록도 그대로 승계함.
+RACKET_SPORTS_KEYWORDS = ["테니스", "배드민턴", "탁구", "스쿼시"]
+RACKET_SPORTS_FALSE_POSITIVES = ["테니스공", "탁구공"]
+
+# ⭐ 2026-09-12 - 구기종목 3종(축구/농구/야구)을 각각 전용 아이콘으로 분리.
+# 배구는 전용 아이콘 없이 BALL_SPORTS_KEYWORDS(구기종목, 뭉뚱그린 아이콘
+# 하나)로 남김.
+SOCCER_KEYWORDS = ["축구"]
+SOCCER_FALSE_POSITIVES = ["축구공"]
+BASKETBALL_KEYWORDS = ["농구"]
+BASKETBALL_FALSE_POSITIVES = ["농구공"]
+BASEBALL_KEYWORDS = ["야구"]
+BASEBALL_FALSE_POSITIVES = ["야구공"]
+BALL_SPORTS_KEYWORDS = ["배구"]
+
+# ⭐ 2026-09-12 - 입식 격투기(복싱/킥복싱/무에타이) 전용 카테고리 신설.
+# "복싱"은 기존 SPORTS_KEYWORDS에 있던 걸 그대로 옮겨옴, 킥복싱/무에타이는 신규.
+COMBAT_SPORTS_KEYWORDS = ["복싱", "킥복싱", "무에타이"]
 
 # ⭐ 2026-09-01 - 카테고리 확장(10개 -> 17개). "운동" 아이콘(아령)이 달리기/수영/
 # 등산까지 뭉뚱그리는 게 별로라는 피드백으로 이 3개를 전용 카테고리로 분리함.
@@ -290,6 +324,16 @@ ACTIVITY_CONTAINS_KEYWORDS = {
     "쇼핑": ["쇼핑"],
 }
 
+# ⭐ 2026-09-12(사용자 신고) - "사파리투어"가 쇼핑으로 오분류되던 문제 수정.
+# "투어"/"관광"은 지명 뒤에 그대로 붙는 복합어로 흔히 쓰여서 anywhere=True
+# (_verb_word_matched)로 잡음. ⚠️ 처음엔 단순 contains로 잡았다가
+# check_keyword_regressions.py 실측 검증에서 "관광통역안내사 자격시험
+# 신청"(공부)이 "관광"을 포함한다는 이유만으로 여가로 오분류되는 걸 발견해서,
+# RUNNING/HIKING과 동일한 엄격한 매처로 바꿈. "여행" 자체는 관계·목적에 따라
+# 갈리는 폭이 넓어서(위 파일 상단 주석 "반려동물/육아/여행은... 제외함" 참고)
+# 안 넣음.
+LEISURE_TRAVEL_KEYWORDS = ["투어", "관광"]
+
 # ⭐ 2026-09-06 - route()의 tier3d_eating_proposal 참고. "먹자"/"먹을래"/"먹으러"는
 # 뒤에 무슨 말이 오든(음식 이름, 아무것도 없음) 거의 항상 "같이 밥 먹자"는 뜻이라
 # contains(부분일치)로 넉넉하게 잡는다.
@@ -326,6 +370,19 @@ def _prefix_matched(tokens, keywords):
 
 def _contains_matched(text, keywords):
     return [kw for kw in keywords if kw in text]
+
+
+# ⭐ 2026-09-12 - "PT"(개인 트레이닝) 전용 대소문자 무시 매처. 이 키워드
+# 체계의 다른 항목은 전부 한글이라 케이스 이슈가 없었는데, "PT"는 영문
+# 약어라 사용자가 "pt받기"처럼 소문자로도 흔히 씀.
+def _prefix_matched_ignore_case(tokens, keywords):
+    upper_keywords = [kw.upper() for kw in keywords]
+    return [kw for tok in tokens for kw in upper_keywords if tok.upper().startswith(kw)]
+
+
+def _contains_matched_ignore_case(text, keywords):
+    upper_text = text.upper()
+    return [kw for kw in keywords if kw.upper() in upper_text]
 
 
 # ⭐ 2026-09-01(2차 - 어미/앞말 대응 점검) - 처음엔 "하"/"해" 두 어간만 인정했는데
@@ -407,6 +464,32 @@ def route(text):
     if sports_hit and not _contains_matched(text, SPORTS_FALSE_POSITIVES):
         return "운동", "tier3_sports"
 
+    # ⭐ 2026-09-12 - "PT받기"(헬스장 개인 트레이닝) 전용 tier. bare "PT"만으론
+    # 부족하고 개인 트레이닝 맥락(받기/등록/수업/예약/트레이너/헬스)이 같이
+    # 있어야 하며, 업무 발표(PT 자료/PT 준비 등) 신호가 있으면 제외한다.
+    if (_prefix_matched_ignore_case(tokens, PERSONAL_TRAINING_KEYWORDS)
+            and _contains_matched(text, PERSONAL_TRAINING_CONTEXT_KEYWORDS)
+            and not _contains_matched_ignore_case(text, PERSONAL_TRAINING_FALSE_POSITIVES)):
+        return "운동", "tier3_personal_training"
+
+    # ⭐ 2026-09-12 - 라켓 스포츠/구기종목 3종/기타 구기/입식 격투기 - 전부
+    # 위 tier3_sports("운동")에서 갈라져 나온 종목이라 매칭 방식(prefix+
+    # contains, false positives)도 그대로 승계함. tier3_sports가 원래도
+    # 사교 방어(모임/동호회 신호로 defer)를 안 걸었던 것과 동일하게 여기도
+    # 안 건다.
+    if _prefix_matched(tokens, RACKET_SPORTS_KEYWORDS) and not _contains_matched(text, RACKET_SPORTS_FALSE_POSITIVES):
+        return "라켓 스포츠", "tier3_racket_sports"
+    if _prefix_matched(tokens, SOCCER_KEYWORDS) and not _contains_matched(text, SOCCER_FALSE_POSITIVES):
+        return "축구", "tier3_soccer"
+    if _prefix_matched(tokens, BASKETBALL_KEYWORDS) and not _contains_matched(text, BASKETBALL_FALSE_POSITIVES):
+        return "농구", "tier3_basketball"
+    if _prefix_matched(tokens, BASEBALL_KEYWORDS) and not _contains_matched(text, BASEBALL_FALSE_POSITIVES):
+        return "야구", "tier3_baseball"
+    if _prefix_matched(tokens, BALL_SPORTS_KEYWORDS):
+        return "구기종목", "tier3_ball_sports"
+    if _prefix_matched(tokens, COMBAT_SPORTS_KEYWORDS):
+        return "입식 격투기", "tier3_combat_sports"
+
     # ⭐ 2026-09-01(실측 후 수정) - 신설 카테고리 3종(달리기/수영/등산)은 처음엔
     # 일반 스포츠처럼 prefix+contains로 잡았다가, "러닝메이트랑 저녁"(사교인데
     # "러닝메이트"가 "러닝"으로 시작해서 오분류), "러닝머신 매트 주문"/"등산화
@@ -475,6 +558,10 @@ def route(text):
     # 인정해야 함.
     if not cert_defer and (_contains_matched(text, BEAUTY_CONTAINS_KEYWORDS) or _verb_word_matched(tokens, BEAUTY_PREFIX_KEYWORDS)):
         return "미용", "tier3c_beauty"
+
+    # ⭐ 2026-09-12 - 여가/휴식(투어/관광) - 위 LEISURE_TRAVEL_KEYWORDS 주석 참고.
+    if _verb_word_matched(tokens, LEISURE_TRAVEL_KEYWORDS, anywhere=True):
+        return "여가/휴식", "tier3c_leisure_travel"
 
     # ⭐ 2026-09-06(실사용 신고) - "치킨 먹자"/"~~먹자"류의 구어체 제안형 식사
     # 표현이 하드매핑에 전혀 안 걸려서(ACTIVITY_PREFIX_KEYWORDS의 "식사"/"외식"만

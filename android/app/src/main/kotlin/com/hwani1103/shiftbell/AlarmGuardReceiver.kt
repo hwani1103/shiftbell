@@ -49,6 +49,16 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // 3주 창이 넘어가게 함). 알람 갱신과 완전히 독립된 read-only 경로라
             // 여기 추가해도 위의 알람 로직에는 아무 영향 없음 - 실패해도 무시.
             CalendarWidgetProvider.requestUpdate(context)
+            // ⭐ 2026-09-08 - 수면 위젯("오늘 근무" 칩)이 자정에 하루가 넘어가도 안
+            // 바뀌고 예전 근무명을 계속 보여주는 버그 발견(사용자 신고 - 야간인데
+            // 하루 종일 주간으로 보임, 앱을 재실행하니 그제서야 바로잡힘). 원인:
+            // 이 하트비트가 캘린더 위젯만 깨우고 수면 위젯은 안 깨웠음 - 수면
+            // 위젯은 자체 30분 시스템 주기(sleep_widget_info.xml의
+            // updatePeriodMillis)에 기대야 했는데, 그 주기 자체가 배터리 최적화
+            // 등으로 안드로이드가 실제로는 훨씬 느슨하게(또는 거의 안) 지킬 때가
+            // 있어 하루 종일 안 바뀌는 게 실제로 관찰됨. 캘린더 위젯과 똑같이
+            // 매 하트비트마다 같이 깨움.
+            SleepWidgetProvider.requestUpdate(context)
 
             // ⭐ 실제 수면 기록/자동 추정("C번 요구사항") - 이 하트비트에 편승해서
             // 수면 감지 예약도 항상 최신 상태로 유지(앱을 며칠 안 열어도 안 끊기게).
@@ -66,6 +76,10 @@ class AlarmGuardReceiver : BroadcastReceiver() {
 
         // ⭐ 이 브로드캐스트도 위젯 갱신의 하트비트 역할을 겸함 (자정/20분전마다 호출됨)
         CalendarWidgetProvider.requestUpdate(context)
+        // ⭐ 2026-09-08 - 위 triggerCheck()와 동일한 이유로 수면 위젯도 같이 갱신
+        // (onReceive 경로는 triggerCheck를 거치지 않는 별도 진입점이라 여기도
+        // 따로 추가해야 함).
+        SleepWidgetProvider.requestUpdate(context)
 
         if (intent.action == Intent.ACTION_TIME_CHANGED || intent.action == Intent.ACTION_TIMEZONE_CHANGED) {
             // ⭐ 시계/시간대가 바뀌면 이미 예약된 알람들의 절대 시각이 전부 틀어질 수 있음.

@@ -667,11 +667,16 @@ Widget build(BuildContext context) {
                                 child: IgnorePointer(child: SizedBox()),
                               ),
                               // 화~토 칸 - 테마에 따라 월별 OT 카드 또는 범례
+                              // ⭐ 2026-09-11 - 범례(언더라인/매거진)도 다른 테마의 버튼
+                              // 3칸과 같은 영역이니 스와이프로 월 이동되게 함
+                              // (_wrapWithMonthSwipe 참고). 메인 화이트/다크의
+                              // _buildMonthlyOvertimeCard()는 이미 자체적으로 같은
+                              // 래핑을 하고 있어 또 감쌀 필요 없음.
                               Expanded(
                                 flex: 5,
                                 child: (theme == CalendarThemeId.mainWhite || theme == CalendarThemeId.mainDark)
                                     ? _buildMonthlyOvertimeCard()
-                                    : _buildThemedLegend(theme, schedule),
+                                    : _wrapWithMonthSwipe(_buildThemedLegend(theme, schedule)),
                               ),
                             ],
                           ),
@@ -689,7 +694,11 @@ Widget build(BuildContext context) {
                           left: 6.w,
                           right: 6.w,
                           height: rowH,
-                          child: Row(
+                          // ⭐ 2026-09-11(사용자 요청) - 이 버튼 3칸(목/금/토) 위에서도
+                          // 좌우 스와이프로 월 이동이 되게 바깥을 _wrapWithMonthSwipe로
+                          // 감쌈. 안쪽 각 버튼의 onTap은 그대로 살아있음(제스처 아레나가
+                          // 탭/드래그를 알아서 중재 - _wrapWithMonthSwipe 주석 참고).
+                          child: _wrapWithMonthSwipe(Row(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               // 일~수 칸 (다음 달 날짜 표시 - 제스처를 아래 TableCalendar로 전달)
@@ -697,16 +706,16 @@ Widget build(BuildContext context) {
                                 flex: 4,
                                 child: IgnorePointer(child: SizedBox()),
                               ),
-                              // 목 - 일정공유, 항상
-                              Expanded(
-                                child: _rowSixButton(
-                                  theme,
-                                  icon: Icons.people_alt_outlined,
-                                  label: context.l10n.friendShareTitle,
-                                  onTap: _openFriendShare,
-                                ),
-                              ),
-                              // 금 - 전체근무표, 규칙적 근무자만. ⭐ "전체 조 근무표"가
+                              // ⭐ 2026-09-13 - 버튼 순서를 전체근무표/일정공유/오늘로
+                              // 바꿈(사용자 지적/제안) - 불규칙 근무자는 전체근무표가
+                              // 안 보이는데, 예전 순서(일정공유/전체근무표/오늘)에서는
+                              // 그 빈 자리가 두 버튼 "사이"(목-금-토 중 금)에 끼어서,
+                              // 이미 항상 비어있는 왼쪽 4칸(일~수)과 안 이어지고 뜬금없이
+                              // 그 자리만 달력 그리드가 비쳐 보였음. 조건부로 사라지는
+                              // 버튼(전체근무표)을 이 3칸 중 맨 왼쪽(목)에 두면, 사라졌을
+                              // 때 왼쪽 4칸의 빈 공간과 자연스럽게 하나로 이어져서 더 이상
+                              // 튀어 보이지 않음.
+                              // 목 - 전체근무표, 규칙적 근무자만. ⭐ "전체 조 근무표"가
                               // 한 줄엔 안 들어가 잘려 보여서, 자리가 좁은 이 칩에서만
                               // 한국어 로케일 한정으로 "전체 조\n근무표" 두 줄로 직접
                               // 끊음(공용 l10n 문자열 자체는 안 건드림 - 다른 테마
@@ -723,6 +732,15 @@ Widget build(BuildContext context) {
                                       )
                                     : const IgnorePointer(child: SizedBox()),
                               ),
+                              // 금 - 일정공유, 항상
+                              Expanded(
+                                child: _rowSixButton(
+                                  theme,
+                                  icon: Icons.people_alt_outlined,
+                                  label: context.l10n.friendShareTitle,
+                                  onTap: _openFriendShare,
+                                ),
+                              ),
                               // 토 - 오늘, 항상
                               Expanded(
                                 child: _rowSixButton(
@@ -733,7 +751,7 @@ Widget build(BuildContext context) {
                                 ),
                               ),
                             ],
-                          ),
+                          )),
                         ),
                       // ⭐ "맨 아랫줄은 가로줄이 없어서 부자연스럽다"는 지적 - 1번은
                       // 세로선(칸 왼쪽 테두리)만 있고 가로선은 요일행 밑 구분선
@@ -747,6 +765,30 @@ Widget build(BuildContext context) {
                           right: 6.w,
                           height: 1,
                           child: Container(color: Colors.grey.shade200),
+                        ),
+                      // ⭐ 2026-09-13 - 다크 그리드(굵은 격자형)만의 추가 지적 - 토(오늘
+                      // 버튼) 칸은 위 _isSixthRowButtonCell 규칙상 항상 reclaim되어
+                      // row6에 실제 셀이 안 그려지므로, 5번째 줄 토요일 칸 밑 가로
+                      // 테두리가 (이웃 칸들처럼 위아래 두 셀 테두리가 겹쳐 두꺼워지는
+                      // 것과 달리) row5 자신의 테두리 한 겹만 남아 얇아 보임 - 같은
+                      // 굵기(0.6)의 선을 하나 더 겹쳐 그어서 다른 칸들과 두께를 맞춤.
+                      // 목(전체근무표) 칸은 불규칙+근무 미배정일 때 이제 reclaim되지
+                      // 않아(위 case 4 수정) 실제 셀이 그대로 그려지므로 자동으로
+                      // 두꺼워짐 - 여기서 따로 안 그려도 됨.
+                      if (theme == CalendarThemeId.boldGrid)
+                        Positioned(
+                          top: 28.h + rowH * 5 - 0.6,
+                          left: 6.w,
+                          right: 6.w,
+                          height: 0.6,
+                          child: Row(
+                            children: [
+                              const Expanded(flex: 4, child: SizedBox.shrink()),
+                              const Expanded(child: SizedBox.shrink()), // 목 - 자동으로 두꺼워짐
+                              const Expanded(child: SizedBox.shrink()), // 금
+                              Expanded(child: Container(color: Colors.grey.shade600)), // 토
+                            ],
+                          ),
                         ),
                     ],
                         );
@@ -957,13 +999,12 @@ Widget build(BuildContext context) {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Expanded(flex: 2, child: SizedBox.shrink()),
-                      Expanded(
-                        child: _mainThemeRowSixButton(
-                          colorScheme: colorScheme,
-                          icon: Icons.people_alt_outlined,
-                          onTap: _openFriendShare,
-                        ),
-                      ),
+                      // ⭐ 2026-09-13 - 위 reclaimsSixthRowButtons 블록과 동일한 이유로
+                      // 순서를 전체근무표/일정공유/오늘로 바꿈 - 불규칙 근무자는
+                      // 전체근무표가 사라지는데, 예전 순서에선 그 자리가 일정공유와
+                      // 오늘 "사이"에 끼어서 일정공유 버튼이 오늘 버튼과 안 붙고
+                      // 중간에 붕 떠 보였음. 조건부 버튼을 맨 앞(왼쪽 spacer 바로
+                      // 옆)에 두면 사라졌을 때 왼쪽 spacer와 자연스럽게 이어짐.
                       Expanded(
                         child: (schedule?.isRegular ?? false)
                             ? _mainThemeRowSixButton(
@@ -972,6 +1013,13 @@ Widget build(BuildContext context) {
                                 onTap: _openAllShiftsView,
                               )
                             : const SizedBox.shrink(),
+                      ),
+                      Expanded(
+                        child: _mainThemeRowSixButton(
+                          colorScheme: colorScheme,
+                          icon: Icons.people_alt_outlined,
+                          onTap: _openFriendShare,
+                        ),
                       ),
                       Expanded(
                         child: _mainThemeRowSixButton(
@@ -999,6 +1047,31 @@ Widget build(BuildContext context) {
       _focusedDay = newMonth;
     });
     _loadMemosForMonth(newMonth);
+  }
+
+  // ⭐ 2026-09-11(사용자 요청) - 6번째 줄을 재활용하는 영역(일정공유/전체근무표/
+  // 오늘 버튼, 범주 범례) 위에서도 달력 그리드와 똑같이 좌우 스와이프로 월
+  // 이동이 되게 함. _buildMonthlyOvertimeCard()가 이미 이 방식(바깥
+  // GestureDetector가 onHorizontalDragEnd로 스와이프를 잡고, 안쪽 각 버튼의
+  // GestureDetector가 탭을 그대로 잡음 - Flutter 제스처 아레나가 "손가락이
+  // touch slop을 넘게 움직이면 드래그가, 그대로 떼면 탭이 이긴다"로 알아서
+  // 중재해줘서 버튼 탭 기능은 전혀 안 깨짐)로 이미 검증돼 있어서, 그 로직만
+  // 재사용 가능한 래퍼로 뽑음(같은 속도 임계값 300 유지 - 다른 데서 손대지
+  // 말 것, 여러 군데서 값이 어긋나면 체감 스와이프 민감도가 달라짐).
+  Widget _wrapWithMonthSwipe(Widget child) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragEnd: (details) {
+        final velocity = details.primaryVelocity;
+        if (velocity == null) return;
+        if (velocity < -300) {
+          _changeMonthBySwipe(1); // 왼쪽으로 스와이프 → 다음 달
+        } else if (velocity > 300) {
+          _changeMonthBySwipe(-1); // 오른쪽으로 스와이프 → 이전 달
+        }
+      },
+      child: child,
+    );
   }
 
   // ⭐ 이번 달 OT 상세 목록 시트 (기준 기간은 달력 월 기준일 수도, 급여일 기준일
@@ -1667,8 +1740,22 @@ Widget build(BuildContext context) {
 
   // ⭐ 6번째 줄의 목(4)/금(5)/토(6) 3칸 여부 - _isSixthRowEmptyCell(화~토 5칸,
   // OT카드/범례용)과는 대상 칸도 용도도 다른 별도 헬퍼. 토(오늘 버튼)는 항상,
-  // 금(전체근무표)은 규칙적 근무자일 때만, 목(일정공유)은 친구 유무와 무관하게
-  // 항상 - 나머지 조건은 호출부(build())가 인자로 넘겨줌.
+  // 금(일정공유)은 친구 유무와 무관하게 항상, 목(전체근무표)은 규칙적
+  // 근무자일 때만 - 나머지 조건은 호출부(build())가 인자로 넘겨줌.
+  // ⭐ 2026-09-13 버그 수정 - build()의 실제 버튼 배치(목/금/토 Row, 2026-09-13
+  // 순서 변경 주석 참고)는 "조건부로 사라지는 버튼(전체근무표)을 목으로,
+  // 항상 있는 일정공유를 금으로" 바꿨는데, 이 셀 판정 함수는 그때 같이 안
+  // 고쳐져서 여전히 옛 순서(목=항상/금=조건부)로 남아있었음 - 그 결과
+  // 불규칙+근무 미배정 상태(전체근무표 버튼이 조건부로 사라짐)에서 실제로는
+  // 금 칸이 "true"가 아니라 예전 규칙(금=조건부)에 걸려 reclaim 안 되고, 목
+  // 칸은 예전 규칙(목=항상) 그대로 reclaim 됨 - 즉 화면에 그려지는 버튼
+  // 위치(목=빈칸/금=일정공유)와 실제 날짜 셀이 비워지는 위치(목=비워짐/
+  // 금=안 비워짐)가 서로 어긋나서, 금 칸에 실제 달력 셀(스필오버 날짜 +
+  // 테마별 배경/테두리)이 일정공유 버튼 밑에 그대로 남아 버튼 여백 틈으로
+  // 비쳐 보였음(심플 라인 테마의 "수요일 우측 세로선 소실 + 목요일 우측
+  // 세로선 뜬금없이 등장", 다이어리/다크그리드/컬러뱃지/이벤트캘린더 테마의
+  // "6번째 줄 금요일에 뜬금없는 달력 셀" 전부 이 어긋남 하나가 원인). 목/금
+  // 판정을 실제 버튼 배치와 같은 조건으로 맞춤.
   bool _isSixthRowButtonCell(
     DateTime day,
     DateTime focusedMonth, {
@@ -1678,10 +1765,10 @@ Widget build(BuildContext context) {
     switch (day.weekday) {
       case 6: // 토 - 오늘 버튼, 항상
         return true;
-      case 5: // 금 - 전체근무표, 규칙적 근무자만
-        return includeAllShiftsCol;
-      case 4: // 목 - 일정공유, 친구 유무와 무관하게 항상
+      case 5: // 금 - 일정공유, 친구 유무와 무관하게 항상
         return true;
+      case 4: // 목 - 전체근무표, 규칙적 근무자만
+        return includeAllShiftsCol;
       default:
         return false;
     }
@@ -3049,13 +3136,24 @@ Widget build(BuildContext context) {
       child: Container(
         width: double.infinity,
         margin: EdgeInsets.all(1.w),
-        clipBehavior: Clip.antiAlias, // 둥근 모서리 밖으로 안쪽 테두리선이 삐져나오지 않게
         decoration: BoxDecoration(
           color: Colors.white,
           border: Border.all(color: borderColor, width: 0.8),
           borderRadius: BorderRadius.circular(6.r),
         ),
-        child: Column(
+        // ⭐ 2026-09-13 버그 수정 - "모든 달력 셀의 우측상단 모서리가 살짝
+        // 잘려 보인다"는 지적 - Container의 clipBehavior(Clip.antiAlias)만으로는
+        // border+borderRadius가 같이 있을 때 자식(특히 이 셀 우측상단에 바로
+        // 맞닿는 근무명 배지 Container - 그 자체는 각진 사각형이라 둥근 모서리
+        // 부분을 깎아줘야 함)이 둥근 모서리 밖으로 정확히 안 깎여서, 각진
+        // 모서리가 테두리선 바로 안쪽에 살짝 삐져나와 보였음(특히 얇은
+        // 테두리(0.8)+작은 반지름(6.r) 조합에서 두드러짐). 명시적 ClipRRect로
+        // 교체하고, 테두리 두께만큼 안쪽으로 줄인 반지름을 써서 클립 경계가
+        // 항상 바깥 테두리선 안쪽에 오게 함(바깥 테두리는 그 위에 그대로
+        // 그려지므로 이음매가 안 보임).
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(5.2.r),
+          child: Column(
           children: [
             // 🔧 상단 박스 - 날짜(왼쪽 절반) | 근무명(오른쪽 절반, 근무색 채움).
             // IntrinsicHeight가 있어야 가운데 세로선(Container)이 Row의 실제
@@ -3120,6 +3218,7 @@ Widget build(BuildContext context) {
               ),
             ),
           ],
+          ),
         ),
       ),
     );

@@ -898,8 +898,9 @@ class _WaveGradientBackgroundState extends State<_WaveGradientBackground> with S
   @override
   void initState() {
     super.initState();
-    // 네이티브(WaveGradientView.kt)와 동일한 13초 회전 주기.
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 13))..repeat();
+    // 네이티브(WaveGradientView.kt)와 동일한 8초 회전 주기(2026-09-13 - "조금
+    // 더 빠르게" 피드백으로 13초 → 8초, 둘 다 같이 바꿈).
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 8))..repeat();
   }
 
   @override

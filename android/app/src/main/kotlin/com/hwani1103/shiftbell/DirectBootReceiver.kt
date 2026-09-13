@@ -64,6 +64,12 @@ class DirectBootReceiver : BroadcastReceiver() {
             // 2026-09-01 - checkNow로 바꿔 재부팅 직후에도 진행 중 후보가 있으면 즉시 판정.
             SleepDetectionReceiver.checkNow(context)
 
+            // ⭐ 5단계: 일정관리 탭 "일정에 맞춰서 알림받기" 재예약(2026-09-12 신설).
+            // 이 알림도 AlarmManager 기반이라 재부팅하면 전부 사라짐 - date_schedules에
+            // notify_enabled=1로 남아있는 미래 일정들을 다시 걺. 위 알람/수면감지
+            // 재등록과 완전히 독립된 별도 스윕이라 서로 영향 없음.
+            ScheduleNotificationScheduler.rescheduleAllFromDb(context)
+
             Log.e("DirectBoot", "========== DIRECT BOOT COMPLETE ==========")
         } catch (e: Exception) {
             Log.e("DirectBoot", "========== ERROR ==========", e)

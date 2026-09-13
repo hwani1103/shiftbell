@@ -5,10 +5,19 @@
 // 조용히 삼키고 firebaseReady=false로 남겨서 앱의 나머지 기능(알람 등)은 평소대로 동작하게
 // 함 - 친구공유의 Firestore 기능만 "동기화 실패"로 조용히 no-op됨 (friend_sync_service.dart
 // 참고). main.dart/web_main.dart 둘 다 runApp() 전에 이걸 호출함.
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../firebase_options.dart';
 
 bool firebaseReady = false;
+
+// ⭐ 2026-09-12 - "교대시계 관리자" 1단계(project_admin_analytics_plan 메모리 참고).
+// 커스텀 이벤트 없이 자동 수집 이벤트(session_start/first_open/screen_view 등)만으로
+// DAU/MAU를 보는 게 목표라 Dart 쪽에서 할 일은 사실 거의 없음(네이티브 SDK가 앱
+// 시작과 동시에 자동 수집을 시작함) - 그래도 플러그인 MethodChannel이 확실히
+// 붙도록 인스턴스를 한 번 만들어두고, 수집이 꺼져있을 가능성(예: 이전에 opt-out
+// 설정이 있었던 경우) 없이 항상 켜져 있게 명시적으로 보장함.
+FirebaseAnalytics? analytics;
 
 Future<void> initFirebase() async {
   // ⭐ 2026-08-14: Firebase Hosting(실 네트워크 지연) 환경에서만 재현된 레이스 컨디션 -
@@ -21,6 +30,8 @@ Future<void> initFirebase() async {
     try {
       await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
       firebaseReady = true;
+      analytics = FirebaseAnalytics.instance;
+      await analytics!.setAnalyticsCollectionEnabled(true);
       print('✅ Firebase 초기화 완료 (시도 $attempt번째)');
       return;
     } catch (e) {

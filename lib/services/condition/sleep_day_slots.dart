@@ -237,19 +237,31 @@ List<SleepDaySlots> buildSleepDaySlots({
     SleepRecord? main;
     final naps = <SleepRecord>[];
     if (dayRecords != null) {
+      // ⭐ 2026-09-06 재설계(사용자 지적) - 주 수면 "자격"이 있는 기록이 하루에
+      // 둘 이상이면(예: 휴무일 낮 4시간 낮잠 + 그날 밤 7시간 정상 취침 - 둘 다
+      // 근무와 안 겹치고 2시간 이상이라 자격은 있음) 예전엔 시작시각이 이른
+      // 쪽이 그냥 이겼다(코드가 dayRecords를 시작시각 순으로 훑으며 "먼저 온
+      // 자격자"를 씀) - 그러면 낮 4시간 낮잠이 주 수면 칸을 차지하고 진짜
+      // 밤잠(7시간)이 낮잠 칸으로 밀리는 직관에 안 맞는 결과가 나왔다. 자격
+      // 있는 후보들 중 "가장 긴 것"이 그날의 주 수면이어야 한다는 게 더
+      // 합리적이므로, 자격자들을 따로 모아 길이순 정렬 후 최장만 주 수면으로
+      // 뽑고 나머지는(원래부터 낮잠이던 것과 합쳐서) 다시 시작시각 순으로
+      // 정렬해 낮잠 칸에 채운다. 두 후보 다 확정 안 된(진행 중, durationMinutes
+      // null) 경우는 실제 길이를 모르니 0으로 쳐서 최하위로 미룸(둘 다
+      // 진행중이면 어차피 순서가 안 중요함 - 곧 재계산됨).
+      final mainCandidates = <SleepRecord>[];
       for (final r in dayRecords) {
-        // ⭐ 2026-09-06 버그 수정(사용자 신고) - 원래 "주 수면 자격이 있는데 그
-        // 칸이 이미 찼으면" 그냥 버려서(`main ??= r`이 두 번째부터는 조용히
-        // 무시) 실제로 존재하는 수면 기록이 화면에서 통째로 사라졌다(위
-        // _attributedDay/_isRecoverySleepFromYesterdayNightShift의 .inHours
-        // truncate 버그와 겹치면 특히 잘 발생 - 그 버그로 다른 기록이 같은 날에
-        // 잘못 끼어들어와 주 수면 칸을 먼저 차지해버림). 자격이 있어도 칸이
-        // 이미 찼으면 낮잠 칸으로 대신 넣어 최소한 화면에서 없어지지는 않게 함.
-        if (_isMainSleep(r, analyzer) && main == null) {
-          main = r;
+        if (_isMainSleep(r, analyzer)) {
+          mainCandidates.add(r);
         } else {
           naps.add(r);
         }
+      }
+      if (mainCandidates.isNotEmpty) {
+        mainCandidates.sort((a, b) => (b.durationMinutes ?? 0).compareTo(a.durationMinutes ?? 0));
+        main = mainCandidates.first;
+        naps.addAll(mainCandidates.skip(1));
+        naps.sort((a, b) => a.start.compareTo(b.start));
       }
     }
     result.add(SleepDaySlots(

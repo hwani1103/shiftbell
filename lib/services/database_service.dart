@@ -58,7 +58,7 @@ class DatabaseService {
     
     return await openDatabase(
       path,
-      version: 22,  // v22: sleep_records/sleep_expected_bedtime 테이블 추가 (실제 수면 기록/자동 추정)
+      version: 23,  // v23: date_schedules.notify_enabled/notify_offset_minutes 추가 (일정 알림)
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onOpen: (db) async {
@@ -166,6 +166,10 @@ class DatabaseService {
     // CRUD하는 테이블. 메모_자동분류_ML_계획.md Phase 5의 카테고리 자동배정
     // 결과를 predicted_category/is_user_corrected로 같이 기록함(v1부터 캡처
     // 구조를 넣어야 나중에 재학습용 피드백을 놓치지 않음 - 그 계획서 참고).
+    // ⭐ v23 - notify_enabled/notify_offset_minutes 추가(일정 알림, "일정에 맞춰서
+    // 알림받기" 실제 구현). 전체근무표_개선안_및_일정알림_설계메모.md 2장 참고.
+    // 이번엔 v20/v21과 달리 Native(ScheduleNotificationScheduler.kt)가 재부팅
+    // 재예약을 위해 이 테이블을 직접 읽는다 - v22(sleep_records)와 같은 부류.
   await db.execute('''
     CREATE TABLE IF NOT EXISTS date_schedules(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -179,6 +183,8 @@ class DatabaseService {
       font_index INTEGER NOT NULL DEFAULT 1,
       predicted_category TEXT,
       is_user_corrected INTEGER NOT NULL DEFAULT 0,
+      notify_enabled INTEGER NOT NULL DEFAULT 0,
+      notify_offset_minutes INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
       updated_at TEXT
     )
@@ -626,6 +632,28 @@ class DatabaseService {
       print('⚠️ sleep_records/sleep_expected_bedtime 생성 스킵(이미 존재 가능성): $e');
     }
     print('✅ DB 업그레이드 완료 (v$oldVersion → v22): sleep_records/sleep_expected_bedtime 테이블 추가');
+  }
+
+  // ⭐ v23 - 일정관리 탭 "일정에 맞춰서 알림받기" 실제 구현(전체근무표_개선안_및_
+  // 일정알림_설계메모.md 2장). 기존 date_schedules(v20)에 컬럼만 추가 - 다른
+  // 테이블은 전혀 안 건드림. notify_enabled/notify_offset_minutes 둘 다
+  // NOT NULL DEFAULT 0이라, 이미 저장된 기존 일정들은 업그레이드 직후
+  // 전부 "알림 꺼짐"으로 안전하게 채워짐(과거에 만든 일정이 갑자기 알림을
+  // 울리기 시작하는 일 없음).
+  if (oldVersion < 23) {
+    try {
+      await db.execute(
+          'ALTER TABLE date_schedules ADD COLUMN notify_enabled INTEGER NOT NULL DEFAULT 0');
+    } catch (e) {
+      print('⚠️ date_schedules.notify_enabled 추가 스킵(이미 존재 가능성): $e');
+    }
+    try {
+      await db.execute(
+          'ALTER TABLE date_schedules ADD COLUMN notify_offset_minutes INTEGER NOT NULL DEFAULT 0');
+    } catch (e) {
+      print('⚠️ date_schedules.notify_offset_minutes 추가 스킵(이미 존재 가능성): $e');
+    }
+    print('✅ DB 업그레이드 완료 (v$oldVersion → v23): date_schedules 알림 컬럼 추가');
   }
 }
 

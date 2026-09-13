@@ -22,10 +22,12 @@ import 'package:flutter/services.dart' show rootBundle;
 
 /// 분류 결과. [categoryKey]는 'work'/'study'/'exercise'/'health'/'meal'/'social'/
 /// 'family'/'shopping'/'leisure'/'running'/'swimming'/'hiking'/'culture'/
-/// 'finance'/'housework'/'beauty'/'cycling'/'yoga'/'etc' 중 하나
-/// (2026-09-01 - 10종 -> 17종, 2026-09-03 - 17종 -> 19종) -
-/// assets/icons/memo_category/의 파일명, lib/screens/schedule_management_tab.dart의
-/// _kScheduleCategoryIcons와 동일한 키 체계.
+/// 'finance'/'housework'/'beauty'/'cycling'/'yoga'/'racket_sports'/'soccer'/
+/// 'basketball'/'baseball'/'ball_sports'/'combat_sports'/'etc' 중 하나
+/// (2026-09-01 - 10종 -> 17종, 2026-09-03 - 17종 -> 19종, 2026-09-12 - 19종 ->
+/// 25종: "운동"에서 6종 세분화) - assets/icons/memo_category/의 파일명,
+/// lib/screens/schedule_management_tab.dart의 _kScheduleCategoryIcons와
+/// 동일한 키 체계.
 class MemoCategoryPrediction {
   final String categoryKey;
   final String method; // 디버깅/로그용 - 'tier1_immediate_family', 'ml', 'ml_low_confidence_fallback' 등
@@ -276,17 +278,56 @@ const List<String> _kPurchaseMarkers = <String>[];
 
 // ⭐ 2026-09-01(카테고리 확장) - "마라톤"은 _kRunningKeywords로 옮김(ml/
 // keyword_router.py 참고).
+// ⭐ 2026-09-12 - 라켓 스포츠(테니스/배드민턴/탁구/스쿼시), 구기종목(축구/
+// 농구/야구/배구), 입식 격투기(복싱)를 각각 전용 카테고리로 분리(사용자
+// 요청 - "운동" 하나로 뭉뚱그려지던 종목별 아이콘을 원함). 남은 건 골프/
+// 라운딩/클라이밍/웨이트/줄넘기/크로스핏 - "헬스장 트레이닝" 성격의 종목만.
 const List<String> _kSportsKeywords = [
-  '테니스', '골프', '라운딩', '탁구', '축구', '배드민턴', '스쿼시',
-  '클라이밍', '복싱', '웨이트', '농구', '배구',
-  '야구', '줄넘기', '크로스핏',
+  '골프', '라운딩', '클라이밍', '웨이트', '줄넘기', '크로스핏',
 ];
-// ⭐ 2026-09-03 - "필라테스"는 카테고리 확장(요가/필라테스 신설)으로 이
-// 목록에서 빠짐(전용 카테고리로 승격, ml/keyword_router.py 참고).
 
-const List<String> _kSportsFalsePositives = [
-  '골프공', '테니스공', '야구공', '축구공', '탁구공',
+const List<String> _kSportsFalsePositives = ['골프공'];
+
+// ⭐ 2026-09-12 - "PT받기"가 병원·건강관리로 오분류되던 문제 수정(사용자
+// 신고: "PT받기는 헬스장 개인 트레이닝을 말하는 건데 병원으로 잡히면
+// 곤란"). 학습 데이터에 "PT"가 아예 없어서 ML이 짧은 텍스트 특유의 우연한
+// 상관으로 건강 쪽에 붙었던 것으로 추정.
+// ⚠️ bare "PT"만 보고 무조건 운동으로 보내면 안 됨 - "PT 자료 준비"/"PT
+// 발표"처럼 업무 맥락(PowerPoint 발표자료의 흔한 준말)으로도 매우 흔히
+// 쓰임. 그래서 "PT" 토큰이 있어도 개인 트레이닝 맥락의 동반 신호(받다/
+// 등록/수업/예약/트레이너/헬스)가 문장 어딘가에 같이 있을 때만 인정하고,
+// 업무 발표 신호가 있으면 명시적으로 제외한다(둘 다 있으면 - 실무상
+// 거의 없는 조합이라 false positive 목록을 우선시해서 제외 쪽으로 둠).
+const List<String> _kPersonalTrainingKeywords = ['PT'];
+const List<String> _kPersonalTrainingContextKeywords = [
+  '받기', '받자', '받을', '받았', '등록', '수업', '예약', '트레이너', '헬스',
 ];
+const List<String> _kPersonalTrainingFalsePositives = [
+  'PT자료', 'PT준비', 'PT발표', 'PT연습', '사업PT', '기업PT', '경쟁PT',
+];
+
+// ⭐ 2026-09-12 - 라켓 스포츠(테니스/배드민턴/탁구/스쿼시) 전용 카테고리
+// 신설. 전부 _kSportsKeywords에서 그대로 옮겨온 단어라 매칭 방식/오탐
+// 목록도 그대로 승계함.
+const List<String> _kRacketSportsKeywords = ['테니스', '배드민턴', '탁구', '스쿼시'];
+const List<String> _kRacketSportsFalsePositives = ['테니스공', '탁구공'];
+
+// ⭐ 2026-09-12 - 구기종목 3종(축구/농구/야구)을 각각 전용 아이콘으로 분리
+// (사용자 요청 - "따로 분류 가능하면 각각"). 배구는 전용 아이콘 없이
+// _kBallSportsKeywords(구기종목, 뭉뚱그린 아이콘 하나)로 남김(요청 - "곤란
+// 하면 공 하나로 뭉뚱그려서").
+const List<String> _kSoccerKeywords = ['축구'];
+const List<String> _kSoccerFalsePositives = ['축구공'];
+const List<String> _kBasketballKeywords = ['농구'];
+const List<String> _kBasketballFalsePositives = ['농구공'];
+const List<String> _kBaseballKeywords = ['야구'];
+const List<String> _kBaseballFalsePositives = ['야구공'];
+const List<String> _kBallSportsKeywords = ['배구'];
+
+// ⭐ 2026-09-12 - 입식 격투기(복싱/킥복싱/무에타이) 전용 카테고리 신설.
+// "복싱"은 기존 _kSportsKeywords에 있던 걸 그대로 옮겨옴, 킥복싱/무에타이는
+// 신규(둘 다 실제 헬스장/체육관에서 흔히 쓰이는 종목명이라 오탐 위험 낮음).
+const List<String> _kCombatSportsKeywords = ['복싱', '킥복싱', '무에타이'];
 
 // ⭐ 2026-09-01 - 카테고리 확장(10 -> 17개). ml/keyword_router.py의 동일
 // 섹션(주석 포함)을 그대로 이식 - 근거/트레이드오프는 그쪽 주석 참고.
@@ -340,6 +381,21 @@ const Map<String, List<String>> _kActivityPrefixKeywords = {
 const Map<String, List<String>> _kActivityContainsKeywords = {
   'shopping': ['쇼핑'],
 };
+
+// ⭐ 2026-09-12(사용자 신고) - "사파리투어"가 쇼핑으로 오분류되던 문제 수정.
+// "투어"/"관광"은 "사파리투어"/"부산관광"처럼 지명 뒤에 그대로 붙는 복합어로
+// 흔히 쓰여서 anywhere=true(_anyVerbWordMatched)로 잡음 - 능동적 나들이/구경이
+// 핵심이라 여가/휴식 정의("취미·카페·나들이")에 정확히 부합. ⚠️ 처음엔 단순
+// contains로 잡았다가 check_keyword_regressions.py 실측 검증에서 "관광통역
+// 안내사 자격시험 신청"(공부)이 "관광"을 포함한다는 이유만으로 여가로
+// 오분류되는 걸 발견해서, RUNNING/HIKING과 동일한 엄격한 매처로 바꿈(뒤에
+// 조사/"하다" 활용형이 아니라 "통역안내사"처럼 명사가 이어지면 안 잡음).
+// 가족/사교 신호가 같이 있으면(예: "엄마랑 유럽여행") route()에서 그 tier가
+// 여기보다 먼저 걸리므로 우선순위는 그대로 유지됨. "여행" 자체는 관계·목적에
+// 따라 갈리는 폭이 넓어(ml/카테고리_가이드.md 상단 "반려동물/육아/여행은...
+// 제외함" 참고) 여기 넣지 않고 ML 판단에 맡김 - "투어"/"관광"은 그보다 훨씬
+// 좁고 명확한 나들이·구경 어휘라 하드매핑 대상에 넣음.
+const List<String> _kLeisureTravelKeywords = ['투어', '관광'];
 
 // ⭐ 2026-09-06(실사용 신고) - "치킨 먹자"/"~~먹자"류의 구어체 제안형 식사
 // 표현이 하드매핑에 전혀 안 걸려서(_kActivityPrefixKeywords의 '식사'/'외식'만
@@ -398,6 +454,30 @@ abstract final class _MemoKeywordRouter {
   static bool _anyContainsMatched(String text, List<String> keywords) {
     for (final kw in keywords) {
       if (text.contains(kw)) return true;
+    }
+    return false;
+  }
+
+  // ⭐ 2026-09-12 - "PT"(개인 트레이닝) 전용 대소문자 무시 매처. 이 키워드
+  // 체계의 다른 항목은 전부 한글이라 케이스 이슈가 없었는데, "PT"는 영문
+  // 약어라 사용자가 "pt받기"/"Pt 받기"처럼 소문자로도 흔히 씀 - 대소문자를
+  // 구분하면 그런 표기를 그냥 놓치게 됨.
+  static bool _anyPrefixMatchedIgnoreCase(
+      List<String> tokens, List<String> keywords) {
+    for (final tok in tokens) {
+      final upperTok = tok.toUpperCase();
+      for (final kw in keywords) {
+        if (upperTok.startsWith(kw.toUpperCase())) return true;
+      }
+    }
+    return false;
+  }
+
+  static bool _anyContainsMatchedIgnoreCase(
+      String text, List<String> keywords) {
+    final upperText = text.toUpperCase();
+    for (final kw in keywords) {
+      if (upperText.contains(kw.toUpperCase())) return true;
     }
     return false;
   }
@@ -479,6 +559,44 @@ abstract final class _MemoKeywordRouter {
       return ('exercise', 'tier3_sports');
     }
 
+    // ⭐ 2026-09-12 - "PT받기"(헬스장 개인 트레이닝) 전용 tier. 위
+    // _kPersonalTrainingKeywords 주석 참고 - bare "PT"만으론 부족하고 개인
+    // 트레이닝 맥락(받기/등록/수업/예약/트레이너/헬스)이 같이 있어야 하며,
+    // 업무 발표(PT 자료/PT 준비 등) 신호가 있으면 제외한다.
+    if (_anyPrefixMatchedIgnoreCase(tokens, _kPersonalTrainingKeywords) &&
+        _anyContainsMatched(text, _kPersonalTrainingContextKeywords) &&
+        !_anyContainsMatchedIgnoreCase(text, _kPersonalTrainingFalsePositives)) {
+      return ('exercise', 'tier3_personal_training');
+    }
+
+    // ⭐ 2026-09-12 - 라켓 스포츠/구기종목 3종/기타 구기/입식 격투기 - 전부
+    // 위 tier3_sports("운동")에서 갈라져 나온 종목이라 매칭 방식(prefix+
+    // contains, false positives)도 그대로 승계함. tier3_sports가 원래도
+    // 사교 방어(모임/동호회 신호로 defer)를 안 걸었던 것과 동일하게 여기도
+    // 안 건다(그 비대칭을 새로 만든 게 아니라 원래 있던 걸 그대로 유지).
+    if (_anyPrefixMatched(tokens, _kRacketSportsKeywords) &&
+        !_anyContainsMatched(text, _kRacketSportsFalsePositives)) {
+      return ('racket_sports', 'tier3_racket_sports');
+    }
+    if (_anyPrefixMatched(tokens, _kSoccerKeywords) &&
+        !_anyContainsMatched(text, _kSoccerFalsePositives)) {
+      return ('soccer', 'tier3_soccer');
+    }
+    if (_anyPrefixMatched(tokens, _kBasketballKeywords) &&
+        !_anyContainsMatched(text, _kBasketballFalsePositives)) {
+      return ('basketball', 'tier3_basketball');
+    }
+    if (_anyPrefixMatched(tokens, _kBaseballKeywords) &&
+        !_anyContainsMatched(text, _kBaseballFalsePositives)) {
+      return ('baseball', 'tier3_baseball');
+    }
+    if (_anyPrefixMatched(tokens, _kBallSportsKeywords)) {
+      return ('ball_sports', 'tier3_ball_sports');
+    }
+    if (_anyPrefixMatched(tokens, _kCombatSportsKeywords)) {
+      return ('combat_sports', 'tier3_combat_sports');
+    }
+
     // ⭐ 2026-09-01(실측 후 수정) - 신설 카테고리 3종(달리기/수영/등산)은 처음엔
     // 일반 스포츠처럼 prefix+contains로 잡았다가, "러닝메이트랑 저녁"(사교인데
     // "러닝메이트"가 "러닝"으로 시작해서 오분류), "러닝머신 매트 주문"/"등산화
@@ -550,6 +668,11 @@ abstract final class _MemoKeywordRouter {
         (_anyContainsMatched(text, _kBeautyContainsKeywords) ||
             _anyVerbWordMatched(tokens, _kBeautyPrefixKeywords))) {
       return ('beauty', 'tier3c_beauty');
+    }
+
+    // ⭐ 2026-09-12 - 여가/휴식(투어/관광) - 위 _kLeisureTravelKeywords 주석 참고.
+    if (_anyVerbWordMatched(tokens, _kLeisureTravelKeywords, anywhere: true)) {
+      return ('leisure', 'tier3c_leisure_travel');
     }
 
     // ⭐ "모임"이 같이 있으면(예: "동네 주민 모임에서 붕어빵 먹으러 가자고

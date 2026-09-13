@@ -9,9 +9,28 @@
 // DB 쓰기 자체가 항상 새 row(insert) 또는 "자기 자신"만 update하는 구조로 지켜짐 -
 // 이 Provider가 기존 레코드를 자동으로 병합/치환하는 로직은 없음.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../constants/platform_channel.dart';
 import '../models/sleep_record.dart';
 import '../services/database_service.dart';
+
+/// ⭐ 2026-09-11(사용자 요청) - "장기간 폰을 안 만지면 몇 시든 무조건 수면으로
+/// 잡힌다"는 오탐 문제의 완화책. 근무 중/휴무일 조용한 활동처럼 일정만으로는
+/// 구분 불가능한 시간대는, 사용자가 실제로 "이건 수면이 아니었다"고 거부한
+/// 기록 자체를 근거로 학습한다(Native SleepDetectionReceiver.kt의 REJECT_* 참고
+/// - 같은 시(hour)에서 반복 거부되면 그 시간대의 자동 후보 생성을 건너뜀).
+/// 순수 부가 기능이라 실패해도 기록 삭제 자체는 항상 정상 진행되어야 함.
+Future<void> _notifyAutoRejection(SleepRecord record) async {
+  if (record.source != SleepSource.autoDetected) return;
+  try {
+    await kAlarmChannel.invokeMethod('recordSleepAutoRejection', {
+      'startEpochMillis': record.start.millisecondsSinceEpoch,
+    });
+  } catch (e) {
+    debugPrint('⚠️ recordSleepAutoRejection 실패(무시): $e');
+  }
+}
 
 final sleepRecordProvider =
     StateNotifierProvider<SleepRecordNotifier, AsyncValue<List<SleepRecord>>>(
@@ -82,6 +101,7 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
   /// "기록하지 않기" - 자동 감지 결과를 완전히 폐기.
   Future<void> discardPending(SleepRecord record) async {
     if (record.id == null) return;
+    await _notifyAutoRejection(record);
     await DatabaseService.instance.deleteSleepRecord(record.id!);
     await refresh();
   }
@@ -97,6 +117,12 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
   }
 
   Future<void> deleteRecord(int id) async {
+    // ⭐ 2026-09-11 - "최근 수면 기록" 미니 달력/전체보기에서 확정된 AUTO_DETECTED
+    // 기록을 나중에 지우는 것도 "이건 수면이 아니었다"는 동일한 신호이므로
+    // discardPending과 마찬가지로 거부 학습에 반영한다.
+    final current = state.value ?? const [];
+    final matches = current.where((r) => r.id == id);
+    if (matches.isNotEmpty) await _notifyAutoRejection(matches.first);
     await DatabaseService.instance.deleteSleepRecord(id);
     await refresh();
   }

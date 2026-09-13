@@ -206,4 +206,32 @@ void main() {
     expect(todaySlot.mainSleep, isNotNull, reason: '21시 이후 취침은 항상 그날 자신의 주수면이어야 함');
     expect(todaySlot.mainSleep!.start, lateBedtime.start);
   });
+
+  // ⭐ 2026-09-06 재설계(사용자 지적) - 주 수면 "자격"이 있는 후보가 하루에
+  // 둘 이상이면(휴무일 낮잠 4시간 + 그날 밤 정상 취침 7시간, 둘 다 근무와
+  // 안 겹치고 2시간 이상) 예전엔 시작시각이 이른 낮잠이 이겼는데, 이제는
+  // 가장 긴 쪽이 주 수면이어야 함.
+  test('8. 휴무일 - 낮 4시간 낮잠 + 그날 밤 7시간 정상 취침이 같이 있으면 '
+      '더 긴 밤잠이 주 수면, 낮잠은 낮잠 칸으로', () {
+    final pattern = [_kOff, _kOff, _kOff, _kOff, _kOff, _kOff, _kOff];
+    final schedule = ShiftSchedule(
+      isRegular: true,
+      pattern: pattern,
+      todayIndex: 0,
+      startDate: today,
+      shiftTypes: const [_kOff],
+    );
+    final analyzer = ShiftPatternAnalyzer(schedule: schedule, shiftTimes: _shiftTimes);
+
+    final afternoonNap = _record(DateTime(today.year, today.month, today.day, 14), 4 * 60); // 14~18시
+    final nightSleep = _record(DateTime(today.year, today.month, today.day, 23), 7 * 60); // 23시~06시
+
+    final slots = buildSleepDaySlots(records: [afternoonNap, nightSleep], from: today, to: today, analyzer: analyzer);
+    final todaySlot = slots.first;
+
+    expect(todaySlot.mainSleep, isNotNull);
+    expect(todaySlot.mainSleep!.start, nightSleep.start, reason: '더 긴 쪽(7시간 밤잠)이 주 수면이어야 함');
+    expect(todaySlot.nap1, isNotNull);
+    expect(todaySlot.nap1!.start, afternoonNap.start, reason: '짧은 쪽(4시간 낮잠)은 낮잠 칸으로');
+  });
 }

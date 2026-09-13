@@ -13,7 +13,6 @@ import 'screens/next_alarm_tab.dart';
 import 'screens/calendar_tab.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
-import 'screens/onboarding_popup_lab_screen.dart';
 import 'screens/schedule_management_tab.dart';
 import 'screens/condition_tab.dart';
 import 'screens/permission_intro_screen.dart';
@@ -21,6 +20,8 @@ import 'widgets/permission_warning_banner.dart';
 import 'widgets/banner_ad_slot.dart';
 import 'services/ad_service.dart';
 import 'services/backup_watcher.dart';
+import 'services/schedule_notification_service.dart';
+import 'services/widget_refresh_service.dart';
 import 'services/backup_storage_service.dart';
 import 'models/backup_payload.dart';
 import 'screens/restore_backup_screen.dart';
@@ -39,6 +40,8 @@ import 'services/memo_category_classifier.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'l10n/l10n_extensions.dart';
+import 'utils/schedule_focus_request.dart';
+import 'providers/tab_visibility_provider.dart';
 
 // ⭐ 2026-09-04 - MainScreen 바텀 네비게이션에서 "달력탭"을 가리키는 인덱스.
 // 탭 순서(다음알람/일정관리/달력/컨디션/설정)가 바뀔 때마다 이 값 하나만
@@ -48,6 +51,22 @@ import 'l10n/l10n_extensions.dart';
 // 값이 전부 이 숫자를 그대로 써야 함(Kotlin 쪽은 언어가 달라 상수 공유가 안 되니
 // 직접 값(2)을 맞춰뒀음 - 여길 바꾸면 거기도 같이 바꿀 것).
 const int kCalendarTabIndex = 2;
+
+// ⭐ 2026-09-12 - "일정관리" 탭 인덱스. 위 kCalendarTabIndex와 같은 이유로
+// 탭 순서(다음알람(0)/일정관리(1)/달력(2)/...)가 바뀌면 이 값도 같이 맞출 것.
+// 일정 알림(ScheduleNotificationReceiver.kt)을 탭했을 때 이 탭으로 이동시키는
+// 용도(openDateSchedule 핸들러 참고) - kOpenConditionTabSentinel과 달리 이
+// 탭은 로케일과 무관하게 항상 _tabs에 존재해서 센티널이 필요 없음.
+const int kScheduleManagementTabIndex = 1;
+
+// ⭐ 2026-09-07 - 수면 위젯(SleepWidgetProvider.kt) 탭(수면/기상 버튼 이외
+// 영역) → 컨디션 탭으로 바로 열기 위한 Native→Dart 요청 센티널. 컨디션 탭은
+// 한국어 로케일에서만 _tabs에 실제로 존재해서(_showConditionTab) 그 인덱스를
+// Kotlin이 고정 숫자로 알 수 없다 - 그래서 실제 인덱스 대신 이 음수 값을
+// 보내고, Dart(_MyAppState의 openTab 핸들러)가 런타임에 진짜 인덱스로
+// 변환한다(MainActivity.kt의 handleOpenTabIntent가 음수도 그대로 전달하도록
+// 이미 고쳐둠). 인덱스 값(0/2)과 안 겹치게 음수로 둠.
+const int kOpenConditionTabSentinel = -2;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -153,6 +172,24 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     // ⭐ MethodChannel handler는 MainScreen에서 등록 (중복 방지)
+
+    // ⭐ 2026-09-11(사용자 신고 - "자동백업이 안 되고 있는 것 같다") - 지금까지는
+    // 자동 백업이 AppLifecycleState.paused(앱이 백그라운드로 "나갈 때") 한
+    // 지점에서만 fire-and-forget으로 돌았음. 문제는 그 시점 이후 프로세스가
+    // 계속 살아있는다는 보장이 없다는 것 - Android가 onStop 직후 앱을 곧바로
+    // 캐시/정지시키면(특히 배터리 최적화가 공격적인 제조사 기기, 이 저장소
+    // 문서에 이미 여러 번 등장하는 삼성 포함), exportAll()이 모든 테이블을
+    // 조회하고 JSON 인코딩하고 MediaStore에 파일로 쓰는 그 비동기 작업 도중에
+    // 프로세스가 멈춰서 백업이 조용히 끝까지 못 도는 경우가 생길 수 있음(특히
+    // alarm_history/alarm_creation_log는 규칙상 영구 보존이라 오래 쓸수록 행 수가
+    // 계속 늘어나 export가 점점 느려짐 - History permanence rule 참고). "나갈
+    // 때"만 믿지 않고, 앱이 정상적으로 켜져서 포그라운드에 살아있는(=중간에
+    // 안 죽을) 이 시점에도 한 번 더 시도해서 신뢰도를 높인다. backupNow()는
+    // data_version이 그대로면 즉시 반환하는 가벼운 함수라(백업_watcher.dart
+    // 참고) 매 콜드 스타트마다 불러도 비용이 거의 없음.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(BackupWatcher.instance.backupNow());
+    });
   }
 
   @override
@@ -183,6 +220,15 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
         print('❌ AlarmNotifier 갱신 실패: $e');
       }
     }
+
+    // ⭐ 2026-09-11(사용자 신고 - "자동백업이 실제로 안 되고 있다") - 콜드
+    // 스타트(initState)뿐 아니라 재개(resumed)될 때마다도 기회를 한 번 더 줌.
+    // paused 트리거는 "이제 막 배경으로 나가는" 시점이라 그 직후 OS가 프로세스를
+    // 정지시키면 exportAll()~파일쓰기 도중에 끊길 위험이 있는데(main.dart의
+    // initState 주석 참고), resumed는 반대로 "방금 포그라운드로 돌아와서 확실히
+    // 살아있는" 시점이라 그 위험이 없음. backupNow()는 data_version이 그대로면
+    // 즉시 반환하는 가벼운 함수라 앱을 여닫을 때마다 불러도 비용이 거의 없음.
+    unawaited(BackupWatcher.instance.backupNow());
   } else if (state == AppLifecycleState.paused) {
     // ⭐ 사용자 데이터 백업("A번 요구사항") 자동 트리거(Layer 3) - 앱이
     // 백그라운드로 전환되는 시점에만, 그것도 마지막 백업 이후 실제로 데이터가
@@ -327,6 +373,9 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
 
     // ⭐ Method Call Handler 등록
     platform.setMethodCallHandler(_handleMethod);
+    // ⭐ 2026-09-13 - 등록 직후 콜드스타트 유실 방지용 pull 확인(위
+    // _checkPendingScheduleOpenOnStartup 주석 참고).
+    _checkPendingScheduleOpenOnStartup();
 
     // ⭐ Provider 사전 로드 (첫 탭 전환 시 버벅임 방지)
     Future.microtask(() {
@@ -393,7 +442,14 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
     // 보내는 openTab=0은 영향 없음.
     _tabs = [
       const NextAlarmTab(),
-      const ScheduleManagementTab(),
+      // ⭐ 2026-09-13 - "OO 화면 사용하지 않기" 버튼을 이 탭 자신의 스크롤
+      // 콘텐츠 맨 아래로 옮기면서(사용자 요청) main.dart가 더 이상 이 버튼을
+      // 고정 위치에 그리지 않음 - 대신 그 자리에서 쓰던 콜백을 그대로
+      // 생성자로 내려줌(아래 build()의 옛 DisableTabButton 자리 주석 참고).
+      ScheduleManagementTab(
+        onDisabled: () => setState(() => _currentIndex = kCalendarTabIndex),
+        onConfirmed: ScheduleNotificationService.cancelAllForTabDisable,
+      ),
       Consumer(
         builder: (context, ref, _) {
           final isDark = ref.watch(calendarThemeProvider).isDark;
@@ -405,9 +461,22 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
       ),
       // ⭐ 2026-08-31 - 컨디션 매니저 1차 버전(컨디션매니저_설계.md 참고).
       // "일정관리 옆에 독립 탭으로" 요청대로 여기(달력 다음, 설정 이전)에
-      // 끼워 넣음. ⭐ 2026-09-03 - 영어 로케일이면 이 탭 자체를 목록에서
-      // 뺌(_showConditionTab).
-      if (_showConditionTab) const ConditionTab(),
+      // 끼워 넣음.
+      // ⭐ 2026-09-13 - 예전엔 "영어 로케일이면 이 탭 자체를 목록에서 뺌"이라고
+      // 여기서 배열 길이 자체를 바꿨는데(_showConditionTab), 그러면 사용자가
+      // 탭을 껐다 켰다 하는 기능(scheduleTabEnabledProvider/
+      // conditionTabEnabledProvider)까지 더해질 때 이 배열의 길이/인덱스가
+      // 두 가지 서로 다른 이유로 흔들려서 kScheduleManagementTabIndex/
+      // kCalendarTabIndex 같은 고정 상수들이 깨지기 쉬워짐. _tabs 배열
+      // 자체는 이제 로케일/사용자 설정과 무관하게 항상 고정 5칸으로 유지하고,
+      // "실제로 보여줄지"는 build()의 _visibleTabIndices가 네비게이션 레벨
+      // 에서만 필터링함(이 위젯은 만들어지긴 하지만 그 탭으로 이동하지 않는
+      // 한 실제로 build되지 않음 - 이 화면이 IndexedStack이 아니라
+      // `_tabs[_currentIndex]` 하나만 트리에 올리는 구조이기 때문).
+      ConditionTab(
+        onDisabled: () => setState(() => _currentIndex = kCalendarTabIndex),
+        onConfirmed: WidgetRefreshService.refresh,
+      ),
       // ⭐ 2026-09-01 후속13 - "컨디션 팁 실험실" 임시 개발용 탭(후속8에서 추가,
       // 컨디션 매니저 추천 로직 리팩토링 전 검토용)은 검토 끝나서 삭제함
       // (condition_tip_lab_screen.dart 파일 자체도 삭제).
@@ -416,15 +485,15 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
       // 그라데이션·코랄) 임시 아이콘 픽커 탭 제거함. ui_theme_lab_screen.dart
       // 파일 자체는 나중에 다시 후보를 검토할 일이 생기면 재사용할 수 있어
       // 지우지 않고 남겨둠 - 필요하면 이 자리에 다시 추가하면 됨.
-      // ⭐ 2026-09-05 - 웰컴/근무배정 팝업 확인용 임시 lab 탭(사용자 요청).
-      // 맨 끝에 추가해서 kCalendarTabIndex(2)/openTab(0,2) 등 기존 인덱스는
-      // 전혀 안 건드림 - 확인 끝나면 이 한 줄만 지우면 됨.
-      const OnboardingPopupLabScreen(),
+      // ⭐ 2026-09-05 - 웰컴/근무배정 팝업 확인용 임시 lab 탭(사용자 요청)은
+      // 2026-09-07 확인 끝나서 제거, 2026-09-12에 "테스트알림" 탭으로 잠깐
+      // 다시 추가했다가 배포 전 최종 점검을 마치고 이번에 완전히 제거함
+      // (onboarding_popup_lab_screen.dart 파일 자체도 삭제 - 다른 lab 화면들과
+      // 달리 이번 배포 직전 점검 전용 1회성 도구라 재사용 계획이 없음).
     ];
 
-    // ⭐ 컨디션 탭을 뺀 영어 로케일이면 _currentIndex가 밀린 "설정" 자리를
-    // 가리키고 있을 수 있음(예: 알림 등에서 미리 3을 넘겼다거나) - 방어적으로
-    // 범위를 벗어나면 달력 탭(2)으로 되돌림.
+    // ⭐ _tabs가 이제 항상 고정 5칸이라(위 주석 참고) 사실상 트리거될 일은
+    // 없지만, 혹시 모를 범위 밖 값에 대한 안전망으로 그대로 남겨둠.
     if (_currentIndex >= _tabs.length) _currentIndex = kCalendarTabIndex;
 
     // ⭐ 2026-09-01 후속14 - "컨디션 탭에 처음 들어가면 카드들이 텅 비어있다가
@@ -487,6 +556,45 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
     }
   }
 
+  // ⭐ 2026-09-13 - openDateSchedule(push)과 consumePendingScheduleOpen(pull,
+  // 아래 initState 참고)이 공유하는 실제 적용 로직 - 일정관리 탭으로 전환 +
+  // schedule_focus_request.dart에 요청을 채워서, 그 탭이 마운트/재빌드될 때
+  // 날짜/시간축을 그 일정 위치로 맞추게 함.
+  void _applyOpenDateSchedule(Map? args) {
+    if (args != null) {
+      final date = args['date'] as String?;
+      final startMinutes = args['startMinutes'] as int?;
+      print('🔔 일정 알림 탭 → 일정관리 탭 이동: date=$date startMinutes=$startMinutes');
+      if (date != null && startMinutes != null) {
+        pendingScheduleFocusRequest.value =
+            ScheduleFocusRequest(date: date, startMinutes: startMinutes);
+      }
+    }
+    if (mounted) {
+      setState(() => _currentIndex = kScheduleManagementTabIndex);
+    }
+  }
+
+  // ⭐ 2026-09-13(사용자 신고 - "일정 알림 누르면 그냥 달력탭으로 와버림") -
+  // MainActivity.kt의 handleOpenDateScheduleIntent가 콜드 스타트 시 이
+  // setMethodCallHandler 등록보다 먼저 invokeMethod("openDateSchedule")를
+  // 보내버리면(그 시점엔 이 핸들러가 아직 없어 메시지가 그냥 유실됨) 요청
+  // 자체가 사라져서 InitialRouter의 기본값(달력 탭)에 그대로 머무르는 문제가
+  // 있었음. 핸들러 등록 직후 "혹시 그 사이에 못 받은 요청 있어?"라고 Native에
+  // 직접 되물어(pull) 타이밍과 무관하게 항상 처리되게 함 - 대기 중인 요청이
+  // 없으면 그냥 null이 오고 아무 일도 안 일어남(기존 동작에 영향 없음).
+  Future<void> _checkPendingScheduleOpenOnStartup() async {
+    try {
+      final result = await platform.invokeMethod('consumePendingScheduleOpen');
+      if (result is Map) {
+        print('🔔 콜드스타트 유실 방지 - 대기 중이던 일정 알림 요청을 뒤늦게 적용');
+        _applyOpenDateSchedule(result);
+      }
+    } catch (e) {
+      print('❌ consumePendingScheduleOpen 확인 실패: $e');
+    }
+  }
+
   // ⭐ Native에서 호출하는 메서드 처리 (통합 버전)
 Future<void> _handleMethod(MethodCall call) async {
   print('📞 Method Call 수신: ${call.method}');
@@ -512,14 +620,81 @@ Future<void> _handleMethod(MethodCall call) async {
     print('📱 탭 이동 요청: $tabIndex');
     if (mounted) {
       setState(() {
-        _currentIndex = tabIndex;
+        if (tabIndex == kOpenConditionTabSentinel) {
+          // ⭐ 2026-09-07 - 컨디션 탭은 항상 "달력 바로 다음"에 위치함.
+          // ⭐ 2026-09-13 - 영어 로케일이거나(_showConditionTab) 사용자가 설정에서
+          // 꺼놨으면(conditionTabEnabledProvider) 그 탭 자체가 네비게이션에
+          // 없으니 다음알람 탭(0)으로 안전하게 대체.
+          final conditionVisible =
+              _showConditionTab && ref.read(conditionTabEnabledProvider);
+          _currentIndex = conditionVisible ? kCalendarTabIndex + 1 : 0;
+        } else {
+          _currentIndex = tabIndex;
+        }
       });
     }
+  } else if (call.method == 'openDateSchedule') {
+    // ⭐ 2026-09-12 - 일정 알림(ScheduleNotificationReceiver.kt)을 탭했을 때
+    // ScheduleNotificationReceiver.kt가 MainActivity에 심어둔 extras를
+    // handleOpenDateScheduleIntent(Kotlin)가 여기로 그대로 전달함(즉시 push
+    // 경로 - 앱이 이미 떠 있는 warm start에서 정상 동작).
+    final args = call.arguments;
+    _applyOpenDateSchedule(args is Map ? args : null);
+    // ⭐ 2026-09-13 - Native에게 "받았다"고 알려서 콜드스타트 유실 대비용
+    // pending 값을 지우게 함(_checkPendingScheduleOpenOnStartup 주석 참고) -
+    // 안 지우면 다음 번 무관한 콜드 스타트 때 이 오래된 요청이 잘못 재사용될 수 있음.
+    platform.invokeMethod('clearPendingScheduleOpen');
   }
 }
 
+  // ⭐ 2026-09-13 - 네비게이션에 실제로 보여줄 탭들의 실제 인덱스 목록(항상
+  // kScheduleManagementTabIndex(1) < kCalendarTabIndex(2) < 3(컨디션) < 4(설정)
+  // 순서 유지, 0(다음알람)/kCalendarTabIndex(달력)/4(설정)는 끌 수 없어 항상
+  // 포함됨). _tabs 배열 자체는 항상 고정 5칸이고(위 _setupTabsAndPrewarm
+  // 주석 참고), 여기서만 "실제로 네비게이션에 노출할지"를 결정함 - 로케일
+  // 조건(_showConditionTab)과 사용자가 설정/각 탭에서 끈 값
+  // (scheduleTabEnabledProvider/conditionTabEnabledProvider) 둘 다 여기서
+  // 합쳐진다.
+  List<int> get _visibleTabIndices {
+    final scheduleVisible = ref.watch(scheduleTabEnabledProvider);
+    final conditionVisible = _showConditionTab && ref.watch(conditionTabEnabledProvider);
+    return [
+      0,
+      if (scheduleVisible) kScheduleManagementTabIndex,
+      kCalendarTabIndex,
+      if (conditionVisible) 3,
+      4,
+    ];
+  }
+
+  BottomNavigationBarItem _navItemFor(int index, BuildContext context) {
+    switch (index) {
+      case 0:
+        return BottomNavigationBarItem(icon: const Icon(Icons.alarm), label: context.l10n.navNextAlarm);
+      case 1:
+        return BottomNavigationBarItem(icon: const Icon(Icons.event_note_outlined), label: context.l10n.navScheduleManagement);
+      case 2:
+        return BottomNavigationBarItem(icon: const Icon(Icons.calendar_month), label: context.l10n.navCalendar);
+      case 3:
+        return const BottomNavigationBarItem(icon: Icon(Icons.self_improvement), label: '컨디션');
+      default:
+        return BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.l10n.navSettings);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final visibleTabIndices = _visibleTabIndices;
+    // ⭐ 방금 이 탭이 꺼졌는데(다른 경로로, 혹은 아직 반영 전 프레임에) 지금
+    // 하필 그 탭을 보고 있었다면 안전한 탭(달력)으로 옮김 - DisableTabButton의
+    // onDisabled가 이미 즉시 처리하지만, 이건 그 경로를 놓쳤을 때의 안전망.
+    if (!visibleTabIndices.contains(_currentIndex)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_visibleTabIndices.contains(_currentIndex)) {
+          setState(() => _currentIndex = kCalendarTabIndex);
+        }
+      });
+    }
     return PopScope(
       canPop: _currentIndex == kCalendarTabIndex,  // 달력탭이면 앱 종료 허용
       onPopInvokedWithResult: (didPop, result) {
@@ -576,6 +751,14 @@ Future<void> _handleMethod(MethodCall call) async {
             // 설정 탭 자리가 됨 - 그 상태에서 index 3을 그대로 광고 대상에
             // 넣으면 설정 탭에도 광고가 뜨는 버그가 생겨서 _showConditionTab을
             // 반영해 조건을 분기함.
+            // ⭐ 2026-09-13(2차) - "OO 화면 사용하지 않기" 버튼을 여기(광고
+            // 바로 위, 항상 고정 위치)에서 각 탭 자신의 스크롤 콘텐츠 맨
+            // 아래로 옮김(사용자 요청 - "진짜 필요할 때만 누르는 버튼이니
+            // 스크롤을 끝까지 내려야 보이게"). 콜백(onDisabled/onConfirmed -
+            // 일정 알림 일괄 취소/수면 위젯 즉시 갱신 등, 탭 숨김의 우회
+            // 경로를 막는 로직)은 그대로 두고 ScheduleManagementTab/
+            // ConditionTab 생성자로 내려보냄(_setupTabsAndPrewarm 참고) -
+            // 동작 자체는 안 바뀌고 버튼이 그려지는 위치만 바뀜.
             Offstage(
               offstage: _currentIndex != 1 &&
                   _currentIndex != kCalendarTabIndex &&
@@ -586,24 +769,19 @@ Future<void> _handleMethod(MethodCall call) async {
         ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          currentIndex: _currentIndex,
-          onTap: (index) => setState(() => _currentIndex = index),
-          items: [
-            BottomNavigationBarItem(icon: const Icon(Icons.alarm), label: context.l10n.navNextAlarm),
-            BottomNavigationBarItem(icon: const Icon(Icons.event_note_outlined), label: context.l10n.navScheduleManagement),
-            BottomNavigationBarItem(icon: const Icon(Icons.calendar_month), label: context.l10n.navCalendar),
-            // ⭐ 2026-08-31 - 컨디션 매니저 1차 버전. 이 탭만 아직 l10n 키가 없어
-            // 한국어 문자열을 직접 씀(condition_tab.dart 상단 주석 참고).
-            // ⭐ 2026-09-03 - 영어 로케일이면 _tabs 목록과 마찬가지로 이 항목도
-            // 통째로 뺌(_showConditionTab) - 두 리스트 길이/순서가 항상 일치해야
-            // BottomNavigationBar의 currentIndex가 어긋나지 않음.
-            if (_showConditionTab)
-              const BottomNavigationBarItem(icon: Icon(Icons.self_improvement), label: '컨디션'),
-            BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.l10n.navSettings),
-            // ⭐ 2026-09-05 - 웰컴/근무배정 팝업 확인용 임시 lab 탭(위 _tabs 주석
-            // 참고) - 확인 끝나면 이 한 줄도 같이 지울 것.
-            const BottomNavigationBarItem(icon: Icon(Icons.science_outlined), label: '팝업확인'),
-          ],
+          // ⭐ 2026-09-13 - BottomNavigationBar의 currentIndex/items는 실제
+          // _tabs 인덱스가 아니라 "보이는 탭들 중 몇 번째인지"를 써야 함(예:
+          // 일정관리를 껐으면 [0, 2, 3, 4] 중 _currentIndex(=2, 달력)의
+          // 위치는 1) - 안 그러면 숨긴 탭 자리만큼 나머지 항목들이 밀려
+          // 보인다. indexOf가 -1이면(과도기 프레임에서 _currentIndex가 막
+          // 숨겨진 탭을 가리키는 순간, 위 build() 시작의 안전망이 다음
+          // 프레임에 고쳐주기 전) 0으로 방어.
+          currentIndex: () {
+            final idx = visibleTabIndices.indexOf(_currentIndex);
+            return idx < 0 ? 0 : idx;
+          }(),
+          onTap: (visibleIndex) => setState(() => _currentIndex = visibleTabIndices[visibleIndex]),
+          items: [for (final i in visibleTabIndices) _navItemFor(i, context)],
         ),
       ),
     );

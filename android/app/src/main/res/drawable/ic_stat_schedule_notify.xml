@@ -1,0 +1,19 @@
+<!-- android/app/src/main/res/drawable/ic_stat_schedule_notify.xml
+
+     ⭐ 2026-09-12 - 일정 알림(ScheduleNotificationReceiver.kt) 전용 상태바
+     아이콘. 기존 알람 관련 알림들은 전부 시스템 기본 아이콘(android.R.drawable.
+     ic_lock_idle_alarm 등)을 재사용해왔는데, 이 알림은 "알람"이 아니라
+     "일정" 알림이라 구분되는 아이콘이 필요함. Material "event"(달력 위에
+     날짜 블록 하나) 아이콘 - 24x24 viewBox, 단색 실루엣(표준 상태바 아이콘
+     규칙 - 시스템이 알아서 흰색/테마색으로 다시 칠함). 벡터라 AAB 용량에
+     거의 안 잡힘(PNG 여러 해상도 대신 XML 하나). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFFFFFFF">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M17,12h-5v5h5v-5zM16,1v2H8V1H6v2H5C3.89,3 3.01,3.9 3.01,5L3,19c0,1.1 0.89,2 2,2h14c1.1,0 2,-0.9 2,-2L21,5c0,-1.1 -0.9,-2 -2,-2h-1L18,1h-2zM19,19L5,19L5,8h14v11z" />
+</vector>

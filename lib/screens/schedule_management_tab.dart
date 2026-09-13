@@ -23,6 +23,7 @@
 //  - 지금 단계에선 "일정 목록/카드"는 아직 안 만듦 - 시간축 + 인디케이터 +
 //    확인 팝업까지만. 실제로 일정을 만들어 저장하는 건 다음 단계.
 
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -42,8 +43,12 @@ import '../providers/schedule_background_provider.dart';
 import '../providers/schedule_provider.dart';
 import '../services/memo_category_classifier.dart';
 import '../theme/app_colors.dart';
+import '../utils/schedule_focus_request.dart';
+import '../providers/tab_visibility_provider.dart';
 import '../widgets/app_second_button.dart';
 import '../widgets/app_shift_chip.dart';
+import '../widgets/disable_tab_button.dart';
+import '../widgets/onboarding_info_popups.dart';
 
 // ⭐ 2026-08-27(2차) - "배경색 설정을 만들면 그거 따라서 텍스트/영역 색도
 // 전부 유동적으로" 요청으로, 예전엔 흰 배경 전용 고정값이었던
@@ -134,7 +139,15 @@ BoxDecoration _scheduleChipDecoration(_ScheduleColorScheme scheme) {
 }
 
 class ScheduleManagementTab extends ConsumerStatefulWidget {
-  const ScheduleManagementTab({super.key});
+  // ⭐ 2026-09-13 - "OO 화면 사용하지 않기" 버튼을 main.dart의 고정 위치(광고
+  // 바로 위, 항상 보임)에서 이 탭 자신의 세로 시간축 맨 아래(마지막 "00"보다
+  // 더 아래로 스크롤해야 보이는 위치)로 옮김(사용자 요청 - "진짜 필요할 때만
+  // 누르게" 하려면 스크롤 끝까지 내려야 보여야 한다는 취지). _TimeAxisPicker의
+  // 스크롤 콘텐츠 안에 그려야 해서 콜백을 그 안까지 그대로 내려보냄.
+  final VoidCallback onDisabled;
+  final Future<void> Function() onConfirmed;
+
+  const ScheduleManagementTab({super.key, required this.onDisabled, required this.onConfirmed});
 
   @override
   ConsumerState<ScheduleManagementTab> createState() =>
@@ -167,19 +180,84 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
   static const double _dateChipHeight = 34;
   static const double _dateChipGap = 6;
 
+  // ⭐ 2026-09-12 - 일정 알림을 탭했을 때 "그 일정이 있는 시간대로 바로
+  // focusing"하기 위한 상태. schedule_focus_request.dart의 전역 요청을 소비해서
+  // 여기 담아둠 - _activeFocusRequest.date가 지금 보고 있는 날짜(dateKey)와
+  // 같을 때만 build()가 _TimeAxisPicker에 focusMinutes를 넘김(다른 날짜로
+  // 스와이프해가면 자동으로 안 넘어감). _focusNonce는 "같은 날짜에 다시 요청이
+  // 와도 _TimeAxisPicker를 강제로 새로 마운트해서 초기 스크롤 로직을 다시
+  // 태워야" 해서 존재 - ValueKey에 섞어 넣음(아래 build() 참고).
+  ScheduleFocusRequest? _activeFocusRequest;
+  int _focusNonce = 0;
+
+  // ⭐ 2026-09-13 - 최초 진입 안내 팝업(컨디션 탭의 _tutorialChecked와 동일한
+  // 패턴) - build()가 여러 번 불려도 딱 한 번만 표시 시도하게 하는 가드.
+  bool _tutorialChecked = false;
+
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    _selectedDate = DateTime(now.year, now.month, now.day);
+    // ⭐ 앱을 완전히 새로 켰거나(콜드 스타트) 다른 탭에서 이 탭으로 처음
+    // 전환되는 경우 - 이 State 자체가 이제 막 생성되는 시점이라, main.dart가
+    // 이미 채워둔 요청이 있으면(리스너 등록보다 먼저 도착했을 수 있음) 여기서
+    // 직접 한 번 확인해서 소비함. 아래 리스너는 "이 탭이 이미 떠 있는 채로"
+    // 새 알림을 탭한 경우(재마운트가 안 일어남)를 보완함.
+    final pending = pendingScheduleFocusRequest.value;
+    pendingScheduleFocusRequest.value = null; // 성공/실패와 무관하게 항상 소비
+    final parsedPendingDate =
+        pending == null ? null : _parseDateKey(pending.date);
+    if (parsedPendingDate != null) {
+      _selectedDate = parsedPendingDate;
+      _activeFocusRequest = pending;
+      _focusNonce++;
+    } else {
+      _selectedDate = _todayDate();
+    }
+    pendingScheduleFocusRequest.addListener(_onScheduleFocusRequest);
     WidgetsBinding.instance.addPostFrameCallback(
         (_) => _scrollDateStripToSelected(animate: false));
   }
 
   @override
   void dispose() {
+    pendingScheduleFocusRequest.removeListener(_onScheduleFocusRequest);
     _dateStripController.dispose();
     super.dispose();
+  }
+
+  DateTime _todayDate() {
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
+  }
+
+  DateTime? _parseDateKey(String date) {
+    final parts = date.split('-');
+    if (parts.length != 3) return null;
+    final y = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    final d = int.tryParse(parts[2]);
+    if (y == null || m == null || d == null) return null;
+    return DateTime(y, m, d);
+  }
+
+  // ⭐ 위 initState 주석 참고 - 이 탭이 이미 마운트된 채로(재생성 없이) 새
+  // 일정 알림을 탭했을 때만 실제로 의미 있는 경로. setState로 날짜를
+  // 옮기고 _focusNonce를 올려서 _TimeAxisPicker가 그 순간 다시 마운트되며
+  // 새 위치로 점프하게 함(build()의 ValueKey 참고).
+  void _onScheduleFocusRequest() {
+    final req = pendingScheduleFocusRequest.value;
+    if (req == null) return;
+    pendingScheduleFocusRequest.value = null;
+    if (!mounted) return;
+    final parsed = _parseDateKey(req.date);
+    if (parsed == null) return;
+    setState(() {
+      _selectedDate = parsed;
+      _activeFocusRequest = req;
+      _focusNonce++;
+    });
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _scrollDateStripToSelected());
   }
 
   void _scrollDateStripToSelected({bool animate = true}) {
@@ -248,6 +326,13 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_tutorialChecked) {
+      _tutorialChecked = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) maybeShowScheduleTabTutorial(context);
+      });
+    }
+
     final daysInMonth =
         DateUtils.getDaysInMonth(_selectedDate.year, _selectedDate.month);
     final schedule = ref.watch(scheduleProvider).value;
@@ -267,6 +352,19 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
     final locale = _intlLocale(context);
     final dateLabel = DateFormat.yMMMMEEEEd(locale).format(_selectedDate);
     final dateKey = _selectedDate.toIso8601String().split('T')[0];
+    // ⭐ 2026-09-12 - 일정 알림으로 도착한 포커스 요청이 "지금 보고 있는
+    // 날짜"에 대한 것일 때만 실제로 전달함(다른 날짜에 대한 요청이 남아있는
+    // 상태로 사용자가 스와이프해버린 극단적 타이밍이어도, 엉뚱한 날짜에서
+    // 갑자기 튀는 위치로 안 뜀). 한 번 전달한 뒤엔 다음 프레임에 소비 처리.
+    final focusMinutes = (_activeFocusRequest != null &&
+            _activeFocusRequest!.date == dateKey)
+        ? _activeFocusRequest!.startMinutes
+        : null;
+    if (focusMinutes != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _activeFocusRequest = null;
+      });
+    }
     // ⭐ 2026-08-27(2차) - "근무 칩/점 빼고는 전부 배경에 따라 유동적으로"
     // 요청으로 헤더/날짜스트립도 이 스킴을 받아서 색을 맞춤(_buildHeader/
     // _buildDateStrip에 scheme로 넘김) - 더 이상 "일단 배경만" 단계가 아님.
@@ -317,14 +415,23 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
             Container(height: 1, color: kAppChipBorder.withValues(alpha: 0.08)),
             Expanded(
                 child: _TimeAxisPicker(
-                    key: ValueKey(dateKey),
+                    // ⭐ 2026-09-12 - _focusNonce를 키에 섞어서, 같은 날짜에
+                    // 대한 새 포커스 요청이 와도(예: 방금 그 날짜를 보고 있는
+                    // 채로 그 날짜의 다른 일정 알림을 또 탭한 경우) 이 위젯을
+                    // 강제로 새로 마운트해 초기 스크롤 로직을 다시 태움 - 원래
+                    // ValueKey(dateKey)만으로는 날짜가 안 바뀌면 재마운트가
+                    // 안 일어나서 두 번째 포커스가 무시됐음.
+                    key: ValueKey('${dateKey}_$_focusNonce'),
                     dateKey: dateKey,
                     hasShiftToday: selectedHasShift,
+                    focusMinutes: focusMinutes,
                     onSelectionModeChanged: (active) {
                       if (_childSelectionModeActive != active) {
                         setState(() => _childSelectionModeActive = active);
                       }
-                    })),
+                    },
+                    onTabDisabled: widget.onDisabled,
+                    onTabDisableConfirmed: widget.onConfirmed)),
           ],
         ),
       ),
@@ -395,76 +502,118 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
   // 공용 데코레이션(_scheduleChipDecoration)으로 통일(요청: "두 칩은
   // 디자인적으로 100% 동일해야 함") - 배경은 scheme.mainBg(선택된 배경색
   // 그대로), 텍스트/아이콘은 scheme.headerText(선택 안 된 상태 기준).
+  // ⭐ 2026-09-07 - 설정 칩이 날짜 목록의 "마지막 아이템"이라 30일/31일까지
+  // 스크롤해야만 보였음(요청: "화면 맨 우측에 항상 있게"). 스크롤되는
+  // ListView 밖으로 빼서 Row의 고정 트레일링 요소로 두고, 날짜칩과 똑같은
+  // _scheduleChipDecoration을 그대로 써서 이질감 없이 - 그 데코레이션 자체가
+  // 이미 입체감(그림자)을 주고 있어서, 스크롤 목록 위에 살짝 "떠 있는" 느낌이
+  // 자연스럽게 난다. 목록이 그 밑으로 지나갈 때 잘리는 느낌이 안 들도록
+  // 왼쪽에 배경색 그라데이션 페이드를 살짝 얹었다.
   Widget _buildDateStrip(int daysInMonth, _ScheduleColorScheme scheme) {
     final chipDecoration = _scheduleChipDecoration(scheme);
     return Container(
       color: scheme.headerBg,
       height: _dateChipHeight.h + 14.h,
-      child: ListView.separated(
-        controller: _dateStripController,
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
-        itemCount: daysInMonth + 1,
-        separatorBuilder: (_, __) => SizedBox(width: _dateChipGap.w),
-        itemBuilder: (context, index) {
-          if (index == daysInMonth) {
-            return GestureDetector(
-              onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (_) => const _ScheduleSettingsScreen())),
-              child: Container(
-                width: _dateChipWidth.w,
-                height: _dateChipHeight.h,
-                alignment: Alignment.center,
-                decoration: chipDecoration,
-                child: Icon(Icons.settings,
-                    size: 16.sp, color: scheme.headerText),
-              ),
-            );
-          }
-          final date =
-              DateTime(_selectedDate.year, _selectedDate.month, index + 1);
-          final isSelected = date.day == _selectedDate.day;
-          final isToday = DateUtils.isSameDay(date, DateTime.now());
+      child: Row(
+        children: [
+          Expanded(
+            child: ListView.separated(
+              controller: _dateStripController,
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.only(
+                  left: 12.w, right: 6.w, top: 7.h, bottom: 7.h),
+              itemCount: daysInMonth,
+              separatorBuilder: (_, __) => SizedBox(width: _dateChipGap.w),
+              itemBuilder: (context, index) {
+                final date = DateTime(
+                    _selectedDate.year, _selectedDate.month, index + 1);
+                final isSelected = date.day == _selectedDate.day;
+                final isToday = DateUtils.isSameDay(date, DateTime.now());
 
-          return GestureDetector(
-            onTap: () {
-              setState(() => _selectedDate = date);
-              _scrollDateStripToSelected();
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              width: _dateChipWidth.w,
-              height: _dateChipHeight.h,
-              alignment: Alignment.center,
-              decoration: isSelected
-                  ? BoxDecoration(
-                      color: kAppMainAccent,
-                      borderRadius: BorderRadius.circular(11.r),
-                      boxShadow: [
-                        BoxShadow(
-                            color: kAppMainAccent.withValues(alpha: 0.35),
-                            blurRadius: 7,
-                            offset: const Offset(0, 3))
-                      ],
-                    )
-                  : chipDecoration.copyWith(
-                      border: isToday
-                          ? Border.all(
-                              color: kAppMainAccent.withValues(alpha: 0.5),
-                              width: 1.3)
-                          : chipDecoration.border,
+                return GestureDetector(
+                  onTap: () {
+                    setState(() => _selectedDate = date);
+                    _scrollDateStripToSelected();
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    width: _dateChipWidth.w,
+                    height: _dateChipHeight.h,
+                    alignment: Alignment.center,
+                    decoration: isSelected
+                        ? BoxDecoration(
+                            color: kAppMainAccent,
+                            borderRadius: BorderRadius.circular(11.r),
+                            boxShadow: [
+                              BoxShadow(
+                                  color: kAppMainAccent.withValues(
+                                      alpha: 0.35),
+                                  blurRadius: 7,
+                                  offset: const Offset(0, 3))
+                            ],
+                          )
+                        : chipDecoration.copyWith(
+                            border: isToday
+                                ? Border.all(
+                                    color: kAppMainAccent.withValues(
+                                        alpha: 0.5),
+                                    width: 1.3)
+                                : chipDecoration.border,
+                          ),
+                    child: Text(
+                      '${date.day}',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected ? Colors.white : scheme.headerText,
+                      ),
                     ),
-              child: Text(
-                '${date.day}',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.bold,
-                  color: isSelected ? Colors.white : scheme.headerText,
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+          SizedBox(
+            width: _dateChipWidth.w + 16.w,
+            height: _dateChipHeight.h + 14.h,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // 목록이 설정칩 밑으로 지나갈 때 뚝 끊기지 않도록 배경색
+                // 그라데이션으로 살짝 페이드아웃.
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            scheme.headerBg.withValues(alpha: 0),
+                            scheme.headerBg,
+                          ],
+                          stops: const [0.0, 0.35],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const _ScheduleSettingsScreen())),
+                  child: Container(
+                    width: _dateChipWidth.w,
+                    height: _dateChipHeight.h,
+                    alignment: Alignment.center,
+                    decoration: chipDecoration,
+                    child: Icon(Icons.settings,
+                        size: 16.sp, color: scheme.headerText),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -568,11 +717,25 @@ class _TimeAxisPicker extends ConsumerStatefulWidget {
   // 부모(_ScheduleManagementTabState)에 알려서, 부모의 날짜 스와이프
   // 제스처와 여기 선택 드래그가 서로 경합하지 않게 함.
   final ValueChanged<bool> onSelectionModeChanged;
+  // ⭐ 2026-09-12 - 일정 알림을 탭해서 들어왔을 때 "이 시각으로 바로
+  // focusing"하기 위한 외부 지정값(분 단위). null이면 평소처럼
+  // _computeInitialCenterMinutes()의 기본 로직(그 날 첫 일정 또는 09:00)을 씀 -
+  // 부모가 이 값을 넘길 때는 항상 key도 같이 바꿔서(_focusNonce) 이 위젯을
+  // 새로 마운트하므로, 여기서는 그냥 "이번 마운트의 초기 위치"로만 쓰면 됨.
+  final int? focusMinutes;
+  // ⭐ 2026-09-13 - "일정관리 화면 사용하지 않기" 버튼을 이 축의 스크롤
+  // 콘텐츠 맨 아래(마지막 "00"보다 더 아래로 스크롤해야 보이는 위치)에
+  // 그리기 위해 부모(ScheduleManagementTab)로부터 그대로 내려받은 콜백.
+  final VoidCallback onTabDisabled;
+  final Future<void> Function() onTabDisableConfirmed;
   const _TimeAxisPicker(
       {super.key,
       required this.hasShiftToday,
       required this.dateKey,
-      required this.onSelectionModeChanged});
+      required this.onSelectionModeChanged,
+      required this.onTabDisabled,
+      required this.onTabDisableConfirmed,
+      this.focusMinutes});
 
   @override
   ConsumerState<_TimeAxisPicker> createState() => _TimeAxisPickerState();
@@ -674,6 +837,25 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   // 여백만 둠 - 그 대신 아주 처음/끝 슬롯 근처에서는 인디케이터가 화면
   // 정중앙이 아니라 그 여백만큼 치우친 채로 멈출 수 있음(트레이드오프).
   static double get _edgePadding => (48 * 7 / 8).h;
+  // ⭐ 2026-09-13 - "일정관리 화면 사용하지 않기" 버튼을 이 축 스크롤 콘텐츠의
+  // 맨 아래(마지막 "00"보다 더 아래로 스크롤해야 보이는 위치)에 두기 위해
+  // 확보하는 여분 공간 - totalContentHeight/_virtualOffsetMax 양쪽에 똑같이
+  // 더해야 실제로 그 공간까지 스크롤(드래그)이 가능해짐(아래 두 곳 참고).
+  // ⭐ 2026-09-13(2차) - 원래 값(200*7/8)이 버튼 실제 높이의 두 배 가까이 커서
+  // "00부터 버튼까지"는 원하는 만큼인데 "버튼부터 광고 영역까지" 아래쪽에
+  // 불필요한 빈 여백이 남는다는 지적(요청) - 버튼 위 여백(아래 Positioned의
+  // 28.h, 그대로 유지)과 버튼 자체의 실측 높이(패딩 10+10, 아이콘/텍스트 한 줄
+  // 기준 약 46)만 정확히 더한 값으로 줄임.
+  // ⭐ 2026-09-13(3차) - "버튼~광고 거리를 컨디션 탭과 맞추고, 최대한 작게
+  // (단, 너무 딱 붙지는 않게)" 요청 - totalContentHeight 공식의
+  // "_edgePadding*2" 항 중 하나가 그대로 버튼 아래 여백이 되던 걸(기존 42.h,
+  // 컨디션 탭의 12.h보다 훨씬 큼) 컨디션 탭과 정확히 같은 _afterButtonGap
+  // (12.h)으로 맞춤 - 아래 totalContentHeight 공식 자체는 안 바꾸고 이 값만
+  // "버튼 위 여백 + 버튼 높이 + 원하는 아래 여백 - _edgePadding"으로 역산해서
+  // 결과적으로 버튼 아래에 정확히 12.h만 남게 함.
+  static double get _afterButtonGap => 12.h;
+  static double get _bottomButtonAreaHeight =>
+      28.h + 46.h + _afterButtonGap - _edgePadding;
   // ⭐ 세로축 선의 두께 - 원형/선 두께처럼 가로세로 구분 없는 값이라 .r로 통일.
   // ⭐ 2026-08-27 - 정각/30분 눈금(짧은 선) 자체는 삭제함(요청) - 숫자만 남김.
   // 눈금 두께 상수(_hourTickThickness/_halfTickThickness)도 같이 제거.
@@ -682,6 +864,26 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   final ScrollController _controller = ScrollController();
   double _initialMinutes = 0; // 최초 진입 시 중앙에 놓일 시각(현재 시각)
   bool _jumpedToInitial = false;
+  // ⭐ 2026-09-08 - "날짜를 좌우로 넘길 때마다 왼쪽 시간 축 숫자가 위에서
+  // 아래로 빠르게 스크롤되는 것처럼 보인다"는 신고 수정. 원인: 이 위젯은
+  // 날짜가 바뀔 때마다 key: ValueKey(dateKey)로 완전히 새로 마운트되고
+  // (initState 주석 참고), 최초 프레임은 항상 스크롤 0(축 맨 위, 00:00
+  // 근처)에서 그려진 뒤에야 데이터 로드가 끝나서 목표 위치(현재 시각 또는
+  // 그날 첫 일정)로 jumpTo됨 - "0에서 시작해 목표 위치로 튀는" 그 사이가
+  // 눈에 보였던 것(일정이 있는 날은 슬롯 높이도 그 사이에 같이 바뀌어서 더
+  // 두드러짐). jumpTo 자체는 원래도 순간 이동(애니메이션 없음)이라 로직은
+  // 안 바꾸고, 그 준비가 끝나기 전까지는 그냥 안 보여주기만 함(Opacity로
+  // 감쌈, 아래 build() 참고) - 레이아웃 계산 자체는 평소처럼 계속 돌지만
+  // 화면엔 위치가 확정된 뒤에야 나타나서 "튀는" 게 안 보임.
+  bool _readyToPaint = false;
+
+  // ⭐ 2026-09-12 - 일정 알림을 탭해서 들어왔을 때(widget.focusMinutes != null),
+  // 그 시각으로 점프만 하는 것보다 "여기예요"가 눈에 띄게 잠깐 밝게
+  // 강조했다가 서서히 사라지게 함. 최초 점프(_jumpedToInitial 블록)에서만
+  // 켜지고, 아래 build()의 highlightSlot 배경 Positioned가 이 값이 null이
+  // 아닐 때만 그려짐. 타이머로 일정 시간 뒤 스스로 꺼짐(사용자 조작 불필요).
+  int? _focusHighlightSlot;
+  Timer? _focusHighlightTimer;
 
   // ⭐ 2026-08-28 - "스크롤이 한번씩 버벅인다" 피드백 - 원인은 이 축이
   // SingleChildScrollView의 기본 드래그(관성/fling 포함)를 안 쓰고
@@ -896,6 +1098,11 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   // 분기는 없앰(값이 흔들리면 "인디케이터가 왜 매번 다른 데를 가리키냐"는
   // 혼란을 줄 수 있어서, 이제 순수하게 "그 날 일정 유무"만 기준으로 함).
   double _computeInitialCenterMinutes() {
+    // ⭐ 2026-09-12 - 일정 알림 탭으로 들어온 경우 그 무엇보다 우선. "그 날
+    // 첫 일정"이나 09:00 기본값은 알림이 가리키는 그 시각과 다를 수 있어서
+    // (예: 그날 다른 일정이 더 이른 시각에 있는 경우) 명시적으로 지정된
+    // 이 값을 항상 최우선으로 씀.
+    if (widget.focusMinutes != null) return widget.focusMinutes!.toDouble();
     if (_blocks.isNotEmpty) {
       final earliest =
           _blocks.map((b) => b.startMinutes).reduce((a, b) => a < b ? a : b);
@@ -920,6 +1127,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     _controller.dispose();
     _pulseController.dispose();
     _flingController.dispose();
+    _focusHighlightTimer?.cancel();
     super.dispose();
   }
 
@@ -931,9 +1139,17 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   // ⭐ "정확히 동일한 시간 범위"의 일정은 중복 생성을 막음 - 그런 경우는
   // 기존 일정에 내용을 같이 적으면 되니까. [exclude]는 수정 시 자기 자신은
   // 비교 대상에서 빼기 위함.
+  // ⭐ 2026-09-12(실기기 테스트 중 발견) - 원래 `!identical(b, exclude)`로
+  // "같은 객체 인스턴스인지"를 봤는데, `DateScheduleNotifier.update()`가
+  // 저장 성공 후 provider state의 그 일정을 새 `DateSchedule` 인스턴스로
+  // 교체하기 때문에(내용은 같아도 객체는 다름), **같은 일정을 두 번째로
+  // 열어 수정하면 그 시점의 `_blocks`엔 더 이상 `exclude`와 동일한 인스턴스가
+  // 없어서 자기 자신을 "중복"으로 오판정** - 저장이 조용히 막히고(스낵바만
+  // 뜨고 실제 update()/알림 동기화는 전혀 호출 안 됨) 알림이 왜 안 오는지
+  // 알 수 없게 만드는 원인이었음. 인스턴스가 아니라 DB `id`로 비교하도록 수정.
   bool _hasDuplicateRange(int start, int? duration, {DateSchedule? exclude}) {
     return _blocks.any((b) =>
-        !identical(b, exclude) &&
+        (exclude == null || b.id != exclude.id) &&
         b.startMinutes == start &&
         b.durationMinutes == duration);
   }
@@ -1462,8 +1678,15 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   // 반대로 돌리는 순간 항상 즉시 반응함(빚이 0 아니면 딱 그 지점에서
   // 시작하는 것과 동일 - "몇 번을 더 밀었든" 결과가 똑같아짐).
   double get _virtualOffsetMin => _edgePadding - _viewportHeight / 2;
+  // ⭐ 2026-09-13 - "사용하지 않기" 버튼 공간(_bottomButtonAreaHeight)만큼
+  // 최대 스크롤 한도를 늘림 - 안 그러면 totalContentHeight만 늘어나고 이
+  // 드래그 클램프가 그대로라 실제로는 그 공간까지 스크롤이 안 됨(사용자가
+  // 손으로 끌어도 끝까지 안 가짐).
   double get _virtualOffsetMax =>
-      _slotTops[_slotCount - 1] + _edgePadding - _viewportHeight / 2;
+      _slotTops[_slotCount - 1] +
+      _edgePadding -
+      _viewportHeight / 2 +
+      _bottomButtonAreaHeight;
 
   // ⭐ 2026-08-28(2차) - 축 스크롤 전체를 이 위젯이 직접 처리함(build()에서
   // SingleChildScrollView는 physics: NeverScrollableScrollPhysics로 사용자
@@ -1628,7 +1851,13 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     // 똑같은 배경값을 그대로 다시 watch해서 계산함(단일 소스, 같은 함수).
     final scheme = _ScheduleColorScheme.of(
         kScheduleBackgroundColors[ref.watch(scheduleBackgroundProvider)]);
-    return LayoutBuilder(
+    // ⭐ 2026-09-08 - _readyToPaint 주석 참고. 최초 위치가 확정되기 전까지는
+    // 이 축 전체를 투명하게 감춰서, "0에서 목표 위치로 튀는" 과정 자체가
+    // 화면에 안 보이게 함(레이아웃 계산은 평소처럼 계속 돎 - Opacity는 paint만
+    // 건너뛰지 layout에는 영향 없음).
+    return Opacity(
+      opacity: _readyToPaint ? 1.0 : 0.0,
+      child: LayoutBuilder(
       builder: (context, constraints) {
         _viewportHeight = constraints.maxHeight;
         _viewportWidth = constraints.maxWidth;
@@ -1641,7 +1870,11 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
         // 줄이 되어 잘림" 오차가 생길 수 있어서 명시적으로 넘겨줌.
         _textScaler = MediaQuery.textScalerOf(context);
         _recomputeLayout();
-        final totalContentHeight = _slotTops[_slotCount] + _edgePadding * 2;
+        // ⭐ 2026-09-13 - _bottomButtonAreaHeight만큼 늘려서 "사용하지 않기"
+        // 버튼이 들어갈 자리를 마지막 "00" 아래에 확보(_virtualOffsetMax
+        // 주석 참고 - 두 곳을 같이 늘려야 실제로 스크롤 가능해짐).
+        final totalContentHeight =
+            _slotTops[_slotCount] + _edgePadding * 2 + _bottomButtonAreaHeight;
         // ⭐ 고정 인디케이터(축 정중앙에 뜬 원)와 안 겹치게 살짝 더 띄움 -
         // 일정을 새로 만들 때 "움직인" 인디케이터와 겹치는 건 상관없음
         // (요청), 가만히 있는 기본 위치와만 안 겹치면 됨. 평소 인디케이터가
@@ -1657,12 +1890,32 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
         if (!_jumpedToInitial && isLoaded) {
           _jumpedToInitial = true;
           _initialMinutes = _computeInitialCenterMinutes();
+          // ⭐ 2026-09-12 - 일정 알림으로 들어온 경우에만 도착 슬롯을 잠깐
+          // 밝게 강조(포커싱을 "느껴지게"). widget.focusMinutes가 null이면
+          // (평소처럼 그 날 첫 일정/09:00으로 점프하는 경우) 강조 자체를
+          // 안 함 - 매번 화면을 열 때마다 반짝이면 오히려 산만함.
+          final focusSlot = widget.focusMinutes == null
+              ? null
+              : (widget.focusMinutes! ~/ 30).clamp(0, _slotCount - 1);
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!_controller.hasClients) return;
             final slot = (_initialMinutes ~/ 30).clamp(0, _slotCount - 1);
             final target = _slotTops[slot] - _viewportHeight / 2 + _edgePadding;
             _controller.jumpTo(
                 target.clamp(0.0, _controller.position.maxScrollExtent));
+            // ⭐ 위치가 확정된 바로 이 시점에야 보여줌(아래 build()의 Opacity 참고).
+            if (!mounted) return;
+            setState(() {
+              _readyToPaint = true;
+              _focusHighlightSlot = focusSlot;
+            });
+            if (focusSlot != null) {
+              _focusHighlightTimer?.cancel();
+              _focusHighlightTimer =
+                  Timer(const Duration(milliseconds: 1600), () {
+                if (mounted) setState(() => _focusHighlightSlot = null);
+              });
+            }
           });
         }
 
@@ -1754,6 +2007,38 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
                         ),
                       ),
                     ),
+                    // ⭐ 2026-09-12 - 일정 알림을 탭해서 들어왔을 때 "여기예요"를
+                    // 잠깐 밝게 보여주는 강조 밴드. _focusHighlightSlot이 null이면
+                    // (평소 진입) 아무것도 안 그림 - IgnorePointer로 터치는 항상
+                    // 그 아래 콘텐츠(일정 카드 등)로 그대로 통과시킴. 이 축의
+                    // 다른 배경 요소(축선/시각 숫자)보다는 위, 일정 카드(built.normal)
+                    // 보다는 아래에 그려서 글자를 가리지 않게 함.
+                    if (_focusHighlightSlot != null)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        top: _edgePadding +
+                            _tickDisplayY(_focusHighlightSlot!) -
+                            _baseSlotHeight,
+                        height: _baseSlotHeight * 2,
+                        child: IgnorePointer(
+                          child: TweenAnimationBuilder<double>(
+                            tween: Tween(begin: 1.0, end: 0.0),
+                            duration: const Duration(milliseconds: 1600),
+                            curve: Curves.easeOut,
+                            builder: (context, t, child) => Opacity(
+                              opacity: t * 0.35,
+                              child: child,
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: kAppMainAccent,
+                                borderRadius: BorderRadius.circular((12 * 7 / 8).r),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     // ⭐ 2026-08-27 - 정각/30분 눈금(짧은 선) 전부 삭제 요청 -
                     // 숫자만 남기고, 그만큼 폰트를 살짝 키우고 축에 더 붙임
                     // (눈금이 없어져서 숫자 오른쪽 끝이 자연히 축에 닿음).
@@ -1914,6 +2199,25 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
                         ),
                       ),
                     ],
+                    // ⭐ 2026-09-13 - "일정관리 화면 사용하지 않기" 버튼을
+                    // 여기(축 콘텐츠의 맨 아래, 마지막 "00"보다 더 아래)에
+                    // 배치 - main.dart의 고정 위치에서 옮겨온 것(사용자 요청:
+                    // "진짜 필요할 때만 누르는 버튼이니 스크롤을 끝까지
+                    // 내려야 보이게"). _bottomButtonAreaHeight만큼 확보해둔
+                    // 공간 안에 그림(위 totalContentHeight/_virtualOffsetMax
+                    // 참고).
+                    Positioned(
+                      left: 16.w,
+                      right: 16.w,
+                      top: _edgePadding + _slotTops[_slotCount] + 28.h,
+                      child: DisableTabButton(
+                        tabLabel: '일정관리',
+                        provider: scheduleTabEnabledProvider,
+                        extraNotice: '예정된 일정 알림도 모두 취소됩니다.',
+                        onConfirmed: widget.onTabDisableConfirmed,
+                        onDisabled: widget.onTabDisabled,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -1940,6 +2244,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
           ],
         );
       },
+      ),
     );
   }
 }
@@ -2558,8 +2863,9 @@ class _ScheduleRow extends StatelessWidget {
 // date_schedules 영구 저장(DB v20)으로 전환하며 lib/models/date_schedule.dart로
 // 옮김(그 파일이 kScheduleBlockColors도 같이 들고 있음). 이 화면은 그걸 import해서 씀.
 
-// ⭐ 카테고리 아이콘 19종(2026-08-27 10종 -> 2026-09-01 7종 추가 -> 2026-09-03
-// 2종 추가: 자전거/요가·필라테스) -
+// ⭐ 카테고리 아이콘 25종(2026-08-27 10종 -> 2026-09-01 7종 추가 -> 2026-09-03
+// 2종 추가: 자전거/요가·필라테스 -> 2026-09-12 6종 추가: "운동" 세분화 -
+// 라켓 스포츠/축구/농구/야구/구기종목/입식 격투기) -
 // assets/icons/memo_category/README.md의 매핑과 동일(memo_category_icon_lab_
 // screen.dart의 kMemoCategoryIcons도 같은 목록이지만, 그 파일은 "확인용 임시
 // 화면"이라 나중에 지워질 수 있어서 여기 독립적으로 같은 목록을 둠 - 그
@@ -2604,6 +2910,20 @@ const List<(String key, String label, String asset)> _kScheduleCategoryIcons = [
   ('etc', '기타', 'assets/icons/memo_category/etc8.svg'),
   ('etc', '기타', 'assets/icons/memo_category/etc9.svg'),
   ('etc', '기타', 'assets/icons/memo_category/etc10.svg'),
+  // ⭐ 2026-09-12 - 신설 6종(라켓 스포츠/축구/농구/야구/구기종목/입식 격투기).
+  // 전부 예전엔 "운동"(exercise)에 뭉뚱그려져 있던 종목을 세분화(사용자 요청).
+  // ⚠️ 반드시 이 목록 맨 끝에 추가할 것 - iconIndex는 DB에 이 리스트의 정수
+  // 위치로 저장되므로, 기존 항목들 "사이"에 끼워 넣으면 이미 저장된 옛
+  // 일정들의 아이콘이 전부 엉뚱하게 밀려버림(etc 10종 바로 뒤도 마찬가지 -
+  // _nextEtcIconIndex()는 key로 동적 스캔해서 위치가 안 밀리지만, 이미 저장된
+  // 정수 iconIndex 값은 그런 보정이 없음). ml/카테고리_가이드.md/
+  // assets/icons/memo_category/README.md 참고.
+  ('racket_sports', '라켓 스포츠', 'assets/icons/memo_category/racket_sports.svg'),
+  ('soccer', '축구', 'assets/icons/memo_category/soccer.svg'),
+  ('basketball', '농구', 'assets/icons/memo_category/basketball.svg'),
+  ('baseball', '야구', 'assets/icons/memo_category/baseball.svg'),
+  ('ball_sports', '구기종목', 'assets/icons/memo_category/ball_sports.svg'),
+  ('combat_sports', '입식 격투기', 'assets/icons/memo_category/combat_sports.svg'),
 ];
 
 // ⭐ 2026-09-01 - "기타"로 분류될 때마다 위 10개 도형 아이콘을 순서대로(1→2→
@@ -2737,15 +3057,6 @@ Future<T?> _showFixedBottomSheet<T>(
 // 쪽이 −/+ 스텝 조정 대상인지.
 enum _TimeCardSlot { start, end }
 
-/// ⭐ 2026-09-05 - 일정 알림 UI 껍데기의 임시 저장소. `date_schedules`에 아직
-/// 실제 컬럼이 없어서(DB 스키마 변경 전) 이 세션 동안만 메모리에 들고
-/// 있음 - 앱을 재시작하면 사라짐. 실제 DB 컬럼이 생기면 이 캐시는 통째로
-/// 걷어내고 그 컬럼 값으로 바로 대체할 것.
-/// 키: `'${date}_$startMinutes'` - 이 시트는 수정 모드에서 시작 시각을 못
-/// 바꾸므로(`_openEditSheet` 주석 참고) 한 일정의 생애주기 동안 이 키가 안
-/// 바뀌어 안전하게 식별자로 쓸 수 있음.
-final Map<String, ({bool enabled, int offsetMinutes})> _scheduleNotifyDraftCache = {};
-
 class _CreateBlockSheet extends StatefulWidget {
   final int startMinutes;
   // ⭐ 2026-09-05 - _scheduleNotifyDraftCache 조회/기록용 키를 만들려면 날짜도
@@ -2773,15 +3084,19 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
   // _iconManuallySet 같은 "수동 우선" 개념 자체가 없어짐(고를 UI가 없으니까).
   bool _autoClassifying = false;
 
-  // ⭐ 2026-09-05 - 일정 알림 UI 껍데기(전체근무표_개선안_및_일정알림_설계메모.md
-  // 참고). 아직 DB 컬럼도, 실제 예약 로직도 없음 - _scheduleNotifyDraftCache
-  // (세션 한정 메모리 캐시)로만 왔다갔다 함. 다음 세션에서 DB(date_schedules
-  // v23 검토)/알림 예약을 붙일 때 이 캐시를 통째로 걷어내고 그 컬럼 값으로
-  // 대체할 것. late인 이유 - initState에서 캐시를 조회해 프리필해야 해서
-  // 필드 초기화 시점(위젯 생성자 실행 전)엔 값을 못 정함.
+  // ⭐ 2026-09-12 - "일정에 맞춰서 알림받기" 실제 구현(전체근무표_개선안_및_
+  // 일정알림_설계메모.md 2장). date_schedules(DB v23) notify_enabled/
+  // notify_offset_minutes 컬럼과 1:1 대응 - 수정 모드는 widget.existing에서,
+  // 생성 모드는 기본값(꺼짐/정시)에서 시작함. late인 이유 - initState에서
+  // widget.existing을 조회해 프리필해야 해서 필드 초기화 시점(위젯 생성자
+  // 실행 전)엔 값을 못 정함.
   late bool _notifyEnabled;
   late int _notifyOffsetMinutes; // 0=정시, 5/10/30=N분 전
   static const List<int> _kNotifyOffsetOptions = [0, 5, 10, 30];
+  // ⭐ 알림을 켜는 순간 그 아래 N분전 칩들이 화면 밖(시트 아래쪽)에 있어서 잘
+  // 안 보인다는 피드백 - 이 컨트롤러로 시트 내용 스크롤 영역 맨 아래까지
+  // 자동으로 스크롤해줌(Switch onChanged 참고).
+  final _sheetScrollController = ScrollController();
 
   // ⭐ 2026-09-03(2차) - 처음엔 showDialog(AlertDialog)로 만들었다가, "텍스트필드
   // 활성화 중에 삭제를 누르면 다이얼로그가 위에서 뚝 떨어지고, 동시에 키보드도
@@ -2833,10 +3148,30 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
   // 그대로 있고, 그만큼 소요시간(표시용, _displayDurationMinutes)만 바뀐다 -
   // 종료 카드를 직접 조정할 때만 _endMinutes 자체가 움직임. 기본값은 여전히
   // "시작+30분"(요청: "우측은 기본으로 +30").
-  late int _endMinutes = (widget.existing != null
-          ? widget.existing!.startMinutes + (widget.existing!.durationMinutes ?? 30)
-          : widget.startMinutes + 30)
-      .clamp(0, _dayEndMinutes);
+  // ⭐ 2026-09-11(사용자 신고) - "지속시간 없는 일정을 다시 만들 수 없게 됐다"
+  // 버그 수정. null = "지속시간 없음"(_scheduleTimeLabel의 null 분기, 원래
+  // 요청 "몇 시간 할지는 안 정해도 되게"가 의도한 상태) - 종료 카드에서 "−"를
+  // 최소 소요시간(5분) 밑으로 더 내리면 어중간한 값 대신 아예 이 상태로 꺼짐
+  // (_adjustActiveCard 참고). 기존 근무(widget.existing)를 열 때는 그 근무가
+  // 이미 durationMinutes==null이었다면 그대로 null을 유지해 원래 상태를 보존.
+  // ⭐ 2026-09-12(2차, 사용자 피드백) - "새 일정을 만들 때 기본값이 항상
+  // 시작+30분으로 잡혀있어서, 지속시간 없는 일정을 만들려면 매번 '−'를 눌러
+  // 꺼야 했다"는 지적 - 새로 만들 때 기본값 자체를 "지속시간 없음"(null)으로
+  // 바꿈. 대신 종료 카드가 완전히 사라지지 않고, "지속시간 없음"과 구체적인
+  // 제안 시각(시작+30분)을 위아래로 반씩 보여주는 분할 카드로 표시됨
+  // (_TimeCardSplitButton 참고) - 아래쪽(제안 시각)을 탭하면 그 값으로 확정되며
+  // 지금의 단일 카드 레이아웃으로 바뀜.
+  late int? _endMinutes = widget.existing != null
+      ? (widget.existing!.durationMinutes == null
+          ? null
+          : (widget.existing!.startMinutes + widget.existing!.durationMinutes!).clamp(0, _dayEndMinutes))
+      : null;
+
+  // ⭐ 위 _endMinutes가 null일 때(분할 카드 상태) 아래쪽 반쪽에 보여줄 제안
+  // 종료 시각 - 저장된 상태가 아니라 항상 "지금 시작 시각+30분"으로 실시간
+  // 계산(시작 카드를 나중에 조정해도 제안값이 그때그때 같이 따라옴).
+  int get _suggestedEndMinutes =>
+      (_displayStartMinutes + 30).clamp(0, _dayEndMinutes);
 
   // ⭐ "−"/"+" 토글 - 다음 스텝의 방향. 스펙: "둘 중 하나는 무조건 선택,
   // 하나만 선택된 상태" - 토글 자체가 시간을 바꾸지 않고, 그 다음 스텝 버튼
@@ -2859,8 +3194,9 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
 
   int get _displayStartMinutes =>
       _isEditing ? widget.existing!.startMinutes : _preciseMinutes;
-  int get _displayEndMinutes => _endMinutes;
-  int get _displayDurationMinutes => _displayEndMinutes - _displayStartMinutes;
+  int? get _displayEndMinutes => _endMinutes;
+  int? get _displayDurationMinutes =>
+      _displayEndMinutes == null ? null : _displayEndMinutes! - _displayStartMinutes;
 
   void _selectCard(_TimeCardSlot slot) {
     if (slot == _TimeCardSlot.start && _isEditing) return; // 수정 모드: 시작 카드 비활성
@@ -2884,7 +3220,9 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
     final delta = _adjustDown ? -stepMinutes : stepMinutes;
     if (_activeCard == _TimeCardSlot.start) {
       final upperBound = _fineAdjustBoundCenter + _fineAdjustRangeMinutes;
-      final startCap = _endMinutes - _minDurationMinutes;
+      // ⭐ 2026-09-11 - _endMinutes가 null("지속시간 없음")이면 종료 시각
+      // 기준으로 시작을 제한할 이유가 없으니 그 제약 자체를 뺌(하루 범위만 적용).
+      final startCap = _endMinutes == null ? _dayEndMinutes : _endMinutes! - _minDurationMinutes;
       // ⭐ 2026-09-04 - M6 수정(전체_코드_점검_리포트_2026-09-04.md). 00:00
       // 슬롯(_fineAdjustBoundCenter == 0)에서 하한이 그대로 0-25=-25가 되어
       // "−" 방향으로 내리면 음수 시각이 저장될 수 있었음 - 하루의 시작(0분)
@@ -2897,7 +3235,24 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
       if (next == _preciseMinutes) return;
       setState(() => _preciseMinutes = next);
     } else {
-      final next = (_endMinutes + delta).clamp(_displayStartMinutes + _minDurationMinutes, _dayEndMinutes);
+      // ⭐ 2026-09-11(사용자 신고) - "출근/시작만 정하고 소요시간은 안 정해도
+      // 되게" 하려던 원래 취지(_scheduleTimeLabel 주석 참고)가, 2026-09-01
+      // 후속5의 −/+ 스텝 재설계 이후로는 종료 카드가 항상 "시작+5분" 밑으로는
+      // 못 내려가게 막혀있어 한 번 시간을 건드리면 다시 "지속시간 없음"으로
+      // 되돌릴 방법이 없었음. 최소 소요시간(5분) 밑으로 더 내리면 1~4분 같은
+      // 어중간한 값 대신 아예 "지속시간 없음"(null)으로 완전히 끄고, 그 상태에서
+      // "+"를 누르면 5분부터 다시 시작한다("−"는 이미 꺼진 상태라 무시).
+      if (_endMinutes == null) {
+        if (_adjustDown) return;
+        setState(() => _endMinutes = (_displayStartMinutes + _minDurationMinutes).clamp(0, _dayEndMinutes));
+        return;
+      }
+      final candidate = _endMinutes! + delta;
+      if (candidate - _displayStartMinutes < _minDurationMinutes) {
+        setState(() => _endMinutes = null);
+        return;
+      }
+      final next = candidate.clamp(_displayStartMinutes + _minDurationMinutes, _dayEndMinutes);
       if (next == _endMinutes) return;
       setState(() => _endMinutes = next);
     }
@@ -2944,26 +3299,58 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
         if (mounted) _contentFocusNode.requestFocus();
       });
     }
-    // ⭐ 2026-09-05 - 수정 모드에서 이전에 설정해둔 알림 초안을 그대로 복원
-    // (생성 모드는 캐시에 아직 아무것도 없으니 항상 기본값). 위 캐시 주석
-    // 참고 - 앱을 새로 켜면 이 캐시 자체가 비어서 기본값으로 돌아감(의도된
-    // 한계, 진짜 DB 컬럼이 생기기 전까지).
-    final cached = _isEditing
-        ? _scheduleNotifyDraftCache['${widget.dateKey}_${widget.existing!.startMinutes}']
-        : null;
-    _notifyEnabled = cached?.enabled ?? false;
-    _notifyOffsetMinutes = cached?.offsetMinutes ?? 0;
+    // ⭐ 2026-09-12 - 수정 모드는 그 일정에 실제로 저장된 알림 설정을 그대로
+    // 복원, 생성 모드는 항상 기본값(꺼짐/정시)에서 시작.
+    _notifyEnabled = widget.existing?.notifyEnabled ?? false;
+    _notifyOffsetMinutes = widget.existing?.notifyOffsetMinutes ?? 0;
   }
 
   @override
   void dispose() {
     _contentController.dispose();
     _contentFocusNode.dispose();
+    _sheetScrollController.dispose();
     super.dispose();
+  }
+
+  // ⭐ 2026-09-12 - 알림을 켜는 순간 그 아래 N분전 칩 섹션이 자연스럽게
+  // 보이도록 시트 스크롤 영역 맨 아래로 부드럽게 스크롤. 끄는 쪽은 섹션이
+  // 다시 접히기만 하면 되니 스크롤 안 건드림. addPostFrameCallback인 이유 -
+  // setState로 칩 섹션이 새로 나타나 maxScrollExtent가 늘어난 "다음" 프레임에
+  // 스크롤해야 실제로 끝까지 내려감(같은 프레임에선 아직 레이아웃 전이라
+  // 옛 maxScrollExtent로 계산됨).
+  void _onNotifyToggle(bool enabled) {
+    setState(() => _notifyEnabled = enabled);
+    if (!enabled) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_sheetScrollController.hasClients) return;
+      _sheetScrollController.animateTo(
+        _sheetScrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   // ⭐ 제목이 없어졌으니 이제 "내용"이 유일한 필수 입력.
   bool get _isValid => _contentController.text.trim().isNotEmpty;
+
+  // ⭐ 2026-09-12(사용자 피드백) - "이미 지난 시각으로 알림을 켜면 아무 안내
+  // 없이 그냥 켜진다" 지적 - ScheduleNotificationService._triggerDateTime()과
+  // 반드시 같은 계산이어야 함(그 파일 상단 주석 참고, 이제 세 곳 - Dart 여기,
+  // Dart 알림 서비스, Kotlin 재부팅 재예약 - 가 전부 이 계산을 각자 구현).
+  // 실제로 예약이 조용히 스킵되는 것과 똑같은 조건일 때만 경고를 보여준다.
+  bool get _isNotifyTriggerInPast {
+    final parts = widget.dateKey.split('-');
+    if (parts.length != 3) return false;
+    final year = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    final day = int.tryParse(parts[2]);
+    if (year == null || month == null || day == null) return false;
+    final trigger = DateTime(year, month, day)
+        .add(Duration(minutes: _displayStartMinutes - _notifyOffsetMinutes));
+    return !trigger.isAfter(DateTime.now());
+  }
 
   // ⭐ 2026-08-27 - 저장 버튼 핸들러. 아이콘 선택 팝업이 없어졌으므로 항상
   // 내용 텍스트로 자동분류(MemoCategoryClassifier)함 - 분류에 실패(모델 로드
@@ -3017,10 +3404,6 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
     // DateSchedule과 알림 초안 캐시 키 둘 다 이 값을 같이 씀(같은 일정의 같은
     // 시작 시각이어야 하므로).
     final startMinutes = _isEditing ? widget.existing!.startMinutes : _preciseMinutes;
-    // ⭐ 2026-09-05 - 일정 알림 UI 껍데기 저장(위 _scheduleNotifyDraftCache
-    // 주석 참고 - 진짜 DB가 아니라 이 세션 동안만 유지되는 캐시).
-    _scheduleNotifyDraftCache['${widget.dateKey}_$startMinutes'] =
-        (enabled: _notifyEnabled, offsetMinutes: _notifyOffsetMinutes);
     Navigator.pop(
       context,
       DateSchedule(
@@ -3036,6 +3419,11 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
         predictedCategory: predictedCategory,
         // ⭐ 수동 선택 자체가 없어져서 "정정" 개념이 성립 안 함 - 항상 false.
         isUserCorrected: false,
+        // ⭐ 2026-09-12 - 실제 DB 컬럼(date_schedules v23)에 저장될 값. 호출부
+        // (_openCreateSheet/_openEditSheet → dateScheduleProvider.create/update)가
+        // 이 값을 기준으로 Native 알림을 예약/취소함(schedule_notification_service.dart).
+        notifyEnabled: _notifyEnabled,
+        notifyOffsetMinutes: _notifyOffsetMinutes,
         createdAt: '', // 위와 동일 - 호출부가 덮어씀
       ),
     );
@@ -3046,7 +3434,11 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
     // ⭐ 2026-09-01 후속8 - adjustResize 때문에 이 값 자체는 키보드가 뜨면
     // 실제로 작아짐(위 _contentFocusNode 주석 참고) - 이제 캐시하지 않고
     // 매번 그대로 반영하되, 그 변화를 AnimatedContainer로 부드럽게 감쌈.
-    final sheetHeight = MediaQuery.of(context).size.height * 0.76;
+    // ⭐ 2026-09-12(사용자 피드백) - 알림 켜짐 상태(설명 문구 + N분전 칩 목록까지
+    // 다 펼쳐진 수정 화면)에서 0.76배로는 맨 아래 칩 줄이 살짝 잘려서 스크롤을
+    // 해야만 보였음 - 0.90으로 올려서 대부분의 경우 스크롤 없이 한 번에 다
+    // 보이게 함.
+    final sheetHeight = MediaQuery.of(context).size.height * 0.90;
     return SafeArea(
       top: false,
       child: AnimatedContainer(
@@ -3068,6 +3460,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
           children: [
             Expanded(
               child: SingleChildScrollView(
+                controller: _sheetScrollController,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -3156,18 +3549,37 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                             color: kAppChipBorder.withValues(alpha: 0.3))),
                   ),
                   Expanded(
-                    child: _TimeCardButton(
-                      icon: null,
-                      label: _scheduleTimeLabel(_displayEndMinutes, null),
-                      // ⭐ 2026-09-01 후속5(2차) - 타임라인 카드/라벨("30m", "1h
-                      // 30m")과 달리 이 시트는 카드 안에 한 줄 정도는 여유가
-                      // 있어서 "2시간 30분"처럼 한글로 풀어 씀(요청). ⭐ 2026-09-03 -
-                      // 영어 로케일은 _durationPresetLabel("1h 30m")로 대체.
-                      sublabel: '(${_isKorean ? _durationKoreanLabel(_displayDurationMinutes) : _durationPresetLabel(_displayDurationMinutes)})',
-                      active: _activeCard == _TimeCardSlot.end,
-                      enabled: true,
-                      onTap: () => _selectCard(_TimeCardSlot.end),
-                    ),
+                    // ⭐ 2026-09-12(2차) - _displayEndMinutes == null(지속시간
+                    // 없음) 상태만 분할 카드(_TimeCardSplitButton)로, 그 외엔
+                    // 기존 단일 카드 그대로 - 아래쪽(제안 시각)을 탭해서 확정하는
+                    // 순간 이 조건이 자연히 false가 되어 단일 카드로 전환됨.
+                    child: _displayEndMinutes == null
+                        ? _TimeCardSplitButton(
+                            suggestedLabel:
+                                _scheduleTimeLabel(_suggestedEndMinutes, null),
+                            onTapNoDuration: () =>
+                                _selectCard(_TimeCardSlot.end),
+                            onTapSuggested: () {
+                              _contentFocusNode.unfocus();
+                              setState(() {
+                                _endMinutes = _suggestedEndMinutes;
+                                _activeCard = _TimeCardSlot.end;
+                              });
+                            },
+                          )
+                        : _TimeCardButton(
+                            icon: null,
+                            label: _scheduleTimeLabel(_displayEndMinutes!, null),
+                            // ⭐ 2026-09-01 후속5(2차) - 타임라인 카드/라벨("30m", "1h
+                            // 30m")과 달리 이 시트는 카드 안에 한 줄 정도는 여유가
+                            // 있어서 "2시간 30분"처럼 한글로 풀어 씀(요청). ⭐ 2026-09-03 -
+                            // 영어 로케일은 _durationPresetLabel("1h 30m")로 대체.
+                            sublabel:
+                                '(${_isKorean ? _durationKoreanLabel(_displayDurationMinutes!) : _durationPresetLabel(_displayDurationMinutes!)})',
+                            active: _activeCard == _TimeCardSlot.end,
+                            enabled: true,
+                            onTap: () => _selectCard(_TimeCardSlot.end),
+                          ),
                   ),
                 ],
               ),
@@ -3224,7 +3636,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                   ),
                   Switch(
                     value: _notifyEnabled,
-                    onChanged: (v) => setState(() => _notifyEnabled = v),
+                    onChanged: _onNotifyToggle,
                     activeColor: kAppMainAccent,
                   ),
                 ],
@@ -3256,6 +3668,25 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                     );
                   }).toList(),
                 ),
+                // ⭐ 2026-09-12 - 위 _isNotifyTriggerInPast 참고. 시작 시각/N분전
+                // 값을 바꿀 때마다 실시간으로 다시 계산되므로(둘 다 setState를
+                // 타는 값), 경고가 붙었다 떨어졌다 항상 최신 상태를 반영함.
+                if (_isNotifyTriggerInPast) ...[
+                  SizedBox(height: 8.h),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.error_outline, size: 14, color: Color(0xFFD64545)),
+                      SizedBox(width: 4.w),
+                      Expanded(
+                        child: Text(
+                          context.l10n.scheduleNotifyPastTimeWarning,
+                          style: const TextStyle(fontSize: 11.5, color: Color(0xFFD64545)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ],
                   ],
                 ),
@@ -3308,10 +3739,11 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                     child: AppSecondButton(
                       variant: AppSecondButtonVariant.danger,
                       onPressed: () {
-                        // ⭐ 일정 자체가 삭제되니 알림 초안 캐시도 같이 정리 -
-                        // 안 지우면 나중에 같은 날짜+시각에 새 일정을 만들 때
-                        // 엉뚱하게 옛 값이 프리필될 수 있음(orphan 방지).
-                        _scheduleNotifyDraftCache.remove('${widget.dateKey}_${widget.existing!.startMinutes}');
+                        // ⭐ 2026-09-12 - 예약된 일정 알림 취소는 여기서 직접
+                        // 안 함 - Navigator.pop으로 deleteSignal을 돌려주면
+                        // _openEditSheet → dateScheduleProvider.delete()가
+                        // ScheduleNotificationService.cancelForSchedule()까지
+                        // 호출함(date_schedule_provider.dart 참고).
                         Navigator.pop(context, _CreateBlockSheet.deleteSignal);
                       },
                       child: Text(context.l10n.commonDelete),
@@ -3413,6 +3845,86 @@ class _TimeCardButton extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// ⭐ 2026-09-12(2차) - 종료 카드가 "지속시간 없음" 상태일 때만 보여주는 분할
+// 카드 - _TimeCardButton과 바깥 크기(Row의 Expanded 폭)는 똑같이 맞추고,
+// 안쪽만 위/아래로 정확히 반씩 나눠서 두 개의 독립된 탭 영역을 만든다.
+// 위(_isKorean ? '지속시간 없음' : 'No duration') - 지금 실제로 적용 중인
+// 상태라 항상 활성(강조) 스타일로 표시. 탭해도 값 변경 없음(그냥 종료 카드를
+// 스텝 조정 대상으로 선택만 함 - 예전 단일 카드가 그랬던 것과 동일).
+// 아래(제안 종료 시각, 예: "04:00 AM") - 비활성 스타일. 탭하면 그 값으로
+// 확정하고 곧바로 단일 카드 레이아웃(_TimeCardButton)으로 전환됨.
+class _TimeCardSplitButton extends StatelessWidget {
+  final String suggestedLabel;
+  final VoidCallback onTapNoDuration;
+  final VoidCallback onTapSuggested;
+  const _TimeCardSplitButton({
+    required this.suggestedLabel,
+    required this.onTapNoDuration,
+    required this.onTapSuggested,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r)),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: onTapNoDuration,
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
+              decoration: BoxDecoration(
+                color: kAppMainAccent.withValues(alpha: 0.08),
+                border: Border.all(color: kAppMainAccent.withValues(alpha: 0.4)),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12.r),
+                  topRight: Radius.circular(12.r),
+                ),
+              ),
+              child: Text(
+                Localizations.localeOf(context).languageCode == 'ko'
+                    ? '지속시간 없음'
+                    : 'No duration',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 13.sp, fontWeight: FontWeight.w800, color: kAppMainAccent),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          SizedBox(height: 1.h),
+          GestureDetector(
+            onTap: onTapSuggested,
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF4F6FC),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(12.r),
+                  bottomRight: Radius.circular(12.r),
+                ),
+              ),
+              child: Text(
+                suggestedLabel,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w800,
+                    color: kAppChipBorder.withValues(alpha: 0.55)),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,7 +1,7 @@
 name: shiftbell
 description: 교대근무자를 위한 자동 알람 관리 앱
 publish_to: 'none'
-version: 1.0.22+24
+version: 1.0.23+25
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -85,6 +85,11 @@ dependencies:
   # 되면 안 됨 - 친구는 read만 해야 함) uid가 필요함. Spark 무료 플랜 포함,
   # 사용자가 콘솔에서 "Anonymous" 로그인 방법만 켜주면 됨.
   firebase_auth: ^6.5.7
+  # ⭐ 2026-09-12 - "교대시계 관리자" DAU/MAU 앱 계획 1단계(project_admin_analytics_plan
+  # 메모리 참고) - 메인 앱에 Firebase Analytics만 붙임(Cloud Function/관리자 앱은
+  # 아직 안 만듦). google-services.json 없이 firebase_options.dart의 FirebaseOptions로만
+  # 초기화(firebase_auth/cloud_firestore와 동일한 방식 - firebase_bootstrap.dart 참고).
+  firebase_analytics: ^12.0.2
   # ⭐ 2026-08-25 - Kotlin을 2.3.0으로 올리면서 9.x로 복귀함(코틀린_버전업_계획.md
   # 참고) - 5.1.0으로 고정했던 이유(구버전 Kotlin과의 metadata 불일치)가 해소됨.
   google_mobile_ads: ^9.1.0
@@ -92,6 +97,13 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # ⭐ 2026-09-12 도입 → 2026-09-13 제거: integration_test/(실기기 E2E)는 이
+  # 개발 환경(호스트 총 RAM 6GB)에서 에뮬레이터+Gradle 빌드를 동시에 못 버텨
+  # `flutter test integration_test/`가 두 번 다 메모리 부족으로 강제 종료됨 -
+  # 이 환경에서는 실용성이 없다고 판단해 코드까지 되돌림(사용자 결정,
+  # 2026-09-13). 대신 에뮬레이터 기반 수동/스크립트 탐색적 테스트(라운드 기반,
+  # 테스트_진행상황.txt)로 커버함. Kotlin 쪽 Robolectric 유닛테스트
+  # (android/app/src/test/)는 이 문제와 무관해 그대로 유지.
   flutter_lints: ^3.0.0
   flutter_launcher_icons: ^0.14.3
 

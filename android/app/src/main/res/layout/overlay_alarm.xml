@@ -7,7 +7,12 @@
      부모 안에서 match_parent 자식은 형제가 확정한 최종 크기를 그대로 따라가는
      표준 안드로이드 동작이라 별도 계산 없이 카드 크기에 맞춰짐.
      뷰 ID(timeText/shiftTypeText/dismissButton/snoozeButton)는 그대로 -
-     AlarmOverlayService.kt의 findViewById 참조는 안 건드림. -->
+     AlarmOverlayService.kt의 findViewById 참조는 안 건드림.
+
+     ⭐ 2026-09-13(사용자 요청 - "카톡 메시지 온 것 같은 카드 형태로") - 위쪽
+     모서리도 24dp로 둥글게(topCornerRadius 추가) - 전체가 하나의 둥근 카드로
+     보이게 함. 색상/버튼 등 내용물은 전혀 안 바꿈 - 카드 4면 모서리와(아래
+     AlarmOverlayService.kt의) 화면상 위치만 조정. -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -17,7 +22,8 @@
     <com.hwani1103.shiftbell.WaveGradientView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:bottomCornerRadius="24dp"/>
+        app:bottomCornerRadius="24dp"
+        app:topCornerRadius="24dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"

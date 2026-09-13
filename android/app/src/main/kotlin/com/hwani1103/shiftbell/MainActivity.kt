@@ -27,6 +27,30 @@ class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.hwani1103.shiftbell/alarm"
     private var methodChannel: MethodChannel? = null
 
+    companion object {
+        // ⭐ 2026-09-12 - 일정 알림(ScheduleNotificationReceiver.kt)이 알림을
+        // 탭했을 때 심는 Intent extra 키. ScheduleNotificationReceiver도 같은
+        // 상수를 참조해서 여기 이름이 바뀌면 그쪽도 컴파일 에러로 바로 드러남.
+        const val EXTRA_OPEN_SCHEDULE_DATE = "openDateSchedule_date"
+        const val EXTRA_OPEN_SCHEDULE_START_MINUTES = "openDateSchedule_startMinutes"
+
+        // ⭐ 2026-09-13(사용자 신고 - "일정 알림 누르면 그냥 달력탭으로 와버림")
+        // 원인: 앱이 완전히 종료된 콜드 스타트에서는 InitialRouter가 항상
+        // MainScreen(initialIndex: kCalendarTabIndex)("달력탭 고정")로 먼저
+        // 뜨고, handleOpenDateScheduleIntent()의 invokeMethod("openDateSchedule")는
+        // Dart의 MainScreen이 아직 initState에서 setMethodCallHandler를 등록하기
+        // 전에 도착하면 그냥 유실됨(Flutter MethodChannel은 핸들러가 없는 채로
+        // 온 메시지를 큐잉하지 않음) - 그 결과 요청 자체가 통째로 씹혀서 그냥
+        // 기본값인 달력 탭에 머무름. "Native가 밀어넣기(push)"만 믿지 않고,
+        // Dart가 스스로 시작 시점에 "혹시 대기 중인 요청 있어?"라고 다시
+        // 물어보는(pull) consumePendingScheduleOpen 핸들러를 추가해 타이밍과
+        // 무관하게 항상 전달되도록 함. 앱이 이미 떠 있는 채로(warm) 탭한
+        // 경우엔 기존 즉시 invokeMethod 경로가 정상 처리하므로 그대로 둠 -
+        // 이 값은 그게 놓쳤을 때만 쓰이는 안전망.
+        private var pendingScheduleOpenDate: String? = null
+        private var pendingScheduleOpenStartMinutes: Int = 0
+    }
+
     // ⭐ 사용자 데이터 백업("A번 요구사항") - MediaStore에 항상 파일 하나만 유지
     // (writeBackupFile/readBackupFile/cleanupOldBackupFiles 참고). 2026-09-01 - 파일명에
     // 날짜를 넣어달라는 요청으로 "ShiftBell_Backup_YYMMDD.json" 형식으로 변경 -
@@ -34,7 +58,36 @@ class MainActivity: FlutterActivity() {
     // 목적이라, 매일 새 파일이 쌓이는 게 아니라 여전히 "파일 하나"만 유지하고
     // 쓸 때마다 그날 날짜로 다시 이름 붙임. 정확한 이름은 매번 날짜가 바뀌므로
     // 매칭/정리 로직은 전부 접두어(BACKUP_DISPLAY_NAME_PREFIX)로 함.
-    private val BACKUP_DISPLAY_NAME_PREFIX = "ShiftBell_Backup_"
+    //
+    // ⭐ 2026-09-11(사용자 신고 - "자동백업이 실제로 안 되고 있다, 폴더에 예전
+    // 파일 하나만 있다") 재점검 - dev/prod 두 flavor(build.gradle.kts, applicationId
+    // "com.hwani1103.shiftbell" vs ".dev")가 완전히 다른 앱인데도 지금까지 이
+    // 접두어가 고정 문자열이라 **둘 다 정확히 같은 파일명 규칙으로 같은 폴더**
+    // (Download/ShiftBell/)에 쓰고 있었음. 바로 위 readBackupFile() 주석에 이미
+    // 적혀있듯 이 앱은 (OEM 버그 우회 목적으로) MediaStore를 selection 없이
+    // "전체 스캔"해서 이름만으로 매칭/삭제하는 경로를 쓰는데, 이 상태에서 두
+    // 앱이 같은 이름 규칙을 쓰면 - 특히 owner_package_name이 NULL로 남는
+    // 기종(이미 확인된 삼성 버그)에서는 - 한쪽이 자기 백업인 줄 알고 다른 쪽
+    // 앱이 방금 쓴 파일을 정리 대상으로 오인하거나, 이름 충돌로 MediaStore가
+    // 삽입을 예기치 않게 처리할 여지가 있었음(둘 다 개발자가 dev 빌드로 자주
+    // 테스트하면서 prod(스토어) 앱도 같이 쓰는 이 기기 환경에서 실제로 부딪힐
+    // 수 있는 조합). packageName을 접두어에 항상 포함시켜 두 앱이 물리적으로도
+    // 절대 같은 파일명을 안 쓰게 함 - 이러면 위 OEM 버그가 어떻게 작동하든
+    // 이름 충돌 가능성 자체가 원천 차단됨(부수 효과로 파일관리자에서 어느
+    // 설치본의 백업인지도 파일명만으로 바로 구분됨).
+    // ⭐ 2026-09-13(사용자 신고 - "백업 파일명에 왜 hwani가 붙어있냐, 실제
+    // 배포판에도 이러면 안 된다") - 원인: 위에서 packageName 전체
+    // ("com.hwani1103.shiftbell")를 그대로 파일명에 박아넣어서, 실제
+    // 스토어(prod) 배포판에서도 사용자 눈에 개발자 개인 식별자가 그대로
+    // 노출되고 있었음(dev/prod 충돌 방지라는 목적 자체는 맞지만, 그 목적엔
+    // "서로 다르기만 하면" 충분해서 patternName 전체를 노출할 필요가 없었음).
+    // prod는 접미사 없이 깔끔하게, dev만 짧은 "_dev" 구분자를 붙이는 것으로
+    // 바꿔서 목적(충돌 방지)은 그대로 유지하면서 실제 사용자에게 보이는
+    // prod 파일명에서 패키지명이 완전히 사라지게 함.
+    private val BACKUP_DISPLAY_NAME_PREFIX by lazy {
+        val flavorSuffix = if (packageName.endsWith(".dev")) "_dev" else ""
+        "ShiftBell_Backup${flavorSuffix}_"
+    }
     private val BACKUP_RELATIVE_PATH = "Download/ShiftBell/"
 
     private fun buildBackupDisplayName(): String {
@@ -84,6 +137,7 @@ class MainActivity: FlutterActivity() {
         window.decorView.post {
             handleStopAlarmIntent(intent)
             handleOpenTabIntent(intent)
+            handleOpenDateScheduleIntent(intent)
         }
     }
 
@@ -153,22 +207,51 @@ override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
     handleStopAlarmIntent(intent)
     handleOpenTabIntent(intent)
+    handleOpenDateScheduleIntent(intent)
     android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
         methodChannel?.invokeMethod("refreshAlarms", null)
     }, 300)
 }
     
     // ⭐ 알림 탭 시 다음알람 탭으로 이동
+    // ⭐ 2026-09-07 - 예전엔 "tabIndex >= 0"으로 걸러서 음수 값은 아예 무시했는데,
+    // 수면 위젯(SleepWidgetProvider.kt)이 "컨디션 탭으로 열기" 요청을 음수
+    // 센티널(kOpenConditionTabSentinel, Dart main.dart 참고 - 로케일에 따라
+    // 실제 탭 인덱스가 달라져서 Kotlin이 고정 숫자로 못 보냄)로 보내야 해서
+    // hasExtra로 바꿈 - "extra가 아예 없으면 무시, 있으면(음수 포함) 그대로
+    // Dart에 전달"로 의미가 정확해짐. 기존 호출부(0/kCalendarTabIndex=2)는
+    // 전부 0 이상이라 동작 그대로 유지됨.
     private fun handleOpenTabIntent(intent: Intent?) {
-        val tabIndex = intent?.getIntExtra("openTab", -1) ?: -1
-        if (tabIndex >= 0) {
-            flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
-                MethodChannel(messenger, CHANNEL).invokeMethod("openTab", tabIndex)
-            }
+        if (intent?.hasExtra("openTab") != true) return
+        val tabIndex = intent.getIntExtra("openTab", -1)
+        flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+            MethodChannel(messenger, CHANNEL).invokeMethod("openTab", tabIndex)
         }
     }
-    
-    
+
+    // ⭐ 2026-09-12 - 일정 알림(ScheduleNotificationReceiver.kt)을 탭했을 때 -
+    // 그 알림의 contentIntent가 심어둔 extras를 그대로 Dart로 릴레이함.
+    // 위 handleOpenTabIntent와 같은 패턴(hasExtra로 "이 intent가 그 용도로 온
+    // 게 맞는지"부터 확인) - 이 앱을 켜는 다른 모든 경로(런처 아이콘, 다른
+    // 알림 등)의 intent는 이 extra가 없으므로 아무 영향 없음.
+    private fun handleOpenDateScheduleIntent(intent: Intent?) {
+        if (intent?.hasExtra(EXTRA_OPEN_SCHEDULE_DATE) != true) return
+        val date = intent.getStringExtra(EXTRA_OPEN_SCHEDULE_DATE) ?: return
+        val startMinutes = intent.getIntExtra(EXTRA_OPEN_SCHEDULE_START_MINUTES, 0)
+        // ⭐ 콜드 스타트에서 아래 즉시 invokeMethod가 유실되더라도(위 companion
+        // object 주석 참고) Dart가 나중에 consumePendingScheduleOpen으로 다시
+        // 가져갈 수 있도록 항상 먼저 저장해둠.
+        pendingScheduleOpenDate = date
+        pendingScheduleOpenStartMinutes = startMinutes
+        flutterEngine?.dartExecutor?.binaryMessenger?.let { messenger ->
+            MethodChannel(messenger, CHANNEL).invokeMethod(
+                "openDateSchedule",
+                mapOf("date" to date, "startMinutes" to startMinutes)
+            )
+        }
+    }
+
+
     private fun handleStopAlarmIntent(intent: Intent?) {
         when (intent?.action) {
             "STOP_ALARM" -> {
@@ -226,6 +309,64 @@ override fun onNewIntent(intent: Intent) {
                     cancelNativeAlarm(id)
                     result.success(null)
                 }
+                // ⭐ 2026-09-12 - 일정관리 탭 "일정에 맞춰서 알림받기" 실제 예약.
+                // 기존 알람(scheduleNativeAlarm)과 완전히 별개 경로 - 잠금화면/벨소리
+                // 없이 가벼운 일반 알림 1건만 표시함(ScheduleNotificationScheduler.kt).
+                "scheduleDateNotification" -> {
+                    val id = call.argument<Int>("id") ?: 0
+                    val triggerAtMillis = call.argument<Long>("triggerAtMillis") ?: 0L
+                    val date = call.argument<String>("date") ?: ""
+                    val startMinutes = call.argument<Int>("startMinutes") ?: 0
+                    val content = call.argument<String>("content") ?: ""
+                    // ⭐ 2026-09-13 - 알림 첫 줄 시간 표시("HH:mm" 또는 "HH:mm - HH:mm")용.
+                    val durationMinutes = call.argument<Int>("durationMinutes") ?: 0
+                    ScheduleNotificationScheduler.schedule(
+                        applicationContext, id, triggerAtMillis, date, startMinutes, content, durationMinutes
+                    )
+                    result.success(null)
+                }
+                "cancelDateNotification" -> {
+                    val id = call.argument<Int>("id") ?: 0
+                    ScheduleNotificationScheduler.cancel(applicationContext, id)
+                    result.success(null)
+                }
+                // ⭐ 2026-09-13 - "일정관리 화면 사용하지 않기"(탭 숨기기) 시점에
+                // 호출 - 예약된 일정 알림 + 이미 표시된 알림을 전부 없애 그
+                // 탭으로 돌아가는 진입 경로 자체를 닫는다(ScheduleNotificationScheduler.kt
+                // cancelAllFromDb 주석 참고). DB는 안 건드리므로 되돌릴 수 있음.
+                "cancelAllScheduleNotifications" -> {
+                    ScheduleNotificationScheduler.cancelAllFromDb(applicationContext)
+                    result.success(null)
+                }
+                // ⭐ 2026-09-13 - "일정관리 화면 사용하기"(탭 복원) 시점에 호출 -
+                // 재부팅 재예약과 완전히 같은 함수를 재사용해 숨겨져 있던 동안
+                // 취소됐던 알림들을 원래 상태로 그대로 복원함.
+                "rescheduleAllScheduleNotifications" -> {
+                    ScheduleNotificationScheduler.rescheduleAllFromDb(applicationContext)
+                    result.success(null)
+                }
+                // ⭐ 2026-09-13 - openDateSchedule 콜드스타트 유실 대비 pull 경로
+                // (위 companion object 주석 참고). MainScreen.initState()가
+                // setMethodCallHandler 등록 직후 한 번 호출해서 "혹시 그 사이에
+                // 놓친 요청 있어?"라고 확인함.
+                "consumePendingScheduleOpen" -> {
+                    val date = pendingScheduleOpenDate
+                    if (date != null) {
+                        result.success(mapOf("date" to date, "startMinutes" to pendingScheduleOpenStartMinutes))
+                        pendingScheduleOpenDate = null
+                    } else {
+                        result.success(null)
+                    }
+                }
+                // ⭐ 즉시 push(invokeMethod("openDateSchedule"))가 실제로 Dart에
+                // 도달해서 처리됐으면 Dart가 이걸 불러서 companion의 대기값을
+                // 지움 - 안 지우면 다음번 완전히 무관한 콜드 스타트 때
+                // consumePendingScheduleOpen이 이 오래된 값을 잘못 다시 꺼내
+                // 쓸 수 있음(스테일 데이터 방지).
+                "clearPendingScheduleOpen" -> {
+                    pendingScheduleOpenDate = null
+                    result.success(null)
+                }
                 "stopAlarm" -> {
                     AlarmPlayer.getInstance(applicationContext).stopAlarm()
                     result.success(null)
@@ -263,6 +404,16 @@ override fun onNewIntent(intent: Intent) {
                 }
                 "triggerGuardCheck" -> {
                     triggerGuardCheck()
+                    result.success(null)
+                }
+                // ⭐ 2026-09-11 - 수면 자동 감지 "거부 학습"(SleepDetectionReceiver.kt
+                // 상단 REJECT_* 주석 참고) - Dart(sleep_record_provider.dart)가
+                // AUTO_DETECTED 기록을 "기록하지 않기"/삭제할 때마다 호출.
+                "recordSleepAutoRejection" -> {
+                    val startEpochMillis = call.argument<Long>("startEpochMillis")
+                    if (startEpochMillis != null) {
+                        SleepDetectionReceiver.recordRejection(applicationContext, startEpochMillis)
+                    }
                     result.success(null)
                 }
                 // ⭐ 신규 추가
@@ -554,22 +705,39 @@ override fun onNewIntent(intent: Intent) {
     // cleanupOldBackupFiles로 분리함)를 그대로 재사용함 - 새 URI를 기억하기 전에
     // 옛 URI를 먼저 읽어만 둠.
     private fun writeBackupFile(content: String): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return false
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            Log.w("MainActivity", "⚠️ 백업 저장 스킵 - Android 10(Q) 미만")
+            return false
+        }
         val prefs = getSharedPreferences("backup_prefs", Context.MODE_PRIVATE)
         val previousUriStr = prefs.getString("last_backup_uri", null)
+        // ⭐ 2026-09-11 - 자동 백업이 조용히 안 되는 문제 재점검용 로그. 이 함수는
+        // MethodChannel을 타고 native까지 도달했다는 뜻이라, 이 로그 한 줄만
+        // 봐도 "Dart 쪽에서 아예 호출을 안 한 것"과 "호출은 됐는데 여기서
+        // 실패한 것"을 구분할 수 있음.
+        Log.d("MainActivity", "💾 백업 저장 시도(content=${content.length}자, prevUri=$previousUriStr)")
 
         return try {
             val resolver = contentResolver
+            val displayName = buildBackupDisplayName()
             val values = ContentValues().apply {
-                put(MediaStore.Downloads.DISPLAY_NAME, buildBackupDisplayName())
+                put(MediaStore.Downloads.DISPLAY_NAME, displayName)
                 put(MediaStore.Downloads.MIME_TYPE, "application/json")
                 put(MediaStore.Downloads.RELATIVE_PATH, BACKUP_RELATIVE_PATH)
             }
             val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
-                ?: return false
-            resolver.openOutputStream(uri)?.use { out ->
+            if (uri == null) {
+                Log.w("MainActivity", "❌ 백업 저장 실패 - insert()가 null 반환(name=$displayName)")
+                return false
+            }
+            val stream = resolver.openOutputStream(uri)
+            if (stream == null) {
+                Log.w("MainActivity", "❌ 백업 저장 실패 - openOutputStream()이 null 반환(uri=$uri)")
+                return false
+            }
+            stream.use { out ->
                 out.write(content.toByteArray(Charsets.UTF_8))
-            } ?: return false
+            }
 
             // ⭐ 새 백업이 실제로 저장에 성공한 뒤에만: 다음 write() 때 지울 URI를
             // 갱신하고, 옛 백업(방금 저장한 새 백업이 아니라 그 이전 것)을 지움.

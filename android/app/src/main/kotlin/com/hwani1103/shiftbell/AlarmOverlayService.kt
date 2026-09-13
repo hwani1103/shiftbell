@@ -328,7 +328,18 @@ class AlarmOverlayService : Service() {
 
             // 상단에 위치
             params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-            params.y = 0
+            // ⭐ 2026-09-13(사용자 요청 - "카톡 메시지 온 것 같은 카드 형태로,
+            // 상태표시줄이랑은 안 닿는 위치로") - FLAG_LAYOUT_IN_SCREEN이라
+            // y=0은 상태표시줄 영역까지 포함한 화면 맨 위를 가리켰음(카드
+            // 위쪽이 상태표시줄에 딱 붙어서 시작). 상태표시줄 높이만큼 내리고
+            // 추가로 12dp 여백을 더 둬서 카드와 상태표시줄 사이를 살짝 띄움 -
+            // 색상/버튼 등 카드 내용물 자체는 전혀 안 바꿈, 화면상 y좌표만 조정.
+            val statusBarHeightPx = run {
+                val resId = resources.getIdentifier("status_bar_height", "dimen", "android")
+                if (resId > 0) resources.getDimensionPixelSize(resId) else 0
+            }
+            val extraGapPx = (12 * resources.displayMetrics.density).toInt()
+            params.y = statusBarHeightPx + extraGapPx
 
             // 화면에 추가
             windowManager?.addView(overlayView, params)

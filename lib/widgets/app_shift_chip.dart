@@ -72,8 +72,14 @@ class AppShiftChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ⭐ 2026-09-12(사용자 피드백) - "선택된 상태가 너무 연하게 보인다"(일정
+    // 알림의 N분전 칩에서 지적) - 완전히 꽉 찬 배경(버튼처럼 보임, 위 이력
+    // 참고)까지는 안 가고, 선택 시에만 테두리를 살짝 더 두껍게 + 채움 색을
+    // 좀 더 진하게 해서 대비만 끌어올림. day_offset_chip 등 이 칩을 쓰는
+    // 다른 화면에도 공통 적용됨(전부 "선택 표시가 흐리다"는 같은 성격의
+    // 개선이라 화면별로 다르게 둘 이유가 없음).
     final radius = dense ? 10.r : 16.r;
-    final borderWidth = dense ? 1.6 : 3.0;
+    final borderWidth = selected ? (dense ? 2.2 : 3.6) : (dense ? 1.6 : 3.0);
 
     final Color borderColor;
     final Color fillColor;
@@ -84,7 +90,7 @@ class AppShiftChip extends StatelessWidget {
       textColor = kAppChipBorder.withValues(alpha: 0.45);
     } else if (selected) {
       borderColor = kAppMainAccent;
-      fillColor = kAppMainAccent.withValues(alpha: 0.16);
+      fillColor = kAppMainAccent.withValues(alpha: 0.26);
       textColor = kAppMainAccent;
     } else {
       borderColor = kAppChipBorder;
@@ -106,7 +112,7 @@ class AppShiftChip extends StatelessWidget {
         label,
         style: TextStyle(
           fontSize: dense ? 12.sp : 14.sp,
-          fontWeight: FontWeight.w600,
+          fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
           color: textColor,
         ),
       ),

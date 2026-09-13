@@ -23,6 +23,7 @@ import '../models/friend_schedule.dart';
 import '../models/shift_schedule.dart';
 import '../utils/holiday_util.dart';
 import '../l10n/l10n_extensions.dart';
+import 'friend_list_screen.dart';
 
 class FriendCalendarView extends StatefulWidget {
   final String friendName;
@@ -99,7 +100,38 @@ class _FriendCalendarViewState extends State<FriendCalendarView> {
     final displayName = widget.friendName.isEmpty ? context.l10n.friendDefaultDisplayName : widget.friendName;
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.friendScheduleOf(displayName), style: TextStyle(fontSize: 17.sp))),
+      appBar: AppBar(
+        // ⭐ 2026-09-08 - 화면 크기 점검 중 발견: displayName은 친구가 직접
+        // 정한 공유 이름이라 길이가 임의로 길 수 있는데, maxLines/overflow가
+        // 없었음. 아래 actions에 아이콘 버튼이 새로 생겨 제목이 쓸 수 있는
+        // 가로 폭이 더 줄어들면서, 좁은 화면 + 긴 이름 조합에서 제목이 두 줄로
+        // 꺾여 AppBar 높이 밖으로 잘릴 위험이 생겨 한 줄+말줄임으로 고정.
+        title: Text(
+          context.l10n.friendScheduleOf(displayName),
+          style: TextStyle(fontSize: 17.sp),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        // ⭐ 2026-09-06(사용자 지적) - 친구가 1명뿐이면 달력탭 "친구 일정
+        // 바로가기"가 목록 화면(FriendListScreen)을 거치지 않고 이 화면으로
+        // 곧장 옴(calendar_tab.dart의 _openFriendShare 참고) - 그러면 "내 공유
+        // 코드 보기"/"친구 추가" 같은 일정공유 메인 화면으로 되돌아갈 방법이
+        // 아예 없었다. 앱 내(showInstallPrompt=false)에서만 아이콘 버튼으로
+        // 목록 화면 진입로를 열어줌 - 웹 뷰어(트랙1, 앱 미설치자)는 애초에
+        // 로그인/친구목록 개념이 없으니 그대로 숨김.
+        actions: widget.showInstallPrompt
+            ? null
+            : [
+                IconButton(
+                  icon: const Icon(Icons.groups_outlined),
+                  tooltip: context.l10n.friendShareTitle,
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const FriendListScreen()),
+                  ),
+                ),
+              ],
+      ),
       // ⭐ 하단 SafeArea 없이 body를 바로 뒀더니 제스처 네비게이션 바/화면 하단
       // 곡면에 마지막 줄(6번째 주 또는 설치 유도 배너)이 잘리는 문제가 있었음 -
       // 실제 앱(main.dart 쪽 Scaffold들)은 전부 SafeArea 하위에서 그려지는데

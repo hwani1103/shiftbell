@@ -28,7 +28,12 @@ Play Store 배포중 — **현재 운영 버전 `v1.0.22+24`** (태그 `v1.0.22`
 - **SQLite (sqflite)** — **Device Protected Storage**에 저장 (잠금 해제 전에도 알람이 동작해야 하므로)
 - **MethodChannel** — `com.hwani1103.shiftbell/alarm` (⚠️ `com.example`이 아님)
   - 채널 이름은 `lib/constants/platform_channel.dart`의 `kAlarmChannel` **하나만** 사용할 것. 리터럴 문자열 금지
-- **Firebase** — Firestore만 사용 (Analytics/Messaging 등 없음)
+- **Firebase** — Firestore + Analytics (2026-09-12부터, "교대시계 관리자" DAU/MAU
+  1단계 - Messaging 등은 여전히 없음). Analytics는 Firestore/Auth와 달리
+  `firebase_options.dart`의 `FirebaseOptions`만으론 동작 안 함 - `google-services.json`
+  (`android/app/`, prod/dev 패키지명 둘 다 등록돼 있음) + `com.google.gms.google-services`
+  Gradle 플러그인이 실제로 붙어 있어야 함(`친구공유_v1_스펙.md`에 이 플러그인을 한 번
+  뺐다가 다시 붙인 경위 기록)
   - `friend_schedules` : 친구 근무표 공유 (익명 인증 `ownerId` 기반)
   - `app_config` : 업데이트 안내용 원격 설정 (읽기 전용, 값은 콘솔에서 직접 수정)
   - 규칙: `firestore.rules`
@@ -79,12 +84,25 @@ flutter build appbundle --release --flavor prod   # 스토어 배포용
 ### 일정관리 탭 / 메모·일정 카테고리 자동분류
 - `schedule_management_tab.dart` — 세로 시간축에서 시각을 골라 일정 생성/수정.
   `date_schedules` 테이블(v20, `date_memos`와 완전히 별개)에 영구 저장
+- **일정에 맞춰서 알림받기**(2026-09-12) — 일정 생성/수정 시트의 스위치를 켜면
+  정시(또는 5/10/30분 전, `notify_offset_minutes`)에 가벼운 일반 알림 1건이
+  옴 - 기존 "알람"(잠금화면/벨소리/스누즈)과 무관, 소리/진동/무음은 이 알림
+  전용 채널("일정 알림")의 시스템 기본값을 그대로 따름. 예약은 기존 알람과
+  같은 방식(Native `AlarmManager`, `ScheduleNotificationScheduler.kt`/
+  `ScheduleNotificationReceiver.kt`) - 재부팅 시 `DirectBootReceiver`가
+  `date_schedules`를 직접 읽어 재예약함. 알림을 탭하면 일정관리 탭으로 이동해
+  그 일정의 시간대로 자동 스크롤(`lib/utils/schedule_focus_request.dart`).
+  DB v23(`notify_enabled`/`notify_offset_minutes`), 등록/취소는
+  `date_schedule_provider.dart`의 create/update/delete 세 지점뿐 -
+  `전체근무표_개선안_및_일정알림_설계메모.md` 2장 참고
 - 일정 생성 시 아이콘을 직접 안 고르면 내용 텍스트로 자동분류해서 카테고리
   아이콘을 대신 배정(`MemoCategoryClassifier`, 키워드 하드매핑 + 온디바이스
   TF-IDF/LogisticRegression, `assets/ml/memo_category_model.json`) — 직접 고르면
   항상 그 선택이 우선. 모델 학습/재export는 `ml/`(Python) 참고
-- 카테고리 **19종**(2026-09-01, 기존 10종에서 확장 — 달리기/수영/등산/문화생활/
-  금융/집안일/미용 신설. 2026-09-03, 자전거/요가·필라테스 추가 신설). 정의/
+- 카테고리 **25종**(2026-09-01, 기존 10종에서 확장 — 달리기/수영/등산/문화생활/
+  금융/집안일/미용 신설. 2026-09-03, 자전거/요가·필라테스 추가 신설. 2026-09-12,
+  "운동"에서 세분화 — 라켓 스포츠/축구/농구/야구/구기종목/입식 격투기 6종
+  신설, 신규 6종은 전부 하드매핑 전용이라 ML 재학습 없이 동작). 정의/
   우선순위는 `ml/카테고리_가이드.md`, 아이콘 매핑은
   `assets/icons/memo_category/README.md` 참고
 - 상세: `메모_자동분류_ML_계획.md`(Phase 0~5 완료, Phase 6~7 보류, Phase 8
@@ -97,9 +115,9 @@ flutter build appbundle --release --flavor prod   # 스토어 배포용
 
 ### 업데이트 안내
 `update_service.dart` — Play In-App Update API를 **쓰지 않음**(새 버전 전파 지연 때문).
-Firestore `app_config`의 `latestVersionCode`를 앱이 직접 읽어 판단하고,
-`minSupportedVersionCode`로 강제 업데이트도 가능(기본 비활성).
+Firestore `app_config`의 `latestVersionCode`를 앱이 직접 읽어 판단함.
 포그라운드 복귀 때마다 재체크하되 버전코드로 dedupe + 쿨다운.
+강제 업데이트(`minSupportedVersionCode`) 기능은 2026-09-12에 안 쓰기로 하고 제거함.
 
 ### 컨디션 매니저 (1차 버전 — 신설 탭, "일정관리" 옆)
 `lib/screens/condition_tab.dart` + `lib/services/condition/*` — 교대근무 일정을
@@ -308,7 +326,7 @@ android/app/src/main/kotlin/com/hwani1103/shiftbell/
 
 | 값 | Kotlin | Dart |
 |----|--------|------|
-| DB 스키마 버전 | `DatabaseHelper.kt` `DATABASE_VERSION` (현재 **22**) | `database_service.dart` `version:` |
+| DB 스키마 버전 | `DatabaseHelper.kt` `DATABASE_VERSION` (현재 **23**) | `database_service.dart` `version:` |
 | 갱신 윈도우 일수 | `AlarmRefreshEngine.kt` `DAYS_AHEAD` (현재 **10**) | `alarm_limits.dart` `kAlarmRefreshWindowDays` |
 
 새로 이런 쌍이 생기면 `checkPair()` 호출을 하나 더 추가할 것.
@@ -346,7 +364,7 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
 
 ---
 
-## DB 스키마 (v22)
+## DB 스키마 (v23)
 
 `shift_schedule` · `shift_alarm_templates` · `alarms` · `alarm_types` ·
 `alarm_history` · `alarm_creation_log` · `date_memos` · `date_schedules` ·
@@ -368,11 +386,16 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
   근무명별 출퇴근 시각(자정 기준 분)만 저장. Native는 이 테이블을 전혀 안 읽음
 - v22 — `sleep_records`/`sleep_expected_bedtime` 테이블 신설. 실제 수면 기록/자동
   추정 전용 - 이번엔 Native(SleepDetectionReceiver.kt 등)가 직접 읽고 씀
-- (되돌려짐) v23 시도 — "D번 요구사항"(일정관리 탭 일정 생성 팝업 5분
+- (되돌려짐) v23 시도(1차) — "D번 요구사항"(일정관리 탭 일정 생성 팝업 5분
   미세조정)의 물리적 표시 위치를 `date_schedules.slot_minutes` 컬럼으로
   저장하려 했으나, `start_minutes`만으로 항상 계산 가능한 순수 파생값으로
   정정되어(`date_schedule.dart`의 `computeSlotMinutes()`) 마이그레이션을
   되돌림 - DB는 다시 v22.
+- v23(2026-09-12) — `date_schedules`에 `notify_enabled`/`notify_offset_minutes`
+  추가. 일정관리 탭 "일정에 맞춰서 알림받기" 실제 구현(그동안 UI만 있고
+  DB 컬럼/예약 로직이 없던 목업 - `전체근무표_개선안_및_일정알림_설계메모.md`
+  2장 참고). 이번엔 Native(`ScheduleNotificationScheduler.kt`)가 재부팅 재예약을
+  위해 이 테이블을 직접 읽음 - v20/v21 당시의 "Native 미사용" 전제가 끝남.
 
 ---
 
@@ -397,6 +420,8 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
 | `수면기록_자동추정_설계.md` | 위 기능의 아키텍처/DB/위젯/컨디션 매니저와의 분리 원칙 |
 | `백업_수면_컨디션_기능_검토_2026-09-01.md` | 위 세 기능(백업/수면기록/컨디션매니저) 코드+UX 검토(리뷰만, 수정은 별도) — B1(연속 야간근무 시 자동 감지 창 계산 버그, HIGH)은 2026-09-04 재점검에서 Dart/Kotlin 양쪽 다 이미 고쳐져 있음을 확인함(아래 전체_코드_점검_리포트 참고), A2/A3/B3/C1은 여전히 미해결 |
 | `전체_코드_점검_리포트_2026-09-04.md` | 알람/수면기록/컨디션매니저/백업·DB마이그레이션/주요 UI 화면/친구공유(Firestore 포함) 전면 재점검(리뷰만) — HIGH 3건(컨디션 탭 무한루프 위험, 알람갱신 트랜잭션 중 OS콜, 자동백업 감지 로직 결함) 최우선 |
+| `세션_기록_2026-09-11.md` | 9개 UX 수정(전부 dev 미커밋) + 자동백업 재점검(dev/prod 파일명 충돌 수정, 근본원인 미확정) + 수면감지 거부학습 + "교대시계 관리자"(DAU/MAU) 앱 계획 1단계 착수 중 막힌 지점 기록 — 다음 세션 시작 시 먼저 읽을 것 |
+| `테스트_계획_2026-09-12.md` | 라운드 기반 탐색적 수동 테스트(A) + 자동화 테스트 인프라(B: Kotlin/Robolectric) 계획. `integration_test/`(Flutter E2E)는 2026-09-13 환경 제약(호스트 RAM 6GB)으로 코드까지 제거함 — 아래 "알려진 상태" 참고. 진행 경과/PASS·FAIL 기록은 바탕화면 `테스트_진행상황.txt`(라운드별로 계속 갱신, 저장소 밖) |
 
 ---
 
@@ -406,3 +431,14 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
   모바일 빌드엔 영향 없음), 경고 0건, 나머지는 info 린트
 - 저장소 히스토리에 예전 logcat 덤프 86MB가 남아 있음(팩 16MB). 추적은 해제됨
 - 미검증: 홈 화면 위젯 테마 반영은 코드상 완성이지만 실기기 확인 이력 없음
+- 2026-09-12 - 이 프로젝트 최초의 Kotlin 테스트(`android/app/src/test/kotlin/...`,
+  JUnit4+Robolectric+Mockito, `./gradlew testDevDebugUnitTest`) 신설 — 테스트_계획_2026-09-12.md
+  B 참고. Flutter `integration_test/`도 같은 날 신설했으나 이 개발 환경(호스트
+  총 RAM 6GB)에서 에뮬레이터+Gradle 빌드를 동시에 못 버텨 2026-09-13에 코드까지
+  되돌림(실행 시도 2회 모두 메모리 부족으로 강제 종료) — 대신 에뮬레이터 기반
+  수동/스크립트 탐색적 테스트(라운드 기반, 바탕화면 `테스트_진행상황.txt`)로
+  커버함. `AlarmRefreshEngine.doRefresh()`/`computeDesiredAlarms()`와
+  `ScheduleNotificationScheduler.triggerMillisFor()`를 테스트 가능하게 `private`→`internal`로
+  넓힘(동작 변경 없음) - 새 Kotlin 테스트를 추가할 때 Robolectric이 아직 SDK 36을
+  지원 안 해서 `android/app/src/test/resources/robolectric.properties`로 SDK 34에
+  고정해둔 상태임을 참고할 것.

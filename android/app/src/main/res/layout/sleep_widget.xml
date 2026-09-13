@@ -43,30 +43,15 @@
             android:textStyle="bold"
             android:textSize="11sp"/>
 
-        <FrameLayout
+        <!-- ⭐ 2026-09-13(2차) - 배경 알약 + 글자를 SleepWidgetProvider.kt의
+             roundedChipBitmap()이 한 비트맵에 같이 그려서 넣음(텍스트를 별도
+             TextView로 겹치던 방식은 기기마다 정렬이 어긋나는 문제가 있어
+             제거함 - 위 Kotlin 파일 주석 참고). wrap_content로 비트맵 실제
+             크기 그대로 표시 - scaleType 없음(늘리지 않음, 그린 그대로). -->
+        <ImageView
+            android:id="@+id/sleep_shift_chip_bg"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-            <ImageView
-                android:id="@+id/sleep_shift_chip_bg"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="fitXY"/>
-            <TextView
-                android:id="@+id/sleep_shift_chip_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
-                android:maxLines="1"
-                android:ellipsize="end"
-                android:text="야간"
-                android:textStyle="bold"
-                android:textSize="11sp"/>
-        </FrameLayout>
+            android:layout_height="wrap_content"/>
 
     </LinearLayout>
 
@@ -98,6 +83,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="end"
+            android:maxEms="10"
             android:text="활동중"
             android:textColor="#FF212121"
             android:textStyle="bold"

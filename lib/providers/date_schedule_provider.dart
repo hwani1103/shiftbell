@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/date_schedule.dart';
 import '../services/database_service.dart';
+import '../services/schedule_notification_service.dart';
 
 final dateScheduleProvider = StateNotifierProvider<DateScheduleNotifier,
     Map<String, List<DateSchedule>>>((ref) {
@@ -35,6 +36,10 @@ class DateScheduleNotifier extends StateNotifier<Map<String, List<DateSchedule>>
     final saved = await _db.createSchedule(schedule);
     final list = [...(state[schedule.date] ?? const <DateSchedule>[]), saved];
     state = {...state, schedule.date: list};
+    // ⭐ 2026-09-12 - "일정에 맞춰서 알림받기". id가 확정된 뒤(saved)에만
+    // Native에 예약 가능(PendingIntent 식별자로 이 id를 씀) - schedule.id는
+    // 아직 null이라 반드시 saved를 넘겨야 함.
+    await ScheduleNotificationService.syncForSchedule(saved);
     return saved;
   }
 
@@ -44,6 +49,10 @@ class DateScheduleNotifier extends StateNotifier<Map<String, List<DateSchedule>>
         .map((s) => s.id == schedule.id ? schedule : s)
         .toList();
     state = {...state, schedule.date: list};
+    // ⭐ 알림 on/off·N분전 값·내용이 뭐가 바뀌었든 한 번에 재동기화(취소 후
+    // 필요하면 재예약) - syncForSchedule 주석 참고, 매번 취소부터 하는 게
+    // 항상 안전하고 단순함.
+    await ScheduleNotificationService.syncForSchedule(schedule);
   }
 
   Future<void> delete(DateSchedule schedule) async {
@@ -53,5 +62,6 @@ class DateScheduleNotifier extends StateNotifier<Map<String, List<DateSchedule>>
         .where((s) => s.id != schedule.id)
         .toList();
     state = {...state, schedule.date: list};
+    await ScheduleNotificationService.cancelForSchedule(schedule.id!);
   }
 }

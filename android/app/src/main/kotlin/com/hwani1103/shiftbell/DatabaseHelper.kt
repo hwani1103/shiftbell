@@ -62,7 +62,14 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // 그 값이 사용자 확인 결과 startMinutes만으로 매번 계산 가능한 순수
         // 파생값으로 정정되어(date_schedule.dart의 computeSlotMinutes 참고)
         // 저장할 필요 자체가 없어짐 - 그 마이그레이션을 되돌려서 다시 22.
-        private const val DATABASE_VERSION = 22
+        // ⭐ 2026-09-12 - "일정에 맞춰서 알림받기" 실제 구현(그동안 date_schedules에
+        // notify_enabled/notify_offset_minutes 컬럼도, 예약 로직도 없이 UI만 있던
+        // 목업이었음 - 전체근무표_개선안_및_일정알림_설계메모.md 2장 참고). 위 되돌린
+        // v23과 번호는 같지만 내용은 다름(그땐 slot_minutes, 이번엔 notify_* 컬럼).
+        // 이번엔 Native가 date_schedules를 직접 읽는다(ScheduleNotificationScheduler.kt -
+        // 재부팅 시 AlarmManager 알람이 전부 사라지므로 DirectBootReceiver에서 재예약
+        // 필요) - v20/v21의 "Native 미사용" 전제가 이 테이블에 한해 끝남.
+        private const val DATABASE_VERSION = 23
         private const val TAG = "DatabaseHelper"
 
         @Volatile
@@ -84,6 +91,24 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
                     INSTANCE = it
                 }
             }
+        }
+
+        // ⭐ 2026-09-12 - 테스트 전용. Robolectric은 테스트 메서드마다 native SQLite
+        // 연결 풀을 새로 초기화하지만, 이 Kotlin companion object의 정적 INSTANCE는
+        // JVM 프로세스/클래스로더 생명주기를 따라가서 테스트 메서드 사이에도 그대로
+        // 남는다 - 그 결과 이전 테스트에서 이미 무효화된 커넥션 포인터를 든 채인
+        // 낡은 DatabaseHelper 객체를 다음 테스트가 그대로 재사용하다가
+        // "Illegal connection pointer" 오류로 깨짐(AlarmRefreshEngineH2Test.kt에서
+        // 실제로 겪음). 프로덕션 코드 경로는 이 함수를 전혀 호출하지 않음 - 테스트의
+        // @Before/@After에서만 호출해서 매 테스트마다 새 인스턴스로 시작하게 함.
+        internal fun resetInstanceForTest() {
+            try {
+                INSTANCE?.close()
+            } catch (e: Exception) {
+                // 이미 깨진 연결을 닫으려다 나는 예외는 무시 - 테스트 격리가 목적이지
+                // 정상 종료 여부가 중요한 게 아님.
+            }
+            INSTANCE = null
         }
     }
 

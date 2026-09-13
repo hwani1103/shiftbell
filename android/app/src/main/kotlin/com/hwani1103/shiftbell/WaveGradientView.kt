@@ -50,6 +50,8 @@ class WaveGradientView @JvmOverloads constructor(
     )
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val bottomCornerRadiusPx: Float
+    // ⭐ 2026-09-13 추가 - 위 attrs.xml topCornerRadius 참고.
+    private val topCornerRadiusPx: Float
 
     // 315도(기존 angle=315 정적 그라데이션과 동일한 시작 각도)에서 시작.
     private var angleDeg = 315f
@@ -58,6 +60,7 @@ class WaveGradientView @JvmOverloads constructor(
     init {
         val a = context.obtainStyledAttributes(attrs, R.styleable.WaveGradientView)
         bottomCornerRadiusPx = a.getDimension(R.styleable.WaveGradientView_bottomCornerRadius, 0f)
+        topCornerRadiusPx = a.getDimension(R.styleable.WaveGradientView_topCornerRadius, 0f)
         a.recycle()
         setWillNotDraw(false)
     }
@@ -84,10 +87,13 @@ class WaveGradientView @JvmOverloads constructor(
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         if (animator == null) {
-            // ⭐ 360도를 13초에 걸쳐 한 바퀴("조금 더 빠르게" 피드백으로
-            // 18초 → 13초).
+            // ⭐ 360도를 8초에 걸쳐 한 바퀴("조금 더 빠르게, 파도 애니메이션이
+            // 확실히 보이게" 피드백으로 2026-09-13 재조정: 18초 → 13초 → 8초.
+            // Dart 쪽 next_alarm_tab.dart의 _WaveGradientBackgroundState도
+            // 반드시 같은 값으로 유지할 것(동일한 시각 효과를 내는 두 언어
+            // 이중구현 - 알람 생성 로직의 Dart/Kotlin 동기화와 같은 선례).
             animator = ValueAnimator.ofFloat(315f, 315f + 360f).apply {
-                duration = 13_000L
+                duration = 8_000L
                 repeatCount = ValueAnimator.INFINITE
                 interpolator = LinearInterpolator()
                 addUpdateListener {
@@ -111,11 +117,12 @@ class WaveGradientView @JvmOverloads constructor(
         val h = height.toFloat()
         if (w <= 0f || h <= 0f) return
 
-        if (bottomCornerRadiusPx > 0f) {
+        val hasRoundedCorners = bottomCornerRadiusPx > 0f || topCornerRadiusPx > 0f
+        if (hasRoundedCorners) {
             val path = Path()
             val radii = floatArrayOf(
-                0f, 0f, // top-left
-                0f, 0f, // top-right
+                topCornerRadiusPx, topCornerRadiusPx, // top-left
+                topCornerRadiusPx, topCornerRadiusPx, // top-right
                 bottomCornerRadiusPx, bottomCornerRadiusPx, // bottom-right
                 bottomCornerRadiusPx, bottomCornerRadiusPx, // bottom-left
             )
@@ -140,7 +147,7 @@ class WaveGradientView @JvmOverloads constructor(
         )
         canvas.drawRect(0f, 0f, w, h, paint)
 
-        if (bottomCornerRadiusPx > 0f) {
+        if (hasRoundedCorners) {
             canvas.restore()
         }
     }

@@ -15,6 +15,7 @@
 // 동일 원칙) - DatabaseService.database(연결)만 재사용하고 그 안의 알람 관련
 // 메서드는 하나도 안 부름.
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -33,6 +34,13 @@ class BackupWatcher {
   /// 데이터가 실제로 안 바뀌었으면 아무것도 안 하고 성공으로 취급(스킵도 성공).
   /// [force]가 true(수동 "지금 백업" 버튼용)면 변경 여부와 무관하게 항상 씀.
   Future<bool> backupNow({bool force = false}) async {
+    // ⭐ 2026-09-11(사용자 신고 - "자동백업이 실제로 안 되고 있다, 폴더에 예전
+    // 파일 하나만 있다") - 이 함수는 실패해도 절대 앱 사용을 막으면 안 돼서
+    // 지금까지 모든 실패를 조용히 삼켰는데, 그 결과 "정말 실패하는지, 왜
+    // 실패하는지"를 아무도 알 수 없었다. debugPrint는 release 빌드에서도
+    // logcat에 그대로 찍히므로(단지 화면엔 안 보일 뿐) 이 로그들만으로 다음
+    // 실사용/logcat 캡처에서 정확한 실패 지점을 특정할 수 있게 함 - 동작 자체는
+    // 전혀 안 바뀜(로그만 추가).
     try {
       final db = await DatabaseService.instance.database;
 
@@ -47,7 +55,11 @@ class BackupWatcher {
       final prefs = await SharedPreferences.getInstance();
       if (!force) {
         final lastVersion = prefs.getInt(_kLastDataVersionKey);
-        if (lastVersion == currentVersion) return true; // 변경 없음 - 스킵
+        debugPrint('🗄️ [backup] 자동 체크: last=$lastVersion current=$currentVersion');
+        if (lastVersion == currentVersion) {
+          debugPrint('🗄️ [backup] 스킵 - 데이터 변경 없음');
+          return true; // 변경 없음 - 스킵
+        }
 
         // ⭐ 2026-09-01 - "복구하기를 눌러도 계속 빈 백업만 나온다" 버그를
         // 추적하다 추가한 안전장치. 자동 백업(force=false)은 앱이 background로
@@ -61,18 +73,25 @@ class BackupWatcher {
         // 사용자가 설정 탭에서 직접 누른 명시적 행동이라 그대로 존중해서 막지
         // 않음(그 화면엔 애초에 일정이 있어야 도달 가능하기도 함).
         final scheduleRows = await db.query('shift_schedule', limit: 1);
-        if (scheduleRows.isEmpty) return true; // 백업할 유효한 근무 일정 없음 - 스킵
+        if (scheduleRows.isEmpty) {
+          debugPrint('🗄️ [backup] 스킵 - shift_schedule 비어있음');
+          return true; // 백업할 유효한 근무 일정 없음 - 스킵
+        }
       }
 
+      debugPrint('🗄️ [backup] 쓰기 시작(force=$force)');
       final payload = await BackupService.instance.exportAll();
       final wrote = await BackupStorageService.instance.write(payload.encode());
+      debugPrint('🗄️ [backup] 쓰기 결과: $wrote (테이블 ${payload.tables.length}개, 행 ${payload.totalRowCount}개)');
       if (!wrote) return false;
 
       await prefs.setInt(_kLastDataVersionKey, currentVersion);
       await prefs.setString(_kLastSavedAtKey, DateTime.now().toIso8601String());
       return true;
-    } catch (e) {
-      // ⭐ 백업(특히 자동 트리거) 실패가 앱 사용을 방해하면 안 됨 - 조용히 실패.
+    } catch (e, st) {
+      // ⭐ 백업(특히 자동 트리거) 실패가 앱 사용을 방해하면 안 됨 - 조용히
+      // 실패하되, 이제는 최소한 로그로는 남김(위 주석 참고).
+      debugPrint('🗄️ [backup] ❌ 예외로 실패: $e\n$st');
       return false;
     }
   }
@@ -97,13 +116,27 @@ class BackupWatcher {
   /// SQLite 파일 하나에 여러 커넥션이 동시에 붙는 것 자체는 이 앱의 기존
   /// 설계와 같은 패턴).
   Future<int> _readDataVersion(String path) async {
-    final versionDb = await openReadOnlyDatabase(path, singleInstance: false);
-    try {
-      final rows = await versionDb.rawQuery('PRAGMA data_version');
-      return rows.first['data_version'] as int;
-    } finally {
-      await versionDb.close();
+    // ⭐ 2026-09-11 - 자동 트리거(AppLifecycleState.paused)는 하필 앱이 막
+    // 배경으로 전환되는 순간이라, 그 직전에 진행 중이던 쓰기 트랜잭션과 아주
+    // 드물게 겹쳐 "database is locked" 예외가 날 수 있음(이 창은 짧아서
+    // 한 번만 재시도해도 대부분 해소됨). 여기서 조용히 실패시키면 그 백그라운드
+    // 전환 한 번의 백업만 스킵되는데, 어차피 위 backupNow()의 콜드 스타트
+    // 트리거가 다음 실행 때 다시 시도하므로 완전히 유실되진 않지만, 가능하면
+    // 그 자리에서 한 번 더 시도해 성공률을 높인다.
+    for (var attempt = 0; attempt < 2; attempt++) {
+      Database? versionDb;
+      try {
+        versionDb = await openReadOnlyDatabase(path, singleInstance: false);
+        final rows = await versionDb.rawQuery('PRAGMA data_version');
+        return rows.first['data_version'] as int;
+      } catch (e) {
+        if (attempt == 1) rethrow;
+        await Future.delayed(const Duration(milliseconds: 200));
+      } finally {
+        await versionDb?.close();
+      }
     }
+    throw StateError('unreachable');
   }
 
   /// 설정 탭에 "마지막 백업: OOOO" 표시용.

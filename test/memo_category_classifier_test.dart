@@ -40,7 +40,7 @@ void main() {
     });
 
     test('명확한 스포츠 키워드는 운동으로 분류된다', () {
-      final r = classifier.classify('테니스 치기');
+      final r = classifier.classify('웨이트 하러가기');
       expect(r.categoryKey, 'exercise');
       expect(r.method, 'tier3_sports');
     });
@@ -131,6 +131,75 @@ void main() {
       final r = classifier.classify('자전거 안전장비 새로 사서 라이딩');
       expect(r.categoryKey, 'cycling');
       expect(r.method, 'tier3b_cycling');
+    });
+  });
+
+  group('종목별 스포츠 분리 + PT/여행 하드매핑(tier3, 2026-09-12 신설)', () {
+    test('라켓 스포츠(테니스/배드민턴/탁구/스쿼시)는 전용 카테고리로 분류된다', () {
+      expect(classifier.classify('테니스 치기').categoryKey, 'racket_sports');
+      expect(classifier.classify('배드민턴 치러 가기').categoryKey, 'racket_sports');
+      final r = classifier.classify('탁구 배우기');
+      expect(r.categoryKey, 'racket_sports');
+      expect(r.method, 'tier3_racket_sports');
+    });
+
+    test('축구/농구/야구는 각각 전용 카테고리로 분류되고, 배구는 구기종목으로 뭉뚱그려진다', () {
+      expect(classifier.classify('축구하기').categoryKey, 'soccer');
+      expect(classifier.classify('농구 하러 가기').categoryKey, 'basketball');
+      expect(classifier.classify('야구 하러 가기').categoryKey, 'baseball');
+      final r = classifier.classify('배구하기');
+      expect(r.categoryKey, 'ball_sports');
+      expect(r.method, 'tier3_ball_sports');
+    });
+
+    test('공을 사기만 하는 문장은 여전히 하드매핑을 defer한다(구기종목 오탐 방지)', () {
+      expect(classifier.classify('테니스공 사기').method, isNot('tier3_racket_sports'));
+      expect(classifier.classify('축구공 사러 가기').method, isNot('tier3_soccer'));
+    });
+
+    test('입식 격투기(복싱/킥복싱/무에타이)는 전용 카테고리로 분류된다', () {
+      expect(classifier.classify('복싱 배우기').categoryKey, 'combat_sports');
+      expect(classifier.classify('킥복싱 수업 등록').categoryKey, 'combat_sports');
+      final r = classifier.classify('무에타이 체험하기');
+      expect(r.categoryKey, 'combat_sports');
+      expect(r.method, 'tier3_combat_sports');
+    });
+
+    test('"PT받기"는 병원이 아니라 운동(헬스장 개인 트레이닝)으로 분류된다', () {
+      final r = classifier.classify('PT받기');
+      expect(r.categoryKey, 'exercise');
+      expect(r.method, 'tier3_personal_training');
+    });
+
+    test('"PT" 대소문자를 구분하지 않고, 띄어 써도 잡힌다', () {
+      expect(classifier.classify('pt받기').categoryKey, 'exercise');
+      expect(classifier.classify('PT 등록하기').categoryKey, 'exercise');
+    });
+
+    test('개인 트레이닝 맥락 신호가 없는 bare "PT"는 하드매핑을 강제하지 않는다', () {
+      expect(classifier.classify('내일 PT 있음').method, isNot('tier3_personal_training'));
+    });
+
+    test('"PT 자료 준비"처럼 업무 발표 맥락이면 운동으로 강제되지 않는다', () {
+      expect(
+        classifier.classify('PT 자료 준비').method,
+        isNot('tier3_personal_training'),
+      );
+      expect(
+        classifier.classify('PT 발표 준비하기').method,
+        isNot('tier3_personal_training'),
+      );
+    });
+
+    test('"사파리투어"는 쇼핑이 아니라 여가/휴식으로 분류된다', () {
+      final r = classifier.classify('사파리투어');
+      expect(r.categoryKey, 'leisure');
+      expect(r.method, 'tier3c_leisure_travel');
+    });
+
+    test('"관광"이 포함된 무관한 복합명사는 여가로 강제되지 않는다', () {
+      final r = classifier.classify('관광통역안내사 자격시험 신청');
+      expect(r.method, isNot('tier3c_leisure_travel'));
     });
   });
 

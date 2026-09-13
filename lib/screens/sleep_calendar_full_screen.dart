@@ -235,6 +235,7 @@ class _SleepDayListRow extends ConsumerWidget {
                 if (category != SleepSlotCategory.values.first) const SizedBox(width: 8),
                 Expanded(
                   child: _SlotChip(
+                    cardDate: day.date,
                     category: category,
                     record: day.forCategory(category),
                     onTap: () async {
@@ -259,10 +260,19 @@ class _SleepDayListRow extends ConsumerWidget {
 }
 
 class _SlotChip extends StatelessWidget {
+  final DateTime cardDate;
   final SleepSlotCategory category;
   final SleepRecord? record;
   final VoidCallback onTap;
-  const _SlotChip({required this.category, required this.record, required this.onTap});
+  const _SlotChip({
+    required this.cardDate,
+    required this.category,
+    required this.record,
+    required this.onTap,
+  });
+
+  bool _isSameDate(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   Widget build(BuildContext context) {
@@ -293,12 +303,23 @@ class _SlotChip extends StatelessWidget {
             if (r == null)
               const Text('+ 기록', style: TextStyle(fontSize: 12.5, color: Colors.black54, fontWeight: FontWeight.w500))
             else ...[
-              Text(
-                r.end != null ? '${fmtTimeOnly(r.start)} - ${fmtTimeOnly(r.end!)}' : '${fmtTimeOnly(r.start)}~ 진행 중',
-                style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Builder(builder: (context) {
+                // ⭐ 2026-09-13(사용자 요청) - condition_tab.dart의 _SleepSlotCell과
+                // 동일한 이유(야간 근무 회복수면은 카드 날짜와 실제 취침 날짜가
+                // 다를 수 있음) - 다르면 "M/D " 접두어를 붙임.
+                final timeText = r.end != null
+                    ? '${fmtTimeOnly(r.start)} - ${fmtTimeOnly(r.end!)}'
+                    : '${fmtTimeOnly(r.start)}~ 진행 중';
+                final startsOnDifferentDate = !_isSameDate(r.start, cardDate);
+                final displayText =
+                    startsOnDifferentDate ? '${r.start.month}/${r.start.day} $timeText' : timeText;
+                return Text(
+                  displayText,
+                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                );
+              }),
               if (r.durationMinutes != null)
                 Text(
                   '(${fmtSleepDuration(Duration(minutes: r.durationMinutes!), r.source)})',

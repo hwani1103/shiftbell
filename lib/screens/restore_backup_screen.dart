@@ -27,6 +27,7 @@ import '../services/alarm_refresh_service.dart';
 import '../services/backup_service.dart';
 import '../services/database_service.dart';
 import '../services/permission_service.dart';
+import '../services/update_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_button.dart';
 import 'onboarding_screen.dart';
@@ -94,6 +95,19 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
         }
         return;
       }
+
+      // ⭐ 2026-09-08 - "완전 새로 설치하고 백업으로 복구했는데, 메인화면에
+      // 들어가자마자 '이번 업데이트는 꼭 확인해주세요'(업데이트 후 첫 실행
+      // 안내) 팝업이 떴다"는 신고로 발견한 버그 수정. 이 안내는
+      // markOnboardingBaselineVersion()으로 "방금 이 버전으로 막 시작한
+      // 사람"이라는 기준선을 남겨야 신규 설치자에게 안 뜨는데, 그 호출이
+      // onboarding_screen.dart(근무 설정 마법사를 끝까지 마치는 경로)에만
+      // 있었고 이 백업 복구 경로엔 빠져 있었음 - 복구도 "이 기기에서는 방금
+      // 막 시작한 것"과 똑같은 의미라 여기도 반드시 남겨야 함. 이후 화면이
+      // 곧장 MainScreen으로 가든(아래) PermissionIntroScreen을 한 번 거쳐서
+      // 가든(permission_intro_screen.dart의 _navigateToOnboarding, schedule
+      // != null 분기) 상관없이 SharedPreferences에 이미 기록된 값이라 적용됨.
+      await UpdateService.markOnboardingBaselineVersion();
 
       // ⭐ 위 import 주석 참고 - 네이티브의 "하루 1번" 갱신 쿨다운을 무시하고
       // 지금 막 바뀐 shift_schedule/shift_alarm_templates 기준으로 alarms

@@ -1,6 +1,6 @@
 # DB 스키마 변경 가이드
 
-현재 스키마 버전: **v22**
+현재 스키마 버전: **v23**
 
 이 앱은 **Flutter(sqflite)와 Kotlin(SQLiteOpenHelper)이 같은 SQLite 파일을 각자 연다**.
 그래서 스키마 변경이 다른 앱보다 까다롭고, 실제로 같은 실수가 세 번 재발해서
@@ -171,7 +171,7 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
 
 ---
 
-## 5. 현재 스키마 (v22)
+## 5. 현재 스키마 (v23)
 
 | 테이블 | 용도 |
 |---|---|
@@ -182,7 +182,7 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
 | `alarm_history` | 알람 이력 — **영구 보존, 자동 삭제 금지** |
 | `alarm_creation_log` | 알람 생성 로그 — **영구 보존, 자동 삭제 금지** |
 | `date_memos` | 날짜별 메모(달력 탭) |
-| `date_schedules` | 일정관리 탭 전용 (v20 신규 - `date_memos`와 완전히 별개 CRUD) |
+| `date_schedules` | 일정관리 탭 전용 (v20 신규 - `date_memos`와 완전히 별개 CRUD, v23에서 `notify_enabled`/`notify_offset_minutes` 추가 - Native가 재부팅 재예약을 위해 직접 읽음) |
 | `date_overtime` | 날짜별 OT/특근 |
 | `friends` | 친구 공유 (v17에서 Firestore `ownerId` 기반으로 재설계) |
 | `condition_shift_times` | 컨디션 매니저 전용(v21 신규) - 근무명별 출퇴근 시각. 알람/근무패턴 로직은 안 읽음 |
@@ -212,7 +212,7 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
   자동 추정 - 수면기록_자동추정_설계.md 참고). 이번엔 Native가 이 테이블들을
   직접 읽고 쓴다(`SleepDetectionReceiver.kt`/`SleepWidgetActionReceiver.kt`/
   `SleepScheduleResolver.kt`) - v20/v21과 달리 "Native 미사용" 케이스가 아님.
-- **(되돌려짐) v23 시도** — "D번 요구사항"(일정관리 탭 일정 생성 팝업 5분
+- **(되돌려짐) v23 시도(1차)** — "D번 요구사항"(일정관리 탭 일정 생성 팝업 5분
   미세조정)의 "물리적 표시 위치" 값을 처음엔 `date_schedules.slot_minutes`
   컬럼으로 저장하려 했으나, 그 위치 규칙이 "정각(분=0)이면 그 정각, 그 외
   (1~59분)엔 그 시간대의 30분 자리"라는 `start_minutes` 하나만으로 항상
@@ -220,6 +220,19 @@ cd .. && flutter install --release --flavor dev      # ⚠️ 반드시 --flavor
   이유가 없어져서 마이그레이션 자체를 되돌림(DB는 다시 v22). 계산은
   `lib/models/date_schedule.dart`의 `computeSlotMinutes()` 참고 - work_hours_calculator.dart가
   통계를 저장 안 하고 매번 계산하는 것과 같은 원칙.
+- **v23(2026-09-12)** — `date_schedules`에 `notify_enabled INTEGER NOT NULL
+  DEFAULT 0`/`notify_offset_minutes INTEGER NOT NULL DEFAULT 0` 추가. 일정관리
+  탭 "일정에 맞춰서 알림받기"(그동안 스위치/칩 UI만 있고 실제 예약 로직이
+  없던 목업)를 실제로 구현 - `전체근무표_개선안_및_일정알림_설계메모.md` 2장의
+  결론(기존 알람과 별개인 가벼운 일반 알림 1건, Native `AlarmManager` 기반)을
+  그대로 따름. **이번엔 v20/v21과 달리 Native가 이 테이블을 직접 읽는다** -
+  `ScheduleNotificationScheduler.kt`가 재부팅 직후(`DirectBootReceiver`)
+  `date_schedules`를 조회해서 `notify_enabled=1`이고 트리거 시각이 아직
+  미래인 것만 재예약함(AlarmManager 알람은 재부팅하면 전부 사라지므로 -
+  기존 알람/수면감지 재부팅 재예약과 같은 이유). 등록/취소 트리거 지점은
+  `lib/providers/date_schedule_provider.dart`의 create/update/delete 세 곳뿐 -
+  `date_schedules`는 알람처럼 반복 패턴이 아니라 개별 1회성 일정이라 "10일치
+  롤링 재생성" 개념 자체가 불필요함.
 
 ---
 

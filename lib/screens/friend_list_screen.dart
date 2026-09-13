@@ -170,7 +170,7 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                 ),
                 SizedBox(height: 6.h),
                 Text(
-                  '${context.l10n.friendEnterShareCode}\n${context.l10n.friendCanCheckAnytime}',
+                  context.l10n.friendEnterShareCode,
                   style: TextStyle(fontSize: 12.5.sp, color: colorScheme.onSurfaceVariant),
                 ),
               ],

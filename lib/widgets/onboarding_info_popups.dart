@@ -11,15 +11,11 @@
 //
 // 내용은 서로 완전히 다른 주제(웰컴 인사말 vs 근무 배정 조작법)라 별도
 // 위젯이지만, "같은 크기·같은 톤의 카드"로 보이도록 [_InfoPopupCard] 하나를
-// 공유해서 씀 - 사용자가 새로 만든 lab 탭(onboarding_popup_lab_screen.dart)에서
-// 두 개를 나란히 비교해도 크기가 어긋나 보이지 않게 하려는 목적.
+// 공유해서 씀.
 //
-// ⭐ 2026-09-06(사용자 요청) - "업데이트 안내"/"업데이트 후 첫 1회 안내"
-// 팝업(둘 다 실제 구현은 update_service.dart에 이미 있고 여기서 새로 만드는 게
-// 아님)도 같은 lab 탭에서 같은 카드 스타일로 미리보기만 하고 싶다고 해서
-// UpdateAvailableContent/ReleaseNoteContent를 추가함 - 문구는 l10n(app_ko.arb)에
-// 저장된 실제 값을 그대로 옮김. update_service.dart의 실제 다이얼로그 로직/트리거
-// 조건은 전혀 안 건드림(이 파일은 순수 미리보기 카드 전용).
+// ⭐ 2026-09-12 - 한때 있던 미리보기 전용 lab 탭("테스트알림",
+// onboarding_popup_lab_screen.dart)은 배포 전 최종 점검 후 제거함 - 이 파일엔
+// 그 흔적(미리보기 전용 클래스들)이 없고, 실제 팝업 로직만 남아있음.
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,6 +23,11 @@ import 'app_button.dart';
 
 const _kWelcomePopupShownKey = 'welcome_popup_shown';
 const _kShiftAssignTutorialShownKey = 'shift_assign_tutorial_shown';
+// ⭐ 2026-09-11 추가(사용자 요청) - 컨디션 탭 최초 진입 안내.
+const _kConditionTabTutorialShownKey = 'condition_tab_tutorial_shown';
+// ⭐ 2026-09-13 추가(사용자 요청) - 일정관리 탭 최초 진입 안내(컨디션 탭과
+// 동일한 디자인/원칙).
+const _kScheduleTabTutorialShownKey = 'schedule_tab_tutorial_shown';
 
 /// 온보딩 첫 화면(_OnboardingScreenState)이 initState에서 부르는 함수 - 이미
 /// 봤으면 아무 것도 안 함.
@@ -69,22 +70,73 @@ Future<void> maybeShowShiftAssignTutorial(BuildContext context, {required bool i
   );
 }
 
+/// 컨디션 탭(condition_tab.dart) `_ConditionBodyState`가 최초 build 시 부르는
+/// 함수 - 이미 봤으면 아무 것도 안 함. setupNeeded 여부와 무관하게 항상 뜸(설정이
+/// 안 돼 있으면 그 자체가 이 안내의 1번 내용이므로).
+Future<void> maybeShowConditionTabTutorial(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  if (prefs.getBool(_kConditionTabTutorialShownKey) ?? false) return;
+  await prefs.setBool(_kConditionTabTutorialShownKey, true);
+  if (!context.mounted) return;
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => Dialog(
+      backgroundColor: Colors.transparent,
+      child: _InfoPopupCard(
+        content: ConditionTabTutorialContent(),
+        onConfirm: () => Navigator.of(context).pop(),
+      ),
+    ),
+  );
+}
+
+/// 일정관리 탭(schedule_management_tab.dart)이 최초 build 시 부르는 함수 -
+/// 이미 봤으면 아무 것도 안 함. 컨디션 탭의 maybeShowConditionTabTutorial과
+/// 완전히 동일한 패턴(같은 카드/버튼 디자인, 평생 1회).
+Future<void> maybeShowScheduleTabTutorial(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  if (prefs.getBool(_kScheduleTabTutorialShownKey) ?? false) return;
+  await prefs.setBool(_kScheduleTabTutorialShownKey, true);
+  if (!context.mounted) return;
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => Dialog(
+      backgroundColor: Colors.transparent,
+      child: _InfoPopupCard(
+        content: ScheduleTabTutorialContent(),
+        onConfirm: () => Navigator.of(context).pop(),
+      ),
+    ),
+  );
+}
+
 /// 공용 카드 - 두 팝업이 항상 같은 크기/톤으로 보이게 함(제목 아이콘 + 제목 +
 /// 본문 + 버튼 1개, 최소 높이를 통일해서 본문 길이가 달라도 비슷한 크기로 보임).
 class _InfoPopupCard extends StatelessWidget {
   final _PopupContent content;
   final VoidCallback onConfirm;
-  // ⭐ 2026-09-06 - "업데이트 안내" 미리보기용. null이면(기존 두 팝업) 예전처럼
-  // 버튼 1개(전체 너비)만 그림 - 실제 다이얼로그 로직과는 무관한 미리보기
-  // 전용이라 onSecondaryConfirm도 그냥 시각적 버튼만 필요할 뿐 실제 동작은
-  // 없어도 됨.
-  final VoidCallback? onSecondaryConfirm;
-  const _InfoPopupCard({required this.content, required this.onConfirm, this.onSecondaryConfirm});
+  const _InfoPopupCard({required this.content, required this.onConfirm});
 
   @override
   Widget build(BuildContext context) {
+    // ⭐ 2026-09-12(사용자 신고 - "컨디션 탭 최초진입 팝업, 스크롤이 없어서
+    // 버튼이 팝업 밑으로 내려가버렸다") - 근본 원인 수정. 예전(2026-09-05)
+    // 주석은 "실제 Dialog에서는 높이 제한이 되니 문제 없다"고 가정했는데,
+    // 이 카드를 감싼 바깥 Dialog는 maxHeight를 안 정해주는 평범한 Dialog라
+    // 본문이 화면보다 길어지면(컨디션탭 튜토리얼처럼 5단계짜리 긴 본문)
+    // 그 가정이 깨짐 - SingleChildScrollView가 본문 Text 하나만 감싸고
+    // 있었는데, 그 자체를 제한할 부모 높이가 없어서 스크롤이 전혀 동작 안
+    // 하고 Column 전체가 화면 아래로 그냥 넘쳐버렸음(버튼이 화면 밖으로).
+    // 고친 방법: 바깥 ConstrainedBox에 화면 기준 maxHeight를 주고, 스크롤
+    // 대상을 본문 Text 하나가 아니라 "이모지+제목+본문" 전체로 넓힌 뒤
+    // Flexible로 감싸서 - 화면이 부족하면 이 부분만 줄어들며 스크롤되고,
+    // 버튼은 항상 그 아래 고정된 자리에서 보이게 함(AlertDialog의 content/
+    // actions 분리와 같은 원리).
+    final maxHeight = MediaQuery.of(context).size.height * 0.8;
     return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 320, maxWidth: 340),
+      constraints: BoxConstraints(minHeight: 320, maxWidth: 340, maxHeight: maxHeight),
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
         decoration: BoxDecoration(
@@ -98,51 +150,32 @@ class _InfoPopupCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(content.emoji, style: const TextStyle(fontSize: 40)),
-            const SizedBox(height: 14),
-            Text(
-              content.title,
-              style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: Colors.black87),
-            ),
-            const SizedBox(height: 14),
-            // ⭐ 2026-09-05 버그 수정(사용자 신고 - "팝업확인 탭에 아무것도 안
-            // 보임") - 여기 Expanded가 원인이었음. 실제 팝업(showDialog)에서는
-            // Dialog가 높이를 제한해주니 문제가 없었는데, lab
-            // 탭(onboarding_popup_lab_screen.dart)은 이 카드를
-            // SingleChildScrollView 안에 그대로 두므로 그 Column의 높이가
-            // 무제한(unbounded)이 됨 - Expanded는 부모 높이가 유한해야만
-            // 동작해서 레이아웃 예외가 나 화면이 통째로 안 그려졌음. 이
-            // 카드는 애초에 maxHeight 제약이 없어서(ConstrainedBox엔
-            // minHeight만 있음) Expanded로 "남는 공간 채우기"를 할 이유가
-            // 없었음 - 그냥 내용 높이만큼만 차지하게 두면 Dialog/lab 탭 양쪽
-            // 다 안전함(SingleChildScrollView는 그대로 둬서, 아주 작은
-            // 화면에서 Dialog에 담겼을 때 내용이 넘치면 스크롤은 여전히 됨).
-            SingleChildScrollView(
-              child: Text(
-                content.body,
-                style: TextStyle(fontSize: 14.5, height: 1.55, color: Colors.black.withOpacity(0.75)),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(content.emoji, style: const TextStyle(fontSize: 40)),
+                    const SizedBox(height: 14),
+                    Text(
+                      content.title,
+                      style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: Colors.black87),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      content.body,
+                      style: TextStyle(fontSize: 14.5, height: 1.55, color: Colors.black.withOpacity(0.75)),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 20),
-            if (content.secondaryButtonLabel == null)
-              SizedBox(
-                width: double.infinity,
-                child: AppButton(onPressed: onConfirm, child: Text(content.buttonLabel)),
-              )
-            else
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: onSecondaryConfirm,
-                      style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
-                      child: Text(content.secondaryButtonLabel!),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(child: AppButton(onPressed: onConfirm, child: Text(content.buttonLabel))),
-                ],
-              ),
+            SizedBox(
+              width: double.infinity,
+              child: AppButton(onPressed: onConfirm, child: Text(content.buttonLabel)),
+            ),
           ],
         ),
       ),
@@ -155,13 +188,11 @@ class _PopupContent {
   final String title;
   final String body;
   final String buttonLabel;
-  final String? secondaryButtonLabel;
   const _PopupContent({
     required this.emoji,
     required this.title,
     required this.body,
     required this.buttonLabel,
-    this.secondaryButtonLabel,
   });
 }
 
@@ -196,67 +227,64 @@ class ShiftAssignTutorialContent extends _PopupContent {
         );
 }
 
-// ⭐ 2026-09-06 - update_service.dart의 "새 버전이 있어요!" 다이얼로그
-// (_showUpdateDialog)와 문구/버튼 구성을 그대로 옮긴 미리보기 전용 content.
-// 실제 로직(Firestore 조회, 버전 비교, notifiedVersion 저장 등)은 여기서 전혀
-// 안 건드림 - l10n 문구(app_ko.arb)만 그대로 가져와 카드로 보여줄 뿐.
-class UpdateAvailableContent extends _PopupContent {
-  UpdateAvailableContent()
+// ⭐ 2026-09-11 추가(사용자 요청) - 컨디션 탭에 처음 들어왔을 때, "설정부터
+// 해야 아무것도 안 보인다"는 진입장벽과 "수면 기록이 대체 어떻게 쌓이는
+// 건지"를 한 번에 설명하는 안내. 근무시간 설정/수면 위젯 추가/자동·수동 기록
+// 4가지를 다 다루다 보니 다른 팝업보다 본문이 길다 - _InfoPopupCard의
+// SingleChildScrollView가 이미 넘치는 내용을 스크롤로 받아주므로 그대로 재사용.
+class ConditionTabTutorialContent extends _PopupContent {
+  ConditionTabTutorialContent()
       : super(
-          emoji: '🎉',
-          title: '새 버전이 있어요!',
-          body: '더 나은 사용을 위해\n업데이트를 권장드려요.\n\n(저장된 정보는 그대로 유지됩니다)',
-          buttonLabel: '업데이트',
-          secondaryButtonLabel: '나중에',
-        );
-}
-
-// ⭐ 2026-09-06 - update_service.dart의 "업데이트 후 첫 실행" 안내
-// (_showReleaseNoteDialog)와 문구를 그대로 옮긴 미리보기 전용 content. 버전마다
-// 바뀌는 문구(_releaseNoteVersion='1.0.19' 기준 현재 저장된 값)라 다음 버전엔
-// 이 카드 문구도 같이 갱신해야 실제 화면과 계속 일치함.
-class ReleaseNoteContent extends _PopupContent {
-  ReleaseNoteContent()
-      : super(
-          emoji: '📢',
-          title: '이번 업데이트는 꼭 확인해주세요',
-          body: '사용자 편의 개선을 위해 달력 테마에서 지정한 근무명 색상 외에 기존의 근무명 색상 변경 기능 복원 - '
-              '기본적으로 테마별 색상이 지정되고, 색상 변경시 변경된 색상으로 모든 테마에 고정됩니다. '
-              '많은 사용 부탁드립니다 ^^',
+          emoji: '🌙',
+          title: '컨디션 탭, 이렇게 써보세요',
+          body: '1. 근무시간 설정 (필수)\n'
+              '설정 → 근무시간 및 OT 설정에서, 사용 중인 근무명 중 하나 이상의 '
+              '출퇴근 시각을 입력해야 이 탭이 동작해요.\n\n'
+              '2. 수면 위젯 추가\n'
+              '홈 화면을 길게 눌러 위젯 추가 화면에서 "교대시계 수면" 위젯을 '
+              '올려두면, 앱을 열지 않고도 취침/기상을 바로 기록할 수 있어요.\n\n'
+              '3. 위젯 사용법\n'
+              '취침 전 "🌙 수면" 버튼을, 기상 후 "☀️ 기상" 버튼을 눌러주세요.\n\n'
+              '4. 자동 기록\n'
+              '위젯을 안 눌러도, 정해진 수면 시간대에 폰을 오래 안 만지면 자동으로 '
+              '추정해서 기록해요. 다만 추정이라 확실하지 않을 수 있어 확인이 필요하면 '
+              '탭 상단에 확인 카드가 떠요 - 맞으면 "맞아요", 아니면 "기록하지 않기"를 '
+              '눌러주세요(거부한 시간대는 다음부터는 자동으로 덜 잡히도록 학습돼요).\n\n'
+              '5. 수동 입력/수정\n'
+              '아래 "최근 수면 기록" 달력의 빈 칸을 탭하면 직접 기록을 추가하거나, '
+              '이미 있는 기록을 눌러 시각을 고치거나 지울 수 있어요.',
           buttonLabel: '확인했어요',
         );
 }
 
-enum _PreviewKind { welcome, shiftAssignTutorial, updateAvailable, releaseNote }
-
-/// lab 탭 전용 - 카드만 (다이얼로그 없이) 보여주고 싶을 때 씀. 팩토리로만
-/// 만들 수 있게 해서(private 생성자) 실수로 다른 content 타입이 안 들어가게 함.
-class OnboardingInfoPreviewCard extends StatelessWidget {
-  const OnboardingInfoPreviewCard._(this._kind);
-  final _PreviewKind _kind;
-
-  const OnboardingInfoPreviewCard.welcome() : this._(_PreviewKind.welcome);
-  const OnboardingInfoPreviewCard.shiftAssignTutorial() : this._(_PreviewKind.shiftAssignTutorial);
-  const OnboardingInfoPreviewCard.updateAvailable() : this._(_PreviewKind.updateAvailable);
-  const OnboardingInfoPreviewCard.releaseNote() : this._(_PreviewKind.releaseNote);
-
-  @override
-  Widget build(BuildContext context) {
-    final _PopupContent content;
-    switch (_kind) {
-      case _PreviewKind.welcome:
-        content = WelcomePopupContent();
-      case _PreviewKind.shiftAssignTutorial:
-        content = ShiftAssignTutorialContent();
-      case _PreviewKind.updateAvailable:
-        content = UpdateAvailableContent();
-      case _PreviewKind.releaseNote:
-        content = ReleaseNoteContent();
-    }
-    return _InfoPopupCard(
-      content: content,
-      onConfirm: () {},
-      onSecondaryConfirm: () {},
-    );
-  }
+// ⭐ 2026-09-13 추가(사용자 요청) - 일정관리 탭에 처음 들어왔을 때, 세로
+// 시간축에서 일정을 만드는 방법과 지속시간/알림 옵션을 한 번에 설명하는 안내.
+class ScheduleTabTutorialContent extends _PopupContent {
+  ScheduleTabTutorialContent()
+      : super(
+          emoji: '🗓️',
+          title: '일정관리 탭, 이렇게 써보세요',
+          body: '1. 일정 만들기\n'
+              '오른쪽 아래 시계 아이콘을 탭하면 시간축 위에서 시각을 고를 수 있는 '
+              '모드로 바뀌어요. 원하는 시각에서 한 번 더 탭하면 그 시각으로 새 '
+              '일정을 만들 수 있어요.\n\n'
+              '2. 지속시간 설정\n'
+              '기본은 "지속시간 없음"(특정 시각 하나)이에요. "+"나 5분/30분/1시간 '
+              '버튼을 누르면 종료 시각이 있는 일정으로 바뀌어요.\n\n'
+              '3. 일정에 맞춰 알림받기\n'
+              '스위치를 켜면 정시 또는 5/10/30분 전에 가벼운 알림 1건을 받을 수 '
+              '있어요. 기존 "알람"(잠금화면/벨소리)과는 별개로, 시스템 알림 '
+              '설정을 그대로 따르는 알림이에요.\n\n'
+              '4. 지난 시각 표시\n'
+              '이미 지난 시각에 만든 일정은 느낌표(⚠) 아이콘으로 구분해서 '
+              '보여드려요.',
+          buttonLabel: '확인했어요',
+        );
 }
+
+// ⭐ 2026-09-12 - 이 밑에 있던 미리보기 전용 코드(UpdateAvailableContent/
+// ReleaseNoteContent/ForceUpdateContent/OnboardingInfoPreviewCard/_PreviewKind)는
+// "테스트알림" 임시 lab 탭(onboarding_popup_lab_screen.dart) 전용이었음 - 그
+// 탭을 배포 전 최종 점검 후 완전히 제거하면서 같이 정리함. 실제 팝업에 쓰이는
+// WelcomePopupContent/ShiftAssignTutorialContent/ConditionTabTutorialContent와
+// 그걸 띄우는 maybeShow* 함수들은 이 파일 위쪽에 그대로 남아있음(영향 없음).

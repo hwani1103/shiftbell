@@ -69,6 +69,14 @@ class DateSchedule {
   // 최종 iconIndex가 predictedCategory의 아이콘과 다르면 true(=사용자가 자동
   // 배정을 고쳤다는 뜻 - 재학습용 신호).
   final bool isUserCorrected;
+  // ⭐ 2026-09-12(DB v23) - "일정에 맞춰서 알림받기". schedule_notification_service.dart가
+  // 이 두 필드로 트리거 시각(date의 자정 + startMinutes - notifyOffsetMinutes)을
+  // 계산해 Native AlarmManager에 예약/취소한다(date_schedule_provider.dart의
+  // create/update/delete가 호출 지점). notifyOffsetMinutes는 notifyEnabled가
+  // false여도 마지막으로 고른 값을 그대로 들고 있음(다시 켰을 때 이전 선택
+  // 복원용) - 실제로 알림이 나가는지는 항상 notifyEnabled만으로 판단.
+  final bool notifyEnabled;
+  final int notifyOffsetMinutes; // 0=정시, 5/10/30=N분 전
   final String createdAt;
   final String? updatedAt;
 
@@ -84,6 +92,8 @@ class DateSchedule {
     this.fontIndex = 1,
     this.predictedCategory,
     this.isUserCorrected = false,
+    this.notifyEnabled = false,
+    this.notifyOffsetMinutes = 0,
     required this.createdAt,
     this.updatedAt,
   });
@@ -104,6 +114,8 @@ class DateSchedule {
     int? fontIndex,
     String? predictedCategory,
     bool? isUserCorrected,
+    bool? notifyEnabled,
+    int? notifyOffsetMinutes,
     String? createdAt,
     String? updatedAt,
   }) {
@@ -120,6 +132,8 @@ class DateSchedule {
       fontIndex: fontIndex ?? this.fontIndex,
       predictedCategory: predictedCategory ?? this.predictedCategory,
       isUserCorrected: isUserCorrected ?? this.isUserCorrected,
+      notifyEnabled: notifyEnabled ?? this.notifyEnabled,
+      notifyOffsetMinutes: notifyOffsetMinutes ?? this.notifyOffsetMinutes,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
@@ -140,6 +154,8 @@ class DateSchedule {
       fontIndex: (map['font_index'] as int?) ?? 1,
       predictedCategory: map['predicted_category'] as String?,
       isUserCorrected: ((map['is_user_corrected'] as int?) ?? 0) == 1,
+      notifyEnabled: ((map['notify_enabled'] as int?) ?? 0) == 1,
+      notifyOffsetMinutes: (map['notify_offset_minutes'] as int?) ?? 0,
       createdAt: map['created_at'] as String,
       updatedAt: map['updated_at'] as String?,
     );
@@ -160,6 +176,8 @@ class DateSchedule {
       'font_index': fontIndex,
       'predicted_category': predictedCategory,
       'is_user_corrected': isUserCorrected ? 1 : 0,
+      'notify_enabled': notifyEnabled ? 1 : 0,
+      'notify_offset_minutes': notifyOffsetMinutes,
       'created_at': createdAt,
       'updated_at': updatedAt,
     };

@@ -133,6 +133,24 @@ class ShiftPatternAnalyzer {
     return result;
   }
 
+  /// ⭐ 2026-09-13 - "이 스케줄 자체가 정의상 쉬는 날이 하루도 없는가"를
+  /// 즉시(오늘까지 스트릭이 쌓이길 기다리지 않고) 판정한다. 규칙적 패턴은
+  /// `pattern`(순환 주기) 안의 근무명들만 보면 되므로 날짜와 무관한 순수
+  /// 정적 사실 - `isRestShiftName()`(shift_name_util.dart, 이미 instanceForDate가
+  /// 쓰는 것과 동일한 판정)으로 패턴 전체에 휴무 슬롯이 하나라도 있는지만
+  /// 확인한다. 불규칙 스케줄은 "패턴"이라는 개념 자체가 없어 판정 불가 -> null
+  /// (예/아니오 둘 다 아님 - 호출부는 null을 "모름"으로 취급해서 아무 것도
+  /// 안 함). consecutiveWorkStreakEndingAt과의 차이: 그건 "오늘까지 실제로
+  /// 며칠째 안 쉬었는지"(시간이 지나야 쌓임, 일시적 성수기와 구분 안 됨)이고,
+  /// 이건 "이 스케줄이 애초에 쉬는 날을 아예 포함하지 않도록 설계됐는지"
+  /// (스케줄을 만든 첫날부터 참/거짓이 정해짐, 더 근본적인 신호).
+  bool? get patternHasNoRestDay {
+    if (!schedule.isRegular) return null;
+    final pattern = schedule.pattern;
+    if (pattern == null || pattern.isEmpty) return null;
+    return !pattern.any((name) => isRestShiftName(name));
+  }
+
   /// date를 마지막 날로 하는 연속 야간근무 일수(0이면 date 자체가 야간이 아님).
   /// ⭐ 2026-09-04 - [maxLookbackDays] 캡 추가(전체_코드_점검_리포트_2026-09-04.md H1).
   /// 쉬는 날이 하루도 없는 규칙적 패턴(매일 야간만 도는 스케줄 등)에서는

@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/shift_schedule.dart';
 import '../models/sleep_record.dart';
 import '../providers/condition_provider.dart';
@@ -26,11 +27,22 @@ import '../services/condition/sleep_day_slots.dart';
 import '../services/condition/today_forecast_engine.dart';
 import '../theme/app_colors.dart';
 import '../utils/sleep_format_util.dart';
+import '../providers/tab_visibility_provider.dart';
+import '../widgets/onboarding_info_popups.dart';
 import '../widgets/sleep_edit_dialog.dart';
+import '../widgets/disable_tab_button.dart';
 import 'sleep_calendar_full_screen.dart';
 
 class ConditionTab extends ConsumerWidget {
-  const ConditionTab({super.key});
+  // ⭐ 2026-09-13 - "OO 화면 사용하지 않기" 버튼을 main.dart의 고정 위치(광고
+  // 바로 위, 항상 보임)에서 이 탭 자신의 스크롤 콘텐츠 맨 아래로 옮김(사용자
+  // 요청 - "진짜 필요할 때만 누르게" 하려면 스크롤을 끝까지 내려야 보여야
+  // 한다는 취지). main.dart가 더 이상 이 버튼을 그리지 않으므로, 그 자리에서
+  // 쓰던 콜백을 그대로 여기로 내려받음.
+  final VoidCallback onDisabled;
+  final Future<void> Function() onConfirmed;
+
+  const ConditionTab({super.key, required this.onDisabled, required this.onConfirmed});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -49,7 +61,7 @@ class ConditionTab extends ConsumerWidget {
           if (schedule == null) {
             return const _NoScheduleNotice();
           }
-          return _ConditionBody(schedule: schedule);
+          return _ConditionBody(schedule: schedule, onDisabled: onDisabled, onConfirmed: onConfirmed);
         },
       ),
     );
@@ -76,13 +88,20 @@ class _NoScheduleNotice extends StatelessWidget {
 
 class _ConditionBody extends ConsumerStatefulWidget {
   final ShiftSchedule schedule;
-  const _ConditionBody({required this.schedule});
+  final VoidCallback onDisabled;
+  final Future<void> Function() onConfirmed;
+  const _ConditionBody({required this.schedule, required this.onDisabled, required this.onConfirmed});
 
   @override
   ConsumerState<_ConditionBody> createState() => _ConditionBodyState();
 }
 
 class _ConditionBodyState extends ConsumerState<_ConditionBody> with WidgetsBindingObserver {
+  // ⭐ 2026-09-11 추가(사용자 요청) - 컨디션 탭 최초 진입 사용법 안내. build()가
+  // 여러 번 불려도 addPostFrameCallback을 중복 예약하지 않도록 calendar_tab.dart/
+  // onboarding_screen.dart와 동일한 "_xChecked" 가드 패턴을 그대로 씀.
+  bool _tutorialChecked = false;
+
   @override
   void initState() {
     super.initState();
@@ -118,6 +137,13 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody> with WidgetsBind
   // 있어서 안내 자체가 불필요하다는 판단 - 대체 기능 없이 그냥 삭제.
   @override
   Widget build(BuildContext context) {
+    if (!_tutorialChecked) {
+      _tutorialChecked = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) maybeShowConditionTabTutorial(context);
+      });
+    }
+
     final setupNeeded = ref.watch(conditionSetupNeededProvider);
 
     // ⭐ 2026-09-01 - 근무별 실제 근무시간(하나라도)이 설정 탭에서 입력되기
@@ -125,13 +151,19 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody> with WidgetsBind
     // 이제 이 탭에 없으므로(설정 → 근무시간 및 OT 설정으로 이동) 여기서
     // "부분적으로라도 보여줄 것"이 없음.
     if (setupNeeded) {
-      return const _SetupNeededNotice();
+      return _SetupNeededNotice(onDisabled: widget.onDisabled, onConfirmed: widget.onConfirmed);
     }
 
     final pending = ref.watch(pendingSleepRecordsProvider);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+      // ⭐ 2026-09-13(3차) - 아래쪽 여백을 광고 영역과의 거리로 씀(사용자
+      // 요청: "사용하지 않기 버튼을 광고 쪽으로 좀 더 붙여줘, 일정관리 탭과
+      // 거리를 맞추되 너무 딱 붙이진 않게") - schedule_management_tab.dart의
+      // 버튼 아래 여백과 정확히 같은 값(12.h)을 씀. 이 파일은 원래 screenutil을
+      // 안 쓰던 파일이라 이 한 곳만 예외적으로 씀(기기별로 정확히 같은 거리가
+      // 나오게 하려면 두 탭이 같은 단위 체계를 써야 함).
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 12.h),
       children: [
         if (pending.isNotEmpty) ...[
           for (final r in pending) _PendingSleepConfirmationCard(record: r),
@@ -160,6 +192,18 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody> with WidgetsBind
         const _HealthTipCard(),
         const SizedBox(height: 16),
         const _SleepMiniCalendarCard(),
+        // ⭐ 2026-09-13 - "화면 맨 아래로 스크롤해야 보이는" 위치로 옮김(사용자
+        // 요청). 콘텐츠가 짧아 화면에 다 들어오면 스크롤 없이도 바로 보일 수
+        // 있는데, 그건 의도된 동작(요청 원문: "컨디션탭은 화면에 뭐가 많이
+        // 없으니 그 버튼이 바로 보여도 되는데") - 로직 자체는 일정관리 탭과
+        // 동일하게 "마지막 콘텐츠보다 이 정도 여백만큼 더 아래".
+        const SizedBox(height: 28),
+        DisableTabButton(
+          tabLabel: '컨디션',
+          provider: conditionTabEnabledProvider,
+          onConfirmed: widget.onConfirmed,
+          onDisabled: widget.onDisabled,
+        ),
       ],
     );
   }
@@ -178,14 +222,17 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody> with WidgetsBind
 // 동작함. 나머지 카드(오늘의 컨디션 예측/최근 수면기록)는 근무시간이 있어야만
 // 의미 있는 계산이라 여전히 설정 후에만 보임(아래 build()의 setupNeeded 분기).
 class _SetupNeededNotice extends StatelessWidget {
-  const _SetupNeededNotice();
+  final VoidCallback onDisabled;
+  final Future<void> Function() onConfirmed;
+  const _SetupNeededNotice({required this.onDisabled, required this.onConfirmed});
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-      children: const [
-        Padding(
+      // ⭐ 2026-09-13(3차) - 위 _ConditionBody와 동일 이유/동일 값(12.h).
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 12.h),
+      children: [
+        const Padding(
           padding: EdgeInsets.symmetric(vertical: 8),
           child: Text(
             '먼저 설정에서 근무별 실제 근무시간을 입력해주세요.\n'
@@ -194,8 +241,16 @@ class _SetupNeededNotice extends StatelessWidget {
             style: TextStyle(fontSize: 15, color: Colors.black54),
           ),
         ),
-        SizedBox(height: 16),
-        _HealthTipCard(),
+        const SizedBox(height: 16),
+        const _HealthTipCard(),
+        // ⭐ 2026-09-13 - _ConditionBody 정상 경로와 동일한 위치/여백 규칙.
+        const SizedBox(height: 28),
+        DisableTabButton(
+          tabLabel: '컨디션',
+          provider: conditionTabEnabledProvider,
+          onConfirmed: onConfirmed,
+          onDisabled: onDisabled,
+        ),
       ],
     );
   }
@@ -582,6 +637,7 @@ class _SleepDayTile extends ConsumerWidget {
           for (final category in SleepSlotCategory.values) ...[
             Expanded(
               child: _SleepSlotCell(
+                cardDate: day.date,
                 category: category,
                 record: day.forCategory(category),
                 onTap: () => _handleTap(context, ref, category),
@@ -596,10 +652,19 @@ class _SleepDayTile extends ConsumerWidget {
 }
 
 class _SleepSlotCell extends StatelessWidget {
+  final DateTime cardDate;
   final SleepSlotCategory category;
   final SleepRecord? record;
   final VoidCallback onTap;
-  const _SleepSlotCell({required this.category, required this.record, required this.onTap});
+  const _SleepSlotCell({
+    required this.cardDate,
+    required this.category,
+    required this.record,
+    required this.onTap,
+  });
+
+  bool _isSameDate(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   Widget build(BuildContext context) {
@@ -622,12 +687,26 @@ class _SleepSlotCell extends StatelessWidget {
             if (r == null)
               const Text('+ 기록', style: TextStyle(fontSize: 11, color: Colors.black54, fontWeight: FontWeight.w500))
             else ...[
-              Text(
-                r.end != null ? '${fmtTimeOnly(r.start)}-${fmtTimeOnly(r.end!)}' : '${fmtTimeOnly(r.start)}~ 진행중',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+              Builder(builder: (context) {
+                // ⭐ 2026-09-13(사용자 요청) - 이 카드는 "귀속되는 날짜"
+                // (_attributedDay, sleep_day_slots.dart) 기준으로 보여지는데,
+                // 야간 근무 회복수면처럼 실제 취침 시각은 그 다음날일 수 있다
+                // (예: 9/6 야간 → 9/7 오전 수면이 9/6 카드에 표시됨). 그 경우
+                // 실제 시작 날짜가 카드 날짜와 다르므로 시각 앞에 "M/D "를 붙여
+                // 헷갈리지 않게 함(같은 날이면 기존처럼 시각만 표시).
+                final timeText = r.end != null
+                    ? '${fmtTimeOnly(r.start)}-${fmtTimeOnly(r.end!)}'
+                    : '${fmtTimeOnly(r.start)}~ 진행중';
+                final startsOnDifferentDate = !_isSameDate(r.start, cardDate);
+                final displayText =
+                    startsOnDifferentDate ? '${r.start.month}/${r.start.day} $timeText' : timeText;
+                return Text(
+                  displayText,
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                );
+              }),
               if (r.durationMinutes != null)
                 Text(
                   '(${fmtSleepDuration(Duration(minutes: r.durationMinutes!), r.source)})',

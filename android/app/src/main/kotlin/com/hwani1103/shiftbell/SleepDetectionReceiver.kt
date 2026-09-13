@@ -49,6 +49,61 @@ class SleepDetectionReceiver : BroadcastReceiver() {
         private const val MIN_MINUTES_FOR_MEDIUM_PLUS = 90L
         private const val ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
 
+        // ⭐ 2026-09-11(사용자 요청) - "거부 학습" 억제 - 화면 꺼짐이 곧 수면은 아니다
+        // (근무 중 집중해서 폰을 안 만졌거나, 휴무일에 폰 없이 취미생활을 했거나
+        // 등). sleep_opportunity.dart의 창(work 시간대는 이미 배제)만으로는 창
+        // "안"에서 일어나는 이런 조용한 활동(예: 휴무일 21시 이후 폰 없이 영화
+        // 감상)까지는 못 거른다 - 그건 일정만으로는 구분 불가능한 진짜 행동
+        // 데이터이기 때문. 그래서 사용자가 "기록하지 않기"/삭제로 자동 감지
+        // 결과를 거부한 기록 자체를 근거(evidence)로 재사용한다: 같은 시각대
+        // (시 단위)에서 반복해서 거부됐다면, 그 시간대는 이 사용자에게는
+        // "일상적으로 깨어있는 시간"일 확률이 높다고 보고 그 시간대의 자동 후보
+        // 생성 자체를 건너뛴다. ML이 아니라 사용자 스스로의 거부 행동을 그대로
+        // 되돌려주는 결정론적 카운터일 뿐이고, DB 마이그레이션 없이 기존
+        // device-protected SharedPreferences(sleep_detection_state)에만 저장한다.
+        // 오탐 한 번으로 성급하게 억제하지 않도록 2회 이상 거부돼야 억제하고,
+        // 오래된 힌트(60일 넘게 재확인 안 됨)는 습관이 바뀌었을 수 있으니 자동
+        // 만료시켜 다시 2회부터 쌓이게 한다. 억제되면 그냥 "아무 것도 안 기록"할
+        // 뿐이라 최악의 경우도 위젯 수동 기록으로 보완 가능(과탐 쪽으로 치우친
+        // 설계 - 실제 수면을 다는 놓치더라도 오탐으로 매번 확인 카드를 지우게
+        // 만드는 것보다 낫다는 판단).
+        private const val REJECT_COUNT_PREFIX = "reject_hour_count_"
+        private const val REJECT_LAST_AT_PREFIX = "reject_hour_last_at_"
+        private const val REJECT_SUPPRESS_THRESHOLD = 2
+        private const val REJECT_HINT_STALE_DAYS = 60L
+
+        private fun hourBucketOf(millis: Long): Int {
+            val cal = java.util.Calendar.getInstance()
+            cal.timeInMillis = millis
+            return cal.get(java.util.Calendar.HOUR_OF_DAY)
+        }
+
+        /** Dart(sleep_record_provider.dart)가 AUTO_DETECTED 기록을 "기록하지 않기"/삭제로
+         * 거부할 때마다 호출됨(MainActivity의 recordSleepAutoRejection 채널 핸들러). */
+        fun recordRejection(context: Context, startMillis: Long) {
+            val prefs = devicePrefs(context)
+            val hour = hourBucketOf(startMillis)
+            val countKey = REJECT_COUNT_PREFIX + hour
+            val lastKey = REJECT_LAST_AT_PREFIX + hour
+            val now = System.currentTimeMillis()
+            val prevLast = prefs.getLong(lastKey, -1L)
+            val stale = prevLast < 0L || (now - prevLast) > REJECT_HINT_STALE_DAYS * 24 * 3_600_000L
+            val prevCount = if (stale) 0 else prefs.getInt(countKey, 0)
+            prefs.edit().putInt(countKey, prevCount + 1).putLong(lastKey, now).apply()
+            Log.d(TAG, "🙅 자동감지 거부 학습(hour=$hour, count=${prevCount + 1})")
+        }
+
+        /** [candidateStartMillis]의 시(hour)가 최근 반복 거부된 시간대인가. */
+        private fun isHourSuppressed(context: Context, candidateStartMillis: Long): Boolean {
+            val prefs = devicePrefs(context)
+            val hour = hourBucketOf(candidateStartMillis)
+            val count = prefs.getInt(REJECT_COUNT_PREFIX + hour, 0)
+            if (count < REJECT_SUPPRESS_THRESHOLD) return false
+            val last = prefs.getLong(REJECT_LAST_AT_PREFIX + hour, -1L)
+            if (last < 0L) return false
+            return (System.currentTimeMillis() - last) <= REJECT_HINT_STALE_DAYS * 24 * 3_600_000L
+        }
+
         // ⭐ 2026-09-01 후속4 - "메인 수면"으로 인정할 최소 길이(2시간, 순수 UX
         // 판단값 - 근거자료 값 아님). 이보다 짧으면 자동 감지 후보를 폐기한다.
         private const val MIN_MAIN_SLEEP_MINUTES = 120L
@@ -143,6 +198,15 @@ class SleepDetectionReceiver : BroadcastReceiver() {
                     // ⭐ 스펙 14장 "중복 방지" - 이미 그 시각을 덮는 기록(수동 등)이 있으면
                     // 새 후보를 만들지 않음.
                     prefs.edit().remove(KEY_FIRST_OFF_SAMPLE_AT).apply()
+                    return
+                }
+
+                if (isHourSuppressed(context, firstOffAt)) {
+                    // ⭐ 2026-09-11 - 반복 거부 학습(위 REJECT_* 주석 참고) - 사용자가 이
+                    // 시간대의 자동 감지를 반복해서 거부했으니 이번엔 아예 후보를
+                    // 만들지 않는다.
+                    prefs.edit().remove(KEY_FIRST_OFF_SAMPLE_AT).apply()
+                    Log.d(TAG, "⏭️ 반복 거부된 시간대(hour=${hourBucketOf(firstOffAt)}) - 자동 후보 생성 안 함")
                     return
                 }
 

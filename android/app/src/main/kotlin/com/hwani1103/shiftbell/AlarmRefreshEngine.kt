@@ -35,7 +35,13 @@ object AlarmRefreshEngine {
     private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
     private const val DAYS_AHEAD = 10
 
-    private data class ScheduleData(
+    // ⭐ 2026-09-12 - 아래 세 data class(ScheduleData/DesiredAlarm/TemplateEntry)와
+    // computeDesiredAlarms()/doRefresh()는 원래 전부 private였으나, 테스트_계획_
+    // 2026-09-12.md B-2 대상(day_offset 알람 우선순위 계산, H2 트랜잭션 중 OS콜
+    // 검증용)으로 Robolectric 유닛테스트(AlarmRefreshEngineTest.kt)가 직접 호출/구성할
+    // 수 있어야 해서 internal로 넓힘 - 외부(다른 앱 모듈) 공개 API가 늘어난 건 아니고
+    // (internal은 이 Gradle 모듈 안에서만 보임), 계산 로직/동작 자체는 전혀 안 바뀜.
+    internal data class ScheduleData(
         val isRegular: Boolean,
         val pattern: List<String>,
         val todayIndex: Int,
@@ -43,7 +49,7 @@ object AlarmRefreshEngine {
         val assignedDates: Map<String, String>
     )
 
-    private data class DesiredAlarm(
+    internal data class DesiredAlarm(
         val dateStr: String,
         val time: String,
         val shiftType: String,
@@ -76,7 +82,7 @@ object AlarmRefreshEngine {
     }
 
     // ⭐ shift_alarm_templates 한 행 - day_offset(-1/전날, 0/당일, 1/다음날) 포함.
-    private data class TemplateEntry(val time: String, val alarmTypeId: Int, val dayOffset: Int)
+    internal data class TemplateEntry(val time: String, val alarmTypeId: Int, val dayOffset: Int)
 
     fun refresh(context: Context) {
         // ⭐ owner를 호출마다 고유하게(UUID) 생성해야 함. 예전엔 "AlarmRefreshEngine"
@@ -98,7 +104,16 @@ object AlarmRefreshEngine {
         }
     }
 
-    private fun doRefresh(context: Context) {
+    // ⭐ 2026-09-12 - scheduleNativeAlarmOverride 파라미터 추가(기본값 null =
+    // 기존 동작 그대로, 운영 코드 경로는 0.000000001도 안 바뀜). B-2 대상 #1(H2 -
+    // toAdd 배치 중 N번째 항목에서 scheduleNativeAlarm()이 예외를 던지도록 mock)을
+    // 테스트하려면 이 네이티브 OS 호출 지점에 가짜 동작을 주입할 수 있는 seam이
+    // 필요했음 - Robolectric 테스트(AlarmRefreshEngineTest.kt)만 이 파라미터를 씀.
+    internal fun doRefresh(
+        context: Context,
+        scheduleNativeAlarmOverride: ((Context, AlarmManager, Int, Long, String) -> Unit)? = null
+    ) {
+        val doScheduleNativeAlarm = scheduleNativeAlarmOverride ?: ::scheduleNativeAlarm
         val dbHelper = DatabaseHelper.getInstance(context)
         // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고) -
         // 이 시점엔 스케줄도 없는 게 정상이라 "스케줄 없음"과 동일하게 처리.
@@ -163,7 +178,7 @@ object AlarmRefreshEngine {
                     }
                     val alarmId = rowId.toInt()
                     insertCreationLog(db, alarmId, item.dateStr, item.time, item.shiftType, item.alarmTypeId, item.dayOffset, "auto")
-                    scheduleNativeAlarm(context, alarmManager, alarmId, item.timestamp, item.shiftType)
+                    doScheduleNativeAlarm(context, alarmManager, alarmId, item.timestamp, item.shiftType)
                 }
 
                 db.setTransactionSuccessful()
@@ -183,7 +198,7 @@ object AlarmRefreshEngine {
             for (item in desired) {
                 val existingId = existingByKey[item.key()]?.id ?: continue  // toAdd는 위에서 이미 등록함
                 try {
-                    scheduleNativeAlarm(context, alarmManager, existingId, item.timestamp, item.shiftType)
+                    doScheduleNativeAlarm(context, alarmManager, existingId, item.timestamp, item.shiftType)
                     rearmedCount++
                 } catch (e: Exception) {
                     Log.e(TAG, "❌ 기존 알람 재등록 실패: id=$existingId", e)
@@ -358,7 +373,7 @@ object AlarmRefreshEngine {
     // 동일한 알고리즘(우선순위: 당일 > 전날 기여 > 다음날 기여)을 유지해야 함 -
     // 어긋나면 diff 갱신이 Dart가 방금 만든 알람을 "다르다"고 오판해서 불필요하게
     // 지웠다 다시 만듦.
-    private fun computeDesiredAlarms(
+    internal fun computeDesiredAlarms(
         schedule: ScheduleData,
         templates: Map<String, List<TemplateEntry>>
     ): List<DesiredAlarm> {

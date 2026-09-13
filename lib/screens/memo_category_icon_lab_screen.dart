@@ -16,8 +16,9 @@ import '../theme/app_colors.dart';
 
 /// assets/icons/memo_category/README.md의 매핑과 동일하게 유지할 것.
 /// ⭐ 2026-09-01 - 10종 -> 17종(7개 신설). 2026-09-03 - 17종 -> 19종(자전거/
-/// 요가·필라테스 신설). lib/screens/schedule_management_tab.dart의
-/// _kScheduleCategoryIcons도 같은 목록.
+/// 요가·필라테스 신설). 2026-09-12 - 19종 -> 25종("운동"에서 6종 세분화 -
+/// 라켓 스포츠/축구/농구/야구/구기종목/입식 격투기). lib/screens/
+/// schedule_management_tab.dart의 _kScheduleCategoryIcons도 같은 목록.
 const List<(String key, String label, String asset)> kMemoCategoryIcons = [
   ('work', '업무', 'assets/icons/memo_category/work.svg'),
   ('study', '공부', 'assets/icons/memo_category/study.svg'),
@@ -50,6 +51,14 @@ const List<(String key, String label, String asset)> kMemoCategoryIcons = [
   ('etc', '기타', 'assets/icons/memo_category/etc8.svg'),
   ('etc', '기타', 'assets/icons/memo_category/etc9.svg'),
   ('etc', '기타', 'assets/icons/memo_category/etc10.svg'),
+  // ⭐ 2026-09-12 - 신설 6종(라켓 스포츠/축구/농구/야구/구기종목/입식 격투기) -
+  // schedule_management_tab.dart의 _kScheduleCategoryIcons와 동일 목록.
+  ('racket_sports', '라켓 스포츠', 'assets/icons/memo_category/racket_sports.svg'),
+  ('soccer', '축구', 'assets/icons/memo_category/soccer.svg'),
+  ('basketball', '농구', 'assets/icons/memo_category/basketball.svg'),
+  ('baseball', '야구', 'assets/icons/memo_category/baseball.svg'),
+  ('ball_sports', '구기종목', 'assets/icons/memo_category/ball_sports.svg'),
+  ('combat_sports', '입식 격투기', 'assets/icons/memo_category/combat_sports.svg'),
 ];
 
 class MemoCategoryIconLabScreen extends StatelessWidget {
@@ -66,7 +75,7 @@ class MemoCategoryIconLabScreen extends StatelessWidget {
             padding: EdgeInsets.all(16.w),
             color: Colors.grey.shade100,
             child: Text(
-              'assets/icons/memo_category/의 SVG 19종을 flutter_svg로 그대로 그린 것. '
+              'assets/icons/memo_category/의 SVG 25종을 flutter_svg로 그대로 그린 것. '
               '색은 앱 메인 액센트(kAppMainAccent)로 tint. 실제 적용 화면(일정관리 등)에서는 '
               '카테고리별 다른 색을 쓸 수도 있음 - 이 화면은 "아이콘 모양 자체"만 확인하는 용도.',
               style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700, height: 1.4),

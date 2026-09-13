@@ -4,5 +4,9 @@
     <declare-styleable name="WaveGradientView">
         <!-- 아래쪽 모서리만 둥글게(오버레이 카드용). 0이면 전부 각짐(잠금화면용). -->
         <attr name="bottomCornerRadius" format="dimension"/>
+        <!-- ⭐ 2026-09-13 추가 - 위쪽 모서리도 둥글게(오버레이를 "카톡 메시지
+             카드"처럼 4면 다 둥글게 만들기 위함, 사용자 요청). 잠금화면은
+             지정 안 함(기본 0, 기존 디자인 그대로 유지). -->
+        <attr name="topCornerRadius" format="dimension"/>
     </declare-styleable>
 </resources>

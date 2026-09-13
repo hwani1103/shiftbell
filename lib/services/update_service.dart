@@ -30,7 +30,15 @@ class UpdateService {
   // 이후 이 시간 안이면 그냥 건너뜀 - "버전당 1번만 알림"이라는 정책과는 별개로,
   // 순수하게 "체크 자체"를 너무 자주 하지 않기 위한 쿨다운.
   static const String _lastCheckedAtKey = 'update_check_last_checked_at';
-  static const Duration _checkCooldown = Duration(minutes: 30);
+  // ⭐ 2026-09-11(사용자 요청 - Firestore 무료 티어 비용 점검) - 30분은 "새
+  // 버전이 있는지" 체크치고는 불필요하게 잦음(latestVersionCode는 개발자가
+  // 배포 직후 손으로 딱 한 번 바꾸는 값이라, 그 몇 시간 안에만 반영돼도
+  // 충분함). 기능(정책 1의 "버전당 1번만 알림")은 전혀 안 바뀌고 순회
+  // 빈도만 줄어듦 - 앱을 하루에 여러 번 여는 사용자의 문서 읽기 횟수가
+  // 최대 1/12로 줄어들어(기존 최악 48회/일 → 4회/일) Firestore 읽기 쿼터
+  // 여유를 더 확보함(app_config는 애초에 문서 1개뿐이라 지금도 무료 티어
+  // 대비 미미하지만, 사용자가 많아졌을 때의 여유를 미리 늘려두는 것).
+  static const Duration _checkCooldown = Duration(hours: 6);
 
   // ⭐ 이번 릴리즈 전용 "업데이트 후 첫 실행" 안내 문구.
   // 아래 _showUpdateDialog(업데이트 하기 "전" 구버전에서 뜨는 안내)와 달리, 이건
@@ -39,7 +47,7 @@ class UpdateService {
   // 다음 버전엔 이 내용을 다시 쓰고 싶지 않으면 _releaseNoteVersion을 빈 문자열로
   // 두면 됨 → 그러면 이 다이얼로그는 그냥 안 뜨고, 위의 "새 버전이 있어요" 안내만
   // 평소처럼 동작함.
-  static const String _releaseNoteVersion = '1.0.19';
+  static const String _releaseNoteVersion = '1.0.23';
   static const String _releaseNoteSeenKey = 'release_note_seen_version';
 
   // ⭐ 2026-08-20 "기존 유저인데도 업데이트 후 안내가 안 뜬다" 버그 수정 - 예전엔
@@ -202,14 +210,9 @@ class UpdateService {
       final data = doc.data();
       if (data == null) return;  // 문서가 아직 없음(개발자가 아직 안 만듦) - 조용히 스킵
 
-      // ⭐ 강제 업데이트(하위 호환이 깨지는 등 반드시 최신이어야 하는 경우) - 지금은
-      // 문서에 이 필드를 안 넣어두면 0으로 취급돼 자동으로 비활성 상태. 필요할 때
-      // Firebase 콘솔에서 minSupportedVersionCode 필드만 채우면 바로 작동함.
-      final minSupportedVersionCode = (data['minSupportedVersionCode'] as num?)?.toInt() ?? 0;
-      if (minSupportedVersionCode > 0 && currentVersionCode < minSupportedVersionCode) {
-        if (context.mounted) await _showForceUpdateDialog(context);
-        return;  // 강제 업데이트 안내를 띄웠으면 아래 소프트 안내는 겹쳐서 안 띄움
-      }
+      // ⭐ 2026-09-12(사용자 요청) - 강제 업데이트 기능 자체를 안 쓰기로 함(제거).
+      // app_config/android 문서에 minSupportedVersionCode/forceUpdateTitle/
+      // forceUpdateMessage 필드가 남아있어도 이제 아무 의미 없음 - 그냥 무시됨.
 
       final latestVersionCode = (data['latestVersionCode'] as num?)?.toInt() ?? 0;
       if (latestVersionCode <= currentVersionCode) return;  // 이미 최신 - 안내 불필요
@@ -238,72 +241,6 @@ class UpdateService {
       // 업데이트 체크 실패해도 앱 사용에는 문제 없음
       debugPrint('업데이트 체크 실패: $e');
     }
-  }
-
-  /// 강제 업데이트 안내 - minSupportedVersionCode 미만일 때만 뜸(기본은 비활성).
-  /// 뒤로가기/바깥터치로 닫을 수 없음 - 반드시 업데이트해야 계속 쓸 수 있는 상황 전용.
-  static Future<void> _showForceUpdateDialog(BuildContext context) async {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => PopScope(
-        canPop: false,
-        child: AlertDialog(
-          backgroundColor: colorScheme.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          contentPadding: EdgeInsets.all(24.w),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.system_update_alt, size: 24.sp, color: colorScheme.error),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: Text(
-                      context.l10n.updateForceUpdateTitle,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.h),
-              Text(
-                context.l10n.updateForceUpdateBody,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant, height: 1.5),
-              ),
-              SizedBox(height: 24.h),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await _openPlayStore();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colorScheme.primary,
-                    foregroundColor: colorScheme.onPrimary,
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                  ),
-                  child: Text(
-                    context.l10n.commonUpdate,
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   /// 업데이트 안내 다이얼로그

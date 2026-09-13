@@ -29,6 +29,17 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
   // 아래까지 스크롤해서 펼쳐진 내용이 바로 눈에 들어오게 함.
   final _scrollController = ScrollController();
 
+  // ⭐ 2026-09-11(사용자 신고) - "출근만 입력했는데 퇴근이 멋대로 18:00으로
+  // 채워진다" 버그 수정용 - ShiftTimeRange는 start/endMinutes가 둘 다
+  // non-nullable이라(모델 그대로 유지, DB 마이그레이션 없이 해결하려고 일부러
+  // 안 건드림) "한쪽만 입력된" 상태를 그 자체로는 표현할 수 없다. 그래서 아직
+  // provider(condition_shift_times, 실제 저장소)에 커밋하기 전, "한쪽만 입력된"
+  // 임시 상태를 이 화면 로컬에만 들고 있다가 둘 다 채워진 순간에만 저장한다 -
+  // 이미 완성된(range != null) 근무의 한쪽만 고치는 기존 동작(예: 출근시간만
+  // 조정)은 기존 값을 그대로 재사용해 즉시 저장되므로 전혀 안 바뀜.
+  final Map<String, int> _pendingStartOnlyMinutes = {};
+  final Map<String, int> _pendingEndOnlyMinutes = {};
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -188,11 +199,51 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 ),
               ),
               SizedBox(width: 8.w),
-              Text(
-                range == null ? context.l10n.commonNotSet : _formatDuration(range.durationMinutes),
-                maxLines: 1,
-                style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: colorScheme.primary),
+              // ⭐ 2026-09-12(2차, 사용자 피드백) - 소요시간 텍스트를 그냥 맨
+              // 글자로 두지 않고 옅은 배지(칩)로 감싸서, 바로 옆 되돌리기
+              // 버튼과 한 그룹처럼 보이게 다듬음(예전엔 텍스트+아이콘이 서로
+              // 남남처럼 붙어있어 어색했음).
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  range == null ? context.l10n.commonNotSet : _formatDuration(range.durationMinutes),
+                  maxLines: 1,
+                  style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: colorScheme.primary),
+                ),
               ),
+              // ⭐ 2026-09-12(사용자 요청) - "어떤 근무든 한 번 시간을 지정하면
+              // 되돌릴 수가 없다" - 출퇴근이 이미 채워진(range != null) 근무에만
+              // 보여주는 되돌리기 버튼. 눌러도 별도 확인 없이 바로 --:--/--:--로
+              // 되돌림(값 자체를 지우는 거라 그 근무의 근로시간/OT 계산이
+              // 그때부터 0으로 빠짐 - 실수로 눌렀으면 다시 출퇴근을 입력하면
+              // 그만이라 삭제 확인 다이얼로그까지는 과함).
+              // ⭐ 2026-09-12(2차) - 배치가 어색하다는 피드백으로 다듬음: 맨
+              // 아이콘(delete_outline, 근무 자체를 지우는 것처럼 오해될 수
+              // 있음)을 "되돌리기"를 뜻하는 replay 아이콘으로 바꾸고, 옅은
+              // 원형 배경(Material+InkWell 리플)을 줘서 위 배지와 한 세트로
+              // 보이게, 배지와의 간격도 넉넉히 줌.
+              if (range != null) ...[
+                SizedBox(width: 6.w),
+                Tooltip(
+                  message: context.l10n.workHoursResetShiftTime,
+                  child: Material(
+                    color: colorScheme.error.withValues(alpha: 0.1),
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => _resetShiftTime(schedule, shift),
+                      child: Padding(
+                        padding: EdgeInsets.all(6.w),
+                        child: Icon(Icons.replay_rounded, size: 15.sp, color: colorScheme.error),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
           SizedBox(height: 10.h),
@@ -202,7 +253,8 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 child: OutlinedButton(
                   onPressed: () => _pickShiftTime(schedule, shift, range, isStart: true),
                   child: Text(
-                    '${context.l10n.workHoursShiftTimeClockIn} ${_fmtRangeTime(range?.startMinutes)}',
+                    '${context.l10n.workHoursShiftTimeClockIn} '
+                    '${_fmtRangeTime(range?.startMinutes ?? _pendingStartOnlyMinutes[shift])}',
                     style: TextStyle(fontSize: 12.5.sp),
                   ),
                 ),
@@ -212,7 +264,8 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 child: OutlinedButton(
                   onPressed: () => _pickShiftTime(schedule, shift, range, isStart: false),
                   child: Text(
-                    '${context.l10n.workHoursShiftTimeClockOut} ${_fmtRangeTime(range?.endMinutes)}',
+                    '${context.l10n.workHoursShiftTimeClockOut} '
+                    '${_fmtRangeTime(range?.endMinutes ?? _pendingEndOnlyMinutes[shift])}',
                     style: TextStyle(fontSize: 12.5.sp),
                   ),
                 ),
@@ -250,16 +303,38 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     ShiftTimeRange? range, {
     required bool isStart,
   }) async {
-    final currentMinutes = range == null
-        ? (isStart ? 9 * 60 : 18 * 60)
-        : (isStart ? range.startMinutes : range.endMinutes);
+    // ⭐ 2026-09-11 - 아직 완성 안 된(range == null) 근무는 피커의 초기값으로
+    // "9시/18시"를 그냥 들이밀지 않고, 이미 한쪽을 입력해뒀다면(_pendingXOnlyMinutes)
+    // 그 값을 그대로 초기값으로 써서 "방금 고른 값이 사라진 것처럼" 보이지 않게 함.
+    final currentMinutes = range != null
+        ? (isStart ? range.startMinutes : range.endMinutes)
+        : (isStart ? (_pendingStartOnlyMinutes[shift] ?? 9 * 60) : (_pendingEndOnlyMinutes[shift] ?? 18 * 60));
     final initial = TimeOfDay(hour: (currentMinutes ~/ 60) % 24, minute: currentMinutes % 60);
     final picked = await showTimePicker(context: context, initialTime: initial);
     if (picked == null) return;
 
     final newMinutes = picked.hour * 60 + picked.minute;
-    final startMinutes = isStart ? newMinutes : (range?.startMinutes ?? 9 * 60);
-    final endMinutes = isStart ? (range?.endMinutes ?? 18 * 60) : newMinutes;
+    final startMinutes = isStart ? newMinutes : (range?.startMinutes ?? _pendingStartOnlyMinutes[shift]);
+    final endMinutes = isStart ? (range?.endMinutes ?? _pendingEndOnlyMinutes[shift]) : newMinutes;
+
+    if (startMinutes == null || endMinutes == null) {
+      // ⭐ 아직 한쪽만 입력됨 - "기록하지 않기" 원칙과 동일하게, 나머지 한쪽을
+      // 마저 입력하기 전까지는 DB에 아무 것도 저장하지 않고 화면에만 반영한다
+      // (사용자가 신고한 "출근만 입력했는데 퇴근이 멋대로 채워진다" 버그의
+      // 원인 - 예전엔 여기서 무조건 기본값(9시/18시)으로 채워 바로 저장했음).
+      setState(() {
+        if (isStart) {
+          _pendingStartOnlyMinutes[shift] = newMinutes;
+        } else {
+          _pendingEndOnlyMinutes[shift] = newMinutes;
+        }
+      });
+      return;
+    }
+
+    // 둘 다 채워졌으니 실제로 저장하고, 로컬 임시 상태는 더 이상 필요 없으니 정리.
+    _pendingStartOnlyMinutes.remove(shift);
+    _pendingEndOnlyMinutes.remove(shift);
     final newRange = ShiftTimeRange(shiftName: shift, startMinutes: startMinutes, endMinutes: endMinutes);
 
     // 1) 컨디션 탭용 - 시각 자체
@@ -283,6 +358,39 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
       shiftDurations: newDurations,
     );
 
+    await ref.read(scheduleProvider.notifier).updateSchedule(newSchedule);
+  }
+
+  // ⭐ 2026-09-12(사용자 요청) - 이미 출퇴근이 채워진 근무를 다시 --:--/--:--로
+  // 되돌리는 기능(그동안 한 번 채우면 되돌릴 방법이 아예 없었음). 세 곳을
+  // 전부 원상복구해야 함: 1) 임시 상태(_pending...) - 이미 null이지만 방어적으로
+  // 같이 지움, 2) 컨디션 탭용 condition_shift_times(ConditionShiftTimeNotifier.remove),
+  // 3) 근로시간/OT 계산용 schedule.shiftDurations - 컬럼 삭제가 안 되니(DB_스키마_
+  // 변경_가이드.md) 0으로 되돌림(_formatDuration이 0을 "설정 안 함"으로 표시하는
+  // 기존 sentinel 그대로 재사용 - 새 마이그레이션 불필요).
+  Future<void> _resetShiftTime(ShiftSchedule schedule, String shift) async {
+    setState(() {
+      _pendingStartOnlyMinutes.remove(shift);
+      _pendingEndOnlyMinutes.remove(shift);
+    });
+
+    await ref.read(conditionShiftTimeProvider.notifier).remove(shift);
+
+    final newDurations = Map<String, int>.from(schedule.shiftDurations ?? {});
+    newDurations[shift] = 0;
+    final newSchedule = ShiftSchedule(
+      id: schedule.id,
+      isRegular: schedule.isRegular,
+      pattern: schedule.pattern,
+      todayIndex: schedule.todayIndex,
+      shiftTypes: schedule.shiftTypes,
+      activeShiftTypes: schedule.activeShiftTypes,
+      startDate: schedule.startDate,
+      shiftColors: schedule.shiftColors,
+      customShiftColors: schedule.customShiftColors,
+      assignedDates: schedule.assignedDates,
+      shiftDurations: newDurations,
+    );
     await ref.read(scheduleProvider.notifier).updateSchedule(newSchedule);
   }
 
