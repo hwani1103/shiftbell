@@ -29,11 +29,20 @@ object SleepDetectionScheduler {
             val now = System.currentTimeMillis()
             val window = SleepScheduleResolver.computeWindowForNow(context, now)
 
-            val nextWakeMillis = when {
+            val windowWakeMillis = when {
                 window != null && now >= window.startMillis && now < window.endMillis ->
                     now + SAMPLE_INTERVAL_MINUTES * 60_000L
                 window != null && now < window.startMillis -> window.startMillis
                 else -> nextMidnightCheckMillis()
+            }
+
+            // 감지 창이 먼저 닫혀도 진행 중 AUTO_DETECTED 행의 start+9h에는 반드시
+            // 다시 판정한다. 기한은 prefs에 복제하지 않고 매번 DB 행에서 파생한다.
+            val candidateDeadline = SleepDetectionReceiver.ongoingAutoDeadlineMillis(context)
+            val nextWakeMillis = if (candidateDeadline == null) {
+                windowWakeMillis
+            } else {
+                minOf(windowWakeMillis, candidateDeadline.coerceAtLeast(now + 1_000L))
             }
 
             schedule(context, nextWakeMillis)
