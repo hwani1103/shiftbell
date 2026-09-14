@@ -34,3 +34,11 @@
 | 일시 | 담당 AI | T | 감사 번호 / 하위 작업 | 커밋 SHA | 다음에 할 일 |
 |---|---|---|---|---|---|
 | 2026-09-14 | Codex | T08 | #15 OT revision 소비, #22 9시간 후보 종료, #17 수면 locale 고정 — CODE_FROZEN | `98c4831` | T10에서 G1 revision 연결 후 T14/S14 검증 |
+
+## T10 연결 (Claude, 통합 담당자, 2026-09-14)
+
+- G3 브랜치에 넣을 연결 코드 없음 — **T14 테스트 대상 SHA = `98c4831`** (CODE_FROZEN 그대로).
+- 요청 #1(G1 저장 경로 revision 성공 통지): release/g1 `9b8a586`에 구현(schedule/work_hours/condition_shift_time/overtime notifier). 두 그룹이 합쳐진 동작 확인은 5단계 순차 통합 뒤. T14의 G3 단독 테스트는 `dataRevisionProvider`를 테스트에서 직접 올려 재계산을 확인.
+- 요청 #2(복원 gate): G4(T18) 대상.
+- 수면 계열 Kotlin `Locale.getDefault()` 잔존 없음 확인(release/g3의 SleepDetectionReceiver·SleepDetectionScheduler·SleepWidgetActionReceiver·SleepScheduleResolver·SleepWidgetProvider).
+- 빌드 확인: `flutter pub get` 후 `flutter build apk --flavor dev --debug`(shiftbell-g3) exit 0, assembleDevDebug 373.8s. 설치·실행 안 함.

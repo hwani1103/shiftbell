@@ -67,3 +67,11 @@
 |---|---|---|---|---|---|
 | 2026-09-14 | Codex | T07 | #24 상태 머신·직렬 제출·dirty/generation/retry API + #21 server 강제 조회·캐시 상태 + #30 fingerprint/입력 제한·refreshAll 1회 load | `bf162ac` | 최초 cache load와 화면 진입 refresh 경합 재검토 |
 | 2026-09-14 | Codex | T07 | #30 최초 load 완료 전 refreshAll이 빈 state를 확정하는 경합 수정 → CODE_FROZEN | `5cda0e0` | T10 연결 요청 G2-01~04 반영 후 빌드 가능 확인; T13 테스트 |
+
+## T10 연결 (Claude, 통합 담당자, 2026-09-14)
+
+- release/g2 `4a8f67e` = CODE_FROZEN `5cda0e0` + 연결 코드. **T13 테스트 대상 SHA = `4a8f67e`.**
+- G2-01 반영: `lib/main.dart` `_MainScreenState` — `ref.listenManual(scheduleProvider, fireImmediately: true)`로 근무표 첫 로드(없음 포함) 뒤 `FriendSyncService.onAppStarted` 1회, `didChangeAppLifecycleState(resumed)`마다 `onAppResumed`. 둘 다 fire-and-forget, 오류는 `debugPrint`만. 앱에 네트워크 재연결 신호가 없어 `onNetworkReconnected`는 미연결.
+- G2-02 반영: `lib/screens/my_share_code_screen.dart` — `getShareState()` 보관, active+dirty / stop_pending 배너 + "지금 다시 보내기"(`retryPending`), 이름 변경이 서버 확인 대기면 실패 대신 대기 안내, 중지 뒤 상태를 다시 읽어 확인 전이면 대기 배너(삭제 완료 문구 없음). ARB 4개 `friendSyncPendingBanner`·`friendStopPendingBanner`·`friendRetrySync`·`friendSyncPendingToast`(ko/en, friend 키 근처 — G1 ARB 추가 위치와 다른 곳).
+- G2-03(G4)·G2-04(G5)는 T10 대상 아님.
+- 확인: `flutter analyze lib/main.dart lib/screens/my_share_code_screen.dart` error 0(warning 1건 `_MyAppState.platform` 미사용은 기존), `flutter build apk --flavor dev --debug`(shiftbell-g2) exit 0, assembleDevDebug 313.7s. 테스트 코드 없음(T13), 설치·실행 안 함.
