@@ -191,6 +191,18 @@ val checkDartKotlinSync = tasks.register("checkDartKotlinSync") {
             hint = "DatabaseHelper.kt의 DATABASE_VERSION을 database_service.dart의 version:과 같은 값으로 맞추세요."
         )
 
+        // ⭐ 2026-09-14 (G0, v4 #1) - Native도 assets/db/migrations.json으로 직접 마이그레이션하므로
+        // 그 SQL 원본의 목표 버전도 DATABASE_VERSION과 같아야 함(다르면 DbMigrationRunner가 런타임에
+        // 예외를 던져 Native DB 접근이 전부 실패함 - 빌드 때 먼저 잡음).
+        checkPair(
+            label = "DB 스키마 SQL 원본 목표 버전",
+            kotlinFile = file("src/main/kotlin/com/hwani1103/shiftbell/DatabaseHelper.kt"),
+            kotlinRegex = Regex("""DATABASE_VERSION\s*=\s*(\d+)"""),
+            dartFile = File(repoRoot, "assets/db/migrations.json"),
+            dartRegex = Regex(""""targetVersion"\s*:\s*(\d+)"""),
+            hint = "assets/db/migrations.json의 targetVersion을 DATABASE_VERSION과 같게 맞추고, migrations에 그 버전 항목과 repair 최종 형태를 추가하세요(DB_스키마_변경_가이드.md)."
+        )
+
         checkPair(
             label = "알람 자동 갱신 윈도우(일수)",
             kotlinFile = file("src/main/kotlin/com/hwani1103/shiftbell/AlarmRefreshEngine.kt"),

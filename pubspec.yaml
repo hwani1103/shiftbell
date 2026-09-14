@@ -121,6 +121,10 @@ flutter:
   # 때 assets/icon/gen_icon.py로 재생성하면 이 자산도 자동으로 최신 걸 가리킴
   # (파일 경로가 그대로라서 - 임시 화면 다 쓰고 나면 이 항목도 같이 지울 것).
   assets:
+    # ⭐ 2026-09-14 (G0, 출시전_코드감사_검토결과_v4 #1) - DB 스키마 SQL 단일 원본.
+    # Dart(rootBundle)와 Native(APK의 flutter_assets/assets/db/migrations.json)가 같이 읽음 -
+    # 이 항목이 빠지면 Native 마이그레이션이 전부 실패하므로 절대 지우지 말 것.
+    - assets/db/migrations.json
     - assets/icon/app_icon_foreground.png
     - assets/icon/app_icon.png
     # ⭐ 2026-08-27 - 메모 자동분류(ml/, 메모_자동분류_ML_계획.md) Phase 5용 카테고리

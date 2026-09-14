@@ -14,6 +14,7 @@ import '../models/date_memo.dart';
 import '../models/date_schedule.dart';
 import '../models/shift_time_range.dart';
 import '../models/sleep_record.dart';
+import 'db_migration_runner.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
@@ -55,24 +56,43 @@ class DatabaseService {
       path = join(await getDatabasesPath(), 'shiftbell.db');
       print('⚠️ 일반 DB 경로 사용: $path');
     }
-    
+
+    // ⭐ 2026-09-14 (G0, v4 #1/#8) - 스키마 SQL 단일 원본. 못 읽으면 예외를 그대로 던짐
+    // (main.dart의 시작 실패 화면에서 다시 시도) - 원본 없이 여는 경로는 두지 않음.
+    final script = await DbMigrationScript.loadFromAssets();
+
     return await openDatabase(
       path,
-      version: 23,  // v23: date_schedules.notify_enabled/notify_offset_minutes 추가 (일정 알림)
+      version: 24,  // v24: alarm_overrides 추가 (개별 알람 예외) - DatabaseHelper.kt, migrations.json targetVersion과 같아야 함(빌드 검사)
       onCreate: _onCreate,
-      onUpgrade: _onUpgrade,
+      onUpgrade: (db, oldVersion, newVersion) =>
+          DbMigrationRunner.migrate(db, script, oldVersion, newVersion),
+      // ⭐ 예전엔 onDowngrade가 없어서, 더 높은 버전 DB를 이 앱이 열면 sqflite가 버전을
+      // 조용히 낮게 찍었음(Native가 그 뒤 과거 마이그레이션을 다시 실행할 위험). 개발 중
+      // 구버전 APK를 덮어 설치하는 경우에만 생기며, 이제는 시작 실패 화면으로 드러남.
+      onDowngrade: (db, oldVersion, newVersion) async {
+        throw DbMigrationException('DB 다운그레이드 금지: disk v$oldVersion > app v$newVersion');
+      },
+      // ⭐ 예전엔 shift_schedule 테이블 존재만 보고 없으면 _onCreate를 다시 불렀음 - 컬럼
+      // 누락은 못 잡았음(H16). 이제 migrations.json의 repair(비파괴 SQL만)로 빠진
+      // 테이블/컬럼/인덱스만 채우고, 프리셋 알람 타입이 비어 있으면 다시 넣음.
       onOpen: (db) async {
-        var result = await db.rawQuery(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name='shift_schedule'"
-        );
-
-        if (result.isEmpty) {
-          print('⚠️ 테이블 없음 - 재생성 중...');
-          await _onCreate(db, 4);
-          print('✅ 테이블 생성 완료');
-        }
+        await DbMigrationRunner.repair(db, script);
+        await _insertPresetAlarmTypesIfMissing(db);
       },
     );
+  }
+
+  Future<void> _insertPresetAlarmTypesIfMissing(Database db) async {
+    final presetCount = Sqflite.firstIntValue(
+          await db.rawQuery('SELECT COUNT(*) FROM alarm_types WHERE is_preset = 1'),
+        ) ??
+        0;
+    if (presetCount > 0) return;
+    for (var type in AlarmType.presets) {
+      await db.insert('alarm_types', type.toMap(), conflictAlgorithm: ConflictAlgorithm.ignore);
+    }
+    print('🛠️ 프리셋 알람 타입이 없어 다시 넣음');
   }
 
   // ⭐ CRITICAL FIX: 모든 CREATE TABLE/INDEX에 IF NOT EXISTS를 붙여서 이 함수가 두 번
@@ -281,6 +301,30 @@ class DatabaseService {
       )
     ''');
 
+    // ⭐ 신규(v24, 2026-09-14 G0): 개별 알람 예외(출시전_코드감사_검토결과_v4 #31, D10).
+    // 사용자가 템플릿으로 생성된 알람 하나를 삭제(skip)하거나 소리/진동/무음을 바꾸면(set_type)
+    // 그 의도를 원본 데이터로 남겨서, 자정 갱신·Flutter 재생성이 다시 만들어도 원복되지 않게 함.
+    // 슬롯 키 = (slot_time 'yyyy-MM-ddTHH:mm:ss' Locale.US 초 00, shift_type, day_offset).
+    // origin_date/origin_shift는 D12(배정일·템플릿 변경 시 관련 예외 삭제)용. 동작 구현은 G1.
+    // ⚠️ assets/db/migrations.json의 v24/repair와 같은 최종 형태여야 함(테스트로 비교).
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS alarm_overrides(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slot_time TEXT NOT NULL,
+        shift_type TEXT NOT NULL,
+        day_offset INTEGER NOT NULL DEFAULT 0 CHECK (day_offset IN (-1, 0, 1)),
+        action TEXT NOT NULL CHECK (action IN ('skip', 'set_type')),
+        alarm_type_id INTEGER,
+        origin_date TEXT NOT NULL,
+        origin_shift TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE (slot_time, shift_type, day_offset),
+        CHECK ((action = 'skip' AND alarm_type_id IS NULL) OR (action = 'set_type' AND alarm_type_id IS NOT NULL))
+      )
+    ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_alarm_overrides_origin_date ON alarm_overrides(origin_date)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_alarm_overrides_origin_shift ON alarm_overrides(origin_shift)');
+
     for (var type in AlarmType.presets) {
       await db.insert('alarm_types', type.toMap(), conflictAlgorithm: ConflictAlgorithm.ignore);
     }
@@ -288,374 +332,14 @@ class DatabaseService {
     print('✅ 데이터베이스 초기화 완료');
   }
 
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-  if (oldVersion < 2) {
-    await db.execute('ALTER TABLE shift_schedule ADD COLUMN shift_colors TEXT');
-    
-    await db.execute('''
-      CREATE TABLE shift_alarm_templates(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        shift_type TEXT NOT NULL,
-        time TEXT NOT NULL,
-        alarm_type_id INTEGER NOT NULL
-      )
-    ''');
-    
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v2)');
-  }
-  
-  if (oldVersion < 3) {
-    await db.execute('ALTER TABLE shift_schedule ADD COLUMN assigned_dates TEXT');
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v3)');
-  }
-  
-  if (oldVersion < 4) {
-    await db.execute('ALTER TABLE shift_schedule ADD COLUMN active_shift_types TEXT');
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v4)');
-  }
-
-  if (oldVersion < 5) {
-    await db.execute('''
-      CREATE TABLE alarm_history(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        alarm_id INTEGER NOT NULL,
-        scheduled_time TEXT NOT NULL,
-        scheduled_date TEXT NOT NULL,
-        actual_ring_time TEXT NOT NULL,
-        dismiss_type TEXT NOT NULL,
-        snooze_count INTEGER DEFAULT 0,
-        shift_type TEXT,
-        created_at TEXT NOT NULL
-      )
-    ''');
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v5)');
-  }
-  
-  if (oldVersion < 6) {
-    await db.execute('ALTER TABLE alarm_types ADD COLUMN duration INTEGER DEFAULT 10');
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v6)');
-  }
-
-  if (oldVersion < 7) {
-    await db.execute('ALTER TABLE alarm_types ADD COLUMN vibration_strength INTEGER DEFAULT 2');
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v7)');
-  }
-
-  // v8: 기본값 변경 (알람벨1, 70%, 강하게, 3분)
-  if (oldVersion < 8) {
-    // 소리 타입 (id=1): alarmbell1, 70%, 강하게, 3분
-    await db.execute('''
-      UPDATE alarm_types SET
-        sound_file = 'alarmbell1',
-        volume = 0.7,
-        vibration_strength = 3,
-        duration = 3
-      WHERE id = 1
-    ''');
-
-    // 진동 타입 (id=2): 강하게, 3분
-    await db.execute('''
-      UPDATE alarm_types SET
-        vibration_strength = 3,
-        duration = 3
-      WHERE id = 2
-    ''');
-
-    // 무음 타입 (id=3): 3분
-    await db.execute('''
-      UPDATE alarm_types SET
-        duration = 3
-      WHERE id = 3
-    ''');
-
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v8): 기본값 마이그레이션');
-  }
-
-  // v9: 진동/무음 기본값 재적용 (강하게, 3분)
-  if (oldVersion < 9) {
-    // 진동 타입 (id=2): 강하게, 3분
-    await db.execute('''
-      UPDATE alarm_types SET
-        vibration_strength = 3,
-        duration = 3
-      WHERE id = 2
-    ''');
-
-    // 무음 타입 (id=3): 3분
-    await db.execute('''
-      UPDATE alarm_types SET
-        duration = 3
-      WHERE id = 3
-    ''');
-
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v9): 진동/무음 기본값 재적용');
-  }
-
-  // v10: 소리 타입 sound_file 강제 업데이트 (loud → alarmbell1)
-  if (oldVersion < 10) {
-    await db.execute('''
-      UPDATE alarm_types SET
-        sound_file = 'alarmbell1',
-        volume = 0.7,
-        vibration_strength = 3,
-        duration = 3
-      WHERE id = 1
-    ''');
-
-    // 진동/무음도 재확인
-    await db.execute('''
-      UPDATE alarm_types SET
-        vibration_strength = 3,
-        duration = 3
-      WHERE id = 2
-    ''');
-
-    await db.execute('''
-      UPDATE alarm_types SET
-        duration = 3
-      WHERE id = 3
-    ''');
-
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v10): sound_file=alarmbell1 강제 적용');
-  }
-
-  // v11: 진동/무음 기본값 최종 강제 적용
-  if (oldVersion < 11) {
-    await db.execute("UPDATE alarm_types SET vibration_strength = 3, duration = 3 WHERE id = 2");
-    await db.execute("UPDATE alarm_types SET duration = 3 WHERE id = 3");
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v11): 진동/무음 기본값 최종 적용');
-  }
-
-  // v12: 날짜별 메모 테이블 추가
-  if (oldVersion < 12) {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS date_memos(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date TEXT NOT NULL,
-        memo_text TEXT NOT NULL,
-        order_index INTEGER NOT NULL,
-        created_at TEXT NOT NULL
-      )
-    ''');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_date_memos_date ON date_memos(date)');
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v12): date_memos 테이블 추가');
-  }
-
-  // v13: 알람 생성 이력 원장 추가
-  if (oldVersion < 13) {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS alarm_creation_log(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        alarm_id INTEGER NOT NULL,
-        scheduled_date TEXT NOT NULL,
-        scheduled_time TEXT NOT NULL,
-        shift_type TEXT,
-        alarm_type_id INTEGER,
-        source TEXT NOT NULL,
-        created_at TEXT NOT NULL
-      )
-    ''');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_creation_log_alarm_id ON alarm_creation_log(alarm_id)');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_creation_log_created_at ON alarm_creation_log(created_at)');
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v13): alarm_creation_log 테이블 추가');
-  }
-
-  // v14: 날짜별 OT(추가근무) 누적 시간 추가
-  if (oldVersion < 14) {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS date_overtime(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date TEXT NOT NULL UNIQUE,
-        minutes INTEGER NOT NULL,
-        updated_at TEXT NOT NULL
-      )
-    ''');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_date_overtime_date ON date_overtime(date)');
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v14): date_overtime 테이블 추가');
-  }
-
-  // v15: 근무별 기본 근로시간(shift_durations) 컬럼 추가
-  if (oldVersion < 15) {
-    try {
-      await db.execute('ALTER TABLE shift_schedule ADD COLUMN shift_durations TEXT');
-    } catch (e) {
-      // ⭐ IF NOT EXISTS가 없는 ALTER문이라, 혹시 이미 컬럼이 있으면(드문 재시도 등)
-      // 예외 대신 조용히 넘어가게 방어
-      print('⚠️ shift_durations 컬럼 추가 스킵(이미 존재 가능성): $e');
-    }
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v15): shift_schedule.shift_durations 컬럼 추가');
-  }
-
-  // v16: 친구 공유 코드 저장 테이블 추가
-  if (oldVersion < 16) {
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS friends(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        data_json TEXT NOT NULL,
-        has_memos INTEGER NOT NULL,
-        added_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      )
-    ''');
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v16): friends 테이블 추가');
-  }
-
-  // v17: 친구공유 v1(Firestore) 전환 - friends 테이블을 owner_id 기반으로 재설계.
-  // ⭐ 아직 정식 출시 전 기능(베타 단계, 실사용자 스냅샷 데이터 없음)이라 기존
-  // data_json(전체 스냅샷)을 마이그레이션하지 않고 통째로 새로 만듦 - alarm_history
-  // 등과 달리 friends 테이블은 영구보존 대상이 아님([[history-permanence]] 무관).
-  if (oldVersion < 17) {
-    await db.execute('DROP TABLE IF EXISTS friends');
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS friends(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        owner_id TEXT NOT NULL UNIQUE,
-        data_json TEXT,
-        added_at TEXT NOT NULL,
-        updated_at TEXT NOT NULL
-      )
-    ''');
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v17): friends 테이블을 Firestore ownerId 기반으로 재설계');
-  }
-
-  // v18: "근무명 색상 변경" 기능 복원 - 사용자가 직접 지정한(테마 무관 고정) 색상만
-  // 담는 별도 컬럼 추가. 기존 shift_colors는 계속 "테마 디폴트 + 이 오버라이드를 합친
-  // 최종 캐시" 역할(위젯/전체근무표용)로 남고, 이 컬럼이 진짜 오버라이드 원본.
-  if (oldVersion < 18) {
-    try {
-      await db.execute('ALTER TABLE shift_schedule ADD COLUMN custom_shift_colors TEXT');
-    } catch (e) {
-      print('⚠️ custom_shift_colors 컬럼 추가 스킵(이미 존재 가능성): $e');
-    }
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v18): shift_schedule.custom_shift_colors 추가');
-  }
-
-  // v19: 고정 알람에 "전날/당일/다음날" 지원 - 근무가 배정된 날짜 기준으로 -1/0/+1일
-  // 오프셋을 준 알람을 만들 수 있게 됨 (예: 야간 근무 전날 저녁 알람). 어떤 알람이
-  // 어느 오프셋으로 만들어졌는지는 이후 화면 표시(칩)/이력에도 그대로 필요해서
-  // 템플릿뿐 아니라 실제 alarms/alarm_history/alarm_creation_log에도 전부 저장함
-  // (근무가 바뀌어도 "그 알람은 원래 며칠 오프셋이었는지" 기록이 흔들리지 않게).
-  if (oldVersion < 19) {
-    for (final stmt in [
-      'ALTER TABLE shift_alarm_templates ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE alarms ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE alarm_history ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE alarm_creation_log ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0',
-    ]) {
-      try {
-        await db.execute(stmt);
-      } catch (e) {
-        print('⚠️ day_offset 컬럼 추가 스킵(이미 존재 가능성): $stmt - $e');
-      }
-    }
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v19): 전날/당일/다음날(day_offset) 컬럼 추가');
-  }
-
-  // ⭐ v20 - 일정관리 탭 영구 저장용 date_schedules 테이블 신설. 기존
-  // date_memos/다른 테이블은 전혀 안 건드림 - 완전히 새 테이블이라 여기서도
-  // CREATE TABLE IF NOT EXISTS(신규 설치처럼 동작)면 충분함.
-  if (oldVersion < 20) {
-    try {
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS date_schedules(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          date TEXT NOT NULL,
-          content TEXT NOT NULL,
-          start_minutes INTEGER NOT NULL,
-          duration_minutes INTEGER NOT NULL,
-          color_index INTEGER NOT NULL DEFAULT 0,
-          icon_index INTEGER NOT NULL DEFAULT 0,
-          style_index INTEGER NOT NULL DEFAULT 1,
-          font_index INTEGER NOT NULL DEFAULT 1,
-          predicted_category TEXT,
-          is_user_corrected INTEGER NOT NULL DEFAULT 0,
-          created_at TEXT NOT NULL,
-          updated_at TEXT
-        )
-      ''');
-      await db.execute(
-          'CREATE INDEX IF NOT EXISTS idx_date_schedules_date ON date_schedules(date)');
-    } catch (e) {
-      print('⚠️ date_schedules 생성 스킵(이미 존재 가능성): $e');
-    }
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v20): date_schedules 테이블 추가');
-  }
-
-  // ⭐ v21 - 컨디션 매니저용 condition_shift_times 테이블 신설. 완전히 새
-  // 테이블이라 기존 테이블은 전혀 안 건드림 - CREATE TABLE IF NOT EXISTS면
-  // 충분함(컨디션매니저_설계.md 3장).
-  if (oldVersion < 21) {
-    try {
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS condition_shift_times(
-          shift_name TEXT PRIMARY KEY,
-          start_minutes INTEGER NOT NULL,
-          end_minutes INTEGER NOT NULL,
-          updated_at TEXT NOT NULL
-        )
-      ''');
-    } catch (e) {
-      print('⚠️ condition_shift_times 생성 스킵(이미 존재 가능성): $e');
-    }
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v21): condition_shift_times 테이블 추가');
-  }
-
-  // ⭐ v22 - 실제 수면 기록/자동 추정("C번 요구사항") - sleep_records/
-  // sleep_expected_bedtime 테이블 신설. 완전히 새 테이블이라 기존 테이블은 전혀
-  // 안 건드림 - CREATE TABLE IF NOT EXISTS면 충분함(수면기록_자동추정_설계.md 1장).
-  if (oldVersion < 22) {
-    try {
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS sleep_records(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          start_time TEXT NOT NULL,
-          end_time TEXT,
-          source TEXT NOT NULL,
-          status TEXT NOT NULL,
-          confidence TEXT,
-          created_at TEXT NOT NULL,
-          updated_at TEXT
-        )
-      ''');
-      await db.execute(
-          'CREATE INDEX IF NOT EXISTS idx_sleep_records_start ON sleep_records(start_time)');
-      await db.execute('''
-        CREATE TABLE IF NOT EXISTS sleep_expected_bedtime(
-          shift_key TEXT PRIMARY KEY,
-          bedtime_minutes INTEGER NOT NULL,
-          updated_at TEXT NOT NULL
-        )
-      ''');
-    } catch (e) {
-      print('⚠️ sleep_records/sleep_expected_bedtime 생성 스킵(이미 존재 가능성): $e');
-    }
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v22): sleep_records/sleep_expected_bedtime 테이블 추가');
-  }
-
-  // ⭐ v23 - 일정관리 탭 "일정에 맞춰서 알림받기" 실제 구현(전체근무표_개선안_및_
-  // 일정알림_설계메모.md 2장). 기존 date_schedules(v20)에 컬럼만 추가 - 다른
-  // 테이블은 전혀 안 건드림. notify_enabled/notify_offset_minutes 둘 다
-  // NOT NULL DEFAULT 0이라, 이미 저장된 기존 일정들은 업그레이드 직후
-  // 전부 "알림 꺼짐"으로 안전하게 채워짐(과거에 만든 일정이 갑자기 알림을
-  // 울리기 시작하는 일 없음).
-  if (oldVersion < 23) {
-    try {
-      await db.execute(
-          'ALTER TABLE date_schedules ADD COLUMN notify_enabled INTEGER NOT NULL DEFAULT 0');
-    } catch (e) {
-      print('⚠️ date_schedules.notify_enabled 추가 스킵(이미 존재 가능성): $e');
-    }
-    try {
-      await db.execute(
-          'ALTER TABLE date_schedules ADD COLUMN notify_offset_minutes INTEGER NOT NULL DEFAULT 0');
-    } catch (e) {
-      print('⚠️ date_schedules.notify_offset_minutes 추가 스킵(이미 존재 가능성): $e');
-    }
-    print('✅ DB 업그레이드 완료 (v$oldVersion → v23): date_schedules 알림 컬럼 추가');
-  }
-}
+  // ⭐ 2026-09-14 (G0, 출시전_코드감사_검토결과_v4 #1/#8) - 예전의 _onUpgrade(v2~v23 SQL을
+  // 이 파일에 직접 나열하고, ALTER 실패를 "이미 있을 수 있음"으로 catch해서 삼키던 코드)는
+  // 삭제됨. 버전별 SQL은 이제 assets/db/migrations.json 하나에만 있고, Dart(위 openDatabase의
+  // onUpgrade)와 Native(DatabaseHelper.onUpgrade)가 같은 파일을 DbMigrationRunner로 실행함 -
+  // 업데이트 후 앱을 열기 전(잠금 해제 전 재부팅 포함)에 Native가 먼저 올려도 결과가 같음.
+  // ALTER ADD COLUMN은 실제로 컬럼이 있을 때만 건너뛰고, 그 외 실패는 던져서 sqflite가 버전
+  // 갱신까지 함께 롤백 → 다음 실행 때 재시도. 과거 블록의 원문/주석은 git 이력과
+  // migrations.json의 note 참고.
 
   // === 기존 메서드들 유지 ===
   
