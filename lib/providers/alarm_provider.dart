@@ -97,13 +97,18 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
 
   Future<void> deleteAlarm(int id, DateTime? date) async {
     try {
-      // ⭐ 알람이 울리는 중인지 확인
+      // ⭐ 알람이 울리는 중이면 먼저 울림을 끝냄
+      // ⭐ 2026-09-14 (출시전 감사 #14) - 예전엔 'isAlarmRinging'(Native 재생기 전역 상태)을 보고
+      // 'stopAlarm'을 불러서, 다른 알람이 울리는 중에 이 알람을 삭제하면 울리던 알람 소리가 멈추고 이
+      // 알람 이력은 'swiped'로 잘못 남았음(진동·무음 알람은 반대로 울리는 중인데 못 알아챔). 이제
+      // Native가 "이 ID가 지금 울리는 회차인가"를 보고 그때만 끝내며 끝냈는지를 돌려줌 - 판정과 종료를
+      // 한 번에 해서, 그 사이 자동 종료가 끼어들어 이력이 두 번 남는 일도 막음.
       bool isRinging = false;
       try {
-        isRinging = await _platform.invokeMethod('isAlarmRinging') ?? false;
-        print('📊 알람 상태: ${isRinging ? "울림 중" : "울리기 전"}');
+        isRinging = await _platform.invokeMethod<bool>('stopRingingAlarm', {'alarmId': id}) ?? false;
+        print('📊 알람 상태: ${isRinging ? "울림 중 → 울림 종료" : "울리기 전"}');
       } catch (e) {
-        print('⚠️ 알람 상태 확인 실패: $e');
+        print('⚠️ 알람 울림 확인/종료 실패: $e');
       }
 
       // ⭐ 이력 생성 정책: 삭제 사유와 무관하게 항상 이력을 남김 (절대 삭제되지 않아야 함)
@@ -115,16 +120,6 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
         await DatabaseService.instance.deleteAlarm(id, dismissType: 'cancelled_before_ring', createHistory: true);
       }
       await AlarmService().cancelAlarm(id);
-
-      // ⭐ 알람 울리는 중이면 소리 중지
-      if (isRinging) {
-        try {
-          await _platform.invokeMethod('stopAlarm');
-          print('✅ 알람 소리 중지');
-        } catch (e) {
-          print('⚠️ 알람 소리 중지 실패: $e');
-        }
-      }
 
       // ⭐ Notification 삭제 (7777, 8888, 8889)
       try {

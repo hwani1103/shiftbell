@@ -54,8 +54,19 @@ override fun onReceive(context: Context, intent: Intent) {
     // 지워지는 유령 행이 생길 수 있었음(RingingAlarmTracker.kt 클래스 주석 참고).
     // 실제 소리는 이미 AlarmPlayer(싱글턴, 아래에서 재생)가 최신 알람 것 하나로 항상
     // 자동 전환하므로 이 처리는 "화면/DB/이력을 소리와 일치시키는" 역할.
-    val previousRingingId = RingingAlarmTracker.getRingingAlarmId(context)
-    if (previousRingingId != null && previousRingingId != id) {
+    // ⭐ 2026-09-14 (출시전 감사 #3) - 이전 울림도 회차 관문(AlarmActionHelper.claimRingEnd)을 통과해야
+    // 마무리함. 관문이 먼저 회차를 폐기하므로, 아래 오버레이 종료 신호가 새 알람 재생 뒤에 도착해도
+    // 오버레이는 창만 닫고 새 알람 소리는 멈추지 않음(AlarmOverlayService.dismissAlarmFromExternal).
+    val previousRing = RingingAlarmTracker.current(context)
+    if (previousRing != null && previousRing.alarmId == id) {
+        // ⭐ 같은 알람이 끝나기 전에 또 수신됨(예: 재부팅 직후 같은 시각 예약이 두 경로로 등록돼
+        // 0.5초 간격으로 두 번 도착 - g1/handoff.md 착수 전 메모, 원인 제거는 #20). 이전 회차의
+        // 종료 예약만 거둬들이고 새 회차로 이어서 울림.
+        AlarmActionHelper.claimRingEnd(context, previousRing.alarmId, previousRing.round)
+    }
+    if (previousRing != null && previousRing.alarmId != id &&
+        AlarmActionHelper.claimRingEnd(context, previousRing.alarmId, previousRing.round)) {
+        val previousRingingId = previousRing.alarmId
         Log.e("CustomAlarmReceiver", "⏰ 이전 알람($previousRingingId)이 아직 응답 전인데 새 알람($id) 도착 - 이전 알람 자동 마무리")
         AlarmActionHelper.supersede(context, previousRingingId)
         try {
@@ -102,7 +113,11 @@ override fun onReceive(context: Context, intent: Intent) {
             Log.e("CustomAlarmReceiver", "⚠️ 이전 알람 오버레이 종료 신호 실패", e)
         }
     }
-    RingingAlarmTracker.setRingingAlarmId(context, id)
+    val ring = RingingAlarmTracker.startRing(context, id)
+    // ⭐ 2026-09-14 (#3) - 자동 종료를 화면 타이머에만 맡기지 않고 이 회차 기준으로 AlarmManager에 예약함
+    // (홈으로 나가 AlarmActivity가 파괴돼도, 절전 상태여도 지속시간에 끝남 - AlarmActionHelper 주석 참고)
+    val durationMinutes = getDurationFromDB(context, id)
+    AlarmActionHelper.scheduleRingTimeout(context, ring, durationMinutes)
 
     // ⭐ 신규: 알람 울릴 때 즉시 갱신 체크!
     AlarmRefreshUtil.checkAndTriggerRefresh(context)
@@ -127,17 +142,22 @@ override fun onReceive(context: Context, intent: Intent) {
     Log.e("CustomAlarmReceiver", "잠금 상태: ${if (isLocked) "잠금" else "해제"}")
     
     Handler(Looper.getMainLooper()).postDelayed({
+        // ⭐ 2026-09-14 (#3) - 이 0.5초 사이에 울림이 끝났거나(앱에서 삭제 등) 다음 울림에 넘어갔으면 화면을 안 띄움
+        if (!RingingAlarmTracker.isCurrent(context, id, ring.round)) {
+            Log.w("CustomAlarmReceiver", "⚠️ 표시 전에 회차가 끝남 - 화면 생략: id=$id 회차=${ring.round}")
+            return@postDelayed
+        }
         if (isLocked) {
             Log.e("CustomAlarmReceiver", "✅ 잠금 상태 - AlarmActivity 표시")
             // ⭐ 잠금화면 AlarmActivity만 표시 (홈 버튼 시 Notification으로 제어)
-            showAlarmActivity(context, id, label)
+            showAlarmActivity(context, id, label, ring.round, durationMinutes)
         } else {
             if (canDrawOverlays(context)) {
                 Log.e("CustomAlarmReceiver", "✅ 잠금 해제 - Overlay 표시")
-                showOverlayWindow(context, id, label)
+                showOverlayWindow(context, id, label, ring.round)
             } else {
                 Log.e("CustomAlarmReceiver", "⚠️ Overlay 권한 없음 - Notification")
-                showNotification(context, id, label)
+                showNotification(context, id, label, ring.round, durationMinutes)
             }
         }
     }, 500)
@@ -187,10 +207,7 @@ override fun onReceive(context: Context, intent: Intent) {
         }
     }
     
-    private fun showAlarmActivity(context: Context, id: Int, label: String) {
-    // ⭐ DB에서 duration 읽기
-    val duration = getDurationFromDB(context, id)
-
+    private fun showAlarmActivity(context: Context, id: Int, label: String, round: Long, duration: Int) {
     val activityIntent = Intent(context, AlarmActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or
                 Intent.FLAG_ACTIVITY_CLEAR_TASK or
@@ -198,6 +215,7 @@ override fun onReceive(context: Context, intent: Intent) {
         putExtra("alarmId", id)
         putExtra("label", label)
         putExtra("alarmDuration", duration)
+        putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, round)
     }
 
     try {
@@ -205,7 +223,7 @@ override fun onReceive(context: Context, intent: Intent) {
         Log.e("CustomAlarmReceiver", "✅ AlarmActivity 시작 (duration=${duration}분)")
     } catch (e: Exception) {
         Log.e("CustomAlarmReceiver", "❌ AlarmActivity 시작 실패", e)
-        showNotification(context, id, label)
+        showNotification(context, id, label, round, duration)
     }
 }
 
@@ -261,23 +279,26 @@ override fun onReceive(context: Context, intent: Intent) {
         }
     }
     
-    private fun showOverlayWindow(context: Context, id: Int, label: String) {
+    private fun showOverlayWindow(context: Context, id: Int, label: String, round: Long) {
         Log.e("CustomAlarmReceiver", "✅ Overlay 표시 시작")
         
         val overlayIntent = Intent(context, AlarmOverlayService::class.java).apply {
             putExtra("alarmId", id)
+            putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, round)
         }
         
         context.startService(overlayIntent)
     }
     
-    private fun showNotification(context: Context, id: Int, label: String) {
+    private fun showNotification(context: Context, id: Int, label: String, round: Long, duration: Int) {
         Log.e("CustomAlarmReceiver", "⚠️ Notification으로 폴백")
         
         val fullScreenIntent = Intent(context, AlarmActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or 
                     Intent.FLAG_ACTIVITY_CLEAR_TASK
             putExtra("alarmId", id)
+            putExtra("alarmDuration", duration)
+            putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, round)
         }
         
         val fullScreenPendingIntent = PendingIntent.getActivity(

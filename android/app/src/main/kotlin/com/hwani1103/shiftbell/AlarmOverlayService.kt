@@ -36,6 +36,8 @@ class AlarmOverlayService : Service() {
     private var timeoutRunnable: Runnable? = null
     private var alarmDuration: Int = 3  // 기본 3분
     private var isOverlayVisible: Boolean = false  // ⭐ Overlay 표시 상태
+    // ⭐ 2026-09-14 (출시전 감사 #3) - 이 오버레이가 보여주는 울림 회차(AlarmActionHelper.claimRingEnd)
+    private var ringRound: Long = RingingAlarmTracker.NO_ROUND
 
     // 외부에서 Overlay 종료/스누즈 신호를 받기 위한 BroadcastReceiver
     private val overlayActionReceiver = object : BroadcastReceiver() {
@@ -93,6 +95,15 @@ class AlarmOverlayService : Service() {
             Log.d("AlarmOverlay", "📡 외부 신호 리시버 등록")
         }
 
+        val newRound = intent?.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, RingingAlarmTracker.NO_ROUND)
+            ?: RingingAlarmTracker.NO_ROUND
+        // ⭐ 2026-09-14 (#3) - 표시 요청이 도착하기 전에 그 회차가 이미 끝났으면(앱에서 삭제·인계 등) 안 띄움
+        if (!RingingAlarmTracker.isCurrent(applicationContext, newAlarmId, newRound)) {
+            Log.w("AlarmOverlay", "⚠️ 지난 회차 표시 요청 무시: id=$newAlarmId 회차=$newRound")
+            if (!isOverlayVisible) stopSelf()
+            return START_NOT_STICKY
+        }
+
         // ⭐ 2026-08-25 - 겹쳐 울리는 알람: 이미 다른 알람의 Overlay가 떠 있는 상태에서
         // 새 알람이 도착한 경우. CustomAlarmReceiver.onReceive()가 이전 알람의 DB/이력은
         // 이미 정리했지만(RingingAlarmTracker 참고), 이 Service는 같은 인스턴스가
@@ -106,6 +117,7 @@ class AlarmOverlayService : Service() {
         }
 
         alarmId = newAlarmId
+        ringRound = newRound
 
         // DB에서 알람 정보 조회
         loadAlarmInfo()
@@ -121,13 +133,14 @@ class AlarmOverlayService : Service() {
     // 외부에서 호출된 DISMISS (소리만 중지, DB 작업은 이미 외부에서 처리됨)
     private fun dismissAlarmFromExternal() {
         cancelTimeoutTimer()
-        AlarmPlayer.getInstance(applicationContext).stopAlarm()
-        // ⭐ 이 경로(예: Flutter 쪽 달력탭 알람 삭제)는 DB 삭제를 Dart의 sqflite
-        // 커넥션이 직접 처리해서 AlarmActionHelper.finishUp()을 안 거침 - 여기서
-        // 직접 지워야 다음 알람이 도착했을 때 이미 없는 이 알람을 "아직 응답 안 한
-        // 이전 알람"으로 오인해 supersede()를 불필요하게 시도하지 않음(시도해도
-        // 안전하긴 하지만, 여기서 바로 지우는 게 더 정확함).
-        RingingAlarmTracker.clearIfMatches(applicationContext, alarmId)
+        // ⭐ 2026-09-14 (출시전 감사 #3/#14) - 예전엔 여기서 무조건 소리를 멈췄음. 이 신호는
+        // CustomAlarmReceiver의 인계(이전 알람 정리)·종료 예약·앱 삭제(AlarmActionHelper.closeRingUi)가
+        // 보내는데, 브로드캐스트라 새 알람 재생이 시작된 뒤에 도착할 수 있어서 새 알람 소리까지 멈출 수
+        // 있었음. 보낸 쪽이 이미 회차를 폐기했으면 창만 닫고, 이 알람이 아직 활성 울림일 때만
+        // (외부에서 dismissOverlay만 보낸 경우) 울림을 끝냄.
+        if (AlarmActionHelper.claimCurrentRingOf(applicationContext, alarmId)) {
+            AlarmPlayer.getInstance(applicationContext).stopAlarm()
+        }
         removeOverlay()
         stopSelf()
         Log.d("AlarmOverlay", "✅ 외부 신호로 Overlay 종료")
@@ -136,8 +149,10 @@ class AlarmOverlayService : Service() {
     // 외부에서 호출된 SNOOZE (소리만 중지, DB 작업은 이미 외부에서 처리됨)
     private fun snoozeAlarmFromExternal() {
         cancelTimeoutTimer()
-        RingingAlarmTracker.clearIfMatches(applicationContext, alarmId)
-        AlarmPlayer.getInstance(applicationContext).stopAlarm()
+        // ⭐ 2026-09-14 (#3/#14) - dismissAlarmFromExternal()과 같은 이유로 활성 울림일 때만 멈춤
+        if (AlarmActionHelper.claimCurrentRingOf(applicationContext, alarmId)) {
+            AlarmPlayer.getInstance(applicationContext).stopAlarm()
+        }
         removeOverlay()
         stopSelf()
         Log.d("AlarmOverlay", "✅ 외부 신호로 Overlay 종료 (스누즈)")
@@ -219,6 +234,13 @@ class AlarmOverlayService : Service() {
 
     private fun timeoutAlarm() {
         Log.d("AlarmOverlay", "⏰ 알람 타임아웃 - 자동 종료")
+
+        // ⭐ 2026-09-14 (#3) - 종료 예약이 먼저 끝냈거나 지난 회차면 창만 닫음
+        if (!AlarmActionHelper.claimRingEnd(applicationContext, alarmId, ringRound)) {
+            removeOverlay()
+            stopSelf()
+            return
+        }
 
         // 알람 소리 중지
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
@@ -360,6 +382,13 @@ class AlarmOverlayService : Service() {
     private fun dismissAlarm() {
     cancelTimeoutTimer()
 
+    // ⭐ 2026-09-14 (#3) - 지난 회차 창의 버튼이면 다른 울림을 건드리지 않고 창만 닫음
+    if (!AlarmActionHelper.claimRingEnd(applicationContext, alarmId, ringRound)) {
+        removeOverlay()
+        stopSelf()
+        return
+    }
+
     // 알람 소리 중지
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
@@ -383,6 +412,13 @@ class AlarmOverlayService : Service() {
     
     private fun snoozeAlarm() {
         cancelTimeoutTimer()
+
+        // ⭐ 2026-09-14 (#3) - 지난 회차 창의 버튼이면 다른 울림을 건드리지 않고 창만 닫음
+        if (!AlarmActionHelper.claimRingEnd(applicationContext, alarmId, ringRound)) {
+            removeOverlay()
+            stopSelf()
+            return
+        }
 
         // 알람 소리 중지
         AlarmPlayer.getInstance(applicationContext).stopAlarm()

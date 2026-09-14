@@ -35,6 +35,10 @@ class AlarmActivity : AppCompatActivity() {
     private var timeoutRunnable: Runnable? = null
     private var swipeHintAnimator: android.animation.Animator? = null
 
+    // ⭐ 2026-09-14 (출시전 감사 #3) - 이 화면이 보여주는 울림 회차. 끄기·스누즈·타임아웃은 이 회차가
+    // 아직 활성일 때만 동작함(AlarmActionHelper.claimRingEnd)
+    private var ringRound: Long = RingingAlarmTracker.NO_ROUND
+
     // ⭐ 의도적 종료 플래그 (timeout/dismiss/snooze 중에는 7777 생성 방지)
     private var isIntentionalExit: Boolean = false
 
@@ -54,6 +58,15 @@ class AlarmActivity : AppCompatActivity() {
 
         alarmId = intent.getIntExtra("alarmId", 0)
         alarmDuration = intent.getIntExtra("alarmDuration", 3)  // 기본 3분
+        ringRound = intent.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, RingingAlarmTracker.NO_ROUND)
+
+        // ⭐ 2026-09-14 (#3) - 이미 끝난 회차의 화면 요청(예: 울림이 끝난 뒤 남은 알림 탭)이면 바로 닫음
+        if (!RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) {
+            Log.w("AlarmActivity", "⚠️ 지난 회차 화면 요청 - 표시 안 함: id=$alarmId 회차=$ringRound")
+            isIntentionalExit = true
+            finish()
+            return
+        }
 
         setupWindowFlags()
 
@@ -134,6 +147,13 @@ private fun timeoutAlarm() {
 
     // ⭐ 의도적 종료 플래그 설정 (onUserLeaveHint에서 7777 생성 방지)
     isIntentionalExit = true
+
+    // ⭐ 2026-09-14 (#3) - 종료 예약(AlarmActionReceiver)이 먼저 끝냈거나 지난 회차면 화면만 닫음
+    // (화면 타이머는 S4 확인 전까지 보조로 남겨둔 것 - AlarmActionHelper 주석 참고)
+    if (!AlarmActionHelper.claimRingEnd(applicationContext, alarmId, ringRound)) {
+        finish()
+        return
+    }
 
     // 알람 소리 중지
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
@@ -264,6 +284,12 @@ private fun dismissAlarm() {
     // ⭐ 의도적 종료 플래그 설정 (onUserLeaveHint에서 7777 생성 방지)
     isIntentionalExit = true
 
+    // ⭐ 2026-09-14 (#3) - 지난 회차 화면의 조작이면 다른 울림을 건드리지 않고 닫기만 함
+    if (!AlarmActionHelper.claimRingEnd(applicationContext, alarmId, ringRound)) {
+        finish()
+        return
+    }
+
     AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
     // ⭐ Overlay 서비스도 종료
@@ -290,6 +316,12 @@ private fun dismissAlarm() {
 
         // ⭐ 의도적 종료 플래그 설정 (onUserLeaveHint에서 7777 생성 방지)
         isIntentionalExit = true
+
+        // ⭐ 2026-09-14 (#3) - 지난 회차 화면의 조작이면 다른 울림을 건드리지 않고 닫기만 함
+        if (!AlarmActionHelper.claimRingEnd(applicationContext, alarmId, ringRound)) {
+            finish()
+            return
+        }
 
         AlarmPlayer.getInstance(applicationContext).stopAlarm()
 
@@ -341,6 +373,10 @@ private fun dismissAlarm() {
             Log.d("AlarmActivity", "👋 의도적 종료 중 → Notification 생성 안 함")
             return
         }
+        if (!RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) {
+            Log.d("AlarmActivity", "👋 이미 끝난 회차 → Notification 생성 안 함")
+            return
+        }
         // ⭐ 홈 버튼 눌렀을 때 → 알람 제어 Notification 표시
         Log.d("AlarmActivity", "👋 홈 버튼 감지 → Notification 표시")
         showAlarmControlNotification()
@@ -368,6 +404,7 @@ private fun dismissAlarm() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("alarmId", alarmId)
             putExtra("alarmDuration", alarmDuration)
+            putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, ringRound)
         }
         val activityPendingIntent = PendingIntent.getActivity(
             this,
@@ -378,8 +415,9 @@ private fun dismissAlarm() {
 
         // "알람 끄기" 버튼 (스와이프로 지울 때도 동일한 액션을 씀 - setDeleteIntent)
         val dismissIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = "DISMISS_FROM_NOTIFICATION"
+            action = AlarmActionReceiver.ACTION_DISMISS_FROM_NOTIFICATION
             putExtra("alarmId", alarmId)
+            putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, ringRound)
         }
         val dismissPendingIntent = PendingIntent.getBroadcast(
             this,

@@ -4053,13 +4053,8 @@ Widget build(BuildContext context) {
 
   // ⭐ 알람 삭제 (울리는 중이면 Overlay도 종료)
   Future<void> _deleteAlarm(Alarm alarm) async {
-    try {
-      // 1. 울리는 중인 Overlay 종료
-      await platform.invokeMethod('dismissOverlay', {'alarmId': alarm.id});
-    } catch (e) {
-      print('⚠️ Overlay 종료 신호 실패: $e');
-    }
-
+    // ⭐ 2026-09-14 (출시전 감사 #14) - 여기서 먼저 'dismissOverlay'를 보내던 호출 제거. 울리는 중이면 deleteAlarm()이 Native 'stopRingingAlarm'으로 오버레이까지 닫음.
+    // 먼저 보내면 오버레이가 울림을 끝낸 뒤라 삭제 이력이 'cancelled_before_ring'으로 잘못 남음.
     try {
       // 2. DB에서 알람 삭제 + Native 알람 취소
       await ref.read(alarmNotifierProvider.notifier).deleteAlarm(alarm.id!, alarm.date);

@@ -500,9 +500,24 @@ override fun onNewIntent(intent: Intent) {
                     result.success(null)
                 }
                 // ⭐ 알람이 울리는 중인지 확인
+                // ⭐ 2026-09-14 (출시전 감사 #14) - 예전엔 MediaPlayer 재생 여부(전역)라 다른 알람을 삭제할 때도
+                // true였고 진동·무음 알람은 울리는 중에도 false였음. 이제 활성 울림 회차의 알람 ID로 판정.
                 "isAlarmRinging" -> {
-                    val isRinging = AlarmPlayer.getInstance(applicationContext).isAlarmRinging()
-                    result.success(isRinging)
+                    val alarmId = call.argument<Int>("alarmId")
+                    result.success(
+                        if (alarmId == null) RingingAlarmTracker.current(applicationContext) != null
+                        else AlarmActionHelper.isAlarmRinging(applicationContext, alarmId)
+                    )
+                }
+                // ⭐ #14 - 그 알람이 지금 울리는 중일 때만 울림을 끝냄(소리·화면·오버레이·제어 알림).
+                // 반환값 = 실제로 울리던 중이었는지(삭제 이력 swiped/cancelled_before_ring 판정에 씀).
+                "stopRingingAlarm" -> {
+                    val alarmId = call.argument<Int>("alarmId")
+                    if (alarmId == null) {
+                        result.error("INVALID_ARGUMENT", "alarmId required", null)
+                    } else {
+                        result.success(AlarmActionHelper.stopRingingAlarm(applicationContext, alarmId))
+                    }
                 }
                 // ⭐ 홈 화면 캘린더 위젯 즉시 갱신 (스케줄 저장/변경 직후 Flutter가 호출)
                 "refreshCalendarWidget" -> {

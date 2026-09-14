@@ -198,27 +198,10 @@ class AlarmPlayer(private val context: Context) {
             val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/$resourceId")
             Log.d("AlarmPlayer", "커스텀 사운드 로드: $soundUri")
 
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(context, soundUri)
-
-                // 핵심: STREAM_ALARM 사용!
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-
-                // ⭐ 음량 calibration 적용 (sqrt 커브, 새 50%≈기존 70% 체감)
-                val calibrated = VolumeCalibration.linearGain(volume)
-                setVolume(calibrated, calibrated)
-
-                isLooping = true
-                prepare()
-                start()
-
-                applyLoudnessBoost(audioSessionId, volume)
-            }
+            // ⭐ 2026-09-14 (#23) - 재생까지 성공한 플레이어만 필드에 대입 (startLoopingPlayer 주석 참고)
+            val player = startLoopingPlayer(soundUri, volume)
+            mediaPlayer = player
+            applyLoudnessBoost(player.audioSessionId, volume)
 
             Log.d("AlarmPlayer", "커스텀 사운드 재생 시작: $soundFile, 음량 ${(volume * 100).toInt()}%")
 
@@ -255,32 +238,50 @@ class AlarmPlayer(private val context: Context) {
             // 알람 소리 URI
             val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
 
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(context, alarmUri)
-
-                // 핵심: STREAM_ALARM 사용!
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-
-                // ⭐ 음량 calibration 적용 (sqrt 커브, 새 50%≈기존 70% 체감)
-                val calibrated = VolumeCalibration.linearGain(volume)
-                setVolume(calibrated, calibrated)
-
-                isLooping = true
-                prepare()
-                start()
-
-                applyLoudnessBoost(audioSessionId, volume)
-            }
+            // ⭐ 2026-09-14 (#23) - 재생까지 성공한 플레이어만 필드에 대입 (startLoopingPlayer 주석 참고)
+            val player = startLoopingPlayer(alarmUri, volume)
+            mediaPlayer = player
+            applyLoudnessBoost(player.audioSessionId, volume)
 
             Log.d("AlarmPlayer", "기본 알람 소리 재생 시작: 음량 ${(volume * 100).toInt()}%")
 
         } catch (e: Exception) {
             Log.e("AlarmPlayer", "기본 알람 소리 재생 실패", e)
+        }
+    }
+
+    // ⭐ 2026-09-14 (출시전 감사 #23) - 예전엔 `mediaPlayer = MediaPlayer().apply { ...prepare(); start() }`
+    // 형태라 setDataSource/prepare/start 중 하나가 예외를 던지면, 그 MediaPlayer는 필드에 대입되기 전이라
+    // 아무도 release()하지 못한 채 새어나갔음(실패가 반복되면 네이티브 재생 자원이 쌓임). 지역 변수로
+    // 만들어 실패하면 여기서 바로 해제하고, 재생 시작까지 성공한 것만 돌려줌.
+    private fun startLoopingPlayer(uri: android.net.Uri, volume: Float): MediaPlayer {
+        val player = MediaPlayer()
+        try {
+            player.setDataSource(context, uri)
+
+            // 핵심: STREAM_ALARM 사용!
+            player.setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+
+            // ⭐ 음량 calibration 적용 (sqrt 커브, 새 50%≈기존 70% 체감)
+            val calibrated = VolumeCalibration.linearGain(volume)
+            player.setVolume(calibrated, calibrated)
+
+            player.isLooping = true
+            player.prepare()
+            player.start()
+            return player
+        } catch (e: Exception) {
+            try {
+                player.release()
+            } catch (releaseError: Exception) {
+                Log.e("AlarmPlayer", "실패한 MediaPlayer 해제 실패", releaseError)
+            }
+            throw e
         }
     }
 
@@ -398,15 +399,9 @@ class AlarmPlayer(private val context: Context) {
         }
     }
 
-    // ⭐ 알람이 재생 중인지 확인
-    fun isAlarmRinging(): Boolean {
-        return try {
-            mediaPlayer?.isPlaying ?: false
-        } catch (e: Exception) {
-            Log.e("AlarmPlayer", "isPlaying 확인 실패", e)
-            false
-        }
-    }
+    // ⭐ 2026-09-14 (출시전 감사 #14) - isAlarmRinging()(MediaPlayer.isPlaying 기준)은 제거함. 알람 ID를
+    // 구분하지 못하고 진동·무음 알람은 항상 false라, 앱에서 다른 알람을 삭제하면 울리는 알람이 멈추는
+    // 원인이었음. 대신 AlarmActionHelper.isAlarmRinging(context, alarmId)(활성 울림 회차 기준)을 씀.
 
     fun stopAlarm() {
         Log.d("AlarmPlayer", "알람 중지")
