@@ -157,10 +157,15 @@
 | 〃 | `last_boot_time`, `last_checked_boot_time` | long | DirectBootReceiver, AlarmRefreshUtil | G1 | 안 됨 |
 | 〃 | `refresh_lock_owner`, `refresh_lock_until` | 〃 | RefreshLockManager | G1 | 안 됨 |
 | 〃 | `currently_ringing_alarm_id` | int | RingingAlarmTracker | G1 (#3 확장) | 안 됨 |
-| 〃 (신규 예정) | `refresh_policy_version` | int | 갱신 엔진 | G1 | 안 됨 |
+| 〃 (T10 등록, G1 9b8a586) | `currently_ringing_round` | long | RingingAlarmTracker — 활성 울림 회차, 없으면 0(이전 버전 값) | G1 #3 | 안 됨 |
+| 〃 (T10 등록) | `ring_counter` | long | RingingAlarmTracker — 누적 회차, **초기화 안 함** | G1 #3 | 안 됨 |
+| 〃 (T10 등록) | `os_sync_failed_alarm_ids` | StringSet | AlarmWakeScheduler — OS 반영 실패 알람 ID, 성공·할 일 없음 시 제거 | G1 #27 | 안 됨 |
+| 〃 (T10 등록) | `refresh_policy_version` | int | AlarmRefreshEngine.markRefreshed(성공 뒤에만, 현재 값 1) / AlarmRefreshUtil(낮으면 강제 갱신) | G1 #26 P1 | 안 됨 |
+| 〃 (T10 등록) | `schedule_tab_enabled` | bool(기본 true) | ScheduleNotificationScheduler — 탭 숨김/복원 채널·앱 시작 동기화(Flutter prefs `schedule_tab_enabled`와 짝) | G1 #5 | 안 됨 — **G4 복원 후 앱 시작 동기화로 재설정** |
 | `sleep_detection_state` (Device Protected) | `first_off_sample_at`, `reject_hour_count_<h>`, `reject_hour_last_at_<h>` | long/int | SleepDetectionReceiver | G3 | 안 됨 |
 | `backup_prefs` (**일반 저장소**, DP 아님) | `last_backup_uri` | String | MainActivity | G4 | 안 됨 |
 
+- **T10 소유권 결정(2026-09-14)**: §3.1 목록 밖이던 `lib/services/permission_service.dart`, `lib/widgets/permission_warning_banner.dart`(G1 #13), `CalendarWidgetScheduleResolver.kt`(G1 #17), `lib/providers/overtime_provider.dart`(contracts §3 OT 통지)를 **G1 소유**로 확정 — release/g2·g3 변경 경로와 교집합 0건.
 - 위 `RefreshLockManager.kt`·`AlarmRefreshUtil.kt`·`AlarmGuardReceiver.kt`처럼 실행계획 §3.1 목록에 파일명이 직접 없는 알람 계열 Native 파일은 **G1 소유**로 확정. 공유 위젯 resolver(`CalendarWidgetScheduleResolver.kt`)는 수정이 필요하면 G1로 배정.
 
 ## 8. 테스트 경계와 작업 환경
