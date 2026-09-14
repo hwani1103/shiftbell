@@ -150,3 +150,15 @@
 
 - `settings_tab.dart:631`, `disable_tab_button.dart:68`이 `setEnabled`의 `StateError`를 잡지 않음. 상태는 안 바뀌어 일관성은 맞지만 탭을 눌러도 아무 반응 없이 끝남.
 - 요청(선택): 두 호출부에서 잡아 SnackBar로 실패 안내(ARB는 기존 `scheduleNotifyRegisterFailed` 재사용 가능 여부 확인). 출시 차단 아님.
+
+### T11-FIX2 결과 (Codex 수정 → Codex 토큰 소진으로 Claude가 마무리, 2026-09-14)
+
+| 항목 | 상태 | 커밋 | 수정 |
+|---|---|---|---|
+| C-01 | **FIXED** | `c257d77` | DB 없는 `dismiss`는 `cancelRaw`로 OS 예약 직접 취소, 실패 시에만 `recordFailure`. 테스트 `G1WakeSyncTest` "C-01 DB 없는 dismiss도 … OS 예약을 취소한다" |
+| C-02 | **FIXED** | `c257d77` | `scheduleIfCurrent`의 DB null·조회 예외·row 파싱 실패 → `scheduleUnverified`(예약 진행 + `recordFailure`). 행 없음·시각 불일치만 버림. 취소 경로(T11-04 B)는 유지. 테스트 "C-02 …" 3경로 + stale 수신 `SKIP_NO_ROW` 명시 |
+| C-03 | **FIXED** | `4771493` | `setTabEnabledWithFeedback`(disable_tab_button.dart)로 `StateError`를 SnackBar `scheduleTabSyncFailed`(ko/en 신규 키) 안내 + 후속 동작 중단. settings_tab 일정 탭 복원·DisableTabButton 양쪽 적용. 위젯 테스트 "C-03 …" |
+
+- 제품 수정·표적 테스트: Codex. 테스트 한 줄(`locale: const Locale('ko')`), 최종 검증·커밋·문서: Claude. Claude가 커밋 전 diff 전체 확인.
+- 수정 전 FAIL: Codex가 표적 테스트로 확인했다고 보고했으나 FAIL 출력은 기록되지 않았고 Claude가 재실행하지 않음(수정 전 코드 = `e6e679a`의 해당 함수).
+- 최종 검증: Gradle `testDevDebugUnitTest` 71/71 PASS, `flutter test` 212/212 PASS, `flutter analyze` error는 허용된 web_main dart:js_util 1건(exit 1, warning 22건은 기존 줄), `flutter build apk --flavor dev --debug` PASS(assembleDevDebug 101.3s).

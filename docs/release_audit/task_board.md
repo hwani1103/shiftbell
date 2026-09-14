@@ -3,8 +3,8 @@
 > **메인 폴더 사본만 유효.** 규칙은 `출시전_수정작업_그룹별_실행계획_및_세션인계_2026-09-14.md` §11.
 > 작업을 시작·중단·완료할 때마다 **아래 두 줄**과 표를 갱신한다. 두 AI는 동시에 작업하지 않는다.
 
-**Claude 이어서 할 작업:** T11-FIX 확인 완료(`g1/review.md` C-01~03). Codex T11-FIX2 끝나면 그 diff 확인 → T12. T14(G3 테스트, `98c4831`)도 가능
-**Codex 지금 할 수 있는 작업:** T11-FIX2 — `g1/review.md` "T11-FIX 확인" C-01(Medium)·C-02(Medium)·C-03(Low, 선택) 수정 후 G1 재동결
+**Claude 이어서 할 작업:** T12 — G1 테스트(대상 release/g1 `4771493`). T11-FIX2 diff는 커밋 전 확인 완료. T14(G3 테스트, `98c4831`)도 가능
+**Codex 지금 할 수 있는 작업:** 없음 — T11-FIX2 수정 완료(토큰 소진으로 검증·커밋은 Claude가 마무리)
 
 ---
 
@@ -38,7 +38,7 @@
 | T11a | (선행) G1 알람 계산 기대값 — contracts §2·v4 #26/#31만 근거, G1 코드 미참조. docs/release_audit/g1/fixtures_draft_p1/ | Codex | — | T05 | 완료 | - | 생성 6건·상태 변화 6건 JSON + README. T06/T12 테스트에서 사용 |
 | R0 | (추가) G0 교차 리뷰 — release/g0 diff 읽기 전용, g0/review_codex.md | Codex | — | T05 | 완료 | - | CHANGES_REQUESTED: High 2·Medium 2 → Claude 판정 전부 타당, T02 재수정 |
 | R0-T | (추가) R0 재현 테스트 초안 — docs/release_audit/g0/r0_repro_tests/ (수정 전 FAIL·수정 후 PASS), 실행은 Claude | Codex | — | R0 | 완료(초안) | - | 테스트 4개 + README(R0-02 timeout 주입 지점 요구). Claude가 에뮬레이터 종료 후 G0 수정본에 대입·실행 |
-| T11 | G1 교차 리뷰 + 공통 fixture 기대값 | Codex | — | T10 | 완료(`FIXED`) | `e6e679a` | High 5·Medium 3 리뷰 후 수정 완료 `e6e679a`. 수정 전 재현 FAIL·후 PASS, Gradle 전체·Flutter 211/211·dev debug APK PASS; analyze 허용 error 1건만. `g1/review.md`, `g1/review_fixture_additions.json`. Claude 확인: C-01·C-02 Medium, C-03 Low 후속 요청(T11-FIX2) |
+| T11 | G1 교차 리뷰 + 공통 fixture 기대값 | Codex | — | T10 | 완료(`FIXED`) | `e6e679a` | High 5·Medium 3 리뷰 후 수정 완료 `e6e679a`. 수정 전 재현 FAIL·후 PASS, Gradle 전체·Flutter 211/211·dev debug APK PASS; analyze 허용 error 1건만. `g1/review.md`, `g1/review_fixture_additions.json`. Claude 확인: C-01·C-02 Medium, C-03 Low 후속 → T11-FIX2 FIXED `c257d77`·`4771493` |
 | T12 | G1 테스트 | Claude | Codex | T10, T11 | 대기 | - | |
 | T13 | G2 테스트 | Claude | Codex | T10 | 완료 | release/g2 `0cbe392` (대상 `4a8f67e`) | F 40/40·전체 179/179·FS 16/16. #21 부분 PASS·#24 로컬 PASS(서버 경로 S9)·#29 NOT_RUN·#30 앱 측 PASS. FS 관찰 4건(서버 형식·크기·회차 강제 없음) → T16. `g2/test_results.md` |
 | T14 | G3 테스트 | Claude | Codex | T10 | 대기 | - | |
