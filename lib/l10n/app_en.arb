@@ -211,6 +211,8 @@
   "onboardingCharLimitError": "Please enter {chars} characters or fewer",
   "@onboardingCharLimitError": {"placeholders": {"chars": {"type": "int"}}},
   "onboardingDuplicateShiftName": "This shift name already exists",
+  "shiftNameCommaNotAllowed": "Shift names can't contain commas (,)",
+  "shiftNameReserved": "\"{name}\" is reserved by the app and can't be used as a shift name",
   "onboardingFixedAlarmDialogTitle": "{shift} Fixed Alarms",
   "@onboardingFixedAlarmDialogTitle": {"placeholders": {"shift": {"type": "String"}}},
   "onboardingFixedAlarmMaxHint": "Up to {max} alarms per shift",

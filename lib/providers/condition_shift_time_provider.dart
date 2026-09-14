@@ -42,6 +42,18 @@ class ConditionShiftTimeNotifier extends StateNotifier<AsyncValue<Map<String, Sh
     state = AsyncValue.data(current);
   }
 
+  /// ⭐ 2026-09-14 (출시전 감사 #28) - DB에는 이미 저장된 값(DatabaseService.saveShiftTimeRange - 근로시간과 한 트랜잭션)을
+  /// 상태에만 반영. [range]가 null이면 삭제.
+  void applyExternallyPersisted(String shiftName, ShiftTimeRange? range) {
+    final current = Map<String, ShiftTimeRange>.from(state.value ?? {});
+    if (range == null) {
+      current.remove(shiftName);
+    } else {
+      current[shiftName] = range;
+    }
+    state = AsyncValue.data(current);
+  }
+
   Future<void> remove(String shiftName) async {
     await DatabaseService.instance.deleteConditionShiftTime(shiftName);
     final current = Map<String, ShiftTimeRange>.from(state.value ?? {});

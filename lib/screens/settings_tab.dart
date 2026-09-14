@@ -1127,6 +1127,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
       context: context,
       builder: (context) => _EditShiftNamesDialog(
         shiftTypes: activeShifts,
+        allShiftTypes: schedule.shiftTypes,
         onSave: (Map<String, String> renamedShifts) async {
           await _applyShiftNameChanges(renamedShifts);
         },
@@ -1203,10 +1204,22 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
       shiftDurations: newShiftDurations,
     );
 
-    await DatabaseService.instance.renameShiftAtomic(
-      renamedShifts: renamedShifts,
-      newSchedule: newSchedule,
-    );
+    // ⭐ 2026-09-14 (출시전 감사 #11/#12) - 이름 형식·최종 이름 중복은 renameShiftAtomic이 한 번 더 막고(예외),
+    // 실패하면 트랜잭션 전체가 롤백되므로 화면 상태도 바꾸지 않고 안내만 함
+    try {
+      await DatabaseService.instance.renameShiftAtomic(
+        renamedShifts: renamedShifts,
+        newSchedule: newSchedule,
+      );
+    } catch (e) {
+      print('❌ 근무명 변경 실패: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.statusErrorWithDetail('$e'))),
+        );
+      }
+      return;
+    }
     ref.read(scheduleProvider.notifier).applyExternallyPersisted(newSchedule);
     await ref.read(alarmNotifierProvider.notifier).refresh();
 
@@ -1940,10 +1953,13 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
 // ============================================================
 class _EditShiftNamesDialog extends StatefulWidget {
   final List<String> shiftTypes;
+  // ⭐ 2026-09-14 (#12) - 화면에 안 보이는(비활성) 근무명까지 포함한 전체 목록 - 변경 후 이름 중복 검사용
+  final List<String> allShiftTypes;
   final Function(Map<String, String>) onSave;
 
   const _EditShiftNamesDialog({
     required this.shiftTypes,
+    required this.allShiftTypes,
     required this.onSave,
   });
 
@@ -2021,6 +2037,21 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
 
               if (newName.isNotEmpty && newName != oldName) {
                 renamedShifts[oldName] = newName;
+              }
+            }
+
+            // ⭐ 2026-09-14 (출시전 감사 #11/#12) - 새 이름 형식(쉼표·예약어·길이) + "변경 후" 이름끼리 중복 검사.
+            // 맞바꾸기(A↔B)·순환은 허용하고, 두 근무가 같은 이름이 되는 경우만 거부(예전엔 그대로 저장돼 서로 다른
+            // 근무의 알람·이력·출퇴근시각이 한 이름으로 합쳐졌음).
+            final finalNames = widget.allShiftTypes.map((s) => renamedShifts[s] ?? s).toList();
+            for (final newName in renamedShifts.values) {
+              final issue = validateShiftName(newName) ??
+                  (finalNames.where((n) => n == newName).length > 1 ? ShiftNameIssue.duplicate : null);
+              if (issue != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(_shiftNameIssueMessage(context, issue, newName))),
+                );
+                return;
               }
             }
 
@@ -3332,5 +3363,21 @@ class _ColorPickerDialog extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+// ⭐ 2026-09-14 (출시전 감사 #11) - 근무명 검증 결과 → 사용자 안내 문구
+String _shiftNameIssueMessage(BuildContext context, ShiftNameIssue issue, String name) {
+  switch (issue) {
+    case ShiftNameIssue.empty:
+      return context.l10n.onboardingEnterShiftName;
+    case ShiftNameIssue.tooLong:
+      return context.l10n.onboardingCharLimitError(kMaxShiftNameLength);
+    case ShiftNameIssue.comma:
+      return context.l10n.shiftNameCommaNotAllowed;
+    case ShiftNameIssue.reserved:
+      return context.l10n.shiftNameReserved(name);
+    case ShiftNameIssue.duplicate:
+      return context.l10n.onboardingDuplicateShiftName;
   }
 }

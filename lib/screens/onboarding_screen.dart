@@ -647,21 +647,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             variant: AppSecondButtonVariant.success,
             onPressed: () {
               final text = controller.text.trim();
-              if (text.isEmpty) {
+              // ⭐ 2026-09-14 (출시전 감사 #11) - 빈 이름·길이·중복에 더해 쉼표·예약어("미설정" 등) 차단
+              final issue = validateShiftName(text, otherNames: _allShiftTypes);
+              if (issue != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.l10n.onboardingEnterShiftName)),
-                );
-                return;
-              }
-              if (text.length > kMaxShiftNameLength) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.l10n.onboardingCharLimitError(kMaxShiftNameLength))),
-                );
-                return;
-              }
-              if (_allShiftTypes.contains(text)) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(context.l10n.onboardingDuplicateShiftName)),
+                  SnackBar(content: Text(_shiftNameIssueMessage(context, issue, text))),
                 );
                 return;
               }
@@ -1837,5 +1827,21 @@ class _TappableNumberPickerState extends State<_TappableNumberPicker> {
         ),
       ),
     );
+  }
+}
+
+// ⭐ 2026-09-14 (출시전 감사 #11) - 근무명 검증 결과 → 사용자 안내 문구
+String _shiftNameIssueMessage(BuildContext context, ShiftNameIssue issue, String name) {
+  switch (issue) {
+    case ShiftNameIssue.empty:
+      return context.l10n.onboardingEnterShiftName;
+    case ShiftNameIssue.tooLong:
+      return context.l10n.onboardingCharLimitError(kMaxShiftNameLength);
+    case ShiftNameIssue.comma:
+      return context.l10n.shiftNameCommaNotAllowed;
+    case ShiftNameIssue.reserved:
+      return context.l10n.shiftNameReserved(name);
+    case ShiftNameIssue.duplicate:
+      return context.l10n.onboardingDuplicateShiftName;
   }
 }

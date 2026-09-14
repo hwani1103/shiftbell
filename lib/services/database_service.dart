@@ -793,76 +793,39 @@ class DatabaseService {
     required Map<String, String> renamedShifts,
     required ShiftSchedule newSchedule,
   }) async {
-    if (renamedShifts.isEmpty) return;
+    final changes = Map<String, String>.fromEntries(renamedShifts.entries.where((e) => e.key != e.value));
+    if (changes.isEmpty) return;
+
+    // ⭐ 2026-09-14 (출시전 감사 #11/#12, G1) - 화면 검사와 별개로 저장 직전에 한 번 더 막음: 새 이름 형식(쉼표·예약어 등),
+    // 변경 "후" 근무 목록의 중복(두 근무가 같은 이름이 되면 참조가 합쳐짐). 거부하면 아무것도 바꾸지 않음.
+    for (final newName in changes.values) {
+      final issue = validateShiftName(newName);
+      if (issue != null) throw ArgumentError('근무명 형식 오류(${issue.name}): $newName');
+    }
+    final finalNames = newSchedule.shiftTypes;
+    if (finalNames.toSet().length != finalNames.length) {
+      throw ArgumentError('근무명 변경 결과에 중복 이름이 있음: $finalNames');
+    }
 
     final db = await database;
 
     await db.transaction((txn) async {
-      for (var entry in renamedShifts.entries) {
-        final oldName = entry.key;
-        final newName = entry.value;
-
-        // 1. alarms 테이블의 shift_type 업데이트
-        await txn.update(
-          'alarms',
-          {'shift_type': newName},
-          where: 'shift_type = ?',
-          whereArgs: [oldName],
-        );
-
-        // 2. shift_alarm_templates 테이블의 shift_type 업데이트
-        await txn.update(
-          'shift_alarm_templates',
-          {'shift_type': newName},
-          where: 'shift_type = ?',
-          whereArgs: [oldName],
-        );
-
-        // 3. alarm_history 테이블의 shift_type 업데이트
-        await txn.update(
-          'alarm_history',
-          {'shift_type': newName},
-          where: 'shift_type = ?',
-          whereArgs: [oldName],
-        );
-
-        // 4. alarm_creation_log 테이블의 shift_type 업데이트 (영구 보존 로그 - 예전엔 빠져있었음)
-        await txn.update(
-          'alarm_creation_log',
-          {'shift_type': newName},
-          where: 'shift_type = ?',
-          whereArgs: [oldName],
-        );
-
-        // 5. condition_shift_times(v21, shift_name이 PK) - 예전엔 빠져있어서
-        // rename 후 컨디션 매니저 출퇴근시각 입력이 고아로 남았음(M1,
-        // 전체_코드_점검_리포트_2026-09-04.md). newName 행이 이미 있으면(근무명
-        // 맞바꾸기 등) PK 충돌을 피하기 위해 먼저 지우고 oldName 값으로 대체.
-        final existingConditionTimes = await txn.query(
-          'condition_shift_times',
-          where: 'shift_name = ?',
-          whereArgs: [oldName],
-        );
-        if (existingConditionTimes.isNotEmpty) {
-          await txn.delete('condition_shift_times', where: 'shift_name = ?', whereArgs: [newName]);
-          await txn.update(
-            'condition_shift_times',
-            {'shift_name': newName},
-            where: 'shift_name = ?',
-            whereArgs: [oldName],
-          );
-        }
-
-        // 6. ⭐ 2026-09-14 (출시전 감사 #31 D12) - 개별 예외의 근무명(shift_type)과 배정 근무명(origin_shift)도
-        // 같은 트랜잭션에서 변경 - 안 바꾸면 이름만 바뀐 같은 알람의 예외가 슬롯 키 불일치로 사라진 것처럼 됨.
-        // (근무명 맞바꾸기 A↔B의 UNIQUE 충돌·임시 이름 2단계 처리는 #12)
-        await txn.update('alarm_overrides', {'shift_type': newName}, where: 'shift_type = ?', whereArgs: [oldName]);
-        await txn.update('alarm_overrides', {'origin_shift': newName}, where: 'origin_shift = ?', whereArgs: [oldName]);
-
-        print('✅ 근무명 변경(원자적): $oldName → $newName');
+      // ⭐ #12 - 2단계 rename: 바뀌는 옛 이름을 전부 서로 겹치지 않는 임시 이름으로 먼저 옮긴 뒤 새 이름으로.
+      // 예전엔 한 번에 old→new로 바꿔서 A↔B 맞바꾸기에서 "A→B" 순간 원래 B 행과 합쳐지고 이어서 "B→A"가 둘 다 A로
+      // 만들었음(condition_shift_times는 B 행을 지워버림) - 서로 다른 근무의 알람·템플릿·이력·출퇴근시각·예외가 뒤섞였음.
+      final temps = <String, String>{};
+      var index = 0;
+      for (final oldName in changes.keys) {
+        final temp = '__shiftbell_rename_tmp_${index++}__';
+        temps[oldName] = temp;
+        await _renameShiftReferences(txn, oldName, temp);
+      }
+      for (final entry in changes.entries) {
+        await _renameShiftReferences(txn, temps[entry.key]!, entry.value);
+        print('✅ 근무명 변경(원자적): ${entry.key} → ${entry.value}');
       }
 
-      // 5. shift_schedule 행(패턴/근무명 목록/색상/근무변경/근로시간) 업데이트
+      // shift_schedule 행(패턴/근무명 목록/색상/근무변경/근로시간) 업데이트
       await txn.update(
         'shift_schedule',
         newSchedule.toMap(),
@@ -870,6 +833,29 @@ class DatabaseService {
         whereArgs: [newSchedule.id],
       );
     });
+  }
+
+  /// 근무명을 참조하는 모든 테이블에서 [from] → [to]. renameShiftAtomic의 트랜잭션 안에서만 호출.
+  Future<void> _renameShiftReferences(DatabaseExecutor txn, String from, String to) async {
+    // 1~4. alarms / shift_alarm_templates / alarm_history / alarm_creation_log(영구 보존 로그도 함께)
+    for (final table in ['alarms', 'shift_alarm_templates', 'alarm_history', 'alarm_creation_log']) {
+      await txn.update(table, {'shift_type': to}, where: 'shift_type = ?', whereArgs: [from]);
+    }
+
+    // 5. condition_shift_times(v21, shift_name이 PK) - 예전엔 빠져있어서 rename 후 컨디션 매니저 출퇴근시각 입력이
+    // 고아로 남았음(M1). 대상 이름의 행이 이미 있으면(현재 근무 목록에 없는 옛 고아 기록) 교체.
+    final existingConditionTimes = await txn.query('condition_shift_times', where: 'shift_name = ?', whereArgs: [from]);
+    if (existingConditionTimes.isNotEmpty) {
+      await txn.delete('condition_shift_times', where: 'shift_name = ?', whereArgs: [to]);
+      await txn.update('condition_shift_times', {'shift_name': to}, where: 'shift_name = ?', whereArgs: [from]);
+    }
+
+    // 6. ⭐ #31 D12 - 개별 예외의 근무명(shift_type)과 배정 근무명(origin_shift). 안 바꾸면 이름만 바뀐 같은 알람의 예외가
+    // 슬롯 키 불일치로 사라진 것처럼 되고, 이후 템플릿 수정 때 origin_shift로 찾는 D12 정리도 빠짐.
+    // UNIQUE 슬롯 충돌 = 대상 이름에 남은 고아 예외 → 교체.
+    await txn.update('alarm_overrides', {'shift_type': to},
+        where: 'shift_type = ?', whereArgs: [from], conflictAlgorithm: ConflictAlgorithm.replace);
+    await txn.update('alarm_overrides', {'origin_shift': to}, where: 'origin_shift = ?', whereArgs: [from]);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1401,6 +1387,49 @@ Future<void> upsertConditionShiftTime(ShiftTimeRange range) async {
 Future<void> deleteConditionShiftTime(String shiftName) async {
   final db = await database;
   await db.delete('condition_shift_times', where: 'shift_name = ?', whereArgs: [shiftName]);
+}
+
+/// ⭐ 2026-09-14 (출시전 감사 #28, G1) - 근무 하나의 출퇴근 시각 저장/되돌리기를 한 트랜잭션으로.
+/// 예전엔 condition_shift_times 저장과 shift_schedule.shift_durations 저장이 따로라 뒤쪽이 실패하면 두 값이 어긋났고,
+/// 화면이 들고 있던 옛 schedule 스냅샷의 shift_durations 맵 "전체"를 다시 써서, 연속으로 수정·초기화하면 방금 바꾼
+/// 다른 근무 값을 옛 값으로 덮어썼음. 이제 트랜잭션 안에서 DB의 최신 shift_schedule 행을 읽어 이 근무 키만 바꿈.
+/// [range]가 null이면 되돌리기(시각 삭제 + 근로시간 0 = "설정 안 함"). 반환: 저장된 최신 근무표(근무표가 없으면 null).
+Future<ShiftSchedule?> saveShiftTimeRange(String shiftName, ShiftTimeRange? range) async {
+  final db = await database;
+  return db.transaction((txn) async {
+    final rows = await txn.query('shift_schedule', limit: 1);
+    if (rows.isEmpty) return null;
+    final current = ShiftSchedule.fromMap(rows.first);
+
+    if (range == null) {
+      await txn.delete('condition_shift_times', where: 'shift_name = ?', whereArgs: [shiftName]);
+    } else {
+      await txn.insert(
+        'condition_shift_times',
+        {...range.toMap(), 'updated_at': DateTime.now().toIso8601String()},
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
+
+    final durations = Map<String, int>.from(current.shiftDurations ?? {});
+    durations[shiftName] = range?.durationMinutes ?? 0;
+    await txn.update('shift_schedule', {'shift_durations': jsonEncode(durations)},
+        where: 'id = ?', whereArgs: [current.id]);
+
+    return ShiftSchedule(
+      id: current.id,
+      isRegular: current.isRegular,
+      pattern: current.pattern,
+      todayIndex: current.todayIndex,
+      shiftTypes: current.shiftTypes,
+      activeShiftTypes: current.activeShiftTypes,
+      startDate: current.startDate,
+      shiftColors: current.shiftColors,
+      customShiftColors: current.customShiftColors,
+      assignedDates: current.assignedDates,
+      shiftDurations: durations,
+    );
+  });
 }
 
 // ===== 실제 수면 기록/자동 추정 - sleep_records =====

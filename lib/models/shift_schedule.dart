@@ -1,5 +1,6 @@
 // models/shift_schedule.dart
 
+import '../constants/shift_name_limits.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,41 @@ import 'package:flutter/material.dart';
 // 뽑음 - UI에 실제로 보여줄 때는 이 값이 아니라 context.l10n.commonNotSet을
 // 쓰도록 각 화면에서 변환해서 표시함(센티널 자체가 화면에 그대로 노출되면 안 됨).
 const String kUnsetShiftSentinel = '미설정';
+
+// ⭐ 2026-09-14 (출시전 감사 #11, G1) - 근무명으로 쓰면 안 되는 이름.
+//  - kUnsetShiftSentinel("미설정"): "배정 없음"을 뜻하는 내부 값 - 실제 근무명이면 그 근무의 알람 생성·통계가 조용히 빠짐
+//  - "없음": 달력 일괄 배정 화면의 "근무 해제" 선택지 문자열 - 같은 이름의 근무는 배정할 수 없게 됨(calendar_tab.dart)
+const Set<String> kReservedShiftNames = {kUnsetShiftSentinel, '없음'};
+
+enum ShiftNameIssue { empty, tooLong, comma, reserved, duplicate }
+
+/// ⭐ #11 - 새로 입력하는 근무명 검증(온보딩 추가·설정 이름 변경 공통). 쉼표는 pattern·shift_types·active_shift_types를
+/// 쉼표로 이어 저장하는 직렬화를 깨뜨려 한 근무가 두 근무로 쪼개짐. [otherNames]는 같은 목록의 다른 근무명(중복 검사용).
+/// 이미 저장된 값에는 쓰지 않음 - D6: 자동 변환 없이 [invalidStoredShiftNames]로 로그만.
+ShiftNameIssue? validateShiftName(String name, {Iterable<String> otherNames = const []}) {
+  final trimmed = name.trim();
+  if (trimmed.isEmpty) return ShiftNameIssue.empty;
+  if (trimmed.length > kMaxShiftNameLength) return ShiftNameIssue.tooLong;
+  if (trimmed.contains(',')) return ShiftNameIssue.comma;
+  if (kReservedShiftNames.contains(trimmed)) return ShiftNameIssue.reserved;
+  if (otherNames.contains(trimmed)) return ShiftNameIssue.duplicate;
+  return null;
+}
+
+/// ⭐ #11 D6 - 저장된 근무표에서 지금 규칙으로는 입력이 막히는 근무명(빈 이름·예약어·중복)과, 쉼표로 쪼개진
+/// 흔적(패턴에는 있는데 근무 목록에 없는 조각)을 설명 문자열로 돌려줌. 로그용 - 데이터는 바꾸지 않음.
+List<String> invalidStoredShiftNames(ShiftSchedule schedule) {
+  final issues = <String>[];
+  final seen = <String>{};
+  for (final n in schedule.shiftTypes) {
+    if (n.trim().isEmpty || kReservedShiftNames.contains(n) || n.contains(',')) issues.add('invalid name "$n"');
+    if (!seen.add(n)) issues.add('duplicate name "$n"');
+  }
+  for (final p in schedule.pattern ?? const <String>[]) {
+    if (p != kUnsetShiftSentinel && !schedule.shiftTypes.contains(p)) issues.add('pattern entry not in shift list "$p"');
+  }
+  return issues;
+}
 
 int julianDayNumber(int year, int month, int day) {
   final a = (14 - month) ~/ 12;

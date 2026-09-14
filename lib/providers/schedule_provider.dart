@@ -25,6 +25,12 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     state = const AsyncValue.loading();
     try {
       final schedule = await DatabaseService.instance.getShiftSchedule();
+      // ⭐ 2026-09-14 (출시전 감사 #11, D6) - 이미 저장된 잘못된 근무명(쉼표로 쪼개진 흔적·예약어·중복)은 자동으로
+      // 고치지 않고 로그만 남김(임의 변환은 사용자 데이터 손상 위험 - 사용자 결정 D6)
+      if (schedule != null) {
+        final invalid = invalidStoredShiftNames(schedule);
+        if (invalid.isNotEmpty) print('⚠️ 저장된 근무명 검증 실패(자동 변환 안 함, D6): $invalid');
+      }
       state = AsyncValue.data(schedule);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
