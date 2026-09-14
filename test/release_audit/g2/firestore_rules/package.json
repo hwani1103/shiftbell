@@ -1,0 +1,10 @@
+{
+  "name": "shiftbell-g2-rules-test",
+  "private": true,
+  "type": "module",
+  "description": "T13 G2 Firestore rules emulator test. demo- project only. Never deploys or touches production.",
+  "scripts": {
+    "test": "firebase emulators:exec --only firestore --project demo-shiftbell-t13 \"node --test t13_rules.test.mjs\""
+  },
+  "devDependencies": { "@firebase/rules-unit-testing": "^4.0.1", "firebase": "^11.10.0" }
+}
