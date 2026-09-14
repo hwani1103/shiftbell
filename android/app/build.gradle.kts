@@ -51,6 +51,10 @@ android {
         targetSdk = 36
         versionCode = 25
         versionName = "1.0.23"
+        // ⭐ 2026-09-14 (출시전 감사 G5 #6, D2) - AdMob 앱 ID. prod는 Gradle 속성 ADMOB_APP_ID로 최종 배포 직전에 주입,
+        // 없으면 구글 공개 테스트 앱 ID(dev는 아래 flavor에서 항상 테스트 ID). lib/constants/ad_config.dart 참고.
+        manifestPlaceholders["admobAppId"] =
+            (project.findProperty("ADMOB_APP_ID") as String?) ?: "ca-app-pub-3940256099942544~3347511713"
     }
 
     // ⭐ 정식(prod) 앱과 테스트(dev) 앱을 같은 기기에 동시에 설치해둘 수 있게 분리함.
@@ -73,6 +77,7 @@ android {
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
             resValue("string", "app_name", "교대시계 (테스트)")
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
         }
     }
 

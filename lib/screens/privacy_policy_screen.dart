@@ -40,6 +40,12 @@ final List<_PrivacySection> _privacySections = [
     title: (l10n) => l10n.privacyNoCollectionTitle,
     body: (l10n) => l10n.privacyNoCollectionBody,
   ),
+  // ⭐ 2026-09-14 (출시전 감사 G5 #7) - Analytics 자동 수집을 '외부 전송 없음'으로 안내하던 불일치 수정
+  _PrivacySection(
+    icon: Icons.insights_outlined,
+    title: (l10n) => l10n.privacyAnalyticsTitle,
+    body: (l10n) => l10n.privacyAnalyticsBody,
+  ),
   _PrivacySection(
     icon: Icons.cloud_outlined,
     title: (l10n) => l10n.privacyFirebaseTitle,

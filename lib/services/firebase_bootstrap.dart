@@ -7,6 +7,8 @@
 // 참고). main.dart/web_main.dart 둘 다 runApp() 전에 이걸 호출함.
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart' show appFlavor;
 import '../firebase_options.dart';
 
 bool firebaseReady = false;
@@ -28,10 +30,17 @@ Future<void> initFirebase() async {
   // 원인은 FlutterFire/엔진 쪽이라 우리 코드로 못 고침). 짧은 재시도로 우회.
   for (var attempt = 1; attempt <= 3; attempt++) {
     try {
-      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+      // ⭐ 2026-09-14 (출시전 감사 #29, D8) - dev flavor는 google-services.json에 등록된 dev 앱 ID로 초기화하고
+      // Analytics 수집을 끔 → 테스트 설치가 운영 앱의 DAU/MAU·이벤트 통계에 섞이지 않음.
+      // Firebase 프로젝트 자체는 prod와 같음(분리하려면 Console 작업이 필요해 이번 출시 범위 밖) - dev 친구공유 테스트는
+      // 같은 Firestore에 문서를 씀.
+      final isDevFlavor = !kIsWeb && appFlavor == 'dev';
+      await Firebase.initializeApp(
+        options: isDevFlavor ? DefaultFirebaseOptions.androidDev : DefaultFirebaseOptions.currentPlatform,
+      );
       firebaseReady = true;
       analytics = FirebaseAnalytics.instance;
-      await analytics!.setAnalyticsCollectionEnabled(true);
+      await analytics!.setAnalyticsCollectionEnabled(!isDevFlavor);
       print('✅ Firebase 초기화 완료 (시도 $attempt번째)');
       return;
     } catch (e) {

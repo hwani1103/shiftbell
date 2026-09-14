@@ -65,4 +65,14 @@ class DefaultFirebaseOptions {
     projectId: 'shiftbell-29f31',
     storageBucket: 'shiftbell-29f31.firebasestorage.app',
   );
+
+  // ⭐ 2026-09-14 (출시전 감사 #29, D8) - dev flavor 전용(firebase_bootstrap.dart가 선택). google-services.json에 등록된
+  // com.hwani1103.shiftbell.dev 앱 ID - 같은 프로젝트·같은 API 키. Analytics 통계가 운영 앱과 섞이지 않게 앱 단위로 분리.
+  static const FirebaseOptions androidDev = FirebaseOptions(
+    apiKey: 'AIzaSyAh69cBPqjX7lXa1L3tmw07RH72rzJqW9g',
+    appId: '1:52312015153:android:b33de2e9e6295957147010',
+    messagingSenderId: '52312015153',
+    projectId: 'shiftbell-29f31',
+    storageBucket: 'shiftbell-29f31.firebasestorage.app',
+  );
 }

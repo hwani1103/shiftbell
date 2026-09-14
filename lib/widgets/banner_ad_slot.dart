@@ -47,6 +47,11 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
 
     // 높이 계산에 실패했거나 SDK 초기화가 안 됐으면 광고를 만들지 않음.
     // 자리(높이)는 아래 build에서 fallback 높이로 이미 확보되므로 레이아웃엔 영향 없음.
+    // ⭐ 2026-09-14 (G5 #6) - 운영(prod release) 빌드인데 실제 광고 ID가 주입되지 않았으면 요청하지 않음(테스트 ID 운영 노출 방지)
+    if (kBannerAdUnitId.isEmpty) {
+      debugPrint('⏭️ 배너 광고 생략(운영 광고 ID 미설정) - 자리만 확보함');
+      return;
+    }
     if (size == null || !AdService.isInitialized) {
       debugPrint('⏭️ 배너 광고 생략(크기 미확정 또는 SDK 미초기화) - 자리만 확보함');
       return;
