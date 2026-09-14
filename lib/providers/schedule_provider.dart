@@ -1,5 +1,6 @@
 // lib/providers/schedule_provider.dart
 
+import 'data_revision_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/shift_schedule.dart';
 import '../services/database_service.dart';
@@ -13,12 +14,24 @@ import '../constants/alarm_limits.dart';
 
 
 final scheduleProvider = StateNotifierProvider<ScheduleNotifier, AsyncValue<ShiftSchedule?>>((ref) {
-  return ScheduleNotifier();
+  return ScheduleNotifier(ref);
 });
 
 class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
-  ScheduleNotifier() : super(const AsyncValue.loading()) {
+  ScheduleNotifier([this._ref]) : super(const AsyncValue.loading()) {
     _loadSchedule();
+  }
+
+  final Ref? _ref;
+
+  // ⭐ 2026-09-14 (출시전 수정 연결 - docs/release_audit/contracts.md §3) - 원본 저장이 성공한 뒤에만 변경 통지.
+  // 계산 쪽(G3 컨디션·수면 provider)이 이 revision을 watch해 다시 계산함. 저장 실패·예외면 올리지 않음.
+  // shift_schedule 행에는 근로시간(shift_durations)도 들어 있어 workHoursSettings도 함께 올림(같은 값 재저장 시 올려도 되는 규칙).
+  void _notifyScheduleChanged() {
+    final ref = _ref;
+    if (ref == null) return;
+    ref.read(dataRevisionProvider(DataDomain.shiftSchedule).notifier).state++;
+    ref.read(dataRevisionProvider(DataDomain.workHoursSettings).notifier).state++;
   }
 
   Future<void> _loadSchedule() async {
@@ -57,6 +70,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     );
 
     state = AsyncValue.data(savedSchedule);
+    _notifyScheduleChanged();
     WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
     FriendSyncService.instance.syncIfEnabled(savedSchedule);  // ⭐ 친구공유 중이면 Firestore도 갱신
   } catch (e, stack) {
@@ -71,6 +85,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   // 쓰기 방지). 위젯 갱신/친구공유 동기화는 saveSchedule/updateSchedule과 동일하게 함.
   void applyExternallyPersisted(ShiftSchedule schedule) {
     state = AsyncValue.data(schedule);
+    _notifyScheduleChanged();
     WidgetRefreshService.refresh();
     FriendSyncService.instance.syncIfEnabled(schedule);
   }
@@ -79,6 +94,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     try {
       await DatabaseService.instance.updateShiftSchedule(schedule);
       state = AsyncValue.data(schedule);
+      _notifyScheduleChanged();
       WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
       FriendSyncService.instance.syncIfEnabled(schedule);  // ⭐ 친구공유 중이면 Firestore도 갱신
     } catch (e, stack) {
@@ -230,6 +246,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       await db.delete('alarm_overrides');
 
       state = const AsyncValue.data(null);
+      _notifyScheduleChanged();
       WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 초기화 반영
       print('🗑️ 교대근무 초기화 완료');
     } catch (e) {
@@ -327,6 +344,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   }
 
   state = AsyncValue.data(updatedSchedule);
+  _notifyScheduleChanged();
   WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
   FriendSyncService.instance.syncIfEnabled(updatedSchedule);  // ⭐ 친구공유 중이면 Firestore도 갱신
 

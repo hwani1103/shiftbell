@@ -5,17 +5,26 @@
 // 따름(StateNotifier + AsyncValue). 기존 scheduleProvider/알람 Provider는 이
 // 파일을 참조하지 않음 - 컨디션 매니저 쪽에서만 이 provider를 씀.
 
+import 'data_revision_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/shift_time_range.dart';
 import '../services/database_service.dart';
 
 final conditionShiftTimeProvider =
     StateNotifierProvider<ConditionShiftTimeNotifier, AsyncValue<Map<String, ShiftTimeRange>>>(
-        (ref) => ConditionShiftTimeNotifier());
+        (ref) => ConditionShiftTimeNotifier(ref));
 
 class ConditionShiftTimeNotifier extends StateNotifier<AsyncValue<Map<String, ShiftTimeRange>>> {
-  ConditionShiftTimeNotifier() : super(const AsyncValue.loading()) {
+  ConditionShiftTimeNotifier([this._ref]) : super(const AsyncValue.loading()) {
     _load();
+  }
+
+  final Ref? _ref;
+
+  // ⭐ 2026-09-14 (출시전 수정 연결 - docs/release_audit/contracts.md §3) - 원본 저장이 성공한 뒤에만 변경 통지.
+  // 계산 쪽(G3 컨디션·수면 provider)이 이 revision을 watch해 다시 계산함. 저장 실패·예외면 올리지 않음.
+  void _notifyChanged() {
+    _ref?.read(dataRevisionProvider(DataDomain.shiftTimes).notifier).state++;
   }
 
   Future<void> _load() async {
@@ -40,6 +49,7 @@ class ConditionShiftTimeNotifier extends StateNotifier<AsyncValue<Map<String, Sh
     final current = Map<String, ShiftTimeRange>.from(state.value ?? {});
     current[shiftName] = range;
     state = AsyncValue.data(current);
+    _notifyChanged();
   }
 
   /// ⭐ 2026-09-14 (출시전 감사 #28) - DB에는 이미 저장된 값(DatabaseService.saveShiftTimeRange - 근로시간과 한 트랜잭션)을
@@ -59,5 +69,6 @@ class ConditionShiftTimeNotifier extends StateNotifier<AsyncValue<Map<String, Sh
     final current = Map<String, ShiftTimeRange>.from(state.value ?? {});
     current.remove(shiftName);
     state = AsyncValue.data(current);
+    _notifyChanged();
   }
 }

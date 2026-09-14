@@ -1,3 +1,4 @@
+import '../providers/data_revision_provider.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -1221,6 +1222,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
       return;
     }
     ref.read(scheduleProvider.notifier).applyExternallyPersisted(newSchedule);
+    // ⭐ 2026-09-14 (contracts §3) - condition_shift_times의 근무명도 같은 트랜잭션에서 바뀌었으므로 출퇴근 시각 영역도 통지
+    ref.read(dataRevisionProvider(DataDomain.shiftTimes).notifier).state++;
     await ref.read(alarmNotifierProvider.notifier).refresh();
 
     if (mounted) {
