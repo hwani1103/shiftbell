@@ -36,6 +36,7 @@
 - 호출처는 스누즈(`AlarmActionHelper.kt:143`) 한 곳뿐.
 - 아랍어처럼 숫자가 ASCII가 아닌 Locale에서만 비교가 틀어짐. 결과는 겹침 검사가 무력화되는 정도라, 스누즈 알람이 다른 알람과 같은 시각에 설 수 있음.
 - 한국어·영어 사용자에게는 영향 없음. 다음 버전에서 `Locale.US`로 한 줄 수정 권장.
+- 1.0.22(`ca82d69` DatabaseHelper L206-208)에도 똑같이 있던 코드라 **이번 업데이트의 회귀는 아님**.
 
 ### R-04 운영: Analytics가 prod 사용자에게 새로 켜짐
 - `firebase_bootstrap.dart:43`은 prod flavor에서 수집 ON.
