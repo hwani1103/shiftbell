@@ -2,17 +2,17 @@
 
 ```text
 그룹 / 담당 / worktree / branch: G1 / Claude / C:\Users\Administrator\Desktop\shiftbell-g1 / release/g1
-공통 기준 SHA / 최종 소스 SHA: 94ff08f / (미시작)
-상태: CODING (2026-09-14 T06 시작)
-수정한 감사 번호:
-실제 변경 파일(소유권 범위 검사 결과):
-공통 파일/API/ARB 연결 요청 및 반영 SHA:
-사용자 결정 확인(D 번호·선택·일시): D1~D12 전부 확정(2026-09-14, 실행계획 §4). PROVISIONAL / G0 실기기(T04) 미통과 상속
-최종 동작과 회귀 금지 규칙 준수:
-추가/변경 테스트와 실제 실행 명령:
-테스트 결과(실행 빌드·환경·expected/actual·증적):
-미실행 실기기/Console 항목:
-잔여 위험·다음 그룹 주의사항:
+공통 기준 SHA / 최종 소스 SHA: 94ff08f / 9b8a586 (CODE_FROZEN 2026-09-14, 커밋 9개: 97c72fc 47909d3 15a48ad 2763e04 64a2130 bef9f58 7b56d3c 18985a7 9b8a586)
+상태: CODE_FROZEN (2026-09-14) — 다음: T10 연결(Claude), T11 교차 리뷰(Codex, T10 뒤)
+수정한 감사 번호: #3 #4 #5 #10 #11 #12 #13 #14 #16 #17(G1 Kotlin 핵심) #20(예약 API setAlarmClock 통일 — S3 미실측) #23 #26 #27 #28 #31(실행·D11·D12) V6(수신 코드 — Manifest는 연결 요청) + contracts §3 변경 통지 연결. V7은 코드 변경 없음(검증 항목). H03-GATE는 실기기 S4 필수(코드 미변경).
+실제 변경 파일(소유권 범위 검사 결과): 56개(94ff08f..9b8a586). §3.1 G1 목록 — Alarm*.kt·CustomAlarmReceiver·RingingAlarmTracker·DirectBootReceiver·ScheduleNotification*·MainActivity·NotificationHelper(contracts §7 메모상 G1)·alarm/schedule/date_schedule/tab_visibility/work_hours_settings/condition_shift_time provider·calendar/next_alarm/onboarding/schedule_management/settings/work_hours_settings 화면·alarm_generation/alarm/schedule_notification 서비스·database_service(CRUD/트랜잭션)·shift_schedule 모델·테스트. 목록 밖은 연결 요청으로 기록: ARB 2파일(#2), permission_service·permission_warning_banner(#3), CalendarWidgetScheduleResolver(#4), overtime_provider(#6). release/g2·g3 변경 경로와 교집합 0건. DB 스키마·migrations·DatabaseHelper·Gradle·Manifest·main.dart 미변경.
+공통 파일/API/ARB 연결 요청 및 반영 SHA: g1/integration_requests.md #1~#6(Manifest intent-filter 3개, ARB 키 5개, 소유권 3건, contracts §7.2 키 5개) — 반영 SHA는 T10에서 기록. G3 요청 #1(revision 성공 통지)은 9b8a586로 G1 쪽 구현 완료.
+사용자 결정 확인(D 번호·선택·일시): D1~D12 전부 확정(2026-09-14, 실행계획 §4). 적용 — D1 P1(#26), D6 로그만(#11), D10 override(#31), D11 30일 정리, D12 원본 변경 시 삭제. REPAIR-REJECT=A(G0). PROVISIONAL / G0 실기기(T04-D) 미통과 상속
+최종 동작과 회귀 금지 규칙 준수: 알람 이력·생성 로그 자동 삭제 없음(D11은 alarm_overrides만), DB 스키마 미변경(G0 v24 계약 사용), 트랜잭션 안 OS 호출 없음(contracts §1.4), 기상 알람 예약 경로 단일화, Dart/Kotlin 생성 계산을 같은 fixture로 비교, 기존 근무명 자동 변환 없음(D6), 가벼운 일정 알림은 기상 알람 정책과 분리.
+추가/변경 테스트와 실제 실행 명령: Kotlin `sh ./gradlew testDevDebugUnitTest`(android/, Robolectric SDK34) — G1RingRoundTest 13, G1ScheduleResultTest 2, G1WakeSyncTest 9, G1GenerationFixtureTest 1, G1GenerationEngineTest 7, G1ScheduleNotifyTest 8, G1LocaleTest 2, AlarmRefreshEngineH2Test 갱신 2. Dart `flutter test`(test/release_audit/g1 — schedule_failure 16, generation_fixture 6, override_state 11, shift_name 20, schedule_tab_sync 3, revision 5). 수정 전 FAIL 확인 — #23(AlarmPlayer), 재부팅 중복 예약(DirectBootReceiver), #12 맞바꾸기(94ff08f 참조 합쳐짐 / bef9f58 UNIQUE), #17(태국 불기 연도): 각 진행 기록 행.
+테스트 결과(실행 빌드·환경·expected/actual·증적): Kotlin 65/65 PASS(18985a7 이후 Native 무변경), `flutter test` 전체 205/205 PASS(9b8a586), `flutter analyze` error 1건(기존 web_main dart:js_util — 모바일 무관), 신규 warning 0. 에뮬레이터·실기기 실행 없음. 주의: 실행계획 §8(상태 흐름)은 테스트를 동결 뒤 테스트 단계에서 실행하도록 하지만, 이번 G1은 코딩 중에 재현·회귀 테스트를 작성·실행했음 — 공식 판정은 T11 리뷰 + T12 테스트 실행에서 다시 함.
+미실행 실기기/Console 항목: S1(V6 실제 OS 수신 — Manifest 반영 후), S2(#4·#13 권한 조합·제어 알림, 삼성), S3(#20 setAlarmClock 수신 시각·스누즈·다음 알람 표시), S4(#3·#14 홈/잠금/Doze 자동 종료·진동/무음 삭제, H03-GATE 재생 유지), S5·S15(#26 앱 미실행·자정·재부팅), S7(#10 시간대), S8(#11·#12·#28), S11(#5 탭 숨김·재부팅), S13(#27 경합), S16(#31 개별 삭제·타입 변경 유지). T04-D 삼성 ①② 상속.
+잔여 위험·다음 그룹 주의사항: (1) 화면·오버레이 종료 타이머는 회차 토큰으로 보호한 채 유지 — S4 후 제거 판단 (2) 알림 권한까지 거부 시 제어 수단은 화면·오버레이·자동 종료뿐(#4) (3) 수신 이벤트 자체 지연·누락은 수신 검사로 못 막음(#27), 재시도는 다음 트리거 의존 (4) 엔진 쓰기 잠금 동안 Flutter 저장 대기 체감 미측정 (5) 제어 알림·스누즈 알림 문구는 네이티브 한국어 하드코딩(G5 현지화 판단) (6) #13 전부 실패 시 일괄 배정 catch 문구가 근무 저장 사실을 안 드러냄, 온보딩 초기 알람 등록 루프 실패 처리 없음 (7) 수면 계열(G3) Kotlin의 Locale은 G3 #17 범위 — T10 통합 뒤 확인 (8) 백업 복원(G4)은 alarm_overrides·alarm_state 신규 키·schedule_tab_enabled 동기화·변경 통지를 고려해야 함 (9) TEST_CHECKLIST.md 1.2·3.6절(불규칙 자동 생성 안 됨)·CLAUDE.md 알람 설명(예약 헬퍼·P1·override)은 T10 문서 단계에서 갱신 (10) 백업 import 근무명 검증은 G4(#19).
 ```
 
 ## 착수 전 인계 메모 (T06 시작 전, Claude)
