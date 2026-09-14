@@ -116,3 +116,37 @@
 ## 결론
 
 **FIXED / CODE_FROZEN `e6e679a`.** High 5건과 Medium 3건을 모두 수정했다. 수정 전 재현 FAIL과 수정 후 같은 테스트 PASS를 확인했으며, Kotlin 전체 `testDevDebugUnitTest`, Flutter 전체 211건, dev debug APK 빌드가 통과했다. `flutter analyze`의 유일한 error는 허용된 기존 `lib/web_main.dart`의 `dart:js_util` 1건이다. 에뮬레이터·실기기 검증은 실행하지 않았고 T12에서 계속한다.
+
+## T11-FIX 확인 (Claude, 2026-09-14 — 수정 diff 가벼운 확인, 빌드·테스트 재실행 안 함)
+
+대상 `2b82adc..e6e679a` (제품 코드 11개 파일 + 테스트). 방법: diff 전체 읽기 + 바뀐 함수의 호출부 대조. 판정: **CHANGES_REQUESTED(작은 후속 2건 + Low 1건)**.
+
+| 항목 | 확인 |
+|---|---|
+| T11-01 | OK. `unknown`은 false. 권한 소개 화면은 경고 다이얼로그의 "계속"으로 넘어갈 수 있어 사용자가 갇히지 않음 |
+| T11-02 | OK. extra 없으면 표시 안 함, DB 시각이 미래면 재예약 |
+| T11-03 | OK. Kotlin diff 키에 `day_offset` 포함 — Dart(T11-05) 키와 일치 |
+| T11-04 | 취소 경로(B) OK: 조회 후 유효 미래 행이면 취소 없이 교체 예약. **예약 경로(A)는 아래 C-02 재검토** |
+| T11-05 | OK. `(slot_time, shift_type, day_offset)|alarm_type_id` 매칭으로 ID 보존, 실제 diff만 이력·OS 반영 |
+| T11-06 | OK |
+| T11-07 | 동작 OK(Native 먼저, 실패 시 상태·prefs 무변경). 아래 C-03(Low) |
+| T11-08 | OK. shiftTimes 1·workHoursSettings 1(근무표 저장 결과 있을 때)·shiftSchedule 0 |
+
+### C-01 — Medium — T11-04 수정이 `dismiss`의 DB 없음 경로에서 OS 취소를 막음 (회귀)
+
+- 위치: `AlarmActionHelper.kt:43-47` `dismiss()` — `getWritableDatabaseWithRetry()`가 null(DB 미준비 또는 3회 열기 실패)이면 `AlarmWakeScheduler.cancelIfGone(context, null, alarmId)` 호출.
+- 수정 전: null DB면 `cancelRaw` 후 CANCELLED. 수정 후: `db == null` → `recordFailure` + FAILED, **OS 예약을 지우지 않음**.
+- 결과: 울리기 전 취소(`cancelled_before_ring`)를 눌렀는데 DB를 못 연 경우 예약이 남아 그대로 울림(수신 판정도 DB 열기 실패 시 RING). 주석("Native 알람 취소만 수행")과 반대.
+- 요청: 이 경로는 사용자의 명시적 끄기이므로 DB 확인 없이 `cancelRaw`(실패 시 recordFailure) — `cancelIfGone`의 null 처리 대신 명시적 경로로. 테스트: null DB dismiss 뒤 OS 예약 없음.
+
+### C-02 — Medium — 예약 직전 DB 조회 실패 시 예약을 보류하면 알람을 놓칠 수 있음 (T11-04 A 재검토)
+
+- 위치: `AlarmWakeScheduler.scheduleIfCurrent` — `db == null`·조회 예외·row 파싱 실패 → FAILED, 예약 안 함.
+- 근거: 옛 payload가 울릴 위험은 수신 시 `decideOnReceive`가 이미 막음(행 없음 → SKIP_NO_ROW, 시각 불일치 → 재예약·SKIP). 반면 예약 보류는 `retryFailed`(Guard·자정·엔진 실행) 전에 알람 시각이 오면 **안 울림** — 알람 앱에서 더 나쁜 쪽.
+- 요청: 기상 알람 예약은 조회 실패 시 **예약을 진행하고 동시에 recordFailure**(재시도로 다시 확인). 명확한 SKIPPED_STALE(행 없음·시각 다름)만 버림. `MainActivity.scheduleNativeAlarm`의 FAILED → 채널 오류 흐름은 OS 예약 자체가 실패한 경우로 유지. 테스트: 조회 예외 주입 → 예약됨 + 실패 ID 기록, 수신 시 행 없음이면 SKIP.
+- Codex가 이 판단에 반대하면 근거(수신 판정이 막지 못하는 경로)를 적고 유지해도 됨.
+
+### C-03 — Low — 탭 표시 전환 실패가 사용자에게 안 보임
+
+- `settings_tab.dart:631`, `disable_tab_button.dart:68`이 `setEnabled`의 `StateError`를 잡지 않음. 상태는 안 바뀌어 일관성은 맞지만 탭을 눌러도 아무 반응 없이 끝남.
+- 요청(선택): 두 호출부에서 잡아 SnackBar로 실패 안내(ARB는 기존 `scheduleNotifyRegisterFailed` 재사용 가능 여부 확인). 출시 차단 아님.
