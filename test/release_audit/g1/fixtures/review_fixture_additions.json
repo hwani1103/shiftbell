@@ -1,0 +1,39 @@
+{
+  "fixture_format": 1,
+  "purpose": "T11 교차 리뷰에서 발견한 기존 공통 fixture 어댑터의 상태 전이 및 DB diff 공백 보강",
+  "basis": ["contracts.md#2", "execution_plan#5-G1-P1-override"],
+  "timezone": "Asia/Seoul",
+  "cases": [
+    {
+      "id": "OFFSET_ORIGIN_TRANSITION_SAME_VISIBLE_KEY",
+      "now": "2026-09-14T10:30:00",
+      "operation": "native_refresh_after_assignment_change",
+      "schedule": {"mode": "irregular", "assigned_dates": {"2026-09-14": "A", "2026-09-15": "미설정"}},
+      "templates": [{"shift_type": "A", "time": "06:00", "day_offset": 1, "alarm_type_id": 1}],
+      "overrides": [],
+      "existing_alarm_rows": [
+        {"id": 1101, "time": "06:00", "slot_time": "2026-09-15T06:00:00", "type": "fixed", "shift_type": "A", "day_offset": 0, "alarm_type_id": 1}
+      ],
+      "expected_generation_slots": [
+        {"slot_time": "2026-09-15T06:00:00", "shift_type": "A", "day_offset": 1, "alarm_type_id": 1, "origin_date": "2026-09-14", "origin_shift": "A"}
+      ],
+      "expected_postcondition": {"matching_fixed_row_count": 1, "stored_day_offset": 1, "delete_or_set_type_override_origin_date": "2026-09-14"}
+    },
+    {
+      "id": "DART_REGEN_IDEMPOTENT_EXISTING_ROW",
+      "now": "2026-09-14T10:30:00",
+      "operation": "regenerate_same_affected_date_twice",
+      "schedule": {"mode": "irregular", "assigned_dates": {"2026-09-14": "DAY"}},
+      "templates": [{"shift_type": "DAY", "time": "11:00", "day_offset": 0, "alarm_type_id": 1}],
+      "overrides": [],
+      "existing_alarm_rows": [
+        {"id": 1201, "time": "11:00", "slot_time": "2026-09-14T11:00:00", "type": "fixed", "shift_type": "DAY", "day_offset": 0, "alarm_type_id": 1}
+      ],
+      "expected_generation_slots": [
+        {"slot_time": "2026-09-14T11:00:00", "shift_type": "DAY", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-14", "origin_shift": "DAY"}
+      ],
+      "expected_after_first_run": {"alarm_ids": [1201], "insert_count": 0, "delete_count": 0, "history_delta": 0, "creation_log_delta": 0, "os_cancel_count": 0},
+      "expected_after_second_run": {"alarm_ids": [1201], "insert_count": 0, "delete_count": 0, "history_delta": 0, "creation_log_delta": 0, "os_cancel_count": 0}
+    }
+  ]
+}

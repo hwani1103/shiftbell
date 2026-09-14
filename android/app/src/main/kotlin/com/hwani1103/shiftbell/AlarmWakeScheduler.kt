@@ -142,7 +142,7 @@ object AlarmWakeScheduler {
 
     /**
      * 예약 반영(커밋 뒤 호출). 행이 없거나 DB 예정 시각이 [timestamp]와 다르면 버림(SKIPPED_STALE - 더 최신 작업이
-     * 따로 반영함). db가 null이거나 읽기에 실패하면 확인을 못 하므로 예약은 진행.
+     * 따로 반영함). DB가 없거나 읽기에 실패하면 확인 조건을 충족하지 못했으므로 예약하지 않고 재시도에 남김.
      */
     fun scheduleIfCurrent(
         context: Context,
@@ -152,25 +152,32 @@ object AlarmWakeScheduler {
         label: String,
         scheduleFn: (Context, Int, Long, String) -> Unit = { c, i, t, l -> scheduleRaw(c, i, t, l) }
     ): Outcome {
-        if (db != null) {
-            val found = try {
-                lookup(db, id)
-            } catch (e: Exception) {
-                Log.e(TAG, "예약 전 행 확인 실패 - 확인 없이 예약: id=$id", e)
-                null
-            }
-            if (found != null) {
-                if (!found.exists) {
-                    Log.d(TAG, "⏭️ 예약 버림(행 없음): id=$id")
-                    clearFailure(context, id)
-                    return Outcome.SKIPPED_STALE
-                }
-                val row = found.row
-                if (row != null && row.timestamp != normalize(timestamp)) {
-                    Log.d(TAG, "⏭️ 예약 버림(DB 시각 변경됨): id=$id 작업=$timestamp DB=${row.timestamp}")
-                    return Outcome.SKIPPED_STALE
-                }
-            }
+        if (db == null) {
+            Log.e(TAG, "예약 전 행 확인 불가(DB 없음): id=$id")
+            recordFailure(context, id)
+            return Outcome.FAILED
+        }
+        val found = try {
+            lookup(db, id)
+        } catch (e: Exception) {
+            Log.e(TAG, "예약 전 행 확인 실패 - 예약 보류: id=$id", e)
+            recordFailure(context, id)
+            return Outcome.FAILED
+        }
+        if (!found.exists) {
+            Log.d(TAG, "⏭️ 예약 버림(행 없음): id=$id")
+            clearFailure(context, id)
+            return Outcome.SKIPPED_STALE
+        }
+        val row = found.row
+        if (row == null) {
+            Log.e(TAG, "예약 전 행 시각 확인 실패 - 예약 보류: id=$id")
+            recordFailure(context, id)
+            return Outcome.FAILED
+        }
+        if (row.timestamp != normalize(timestamp)) {
+            Log.d(TAG, "⏭️ 예약 버림(DB 시각 변경됨): id=$id 작업=$timestamp DB=${row.timestamp}")
+            return Outcome.SKIPPED_STALE
         }
         return try {
             scheduleFn(context, id, timestamp, label)
@@ -184,28 +191,38 @@ object AlarmWakeScheduler {
     }
 
     /**
-     * 취소 반영(커밋 뒤 호출). 항상 OS 예약을 지운 뒤, 행이 남아 있고 미래면(같은 ID를 스누즈가 다시 쓰는 경우 등)
-     * DB 시각으로 다시 예약함.
+     * 취소 반영(커밋 뒤 호출). 먼저 DB를 확인하고, 행이 남아 있고 미래면(같은 ID를 스누즈가 다시 쓰는 경우 등)
+     * 기존 예약을 지우지 않은 채 DB 시각으로 교체 예약함. DB 확인 실패 시 현재 OS 예약을 보존하고 재시도에 남김.
      */
     fun cancelIfGone(context: Context, db: SQLiteDatabase?, id: Int): Outcome {
+        if (db == null) {
+            Log.e(TAG, "취소 전 행 확인 불가(DB 없음): id=$id")
+            recordFailure(context, id)
+            return Outcome.FAILED
+        }
+        val found = try {
+            lookup(db, id)
+        } catch (e: Exception) {
+            Log.e(TAG, "취소 전 행 확인 실패 - 현재 예약 보존: id=$id", e)
+            recordFailure(context, id)
+            return Outcome.FAILED
+        }
+        val row = found.row
+        if (found.exists && row == null) {
+            Log.e(TAG, "취소 전 행 시각 확인 실패 - 현재 예약 보존: id=$id")
+            recordFailure(context, id)
+            return Outcome.FAILED
+        }
+        if (row != null && row.timestamp > System.currentTimeMillis()) {
+            Log.d(TAG, "🔁 취소 대상 행이 아직 유효 - 현재 예약을 DB 시각으로 교체: id=$id")
+            return scheduleIfCurrent(context, db, id, row.timestamp, row.label)
+        }
         try {
             cancelRaw(context, id)
         } catch (e: Exception) {
             Log.e(TAG, "❌ 기상 알람 OS 취소 실패(재시도 목록에 기록): id=$id", e)
             recordFailure(context, id)
             return Outcome.FAILED
-        }
-        val row = db?.let {
-            try {
-                lookup(it, id).row
-            } catch (e: Exception) {
-                Log.e(TAG, "취소 후 행 확인 실패: id=$id", e)
-                null
-            }
-        }
-        if (row != null && row.timestamp > System.currentTimeMillis()) {
-            Log.d(TAG, "🔁 취소 대상 행이 아직 유효 - DB 시각으로 재예약: id=$id")
-            return scheduleIfCurrent(context, db, id, row.timestamp, row.label)
         }
         clearFailure(context, id)
         return Outcome.CANCELLED

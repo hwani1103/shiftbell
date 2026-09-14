@@ -41,7 +41,7 @@ class AlarmPlayer(private val context: Context) {
         Log.d("AlarmPlayer", "🔊 알람 재생 시작")
         Log.d("AlarmPlayer", "  soundFile=$soundFile, volume=$volume, vibrationStrength=$vibrationStrength")
 
-        // ⭐ MediaPlayer만 정리 (Vibrator는 playVibration()에서 처리)
+        // 새 회차가 무음이어도 이전 회차의 출력이 남지 않도록 소리와 진동을 모두 정리.
         try {
             mediaPlayer?.apply {
                 if (isPlaying) {
@@ -53,6 +53,13 @@ class AlarmPlayer(private val context: Context) {
             releaseLoudnessEnhancer()
         } catch (e: Exception) {
             Log.e("AlarmPlayer", "MediaPlayer 정리 실패", e)
+        }
+        try {
+            vibrator?.cancel()
+        } catch (e: Exception) {
+            Log.e("AlarmPlayer", "이전 진동 정리 실패", e)
+        } finally {
+            vibrator = null
         }
 
         when {

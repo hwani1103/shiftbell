@@ -163,6 +163,31 @@ class G1WakeSyncTest {
         assertEquals(listOf(dbTime), wakeTimes(7))
     }
 
+    @Test
+    fun `T11-04 DB 재조회 실패는 stale 예약을 진행하거나 기존 snooze 예약을 취소하지 않는다`() {
+        val scheduleTime = at(3 * 3_600_000L)
+        val snoozeTime = at(4 * 3_600_000L)
+        insertAlarm(7, scheduleTime)
+        insertAlarm(8, snoozeTime)
+        AlarmWakeScheduler.scheduleRaw(context, 8, snoozeTime, "스누즈")
+        val closedDb = dbHelper.writableDatabase
+        closedDb.close()
+        var staleScheduleCalled = false
+
+        val scheduleOutcome = AlarmWakeScheduler.scheduleIfCurrent(
+            context, closedDb, 7, scheduleTime, "주간"
+        ) { _, _, _, _ -> staleScheduleCalled = true }
+        val cancelOutcome = AlarmWakeScheduler.cancelIfGone(context, closedDb, 8)
+
+        // 수정 전 기대 결과: FAIL - schedule은 SCHEDULED, cancel은 CANCELLED이고 snooze 예약이 사라짐.
+        // 수정 후 기대 결과: PASS - 둘 다 FAILED로 재시도 목록에 남고 기존 OS 예약은 보존됨.
+        assertEquals(AlarmWakeScheduler.Outcome.FAILED, scheduleOutcome)
+        assertEquals(AlarmWakeScheduler.Outcome.FAILED, cancelOutcome)
+        assertTrue(!staleScheduleCalled)
+        assertEquals(listOf(snoozeTime), wakeTimes(8))
+        assertEquals(setOf(7, 8), AlarmWakeScheduler.failedIds(context))
+    }
+
     // ───────────────────────────── 실패 기록·재시도
 
     @Test

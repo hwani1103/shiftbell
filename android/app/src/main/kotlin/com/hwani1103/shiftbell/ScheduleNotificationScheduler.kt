@@ -250,7 +250,7 @@ object ScheduleNotificationScheduler {
      * ⭐ 2026-09-14 (출시전 감사 #5) - 수신 시 표시 여부를 DB로 다시 판정. 표시할 내용(DB 기준) 또는 null.
      * 표시 조건: 탭 사용 중 + 행 존재 + notify_enabled = 1 + DB로 다시 계산한 트리거 시각 == 예약 당시 시각(허용 오차 없음).
      * 시각이 다르면 표시하지 않고, DB 시각이 미래면 그 시각으로 다시 예약(같은 ID 일정의 시각을 바꿨는데 옛 예약이 남은 경우).
-     * 예약 당시 시각이 없는 이 수정 이전 예약은 DB 시각이 이미 됐으면(=지금 울릴 차례) 표시, 아직이면 재예약.
+     * 예약 당시 시각이 없는 이 수정 이전 예약은 정확히 대조할 수 없으므로 표시하지 않음. DB 시각이 미래면 재예약.
      * DB를 못 열면 확인할 수 없으므로 표시하지 않음(가벼운 일정 알림이라 기상 알람과 달리 fail-closed).
      */
     internal fun resolveOnReceive(context: Context, id: Int, expectedAtMillis: Long?): ScheduleDisplay? {
@@ -283,7 +283,7 @@ object ScheduleNotificationScheduler {
             val content = c.getString(3) ?: ""
             val trigger = triggerMillisFor(date, startMinutes, c.getInt(2)) ?: return null
             val now = System.currentTimeMillis()
-            val matches = if (expectedAtMillis == null) trigger <= now else trigger == expectedAtMillis
+            val matches = expectedAtMillis != null && trigger == expectedAtMillis
             if (!matches) {
                 if (trigger > now) {
                     Log.w(TAG, "⚠️ 옛 시각 예약 도착 - 표시 안 하고 DB 시각으로 재예약: id=$id")

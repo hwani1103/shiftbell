@@ -217,6 +217,25 @@ class G1GenerationEngineTest {
     }
 
     @Test
+    fun `T11-03 같은 시각과 타입이어도 day_offset이 바뀌면 원점 metadata를 갱신한다`() {
+        val c = case("review_fixture_additions.json", "OFFSET_ORIGIN_TRANSITION_SAME_VISIBLE_KEY")
+        seedSchedule(c.getJSONObject("schedule"))
+        seedTemplates(c)
+        seedRows(c)
+
+        AlarmRefreshEngine.doRefresh(context, noopSchedule, millis(c.getString("now")))
+
+        val rows = db.rawQuery(
+            "SELECT date, shift_type, day_offset, alarm_type_id FROM alarms WHERE type = 'fixed'", null
+        ).use { cursor -> buildList {
+            while (cursor.moveToNext()) add("${cursor.getString(0)}|${cursor.getString(1)}|${cursor.getInt(2)}|type=${cursor.getInt(3)}")
+        } }
+        // 수정 전 기대 결과: FAIL - 기존 diff key가 day_offset을 빼서 offset=0 행을 그대로 둠.
+        // 수정 후 기대 결과: PASS - fixture의 실제 기여 원점 offset=1만 남음.
+        assertEquals(listOf("2026-09-15T06:00:00|A|1|type=1"), rows)
+    }
+
+    @Test
     fun `D11 - 슬롯 시각이 30일 이상 지난 예외만 정리하고 이력 테이블은 건드리지 않는다`() {
         val c = case("state_change_cases.json", "D11_AGE_BOUNDARY")
         seedSchedule(JSONObject("""{"mode":"irregular","assigned_dates":{}}"""))

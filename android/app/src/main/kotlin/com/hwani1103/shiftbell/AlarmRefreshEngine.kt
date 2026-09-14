@@ -76,10 +76,9 @@ object AlarmRefreshEngine {
         // 문자열은 밀리초가 없는 "...T10:00:00" 형태라, 문자열로 비교하면 Dart에서 만든 알람은
         // 절대 일치하지 않아서 매번 "다른 알람"으로 오인되어 전부 삭제 후 재생성되고
         // (이력엔 전부 superseded로 찍힘) 재부팅 등으로 엔진이 한 번 돌 때마다 반복됐음.
-        // ⭐ dayOffset은 key에 안 넣음 - timestamp가 이미 오프셋이 반영된 실제 시각이라
-        // shiftType+alarmTypeId+timestamp만으로 충분히 유일함(offset이 달라져도 timestamp가
-        // 달라지므로 key 충돌이 안 남).
-        fun key() = "$timestamp|$shiftType|$alarmTypeId"
+        // 같은 근무의 연속 배정에서는 offset이 달라도 같은 실제 시각에 기여할 수 있다.
+        // override 원점(origin_date)을 정확히 보존하려면 dayOffset도 diff identity에 포함해야 한다.
+        fun key() = "$timestamp|$shiftType|$dayOffset|$alarmTypeId"
     }
 
     private data class ExistingAlarm(
@@ -91,7 +90,7 @@ object AlarmRefreshEngine {
         val dayOffset: Int,
         val timestamp: Long
     ) {
-        fun key() = "$timestamp|$shiftType|$alarmTypeId"
+        fun key() = "$timestamp|$shiftType|$dayOffset|$alarmTypeId"
     }
 
     // ⭐ shift_alarm_templates 한 행 - day_offset(-1/전날, 0/당일, 1/다음날) 포함.

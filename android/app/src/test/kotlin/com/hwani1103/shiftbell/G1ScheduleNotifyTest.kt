@@ -144,6 +144,18 @@ class G1ScheduleNotifyTest {
         assertEquals(listOf(trigger(date, 600)), scheduleTimes(4))
     }
 
+    @Test
+    fun `T11-02 예정 시각 extra가 없는 옛 예약은 DB 트리거가 지났어도 표시하지 않는다`() {
+        val date = dayKey(-1)
+        insertSchedule(40, date, 480, "변경 뒤 DB 내용")
+
+        ScheduleNotificationReceiver().onReceive(context, receiveIntent(40, null))
+
+        // 수정 전 기대 결과: FAIL - legacy 경로가 trigger <= now만 보고 stale 예약을 표시함.
+        // 수정 후 기대 결과: PASS - 예약 시각을 DB와 정확히 대조할 수 없으므로 fail-closed.
+        assertNull(shown(40))
+    }
+
     // ───────────────────────────── #5 탭 숨김·동기화
 
     @Test

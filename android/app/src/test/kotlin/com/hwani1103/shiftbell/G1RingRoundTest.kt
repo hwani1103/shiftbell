@@ -17,6 +17,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.media.RingtoneManager
+import android.os.Vibrator
 import androidx.test.core.app.ApplicationProvider
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -324,5 +325,20 @@ class G1RingRoundTest {
 
         player.stopAlarm()
         assertEquals(ShadowMediaPlayer.State.END, shadowOf(created[0]).state)
+    }
+
+    @Test
+    fun `T11-06 진동 알람 뒤 무음 알람으로 인계하면 이전 진동을 즉시 끈다`() {
+        val player = AlarmPlayer(context)
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+        player.playAlarmWithSettings("vibrate", 1.0f, 2)
+        assertTrue(shadowOf(vibrator).isVibrating)
+        player.playAlarmWithSettings("silent", 1.0f, 0)
+
+        // 수정 전 기대 결과: FAIL - silent 분기는 기존 vibrator를 취소하지 않음.
+        // 수정 후 기대 결과: PASS - 새 회차 시작 전 모든 이전 출력 자원을 정리함.
+        assertFalse(shadowOf(vibrator).isVibrating)
+        player.stopAlarm()
     }
 }

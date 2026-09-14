@@ -34,8 +34,9 @@ class G1GenerationFixtureTest {
         TimeZone.setDefault(originalTz)
     }
 
-    private fun fixture(): JSONObject =
-        JSONObject(File(G0TestSupport.repoRoot, "test/release_audit/g1/fixtures/generation_cases.json").readText(Charsets.UTF_8))
+    private fun fixtures(): List<JSONObject> = listOf("generation_cases.json", "review_fixture_additions.json").map {
+        JSONObject(File(G0TestSupport.repoRoot, "test/release_audit/g1/fixtures/$it").readText(Charsets.UTF_8))
+    }
 
     private fun slot(timestamp: Long) = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).format(java.util.Date(timestamp))
 
@@ -59,39 +60,39 @@ class G1GenerationFixtureTest {
 
     @Test
     fun `#26 #31 생성 계산이 독립 fixture 기대값과 같다`() {
-        val root = fixture()
-        TimeZone.setDefault(TimeZone.getTimeZone(root.getString("timezone")))
-        val cases = root.getJSONArray("cases")
         var compared = 0
+        for (root in fixtures()) {
+            TimeZone.setDefault(TimeZone.getTimeZone(root.getString("timezone")))
+            val cases = root.getJSONArray("cases")
+            for (i in 0 until cases.length()) {
+                val case = cases.getJSONObject(i)
+                val id = case.getString("id")
+                if (case.optString("template_query_result") == "error") continue  // 엔진 경로 테스트에서 확인
+                val expectedJson = case.optJSONArray("expected_generation_slots") ?: continue
 
-        for (i in 0 until cases.length()) {
-            val case = cases.getJSONObject(i)
-            val id = case.getString("id")
-            if (case.optString("template_query_result") == "error") continue  // 엔진 경로 테스트에서 확인
-            val expectedJson = case.optJSONArray("expected_generation_slots") ?: continue
-
-            val templatesJson = case.getJSONArray("templates")
-            val templates = (0 until templatesJson.length()).map { templatesJson.getJSONObject(it) }
-                .groupBy({ it.getString("shift_type") }) {
-                    AlarmRefreshEngine.TemplateEntry(it.getString("time"), it.getInt("alarm_type_id"), it.getInt("day_offset"))
+                val templatesJson = case.getJSONArray("templates")
+                val templates = (0 until templatesJson.length()).map { templatesJson.getJSONObject(it) }
+                    .groupBy({ it.getString("shift_type") }) {
+                        AlarmRefreshEngine.TemplateEntry(it.getString("time"), it.getInt("alarm_type_id"), it.getInt("day_offset"))
+                    }
+                val overridesJson = case.getJSONArray("overrides")
+                val overrides = (0 until overridesJson.length()).map { overridesJson.getJSONObject(it) }.associate {
+                    AlarmRefreshEngine.slotKey(it.getString("slot_time"), it.getString("shift_type"), it.getInt("day_offset")) to
+                        AlarmRefreshEngine.OverrideEntry(it.getString("action"), if (it.isNull("alarm_type_id")) null else it.getInt("alarm_type_id"))
                 }
-            val overridesJson = case.getJSONArray("overrides")
-            val overrides = (0 until overridesJson.length()).map { overridesJson.getJSONObject(it) }.associate {
-                AlarmRefreshEngine.slotKey(it.getString("slot_time"), it.getString("shift_type"), it.getInt("day_offset")) to
-                    AlarmRefreshEngine.OverrideEntry(it.getString("action"), if (it.isNull("alarm_type_id")) null else it.getInt("alarm_type_id"))
+                val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(case.getString("now"))!!.time
+
+                val actual = AlarmRefreshEngine.computeDesiredAlarms(scheduleOf(case.getJSONObject("schedule")), templates, overrides, now)
+                    .map { "${slot(it.timestamp)}|${it.shiftType}|${it.dayOffset}|type=${it.alarmTypeId}" }
+                    .sorted()
+                val expected = (0 until expectedJson.length()).map { expectedJson.getJSONObject(it) }
+                    .map { "${it.getString("slot_time")}|${it.getString("shift_type")}|${it.getInt("day_offset")}|type=${it.getInt("alarm_type_id")}" }
+                    .sorted()
+
+                assertEquals("fixture $id", expected, actual)
+                compared++
             }
-            val now = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(case.getString("now"))!!.time
-
-            val actual = AlarmRefreshEngine.computeDesiredAlarms(scheduleOf(case.getJSONObject("schedule")), templates, overrides, now)
-                .map { "${slot(it.timestamp)}|${it.shiftType}|${it.dayOffset}|type=${it.alarmTypeId}" }
-                .sorted()
-            val expected = (0 until expectedJson.length()).map { expectedJson.getJSONObject(it) }
-                .map { "${it.getString("slot_time")}|${it.getString("shift_type")}|${it.getInt("day_offset")}|type=${it.getInt("alarm_type_id")}" }
-                .sorted()
-
-            assertEquals("fixture $id", expected, actual)
-            compared++
         }
-        assertEquals("비교한 케이스 수(오류 케이스 제외 5개)", 5, compared)
+        assertEquals("비교한 케이스 수(기존 5 + T11 보강 2)", 7, compared)
     }
 }
