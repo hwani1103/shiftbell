@@ -12,7 +12,7 @@
   - lib/firebase_options.dart(androidDev 추가), lib/services/firebase_bootstrap.dart - dev flavor는 dev 앱 ID + Analytics 수집 끔
   - lib/l10n/app_ko.arb, app_en.arb - privacyIntro/NoCollection/Firebase/Ads/DataRetention/EffectiveDate 수정, privacyAnalyticsTitle/Body 신설, settingsDataBackupSuccessToast(V2), friendStopSharingConfirm(G2-04)
   - lib/screens/privacy_policy_screen.dart - '사용 통계' 섹션 추가
-공통 파일/API/ARB 연결 요청 및 반영 SHA: G2-04 06f450b
+공통 파일/API/ARB 연결 요청 및 반영 SHA: G2-04 - 문구(ARB)는 1c5d403에 함께 커밋, 화면·설정 코드는 06f450b
 사용자 결정 확인: D2(광고 운영, 실제 ID는 최종 배포 직전 주입 - 구조만 준비), D3(문구는 코드 사실 기준 초안 확정, Console·DebugView 확인 후 배포일에 최종 확인). D8 후속·D7 후속은 AI 위임 결정(decisions_delegated_2026-09-14.md)
 최종 동작과 회귀 금지 규칙 준수: 실제 광고 ID를 소스·dev에 넣지 않음, Firebase 프로젝트·Console·rules 배포 변경 없음, 새 Analytics 이벤트 없음(L02)
 추가/변경 테스트와 실제 실행 명령: 없음(T23 보류). 회귀 확인 flutter build apk --flavor dev --debug PASS, flutter test 252/252 PASS, gradlew testDevDebugUnitTest 71/71 PASS (2026-09-14, dev 통합본)
