@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'constants/platform_channel.dart';
@@ -42,6 +43,7 @@ import 'l10n/generated/app_localizations.dart';
 import 'l10n/l10n_extensions.dart';
 import 'utils/schedule_focus_request.dart';
 import 'providers/tab_visibility_provider.dart';
+import 'screens/startup_gate.dart';
 
 // ⭐ 2026-09-04 - MainScreen 바텀 네비게이션에서 "달력탭"을 가리키는 인덱스.
 // 탭 순서(다음알람/일정관리/달력/컨디션/설정)가 바뀔 때마다 이 값 하나만
@@ -76,6 +78,11 @@ void main() async {
   // "가끔 화면이 백지로 보인다" 같은 문제의 실제 원인을 릴리즈에서는 알 수가
   // 없었음 - 릴리즈에서도 어떤 에러인지 최소한 화면에 보이게 함.
   ErrorWidget.builder = (FlutterErrorDetails details) {
+    // ⭐ 2026-09-14 (G0, 출시전_코드감사_검토결과_v4 V4) - 릴리스에서는 예외 원문/스택(내부
+    // 경로나 데이터 일부가 섞일 수 있음)을 화면에 보이지 않음. 원문은 FlutterError 로그로만
+    // 남음. 아래의 상세 표시는 디버그/프로필 빌드에서만 유지.
+    if (kReleaseMode) return const _ReleaseErrorPlaceholder();
+
     // ⭐ context에 "어느 위젯을 빌드하다가" 났는지가 요약돼 있어서, 메시지만으로
     // 재현 상황을 특정하기 어려운 버그(예: 특정 화면에서만 5초 이내에 재현) 리포트 시
     // 훨씬 빨리 원인 파일/위젯을 좁힐 수 있음.
@@ -108,18 +115,45 @@ void main() async {
   // ⭐ 런치 스크린 유지 시간 (0.3초)
   await Future.delayed(const Duration(milliseconds: 300));
 
+  // ⭐ 2026-09-14 (G0, 출시전_코드감사_검토결과_v4 V4) - 초기화를 runApp() 전에 무방비로
+  // await하지 않고 StartupGate 안에서 실행함. 필수 초기화가 실패하면 시작 실패 화면 +
+  // 다시 시도, 성공하면 기존과 똑같이 ProviderScope(달력 테마 override) + MyApp을 그림.
+  runApp(
+    StartupGate<CalendarThemeId>(
+      initialize: _initializeApp,
+      builder: (initialCalendarTheme) => ProviderScope(
+        overrides: [
+          calendarThemeProvider.overrideWith((ref) => CalendarThemeNotifier.withInitial(initialCalendarTheme)),
+        ],
+        child: const MyApp(),
+      ),
+    ),
+  );
+}
+
+// ⭐ 2026-09-14 (G0, V4) - 앱 시작 초기화. 필수 단계는 실패하면 예외를 그대로 던지고
+// (StartupGate가 시작 실패 화면으로 처리), 선택 단계는 실패/지연돼도 앱을 시작함.
+// 다시 시도 시 이 함수 전체가 다시 불리므로 각 단계는 여러 번 불려도 안전해야 함.
+Future<CalendarThemeId> _initializeApp() async {
+  // ── 필수 ──
   // ⭐ 영어 현지화: 이제 기기 로케일에 따라 ko_KR 또는 en_US 포맷터를 쓸 수 있어야
   // 하므로, 둘 다 미리 초기화해둠(하나만 초기화된 상태에서 다른 로케일 포맷터를
   // 쓰면 intl이 LocaleDataException을 던짐).
   await initializeDateFormatting('ko_KR', null);
   await initializeDateFormatting('en_US', null);
+  // DB 열기 + 마이그레이션(#1/#8 - 실패를 삼키지 않음). 실패 후 다시 부르면 새로 시도함.
   await DatabaseService.instance.database;
   await AlarmService().initialize();
+
+  // ── 선택 (없어도 알람/달력 핵심 기능은 동작) ──
   // ⭐ Phase 4 - 메모/일정 카테고리 자동분류 모델(~2.2MB JSON) 미리 로드.
   // await 안 함 - 첫 프레임을 이걸로 막을 이유가 없고, 실제 분류 시점(일정
   // 생성 저장)에서 안 끝났으면 그쪽에서 ensureLoaded()를 다시 await해서
   // 안전하게 기다림 (memo_category_classifier.dart 참고).
-  unawaited(MemoCategoryClassifier.instance.ensureLoaded());
+  unawaited(MemoCategoryClassifier.instance.ensureLoaded().then<void>(
+    (_) {},
+    onError: (Object e) => debugPrint('⚠️ 카테고리 분류 모델 미리 로드 실패 - 분류 시점에 다시 시도: $e'),
+  ));
   // ⭐ 2026-09-01 - "일정 생성 직후 잠깐 기본 폰트로 보였다가 1초 뒤에 주아체로
   // 바뀐다"는 피드백. schedule_management_tab.dart의 _ScheduleRow가 매번
   // GoogleFonts.jua()를 직접 부르는데, google_fonts 패키지는 처음 쓰는 폰트를
@@ -127,31 +161,64 @@ void main() async {
   // 대체 표시함(FOUT) - 위 MemoCategoryClassifier와 같은 패턴으로 앱 시작
   // 시점에 미리 한 번 받아둬서, 실제로 일정 카드를 그릴 때는 이미 캐시돼
   // 있게 함(마찬가지로 첫 프레임을 막지 않도록 await 안 함).
-  unawaited(GoogleFonts.pendingFonts([GoogleFonts.jua()]));
+  // ⭐ 2026-09-14 (G0, V4) - 오프라인 등으로 받기에 실패하면 처리 안 된 비동기 오류가
+  // 되던 것을 로그로만 남김(표시는 기본 폰트로 계속됨).
+  unawaited(GoogleFonts.pendingFonts([GoogleFonts.jua()]).then<void>(
+    (_) {},
+    onError: (Object e) => debugPrint('⚠️ 폰트 미리 받기 실패 - 기본 폰트로 표시될 수 있음: $e'),
+  ));
   // ⭐ 친구공유(Firestore) 초기화 - firebase_options.dart가 아직 플레이스홀더면
   // 조용히 실패하고 친구공유 기능만 비활성화됨 (firebase_bootstrap.dart 참고).
-  await initFirebase();
+  // 다시 시도로 이 함수가 또 불려도 이미 성공했으면 중복 초기화하지 않음.
+  if (!firebaseReady) await _optionalStartupStep('Firebase', initFirebase);
+
+  // ⭐ 광고 SDK 초기화 + 배너가 차지할 높이를 첫 프레임 전에 미리 확정해둠.
+  // 화면을 그리는 중에 높이를 구하면 "높이 모르는 프레임 → 아는 프레임"으로 한 번
+  // 튀는데, 그 튐을 막는 게 이 슬롯의 목적이라 여기서 미리 함.
+  // 실패해도 예외를 던지지 않고 fallback 높이로 넘어감 (ad_service.dart 참고).
+  await _optionalStartupStep('AdMob', AdService.warmUp);
 
   // ⭐ 앱 시작 전에 달력 테마 미리 로드 (깜빡임 방지) - 예전엔 "다크모드
   // on/off"를 미리 읽었는데, 이제는 9개 달력 테마 중 뭐가 선택돼 있는지를
   // 미리 읽음. 앱 전체 밝기는 항상 라이트 고정이고, 이 값은 오직 (1) 달력
   // 탭 자체가 어떤 테마로 그려질지 (2) 시스템 상태표시줄 아이콘 밝기에만 씀.
-  // ⭐ 광고 SDK 초기화 + 배너가 차지할 높이를 첫 프레임 전에 미리 확정해둠.
-  // 화면을 그리는 중에 높이를 구하면 "높이 모르는 프레임 → 아는 프레임"으로 한 번
-  // 튀는데, 그 튐을 막는 게 이 슬롯의 목적이라 여기서 미리 함.
-  // 실패해도 예외를 던지지 않고 fallback 높이로 넘어감 (ad_service.dart 참고).
-  await AdService.warmUp();
+  // (실패하면 내부에서 기본 테마로 대체함 - calendar_theme_provider.dart)
+  return CalendarThemeNotifier.loadInitial();
+}
 
-  final initialCalendarTheme = await CalendarThemeNotifier.loadInitial();
+// ⭐ 2026-09-14 (G0, V4) - 없어도 앱 핵심(알람/달력)이 동작하는 초기화 단계. 예외는 로그만
+// 남기고, 너무 오래 걸리면 기다리지 않고 앱을 시작함(그 Future는 뒤에서 계속 진행 - Dart는
+// Future를 취소할 수 없음). 10초는 측정값이 아니라 "첫 화면을 무한정 막지 않는다"는 상한값.
+Future<void> _optionalStartupStep(
+  String name,
+  Future<void> Function() step, {
+  Duration timeout = const Duration(seconds: 10),
+}) async {
+  try {
+    await step().timeout(timeout);
+  } on TimeoutException {
+    debugPrint('⚠️ 시작 초기화 지연($name) - 기다리지 않고 앱 시작');
+  } catch (e) {
+    debugPrint('⚠️ 시작 초기화 실패($name) - 이 기능 없이 앱 시작: $e');
+  }
+}
 
-  runApp(
-    ProviderScope(
-      overrides: [
-        calendarThemeProvider.overrideWith((ref) => CalendarThemeNotifier.withInitial(initialCalendarTheme)),
-      ],
-      child: const MyApp(),
-    ),
-  );
+// ⭐ 2026-09-14 (G0, V4) - 릴리스 빌드의 위젯 빌드 오류 자리 표시. 원문 없이 아이콘만.
+class _ReleaseErrorPlaceholder extends StatelessWidget {
+  const _ReleaseErrorPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Directionality(
+      textDirection: TextDirection.ltr,
+      child: ColoredBox(
+        color: Color(0xFFFAFAFA),
+        child: Center(
+          child: Icon(Icons.error_outline, size: 28, color: Color(0xFF9E9E9E)),
+        ),
+      ),
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {

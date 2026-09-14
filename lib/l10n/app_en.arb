@@ -610,5 +610,10 @@
   "helpTroubleshootBackupFileMissingTitle": "I can't find my backup file",
   "helpTroubleshootBackupFileMissingBody": "Check the Download/ShiftBell folder directly using your device's file manager app. If the folder doesn't exist, no automatic backup has run yet — we recommend tapping \"Back Up Now\" in settings to create one.",
   "helpTroubleshootFriendDisconnectedTitle": "My friend's schedule hasn't changed in days",
-  "helpTroubleshootFriendDisconnectedBody": "If the schedule just looks frozen with no error shown, it's almost always because your friend reinstalled the app. Reinstalling issues a new internal account, which breaks the existing connection — but nothing on screen tells you that happened, it just keeps showing whatever it last had.\n\nCheck the \"Last synced\" time at the top of your friend's schedule screen — if it's stuck on an old date, that's the sign. Ask your friend for a new share code, then remove the old entry and add them again with it."
+  "helpTroubleshootFriendDisconnectedBody": "If the schedule just looks frozen with no error shown, it's almost always because your friend reinstalled the app. Reinstalling issues a new internal account, which breaks the existing connection — but nothing on screen tells you that happened, it just keeps showing whatever it last had.\n\nCheck the \"Last synced\" time at the top of your friend's schedule screen — if it's stuck on an old date, that's the sign. Ask your friend for a new share code, then remove the old entry and add them again with it.",
+
+  "startupFailedTitle": "Couldn't start the app",
+  "startupFailedBody": "Something went wrong while getting the app ready. Make sure your device has enough free storage, then try again. If this keeps happening, try restarting your device.",
+  "startupRetry": "Try again",
+  "startupSlowMessage": "Getting the app ready. Please wait a moment."
 }

@@ -1,4 +1,4 @@
-// android/app/src/main/kotlin/com/example/shiftbell/DatabaseHelper.kt
+// android/app/src/main/kotlin/com/hwani1103/shiftbell/DatabaseHelper.kt
 
 package com.hwani1103.shiftbell
 
@@ -69,7 +69,14 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // 이번엔 Native가 date_schedules를 직접 읽는다(ScheduleNotificationScheduler.kt -
         // 재부팅 시 AlarmManager 알람이 전부 사라지므로 DirectBootReceiver에서 재예약
         // 필요) - v20/v21의 "Native 미사용" 전제가 이 테이블에 한해 끝남.
-        private const val DATABASE_VERSION = 23
+        // ⭐ 2026-09-14 (G0, 출시전_코드감사_검토결과_v4 #1/#8/#31) - v24(alarm_overrides,
+        // 개별 알람 예외). 그리고 이번부터 Native도 직접 마이그레이션한다: 위 사고들의
+        // 뿌리는 "Native는 Flutter가 올려줄 때까지 DB를 못 쓴다"는 구조였고, 그 때문에
+        // 업데이트 후 앱을 안 열거나 잠금 해제 전에 재부팅하면 알람 설정/스누즈/이력을
+        // 못 읽었음(C01). 이제 onUpgrade가 Flutter와 같은 SQL 원본(assets/db/migrations.json)을
+        // DbMigrationRunner로 실행함. 이 값은 여전히 database_service.dart의 version:,
+        // migrations.json의 targetVersion과 같아야 하고 checkDartKotlinSync가 빌드 때 검사함.
+        private const val DATABASE_VERSION = 24
         private const val TAG = "DatabaseHelper"
 
         @Volatile
@@ -112,17 +119,45 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         }
     }
 
+    // ⭐ 2026-09-14 (G0) - 예전엔 빈 함수였음. SQLiteOpenHelper는 user_version이 0인 파일을
+    // 열면 onCreate 뒤에 버전을 최신으로 찍는데, Native는 테이블을 만들지 않으므로 "테이블이
+    // 하나도 없는 최신 버전 DB"가 생길 수 있었음(아래 databaseFileExists() 주석의 사고).
+    // 신규 설치 DB 생성은 Flutter(database_service.dart _onCreate) 전담 - 여기서는 예외를 던져
+    // 트랜잭션째 롤백시킴(버전도 안 찍힘). isDatabaseReady()가 파일 없음/버전 0을 먼저
+    // 걸러내므로 정상 경로에서는 호출되지 않음.
     override fun onCreate(db: SQLiteDatabase) {
-        // Flutter에서 관리하므로 비워둠
+        throw DbMigrationException("Native는 DB를 새로 만들지 않음(user_version=0) - Flutter가 생성해야 함")
     }
 
+    // ⭐ 2026-09-14 (G0, v4 #1) - 예전엔 빈 함수라 "마이그레이션 없이 버전만 찍힘" 위험 때문에
+    // 게이트가 정확히 같은 버전일 때만 열었음. 이제 Flutter와 같은 SQL 원본을 실행함.
+    // SQLiteOpenHelper는 이 호출과 setVersion()을 한 트랜잭션(BEGIN EXCLUSIVE)으로 묶으므로
+    // 스키마와 버전이 함께 성공하거나 함께 롤백됨. 실패하면 예외가 그대로 나가서 해당 DB
+    // 접근만 실패(호출부의 기존 fail-safe 동작)하고, 버전이 낮게 남아 다음 접근 때 재시도됨.
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Flutter에서 관리하므로 비워둠
+        // SQLiteOpenHelper는 oldVersion을 트랜잭션(쓰기 잠금) 밖에서 읽음 - 그사이 Flutter가
+        // 먼저 올렸을 수 있으므로 잠금을 잡은 지금 다시 읽어서 그 값 기준으로 진행.
+        // (sqflite는 스스로 잠금 안에서 다시 읽으므로 반대 방향은 이미 안전함.)
+        val current = db.version
+        if (current == newVersion) {
+            Log.i(TAG, "⏭️ 잠금 획득 사이 이미 v${newVersion}으로 올라가 있음(Flutter가 먼저 실행) - 건너뜀")
+            return
+        }
+        if (current > newVersion) {
+            throw DbMigrationException("잠금 획득 후 확인한 버전(v$current)이 Native(v$newVersion)보다 높음 - 다운그레이드 금지")
+        }
+        if (current != oldVersion) {
+            Log.w(TAG, "⚠️ 버전이 잠금 전후로 다름(v$oldVersion → v$current) - v$current 기준으로 진행")
+        }
+        Log.i(TAG, "🔧 Native 마이그레이션 시작 v$current → v$newVersion")
+        DbMigrationRunner.migrate(db, DbMigrationScript.load(appContext), current, newVersion)
+        Log.i(TAG, "✅ Native 마이그레이션 완료 v$current → v$newVersion")
     }
 
+    // ⭐ 2026-09-14 (G0, v4 #1) - 예전엔 경고 로그만 남기고 무시해서, 더 높은 버전 DB를 열면
+    // SQLiteOpenHelper가 버전을 낮게 찍어버릴 수 있었음. 예외로 막아 버전을 건드리지 않음.
     override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Flutter가 이미 업그레이드한 DB를 Native에서 열 때 에러 방지
-        Log.w(TAG, "⚠️ DB 버전 다운그레이드 무시: $oldVersion → $newVersion")
+        throw DbMigrationException("DB 다운그레이드 금지: disk v$oldVersion > native v$newVersion")
     }
 
     // ⭐ WAL 모드 활성화 (동시 읽기/쓰기 허용)
@@ -132,42 +167,48 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         Log.d(TAG, "✅ WAL 모드 활성화")
     }
 
-    // ⭐ CRITICAL FIX: DB 파일이 실제로 디스크에 있는지 확인. Flutter(sqflite)가 이
-    // DB의 스키마(테이블 생성)를 전담하는데, Native가 파일이 생기기도 전에
+    // ⭐ 2026-09-14 (G0, v4 #1-7/#8) - 버전은 최신인데 컬럼/테이블/인덱스가 빠진 DB(과거 Dart가
+    // ALTER 실패를 삼키던 시절에 생겼을 수 있음)를 Native가 먼저 열면 onUpgrade가 안 불리므로
+    // 여기서 비파괴 repair만 실행함. 과거 마이그레이션 재실행은 절대 안 함(v17 DROP friends 등).
+    // 없는 게 없으면 읽기만 하고 끝남. SQL 원본 자체를 못 읽는 경우(자산 누락)는 복구만
+    // 건너뛰고 DB는 계속 쓰게 둠 - 복구 불가가 알람 재생까지 막으면 안 됨. 복구 SQL 실행
+    // 실패는 그대로 던짐(해당 접근만 실패, 다음 접근 때 재시도).
+    override fun onOpen(db: SQLiteDatabase) {
+        super.onOpen(db)
+        val script = try {
+            DbMigrationScript.load(appContext)
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ SQL 원본을 못 읽어 스키마 복구 건너뜀: ${e.message}")
+            return
+        }
+        DbMigrationRunner.repair(db, script)
+    }
+
+    // ⭐ CRITICAL FIX: DB 파일이 실제로 디스크에 있는지 확인. Flutter(sqflite)가 신규 설치
+    // DB의 생성(테이블 생성)을 전담하는데, Native가 파일이 생기기도 전에
     // readableDatabase/writableDatabase를 먼저 건드리면 SQLiteOpenHelper가 "새 파일을
-    // 만들어야 하는 쪽"이 되어버림 - Native의 onCreate()는 비어있어서(Flutter가 관리하므로)
-    // 테이블이 하나도 없는 빈 파일이 생기고, 그 파일의 버전만 DATABASE_VERSION(13)으로
-    // 찍힘. 그 다음 Flutter가 이 파일을 열면 "새로 만들기"가 아니라 "13→14 업그레이드"로
-    // 오판해서, 기본 테이블(alarms/alarm_types/shift_schedule 등)을 만드는 _onCreate를
-    // 통째로 건너뛰고 v14 증분 마이그레이션(date_overtime 테이블 추가)만 실행함. 그 결과
-    // 기본 테이블이 하나도 없는 DB가 되고, 뒤이은 방어 로직(onOpen의 재생성 체크)이
-    // "테이블 없음"을 감지해 _onCreate를 다시 시도하지만, 이미 date_overtime은 만들어져
-    // 있어서 "테이블이 이미 존재함" 예외로 앱 초기화 자체가 죽어버림 - 설치 직후 첫 실행이
-    // 스플래시 화면에서 멈춘 것처럼 보이다가 프로세스가 죽고 재시작을 반복하던 원인이
-    // 바로 이 레이스였음 (실제 기기 logcat에서 이 정확한 예외 체인을 확인함).
+    // 만들어야 하는 쪽"이 되어버림 - 예전 Native의 onCreate()는 비어있어서 테이블이 하나도
+    // 없는 빈 파일이 생기고, 그 파일의 버전만 최신으로 찍혔음. 그 다음 Flutter가 이 파일을
+    // 열면 "새로 만들기"가 아니라 "업그레이드"로 오판해서 기본 테이블을 만드는 _onCreate를
+    // 통째로 건너뛰었고, 설치 직후 첫 실행이 스플래시에서 멈춘 것처럼 보이다가 프로세스가
+    // 죽고 재시작을 반복했음(실제 기기 logcat에서 확인한 레이스). 지금은 onCreate가 예외라
+    // 빈 파일에 버전이 찍히진 않지만, 파일 자체를 만들지 않도록 이 가드는 그대로 유지함.
     // 파일이 아직 없으면 Native는 아무것도 하지 않고 조용히 스킵 - 이 시점엔 스케줄/알람이
     // 애초에 없는 게 정상(온보딩 전)이라 "데이터 없음"으로 처리하는 게 맞음.
     fun databaseFileExists(): Boolean {
         return appContext.getDatabasePath(DATABASE_NAME).exists()
     }
 
-    // ⭐ CRITICAL FIX: 파일이 "존재"하는 것만으로는 안전하지 않음 - 존재하지만 아직
-    // Flutter가 최신 버전까지 마이그레이션을 안 끝낸 상태(예: 방금 업데이트한 구버전
-    // 사용자의 옛 DB)일 수 있음. 그 상태에서 Native가 SQLiteOpenHelper로 열면
-    // onUpgrade가 비어있어도 db.setVersion(DATABASE_VERSION)이 실행되면서 실제
-    // 마이그레이션 없이 버전만 최신으로 찍혀버려서, 뒤이어 Flutter가 열 때 "이미 최신"
-    // 으로 오판해 자기 마이그레이션을 통째로 건너뛸 수 있음. 그래서 SQLiteOpenHelper를
-    // 아예 거치지 않는 별도의 읽기 전용 연결로 디스크의 실제 버전을 먼저 확인하고,
-    // 정확히 DATABASE_VERSION과 같을 때만(=Flutter가 이미 완전히 마이그레이션 끝낸
-    // 상태) 진행함. 다르면 Native는 아무것도 안 하고 Flutter가 먼저 열 때까지 기다림.
+    // ⭐ SQLiteOpenHelper를 거치지 않는 별도 연결로 디스크의 실제 버전을 먼저 확인.
     // ⭐ CRITICAL FIX #2: OPEN_READONLY로 열었었는데, 이 DB는 WAL 모드라 별도 연결을
     // 읽기 전용으로 여는 게 -wal/-shm 파일 접근 문제로 실패하는 경우가 있음(기기별로
-    // 다름). 그러면 catch가 매번 -1을 반환하고, -1은 DATABASE_VERSION과 절대 같을 수
-    // 없어서 isDatabaseReady()가 영원히 false → Native의 모든 DB 쓰기(갱신 엔진 포함)가
-    // 영구 차단됨. 실제로 이 버그 때문에 자정이 지나도, 20분 전 체크가 돌아도, 앱을
-    // 열어도 10일치 알람이 전혀 안 늘어나는 증상이 발생함. READWRITE로 열면(원본 파일과
-    // 같은 WAL 상태를 공유하는 정상적인 추가 연결이라) 이 문제가 없음.
-    private fun onDiskVersion(): Int {
+    // 다름). READWRITE로 열면(원본 파일과 같은 WAL 상태를 공유하는 정상적인 추가 연결이라)
+    // 이 문제가 없음.
+    // ⭐ 2026-09-14 (G0, v4 #1-5) - 확인 실패 시 예전엔 "최신 버전"이라고 가정(fail-open)했는데,
+    // 그러면 실제로 낮은 버전 DB도 최신인 척 통과할 수 있었음. 이제 null을 반환하고, 판단은
+    // 헬퍼의 실제 open에 맡김(낮으면 onUpgrade가 마이그레이션, 0/더 높으면 onCreate/onDowngrade가
+    // 예외 → 해당 호출만 실패). 확인 실패가 핵심 기능을 영구 차단하지 않는다는 원래 의도는 유지.
+    private fun onDiskVersion(): Int? {
         return try {
             SQLiteDatabase.openDatabase(
                 appContext.getDatabasePath(DATABASE_NAME).path,
@@ -175,26 +216,39 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
                 SQLiteDatabase.OPEN_READWRITE
             ).use { it.version }
         } catch (e: Exception) {
-            // ⭐ CRITICAL FIX #3: 이 확인 자체가 실패해도 fail-closed(영구 차단)가 아니라
-            // fail-open(그냥 진행)으로 감. 버전 불일치 레이스는 드문 엣지케이스인데,
-            // 그걸 막으려던 안전장치가 고장 나서 핵심 기능(알람 갱신)을 영구히 막아버리면
-            // 훨씬 더 나쁨 - 안전장치는 실패해도 원래 기능엔 지장 없어야 함.
-            Log.w(TAG, "⚠️ 디스크 DB 버전 확인 실패 - 체크 건너뛰고 진행: ${e.message}")
-            DATABASE_VERSION
+            Log.w(TAG, "⚠️ 디스크 DB 버전 확인 실패 - 최신으로 가정하지 않고 헬퍼 open에서 판단: ${e.message}")
+            null
         }
     }
 
+    // ⭐ 2026-09-14 (G0, v4 #1-5) - 게이트 교체. 예전엔 "디스크 버전 == DATABASE_VERSION"일 때만
+    // 열었고(Flutter가 마이그레이션을 끝낼 때까지 Native 전면 차단), 이게 C01의 원인이었음.
+    //  - 파일 없음 → 스킵(Flutter가 신규 생성 전)
+    //  - 버전 0 → 스킵(Flutter가 신규 생성 중이거나 비정상 파일 - Native는 만들지 않음)
+    //  - 디스크 > Native → 스킵(다운그레이드 방지)
+    //  - 디스크 < Native → 진행(헬퍼 open 안에서 onUpgrade가 마이그레이션)
+    //  - 같음 / 확인 실패 → 진행
     private fun isDatabaseReady(): Boolean {
         if (!databaseFileExists()) {
             Log.d(TAG, "⏭️ DB 파일 아직 없음(Flutter가 아직 생성 전) - Native는 생성하지 않고 스킵")
             return false
         }
-        val disk = onDiskVersion()
-        if (disk != DATABASE_VERSION) {
-            Log.w(TAG, "⏭️ DB 버전 불일치(disk=$disk, native=$DATABASE_VERSION) - Flutter 마이그레이션 전까지 스킵")
-            return false
+        val disk = onDiskVersion() ?: return true
+        return when {
+            disk == 0 -> {
+                Log.w(TAG, "⏭️ DB user_version=0(Flutter 신규 생성 중이거나 비정상) - Native는 생성하지 않고 스킵")
+                false
+            }
+            disk > DATABASE_VERSION -> {
+                Log.w(TAG, "⏭️ 디스크 DB(v$disk)가 Native(v$DATABASE_VERSION)보다 높음 - 다운그레이드 방지로 스킵")
+                false
+            }
+            disk < DATABASE_VERSION -> {
+                Log.i(TAG, "🔧 디스크 DB v$disk < Native v$DATABASE_VERSION - 열면서 마이그레이션 진행")
+                true
+            }
+            else -> true
         }
-        return true
     }
 
     // ⭐ 재시도 로직이 포함된 안전한 DB 접근

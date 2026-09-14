@@ -1,0 +1,3471 @@
+{
+  "status": "DRAFT_NOT_RUN",
+  "schema_source": "historical Git only; no G0 migrations.json read",
+  "fixtures": [
+    {
+      "file": "v01.sql",
+      "user_version": 1,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "reconstructed",
+        "sha": "059bd255ac925dad6d338811ca25b5be0af6eedc",
+        "basis": "v2 onCreate minus the v2 onUpgrade additions; no v1 snapshot exists in reachable history"
+      },
+      "sha256": "82af64d715b4e52cffb984b2d44e62b17193e0359dc4023ae7c56990073f2303",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "is_preset": 1
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "is_preset": 0
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "start_date": "2026-09-14T00:00:00.000"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v02.sql",
+      "user_version": 2,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "059bd255ac925dad6d338811ca25b5be0af6eedc",
+        "lines": [
+          32,
+          90
+        ]
+      },
+      "sha256": "c04ea8e9c3d9d10f9a187a3f2d1ed8e201c28127070771b91bb2397997bc01ce",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "is_preset": 1
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "is_preset": 0
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ]
+      }
+    },
+    {
+      "file": "v03.sql",
+      "user_version": 3,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "reconstructed",
+        "base_version": 2,
+        "sha": "5fdbc880bb80835752fa3c404ba5278396e27ada",
+        "basis": "prior fixture DDL plus historical onUpgrade oldVersion < 3; not a released snapshot"
+      },
+      "sha256": "b9d437ce53c409c964ff9818c2f197d7d798d33892829896b2651fd769853088",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "is_preset": 1
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "is_preset": 0
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ]
+      }
+    },
+    {
+      "file": "v04.sql",
+      "user_version": 4,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "reconstructed",
+        "base_version": 3,
+        "sha": "5fdbc880bb80835752fa3c404ba5278396e27ada",
+        "basis": "prior fixture DDL plus historical onUpgrade oldVersion < 4; not a released snapshot"
+      },
+      "sha256": "9f9d3217b1244c8af3aec007b50df3d538212c866b42aec80270167d7bc3108c",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "is_preset": 1
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "is_preset": 0
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "active_shift_types": "Day,Night"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ]
+      }
+    },
+    {
+      "file": "v05.sql",
+      "user_version": 5,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "reconstructed",
+        "base_version": 4,
+        "sha": "5fdbc880bb80835752fa3c404ba5278396e27ada",
+        "basis": "prior fixture DDL plus historical onUpgrade oldVersion < 5; not a released snapshot"
+      },
+      "sha256": "c83f7698abe68c0ed5fdeeb00693ed3c12277b71db16f6a80b0c81e945443b16",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "is_preset": 1
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "is_preset": 0
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "active_shift_types": "Day,Night"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v06.sql",
+      "user_version": 6,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "7ce304f324a2b41f53d3ac502461d0816a66baca",
+        "lines": [
+          72,
+          142
+        ]
+      },
+      "sha256": "8ec2df38f18bcb5b17b113706ab4f0696146b99983ec269cb1453b43d871f7d5",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v07.sql",
+      "user_version": 7,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "eeef178efc97f2738d385e05b09639db8c566024",
+        "lines": [
+          72,
+          143
+        ]
+      },
+      "sha256": "74985e85caa62f6498635ee5d251a5bde29d63a928c055c270209aed049887b5",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v08.sql",
+      "user_version": 8,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "470a9686d5b2f03f171673f201edc2f786bf24b6",
+        "lines": [
+          72,
+          143
+        ]
+      },
+      "sha256": "368c555f4eb65c2305cdaec8b4ef277e920f35f74cb03b2f463ff7db7eaaa5f7",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v09.sql",
+      "user_version": 9,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "6166e076f43b89f285c8af3153c1bcc81857f936",
+        "lines": [
+          72,
+          143
+        ]
+      },
+      "sha256": "150f0b4d8ba8682b3a5f87b8f18b10822fd64adf3f70a700398da2dd012d6a1b",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v10.sql",
+      "user_version": 10,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "efb0cce1c20b2b3ed4e6e10b98315220ee4c0ad1",
+        "lines": [
+          72,
+          143
+        ]
+      },
+      "sha256": "7af07b3f23f435055ca2cc6b0525034aec1602935051e13bce0174dff559879f",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v11.sql",
+      "user_version": 11,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "e1147fe48e97d149311a2c8d5a270f51759b0bed",
+        "lines": [
+          72,
+          143
+        ]
+      },
+      "sha256": "6818c82803164d84dcd5d6a4304ea57461b4745ef53c874fa3e13bb58e60523d",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v12.sql",
+      "user_version": 12,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "120b8103eed42e99ec8cc7e49e27a660b9d8692b",
+        "lines": [
+          73,
+          157
+        ]
+      },
+      "sha256": "36df428ec20526fde44fa43024602ecdb61a4419693d8a98e5ca515b2f607259",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v13.sql",
+      "user_version": 13,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "reconstructed",
+        "base_version": 12,
+        "sha": "5fdbc880bb80835752fa3c404ba5278396e27ada",
+        "basis": "prior fixture DDL plus historical onUpgrade oldVersion < 13; not a released snapshot"
+      },
+      "sha256": "09a9829dc0a8e7c7410841e35a4585453b992f32afac817c5ff158433e6bfdf9",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v14.sql",
+      "user_version": 14,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "c9a8c5c37a79933e94526111c9d5a78977181a6c",
+        "lines": [
+          80,
+          193
+        ]
+      },
+      "sha256": "06afeab8b8358a0e8b6da016982cd0e5634d7727f72578852f6c955e279fd921",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_overtime": [
+          {
+            "id": 601,
+            "date": "2026-09-14",
+            "minutes": 90,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v15.sql",
+      "user_version": 15,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "555cb20d48fd49ed0e7f8af51ba6e3a90007bab9",
+        "lines": [
+          80,
+          194
+        ]
+      },
+      "sha256": "de46f8cb7635f4b41320034136cd09d06eb9ad4d1f5d820f74d769378c14c8da",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "shift_durations": "{\"Day\":480,\"Night\":600}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_overtime": [
+          {
+            "id": 601,
+            "date": "2026-09-14",
+            "minutes": 90,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v16.sql",
+      "user_version": 16,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "b674c731f629e8ff73abbbb9c40bd0e8a60f39c7",
+        "lines": [
+          80,
+          206
+        ]
+      },
+      "sha256": "a464498fcc341d96e04aeb39d235de7dace0817064fc6d285e956a3d6e7ae232",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "shift_durations": "{\"Day\":480,\"Night\":600}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_overtime": [
+          {
+            "id": 601,
+            "date": "2026-09-14",
+            "minutes": 90,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "friends": [
+          {
+            "id": 701,
+            "name": "Cached coworker",
+            "data_json": "{\"isRegular\":true,\"pattern\":[\"Day\",\"Night\",\"Off\"],\"shiftTypes\":[\"Day\",\"Night\",\"Off\"],\"todayIndex\":0,\"startDate\":\"2026-09-14T00:00:00.000\"}",
+            "has_memos": 1,
+            "added_at": "2026-08-10T06:30:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v17.sql",
+      "user_version": 17,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "65867d6cfe4b3d042d57f75f9516b14cedf2fbff",
+        "lines": [
+          80,
+          208
+        ]
+      },
+      "sha256": "e02b72b4b79075a862358ccd0370d4a11bd39ce803b12d88a4147b728bc31937",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "shift_durations": "{\"Day\":480,\"Night\":600}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_overtime": [
+          {
+            "id": 601,
+            "date": "2026-09-14",
+            "minutes": 90,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "friends": [
+          {
+            "id": 701,
+            "name": "Cached coworker",
+            "owner_id": "fixture-owner-a",
+            "data_json": "{\"isRegular\":true,\"pattern\":[\"Day\",\"Night\",\"Off\"],\"shiftTypes\":[\"Day\",\"Night\",\"Off\"],\"todayIndex\":0,\"startDate\":\"2026-09-14T00:00:00.000\"}",
+            "added_at": "2026-08-10T06:30:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 702,
+            "name": "Not fetched",
+            "owner_id": "fixture-owner-b",
+            "data_json": null,
+            "added_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v18.sql",
+      "user_version": 18,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "ca82d69d0cf1d9eff3f4a9d47ed5460715f0ee7f",
+        "lines": [
+          80,
+          209
+        ]
+      },
+      "sha256": "7e6d05dc0c3869f00191e8bbb377c8c700bf28c40c45ff0f51b1d842a10874ed",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "custom_shift_colors": "{\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "shift_durations": "{\"Day\":480,\"Night\":600}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day"
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day"
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000"
+          }
+        ],
+        "date_overtime": [
+          {
+            "id": 601,
+            "date": "2026-09-14",
+            "minutes": 90,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "friends": [
+          {
+            "id": 701,
+            "name": "Cached coworker",
+            "owner_id": "fixture-owner-a",
+            "data_json": "{\"isRegular\":true,\"pattern\":[\"Day\",\"Night\",\"Off\"],\"shiftTypes\":[\"Day\",\"Night\",\"Off\"],\"todayIndex\":0,\"startDate\":\"2026-09-14T00:00:00.000\"}",
+            "added_at": "2026-08-10T06:30:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 702,
+            "name": "Not fetched",
+            "owner_id": "fixture-owner-b",
+            "data_json": null,
+            "added_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v19.sql",
+      "user_version": 19,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "08b48f37d627d9e2496d578ee30b7d60732bdd8e",
+        "lines": [
+          80,
+          213
+        ]
+      },
+      "sha256": "113012517e6085eb31e2a56ee82145b2acbca5c7ae2c3affa87822cc224c86fe",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "custom_shift_colors": "{\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "shift_durations": "{\"Day\":480,\"Night\":600}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day",
+            "day_offset": 0
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null,
+            "day_offset": 0
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day",
+            "day_offset": 0
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1,
+            "day_offset": 0
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41,
+            "day_offset": -1
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000",
+            "day_offset": 0
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000",
+            "day_offset": 0
+          }
+        ],
+        "date_overtime": [
+          {
+            "id": 601,
+            "date": "2026-09-14",
+            "minutes": 90,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "friends": [
+          {
+            "id": 701,
+            "name": "Cached coworker",
+            "owner_id": "fixture-owner-a",
+            "data_json": "{\"isRegular\":true,\"pattern\":[\"Day\",\"Night\",\"Off\"],\"shiftTypes\":[\"Day\",\"Night\",\"Off\"],\"todayIndex\":0,\"startDate\":\"2026-09-14T00:00:00.000\"}",
+            "added_at": "2026-08-10T06:30:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 702,
+            "name": "Not fetched",
+            "owner_id": "fixture-owner-b",
+            "data_json": null,
+            "added_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v20.sql",
+      "user_version": 20,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "64c6224bb5a83aff2542041a9b9b5f888508859e",
+        "lines": [
+          81,
+          238
+        ]
+      },
+      "sha256": "2fd967ca945554a965e06b3db394b5b005fd61e15a01238870be9e212bf2b2cc",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "custom_shift_colors": "{\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "shift_durations": "{\"Day\":480,\"Night\":600}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day",
+            "day_offset": 0
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null,
+            "day_offset": 0
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day",
+            "day_offset": 0
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1,
+            "day_offset": 0
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41,
+            "day_offset": -1
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000",
+            "day_offset": 0
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "date_schedules": [
+          {
+            "id": 801,
+            "date": "2026-09-15",
+            "content": "Team meeting",
+            "start_minutes": 540,
+            "duration_minutes": 30,
+            "color_index": 2,
+            "icon_index": 1,
+            "style_index": 1,
+            "font_index": 1,
+            "predicted_category": "work",
+            "is_user_corrected": 1,
+            "created_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000",
+            "day_offset": 0
+          }
+        ],
+        "date_overtime": [
+          {
+            "id": 601,
+            "date": "2026-09-14",
+            "minutes": 90,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "friends": [
+          {
+            "id": 701,
+            "name": "Cached coworker",
+            "owner_id": "fixture-owner-a",
+            "data_json": "{\"isRegular\":true,\"pattern\":[\"Day\",\"Night\",\"Off\"],\"shiftTypes\":[\"Day\",\"Night\",\"Off\"],\"todayIndex\":0,\"startDate\":\"2026-09-14T00:00:00.000\"}",
+            "added_at": "2026-08-10T06:30:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 702,
+            "name": "Not fetched",
+            "owner_id": "fixture-owner-b",
+            "data_json": null,
+            "added_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v21.sql",
+      "user_version": 21,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "reconstructed",
+        "base_version": 20,
+        "sha": "5fdbc880bb80835752fa3c404ba5278396e27ada",
+        "basis": "prior fixture DDL plus historical onUpgrade oldVersion < 21; not a released snapshot"
+      },
+      "sha256": "7cf8329200997bc281772cb3c438211b735876f00ac03028dbecc8d7f27f8d41",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "custom_shift_colors": "{\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "shift_durations": "{\"Day\":480,\"Night\":600}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day",
+            "day_offset": 0
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null,
+            "day_offset": 0
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day",
+            "day_offset": 0
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1,
+            "day_offset": 0
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41,
+            "day_offset": -1
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000",
+            "day_offset": 0
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "date_schedules": [
+          {
+            "id": 801,
+            "date": "2026-09-15",
+            "content": "Team meeting",
+            "start_minutes": 540,
+            "duration_minutes": 30,
+            "color_index": 2,
+            "icon_index": 1,
+            "style_index": 1,
+            "font_index": 1,
+            "predicted_category": "work",
+            "is_user_corrected": 1,
+            "created_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000",
+            "day_offset": 0
+          }
+        ],
+        "date_overtime": [
+          {
+            "id": 601,
+            "date": "2026-09-14",
+            "minutes": 90,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "friends": [
+          {
+            "id": 701,
+            "name": "Cached coworker",
+            "owner_id": "fixture-owner-a",
+            "data_json": "{\"isRegular\":true,\"pattern\":[\"Day\",\"Night\",\"Off\"],\"shiftTypes\":[\"Day\",\"Night\",\"Off\"],\"todayIndex\":0,\"startDate\":\"2026-09-14T00:00:00.000\"}",
+            "added_at": "2026-08-10T06:30:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 702,
+            "name": "Not fetched",
+            "owner_id": "fixture-owner-b",
+            "data_json": null,
+            "added_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "condition_shift_times": [
+          {
+            "shift_name": "Night",
+            "start_minutes": 1320,
+            "end_minutes": 420,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v22.sql",
+      "user_version": 22,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "a97e1d9a7ecda503b9a146ff8c00f2d43f254b95",
+        "lines": [
+          83,
+          285
+        ]
+      },
+      "sha256": "235ba0fef97f7d39a4c4fda3243c5712910e5ae762c30f76ca9b567babbca771",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "custom_shift_colors": "{\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "shift_durations": "{\"Day\":480,\"Night\":600}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day",
+            "day_offset": 0
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null,
+            "day_offset": 0
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day",
+            "day_offset": 0
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1,
+            "day_offset": 0
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41,
+            "day_offset": -1
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000",
+            "day_offset": 0
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "date_schedules": [
+          {
+            "id": 801,
+            "date": "2026-09-15",
+            "content": "Team meeting",
+            "start_minutes": 540,
+            "duration_minutes": 30,
+            "color_index": 2,
+            "icon_index": 1,
+            "style_index": 1,
+            "font_index": 1,
+            "predicted_category": "work",
+            "is_user_corrected": 1,
+            "created_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000",
+            "day_offset": 0
+          }
+        ],
+        "date_overtime": [
+          {
+            "id": 601,
+            "date": "2026-09-14",
+            "minutes": 90,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "friends": [
+          {
+            "id": 701,
+            "name": "Cached coworker",
+            "owner_id": "fixture-owner-a",
+            "data_json": "{\"isRegular\":true,\"pattern\":[\"Day\",\"Night\",\"Off\"],\"shiftTypes\":[\"Day\",\"Night\",\"Off\"],\"todayIndex\":0,\"startDate\":\"2026-09-14T00:00:00.000\"}",
+            "added_at": "2026-08-10T06:30:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 702,
+            "name": "Not fetched",
+            "owner_id": "fixture-owner-b",
+            "data_json": null,
+            "added_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "condition_shift_times": [
+          {
+            "shift_name": "Night",
+            "start_minutes": 1320,
+            "end_minutes": 420,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "sleep_records": [
+          {
+            "id": 901,
+            "start_time": "2026-09-13T23:00:00.000",
+            "end_time": "2026-09-14T06:00:00.000",
+            "source": "MANUAL",
+            "status": "CONFIRMED",
+            "confidence": null,
+            "created_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 902,
+            "start_time": "2026-09-14T23:00:00.000",
+            "end_time": null,
+            "source": "AUTO_DETECTED",
+            "status": "PENDING_CONFIRMATION",
+            "confidence": "LOW",
+            "created_at": "2026-09-14T05:00:00.000",
+            "updated_at": null
+          }
+        ],
+        "sleep_expected_bedtime": [
+          {
+            "shift_key": "Night",
+            "bedtime_minutes": 540,
+            "updated_at": "2026-08-10T06:30:00.000"
+          }
+        ]
+      }
+    },
+    {
+      "file": "v23.sql",
+      "user_version": 23,
+      "source_path": "lib/services/database_service.dart",
+      "origin": {
+        "kind": "historical_onCreate",
+        "sha": "5fdbc880bb80835752fa3c404ba5278396e27ada",
+        "lines": [
+          83,
+          291
+        ]
+      },
+      "sha256": "bfc8be73fc467f245db6a5477a398aaf968b8363a0a5fd203f3a9913bb59713d",
+      "input_rows": {
+        "alarm_types": [
+          {
+            "id": 1,
+            "name": "Sound",
+            "emoji": "S",
+            "sound_file": "alarmbell1",
+            "volume": 0.43,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 2,
+            "name": "Vibrate",
+            "emoji": "V",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 3,
+            "name": "Silent",
+            "emoji": "M",
+            "sound_file": "",
+            "volume": 0.0,
+            "vibration_strength": 1,
+            "is_preset": 1,
+            "duration": 7
+          },
+          {
+            "id": 41,
+            "name": "Personal",
+            "emoji": "P",
+            "sound_file": "alarmbell2",
+            "volume": 0.35,
+            "vibration_strength": 1,
+            "is_preset": 0,
+            "duration": 7
+          }
+        ],
+        "shift_schedule": [
+          {
+            "id": 1,
+            "is_regular": 1,
+            "pattern": "Day,Night,Off",
+            "today_index": 0,
+            "shift_types": "Day,Night,Off",
+            "active_shift_types": "Day,Night",
+            "start_date": "2026-09-14T00:00:00.000",
+            "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+            "custom_shift_colors": "{\"Night\":4288423856}",
+            "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+            "shift_durations": "{\"Day\":480,\"Night\":600}"
+          }
+        ],
+        "alarms": [
+          {
+            "id": 101,
+            "time": "06:30",
+            "date": "2026-09-15T06:30:00.000",
+            "type": "fixed",
+            "alarm_type_id": 1,
+            "shift_type": "Day",
+            "day_offset": 0
+          },
+          {
+            "id": 102,
+            "time": "08:10",
+            "date": "2026-09-15T08:10:00.000",
+            "type": "custom",
+            "alarm_type_id": 41,
+            "shift_type": null,
+            "day_offset": 0
+          },
+          {
+            "id": 103,
+            "time": "06:35",
+            "date": "2026-09-15T06:35:00.000",
+            "type": "snoozed",
+            "alarm_type_id": 2,
+            "shift_type": "Day",
+            "day_offset": 0
+          }
+        ],
+        "shift_alarm_templates": [
+          {
+            "id": 201,
+            "shift_type": "Day",
+            "time": "06:30",
+            "alarm_type_id": 1,
+            "day_offset": 0
+          },
+          {
+            "id": 202,
+            "shift_type": "Night",
+            "time": "22:30",
+            "alarm_type_id": 41,
+            "day_offset": -1
+          }
+        ],
+        "alarm_history": [
+          {
+            "id": 301,
+            "alarm_id": 999,
+            "scheduled_time": "06:30",
+            "scheduled_date": "2026-08-10",
+            "actual_ring_time": "2026-08-10T06:30:00.000",
+            "dismiss_type": "snoozed",
+            "snooze_count": 2,
+            "shift_type": "Day",
+            "created_at": "2026-08-10T06:30:00.000",
+            "day_offset": 0
+          }
+        ],
+        "date_memos": [
+          {
+            "id": 401,
+            "date": "2026-09-15",
+            "memo_text": "Shift handover / O'Brien",
+            "order_index": 0,
+            "created_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 402,
+            "date": "2026-09-15",
+            "memo_text": "Bring uniform",
+            "order_index": 1,
+            "created_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "date_schedules": [
+          {
+            "id": 801,
+            "date": "2026-09-15",
+            "content": "Team meeting",
+            "start_minutes": 540,
+            "duration_minutes": 30,
+            "color_index": 2,
+            "icon_index": 1,
+            "style_index": 1,
+            "font_index": 1,
+            "predicted_category": "work",
+            "is_user_corrected": 1,
+            "notify_enabled": 1,
+            "notify_offset_minutes": 15,
+            "created_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "alarm_creation_log": [
+          {
+            "id": 501,
+            "alarm_id": 999,
+            "scheduled_date": "2026-08-10",
+            "scheduled_time": "06:30",
+            "shift_type": "Day",
+            "alarm_type_id": 1,
+            "source": "flutter",
+            "created_at": "2026-08-10T06:30:00.000",
+            "day_offset": 0
+          }
+        ],
+        "date_overtime": [
+          {
+            "id": 601,
+            "date": "2026-09-14",
+            "minutes": 90,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "friends": [
+          {
+            "id": 701,
+            "name": "Cached coworker",
+            "owner_id": "fixture-owner-a",
+            "data_json": "{\"isRegular\":true,\"pattern\":[\"Day\",\"Night\",\"Off\"],\"shiftTypes\":[\"Day\",\"Night\",\"Off\"],\"todayIndex\":0,\"startDate\":\"2026-09-14T00:00:00.000\"}",
+            "added_at": "2026-08-10T06:30:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 702,
+            "name": "Not fetched",
+            "owner_id": "fixture-owner-b",
+            "data_json": null,
+            "added_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "condition_shift_times": [
+          {
+            "shift_name": "Night",
+            "start_minutes": 1320,
+            "end_minutes": 420,
+            "updated_at": "2026-09-14T05:00:00.000"
+          }
+        ],
+        "sleep_records": [
+          {
+            "id": 901,
+            "start_time": "2026-09-13T23:00:00.000",
+            "end_time": "2026-09-14T06:00:00.000",
+            "source": "MANUAL",
+            "status": "CONFIRMED",
+            "confidence": null,
+            "created_at": "2026-09-14T05:00:00.000",
+            "updated_at": "2026-09-14T05:00:00.000"
+          },
+          {
+            "id": 902,
+            "start_time": "2026-09-14T23:00:00.000",
+            "end_time": null,
+            "source": "AUTO_DETECTED",
+            "status": "PENDING_CONFIRMATION",
+            "confidence": "LOW",
+            "created_at": "2026-09-14T05:00:00.000",
+            "updated_at": null
+          }
+        ],
+        "sleep_expected_bedtime": [
+          {
+            "shift_key": "Night",
+            "bedtime_minutes": 540,
+            "updated_at": "2026-08-10T06:30:00.000"
+          }
+        ]
+      }
+    }
+  ]
+}

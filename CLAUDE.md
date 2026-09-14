@@ -311,6 +311,7 @@ android/app/src/main/kotlin/com/hwani1103/shiftbell/
 ├── DirectBootReceiver.kt              재부팅 처리
 ├── AlarmActionReceiver.kt / AlarmActionHelper.kt / NotificationHelper.kt
 ├── DatabaseHelper.kt                  ⭐ Native DB 접근 (DATABASE_VERSION)
+├── DbMigrationRunner.kt               ⭐ DB 마이그레이션 실행기 (assets/db/migrations.json, Dart 쌍 db_migration_runner.dart)
 └── CalendarWidget{Provider,ScheduleResolver,Holidays}.kt
 ```
 
@@ -326,7 +327,8 @@ android/app/src/main/kotlin/com/hwani1103/shiftbell/
 
 | 값 | Kotlin | Dart |
 |----|--------|------|
-| DB 스키마 버전 | `DatabaseHelper.kt` `DATABASE_VERSION` (현재 **23**) | `database_service.dart` `version:` |
+| DB 스키마 버전 | `DatabaseHelper.kt` `DATABASE_VERSION` (현재 **24**) | `database_service.dart` `version:` |
+| DB SQL 원본 목표 버전 | `DatabaseHelper.kt` `DATABASE_VERSION` | `assets/db/migrations.json` `"targetVersion"` |
 | 갱신 윈도우 일수 | `AlarmRefreshEngine.kt` `DAYS_AHEAD` (현재 **10**) | `alarm_limits.dart` `kAlarmRefreshWindowDays` |
 
 새로 이런 쌍이 생기면 `checkPair()` 호출을 하나 더 추가할 것.
@@ -351,10 +353,13 @@ final path = await kAlarmChannel.invokeMethod('getDeviceProtectedStoragePath');
 
 Flutter의 `SharedPreferences`와 Native의 `alarm_state`는 **서로 다른 경로**임. 혼동 금지.
 
-### 4. DB 마이그레이션 순서
-Native(`DatabaseHelper.kt`)는 디스크 버전이 `DATABASE_VERSION`과 정확히 일치할 때만
-DB를 건드림 — Flutter가 마이그레이션을 끝내기 전에는 스킵. 스키마를 바꿀 땐
-Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
+### 4. DB 마이그레이션 (2026-09-14 교체, v24~)
+버전별 SQL은 `assets/db/migrations.json` **하나에만** 있고 Flutter(`lib/services/db_migration_runner.dart`)와
+Native(`DbMigrationRunner.kt`)가 같은 규칙으로 실행함. **Native도 첫 DB 접근(업데이트 후 앱 미실행·잠금 해제 전
+부팅·알람 수신 포함)에서 직접 마이그레이션**하므로 "Native는 Flutter가 올려준 뒤에만 DB를 쓴다"는 예전 규칙은 폐기됨.
+스키마를 바꿀 땐 한 커밋에서 `migrations.json`(migrations 증분 + repair 최종형 + targetVersion) ·
+`_onCreate`/`version:` · `DATABASE_VERSION`을 같이 바꿀 것. 기존 migrations 항목 수정 금지, repair는 비파괴 SQL만,
+ALTER를 try/catch로 삼키지 말 것. 상세: `DB_스키마_변경_가이드.md` §3-1·§4.
 
 ### 5. 알람 갱신 트리거 지점
 1. 알람이 울릴 때 (`CustomAlarmReceiver.onReceive`)
@@ -364,10 +369,10 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
 
 ---
 
-## DB 스키마 (v23)
+## DB 스키마 (v24)
 
 `shift_schedule` · `shift_alarm_templates` · `alarms` · `alarm_types` ·
-`alarm_history` · `alarm_creation_log` · `date_memos` · `date_schedules` ·
+`alarm_history` · `alarm_creation_log` · `alarm_overrides` · `date_memos` · `date_schedules` ·
 `date_overtime` · `friends` · `condition_shift_times` · `sleep_records` ·
 `sleep_expected_bedtime`
 
@@ -396,6 +401,11 @@ Flutter `onUpgrade`와 Kotlin 상수를 같은 커밋에서 올릴 것.
   DB 컬럼/예약 로직이 없던 목업 - `전체근무표_개선안_및_일정알림_설계메모.md`
   2장 참고). 이번엔 Native(`ScheduleNotificationScheduler.kt`)가 재부팅 재예약을
   위해 이 테이블을 직접 읽음 - v20/v21 당시의 "Native 미사용" 전제가 끝남.
+- v24(2026-09-14, 출시전 감사 G0) — `alarm_overrides` 테이블 신설(개별 알람 예외 - 템플릿으로
+  생성된 알람 하나의 삭제 `skip`/타입 변경 `set_type`을 원본으로 저장해 자동 갱신이 원복하지 않게 함,
+  v4 #31·D10. 동작 구현은 G1). **같은 변경에서 마이그레이션 구조를 교체**: 옛 `_onUpgrade`의 SQL을
+  `assets/db/migrations.json`(단일 원본)으로 옮기고 Native(`DatabaseHelper.onUpgrade`)도 직접
+  마이그레이션함 — 위 ⚠️4 참고.
 
 ---
 

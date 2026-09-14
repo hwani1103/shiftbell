@@ -611,5 +611,14 @@
   "helpTroubleshootBackupFileMissingTitle": "백업 파일을 못 찾겠어요",
   "helpTroubleshootBackupFileMissingBody": "기기의 파일 관리 앱에서 Download/ShiftBell 폴더를 직접 확인해보세요. 폴더가 없다면 한 번도 자동 백업이 실행된 적이 없다는 뜻이니, 설정에서 \"지금 백업\"을 먼저 눌러 하나 만들어두는 걸 추천해요.",
   "helpTroubleshootFriendDisconnectedTitle": "친구 근무표가 며칠째 안 바뀌어요",
-  "helpTroubleshootFriendDisconnectedBody": "에러 없이 근무표가 그대로 멈춰 있다면, 십중팔구 친구가 앱을 재설치한 경우입니다. 재설치하면 내부 계정이 새로 발급돼서 기존 연결이 끊어지는데, 이땐 화면에 아무 안내도 뜨지 않고 그냥 재설치 전 마지막 모습이 계속 보여요.\n\n친구 근무표 화면 상단의 \"마지막 동기화\" 시간이 계속 옛날 날짜에 머물러 있는지 확인해보세요. 그렇다면 친구에게 새 공유 코드를 다시 받아, 기존 항목을 삭제하고 새 코드로 다시 추가하면 됩니다."
+  "helpTroubleshootFriendDisconnectedBody": "에러 없이 근무표가 그대로 멈춰 있다면, 십중팔구 친구가 앱을 재설치한 경우입니다. 재설치하면 내부 계정이 새로 발급돼서 기존 연결이 끊어지는데, 이땐 화면에 아무 안내도 뜨지 않고 그냥 재설치 전 마지막 모습이 계속 보여요.\n\n친구 근무표 화면 상단의 \"마지막 동기화\" 시간이 계속 옛날 날짜에 머물러 있는지 확인해보세요. 그렇다면 친구에게 새 공유 코드를 다시 받아, 기존 항목을 삭제하고 새 코드로 다시 추가하면 됩니다.",
+
+  "startupFailedTitle": "앱을 시작하지 못했어요",
+  "@startupFailedTitle": {"description": "앱 시작 초기화(DB 열기·마이그레이션 등) 실패 화면 제목 - lib/screens/startup_gate.dart (출시전 감사 V4)"},
+  "startupFailedBody": "앱을 준비하는 중 문제가 생겼어요. 기기 저장공간이 부족하지 않은지 확인한 뒤 다시 시도해주세요. 계속 같은 화면이 나오면 기기를 다시 시작해보세요.",
+  "@startupFailedBody": {"description": "시작 실패 화면 본문. 원인 원문은 보여주지 않음(릴리스)"},
+  "startupRetry": "다시 시도",
+  "@startupRetry": {"description": "시작 실패 화면의 재시도 버튼"},
+  "startupSlowMessage": "앱을 준비하고 있어요. 잠시만 기다려주세요.",
+  "@startupSlowMessage": {"description": "시작 초기화가 오래 걸릴 때 표시(업데이트 직후 DB 마이그레이션 등)"}
 }
