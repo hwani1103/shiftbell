@@ -56,6 +56,11 @@ class SleepWidgetActionReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        // ⭐ G4 #19 / G3 연결 요청 #2 - 복원이 DB를 교체하는 동안 위젯 입력으로 수면 기록을 쓰지 않음(입력은 버리고 안내)
+        if (RestoreGate.shouldDefer(context, "sleepWidget")) {
+            android.widget.Toast.makeText(context, "백업 복원 중이에요. 잠시 후 다시 눌러주세요.", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
         try {
             val db = DatabaseHelper.getInstance(context).getWritableDatabaseWithRetry()
             if (db == null) {

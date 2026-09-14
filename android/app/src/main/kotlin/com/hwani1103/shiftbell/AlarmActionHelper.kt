@@ -36,6 +36,8 @@ object AlarmActionHelper {
      * dismissType: "swiped"(울리는 중 확인) | "cancelled_before_ring"(울리기 전 취소) | "timeout"
      */
     fun dismiss(context: Context, alarmId: Int, dismissType: String) {
+        // ⭐ G4 #19 - 끄기·타임아웃으로 이 알람의 진행이 끝나면 복원 전 재생 설정 스냅샷도 정리
+        RestoreGate.clearRingSnapshot(context, alarmId)
         val dbHelper = DatabaseHelper.getInstance(context)
         // ⭐ DB 파일이 없으면(=아직 스케줄 자체가 없음) Native가 만들면 안 됨 - DatabaseHelper.kt
         // 상세 주석 참고. 이 시점엔 지울 알람도 없는 게 정상이라 그냥 취소만 하고 넘어감.

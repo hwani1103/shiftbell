@@ -236,6 +236,8 @@ override fun onReceive(context: Context, intent: Intent) {
 
     // ⭐ DB에서 알람 타입의 duration 읽기
     private fun getDurationFromDB(context: Context, alarmId: Int): Int {
+        // ⭐ G4 #19 - 복원으로 alarm_types가 바뀌기 전의 설정(진행 중 알람 스냅샷)이 있으면 그것을 우선
+        RestoreGate.ringSnapshot(context, alarmId)?.let { return it.durationMinutes }
         var alarmCursor: android.database.Cursor? = null
         var typeCursor: android.database.Cursor? = null
         var db: android.database.sqlite.SQLiteDatabase? = null

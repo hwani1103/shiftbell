@@ -555,16 +555,54 @@ override fun onNewIntent(intent: Intent) {
                 // Downloads/ShiftBell 폴더)에 백업 파일 하나를 쓰고/읽음. 클라우드도
                 // 로그인도 전혀 안 씀 - 백업복구_설계.md 참고. Android 10(Q) 미만은
                 // 스코프드 스토리지 이전이라 미지원(success=false로 응답).
+                // ⭐ 2026-09-14 (G4 #2) - MediaStore 파일 I/O를 메인 스레드 밖에서 실행(백업이 커져도 UI가 멈추지 않게)
                 "writeBackupFile" -> {
                     val content = call.argument<String>("content")
                     if (content == null) {
                         result.success(false)
                     } else {
-                        result.success(writeBackupFile(content))
+                        Thread {
+                            val ok = writeBackupFile(content)
+                            runOnUiThread { result.success(ok) }
+                        }.start()
                     }
                 }
                 "readBackupFile" -> {
-                    result.success(readBackupFile())
+                    Thread {
+                        val content = readBackupFile()
+                        runOnUiThread { result.success(content) }
+                    }.start()
+                }
+                // ⭐ 2026-09-14 (G4 #19/#9) - 백업 복원 잠금·OS 단계(RestoreGate/RestoreOs 상단 주석 참고)
+                "restoreAcquireLock" -> {
+                    result.success(RestoreGate.acquire(applicationContext, call.argument<String>("token") ?: ""))
+                }
+                "restoreReleaseLock" -> {
+                    val ok = RestoreGate.release(applicationContext, call.argument<String>("token") ?: "")
+                    Thread { RestoreOs.cleanupSnapshots(applicationContext) }.start()
+                    result.success(ok)
+                }
+                "restoreIsLocked" -> {
+                    result.success(RestoreGate.isLocked(applicationContext))
+                }
+                "restoreConsumeInterrupted" -> {
+                    val flagged = RestoreGate.consumeInterrupted(applicationContext)
+                    Thread { RestoreOs.cleanupSnapshots(applicationContext) }.start()
+                    result.success(flagged)
+                }
+                "restorePrepareCarryOver" -> {
+                    val token = call.argument<String>("token")
+                    runRestoreStep(result) { RestoreOs.prepareCarryOver(applicationContext, token) }
+                }
+                "restoreClearOs" -> {
+                    val token = call.argument<String>("token")
+                    val keepIds = (call.argument<List<Int>>("keepIds") ?: emptyList()).toSet()
+                    runRestoreStep(result) { RestoreOs.clearOs(applicationContext, token, keepIds); null }
+                }
+                "restoreReconcileOs" -> {
+                    val token = call.argument<String>("token")
+                    val tabEnabled = call.argument<Boolean>("scheduleTabEnabled") ?: true
+                    runRestoreStep(result) { RestoreOs.reconcileOs(applicationContext, token, tabEnabled); null }
                 }
                 // ⭐ 설정 탭 "백업 데이터 불러오기"(사용 중인 앱 위에 다른 백업을
                 // 덮어씀) 전용 - restoreAll()로 거의 모든 테이블을 한 번에 갈아
@@ -694,6 +732,19 @@ override fun onNewIntent(intent: Intent) {
     }
 
     // ⭐ 테스트용: Native 갱신 강제 실행 (리셋 후 트리거)
+    // ⭐ G4 - 복원 OS 단계는 DB를 동기적으로 읽고 AlarmManager를 여러 번 부르므로 백그라운드 스레드에서 실행하고 결과만 메인에서 돌려줌
+    private fun runRestoreStep(result: MethodChannel.Result, step: () -> Any?) {
+        Thread {
+            try {
+                val value = step()
+                runOnUiThread { result.success(value) }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "❌ 복원 단계 실패", e)
+                runOnUiThread { result.error("RESTORE_STEP_FAILED", e.message, null) }
+            }
+        }.start()
+    }
+
     private fun forceNativeRefresh() {
         resetNativeRefreshFlag()
         val intent = Intent("com.hwani1103.shiftbell.REFRESH_ALARMS").apply {
@@ -754,23 +805,39 @@ override fun onNewIntent(intent: Intent) {
         return try {
             val resolver = contentResolver
             val displayName = buildBackupDisplayName()
+            // ⭐ 2026-09-14 (G4 #18) - 쓰는 동안 IS_PENDING=1로 숨겨 두고, 끝까지 쓴 뒤에만 공개(0). 중간 실패면 그 행을 지워서
+            // 미완성 파일이 "최신 백업"으로 잡히거나 직전 정상 백업을 가리지 않게 함(직전 정상본은 아래에서 성공 뒤에만 정리).
             val values = ContentValues().apply {
                 put(MediaStore.Downloads.DISPLAY_NAME, displayName)
                 put(MediaStore.Downloads.MIME_TYPE, "application/json")
                 put(MediaStore.Downloads.RELATIVE_PATH, BACKUP_RELATIVE_PATH)
+                put(MediaStore.Downloads.IS_PENDING, 1)
             }
             val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
             if (uri == null) {
                 Log.w("MainActivity", "❌ 백업 저장 실패 - insert()가 null 반환(name=$displayName)")
                 return false
             }
-            val stream = resolver.openOutputStream(uri)
-            if (stream == null) {
-                Log.w("MainActivity", "❌ 백업 저장 실패 - openOutputStream()이 null 반환(uri=$uri)")
-                return false
+            val completed = try {
+                val stream = resolver.openOutputStream(uri)
+                    ?: throw IllegalStateException("openOutputStream()이 null 반환(uri=$uri)")
+                stream.use { out ->
+                    out.write(content.toByteArray(Charsets.UTF_8))
+                    out.flush()
+                }
+                val publish = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
+                resolver.update(uri, publish, null, null) > 0
+            } catch (e: Exception) {
+                Log.e("MainActivity", "❌ 백업 파일 쓰기 중 실패 - 미완성 파일 삭제", e)
+                false
             }
-            stream.use { out ->
-                out.write(content.toByteArray(Charsets.UTF_8))
+            if (!completed) {
+                try {
+                    resolver.delete(uri, null, null)
+                } catch (e: Exception) {
+                    Log.e("MainActivity", "⚠️ 미완성 백업 파일 삭제 실패", e)
+                }
+                return false
             }
 
             // ⭐ 새 백업이 실제로 저장에 성공한 뒤에만: 다음 write() 때 지울 URI를
@@ -804,8 +871,9 @@ override fun onNewIntent(intent: Intent) {
         return try {
             val resolver = contentResolver
             val projection = arrayOf(MediaStore.Downloads._ID, MediaStore.Downloads.DISPLAY_NAME)
-            var bestId = -1L
-            var bestName = ""
+            // ⭐ 2026-09-14 (G4 #18) - 가장 최근 후보 하나만 보지 않고 최신순으로 "완결된 백업 JSON"인 첫 파일을 고름
+            // (중간에 끊긴 파일이 남아 있어도 직전 정상 백업으로 복구 가능)
+            val candidates = mutableListOf<Pair<Long, String>>()
             var totalCount = 0
             resolver.query(
                 MediaStore.Downloads.EXTERNAL_CONTENT_URI, projection, null, null, null
@@ -816,17 +884,24 @@ override fun onNewIntent(intent: Intent) {
                     totalCount++
                     val name = cursor.getString(nameIdx) ?: continue
                     if (name.startsWith(BACKUP_DISPLAY_NAME_PREFIX)) {
-                        val id = cursor.getLong(idIdx)
-                        if (id > bestId) { bestId = id; bestName = name } // _ID가 큰 쪽 = 가장 최근 삽입
+                        candidates.add(cursor.getLong(idIdx) to name) // _ID가 큰 쪽 = 가장 최근 삽입
                     }
                 }
             }
-            Log.d("MainActivity", "🔍 Downloads 전체 ${totalCount}건 중 백업 후보: ${if (bestId >= 0) bestName else "없음"}")
-            if (bestId < 0) return null
-            val uri = ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, bestId)
-            Log.d("MainActivity", "✅ 백업 파일 발견: $uri")
-            resolver.openInputStream(uri)?.use { input ->
-                return input.readBytes().toString(Charsets.UTF_8)
+            Log.d("MainActivity", "🔍 Downloads 전체 ${totalCount}건 중 백업 후보 ${candidates.size}건")
+            for ((id, name) in candidates.sortedByDescending { it.first }) {
+                val uri = ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, id)
+                val content = try {
+                    resolver.openInputStream(uri)?.use { input -> input.readBytes().toString(Charsets.UTF_8) }
+                } catch (e: Exception) {
+                    Log.w("MainActivity", "⚠️ 백업 후보 읽기 실패($name) - 다음 후보 확인", e)
+                    null
+                } ?: continue
+                if (looksLikeCompleteBackup(content)) {
+                    Log.d("MainActivity", "✅ 백업 파일 발견: $uri ($name)")
+                    return content
+                }
+                Log.w("MainActivity", "⚠️ 불완전하거나 형식이 다른 백업 후보 건너뜀: $name")
             }
             null
         } catch (e: Exception) {
@@ -856,6 +931,13 @@ override fun onNewIntent(intent: Intent) {
     // deleteBackupFile()과 동일한 2단계 전략을 그대로 유지 - 1) 기억해둔 "직전"
     // URI 직접 삭제 2) 보조로 selection 없는 전체 스캔. 이 기종(삼성)의
     // owner_package_name NULL 버그 우회 방법은 그대로 - 아래 주석 참고).
+    private fun looksLikeCompleteBackup(content: String): Boolean = try {
+        val json = org.json.JSONObject(content)
+        json.has("schemaVersion") && json.optJSONObject("tables") != null
+    } catch (e: Exception) {
+        false
+    }
+
     private fun cleanupOldBackupFiles(
         resolver: android.content.ContentResolver,
         previousUriStr: String?,

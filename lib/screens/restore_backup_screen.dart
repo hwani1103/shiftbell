@@ -23,8 +23,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/l10n_extensions.dart';
 import '../main.dart'; // ⭐ MainScreen import
 import '../models/backup_payload.dart';
-import '../services/alarm_refresh_service.dart';
-import '../services/backup_service.dart';
+import '../services/backup_validator.dart';
+import '../services/restore_coordinator.dart';
 import '../services/database_service.dart';
 import '../services/permission_service.dart';
 import '../services/update_service.dart';
@@ -32,6 +32,7 @@ import '../theme/app_colors.dart';
 import '../widgets/app_button.dart';
 import 'onboarding_screen.dart';
 import 'permission_intro_screen.dart';
+import 'restore_interrupted_screen.dart';
 
 class RestoreBackupScreen extends StatefulWidget {
   final BackupPayload payload;
@@ -66,7 +67,25 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
     // 커밋 후 실패는 다르게 처리한다.
     var dbCommitted = false;
     try {
-      await BackupService.instance.restoreAll(widget.payload);
+      // ⭐ 2026-09-14 (출시전 감사 G4 #19) - 복원은 RestoreCoordinator(검증 → 작업 사본 → 잠금 → OS 정리 → DB/설정 → OS 재조정).
+      // 근무 일정이 없는 빈 백업은 시작 전에 걸러 아무것도 바꾸지 않음.
+      if (!BackupValidator.hasSchedule(widget.payload)) {
+        if (!mounted) return;
+        setState(() => _restoring = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.backupRestoreEmptyToast)),
+        );
+        if (widget.onCancel != null) {
+          widget.onCancel!();
+        } else {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+            (route) => false,
+          );
+        }
+        return;
+      }
+      await RestoreCoordinator.instance.start(widget.payload, overwrite: false);
       dbCommitted = true;
 
       // ⭐ 2026-09-01 - "복구하기 -> 권한화면 -> 다시 백업화면"으로 무한
@@ -112,7 +131,7 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
       // ⭐ 위 import 주석 참고 - 네이티브의 "하루 1번" 갱신 쿨다운을 무시하고
       // 지금 막 바뀐 shift_schedule/shift_alarm_templates 기준으로 alarms
       // 테이블·실제 OS 알람을 즉시 재생성시킴.
-      await AlarmRefreshService.instance.forceRefresh();
+      // (알람·일정 알림 재조정은 RestoreCoordinator의 os_reconciled 단계에서 이미 끝남 - 별도 forceRefresh 불필요)
 
       // ⭐ 2026-09-01 - "복구하기 눌렀더니 권한화면이 잠깐 보였다가 바로 달력으로
       // 넘어간다" 버그 수정. 이 화면은 이제 두 경로에서 온다: (1) 진짜 재설치 -
@@ -144,6 +163,19 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
 
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: kCalendarTabIndex)), // 달력탭
+        (route) => false,
+      );
+    } on BackupValidationException {
+      if (!mounted) return;
+      setState(() => _restoring = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.backupRestoreInvalidToast)),
+      );
+    } on RestoreIncompleteException {
+      // 작업 기록이 남아 있음 - 이어서 완료 / 지금 데이터로 계속을 바로 묻는다
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const RestoreInterruptedScreen()),
         (route) => false,
       );
     } catch (e) {

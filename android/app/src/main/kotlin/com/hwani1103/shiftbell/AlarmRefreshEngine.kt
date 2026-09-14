@@ -99,7 +99,9 @@ object AlarmRefreshEngine {
     // ⭐ 2026-09-14 (#31) - alarm_overrides 한 행의 동작. action = "skip" | "set_type"
     internal data class OverrideEntry(val action: String, val alarmTypeId: Int?)
 
-    fun refresh(context: Context) {
+    fun refresh(context: Context, ownerToken: String? = null) {
+        // ⭐ 2026-09-14 (G4 #19) - 백업 복원 중이면 쓰지 않음. 복원 owner가 마지막에 토큰으로 직접 부름(RestoreOs.reconcileOs)
+        if (RestoreGate.shouldDefer(context, "refresh", ownerToken)) return
         // ⭐ owner를 호출마다 고유하게(UUID) 생성해야 함. 예전엔 "AlarmRefreshEngine"
         // 고정 문자열을 owner로 썼는데, RefreshLockManager.tryAcquire의 거부 조건이
         // "currentOwner != owner"라서 이 함수의 모든 호출이 항상 같은 owner를 쓰면

@@ -48,8 +48,11 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
         final invalid = invalidStoredShiftNames(schedule);
         if (invalid.isNotEmpty) print('⚠️ 저장된 근무명 검증 실패(자동 변환 안 함, D6): $invalid');
       }
+      // 2026-09-14 (T17 통합) - DB 로드가 끝나기 전에 provider가 폐기되면 상태를 쓰지 않음(폐기 후 state 대입은 StateError)
+      if (!mounted) return;
       state = AsyncValue.data(schedule);
     } catch (e, stack) {
+      if (!mounted) return;
       state = AsyncValue.error(e, stack);
     }
   }

@@ -1,4 +1,6 @@
 import 'services/friend_sync_service.dart';
+import 'services/restore_coordinator.dart';
+import 'screens/restore_interrupted_screen.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kReleaseMode;
@@ -1236,6 +1238,16 @@ class _InitialRouterState extends State<InitialRouter> {
 
   Future<void> _navigate() async {
     if (!mounted) return;
+
+    // ⭐ 2026-09-14 (출시전 감사 G4 #19) - 중단된 백업 복원 작업이 남아 있으면, 데이터를 고칠 수 있는 화면보다 먼저
+    // "이어서 복원 / 지금 데이터로 계속"을 묻는다(자동 이어하기가 그 사이 변경을 몰래 덮어쓰지 않게).
+    await RestoreCoordinator.instance.consumeInterruptedFlag();
+    if (await RestoreCoordinator.instance.hasPendingJob()) {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(_instantRoute(const RestoreInterruptedScreen()));
+      }
+      return;
+    }
 
     // 1. 권한 요청 여부 확인
     final prefs = await SharedPreferences.getInstance();

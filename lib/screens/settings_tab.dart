@@ -33,14 +33,14 @@ import '../constants/alarm_day_offset.dart';
 import '../l10n/l10n_extensions.dart';
 import '../constants/shift_name_limits.dart';
 import '../services/backup_watcher.dart';
-import '../services/backup_service.dart';
 import '../services/backup_storage_service.dart';
-import '../services/alarm_refresh_service.dart';
 import '../models/backup_payload.dart';
 import '../providers/tab_visibility_provider.dart';
 import '../services/schedule_notification_service.dart';
 import '../services/widget_refresh_service.dart';
 import '../widgets/disable_tab_button.dart';
+import '../services/backup_validator.dart';
+import '../services/restore_coordinator.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
@@ -174,6 +174,13 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
       );
       return;
     }
+    // ⭐ 2026-09-14 (G4 #19) - 근무 일정이 없는 백업으로 지금 데이터를 통째로 비우지 않음
+    if (!BackupValidator.hasSchedule(payload)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.settingsRestoreFromBackupEmptyToast)),
+      );
+      return;
+    }
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -202,14 +209,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
 
     setState(() => _isRestoringFromBackup = true);
     try {
-      await BackupService.instance.restoreAll(payload, force: true);
-      // ⭐ 네이티브 알람 갱신 엔진은 "하루 1번" 쿨다운이 있어서(AlarmRefreshUtil.
-      // checkAndTriggerRefresh), 이 화면에 도달했다는 건 이미 앱을 쓰던 중이라
-      // 오늘 한 번 갱신됐을 가능성이 높음 - 그 상태에서 restoreAll()로 DB
-      // 내용만 바꿔치기하면 네이티브가 그 변화를 못 알아채고 넘어갈 수 있음
-      // ("근무표/이력엔 반영됐는데 다음 알람만 한참 있다가 나타난다" 버그 원인).
-      // 재시작 전에 강제로 재생성시켜서 재시작 시점엔 이미 알람이 최신 상태이게 함.
-      await AlarmRefreshService.instance.forceRefresh();
+      // ⭐ 2026-09-14 (출시전 감사 G4 #9/#19/#25) - 덮어쓰기 복원은 RestoreCoordinator가 검증·작업 사본·잠금·단계 기록으로 실행.
+      // 진행 중 알람(울림·스누즈)은 원래 ID로 보존, 이력은 병합, 친구공유 상태는 이 기기 값 유지, 마지막에 알람·일정 알림 재조정까지 함.
+      await RestoreCoordinator.instance.start(payload, overwrite: true);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.settingsRestoreFromBackupSuccessToast)),
@@ -217,6 +219,20 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
       // ⭐ 토스트를 잠깐 보여준 뒤 재시작 - 네이티브 쪽에도 300ms 지연이 한 번 더
       // 있어서(MainActivity.kt) 총 지연은 그리 길지 않음.
       await Future.delayed(const Duration(milliseconds: 600));
+      await kAlarmChannel.invokeMethod('restartApp');
+    } on BackupValidationException {
+      if (!mounted) return;
+      setState(() => _isRestoringFromBackup = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.backupRestoreInvalidToast)),
+      );
+    } on RestoreIncompleteException {
+      // 작업 기록이 남음 - 재시작하면 앱 시작 화면에서 이어서 완료/지금 데이터로 계속을 묻는다
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.backupRestoreIncompleteToast)),
+      );
+      await Future.delayed(const Duration(milliseconds: 1200));
       await kAlarmChannel.invokeMethod('restartApp');
     } catch (e) {
       if (!mounted) return;

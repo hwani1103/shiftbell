@@ -96,6 +96,13 @@ class AlarmPlayer(private val context: Context) {
 
     // DB에서 알람 타입 설정 읽어서 재생
     fun playAlarmFromDB(alarmId: Int) {
+        // ⭐ 2026-09-14 (G4 #19) - 백업 복원이 alarm_types를 바꾸기 전에 저장한 이 알람의 재생 설정이 있으면 그대로 사용
+        // (진행 중 알람이 복원 뒤 다른 소리·음량으로 울리지 않게 - RestoreGate 상단 주석 참고)
+        RestoreGate.ringSnapshot(context, alarmId)?.let { snap ->
+            Log.d("AlarmPlayer", "복원 전 설정 스냅샷으로 재생: alarmId=$alarmId sound=${snap.soundFile}")
+            playAlarmWithSettings(snap.soundFile, snap.volume, snap.vibrationStrength)
+            return
+        }
         var alarmCursor: android.database.Cursor? = null
         var typeCursor: android.database.Cursor? = null
         var db: android.database.sqlite.SQLiteDatabase? = null

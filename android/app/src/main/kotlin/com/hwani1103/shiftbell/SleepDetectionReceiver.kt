@@ -134,6 +134,8 @@ class SleepDetectionReceiver : BroadcastReceiver() {
 
         /** 20분 알람 수신 시 + 화면 재개 등 "지금 확인해도 되는" 모든 트리거 지점에서 호출. */
         fun checkNow(context: Context) {
+            // ⭐ G4 #19 / G3 연결 요청 #2 - 복원 중엔 수면 기록 쓰기·감지 재예약을 미룸(복원 완료 뒤 앱 재개·Guard에서 다시 판정)
+            if (RestoreGate.shouldDefer(context, "sleepDetection")) return
             try {
                 handle(context)
             } catch (e: Exception) {

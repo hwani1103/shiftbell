@@ -10,12 +10,14 @@
 
 import 'dart:convert';
 
-/// 백업 데이터 "봉투" 형식(JSON 구조) 버전. DB의 DATABASE_VERSION(현재 20,
-/// database_service.dart)과는 완전히 다른 개념 - 테이블이 늘어나는 것 자체는
-/// 이 버전을 안 올려도 됨(BackupService가 테이블 목록을 매번 동적으로 읽으므로).
-/// 이 값은 오직 봉투 구조 자체(tables/preferences 필드 의미 등)가 바뀔 때만
-/// 올린다. DB_스키마_변경_가이드.md의 DATABASE_VERSION과 혼동하지 말 것.
-const int kBackupSchemaVersion = 1;
+/// 백업 데이터 "봉투" 형식(JSON 구조) 버전. DB의 DATABASE_VERSION과는 완전히 다른 개념 -
+/// 테이블이 늘어나는 것 자체는 이 버전을 안 올려도 됨(BackupService가 테이블 목록을 매번 동적으로 읽으므로).
+/// 이 값은 오직 봉투 구조 자체(tables/preferences 필드 의미 등)가 바뀔 때만 올린다.
+///
+/// - 1: 초기 형식(alarms 제외, 설정 전체).
+/// - 2 (2026-09-14, 출시전 감사 G4 #9/#25): `tables.alarms`에 미래 custom 알람만 담고, 친구공유 상태·설치별 설정 키는
+///   담지 않음(backup_policy.dart). 1 형식도 그대로 읽음 - alarms 없음 = 복원할 custom 알람 없음.
+const int kBackupSchemaVersion = 2;
 
 class BackupPayload {
   final int schemaVersion;
@@ -26,9 +28,8 @@ class BackupPayload {
   /// DB 테이블명 → 그 테이블의 전체 행(raw Map, sqflite가 반환하는 그대로).
   final Map<String, List<Map<String, dynamic>>> tables;
 
-  /// SharedPreferences 전체 스냅샷(키 → 값). 의도적으로 선별하지 않고 전체를
-  /// 담음 - 새 설정이 추가돼도 이 파일을 손댈 필요가 없게 하기 위함
-  /// (백업복구_설계.md 4장 "설정 데이터" 참고).
+  /// SharedPreferences 스냅샷(키 → 값). 설치별 값·친구공유 소유권 키는 제외(backup_policy.dart) -
+  /// 그 외 새 설정은 이 파일을 손대지 않아도 자동으로 포함됨(백업복구_설계.md 4장).
   final Map<String, dynamic> preferences;
 
   const BackupPayload({
@@ -71,6 +72,16 @@ class BackupPayload {
 
   static BackupPayload decode(String jsonStr) =>
       BackupPayload.fromJson(jsonDecode(jsonStr) as Map<String, dynamic>);
+
+  /// 형식이 맞지 않으면 null (파일 선택·자동 탐지 결과 판정용).
+  static BackupPayload? tryDecode(String? jsonStr) {
+    if (jsonStr == null) return null;
+    try {
+      return decode(jsonStr);
+    } catch (_) {
+      return null;
+    }
+  }
 
   /// 대략적인 규모 요약(디버그/UI 표시용) - 전체 행 개수 합.
   int get totalRowCount =>

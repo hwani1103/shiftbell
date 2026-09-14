@@ -125,7 +125,7 @@ object AlarmWakeScheduler {
         pi.cancel()
     }
 
-    private fun parse(dateStr: String): Long? = try {
+    internal fun parse(dateStr: String): Long? = try {
         SimpleDateFormat(DATE_FORMAT, Locale.US).parse(dateStr)?.time
     } catch (e: Exception) {
         Log.e(TAG, "❌ 알람 날짜 파싱 실패: $dateStr", e)
@@ -296,6 +296,8 @@ object AlarmWakeScheduler {
 
     /** 기록된 OS 반영 실패를 DB 기준으로 재시도(엔진 시작·Guard·앱 재개). 성공하거나 할 일이 없어진 ID는 목록에서 지움. */
     fun retryFailed(context: Context) {
+        // ⭐ G4 #19 - 복원 중엔 옛/중간 DB로 OS를 바꾸지 않음(복원 owner가 최종 재조정)
+        if (RestoreGate.shouldDefer(context, "retryFailed")) return
         val ids = failedIds(context)
         if (ids.isEmpty()) return
         val db = try {
