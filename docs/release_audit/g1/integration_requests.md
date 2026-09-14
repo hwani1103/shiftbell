@@ -4,3 +4,8 @@
 
 | # | 대상 파일 | 이유 | 필요 API / 변경 | 호출 시점 | 실패 시 의미 | 반영 SHA |
 |---|---|---|---|---|---|---|
+| 1 | `android/app/src/main/AndroidManifest.xml` | V6 — `DirectBootReceiver`가 LOCKED_BOOT_COMPLETED만 받음 | `DirectBootReceiver` intent-filter에 `android.intent.action.BOOT_COMPLETED`, `android.intent.action.MY_PACKAGE_REPLACED`, `android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED` 추가(수신 코드는 release/g1에 구현됨). 기존 `android:permission="RECEIVE_BOOT_COMPLETED"`는 시스템 발신이라 유지 가능 — 연결 시 실기기 수신 확인 | 재부팅(잠금 해제 후)·앱 업데이트 직후·정확한 알람 권한 허용 순간 | 미반영이면 해당 이벤트에서 즉시 재조정이 안 되고 다음 트리거(자정 Guard·앱 실행)까지 지연 | |
+| 2 | `lib/l10n/app_ko.arb`, `app_en.arb` (+`flutter gen-l10n`) | #13·#11 안내 문구 | 신규 키 5개: `alarmSchedulePartialFailed{failed,total}`, `scheduleNotifyRegisterFailed`, `permissionStatusUnknown{name}`, `shiftNameCommaNotAllowed`, `shiftNameReserved{name}` — G0 선례대로 release/g1에 이미 추가, 통합 시 키 충돌·영문 검수 | 일괄 배정 일부 실패, 일정 알림 예약 실패, 권한 확인 불가 배너, 근무명 입력 오류 | 미반영이면 컴파일 실패(키 참조) | |
+| 3 | 소유권 — `lib/services/permission_service.dart`, `lib/widgets/permission_warning_banner.dart` | #13 권한 상태 3단계 | §3.1 목록 밖 → G1 배정 요청. release/g2·g3 동결 변경 경로와 교집합 0건(`git diff --name-only c0b2e73 release/g2`, `release/g3`) | — | — | |
+| 4 | 소유권 — `android/.../CalendarWidgetScheduleResolver.kt` | #17 DB 날짜 문자열 `Locale.US` 고정 | contracts §7 메모("수정 필요 시 G1로 배정")에 따라 G1이 `Locale.getDefault()` 2곳만 `Locale.US`로 변경 | — | — | |
+| 5 | `docs/release_audit/contracts.md` §7.2 키 등록부 | G1 신규 Native 키 | `alarm_state.currently_ringing_round`(long, 없으면 회차 0), `ring_counter`(long, 초기화 안 함), `os_sync_failed_alarm_ids`(StringSet), `refresh_policy_version`(int, 이미 예정 등록 — 값 1, 성공 뒤 기록), `schedule_tab_enabled`(bool, 기본 true) — 전부 G1 소유·백업 안 됨 | — | — | |
