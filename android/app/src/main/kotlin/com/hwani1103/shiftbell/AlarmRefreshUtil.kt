@@ -45,7 +45,15 @@ object AlarmRefreshUtil {
             }
 
             // ⭐ 재부팅 또는 날짜 변경 시 갱신
-            if (rebootDetected || dateChanged) {
+            // ⭐ 2026-09-14 (출시전 감사 #26 P1) - 생성 정책이 바뀐 뒤 첫 갱신은 "오늘 이미 갱신함"과 무관하게 강제.
+            // (P1 업데이트 당일에 옛 코드가 이미 오늘 갱신 완료를 기록했을 수 있음) 버전 기록은 엔진이 성공 뒤에만 함.
+            val policyOutdated = prefs.getInt(AlarmRefreshEngine.KEY_REFRESH_POLICY_VERSION, 0) <
+                AlarmRefreshEngine.REFRESH_POLICY_VERSION
+
+            if (rebootDetected || dateChanged || policyOutdated) {
+                if (policyOutdated) {
+                    Log.d("AlarmRefreshUtil", "🔄 알람 생성 정책 변경 - 1회 강제 갱신")
+                }
                 if (rebootDetected) {
                     Log.d("AlarmRefreshUtil", "🔄 재부팅 감지 - Native 갱신 실행")
                     Log.d("AlarmRefreshUtil", "   lastBootTime: $lastBootTime, lastCheckedBootTime: $lastCheckedBootTime")

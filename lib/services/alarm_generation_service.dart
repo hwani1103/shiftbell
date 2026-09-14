@@ -41,6 +41,33 @@ class PendingFixedAlarm {
   });
 }
 
+/// ⭐ 2026-09-14 (출시전 감사 #31, G1) - alarm_overrides 한 행의 동작.
+/// 슬롯 키 = (slot_time, shift_type, day_offset) - contracts.md §1.1.
+class AlarmOverrideEntry {
+  final String action; // 'skip' | 'set_type'
+  final int? alarmTypeId;
+  const AlarmOverrideEntry({required this.action, this.alarmTypeId});
+}
+
+String _two(int v) => v.toString().padLeft(2, '0');
+
+/// 슬롯 시각 문자열 `yyyy-MM-dd'T'HH:mm:ss`(초 00, 밀리초 없음). 숫자만 직접 조립해 로케일과 무관
+/// (Kotlin은 SimpleDateFormat Locale.US - 같은 fixture로 비교 테스트).
+String alarmSlotTime(DateTime t) =>
+    '${t.year.toString().padLeft(4, '0')}-${_two(t.month)}-${_two(t.day)}T${_two(t.hour)}:${_two(t.minute)}:00';
+
+String alarmSlotKey(String slotTime, String shiftType, int dayOffset) => '$slotTime|$shiftType|$dayOffset';
+
+/// alarm_overrides 전체를 슬롯 키 맵으로 읽음. 조회 실패는 예외로 전파(빈 맵으로 바꾸지 않음).
+Future<Map<String, AlarmOverrideEntry>> readAlarmOverrides(DatabaseExecutor db) async {
+  final rows = await db.query('alarm_overrides');
+  return {
+    for (final r in rows)
+      alarmSlotKey(r['slot_time'] as String, r['shift_type'] as String, r['day_offset'] as int):
+          AlarmOverrideEntry(action: r['action'] as String, alarmTypeId: r['alarm_type_id'] as int?),
+  };
+}
+
 /// 실제 날짜 [date]에 울려야 하는 고정 알람 목록을 계산함(과거 시각은 제외).
 /// [allTemplates]는 보통 DatabaseService.getAllAlarmTemplates()의 전체 목록을
 /// 그대로 넘기면 됨(호출부가 여러 날짜를 반복 계산할 때 매번 다시 쿼리하지
@@ -50,6 +77,7 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
   required ShiftSchedule schedule,
   required List<AlarmTemplate> allTemplates,
   DateTime? now,
+  Map<String, AlarmOverrideEntry> overrides = const {},
 }) {
   final effectiveNow = now ?? DateTime.now();
   final dayBefore = DateTime(date.year, date.month, date.day - 1);
@@ -101,7 +129,29 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
   addFrom(nextDayShift, kAlarmDayBefore);
   addFrom(prevDayShift, kAlarmDayAfter);
 
-  return byTime.values.toList();
+  // ⭐ 2026-09-14 (출시전 감사 #31) - 우선순위로 시각별 알람을 고른 "뒤"에 개별 예외 적용. skip이면 그 시각은
+  // 비워 두고 다른 근무의 같은 시각 템플릿으로 채우지 않음(사용자가 지운 "그 시각 알람"이 다른 이름으로
+  // 되살아나지 않게), set_type이면 타입만 바꿈. AlarmRefreshEngine.computeDesiredAlarms와 같은 규칙.
+  final result = <PendingFixedAlarm>[];
+  for (final alarm in byTime.values) {
+    final override = overrides[alarmSlotKey(alarmSlotTime(alarm.dateTime), alarm.shiftType, alarm.dayOffset)];
+    if (override == null) {
+      result.add(alarm);
+    } else if (override.action == 'skip') {
+      continue;
+    } else if (override.action == 'set_type' && override.alarmTypeId != null) {
+      result.add(PendingFixedAlarm(
+        dateTime: alarm.dateTime,
+        time: alarm.time,
+        alarmTypeId: override.alarmTypeId!,
+        shiftType: alarm.shiftType,
+        dayOffset: alarm.dayOffset,
+      ));
+    } else {
+      result.add(alarm);
+    }
+  }
+  return result;
 }
 
 /// 원본 근무일 [date]가 배정/변경되면, 그 알람이 전날/당일/다음날 중 무엇으로도
@@ -149,6 +199,8 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
 
   final templateMaps = await txn.query('shift_alarm_templates');
   final allTemplates = templateMaps.map((m) => AlarmTemplate.fromMap(m)).toList();
+  // ⭐ 2026-09-14 (#31) - 개별 예외를 같은 트랜잭션에서 읽어 계산에 적용(Flutter 재생성도 사용자 변경을 원복하지 않게)
+  final overrides = await readAlarmOverrides(txn);
 
   for (final date in dates) {
     final dateStr = date.toIso8601String().split('T')[0];
@@ -197,6 +249,7 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
       schedule: schedule,
       allTemplates: allTemplates,
       now: now,
+      overrides: overrides,
     );
     for (final item in desired) {
       final alarm = Alarm(

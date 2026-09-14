@@ -1,0 +1,207 @@
+{
+  "fixture_format": 1,
+  "basis": [
+    "contracts.md#2",
+    "v4#26",
+    "v4#31"
+  ],
+  "timezone": "Asia/Seoul",
+  "slot_time_format": "yyyy-MM-dd'T'HH:mm:ss",
+  "window_days_including_today": 10,
+  "cases": [
+    {
+      "id": "REGULAR_COLLISION_WINDOW_AND_PAST",
+      "now": "2026-09-14T10:30:00",
+      "schedule": {
+        "mode": "regular",
+        "start_date": "2026-09-14",
+        "today_index": 0,
+        "pattern": ["C", "P", "N"],
+        "assigned_dates": {}
+      },
+      "templates": [
+        {"shift_type": "C", "time": "09:00", "day_offset": 0, "alarm_type_id": 1},
+        {"shift_type": "P", "time": "09:00", "day_offset": -1, "alarm_type_id": 2},
+        {"shift_type": "N", "time": "09:00", "day_offset": 1, "alarm_type_id": 3},
+        {"shift_type": "C", "time": "12:00", "day_offset": 0, "alarm_type_id": 1},
+        {"shift_type": "P", "time": "12:00", "day_offset": -1, "alarm_type_id": 2},
+        {"shift_type": "N", "time": "12:00", "day_offset": 1, "alarm_type_id": 3}
+      ],
+      "template_query_result": "success",
+      "overrides": [],
+      "existing_alarm_rows": [],
+      "active_ring_id": null,
+      "expected_generation_slots": [
+        {"slot_time": "2026-09-14T12:00:00", "shift_type": "C", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-14", "origin_shift": "C", "selected_priority": "same_day"},
+        {"slot_time": "2026-09-17T09:00:00", "shift_type": "C", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-17", "origin_shift": "C", "selected_priority": "same_day"},
+        {"slot_time": "2026-09-17T12:00:00", "shift_type": "C", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-17", "origin_shift": "C", "selected_priority": "same_day"},
+        {"slot_time": "2026-09-20T09:00:00", "shift_type": "C", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-20", "origin_shift": "C", "selected_priority": "same_day"},
+        {"slot_time": "2026-09-20T12:00:00", "shift_type": "C", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-20", "origin_shift": "C", "selected_priority": "same_day"},
+        {"slot_time": "2026-09-23T09:00:00", "shift_type": "C", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-23", "origin_shift": "C", "selected_priority": "same_day"},
+        {"slot_time": "2026-09-23T12:00:00", "shift_type": "C", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-23", "origin_shift": "C", "selected_priority": "same_day"}
+      ],
+      "expected_excluded": [
+        {"slot_time": "2026-09-14T09:00:00", "reason": "before_now"},
+        {"slot_time": "2026-09-26T12:00:00", "reason": "ring_date_outside_window"}
+      ],
+      "notes": "2026-09-23의 P(-1) 기여는 배정일 2026-09-24에서 오지만 같은 시각의 당일 C가 우선한다."
+    },
+    {
+      "id": "IRREGULAR_OUTSIDE_ASSIGNMENT_CONTRIBUTION",
+      "now": "2026-09-14T10:30:00",
+      "schedule": {
+        "mode": "irregular",
+        "start_date": null,
+        "today_index": null,
+        "pattern": [],
+        "assigned_dates": {
+          "2026-09-13": "LATE",
+          "2026-09-14": "DAY",
+          "2026-09-16": "미설정",
+          "2026-09-24": "EARLY",
+          "2026-09-25": "DAY"
+        }
+      },
+      "templates": [
+        {"shift_type": "LATE", "time": "12:15", "day_offset": 1, "alarm_type_id": 3},
+        {"shift_type": "DAY", "time": "11:00", "day_offset": 0, "alarm_type_id": 1},
+        {"shift_type": "EARLY", "time": "05:30", "day_offset": -1, "alarm_type_id": 2}
+      ],
+      "template_query_result": "success",
+      "overrides": [],
+      "existing_alarm_rows": [],
+      "active_ring_id": null,
+      "expected_generation_slots": [
+        {"slot_time": "2026-09-14T11:00:00", "shift_type": "DAY", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-14", "origin_shift": "DAY", "selected_priority": "same_day"},
+        {"slot_time": "2026-09-14T12:15:00", "shift_type": "LATE", "day_offset": 1, "alarm_type_id": 3, "origin_date": "2026-09-13", "origin_shift": "LATE", "selected_priority": "next_day"},
+        {"slot_time": "2026-09-23T05:30:00", "shift_type": "EARLY", "day_offset": -1, "alarm_type_id": 2, "origin_date": "2026-09-24", "origin_shift": "EARLY", "selected_priority": "previous_day"}
+      ],
+      "expected_excluded": [
+        {"origin_date": "2026-09-16", "reason": "unset_assignment"},
+        {"origin_date": "2026-09-25", "reason": "all_ring_dates_outside_window"}
+      ]
+    },
+    {
+      "id": "EMPTY_TEMPLATES_CLEAN_FIXED",
+      "now": "2026-09-14T10:30:00",
+      "schedule": {
+        "mode": "irregular",
+        "start_date": null,
+        "today_index": null,
+        "pattern": [],
+        "assigned_dates": {"2026-09-15": "DAY"}
+      },
+      "templates": [],
+      "template_query_result": "success",
+      "overrides": [],
+      "existing_alarm_rows": [
+        {"id": 101, "slot_time": "2026-09-15T06:00:00", "time": "06:00", "type": "fixed", "alarm_type_id": 1, "shift_type": "DAY", "day_offset": 0},
+        {"id": 102, "slot_time": "2026-09-15T06:10:00", "time": "06:10", "type": "custom", "alarm_type_id": 1, "shift_type": null, "day_offset": 0},
+        {"id": 103, "slot_time": "2026-09-15T06:20:00", "time": "06:20", "type": "snoozed", "alarm_type_id": 1, "shift_type": "DAY", "day_offset": 0},
+        {"id": 104, "slot_time": "2026-09-14T10:30:00", "time": "10:30", "type": "fixed", "alarm_type_id": 1, "shift_type": "DAY", "day_offset": 0}
+      ],
+      "active_ring_id": 104,
+      "expected_generation_slots": [],
+      "expected_diff": {
+        "delete_alarm_ids": [101],
+        "insert_slots": [],
+        "preserve_alarm_ids": [102, 103, 104]
+      },
+      "expected_guard": "midnight_guard_remains_scheduled"
+    },
+    {
+      "id": "TEMPLATE_QUERY_ERROR_NO_MUTATION",
+      "now": "2026-09-14T10:30:00",
+      "schedule": {
+        "mode": "regular",
+        "start_date": "2026-09-14",
+        "today_index": 0,
+        "pattern": ["DAY"],
+        "assigned_dates": {}
+      },
+      "templates": null,
+      "template_query_result": "error",
+      "overrides": [],
+      "existing_alarm_rows": [
+        {"id": 201, "slot_time": "2026-09-15T06:00:00", "time": "06:00", "type": "fixed", "alarm_type_id": 1, "shift_type": "DAY", "day_offset": 0}
+      ],
+      "active_ring_id": null,
+      "expected_error": "template_query_error_propagated",
+      "expected_generation_slots": null,
+      "expected_diff": {
+        "delete_alarm_ids": [],
+        "insert_slots": [],
+        "preserve_alarm_ids": [201],
+        "history_delta": 0
+      }
+    },
+    {
+      "id": "OVERRIDE_SKIP_AND_SET_TYPE",
+      "now": "2026-09-14T10:30:00",
+      "schedule": {
+        "mode": "irregular",
+        "start_date": null,
+        "today_index": null,
+        "pattern": [],
+        "assigned_dates": {"2026-09-15": "DAY"}
+      },
+      "templates": [
+        {"shift_type": "DAY", "time": "06:00", "day_offset": 0, "alarm_type_id": 1},
+        {"shift_type": "DAY", "time": "07:00", "day_offset": 0, "alarm_type_id": 1},
+        {"shift_type": "DAY", "time": "08:00", "day_offset": 0, "alarm_type_id": 1}
+      ],
+      "template_query_result": "success",
+      "overrides": [
+        {"id": 301, "slot_time": "2026-09-15T06:00:00", "shift_type": "DAY", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-15", "origin_shift": "DAY"},
+        {"id": 302, "slot_time": "2026-09-15T07:00:00", "shift_type": "DAY", "day_offset": 0, "action": "set_type", "alarm_type_id": 9, "origin_date": "2026-09-15", "origin_shift": "DAY"},
+        {"id": 303, "slot_time": "2026-09-16T08:00:00", "shift_type": "DAY", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-16", "origin_shift": "DAY"}
+      ],
+      "existing_alarm_rows": [],
+      "active_ring_id": null,
+      "expected_generation_slots": [
+        {"slot_time": "2026-09-15T07:00:00", "shift_type": "DAY", "day_offset": 0, "alarm_type_id": 9, "origin_date": "2026-09-15", "origin_shift": "DAY", "selected_priority": "same_day"},
+        {"slot_time": "2026-09-15T08:00:00", "shift_type": "DAY", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-15", "origin_shift": "DAY", "selected_priority": "same_day"}
+      ],
+      "expected_excluded": [
+        {"slot_time": "2026-09-15T06:00:00", "reason": "override_skip"}
+      ]
+    },
+    {
+      "id": "IDEMPOTENT_EXACT_EXISTING",
+      "now": "2026-09-14T10:30:00",
+      "schedule": {
+        "mode": "irregular",
+        "start_date": null,
+        "today_index": null,
+        "pattern": [],
+        "assigned_dates": {"2026-09-14": "DAY"}
+      },
+      "templates": [
+        {"shift_type": "DAY", "time": "11:00", "day_offset": 0, "alarm_type_id": 1}
+      ],
+      "template_query_result": "success",
+      "overrides": [],
+      "existing_alarm_rows": [
+        {"id": 401, "slot_time": "2026-09-14T11:00:00", "time": "11:00", "type": "fixed", "alarm_type_id": 1, "shift_type": "DAY", "day_offset": 0}
+      ],
+      "active_ring_id": null,
+      "expected_generation_slots": [
+        {"slot_time": "2026-09-14T11:00:00", "shift_type": "DAY", "day_offset": 0, "alarm_type_id": 1, "origin_date": "2026-09-14", "origin_shift": "DAY", "selected_priority": "same_day"}
+      ],
+      "expected_diff_first_run": {
+        "delete_alarm_ids": [],
+        "insert_slots": [],
+        "preserve_alarm_ids": [401],
+        "history_delta": 0,
+        "creation_log_delta": 0
+      },
+      "expected_diff_second_run": {
+        "delete_alarm_ids": [],
+        "insert_slots": [],
+        "preserve_alarm_ids": [401],
+        "history_delta": 0,
+        "creation_log_delta": 0
+      }
+    }
+  ]
+}
