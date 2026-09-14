@@ -37,11 +37,12 @@ class FriendEntry {
 
 class FriendNotifier extends StateNotifier<List<FriendEntry>> {
   FriendNotifier() : super([]) {
-    load();
+    _initialLoad = load();
   }
 
   final _db = DatabaseService.instance;
   final Map<String, FriendAvailability> _availabilityByOwnerId = {};
+  late final Future<void> _initialLoad;
 
   FriendScheduleData? _decodeCachedSchedule(String? rawJson) {
     if (rawJson == null) return null;
@@ -154,6 +155,9 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
   /// - [force]=true(pull-to-refresh 등 사용자가 명시적으로 당겼을 때): 스로틀
   ///   무시하고 무조건 새로 받아옴.
   Future<void> refreshAll({bool force = false}) async {
+    // 화면 첫 frame의 자동 새로고침이 SQLite 초기 load보다 먼저 빈 state를 보는
+    // 경합을 막는다.
+    await _initialLoad;
     if (!force && _lastRefreshAllAt != null &&
         DateTime.now().difference(_lastRefreshAllAt!) < _refreshAllThrottle) {
       return;
