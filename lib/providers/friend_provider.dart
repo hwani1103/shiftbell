@@ -11,6 +11,10 @@ import '../services/database_service.dart';
 import '../services/friend_share_service.dart';
 import '../services/friend_sync_service.dart';
 
+enum FriendAvailability { unknown, available, unconfirmed, invalid }
+
+enum FriendRefreshResult { refreshed, serverRemoved, unavailable, invalid }
+
 class FriendEntry {
   final int id;
   final String name;
@@ -18,6 +22,7 @@ class FriendEntry {
   final FriendScheduleData? data; // ⭐ null이면 아직 한 번도 조회 성공 못 한 상태
   final DateTime addedAt;
   final DateTime updatedAt;
+  final FriendAvailability availability;
 
   const FriendEntry({
     required this.id,
@@ -26,6 +31,7 @@ class FriendEntry {
     required this.data,
     required this.addedAt,
     required this.updatedAt,
+    this.availability = FriendAvailability.unknown,
   });
 }
 
@@ -35,6 +41,17 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
   }
 
   final _db = DatabaseService.instance;
+  final Map<String, FriendAvailability> _availabilityByOwnerId = {};
+
+  FriendScheduleData? _decodeCachedSchedule(String? rawJson) {
+    if (rawJson == null) return null;
+    try {
+      return FriendScheduleData.decodeFromJsonString(rawJson);
+    } catch (error) {
+      print('⚠️ 친구 스케줄 캐시 형식 오류: $error');
+      return null;
+    }
+  }
 
   Future<void> load() async {
     final rows = await _db.getAllFriends();
@@ -44,9 +61,12 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
         id: row['id'] as int,
         name: row['name'] as String,
         ownerId: row['owner_id'] as String,
-        data: rawJson != null ? FriendScheduleData.decodeFromJsonString(rawJson) : null,
+        data: _decodeCachedSchedule(rawJson),
         addedAt: DateTime.tryParse(row['added_at'] as String) ?? DateTime.now(),
         updatedAt: DateTime.tryParse(row['updated_at'] as String) ?? DateTime.now(),
+        availability:
+            _availabilityByOwnerId[row['owner_id'] as String] ??
+                FriendAvailability.unknown,
       );
     }).toList();
   }
@@ -61,7 +81,13 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
     final existing = await _db.getAllFriends();
     if (existing.any((row) => row['owner_id'] == ownerId)) return false;
 
-    final data = await FriendSyncService.instance.fetchByOwnerId(ownerId);
+    final fetch =
+        await FriendSyncService.instance.fetchByOwnerIdDetailed(ownerId);
+    if (fetch.serverConfirmedUnavailable ||
+        fetch.status == FriendFetchStatus.invalid) {
+      return false;
+    }
+    final data = fetch.data;
     // ⭐ 영어 현지화: 여기(Riverpod Notifier)는 BuildContext가 없어서 언어별 기본
     // 문구를 고를 수 없음 - 빈 문자열로 저장해두고, 실제 화면에 표시할 때(예:
     // friend_list_screen.dart)가 비어있으면 context.l10n.friendDefaultDisplayName로
@@ -75,18 +101,43 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
       print('⚠️ 친구 추가 실패: $e');
       return false;
     }
+    _availabilityByOwnerId[ownerId] = data == null
+        ? FriendAvailability.unconfirmed
+        : FriendAvailability.available;
     await load();
     return true;
   }
 
-  /// 친구 한 명의 최신 스케줄을 Firestore에서 다시 받아옴. 실패하면(오프라인/문서 삭제됨)
-  /// 캐시를 건드리지 않고 false만 반환.
-  Future<bool> refreshFriend(int id, String ownerId) async {
-    final data = await FriendSyncService.instance.fetchByOwnerId(ownerId);
-    if (data == null) return false;
-    await _db.updateFriendData(id, dataJson: data.encodeToJsonString());
+  Future<FriendRefreshResult> _refreshWithoutLoad(
+      int id, String ownerId) async {
+    final fetch =
+        await FriendSyncService.instance.fetchByOwnerIdDetailed(ownerId);
+    switch (fetch.status) {
+      case FriendFetchStatus.found:
+        await _db.updateFriendData(
+            id, dataJson: fetch.data!.encodeToJsonString());
+        _availabilityByOwnerId[ownerId] = FriendAvailability.available;
+        return FriendRefreshResult.refreshed;
+      case FriendFetchStatus.notFound:
+      case FriendFetchStatus.revoked:
+        // Source.server가 확인한 삭제/중지만 로컬 캐시와 등록 항목을 제거한다.
+        await _db.deleteFriend(id);
+        _availabilityByOwnerId.remove(ownerId);
+        return FriendRefreshResult.serverRemoved;
+      case FriendFetchStatus.unavailable:
+        _availabilityByOwnerId[ownerId] = FriendAvailability.unconfirmed;
+        return FriendRefreshResult.unavailable;
+      case FriendFetchStatus.invalid:
+        _availabilityByOwnerId[ownerId] = FriendAvailability.invalid;
+        return FriendRefreshResult.invalid;
+    }
+  }
+
+  /// 서버 확인 삭제/중지는 제거하고, offline·오류는 캐시를 유지한 채 확인 불가로 둔다.
+  Future<FriendRefreshResult> refreshFriend(int id, String ownerId) async {
+    final result = await _refreshWithoutLoad(id, ownerId);
     await load();
-    return true;
+    return result;
   }
 
   // ⭐ "새로고침" 버튼을 없애고 화면 진입마다 조용히 자동 새로고침하는 방식으로
@@ -108,12 +159,19 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
       return;
     }
     _lastRefreshAllAt = DateTime.now();
-    for (final friend in state) {
-      await refreshFriend(friend.id, friend.ownerId);
+    final snapshot = List<FriendEntry>.from(state);
+    for (final friend in snapshot) {
+      await _refreshWithoutLoad(friend.id, friend.ownerId);
     }
+    // 친구마다 전체 SQLite 목록을 다시 읽지 않고 모든 fetch/update 뒤 한 번만 읽는다.
+    await load();
   }
 
   Future<void> removeFriend(int id) async {
+    final ownerIds = state.where((friend) => friend.id == id).map((e) => e.ownerId);
+    for (final ownerId in ownerIds) {
+      _availabilityByOwnerId.remove(ownerId);
+    }
     await _db.deleteFriend(id);
     await load();
   }

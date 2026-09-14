@@ -15,6 +15,11 @@ import 'dart:convert';
 import '../models/shift_schedule.dart';
 
 class FriendScheduleData {
+  static const maxOwnerNameLength = 80;
+  static const maxShiftNameLength = 80;
+  static const maxPatternLength = 128;
+  static const maxMapEntries = 5000;
+
   final String ownerName; // ⭐ 코드를 만든 사람이 직접 적은 자기 이름
   final bool isRegular;
   final List<String>? pattern;
@@ -80,24 +85,124 @@ class FriendScheduleData {
         'updatedAt': updatedAt.toIso8601String(),
       };
 
-  factory FriendScheduleData.fromJson(Map<String, dynamic> json) {
+  static bool _validShiftName(Object? value) =>
+      value is String && value.isNotEmpty && value.length <= maxShiftNameLength;
+
+  static bool _validDateKey(String value) {
+    if (!RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(value)) return false;
+    final parsed = DateTime.tryParse(value);
+    if (parsed == null) return false;
+    final normalized =
+        '${parsed.year.toString().padLeft(4, '0')}-'
+        '${parsed.month.toString().padLeft(2, '0')}-'
+        '${parsed.day.toString().padLeft(2, '0')}';
+    return normalized == value;
+  }
+
+  /// Firestore와 로컬 캐시는 외부 입력이다. 잘못된 자료형이나 과도한 컬렉션을
+  /// 화면 모델로 바꾸지 않고 null로 거부한다.
+  static FriendScheduleData? tryFromJson(Map<String, dynamic> json) {
+    final ownerNameRaw = json['ownerName'];
+    final isRegularRaw = json['isRegular'];
+    final patternRaw = json['pattern'];
+    final todayIndexRaw = json['todayIndex'];
+    final startDateRaw = json['startDate'];
+    final shiftColorsRaw = json['shiftColors'];
+    final assignedDatesRaw = json['assignedDates'];
+    final updatedAtRaw = json['updatedAt'];
+
+    if (ownerNameRaw is! String ||
+        ownerNameRaw.length > maxOwnerNameLength ||
+        isRegularRaw is! bool ||
+        (patternRaw != null && patternRaw is! List) ||
+        (todayIndexRaw != null && todayIndexRaw is! int) ||
+        (startDateRaw != null && startDateRaw is! String) ||
+        (shiftColorsRaw != null && shiftColorsRaw is! Map) ||
+        (assignedDatesRaw != null && assignedDatesRaw is! Map) ||
+        updatedAtRaw is! String) {
+      return null;
+    }
+
+    final pattern = patternRaw == null
+        ? null
+        : List<Object?>.from(patternRaw as List);
+    if (pattern != null &&
+        (pattern.length > maxPatternLength ||
+            pattern.any((value) => !_validShiftName(value)))) {
+      return null;
+    }
+
+    final startDate = startDateRaw == null
+        ? null
+        : DateTime.tryParse(startDateRaw as String);
+    final updatedAt = DateTime.tryParse(updatedAtRaw);
+    if ((startDateRaw != null && startDate == null) || updatedAt == null) {
+      return null;
+    }
+    if (isRegularRaw &&
+        (pattern == null ||
+            pattern.isEmpty ||
+            todayIndexRaw == null ||
+            todayIndexRaw < 0 ||
+            todayIndexRaw >= pattern.length ||
+            startDate == null)) {
+      return null;
+    }
+
+    final rawColors = shiftColorsRaw as Map? ?? const {};
+    final rawAssignments = assignedDatesRaw as Map? ?? const {};
+    if (rawColors.length > maxMapEntries ||
+        rawAssignments.length > maxMapEntries) {
+      return null;
+    }
+
+    final colors = <String, int>{};
+    for (final entry in rawColors.entries) {
+      if (!_validShiftName(entry.key) ||
+          entry.value is! int ||
+          (entry.value as int) < 0 ||
+          (entry.value as int) > 0xffffffff) {
+        return null;
+      }
+      colors[entry.key as String] = entry.value as int;
+    }
+
+    final assignments = <String, String>{};
+    for (final entry in rawAssignments.entries) {
+      if (entry.key is! String ||
+          !_validDateKey(entry.key as String) ||
+          !_validShiftName(entry.value)) {
+        return null;
+      }
+      assignments[entry.key as String] = entry.value as String;
+    }
+
     return FriendScheduleData(
-      // ⭐ 영어 현지화: 모델은 BuildContext가 없어서 언어별 기본값을 못 고름 - 정상
-      // 케이스라면 항상 채워져 있는 필드라(친구공유 시작 시 앱이 항상 씀) 여기선
-      // 빈 문자열로만 폴백하고, 실제로 화면에 보여줄 이름이 필요한 자리
-      // (friend_calendar_view.dart 등)에서 비어있으면 context.l10n.friendDefaultDisplayName로
-      // 대체함.
-      ownerName: (json['ownerName'] as String?)?.trim().isNotEmpty == true ? json['ownerName'] as String : '',
-      isRegular: json['isRegular'] as bool? ?? false,
-      pattern: (json['pattern'] as List?)?.map((e) => e.toString()).toList(),
-      todayIndex: json['todayIndex'] as int?,
-      startDate: json['startDate'] != null ? DateTime.tryParse(json['startDate'] as String) : null,
-      shiftColors: (json['shiftColors'] as Map?)?.map((k, v) => MapEntry(k.toString(), (v as num).toInt())) ?? {},
-      assignedDates: (json['assignedDates'] as Map?)?.map((k, v) => MapEntry(k.toString(), v.toString())) ?? {},
-      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt'] as String) ?? DateTime.now() : DateTime.now(),
+      ownerName: ownerNameRaw.trim(),
+      isRegular: isRegularRaw,
+      pattern: pattern?.cast<String>(),
+      todayIndex: todayIndexRaw,
+      startDate: startDate,
+      shiftColors: colors,
+      assignedDates: assignments,
+      updatedAt: updatedAt,
     );
   }
 
+  factory FriendScheduleData.fromJson(Map<String, dynamic> json) {
+    final parsed = tryFromJson(json);
+    if (parsed == null) {
+      throw const FormatException('Invalid friend schedule payload');
+    }
+    return parsed;
+  }
+
   String encodeToJsonString() => jsonEncode(toJson());
-  factory FriendScheduleData.decodeFromJsonString(String s) => FriendScheduleData.fromJson(jsonDecode(s) as Map<String, dynamic>);
+  factory FriendScheduleData.decodeFromJsonString(String s) {
+    final decoded = jsonDecode(s);
+    if (decoded is! Map<String, dynamic>) {
+      throw const FormatException('Invalid friend schedule cache');
+    }
+    return FriendScheduleData.fromJson(decoded);
+  }
 }

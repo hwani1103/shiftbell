@@ -1,24 +1,60 @@
 // services/friend_sync_service.dart
 //
-// ⭐ 친구공유 v1 - Firestore 연동. friend_schedules/{ownerId} 문서에 내 스케줄을
-// upsert하고, 친구의 ownerId로 최신 스케줄을 1회 fetch함 (실시간 스트리밍 아님 - "열 때/
-// 새로고침할 때"만 조회, 친구공유_v1_스펙.md 참고). Firebase가 아직 설정 안 됐으면
-// (firebaseReady == false) 모든 메서드가 조용히 no-op/null을 반환해서 앱의 나머지 기능에는
-// 영향이 없음.
-//
-// ⭐ ownerId = Firebase 익명 인증(Anonymous Auth) uid. 로그인 화면 없이도 기기마다
-// 안정적인 uid를 받을 수 있고(로그아웃하지 않는 한 재설치 전까지 유지), 무엇보다
-// firestore.rules가 "본인 문서만 write 가능"을 실제로 강제하려면 이게 필요함 - 그냥
-// 로컬에서 생성한 UUID는 "문서 ID를 아는 사람이면 누구나(=친구도!) write 가능"해지는
-// 구멍이 있어서(코드를 공유하는 순간 read용 ID와 write용 ID가 같은 값이 되어버림),
-// uid 기반 write 검증 없이는 친구가 실수로/악의적으로 내 스케줄을 덮어쓰는 것도 막을
-// 방법이 없음. 사용자가 Firebase 콘솔에서 "Anonymous" 로그인 방법만 켜주면 됨(무료).
+// 친구 공유의 로컬 의도와 Firestore 제출을 한 곳에서 직렬화한다. Firestore의
+// offline write Future는 서버 ACK까지 오래 끝나지 않을 수 있으므로 제한 시간 뒤에도
+// dirty를 유지하고 다음 작업(특히 공유 중지)을 제출한다. 제한 시간은 제출 취소가 아니다.
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/friend_schedule.dart';
 import '../models/shift_schedule.dart';
 import 'firebase_bootstrap.dart';
+import 'friend_share_service.dart';
+
+enum FriendShareIntent { off, active, stopPending }
+
+enum FriendSyncOutcome { confirmed, pending, rejected, skipped }
+
+enum FriendFetchStatus { found, notFound, revoked, unavailable, invalid }
+
+class FriendShareState {
+  final FriendShareIntent intent;
+  final bool dirty;
+  final int generation;
+
+  const FriendShareState({
+    required this.intent,
+    required this.dirty,
+    required this.generation,
+  });
+
+  bool get isActive => intent == FriendShareIntent.active;
+}
+
+class FriendFetchResult {
+  final FriendFetchStatus status;
+  final FriendScheduleData? data;
+
+  const FriendFetchResult._(this.status, [this.data]);
+
+  const FriendFetchResult.found(FriendScheduleData data)
+      : this._(FriendFetchStatus.found, data);
+  const FriendFetchResult.notFound()
+      : this._(FriendFetchStatus.notFound);
+  const FriendFetchResult.revoked()
+      : this._(FriendFetchStatus.revoked);
+  const FriendFetchResult.unavailable()
+      : this._(FriendFetchStatus.unavailable);
+  const FriendFetchResult.invalid()
+      : this._(FriendFetchStatus.invalid);
+
+  bool get serverConfirmedUnavailable =>
+      status == FriendFetchStatus.notFound || status == FriendFetchStatus.revoked;
+}
 
 class FriendSyncService {
   FriendSyncService._();
@@ -26,132 +62,440 @@ class FriendSyncService {
 
   static const _kEnabledKey = 'friend_share_enabled';
   static const _kMyNameKey = 'friend_share_my_name';
+  static const _kIntentKey = 'friend_share_intent';
+  static const _kDirtyKey = 'friend_share_dirty';
+  static const _kGenerationKey = 'friend_share_generation';
+  static const _kDesiredFingerprintKey =
+      'friend_share_desired_fingerprint';
+  static const _kConfirmedFingerprintKey =
+      'friend_share_confirmed_fingerprint';
+
+  /// G4 복원에서 제외해야 한다. UID가 바뀐 설치에 옛 공유 의도나 회차를 이식하면 안 된다.
+  static const backupExcludedPreferenceKeys = <String>{
+    _kEnabledKey,
+    _kMyNameKey,
+    _kIntentKey,
+    _kDirtyKey,
+    _kGenerationKey,
+    _kDesiredFingerprintKey,
+    _kConfirmedFingerprintKey,
+  };
+
+  static const _submissionWait = Duration(seconds: 5);
+
+  Future<void> _serialTail = Future<void>.value();
+  Future<String?>? _ownerIdInFlight;
 
   CollectionReference<Map<String, dynamic>> get _col =>
       FirebaseFirestore.instance.collection('friend_schedules');
 
-  // ⭐ 이 기기의 공유 문서 ID(=익명 인증 uid). 이미 로그인돼 있으면 그대로, 아니면
-  // 새로 익명 로그인함. Firebase 미설정/오프라인이면 null.
-  Future<String?> getOrCreateOwnerId() async {
-    if (!firebaseReady) return null;
-    try {
-      final auth = FirebaseAuth.instance;
-      final current = auth.currentUser;
-      if (current != null) return current.uid;
-      final cred = await auth.signInAnonymously();
-      return cred.user?.uid;
-    } catch (e) {
-      print('⚠️ 친구공유 익명 로그인 실패: $e');
-      return null;
+  Future<T> _enqueue<T>(Future<T> Function() action) {
+    final completer = Completer<T>();
+    _serialTail = _serialTail.then((_) async {
+      try {
+        completer.complete(await action());
+      } catch (error, stackTrace) {
+        completer.completeError(error, stackTrace);
+      }
+    });
+    return completer.future;
+  }
+
+  Future<void> _requireWrite(Future<bool> write, String key) async {
+    if (!await write) {
+      throw StateError('공유 상태 저장 실패: $key');
     }
   }
 
-  Future<bool> isSharingEnabled() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_kEnabledKey) ?? false;
+  FriendShareIntent _parseIntent(String? raw, bool legacyEnabled) {
+    switch (raw) {
+      case 'active':
+        return FriendShareIntent.active;
+      case 'stop_pending':
+        return FriendShareIntent.stopPending;
+      case 'off':
+        return FriendShareIntent.off;
+      default:
+        return legacyEnabled ? FriendShareIntent.active : FriendShareIntent.off;
+    }
   }
+
+  String _intentValue(FriendShareIntent intent) {
+    switch (intent) {
+      case FriendShareIntent.active:
+        return 'active';
+      case FriendShareIntent.stopPending:
+        return 'stop_pending';
+      case FriendShareIntent.off:
+        return 'off';
+    }
+  }
+
+  /// 기존 enabled 플래그만 있는 설치도 active 회차 1로 안전하게 올린다.
+  Future<FriendShareState> getShareState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final legacyEnabled = prefs.getBool(_kEnabledKey) ?? false;
+    final storedIntent = prefs.getString(_kIntentKey);
+    final intent = _parseIntent(storedIntent, legacyEnabled);
+    var generation = prefs.getInt(_kGenerationKey) ?? 0;
+    var dirty = prefs.getBool(_kDirtyKey) ?? false;
+
+    if (storedIntent == null) {
+      if (intent == FriendShareIntent.active && generation < 1) {
+        generation = 1;
+        dirty = true;
+        await _requireWrite(prefs.setInt(_kGenerationKey, generation),
+            _kGenerationKey);
+        await _requireWrite(prefs.setBool(_kDirtyKey, true), _kDirtyKey);
+      }
+      await _requireWrite(
+          prefs.setString(_kIntentKey, _intentValue(intent)), _kIntentKey);
+    }
+
+    return FriendShareState(
+      intent: intent,
+      dirty: dirty,
+      generation: generation,
+    );
+  }
+
+  Future<String?> getOrCreateOwnerId() async {
+    if (!firebaseReady) return null;
+    final existing = FirebaseAuth.instance.currentUser;
+    if (existing != null) return existing.uid;
+    if (_ownerIdInFlight != null) return _ownerIdInFlight!;
+
+    final completer = Completer<String?>();
+    _ownerIdInFlight = completer.future;
+    try {
+      final credential = await FirebaseAuth.instance.signInAnonymously();
+      completer.complete(credential.user?.uid);
+    } catch (error) {
+      print('⚠️ 친구공유 익명 로그인 실패: $error');
+      completer.complete(null);
+    } finally {
+      _ownerIdInFlight = null;
+    }
+    return completer.future;
+  }
+
+  Future<bool> isSharingEnabled() async => (await getShareState()).isActive;
 
   Future<String?> savedMyName() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_kMyNameKey);
   }
 
-  /// "공유 시작하기" 최초 실행 시 호출 - 공유를 켜고 최초 upsert. 실패하면(로그인 실패
-  /// 등) null - 호출부가 사용자에게 실패를 안내함.
-  Future<String?> startSharing({required ShiftSchedule schedule, required String ownerName}) async {
-    final ownerId = await getOrCreateOwnerId();
-    if (ownerId == null) return null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kEnabledKey, true);
-    await prefs.setString(_kMyNameKey, ownerName);
-    await _upsert(ownerId, schedule, ownerName);
-    return ownerId;
-  }
-
-  /// 스케줄이 바뀔 때마다(근무변경/패턴수정 등) 호출 - 공유를 한 번도 시작 안 했으면
-  /// 아무 일도 안 함(불필요한 Firestore 쓰기 방지). schedule_provider.dart가 스케줄을
-  /// 저장하는 모든 지점에서 호출함.
-  Future<void> syncIfEnabled(ShiftSchedule? schedule) async {
-    if (schedule == null || !firebaseReady) return;
-    try {
-      if (!await isSharingEnabled()) return;
-      final ownerId = await getOrCreateOwnerId();
-      if (ownerId == null) return;
-      // ⭐ 영어 현지화: 백그라운드 동기화 경로라 BuildContext가 없음 - 정상 흐름이면
-      // "공유 시작하기"에서 이미 이름을 저장해뒀어야 해서 이 폴백은 사실상 방어용.
-      // 그래도 혹시 비어있으면 빈 문자열로 Firestore에 씀(friend_schedule.dart의
-      // ownerName 처리와 동일 - 보는 쪽 화면에서 friendDefaultDisplayName으로 대체).
-      final name = await savedMyName() ?? '';
-      await _upsert(ownerId, schedule, name);
-    } catch (e) {
-      // ⭐ 오프라인/미설정 등으로 실패해도 스케줄 자체 저장(로컬 DB)은 이미 끝난 뒤라
-      // 조용히 무시 - 다음 변경 때, 또는 친구가 새로고침할 때 다시 반영 시도됨.
-      print('⚠️ 친구공유 동기화 실패(무시): $e');
-    }
-  }
-
-  /// 이미 공유 중일 때 "친구에게 보일 이름"만 바꿈 - ownerId/코드/링크는 그대로 유지되고
-  /// Firestore 문서의 ownerName 필드만 갱신됨. 실패하면(오프라인 등) false - 호출부가
-  /// 로컬 표시는 유지한 채 안내만 함.
-  Future<bool> updateMyName({required String newName, required ShiftSchedule schedule}) async {
-    if (!firebaseReady) return false;
-    final ownerId = await getOrCreateOwnerId();
-    if (ownerId == null) return false;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_kMyNameKey, newName);
-      await _upsert(ownerId, schedule, newName);
-      return true;
-    } catch (e) {
-      print('⚠️ 공유 이름 변경 실패: $e');
-      return false;
-    }
-  }
-
-  /// 공유 중지 - 이후 syncIfEnabled가 조용히 no-op되도록 로컬 플래그를 끄고, Firestore
-  /// 문서도 지워서 이미 코드/링크를 받은 친구도 더 이상 내 스케줄을 못 보게 함.
-  Future<void> stopSharing() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_kEnabledKey, false);
-    if (!firebaseReady) return;
-    try {
-      final ownerId = await getOrCreateOwnerId();
-      if (ownerId == null) return;
-      await _col.doc(ownerId).delete();
-    } catch (e) {
-      print('⚠️ 공유 중지 시 Firestore 문서 삭제 실패(무시): $e');
-    }
-  }
-
-  Future<void> _upsert(String ownerId, ShiftSchedule schedule, String ownerName) async {
-    await _col.doc(ownerId).set({
+  Map<String, dynamic> _activePayload(
+    ShiftSchedule schedule,
+    String ownerName,
+    int generation,
+  ) {
+    return <String, dynamic>{
       'ownerName': ownerName,
       'isRegular': schedule.isRegular,
       'pattern': schedule.pattern,
       'todayIndex': schedule.todayIndex,
       'startDate': schedule.startDate?.toIso8601String(),
-      'shiftColors': schedule.shiftColors ?? {},
-      'assignedDates': schedule.assignedDates ?? {},
-      'updatedAt': FieldValue.serverTimestamp(),
+      'shiftColors': schedule.shiftColors ?? <String, int>{},
+      'assignedDates': schedule.assignedDates ?? <String, String>{},
+      'generation': generation,
+      'revoked': false,
+    };
+  }
+
+  dynamic _canonicalize(dynamic value) {
+    if (value is Map) {
+      final keys = value.keys.map((key) => key.toString()).toList()..sort();
+      return <String, dynamic>{
+        for (final key in keys) key: _canonicalize(value[key]),
+      };
+    }
+    if (value is List) return value.map(_canonicalize).toList();
+    return value;
+  }
+
+  String _fingerprint(Map<String, dynamic> payload) =>
+      jsonEncode(_canonicalize(payload));
+
+  bool _validActivePayload(Map<String, dynamic> payload) {
+    final validModel = FriendScheduleData.tryFromJson(<String, dynamic>{
+          ...payload,
+          'updatedAt': DateTime.fromMillisecondsSinceEpoch(0).toIso8601String(),
+        }) != null;
+    if (!validModel) return false;
+    // Firestore 1 MiB 문서 한도 직전까지 보내지 않도록 timestamp 여유를 남긴다.
+    return utf8.encode(jsonEncode(_canonicalize(payload))).length <= 800 * 1024;
+  }
+
+  Future<void> _markDesired(
+    SharedPreferences prefs,
+    String fingerprint,
+  ) async {
+    await _requireWrite(
+        prefs.setString(_kDesiredFingerprintKey, fingerprint),
+        _kDesiredFingerprintKey);
+    await _requireWrite(prefs.setBool(_kDirtyKey, true), _kDirtyKey);
+  }
+
+  Future<void> _confirmActive(int generation, String fingerprint) async {
+    final state = await getShareState();
+    final prefs = await SharedPreferences.getInstance();
+    if (state.intent != FriendShareIntent.active ||
+        state.generation != generation ||
+        prefs.getString(_kDesiredFingerprintKey) != fingerprint) {
+      return;
+    }
+    await _requireWrite(
+        prefs.setString(_kConfirmedFingerprintKey, fingerprint),
+        _kConfirmedFingerprintKey);
+    await _requireWrite(prefs.setBool(_kDirtyKey, false), _kDirtyKey);
+  }
+
+  Future<void> _confirmStopped(int generation) async {
+    final state = await getShareState();
+    if (state.intent != FriendShareIntent.stopPending ||
+        state.generation != generation) {
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    await _requireWrite(prefs.setBool(_kEnabledKey, false), _kEnabledKey);
+    await _requireWrite(prefs.setBool(_kDirtyKey, false), _kDirtyKey);
+    await _requireWrite(
+        prefs.setString(_kIntentKey, _intentValue(FriendShareIntent.off)),
+        _kIntentKey);
+  }
+
+  Future<FriendSyncOutcome> _observeWrite(
+    Future<void> write,
+    Future<void> Function() onConfirmed,
+    String label,
+  ) async {
+    try {
+      await write.timeout(_submissionWait);
+      await onConfirmed();
+      return FriendSyncOutcome.confirmed;
+    } on TimeoutException {
+      // Firestore가 이미 받은 offline write는 취소할 수 없다. 완료 콜백은 최신
+      // intent/generation/fingerprint를 다시 검사하므로 옛 작업이 dirty를 지우지 못한다.
+      unawaited(write.then((_) => onConfirmed()).catchError((Object error) {
+        print('⚠️ 친구공유 $label 지연 제출 실패: $error');
+      }));
+      return FriendSyncOutcome.pending;
+    } catch (error) {
+      print('⚠️ 친구공유 $label 제출 실패: $error');
+      return FriendSyncOutcome.rejected;
+    }
+  }
+
+  Future<FriendSyncOutcome> _submitActive(
+    ShiftSchedule schedule,
+    String ownerName,
+    int generation,
+  ) {
+    final payload = _activePayload(schedule, ownerName, generation);
+    if (!_validActivePayload(payload)) {
+      print('⚠️ 친구공유 업로드 거부: 허용 범위를 벗어난 스케줄 데이터');
+      return Future.value(FriendSyncOutcome.rejected);
+    }
+    final fingerprint = _fingerprint(payload);
+    return _enqueue(() async {
+      final state = await getShareState();
+      final prefs = await SharedPreferences.getInstance();
+      if (state.intent != FriendShareIntent.active ||
+          state.generation != generation ||
+          prefs.getString(_kDesiredFingerprintKey) != fingerprint) {
+        return FriendSyncOutcome.skipped;
+      }
+      if (!firebaseReady) return FriendSyncOutcome.pending;
+      final ownerId = await getOrCreateOwnerId();
+      if (ownerId == null) return FriendSyncOutcome.pending;
+
+      // 실제 set 직전에 다시 검사한다. queued 작업이 기다리는 동안 stop/새 회차가
+      // 들어왔다면 옛 payload를 SDK에 넘기지 않는다.
+      final latest = await getShareState();
+      final latestPrefs = await SharedPreferences.getInstance();
+      if (latest.intent != FriendShareIntent.active ||
+          latest.generation != generation ||
+          latestPrefs.getString(_kDesiredFingerprintKey) != fingerprint) {
+        return FriendSyncOutcome.skipped;
+      }
+      final serverPayload = <String, dynamic>{
+        ...payload,
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+      return _observeWrite(
+        _col.doc(ownerId).set(serverPayload),
+        () => _confirmActive(generation, fingerprint),
+        '업로드',
+      );
     });
   }
 
-  /// 친구의 ownerId로 최신 스케줄을 1회 조회. 문서가 없거나(친구가 공유를 중단/삭제)
-  /// Firebase 미설정/오프라인이면 null - 호출부가 "동기화 실패"를 안내함. 읽기는 로그인
-  /// 없이도 되지만(firestore.rules 참고), 웹뷰어에서도 규칙이 요구하면 통하도록 여기서도
-  /// 먼저 익명 로그인을 시도해둠 - 이미 로그인돼 있으면 비용 없음.
-  Future<FriendScheduleData?> fetchByOwnerId(String ownerId) async {
-    if (!firebaseReady) return null;
+  Future<String?> startSharing({
+    required ShiftSchedule schedule,
+    required String ownerName,
+  }) async {
+    final normalizedName = ownerName.trim();
+    if (normalizedName.isEmpty || !firebaseReady) return null;
+    final ownerId = await getOrCreateOwnerId();
+    if (ownerId == null) return null;
+
+    final before = await getShareState();
+    final generation = before.intent == FriendShareIntent.active
+        ? before.generation
+        : before.generation + 1;
+    final payload = _activePayload(schedule, normalizedName, generation);
+    if (!_validActivePayload(payload)) return null;
+    final fingerprint = _fingerprint(payload);
+    final prefs = await SharedPreferences.getInstance();
+    await _requireWrite(
+        prefs.setInt(_kGenerationKey, generation), _kGenerationKey);
+    await _requireWrite(
+        prefs.setString(_kMyNameKey, normalizedName), _kMyNameKey);
+    await _markDesired(prefs, fingerprint);
+    await _requireWrite(prefs.setBool(_kEnabledKey, true), _kEnabledKey);
+    await _requireWrite(
+        prefs.setString(_kIntentKey, _intentValue(FriendShareIntent.active)),
+        _kIntentKey);
+
+    final outcome =
+        await _submitActive(schedule, normalizedName, generation);
+    return outcome == FriendSyncOutcome.rejected ? null : ownerId;
+  }
+
+  Future<void> syncIfEnabled(ShiftSchedule? schedule) async {
     try {
-      await getOrCreateOwnerId();
-      final snap = await _col.doc(ownerId).get();
-      final raw = snap.data();
-      if (!snap.exists || raw == null) return null;
+      if (schedule == null) return;
+      final state = await getShareState();
+      if (state.intent != FriendShareIntent.active) return;
+      final prefs = await SharedPreferences.getInstance();
+      final ownerName = prefs.getString(_kMyNameKey) ?? '';
+      final payload = _activePayload(schedule, ownerName, state.generation);
+      if (!_validActivePayload(payload)) {
+        print('⚠️ 친구공유 동기화 보류: 허용 범위를 벗어난 스케줄 데이터');
+        await _requireWrite(prefs.setBool(_kDirtyKey, true), _kDirtyKey);
+        return;
+      }
+      final fingerprint = _fingerprint(payload);
+      final alreadyConfirmed =
+          prefs.getString(_kConfirmedFingerprintKey) == fingerprint;
+      if (alreadyConfirmed && !state.dirty) return;
+
+      await _markDesired(prefs, fingerprint);
+      await _submitActive(schedule, ownerName, state.generation);
+    } catch (error) {
+      // schedule 저장 호출자는 이 Future를 기다리지 않는 경로도 있다. 로컬 저장을
+      // 실패로 만들지 않고 dirty를 다음 재시도에 남긴다.
+      print('⚠️ 친구공유 동기화 상태 저장 실패: $error');
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(_kDirtyKey, true);
+      } catch (_) {}
+    }
+  }
+
+  Future<bool> updateMyName({
+    required String newName,
+    required ShiftSchedule schedule,
+  }) async {
+    final normalizedName = newName.trim();
+    if (normalizedName.isEmpty) return false;
+    final state = await getShareState();
+    if (state.intent != FriendShareIntent.active) return false;
+    final payload =
+        _activePayload(schedule, normalizedName, state.generation);
+    if (!_validActivePayload(payload)) return false;
+    final prefs = await SharedPreferences.getInstance();
+    await _requireWrite(
+        prefs.setString(_kMyNameKey, normalizedName), _kMyNameKey);
+    final fingerprint = _fingerprint(payload);
+    await _markDesired(prefs, fingerprint);
+    final outcome =
+        await _submitActive(schedule, normalizedName, state.generation);
+    return outcome == FriendSyncOutcome.confirmed;
+  }
+
+  /// 로컬에서는 호출 즉시 off로 보이고, 서버 delete 확인 전에는 stop_pending이다.
+  /// D7 후속 선택 전이므로 이번 단계는 기존 서버 형식과 호환되는 delete를 유지한다.
+  Future<void> stopSharing() async {
+    final state = await getShareState();
+    final prefs = await SharedPreferences.getInstance();
+    await _requireWrite(
+        prefs.setString(
+            _kIntentKey, _intentValue(FriendShareIntent.stopPending)),
+        _kIntentKey);
+    await _requireWrite(prefs.setBool(_kEnabledKey, false), _kEnabledKey);
+    await _requireWrite(prefs.setBool(_kDirtyKey, true), _kDirtyKey);
+    await _submitStop(state.generation);
+  }
+
+  Future<FriendSyncOutcome> _submitStop(int generation) {
+    return _enqueue(() async {
+      if (!firebaseReady) return FriendSyncOutcome.pending;
+      final ownerId = await getOrCreateOwnerId();
+      if (ownerId == null) return FriendSyncOutcome.pending;
+
+      // 이 delete는 큐에서 이후 새 회차 set보다 먼저 SDK에 제출된다. 서버 완료가
+      // 늦어도 Firestore의 같은 클라이언트 write 순서가 새 회차를 마지막에 둔다.
+      return _observeWrite(
+        _col.doc(ownerId).delete(),
+        () => _confirmStopped(generation),
+        '중지',
+      );
+    });
+  }
+
+  Future<void> retryPending(ShiftSchedule? currentSchedule) async {
+    final state = await getShareState();
+    if (state.intent == FriendShareIntent.stopPending) {
+      await _submitStop(state.generation);
+      return;
+    }
+    if (state.intent == FriendShareIntent.active && currentSchedule != null) {
+      await syncIfEnabled(currentSchedule);
+    }
+  }
+
+  Future<void> onAppStarted(ShiftSchedule? currentSchedule) =>
+      retryPending(currentSchedule);
+  Future<void> onAppResumed(ShiftSchedule? currentSchedule) =>
+      retryPending(currentSchedule);
+  Future<void> onNetworkReconnected(ShiftSchedule? currentSchedule) =>
+      retryPending(currentSchedule);
+
+  /// G4는 복원 전 UID/generation/intent를 유지한 뒤 이 진입점만 호출한다.
+  Future<void> onRestoreCompleted(ShiftSchedule? restoredSchedule) async {
+    final state = await getShareState();
+    if (state.intent == FriendShareIntent.active) {
+      final prefs = await SharedPreferences.getInstance();
+      await _requireWrite(prefs.setBool(_kDirtyKey, true), _kDirtyKey);
+    }
+    await retryPending(restoredSchedule);
+  }
+
+  /// 서버 강제 조회 결과를 notFound/revoked/offline·오류로 구분한다.
+  Future<FriendFetchResult> fetchByOwnerIdDetailed(String ownerId) async {
+    if (!firebaseReady || !FriendShareService.isValidOwnerId(ownerId)) {
+      return const FriendFetchResult.unavailable();
+    }
+    try {
+      final snapshot = await _col
+          .doc(ownerId)
+          .get(const GetOptions(source: Source.server));
+      final raw = snapshot.data();
+      if (!snapshot.exists || raw == null) {
+        return const FriendFetchResult.notFound();
+      }
+      if (raw['revoked'] == true) {
+        return const FriendFetchResult.revoked();
+      }
 
       final updatedAtRaw = raw['updatedAt'];
-      final updatedAtIso = updatedAtRaw is Timestamp ? updatedAtRaw.toDate().toIso8601String() : null;
-
-      return FriendScheduleData.fromJson({
+      final updatedAtIso = updatedAtRaw is Timestamp
+          ? updatedAtRaw.toDate().toIso8601String()
+          : null;
+      final data = FriendScheduleData.tryFromJson(<String, dynamic>{
         'ownerName': raw['ownerName'],
         'isRegular': raw['isRegular'],
         'pattern': raw['pattern'],
@@ -161,9 +505,18 @@ class FriendSyncService {
         'assignedDates': raw['assignedDates'],
         'updatedAt': updatedAtIso,
       });
-    } catch (e) {
-      print('⚠️ 친구 스케줄 조회 실패: $e');
-      return null;
+      return data == null
+          ? const FriendFetchResult.invalid()
+          : FriendFetchResult.found(data);
+    } catch (error) {
+      print('⚠️ 친구 스케줄 서버 조회 실패: $error');
+      return const FriendFetchResult.unavailable();
     }
+  }
+
+  /// 웹뷰어 등 기존 호출자 호환. 상세 구분이 필요한 앱 캐시는 detailed API를 쓴다.
+  Future<FriendScheduleData?> fetchByOwnerId(String ownerId) async {
+    final result = await fetchByOwnerIdDetailed(ownerId);
+    return result.data;
   }
 }
