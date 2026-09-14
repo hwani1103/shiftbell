@@ -104,16 +104,21 @@ object AlarmRefreshEngine {
         }
     }
 
-    // ⭐ 2026-09-12 - scheduleNativeAlarmOverride 파라미터 추가(기본값 null =
-    // 기존 동작 그대로, 운영 코드 경로는 0.000000001도 안 바뀜). B-2 대상 #1(H2 -
-    // toAdd 배치 중 N번째 항목에서 scheduleNativeAlarm()이 예외를 던지도록 mock)을
-    // 테스트하려면 이 네이티브 OS 호출 지점에 가짜 동작을 주입할 수 있는 seam이
-    // 필요했음 - Robolectric 테스트(AlarmRefreshEngineTest.kt)만 이 파라미터를 씀.
+    // ⭐ 2026-09-12 - scheduleNativeAlarmOverride 파라미터 추가(기본값 null = 운영 경로). H2 테스트
+    // (AlarmRefreshEngineH2Test)가 N번째 OS 등록에서 예외를 던지게 주입하는 seam.
+    //
+    // ⭐ 2026-09-14 (출시전 감사 #16/#27, G1) - 순서를 "잠금 트랜잭션 안에서 읽기→계산→DB 쓰기 → 커밋 → OS 반영"으로 바꿈.
+    //  - #27: 예전엔 근무표·템플릿·기존 알람을 트랜잭션 "전에" 읽어서, 그 사이 Flutter가 근무표를 저장하면 옛 근무표로
+    //    계산한 diff를 썼음. beginTransaction()은 쓰기 잠금(EXCLUSIVE)이라 이제 Flutter 저장과 이 읽기→쓰기가 순서대로만 실행됨.
+    //  - #16: 예전엔 트랜잭션 안에서 OS 예약을 불러서, N번째 예약 예외가 앞선 insert까지 통째로 롤백시켰음(OS에는 이미
+    //    걸린 알람이 DB엔 없는 상태). 이제 OS 반영은 커밋 뒤 AlarmWakeScheduler가 행을 다시 확인하며 하나씩 하고,
+    //    실패는 기록해서 다음 트리거에 재시도함.
     internal fun doRefresh(
         context: Context,
-        scheduleNativeAlarmOverride: ((Context, AlarmManager, Int, Long, String) -> Unit)? = null
+        scheduleNativeAlarmOverride: ((Context, Int, Long, String) -> Unit)? = null
     ) {
-        val doScheduleNativeAlarm = scheduleNativeAlarmOverride ?: ::scheduleNativeAlarm
+        val scheduleFn: (Context, Int, Long, String) -> Unit =
+            scheduleNativeAlarmOverride ?: { c, id, t, label -> AlarmWakeScheduler.scheduleRaw(c, id, t, label) }
         val dbHelper = DatabaseHelper.getInstance(context)
         // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고) -
         // 이 시점엔 스케줄도 없는 게 정상이라 "스케줄 없음"과 동일하게 처리.
@@ -123,6 +128,17 @@ object AlarmRefreshEngine {
             return
         }
 
+        // 지난 트리거에서 OS 반영에 실패한 알람부터 DB 기준으로 재시도 (#27 2-2)
+        AlarmWakeScheduler.retryFailed(context)
+
+        var irregular = false
+        val toCancel = mutableListOf<Int>()
+        val toSchedule = mutableListOf<AlarmWakeScheduler.WakeRow>()
+        var addedCount = 0
+        var removedCount = 0
+        var rearmCount = 0
+
+        db.beginTransaction()
         try {
             val schedule = readSchedule(db)
             if (schedule == null) {
@@ -131,35 +147,26 @@ object AlarmRefreshEngine {
             }
 
             if (!schedule.isRegular) {
-                Log.d(TAG, "⏭️ 불규칙 스케줄 - 기존 알람 재등록만 수행")
-                reRegisterExistingAlarms(context, db)
-                markRefreshed(context)
-                notifyFlutter(context)
-                return
-            }
+                irregular = true
+            } else {
+                val templates = readTemplates(db)
+                if (templates.isEmpty()) {
+                    Log.d(TAG, "⚠️ 템플릿 없음 - 갱신 중단")
+                    return
+                }
 
-            val templates = readTemplates(db)
-            if (templates.isEmpty()) {
-                Log.d(TAG, "⚠️ 템플릿 없음 - 갱신 중단")
-                return
-            }
+                val desired = computeDesiredAlarms(schedule, templates)
+                val existing = readExistingFixedAlarms(db)
+                val existingByKey = existing.associateBy { it.key() }
+                val desiredKeys = desired.map { it.key() }.toSet()
 
-            val desired = computeDesiredAlarms(schedule, templates)
-            val existing = readExistingFixedAlarms(db)
-            val existingByKey = existing.associateBy { it.key() }
-            val desiredKeys = desired.map { it.key() }.toSet()
+                val toAdd = desired.filter { it.key() !in existingByKey.keys }
+                val toRemove = existing.filter { it.key() !in desiredKeys }
 
-            val toAdd = desired.filter { it.key() !in existingByKey.keys }
-            val toRemove = existing.filter { it.key() !in desiredKeys }
-
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-            db.beginTransaction()
-            try {
                 for (item in toRemove) {
-                    cancelNativeAlarm(context, alarmManager, item.id)
                     insertHistory(db, item.id, item.dateStr, item.time, item.shiftType, item.dayOffset, "superseded")
                     db.delete("alarms", "id = ?", arrayOf(item.id.toString()))
+                    toCancel += item.id
                 }
 
                 for (item in toAdd) {
@@ -178,51 +185,54 @@ object AlarmRefreshEngine {
                     }
                     val alarmId = rowId.toInt()
                     insertCreationLog(db, alarmId, item.dateStr, item.time, item.shiftType, item.alarmTypeId, item.dayOffset, "auto")
-                    doScheduleNativeAlarm(context, alarmManager, alarmId, item.timestamp, item.shiftType)
+                    toSchedule += AlarmWakeScheduler.WakeRow(alarmId, item.timestamp, item.shiftType)
+                    addedCount++
                 }
 
-                db.setTransactionSuccessful()
-            } finally {
-                db.endTransaction()
-            }
-
-            // ⭐ CRITICAL: diff에서 "안 바뀐" 알람도 OS AlarmManager에 반드시 다시 등록함.
-            // DB row가 그대로라고 해서 OS 알람도 여전히 살아있다는 보장이 없음 —
-            // 재부팅하면 DB는 그대로인데 AlarmManager 등록은 전부 날아감. 예전 "전체 삭제 후
-            // 재생성" 방식은 매번 전부 다시 등록했기 때문에 이 문제가 가려져 있었는데,
-            // diff 방식으로 바꾸면서 "새로 추가된 것만" 등록하면 재부팅 후 아직 refresh가
-            // 안 도는 알람들이 DB엔 있지만 실제로는 안 울리는 유령이 될 수 있었음.
-            // AlarmManager 등록 자체는 DB를 안 건드리는 가벼운 작업이라 매번 다시 걸어도 무해함.
-            var rearmedCount = 0
-            var rearmFailures = 0
-            for (item in desired) {
-                val existingId = existingByKey[item.key()]?.id ?: continue  // toAdd는 위에서 이미 등록함
-                try {
-                    doScheduleNativeAlarm(context, alarmManager, existingId, item.timestamp, item.shiftType)
-                    rearmedCount++
-                } catch (e: Exception) {
-                    Log.e(TAG, "❌ 기존 알람 재등록 실패: id=$existingId", e)
-                    rearmFailures++
+                // ⭐ CRITICAL: diff에서 "안 바뀐" 알람도 OS AlarmManager에 반드시 다시 등록함.
+                // DB row가 그대로라고 해서 OS 알람도 여전히 살아있다는 보장이 없음 —
+                // 재부팅하면 DB는 그대로인데 AlarmManager 등록은 전부 날아감. diff 방식으로 "새로 추가된 것만"
+                // 등록하면 재부팅 후 아직 refresh가 안 도는 알람들이 DB엔 있지만 실제로는 안 울리는 유령이 될 수 있었음.
+                // AlarmManager 등록 자체는 DB를 안 건드리는 가벼운 작업이라 매번 다시 걸어도 무해함.
+                for (item in desired) {
+                    val existingId = existingByKey[item.key()]?.id ?: continue  // toAdd는 위에서 이미 넣음
+                    toSchedule += AlarmWakeScheduler.WakeRow(existingId, item.timestamp, item.shiftType)
+                    rearmCount++
                 }
+                removedCount = toRemove.size
             }
 
-            // ⭐ 재등록이 하나라도 실패했으면 "오늘 갱신 완료"로 표시하지 않음.
-            // markRefreshed()를 무조건 호출하면, 권한이 일시적으로 막혀서 재등록이
-            // 전부 실패해도 "오늘은 이미 갱신함" 플래그가 찍혀서 dateChanged 기반
-            // 재시도가 다음 날까지(최대 24시간) 막혀버림 - 그동안 실제로는 OS에
-            // 재등록 안 된 알람이 방치됨. 실패가 있으면 플래그를 남기지 않아서
-            // 다음 트리거(20분 뒤, 알람 울림, 앱 실행 등) 때 바로 재시도되게 함.
-            if (rearmFailures == 0) {
-                markRefreshed(context)
-            } else {
-                Log.e(TAG, "⚠️ 재등록 실패 ${rearmFailures}건 - '오늘 갱신 완료' 표시 안 함 (다음 트리거에 재시도)")
-            }
-            notifyFlutter(context)
-
-            Log.d(TAG, "✅ diff 갱신 완료: +${toAdd.size} -${toRemove.size} 재등록=$rearmedCount")
+            db.setTransactionSuccessful()
         } finally {
-            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
+            db.endTransaction()
         }
+
+        if (irregular) {
+            Log.d(TAG, "⏭️ 불규칙 스케줄 - 기존 알람 재등록만 수행")
+            reRegisterExistingAlarms(context, db)
+            if (AlarmWakeScheduler.failedIds(context).isEmpty()) markRefreshed(context)
+            notifyFlutter(context)
+            return
+        }
+
+        // ── 커밋 뒤 OS 반영 (반영 직전 재확인은 AlarmWakeScheduler) ──
+        for (id in toCancel) AlarmWakeScheduler.cancelIfGone(context, db, id)
+        var failures = 0
+        for (row in toSchedule) {
+            val outcome = AlarmWakeScheduler.scheduleIfCurrent(context, db, row.id, row.timestamp, row.label, scheduleFn)
+            if (outcome == AlarmWakeScheduler.Outcome.FAILED) failures++
+        }
+
+        // ⭐ OS 반영이 하나라도 실패했으면(이번 실패 또는 재시도로도 못 푼 지난 실패) "오늘 갱신 완료"로 표시하지 않음.
+        // 플래그를 찍으면 dateChanged 기반 재시도가 다음 날까지(최대 24시간) 막혀서, 그동안 OS에 안 걸린 알람이 방치됨.
+        if (failures == 0 && AlarmWakeScheduler.failedIds(context).isEmpty()) {
+            markRefreshed(context)
+        } else {
+            Log.e(TAG, "⚠️ OS 반영 실패 ${failures}건 - '오늘 갱신 완료' 표시 안 함 (다음 트리거에 재시도)")
+        }
+        notifyFlutter(context)
+
+        Log.d(TAG, "✅ diff 갱신 완료: +$addedCount -$removedCount 재등록=$rearmCount 실패=$failures")
     }
 
     private fun readSchedule(db: SQLiteDatabase): ScheduleData? {
@@ -448,34 +458,7 @@ object AlarmRefreshEngine {
         return result
     }
 
-    private fun cancelNativeAlarm(context: Context, alarmManager: AlarmManager, alarmId: Int) {
-        val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
-            data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, alarmId, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.cancel(pendingIntent)
-    }
-
-    private fun scheduleNativeAlarm(context: Context, alarmManager: AlarmManager, alarmId: Int, timestamp: Long, shiftType: String) {
-        val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
-            data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
-            putExtra(CustomAlarmReceiver.EXTRA_ID, alarmId)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, shiftType)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, alarmId, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
-        }
-    }
+    // ⭐ 2026-09-14 (#16/#27/#20) - 이 엔진 전용 cancelNativeAlarm/scheduleNativeAlarm은 AlarmWakeScheduler로 통합됨
 
     private fun insertHistory(db: SQLiteDatabase, alarmId: Int, dateStr: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {
         val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
@@ -511,7 +494,6 @@ object AlarmRefreshEngine {
     // ⭐ 불규칙 스케줄: DB에 있는 모든 미래 알람을 Native AlarmManager에 재등록
     private fun reRegisterExistingAlarms(context: Context, db: SQLiteDatabase) {
         val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         var count = 0
 
         db.query("alarms", null, "date > ?", arrayOf(now), null, null, "date ASC").use { cursor ->
@@ -525,8 +507,14 @@ object AlarmRefreshEngine {
                     null
                 }
                 if (timestamp != null && timestamp > System.currentTimeMillis()) {
-                    scheduleNativeAlarm(context, alarmManager, id, timestamp, shiftType)
-                    count++
+                    // ⭐ 2026-09-14 (#27) - 예약 경로 통일(AlarmWakeScheduler), 실패는 기록 후 재시도
+                    try {
+                        AlarmWakeScheduler.scheduleRaw(context, id, timestamp, shiftType)
+                        count++
+                    } catch (e: Exception) {
+                        Log.e(TAG, "❌ 불규칙 스케줄 알람 재등록 실패: id=$id", e)
+                        AlarmWakeScheduler.recordFailure(context, id)
+                    }
                 }
             }
         }

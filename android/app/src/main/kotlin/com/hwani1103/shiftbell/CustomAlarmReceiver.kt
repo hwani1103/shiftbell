@@ -42,9 +42,24 @@ override fun onReceive(context: Context, intent: Intent) {
     // 경우(예: 설정에서 알람 시간 수정 시 옛 알람)에도, 최소한 실제로 울리는 것만큼은 막는
     // 마지막 방어선. (진짜 원인은 diff 갱신 엔진의 cancelNativeAlarm이 담당하지만, 어떤
     // 이유로든 새어나간 PendingIntent가 있어도 여기서 한 번 더 걸러짐)
-    if (!alarmExistsInDb(context, id)) {
-        Log.e("CustomAlarmReceiver", "⚠️ DB에 없는 알람(id=$id) - 재생 건너뜀 (이미 취소/수정됨)")
-        return
+    //
+    // ⭐ 2026-09-14 (출시전 감사 #27) - 행 존재뿐 아니라 예약 당시 예정 시각까지 DB와 정확히 대조함
+    // (AlarmWakeScheduler.decideOnReceive). 사용자가 시각을 바꾼 뒤 옛 예약이 늦게 도착해도 앞당겨 울리지 않음.
+    val expectedAt = if (intent.hasExtra(AlarmWakeScheduler.EXTRA_EXPECTED_AT)) {
+        intent.getLongExtra(AlarmWakeScheduler.EXTRA_EXPECTED_AT, 0L)
+    } else {
+        null
+    }
+    when (AlarmWakeScheduler.decideOnReceive(context, id, expectedAt)) {
+        AlarmWakeScheduler.ReceiveDecision.SKIP_NO_ROW -> {
+            Log.e("CustomAlarmReceiver", "⚠️ DB에 없는 알람(id=$id) - 재생 건너뜀 (이미 취소/수정됨)")
+            return
+        }
+        AlarmWakeScheduler.ReceiveDecision.SKIP_RESCHEDULED -> {
+            Log.e("CustomAlarmReceiver", "⚠️ 옛 예약 도착(예정 시각 불일치, DB 시각은 미래) - 울리지 않고 DB 시각으로 재예약: id=$id")
+            return
+        }
+        AlarmWakeScheduler.ReceiveDecision.RING -> Unit
     }
 
     // ⭐ 2026-08-25 - 겹쳐 울리는 알람 처리: 아직 응답(끄기/스누즈/타임아웃)되지 않은
@@ -172,24 +187,7 @@ override fun onReceive(context: Context, intent: Intent) {
     }, 500)
 }
     
-    private fun alarmExistsInDb(context: Context, id: Int): Boolean {
-        var cursor: android.database.Cursor? = null
-        var db: android.database.sqlite.SQLiteDatabase? = null
-        return try {
-            val dbHelper = DatabaseHelper.getInstance(context)
-            // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고).
-            // 확인 자체가 불가능한 상황이므로 기존 예외 처리와 동일하게 재생을 막지 않음.
-            db = dbHelper.getReadableDatabaseWithRetry() ?: return true
-            cursor = db.query("alarms", arrayOf("id"), "id = ?", arrayOf(id.toString()), null, null, null)
-            cursor.moveToFirst()
-        } catch (e: Exception) {
-            Log.e("CustomAlarmReceiver", "❌ 알람 존재 확인 실패 - 안전하게 재생 진행", e)
-            true  // 확인 자체가 실패하면 (기존 동작 유지 위해) 재생은 막지 않음
-        } finally {
-            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
-            cursor?.close()
-        }
-    }
+    // ⭐ 2026-09-14 (#27) - alarmExistsInDb()는 AlarmWakeScheduler.decideOnReceive()로 대체됨
 
     private fun wakeUpScreen(context: Context) {
         try {

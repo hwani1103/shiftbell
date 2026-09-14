@@ -39,14 +39,12 @@ object AlarmActionHelper {
         val db = dbHelper.getWritableDatabaseWithRetry()
         if (db == null) {
             Log.w(TAG, "⚠️ dismiss: DB 파일 없음 - Native 알람 취소만 수행")
-            cancelNativeAlarm(context, alarmId)
+            AlarmWakeScheduler.cancelIfGone(context, null, alarmId)
             finishUp(context, alarmId)
             return
         }
 
         try {
-            cancelNativeAlarm(context, alarmId)
-
             db.beginTransaction()
             try {
                 db.query(
@@ -74,6 +72,9 @@ object AlarmActionHelper {
         } catch (e: Exception) {
             Log.e(TAG, "❌ dismiss 실패: alarmId=$alarmId", e)
         }
+        // ⭐ 2026-09-14 (출시전 감사 #16) - OS 취소는 DB 커밋 뒤, 행을 다시 확인하고 반영(AlarmWakeScheduler) -
+        // 트랜잭션이 실패해 행이 남았고 미래 시각이면 취소 대신 그 시각으로 다시 걸림
+        AlarmWakeScheduler.cancelIfGone(context, db, alarmId)
         // ⭐ CRITICAL FIX: db.close() 제거. DatabaseHelper는 앱 전체에서 공유하는
         // 싱글턴인데, getReadableDatabase()/getWritableDatabase()가 돌려주는 건
         // "새로 연 연결"이 아니라 SQLiteOpenHelper가 내부적으로 캐싱해서 계속
@@ -132,8 +133,9 @@ object AlarmActionHelper {
                 Log.d(TAG, "⚠️ 시간 충돌 감지 → ${adjustedMinutes}분 후로 조정")
             }
 
-            cancelNativeAlarm(context, alarmId)
-            scheduleNativeAlarmAt(context, alarmId, newTimestamp, shiftType)
+            // ⭐ 2026-09-14 (출시전 감사 #16/#27) - OS 예약은 DB 커밋 뒤로 옮김(아래). 새 시각은 초 단위로 맞춰
+            // DB 문자열·수신 시 예정 시각 대조와 정확히 일치하게 함
+            newTimestamp = AlarmWakeScheduler.normalize(newTimestamp)
 
             val dateStr = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(newTimestamp))
             val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(newTimestamp))
@@ -159,6 +161,11 @@ object AlarmActionHelper {
             }
 
             result = SnoozeResult(timeStr, shiftType)
+            // ⭐ #16 - 커밋 뒤 OS 반영(행 재확인). 실패하면 AlarmWakeScheduler가 기록해 다음 트리거에 재시도
+            if (AlarmWakeScheduler.scheduleIfCurrent(context, db, alarmId, newTimestamp, shiftType) ==
+                AlarmWakeScheduler.Outcome.FAILED) {
+                Log.e(TAG, "❌ 스누즈 OS 예약 실패(재시도 목록에 기록): alarmId=$alarmId")
+            }
         } catch (e: Exception) {
             Log.e(TAG, "❌ snooze 실패: alarmId=$alarmId", e)
         }
@@ -308,42 +315,6 @@ object AlarmActionHelper {
         AlarmRefreshUtil.checkAndTriggerRefresh(context)
         context.sendBroadcast(Intent(context, AlarmGuardReceiver::class.java))
         notifyFlutter(context)
-    }
-
-    private fun cancelNativeAlarm(context: Context, alarmId: Int) {
-        try {
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
-                data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context, alarmId, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            alarmManager.cancel(pendingIntent)
-            pendingIntent.cancel()
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ Native 알람 취소 실패: id=$alarmId", e)
-        }
-    }
-
-    private fun scheduleNativeAlarmAt(context: Context, alarmId: Int, timestamp: Long, shiftType: String) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
-            data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
-            putExtra(CustomAlarmReceiver.EXTRA_ID, alarmId)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, shiftType)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, alarmId, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, timestamp, pendingIntent)
-        }
     }
 
     private fun insertHistory(db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {

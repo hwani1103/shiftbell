@@ -37,6 +37,10 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // 갱신 체크
             AlarmRefreshUtil.checkAndTriggerRefresh(context)
 
+            // ⭐ 2026-09-14 (출시전 감사 #27 2-2) - 지난번 OS 반영에 실패한 기상 알람을 DB 기준으로 재시도
+            // (앱 재개(MainActivity.onResume)·알람 등록 직후도 이 함수를 거침)
+            AlarmWakeScheduler.retryFailed(context)
+
             // 다음 알람 체크 + 8888 상태 갱신
             val instance = AlarmGuardReceiver()
             val nextAlarm = instance.getNextAlarmFromDB(context)
@@ -94,6 +98,9 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // ⭐ 신규: 갱신 체크 & 실행 (Native에서 직접!)
             AlarmRefreshUtil.checkAndTriggerRefresh(context)
         }
+
+        // ⭐ 2026-09-14 (#27 2-2) - 지난번 OS 반영에 실패한 기상 알람 재시도(하트비트마다)
+        AlarmWakeScheduler.retryFailed(context)
 
         // 다음 알람 체크 + 8888 상태 갱신 (20분 이내면 표시, 아니면 정리)
         val nextAlarm = getNextAlarmFromDB(context)
@@ -205,12 +212,10 @@ class AlarmGuardReceiver : BroadcastReceiver() {
 
         Log.d("AlarmGuardReceiver", "🔍 알람 20분 이내: ${alarm.time} (${alarm.shiftType})")
 
-        if (!isAlarmScheduled(context, alarm.id)) {
-            Log.e("AlarmGuardReceiver", "❌ 알람 누락! 재등록")
-            reScheduleAlarm(context, alarm)
-        } else {
-            Log.d("AlarmGuardReceiver", "✅ 알람 정상")
-        }
+        // ⭐ 2026-09-14 (출시전 감사 #27 3번) - 예전엔 FLAG_NO_CREATE로 PendingIntent "존재"만 보고 재등록 여부를
+        // 정했는데, 존재해도 옛 시각의 예약일 수 있었음. 20분 이내 다음 알람은 판정 없이 DB 시각으로 항상 다시 걺
+        // (같은 PendingIntent라 덮어쓰기 - 추가 복구 수단)
+        reScheduleAlarm(context, alarm)
 
         if (shownNotifications.contains(alarm.id)) {
             Log.d("AlarmGuardReceiver", "⏭️ Notification 스킵 (이미 표시함)")
@@ -221,54 +226,12 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         }
     }
     
-    private fun isAlarmScheduled(context: Context, alarmId: Int): Boolean {
-        val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
-            data = android.net.Uri.parse("shiftbell://alarm/$alarmId")
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            alarmId,
-            intent,
-            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        return pendingIntent != null
-    }
-    
     private fun reScheduleAlarm(context: Context, alarm: AlarmData) {
         try {
-            val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
-                data = android.net.Uri.parse("shiftbell://alarm/${alarm.id}")
-                putExtra(CustomAlarmReceiver.EXTRA_ID, alarm.id)
-                putExtra(CustomAlarmReceiver.EXTRA_LABEL, alarm.shiftType)
-                putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-            }
-            
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                alarm.id,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    alarm.timestamp,
-                    pendingIntent
-                )
-            } else {
-                alarmManager.setExact(
-                    AlarmManager.RTC_WAKEUP,
-                    alarm.timestamp,
-                    pendingIntent
-                )
-            }
-            
+            AlarmWakeScheduler.scheduleRaw(context, alarm.id, alarm.timestamp, alarm.shiftType)
             Log.d("AlarmGuardReceiver", "✅ 알람 재등록 완료: ID=${alarm.id}")
         } catch (e: Exception) {
+            AlarmWakeScheduler.recordFailure(context, alarm.id)
             Log.e("AlarmGuardReceiver", "❌ 알람 재등록 실패", e)
         }
     }

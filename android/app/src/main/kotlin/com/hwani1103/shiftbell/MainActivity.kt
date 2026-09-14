@@ -940,60 +940,30 @@ override fun onNewIntent(intent: Intent) {
         }
     }
 
+    // ⭐ 2026-09-14 (출시전 감사 #16/#27/#20) - Dart 경로의 기상 알람 예약/취소도 AlarmWakeScheduler 한 곳으로.
+    // Dart는 DB 저장 뒤 이 채널을 부르므로 행을 재확인한 뒤 반영하고, OS 예약 실패는 예외로 던져 채널이 오류를
+    // 돌려주게 함(#13). soundType은 예약 Intent가 항상 "loud"라 쓰지 않음(Dart도 항상 'loud').
     private fun scheduleNativeAlarm(id: Int, timestamp: Long, label: String, soundType: String) {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        
-        val intent = Intent(this, CustomAlarmReceiver::class.java).apply {
-            data = android.net.Uri.parse("shiftbell://alarm/$id")
-            putExtra(CustomAlarmReceiver.EXTRA_ID, id)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, soundType)
-        }
-        
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            id,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                timestamp,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                timestamp,
-                pendingIntent
-            )
+        val db = DatabaseHelper.getInstance(applicationContext).getReadableDatabaseWithRetry()
+        val outcome = AlarmWakeScheduler.scheduleIfCurrent(applicationContext, db, id, timestamp, label)
+        if (outcome == AlarmWakeScheduler.Outcome.FAILED) {
+            throw IllegalStateException("alarm schedule failed: id=$id")
         }
 
         // ⭐ 알람 등록 후 AlarmGuardReceiver 직접 트리거 (20분 이내면 Notification 표시)
         AlarmGuardReceiver.triggerCheck(this)
-        Log.d("MainActivity", "✅ 알람 등록 완료: ID=$id, AlarmGuardReceiver 직접 트리거")
+        Log.d("MainActivity", "✅ 알람 등록 처리: ID=$id ($outcome, soundType=$soundType)")
     }
 
     private fun cancelNativeAlarm(id: Int) {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, CustomAlarmReceiver::class.java).apply {
-            data = android.net.Uri.parse("shiftbell://alarm/$id")
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            id,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.cancel(pendingIntent)
+        val db = DatabaseHelper.getInstance(applicationContext).getReadableDatabaseWithRetry()
+        AlarmWakeScheduler.cancelIfGone(applicationContext, db, id)
 
         // ⭐ shownNotifications에서 제거 (같은 ID 재사용 시 notification 표시 위해)
         AlarmGuardReceiver.removeShownNotification(id)
         Log.d("MainActivity", "✅ 알람 취소 및 shownNotifications 제거: ID=$id")
     }
-    
+
     // ⭐ 진동 테스트 (약 1초간)
     private fun testVibration(strength: Int) {
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator

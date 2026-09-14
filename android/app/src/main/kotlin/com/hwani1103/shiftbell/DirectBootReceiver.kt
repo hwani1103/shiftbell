@@ -145,6 +145,9 @@ class DirectBootReceiver : BroadcastReceiver() {
         }
     }
     
+    // ⭐ 2026-09-14 (출시전 감사 #27/#20) - 예전엔 여기만 Intent에 setPackage()를 넣어서 다른 예약 경로와 PendingIntent가
+    // 달라졌음 → 재부팅 후 같은 알람이 두 번 예약·수신됐고(0.47초 간격, g1/handoff.md) 엔진의 취소도 이 예약을 못 지웠음.
+    // AlarmWakeScheduler로 통일(같은 Intent·setAlarmClock·예정 시각 extra, 옛 변형 예약도 함께 제거).
     private fun scheduleNativeAlarm(
         context: Context,
         id: Int,
@@ -152,28 +155,10 @@ class DirectBootReceiver : BroadcastReceiver() {
         label: String
     ) {
         try {
-            val intent = Intent(context, CustomAlarmReceiver::class.java).apply {
-                putExtra(CustomAlarmReceiver.EXTRA_ID, id)
-                putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-                putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, "loud")
-                setPackage(context.packageName)
-                data = android.net.Uri.parse("shiftbell://alarm/$id")  // ⭐ PendingIntent 충돌 방지
-            }
-            
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                id,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-            
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            
-            val alarmClockInfo = AlarmManager.AlarmClockInfo(timestamp, pendingIntent)
-            alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
-            
-            Log.d("DirectBoot", "✅ Native 알람 등록 (AlarmClock): ID=$id, timestamp=$timestamp")
+            AlarmWakeScheduler.scheduleRaw(context, id, timestamp, label)
+            Log.d("DirectBoot", "✅ Native 알람 등록: ID=$id, timestamp=$timestamp")
         } catch (e: Exception) {
+            AlarmWakeScheduler.recordFailure(context, id)
             Log.e("DirectBoot", "Native 알람 등록 실패: ID=$id", e)
         }
     }
