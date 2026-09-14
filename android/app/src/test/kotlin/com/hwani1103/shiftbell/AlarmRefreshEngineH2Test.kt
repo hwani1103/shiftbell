@@ -80,8 +80,9 @@ class AlarmRefreshEngineH2Test {
         // 예외로 바뀌어(빈 최신 버전 DB 생성 차단, 출시전 감사 #1) 그 방식은 더 이상 동작하지 않음.
         // → 같은 최소 스키마를 user_version=24로 미리 만들어 둔 파일(tool/g0/build_fixtures.py가 생성)을
         // 복사한 뒤 헬퍼로 연다. 원시 연결로 파일을 만드는 방식은 위 주석의 Robolectric 연결 오류 때문에 피함.
-        // SQL 원본을 주입하지 않으므로(DbMigrationScript.overrideForTest 미설정) onOpen repair는 건너뛰어
-        // 이 테스트의 최소 스키마가 그대로 유지됨.
+        // 버전이 이미 24라 마이그레이션은 없음. 단 Gradle 단위 테스트에는 flutter 자산이 합쳐져 들어가서
+        // onOpen repair가 실제 SQL 원본으로 돌아, 이 최소 스키마에 없는 테이블/컬럼(기본값 NULL 또는 0)을
+        // 추가함 - 이 테스트가 쓰는 컬럼과 값에는 영향 없음(T03 실행으로 확인).
         val dbFile = context.applicationContext.createDeviceProtectedStorageContext().getDatabasePath("shiftbell.db")
         for (suffix in listOf("", "-wal", "-shm", "-journal")) java.io.File(dbFile.path + suffix).delete()
         dbFile.parentFile?.mkdirs()

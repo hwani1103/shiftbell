@@ -232,19 +232,26 @@ class G0NativeMigrationTest {
         assertFalse("Native가 DB 파일을 만들면 안 됨", dbFile.exists())
     }
 
+    // ⭐ T03 1차 실행에서 확인: Gradle testDevDebugUnitTest는 copyFlutterAssetsDevDebug로 flutter 자산을
+    // 합쳐 넣고 isIncludeAndroidResources=true라서, Robolectric에서도 AssetManager로
+    // flutter_assets/assets/db/migrations.json이 읽힌다. 그래서 "자산 누락" 상황은 주입 지점이 없어
+    // 이 테스트로 재현할 수 없음(test_results.md에 NOT_RUN) - 대신 제품 경로의 자산 읽기를 검증한다.
+    // (debug merge 기준. release APK·첫 잠금 해제 전 읽기는 실기기 S1에서만 확인 가능)
     @Test
-    fun scriptMissing_upgradeFails_butLatestDbStillOpens_withoutRepair() {
-        DbMigrationScript.overrideForTest = null // Robolectric엔 flutter_assets가 없음 = 자산 누락 상황
+    fun assetPath_nativeLoadsSameScriptAsRepo_andUpgradesWithoutOverride() {
+        DbMigrationScript.overrideForTest = null
+        val fromAsset = DbMigrationScript.load(context)
+        val fromRepo = DbMigrationScript.parse(G0TestSupport.repoScriptJson())
+        assertEquals(fromRepo.targetVersion, fromAsset.targetVersion)
+        assertEquals(fromRepo.migrations, fromAsset.migrations)
+        assertEquals(fromRepo.repair, fromAsset.repair)
 
         installFixture("v18.db")
-        assertNull("SQL 원본 없이 업그레이드하면 안 됨", helper().getWritableDatabaseWithRetry())
-        withRaw { assertEquals(18, it.version) }
-
-        installFixture("variant_v23_stamped24_missing.db")
         val db = helper().getWritableDatabaseWithRetry()
-        assertNotNull("최신 버전 DB는 원본이 없어도 열려야 함(알람 재생을 막지 않음)", db)
-        val cols = G0TestSupport.query(db!!, "PRAGMA table_info(date_schedules)").map { it["name"] }.toSet()
-        assertFalse("원본이 없으면 repair는 건너뜀", "notify_offset_minutes" in cols)
+        assertNotNull("자산 원본으로 v18 → v24", db)
+        assertEquals(24, db!!.version)
+        assertEquals(emptyList<String>(), G0TestSupport.diffExpectedData(G0TestSupport.dumpTables(db), expected("v18.json")))
+        println("G0 Robolectric sqlite_version=" + G0TestSupport.query(db, "SELECT sqlite_version() AS v").first()["v"])
     }
 
     @Test

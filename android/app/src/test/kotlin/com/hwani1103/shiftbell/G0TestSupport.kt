@@ -68,12 +68,23 @@ object G0TestSupport {
                     "pk" to it["pk"],
                 )
             }.sortedBy { it["name"] as String }
+            val pkColumns = columns.filter { (it["pk"] as Long) > 0 }.sortedBy { it["pk"] as Long }.map { it["name"] }
             val indexes = query(db, "PRAGMA index_list($name)").map { idx ->
                 val indexName = idx["name"] as String
                 val cols = query(db, "PRAGMA index_info(\"$indexName\")")
                     .sortedBy { (it["seqno"] as Long) }
                     .map { it["name"] }
-                mapOf("unique" to idx["unique"], "origin" to idx["origin"], "partial" to idx["partial"], "columns" to cols)
+                // Robolectric의 SQLite는 index_list에 origin/partial 열이 없어 null로 옴(Dart ffi SQLite엔 있음).
+                // 비교 강도를 유지하려고 같은 의미를 sqlite_master에서 직접 계산한다.
+                val sql = query(db, "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = '$indexName'")
+                    .firstOrNull()?.get("sql") as String?
+                val origin = idx["origin"] ?: when {
+                    !indexName.startsWith("sqlite_autoindex_") -> "c"
+                    cols == pkColumns -> "pk"
+                    else -> "u"
+                }
+                val partial = idx["partial"] ?: if (sql != null && Regex("""\bWHERE\b""", RegexOption.IGNORE_CASE).containsMatchIn(sql)) 1L else 0L
+                mapOf("unique" to idx["unique"], "origin" to origin, "partial" to partial, "columns" to cols)
             }.sortedBy { canonical(it) }
             val fks = query(db, "PRAGMA foreign_key_list($name)").map {
                 mapOf("table" to it["table"], "from" to it["from"], "to" to it["to"])
@@ -104,7 +115,7 @@ object G0TestSupport {
         else -> error("정규화할 수 없는 값: $value (${value.javaClass})")
     }
 
-    /** 기대 데이터(expected_v24/*.json)와의 테이블별 불일치 목록. 비어 있으면 일치. */
+    /** 기대 데이터(expected_v24 폴더의 json)와의 테이블별 불일치 목록. 비어 있으면 일치. */
     fun diffExpectedData(actual: Map<String, List<Map<String, Any?>>>, expected: JSONObject): List<String> {
         val problems = ArrayList<String>()
         val tables = expected.getJSONObject("tables")
