@@ -301,8 +301,15 @@ override fun onNewIntent(intent: Intent) {
                     val label = call.argument<String>("label") ?: "알람"
                     val soundType = call.argument<String>("soundType") ?: "loud"
                     
-                    scheduleNativeAlarm(id, timestamp, label, soundType)
-                    result.success(null)
+                    // ⭐ 2026-09-14 (출시전 감사 #13) - 등록 실패(정확한 알람 권한 없음 등)를 성공으로 돌려주지
+                    // 않고 오류로 알림 - Dart 호출부가 실패 개수를 세서 전부/일부 실패를 안내함
+                    try {
+                        scheduleNativeAlarm(id, timestamp, label, soundType)
+                        result.success(null)
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "❌ 알람 등록 실패: ID=$id", e)
+                        result.error("SCHEDULE_FAILED", e.message, null)
+                    }
                 }
                 "cancelNativeAlarm" -> {
                     val id = call.argument<Int>("id") ?: 0
@@ -320,10 +327,12 @@ override fun onNewIntent(intent: Intent) {
                     val content = call.argument<String>("content") ?: ""
                     // ⭐ 2026-09-13 - 알림 첫 줄 시간 표시("HH:mm" 또는 "HH:mm - HH:mm")용.
                     val durationMinutes = call.argument<Int>("durationMinutes") ?: 0
-                    ScheduleNotificationScheduler.schedule(
-                        applicationContext, id, triggerAtMillis, date, startMinutes, content, durationMinutes
+                    // ⭐ 2026-09-14 (#13) - 예약 성공 여부(bool)를 그대로 돌려줌
+                    result.success(
+                        ScheduleNotificationScheduler.schedule(
+                            applicationContext, id, triggerAtMillis, date, startMinutes, content, durationMinutes
+                        )
                     )
-                    result.success(null)
                 }
                 "cancelDateNotification" -> {
                     val id = call.argument<Int>("id") ?: 0
@@ -335,6 +344,8 @@ override fun onNewIntent(intent: Intent) {
                 // 탭으로 돌아가는 진입 경로 자체를 닫는다(ScheduleNotificationScheduler.kt
                 // cancelAllFromDb 주석 참고). DB는 안 건드리므로 되돌릴 수 있음.
                 "cancelAllScheduleNotifications" -> {
+                    // ⭐ 2026-09-14 (#5) - 탭 숨김을 Native(Device Protected)에도 기록 - 재부팅·수신 때 되살리지 않게
+                    ScheduleNotificationScheduler.setTabEnabled(applicationContext, false)
                     ScheduleNotificationScheduler.cancelAllFromDb(applicationContext)
                     result.success(null)
                 }
@@ -342,7 +353,15 @@ override fun onNewIntent(intent: Intent) {
                 // 재부팅 재예약과 완전히 같은 함수를 재사용해 숨겨져 있던 동안
                 // 취소됐던 알림들을 원래 상태로 그대로 복원함.
                 "rescheduleAllScheduleNotifications" -> {
+                    ScheduleNotificationScheduler.setTabEnabled(applicationContext, true)  // #5
                     ScheduleNotificationScheduler.rescheduleAllFromDb(applicationContext)
+                    result.success(null)
+                }
+                // ⭐ 2026-09-14 (출시전 감사 #5) - 앱 시작 시 Flutter 설정값(schedule_tab_enabled)을 Native로 동기화
+                // (백업 복원 등으로 두 값이 어긋났을 때 바로잡음 - 바뀐 경우에만 예약을 거두거나 되살림)
+                "syncScheduleTabEnabled" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: true
+                    ScheduleNotificationScheduler.syncTabEnabled(applicationContext, enabled)
                     result.success(null)
                 }
                 // ⭐ 2026-09-13 - openDateSchedule 콜드스타트 유실 대비 pull 경로
@@ -500,9 +519,24 @@ override fun onNewIntent(intent: Intent) {
                     result.success(null)
                 }
                 // ⭐ 알람이 울리는 중인지 확인
+                // ⭐ 2026-09-14 (출시전 감사 #14) - 예전엔 MediaPlayer 재생 여부(전역)라 다른 알람을 삭제할 때도
+                // true였고 진동·무음 알람은 울리는 중에도 false였음. 이제 활성 울림 회차의 알람 ID로 판정.
                 "isAlarmRinging" -> {
-                    val isRinging = AlarmPlayer.getInstance(applicationContext).isAlarmRinging()
-                    result.success(isRinging)
+                    val alarmId = call.argument<Int>("alarmId")
+                    result.success(
+                        if (alarmId == null) RingingAlarmTracker.current(applicationContext) != null
+                        else AlarmActionHelper.isAlarmRinging(applicationContext, alarmId)
+                    )
+                }
+                // ⭐ #14 - 그 알람이 지금 울리는 중일 때만 울림을 끝냄(소리·화면·오버레이·제어 알림).
+                // 반환값 = 실제로 울리던 중이었는지(삭제 이력 swiped/cancelled_before_ring 판정에 씀).
+                "stopRingingAlarm" -> {
+                    val alarmId = call.argument<Int>("alarmId")
+                    if (alarmId == null) {
+                        result.error("INVALID_ARGUMENT", "alarmId required", null)
+                    } else {
+                        result.success(AlarmActionHelper.stopRingingAlarm(applicationContext, alarmId))
+                    }
                 }
                 // ⭐ 홈 화면 캘린더 위젯 즉시 갱신 (스케줄 저장/변경 직후 Flutter가 호출)
                 "refreshCalendarWidget" -> {
@@ -916,60 +950,30 @@ override fun onNewIntent(intent: Intent) {
         }
     }
 
+    // ⭐ 2026-09-14 (출시전 감사 #16/#27/#20) - Dart 경로의 기상 알람 예약/취소도 AlarmWakeScheduler 한 곳으로.
+    // Dart는 DB 저장 뒤 이 채널을 부르므로 행을 재확인한 뒤 반영하고, OS 예약 실패는 예외로 던져 채널이 오류를
+    // 돌려주게 함(#13). soundType은 예약 Intent가 항상 "loud"라 쓰지 않음(Dart도 항상 'loud').
     private fun scheduleNativeAlarm(id: Int, timestamp: Long, label: String, soundType: String) {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        
-        val intent = Intent(this, CustomAlarmReceiver::class.java).apply {
-            data = android.net.Uri.parse("shiftbell://alarm/$id")
-            putExtra(CustomAlarmReceiver.EXTRA_ID, id)
-            putExtra(CustomAlarmReceiver.EXTRA_LABEL, label)
-            putExtra(CustomAlarmReceiver.EXTRA_SOUND_TYPE, soundType)
-        }
-        
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            id,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                timestamp,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                timestamp,
-                pendingIntent
-            )
+        val db = DatabaseHelper.getInstance(applicationContext).getReadableDatabaseWithRetry()
+        val outcome = AlarmWakeScheduler.scheduleIfCurrent(applicationContext, db, id, timestamp, label)
+        if (outcome == AlarmWakeScheduler.Outcome.FAILED) {
+            throw IllegalStateException("alarm schedule failed: id=$id")
         }
 
         // ⭐ 알람 등록 후 AlarmGuardReceiver 직접 트리거 (20분 이내면 Notification 표시)
         AlarmGuardReceiver.triggerCheck(this)
-        Log.d("MainActivity", "✅ 알람 등록 완료: ID=$id, AlarmGuardReceiver 직접 트리거")
+        Log.d("MainActivity", "✅ 알람 등록 처리: ID=$id ($outcome, soundType=$soundType)")
     }
 
     private fun cancelNativeAlarm(id: Int) {
-        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(this, CustomAlarmReceiver::class.java).apply {
-            data = android.net.Uri.parse("shiftbell://alarm/$id")
-        }
-        val pendingIntent = PendingIntent.getBroadcast(
-            this,
-            id,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.cancel(pendingIntent)
+        val db = DatabaseHelper.getInstance(applicationContext).getReadableDatabaseWithRetry()
+        AlarmWakeScheduler.cancelIfGone(applicationContext, db, id)
 
         // ⭐ shownNotifications에서 제거 (같은 ID 재사용 시 notification 표시 위해)
         AlarmGuardReceiver.removeShownNotification(id)
         Log.d("MainActivity", "✅ 알람 취소 및 shownNotifications 제거: ID=$id")
     }
-    
+
     // ⭐ 진동 테스트 (약 1초간)
     private fun testVibration(strength: Int) {
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator

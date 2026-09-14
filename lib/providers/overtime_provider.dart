@@ -1,12 +1,15 @@
 // providers/overtime_provider.dart
 
+import 'data_revision_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/database_service.dart';
 
 // ⭐ 날짜별 OT(추가근무) 누적 시간 상태 관리 (date 'YYYY-MM-DD' -> 분)
 // date_memos와 동일한 패턴: 달이 바뀔 때 그 달 범위를 통째로 다시 불러와 캐시함
 class OvertimeNotifier extends StateNotifier<Map<String, int>> {
-  OvertimeNotifier() : super({});
+  OvertimeNotifier([this._ref]) : super({});
+
+  final Ref? _ref;
 
   final _db = DatabaseService.instance;
 
@@ -37,6 +40,8 @@ class OvertimeNotifier extends StateNotifier<Map<String, int>> {
       newState.remove(date);
     }
     state = newState;
+    // ⭐ 2026-09-14 (출시전 수정 연결 - contracts §3) - OT 저장 성공 뒤 변경 통지(컨디션 판정이 최신 OT로 다시 계산, #15와 짝)
+    _ref?.read(dataRevisionProvider(DataDomain.overtime).notifier).state++;
     return newTotal;
   }
 
@@ -91,5 +96,5 @@ class OvertimeNotifier extends StateNotifier<Map<String, int>> {
 }
 
 final overtimeProvider = StateNotifierProvider<OvertimeNotifier, Map<String, int>>(
-  (ref) => OvertimeNotifier(),
+  (ref) => OvertimeNotifier(ref),
 );

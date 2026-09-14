@@ -1,5 +1,6 @@
 // lib/providers/work_hours_settings_provider.dart
 
+import 'data_revision_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -125,8 +126,18 @@ class WorkHoursSettings {
 }
 
 class WorkHoursSettingsNotifier extends StateNotifier<WorkHoursSettings> {
-  WorkHoursSettingsNotifier() : super(const WorkHoursSettings()) {
+  WorkHoursSettingsNotifier([this._ref]) : super(const WorkHoursSettings()) {
     _load();
+  }
+
+  final Ref? _ref;
+
+  // ⭐ 2026-09-14 (출시전 수정 연결 - docs/release_audit/contracts.md §3) - 원본 저장이 성공한 뒤에만 변경 통지.
+  // 계산 쪽(G3 컨디션·수면 provider)이 이 revision을 watch해 다시 계산함. 저장 실패·예외면 올리지 않음.
+  void _notifyChanged(bool saved) {
+    final ref = _ref;
+    if (!saved || ref == null) return;
+    ref.read(dataRevisionProvider(DataDomain.workHoursSettings).notifier).state++;
   }
 
   static const _modeKey = 'work_hours_period_mode';
@@ -166,30 +177,34 @@ class WorkHoursSettingsNotifier extends StateNotifier<WorkHoursSettings> {
 
   Future<void> setPeriodMode(MonthlyPeriodMode mode) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_modeKey, mode == MonthlyPeriodMode.payday ? 'payday' : 'calendar');
+    final saved = await prefs.setString(_modeKey, mode == MonthlyPeriodMode.payday ? 'payday' : 'calendar');
     state = state.copyWith(periodMode: mode);
+    _notifyChanged(saved);
   }
 
   Future<void> setPaydayCutoffDay(int day) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_cutoffKey, day);
+    final saved = await prefs.setInt(_cutoffKey, day);
     state = state.copyWith(paydayCutoffDay: day);
+    _notifyChanged(saved);
   }
 
   Future<void> setCutoffAnchor(PaydayCutoffAnchor anchor) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_cutoffAnchorKey, anchor.name);
+    final saved = await prefs.setString(_cutoffAnchorKey, anchor.name);
     state = state.copyWith(cutoffAnchor: anchor);
+    _notifyChanged(saved);
   }
 
   Future<void> setShiftChangeCountsAsOt(bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_shiftChangeAsOtKey, value);
+    final saved = await prefs.setBool(_shiftChangeAsOtKey, value);
     state = state.copyWith(shiftChangeCountsAsOt: value);
+    _notifyChanged(saved);
   }
 }
 
 final workHoursSettingsProvider =
     StateNotifierProvider<WorkHoursSettingsNotifier, WorkHoursSettings>(
-  (ref) => WorkHoursSettingsNotifier(),
+  (ref) => WorkHoursSettingsNotifier(ref),
 );

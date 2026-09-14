@@ -42,9 +42,24 @@ override fun onReceive(context: Context, intent: Intent) {
     // 경우(예: 설정에서 알람 시간 수정 시 옛 알람)에도, 최소한 실제로 울리는 것만큼은 막는
     // 마지막 방어선. (진짜 원인은 diff 갱신 엔진의 cancelNativeAlarm이 담당하지만, 어떤
     // 이유로든 새어나간 PendingIntent가 있어도 여기서 한 번 더 걸러짐)
-    if (!alarmExistsInDb(context, id)) {
-        Log.e("CustomAlarmReceiver", "⚠️ DB에 없는 알람(id=$id) - 재생 건너뜀 (이미 취소/수정됨)")
-        return
+    //
+    // ⭐ 2026-09-14 (출시전 감사 #27) - 행 존재뿐 아니라 예약 당시 예정 시각까지 DB와 정확히 대조함
+    // (AlarmWakeScheduler.decideOnReceive). 사용자가 시각을 바꾼 뒤 옛 예약이 늦게 도착해도 앞당겨 울리지 않음.
+    val expectedAt = if (intent.hasExtra(AlarmWakeScheduler.EXTRA_EXPECTED_AT)) {
+        intent.getLongExtra(AlarmWakeScheduler.EXTRA_EXPECTED_AT, 0L)
+    } else {
+        null
+    }
+    when (AlarmWakeScheduler.decideOnReceive(context, id, expectedAt)) {
+        AlarmWakeScheduler.ReceiveDecision.SKIP_NO_ROW -> {
+            Log.e("CustomAlarmReceiver", "⚠️ DB에 없는 알람(id=$id) - 재생 건너뜀 (이미 취소/수정됨)")
+            return
+        }
+        AlarmWakeScheduler.ReceiveDecision.SKIP_RESCHEDULED -> {
+            Log.e("CustomAlarmReceiver", "⚠️ 옛 예약 도착(예정 시각 불일치, DB 시각은 미래) - 울리지 않고 DB 시각으로 재예약: id=$id")
+            return
+        }
+        AlarmWakeScheduler.ReceiveDecision.RING -> Unit
     }
 
     // ⭐ 2026-08-25 - 겹쳐 울리는 알람 처리: 아직 응답(끄기/스누즈/타임아웃)되지 않은
@@ -54,8 +69,19 @@ override fun onReceive(context: Context, intent: Intent) {
     // 지워지는 유령 행이 생길 수 있었음(RingingAlarmTracker.kt 클래스 주석 참고).
     // 실제 소리는 이미 AlarmPlayer(싱글턴, 아래에서 재생)가 최신 알람 것 하나로 항상
     // 자동 전환하므로 이 처리는 "화면/DB/이력을 소리와 일치시키는" 역할.
-    val previousRingingId = RingingAlarmTracker.getRingingAlarmId(context)
-    if (previousRingingId != null && previousRingingId != id) {
+    // ⭐ 2026-09-14 (출시전 감사 #3) - 이전 울림도 회차 관문(AlarmActionHelper.claimRingEnd)을 통과해야
+    // 마무리함. 관문이 먼저 회차를 폐기하므로, 아래 오버레이 종료 신호가 새 알람 재생 뒤에 도착해도
+    // 오버레이는 창만 닫고 새 알람 소리는 멈추지 않음(AlarmOverlayService.dismissAlarmFromExternal).
+    val previousRing = RingingAlarmTracker.current(context)
+    if (previousRing != null && previousRing.alarmId == id) {
+        // ⭐ 같은 알람이 끝나기 전에 또 수신됨(예: 재부팅 직후 같은 시각 예약이 두 경로로 등록돼
+        // 0.5초 간격으로 두 번 도착 - g1/handoff.md 착수 전 메모, 원인 제거는 #20). 이전 회차의
+        // 종료 예약만 거둬들이고 새 회차로 이어서 울림.
+        AlarmActionHelper.claimRingEnd(context, previousRing.alarmId, previousRing.round)
+    }
+    if (previousRing != null && previousRing.alarmId != id &&
+        AlarmActionHelper.claimRingEnd(context, previousRing.alarmId, previousRing.round)) {
+        val previousRingingId = previousRing.alarmId
         Log.e("CustomAlarmReceiver", "⏰ 이전 알람($previousRingingId)이 아직 응답 전인데 새 알람($id) 도착 - 이전 알람 자동 마무리")
         AlarmActionHelper.supersede(context, previousRingingId)
         try {
@@ -102,7 +128,11 @@ override fun onReceive(context: Context, intent: Intent) {
             Log.e("CustomAlarmReceiver", "⚠️ 이전 알람 오버레이 종료 신호 실패", e)
         }
     }
-    RingingAlarmTracker.setRingingAlarmId(context, id)
+    val ring = RingingAlarmTracker.startRing(context, id)
+    // ⭐ 2026-09-14 (#3) - 자동 종료를 화면 타이머에만 맡기지 않고 이 회차 기준으로 AlarmManager에 예약함
+    // (홈으로 나가 AlarmActivity가 파괴돼도, 절전 상태여도 지속시간에 끝남 - AlarmActionHelper 주석 참고)
+    val durationMinutes = getDurationFromDB(context, id)
+    AlarmActionHelper.scheduleRingTimeout(context, ring, durationMinutes)
 
     // ⭐ 신규: 알람 울릴 때 즉시 갱신 체크!
     AlarmRefreshUtil.checkAndTriggerRefresh(context)
@@ -116,6 +146,10 @@ override fun onReceive(context: Context, intent: Intent) {
 
     // 알람 재생 (DB에서 설정 읽어서 적용)
     AlarmPlayer.getInstance(context.applicationContext).playAlarmFromDB(id)
+
+    // ⭐ 2026-09-14 (출시전 감사 #4) - 화면/오버레이보다 먼저 제어 알림(끄기·5분 후·전체화면)을 올림.
+    // 화면 실행이 조용히 막히거나 오버레이 권한이 없어도 끌 수단이 남음(NotificationHelper 주석 참고).
+    NotificationHelper.showRingControlNotification(context, id, ring.round, label, durationMinutes)
     
     // 화면 강제로 깨우기
     wakeUpScreen(context)
@@ -127,40 +161,33 @@ override fun onReceive(context: Context, intent: Intent) {
     Log.e("CustomAlarmReceiver", "잠금 상태: ${if (isLocked) "잠금" else "해제"}")
     
     Handler(Looper.getMainLooper()).postDelayed({
+        // ⭐ 2026-09-14 (#3) - 이 0.5초 사이에 울림이 끝났거나(앱에서 삭제 등) 다음 울림에 넘어갔으면 화면을 안 띄움
+        if (!RingingAlarmTracker.isCurrent(context, id, ring.round)) {
+            Log.w("CustomAlarmReceiver", "⚠️ 표시 전에 회차가 끝남 - 화면 생략: id=$id 회차=${ring.round}")
+            return@postDelayed
+        }
         if (isLocked) {
             Log.e("CustomAlarmReceiver", "✅ 잠금 상태 - AlarmActivity 표시")
-            // ⭐ 잠금화면 AlarmActivity만 표시 (홈 버튼 시 Notification으로 제어)
-            showAlarmActivity(context, id, label)
+            // ⭐ 잠금화면 AlarmActivity 표시. 제어 알림의 전체화면 인텐트가 이미 이 회차 화면을 띄웠으면
+            // 다시 띄우지 않음(CLEAR_TASK로 재생성되며 깜빡이는 것 방지) - 2026-09-14 #4
+            if (AlarmActivity.visibleRing == ring) {
+                Log.e("CustomAlarmReceiver", "✅ 전체화면 알림으로 AlarmActivity 이미 표시됨")
+            } else {
+                showAlarmActivity(context, id, label, ring.round, durationMinutes)
+            }
         } else {
             if (canDrawOverlays(context)) {
                 Log.e("CustomAlarmReceiver", "✅ 잠금 해제 - Overlay 표시")
-                showOverlayWindow(context, id, label)
+                showOverlayWindow(context, id, label, ring.round)
             } else {
-                Log.e("CustomAlarmReceiver", "⚠️ Overlay 권한 없음 - Notification")
-                showNotification(context, id, label)
+                // ⭐ 2026-09-14 (#4) - 예전 폴백 알림(끄기 버튼 없음) 대신 이미 게시된 제어 알림(7777)으로 제어
+                Log.e("CustomAlarmReceiver", "⚠️ Overlay 권한 없음 - 제어 알림(7777)으로 제어")
             }
         }
     }, 500)
 }
     
-    private fun alarmExistsInDb(context: Context, id: Int): Boolean {
-        var cursor: android.database.Cursor? = null
-        var db: android.database.sqlite.SQLiteDatabase? = null
-        return try {
-            val dbHelper = DatabaseHelper.getInstance(context)
-            // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고).
-            // 확인 자체가 불가능한 상황이므로 기존 예외 처리와 동일하게 재생을 막지 않음.
-            db = dbHelper.getReadableDatabaseWithRetry() ?: return true
-            cursor = db.query("alarms", arrayOf("id"), "id = ?", arrayOf(id.toString()), null, null, null)
-            cursor.moveToFirst()
-        } catch (e: Exception) {
-            Log.e("CustomAlarmReceiver", "❌ 알람 존재 확인 실패 - 안전하게 재생 진행", e)
-            true  // 확인 자체가 실패하면 (기존 동작 유지 위해) 재생은 막지 않음
-        } finally {
-            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
-            cursor?.close()
-        }
-    }
+    // ⭐ 2026-09-14 (#27) - alarmExistsInDb()는 AlarmWakeScheduler.decideOnReceive()로 대체됨
 
     private fun wakeUpScreen(context: Context) {
         try {
@@ -187,10 +214,7 @@ override fun onReceive(context: Context, intent: Intent) {
         }
     }
     
-    private fun showAlarmActivity(context: Context, id: Int, label: String) {
-    // ⭐ DB에서 duration 읽기
-    val duration = getDurationFromDB(context, id)
-
+    private fun showAlarmActivity(context: Context, id: Int, label: String, round: Long, duration: Int) {
     val activityIntent = Intent(context, AlarmActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or
                 Intent.FLAG_ACTIVITY_CLEAR_TASK or
@@ -198,14 +222,15 @@ override fun onReceive(context: Context, intent: Intent) {
         putExtra("alarmId", id)
         putExtra("label", label)
         putExtra("alarmDuration", duration)
+        putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, round)
     }
 
     try {
         context.startActivity(activityIntent)
         Log.e("CustomAlarmReceiver", "✅ AlarmActivity 시작 (duration=${duration}분)")
     } catch (e: Exception) {
-        Log.e("CustomAlarmReceiver", "❌ AlarmActivity 시작 실패", e)
-        showNotification(context, id, label)
+        // ⭐ 2026-09-14 (#4) - 제어 알림(7777)이 이미 게시돼 있어 따로 폴백 알림을 만들지 않음
+        Log.e("CustomAlarmReceiver", "❌ AlarmActivity 시작 실패 - 제어 알림(7777)으로 제어", e)
     }
 }
 
@@ -261,65 +286,17 @@ override fun onReceive(context: Context, intent: Intent) {
         }
     }
     
-    private fun showOverlayWindow(context: Context, id: Int, label: String) {
+    private fun showOverlayWindow(context: Context, id: Int, label: String, round: Long) {
         Log.e("CustomAlarmReceiver", "✅ Overlay 표시 시작")
         
         val overlayIntent = Intent(context, AlarmOverlayService::class.java).apply {
             putExtra("alarmId", id)
+            putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, round)
         }
         
         context.startService(overlayIntent)
     }
     
-    private fun showNotification(context: Context, id: Int, label: String) {
-        Log.e("CustomAlarmReceiver", "⚠️ Notification으로 폴백")
-        
-        val fullScreenIntent = Intent(context, AlarmActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or 
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra("alarmId", id)
-        }
-        
-        val fullScreenPendingIntent = PendingIntent.getActivity(
-            context,
-            id,
-            fullScreenIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        
-        // ⭐ 채널 생성 (무음 - 소리는 AlarmPlayer에서 재생) - "알람" 키워드 제거
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Shiftbell",  // ⭐ "알람" 제거 (삼성 시스템 스누즈 방지)
-                NotificationManager.IMPORTANCE_HIGH  // fullScreenIntent를 위해 HIGH 유지
-            ).apply {
-                description = "근무 시간 알림"
-                enableVibration(false)
-                setSound(null, null)  // notification 자체는 무음
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Shiftbell")  // ⭐ "알람" 제거
-            .setContentText(label)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_CALL)  // ⭐ CALL 사용 (삼성 시스템 스누즈 방지, full-screen 지원)
-            .setFullScreenIntent(fullScreenPendingIntent, true)
-            .setSilent(true)  // ⭐ 소리/진동 없음 (알람 소리는 AlarmPlayer)
-            .setAutoCancel(true)
-            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
-            .setGroupSummary(false)
-            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(label))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
-            .build()
-        
-        notificationManager.notify(id + 100000, notification)  // ⭐ 8888/8889와 충돌 방지
-        
-        Log.e("CustomAlarmReceiver", "✅ Notification 표시")
-    }
+    // ⭐ 2026-09-14 (출시전 감사 #4) - showNotification()(끄기/스누즈 버튼 없는 폴백 알림, ID alarmId+100000) 제거.
+    // 울리는 즉시 게시하는 NotificationHelper.showRingControlNotification()으로 대체됨.
 }

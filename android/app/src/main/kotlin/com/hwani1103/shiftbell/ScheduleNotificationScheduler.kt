@@ -40,6 +40,33 @@ object ScheduleNotificationScheduler {
     // 정확히 그 알림을 지울 수 있음.
     const val REQUEST_CODE_OFFSET = 300000
 
+    // ⭐ 2026-09-14 (출시전 감사 #5, G1) - 예약 당시 트리거 시각(ms). 수신 시 DB 기준으로 다시 계산한 시각과 정확히 비교.
+    const val EXTRA_EXPECTED_AT = "schedule_expected_at"
+
+    // ⭐ #5 - 일정관리 탭 사용 여부를 Device Protected alarm_state에도 둠. Flutter 설정(schedule_tab_enabled)은 잠금 해제
+    // 전에는 읽을 수 없어서, 탭을 숨긴 뒤 재부팅하면 DirectBootReceiver가 일정 알림을 전부 되살렸음.
+    // 쓰는 곳: MainActivity(탭 숨김·복원 채널, 앱 시작 동기화 syncScheduleTabEnabled). 기본값 true(기존 사용자 동작 유지).
+    private const val PREFS_NAME = "alarm_state"
+    internal const val KEY_TAB_ENABLED = "schedule_tab_enabled"
+
+    private fun prefs(context: Context) = (
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) context.createDeviceProtectedStorageContext() else context
+    ).getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    fun isTabEnabled(context: Context): Boolean = prefs(context).getBoolean(KEY_TAB_ENABLED, true)
+
+    fun setTabEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_TAB_ENABLED, enabled).commit()
+    }
+
+    /** 앱 시작 시 Flutter 값과 맞춤 - 값이 바뀐 경우에만 예약을 거두거나 되살림. */
+    fun syncTabEnabled(context: Context, enabled: Boolean) {
+        val previous = isTabEnabled(context)
+        setTabEnabled(context, enabled)
+        if (previous == enabled) return
+        if (enabled) rescheduleAllFromDb(context) else cancelAllFromDb(context)
+    }
+
     fun schedule(
         context: Context,
         id: Int,
@@ -48,10 +75,17 @@ object ScheduleNotificationScheduler {
         startMinutes: Int,
         content: String,
         durationMinutes: Int = 0
-    ) {
+    ): Boolean {
+        if (!isTabEnabled(context)) {
+            // #5 - 탭을 숨긴 상태에선 새로 걸지 않음(탭 복원 시 rescheduleAllFromDb가 DB 기준으로 다시 검)
+            Log.d(TAG, "⏭️ 일정관리 탭 숨김 - 일정 알림 예약 안 함: id=$id")
+            return true
+        }
+        // ⭐ 2026-09-14 (출시전 감사 #13) - 예약 성공 여부를 돌려줌. 예전엔 실패를 로그로만 삼켜서
+        // Dart(일정 저장 화면)가 성공으로 알고 아무 안내도 안 했음.
         try {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val pendingIntent = buildPendingIntent(context, id, date, startMinutes, content, durationMinutes)
+            val pendingIntent = buildPendingIntent(context, id, date, startMinutes, content, durationMinutes, triggerAtMillis)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent
@@ -60,11 +94,13 @@ object ScheduleNotificationScheduler {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
             }
             Log.d(TAG, "✅ 일정 알림 예약: id=$id trigger=$triggerAtMillis")
+            return true
         } catch (e: Exception) {
             // ⭐ 정확한 알람 권한(SCHEDULE_EXACT_ALARM)이 꺼져 있는 등의 사유로
             // SecurityException이 날 수 있음 - 이 알림 하나를 못 건 것뿐이라
             // 기존 알람 시스템 전체에는 영향 없이 조용히 로그만 남김.
             Log.e(TAG, "❌ 일정 알림 예약 실패: id=$id", e)
+            return false
         }
     }
 
@@ -74,7 +110,7 @@ object ScheduleNotificationScheduler {
             // ⭐ 취소만 할 때는 실제 알림 문구(date/startMinutes/content)가 중요하지
             // 않음 - PendingIntent 매칭은 requestCode + data Uri만 보므로 더미 값으로
             // 충분함(FLAG_UPDATE_CURRENT라 값이 달라도 같은 PendingIntent로 인식됨).
-            val pendingIntent = buildPendingIntent(context, id, "", 0, "", 0)
+            val pendingIntent = buildPendingIntent(context, id, "", 0, "", 0, 0L)
             alarmManager.cancel(pendingIntent)
             pendingIntent.cancel()
 
@@ -97,6 +133,12 @@ object ScheduleNotificationScheduler {
     // 않는다"). Native가 date_schedules를 읽는 건 이번이 처음(DB_스키마_변경_
     // 가이드.md v23 항목 참고) - 이 함수 하나가 유일한 진입점.
     fun rescheduleAllFromDb(context: Context) {
+        // ⭐ 2026-09-14 (#5) - 탭을 숨긴 상태면 되살리지 않고 오히려 남아 있을 수 있는 예약을 거둠
+        if (!isTabEnabled(context)) {
+            Log.d(TAG, "⏭️ 일정관리 탭 숨김 - 재예약 대신 일괄 취소")
+            cancelAllFromDb(context)
+            return
+        }
         var cursor: android.database.Cursor? = null
         try {
             val dbHelper = DatabaseHelper.getInstance(context)
@@ -130,7 +172,13 @@ object ScheduleNotificationScheduler {
                 val durationMinutes = if (durationIdx >= 0) cursor.getInt(durationIdx) else 0
 
                 val triggerAtMillis = triggerMillisFor(date, startMinutes, offsetMinutes) ?: continue
-                if (triggerAtMillis <= now) continue // 지난 일정 - 조용히 스킵
+                if (triggerAtMillis <= now) {
+                    // ⭐ 2026-09-14 (출시전 감사 #10) - 지난 일정은 건너뛰기 "전에" 예약을 지움. 시간대·시계 변경으로 이
+                    // 함수가 다시 불렸을 때, 옛 절대 시각으로 걸려 있던 예약이 남아 엉뚱한 때 울리지 않게.
+                    // 이미 화면에 떠 있는 알림은 지우지 않음(사용자가 아직 못 봤을 수 있음).
+                    cancelAlarmOnly(context, id)
+                    continue
+                }
 
                 schedule(context, id, triggerAtMillis, date, startMinutes, content, durationMinutes)
                 count++
@@ -178,6 +226,77 @@ object ScheduleNotificationScheduler {
         }
     }
 
+    /** 예약만 취소(이미 표시된 알림은 그대로). */
+    private fun cancelAlarmOnly(context: Context, id: Int) {
+        try {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val pendingIntent = buildPendingIntent(context, id, "", 0, "", 0, 0L)
+            alarmManager.cancel(pendingIntent)
+            pendingIntent.cancel()
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ 지난 일정 예약 취소 실패: id=$id", e)
+        }
+    }
+
+    internal data class ScheduleDisplay(
+        val id: Int,
+        val date: String,
+        val startMinutes: Int,
+        val content: String,
+        val durationMinutes: Int
+    )
+
+    /**
+     * ⭐ 2026-09-14 (출시전 감사 #5) - 수신 시 표시 여부를 DB로 다시 판정. 표시할 내용(DB 기준) 또는 null.
+     * 표시 조건: 탭 사용 중 + 행 존재 + notify_enabled = 1 + DB로 다시 계산한 트리거 시각 == 예약 당시 시각(허용 오차 없음).
+     * 시각이 다르면 표시하지 않고, DB 시각이 미래면 그 시각으로 다시 예약(같은 ID 일정의 시각을 바꿨는데 옛 예약이 남은 경우).
+     * 예약 당시 시각이 없는 이 수정 이전 예약은 정확히 대조할 수 없으므로 표시하지 않음. DB 시각이 미래면 재예약.
+     * DB를 못 열면 확인할 수 없으므로 표시하지 않음(가벼운 일정 알림이라 기상 알람과 달리 fail-closed).
+     */
+    internal fun resolveOnReceive(context: Context, id: Int, expectedAtMillis: Long?): ScheduleDisplay? {
+        if (!isTabEnabled(context)) {
+            Log.d(TAG, "⏭️ 일정관리 탭 숨김 - 일정 알림 표시 안 함: id=$id")
+            return null
+        }
+        val db = try {
+            DatabaseHelper.getInstance(context).getReadableDatabaseWithRetry()
+        } catch (e: Exception) {
+            Log.e(TAG, "수신 판정 DB 열기 실패: id=$id", e)
+            null
+        } ?: return null
+        db.query(
+            "date_schedules",
+            arrayOf("date", "start_minutes", "notify_offset_minutes", "content", "duration_minutes", "notify_enabled"),
+            "id = ?", arrayOf(id.toString()), null, null, null
+        ).use { c ->
+            if (!c.moveToFirst()) {
+                Log.d(TAG, "⏭️ 삭제된 일정의 알림 - 표시 안 함: id=$id")
+                return null
+            }
+            if (c.getInt(5) != 1) {
+                Log.d(TAG, "⏭️ 알림이 꺼진 일정 - 표시 안 함: id=$id")
+                return null
+            }
+            val date = c.getString(0)
+            val startMinutes = c.getInt(1)
+            val durationMinutes = if (c.isNull(4)) 0 else c.getInt(4)
+            val content = c.getString(3) ?: ""
+            val trigger = triggerMillisFor(date, startMinutes, c.getInt(2)) ?: return null
+            val now = System.currentTimeMillis()
+            val matches = expectedAtMillis != null && trigger == expectedAtMillis
+            if (!matches) {
+                if (trigger > now) {
+                    Log.w(TAG, "⚠️ 옛 시각 예약 도착 - 표시 안 하고 DB 시각으로 재예약: id=$id")
+                    schedule(context, id, trigger, date, startMinutes, content, durationMinutes)
+                } else {
+                    Log.w(TAG, "⚠️ 예약 시각과 DB 시각 불일치(DB 시각은 지남) - 표시 안 함: id=$id")
+                }
+                return null
+            }
+            return ScheduleDisplay(id, date, startMinutes, content, durationMinutes)
+        }
+    }
+
     // ⭐ Dart schedule_notification_service.dart의 _triggerDateTime()과 반드시
     // 같은 계산이어야 함(그 파일 상단 주석 참고) - date('YYYY-MM-DD') 자정 +
     // startMinutes - offsetMinutes, 전부 기기 로컬 타임존 기준.
@@ -209,7 +328,8 @@ object ScheduleNotificationScheduler {
         date: String,
         startMinutes: Int,
         content: String,
-        durationMinutes: Int
+        durationMinutes: Int,
+        triggerAtMillis: Long
     ): PendingIntent {
         val intent = Intent(context, ScheduleNotificationReceiver::class.java).apply {
             // ⭐ id별로 항상 다른 data Uri - CustomAlarmReceiver의 "shiftbell://alarm/$id"와
@@ -220,6 +340,7 @@ object ScheduleNotificationScheduler {
             putExtra(ScheduleNotificationReceiver.EXTRA_START_MINUTES, startMinutes)
             putExtra(ScheduleNotificationReceiver.EXTRA_CONTENT, content)
             putExtra(ScheduleNotificationReceiver.EXTRA_DURATION_MINUTES, durationMinutes)
+            putExtra(EXTRA_EXPECTED_AT, triggerAtMillis)
         }
         return PendingIntent.getBroadcast(
             context,

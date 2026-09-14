@@ -212,6 +212,9 @@
   "onboardingCharLimitError": "{chars}글자 이하로 입력해주세요",
   "@onboardingCharLimitError": {"placeholders": {"chars": {"type": "int"}}},
   "onboardingDuplicateShiftName": "이미 존재하는 근무명입니다",
+  "shiftNameCommaNotAllowed": "근무명에는 쉼표(,)를 쓸 수 없어요",
+  "shiftNameReserved": "\"{name}\"은(는) 앱에서 따로 쓰는 이름이라 근무명으로 쓸 수 없어요",
+  "@shiftNameReserved": {"placeholders": {"name": {"type": "String"}}},
   "onboardingFixedAlarmDialogTitle": "{shift} 고정 알람",
   "@onboardingFixedAlarmDialogTitle": {"placeholders": {"shift": {"type": "String"}}},
   "onboardingFixedAlarmMaxHint": "근무별 알람 {max}개까지 등록 가능",
@@ -422,6 +425,21 @@
   "statusShiftAssigned": "근무가 할당되었습니다",
   "statusShiftAssignFailed": "근무 할당 실패",
   "statusShiftChangeFailed": "근무 변경 실패",
+  "alarmSchedulePartialFailed": "근무는 저장됐지만 알람 {total}개 중 {failed}개를 등록하지 못했어요. 정확한 알람 권한을 확인한 뒤 근무를 다시 저장해 주세요.",
+  "@alarmSchedulePartialFailed": {
+    "placeholders": {
+      "failed": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "scheduleNotifyRegisterFailed": "일정은 저장됐지만 알림을 예약하지 못했어요. 정확한 알람 권한을 확인한 뒤 일정을 다시 저장해 주세요.",
+  "scheduleTabSyncFailed": "화면 설정을 바꾸지 못했어요. 잠시 후 다시 시도해주세요.",
+  "permissionStatusUnknown": "{name}(확인 불가)",
+  "@permissionStatusUnknown": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
   "statusShiftNameUpdated": "근무명이 변경되었습니다",
   "statusShiftColorUpdated": "근무명 색상이 변경되었습니다",
   "statusColorAlreadyUsed": "이미 다른 근무에서 사용 중인 색상입니다",

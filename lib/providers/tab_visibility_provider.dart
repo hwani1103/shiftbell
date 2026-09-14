@@ -14,6 +14,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/schedule_notification_service.dart';
+
 const _kScheduleTabEnabledKey = 'schedule_tab_enabled';
 const _kConditionTabEnabledKey = 'condition_tab_enabled';
 
@@ -26,12 +28,27 @@ class TabEnabledNotifier extends StateNotifier<bool> {
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
     state = prefs.getBool(_prefsKey) ?? true;
+    // ⭐ 2026-09-14 (출시전 감사 #5) - 일정관리 탭 설정은 Native에도 맞춰 둠(재부팅·알림 수신 때 확인)
+    if (_prefsKey == _kScheduleTabEnabledKey) {
+      await ScheduleNotificationService.syncTabEnabledToNative(state);
+    }
   }
 
   Future<void> setEnabled(bool enabled) async {
-    state = enabled;
+    final previous = state;
+    if (_prefsKey == _kScheduleTabEnabledKey) {
+      final synced = await ScheduleNotificationService.syncTabEnabledToNative(enabled);
+      if (!synced) throw StateError('일정관리 탭 Native 동기화 실패');
+    }
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_prefsKey, enabled);
+    final saved = await prefs.setBool(_prefsKey, enabled);
+    if (!saved) {
+      if (_prefsKey == _kScheduleTabEnabledKey) {
+        await ScheduleNotificationService.syncTabEnabledToNative(previous);
+      }
+      throw StateError('탭 설정 저장 실패: $_prefsKey');
+    }
+    state = enabled;
   }
 }
 

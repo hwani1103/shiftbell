@@ -35,6 +35,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -122,7 +123,7 @@ class AlarmRefreshEngineH2Test {
 
     @Test
     fun `대조군 - 아무 것도 실패하지 않으면 매일 알람이 정상 삽입된다`() {
-        AlarmRefreshEngine.doRefresh(context, scheduleNativeAlarmOverride = { _, _, _, _, _ -> /* 성공한 척 */ })
+        AlarmRefreshEngine.doRefresh(context, scheduleNativeAlarmOverride = { _, _, _, _ -> /* 성공한 척 */ })
         val count = countAlarmRows()
         assertTrue(
             "픽스처가 올바르면 최소 ${minExpectedAlarms}일치가 삽입돼야 함(=$count) - 0이면 " +
@@ -132,7 +133,10 @@ class AlarmRefreshEngineH2Test {
     }
 
     @Test
-    fun `H2 - N번째 항목에서 OS 알람 등록이 실패하면 이전 항목들의 DB insert까지 통째로 롤백된다`() {
+    // ⭐ 2026-09-14 (출시전 감사 #16, G1) - H2를 고침: OS 반영을 커밋 뒤로 옮겨서 N번째 OS 등록 실패가
+    // DB를 롤백하지 않음. 실패한 알람은 AlarmWakeScheduler 실패 목록에 남아 다음 트리거에 재시도되고,
+    // 그동안은 "오늘 갱신 완료"를 찍지 않음. (이 파일 상단 주석의 예고대로 assertion을 고친 동작에 맞게 바꿈)
+    fun `H2 수정 - N번째 OS 알람 등록이 실패해도 DB 알람은 모두 남고 실패만 기록된다`() {
         val callCount = AtomicInteger(0)
         val failAtNth = 3
 
@@ -140,7 +144,7 @@ class AlarmRefreshEngineH2Test {
         try {
             AlarmRefreshEngine.doRefresh(
                 context,
-                scheduleNativeAlarmOverride = { _, _, _, _, _ ->
+                scheduleNativeAlarmOverride = { _, _, _, _ ->
                     if (callCount.incrementAndGet() == failAtNth) {
                         throw RuntimeException("가짜 OS 알람 등록 실패 (예: SecurityException 등을 흉내)")
                     }
@@ -150,22 +154,20 @@ class AlarmRefreshEngineH2Test {
             thrown = e
         }
 
-        assertTrue("scheduleNativeAlarm 실패는 doRefresh 밖으로 예외를 그대로 전파해야 함(현재 동작)", thrown != null)
+        assertNull("OS 등록 실패가 doRefresh 밖으로 전파되면 안 됨(커밋 뒤 개별 처리)", thrown)
         assertTrue(
             "픽스처가 최소 ${minExpectedAlarms}개를 만들어야 N번째(=$failAtNth)에 도달 가능한데 " +
                 "실제로는 ${callCount.get()}번만 호출됨 - 픽스처 문제일 수 있음",
             callCount.get() >= failAtNth
         )
 
-        // ⭐ H2의 핵심 증상: 1~(N-1)번째는 db.insert()가 이미 성공했었는데도,
-        // 트랜잭션 전체가 롤백되어 DB에는 단 한 건도 안 남는다.
         val countAfterFailure = countAlarmRows()
-        assertEquals(
-            "H2 미수정 상태의 현재 동작 - 트랜잭션 전체 롤백으로 1~${failAtNth - 1}번째 항목의 " +
-                "insert까지 전부 사라짐. 이 값이 0이 아니게 바뀌면(예: ${failAtNth - 1}) H2가 " +
-                "고쳐졌다는 뜻이니 이 assertion을 그 고친 내용에 맞게 업데이트할 것.",
-            0,
-            countAfterFailure
-        )
+        assertEquals("DB 알람은 OS 실패와 무관하게 전부 남아야 함", callCount.get(), countAfterFailure)
+        assertTrue(countAfterFailure >= minExpectedAlarms)
+        assertEquals("실패한 1건만 재시도 목록에 기록", 1, AlarmWakeScheduler.failedIds(context).size)
+
+        val lastRefresh = context.createDeviceProtectedStorageContext()
+            .getSharedPreferences("alarm_state", Context.MODE_PRIVATE).getLong("last_alarm_refresh", 0L)
+        assertEquals("실패가 남아 있으면 '오늘 갱신 완료'를 찍지 않음(다음 트리거 재시도)", 0L, lastRefresh)
     }
 }

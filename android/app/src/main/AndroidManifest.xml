@@ -91,8 +91,15 @@
             android:exported="true"
             android:directBootAware="true"
             android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            <!-- ⭐ 2026-09-14 (출시전 감사 V6, T10 연결) - 잠금 해제 전 부팅만이 아니라 잠금 해제 후 부팅(LOCKED_BOOT가
+                 안 오는 기기/경로), 앱 업데이트 직후, 정확한 알람 권한 허용 순간에도 알람·일정 알림을 즉시 다시 맞춤.
+                 수신 처리: DirectBootReceiver.kt (g1/integration_requests.md #1). 세 액션 모두 시스템이 보내므로
+                 receiver의 RECEIVE_BOOT_COMPLETED 발신자 권한 조건을 만족함. -->
             <intent-filter>
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED"/>
                 <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </receiver>

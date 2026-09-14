@@ -1,5 +1,21 @@
 import '../constants/platform_channel.dart';
 
+/// ⭐ 2026-09-14 (출시전 감사 #13) - 여러 알람을 Native에 등록한 결과 판정.
+/// 예전 판정 `failCount > 0 && scheduled.isEmpty`는 실패가 있으면 목록이 비어 있을 수 없어서
+/// 항상 거짓이었음(전부 실패해도 성공 안내). 판정을 이 한 곳에 둠.
+class AlarmScheduleOutcome {
+  const AlarmScheduleOutcome({required this.attempted, required this.failed});
+
+  /// 등록을 시도한 알람 수
+  final int attempted;
+
+  /// 그중 등록에 실패한 수
+  final int failed;
+
+  bool get allFailed => attempted > 0 && failed == attempted;
+  bool get partiallyFailed => failed > 0 && failed < attempted;
+}
+
 @pragma('vm:entry-point')
 class AlarmService {
   static final AlarmService _instance = AlarmService._internal();

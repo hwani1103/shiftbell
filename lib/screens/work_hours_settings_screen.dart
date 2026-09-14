@@ -4,6 +4,8 @@
 // 1. 근무 카드별 기본 근무시간 (1시간/30분 단위)
 // 2. 월별 총 근무시간을 합산할 기준 기간 (달력 월 vs 급여일 기준)
 
+import '../providers/data_revision_provider.dart';
+import '../services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -337,28 +339,23 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     _pendingEndOnlyMinutes.remove(shift);
     final newRange = ShiftTimeRange(shiftName: shift, startMinutes: startMinutes, endMinutes: endMinutes);
 
-    // 1) 컨디션 탭용 - 시각 자체
-    await ref.read(conditionShiftTimeProvider.notifier).save(shift, startMinutes, endMinutes);
+    await _persistShiftTime(shift, newRange);
+  }
 
-    // 2) 근로시간/OT 계산용(기존 소비자 변경 없음) - 시각에서 계산된 분 단위 값
-    final newDurations = Map<String, int>.from(schedule.shiftDurations ?? {});
-    newDurations[shift] = newRange.durationMinutes;
-
-    final newSchedule = ShiftSchedule(
-      id: schedule.id,
-      isRegular: schedule.isRegular,
-      pattern: schedule.pattern,
-      todayIndex: schedule.todayIndex,
-      shiftTypes: schedule.shiftTypes,
-      activeShiftTypes: schedule.activeShiftTypes,
-      startDate: schedule.startDate,
-      shiftColors: schedule.shiftColors,
-      customShiftColors: schedule.customShiftColors,
-      assignedDates: schedule.assignedDates,
-      shiftDurations: newDurations,
-    );
-
-    await ref.read(scheduleProvider.notifier).updateSchedule(newSchedule);
+  // ⭐ 2026-09-14 (출시전 감사 #28, G1) - 출퇴근 시각(condition_shift_times)과 근로시간(shift_schedule.shift_durations)을
+  // 한 트랜잭션으로, DB의 최신 근무표 기준 "이 근무 키만" 저장(DatabaseService.saveShiftTimeRange). 예전엔 두 곳을 따로
+  // 저장하고 화면이 들고 있던 옛 schedule 스냅샷의 근로시간 맵 전체를 다시 써서, 한쪽 실패 시 불일치·연속 수정/초기화 시
+  // 방금 바꾼 다른 근무 값이 옛 값으로 덮어써졌음. 저장 성공 뒤에만 화면 상태와 변경 통지(contracts §3)를 반영.
+  // [range]가 null이면 되돌리기.
+  Future<void> _persistShiftTime(String shift, ShiftTimeRange? range) async {
+    final saved = await DatabaseService.instance.saveShiftTimeRange(shift, range);
+    ref.read(conditionShiftTimeProvider.notifier).applyExternallyPersisted(shift, range, notify: true);
+    if (saved != null) {
+      ref.read(scheduleProvider.notifier).applyExternallyPersisted(
+        saved,
+        notifyDomains: const {DataDomain.workHoursSettings},
+      );
+    }
   }
 
   // ⭐ 2026-09-12(사용자 요청) - 이미 출퇴근이 채워진 근무를 다시 --:--/--:--로
@@ -374,24 +371,7 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
       _pendingEndOnlyMinutes.remove(shift);
     });
 
-    await ref.read(conditionShiftTimeProvider.notifier).remove(shift);
-
-    final newDurations = Map<String, int>.from(schedule.shiftDurations ?? {});
-    newDurations[shift] = 0;
-    final newSchedule = ShiftSchedule(
-      id: schedule.id,
-      isRegular: schedule.isRegular,
-      pattern: schedule.pattern,
-      todayIndex: schedule.todayIndex,
-      shiftTypes: schedule.shiftTypes,
-      activeShiftTypes: schedule.activeShiftTypes,
-      startDate: schedule.startDate,
-      shiftColors: schedule.shiftColors,
-      customShiftColors: schedule.customShiftColors,
-      assignedDates: schedule.assignedDates,
-      shiftDurations: newDurations,
-    );
-    await ref.read(scheduleProvider.notifier).updateSchedule(newSchedule);
+    await _persistShiftTime(shift, null);
   }
 
   // ⭐ 선택된 상태 배경색. 라이트 모드에서 colorScheme.primaryContainer가

@@ -3,6 +3,7 @@ package com.hwani1103.shiftbell
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import android.util.Log
 
 /**
  * ⭐ 2026-08-25 추가 - "지금 화면/소리로 응답을 기다리고 있는 알람이 있는가"를 추적함.
@@ -25,13 +26,46 @@ import android.os.Build
  * AlarmOverlayService도 자기 알람 ID가 바뀌는 걸 감지하면 뷰를 강제로 다시 그림
  * (표시 데이터 불일치 방지) - 두 수정은 독립적이지만 서로를 보완함.
  *
+ * ⭐ 2026-09-14 (출시전 감사 #3/#14, G1) - 알람 ID만으로는 "같은 알람의 어느 울림"인지
+ * 구분이 안 됐음. 스누즈한 알람은 같은 ID로 다시 울리므로, 이전 울림의 늦게 도착한 종료
+ * 신호(화면 타이머·종료 예약·7777 알림 버튼)가 새 울림을 끌 수 있었음. 그래서 두 값을 분리함:
+ *  - ring_counter: 누적 회차 번호. 새 울림마다 +1, **절대 지우지 않음**(번호 재사용 없음)
+ *  - 활성 울림(ID, 회차): 끄기·스누즈·인계·타임아웃에서만 폐기
+ * 종료 경로는 전부 AlarmActionHelper.claimRingEnd(ID, 회차)를 먼저 통과해야 하고, 둘 다
+ * 일치할 때만 그 울림을 끝냄(불일치는 무시 + 로그). 증가·설정·폐기·비교는 한 lock 안에서만.
+ *
+ * 저장은 commit()(동기) + 1회 재시도. 그래도 실패하면 이 프로세스 메모리 값으로 회차 판정을
+ * 계속함 - ID만 비교하는 폴백은 위 문제를 되살리므로 쓰지 않음. 리시버·서비스·Activity·
+ * MainActivity가 전부 같은 기본 프로세스라 메모리 값이 이 프로세스 안에서는 기준이 됨
+ * (android:process를 따로 두게 되면 다시 설계할 것). 프로세스가 죽으면 소리도 같이 멈추고,
+ * 다음 프로세스는 마지막으로 저장된 값에서 시작함.
+ *
  * Device Protected Storage를 씀(다른 alarm_state 값들과 동일한 이유 - 잠금 해제 전에도
  * CustomAlarmReceiver가 접근 가능해야 함).
  */
 object RingingAlarmTracker {
+    private const val TAG = "RingingAlarmTracker"
     private const val PREFS_NAME = "alarm_state"
     private const val KEY_RINGING_ID = "currently_ringing_alarm_id"
+    private const val KEY_RINGING_ROUND = "currently_ringing_round"
+    private const val KEY_RING_COUNTER = "ring_counter"
     private const val NONE = -1
+
+    /** 이 수정 이전 버전이 ID만 남겨둔 경우의 회차. 새 회차는 1부터라 겹치지 않음. */
+    const val LEGACY_ROUND = 0L
+
+    /** 회차 정보가 없는 요청(수정 이전에 만들어진 Intent 등). 어떤 활성 울림과도 일치하지 않음. */
+    const val NO_ROUND = -1L
+
+    data class ActiveRing(val alarmId: Int, val round: Long)
+
+    private val lock = Any()
+    private var loaded = false
+    private var counter = 0L
+    private var active: ActiveRing? = null
+
+    /** 테스트 전용 - commit 실패 주입. null이면 실제 commit(). */
+    internal var commitOverride: ((SharedPreferences.Editor) -> Boolean)? = null
 
     private fun prefs(context: Context): SharedPreferences {
         val deviceContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -42,23 +76,90 @@ object RingingAlarmTracker {
         return deviceContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
-    /** 지금 응답 대기 중인 알람 ID, 없으면 null. */
-    fun getRingingAlarmId(context: Context): Int? {
-        val id = prefs(context).getInt(KEY_RINGING_ID, NONE)
-        return if (id == NONE) null else id
-    }
-
-    /** 새 알람이 화면/소리를 시작할 때 호출 - "지금부터 이 알람이 응답 대기 중"으로 표시. */
-    fun setRingingAlarmId(context: Context, id: Int) {
-        prefs(context).edit().putInt(KEY_RINGING_ID, id).apply()
-    }
-
-    /** 이 id가 지금 추적 중인 값과 일치할 때만 지움(다른 알람이 이미 그 자리를 차지했으면
-     * 건드리지 않음 - 순서가 꼬여도 안전하게). */
-    fun clearIfMatches(context: Context, id: Int) {
+    // lock 안에서만 호출
+    private fun ensureLoaded(context: Context) {
+        if (loaded) return
         val p = prefs(context)
-        if (p.getInt(KEY_RINGING_ID, NONE) == id) {
-            p.edit().remove(KEY_RINGING_ID).apply()
+        counter = p.getLong(KEY_RING_COUNTER, 0L)
+        val id = p.getInt(KEY_RINGING_ID, NONE)
+        active = if (id == NONE) null else ActiveRing(id, p.getLong(KEY_RINGING_ROUND, LEGACY_ROUND))
+        loaded = true
+    }
+
+    // lock 안에서만 호출
+    private fun persist(context: Context, change: SharedPreferences.Editor.() -> Unit) {
+        repeat(2) { attempt ->
+            val ok = try {
+                val editor = prefs(context).edit()
+                editor.change()
+                commitOverride?.invoke(editor) ?: editor.commit()
+            } catch (e: Exception) {
+                Log.e(TAG, "울림 상태 저장 예외 (시도 ${attempt + 1})", e)
+                false
+            }
+            if (ok) return
         }
+        Log.e(TAG, "❌ 울림 상태 저장 2회 실패 - 이 프로세스 동안 메모리 회차로 계속 판정: active=$active counter=$counter")
+    }
+
+    /** 새 울림 시작 - 회차를 하나 올리고 (ID, 회차)를 활성으로 기록. 이전 활성 값은 덮어씀. */
+    fun startRing(context: Context, alarmId: Int): ActiveRing = synchronized(lock) {
+        ensureLoaded(context)
+        counter += 1
+        val ring = ActiveRing(alarmId, counter)
+        active = ring
+        persist(context) {
+            putLong(KEY_RING_COUNTER, ring.round)
+            putInt(KEY_RINGING_ID, alarmId)
+            putLong(KEY_RINGING_ROUND, ring.round)
+        }
+        ring
+    }
+
+    /** 지금 활성인 울림, 없으면 null. */
+    fun current(context: Context): ActiveRing? = synchronized(lock) {
+        ensureLoaded(context)
+        active
+    }
+
+    /** 지금 응답 대기 중인 알람 ID, 없으면 null. */
+    fun getRingingAlarmId(context: Context): Int? = current(context)?.alarmId
+
+    fun isCurrent(context: Context, alarmId: Int, round: Long): Boolean = synchronized(lock) {
+        ensureLoaded(context)
+        active == ActiveRing(alarmId, round)
+    }
+
+    /** (ID, 회차)가 둘 다 활성 값과 같을 때만 폐기하고 true. 아니면 아무것도 안 바꾸고 false. */
+    fun endIfCurrent(context: Context, alarmId: Int, round: Long): Boolean = synchronized(lock) {
+        ensureLoaded(context)
+        if (active != ActiveRing(alarmId, round)) {
+            Log.w(TAG, "⚠️ 지난 회차 종료 요청 무시: 요청=($alarmId, $round) 활성=$active")
+            return false
+        }
+        active = null
+        persist(context) {
+            remove(KEY_RINGING_ID)
+            remove(KEY_RINGING_ROUND)
+        }
+        true
+    }
+
+    /**
+     * 회차를 모르는 "지금 이 알람" 요청용(예: 앱에서 알람 삭제) - 활성 울림의 ID가 같으면 그
+     * 회차를 폐기하고 돌려줌. 판단 시점의 활성 값을 쓰므로 늦게 도착한 옛 신호에는 쓰지 말 것.
+     */
+    fun endCurrentOf(context: Context, alarmId: Int): ActiveRing? = synchronized(lock) {
+        ensureLoaded(context)
+        val ring = active?.takeIf { it.alarmId == alarmId } ?: return null
+        if (endIfCurrent(context, ring.alarmId, ring.round)) ring else null
+    }
+
+    /** 테스트 전용 - 프로세스 재시작처럼 메모리 값을 버림(저장된 값은 유지). */
+    internal fun resetMemoryForTest() = synchronized(lock) {
+        loaded = false
+        counter = 0L
+        active = null
+        commitOverride = null
     }
 }

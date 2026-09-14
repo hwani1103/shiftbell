@@ -37,12 +37,22 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
 
   Future<void> _checkPermissions() async {
     final permissions = await PermissionService().checkPermissions();
+    // ⭐ 2026-09-14 (출시전 감사 #13) - 정확한 알람은 허용/거부/확인 불가를 구분해서 표시
+    // (확인 불가를 허용으로 숨기지 않음)
+    final exactAlarm = await PermissionService().checkExactAlarmPermissionState();
 
     if (mounted) {
       final missing = <String>[];
       if (!permissions['notification']!) missing.add(context.l10n.permissionNotification);
       if (!permissions['overlay']!) missing.add(context.l10n.permissionOverlay);
-      if (!permissions['exactAlarm']!) missing.add(context.l10n.permissionExactAlarm);
+      switch (exactAlarm) {
+        case ExactAlarmPermissionState.denied:
+          missing.add(context.l10n.permissionExactAlarm);
+        case ExactAlarmPermissionState.unknown:
+          missing.add(context.l10n.permissionStatusUnknown(context.l10n.permissionExactAlarm));
+        case ExactAlarmPermissionState.granted:
+          break;
+      }
 
       setState(() {
         _missingPermissions = missing;

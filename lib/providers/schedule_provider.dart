@@ -1,5 +1,6 @@
 // lib/providers/schedule_provider.dart
 
+import 'data_revision_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/shift_schedule.dart';
 import '../services/database_service.dart';
@@ -13,18 +14,40 @@ import '../constants/alarm_limits.dart';
 
 
 final scheduleProvider = StateNotifierProvider<ScheduleNotifier, AsyncValue<ShiftSchedule?>>((ref) {
-  return ScheduleNotifier();
+  return ScheduleNotifier(ref);
 });
 
 class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
-  ScheduleNotifier() : super(const AsyncValue.loading()) {
+  ScheduleNotifier([this._ref]) : super(const AsyncValue.loading()) {
     _loadSchedule();
   }
+
+  final Ref? _ref;
+
+  // ⭐ 2026-09-14 (출시전 수정 연결 - docs/release_audit/contracts.md §3) - 원본 저장이 성공한 뒤에만 변경 통지.
+  // 계산 쪽(G3 컨디션·수면 provider)이 이 revision을 watch해 다시 계산함. 저장 실패·예외면 올리지 않음.
+  // shift_schedule 행에는 근로시간(shift_durations)도 들어 있어 workHoursSettings도 함께 올림(같은 값 재저장 시 올려도 되는 규칙).
+  void _notifyDomains(Set<DataDomain> domains) {
+    final ref = _ref;
+    if (ref == null) return;
+    for (final domain in domains) {
+      ref.read(dataRevisionProvider(domain).notifier).state++;
+    }
+  }
+
+  void _notifyScheduleChanged() =>
+      _notifyDomains(const {DataDomain.shiftSchedule, DataDomain.workHoursSettings});
 
   Future<void> _loadSchedule() async {
     state = const AsyncValue.loading();
     try {
       final schedule = await DatabaseService.instance.getShiftSchedule();
+      // ⭐ 2026-09-14 (출시전 감사 #11, D6) - 이미 저장된 잘못된 근무명(쉼표로 쪼개진 흔적·예약어·중복)은 자동으로
+      // 고치지 않고 로그만 남김(임의 변환은 사용자 데이터 손상 위험 - 사용자 결정 D6)
+      if (schedule != null) {
+        final invalid = invalidStoredShiftNames(schedule);
+        if (invalid.isNotEmpty) print('⚠️ 저장된 근무명 검증 실패(자동 변환 안 함, D6): $invalid');
+      }
       state = AsyncValue.data(schedule);
     } catch (e, stack) {
       state = AsyncValue.error(e, stack);
@@ -51,6 +74,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     );
 
     state = AsyncValue.data(savedSchedule);
+    _notifyScheduleChanged();
     WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
     FriendSyncService.instance.syncIfEnabled(savedSchedule);  // ⭐ 친구공유 중이면 Firestore도 갱신
   } catch (e, stack) {
@@ -63,8 +87,15 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   // 테이블과 함께 하나의 트랜잭션으로 묶어야 해서 saveSchedule/updateSchedule을 못
   // 씀)에서 저장이 끝난 스케줄을 Riverpod 상태에만 반영함 - DB에 다시 쓰지 않음(중복
   // 쓰기 방지). 위젯 갱신/친구공유 동기화는 saveSchedule/updateSchedule과 동일하게 함.
-  void applyExternallyPersisted(ShiftSchedule schedule) {
+  void applyExternallyPersisted(
+    ShiftSchedule schedule, {
+    Set<DataDomain> notifyDomains = const {
+      DataDomain.shiftSchedule,
+      DataDomain.workHoursSettings,
+    },
+  }) {
     state = AsyncValue.data(schedule);
+    _notifyDomains(notifyDomains);
     WidgetRefreshService.refresh();
     FriendSyncService.instance.syncIfEnabled(schedule);
   }
@@ -73,6 +104,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     try {
       await DatabaseService.instance.updateShiftSchedule(schedule);
       state = AsyncValue.data(schedule);
+      _notifyScheduleChanged();
       WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
       FriendSyncService.instance.syncIfEnabled(schedule);  // ⭐ 친구공유 중이면 Firestore도 갱신
     } catch (e, stack) {
@@ -220,8 +252,11 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       final db = await DatabaseService.instance.database;
       await db.delete('shift_schedule');
       await db.delete('shift_alarm_templates');
+      // ⭐ 2026-09-14 (#31) - 근무표·템플릿을 모두 지우는 초기화이므로 개별 알람 예외도 함께 삭제
+      await db.delete('alarm_overrides');
 
       state = const AsyncValue.data(null);
+      _notifyScheduleChanged();
       WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 초기화 반영
       print('🗑️ 교대근무 초기화 완료');
     } catch (e) {
@@ -277,6 +312,8 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       where: 'id = ?',
       whereArgs: [updatedSchedule.id],
     );
+    // ⭐ 2026-09-14 (출시전 감사 #31 D12) - 근무가 바뀐 배정일의 개별 예외를 같은 트랜잭션에서, 재생성보다 먼저 삭제
+    await DatabaseService.instance.deleteOverridesForChangedAssignments(txn, currentSchedule, updatedSchedule);
 
     if (targetDates.isNotEmpty) {
       result = await regenerateFixedAlarmsForDatesTxn(
@@ -291,13 +328,25 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     for (var id in result!.cancelIds) {
       await AlarmService().cancelAlarm(id);
     }
+    // ⭐ 2026-09-14 (출시전 감사 #13) - 예전엔 하나가 실패하면 예외로 나머지 등록까지 전부 건너뜀.
+    // 하나씩 시도하고 실패 수를 남김(이 함수의 화면 호출부 calendar_tab._changeShift는 현재 미사용이라
+    // 안내는 달력 일괄 배정 경로(alarm_provider.regenerateAlarmsAroundDates)에서만 함).
+    var failCount = 0;
     for (var s in result!.scheduled) {
-      await AlarmService().scheduleAlarm(
-        id: s.id,
-        dateTime: s.dateTime,
-        label: s.label,
-        soundType: 'loud',
-      );
+      try {
+        await AlarmService().scheduleAlarm(
+          id: s.id,
+          dateTime: s.dateTime,
+          label: s.label,
+          soundType: 'loud',
+        );
+      } catch (e) {
+        failCount++;
+        print('⚠️ 네이티브 알람 등록 실패 (ID: ${s.id}): $e');
+      }
+    }
+    if (failCount > 0) {
+      print('⚠️ 알람 등록 실패 $failCount/${result!.scheduled.length}');
     }
     print('🔵 알람 재계산: 대상 ${targetDates.length}일 (삭제: ${result!.cancelIds.length}, 생성: ${result!.scheduled.length})');
   } else {
@@ -305,6 +354,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   }
 
   state = AsyncValue.data(updatedSchedule);
+  _notifyScheduleChanged();
   WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 즉시 갱신
   FriendSyncService.instance.syncIfEnabled(updatedSchedule);  // ⭐ 친구공유 중이면 Firestore도 갱신
 

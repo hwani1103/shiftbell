@@ -1572,13 +1572,19 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     // 계속 순환하게.
     final color =
         kScheduleBlockColors[_blocks.length % kScheduleBlockColors.length];
-    await ref.read(dateScheduleProvider.notifier).create(
+    final created = await ref.read(dateScheduleProvider.notifier).create(
           raw.copyWith(
             date: widget.dateKey,
             color: color,
             createdAt: DateTime.now().toIso8601String(),
           ),
         );
+    // ⭐ 2026-09-14 (출시전 감사 #13) - 일정은 저장됐는데 알림 예약이 실패하면 조용히 넘어가지 않고 안내
+    if (!created.notifyScheduled && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.scheduleNotifyRegisterFailed)),
+      );
+    }
   }
 
   // ⭐ 기존 일정을 탭하면 - 같은 시트를 "수정 모드"로 열어서 저장/삭제 가능하게
@@ -1605,12 +1611,18 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     if (result == _CreateBlockSheet.deleteSignal) {
       await notifier.delete(block);
     } else if (result is DateSchedule) {
-      await notifier.update(result.copyWith(
+      final notifyScheduled = await notifier.update(result.copyWith(
         id: block.id,
         date: block.date,
         color: block.color,
         createdAt: block.createdAt,
       ));
+      // ⭐ 2026-09-14 (#13) - 알림 예약 실패 안내 (create와 동일)
+      if (!notifyScheduled && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.scheduleNotifyRegisterFailed)),
+        );
+      }
     }
   }
 
