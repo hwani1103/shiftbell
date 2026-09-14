@@ -199,7 +199,7 @@ val checkDartKotlinSync = tasks.register("checkDartKotlinSync") {
             kotlinFile = file("src/main/kotlin/com/hwani1103/shiftbell/DatabaseHelper.kt"),
             kotlinRegex = Regex("""DATABASE_VERSION\s*=\s*(\d+)"""),
             dartFile = File(repoRoot, "assets/db/migrations.json"),
-            dartRegex = Regex(""""targetVersion"\s*:\s*(\d+)"""),
+            dartRegex = Regex("\"targetVersion\"\\s*:\\s*(\\d+)"),
             hint = "assets/db/migrations.json의 targetVersion을 DATABASE_VERSION과 같게 맞추고, migrations에 그 버전 항목과 repair 최종 형태를 추가하세요(DB_스키마_변경_가이드.md)."
         )
 
