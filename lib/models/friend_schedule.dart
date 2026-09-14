@@ -20,6 +20,13 @@ class FriendScheduleData {
   static const maxPatternLength = 128;
   static const maxMapEntries = 5000;
 
+  /// ⭐ 2026-09-14 (출시전 교차 검토 X-11) - 1.0.22는 공유 이름 길이 제한이 없었음. 그때 만든 긴 이름의 문서·캐시를 거부하면
+  /// 업데이트 뒤 친구 근무표가 안 보이고 내 업로드도 계속 보류됨 → 거부 대신 표시·업로드 길이로 자름(runes 기준).
+  static String clampOwnerName(String name) {
+    final runes = name.runes;
+    return runes.length <= maxOwnerNameLength ? name : String.fromCharCodes(runes.take(maxOwnerNameLength));
+  }
+
   final String ownerName; // ⭐ 코드를 만든 사람이 직접 적은 자기 이름
   final bool isRegular;
   final List<String>? pattern;
@@ -112,7 +119,6 @@ class FriendScheduleData {
     final updatedAtRaw = json['updatedAt'];
 
     if (ownerNameRaw is! String ||
-        ownerNameRaw.length > maxOwnerNameLength ||
         isRegularRaw is! bool ||
         (patternRaw != null && patternRaw is! List) ||
         (todayIndexRaw != null && todayIndexRaw is! int) ||
@@ -178,7 +184,7 @@ class FriendScheduleData {
     }
 
     return FriendScheduleData(
-      ownerName: ownerNameRaw.trim(),
+      ownerName: clampOwnerName(ownerNameRaw.trim()),
       isRegular: isRegularRaw,
       pattern: pattern?.cast<String>(),
       todayIndex: todayIndexRaw,

@@ -67,7 +67,11 @@ class AlarmActivity : AppCompatActivity() {
 
         alarmId = intent.getIntExtra("alarmId", 0)
         alarmDuration = intent.getIntExtra("alarmDuration", 3)  // 기본 3분
-        ringRound = intent.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, RingingAlarmTracker.NO_ROUND)
+        // ⭐ 2026-09-14 (교차 검토 X-12) - 회차 없는 옛 Intent는 옛 버전이 남긴 같은 ID의 울림에만 매핑
+        ringRound = RingingAlarmTracker.normalizeRound(
+            applicationContext, alarmId,
+            intent.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, RingingAlarmTracker.NO_ROUND)
+        )
 
         // ⭐ 2026-09-14 (#3) - 이미 끝난 회차의 화면 요청(예: 울림이 끝난 뒤 남은 알림 탭)이면 바로 닫음
         if (!RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) {

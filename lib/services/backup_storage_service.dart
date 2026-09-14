@@ -10,6 +10,9 @@
 // 로직은 전혀 참조하지 않는다.
 
 import '../constants/platform_channel.dart';
+import '../models/backup_payload.dart';
+import 'backup_validator.dart';
+import 'database_service.dart';
 
 class BackupStorageService {
   BackupStorageService._();
@@ -17,7 +20,10 @@ class BackupStorageService {
 
   static const _channel = kAlarmChannel;
 
-  /// 백업 JSON 문자열을 기기 저장소에 씀(항상 같은 파일 하나를 덮어씀).
+  /// 자동 탐지에서 최신순으로 확인할 최대 후보 수(네이티브는 최신 + 직전 정상본을 남기지만, 옛 설치의 잔여 파일까지 고려).
+  static const _maxCandidates = 5;
+
+  /// 백업 JSON 문자열을 기기 저장소에 씀. 성공하면 네이티브가 최신 + 직전 백업 1개만 남기고 정리함.
   /// Android 10(Q) 미만 기기에서는 지원 안 함 - false 반환.
   Future<bool> write(String jsonContent) async {
     try {
@@ -29,12 +35,33 @@ class BackupStorageService {
     }
   }
 
-  /// 기기에 저장된 백업 JSON 문자열을 읽어옴. 없거나 미지원 기기면 null.
+  /// 기기에 저장된 백업 중 복원에 쓸 수 있는 가장 최근 것의 JSON. 없거나 미지원 기기면 null.
+  ///
+  /// ⭐ 2026-09-14 (출시전 교차 검토 X-07) - 예전엔 네이티브가 "schemaVersion + tables 형식인 첫 파일"에서 멈춰서, 최신 파일이
+  /// 형식만 맞고 실제로는 비었거나 검증에 실패하면 더 오래된 정상 백업을 찾지 않았음. 이제 후보를 최신순으로 하나씩 받아
+  /// 디코딩 → 근무 일정 존재 → 현재 스키마 기준 검증(BackupValidator)까지 통과한 첫 파일을 고름.
   Future<String?> read() async {
+    for (var skip = 0; skip < _maxCandidates; skip++) {
+      final String? content;
+      try {
+        content = await _channel.invokeMethod<String>('readBackupFile', {'skip': skip});
+      } catch (e) {
+        return null;
+      }
+      if (content == null) return null;
+      if (await _isRestorable(content)) return content;
+    }
+    return null;
+  }
+
+  Future<bool> _isRestorable(String content) async {
+    final payload = BackupPayload.tryDecode(content);
+    if (payload == null || !BackupValidator.hasSchedule(payload)) return false;
     try {
-      return await _channel.invokeMethod<String>('readBackupFile');
-    } catch (e) {
-      return null;
+      final db = await DatabaseService.instance.database;
+      return (await BackupValidator.validate(payload, db)).isEmpty;
+    } catch (_) {
+      return false;
     }
   }
 

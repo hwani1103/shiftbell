@@ -229,10 +229,15 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         }
     }
     
+    // ⭐ 2026-09-14 (출시전 교차 검토 X-05) - 예전엔 scheduleRaw로 무조건 다시 걸어서 (1) 백업 복원이 취소한 옛 예약을
+    // 복원 도중에 되살리거나 (2) 방금 읽은 뒤 스누즈·시각 변경으로 DB가 바뀐 경우 옛 시각으로 덮어쓸 수 있었음.
+    // 이제 복원 잠금이면 미루고(복원 owner가 마지막에 재조정), 반영 직전 DB 시각을 다시 확인하는 경로(scheduleIfCurrent)로만 건다.
     private fun reScheduleAlarm(context: Context, alarm: AlarmData) {
+        if (RestoreGate.shouldDefer(context, "guardRearm")) return
         try {
-            AlarmWakeScheduler.scheduleRaw(context, alarm.id, alarm.timestamp, alarm.shiftType)
-            Log.d("AlarmGuardReceiver", "✅ 알람 재등록 완료: ID=${alarm.id}")
+            val db = DatabaseHelper.getInstance(context).getReadableDatabaseWithRetry()
+            val outcome = AlarmWakeScheduler.scheduleIfCurrent(context, db, alarm.id, alarm.timestamp, alarm.shiftType)
+            Log.d("AlarmGuardReceiver", "✅ 알람 재등록 확인: ID=${alarm.id} 결과=$outcome")
         } catch (e: Exception) {
             AlarmWakeScheduler.recordFailure(context, alarm.id)
             Log.e("AlarmGuardReceiver", "❌ 알람 재등록 실패", e)

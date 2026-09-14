@@ -7,11 +7,14 @@
 //  - 지금 데이터로 계속 쓰기: 현재 DB 기준으로 알람·일정 알림 예약을 다시 맞추고 작업 기록 삭제 → 앱 재시작.
 //  - 사본이 없거나 손상됐으면 이어서 할 수 없다고 알리고, 현재 데이터 기준 정리 후 계속만 제공.
 // 그동안 알람은 네이티브가 현재 DB 기준으로 정상 동작한다(RestoreGate 죽은 잠금 해제).
+//
+// ⭐ 2026-09-14 (출시전 교차 검토 X-03/X-06) - 재시작은 이 프로세스에서 울리는 알람이 끝난 뒤에만. "지금 데이터로 계속"의
+// 재조정이 실패하면 작업 기록이 남으므로 재시작하지 않고 이 화면에서 다시 선택하게 함.
 
 import 'package:flutter/material.dart';
 
-import '../constants/platform_channel.dart';
 import '../l10n/l10n_extensions.dart';
+import '../services/app_restart.dart';
 import '../services/restore_coordinator.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_button.dart';
@@ -26,9 +29,20 @@ class RestoreInterruptedScreen extends StatefulWidget {
 class _RestoreInterruptedScreenState extends State<RestoreInterruptedScreen> {
   bool _working = false;
   bool _copyLost = false;
+  bool _waitingAlarm = false;
 
   Future<void> _restartApp() async {
-    await kAlarmChannel.invokeMethod('restartApp');
+    await restartAppWhenNoAlarmRinging(onWaiting: () {
+      if (mounted && !_waitingAlarm) setState(() => _waitingAlarm = true);
+    });
+  }
+
+  void _showIncomplete() {
+    if (!mounted) return;
+    setState(() => _working = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.backupRestoreIncompleteToast)),
+    );
   }
 
   Future<void> _resume() async {
@@ -43,11 +57,7 @@ class _RestoreInterruptedScreenState extends State<RestoreInterruptedScreen> {
         _copyLost = true;
       });
     } catch (e) {
-      if (!mounted) return;
-      setState(() => _working = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.backupRestoreIncompleteToast)),
-      );
+      _showIncomplete();
     }
   }
 
@@ -56,7 +66,9 @@ class _RestoreInterruptedScreenState extends State<RestoreInterruptedScreen> {
     try {
       await RestoreCoordinator.instance.safeEnd();
     } catch (_) {
-      // 정리 실패여도 알람은 네이티브가 현재 DB로 동작 - 재시작 후 다시 이 화면에서 선택 가능
+      // 재조정을 끝내지 못해 작업 기록이 남음 - 알람은 네이티브가 현재 DB로 동작. 여기서 다시 선택 가능
+      _showIncomplete();
+      return;
     }
     await _restartApp();
   }
@@ -95,6 +107,14 @@ class _RestoreInterruptedScreenState extends State<RestoreInterruptedScreen> {
                       const CircularProgressIndicator(),
                       const SizedBox(height: 12),
                       Text(l10n.restoreInterruptedInProgress, textAlign: TextAlign.center),
+                      if (_waitingAlarm) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          l10n.restoreWaitingAlarmEnd,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 14, color: Colors.black54, height: 1.5),
+                        ),
+                      ],
                     ],
                   )
                 else if (_copyLost)

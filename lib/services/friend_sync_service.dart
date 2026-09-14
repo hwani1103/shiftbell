@@ -192,7 +192,7 @@ class FriendSyncService {
     int generation,
   ) {
     return <String, dynamic>{
-      'ownerName': ownerName,
+      'ownerName': FriendScheduleData.clampOwnerName(ownerName),
       'isRegular': schedule.isRegular,
       'pattern': schedule.pattern,
       'todayIndex': schedule.todayIndex,
@@ -336,7 +336,7 @@ class FriendSyncService {
     required ShiftSchedule schedule,
     required String ownerName,
   }) async {
-    final normalizedName = ownerName.trim();
+    final normalizedName = FriendScheduleData.clampOwnerName(ownerName.trim());
     if (normalizedName.isEmpty || !firebaseReady) return null;
     final ownerId = await getOrCreateOwnerId();
     if (ownerId == null) return null;

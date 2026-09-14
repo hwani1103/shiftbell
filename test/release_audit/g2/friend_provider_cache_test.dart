@@ -122,13 +122,16 @@ void main() {
 
   test('F-P05 깨졌거나 경계 밖 캐시는 data null로 표시하고 목록은 유지', () async {
     await insertFriend('broken', dataJson: '{not json');
-    await insertFriend('tooLong', dataJson: '{"ownerName":"${'a' * 81}","isRegular":false,"updatedAt":"2026-09-01T00:00:00.000"}');
+    await insertFriend('badType', dataJson: '{"ownerName":"x","isRegular":"no","updatedAt":"2026-09-01T00:00:00.000"}');
+    // 교차 검토 X-11 - 1.0.22에서 만든 80자 초과 이름 캐시는 거부하지 않고 80자로 잘라 표시
+    await insertFriend('longName', dataJson: '{"ownerName":"${'a' * 81}","isRegular":false,"updatedAt":"2026-09-01T00:00:00.000"}');
     final n = FriendNotifier();
     addTearDown(n.dispose);
 
     await n.load();
-    expect(n.state, hasLength(2));
-    expect(n.state.every((f) => f.data == null), isTrue);
+    expect(n.state, hasLength(3));
+    expect(n.state.where((f) => f.data == null), hasLength(2));
+    expect(n.state.where((f) => f.data != null).single.data!.ownerName, 'a' * 80);
   });
 
   test('F-P06 친구 추가: 잘못된 코드·중복 거부, 확인 불가면 등록 후 unconfirmed', () async {

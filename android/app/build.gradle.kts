@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.util.Base64
 import java.io.InputStreamReader
 import java.io.FileInputStream
 import java.nio.charset.Charset
@@ -55,6 +56,8 @@ android {
         // 없으면 구글 공개 테스트 앱 ID(dev는 아래 flavor에서 항상 테스트 ID). lib/constants/ad_config.dart 참고.
         manifestPlaceholders["admobAppId"] =
             (project.findProperty("ADMOB_APP_ID") as String?) ?: "ca-app-pub-3940256099942544~3347511713"
+        // ⭐ 2026-09-14 (출시전 교차 검토 X-14) - Analytics 초기 수집 여부를 Manifest에서부터 정함(dev flavor는 아래에서 false).
+        manifestPlaceholders["analyticsCollectionEnabled"] = "true"
     }
 
     // ⭐ 정식(prod) 앱과 테스트(dev) 앱을 같은 기기에 동시에 설치해둘 수 있게 분리함.
@@ -78,6 +81,7 @@ android {
             versionNameSuffix = "-dev"
             resValue("string", "app_name", "교대시계 (테스트)")
             manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
+            manifestPlaceholders["analyticsCollectionEnabled"] = "false"
         }
     }
 
@@ -229,4 +233,45 @@ val checkDartKotlinSync = tasks.register("checkDartKotlinSync") {
 // 같은 무관한 태스크는 제외되는 것까지 확인).
 tasks.matching { it.name.startsWith("pre") && it.name.endsWith("Build") }.configureEach {
     dependsOn(checkDartKotlinSync)
+}
+
+// ⭐ 2026-09-14 (출시전 교차 검토 X-13) - prod release(스토어 업로드용) 빌드는 AdMob 앱 ID·배너 ID가 모두 실제 값이어야만 진행.
+// 앱 ID(Gradle 속성 ADMOB_APP_ID)만 빠지면 Manifest에 구글 테스트 앱 ID가 들어간 채 실제 배너를 요청하고, 배너 ID
+// (--dart-define=ADMOB_BANNER_ID)만 빠지면 광고가 조용히 안 뜸 - 둘 다 빌드가 성공해 버려서 여기서 막음.
+// dev·debug·prod debug 빌드에는 영향 없음. 넣는 방법: 업데이트_가이드.md ③.
+val checkProdAdIds = tasks.register("checkProdAdIds") {
+    group = "verification"
+    description = "prod release 빌드에 실제 AdMob 앱 ID와 배너 ID가 주입됐는지 확인합니다 (없거나 테스트 ID면 빌드 실패)."
+    val appId = project.findProperty("ADMOB_APP_ID") as String?
+    val dartDefines = project.findProperty("dart-defines") as String?
+    doLast {
+        val testPublisher = "ca-app-pub-3940256099942544"
+        val problems = mutableListOf<String>()
+        if (appId.isNullOrBlank() || appId.startsWith(testPublisher)) {
+            problems += "ADMOB_APP_ID(Gradle 속성)가 없거나 구글 테스트 ID입니다."
+        }
+        // Flutter는 --dart-define 값을 항목마다 Base64로 인코딩해 쉼표로 이어 dart-defines 속성으로 넘김
+        val defines = dartDefines.orEmpty().split(",").filter { it.isNotBlank() }.map {
+            try {
+                String(Base64.getDecoder().decode(it), Charsets.UTF_8)
+            } catch (e: IllegalArgumentException) {
+                it
+            }
+        }
+        val banner = defines.firstOrNull { it.startsWith("ADMOB_BANNER_ID=") }?.substringAfter("=")
+        if (banner.isNullOrBlank() || banner.startsWith(testPublisher)) {
+            problems += "ADMOB_BANNER_ID(--dart-define)가 없거나 구글 테스트 ID입니다."
+        }
+        if (problems.isNotEmpty()) {
+            throw GradleException(
+                "\n\n🚨 prod release 광고 ID 확인 실패\n  - " + problems.joinToString("\n  - ") +
+                    "\n  → 업데이트_가이드.md ③대로 두 값을 모두 넣고 다시 빌드하세요.\n"
+            )
+        }
+        logger.lifecycle("✅ [광고 ID] prod release 앱 ID·배너 ID 주입 확인")
+    }
+}
+
+tasks.matching { it.name == "preProdReleaseBuild" }.configureEach {
+    dependsOn(checkProdAdIds)
 }

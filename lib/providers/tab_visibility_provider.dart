@@ -27,7 +27,9 @@ class TabEnabledNotifier extends StateNotifier<bool> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    state = prefs.getBool(_prefsKey) ?? true;
+    // ⭐ 2026-09-14 (출시전 교차 검토 X-09) - 손상된 값(bool이 아닌 자료형)이 남아 있어도 탭 초기화가 깨지지 않게 기본값으로
+    final raw = prefs.get(_prefsKey);
+    state = raw is bool ? raw : true;
     // ⭐ 2026-09-14 (출시전 감사 #5) - 일정관리 탭 설정은 Native에도 맞춰 둠(재부팅·알림 수신 때 확인)
     if (_prefsKey == _kScheduleTabEnabledKey) {
       await ScheduleNotificationService.syncTabEnabledToNative(state);

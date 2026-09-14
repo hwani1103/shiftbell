@@ -36,6 +36,15 @@ object AlarmActionHelper {
      * dismissType: "swiped"(울리는 중 확인) | "cancelled_before_ring"(울리기 전 취소) | "timeout"
      */
     fun dismiss(context: Context, alarmId: Int, dismissType: String) {
+        // ⭐ 2026-09-14 (교차 검토 X-04) - 끄기 DB 반영이 끝났음을(성공·실패 무관) 복원 이월 판정에 알림
+        try {
+            dismissInternal(context, alarmId, dismissType)
+        } finally {
+            RingingAlarmTracker.finishTransition(alarmId)
+        }
+    }
+
+    private fun dismissInternal(context: Context, alarmId: Int, dismissType: String) {
         // ⭐ G4 #19 - 끄기·타임아웃으로 이 알람의 진행이 끝나면 복원 전 재생 설정 스냅샷도 정리
         RestoreGate.clearRingSnapshot(context, alarmId)
         val dbHelper = DatabaseHelper.getInstance(context)
@@ -103,6 +112,15 @@ object AlarmActionHelper {
 
     /** 알람을 N분 뒤로 미룸. 성공 시 새 시간 정보 반환, 실패(알람 없음 등)면 null */
     fun snooze(context: Context, alarmId: Int, minutes: Int = 5): SnoozeResult? {
+        // ⭐ 2026-09-14 (교차 검토 X-04) - 스누즈 DB 반영이 끝났음을(성공·실패 무관) 복원 이월 판정에 알림
+        try {
+            return snoozeInternal(context, alarmId, minutes)
+        } finally {
+            RingingAlarmTracker.finishTransition(alarmId)
+        }
+    }
+
+    private fun snoozeInternal(context: Context, alarmId: Int, minutes: Int): SnoozeResult? {
         val dbHelper = DatabaseHelper.getInstance(context)
         // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 - DatabaseHelper.kt 상세 주석 참고.
         val db = dbHelper.getWritableDatabaseWithRetry() ?: run {
@@ -160,7 +178,10 @@ object AlarmActionHelper {
                     put("time", timeStr)
                     put("type", "snoozed")  // 자동 갱신 diff 대상에서 제외되어 보호됨
                 }
-                db.update("alarms", values, "id = ?", arrayOf(alarmId.toString()))
+                // ⭐ 2026-09-14 (교차 검토 X-04) - 조회 뒤 행이 사라졌으면(백업 복원 교체 등) 스누즈 이력만 남기고 성공처럼 끝내지 않음
+                if (db.update("alarms", values, "id = ?", arrayOf(alarmId.toString())) == 0) {
+                    throw IllegalStateException("snooze target row missing: id=$alarmId")
+                }
 
                 if (originalTime.isNotEmpty() && originalDate.isNotEmpty()) {
                     insertHistory(db, alarmId, originalDate, originalTime, shiftType, dayOffset, "snoozed")

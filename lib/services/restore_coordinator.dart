@@ -6,16 +6,24 @@
 // 단계: validated → locked → os_cleared → db_applied → prefs_applied → os_reconciled → (잠금 해제·기록 삭제)
 //  1. 검증(BackupValidator)이 모든 변경보다 먼저. 실패면 아무것도 안 바꿈.
 //  2. 검증 통과 내용을 Device Protected 저장소에 작업 사본 + 지문으로 저장. 이후 단계는 원본(다운로드 폴더) 대신 사본 사용.
-//  3. 잠금: 네이티브 RestoreGate(토큰 = prefs + 프로세스 메모리). 갱신 엔진·재시도·일정 재예약·수면 감지/위젯은 미룸,
-//     알람 재생·끄기·스누즈·타임아웃은 막지 않음. 이 owner의 최종 재조정은 토큰으로 통과.
-//  4. os_cleared: 진행 중 알람(울림 + 미래 스누즈)의 재생 설정 스냅샷 → 그 ID를 뺀 옛 기상 알람·일정 알림 예약 취소.
+//  3. 잠금: 네이티브 RestoreGate(토큰 = prefs + 프로세스 메모리). 갱신 엔진·재시도·일정 재예약·수면 감지/위젯·Guard 재등록은
+//     미룸, 알람 재생·끄기·스누즈·타임아웃은 막지 않음. 이 owner의 최종 재조정은 토큰으로 통과.
+//  4. os_cleared: 진행 중 알람(울림 + 종료 처리 중 + 최근 스누즈)의 재생 설정 스냅샷 → 그 ID를 뺀 옛 기상 알람·일정 알림 예약 취소.
 //  5. db_applied: 한 트랜잭션. 원본 테이블은 백업 내용으로 교체(백업에 없는 테이블은 비움 - 구버전 백업에 alarm_overrides가
 //     없으면 옛 예외가 남지 않게), 영구 이력은 자연키로 중복 제외 병합(절대 비우지 않음), alarms는 진행 중 행을 **원래 ID로**
 //     이월 + 백업 custom 행 삽입. ID가 겹치면 **백업 custom 쪽**이 새 ID를 받고, {백업ID: 새ID}는 트랜잭션 전에 작업 기록에 저장해
-//     재시도에서 같은 값을 씀. 트랜잭션 안에서 이월 대상이 늘어 새 충돌이 생기면 롤백 후 매핑을 늘려 다시 시도.
-//  6. prefs_applied: 백업 설정 중 허용 키만 반영(친구공유 7키·설치별 키 제외). 쓰기 실패는 실패로 처리.
+//     재시도에서 같은 값을 씀.
+//  6. prefs_applied: 백업 설정 중 허용 키만 반영(친구공유 7키·설치별 키 제외), 백업에 없는 허용 키는 지워 기본값으로. 쓰기 실패는 실패.
 //  7. os_reconciled: 네이티브가 fixed 재계산 + 미래 custom·snoozed 명시 재예약 + 복원된 탭 설정으로 일정 알림 재예약.
+//     갱신 엔진이나 일정 재예약이 끝까지 못 돌면 실패 → 작업 기록을 남기고 사용자에게 이어서 완료를 묻는다.
 //  완료 뒤(잠금 해제 후): Guard 재확인·위젯 갱신·친구공유 onRestoreCompleted(active면 현재 UID·회차로 dirty 재업로드).
+//
+// ⭐ 2026-09-14 (출시전 교차 검토 X-04/X-06/X-08) 보강:
+//  - X-04: 이월 대상을 네이티브가 준 ID(울림·종료 처리 중) + 최근 1시간 이후 스누즈 행으로 트랜잭션 안에서 다시 모으고,
+//    트랜잭션 끝에서 네이티브 울림 상태 epoch를 다시 읽어 준비 시점과 다르면(그 사이 새 울림·끄기·스누즈) 롤백 후 재시도.
+//    SQLite 잠금 밖에 있는 메모리 울림 상태·스냅샷까지 교체 직전 기준으로 맞추기 위함.
+//  - X-06: 최종 재조정 실패를 성공으로 넘기지 않음. "지금 데이터로 계속"(safeEnd)도 재조정에 실패하면 작업 기록을 지우지 않음.
+//  - X-08: 설정은 백업에 있는 키만 덮어쓰던 것을, 백업에 없는 허용 키는 지우도록 바꿈(기본값 사용 상태까지 복원).
 //
 // DB 교체는 트랜잭션이라 재실행해도 결과가 같음(원본 테이블은 같은 사본으로 다시 채움, 이력은 자연키로 중복 제외, 매핑은 기록 재사용).
 // 중간 실패 시: 현재 DB 기준으로 OS 예약을 다시 맞춘 뒤(예약이 취소된 채 남지 않게) 잠금을 풀고 작업 기록은 남김 → 앱을 열면
@@ -93,7 +101,10 @@ class RestoreIncompleteException implements Exception {
 /// 이어서 할 작업 사본이 없거나 손상됨 - 현재 DB 기준으로 정리하고 작업을 끝냄.
 class RestoreCopyLostException implements Exception {}
 
-class _MappingChanged implements Exception {}
+/// DB 교체를 준비하는 동안 진행 중 알람(울림·종료 처리·스누즈)이나 ID 매핑 조건이 바뀜 - 롤백 후 다시 준비.
+class _CarryChanged implements Exception {}
+
+typedef _Carry = ({int? activeRingId, Set<int> carryIds, int epoch});
 
 class RestoreCoordinator {
   RestoreCoordinator._();
@@ -101,6 +112,8 @@ class RestoreCoordinator {
 
   static const _channel = kAlarmChannel;
   static const _jobFileName = 'job.json';
+  static const _maxCarryAttempts = 5;
+  static const _snoozeCarryLookback = Duration(hours: 1);
   static const _historyKeys = {
     'alarm_history': ['alarm_id', 'scheduled_date', 'scheduled_time', 'actual_ring_time', 'dismiss_type'],
     'alarm_creation_log': ['alarm_id', 'scheduled_date', 'scheduled_time', 'source', 'created_at'],
@@ -203,18 +216,29 @@ class RestoreCoordinator {
   }
 
   /// 이어서 하지 않고 지금 데이터로 계속 사용: 현재 DB 기준 OS 재조정 → 작업 기록·사본 삭제.
+  /// 재조정이 끝까지 못 돌면 작업 기록을 지우지 않고 [RestoreIncompleteException](X-06 - 다음에 다시 선택 가능).
   Future<void> safeEnd() async {
-    final token = _newToken();
-    final locked = await _acquire(token);
+    if (_running) throw StateError('restore already running');
+    _running = true;
     try {
-      if (locked) await _reconcile(token);
-    } catch (e) {
-      debugPrint('🧯 [restore] 안전 종료 재조정 실패: $e');
+      final token = _newToken();
+      if (!await _acquire(token)) {
+        throw RestoreIncompleteException(StateError('restore lock not acquired'));
+      }
+      try {
+        await _reconcile(token);
+      } catch (e) {
+        debugPrint('🧯 [restore] 안전 종료 재조정 실패 - 작업 기록 유지: $e');
+        await _release(token);
+        await _afterUnlock();
+        throw RestoreIncompleteException(e);
+      }
+      await _release(token);
+      await _deleteJob(await loadPendingJob());
+      await _afterUnlock();
     } finally {
-      if (locked) await _release(token);
+      _running = false;
     }
-    await _deleteJob(await loadPendingJob());
-    await _afterUnlock();
   }
 
   // ── 실행 ────────────────────────────────────────────────────────
@@ -260,32 +284,40 @@ class RestoreCoordinator {
     await _saveJob(job);
   }
 
-  Future<({int? activeRingId, Set<int> carryIds})> _prepareCarry(String token) async {
+  Future<_Carry> _prepareCarry(String token) async {
     final res = await _channel.invokeMethod<Map>('restorePrepareCarryOver', {'token': token});
     final ids = ((res?['carryIds'] as List?) ?? const []).map((e) => e as int).toSet();
-    return (activeRingId: res?['activeRingId'] as int?, carryIds: ids);
+    final epoch = res?['epoch'];
+    if (epoch is! int) throw StateError('restorePrepareCarryOver returned no epoch');
+    return (activeRingId: res?['activeRingId'] as int?, carryIds: ids, epoch: epoch);
+  }
+
+  Future<int> _ringEpoch() async {
+    final epoch = await _channel.invokeMethod<int>('restoreRingEpoch');
+    if (epoch == null) throw StateError('restoreRingEpoch returned null');
+    return epoch;
   }
 
   Future<void> _applyDb(RestoreJob job, BackupPayload payload, String token) async {
     final db = await DatabaseService.instance.database;
     for (var attempt = 0;; attempt++) {
-      // 매 시도 전에 진행 중 알람 스냅샷을 다시 확인(그 사이 새로 스누즈된 알람 포함 - 이미 있는 스냅샷은 유지)
+      // 매 시도 전에 진행 중 알람과 스냅샷을 다시 확인(그 사이 새로 울리거나 스누즈된 알람 포함 - 이미 있는 스냅샷은 유지)
       final carry = await _prepareCarry(token);
-      await _extendIdMap(db, job, payload, carry.activeRingId);
+      await _extendIdMap(db, job, payload, carry.carryIds);
       try {
-        await db.transaction((txn) => _replaceInTxn(txn, job, payload, carry.activeRingId));
+        await db.transaction((txn) => _replaceInTxn(txn, job, payload, carry));
         return;
-      } on _MappingChanged {
-        if (attempt >= 2) rethrow;
-        debugPrint('🧯 [restore] 트랜잭션 중 진행 중 알람이 늘어 ID 매핑 재계산');
+      } on _CarryChanged {
+        if (attempt >= _maxCarryAttempts - 1) rethrow;
+        debugPrint('🧯 [restore] DB 교체 준비 중 진행 중 알람이 바뀜 - 롤백 후 다시 준비(${attempt + 1}/$_maxCarryAttempts)');
       }
     }
   }
 
   /// 백업 custom 알람 ID가 이 기기의 진행 중 알람 ID와 겹치면 백업 쪽에 새 ID 배정. 기존 매핑은 유지(재시도 결과 고정).
-  Future<void> _extendIdMap(DatabaseExecutor db, RestoreJob job, BackupPayload payload, int? activeRingId) async {
+  Future<void> _extendIdMap(DatabaseExecutor db, RestoreJob job, BackupPayload payload, Set<int> nativeCarryIds) async {
     final backupIds = (payload.tables[kBackupAlarmsTable] ?? const []).map((r) => r['id'] as int).toList()..sort();
-    final carry = await _carryIds(db, activeRingId);
+    final carry = await _carryIds(db, nativeCarryIds);
     final seqRows = await db.rawQuery("SELECT seq FROM sqlite_sequence WHERE name = 'alarms'");
     var next = [
       ...backupIds,
@@ -305,20 +337,23 @@ class RestoreCoordinator {
     if (changed) await _saveJob(job);
   }
 
-  Future<Set<int>> _carryIds(DatabaseExecutor db, int? activeRingId) async {
+  /// 이월할 행 ID: 네이티브가 알려준 진행 중 알람(울림·종료 처리 중) + 최근 1시간 이후 스누즈 행(시각이 막 지나 수신 직전인 것 포함).
+  Future<Set<int>> _carryIds(DatabaseExecutor db, Set<int> nativeCarryIds) async {
+    final ids = nativeCarryIds.toList();
+    final idClause = ids.isEmpty ? '' : ' OR id IN (${List.filled(ids.length, '?').join(',')})';
     final rows = await db.rawQuery(
-      "SELECT id FROM alarms WHERE (type = 'snoozed' AND date > ?) OR id = ?",
-      [_nowDbString(), activeRingId ?? -1],
+      "SELECT id FROM alarms WHERE (type = 'snoozed' AND date > ?)$idClause",
+      [_dbString(DateTime.now().subtract(_snoozeCarryLookback)), ...ids],
     );
     return rows.map((r) => r['id'] as int).toSet();
   }
 
-  Future<void> _replaceInTxn(Transaction txn, RestoreJob job, BackupPayload payload, int? activeRingId) async {
-    final carry = await _carryIds(txn, activeRingId);
+  Future<void> _replaceInTxn(Transaction txn, RestoreJob job, BackupPayload payload, _Carry prepared) async {
+    final carry = await _carryIds(txn, prepared.carryIds);
     final backupAlarms = payload.tables[kBackupAlarmsTable] ?? const <Map<String, dynamic>>[];
     for (final row in backupAlarms) {
       final target = job.idMap[row['id'] as int] ?? row['id'] as int;
-      if (carry.contains(target)) throw _MappingChanged();
+      if (carry.contains(target)) throw _CarryChanged();
     }
     final carryRows = carry.isEmpty
         ? const <Map<String, Object?>>[]
@@ -340,9 +375,9 @@ class RestoreCoordinator {
       if (!known.contains(entry.key)) continue;
       final keyCols = entry.value;
       final existing = await txn.query(entry.key, columns: keyCols);
-      final seen = existing.map((r) => keyCols.map((c) => '${r[c]}').join('')).toSet();
+      final seen = existing.map((r) => keyCols.map((c) => '${r[c]}').join('')).toSet();
       for (final row in payload.tables[entry.key] ?? const <Map<String, dynamic>>[]) {
-        final key = keyCols.map((c) => '${row[c]}').join('');
+        final key = keyCols.map((c) => '${row[c]}').join('');
         if (!seen.add(key)) continue;
         final copy = Map<String, dynamic>.from(row)..remove('id');
         await txn.insert(entry.key, copy);
@@ -354,17 +389,27 @@ class RestoreCoordinator {
     for (final row in carryRows) {
       await txn.insert('alarms', row);
     }
-    final now = _nowDbString();
+    final now = _dbString(DateTime.now());
     for (final row in backupAlarms) {
       final date = row['date'] as String?;
       if (date == null || date.compareTo(now) <= 0) continue;
       final copy = Map<String, dynamic>.from(row)..['id'] = job.idMap[row['id'] as int] ?? row['id'];
       await txn.insert('alarms', copy);
     }
+
+    // X-04 - 준비한 뒤 커밋 직전까지 울림 시작·종료·끄기/스누즈 반영이 있었으면 이월 대상이 달라졌을 수 있음 → 롤백 후 다시 준비.
+    // (네이티브는 메모리 값만 읽고 DB에 접근하지 않으므로 이 트랜잭션과 교착하지 않음)
+    if (await _ringEpoch() != prepared.epoch) throw _CarryChanged();
   }
 
   Future<void> _applyPrefs(BackupPayload payload) async {
     final prefs = await SharedPreferences.getInstance();
+    // X-08 - 백업에 없는 복원 대상 키는 지워서 앱 기본값으로(이 기기의 값이 덮어쓰기 복원 뒤에 남지 않게).
+    // 친구공유·설치별 키는 isBackupPreferenceKey가 false라 그대로 둠.
+    for (final key in prefs.getKeys().toList()) {
+      if (!isBackupPreferenceKey(key) || payload.preferences.containsKey(key)) continue;
+      if (!await prefs.remove(key)) throw StateError('preference remove failed: $key');
+    }
     for (final entry in payload.preferences.entries) {
       if (!isBackupPreferenceKey(entry.key)) continue;
       final value = entry.value;
@@ -386,10 +431,17 @@ class RestoreCoordinator {
     }
   }
 
+  /// 최종 OS 재조정. 네이티브가 갱신 엔진·일정 재예약을 끝까지 못 돌리면 예외(X-06).
+  /// 개별 기상 알람 예약 실패(정확한 알람 권한 거부 등)는 비정확 예약 + 재시도 목록으로 넘어가므로 실패로 보지 않고 로그만.
   Future<void> _reconcile(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    final tabEnabled = prefs.getBool('schedule_tab_enabled') ?? true;
-    await _channel.invokeMethod('restoreReconcileOs', {'token': token, 'scheduleTabEnabled': tabEnabled});
+    final rawTab = prefs.get('schedule_tab_enabled');
+    final tabEnabled = rawTab is bool ? rawTab : true;
+    final res = await _channel.invokeMethod<Map>('restoreReconcileOs', {'token': token, 'scheduleTabEnabled': tabEnabled});
+    final failures = res?['wakeFailures'];
+    if (failures is int && failures > 0) {
+      debugPrint('🧯 [restore] 재조정 중 개별 기상 알람 예약 실패 $failures건 - 재시도 목록으로 넘어감');
+    }
   }
 
   /// 잠금 해제 뒤(일반 writer 허용 상태)에만 하는 후속 동작.
@@ -479,9 +531,8 @@ class RestoreCoordinator {
     return List.generate(16, (_) => r.nextInt(256).toRadixString(16).padLeft(2, '0')).join();
   }
 
-  /// alarms.date와 같은 형식(초 단위, 로케일 무관)의 현재 시각 문자열.
-  static String _nowDbString() {
-    final n = DateTime.now();
+  /// alarms.date와 같은 형식(초 단위, 로케일 무관)의 시각 문자열.
+  static String _dbString(DateTime n) {
     String two(int v) => v.toString().padLeft(2, '0');
     return '${n.year.toString().padLeft(4, '0')}-${two(n.month)}-${two(n.day)}T${two(n.hour)}:${two(n.minute)}:${two(n.second)}';
   }

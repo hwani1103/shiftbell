@@ -568,8 +568,10 @@ override fun onNewIntent(intent: Intent) {
                     }
                 }
                 "readBackupFile" -> {
+                    // ⭐ 2026-09-14 (교차 검토 X-07) - skip = 형식은 맞았지만 Dart 검증에서 걸러진 최신 후보 수(다음 후보를 요청)
+                    val skip = call.argument<Int>("skip") ?: 0
                     Thread {
-                        val content = readBackupFile()
+                        val content = readBackupFile(skip)
                         runOnUiThread { result.success(content) }
                     }.start()
                 }
@@ -602,7 +604,15 @@ override fun onNewIntent(intent: Intent) {
                 "restoreReconcileOs" -> {
                     val token = call.argument<String>("token")
                     val tabEnabled = call.argument<Boolean>("scheduleTabEnabled") ?: true
-                    runRestoreStep(result) { RestoreOs.reconcileOs(applicationContext, token, tabEnabled); null }
+                    runRestoreStep(result) { RestoreOs.reconcileOs(applicationContext, token, tabEnabled) }
+                }
+                // ⭐ 2026-09-14 (교차 검토 X-04) - 복원 DB 교체 트랜잭션 끝에서 울림 상태가 바뀌었는지 확인(메모리 값만 - DB 접근 없음)
+                "restoreRingEpoch" -> {
+                    result.success(RingingAlarmTracker.carryState(applicationContext).epoch)
+                }
+                // ⭐ 2026-09-14 (교차 검토 X-03) - 복원 뒤 앱 재시작을 미룰지: 이 프로세스에서 시작된 울림이 아직 안 끝났는지
+                "isAlarmRingingLive" -> {
+                    result.success(RingingAlarmTracker.isLiveRing(applicationContext))
                 }
                 // ⭐ 설정 탭 "백업 데이터 불러오기"(사용 중인 앱 위에 다른 백업을
                 // 덮어씀) 전용 - restoreAll()로 거의 모든 테이블을 한 번에 갈아
@@ -842,8 +852,14 @@ override fun onNewIntent(intent: Intent) {
 
             // ⭐ 새 백업이 실제로 저장에 성공한 뒤에만: 다음 write() 때 지울 URI를
             // 갱신하고, 옛 백업(방금 저장한 새 백업이 아니라 그 이전 것)을 지움.
-            prefs.edit().putString("last_backup_uri", uri.toString()).apply()
-            cleanupOldBackupFiles(resolver, previousUriStr, keepUri = uri)
+            // ⭐ 2026-09-14 (교차 검토 X-07) - 직전 정상 백업 1개는 남김(새 파일이 나중에 손상·오판돼도 되돌아갈 곳).
+            // 지우는 건 그보다 이전 것. "백업 = 파일 하나" 원칙을 "최신 + 직전 1개"로 바꿈.
+            val olderUriStr = prefs.getString("prev_backup_uri", null)
+            prefs.edit()
+                .putString("last_backup_uri", uri.toString())
+                .putString("prev_backup_uri", previousUriStr)
+                .apply()
+            cleanupOldBackupFiles(resolver, olderUriStr, keepUris = listOfNotNull(uri.toString(), previousUriStr))
 
             Log.d("MainActivity", "✅ 백업 파일 저장 완료: $uri")
             true
@@ -866,7 +882,7 @@ override fun onNewIntent(intent: Intent) {
     // 지움 - 둘 다 selection/LIKE 없이 동작하는 가장 기본적인 경로라 OEM 프로바이더
     // 차이를 탈 위험이 훨씬 적음. 이 앱이 만드는 백업 파일 개수는 항상 소수라
     // 전체 목록을 가져오는 성능 부담도 없음.
-    private fun readBackupFile(): String? {
+    private fun readBackupFile(skip: Int = 0): String? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return null
         return try {
             val resolver = contentResolver
@@ -889,6 +905,7 @@ override fun onNewIntent(intent: Intent) {
                 }
             }
             Log.d("MainActivity", "🔍 Downloads 전체 ${totalCount}건 중 백업 후보 ${candidates.size}건")
+            var remainingSkip = skip
             for ((id, name) in candidates.sortedByDescending { it.first }) {
                 val uri = ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, id)
                 val content = try {
@@ -898,6 +915,10 @@ override fun onNewIntent(intent: Intent) {
                     null
                 } ?: continue
                 if (looksLikeCompleteBackup(content)) {
+                    if (remainingSkip > 0) {
+                        remainingSkip--
+                        continue
+                    }
                     Log.d("MainActivity", "✅ 백업 파일 발견: $uri ($name)")
                     return content
                 }
@@ -938,29 +959,31 @@ override fun onNewIntent(intent: Intent) {
         false
     }
 
+    // ⭐ 2026-09-14 (출시전 교차 검토 X-07) - [deleteUriStr]은 기억해 둔 "그보다 이전" 백업(직접 삭제), [keepUris]는 방금 쓴 새 백업과
+    // 직전 백업. 스캔 정리에서도 두 개는 남기고, 직전 백업을 기억하지 못하는 경우(재설치·이 수정 이전 설치)에는 스캔에서 가장 최근
+    // 것 하나를 직전 백업으로 남김.
     private fun cleanupOldBackupFiles(
         resolver: android.content.ContentResolver,
-        previousUriStr: String?,
-        keepUri: android.net.Uri
+        deleteUriStr: String?,
+        keepUris: List<String>
     ) {
         var deleted = 0
 
-        // 1) 기억해둔 "직전" URI를 직접 지움 - 쿼리를 안 타서 owner_package_name
-        // 버그의 영향을 안 받는, 사실상 유일하게 이 기기에서 실제로 동작하는 경로.
-        if (previousUriStr != null && previousUriStr != keepUri.toString()) {
+        // 1) 기억해둔 옛 URI를 직접 지움 - 쿼리를 안 타서 owner_package_name 버그의 영향을 안 받는, 이 기기에서 실제로 동작하는 경로.
+        if (deleteUriStr != null && deleteUriStr !in keepUris) {
             try {
-                deleted += resolver.delete(android.net.Uri.parse(previousUriStr), null, null)
+                deleted += resolver.delete(android.net.Uri.parse(deleteUriStr), null, null)
             } catch (e: Exception) {
                 Log.e("MainActivity", "⚠️ 옛 백업 파일 삭제 실패(무시 - 다음 백업 때 재시도됨)", e)
             }
         }
 
-        // 2) selection 없는 전체 스캔 - 이 기기에선 매번 0건이지만, 이 버그가
-        // 없는 다른 기기(또는 재설치로 기억이 끊긴 이전 설치)에서는 여기서 나머지
-        // 잔여 파일까지 정리됨. 방금 쓴 새 백업([keepUri])은 반드시 제외.
+        // 2) selection 없는 전체 스캔 - 이 버그가 없는 다른 기기(또는 재설치로 기억이 끊긴 이전 설치)에서 나머지 잔여 파일 정리.
         try {
-            val keepId = try { ContentUris.parseId(keepUri) } catch (e: Exception) { -1L }
-            val idsToDelete = mutableListOf<Long>()
+            val keepIds = keepUris.mapNotNull {
+                try { ContentUris.parseId(android.net.Uri.parse(it)) } catch (e: Exception) { null }
+            }.toSet()
+            val others = mutableListOf<Long>()
             resolver.query(
                 MediaStore.Downloads.EXTERNAL_CONTENT_URI,
                 arrayOf(MediaStore.Downloads._ID, MediaStore.Downloads.DISPLAY_NAME),
@@ -971,11 +994,13 @@ override fun onNewIntent(intent: Intent) {
                 while (cursor.moveToNext()) {
                     val name = cursor.getString(nameIdx) ?: continue
                     val id = cursor.getLong(idIdx)
-                    if (name.startsWith(BACKUP_DISPLAY_NAME_PREFIX) && id != keepId) {
-                        idsToDelete.add(id)
+                    if (name.startsWith(BACKUP_DISPLAY_NAME_PREFIX) && id !in keepIds) {
+                        others.add(id)
                     }
                 }
             }
+            val newestFirst = others.sortedDescending()  // _ID가 큰 쪽 = 가장 최근 삽입
+            val idsToDelete = if (keepIds.size >= 2) newestFirst else newestFirst.drop(1)
             for (id in idsToDelete) {
                 val uri = ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, id)
                 deleted += resolver.delete(uri, null, null)

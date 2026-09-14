@@ -89,7 +89,9 @@ class BackupValidator {
         issues.add('override action invalid $action');
       }
       if (!_isOffset(row['day_offset'] ?? 0)) issues.add('override day_offset invalid');
-      if (!_isDateTime(row['slot_time']) || !_isDate(row['origin_date'])) issues.add('override time invalid');
+      if (!_isDbDateTime(row['slot_time'], allowFraction: false) || !_isDate(row['origin_date'])) {
+        issues.add('override time invalid');
+      }
       if (!overrideKeys.add('${row['slot_time']}|${row['shift_type']}|${row['day_offset'] ?? 0}')) {
         issues.add('override duplicate slot');
       }
@@ -97,7 +99,7 @@ class BackupValidator {
 
     for (final row in tables[kBackupAlarmsTable] ?? const <Map<String, dynamic>>[]) {
       if (row['type'] != 'custom') issues.add('alarms row not custom (${row['type']})');
-      if (!_isDateTime(row['date'])) issues.add('alarms date invalid');
+      if (!_isDbDateTime(row['date'], allowFraction: true)) issues.add('alarms date invalid');
       if (!_isHm(row['time'])) issues.add('alarms time invalid');
       if (!typeIds.contains(row['alarm_type_id'])) issues.add('alarms alarm_type_id unknown');
       if (row['id'] is! int) issues.add('alarms id missing');
@@ -125,7 +127,15 @@ class BackupValidator {
     for (final entry in payload.preferences.entries) {
       final v = entry.value;
       final ok = v is bool || v is int || v is double || v is String || (v is List && v.every((e) => e is String));
-      if (!ok) issues.add('preference ${entry.key} unsupported type');
+      if (!ok) {
+        issues.add('preference ${entry.key} unsupported type');
+        continue;
+      }
+      // ⭐ 2026-09-14 (교차 검토 X-09) - 앱이 자료형을 정해 읽는 키는 그 자료형이어야 함(backup_policy.dart 등록표)
+      final expected = kBackupPreferenceTypes[entry.key];
+      if (expected != null && !backupPrefValueMatches(expected, v)) {
+        issues.add('preference ${entry.key} type mismatch');
+      }
     }
     return issues;
   }
@@ -210,7 +220,12 @@ class BackupValidator {
 
   static bool _isHm(Object? v) => v is String && _hm.hasMatch(v);
   static bool _isOffset(Object? v) => v is int && v >= -1 && v <= 1;
-  static bool _isDateTime(Object? v) => v is String && DateTime.tryParse(v) != null;
+  // ⭐ 2026-09-14 (교차 검토 X-09) - DB 비교·네이티브 파싱에 쓰는 날짜 문자열은 파싱만 되는 게 아니라 저장 형식이어야 함.
+  // 알람 date는 Dart toIso8601String의 밀리초가 붙을 수 있어 허용, 예외 slot_time은 초 단위 고정.
+  static final _dbDateTime = RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$');
+  static final _dbDateTimeFraction = RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?$');
+  static bool _isDbDateTime(Object? v, {required bool allowFraction}) =>
+      v is String && (allowFraction ? _dbDateTimeFraction : _dbDateTime).hasMatch(v) && DateTime.tryParse(v) != null;
   static bool _isDate(Object? v) {
     if (v is! String || !_dateKey.hasMatch(v)) return false;
     final parsed = DateTime.tryParse(v);

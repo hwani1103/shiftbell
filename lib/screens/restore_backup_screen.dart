@@ -226,55 +226,59 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Icon(Icons.restore, size: 64, color: kAppMainAccent),
-              const SizedBox(height: 24),
-              Text(
-                context.l10n.backupRestoreFoundTitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                context.l10n.backupRestoreFoundDesc,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, color: Colors.black54),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                context.l10n.backupRestoreLastSavedAt(_formatDate(widget.payload.exportedAt)),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12.5, color: Colors.black45),
-              ),
-              const SizedBox(height: 36),
-              if (_restoring)
-                Column(
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 12),
-                    Text(context.l10n.backupRestoreInProgress),
-                  ],
-                )
-              else ...[
-                AppButton(
-                  onPressed: _restore,
-                  child: Text(context.l10n.backupRestoreButton),
+    // ⭐ 2026-09-14 (출시전 교차 검토 X-02) - 복원 중 뒤로가기로 화면을 벗어나 앱을 닫거나 다른 화면에서 데이터를 고치지 못하게 함
+    return PopScope(
+      canPop: !_restoring,
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Icon(Icons.restore, size: 64, color: kAppMainAccent),
+                const SizedBox(height: 24),
+                Text(
+                  context.l10n.backupRestoreFoundTitle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 12),
-                TextButton(
-                  onPressed: _skip,
-                  child: Text(context.l10n.backupRestoreSkipButton),
+                Text(
+                  context.l10n.backupRestoreFoundDesc,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 14, color: Colors.black54),
                 ),
+                const SizedBox(height: 12),
+                Text(
+                  context.l10n.backupRestoreLastSavedAt(_formatDate(widget.payload.exportedAt)),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 12.5, color: Colors.black45),
+                ),
+                const SizedBox(height: 36),
+                if (_restoring)
+                  Column(
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 12),
+                      Text(context.l10n.backupRestoreInProgress),
+                    ],
+                  )
+                else ...[
+                  AppButton(
+                    onPressed: _restore,
+                    child: Text(context.l10n.backupRestoreButton),
+                  ),
+                  const SizedBox(height: 12),
+                  TextButton(
+                    onPressed: _skip,
+                    child: Text(context.l10n.backupRestoreSkipButton),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

@@ -29,6 +29,9 @@ object NotificationHelper {
     /** 울리는 중인 알람의 제어 알림 ID (한 번에 한 울림만 있으므로 고정) */
     const val RING_CONTROL_ID = 7777
 
+    /** 1.0.22까지 홈 버튼 제어 알림이 쓰던 채널(교차 검토 X-10) - 새로 만들지 않고, 이미 있을 때 폴백으로만 사용 */
+    private const val LEGACY_CONTROL_CHANNEL_ID = "alarm_control"
+
     /**
      * 스누즈 결과 Notification 표시 (8889)
      * 1. 8889 표시
@@ -129,6 +132,7 @@ object NotificationHelper {
             Log.w(TAG, "알림 상태 점검 실패", e)
         }
 
+        var channelId = CustomAlarmReceiver.CHANNEL_ID
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CustomAlarmReceiver.CHANNEL_ID,
@@ -142,7 +146,16 @@ object NotificationHelper {
             notificationManager.createNotificationChannel(channel)
             val current = notificationManager.getNotificationChannel(CustomAlarmReceiver.CHANNEL_ID)
             if (current != null && current.importance == NotificationManager.IMPORTANCE_NONE) {
-                Log.w(TAG, "⚠️ 알람 알림 채널이 사용자 설정으로 차단됨 - 제어 알림이 안 보임")
+                // ⭐ 2026-09-14 (교차 검토 X-10) - 1.0.22까지 홈 버튼 제어 알림은 별도 채널(alarm_control)이었음. 사용자가 새
+                // 채널만 막아 두고 옛 제어 채널은 허용해 둔 기기라면, 업데이트 뒤에도 제어 알림이 사라지지 않게 옛 채널로 게시.
+                // 옛 채널은 새로 만들지 않음(이미 있는 설치에서만 사용).
+                val legacy = notificationManager.getNotificationChannel(LEGACY_CONTROL_CHANNEL_ID)
+                if (legacy != null && legacy.importance != NotificationManager.IMPORTANCE_NONE) {
+                    channelId = LEGACY_CONTROL_CHANNEL_ID
+                    Log.w(TAG, "⚠️ 알람 알림 채널 차단됨 - 옛 제어 채널(alarm_control)로 제어 알림 게시")
+                } else {
+                    Log.w(TAG, "⚠️ 알람 알림 채널이 사용자 설정으로 차단됨 - 제어 알림이 안 보임")
+                }
             }
         }
 
@@ -176,7 +189,7 @@ object NotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(context, CustomAlarmReceiver.CHANNEL_ID)
+        val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(label)
             .setContentText("알람 울림 중")

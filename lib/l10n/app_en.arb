@@ -285,6 +285,8 @@
   "settingsRestoreFromBackupConfirmButton": "Restore",
   "settingsRestoreFromBackupInProgress": "Restoring...",
   "settingsRestoreFromBackupSuccessToast": "Restored! Restarting the app now.",
+  "restoreWaitingAlarmEnd": "An alarm is ringing. The app will restart after the alarm ends.",
+  "restoreDoNotLeave": "Please don't close the app or leave this screen until the restore finishes.",
   "settingsRestoreFromBackupFailedToast": "Restore failed. Please try again.",
   "settingsHelp": "Help",
   "settingsHelpDesc": "How to Use This App",

@@ -207,6 +207,13 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="${admobAppId}"/>
 
+        <!-- ⭐ 2026-09-14 (출시전 교차 검토 X-14) - Firebase Analytics 초기 수집 여부. dev flavor는 false, prod는 true
+             (build.gradle.kts manifestPlaceholders). Dart의 setAnalyticsCollectionEnabled(firebase_bootstrap.dart)보다
+             먼저 적용돼 첫 실행·초기화 실패·Native만 뜨는 경로에서도 dev 설치가 운영 통계에 섞이지 않게 함. -->
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
+            android:value="${analyticsCollectionEnabled}"/>
+
     </application>
 
     <queries>

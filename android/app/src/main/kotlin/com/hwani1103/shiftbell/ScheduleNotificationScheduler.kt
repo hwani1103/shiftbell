@@ -132,24 +132,25 @@ object ScheduleNotificationScheduler {
     // schedule_notification_service.dart 상단 주석 참고, "지난 일정은 예약하지
     // 않는다"). Native가 date_schedules를 읽는 건 이번이 처음(DB_스키마_변경_
     // 가이드.md v23 항목 참고) - 이 함수 하나가 유일한 진입점.
-    fun rescheduleAllFromDb(context: Context, ownerToken: String? = null) {
+    // ⭐ 2026-09-14 (교차 검토 X-06) - 끝까지 처리했으면 true(탭 숨김으로 일괄 취소한 경우 포함). 복원 최종 재조정만 결과를 확인함.
+    fun rescheduleAllFromDb(context: Context, ownerToken: String? = null): Boolean {
         // ⭐ G4 #19 - 복원 중엔 재예약하지 않음(복원 owner가 복원된 탭 설정으로 마지막에 다시 부름)
-        if (RestoreGate.shouldDefer(context, "scheduleReschedule", ownerToken)) return
+        if (RestoreGate.shouldDefer(context, "scheduleReschedule", ownerToken)) return false
         // ⭐ 2026-09-14 (#5) - 탭을 숨긴 상태면 되살리지 않고 오히려 남아 있을 수 있는 예약을 거둠
         if (!isTabEnabled(context)) {
             Log.d(TAG, "⏭️ 일정관리 탭 숨김 - 재예약 대신 일괄 취소")
             cancelAllFromDb(context)
-            return
+            return true
         }
         var cursor: android.database.Cursor? = null
-        try {
+        return try {
             val dbHelper = DatabaseHelper.getInstance(context)
             // ⭐ DB 파일이 아직 없거나 버전이 안 맞으면 null - Native가 함부로
             // 만들거나 건드리면 안 됨(DatabaseHelper.kt 상단 주석 참고). 이 경우
             // 그냥 스킵 - 다음에 앱이 열려서 Dart가 다시 만들 때 자연히 정상화됨.
             val db = dbHelper.getReadableDatabaseWithRetry() ?: run {
                 Log.d(TAG, "⏭️ DB 준비 안 됨 - 일정 알림 재예약 스킵")
-                return
+                return false
             }
 
             cursor = db.query(
@@ -186,8 +187,10 @@ object ScheduleNotificationScheduler {
                 count++
             }
             Log.d(TAG, "✅ 재부팅 후 일정 알림 재예약 완료: ${count}건")
+            true
         } catch (e: Exception) {
             Log.e(TAG, "❌ 일정 알림 재예약 실패", e)
+            false
         } finally {
             cursor?.close()
         }

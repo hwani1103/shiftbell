@@ -40,7 +40,7 @@ import '../services/schedule_notification_service.dart';
 import '../services/widget_refresh_service.dart';
 import '../widgets/disable_tab_button.dart';
 import '../services/backup_validator.dart';
-import '../services/restore_coordinator.dart';
+import 'restore_progress_screen.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
@@ -207,39 +207,31 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
     );
     if (confirmed != true || !mounted) return;
 
+    // ⭐ 2026-09-14 (출시전 감사 G4 #9/#19/#25) - 덮어쓰기 복원은 RestoreCoordinator가 검증·작업 사본·잠금·단계 기록으로 실행.
+    // 진행 중 알람(울림·스누즈)은 원래 ID로 보존, 이력은 병합, 친구공유 상태는 이 기기 값 유지, 마지막에 알람·일정 알림 재조정까지 함.
+    // ⭐ 2026-09-14 (출시전 교차 검토 X-02/X-03) - 실행은 앱 루트 네비게이터의 전용 화면(RestoreProgressScreen)에서. 진행 중 탭 이동·
+    // 뒤로가기를 막고, 이 탭이 사라져도 완료 후 재시작(울리는 알람이 있으면 끝난 뒤)을 그 화면이 직접 끝냄. 여기로 돌아오는 건
+    // 아무것도 바뀌지 않은 실패뿐.
+    final restorePayload = payload;
     setState(() => _isRestoringFromBackup = true);
-    try {
-      // ⭐ 2026-09-14 (출시전 감사 G4 #9/#19/#25) - 덮어쓰기 복원은 RestoreCoordinator가 검증·작업 사본·잠금·단계 기록으로 실행.
-      // 진행 중 알람(울림·스누즈)은 원래 ID로 보존, 이력은 병합, 친구공유 상태는 이 기기 값 유지, 마지막에 알람·일정 알림 재조정까지 함.
-      await RestoreCoordinator.instance.start(payload, overwrite: true);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.settingsRestoreFromBackupSuccessToast)),
-      );
-      // ⭐ 토스트를 잠깐 보여준 뒤 재시작 - 네이티브 쪽에도 300ms 지연이 한 번 더
-      // 있어서(MainActivity.kt) 총 지연은 그리 길지 않음.
-      await Future.delayed(const Duration(milliseconds: 600));
-      await kAlarmChannel.invokeMethod('restartApp');
-    } on BackupValidationException {
-      if (!mounted) return;
-      setState(() => _isRestoringFromBackup = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.backupRestoreInvalidToast)),
-      );
-    } on RestoreIncompleteException {
-      // 작업 기록이 남음 - 재시작하면 앱 시작 화면에서 이어서 완료/지금 데이터로 계속을 묻는다
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.backupRestoreIncompleteToast)),
-      );
-      await Future.delayed(const Duration(milliseconds: 1200));
-      await kAlarmChannel.invokeMethod('restartApp');
-    } catch (e) {
-      if (!mounted) return;
-      setState(() => _isRestoringFromBackup = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.settingsRestoreFromBackupFailedToast)),
-      );
+    final outcome = await Navigator.of(context, rootNavigator: true).push<RestoreProgressOutcome>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => RestoreProgressScreen(payload: restorePayload),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _isRestoringFromBackup = false);
+    switch (outcome) {
+      case RestoreProgressOutcome.invalid:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.backupRestoreInvalidToast)),
+        );
+      case RestoreProgressOutcome.failed:
+      case null:
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.settingsRestoreFromBackupFailedToast)),
+        );
     }
   }
 

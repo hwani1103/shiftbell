@@ -33,7 +33,10 @@ class AlarmActionReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val alarmId = intent.getIntExtra(EXTRA_ALARM_ID, 0)
-        val round = intent.getLongExtra(EXTRA_RING_ROUND, RingingAlarmTracker.NO_ROUND)
+        // ⭐ 2026-09-14 (교차 검토 X-12) - 1.0.22 이하가 게시한 제어 알림(회차 없음)은 옛 버전이 남긴 같은 ID의 활성 울림에만 매핑
+        val round = RingingAlarmTracker.normalizeRound(
+            context, alarmId, intent.getLongExtra(EXTRA_RING_ROUND, RingingAlarmTracker.NO_ROUND)
+        )
 
         when (intent.action) {
             // ⭐ 30초 후 8889 자동 삭제

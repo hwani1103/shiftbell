@@ -143,10 +143,11 @@ object RestoreGate {
 
     // ── 재생 설정 스냅샷 ──────────────────────────────────────────────
 
+    /** 스냅샷이 확보됐으면 true(이미 있었거나 방금 저장). 저장 실패만 false - 호출부는 복원을 실패로 처리해야 함(교차 검토 X-04). */
     fun saveRingSnapshotIfAbsent(context: Context, alarmId: Int, snapshot: RingSnapshot): Boolean {
         val p = prefs(context)
         val key = "$SNAPSHOT_PREFIX$alarmId"
-        if (p.contains(key)) return false
+        if (p.contains(key)) return true
         val json = JSONObject()
             .put("sound_file", snapshot.soundFile)
             .put("volume", snapshot.volume.toDouble())

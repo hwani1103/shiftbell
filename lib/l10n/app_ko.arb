@@ -287,6 +287,8 @@
   "settingsRestoreFromBackupConfirmButton": "복구하기",
   "settingsRestoreFromBackupInProgress": "복구하는 중...",
   "settingsRestoreFromBackupSuccessToast": "복구 완료! 앱을 다시 시작할게요.",
+  "restoreWaitingAlarmEnd": "알람이 울리는 중이에요. 알람이 끝나면 앱을 다시 시작할게요.",
+  "restoreDoNotLeave": "복구가 끝날 때까지 앱을 닫거나 다른 화면으로 이동하지 마세요.",
   "settingsRestoreFromBackupFailedToast": "복구에 실패했어요. 다시 시도해주세요.",
   "settingsHelp": "도움말",
   "settingsHelpDesc": "앱 사용법 안내",

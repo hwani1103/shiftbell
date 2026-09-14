@@ -56,8 +56,11 @@ flutter build appbundle --release --flavor prod --dart-define=ADMOB_BANNER_ID=<�
 
 ### 광고 (2026-09-14 G5 #6)
 `lib/constants/ad_config.dart` — 배너 단위 ID는 **prod flavor + release**에서만 `--dart-define=ADMOB_BANNER_ID`로 주입,
-주입 안 하면 광고 요청 자체를 안 함(테스트 ID가 운영에 나가지 않음). 앱 ID는 `build.gradle.kts`의
+주입 안 하면 광고 요청 자체를 안 함. 앱 ID는 `build.gradle.kts`의
 `manifestPlaceholders["admobAppId"]` ← Gradle 속성 `ADMOB_APP_ID`(없으면·dev는 구글 테스트 앱 ID).
+**prod release 빌드는 두 ID가 모두 실제 값이 아니면 `checkProdAdIds`가 빌드를 실패시킴**(교차 검토 X-13 — 앱 ID만 빠지면
+테스트 앱 ID로 실제 배너를 요청하는 상태가 됐었음). Analytics 초기 수집은 Manifest `firebase_analytics_collection_enabled`
+(dev false / prod true, placeholder)로도 막음(X-14).
 광고 영역 파란 틴트는 debug 빌드에서만. 개발 중 실제 ID 사용 금지(무효 트래픽으로 계정 정지 위험).
 
 ---
@@ -125,11 +128,17 @@ flutter build appbundle --release --flavor prod --dart-define=ADMOB_BANNER_ID=<�
   (파생 데이터 테이블만 제외 목록에 추가할 것)
 - **자동 백업** `backup_watcher.dart`: 시작·재개·배경 전환 때 내용 지문이 다를 때만, single flight, isolate 인코딩,
   네이티브 백그라운드 I/O, MediaStore `IS_PENDING`으로 완성 후 공개(#18). 복원 중/중단 작업이 있으면 안 씀
-- **저장소**: MediaStore `Download/ShiftBell/ShiftBell_Backup[_dev]_YYMMDD.json` 하나. Android 10 미만 미지원. 평문(D9 — 안내로 대응)
+- **저장소**: MediaStore `Download/ShiftBell/ShiftBell_Backup[_dev]_YYMMDD.json` — **최신 + 직전 정상본 1개**만 남김(X-07).
+  자동 탐지는 최신순 후보를 디코딩·근무표 존재·스키마 검증까지 통과한 첫 파일로 고름. Android 10 미만 미지원. 평문(D9 — 안내로 대응)
 - **복원** `restore_coordinator.dart`: 검증(`backup_validator.dart`) → DP 작업 사본 → 네이티브 잠금(`RestoreGate.kt`) →
   옛 OS 예약 취소(`RestoreOs.kt`) → DB 교체(원본 테이블 교체·백업에 없는 원본 테이블은 비움, **이력은 자연키 병합**,
   울림/스누즈 중 알람은 원래 ID로 이월 + 재생 설정 스냅샷, 충돌 시 백업 custom이 새 ID) → 설정 → OS 재조정 → 친구공유 재업로드.
   중단되면 앱 시작 첫 화면 `restore_interrupted_screen.dart`에서 이어서 복원 / 지금 데이터로 계속
+- **교차 검토 보강(2026-09-15, X-02~X-09)**: 설정의 덮어쓰기 복원은 루트 네비게이터 전체 화면 `restore_progress_screen.dart`에서
+  실행(뒤로가기·탭 이동 불가). 재시작은 `app_restart.dart` — 이 프로세스에서 울리는 알람이 끝난 뒤에만. 이월은 네이티브 울림 상태
+  epoch(`RingingAlarmTracker.carryState`)를 DB 교체 트랜잭션 끝에서 다시 비교해 바뀌었으면 롤백 후 재시도, 종료 처리 중 알람·최근
+  스누즈도 이월. Guard 재등록도 복원 잠금·DB 재확인 경로. 최종 재조정(엔진·일정 재예약)이 끝까지 못 돌면 미완료로 남김.
+  백업에 없는 복원 대상 설정 키는 지워 기본값으로. 설정 자료형 등록표 `kBackupPreferenceTypes`(새 설정 키를 만들면 여기도 추가)
 - 신규 설치에서 백업을 자동 탐지 못 하는 기기(삼성 `owner_package_name` NULL 버그)는 온보딩 "이전 백업 불러오기"(SAF)로 직접 선택
 - 알려진 한계: 재설치하면 익명 UID가 바뀌어 예전에 공유한 문서를 앱에서 지울 수 없음
 - 상세: `docs/release_audit/g4/handoff.md`

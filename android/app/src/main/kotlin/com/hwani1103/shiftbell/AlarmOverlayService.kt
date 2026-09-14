@@ -95,8 +95,12 @@ class AlarmOverlayService : Service() {
             Log.d("AlarmOverlay", "📡 외부 신호 리시버 등록")
         }
 
-        val newRound = intent?.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, RingingAlarmTracker.NO_ROUND)
-            ?: RingingAlarmTracker.NO_ROUND
+        // ⭐ 2026-09-14 (교차 검토 X-12) - 회차 없는 옛 Intent는 옛 버전이 남긴 같은 ID의 울림에만 매핑
+        val newRound = RingingAlarmTracker.normalizeRound(
+            applicationContext, newAlarmId,
+            intent?.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, RingingAlarmTracker.NO_ROUND)
+                ?: RingingAlarmTracker.NO_ROUND
+        )
         // ⭐ 2026-09-14 (#3) - 표시 요청이 도착하기 전에 그 회차가 이미 끝났으면(앱에서 삭제·인계 등) 안 띄움
         if (!RingingAlarmTracker.isCurrent(applicationContext, newAlarmId, newRound)) {
             Log.w("AlarmOverlay", "⚠️ 지난 회차 표시 요청 무시: id=$newAlarmId 회차=$newRound")

@@ -99,9 +99,13 @@ object AlarmRefreshEngine {
     // ⭐ 2026-09-14 (#31) - alarm_overrides 한 행의 동작. action = "skip" | "set_type"
     internal data class OverrideEntry(val action: String, val alarmTypeId: Int?)
 
-    fun refresh(context: Context, ownerToken: String? = null) {
+    /**
+     * 갱신이 끝까지 실행됐으면 true. 복원 잠금으로 미뤘거나, 다른 갱신과 겹쳐 건너뛰었거나, 예외면 false.
+     * ⭐ 2026-09-14 (교차 검토 X-06) - 복원 최종 재조정이 이 결과로 "실제로 재계산됐는지"를 확인함(다른 호출부는 무시해도 됨).
+     */
+    fun refresh(context: Context, ownerToken: String? = null): Boolean {
         // ⭐ 2026-09-14 (G4 #19) - 백업 복원 중이면 쓰지 않음. 복원 owner가 마지막에 토큰으로 직접 부름(RestoreOs.reconcileOs)
-        if (RestoreGate.shouldDefer(context, "refresh", ownerToken)) return
+        if (RestoreGate.shouldDefer(context, "refresh", ownerToken)) return false
         // ⭐ owner를 호출마다 고유하게(UUID) 생성해야 함. 예전엔 "AlarmRefreshEngine"
         // 고정 문자열을 owner로 썼는데, RefreshLockManager.tryAcquire의 거부 조건이
         // "currentOwner != owner"라서 이 함수의 모든 호출이 항상 같은 owner를 쓰면
@@ -110,12 +114,14 @@ object AlarmRefreshEngine {
         val owner = "AlarmRefreshEngine-${UUID.randomUUID()}"
         if (!RefreshLockManager.tryAcquire(context, owner)) {
             Log.d(TAG, "⏭️ 다른 프로세스가 갱신 중 - 스킵")
-            return
+            return false
         }
-        try {
+        return try {
             doRefresh(context)
+            true
         } catch (e: Exception) {
             Log.e(TAG, "❌ 갱신 실패", e)
+            false
         } finally {
             RefreshLockManager.release(context, owner)
         }
@@ -309,8 +315,10 @@ object AlarmRefreshEngine {
             obj.keys().forEach { key -> map[key] = obj.getString(key) }
             map
         } catch (e: Exception) {
-            Log.e(TAG, "❌ assignedDates 파싱 실패", e)
-            emptyMap()
+            // ⭐ 2026-09-14 (교차 검토 추가 edge) - 예전엔 빈 배정으로 바꿔서, 불규칙 근무의 미래 fixed 알람을 "배정 없음"으로 보고
+            // 전부 지웠음. 원본을 못 읽는 것과 정상적인 빈 배정을 구분 - 갱신을 실패시켜(트랜잭션 롤백) 기존 알람을 그대로 둠.
+            Log.e(TAG, "❌ assignedDates 파싱 실패 - 갱신 중단(기존 알람 유지)", e)
+            throw IllegalStateException("assigned_dates malformed", e)
         }
     }
 

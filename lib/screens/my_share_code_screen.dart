@@ -15,6 +15,7 @@ import '../services/friend_share_service.dart';
 import '../services/friend_sync_service.dart';
 import '../services/firebase_bootstrap.dart';
 import '../providers/schedule_provider.dart';
+import '../models/friend_schedule.dart';
 import '../l10n/l10n_extensions.dart';
 
 // ⭐ 트랙1(웹) 배포 도메인 - Firebase Hosting(shiftbell-29f31)에 실제 배포 완료
@@ -302,8 +303,11 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                   TextField(
                     controller: _nameController,
                     focusNode: _nameFocusNode,
+                    // ⭐ 2026-09-14 (교차 검토 X-11) - 공유 문서의 이름 길이 제한과 같게
+                    maxLength: FriendScheduleData.maxOwnerNameLength,
                     decoration: InputDecoration(
                       hintText: context.l10n.friendEnterDisplayName,
+                      counterText: '',
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                     ),

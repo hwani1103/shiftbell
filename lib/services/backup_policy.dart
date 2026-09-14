@@ -44,6 +44,39 @@ bool isBackupPreferenceKey(String key) =>
     !kDeviceLocalPreferenceKeys.contains(key) &&
     !FriendSyncService.backupExcludedPreferenceKeys.contains(key);
 
+/// ⭐ 2026-09-14 (출시전 교차 검토 X-09) - 앱이 자료형을 정해 읽는 설정 키. 복원 검증은 백업 값의 자료형이 다르면 적용 전에 거부한다
+/// (예: bool 키에 문자열이 들어간 손상·편집된 백업이 복원된 뒤 getBool에서 실패해 탭·설정 초기화가 계속 깨지는 경우).
+/// 새 설정 키를 추가하면 여기에도 적을 것 - 안 적어도 백업·복원은 되지만 자료형 검증을 받지 못함.
+enum BackupPrefType { boolean, integer, real, string, stringList }
+
+const Map<String, BackupPrefType> kBackupPreferenceTypes = {
+  'schedule_tab_enabled': BackupPrefType.boolean,
+  'condition_tab_enabled': BackupPrefType.boolean,
+  'calendar_theme_id': BackupPrefType.string,
+  'schedule_management_bg_color_index': BackupPrefType.integer,
+  'work_hours_period_mode': BackupPrefType.string,
+  'work_hours_payday_cutoff_day': BackupPrefType.integer,
+  'work_hours_cutoff_anchor': BackupPrefType.string,
+  'work_hours_cutoff_is_period_start': BackupPrefType.boolean,
+  'work_hours_shift_change_as_ot': BackupPrefType.boolean,
+  'schedule_etc_icon_rotation_counter': BackupPrefType.integer,
+  'all_teams_my_team': BackupPrefType.string,
+  'all_teams_offsets': BackupPrefType.string,
+  'all_teams_names': BackupPrefType.stringList,
+  'welcome_popup_shown': BackupPrefType.boolean,
+  'shift_assign_tutorial_shown': BackupPrefType.boolean,
+  'condition_tab_tutorial_shown': BackupPrefType.boolean,
+  'schedule_tab_tutorial_shown': BackupPrefType.boolean,
+};
+
+bool backupPrefValueMatches(BackupPrefType type, Object? value) => switch (type) {
+      BackupPrefType.boolean => value is bool,
+      BackupPrefType.integer => value is int,
+      BackupPrefType.real => value is double,
+      BackupPrefType.string => value is String,
+      BackupPrefType.stringList => value is List && value.every((e) => e is String),
+    };
+
 /// 복원 적용 순서상 먼저 비우고 채워야 하는 원본 테이블 판정(시스템·이력·알람 제외).
 bool isReplaceableSourceTable(String table) =>
     !kBackupSystemTables.contains(table) &&

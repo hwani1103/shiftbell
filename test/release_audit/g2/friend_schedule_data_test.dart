@@ -44,7 +44,8 @@ void main() {
 
   test('F-D03 ownerName 자료형·길이(80) 경계', () {
     expect(parse({'ownerName': 'a' * 80}), isNotNull);
-    expect(parse({'ownerName': 'a' * 81}), isNull);
+    // 교차 검토 X-11 - 1.0.22에서 만든 긴 이름은 거부하지 않고 80자로 잘라 사용
+    expect(parse({'ownerName': 'a' * 81})?.ownerName, 'a' * 80);
     expect(parse({'ownerName': 123}), isNull);
     expect(parse({'ownerName': _remove}), isNull);
   });

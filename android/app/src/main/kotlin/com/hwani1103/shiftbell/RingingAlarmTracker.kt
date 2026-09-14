@@ -64,6 +64,18 @@ object RingingAlarmTracker {
     private var counter = 0L
     private var active: ActiveRing? = null
 
+    // ⭐ 2026-09-14 (출시전 교차 검토 X-04) - 백업 복원 이월 판정용. 메모리 전용(프로세스가 죽으면 복원 작업도 같이 끝남).
+    //  - epoch: 울림 시작·종료 관문 통과·끄기/스누즈 DB 반영 완료마다 +1. 복원은 DB 교체 트랜잭션 끝에서 다시 읽어 달라졌으면 롤백 후 재시도.
+    //  - ending: 종료 관문은 통과했지만 끄기/스누즈 DB 반영이 아직 안 끝난 알람 ID. 복원이 이 행을 이월 대상에 넣어
+    //    "관문 통과 → (복원이 행 교체) → 스누즈 DB 쓰기 실패"로 스누즈가 사라지지 않게 함. Dart 삭제처럼 네이티브가
+    //    완료를 모르는 경로가 있어 일정 시간 뒤 자동으로 빠짐.
+    private var epoch = 0L
+    private val ending = HashMap<Int, Long>()
+    private const val ENDING_TTL_MS = 60_000L
+
+    // ⭐ X-03 - 활성 울림이 이 프로세스에서 시작됐는지. 저장값에서 읽어 온 활성 울림은 이전 프로세스의 것이라 소리가 이미 멈춘 상태.
+    private var activeStartedHere = false
+
     /** 테스트 전용 - commit 실패 주입. null이면 실제 commit(). */
     internal var commitOverride: ((SharedPreferences.Editor) -> Boolean)? = null
 
@@ -108,6 +120,8 @@ object RingingAlarmTracker {
         counter += 1
         val ring = ActiveRing(alarmId, counter)
         active = ring
+        activeStartedHere = true
+        epoch++
         persist(context) {
             putLong(KEY_RING_COUNTER, ring.round)
             putInt(KEY_RINGING_ID, alarmId)
@@ -138,6 +152,9 @@ object RingingAlarmTracker {
             return false
         }
         active = null
+        activeStartedHere = false
+        epoch++
+        ending[alarmId] = android.os.SystemClock.elapsedRealtime()
         persist(context) {
             remove(KEY_RINGING_ID)
             remove(KEY_RINGING_ROUND)
@@ -155,11 +172,49 @@ object RingingAlarmTracker {
         if (endIfCurrent(context, ring.alarmId, ring.round)) ring else null
     }
 
+    /** 끄기·스누즈의 DB 반영이 끝남(AlarmActionHelper, 성공·실패 무관). 복원 이월 판정 epoch를 올림(X-04). */
+    fun finishTransition(alarmId: Int) {
+        synchronized(lock) {
+            ending.remove(alarmId)
+            epoch++
+        }
+    }
+
+    data class CarryState(val active: ActiveRing?, val endingIds: Set<Int>, val epoch: Long)
+
+    /** 복원 이월 판정용 스냅샷(X-04): 활성 울림 + 종료 처리 중 ID + epoch를 한 lock 안에서. */
+    fun carryState(context: Context): CarryState = synchronized(lock) {
+        ensureLoaded(context)
+        val now = android.os.SystemClock.elapsedRealtime()
+        ending.entries.removeAll { now - it.value > ENDING_TTL_MS }
+        CarryState(active, ending.keys.toSet(), epoch)
+    }
+
+    /** 이 프로세스에서 시작돼 아직 끝나지 않은 울림이 있는지(X-03 - 복원 뒤 앱 재시작을 미룰지 판단). */
+    fun isLiveRing(context: Context): Boolean = synchronized(lock) {
+        ensureLoaded(context)
+        active != null && activeStartedHere
+    }
+
+    /**
+     * X-12 - 회차 정보가 없는 요청(1.0.22 이하가 게시한 제어 알림·화면 Intent)은, 활성 울림이 같은 ID의 옛 버전 기록
+     * ([LEGACY_ROUND])일 때만 그 회차로 취급. 새 회차(1 이상)에는 절대 매핑하지 않음 - 스누즈 후 재울림을 옛 신호가 끄는
+     * 문제(#3)가 되살아나지 않게.
+     */
+    fun normalizeRound(context: Context, alarmId: Int, round: Long): Long = synchronized(lock) {
+        ensureLoaded(context)
+        val ring = active
+        if (round == NO_ROUND && ring != null && ring.alarmId == alarmId && ring.round == LEGACY_ROUND) LEGACY_ROUND else round
+    }
+
     /** 테스트 전용 - 프로세스 재시작처럼 메모리 값을 버림(저장된 값은 유지). */
     internal fun resetMemoryForTest() = synchronized(lock) {
         loaded = false
         counter = 0L
         active = null
+        activeStartedHere = false
+        epoch = 0L
+        ending.clear()
         commitOverride = null
     }
 }
