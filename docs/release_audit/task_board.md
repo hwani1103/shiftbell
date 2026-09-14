@@ -3,7 +3,7 @@
 > **메인 폴더 사본만 유효.** 규칙은 `출시전_수정작업_그룹별_실행계획_및_세션인계_2026-09-14.md` §11.
 > 작업을 시작·중단·완료할 때마다 **아래 두 줄**과 표를 갱신한다. 두 AI는 동시에 작업하지 않는다.
 
-**Claude 이어서 할 작업:** T06 — G1 수정 (`shiftbell-g1`, 기준 `94ff08f`). 여러 번 끊겨도 Claude가 이어감
+**Claude 이어서 할 작업:** T06 — G1 수정 진행중 (`shiftbell-g1`, 기준 `94ff08f`). 첫 묶음 #3·#14·#23(재생 회차·자원). 진행 기록은 g1/handoff.md
 **Codex 지금 할 수 있는 작업:** 없음 — 다음은 T11(G1 교차 리뷰, T10 후). 병행 예외 종료(에뮬레이터 테스트 끝남)
 
 ---
@@ -30,7 +30,7 @@
 | T03 | G0 테스트 | Claude | Codex | T01, T02 동결 | PASS | `0f9e6a1` | Flutter 146/146(R0 재검증 포함), Kotlin 23/23. REPAIR-REJECT 사용자 결정 A |
 | T04 | S1 확인: **E** 에뮬레이터(Claude) / **D** 삼성 실기기(사용자, G6로 미룸) | Claude / 사용자 | — | T03 | **E PASS** · D 대기 | - | E: 케이스 ①(업데이트 후 앱 미실행)·②(재부팅 후 잠금 해제 전) PASS, ③④⑤ 생략. 중복 수신 관찰 G1 인계. 결과 g0/test_results.md 8장. D는 G6 필수 |
 | T05 | contracts 확정, G0 기준 커밋, g1/g2/g3 worktree | Claude | — | T03 PASS | 완료 | `c0b2e73` | 공통 선언 data_revision_provider.dart 포함 |
-| T06 | G1 수정 | Claude | 없음 | T05 | 대기 | `94ff08f` | 기준 `94ff08f`(R0 반영 G0). 착수 전 메모 g1/handoff.md |
+| T06 | G1 수정 | Claude | 없음 | T05 | 진행중 | `94ff08f` | 기준 `94ff08f`(R0 반영 G0). 착수 전 메모 g1/handoff.md |
 | T07 | G2 수정 | Codex | Claude | T05 | 동결 | `5cda0e0` | #21·#24·#30, #29 정적 조사만(S12 NOT_RUN). 연결 요청 0 |
 | T08 | G3 수정 | Codex | Claude | T05 | 동결 | `98c4831` | #15·#22·#17(수면). 연결 요청 2건(T10) |
 | T09 | G4/G5 준비 문서 (읽기 전용) | Codex | Claude | T05 | 완료(초안) | - | g4/prep_writer_inventory.md(G1 수정 전 초안), g4/prep_s17_failure_injection.md, g5/prep_data_collection.md |
