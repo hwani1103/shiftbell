@@ -620,5 +620,7 @@
   "startupRetry": "다시 시도",
   "@startupRetry": {"description": "시작 실패 화면의 재시도 버튼"},
   "startupSlowMessage": "앱을 준비하고 있어요. 잠시만 기다려주세요.",
+  "startupStalledMessage": "준비가 평소보다 오래 걸리고 있어요. 다시 시도해도 계속 이 화면이면 앱을 완전히 종료한 뒤 다시 열어주세요.",
+  "@startupStalledMessage": {"description": "시작 초기화가 끝나지 않고 멈췄을 때(stallThreshold) 다시 시도 버튼과 함께 표시 - 출시전 감사 R0-02"},
   "@startupSlowMessage": {"description": "시작 초기화가 오래 걸릴 때 표시(업데이트 직후 DB 마이그레이션 등)"}
 }

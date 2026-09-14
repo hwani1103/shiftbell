@@ -615,5 +615,6 @@
   "startupFailedTitle": "Couldn't start the app",
   "startupFailedBody": "Something went wrong while getting the app ready. Make sure your device has enough free storage, then try again. If this keeps happening, try restarting your device.",
   "startupRetry": "Try again",
-  "startupSlowMessage": "Getting the app ready. Please wait a moment."
+  "startupSlowMessage": "Getting the app ready. Please wait a moment.",
+  "startupStalledMessage": "This is taking longer than usual. If you still see this screen after trying again, close the app completely and open it again."
 }
