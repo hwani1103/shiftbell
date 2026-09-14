@@ -9,7 +9,26 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../l10n/l10n_extensions.dart';
 import '../providers/tab_visibility_provider.dart';
+
+/// 일정관리 탭의 Native/로컬 동기화 실패를 사용자에게 알리고 호출부의 후속 동작을 막는다.
+Future<bool> setTabEnabledWithFeedback(
+  BuildContext context,
+  Future<void> Function() setEnabled,
+) async {
+  try {
+    await setEnabled();
+    return true;
+  } on StateError {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.scheduleTabSyncFailed)),
+      );
+    }
+    return false;
+  }
+}
 
 /// [tabLabel] 예: "일정관리", "컨디션". 눌러서 확인하면 [provider]를 false로
 /// 바꾸고, [onDisabled]로 부모(main.dart)에게 "지금 이 탭을 보고 있었다면
@@ -65,7 +84,11 @@ class DisableTabButton extends ConsumerWidget {
       ),
     );
     if (confirmed != true) return;
-    await ref.read(provider.notifier).setEnabled(false);
+    final changed = await setTabEnabledWithFeedback(
+      context,
+      () => ref.read(provider.notifier).setEnabled(false),
+    );
+    if (!changed) return;
     if (onConfirmed != null) await onConfirmed!();
     onDisabled();
   }

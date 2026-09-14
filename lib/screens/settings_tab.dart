@@ -40,6 +40,7 @@ import '../models/backup_payload.dart';
 import '../providers/tab_visibility_provider.dart';
 import '../services/schedule_notification_service.dart';
 import '../services/widget_refresh_service.dart';
+import '../widgets/disable_tab_button.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
@@ -628,7 +629,11 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                   // 상태로 그대로 복원(main.dart의 DisableTabButton onConfirmed
                   // 주석 참고 - 대칭 동작).
                   onTap: () async {
-                    await ref.read(scheduleTabEnabledProvider.notifier).setEnabled(true);
+                    final changed = await setTabEnabledWithFeedback(
+                      context,
+                      () => ref.read(scheduleTabEnabledProvider.notifier).setEnabled(true),
+                    );
+                    if (!changed) return;
                     await ScheduleNotificationService.restoreAllForTabEnable();
                   },
                 ),

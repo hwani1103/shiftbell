@@ -433,6 +433,7 @@
     }
   },
   "scheduleNotifyRegisterFailed": "일정은 저장됐지만 알림을 예약하지 못했어요. 정확한 알람 권한을 확인한 뒤 일정을 다시 저장해 주세요.",
+  "scheduleTabSyncFailed": "화면 설정을 바꾸지 못했어요. 잠시 후 다시 시도해주세요.",
   "permissionStatusUnknown": "{name}(확인 불가)",
   "@permissionStatusUnknown": {
     "placeholders": {
