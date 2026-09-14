@@ -292,13 +292,9 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
   // 알람 타입 업데이트
   Future<void> updateAlarmType(int alarmId, int newTypeId) async {
     try {
-      final db = await DatabaseService.instance.database;
-      await db.update(
-        'alarms',
-        {'alarm_type_id': newTypeId},
-        where: 'id = ?',
-        whereArgs: [alarmId],
-      );
+      // ⭐ 2026-09-14 (출시전 감사 #31) - 템플릿 알람이면 같은 트랜잭션에서 set_type 예외를 남김
+      // (예전엔 행의 alarm_type_id만 바꿔서 자정 갱신·인접 날짜 재생성이 템플릿 타입으로 되돌렸음)
+      await DatabaseService.instance.updateAlarmTypeWithOverride(alarmId, newTypeId);
 
       await _loadAlarms();
       print('✅ 알람 타입 변경 완료 (ID: $alarmId → 타입: $newTypeId)');

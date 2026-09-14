@@ -17,6 +17,7 @@ import '../models/date_schedule.dart';
 import '../models/shift_time_range.dart';
 import '../models/sleep_record.dart';
 import 'db_migration_runner.dart';
+import 'alarm_generation_service.dart' show alarmSlotTime;
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
@@ -32,6 +33,12 @@ class DatabaseService {
   static bool? debugIsAndroidOverride;
 
   static bool get _isAndroid => debugIsAndroidOverride ?? Platform.isAndroid;
+
+  /// 테스트 전용 - 개별 알람 예외(#31/D12)의 "미래" 판정 시각을 fixture 시각으로 고정. null이면 실제 시각.
+  @visibleForTesting
+  static DateTime Function()? debugNowOverride;
+
+  static DateTime get _now => (debugNowOverride ?? DateTime.now)();
 
   // ⭐ HIGH-2 수정: Completer 패턴으로 Race Condition 완전 해결
   // ⭐ 2026-09-14 (G0, R0-04 교차 리뷰) - 예전엔 첫 호출자는 _initDatabase()를 직접 await하고,
@@ -549,6 +556,10 @@ class DatabaseService {
         print('ℹ️ 알람 삭제 (이력 생성 안 함): ID=$id');
       }
 
+      // ⭐ 2026-09-14 (출시전 감사 #31) - 템플릿으로 만든 미래 알람을 사용자가 지우면 같은 트랜잭션에서
+      // "건너뛰기" 예외를 남김(자정 갱신·Flutter 재생성이 다시 만들지 않게). custom·지난 알람은 기록 안 함.
+      await _recordOverrideForUserChange(txn, id, action: 'skip');
+
       // 알람 삭제
       deletedCount = await txn.delete(
         'alarms',
@@ -562,11 +573,17 @@ class DatabaseService {
   
   Future<int> saveShiftSchedule(ShiftSchedule schedule) async {
     final db = await database;
-    return await db.insert(
-      'shift_schedule',
-      schedule.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    // ⭐ 2026-09-14 (#31 D12) - 근무표 저장과 "근무가 바뀐 배정일의 개별 예외 삭제"를 한 트랜잭션으로
+    return await db.transaction((txn) async {
+      final before = await _readScheduleForUpdate(txn, schedule.id);
+      final id = await txn.insert(
+        'shift_schedule',
+        schedule.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      await deleteOverridesForChangedAssignments(txn, before, schedule);
+      return id;
+    });
   }
 
   Future<ShiftSchedule?> getShiftSchedule() async {
@@ -578,12 +595,18 @@ class DatabaseService {
 
   Future<int> updateShiftSchedule(ShiftSchedule schedule) async {
     final db = await database;
-    return await db.update(
-      'shift_schedule',
-      schedule.toMap(),
-      where: 'id = ?',
-      whereArgs: [schedule.id],
-    );
+    // ⭐ 2026-09-14 (#31 D12) - 근무표 변경(날짜 근무 변경·일괄 배정·패턴 변경)과 관련 예외 삭제를 한 트랜잭션으로
+    return await db.transaction((txn) async {
+      final before = await _readScheduleForUpdate(txn, schedule.id);
+      final count = await txn.update(
+        'shift_schedule',
+        schedule.toMap(),
+        where: 'id = ?',
+        whereArgs: [schedule.id],
+      );
+      await deleteOverridesForChangedAssignments(txn, before, schedule);
+      return count;
+    });
   }
 
   Future<void> insertAlarmsInBatch(List<Alarm> alarms, {String source = 'auto'}) async {
@@ -683,7 +706,11 @@ class DatabaseService {
   // ⭐ 신규: 모든 알람 템플릿 삭제
   Future<void> deleteAllAlarmTemplates() async {
     final db = await database;
-    await db.delete('shift_alarm_templates');
+    await db.transaction((txn) async {
+      await txn.delete('shift_alarm_templates');
+      // ⭐ 2026-09-14 (#31 D12) - 모든 근무의 템플릿이 사라졌으므로 미래 개별 예외도 같은 트랜잭션에서 삭제
+      await txn.delete('alarm_overrides', where: 'slot_time > ?', whereArgs: [alarmSlotTime(_now)]);
+    });
     print('🗑️ 모든 알람 템플릿 삭제 완료');
   }
 
@@ -694,11 +721,15 @@ class DatabaseService {
     int dayOffset = 0,
   }) async {
     final db = await database;
-    return await db.insert('shift_alarm_templates', {
-      'shift_type': shiftType,
-      'time': time,
-      'alarm_type_id': alarmTypeId,
-      'day_offset': dayOffset,
+    // ⭐ 2026-09-14 (#31 D12) - 이 근무의 템플릿이 바뀌므로 그 근무에서 나온 미래 예외를 같은 트랜잭션에서 삭제
+    return await db.transaction((txn) async {
+      await _deleteFutureOverridesForShifts(txn, {shiftType});
+      return txn.insert('shift_alarm_templates', {
+        'shift_type': shiftType,
+        'time': time,
+        'alarm_type_id': alarmTypeId,
+        'day_offset': dayOffset,
+      });
     });
   }
 
@@ -712,6 +743,10 @@ class DatabaseService {
   Future<void> replaceAllAlarmTemplates(List<Map<String, dynamic>> templates) async {
     final db = await database;
     await db.transaction((txn) async {
+      // ⭐ 2026-09-14 (출시전 감사 #31 D12) - 템플릿 구성이 바뀐 근무의 미래 개별 예외를 같은 트랜잭션에서 삭제.
+      // 템플릿을 다시 쓰기 "전에" 지우므로 뒤의 insert가 실패하면 예외 삭제도 함께 롤백됨.
+      final before = await txn.query('shift_alarm_templates');
+      await _deleteFutureOverridesForShifts(txn, changedTemplateShifts(before, templates));
       await txn.delete('shift_alarm_templates');
       for (final t in templates) {
         await txn.insert('shift_alarm_templates', t);
@@ -818,6 +853,12 @@ class DatabaseService {
           );
         }
 
+        // 6. ⭐ 2026-09-14 (출시전 감사 #31 D12) - 개별 예외의 근무명(shift_type)과 배정 근무명(origin_shift)도
+        // 같은 트랜잭션에서 변경 - 안 바꾸면 이름만 바뀐 같은 알람의 예외가 슬롯 키 불일치로 사라진 것처럼 됨.
+        // (근무명 맞바꾸기 A↔B의 UNIQUE 충돌·임시 이름 2단계 처리는 #12)
+        await txn.update('alarm_overrides', {'shift_type': newName}, where: 'shift_type = ?', whereArgs: [oldName]);
+        await txn.update('alarm_overrides', {'origin_shift': newName}, where: 'origin_shift = ?', whereArgs: [oldName]);
+
         print('✅ 근무명 변경(원자적): $oldName → $newName');
       }
 
@@ -829,6 +870,114 @@ class DatabaseService {
         whereArgs: [newSchedule.id],
       );
     });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // ⭐ 2026-09-14 (출시전 감사 #31 / D12, G1) - 개별 알람 예외(alarm_overrides) 기록·정리.
+  // 예전엔 템플릿으로 만든 알람 하나를 지우거나 타입(소리/진동/무음)을 바꿔도 그 사실이 원본으로 남지 않아서,
+  // 자정 갱신(Native 엔진)이나 인접 날짜 근무 변경(Flutter 재생성)이 템플릿대로 다시 만들어 **지운 알람이 울리거나
+  // 무음으로 바꾼 알람이 소리로 울렸음**. 이제 사용자 변경을 행 변경과 같은 트랜잭션에서 예외로 남기고, 생성 계산
+  // (alarm_generation_service.dart / AlarmRefreshEngine.kt)이 적용함.
+  // D12: 원본이 바뀌면 관련 예외를 같은 트랜잭션에서 삭제 - 배정일 D의 근무가 바뀌면 origin_date = D, 근무 S의
+  // 템플릿이 바뀌면 origin_shift = S인 미래 예외. 되돌려도(A→B→A) 옛 "건너뛰기"가 조용히 부활하지 않음.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  static String _dateKey(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  /// 템플릿으로 만든 **미래** 알람 행이면 그 슬롯의 예외를 upsert(같은 슬롯은 교체).
+  /// custom·snoozed·이미 지난 알람·행 없음이면 아무것도 안 함. 호출부 트랜잭션 안에서, 행을 바꾸기 **전에** 호출.
+  Future<void> _recordOverrideForUserChange(DatabaseExecutor txn, int alarmId,
+      {required String action, int? alarmTypeId}) async {
+    final rows = await txn.query('alarms', where: 'id = ?', whereArgs: [alarmId], limit: 1);
+    if (rows.isEmpty) return;
+    final row = rows.first;
+    if (row['type'] != 'fixed') return;
+    final dateStr = row['date'] as String?;
+    final shiftType = row['shift_type'] as String?;
+    if (dateStr == null || shiftType == null) return;
+    final ringAt = DateTime.tryParse(dateStr);
+    if (ringAt == null || !ringAt.isAfter(_now)) return;
+    final dayOffset = row['day_offset'] as int? ?? 0;
+    // 전날(-1) 알람의 배정일은 다음날, 다음날(+1) 알람의 배정일은 전날
+    final origin = DateTime(ringAt.year, ringAt.month, ringAt.day - dayOffset);
+    await txn.insert(
+      'alarm_overrides',
+      {
+        'slot_time': alarmSlotTime(ringAt),
+        'shift_type': shiftType,
+        'day_offset': dayOffset,
+        'action': action,
+        'alarm_type_id': action == 'set_type' ? alarmTypeId : null,
+        'origin_date': _dateKey(origin),
+        'origin_shift': shiftType,
+        'created_at': _now.toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,  // UNIQUE 슬롯 키 - contracts §1.1 "upsert(교체)"
+    );
+  }
+
+  /// ⭐ #31 - 알람 하나의 타입 변경. 템플릿 알람이면 같은 트랜잭션에서 set_type 예외를 남겨 자동 갱신·재생성이
+  /// 템플릿 타입으로 되돌리지 않게 함.
+  Future<void> updateAlarmTypeWithOverride(int alarmId, int newTypeId) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await _recordOverrideForUserChange(txn, alarmId, action: 'set_type', alarmTypeId: newTypeId);
+      await txn.update('alarms', {'alarm_type_id': newTypeId}, where: 'id = ?', whereArgs: [alarmId]);
+    });
+  }
+
+  /// ⭐ D12 - 배정일 D의 근무가 바뀌었으면 origin_date = D인 예외를 삭제. 근무표 저장과 **같은 트랜잭션**에서 호출.
+  /// 예외가 가리키는 배정일만 비교하므로 날짜 하나 변경·일괄 배정·규칙 근무 패턴 변경(여러 날짜가 한꺼번에 바뀜)을
+  /// 같은 규칙으로 처리함. 근무명 rename은 이 경로를 쓰지 않음(renameShiftAtomic이 예외의 이름을 같이 바꿈).
+  Future<void> deleteOverridesForChangedAssignments(
+      DatabaseExecutor txn, ShiftSchedule? before, ShiftSchedule after) async {
+    final rows = await txn.rawQuery('SELECT DISTINCT origin_date FROM alarm_overrides');
+    for (final r in rows) {
+      final key = r['origin_date'] as String;
+      final parts = key.split('-');
+      if (parts.length != 3) continue;
+      final y = int.tryParse(parts[0]);
+      final m = int.tryParse(parts[1]);
+      final d = int.tryParse(parts[2]);
+      if (y == null || m == null || d == null) continue;
+      final date = DateTime(y, m, d);
+      final oldShift = before?.getShiftForDate(date) ?? kUnsetShiftSentinel;
+      if (oldShift != after.getShiftForDate(date)) {
+        await txn.delete('alarm_overrides', where: 'origin_date = ?', whereArgs: [key]);
+      }
+    }
+  }
+
+  Future<ShiftSchedule?> _readScheduleForUpdate(DatabaseExecutor txn, int? id) async {
+    final rows = id == null
+        ? await txn.query('shift_schedule', limit: 1)
+        : await txn.query('shift_schedule', where: 'id = ?', whereArgs: [id], limit: 1);
+    return rows.isEmpty ? null : ShiftSchedule.fromMap(rows.first);
+  }
+
+  /// 근무별 템플릿 구성(시각·타입·전날/당일/다음날)이 달라진 근무명 집합 (D12)
+  @visibleForTesting
+  static Set<String> changedTemplateShifts(List<Map<String, Object?>> before, List<Map<String, Object?>> after) {
+    Map<String, String> signature(List<Map<String, Object?>> rows) {
+      final byShift = <String, List<String>>{};
+      for (final r in rows) {
+        (byShift[r['shift_type'] as String] ??= []).add('${r['time']}|${r['alarm_type_id']}|${r['day_offset'] ?? 0}');
+      }
+      return byShift.map((k, v) => MapEntry(k, (v..sort()).join(',')));
+    }
+
+    final a = signature(before);
+    final b = signature(after);
+    return {...a.keys, ...b.keys}.where((s) => a[s] != b[s]).toSet();
+  }
+
+  Future<void> _deleteFutureOverridesForShifts(DatabaseExecutor txn, Set<String> shifts) async {
+    if (shifts.isEmpty) return;
+    final nowSlot = alarmSlotTime(_now);
+    for (final shift in shifts) {
+      await txn.delete('alarm_overrides', where: 'origin_shift = ? AND slot_time > ?', whereArgs: [shift, nowSlot]);
+    }
   }
 
   // ⭐ 신규: 알람 이력 조회

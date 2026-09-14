@@ -220,6 +220,8 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       final db = await DatabaseService.instance.database;
       await db.delete('shift_schedule');
       await db.delete('shift_alarm_templates');
+      // ⭐ 2026-09-14 (#31) - 근무표·템플릿을 모두 지우는 초기화이므로 개별 알람 예외도 함께 삭제
+      await db.delete('alarm_overrides');
 
       state = const AsyncValue.data(null);
       WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 초기화 반영
@@ -277,6 +279,8 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       where: 'id = ?',
       whereArgs: [updatedSchedule.id],
     );
+    // ⭐ 2026-09-14 (출시전 감사 #31 D12) - 근무가 바뀐 배정일의 개별 예외를 같은 트랜잭션에서, 재생성보다 먼저 삭제
+    await DatabaseService.instance.deleteOverridesForChangedAssignments(txn, currentSchedule, updatedSchedule);
 
     if (targetDates.isNotEmpty) {
       result = await regenerateFixedAlarmsForDatesTxn(
