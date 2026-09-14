@@ -1,0 +1,142 @@
+{
+ "fixtures": [
+  {
+   "db": "v01.db",
+   "expected": "v01.json",
+   "start_version": 1
+  },
+  {
+   "db": "v02.db",
+   "expected": "v02.json",
+   "start_version": 2
+  },
+  {
+   "db": "v03.db",
+   "expected": "v03.json",
+   "start_version": 3
+  },
+  {
+   "db": "v04.db",
+   "expected": "v04.json",
+   "start_version": 4
+  },
+  {
+   "db": "v05.db",
+   "expected": "v05.json",
+   "start_version": 5
+  },
+  {
+   "db": "v06.db",
+   "expected": "v06.json",
+   "start_version": 6
+  },
+  {
+   "db": "v07.db",
+   "expected": "v07.json",
+   "start_version": 7
+  },
+  {
+   "db": "v08.db",
+   "expected": "v08.json",
+   "start_version": 8
+  },
+  {
+   "db": "v09.db",
+   "expected": "v09.json",
+   "start_version": 9
+  },
+  {
+   "db": "v10.db",
+   "expected": "v10.json",
+   "start_version": 10
+  },
+  {
+   "db": "v11.db",
+   "expected": "v11.json",
+   "start_version": 11
+  },
+  {
+   "db": "v12.db",
+   "expected": "v12.json",
+   "start_version": 12
+  },
+  {
+   "db": "v13.db",
+   "expected": "v13.json",
+   "start_version": 13
+  },
+  {
+   "db": "v14.db",
+   "expected": "v14.json",
+   "start_version": 14
+  },
+  {
+   "db": "v15.db",
+   "expected": "v15.json",
+   "start_version": 15
+  },
+  {
+   "db": "v16.db",
+   "expected": "v16.json",
+   "start_version": 16
+  },
+  {
+   "db": "v17.db",
+   "expected": "v17.json",
+   "start_version": 17
+  },
+  {
+   "db": "v18.db",
+   "expected": "v18.json",
+   "start_version": 18
+  },
+  {
+   "db": "v19.db",
+   "expected": "v19.json",
+   "start_version": 19
+  },
+  {
+   "db": "v20.db",
+   "expected": "v20.json",
+   "start_version": 20
+  },
+  {
+   "db": "v21.db",
+   "expected": "v21.json",
+   "start_version": 21
+  },
+  {
+   "db": "v22.db",
+   "expected": "v22.json",
+   "start_version": 22
+  },
+  {
+   "db": "v23.db",
+   "expected": "v23.json",
+   "start_version": 23
+  }
+ ],
+ "variants": [
+  {
+   "db": "variant_v23_stamped24_missing.db",
+   "expected": "variant_v23_stamped24_missing.json",
+   "case": "MISSING-COLUMN"
+  },
+  {
+   "db": "variant_v23_stamped25.db",
+   "case": "FUTURE-VERSION"
+  },
+  {
+   "db": "variant_empty_v0.db",
+   "case": "VERSION-ZERO"
+  },
+  {
+   "db": "variant_v16_stamped24_oldfriends.db",
+   "case": "REPAIR-REJECT"
+  },
+  {
+   "db": "aux_h2_minimal_v24.db",
+   "case": "H2-TEST-FIXTURE"
+  }
+ ]
+}

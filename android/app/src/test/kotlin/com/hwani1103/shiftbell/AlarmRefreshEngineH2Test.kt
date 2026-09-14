@@ -75,32 +75,18 @@ class AlarmRefreshEngineH2Test {
     }
 
     private fun seedMinimalDatabase() {
-        // ⭐ 최초 호출 - SQLiteOpenHelper가 물리 파일을 만들고 onCreate(no-op) 실행 후
-        // version을 DATABASE_VERSION(23)으로 자동 설정함. 이 연결을 그대로 계속 씀.
+        // ⭐ 2026-09-14 (G0, T03) - 예전엔 여기서 dbHelper.writableDatabase를 먼저 불러 SQLiteOpenHelper가
+        // 빈 파일을 만들고 onCreate(no-op) 후 버전을 찍게 한 뒤 테이블을 만들었음. G0에서 Native onCreate가
+        // 예외로 바뀌어(빈 최신 버전 DB 생성 차단, 출시전 감사 #1) 그 방식은 더 이상 동작하지 않음.
+        // → 같은 최소 스키마를 user_version=24로 미리 만들어 둔 파일(tool/g0/build_fixtures.py가 생성)을
+        // 복사한 뒤 헬퍼로 연다. 원시 연결로 파일을 만드는 방식은 위 주석의 Robolectric 연결 오류 때문에 피함.
+        // SQL 원본을 주입하지 않으므로(DbMigrationScript.overrideForTest 미설정) onOpen repair는 건너뛰어
+        // 이 테스트의 최소 스키마가 그대로 유지됨.
+        val dbFile = context.applicationContext.createDeviceProtectedStorageContext().getDatabasePath("shiftbell.db")
+        for (suffix in listOf("", "-wal", "-shm", "-journal")) java.io.File(dbFile.path + suffix).delete()
+        dbFile.parentFile?.mkdirs()
+        java.io.File(G0TestSupport.g0Dir, "fixtures_db/aux_h2_minimal_v24.db").copyTo(dbFile, overwrite = true)
         val db = dbHelper.writableDatabase
-
-        db.execSQL(
-            "CREATE TABLE shift_schedule (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "is_regular INTEGER, pattern TEXT, today_index INTEGER, start_date TEXT, assigned_dates TEXT)"
-        )
-        db.execSQL(
-            "CREATE TABLE shift_alarm_templates (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "shift_type TEXT, time TEXT, alarm_type_id INTEGER, day_offset INTEGER)"
-        )
-        db.execSQL(
-            "CREATE TABLE alarms (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "time TEXT, date TEXT, type TEXT, alarm_type_id INTEGER, shift_type TEXT, day_offset INTEGER)"
-        )
-        db.execSQL(
-            "CREATE TABLE alarm_history (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "alarm_id INTEGER, scheduled_time TEXT, scheduled_date TEXT, actual_ring_time TEXT, " +
-                "dismiss_type TEXT, snooze_count INTEGER, shift_type TEXT, created_at TEXT, day_offset INTEGER)"
-        )
-        db.execSQL(
-            "CREATE TABLE alarm_creation_log (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "alarm_id INTEGER, scheduled_date TEXT, scheduled_time TEXT, shift_type TEXT, " +
-                "alarm_type_id INTEGER, source TEXT, created_at TEXT, day_offset INTEGER)"
-        )
 
         // 매일 "주간"만 반복되는 규칙적 패턴(패턴 길이 1) - 매일이 전부 "주간"이 되어
         // toAdd에 (오늘 07:00이 이미 지났으면 9개, 아니면 10개가) 들어감.

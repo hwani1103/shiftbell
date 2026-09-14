@@ -1,0 +1,166 @@
+{
+ "fixture": "v14.sql",
+ "start_version": 14,
+ "tables": {
+  "alarm_creation_log": [
+   {
+    "alarm_id": 999,
+    "alarm_type_id": 1,
+    "created_at": "2026-08-10T06:30:00.000",
+    "day_offset": 0,
+    "id": 501,
+    "scheduled_date": "2026-08-10",
+    "scheduled_time": "06:30",
+    "shift_type": "Day",
+    "source": "flutter"
+   }
+  ],
+  "alarm_history": [
+   {
+    "actual_ring_time": "2026-08-10T06:30:00.000",
+    "alarm_id": 999,
+    "created_at": "2026-08-10T06:30:00.000",
+    "day_offset": 0,
+    "dismiss_type": "snoozed",
+    "id": 301,
+    "scheduled_date": "2026-08-10",
+    "scheduled_time": "06:30",
+    "shift_type": "Day",
+    "snooze_count": 2
+   }
+  ],
+  "alarm_overrides": [],
+  "alarm_types": [
+   {
+    "duration": 7,
+    "emoji": "M",
+    "id": 3,
+    "is_preset": 1,
+    "name": "Silent",
+    "sound_file": "",
+    "vibration_strength": 1,
+    "volume": 0.0
+   },
+   {
+    "duration": 7,
+    "emoji": "P",
+    "id": 41,
+    "is_preset": 0,
+    "name": "Personal",
+    "sound_file": "alarmbell2",
+    "vibration_strength": 1,
+    "volume": 0.35
+   },
+   {
+    "duration": 7,
+    "emoji": "S",
+    "id": 1,
+    "is_preset": 1,
+    "name": "Sound",
+    "sound_file": "alarmbell1",
+    "vibration_strength": 1,
+    "volume": 0.43
+   },
+   {
+    "duration": 7,
+    "emoji": "V",
+    "id": 2,
+    "is_preset": 1,
+    "name": "Vibrate",
+    "sound_file": "",
+    "vibration_strength": 1,
+    "volume": 0.0
+   }
+  ],
+  "alarms": [
+   {
+    "alarm_type_id": 1,
+    "date": "2026-09-15T06:30:00.000",
+    "day_offset": 0,
+    "id": 101,
+    "shift_type": "Day",
+    "time": "06:30",
+    "type": "fixed"
+   },
+   {
+    "alarm_type_id": 2,
+    "date": "2026-09-15T06:35:00.000",
+    "day_offset": 0,
+    "id": 103,
+    "shift_type": "Day",
+    "time": "06:35",
+    "type": "snoozed"
+   },
+   {
+    "alarm_type_id": 41,
+    "date": "2026-09-15T08:10:00.000",
+    "day_offset": 0,
+    "id": 102,
+    "shift_type": null,
+    "time": "08:10",
+    "type": "custom"
+   }
+  ],
+  "condition_shift_times": [],
+  "date_memos": [
+   {
+    "created_at": "2026-09-14T05:00:00.000",
+    "date": "2026-09-15",
+    "id": 401,
+    "memo_text": "Shift handover / O'Brien",
+    "order_index": 0
+   },
+   {
+    "created_at": "2026-09-14T05:00:00.000",
+    "date": "2026-09-15",
+    "id": 402,
+    "memo_text": "Bring uniform",
+    "order_index": 1
+   }
+  ],
+  "date_overtime": [
+   {
+    "date": "2026-09-14",
+    "id": 601,
+    "minutes": 90,
+    "updated_at": "2026-09-14T05:00:00.000"
+   }
+  ],
+  "date_schedules": [],
+  "friends": [],
+  "shift_alarm_templates": [
+   {
+    "alarm_type_id": 1,
+    "day_offset": 0,
+    "id": 201,
+    "shift_type": "Day",
+    "time": "06:30"
+   },
+   {
+    "alarm_type_id": 41,
+    "day_offset": 0,
+    "id": 202,
+    "shift_type": "Night",
+    "time": "22:30"
+   }
+  ],
+  "shift_schedule": [
+   {
+    "active_shift_types": "Day,Night",
+    "assigned_dates": "{\"2026-09-16\":\"Night\"}",
+    "custom_shift_colors": null,
+    "id": 1,
+    "is_regular": 1,
+    "pattern": "Day,Night,Off",
+    "shift_colors": "{\"Day\":4280391411,\"Night\":4288423856}",
+    "shift_durations": null,
+    "shift_types": "Day,Night,Off",
+    "start_date": "2026-09-14T00:00:00.000",
+    "today_index": 0
+   }
+  ],
+  "sleep_expected_bedtime": [],
+  "sleep_records": []
+ },
+ "user_version": 24
+}

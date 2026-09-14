@@ -106,6 +106,7 @@ dev_dependencies:
   # (android/app/src/test/)는 이 문제와 무관해 그대로 유지.
   flutter_lints: ^3.0.0
   flutter_launcher_icons: ^0.14.3
+  sqflite_common_ffi: ^2.4.0+3
 
 flutter:
   uses-material-design: true

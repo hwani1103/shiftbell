@@ -1,0 +1,935 @@
+{
+ "alarm_creation_log": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "alarm_id",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "alarm_type_id",
+    "notnull": 0,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "created_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": "0",
+    "name": "day_offset",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "scheduled_date",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "scheduled_time",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "shift_type",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "source",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": [
+   {
+    "columns": [
+     "alarm_id"
+    ],
+    "origin": "c",
+    "partial": 0,
+    "unique": 0
+   },
+   {
+    "columns": [
+     "created_at"
+    ],
+    "origin": "c",
+    "partial": 0,
+    "unique": 0
+   }
+  ]
+ },
+ "alarm_history": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "actual_ring_time",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "alarm_id",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "created_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": "0",
+    "name": "day_offset",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "dismiss_type",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "scheduled_date",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "scheduled_time",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "shift_type",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": "0",
+    "name": "snooze_count",
+    "notnull": 0,
+    "pk": 0,
+    "type": "INTEGER"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": []
+ },
+ "alarm_overrides": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "action",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "alarm_type_id",
+    "notnull": 0,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "created_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": "0",
+    "name": "day_offset",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "origin_date",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "origin_shift",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "shift_type",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "slot_time",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": [
+   {
+    "columns": [
+     "origin_date"
+    ],
+    "origin": "c",
+    "partial": 0,
+    "unique": 0
+   },
+   {
+    "columns": [
+     "origin_shift"
+    ],
+    "origin": "c",
+    "partial": 0,
+    "unique": 0
+   },
+   {
+    "columns": [
+     "slot_time",
+     "shift_type",
+     "day_offset"
+    ],
+    "origin": "u",
+    "partial": 0,
+    "unique": 1
+   }
+  ]
+ },
+ "alarm_types": {
+  "columns": [
+   {
+    "dflt": "10",
+    "name": "duration",
+    "notnull": 0,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "emoji",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "is_preset",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "name",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "sound_file",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": "2",
+    "name": "vibration_strength",
+    "notnull": 0,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "volume",
+    "notnull": 1,
+    "pk": 0,
+    "type": "REAL"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": []
+ },
+ "alarms": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "alarm_type_id",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "date",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": "0",
+    "name": "day_offset",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "shift_type",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "time",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "type",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   }
+  ],
+  "foreign_keys": [
+   {
+    "from": "alarm_type_id",
+    "table": "alarm_types",
+    "to": "id"
+   }
+  ],
+  "indexes": []
+ },
+ "condition_shift_times": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "end_minutes",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "shift_name",
+    "notnull": 0,
+    "pk": 1,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "start_minutes",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "updated_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": [
+   {
+    "columns": [
+     "shift_name"
+    ],
+    "origin": "pk",
+    "partial": 0,
+    "unique": 1
+   }
+  ]
+ },
+ "date_memos": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "created_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "date",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "memo_text",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "order_index",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": [
+   {
+    "columns": [
+     "date"
+    ],
+    "origin": "c",
+    "partial": 0,
+    "unique": 0
+   }
+  ]
+ },
+ "date_overtime": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "date",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "minutes",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "updated_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": [
+   {
+    "columns": [
+     "date"
+    ],
+    "origin": "c",
+    "partial": 0,
+    "unique": 0
+   },
+   {
+    "columns": [
+     "date"
+    ],
+    "origin": "u",
+    "partial": 0,
+    "unique": 1
+   }
+  ]
+ },
+ "date_schedules": {
+  "columns": [
+   {
+    "dflt": "0",
+    "name": "color_index",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "content",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "created_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "date",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "duration_minutes",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": "1",
+    "name": "font_index",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": "0",
+    "name": "icon_index",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": "0",
+    "name": "is_user_corrected",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": "0",
+    "name": "notify_enabled",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": "0",
+    "name": "notify_offset_minutes",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "predicted_category",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "start_minutes",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": "1",
+    "name": "style_index",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "updated_at",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": [
+   {
+    "columns": [
+     "date"
+    ],
+    "origin": "c",
+    "partial": 0,
+    "unique": 0
+   }
+  ]
+ },
+ "friends": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "added_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "data_json",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "name",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "owner_id",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "updated_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": [
+   {
+    "columns": [
+     "owner_id"
+    ],
+    "origin": "u",
+    "partial": 0,
+    "unique": 1
+   }
+  ]
+ },
+ "shift_alarm_templates": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "alarm_type_id",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": "0",
+    "name": "day_offset",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "shift_type",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "time",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": []
+ },
+ "shift_schedule": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "active_shift_types",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "assigned_dates",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "custom_shift_colors",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "is_regular",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "pattern",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "shift_colors",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "shift_durations",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "shift_types",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "start_date",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "today_index",
+    "notnull": 0,
+    "pk": 0,
+    "type": "INTEGER"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": []
+ },
+ "sleep_expected_bedtime": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "bedtime_minutes",
+    "notnull": 1,
+    "pk": 0,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "shift_key",
+    "notnull": 0,
+    "pk": 1,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "updated_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": [
+   {
+    "columns": [
+     "shift_key"
+    ],
+    "origin": "pk",
+    "partial": 0,
+    "unique": 1
+   }
+  ]
+ },
+ "sleep_records": {
+  "columns": [
+   {
+    "dflt": null,
+    "name": "confidence",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "created_at",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "end_time",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "id",
+    "notnull": 0,
+    "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "source",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "start_time",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "status",
+    "notnull": 1,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
+    "name": "updated_at",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   }
+  ],
+  "foreign_keys": [],
+  "indexes": [
+   {
+    "columns": [
+     "start_time"
+    ],
+    "origin": "c",
+    "partial": 0,
+    "unique": 0
+   }
+  ]
+ }
+}

@@ -1,0 +1,25 @@
+{
+  "_readme": "G0(T03) SQL 원본 파싱 규칙 케이스. Dart(db_migration_dart_test.dart)와 Kotlin(G0NativeMigrationTest.kt)이 같은 파일을 읽어 같은 결과(accept/reject)를 내야 한다. 저장소 assets/db/migrations.json에 mutation을 적용한 뒤 parse한다.",
+  "cases": [
+    {"name": "원본 그대로", "mutation": {}, "expect": "accept"},
+    {"name": "repair DROP 거부", "mutation": {"repair_append": "DROP TABLE friends"}, "expect": "reject"},
+    {"name": "repair UPDATE 거부", "mutation": {"repair_append": "UPDATE alarm_types SET duration = 3 WHERE id = 2"}, "expect": "reject"},
+    {"name": "repair DELETE 거부", "mutation": {"repair_append": "DELETE FROM friends"}, "expect": "reject"},
+    {"name": "repair RENAME 거부", "mutation": {"repair_append": "ALTER TABLE friends RENAME TO friends_old"}, "expect": "reject"},
+    {"name": "repair INSERT 거부", "mutation": {"repair_append": "INSERT INTO friends(name, owner_id, added_at, updated_at) VALUES ('x', 'y', 'z', 'w')"}, "expect": "reject"},
+    {"name": "repair DROP COLUMN 거부", "mutation": {"repair_append": "ALTER TABLE friends DROP COLUMN data_json"}, "expect": "reject"},
+    {"name": "repair 세미콜론으로 두 문장 거부", "mutation": {"repair_append": "CREATE INDEX IF NOT EXISTS idx_friends_name ON friends(name); DROP TABLE friends"}, "expect": "reject"},
+    {"name": "repair IF NOT EXISTS 없는 CREATE TABLE 거부", "mutation": {"repair_append": "CREATE TABLE extra(id INTEGER)"}, "expect": "reject"},
+    {"name": "repair CREATE TABLE이 ALTER/INDEX 뒤에 오면 거부", "mutation": {"repair_append": "CREATE TABLE IF NOT EXISTS extra(id INTEGER)"}, "expect": "reject"},
+    {"name": "repair ALTER 대상 테이블의 CREATE가 없으면 거부", "mutation": {"repair_append": "ALTER TABLE no_such_table ADD COLUMN c TEXT"}, "expect": "reject"},
+    {"name": "repair INDEX 대상 테이블의 CREATE가 없으면 거부", "mutation": {"repair_append": "CREATE INDEX IF NOT EXISTS idx_nope ON no_such_table(c)"}, "expect": "reject"},
+    {"name": "repair 인덱스 추가 허용", "mutation": {"repair_append": "CREATE INDEX IF NOT EXISTS idx_friends_name ON friends(name)"}, "expect": "accept"},
+    {"name": "repair UNIQUE 인덱스 추가 허용", "mutation": {"repair_append": "CREATE UNIQUE INDEX IF NOT EXISTS idx_friends_owner2 ON friends(owner_id)"}, "expect": "accept"},
+    {"name": "repair 소문자 허용 형태 허용", "mutation": {"repair_append": "create index if not exists idx_lower on friends(name)"}, "expect": "accept"},
+    {"name": "migrations 중간 버전 누락 거부", "mutation": {"remove_migration_version": 13}, "expect": "reject"},
+    {"name": "migrations 버전 중복 거부", "mutation": {"duplicate_migration_version": 13}, "expect": "reject"},
+    {"name": "migrations 한 항목 두 문장 거부", "mutation": {"migration_append": {"version": 24, "sql": "CREATE INDEX IF NOT EXISTS idx_a ON friends(name); DROP TABLE friends"}}, "expect": "reject"},
+    {"name": "targetVersion보다 migrations가 모자라면 거부", "mutation": {"set_target_version": 25}, "expect": "reject"},
+    {"name": "format 2 거부", "mutation": {"set_format": 2}, "expect": "reject"}
+  ]
+}
