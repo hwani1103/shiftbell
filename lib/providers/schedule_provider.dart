@@ -291,13 +291,25 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     for (var id in result!.cancelIds) {
       await AlarmService().cancelAlarm(id);
     }
+    // ⭐ 2026-09-14 (출시전 감사 #13) - 예전엔 하나가 실패하면 예외로 나머지 등록까지 전부 건너뜀.
+    // 하나씩 시도하고 실패 수를 남김(이 함수의 화면 호출부 calendar_tab._changeShift는 현재 미사용이라
+    // 안내는 달력 일괄 배정 경로(alarm_provider.regenerateAlarmsAroundDates)에서만 함).
+    var failCount = 0;
     for (var s in result!.scheduled) {
-      await AlarmService().scheduleAlarm(
-        id: s.id,
-        dateTime: s.dateTime,
-        label: s.label,
-        soundType: 'loud',
-      );
+      try {
+        await AlarmService().scheduleAlarm(
+          id: s.id,
+          dateTime: s.dateTime,
+          label: s.label,
+          soundType: 'loud',
+        );
+      } catch (e) {
+        failCount++;
+        print('⚠️ 네이티브 알람 등록 실패 (ID: ${s.id}): $e');
+      }
+    }
+    if (failCount > 0) {
+      print('⚠️ 알람 등록 실패 $failCount/${result!.scheduled.length}');
     }
     print('🔵 알람 재계산: 대상 ${targetDates.length}일 (삭제: ${result!.cancelIds.length}, 생성: ${result!.scheduled.length})');
   } else {

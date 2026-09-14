@@ -152,13 +152,15 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
   // 템플릿을 다시 계산해서 델타를 적용함 - 예전처럼 "이 날짜엔 이 근무 하나"가
   // 아니라 [schedule]에서 매번 다시 읽으므로 shiftType 파라미터는 더 이상 필요 없음
   // (calendar_tab.dart의 달력 일괄 배정에서 근무를 바꾼 "직후"의 schedule을 넘겨야 함).
-  Future<void> regenerateAlarmsAroundDate(DateTime date, ShiftSchedule schedule) async {
-    await regenerateAlarmsAroundDates([date], schedule);
+  Future<AlarmScheduleOutcome> regenerateAlarmsAroundDate(DateTime date, ShiftSchedule schedule) {
+    return regenerateAlarmsAroundDates([date], schedule);
   }
 
   // ⭐ 여러 날짜를 한꺼번에(일괄 배정) 바꿀 때 쓰는 버전 - 각 원본 날짜의 ±1일을
   // 전부 합집합으로 모아서 겹치는 날짜를 중복 계산하지 않고 트랜잭션 하나로 처리함.
-  Future<void> regenerateAlarmsAroundDates(Iterable<DateTime> originDates, ShiftSchedule schedule) async {
+  // ⭐ 2026-09-14 (출시전 감사 #13) - 등록 결과(AlarmScheduleOutcome)를 돌려줌. 전부 실패면 예외, 일부
+  // 실패면 결과로 알려서 호출 화면이 "N개 등록 못 함"을 안내함.
+  Future<AlarmScheduleOutcome> regenerateAlarmsAroundDates(Iterable<DateTime> originDates, ShiftSchedule schedule) async {
     try {
       final db = await DatabaseService.instance.database;
 
@@ -175,7 +177,7 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
 
       if (targetDates.isEmpty) {
         print('🔵 ${kAlarmRefreshWindowDays}일 창 밖 - 알람 재계산 스킵');
-        return;
+        return const AlarmScheduleOutcome(attempted: 0, failed: 0);
       }
 
       final result = await regenerateFixedAlarmsForDates(
@@ -216,12 +218,16 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
         print('⚠️ AlarmProvider에서 AlarmGuardReceiver 트리거 실패: $e');
       }
 
-      if (failCount > 0 && result.scheduled.isEmpty) {
+      // ⭐ 2026-09-14 (#13) - 예전 조건 `failCount > 0 && result.scheduled.isEmpty`는 항상 거짓이었음
+      // (AlarmScheduleOutcome 주석 참고)
+      final outcome = AlarmScheduleOutcome(attempted: result.scheduled.length, failed: failCount);
+      if (outcome.allFailed) {
         // ⭐ 영어 현지화: 이 메시지는 UI에 그대로 노출된 적 없음(호출부가 항상
         // catch해서 자체 에러 문구를 보여줌) - 그래도 로그/크래시 리포트에서 읽는
         // 사람 기준으로 개발자용 예외 메시지는 관례상 영어로 통일.
         throw Exception('Failed to regenerate fixed alarms: all $failCount attempt(s) failed');
       }
+      return outcome;
     } catch (e) {
       print('❌ 고정 알람 재생성 실패: $e');
       rethrow;

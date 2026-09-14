@@ -66,16 +66,25 @@ class PermissionService {
     return result;
   }
 
-  /// 정확한 알람 권한 상태 확인
-  Future<bool> checkExactAlarmPermission() async {
+  /// ⭐ 2026-09-14 (출시전 감사 #13) - 허용/거부/확인 불가를 구분. 예전엔 채널 호출이 실패하면 true를
+  /// 돌려서 실제 상태를 모르는데도 허용된 것처럼 보였음(경고 배너도 안 뜸).
+  Future<ExactAlarmPermissionState> checkExactAlarmPermissionState() async {
     try {
       final result = await _platform.invokeMethod('checkExactAlarmPermission');
-      return result == true;
+      if (result == true) return ExactAlarmPermissionState.granted;
+      if (result == false) return ExactAlarmPermissionState.denied;
+      print('⚠️ 정확한 알람 권한 확인 결과 형식 이상: $result');
+      return ExactAlarmPermissionState.unknown;
     } catch (e) {
       print('⚠️ 정확한 알람 권한 확인 실패: $e');
-      return true; // 확인 자체가 실패하면 경고 배너로 사용자를 막지 않도록 보수적으로 true
+      return ExactAlarmPermissionState.unknown;
     }
   }
+
+  /// 정확한 알람 권한 통과 여부 - 확인 불가(unknown)는 첫 실행 권한 화면 등에서 사용자를 막지 않도록
+  /// 통과로 취급(기존 동작 유지). 실제 상태를 보여줘야 하는 곳은 [checkExactAlarmPermissionState]를 쓸 것.
+  Future<bool> checkExactAlarmPermission() async =>
+      await checkExactAlarmPermissionState() != ExactAlarmPermissionState.denied;
 
   /// 정확한 알람 권한 설정 화면 열기
   Future<void> requestExactAlarmPermission() async {
@@ -100,3 +109,6 @@ class PermissionService {
     await openAppSettings();
   }
 }
+
+/// 정확한 알람 권한 상태 (#13). unknown = Native 확인 호출 실패·형식 이상.
+enum ExactAlarmPermissionState { granted, denied, unknown }

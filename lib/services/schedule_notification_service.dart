@@ -41,20 +41,24 @@ class ScheduleNotificationService {
   ///
   /// [schedule]은 반드시 DB에 저장되어 id가 확정된 상태여야 함(취소/예약 둘
   /// 다 이 id를 Native PendingIntent의 식별자로 씀).
-  static Future<void> syncForSchedule(DateSchedule schedule) async {
+  ///
+  /// ⭐ 2026-09-14 (출시전 감사 #13) - 반환값: 알림이 필요한데 예약하지 못했으면 false(날짜 형식 오류,
+  /// Native 예약 실패, 채널 오류). 알림이 꺼져 있거나 이미 지난 시각이라 예약할 게 없으면 true.
+  /// 예전엔 실패를 로그로만 삼켜서 화면이 아무 안내도 못 했음.
+  static Future<bool> syncForSchedule(DateSchedule schedule) async {
     final id = schedule.id;
-    if (id == null) return; // 저장 전 일정 - 아직 예약할 id가 없음
+    if (id == null) return true; // 저장 전 일정 - 아직 예약할 id가 없음
     await _cancel(id);
-    if (!schedule.notifyEnabled) return;
+    if (!schedule.notifyEnabled) return true;
 
     final trigger = _triggerDateTime(schedule);
-    if (trigger == null) return;
+    if (trigger == null) return false;
     // ⭐ 과거 시각이면 예약하지 않음(위 클래스 주석 참고) - "지난 일정 알림
     // 자동 정리" 문제를 애초에 예약을 안 하는 쪽으로 단순하게 해결함.
-    if (!trigger.isAfter(DateTime.now())) return;
+    if (!trigger.isAfter(DateTime.now())) return true;
 
     try {
-      await kAlarmChannel.invokeMethod('scheduleDateNotification', {
+      final scheduled = await kAlarmChannel.invokeMethod<bool>('scheduleDateNotification', {
         'id': id,
         'triggerAtMillis': trigger.millisecondsSinceEpoch,
         'date': schedule.date,
@@ -65,8 +69,14 @@ class ScheduleNotificationService {
         // "시작 시각만" 표시하게 함(ScheduleNotificationReceiver.kt 참고).
         'durationMinutes': schedule.durationMinutes ?? 0,
       });
+      if (scheduled != true) {
+        debugPrint('⚠️ 일정 알림 예약 실패(id=$id): Native 결과 $scheduled');
+        return false;
+      }
+      return true;
     } catch (e) {
       debugPrint('⚠️ 일정 알림 예약 실패(id=$id): $e');
+      return false;
     }
   }
 

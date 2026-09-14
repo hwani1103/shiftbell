@@ -422,6 +422,20 @@
   "statusShiftAssigned": "근무가 할당되었습니다",
   "statusShiftAssignFailed": "근무 할당 실패",
   "statusShiftChangeFailed": "근무 변경 실패",
+  "alarmSchedulePartialFailed": "근무는 저장됐지만 알람 {total}개 중 {failed}개를 등록하지 못했어요. 정확한 알람 권한을 확인한 뒤 근무를 다시 저장해 주세요.",
+  "@alarmSchedulePartialFailed": {
+    "placeholders": {
+      "failed": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "scheduleNotifyRegisterFailed": "일정은 저장됐지만 알림을 예약하지 못했어요. 정확한 알람 권한을 확인한 뒤 일정을 다시 저장해 주세요.",
+  "permissionStatusUnknown": "{name}(확인 불가)",
+  "@permissionStatusUnknown": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
   "statusShiftNameUpdated": "근무명이 변경되었습니다",
   "statusShiftColorUpdated": "근무명 색상이 변경되었습니다",
   "statusColorAlreadyUsed": "이미 다른 근무에서 사용 중인 색상입니다",

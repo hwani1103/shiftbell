@@ -301,8 +301,15 @@ override fun onNewIntent(intent: Intent) {
                     val label = call.argument<String>("label") ?: "알람"
                     val soundType = call.argument<String>("soundType") ?: "loud"
                     
-                    scheduleNativeAlarm(id, timestamp, label, soundType)
-                    result.success(null)
+                    // ⭐ 2026-09-14 (출시전 감사 #13) - 등록 실패(정확한 알람 권한 없음 등)를 성공으로 돌려주지
+                    // 않고 오류로 알림 - Dart 호출부가 실패 개수를 세서 전부/일부 실패를 안내함
+                    try {
+                        scheduleNativeAlarm(id, timestamp, label, soundType)
+                        result.success(null)
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "❌ 알람 등록 실패: ID=$id", e)
+                        result.error("SCHEDULE_FAILED", e.message, null)
+                    }
                 }
                 "cancelNativeAlarm" -> {
                     val id = call.argument<Int>("id") ?: 0
@@ -320,10 +327,12 @@ override fun onNewIntent(intent: Intent) {
                     val content = call.argument<String>("content") ?: ""
                     // ⭐ 2026-09-13 - 알림 첫 줄 시간 표시("HH:mm" 또는 "HH:mm - HH:mm")용.
                     val durationMinutes = call.argument<Int>("durationMinutes") ?: 0
-                    ScheduleNotificationScheduler.schedule(
-                        applicationContext, id, triggerAtMillis, date, startMinutes, content, durationMinutes
+                    // ⭐ 2026-09-14 (#13) - 예약 성공 여부(bool)를 그대로 돌려줌
+                    result.success(
+                        ScheduleNotificationScheduler.schedule(
+                            applicationContext, id, triggerAtMillis, date, startMinutes, content, durationMinutes
+                        )
                     )
-                    result.success(null)
                 }
                 "cancelDateNotification" -> {
                     val id = call.argument<Int>("id") ?: 0

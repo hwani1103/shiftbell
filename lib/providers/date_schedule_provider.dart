@@ -32,18 +32,21 @@ class DateScheduleNotifier extends StateNotifier<Map<String, List<DateSchedule>>
     state = {...state, date: items};
   }
 
-  Future<DateSchedule> create(DateSchedule schedule) async {
+  /// ⭐ 2026-09-14 (출시전 감사 #13) - notifyScheduled: 필요한 알림 예약이 실패했으면 false
+  /// (ScheduleNotificationService.syncForSchedule 참고). 일정 자체는 이미 저장된 상태.
+  Future<({DateSchedule saved, bool notifyScheduled})> create(DateSchedule schedule) async {
     final saved = await _db.createSchedule(schedule);
     final list = [...(state[schedule.date] ?? const <DateSchedule>[]), saved];
     state = {...state, schedule.date: list};
     // ⭐ 2026-09-12 - "일정에 맞춰서 알림받기". id가 확정된 뒤(saved)에만
     // Native에 예약 가능(PendingIntent 식별자로 이 id를 씀) - schedule.id는
     // 아직 null이라 반드시 saved를 넘겨야 함.
-    await ScheduleNotificationService.syncForSchedule(saved);
-    return saved;
+    final notifyScheduled = await ScheduleNotificationService.syncForSchedule(saved);
+    return (saved: saved, notifyScheduled: notifyScheduled);
   }
 
-  Future<void> update(DateSchedule schedule) async {
+  /// 반환값: 필요한 알림 예약이 실패했으면 false (#13, [create] 참고)
+  Future<bool> update(DateSchedule schedule) async {
     await _db.updateSchedule(schedule);
     final list = (state[schedule.date] ?? const <DateSchedule>[])
         .map((s) => s.id == schedule.id ? schedule : s)
@@ -52,7 +55,7 @@ class DateScheduleNotifier extends StateNotifier<Map<String, List<DateSchedule>>
     // ⭐ 알림 on/off·N분전 값·내용이 뭐가 바뀌었든 한 번에 재동기화(취소 후
     // 필요하면 재예약) - syncForSchedule 주석 참고, 매번 취소부터 하는 게
     // 항상 안전하고 단순함.
-    await ScheduleNotificationService.syncForSchedule(schedule);
+    return ScheduleNotificationService.syncForSchedule(schedule);
   }
 
   Future<void> delete(DateSchedule schedule) async {

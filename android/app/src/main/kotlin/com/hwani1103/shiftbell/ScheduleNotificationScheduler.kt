@@ -48,7 +48,9 @@ object ScheduleNotificationScheduler {
         startMinutes: Int,
         content: String,
         durationMinutes: Int = 0
-    ) {
+    ): Boolean {
+        // ⭐ 2026-09-14 (출시전 감사 #13) - 예약 성공 여부를 돌려줌. 예전엔 실패를 로그로만 삼켜서
+        // Dart(일정 저장 화면)가 성공으로 알고 아무 안내도 안 했음.
         try {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val pendingIntent = buildPendingIntent(context, id, date, startMinutes, content, durationMinutes)
@@ -60,11 +62,13 @@ object ScheduleNotificationScheduler {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
             }
             Log.d(TAG, "✅ 일정 알림 예약: id=$id trigger=$triggerAtMillis")
+            return true
         } catch (e: Exception) {
             // ⭐ 정확한 알람 권한(SCHEDULE_EXACT_ALARM)이 꺼져 있는 등의 사유로
             // SecurityException이 날 수 있음 - 이 알림 하나를 못 건 것뿐이라
             // 기존 알람 시스템 전체에는 영향 없이 조용히 로그만 남김.
             Log.e(TAG, "❌ 일정 알림 예약 실패: id=$id", e)
+            return false
         }
     }
 

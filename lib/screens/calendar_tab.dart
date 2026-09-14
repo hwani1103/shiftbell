@@ -4293,8 +4293,9 @@ Widget build(BuildContext context) {
       // 때까지 실제 기기에 그대로 armed 상태로 남아있었음 - 단일 날짜 변경 경로
       // (changeShiftWithAlarms)는 이 가드가 없어서 원래도 정상 동작했음.
       final updatedSchedule = ref.read(scheduleProvider).value;
+      AlarmScheduleOutcome? alarmOutcome;
       if (updatedSchedule != null) {
-        await ref.read(alarmNotifierProvider.notifier).regenerateAlarmsAroundDates(
+        alarmOutcome = await ref.read(alarmNotifierProvider.notifier).regenerateAlarmsAroundDates(
           _selectedDates,
           updatedSchedule,
         );
@@ -4304,8 +4305,16 @@ Widget build(BuildContext context) {
       _exitMultiSelectMode();
 
       if (mounted) {
+        // ⭐ 2026-09-14 (출시전 감사 #13) - 알람 일부만 등록 실패하면 성공 문구 대신 몇 개가 빠졌는지 안내
+        // (전부 실패는 regenerateAlarmsAroundDates가 예외 → 아래 catch)
+        final partial = alarmOutcome != null && alarmOutcome.partiallyFailed;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('✅ ${context.l10n.statusShiftAssigned}')),
+          partial
+              ? SnackBar(
+                  content: Text('⚠️ ${context.l10n.alarmSchedulePartialFailed(alarmOutcome.failed, alarmOutcome.attempted)}'),
+                  backgroundColor: Colors.orange,
+                )
+              : SnackBar(content: Text('✅ ${context.l10n.statusShiftAssigned}')),
         );
       }
     } catch (e) {
