@@ -9,15 +9,24 @@ class FriendShareService {
   // ⭐ 버전 프리픽스 - SB1:은 예전 "전체 스냅샷" 포맷이라 더 이상 디코딩하지 않음
   // (그 코드를 아직 들고 있는 사용자는 새로 코드를 받아야 함 - 베타 단계라 감수).
   static const _prefix = 'SB2:';
+  static final _ownerIdPattern = RegExp(r'^[A-Za-z0-9_-]{1,128}$');
 
-  static String encodeOwnerId(String ownerId) => '$_prefix$ownerId';
+  static bool isValidOwnerId(String ownerId) =>
+      _ownerIdPattern.hasMatch(ownerId);
+
+  static String encodeOwnerId(String ownerId) {
+    if (!isValidOwnerId(ownerId)) {
+      throw const FormatException('Invalid friend owner id');
+    }
+    return '$_prefix$ownerId';
+  }
 
   /// 코드/링크 문자열에서 ownerId만 뽑아냄. 형식이 아니거나 비어있으면 null.
   static String? decodeOwnerId(String code) {
     final trimmed = code.trim();
     if (!trimmed.startsWith(_prefix)) return null;
     final ownerId = trimmed.substring(_prefix.length).trim();
-    if (ownerId.isEmpty) return null;
+    if (!isValidOwnerId(ownerId)) return null;
     return ownerId;
   }
 }

@@ -24,9 +24,17 @@ Future<void> openFriendCalendar(BuildContext context, WidgetRef ref, FriendEntry
     barrierDismissible: false,
     builder: (context) => const Center(child: CircularProgressIndicator()),
   );
-  final refreshed = await ref.read(friendProvider.notifier).refreshFriend(friend.id, friend.ownerId);
+  final refreshResult =
+      await ref.read(friendProvider.notifier).refreshFriend(friend.id, friend.ownerId);
   if (!context.mounted) return;
   Navigator.pop(context); // 로딩 다이얼로그 닫기
+
+  if (refreshResult == FriendRefreshResult.serverRemoved) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.friendLoadFailedDetailed)),
+    );
+    return;
+  }
 
   final updatedList = ref.read(friendProvider).where((f) => f.id == friend.id);
   final latest = updatedList.isEmpty ? friend : updatedList.first;
@@ -36,7 +44,7 @@ Future<void> openFriendCalendar(BuildContext context, WidgetRef ref, FriendEntry
     );
     return;
   }
-  if (!refreshed) {
+  if (refreshResult != FriendRefreshResult.refreshed) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(context.l10n.friendShowingCachedSchedule)),
     );

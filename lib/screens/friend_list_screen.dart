@@ -200,6 +200,25 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                               context.l10n.friendScheduleOf(displayName),
                               style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
                             ),
+                            subtitle: friend.availability ==
+                                    FriendAvailability.unconfirmed
+                                ? Text(
+                                    friend.data == null
+                                        ? context.l10n.friendLoadFailedCheckNetwork
+                                        : context.l10n.friendShowingCachedSchedule,
+                                    style: TextStyle(
+                                        fontSize: 11.5.sp,
+                                        color: colorScheme.onSurfaceVariant),
+                                  )
+                                : friend.availability ==
+                                        FriendAvailability.invalid
+                                    ? Text(
+                                        context.l10n.friendLoadFailedDetailed,
+                                        style: TextStyle(
+                                            fontSize: 11.5.sp,
+                                            color: colorScheme.error),
+                                      )
+                                    : null,
                             trailing: IconButton(
                               icon: Icon(Icons.delete_outline, color: colorScheme.error),
                               onPressed: () async {
