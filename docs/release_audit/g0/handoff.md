@@ -2,8 +2,8 @@
 
 ```text
 그룹 / 담당 / worktree / branch: G0 / Claude / C:\Users\Administrator\Desktop\shiftbell-g0 / release/g0
-공통 기준 SHA / 최종 소스 SHA: dafe06b / 637b56a (제품 재동결) · 테스트 코드 c06ffea
-상태: CODE_FROZEN(637b56a) + T03 자동 테스트 PASS (REPAIR-REJECT 사용자 결정 A 수용) — S1 실기기(T04) 미통과 → 후속 그룹 PROVISIONAL
+공통 기준 SHA / 최종 소스 SHA: dafe06b / 0f9e6a1 (R0 반영 재동결) · dev 병합 94ff08f
+상태: CODE_FROZEN(0f9e6a1) + 자동 테스트 PASS(Flutter 146, Kotlin 23) + T04-E 에뮬레이터 S1 PASS — 실기기 D는 G6 필수(PROVISIONAL 유지)
 수정한 감사 번호: #1(C01 + H16 native), #8(H16 Dart), #31 스키마(v24 alarm_overrides), V4
 실제 변경 파일(소유권 범위 검사 결과): 범위 밖 파일 수정 없음
   - assets/db/migrations.json (신규) — SQL 단일 원본: migrations v2~v24 + repair
@@ -66,3 +66,5 @@
 - Robolectric SQLite는 3.8.7 — 최신 SQLite 문법(DROP COLUMN 등)·PRAGMA 열 차이 주의.
 - REPAIR-REJECT: 사용자 결정 A(현 동작 유지, 2026-09-14). **G4 주의:** 이 상태에서 만든 백업은 옛 friends 컬럼(has_memos 등)을 담아 현재 restoreAll에서 복구 전체가 실패할 수 있음 → #19 복원 전 컬럼 검증에서 처리할 것(test_results.md 6장).
 | 2026-09-14 | Claude | T03 | REPAIR-REJECT 사용자 결정 A(유지) 기록, 백업 복구 연쇄 위험을 G4 인계 | - | T05 |
+| 2026-09-14 | Claude | T02(R0) | R0 교차 리뷰(High 2·Medium 2) 반영 코드+테스트 작성, 커밋. **flutter analyze·test 미실행**(에뮬레이터 케이스 ② 진행 중) | `6214514` | 케이스 ② 종료 후 analyze → flutter test 전체 → Codex R0-T 재현 테스트 실행 → 재동결 → dev 반영 |
+| 2026-09-14 | Claude | T02·T03(R0) | R0 4건 반영·재현 테스트 반입·flutter test 146/146 → 재동결, dev 병합(G1 새 기준) | `0f9e6a1` / `94ff08f` | T06 G1 시작 |

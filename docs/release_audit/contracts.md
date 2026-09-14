@@ -8,7 +8,7 @@
 
 | 항목 | 값 |
 |---|---|
-| 기준 커밋 (T05, `dev`) | `c0b2e73` (merge: G0 → dev). 브랜치 release/g1·g2·g3 모두 이 커밋에서 시작 |
+| 기준 커밋 (T05, `dev`) | `c0b2e73` (merge: G0 → dev) — release/g2·g3 시작점. **G1은 `94ff08f`**(R0 교차 리뷰 반영 G0 재병합, 2026-09-14)에서 시작. 계약 의미 변경은 §5(시작 멈춤·DB 경로)뿐 |
 | 포함 | G0 제품 `637b56a` + 테스트 `c06ffea` + 문서 + 공통 인터페이스 `lib/providers/data_revision_provider.dart` |
 | G0 상태 | 자동 테스트 PASS, **S1 실기기(T04) 미통과 → G1/G2/G3는 `PROVISIONAL / G0 실기기 미통과` 상속** (실행계획 §2.2). T04 결과로 G0 계약이 바뀌면 통합 담당자가 각 그룹을 동결·재기준화 |
 | 결정 | D1~D12 확정(실행계획 §4). REPAIR-REJECT = 사용자 결정 A(`g0/test_results.md` 6장) |
@@ -105,7 +105,9 @@
 - `lib/main.dart` `_initializeApp()`:
   - **필수**(실패 → 시작 실패 화면): `initializeDateFormatting(ko_KR, en_US)`, `DatabaseService.instance.database`, `AlarmService().initialize()`.
   - **선택**(예외 로그, 10초 넘으면 기다리지 않음): `initFirebase`(이미 `firebaseReady`면 생략), `AdService.warmUp`. `MemoCategoryClassifier.ensureLoaded`, `GoogleFonts.pendingFonts`는 await 없이 오류만 로그.
-- `lib/screens/startup_gate.dart` `StartupGate<T>`: 빈 화면 → 15초 넘으면 준비 중 → 실패 시 안내 + 다시 시도(실패 상태에서만) → 성공 시 builder. 릴리스 빌드는 원문 미표시.
+- `lib/screens/startup_gate.dart` `StartupGate<T>`: 빈 화면 → 15초 넘으면 준비 중 → **45초 넘게 끝나지 않으면 멈춤(다시 시도 버튼)** → 실패 시 안내 + 다시 시도 → 성공 시 builder. 다시 시도는 실패·멈춤 상태에서만, 늦게 끝난 옛 시도 결과는 무시. 릴리스 빌드는 원문 미표시. (R0-02 반영, 2026-09-14)
+- **DB 경로(R0-01, 2026-09-14):** Android에서는 `getDeviceProtectedStoragePath` 조회가 실패하면 **다른 경로로 대체하지 않고 예외** → 시작 실패 화면. Native와 DB가 갈라지는 것을 막기 위함. Android가 아닌 환경(호스트 테스트)만 일반 경로. 테스트 스위치 `DatabaseService.debugIsAndroidOverride`.
+- **`DatabaseService.instance.database`(R0-04):** 첫 호출자를 포함한 모든 호출자가 같은 초기화 Future를 기다림. 진행 중에 다시 불러도 새로 열지 않음, 실패하면 다음 호출이 처음부터 다시 시도.
 - **필수 단계를 추가하는 그룹은 그 단계가 여러 번 불려도 안전해야 함.** 선택 서비스는 늦게 준비될 수 있음을 전제.
 - `main.dart`는 병렬 구간에서 G1 소유. G2/G3의 진입점 연결은 `integration_requests.md`로.
 

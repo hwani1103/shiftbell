@@ -1,0 +1,116 @@
+{
+  "fixture_format": 1,
+  "basis": [
+    "contracts.md#2-D11-D12",
+    "v4#31"
+  ],
+  "timezone": "Asia/Seoul",
+  "cases": [
+    {
+      "id": "D11_AGE_BOUNDARY",
+      "now": "2026-09-14T10:30:00",
+      "operation": {"kind": "cleanup_overrides", "age_days_at_least": 30},
+      "overrides_before": [
+        {"id": 501, "slot_time": "2026-08-14T10:30:00", "shift_type": "DAY", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-08-14", "origin_shift": "DAY"},
+        {"id": 502, "slot_time": "2026-08-15T10:30:00", "shift_type": "DAY", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-08-15", "origin_shift": "DAY"},
+        {"id": 503, "slot_time": "2026-08-15T10:31:00", "shift_type": "DAY", "day_offset": 0, "action": "set_type", "alarm_type_id": 9, "origin_date": "2026-08-15", "origin_shift": "DAY"},
+        {"id": 504, "slot_time": "2026-09-20T06:00:00", "shift_type": "DAY", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-20", "origin_shift": "DAY"}
+      ],
+      "history_before": {"alarm_history_ids": [1, 2], "alarm_creation_log_ids": [11, 12]},
+      "expected": {
+        "deleted_override_ids": [501, 502],
+        "remaining_override_ids": [503, 504],
+        "alarm_history_ids": [1, 2],
+        "alarm_creation_log_ids": [11, 12]
+      },
+      "notes": "정확히 30일인 502도 '30일 이상'이므로 삭제하고 30일에 1분 못 미친 503은 보존한다."
+    },
+    {
+      "id": "D12_ASSIGNMENT_CHANGE",
+      "now": "2026-09-14T10:30:00",
+      "operation": {"kind": "change_assignment", "origin_date": "2026-09-18", "from_shift": "A", "to_shift": "B"},
+      "schedule_before": {"mode": "irregular", "assigned_dates": {"2026-09-18": "A", "2026-09-19": "A"}},
+      "overrides_before": [
+        {"id": 601, "slot_time": "2026-09-17T23:00:00", "shift_type": "A", "day_offset": -1, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-18", "origin_shift": "A"},
+        {"id": 602, "slot_time": "2026-09-18T06:00:00", "shift_type": "A", "day_offset": 0, "action": "set_type", "alarm_type_id": 9, "origin_date": "2026-09-18", "origin_shift": "A"},
+        {"id": 603, "slot_time": "2026-09-19T01:00:00", "shift_type": "A", "day_offset": 1, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-18", "origin_shift": "A"},
+        {"id": 604, "slot_time": "2026-09-19T06:00:00", "shift_type": "A", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-19", "origin_shift": "A"}
+      ],
+      "transaction_expectation": "atomic",
+      "expected": {
+        "assigned_dates": {"2026-09-18": "B", "2026-09-19": "A"},
+        "deleted_override_ids": [601, 602, 603],
+        "remaining_override_ids": [604]
+      }
+    },
+    {
+      "id": "D12_TEMPLATE_CHANGE",
+      "now": "2026-09-14T10:30:00",
+      "operation": {"kind": "replace_templates_for_shift", "origin_shift": "A"},
+      "templates_before": [
+        {"shift_type": "A", "time": "06:00", "day_offset": 0, "alarm_type_id": 1},
+        {"shift_type": "B", "time": "07:00", "day_offset": 0, "alarm_type_id": 1}
+      ],
+      "templates_after": [
+        {"shift_type": "A", "time": "06:30", "day_offset": 0, "alarm_type_id": 1},
+        {"shift_type": "B", "time": "07:00", "day_offset": 0, "alarm_type_id": 1}
+      ],
+      "overrides_before": [
+        {"id": 701, "slot_time": "2026-09-13T06:00:00", "shift_type": "A", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-13", "origin_shift": "A"},
+        {"id": 702, "slot_time": "2026-09-18T06:00:00", "shift_type": "A", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-18", "origin_shift": "A"},
+        {"id": 703, "slot_time": "2026-09-18T07:00:00", "shift_type": "B", "day_offset": 0, "action": "set_type", "alarm_type_id": 9, "origin_date": "2026-09-18", "origin_shift": "B"}
+      ],
+      "transaction_expectation": "atomic",
+      "expected": {
+        "deleted_override_ids": [702],
+        "remaining_override_ids": [701, 703]
+      },
+      "notes": "D12는 origin_shift=A인 미래 예외만 삭제한다. 과거 A 예외는 D11 수명 정책에 맡긴다."
+    },
+    {
+      "id": "D12_SHIFT_RENAME",
+      "now": "2026-09-14T10:30:00",
+      "operation": {"kind": "rename_shift", "from_shift": "A", "to_shift": "A2"},
+      "overrides_before": [
+        {"id": 801, "slot_time": "2026-09-18T06:00:00", "shift_type": "A", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-18", "origin_shift": "A"},
+        {"id": 802, "slot_time": "2026-09-19T06:00:00", "shift_type": "A", "day_offset": 0, "action": "set_type", "alarm_type_id": 9, "origin_date": "2026-09-19", "origin_shift": "B"},
+        {"id": 803, "slot_time": "2026-09-20T06:00:00", "shift_type": "B", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-20", "origin_shift": "A"}
+      ],
+      "transaction_expectation": "atomic",
+      "expected_overrides": [
+        {"id": 801, "slot_time": "2026-09-18T06:00:00", "shift_type": "A2", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-18", "origin_shift": "A2"},
+        {"id": 802, "slot_time": "2026-09-19T06:00:00", "shift_type": "A2", "day_offset": 0, "action": "set_type", "alarm_type_id": 9, "origin_date": "2026-09-19", "origin_shift": "B"},
+        {"id": 803, "slot_time": "2026-09-20T06:00:00", "shift_type": "B", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-20", "origin_shift": "A2"}
+      ]
+    },
+    {
+      "id": "D12_ASSIGNMENT_ABA",
+      "now": "2026-09-14T10:30:00",
+      "operations": [
+        {"kind": "change_assignment", "origin_date": "2026-09-18", "from_shift": "A", "to_shift": "B"},
+        {"kind": "change_assignment", "origin_date": "2026-09-18", "from_shift": "B", "to_shift": "A"}
+      ],
+      "schedule_before": {"mode": "irregular", "assigned_dates": {"2026-09-18": "A"}},
+      "overrides_before": [
+        {"id": 901, "slot_time": "2026-09-18T06:00:00", "shift_type": "A", "day_offset": 0, "action": "skip", "alarm_type_id": null, "origin_date": "2026-09-18", "origin_shift": "A"}
+      ],
+      "transaction_expectation": "each_operation_atomic",
+      "expected_after_first_operation": {"assigned_dates": {"2026-09-18": "B"}, "override_ids": []},
+      "expected_after_second_operation": {"assigned_dates": {"2026-09-18": "A"}, "override_ids": [], "resurrected_override_ids": []}
+    },
+    {
+      "id": "D12_TEMPLATE_ABA",
+      "now": "2026-09-14T10:30:00",
+      "operations": [
+        {"kind": "replace_templates_for_shift", "origin_shift": "A", "from_time": "06:00", "to_time": "06:30"},
+        {"kind": "replace_templates_for_shift", "origin_shift": "A", "from_time": "06:30", "to_time": "06:00"}
+      ],
+      "overrides_before": [
+        {"id": 1001, "slot_time": "2026-09-18T06:00:00", "shift_type": "A", "day_offset": 0, "action": "set_type", "alarm_type_id": 9, "origin_date": "2026-09-18", "origin_shift": "A"}
+      ],
+      "transaction_expectation": "each_operation_atomic",
+      "expected_after_first_operation": {"template_time": "06:30", "override_ids": []},
+      "expected_after_second_operation": {"template_time": "06:00", "override_ids": [], "resurrected_override_ids": []}
+    }
+  ]
+}

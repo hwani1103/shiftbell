@@ -95,3 +95,82 @@ cd .. && flutter test
 
 - 자동 테스트 범위: **PASS** — 모든 실행 케이스 통과. REPAIR-REJECT는 부분 충족을 사용자가 A(현 동작 유지)로 수용(2026-09-14).
 - G0 전체 PASS 아님: S1 실기기(T04) 미실행. 실행계획 §2.2에 따라 T05 이후 그룹은 `PROVISIONAL / G0 실기기 미통과`를 상속.
+
+## 8. T04-E — S1 에뮬레이터 (진행 중 기록)
+
+> 사용자 결정(2026-09-14): 에뮬레이터 OK면 T06 진행, 삼성 실기기 ①②는 출시 전 G6에서. **이 절은 E 결과이며 D(실기기) PASS를 대신하지 않음.**
+
+| 항목 | 값 |
+|---|---|
+| 에뮬레이터 | `Pixel_3a_API_33_x86_64` (Android 13, google_apis, RAM 1.5GB, headless), 시간대 GMT |
+| 옛 앱 | `v1.0.22` 태그 dev release APK — versionCode 24, DB v18 |
+| 새 앱 | `dev` `0a630b2`(G0 병합 기준 `c0b2e73` + 문서) dev release APK — versionCode 25, APK 안 `assets/flutter_assets/assets/db/migrations.json` 포함 |
+| 서명 | 두 APK 동일 인증서 SHA-256 `261bb69d…4a1d` → `adb install -r` 덮어 설치 |
+| 시드 | T01 v18 스키마 + 매일 '주간' 근무표, 템플릿 05:04·05:34(소리 preset 1), 영구 보존 확인용 이력 301·생성로그 501. 권한(알림·정확한 알람·오버레이) adb로 허용 |
+| 도구 | `scratchpad/t04e/t04e.sh`, `seed.py` (저장소 밖) |
+
+### 케이스 ① 업데이트 후 앱 미실행 → 알람
+
+| 단계 | 결과 |
+|---|---|
+| 옛 앱 1회 실행 | 갱신 엔진 `diff 갱신 완료: +20`, OS 알람 20개 등록 (브로드캐스트 전달이 약 1분 30초 지연 — 에뮬레이터 관찰) |
+| 새 APK 덮어 설치(앱 미실행) | versionCode 25, **OS 알람 20개 유지**, 앱 프로세스 없음, 디스크 DB **여전히 v18**(새 테이블 없음) |
+| 05:04:00 알람 수신 | `CustomAlarmReceiver 알람 수신 ID:1` → `DatabaseHelper 디스크 DB v18 < Native v24 - 열면서 마이그레이션` → `DbMigrationRunner v18→v19 … v23→v24` → `Native 마이그레이션 완료` (수신 후 약 0.13초) |
+| 재생 설정 | `AlarmPlayer DB 설정: soundFile=default, volume=0.7, vibration=3` → 기본 알람음 + 진동. **fail-safe 진동 폴백 아님** ✅ |
+| release 자산 | `SQL 원본을 못 읽어`·`DbMigrationException` 로그 없음 ✅ |
+| 화면 | 잠금 해제 상태 → 오버레이 표시(`AlarmOverlayService`, 05:04 / 주간 / +5m / ×) |
+| 알람 후 DB | `user_version` 24, 새 테이블 전부(`alarm_overrides` 컬럼 9개 포함), 알람 20행 유지, 이력 301·생성로그 501 보존, 프리셋 값 유지, `integrity_check ok` ✅ |
+| 스누즈 (05:06:13 오버레이 +5m 탭) | OS 알람 **05:11:13** 예약(정확히 +5분), DB 알람 1 `type=snoozed`, 이력 302 `snoozed` 기록 ✅ |
+| 재울림 (05:11:13) | 예약 시각 수신, `DB 설정: soundFile=default, volume=0.7, vibration=3`로 재생, 오버레이 ✅ |
+| 끄기 (05:11:24 × 탭) | 오버레이 사라짐, 알람 1 행 정리, 이력 303 `swiped` 추가, 과거 이력 301 유지 ✅ |
+| **케이스 ① 판정** | **PASS (E)** — 업데이트 후 앱 미실행 상태에서 알람 수신 시 Native가 v18→v24 마이그레이션, 설정대로 재생·스누즈·끄기·이력 정상 |
+| 관찰(결함 아님, 기존 동작) | 버튼 끄기의 이력 `dismiss_type`이 `swiped`로 기록됨, 스누즈 후 이력 `snooze_count` 0 — G0 범위 밖, 기록만 |
+
+### 케이스 ② 재부팅 후 첫 잠금 해제 전 알람
+
+**1차 실행 (05:11~05:17) — 무효(테스트 준비 결함, 제품 결함 아님).**
+- 증상: 옛 앱 실행 후 갱신 엔진이 `DB 파일 없음 - 갱신 중단`, OS 알람 0개. 재부팅 후 잠금 해제 전(`RUNNING_LOCKED`) 새 앱의 Native DB 열기도 `SQLiteCantOpenDatabaseException`(errno 13).
+- 원인: SELinux `avc: denied { open }` — 앱 프로세스 `untrusted_app:s0:c161,…`(케이스 ② 재설치로 uid 10161)인데 시드로 넣은 DB 파일이 `app_data_file:s0:c160,…`(케이스 ① uid 10160 카테고리). `adb push` 후 `restorecon`은 앱별 MLS 카테고리를 다시 계산하지 않음.
+- 판단: 실사용에서는 앱이 자기 uid로 DB를 만들고 업데이트(`install -r`)는 uid를 유지하므로 이 불일치가 생기지 않음 → 시드 방식의 결함. 케이스 ①은 파일 카테고리 c160과 앱 uid 10160이 일치해 **유효**.
+- 조치: 시드 후 패키지 폴더의 SELinux 컨텍스트를 DB 폴더·파일·설정 파일에 `chcon`으로 복사, 옛 앱 갱신 완료·OS 알람 존재를 전제조건으로 확인 못 하면 즉시 중단하도록 스크립트 보강 → 재실행.
+
+**2차 실행 (05:54~):**
+
+| 단계 | 결과 |
+|---|---|
+| 시드 레이블 | 앱 uid 10162 ↔ DB·설정 파일 `s0:c162,…` 일치 확인 |
+| 옛 앱 1회 실행 | `diff 갱신 완료: +10`, OS 알람 10개 (전제조건 통과) |
+| 새 APK 덮어 설치(앱 미실행) → PIN 설정 → 재부팅 | versionCode 25, 부팅 후 `RUNNING_LOCKED`(첫 잠금 해제 전), keyguard 표시 |
+| 부팅 수신(잠금 해제 전) | `DatabaseHelper 디스크 DB v18 < Native v24` → `Native 마이그레이션 v18→v24 완료`(05:56:23) → 갱신 엔진 `재등록=10` → `DIRECT BOOT COMPLETE`. OS 알람 12개(알람 10 + Guard 등) ✅ |
+| 06:10 잠금 상태 알람 (`RUNNING_LOCKED` 유지) | 06:10:00 `CustomAlarmReceiver 알람 수신 ID:1` → `AlarmPlayer DB 설정: soundFile=default, volume=0.7, vibration=3`(기본 알람음+진동, 폴백 아님) → `잠금 상태 - AlarmActivity 표시`, `DB duration: 3 분` → 최상위 화면 `AlarmActivity` ✅ |
+| 관찰 (G0 범위 밖 → G1 인계) | 같은 알람 ID 1의 `알람 수신`이 0.47초 간격으로 **2회** 기록(케이스 ①의 재부팅 없는 경로는 1회). 재부팅 시 DirectBootReceiver의 "가장 가까운 알람 즉시 등록"과 갱신 엔진 재등록이 같은 알람에 별도 예약을 만든 것으로 추정 — #20 기상 알람 예약 경로 통일(G1)에서 확인 |
+| 화면 증거 | `scratchpad/t04e/case2_locked_alarmactivity.png` — 잠금 해제 전 상태에서 AlarmActivity 전체 화면(06:10 / 주간 / "위로 스와이프해서 끄기" / +5m 5분 후 / × 끄기) ✅ |
+| 잠금 상태 끄기 조작 | 보안 잠금 화면에서는 `uiautomator dump` 파일이 생성되지 않아 끄기 버튼 좌표 탐색 실패(테스트 도구 제약). 이어서 잠금 해제용 키 입력(MENU·PIN·ENTER)이 알람 화면에 전달되어 **스누즈 동작**이 실행됨 — 의도한 조작은 아님 |
+| 스누즈 결과 (잠금 해제 전 부팅 경로) | 이력 302 `snoozed`(06:11:14), 알람 1 `type=snoozed` 06:16:14로 재예약 → 잠금 해제 전 부팅 경로에서도 스누즈 DB 기록·재예약 정상 ✅ |
+| 잠금 해제·PIN 제거 후 DB | `user_version` 24, `integrity_check ok`, `alarm_overrides` 존재, 알람 10행, 과거 이력 301·생성로그 501 보존 ✅ |
+| 스누즈 재울림 (06:16:14) | 예약 시각에 수신, `DB 설정: soundFile=default, volume=0.7, vibration=3`, 화면이 다시 꺼져 잠금 화면 알람(AlarmActivity) 표시 ✅. 이 회차 끄기는 탭하지 않고 에뮬레이터 종료(끄기·이력은 케이스 ①에서 확인) |
+| **케이스 ② 판정** | **PASS (E)** — 업데이트 → 앱 미실행 → 재부팅 → 첫 잠금 해제 전: 부팅 수신 시 Native v18→v24 마이그레이션, 알람 재등록, 잠금 화면 알람 설정대로 재생, 스누즈 기록·재울림 |
+
+### 케이스 ③④⑤ — NOT_RUN (선택 항목, 사용자 결정으로 이번 E 범위에서 생략)
+
+### T04-E 판정
+
+- **PASS (에뮬레이터)** — 필수 케이스 ①② 통과. release APK 안의 SQL 원본을 Native가 앱 미실행·잠금 해제 전에 읽어 마이그레이션함을 확인.
+- **T04-D(삼성 실기기 ①②)는 미실행 — 출시 전 G6에서 필수**(사용자 결정 2026-09-14). G0 상태는 `PROVISIONAL / G0 실기기 미통과` 유지.
+- G1 인계 관찰: 재부팅 경로에서 같은 알람 중복 수신(g1/handoff.md 착수 전 메모).
+- 테스트 준비 결함 기록: 1차 케이스 ② 무효(시드 SELinux 카테고리) — 제품 결함 아님.
+
+## 9. R0 교차 리뷰 반영 재검증 (T02 재수정 → T03 재실행)
+
+| 항목 | 값 |
+|---|---|
+| 리뷰 | `g0/review_codex.md` (Codex R0) — CHANGES_REQUESTED, High 2·Medium 2. Claude 판정: **4건 모두 타당** |
+| 수정 | `6214514` — R0-01 Android에서 DP 경로 조회 실패 시 일반 경로 대체 금지(예외→시작 실패 화면) / R0-02 StartupGate `stalled`(45초) 다시 시도 / R0-03 프리셋 id별 누락 확인 + 한 트랜잭션 / R0-04 첫 호출자도 공유 Completer.future 대기 |
+| 테스트 | Claude: `r0_db_init_test`, `r0_preset_repair_test`, `startup_gate_test` stalled 케이스 / Codex 재현 테스트 4개(`r0_repro/`, 반입 `0f9e6a1`) |
+| 실행 | `flutter gen-l10n` 후 `flutter test` 전체 **146/146 PASS**, `flutter analyze` error 0 (warning 6: 변경 전부터 있던 unused import/field 3, Codex 초안 unused import·불필요한 `!` 3) |
+| Kotlin | 이번 변경은 Dart만 → `c06ffea` 기준 Kotlin 23/23 결과 유지(재실행 안 함) |
+| 재동결 / 기준 | `release/g0` `0f9e6a1` → `dev` 병합 `94ff08f` = **G1 새 기준**(`release/g1` fast-forward). G2(`5cda0e0`)·G3(`98c4831`)는 `c0b2e73` 기준 유지 — 이번 변경 파일(database_service·startup_gate·ARB)을 건드리지 않아 T10에서 병합 |
+
+**Codex 재현 테스트 반입 시 연결 수정(기대 결과 불변):** import 경로 / 호스트에서는 수정본이 경로 채널을 부르지 않으므로 `DatabaseService.debugIsAndroidOverride = true`로 초안의 채널 mock을 실제 사용 / README가 요청한 timeout 주입 지점으로 `stallThreshold: 5초` / 이 Flutter 버전의 `setMockMethodCallHandler`는 `void`라 붙어 있던 `await` 제거.
+
+**한계:** "수정 전(c06ffea)에서는 FAIL" 확인은 **NOT_RUN** — 반입한 테스트가 수정본에만 있는 연결 장치(`debugIsAndroidOverride`, `stallThreshold`)를 써서 수정 전 코드에선 컴파일되지 않음. 대신 초안 원문의 FAIL 이유(각 파일 머리 주석)와 수정 내용이 1:1로 대응함을 코드로 대조.
