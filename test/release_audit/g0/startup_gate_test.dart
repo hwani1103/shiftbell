@@ -64,6 +64,38 @@ void main() {
     expect(calls, 1);
   });
 
+  testWidgets('R0-02: 끝나지 않는 초기화 → stallThreshold 뒤 다시 시도 버튼, 새 시도 성공 시 앱, 늦게 끝난 옛 시도는 무시', (tester) async {
+    var calls = 0;
+    final never = Completer<int>();
+    await tester.pumpWidget(StartupGate<int>(
+      initialize: () {
+        calls++;
+        return calls == 1 ? never.future : Future.value(9);
+      },
+      slowThreshold: const Duration(seconds: 2),
+      stallThreshold: const Duration(seconds: 5),
+      builder: (value) => MaterialApp(home: Scaffold(body: Text('ready $value'))),
+    ));
+
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(ElevatedButton), findsNothing, reason: '멈춤 판정 전에는 다시 시도 없음');
+
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.byType(ElevatedButton), findsOneWidget, reason: '멈추면 다시 시도를 열어줘야 함');
+    expect(calls, 1);
+
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    expect(calls, 2);
+    expect(find.text('ready 9'), findsOneWidget);
+
+    never.complete(1);
+    await tester.pumpAndSettle();
+    expect(find.text('ready 9'), findsOneWidget, reason: '늦게 끝난 옛 시도의 결과로 바꾸면 안 됨');
+    expect(find.text('ready 1'), findsNothing);
+  });
+
   testWidgets('실패가 여러 번 이어져도 다시 시도할 때마다 한 번씩만 실행', (tester) async {
     var calls = 0;
     await tester.pumpWidget(app(() async {

@@ -9,6 +9,8 @@ import '../models/shift_schedule.dart';
 import '../models/alarm_template.dart';
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import '../models/alarm_history.dart';
 import '../models/date_memo.dart';
 import '../models/date_schedule.dart';
@@ -24,37 +26,59 @@ class DatabaseService {
   static Completer<Database>? _initCompleter;
   static const platform = kAlarmChannel;
 
+  /// 테스트 전용 - Android 여부를 강제해 경로 조회 실패 분기(R0-01)를 호스트 테스트에서 검증.
+  /// null이면 실제 플랫폼을 따른다.
+  @visibleForTesting
+  static bool? debugIsAndroidOverride;
+
+  static bool get _isAndroid => debugIsAndroidOverride ?? Platform.isAndroid;
+
   // ⭐ HIGH-2 수정: Completer 패턴으로 Race Condition 완전 해결
-  Future<Database> get database async {
-    if (_database != null) return _database!;
+  // ⭐ 2026-09-14 (G0, R0-04 교차 리뷰) - 예전엔 첫 호출자는 _initDatabase()를 직접 await하고,
+  // 동시에 아무도 구독하지 않은 Completer에도 completeError를 해서 같은 실패가 "처리되지 않은
+  // 비동기 오류"로 한 번 더 새어 나갔음(시작 실패 화면과 별개로). 이제 첫 호출자를 포함한
+  // 모든 호출자가 같은 Completer.future를 기다리고, 실패하면 Completer를 비워 다음 호출이
+  // 처음부터 다시 시도한다. 초기화가 진행 중일 때의 다시 시도(StartupGate 멈춤 상태)는 새로
+  // 열지 않고 진행 중인 같은 Future를 기다린다.
+  Future<Database> get database {
+    final opened = _database;
+    if (opened != null) return Future.value(opened);
+    final pending = _initCompleter;
+    if (pending != null) return pending.future;
 
-    // 이미 초기화 중이면 같은 Future를 기다림
-    if (_initCompleter != null) return _initCompleter!.future;
-
-    _initCompleter = Completer<Database>();
-    try {
-      _database = await _initDatabase();
-      _initCompleter!.complete(_database!);
-      return _database!;
-    } catch (e, stackTrace) {
-      _initCompleter!.completeError(e, stackTrace);
-      rethrow;
-    } finally {
-      _initCompleter = null;
-    }
+    final completer = Completer<Database>();
+    _initCompleter = completer;
+    _initDatabase().then(
+      (db) {
+        _database = db;
+        completer.complete(db);
+      },
+      onError: (Object error, StackTrace stackTrace) => completer.completeError(error, stackTrace),
+    ).whenComplete(() {
+      if (identical(_initCompleter, completer)) _initCompleter = null;
+    });
+    return completer.future;
   }
-  
+
   Future<Database> _initDatabase() async {
     // ⭐ Device Protected 경로 사용
+    // ⭐ 2026-09-14 (G0, R0-01 교차 리뷰) - 예전엔 경로 조회가 실패하면 일반 경로
+    // (getDatabasesPath)로 조용히 대체했음. Android에서는 Native(DatabaseHelper)가 항상 Device
+    // Protected 경로의 파일을 쓰므로, 대체하는 순간 Flutter만 빈 새 DB를 만들어 근무표·알람이
+    // 사라진 것처럼 보이고 Native와 DB가 영구히 갈라짐(#1의 "같은 DB" 전제 붕괴). Android에서는
+    // 실패를 그대로 던져 시작 실패 화면 + 다시 시도(V4)로 보낸다. Android가 아닌 환경(호스트
+    // 테스트 등)에서만 일반 경로를 쓴다.
     String path;
-    try {
-      final deviceProtectedPath = await platform.invokeMethod('getDeviceProtectedStoragePath');
-      path = deviceProtectedPath as String;
+    if (_isAndroid) {
+      final deviceProtectedPath = await platform.invokeMethod<String>('getDeviceProtectedStoragePath');
+      if (deviceProtectedPath == null || deviceProtectedPath.isEmpty) {
+        throw StateError('Device Protected DB 경로가 비어 있음 - 다른 경로로 대체하지 않음');
+      }
+      path = deviceProtectedPath;
       print('✅ Device Protected DB 경로: $path');
-    } catch (e) {
-      // Fallback: 일반 경로
+    } else {
       path = join(await getDatabasesPath(), 'shiftbell.db');
-      print('⚠️ 일반 DB 경로 사용: $path');
+      print('⚠️ Android가 아님 - 일반 DB 경로 사용: $path');
     }
 
     // ⭐ 2026-09-14 (G0, v4 #1/#8) - 스키마 SQL 단일 원본. 못 읽으면 예외를 그대로 던짐
@@ -83,16 +107,27 @@ class DatabaseService {
     );
   }
 
+  // ⭐ 2026-09-14 (G0, R0-03 교차 리뷰) - 예전엔 is_preset 행이 하나라도 있으면 바로 반환하고,
+  // 없으면 세 개를 트랜잭션 없이 하나씩 넣었음 → 중간 insert가 실패하면 1개만 커밋된 채 남고,
+  // 다음 open에서는 "하나라도 있음"으로 통과해 빠진 프리셋이 영영 복구되지 않았음.
+  // 이제 프리셋 id별로 빠진 것만 골라 한 트랜잭션으로 넣음(실패하면 전부 롤백 → 다음 open에서
+  // 다시 시도). 이미 있는 프리셋의 사용자 설정값은 건드리지 않음(ignore).
   Future<void> _insertPresetAlarmTypesIfMissing(Database db) async {
-    final presetCount = Sqflite.firstIntValue(
-          await db.rawQuery('SELECT COUNT(*) FROM alarm_types WHERE is_preset = 1'),
-        ) ??
-        0;
-    if (presetCount > 0) return;
-    for (var type in AlarmType.presets) {
-      await db.insert('alarm_types', type.toMap(), conflictAlgorithm: ConflictAlgorithm.ignore);
-    }
-    print('🛠️ 프리셋 알람 타입이 없어 다시 넣음');
+    final presetIds = AlarmType.presets.map((t) => t.id).toList();
+    final existing = (await db.rawQuery(
+      'SELECT id FROM alarm_types WHERE id IN (${List.filled(presetIds.length, '?').join(',')})',
+      presetIds,
+    ))
+        .map((r) => r['id'])
+        .toSet();
+    final missing = AlarmType.presets.where((t) => !existing.contains(t.id)).toList();
+    if (missing.isEmpty) return;
+    await db.transaction((txn) async {
+      for (final type in missing) {
+        await txn.insert('alarm_types', type.toMap(), conflictAlgorithm: ConflictAlgorithm.ignore);
+      }
+    });
+    print('🛠️ 빠진 프리셋 알람 타입 다시 넣음: ${missing.map((t) => t.id).toList()}');
   }
 
   // ⭐ CRITICAL FIX: 모든 CREATE TABLE/INDEX에 IF NOT EXISTS를 붙여서 이 함수가 두 번

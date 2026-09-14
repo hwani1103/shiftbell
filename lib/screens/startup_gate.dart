@@ -8,8 +8,12 @@
 // 반드시 함께 필요함.
 //
 // - 필수 초기화가 실패하면 안내 + "다시 시도". 릴리스 빌드에서는 예외 원문을 보여주지 않음.
-// - 오래 걸리면(slowThreshold) 진행 중 표시만 함. 진행 중인 초기화를 취소하거나 중복
-//   실행하지 않음(DB 마이그레이션 트랜잭션 도중일 수 있고, Dart Future는 취소도 안 됨).
+// - 오래 걸리면(slowThreshold) 진행 중 표시.
+// - ⭐ 2026-09-14 (R0-02 교차 리뷰) 실패도 성공도 하지 않고 멈추면(stallThreshold, DB 잠금·
+//   플랫폼 호출 정지 등) "다시 시도" 버튼을 보여줌. 예전엔 진행 중 표시만 무기한 이어졌음.
+//   진행 중인 옛 시도는 취소할 수 없으므로(Dart Future) 그대로 두고 새 시도를 시작하며,
+//   옛 시도의 결과는 무시함. DB 열기는 DatabaseService가 진행 중인 같은 Future를 공유하므로
+//   다시 시도해도 마이그레이션이 겹쳐 돌지 않음(contracts §5: 필수 단계는 여러 번 불려도 안전).
 // - 성공하면 builder로 실제 앱을 그림.
 import 'dart:async';
 
@@ -27,6 +31,7 @@ class StartupGate<T> extends StatefulWidget {
     required this.initialize,
     required this.builder,
     this.slowThreshold = const Duration(seconds: 15),
+    this.stallThreshold = const Duration(seconds: 45),
   });
 
   /// 앱 시작에 반드시 필요한 초기화. 실패하면 예외를 던져야 함.
@@ -39,17 +44,22 @@ class StartupGate<T> extends StatefulWidget {
   /// 오래 두지 않기 위한 표시 기준).
   final Duration slowThreshold;
 
+  /// 이 시간이 지나도 안 끝나면 멈춘 것으로 보고 "다시 시도"를 열어줌 (측정값이 아니라
+  /// 사용자가 무기한 기다리지 않게 하는 상한 정책값). slowThreshold보다 길어야 함.
+  final Duration stallThreshold;
+
   @override
   State<StartupGate<T>> createState() => _StartupGateState<T>();
 }
 
-enum StartupPhase { running, slow, failed, done }
+enum StartupPhase { running, slow, stalled, failed, done }
 
 class _StartupGateState<T> extends State<StartupGate<T>> {
   StartupPhase _phase = StartupPhase.running;
   late T _result;
   Object? _error;
   Timer? _slowTimer;
+  Timer? _stallTimer;
   int _attempt = 0;
 
   @override
@@ -60,23 +70,36 @@ class _StartupGateState<T> extends State<StartupGate<T>> {
 
   @override
   void dispose() {
-    _slowTimer?.cancel();
+    _cancelTimers();
     super.dispose();
+  }
+
+  void _cancelTimers() {
+    _slowTimer?.cancel();
+    _stallTimer?.cancel();
   }
 
   void _run() {
     final attempt = ++_attempt;
-    _slowTimer?.cancel();
+    _cancelTimers();
     _slowTimer = Timer(widget.slowThreshold, () {
       if (mounted && attempt == _attempt && _phase == StartupPhase.running) {
         setState(() => _phase = StartupPhase.slow);
+      }
+    });
+    _stallTimer = Timer(widget.stallThreshold, () {
+      if (mounted &&
+          attempt == _attempt &&
+          (_phase == StartupPhase.running || _phase == StartupPhase.slow)) {
+        debugPrint('⚠️ 앱 시작 초기화가 ${widget.stallThreshold.inSeconds}초 넘게 끝나지 않음 - 다시 시도 허용');
+        setState(() => _phase = StartupPhase.stalled);
       }
     });
 
     Future<T>.sync(widget.initialize).then(
       (result) {
         if (!mounted || attempt != _attempt) return;
-        _slowTimer?.cancel();
+        _cancelTimers();
         setState(() {
           _result = result;
           _phase = StartupPhase.done;
@@ -85,7 +108,7 @@ class _StartupGateState<T> extends State<StartupGate<T>> {
       onError: (Object error, StackTrace stack) {
         debugPrint('❌ 앱 시작 초기화 실패: $error\n$stack');
         if (!mounted || attempt != _attempt) return;
-        _slowTimer?.cancel();
+        _cancelTimers();
         setState(() {
           _error = error;
           _phase = StartupPhase.failed;
@@ -95,8 +118,8 @@ class _StartupGateState<T> extends State<StartupGate<T>> {
   }
 
   void _retry() {
-    // 진행 중에는 다시 시작하지 않음 - 같은 초기화가 겹쳐 돌지 않게.
-    if (_phase != StartupPhase.failed) return;
+    // 실패했거나 멈춘 경우에만 다시 시작 - 정상 진행 중에는 겹쳐 실행하지 않음.
+    if (_phase != StartupPhase.failed && _phase != StartupPhase.stalled) return;
     setState(() {
       _error = null;
       _phase = StartupPhase.running;
@@ -159,6 +182,21 @@ class StartupStatusScreen extends StatelessWidget {
                     const SizedBox(height: 16),
                     Text(context.l10n.startupSlowMessage, textAlign: TextAlign.center),
                   ],
+                ),
+              StartupPhase.stalled => SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.hourglass_bottom, size: 48, color: Colors.grey.shade600),
+                      const SizedBox(height: 16),
+                      Text(context.l10n.startupStalledMessage, textAlign: TextAlign.center),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: onRetry,
+                        child: Text(context.l10n.startupRetry),
+                      ),
+                    ],
+                  ),
                 ),
               StartupPhase.failed => SingleChildScrollView(
                   child: Column(
