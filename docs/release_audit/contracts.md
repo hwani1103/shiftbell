@@ -178,3 +178,17 @@
 - **새 worktree 준비:** 추적 제외 파일 복사 필요 — `android/gradlew`, `android/gradlew.bat`, `android/gradle/wrapper/gradle-wrapper.jar`(T05에서 g1~g3에 복사함). 처음에 `flutter pub get`(l10n 생성 포함). release 서명이 필요한 작업만 `android/key.properties` 별도 복사.
 - **이 PC에서 Gradle은 `sh ./gradlew …`로 실행**(Git Bash의 `gradlew.bat`·`cmd /c` 실패). 빌드·테스트는 한 번에 하나, 끝나면 `sh ./gradlew --stop`.
 - 기록 문서(`docs/release_audit/**`)는 메인 폴더 사본만 쓴다. worktree에는 제품·테스트 코드만.
+
+## G4/G5 추가 키 (2026-09-14)
+
+> §7.2 등록부 보충 - G4 `1c5d403`, G5 `06f450b`.
+
+| 저장소 | 키 | 형 | 소유 | 백업 | 의미 |
+|---|---|---|---|---|---|
+| Native DP prefs `restore_state` | `restore_lock_token` | String | G4 | 안 됨 | 살아 있는 복원 토큰(메모리 토큰과 같을 때만 유효) |
+| Native DP prefs `restore_state` | `restore_interrupted` | bool | G4 | 안 됨 | 죽은 잠금을 정리했음(앱 시작 시 소비) |
+| Native DP prefs `restore_state` | `restore_deferred_writers` | StringSet | G4 | 안 됨 | 복원 중 미뤄진 writer 이름(진단용) |
+| Native DP prefs `restore_state` | `ring_snapshot_<alarmId>` | String(JSON) | G4 | 안 됨 | 복원 전 재생 설정(sound_file·volume·vibration_strength·duration) |
+| Flutter prefs | `backup_last_content_hash` | String | G4 | 제외 | 마지막 성공 백업 내용 지문 |
+| DP 파일 `restore_work/job.json`, `copy_<id>.json` | - | 파일 | G4 | - | 복원 단계 기록·작업 사본 |
+| 백업 제외 설정 | `backup_last_*`, `permissions_requested`, 업데이트 안내 4키, `shiftbell_last_owner_id`, 친구공유 7키 | - | G4/G2 | 제외 | `lib/services/backup_policy.dart` |

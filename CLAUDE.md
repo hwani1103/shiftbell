@@ -70,6 +70,9 @@ flutter build appbundle --release --flavor prod   # 스토어 배포용
 - 20분 전 사전 알림, 스누즈(5분), 타임아웃 자동 종료(지속시간은 **알람 타입별 DB 값**)
 - 알람음 7종 + 제조사 시스템 알람음, 볼륨 보정(`VolumeCalibration.kt`)
 - 알람 이력/생성 로그 영구 보존 (`alarm_history`, `alarm_creation_log`)
+- (2026-09-14 출시전 감사 G1) 불규칙 근무도 규칙 근무와 같은 계산으로 자동 생성(#26 P1), 개별 알람
+  삭제·타입 변경은 `alarm_overrides`로 보존(#31), 기상 알람 OS 예약·취소는 `AlarmWakeScheduler.kt`
+  한 곳(`setAlarmClock`)에서만 - 상세 `docs/release_audit/g1/handoff.md`
 
 ### 달력 / 근무
 - 달력 탭, 전체 근무표(`all_shifts_view`), 날짜별 근무 변경
@@ -240,20 +243,29 @@ Evidence ID로 추적 가능해야 함(AI가 임의 판단 금지).
 
 ### 백업/복구 (기능 완성 — 새 데이터 도메인 만들기 전에 먼저 읽을 것)
 `lib/models/backup_payload.dart` + `lib/services/backup_service.dart` — DB(`shiftbell.db`)
-전체 테이블을 `sqlite_master`로 그때그때 자동 스윕해서 JSON으로 내보내고(`exportAll`),
-빈 상태(재설치 직후)에서만 되돌려놓는(`restoreAll`) 순수 추가 레이어. **기존 파일은
-0개 수정** — 알람 데이터/근무패턴/알람 갱신·발생·notification 로직은 전혀 안 건드림
-(`alarms` 테이블은 파생 데이터라 백업 제외, 복구 후 기존 알람 갱신 로직이 알아서
-재생성).
+전체 테이블을 `sqlite_master`로 그때그때 자동 스윕해서 **한 읽기 트랜잭션 안에서** JSON으로
+내보냄(`exportAll`). 무엇을 넣고 빼는지는 `lib/services/backup_policy.dart` 한 곳 —
+`alarms`는 fixed(파생)·snoozed 대신 **미래 custom 알람만**, 친구공유 소유권 7키·설치별
+설정(백업 상태·권한 요청·업데이트 안내)은 제외. 새 원본 테이블/설정은 여전히 코드 수정 없이
+자동 포함됨.
+- **복원(2026-09-14 출시전 감사 G4 #9/#19/#25)**: `lib/services/restore_coordinator.dart` —
+  검증(`backup_validator.dart`) → Device Protected 작업 사본 → 네이티브 잠금(`RestoreGate.kt`,
+  갱신 엔진·재시도·일정 재예약·수면 감지/위젯 쓰기를 미룸, 알람 재생·끄기·스누즈는 막지 않음)
+  → 옛 OS 예약 취소(`RestoreOs.kt`) → DB 교체(원본 테이블 교체, **이력은 자연키 병합 - 절대
+  비우지 않음**, 진행 중 울림·스누즈 알람은 원래 ID로 이월) → 설정 → OS 재조정 → 친구공유
+  `onRestoreCompleted`. 단계는 작업 기록에 남아 중단되면 앱 시작 화면
+  (`restore_interrupted_screen.dart`)에서 이어서 복원/지금 데이터로 계속을 고름.
 
 - **저장소**: 기기 로컬 `MediaStore`(Download/ShiftBell 폴더) 하나뿐 — 클라우드/
   Firebase/로그인 전혀 안 씀. Android 10(Q) 미만 미지원. Native 쪽은
   `MainActivity.kt`의 `writeBackupFile`/`readBackupFile`, Dart 쪽은
   `lib/services/backup_storage_service.dart`.
-- **자동 백업**: `lib/services/backup_watcher.dart` — 앱이 background로 전환되는
-  시점(`main.dart`의 `didChangeAppLifecycleState`)에만, `PRAGMA data_version`으로
-  실제 변경이 있을 때만 씀(폴링 없음). 수동 "지금 백업"(설정 탭)도 같은 함수를
-  `force: true`로 호출 - 자동/수동 표시가 항상 일치함.
+- **자동 백업**: `lib/services/backup_watcher.dart` — 앱 시작·재개·배경 전환 때, 백업 내용의
+  **정규화 지문**(`backup_policy.dart`)이 마지막 성공 백업과 다를 때만 씀(설정 변경도 감지,
+  2026-09-14 G4 #2 - 예전 `PRAGMA data_version` 비교는 연결이 달라 변경을 놓칠 수 있었음).
+  single flight, 인코딩은 isolate·파일 I/O는 네이티브 백그라운드 스레드, 파일은 IS_PENDING으로
+  완성 후 공개(#18). 복원 중·중단된 복원 작업이 있으면 쓰지 않음. 수동 "지금 백업"(설정 탭)도
+  같은 함수를 `force: true`로 호출.
   범위/한계는 `백업복구_설계.md` 13장 참고.
 - **복구 UX**: `lib/screens/restore_backup_screen.dart` — 신규 설치(`schedule ==
   null`)시 기기에 백업이 있으면 `PermissionIntroScreen`(신규 설치 첫 화면)이
@@ -441,6 +453,11 @@ ALTER를 try/catch로 삼키지 말 것. 상세: `DB_스키마_변경_가이드.
   모바일 빌드엔 영향 없음), 경고 0건, 나머지는 info 린트
 - 저장소 히스토리에 예전 logcat 덤프 86MB가 남아 있음(팩 16MB). 추적은 해제됨
 - 미검증: 홈 화면 위젯 테마 반영은 코드상 완성이지만 실기기 확인 이력 없음
+- 2026-09-14 출시전 감사(G0~G5) 코드 완료·dev 통합. 실기기·Console 검증 목록은
+  `docs/release_audit/g6/device_test_plan.md`, AI 위임 결정은 `docs/release_audit/decisions_delegated_2026-09-14.md`
+- 운영 광고 ID는 소스에 없음(G5 #6): prod release 빌드 때 `--dart-define=ADMOB_BANNER_ID=...` +
+  Gradle 속성 `ADMOB_APP_ID` 주입(`lib/constants/ad_config.dart`). 주입 안 하면 광고 요청 안 함, dev·debug는 항상 테스트 ID
+- dev flavor는 Firebase dev 앱 ID로 초기화하고 Analytics 수집을 끔(#29) - 같은 Firestore 프로젝트는 공유
 - 2026-09-12 - 이 프로젝트 최초의 Kotlin 테스트(`android/app/src/test/kotlin/...`,
   JUnit4+Robolectric+Mockito, `./gradlew testDevDebugUnitTest`) 신설 — 테스트_계획_2026-09-12.md
   B 참고. Flutter `integration_test/`도 같은 날 신설했으나 이 개발 환경(호스트

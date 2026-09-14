@@ -3,8 +3,8 @@
 > **메인 폴더 사본만 유효.** 규칙은 `출시전_수정작업_그룹별_실행계획_및_세션인계_2026-09-14.md` §11.
 > 작업을 시작·중단·완료할 때마다 **아래 두 줄**과 표를 갱신한다. 두 AI는 동시에 작업하지 않는다.
 
-**Claude 이어서 할 작업:** T12 — G1 테스트(대상 release/g1 `4771493`). T11-FIX2 diff는 커밋 전 확인 완료. T14(G3 테스트, `98c4831`)도 가능
-**Codex 지금 할 수 있는 작업:** 없음 — T11-FIX2 수정 완료(토큰 소진으로 검증·커밋은 Claude가 마무리)
+**Claude 이어서 할 작업:** 코드 작업 전부 완료(T17 통합·T18 G4·T21/T22 G5, 사용자 지시 2026-09-14). 남은 것은 사용자 실기기·Console(`g6/device_test_plan.md`)과 보류된 자동 테스트(T12·T14·T19·T23)
+**Codex 지금 할 수 있는 작업:** 교차 리뷰 — G4 `1c5d403`·G5 `06f450b`(dev, 기준 `cb017cb`) diff 읽기 전용 + `decisions_delegated_2026-09-14.md` 위임 결정 검토. 결과는 `g4/review.md`·`g5/review.md`
 
 ---
 
@@ -14,7 +14,7 @@
 |---|---|
 | T00 커밋 (`dev`) | `dafe06b303d6959cffee83495ec38b3c5861524c` |
 | G0 기준 커밋 (T05) | `c0b2e73`(g2·g3 시작점) → **G1 `94ff08f`**(R0 반영 재병합). worktree shiftbell-g1/g2/g3. PROVISIONAL(실기기 D 미통과, E PASS) |
-| G4 기준 커밋 (T17) | - |
+| G4 기준 커밋 (T17) | `cb017cb` (dev에 G1 `4771493`·G2 `0cbe392`·G3 `98c4831` 병합, 충돌 0) |
 | 호스트 RAM | 5.9GB (2026-09-14 확인). 교대 전 `gradlew --stop`, 에뮬레이터 종료 |
 | 결정 | D1~D12 전부 확정 (2026-09-14). D7·D8 후속 판단은 T16에서 사용자 보고 |
 
@@ -39,19 +39,19 @@
 | R0 | (추가) G0 교차 리뷰 — release/g0 diff 읽기 전용, g0/review_codex.md | Codex | — | T05 | 완료 | - | CHANGES_REQUESTED: High 2·Medium 2 → Claude 판정 전부 타당, T02 재수정 |
 | R0-T | (추가) R0 재현 테스트 초안 — docs/release_audit/g0/r0_repro_tests/ (수정 전 FAIL·수정 후 PASS), 실행은 Claude | Codex | — | R0 | 완료(초안) | - | 테스트 4개 + README(R0-02 timeout 주입 지점 요구). Claude가 에뮬레이터 종료 후 G0 수정본에 대입·실행 |
 | T11 | G1 교차 리뷰 + 공통 fixture 기대값 | Codex | — | T10 | 완료(`FIXED`) | `e6e679a` | High 5·Medium 3 리뷰 후 수정 완료 `e6e679a`. 수정 전 재현 FAIL·후 PASS, Gradle 전체·Flutter 211/211·dev debug APK PASS; analyze 허용 error 1건만. `g1/review.md`, `g1/review_fixture_additions.json`. Claude 확인: C-01·C-02 Medium, C-03 Low 후속 → T11-FIX2 FIXED `c257d77`·`4771493` |
-| T12 | G1 테스트 | Claude | Codex | T10, T11 | 대기 | - | |
+| T12 | G1 테스트 | Claude | Codex | T10, T11 | 보류(사용자 지시) | - | 그룹 자동 테스트는 통합본 회귀로 실행(252/252·71/71). 공식 T12 판정·에뮬레이터 S는 미실행 |
 | T13 | G2 테스트 | Claude | Codex | T10 | 완료 | release/g2 `0cbe392` (대상 `4a8f67e`) | F 40/40·전체 179/179·FS 16/16. #21 부분 PASS·#24 로컬 PASS(서버 경로 S9)·#29 NOT_RUN·#30 앱 측 PASS. FS 관찰 4건(서버 형식·크기·회차 강제 없음) → T16. `g2/test_results.md` |
-| T14 | G3 테스트 | Claude | Codex | T10 | 대기 | - | |
-| T15 | 실기기 S2·S3·S4·S14, 두 기기 S9 | 사용자 | — | T12~T14 | 대기 | - | |
-| T16 | S9·S12 보고 → D7·D8 후속 선택 | Codex | Claude | T13, T15 | 대기 | - | |
-| T17 | G1→G2→G3 통합, G4 기준 커밋 | Claude | — | T12~T16 | 대기 | - | |
-| T18 | G4 수정 | Claude | 없음 | T17 | 대기 | - | |
-| T19 | G4 테스트 (S17 실패 주입, S5·S6) | Codex | Claude | T18 동결 | 대기 | - | |
-| T20 | 실기기 S5·S17, 재설치 V2 | 사용자 | — | T19 | 대기 | - | |
-| T21 | G5 설정 수정 | Claude | — | T20 | 대기 | - | |
-| T22 | G5 개인정보·데이터 보안 초안 (docs만) | Codex | Claude | T20 | 대기 | - | |
-| T23 | G5 테스트 (S10, prod release) | Codex | Claude | T21, T22 동결 | 대기 | - | |
-| T24 | Console 실제 값 확인 (S12, V5, V7) | 사용자 | — | T21 | 대기 | - | |
+| T14 | G3 테스트 | Claude | Codex | T10 | 보류(사용자 지시) | - | 통합본 회귀만 |
+| T15 | 실기기 S2·S3·S4·S14, 두 기기 S9 | 사용자 | — | T12~T14 | 대기 | - | `g6/device_test_plan.md` 세션 A·B·D |
+| T16 | S9·S12 보고 → D7·D8 후속 선택 | Codex | Claude | T13, T15 | 위임 결정됨 | - | D7 rules 미채택·D8 프로젝트 분리 안 함(dev 앱 ID+Analytics 끔) - `decisions_delegated_2026-09-14.md`. S9에서 부활 재현 시 재검토 |
+| T17 | G1→G2→G3 통합, G4 기준 커밋 | Claude | — | T12~T16 | 완료 | `cb017cb` | 사용자 지시로 T12~T16 전 선행. 통합 회귀 1건(ScheduleNotifier 폐기 후 state) G4 커밋에서 수정 |
+| T18 | G4 수정 | Claude | 없음 | T17 | 동결 | `1c5d403` | #2 #9 #18 #19 #25, G2-03, G3 #2. `g4/handoff.md` |
+| T19 | G4 테스트 (S17 실패 주입, S5·S6) | Codex | Claude | T18 동결 | 보류(사용자 지시) | - | `g4/prep_s17_failure_injection.md` 설계 그대로 가능 |
+| T20 | 실기기 S5·S17, 재설치 V2 | 사용자 | — | T19 | 대기 | - | `g6/device_test_plan.md` 세션 C |
+| T21 | G5 설정 수정 | Claude | — | T20 | 동결 | `06f450b` | #6 #29(설정 연결). `g5/handoff.md` |
+| T22 | G5 개인정보·데이터 보안 초안 (docs만) | Codex | Claude | T20 | 완료(Claude, 앱 문구로 반영) | `1c5d403` | #7·G2-04 ko/en 문구. Play 양식 대조는 T24 |
+| T23 | G5 테스트 (S10, prod release) | Codex | Claude | T21, T22 동결 | 대기 | - | `g6/device_test_plan.md` 세션 E |
+| T24 | Console 실제 값 확인 (S12, V5, V7) | 사용자 | — | T21 | 대기 | - | 세션 E3~E5 |
 | T25 | G6 통합 시나리오 실행 | Claude | Codex | T23, T24 | 대기 | - | |
 | T26 | G6 최종 판정 | Codex | Claude(분리 불가 표시) | T25 | 대기 | - | |
 
