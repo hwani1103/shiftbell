@@ -302,7 +302,7 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         return try {
             val dateStr = java.text.SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
-                java.util.Locale.getDefault()
+                java.util.Locale.US  // ⭐ 2026-09-14 (출시전 심층 검토 R-03) - DB 날짜 문자열은 Locale.US(#17)
             ).format(java.util.Date(targetTimestamp))
 
             cursor = if (excludeId != null) {
