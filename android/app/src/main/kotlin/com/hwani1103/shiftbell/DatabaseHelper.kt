@@ -140,7 +140,7 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // (sqflite는 스스로 잠금 안에서 다시 읽으므로 반대 방향은 이미 안전함.)
         val current = db.version
         if (current == newVersion) {
-            Log.i(TAG, "⏭️ 잠금 획득 사이 이미 v$newVersion으로 올라가 있음(Flutter가 먼저 실행) - 건너뜀")
+            Log.i(TAG, "⏭️ 잠금 획득 사이 이미 v${newVersion}으로 올라가 있음(Flutter가 먼저 실행) - 건너뜀")
             return
         }
         if (current > newVersion) {
