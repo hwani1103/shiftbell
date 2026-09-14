@@ -75,3 +75,12 @@
 - G2-02 반영: `lib/screens/my_share_code_screen.dart` — `getShareState()` 보관, active+dirty / stop_pending 배너 + "지금 다시 보내기"(`retryPending`), 이름 변경이 서버 확인 대기면 실패 대신 대기 안내, 중지 뒤 상태를 다시 읽어 확인 전이면 대기 배너(삭제 완료 문구 없음). ARB 4개 `friendSyncPendingBanner`·`friendStopPendingBanner`·`friendRetrySync`·`friendSyncPendingToast`(ko/en, friend 키 근처 — G1 ARB 추가 위치와 다른 곳).
 - G2-03(G4)·G2-04(G5)는 T10 대상 아님.
 - 확인: `flutter analyze lib/main.dart lib/screens/my_share_code_screen.dart` error 0(warning 1건 `_MyAppState.platform` 미사용은 기존), `flutter build apk --flavor dev --debug`(shiftbell-g2) exit 0, assembleDevDebug 313.7s. 테스트 코드 없음(T13), 설치·실행 안 함.
+
+## T13 G2 테스트 (Claude, 2026-09-14)
+
+- 대상 release/g2 `4a8f67e`. 테스트 코드만 추가(`test/release_audit/g2/`, 커밋 `0cbe392`), 제품 코드 무변경. 상세·판정: `g2/test_results.md`.
+- F 40/40 PASS(상태 머신 15·친구 캐시 6·payload 경계 9·공유 코드 5·공유 화면 대기 안내 5), 전체 `flutter test` 179/179, `flutter analyze test/release_audit/g2` 이슈 0.
+- FS(Firestore emulator, `demo-shiftbell-t13`) 16/16 PASS — 소유권·list 차단·기타 컬렉션·legacy 호환. 관찰 4건: 서버 형식·크기 검증 없음, delete 뒤 옛 회차 set 재생성, tombstone 회차 강제 없음(잔여 위험 2·3 확인, D7 입력).
+- 판정: #21 부분 PASS(서버 확인 삭제 경로 S9), #24 로컬 상태 머신 PASS(서버 ACK·timeout·늦은 ACK 경로 S9), #29 NOT_RUN(S12), #30 앱 측 PASS.
+- 코드 읽기 관찰(PLAUSIBLE, 미재현): 큐 작업 안의 `signInAnonymously`에 timeout이 없어 로그인 호출이 멈추면 뒤의 stop 제출도 대기. T16 입력.
+- 주입 지점 없음: 서버 ACK/timeout 자동 테스트는 G2 코드 변경이 필요 — S9로 대신할지 T16 결정.

@@ -3,8 +3,8 @@
 > **메인 폴더 사본만 유효.** 규칙은 `출시전_수정작업_그룹별_실행계획_및_세션인계_2026-09-14.md` §11.
 > 작업을 시작·중단·완료할 때마다 **아래 두 줄**과 표를 갱신한다. 두 AI는 동시에 작업하지 않는다.
 
-**Claude 이어서 할 작업:** T13 — G2 테스트(대상 release/g2 `4a8f67e`). T12(G1 테스트)는 T11 끝난 뒤. T14(G3, `98c4831`)도 가능
-**Codex 지금 할 수 있는 작업:** T11 — G1 교차 리뷰(대상 release/g1 `2b82adc` = 동결 `9b8a586` + Manifest 연결, 기준 `94ff08f`). 인계 g1/handoff.md, 연결 요청 g1/integration_requests.md
+**Claude 이어서 할 작업:** T11 리뷰(`g1/review.md`, High 5·Medium 3) 분류 → G1 수정·재동결 → T12. T14(G3 테스트, `98c4831`)도 가능. T13 완료(`0cbe392`)
+**Codex 지금 할 수 있는 작업:** 없음 — T11 교차 리뷰 완료(`CHANGES_REQUESTED`, High 5·Medium 3). G1 수정·재동결 전 T12 진행 보류
 
 ---
 
@@ -38,9 +38,9 @@
 | T11a | (선행) G1 알람 계산 기대값 — contracts §2·v4 #26/#31만 근거, G1 코드 미참조. docs/release_audit/g1/fixtures_draft_p1/ | Codex | — | T05 | 완료 | - | 생성 6건·상태 변화 6건 JSON + README. T06/T12 테스트에서 사용 |
 | R0 | (추가) G0 교차 리뷰 — release/g0 diff 읽기 전용, g0/review_codex.md | Codex | — | T05 | 완료 | - | CHANGES_REQUESTED: High 2·Medium 2 → Claude 판정 전부 타당, T02 재수정 |
 | R0-T | (추가) R0 재현 테스트 초안 — docs/release_audit/g0/r0_repro_tests/ (수정 전 FAIL·수정 후 PASS), 실행은 Claude | Codex | — | R0 | 완료(초안) | - | 테스트 4개 + README(R0-02 timeout 주입 지점 요구). Claude가 에뮬레이터 종료 후 G0 수정본에 대입·실행 |
-| T11 | G1 교차 리뷰 + 공통 fixture 기대값 | Codex | — | T10 | 대기 | - | |
+| T11 | G1 교차 리뷰 + 공통 fixture 기대값 | Codex | — | T10 | 완료(`CHANGES_REQUESTED`) | 대상 `2b82adc` | High 5·Medium 3. `g1/review.md`, `g1/review_fixture_additions.json`; 빌드·테스트 미실행 |
 | T12 | G1 테스트 | Claude | Codex | T10, T11 | 대기 | - | |
-| T13 | G2 테스트 | Claude | Codex | T10 | 대기 | - | |
+| T13 | G2 테스트 | Claude | Codex | T10 | 완료 | release/g2 `0cbe392` (대상 `4a8f67e`) | F 40/40·전체 179/179·FS 16/16. #21 부분 PASS·#24 로컬 PASS(서버 경로 S9)·#29 NOT_RUN·#30 앱 측 PASS. FS 관찰 4건(서버 형식·크기·회차 강제 없음) → T16. `g2/test_results.md` |
 | T14 | G3 테스트 | Claude | Codex | T10 | 대기 | - | |
 | T15 | 실기기 S2·S3·S4·S14, 두 기기 S9 | 사용자 | — | T12~T14 | 대기 | - | |
 | T16 | S9·S12 보고 → D7·D8 후속 선택 | Codex | Claude | T13, T15 | 대기 | - | |
