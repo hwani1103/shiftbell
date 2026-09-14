@@ -3,8 +3,8 @@
 > **메인 폴더 사본만 유효.** 규칙은 `출시전_수정작업_그룹별_실행계획_및_세션인계_2026-09-14.md` §11.
 > 작업을 시작·중단·완료할 때마다 **아래 두 줄**과 표를 갱신한다. 두 AI는 동시에 작업하지 않는다.
 
-**Claude 이어서 할 작업:** T05 — 진행중 (contracts 확정 → 문서·공통 파일 dev 커밋 → G0 병합 → g1/g2/g3 worktree)
-**Codex 지금 할 수 있는 작업:** 없음 (T07·T08·T09는 T05 기준 커밋 필요). 사용자는 T04 실기기 S1 가능
+**Claude 이어서 할 작업:** T06 — G1 수정 (`shiftbell-g1`, 기준 `c0b2e73`). 여러 번 끊겨도 Claude가 이어감
+**Codex 지금 할 수 있는 작업:** T07 — G2 수정 (`shiftbell-g2`, 기준 `c0b2e73`). 끝나면 T08(G3, `shiftbell-g3`) → T09. 먼저 contracts.md §0·§4·§7·§8 필독
 
 ---
 
@@ -13,7 +13,7 @@
 | 항목 | 값 |
 |---|---|
 | T00 커밋 (`dev`) | `dafe06b303d6959cffee83495ec38b3c5861524c` |
-| G0 기준 커밋 (T05) | - |
+| G0 기준 커밋 (T05) | `c0b2e73` — worktree shiftbell-g1/g2/g3 (브랜치 release/g1~g3). PROVISIONAL(S1 미통과) |
 | G4 기준 커밋 (T17) | - |
 | 호스트 RAM | 5.9GB (2026-09-14 확인). 교대 전 `gradlew --stop`, 에뮬레이터 종료 |
 | 결정 | D1~D12 전부 확정 (2026-09-14). D7·D8 후속 판단은 T16에서 사용자 보고 |
@@ -29,7 +29,7 @@
 | T02 | G0 수정 (`shiftbell-g0`) | Claude | — | T00 | 동결 | `637b56a` | T03 중 컴파일 결함 수정 후 재동결 |
 | T03 | G0 테스트 | Claude | Codex | T01, T02 동결 | PASS | `c06ffea` | Flutter 139/139, Kotlin 23/23. REPAIR-REJECT는 사용자 결정 A(유지). S1은 T04 |
 | T04 | 실기기 S1 | 사용자 | — | T03 | 대기 | - | 절차: g0/t04_s1_device_procedure.md |
-| T05 | contracts 확정, G0 기준 커밋, g1/g2/g3 worktree | Claude | — | T03 PASS | 진행중 | - | |
+| T05 | contracts 확정, G0 기준 커밋, g1/g2/g3 worktree | Claude | — | T03 PASS | 완료 | `c0b2e73` | 공통 선언 data_revision_provider.dart 포함 |
 | T06 | G1 수정 | Claude | 없음 | T05 | 대기 | - | |
 | T07 | G2 수정 | Codex | Claude | T05 | 대기 | - | |
 | T08 | G3 수정 | Codex | Claude | T05 | 대기 | - | |
@@ -60,3 +60,4 @@
 | 2026-09-14 | Claude | T02 | G0 수정 완료·동결 (DB v24 네이티브 마이그레이션, V4). Kotlin 컴파일·테스트는 T03 | `cf7421b` |
 | 2026-09-14 | Codex | T01 | fixture 초안 완료: 필수 6개 버전 포함 v1~v23 SQL, 재구성본 구분, 입력 manifest·독립 기대값·T03 절차. 문서 수준 대조만 수행, SQL/테스트 NOT_RUN | 기준 `dafe06b`, 문서 미커밋 |
 | 2026-09-14 | Claude | T03 | 자동 테스트 PASS(조건부). 중간에 제품 컴파일 결함 1건 발견→T02 재수정·재동결(637b56a). REPAIR-REJECT 사용자 확인 대기 | `c06ffea` |
+| 2026-09-14 | Claude | T05 | contracts 확정, G0를 dev에 병합(기준 커밋), g1/g2/g3 worktree 생성·gradle 래퍼 복사 | `c0b2e73` |

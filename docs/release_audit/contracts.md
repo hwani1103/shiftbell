@@ -8,7 +8,7 @@
 
 | 항목 | 값 |
 |---|---|
-| 기준 커밋 (T05, `dev`) | @BASE@ |
+| 기준 커밋 (T05, `dev`) | `c0b2e73` (merge: G0 → dev). 브랜치 release/g1·g2·g3 모두 이 커밋에서 시작 |
 | 포함 | G0 제품 `637b56a` + 테스트 `c06ffea` + 문서 + 공통 인터페이스 `lib/providers/data_revision_provider.dart` |
 | G0 상태 | 자동 테스트 PASS, **S1 실기기(T04) 미통과 → G1/G2/G3는 `PROVISIONAL / G0 실기기 미통과` 상속** (실행계획 §2.2). T04 결과로 G0 계약이 바뀌면 통합 담당자가 각 그룹을 동결·재기준화 |
 | 결정 | D1~D12 확정(실행계획 §4). REPAIR-REJECT = 사용자 결정 A(`g0/test_results.md` 6장) |
