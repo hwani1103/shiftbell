@@ -1,7 +1,7 @@
 # G2 handoff
 
 ```text
-그룹 / 담당 / worktree / branch: G2 / Codex / C:SERSADMINISTRATORDESKTOPSHIFTBELL-G2 / RELEASE/G2
+그룹 / 담당 / worktree / branch: G2 / Codex / C:\Users\Administrator\Desktop\shiftbell-g2 / release/g2
 공통 기준 SHA / 최종 소스 SHA: c0b2e73 / (미시작)
 상태: PLANNED
 수정한 감사 번호:

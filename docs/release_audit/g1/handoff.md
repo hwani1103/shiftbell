@@ -1,7 +1,7 @@
 # G1 handoff
 
 ```text
-그룹 / 담당 / worktree / branch: G1 / Claude / C:SERSADMINISTRATORDESKTOPSHIFTBELL-G1 / RELEASE/G1
+그룹 / 담당 / worktree / branch: G1 / Claude / C:\Users\Administrator\Desktop\shiftbell-g1 / release/g1
 공통 기준 SHA / 최종 소스 SHA: c0b2e73 / (미시작)
 상태: PLANNED
 수정한 감사 번호:

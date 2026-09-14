@@ -1,7 +1,7 @@
 # G3 handoff
 
 ```text
-그룹 / 담당 / worktree / branch: G3 / Codex / C:SERSADMINISTRATORDESKTOPSHIFTBELL-G3 / RELEASE/G3
+그룹 / 담당 / worktree / branch: G3 / Codex / C:\Users\Administrator\Desktop\shiftbell-g3 / release/g3
 공통 기준 SHA / 최종 소스 SHA: c0b2e73 / (미시작)
 상태: PLANNED
 수정한 감사 번호:
