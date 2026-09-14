@@ -63,7 +63,7 @@ object CalendarWidgetScheduleResolver {
                 }
 
                 val parsedStart = try {
-                    SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(startDateStr)
+                    SimpleDateFormat(DATE_FORMAT, Locale.US).parse(startDateStr)
                 } catch (e: Exception) {
                     Log.e(TAG, "❌ startDate 파싱 실패: $startDateStr", e)
                     return null
@@ -97,7 +97,7 @@ object CalendarWidgetScheduleResolver {
     // ⭐ 특정 날짜에 배정된 근무명. assignedDates(달력에서 수동 지정한 예외)가 최우선,
     // 그다음 패턴 순환. 둘 다 없으면 "미설정".
     fun shiftForDate(schedule: ResolvedSchedule, cal: Calendar): String {
-        val dayKey = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(cal.time)
+        val dayKey = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(cal.time)
         schedule.assignedDates[dayKey]?.let { return it }
 
         if (!schedule.isRegular || schedule.pattern.isEmpty()) return "미설정"

@@ -32,6 +32,9 @@ import java.util.*
  */
 object AlarmRefreshEngine {
     private const val TAG = "AlarmRefreshEngine"
+    // ⭐ 2026-09-14 (출시전 감사 #17, G1) - DB에 저장·조회하는 날짜 문자열은 SimpleDateFormat을 전부 Locale.US로.
+    // 기기 로케일을 따르면 태국어(불기 연도 2569)·페르시아어/아랍어(해당 문자권 숫자) 기기에서 Dart가 쓴 ASCII 문자열과
+    // 비교·파싱이 어긋나 배정일 조회·알람 diff·예외 슬롯이 조용히 틀어졌음. 사용자에게 보여주는 표시용 형식은 제외.
     private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
     private const val DAYS_AHEAD = 10
 
@@ -272,7 +275,7 @@ object AlarmRefreshEngine {
             }
 
             val parsedStart = try {
-                SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(startDateStr)
+                SimpleDateFormat(DATE_FORMAT, Locale.US).parse(startDateStr)
             } catch (e: Exception) {
                 Log.e(TAG, "❌ startDate 파싱 실패: $startDateStr", e)
                 return null
@@ -327,7 +330,7 @@ object AlarmRefreshEngine {
 
     private fun readExistingFixedAlarms(db: SQLiteDatabase, nowMillis: Long): List<ExistingAlarm> {
         val result = mutableListOf<ExistingAlarm>()
-        val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(nowMillis))
+        val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date(nowMillis))
         db.query("alarms", null, "type = ? AND date > ?", arrayOf("fixed", now), null, null, null).use { cursor ->
             val dayOffsetIdx = cursor.getColumnIndex("day_offset")
             while (cursor.moveToNext()) {
@@ -368,7 +371,7 @@ object AlarmRefreshEngine {
     // 남는 문자(.000)는 무시하므로 하나의 포맷터로 두 형식 다 안전하게 처리 가능.
     private fun parseStoredDate(dateStr: String): Long? {
         return try {
-            SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(dateStr)?.time
+            SimpleDateFormat(DATE_FORMAT, Locale.US).parse(dateStr)?.time
         } catch (e: Exception) {
             Log.e(TAG, "❌ 저장된 날짜 파싱 실패: $dateStr", e)
             null
@@ -415,8 +418,8 @@ object AlarmRefreshEngine {
         val today = Calendar.getInstance().apply { timeInMillis = nowMillis }
         val now = nowMillis
         val slotFormat = SimpleDateFormat(SLOT_FORMAT, Locale.US)
-        val dayKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val fullFormat = SimpleDateFormat(DATE_FORMAT, Locale.getDefault())
+        val dayKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        val fullFormat = SimpleDateFormat(DATE_FORMAT, Locale.US)
 
         fun dateAt(base: Calendar, dayDelta: Int): Calendar = Calendar.getInstance().apply {
             timeInMillis = base.timeInMillis
@@ -493,7 +496,7 @@ object AlarmRefreshEngine {
     // ⭐ 2026-09-14 (#16/#27/#20) - 이 엔진 전용 cancelNativeAlarm/scheduleNativeAlarm은 AlarmWakeScheduler로 통합됨
 
     private fun insertHistory(db: SQLiteDatabase, alarmId: Int, dateStr: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {
-        val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
+        val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
             put("scheduled_time", time)
@@ -509,7 +512,7 @@ object AlarmRefreshEngine {
     }
 
     private fun insertCreationLog(db: SQLiteDatabase, alarmId: Int, dateStr: String, time: String, shiftType: String, alarmTypeId: Int, dayOffset: Int, source: String) {
-        val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
+        val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
             put("scheduled_date", dateStr)
@@ -526,7 +529,7 @@ object AlarmRefreshEngine {
     // ⭐ 2026-09-14 (출시전 감사 #26) - fixed가 아닌 미래 알람(custom·snoozed). 불규칙 전용이던
     // reRegisterExistingAlarms()를 대체 - 이제 규칙·불규칙 모두 커밋 뒤 AlarmWakeScheduler로 재등록.
     private fun readOtherFutureAlarms(db: SQLiteDatabase, nowMillis: Long): List<AlarmWakeScheduler.WakeRow> {
-        val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(nowMillis))
+        val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date(nowMillis))
         val result = mutableListOf<AlarmWakeScheduler.WakeRow>()
         db.query("alarms", arrayOf("id", "date", "shift_type"), "type != ? AND date > ?", arrayOf("fixed", now),
             null, null, null).use { c ->

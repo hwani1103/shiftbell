@@ -77,10 +77,18 @@ class ScheduleNotificationReceiver : BroadcastReceiver() {
             Log.w("ScheduleNotify", "⚠️ id 없는 일정 알림 무시")
             return
         }
-        val date = intent.getStringExtra(EXTRA_DATE) ?: ""
-        val startMinutes = intent.getIntExtra(EXTRA_START_MINUTES, 0)
-        val content = intent.getStringExtra(EXTRA_CONTENT) ?: ""
-        val durationMinutes = intent.getIntExtra(EXTRA_DURATION_MINUTES, 0)
+        // ⭐ 2026-09-14 (출시전 감사 #5, G1) - 예전엔 Intent에 담긴 예약 당시 내용을 그대로 표시해서, 일정 내용·시각을 바꾸거나
+        // 알림을 끄거나 탭을 숨긴 뒤에도 남아 있던 옛 예약이 옛 내용·옛 시각으로 울렸음. 이제 DB로 다시 판정하고 DB 내용으로 표시.
+        val expectedAt = if (intent.hasExtra(ScheduleNotificationScheduler.EXTRA_EXPECTED_AT)) {
+            intent.getLongExtra(ScheduleNotificationScheduler.EXTRA_EXPECTED_AT, 0L)
+        } else {
+            null
+        }
+        val display = ScheduleNotificationScheduler.resolveOnReceive(context, id, expectedAt) ?: return
+        val date = display.date
+        val startMinutes = display.startMinutes
+        val content = display.content
+        val durationMinutes = display.durationMinutes
         val timeHeadline = formatTimeHeadline(startMinutes, durationMinutes)
 
         val notificationManager =

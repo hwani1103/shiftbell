@@ -24,6 +24,9 @@ import java.util.*
  */
 object AlarmActionHelper {
     private const val TAG = "AlarmActionHelper"
+    // ⭐ 2026-09-14 (출시전 감사 #17, G1) - DB에 저장·조회하는 날짜 문자열은 SimpleDateFormat을 전부 Locale.US로.
+    // 기기 로케일을 따르면 태국어(불기 연도 2569)·페르시아어/아랍어(해당 문자권 숫자) 기기에서 Dart가 쓴 ASCII 문자열과
+    // 비교·파싱이 어긋나 배정일 조회·알람 diff·예외 슬롯이 조용히 틀어졌음. 사용자에게 보여주는 표시용 형식은 제외.
     private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
 
     data class SnoozeResult(val newTimeStr: String, val shiftType: String)
@@ -137,8 +140,8 @@ object AlarmActionHelper {
             // DB 문자열·수신 시 예정 시각 대조와 정확히 일치하게 함
             newTimestamp = AlarmWakeScheduler.normalize(newTimestamp)
 
-            val dateStr = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date(newTimestamp))
-            val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(newTimestamp))
+            val dateStr = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date(newTimestamp))
+            val timeStr = SimpleDateFormat("HH:mm", Locale.US).format(Date(newTimestamp))
 
             db.beginTransaction()
             try {
@@ -318,7 +321,7 @@ object AlarmActionHelper {
     }
 
     private fun insertHistory(db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {
-        val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
+        val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
             put("scheduled_time", time)
@@ -334,7 +337,7 @@ object AlarmActionHelper {
     }
 
     private fun insertCreationLog(db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, alarmTypeId: Int, dayOffset: Int, source: String) {
-        val now = SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).format(Date())
+        val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
             put("scheduled_date", date)

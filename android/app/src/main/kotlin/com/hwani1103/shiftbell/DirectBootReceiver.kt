@@ -15,8 +15,19 @@ import java.util.*
 class DirectBootReceiver : BroadcastReceiver() {
     
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != Intent.ACTION_LOCKED_BOOT_COMPLETED) {
-            Log.d("DirectBoot", "⏭️ 다른 액션: ${intent.action}")
+        val action = intent.action
+        // ⭐ 2026-09-14 (출시전 감사 V6, G1) - 예전엔 LOCKED_BOOT_COMPLETED만 처리했음:
+        //  - BOOT_COMPLETED: LOCKED_BOOT가 안 오는 기기/경로(파일 기반 암호화 없음 등)에서 재부팅 후 재예약이 빠질 수 있음
+        //  - MY_PACKAGE_REPLACED: 업데이트 직후 앱을 열기 전까지 새 정책(#26 등)으로 갱신·재예약이 안 됨
+        //  - 정확한 알람 권한 재허용: 거부 동안 실패한 예약(#13·#27 실패 목록)을 다음 트리거까지 방치
+        // Manifest intent-filter 추가는 통합 담당자 요청(g1/integration_requests.md) - 이 코드는 수신만 되면 동작.
+        if (action == Intent.ACTION_MY_PACKAGE_REPLACED ||
+            action == AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED) {
+            resyncAfterEnvironmentChange(context, action)
+            return
+        }
+        if (action != Intent.ACTION_LOCKED_BOOT_COMPLETED && action != Intent.ACTION_BOOT_COMPLETED) {
+            Log.d("DirectBoot", "⏭️ 다른 액션: $action")
             return
         }
         
@@ -76,6 +87,27 @@ class DirectBootReceiver : BroadcastReceiver() {
         }
     }
     
+    // ⭐ V6 - 업데이트·정확한 알람 권한 재허용: 부팅 시각은 그대로 두고 알람·일정 알림만 즉시 다시 맞춤.
+    // 엔진 갱신은 "오늘 이미 갱신함"과 무관하게 실행되고(refresh 직접 호출), 시작 시 OS 반영 실패 목록부터 재시도함.
+    private fun resyncAfterEnvironmentChange(context: Context, action: String) {
+        if (action == AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED &&
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Log.d("DirectBoot", "⏭️ 정확한 알람 권한 상태 변경(허용 아님) - 재조정 안 함")
+                return
+            }
+        }
+        Log.e("DirectBoot", "🔄 $action - 알람·일정 알림 재조정")
+        try {
+            AlarmRefreshEngine.refresh(context)
+            AlarmGuardReceiver.triggerCheck(context)
+            ScheduleNotificationScheduler.rescheduleAllFromDb(context)
+        } catch (e: Exception) {
+            Log.e("DirectBoot", "❌ 재조정 실패: $action", e)
+        }
+    }
+
     private fun saveBootTime(context: Context) {
         val prefs = context.getSharedPreferences("alarm_state", Context.MODE_PRIVATE)
         val bootTime = System.currentTimeMillis()
@@ -98,7 +130,7 @@ class DirectBootReceiver : BroadcastReceiver() {
 
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
-                Locale.getDefault()
+                Locale.US
             ).format(Date())
 
             Log.d("DirectBoot", "현재 시각: $now")
@@ -124,7 +156,7 @@ class DirectBootReceiver : BroadcastReceiver() {
 
                 val timestamp = SimpleDateFormat(
                     "yyyy-MM-dd'T'HH:mm:ss",
-                    Locale.getDefault()
+                    Locale.US
                 ).parse(dateStr)?.time
 
                 if (timestamp != null) {

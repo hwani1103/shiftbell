@@ -344,6 +344,8 @@ override fun onNewIntent(intent: Intent) {
                 // 탭으로 돌아가는 진입 경로 자체를 닫는다(ScheduleNotificationScheduler.kt
                 // cancelAllFromDb 주석 참고). DB는 안 건드리므로 되돌릴 수 있음.
                 "cancelAllScheduleNotifications" -> {
+                    // ⭐ 2026-09-14 (#5) - 탭 숨김을 Native(Device Protected)에도 기록 - 재부팅·수신 때 되살리지 않게
+                    ScheduleNotificationScheduler.setTabEnabled(applicationContext, false)
                     ScheduleNotificationScheduler.cancelAllFromDb(applicationContext)
                     result.success(null)
                 }
@@ -351,7 +353,15 @@ override fun onNewIntent(intent: Intent) {
                 // 재부팅 재예약과 완전히 같은 함수를 재사용해 숨겨져 있던 동안
                 // 취소됐던 알림들을 원래 상태로 그대로 복원함.
                 "rescheduleAllScheduleNotifications" -> {
+                    ScheduleNotificationScheduler.setTabEnabled(applicationContext, true)  // #5
                     ScheduleNotificationScheduler.rescheduleAllFromDb(applicationContext)
+                    result.success(null)
+                }
+                // ⭐ 2026-09-14 (출시전 감사 #5) - 앱 시작 시 Flutter 설정값(schedule_tab_enabled)을 Native로 동기화
+                // (백업 복원 등으로 두 값이 어긋났을 때 바로잡음 - 바뀐 경우에만 예약을 거두거나 되살림)
+                "syncScheduleTabEnabled" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: true
+                    ScheduleNotificationScheduler.syncTabEnabled(applicationContext, enabled)
                     result.success(null)
                 }
                 // ⭐ 2026-09-13 - openDateSchedule 콜드스타트 유실 대비 pull 경로

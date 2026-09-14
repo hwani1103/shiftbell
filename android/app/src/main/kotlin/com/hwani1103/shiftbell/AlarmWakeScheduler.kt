@@ -126,7 +126,7 @@ object AlarmWakeScheduler {
     }
 
     private fun parse(dateStr: String): Long? = try {
-        SimpleDateFormat(DATE_FORMAT, Locale.getDefault()).parse(dateStr)?.time
+        SimpleDateFormat(DATE_FORMAT, Locale.US).parse(dateStr)?.time
     } catch (e: Exception) {
         Log.e(TAG, "❌ 알람 날짜 파싱 실패: $dateStr", e)
         null

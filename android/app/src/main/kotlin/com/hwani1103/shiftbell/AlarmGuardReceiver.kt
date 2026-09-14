@@ -94,6 +94,9 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // 계산된 절대 시각으로 OS 알람을 고쳐 씀).
             Log.d("AlarmGuardReceiver", "🌐 시계/시간대 변경 감지 - 강제 전체 갱신")
             AlarmRefreshEngine.refresh(context)
+            // ⭐ 2026-09-14 (출시전 감사 #10) - 일정 알림도 절대 시각(epoch ms)으로 예약돼 있어 시간대가 바뀌면 옛 시각에 울렸음.
+            // DB 기준으로 다시 계산해 걸고, 지난 일정의 옛 예약은 지움(탭 숨김 상태면 걸지 않음 - #5)
+            ScheduleNotificationScheduler.rescheduleAllFromDb(context)
         } else {
             // ⭐ 신규: 갱신 체크 & 실행 (Native에서 직접!)
             AlarmRefreshUtil.checkAndTriggerRefresh(context)
@@ -305,7 +308,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
 
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
-                Locale.getDefault()
+                Locale.US
             ).format(Date())
 
             cursor = db.query(
@@ -328,7 +331,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
 
                 val timestamp = SimpleDateFormat(
                     "yyyy-MM-dd'T'HH:mm:ss",
-                    Locale.getDefault()
+                    Locale.US
                 ).parse(dateStr)?.time
 
                 if (timestamp != null) {
