@@ -22,6 +22,31 @@ enum SleepStatus { confirmed, pendingConfirmation }
 
 enum SleepConfidence { low, medium, high }
 
+/// 자동 감지 후보는 시작 후 이 시간이 지나면 LOW 신뢰도의 확인 대기 기록으로
+/// 닫힌다. Native와 Dart가 같은 행 기반 기한을 사용하며 별도 prefs에는 저장하지 않는다.
+const Duration maxAutoSleepCandidateDuration = Duration(hours: 9);
+
+DateTime autoSleepCandidateDeadline(DateTime start) =>
+    start.add(maxAutoSleepCandidateDuration);
+
+DateTime cappedAutoSleepCandidateEnd(DateTime start, DateTime now) {
+  final deadline = autoSleepCandidateDeadline(start);
+  return now.isBefore(deadline) ? now : deadline;
+}
+
+bool isAutoSleepCandidateExpired(DateTime start, DateTime now) =>
+    !now.isBefore(autoSleepCandidateDeadline(start));
+
+/// Native 수면 writer와 같은 locale 독립 DB 형식. 화면 표시용 locale과 분리하고
+/// 밀리초를 저장하지 않아 어느 경로에서 닫아도 같은 end_time 문자열이 된다.
+String sleepDateTimeToDb(DateTime value) {
+  final local = value.toLocal();
+  String two(int number) => number.toString().padLeft(2, '0');
+  return '${local.year.toString().padLeft(4, '0')}-'
+      '${two(local.month)}-${two(local.day)}T'
+      '${two(local.hour)}:${two(local.minute)}:${two(local.second)}';
+}
+
 String sleepSourceToDb(SleepSource s) {
   switch (s) {
     case SleepSource.autoDetected:
@@ -126,8 +151,8 @@ class SleepRecord {
 
   Map<String, dynamic> toMap() => {
         if (id != null) 'id': id,
-        'start_time': start.toIso8601String(),
-        'end_time': end?.toIso8601String(),
+        'start_time': sleepDateTimeToDb(start),
+        'end_time': end == null ? null : sleepDateTimeToDb(end!),
         'source': sleepSourceToDb(source),
         'status': sleepStatusToDb(status),
         'confidence': sleepConfidenceToDb(confidence),

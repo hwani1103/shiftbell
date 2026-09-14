@@ -54,6 +54,22 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
   Future<void> _load() async {
     state = const AsyncValue.loading();
     try {
+      final now = DateTime.now();
+      final pending = await DatabaseService.instance.getPendingSleepRecords();
+      for (final record in pending) {
+        if (record.id == null ||
+            record.source != SleepSource.autoDetected ||
+            record.end != null ||
+            !isAutoSleepCandidateExpired(record.start, now)) {
+          continue;
+        }
+        // Native의 9시간 트리거가 지연되거나 앱이 먼저 열린 경우의 동일한
+        // 백스톱. 종료 시각은 행의 start에서 파생하며 확인 대기 상태를 유지한다.
+        await DatabaseService.instance.updateSleepRecord(record.copyWith(
+          end: cappedAutoSleepCandidateEnd(record.start, now),
+          confidence: SleepConfidence.low,
+        ));
+      }
       // ⭐ 2026-09-01 - "오늘의 컨디션 예측"이 최대 8주(56일)치 근무-수면 데이터를
       // 봐야 해서 30일 → 60일로 넓힘(sleep_history.dart/today_forecast_engine.dart
       // 참고). 그 외 화면(최근 수면 기록 리스트 등)은 원래도 "최근 N개/N일"만

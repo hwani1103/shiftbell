@@ -64,7 +64,7 @@ class SleepWidgetActionReceiver : BroadcastReceiver() {
             }
 
             val now = System.currentTimeMillis()
-            val nowStr = SimpleDateFormat(ISO_FORMAT, Locale.getDefault()).format(Date(now))
+            val nowStr = SimpleDateFormat(ISO_FORMAT, Locale.US).format(Date(now))
 
             val ongoingManual = db.query(
                 "sleep_records", arrayOf("id", "start_time"),
@@ -163,7 +163,7 @@ class SleepWidgetActionReceiver : BroadcastReceiver() {
     private fun parseIso(s: String?): Long? {
         if (s == null) return null
         return try {
-            SimpleDateFormat(ISO_FORMAT, Locale.getDefault()).parse(s)?.time
+            SimpleDateFormat(ISO_FORMAT, Locale.US).parse(s)?.time
         } catch (e: Exception) {
             null
         }

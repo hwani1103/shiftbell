@@ -11,6 +11,7 @@ import '../services/condition/shift_pattern_analyzer.dart';
 import '../services/database_service.dart';
 import '../utils/shift_name_util.dart';
 import 'condition_shift_time_provider.dart';
+import 'data_revision_provider.dart';
 import 'schedule_provider.dart';
 
 /// 실제로 출퇴근 시각을 입력받아야 하는 근무명 목록(휴무 제외).
@@ -31,6 +32,8 @@ List<String> conditionRelevantShiftNames(ShiftSchedule schedule) {
 /// 그건 이 탭이 아니라 InitialRouter가 처리할 상태라 컨디션 탭에서 또
 /// 안내하지 않음.
 final conditionSetupNeededProvider = Provider<bool>((ref) {
+  ref.watch(dataRevisionProvider(DataDomain.shiftSchedule));
+  ref.watch(dataRevisionProvider(DataDomain.shiftTimes));
   final schedule = ref.watch(scheduleProvider).value;
   if (schedule == null) return false;
   final times = ref.watch(conditionShiftTimeProvider).value;
@@ -46,6 +49,8 @@ final conditionSetupNeededProvider = Provider<bool>((ref) {
 // 겹침 분류, 근무 후 평균 수면 통계) public으로 노출함 - 그 전에는 이 파일
 // 안에서만 쓰던 private provider였음.
 final conditionAnalyzerProvider = Provider<ShiftPatternAnalyzer?>((ref) {
+  ref.watch(dataRevisionProvider(DataDomain.shiftSchedule));
+  ref.watch(dataRevisionProvider(DataDomain.shiftTimes));
   final schedule = ref.watch(scheduleProvider).value;
   final times = ref.watch(conditionShiftTimeProvider).value;
   if (schedule == null || times == null) return null;
@@ -61,6 +66,9 @@ final conditionAnalyzerProvider = Provider<ShiftPatternAnalyzer?>((ref) {
 // 더 기반 레이어인 이 파일로 옮김 - sleep_condition_provider.dart는 이미 이
 // 파일을 import하고 있어서 그대로 재사용 가능(순환 import 방지).
 final recentOvertimeMinutesProvider = FutureProvider<Map<String, int>>((ref) async {
+  // G1은 date_overtime 저장이 성공한 뒤에만 이 revision을 올린다. 따라서
+  // OT 추가/수정/삭제는 DB를 다시 읽고, 실패/롤백은 현재 계산을 유지한다.
+  ref.watch(dataRevisionProvider(DataDomain.overtime));
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final start = today.subtract(const Duration(days: 6));

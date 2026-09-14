@@ -47,6 +47,7 @@ class SleepDetectionReceiver : BroadcastReceiver() {
         private const val PREFS_NAME = "sleep_detection_state"
         private const val KEY_FIRST_OFF_SAMPLE_AT = "first_off_sample_at"
         private const val MIN_MINUTES_FOR_MEDIUM_PLUS = 90L
+        private const val MAX_AUTO_CANDIDATE_MILLIS = 9L * 60L * 60L * 1_000L
         private const val ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
 
         // ⭐ 2026-09-11(사용자 요청) - "거부 학습" 억제 - 화면 꺼짐이 곧 수면은 아니다
@@ -109,12 +110,26 @@ class SleepDetectionReceiver : BroadcastReceiver() {
         private const val MIN_MAIN_SLEEP_MINUTES = 120L
 
         private fun isoFormat(millis: Long): String =
-            SimpleDateFormat(ISO_FORMAT, Locale.getDefault()).format(Date(millis))
+            SimpleDateFormat(ISO_FORMAT, Locale.US).format(Date(millis))
 
         private fun parseIso(s: String): Long? = try {
-            SimpleDateFormat(ISO_FORMAT, Locale.getDefault()).parse(s)?.time
+            SimpleDateFormat(ISO_FORMAT, Locale.US).parse(s)?.time
         } catch (e: Exception) {
             null
+        }
+
+        internal fun autoCandidateDeadlineMillis(startMillis: Long): Long =
+            startMillis + MAX_AUTO_CANDIDATE_MILLIS
+
+        internal fun cappedAutoCandidateEndMillis(startMillis: Long, nowMillis: Long): Long =
+            minOf(nowMillis, autoCandidateDeadlineMillis(startMillis))
+
+        /** 예약기가 감지 창 종료 뒤에도 진행 중 후보의 행 기반 9시간 기한을
+         * 놓치지 않도록 제공한다. 별도 prefs deadline은 만들지 않는다. */
+        internal fun ongoingAutoDeadlineMillis(context: Context): Long? {
+            val db = DatabaseHelper.getInstance(context).getReadableDatabaseWithRetry() ?: return null
+            val ongoing = findOngoingAutoRecord(db) ?: return null
+            return autoCandidateDeadlineMillis(ongoing.second)
         }
 
         /** 20분 알람 수신 시 + 화면 재개 등 "지금 확인해도 되는" 모든 트리거 지점에서 호출. */
@@ -147,6 +162,25 @@ class SleepDetectionReceiver : BroadcastReceiver() {
             }
 
             val ongoing = findOngoingAutoRecord(db)
+
+            // 화면이 계속 꺼져 있어도 자동 후보는 start+9h에 닫힌다. 늦게 도착한
+            // 트리거도 실제 now가 아니라 같은 deadline을 저장하므로 Dart 앱 경로와
+            // 결과가 같고, 자동 종료만으로 사용자 확인 완료 상태가 되지 않는다.
+            if (ongoing != null) {
+                val (id, startMillis) = ongoing
+                val deadlineMillis = autoCandidateDeadlineMillis(startMillis)
+                if (now >= deadlineMillis) {
+                    val values = ContentValues().apply {
+                        put("end_time", isoFormat(cappedAutoCandidateEndMillis(startMillis, now)))
+                        put("confidence", "LOW")
+                        put("updated_at", isoFormat(now))
+                    }
+                    db.update("sleep_records", values, "id = ?", arrayOf(id.toString()))
+                    prefs.edit().remove(KEY_FIRST_OFF_SAMPLE_AT).apply()
+                    Log.d(TAG, "⏳ 자동 수면 후보 9시간 종료(id=$id, 확인 대기 유지)")
+                    return
+                }
+            }
 
             if (!isInteractive) {
                 if (ongoing != null) {
@@ -226,6 +260,7 @@ class SleepDetectionReceiver : BroadcastReceiver() {
             } else if (ongoing != null) {
                 val (id, startMillis) = ongoing
                 val durationMinutes = (now - startMillis) / 60_000L
+                val endMillis = cappedAutoCandidateEndMillis(startMillis, now)
 
                 // ⭐ 2026-09-01 후속4 - "메인 수면은 최소 2시간 이상"(사용자 요청) -
                 // 이보다 짧게 끝나면 애초에 진짜 수면이 아니라 화면이 잠깐 꺼졌다
@@ -242,7 +277,7 @@ class SleepDetectionReceiver : BroadcastReceiver() {
                 val confidence = computeConfidence(durationMinutes, charging)
 
                 val values = ContentValues().apply {
-                    put("end_time", isoFormat(now))
+                    put("end_time", isoFormat(endMillis))
                     put("confidence", confidence)
                     put("updated_at", isoFormat(now))
                 }
