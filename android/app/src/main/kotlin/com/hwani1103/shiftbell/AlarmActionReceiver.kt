@@ -25,6 +25,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
     companion object {
         const val ACTION_DELETE_SNOOZE_NOTIFICATION = "DELETE_SNOOZE_NOTIFICATION"
         const val ACTION_DISMISS_FROM_NOTIFICATION = "DISMISS_FROM_NOTIFICATION"
+        const val ACTION_SNOOZE_FROM_NOTIFICATION = "SNOOZE_FROM_NOTIFICATION"
         const val ACTION_RING_TIMEOUT = "com.hwani1103.shiftbell.RING_TIMEOUT"
         const val EXTRA_ALARM_ID = "alarmId"
         const val EXTRA_RING_ROUND = "ringRound"
@@ -47,26 +48,33 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
                 // ⭐ 2026-09-14 (#3) - 이미 끝난 회차의 알림이면 다른 울림(같은 알람의 스누즈 후 재울림 포함)을
-                // 건드리지 않고 알림만 치움
+                // 건드리지 않음. 7777도 지우지 않음 - 같은 ID로 새 울림의 제어 알림이 이미 떠 있을 수 있음
+                // (지난 회차 알림 자체는 그 울림이 끝날 때 이미 지워졌거나 새 알림으로 교체됨)
                 if (!AlarmActionHelper.claimRingEnd(context, alarmId, round)) {
-                    notificationManager.cancel(7777)
                     return
                 }
 
-                val finishIntent = Intent("FINISH_ALARM_ACTIVITY").apply {
-                    setPackage(context.packageName)
-                    putExtra("alarmId", alarmId)
-                }
-                context.sendBroadcast(finishIntent)
-
                 AlarmPlayer.getInstance(context).stopAlarm()
-
+                // ⭐ 2026-09-14 (#4) - 제어 알림은 화면·오버레이가 떠 있어도 게시돼 있으므로 둘 다 닫고
+                // 7777/8889도 정리(8888은 AlarmGuardReceiver가 전담 - dismiss가 재트리거함)
+                AlarmActionHelper.closeRingUi(context, alarmId)
                 AlarmActionHelper.dismiss(context, alarmId, "swiped")
-
-                // ⭐ 8888은 AlarmGuardReceiver가 전담 (AlarmActionHelper.dismiss가 이미 재트리거함)
-                notificationManager.cancel(7777)
-                notificationManager.cancel(8889)
-                Log.d("AlarmAction", "✅ Notification 삭제 완료")
+                Log.d("AlarmAction", "✅ 알림에서 끄기 완료")
+            }
+            // ⭐ 2026-09-14 (출시전 감사 #4) - 제어 알림 "5분 후"(예전 7777엔 끄기만 있었음)
+            ACTION_SNOOZE_FROM_NOTIFICATION -> {
+                Log.d("AlarmAction", "🔔 Notification에서 5분 후: ID=$alarmId 회차=$round")
+                if (!AlarmActionHelper.claimRingEnd(context, alarmId, round)) {
+                    return
+                }
+                AlarmPlayer.getInstance(context).stopAlarm()
+                AlarmActionHelper.closeRingUi(context, alarmId)
+                val result = AlarmActionHelper.snooze(context, alarmId)
+                if (result != null) {
+                    NotificationHelper.showUpdatedNotification(context, result.newTimeStr, result.shiftType)
+                } else {
+                    Log.e("AlarmAction", "❌ 알림에서 스누즈 실패(알람 정보 없음): ID=$alarmId")
+                }
             }
             // ⭐ 2026-09-14 (#3) - 울린 순간 CustomAlarmReceiver가 예약한 이 회차의 자동 종료
             ACTION_RING_TIMEOUT -> {

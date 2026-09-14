@@ -140,6 +140,8 @@ class AlarmOverlayService : Service() {
         // (외부에서 dismissOverlay만 보낸 경우) 울림을 끝냄.
         if (AlarmActionHelper.claimCurrentRingOf(applicationContext, alarmId)) {
             AlarmPlayer.getInstance(applicationContext).stopAlarm()
+            // ⭐ 2026-09-14 (#4) - 울리는 내내 떠 있던 제어 알림도 정리
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(NotificationHelper.RING_CONTROL_ID)
         }
         removeOverlay()
         stopSelf()
@@ -152,6 +154,8 @@ class AlarmOverlayService : Service() {
         // ⭐ 2026-09-14 (#3/#14) - dismissAlarmFromExternal()과 같은 이유로 활성 울림일 때만 멈춤
         if (AlarmActionHelper.claimCurrentRingOf(applicationContext, alarmId)) {
             AlarmPlayer.getInstance(applicationContext).stopAlarm()
+            // ⭐ 2026-09-14 (#4) - 울리는 내내 떠 있던 제어 알림도 정리
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(NotificationHelper.RING_CONTROL_ID)
         }
         removeOverlay()
         stopSelf()
@@ -434,6 +438,10 @@ class AlarmOverlayService : Service() {
         } else {
             Log.e("AlarmOverlay", "❌ 알람 정보 없음: ID=$alarmId")
         }
+
+        // ⭐ 2026-09-14 (출시전 감사 #4) - 제어 알림(7777)은 울리는 내내 떠 있으므로 스누즈에서도 정리
+        // (예전엔 오버레이 스누즈가 7777을 지우지 않았음 - 그땐 오버레이 상태에서 7777이 없었기 때문)
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(NotificationHelper.RING_CONTROL_ID)
 
         // Overlay 제거
         removeOverlay()

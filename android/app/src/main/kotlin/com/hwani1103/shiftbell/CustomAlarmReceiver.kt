@@ -131,6 +131,10 @@ override fun onReceive(context: Context, intent: Intent) {
 
     // 알람 재생 (DB에서 설정 읽어서 적용)
     AlarmPlayer.getInstance(context.applicationContext).playAlarmFromDB(id)
+
+    // ⭐ 2026-09-14 (출시전 감사 #4) - 화면/오버레이보다 먼저 제어 알림(끄기·5분 후·전체화면)을 올림.
+    // 화면 실행이 조용히 막히거나 오버레이 권한이 없어도 끌 수단이 남음(NotificationHelper 주석 참고).
+    NotificationHelper.showRingControlNotification(context, id, ring.round, label, durationMinutes)
     
     // 화면 강제로 깨우기
     wakeUpScreen(context)
@@ -149,15 +153,20 @@ override fun onReceive(context: Context, intent: Intent) {
         }
         if (isLocked) {
             Log.e("CustomAlarmReceiver", "✅ 잠금 상태 - AlarmActivity 표시")
-            // ⭐ 잠금화면 AlarmActivity만 표시 (홈 버튼 시 Notification으로 제어)
-            showAlarmActivity(context, id, label, ring.round, durationMinutes)
+            // ⭐ 잠금화면 AlarmActivity 표시. 제어 알림의 전체화면 인텐트가 이미 이 회차 화면을 띄웠으면
+            // 다시 띄우지 않음(CLEAR_TASK로 재생성되며 깜빡이는 것 방지) - 2026-09-14 #4
+            if (AlarmActivity.visibleRing == ring) {
+                Log.e("CustomAlarmReceiver", "✅ 전체화면 알림으로 AlarmActivity 이미 표시됨")
+            } else {
+                showAlarmActivity(context, id, label, ring.round, durationMinutes)
+            }
         } else {
             if (canDrawOverlays(context)) {
                 Log.e("CustomAlarmReceiver", "✅ 잠금 해제 - Overlay 표시")
                 showOverlayWindow(context, id, label, ring.round)
             } else {
-                Log.e("CustomAlarmReceiver", "⚠️ Overlay 권한 없음 - Notification")
-                showNotification(context, id, label, ring.round, durationMinutes)
+                // ⭐ 2026-09-14 (#4) - 예전 폴백 알림(끄기 버튼 없음) 대신 이미 게시된 제어 알림(7777)으로 제어
+                Log.e("CustomAlarmReceiver", "⚠️ Overlay 권한 없음 - 제어 알림(7777)으로 제어")
             }
         }
     }, 500)
@@ -222,8 +231,8 @@ override fun onReceive(context: Context, intent: Intent) {
         context.startActivity(activityIntent)
         Log.e("CustomAlarmReceiver", "✅ AlarmActivity 시작 (duration=${duration}분)")
     } catch (e: Exception) {
-        Log.e("CustomAlarmReceiver", "❌ AlarmActivity 시작 실패", e)
-        showNotification(context, id, label, round, duration)
+        // ⭐ 2026-09-14 (#4) - 제어 알림(7777)이 이미 게시돼 있어 따로 폴백 알림을 만들지 않음
+        Log.e("CustomAlarmReceiver", "❌ AlarmActivity 시작 실패 - 제어 알림(7777)으로 제어", e)
     }
 }
 
@@ -290,57 +299,6 @@ override fun onReceive(context: Context, intent: Intent) {
         context.startService(overlayIntent)
     }
     
-    private fun showNotification(context: Context, id: Int, label: String, round: Long, duration: Int) {
-        Log.e("CustomAlarmReceiver", "⚠️ Notification으로 폴백")
-        
-        val fullScreenIntent = Intent(context, AlarmActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or 
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra("alarmId", id)
-            putExtra("alarmDuration", duration)
-            putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, round)
-        }
-        
-        val fullScreenPendingIntent = PendingIntent.getActivity(
-            context,
-            id,
-            fullScreenIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        
-        // ⭐ 채널 생성 (무음 - 소리는 AlarmPlayer에서 재생) - "알람" 키워드 제거
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Shiftbell",  // ⭐ "알람" 제거 (삼성 시스템 스누즈 방지)
-                NotificationManager.IMPORTANCE_HIGH  // fullScreenIntent를 위해 HIGH 유지
-            ).apply {
-                description = "근무 시간 알림"
-                enableVibration(false)
-                setSound(null, null)  // notification 자체는 무음
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Shiftbell")  // ⭐ "알람" 제거
-            .setContentText(label)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_CALL)  // ⭐ CALL 사용 (삼성 시스템 스누즈 방지, full-screen 지원)
-            .setFullScreenIntent(fullScreenPendingIntent, true)
-            .setSilent(true)  // ⭐ 소리/진동 없음 (알람 소리는 AlarmPlayer)
-            .setAutoCancel(true)
-            .setGroup("shiftbell_notifications")  // ⭐ 그룹 설정 (삼성 시스템 스누즈 방지)
-            .setGroupSummary(false)
-            .setLocalOnly(true)  // ⭐ 로컬 전용 (삼성 시스템 스누즈 방지)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(label))  // ⭐ 스타일 설정 (삼성 시스템 스누즈 방지)
-            .build()
-        
-        notificationManager.notify(id + 100000, notification)  // ⭐ 8888/8889와 충돌 방지
-        
-        Log.e("CustomAlarmReceiver", "✅ Notification 표시")
-    }
+    // ⭐ 2026-09-14 (출시전 감사 #4) - showNotification()(끄기/스누즈 버튼 없는 폴백 알림, ID alarmId+100000) 제거.
+    // 울리는 즉시 게시하는 NotificationHelper.showRingControlNotification()으로 대체됨.
 }

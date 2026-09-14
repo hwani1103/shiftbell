@@ -26,6 +26,15 @@ import androidx.core.app.NotificationCompat
 import kotlin.math.abs
 
 class AlarmActivity : AppCompatActivity() {
+    companion object {
+        /**
+         * ⭐ 2026-09-14 (출시전 감사 #4) - 지금 화면에 떠 있는 울림 회차. 제어 알림의 전체화면 인텐트가 먼저
+         * 이 화면을 띄웠으면 CustomAlarmReceiver가 다시 띄우지 않게 함(같은 프로세스 메인 스레드에서만 씀).
+         */
+        @Volatile
+        var visibleRing: RingingAlarmTracker.ActiveRing? = null
+    }
+
     private var alarmId: Int = 0
     private var alarmDuration: Int = 3  // 기본 3분
     private var alarmTimeStr: String = ""  // 알람 시간 저장
@@ -67,6 +76,7 @@ class AlarmActivity : AppCompatActivity() {
             finish()
             return
         }
+        visibleRing = RingingAlarmTracker.ActiveRing(alarmId, ringRound)
 
         setupWindowFlags()
 
@@ -378,74 +388,14 @@ private fun dismissAlarm() {
             return
         }
         // ⭐ 홈 버튼 눌렀을 때 → 알람 제어 Notification 표시
+        // (2026-09-14 #4 - 울리는 순간 이미 게시되지만, 사용자가 치웠을 수도 있어 한 번 더 확실히 게시)
         Log.d("AlarmActivity", "👋 홈 버튼 감지 → Notification 표시")
         showAlarmControlNotification()
     }
 
+    // ⭐ 2026-09-14 (출시전 감사 #4) - 제어 알림 내용은 울리는 순간 게시하는 것과 똑같아야 해서 한 곳으로 모음
     private fun showAlarmControlNotification() {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        // 채널 생성
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                "alarm_control",
-                "알람 제어",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "울리는 알람을 제어할 수 있습니다"
-                setSound(null, null)
-                enableVibration(false)
-            }
-            notificationManager.createNotificationChannel(channel)
-        }
-
-        // Notification 탭 시 AlarmActivity 재시작
-        val activityIntent = Intent(this, AlarmActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            putExtra("alarmId", alarmId)
-            putExtra("alarmDuration", alarmDuration)
-            putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, ringRound)
-        }
-        val activityPendingIntent = PendingIntent.getActivity(
-            this,
-            alarmId,
-            activityIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // "알람 끄기" 버튼 (스와이프로 지울 때도 동일한 액션을 씀 - setDeleteIntent)
-        val dismissIntent = Intent(this, AlarmActionReceiver::class.java).apply {
-            action = AlarmActionReceiver.ACTION_DISMISS_FROM_NOTIFICATION
-            putExtra("alarmId", alarmId)
-            putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, ringRound)
-        }
-        val dismissPendingIntent = PendingIntent.getBroadcast(
-            this,
-            alarmId + 10000,
-            dismissIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // Notification 생성
-        // ⭐ "5분 후" 버튼 제거함 (알람 제어 경로를 하나로 단순화).
-        // ⭐ setOngoing(false) + setDeleteIntent: 사용자가 이 알림을 스와이프로 지워도
-        //   "알람 끄기" 버튼을 누른 것과 동일하게 처리됨 (의도: 실수로 잠금해제해서
-        //   AlarmActivity를 못 보고 이 알림만 남았을 때, 버튼을 누르든 알림을 치우든
-        //   똑같이 "알람 확인"으로 취급).
-        val notification = NotificationCompat.Builder(this, "alarm_control")
-            .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("알람 울림 중")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
-            .setOngoing(false)
-            .setAutoCancel(true)
-            .setContentIntent(activityPendingIntent)
-            .setDeleteIntent(dismissPendingIntent)
-            .addAction(android.R.drawable.ic_delete, "알람 끄기", dismissPendingIntent)
-            .build()
-
-        notificationManager.notify(7777, notification)
-        Log.d("AlarmActivity", "✅ 알람 제어 Notification 표시 (ID=7777)")
+        NotificationHelper.showRingControlNotification(this, alarmId, ringRound, alarmLabel, alarmDuration)
     }
 
     override fun onBackPressed() {
@@ -455,6 +405,7 @@ private fun dismissAlarm() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (visibleRing == RingingAlarmTracker.ActiveRing(alarmId, ringRound)) visibleRing = null
         cancelTimeoutTimer()
         swipeHintAnimator?.cancel()
         swipeHintAnimator = null

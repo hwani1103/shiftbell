@@ -10,6 +10,8 @@
 package com.hwani1103.shiftbell
 
 import android.app.AlarmManager
+import android.app.Notification
+import android.app.NotificationManager
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
@@ -211,6 +213,67 @@ class G1RingRoundTest {
         val current = RingingAlarmTracker.current(context)!!
         assertEquals(8, current.alarmId)
         assertEquals(listOf(8), ringTimeouts().map { it.getIntExtra(AlarmActionReceiver.EXTRA_ALARM_ID, -1) })
+    }
+
+    // ───────────────────────────── #4 제어 알림
+
+    private fun controlNotification(): Notification? {
+        val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        return shadowOf(nm).getNotification(NotificationHelper.RING_CONTROL_ID)
+    }
+
+    private fun alarmType(id: Int): String? =
+        dbHelper.writableDatabase.rawQuery("SELECT type FROM alarms WHERE id = ?", arrayOf(id.toString())).use {
+            if (it.moveToFirst()) it.getString(0) else null
+        }
+
+    @Test
+    fun `#4 울리는 즉시 끄기·5분 후 버튼과 전체화면 인텐트를 가진 유지형 제어 알림이 이 회차로 게시된다`() {
+        CustomAlarmReceiver().onReceive(context, alarmIntent(7))
+        val ring = RingingAlarmTracker.current(context)!!
+        val n = controlNotification()!!
+
+        assertTrue("울리는 동안 유지(ongoing)", n.flags and Notification.FLAG_ONGOING_EVENT != 0)
+        assertTrue("전체화면 인텐트", n.fullScreenIntent != null)
+        val actions = n.actions.map { shadowOf(it.actionIntent).savedIntent }
+        assertEquals(
+            listOf(AlarmActionReceiver.ACTION_SNOOZE_FROM_NOTIFICATION, AlarmActionReceiver.ACTION_DISMISS_FROM_NOTIFICATION),
+            actions.map { it.action }
+        )
+        actions.forEach { assertEquals(ring.round, it.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, -99)) }
+        assertEquals(ring.round, shadowOf(n.fullScreenIntent).savedIntent.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, -99))
+    }
+
+    @Test
+    fun `#4 제어 알림 5분 후 - 지난 회차는 무시하고 현재 회차만 스누즈하며 제어 알림을 지운다`() {
+        CustomAlarmReceiver().onReceive(context, alarmIntent(7))
+        val ring = RingingAlarmTracker.current(context)!!
+        val snooze = shadowOf(controlNotification()!!.actions[0].actionIntent).savedIntent
+
+        AlarmActionReceiver().onReceive(context, Intent(snooze).putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, ring.round - 1))
+        assertEquals(ring, RingingAlarmTracker.current(context))
+        assertEquals("fixed", alarmType(7))
+
+        AlarmActionReceiver().onReceive(context, snooze)
+        assertNull(RingingAlarmTracker.current(context))
+        assertEquals("snoozed", alarmType(7))
+        assertEquals(listOf("snoozed"), history(7))
+        assertNull("스누즈 후 제어 알림 제거", controlNotification())
+        assertTrue(ringTimeouts().isEmpty())
+    }
+
+    @Test
+    fun `#4 제어 알림 끄기 - swiped 이력 1건과 행 삭제, 제어 알림 제거`() {
+        CustomAlarmReceiver().onReceive(context, alarmIntent(7))
+        val dismiss = shadowOf(controlNotification()!!.actions[1].actionIntent).savedIntent
+
+        AlarmActionReceiver().onReceive(context, dismiss)
+        assertEquals(0, alarmRows(7))
+        assertEquals(listOf("swiped"), history(7))
+        assertNull(controlNotification())
+
+        AlarmActionReceiver().onReceive(context, dismiss)  // 알림 치우기(deleteIntent) 등 두 번째 신호
+        assertEquals(listOf("swiped"), history(7))
     }
 
     // ───────────────────────────── #14 앱에서 삭제
