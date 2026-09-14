@@ -166,6 +166,9 @@ class MainActivity: FlutterActivity() {
     }
 
     override fun onDestroy() {
+        // ⭐ 2026-09-15 (전체 코드 점검 Q-03) - 미리듣기 중 앱이 종료되면 50%로 바꾼 시스템 알람
+        // 볼륨이 복원되지 않고 남았음(다른 시계 앱 알람 음량까지 바뀜).
+        stopPreviewSound()
         super.onDestroy()
         try {
             unregisterReceiver(refreshReceiver)
@@ -1132,7 +1135,7 @@ override fun onNewIntent(intent: Intent) {
 
             // ⭐ 시스템 알람 볼륨을 50%로 임시 변경 (미리듣기용)
             val maxVolume = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM)
-            val halfVolume = maxVolume / 2
+            val halfVolume = (maxVolume / 2).coerceAtLeast(1)  // AlarmPlayer와 동일 - 최대 1단계 기기 무음 방지
             audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, halfVolume, 0)
 
             // ⭐ 사운드 URI 결정 (default = 시스템 기본 알람음)
@@ -1164,6 +1167,8 @@ override fun onNewIntent(intent: Intent) {
                 setVolume(calibrated, calibrated)
 
                 isLooping = false  // 미리듣기는 반복 안 함
+                // ⭐ 2026-09-15 (Q-03) - 끝까지 재생되면 바로 볼륨 복원(예전엔 화면을 나갈 때까지 50% 유지)
+                setOnCompletionListener { stopPreviewSound() }
                 prepare()
                 start()
 

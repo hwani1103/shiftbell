@@ -4227,9 +4227,13 @@ Widget build(BuildContext context) {
                   final shiftType = displayShifts[index];
                   
                   return ElevatedButton(
+                    // ⭐ 2026-09-15 (전체 코드 점검 Q-02) - 시트를 먼저 닫고 일괄 변경을 시작함.
+                    // 예전엔 순서가 반대라 _bulkAssignShift가 첫 await 전에 동기로 띄운 진행
+                    // 다이얼로그를 이 pop이 닫아버렸음 → 시트가 작업 내내 열린 채 남고, 그 사이
+                    // 다른 근무를 또 누르면 작업 끝의 pop이 한 번 더 불려 메인 화면까지 닫힐 수 있었음.
                     onPressed: () {
-                      _bulkAssignShift(shiftType, schedule);
                       Navigator.pop(context);
+                      _bulkAssignShift(shiftType, schedule);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _getShiftBackgroundColor(shiftType, schedule),

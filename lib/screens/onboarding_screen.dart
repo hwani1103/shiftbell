@@ -924,7 +924,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           SizedBox(
             width: double.infinity,
             child: AppButton(
-              onPressed: _saveAndFinish,
+              onPressed: _finishing ? null : _saveAndFinish,
               child: Text(context.l10n.commonGetStarted),
             ),
           ),
@@ -966,8 +966,27 @@ Future<void> _saveAlarmTemplates() async {
 
  // onboarding_screen.dart의 _saveAndFinish() 수정
 
-// onboarding_screen.dart - _saveAndFinish()
+// ⭐ 2026-09-15 (전체 코드 점검 Q-01) - "시작하기" 연타 방지. 예전엔 가드가 없어 두 번 누르면
+// 저장이 두 번 돌아 스케줄 행·알람 템플릿·알람이 중복으로 들어갈 수 있었음(saveSchedule은
+// id 없는 스케줄을 insert, insertAlarmTemplate은 append). 성공하면 화면이 교체되므로 되돌리지
+// 않고, 실패했을 때만 다시 누를 수 있게 풀어줌.
+bool _finishing = false;
+
 Future<void> _saveAndFinish() async {
+  if (_finishing) return;
+  setState(() => _finishing = true);
+  try {
+    await _saveAndFinishOnce();
+  } catch (e) {
+    debugPrint('❌ 온보딩 저장 실패: $e');
+    if (mounted) {
+      setState(() => _finishing = false);
+    }
+    rethrow;
+  }
+}
+
+Future<void> _saveAndFinishOnce() async {
   final shiftColors = _generateShiftColors();
   
   List<String> activeShifts;
