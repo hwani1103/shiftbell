@@ -142,7 +142,8 @@ object AlarmWakeScheduler {
 
     /**
      * 예약 반영(커밋 뒤 호출). 행이 없거나 DB 예정 시각이 [timestamp]와 다르면 버림(SKIPPED_STALE - 더 최신 작업이
-     * 따로 반영함). DB가 없거나 읽기에 실패하면 확인 조건을 충족하지 못했으므로 예약하지 않고 재시도에 남김.
+     * 따로 반영함). DB가 없거나 읽기·파싱에 실패하면 수신 시 [decideOnReceive]가 다시 판정할 수 있도록 예약은
+     * 진행하고, DB 기준 재확인을 위해 실패 ID도 남김.
      */
     fun scheduleIfCurrent(
         context: Context,
@@ -153,16 +154,14 @@ object AlarmWakeScheduler {
         scheduleFn: (Context, Int, Long, String) -> Unit = { c, i, t, l -> scheduleRaw(c, i, t, l) }
     ): Outcome {
         if (db == null) {
-            Log.e(TAG, "예약 전 행 확인 불가(DB 없음): id=$id")
-            recordFailure(context, id)
-            return Outcome.FAILED
+            Log.w(TAG, "예약 전 행 확인 불가(DB 없음) - 우선 예약 후 재확인: id=$id")
+            return scheduleUnverified(context, id, timestamp, label, scheduleFn)
         }
         val found = try {
             lookup(db, id)
         } catch (e: Exception) {
-            Log.e(TAG, "예약 전 행 확인 실패 - 예약 보류: id=$id", e)
-            recordFailure(context, id)
-            return Outcome.FAILED
+            Log.e(TAG, "예약 전 행 확인 실패 - 우선 예약 후 재확인: id=$id", e)
+            return scheduleUnverified(context, id, timestamp, label, scheduleFn)
         }
         if (!found.exists) {
             Log.d(TAG, "⏭️ 예약 버림(행 없음): id=$id")
@@ -171,9 +170,8 @@ object AlarmWakeScheduler {
         }
         val row = found.row
         if (row == null) {
-            Log.e(TAG, "예약 전 행 시각 확인 실패 - 예약 보류: id=$id")
-            recordFailure(context, id)
-            return Outcome.FAILED
+            Log.e(TAG, "예약 전 행 시각 확인 실패 - 우선 예약 후 재확인: id=$id")
+            return scheduleUnverified(context, id, timestamp, label, scheduleFn)
         }
         if (row.timestamp != normalize(timestamp)) {
             Log.d(TAG, "⏭️ 예약 버림(DB 시각 변경됨): id=$id 작업=$timestamp DB=${row.timestamp}")
@@ -188,6 +186,23 @@ object AlarmWakeScheduler {
             recordFailure(context, id)
             Outcome.FAILED
         }
+    }
+
+    /** DB 상태를 확인하지 못한 경우 알람 누락을 피하되, 다음 트리거에서 DB 기준 재검증하도록 실패 ID를 유지한다. */
+    private fun scheduleUnverified(
+        context: Context,
+        id: Int,
+        timestamp: Long,
+        label: String,
+        scheduleFn: (Context, Int, Long, String) -> Unit
+    ): Outcome = try {
+        scheduleFn(context, id, timestamp, label)
+        recordFailure(context, id)
+        Outcome.SCHEDULED
+    } catch (e: Exception) {
+        Log.e(TAG, "❌ 미확인 기상 알람 OS 예약 실패: id=$id", e)
+        recordFailure(context, id)
+        Outcome.FAILED
     }
 
     /**
@@ -272,7 +287,7 @@ object AlarmWakeScheduler {
     }
 
     @Synchronized
-    private fun clearFailure(context: Context, id: Int) {
+    internal fun clearFailure(context: Context, id: Int) {
         val p = prefs(context)
         val current = p.getStringSet(KEY_FAILED_IDS, emptySet())!!
         if (id.toString() !in current) return

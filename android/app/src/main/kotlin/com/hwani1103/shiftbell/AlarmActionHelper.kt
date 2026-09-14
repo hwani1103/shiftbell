@@ -42,7 +42,15 @@ object AlarmActionHelper {
         val db = dbHelper.getWritableDatabaseWithRetry()
         if (db == null) {
             Log.w(TAG, "⚠️ dismiss: DB 파일 없음 - Native 알람 취소만 수행")
-            AlarmWakeScheduler.cancelIfGone(context, null, alarmId)
+            try {
+                // 사용자가 명시적으로 끈 경로다. DB가 없으면 더 최신 행을 보존할 가능성이 없으므로
+                // 재확인용 cancelIfGone 대신 OS 예약을 직접 취소한다.
+                AlarmWakeScheduler.cancelRaw(context, alarmId)
+                AlarmWakeScheduler.clearFailure(context, alarmId)
+            } catch (e: Exception) {
+                Log.e(TAG, "❌ dismiss: DB 없는 상태의 OS 예약 취소 실패 id=$alarmId", e)
+                AlarmWakeScheduler.recordFailure(context, alarmId)
+            }
             finishUp(context, alarmId)
             return
         }

@@ -98,7 +98,12 @@ class G1WakeSyncTest {
 
     @Test
     fun `#27 수신 - DB에 행이 없으면 울리지 않는다`() {
-        receive(99, at(0))
+        val expectedAt = at(0)
+        assertEquals(
+            AlarmWakeScheduler.ReceiveDecision.SKIP_NO_ROW,
+            AlarmWakeScheduler.decideOnReceive(context, 99, expectedAt)
+        )
+        receive(99, expectedAt)
         assertNull(RingingAlarmTracker.current(context))
     }
 
@@ -164,28 +169,78 @@ class G1WakeSyncTest {
     }
 
     @Test
-    fun `T11-04 DB 재조회 실패는 stale 예약을 진행하거나 기존 snooze 예약을 취소하지 않는다`() {
-        val scheduleTime = at(3 * 3_600_000L)
+    fun `C-01 DB 없는 dismiss도 사용자가 명시적으로 끈 OS 예약을 취소한다`() {
+        val alarmId = 51
+        val scheduleTime = at(3_600_000L)
+        AlarmWakeScheduler.scheduleRaw(context, alarmId, scheduleTime, "주간")
+        assertEquals(listOf(scheduleTime), wakeTimes(alarmId))
+
+        DatabaseHelper.resetInstanceForTest()
+        val deviceContext = context.createDeviceProtectedStorageContext()
+        val dbFile = deviceContext.getDatabasePath("shiftbell.db")
+        for (suffix in listOf("", "-wal", "-shm", "-journal")) java.io.File(dbFile.path + suffix).delete()
+
+        AlarmActionHelper.dismiss(context, alarmId, "cancelled_before_ring")
+
+        // 수정 전 기대 결과: FAIL - cancelIfGone(null)이 FAILED로 끝나 OS 예약이 남는다.
+        // 수정 후 기대 결과: PASS - 명시적 dismiss는 DB가 없어도 cancelRaw로 OS 예약을 제거한다.
+        assertTrue(wakeTimes(alarmId).isEmpty())
+    }
+
+    @Test
+    fun `C-02 예약 전 DB를 확인할 수 없어도 예약하고 실패 ID를 남긴다`() {
+        val nullDbTime = at(2 * 3_600_000L)
+        val parseFailureTime = at(3 * 3_600_000L)
+        val queryFailureTime = at(4 * 3_600_000L)
+
+        val nullDbOutcome = AlarmWakeScheduler.scheduleIfCurrent(
+            context, null, 61, nullDbTime, "DB 없음"
+        )
+
+        val db = dbHelper.writableDatabase
+        db.insert("alarms", null, ContentValues().apply {
+            put("id", 62)
+            put("time", "00:00")
+            put("date", "not-a-date")
+            put("type", "fixed")
+            put("alarm_type_id", 1)
+            put("shift_type", "파싱 실패")
+            put("day_offset", 0)
+        })
+        val parseFailureOutcome = AlarmWakeScheduler.scheduleIfCurrent(
+            context, db, 62, parseFailureTime, "파싱 실패"
+        )
+
+        db.close()
+        val queryFailureOutcome = AlarmWakeScheduler.scheduleIfCurrent(
+            context, db, 63, queryFailureTime, "조회 실패"
+        )
+
+        // 수정 전 기대 결과: FAIL - 세 경로 모두 FAILED이고 OS 예약이 없다.
+        // 수정 후 기대 결과: PASS - 예약은 진행하되 재확인용 실패 ID를 모두 유지한다.
+        assertEquals(AlarmWakeScheduler.Outcome.SCHEDULED, nullDbOutcome)
+        assertEquals(AlarmWakeScheduler.Outcome.SCHEDULED, parseFailureOutcome)
+        assertEquals(AlarmWakeScheduler.Outcome.SCHEDULED, queryFailureOutcome)
+        assertEquals(listOf(nullDbTime), wakeTimes(61))
+        assertEquals(listOf(parseFailureTime), wakeTimes(62))
+        assertEquals(listOf(queryFailureTime), wakeTimes(63))
+        assertTrue(AlarmWakeScheduler.failedIds(context).containsAll(setOf(61, 62, 63)))
+    }
+
+    @Test
+    fun `T11-04 취소 전 DB 재조회 실패는 기존 snooze 예약을 보존한다`() {
         val snoozeTime = at(4 * 3_600_000L)
-        insertAlarm(7, scheduleTime)
         insertAlarm(8, snoozeTime)
         AlarmWakeScheduler.scheduleRaw(context, 8, snoozeTime, "스누즈")
         val closedDb = dbHelper.writableDatabase
         closedDb.close()
-        var staleScheduleCalled = false
 
-        val scheduleOutcome = AlarmWakeScheduler.scheduleIfCurrent(
-            context, closedDb, 7, scheduleTime, "주간"
-        ) { _, _, _, _ -> staleScheduleCalled = true }
         val cancelOutcome = AlarmWakeScheduler.cancelIfGone(context, closedDb, 8)
 
-        // 수정 전 기대 결과: FAIL - schedule은 SCHEDULED, cancel은 CANCELLED이고 snooze 예약이 사라짐.
-        // 수정 후 기대 결과: PASS - 둘 다 FAILED로 재시도 목록에 남고 기존 OS 예약은 보존됨.
-        assertEquals(AlarmWakeScheduler.Outcome.FAILED, scheduleOutcome)
+        // T11-04 수정 후 기대 결과: PASS - 취소 경로는 FAILED로 남고 기존 OS 예약을 보존한다.
         assertEquals(AlarmWakeScheduler.Outcome.FAILED, cancelOutcome)
-        assertTrue(!staleScheduleCalled)
         assertEquals(listOf(snoozeTime), wakeTimes(8))
-        assertEquals(setOf(7, 8), AlarmWakeScheduler.failedIds(context))
+        assertTrue(AlarmWakeScheduler.failedIds(context).contains(8))
     }
 
     // ───────────────────────────── 실패 기록·재시도
