@@ -39,4 +39,26 @@ void main() {
     final calls = await loadWith({'condition_tab_enabled': false}, 'condition_tab_enabled');
     expect(calls, isEmpty);
   });
+
+  test('T11-07 Native 동기화 실패 시 일정 탭 로컬 상태와 prefs를 바꾸지 않는다', () async {
+    SharedPreferences.setMockInitialValues({'schedule_tab_enabled': true});
+    final calls = <MethodCall>[];
+    messenger.setMockMethodCallHandler(kAlarmChannel, (call) async {
+      calls.add(call);
+      final enabled = (call.arguments as Map?)?['enabled'];
+      if (call.method == 'syncScheduleTabEnabled' && enabled == false) {
+        throw PlatformException(code: 'injected');
+      }
+      return null;
+    });
+    final notifier = TabEnabledNotifier('schedule_tab_enabled');
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+
+    await expectLater(notifier.setEnabled(false), throwsA(anything));
+
+    expect(notifier.state, isTrue);
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.getBool('schedule_tab_enabled'), isTrue);
+    expect(calls.where((c) => c.method == 'syncScheduleTabEnabled').length, 2);
+  });
 }

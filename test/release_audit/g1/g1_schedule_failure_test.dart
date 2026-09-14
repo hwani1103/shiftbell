@@ -130,9 +130,13 @@ void main() {
     test('형식 이상(null) → unknown', () async {
       expect(await stateFor((_) => null), ExactAlarmPermissionState.unknown);
     });
-    test('unknown은 기존 통과 규칙 유지(checkExactAlarmPermission true)', () async {
+    test('T11-01 채널 오류 unknown은 권한 허용으로 축약하지 않는다', () async {
       mockChannel((_) => throw PlatformException(code: 'boom'));
-      expect(await PermissionService().checkExactAlarmPermission(), isTrue);
+      expect(await PermissionService().checkExactAlarmPermission(), isFalse);
+    });
+    test('T11-01 형식 이상 unknown도 권한 허용으로 축약하지 않는다', () async {
+      mockChannel((_) => null);
+      expect(await PermissionService().checkExactAlarmPermission(), isFalse);
     });
   });
 }

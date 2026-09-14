@@ -27,12 +27,16 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   // ⭐ 2026-09-14 (출시전 수정 연결 - docs/release_audit/contracts.md §3) - 원본 저장이 성공한 뒤에만 변경 통지.
   // 계산 쪽(G3 컨디션·수면 provider)이 이 revision을 watch해 다시 계산함. 저장 실패·예외면 올리지 않음.
   // shift_schedule 행에는 근로시간(shift_durations)도 들어 있어 workHoursSettings도 함께 올림(같은 값 재저장 시 올려도 되는 규칙).
-  void _notifyScheduleChanged() {
+  void _notifyDomains(Set<DataDomain> domains) {
     final ref = _ref;
     if (ref == null) return;
-    ref.read(dataRevisionProvider(DataDomain.shiftSchedule).notifier).state++;
-    ref.read(dataRevisionProvider(DataDomain.workHoursSettings).notifier).state++;
+    for (final domain in domains) {
+      ref.read(dataRevisionProvider(domain).notifier).state++;
+    }
   }
+
+  void _notifyScheduleChanged() =>
+      _notifyDomains(const {DataDomain.shiftSchedule, DataDomain.workHoursSettings});
 
   Future<void> _loadSchedule() async {
     state = const AsyncValue.loading();
@@ -83,9 +87,15 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
   // 테이블과 함께 하나의 트랜잭션으로 묶어야 해서 saveSchedule/updateSchedule을 못
   // 씀)에서 저장이 끝난 스케줄을 Riverpod 상태에만 반영함 - DB에 다시 쓰지 않음(중복
   // 쓰기 방지). 위젯 갱신/친구공유 동기화는 saveSchedule/updateSchedule과 동일하게 함.
-  void applyExternallyPersisted(ShiftSchedule schedule) {
+  void applyExternallyPersisted(
+    ShiftSchedule schedule, {
+    Set<DataDomain> notifyDomains = const {
+      DataDomain.shiftSchedule,
+      DataDomain.workHoursSettings,
+    },
+  }) {
     state = AsyncValue.data(schedule);
-    _notifyScheduleChanged();
+    _notifyDomains(notifyDomains);
     WidgetRefreshService.refresh();
     FriendSyncService.instance.syncIfEnabled(schedule);
   }

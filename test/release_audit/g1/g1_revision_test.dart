@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/constants/platform_channel.dart';
 import 'package:shiftbell/models/shift_schedule.dart';
+import 'package:shiftbell/models/shift_time_range.dart';
 import 'package:shiftbell/providers/condition_shift_time_provider.dart';
 import 'package:shiftbell/providers/data_revision_provider.dart';
 import 'package:shiftbell/providers/overtime_provider.dart';
@@ -103,5 +104,34 @@ void main() {
     await notifier.save('A', 540, 1080);
     await notifier.remove('A');
     expect(rev(c, DataDomain.shiftTimes), 2);
+  });
+
+  test('T11-08 출퇴근 한 트랜잭션은 shiftTimes와 workHoursSettings만 각각 1회 통지', () async {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    const range = ShiftTimeRange(shiftName: 'A', startMinutes: 540, endMinutes: 1080);
+    final saved = ShiftSchedule(
+      id: 1,
+      isRegular: false,
+      shiftTypes: const ['A'],
+      shiftDurations: const {'A': 540},
+    );
+
+    final conditionNotifier = c.read(conditionShiftTimeProvider.notifier);
+    final scheduleNotifier = c.read(scheduleProvider.notifier);
+    while (c.read(conditionShiftTimeProvider).isLoading || c.read(scheduleProvider).isLoading) {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+    }
+    conditionNotifier.applyExternallyPersisted('A', range, notify: true);
+    scheduleNotifier.applyExternallyPersisted(
+      saved,
+      notifyDomains: const {DataDomain.workHoursSettings},
+    );
+
+    // 수정 전 기대 결과: FAIL(컴파일) - 외부 저장 API가 변경 domain을 구분하지 못하고 화면이 수동으로 중복 증가시킴.
+    // 수정 후 기대 결과: PASS - 커밋 1회당 실제 두 domain만 정확히 한 번씩 증가.
+    expect(rev(c, DataDomain.shiftTimes), 1);
+    expect(rev(c, DataDomain.workHoursSettings), 1);
+    expect(rev(c, DataDomain.shiftSchedule), 0);
   });
 }

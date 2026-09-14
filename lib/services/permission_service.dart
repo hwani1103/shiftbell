@@ -81,10 +81,10 @@ class PermissionService {
     }
   }
 
-  /// 정확한 알람 권한 통과 여부 - 확인 불가(unknown)는 첫 실행 권한 화면 등에서 사용자를 막지 않도록
-  /// 통과로 취급(기존 동작 유지). 실제 상태를 보여줘야 하는 곳은 [checkExactAlarmPermissionState]를 쓸 것.
+  /// 정확한 알람 권한 통과 여부. 확인 불가(unknown)는 허용으로 축약하지 않는다.
+  /// 호출 실패 뒤 권한 소개 화면이 완료 처리되면 실제 예약 실패를 사용자가 알 수 없기 때문이다.
   Future<bool> checkExactAlarmPermission() async =>
-      await checkExactAlarmPermissionState() != ExactAlarmPermissionState.denied;
+      await checkExactAlarmPermissionState() == ExactAlarmPermissionState.granted;
 
   /// 정확한 알람 권한 설정 화면 열기
   Future<void> requestExactAlarmPermission() async {

@@ -349,12 +349,13 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
   // [range]가 null이면 되돌리기.
   Future<void> _persistShiftTime(String shift, ShiftTimeRange? range) async {
     final saved = await DatabaseService.instance.saveShiftTimeRange(shift, range);
-    ref.read(conditionShiftTimeProvider.notifier).applyExternallyPersisted(shift, range);
+    ref.read(conditionShiftTimeProvider.notifier).applyExternallyPersisted(shift, range, notify: true);
     if (saved != null) {
-      ref.read(scheduleProvider.notifier).applyExternallyPersisted(saved);
+      ref.read(scheduleProvider.notifier).applyExternallyPersisted(
+        saved,
+        notifyDomains: const {DataDomain.workHoursSettings},
+      );
     }
-    ref.read(dataRevisionProvider(DataDomain.shiftTimes).notifier).state++;
-    ref.read(dataRevisionProvider(DataDomain.workHoursSettings).notifier).state++;
   }
 
   // ⭐ 2026-09-12(사용자 요청) - 이미 출퇴근이 채워진 근무를 다시 --:--/--:--로

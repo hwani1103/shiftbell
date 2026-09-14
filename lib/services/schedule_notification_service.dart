@@ -117,11 +117,13 @@ class ScheduleNotificationService {
 
   /// ⭐ 2026-09-14 (출시전 감사 #5) - 앱 시작 시 "일정관리 탭 사용" 설정을 Native(Device Protected)로 동기화.
   /// Native는 잠금 해제 전 재부팅 재예약·알림 수신에서 이 값을 확인함(Flutter 설정은 그때 읽을 수 없음).
-  static Future<void> syncTabEnabledToNative(bool enabled) async {
+  static Future<bool> syncTabEnabledToNative(bool enabled) async {
     try {
       await kAlarmChannel.invokeMethod('syncScheduleTabEnabled', {'enabled': enabled});
+      return true;
     } catch (e) {
       debugPrint('⚠️ 일정관리 탭 설정 Native 동기화 실패: $e');
+      return false;
     }
   }
 

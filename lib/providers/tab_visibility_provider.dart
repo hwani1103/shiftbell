@@ -35,9 +35,20 @@ class TabEnabledNotifier extends StateNotifier<bool> {
   }
 
   Future<void> setEnabled(bool enabled) async {
-    state = enabled;
+    final previous = state;
+    if (_prefsKey == _kScheduleTabEnabledKey) {
+      final synced = await ScheduleNotificationService.syncTabEnabledToNative(enabled);
+      if (!synced) throw StateError('일정관리 탭 Native 동기화 실패');
+    }
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_prefsKey, enabled);
+    final saved = await prefs.setBool(_prefsKey, enabled);
+    if (!saved) {
+      if (_prefsKey == _kScheduleTabEnabledKey) {
+        await ScheduleNotificationService.syncTabEnabledToNative(previous);
+      }
+      throw StateError('탭 설정 저장 실패: $_prefsKey');
+    }
+    state = enabled;
   }
 }
 

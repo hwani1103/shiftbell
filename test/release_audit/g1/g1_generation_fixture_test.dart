@@ -19,6 +19,10 @@ void main() {
   final root = jsonDecode(File('test/release_audit/g1/fixtures/generation_cases.json').readAsStringSync())
       as Map<String, dynamic>;
   final cases = (root['cases'] as List).cast<Map<String, dynamic>>();
+  final reviewRoot = jsonDecode(
+    File('test/release_audit/g1/fixtures/review_fixture_additions.json').readAsStringSync(),
+  ) as Map<String, dynamic>;
+  cases.addAll((reviewRoot['cases'] as List).cast<Map<String, dynamic>>());
 
   ShiftSchedule scheduleOf(Map<String, dynamic> s) {
     final assigned = (s['assigned_dates'] as Map?)?.map((k, v) => MapEntry(k as String, v as String));
