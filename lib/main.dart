@@ -1,3 +1,4 @@
+import 'services/friend_sync_service.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kReleaseMode;
@@ -444,6 +445,15 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
     // _checkPendingScheduleOpenOnStartup 주석 참고).
     _checkPendingScheduleOpenOnStartup();
 
+    // ⭐ 2026-09-14 (출시전 수정 T10 연결, G2-01) - 친구공유 dirty/stop_pending 재시도.
+    // 근무표가 처음 로드된 뒤(없음 포함) 앱 시작 1회 onAppStarted - 앱 시작을 막지 않고 오류는 로그만.
+    // Firebase 초기화가 지연돼 아직 준비 전이면 서비스가 pending으로 두고 다음 재개 때 다시 시도함.
+    ref.listenManual<AsyncValue<ShiftSchedule?>>(scheduleProvider, (previous, next) {
+      if (_friendSyncStartNotified || next.isLoading) return;
+      _friendSyncStartNotified = true;
+      _runFriendSync('onAppStarted', FriendSyncService.instance.onAppStarted(next.valueOrNull));
+    }, fireImmediately: true);
+
     // ⭐ Provider 사전 로드 (첫 탭 전환 시 버벅임 방지)
     Future.microtask(() {
       final container = ProviderScope.containerOf(context);
@@ -603,7 +613,19 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
       UpdateService.checkForUpdate(context);
+      // ⭐ 2026-09-14 (T10 연결, G2-01) - 재개될 때마다 친구공유 대기 작업(dirty/stop_pending) 재시도
+      _runFriendSync('onAppResumed', FriendSyncService.instance.onAppResumed(ref.read(scheduleProvider).valueOrNull));
     }
+  }
+
+  bool _friendSyncStartNotified = false;
+
+  // 친구공유는 선택 기능 - 실패가 앱 흐름을 막거나 처리되지 않은 비동기 오류가 되지 않게 로그만 남김
+  void _runFriendSync(String label, Future<void> work) {
+    unawaited(work.then<void>(
+      (_) {},
+      onError: (Object e) => debugPrint('⚠️ 친구공유 $label 재시도 실패(무시): $e'),
+    ));
   }
 
   // ⭐ 6번 기능: 달력탭으로 이동

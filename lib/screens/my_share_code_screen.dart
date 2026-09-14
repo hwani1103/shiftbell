@@ -35,6 +35,9 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
   bool _loading = true;
   bool _working = false;
   bool _sharingEnabled = false;
+  // ⭐ 2026-09-14 (T10 연결, G2-02) - bool만으로는 "서버 반영 대기"(active+dirty)와 "중지 요청 대기"(stop_pending)를
+  // 구분할 수 없어서 로컬 의도 상태를 그대로 들고 있음 (FriendSyncService.getShareState)
+  FriendShareState? _shareState;
   String? _ownerId;
   String? _savedName; // ⭐ Firestore에 마지막으로 반영된 이름 - 이름 변경 감지용
 
@@ -50,11 +53,13 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
   }
 
   Future<void> _load() async {
-    final enabled = await FriendSyncService.instance.isSharingEnabled();
+    final shareState = await FriendSyncService.instance.getShareState();
+    final enabled = shareState.isActive;
     final savedName = await FriendSyncService.instance.savedMyName();
     final ownerId = enabled ? await FriendSyncService.instance.getOrCreateOwnerId() : null;
     if (!mounted) return;
     setState(() {
+      _shareState = shareState;
       _sharingEnabled = enabled;
       _ownerId = ownerId;
       _savedName = savedName;
@@ -80,11 +85,19 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
     final schedule = ref.read(scheduleProvider).value;
     if (schedule == null) return;
     final ok = await FriendSyncService.instance.updateMyName(newName: name, schedule: schedule);
+    final after = await FriendSyncService.instance.getShareState();
     if (!mounted) return;
+    setState(() => _shareState = after);
     if (ok) {
       setState(() => _savedName = name);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.friendDisplayNameUpdated)),
+      );
+    } else if (after.isActive && after.dirty) {
+      // ⭐ T10 연결(G2-02) - 서버 확인만 늦어진 경우(오프라인 등)는 실패가 아니라 대기 - 이름은 로컬에 저장돼 자동 재전송됨
+      setState(() => _savedName = name);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.friendSyncPendingToast)),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -126,7 +139,10 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
         );
         return;
       }
+      final after = await FriendSyncService.instance.getShareState();
+      if (!mounted) return;
       setState(() {
+        _shareState = after;
         _sharingEnabled = true;
         _ownerId = ownerId;
         _savedName = name;
@@ -155,14 +171,80 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
     setState(() => _working = true);
     try {
       await FriendSyncService.instance.stopSharing();
+      // ⭐ T10 연결(G2-02) - 서버 삭제 확인 전이면 stop_pending으로 남음 - "삭제 완료"로 표시하지 않고 대기 안내
+      final after = await FriendSyncService.instance.getShareState();
       if (!mounted) return;
       setState(() {
+        _shareState = after;
         _sharingEnabled = false;
         _ownerId = null;
       });
     } finally {
       if (mounted) setState(() => _working = false);
     }
+  }
+
+  // ⭐ 2026-09-14 (T10 연결, G2-02) - 대기 중인 친구공유 작업(반영·중지)을 지금 다시 보냄. 결과는 상태를 다시 읽어 표시.
+  Future<void> _retryPending() async {
+    setState(() => _working = true);
+    try {
+      await FriendSyncService.instance.retryPending(ref.read(scheduleProvider).value);
+      final after = await FriendSyncService.instance.getShareState();
+      if (!mounted) return;
+      setState(() => _shareState = after);
+      if ((after.isActive && after.dirty) || after.intent == FriendShareIntent.stopPending) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.friendSyncPendingToast)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _working = false);
+    }
+  }
+
+  // 대기 상태 안내 카드 - active+dirty(친구에게 아직 반영 중) / stop_pending(중지 요청 확인 전)
+  Widget? _pendingBanner(ColorScheme colorScheme) {
+    final state = _shareState;
+    if (state == null) return null;
+    final String message;
+    if (state.intent == FriendShareIntent.stopPending) {
+      message = context.l10n.friendStopPendingBanner;
+    } else if (state.isActive && state.dirty) {
+      message = context.l10n.friendSyncPendingBanner;
+    } else {
+      return null;
+    }
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.sync, size: 18.sp, color: colorScheme.onSecondaryContainer),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Text(message, style: TextStyle(fontSize: 12.5.sp, color: colorScheme.onSecondaryContainer)),
+              ),
+            ],
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: _working ? null : _retryPending,
+              child: Text(context.l10n.friendRetrySync),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _copy(String text, String message) {
@@ -230,6 +312,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                     onSubmitted: (_) => _maybeSaveName(),
                   ),
                   SizedBox(height: 24.h),
+                  if (_pendingBanner(colorScheme) case final banner?) banner,
                   if (!_sharingEnabled)
                     SizedBox(
                       width: double.infinity,
