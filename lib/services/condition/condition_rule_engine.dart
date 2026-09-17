@@ -5,18 +5,21 @@
 // ConditionLevel(NORMAL/ATTENTION/HIGH_LOAD)과 Finding/Tip을 만든다.
 //
 // ⚠️ 지켜야 할 원칙(컨디션매니저_설계.md 5장 → 2026-09-04 v2로 개정,
-// 컨디션매니저_근거자료.md 결론):
+// 컨디션매니저_근거자료.md 결론, 2026-09-17 v3 재설계 - CLAUDE.md 설계 기록 참고):
 //  1. ConditionLevel을 올리는 조건은 evidence_database.dart에 실제로 대응
 //     항목이 있는 신호만 쓴다 - "여기 없는 근거는 어떤 Rule에도 안 쓴다"는
-//     원칙 자체는 그대로 유지. 다만 2026-09-04에 "앱이 이미 계산 가능한
-//     evidence 신호는 빠짐없이 판정에 활용해달라"는 요청으로 대상을 6개로
-//     넓힘(v1의 회복시간/장시간근무/장시간연속에 주간 초과근무·역방향 교대를
-//     추가) - 아래 5장 표 참고. 반대로 대응 evidence가 없는 순수 계산값
-//     (연속 야간근무 일수 자체, 연속근무일수)은 여전히 판정에 안 쓴다 -
-//     워딩(설명 문구)에만 활용.
+//     원칙 자체는 그대로 유지. 2026-09-17에 "절대 12시간 임계값 단독 트리거"
+//     (RULE_LONG_SHIFT)를 폐지하고, 그 자리를 근무시간대별 일반화된 연속근무
+//     버킷(streakBucketFor, EVIDENCE-005)과 "최근 7일 총 실근무시간"(기본근무+
+//     초과근무, RULE_WEEKLY_TOTAL_LOAD, EVIDENCE-012/014)으로 대체함 - 절대적인
+//     하루 근무시간이 아니라 "쉬지 못하고 누적됐는지"를 본다. 근거가 약한 항목
+//     (연속근무일수 자체, RULE_CONSECUTIVE_WORKDAYS)은 RULE_COMPOUND_HIGH_LOAD와
+//     같은 방식으로 "이 앱의 판단"임을 문구에 명시하고 쓴다.
 //  2. 모든 Finding/Tip은 evidenceIds를 최소 1개 가져야 한다.
-//  3. 숫자 점수(0~100)나 %, 질병 위험도는 condition_score.dart(사용자 요청으로
-//     승인된 예외, CLAUDE.md 참고) 외에는 어디에도 만들지 않는다.
+//  3. 숫자 점수(0~100)나 %, 질병 위험도는 어디에도 만들지 않는다(2026-09-15 - 유일한 예외였던
+//     condition_score.dart를 출시 적합성 재검토 후 삭제함).
+//  4. 아래 기준값 상수는 recovery_briefing_engine.dart("오늘의 컨디션")가 그대로 가져다 쓴다 -
+//     같은 주장에 다른 숫자를 쓰지 않도록 여기 한 곳에만 둔다.
 
 import 'package:flutter/material.dart' show DateTimeRange;
 import 'shift_pattern_analyzer.dart';
@@ -104,26 +107,103 @@ class ConditionResult {
   });
 }
 
+/// 근무시간대별로 일반화한 "연속 장시간근무 후 필요 휴식" 한 세트(EVIDENCE-005,
+/// 2026-09-17 재조사 - NIOSH mod5/05.html은 근무시간대(8h/10h/12h)별로 다른 연속일수
+/// 기준을 원문에 명시함). [floorMinutes]는 이 구간의 최소 근무시간 - 연속일수는 이
+/// 값 이상인 날만 센다(ShiftPatternAnalyzer.consecutiveLongShiftStreakEndingAt에 그대로
+/// 넘김).
+class ShiftStreakBucket {
+  final int floorMinutes;
+  final int thresholdDays;
+  final int requiredBreakMinutes;
+  final List<String> evidenceIds;
+
+  const ShiftStreakBucket({
+    required this.floorMinutes,
+    required this.thresholdDays,
+    required this.requiredBreakMinutes,
+    required this.evidenceIds,
+  });
+}
+
 class ConditionRuleEngine {
-  static const _minRecoveryMinutes = 11 * 60; // EVIDENCE-002, EVIDENCE-003
-  static const _longShiftThresholdMinutes = 12 * 60; // EVIDENCE-004
-  static const _extendedStreakDays = 3; // EVIDENCE-005 원문 숫자
-  static const _extendedStreakRequiredBreakMinutes = 48 * 60; // EVIDENCE-005 원문 숫자("2일")
-  static const _recommendedSleepMinMinutes = 7 * 60; // EVIDENCE-011
-  static const _recommendedSleepMaxMinutes = 9 * 60; // EVIDENCE-011
-  static const _sleepBufferMinutes = 60; // ⚠️ 연구값 아님 - 이동/정리 여유(설계 문서 6장 명시)
-  static const _caffeineCutoffHoursBeforeSleep = 6; // EVIDENCE-008
-  // ⭐ 2026-09-04 v2 추가 - condition_score.dart/today_forecast_engine.dart가
-  // 이미 쓰던 것과 동일한 값(최근 7일 중 누적 8시간 이상 = "유의미한 초과근무",
-  // EVIDENCE-012). 세 파일에 각각 정의돼 있어 값 하나 바뀌면 서로 어긋날 수
-  // 있음 - 바꿀 땐 반드시 세 곳 다 같이 맞출 것(Dart↔Kotlin 상수 동기화와
-  // 같은 이유의 위험).
-  static const _overtimeLookbackDays = 7;
-  static const _heavyOvertimeThresholdMinutes = 8 * 60;
+  static const minRecoveryMinutes = 11 * 60; // EVIDENCE-002, EVIDENCE-003
+  static const longShiftThresholdMinutes = 12 * 60; // EVIDENCE-004, EVIDENCE-005 12시간대 구간
+  static const extendedStreakDays = 3; // EVIDENCE-005 원문 숫자(12시간대)
+  static const extendedStreakRequiredBreakMinutes = 48 * 60; // EVIDENCE-005 원문 숫자("2일", 12시간대)
+  // ⭐ 2026-09-17 - EVIDENCE-005 재조사로 확인한 10시간대/8시간대 구간(원문: "10시간
+  // 근무 4일 또는 8시간 근무 5일 후 1~2일의 완전한 휴식"). 필요 휴식은 원문이 "1~2일"로
+  // 폭을 주므로 보수적으로 짧은 쪽(1일=24시간)을 임계값으로 씀 - 12시간대(원문이 "2일"로
+  // 단일 수치를 명시)와 구분.
+  static const midShiftThresholdMinutes = 10 * 60;
+  static const midStreakDays = 4;
+  static const shortShiftThresholdMinutes = 8 * 60;
+  static const shortStreakDays = 5;
+  static const genericRequiredBreakMinutes = 24 * 60;
+  static const recommendedSleepMinMinutes = 7 * 60; // EVIDENCE-011
+  static const recommendedSleepMaxMinutes = 9 * 60; // EVIDENCE-011
+  static const sleepBufferMinutes = 60; // ⚠️ 연구값 아님 - 이동/정리 여유(설계 문서 6장 명시)
+  static const caffeineCutoffHoursBeforeSleep = 6; // EVIDENCE-008
+  // ⭐ 2026-09-04 v2 추가, 2026-09-17 재설계 - 최근 7일 "총 실근무시간"(기본근무+초과근무,
+  // 근무시간대와 무관하게 누적) 기준. EU 48시간(EVIDENCE-012)/IOM 60시간(EVIDENCE-014) 2단계.
+  // 2026-09-15 - 예전엔 condition_score.dart/today_forecast_engine.dart에도 같은 값이 따로 있었는데 둘 다
+  // 삭제됐고, recovery_briefing_engine.dart는 이 상수를 직접 참조한다(값은 여기서만 바꿀 것).
+  static const overtimeLookbackDays = 7;
+  static const weeklyLoadAttentionMinutes = 48 * 60; // EVIDENCE-012
+  static const weeklyLoadSevereMinutes = 60 * 60; // EVIDENCE-014
+  // ⭐ 2026-09-17 - "근무시간과 무관하게 쉬는 날 없이 이어지는 근무 자체"(EVIDENCE-005의
+  // 일반 원칙 "며칠 몰아 일하고 몰아 쉬는 패턴을 피하라"만 빌림 - 정확한 일수는 이 앱의
+  // 판단이라 appUsage에도 명시함).
+  static const consecutiveWorkdayAttentionThreshold = 7;
+  static const consecutiveWorkdaySevereThreshold = 10;
 
   final ShiftPatternAnalyzer analyzer;
 
   const ConditionRuleEngine(this.analyzer);
+
+  /// 오늘 근무의 실제 근무시간(분)에 맞는 연속근무 버킷(EVIDENCE-005 일반화). 8시간
+  /// 미만은 이 근거가 다루지 않아 null(레벨 판정에 안 씀 - RULE_CONSECUTIVE_WORKDAYS가
+  /// 근무시간과 무관하게 별도로 다룸).
+  static ShiftStreakBucket? streakBucketFor(int shiftMinutes) {
+    if (shiftMinutes >= longShiftThresholdMinutes) {
+      return const ShiftStreakBucket(
+        floorMinutes: longShiftThresholdMinutes,
+        thresholdDays: extendedStreakDays,
+        requiredBreakMinutes: extendedStreakRequiredBreakMinutes,
+        evidenceIds: ['EVIDENCE-004', 'EVIDENCE-005'],
+      );
+    }
+    if (shiftMinutes >= midShiftThresholdMinutes) {
+      return const ShiftStreakBucket(
+        floorMinutes: midShiftThresholdMinutes,
+        thresholdDays: midStreakDays,
+        requiredBreakMinutes: genericRequiredBreakMinutes,
+        evidenceIds: ['EVIDENCE-005'],
+      );
+    }
+    if (shiftMinutes >= shortShiftThresholdMinutes) {
+      return const ShiftStreakBucket(
+        floorMinutes: shortShiftThresholdMinutes,
+        thresholdDays: shortStreakDays,
+        requiredBreakMinutes: genericRequiredBreakMinutes,
+        evidenceIds: ['EVIDENCE-005'],
+      );
+    }
+    return null;
+  }
+
+  /// ⭐ 2026-09-18 - 연속일수([ConsecutiveStreak], shift_pattern_analyzer.dart)를 문구로
+  /// 바꾸는 유일한 경로. 안전 상한(capped)에 도달했으면 [normal]의 숫자 대신 [capped]
+  /// 문장 전체를 쓴다 - 숫자만 치환하면("휴무 없이 매우 오래일째") 문법이 깨지므로
+  /// 항상 완결된 문장 두 개를 따로 받는다. condition_rule_engine.dart와
+  /// recovery_briefing_engine.dart가 연속일수를 문구에 넣는 모든 곳에서 이걸 거친다.
+  static String streakClause(
+    ConsecutiveStreak streak, {
+    required String Function(int days) normal,
+    required String capped,
+  }) {
+    return streak.capped ? capped : normal(streak.days);
+  }
 
   // ⭐ 2026-09-04 v2 - [otMinutesByDate]는 RULE_WEEKLY_OVERTIME(EVIDENCE-012)
   // 계산용. 기본값(빈 맵)이라 기존 호출부(테스트 등)는 그대로 컴파일되지만,
@@ -158,7 +238,7 @@ class ConditionRuleEngine {
     final window = analyzer.recoveryWindowContaining(date);
     final recoveryMinutes = window?.start.difference(window.end).inMinutes;
 
-    final shortRecovery = recoveryMinutes != null && recoveryMinutes < _minRecoveryMinutes;
+    final shortRecovery = recoveryMinutes != null && recoveryMinutes < minRecoveryMinutes;
     // "오늘/이 회복구간을 만든 근무"의 길이 - today가 근무일이면 그 근무, 아니면
     // 회복구간을 시작시킨 직전 근무의 길이를 최근접 근무일에서 다시 조회.
     int? relevantShiftMinutes = today.durationMinutes;
@@ -173,19 +253,30 @@ class ConditionRuleEngine {
         }
       }
     }
-    final longShift = relevantShiftMinutes != null && relevantShiftMinutes >= _longShiftThresholdMinutes;
+    // ⭐ 2026-09-17 재설계 - "절대 12시간이면 위험" 단독 트리거를 폐지함(사용자 지적:
+    // 12시간이 표준 근무인 사람에게 매 근무일 캐션이 뜨는 건 실행 불가능한 정보이자
+    // 경고 피로만 유발함). 대신 relevantShiftMinutes는 아래 RULE_EXTENDED_STREAK_SHORT_
+    // BREAK의 버킷 선택에만 쓰고(연속 며칠째인지 + 그 다음 회복시간이 짧은지로 판단),
+    // "오늘 하루 12시간 자체"는 더 이상 levelFindings에 안 올린다.
 
-    // ⭐ 2026-09-04 v2 - 주간 초과근무(EVIDENCE-012, EU 근로시간지침 48h 기준을
-    // condition_score.dart/today_forecast_engine.dart와 동일하게 "최근 7일
-    // 누적 8시간 이상"으로 적용). 원래 이 신호는 today_forecast_engine.dart
-    // (문구 레이어)에서만 읽었는데(그때는 ConditionRuleEngine을 "0줄 수정"하는게
-    // 원칙이었음 - 컨디션매니저_설계.md 14장 참고), 이번엔 사용자가 명시적으로
-    // 판정 자체에 반영해달라고 요청해서 그 원칙을 의도적으로 갱신함.
-    var otTotalMinutes = 0;
-    for (var i = 0; i < _overtimeLookbackDays; i++) {
-      otTotalMinutes += otMinutesByDate[_dateKey(date.subtract(Duration(days: i)))] ?? 0;
+    // ⭐ 2026-09-04 v2 최초 추가, 2026-09-17 재설계 - 최근 7일 "총 실근무시간"(기본근무
+    // +초과근무, 근무시간대와 무관하게 누적)으로 확장. 예전엔 초과근무(date_overtime)만
+    // 더했는데, 그러면 "12시간×15일/월"과 "8시간×22일/월"처럼 총량은 비슷한데 하루
+    // 근무시간만 다른 두 패턴을 공정하게 비교할 수 없었음(기본근무가 누적 대상에서
+    // 아예 빠져 있었기 때문) - 이제 기본근무까지 합산해서 EU 48시간(EVIDENCE-012)/IOM
+    // 60시간(EVIDENCE-014) 기준과 비교한다.
+    var weeklyBaseMinutes = 0;
+    for (var i = 0; i < overtimeLookbackDays; i++) {
+      final inst = analyzer.instanceForDate(date.subtract(Duration(days: i)));
+      if (inst.isWorkDay) weeklyBaseMinutes += inst.durationMinutes ?? 0;
     }
-    final heavyOvertime = otTotalMinutes >= _heavyOvertimeThresholdMinutes;
+    var otTotalMinutes = 0;
+    for (var i = 0; i < overtimeLookbackDays; i++) {
+      otTotalMinutes += otMinutesByDate[dateKey(date.subtract(Duration(days: i)))] ?? 0;
+    }
+    final weeklyTotalMinutes = weeklyBaseMinutes + otTotalMinutes;
+    final heavyLoad = weeklyTotalMinutes >= weeklyLoadAttentionMinutes;
+    final severeLoad = weeklyTotalMinutes >= weeklyLoadSevereMinutes;
 
     // ⭐ 2026-09-04 v2 - 교대 방향(EVIDENCE-001). 비교 연구 수준 근거("정방향이
     // 상대적으로 유리한 경향"이지 절대 위험 수치가 아님)라 이 신호 하나만으로는
@@ -206,11 +297,21 @@ class ConditionRuleEngine {
     // (consecutiveNightStreakEndingAt은 오늘이 야간이 아니면 항상 0을 반환하므로
     // 별도로 "오늘이 야간인지"를 다시 확인할 필요 없음 - shift_pattern_analyzer.dart 참고.)
     final consecutiveNight = analyzer.consecutiveNightStreakEndingAt(date);
-    final nightStreakAttention = consecutiveNight >= 3;
-    final nightStreakSevere = consecutiveNight >= 4;
+    final nightStreakAttention = consecutiveNight.days >= 3;
+    final nightStreakSevere = consecutiveNight.days >= 4;
 
-    // ⭐ 2026-09-04 v2 - ATTENTION급 개별 신호 5개(회복시간 부족/장시간근무/
-    // 주간 초과근무/역방향 교대/연속 야간근무 3일 이상)를 한데 모아 "몇 개나
+    // ⭐ 2026-09-17 재설계 - 근무시간과 무관하게 "쉬는 날 없이 이어지는 근무 일수"
+    // 자체(사용자 지적: "4시간짜리 근무여도 7일 연속이면 힘들다"). EVIDENCE-005 원문에
+    // 정확한 상한 수치는 없고 "며칠 몰아 일하고 몰아 쉬는 패턴을 피하라"는 일반 원칙만
+    // 있어서, 정확한 일수 기준(7일/10일)은 이 앱이 보수적으로 정한 값임을 문구에도 명시함
+    // (RULE_COMPOUND_HIGH_LOAD와 동일한 "이 앱의 판단" 취급).
+    final consecutiveWork =
+        today.isWorkDay ? analyzer.consecutiveWorkStreakEndingAt(date) : (days: 0, capped: false);
+    final workStreakAttention = consecutiveWork.days >= consecutiveWorkdayAttentionThreshold;
+    final workStreakSevere = consecutiveWork.days >= consecutiveWorkdaySevereThreshold;
+
+    // ⭐ 2026-09-04 v2 - ATTENTION급 개별 신호(회복시간 부족/주간 총 근무시간 초과/
+    // 역방향 교대/연속 야간근무 3일 이상/연속근무일수 누적)를 한데 모아 "몇 개나
     // 겹치는지"로 최종 레벨을 정함: 1개면 ATTENTION, 2개 이상이면 HIGH_LOAD.
     // "2개 이상이면 심각"이라는 조합 기준 자체는 특정 논문 수치가 아니라 이 앱의
     // 설계 판단(여러 연구가 개별적으로 뒷받침하는 부담이 겹치면 누적된다는
@@ -218,10 +319,10 @@ class ConditionRuleEngine {
     // Finding에 그대로 남아 있어 "무엇이 왜"는 항상 추적 가능함.
     final attentionSignalIds = <String>[
       if (shortRecovery) 'RULE_SHORT_RECOVERY',
-      if (longShift) 'RULE_LONG_SHIFT',
-      if (heavyOvertime) 'RULE_WEEKLY_OVERTIME',
+      if (heavyLoad) 'RULE_WEEKLY_TOTAL_LOAD',
       if (isBackward) 'RULE_BACKWARD_DIRECTION',
       if (nightStreakAttention) 'RULE_CONSECUTIVE_NIGHT_SHIFTS',
+      if (workStreakAttention) 'RULE_CONSECUTIVE_WORKDAYS',
     ];
     var level = attentionSignalIds.isEmpty ? ConditionLevel.normal : ConditionLevel.attention;
 
@@ -233,22 +334,33 @@ class ConditionRuleEngine {
         evidenceIds: const ['EVIDENCE-002', 'EVIDENCE-003'],
       ));
     }
-    if (longShift) {
+    if (heavyLoad) {
       levelFindings.add(ConditionFinding(
-        ruleId: 'RULE_LONG_SHIFT',
-        message: '${_formatHours(relevantShiftMinutes)} 근무입니다. 관련 연구에서는 '
-            '근무시간이 길어질수록 피로·사고 위험이 상대적으로 높아지는 경향이 '
-            '보고됩니다.',
-        evidenceIds: const ['EVIDENCE-004'],
+        ruleId: 'RULE_WEEKLY_TOTAL_LOAD',
+        message: severeLoad
+            ? '최근 7일간 실제 근무시간이 총 ${_formatHours(weeklyTotalMinutes)}으로, 간호사 근무시간 '
+                '권고 상한(주 60시간)을 넘었습니다.'
+            : '최근 7일간 실제 근무시간이 총 ${_formatHours(weeklyTotalMinutes)}입니다. EU 근로시간지침 '
+                '등은 평균 주간 근무시간이 48시간을 넘지 않을 것을 기준으로 제시합니다.',
+        evidenceIds: severeLoad ? const ['EVIDENCE-012', 'EVIDENCE-014'] : const ['EVIDENCE-012'],
       ));
     }
-    if (heavyOvertime) {
+    if (workStreakAttention) {
       levelFindings.add(ConditionFinding(
-        ruleId: 'RULE_WEEKLY_OVERTIME',
-        message: '최근 7일간 초과근무가 ${_formatHours(otTotalMinutes)} 누적됐습니다. '
-            'EU 근로시간지침 등은 평균 주간 근무시간이 48시간을 넘지 않을 것을 '
-            '기준으로 제시합니다.',
-        evidenceIds: const ['EVIDENCE-012'],
+        ruleId: 'RULE_CONSECUTIVE_WORKDAYS',
+        message: streakClause(
+          consecutiveWork,
+          normal: (days) => workStreakSevere
+              ? '오늘로 연속 근무 $days일째입니다. 하루 근무시간과 무관하게 쉬는 날 '
+                  '없이 근무가 길게 이어지는 것 자체가 피로 누적으로 이어질 수 있습니다 '
+                  '(정확한 일수 기준은 특정 연구 수치가 아니라 이 앱이 보수적으로 정한 값입니다).'
+              : '오늘로 연속 근무 $days일째입니다. 하루 근무시간과 무관하게 쉬는 날 없이 '
+                  '근무가 이어지면 피로가 쌓일 수 있습니다(정확한 일수 기준은 이 앱의 판단입니다).',
+          capped: '휴무 없이 매우 오랜 기간 근무가 이어지고 있습니다. 하루 근무시간과 무관하게 '
+              '쉬는 날 없이 근무가 길게 이어지는 것 자체가 피로 누적으로 이어질 수 있습니다 '
+              '(정확한 일수 기준은 특정 연구 수치가 아니라 이 앱이 보수적으로 정한 값입니다).',
+        ),
+        evidenceIds: const ['EVIDENCE-005'],
       ));
     }
     if (isBackward) {
@@ -263,14 +375,20 @@ class ConditionRuleEngine {
     if (nightStreakAttention) {
       levelFindings.add(ConditionFinding(
         ruleId: 'RULE_CONSECUTIVE_NIGHT_SHIFTS',
-        message: nightStreakSevere
-            ? '연속 야간근무가 $consecutiveNight일째로 접어들었습니다. 관련 연구는 '
-                '이 시점부터 사고·실수 위험이 뚜렷하게 가속화된다고 보고하며, 일부 '
-                '안전 최우선 산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 '
-                '둡니다.'
-            : '연속 야간근무 $consecutiveNight일째입니다. 관련 연구는 야간근무가 '
-                '연속될수록(특히 낮·오후근무 연속보다 더 가파르게) 사고·실수 위험이 '
-                '누적된다고 보고합니다.',
+        message: streakClause(
+          consecutiveNight,
+          normal: (days) => nightStreakSevere
+              ? '연속 야간근무가 $days일째로 접어들었습니다. 관련 연구는 '
+                  '이 시점부터 사고·실수 위험이 뚜렷하게 가속화된다고 보고하며, 일부 '
+                  '안전 최우선 산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 '
+                  '둡니다.'
+              : '연속 야간근무 $days일째입니다. 관련 연구는 야간근무가 '
+                  '연속될수록(특히 낮·오후근무 연속보다 더 가파르게) 사고·실수 위험이 '
+                  '누적된다고 보고합니다.',
+          capped: '연속 야간근무가 휴무 없이 매우 오래 이어지고 있습니다. 관련 연구는 '
+              '이 시점부터 사고·실수 위험이 뚜렷하게 가속화된다고 보고하며, 일부 '
+              '안전 최우선 산업의 근무 규정은 연속 야간근무를 보통 4일로 상한선을 둡니다.',
+        ),
         evidenceIds: const ['EVIDENCE-013'],
       ));
     }
@@ -279,17 +397,17 @@ class ConditionRuleEngine {
       level = ConditionLevel.highLoad;
       final compoundLabels = [
         if (shortRecovery) '회복시간 부족',
-        if (longShift) '장시간 근무',
-        if (heavyOvertime) '초과근무 누적',
+        if (heavyLoad) '주간 누적 근무시간 초과',
         if (isBackward) '역방향 교대 전환',
         if (nightStreakAttention) '연속 야간근무',
+        if (workStreakAttention) '연속근무일수 누적',
       ];
       final compoundEvidenceIds = <String>{
         if (shortRecovery) ...['EVIDENCE-002', 'EVIDENCE-003'],
-        if (longShift) 'EVIDENCE-004',
-        if (heavyOvertime) 'EVIDENCE-012',
+        if (heavyLoad) ...(severeLoad ? ['EVIDENCE-012', 'EVIDENCE-014'] : ['EVIDENCE-012']),
         if (isBackward) 'EVIDENCE-001',
         if (nightStreakAttention) 'EVIDENCE-013',
+        if (workStreakAttention) 'EVIDENCE-005',
       };
       levelFindings.add(ConditionFinding(
         ruleId: 'RULE_COMPOUND_HIGH_LOAD',
@@ -300,53 +418,71 @@ class ConditionRuleEngine {
       ));
     }
 
-    // 연속 장시간근무 + 짧은 다음 회복 (EVIDENCE-004 + EVIDENCE-005) - 근거가
-    // 강해(원문이 제시하는 정량적 권고) 위 조합 규칙과 무관하게 그 자체로도
-    // 단독 HIGH_LOAD.
+    // ⭐ 2026-09-17 재설계 - 근무시간대별 일반화(EVIDENCE-005): 오늘/이 회복구간을 만든
+    // 근무의 실제 길이에 맞는 버킷(8h→5일, 10h→4일, 12h→3일)을 고르고, 그 길이 이상인
+    // 날이 버킷 기준일수 이상 연속됐는데 그 다음 회복시간까지 짧으면 근거가 강해(원문이
+    // 제시하는 정량적 권고) 위 조합 규칙과 무관하게 그 자체로도 단독 HIGH_LOAD. 8시간
+    // 미만 근무는 이 근거가 다루지 않아 버킷이 없음(streakBucketFor가 null 반환) -
+    // RULE_CONSECUTIVE_WORKDAYS가 근무시간과 무관하게 별도로 다룸.
     final longShiftStreakDate = window != null
         ? _findInstanceDateByEnd(date, window.end) ?? date
         : date;
-    final longStreak = analyzer.consecutiveLongShiftStreakEndingAt(
-      longShiftStreakDate,
-      thresholdMinutes: _longShiftThresholdMinutes,
-    );
-    if (longStreak >= _extendedStreakDays &&
-        (recoveryMinutes == null || recoveryMinutes < _extendedStreakRequiredBreakMinutes)) {
-      levelFindings.add(ConditionFinding(
-        ruleId: 'RULE_EXTENDED_STREAK_SHORT_BREAK',
-        message: '12시간 이상 근무가 $longStreak일 연속 이어졌습니다. 관련 훈련자료는 '
-            '이런 경우 최소 2일의 휴식을 고려할 것을 제안합니다.',
-        evidenceIds: const ['EVIDENCE-004', 'EVIDENCE-005'],
-      ));
-      level = ConditionLevel.highLoad;
+    final streakBucket = relevantShiftMinutes != null ? streakBucketFor(relevantShiftMinutes) : null;
+    if (streakBucket != null) {
+      final bucketStreak = analyzer.consecutiveLongShiftStreakEndingAt(
+        longShiftStreakDate,
+        thresholdMinutes: streakBucket.floorMinutes,
+      );
+      if (bucketStreak.days >= streakBucket.thresholdDays &&
+          (recoveryMinutes == null || recoveryMinutes < streakBucket.requiredBreakMinutes)) {
+        final floorHours = streakBucket.floorMinutes ~/ 60;
+        final breakDays = (streakBucket.requiredBreakMinutes / (24 * 60)).ceil();
+        levelFindings.add(ConditionFinding(
+          ruleId: 'RULE_EXTENDED_STREAK_SHORT_BREAK',
+          message: streakClause(
+            bucketStreak,
+            normal: (days) => '$floorHours시간 이상 근무가 $days일 연속 이어졌습니다. 관련 훈련자료는 '
+                '이런 경우 최소 $breakDays일의 휴식을 고려할 것을 제안합니다.',
+            capped: '$floorHours시간 이상 근무가 휴무 없이 매우 오래 이어지고 있습니다. 관련 '
+                '훈련자료는 이런 경우 최소 $breakDays일의 휴식을 고려할 것을 제안합니다.',
+          ),
+          evidenceIds: streakBucket.evidenceIds,
+        ));
+        level = ConditionLevel.highLoad;
+      }
     }
 
-    // ⭐ 2026-09-04 v2 후속 - 연속 야간근무 4일 이상은 그 자체로 단독 HIGH_LOAD
-    // (원 연구가 "이 시점부터 가속화"라고 명시하는 구간 - 위 RULE_EXTENDED_
+    // ⭐ 2026-09-04 v2 후속 - 연속 야간근무 4일 이상 / 2026-09-17 - 주간 누적 근무시간
+    // 60시간 이상 / 연속근무일수 10일 이상은 그 자체로 단독 HIGH_LOAD(원 연구·근거가
+    // "이 시점부터 가속화·상한 초과"라고 명시하는 구간 - 위 RULE_EXTENDED_
     // STREAK_SHORT_BREAK와 동일한 취급).
-    if (nightStreakSevere) {
+    if (nightStreakSevere || severeLoad || workStreakSevere) {
       level = ConditionLevel.highLoad;
     }
 
     // ── 설명용 맥락(판정에는 영향 없음) ──────────────────────────────
-    final consecutiveWork = today.isWorkDay ? analyzer.consecutiveWorkStreakEndingAt(date) : 0;
-
-    if (consecutiveNight >= 1 && !nightStreakAttention) {
+    if (consecutiveNight.days >= 1 && !nightStreakAttention) {
       // 3일 미만은 여전히 순수 계산값(대응 evidence 없음)이라 판정에도 안 쓰고
       // 사실만 서술 - 3일 이상은 이제 위에서 RULE_CONSECUTIVE_NIGHT_SHIFTS로
-      // 이미 다뤘으니 여기서 중복 표시 안 함.
+      // 이미 다뤘으니 여기서 중복 표시 안 함. (1~2일뿐이라 캡에 걸릴 수 없음 -
+      // streakClause 불필요.)
       contextFindings.add(ConditionFinding(
-        message: '오늘로 연속 야간근무 $consecutiveNight일째입니다.',
+        message: '오늘로 연속 야간근무 ${consecutiveNight.days}일째입니다.',
         evidenceIds: const [],
       ));
     }
-    if (today.isOff && consecutiveNight == 0) {
+    if (today.isOff && consecutiveNight.days == 0) {
       final ySt = analyzer.consecutiveNightStreakEndingAt(date.subtract(const Duration(days: 1)));
-      if (ySt >= 1) {
+      if (ySt.days >= 1) {
         contextFindings.add(ConditionFinding(
           ruleId: 'RULE_NIGHT_FOLLOWED_BY_OFF',
-          message: '어제까지 이어진 야간근무($ySt일) 이후의 휴무입니다. 회복을 위한 '
-              '수면·휴식 구간으로 활용해보세요.',
+          message: streakClause(
+            ySt,
+            normal: (days) => '어제까지 이어진 야간근무($days일) 이후의 휴무입니다. 회복을 위한 '
+                '수면·휴식 구간으로 활용해보세요.',
+            capped: '휴무 없이 매우 오래 이어진 야간근무 이후의 휴무입니다. 회복을 위한 '
+                '수면·휴식 구간으로 활용해보세요.',
+          ),
           evidenceIds: const ['EVIDENCE-006'],
         ));
       }
@@ -370,15 +506,15 @@ class ConditionRuleEngine {
     var sleepShorterThanRecommended = false;
 
     if (window != null) {
-      final sleepStart = window.end.add(const Duration(minutes: _sleepBufferMinutes));
-      final maxBySleepLength = sleepStart.add(const Duration(minutes: _recommendedSleepMaxMinutes));
-      final maxByNextShift = window.start.subtract(const Duration(minutes: _sleepBufferMinutes));
+      final sleepStart = window.end.add(const Duration(minutes: sleepBufferMinutes));
+      final maxBySleepLength = sleepStart.add(const Duration(minutes: recommendedSleepMaxMinutes));
+      final maxByNextShift = window.start.subtract(const Duration(minutes: sleepBufferMinutes));
       final sleepEnd = maxBySleepLength.isBefore(maxByNextShift) ? maxBySleepLength : maxByNextShift;
 
       if (sleepEnd.isAfter(sleepStart)) {
         sleepWindow = DateTimeRange(start: sleepStart, end: sleepEnd);
         final actualMinutes = sleepEnd.difference(sleepStart).inMinutes;
-        sleepShorterThanRecommended = actualMinutes < _recommendedSleepMinMinutes;
+        sleepShorterThanRecommended = actualMinutes < recommendedSleepMinMinutes;
 
         tips.add(ConditionTip(
           ruleId: 'RULE_SLEEP_WINDOW',
@@ -391,7 +527,7 @@ class ConditionRuleEngine {
           evidenceIds: const ['EVIDENCE-011'],
         ));
 
-        final cutoff = sleepStart.subtract(const Duration(hours: _caffeineCutoffHoursBeforeSleep));
+        final cutoff = sleepStart.subtract(const Duration(hours: caffeineCutoffHoursBeforeSleep));
         tips.add(ConditionTip(
           ruleId: 'RULE_CAFFEINE_CUTOFF',
           category: 'caffeine',
@@ -456,8 +592,8 @@ class ConditionRuleEngine {
       recommendedSleepWindow: sleepWindow,
       sleepWindowShorterThanRecommended: sleepShorterThanRecommended,
       recoveryMinutes: recoveryMinutes,
-      consecutiveNightDays: consecutiveNight,
-      consecutiveWorkDays: consecutiveWork,
+      consecutiveNightDays: consecutiveNight.days,
+      consecutiveWorkDays: consecutiveWork.days,
     );
   }
 
@@ -482,7 +618,7 @@ class ConditionRuleEngine {
     return '$h시간 $m분';
   }
 
-  // RULE_WEEKLY_OVERTIME에서 씀 - condition_score.dart의 동명 헬퍼와 동일 형식.
-  static String _dateKey(DateTime d) =>
+  // RULE_WEEKLY_TOTAL_LOAD에서 씀 - condition_score.dart의 동명 헬퍼와 동일 형식.
+  static String dateKey(DateTime d) =>
       '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 }

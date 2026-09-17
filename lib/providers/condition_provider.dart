@@ -11,6 +11,7 @@ import '../services/condition/shift_pattern_analyzer.dart';
 import '../services/database_service.dart';
 import '../utils/shift_name_util.dart';
 import 'condition_shift_time_provider.dart';
+import 'current_date_provider.dart';
 import 'data_revision_provider.dart';
 import 'schedule_provider.dart';
 
@@ -62,15 +63,15 @@ final conditionAnalyzerProvider = Provider<ShiftPatternAnalyzer?>((ref) {
 // 기대지 않고 직접 불러온다(컨디션 탭을 달력 없이 바로 열어도 항상 정확하게
 // 반영되도록) - 엔진의 창(최근 7일)보다 여유 있게 잡음.
 // ⭐ 2026-09-04 v2 - 원래 sleep_condition_provider.dart에 있었는데, 이제
-// ConditionRuleEngine 자체(RULE_WEEKLY_OVERTIME)도 이 데이터가 필요해져서
-// 더 기반 레이어인 이 파일로 옮김 - sleep_condition_provider.dart는 이미 이
-// 파일을 import하고 있어서 그대로 재사용 가능(순환 import 방지).
+// ConditionRuleEngine 자체(RULE_WEEKLY_TOTAL_LOAD, 2026-09-17까지는 RULE_WEEKLY_OVERTIME)도
+// 이 데이터가 필요해져서 더 기반 레이어인 이 파일로 옮김 - sleep_condition_provider.dart는
+// 이미 이 파일을 import하고 있어서 그대로 재사용 가능(순환 import 방지).
 final recentOvertimeMinutesProvider = FutureProvider<Map<String, int>>((ref) async {
   // G1은 date_overtime 저장이 성공한 뒤에만 이 revision을 올린다. 따라서
   // OT 추가/수정/삭제는 DB를 다시 읽고, 실패/롤백은 현재 계산을 유지한다.
   ref.watch(dataRevisionProvider(DataDomain.overtime));
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
+  // ⭐ 2026-09-15 (AUD-05) - 자정·앱 재개 때 바뀌는 "오늘"을 구독(current_date_provider.dart)
+  final today = ref.watch(currentDateProvider);
   final start = today.subtract(const Duration(days: 6));
   return DatabaseService.instance.getOvertimeForRange(start, today);
 });
@@ -79,14 +80,17 @@ final recentOvertimeMinutesProvider = FutureProvider<Map<String, int>>((ref) asy
 final todayConditionResultProvider = Provider<ConditionResult?>((ref) {
   final analyzer = ref.watch(conditionAnalyzerProvider);
   if (analyzer == null) return null;
-  final now = DateTime.now();
-  // ⭐ 2026-09-04 v2 - RULE_WEEKLY_OVERTIME(EVIDENCE-012)이 실제 판정에 쓰이도록
-  // OT 데이터를 같이 넘김. FutureProvider라 로딩 중엔 빈 맵으로 취급(그 사이엔
-  // 이 규칙만 일시적으로 꺼진 채로 평가되고, 로딩 끝나면 자동 재계산됨 -
-  // conditionScoreProvider가 이미 쓰던 것과 동일한 패턴).
+  // ⭐ 2026-09-15 (AUD-05) - 자정·앱 재개 때 바뀌는 "오늘"을 구독. 예전엔 생성 시점 날짜가 캐시에 남아
+  // 앱을 밤부터 다음 날까지 살려 두면 전날 기준 판정이 계속 보였음
+  final today = ref.watch(currentDateProvider);
+  // ⭐ 2026-09-04 v2, 2026-09-17 재설계 - RULE_WEEKLY_TOTAL_LOAD(EVIDENCE-012/014)가
+  // 실제 판정에 쓰이도록 OT 데이터를 같이 넘김(기본근무 합산은 엔진이 analyzer로 직접
+  // 계산). FutureProvider라 로딩 중엔 빈 맵으로 취급(그 사이엔 OT 부분만 0으로 취급돼
+  // 총량이 과소평가되고, 로딩 끝나면 자동 재계산됨 - conditionScoreProvider가 이미 쓰던
+  // 것과 동일한 패턴).
   final otMinutes = ref.watch(recentOvertimeMinutesProvider).value ?? const {};
   return ConditionRuleEngine(analyzer).evaluate(
-    DateTime(now.year, now.month, now.day),
+    today,
     otMinutesByDate: otMinutes,
   );
 });
@@ -95,8 +99,8 @@ final todayConditionResultProvider = Provider<ConditionResult?>((ref) {
 final currentWeekSummaryProvider = Provider<WeeklyPatternSummary?>((ref) {
   final analyzer = ref.watch(conditionAnalyzerProvider);
   if (analyzer == null) return null;
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
+  // ⭐ 2026-09-15 (AUD-05) - 자정·앱 재개 때 바뀌는 "오늘"을 구독(current_date_provider.dart)
+  final today = ref.watch(currentDateProvider);
   final weekStart = today.subtract(Duration(days: today.weekday - 1));
   return analyzer.weeklySummary(weekStart);
 });

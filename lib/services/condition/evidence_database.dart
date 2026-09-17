@@ -73,13 +73,18 @@ const List<Evidence> kEvidenceDatabase = [
   Evidence(
     id: 'EVIDENCE-005',
     source: 'NIOSH, Training for Nurses on Shift Work and Long Work Hours (Module 5, Extended Shifts)',
-    topic: '연속 장시간근무 후 휴식일',
-    finding: '연속 12시간 근무 3일 후에는 최소 2일의 휴식을 고려할 것을 제안.',
+    topic: '연속 근무 후 휴식일(근무시간대별 일반화)',
+    finding: '"연속 8시간 근무 5일 또는 10시간 근무 4일 후에는 1~2일의 완전한 휴식을, '
+        '연속 12시간 근무 3일 후에는 2일의 휴식을 계획할 것"을 권고. 또한 "며칠 몰아서 '
+        '일하고 4~7일을 몰아 쉬는" 압축 패턴은 전문가들이 피할 것을 권고한다고 명시(2026-09-17 '
+        '재조사로 근무시간대별 일반화된 수치 확인 - 기존엔 12시간 근무 축만 반영했음).',
     evidenceLevel: '정부기관 종합 훈련자료의 정성적 권고(정량적 "위험 시작 일수"는 아님)',
-    appUsage: '연속 12시간 이상 근무가 3일 이상 이어지고 그 다음 회복시간이 48시간 '
-        '미만일 때만 "높은 부담" 판정에 사용 - 원문 숫자(3일/2일)를 그대로 씀, '
-        '임의로 만든 임계값이 아님.',
-    url: 'https://www.cdc.gov/niosh/work-hour-training-for-nurses/longhours/mod5/07.html',
+    appUsage: '근무시간이 8시간대/10시간대/12시간대인지에 따라 각각 5일/4일/3일 연속 뒤 '
+        '회복시간이 부족(24~48시간 미만)하면 "높은 부담" 판정에 사용 - 원문 숫자를 그대로 '
+        '씀, 임의로 만든 임계값이 아님. 8시간 미만 근무의 연속일수는 이 근거가 다루지 않아 '
+        '레벨 판정에 안 씀(RULE_CONSECUTIVE_WORKDAYS 참고 - "며칠 몰아서 일하는 압축 패턴을 '
+        '피하라"는 이 자료의 일반 원칙만 빌리고, 정확한 일수 기준 자체는 이 앱의 판단).',
+    url: 'https://www.cdc.gov/niosh/work-hour-training-for-nurses/longhours/mod5/05.html',
   ),
   Evidence(
     id: 'EVIDENCE-006',
@@ -156,10 +161,10 @@ const List<Evidence> kEvidenceDatabase = [
     finding: '평균 주간 근무시간(연장근무 포함)이 기준기간 동안 48시간을 넘지 '
         '않아야 함.',
     evidenceLevel: '법제/정부 가이드라인(널리 채택된 최소 기준)',
-    appUsage: '2026-09-01 후속5 - "오늘의 컨디션 예측"의 "최근 5일 실측 피로도" 축'
-        '(today_forecast_engine.dart)에서, 최근 5일 누적 실제 초과근무(OT, '
-        'date_overtime)가 유의미한 수준(8시간 이상, 설계값 - 3시간 안팎의 사소한 '
-        'OT는 문구를 바꾸지 않음)일 때만 "초과근무가 많아 보여요" 수준으로 서술. '
+    appUsage: 'ConditionRuleEngine RULE_WEEKLY_TOTAL_LOAD와 "오늘의 컨디션"(recovery_briefing_engine.dart, '
+        '2026-09-17 재설계)에서 최근 7일 누적 실제 근무시간(기본근무+초과근무 합계)이 48시간 '
+        '이상일 때 "최근 7일 실근무시간 N시간" 사실과 "추가 근무를 줄여보세요" 행동으로 서술. '
+        '60시간 이상은 EVIDENCE-014와 함께 그 자체로 "회복 부담이 큰 날" 판정에 사용. '
         '개인 위험도·질병 연관은 절대 언급하지 않음.',
     url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32003L0088',
   ),
@@ -185,6 +190,28 @@ const List<Evidence> kEvidenceDatabase = [
         '"회복 부담이 큰 날"로 판정(가속화 구간이라는 원 연구 취지 반영). 개인별 '
         '%나 사고 확률은 표시하지 않고 "위험이 누적/가속화되는 경향" 수준으로만 '
         '서술.',
+  ),
+  // ⭐ 2026-09-17 - 사용자 요청("12시간 근무 자체를 매번 위험하다고 하지 말고, 근무
+  // 시간대와 무관하게 최근 며칠간 총 근무량이 실제로 많은지로 판단해야 한다")에 따라
+  // 조사해서 추가. EVIDENCE-012(EU 48시간)와 같은 "주간 총 근무시간" 축이지만, EU
+  // 지침보다 더 구체적인 절대 상한(주 60시간)을 제시하는 별개 출처라 분리함 - 두 근거를
+  // 합쳐 48시간(주의)/60시간(그 자체로 높은 부담) 2단계로 씀.
+  Evidence(
+    id: 'EVIDENCE-014',
+    source: 'Institute of Medicine, Keeping Patients Safe (2004); 2014년 체계적 검토 '
+        '(둘 다 NIOSH Training for Nurses Module 5에 인용된 수치로 확인)',
+    topic: '주간 누적 근무시간 상한',
+    finding: '간호사 근무시간을 24시간 내 12시간, 7일 내 60시간을 넘지 않도록 제한할 '
+        '것을 권고(IOM 2004). 2014년 체계적 검토는 주 40시간을 넘는 근무가 환자안전 '
+        '저하와 연관된다고 보고.',
+    evidenceLevel: '정부기관 종합 훈련자료에 인용된 위원회 보고서 + 체계적 검토(원문 '
+        '직접 확인은 이번 조사에서 못 함 - 2차 인용 확인 수준)',
+    appUsage: '최근 7일 누적 실제 근무시간(기본근무+초과근무 합계)이 60시간 이상일 때 '
+        '그 자체로 "회복 부담이 큰 날" 판정에 사용(EVIDENCE-012의 48시간 기준과 함께 '
+        '2단계 중 상위 단계). 40시간 수치는 서술에서 참고만 하고 별도 레벨 신호로는 '
+        '쓰지 않음(EU 48시간 기준과 같은 축의 더 약한 근거를 이중으로 반영하지 않기 '
+        '위함). 개인 위험도·질병 연관은 언급하지 않음.',
+    url: 'https://www.cdc.gov/niosh/work-hour-training-for-nurses/longhours/mod5/07.html',
   ),
 ];
 

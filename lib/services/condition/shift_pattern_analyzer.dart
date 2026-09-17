@@ -57,6 +57,16 @@ class ShiftDirectionResult {
   const ShiftDirectionResult({required this.direction, required this.sequence});
 }
 
+/// ⭐ 2026-09-18 - 연속일수 계산 3종(아래)이 공통으로 반환하는 결과. [days]가
+/// 실제 연속일수, [capped]는 무한루프 방지용 안전 상한([maxLookbackDays], 기본
+/// 180)에 도달해서 "진짜 연속일수가 이보다 더 길 수도 있어 정확한 숫자를 모른다"는
+/// 뜻이다. 캡에 도달했을 때 [days](예: 180)를 실제 사실인 것처럼 문구에 그대로
+/// 쓰면(예: "180일 연속 근무") 이 값은 실제 근무 이력이 아니라 계산을 멈춘
+/// 지점이라 사용자에게 신뢰를 깨는 부정확한 정보가 된다 - 호출부(condition_rule_
+/// engine.dart/recovery_briefing_engine.dart)는 반드시 [capped]를 먼저 확인하고
+/// `ConditionRuleEngine.streakClause()`로 문구를 골라야 한다.
+typedef ConsecutiveStreak = ({int days, bool capped});
+
 /// 한 주(월~일)의 패턴 요약. "이번 주 특징"(스펙 28장) 화면에 그대로 씀.
 class WeeklyPatternSummary {
   final DateTime weekStart;
@@ -156,32 +166,37 @@ class ShiftPatternAnalyzer {
   /// 쉬는 날이 하루도 없는 규칙적 패턴(매일 야간만 도는 스케줄 등)에서는
   /// `getShiftForDate`가 과거 어느 날짜든 답을 내주기 때문에 캡이 없으면 이
   /// 루프가 끝나지 않아 ANR로 이어짐 - `recoveryWindowContaining`과 동일하게 캡을 둠.
-  int consecutiveNightStreakEndingAt(DateTime date, {int maxLookbackDays = 180}) {
+  /// ⭐ 2026-09-18 - 반환 타입을 int→[ConsecutiveStreak]로 바꿈(위 typedef 설명 참고) -
+  /// 캡에 도달한 값을 문구에 그대로 노출하는 버그(예: "180일 연속 근무")를 호출부에서
+  /// 놓치지 않도록 타입 차원에서 강제.
+  ConsecutiveStreak consecutiveNightStreakEndingAt(DateTime date, {int maxLookbackDays = 180}) {
     var count = 0;
     var d = _dayOnly(date);
     while (count < maxLookbackDays && instanceForDate(d).category == ShiftTimeCategory.night) {
       count++;
       d = d.subtract(const Duration(days: 1));
     }
-    return count;
+    return (days: count, capped: count >= maxLookbackDays);
   }
 
   /// date를 마지막 날로 하는 연속 근무일수(휴무/미설정이면 0).
   /// ⭐ 2026-09-04 - H1: maxLookbackDays 캡 추가(위 함수와 동일 이유).
-  int consecutiveWorkStreakEndingAt(DateTime date, {int maxLookbackDays = 180}) {
+  /// ⭐ 2026-09-18 - [ConsecutiveStreak] 반환(위 참고).
+  ConsecutiveStreak consecutiveWorkStreakEndingAt(DateTime date, {int maxLookbackDays = 180}) {
     var count = 0;
     var d = _dayOnly(date);
     while (count < maxLookbackDays && instanceForDate(d).isWorkDay) {
       count++;
       d = d.subtract(const Duration(days: 1));
     }
-    return count;
+    return (days: count, capped: count >= maxLookbackDays);
   }
 
   /// date를 마지막 날로 하는 "연속 장시간(>=thresholdMinutes) 근무" 일수.
   /// 출퇴근 시각이 없는 날을 만나면 스트릭이 끊긴 것으로 봄(과대 판정 방지).
   /// ⭐ 2026-09-04 - H1: maxLookbackDays 캡 추가(위 함수와 동일 이유).
-  int consecutiveLongShiftStreakEndingAt(DateTime date, {int thresholdMinutes = 12 * 60, int maxLookbackDays = 180}) {
+  /// ⭐ 2026-09-18 - [ConsecutiveStreak] 반환(위 참고).
+  ConsecutiveStreak consecutiveLongShiftStreakEndingAt(DateTime date, {int thresholdMinutes = 12 * 60, int maxLookbackDays = 180}) {
     var count = 0;
     var d = _dayOnly(date);
     while (count < maxLookbackDays) {
@@ -191,7 +206,7 @@ class ShiftPatternAnalyzer {
       count++;
       d = d.subtract(const Duration(days: 1));
     }
-    return count;
+    return (days: count, capped: count >= maxLookbackDays);
   }
 
   /// date가 속한 "근무 사이 회복구간"을 찾는다 - date 이전(포함) 가장 가까운
