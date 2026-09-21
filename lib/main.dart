@@ -798,15 +798,6 @@ class _MainScreenState extends ConsumerState<MainScreen>
   @override
   Widget build(BuildContext context) {
     final visibleTabIndices = _visibleTabIndices;
-    final calendarTheme = ref.watch(calendarThemeProvider);
-    final showCalendarHeaderAd = _currentIndex == kCalendarTabIndex &&
-        calendarTheme.supportsHeaderBanner;
-    final showBottomAd = _currentIndex == 1 ||
-        (_showConditionTab && _currentIndex == 3) ||
-        (_currentIndex == kCalendarTabIndex && !showCalendarHeaderAd);
-    final showAd = showCalendarHeaderAd || showBottomAd;
-    final headerHeight =
-        AdService.bannerHeight > 48.h ? AdService.bannerHeight : 48.h;
     // ⭐ 방금 이 탭이 꺼졌는데(다른 경로로, 혹은 아직 반영 전 프레임에) 지금
     // 하필 그 탭을 보고 있었다면 안전한 탭(달력)으로 옮김 - DisableTabButton의
     // onDisabled가 이미 즉시 처리하지만, 이건 그 경로를 놓쳤을 때의 안전망.
@@ -844,10 +835,9 @@ class _MainScreenState extends ConsumerState<MainScreen>
         // 뷰가 살아있음) 화면에서 크기·렌더링만 뺀다 - 그래서 탭을 몇 번을 오가도
         // 광고는 앱 시작 시 딱 한 번만 로드되고, 달력 탭으로 돌아오면 다시
         // "짠" 나타나기만 함(재생성 없음).
-        body: Stack(
+        body: Column(
           children: [
-            Positioned.fill(
-              bottom: showBottomAd ? AdService.bannerHeight : 0,
+            Expanded(
               child: Stack(
                 children: [
                   // 탭 화면
@@ -882,19 +872,11 @@ class _MainScreenState extends ConsumerState<MainScreen>
             // 경로를 막는 로직)은 그대로 두고 ScheduleManagementTab/
             // ConditionTab 생성자로 내려보냄(_setupTabsAndPrewarm 참고) -
             // 동작 자체는 안 바뀌고 버튼이 그려지는 위치만 바뀜.
-            Positioned(
-              top: showCalendarHeaderAd
-                  ? MediaQuery.paddingOf(context).top +
-                      (headerHeight - AdService.bannerHeight) / 2
-                  : null,
-              bottom: showCalendarHeaderAd ? null : 0,
-              left: showCalendarHeaderAd ? kCalendarHeaderAdLeft : 0,
-              right: 0,
-              height: AdService.bannerHeight,
-              child: Offstage(
-                offstage: !showAd,
-                child: const BannerAdSlot(),
-              ),
+            Offstage(
+              offstage: _currentIndex != 1 &&
+                  _currentIndex != kCalendarTabIndex &&
+                  !(_showConditionTab && _currentIndex == 3),
+              child: const BannerAdSlot(),
             ),
           ],
         ),

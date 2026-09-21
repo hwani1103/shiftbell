@@ -38,13 +38,6 @@ enum CalendarThemeId {
   diary, // 날짜|근무명 절반씩 나눈 상단 박스 + 아이보리 톤의 절제된 캘린더
 }
 
-extension CalendarThemeAdPlacement on CalendarThemeId {
-  /// underline/editorial은 일정공유·전체근무표·오늘 버튼이 헤더에 남아 있어
-  /// 광고로 덮을 수 없다. 나머지 테마는 해당 버튼이 6번째 행에 있다.
-  bool get supportsHeaderBanner =>
-      this != CalendarThemeId.underline && this != CalendarThemeId.editorial;
-}
-
 extension CalendarThemeIdX on CalendarThemeId {
   // ⭐ "테마 번호 대신 각 테마에 어울리는 이름을 붙여달라"는 요청으로 실험
   // 단계 번호(1/2/4/5/8/9/10번)를 각 디자인 컨셉을 담은 이름으로 교체함.

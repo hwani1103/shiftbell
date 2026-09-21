@@ -76,10 +76,8 @@ class AdService {
       final contentWidthDp = screenWidthDp < kAppMaxContentWidth
           ? screenWidthDp
           : kAppMaxContentWidth.truncate();
-      // 달력 기본 테마에서는 좌측 48dp에 연/월을 세로 표시하고 8dp 간격 뒤
-      // 나머지 폭에 광고를 둔다. 같은 BannerAd를 다른 탭 하단에서도 재사용하므로 요청
-      // 크기는 가장 좁은 실제 슬롯(헤더)을 기준으로 해야 잘리지 않는다.
-      final widthDp = contentWidthDp - kCalendarHeaderAdLeft.truncate();
+      // 세 광고 대상 탭 모두 하단의 동일한 전체 폭 슬롯을 공유한다.
+      final widthDp = contentWidthDp;
       if (widthDp <= 0) {
         debugPrint('⚠️ 화면 폭이 0 이하 - 배너 높이 fallback 사용');
         return;

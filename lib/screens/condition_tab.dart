@@ -703,6 +703,11 @@ class _SleepCategoryAveragesCard extends ConsumerWidget {
     final averages = ref.watch(sleepCategoryAveragesProvider);
     if (averages.isEmpty) return const SizedBox.shrink();
 
+    // ⭐ 막대 공통 스케일 - 권장선(7시간)이 항상 같은 위치에 오도록 고정 하한을 두고,
+    // 그보다 오래 자는 카테고리가 있으면 거기에 맞춰 늘린다(막대가 넘치지 않도록).
+    final maxTotal = averages.map((a) => a.averageMinutes).reduce((a, b) => a > b ? a : b);
+    final scale = maxTotal > _kSleepBarBaseScaleMinutes ? maxTotal : _kSleepBarBaseScaleMinutes;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -715,12 +720,14 @@ class _SleepCategoryAveragesCard extends ConsumerWidget {
               '최근 30일 기록 기준이에요. 표본이 3일 미만인 근무는 안 보여요.',
               style: TextStyle(fontSize: 11.5, color: Colors.black45),
             ),
-            const SizedBox(height: 10),
-            Wrap(
-              spacing: 16,
-              runSpacing: 10,
-              children: [for (final a in averages) _SleepCategoryAverageTile(average: a)],
-            ),
+            const SizedBox(height: 8),
+            const _SleepCategoryLegend(),
+            const SizedBox(height: 12),
+            for (final a in averages)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: _SleepCategoryAverageRow(average: a, scaleMinutes: scale),
+              ),
           ],
         ),
       ),
@@ -728,32 +735,158 @@ class _SleepCategoryAveragesCard extends ConsumerWidget {
   }
 }
 
-class _SleepCategoryAverageTile extends StatelessWidget {
-  final SleepCategoryAverage average;
-  const _SleepCategoryAverageTile({required this.average});
+/// ⭐ 2026-09-21(사용자 요청) - 막대 공통 스케일의 하한(10시간). 권장선(7시간)이
+/// 항상 막대의 70% 지점에 오도록 해서 카테고리끼리 눈으로 바로 비교되게 한다.
+const int _kSleepBarBaseScaleMinutes = 10 * 60;
+
+const Color _kMainSleepBarColor = kAppMainAccent;
+final Color _kNapBarColor = kAppMainAccent.withOpacity(0.32);
+
+String _sleepCategoryRowLabel(ShiftTimeCategory c) =>
+    c == ShiftTimeCategory.off ? '휴무일' : '${c.label} 근무일';
+
+class _SleepCategoryLegend extends StatelessWidget {
+  const _SleepCategoryLegend();
 
   @override
   Widget build(BuildContext context) {
-    final low = average.averageMinutes < ConditionRuleEngine.recommendedSleepMinMinutes;
+    // ⭐ 글꼴 배율을 키운 기기에서 한 줄에 안 들어갈 수 있어 Wrap으로 감쌈(항목별로는
+    // 색칩과 라벨이 떨어지면 안 되므로 각 쌍을 Row로 묶어서 넣는다).
+    return Wrap(
+      spacing: 12,
+      runSpacing: 4,
+      children: [
+        _item(_swatch(_kMainSleepBarColor), '주 수면'),
+        _item(_swatch(_kNapBarColor), '낮잠'),
+        _item(Container(width: 1.5, height: 10, color: Colors.black38), '권장 7시간'),
+      ],
+    );
+  }
+
+  Widget _item(Widget mark, String label) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          mark,
+          const SizedBox(width: 4),
+          Text(label, style: const TextStyle(fontSize: 11, color: Colors.black54)),
+        ],
+      );
+
+  Widget _swatch(Color color) => Container(
+        width: 10,
+        height: 10,
+        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
+      );
+}
+
+/// 한 카테고리 = 라벨/총합 한 줄 + 누적 막대 + 주수면·낮잠 분해 한 줄.
+class _SleepCategoryAverageRow extends StatelessWidget {
+  final SleepCategoryAverage average;
+  final int scaleMinutes;
+  const _SleepCategoryAverageRow({required this.average, required this.scaleMinutes});
+
+  @override
+  Widget build(BuildContext context) {
+    final total = average.averageMinutes;
+    final low = total < ConditionRuleEngine.recommendedSleepMinMinutes;
+    final hasNap = average.averageNapMinutes > 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Text(average.category.label, style: const TextStyle(fontSize: 12.5, color: Colors.black54)),
-            if (low) ...[
-              const SizedBox(width: 3),
-              const Icon(Icons.info_outline, size: 12, color: Color(0xFFB26A00)),
-            ],
+            Expanded(
+              child: Text(
+                _sleepCategoryRowLabel(average.category),
+                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+              ),
+            ),
+            Text(
+              fmtDuration(Duration(minutes: total)),
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: low ? const Color(0xFFB26A00) : Colors.black87,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text('(${average.sampleDays}일)', style: const TextStyle(fontSize: 10.5, color: Colors.black38)),
           ],
         ),
-        const SizedBox(height: 2),
-        Text(
-          '${fmtDuration(Duration(minutes: average.averageMinutes))} 후',
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: low ? const Color(0xFFB26A00) : Colors.black87),
+        const SizedBox(height: 5),
+        _SleepStackedBar(
+          mainMinutes: average.averageMainMinutes,
+          napMinutes: average.averageNapMinutes,
+          scaleMinutes: scaleMinutes,
+          markerMinutes: ConditionRuleEngine.recommendedSleepMinMinutes,
         ),
-        Text('(${average.sampleDays}일 기준)', style: const TextStyle(fontSize: 10.5, color: Colors.black38)),
+        const SizedBox(height: 4),
+        Text(
+          // ⭐ 낮잠이 0이면 줄 자체를 짧게 - "낮잠 0분"이 주간·휴무마다 반복되면 노이즈만 됨.
+          hasNap
+              ? '주 수면 ${fmtDuration(Duration(minutes: average.averageMainMinutes))}'
+                  ' · 낮잠 ${fmtDuration(Duration(minutes: average.averageNapMinutes))}'
+              : '주 수면 ${fmtDuration(Duration(minutes: average.averageMainMinutes))}',
+          style: const TextStyle(fontSize: 11.5, color: Colors.black54),
+        ),
       ],
+    );
+  }
+}
+
+class _SleepStackedBar extends StatelessWidget {
+  final int mainMinutes;
+  final int napMinutes;
+  final int scaleMinutes;
+  final int markerMinutes;
+  const _SleepStackedBar({
+    required this.mainMinutes,
+    required this.napMinutes,
+    required this.scaleMinutes,
+    required this.markerMinutes,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const height = 10.0;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = constraints.maxWidth;
+        double px(int minutes) => scaleMinutes <= 0 ? 0 : (minutes / scaleMinutes * w).clamp(0.0, w);
+        final mainW = px(mainMinutes);
+        final napW = px(napMinutes).clamp(0.0, (w - mainW).clamp(0.0, w));
+        final markerX = px(markerMinutes);
+
+        return SizedBox(
+          height: height,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(height / 2),
+                  ),
+                ),
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(height / 2),
+                child: Row(
+                  children: [
+                    Container(width: mainW, height: height, color: _kMainSleepBarColor),
+                    Container(width: napW, height: height, color: _kNapBarColor),
+                  ],
+                ),
+              ),
+              Positioned(
+                left: (markerX - 0.75).clamp(0.0, w),
+                child: Container(width: 1.5, height: height, color: Colors.black38),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

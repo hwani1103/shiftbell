@@ -109,6 +109,30 @@ class SleepDetectionReceiver : BroadcastReceiver() {
         // 판단값 - 근거자료 값 아님). 이보다 짧으면 자동 감지 후보를 폐기한다.
         private const val MIN_MAIN_SLEEP_MINUTES = 120L
 
+        // ⭐ 2026-09-21(사용자 결정) - 야간 출근 전 낮잠은 보통 1~2시간이라 위 2시간
+        // 기준을 그대로 쓰면 **잡혀도 전부 폐기된다**(실제로 그래서 연속 야간의 출근 전
+        // 수면이 한 번도 자동 기록되지 않았음). 낮잠창에서만 기준을 따로 둔다.
+        // 20분 샘플링 + "2회 연속 꺼짐" 규칙상 최소 검출 가능치가 ~40분이라 그 값에 맞춤.
+        private const val MIN_PRE_SHIFT_NAP_MINUTES = 40L
+
+        /**
+         * 이 후보에 적용할 인정 최소 길이. 후보가 어느 창에서 생겼는지는 prefs/DB에
+         * 저장하지 않고 시각으로 다시 유도한다(창끼리 겹치지 않으므로 복원 가능).
+         *
+         * ⚠️ 시작 시각 하나만 보면 안 된다 - 후보 시작은 "첫 꺼짐 샘플"로 최대 20분
+         * 소급되므로 낮잠창 경계(예: 15:00) 직전(14:55)으로 밀려날 수 있고, 그러면
+         * 실제로는 낮잠인데 메인 잠 기준(2시간)에 걸려 다시 폐기된다(이번 작업에서
+         * 고치려던 바로 그 증상). 시작·종료 중 **한쪽이라도** 낮잠창에 들면 낮잠
+         * 기준을 쓴다 - 두 기준 중 느슨한 쪽을 택하는 방향이라, 틀려도 "짧은 기록이
+         * 하나 남고 사용자가 거부"일 뿐 "실제 수면이 조용히 사라짐"은 안 생긴다.
+         */
+        private fun minCandidateMinutes(context: Context, startMillis: Long, endMillis: Long): Long {
+            val nap = SleepScheduleResolver.WindowKind.PRE_SHIFT_NAP
+            val inNapWindow = SleepScheduleResolver.computeWindowForNow(context, startMillis)?.kind == nap ||
+                SleepScheduleResolver.computeWindowForNow(context, endMillis)?.kind == nap
+            return if (inNapWindow) MIN_PRE_SHIFT_NAP_MINUTES else MIN_MAIN_SLEEP_MINUTES
+        }
+
         private fun isoFormat(millis: Long): String =
             SimpleDateFormat(ISO_FORMAT, Locale.US).format(Date(millis))
 
@@ -269,9 +293,11 @@ class SleepDetectionReceiver : BroadcastReceiver() {
                 // 켜진 것뿐일 가능성이 커서, 기록으로 남기지 않고 버린다(위젯의
                 // MIN_MEANINGFUL_MINUTES와 같은 취지지만 자동 감지는 "메인 잠
                 // 전용"이라 기준을 훨씬 크게 잡음 - SleepWidgetActionReceiver 참고).
-                if (durationMinutes < MIN_MAIN_SLEEP_MINUTES) {
+                // ⭐ 2026-09-21 - 기준이 창 종류에 따라 다름(메인 잠 2시간 / 출근 전 낮잠 40분).
+                val minMinutes = minCandidateMinutes(context, startMillis, endMillis)
+                if (durationMinutes < minMinutes) {
                     db.delete("sleep_records", "id = ?", arrayOf(id.toString()))
-                    Log.d(TAG, "🗑️ 메인 수면 최소 길이(2시간) 미만(${durationMinutes}분) - 후보 폐기(id=$id)")
+                    Log.d(TAG, "🗑️ 최소 길이(${minMinutes}분) 미만(${durationMinutes}분) - 후보 폐기(id=$id)")
                     return
                 }
 

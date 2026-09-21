@@ -36,8 +36,6 @@ import '../providers/friend_provider.dart';
 import 'friend_list_screen.dart';
 import '../utils/friend_open_util.dart';
 import '../utils/blocking_progress.dart';
-import '../constants/layout_limits.dart';
-import '../services/ad_service.dart';
 
 // ⭐ 공휴일 판정 로직은 utils/holiday_util.dart로 이동함 (friend_calendar_view.dart도
 // 똑같은 공휴일 표시가 필요해져서 공용화 - 두 파일 이름만 다르게 감싸서 기존 호출부
@@ -425,7 +423,6 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
         }
 
         final theme = ref.watch(calendarThemeProvider);
-        final usesHeaderBanner = theme.supportsHeaderBanner;
         final reclaimsSixthRow = _themeReclaimsSixthRow(theme);
         // ⭐ 2026-09-05 - 6번째 줄 마지막 3칸(목/금/토)에 일정공유/전체 조 근무표/
         // 오늘 버튼(다이어리 + 범례 없는 나머지 5개 테마, _themeReclaimsSixthRowButtons
@@ -479,58 +476,44 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                           // 있었지만 "흰 글씨 on 흰 배경"이라 안 보였던 것. 요일행
                           // (dowBuilder)은 이미 자기 배경을 스스로 그려서 문제 없었음.
                           Padding(
-                            padding: usesHeaderBanner
-                                ? EdgeInsets.zero
-                                : EdgeInsets.symmetric(horizontal: 6.w),
+                            padding: EdgeInsets.symmetric(horizontal: 6.w),
                             child: Container(
                               color: _themeHeaderBackground(theme),
                               child: SizedBox(
-                                height: AdService.bannerHeight > 48.h
-                                    ? AdService.bannerHeight
-                                    : 48.h,
+                                height: 48.h,
                                 child: Padding(
-                                  padding: usesHeaderBanner
-                                      ? EdgeInsets.zero
-                                      : EdgeInsets.symmetric(
-                                          horizontal: 8.w, vertical: 4.h),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 8.w, vertical: 4.h),
                                   child: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      if (usesHeaderBanner)
-                                        _isMultiSelectMode
-                                            ? _buildCompactSelectionHeader()
-                                            : _buildCompactAdHeaderTitle(theme)
-                                      else
-                                        _isMultiSelectMode
-                                            ? Row(
-                                                children: [
-                                                  IconButton(
-                                                    icon: Icon(Icons.close,
-                                                        size: 20.sp),
-                                                    onPressed:
-                                                        _exitMultiSelectMode,
-                                                    padding: EdgeInsets.zero,
-                                                    constraints:
-                                                        BoxConstraints(),
-                                                  ),
-                                                  SizedBox(width: 8.w),
-                                                  Text(
-                                                    context.l10n
-                                                        .calendarNSelected(
-                                                            _selectedDates
-                                                                .length),
-                                                    style: TextStyle(
-                                                        fontSize: 16.sp,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ],
-                                              )
-                                            : _buildThemedHeaderTitle(theme),
-                                      if (usesHeaderBanner)
-                                        const Expanded(child: SizedBox.shrink())
-                                      else if (!_isMultiSelectMode)
+                                      _isMultiSelectMode
+                                          ? Row(
+                                              children: [
+                                                IconButton(
+                                                  icon: Icon(Icons.close,
+                                                      size: 20.sp),
+                                                  onPressed:
+                                                      _exitMultiSelectMode,
+                                                  padding: EdgeInsets.zero,
+                                                  constraints: BoxConstraints(),
+                                                ),
+                                                SizedBox(width: 8.w),
+                                                Text(
+                                                  context.l10n
+                                                      .calendarNSelected(
+                                                          _selectedDates
+                                                              .length),
+                                                  style: TextStyle(
+                                                      fontSize: 16.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ],
+                                            )
+                                          : _buildThemedHeaderTitle(theme),
+                                      if (!_isMultiSelectMode)
                                         _buildThemedHeaderButtons(
                                             theme, schedule),
                                     ],
@@ -2330,56 +2313,6 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
           ]),
         );
     }
-  }
-
-  Widget _buildCompactAdHeaderTitle(CalendarThemeId theme) {
-    final isKorean = Localizations.localeOf(context).languageCode == 'ko';
-    final foreground = theme == CalendarThemeId.boldGrid
-        ? Colors.white
-        : Theme.of(context).colorScheme.onSurface;
-    final month = isKorean
-        ? '${_focusedDay.month}월'
-        : DateFormat.MMM('en').format(_focusedDay);
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _showMonthYearPicker,
-      child: SizedBox(
-        width: kCalendarHeaderLeadingWidth,
-        height: double.infinity,
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            '${_focusedDay.year}\n$month',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12.sp,
-              height: 1.05,
-              fontWeight: FontWeight.w800,
-              color: foreground,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompactSelectionHeader() {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _exitMultiSelectMode,
-      child: SizedBox(
-        width: kCalendarHeaderLeadingWidth,
-        height: double.infinity,
-        child: Center(
-          child: Text(
-            '×\n${_selectedDates.length}',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 13.sp, height: 1.0, fontWeight: FontWeight.w800),
-          ),
-        ),
-      ),
-    );
   }
 
   // ⭐ 2026-09-05 - 예전엔 여기서 "친구가 있으면 헤더 버튼 끝에 아이콘 하나

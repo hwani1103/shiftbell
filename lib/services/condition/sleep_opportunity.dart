@@ -32,15 +32,42 @@
 //    뒤"라서 그 사이 내내(며칠간) 20분마다 계속 깨어나 샘플링하는 낭비를 막음.
 // 4. 근무 중 짧은 낮잠/쪽잠은 이 파일이 계산하는 창 안에 절대 포함되지 않는다 -
 //    그런 수면은 오직 위젯 수동 기록으로만 남긴다(자동 감지는 메인 잠 전용).
+//
+// ⭐ 2026-09-21 재설계(사용자 결정) - 위 4번 원칙에 **예외 하나**를 둔다:
+// **야간 근무 출근 전 낮잠창**(preShiftNapWindowFor). 계기는 사용자 실사용 신고 -
+// 연속 야간(야간1·야간2)에서 야간2 출근 전에 자는 잠이 한 번도 자동 기록되지
+// 않았는데, 원인이 3중이었다.
+//   ⑴ 야간1 회복창이 9시간 캡(06:00~15:00)으로 이미 닫힘 → 샘플링 알람 자체가 안 돎
+//   ⑵ 설령 열려 있어도 "창당 기록 1건" 규칙(아침 회복수면이 이미 그 창을 씀)에 막힘
+//   ⑶ 낮잠은 보통 1~2시간이라 자동 후보 최소 2시간 기준에서 폐기됨
+// 그래서 이 구간만 별도 창(kind: preShiftNap)으로 분리하고 최소 길이도 따로 둔다.
+// **근무 "중"** 낮잠은 여전히 자동 감지 대상이 아니다(4번 원칙 그대로).
 
 import 'shift_pattern_analyzer.dart';
 import 'shift_time_category.dart';
 
+/// ⭐ 2026-09-21(사용자 결정) - 창의 종류. 예전엔 창이 한 종류(메인 잠)뿐이라
+/// 구분이 필요 없었는데, "야간 출근 전 낮잠"을 자동 감지 대상에 넣으면서
+/// **인정 최소 길이가 달라졌다**(메인 잠 2시간 vs 낮잠 40분). 감지 리시버가
+/// 후보를 닫을 때 이 값으로 기준을 고른다(`SleepDetectionReceiver`).
+enum SleepWindowKind {
+  /// 퇴근 후 회복수면 / 밤 정상 취침 - 최소 2시간
+  mainSleep,
+
+  /// 야간 근무 출근 전에 미리 자는 잠 - 보통 1~2시간이라 기준이 따로 필요
+  preShiftNap,
+}
+
 class SleepOpportunityWindow {
   final DateTime start;
   final DateTime end;
+  final SleepWindowKind kind;
 
-  const SleepOpportunityWindow({required this.start, required this.end});
+  const SleepOpportunityWindow({
+    required this.start,
+    required this.end,
+    this.kind = SleepWindowKind.mainSleep,
+  });
 
   bool contains(DateTime time) => !time.isBefore(start) && time.isBefore(end);
 }
@@ -53,6 +80,11 @@ const int kFlatSleepStartHour = 21;
 
 /// 창의 최대 길이(시간) - 다음 근무 시작이 이보다 늦어도 여기서 컷.
 const int kSleepTrackingWindowMaxHours = 9;
+
+/// ⭐ 2026-09-21 - 야간 출근 전 낮잠 창을 "출근 몇 시간 전"부터 열지.
+/// recovery_briefing_engine.dart가 낮잠을 권하는 상한(_kNapMaxLead)과 같은 값 -
+/// 앱이 "지금 낮잠 자라"고 말하는 구간과 실제로 그 낮잠을 잡는 구간을 일치시킨다.
+const int kPreShiftNapLeadHours = 6;
 
 DateTime _dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -103,39 +135,104 @@ SleepOpportunityWindow? sleepOpportunityWindowFor(
   //    자동 감지가 통째로 멈추는 버그였음. "이미 시작됐는지"를 먼저 따지도록
   //    고침 - `SleepScheduleResolver.kt`의 `computeWindowForNow`도 동일하게
   //    고칠 것(Dart/Kotlin 알고리즘 동일 유지 원칙).
-  SleepOpportunityWindow? activeWindow;
-  SleepOpportunityWindow? earliestUpcoming;
+  // ⭐ 2026-09-21 재구성(사용자 결정) - 예전엔 "야간 회복창을 먼저 보고, 하나도
+  // 없을 때만 플랫창"이라는 2단 폴백이었다. 여기에 출근 전 낮잠창이 추가되면서
+  // 그 구조가 깨진다: 내일이 야간이면 "내일 13시 낮잠창"이 upcoming 후보로 잡혀
+  // 먼저 반환되는 바람에, **지금 실제로 자고 있는 오늘 밤 플랫창(활성)**이
+  // 통째로 무시되는 버그가 생긴다(리뷰 중 발견). 그래서 세 종류를 전부 후보로
+  // 모은 뒤 "활성 창 우선, 없으면 가장 이른 예정 창"이라는 하나의 규칙으로만
+  // 고른다 - B1 수정(활성 우선)의 원래 취지를 모든 창 종류로 확장한 것.
+  final candidates = <SleepOpportunityWindow>[];
+
+  // (a) 야간 근무 회복창 - 종료 1시간 전부터
   for (var offset = 0; offset <= 2; offset++) {
     final d = today.subtract(Duration(days: offset));
     final inst = analyzer.instanceForDate(d);
     if (inst.isWorkDay && inst.category == ShiftTimeCategory.night && inst.end != null) {
       final windowStart = inst.end!.subtract(const Duration(minutes: kNightShiftPreEndMinutes));
-      final windowEnd = _cappedEnd(analyzer, afterDate: d, from: windowStart);
-      if (!now.isBefore(windowEnd)) continue; // 이미 끝난 창 - 후보 아님
-
-      if (!now.isBefore(windowStart)) {
-        // 지금 이미 이 창 안(진행 중) - 정상 스케줄에서는 활성 창이 동시에
-        // 두 개일 수 없지만, 방어적으로 더 늦게 시작한(더 최신인) 쪽을 택함.
-        if (activeWindow == null || windowStart.isAfter(activeWindow.start)) {
-          activeWindow = SleepOpportunityWindow(start: windowStart, end: windowEnd);
-        }
-      } else {
-        // 아직 시작 전 - 가장 이르게 시작하는 후보만 남겨둠(활성 창이 끝내
-        // 없을 때의 폴백용).
-        if (earliestUpcoming == null || windowStart.isBefore(earliestUpcoming.start)) {
-          earliestUpcoming = SleepOpportunityWindow(start: windowStart, end: windowEnd);
-        }
-      }
+      candidates.add(SleepOpportunityWindow(
+        start: windowStart,
+        end: _cappedEnd(analyzer, afterDate: d, from: windowStart),
+      ));
     }
   }
-  if (activeWindow != null) return activeWindow;
-  if (earliestUpcoming != null) return earliestUpcoming;
 
+  // (b) 야간 출근 전 낮잠창(2026-09-21 신설)
+  for (var offset = -1; offset <= 1; offset++) {
+    final w = preShiftNapWindowFor(analyzer, today.add(Duration(days: offset)));
+    if (w != null) candidates.add(w);
+  }
+
+  // (c) 플랫창(21시~) - 아래에서 계산해 같은 후보 목록에 넣는다
+  final flat = _flatWindow(analyzer, now, today);
+  if (flat != null) candidates.add(flat);
+
+  SleepOpportunityWindow? activeWindow;
+  SleepOpportunityWindow? earliestUpcoming;
+  for (final w in candidates) {
+    if (!now.isBefore(w.end)) continue; // 이미 끝난 창 - 후보 아님
+    if (!now.isBefore(w.start)) {
+      // 지금 이미 이 창 안(진행 중) - 정상 스케줄에서는 활성 창이 동시에
+      // 두 개일 수 없지만, 방어적으로 더 늦게 시작한(더 최신인) 쪽을 택함.
+      if (activeWindow == null || w.start.isAfter(activeWindow.start)) activeWindow = w;
+    } else {
+      // 아직 시작 전 - 가장 이르게 시작하는 후보만 남겨둠.
+      if (earliestUpcoming == null || w.start.isBefore(earliestUpcoming.start)) earliestUpcoming = w;
+    }
+  }
+  return activeWindow ?? earliestUpcoming;
+}
+
+/// ⭐ 2026-09-21 신설(사용자 결정) - **야간 근무 출근 전 낮잠창**. [d]에 야간 근무가
+/// 배정돼 있으면 `[출근 - kPreShiftNapLeadHours시간, 출근]` 구간을 연다.
+///
+/// 예전엔 자동 감지가 "메인 잠 전용"이라 이 구간이 통째로 사각지대였다 - 연속
+/// 야간(야간1·야간2)에서 야간2 출근 전에 자는 잠은 ⑴ 야간1 회복창이 9시간 캡으로
+/// 이미 닫혀 있고 ⑵ 설령 열려 있어도 "창당 기록 1건" 규칙에 막히고 ⑶ 2시간 미만이라
+/// 폐기돼서, 영원히 자동으로 안 잡혔다(사용자 신고). 그래서 이 구간만 별도 창으로
+/// 분리하고, 인정 최소 길이도 따로 둔다([SleepWindowKind.preShiftNap]).
+///
+/// **어제도 야간이면** 그 회복창(메인 잠)이 먼저 쓰이도록 그 창이 끝난 뒤부터 연다 -
+/// 두 창이 겹치면 같은 잠이 양쪽 후보가 되어 "창당 1건" 규칙이 어느 쪽을 막을지
+/// 불안정해진다. 예) 야간1 19~07시 / 야간2 19~07시
+///   회복창 06:00~15:00(9시간 캡) → 낮잠창 15:00~19:00
+/// 어제가 야간이 아니면(야간 첫날) 그냥 13:00~19:00.
+SleepOpportunityWindow? preShiftNapWindowFor(ShiftPatternAnalyzer analyzer, DateTime d) {
+  final day = _dayOnly(d);
+  final inst = analyzer.instanceForDate(day);
+  if (!inst.isWorkDay || inst.category != ShiftTimeCategory.night || inst.start == null) return null;
+
+  var start = inst.start!.subtract(const Duration(hours: kPreShiftNapLeadHours));
+  final prevDay = day.subtract(const Duration(days: 1));
+  final prev = analyzer.instanceForDate(prevDay);
+  if (prev.isWorkDay && prev.category == ShiftTimeCategory.night && prev.end != null) {
+    final prevStart = prev.end!.subtract(const Duration(minutes: kNightShiftPreEndMinutes));
+    final prevEnd = _cappedEnd(analyzer, afterDate: prevDay, from: prevStart);
+    if (prevEnd.isAfter(start)) start = prevEnd;
+  }
+  if (!start.isBefore(inst.start!)) return null; // 남는 구간이 없음(회복창이 출근까지 꽉 참)
+  return SleepOpportunityWindow(
+    start: start,
+    end: inst.start!,
+    kind: SleepWindowKind.preShiftNap,
+  );
+}
+
+/// "일상적인 수면 시간대"(21시~) 플랫창. **야간 근무일에는 만들지 않는다** - 그날
+/// 21시는 이미 근무 중이라(야간 시작은 17:00~04:59) 창을 열면 근무 중 수면을 잡는다.
+/// 야간 쪽은 (a) 회복창과 (b) 낮잠창이 전담한다.
+SleepOpportunityWindow? _flatWindow(ShiftPatternAnalyzer analyzer, DateTime now, DateTime today) {
   // 2) 그 외 - "일상적인 수면 시간대"(21시~) 플랫 규칙. now가 자정~06시 사이면
   //    어젯밤 21시가 앵커, 그 외(06시~21시, 21시~자정)면 오늘 21시가 앵커 -
   //    이렇게 하면 자정을 넘긴 새벽 시각도, 아직 오늘 밤을 기다리는 낮 시각도,
   //    이미 시작된 오늘 밤 21시 이후도 전부 올바르게 계산된다.
   final anchorDay = now.hour < 6 ? today.subtract(const Duration(days: 1)) : today;
+  final anchorInstEarly = analyzer.instanceForDate(anchorDay);
+  // ⭐ 2026-09-21 - 앵커 날짜가 야간 근무일이면 플랫창을 아예 만들지 않는다.
+  // 예전엔 플랫창이 "야간 후보가 하나도 없을 때만" 쓰이는 폴백이라 이 경우가
+  // 닿지 않았는데, 이제 세 창을 동등하게 비교하므로 가드가 필요하다 - 없으면
+  // 야간 근무일 21시(=이미 근무 중)에 창이 열려 근무 중 수면을 잡는다.
+  if (anchorInstEarly.isWorkDay && anchorInstEarly.category == ShiftTimeCategory.night) return null;
   var flatStart = DateTime(anchorDay.year, anchorDay.month, anchorDay.day, kFlatSleepStartHour);
   // ⭐ 2026-09-06(사용자 논의) - 21시가 "그 외"(주간/오후/휴무) 전체에 무조건
   // 적용되다 보니, 21시를 넘겨 끝나는 주간/오후 근무(예: 12시간 주간 10~22시)
@@ -145,12 +242,8 @@ SleepOpportunityWindow? sleepOpportunityWindowFor(
   // 주간/오후에도 일관되게 적용하는 것(하드코딩된 시각을 늘리는 게 아니라,
   // 21시와 실제 종료시각 중 "더 늦은 쪽"을 취하는 것 - 휴무일처럼 근무 자체가
   // 없는 날은 비교할 종료시각이 없으니 그대로 21시).
-  final anchorInst = analyzer.instanceForDate(anchorDay);
-  if (anchorInst.isWorkDay &&
-      anchorInst.category != ShiftTimeCategory.night &&
-      anchorInst.end != null &&
-      anchorInst.end!.isAfter(flatStart)) {
-    flatStart = anchorInst.end!;
+  if (anchorInstEarly.end != null && anchorInstEarly.end!.isAfter(flatStart)) {
+    flatStart = anchorInstEarly.end!;
   }
   final flatEnd = _cappedEnd(analyzer, afterDate: anchorDay, from: flatStart);
   if (now.isBefore(flatEnd)) {

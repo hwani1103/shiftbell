@@ -76,4 +76,71 @@ void main() {
     final averages = buildSleepCategoryAverages(records: records, analyzer: analyzer, now: now);
     expect(averages, isEmpty, reason: '표본 2건은 최소 기준(3일) 미만이라 아무 카테고리도 안 보여야 함');
   });
+
+  // ⭐ 2026-09-21(사용자 요청) - 합계 하나였던 것을 주 수면/낮잠으로 쪼갠 것의 회귀.
+  // 연속 야간에서 "아침 회복수면(주 수면) + 출근 전 낮잠"이 각각 제 칸으로 가야 한다.
+  test('연속 야간 - 아침 회복수면은 주 수면 평균, 출근 전 낮잠은 낮잠 평균으로 나뉜다', () {
+    final start = DateTime(2026, 3, 1);
+    final schedule = ShiftSchedule(
+      isRegular: true,
+      pattern: [_kNight, _kNight, _kOff, _kOff],
+      todayIndex: 0,
+      startDate: start,
+      shiftTypes: [_kNight, _kOff],
+    );
+    final times = {_kNight: const ShiftTimeRange(shiftName: _kNight, startMinutes: 19 * 60, endMinutes: 7 * 60)};
+    final analyzer = ShiftPatternAnalyzer(schedule: schedule, shiftTimes: times);
+
+    // 4일 주기(야간·야간·휴무·휴무)를 7바퀴. 각 야간 근무일마다:
+    //   다음날 08시 회복수면 5시간(→ 그 야간 근무일의 주 수면)
+    //   다음날 15시 낮잠 90분(→ 다음날이 야간이면 그 다음날의 출근 전 낮잠)
+    final records = <SleepRecord>[];
+    for (var cycle = 0; cycle < 7; cycle++) {
+      final night2 = start.add(Duration(days: cycle * 4 + 1)); // 두 번째 야간일
+      // 야간1의 회복수면(야간2날 08시) + 야간2의 출근 전 낮잠(야간2날 15시)
+      records.add(_sleep(night2.add(const Duration(hours: 8)), 300));
+      records.add(_sleep(night2.add(const Duration(hours: 15)), 90));
+    }
+
+    final averages = buildSleepCategoryAverages(
+      records: records,
+      analyzer: analyzer,
+      now: start.add(const Duration(days: 29)),
+    );
+    final night = averages.firstWhere((a) => a.category == ShiftTimeCategory.night);
+
+    expect(night.averageMainMinutes, greaterThan(0), reason: '아침 회복수면은 주 수면 쪽에 잡혀야 함');
+    expect(night.averageNapMinutes, greaterThan(0), reason: '출근 전 낮잠은 낮잠 쪽에 잡혀야 함');
+    expect(night.averageMinutes, night.averageMainMinutes + night.averageNapMinutes,
+        reason: '합계는 두 값의 합과 정확히 같아야 함(같은 표본 수로 나누므로)');
+  });
+
+  test('낮잠이 없는 카테고리는 낮잠 평균이 0(낮잠 있는 날만 세어 부풀리지 않는다)', () {
+    final start = DateTime(2026, 3, 1);
+    final schedule = ShiftSchedule(
+      isRegular: true,
+      pattern: [_kOff],
+      todayIndex: 0,
+      startDate: start,
+      shiftTypes: [_kOff],
+    );
+    final analyzer = ShiftPatternAnalyzer(schedule: schedule, shiftTimes: const {});
+
+    final records = <SleepRecord>[];
+    for (var i = 1; i <= 10; i++) {
+      records.add(_sleep(start.add(Duration(days: i, hours: 23)), 420)); // 매일 밤 7시간만
+    }
+    // 하루만 낮잠 2시간을 추가 - 이 하루 때문에 "낮잠 평균 2시간"이 되면 안 된다.
+    records.add(_sleep(start.add(const Duration(days: 3, hours: 14)), 120));
+
+    final averages = buildSleepCategoryAverages(
+      records: records,
+      analyzer: analyzer,
+      now: start.add(const Duration(days: 12)),
+    );
+    final off = averages.firstWhere((a) => a.category == ShiftTimeCategory.off);
+    expect(off.averageNapMinutes, lessThan(120),
+        reason: '낮잠이 없던 날도 표본에 포함(0분)돼야 평균이 부풀려지지 않음');
+    expect(off.averageNapMinutes, greaterThan(0));
+  });
 }

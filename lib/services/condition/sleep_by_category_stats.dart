@@ -24,15 +24,29 @@ const int kMinSampleDaysForCategoryAverage = 3;
 /// 오래된 데이터까지 섞이는 걸 피할 수 있는 절충(연구값 아닌 화면 구성용 관례값).
 const int kCategoryStatsLookbackDays = 30;
 
+/// ⭐ 2026-09-21(사용자 요청) - 주 수면과 낮잠을 나눠서 보여주기 위해 합계 하나에서
+/// 두 값으로 쪼갬. 야간 근무자는 "주 수면이 짧고 그 부족분을 출근 전 낮잠으로 메운다"는
+/// 패턴이 실제로 나타나는데, 합계 하나만 보면 그게 안 보였다.
+///
+/// ⚠️ 두 값을 각각 평균 낸 뒤 더한 값은 "합계를 평균 낸 값"과 정확히 같다(둘 다 같은
+/// [sampleDays]로 나누므로) - 그래서 [averageMinutes]는 파생값으로 둬도 안전하다.
+/// 낮잠이 없던 날도 표본에 포함된다(그날 낮잠 = 0분) - 낮잠이 있는 날만 세면 평균이
+/// 실제보다 부풀려진다.
 class SleepCategoryAverage {
   final ShiftTimeCategory category;
-  final int averageMinutes;
+  final int averageMainMinutes;
+  final int averageNapMinutes;
   final int sampleDays;
-  const SleepCategoryAverage({required this.category, required this.averageMinutes, required this.sampleDays});
-}
 
-int _slotTotal(SleepDaySlots s) =>
-    (s.mainSleep?.durationMinutes ?? 0) + (s.nap1?.durationMinutes ?? 0) + (s.nap2?.durationMinutes ?? 0);
+  const SleepCategoryAverage({
+    required this.category,
+    required this.averageMainMinutes,
+    required this.averageNapMinutes,
+    required this.sampleDays,
+  });
+
+  int get averageMinutes => averageMainMinutes + averageNapMinutes;
+}
 
 /// [now] 기준 최근 [lookbackDays]일(오늘은 아직 끝나지 않아 제외 - recovery_briefing_
 /// engine.dart의 최근 7일 평균 수면과 동일 관례)의 수면을, 그 수면이 "귀속된" 날짜
@@ -52,19 +66,27 @@ List<SleepCategoryAverage> buildSleepCategoryAverages({
 
   final slots = buildSleepDaySlots(records: records, from: from, to: to, analyzer: analyzer);
 
-  final totalsByCategory = <ShiftTimeCategory, List<int>>{};
+  final byCategory = <ShiftTimeCategory, List<({int main, int nap})>>{};
   for (final slot in slots) {
-    final total = _slotTotal(slot);
-    if (total <= 0) continue;
+    final main = slot.mainSleep?.durationMinutes ?? 0;
+    final nap = (slot.nap1?.durationMinutes ?? 0) + (slot.nap2?.durationMinutes ?? 0);
+    if (main + nap <= 0) continue; // 기록이 아예 없는 날은 표본에서 제외(0시간으로 세지 않음)
     final category = analyzer.instanceForDate(slot.date).category;
-    (totalsByCategory[category] ??= []).add(total);
+    (byCategory[category] ??= []).add((main: main, nap: nap));
   }
 
   final result = <SleepCategoryAverage>[];
-  for (final entry in totalsByCategory.entries) {
-    if (entry.value.length < minSampleDays) continue;
-    final avg = (entry.value.reduce((a, b) => a + b) / entry.value.length).round();
-    result.add(SleepCategoryAverage(category: entry.key, averageMinutes: avg, sampleDays: entry.value.length));
+  for (final entry in byCategory.entries) {
+    final days = entry.value.length;
+    if (days < minSampleDays) continue;
+    final mainTotal = entry.value.fold<int>(0, (sum, e) => sum + e.main);
+    final napTotal = entry.value.fold<int>(0, (sum, e) => sum + e.nap);
+    result.add(SleepCategoryAverage(
+      category: entry.key,
+      averageMainMinutes: (mainTotal / days).round(),
+      averageNapMinutes: (napTotal / days).round(),
+      sampleDays: days,
+    ));
   }
 
   // 화면 표시 순서 - 근무 흐름 순(주간→오후→야간)으로 보여주고 휴무를 마지막에.
