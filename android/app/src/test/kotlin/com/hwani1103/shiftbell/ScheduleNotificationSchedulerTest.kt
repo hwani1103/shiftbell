@@ -10,6 +10,7 @@
 package com.hwani1103.shiftbell
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,6 +19,17 @@ import java.util.Calendar
 
 @RunWith(RobolectricTestRunner::class)
 class ScheduleNotificationSchedulerTest {
+
+    @Test
+    fun `먼 미래 일정도 별도 기간 제한 없이 계산한다`() {
+        val millis = ScheduleNotificationScheduler.triggerMillisFor("2045-12-31", 23 * 60 + 50, 30)
+        assertNotNull(millis)
+        val expected = Calendar.getInstance().apply {
+            set(2045, Calendar.DECEMBER, 31, 23, 20, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+        assertEquals(expected, millis)
+    }
 
     private fun calendarAt(date: String, hour: Int, minute: Int): Calendar =
         Calendar.getInstance().apply {

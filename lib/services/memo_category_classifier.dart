@@ -30,7 +30,8 @@ import 'package:flutter/services.dart' show rootBundle;
 /// 동일한 키 체계.
 class MemoCategoryPrediction {
   final String categoryKey;
-  final String method; // 디버깅/로그용 - 'tier1_immediate_family', 'ml', 'ml_low_confidence_fallback' 등
+  final String
+      method; // 디버깅/로그용 - 'tier1_immediate_family', 'ml', 'ml_low_confidence_fallback' 등
   final double? confidence;
   final double? margin;
 
@@ -83,15 +84,12 @@ class MemoCategoryClassifier {
       vocab[vocabList[i]] = i;
     }
     _vocab = vocab;
-    _idf =
-        (json['idf'] as List).map((e) => (e as num).toDouble()).toList();
+    _idf = (json['idf'] as List).map((e) => (e as num).toDouble()).toList();
     _coef = (json['coef'] as List)
-        .map((row) =>
-            (row as List).map((e) => (e as num).toDouble()).toList())
+        .map((row) => (row as List).map((e) => (e as num).toDouble()).toList())
         .toList();
-    _intercept = (json['intercept'] as List)
-        .map((e) => (e as num).toDouble())
-        .toList();
+    _intercept =
+        (json['intercept'] as List).map((e) => (e as num).toDouble()).toList();
     _classesKey = (json['classes_key'] as List).cast<String>();
     _loaded = true;
   }
@@ -109,8 +107,7 @@ class MemoCategoryClassifier {
 
     final routed = _MemoKeywordRouter.route(trimmed);
     if (routed != null) {
-      return MemoCategoryPrediction(
-          categoryKey: routed.$1, method: routed.$2);
+      return MemoCategoryPrediction(categoryKey: routed.$1, method: routed.$2);
     }
 
     if (!_loaded) {
@@ -235,7 +232,8 @@ const List<String> _kCommonParticles = [
 // (ml/keyword_router.py의 RUNNING_KEYWORDS 주석 근처 설명 참고).
 bool _particleSuffixOk(String rest) {
   if (rest.isEmpty) return true;
-  final sorted = [..._kCommonParticles]..sort((a, b) => b.length.compareTo(a.length));
+  final sorted = [..._kCommonParticles]
+    ..sort((a, b) => b.length.compareTo(a.length));
   for (final p in sorted) {
     if (rest.startsWith(p) && _particleSuffixOk(rest.substring(p.length))) {
       return true;
@@ -245,8 +243,21 @@ bool _particleSuffixOk(String rest) {
 }
 
 const List<String> _kImmediateFamily = [
-  '엄마', '어머니', '아빠', '아버지', '아들', '딸', '남편', '아내', '배우자',
-  '할머니', '할아버지', '부모님', '친정엄마', '친정아빠', '아이',
+  '엄마',
+  '어머니',
+  '아빠',
+  '아버지',
+  '아들',
+  '딸',
+  '남편',
+  '아내',
+  '배우자',
+  '할머니',
+  '할아버지',
+  '부모님',
+  '친정엄마',
+  '친정아빠',
+  '아이',
 ];
 
 // "가족"은 "온가족/전가족"처럼 복합어로도 자주 쓰여서 contains(부분일치)로 따로 잡음.
@@ -257,20 +268,60 @@ const List<String> _kImmediateFamilyContains = ['가족', '본가'];
 // "형/누나/언니/오빠/동생"은 일부러 뺐다 - 혈연이 아니라 친한 사람을 부르는
 // 호칭으로도 매우 흔히 쓰여서(ml/keyword_router.py 참고), ML+margin 판단에 맡김.
 const List<String> _kExtendedFamily = [
-  '며느리', '사위', '시댁', '처가',
-  '장인', '장모', '처남', '처형', '처제', '매형', '매부', '동서', '시누이',
-  '형수', '제수', '올케', '고모', '이모', '삼촌', '외삼촌', '조카', '사돈',
-  '시아버지', '시어머니', '시부모님', '손자', '손녀', '사촌',
+  '며느리',
+  '사위',
+  '시댁',
+  '처가',
+  '장인',
+  '장모',
+  '처남',
+  '처형',
+  '처제',
+  '매형',
+  '매부',
+  '동서',
+  '시누이',
+  '형수',
+  '제수',
+  '올케',
+  '고모',
+  '이모',
+  '삼촌',
+  '외삼촌',
+  '조카',
+  '사돈',
+  '시아버지',
+  '시어머니',
+  '시부모님',
+  '손자',
+  '손녀',
+  '사촌',
 ];
 
 // ⭐ 2026-09-01(실사용 문장 테스트) - "팀원"도 "동료"와 동일 개념인데 빠져있어서
 // 추가("점심시간에 팀원들이랑 순대국밥집 가기"가 사교로 안 잡히던 걸 발견).
 const List<String> _kAcquaintanceMarkers = [
-  '친구', '동료', '지인', '소개', '동창', '직장동료', '회사동료', '팀원',
+  '친구',
+  '동료',
+  '지인',
+  '소개',
+  '동창',
+  '직장동료',
+  '회사동료',
+  '팀원',
 ];
 
 const List<String> _kSocialKeywords = [
-  '친구', '동창', '동기', '선배', '후배', '동료', '지인', '정모', '동호회', '팀원',
+  '친구',
+  '동창',
+  '동기',
+  '선배',
+  '후배',
+  '동료',
+  '지인',
+  '정모',
+  '동호회',
+  '팀원',
 ];
 
 // 잠정 비활성화(원본과 동일 - ml/keyword_router.py의 PURCHASE_MARKERS 주석 참고).
@@ -283,7 +334,12 @@ const List<String> _kPurchaseMarkers = <String>[];
 // 요청 - "운동" 하나로 뭉뚱그려지던 종목별 아이콘을 원함). 남은 건 골프/
 // 라운딩/클라이밍/웨이트/줄넘기/크로스핏 - "헬스장 트레이닝" 성격의 종목만.
 const List<String> _kSportsKeywords = [
-  '골프', '라운딩', '클라이밍', '웨이트', '줄넘기', '크로스핏',
+  '골프',
+  '라운딩',
+  '클라이밍',
+  '웨이트',
+  '줄넘기',
+  '크로스핏',
 ];
 
 const List<String> _kSportsFalsePositives = ['골프공'];
@@ -300,10 +356,24 @@ const List<String> _kSportsFalsePositives = ['골프공'];
 // 거의 없는 조합이라 false positive 목록을 우선시해서 제외 쪽으로 둠).
 const List<String> _kPersonalTrainingKeywords = ['PT'];
 const List<String> _kPersonalTrainingContextKeywords = [
-  '받기', '받자', '받을', '받았', '등록', '수업', '예약', '트레이너', '헬스',
+  '받기',
+  '받자',
+  '받을',
+  '받았',
+  '등록',
+  '수업',
+  '예약',
+  '트레이너',
+  '헬스',
 ];
 const List<String> _kPersonalTrainingFalsePositives = [
-  'PT자료', 'PT준비', 'PT발표', 'PT연습', '사업PT', '기업PT', '경쟁PT',
+  'PT자료',
+  'PT준비',
+  'PT발표',
+  'PT연습',
+  '사업PT',
+  '기업PT',
+  '경쟁PT',
 ];
 
 // ⭐ 2026-09-12 - 라켓 스포츠(테니스/배드민턴/탁구/스쿼시) 전용 카테고리
@@ -350,13 +420,30 @@ const List<String> _kYogaKeywordsAnywhere = ['필라테스', '스트레칭'];
 // "필요가"가 "요가"로 끝나는 오탐 방지(ml/keyword_router.py 참고).
 const List<String> _kYogaKeywordsPrefixOnly = ['요가'];
 const List<String> _kCyclingYogaPurchaseOrRepairMarkers = [
-  '사기', '사주기', '구매하기', '구입하기', '주문하기', '장만하기', '수리', '맡기러',
+  '사기',
+  '사주기',
+  '구매하기',
+  '구입하기',
+  '주문하기',
+  '장만하기',
+  '수리',
+  '맡기러',
 ];
-const List<String> _kCultureKeywords = ['영화', '콘서트', '공연', '전시', '뮤지컬', '연극', '페스티벌'];
+const List<String> _kCultureKeywords = [
+  '영화',
+  '콘서트',
+  '공연',
+  '전시',
+  '뮤지컬',
+  '연극',
+  '페스티벌'
+];
 const List<String> _kFinanceKeywords = ['은행', '환전', '적금', '예금', '연말정산', '공과금'];
 const List<String> _kFinanceFalsePositives = ['은행나무'];
 const List<String> _kChoreKeywords = ['청소', '빨래', '설거지', '분리수거'];
-const List<String> _kBeautyContainsKeywords = ['미용실', '네일아트', '네일샵', '왁싱', '염색', '속눈썹'];
+// 학습 데이터 전수 확인(2026-09-21): "네일" 포함 102건 중 99건이 미용.
+// "네일아트/네일샵"만 잡던 기존 목록은 "네일 예약/네일 받기"를 놓쳤다.
+const List<String> _kBeautyContainsKeywords = ['미용실', '네일', '왁싱', '염색', '속눈썹'];
 const List<String> _kBeautyPrefixKeywords = ['펌', '커트'];
 
 // ⭐ 2026-08-27 - 짧은 단어/구가 '기타'로 자주 빠지는 문제 실측 후 추가.
@@ -371,11 +458,14 @@ const List<String> _kBeautyPrefixKeywords = ['펌', '커트'];
 // 실제 라벨 데이터와 충돌해서 뺐음(그쪽 파일 주석 참고).
 const Map<String, List<String>> _kActivityPrefixKeywords = {
   'study': ['공부', '독서', '인강', '강의', '코테'],
-  'health': ['병원'],
+  // 학습 데이터 전수 확인: 치과 42건 중 37건, 약국 13건 중 12건이 건강.
+  // 가족 신호는 이 tier보다 먼저 처리되므로 "엄마 치과 동행"은 계속 가족이다.
+  'health': ['병원', '치과', '약국'],
   'work': ['출장'],
   'meal': ['식사', '외식'],
   'leisure': ['여가', '집콕', '방탈출'],
 };
+const List<String> _kHealthActivityFalsePositives = ['치과위생사'];
 
 // "쇼핑"은 "온라인쇼핑"처럼 복합어로도 흔히 쓰여서 contains로 잡음.
 const Map<String, List<String>> _kActivityContainsKeywords = {
@@ -408,7 +498,13 @@ const List<String> _kLeisureTravelKeywords = ['투어', '관광'];
 // EATING_PROPOSAL_KEYWORDS/EATING_PROPOSAL_MEDICATION_DEFER와 동일.
 const List<String> _kEatingProposalKeywords = ['먹자', '먹을래', '먹으러'];
 const List<String> _kEatingProposalMedicationDefer = [
-  '약', '영양제', '유산균', '비타민', '오메가', '프로폴리스', '한약',
+  '약',
+  '영양제',
+  '유산균',
+  '비타민',
+  '오메가',
+  '프로폴리스',
+  '한약',
 ];
 
 // "독서 모임"류처럼 실제로는 사람을 만나는 게 핵심인 경우가 더 많아서(실측),
@@ -416,11 +512,8 @@ const List<String> _kEatingProposalMedicationDefer = [
 const List<String> _kActivityDeferMarkers = ['모임'];
 
 abstract final class _MemoKeywordRouter {
-  static List<String> _tokens(String text) => text
-      .trim()
-      .split(RegExp(r'\s+'))
-      .where((t) => t.isNotEmpty)
-      .toList();
+  static List<String> _tokens(String text) =>
+      text.trim().split(RegExp(r'\s+')).where((t) => t.isNotEmpty).toList();
 
   static bool _wordMatchesToken(String token, String word) {
     if (!token.startsWith(word)) return false;
@@ -491,7 +584,15 @@ abstract final class _MemoKeywordRouter {
   // 탄다/탈/탔). "청소타령"류 무관한 단어와의 충돌 위험 때문에 전역 _kVerbStems
   // 에는 안 넣고 이 tier에만 좁게 적용(ml/keyword_router.py 참고).
   static const List<String> _kCyclingVerbStems = [
-    '하', '해', '할', '했', '한', '타', '탄', '탈', '탔',
+    '하',
+    '해',
+    '할',
+    '했',
+    '한',
+    '타',
+    '탄',
+    '탈',
+    '탔',
   ];
 
   // ⭐ 2026-09-01 - CHORE_KEYWORDS(집안일)/RUNNING·SWIMMING·HIKING_KEYWORDS/
@@ -508,7 +609,8 @@ abstract final class _MemoKeywordRouter {
   // anywhere=false(기본값)로 유지할 것.
   static bool _verbWordMatchesToken(String token, String word,
       {bool anywhere = false, List<String> stems = _kVerbStems}) {
-    final idx = anywhere ? token.indexOf(word) : (token.startsWith(word) ? 0 : -1);
+    final idx =
+        anywhere ? token.indexOf(word) : (token.startsWith(word) ? 0 : -1);
     if (idx == -1) return false;
     final rest = token.substring(idx + word.length);
     if (rest.isEmpty) return true;
@@ -520,7 +622,8 @@ abstract final class _MemoKeywordRouter {
       {bool anywhere = false, List<String> stems = _kVerbStems}) {
     for (final tok in tokens) {
       for (final kw in keywords) {
-        if (_verbWordMatchesToken(tok, kw, anywhere: anywhere, stems: stems)) return true;
+        if (_verbWordMatchesToken(tok, kw, anywhere: anywhere, stems: stems))
+          return true;
       }
     }
     return false;
@@ -565,7 +668,8 @@ abstract final class _MemoKeywordRouter {
     // 업무 발표(PT 자료/PT 준비 등) 신호가 있으면 제외한다.
     if (_anyPrefixMatchedIgnoreCase(tokens, _kPersonalTrainingKeywords) &&
         _anyContainsMatched(text, _kPersonalTrainingContextKeywords) &&
-        !_anyContainsMatchedIgnoreCase(text, _kPersonalTrainingFalsePositives)) {
+        !_anyContainsMatchedIgnoreCase(
+            text, _kPersonalTrainingFalsePositives)) {
       return ('exercise', 'tier3_personal_training');
     }
 
@@ -636,7 +740,8 @@ abstract final class _MemoKeywordRouter {
             !_anyContainsMatched(text, _kCyclingFalsePositives)) {
           return ('cycling', 'tier3b_cycling');
         }
-        if (_anyVerbWordMatched(tokens, _kYogaKeywordsAnywhere, anywhere: true) ||
+        if (_anyVerbWordMatched(tokens, _kYogaKeywordsAnywhere,
+                anywhere: true) ||
             _anyVerbWordMatched(tokens, _kYogaKeywordsPrefixOnly)) {
           return ('yoga', 'tier3b_yoga');
         }
@@ -656,7 +761,8 @@ abstract final class _MemoKeywordRouter {
     }
     // ⭐ 2026-09-01(2차) - "주말청소"/"저녁설거지"처럼 앞에 다른 말이 붙는
     // 경우도 잡게 anywhere:true (RUNNING/SWIMMING/HIKING과 같은 이유).
-    if (!certDefer && _anyVerbWordMatched(tokens, _kChoreKeywords, anywhere: true)) {
+    if (!certDefer &&
+        _anyVerbWordMatched(tokens, _kChoreKeywords, anywhere: true)) {
       return ('housework', 'tier3c_housework');
     }
     // ⭐ "펌"/"커트"는 "컨펌"/"펌프형"과 충돌 위험이 있어 단순 prefix가 아니라
@@ -687,6 +793,10 @@ abstract final class _MemoKeywordRouter {
 
     if (!_anyContainsMatched(text, _kActivityDeferMarkers)) {
       for (final entry in _kActivityPrefixKeywords.entries) {
+        if (entry.key == 'health' &&
+            _anyContainsMatched(text, _kHealthActivityFalsePositives)) {
+          continue;
+        }
         if (_anyPrefixMatched(tokens, entry.value)) {
           return (entry.key, 'tier4_activity');
         }

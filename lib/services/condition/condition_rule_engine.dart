@@ -14,12 +14,19 @@
 //     초과근무, RULE_WEEKLY_TOTAL_LOAD, EVIDENCE-012/014)으로 대체함 - 절대적인
 //     하루 근무시간이 아니라 "쉬지 못하고 누적됐는지"를 본다. 근거가 약한 항목
 //     (연속근무일수 자체, RULE_CONSECUTIVE_WORKDAYS)은 RULE_COMPOUND_HIGH_LOAD와
-//     같은 방식으로 "이 앱의 판단"임을 문구에 명시하고 쓴다.
+//     같은 방식으로 "이 앱의 판단"임을 문구에 명시하고 쓴다. 2026-09-18 - "최근 7일
+//     총 실근무시간"까지도 EU/IOM 절대값 비교가 12시간 표준 근무자에게 매일
+//     발동하는 문제가 있어(실측 8주 시뮬레이션 NORMAL 0%), RULE_WEEKLY_TOTAL_LOAD를
+//     RULE_WEEKLY_LOAD_INCREASE로 개명하고 개인 기준선(analyzer.baselineWeeklyMinutesAsOf)
+//     대비 증가 폭으로 재설계함(weeklyLoadIncrease 참고). EU/IOM 절대값은
+//     ScheduleLoadProfile(레벨과 무관한 구조적 배경 정보)로 분리.
 //  2. 모든 Finding/Tip은 evidenceIds를 최소 1개 가져야 한다.
 //  3. 숫자 점수(0~100)나 %, 질병 위험도는 어디에도 만들지 않는다(2026-09-15 - 유일한 예외였던
 //     condition_score.dart를 출시 적합성 재검토 후 삭제함).
 //  4. 아래 기준값 상수는 recovery_briefing_engine.dart("오늘의 컨디션")가 그대로 가져다 쓴다 -
 //     같은 주장에 다른 숫자를 쓰지 않도록 여기 한 곳에만 둔다.
+
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart' show DateTimeRange;
 import 'shift_pattern_analyzer.dart';
@@ -91,6 +98,10 @@ class ConditionResult {
   final int? recoveryMinutes;
   final int? consecutiveNightDays;
   final int? consecutiveWorkDays;
+  // ⭐ 2026-09-18 - 개인 기준선(baselineWeeklyMinutesAsOf 결과)을 그대로 노출해서
+  // recovery_briefing_engine.dart와 scheduleLoadProfileProvider(condition_provider.dart)가
+  // 같은 값을 재계산 없이 재사용하게 함(원칙 4 - 같은 주장에 다른 숫자를 쓰지 않는다).
+  final int? weeklyBaselineMinutes;
 
   const ConditionResult({
     required this.date,
@@ -104,6 +115,7 @@ class ConditionResult {
     required this.recoveryMinutes,
     required this.consecutiveNightDays,
     required this.consecutiveWorkDays,
+    required this.weeklyBaselineMinutes,
   });
 }
 
@@ -126,6 +138,25 @@ class ShiftStreakBucket {
   });
 }
 
+/// ⭐ 2026-09-18 - "이 근무 패턴 자체가 구조적으로 EU/IOM 절대 기준을 넘는지"를
+/// 담는 조용한 배경 정보. RULE_WEEKLY_LOAD_INCREASE(개인 기준선 대비 늘었는지)와는
+/// 완전히 다른 질문이라 [ConditionLevel]에 전혀 영향을 안 준다 - 스케줄 자체가
+/// 안 바뀌면 매일 똑같은 값이라, "오늘의 알림"이 아니라 "이 근무의 배경 정보"로
+/// 화면에 한 번만 조용히 보여줘야 한다(사용자 지적 - 매일 반복되는 캐션 취급 금지).
+class ScheduleLoadProfile {
+  final int baselineWeeklyMinutes;
+  final bool exceedsIomLimit; // 주 60시간 이상(EVIDENCE-014)
+  final String note;
+  final List<String> evidenceIds;
+
+  const ScheduleLoadProfile({
+    required this.baselineWeeklyMinutes,
+    required this.exceedsIomLimit,
+    required this.note,
+    required this.evidenceIds,
+  });
+}
+
 class ConditionRuleEngine {
   static const minRecoveryMinutes = 11 * 60; // EVIDENCE-002, EVIDENCE-003
   static const longShiftThresholdMinutes = 12 * 60; // EVIDENCE-004, EVIDENCE-005 12시간대 구간
@@ -144,13 +175,29 @@ class ConditionRuleEngine {
   static const recommendedSleepMaxMinutes = 9 * 60; // EVIDENCE-011
   static const sleepBufferMinutes = 60; // ⚠️ 연구값 아님 - 이동/정리 여유(설계 문서 6장 명시)
   static const caffeineCutoffHoursBeforeSleep = 6; // EVIDENCE-008
-  // ⭐ 2026-09-04 v2 추가, 2026-09-17 재설계 - 최근 7일 "총 실근무시간"(기본근무+초과근무,
-  // 근무시간대와 무관하게 누적) 기준. EU 48시간(EVIDENCE-012)/IOM 60시간(EVIDENCE-014) 2단계.
+  // ⭐ 2026-09-04 v2 추가, 2026-09-17 재설계, 2026-09-18 재설계 - 최근 7일 "총 실근무시간"
+  // (기본근무+초과근무, 근무시간대와 무관하게 누적)을 더 이상 EU 48시간(EVIDENCE-012)/
+  // IOM 60시간(EVIDENCE-014) 절대값과 비교하지 않는다(계기: 12시간 표준 근무자는
+  // 구조적으로 주 48~60시간이 정상이라, 절대 임계값으로는 "보통인 날"이 하루도
+  // 없었음 - 실측 8주 시뮬레이션 NORMAL 0%). 이제 개인 기준선(analyzer.
+  // baselineWeeklyMinutesAsOf) 대비 "얼마나 늘었는지"로 판단한다(weeklyLoadIncrease
+  // 참고) - 아래 두 값은 그 증가 폭 임계값(퍼센트/최소분 하한, 정확한 수치는
+  // 논문값이 아니라 이 앱의 판단). EU/IOM 절대 수치는 이제 ScheduleLoadProfile
+  // (구조적 배경 정보, 레벨과 무관)에서만 쓴다.
   // 2026-09-15 - 예전엔 condition_score.dart/today_forecast_engine.dart에도 같은 값이 따로 있었는데 둘 다
   // 삭제됐고, recovery_briefing_engine.dart는 이 상수를 직접 참조한다(값은 여기서만 바꿀 것).
   static const overtimeLookbackDays = 7;
-  static const weeklyLoadAttentionMinutes = 48 * 60; // EVIDENCE-012
-  static const weeklyLoadSevereMinutes = 60 * 60; // EVIDENCE-014
+  static const weeklyLoadAttentionMinutes = 48 * 60; // EVIDENCE-012 - ScheduleLoadProfile에서만 씀
+  static const weeklyLoadSevereMinutes = 60 * 60; // EVIDENCE-014 - ScheduleLoadProfile에서만 씀
+  // ⭐ 2026-09-18 - 개인 기준선 대비 증가 폭 임계값. 퍼센트(기준선의 15%/25%)와
+  // 최소분 하한(6시간/12시간) 중 큰 쪽을 씀 - 기준선이 아주 짧은 사람(예: 주
+  // 20시간 파트타임)에게 퍼센트만 쓰면 몇 십 분 차이로도 발동해버리는 걸 막고,
+  // 기준선이 아주 긴 사람에게 최소분만 쓰면 둔감해지는 걸 막는 절충. 정확한
+  // 15%/25%/6h/12h 수치는 논문 근거가 아니라 이 앱이 보수적으로 정한 값.
+  static const weeklyLoadIncreaseAttentionRatio = 0.15;
+  static const weeklyLoadIncreaseSevereRatio = 0.25;
+  static const weeklyLoadIncreaseMinAttentionMinutes = 6 * 60;
+  static const weeklyLoadIncreaseMinSevereMinutes = 12 * 60;
   // ⭐ 2026-09-17 - "근무시간과 무관하게 쉬는 날 없이 이어지는 근무 자체"(EVIDENCE-005의
   // 일반 원칙 "며칠 몰아 일하고 몰아 쉬는 패턴을 피하라"만 빌림 - 정확한 일수는 이 앱의
   // 판단이라 appUsage에도 명시함).
@@ -205,6 +252,47 @@ class ConditionRuleEngine {
     return streak.capped ? capped : normal(streak.days);
   }
 
+  /// ⭐ 2026-09-18 - "최근 7일 실근무시간이 이 사람의 평소보다 얼마나 늘었는지"
+  /// 판정을 여기 하나로 통일(원칙 4 - 같은 주장에 다른 숫자를 쓰지 않는다).
+  /// evaluate()와 recovery_briefing_engine.dart(오늘의 컨디션)가 둘 다 이 함수만
+  /// 부른다. [baselineWeeklyMinutes]가 null이면(불규칙 근무라 기준선 계산 불가 등)
+  /// "비교할 평소가 없다"는 뜻이라 항상 조용하다(근거 없으면 신호를 안 낸다는
+  /// 기존 원칙과 동일).
+  static ({bool heavy, bool severe, int? extraMinutes}) weeklyLoadIncrease({
+    required int actualWeeklyMinutes,
+    required int? baselineWeeklyMinutes,
+  }) {
+    if (baselineWeeklyMinutes == null) return (heavy: false, severe: false, extraMinutes: null);
+    final extra = actualWeeklyMinutes - baselineWeeklyMinutes;
+    final attentionThreshold = math.max(
+      weeklyLoadIncreaseMinAttentionMinutes,
+      (baselineWeeklyMinutes * weeklyLoadIncreaseAttentionRatio).round(),
+    );
+    final severeThreshold = math.max(
+      weeklyLoadIncreaseMinSevereMinutes,
+      (baselineWeeklyMinutes * weeklyLoadIncreaseSevereRatio).round(),
+    );
+    return (heavy: extra >= attentionThreshold, severe: extra >= severeThreshold, extraMinutes: extra);
+  }
+
+  /// ⭐ 2026-09-18 - 개인 기준선이 EU 48시간(EVIDENCE-012)/IOM 60시간(EVIDENCE-014)
+  /// 절대 기준 자체를 구조적으로 넘는지(레벨과 무관, 조용한 배경 정보 - 클래스
+  /// 설명 참고). 기준선을 모르거나(null) 둘 다 안 넘으면 보여줄 게 없어 null.
+  static ScheduleLoadProfile? scheduleLoadProfileFor(int? baselineWeeklyMinutes) {
+    if (baselineWeeklyMinutes == null || baselineWeeklyMinutes < weeklyLoadAttentionMinutes) return null;
+    final severe = baselineWeeklyMinutes >= weeklyLoadSevereMinutes;
+    return ScheduleLoadProfile(
+      baselineWeeklyMinutes: baselineWeeklyMinutes,
+      exceedsIomLimit: severe,
+      note: severe
+          ? '이 근무 패턴은 평균 주 ${_formatHours(baselineWeeklyMinutes)} 안팎이에요. 간호사 근무시간 권고 상한(주 60시간)과 '
+              'EU 근로시간지침 기준(주 48시간)을 구조적으로 넘는 편이에요.'
+          : '이 근무 패턴은 평균 주 ${_formatHours(baselineWeeklyMinutes)} 안팎이에요. EU 근로시간지침 기준(주 48시간)을 '
+              '구조적으로 넘는 편이에요.',
+      evidenceIds: severe ? const ['EVIDENCE-012', 'EVIDENCE-014'] : const ['EVIDENCE-012'],
+    );
+  }
+
   // ⭐ 2026-09-04 v2 - [otMinutesByDate]는 RULE_WEEKLY_OVERTIME(EVIDENCE-012)
   // 계산용. 기본값(빈 맵)이라 기존 호출부(테스트 등)는 그대로 컴파일되지만,
   // 그러면 이 신호는 항상 꺼진 채로 평가됨 - 실제 앱 배선은
@@ -227,6 +315,7 @@ class ConditionRuleEngine {
         recoveryMinutes: null,
         consecutiveNightDays: null,
         consecutiveWorkDays: null,
+        weeklyBaselineMinutes: null,
       );
     }
 
@@ -259,12 +348,13 @@ class ConditionRuleEngine {
     // BREAK의 버킷 선택에만 쓰고(연속 며칠째인지 + 그 다음 회복시간이 짧은지로 판단),
     // "오늘 하루 12시간 자체"는 더 이상 levelFindings에 안 올린다.
 
-    // ⭐ 2026-09-04 v2 최초 추가, 2026-09-17 재설계 - 최근 7일 "총 실근무시간"(기본근무
-    // +초과근무, 근무시간대와 무관하게 누적)으로 확장. 예전엔 초과근무(date_overtime)만
-    // 더했는데, 그러면 "12시간×15일/월"과 "8시간×22일/월"처럼 총량은 비슷한데 하루
-    // 근무시간만 다른 두 패턴을 공정하게 비교할 수 없었음(기본근무가 누적 대상에서
-    // 아예 빠져 있었기 때문) - 이제 기본근무까지 합산해서 EU 48시간(EVIDENCE-012)/IOM
-    // 60시간(EVIDENCE-014) 기준과 비교한다.
+    // ⭐ 2026-09-04 v2 최초 추가, 2026-09-17 재설계, 2026-09-18 재설계 - 최근 7일 "총
+    // 실근무시간"(기본근무+초과근무, 근무시간대와 무관하게 누적). 예전엔 초과근무
+    // (date_overtime)만 더했는데, 그러면 "12시간×15일/월"과 "8시간×22일/월"처럼 총량은
+    // 비슷한데 하루 근무시간만 다른 두 패턴을 공정하게 비교할 수 없었음(기본근무가
+    // 누적 대상에서 아예 빠져 있었기 때문) - 이제 기본근무까지 합산한다. 2026-09-18 -
+    // 이 총량을 EU/IOM 절대값과 비교하는 대신 개인 기준선과 비교(weeklyLoadIncrease,
+    // 위 클래스 주석 참고).
     var weeklyBaseMinutes = 0;
     for (var i = 0; i < overtimeLookbackDays; i++) {
       final inst = analyzer.instanceForDate(date.subtract(Duration(days: i)));
@@ -275,8 +365,13 @@ class ConditionRuleEngine {
       otTotalMinutes += otMinutesByDate[dateKey(date.subtract(Duration(days: i)))] ?? 0;
     }
     final weeklyTotalMinutes = weeklyBaseMinutes + otTotalMinutes;
-    final heavyLoad = weeklyTotalMinutes >= weeklyLoadAttentionMinutes;
-    final severeLoad = weeklyTotalMinutes >= weeklyLoadSevereMinutes;
+    final weeklyBaselineMinutes = analyzer.baselineWeeklyMinutesAsOf(date);
+    final loadIncrease = weeklyLoadIncrease(
+      actualWeeklyMinutes: weeklyTotalMinutes,
+      baselineWeeklyMinutes: weeklyBaselineMinutes,
+    );
+    final heavyLoad = loadIncrease.heavy;
+    final severeLoad = loadIncrease.severe;
 
     // ⭐ 2026-09-04 v2 - 교대 방향(EVIDENCE-001). 비교 연구 수준 근거("정방향이
     // 상대적으로 유리한 경향"이지 절대 위험 수치가 아님)라 이 신호 하나만으로는
@@ -319,7 +414,7 @@ class ConditionRuleEngine {
     // Finding에 그대로 남아 있어 "무엇이 왜"는 항상 추적 가능함.
     final attentionSignalIds = <String>[
       if (shortRecovery) 'RULE_SHORT_RECOVERY',
-      if (heavyLoad) 'RULE_WEEKLY_TOTAL_LOAD',
+      if (heavyLoad) 'RULE_WEEKLY_LOAD_INCREASE',
       if (isBackward) 'RULE_BACKWARD_DIRECTION',
       if (nightStreakAttention) 'RULE_CONSECUTIVE_NIGHT_SHIFTS',
       if (workStreakAttention) 'RULE_CONSECUTIVE_WORKDAYS',
@@ -335,13 +430,19 @@ class ConditionRuleEngine {
       ));
     }
     if (heavyLoad) {
+      // heavyLoad가 true면 weeklyLoadIncrease() 정의상 baseline/extraMinutes는 항상 non-null.
+      final baseline = weeklyBaselineMinutes!;
+      final extra = loadIncrease.extraMinutes!;
       levelFindings.add(ConditionFinding(
-        ruleId: 'RULE_WEEKLY_TOTAL_LOAD',
+        ruleId: 'RULE_WEEKLY_LOAD_INCREASE',
         message: severeLoad
-            ? '최근 7일간 실제 근무시간이 총 ${_formatHours(weeklyTotalMinutes)}으로, 간호사 근무시간 '
-                '권고 상한(주 60시간)을 넘었습니다.'
-            : '최근 7일간 실제 근무시간이 총 ${_formatHours(weeklyTotalMinutes)}입니다. EU 근로시간지침 '
-                '등은 평균 주간 근무시간이 48시간을 넘지 않을 것을 기준으로 제시합니다.',
+            ? '최근 7일간 실제 근무시간이 총 ${_formatHours(weeklyTotalMinutes)}으로, 평소(주 '
+                '${_formatHours(baseline)} 안팎)보다 ${_formatHours(extra)} 더 많습니다. 평소보다 근무가 많이 '
+                '누적되면 피로가 커질 수 있습니다(정확한 증가 폭 기준은 특정 연구 수치가 아니라 이 앱이 '
+                '보수적으로 정한 값입니다).'
+            : '최근 7일간 실제 근무시간이 총 ${_formatHours(weeklyTotalMinutes)}으로, 평소(주 '
+                '${_formatHours(baseline)} 안팎)보다 ${_formatHours(extra)} 더 많습니다. 평소보다 근무가 '
+                '누적되면 피로가 커질 수 있습니다(정확한 증가 폭 기준은 이 앱의 판단입니다).',
         evidenceIds: severeLoad ? const ['EVIDENCE-012', 'EVIDENCE-014'] : const ['EVIDENCE-012'],
       ));
     }
@@ -397,7 +498,7 @@ class ConditionRuleEngine {
       level = ConditionLevel.highLoad;
       final compoundLabels = [
         if (shortRecovery) '회복시간 부족',
-        if (heavyLoad) '주간 누적 근무시간 초과',
+        if (heavyLoad) '평소보다 근무 누적',
         if (isBackward) '역방향 교대 전환',
         if (nightStreakAttention) '연속 야간근무',
         if (workStreakAttention) '연속근무일수 누적',
@@ -594,6 +695,7 @@ class ConditionRuleEngine {
       recoveryMinutes: recoveryMinutes,
       consecutiveNightDays: consecutiveNight.days,
       consecutiveWorkDays: consecutiveWork.days,
+      weeklyBaselineMinutes: weeklyBaselineMinutes,
     );
   }
 

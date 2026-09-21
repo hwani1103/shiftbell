@@ -290,6 +290,19 @@ class ShiftSchedule {
   }
 }
 
+  /// ⭐ 2026-09-17 - 설정 화면의 패턴 칩에서 "오늘은 여기" 를 표시하기 위해 근무명이 아니라
+  /// **패턴 안의 위치(index)**를 돌려줌 - 같은 근무명이 한 패턴에 여러 번 나올 수 있어
+  /// 이름으로는 위치를 특정할 수 없기 때문. 계산은 [getPatternShiftForDate]와 완전히 동일하고,
+  /// 날짜별 근무 변경(assignedDates) 예외는 무시한다(패턴 주기상의 자리를 보여주는 것이 목적).
+  int? getPatternIndexForDate(DateTime date) {
+    if (!isRegular || pattern == null || pattern!.isEmpty || todayIndex == null || startDate == null) {
+      return null;
+    }
+    final daysDiff = julianDayNumber(date.year, date.month, date.day) -
+        julianDayNumber(startDate!.year, startDate!.month, startDate!.day);
+    return ((todayIndex! + daysDiff) % pattern!.length + pattern!.length) % pattern!.length;
+  }
+
   // ⭐ 패턴상의 근무만 반환 (수동 할당 무시)
   String getPatternShiftForDate(DateTime date) {
     if (!isRegular || pattern == null || todayIndex == null || startDate == null) {

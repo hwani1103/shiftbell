@@ -1449,7 +1449,7 @@ Future<List<SleepRecord>> getSleepRecords({DateTime? since}) async {
           orderBy: 'start_time DESC',
         )
       : await db.query('sleep_records', orderBy: 'start_time DESC');
-  return rows.map(SleepRecord.fromMap).toList();
+  return decodeSleepRecordRows(rows);
 }
 
 /// PENDING_CONFIRMATION 상태(자동 감지, 아직 사용자 확인 전) 전체 조회.
@@ -1461,7 +1461,7 @@ Future<List<SleepRecord>> getPendingSleepRecords() async {
     whereArgs: [sleepStatusToDb(SleepStatus.pendingConfirmation)],
     orderBy: 'start_time DESC',
   );
-  return rows.map(SleepRecord.fromMap).toList();
+  return decodeSleepRecordRows(rows);
 }
 
 Future<int> insertSleepRecord(SleepRecord record) async {
@@ -1500,4 +1500,20 @@ Future<void> deleteSleepRecord(int id) async {
 // 버전을 올려야 하는데, 이 정도 죽은 테이블 하나 남기는 것보다 그 리스크가
 // 더 커서 보류. 필요해지면 그때 정식 마이그레이션으로 드롭).
 
+}
+
+/// ⭐ 2026-09-15 (전체 코드 점검 Q-07) - 예전엔 `rows.map(SleepRecord.fromMap)`이라 행 하나의 날짜·값이 깨져 있으면
+/// DateTime.parse 예외로 수면 목록 전체 로딩이 실패했음(수면·회복 탭의 오늘의 컨디션·미니 달력·자동 기록 확인 카드가
+/// 한꺼번에 사라짐). 깨진 행만 건너뛰고 로그를 남긴다 - 행 자체는 지우지 않음(원인 조사용으로 DB에 그대로 둠).
+@visibleForTesting
+List<SleepRecord> decodeSleepRecordRows(List<Map<String, Object?>> rows) {
+  final result = <SleepRecord>[];
+  for (final row in rows) {
+    try {
+      result.add(SleepRecord.fromMap(row));
+    } catch (e) {
+      print('⚠️ 손상된 수면 기록 행 건너뜀(id=${row['id']}): $e');
+    }
+  }
+  return result;
 }

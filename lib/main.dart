@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'constants/platform_channel.dart';
+import 'constants/layout_limits.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'services/alarm_service.dart';
@@ -35,7 +36,8 @@ import '../models/shift_schedule.dart';
 import 'providers/alarm_provider.dart';
 import 'providers/schedule_provider.dart';
 import 'providers/calendar_theme_provider.dart';
-import 'providers/health_tip_provider.dart';
+import 'providers/condition_provider.dart';
+import 'providers/sleep_record_provider.dart';
 import 'providers/sleep_condition_provider.dart';
 import 'models/calendar_theme.dart';
 import 'theme/app_theme.dart';
@@ -126,7 +128,8 @@ void main() async {
       initialize: _initializeApp,
       builder: (initialCalendarTheme) => ProviderScope(
         overrides: [
-          calendarThemeProvider.overrideWith((ref) => CalendarThemeNotifier.withInitial(initialCalendarTheme)),
+          calendarThemeProvider.overrideWith(
+              (ref) => CalendarThemeNotifier.withInitial(initialCalendarTheme)),
         ],
         child: const MyApp(),
       ),
@@ -154,9 +157,10 @@ Future<CalendarThemeId> _initializeApp() async {
   // 생성 저장)에서 안 끝났으면 그쪽에서 ensureLoaded()를 다시 await해서
   // 안전하게 기다림 (memo_category_classifier.dart 참고).
   unawaited(MemoCategoryClassifier.instance.ensureLoaded().then<void>(
-    (_) {},
-    onError: (Object e) => debugPrint('⚠️ 카테고리 분류 모델 미리 로드 실패 - 분류 시점에 다시 시도: $e'),
-  ));
+        (_) {},
+        onError: (Object e) =>
+            debugPrint('⚠️ 카테고리 분류 모델 미리 로드 실패 - 분류 시점에 다시 시도: $e'),
+      ));
   // ⭐ 2026-09-01 - "일정 생성 직후 잠깐 기본 폰트로 보였다가 1초 뒤에 주아체로
   // 바뀐다"는 피드백. schedule_management_tab.dart의 _ScheduleRow가 매번
   // GoogleFonts.jua()를 직접 부르는데, google_fonts 패키지는 처음 쓰는 폰트를
@@ -270,48 +274,48 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   // ⭐ 앱이 포그라운드로 돌아올 때마다 체크
   // main.dart - _MyAppState
-@override
-void didChangeAppLifecycleState(AppLifecycleState state) {
-  super.didChangeAppLifecycleState(state);
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
 
-  if (state == AppLifecycleState.resumed) {
-    // ⭐ Native MainActivity.onResume()이 이미 자체적으로 AlarmGuardReceiver.triggerCheck()를
-    // 호출해서 갱신 필요 여부를 판단/실행함 (Dart에서 또 트리거하면 중복이라 제거함).
-    // 여기서는 화면에 보여줄 데이터만 새로고침하면 됨.
-    print('📱 앱 포그라운드 진입 - UI 새로고침');
+    if (state == AppLifecycleState.resumed) {
+      // ⭐ Native MainActivity.onResume()이 이미 자체적으로 AlarmGuardReceiver.triggerCheck()를
+      // 호출해서 갱신 필요 여부를 판단/실행함 (Dart에서 또 트리거하면 중복이라 제거함).
+      // 여기서는 화면에 보여줄 데이터만 새로고침하면 됨.
+      print('📱 앱 포그라운드 진입 - UI 새로고침');
 
-    // ⭐ 추가: AlarmNotifier도 강제 갱신
-    if (mounted) {
-      try {
-        final container = ProviderScope.containerOf(context);
-        container.read(alarmNotifierProvider.notifier).refresh();
-        print('✅ AlarmNotifier 강제 갱신 완료');
-      } catch (e) {
-        print('❌ AlarmNotifier 갱신 실패: $e');
+      // ⭐ 추가: AlarmNotifier도 강제 갱신
+      if (mounted) {
+        try {
+          final container = ProviderScope.containerOf(context);
+          container.read(alarmNotifierProvider.notifier).refresh();
+          print('✅ AlarmNotifier 강제 갱신 완료');
+        } catch (e) {
+          print('❌ AlarmNotifier 갱신 실패: $e');
+        }
       }
-    }
 
-    // ⭐ 2026-09-11(사용자 신고 - "자동백업이 실제로 안 되고 있다") - 콜드
-    // 스타트(initState)뿐 아니라 재개(resumed)될 때마다도 기회를 한 번 더 줌.
-    // paused 트리거는 "이제 막 배경으로 나가는" 시점이라 그 직후 OS가 프로세스를
-    // 정지시키면 exportAll()~파일쓰기 도중에 끊길 위험이 있는데(main.dart의
-    // initState 주석 참고), resumed는 반대로 "방금 포그라운드로 돌아와서 확실히
-    // 살아있는" 시점이라 그 위험이 없음. backupNow()는 data_version이 그대로면
-    // 즉시 반환하는 가벼운 함수라 앱을 여닫을 때마다 불러도 비용이 거의 없음.
-    unawaited(BackupWatcher.instance.backupNow());
-  } else if (state == AppLifecycleState.paused) {
-    // ⭐ 사용자 데이터 백업("A번 요구사항") 자동 트리거(Layer 3) - 앱이
-    // 백그라운드로 전환되는 시점에만, 그것도 마지막 백업 이후 실제로 데이터가
-    // 바뀌었을 때만 조용히 백업함(BackupWatcher.backupNow 참고 - PRAGMA
-    // data_version으로 가볍게 확인). 알람/근무패턴 로직과 완전히 독립된
-    // read-only 판단 + 별개의 파일 쓰기라 기존 로직에 전혀 영향 없음 -
-    // await 없이 fire-and-forget(백그라운드 전환을 지연시키지 않음).
-    unawaited(BackupWatcher.instance.backupNow());
+      // ⭐ 2026-09-11(사용자 신고 - "자동백업이 실제로 안 되고 있다") - 콜드
+      // 스타트(initState)뿐 아니라 재개(resumed)될 때마다도 기회를 한 번 더 줌.
+      // paused 트리거는 "이제 막 배경으로 나가는" 시점이라 그 직후 OS가 프로세스를
+      // 정지시키면 exportAll()~파일쓰기 도중에 끊길 위험이 있는데(main.dart의
+      // initState 주석 참고), resumed는 반대로 "방금 포그라운드로 돌아와서 확실히
+      // 살아있는" 시점이라 그 위험이 없음. backupNow()는 data_version이 그대로면
+      // 즉시 반환하는 가벼운 함수라 앱을 여닫을 때마다 불러도 비용이 거의 없음.
+      unawaited(BackupWatcher.instance.backupNow());
+    } else if (state == AppLifecycleState.paused) {
+      // ⭐ 사용자 데이터 백업("A번 요구사항") 자동 트리거(Layer 3) - 앱이
+      // 백그라운드로 전환되는 시점에만, 그것도 마지막 백업 이후 실제로 데이터가
+      // 바뀌었을 때만 조용히 백업함(BackupWatcher.backupNow 참고 - PRAGMA
+      // data_version으로 가볍게 확인). 알람/근무패턴 로직과 완전히 독립된
+      // read-only 판단 + 별개의 파일 쓰기라 기존 로직에 전혀 영향 없음 -
+      // await 없이 fire-and-forget(백그라운드 전환을 지연시키지 않음).
+      unawaited(BackupWatcher.instance.backupNow());
+    }
   }
-}
 
   // 6.5인치 기준 최대 너비 (Fold 7 펼친 상태 대응)
-  static const double maxContentWidth = 500.0;
+  static const double maxContentWidth = kAppMaxContentWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +335,9 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
             final isCalendarThemeDark = ref.watch(calendarThemeProvider).isDark;
 
             return AnnotatedRegion<SystemUiOverlayStyle>(
-              value: isCalendarThemeDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+              value: isCalendarThemeDark
+                  ? SystemUiOverlayStyle.light
+                  : SystemUiOverlayStyle.dark,
               child: MaterialApp(
                 onGenerateTitle: (context) => context.l10n.appTitle,
                 // ⭐ 영어 현지화 인프라 - flutter_localizations(SDK) + 이 앱의
@@ -366,12 +372,13 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
                 // 이 깜빡임의 근본 원인 자체를 없앰.
                 builder: (context, child) {
                   return Container(
-                    color: Colors.grey.shade200,  // 넓은 화면에서 양옆 배경색 - 항상 라이트
+                    color: Colors.grey.shade200, // 넓은 화면에서 양옆 배경색 - 항상 라이트
                     child: Center(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: maxContentWidth),
+                        constraints:
+                            const BoxConstraints(maxWidth: maxContentWidth),
                         child: Container(
-                          color: Colors.white,  // 컨텐츠 영역 배경 - 항상 라이트
+                          color: Colors.white, // 컨텐츠 영역 배경 - 항상 라이트
                           child: child,
                         ),
                       ),
@@ -380,7 +387,8 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
                 },
                 home: const InitialRouter(),
                 routes: {
-                  '/permission_intro': (context) => const PermissionIntroScreen(),
+                  '/permission_intro': (context) =>
+                      const PermissionIntroScreen(),
                   '/onboarding': (context) => const OnboardingScreen(),
                   // '/home' 경로는 제거 - InitialRouter에서 직접 MainScreen 생성
                 },
@@ -394,7 +402,7 @@ void didChangeAppLifecycleState(AppLifecycleState state) {
 }
 
 class MainScreen extends ConsumerStatefulWidget {
-  final int initialIndex;  // ⭐ 초기 탭 인덱스 받기
+  final int initialIndex; // ⭐ 초기 탭 인덱스 받기
   const MainScreen({super.key, required this.initialIndex});
 
   @override
@@ -411,8 +419,9 @@ class MainScreen extends ConsumerStatefulWidget {
 // 체크하도록 함 - UpdateService.checkForUpdate() 자체가 이미 "이 버전은 이미
 // 안내했다" 여부를 버전코드로 dedupe하므로 스팸 다이얼로그 걱정은 없고, 추가로
 // update_service.dart에 쿨다운을 둬서 Play Core 호출 자체도 너무 잦지 않게 함.
-class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObserver {
-  late int _currentIndex;  // ⭐ nullable 제거
+class _MainScreenState extends ConsumerState<MainScreen>
+    with WidgetsBindingObserver {
+  late int _currentIndex; // ⭐ nullable 제거
   static const platform = kAlarmChannel;
 
   late List<Widget> _tabs;
@@ -450,10 +459,12 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
     // ⭐ 2026-09-14 (출시전 수정 T10 연결, G2-01) - 친구공유 dirty/stop_pending 재시도.
     // 근무표가 처음 로드된 뒤(없음 포함) 앱 시작 1회 onAppStarted - 앱 시작을 막지 않고 오류는 로그만.
     // Firebase 초기화가 지연돼 아직 준비 전이면 서비스가 pending으로 두고 다음 재개 때 다시 시도함.
-    ref.listenManual<AsyncValue<ShiftSchedule?>>(scheduleProvider, (previous, next) {
+    ref.listenManual<AsyncValue<ShiftSchedule?>>(scheduleProvider,
+        (previous, next) {
       if (_friendSyncStartNotified || next.isLoading) return;
       _friendSyncStartNotified = true;
-      _runFriendSync('onAppStarted', FriendSyncService.instance.onAppStarted(next.valueOrNull));
+      _runFriendSync('onAppStarted',
+          FriendSyncService.instance.onAppStarted(next.valueOrNull));
     }, fireImmediately: true);
 
     // ⭐ Provider 사전 로드 (첫 탭 전환 시 버벅임 방지)
@@ -593,9 +604,10 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
     // ⭐ 2026-09-03 - 영어 로케일(탭 자체가 안 보임)이면 이 프리웜도 그냥
     // 낭비(불필요한 DB 읽기 + Firestore 네트워크 호출)라 같이 건너뜀.
     if (_showConditionTab) {
-      ref.read(todayForecastProvider);
-      ref.read(conditionScoreProvider);
-      ref.read(todayHealthTipProvider);
+      // ⭐ 2026-09-15 - 점수·건강 Tip 삭제 후: "오늘의 컨디션"이 쓰는 입력(판정·수면 기록·미니 달력)만 미리 로딩
+      // (recoveryBriefingProvider 자체는 1분 시계를 쓰는 autoDispose라 화면이 볼 때만 만든다)
+      ref.read(todayConditionResultProvider);
+      ref.read(sleepRecordProvider);
       ref.read(recentSleepDaySlotsProvider);
     }
   }
@@ -616,7 +628,10 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
     if (state == AppLifecycleState.resumed && mounted) {
       UpdateService.checkForUpdate(context);
       // ⭐ 2026-09-14 (T10 연결, G2-01) - 재개될 때마다 친구공유 대기 작업(dirty/stop_pending) 재시도
-      _runFriendSync('onAppResumed', FriendSyncService.instance.onAppResumed(ref.read(scheduleProvider).valueOrNull));
+      _runFriendSync(
+          'onAppResumed',
+          FriendSyncService.instance
+              .onAppResumed(ref.read(scheduleProvider).valueOrNull));
     }
   }
 
@@ -687,56 +702,55 @@ class _MainScreenState extends ConsumerState<MainScreen> with WidgetsBindingObse
   }
 
   // ⭐ Native에서 호출하는 메서드 처리 (통합 버전)
-Future<void> _handleMethod(MethodCall call) async {
-  print('📞 Method Call 수신: ${call.method}');
+  Future<void> _handleMethod(MethodCall call) async {
+    print('📞 Method Call 수신: ${call.method}');
 
-  if (call.method == 'refreshAlarms') {
-    // ⭐ Native가 이미 갱신(AlarmRefreshEngine)을 끝내고 나서 UI만 새로고침해달라고
-    // 보내는 신호임. 여기서 다시 갱신을 트리거하면 Native가 방금 한 일을 Dart가
-    // 또 반복하는 꼴이라 삭제/재등록 경쟁 상태가 생김 - 그래서 UI 갱신만 함.
-    print('🔄 Native 갱신 완료 신호 수신 - UI만 새로고침');
+    if (call.method == 'refreshAlarms') {
+      // ⭐ Native가 이미 갱신(AlarmRefreshEngine)을 끝내고 나서 UI만 새로고침해달라고
+      // 보내는 신호임. 여기서 다시 갱신을 트리거하면 Native가 방금 한 일을 Dart가
+      // 또 반복하는 꼴이라 삭제/재등록 경쟁 상태가 생김 - 그래서 UI 갱신만 함.
+      print('🔄 Native 갱신 완료 신호 수신 - UI만 새로고침');
 
-    try {
-      if (mounted) {
-        final container = ProviderScope.containerOf(context);
-        await container.read(alarmNotifierProvider.notifier).refresh();
-        print('✅ AlarmNotifier 새로고침 완료');
-      }
-    } catch (e) {
-      print('❌ UI 새로고침 실패: $e');
-    }
-
-  } else if (call.method == 'openTab') {
-    final tabIndex = call.arguments as int;
-    print('📱 탭 이동 요청: $tabIndex');
-    if (mounted) {
-      setState(() {
-        if (tabIndex == kOpenConditionTabSentinel) {
-          // ⭐ 2026-09-07 - 컨디션 탭은 항상 "달력 바로 다음"에 위치함.
-          // ⭐ 2026-09-13 - 영어 로케일이거나(_showConditionTab) 사용자가 설정에서
-          // 꺼놨으면(conditionTabEnabledProvider) 그 탭 자체가 네비게이션에
-          // 없으니 다음알람 탭(0)으로 안전하게 대체.
-          final conditionVisible =
-              _showConditionTab && ref.read(conditionTabEnabledProvider);
-          _currentIndex = conditionVisible ? kCalendarTabIndex + 1 : 0;
-        } else {
-          _currentIndex = tabIndex;
+      try {
+        if (mounted) {
+          final container = ProviderScope.containerOf(context);
+          await container.read(alarmNotifierProvider.notifier).refresh();
+          print('✅ AlarmNotifier 새로고침 완료');
         }
-      });
+      } catch (e) {
+        print('❌ UI 새로고침 실패: $e');
+      }
+    } else if (call.method == 'openTab') {
+      final tabIndex = call.arguments as int;
+      print('📱 탭 이동 요청: $tabIndex');
+      if (mounted) {
+        setState(() {
+          if (tabIndex == kOpenConditionTabSentinel) {
+            // ⭐ 2026-09-07 - 컨디션 탭은 항상 "달력 바로 다음"에 위치함.
+            // ⭐ 2026-09-13 - 영어 로케일이거나(_showConditionTab) 사용자가 설정에서
+            // 꺼놨으면(conditionTabEnabledProvider) 그 탭 자체가 네비게이션에
+            // 없으니 다음알람 탭(0)으로 안전하게 대체.
+            final conditionVisible =
+                _showConditionTab && ref.read(conditionTabEnabledProvider);
+            _currentIndex = conditionVisible ? kCalendarTabIndex + 1 : 0;
+          } else {
+            _currentIndex = tabIndex;
+          }
+        });
+      }
+    } else if (call.method == 'openDateSchedule') {
+      // ⭐ 2026-09-12 - 일정 알림(ScheduleNotificationReceiver.kt)을 탭했을 때
+      // ScheduleNotificationReceiver.kt가 MainActivity에 심어둔 extras를
+      // handleOpenDateScheduleIntent(Kotlin)가 여기로 그대로 전달함(즉시 push
+      // 경로 - 앱이 이미 떠 있는 warm start에서 정상 동작).
+      final args = call.arguments;
+      _applyOpenDateSchedule(args is Map ? args : null);
+      // ⭐ 2026-09-13 - Native에게 "받았다"고 알려서 콜드스타트 유실 대비용
+      // pending 값을 지우게 함(_checkPendingScheduleOpenOnStartup 주석 참고) -
+      // 안 지우면 다음 번 무관한 콜드 스타트 때 이 오래된 요청이 잘못 재사용될 수 있음.
+      platform.invokeMethod('clearPendingScheduleOpen');
     }
-  } else if (call.method == 'openDateSchedule') {
-    // ⭐ 2026-09-12 - 일정 알림(ScheduleNotificationReceiver.kt)을 탭했을 때
-    // ScheduleNotificationReceiver.kt가 MainActivity에 심어둔 extras를
-    // handleOpenDateScheduleIntent(Kotlin)가 여기로 그대로 전달함(즉시 push
-    // 경로 - 앱이 이미 떠 있는 warm start에서 정상 동작).
-    final args = call.arguments;
-    _applyOpenDateSchedule(args is Map ? args : null);
-    // ⭐ 2026-09-13 - Native에게 "받았다"고 알려서 콜드스타트 유실 대비용
-    // pending 값을 지우게 함(_checkPendingScheduleOpenOnStartup 주석 참고) -
-    // 안 지우면 다음 번 무관한 콜드 스타트 때 이 오래된 요청이 잘못 재사용될 수 있음.
-    platform.invokeMethod('clearPendingScheduleOpen');
   }
-}
 
   // ⭐ 2026-09-13 - 네비게이션에 실제로 보여줄 탭들의 실제 인덱스 목록(항상
   // kScheduleManagementTabIndex(1) < kCalendarTabIndex(2) < 3(컨디션) < 4(설정)
@@ -748,7 +762,8 @@ Future<void> _handleMethod(MethodCall call) async {
   // 합쳐진다.
   List<int> get _visibleTabIndices {
     final scheduleVisible = ref.watch(scheduleTabEnabledProvider);
-    final conditionVisible = _showConditionTab && ref.watch(conditionTabEnabledProvider);
+    final conditionVisible =
+        _showConditionTab && ref.watch(conditionTabEnabledProvider);
     return [
       0,
       if (scheduleVisible) kScheduleManagementTabIndex,
@@ -761,21 +776,37 @@ Future<void> _handleMethod(MethodCall call) async {
   BottomNavigationBarItem _navItemFor(int index, BuildContext context) {
     switch (index) {
       case 0:
-        return BottomNavigationBarItem(icon: const Icon(Icons.alarm), label: context.l10n.navNextAlarm);
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.alarm), label: context.l10n.navNextAlarm);
       case 1:
-        return BottomNavigationBarItem(icon: const Icon(Icons.event_note_outlined), label: context.l10n.navScheduleManagement);
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.event_note_outlined),
+            label: context.l10n.navScheduleManagement);
       case 2:
-        return BottomNavigationBarItem(icon: const Icon(Icons.calendar_month), label: context.l10n.navCalendar);
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.calendar_month),
+            label: context.l10n.navCalendar);
       case 3:
-        return const BottomNavigationBarItem(icon: Icon(Icons.self_improvement), label: '컨디션');
+        return const BottomNavigationBarItem(
+            icon: Icon(Icons.self_improvement), label: '수면·회복');
       default:
-        return BottomNavigationBarItem(icon: const Icon(Icons.settings), label: context.l10n.navSettings);
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.settings), label: context.l10n.navSettings);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final visibleTabIndices = _visibleTabIndices;
+    final calendarTheme = ref.watch(calendarThemeProvider);
+    final showCalendarHeaderAd = _currentIndex == kCalendarTabIndex &&
+        calendarTheme.supportsHeaderBanner;
+    final showBottomAd = _currentIndex == 1 ||
+        (_showConditionTab && _currentIndex == 3) ||
+        (_currentIndex == kCalendarTabIndex && !showCalendarHeaderAd);
+    final showAd = showCalendarHeaderAd || showBottomAd;
+    final headerHeight =
+        AdService.bannerHeight > 48.h ? AdService.bannerHeight : 48.h;
     // ⭐ 방금 이 탭이 꺼졌는데(다른 경로로, 혹은 아직 반영 전 프레임에) 지금
     // 하필 그 탭을 보고 있었다면 안전한 탭(달력)으로 옮김 - DisableTabButton의
     // onDisabled가 이미 즉시 처리하지만, 이건 그 경로를 놓쳤을 때의 안전망.
@@ -787,7 +818,7 @@ Future<void> _handleMethod(MethodCall call) async {
       });
     }
     return PopScope(
-      canPop: _currentIndex == kCalendarTabIndex,  // 달력탭이면 앱 종료 허용
+      canPop: _currentIndex == kCalendarTabIndex, // 달력탭이면 앱 종료 허용
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop && _currentIndex != kCalendarTabIndex) {
           // 달력탭이 아니면 달력탭으로 이동
@@ -813,9 +844,10 @@ Future<void> _handleMethod(MethodCall call) async {
         // 뷰가 살아있음) 화면에서 크기·렌더링만 뺀다 - 그래서 탭을 몇 번을 오가도
         // 광고는 앱 시작 시 딱 한 번만 로드되고, 달력 탭으로 돌아오면 다시
         // "짠" 나타나기만 함(재생성 없음).
-        body: Column(
+        body: Stack(
           children: [
-            Expanded(
+            Positioned.fill(
+              bottom: showBottomAd ? AdService.bannerHeight : 0,
               child: Stack(
                 children: [
                   // 탭 화면
@@ -850,11 +882,19 @@ Future<void> _handleMethod(MethodCall call) async {
             // 경로를 막는 로직)은 그대로 두고 ScheduleManagementTab/
             // ConditionTab 생성자로 내려보냄(_setupTabsAndPrewarm 참고) -
             // 동작 자체는 안 바뀌고 버튼이 그려지는 위치만 바뀜.
-            Offstage(
-              offstage: _currentIndex != 1 &&
-                  _currentIndex != kCalendarTabIndex &&
-                  !(_showConditionTab && _currentIndex == 3),
-              child: const BannerAdSlot(),
+            Positioned(
+              top: showCalendarHeaderAd
+                  ? MediaQuery.paddingOf(context).top +
+                      (headerHeight - AdService.bannerHeight) / 2
+                  : null,
+              bottom: showCalendarHeaderAd ? null : 0,
+              left: showCalendarHeaderAd ? kCalendarHeaderAdLeft : 0,
+              right: 0,
+              height: AdService.bannerHeight,
+              child: Offstage(
+                offstage: !showAd,
+                child: const BannerAdSlot(),
+              ),
             ),
           ],
         ),
@@ -871,7 +911,8 @@ Future<void> _handleMethod(MethodCall call) async {
             final idx = visibleTabIndices.indexOf(_currentIndex);
             return idx < 0 ? 0 : idx;
           }(),
-          onTap: (visibleIndex) => setState(() => _currentIndex = visibleTabIndices[visibleIndex]),
+          onTap: (visibleIndex) =>
+              setState(() => _currentIndex = visibleTabIndices[visibleIndex]),
           items: [for (final i in visibleTabIndices) _navItemFor(i, context)],
         ),
       ),
@@ -1039,8 +1080,8 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(overlayPermissionGranted
-          ? '🧪 5초 후 작은 팝업창이 뜹니다!'
-          : '🧪 5초 후 전체 화면이 뜹니다!\n(Overlay 권한 없음)'),
+            ? '🧪 5초 후 작은 팝업창이 뜹니다!'
+            : '🧪 5초 후 전체 화면이 뜹니다!\n(Overlay 권한 없음)'),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -1135,9 +1176,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
                 ),
               ),
             ),
-
             SizedBox(height: 24.h),
-
             Text(
               '알람 시간',
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
@@ -1145,16 +1184,16 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
             SizedBox(height: 8.h),
             Card(
               child: ListTile(
-                leading: Icon(Icons.access_time, color: Colors.blue, size: 24.sp),
-                title: Text(_formatDateTime(selectedDateTime), style: TextStyle(fontSize: 16.sp)),
+                leading:
+                    Icon(Icons.access_time, color: Colors.blue, size: 24.sp),
+                title: Text(_formatDateTime(selectedDateTime),
+                    style: TextStyle(fontSize: 16.sp)),
                 subtitle: Text('탭하여 시간 변경', style: TextStyle(fontSize: 14.sp)),
                 trailing: Icon(Icons.arrow_forward_ios, size: 16.sp),
                 onTap: _selectDateTime,
               ),
             ),
-
             SizedBox(height: 24.h),
-
             Text(
               '알람 타입',
               style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
@@ -1166,7 +1205,9 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
                 color: isSelected ? Colors.blue.shade50 : null,
                 child: ListTile(
                   leading: Icon(
-                    isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                    isSelected
+                        ? Icons.radio_button_checked
+                        : Icons.radio_button_unchecked,
                     color: isSelected ? Colors.blue : Colors.grey,
                     size: 24.sp,
                   ),
@@ -1179,9 +1220,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
                 ),
               );
             }).toList(),
-
             SizedBox(height: 32.h),
-
             ElevatedButton.icon(
               onPressed: _scheduleAlarm,
               icon: const Icon(Icons.alarm_add),
@@ -1192,9 +1231,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
                 foregroundColor: Colors.white,
               ),
             ),
-
             SizedBox(height: 12.h),
-
             OutlinedButton.icon(
               onPressed: _scheduleTestAlarm,
               icon: const Icon(Icons.science),
@@ -1203,9 +1240,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
                 padding: EdgeInsets.all(16.h),
               ),
             ),
-
             SizedBox(height: 12.h),
-
             TextButton.icon(
               onPressed: _cancelAlarm,
               icon: const Icon(Icons.cancel),
@@ -1244,14 +1279,16 @@ class _InitialRouterState extends State<InitialRouter> {
     await RestoreCoordinator.instance.consumeInterruptedFlag();
     if (await RestoreCoordinator.instance.hasPendingJob()) {
       if (mounted) {
-        Navigator.of(context).pushReplacement(_instantRoute(const RestoreInterruptedScreen()));
+        Navigator.of(context)
+            .pushReplacement(_instantRoute(const RestoreInterruptedScreen()));
       }
       return;
     }
 
     // 1. 권한 요청 여부 확인
     final prefs = await SharedPreferences.getInstance();
-    final permissionsRequested = prefs.getBool('permissions_requested') ?? false;
+    final permissionsRequested =
+        prefs.getBool('permissions_requested') ?? false;
 
     // 2. 스케줄 존재 여부 확인
     final schedule = await DatabaseService.instance.getShiftSchedule();
@@ -1271,7 +1308,8 @@ class _InitialRouterState extends State<InitialRouter> {
     // 생길 수가 없음.
     if (!permissionsRequested) {
       if (mounted) {
-        Navigator.of(context).pushReplacement(_instantRoute(const PermissionIntroScreen()));
+        Navigator.of(context)
+            .pushReplacement(_instantRoute(const PermissionIntroScreen()));
       }
     } else if (schedule == null) {
       // ⭐ 사용자 데이터 백업("A번 요구사항") - 스케줄이 아직 없다는 건 신규
@@ -1292,16 +1330,17 @@ class _InitialRouterState extends State<InitialRouter> {
       }
       if (!mounted) return;
       if (payload != null) {
-        Navigator.of(context)
-            .pushReplacement(_instantRoute(RestoreBackupScreen(payload: payload)));
+        Navigator.of(context).pushReplacement(
+            _instantRoute(RestoreBackupScreen(payload: payload)));
       } else {
-        Navigator.of(context).pushReplacement(_instantRoute(const OnboardingScreen()));
+        Navigator.of(context)
+            .pushReplacement(_instantRoute(const OnboardingScreen()));
       }
     } else {
       // ⭐ 홈 화면: 항상 달력탭으로 시작
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          _instantRoute(MainScreen(initialIndex: kCalendarTabIndex)),  // 달력탭 고정
+          _instantRoute(MainScreen(initialIndex: kCalendarTabIndex)), // 달력탭 고정
         );
       }
     }

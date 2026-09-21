@@ -158,6 +158,10 @@ DateTime _dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 /// 취침시각을 넘겼는가"로 기준을 바꾸면 퇴근 시각이 몇 시든 항상 같은 기준으로
 /// 갈린다(21일이 야간이고 22일이 휴무인 경우: 22일 07~13시의 회복수면은 21일
 /// 칸, 22일 23시부터의 정상 취침은 22일 자신의 주수면 - 둘 다 정확히 갈라짐).
+///
+/// ⭐ 2026-09-21 - 오늘도 출근 시각이 있는 근무라면 경계를 "어제 퇴근 ~ 오늘 출근"의
+/// 한가운데까지 당긴다(연속 야간의 "출근 전 수면"을 어제 것으로 삼키던 버그 수정 -
+/// 아래 본문 주석 참고). 오늘이 휴무면 21시 앵커 그대로.
 DateTime _attributedDay(SleepRecord r, ShiftPatternAnalyzer? analyzer) {
   final startDay = _dayOnly(r.start);
   if (analyzer == null) return startDay;
@@ -180,9 +184,36 @@ DateTime _attributedDay(SleepRecord r, ShiftPatternAnalyzer? analyzer) {
 
   // 오늘(=수면이 시작한 날) 자신의 평소 취침시각 앵커 - 자동 감지 창의
   // kFlatSleepStartHour(sleep_opportunity.dart)와 동일 값을 재사용한다.
-  final todayBedtimeAnchor =
-      DateTime(startDay.year, startDay.month, startDay.day, kFlatSleepStartHour);
-  if (!r.start.isBefore(todayBedtimeAnchor)) return startDay; // 오늘 21시 이후 - 오늘 자신의 주수면
+  var boundary = DateTime(startDay.year, startDay.month, startDay.day, kFlatSleepStartHour);
+
+  // ⭐ 2026-09-21 버그 수정(사용자 신고) - 연속 야간(야간1·야간2)일 때 "야간2 출근 전
+  // 낮잠"(예: 14~17시)까지 21시 앵커 안에 들어와서 통째로 야간1의 회복수면으로
+  // 귀속되던 문제. 그 결과 (a) 야간2 칸에는 출근 전 수면이 안 보이고 (b) 야간1 칸에
+  // 낮잠이 하나 더 붙어 같은 잠이 엉뚱한 날에 표시됐다.
+  //
+  // 오늘도 근무가 있고 그 출근 시각이 어제 퇴근 이후라면, 경계를 "어제 퇴근 ~ 오늘
+  // 출근"의 한가운데로 당긴다 - 앞쪽 절반은 어제 근무의 회복수면(퇴근하고 바로 자는
+  // 잠), 뒤쪽 절반은 오늘 근무를 위한 출근 전 수면으로 갈린다. 퇴근·출근 시각이
+  // 몇 시든 항상 같은 규칙으로 갈리고(고정 시각 가정 없음), 오늘이 휴무면 비교할
+  // 출근 시각이 없으므로 기존 21시 앵커가 그대로 쓰인다.
+  //
+  // 예) 야간1 19~07시 / 야간2 19~07시 → 경계 13:00
+  //     08~13시 수면 = 야간1의 주수면(어제 칸) · 14~17시 수면 = 야간2의 출근 전 수면(오늘 칸)
+  final todayInst = analyzer.instanceForDate(startDay);
+  if (todayInst.isWorkDay && todayInst.start != null && todayInst.start!.isAfter(effectiveEnd)) {
+    final mid = effectiveEnd.add(todayInst.start!.difference(effectiveEnd) ~/ 2);
+    if (mid.isBefore(boundary)) boundary = mid;
+  }
+
+  // ⭐ 2026-09-21 - 경계와 비교하는 값은 시작 시각이 아니라 그 수면의 "가운데"다.
+  // 시작 시각만 보면 경계를 살짝 앞두고 시작한 긴 잠(예: 경계 13:00인데 12:00~18:30에
+  // 자고 19:00에 야간 출근)이 통째로 어제 몫이 되고, 반대로 경계 직전에 시작한 그날 밤
+  // 정상 취침(예: 휴무일 20:30~05:00)도 어제 몫이 된다. 무게중심으로 보면 두 경우 다
+  // 자연스럽게 갈린다(아직 기상 전이라 길이를 모르면 시작 시각으로 판단).
+  final pivot = r.end == null
+      ? r.start
+      : r.start.add(Duration(minutes: r.end!.difference(r.start).inMinutes ~/ 2));
+  if (!pivot.isBefore(boundary)) return startDay; // 경계 이후 - 오늘 자신의 수면
   return prevDay;
 }
 

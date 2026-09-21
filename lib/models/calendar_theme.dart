@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../l10n/l10n_extensions.dart';
 import '../utils/shift_name_util.dart';
+
 //
 // ⭐ 달력 테마 선택 시스템의 중심 모델. calendar_theme_lab_screen.dart에서
 // 실험하던 9개 후보(1/2/4/5/8/9/10번 + 메인·화이트/메인·다크)를 실제 선택
@@ -19,22 +20,29 @@ import '../utils/shift_name_util.dart';
 // kAllCalendarThemeIds=CalendarThemeId.values를 선언 순서 그대로 씀). 저장은
 // enum.name(문자열)으로 하므로 이 순서 변경이 기존 저장된 선택값에 영향 없음.
 enum CalendarThemeId {
-  mainWhite,    // 메인테마 · 화이트
-  mainDark,     // 메인테마 · 다크
-  minimal,      // (구)1번 · 미니멀 라인
+  mainWhite, // 메인테마 · 화이트
+  mainDark, // 메인테마 · 다크
+  minimal, // (구)1번 · 미니멀 라인
   materialCard, // (구)2번 · 머티리얼 카드형
-  boldGrid,     // (구)4번 · 굵은 격자형
+  boldGrid, // (구)4번 · 굵은 격자형
   initialBadge, // (구)5번 · 이니셜 뱃지형
-  underline,    // (구)8번 · 언더라인 미니멀형
-  eventChip,    // (구)9번 · 이벤트 칩형
-  editorial,    // (구)10번 · 매거진 에디토리얼형
+  underline, // (구)8번 · 언더라인 미니멀형
+  eventChip, // (구)9번 · 이벤트 칩형
+  editorial, // (구)10번 · 매거진 에디토리얼형
   // ⭐ 2026-09-01 신설 - enum.name으로 영구 저장되므로 반드시 끝에만 추가할 것
   // (기존 9개 순서/이름은 절대 바꾸지 말 것 - 이미 저장된 사용자 선택값이
   // 깨짐). 처음엔 A(노르딕)/B(다이어리) 두 개를 따로 만들었다가, "다이어리는
   // 특별한 게 없다"는 판단으로 노르딕 하나만 남기고 그 위에 다이어리 톤을
   // 살짝 얹어 이름을 다이어리로 바꿈 - 그래서 실사용 전이라 부담 없이 enum
   // 값 자체를 diary 하나로 정리함(이전 nordic 값은 없음).
-  diary,        // 날짜|근무명 절반씩 나눈 상단 박스 + 아이보리 톤의 절제된 캘린더
+  diary, // 날짜|근무명 절반씩 나눈 상단 박스 + 아이보리 톤의 절제된 캘린더
+}
+
+extension CalendarThemeAdPlacement on CalendarThemeId {
+  /// underline/editorial은 일정공유·전체근무표·오늘 버튼이 헤더에 남아 있어
+  /// 광고로 덮을 수 없다. 나머지 테마는 해당 버튼이 6번째 행에 있다.
+  bool get supportsHeaderBanner =>
+      this != CalendarThemeId.underline && this != CalendarThemeId.editorial;
 }
 
 extension CalendarThemeIdX on CalendarThemeId {
@@ -46,16 +54,26 @@ extension CalendarThemeIdX on CalendarThemeId {
   String label(BuildContext context) {
     final l10n = context.l10n;
     switch (this) {
-      case CalendarThemeId.mainWhite: return l10n.themeMainWhite;
-      case CalendarThemeId.mainDark: return l10n.themeMainDark;
-      case CalendarThemeId.minimal: return l10n.themeMinimal;
-      case CalendarThemeId.materialCard: return l10n.themeMaterialCard;
-      case CalendarThemeId.boldGrid: return l10n.themeBoldGrid;
-      case CalendarThemeId.initialBadge: return l10n.themeInitialBadge;
-      case CalendarThemeId.underline: return l10n.themeUnderline;
-      case CalendarThemeId.eventChip: return l10n.themeEventChip;
-      case CalendarThemeId.editorial: return l10n.themeEditorial;
-      case CalendarThemeId.diary: return l10n.themeDiary;
+      case CalendarThemeId.mainWhite:
+        return l10n.themeMainWhite;
+      case CalendarThemeId.mainDark:
+        return l10n.themeMainDark;
+      case CalendarThemeId.minimal:
+        return l10n.themeMinimal;
+      case CalendarThemeId.materialCard:
+        return l10n.themeMaterialCard;
+      case CalendarThemeId.boldGrid:
+        return l10n.themeBoldGrid;
+      case CalendarThemeId.initialBadge:
+        return l10n.themeInitialBadge;
+      case CalendarThemeId.underline:
+        return l10n.themeUnderline;
+      case CalendarThemeId.eventChip:
+        return l10n.themeEventChip;
+      case CalendarThemeId.editorial:
+        return l10n.themeEditorial;
+      case CalendarThemeId.diary:
+        return l10n.themeDiary;
     }
   }
 
@@ -65,7 +83,8 @@ extension CalendarThemeIdX on CalendarThemeId {
   bool get isDark => this == CalendarThemeId.mainDark;
 
   // ⭐ 근무를 색상으로만 구분해서 범례(색상=근무명 매칭 카드)가 필수인 테마.
-  bool get hasLegend => this == CalendarThemeId.underline || this == CalendarThemeId.editorial;
+  bool get hasLegend =>
+      this == CalendarThemeId.underline || this == CalendarThemeId.editorial;
 }
 
 const kDefaultCalendarThemeId = CalendarThemeId.mainWhite;
@@ -108,9 +127,35 @@ const kAllCalendarThemeIds = [
 List<String> mockShiftNames(BuildContext context) {
   final isKorean = Localizations.localeOf(context).languageCode == 'ko';
   if (isKorean) {
-    return const ['주간', '야간', '오전', '오후', '휴무', '당직', '연장', '대기', '재택', '출장', '교육', '특근'];
+    return const [
+      '주간',
+      '야간',
+      '오전',
+      '오후',
+      '휴무',
+      '당직',
+      '연장',
+      '대기',
+      '재택',
+      '출장',
+      '교육',
+      '특근'
+    ];
   }
-  return const ['Day', 'Night', 'Morning', 'Afternoon', 'Off', 'On-Call', 'Extra', 'Standby', 'Remote', 'Travel', 'Training', 'Special'];
+  return const [
+    'Day',
+    'Night',
+    'Morning',
+    'Afternoon',
+    'Off',
+    'On-Call',
+    'Extra',
+    'Standby',
+    'Remote',
+    'Travel',
+    'Training',
+    'Special'
+  ];
 }
 
 const kMainRestColor = Color(0xFFEF5350); // 휴무 고정 - 라이트/다크 공통
@@ -136,7 +181,7 @@ const kMainLightPalette = [
   Color(0xFF6B6524), // 야간 - 다크 골드
   Color(0xFF662F74), // 오전 - 퍼플
   Color(0xFF4DCBC1), // 오후 - 틸
-  kMainRestColor,     // 휴무 - 고정 빨강
+  kMainRestColor, // 휴무 - 고정 빨강
   Color(0xFF36307E), // 당직 - 인디고
   Color(0xFFB946AA), // 연장 - 마젠타 바이올렛
   Color(0xFF6E7722), // 대기 - 올리브
@@ -154,7 +199,7 @@ const kMainDarkPalette = [
   Color(0xFFD68C6A), // 야간 - 뮤트 테라코타
   Color(0xFF8FB89A), // 오전 - 세이지 그린
   Color(0xFFA79BC9), // 오후 - 더스티 라벤더
-  kMainRestColor,     // 휴무 - 고정 빨강(다크에서도 그대로 - 잘 보임)
+  kMainRestColor, // 휴무 - 고정 빨강(다크에서도 그대로 - 잘 보임)
   Color(0xFFD9AE6B), // 당직 - 소프트 앰버
   Color(0xFF7B93B5), // 연장 - 슬레이트 블루
   Color(0xFFA3AD72), // 대기 - 뮤트 올리브
@@ -184,7 +229,7 @@ const kVividPalette = [
   Color(0xFF4771D1), // 블루
   Color(0xFF4B762D), // 모스 그린
   Color(0xFF662F74), // 퍼플
-  kMainRestColor,     // 휴무 - 고정 빨강
+  kMainRestColor, // 휴무 - 고정 빨강
   Color(0xFFB946AA), // 마젠타 바이올렛
   Color(0xFF6E7722), // 올리브
   Color(0xFF36307E), // 인디고
@@ -206,7 +251,7 @@ const kBoldGridPalette = [
   Color(0xFFC9A66B), // 머스타드 골드
   Color(0xFF4E9E94), // 틸(청록)
   Color(0xFF9575CD), // 바이올렛
-  kMainRestColor,     // 휴무 - 고정 빨강
+  kMainRestColor, // 휴무 - 고정 빨강
   Color(0xFFB0855C), // 러스트 탄
   Color(0xFF7CA982), // 세이지 그린
   Color(0xFF37474F), // 짙은 슬레이트 (어두운 톤 2/2 - 위 차콜과 최대한 멀리 배치)
@@ -228,7 +273,7 @@ const kDiaryPalette = [
   Color(0xFFB8794F), // 테라코타
   Color(0xFF6B8E6E), // 세이지 그린
   Color(0xFF8B6F9E), // 더스티 플럼
-  kMainRestColor,     // 휴무 - 고정 빨강
+  kMainRestColor, // 휴무 - 고정 빨강
   Color(0xFFC2A24C), // 머스타드 오커
   Color(0xFF4A6670), // 딥 틸그레이
   Color(0xFFB98080), // 더스티 로즈
@@ -243,15 +288,18 @@ const kDiaryPalette = [
 // 저장된 schedule.shiftColors를 읽는 대신) 이 함수로 매번 계산해서 씀.
 // onboarding_screen.dart의 _generateShiftColors()와 동일한 2단계 규칙
 // (휴무 먼저 고정 배정 → 나머지는 순서대로 팔레트 배정)을 그대로 따름.
-Map<String, Color> assignShiftColors(List<String> shiftTypes, {required bool isDark}) {
-  return _assignFromPalette(shiftTypes, isDark ? kMainDarkPalette : kMainLightPalette, 0);
+Map<String, Color> assignShiftColors(List<String> shiftTypes,
+    {required bool isDark}) {
+  return _assignFromPalette(
+      shiftTypes, isDark ? kMainDarkPalette : kMainLightPalette, 0);
 }
 
 // ⭐ "비슷한 테마끼리 근무색까지 똑같아서 차별점이 없다"는 지적을 해결하는
 // 테마별 진입점 - 팔레트 자체(그룹1=표준 라이트, 그룹2=비비드, 4번/다크는
 // 전용)와 그 안에서의 시작 로테이션을 테마마다 다르게 줘서, 같은 그룹 안에서도
 // "같은 색상 세트, 다른 배정 순서"로 서로 구분되게 함.
-Map<String, Color> assignShiftColorsForTheme(List<String> shiftTypes, CalendarThemeId theme) {
+Map<String, Color> assignShiftColorsForTheme(
+    List<String> shiftTypes, CalendarThemeId theme) {
   switch (theme) {
     case CalendarThemeId.mainWhite:
       return _assignFromPalette(shiftTypes, kMainLightPalette, 0);
@@ -301,7 +349,8 @@ Map<String, Color> effectiveShiftColors(
   return result;
 }
 
-Map<String, Color> _assignFromPalette(List<String> shiftTypes, List<Color> palette, int rotation) {
+Map<String, Color> _assignFromPalette(
+    List<String> shiftTypes, List<Color> palette, int rotation) {
   final colors = <String, Color>{};
 
   // ⭐ 영어 현지화: 이 함수가 실제 사용자 스케줄(assignShiftColors/
@@ -319,7 +368,8 @@ Map<String, Color> _assignFromPalette(List<String> shiftTypes, List<Color> palet
   // 목록 안에서 시작 위치만 밀어주는 것 - 팔레트 자체(색상 구성)는 그대로.
   final nonRestPalette = palette.where((c) => c != kMainRestColor).toList();
   for (int i = 0; i < nonRestShifts.length; i++) {
-    colors[nonRestShifts[i]] = nonRestPalette[(i + rotation) % nonRestPalette.length];
+    colors[nonRestShifts[i]] =
+        nonRestPalette[(i + rotation) % nonRestPalette.length];
   }
 
   return colors;

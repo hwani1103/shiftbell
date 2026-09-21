@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_button.dart';
+import 'word_safe_spans.dart';
 
 const _kWelcomePopupShownKey = 'welcome_popup_shown';
 const _kShiftAssignTutorialShownKey = 'shift_assign_tutorial_shown';
@@ -51,7 +52,8 @@ Future<void> maybeShowWelcomePopup(BuildContext context) async {
 
 /// 달력 탭(calendar_tab.dart)이 스케줄 로드 후 부르는 함수 - 불규칙 스케줄이고
 /// 아직 안 봤을 때만 뜸.
-Future<void> maybeShowShiftAssignTutorial(BuildContext context, {required bool isRegular}) async {
+Future<void> maybeShowShiftAssignTutorial(BuildContext context,
+    {required bool isRegular}) async {
   if (isRegular) return;
   final prefs = await SharedPreferences.getInstance();
   if (prefs.getBool(_kShiftAssignTutorialShownKey) ?? false) return;
@@ -136,14 +138,18 @@ class _InfoPopupCard extends StatelessWidget {
     // actions 분리와 같은 원리).
     final maxHeight = MediaQuery.of(context).size.height * 0.8;
     return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: 320, maxWidth: 340, maxHeight: maxHeight),
+      constraints:
+          BoxConstraints(minHeight: 320, maxWidth: 340, maxHeight: maxHeight),
       child: Container(
         padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 24, offset: const Offset(0, 8)),
+            BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 24,
+                offset: const Offset(0, 8)),
           ],
         ),
         child: Column(
@@ -158,14 +164,29 @@ class _InfoPopupCard extends StatelessWidget {
                   children: [
                     Text(content.emoji, style: const TextStyle(fontSize: 40)),
                     const SizedBox(height: 14),
-                    Text(
-                      content.title,
-                      style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: Colors.black87),
+                    // ⭐ 2026-09-15 - 한국어가 "감사합\n니다"처럼 단어 중간에서 끊기지 않게 wordSafeSpans(명시 \n은 유지)
+                    Text.rich(
+                      TextSpan(
+                        children: wordSafeSpans(
+                          content.title,
+                          const TextStyle(
+                              fontSize: 19,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.black87),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: 14),
-                    Text(
-                      content.body,
-                      style: TextStyle(fontSize: 14.5, height: 1.55, color: Colors.black.withOpacity(0.75)),
+                    Text.rich(
+                      TextSpan(
+                        children: wordSafeSpans(
+                          content.body,
+                          TextStyle(
+                              fontSize: 14.5,
+                              height: 1.55,
+                              color: Colors.black.withOpacity(0.75)),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -174,7 +195,8 @@ class _InfoPopupCard extends StatelessWidget {
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
-              child: AppButton(onPressed: onConfirm, child: Text(content.buttonLabel)),
+              child: AppButton(
+                  onPressed: onConfirm, child: Text(content.buttonLabel)),
             ),
           ],
         ),
@@ -204,12 +226,15 @@ class WelcomePopupContent extends _PopupContent {
   WelcomePopupContent()
       : super(
           emoji: '👋',
-          title: '교대시계 앱을 설치해주셔서 \n감사합니다.',
-          body: 
-              '최초 1회 내 근무 스케줄을 설정하고 알람을 등록해두면, '
-              '내 근무에 맞춰 정해진 시간에 시간에 자동으로 알람이 울려요.\n'
-              '일정, 컨디션 관리, 친구 공유 등 다양한 기능도 구현되어 있습니다.\n\n'
-              '많은 사용 부탁드립니다!',
+          title: '교대시계를 설치해 주셔서\n감사합니다',
+          // ⭐ 2026-09-15 (사용자 요청) - 너무 간소화됐다는 피드백으로 기능 소개를 되살림. 문장 중간에 \n을 넣으면
+          // 화면 폭에 따라 어색하게 끊겨서 문단 사이에만 줄바꿈하고, 줄바꿈은 _InfoPopupCard의 wordSafeSpans에 맡김.
+          body: '처음 한 번만 근무표와 알람을 등록해 두면, '
+              '내 근무에 맞춰 정해진 시간에 알람이 자동으로 울려요.\n\n'
+              '📅  달력에서 날짜별 근무 한눈에 보기\n'
+              '🗓️  일정 관리와 일정 알림\n'
+              '🌙  수면·회복 관리\n'
+              '👥  친구와 근무표 공유',
           buttonLabel: '시작하기',
         );
 }
@@ -230,27 +255,38 @@ class ShiftAssignTutorialContent extends _PopupContent {
 // ⭐ 2026-09-11 추가(사용자 요청) - 컨디션 탭에 처음 들어왔을 때, "설정부터
 // 해야 아무것도 안 보인다"는 진입장벽과 "수면 기록이 대체 어떻게 쌓이는
 // 건지"를 한 번에 설명하는 안내. 근무시간 설정/수면 위젯 추가/자동·수동 기록
-// 4가지를 다 다루다 보니 다른 팝업보다 본문이 길다 - _InfoPopupCard의
+// 여러 가지를 다 다루다 보니 다른 팝업보다 본문이 길다 - _InfoPopupCard의
 // SingleChildScrollView가 이미 넘치는 내용을 스크롤로 받아주므로 그대로 재사용.
+// ⭐ 2026-09-18 - 컨디션 판정 로직 v3(개인 기준선) 재설계 + 근무별 평균 수면(P2#6)
+// + 자동 기록 일괄 확인(P2#7) 반영해서 전면 갱신. "확인된 사실" 섹션 라벨이
+// condition_tab.dart에서 "최근 근무·수면"으로 바뀐 것도 같이 맞춤(같은 화면인데
+// 팝업 문구만 옛 이름으로 남아있으면 안 됨). 예전 본문의 "3."이 두 번 나오던
+// 오타도 이번에 같이 정리함.
 class ConditionTabTutorialContent extends _PopupContent {
   ConditionTabTutorialContent()
       : super(
           emoji: '🌙',
-          title: '컨디션 탭, 이렇게 써보세요',
-          body: '1. 근무시간 설정 (필수)\n'
+          title: '수면·회복 탭, 이렇게 써보세요',
+          body: '1. 근무시간 설정\n'
               '설정 → 근무시간 및 OT 설정에서, 사용 중인 근무명 중 하나 이상의 '
-              '출퇴근 시각을 입력해야 이 탭이 동작해요.\n\n'
-              '2. 수면 위젯 추가\n'
-              '홈 화면을 길게 눌러 위젯 추가 화면에서 "교대시계 수면" 위젯을 '
-              '올려두면, 앱을 열지 않고도 취침/기상을 바로 기록할 수 있어요.\n\n'
-              '3. 위젯 사용법\n'
-              '취침 전 "🌙 수면" 버튼을, 기상 후 "☀️ 기상" 버튼을 눌러주세요.\n\n'
-              '4. 자동 기록\n'
+              '출퇴근 시각을 입력하면 "오늘의 컨디션"이 나와요. 수면 기록은 입력 전에도 남길 수 있어요.\n\n'
+              '2. 오늘의 컨디션\n'
+              '지금 시각을 기준으로 근무 사이 회복시간·퇴근 후 실제 수면 같은 "최근 근무·수면" 정보와, '
+              '몇 시까지 잠자리에 들기·카페인 끊을 시각 같은 "추천 행동"을 보여드려요. 평소 근무량보다 '
+              '이번 주가 유독 많을 때만 알려드리고, 기록이 부족하면 상태를 나쁘게 보지 않고 "판단 범위"에 적어둬요.\n\n'
+              '3. 근무별 평균 수면\n'
+              '야간 후/주간 후/휴무일처럼 근무 종류별로 평균 수면시간을 따로 모아 보여드려요 '
+              '(그 종류로 기록이 3일 이상 쌓여야 나와요).\n\n'
+              '4. 수면 위젯\n'
+              '홈 화면을 길게 눌러 위젯 추가 화면에서 "교대시계 수면" 위젯을 올려두면, 앱을 열지 않고도 '
+              '취침 전 "🌙 수면", 기상 후 "☀️ 기상" 버튼으로 바로 기록할 수 있어요.\n\n'
+              '5. 자동 기록\n'
               '위젯을 안 눌러도, 정해진 수면 시간대에 폰을 오래 안 만지면 자동으로 '
               '추정해서 기록해요. 다만 추정이라 확실하지 않을 수 있어 확인이 필요하면 '
               '탭 상단에 확인 카드가 떠요 - 맞으면 "맞아요", 아니면 "기록하지 않기"를 '
-              '눌러주세요(거부한 시간대는 다음부터는 자동으로 덜 잡히도록 학습돼요).\n\n'
-              '5. 수동 입력/수정\n'
+              '눌러주세요(거부한 시간대는 다음부터는 자동으로 덜 잡히도록 학습돼요). 카드가 여러 개 쌓이면 '
+              '"보이는 기록 모두 확인" 버튼으로 한 번에 처리할 수도 있어요.\n\n'
+              '6. 수동 입력/수정\n'
               '아래 "최근 수면 기록" 달력의 빈 칸을 탭하면 직접 기록을 추가하거나, '
               '이미 있는 기록을 눌러 시각을 고치거나 지울 수 있어요.',
           buttonLabel: '확인했어요',

@@ -197,6 +197,17 @@ object RingingAlarmTracker {
     }
 
     /**
+     * ⭐ 2026-09-15 (출시 적합성 재검토 AUD-02) - 이 프로세스에 살아 있는 울림이 없을 때만 [block](복원 뒤 앱 재시작의 프로세스 종료)을
+     * lock 안에서 실행하고 true. 확인과 종료 사이에 [startRing]이 끼어들 수 없게 같은 lock을 잡음. 울리는 중이면 실행하지 않고 false.
+     */
+    fun runIfNoLiveRing(context: Context, block: () -> Unit): Boolean = synchronized(lock) {
+        ensureLoaded(context)
+        if (active != null && activeStartedHere) return@synchronized false
+        block()
+        true
+    }
+
+    /**
      * X-12 - 회차 정보가 없는 요청(1.0.22 이하가 게시한 제어 알림·화면 Intent)은, 활성 울림이 같은 ID의 옛 버전 기록
      * ([LEGACY_ROUND])일 때만 그 회차로 취급. 새 회차(1 이상)에는 절대 매핑하지 않음 - 스누즈 후 재울림을 옛 신호가 끄는
      * 문제(#3)가 되살아나지 않게.

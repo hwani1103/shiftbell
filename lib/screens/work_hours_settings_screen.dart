@@ -21,10 +21,12 @@ class WorkHoursSettingsScreen extends ConsumerStatefulWidget {
   const WorkHoursSettingsScreen({super.key});
 
   @override
-  ConsumerState<WorkHoursSettingsScreen> createState() => _WorkHoursSettingsScreenState();
+  ConsumerState<WorkHoursSettingsScreen> createState() =>
+      _WorkHoursSettingsScreenState();
 }
 
-class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScreen> {
+class _WorkHoursSettingsScreenState
+    extends ConsumerState<WorkHoursSettingsScreen> {
   // ⭐ 2026-08-25 - "급여 산정일 기준"을 고르면 그 아래로 날짜 피커 등 추가
   // 콘텐츠가 펼쳐지는데, 화면 아래쪽이라 스크롤하지 않으면 안 보임 - 골라도
   // 뭐가 바뀌었는지 못 보고 지나치기 쉬웠음. 그 옵션을 고른 직후 자동으로 맨
@@ -69,7 +71,8 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     // (shift_time_range.dart 참고 - 하나의 입력으로 두 데이터를 같이 채움).
     // 컨디션 탭은 이 값이 하나라도 있어야 동작하므로, 이 화면이 이제 그 입력
     // 지점이 됨(조건매니저_설계.md, 컨디션 탭 자체의 입력 UI는 삭제함).
-    final shiftTimes = ref.watch(conditionShiftTimeProvider).value ?? const <String, ShiftTimeRange>{};
+    final shiftTimes = ref.watch(conditionShiftTimeProvider).value ??
+        const <String, ShiftTimeRange>{};
 
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.settingsWorkHoursAndOt)),
@@ -87,81 +90,96 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 controller: _scrollController,
                 padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 40.h),
                 children: [
-                // ⭐ 시인성 때문에 맨 위로 - 제목 줄 우측에 바로 스위치가 붙어있어서
-                // 이 화면에 들어오자마자 토글만 바로 켜고 나갈 수도 있음.
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        context.l10n.workHoursShiftChangeOtTitle,
-                        style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
+                  // ⭐ 시인성 때문에 맨 위로 - 제목 줄 우측에 바로 스위치가 붙어있어서
+                  // 이 화면에 들어오자마자 토글만 바로 켜고 나갈 수도 있음.
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          context.l10n.workHoursShiftChangeOtTitle,
+                          style: TextStyle(
+                              fontSize: 17.sp, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                    ),
-                    Switch(
-                      value: workSettings.shiftChangeCountsAsOt,
-                      onChanged: (v) => ref.read(workHoursSettingsProvider.notifier).setShiftChangeCountsAsOt(v),
-                      activeColor: colorScheme.primary,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  context.l10n.workHoursShiftChangeOtDesc,
-                  style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
-                ),
+                      Switch(
+                        value: workSettings.shiftChangeCountsAsOt,
+                        onChanged: (v) => ref
+                            .read(workHoursSettingsProvider.notifier)
+                            .setShiftChangeCountsAsOt(v),
+                        activeColor: colorScheme.primary,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    context.l10n.workHoursShiftChangeOtDesc,
+                    style: TextStyle(
+                        fontSize: 12.sp,
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.4),
+                  ),
 
-                SizedBox(height: 28.h),
-                Divider(color: colorScheme.outline.withOpacity(0.4)),
-                SizedBox(height: 20.h),
+                  SizedBox(height: 28.h),
+                  Divider(color: colorScheme.outline.withOpacity(0.4)),
+                  SizedBox(height: 20.h),
 
-                Text(
-                  context.l10n.settingsDefaultWorkHoursPerShift,
-                  style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  context.l10n.workHoursDefaultDurationDesc,
-                  style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
-                ),
-                SizedBox(height: 16.h),
-                ...schedule.shiftTypes.map((shift) => _buildShiftTimeTile(schedule, shift, shiftTimes[shift])),
-
-                SizedBox(height: 28.h),
-                Divider(color: colorScheme.outline.withOpacity(0.4)),
-                SizedBox(height: 20.h),
-
-                Text(
-                  context.l10n.settingsMonthlyPeriodBasis,
-                  style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  context.l10n.workHoursPeriodBasisDesc,
-                  style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant, height: 1.4),
-                ),
-                SizedBox(height: 12.h),
-                _buildPeriodModeOption(
-                  mode: MonthlyPeriodMode.calendar,
-                  current: workSettings.periodMode,
-                  title: context.l10n.settingsCalendarMonthBasis,
-                  subtitle: context.l10n.settingsCalendarMonthBasisDesc,
-                ),
-                SizedBox(height: 8.h),
-                _buildPeriodModeOption(
-                  mode: MonthlyPeriodMode.payday,
-                  current: workSettings.periodMode,
-                  title: context.l10n.settingsPaydayBasis,
-                  subtitle: context.l10n.settingsPaydayBasisDesc,
-                ),
-
-                if (workSettings.periodMode == MonthlyPeriodMode.payday) ...[
+                  Text(
+                    context.l10n.settingsDefaultWorkHoursPerShift,
+                    style:
+                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    context.l10n.workHoursDefaultDurationDesc,
+                    style: TextStyle(
+                        fontSize: 12.sp,
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.4),
+                  ),
                   SizedBox(height: 16.h),
-                  _buildCutoffDayPicker(workSettings.paydayCutoffDay),
+                  ...schedule.shiftTypes.map((shift) =>
+                      _buildShiftTimeTile(schedule, shift, shiftTimes[shift])),
+
+                  SizedBox(height: 28.h),
+                  Divider(color: colorScheme.outline.withOpacity(0.4)),
+                  SizedBox(height: 20.h),
+
+                  Text(
+                    context.l10n.settingsMonthlyPeriodBasis,
+                    style:
+                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    context.l10n.workHoursPeriodBasisDesc,
+                    style: TextStyle(
+                        fontSize: 12.sp,
+                        color: colorScheme.onSurfaceVariant,
+                        height: 1.4),
+                  ),
                   SizedBox(height: 12.h),
-                  _buildCutoffAnchorToggle(workSettings),
-                  SizedBox(height: 12.h),
-                  _buildPeriodPreview(workSettings),
-                ],
+                  _buildPeriodModeOption(
+                    mode: MonthlyPeriodMode.calendar,
+                    current: workSettings.periodMode,
+                    title: context.l10n.settingsCalendarMonthBasis,
+                    subtitle: context.l10n.settingsCalendarMonthBasisDesc,
+                  ),
+                  SizedBox(height: 8.h),
+                  _buildPeriodModeOption(
+                    mode: MonthlyPeriodMode.payday,
+                    current: workSettings.periodMode,
+                    title: context.l10n.settingsPaydayBasis,
+                    subtitle: context.l10n.settingsPaydayBasisDesc,
+                  ),
+
+                  if (workSettings.periodMode == MonthlyPeriodMode.payday) ...[
+                    SizedBox(height: 16.h),
+                    _buildCutoffDayPicker(workSettings.paydayCutoffDay),
+                    SizedBox(height: 12.h),
+                    _buildCutoffAnchorToggle(workSettings),
+                    SizedBox(height: 12.h),
+                    _buildPeriodPreview(workSettings),
+                  ],
                 ],
               ),
             ),
@@ -177,7 +195,8 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
   // schedule.shiftDurations(기존 근로시간/OT 계산용, 계산된 분 단위 값) -
   // 기존 소비자(work_hours_calculator.dart 등)는 여전히 shiftDurations만 읽으므로
   // 한 줄도 안 건드림.
-  Widget _buildShiftTimeTile(ShiftSchedule schedule, String shift, ShiftTimeRange? range) {
+  Widget _buildShiftTimeTile(
+      ShiftSchedule schedule, String shift, ShiftTimeRange? range) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -197,7 +216,10 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                   shift,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurface),
+                  style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: colorScheme.onSurface),
                 ),
               ),
               SizedBox(width: 8.w),
@@ -212,9 +234,14 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  range == null ? context.l10n.commonNotSet : _formatDuration(range.durationMinutes),
+                  range == null
+                      ? context.l10n.commonNotSet
+                      : _formatDuration(range.durationMinutes),
                   maxLines: 1,
-                  style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: colorScheme.primary),
+                  style: TextStyle(
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary),
                 ),
               ),
               // ⭐ 2026-09-12(사용자 요청) - "어떤 근무든 한 번 시간을 지정하면
@@ -240,7 +267,8 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                       onTap: () => _resetShiftTime(schedule, shift),
                       child: Padding(
                         padding: EdgeInsets.all(6.w),
-                        child: Icon(Icons.replay_rounded, size: 15.sp, color: colorScheme.error),
+                        child: Icon(Icons.replay_rounded,
+                            size: 15.sp, color: colorScheme.error),
                       ),
                     ),
                   ),
@@ -253,7 +281,8 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
             children: [
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => _pickShiftTime(schedule, shift, range, isStart: true),
+                  onPressed: () =>
+                      _pickShiftTime(schedule, shift, range, isStart: true),
                   child: Text(
                     '${context.l10n.workHoursShiftTimeClockIn} '
                     '${_fmtRangeTime(range?.startMinutes ?? _pendingStartOnlyMinutes[shift])}',
@@ -264,7 +293,8 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
               SizedBox(width: 8.w),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: () => _pickShiftTime(schedule, shift, range, isStart: false),
+                  onPressed: () =>
+                      _pickShiftTime(schedule, shift, range, isStart: false),
                   child: Text(
                     '${context.l10n.workHoursShiftTimeClockOut} '
                     '${_fmtRangeTime(range?.endMinutes ?? _pendingEndOnlyMinutes[shift])}',
@@ -310,14 +340,27 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     // 그 값을 그대로 초기값으로 써서 "방금 고른 값이 사라진 것처럼" 보이지 않게 함.
     final currentMinutes = range != null
         ? (isStart ? range.startMinutes : range.endMinutes)
-        : (isStart ? (_pendingStartOnlyMinutes[shift] ?? 9 * 60) : (_pendingEndOnlyMinutes[shift] ?? 18 * 60));
-    final initial = TimeOfDay(hour: (currentMinutes ~/ 60) % 24, minute: currentMinutes % 60);
-    final picked = await showTimePicker(context: context, initialTime: initial);
+        : (isStart
+            ? (_pendingStartOnlyMinutes[shift] ?? 9 * 60)
+            : (_pendingEndOnlyMinutes[shift] ?? 18 * 60));
+    final initial = TimeOfDay(
+        hour: (currentMinutes ~/ 60) % 24, minute: currentMinutes % 60);
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      // 시간 피커 안에서도 어느 근무의 어느 시각을 고르는지 놓치지 않게 한다.
+      helpText:
+          '$shift · ${isStart ? context.l10n.workHoursShiftTimeClockIn : context.l10n.workHoursShiftTimeClockOut}',
+    );
     if (picked == null) return;
 
     final newMinutes = picked.hour * 60 + picked.minute;
-    final startMinutes = isStart ? newMinutes : (range?.startMinutes ?? _pendingStartOnlyMinutes[shift]);
-    final endMinutes = isStart ? (range?.endMinutes ?? _pendingEndOnlyMinutes[shift]) : newMinutes;
+    final startMinutes = isStart
+        ? newMinutes
+        : (range?.startMinutes ?? _pendingStartOnlyMinutes[shift]);
+    final endMinutes = isStart
+        ? (range?.endMinutes ?? _pendingEndOnlyMinutes[shift])
+        : newMinutes;
 
     if (startMinutes == null || endMinutes == null) {
       // ⭐ 아직 한쪽만 입력됨 - "기록하지 않기" 원칙과 동일하게, 나머지 한쪽을
@@ -337,7 +380,8 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     // 둘 다 채워졌으니 실제로 저장하고, 로컬 임시 상태는 더 이상 필요 없으니 정리.
     _pendingStartOnlyMinutes.remove(shift);
     _pendingEndOnlyMinutes.remove(shift);
-    final newRange = ShiftTimeRange(shiftName: shift, startMinutes: startMinutes, endMinutes: endMinutes);
+    final newRange = ShiftTimeRange(
+        shiftName: shift, startMinutes: startMinutes, endMinutes: endMinutes);
 
     await _persistShiftTime(shift, newRange);
   }
@@ -348,8 +392,11 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
   // 방금 바꾼 다른 근무 값이 옛 값으로 덮어써졌음. 저장 성공 뒤에만 화면 상태와 변경 통지(contracts §3)를 반영.
   // [range]가 null이면 되돌리기.
   Future<void> _persistShiftTime(String shift, ShiftTimeRange? range) async {
-    final saved = await DatabaseService.instance.saveShiftTimeRange(shift, range);
-    ref.read(conditionShiftTimeProvider.notifier).applyExternallyPersisted(shift, range, notify: true);
+    final saved =
+        await DatabaseService.instance.saveShiftTimeRange(shift, range);
+    ref
+        .read(conditionShiftTimeProvider.notifier)
+        .applyExternallyPersisted(shift, range, notify: true);
     if (saved != null) {
       ref.read(scheduleProvider.notifier).applyExternallyPersisted(
         saved,
@@ -382,7 +429,9 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
   Color _selectedBg(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return isDark ? colorScheme.primaryContainer.withOpacity(0.5) : colorScheme.primary.withOpacity(0.08);
+    return isDark
+        ? colorScheme.primaryContainer.withOpacity(0.5)
+        : colorScheme.primary.withOpacity(0.08);
   }
 
   Widget _buildPeriodModeOption({
@@ -395,12 +444,16 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
     final isSelected = mode == current;
 
     return Material(
-      color: isSelected ? _selectedBg(context) : colorScheme.surfaceVariant.withOpacity(0.3),
+      color: isSelected
+          ? _selectedBg(context)
+          : colorScheme.surfaceVariant.withOpacity(0.3),
       borderRadius: BorderRadius.circular(12.r),
       child: InkWell(
         borderRadius: BorderRadius.circular(12.r),
         onTap: () async {
-          await ref.read(workHoursSettingsProvider.notifier).setPeriodMode(mode);
+          await ref
+              .read(workHoursSettingsProvider.notifier)
+              .setPeriodMode(mode);
           // ⭐ "급여 산정일 기준"을 고르면 그 아래로 날짜 피커 등이 새로 펼쳐짐 -
           // 스크롤 안 하면 화면 밖이라 안 보이므로 고른 직후 맨 아래로 스크롤.
           if (mode == MonthlyPeriodMode.payday) {
@@ -412,14 +465,18 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
-              color: isSelected ? colorScheme.primary : colorScheme.outline.withOpacity(0.4),
+              color: isSelected
+                  ? colorScheme.primary
+                  : colorScheme.outline.withOpacity(0.4),
               width: isSelected ? 1.5 : 1,
             ),
           ),
           child: Row(
             children: [
               Icon(
-                isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_unchecked,
                 color: isSelected ? colorScheme.primary : colorScheme.outline,
                 size: 20.sp,
               ),
@@ -428,9 +485,16 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurface)),
+                    Text(title,
+                        style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface)),
                     SizedBox(height: 2.h),
-                    Text(subtitle, style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant)),
+                    Text(subtitle,
+                        style: TextStyle(
+                            fontSize: 12.sp,
+                            color: colorScheme.onSurfaceVariant)),
                   ],
                 ),
               ),
@@ -453,7 +517,8 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
       ),
       child: Row(
         children: [
-          Text(context.l10n.workHoursCutoffDayPrefix, style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface)),
+          Text(context.l10n.workHoursCutoffDayPrefix,
+              style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface)),
           // ⭐ "일"을 피커 바로 옆에 좁게 붙이지 않고, "매월"과 대칭되게 오른쪽
           // 끝에 독립적으로 배치 - 매월 [ 가운데 피커 ] 일, 형태로 균형 잡음.
           Expanded(
@@ -465,19 +530,26 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
                 axis: Axis.horizontal,
                 itemHeight: 40.h,
                 itemWidth: 48.w,
-                textStyle: TextStyle(fontSize: 13.sp, color: colorScheme.onSurfaceVariant),
-                selectedTextStyle: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
+                textStyle: TextStyle(
+                    fontSize: 13.sp, color: colorScheme.onSurfaceVariant),
+                selectedTextStyle: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface),
                 decoration: BoxDecoration(
                   border: Border(
                     left: BorderSide(color: colorScheme.outline),
                     right: BorderSide(color: colorScheme.outline),
                   ),
                 ),
-                onChanged: (v) => ref.read(workHoursSettingsProvider.notifier).setPaydayCutoffDay(v),
+                onChanged: (v) => ref
+                    .read(workHoursSettingsProvider.notifier)
+                    .setPaydayCutoffDay(v),
               ),
             ),
           ),
-          Text(context.l10n.workHoursCutoffDaySuffix, style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface)),
+          Text(context.l10n.workHoursCutoffDaySuffix,
+              style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface)),
         ],
       ),
     );
@@ -492,7 +564,9 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
           child: _buildAnchorChip(
             label: context.l10n.settingsPeriodStartBasis,
             selected: settings.cutoffAnchor == PaydayCutoffAnchor.periodStart,
-            onTap: () => ref.read(workHoursSettingsProvider.notifier).setCutoffAnchor(PaydayCutoffAnchor.periodStart),
+            onTap: () => ref
+                .read(workHoursSettingsProvider.notifier)
+                .setCutoffAnchor(PaydayCutoffAnchor.periodStart),
           ),
         ),
         SizedBox(width: 10.w),
@@ -500,18 +574,25 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
           child: _buildAnchorChip(
             label: context.l10n.settingsPeriodEndBasis,
             selected: settings.cutoffAnchor == PaydayCutoffAnchor.periodEnd,
-            onTap: () => ref.read(workHoursSettingsProvider.notifier).setCutoffAnchor(PaydayCutoffAnchor.periodEnd),
+            onTap: () => ref
+                .read(workHoursSettingsProvider.notifier)
+                .setCutoffAnchor(PaydayCutoffAnchor.periodEnd),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildAnchorChip({required String label, required bool selected, required VoidCallback onTap}) {
+  Widget _buildAnchorChip(
+      {required String label,
+      required bool selected,
+      required VoidCallback onTap}) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
-      color: selected ? _selectedBg(context) : colorScheme.surfaceVariant.withOpacity(0.3),
+      color: selected
+          ? _selectedBg(context)
+          : colorScheme.surfaceVariant.withOpacity(0.3),
       borderRadius: BorderRadius.circular(10.r),
       child: InkWell(
         borderRadius: BorderRadius.circular(10.r),
@@ -522,7 +603,9 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10.r),
             border: Border.all(
-              color: selected ? colorScheme.primary : colorScheme.outline.withOpacity(0.4),
+              color: selected
+                  ? colorScheme.primary
+                  : colorScheme.outline.withOpacity(0.4),
               width: selected ? 1.5 : 1,
             ),
           ),
@@ -531,7 +614,8 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w600,
-              color: selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+              color:
+                  selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),
             maxLines: 1,
           ),
@@ -552,12 +636,17 @@ class _WorkHoursSettingsScreenState extends ConsumerState<WorkHoursSettingsScree
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       decoration: BoxDecoration(
-        color: isDark ? colorScheme.primaryContainer.withOpacity(0.25) : colorScheme.primary.withOpacity(0.06),
+        color: isDark
+            ? colorScheme.primaryContainer.withOpacity(0.25)
+            : colorScheme.primary.withOpacity(0.06),
         borderRadius: BorderRadius.circular(10.r),
       ),
       child: Text(
         context.l10n.settingsPreviewThisMonth(range),
-        style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: colorScheme.primary),
+        style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+            color: colorScheme.primary),
       ),
     );
   }

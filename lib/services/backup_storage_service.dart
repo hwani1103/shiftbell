@@ -65,13 +65,16 @@ class BackupStorageService {
     }
   }
 
-  /// ⭐ 2026-09-01 - [read]의 자동 탐지(MediaStore 쿼리)가 일부 기기(확인된 사례:
-  /// 삼성 기기 - MediaStore가 저장한 행의 owner_package_name이 NULL로 남는
-  /// OEM 버그로 추정, 우리 쪽 쿼리 코드로는 못 고침)에서 실패하는 게 확인돼서
-  /// 추가한 수동 대안. 시스템 파일 선택기(SAF)를 띄워 사용자가 직접
-  /// Downloads/ShiftBell/shiftbell_backup.json을 고르게 함 - 사용자가 명시적으로
-  /// 고른 파일에 대한 접근 권한은 그 자리에서 새로 받기 때문에 소유권 메타데이터
-  /// 버그와 무관하게 항상 동작함. 사용자가 취소하거나 읽기 실패하면 null.
+  /// ⭐ 2026-09-01 - [read]의 자동 탐지(MediaStore 쿼리)가 실기기에서 실패하는 것이 확인돼 추가한
+  /// 수동 대안. 시스템 파일 선택기(SAF)를 띄워 사용자가 Download/ShiftBell/의 백업 파일을 직접
+  /// 고르게 함 - 사용자가 명시적으로 고른 파일은 그 자리에서 접근 권한을 받으므로 소유권 메타데이터와
+  /// 무관하게 항상 동작함. 사용자가 취소하거나 읽기 실패하면 null.
+  ///
+  /// ⭐ 2026-09-17 정정 - 자동 탐지가 실패하는 진짜 이유는 그동안 적어 둔 "삼성 OEM 버그"가 아니라,
+  /// 앱을 삭제하면 MediaStore가 그 앱이 만든 행의 owner_package_name을 비우기 때문이다(파일은 남음).
+  /// 이 앱은 저장소 권한이 없고 스코프드 스토리지라 자기가 소유한 파일만 보이므로,
+  /// **앱을 지우고 다시 깔 때는 이전 백업을 자동으로 못 찾는 게 정상**이고, 이 수동 선택이 유일한 경로다.
+  /// 측정값·근거는 MainActivity.readBackupFile() 주석의 "2026-09-17 정정" 참고.
   Future<String?> pickAndRead() async {
     try {
       return await _channel.invokeMethod<String>('pickBackupFile');

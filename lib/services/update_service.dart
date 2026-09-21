@@ -47,7 +47,10 @@ class UpdateService {
   // 다음 버전엔 이 내용을 다시 쓰고 싶지 않으면 _releaseNoteVersion을 빈 문자열로
   // 두면 됨 → 그러면 이 다이얼로그는 그냥 안 뜨고, 위의 "새 버전이 있어요" 안내만
   // 평소처럼 동작함.
-  static const String _releaseNoteVersion = '1.0.23';
+  // ⭐ 2026-09-21(사용자 결정) - 1.0.23은 "이번 업데이트는 꼭 확인해주세요" 안내를 띄우지 않음(불필요).
+  // 빈 문자열이면 checkAndShowReleaseNote가 즉시 반환하고 "새 버전이 있어요" 안내만 동작함. 다음에 릴리즈 노트를
+  // 다시 쓰려면 이 값을 그 버전 문자열로 바꾸고 l10n의 updateReleaseNoteTitle/Body를 새로 쓸 것.
+  static const String _releaseNoteVersion = '';
   static const String _releaseNoteSeenKey = 'release_note_seen_version';
 
   // ⭐ 2026-08-20 "기존 유저인데도 업데이트 후 안내가 안 뜬다" 버그 수정 - 예전엔

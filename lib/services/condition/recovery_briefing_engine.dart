@@ -114,7 +114,9 @@ const Duration _kBeforeShiftWindow = Duration(hours: 3);
 const Duration _kRecoveringWindow = Duration(hours: 16);
 const Duration _kCommuteWindow = Duration(hours: 3);
 const Duration _kNoSleepNudgeAfter = Duration(hours: 4);
-const Duration _kPreShiftSleepLookback = Duration(hours: 24);
+/// ⭐ 2026-09-21 - "지난 24시간 총 수면"의 창. EVIDENCE-011(성인 7~9시간)은 원래
+/// 24시간당 기준이라, 수면량 비교는 항상 이 창으로 한다(아래 3-1 참고).
+const Duration _kSleepDayWindow = Duration(hours: 24);
 const Duration _kNapMinLead = Duration(hours: 1);
 const Duration _kNapMaxLead = Duration(hours: 6);
 const Duration _kCaffeineCutoff = Duration(hours: ConditionRuleEngine.caffeineCutoffHoursBeforeSleep);
@@ -142,7 +144,7 @@ const BriefingAction _commuteAction = BriefingAction(
 );
 const BriefingAction _napAction = BriefingAction(
   'nap_before_night',
-  '출근 전에 짧게 눈을 붙이면 야간 졸림을 줄이는 데 도움이 될 수 있어요(근거 수준은 낮음). 깬 직후엔 몽롱할 수 있으니 바로 운전하지는 마세요.',
+  '출근 전에 짧게 눈을 붙이면 야간 졸림을 줄이는 데 도움이 될 수 있어요. 깬 직후엔 잠깐 멍할 수 있으니 바로 운전하지는 마세요.',
   evidenceIds: _eNap,
 );
 const BriefingAction _mealAction = BriefingAction(
@@ -152,7 +154,7 @@ const BriefingAction _mealAction = BriefingAction(
 );
 const BriefingAction _recordSleepAction = BriefingAction(
   'record_sleep',
-  '퇴근 후 잠을 잤다면 아래 "최근 수면 기록"에 남겨주세요. 기록이 있어야 회복 상태를 정확히 보여드릴 수 있어요.',
+  '잠을 잤다면 아래 "최근 수면 기록"에 남겨주세요. 기록이 있어야 실제 수면까지 반영해서 알려드릴 수 있어요.',
 );
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);
@@ -331,13 +333,34 @@ RecoveryBriefing buildRecoveryBriefing({
   final hasRecentRecords = confirmed.any((r) => r.end!.isAfter(now.subtract(const Duration(days: 14))));
   final sleepingNow = records.any((r) => r.end == null && !r.start.isAfter(now));
 
-  final slots = buildSleepDaySlots(
+  // ⭐ 2026-09-21 - 오늘 칸까지 같이 만든다. 아래 3-1의 "출근 전 수면"이 미니 달력과
+  // 정확히 같은 귀속 규칙을 쓰게 하기 위함(귀속 규칙은 sleep_day_slots.dart의
+  // _attributedDay 하나만 신뢰 - 여기서 다시 구현하지 않는다). 평균·어제 수면은
+  // 여전히 "이미 끝난 날"만 쓰므로 오늘 칸은 빼고 계산한다.
+  final slotsIncludingToday = buildSleepDaySlots(
     records: records,
     from: today.subtract(const Duration(days: 7)),
-    to: today.subtract(const Duration(days: 1)),
+    to: today,
     analyzer: analyzer,
   );
+  final slots = slotsIncludingToday.where((s) => s.date.isBefore(today)).toList();
   final dayTotals = [for (final s in slots) _slotTotal(s)];
+
+  // [inst] 근무일 칸에 귀속된 수면 중 출근 시각 전에 끝난 것의 합 = "출근 전 수면".
+  // (야간 첫날의 전날 밤잠은 전날 칸에, 연속 야간의 아침 회복수면은 어제 칸에
+  // 귀속되므로 여기 섞이지 않는다 - 순수하게 "그 근무를 위해 미리 잔 잠"만 남는다.)
+  int preShiftSleepFor(ShiftInstance inst) {
+    var total = 0;
+    for (final slot in slotsIncludingToday) {
+      if (slot.date != inst.date) continue;
+      for (final r in [slot.mainSleep, slot.nap1, slot.nap2]) {
+        if (r?.end == null || r!.end!.isAfter(inst.start!)) continue;
+        total += r.durationMinutes ?? 0;
+      }
+    }
+    return total;
+  }
+
   final recordedDays = dayTotals.where((m) => m > 0).toList();
   final yesterdayTotal = dayTotals.isEmpty ? 0 : dayTotals.last;
   final int? avgRecent = recordedDays.length >= _kMinRecordedDaysForAverage
@@ -349,25 +372,43 @@ RecoveryBriefing buildRecoveryBriefing({
   void act(int rank, BriefingAction action) => ranked.add(_RankedAction(rank, ranked.length, action));
 
   // ── 3. 확인된 사실 ───────────────────────────────────────────────────
-  // 3-1. 이번(또는 곧 시작할) 근무 전 수면 - 근무 시작 24시간 이내·직전 퇴근 이후만
-  var preShiftSleep = 0;
-  if (phase == BriefingPhase.onShift || phase == BriefingPhase.beforeShift || phase == BriefingPhase.laterToday) {
-    final shiftStart = (current ?? next)!.start!;
-    final lookbackStart = shiftStart.subtract(_kPreShiftSleepLookback);
-    var from = last != null ? graceAdjustedShiftEnd(last) : lookbackStart;
-    if (from.isBefore(lookbackStart)) from = lookbackStart;
-    preShiftSleep = sleptBetween(from, phase == BriefingPhase.onShift ? shiftStart : now);
-    final label = phase == BriefingPhase.onShift ? '이번 근무 전 수면' : '출근 전 수면';
-    if (preShiftSleep > 0) {
-      final enough = preShiftSleep >= target;
+  // ⭐ 2026-09-21 - 수면 기록이 비어 있는 구간이면 "그래서 뭘 하면 되는지"를 항상
+  // 같이 준다(예전엔 "출근 전 수면 기록이 없어요"에서 문장이 끊겼음 - 사용자 지적).
+  var sleepDataMissing = false;
+
+  // 3-1. 지난 24시간 수면(근무 중 / 출근 전 / 오늘 근무 대기)
+  // ⭐ 2026-09-21 재설계(사용자 지적) - 예전엔 "직전 퇴근 이후 ~ 출근까지"만 세어
+  //   "출근 전 수면 2시간 — 권장 7시간보다 짧아요"라고 말했다. 야간 근무에서는 출근
+  //   전에 7시간을 채우는 게 애초에 불가능하거나(어제 주간 → 오늘 야간) 그 7시간이
+  //   "출근 전 낮잠 + 퇴근 후 회복수면"으로 쪼개지는 게 정상이라, 출근 전 수면만
+  //   떼어 7시간과 비교하는 건 실행 불가능한 요구가 된다. 권장 7~9시간(EVIDENCE-011)은
+  //   원래 **24시간당** 기준이므로 비교 대상도 지난 24시간 총 수면으로 바꾼다 -
+  //   야간 첫날(전날 밤잠 + 출근 전 낮잠)이든 연속 야간 둘째 날(아침 회복수면 +
+  //   출근 전 낮잠)이든, 경우를 나눠 세지 않아도 그 사람이 실제로 확보한 수면이
+  //   그대로 잡힌다. 출근 전에 따로 눈을 붙인 게 있으면 그 값만 괄호로 덧붙인다.
+  var last24hSleep = 0;
+  final beforeOrOnShift = phase == BriefingPhase.onShift ||
+      phase == BriefingPhase.beforeShift ||
+      phase == BriefingPhase.laterToday;
+  if (beforeOrOnShift) {
+    final shiftInst = (current ?? next)!;
+    last24hSleep = sleptBetween(now.subtract(_kSleepDayWindow), now);
+    final preShiftSleep = preShiftSleepFor(shiftInst);
+    if (last24hSleep > 0) {
+      final enough = last24hSleep >= target;
+      // 괄호는 "24시간 총량과 다른 값일 때"만 - 같으면 같은 말을 두 번 하는 셈이라 뺀다.
+      final preNote = (preShiftSleep > 0 && preShiftSleep < last24hSleep) ? ' (출근 전 ${dur(preShiftSleep)} 포함)' : '';
       facts.add(BriefingFact(
-        '$label ${dur(preShiftSleep)} (기록 기준)${enough ? '' : ' — 권장 7시간보다 짧아요'}',
+        '지난 24시간 수면 ${dur(last24hSleep)}$preNote${enough ? '' : ' — 권장 7시간보다 적어요'}',
         tone: enough ? BriefingTone.good : BriefingTone.caution,
         evidenceIds: const [_eSleepAmount],
         topic: BriefingTopic.sleepAmount,
       ));
-    } else if (hasRecentRecords && !sleepingNow) {
-      facts.add(BriefingFact('$label 기록이 없어요'));
+    } else if (!sleepingNow) {
+      sleepDataMissing = true;
+      if (hasRecentRecords) {
+        facts.add(const BriefingFact('지난 24시간 수면 기록이 없어요', topic: BriefingTopic.sleepAmount));
+      }
     }
   }
 
@@ -382,15 +423,16 @@ RecoveryBriefing buildRecoveryBriefing({
       final enough = sleepSinceLast >= target;
       final cannotReach = !enough && sleepSinceLast + canStillSleep < target;
       facts.add(BriefingFact(
-        '퇴근(${when(l.end!)}) 후 수면 ${dur(sleepSinceLast)} (기록 기준)${cannotReach ? ' — 출근 전까지 7시간을 채우기 어려워요' : ''}',
+        '퇴근(${when(l.end!)}) 후 수면 ${dur(sleepSinceLast)}${cannotReach ? ' — 다음 출근 전까지 7시간을 채우긴 어려워요' : ''}',
         tone: enough ? BriefingTone.good : (cannotReach ? BriefingTone.caution : BriefingTone.neutral),
         evidenceIds: const [_eSleepAmount],
         topic: BriefingTopic.sleepAmount,
       ));
     } else if (sleepingNow) {
       facts.add(const BriefingFact('지금 수면 중으로 기록돼 있어요'));
-    } else if (hasRecentRecords && now.difference(l.end!) >= _kNoSleepNudgeAfter) {
-      facts.add(BriefingFact('퇴근(${when(l.end!)}) 후 기록된 수면이 아직 없어요'));
+    } else if (now.difference(l.end!) >= _kNoSleepNudgeAfter) {
+      sleepDataMissing = true;
+      if (hasRecentRecords) facts.add(BriefingFact('퇴근(${when(l.end!)}) 후 기록된 수면이 아직 없어요'));
     }
   }
 
@@ -400,13 +442,14 @@ RecoveryBriefing buildRecoveryBriefing({
     if (yesterdayTotal > 0) {
       final enough = yesterdayTotal >= target;
       facts.add(BriefingFact(
-        '어제(${y.month}/${y.day}) 수면 ${dur(yesterdayTotal)} (기록 기준)${enough ? '' : ' — 권장 7시간보다 짧아요'}',
+        '어제(${y.month}/${y.day}) 수면 ${dur(yesterdayTotal)}${enough ? '' : ' — 권장 7시간보다 적어요'}',
         tone: enough ? BriefingTone.good : BriefingTone.caution,
         evidenceIds: const [_eSleepAmount],
         topic: BriefingTopic.sleepAmount,
       ));
-    } else if (hasRecentRecords) {
-      facts.add(BriefingFact('어제(${y.month}/${y.day}) 수면 기록이 없어요'));
+    } else {
+      sleepDataMissing = true;
+      if (hasRecentRecords) facts.add(BriefingFact('어제(${y.month}/${y.day}) 수면 기록이 없어요'));
     }
   }
 
@@ -458,7 +501,7 @@ RecoveryBriefing buildRecoveryBriefing({
         capped: phase == BriefingPhase.recovering ? '야간 근무가 휴무 없이 매우 오래 이어진 후' : '연속 야간 근무가 휴무 없이 매우 오래 이어지고 있음',
       );
       facts.add(BriefingFact(
-        severe ? '$text — 연속될수록 실수·사고 위험이 쌓인다고 보고돼요' : text,
+        severe ? '$text — 연속될수록 피로와 실수가 쌓이기 쉬워요' : text,
         tone: severe ? BriefingTone.caution : BriefingTone.neutral,
         evidenceIds: severe ? _eNightStreak : const [],
         topic: BriefingTopic.nightStreak,
@@ -511,9 +554,9 @@ RecoveryBriefing buildRecoveryBriefing({
       ));
       act(60, BriefingAction(
         'extended_streak_rest',
-        '근무 조정이 가능하다면 이어서 $breakDays일 정도 쉬는 것을 고려해보세요. $floorHours시간 근무가 '
+        '$floorHours시간 근무가 '
             '${ConditionRuleEngine.streakClause(bucketStreak, normal: (days) => '$days일', capped: '휴무 없이 매우 오래')} '
-            '이어진 뒤엔 최소 $breakDays일 휴식이 제안돼요.',
+            '이어졌어요. 근무 조정이 가능하다면 이어서 $breakDays일 정도는 쉬어보세요.',
         evidenceIds: bucket.evidenceIds,
         topic: BriefingTopic.longWorkStreak,
       ));
@@ -522,8 +565,8 @@ RecoveryBriefing buildRecoveryBriefing({
       facts.add(BriefingFact(
         ConditionRuleEngine.streakClause(
           workStreak,
-          normal: (days) => '$days일째 연속 근무 — 하루 근무시간과 무관하게 쉬는 날 없이 이어지면 피로가 쌓일 수 있어요',
-          capped: '휴무 없이 매우 오래 근무가 이어지고 있어요 — 하루 근무시간과 무관하게 쉬는 날 없이 이어지면 피로가 쌓일 수 있어요',
+          normal: (days) => '$days일째 연속 근무 중이에요 — 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요',
+          capped: '휴무 없이 매우 오래 근무가 이어지고 있어요 — 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요',
         ),
         tone: BriefingTone.caution,
         evidenceIds: _eConsecutiveWorkdays,
@@ -532,7 +575,7 @@ RecoveryBriefing buildRecoveryBriefing({
       if (severe) {
         act(65, const BriefingAction(
           'consecutive_workdays_rest',
-          '연속 근무가 길게 이어지고 있어요. 근무 조정이 가능하다면 쉬는 날을 확보해보세요.',
+          '연속 근무가 길게 이어지고 있어요. 근무 조정이 가능하다면 하루라도 쉬는 날을 만들어보세요.',
           evidenceIds: _eConsecutiveWorkdays,
           topic: BriefingTopic.longWorkStreak,
         ));
@@ -546,7 +589,10 @@ RecoveryBriefing buildRecoveryBriefing({
   }
 
   // ⭐ 2026-09-17 재설계 - "최근 7일 초과근무"에서 "최근 7일 총 실근무시간"(기본근무+
-  // 초과근무)으로 확장. ConditionRuleEngine.evaluate()의 RULE_WEEKLY_TOTAL_LOAD와 동일 계산.
+  // 초과근무)으로 확장. 2026-09-18 재설계 - EU/IOM 절대값이 아니라 개인 기준선 대비
+  // 증가 폭으로 판단(ConditionRuleEngine.weeklyLoadIncrease - evaluate()가 이미 계산한
+  // base.weeklyBaselineMinutes를 그대로 재사용해서 여기서 다시 계산하지 않음. 원칙 4 -
+  // 같은 주장에 다른 숫자를 쓰지 않는다).
   var weeklyBase = 0;
   for (var i = 0; i < ConditionRuleEngine.overtimeLookbackDays; i++) {
     final inst = analyzer.instanceForDate(today.subtract(Duration(days: i)));
@@ -557,20 +603,26 @@ RecoveryBriefing buildRecoveryBriefing({
     otTotal += otMinutesByDate[ConditionRuleEngine.dateKey(today.subtract(Duration(days: i)))] ?? 0;
   }
   final weeklyTotal = weeklyBase + otTotal;
-  if (weeklyTotal >= ConditionRuleEngine.weeklyLoadAttentionMinutes) {
-    final severe = weeklyTotal >= ConditionRuleEngine.weeklyLoadSevereMinutes;
+  final loadIncrease = ConditionRuleEngine.weeklyLoadIncrease(
+    actualWeeklyMinutes: weeklyTotal,
+    baselineWeeklyMinutes: base.weeklyBaselineMinutes,
+  );
+  if (loadIncrease.heavy) {
+    // heavy가 true면 weeklyLoadIncrease() 정의상 baseline/extraMinutes는 항상 non-null.
+    final baseline = base.weeklyBaselineMinutes!;
+    final extra = loadIncrease.extraMinutes!;
     facts.add(BriefingFact(
-      '최근 7일 실근무시간 ${dur(weeklyTotal)}',
+      '최근 7일 실근무시간 ${dur(weeklyTotal)} — 평소(주 ${dur(baseline)} 안팎)보다 ${dur(extra)} 많아요',
       tone: BriefingTone.caution,
-      evidenceIds: severe ? _eOvertimeSevere : _eOvertime,
+      evidenceIds: loadIncrease.severe ? _eOvertimeSevere : _eOvertime,
       topic: BriefingTopic.weeklyLoad,
     ));
     act(70, BriefingAction(
       'overtime',
-      severe
-          ? '최근 7일 근무시간이 많이 누적됐어요. 가능하면 추가 근무를 줄이고 휴식을 먼저 확보하세요.'
-          : '이번 주 추가 근무는 가능하면 줄여보세요. 연장근무를 포함해 주 평균 48시간을 넘지 않는 것이 기준으로 제시돼요.',
-      evidenceIds: severe ? _eOvertimeSevere : _eOvertime,
+      loadIncrease.severe
+          ? '최근 7일 근무시간이 평소보다 많이 쌓였어요. 가능하면 추가 근무를 줄이고 쉬는 시간부터 먼저 챙기세요.'
+          : '이번 주는 평소보다 근무가 좀 더 많아요. 가능하면 추가 근무를 줄이고 휴식을 챙겨보세요.',
+      evidenceIds: loadIncrease.severe ? _eOvertimeSevere : _eOvertime,
       topic: BriefingTopic.weeklyLoad,
     ));
   }
@@ -590,7 +642,7 @@ RecoveryBriefing buildRecoveryBriefing({
         prev.category != ctx.category &&
         _isBackwardStep(prev.category, ctx.category)) {
       facts.add(BriefingFact(
-        '역방향 교대 전환(${prev.category.label} → ${ctx.category.label}) — 정방향보다 적응에 불리한 경향이 보고돼요',
+        '역방향 교대 전환(${prev.category.label} → ${ctx.category.label}) — 정방향보다 몸이 적응하기 어려운 편이에요',
         tone: BriefingTone.caution,
         evidenceIds: _eDirection,
         topic: BriefingTopic.direction,
@@ -604,7 +656,7 @@ RecoveryBriefing buildRecoveryBriefing({
     return cutoff.isAfter(now)
         ? BriefingAction(
             'caffeine',
-            '${when(cutoff)} 이후엔 커피·에너지음료를 피하세요(잠드는 목표 ${when(bed)}). 잠들기 6시간 전에 마신 카페인도 수면을 줄인다고 보고돼요.',
+            '${when(cutoff)} 이후엔 커피·에너지음료를 피하세요(잠드는 목표 ${when(bed)}).',
             evidenceIds: _eCaffeine,
           )
         : BriefingAction(
@@ -625,7 +677,7 @@ RecoveryBriefing buildRecoveryBriefing({
       if (available < 60) {
         act(10, const BriefingAction(
           'sleep_after_shift',
-          '퇴근 후 다음 출근까지 잘 수 있는 시간이 거의 없어요. 가능하다면 근무 조정이나 근무 중 휴식을 확인해보세요.',
+          '퇴근 후 다음 출근까지 잘 수 있는 시간이 거의 없어요. 가능하다면 근무 조정을 요청하거나 근무 중에라도 잠깐 쉴 수 있는지 알아보세요.',
           evidenceIds: _eRecovery,
         ));
       } else if (available < target) {
@@ -652,12 +704,12 @@ RecoveryBriefing buildRecoveryBriefing({
     final n = next!;
     final isNight = n.category == ShiftTimeCategory.night;
     final lead = n.start!.difference(now);
-    if (isNight && lead >= _kNapMinLead && lead <= _kNapMaxLead && preShiftSleep < target) act(20, _napAction);
+    if (isNight && lead >= _kNapMinLead && lead <= _kNapMaxLead && last24hSleep < target) act(20, _napAction);
     final bedAfter = n.end!.add(_kPrepBuffer);
-    if (preShiftSleep > 0 && preShiftSleep < target) {
+    if (last24hSleep > 0 && last24hSleep < target) {
       act(15, BriefingAction(
         'sleep_after_next',
-        '출근 전 수면이 권장량보다 적었어요. 이번 근무를 마치면(${when(bedAfter)}쯤) 다른 일정보다 수면을 먼저 챙기세요.',
+        '지난 24시간 수면이 권장량보다 적어요. 이번 근무를 마치면(${when(bedAfter)}쯤) 다른 일정보다 수면을 먼저 챙기세요.',
         evidenceIds: const [_eSleepAmount],
       ));
     }
@@ -709,9 +761,6 @@ RecoveryBriefing buildRecoveryBriefing({
       final lead = next.start!.difference(now);
       if (lead >= _kNapMinLead && lead <= _kNapMaxLead && sleepSinceLast > 0) act(20, _napAction);
     }
-    if (sleepSinceLast == 0 && !sleepingNow && hasRecentRecords && now.difference(l.end!) >= _kNoSleepNudgeAfter) {
-      act(90, _recordSleepAction);
-    }
   }
 
   if (phase == BriefingPhase.offDay) {
@@ -752,6 +801,12 @@ RecoveryBriefing buildRecoveryBriefing({
     }
   }
 
+  // ⭐ 2026-09-21 - 수면 기록이 비어 있으면 어느 phase든 "기록하면 반영된다"는 다음
+  // 단계를 준다(예전엔 퇴근 후 구간에서만 안내해서, 출근 전·휴무엔 "기록이 없어요"로
+  // 문장이 끊겼음 - 사용자 지적). 수면을 하나도 모르는 상태에서는 일반적인 야간 식사
+  // 팁(rank 40)보다 이쪽이 먼저 나와야 해서 카페인(30)과 식사(40) 사이에 둔다.
+  if (sleepDataMissing && !sleepingNow) act(35, _recordSleepAction);
+
   // 평균 수면은 사실 목록 맨 끝(오늘 판단의 보조 정보)
   if (avgRecent != null) {
     final low = avgRecent < target;
@@ -768,7 +823,7 @@ RecoveryBriefing buildRecoveryBriefing({
     final nightStreakLabel = nightStreakCapped ? '연속 야간 근무가 휴무 없이 매우 오래 이어지고 있어요' : '연속 야간 $nightStreak일째예요';
     act(50, BriefingAction(
       'night_streak',
-      '$nightStreakLabel. 이 무렵부터 실수·사고 위험이 뚜렷하게 커진다고 보고되니, 운전이나 위험한 작업은 특히 조심하세요.',
+      '$nightStreakLabel. 운전이나 위험한 작업은 특히 조심하세요.',
       evidenceIds: _eNightStreak,
       topic: BriefingTopic.nightStreak,
     ));
@@ -777,13 +832,13 @@ RecoveryBriefing buildRecoveryBriefing({
   // ── 5. 판단 범위 ────────────────────────────────────────────────────
   final limitations = <String>[];
   if (!hasRecentRecords) {
-    limitations.add('최근 2주 수면 기록이 없어 근무 일정만으로 안내했어요. 아래 "최근 수면 기록"에서 기록하면 실제 수면까지 반영돼요.');
+    limitations.add('최근 2주 수면 기록이 없어 근무 일정만 보고 안내했어요.');
   } else if (recordedDays.isNotEmpty && avgRecent == null) {
-    limitations.add('최근 7일 중 수면 기록이 ${recordedDays.length}일뿐이라 평균 수면은 계산하지 않았어요.');
+    limitations.add('최근 7일 중 기록이 ${recordedDays.length}일뿐이라 평균 수면은 계산하지 않았어요.');
   }
   if (untimedNames.isNotEmpty) {
     final names = untimedNames.map((n) => "'$n'").join(', ');
-    limitations.add('$names 근무는 출퇴근 시각이 없어 그날의 근무·회복시간을 계산하지 못했어요. (설정 → 근무시간 및 OT 설정)');
+    limitations.add('$names 근무는 출퇴근 시각이 없어 그날은 계산에서 빠졌어요. (설정 → 근무시간 및 OT 설정)');
   }
   if (pendingCount > 0) {
     limitations.add('확인하지 않은 자동 수면 기록 $pendingCount건은 반영하지 않았어요.');

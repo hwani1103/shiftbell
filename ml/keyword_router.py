@@ -265,7 +265,9 @@ CHORE_KEYWORDS = ["청소", "빨래", "설거지", "분리수거"]
 # prefix 매칭(어절이 "펌"으로 시작)으로만 잡음(뒤에 조사/활용형이 붙는 경우만
 # 인정 - _word_matched와 동일 원리라 "컨펌"/"펌프형"은 애초에 "펌"으로
 # 시작하지 않아서 안전).
-BEAUTY_CONTAINS_KEYWORDS = ["미용실", "네일아트", "네일샵", "왁싱", "염색", "속눈썹"]
+# 학습 데이터 전수 확인(2026-09-21): "네일" 포함 102건 중 99건이 미용.
+# "네일아트/네일샵"만 잡던 기존 목록은 "네일 예약/네일 받기"를 놓쳤다.
+BEAUTY_CONTAINS_KEYWORDS = ["미용실", "네일", "왁싱", "염색", "속눈썹"]
 BEAUTY_PREFIX_KEYWORDS = ["펌", "커트"]
 
 # ⭐ 2026-08-27 - "짧은 단어/구가 기타로 자주 빠진다" 실측(사용자 제보 +
@@ -297,7 +299,9 @@ ACTIVITY_PREFIX_KEYWORDS = {
     # ⭐ 2026-09-03 - "코테"(코딩테스트 줄임말, "인강"과 같은 원리 - 다른 뜻으로
     # 쓰일 여지가 사실상 없는 축약어)를 e2e 평가(eval_e2e.py)에서 발견해 추가.
     "공부": ["공부", "독서", "인강", "강의", "코테"],
-    "병원·건강관리": ["병원"],
+    # 학습 데이터 전수 확인: 치과 42건 중 37건, 약국 13건 중 12건이 건강.
+    # 가족 신호는 이 tier보다 먼저 처리되므로 "엄마 치과 동행"은 계속 가족이다.
+    "병원·건강관리": ["병원", "치과", "약국"],
     "업무": ["출장"],
     "식사": ["식사", "외식"],
     # ⭐ 2026-09-03 - "집콕"/"방탈출" 추가(check_keyword_regressions.py 전체
@@ -311,6 +315,7 @@ ACTIVITY_PREFIX_KEYWORDS = {
     #     RUNNING_KEYWORDS처럼 별도 매처 없이 단순 prefix라 못 갈랐음).
     "여가/휴식": ["여가", "집콕", "방탈출"],
 }
+HEALTH_ACTIVITY_FALSE_POSITIVES = ["치과위생사"]
 # "독서"는 "독서 모임/독서모임"처럼 실제로는 사람을 만나는 모임(사교)을
 # 가리키는 경우가 실측 데이터에서 더 많이 나와서("모임"이 같이 있으면 방향이
 # 뒤집힘, ml/check_keyword_regressions.py로 확인) - "모임" 신호가 있으면
@@ -581,6 +586,8 @@ def route(text):
 
     if not _contains_matched(text, ACTIVITY_DEFER_MARKERS):
         for label, keywords in ACTIVITY_PREFIX_KEYWORDS.items():
+            if label == "병원·건강관리" and _contains_matched(text, HEALTH_ACTIVITY_FALSE_POSITIVES):
+                continue
             if _prefix_matched(tokens, keywords):
                 return label, "tier4_activity"
         for label, keywords in ACTIVITY_CONTAINS_KEYWORDS.items():

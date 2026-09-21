@@ -35,6 +35,9 @@ import '../widgets/onboarding_info_popups.dart';
 import '../providers/friend_provider.dart';
 import 'friend_list_screen.dart';
 import '../utils/friend_open_util.dart';
+import '../utils/blocking_progress.dart';
+import '../constants/layout_limits.dart';
+import '../services/ad_service.dart';
 
 // ⭐ 공휴일 판정 로직은 utils/holiday_util.dart로 이동함 (friend_calendar_view.dart도
 // 똑같은 공휴일 표시가 필요해져서 공용화 - 두 파일 이름만 다르게 감싸서 기존 호출부
@@ -42,7 +45,8 @@ import '../utils/friend_open_util.dart';
 // ⭐ 영어 현지화: 영어 로케일에서는 한국 고유 공휴일을 표시하지 않기로 결정됨
 // (holiday_util.dart의 isKorean 파라미터 참고) - 호출부에서 현재 로케일을 넘겨줌.
 String? _getHolidayName(DateTime date, BuildContext context) =>
-    getHolidayName(date, isKorean: Localizations.localeOf(context).languageCode == 'ko');
+    getHolidayName(date,
+        isKorean: Localizations.localeOf(context).languageCode == 'ko');
 
 // ⭐ 테마별 헤더/요일행 표기에 쓰는 공용 상수 - calendar_theme_lab_screen.dart의
 // 동명 상수(그 파일 안에서만 쓰이는 private const)와 값은 같지만 별도 파일이라
@@ -52,9 +56,30 @@ String? _getHolidayName(DateTime date, BuildContext context) =>
 // weekdayLabel(context, i)로 통일됨(사용부 참고) - 이 배열은 삭제. 아래
 // _weekdayEn3/_weekdayEn1은 "그 테마 디자인 자체가 항상 영어 약자로 보이는"
 // 의도적 스타일이라 로케일과 무관하게 그대로 둠.
-const List<String> _weekdayEn3 = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const List<String> _weekdayEn3 = [
+  'Sun',
+  'Mon',
+  'Tue',
+  'Wed',
+  'Thu',
+  'Fri',
+  'Sat'
+];
 const List<String> _weekdayEn1 = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-const List<String> _monthEn3 = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const List<String> _monthEn3 = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec'
+];
 
 // ⭐ 다이어리 테마(CalendarThemeId.diary) 전용 포인트 컬러 - 헤더 점 장식/오늘
 // 표시/빨간날 텍스트 등 이 테마 안 여러 곳에서 공유해서 씀(_themeDiaryCell,
@@ -74,15 +99,17 @@ const Color _diaryAccent = Color(0xFFCB8A4E);
 const Color _diaryTodayRedBg = Color(0xFFFCE2B0);
 
 // StatefulWidget → ConsumerStatefulWidget으로 변경
-class CalendarTab extends ConsumerStatefulWidget {  // ⭐ 변경
+class CalendarTab extends ConsumerStatefulWidget {
+  // ⭐ 변경
   const CalendarTab({super.key});
 
   @override
-  ConsumerState<CalendarTab> createState() => _CalendarTabState();  // ⭐ 변경
+  ConsumerState<CalendarTab> createState() => _CalendarTabState(); // ⭐ 변경
 }
 
-class _CalendarTabState extends ConsumerState<CalendarTab> {  // ⭐ 변경
-  static const platform = kAlarmChannel;  // ⭐ 추가
+class _CalendarTabState extends ConsumerState<CalendarTab> {
+  // ⭐ 변경
+  static const platform = kAlarmChannel; // ⭐ 추가
 
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
@@ -92,7 +119,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {  // ⭐ 변경
   Set<DateTime> _selectedDates = {};
 
   // _loadSchedule() 메서드 삭제 (Provider가 자동으로 관리)
-  
+
   // 색상 메서드는 그대로 유지
   // calendar_tab.dart의 _getShiftBackgroundColor() 함수 수정
 
@@ -107,43 +134,44 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {  // ⭐ 변경
 // schedule.customShiftColors(사용자가 직접 고정한 색)를 덮어씀
 // (effectiveShiftColors 참고) - 이래야 사용자가 색을 지정한 근무는 테마를
 // 바꿔도 그 색 그대로 유지됨.
-Map<String, Color> _shiftColorMap(ShiftSchedule? schedule) {
-  if (schedule == null) return {};
-  final theme = ref.watch(calendarThemeProvider);
-  return effectiveShiftColors(schedule.shiftTypes, theme, schedule.customShiftColors);
-}
-
-Color _getShiftBackgroundColor(String shift, ShiftSchedule? schedule) {
-  if (shift == '미설정' || shift.isEmpty) return Colors.transparent;
-
-  // ⭐ "없음" 옵션 색상 (회색)
-  if (shift == '없음') {
-    return Theme.of(context).colorScheme.surfaceVariant;
+  Map<String, Color> _shiftColorMap(ShiftSchedule? schedule) {
+    if (schedule == null) return {};
+    final theme = ref.watch(calendarThemeProvider);
+    return effectiveShiftColors(
+        schedule.shiftTypes, theme, schedule.customShiftColors);
   }
 
-  final color = _shiftColorMap(schedule)[shift];
-  if (color != null) return color;
+  Color _getShiftBackgroundColor(String shift, ShiftSchedule? schedule) {
+    if (shift == '미설정' || shift.isEmpty) return Colors.transparent;
 
-  final colorScheme = Theme.of(context).colorScheme;
-  return colorScheme.surfaceVariant;
-}
+    // ⭐ "없음" 옵션 색상 (회색)
+    if (shift == '없음') {
+      return Theme.of(context).colorScheme.surfaceVariant;
+    }
+
+    final color = _shiftColorMap(schedule)[shift];
+    if (color != null) return color;
+
+    final colorScheme = Theme.of(context).colorScheme;
+    return colorScheme.surfaceVariant;
+  }
 
   // calendar_tab.dart의 _getShiftTextColor() 함수 수정
 
-Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
-  if (shift == '미설정' || shift.isEmpty) return Colors.transparent;
+  Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
+    if (shift == '미설정' || shift.isEmpty) return Colors.transparent;
 
-  // ⭐ "없음" 옵션 텍스트 색상
-  if (shift == '없음') {
-    return Theme.of(context).colorScheme.onSurfaceVariant;
+    // ⭐ "없음" 옵션 텍스트 색상
+    if (shift == '없음') {
+      return Theme.of(context).colorScheme.onSurfaceVariant;
+    }
+
+    final color = _shiftColorMap(schedule)[shift];
+    if (color != null) return ShiftSchedule.getTextColor(color);
+
+    final colorScheme = Theme.of(context).colorScheme;
+    return colorScheme.onSurfaceVariant;
   }
-
-  final color = _shiftColorMap(schedule)[shift];
-  if (color != null) return ShiftSchedule.getTextColor(color);
-
-  final colorScheme = Theme.of(context).colorScheme;
-  return colorScheme.onSurfaceVariant;
-}
 
   // ⭐ 2026-09-05 - "불규칙 온보딩으로 맨 처음 메인 달력에 왔을 때" 1회 근무
   // 배정 방법 안내 팝업(사용자 요청) - build()가 여러 번 도는 동안 중복으로
@@ -173,7 +201,8 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
       daysFromSunday = firstDayOfMonth.weekday;
     }
 
-    final calendarStart = firstDayOfMonth.subtract(Duration(days: daysFromSunday));
+    final calendarStart =
+        firstDayOfMonth.subtract(Duration(days: daysFromSunday));
     final daysDifference = day.difference(calendarStart).inDays;
 
     // 6번째 줄은 35일 ~ 41일 (5주 * 7일 = 35일부터)
@@ -186,8 +215,10 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
   // 뱃지가 구분선에 딱 붙게 함(lab 원본의 isFirstRow와 동일한 목적).
   bool _isFirstRow(DateTime day, DateTime focusedMonth) {
     final firstDayOfMonth = DateTime(focusedMonth.year, focusedMonth.month, 1);
-    final daysFromSunday = firstDayOfMonth.weekday == 7 ? 0 : firstDayOfMonth.weekday;
-    final calendarStart = firstDayOfMonth.subtract(Duration(days: daysFromSunday));
+    final daysFromSunday =
+        firstDayOfMonth.weekday == 7 ? 0 : firstDayOfMonth.weekday;
+    final calendarStart =
+        firstDayOfMonth.subtract(Duration(days: daysFromSunday));
     final daysDifference = day.difference(calendarStart).inDays;
     return daysDifference >= 0 && daysDifference < 7;
   }
@@ -203,8 +234,10 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
 
   // ⭐ 특정 달의 메모 미리 로드 (달력에 보이는 이전/다음 달 날짜 포함)
   void _loadMemosForMonth(DateTime month) {
-    final firstDay = DateTime(month.year, month.month, 1).subtract(Duration(days: 7));
-    final lastDay = DateTime(month.year, month.month + 1, 0).add(Duration(days: 7));
+    final firstDay =
+        DateTime(month.year, month.month, 1).subtract(Duration(days: 7));
+    final lastDay =
+        DateTime(month.year, month.month + 1, 0).add(Duration(days: 7));
     ref.read(memoProvider.notifier).loadMemosForDateRange(firstDay, lastDay);
     // ⭐ 같은 범위로 OT도 같이 로드 (달력에 보이는 달 전체 커버)
     ref.read(overtimeProvider.notifier).loadForRange(firstDay, lastDay);
@@ -233,7 +266,9 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(context.l10n.calendarSelectDate, style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+                  Text(context.l10n.calendarSelectDate,
+                      style: TextStyle(
+                          fontSize: 20.sp, fontWeight: FontWeight.bold)),
                   IconButton(
                     icon: Icon(Icons.close, size: 24.sp),
                     onPressed: () => Navigator.pop(context),
@@ -262,7 +297,8 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                           child: Text(
                             isKorean ? '$selectedYear년' : '$selectedYear',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 18.sp, fontWeight: FontWeight.bold),
                           ),
                         ),
                         IconButton(
@@ -299,7 +335,9 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.surfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceVariant,
                                 borderRadius: BorderRadius.circular(8.r),
                                 border: Border.all(
                                   color: Theme.of(context).colorScheme.outline,
@@ -308,11 +346,15 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
                               ),
                               child: Center(
                                 child: Text(
-                                  isKorean ? '$month월' : monthFormat.format(DateTime(selectedYear, month)),
+                                  isKorean
+                                      ? '$month월'
+                                      : monthFormat.format(
+                                          DateTime(selectedYear, month)),
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.normal,
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ),
@@ -333,513 +375,682 @@ Color _getShiftTextColor(String shift, ShiftSchedule? schedule) {
   }
 
   @override
-Widget build(BuildContext context) {
-  final scheduleAsync = ref.watch(scheduleProvider);
-  // ⭐ 2026-09-01 버그 수정 - 메인테마·다크가 흰 배경으로 깨졌던 원인이 바로
-  // 아래 Scaffold들의 `backgroundColor: Colors.white` 하드코딩이었음. 2026-08-24에
-  // "파스텔 배경에서 달력 탭만 제외"하려고 추가된 값인데, 그 의도(파스텔 대신
-  // 흰색)만 담고 "메인·다크일 땐 흰색이 아니라 진한 남색이어야 한다"는 조건을
-  // 놓쳤음. main.dart가 CalendarTab 전체를 `Theme(data: isDark ?
-  // AppTheme.darkTheme : AppTheme.lightTheme)`로 감싸서 다크일 때 scaffoldBackgroundColor가
-  // 0xFF1A1F2E가 되도록 이미 설계돼 있었는데, 이 화면이 그 값을 무시하고 흰색을
-  // 직접 못박아버려서 이번 달 OT/주별근무시간 카드(별도 Container로 자기 배경을
-  // 직접 그림 - 그래서 유일하게 안 깨져 보였음)를 제외한 모든 배경이 흰색으로
-  // 보였던 것. calendarThemeProvider를 여기서 먼저 읽어(schedule 유무와 무관하게
-  // 항상 값이 있음) 로딩/에러/스케줄없음 상태까지 포함한 모든 Scaffold가
-  // 다크일 땐 0xFF1A1F2E(=AppTheme.darkTheme.scaffoldBackgroundColor와 동일한 값 -
-  // app_theme.dart 참고, 두 값이 다시 어긋나지 않게 항상 이 상수를 그대로 씀),
-  // 아니면 흰색을 쓰게 통일함.
-  final isDarkTheme = ref.watch(calendarThemeProvider).isDark;
-  final scaffoldBg = isDarkTheme ? const Color(0xFF1A1F2E) : Colors.white;
+  Widget build(BuildContext context) {
+    final scheduleAsync = ref.watch(scheduleProvider);
+    // ⭐ 2026-09-01 버그 수정 - 메인테마·다크가 흰 배경으로 깨졌던 원인이 바로
+    // 아래 Scaffold들의 `backgroundColor: Colors.white` 하드코딩이었음. 2026-08-24에
+    // "파스텔 배경에서 달력 탭만 제외"하려고 추가된 값인데, 그 의도(파스텔 대신
+    // 흰색)만 담고 "메인·다크일 땐 흰색이 아니라 진한 남색이어야 한다"는 조건을
+    // 놓쳤음. main.dart가 CalendarTab 전체를 `Theme(data: isDark ?
+    // AppTheme.darkTheme : AppTheme.lightTheme)`로 감싸서 다크일 때 scaffoldBackgroundColor가
+    // 0xFF1A1F2E가 되도록 이미 설계돼 있었는데, 이 화면이 그 값을 무시하고 흰색을
+    // 직접 못박아버려서 이번 달 OT/주별근무시간 카드(별도 Container로 자기 배경을
+    // 직접 그림 - 그래서 유일하게 안 깨져 보였음)를 제외한 모든 배경이 흰색으로
+    // 보였던 것. calendarThemeProvider를 여기서 먼저 읽어(schedule 유무와 무관하게
+    // 항상 값이 있음) 로딩/에러/스케줄없음 상태까지 포함한 모든 Scaffold가
+    // 다크일 땐 0xFF1A1F2E(=AppTheme.darkTheme.scaffoldBackgroundColor와 동일한 값 -
+    // app_theme.dart 참고, 두 값이 다시 어긋나지 않게 항상 이 상수를 그대로 씀),
+    // 아니면 흰색을 쓰게 통일함.
+    final isDarkTheme = ref.watch(calendarThemeProvider).isDark;
+    final scaffoldBg = isDarkTheme ? const Color(0xFF1A1F2E) : Colors.white;
 
-  return scheduleAsync.when(
-    // ⭐ 로딩/에러/스케줄없음 상태도 달력 탭 배경 예외(위 build() 안쪽 Scaffold
-    // 주석 참고)를 똑같이 적용 - 안 그러면 데이터 로드 전 짧은 순간 파스텔
-    // 배경이 깜빡였다가 흰색/다크와 안 맞는 색으로 바뀌는 게 보일 수 있음.
-    loading: () => Scaffold(
-      backgroundColor: scaffoldBg,
-      body: const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
-    ),
-    error: (error, stack) => Scaffold(
-      backgroundColor: scaffoldBg,
-      body: Center(child: Text('${context.l10n.statusErrorOccurred}: $error')),
-    ),
-    data: (schedule) {
-      if (schedule == null) {
-        return Scaffold(
-          backgroundColor: scaffoldBg,
-          body: Center(child: Text(context.l10n.statusNoSchedule)),
-        );
-      }
-
-      if (!_shiftAssignTutorialChecked) {
-        _shiftAssignTutorialChecked = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) maybeShowShiftAssignTutorial(context, isRegular: schedule.isRegular);
-        });
-      }
-
-      final theme = ref.watch(calendarThemeProvider);
-      final reclaimsSixthRow = _themeReclaimsSixthRow(theme);
-      // ⭐ 2026-09-05 - 6번째 줄 마지막 3칸(목/금/토)에 일정공유/전체 조 근무표/
-      // 오늘 버튼(다이어리 + 범례 없는 나머지 5개 테마, _themeReclaimsSixthRowButtons
-      // 참고). 목(일정공유)은 친구 유무와 무관하게 항상 표시(_openFriendShare 참고).
-      final reclaimsSixthRowButtons = _themeReclaimsSixthRowButtons(theme);
-
-      return Scaffold(
-        // ⭐ 2026-08-24 - 앱 전역 배경을 파스텔톤(app_colors.dart의
-        // kAppBackgroundPastel)으로 바꾸면서, 달력 탭은 그 대상에서 명시적으로
-        // 제외함(9개 달력 테마 각자의 고유 배색을 그대로 유지하기 위해). 이
-        // Scaffold가 배경색을 직접 고정해두지 않으면 AppTheme.lightTheme의
-        // scaffoldBackgroundColor를 그대로 물려받아 파스텔톤이 되어버림 -
-        // 예전부터 달력 탭이 실제로 보여주던 흰색을 여기서 명시적으로 고정.
-        // ⭐ 2026-09-01 - 위 isDarkTheme 계산 참고, 메인·다크에선 흰색 대신
-        // 0xFF1A1F2E를 씀(파일 상단 build() 진입부의 버그 수정 주석 참고).
+    return scheduleAsync.when(
+      // ⭐ 로딩/에러/스케줄없음 상태도 달력 탭 배경 예외(위 build() 안쪽 Scaffold
+      // 주석 참고)를 똑같이 적용 - 안 그러면 데이터 로드 전 짧은 순간 파스텔
+      // 배경이 깜빡였다가 흰색/다크와 안 맞는 색으로 바뀌는 게 보일 수 있음.
+      loading: () => Scaffold(
         backgroundColor: scaffoldBg,
-        body: SafeArea(
-          // ⭐⭐ 2026-08-24 - 애드몹 배너 자리 확보 방식을 재설계함. 예전엔 여기서
-          // "메인 테마가 고정 rowHeight(83.h)라 자연스럽게 남기는 여백"을 재서
-          // 그 크기만큼 다른 테마도 똑같이 비워두는 식이었는데(SizedBox(adSpaceHeight)),
-          // 이건 화면 "높이" 기준으로 계산한 여백이고, 실제 광고(AdMob 적응형 배너)
-          // 높이는 화면 "폭" 기준으로 SDK가 계산함 - 서로 다른 기준의 값이라 기기마다
-          // 우연히만 맞아떨어졌고, 안 맞으면 광고 위/아래에 뜬금없는 흰 여백이 생겼음.
-          //
-          // 이제는 이 위젯이 광고 높이를 아예 몰라도 됨 - main.dart에서 이미
-          // BottomNavigationBar 바로 위에 실제 광고 높이(AdService.bannerHeight)만큼을
-          // Column으로 미리 떼어내고, 그 "위"에 남는 공간만 Expanded로 이 탭에 줌
-          // (banner_ad_slot.dart 참고). 그래서 이 위젯이 할 일은 "받은 높이를
-          // 남김없이 다 쓰는" 것뿐 - 그러면 광고 자리를 뺀 나머지를 정확히 채우게
-          // 되고, 여백이 생길 수가 없음(산수상 남는 공간 자체가 없으므로).
-          // _themeRowHeight()가 이제 모든 테마(메인 포함)에서 "남는 높이를 6등분"하는
-          // 동일한 방식을 쓰도록 통일한 게 이 전제의 나머지 절반 - 예전엔 메인
-          // 테마만 83.h 고정값을 써서 그 아래 자기 몫의 남는 공간을 안 채우고 그냥
-          // 비워뒀었음(project_ot_calendar_card 메모리 참고 - OT카드는 "행 전체 높이"를
-          // 쓰는 게 조건이라 rowH 변수를 그대로 쓰는 이 구조는 그 조건을 그대로 만족함).
-          child: Builder(
-            builder: (context) {
-              return Stack(
-            children: [
-              Container(
-                // ⭐ "2번은 원래 배경색으로 흰 카드 셀들을 구분했었다"는 지적 -
-                // lab이 페이지 전체를 옅은 회색으로 감쌌던 것을 그대로 재현.
-                color: _themeBodyBackground(context, theme),
-                child: Column(
-                children: [
-                  // ⭐ 헤더 영역 - 최소화
-                  // ⭐ "헤더가 안 보인다"는 지적의 실제 원인 - 4번(굵은 격자형)은
-                  // lab에서 어두운 배경(Color(0xFF263238)) 위에 흰 글씨로 디자인돼
-                  // 있는데, 이 헤더 슬롯 자체는 배경색이 없어서(투명) 흰 글씨가
-                  // 흰 배경 위에 그대로 겹쳐 안 보이는 문제였음 - 텍스트는 항상
-                  // 있었지만 "흰 글씨 on 흰 배경"이라 안 보였던 것. 요일행
-                  // (dowBuilder)은 이미 자기 배경을 스스로 그려서 문제 없었음.
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 6.w),
-                    child: Container(
-                      color: _themeHeaderBackground(theme),
-                      child: SizedBox(
-                      height: 48.h,  // 60.h → 32.h → 48.h (조정)
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),  // 12.h → 4.h
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _isMultiSelectMode
-                                ? Row(
-                                    children: [
-                                      IconButton(
-                                        icon: Icon(Icons.close, size: 20.sp),
-                                        onPressed: _exitMultiSelectMode,
-                                        padding: EdgeInsets.zero,
-                                        constraints: BoxConstraints(),
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      Text(
-                                        context.l10n.calendarNSelected(_selectedDates.length),
-                                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  )
-                                : _buildThemedHeaderTitle(theme),
-                            if (!_isMultiSelectMode)
-                              _buildThemedHeaderButtons(theme, schedule),
-                          ],
-                        ),
-                      ),
-                      ),
-                    ),
-                  ),
+        body: const SizedBox.shrink(), // ⭐ 로딩 인디케이터 제거
+      ),
+      error: (error, stack) => Scaffold(
+        backgroundColor: scaffoldBg,
+        body:
+            Center(child: Text('${context.l10n.statusErrorOccurred}: $error')),
+      ),
+      data: (schedule) {
+        if (schedule == null) {
+          return Scaffold(
+            backgroundColor: scaffoldBg,
+            body: Center(child: Text(context.l10n.statusNoSchedule)),
+          );
+        }
 
-                  // ⭐ 달력 (하나의 TableCalendar, 6줄 고정) - Expanded+LayoutBuilder로
-                  // 감싸서 헤더/푸터를 뺀 "실제로 남는 높이"를 직접 재고, 그 안에서
-                  // 6등분한 값을 rowHeight로 씀(lab의 Expanded 6분할과 동일한 계산).
-                  Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final rowH = _themeRowHeight(theme, constraints.maxHeight);
-                        return Stack(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 6.w),
-                        child: TableCalendar(
-                      firstDay: DateTime(DateTime.now().year - 3, 1, 1),
-                      lastDay: DateTime(DateTime.now().year + 3, 12, 31),
-                      focusedDay: _focusedDay,
-                      selectedDayPredicate: (day) {
-                        if (_isMultiSelectMode) {
-                          return _selectedDates.any((d) => isSameDay(d, day));
-                        }
-                        return isSameDay(_selectedDay, day);
-                      },
-                      locale: Localizations.localeOf(context).languageCode == 'ko' ? 'ko_KR' : 'en_US',
+        if (!_shiftAssignTutorialChecked) {
+          _shiftAssignTutorialChecked = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted)
+              maybeShowShiftAssignTutorial(context,
+                  isRegular: schedule.isRegular);
+          });
+        }
 
-                      headerVisible: false,
-                      sixWeekMonthsEnforced: true,  // ⭐ 항상 6줄 고정
-                      rowHeight: rowH,
+        final theme = ref.watch(calendarThemeProvider);
+        final usesHeaderBanner = theme.supportsHeaderBanner;
+        final reclaimsSixthRow = _themeReclaimsSixthRow(theme);
+        // ⭐ 2026-09-05 - 6번째 줄 마지막 3칸(목/금/토)에 일정공유/전체 조 근무표/
+        // 오늘 버튼(다이어리 + 범례 없는 나머지 5개 테마, _themeReclaimsSixthRowButtons
+        // 참고). 목(일정공유)은 친구 유무와 무관하게 항상 표시(_openFriendShare 참고).
+        final reclaimsSixthRowButtons = _themeReclaimsSixthRowButtons(theme);
 
-                      daysOfWeekHeight: 28.h,
-
-                      calendarStyle: CalendarStyle(
-                        cellMargin: EdgeInsets.all(0),
-                        cellPadding: EdgeInsets.all(0),
-
-                        // ⭐ "어떤 테마는 그리드가 아예 없고 가로줄만 있고 각자 다른데
-                        // 결국 다 같은 격자 틀 안에서 그려진다"는 지적 - table_calendar가
-                        // 셀마다 무조건 그려주던 격자선(tableBorder)을 메인·화이트/다크
-                        // (원래부터 이 격자에 의존하던 디자인)에서만 켜고, 나머지 7개
-                        // 테마는 각자 셀 위젯 자신이 이미 필요한 만큼만 테두리를 그리고
-                        // 있으므로(1번=칸 왼쪽 얇은 선만, 2번=카드+그림자, 4번=칸마다
-                        // 굵은 테두리, 5번=둥근 테두리, 8/9번=테두리 없음, 10번=칸마다
-                        // 얇은 테두리) table_calendar 쪽 격자는 완전히 꺼서 이중으로
-                        // 그려지거나 안 어울리는 격자가 겹치지 않게 함.
-                        tableBorder: (theme == CalendarThemeId.mainWhite || theme == CalendarThemeId.mainDark)
-                            ? TableBorder.all(
-                                color: Theme.of(context).brightness == Brightness.dark
-                                  ? Theme.of(context).colorScheme.onSurface.withOpacity(0.4)  // 다크모드: 더 밝게
-                                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.15),  // 화이트모드: 더 진하게
-                                width: 1.0,
-                              )
-                            : const TableBorder(),
-
-                        defaultTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
-                        weekendTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
-                        outsideTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurfaceVariant),
-
-                        todayDecoration: BoxDecoration(
-                          color: Colors.transparent,  // ⭐ 배경 제거, 날짜 숫자만 표시
-                        ),
-                        todayTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
-
-                        selectedDecoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary.withOpacity(_isMultiSelectMode ? 0.3 : 1.0),
-                          shape: BoxShape.circle,
-                        ),
-                        selectedTextStyle: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSecondary),
-                      ),
-
-                      calendarBuilders: CalendarBuilders(
-                        // ⭐ "그리드/요일 표기까지 테마마다 다 다르게 만들어놓고 실제로는
-                        // 그 틀 안에서만 그린다"는 지적 - 요일 헤더 표기(일/월/... vs
-                        // Sun/Mon/... vs S/M/...)도 테마별로 다르므로 daysOfWeekStyle(같은
-                        // 로케일 문구에 스타일만 입히는 것) 대신 dowBuilder로 완전히
-                        // 테마마다 다른 위젯을 그림.
-                        dowBuilder: (context, day) => _buildThemedDow(theme, day),
-                        // ⭐ 여기 4개 콜백만 _buildDateCell → _buildThemedCell로 교체함 -
-                        // 선택된 테마에 따라 셀 디자인을 바꿔주는 유일한 진입점.
-                        // onDaySelected/onDayLongPressed 등 나머지 로직은 전혀 안 건드림.
-                        defaultBuilder: (context, day, focusedDay) {
-                          // ⭐ 6번째 줄 화~토는 빈 Container (범례/OT 카드가 그 자리를
-                          // 대신 차지하는 테마에서만 - 아래 reclaimsSixthRow 참고)
-                          if (_isRowSixReclaimed(day, focusedDay,
-                              reclaimsSixthRow: reclaimsSixthRow,
-                              reclaimsSixthRowButtons: reclaimsSixthRowButtons,
-                              includeAllShiftsCol: schedule.isRegular)) {
-                            return Container();
-                          }
-                          return _buildThemedCell(day, false, false, schedule, focusedDay);
-                        },
-                        outsideBuilder: (context, day, focusedDay) {
-                          if (_isRowSixReclaimed(day, focusedDay,
-                              reclaimsSixthRow: reclaimsSixthRow,
-                              reclaimsSixthRowButtons: reclaimsSixthRowButtons,
-                              includeAllShiftsCol: schedule.isRegular)) {
-                            return Container();
-                          }
-                          return _buildThemedCell(day, false, true, schedule, focusedDay);
-                        },
-                        todayBuilder: (context, day, focusedDay) {
-                          if (_isRowSixReclaimed(day, focusedDay,
-                              reclaimsSixthRow: reclaimsSixthRow,
-                              reclaimsSixthRowButtons: reclaimsSixthRowButtons,
-                              includeAllShiftsCol: schedule.isRegular)) {
-                            return Container();
-                          }
-                          // ⭐ 위 _buildThemedCell 주석과 동일한 이유로, "오늘이 지금 이
-                          // 페이지 기준 바깥달 날짜인가"도 상태(_focusedDay)가 아니라 이
-                          // 콜백이 실제로 받은 focusedDay(그 페이지가 나타내는 달) 기준으로.
-                          final isOutsideMonth = day.month != focusedDay.month || day.year != focusedDay.year;
-                          return _buildThemedCell(day, true, isOutsideMonth, schedule, focusedDay);
-                        },
-                        selectedBuilder: (context, day, focusedDay) {
-                          if (_isRowSixReclaimed(day, focusedDay,
-                              reclaimsSixthRow: reclaimsSixthRow,
-                              reclaimsSixthRowButtons: reclaimsSixthRowButtons,
-                              includeAllShiftsCol: schedule.isRegular)) {
-                            return Container();
-                          }
-                          return _buildThemedCell(day, isSameDay(day, DateTime.now()), false, schedule, focusedDay, isSelected: true);
-                        },
-                      ),
-
-                      onDaySelected: (selectedDay, focusedDay) {
-                        // ⭐ 이전/다음 달 날짜는 탭 무시
-                        if (selectedDay.month != _focusedDay.month || selectedDay.year != _focusedDay.year) {
-                          return;
-                        }
-
-                        // ⭐ 6번째 줄 빈 칸은 탭 무시 (범례/OT 카드가 있는 테마만)
-                        if (_isRowSixReclaimed(selectedDay, focusedDay,
-                            reclaimsSixthRow: reclaimsSixthRow,
-                            reclaimsSixthRowButtons: reclaimsSixthRowButtons,
-                            includeAllShiftsCol: schedule.isRegular)) {
-                          return;
-                        }
-
-                        setState(() {
-                          _focusedDay = focusedDay;
-                        });
-
-                        if (_isMultiSelectMode) {
-                          _toggleDateSelection(selectedDay);
-                        } else {
-                          _showDayDetailPopup(selectedDay, schedule);
-                        }
-                      },
-
-                      onDayLongPressed: (selectedDay, focusedDay) {
-                        // ⭐ 이전/다음 달 날짜는 길게 누르기 무시
-                        if (selectedDay.month != _focusedDay.month || selectedDay.year != _focusedDay.year) {
-                          return;
-                        }
-
-                        // ⭐ 6번째 줄 빈 칸은 길게 누르기 무시 (범례/OT 카드가 있는 테마만)
-                        if (_isRowSixReclaimed(selectedDay, focusedDay,
-                            reclaimsSixthRow: reclaimsSixthRow,
-                            reclaimsSixthRowButtons: reclaimsSixthRowButtons,
-                            includeAllShiftsCol: schedule.isRegular)) {
-                          return;
-                        }
-
-                        if (!_isMultiSelectMode) {
-                          _enterMultiSelectMode(selectedDay);
-                        }
-                      },
-
-                      onPageChanged: (focusedDay) {
-                        setState(() {
-                          _focusedDay = focusedDay;
-                        });
-                        // ⭐ 새 달의 메모 로드
-                        _loadMemosForMonth(focusedDay);
-                      },
-                        ),
-                      ),
-
-                      // ⭐ 6번째 줄 화~토 (원래 빈 공간이었던 곳) - 이 자리를 재활용하는
-                      // 테마(메인·화이트/다크 = OT/주별근무시간 카드, 8/10번 = 범례)만
-                      // 그려줌. 나머지 7개 테마는 6번째 줄도 그냥 평범한 다음 달
-                      // 스필오버 날짜로 실제로 보여줌(재활용 안 함 - reclaimsSixthRow=false).
-                      // ⭐ 2026-09-05 - 언더라인/매거진(범례 필수 2개 테마)은 화~토 5칸을
-                      // 범례가 다 쓰고 있어 6번째 줄에 일정공유 버튼을 넣을 자리가 없음 -
-                      // 이 두 테마는 대신 헤더(_buildThemedHeaderButtonsCore)의 전체조
-                      // 근무표 왼쪽에 일정공유 버튼을 넣음. 일/월 칸은 그대로 빈 채로
-                      // 제스처를 아래 TableCalendar로 전달(다른 재활용 테마와 동일).
-                      if (reclaimsSixthRow)
-                        Positioned(
-                          top: 28.h + rowH * 5,  // 요일 헤더 + 5줄
-                          left: 6.w,
-                          right: 6.w,
-                          height: rowH,
-                          child: Row(
-                            children: [
-                              // 일요일 + 월요일 칸 (다음 달 날짜 표시 - 제스처를 아래 TableCalendar로 전달)
-                              const Expanded(
-                                flex: 2,
-                                child: IgnorePointer(child: SizedBox()),
-                              ),
-                              // 화~토 칸 - 테마에 따라 월별 OT 카드 또는 범례
-                              // ⭐ 2026-09-11 - 범례(언더라인/매거진)도 다른 테마의 버튼
-                              // 3칸과 같은 영역이니 스와이프로 월 이동되게 함
-                              // (_wrapWithMonthSwipe 참고). 메인 화이트/다크의
-                              // _buildMonthlyOvertimeCard()는 이미 자체적으로 같은
-                              // 래핑을 하고 있어 또 감쌀 필요 없음.
-                              Expanded(
-                                flex: 5,
-                                child: (theme == CalendarThemeId.mainWhite || theme == CalendarThemeId.mainDark)
-                                    ? _buildMonthlyOvertimeCard()
-                                    : _wrapWithMonthSwipe(_buildThemedLegend(theme, schedule)),
-                              ),
-                            ],
-                          ),
-                        ),
-                      // ⭐ 2026-09-05 - 6번째 줄 마지막 3칸(목/금/토)에 일정공유/전체 조
-                      // 근무표/오늘 버튼 고정 배치(_themeReclaimsSixthRowButtons 참고 -
-                      // 다이어리 + 범례 없는 나머지 5개 테마). 위 reclaimsSixthRow
-                      // 블록과 같은 세로 위치(top)를 쓰지만 서로 겹치는 테마가 없어
-                      // 동시에 그려질 일은 없음. 목(일정공유)은 친구 유무와 무관하게
-                      // 항상 그림 - 친구가 없으면 눌렀을 때 FriendListScreen의
-                      // "친구 추가" 빈 상태로 감(에러 아님).
-                      if (reclaimsSixthRowButtons)
-                        Positioned(
-                          top: 28.h + rowH * 5,
-                          left: 6.w,
-                          right: 6.w,
-                          height: rowH,
-                          // ⭐ 2026-09-11(사용자 요청) - 이 버튼 3칸(목/금/토) 위에서도
-                          // 좌우 스와이프로 월 이동이 되게 바깥을 _wrapWithMonthSwipe로
-                          // 감쌈. 안쪽 각 버튼의 onTap은 그대로 살아있음(제스처 아레나가
-                          // 탭/드래그를 알아서 중재 - _wrapWithMonthSwipe 주석 참고).
-                          child: _wrapWithMonthSwipe(Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // 일~수 칸 (다음 달 날짜 표시 - 제스처를 아래 TableCalendar로 전달)
-                              const Expanded(
-                                flex: 4,
-                                child: IgnorePointer(child: SizedBox()),
-                              ),
-                              // ⭐ 2026-09-13 - 버튼 순서를 전체근무표/일정공유/오늘로
-                              // 바꿈(사용자 지적/제안) - 불규칙 근무자는 전체근무표가
-                              // 안 보이는데, 예전 순서(일정공유/전체근무표/오늘)에서는
-                              // 그 빈 자리가 두 버튼 "사이"(목-금-토 중 금)에 끼어서,
-                              // 이미 항상 비어있는 왼쪽 4칸(일~수)과 안 이어지고 뜬금없이
-                              // 그 자리만 달력 그리드가 비쳐 보였음. 조건부로 사라지는
-                              // 버튼(전체근무표)을 이 3칸 중 맨 왼쪽(목)에 두면, 사라졌을
-                              // 때 왼쪽 4칸의 빈 공간과 자연스럽게 하나로 이어져서 더 이상
-                              // 튀어 보이지 않음.
-                              // 목 - 전체근무표, 규칙적 근무자만. ⭐ "전체 조 근무표"가
-                              // 한 줄엔 안 들어가 잘려 보여서, 자리가 좁은 이 칩에서만
-                              // 한국어 로케일 한정으로 "전체 조\n근무표" 두 줄로 직접
-                              // 끊음(공용 l10n 문자열 자체는 안 건드림 - 다른 테마
-                              // 버튼/AppBar 제목 등은 그대로 한 줄 문구).
-                              Expanded(
-                                child: schedule.isRegular
-                                    ? _rowSixButton(
-                                        theme,
-                                        icon: Icons.grid_view_rounded,
-                                        label: Localizations.localeOf(context).languageCode == 'ko'
-                                            ? '전체 조\n근무표'
-                                            : context.l10n.shiftFullSchedule,
-                                        onTap: _openAllShiftsView,
-                                      )
-                                    : const IgnorePointer(child: SizedBox()),
-                              ),
-                              // 금 - 일정공유, 항상
-                              Expanded(
-                                child: _rowSixButton(
-                                  theme,
-                                  icon: Icons.people_alt_outlined,
-                                  label: context.l10n.friendShareTitle,
-                                  onTap: _openFriendShare,
-                                ),
-                              ),
-                              // 토 - 오늘, 항상
-                              Expanded(
-                                child: _rowSixButton(
-                                  theme,
-                                  icon: Icons.today_rounded,
-                                  label: context.l10n.commonToday,
-                                  onTap: _jumpToToday,
-                                ),
-                              ),
-                            ],
-                          )),
-                        ),
-                      // ⭐ "맨 아랫줄은 가로줄이 없어서 부자연스럽다"는 지적 - 1번은
-                      // 세로선(칸 왼쪽 테두리)만 있고 가로선은 요일행 밑 구분선
-                      // 하나뿐이라, 그리드 맨 밑을 닫아주는 선이 없어 어색해
-                      // 보였음. 요일행 밑 구분선과 같은 톤으로 6번째 줄 맨
-                      // 밑에도 하나 그어서 사각형 그리드처럼 딱 닫히게 함.
-                      if (theme == CalendarThemeId.minimal)
-                        Positioned(
-                          top: 28.h + rowH * 6 - 1,
-                          left: 6.w,
-                          right: 6.w,
-                          height: 1,
-                          child: Container(color: Colors.grey.shade200),
-                        ),
-                      // ⭐ 2026-09-13 - 다크 그리드(굵은 격자형)만의 추가 지적 - 토(오늘
-                      // 버튼) 칸은 위 _isSixthRowButtonCell 규칙상 항상 reclaim되어
-                      // row6에 실제 셀이 안 그려지므로, 5번째 줄 토요일 칸 밑 가로
-                      // 테두리가 (이웃 칸들처럼 위아래 두 셀 테두리가 겹쳐 두꺼워지는
-                      // 것과 달리) row5 자신의 테두리 한 겹만 남아 얇아 보임 - 같은
-                      // 굵기(0.6)의 선을 하나 더 겹쳐 그어서 다른 칸들과 두께를 맞춤.
-                      // 목(전체근무표) 칸은 불규칙+근무 미배정일 때 이제 reclaim되지
-                      // 않아(위 case 4 수정) 실제 셀이 그대로 그려지므로 자동으로
-                      // 두꺼워짐 - 여기서 따로 안 그려도 됨.
-                      if (theme == CalendarThemeId.boldGrid)
-                        Positioned(
-                          top: 28.h + rowH * 5 - 0.6,
-                          left: 6.w,
-                          right: 6.w,
-                          height: 0.6,
-                          child: Row(
-                            children: [
-                              const Expanded(flex: 4, child: SizedBox.shrink()),
-                              const Expanded(child: SizedBox.shrink()), // 목 - 자동으로 두꺼워짐
-                              const Expanded(child: SizedBox.shrink()), // 금
-                              Expanded(child: Container(color: Colors.grey.shade600)), // 토
-                            ],
-                          ),
-                        ),
-                    ],
-                        );
-                      },
-                    ),
-                  ),
-                  // ⭐ "OT/주별 근무시간까지 테마마다 디자인이 다 다르게 만들어놓고
-                  // 실제 반영 시엔 그대로 안 썼다"는 지적 - 6번째 줄을 재활용하지
-                  // 않는 7개 테마는 그 정보를 달력 그리드 아래 별도 푸터 바로 보여줌
-                  // (각 테마 실험판의 원래 디자인 그대로, 실제 데이터로).
-                  if (_themeHasSeparateFooter(theme))
-                    _buildThemedFooter(theme, schedule),
-                  // ⭐ 2026-08-24 - 예전엔 여기서 "메인 테마를 흉내낸 여백"을 명시적으로
-                  // 넣었었는데(위 Builder 진입부 주석 참고), 이제 모든 테마가 남는
-                  // 높이를 100% 채우도록 통일했으므로 더 채울 여백 자체가 없어져서 삭제함.
-                ],
-                ),
-              ),
-
-              // 플로팅 버튼
-              if (_isMultiSelectMode && _selectedDates.isNotEmpty)
-                Positioned(
-                  bottom: 24.h,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: FloatingActionButton.extended(
-                      onPressed: () => _showBulkAssignSheet(schedule),
-                      icon: Icon(Icons.edit_calendar),
-                      label: Column(
-                        mainAxisSize: MainAxisSize.min,
+        return Scaffold(
+          // ⭐ 2026-08-24 - 앱 전역 배경을 파스텔톤(app_colors.dart의
+          // kAppBackgroundPastel)으로 바꾸면서, 달력 탭은 그 대상에서 명시적으로
+          // 제외함(9개 달력 테마 각자의 고유 배색을 그대로 유지하기 위해). 이
+          // Scaffold가 배경색을 직접 고정해두지 않으면 AppTheme.lightTheme의
+          // scaffoldBackgroundColor를 그대로 물려받아 파스텔톤이 되어버림 -
+          // 예전부터 달력 탭이 실제로 보여주던 흰색을 여기서 명시적으로 고정.
+          // ⭐ 2026-09-01 - 위 isDarkTheme 계산 참고, 메인·다크에선 흰색 대신
+          // 0xFF1A1F2E를 씀(파일 상단 build() 진입부의 버그 수정 주석 참고).
+          backgroundColor: scaffoldBg,
+          body: SafeArea(
+            // ⭐⭐ 2026-08-24 - 애드몹 배너 자리 확보 방식을 재설계함. 예전엔 여기서
+            // "메인 테마가 고정 rowHeight(83.h)라 자연스럽게 남기는 여백"을 재서
+            // 그 크기만큼 다른 테마도 똑같이 비워두는 식이었는데(SizedBox(adSpaceHeight)),
+            // 이건 화면 "높이" 기준으로 계산한 여백이고, 실제 광고(AdMob 적응형 배너)
+            // 높이는 화면 "폭" 기준으로 SDK가 계산함 - 서로 다른 기준의 값이라 기기마다
+            // 우연히만 맞아떨어졌고, 안 맞으면 광고 위/아래에 뜬금없는 흰 여백이 생겼음.
+            //
+            // 이제는 이 위젯이 광고 높이를 아예 몰라도 됨 - main.dart에서 이미
+            // BottomNavigationBar 바로 위에 실제 광고 높이(AdService.bannerHeight)만큼을
+            // Column으로 미리 떼어내고, 그 "위"에 남는 공간만 Expanded로 이 탭에 줌
+            // (banner_ad_slot.dart 참고). 그래서 이 위젯이 할 일은 "받은 높이를
+            // 남김없이 다 쓰는" 것뿐 - 그러면 광고 자리를 뺀 나머지를 정확히 채우게
+            // 되고, 여백이 생길 수가 없음(산수상 남는 공간 자체가 없으므로).
+            // _themeRowHeight()가 이제 모든 테마(메인 포함)에서 "남는 높이를 6등분"하는
+            // 동일한 방식을 쓰도록 통일한 게 이 전제의 나머지 절반 - 예전엔 메인
+            // 테마만 83.h 고정값을 써서 그 아래 자기 몫의 남는 공간을 안 채우고 그냥
+            // 비워뒀었음(project_ot_calendar_card 메모리 참고 - OT카드는 "행 전체 높이"를
+            // 쓰는 게 조건이라 rowH 변수를 그대로 쓰는 이 구조는 그 조건을 그대로 만족함).
+            child: Builder(
+              builder: (context) {
+                return Stack(
+                  children: [
+                    Container(
+                      // ⭐ "2번은 원래 배경색으로 흰 카드 셀들을 구분했었다"는 지적 -
+                      // lab이 페이지 전체를 옅은 회색으로 감쌌던 것을 그대로 재현.
+                      color: _themeBodyBackground(context, theme),
+                      child: Column(
                         children: [
-                          Text(context.l10n.shiftChange, style: TextStyle(fontWeight: FontWeight.bold)),
-                          Text(context.l10n.calendarTapToAddMoreDates, style: TextStyle(fontSize: 10.sp)),
+                          // ⭐ 헤더 영역 - 최소화
+                          // ⭐ "헤더가 안 보인다"는 지적의 실제 원인 - 4번(굵은 격자형)은
+                          // lab에서 어두운 배경(Color(0xFF263238)) 위에 흰 글씨로 디자인돼
+                          // 있는데, 이 헤더 슬롯 자체는 배경색이 없어서(투명) 흰 글씨가
+                          // 흰 배경 위에 그대로 겹쳐 안 보이는 문제였음 - 텍스트는 항상
+                          // 있었지만 "흰 글씨 on 흰 배경"이라 안 보였던 것. 요일행
+                          // (dowBuilder)은 이미 자기 배경을 스스로 그려서 문제 없었음.
+                          Padding(
+                            padding: usesHeaderBanner
+                                ? EdgeInsets.zero
+                                : EdgeInsets.symmetric(horizontal: 6.w),
+                            child: Container(
+                              color: _themeHeaderBackground(theme),
+                              child: SizedBox(
+                                height: AdService.bannerHeight > 48.h
+                                    ? AdService.bannerHeight
+                                    : 48.h,
+                                child: Padding(
+                                  padding: usesHeaderBanner
+                                      ? EdgeInsets.zero
+                                      : EdgeInsets.symmetric(
+                                          horizontal: 8.w, vertical: 4.h),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      if (usesHeaderBanner)
+                                        _isMultiSelectMode
+                                            ? _buildCompactSelectionHeader()
+                                            : _buildCompactAdHeaderTitle(theme)
+                                      else
+                                        _isMultiSelectMode
+                                            ? Row(
+                                                children: [
+                                                  IconButton(
+                                                    icon: Icon(Icons.close,
+                                                        size: 20.sp),
+                                                    onPressed:
+                                                        _exitMultiSelectMode,
+                                                    padding: EdgeInsets.zero,
+                                                    constraints:
+                                                        BoxConstraints(),
+                                                  ),
+                                                  SizedBox(width: 8.w),
+                                                  Text(
+                                                    context.l10n
+                                                        .calendarNSelected(
+                                                            _selectedDates
+                                                                .length),
+                                                    style: TextStyle(
+                                                        fontSize: 16.sp,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                ],
+                                              )
+                                            : _buildThemedHeaderTitle(theme),
+                                      if (usesHeaderBanner)
+                                        const Expanded(child: SizedBox.shrink())
+                                      else if (!_isMultiSelectMode)
+                                        _buildThemedHeaderButtons(
+                                            theme, schedule),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // ⭐ 달력 (하나의 TableCalendar, 6줄 고정) - Expanded+LayoutBuilder로
+                          // 감싸서 헤더/푸터를 뺀 "실제로 남는 높이"를 직접 재고, 그 안에서
+                          // 6등분한 값을 rowHeight로 씀(lab의 Expanded 6분할과 동일한 계산).
+                          Expanded(
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final rowH = _themeRowHeight(
+                                    theme, constraints.maxHeight);
+                                return Stack(
+                                  children: [
+                                    Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 6.w),
+                                      child: TableCalendar(
+                                        firstDay: DateTime(
+                                            DateTime.now().year - 3, 1, 1),
+                                        lastDay: DateTime(
+                                            DateTime.now().year + 3, 12, 31),
+                                        focusedDay: _focusedDay,
+                                        selectedDayPredicate: (day) {
+                                          if (_isMultiSelectMode) {
+                                            return _selectedDates
+                                                .any((d) => isSameDay(d, day));
+                                          }
+                                          return isSameDay(_selectedDay, day);
+                                        },
+                                        locale: Localizations.localeOf(context)
+                                                    .languageCode ==
+                                                'ko'
+                                            ? 'ko_KR'
+                                            : 'en_US',
+
+                                        headerVisible: false,
+                                        sixWeekMonthsEnforced:
+                                            true, // ⭐ 항상 6줄 고정
+                                        rowHeight: rowH,
+
+                                        daysOfWeekHeight: 28.h,
+
+                                        calendarStyle: CalendarStyle(
+                                          cellMargin: EdgeInsets.all(0),
+                                          cellPadding: EdgeInsets.all(0),
+
+                                          // ⭐ "어떤 테마는 그리드가 아예 없고 가로줄만 있고 각자 다른데
+                                          // 결국 다 같은 격자 틀 안에서 그려진다"는 지적 - table_calendar가
+                                          // 셀마다 무조건 그려주던 격자선(tableBorder)을 메인·화이트/다크
+                                          // (원래부터 이 격자에 의존하던 디자인)에서만 켜고, 나머지 7개
+                                          // 테마는 각자 셀 위젯 자신이 이미 필요한 만큼만 테두리를 그리고
+                                          // 있으므로(1번=칸 왼쪽 얇은 선만, 2번=카드+그림자, 4번=칸마다
+                                          // 굵은 테두리, 5번=둥근 테두리, 8/9번=테두리 없음, 10번=칸마다
+                                          // 얇은 테두리) table_calendar 쪽 격자는 완전히 꺼서 이중으로
+                                          // 그려지거나 안 어울리는 격자가 겹치지 않게 함.
+                                          tableBorder: (theme ==
+                                                      CalendarThemeId
+                                                          .mainWhite ||
+                                                  theme ==
+                                                      CalendarThemeId.mainDark)
+                                              ? TableBorder.all(
+                                                  color: Theme.of(context)
+                                                              .brightness ==
+                                                          Brightness.dark
+                                                      ? Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface
+                                                          .withOpacity(
+                                                              0.4) // 다크모드: 더 밝게
+                                                      : Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface
+                                                          .withOpacity(
+                                                              0.15), // 화이트모드: 더 진하게
+                                                  width: 1.0,
+                                                )
+                                              : const TableBorder(),
+
+                                          defaultTextStyle: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface),
+                                          weekendTextStyle: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface),
+                                          outsideTextStyle: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant),
+
+                                          todayDecoration: BoxDecoration(
+                                            color: Colors
+                                                .transparent, // ⭐ 배경 제거, 날짜 숫자만 표시
+                                          ),
+                                          todayTextStyle: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurface),
+
+                                          selectedDecoration: BoxDecoration(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .secondary
+                                                .withOpacity(_isMultiSelectMode
+                                                    ? 0.3
+                                                    : 1.0),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          selectedTextStyle: TextStyle(
+                                              fontSize: 16.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSecondary),
+                                        ),
+
+                                        calendarBuilders: CalendarBuilders(
+                                          // ⭐ "그리드/요일 표기까지 테마마다 다 다르게 만들어놓고 실제로는
+                                          // 그 틀 안에서만 그린다"는 지적 - 요일 헤더 표기(일/월/... vs
+                                          // Sun/Mon/... vs S/M/...)도 테마별로 다르므로 daysOfWeekStyle(같은
+                                          // 로케일 문구에 스타일만 입히는 것) 대신 dowBuilder로 완전히
+                                          // 테마마다 다른 위젯을 그림.
+                                          dowBuilder: (context, day) =>
+                                              _buildThemedDow(theme, day),
+                                          // ⭐ 여기 4개 콜백만 _buildDateCell → _buildThemedCell로 교체함 -
+                                          // 선택된 테마에 따라 셀 디자인을 바꿔주는 유일한 진입점.
+                                          // onDaySelected/onDayLongPressed 등 나머지 로직은 전혀 안 건드림.
+                                          defaultBuilder:
+                                              (context, day, focusedDay) {
+                                            // ⭐ 6번째 줄 화~토는 빈 Container (범례/OT 카드가 그 자리를
+                                            // 대신 차지하는 테마에서만 - 아래 reclaimsSixthRow 참고)
+                                            if (_isRowSixReclaimed(
+                                                day, focusedDay,
+                                                reclaimsSixthRow:
+                                                    reclaimsSixthRow,
+                                                reclaimsSixthRowButtons:
+                                                    reclaimsSixthRowButtons,
+                                                includeAllShiftsCol:
+                                                    schedule.isRegular)) {
+                                              return Container();
+                                            }
+                                            return _buildThemedCell(day, false,
+                                                false, schedule, focusedDay);
+                                          },
+                                          outsideBuilder:
+                                              (context, day, focusedDay) {
+                                            if (_isRowSixReclaimed(
+                                                day, focusedDay,
+                                                reclaimsSixthRow:
+                                                    reclaimsSixthRow,
+                                                reclaimsSixthRowButtons:
+                                                    reclaimsSixthRowButtons,
+                                                includeAllShiftsCol:
+                                                    schedule.isRegular)) {
+                                              return Container();
+                                            }
+                                            return _buildThemedCell(day, false,
+                                                true, schedule, focusedDay);
+                                          },
+                                          todayBuilder:
+                                              (context, day, focusedDay) {
+                                            if (_isRowSixReclaimed(
+                                                day, focusedDay,
+                                                reclaimsSixthRow:
+                                                    reclaimsSixthRow,
+                                                reclaimsSixthRowButtons:
+                                                    reclaimsSixthRowButtons,
+                                                includeAllShiftsCol:
+                                                    schedule.isRegular)) {
+                                              return Container();
+                                            }
+                                            // ⭐ 위 _buildThemedCell 주석과 동일한 이유로, "오늘이 지금 이
+                                            // 페이지 기준 바깥달 날짜인가"도 상태(_focusedDay)가 아니라 이
+                                            // 콜백이 실제로 받은 focusedDay(그 페이지가 나타내는 달) 기준으로.
+                                            final isOutsideMonth =
+                                                day.month != focusedDay.month ||
+                                                    day.year != focusedDay.year;
+                                            return _buildThemedCell(
+                                                day,
+                                                true,
+                                                isOutsideMonth,
+                                                schedule,
+                                                focusedDay);
+                                          },
+                                          selectedBuilder:
+                                              (context, day, focusedDay) {
+                                            if (_isRowSixReclaimed(
+                                                day, focusedDay,
+                                                reclaimsSixthRow:
+                                                    reclaimsSixthRow,
+                                                reclaimsSixthRowButtons:
+                                                    reclaimsSixthRowButtons,
+                                                includeAllShiftsCol:
+                                                    schedule.isRegular)) {
+                                              return Container();
+                                            }
+                                            return _buildThemedCell(
+                                                day,
+                                                isSameDay(day, DateTime.now()),
+                                                false,
+                                                schedule,
+                                                focusedDay,
+                                                isSelected: true);
+                                          },
+                                        ),
+
+                                        onDaySelected:
+                                            (selectedDay, focusedDay) {
+                                          // ⭐ 이전/다음 달 날짜는 탭 무시
+                                          if (selectedDay.month !=
+                                                  _focusedDay.month ||
+                                              selectedDay.year !=
+                                                  _focusedDay.year) {
+                                            return;
+                                          }
+
+                                          // ⭐ 6번째 줄 빈 칸은 탭 무시 (범례/OT 카드가 있는 테마만)
+                                          if (_isRowSixReclaimed(
+                                              selectedDay, focusedDay,
+                                              reclaimsSixthRow:
+                                                  reclaimsSixthRow,
+                                              reclaimsSixthRowButtons:
+                                                  reclaimsSixthRowButtons,
+                                              includeAllShiftsCol:
+                                                  schedule.isRegular)) {
+                                            return;
+                                          }
+
+                                          setState(() {
+                                            _focusedDay = focusedDay;
+                                          });
+
+                                          if (_isMultiSelectMode) {
+                                            _toggleDateSelection(selectedDay);
+                                          } else {
+                                            _showDayDetailPopup(
+                                                selectedDay, schedule);
+                                          }
+                                        },
+
+                                        onDayLongPressed:
+                                            (selectedDay, focusedDay) {
+                                          // ⭐ 이전/다음 달 날짜는 길게 누르기 무시
+                                          if (selectedDay.month !=
+                                                  _focusedDay.month ||
+                                              selectedDay.year !=
+                                                  _focusedDay.year) {
+                                            return;
+                                          }
+
+                                          // ⭐ 6번째 줄 빈 칸은 길게 누르기 무시 (범례/OT 카드가 있는 테마만)
+                                          if (_isRowSixReclaimed(
+                                              selectedDay, focusedDay,
+                                              reclaimsSixthRow:
+                                                  reclaimsSixthRow,
+                                              reclaimsSixthRowButtons:
+                                                  reclaimsSixthRowButtons,
+                                              includeAllShiftsCol:
+                                                  schedule.isRegular)) {
+                                            return;
+                                          }
+
+                                          if (!_isMultiSelectMode) {
+                                            _enterMultiSelectMode(selectedDay);
+                                          }
+                                        },
+
+                                        onPageChanged: (focusedDay) {
+                                          setState(() {
+                                            _focusedDay = focusedDay;
+                                          });
+                                          // ⭐ 새 달의 메모 로드
+                                          _loadMemosForMonth(focusedDay);
+                                        },
+                                      ),
+                                    ),
+
+                                    // ⭐ 6번째 줄 화~토 (원래 빈 공간이었던 곳) - 이 자리를 재활용하는
+                                    // 테마(메인·화이트/다크 = OT/주별근무시간 카드, 8/10번 = 범례)만
+                                    // 그려줌. 나머지 7개 테마는 6번째 줄도 그냥 평범한 다음 달
+                                    // 스필오버 날짜로 실제로 보여줌(재활용 안 함 - reclaimsSixthRow=false).
+                                    // ⭐ 2026-09-05 - 언더라인/매거진(범례 필수 2개 테마)은 화~토 5칸을
+                                    // 범례가 다 쓰고 있어 6번째 줄에 일정공유 버튼을 넣을 자리가 없음 -
+                                    // 이 두 테마는 대신 헤더(_buildThemedHeaderButtonsCore)의 전체조
+                                    // 근무표 왼쪽에 일정공유 버튼을 넣음. 일/월 칸은 그대로 빈 채로
+                                    // 제스처를 아래 TableCalendar로 전달(다른 재활용 테마와 동일).
+                                    if (reclaimsSixthRow)
+                                      Positioned(
+                                        top: 28.h + rowH * 5, // 요일 헤더 + 5줄
+                                        left: 6.w,
+                                        right: 6.w,
+                                        height: rowH,
+                                        child: Row(
+                                          children: [
+                                            // 일요일 + 월요일 칸 (다음 달 날짜 표시 - 제스처를 아래 TableCalendar로 전달)
+                                            const Expanded(
+                                              flex: 2,
+                                              child: IgnorePointer(
+                                                  child: SizedBox()),
+                                            ),
+                                            // 화~토 칸 - 테마에 따라 월별 OT 카드 또는 범례
+                                            // ⭐ 2026-09-11 - 범례(언더라인/매거진)도 다른 테마의 버튼
+                                            // 3칸과 같은 영역이니 스와이프로 월 이동되게 함
+                                            // (_wrapWithMonthSwipe 참고). 메인 화이트/다크의
+                                            // _buildMonthlyOvertimeCard()는 이미 자체적으로 같은
+                                            // 래핑을 하고 있어 또 감쌀 필요 없음.
+                                            Expanded(
+                                              flex: 5,
+                                              child: (theme ==
+                                                          CalendarThemeId
+                                                              .mainWhite ||
+                                                      theme ==
+                                                          CalendarThemeId
+                                                              .mainDark)
+                                                  ? _buildMonthlyOvertimeCard()
+                                                  : _wrapWithMonthSwipe(
+                                                      _buildThemedLegend(
+                                                          theme, schedule)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    // ⭐ 2026-09-05 - 6번째 줄 마지막 3칸(목/금/토)에 일정공유/전체 조
+                                    // 근무표/오늘 버튼 고정 배치(_themeReclaimsSixthRowButtons 참고 -
+                                    // 다이어리 + 범례 없는 나머지 5개 테마). 위 reclaimsSixthRow
+                                    // 블록과 같은 세로 위치(top)를 쓰지만 서로 겹치는 테마가 없어
+                                    // 동시에 그려질 일은 없음. 목(일정공유)은 친구 유무와 무관하게
+                                    // 항상 그림 - 친구가 없으면 눌렀을 때 FriendListScreen의
+                                    // "친구 추가" 빈 상태로 감(에러 아님).
+                                    if (reclaimsSixthRowButtons)
+                                      Positioned(
+                                        top: 28.h + rowH * 5,
+                                        left: 6.w,
+                                        right: 6.w,
+                                        height: rowH,
+                                        // ⭐ 2026-09-11(사용자 요청) - 이 버튼 3칸(목/금/토) 위에서도
+                                        // 좌우 스와이프로 월 이동이 되게 바깥을 _wrapWithMonthSwipe로
+                                        // 감쌈. 안쪽 각 버튼의 onTap은 그대로 살아있음(제스처 아레나가
+                                        // 탭/드래그를 알아서 중재 - _wrapWithMonthSwipe 주석 참고).
+                                        child: _wrapWithMonthSwipe(Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            // 일~수 칸 (다음 달 날짜 표시 - 제스처를 아래 TableCalendar로 전달)
+                                            const Expanded(
+                                              flex: 4,
+                                              child: IgnorePointer(
+                                                  child: SizedBox()),
+                                            ),
+                                            // ⭐ 2026-09-13 - 버튼 순서를 전체근무표/일정공유/오늘로
+                                            // 바꿈(사용자 지적/제안) - 불규칙 근무자는 전체근무표가
+                                            // 안 보이는데, 예전 순서(일정공유/전체근무표/오늘)에서는
+                                            // 그 빈 자리가 두 버튼 "사이"(목-금-토 중 금)에 끼어서,
+                                            // 이미 항상 비어있는 왼쪽 4칸(일~수)과 안 이어지고 뜬금없이
+                                            // 그 자리만 달력 그리드가 비쳐 보였음. 조건부로 사라지는
+                                            // 버튼(전체근무표)을 이 3칸 중 맨 왼쪽(목)에 두면, 사라졌을
+                                            // 때 왼쪽 4칸의 빈 공간과 자연스럽게 하나로 이어져서 더 이상
+                                            // 튀어 보이지 않음.
+                                            // 목 - 전체근무표, 규칙적 근무자만. ⭐ "전체 조 근무표"가
+                                            // 한 줄엔 안 들어가 잘려 보여서, 자리가 좁은 이 칩에서만
+                                            // 한국어 로케일 한정으로 "전체 조\n근무표" 두 줄로 직접
+                                            // 끊음(공용 l10n 문자열 자체는 안 건드림 - 다른 테마
+                                            // 버튼/AppBar 제목 등은 그대로 한 줄 문구).
+                                            Expanded(
+                                              child: schedule.isRegular
+                                                  ? _rowSixButton(
+                                                      theme,
+                                                      icon: Icons
+                                                          .grid_view_rounded,
+                                                      label: Localizations
+                                                                      .localeOf(
+                                                                          context)
+                                                                  .languageCode ==
+                                                              'ko'
+                                                          ? '전체 조\n근무표'
+                                                          : context.l10n
+                                                              .shiftFullSchedule,
+                                                      onTap: _openAllShiftsView,
+                                                    )
+                                                  : const IgnorePointer(
+                                                      child: SizedBox()),
+                                            ),
+                                            // 금 - 일정공유, 항상
+                                            Expanded(
+                                              child: _rowSixButton(
+                                                theme,
+                                                icon: Icons.people_alt_outlined,
+                                                label: context
+                                                    .l10n.friendShareTitle,
+                                                onTap: _openFriendShare,
+                                              ),
+                                            ),
+                                            // 토 - 오늘, 항상
+                                            Expanded(
+                                              child: _rowSixButton(
+                                                theme,
+                                                icon: Icons.today_rounded,
+                                                label: context.l10n.commonToday,
+                                                onTap: _jumpToToday,
+                                              ),
+                                            ),
+                                          ],
+                                        )),
+                                      ),
+                                    // ⭐ "맨 아랫줄은 가로줄이 없어서 부자연스럽다"는 지적 - 1번은
+                                    // 세로선(칸 왼쪽 테두리)만 있고 가로선은 요일행 밑 구분선
+                                    // 하나뿐이라, 그리드 맨 밑을 닫아주는 선이 없어 어색해
+                                    // 보였음. 요일행 밑 구분선과 같은 톤으로 6번째 줄 맨
+                                    // 밑에도 하나 그어서 사각형 그리드처럼 딱 닫히게 함.
+                                    if (theme == CalendarThemeId.minimal)
+                                      Positioned(
+                                        top: 28.h + rowH * 6 - 1,
+                                        left: 6.w,
+                                        right: 6.w,
+                                        height: 1,
+                                        child: Container(
+                                            color: Colors.grey.shade200),
+                                      ),
+                                    // ⭐ 2026-09-13 - 다크 그리드(굵은 격자형)만의 추가 지적 - 토(오늘
+                                    // 버튼) 칸은 위 _isSixthRowButtonCell 규칙상 항상 reclaim되어
+                                    // row6에 실제 셀이 안 그려지므로, 5번째 줄 토요일 칸 밑 가로
+                                    // 테두리가 (이웃 칸들처럼 위아래 두 셀 테두리가 겹쳐 두꺼워지는
+                                    // 것과 달리) row5 자신의 테두리 한 겹만 남아 얇아 보임 - 같은
+                                    // 굵기(0.6)의 선을 하나 더 겹쳐 그어서 다른 칸들과 두께를 맞춤.
+                                    // 목(전체근무표) 칸은 불규칙+근무 미배정일 때 이제 reclaim되지
+                                    // 않아(위 case 4 수정) 실제 셀이 그대로 그려지므로 자동으로
+                                    // 두꺼워짐 - 여기서 따로 안 그려도 됨.
+                                    if (theme == CalendarThemeId.boldGrid)
+                                      Positioned(
+                                        top: 28.h + rowH * 5 - 0.6,
+                                        left: 6.w,
+                                        right: 6.w,
+                                        height: 0.6,
+                                        child: Row(
+                                          children: [
+                                            const Expanded(
+                                                flex: 4,
+                                                child: SizedBox.shrink()),
+                                            const Expanded(
+                                                child: SizedBox
+                                                    .shrink()), // 목 - 자동으로 두꺼워짐
+                                            const Expanded(
+                                                child: SizedBox.shrink()), // 금
+                                            Expanded(
+                                                child: Container(
+                                                    color: Colors
+                                                        .grey.shade600)), // 토
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          // ⭐ "OT/주별 근무시간까지 테마마다 디자인이 다 다르게 만들어놓고
+                          // 실제 반영 시엔 그대로 안 썼다"는 지적 - 6번째 줄을 재활용하지
+                          // 않는 7개 테마는 그 정보를 달력 그리드 아래 별도 푸터 바로 보여줌
+                          // (각 테마 실험판의 원래 디자인 그대로, 실제 데이터로).
+                          if (_themeHasSeparateFooter(theme))
+                            _buildThemedFooter(theme, schedule),
+                          // ⭐ 2026-08-24 - 예전엔 여기서 "메인 테마를 흉내낸 여백"을 명시적으로
+                          // 넣었었는데(위 Builder 진입부 주석 참고), 이제 모든 테마가 남는
+                          // 높이를 100% 채우도록 통일했으므로 더 채울 여백 자체가 없어져서 삭제함.
                         ],
                       ),
-                      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                      foregroundColor: Theme.of(context).colorScheme.onSurface,
-                      elevation: 3,
                     ),
-                  ),
-                ),
-            ],
-              );
-            },
+
+                    // 플로팅 버튼
+                    if (_isMultiSelectMode && _selectedDates.isNotEmpty)
+                      Positioned(
+                        bottom: 24.h,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: FloatingActionButton.extended(
+                            onPressed: () => _showBulkAssignSheet(schedule),
+                            icon: Icon(Icons.edit_calendar),
+                            label: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(context.l10n.shiftChange,
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                Text(context.l10n.calendarTapToAddMoreDates,
+                                    style: TextStyle(fontSize: 10.sp)),
+                              ],
+                            ),
+                            backgroundColor:
+                                Theme.of(context).colorScheme.surfaceVariant,
+                            foregroundColor:
+                                Theme.of(context).colorScheme.onSurface,
+                            elevation: 3,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   // ⭐ 6번째 줄 빈 공간에 들어가는 카드 - 위 절반 "이번 달 OT" / 아래 절반
   // "주별 근무시간"으로 나눔 (각각 독립적으로 탭하면 다른 팝업이 뜸).
@@ -935,8 +1146,12 @@ Widget build(BuildContext context) {
                               formatOvertimeMinutes(context, totalMinutes),
                               style: TextStyle(
                                 fontSize: hasOvertime ? 13.sp : 11.sp,
-                                fontWeight: hasOvertime ? FontWeight.bold : FontWeight.w600,
-                                color: hasOvertime ? colorScheme.onSurface : colorScheme.onSurfaceVariant,
+                                fontWeight: hasOvertime
+                                    ? FontWeight.bold
+                                    : FontWeight.w600,
+                                color: hasOvertime
+                                    ? colorScheme.onSurface
+                                    : colorScheme.onSurfaceVariant,
                               ),
                               maxLines: 1,
                             ),
@@ -947,7 +1162,8 @@ Widget build(BuildContext context) {
                   ),
                 ),
                 // ⭐ 두 영역이 나뉘어있음을 시각적으로 인지되게 하는 구분선
-                Container(height: 1, color: colorScheme.outline.withOpacity(0.3)),
+                Container(
+                    height: 1, color: colorScheme.outline.withOpacity(0.3)),
                 // ⭐ 아래 절반: 주별 근무시간 (색을 살짝 다르게 줘서 구분감을 한 번 더 줌)
                 Expanded(
                   flex: 3,
@@ -976,14 +1192,17 @@ Widget build(BuildContext context) {
                               ),
                             ),
                             SizedBox(width: 4.w),
-                            Icon(Icons.chevron_right, size: 14.sp, color: colorScheme.onSurfaceVariant),
+                            Icon(Icons.chevron_right,
+                                size: 14.sp,
+                                color: colorScheme.onSurfaceVariant),
                           ],
                         ),
                       ),
                     ),
                   ),
                 ),
-                Container(height: 1, color: colorScheme.outline.withOpacity(0.3)),
+                Container(
+                    height: 1, color: colorScheme.outline.withOpacity(0.3)),
                 // ⭐ 2026-09-05 - 남는 40%에 일정공유/전체 조 근무표/오늘 진입 버튼
                 // (다이어리 6번째 줄 버튼과 같은 좌→우 순서: 화/수는 비우고
                 // 목=일정공유, 금=전체 조 근무표, 토=오늘 - 고정). 목(일정공유)은
@@ -1042,7 +1261,8 @@ Widget build(BuildContext context) {
   // ⭐ 이번 달 누적 OT 카드에서의 좌우 스와이프 → 달력 자체를 스와이프한 것과
   // 동일하게 월 이동 (onPageChanged와 동일한 처리)
   void _changeMonthBySwipe(int direction) {
-    final newMonth = DateTime(_focusedDay.year, _focusedDay.month + direction, 1);
+    final newMonth =
+        DateTime(_focusedDay.year, _focusedDay.month + direction, 1);
     setState(() {
       _focusedDay = newMonth;
     });
@@ -1078,7 +1298,9 @@ Widget build(BuildContext context) {
   // 수도 있음 - work_hours_settings_provider의 periodForMonth()가 결정)
   void _showMonthlyOvertimeSheet(DateTimeRange period) {
     // ⭐ 영어 현지화: '$month월' 조립 대신 로케일 인식 월 이름(예: "8월" / "August")
-    final monthLabel = DateFormat.MMMM(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(_focusedDay);
+    final monthLabel = DateFormat.MMMM(
+            Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en')
+        .format(_focusedDay);
 
     // ⭐ 급여일 기준 기간은 달력에 보이는 달 범위보다 넓거나 다를 수 있어서
     // 팝업을 열기 전에 그 기간을 명시적으로 로드해 캐시 누락을 방지함
@@ -1109,7 +1331,8 @@ Widget build(BuildContext context) {
                     countShiftChangeAsOt: workSettings.shiftChangeCountsAsOt,
                   );
             final totalMinutes = computeOtDisplayTotal(entries);
-            final periodLabel = workSettings.periodLabel(_focusedDay, isKorean: Localizations.localeOf(context).languageCode == 'ko');
+            final periodLabel = workSettings.periodLabel(_focusedDay,
+                isKorean: Localizations.localeOf(context).languageCode == 'ko');
             final colorScheme = Theme.of(context).colorScheme;
             final totalWorkMinutes = schedule == null
                 ? 0
@@ -1120,165 +1343,192 @@ Widget build(BuildContext context) {
                     otByDate: otByDate,
                   );
 
-            return DraggableScrollableSheet(
-              initialChildSize: 0.55,
-              minChildSize: 0.3,
-              maxChildSize: 0.85,
-              expand: false,
-              builder: (context, scrollController) {
-                return Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 핸들
-                      Center(
-                        child: Container(
-                          width: 40.w,
-                          height: 4.h,
-                          decoration: BoxDecoration(
-                            color: colorScheme.outline,
-                            borderRadius: BorderRadius.circular(2.r),
+            return SafeArea(
+              top: false,
+              child: DraggableScrollableSheet(
+                initialChildSize: 0.55,
+                minChildSize: 0.3,
+                maxChildSize: 0.85,
+                expand: false,
+                builder: (context, scrollController) {
+                  return Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 핸들
+                        Center(
+                          child: Container(
+                            width: 40.w,
+                            height: 4.h,
+                            decoration: BoxDecoration(
+                              color: colorScheme.outline,
+                              borderRadius: BorderRadius.circular(2.r),
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 16.h),
+                        SizedBox(height: 16.h),
 
-                      Text(
-                        context.l10n.calendarMonthlyOtTitle(monthLabel),
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
+                        Text(
+                          context.l10n.calendarMonthlyOtTitle(monthLabel),
+                          style: TextStyle(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurface,
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 2.h),
-                      Text(
-                        '($periodLabel)',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        context.l10n.calendarOtTotal(formatOvertimeMinutes(context, totalMinutes)),
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        context.l10n.calendarMonthlyWorkTotal(monthLabel, formatOvertimeMinutes(context, totalWorkMinutes)),
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      // ⭐ 근무카드에 근무시간이 하나도 설정 안 돼 있으면 위 합산은
-                      // 사실상 OT만 반영된 값 - 오해 없게 안내 문구를 추가함
-                      if (schedule != null && !schedule.hasAnyWorkDuration) ...[
                         SizedBox(height: 2.h),
                         Text(
-                          context.l10n.calendarSetWorkHoursInSettingsHint,
+                          '($periodLabel)',
                           style: TextStyle(
-                            fontSize: 11.sp,
+                            fontSize: 12.sp,
                             color: colorScheme.onSurfaceVariant,
                           ),
                         ),
-                      ],
-                      SizedBox(height: 16.h),
+                        SizedBox(height: 8.h),
+                        Text(
+                          context.l10n.calendarOtTotal(
+                              formatOvertimeMinutes(context, totalMinutes)),
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.primary,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          context.l10n.calendarMonthlyWorkTotal(monthLabel,
+                              formatOvertimeMinutes(context, totalWorkMinutes)),
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        // ⭐ 근무카드에 근무시간이 하나도 설정 안 돼 있으면 위 합산은
+                        // 사실상 OT만 반영된 값 - 오해 없게 안내 문구를 추가함
+                        if (schedule != null &&
+                            !schedule.hasAnyWorkDuration) ...[
+                          SizedBox(height: 2.h),
+                          Text(
+                            context.l10n.calendarSetWorkHoursInSettingsHint,
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                        SizedBox(height: 16.h),
 
-                      Expanded(
-                        child: entries.isEmpty
-                            ? Center(
-                                child: Text(
-                                  context.l10n.calendarNoOtRegistered,
-                                  style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
-                                ),
-                              )
-                            : ListView.separated(
-                                controller: scrollController,
-                                itemCount: entries.length,
-                                separatorBuilder: (_, __) => SizedBox(height: 8.h),
-                                itemBuilder: (context, index) {
-                                  final entry = entries[index];
-                                  final date = entry.date;
-                                  final weekdayStr = _getWeekday(date, context);
+                        Expanded(
+                          child: entries.isEmpty
+                              ? Center(
+                                  child: Text(
+                                    context.l10n.calendarNoOtRegistered,
+                                    style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: colorScheme.onSurfaceVariant),
+                                  ),
+                                )
+                              : ListView.separated(
+                                  controller: scrollController,
+                                  itemCount: entries.length,
+                                  separatorBuilder: (_, __) =>
+                                      SizedBox(height: 8.h),
+                                  itemBuilder: (context, index) {
+                                    final entry = entries[index];
+                                    final date = entry.date;
+                                    final weekdayStr =
+                                        _getWeekday(date, context);
 
-                                  // ⭐ 근무변경으로 늘어난 시간이 있으면 "휴무 → 주간 (12시간)"
-                                  // 부제목 추가, 수동 OT까지 있으면 옆에 "OT 3시간"도 같이 표기
-                                  // (우측 총합은 항상 entry.totalMinutes = 이 둘의 합)
-                                  final hasManual = entry.hasImplied && entry.manualMinutes > 0;
-                                  final shiftChangeLabel = entry.hasImplied
-                                      ? '${entry.fromShift} → ${entry.toShift} (${formatOvertimeMinutes(context, entry.impliedMinutes)})${hasManual ? ',' : ''}'
-                                      : null;
-                                  final manualLabel = hasManual
-                                      ? '+ OT ${formatOvertimeMinutes(context, entry.manualMinutes)}'
-                                      : null;
+                                    // ⭐ 근무변경으로 늘어난 시간이 있으면 "휴무 → 주간 (12시간)"
+                                    // 부제목 추가, 수동 OT까지 있으면 옆에 "OT 3시간"도 같이 표기
+                                    // (우측 총합은 항상 entry.totalMinutes = 이 둘의 합)
+                                    final hasManual = entry.hasImplied &&
+                                        entry.manualMinutes > 0;
+                                    final shiftChangeLabel = entry.hasImplied
+                                        ? '${entry.fromShift} → ${entry.toShift} (${formatOvertimeMinutes(context, entry.impliedMinutes)})${hasManual ? ',' : ''}'
+                                        : null;
+                                    final manualLabel = hasManual
+                                        ? '+ OT ${formatOvertimeMinutes(context, entry.manualMinutes)}'
+                                        : null;
 
-                                  return Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.surfaceVariant.withOpacity(0.4),
-                                      borderRadius: BorderRadius.circular(10.r),
-                                      border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Text(
-                                              '${DateFormat.MMMd(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(date)} ($weekdayStr)',
-                                              style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface),
-                                            ),
-                                            Spacer(),
-                                            Text(
-                                              formatOvertimeMinutes(context, entry.totalMinutes),
-                                              style: TextStyle(
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.bold,
-                                                color: colorScheme.primary,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        if (shiftChangeLabel != null) ...[
-                                          SizedBox(height: 4.h),
+                                    return Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 14.w, vertical: 12.h),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme.surfaceVariant
+                                            .withOpacity(0.4),
+                                        borderRadius:
+                                            BorderRadius.circular(10.r),
+                                        border: Border.all(
+                                            color: colorScheme.outline
+                                                .withOpacity(0.3)),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
                                           Row(
                                             children: [
                                               Text(
-                                                shiftChangeLabel,
-                                                style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
+                                                '${DateFormat.MMMd(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(date)} ($weekdayStr)',
+                                                style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    color:
+                                                        colorScheme.onSurface),
                                               ),
-                                              if (manualLabel != null) ...[
-                                                SizedBox(width: 10.w),
-                                                Text(
-                                                  manualLabel,
-                                                  style: TextStyle(
-                                                    fontSize: 12.sp,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: colorScheme.onSurfaceVariant,
-                                                  ),
+                                              Spacer(),
+                                              Text(
+                                                formatOvertimeMinutes(context,
+                                                    entry.totalMinutes),
+                                                style: TextStyle(
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: colorScheme.primary,
                                                 ),
-                                              ],
+                                              ),
                                             ],
                                           ),
+                                          if (shiftChangeLabel != null) ...[
+                                            SizedBox(height: 4.h),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  shiftChangeLabel,
+                                                  style: TextStyle(
+                                                      fontSize: 12.sp,
+                                                      color: colorScheme
+                                                          .onSurfaceVariant),
+                                                ),
+                                                if (manualLabel != null) ...[
+                                                  SizedBox(width: 10.w),
+                                                  Text(
+                                                    manualLabel,
+                                                    style: TextStyle(
+                                                      fontSize: 12.sp,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color: colorScheme
+                                                          .onSurfaceVariant,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                          ],
                                         ],
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                                      ),
+                                    );
+                                  },
+                                ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             );
           },
         );
@@ -1290,7 +1540,9 @@ Widget build(BuildContext context) {
   // 항상 달력 월요일~일요일 기준이며, OT와 근무일 변경(assignedDates)도 반영됨.
   void _showWeeklyWorkHoursSheet() {
     // ⭐ 영어 현지화: '$month월' 조립 대신 로케일 인식 월 이름
-    final monthLabel = DateFormat.MMMM(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(_focusedDay);
+    final monthLabel = DateFormat.MMMM(
+            Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en')
+        .format(_focusedDay);
     final weeks = weeksCoveringMonth(_focusedDay);
     final rangeStart = weeks.first.start;
     final rangeEnd = weeks.last.end;
@@ -1334,7 +1586,8 @@ Widget build(BuildContext context) {
               expand: false,
               builder: (context, scrollController) {
                 return Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -1362,7 +1615,9 @@ Widget build(BuildContext context) {
                       SizedBox(height: 2.h),
                       Text(
                         context.l10n.calendarWeeklyBasisHint,
-                        style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
+                        style: TextStyle(
+                            fontSize: 12.sp,
+                            color: colorScheme.onSurfaceVariant),
                       ),
                       SizedBox(height: 16.h),
 
@@ -1371,82 +1626,106 @@ Widget build(BuildContext context) {
                             ? Center(
                                 child: Text(
                                   context.l10n.calendarSetScheduleFirst,
-                                  style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
+                                  style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: colorScheme.onSurfaceVariant),
                                 ),
                               )
                             // ⭐ 근무카드에 근무시간이 하나도 설정 안 돼 있으면 누적할
                             // 근거가 없으므로 (전부 0시간) 리스트 대신 설정 안내만 보여줌
                             : !schedule.hasAnyWorkDuration
-                            ? Center(
-                                child: Text(
-                                  context.l10n.calendarSpecifyWorkHoursInSettings,
-                                  style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurfaceVariant),
-                                  textAlign: TextAlign.center,
-                                ),
-                              )
-                            : ListView.separated(
-                                controller: scrollController,
-                                itemCount: summaries.length,
-                                separatorBuilder: (_, __) => SizedBox(height: 8.h),
-                                itemBuilder: (context, index) {
-                                  final s = summaries[index];
-
-                                  // ⭐ "주간 2일, 야간 3일, ..." 형태로 근무명별 일수 나열
-                                  // (일수가 많은 순 → 이름 가나다순으로 안정적인 정렬)
-                                  final countEntries = s.shiftDayCounts.entries.toList()
-                                    ..sort((a, b) {
-                                      final byCount = b.value.compareTo(a.value);
-                                      return byCount != 0 ? byCount : a.key.compareTo(b.key);
-                                    });
-                                  final countsStr =
-                                      countEntries.map((e) => context.l10n.calendarShiftDayCount(e.key, e.value)).join(', ');
-                                  final otSuffix = s.otMinutes > 0
-                                      ? ', OT ${formatOvertimeMinutes(context, s.otMinutes)}'
-                                      : '';
-
-                                  return Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme.surfaceVariant.withOpacity(0.4),
-                                      borderRadius: BorderRadius.circular(10.r),
-                                      border: Border.all(color: colorScheme.outline.withOpacity(0.3)),
+                                ? Center(
+                                    child: Text(
+                                      context.l10n
+                                          .calendarSpecifyWorkHoursInSettings,
+                                      style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: colorScheme.onSurfaceVariant),
+                                      textAlign: TextAlign.center,
                                     ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
+                                  )
+                                : ListView.separated(
+                                    controller: scrollController,
+                                    itemCount: summaries.length,
+                                    separatorBuilder: (_, __) =>
+                                        SizedBox(height: 8.h),
+                                    itemBuilder: (context, index) {
+                                      final s = summaries[index];
+
+                                      // ⭐ "주간 2일, 야간 3일, ..." 형태로 근무명별 일수 나열
+                                      // (일수가 많은 순 → 이름 가나다순으로 안정적인 정렬)
+                                      final countEntries =
+                                          s.shiftDayCounts.entries.toList()
+                                            ..sort((a, b) {
+                                              final byCount =
+                                                  b.value.compareTo(a.value);
+                                              return byCount != 0
+                                                  ? byCount
+                                                  : a.key.compareTo(b.key);
+                                            });
+                                      final countsStr = countEntries
+                                          .map((e) => context.l10n
+                                              .calendarShiftDayCount(
+                                                  e.key, e.value))
+                                          .join(', ');
+                                      final otSuffix = s.otMinutes > 0
+                                          ? ', OT ${formatOvertimeMinutes(context, s.otMinutes)}'
+                                          : '';
+
+                                      return Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 14.w, vertical: 12.h),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme.surfaceVariant
+                                              .withOpacity(0.4),
+                                          borderRadius:
+                                              BorderRadius.circular(10.r),
+                                          border: Border.all(
+                                              color: colorScheme.outline
+                                                  .withOpacity(0.3)),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              '${s.start.month}/${s.start.day} ~ ${s.end.month}/${s.end.day}',
-                                              style: TextStyle(
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.w600,
-                                                color: colorScheme.onSurface,
-                                              ),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  '${s.start.month}/${s.start.day} ~ ${s.end.month}/${s.end.day}',
+                                                  style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    fontWeight: FontWeight.w600,
+                                                    color:
+                                                        colorScheme.onSurface,
+                                                  ),
+                                                ),
+                                                Spacer(),
+                                                Text(
+                                                  formatOvertimeMinutes(
+                                                      context, s.totalMinutes),
+                                                  style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: colorScheme.primary,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
-                                            Spacer(),
-                                            Text(
-                                              formatOvertimeMinutes(context, s.totalMinutes),
-                                              style: TextStyle(
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.bold,
-                                                color: colorScheme.primary,
+                                            if (countsStr.isNotEmpty) ...[
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                '$countsStr$otSuffix',
+                                                style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    color: colorScheme
+                                                        .onSurfaceVariant),
                                               ),
-                                            ),
+                                            ],
                                           ],
                                         ),
-                                        if (countsStr.isNotEmpty) ...[
-                                          SizedBox(height: 4.h),
-                                          Text(
-                                            '$countsStr$otSuffix',
-                                            style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
+                                      );
+                                    },
+                                  ),
                       ),
                     ],
                   ),
@@ -1479,11 +1758,15 @@ Widget build(BuildContext context) {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              hasOvertime ? formatOvertimeMinutes(context, minutes) : context.l10n.commonNone,
+              hasOvertime
+                  ? formatOvertimeMinutes(context, minutes)
+                  : context.l10n.commonNone,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.bold,
-                color: hasOvertime ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                color: hasOvertime
+                    ? colorScheme.primary
+                    : colorScheme.onSurfaceVariant,
               ),
             ),
             SizedBox(width: 8.w),
@@ -1565,13 +1848,16 @@ Widget build(BuildContext context) {
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: enabled ? colorScheme.secondaryContainer : colorScheme.surfaceVariant.withOpacity(0.5),
+          color: enabled
+              ? colorScheme.secondaryContainer
+              : colorScheme.surfaceVariant.withOpacity(0.5),
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
           size: iconSize,
-          color: enabled ? colorScheme.onSecondaryContainer : colorScheme.outline,
+          color:
+              enabled ? colorScheme.onSecondaryContainer : colorScheme.outline,
         ),
       ),
     );
@@ -1699,8 +1985,10 @@ Widget build(BuildContext context) {
   // 범례가 필수). 나머지 7개 테마는 재활용하지 않고 6번째 줄도 평범하게 다음
   // 달 스필오버 날짜를 그대로 보여줌(대신 OT/주별근무시간은 아래 별도 푸터로).
   bool _themeReclaimsSixthRow(CalendarThemeId t) =>
-      t == CalendarThemeId.mainWhite || t == CalendarThemeId.mainDark ||
-      t == CalendarThemeId.underline || t == CalendarThemeId.editorial;
+      t == CalendarThemeId.mainWhite ||
+      t == CalendarThemeId.mainDark ||
+      t == CalendarThemeId.underline ||
+      t == CalendarThemeId.editorial;
 
   // ⭐ 2026-09-05 - "전체근무표를 자주 보는데 진입 버튼이 위에 있어 번거롭다"는
   // 피드백으로 만든 두 번째 재활용 방식. 위 _themeReclaimsSixthRow와 완전히
@@ -1732,7 +2020,8 @@ Widget build(BuildContext context) {
   }) {
     if (reclaimsSixthRow && _isSixthRowEmptyCell(day, focusedDay)) return true;
     if (reclaimsSixthRowButtons &&
-        _isSixthRowButtonCell(day, focusedDay, includeAllShiftsCol: includeAllShiftsCol)) {
+        _isSixthRowButtonCell(day, focusedDay,
+            includeAllShiftsCol: includeAllShiftsCol)) {
       return true;
     }
     return false;
@@ -1840,7 +2129,8 @@ Widget build(BuildContext context) {
     if (friends.length == 1) {
       openFriendCalendar(context, ref, friends.first);
     } else {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const FriendListScreen()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (_) => const FriendListScreen()));
     }
   }
 
@@ -1851,7 +2141,8 @@ Widget build(BuildContext context) {
     // 전체근무표도 그 달로 열림(예전엔 항상 오늘이 속한 달로만 열렸음).
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => AllShiftsView(initialMonth: _focusedDay)),
+      MaterialPageRoute(
+          builder: (context) => AllShiftsView(initialMonth: _focusedDay)),
     );
   }
 
@@ -1865,7 +2156,8 @@ Widget build(BuildContext context) {
   // ⭐ 이번 달 OT 합계 - _buildMonthlyOvertimeCard()와 완전히 같은 계산식(수동
   // OT + (설정 켜져 있으면) 근무변경으로 늘어난 시간). 테마별 푸터들이 전부
   // 이 값 하나를 공유해서 씀.
-  ({int totalMinutes, DateTimeRange period}) _monthlyOtSummary(ShiftSchedule schedule) {
+  ({int totalMinutes, DateTimeRange period}) _monthlyOtSummary(
+      ShiftSchedule schedule) {
     final otByDate = ref.watch(overtimeProvider);
     final workSettings = ref.watch(workHoursSettingsProvider);
     final period = workSettings.periodForMonth(_focusedDay);
@@ -1894,55 +2186,121 @@ Widget build(BuildContext context) {
     // ⭐ 영어 현지화: '$m월'/'$y년 $m월' 같은 Korean-particle 조립은 로케일에
     // 따라 표기가 달라져야 함 - materialCard/mainWhite/mainDark에서 사용.
     final isKorean = Localizations.localeOf(context).languageCode == 'ko';
-    final shortMonthLabel = DateFormat.MMM(isKorean ? 'ko' : 'en').format(_focusedDay);
+    final shortMonthLabel =
+        DateFormat.MMM(isKorean ? 'ko' : 'en').format(_focusedDay);
     switch (theme) {
       case CalendarThemeId.minimal:
-        return GestureDetector(onTap: _showMonthYearPicker, child: Text('${_monthEn3[m - 1]} $y', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600, color: Colors.black87)));
+        return GestureDetector(
+            onTap: _showMonthYearPicker,
+            child: Text('${_monthEn3[m - 1]} $y',
+                style: TextStyle(
+                    fontSize: 17.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87)));
       case CalendarThemeId.materialCard:
         return GestureDetector(
           onTap: _showMonthYearPicker,
-          child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
-            Text(shortMonthLabel, style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w300, color: Colors.black87)),
-            SizedBox(width: 6.w),
-            Padding(padding: EdgeInsets.only(bottom: 2.h), child: Text('$y', style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade400))),
-          ]),
+          child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(shortMonthLabel,
+                    style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.black87)),
+                SizedBox(width: 6.w),
+                Padding(
+                    padding: EdgeInsets.only(bottom: 2.h),
+                    child: Text('$y',
+                        style: TextStyle(
+                            fontSize: 13.sp, color: Colors.grey.shade400))),
+              ]),
         );
       case CalendarThemeId.boldGrid:
-        return GestureDetector(onTap: _showMonthYearPicker, child: Text('$y-${m.toString().padLeft(2, '0')}', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'monospace')));
+        return GestureDetector(
+            onTap: _showMonthYearPicker,
+            child: Text('$y-${m.toString().padLeft(2, '0')}',
+                style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontFamily: 'monospace')));
       case CalendarThemeId.initialBadge:
-        return GestureDetector(onTap: _showMonthYearPicker, child: Text('$y.${m.toString().padLeft(2, '0')}', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)));
+        return GestureDetector(
+            onTap: _showMonthYearPicker,
+            child: Text('$y.${m.toString().padLeft(2, '0')}',
+                style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87)));
       case CalendarThemeId.underline:
         return GestureDetector(
           onTap: _showMonthYearPicker,
           child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Text(_monthEn3[m - 1].toUpperCase(), style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w700, letterSpacing: 1.5, color: Colors.black87)),
+            Text(_monthEn3[m - 1].toUpperCase(),
+                style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.5,
+                    color: Colors.black87)),
             SizedBox(width: 6.w),
             // ⭐ "2026 년도가 잘 안 보인다"는 지적으로 아주 살짝만 진하게(shade400→shade500).
-            Text('$y', style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade500, letterSpacing: 1)),
+            Text('$y',
+                style: TextStyle(
+                    fontSize: 12.sp,
+                    color: Colors.grey.shade500,
+                    letterSpacing: 1)),
           ]),
         );
       case CalendarThemeId.eventChip:
-        return GestureDetector(onTap: _showMonthYearPicker, child: Text('$y. $m', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)));
+        return GestureDetector(
+            onTap: _showMonthYearPicker,
+            child: Text('$y. $m',
+                style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87)));
       case CalendarThemeId.editorial:
         return GestureDetector(
           onTap: _showMonthYearPicker,
-          child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.end, children: [
-            // ⭐ 2026-09-05 - "September"처럼 다 풀어 쓰면 공간이 부족해서 3글자
-            // 약어("Sep")로 - _monthEn3(minimal/underline과 공유).
-            Text(_monthEn3[m - 1], style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w700, fontFamily: 'serif', color: Colors.black87)),
-            SizedBox(width: 8.w),
-            // ⭐ "2026 등 텍스트를 아주 약간만 더 진하게" - shade500 → shade600.
-            Padding(padding: EdgeInsets.only(bottom: 3.h), child: Text('$y', style: TextStyle(fontSize: 12.sp, fontFamily: 'serif', color: Colors.grey.shade600))),
-          ]),
+          child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // ⭐ 2026-09-05 - "September"처럼 다 풀어 쓰면 공간이 부족해서 3글자
+                // 약어("Sep")로 - _monthEn3(minimal/underline과 공유).
+                Text(_monthEn3[m - 1],
+                    style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'serif',
+                        color: Colors.black87)),
+                SizedBox(width: 8.w),
+                // ⭐ "2026 등 텍스트를 아주 약간만 더 진하게" - shade500 → shade600.
+                Padding(
+                    padding: EdgeInsets.only(bottom: 3.h),
+                    child: Text('$y',
+                        style: TextStyle(
+                            fontSize: 12.sp,
+                            fontFamily: 'serif',
+                            color: Colors.grey.shade600))),
+              ]),
         );
       case CalendarThemeId.mainWhite:
       case CalendarThemeId.mainDark:
         return GestureDetector(
           onTap: _showMonthYearPicker,
           child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Text(isKorean ? '$y년 $m월' : DateFormat.yMMMM('en').format(_focusedDay), style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+            Text(
+                isKorean
+                    ? '$y년 $m월'
+                    : DateFormat.yMMMM('en').format(_focusedDay),
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
             SizedBox(width: 4.w),
-            Icon(Icons.arrow_drop_down, size: 24.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            Icon(Icons.arrow_drop_down,
+                size: 24.sp,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
           ]),
         );
       // ⭐ 2026-09-01 신설 - 다이어리(원래 유럽/애플풍 "노르딕"으로 만들었다가,
@@ -1955,14 +2313,73 @@ Widget build(BuildContext context) {
         return GestureDetector(
           onTap: _showMonthYearPicker,
           child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Container(width: 7.w, height: 7.w, margin: EdgeInsets.only(right: 7.w), decoration: BoxDecoration(color: _diaryAccent, shape: BoxShape.circle)),
+            Container(
+                width: 7.w,
+                height: 7.w,
+                margin: EdgeInsets.only(right: 7.w),
+                decoration:
+                    BoxDecoration(color: _diaryAccent, shape: BoxShape.circle)),
             Text(
               isKorean ? '$y년 $m월' : DateFormat.yMMMM('en').format(_focusedDay),
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500, letterSpacing: 0.2, color: const Color(0xFF4A4038)),
+              style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.2,
+                  color: const Color(0xFF4A4038)),
             ),
           ]),
         );
     }
+  }
+
+  Widget _buildCompactAdHeaderTitle(CalendarThemeId theme) {
+    final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+    final foreground = theme == CalendarThemeId.boldGrid
+        ? Colors.white
+        : Theme.of(context).colorScheme.onSurface;
+    final month = isKorean
+        ? '${_focusedDay.month}월'
+        : DateFormat.MMM('en').format(_focusedDay);
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _showMonthYearPicker,
+      child: SizedBox(
+        width: kCalendarHeaderLeadingWidth,
+        height: double.infinity,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            '${_focusedDay.year}\n$month',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12.sp,
+              height: 1.05,
+              fontWeight: FontWeight.w800,
+              color: foreground,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactSelectionHeader() {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _exitMultiSelectMode,
+      child: SizedBox(
+        width: kCalendarHeaderLeadingWidth,
+        height: double.infinity,
+        child: Center(
+          child: Text(
+            '×\n${_selectedDates.length}',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontSize: 13.sp, height: 1.0, fontWeight: FontWeight.w800),
+          ),
+        ),
+      ),
+    );
   }
 
   // ⭐ 2026-09-05 - 예전엔 여기서 "친구가 있으면 헤더 버튼 끝에 아이콘 하나
@@ -1972,7 +2389,8 @@ Widget build(BuildContext context) {
   // 언더라인/매거진만 예외로 아래 core의 헤더에 직접 넣음) - 그래서 이 자동
   // 덧붙이기는 중복이라 없앰. 이 함수는 이제 core를 그대로 전달하는 얇은
   // wrapper - 호출부(build())를 안 건드리려고 이름만 남겨둠.
-  Widget _buildThemedHeaderButtons(CalendarThemeId theme, ShiftSchedule schedule) {
+  Widget _buildThemedHeaderButtons(
+      CalendarThemeId theme, ShiftSchedule schedule) {
     return _buildThemedHeaderButtonsCore(theme, schedule);
   }
 
@@ -1986,7 +2404,8 @@ Widget build(BuildContext context) {
   // build()의 Positioned 블록에서 실제로 그려짐) - 헤더엔 제목만 남음. 범례가
   // 필수라 6번째 줄에 자리가 없는 언더라인/매거진만 예외로, 기존 헤더 버튼을
   // 유지한 채 일정공유 버튼만 그 헤더 안에 추가로 얹음(아래 case 참고).
-  Widget _buildThemedHeaderButtonsCore(CalendarThemeId theme, ShiftSchedule schedule) {
+  Widget _buildThemedHeaderButtonsCore(
+      CalendarThemeId theme, ShiftSchedule schedule) {
     final showAllShifts = schedule.isRegular;
     switch (theme) {
       case CalendarThemeId.minimal:
@@ -2004,23 +2423,61 @@ Widget build(BuildContext context) {
       // _openFriendShare 참고).
       case CalendarThemeId.underline:
         return Row(children: [
-          GestureDetector(onTap: _jumpToToday, child: Text('TODAY', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5))),
+          GestureDetector(
+              onTap: _jumpToToday,
+              child: Text('TODAY',
+                  style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                      letterSpacing: 0.5))),
           SizedBox(width: 12.w),
-          GestureDetector(onTap: _openFriendShare, child: Text(context.l10n.friendShareTitle, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5))),
+          GestureDetector(
+              onTap: _openFriendShare,
+              child: Text(context.l10n.friendShareTitle,
+                  style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                      letterSpacing: 0.5))),
           if (showAllShifts) ...[
             SizedBox(width: 12.w),
-            GestureDetector(onTap: _openAllShiftsView, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54))),
+            GestureDetector(
+                onTap: _openAllShiftsView,
+                child: Text(context.l10n.shiftFullSchedule,
+                    style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black54))),
           ],
         ]);
       case CalendarThemeId.editorial:
         return Row(children: [
-          GestureDetector(onTap: _openFriendShare, child: Text(context.l10n.friendShareTitle, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+          GestureDetector(
+              onTap: _openFriendShare,
+              child: Text(context.l10n.friendShareTitle,
+                  style: TextStyle(
+                      fontSize: 11.sp,
+                      color: Colors.brown.shade400,
+                      decoration: TextDecoration.underline))),
           SizedBox(width: 10.w),
           if (showAllShifts) ...[
-            GestureDetector(onTap: _openAllShiftsView, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+            GestureDetector(
+                onTap: _openAllShiftsView,
+                child: Text(context.l10n.shiftFullSchedule,
+                    style: TextStyle(
+                        fontSize: 11.sp,
+                        color: Colors.brown.shade400,
+                        decoration: TextDecoration.underline))),
             SizedBox(width: 10.w),
           ],
-          GestureDetector(onTap: _jumpToToday, child: Text(context.l10n.commonToday, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+          GestureDetector(
+              onTap: _jumpToToday,
+              child: Text(context.l10n.commonToday,
+                  style: TextStyle(
+                      fontSize: 11.sp,
+                      color: Colors.brown.shade400,
+                      decoration: TextDecoration.underline))),
         ]);
     }
   }
@@ -2033,7 +2490,10 @@ Widget build(BuildContext context) {
   // ⭐ 2026-09-05 후속2 - "전체 조 근무표"가 "전체 조 근..."처럼 잘려 보인다는
   // 지적 - 한 줄 제한을 풀고 2줄까지 허용함(가운데 정렬 + 줄바꿈). 아이콘도
   // "조금씩 더 크게" 요청으로 15→17.sp.
-  Widget _diaryRowSixButton({required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _diaryRowSixButton(
+      {required IconData icon,
+      required String label,
+      required VoidCallback onTap}) {
     return Padding(
       padding: EdgeInsets.all(3.w),
       child: GestureDetector(
@@ -2052,7 +2512,10 @@ Widget build(BuildContext context) {
               SizedBox(height: 2.h),
               Text(
                 label,
-                style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w700, color: const Color(0xFFB5651D)),
+                style: TextStyle(
+                    fontSize: 8.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFFB5651D)),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -2089,7 +2552,8 @@ Widget build(BuildContext context) {
           alignment: Alignment.center,
           child: FittedBox(
             fit: BoxFit.scaleDown,
-            child: Icon(icon, size: 16.sp, color: colorScheme.onPrimaryContainer),
+            child:
+                Icon(icon, size: 16.sp, color: colorScheme.onPrimaryContainer),
           ),
         ),
       ),
@@ -2100,8 +2564,12 @@ Widget build(BuildContext context) {
   // (_diaryRowSixButton, 웜톤)를 그대로 쓰고, 나머지 5개 테마는 아래
   // _themedRowSixButton으로. 호출부(build())가 테마 분기를 직접 안 해도 되게
   // 여기서 한 번에 처리함.
-  Widget _rowSixButton(CalendarThemeId theme, {required IconData icon, required String label, required VoidCallback onTap}) {
-    if (theme == CalendarThemeId.diary) return _diaryRowSixButton(icon: icon, label: label, onTap: onTap);
+  Widget _rowSixButton(CalendarThemeId theme,
+      {required IconData icon,
+      required String label,
+      required VoidCallback onTap}) {
+    if (theme == CalendarThemeId.diary)
+      return _diaryRowSixButton(icon: icon, label: label, onTap: onTap);
     return _themedRowSixButton(theme, icon: icon, label: label, onTap: onTap);
   }
 
@@ -2111,7 +2579,10 @@ Widget build(BuildContext context) {
   // 같이 넣음. 각 case의 배경/테두리/글자색은 그 테마가 기존에 헤더에서 쓰던
   // 톤을 그대로 옮김(각각 옛 _thinTextButton/_roundIconButton/_gridHeaderBtn/
   // _pillButton 자리를 대신함 - 그 함수들은 헤더 호출부가 없어져 지움).
-  Widget _themedRowSixButton(CalendarThemeId theme, {required IconData icon, required String label, required VoidCallback onTap}) {
+  Widget _themedRowSixButton(CalendarThemeId theme,
+      {required IconData icon,
+      required String label,
+      required VoidCallback onTap}) {
     late final Color bg;
     late final Color fg;
     late final BoxBorder? border;
@@ -2159,7 +2630,8 @@ Widget build(BuildContext context) {
       case CalendarThemeId.eventChip:
         bg = Colors.teal.shade50;
         fg = Colors.teal.shade700;
-        border = Border.all(color: Colors.teal.shade200, width: 0.8); // 칩 특유의 얇은 테두리
+        border =
+            Border.all(color: Colors.teal.shade200, width: 0.8); // 칩 특유의 얇은 테두리
         radius = 8.r; // 칩(pill) 모티프 - 완만하게만 둥글게
         break;
       default:
@@ -2180,7 +2652,10 @@ Widget build(BuildContext context) {
             borderRadius: radius > 0 ? BorderRadius.circular(radius) : null,
             border: border,
             boxShadow: theme == CalendarThemeId.materialCard
-                ? [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 3)]
+                ? [
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.06), blurRadius: 3)
+                  ]
                 : null,
           ),
           child: Column(
@@ -2189,7 +2664,12 @@ Widget build(BuildContext context) {
             children: [
               Icon(icon, size: 16.sp, color: fg),
               SizedBox(height: 2.h),
-              Text(label, style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w600, color: fg), textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis),
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 8.5.sp, fontWeight: FontWeight.w600, color: fg),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis),
             ],
           ),
         ),
@@ -2213,37 +2693,92 @@ Widget build(BuildContext context) {
         // 아무 경계 없이 시작하는 것처럼 보였던 것 - 요일 칸 하나하나 밑에
         // 옅은 선을 그어서 합치면 그 구분선이 그대로 재현됨.
         return Container(
-          decoration: BoxDecoration(border: Border(bottom: BorderSide(color: Colors.grey.shade200))),
+          decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200))),
           alignment: Alignment.center,
           // ⭐ 2026-09-01 - "요일(Mon/Tue) 글자색이 너무 연한 회색"이라는 지적으로
           // grey.shade500 → grey.shade700로 한 단계 더 진하게(materialCard 테마의
           // 요일 색과 동일한 톤).
-          child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w600, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade700)),
+          child: Text(_weekdayEn3[i],
+              style: TextStyle(
+                  fontSize: 10.5.sp,
+                  fontWeight: FontWeight.w600,
+                  color: i == 0 ? Colors.red.shade400 : Colors.grey.shade700)),
         );
       case CalendarThemeId.materialCard:
-        return Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade700)));
+        return Center(
+            child: Text(weekdayLabel(context, i),
+                style: TextStyle(
+                    fontSize: 11.5.sp,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        i == 0 ? Colors.red.shade400 : Colors.grey.shade700)));
       case CalendarThemeId.boldGrid:
-        return Container(color: const Color(0xFF37474F), alignment: Alignment.center, child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.redAccent.shade100 : Colors.white70)));
+        return Container(
+            color: const Color(0xFF37474F),
+            alignment: Alignment.center,
+            child: Text(_weekdayEn3[i],
+                style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        i == 0 ? Colors.redAccent.shade100 : Colors.white70)));
       case CalendarThemeId.initialBadge:
-        return Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500)));
+        return Center(
+            child: Text(weekdayLabel(context, i),
+                style: TextStyle(
+                    fontSize: 10.5.sp,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        i == 0 ? Colors.red.shade400 : Colors.grey.shade500)));
       case CalendarThemeId.underline:
-        return Center(child: Text(_weekdayEn1[i], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade400)));
+        return Center(
+            child: Text(_weekdayEn1[i],
+                style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w600,
+                    color:
+                        i == 0 ? Colors.red.shade400 : Colors.grey.shade400)));
       case CalendarThemeId.eventChip:
-        return Center(child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500)));
+        return Center(
+            child: Text(_weekdayEn3[i],
+                style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        i == 0 ? Colors.red.shade400 : Colors.grey.shade500)));
       case CalendarThemeId.editorial:
         return Container(
-          color: i == 0 ? Colors.red.shade50 : (i == 6 ? Colors.blue.shade50 : Colors.grey.shade100),
+          color: i == 0
+              ? Colors.red.shade50
+              : (i == 6 ? Colors.blue.shade50 : Colors.grey.shade100),
           alignment: Alignment.center,
-          child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade600)),
+          child: Text(_weekdayEn3[i],
+              style: TextStyle(
+                  fontSize: 9.5.sp,
+                  fontWeight: FontWeight.bold,
+                  color: i == 0 ? Colors.red.shade400 : Colors.grey.shade600)),
         );
       case CalendarThemeId.mainWhite:
       case CalendarThemeId.mainDark:
-        return Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)));
+        return Center(
+            child: Text(weekdayLabel(context, i),
+                style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface)));
       // ⭐ 2026-09-01 신설 - 다이어리: 따뜻한 갈색 톤, 로케일 요일명 그대로
       // (Sun/Mon 약자 대신 실제 요일명 - 딱딱한 캘린더 느낌보다 다이어리에
       // 가깝게).
       case CalendarThemeId.diary:
-        return Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: i == 0 ? const Color(0xFFD9534F) : const Color(0xFF8A6F5C))));
+        return Center(
+            child: Text(weekdayLabel(context, i),
+                style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: i == 0
+                        ? const Color(0xFFD9534F)
+                        : const Color(0xFF8A6F5C))));
     }
   }
 
@@ -2278,7 +2813,8 @@ Widget build(BuildContext context) {
   // ⭐ 2026-09-01 신설 - 다이어리: 따뜻한 아이보리 카드 + 얇은 크림색 테두리.
   // 🔧 "이번 달 OT" 글자 크기: fontSize: 11.sp / "주별 근무시간" 글자 크기: 아래
   // GestureDetector 안 Text의 fontSize: 11.sp(각각 따로 조절 가능).
-  Widget _themeDiaryFooter(({int totalMinutes, DateTimeRange period}) summary, String otText) {
+  Widget _themeDiaryFooter(
+      ({int totalMinutes, DateTimeRange period}) summary, String otText) {
     return Container(
       margin: EdgeInsets.fromLTRB(12.w, 4.h, 12.w, 8.h),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
@@ -2292,12 +2828,20 @@ Widget build(BuildContext context) {
           Expanded(
             child: GestureDetector(
               onTap: () => _showMonthlyOvertimeSheet(summary.period),
-              child: Text('${context.l10n.shiftThisMonthOt} $otText', style: TextStyle(fontSize: 11.sp, color: const Color(0xFFB5651D), fontWeight: FontWeight.w700)),
+              child: Text('${context.l10n.shiftThisMonthOt} $otText',
+                  style: TextStyle(
+                      fontSize: 11.sp,
+                      color: const Color(0xFFB5651D),
+                      fontWeight: FontWeight.w700)),
             ),
           ),
           GestureDetector(
             onTap: _showWeeklyWorkHoursSheet,
-            child: Text('${context.l10n.shiftWeeklyWorkHours} ›', style: TextStyle(fontSize: 11.sp, color: const Color(0xFF8A6F5C), fontWeight: FontWeight.w600)),
+            child: Text('${context.l10n.shiftWeeklyWorkHours} ›',
+                style: TextStyle(
+                    fontSize: 11.sp,
+                    color: const Color(0xFF8A6F5C),
+                    fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -2305,38 +2849,51 @@ Widget build(BuildContext context) {
   }
 
   // ⭐ 1/5/9번이 공유하던 lab의 _theme1OtBar() 그대로.
-  Widget _themeOtBar(({int totalMinutes, DateTimeRange period}) summary, String otText) {
+  Widget _themeOtBar(
+      ({int totalMinutes, DateTimeRange period}) summary, String otText) {
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       margin: EdgeInsets.fromLTRB(16.w, 6.h, 16.w, 6.h),
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8.r)),
+      decoration: BoxDecoration(
+          color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8.r)),
       child: Row(
         children: [
           Icon(Icons.access_time, size: 13.sp, color: primary.withOpacity(0.6)),
           SizedBox(width: 5.w),
           GestureDetector(
             onTap: () => _showMonthlyOvertimeSheet(summary.period),
-            child: Text('${context.l10n.shiftThisMonthOt} $otText', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
+            child: Text('${context.l10n.shiftThisMonthOt} $otText',
+                style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
           ),
           const Spacer(),
           GestureDetector(
             onTap: _showWeeklyWorkHoursSheet,
-            child: Text('${context.l10n.shiftWeeklyWorkHours} ›', style: TextStyle(fontSize: 11.sp, color: primary, fontWeight: FontWeight.w600)),
+            child: Text('${context.l10n.shiftWeeklyWorkHours} ›',
+                style: TextStyle(
+                    fontSize: 11.sp,
+                    color: primary,
+                    fontWeight: FontWeight.w600)),
           ),
         ],
       ),
     );
   }
 
-  Widget _theme2OtCardReal(({int totalMinutes, DateTimeRange period}) summary, String otText) {
+  Widget _theme2OtCardReal(
+      ({int totalMinutes, DateTimeRange period}) summary, String otText) {
     return Container(
       margin: EdgeInsets.fromLTRB(12.w, 4.h, 12.w, 8.h),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 9.h),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10.r),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4, offset: const Offset(0, 2))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2))
+        ],
       ),
       // ⭐ "이번 달 OT랑 주별 근무시간이 스크린샷에선 서로 다른 색상이었는데
       // 지금은 똑같다" - lab 원본(_theme2OtCard)은 인디고/틸로 서로 다른
@@ -2344,26 +2901,38 @@ Widget build(BuildContext context) {
       // 합쳐버렸었음 - 원래 색 조합으로 복원.
       child: Row(
         children: [
-          _otChipReal(context.l10n.shiftThisMonthOt, otText, () => _showMonthlyOvertimeSheet(summary.period), Colors.indigo),
+          _otChipReal(context.l10n.shiftThisMonthOt, otText,
+              () => _showMonthlyOvertimeSheet(summary.period), Colors.indigo),
           SizedBox(width: 8.w),
-          _otChipReal(context.l10n.shiftWeeklyWorkHours, context.l10n.commonView, _showWeeklyWorkHoursSheet, Colors.teal),
+          _otChipReal(context.l10n.shiftWeeklyWorkHours,
+              context.l10n.commonView, _showWeeklyWorkHoursSheet, Colors.teal),
         ],
       ),
     );
   }
 
-  Widget _otChipReal(String label, String value, VoidCallback onTap, MaterialColor color) {
+  Widget _otChipReal(
+      String label, String value, VoidCallback onTap, MaterialColor color) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-          decoration: BoxDecoration(color: color.shade50, borderRadius: BorderRadius.circular(8.r)),
+          decoration: BoxDecoration(
+              color: color.shade50, borderRadius: BorderRadius.circular(8.r)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: TextStyle(fontSize: 9.sp, color: color.shade400, fontWeight: FontWeight.w600)),
-              Text(value, style: TextStyle(fontSize: 12.sp, color: color.shade700, fontWeight: FontWeight.bold)),
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 9.sp,
+                      color: color.shade400,
+                      fontWeight: FontWeight.w600)),
+              Text(value,
+                  style: TextStyle(
+                      fontSize: 12.sp,
+                      color: color.shade700,
+                      fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -2371,7 +2940,8 @@ Widget build(BuildContext context) {
     );
   }
 
-  Widget _theme4FooterReal(({int totalMinutes, DateTimeRange period}) summary, String otText) {
+  Widget _theme4FooterReal(
+      ({int totalMinutes, DateTimeRange period}) summary, String otText) {
     return Container(
       color: const Color(0xFFECEFF1),
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
@@ -2379,19 +2949,28 @@ Widget build(BuildContext context) {
         children: [
           GestureDetector(
             onTap: () => _showMonthlyOvertimeSheet(summary.period),
-            child: Text('${context.l10n.shiftThisMonthOt} $otText', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF263238))),
+            child: Text('${context.l10n.shiftThisMonthOt} $otText',
+                style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF263238))),
           ),
           SizedBox(width: 14.w),
           GestureDetector(
             onTap: _showWeeklyWorkHoursSheet,
-            child: Text('${context.l10n.shiftWeeklyWorkHours} ▸', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: const Color(0xFF00695C))),
+            child: Text('${context.l10n.shiftWeeklyWorkHours} ▸',
+                style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF00695C))),
           ),
         ],
       ),
     );
   }
 
-  Widget _theme8FooterReal(({int totalMinutes, DateTimeRange period}) summary, String otText) {
+  Widget _theme8FooterReal(
+      ({int totalMinutes, DateTimeRange period}) summary, String otText) {
     return Padding(
       padding: EdgeInsets.fromLTRB(18.w, 4.h, 18.w, 10.h),
       child: Row(
@@ -2400,7 +2979,8 @@ Widget build(BuildContext context) {
             onTap: () => _showMonthlyOvertimeSheet(summary.period),
             // ⭐ "OT 3시간 30분도 아주 약간만 더 진하게" - black54→black87.
             // ⭐ "OT만 쓰지 말고 다른 테마들처럼 이번 달 OT로 통일" 요청 반영.
-            child: Text('${context.l10n.shiftThisMonthOt} $otText', style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
+            child: Text('${context.l10n.shiftThisMonthOt} $otText',
+                style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
           ),
           const Spacer(),
           // ⭐ "오늘 표시 밑줄은 그대로 두되, 주별 근무시간의 밑줄은 없애자 -
@@ -2408,14 +2988,19 @@ Widget build(BuildContext context) {
           // black87)는 유지하고 밑줄만 제거.
           GestureDetector(
             onTap: _showWeeklyWorkHoursSheet,
-            child: Text(context.l10n.shiftWeeklyWorkHours, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+            child: Text(context.l10n.shiftWeeklyWorkHours,
+                style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87)),
           ),
         ],
       ),
     );
   }
 
-  Widget _theme10FooterReal(({int totalMinutes, DateTimeRange period}) summary, String otText) {
+  Widget _theme10FooterReal(
+      ({int totalMinutes, DateTimeRange period}) summary, String otText) {
     return Container(
       padding: EdgeInsets.fromLTRB(18.w, 6.h, 18.w, 10.h),
       child: Row(
@@ -2424,15 +3009,28 @@ Widget build(BuildContext context) {
           GestureDetector(
             onTap: () => _showMonthlyOvertimeSheet(summary.period),
             child: Row(children: [
-              Text(context.l10n.shiftThisMonthOt, style: TextStyle(fontSize: 10.sp, color: Colors.grey.shade600, fontFamily: 'serif')),
+              Text(context.l10n.shiftThisMonthOt,
+                  style: TextStyle(
+                      fontSize: 10.sp,
+                      color: Colors.grey.shade600,
+                      fontFamily: 'serif')),
               SizedBox(width: 4.w),
-              Text(otText, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: Colors.brown.shade600, fontFamily: 'serif')),
+              Text(otText,
+                  style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown.shade600,
+                      fontFamily: 'serif')),
             ]),
           ),
           const Spacer(),
           GestureDetector(
             onTap: _showWeeklyWorkHoursSheet,
-            child: Text('${context.l10n.shiftWeeklyWorkHours} →', style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade500, fontFamily: 'serif')),
+            child: Text('${context.l10n.shiftWeeklyWorkHours} →',
+                style: TextStyle(
+                    fontSize: 11.sp,
+                    color: Colors.brown.shade500,
+                    fontFamily: 'serif')),
           ),
         ],
       ),
@@ -2453,36 +3051,60 @@ Widget build(BuildContext context) {
       margin: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
       decoration: BoxDecoration(
-        border: Border.all(color: useTriangle ? Colors.grey.shade200 : Colors.grey.shade300, width: 0.7),
+        border: Border.all(
+            color: useTriangle ? Colors.grey.shade200 : Colors.grey.shade300,
+            width: 0.7),
         borderRadius: useTriangle ? null : BorderRadius.circular(4.r),
       ),
       child: ClipRect(
         child: Column(
-          children: List.generate(rows, (r) => Expanded(
-            child: Row(
-              children: List.generate(cols, (c) {
-                final i = r * cols + c;
-                if (i >= shifts.length) return const Expanded(child: SizedBox());
-                final name = shifts[i];
-                final color = colorMap[name] ?? Colors.grey;
-                return Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 1.h),
+          children: List.generate(
+              rows,
+              (r) => Expanded(
                     child: Row(
-                      children: [
-                        useTriangle
-                            ? ClipPath(clipper: _CalendarTriangleClipper(), child: Container(width: 16.w, height: 16.w, color: color))
-                            : Container(width: 16.w, height: 5.h, decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2.r))),
-                        SizedBox(width: useTriangle ? 4.w : 3.w),
-                        // ⭐ "범례 글자를 조금 더 키워도 될 듯" - 7.sp → 7.6.sp.
-                        Expanded(child: Text(name, style: TextStyle(fontSize: 7.6.sp, color: Colors.black87, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
-                      ],
+                      children: List.generate(cols, (c) {
+                        final i = r * cols + c;
+                        if (i >= shifts.length)
+                          return const Expanded(child: SizedBox());
+                        final name = shifts[i];
+                        final color = colorMap[name] ?? Colors.grey;
+                        return Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 2.w, vertical: 1.h),
+                            child: Row(
+                              children: [
+                                useTriangle
+                                    ? ClipPath(
+                                        clipper: _CalendarTriangleClipper(),
+                                        child: Container(
+                                            width: 16.w,
+                                            height: 16.w,
+                                            color: color))
+                                    : Container(
+                                        width: 16.w,
+                                        height: 5.h,
+                                        decoration: BoxDecoration(
+                                            color: color,
+                                            borderRadius:
+                                                BorderRadius.circular(2.r))),
+                                SizedBox(width: useTriangle ? 4.w : 3.w),
+                                // ⭐ "범례 글자를 조금 더 키워도 될 듯" - 7.sp → 7.6.sp.
+                                Expanded(
+                                    child: Text(name,
+                                        style: TextStyle(
+                                            fontSize: 7.6.sp,
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.w600),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis)),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
                     ),
-                  ),
-                );
-              }),
-            ),
-          )),
+                  )),
         ),
       ),
     );
@@ -2506,21 +3128,35 @@ Widget build(BuildContext context) {
   // 기준으로 첫 줄 여부(_isFirstRow)를 판정해서, 스와이프 도중 위쪽 여백이 있다/없다가
   // 뒤바뀌는 셀이 생겼던 것 - 스와이프가 끝나 상태가 갱신되면 다시 맞아 보여서 순간적인
   // "틀어짐"으로만 보였음. 이제 각 빌더 콜백의 focusedDay를 그대로 전달받아 씀.
-  Widget _buildThemedCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, DateTime focusedDay, {bool isSelected = false}) {
+  Widget _buildThemedCell(DateTime day, bool isToday, bool isOutside,
+      ShiftSchedule schedule, DateTime focusedDay,
+      {bool isSelected = false}) {
     final theme = ref.watch(calendarThemeProvider);
-    if (theme == CalendarThemeId.mainWhite || theme == CalendarThemeId.mainDark) {
-      return _buildDateCell(day, isToday, isOutside, schedule, isSelected: isSelected);
+    if (theme == CalendarThemeId.mainWhite ||
+        theme == CalendarThemeId.mainDark) {
+      return _buildDateCell(day, isToday, isOutside, schedule,
+          isSelected: isSelected);
     }
     final cell = switch (theme) {
-      CalendarThemeId.minimal => _theme1Cell(day, isToday, isOutside, schedule, focusedDay),
-      CalendarThemeId.materialCard => _theme2Cell(day, isToday, isOutside, schedule),
-      CalendarThemeId.boldGrid => _theme4Cell(day, isToday, isOutside, schedule),
-      CalendarThemeId.initialBadge => _theme5Cell(day, isToday, isOutside, schedule),
-      CalendarThemeId.underline => _theme8Cell(day, isToday, isOutside, schedule),
-      CalendarThemeId.eventChip => _theme9Cell(day, isToday, isOutside, schedule),
-      CalendarThemeId.editorial => _theme10Cell(day, isToday, isOutside, schedule),
-      CalendarThemeId.diary => _themeDiaryCell(day, isToday, isOutside, schedule),
-      CalendarThemeId.mainWhite || CalendarThemeId.mainDark => throw StateError('unreachable'),
+      CalendarThemeId.minimal =>
+        _theme1Cell(day, isToday, isOutside, schedule, focusedDay),
+      CalendarThemeId.materialCard =>
+        _theme2Cell(day, isToday, isOutside, schedule),
+      CalendarThemeId.boldGrid =>
+        _theme4Cell(day, isToday, isOutside, schedule),
+      CalendarThemeId.initialBadge =>
+        _theme5Cell(day, isToday, isOutside, schedule),
+      CalendarThemeId.underline =>
+        _theme8Cell(day, isToday, isOutside, schedule),
+      CalendarThemeId.eventChip =>
+        _theme9Cell(day, isToday, isOutside, schedule),
+      CalendarThemeId.editorial =>
+        _theme10Cell(day, isToday, isOutside, schedule),
+      CalendarThemeId.diary =>
+        _themeDiaryCell(day, isToday, isOutside, schedule),
+      CalendarThemeId.mainWhite ||
+      CalendarThemeId.mainDark =>
+        throw StateError('unreachable'),
     };
     // ⭐ 7개 실험 테마 셀 함수들은 원래 다중 선택(길게 눌러 여러 날짜 선택) 기능이
     // 없던 시절에 만들어져서 선택 표시가 없음 - 각 셀 디자인은 그대로 두고 선택
@@ -2529,7 +3165,8 @@ Widget build(BuildContext context) {
     if (!isSelected) return cell;
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 2),
+        border: Border.all(
+            color: Theme.of(context).colorScheme.secondary, width: 2),
         color: Theme.of(context).colorScheme.secondary.withOpacity(0.12),
       ),
       child: cell,
@@ -2540,19 +3177,36 @@ Widget build(BuildContext context) {
   // calendar_theme_lab_screen.dart의 목업(_mockShiftFor/_mockMemos 등) 대신
   // 실제 schedule.getShiftForDate/memoProvider를 씀 - 그 외 계산 방식(공휴일,
   // 일요일, 자동 대비 텍스트색 등)은 완전히 동일한 공식을 그대로 씀.
-  ({String shiftText, bool hasShift, Color shiftColor, Color shiftTextColor, bool red, String? holidayName, List<String> memos})
-      _themedCellData(DateTime day, ShiftSchedule schedule) {
+  ({
+    String shiftText,
+    bool hasShift,
+    Color shiftColor,
+    Color shiftTextColor,
+    bool red,
+    String? holidayName,
+    List<String> memos
+  }) _themedCellData(DateTime day, ShiftSchedule schedule) {
     final shiftText = schedule.getShiftForDate(day);
     final hasShift = shiftText.isNotEmpty && shiftText != '미설정';
-    final shiftColor = hasShift ? _getShiftBackgroundColor(shiftText, schedule) : Colors.transparent;
-    final shiftTextColor = hasShift ? _getShiftTextColor(shiftText, schedule) : Colors.transparent;
+    final shiftColor = hasShift
+        ? _getShiftBackgroundColor(shiftText, schedule)
+        : Colors.transparent;
+    final shiftTextColor =
+        hasShift ? _getShiftTextColor(shiftText, schedule) : Colors.transparent;
     final holidayName = _getHolidayName(day, context);
     final red = day.weekday == DateTime.sunday || holidayName != null;
     final dateStr = day.toIso8601String().split('T')[0];
-    final memos = ref.watch(memoProvider)[dateStr]?.map((m) => m.memoText).toList() ?? const <String>[];
+    final memos =
+        ref.watch(memoProvider)[dateStr]?.map((m) => m.memoText).toList() ??
+            const <String>[];
     return (
-      shiftText: shiftText, hasShift: hasShift, shiftColor: shiftColor, shiftTextColor: shiftTextColor,
-      red: red, holidayName: holidayName, memos: memos,
+      shiftText: shiftText,
+      hasShift: hasShift,
+      shiftColor: shiftColor,
+      shiftTextColor: shiftTextColor,
+      red: red,
+      holidayName: holidayName,
+      memos: memos,
     );
   }
 
@@ -2563,18 +3217,27 @@ Widget build(BuildContext context) {
   // 글자까지만 문자열 자체를 잘라내고 그걸 그림 - 이미 딱 맞게 잘린 문자열이라
   // 반쪽 글자가 원천적으로 나올 수 없음. 모든 테마의 메모/공휴일명 렌더링이
   // 공용으로 씀.
-  Widget _fitText(String text, TextStyle style, {TextAlign textAlign = TextAlign.center}) {
+  Widget _fitText(String text, TextStyle style,
+      {TextAlign textAlign = TextAlign.center}) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxWidth = constraints.maxWidth;
         var display = text;
         if (maxWidth.isFinite && maxWidth > 0 && text.isNotEmpty) {
-          final full = TextPainter(text: TextSpan(text: text, style: style), textDirection: TextDirection.ltr, maxLines: 1)..layout();
+          final full = TextPainter(
+              text: TextSpan(text: text, style: style),
+              textDirection: TextDirection.ltr,
+              maxLines: 1)
+            ..layout();
           if (full.width > maxWidth) {
             int lo = 0, hi = text.length;
             while (lo < hi) {
               final mid = (lo + hi + 1) ~/ 2;
-              final p = TextPainter(text: TextSpan(text: text.substring(0, mid), style: style), textDirection: TextDirection.ltr, maxLines: 1)..layout();
+              final p = TextPainter(
+                  text: TextSpan(text: text.substring(0, mid), style: style),
+                  textDirection: TextDirection.ltr,
+                  maxLines: 1)
+                ..layout();
               if (p.width <= maxWidth) {
                 lo = mid;
               } else {
@@ -2584,7 +3247,8 @@ Widget build(BuildContext context) {
             display = text.substring(0, lo);
           }
         }
-        return Text(display, style: style, maxLines: 1, textAlign: textAlign, softWrap: false);
+        return Text(display,
+            style: style, maxLines: 1, textAlign: textAlign, softWrap: false);
       },
     );
   }
@@ -2594,10 +3258,13 @@ Widget build(BuildContext context) {
   // 빌더 콜백이 실제로 받은 값을 그대로 받음 - _buildThemedCell의 주석 참고
   // (스와이프 중 미리 빌드되는 인접 페이지에서 첫 줄 판정이 엉뚱한 달 기준으로
   // 되던 버그 수정).
-  Widget _theme1Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, DateTime focusedDay) {
+  Widget _theme1Cell(DateTime day, bool isToday, bool isOutside,
+      ShiftSchedule schedule, DateTime focusedDay) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
-    final numColor = isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade400 : colorScheme.onSurface);
+    final numColor = isOutside
+        ? colorScheme.onSurfaceVariant.withOpacity(0.5)
+        : (d.red ? Colors.red.shade400 : colorScheme.onSurface);
     // ⭐ "그리드가 이미지보다 진하다"는 지적으로 왼쪽 선을 더 연하게.
     // ⭐ "맨 윗줄 근무명 영역이랑 요일행 밑 구분선 사이에 미세한 여백이 있다"는
     // 지적 - lab 원본도 첫 줄만 위쪽 패딩을 0으로 없앴었는데(다른 행끼리는
@@ -2627,7 +3294,8 @@ Widget build(BuildContext context) {
     return ClipRect(
       child: Container(
         width: double.infinity,
-        decoration: BoxDecoration(border: Border(left: BorderSide(color: Colors.grey.shade200))),
+        decoration: BoxDecoration(
+            border: Border(left: BorderSide(color: Colors.grey.shade200))),
         padding: EdgeInsets.only(top: isFirstRow ? 0 : 2.h, bottom: 2.h),
         child: Column(
           children: [
@@ -2648,8 +3316,12 @@ Widget build(BuildContext context) {
                 // 가능해져서, 안 잘리는 부분까지 버리지 않고 이미 있던
                 // overflow:ellipsis(말줄임표)가 자연스럽게 나머지를 처리하게 둠.
                 child: Text(d.shiftText,
-                    style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor),
-                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                    style: TextStyle(
+                        fontSize: 8.5.sp,
+                        fontWeight: FontWeight.bold,
+                        color: d.shiftTextColor),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
               )
             else
               SizedBox(height: 12.h),
@@ -2662,8 +3334,17 @@ Widget build(BuildContext context) {
               width: 18.w,
               height: 18.w,
               alignment: Alignment.center,
-              decoration: isToday ? BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.indigo.shade400, width: 1.4)) : null,
-              child: Text('${day.day}', style: TextStyle(fontSize: 10.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w500, color: numColor)),
+              decoration: isToday
+                  ? BoxDecoration(
+                      shape: BoxShape.circle,
+                      border:
+                          Border.all(color: Colors.indigo.shade400, width: 1.4))
+                  : null,
+              child: Text('${day.day}',
+                  style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+                      color: numColor)),
             ),
             // 🔧 빨간날(일요일/공휴일) 이름 - 크기: fontSize: 6.5.sp, 색:
             // Colors.red.shade400. 위치는 Column 순서상 "날짜 숫자 바로 아래"로
@@ -2671,7 +3352,13 @@ Widget build(BuildContext context) {
             // 추가하거나, 날짜 숫자보다 위로 올리려면 이 if 블록 자체를 날짜
             // Container보다 앞으로 옮기면 됨.
             if (d.holidayName != null)
-              _fitText(d.holidayName!, TextStyle(fontSize: 7.7.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.1)),
+              _fitText(
+                  d.holidayName!,
+                  TextStyle(
+                      fontSize: 7.7.sp,
+                      color: Colors.red.shade400,
+                      fontWeight: FontWeight.bold,
+                      height: 1.1)),
             // 🔧 메모 시작 위치(날짜/빨간날 ↔ 첫 메모 사이 간격) - 이 SizedBox
             // 높이가 곧 "메모가 위에서 얼마나 아래서 시작하는가"임. 빨간날이 없는
             // 날은 날짜 숫자 바로 아래가 이 간격이 되고, 빨간날이 있는 날은
@@ -2681,9 +3368,15 @@ Widget build(BuildContext context) {
             // 세로 간격은 Padding의 top: (첫 줄만 0, 나머지는 1.h) - 메모끼리
             // 더 붙이려면 이 1.h를 줄이고, 더 띄우려면 키우면 됨.
             ...d.memos.take(3).toList().asMap().entries.map((e) => Padding(
-              padding: EdgeInsets.only(top: e.key == 0 ? 0 : 0.7.h, left: 1.w, right: 1.w),
-              child: _fitText(e.value, TextStyle(fontSize: 7.sp, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600)),
-            )),
+                  padding: EdgeInsets.only(
+                      top: e.key == 0 ? 0 : 0.7.h, left: 1.w, right: 1.w),
+                  child: _fitText(
+                      e.value,
+                      TextStyle(
+                          fontSize: 7.sp,
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600)),
+                )),
           ],
         ),
       ),
@@ -2691,7 +3384,8 @@ Widget build(BuildContext context) {
   }
 
   // ⭐ 2번 · 머티리얼 카드형
-  Widget _theme2Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
+  Widget _theme2Cell(
+      DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
     return ClipRect(
@@ -2720,10 +3414,21 @@ Widget build(BuildContext context) {
             // 교체). 순백(스캐폴드 배경)보다는 한 톤 어둡게 구분되면서도 진해
             // 보이지 않는 중립 연회색(#F1F2F6) 고정값 사용 - outside(다른 달)
             // 셀 스타일은 그대로 둠.
-            color: isOutside ? colorScheme.surfaceVariant.withOpacity(0.15) : const Color(0xFFF1F2F6),
+            color: isOutside
+                ? colorScheme.surfaceVariant.withOpacity(0.15)
+                : const Color(0xFFF1F2F6),
             borderRadius: BorderRadius.circular(6.r),
-            border: isToday ? Border.all(color: Colors.indigo.shade400, width: 1.4) : null,
-            boxShadow: isOutside ? null : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 2, offset: const Offset(0, 1))],
+            border: isToday
+                ? Border.all(color: Colors.indigo.shade400, width: 1.4)
+                : null,
+            boxShadow: isOutside
+                ? null
+                : [
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 2,
+                        offset: const Offset(0, 1))
+                  ],
           ),
           child: Column(
             children: [
@@ -2734,13 +3439,19 @@ Widget build(BuildContext context) {
                   width: double.infinity,
                   height: 12.h,
                   margin: EdgeInsets.fromLTRB(4.w, 1.h, 4.w, 0),
-                  decoration: BoxDecoration(color: d.shiftColor, borderRadius: BorderRadius.circular(3.r)),
+                  decoration: BoxDecoration(
+                      color: d.shiftColor,
+                      borderRadius: BorderRadius.circular(3.r)),
                   alignment: Alignment.center,
                   // ⭐ 영어 현지화: 위 셀과 동일한 이유로 강제 4글자 컷 제거,
                   // 기존 overflow:ellipsis에 맡김.
                   child: Text(d.shiftText,
-                      style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor),
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                      style: TextStyle(
+                          fontSize: 8.5.sp,
+                          fontWeight: FontWeight.bold,
+                          color: d.shiftTextColor),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
                 )
               else
                 SizedBox(height: 13.h),
@@ -2749,22 +3460,38 @@ Widget build(BuildContext context) {
               // 🔧 날짜 숫자 - 크기: fontSize: 12.sp. 이 테마는 날짜 숫자를 Container로
               // 감싸지 않고 Column 안에 직접 두므로, 위아래 위치는 앞뒤 SizedBox
               // 높이로만 조절 가능(별도 정렬 박스 없음).
-              Text('${day.day}', style: TextStyle(
-                fontSize: 11.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w700,
-                color: isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
-              )),
+              Text('${day.day}',
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: isToday ? FontWeight.bold : FontWeight.w700,
+                    color: isOutside
+                        ? colorScheme.onSurfaceVariant.withOpacity(0.5)
+                        : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
+                  )),
               // 🔧 빨간날 이름 - 크기: fontSize: 6.sp, 색: red.shade600. 위치는
               // 날짜 숫자 바로 아래 고정(Column 순서).
               if (d.holidayName != null)
-                _fitText(d.holidayName!, TextStyle(fontSize: 7.sp, color: Colors.red.shade600, fontWeight: FontWeight.bold, height: 1.0)),
+                _fitText(
+                    d.holidayName!,
+                    TextStyle(
+                        fontSize: 7.sp,
+                        color: Colors.red.shade600,
+                        fontWeight: FontWeight.bold,
+                        height: 1.0)),
               // 🔧 메모 시작 위치(날짜/빨간날 ↔ 첫 메모 간격) = 이 SizedBox 높이.
               SizedBox(height: 3.5.h),
               // 🔧 메모 목록 - 최대 3개, fontSize: 7.5.sp. 메모끼리 간격은 Padding
               // top(첫 줄 0, 나머지 1.h).
               ...d.memos.take(3).toList().asMap().entries.map((e) => Padding(
-                padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.5.h),
-                child: _fitText(e.value, TextStyle(fontSize: 8.sp, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600, height: 1.0)),
-              )),
+                    padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.5.h),
+                    child: _fitText(
+                        e.value,
+                        TextStyle(
+                            fontSize: 8.sp,
+                            color: colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                            height: 1.0)),
+                  )),
               // 🔧 이 Spacer가 있어서 이 테마는 메모가 적어도 아래로 안 쏠리고
               // 카드 위쪽에 붙어 보임 - 없애면 세로 중앙 정렬처럼 바뀜.
               const Spacer(),
@@ -2776,7 +3503,8 @@ Widget build(BuildContext context) {
   }
 
   // ⭐ 4번 · 굵은 격자형
-  Widget _theme4Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
+  Widget _theme4Cell(
+      DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
     return ClipRect(
@@ -2792,7 +3520,9 @@ Widget build(BuildContext context) {
         // 이랬나"의 답은 "네, kAppSurface를 계속 이렇게 썼었음").
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade600, width: 0.6),
-          color: isOutside ? colorScheme.surfaceVariant.withOpacity(0.3) : (isToday ? const Color(0xFFFFF9C4) : Colors.white),
+          color: isOutside
+              ? colorScheme.surfaceVariant.withOpacity(0.3)
+              : (isToday ? const Color(0xFFFFF9C4) : Colors.white),
         ),
         padding: EdgeInsets.all(2.w),
         child: Column(
@@ -2806,9 +3536,23 @@ Widget build(BuildContext context) {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('${day.day}', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade600 : colorScheme.onSurface))),
+                Text('${day.day}',
+                    style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.bold,
+                        color: isOutside
+                            ? colorScheme.onSurfaceVariant.withOpacity(0.5)
+                            : (d.red
+                                ? Colors.red.shade600
+                                : colorScheme.onSurface))),
                 if (d.holidayName != null)
-                  Expanded(child: _fitText(d.holidayName!, TextStyle(fontSize: 7.5.sp, color: Colors.red.shade600, fontWeight: FontWeight.bold))),
+                  Expanded(
+                      child: _fitText(
+                          d.holidayName!,
+                          TextStyle(
+                              fontSize: 7.5.sp,
+                              color: Colors.red.shade600,
+                              fontWeight: FontWeight.bold))),
               ],
             ),
             // 🔧 근무명 배지(날짜 줄 바로 아래) - 크기: fontSize: 7.5.sp, 위아래
@@ -2821,7 +3565,14 @@ Widget build(BuildContext context) {
                 padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.2.h),
                 width: double.infinity,
                 decoration: BoxDecoration(color: d.shiftColor),
-                child: Text(d.shiftText, style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor), maxLines: 1, overflow: TextOverflow.clip, textAlign: TextAlign.center),
+                child: Text(d.shiftText,
+                    style: TextStyle(
+                        fontSize: 8.5.sp,
+                        fontWeight: FontWeight.bold,
+                        color: d.shiftTextColor),
+                    maxLines: 1,
+                    overflow: TextOverflow.clip,
+                    textAlign: TextAlign.center),
               ),
             // 🔧 메모 시작 위치(근무명 배지 ↔ 첫 메모 간격) = 이 SizedBox 높이.
             SizedBox(height: 4.0.h),
@@ -2830,7 +3581,13 @@ Widget build(BuildContext context) {
             // 간격은 Text 자체의 줄간격(fontSize와 line-height)에 좌우됨 - 다른
             // 테마들처럼 별도 Padding top이 없어서, 메모 간격만 더 벌리려면
             // 이 map을 Padding(top: ...)으로 감싸야 함.
-            ...d.memos.take(3).map((m) => _fitText('· $m', TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant), textAlign: TextAlign.start)),
+            ...d.memos.take(3).map((m) => _fitText(
+                '· $m',
+                TextStyle(
+                    fontSize: 8.5.sp,
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurfaceVariant),
+                textAlign: TextAlign.start)),
           ],
         ),
       ),
@@ -2838,10 +3595,13 @@ Widget build(BuildContext context) {
   }
 
   // ⭐ 5번 · 이니셜 뱃지형
-  Widget _theme5Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
+  Widget _theme5Cell(
+      DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
-    final numColor = isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade400 : colorScheme.onSurface);
+    final numColor = isOutside
+        ? colorScheme.onSurfaceVariant.withOpacity(0.5)
+        : (d.red ? Colors.red.shade400 : colorScheme.onSurface);
     // ⭐ "메모가 없으면 홀쭉해 보인다"는 지적의 진짜 원인은 셀 자체가 아니라
     // rowHeight를 75.h로 감으로 고정했던 것 - lab은 6줄을 Expanded로 화면
     // 남는 공간만큼 나눠 쓰는데 그 실제 값과 75.h가 안 맞아서 셀이 필요
@@ -2862,7 +3622,9 @@ Widget build(BuildContext context) {
       // 지적 - outlineVariant*0.4는 이 앱 라이트 테마에서 여전히 눈에 띄는
       // 회색이었음. 거의 안 보일 만큼 연한 고정 회색으로 교체.
       decoration: BoxDecoration(
-        border: isToday ? Border.all(color: Colors.indigo.shade400, width: 1.4) : Border.all(color: Colors.grey.shade200, width: 0.5),
+        border: isToday
+            ? Border.all(color: Colors.indigo.shade400, width: 1.4)
+            : Border.all(color: Colors.grey.shade200, width: 0.5),
         borderRadius: BorderRadius.circular(4.r),
       ),
       // ⭐ "스크린샷에서는 근무명·숫자가 셀 맨 위에 붙어있었는데 지금은 중간에
@@ -2885,31 +3647,55 @@ Widget build(BuildContext context) {
                   // (height: 14.w)로 자리를 대신 비움.
                   if (d.hasShift)
                     Container(
-                      width: 14.w, height: 14.w, alignment: Alignment.center,
-                      decoration: BoxDecoration(color: d.shiftColor, shape: BoxShape.circle),
-                      child: Text(d.shiftText[0], style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor)),
+                      width: 14.w,
+                      height: 14.w,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                          color: d.shiftColor, shape: BoxShape.circle),
+                      child: Text(d.shiftText[0],
+                          style: TextStyle(
+                              fontSize: 8.5.sp,
+                              fontWeight: FontWeight.bold,
+                              color: d.shiftTextColor)),
                     )
                   else
                     SizedBox(height: 14.w),
                   // 🔧 뱃지 ↔ 날짜 숫자 간격.
                   SizedBox(height: 0.5.h),
                   // 🔧 날짜 숫자 - 크기: fontSize: 11.5.sp.
-                  Text('${day.day}', style: TextStyle(fontSize: 10.5.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w600, color: numColor)),
+                  Text('${day.day}',
+                      style: TextStyle(
+                          fontSize: 10.5.sp,
+                          fontWeight:
+                              isToday ? FontWeight.bold : FontWeight.w600,
+                          color: numColor)),
                 ],
               ),
             ),
             // 🔧 빨간날 이름 - 크기: fontSize: 6.sp, 날짜 숫자 바로 아래 고정.
             if (d.holidayName != null)
-              _fitText(d.holidayName!, TextStyle(fontSize: 7.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold, height: 1.0)),
+              _fitText(
+                  d.holidayName!,
+                  TextStyle(
+                      fontSize: 7.5.sp,
+                      color: Colors.red.shade400,
+                      fontWeight: FontWeight.bold,
+                      height: 1.0)),
             // 🔧 메모 시작 위치 - 메모가 있을 때만 이 간격(1.2.h)이 붙음(메모가
             // 없으면 이 SizedBox 자체가 안 생김 - if로 감싸져 있음).
             if (d.memos.isNotEmpty) SizedBox(height: 1.2.h),
             // 🔧 메모 목록 - 최대 3개, fontSize: 7.sp. 메모끼리 간격은 Padding
             // top(첫 줄 0, 나머지 2.h - 다른 테마보다 넓은 편).
             ...d.memos.take(3).toList().asMap().entries.map((e) => Padding(
-              padding: EdgeInsets.only(top: e.key == 0 ? 2 : 2.5.h),
-              child: _fitText(e.value, TextStyle(fontSize: 7.5.sp, color: colorScheme.onSurfaceVariant, fontWeight: FontWeight.w600, height: 1.0)),
-            )),
+                  padding: EdgeInsets.only(top: e.key == 0 ? 2 : 2.5.h),
+                  child: _fitText(
+                      e.value,
+                      TextStyle(
+                          fontSize: 7.5.sp,
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                          height: 1.0)),
+                )),
           ],
         ),
       ),
@@ -2919,7 +3705,8 @@ Widget build(BuildContext context) {
   // ⭐ 8번 · 언더라인 미니멀형 (색상만으로 구분 - 범례는 이 화면에선 생략,
   // 사용자 본인 근무명이라 알아보기 쉬움 + row6는 OT카드가 이미 차지 중이라
   // 자리도 없음. 위젯 큰 사이즈엔 범례를 넣기로 함(후속 작업, 네이티브 쪽)).
-  Widget _theme8Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
+  Widget _theme8Cell(
+      DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
     // 🔧 이 테마는 근무명 "글자"를 셀 안에 안 그림(색깔 막대만) - 근무 구분은
@@ -2931,29 +3718,49 @@ Widget build(BuildContext context) {
           // 🔧 날짜 숫자 위쪽 여백(맨 위 시작 위치) = 이 SizedBox.
           SizedBox(height: 3.h),
           // 🔧 날짜 숫자 - 크기: fontSize: 12.sp. 오늘이면 밑줄(underline)로 표시.
-          Text('${day.day}', style: TextStyle(
-            fontSize: 12.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w400,
-            color: isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
-            decoration: isToday ? TextDecoration.underline : null, decorationThickness: 2,
-          )),
+          Text('${day.day}',
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: isToday ? FontWeight.bold : FontWeight.w400,
+                color: isOutside
+                    ? colorScheme.onSurfaceVariant.withOpacity(0.5)
+                    : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
+                decoration: isToday ? TextDecoration.underline : null,
+                decorationThickness: 2,
+              )),
           // 🔧 근무 색깔 막대(글자 없음) - 크기: width: 22.w, height: 3.0.h("근무명
           // 뱃지를 세로로 아주 조금만 더 얇게" 요청으로 3.6.h→3.0.h로 줄어든
           // 이력 있음). 위아래 여백: margin vertical: 2.h. 없는 날은 SizedBox
           // (height: 7.0.h)로 자리를 대신 비움.
           if (d.hasShift)
-            Container(margin: EdgeInsets.symmetric(vertical: 2.h), width: 22.w, height: 3.0.h,
-                decoration: BoxDecoration(color: d.shiftColor, borderRadius: BorderRadius.circular(2.r)))
+            Container(
+                margin: EdgeInsets.symmetric(vertical: 2.h),
+                width: 22.w,
+                height: 3.0.h,
+                decoration: BoxDecoration(
+                    color: d.shiftColor,
+                    borderRadius: BorderRadius.circular(2.r)))
           else
             SizedBox(height: 7.0.h),
           // 🔧 빨간날 이름 - 크기: fontSize: 6.sp, 막대 바로 아래 고정. 별도
           // 시작 간격 SizedBox가 없어서 막대 margin(2.h)이 곧 이 간격임.
           if (d.holidayName != null)
-            _fitText(d.holidayName!, TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold)),
+            _fitText(
+                d.holidayName!,
+                TextStyle(
+                    fontSize: 6.sp,
+                    color: Colors.red.shade400,
+                    fontWeight: FontWeight.bold)),
           // 🔧 메모 목록 - 최대 3개, fontSize: 7.8.sp("너무 연하고 작다"는
           // 지적으로 7.sp→7.8.sp, 색도 onSurfaceVariant→grey.shade700로 진하게
           // 바꾼 이력). 메모끼리 간격을 조절하는 별도 Padding이 없음 - 필요하면
           // 이 map을 Padding(top: ...)으로 감싸서 추가.
-          ...d.memos.take(3).map((m) => _fitText(m, TextStyle(fontSize: 7.8.sp, color: Colors.grey.shade700, fontWeight: FontWeight.w500))),
+          ...d.memos.take(3).map((m) => _fitText(
+              m,
+              TextStyle(
+                  fontSize: 7.8.sp,
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500))),
         ],
       ),
     );
@@ -2974,7 +3781,8 @@ Widget build(BuildContext context) {
   // 셀 전체가 좁게 쪼그라들어 날짜 숫자 위치가 틀어짐. 아래 Container에
   // width: double.infinity를 추가해 배지/칩 유무와 무관하게 항상 셀 전체 폭을
   // 차지하도록 함(_theme1Cell/_theme2Cell 버그 수정과 동일한 처방).
-  Widget _theme9Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
+  Widget _theme9Cell(
+      DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
     return ClipRect(
@@ -2988,27 +3796,49 @@ Widget build(BuildContext context) {
             // (width/height: 15.w) 안에 흰 글씨로. 날짜 숫자 ↔ 근무명 칩 간격은
             // 이 Container의 margin bottom: 1.2.h.
             Container(
-              width: 15.w, height: 15.w, alignment: Alignment.center,
+              width: 15.w,
+              height: 15.w,
+              alignment: Alignment.center,
               margin: EdgeInsets.only(bottom: 1.2.h),
-              decoration: isToday ? BoxDecoration(color: d.red ? Colors.red.shade400 : Colors.indigo.shade400, shape: BoxShape.circle) : null,
-              child: Text('${day.day}', style: TextStyle(
-                fontSize: 10.5.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
-                color: isToday ? Colors.white : (isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade400 : colorScheme.onSurface)),
-              )),
+              decoration: isToday
+                  ? BoxDecoration(
+                      color:
+                          d.red ? Colors.red.shade400 : Colors.indigo.shade400,
+                      shape: BoxShape.circle)
+                  : null,
+              child: Text('${day.day}',
+                  style: TextStyle(
+                    fontSize: 10.5.sp,
+                    fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+                    color: isToday
+                        ? Colors.white
+                        : (isOutside
+                            ? colorScheme.onSurfaceVariant.withOpacity(0.5)
+                            : (d.red
+                                ? Colors.red.shade400
+                                : colorScheme.onSurface)),
+                  )),
             ),
             // 🔧 이 테마는 근무명/빨간날/메모가 전부 같은 "칩(pill)" 모양
             // (_themeChip 공용 위젯, 아래 정의)을 색만 바꿔서 재사용 - 글자
             // 크기(7.5.sp)와 칩 모양(패딩/둥근 모서리)이 셋 다 동일함. 순서가
             // 곧 화면 순서(근무명 → 빨간날 → 메모)이고, 칩끼리 간격은 각 칩의
             // margin bottom(0.6.h, _themeChip 안) + 다음 칩 앞의 Padding top(0.8.h).
-            if (d.hasShift) _themeChip(d.shiftText, d.shiftColor, d.shiftTextColor),
+            if (d.hasShift)
+              _themeChip(d.shiftText, d.shiftColor, d.shiftTextColor),
             // 🔧 빨간날도 칩 형태(배경 red.shade50 / 글자 red.shade400) - 글자
             // 크기는 _themeChip 공용값(7.5.sp)이라 근무명/메모와 따로 못 바꿈
             // (따로 바꾸려면 _themeChip에 fontSize 파라미터를 추가해야 함).
             if (d.holidayName != null)
-              Padding(padding: EdgeInsets.only(top: 0.8.h), child: _themeChip(d.holidayName!, Colors.red.shade50, Colors.red.shade400)),
+              Padding(
+                  padding: EdgeInsets.only(top: 0.8.h),
+                  child: _themeChip(
+                      d.holidayName!, Colors.red.shade50, Colors.red.shade400)),
             // 🔧 메모 목록 - 최대 3개, 칩 사이 간격 = Padding top: 0.8.h.
-            ...d.memos.take(3).map((m) => Padding(padding: EdgeInsets.only(top: 0.8.h), child: _themeChip(m, colorScheme.surfaceVariant, colorScheme.onSurface))),
+            ...d.memos.take(3).map((m) => Padding(
+                padding: EdgeInsets.only(top: 0.8.h),
+                child: _themeChip(
+                    m, colorScheme.surfaceVariant, colorScheme.onSurface))),
           ],
         ),
       ),
@@ -3023,13 +3853,21 @@ Widget build(BuildContext context) {
       width: double.infinity,
       margin: EdgeInsets.only(bottom: 0.6.h),
       padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.1.h),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(2.5.r)),
-      child: _fitText(text, TextStyle(fontSize: 7.sp, color: fg, fontWeight: FontWeight.w600, height: 1.1)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(2.5.r)),
+      child: _fitText(
+          text,
+          TextStyle(
+              fontSize: 7.sp,
+              color: fg,
+              fontWeight: FontWeight.w600,
+              height: 1.1)),
     );
   }
 
   // ⭐ 10번 · 매거진 에디토리얼형 (범례는 8번과 같은 이유로 이 화면에선 생략)
-  Widget _theme10Cell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
+  Widget _theme10Cell(
+      DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
     // ⭐ "스크린샷보다 셀 테두리가 너무 진하다"는 지적으로 다른 테마들과 같은
@@ -3040,7 +3878,8 @@ Widget build(BuildContext context) {
     // 땐 Padding/SizedBox가 아니라 각 Positioned의 top/left/right/bottom 숫자를
     // 직접 바꿔야 함.
     return Container(
-      decoration: BoxDecoration(border: Border.all(color: Colors.grey.shade200, width: 0.5)),
+      decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade200, width: 0.5)),
       child: Stack(
         children: [
           // 🔧 근무 색 - 글자 없이 좌상단 삼각형 하나로만 표시. 크기: width/
@@ -3048,8 +3887,12 @@ Widget build(BuildContext context) {
           // 테마들처럼 Container+Text 배지로 바꿔야 함(지금 구조는 색만 표현).
           if (d.hasShift)
             Positioned(
-              top: 0, left: 0,
-              child: ClipPath(clipper: _CalendarTriangleClipper(), child: Container(width: 16.w, height: 16.w, color: d.shiftColor)),
+              top: 0,
+              left: 0,
+              child: ClipPath(
+                  clipper: _CalendarTriangleClipper(),
+                  child: Container(
+                      width: 16.w, height: 16.w, color: d.shiftColor)),
             ),
           // 🔧 날짜 숫자 - 크기: fontSize: 12.sp, 위치: 우측 상단 고정
           // (Align.topRight), 셀 위쪽 여백: padding top: 3.h.
@@ -3057,11 +3900,15 @@ Widget build(BuildContext context) {
             padding: EdgeInsets.only(top: 3.h, right: 2.w),
             child: Align(
               alignment: Alignment.topRight,
-              child: Text('${day.day}', style: TextStyle(
-                fontSize: 12.sp, fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
-                color: isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
-                decoration: isToday ? TextDecoration.underline : null,
-              )),
+              child: Text('${day.day}',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+                    color: isOutside
+                        ? colorScheme.onSurfaceVariant.withOpacity(0.5)
+                        : (d.red ? Colors.red.shade400 : colorScheme.onSurface),
+                    decoration: isToday ? TextDecoration.underline : null,
+                  )),
             ),
           ),
           // ⭐ "메모 크기를 조금 더 키우고 진하게 - 광복절까지 여유가 꽤 있다"는
@@ -3073,20 +3920,40 @@ Widget build(BuildContext context) {
           // 바꿔도 이 값은 자동으로 안 따라옴, 겹치면 이 숫자를 직접 조절할 것).
           if (d.holidayName != null)
             Positioned(
-              top: 18.h, left: 2.w, right: 2.w,
-              child: _fitText(d.holidayName!, TextStyle(fontSize: 7.5.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), textAlign: TextAlign.right),
+              top: 18.h,
+              left: 2.w,
+              right: 2.w,
+              child: _fitText(
+                  d.holidayName!,
+                  TextStyle(
+                      fontSize: 7.5.sp,
+                      color: Colors.red.shade400,
+                      fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.right),
             ),
           // 🔧 메모 목록 - 이 테마만 "아래에서부터" 시작함(다른 8개는 위에서부터
           // 쌓지만, 이건 Positioned에 top 없이 bottom: 2.h만 줘서 셀 바닥에서
           // 2.h 띄운 자리에 붙이고 메모가 늘어나면 위쪽으로 자람). 최대 3개,
           // fontSize: 7.3.sp, 메모끼리 간격은 Padding top(첫 줄 0, 나머지 1.2.h).
           Positioned(
-            left: 2.w, right: 2.w, bottom: 2.h,
+            left: 2.w,
+            right: 2.w,
+            bottom: 2.h,
             child: Column(
-              children: d.memos.take(3).toList().asMap().entries.map((e) => Padding(
-                padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.2.h),
-                child: _fitText(e.value, TextStyle(fontSize: 7.3.sp, color: Colors.grey.shade800), textAlign: TextAlign.right),
-              )).toList(),
+              children: d.memos
+                  .take(3)
+                  .toList()
+                  .asMap()
+                  .entries
+                  .map((e) => Padding(
+                        padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.2.h),
+                        child: _fitText(
+                            e.value,
+                            TextStyle(
+                                fontSize: 7.3.sp, color: Colors.grey.shade800),
+                            textAlign: TextAlign.right),
+                      ))
+                  .toList(),
             ),
           ),
         ],
@@ -3125,7 +3992,8 @@ Widget build(BuildContext context) {
   //  - 빨간날 텍스트 크기: fontSize: 6.8.sp, 색: 0xFFC0392B(차분한 벽돌색)
   //  - 메모 크기/간격: fontSize: 6.5.sp("– "로 시작하는 다이어리풍 대시 불릿),
   //    Padding top(첫 줄 0, 나머지 0.7.h)
-  Widget _themeDiaryCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
+  Widget _themeDiaryCell(
+      DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
     final colorScheme = Theme.of(context).colorScheme;
     const borderColor = Color(0xFFE4D9C9); // 따뜻한 크림 라인(무채색 회색 대신)
@@ -3154,70 +4022,117 @@ Widget build(BuildContext context) {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(5.2.r),
           child: Column(
-          children: [
-            // 🔧 상단 박스 - 날짜(왼쪽 절반) | 근무명(오른쪽 절반, 근무색 채움).
-            // IntrinsicHeight가 있어야 가운데 세로선(Container)이 Row의 실제
-            // 높이만큼 늘어남(Row가 스스로 높이를 정하는 상황이라 필요).
-            Container(
-              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: borderColor, width: 0.8))),
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: Container(
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.symmetric(vertical: 2.h),
-                        // 🔧 오늘 표시(원형 배지) - 평소엔 _diaryAccent 배경 + 흰 글씨.
-                        // 빨간날이 오늘이면 배경만 _diaryTodayRedBg로 바꾸고 글자는
-                        // 계속 빨간색(dateColor의 빨간 값과 동일) - "빨간날" 신호를
-                        // 잃지 않기 위함(위 _diaryTodayRedBg 선언부 주석 참고).
-                        child: isToday
-                            ? Container(
-                                width: 16.w, height: 16.w, alignment: Alignment.center,
-                                decoration: BoxDecoration(color: d.red ? _diaryTodayRedBg : _diaryAccent, shape: BoxShape.circle),
-                                child: Text('${day.day}', style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: d.red ? const Color(0xFFC0392B) : Colors.white)),
-                              )
-                            : Text('${day.day}', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w600, color: dateColor)),
-                      ),
-                    ),
-                    const VerticalDivider(width: 0.8, thickness: 0.8, color: borderColor),
-                    Expanded(
-                      child: Container(
-                        color: d.hasShift ? d.shiftColor.withOpacity(0.85) : Colors.white,
-                        alignment: Alignment.center,
-                        padding: EdgeInsets.symmetric(vertical: 3.h, horizontal: 1.w),
-                        child: d.hasShift
-                            ? Text(d.shiftText, style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor), maxLines: 1, overflow: TextOverflow.ellipsis)
-                            : const SizedBox.shrink(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            // 🔧 빨간날(공휴일) - 있을 때만, 흰 배경 + 빨간 글씨. 이 줄 자체도
-            // 아래쪽 테두리를 그어서 위 박스와 한 몸처럼 보이게 함.
-            if (d.holidayName != null)
+            children: [
+              // 🔧 상단 박스 - 날짜(왼쪽 절반) | 근무명(오른쪽 절반, 근무색 채움).
+              // IntrinsicHeight가 있어야 가운데 세로선(Container)이 Row의 실제
+              // 높이만큼 늘어남(Row가 스스로 높이를 정하는 상황이라 필요).
               Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: borderColor, width: 0.8))),
-                padding: EdgeInsets.symmetric(vertical: 0.h),
-                child: _fitText(d.holidayName!, TextStyle(fontSize: 8.sp, color: const Color(0xFFC0392B), fontWeight: FontWeight.w700)),
-              ),
-            // 🔧 메모 3개 - 테두리 없음, 남는 공간을 채움(Expanded).
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 2.h),
-                child: Column(
-                  children: d.memos.take(3).toList().asMap().entries.map((e) => Padding(
-                    padding: EdgeInsets.only(top: e.key == 0 ? 0 : 0.7.h),
-                    child: _fitText('– ${e.value}', TextStyle(fontSize: 7.5.sp, color: const Color(0xFF1A1A1A), fontWeight: FontWeight.w600)),
-                  )).toList(),
+                decoration: const BoxDecoration(
+                    border: Border(
+                        bottom: BorderSide(color: borderColor, width: 0.8))),
+                child: IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(vertical: 2.h),
+                          // 🔧 오늘 표시(원형 배지) - 평소엔 _diaryAccent 배경 + 흰 글씨.
+                          // 빨간날이 오늘이면 배경만 _diaryTodayRedBg로 바꾸고 글자는
+                          // 계속 빨간색(dateColor의 빨간 값과 동일) - "빨간날" 신호를
+                          // 잃지 않기 위함(위 _diaryTodayRedBg 선언부 주석 참고).
+                          child: isToday
+                              ? Container(
+                                  width: 16.w,
+                                  height: 16.w,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                      color: d.red
+                                          ? _diaryTodayRedBg
+                                          : _diaryAccent,
+                                      shape: BoxShape.circle),
+                                  child: Text('${day.day}',
+                                      style: TextStyle(
+                                          fontSize: 9.5.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: d.red
+                                              ? const Color(0xFFC0392B)
+                                              : Colors.white)),
+                                )
+                              : Text('${day.day}',
+                                  style: TextStyle(
+                                      fontSize: 11.5.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: dateColor)),
+                        ),
+                      ),
+                      const VerticalDivider(
+                          width: 0.8, thickness: 0.8, color: borderColor),
+                      Expanded(
+                        child: Container(
+                          color: d.hasShift
+                              ? d.shiftColor.withOpacity(0.85)
+                              : Colors.white,
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(
+                              vertical: 3.h, horizontal: 1.w),
+                          child: d.hasShift
+                              ? Text(d.shiftText,
+                                  style: TextStyle(
+                                      fontSize: 8.5.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: d.shiftTextColor),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis)
+                              : const SizedBox.shrink(),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              // 🔧 빨간날(공휴일) - 있을 때만, 흰 배경 + 빨간 글씨. 이 줄 자체도
+              // 아래쪽 테두리를 그어서 위 박스와 한 몸처럼 보이게 함.
+              if (d.holidayName != null)
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(color: borderColor, width: 0.8))),
+                  padding: EdgeInsets.symmetric(vertical: 0.h),
+                  child: _fitText(
+                      d.holidayName!,
+                      TextStyle(
+                          fontSize: 8.sp,
+                          color: const Color(0xFFC0392B),
+                          fontWeight: FontWeight.w700)),
+                ),
+              // 🔧 메모 3개 - 테두리 없음, 남는 공간을 채움(Expanded).
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 2.h),
+                  child: Column(
+                    children: d.memos
+                        .take(3)
+                        .toList()
+                        .asMap()
+                        .entries
+                        .map((e) => Padding(
+                              padding:
+                                  EdgeInsets.only(top: e.key == 0 ? 0 : 0.7.h),
+                              child: _fitText(
+                                  '– ${e.value}',
+                                  TextStyle(
+                                      fontSize: 7.5.sp,
+                                      color: const Color(0xFF1A1A1A),
+                                      fontWeight: FontWeight.w600)),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -3232,35 +4147,42 @@ Widget build(BuildContext context) {
   // 내려주는 값, 실제 색상표는 theme/app_theme.dart)를 쓰는 부분이 섞여 있음 -
   // "다크에서만 색이 이상하다" 싶으면 이 함수 안의 `isDarkMode ? ... : ...`
   // 삼항연산자들부터 볼 것.
-  Widget _buildDateCell(DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule, {bool isSelected = false}) {
+  Widget _buildDateCell(
+      DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule,
+      {bool isSelected = false}) {
     final shiftText = schedule.getShiftForDate(day);
     final patternShift = schedule.getPatternShiftForDate(day);
 
     // ⭐ 패턴과 다른 경우 표시 (패턴이 있고, 현재가 다르고, 둘 다 유효한 경우)
     final isModified = patternShift.isNotEmpty &&
-                       shiftText.isNotEmpty &&
-                       shiftText != '미설정' &&
-                       patternShift != shiftText;
+        shiftText.isNotEmpty &&
+        shiftText != '미설정' &&
+        patternShift != shiftText;
 
     final isSunday = day.weekday == DateTime.sunday;
 
     // ⭐ 오늘이면서 현재 보고 있는 달과 같을 때만 강조
     final shouldHighlightToday = isToday &&
-                                 _focusedDay.year == day.year &&
-                                 _focusedDay.month == day.month;
+        _focusedDay.year == day.year &&
+        _focusedDay.month == day.month;
 
-    final isHoliday = _getHolidayName(day, context) != null;  // ⭐ 공휴일 체크
+    final isHoliday = _getHolidayName(day, context) != null; // ⭐ 공휴일 체크
 
     final colorScheme = Theme.of(context).colorScheme;
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     Color dateColor;
-    if (isSunday || isHoliday) {  // ⭐ 일요일 또는 공휴일
+    if (isSunday || isHoliday) {
+      // ⭐ 일요일 또는 공휴일
       dateColor = isOutside
-          ? (isDarkMode ? Colors.red.shade300.withOpacity(0.5) : Colors.red.withOpacity(0.3))
+          ? (isDarkMode
+              ? Colors.red.shade300.withOpacity(0.5)
+              : Colors.red.withOpacity(0.3))
           : (isDarkMode ? Colors.red.shade300 : Colors.red);
     } else {
-      dateColor = isOutside ? colorScheme.onSurfaceVariant.withOpacity(0.5) : colorScheme.onSurface;
+      dateColor = isOutside
+          ? colorScheme.onSurfaceVariant.withOpacity(0.5)
+          : colorScheme.onSurface;
     }
 
     return Container(
@@ -3269,7 +4191,8 @@ Widget build(BuildContext context) {
             ? Theme.of(context).colorScheme.secondary.withOpacity(0.2)
             : Colors.transparent,
       ),
-      padding: EdgeInsets.only(left: 2.w, right: 2.w, top: 2.h),  // ⭐ 모든 날짜 동일한 padding
+      padding: EdgeInsets.only(
+          left: 2.w, right: 2.w, top: 2.h), // ⭐ 모든 날짜 동일한 padding
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -3290,7 +4213,10 @@ Widget build(BuildContext context) {
                     : BorderRadius.circular(3.r),
                 // ⭐ 패턴과 다른 경우 좌측에 검정 세로 줄 표시
                 border: isModified
-                    ? Border(left: BorderSide(color: Theme.of(context).colorScheme.onSurface, width: 3))
+                    ? Border(
+                        left: BorderSide(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            width: 3))
                     : null,
               ),
               child: Center(
@@ -3313,7 +4239,8 @@ Widget build(BuildContext context) {
           Expanded(
             child: Consumer(
               builder: (context, ref, child) {
-                final dateStr = '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
+                final dateStr =
+                    '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
                 final memos = ref.watch(memoProvider)[dateStr] ?? [];
                 final memoCount = memos.length;
 
@@ -3342,8 +4269,12 @@ Widget build(BuildContext context) {
                                 fontSize: 9.sp,
                                 fontWeight: FontWeight.w600,
                                 color: isOutside
-                                    ? (isDarkMode ? Colors.red.shade300.withOpacity(0.5) : Colors.red.withOpacity(0.3))
-                                    : (isDarkMode ? Colors.red.shade300 : Colors.red),
+                                    ? (isDarkMode
+                                        ? Colors.red.shade300.withOpacity(0.5)
+                                        : Colors.red.withOpacity(0.3))
+                                    : (isDarkMode
+                                        ? Colors.red.shade300
+                                        : Colors.red),
                               ),
                             ),
                           ),
@@ -3363,15 +4294,26 @@ Widget build(BuildContext context) {
                     Align(
                       alignment: Alignment.center,
                       child: Padding(
-                        padding: EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),
+                        padding:
+                            EdgeInsets.only(bottom: memoCount >= 3 ? 20.h : 0),
                         child: Container(
-                          padding: shouldHighlightToday ? EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h) : EdgeInsets.zero,
+                          padding: shouldHighlightToday
+                              ? EdgeInsets.symmetric(
+                                  horizontal: 6.w, vertical: 2.h)
+                              : EdgeInsets.zero,
                           decoration: shouldHighlightToday
                               ? BoxDecoration(
                                   // ⭐ 다크모드 오늘 날짜 배경: 더 밝게
                                   color: (isSunday || isHoliday)
-                                      ? (isDarkMode ? Colors.amber.shade300 : Colors.lime.shade300)  // 다크모드: 밝은 amber
-                                      : (isDarkMode ? Color(0xFFB4BFFF) : Theme.of(context).colorScheme.primary),  // 다크모드: 더 밝은 인디고
+                                      ? (isDarkMode
+                                          ? Colors.amber.shade300
+                                          : Colors
+                                              .lime.shade300) // 다크모드: 밝은 amber
+                                      : (isDarkMode
+                                          ? Color(0xFFB4BFFF)
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .primary), // 다크모드: 더 밝은 인디고
                                   borderRadius: BorderRadius.circular(4.r),
                                 )
                               : null,
@@ -3384,8 +4326,14 @@ Widget build(BuildContext context) {
                               // ⭐ 다크모드 오늘 날짜 텍스트: 명확한 대비
                               color: shouldHighlightToday
                                   ? (isSunday || isHoliday)
-                                      ? (isDarkMode ? Colors.red.shade900 : Colors.red)  // 다크모드: 진한 빨강
-                                      : (isDarkMode ? Colors.white : Theme.of(context).colorScheme.onPrimary)  // 다크모드: 순백
+                                      ? (isDarkMode
+                                          ? Colors.red.shade900
+                                          : Colors.red) // 다크모드: 진한 빨강
+                                      : (isDarkMode
+                                          ? Colors.white
+                                          : Theme.of(context)
+                                              .colorScheme
+                                              .onPrimary) // 다크모드: 순백
                                   : dateColor,
                               height: 1.0,
                             ),
@@ -3404,37 +4352,38 @@ Widget build(BuildContext context) {
                       Positioned(
                         left: 0,
                         right: 0,
-                        bottom: 1.5.h,  // ⭐ 바닥에서 살짝 띄움
+                        bottom: 1.5.h, // ⭐ 바닥에서 살짝 띄움
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: memos.take(3).map((memo) {
                             return Container(
                               width: double.infinity,
                               margin: EdgeInsets.only(bottom: 0.5.h),
-                              padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.5.h),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 2.w, vertical: 0.5.h),
                               decoration: BoxDecoration(
                                 color: isDarkMode
-                                  ? colorScheme.primary.withOpacity(0.3)
-                                  : colorScheme.surfaceVariant,
+                                    ? colorScheme.primary.withOpacity(0.3)
+                                    : colorScheme.surfaceVariant,
                                 border: Border.all(
-                                  color: isDarkMode
-                                    ? colorScheme.primary.withOpacity(0.5)
-                                    : colorScheme.outline,
-                                  width: 0.5
-                                ),
+                                    color: isDarkMode
+                                        ? colorScheme.primary.withOpacity(0.5)
+                                        : colorScheme.outline,
+                                    width: 0.5),
                                 borderRadius: BorderRadius.circular(2.r),
                               ),
                               child: Text(
                                 memo.memoText,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 8.sp,  // ⭐ 7 → 8 (살짝 크게)
+                                  fontSize: 8.sp, // ⭐ 7 → 8 (살짝 크게)
                                   color: colorScheme.onSurface,
                                   fontWeight: FontWeight.w500,
                                   height: 1.0,
                                 ),
                                 maxLines: 1,
-                                overflow: TextOverflow.clip,  // ⭐ ellipsis → clip (더 많이 표시)
+                                overflow: TextOverflow
+                                    .clip, // ⭐ ellipsis → clip (더 많이 표시)
                               ),
                             );
                           }).toList(),
@@ -3449,20 +4398,20 @@ Widget build(BuildContext context) {
       ),
     );
   }
-  
+
   void _showDayDetailPopup(DateTime day, ShiftSchedule schedule) {
     final currentShift = schedule.getShiftForDate(day);
     final patternShift = schedule.getPatternShiftForDate(day);
     final isModified = patternShift.isNotEmpty &&
-                       currentShift.isNotEmpty &&
-                       currentShift != '미설정' &&
-                       patternShift != currentShift;
+        currentShift.isNotEmpty &&
+        currentShift != '미설정' &&
+        patternShift != currentShift;
 
     final screenHeight = MediaQuery.of(context).size.height;
     // ⭐ 메모 3개가 다 찼을 때 맨 아래 여백이 많이 남아서 비율로 살짝 줄임.
     // 키보드가 뜬 상태에서의 높이 조정은 아래 builder 안에서 별도로 계산함
     // (그때만 화면-키보드 높이 기준으로 더 줄여서, 메모 입력창이 키보드 위에 보이게 함).
-    final basePopupHeight = screenHeight * 0.66;  // ⭐ 화면의 66% (기존 72%에서 축소)
+    final basePopupHeight = screenHeight * 0.66; // ⭐ 화면의 66% (기존 72%에서 축소)
 
     final dateStr = day.toIso8601String().split('T')[0];
 
@@ -3485,7 +4434,7 @@ Widget build(BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
             final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-            final isKeyboardVisible = keyboardHeight > 50;  // 키보드 감지 임계값
+            final isKeyboardVisible = keyboardHeight > 50; // 키보드 감지 임계값
 
             // ⭐ CRITICAL FIX: 실시간 측정(RenderBox+setState) 방식은 리빌드가
             // 반복되면서 잔상/겹침 아티팩트가 생겨서 정적 계산으로 되돌림.
@@ -3529,7 +4478,8 @@ Widget build(BuildContext context) {
                         children: [
                           Text(
                             '${DateFormat.MMMd(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(day)} (${_getWeekday(day, context)})',
-                            style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 24.sp, fontWeight: FontWeight.bold),
                           ),
                           Spacer(),
                           _buildOvertimeToggle(dateStr),
@@ -3541,54 +4491,109 @@ Widget build(BuildContext context) {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Text(context.l10n.calendarShiftLabel, style: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
+                          Text(context.l10n.calendarShiftLabel,
+                              style: TextStyle(
+                                  fontSize: 16.sp,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                  fontWeight: FontWeight.w600)),
                           SizedBox(width: 8.w),
                           if (isModified) ...[
                             Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(context.l10n.commonPrevious, style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
+                                Text(context.l10n.commonPrevious,
+                                    style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                        fontWeight: FontWeight.w500)),
                                 SizedBox(height: 4.h),
                                 Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w, vertical: 6.h),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.surfaceVariant,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .surfaceVariant,
                                     borderRadius: BorderRadius.circular(8.r),
-                                    border: Border.all(color: Theme.of(context).colorScheme.outline, width: 1.5),
+                                    border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .outline,
+                                        width: 1.5),
                                   ),
-                                  child: Text(patternShift, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                                  child: Text(patternShift,
+                                      style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant)),
                                 ),
                               ],
                             ),
                             Padding(
-                              padding: EdgeInsets.only(left: 6.w, right: 6.w, top: 16.h),
-                              child: Icon(Icons.arrow_forward, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 18.sp),
+                              padding: EdgeInsets.only(
+                                  left: 6.w, right: 6.w, top: 16.h),
+                              child: Icon(Icons.arrow_forward,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                  size: 18.sp),
                             ),
                             Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(context.l10n.commonCurrent, style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w500)),
+                                Text(context.l10n.commonCurrent,
+                                    style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                        fontWeight: FontWeight.w500)),
                                 SizedBox(height: 4.h),
                                 Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w, vertical: 6.h),
                                   decoration: BoxDecoration(
-                                    color: _getShiftBackgroundColor(currentShift, schedule),
+                                    color: _getShiftBackgroundColor(
+                                        currentShift, schedule),
                                     borderRadius: BorderRadius.circular(8.r),
-                                    border: Border.all(color: _getShiftTextColor(currentShift, schedule), width: 2),
+                                    border: Border.all(
+                                        color: _getShiftTextColor(
+                                            currentShift, schedule),
+                                        width: 2),
                                   ),
-                                  child: Text(currentShift, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: _getShiftTextColor(currentShift, schedule))),
+                                  child: Text(currentShift,
+                                      style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: _getShiftTextColor(
+                                              currentShift, schedule))),
                                 ),
                               ],
                             ),
                           ] else
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12.w, vertical: 6.h),
                               decoration: BoxDecoration(
-                                color: _getShiftBackgroundColor(currentShift, schedule),
+                                color: _getShiftBackgroundColor(
+                                    currentShift, schedule),
                                 borderRadius: BorderRadius.circular(8.r),
-                                border: Border.all(color: _getShiftTextColor(currentShift, schedule), width: 2),
+                                border: Border.all(
+                                    color: _getShiftTextColor(
+                                        currentShift, schedule),
+                                    width: 2),
                               ),
-                              child: Text(currentShift, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: _getShiftTextColor(currentShift, schedule))),
+                              child: Text(currentShift,
+                                  style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: _getShiftTextColor(
+                                          currentShift, schedule))),
                             ),
                         ],
                       ),
@@ -3596,19 +4601,38 @@ Widget build(BuildContext context) {
                       SizedBox(height: 16.h),
 
                       // ⭐ 고정 알람
-                      Text(context.l10n.calendarFixedAlarmLabel, style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
+                      Text(context.l10n.calendarFixedAlarmLabel,
+                          style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Theme.of(context).colorScheme.onSurface,
+                              fontWeight: FontWeight.w600)),
                       SizedBox(height: 8.h),
                       Consumer(
                         builder: (context, ref, child) {
                           final alarmsAsync = ref.watch(alarmNotifierProvider);
 
                           return alarmsAsync.when(
-                            loading: () => SizedBox(height: 20.h, width: 20.w, child: CircularProgressIndicator(strokeWidth: 2)),
-                            error: (_, __) => Text(context.l10n.statusErrorOccurred, style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.error)),
+                            loading: () => SizedBox(
+                                height: 20.h,
+                                width: 20.w,
+                                child:
+                                    CircularProgressIndicator(strokeWidth: 2)),
+                            error: (_, __) => Text(
+                                context.l10n.statusErrorOccurred,
+                                style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color:
+                                        Theme.of(context).colorScheme.error)),
                             data: (allAlarms) {
-                              final dayStr = day.toIso8601String().split('T')[0];
+                              final dayStr =
+                                  day.toIso8601String().split('T')[0];
                               final fixedAlarms = allAlarms
-                                  .where((a) => a.type == 'fixed' && a.date != null && a.date!.toIso8601String().startsWith(dayStr))
+                                  .where((a) =>
+                                      a.type == 'fixed' &&
+                                      a.date != null &&
+                                      a.date!
+                                          .toIso8601String()
+                                          .startsWith(dayStr))
                                   .toList();
 
                               // ⭐ 1단계: 알람이 있으면 우선 표시 (최우선)
@@ -3617,38 +4641,68 @@ Widget build(BuildContext context) {
                                 // Expanded로 균등폭 배치하던 예전 방식은 카드가 너무 좁아지거나
                                 // (5개) 넘치면 레이아웃이 깨짐(그 이상) - 고정폭 카드 + 가로 스크롤로
                                 // 바꿔서 몇 개든 항상 같은 크기로 보이게 함. 시간순 정렬도 추가.
-                                final sortedAlarms = [...fixedAlarms]..sort((a, b) => a.time.compareTo(b.time));
+                                final sortedAlarms = [...fixedAlarms]
+                                  ..sort((a, b) => a.time.compareTo(b.time));
                                 return SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
                                   child: Row(
                                     children: sortedAlarms.map((alarm) {
-                                      final typeInfo = _getAlarmTypeInfo(alarm.alarmTypeId);
+                                      final typeInfo =
+                                          _getAlarmTypeInfo(alarm.alarmTypeId);
                                       return GestureDetector(
-                                        onTap: () => _showAlarmTypeSelectionPopup(alarm, setState),
+                                        onTap: () =>
+                                            _showAlarmTypeSelectionPopup(
+                                                alarm, setState),
                                         child: Container(
                                           width: 78.w,
-                                          margin: EdgeInsets.only(right: alarm != sortedAlarms.last ? 8.w : 0),
-                                          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                                          margin: EdgeInsets.only(
+                                              right: alarm != sortedAlarms.last
+                                                  ? 8.w
+                                                  : 0),
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 8.w, vertical: 6.h),
                                           decoration: BoxDecoration(
-                                            color: Theme.of(context).colorScheme.secondaryContainer,
-                                            borderRadius: BorderRadius.circular(8.r),
-                                            border: Border.all(color: Theme.of(context).colorScheme.secondary.withOpacity(0.3)),
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .secondaryContainer,
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            border: Border.all(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondary
+                                                    .withOpacity(0.3)),
                                           ),
                                           child: Column(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Row(
-                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
                                                 children: [
-                                                  Text(typeInfo['emoji']!, style: TextStyle(fontSize: 14.sp)),
+                                                  Text(typeInfo['emoji']!,
+                                                      style: TextStyle(
+                                                          fontSize: 14.sp)),
                                                   SizedBox(width: 4.w),
-                                                  Text(alarm.time, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSecondaryContainer)),
+                                                  Text(alarm.time,
+                                                      style: TextStyle(
+                                                          fontSize: 14.sp,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Theme.of(
+                                                                  context)
+                                                              .colorScheme
+                                                              .onSecondaryContainer)),
                                                 ],
                                               ),
                                               SizedBox(height: 4.h),
                                               Text(
                                                 typeInfo['label']!,
-                                                style: TextStyle(fontSize: 10.sp, color: Theme.of(context).colorScheme.onSecondaryContainer),
+                                                style: TextStyle(
+                                                    fontSize: 10.sp,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSecondaryContainer),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
@@ -3668,28 +4722,48 @@ Widget build(BuildContext context) {
                               // 만들 수 있음(AlarmRefreshEngine.kt computeDesiredAlarms와
                               // 동일한 판단 기준).
                               return FutureBuilder<bool>(
-                                future: _checkHasUpcomingAlarmTemplate(schedule, day),
+                                future: _checkHasUpcomingAlarmTemplate(
+                                    schedule, day),
                                 builder: (context, snapshot) {
                                   // 3단계: 템플릿이 없거나 로딩 중이면 (없음)
-                                  if (!snapshot.hasData || snapshot.data == false) {
-                                    return Text('(${context.l10n.commonNone})', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
+                                  if (!snapshot.hasData ||
+                                      snapshot.data == false) {
+                                    return Text('(${context.l10n.commonNone})',
+                                        style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurfaceVariant));
                                   }
 
                                   // 4단계: 템플릿은 있는데 알람이 없는 경우 → 10일 체크 (DST 안전)
                                   final now = DateTime.now();
-                                  final daysDiff = julianDayNumber(day.year, day.month, day.day) -
-                                      julianDayNumber(now.year, now.month, now.day);
+                                  final daysDiff = julianDayNumber(
+                                          day.year, day.month, day.day) -
+                                      julianDayNumber(
+                                          now.year, now.month, now.day);
 
                                   // 5단계: 10일 이후면 안내 문구
                                   if (daysDiff >= kAlarmRefreshWindowDays) {
                                     return Text(
-                                      context.l10n.calendarAutoGeneratedWithinDays(kAlarmRefreshWindowDays),
-                                      style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.tertiary),
+                                      context.l10n
+                                          .calendarAutoGeneratedWithinDays(
+                                              kAlarmRefreshWindowDays),
+                                      style: TextStyle(
+                                          fontSize: 13.sp,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .tertiary),
                                     );
                                   }
 
                                   // 6단계: 10일 이내인데 알람이 없으면 (없음) - 버그 상황
-                                  return Text('(${context.l10n.commonNone})', style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant));
+                                  return Text('(${context.l10n.commonNone})',
+                                      style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant));
                                 },
                               );
                             },
@@ -3702,26 +4776,44 @@ Widget build(BuildContext context) {
                       // ⭐ 메모 입력창 (라벨과 같은 라인)
                       Consumer(
                         builder: (context, ref, child) {
-                          final currentMemos = ref.watch(memoProvider)[dateStr] ?? [];
+                          final currentMemos =
+                              ref.watch(memoProvider)[dateStr] ?? [];
                           final isFull = currentMemos.length >= 3;
 
                           return Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(context.l10n.calendarMemoColonLabel, style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w600)),
+                              Text(context.l10n.calendarMemoColonLabel,
+                                  style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      fontWeight: FontWeight.w600)),
                               SizedBox(width: 8.w),
                               Expanded(
                                 child: isFull
                                     ? Container(
-                                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 12.w, vertical: 8.h),
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.surfaceVariant,
-                                          borderRadius: BorderRadius.circular(8.r),
-                                          border: Border.all(color: Theme.of(context).colorScheme.outline),
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .surfaceVariant,
+                                          borderRadius:
+                                              BorderRadius.circular(8.r),
+                                          border: Border.all(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .outline),
                                         ),
                                         child: Text(
                                           context.l10n.statusMemoLimit(3),
-                                          style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                                          style: TextStyle(
+                                              fontSize: 14.sp,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant),
                                         ),
                                       )
                                     : TextField(
@@ -3729,16 +4821,32 @@ Widget build(BuildContext context) {
                                         maxLines: 1,
                                         scrollPhysics: BouncingScrollPhysics(),
                                         decoration: InputDecoration(
-                                          hintText: context.l10n.calendarMemoEnter,
-                                          hintStyle: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6)),
-                                          contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                          hintText:
+                                              context.l10n.calendarMemoEnter,
+                                          hintStyle: TextStyle(
+                                              fontSize: 14.sp,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant
+                                                  .withOpacity(0.6)),
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 12.w, vertical: 8.h),
                                           border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8.r),
-                                            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            borderSide: BorderSide(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .outline),
                                           ),
                                           focusedBorder: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(8.r),
-                                            borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2),
+                                            borderRadius:
+                                                BorderRadius.circular(8.r),
+                                            borderSide: BorderSide(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .secondary,
+                                                width: 2),
                                           ),
                                         ),
                                         style: TextStyle(fontSize: 14.sp),
@@ -3755,7 +4863,8 @@ Widget build(BuildContext context) {
                               // 화면 등 다른 재사용처는 영향 없음.
                               AppSecondButton(
                                 variant: AppSecondButtonVariant.success,
-                                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12.w, vertical: 10.h),
                                 fontSize: 13.sp,
                                 onPressed: isFull
                                     ? null
@@ -3769,7 +4878,9 @@ Widget build(BuildContext context) {
                                         // 저장할 때마다 팝업이 닫혀버려서 사용성이 나빠짐)
                                         FocusScope.of(context).unfocus();
                                         memoController.clear();
-                                        ref.read(memoProvider.notifier).createMemo(dateStr, text);
+                                        ref
+                                            .read(memoProvider.notifier)
+                                            .createMemo(dateStr, text);
                                       },
                                 child: Text(context.l10n.commonSave),
                               ),
@@ -3785,7 +4896,8 @@ Widget build(BuildContext context) {
                         child: SingleChildScrollView(
                           child: Consumer(
                             builder: (context, ref, child) {
-                              final memos = ref.watch(memoProvider)[dateStr] ?? [];
+                              final memos =
+                                  ref.watch(memoProvider)[dateStr] ?? [];
 
                               if (memos.isEmpty) {
                                 return SizedBox.shrink();
@@ -3802,16 +4914,24 @@ Widget build(BuildContext context) {
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(12.r),
                                       child: InkWell(
-                                        borderRadius: BorderRadius.circular(12.r),
+                                        borderRadius:
+                                            BorderRadius.circular(12.r),
                                         onTap: () {
+                                          // 입력칸에 남아 있던 포커스를 먼저 해제해야
+                                          // 상세 팝업을 닫았을 때 키보드가 다시 살아나지 않는다.
+                                          FocusScope.of(context).unfocus();
                                           _showMemoDetailPopup(day, memo);
                                         },
                                         child: Container(
                                           decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(12.r),
+                                            borderRadius:
+                                                BorderRadius.circular(12.r),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Theme.of(context).colorScheme.shadow.withOpacity(0.04),
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .shadow
+                                                    .withOpacity(0.04),
                                                 blurRadius: 6,
                                                 offset: const Offset(0, 2),
                                               ),
@@ -3826,38 +4946,60 @@ Widget build(BuildContext context) {
                                             // 멈추던 원인 - 메모 모아보기 화면의 동일 카드는 minHeight
                                             // 방식이라 이 문제가 없었음). start + 왼쪽 바에 minHeight를
                                             // 줘서 같은 시각 효과를 안전하게 재현.
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
                                               Container(
                                                 width: 4.w,
-                                                constraints: BoxConstraints(minHeight: 40.h),
+                                                constraints: BoxConstraints(
+                                                    minHeight: 40.h),
                                                 decoration: BoxDecoration(
-                                                  color: Theme.of(context).colorScheme.primary,
-                                                  borderRadius: BorderRadius.horizontal(left: Radius.circular(12.r)),
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary,
+                                                  borderRadius:
+                                                      BorderRadius.horizontal(
+                                                          left: Radius.circular(
+                                                              12.r)),
                                                 ),
                                               ),
                                               Expanded(
                                                 child: Padding(
-                                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 12.w,
+                                                      vertical: 10.h),
                                                   child: Text(
                                                     memo.memoText,
                                                     maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                        fontSize: 14.sp,
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurface),
                                                   ),
                                                 ),
                                               ),
                                               // ⭐ 삭제 버튼 (바로 삭제) - 기존 그대로 유지
                                               GestureDetector(
                                                 onTap: () async {
-                                                  await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
+                                                  await ref
+                                                      .read(
+                                                          memoProvider.notifier)
+                                                      .deleteMemo(
+                                                          memo.id!, dateStr);
                                                 },
                                                 child: Container(
-                                                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 10.w,
+                                                      vertical: 10.h),
                                                   child: Icon(
                                                     Icons.delete,
                                                     size: 18.sp,
-                                                    color: Theme.of(context).colorScheme.error,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .error,
                                                   ),
                                                 ),
                                               ),
@@ -3875,8 +5017,8 @@ Widget build(BuildContext context) {
                       ),
                     ],
                   ),
-                ),  // ⭐ Container 닫기
-              ),  // ⭐ Padding 닫기
+                ), // ⭐ Container 닫기
+              ), // ⭐ Padding 닫기
             );
           },
         );
@@ -3908,7 +5050,8 @@ Widget build(BuildContext context) {
 
   // ⭐ 알람 타입 선택 팝업
   void _showAlarmTypeSelectionPopup(Alarm alarm, StateSetter parentSetState) {
-    print('🔍 알람 타입 선택 팝업 열림 - alarm.id: ${alarm.id}, alarmTypeId: ${alarm.alarmTypeId}');
+    print(
+        '🔍 알람 타입 선택 팝업 열림 - alarm.id: ${alarm.id}, alarmTypeId: ${alarm.alarmTypeId}');
     showDialog(
       context: context,
       builder: (context) {
@@ -3919,7 +5062,7 @@ Widget build(BuildContext context) {
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
           content: SizedBox(
-            width: double.maxFinite,  // ⭐ 명시적 width 지정
+            width: double.maxFinite, // ⭐ 명시적 width 지정
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -3935,10 +5078,14 @@ Widget build(BuildContext context) {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    if (alarm.shiftType != null && alarm.shiftType!.isNotEmpty) ...[
+                    if (alarm.shiftType != null &&
+                        alarm.shiftType!.isNotEmpty) ...[
                       Text(
                         alarm.shiftType!,
-                        style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
+                        style: TextStyle(
+                            fontSize: 17.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Theme.of(context).colorScheme.onSurface),
                       ),
                       SizedBox(width: 8.w),
                     ],
@@ -3946,13 +5093,16 @@ Widget build(BuildContext context) {
                     SizedBox(width: 8.w),
                     Text(
                       context.l10n.calendarAlarmAt(alarm.time),
-                      style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
+                      style: TextStyle(
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Theme.of(context).colorScheme.onSurface),
                     ),
                   ],
                 ),
                 SizedBox(height: 16.h),
                 Row(
-                  mainAxisSize: MainAxisSize.max,  // ⭐ 명시적 설정
+                  mainAxisSize: MainAxisSize.max, // ⭐ 명시적 설정
                   children: [
                     _buildAlarmTypeOption(
                       typeId: 1,
@@ -3960,7 +5110,9 @@ Widget build(BuildContext context) {
                       label: context.l10n.alarmSoundVibration,
                       isSelected: alarm.alarmTypeId == 1,
                       onTap: () async {
-                        await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 1);
+                        await ref
+                            .read(alarmNotifierProvider.notifier)
+                            .updateAlarmType(alarm.id!, 1);
                         Navigator.pop(context);
                         parentSetState(() {});
                       },
@@ -3972,7 +5124,9 @@ Widget build(BuildContext context) {
                       label: context.l10n.alarmVibration,
                       isSelected: alarm.alarmTypeId == 2,
                       onTap: () async {
-                        await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 2);
+                        await ref
+                            .read(alarmNotifierProvider.notifier)
+                            .updateAlarmType(alarm.id!, 2);
                         Navigator.pop(context);
                         parentSetState(() {});
                       },
@@ -3984,7 +5138,9 @@ Widget build(BuildContext context) {
                       label: context.l10n.alarmSilent,
                       isSelected: alarm.alarmTypeId == 3,
                       onTap: () async {
-                        await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarm.id!, 3);
+                        await ref
+                            .read(alarmNotifierProvider.notifier)
+                            .updateAlarmType(alarm.id!, 3);
                         Navigator.pop(context);
                         parentSetState(() {});
                       },
@@ -4000,7 +5156,8 @@ Widget build(BuildContext context) {
           actions: [
             AppSecondButton(
               variant: AppSecondButtonVariant.danger,
-              onPressed: () => _showDeleteAlarmConfirmation(alarm, parentSetState),
+              onPressed: () =>
+                  _showDeleteAlarmConfirmation(alarm, parentSetState),
               child: Text(context.l10n.commonDelete),
             ),
             AppSecondButton(
@@ -4035,15 +5192,17 @@ Widget build(BuildContext context) {
             ),
             ElevatedButton(
               onPressed: () async {
-                Navigator.pop(context);  // 확인 팝업 닫기
-                Navigator.pop(context);  // 타입 선택 팝업 닫기
+                Navigator.pop(context); // 확인 팝업 닫기
+                Navigator.pop(context); // 타입 선택 팝업 닫기
                 await _deleteAlarm(alarm);
                 parentSetState(() {});
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.error,
               ),
-              child: Text(context.l10n.commonDelete, style: TextStyle(color: Theme.of(context).colorScheme.onError)),
+              child: Text(context.l10n.commonDelete,
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.onError)),
             ),
           ],
         );
@@ -4057,7 +5216,9 @@ Widget build(BuildContext context) {
     // 먼저 보내면 오버레이가 울림을 끝낸 뒤라 삭제 이력이 'cancelled_before_ring'으로 잘못 남음.
     try {
       // 2. DB에서 알람 삭제 + Native 알람 취소
-      await ref.read(alarmNotifierProvider.notifier).deleteAlarm(alarm.id!, alarm.date);
+      await ref
+          .read(alarmNotifierProvider.notifier)
+          .deleteAlarm(alarm.id!, alarm.date);
 
       // 3. Notification 취소
       try {
@@ -4090,7 +5251,8 @@ Widget build(BuildContext context) {
         SnackBar(
           content: Text(context.l10n.alarmDeletedToast),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
         ),
       );
     }
@@ -4120,10 +5282,14 @@ Widget build(BuildContext context) {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12.h),
           decoration: BoxDecoration(
-            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surfaceVariant,
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.surfaceVariant,
             borderRadius: BorderRadius.circular(12.r),
             border: Border.all(
-              color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outline,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.outline,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -4132,7 +5298,9 @@ Widget build(BuildContext context) {
               Icon(
                 icon,
                 size: 24.sp,
-                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: isSelected
+                    ? Colors.white
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               SizedBox(height: 4.h),
               Text(
@@ -4140,7 +5308,9 @@ Widget build(BuildContext context) {
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: isSelected
+                      ? Colors.white
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -4157,14 +5327,14 @@ Widget build(BuildContext context) {
       _selectedDates.add(firstDate);
     });
   }
-  
+
   void _exitMultiSelectMode() {
     setState(() {
       _isMultiSelectMode = false;
       _selectedDates.clear();
     });
   }
-  
+
   void _toggleDateSelection(DateTime date) {
     setState(() {
       if (_selectedDates.any((d) => isSameDay(d, date))) {
@@ -4178,151 +5348,161 @@ Widget build(BuildContext context) {
       }
     });
   }
-  
+
   void _showBulkAssignSheet(ShiftSchedule schedule) {
-  // ⭐ CRITICAL FIX: activeShiftTypes(패턴에 실제로 쓰이는 근무만)로 제한하지 않고
-  // shiftTypes(온보딩에서 만든 모든 근무 카드)를 그대로 씀 - 패턴엔 없는 근무(예: 오전/
-  // 오후)도 날짜별 근무 변경(꾹 눌러서 변경)에서 선택 가능해야 함.
-  // ⭐ 불규칙 근무인 경우 "없음" 옵션 추가
-  final baseShifts = schedule.shiftTypes;
-  final displayShifts = schedule.isRegular
-    ? baseShifts
-    : [...baseShifts, '없음'];
+    // ⭐ CRITICAL FIX: activeShiftTypes(패턴에 실제로 쓰이는 근무만)로 제한하지 않고
+    // shiftTypes(온보딩에서 만든 모든 근무 카드)를 그대로 씀 - 패턴엔 없는 근무(예: 오전/
+    // 오후)도 날짜별 근무 변경(꾹 눌러서 변경)에서 선택 가능해야 함.
+    // ⭐ 불규칙 근무인 경우 "없음" 옵션 추가
+    final baseShifts = schedule.shiftTypes;
+    final displayShifts =
+        schedule.isRegular ? baseShifts : [...baseShifts, '없음'];
 
-  final screenWidth = MediaQuery.of(context).size.width;
-  final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
 
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (context) => Container(
-      height: screenHeight * 0.4,
-      padding: EdgeInsets.all(24.w),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // ⭐ 제목 텍스트 - 센터 정렬
-          Center(
-            child: Text(
-              context.l10n.calendarBulkChangeShiftTitle(_selectedDates.length),
-              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
-          SizedBox(height: 24.h),
-          
-          // ⭐ 버튼들 - 세로 센터 정렬
-          Expanded(
-            child: Center(  // ⭐ Center 추가
-              child: GridView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 12.w,
-                  mainAxisSpacing: 12.h,
-                  childAspectRatio: 1.8,
-                ),
-                itemCount: displayShifts.length,
-                itemBuilder: (context, index) {
-                  final shiftType = displayShifts[index];
-                  
-                  return ElevatedButton(
-                    // ⭐ 2026-09-15 (전체 코드 점검 Q-02) - 시트를 먼저 닫고 일괄 변경을 시작함.
-                    // 예전엔 순서가 반대라 _bulkAssignShift가 첫 await 전에 동기로 띄운 진행
-                    // 다이얼로그를 이 pop이 닫아버렸음 → 시트가 작업 내내 열린 채 남고, 그 사이
-                    // 다른 근무를 또 누르면 작업 끝의 pop이 한 번 더 불려 메인 화면까지 닫힐 수 있었음.
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _bulkAssignShift(shiftType, schedule);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _getShiftBackgroundColor(shiftType, schedule),
-                      foregroundColor: _getShiftTextColor(shiftType, schedule),
-                      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
-                    ),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: Text(
-                        shiftType == '없음' ? context.l10n.commonNone : shiftType,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  );
-                },
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        height: screenHeight * 0.4,
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ⭐ 제목 텍스트 - 센터 정렬
+            Center(
+              child: Text(
+                context.l10n
+                    .calendarBulkChangeShiftTitle(_selectedDates.length),
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
             ),
-          ),
-        ],
+            SizedBox(height: 24.h),
+
+            // ⭐ 버튼들 - 세로 센터 정렬
+            Expanded(
+              child: Center(
+                // ⭐ Center 추가
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 12.w,
+                    mainAxisSpacing: 12.h,
+                    childAspectRatio: 1.8,
+                  ),
+                  itemCount: displayShifts.length,
+                  itemBuilder: (context, index) {
+                    final shiftType = displayShifts[index];
+
+                    return ElevatedButton(
+                      // ⭐ 2026-09-15 (전체 코드 점검 Q-02) - 시트를 먼저 닫고 일괄 변경을 시작함.
+                      // 예전엔 순서가 반대라 _bulkAssignShift가 첫 await 전에 동기로 띄운 진행
+                      // 다이얼로그를 이 pop이 닫아버렸음 → 시트가 작업 내내 열린 채 남고, 그 사이
+                      // 다른 근무를 또 누르면 작업 끝의 pop이 한 번 더 불려 메인 화면까지 닫힐 수 있었음.
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _bulkAssignShift(shiftType, schedule);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            _getShiftBackgroundColor(shiftType, schedule),
+                        foregroundColor:
+                            _getShiftTextColor(shiftType, schedule),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 4.w, vertical: 8.h),
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          shiftType == '없음'
+                              ? context.l10n.commonNone
+                              : shiftType,
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-  
+    );
+  }
+
+  // ⭐ 2026-09-15 (출시 적합성 재검토 AUD-01) - 일괄 변경이 겹쳐 실행되지 않게
+  bool _bulkAssignInProgress = false;
+
   // ⭐ Provider 사용으로 변경
-  Future<void> _bulkAssignShift(String shiftType, ShiftSchedule schedule) async {
-    if (_selectedDates.isEmpty) return;
+  Future<void> _bulkAssignShift(
+      String shiftType, ShiftSchedule schedule) async {
+    if (_selectedDates.isEmpty || _bulkAssignInProgress) return;
+    _bulkAssignInProgress = true;
 
     // ⭐ "없음"을 "미설정"으로 변환
     final actualShiftType = shiftType == '없음' ? '미설정' : shiftType;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => Center(child: CircularProgressIndicator()),
-    );
-
+    // ⭐ 2026-09-15 (AUD-01) - 예전엔 showDialog(barrierDismissible: false) + 끝에서 Navigator.pop(context)였음.
+    // 시스템 뒤로가기는 막지 못해서 로딩 중 뒤로가기로 진행창이 먼저 닫히면, 끝의 pop이 다른 route(메인 화면)를
+    // 닫아 빈 화면이 될 수 있었음. runWithBlockingProgress는 뒤로가기를 막고 자기가 띄운 진행창만 닫음(성공·예외 모두).
     try {
-      // ⭐ Provider의 bulkAssignShift 사용
-      await ref.read(scheduleProvider.notifier).bulkAssignShift(
-        _selectedDates.toList(),
-        actualShiftType,
-      );
+      final alarmOutcome = await runWithBlockingProgress<AlarmScheduleOutcome?>(
+          context, () async {
+        // ⭐ Provider의 bulkAssignShift 사용
+        await ref.read(scheduleProvider.notifier).bulkAssignShift(
+              _selectedDates.toList(),
+              actualShiftType,
+            );
 
-      // ⭐ 선택된 모든 날짜 ±1일(전날/다음날 알람이 있을 수 있어서)의 고정 알람을
-      // 한 번에 재생성. 방금 갱신된 schedule을 다시 읽어서 넘김 - bulkAssignShift가
-      // 이미 assignedDates를 저장했으므로 provider 상태가 최신임.
-      // ⭐ 2026-09-04 - CRITICAL FIX: "미설정(=근무 일괄 해제)"일 때만 이 호출을
-      // 스킵하던 조건을 제거함. regenerateAlarmsAroundDates/computeDesiredFixedAlarmsForDate는
-      // '미설정'을 만나면 그 날짜에 알람을 새로 안 만들 뿐, 기존 알람을 지우는
-      // 1단계(regenerateFixedAlarmsForDatesTxn의 delete)는 항상 실행됨 - 즉 이
-      // 호출을 스킵하면 "일괄 해제"가 정확히 필요로 하는 정리(전날/다음날 알람
-      // 포함, 이제 존재하지 않는 근무를 근거로 남아있던 알람 삭제)가 통째로 빠짐.
-      // 그 알람들은 다음 네이티브 갱신 트리거(자정/20분전/앱 재실행 등)가 올
-      // 때까지 실제 기기에 그대로 armed 상태로 남아있었음 - 단일 날짜 변경 경로
-      // (changeShiftWithAlarms)는 이 가드가 없어서 원래도 정상 동작했음.
-      final updatedSchedule = ref.read(scheduleProvider).value;
-      AlarmScheduleOutcome? alarmOutcome;
-      if (updatedSchedule != null) {
-        alarmOutcome = await ref.read(alarmNotifierProvider.notifier).regenerateAlarmsAroundDates(
-          _selectedDates,
-          updatedSchedule,
-        );
-      }
-
-      Navigator.pop(context);
-      _exitMultiSelectMode();
+        // ⭐ 선택된 모든 날짜 ±1일(전날/다음날 알람이 있을 수 있어서)의 고정 알람을
+        // 한 번에 재생성. 방금 갱신된 schedule을 다시 읽어서 넘김 - bulkAssignShift가
+        // 이미 assignedDates를 저장했으므로 provider 상태가 최신임.
+        // ⭐ 2026-09-04 - CRITICAL FIX: "미설정(=근무 일괄 해제)"일 때만 이 호출을
+        // 스킵하던 조건을 제거함. regenerateAlarmsAroundDates/computeDesiredFixedAlarmsForDate는
+        // '미설정'을 만나면 그 날짜에 알람을 새로 안 만들 뿐, 기존 알람을 지우는
+        // 1단계(regenerateFixedAlarmsForDatesTxn의 delete)는 항상 실행됨 - 즉 이
+        // 호출을 스킵하면 "일괄 해제"가 정확히 필요로 하는 정리(전날/다음날 알람
+        // 포함, 이제 존재하지 않는 근무를 근거로 남아있던 알람 삭제)가 통째로 빠짐.
+        // 그 알람들은 다음 네이티브 갱신 트리거(자정/20분전/앱 재실행 등)가 올
+        // 때까지 실제 기기에 그대로 armed 상태로 남아있었음 - 단일 날짜 변경 경로
+        // (changeShiftWithAlarms)는 이 가드가 없어서 원래도 정상 동작했음.
+        final updatedSchedule = ref.read(scheduleProvider).value;
+        if (updatedSchedule == null) return null;
+        return await ref
+            .read(alarmNotifierProvider.notifier)
+            .regenerateAlarmsAroundDates(
+              _selectedDates,
+              updatedSchedule,
+            );
+      });
 
       if (mounted) {
+        _exitMultiSelectMode();
         // ⭐ 2026-09-14 (출시전 감사 #13) - 알람 일부만 등록 실패하면 성공 문구 대신 몇 개가 빠졌는지 안내
         // (전부 실패는 regenerateAlarmsAroundDates가 예외 → 아래 catch)
         final partial = alarmOutcome != null && alarmOutcome.partiallyFailed;
         ScaffoldMessenger.of(context).showSnackBar(
           partial
               ? SnackBar(
-                  content: Text('⚠️ ${context.l10n.alarmSchedulePartialFailed(alarmOutcome.failed, alarmOutcome.attempted)}'),
+                  content: Text(
+                      '⚠️ ${context.l10n.alarmSchedulePartialFailed(alarmOutcome.failed, alarmOutcome.attempted)}'),
                   backgroundColor: Colors.orange,
                 )
-              : SnackBar(content: Text('✅ ${context.l10n.statusShiftAssigned}')),
+              : SnackBar(
+                  content: Text('✅ ${context.l10n.statusShiftAssigned}')),
         );
       }
     } catch (e) {
-      Navigator.pop(context);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -4332,12 +5512,17 @@ Widget build(BuildContext context) {
         );
       }
       print('❌ _bulkAssignShift 실패: $e');
+    } finally {
+      _bulkAssignInProgress = false;
     }
   }
-  
-  Future<void> _changeShift(DateTime date, String newShiftType, ShiftSchedule schedule) async {
+
+  Future<void> _changeShift(
+      DateTime date, String newShiftType, ShiftSchedule schedule) async {
     try {
-      await ref.read(scheduleProvider.notifier).changeShiftWithAlarms(date, newShiftType);
+      await ref
+          .read(scheduleProvider.notifier)
+          .changeShiftWithAlarms(date, newShiftType);
 
       // ⭐ 알람 Provider도 수동 갱신
       await ref.read(alarmNotifierProvider.notifier).refresh();
@@ -4377,13 +5562,15 @@ Widget build(BuildContext context) {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (sheetContext, setSheetState) {
             final colorScheme = Theme.of(sheetContext).colorScheme;
             return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(sheetContext).viewInsets.bottom),
+              padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(sheetContext).viewInsets.bottom),
               child: SafeArea(
                 top: false,
                 child: Padding(
@@ -4405,11 +5592,15 @@ Widget build(BuildContext context) {
                       ),
                       Row(
                         children: [
-                          Icon(Icons.event_note_rounded, size: 18.sp, color: colorScheme.primary),
+                          Icon(Icons.event_note_rounded,
+                              size: 18.sp, color: colorScheme.primary),
                           SizedBox(width: 6.w),
                           Text(
                             '${DateFormat.MMMd(Localizations.localeOf(sheetContext).languageCode == 'ko' ? 'ko' : 'en').format(day)} (${_getWeekday(day, sheetContext)})',
-                            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: colorScheme.primary),
+                            style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colorScheme.primary),
                           ),
                         ],
                       ),
@@ -4425,11 +5616,13 @@ Widget build(BuildContext context) {
                             contentPadding: EdgeInsets.all(12.w),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.r),
-                              borderSide: BorderSide(color: colorScheme.outline),
+                              borderSide:
+                                  BorderSide(color: colorScheme.outline),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10.r),
-                              borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                              borderSide: BorderSide(
+                                  color: colorScheme.primary, width: 2),
                             ),
                           ),
                           style: TextStyle(fontSize: 14.sp),
@@ -4444,7 +5637,10 @@ Widget build(BuildContext context) {
                           ),
                           child: Text(
                             memo.memoText,
-                            style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface, height: 1.5),
+                            style: TextStyle(
+                                fontSize: 14.sp,
+                                color: colorScheme.onSurface,
+                                height: 1.5),
                           ),
                         ),
                       SizedBox(height: 16.h),
@@ -4469,18 +5665,24 @@ Widget build(BuildContext context) {
                                 variant: AppSecondButtonVariant.success,
                                 onPressed: () async {
                                   if (editController.text.trim().isEmpty) {
-                                    ScaffoldMessenger.of(sheetContext).showSnackBar(
-                                      SnackBar(content: Text(sheetContext.l10n.statusEnterMemoContent)),
+                                    ScaffoldMessenger.of(sheetContext)
+                                        .showSnackBar(
+                                      SnackBar(
+                                          content: Text(sheetContext
+                                              .l10n.statusEnterMemoContent)),
                                     );
                                     return;
                                   }
                                   FocusScope.of(sheetContext).unfocus();
-                                  await ref.read(memoProvider.notifier).updateMemo(
+                                  await ref
+                                      .read(memoProvider.notifier)
+                                      .updateMemo(
                                         memo.id!,
                                         dateStr,
                                         editController.text.trim(),
                                       );
-                                  if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+                                  if (sheetContext.mounted)
+                                    Navigator.of(sheetContext).pop();
                                 },
                                 child: Text(sheetContext.l10n.commonSave),
                               ),
@@ -4490,8 +5692,11 @@ Widget build(BuildContext context) {
                               child: AppSecondButton(
                                 variant: AppSecondButtonVariant.danger,
                                 onPressed: () async {
-                                  await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
-                                  if (sheetContext.mounted) Navigator.of(sheetContext).pop();
+                                  await ref
+                                      .read(memoProvider.notifier)
+                                      .deleteMemo(memo.id!, dateStr);
+                                  if (sheetContext.mounted)
+                                    Navigator.of(sheetContext).pop();
                                 },
                                 child: Text(sheetContext.l10n.commonDelete),
                               ),
@@ -4533,7 +5738,8 @@ Widget build(BuildContext context) {
   // "10일 이내가 되면 자동 생성됩니다" 문구가 안 나오던 버그).
   // computeDesiredFixedAlarmsForDate()/AlarmRefreshEngine.kt의 computeDesiredAlarms()와
   // 동일한 기여 판단 기준(당일 offset 0 / D+1의 전날 offset -1 / D-1의 다음날 offset +1)을 씀.
-  Future<bool> _checkHasUpcomingAlarmTemplate(ShiftSchedule schedule, DateTime day) async {
+  Future<bool> _checkHasUpcomingAlarmTemplate(
+      ShiftSchedule schedule, DateTime day) async {
     final dayBefore = DateTime(day.year, day.month, day.day - 1);
     final dayAfter = DateTime(day.year, day.month, day.day + 1);
 
@@ -4562,6 +5768,7 @@ Widget build(BuildContext context) {
     }
   }
 }
+
 // ⭐ 10번 테마(에디토리얼형)의 모서리 삼각 배지용 클리퍼 -
 // calendar_theme_lab_screen.dart의 _CornerTriangleClipper와 동일한 도형
 // (그 클래스는 private이라 그대로 import해서 못 씀, 그래서 이 파일에도 하나 둠).

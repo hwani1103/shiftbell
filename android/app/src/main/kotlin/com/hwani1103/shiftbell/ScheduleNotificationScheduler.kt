@@ -162,6 +162,7 @@ object ScheduleNotificationScheduler {
 
             val now = System.currentTimeMillis()
             var count = 0
+            var allSucceeded = true
             while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val date = cursor.getString(cursor.getColumnIndexOrThrow("date"))
@@ -183,11 +184,14 @@ object ScheduleNotificationScheduler {
                     continue
                 }
 
-                schedule(context, id, triggerAtMillis, date, startMinutes, content, durationMinutes)
-                count++
+                if (schedule(context, id, triggerAtMillis, date, startMinutes, content, durationMinutes)) {
+                    count++
+                } else {
+                    allSucceeded = false
+                }
             }
             Log.d(TAG, "✅ 재부팅 후 일정 알림 재예약 완료: ${count}건")
-            true
+            allSucceeded
         } catch (e: Exception) {
             Log.e(TAG, "❌ 일정 알림 재예약 실패", e)
             false

@@ -11,6 +11,7 @@ import 'all_alarms_history_view.dart';
 import '../services/alarm_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
+import '../providers/current_date_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../providers/calendar_theme_provider.dart';
 import '../models/calendar_theme.dart';
@@ -43,7 +44,7 @@ import '../services/backup_validator.dart';
 import 'restore_progress_screen.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
-  final VoidCallback? onSwipeToCalendar;  // ⭐ 6번 기능: 스와이프 callback
+  final VoidCallback? onSwipeToCalendar; // ⭐ 6번 기능: 스와이프 callback
 
   const SettingsTab({super.key, this.onSwipeToCalendar});
 
@@ -51,7 +52,8 @@ class SettingsTab extends ConsumerStatefulWidget {
   ConsumerState<SettingsTab> createState() => _SettingsTabState();
 }
 
-class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingObserver {
+class _SettingsTabState extends ConsumerState<SettingsTab>
+    with WidgetsBindingObserver {
   // ⭐ 사용자 데이터 백업("A번 요구사항") - 설정 탭 진입점(Layer 4). 저장/복구
   // 로직 자체는 BackupWatcher(자동 트리거와 동일 코드 경로 - "지금 백업"도 그냥
   // force:true로 그 함수를 부르는 것뿐)에 있고, 여기선 버튼 상태/마지막 백업
@@ -170,14 +172,16 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
     }
     if (payload == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.backupRestoreManualPickInvalidToast)),
+        SnackBar(
+            content: Text(context.l10n.backupRestoreManualPickInvalidToast)),
       );
       return;
     }
     // ⭐ 2026-09-14 (G4 #19) - 근무 일정이 없는 백업으로 지금 데이터를 통째로 비우지 않음
     if (!BackupValidator.hasSchedule(payload)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.settingsRestoreFromBackupEmptyToast)),
+        SnackBar(
+            content: Text(context.l10n.settingsRestoreFromBackupEmptyToast)),
       );
       return;
     }
@@ -214,7 +218,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
     // 아무것도 바뀌지 않은 실패뿐.
     final restorePayload = payload;
     setState(() => _isRestoringFromBackup = true);
-    final outcome = await Navigator.of(context, rootNavigator: true).push<RestoreProgressOutcome>(
+    final outcome = await Navigator.of(context, rootNavigator: true)
+        .push<RestoreProgressOutcome>(
       MaterialPageRoute(
         fullscreenDialog: true,
         builder: (_) => RestoreProgressScreen(payload: restorePayload),
@@ -230,7 +235,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
       case RestoreProgressOutcome.failed:
       case null:
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.settingsRestoreFromBackupFailedToast)),
+          SnackBar(
+              content: Text(context.l10n.settingsRestoreFromBackupFailedToast)),
         );
     }
   }
@@ -293,8 +299,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
     });
 
     final now = DateTime.now();
-    final futureAlarms = alarms.where((a) => a.date != null && a.date!.isAfter(now)).toList();
-    final pastAlarms = alarms.where((a) => a.date != null && a.date!.isBefore(now)).toList();
+    final futureAlarms =
+        alarms.where((a) => a.date != null && a.date!.isAfter(now)).toList();
+    final pastAlarms =
+        alarms.where((a) => a.date != null && a.date!.isBefore(now)).toList();
 
     if (!mounted) return;
 
@@ -324,9 +332,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildCountItem(context.l10n.alarmCountFuture, futureAlarms.length, Colors.green),
-                    _buildCountItem(context.l10n.alarmCountPast, pastAlarms.length, Colors.grey),
-                    _buildCountItem(context.l10n.alarmCountAll, alarms.length, Colors.blue),
+                    _buildCountItem(context.l10n.alarmCountFuture,
+                        futureAlarms.length, Colors.green),
+                    _buildCountItem(context.l10n.alarmCountPast,
+                        pastAlarms.length, Colors.grey),
+                    _buildCountItem(
+                        context.l10n.alarmCountAll, alarms.length, Colors.blue),
                   ],
                 ),
               ),
@@ -335,7 +346,11 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                 Center(
                   child: Padding(
                     padding: EdgeInsets.all(32.h),
-                    child: Text(context.l10n.alarmNoneRegistered, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                    child: Text(context.l10n.alarmNoneRegistered,
+                        style: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant)),
                   ),
                 )
               else
@@ -352,8 +367,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
 
                       final isPast = alarm.date!.isBefore(now);
                       final isToday = alarm.date!.year == now.year &&
-                                     alarm.date!.month == now.month &&
-                                     alarm.date!.day == now.day;
+                          alarm.date!.month == now.month &&
+                          alarm.date!.day == now.day;
 
                       return Padding(
                         padding: EdgeInsets.symmetric(vertical: 2.h),
@@ -362,8 +377,13 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                           style: TextStyle(
                             fontSize: 13.sp,
                             fontFamily: 'monospace',
-                            color: isPast ? Colors.grey : (isToday ? Colors.orange : Theme.of(context).colorScheme.onSurface),
-                            decoration: isPast ? TextDecoration.lineThrough : null,
+                            color: isPast
+                                ? Colors.grey
+                                : (isToday
+                                    ? Colors.orange
+                                    : Theme.of(context).colorScheme.onSurface),
+                            decoration:
+                                isPast ? TextDecoration.lineThrough : null,
                           ),
                         ),
                       );
@@ -386,7 +406,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
   Widget _buildCountItem(String label, int count, Color color) {
     return Column(
       children: [
-        Text('$count', style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: color)),
+        Text('$count',
+            style: TextStyle(
+                fontSize: 20.sp, fontWeight: FontWeight.bold, color: color)),
         Text(label, style: TextStyle(fontSize: 11.sp)),
       ],
     );
@@ -424,17 +446,18 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
     // CalendarThemePickerScreen(onApplied: ...)로 여전히 씀(테마 적용 후 달력탭으로
     // 돌아가는 콜백) - 그쪽은 스와이프가 아니라 별개 기능이라 유지.
     return Scaffold(
-        appBar: AppBar(
-          // ⭐ 2026-09-06(사용자 지적) - 컨디션 탭 등 다른 탭들은 전부 테마
-          // 기본값(centerTitle:true, 18px w600, app_theme.dart 참고)을 그대로
-          // 쓰는데 이 화면만 Row+Spacer로 오른쪽 정렬 + 20.sp 커스텀 크기를 써서
-          // 탭마다 제목 위치/크기가 달라 보였음 - 다른 탭과 동일하게 가운데
-          // 정렬·같은 크기가 되도록 커스텀 스타일을 걷어냄.
-          title: Text(context.l10n.navSettings),
-        ),
-        body: scheduleAsync.when(
-        loading: () => const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
-        error: (error, stack) => Center(child: Text('${context.l10n.statusErrorOccurred}: $error')),
+      appBar: AppBar(
+        // ⭐ 2026-09-06(사용자 지적) - 컨디션 탭 등 다른 탭들은 전부 테마
+        // 기본값(centerTitle:true, 18px w600, app_theme.dart 참고)을 그대로
+        // 쓰는데 이 화면만 Row+Spacer로 오른쪽 정렬 + 20.sp 커스텀 크기를 써서
+        // 탭마다 제목 위치/크기가 달라 보였음 - 다른 탭과 동일하게 가운데
+        // 정렬·같은 크기가 되도록 커스텀 스타일을 걷어냄.
+        title: Text(context.l10n.navSettings),
+      ),
+      body: scheduleAsync.when(
+        loading: () => const SizedBox.shrink(), // ⭐ 로딩 인디케이터 제거
+        error: (error, stack) =>
+            Center(child: Text('${context.l10n.statusErrorOccurred}: $error')),
         data: (schedule) {
           return ListView(
             padding: EdgeInsets.all(16.w),
@@ -449,13 +472,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Theme.of(context).colorScheme.primary, width: 1.5),
+                  border: Border.all(
+                      color: Theme.of(context).colorScheme.primary, width: 1.5),
                 ),
                 child: Column(
                   children: [
                     // 헤더
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16.w, vertical: 12.h),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.primary,
                         borderRadius: BorderRadius.only(
@@ -465,7 +490,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.calendar_month, color: Theme.of(context).colorScheme.onPrimary, size: 20.sp),
+                          Icon(Icons.calendar_month,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              size: 20.sp),
                           SizedBox(width: 8.w),
                           Text(
                             context.l10n.settingsShiftManagement,
@@ -485,16 +512,24 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (schedule == null)
-                            Text(context.l10n.settingsNotSet, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant))
-                          else if (schedule.isRegular && schedule.pattern != null)
-                            _buildPatternRow(schedule.pattern!)
+                            Text(context.l10n.settingsNotSet,
+                                style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant))
+                          else if (schedule.isRegular &&
+                              schedule.pattern != null)
+                            _buildPatternRow(schedule)
                           else
-                            _buildShiftTypesRow((schedule.activeShiftTypes ?? schedule.shiftTypes)),
+                            _buildShiftTypesRow((schedule.activeShiftTypes ??
+                                schedule.shiftTypes)),
                         ],
                       ),
                     ),
                     // ⭐ 수정 | 초기화 버튼 나란히 배치
-                    Divider(height: 1, color: Theme.of(context).colorScheme.primary),
+                    Divider(
+                        height: 1,
+                        color: Theme.of(context).colorScheme.primary),
                     IntrinsicHeight(
                       child: Row(
                         children: [
@@ -510,12 +545,19 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.edit, color: Theme.of(context).colorScheme.primary, size: 16.sp),
+                                    Icon(Icons.edit,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        size: 16.sp),
                                     SizedBox(width: 6.w),
                                     Text(
-                                      context.l10n.settingsShiftManagementEditButton,
+                                      context.l10n
+                                          .settingsShiftManagementEditButton,
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.primary,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -526,7 +568,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                             ),
                           ),
                           // 구분선
-                          VerticalDivider(width: 1, color: Theme.of(context).colorScheme.primary),
+                          VerticalDivider(
+                              width: 1,
+                              color: Theme.of(context).colorScheme.primary),
                           // 초기화 버튼
                           Expanded(
                             child: InkWell(
@@ -539,12 +583,16 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.refresh, color: Theme.of(context).colorScheme.error, size: 16.sp),
+                                    Icon(Icons.refresh,
+                                        color:
+                                            Theme.of(context).colorScheme.error,
+                                        size: 16.sp),
                                     SizedBox(width: 6.w),
                                     Text(
                                       context.l10n.shiftResetSchedule,
                                       style: TextStyle(
-                                        color: Theme.of(context).colorScheme.error,
+                                        color:
+                                            Theme.of(context).colorScheme.error,
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -570,7 +618,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               // 알람음 관리
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.notifications_active, color: Theme.of(context).colorScheme.tertiary),
+                leading: Icon(Icons.notifications_active,
+                    color: Theme.of(context).colorScheme.tertiary),
                 title: Text(context.l10n.alarmSoundManage),
                 subtitle: Text(context.l10n.settingsAlarmSoundManageDesc),
                 trailing: Icon(Icons.chevron_right),
@@ -580,14 +629,16 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               // ⭐ "근로"를 전부 "근무"로 통일 (탭 제목/부제 포함).
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.work_history_outlined, color: Theme.of(context).colorScheme.tertiary),
+                leading: Icon(Icons.work_history_outlined,
+                    color: Theme.of(context).colorScheme.tertiary),
                 title: Text(context.l10n.settingsWorkHoursAndOt),
                 subtitle: Text(context.l10n.settingsWorkHoursAndOtDesc),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const WorkHoursSettingsScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const WorkHoursSettingsScreen()),
                   );
                 },
               ),
@@ -603,14 +654,18 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               // 지정이 아니라 테마 선택 하나로 전부 결정됨.
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.palette_outlined, color: Theme.of(context).colorScheme.primary),
+                leading: Icon(Icons.palette_outlined,
+                    color: Theme.of(context).colorScheme.primary),
                 title: Text(context.l10n.calendarTheme),
                 subtitle: Text(ref.watch(calendarThemeProvider).label(context)),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (_) => CalendarThemePickerScreen(onApplied: widget.onSwipeToCalendar),
-                  ));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CalendarThemePickerScreen(
+                            onApplied: widget.onSwipeToCalendar),
+                      ));
                 },
               ),
 
@@ -629,7 +684,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               if (!ref.watch(scheduleTabEnabledProvider))
                 ListTile(
                   tileColor: Colors.white,
-                  leading: Icon(Icons.event_note_outlined, color: Theme.of(context).colorScheme.tertiary),
+                  leading: Icon(Icons.event_note_outlined,
+                      color: Theme.of(context).colorScheme.tertiary),
                   title: const Text('일정관리 화면 사용하기'),
                   subtitle: const Text('하단 탭에 일정관리 화면을 다시 표시합니다'),
                   trailing: Icon(Icons.chevron_right),
@@ -639,7 +695,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                   onTap: () async {
                     final changed = await setTabEnabledWithFeedback(
                       context,
-                      () => ref.read(scheduleTabEnabledProvider.notifier).setEnabled(true),
+                      () => ref
+                          .read(scheduleTabEnabledProvider.notifier)
+                          .setEnabled(true),
                     );
                     if (!changed) return;
                     await ScheduleNotificationService.restoreAllForTabEnable();
@@ -648,14 +706,17 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               if (!ref.watch(conditionTabEnabledProvider))
                 ListTile(
                   tileColor: Colors.white,
-                  leading: Icon(Icons.self_improvement, color: Theme.of(context).colorScheme.tertiary),
-                  title: const Text('컨디션 화면 사용하기'),
-                  subtitle: const Text('하단 탭에 컨디션 화면을 다시 표시합니다'),
+                  leading: Icon(Icons.self_improvement,
+                      color: Theme.of(context).colorScheme.tertiary),
+                  title: const Text('수면·회복 화면 사용하기'),
+                  subtitle: const Text('하단 탭에 수면·회복 화면을 다시 표시합니다'),
                   trailing: Icon(Icons.chevron_right),
                   // ⭐ 2026-09-13 - 수면 위젯이 즉시 정상(비회색) 표시로
                   // 돌아오도록 깨움 - 대칭 동작.
                   onTap: () async {
-                    await ref.read(conditionTabEnabledProvider.notifier).setEnabled(true);
+                    await ref
+                        .read(conditionTabEnabledProvider.notifier)
+                        .setEnabled(true);
                     await WidgetRefreshService.refresh();
                   },
                 ),
@@ -673,14 +734,16 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               // 알람 이력
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.alarm_on, color: Theme.of(context).colorScheme.primary),
+                leading: Icon(Icons.alarm_on,
+                    color: Theme.of(context).colorScheme.primary),
                 title: Text(context.l10n.alarmHistory),
                 subtitle: Text(context.l10n.settingsAlarmHistoryDesc),
                 trailing: Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AllAlarmsHistoryView()),
+                    MaterialPageRoute(
+                        builder: (context) => AllAlarmsHistoryView()),
                   );
                 },
               ),
@@ -688,7 +751,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               // 메모 모아보기
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.note_outlined, color: Colors.amber.shade700),
+                leading:
+                    Icon(Icons.note_outlined, color: Colors.amber.shade700),
                 title: Text(context.l10n.calendarMemoAll),
                 subtitle: Text(context.l10n.settingsMemoAllDesc),
                 trailing: Icon(Icons.chevron_right),
@@ -710,13 +774,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               // 없이 항상 최신임.
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.backup_outlined, color: Theme.of(context).colorScheme.primary),
+                leading: Icon(Icons.backup_outlined,
+                    color: Theme.of(context).colorScheme.primary),
                 title: Text(context.l10n.settingsDataBackupTitle),
                 subtitle: Text(
                   _isBackingUp
                       ? context.l10n.settingsDataBackupInProgress
                       : (_lastBackupAt != null
-                          ? context.l10n.settingsDataBackupLastSavedAt(_formatBackupDate(_lastBackupAt!))
+                          ? context.l10n.settingsDataBackupLastSavedAt(
+                              _formatBackupDate(_lastBackupAt!))
                           : context.l10n.settingsDataBackupNeverSaved),
                 ),
                 trailing: _isBackingUp
@@ -734,7 +800,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               // 주석 참고.
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.settings_backup_restore, color: Theme.of(context).colorScheme.primary),
+                leading: Icon(Icons.settings_backup_restore,
+                    color: Theme.of(context).colorScheme.primary),
                 title: Text(context.l10n.settingsRestoreFromBackupTitle),
                 subtitle: Text(
                   _isRestoringFromBackup
@@ -759,7 +826,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               // 모든 알람 완전 삭제
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
+                leading: Icon(Icons.delete_forever,
+                    color: Theme.of(context).colorScheme.error),
                 title: Text(
                   context.l10n.alarmDeleteAllPermanently,
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -806,12 +874,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
 
                   if (confirm == true) {
                     try {
-                      await ref.read(alarmNotifierProvider.notifier).deleteAllAlarmsCompletely();
+                      await ref
+                          .read(alarmNotifierProvider.notifier)
+                          .deleteAllAlarmsCompletely();
 
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('🗑️ ${context.l10n.settingsAllAlarmsDeletedToast}'),
+                            content: Text(
+                                '🗑️ ${context.l10n.settingsAllAlarmsDeletedToast}'),
                             backgroundColor: Colors.red.shade700,
                           ),
                         );
@@ -819,7 +890,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                     } catch (e) {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('❌ ${context.l10n.statusDeleteFailed}: $e')),
+                          SnackBar(
+                              content: Text(
+                                  '❌ ${context.l10n.statusDeleteFailed}: $e')),
                         );
                       }
                     }
@@ -835,7 +908,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               // 도움말
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.help_outline, color: Theme.of(context).colorScheme.secondary),
+                leading: Icon(Icons.help_outline,
+                    color: Theme.of(context).colorScheme.secondary),
                 title: Text(context.l10n.settingsHelp),
                 subtitle: Text(context.l10n.settingsHelpDesc),
                 trailing: Icon(Icons.chevron_right),
@@ -850,10 +924,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                 leading: Icon(Icons.privacy_tip_outlined, color: Colors.teal),
                 title: Text(context.l10n.settingsPrivacyPolicy),
                 trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())),
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (_) => const PrivacyPolicyScreen())),
               ),
-
             ],
           );
         },
@@ -862,7 +935,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
   }
 
   // 교대 패턴 표시 (규칙적)
-  Widget _buildPatternRow(List<String> pattern) {
+  //
+  // ⭐ 2026-09-17 - 패턴 칩 중 **오늘이 어느 근무인지**를 바로 알 수 있게 함(사용자 요청).
+  // 같은 근무명이 패턴에 여러 번 나올 수 있어서 이름이 아니라 위치(index)로 맞춤
+  // (ShiftSchedule.getPatternIndexForDate). "오늘"은 자정에 바뀌므로 currentDateProvider를 구독함(AUD-05 공통 규칙).
+  Widget _buildPatternRow(ShiftSchedule schedule) {
+    final pattern = schedule.pattern!;
+    final today = ref.watch(currentDateProvider);
+    final todayIdx = schedule.getPatternIndexForDate(today);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -880,9 +961,16 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             for (int i = 0; i < pattern.length; i++) ...[
-              AppShiftChip(label: pattern[i], dense: true),
+              AppShiftChip(
+                label: pattern[i],
+                dense: true,
+                selected: i == todayIdx,
+                strongSelected: i == todayIdx,
+              ),
               if (i < pattern.length - 1)
-                Icon(Icons.arrow_forward, size: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                Icon(Icons.arrow_forward,
+                    size: 14.sp,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
             ],
           ],
         ),
@@ -906,7 +994,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
         Wrap(
           spacing: 6.w,
           runSpacing: 6.h,
-          children: shiftTypes.map((type) => AppShiftChip(label: type, dense: true)).toList(),
+          children: shiftTypes
+              .map((type) => AppShiftChip(label: type, dense: true))
+              .toList(),
         ),
       ],
     );
@@ -958,7 +1048,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
                 Divider(height: 1),
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
+                leading: Icon(Icons.edit,
+                    color: Theme.of(context).colorScheme.primary),
                 title: Text(context.l10n.settingsEditShiftNameTitle),
                 subtitle: Text(context.l10n.settingsRenameShiftDesc),
                 onTap: () {
@@ -984,7 +1075,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               Divider(height: 1),
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.alarm, color: Theme.of(context).colorScheme.tertiary),
+                leading: Icon(Icons.alarm,
+                    color: Theme.of(context).colorScheme.tertiary),
                 title: Text(context.l10n.settingsEditFixedAlarmTitle),
                 subtitle: Text(context.l10n.settingsChangeAlarmTimeDesc),
                 onTap: () {
@@ -1029,7 +1121,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
               SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2, color: Theme.of(context).colorScheme.surface),
+                child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Theme.of(context).colorScheme.surface),
               ),
               SizedBox(width: 12),
               Text(context.l10n.settingsScheduleChanging),
@@ -1049,10 +1143,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
         todayIndex: selectedIndex,
         shiftTypes: schedule.shiftTypes,
         activeShiftTypes: schedule.activeShiftTypes,
-        startDate: DateTime.now(),  // ⭐ 오늘로 변경
+        startDate: DateTime.now(), // ⭐ 오늘로 변경
         shiftColors: schedule.shiftColors,
         customShiftColors: schedule.customShiftColors,
-        assignedDates: {},  // ⭐ 수동 할당 초기화
+        assignedDates: {}, // ⭐ 수동 할당 초기화
         shiftDurations: schedule.shiftDurations,
       );
 
@@ -1097,8 +1191,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
       // "다시 만들라"가 아니라 "다시 저장해달라"는 짧은 안내만 조건부로 붙임
       // (전체 근무표를 아예 안 쓰는 사람에게는 무의미한 안내라 설정된 경우만).
       final hasAllTeamsSetup = (await SharedPreferences.getInstance())
-          .getStringList('all_teams_names')
-          ?.isNotEmpty ??
+              .getStringList('all_teams_names')
+              ?.isNotEmpty ??
           false;
 
       if (mounted) {
@@ -1112,7 +1206,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
             ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
-            duration: hasAllTeamsSetup ? const Duration(seconds: 5) : const Duration(seconds: 4),
+            duration: hasAllTeamsSetup
+                ? const Duration(seconds: 5)
+                : const Duration(seconds: 4),
           ),
         );
       }
@@ -1122,7 +1218,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ ${context.l10n.settingsScheduleChangeFailedWithError(e.toString())}'),
+            content: Text(
+                '❌ ${context.l10n.settingsScheduleChangeFailedWithError(e.toString())}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -1262,8 +1359,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
     // (테마 디폴트 + 사용자 오버라이드를 합친 값)을 보여줘야 하지만, 저장은
     // 사용자가 이번에 실제로 건드린 근무만 customShiftColors에 남겨야 함
     // (안 건드린 근무는 계속 테마를 따라가야 하므로) - 그래서 두 맵을 따로 넘김.
-    final effectiveColors = effectiveShiftColors(activeShifts, theme, schedule.customShiftColors)
-        .map((name, color) => MapEntry(name, color.value));
+    final effectiveColors =
+        effectiveShiftColors(activeShifts, theme, schedule.customShiftColors)
+            .map((name, color) => MapEntry(name, color.value));
     final customColors = schedule.customShiftColors ?? {};
 
     showDialog(
@@ -1287,8 +1385,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
     final theme = ref.read(calendarThemeProvider);
     // shiftColors(위젯/전체근무표용 캐시)는 테마 디폴트 + 방금 저장한
     // 오버라이드를 합친 "최종" 값으로 재계산.
-    final effectiveColors = effectiveShiftColors(schedule.shiftTypes, theme, newCustomColors)
-        .map((name, color) => MapEntry(name, color.value));
+    final effectiveColors =
+        effectiveShiftColors(schedule.shiftTypes, theme, newCustomColors)
+            .map((name, color) => MapEntry(name, color.value));
 
     final updatedSchedule = ShiftSchedule(
       id: schedule.id,
@@ -1388,7 +1487,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab> with WidgetsBindingOb
       );
     }
   }
-
 }
 
 // 알람 타입 설정 BottomSheet
@@ -1402,7 +1500,8 @@ class _AlarmTypeSettingsSheet extends StatefulWidget {
   });
 
   @override
-  State<_AlarmTypeSettingsSheet> createState() => _AlarmTypeSettingsSheetState();
+  State<_AlarmTypeSettingsSheet> createState() =>
+      _AlarmTypeSettingsSheetState();
 }
 
 class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
@@ -1521,7 +1620,11 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               Text(type.emoji, style: TextStyle(fontSize: 28.sp)),
               SizedBox(width: 12.w),
               Text(
-                type.isSound ? context.l10n.alarmSoundVibration : type.isVibrate ? context.l10n.alarmVibration : context.l10n.alarmSilent,
+                type.isSound
+                    ? context.l10n.alarmSoundVibration
+                    : type.isVibrate
+                        ? context.l10n.alarmVibration
+                        : context.l10n.alarmSilent,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -1530,7 +1633,9 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               if (type.isSound)
                 Text(
                   ' (${context.l10n.settingsIncludesVibration})',
-                  style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                      fontSize: 12.sp,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
             ],
           ),
@@ -1587,7 +1692,10 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       children: [
         SizedBox(
           width: 50.w,
-          child: Text(label, style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          child: Text(label,
+              style: TextStyle(
+                  fontSize: 13.sp,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ),
         Expanded(
           child: Slider(
@@ -1660,7 +1768,10 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       children: [
         SizedBox(
           width: 50.w,
-          child: Text(context.l10n.alarmSound, style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+          child: Text(context.l10n.alarmSound,
+              style: TextStyle(
+                  fontSize: 13.sp,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ),
         Expanded(
           child: Row(
@@ -1670,23 +1781,30 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                 child: GestureDetector(
                   onTap: () => _showSoundPicker(type),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(color: Theme.of(context).colorScheme.outline),
+                      border: Border.all(
+                          color: Theme.of(context).colorScheme.outline),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.music_note, size: 18.sp, color: Theme.of(context).colorScheme.tertiary),
+                        Icon(Icons.music_note,
+                            size: 18.sp,
+                            color: Theme.of(context).colorScheme.tertiary),
                         SizedBox(width: 8.w),
                         Expanded(
                           child: Text(
-                            _getSoundName(context, type.soundFile),  // DB에서 읽은 값 사용
+                            _getSoundName(
+                                context, type.soundFile), // DB에서 읽은 값 사용
                             style: TextStyle(fontSize: 13.sp),
                           ),
                         ),
-                        Icon(Icons.arrow_drop_down, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                        Icon(Icons.arrow_drop_down,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant),
                       ],
                     ),
                   ),
@@ -1699,13 +1817,19 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                   if (_isPlaying) {
                     _stopSound();
                   } else {
-                    _playSound(type.soundFile, type.volume);  // DB에서 읽은 값 사용
+                    _playSound(type.soundFile, type.volume); // DB에서 읽은 값 사용
                   }
                 },
                 child: Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
-                    color: _isPlaying ? (Theme.of(context).brightness == Brightness.dark ? Colors.red.shade900.withOpacity(0.2) : Colors.red.shade50) : (Theme.of(context).brightness == Brightness.dark ? Colors.blue.shade900.withOpacity(0.2) : Colors.blue.shade50),
+                    color: _isPlaying
+                        ? (Theme.of(context).brightness == Brightness.dark
+                            ? Colors.red.shade900.withOpacity(0.2)
+                            : Colors.red.shade50)
+                        : (Theme.of(context).brightness == Brightness.dark
+                            ? Colors.blue.shade900.withOpacity(0.2)
+                            : Colors.blue.shade50),
                     borderRadius: BorderRadius.circular(8.r),
                     border: Border.all(
                       color: _isPlaying ? Colors.red : Colors.blue,
@@ -1735,11 +1859,11 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      isScrollControlled: true,  // 스크롤 가능하게
+      isScrollControlled: true, // 스크롤 가능하게
       builder: (context) => StatefulBuilder(
         builder: (context, setModalState) => Container(
           constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.5,  // 화면의 50% 높이
+            maxHeight: MediaQuery.of(context).size.height * 0.5, // 화면의 50% 높이
           ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
@@ -1751,12 +1875,14 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               children: [
                 // 헤더
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                   child: Row(
                     children: [
                       Text(
                         context.l10n.alarmSoundChoose,
-                        style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 16.sp, fontWeight: FontWeight.bold),
                       ),
                       Spacer(),
                       IconButton(
@@ -1777,14 +1903,20 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                       final isSelected = type.soundFile == sound['id'];
                       return ListTile(
                         leading: Icon(
-                          isSelected ? Icons.check_circle : Icons.circle_outlined,
+                          isSelected
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
                           color: isSelected ? Colors.orange : Colors.grey,
                         ),
                         title: Text(
                           _getSoundName(context, sound['id']!),
                           style: TextStyle(
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            color: isSelected ? Colors.orange.shade800 : Theme.of(context).colorScheme.onSurface,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                            color: isSelected
+                                ? Colors.orange.shade800
+                                : Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         onTap: () {
@@ -1794,7 +1926,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                             id: type.id,
                             name: type.name,
                             emoji: type.emoji,
-                            soundFile: newSoundId,  // 새로운 사운드 파일명
+                            soundFile: newSoundId, // 새로운 사운드 파일명
                             volume: type.volume,
                             vibrationStrength: type.vibrationStrength,
                             isPreset: type.isPreset,
@@ -1832,7 +1964,9 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
             context.l10n.alarmIntensity,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: TextStyle(
+                fontSize: 13.sp,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ),
         Expanded(
@@ -1870,13 +2004,15 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
             color: isSelected
-              ? (Theme.of(context).brightness == Brightness.dark
-                  ? Colors.orange.shade800  // 다크모드: 진한 주황 (대비율 6.74:1)
-                  : Colors.orange.shade700)  // 화이트모드: 진한 주황 (대비율 5.73:1)
-              : Theme.of(context).colorScheme.surface,
+                ? (Theme.of(context).brightness == Brightness.dark
+                    ? Colors.orange.shade800 // 다크모드: 진한 주황 (대비율 6.74:1)
+                    : Colors.orange.shade700) // 화이트모드: 진한 주황 (대비율 5.73:1)
+                : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
-              color: isSelected ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.outline,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.tertiary
+                  : Theme.of(context).colorScheme.outline,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -1886,7 +2022,11 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,  // 선택 시 흰색으로 통일
+                color: isSelected
+                    ? Colors.white
+                    : Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant, // 선택 시 흰색으로 통일
               ),
             ),
           ),
@@ -1906,7 +2046,9 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
             context.l10n.alarmDuration,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: TextStyle(
+                fontSize: 13.sp,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ),
         Expanded(
@@ -1941,7 +2083,11 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
-            color: isSelected ? (Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.secondary.withOpacity(0.25) : Colors.blue.shade100) : Theme.of(context).colorScheme.surface,
+            color: isSelected
+                ? (Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.secondary.withOpacity(0.25)
+                    : Colors.blue.shade100)
+                : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
               color: isSelected ? Colors.blue : Colors.grey.shade300,
@@ -1954,7 +2100,11 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
               style: TextStyle(
                 fontSize: 12.sp,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? (Theme.of(context).brightness == Brightness.dark ? Theme.of(context).colorScheme.secondary : Colors.blue.shade800) : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: isSelected
+                    ? (Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(context).colorScheme.secondary
+                        : Colors.blue.shade800)
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -2029,7 +2179,8 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.r),
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                 ),
               ),
             );
@@ -2059,13 +2210,18 @@ class _EditShiftNamesDialogState extends State<_EditShiftNamesDialog> {
             // ⭐ 2026-09-14 (출시전 감사 #11/#12) - 새 이름 형식(쉼표·예약어·길이) + "변경 후" 이름끼리 중복 검사.
             // 맞바꾸기(A↔B)·순환은 허용하고, 두 근무가 같은 이름이 되는 경우만 거부(예전엔 그대로 저장돼 서로 다른
             // 근무의 알람·이력·출퇴근시각이 한 이름으로 합쳐졌음).
-            final finalNames = widget.allShiftTypes.map((s) => renamedShifts[s] ?? s).toList();
+            final finalNames =
+                widget.allShiftTypes.map((s) => renamedShifts[s] ?? s).toList();
             for (final newName in renamedShifts.values) {
               final issue = validateShiftName(newName) ??
-                  (finalNames.where((n) => n == newName).length > 1 ? ShiftNameIssue.duplicate : null);
+                  (finalNames.where((n) => n == newName).length > 1
+                      ? ShiftNameIssue.duplicate
+                      : null);
               if (issue != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(_shiftNameIssueMessage(context, issue, newName))),
+                  SnackBar(
+                      content: Text(
+                          _shiftNameIssueMessage(context, issue, newName))),
                 );
                 return;
               }
@@ -2130,7 +2286,8 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
       loadedAlarms[shift] = templates.map((t) {
         final parts = t.time.split(':');
         return AlarmSetting(
-          time: TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1])),
+          time:
+              TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1])),
           alarmTypeId: t.alarmTypeId,
           dayOffset: t.dayOffset,
         );
@@ -2142,7 +2299,8 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
       // ⭐ deep copy - _shiftAlarms의 각 List를 이후 수정해도(추가/삭제/변경)
       // 이 스냅샷은 최초 로드 상태 그대로 남아야 "변경 여부" 비교가 정확함.
       _initialShiftAlarms = {
-        for (final entry in loadedAlarms.entries) entry.key: List.of(entry.value)
+        for (final entry in loadedAlarms.entries)
+          entry.key: List.of(entry.value)
       };
       _isLoading = false;
     });
@@ -2154,7 +2312,8 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
   bool _hasChanges() {
     List<String> canonical(List<AlarmSetting> alarms) {
       final list = alarms
-          .map((a) => '${a.time.hour}:${a.time.minute}:${a.alarmTypeId}:${a.dayOffset}')
+          .map((a) =>
+              '${a.time.hour}:${a.time.minute}:${a.alarmTypeId}:${a.dayOffset}')
           .toList()
         ..sort();
       return list;
@@ -2201,18 +2360,25 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                       children: [
                         Text(
                           context.l10n.onboardingSetFixedAlarmPerShift,
-                          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18.sp, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          context.l10n.onboardingMaxAlarmsPerShift(kMaxAlarmTemplatesPerShift),
-                          style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          context.l10n.onboardingMaxAlarmsPerShift(
+                              kMaxAlarmTemplatesPerShift),
+                          style: TextStyle(
+                              fontSize: 14.sp,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
                         ),
                         SizedBox(height: 16.h),
                         // ⭐ shrinkWrap으로 카드 크기에 맞게 조절
                         GridView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          gridDelegate:
+                              SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: 120.w,
                             crossAxisSpacing: 12.w,
                             mainAxisSpacing: 12.h,
@@ -2230,7 +2396,8 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, MediaQuery.of(context).padding.bottom + 16.h),
+                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w,
+                      MediaQuery.of(context).padding.bottom + 16.h),
                   child: SizedBox(
                     width: double.infinity,
                     // ⭐ 2026-08-31 - 저장 중(_isSaving)엔 버튼을 비활성화하고
@@ -2244,7 +2411,8 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                               height: 20.w,
                               child: const CircularProgressIndicator(
                                 strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation(Colors.white),
+                                valueColor:
+                                    AlwaysStoppedAnimation(Colors.white),
                               ),
                             )
                           : Text(context.l10n.commonSave),
@@ -2264,7 +2432,9 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
           color: Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: alarms.isEmpty ? Colors.red.shade300 : Theme.of(context).colorScheme.onSurface,
+            color: alarms.isEmpty
+                ? Colors.red.shade300
+                : Theme.of(context).colorScheme.onSurface,
             width: 2,
           ),
         ),
@@ -2296,27 +2466,29 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                   : SingleChildScrollView(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: alarms.map((alarm) => Padding(
-                          padding: EdgeInsets.symmetric(vertical: 2.h),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _getAlarmTypeEmoji(alarm.alarmTypeId),
-                                style: TextStyle(fontSize: 12.sp),
-                              ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                _formatTime(alarm.time),
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )).toList(),
+                        children: alarms
+                            .map((alarm) => Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 2.h),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _getAlarmTypeEmoji(alarm.alarmTypeId),
+                                        style: TextStyle(fontSize: 12.sp),
+                                      ),
+                                      SizedBox(width: 4.w),
+                                      Text(
+                                        _formatTime(alarm.time),
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ))
+                            .toList(),
                       ),
                     ),
             ),
@@ -2332,10 +2504,14 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
 
   String _getAlarmTypeEmoji(int alarmTypeId) {
     switch (alarmTypeId) {
-      case 1: return '🔔';
-      case 2: return '📳';
-      case 3: return '🔇';
-      default: return '🔔';
+      case 1:
+        return '🔔';
+      case 2:
+        return '📳';
+      case 3:
+        return '🔇';
+      default:
+        return '🔔';
     }
   }
 
@@ -2456,8 +2632,11 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              context.l10n.settingsFixedAlarmRegisterLimit(kMaxAlarmTemplatesPerShift),
-              style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              context.l10n
+                  .settingsFixedAlarmRegisterLimit(kMaxAlarmTemplatesPerShift),
+              style: TextStyle(
+                  fontSize: 13.sp,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
 
@@ -2474,7 +2653,8 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: Theme.of(context).colorScheme.outline),
+                        border: Border.all(
+                            color: Theme.of(context).colorScheme.outline),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2487,15 +2667,19 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                                 onTap: () => _editAlarmTime(entry.key),
                                 borderRadius: BorderRadius.circular(8.r),
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 4.h, horizontal: 4.w),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      DayOffsetBadge(dayOffset: alarm.dayOffset),
+                                      DayOffsetBadge(
+                                          dayOffset: alarm.dayOffset),
                                       SizedBox(width: 8.w),
                                       Text(
                                         '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
-                                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                            fontSize: 18.sp,
+                                            fontWeight: FontWeight.bold),
                                       ),
                                     ],
                                   ),
@@ -2503,7 +2687,9 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                               ),
                               Spacer(),
                               IconButton(
-                                icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 20.sp),
+                                icon: Icon(Icons.delete,
+                                    color: Theme.of(context).colorScheme.error,
+                                    size: 20.sp),
                                 onPressed: () {
                                   setState(() {
                                     _alarms.removeAt(entry.key);
@@ -2517,11 +2703,14 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                           SizedBox(height: 8.h),
                           Row(
                             children: [
-                              _buildTypeButton(entry.key, 1, '🔔', context.l10n.alarmSoundVibration),
+                              _buildTypeButton(entry.key, 1, '🔔',
+                                  context.l10n.alarmSoundVibration),
                               SizedBox(width: 8.w),
-                              _buildTypeButton(entry.key, 2, '📳', context.l10n.alarmVibration),
+                              _buildTypeButton(entry.key, 2, '📳',
+                                  context.l10n.alarmVibration),
                               SizedBox(width: 8.w),
-                              _buildTypeButton(entry.key, 3, '🔇', context.l10n.alarmSilent),
+                              _buildTypeButton(
+                                  entry.key, 3, '🔇', context.l10n.alarmSilent),
                             ],
                           ),
                         ],
@@ -2539,7 +2728,9 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
             // 최대 개수(5개)에 도달해도 숨기지 않고 비활성 상태로 계속 보여줌.
             Center(
               child: AppThirdButton(
-                onPressed: _alarms.length < kMaxAlarmTemplatesPerShift ? _addAlarm : null,
+                onPressed: _alarms.length < kMaxAlarmTemplatesPerShift
+                    ? _addAlarm
+                    : null,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -2598,13 +2789,15 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
             color: isSelected
-              ? (Theme.of(context).brightness == Brightness.dark
-                  ? Colors.orange.shade800  // 다크모드: 진한 주황 (대비율 6.74:1)
-                  : Colors.orange.shade700)  // 화이트모드: 진한 주황 (대비율 5.73:1)
-              : Theme.of(context).colorScheme.surface,
+                ? (Theme.of(context).brightness == Brightness.dark
+                    ? Colors.orange.shade800 // 다크모드: 진한 주황 (대비율 6.74:1)
+                    : Colors.orange.shade700) // 화이트모드: 진한 주황 (대비율 5.73:1)
+                : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
-              color: isSelected ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.outline,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.tertiary
+                  : Theme.of(context).colorScheme.outline,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -2616,7 +2809,11 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,
-                  color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,  // 선택 시 흰색으로 통일
+                  color: isSelected
+                      ? Colors.white
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurfaceVariant, // 선택 시 흰색으로 통일
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -2641,9 +2838,9 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
           // 서로 다른 실제 날짜에 울리는 별개의 알람이라 중복이 아님.
           final isDuplicate = _alarms.asMap().entries.any((entry) {
             return entry.key != index &&
-                   entry.value.time.hour == time.hour &&
-                   entry.value.time.minute == time.minute &&
-                   entry.value.dayOffset == dayOffset;
+                entry.value.time.hour == time.hour &&
+                entry.value.time.minute == time.minute &&
+                entry.value.dayOffset == dayOffset;
           });
 
           if (isDuplicate) {
@@ -2652,19 +2849,23 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
               builder: (context) => AlertDialog(
                 title: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.tertiary, size: 28),
+                    Icon(Icons.warning_amber_rounded,
+                        color: Theme.of(context).colorScheme.tertiary,
+                        size: 28),
                     SizedBox(width: 8),
                     Text(context.l10n.alarmDuplicate),
                   ],
                 ),
                 content: Text(
-                  context.l10n.alarmAlreadyExistsAtTime('${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'),
+                  context.l10n.alarmAlreadyExistsAtTime(
+                      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'),
                   style: TextStyle(fontSize: 16),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(context.l10n.commonOk, style: TextStyle(fontSize: 16)),
+                    child: Text(context.l10n.commonOk,
+                        style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),
@@ -2673,7 +2874,8 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
           }
 
           setState(() {
-            _alarms[index] = currentAlarm.copyWith(time: time, dayOffset: dayOffset);
+            _alarms[index] =
+                currentAlarm.copyWith(time: time, dayOffset: dayOffset);
           });
         },
       ),
@@ -2688,8 +2890,9 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
         onTimeSelected: (time, dayOffset) async {
           // ⭐ 중복 체크 (시각 + 전날/당일/다음날이 모두 같을 때만 중복)
           final isDuplicate = _alarms.any((alarm) =>
-            alarm.time.hour == time.hour && alarm.time.minute == time.minute && alarm.dayOffset == dayOffset
-          );
+              alarm.time.hour == time.hour &&
+              alarm.time.minute == time.minute &&
+              alarm.dayOffset == dayOffset);
 
           if (isDuplicate) {
             await showDialog(
@@ -2697,19 +2900,23 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
               builder: (context) => AlertDialog(
                 title: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.tertiary, size: 28),
+                    Icon(Icons.warning_amber_rounded,
+                        color: Theme.of(context).colorScheme.tertiary,
+                        size: 28),
                     SizedBox(width: 8),
                     Text(context.l10n.alarmDuplicate),
                   ],
                 ),
                 content: Text(
-                  context.l10n.alarmAlreadyExistsAtTime('${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'),
+                  context.l10n.alarmAlreadyExistsAtTime(
+                      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'),
                   style: TextStyle(fontSize: 16),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(context.l10n.commonOk, style: TextStyle(fontSize: 16)),
+                    child: Text(context.l10n.commonOk,
+                        style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),
@@ -2718,7 +2925,8 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
           }
 
           setState(() {
-            _alarms.add(AlarmSetting(time: time, alarmTypeId: 1, dayOffset: dayOffset));
+            _alarms.add(
+                AlarmSetting(time: time, alarmTypeId: 1, dayOffset: dayOffset));
           });
         },
       ),
@@ -2730,10 +2938,10 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
 // ⭐ 삼성 스타일 시간 선택기 (온보딩과 동일)
 // ============================================================
 class _SettingsTimePicker extends StatefulWidget {
-  final String shiftName;  // ⭐ 제목 왼쪽에 "{근무명} - 시간 선택"으로 표시
+  final String shiftName; // ⭐ 제목 왼쪽에 "{근무명} - 시간 선택"으로 표시
   final Function(TimeOfDay, int dayOffset) onTimeSelected;
-  final TimeOfDay? initialTime;  // ⭐ 초기 시간 (수정 시 사용)
-  final int initialDayOffset;    // ⭐ 초기 전날/당일/다음날 (기본값: 당일)
+  final TimeOfDay? initialTime; // ⭐ 초기 시간 (수정 시 사용)
+  final int initialDayOffset; // ⭐ 초기 전날/당일/다음날 (기본값: 당일)
 
   const _SettingsTimePicker({
     required this.shiftName,
@@ -2834,9 +3042,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                         ),
                       ),
                     ),
-
                     SizedBox(height: 8.h),
-
                     GestureDetector(
                       onTap: () {
                         setState(() {
@@ -2868,9 +3074,7 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                     ),
                   ],
                 ),
-
                 SizedBox(width: 16.w),
-
                 TappableNumberPicker(
                   value: _hour,
                   minValue: 1,
@@ -2878,8 +3082,11 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                   infiniteLoop: true,
                   itemHeight: 50.h,
                   itemWidth: (60.w).clamp(50.0, 80.0),
-                  textStyle: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                  textStyle: TextStyle(
+                      fontSize: 16.sp,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  selectedTextStyle:
+                      TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
                   onChanged: (value) {
                     setState(() {
                       if (_hour == 11 && value == 12) {
@@ -2892,14 +3099,16 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                   },
                   decoration: BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: Theme.of(context).colorScheme.outline),
-                      bottom: BorderSide(color: Theme.of(context).colorScheme.outline),
+                      top: BorderSide(
+                          color: Theme.of(context).colorScheme.outline),
+                      bottom: BorderSide(
+                          color: Theme.of(context).colorScheme.outline),
                     ),
                   ),
                 ),
-
-                Text(':', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold)),
-
+                Text(':',
+                    style: TextStyle(
+                        fontSize: 24.sp, fontWeight: FontWeight.bold)),
                 TappableNumberPicker(
                   value: _minute,
                   minValue: 0,
@@ -2908,8 +3117,11 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                   infiniteLoop: true,
                   itemHeight: 50.h,
                   itemWidth: (60.w).clamp(50.0, 80.0),
-                  textStyle: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
+                  textStyle: TextStyle(
+                      fontSize: 16.sp,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  selectedTextStyle:
+                      TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
                   onChanged: (value) {
                     setState(() {
                       _minute = value;
@@ -2917,8 +3129,10 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                   },
                   decoration: BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: Theme.of(context).colorScheme.outline),
-                      bottom: BorderSide(color: Theme.of(context).colorScheme.outline),
+                      top: BorderSide(
+                          color: Theme.of(context).colorScheme.outline),
+                      bottom: BorderSide(
+                          color: Theme.of(context).colorScheme.outline),
                     ),
                   ),
                 ),
@@ -2946,7 +3160,8 @@ class _SettingsTimePickerState extends State<_SettingsTimePicker> {
                       hour24 = _hour == 12 ? 12 : _hour + 12;
                     }
 
-                    await widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute), _dayOffset);
+                    await widget.onTimeSelected(
+                        TimeOfDay(hour: hour24, minute: _minute), _dayOffset);
                     if (mounted) Navigator.pop(context);
                   },
                   child: Text(context.l10n.commonOk),
@@ -3007,7 +3222,9 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
             SizedBox(height: 8.h),
             Text(
               context.l10n.settingsSelectTodayShiftFromPattern,
-              style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: TextStyle(
+                  fontSize: 13.sp,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
 
@@ -3093,18 +3310,28 @@ class _ChangeScheduleDialogState extends State<_ChangeScheduleDialog> {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: Theme.of(context).brightness == Brightness.dark ? Colors.amber.shade900.withOpacity(0.2) : Colors.amber.shade50,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.amber.shade900.withOpacity(0.2)
+                    : Colors.amber.shade50,
                 borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(color: Theme.of(context).brightness == Brightness.dark ? Colors.amber.shade700 : Colors.amber.shade200),
+                border: Border.all(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.amber.shade700
+                        : Colors.amber.shade200),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Theme.of(context).brightness == Brightness.dark ? Colors.amber.shade400 : Colors.amber.shade700, size: 20.sp),
+                  Icon(Icons.info_outline,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.amber.shade400
+                          : Colors.amber.shade700,
+                      size: 20.sp),
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       context.l10n.settingsScheduleChangeWarning,
-                      style: TextStyle(fontSize: 12.sp, color: Colors.amber.shade800),
+                      style: TextStyle(
+                          fontSize: 12.sp, color: Colors.amber.shade800),
                     ),
                   ),
                 ],
@@ -3160,8 +3387,8 @@ class _EditShiftColorsDialog extends StatefulWidget {
 }
 
 class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
-  late Map<String, int> _previewColors;  // 화면 표시용 (테마 디폴트 포함)
-  late Map<String, int> _customColors;   // 저장용 (사용자가 이번에 지정한 것만)
+  late Map<String, int> _previewColors; // 화면 표시용 (테마 디폴트 포함)
+  late Map<String, int> _customColors; // 저장용 (사용자가 이번에 지정한 것만)
 
   @override
   void initState() {
@@ -3193,7 +3420,8 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
             final textColor = ShiftSchedule.getTextColor(bgColor);
 
             return ListTile(
-              contentPadding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              contentPadding:
+                  EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               // 왼쪽: 현재 색상으로 미리보기 (달력 셀과 동일)
               leading: Container(
                 width: 60.w,
@@ -3261,7 +3489,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
     if (result != null) {
       setState(() {
         _previewColors[shift] = result;
-        _customColors[shift] = result;  // ⭐ 사용자가 직접 고른 순간 이 근무는 "고정"됨
+        _customColors[shift] = result; // ⭐ 사용자가 직접 고른 순간 이 근무는 "고정"됨
       });
     }
   }
@@ -3288,7 +3516,8 @@ class _ColorPickerDialog extends StatelessWidget {
     ];
 
     // 반응형: 화면 크기에 따라 높이 조정 (최대 70%, 최소 300.h)
-    final dialogHeight = (MediaQuery.of(context).size.height * 0.7).clamp(300.h, 600.h);
+    final dialogHeight =
+        (MediaQuery.of(context).size.height * 0.7).clamp(300.h, 600.h);
 
     return AlertDialog(
       title: Text(
@@ -3303,7 +3532,7 @@ class _ColorPickerDialog extends StatelessWidget {
             crossAxisCount: 2,
             mainAxisSpacing: 12.h,
             crossAxisSpacing: 12.w,
-            childAspectRatio: 3,  // 가로로 긴 형태
+            childAspectRatio: 3, // 가로로 긴 형태
           ),
           itemCount: colors.length,
           itemBuilder: (context, index) {
@@ -3327,14 +3556,16 @@ class _ColorPickerDialog extends StatelessWidget {
                 }
               },
               child: Opacity(
-                opacity: isUsed ? 0.3 : 1.0,  // 사용 중이면 반투명
+                opacity: isUsed ? 0.3 : 1.0, // 사용 중이면 반투명
                 child: Container(
                   height: 18.h,
                   decoration: BoxDecoration(
                     color: bgColor,
                     borderRadius: BorderRadius.circular(3.r),
                     border: Border.all(
-                      color: isUsed ? Colors.red : Theme.of(context).colorScheme.outline,
+                      color: isUsed
+                          ? Colors.red
+                          : Theme.of(context).colorScheme.outline,
                       width: isUsed ? 2 : 1,
                     ),
                   ),
@@ -3360,7 +3591,7 @@ class _ColorPickerDialog extends StatelessWidget {
                           child: Icon(
                             Icons.close,
                             size: 12.sp,
-                            color: textColor,  // 배경색에 따라 자동으로 대비색 사용
+                            color: textColor, // 배경색에 따라 자동으로 대비색 사용
                           ),
                         ),
                     ],
@@ -3383,7 +3614,8 @@ class _ColorPickerDialog extends StatelessWidget {
 }
 
 // ⭐ 2026-09-14 (출시전 감사 #11) - 근무명 검증 결과 → 사용자 안내 문구
-String _shiftNameIssueMessage(BuildContext context, ShiftNameIssue issue, String name) {
+String _shiftNameIssueMessage(
+    BuildContext context, ShiftNameIssue issue, String name) {
   switch (issue) {
     case ShiftNameIssue.empty:
       return context.l10n.onboardingEnterShiftName;

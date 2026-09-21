@@ -90,11 +90,32 @@ class MainActivity: FlutterActivity() {
     }
     private val BACKUP_RELATIVE_PATH = "Download/ShiftBell/"
 
+    // ⭐ 2026-09-17 - 파일명에 시각(HHmm)까지 넣음. 이유는 아래 readBackupFile() 주석의 "2026-09-17 정정" 참고 -
+    // 예전 설치본이 남긴 파일은 이 앱이 지울 수 없어서, 같은 날에 다시 백업하면 MediaStore가
+    // "… (1).json", "(2).json"으로 이름을 바꿔 버렸음(실기기에 12개가 쌓인 것을 확인). 분 단위까지 넣으면
+    // 이름 충돌 자체가 거의 안 생기고, 사용자가 파일 선택기에서 직접 고를 때 어느 게 최신인지 바로 보임.
+    // (시각 없는 옛 파일명 "…_YYMMDD.json"도 접두어는 그대로라 탐지·정리 대상에서 빠지지 않음)
     private fun buildBackupDisplayName(): String {
-        val fmt = java.text.SimpleDateFormat("yyMMdd", java.util.Locale.US)
+        val fmt = java.text.SimpleDateFormat("yyMMdd_HHmm", java.util.Locale.US)
         return "$BACKUP_DISPLAY_NAME_PREFIX${fmt.format(java.util.Date())}.json"
     }
 
+    // ⭐⭐ 2026-09-17 정정(실기기 R5KL20DHWAE에서 adb로 직접 확인) - 아래 주석들이 "owner_package_name이 NULL로
+    // 남는 삼성 OEM 버그"로 추정해 둔 부분은 **틀렸다**. 실제 원인은 안드로이드의 정상 동작임:
+    //   · 앱을 **삭제**하면 MediaStore는 그 앱이 만든 행의 owner_package_name을 NULL로 비운다(파일은 남김).
+    //   · 이 앱은 저장소 권한을 하나도 안 받고 targetSdk 36(스코프드 스토리지)라, **자기가 소유한 행만**
+    //     조회된다. 그래서 예전 설치본이 남긴 백업 파일은 쿼리에 아예 안 잡히고(= 전체 스캔 0건), 지울 수도 없다.
+    //   · 그 상태에서 같은 이름으로 다시 쓰면 MediaStore가 "… (1).json"으로 바꿔 삽입한다 → 파일 누적.
+    // 2026-09-17 실측: Download/ShiftBell/에 12개, 그중 10개가 owner NULL. dev 앱의
+    // firstInstallTime == lastUpdateTime == 2026-09-16 23:28:50(= 삭제 후 재설치) 이전에 쓴 것들이 정확히 그 10개였고,
+    // 재설치 후에 쓴 2개만 소유권이 남아 있었음(= 정리 로직 자체는 정상. 설치본당 최신+직전 2개 유지 X-07 그대로).
+    // 따라서:
+    //   · "재설치 후 자동 탐지가 안 된다"는 **버그가 아니라 사양**이다. 대비책은 SAF 수동 선택(pickBackupFile) 하나뿐이고,
+    //     이걸 고치겠다고 저장소 권한(READ_MEDIA/MANAGE_EXTERNAL_STORAGE)을 받으려 하지 말 것(Play 정책·과잉 권한).
+    //   · 옆 앱(dev↔prod) 백업을 서로 읽거나 지우는 사고도 구조상 불가능하다(서로의 행이 쿼리에 안 잡힘). 접두어 분리는
+    //     유지하되, 그건 이제 "사용자가 파일을 손으로 고를 때 구분된다"는 의미만 있다.
+    //   · 아래 "selection/LIKE를 쓰면 못 찾는다"는 관찰도 같은 원인일 가능성이 큼(소유권 없는 행은 조건과 무관하게 안 보임).
+    //     selection 없는 전체 스캔 방식은 해롭지 않아 그대로 두지만, "OEM 버그"를 다시 쫓지는 말 것.
     // ⭐ 2026-09-01 - "자동 탐지"(readBackupFile, selection 없이 전체 스캔)가
     // 실기기에서 계속 실패해서 원인을 파봤더니, MediaStore에 저장된 그 행의
     // `owner_package_name`이 NULL이었음(정상이면 이 앱 패키지명이 자동으로
@@ -191,6 +212,10 @@ override fun onResume() {
     // 20분 전 알림/다음 wakeup 예약은 UI 렌더링과 무관하니 백그라운드 스레드로 옮김.
     Thread {
         AlarmGuardReceiver.triggerCheck(this)
+        // 강제 종료 뒤 사용자가 앱을 다시 열었거나 제조사 절전 정책이 예약을
+        // 정리한 경우에도 DB의 모든 미래 일정 알림을 다시 건다. 같은 id의
+        // PendingIntent라 정상 예약은 중복 생성되지 않고 교체된다.
+        ScheduleNotificationScheduler.rescheduleAllFromDb(applicationContext)
         // ⭐ 실제 수면 기록/자동 추정("C번 요구사항") - 앱을 열 때마다 수면 감지
         // 예약이 최신 상태(스케줄/설정 변경 반영)인지 다시 확인. 알람 로직과 완전히
         // 독립된 read-only 판단 + 별도 알람 예약이라 위 triggerCheck()에 영향 없음.
@@ -627,14 +652,17 @@ override fun onNewIntent(intent: Intent) {
                 // 채운다"는 전제를 실제로 만족시키려면 진짜 재시작이 필요함.
                 // 표준 Flutter API로는 프로세스 재시작이 안 돼서 네이티브에서 처리:
                 // 런처 인텐트로 새 태스크를 띄우고 현재 프로세스를 강제 종료함.
+                // ⭐ 2026-09-15 (출시 적합성 재검토 AUD-02) - Dart의 마지막 울림 확인 ~ 실제 종료 사이에 새 알람이 울리기
+                // 시작하면 exit(0)이 그 소리까지 끊었음. 지금 울리는 중이면 false(Dart가 기다렸다 다시 요청)를 돌려주고,
+                // 받아들인 뒤에도 종료 직전에 다시 확인함(scheduleRestartWhenNoLiveRing).
                 "restartApp" -> {
-                    result.success(true)
-                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                        val restartIntent = packageManager.getLaunchIntentForPackage(packageName)
-                        restartIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                        if (restartIntent != null) startActivity(restartIntent)
-                        Runtime.getRuntime().exit(0)
-                    }, 300)
+                    if (RingingAlarmTracker.isLiveRing(applicationContext)) {
+                        Log.w("MainActivity", "⏸️ 알람 울리는 중 - 재시작 요청 거절")
+                        result.success(false)
+                    } else {
+                        result.success(true)
+                        scheduleRestartWhenNoLiveRing(300)
+                    }
                 }
                 // ⭐ 자동 탐지(readBackupFile) 실패 시 수동 대안 - 시스템 파일 선택기로
                 // 사용자가 직접 백업 파일을 고름(위 pendingBackupPickResult 주석 참고).
@@ -934,6 +962,7 @@ override fun onNewIntent(intent: Intent) {
         }
     }
 
+    // (⚠️ 아래 주석의 "owner_package_name NULL = 삼성 버그" 추정은 2026-09-17에 틀린 것으로 판명 - 위 readBackupFile()의 "2026-09-17 정정" 참고)
     // ⭐ 2026-09-01 - "백업을 여러 번 눌렀더니 shiftbell_backup (1).json,
     // (2).json... 이 계속 쌓인다" 버그의 진짜 원인 - 아래 selection-없는
     // 전체 스캔 방식도 이 기기에선 무용지물이었음: readBackupFile()에서 이미
@@ -1115,28 +1144,35 @@ override fun onNewIntent(intent: Intent) {
         Log.d("MainActivity", "🔔 진동 테스트: 세기=$strength")
     }
 
+    // ⭐ AUD-02 - 재시작 종료 직전에 울림 lock 안에서 다시 확인. 알람 수신(onReceive)과 이 Runnable은 같은 메인 스레드라
+    // 확인~종료 사이에 새 울림 시작이 끼어들 수 없음. 그 전에 울림이 시작됐으면 종료를 미루고 2초마다 재확인.
+    private fun scheduleRestartWhenNoLiveRing(delayMs: Long) {
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            val restarted = RingingAlarmTracker.runIfNoLiveRing(applicationContext) {
+                val restartIntent = packageManager.getLaunchIntentForPackage(packageName)
+                restartIntent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                if (restartIntent != null) applicationContext.startActivity(restartIntent)
+                Runtime.getRuntime().exit(0)
+            }
+            if (!restarted) {
+                Log.w("MainActivity", "⏸️ 재시작 직전에 알람 울림 시작 - 울림이 끝날 때까지 재시작 보류")
+                scheduleRestartWhenNoLiveRing(2000)
+            }
+        }, delayMs)
+    }
+
     // ⭐ 미리듣기용 MediaPlayer
     private var previewMediaPlayer: android.media.MediaPlayer? = null
     private var previewLoudnessEnhancer: android.media.audiofx.LoudnessEnhancer? = null
-    private var originalAlarmVolume: Int = -1  // ⭐ 원래 시스템 알람 볼륨 저장
 
     // ⭐ 알람 음량 미리듣기 (STREAM_ALARM 사용 - 실제 알람과 동일)
     private fun playPreviewSound(soundFile: String, volume: Float) {
         stopPreviewSound()  // 기존 재생 중지
 
         try {
-            val audioManager = getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
-
-            // ⭐ 원래 시스템 알람 볼륨 저장 (처음 한 번만)
-            if (originalAlarmVolume == -1) {
-                originalAlarmVolume = audioManager.getStreamVolume(android.media.AudioManager.STREAM_ALARM)
-                Log.d("MainActivity", "📊 원래 시스템 알람 볼륨 저장: $originalAlarmVolume")
-            }
-
-            // ⭐ 시스템 알람 볼륨을 50%로 임시 변경 (미리듣기용)
-            val maxVolume = audioManager.getStreamMaxVolume(android.media.AudioManager.STREAM_ALARM)
-            val halfVolume = (maxVolume / 2).coerceAtLeast(1)  // AlarmPlayer와 동일 - 최대 1단계 기기 무음 방지
-            audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, halfVolume, 0)
+            // ⭐ 시스템 알람 볼륨을 50%로 임시 변경 (미리듣기용). 원래 볼륨 저장·복원은 실제 알람과 함께 AlarmStreamVolume이
+            // 관리함(AUD-06 - 미리듣기 중 실제 알람이 오면 서로의 복원이 볼륨을 덮어쓰던 문제)
+            AlarmStreamVolume.acquire(this, AlarmStreamVolume.HOLDER_PREVIEW)
 
             // ⭐ 사운드 URI 결정 (default = 시스템 기본 알람음)
             val soundUri = if (soundFile == "default") {
@@ -1212,17 +1248,8 @@ override fun onNewIntent(intent: Intent) {
             previewLoudnessEnhancer = null
         }
 
-        // ⭐ 시스템 알람 볼륨 복원
-        if (originalAlarmVolume != -1) {
-            try {
-                val audioManager = getSystemService(Context.AUDIO_SERVICE) as android.media.AudioManager
-                audioManager.setStreamVolume(android.media.AudioManager.STREAM_ALARM, originalAlarmVolume, 0)
-                Log.d("MainActivity", "🔄 시스템 알람 볼륨 복원: $originalAlarmVolume")
-                originalAlarmVolume = -1  // 초기화
-            } catch (e: Exception) {
-                Log.e("MainActivity", "❌ 볼륨 복원 실패", e)
-            }
-        }
+        // ⭐ 시스템 알람 볼륨 복원 - 실제 알람이 울리는 중이면 그 알람이 끝날 때 복원됨(AUD-06)
+        AlarmStreamVolume.release(this, AlarmStreamVolume.HOLDER_PREVIEW)
 
         Log.d("MainActivity", "🔇 미리듣기 중지")
     }

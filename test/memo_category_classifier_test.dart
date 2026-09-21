@@ -74,6 +74,19 @@ void main() {
       expect(classifier.classify('식사').categoryKey, 'meal');
     });
 
+    test('실측으로 보강한 치과·약국·네일 표현을 잡는다', () {
+      expect(classifier.classify('치과 예약').categoryKey, 'health');
+      expect(classifier.classify('약국 들르기').categoryKey, 'health');
+      expect(classifier.classify('네일 예약').categoryKey, 'beauty');
+      // 가족 우선순위는 유지되어야 한다.
+      expect(classifier.classify('엄마 치과 동행').categoryKey, 'family');
+      // 직업명이 붙은 자격시험은 건강 일정으로 강제하지 않는다.
+      expect(
+        classifier.classify('치과위생사 실기시험 준비').categoryKey,
+        isNot('health'),
+      );
+    });
+
     test('"모임"이 같이 있으면 활동 하드매핑을 보류하고 ML에 맡긴다', () {
       // "독서모임"은 실측 데이터에서 사교로 분류된 경우가 더 많았음
       // (ml/check_keyword_regressions.py) - 공부로 강제하면 안 됨.
@@ -153,7 +166,8 @@ void main() {
     });
 
     test('공을 사기만 하는 문장은 여전히 하드매핑을 defer한다(구기종목 오탐 방지)', () {
-      expect(classifier.classify('테니스공 사기').method, isNot('tier3_racket_sports'));
+      expect(
+          classifier.classify('테니스공 사기').method, isNot('tier3_racket_sports'));
       expect(classifier.classify('축구공 사러 가기').method, isNot('tier3_soccer'));
     });
 
@@ -177,7 +191,8 @@ void main() {
     });
 
     test('개인 트레이닝 맥락 신호가 없는 bare "PT"는 하드매핑을 강제하지 않는다', () {
-      expect(classifier.classify('내일 PT 있음').method, isNot('tier3_personal_training'));
+      expect(classifier.classify('내일 PT 있음').method,
+          isNot('tier3_personal_training'));
     });
 
     test('"PT 자료 준비"처럼 업무 발표 맥락이면 운동으로 강제되지 않는다', () {

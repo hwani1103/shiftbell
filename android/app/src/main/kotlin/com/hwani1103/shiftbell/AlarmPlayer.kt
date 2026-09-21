@@ -16,7 +16,6 @@ class AlarmPlayer(private val context: Context) {
     private var mediaPlayer: MediaPlayer? = null
     private var vibrator: Vibrator? = null
     private var loudnessEnhancer: LoudnessEnhancer? = null
-    private var originalAlarmVolume: Int = -1  // ⭐ 원래 시스템 알람 볼륨 저장
 
     companion object {
         @Volatile
@@ -185,28 +184,9 @@ class AlarmPlayer(private val context: Context) {
                 return
             }
 
-            // ⭐ 원래 시스템 알람 볼륨 저장 - 이미 저장된 값이 있으면(=다른 알람이 아직
-            // 재생 중이었는데 이 알람이 그걸 밀어내고 새로 시작하는 경우) 절대 덮어쓰지
-            // 않음. 안 그러면 그 "다른 알람"이 이미 50%로 낮춰둔 볼륨을 "원래 볼륨"으로
-            // 잘못 저장해버려서, 나중에 stopAlarm()이 "복원"해도 실제로는 50%에 영구히
-            // 고정되는 버그가 있었음 (근접한 시간에 알람이 두 개 이상 겹칠 때 재현됨).
-            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            if (originalAlarmVolume == -1) {
-                originalAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
-                Log.d("AlarmPlayer", "📊 원래 시스템 알람 볼륨 저장: $originalAlarmVolume")
-            } else {
-                Log.d("AlarmPlayer", "📊 이미 저장된 원래 볼륨 유지: $originalAlarmVolume (겹쳐 울리는 알람)")
-            }
-
-            // ⭐ 시스템 알람 볼륨을 50%로 임시 변경
-            // ⭐ 2026-09-04 - LOW 항목 수정(전체_코드_점검_리포트_2026-09-04.md).
-            // 정수 나눗셈이라 최대볼륨 단계가 1인 기기(일부 저가형 단말)에서
-            // maxVolume/2 == 0이 되어 알람이 완전 무음으로 재생될 수 있었음 -
-            // 최소 1단계는 보장.
-            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-            val halfVolume = (maxVolume / 2).coerceAtLeast(1)
-            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, halfVolume, 0)
-            Log.d("AlarmPlayer", "🔊 시스템 알람 볼륨 임시 변경: $halfVolume (50%)")
+            // ⭐ 시스템 알람 볼륨을 50%(최소 1단계)로 임시 변경. 원래 볼륨 저장·복원은 AlarmStreamVolume이 미리듣기와 함께
+            // 관리함(AUD-06). 겹쳐 울리는 알람이 이미 50%로 낮춘 값을 "원래 볼륨"으로 덮어쓰지 않는 규칙도 거기서 지킴.
+            AlarmStreamVolume.acquire(context, AlarmStreamVolume.HOLDER_ALARM)
 
             // 리소스 URI 생성
             val soundUri = android.net.Uri.parse("android.resource://${context.packageName}/$resourceId")
@@ -229,25 +209,8 @@ class AlarmPlayer(private val context: Context) {
     // 시스템 기본 알람 사운드 재생
     private fun playDefaultSound(volume: Float) {
         try {
-            // ⭐ 원래 시스템 알람 볼륨 저장 - 이미 저장된 값이 있으면 덮어쓰지 않음
-            // (playCustomSound와 동일한 이유 - 겹쳐 울리는 알람의 볼륨 복원 버그 방지)
-            val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-            if (originalAlarmVolume == -1) {
-                originalAlarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
-                Log.d("AlarmPlayer", "📊 원래 시스템 알람 볼륨 저장: $originalAlarmVolume")
-            } else {
-                Log.d("AlarmPlayer", "📊 이미 저장된 원래 볼륨 유지: $originalAlarmVolume (겹쳐 울리는 알람)")
-            }
-
-            // ⭐ 시스템 알람 볼륨을 50%로 임시 변경
-            // ⭐ 2026-09-04 - LOW 항목 수정(전체_코드_점검_리포트_2026-09-04.md).
-            // 정수 나눗셈이라 최대볼륨 단계가 1인 기기(일부 저가형 단말)에서
-            // maxVolume/2 == 0이 되어 알람이 완전 무음으로 재생될 수 있었음 -
-            // 최소 1단계는 보장.
-            val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)
-            val halfVolume = (maxVolume / 2).coerceAtLeast(1)
-            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, halfVolume, 0)
-            Log.d("AlarmPlayer", "🔊 시스템 알람 볼륨 임시 변경: $halfVolume (50%)")
+            // ⭐ 시스템 알람 볼륨을 50%로 임시 변경 - playCustomSound와 같이 AlarmStreamVolume이 관리(AUD-06)
+            AlarmStreamVolume.acquire(context, AlarmStreamVolume.HOLDER_ALARM)
 
             // 알람 소리 URI
             val alarmUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
@@ -448,16 +411,7 @@ class AlarmPlayer(private val context: Context) {
             vibrator = null
         }
 
-        // ⭐ 시스템 알람 볼륨 복원
-        if (originalAlarmVolume != -1) {
-            try {
-                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-                audioManager.setStreamVolume(AudioManager.STREAM_ALARM, originalAlarmVolume, 0)
-                Log.d("AlarmPlayer", "🔄 시스템 알람 볼륨 복원: $originalAlarmVolume")
-                originalAlarmVolume = -1  // 초기화
-            } catch (e: Exception) {
-                Log.e("AlarmPlayer", "❌ 볼륨 복원 실패", e)
-            }
-        }
+        // ⭐ 시스템 알람 볼륨 복원 - 미리듣기가 아직 잡고 있으면 미리듣기가 끝날 때 복원됨(AUD-06)
+        AlarmStreamVolume.release(context, AlarmStreamVolume.HOLDER_ALARM)
     }
 }

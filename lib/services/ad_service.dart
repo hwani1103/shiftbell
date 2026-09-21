@@ -26,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../constants/ad_config.dart';
+import '../constants/layout_limits.dart';
 
 class AdService {
   AdService._();
@@ -67,7 +68,18 @@ class AdService {
         debugPrint('⚠️ 화면 정보를 못 읽음 - 배너 높이 fallback 사용');
         return;
       }
-      final widthDp = (view.physicalSize.width / view.devicePixelRatio).truncate();
+      // ⭐ 2026-09-15 (출시 적합성 재검토 AUD-07) - 앱 내용은 main.dart에서 최대 kAppMaxContentWidth(500dp)로 제한되는데
+      // 광고는 기기 전체 폭으로 요청해서 600/840dp 화면에서 슬롯보다 넓은 광고를 요청했음. 슬롯 폭 이하로 요청.
+      // (접기/펼치기·멀티윈도우로 실행 중 폭이 줄면 BannerAdSlot이 넘치는 광고를 표시하지 않음)
+      final screenWidthDp =
+          (view.physicalSize.width / view.devicePixelRatio).truncate();
+      final contentWidthDp = screenWidthDp < kAppMaxContentWidth
+          ? screenWidthDp
+          : kAppMaxContentWidth.truncate();
+      // 달력 기본 테마에서는 좌측 48dp에 연/월을 세로 표시하고 8dp 간격 뒤
+      // 나머지 폭에 광고를 둔다. 같은 BannerAd를 다른 탭 하단에서도 재사용하므로 요청
+      // 크기는 가장 좁은 실제 슬롯(헤더)을 기준으로 해야 잘리지 않는다.
+      final widthDp = contentWidthDp - kCalendarHeaderAdLeft.truncate();
       if (widthDp <= 0) {
         debugPrint('⚠️ 화면 폭이 0 이하 - 배너 높이 fallback 사용');
         return;
@@ -92,13 +104,15 @@ class AdService {
       );
 
       if (size == null) {
-        debugPrint('⚠️ 적응형 배너 크기 계산 실패 - fallback($kBannerAdFallbackHeight) 사용');
+        debugPrint(
+            '⚠️ 적응형 배너 크기 계산 실패 - fallback($kBannerAdFallbackHeight) 사용');
         return;
       }
 
       _bannerAdSize = size;
       _bannerHeight = size.height.toDouble();
-      debugPrint('✅ 배너 높이 확정: ${size.width}×${size.height} (화면 폭 ${widthDp}dp 기준)');
+      debugPrint(
+          '✅ 배너 높이 확정: ${size.width}×${size.height} (화면 폭 ${widthDp}dp 기준)');
     } catch (e) {
       debugPrint('⚠️ 배너 높이 계산 실패 - fallback($kBannerAdFallbackHeight) 사용: $e');
     }

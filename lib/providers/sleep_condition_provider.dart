@@ -14,6 +14,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/sleep_record.dart';
 import '../services/condition/recovery_briefing_engine.dart';
+import '../services/condition/sleep_by_category_stats.dart';
 import '../services/condition/sleep_day_slots.dart';
 import '../services/condition/sleep_shift_relation.dart';
 import 'condition_provider.dart';
@@ -64,6 +65,16 @@ class BriefingClock extends AutoDisposeNotifier<DateTime> {
     return appNow();
   }
 }
+
+/// ⭐ P2 #6(2026-09-18) - "근무 종류별 평균 수면"(야간/주간/오후 후, 휴무일). 스케줄이
+/// 없으면(analyzer null) 빈 목록 - condition_tab.dart는 빈 목록이면 섹션 자체를 숨긴다.
+final sleepCategoryAveragesProvider = Provider<List<SleepCategoryAverage>>((ref) {
+  final analyzer = ref.watch(conditionAnalyzerProvider);
+  if (analyzer == null) return const [];
+  final records = ref.watch(sleepRecordProvider).value ?? const <SleepRecord>[];
+  final today = ref.watch(currentDateProvider);
+  return buildSleepCategoryAverages(records: records, analyzer: analyzer, now: today);
+});
 
 /// "오늘의 컨디션" - 확인된 사실 / 추천 행동 / 판단 범위(recovery_briefing_engine.dart).
 /// 근무시간이 하나도 없거나 스케줄이 없으면 null(화면은 설정 안내를 보여줌).

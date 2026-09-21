@@ -15,7 +15,7 @@ import 'package:shiftbell/models/sleep_record.dart';
 import 'package:shiftbell/services/condition/condition_rule_engine.dart';
 import 'package:shiftbell/services/condition/shift_pattern_analyzer.dart';
 import 'package:shiftbell/services/condition/sleep_history.dart';
-import 'package:shiftbell/services/condition/today_forecast_engine.dart';
+import 'package:shiftbell/services/condition/recovery_briefing_engine.dart';
 
 const _kDay = '주간';
 const _kNight = '야간';
@@ -100,32 +100,26 @@ void main() {
     expect(night.sleepMinutes, 40, reason: '진짜로 40분만 잔 경우는 40분 그대로 나와야 함(과도한 보정 방지)');
   });
 
-  test('5. 통합 검증 - 낮잠+메인수면 합계로 축4/급성이벤트가 "짧은 수면"으로 오판하지 않는지', () {
-    final yesterday = today.subtract(const Duration(days: 1)); // offset-1(index3)=휴무 - 실제 어제 근무 아님
-    // 급성 이벤트는 "어제" 근무를 기준으로 찾으므로, 시나리오를 바꿔 오늘이
-    // 아니라 어제가 근무일이 되도록 todayIndex를 조정한다.
-    final analyzer2 = _analyzerFor(today, todayIndex: 5); // 오늘=index5(야간 2일차) -> 어제(index4)=야간
-    final shiftEndYesterday = analyzer2.instanceForDate(yesterday).end!;
+  test('5. 통합 검증 - 낮잠+메인수면 합계가 충분하면 오늘의 컨디션이 "수면 부족"으로 안내하지 않는지', () {
+    // ⭐ 2026-09-15 - 옛 today_forecast_engine 삭제로 새 엔진(recovery_briefing_engine)에서 같은 회귀를 검증
+    final analyzer2 = _analyzerFor(today, todayIndex: 5); // 오늘=야간 2일차, 어제=야간
+    final shiftEndYesterday = analyzer2.instanceForDate(today.subtract(const Duration(days: 1))).end!; // 오늘 07:00
     final records = [
       _record(shiftEndYesterday.add(const Duration(minutes: 30)), 40), // 낮잠 40분
       _record(shiftEndYesterday.add(const Duration(hours: 5)), 6 * 60 + 30), // 메인수면 6.5시간
     ];
-    final nights = collectRecentWorkNights(analyzer: analyzer2, records: records, referenceDate: today);
-    final patterns = buildPersonalSleepPatterns(nights);
-    final baseResult = ConditionRuleEngine(analyzer2).evaluate(today);
-    final forecast = buildTodayForecast(
-      baseResult: baseResult,
+    final now = DateTime(today.year, today.month, today.day, 19, 30); // 오늘 야간 근무 중
+    final briefing = buildRecoveryBriefing(
       analyzer: analyzer2,
-      nights: nights,
-      personalPatterns: patterns,
-      otMinutesByDate: const {},
-      today: today,
+      base: ConditionRuleEngine(analyzer2).evaluate(today),
+      records: records,
+      now: now,
     );
-    // ignore: avoid_print
-    print('통합검증 메시지: ${forecast.message}');
-    // 어제 실제 총 수면은 40+390=430분(7시간10분)으로 충분 - "짧았어요" 급성
-    // 문구가 뜨면 안 됨(수정 전에는 40분만 잡혀서 반드시 떴을 상황).
-    expect(forecast.message.contains('짧았어요'), false, reason: '낮잠+메인수면 합계가 충분하면 급성 짧은수면 신호가 뜨면 안 됨');
+    // ⭐ 2026-09-21 - "출근 전 수면"만 7시간과 비교하던 사실을 "지난 24시간 총 수면"으로 바꿈
+    // (야간 근무는 출근 전에 7시간을 채우는 게 구조적으로 불가능 - recovery_briefing_engine.dart 3-1).
+    final sleepFact = briefing.facts.firstWhere((f) => f.text.startsWith('지난 24시간 수면'));
+    expect(sleepFact.text, contains('7시간 10분'));
+    expect(sleepFact.tone, BriefingTone.good, reason: '낮잠+메인수면 합계가 7시간 이상이면 부족으로 안내하면 안 됨');
   });
 
   // ⭐ 2026-09-01 후속16 - "근무 중 수면(위젯에서 근무시간에 '수면' 버튼을

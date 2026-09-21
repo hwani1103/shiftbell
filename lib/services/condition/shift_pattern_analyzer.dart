@@ -298,6 +298,56 @@ class ShiftPatternAnalyzer {
     return ShiftDirectionResult(direction: direction, sequence: seq);
   }
 
+  /// ⭐ 2026-09-18 - 개인 기준선(baseline). "이 사람이 보통 얼마나 일하는지"를
+  /// 계산해서, `ConditionRuleEngine.weeklyLoadIncrease()`가 EU/IOM 절대 수치가
+  /// 아니라 "평소 대비 늘었는지"로 판단하게 한다. 계기: 12시간 근무가 표준인
+  /// 3조2교대는 구조적으로 주 48~60시간이 정상 범위라, 절대 임계값 하나로는
+  /// "보통인 날"이 하루도 없었음(실측: 8주 시뮬레이션에서 NORMAL 0%) - 8시간×22일/월과
+  /// 12시간×15일/월처럼 총량은 비슷한데 하루 근무시간만 다른 두 패턴이 "표준
+  /// 근무시간이 다르다"는 이유만으로 다르게 평가되면 안 된다는 기존 원칙의 연장선.
+  ///
+  /// 규칙적 스케줄: `schedule.pattern`(순환 주기) 자체의 평균 근무시간 × 7 -
+  /// 실제 달력 날짜의 assignedDates 예외(하루짜리 근무 변경)는 일부러 안 봄
+  /// (그때그때의 임시 변경까지 기준선에 섞이면 "평소"의 의미가 흐려짐 - 그런
+  /// 임시 변경은 오히려 RULE_WEEKLY_LOAD_INCREASE가 "평소보다 늘었다"고 잡아내야
+  /// 할 대상이다).
+  ///
+  /// 불규칙 스케줄: "패턴"이라는 개념이 없어 [date] 이전 [irregularLookbackDays]일을
+  /// 실측(그 날짜들에 실제로 배정된, 즉 미설정이 아닌 근무만) 평균한다. 배정된
+  /// 날이 [irregularMinKnownDays]일 미만이면(스케줄을 쓰기 시작한 지 얼마 안 됐거나
+  /// 대부분 미배정) 판단 근거가 부족하다고 보고 null - "근거 없으면 신호를 안
+  /// 낸다"는 기존 원칙과 동일(호출부는 null을 "비교 불가"로 취급해 신호를 끔).
+  int? baselineWeeklyMinutesAsOf(
+    DateTime date, {
+    int irregularLookbackDays = 60,
+    int irregularMinKnownDays = 21,
+  }) {
+    int durationFor(String shiftName) {
+      if (isRestShiftName(shiftName)) return 0;
+      return shiftTimes[shiftName]?.durationMinutes ?? 0;
+    }
+
+    if (schedule.isRegular) {
+      final pattern = schedule.pattern;
+      if (pattern == null || pattern.isEmpty) return null;
+      final total = pattern.fold<int>(0, (sum, name) => sum + durationFor(name));
+      return (total / pattern.length * 7).round();
+    }
+
+    final d = _dayOnly(date);
+    var knownDays = 0;
+    var totalMinutes = 0;
+    for (var i = 1; i <= irregularLookbackDays; i++) {
+      final day = d.subtract(Duration(days: i));
+      final name = schedule.getShiftForDate(day);
+      if (name == kUnsetShiftSentinel) continue;
+      knownDays++;
+      totalMinutes += durationFor(name);
+    }
+    if (knownDays < irregularMinKnownDays) return null;
+    return (totalMinutes / knownDays * 7).round();
+  }
+
   /// weekStart(월요일)~weekStart+6(일요일)의 패턴 요약.
   WeeklyPatternSummary weeklySummary(DateTime weekStart) {
     final start = _dayOnly(weekStart);

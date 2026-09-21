@@ -103,26 +103,30 @@ void main() {
       todayIndex: 1, // 휴무
       shiftTimes: times,
     );
-    // otMinutesByDate를 안 넘김 - 기존 테스트/호출부와의 하위호환 확인. 이 패턴은
-    // 최근 7일 기본근무만 합쳐도 48시간에 한참 못 미쳐 조용해야 함(2026-09-17 재설계 -
-    // 예전엔 "OT 8시간"만으로도 걸렸지만, 이제 기본근무까지 합친 총량 기준이라
-    // 초과근무 없이는 이 정도 스케줄로 안 걸림).
+    // otMinutesByDate를 안 넘김 - 기존 테스트/호출부와의 하위호환 확인. OT가 없으면
+    // 기본근무만 3개 근무일치(24시간, 아래 참고)라 기준선(28시간)보다 오히려 적어
+    // 조용해야 함(2026-09-17 재설계 - 예전엔 "OT 8시간"만으로도 걸렸지만, 이제 기본근무
+    // 까지 합친 총량 기준이라 초과근무 없이는 이 정도 스케줄로 안 걸림).
     final withoutOt = ConditionRuleEngine(analyzer).evaluate(today);
     expect(_ruleIds(withoutOt), isEmpty);
     expect(withoutOt.level, ConditionLevel.normal);
 
-    // ⭐ 2026-09-17 재설계 핵심 검증 - "OT만 8시간"으로는 더 이상 안 걸림(총량이
-    // 48시간 미만이면 조용해야 함 - 예전 동작과 의도적으로 달라진 부분).
+    // ⭐ 2026-09-18 재설계 - OT 8시간을 더해도(24h+8h=32h) 기준선(28h)보다 4시간만
+    // 많아 최소 임계값(6시간)에 못 미쳐 여전히 조용함.
     final smallOt = {_dateKey(today.subtract(const Duration(days: 1))): 8 * 60};
     final withSmallOt = ConditionRuleEngine(analyzer).evaluate(today, otMinutesByDate: smallOt);
     expect(_ruleIds(withSmallOt), isEmpty);
     expect(withSmallOt.level, ConditionLevel.normal);
 
-    // 기본근무(8시간×2일=16시간)+초과근무를 합쳐 48시간을 넘기면 RULE_WEEKLY_TOTAL_LOAD 발동.
-    final heavyOt = {_dateKey(today.subtract(const Duration(days: 1))): 33 * 60};
+    // ⭐ 2026-09-18 재설계 - 이 패턴(주간·휴무·야간·휴무 4일 주기)의 개인 기준선은
+    // 12시간(주간8h+야간8h=16h)/4일*7 = 28시간. 이 7일 창은 위상상 실제로 3개 근무일이
+    // 걸려(4일 주기가 7일 창과 안 맞아떨어지는 앨리어싱) 기본근무만 24시간 - 여기에
+    // 초과근무 12시간을 더하면 총 36시간, 기준선(28시간)보다 8시간 많아 최소 임계값
+    // (6시간)은 넘지만 심각 임계값(12시간)에는 못 미쳐 ATTENTION만.
+    final heavyOt = {_dateKey(today.subtract(const Duration(days: 1))): 12 * 60};
     final withHeavyOt = ConditionRuleEngine(analyzer).evaluate(today, otMinutesByDate: heavyOt);
     expect(withHeavyOt.level, ConditionLevel.attention);
-    expect(_ruleIds(withHeavyOt), ['RULE_WEEKLY_TOTAL_LOAD']);
+    expect(_ruleIds(withHeavyOt), ['RULE_WEEKLY_LOAD_INCREASE']);
     expect(withHeavyOt.levelFindings.single.evidenceIds, ['EVIDENCE-012']);
   });
 
@@ -165,14 +169,20 @@ void main() {
   });
 
   test('충분히 쉰 뒤의 장시간근무 vs 짧은 근무의 장기 연속근무 - 후자만 신호가 뜬다', () {
-    // 12시간 근무, 그러나 직전 5일 연속 휴무(패턴: 휴무 5일 + 근무 1일 반복) - 오늘=근무.
+    // 12시간 근무, 그러나 직전 6일 연속 휴무(패턴: 휴무 6일 + 근무 1일 반복, 7일 주기) -
+    // 오늘=근무. 7일 주기로 맞춘 이유: 6일 주기를 쓰면(위 테스트가 이미 지적한 "6일
+    // 주기의 7일 창 앨리어싱") 이 패턴의 유일한 근무일이 7일 롤링창에 두 번 걸려
+    // 개인 기준선 대비 실제보다 훨씬 많이 일한 것처럼 잘못 계산됨 - 7일 주기면 어떤
+    // 위상에서도 항상 정확히 한 번만 걸려 기준선과 실측이 일치한다(2026-09-18 재설계
+    // 이후 - RULE_WEEKLY_LOAD_INCREASE가 개인 기준선을 쓰기 시작하면서 새로 드러난
+    // 앨리어싱 민감도).
     final timesRested = <String, ShiftTimeRange>{
       _kDay: const ShiftTimeRange(shiftName: _kDay, startMinutes: 7 * 60, endMinutes: 19 * 60), // 12시간
     };
     final analyzerRested = _analyzerFor(
       today,
-      pattern: [_kOff, _kOff, _kOff, _kOff, _kOff, _kDay],
-      todayIndex: 5, // 오늘 = 근무(직전 5일 휴무)
+      pattern: [_kOff, _kOff, _kOff, _kOff, _kOff, _kOff, _kDay],
+      todayIndex: 6, // 오늘 = 근무(직전 6일 휴무)
       shiftTimes: timesRested,
     );
     final resultRested = ConditionRuleEngine(analyzerRested).evaluate(today);
@@ -193,8 +203,14 @@ void main() {
     );
     final resultShort = ConditionRuleEngine(analyzerShort).evaluate(today);
     expect(resultShort.consecutiveWorkDays, 7);
-    expect(_ruleIds(resultShort), ['RULE_CONSECUTIVE_WORKDAYS']);
-    expect(resultShort.level, ConditionLevel.attention);
+    // ⭐ 2026-09-18 재설계 - 오늘이 7일 연속근무의 마지막 날이면 트레일링 7일 창이
+    // 이 9일 주기에서 일할 수 있는 날을 전부(7일) 담는 최댓값 위상이라, 개인
+    // 기준선(28시간/9일*7≈21.8시간)보다 실측(28시간)이 6.2시간 많아 RULE_WEEKLY_
+    // LOAD_INCREASE도 함께 발동한다(4시간짜리 근무를 몰아서 하는 주가 실제로 이
+    // 사람의 평소보다 부담이 큰 주라는 뜻이라 부당한 결과가 아님) - 두 신호가 겹쳐
+    // COMPOUND까지 겹치므로 HIGH_LOAD.
+    expect(_ruleIds(resultShort), containsAll(['RULE_CONSECUTIVE_WORKDAYS', 'RULE_WEEKLY_LOAD_INCREASE', 'RULE_COMPOUND_HIGH_LOAD']));
+    expect(resultShort.level, ConditionLevel.highLoad);
 
     // 후자가 전자보다 부담이 낮게 평가되면 안 됨(부당한 역전 방지).
     expect(resultShort.level.index, greaterThanOrEqualTo(resultRested.level.index));
@@ -266,10 +282,17 @@ void main() {
     // 매일 반복되는 14시간 야간(20~10시, 2교대뿐이라 방향 개념 자체가 없음(null),
     // 쉬는 날이 하루도 없는 극단적 패턴) - 24-14=10시간 회복이라 11시간 미만.
     // 2026-09-17 재설계로 이 패턴은 RULE_LONG_SHIFT(폐지됨) 대신 RULE_EXTENDED_
-    // STREAK_SHORT_BREAK(12시간대 버킷)·RULE_WEEKLY_TOTAL_LOAD(주 98시간, 60시간
-    // 상한 초과)·RULE_CONSECUTIVE_WORKDAYS(쉬는 날이 아예 없음)까지 겹쳐 걸린다 -
-    // "쉬는 날이 전혀 없는 스케줄"이라는 극단적 케이스라 더 많은 신호가 겹치는 것이
-    // 이번 재설계의 의도와 일치함(레벨이 HIGH_LOAD로 유지되는 것 자체가 핵심 회귀 검증).
+    // STREAK_SHORT_BREAK(12시간대 버킷)·RULE_CONSECUTIVE_WORKDAYS(쉬는 날이 아예
+    // 없음)까지 겹쳐 걸린다. 2026-09-18 재설계 - RULE_WEEKLY_LOAD_INCREASE(옛
+    // RULE_WEEKLY_TOTAL_LOAD)는 이제 절대 60시간이 아니라 개인 기준선 대비 증가폭을
+    // 보는데, 이 패턴은 "매일 14시간 야간"이 스케줄 자체의 정의(=개인 기준선도 주
+    // 98시간)라 실제(98시간)와 기준선(98시간)이 같아 증가가 없다고 계산됨 - 이 신호는
+    // 의도적으로 조용해야 함(이 사람에게 98시간은 "늘어난 것"이 아니라 "원래 스케줄"
+    // 이므로, 이 신호가 잡을 대상이 아님 - 대신 ScheduleLoadProfile이 별도로 "이 근무
+    // 패턴 자체가 IOM 60시간 상한을 구조적으로 넘는다"고 조용히 알려줌).
+    // "쉬는 날이 전혀 없는 스케줄"이라는 극단적 케이스라 다른 신호는 여전히 겹쳐서
+    // 뜨는 것이 이번 재설계의 의도와 일치함(레벨이 HIGH_LOAD로 유지되는 것 자체가
+    // 핵심 회귀 검증).
     final times = <String, ShiftTimeRange>{
       _kNight: const ShiftTimeRange(shiftName: _kNight, startMinutes: 20 * 60, endMinutes: 10 * 60),
     };
@@ -286,8 +309,9 @@ void main() {
     expect(ids, containsAll(['RULE_SHORT_RECOVERY', 'RULE_EXTENDED_STREAK_SHORT_BREAK', 'RULE_COMPOUND_HIGH_LOAD']));
     expect(ids.contains('RULE_LONG_SHIFT'), isFalse); // 이 rule 자체가 폐지됨(2026-09-17)
     expect(ids.contains('RULE_BACKWARD_DIRECTION'), isFalse); // 방향 개념 자체가 성립 안 함
-    expect(ids.contains('RULE_WEEKLY_OVERTIME'), isFalse); // 이 rule id는 RULE_WEEKLY_TOTAL_LOAD로 이름이 바뀜
-    expect(ids, contains('RULE_WEEKLY_TOTAL_LOAD')); // OT 없이 기본근무만으로도 주 98시간 - 60시간 상한 초과
+    expect(ids.contains('RULE_WEEKLY_LOAD_INCREASE'), isFalse,
+        reason: '98시간이 이 사람의 기준선 자체라 "늘었다"는 신호가 아니어야 함(2026-09-18 핵심 회귀)');
+    expect(result.weeklyBaselineMinutes, 98 * 60);
   });
 
   test('문구 다양성 - 완전히 동일한 스케줄이 반복돼도 누적 수치가 다르면 근거 판정 문구가 달라진다', () {

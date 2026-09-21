@@ -111,8 +111,10 @@ flutter build appbundle --release --flavor prod --dart-define=ADMOB_BANNER_ID=<�
 - 상세: `docs/release_audit/g2/handoff.md`
 
 ### 업데이트 안내
-`update_service.dart` — Play In-App Update API 안 씀(전파 지연). Firestore `app_config.latestVersionCode`를 직접 읽음,
+`update_service.dart` — Play In-App Update API 안 씀(전파 지연). Firestore `app_config/android`의 `latestVersionCode`를 직접 읽음,
 포그라운드 복귀마다 재체크(버전코드 dedupe + 쿨다운 6시간). 강제 업데이트는 2026-09-12에 제거.
+"업데이트 후 첫 실행" 릴리즈 노트 팝업은 `_releaseNoteVersion`이 `''`이면 안 뜸(1.0.23은 사용자 결정으로 끔 — 켜려면 버전 문자열 + ARB 문구 교체).
+1회성 안내 팝업은 `onboarding_info_popups.dart`의 4개(웰컴/불규칙 배정/일정관리 탭/수면·회복 탭)뿐, 각각 평생 1회 플래그.
 
 ### 수면·회복 탭 (구 컨디션 매니저, 2026-09-15 범위 축소)
 `lib/screens/condition_tab.dart` + `lib/services/condition/*` — 하단 탭 이름은 "수면·회복"(클래스·provider·저장 키 `condition_tab_enabled`는 호환 위해 그대로).
@@ -280,8 +282,9 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
   **"절대 12시간 임계값 단독 트리거"(RULE_LONG_SHIFT)를 완전히 폐지**하고 다음으로 대체:
   - `RULE_EXTENDED_STREAK_SHORT_BREAK`: 오늘/직전 근무의 실제 근무시간에 맞는 버킷(`ConditionRuleEngine.streakBucketFor`) — 8시간대→5일
     연속+회복<24h, 10시간대→4일 연속+회복<24h, 12시간대→3일 연속+회복<48h(004/005) — 이면 단독 HIGH_LOAD. 8시간 미만은 이 근거가 안 다뤄 버킷 없음(레벨 불관여)
-  - `RULE_WEEKLY_TOTAL_LOAD`: 최근 7일 **총 실근무시간(기본근무+초과근무, OT만이 아님)**이 48시간 이상이면 ATTENTION(012), 60시간 이상이면
-    그 자체로 단독 HIGH_LOAD(014) — "12h×15일/월 vs 8h×22일/월"처럼 하루 근무시간이 달라도 총량이 비슷하면 비슷하게 평가되는 핵심 장치
+  - `RULE_WEEKLY_TOTAL_LOAD`(2026-09-18 `RULE_WEEKLY_LOAD_INCREASE`로 재설계 — 아래 v4 참고): 최근 7일 **총 실근무시간(기본근무+초과근무,
+    OT만이 아님)**이 48시간 이상이면 ATTENTION(012), 60시간 이상이면 그 자체로 단독 HIGH_LOAD(014) — "12h×15일/월 vs 8h×22일/월"처럼 하루
+    근무시간이 달라도 총량이 비슷하면 비슷하게 평가되는 핵심 장치
   - `RULE_CONSECUTIVE_WORKDAYS`(신규): 근무시간과 무관하게 쉬는 날 없이 이어지는 연속근무일수 자체 — 7일 이상 ATTENTION, 10일 이상 단독
     HIGH_LOAD. 정확한 근거 수치가 없어(005의 일반 원칙만 차용) **"이 앱의 판단"임을 문구에 항상 명시**(RULE_COMPOUND_HIGH_LOAD와 동일 취급)
   - 유지: 회복<11h(002/003) · 역방향 교대(001) · 연속 야간≥3일 ATTENTION/≥4일 단독 HIGH_LOAD(013)
@@ -290,6 +293,56 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
     (연속 스트릭/회복시간 계산 자체가 이미 "직전에 쉬었는지"를 반영하는 구조라 중복 구현하지 않음 — 설계 검토 완료)
   - `evaluate(otMinutesByDate:)` 기본값 빈 맵이면 총 근무시간 계산에서 OT 부분만 0으로 취급(기본근무는 analyzer로 항상 계산되므로 이전처럼
     "신호 자체가 꺼짐"이 아님 — 이 부분이 v2와 다른 점)
+- **판정 v4 재설계(2026-09-18, 개인 기준선)** — 계기: v3의 `RULE_WEEKLY_TOTAL_LOAD`(EU 48h/IOM 60h 절대값)를 실제 한국 교대 패턴 5종으로
+  8주 시뮬레이션한 결과, 12시간 표준 근무자는 구조적으로 주 48~60시간이 정상이라 **"보통인 날"이 하루도 없었음**(3조2교대·2교대 8주
+  시뮬레이션 NORMAL 0%, 통상 근무 NORMAL 100% — 같은 앱인데 표준 근무시간만으로 극단적으로 갈림). 절대 임계값을 없애는 v3의 방향은 맞았지만
+  "최근 7일 총 실근무시간" 신호 자체가 여전히 절대 기준이라 문제가 재발한 것 - 이번엔 **개인 기준선**(이 사람의 스케줄 자체가 원래 얼마나
+  일하도록 설계됐는지)과 비교하도록 다시 고침.
+  - `ShiftPatternAnalyzer.baselineWeeklyMinutesAsOf(date)`: 규칙적 스케줄은 `pattern`(순환 주기) 자체의 평균 근무시간×7(달력의 임시 근무변경은
+    일부러 안 봄 - 그런 변경은 오히려 이 신호가 "평소보다 늘었다"고 잡아내야 할 대상). 불규칙은 과거 60일 중 실제 배정된 날이 21일 이상일
+    때만 그 구간 실측 평균×7, 미만이면 null("근거 없으면 신호 안 낸다" 원칙 그대로)
+  - `RULE_WEEKLY_TOTAL_LOAD` → **`RULE_WEEKLY_LOAD_INCREASE`로 개명**: 최근 7일 총 실근무시간이 개인 기준선보다 `max(6시간, 기준선의 15%)`
+    이상 많으면 ATTENTION, `max(12시간, 기준선의 25%)` 이상 많으면 단독 HIGH_LOAD(`ConditionRuleEngine.weeklyLoadIncrease()` 하나로 통일 -
+    `evaluate()`와 `recovery_briefing_engine.dart`가 둘 다 이 함수만 부름). 문구는 "EU 48시간을 넘었습니다" 같은 절대 기준 위반 단정을 하지
+    않고 항상 "평소(주 N시간 안팎)보다 N시간 더 많습니다"로 개인 비교임을 명시 — evidenceIds(EVIDENCE-012/014)는 배경 근거로 계속 인용하되
+    15%/25%/6h/12h 수치 자체는 "이 앱의 판단"(RULE_COMPOUND_HIGH_LOAD와 동일 취급)
+  - EU 48시간/IOM 60시간 **절대값**은 레벨과 완전히 분리된 `ScheduleLoadProfile`(`ConditionRuleEngine.scheduleLoadProfileFor`)로 옮김 - "이
+    근무 패턴은 평균 주 N시간이에요"라는 **중립 톤 배경 정보 한 줄**(캐션 아님, 매일 안 바뀌면 매번 똑같아도 "오늘의 경고"가 아니라 "이
+    근무의 배경 정보"). `scheduleLoadProfileProvider`(condition_provider.dart)가 `todayConditionResultProvider`의 `weeklyBaselineMinutes`를
+    재사용해서 계산, `condition_tab.dart`의 "오늘의 컨디션" 카드 상단(situation 줄 아래)에 작은 회색 서브텍스트로만 표시 — "확인된 사실"/"최근
+    근무·수면" 리스트에는 절대 안 넣음(거기 넣으면 결국 매일 반복되는 캐션처럼 느껴짐)
+  - **8주 시뮬레이션으로 검증됨**: 위 5개 대표 패턴 모두 재설계 후 정상 스케줄에서는 이 신호가 거의 발동하지 않음(`test/condition_baseline_load_test.dart`).
+    예외: "3일 근무+3일 근무"처럼 **같은 유형을 3일 이상 몰아 배치하는 블록형 패턴**은 그 이음매(6일 연속 12시간)에 걸리는 7일 트레일링 창이
+    장기 평균보다 훨씬 높아, 사이클 안의 그 며칠은 실제로 발동함 — 이건 버그가 아니라 "이 사이클 안에서도 유난히 빡빡한 주"를 정확히 잡아내는
+    의도된 동작(장기 평균 자체가 아니라 그 안의 국소 밀집을 보는 것이라 v4가 없애려던 "표준 근무시간 자체를 매번 경고"와는 다른 문제)
+  - 연속근무일수(`RULE_CONSECUTIVE_WORKDAYS`)·연속 야간(`RULE_CONSECUTIVE_NIGHT_SHIFTS`)·연속 장시간근무 버킷(`RULE_EXTENDED_STREAK_SHORT_
+    BREAK`)·회복시간(`RULE_SHORT_RECOVERY`)·역방향(`RULE_BACKWARD_DIRECTION`)은 이번 재설계로 안 바뀜(그대로 유지)
+- **P2 #6 근무 종류별 평균 수면(2026-09-18, `sleep_by_category_stats.dart`)**: "야간 후 평균 4시간 40분 · 주간 후 6시간 50분" 같은, 근무표와
+  실제 수면 기록을 둘 다 가진 이 앱만 만들 수 있는 통계. `buildSleepDaySlots()`가 이미 검증된 귀속 규칙(야간 근무 다음날 아침 회복수면은 그
+  야간 근무일 카테고리로 집계 — 아래 "수면 귀속 로직 재검토" 참고)을 그대로 재사용, 표본 3일 미만인 카테고리는 숨김(최근 30일 조회, 오늘은
+  아직 안 끝났으니 제외). `condition_tab.dart`의 `_SleepCategoryAveragesCard`(미니 달력 카드 아래) — 점수·등급화 없이 담백한 숫자만, 권장
+  최소(7시간) 미만인 카테고리에만 옅은 아이콘. 새 점수화 아님(기존 recommendedSleepMinMinutes 재사용일 뿐)
+- **P2 #7 자동 감지 확인 카드 일괄 처리(2026-09-18)**: 대기 카드가 2건 이상이면 "보이는 기록 모두 확인" 버튼 노출(`condition_tab.dart`) -
+  화면에 보이는 만큼(최대 `_kMaxPendingCards`개)을 `SleepRecordNotifier.confirmAllPending()`으로 한 번에 confirm(개별 `confirmPending()`을
+  반복 호출하면 매번 DB 갱신 후 전체 재조회가 반복돼 비효율 - 여기선 업데이트를 다 끝내고 마지막에 한 번만 refresh). 시각 수정 없이 "그대로
+  맞다"만 일괄 처리 - 수정이 필요하면 개별 카드의 [수정]이나 확인 후 "최근 수면 기록"에서
+- **수면 귀속 로직 재검토(2026-09-18) — 검토 완료, 코드 수정 없음**: "어제 휴무·오늘 야간·내일 휴무"처럼 오늘의 주수면(내일 아침 회복수면)과
+  내일의 주수면(내일 밤 정상취침)이 시간대로 헷갈릴 수 있는 시나리오를 `sleep_day_slots.dart`의 `_attributedDay()`/`_isMainSleep()`을 직접
+  손으로 추적하고 `buildSleepDaySlots()` 실행 테스트로 재검증함 — **정확히 의도대로 동작함을 확인**(회복수면→야간 근무일로 귀속, 정상
+  밤잠→그날 자신의 것으로 귀속, 출근 전 낮잠→길어도 낮잠 칸 유지). `shift_time_category.dart`의 주/오후/야간 분류도 근무명이 아니라 순수
+  시작시각(사용자가 설정한 실제 `condition_shift_times` 값) 기반이라 사람마다 다른 근무시각에도 정확히 적응함(하드코딩된 특정 시각 가정
+  없음). **다음에 이 로직을 다시 의심하지 말 것** — 필요하면 이 절과 `sleep_day_slots.dart`의 기존 주석(2026-09-05/06/09-01 후속16·17)부터 볼 것
+- **야간 수면 귀속 재설계 v2(2026-09-21, 사용자 실사용 신고)** — 위 2026-09-18 재검토가 "휴무를 낀 야간"만 훑어서 **연속 야간(야간1→야간2)**을
+  놓쳤음. 신고 현상: 야간2 출근 전에 따로 잔 수면(예: 14~17시)이 야간2 칸이 아니라 야간1 칸의 낮잠으로 들어가고, 그 결과 야간2에는 출근 전
+  수면이 없는 것처럼 보였음. 원인은 `_attributedDay()`의 경계가 항상 "오늘 21시"(`kFlatSleepStartHour`)여서, 어제 퇴근(07시) 이후 21시 이전의
+  **모든** 수면이 어제 몫으로 빨려 들어갔던 것. 수정 2가지:
+  - **경계**: 오늘도 출근 시각이 있는 근무라면 경계를 "어제 퇴근(`graceAdjustedShiftEnd`) ~ 오늘 출근"의 **한가운데**로 당긴다(예: 07시 퇴근 /
+    19시 출근 → 13시). 앞쪽 절반 = 어제 야간의 회복수면, 뒤쪽 절반 = 오늘 근무를 위한 출근 전 수면. 오늘이 휴무면 비교할 출근 시각이 없으니
+    21시 앵커 그대로(기존 동작 유지 — 회귀 테스트 6·7번이 이걸 고정함). 퇴근·출근 시각이 몇 시든 같은 규칙이라 하드코딩된 시각 가정이 없음
+  - **비교 대상**: 경계와 비교하는 값을 시작 시각이 아니라 그 수면의 **무게중심(start+길이/2)**으로 바꿈. 시작 시각만 보면 경계 직전에 시작한 긴
+    잠(12:00~18:30 → 19시 야간 출근)이 통째로 어제 몫이 되고, 반대로 휴무일 20:30~05:00 같은 "그날 밤 정상 취침"도 어제 몫이 됐음. 진행 중
+    (기상 전)이라 길이를 모르면 시작 시각으로 판단
+  - 회귀: `test/night_shift_sleep_attribution_test.dart`(신설). 기존 `sleep_day_slots_test.dart` 8개는 그대로 통과 = 휴무 낀 케이스 동작 불변
 - **브리핑 문구 품질 재검토(2026-09-18)** — 계기: v3 신호를 실제 시나리오로 여러 개 돌려서 문장을 직접 읽어본 결과 발견한 문제 2가지.
   1. **안전 상한(캡) 노출 버그**: `ShiftPatternAnalyzer`의 연속일수 계산 3종(`consecutiveNightStreakEndingAt`/`consecutiveWorkStreakEndingAt`/
      `consecutiveLongShiftStreakEndingAt`)이 무한루프 방지용 `maxLookbackDays`(기본 180)에 도달하면 그 숫자를 그대로 "180일 연속 근무"처럼
@@ -312,15 +365,29 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
      동등성·역방향 겹침 등 8개)을 실제 assert(topic 중복 없음, "180일" 리터럴 없음, 특정 문구 포함)로 고정. 앞으로 신호를 추가/수정할 때 이
      파일을 먼저 돌려서 실제 렌더링 문장이 여전히 자연스러운지 확인할 것.
 - **오늘의 컨디션(`recovery_briefing_engine.dart`, 2026-09-15 최초 도입 — `today_forecast_engine.dart` 대체, 2026-09-17 v3 신호 반영,
-  2026-09-18 문구 품질 재검토 반영)**: 순수 함수,
+  2026-09-18 문구 품질 재검토 + 개인 기준선 v4 반영)**: 순수 함수,
   `now` 주입. 위치 판정(근무 중 / 출근 3시간 이내 / 퇴근 후 16시간 이내 / 오늘 근무 대기 / 휴무 / 불명) → **확인된 사실**(이번 근무 전·퇴근 후 실제 수면,
   근무 사이 회복시간 <11h 경고, 연속 야간, **장기연속근무(topic: longWorkStreak - 근무시간대별 버킷과 근무시간 무관 연속근무일수를 하나로
-  통합, 위 문구 품질 재검토 참고)**, 최근 7일 총 실근무시간(48h/60h 2단계), 역방향 전환,
-  최근 7일 평균 수면 — 기록한 날 3일 이상일 때만). **"오늘 근무가 N시간이라 캐션"이라는 절대 임계값 문구는
-  더 이상 없음** — 근무시간/근무명은 situation 줄에서 중립적으로만 보여줌
+  통합, 위 문구 품질 재검토 참고)**, 최근 7일 실근무시간이 개인 기준선보다 늘었는지(위 v4 참고 - "48시간/60시간" 절대값이 아니라 "평소보다
+  N시간 많다"), 역방향 전환, 최근 7일 평균 수면 — 기록한 날 3일 이상일 때만). **"오늘 근무가 N시간이라 캐션"/"EU 48시간을 넘었다"는 절대
+  임계값 문구는 더 이상 없음** — 근무시간/근무명은 situation 줄에서 중립적으로만 보여주고, 근무 패턴 자체가 구조적으로 EU/IOM을 넘는지는
+  `ScheduleLoadProfile`(카드 상단 조용한 배경 정보, 위 v4 참고)에서만
   → **추천 행동** 최대 3개, 우선순위 안전(퇴근길 빛·운전) > 수면(늦어도 몇 시에 잠자리/지금 자도 최대 N시간) > 야간 전 낮잠 > 카페인 끊을 시각 > 야간 식사 >
   연속근무 완화 > 누적 부담 > 기록 안내
   → **판단 범위**(2주 수면 기록 없음·평균 계산 불가·출퇴근 시각 미입력 근무명·확인 전 자동 기록 N건). 수면 기록이 없다고 상태를 깎지 않음.
+  - ⭐ **수면량은 "지난 24시간 총 수면"으로 본다(2026-09-21 재설계)** — 예전엔 "출근 전 수면 N — 권장 7시간보다 짧아요"처럼 *출근 전 수면만*
+    7시간과 비교했는데, 야간 근무는 출근 전에 7시간을 채우는 게 구조적으로 불가능하거나(어제 주간 → 오늘 야간) 그 7시간이 "출근 전 낮잠 +
+    퇴근 후 회복수면"으로 쪼개지는 게 정상이라 실행 불가능한 요구였음(사용자 지적). EVIDENCE-011(성인 7~9시간)이 원래 **24시간당** 기준이므로
+    비교 창도 지난 24시간으로 맞춤 — 야간 첫날이든 연속 야간 둘째 날이든 경우를 나눠 세지 않아도 실제 확보한 수면이 그대로 잡힌다.
+    출근 전에 따로 잔 게 있으면 `(출근 전 N 포함)`으로만 덧붙이고, 그 값은 `buildSleepDaySlots()` 귀속 결과를 그대로 재사용한다(미니 달력과
+    항상 같은 숫자). `nap_before_night`/`sleep_after_next` 행동 조건도 같이 24시간 기준으로 바뀜
+  - ⭐ **기록이 비어 있으면 사실에서 끝내지 않는다(2026-09-21)** — 예전엔 "출근 전 수면 기록이 없어요"로 문장이 끊겼음. 이제 어느 phase든
+    `record_sleep` 행동(rank 35 — 카페인과 야간 식사 사이)을 같이 준다
+  - ⭐ **근무시간 미입력 상태에서도 수면 얘기는 한다(2026-09-21)** — 자동 감지는 그 상태에서도 계속 돌아가는데 화면엔 설정 안내만 떴었음.
+    `condition_tab.dart`의 `_SleepOnlySummaryCard`가 sleepAmount/sleepAverage topic 사실만 추려서 설정 안내 카드 위에 보여줌
+  - ⭐ **워딩 톤(2026-09-21 사용자 요청)** — "(근거 수준은 낮음)", "~라고 보고돼요" 같은 문장별 단서와 부연설명을 빼고 가볍게. 대신 카드 맨
+    아래에 `_GeneralGuidanceNote` 한 줄("수면·교대근무 연구를 참고한 일반적인 안내예요(의학적 진단이 아니에요)")만 상시 노출.
+    ⚠️ `condition_rule_engine.dart`의 Finding/Tip `message`는 **화면에 안 나옴**(ruleId만 소비됨) — 사용자 문구는 이 파일과 `condition_tab.dart`에만 있음
   기준값은 `ConditionRuleEngine` 상수(public, `streakBucketFor`/`streakClause` 포함)를 그대로 씀. 60분 준비 여유·3h/16h 구간은 연구값 아닌
   화면 관례값. 시각 없는 근무가 끼면 직전/다음 근무를 단정 안 함. 건강 기준·조언은 근거 ID 필수(기록 안내 `record_sleep`만 예외, 테스트가
   강제). facts/actions는 `BriefingTopic` 기준으로 dedup됨(위 문구 품질 재검토 참고). 화면은 1분 시계
@@ -328,14 +395,20 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
 - **범용 건강 Tip 삭제(2026-09-15)**: 개인화되지 않는 날짜 로테이션 팁이라 제거(`health_tip_provider`·`health_tips_catalog`·`HealthTip` 삭제, Firestore 규칙은 그대로)
 - **출퇴근 시각 입력**은 설정 → 근무시간 및 OT 설정. 한 근무라도 입력돼 있으면 오늘의 컨디션 표시(없으면 설정 안내 카드 + "근무시간 입력하기" 버튼, 수면 기록은 가능).
   이 탭 문구는 한국어 하드코딩(1차, l10n 미적용 — 영어 로케일에선 탭 자체가 안 보임)
-- 남은 과제: 실데이터로 임계값 튜닝(특히 신규 RULE_CONSECUTIVE_WORKDAYS의 7일/10일), EVIDENCE-013/014 1차 원문 확인(둘 다 2차 인용만 확인),
-  "12시간 근무자는 휴일이 더 잦다" 보완은 미반영, 완전히 규칙적인 스케줄+수면습관에서 브리핑 문구가 며칠 단위로 수렴하는 문제는 v3~문구 품질
-  재검토로 상당히 완화됐으나 완전 해결은 아님(누적 수치 자체가 매일 미세하게 달라지므로 자연 완화). `ConsecutiveStreak.capped`는 "정확히
-  캡 값(180)과 같으면 캡으로 취급"하는 보수적 근사라, 실제 연속일수가 우연히 180과 정확히 같고 다음날 끊기는 극히 드문 경우엔 "휴무 없이
-  매우 오래"로 약간 과장되게 표시될 수 있음(정확한 숫자 오표시보다 안전한 쪽 트레이드오프로 의도한 것)
+- 남은 과제: 실데이터로 임계값 튜닝(특히 RULE_CONSECUTIVE_WORKDAYS의 7일/10일, v4 개인 기준선 증가폭의 15%/25%/6h/12h), EVIDENCE-013/014
+  1차 원문 확인(둘 다 2차 인용만 확인), "12시간 근무자는 휴일이 더 잦다" 보완은 미반영, 완전히 규칙적인 스케줄+수면습관에서 브리핑 문구가
+  며칠 단위로 수렴하는 문제는 v3~문구 품질 재검토로 상당히 완화됐으나 완전 해결은 아님(누적 수치 자체가 매일 미세하게 달라지므로 자연 완화).
+  `ConsecutiveStreak.capped`는 "정확히 캡 값(180)과 같으면 캡으로 취급"하는 보수적 근사라, 실제 연속일수가 우연히 180과 정확히 같고 다음날
+  끊기는 극히 드문 경우엔 "휴무 없이 매우 오래"로 약간 과장되게 표시될 수 있음(정확한 숫자 오표시보다 안전한 쪽 트레이드오프로 의도한 것).
+  P2 #6(근무별 평균 수면)의 30일 조회기간·최소표본 3일은 화면 구성용 관례값(연구 근거 아님)
 - 테스트: `test/condition_rule_engine_v2_test.dart`(2026-09-17 v3 신호 포함 — 총량 동등성, 휴식 후 장시간근무 vs 무휴식 장기연속근무, 문구
-  다양성 케이스 추가), `test/recovery_briefing_engine_test.dart`(위치별 사실·행동·판단 범위, 근거 규칙, Q-07 손상 행),
-  `test/recovery_briefing_overlap_scenarios_test.dart`(2026-09-18 신설 - 겹침 시나리오의 topic 중복·캡 노출 회귀), `sleep_history_test.dart`
+  다양성 케이스 추가, 2026-09-18 v4 개인기준선 재설계에 맞춰 갱신), `test/condition_baseline_load_test.dart`(2026-09-18 신설 - 개인 기준선
+  계산 단위 테스트 + 대표 근무 패턴 5종의 8~9주 시뮬레이션 회귀, 블록형 패턴의 국소 밀집 발동까지 검증), `test/sleep_by_category_stats_test.dart`
+  (2026-09-18 신설 - 근무 종류별 평균 수면 계산, 야간→다음날 아침 회복수면 귀속 검증),
+  `test/night_shift_sleep_attribution_test.dart`(2026-09-21 신설 - 연속 야간의 회복수면/출근 전 수면 분리, "지난 24시간 수면" 문구,
+  기록 없을 때 행동 제공, 근무시간 미입력 상태), `test/recovery_briefing_engine_test.dart`(위치별
+  사실·행동·판단 범위, 근거 규칙, Q-07 손상 행), `test/recovery_briefing_overlap_scenarios_test.dart`(2026-09-18 신설 - 겹침 시나리오의 topic
+  중복·캡 노출 회귀), `sleep_history_test.dart`
 
 ### 수면 기록 / 자동 추정
 - **감지 방식 결정**: `AlarmManager` 20분 샘플링만 사용. 화면 on/off 상시 리시버·Foreground Service는 기각, `UsageStatsManager`(특수 권한·잠금 시 null)는
@@ -344,7 +417,8 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
   근무 중 낮잠은 자동 감지 안 함(위젯 수동 전용). 활성 창이 예정 창보다 우선. 같은 창에 이미 시작한 기록이 있으면 새 후보 안 만듦
 - **판정**: 창 안에서 화면 꺼짐 2회 연속이면 후보(시작은 첫 꺼짐 샘플로 소급), 켜짐이면 종료(확정 아님, 확인 카드). 2시간 미만 자동 후보는 폐기,
   수동은 2분 미만 폐기. 앱 재개·Guard·부팅에서 `SleepDetectionReceiver.checkNow()`로 즉시 판정. 확인 카드에서 2회 이상 거부한 시간대는 스킵(거부 학습)
-- **위젯**: "오늘 근무 / 상태" + 수면·기상 버튼. AUTO 진행 중 "수면"은 무시(소급 시각 보호), "기상"은 그 자리에서 확정. 기상 후 수면시간 요약은 표시 안 함
+- **위젯**: "오늘 근무" 칩 + 수면·기상 버튼(2026-09-18 "상태(활동중/수면중)" 줄 제거 — 지금 자는 중인지는 버튼 강조색으로만 드러남, 탭 꺼짐이면 라벨이 "수면·회복 탭 꺼짐").
+  프레임은 3x2(150x110dp) 고정 — 줄이면 런처마다 행 수가 달라지는 과거 버그 재발. AUTO 진행 중 "수면"은 무시(소급 시각 보호), "기상"은 그 자리에서 확정. 기상 후 수면시간 요약은 표시 안 함
 - **분류는 저장하지 않음**: 주 수면/낮잠은 조회 때 계산(2시간 이상이면 주 수면 후보, 근무와 겹치거나 오늘 야간 출근 전에 끝난 잠은 낮잠,
   후보가 여럿이면 가장 긴 것 - `sleep_day_slots.dart`). 어제 야간 퇴근 뒤 **오늘 21시 전**에 시작한 수면은 야간 근무일로 귀속(2026-09-06 재설계,
   예전 "퇴근 후 16시간" 문구는 낡은 것). 한 밤의 수면시간은 매칭되는 낮잠+메인 합계. 수면·회복 탭 확인 카드는 최신 3건만 표시(2026-09-15)
@@ -398,6 +472,9 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
 ---
 
 ## 알려진 상태 / 문서 위치
+
+- **1.0.23 출시 인수인계: `docs/release_audit/handoff_release_2026_09_21.md`** — 커밋·AdMob 실제 ID 주입·aab 빌드·Play 업로드·main 병합/태그·
+  Firebase `latestVersionCode=25` 순서와 사용자/Claude 역할 구분. 새 세션은 이 문서부터 읽을 것.
 
 - `flutter analyze` — error는 `lib/web_main.dart`의 `dart:js_util` 1건(웹 전용), warning은 기존 미사용 import 등
 - 자동 테스트: `flutter test`(Dart, `test/release_audit/g0~g2` 포함), `cd android && sh ./gradlew testDevDebugUnitTest`(Kotlin JUnit4+Robolectric,

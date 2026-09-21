@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +12,7 @@ import 'package:numberpicker/numberpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
-import '../main.dart';  // ⭐ MainScreen import
+import '../main.dart'; // ⭐ MainScreen import
 import '../constants/alarm_limits.dart';
 import '../constants/shift_name_limits.dart';
 import '../utils/shift_name_util.dart';
@@ -35,10 +34,13 @@ import 'restore_backup_screen.dart';
 // 알람 설정 (시간 + 타입 + 전날/당일/다음날)
 class AlarmSetting {
   final TimeOfDay time;
-  final int alarmTypeId;  // 1: 소리+진동, 2: 진동, 3: 무음
-  final int dayOffset;    // -1: 전날, 0: 당일(기본값), 1: 다음날
+  final int alarmTypeId; // 1: 소리+진동, 2: 진동, 3: 무음
+  final int dayOffset; // -1: 전날, 0: 당일(기본값), 1: 다음날
 
-  AlarmSetting({required this.time, this.alarmTypeId = 1, this.dayOffset = kAlarmDaySame});
+  AlarmSetting(
+      {required this.time,
+      this.alarmTypeId = 1,
+      this.dayOffset = kAlarmDaySame});
 
   AlarmSetting copyWith({TimeOfDay? time, int? alarmTypeId, int? dayOffset}) {
     return AlarmSetting(
@@ -49,14 +51,17 @@ class AlarmSetting {
   }
 }
 
-class OnboardingScreen extends ConsumerStatefulWidget {  // ⭐ 변경
+class OnboardingScreen extends ConsumerStatefulWidget {
+  // ⭐ 변경
   const OnboardingScreen({super.key});
 
   @override
-  ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();  // ⭐ 변경
+  ConsumerState<OnboardingScreen> createState() =>
+      _OnboardingScreenState(); // ⭐ 변경
 }
 
-class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ 변경
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  // ⭐ 변경
   // ⭐ 커스텀 근무 형태 최대 개수(예전엔 리터럴 7이 여러 곳에 흩어져 있었음).
   static const int _maxCustomShiftTypes = 7;
 
@@ -74,12 +79,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   List<String> _customShiftTypes = [];
   List<String> get _allShiftTypes => [..._baseShiftTypes, ..._customShiftTypes];
   Map<String, List<AlarmSetting>> _shiftAlarms = {};
-  List<String> _selectedShifts = [];  // 불규칙용
-
-  // ⭐ 2026-08-24 - _buildShiftTypeCreation()의 "여기" 하이퍼링크(불규칙 전환)용.
-  // RichText의 TextSpan.recognizer는 State가 살아있는 동안 재사용해야 하는
-  // 객체라 build()마다 새로 만들지 않고 필드로 보관 - dispose()에서 해제함.
-  final TapGestureRecognizer _switchToIrregularRecognizer = TapGestureRecognizer();
+  List<String> _selectedShifts = []; // 불규칙용
 
   List<String> get _uniqueShifts {
     return _pattern.toSet().toList();
@@ -116,15 +116,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   }
 
   @override
-  void dispose() {
-    _switchToIrregularRecognizer.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: _step == 0,  // step 0에서만 앱 종료 허용
+      canPop: _step == 0, // step 0에서만 앱 종료 허용
       onPopInvokedWithResult: (didPop, result) {
         if (!didPop) _goBack();
       },
@@ -144,10 +138,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           // 처리하므로(leading 폭과 무관하게 항상 화면 정중앙), 이 Center()는
           // 더 이상 필요 없어 제거함 - 첫 화면(뒤로가기 없음)이든 그 이후
           // 화면(뒤로가기 있음)이든 타이틀이 항상 같은 자리에 옴.
-          title: Text(context.l10n.onboardingCreateSchedule),
+          title: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(context.l10n.onboardingCreateSchedule),
+              SizedBox(height: 2.h),
+              Text(
+                '$_visibleStepNumber / $_totalSteps',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
           leading: _step > 0
               ? IconButton(
-                  icon: Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back),
                   onPressed: _goBack,
                 )
               : null,
@@ -157,6 +165,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         ),
       ),
     );
+  }
+
+  int get _totalSteps => _isRegular == false ? 3 : 4;
+
+  int get _visibleStepNumber {
+    if (_isRegular == false) return _step >= 2 ? 3 : _step + 1;
+    return _step + 1;
   }
 
   // ⭐ 2026-08-24 - "고정적으로 순환하는 교대 근무인가요?" 선택 화면(구 step 0)을
@@ -198,11 +213,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         // isRegular만 false가 되는 경우가 없음.
         return _buildPatternInput();
       case 2:
-        return _isRegular == true ? _buildTodayIndexInput() : _buildMainAlarmSetup();
+        return _isRegular == true
+            ? _buildTodayIndexInput()
+            : _buildMainAlarmSetup();
       case 3:
-        return _isRegular == true ? _buildMainAlarmSetup() : _buildComplete();
-      case 4:
-        return _buildComplete();
+        return _buildMainAlarmSetup();
       default:
         return Container();
     }
@@ -246,7 +261,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     if (!mounted) return;
     if (payload == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.backupRestoreManualPickInvalidToast)),
+        SnackBar(
+            content: Text(context.l10n.backupRestoreManualPickInvalidToast)),
       );
       return;
     }
@@ -300,7 +316,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             TextSpan(
               children: wordSafeSpans(
                 context.l10n.onboardingShiftNameSubHint,
-                TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+                TextStyle(
+                    fontSize: 14.sp,
+                    color: Theme.of(context).colorScheme.onSurface),
               ),
             ),
           ),
@@ -331,7 +349,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                   // 성질은 AppSecondButton도 AppButton과 동일한 구조라 그대로 유지됨.
                   AppSecondButton(
                     variant: AppSecondButtonVariant.neutral,
-                    onPressed: _customShiftTypes.length < _maxCustomShiftTypes ? _showAddCustomDialog : null,
+                    onPressed: _customShiftTypes.length < _maxCustomShiftTypes
+                        ? _showAddCustomDialog
+                        : null,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -356,12 +376,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           Container(
             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+              border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant),
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Row(
               children: [
-                Icon(Icons.history, size: 18.sp, color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.history,
+                    size: 18.sp, color: Theme.of(context).colorScheme.primary),
                 SizedBox(width: 10.w),
                 Expanded(
                   child: Column(
@@ -369,7 +391,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                     children: [
                       Text(
                         context.l10n.onboardingHasBackupTitle,
-                        style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                            fontSize: 13.sp, fontWeight: FontWeight.w600),
                       ),
                       SizedBox(height: 2.h),
                       Text(
@@ -432,49 +455,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 6.h),
-          // ⭐ 2026-08-24 - "여기" 링크: 불규칙 플로우 단순화. 규칙/불규칙 둘 다
-          // 근무명 지정(_buildShiftTypeCreation)은 이미 동일하게 거쳤으므로,
-          // 여기서 누르면 그 근무명들(_allShiftTypes)을 그대로 _selectedShifts에
-          // 담아 step을 2로 바로 건너뛰어 "근무별 고정 알람을 설정하세요"
-          // 화면으로 감(그 자리는 원래부터 불규칙용 슬롯이었음 - case2의
-          // isRegular==false 분기, 손 안 댐). _shiftAlarms는 일부러 안 지움 -
-          // "여기"를 눌렀다 뒤로 갔다를 반복해도 이미 설정한 알람이 안 사라지게.
-          // 뒤로가기 시 step1로 돌아오면 _goBack()이 isRegular를 다시 true로
-          // 되돌려 이 화면(패턴 입력)을 보여줌 - 거기서 다시 규칙 패턴을
-          // 이어 만들 수도 있음.
-          Text.rich(
-            TextSpan(
-              children: [
-                ...wordSafeSpans(
-                  context.l10n.onboardingSwitchToIrregularPrefix,
-                  TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
-                ),
-                TextSpan(
-                  text: context.l10n.onboardingSwitchToIrregularLink,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w700,
-                    color: kAppMainAccent,
-                    decoration: TextDecoration.underline,
-                    decorationColor: kAppMainAccent,
-                  ),
-                  recognizer: (_switchToIrregularRecognizer
-                    ..onTap = () {
-                      setState(() {
-                        _isRegular = false;
-                        _selectedShifts = List.from(_allShiftTypes);
-                        _step = 2;
-                      });
-                    }),
-                ),
-                ...wordSafeSpans(
-                  context.l10n.onboardingSwitchToIrregularSuffix,
-                  TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
-                ),
-              ],
-            ),
+          Text(
+            context.l10n.onboardingPatternHowTo,
+            style: TextStyle(
+                fontSize: 14.sp,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
 
           // ⭐ 2026-08-24 - 근무명 지정 화면(_buildShiftTypeCreation)과 같은
           // 칩 디자인으로 통일. 아래 완성된 패턴을 보여주는 그리드
@@ -482,33 +469,45 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           Wrap(
             spacing: 8.w,
             runSpacing: 8.h,
-            children: _allShiftTypes.map((name) => AppShiftChip(
-              label: name,
-              enabled: _pattern.length < 40,
-              onTap: () => _addToPattern(name),
-            )).toList(),
+            children: _allShiftTypes
+                .map((name) => AppShiftChip(
+                      label: name,
+                      enabled: _pattern.length < 40,
+                      onTap: () => _addToPattern(name),
+                    ))
+                .toList(),
           ),
+
+          SizedBox(height: 12.h),
+
+          // ⭐ 2026-09-17 - "날짜별로 직접 지정" 카드를 근무 칩 아래로 내림(사용자 요청) -
+          // 이 화면의 주 동작은 "칩을 탭해 패턴 만들기"이고, 카드는 그걸 안 하겠다는 사람용 대안이라 뒤에 오는 게 맞음.
+          _buildIrregularChoiceCard(),
 
           SizedBox(height: 16.h),
 
           Text(
             context.l10n.onboardingPatternHint,
-            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: TextStyle(
+                fontSize: 13.sp,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           SizedBox(height: 8.h),
-          
+
           Expanded(
             child: _buildPatternGrid(isSelectable: false),
           ),
-          
+
           SizedBox(height: 16.h),
-          
+
           SizedBox(
             width: double.infinity,
             child: AppButton(
-              onPressed: _pattern.isEmpty ? null : () {
-                setState(() => _step = 2);
-              },
+              onPressed: _pattern.isEmpty
+                  ? null
+                  : () {
+                      setState(() => _step = 2);
+                    },
               child: Text(context.l10n.commonNext),
             ),
           ),
@@ -517,88 +516,177 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
     );
   }
 
-  Widget _buildPatternGrid({required bool isSelectable}) {
-  if (_pattern.isEmpty) {
-    return Center(
-      child: Text(
-        context.l10n.onboardingNoPattern,
-        style: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+  Widget _buildIrregularChoiceCard() {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      label: context.l10n.onboardingIrregularChoiceTitle,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _isRegular = false;
+              _selectedShifts = List.from(_allShiftTypes);
+              _step = 2;
+            });
+          },
+          borderRadius: BorderRadius.circular(12.r),
+          // ⭐ 2026-09-15 (사용자 요청) - 카드가 너무 크고 아이콘·화살표가 작다는 피드백: 패딩을 줄이고 문구를 짧게,
+          // 아이콘은 원형 배경으로 키우고 화살표도 키움. 한국어가 글자 단위로 끊기지 않게 wordSafeSpans 사용.
+          child: Ink(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: colorScheme.outline),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(7.w),
+                  decoration: BoxDecoration(
+                    color: kAppMainAccent.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.calendar_month_outlined,
+                      color: kAppMainAccent, size: 26.sp),
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text.rich(
+                        TextSpan(
+                          children: wordSafeSpans(
+                            context.l10n.onboardingIrregularChoiceTitle,
+                            TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colorScheme.onSurface),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text.rich(
+                        TextSpan(
+                          children: wordSafeSpans(
+                            context.l10n.onboardingIrregularChoiceDescription,
+                            TextStyle(
+                                fontSize: 12.sp,
+                                color: colorScheme.onSurfaceVariant),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: 4.w),
+                Icon(Icons.chevron_right_rounded,
+                    color: kAppMainAccent, size: 30.sp),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  return GridView.builder(
-    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 6,  // ⭐ 6열 고정
-      crossAxisSpacing: 6.w,  // ⭐ 간격 살짝 줄임 (8.w → 6.w)
-      mainAxisSpacing: 6.h,   // ⭐ 간격 살짝 줄임 (8.h → 6.h)
-      childAspectRatio: 1.0, // ⭐ 거의 정사각형 (0.85 → 0.95)
-    ),
-    itemCount: _pattern.length,
-    itemBuilder: (context, index) {
-      final isSelected = isSelectable && _todayIndex == index;
-
-      // ⭐ 2026-08-24 - "탭했을 때 반응이 잘 안 느껴진다"는 피드백으로 splash/
-      // highlight 색을 명시하고, Container의 radius(8.r)와 맞춘 borderRadius를
-      // InkWell에도 지정함(예전엔 없어서 리플이 각진 사각형으로 어긋나 보였음).
-      return InkWell(
-        borderRadius: BorderRadius.circular(8.r),
-        splashColor: kAppMainAccent.withValues(alpha: 0.25),
-        highlightColor: kAppMainAccent.withValues(alpha: 0.15),
-        onTap: isSelectable
-            ? () {
-                setState(() => _todayIndex = index);
-              }
-            : () {
-                _removeFromPattern(index);
-              },
-        child: Container(
-          decoration: BoxDecoration(
-            color: isSelected ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(
-              color: isSelected ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.outline,
-              width: 2,
-            ),
-          ),
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.topLeft,
-                child: Padding(
-                  padding: EdgeInsets.only(left: 4.w, top: 2.h),
-                  child: Text(
-                    '${index + 1}',
-                    style: TextStyle(
-                      fontSize: 9.sp,  // ⭐ 번호도 살짝 축소 (10.sp → 9.sp)
-                      color: isSelected ? Theme.of(context).colorScheme.onSecondary.withOpacity(0.7) : Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
-
-              Expanded(
-                child: Center(
-                  child: Text(
-                    _pattern[index],
-                    style: TextStyle(
-                      fontSize: 11.sp,  // ⭐ 근무명 축소 (14.sp → 12.sp)
-                      fontWeight: FontWeight.bold,
-                      color: isSelected ? Theme.of(context).colorScheme.onSecondary : Theme.of(context).colorScheme.onSurface,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,  // ⭐ 1줄 강제
-                    overflow: TextOverflow.ellipsis,  // ⭐ 넘치면 ... 처리
-                  ),
-                ),
-              ),
-            ],
-          ),
+  Widget _buildPatternGrid({required bool isSelectable}) {
+    if (_pattern.isEmpty) {
+      return Center(
+        child: Text(
+          context.l10n.onboardingNoPattern,
+          style: TextStyle(
+              fontSize: 16.sp,
+              color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       );
-    },
-  );
-}
+    }
+
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: 68.w,
+        crossAxisSpacing: 6.w, // ⭐ 간격 살짝 줄임 (8.w → 6.w)
+        mainAxisSpacing: 6.h, // ⭐ 간격 살짝 줄임 (8.h → 6.h)
+        childAspectRatio: 1.0, // ⭐ 거의 정사각형 (0.85 → 0.95)
+      ),
+      itemCount: _pattern.length,
+      itemBuilder: (context, index) {
+        final isSelected = isSelectable && _todayIndex == index;
+
+        // ⭐ 2026-08-24 - "탭했을 때 반응이 잘 안 느껴진다"는 피드백으로 splash/
+        // highlight 색을 명시하고, Container의 radius(8.r)와 맞춘 borderRadius를
+        // InkWell에도 지정함(예전엔 없어서 리플이 각진 사각형으로 어긋나 보였음).
+        return InkWell(
+          borderRadius: BorderRadius.circular(8.r),
+          splashColor: kAppMainAccent.withValues(alpha: 0.25),
+          highlightColor: kAppMainAccent.withValues(alpha: 0.15),
+          onTap: isSelectable
+              ? () {
+                  setState(() => _todayIndex = index);
+                }
+              : () {
+                  _removeFromPattern(index);
+                },
+          child: Container(
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? Theme.of(context).colorScheme.secondary
+                  : Theme.of(context).colorScheme.surfaceVariant,
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.secondary
+                    : Theme.of(context).colorScheme.outline,
+                width: 2,
+              ),
+            ),
+            child: Column(
+              children: [
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 4.w, top: 2.h),
+                    child: Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: isSelected
+                            ? Theme.of(context)
+                                .colorScheme
+                                .onSecondary
+                                .withOpacity(0.7)
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      _pattern[index],
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected
+                            ? Theme.of(context).colorScheme.onSecondary
+                            : Theme.of(context).colorScheme.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1, // ⭐ 1줄 강제
+                      overflow: TextOverflow.ellipsis, // ⭐ 넘치면 ... 처리
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   // ⭐ 기본 카드(주간/야간/오전/오후/휴무)도 커스텀 카드와 동일하게 삭제 가능하도록
   // 일반화함. 카드가 0개가 되면 다음 단계(패턴 구성/근무 선택) 자체가 불가능해지므로
@@ -621,7 +709,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 
   void _showAddCustomDialog() {
     final controller = TextEditingController();
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -632,7 +720,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             maxLength: kMaxShiftNameLength,
             autofocus: true,
             decoration: InputDecoration(
-              labelText: context.l10n.onboardingShiftNameHint(kMaxShiftNameLength),
+              labelText:
+                  context.l10n.onboardingShiftNameHint(kMaxShiftNameLength),
               counterText: '',
             ),
           ),
@@ -651,7 +740,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
               final issue = validateShiftName(text, otherNames: _allShiftTypes);
               if (issue != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(_shiftNameIssueMessage(context, issue, text))),
+                  SnackBar(
+                      content:
+                          Text(_shiftNameIssueMessage(context, issue, text))),
                 );
                 return;
               }
@@ -682,84 +773,123 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
   }
 
   Widget _buildMainAlarmSetup() {
-  // ⭐ CRITICAL FIX: 패턴에 실제로 쓰인 근무(_uniqueShifts)만이 아니라 만들어둔 모든
-  // 카드(_allShiftTypes)에 대해 알람을 설정할 수 있게 함 - 패턴엔 없어도(예: 오전/오후)
-  // 나중에 달력에서 그날만 근무 변경할 때 알람이 바로 적용되려면 여기서 미리 설정
-  // 가능해야 함.
-  final shiftsToSetup = _isRegular == true ? _allShiftTypes : _selectedShifts;
-  
-  return Padding(
-    padding: EdgeInsets.all(24.w),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.l10n.onboardingSetFixedAlarmPerShift,
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-        ),
-        // ⭐ 2026-08-24 - 근무명 지정 화면(_buildShiftTypeCreation)의 부연설명을
-        // 이 화면 스타일에 맞추면서 같이 적용한 wordSafeSpans()를 여기도 동일하게
-        // 적용 - 이 화면이 스타일 기준이 됐으니 줄바꿈 안전성도 같이 맞춤.
-        Text.rich(
-          TextSpan(
-            children: wordSafeSpans(
-              context.l10n.onboardingMaxAlarmsPerShift(kMaxAlarmTemplatesPerShift),
-              TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
-            ),
-          ),
-        ),
-        Text.rich(
-          TextSpan(
-            children: wordSafeSpans(
-              context.l10n.onboardingCanChangeInSettings,
-              TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
-            ),
-          ),
-        ),
-        SizedBox(height: 24.h),
-        
-        Expanded(
-          child: GridView.builder(
-            physics: const AlwaysScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 120.w,
-              crossAxisSpacing: 12.w,
-              mainAxisSpacing: 12.h,
-              childAspectRatio: 0.70,
-            ),
-            itemCount: shiftsToSetup.length,
-            itemBuilder: (context, index) {
-              final shift = shiftsToSetup[index];
-              final alarms = _shiftAlarms[shift] ?? [];
+    // 반복 패턴에 실제 포함된 근무만 먼저 보여준다. 패턴 밖의 근무는 나중에
+    // 설정에서 알람을 추가할 수 있어, 처음 설정하는 사람에게 불필요한 카드가
+    // 늘어나지 않는다.
+    final shiftsToSetup = _isRegular == true ? _uniqueShifts : _selectedShifts;
 
-              return _buildShiftAlarmCard(shift, alarms);
-            },
+    return Padding(
+      padding: EdgeInsets.all(24.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.onboardingSetFixedAlarmPerShift,
+            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
-        ),
-        
-        SizedBox(height: 16.h),
-        SizedBox(
-          width: double.infinity,
-          child: AppButton(
-            onPressed: () {
-              // ⭐ 2026-08-24 - 스텝 재번호(구 5→신4, 구4→신3) 때 이 삼항식 안의
-              // 값들을 놓쳤던 버그 수정. _buildStep()의 case 검색 정규식이
-              // "_step = <숫자>" 형태만 잡았는데 이 줄은 "_step = 조건 ? 5 : 4"라
-              // 안 걸렸음 - 그 결과 규칙적 플로우는 존재하지 않는 case 5로
-              // 가서 default(빈 Container)가 뜨고, 뒤로가기로 step4(완료 화면)에
-              // 도착해야 보이는 것처럼 보였던 것. 같은 함수(_buildMainAlarmSetup)를
-              // 규칙적(새 step3)/불규칙(새 step2) 양쪽이 공유해서 다음 스텝이
-              // 서로 다름 - 규칙적은 새 step4(_buildComplete 고정), 불규칙은
-              // 새 step3(case3의 삼항이 false일 때 _buildComplete).
-              setState(() => _step = _isRegular == true ? 4 : 3);
-            },
-            child: Text(context.l10n.commonNext),
+          // ⭐ 2026-08-24 - 근무명 지정 화면(_buildShiftTypeCreation)의 부연설명을
+          // 이 화면 스타일에 맞추면서 같이 적용한 wordSafeSpans()를 여기도 동일하게
+          // 적용 - 이 화면이 스타일 기준이 됐으니 줄바꿈 안전성도 같이 맞춤.
+          Text.rich(
+            TextSpan(
+              children: wordSafeSpans(
+                context.l10n
+                    .onboardingMaxAlarmsPerShift(kMaxAlarmTemplatesPerShift),
+                TextStyle(
+                    fontSize: 14.sp,
+                    color: Theme.of(context).colorScheme.onSurface),
+              ),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+          Text.rich(
+            TextSpan(
+              children: wordSafeSpans(
+                context.l10n.onboardingCanChangeInSettings,
+                TextStyle(
+                    fontSize: 14.sp,
+                    color: Theme.of(context).colorScheme.onSurface),
+              ),
+            ),
+          ),
+          // ⭐ 2026-09-15 (사용자 요청) - 위 설명 문구와 구분이 안 된다는 피드백: 강조색 안내 박스로 분리
+          SizedBox(height: 12.h),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: kAppMainAccent.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10.r),
+              border: Border.all(color: kAppMainAccent.withOpacity(0.35)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline_rounded,
+                    color: kAppMainAccent, size: 20.sp),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text.rich(
+                    TextSpan(
+                      children: wordSafeSpans(
+                        context.l10n.onboardingAlarmOptional,
+                        TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          color: kAppMainAccent,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20.h),
+
+          Expanded(
+            child: GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 120.w,
+                crossAxisSpacing: 12.w,
+                mainAxisSpacing: 12.h,
+                childAspectRatio: 0.70,
+              ),
+              itemCount: shiftsToSetup.length,
+              itemBuilder: (context, index) {
+                final shift = shiftsToSetup[index];
+                final alarms = _shiftAlarms[shift] ?? [];
+
+                return _buildShiftAlarmCard(shift, alarms);
+              },
+            ),
+          ),
+
+          SizedBox(height: 16.h),
+          SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              onPressed: _finishing ? null : _saveAndFinish,
+              child: _finishing
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 18.w,
+                          height: 18.w,
+                          child: const CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        ),
+                        SizedBox(width: 10.w),
+                        Text(context.l10n.onboardingSaving),
+                      ],
+                    )
+                  : Text(context.l10n.onboardingFinishSetup),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildShiftAlarmCard(String shift, List<AlarmSetting> alarms) {
     return InkWell(
@@ -769,8 +899,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
           color: Theme.of(context).colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: alarms.isEmpty ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.onSurface,
-            width: 2,
+            color: alarms.isEmpty
+                ? Theme.of(context).colorScheme.outline
+                : kAppMainAccent,
+            width: alarms.isEmpty ? 1 : 2,
           ),
         ),
         padding: EdgeInsets.all(12.w),
@@ -783,9 +915,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             SizedBox(height: 12.h),
-
             Expanded(
               // ⭐ 근무당 알람이 kMaxAlarmTemplatesPerShift(5)개까지 늘어나면서 이
               // 카드는 GridView 셀이라 높이가 고정인데 Center+Column(비스크롤)이라
@@ -804,27 +934,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
                   : SingleChildScrollView(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: alarms.map((alarm) => Padding(
-                          padding: EdgeInsets.symmetric(vertical: 2.h),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _getAlarmTypeEmoji(alarm.alarmTypeId),
-                                style: TextStyle(fontSize: 12.sp),
-                              ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                _formatTime(alarm.time),
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )).toList(),
+                        children: alarms
+                            .map((alarm) => Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 2.h),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        _getAlarmTypeEmoji(alarm.alarmTypeId),
+                                        style: TextStyle(fontSize: 12.sp),
+                                      ),
+                                      SizedBox(width: 4.w),
+                                      Text(
+                                        _formatTime(alarm.time),
+                                        style: TextStyle(
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ))
+                            .toList(),
                       ),
                     ),
             ),
@@ -840,10 +972,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
 
   String _getAlarmTypeEmoji(int alarmTypeId) {
     switch (alarmTypeId) {
-      case 1: return '🔔';  // 소리+진동
-      case 2: return '📳';  // 진동
-      case 3: return '🔇';  // 무음
-      default: return '🔔';
+      case 1:
+        return '🔔'; // 소리+진동
+      case 2:
+        return '📳'; // 진동
+      case 3:
+        return '🔇'; // 무음
+      default:
+        return '🔔';
     }
   }
 
@@ -877,55 +1013,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
             style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 24.h),
-          
           Expanded(
             child: _buildPatternGrid(isSelectable: true),
           ),
-          
           SizedBox(height: 16.h),
           SizedBox(
             width: double.infinity,
             child: AppButton(
-              onPressed: _todayIndex == null ? null : () {
-                setState(() => _step = 3);
-              },
+              onPressed: _todayIndex == null
+                  ? null
+                  : () {
+                      setState(() => _step = 3);
+                    },
               child: Text(context.l10n.commonNext),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ⭐ 2026-08-24 - "시작하기" 버튼을 다른 온보딩 화면들과 같은 위치(화면 맨 아래)로
-  // 옮김 - 예전엔 아이콘+텍스트와 한 그룹으로 화면 중앙에 같이 떠 있었음. 아이콘+
-  // 제목은 Expanded+Center로 남는 공간 안에서 계속 중앙 정렬되고, 버튼만 그 아래
-  // 고정됨(다른 화면들의 Expanded 스크롤영역 + 하단 고정 버튼 구조와 동일).
-  Widget _buildComplete() {
-    return Padding(
-      padding: EdgeInsets.all(24.w),
-      child: Column(
-        children: [
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.check_circle, size: 100.sp, color: Colors.green),
-                  SizedBox(height: 24.h),
-                  Text(
-                    context.l10n.onboardingAllSet,
-                    style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: AppButton(
-              onPressed: _finishing ? null : _saveAndFinish,
-              child: Text(context.l10n.commonGetStarted),
             ),
           ),
         ],
@@ -946,189 +1046,191 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {  // ⭐ �
         .map((name, color) => MapEntry(name, color.value));
   }
 
-Future<void> _saveAlarmTemplates() async {
-  for (var entry in _shiftAlarms.entries) {
-    final shift = entry.key;
-    final alarms = entry.value;
+  Future<void> _saveAlarmTemplates() async {
+    for (var entry in _shiftAlarms.entries) {
+      final shift = entry.key;
+      final alarms = entry.value;
 
-    for (var alarm in alarms) {
-      await DatabaseService.instance.insertAlarmTemplate(
-        shiftType: shift,
-        time: _formatTime(alarm.time),
-        alarmTypeId: alarm.alarmTypeId,  // 사용자가 선택한 타입
-        dayOffset: alarm.dayOffset,
-      );
+      for (var alarm in alarms) {
+        await DatabaseService.instance.insertAlarmTemplate(
+          shiftType: shift,
+          time: _formatTime(alarm.time),
+          alarmTypeId: alarm.alarmTypeId, // 사용자가 선택한 타입
+          dayOffset: alarm.dayOffset,
+        );
+      }
     }
+
+    print('✅ 알람 템플릿 저장 완료');
   }
 
-  print('✅ 알람 템플릿 저장 완료');
-}
-
- // onboarding_screen.dart의 _saveAndFinish() 수정
+  // onboarding_screen.dart의 _saveAndFinish() 수정
 
 // ⭐ 2026-09-15 (전체 코드 점검 Q-01) - "시작하기" 연타 방지. 예전엔 가드가 없어 두 번 누르면
 // 저장이 두 번 돌아 스케줄 행·알람 템플릿·알람이 중복으로 들어갈 수 있었음(saveSchedule은
 // id 없는 스케줄을 insert, insertAlarmTemplate은 append). 성공하면 화면이 교체되므로 되돌리지
 // 않고, 실패했을 때만 다시 누를 수 있게 풀어줌.
-bool _finishing = false;
+  bool _finishing = false;
 
-Future<void> _saveAndFinish() async {
-  if (_finishing) return;
-  setState(() => _finishing = true);
-  try {
-    await _saveAndFinishOnce();
-  } catch (e) {
-    debugPrint('❌ 온보딩 저장 실패: $e');
-    if (mounted) {
-      setState(() => _finishing = false);
-    }
-    rethrow;
-  }
-}
-
-Future<void> _saveAndFinishOnce() async {
-  final shiftColors = _generateShiftColors();
-  
-  List<String> activeShifts;
-  if (_isRegular!) {
-    activeShifts = _pattern.toSet().toList();
-  } else {
-    activeShifts = _selectedShifts;
-  }
-  
-  final schedule = ShiftSchedule(
-    isRegular: _isRegular!,
-    pattern: _isRegular! ? _pattern : null,
-    todayIndex: _todayIndex,
-    shiftTypes: _allShiftTypes,
-    activeShiftTypes: activeShifts,
-    startDate: DateTime.now(),
-    shiftColors: shiftColors,
-  );
-
-  await ref.read(scheduleProvider.notifier).saveSchedule(schedule);
-  await _saveAlarmTemplates();
-
-  // ⭐ 기존 알람 전체 삭제 (Native + DB)
-  // ⭐ CRITICAL FIX: 예전엔 cancelAlarm 하나만 실패해도(권한 문제 등) 예외가 전체를
-  // 끊고 나가서, 그 아래 deleteAllAlarms()가 아예 실행이 안 될 수 있었음 - 그러면
-  // DB에 예전 알람들이 그대로 남은 채로 새 10일치가 추가돼서, 옛 알람(다른 타입/
-  // 사운드로 설정됐던)과 새로 만든 알람이 섞여 울릴 수 있었음. 각 알람 취소를
-  // 개별로 방어해서, 무슨 일이 있어도 DB 삭제까지는 반드시 실행되게 함.
-  try {
-    final allAlarms = await DatabaseService.instance.getAllAlarms();
-    for (final alarm in allAlarms) {
-      if (alarm.id != null) {
-        try {
-          await AlarmService().cancelAlarm(alarm.id!);
-        } catch (e) {
-          print('⚠️ 개별 알람 취소 실패 (ID: ${alarm.id}): $e');
-        }
-      }
-    }
-    await DatabaseService.instance.deleteAllAlarms();
-    print('🗑️ 온보딩: 기존 알람 전체 삭제 완료');
-  } catch (e) {
-    print('⚠️ 기존 알람 삭제 실패: $e');
-  }
-
-  // ⭐ 10일치 알람 생성 (1회만!)
-  if (_isRegular!) {
-    await _generate10DaysAlarms(schedule);
-  }
-
-
-  // AlarmNotifier 갱신
-  if (mounted) {
+  Future<void> _saveAndFinish() async {
+    if (_finishing) return;
+    setState(() => _finishing = true);
     try {
-      await ref.read(alarmNotifierProvider.notifier).refresh();
-      print('✅ 온보딩 완료 - AlarmNotifier 갱신 완료');
+      await _saveAndFinishOnce();
     } catch (e) {
-      print('❌ AlarmNotifier 갱신 실패: $e');
-    }
-  }
-
-  // ⭐ "업데이트 후 첫 실행 안내가 기존 유저에게 안 뜬다" 버그 수정의 일부
-  // (update_service.dart의 markOnboardingBaselineVersion 주석 참고) - 지금
-  // 온보딩을 마치는 사람은 "방금 이 버전으로 막 시작한" 사람이니, 이 버전을
-  // 기준선으로 남겨서 나중에 릴리즈 노트가 신규 유저에게 잘못 뜨지 않게 함.
-  await UpdateService.markOnboardingBaselineVersion();
-
-  // ⭐ 온보딩 완료 후 무조건 달력탭으로 이동
-  if (mounted) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => const MainScreen(initialIndex: kCalendarTabIndex),  // 달력탭
-      ),
-    );
-  }
-}
-
-  // onboarding_screen.dart에서 수정
-
-Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
-  print('🔄 10일치 알람 생성 시작...');
-
-  // ⭐ alarm_generation_service.dart의 공용 계산 - 이 시점엔 _saveAlarmTemplates()가
-  // 이미 DB에 템플릿을 저장한 뒤라서(호출 순서는 _saveAndFinish() 참고) DB에서
-  // 다시 읽어옴. 날짜 D의 알람은 D 하루의 배정뿐 아니라 전날(D-1)/다음날(D+1)
-  // 배정의 "전날/다음날" 템플릿도 기여할 수 있으므로, 달력 탭/설정과 동일한
-  // computeDesiredFixedAlarmsForDate()를 그대로 재사용해야 함(달력 탭 규정과
-  // 어긋나면 안 됨 - 파일 상단 주석 참고).
-  final List<Alarm> alarms = [];
-  final today = DateTime.now();
-  final allTemplates = await DatabaseService.instance.getAllAlarmTemplates();
-
-  for (var i = 0; i < kAlarmRefreshWindowDays; i++) {
-    // ⭐ DST 안전: Duration(days: i) 더하기는 "정확히 24*i시간 뒤"라서, 자정 근처
-    // 시각에 서머타임 전환이 겹치면 원래 의도한 달력 날짜와 다른 날로 넘어갈 수
-    // 있음. DateTime(y, m, d+i)는 달의 일수를 넘어가도 알아서 정규화되면서
-    // 해당 달력 날짜의 로컬 자정을 정확히 가리킴.
-    final date = DateTime(today.year, today.month, today.day + i);
-
-    final desired = computeDesiredFixedAlarmsForDate(
-      date: date,
-      schedule: schedule,
-      allTemplates: allTemplates,
-    );
-
-    for (final item in desired) {
-      alarms.add(Alarm(
-        time: item.time,
-        date: item.dateTime,
-        type: 'fixed',
-        alarmTypeId: item.alarmTypeId,
-        shiftType: item.shiftType,
-        dayOffset: item.dayOffset,
-      ));
-    }
-  }
-
-  if (alarms.isNotEmpty) {
-    // DB 저장
-    await DatabaseService.instance.insertAlarmsInBatch(alarms);
-    
-    // ⭐ 변경: 저장된 알람 다시 읽어서 DB ID로 Native 등록
-    final savedAlarms = await DatabaseService.instance.getAllAlarms();
-    for (var alarm in savedAlarms) {
-      if (alarm.date != null && alarm.date!.isAfter(DateTime.now())) {
-        await AlarmService().scheduleAlarm(
-          id: alarm.id!,  // ⭐ DB ID 사용
-          dateTime: alarm.date!,
-          label: alarm.shiftType ?? context.l10n.alarmTitle,
-          soundType: 'loud',
+      debugPrint('❌ 온보딩 저장 실패: $e');
+      if (mounted) {
+        setState(() => _finishing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.onboardingSaveFailed)),
         );
       }
     }
-    
-    // ⭐ 삭제: refresh() 불필요
-    // if (mounted) {
-    //   ref.read(alarmNotifierProvider.notifier).refresh();
-    // }
   }
-  
-  print('✅ ${alarms.length}개 알람 생성 완료');
-}
+
+  Future<void> _saveAndFinishOnce() async {
+    final shiftColors = _generateShiftColors();
+
+    List<String> activeShifts;
+    if (_isRegular!) {
+      activeShifts = _pattern.toSet().toList();
+    } else {
+      activeShifts = _selectedShifts;
+    }
+
+    final schedule = ShiftSchedule(
+      isRegular: _isRegular!,
+      pattern: _isRegular! ? _pattern : null,
+      todayIndex: _todayIndex,
+      shiftTypes: _allShiftTypes,
+      activeShiftTypes: activeShifts,
+      startDate: DateTime.now(),
+      shiftColors: shiftColors,
+    );
+
+    await ref.read(scheduleProvider.notifier).saveSchedule(schedule);
+    await _saveAlarmTemplates();
+
+    // ⭐ 기존 알람 전체 삭제 (Native + DB)
+    // ⭐ CRITICAL FIX: 예전엔 cancelAlarm 하나만 실패해도(권한 문제 등) 예외가 전체를
+    // 끊고 나가서, 그 아래 deleteAllAlarms()가 아예 실행이 안 될 수 있었음 - 그러면
+    // DB에 예전 알람들이 그대로 남은 채로 새 10일치가 추가돼서, 옛 알람(다른 타입/
+    // 사운드로 설정됐던)과 새로 만든 알람이 섞여 울릴 수 있었음. 각 알람 취소를
+    // 개별로 방어해서, 무슨 일이 있어도 DB 삭제까지는 반드시 실행되게 함.
+    try {
+      final allAlarms = await DatabaseService.instance.getAllAlarms();
+      for (final alarm in allAlarms) {
+        if (alarm.id != null) {
+          try {
+            await AlarmService().cancelAlarm(alarm.id!);
+          } catch (e) {
+            print('⚠️ 개별 알람 취소 실패 (ID: ${alarm.id}): $e');
+          }
+        }
+      }
+      await DatabaseService.instance.deleteAllAlarms();
+      print('🗑️ 온보딩: 기존 알람 전체 삭제 완료');
+    } catch (e) {
+      print('⚠️ 기존 알람 삭제 실패: $e');
+    }
+
+    // ⭐ 10일치 알람 생성 (1회만!)
+    if (_isRegular!) {
+      await _generate10DaysAlarms(schedule);
+    }
+
+    // AlarmNotifier 갱신
+    if (mounted) {
+      try {
+        await ref.read(alarmNotifierProvider.notifier).refresh();
+        print('✅ 온보딩 완료 - AlarmNotifier 갱신 완료');
+      } catch (e) {
+        print('❌ AlarmNotifier 갱신 실패: $e');
+      }
+    }
+
+    // ⭐ "업데이트 후 첫 실행 안내가 기존 유저에게 안 뜬다" 버그 수정의 일부
+    // (update_service.dart의 markOnboardingBaselineVersion 주석 참고) - 지금
+    // 온보딩을 마치는 사람은 "방금 이 버전으로 막 시작한" 사람이니, 이 버전을
+    // 기준선으로 남겨서 나중에 릴리즈 노트가 신규 유저에게 잘못 뜨지 않게 함.
+    await UpdateService.markOnboardingBaselineVersion();
+
+    // ⭐ 온보딩 완료 후 무조건 달력탭으로 이동
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) =>
+              const MainScreen(initialIndex: kCalendarTabIndex), // 달력탭
+        ),
+      );
+    }
+  }
+
+  // onboarding_screen.dart에서 수정
+
+  Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
+    print('🔄 10일치 알람 생성 시작...');
+
+    // ⭐ alarm_generation_service.dart의 공용 계산 - 이 시점엔 _saveAlarmTemplates()가
+    // 이미 DB에 템플릿을 저장한 뒤라서(호출 순서는 _saveAndFinish() 참고) DB에서
+    // 다시 읽어옴. 날짜 D의 알람은 D 하루의 배정뿐 아니라 전날(D-1)/다음날(D+1)
+    // 배정의 "전날/다음날" 템플릿도 기여할 수 있으므로, 달력 탭/설정과 동일한
+    // computeDesiredFixedAlarmsForDate()를 그대로 재사용해야 함(달력 탭 규정과
+    // 어긋나면 안 됨 - 파일 상단 주석 참고).
+    final List<Alarm> alarms = [];
+    final today = DateTime.now();
+    final allTemplates = await DatabaseService.instance.getAllAlarmTemplates();
+
+    for (var i = 0; i < kAlarmRefreshWindowDays; i++) {
+      // ⭐ DST 안전: Duration(days: i) 더하기는 "정확히 24*i시간 뒤"라서, 자정 근처
+      // 시각에 서머타임 전환이 겹치면 원래 의도한 달력 날짜와 다른 날로 넘어갈 수
+      // 있음. DateTime(y, m, d+i)는 달의 일수를 넘어가도 알아서 정규화되면서
+      // 해당 달력 날짜의 로컬 자정을 정확히 가리킴.
+      final date = DateTime(today.year, today.month, today.day + i);
+
+      final desired = computeDesiredFixedAlarmsForDate(
+        date: date,
+        schedule: schedule,
+        allTemplates: allTemplates,
+      );
+
+      for (final item in desired) {
+        alarms.add(Alarm(
+          time: item.time,
+          date: item.dateTime,
+          type: 'fixed',
+          alarmTypeId: item.alarmTypeId,
+          shiftType: item.shiftType,
+          dayOffset: item.dayOffset,
+        ));
+      }
+    }
+
+    if (alarms.isNotEmpty) {
+      // DB 저장
+      await DatabaseService.instance.insertAlarmsInBatch(alarms);
+
+      // ⭐ 변경: 저장된 알람 다시 읽어서 DB ID로 Native 등록
+      final savedAlarms = await DatabaseService.instance.getAllAlarms();
+      for (var alarm in savedAlarms) {
+        if (alarm.date != null && alarm.date!.isAfter(DateTime.now())) {
+          await AlarmService().scheduleAlarm(
+            id: alarm.id!, // ⭐ DB ID 사용
+            dateTime: alarm.date!,
+            label: alarm.shiftType ?? context.l10n.alarmTitle,
+            soundType: 'loud',
+          );
+        }
+      }
+
+      // ⭐ 삭제: refresh() 불필요
+      // if (mounted) {
+      //   ref.read(alarmNotifierProvider.notifier).refresh();
+      // }
+    }
+
+    print('✅ ${alarms.length}개 알람 생성 완료');
+  }
 }
 
 // 알람 시간 설정 다이얼로그
@@ -1180,8 +1282,11 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              context.l10n.onboardingFixedAlarmMaxHint(kMaxAlarmTemplatesPerShift),
-              style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
+              context.l10n
+                  .onboardingFixedAlarmMaxHint(kMaxAlarmTemplatesPerShift),
+              style: TextStyle(
+                  fontSize: 13.sp,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             SizedBox(height: 16.h),
 
@@ -1198,7 +1303,8 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surfaceVariant,
                         borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: Theme.of(context).colorScheme.outline),
+                        border: Border.all(
+                            color: Theme.of(context).colorScheme.outline),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1212,15 +1318,19 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                                 onTap: () => _editAlarmTime(entry.key),
                                 borderRadius: BorderRadius.circular(8.r),
                                 child: Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 4.w),
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 4.h, horizontal: 4.w),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      DayOffsetBadge(dayOffset: alarm.dayOffset),
+                                      DayOffsetBadge(
+                                          dayOffset: alarm.dayOffset),
                                       SizedBox(width: 8.w),
                                       Text(
                                         '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
-                                        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                            fontSize: 18.sp,
+                                            fontWeight: FontWeight.bold),
                                       ),
                                     ],
                                   ),
@@ -1228,7 +1338,9 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                               ),
                               Spacer(),
                               IconButton(
-                                icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error, size: 20.sp),
+                                icon: Icon(Icons.delete,
+                                    color: Theme.of(context).colorScheme.error,
+                                    size: 20.sp),
                                 onPressed: () {
                                   setState(() {
                                     _alarms.removeAt(entry.key);
@@ -1243,11 +1355,14 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                           // 알람 타입 선택 버튼들
                           Row(
                             children: [
-                              _buildTypeButton(entry.key, 1, '🔔', context.l10n.alarmSoundVibration),
+                              _buildTypeButton(entry.key, 1, '🔔',
+                                  context.l10n.alarmSoundVibration),
                               SizedBox(width: 8.w),
-                              _buildTypeButton(entry.key, 2, '📳', context.l10n.alarmVibration),
+                              _buildTypeButton(entry.key, 2, '📳',
+                                  context.l10n.alarmVibration),
                               SizedBox(width: 8.w),
-                              _buildTypeButton(entry.key, 3, '🔇', context.l10n.alarmSilent),
+                              _buildTypeButton(
+                                  entry.key, 3, '🔇', context.l10n.alarmSilent),
                             ],
                           ),
                         ],
@@ -1270,7 +1385,9 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
             // 나음(사라지면 "왜 없어졌지" 헷갈릴 수 있음).
             Center(
               child: AppThirdButton(
-                onPressed: _alarms.length < kMaxAlarmTemplatesPerShift ? _addAlarm : null,
+                onPressed: _alarms.length < kMaxAlarmTemplatesPerShift
+                    ? _addAlarm
+                    : null,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -1279,8 +1396,8 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                     Text(context.l10n.alarmAdd),
                   ],
                 ),
-                ),
               ),
+            ),
             SizedBox(height: 8.h),
             Row(
               // ⭐ 2026-08-25 버그 수정 - mainAxisSize.min이면 이 Row가 부모
@@ -1342,13 +1459,15 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
             color: isSelected
-              ? (Theme.of(context).brightness == Brightness.dark
-                  ? Colors.orange.shade800  // 다크모드: 진한 주황 (대비율 6.74:1)
-                  : Colors.orange.shade700)  // 화이트모드: 진한 주황 (대비율 5.73:1)
-              : Theme.of(context).colorScheme.surface,
+                ? (Theme.of(context).brightness == Brightness.dark
+                    ? Colors.orange.shade800 // 다크모드: 진한 주황 (대비율 6.74:1)
+                    : Colors.orange.shade700) // 화이트모드: 진한 주황 (대비율 5.73:1)
+                : Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(8.r),
             border: Border.all(
-              color: isSelected ? Theme.of(context).colorScheme.tertiary : Theme.of(context).colorScheme.outline,
+              color: isSelected
+                  ? Theme.of(context).colorScheme.tertiary
+                  : Theme.of(context).colorScheme.outline,
               width: isSelected ? 2 : 1,
             ),
           ),
@@ -1360,7 +1479,11 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,
-                  color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,  // 선택 시 흰색으로 통일
+                  color: isSelected
+                      ? Colors.white
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurfaceVariant, // 선택 시 흰색으로 통일
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -1385,9 +1508,9 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           // 서로 다른 실제 날짜에 울리는 별개의 알람이라 중복이 아님.
           final isDuplicate = _alarms.asMap().entries.any((entry) {
             return entry.key != index &&
-                   entry.value.time.hour == time.hour &&
-                   entry.value.time.minute == time.minute &&
-                   entry.value.dayOffset == dayOffset;
+                entry.value.time.hour == time.hour &&
+                entry.value.time.minute == time.minute &&
+                entry.value.dayOffset == dayOffset;
           });
 
           if (isDuplicate) {
@@ -1396,7 +1519,9 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
               builder: (context) => AlertDialog(
                 title: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.tertiary, size: 28),
+                    Icon(Icons.warning_amber_rounded,
+                        color: Theme.of(context).colorScheme.tertiary,
+                        size: 28),
                     SizedBox(width: 8),
                     Text(context.l10n.alarmDuplicate),
                   ],
@@ -1410,7 +1535,8 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(context.l10n.commonOk, style: TextStyle(fontSize: 16)),
+                    child: Text(context.l10n.commonOk,
+                        style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),
@@ -1419,7 +1545,8 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
           }
 
           setState(() {
-            _alarms[index] = currentAlarm.copyWith(time: time, dayOffset: dayOffset);
+            _alarms[index] =
+                currentAlarm.copyWith(time: time, dayOffset: dayOffset);
           });
         },
       ),
@@ -1434,8 +1561,9 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
         onTimeSelected: (time, dayOffset) async {
           // ⭐ 중복 체크 (시각 + 전날/당일/다음날이 모두 같을 때만 중복)
           final isDuplicate = _alarms.any((alarm) =>
-            alarm.time.hour == time.hour && alarm.time.minute == time.minute && alarm.dayOffset == dayOffset
-          );
+              alarm.time.hour == time.hour &&
+              alarm.time.minute == time.minute &&
+              alarm.dayOffset == dayOffset);
 
           if (isDuplicate) {
             await showDialog(
@@ -1443,7 +1571,9 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
               builder: (context) => AlertDialog(
                 title: Row(
                   children: [
-                    Icon(Icons.warning_amber_rounded, color: Theme.of(context).colorScheme.tertiary, size: 28),
+                    Icon(Icons.warning_amber_rounded,
+                        color: Theme.of(context).colorScheme.tertiary,
+                        size: 28),
                     SizedBox(width: 8),
                     Text(context.l10n.alarmDuplicate),
                   ],
@@ -1457,7 +1587,8 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text(context.l10n.commonOk, style: TextStyle(fontSize: 16)),
+                    child: Text(context.l10n.commonOk,
+                        style: TextStyle(fontSize: 16)),
                   ),
                 ],
               ),
@@ -1467,7 +1598,8 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
 
           setState(() {
             // 기본값: 소리 (alarmTypeId = 1)
-            _alarms.add(AlarmSetting(time: time, alarmTypeId: 1, dayOffset: dayOffset));
+            _alarms.add(
+                AlarmSetting(time: time, alarmTypeId: 1, dayOffset: dayOffset));
           });
         },
       ),
@@ -1476,10 +1608,10 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
 }
 
 class _SamsungStyleTimePicker extends StatefulWidget {
-  final String shiftName;  // ⭐ 제목 왼쪽에 "{근무명} - 시간 선택"으로 표시
+  final String shiftName; // ⭐ 제목 왼쪽에 "{근무명} - 시간 선택"으로 표시
   final Function(TimeOfDay, int dayOffset) onTimeSelected;
-  final TimeOfDay? initialTime;  // ⭐ 초기 시간 (수정 시 사용)
-  final int initialDayOffset;    // ⭐ 초기 전날/당일/다음날 (기본값: 당일)
+  final TimeOfDay? initialTime; // ⭐ 초기 시간 (수정 시 사용)
+  final int initialDayOffset; // ⭐ 초기 전날/당일/다음날 (기본값: 당일)
 
   const _SamsungStyleTimePicker({
     required this.shiftName,
@@ -1489,7 +1621,8 @@ class _SamsungStyleTimePicker extends StatefulWidget {
   });
 
   @override
-  State<_SamsungStyleTimePicker> createState() => _SamsungStyleTimePickerState();
+  State<_SamsungStyleTimePicker> createState() =>
+      _SamsungStyleTimePickerState();
 }
 
 class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
@@ -1561,7 +1694,9 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                         height: 50.h,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: _isAM ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.outline,
+                            color: _isAM
+                                ? Theme.of(context).colorScheme.secondary
+                                : Theme.of(context).colorScheme.outline,
                             width: _isAM ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(8.r),
@@ -1579,9 +1714,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                         ),
                       ),
                     ),
-
                     SizedBox(height: 8.h),
-                    
                     GestureDetector(
                       onTap: () {
                         setState(() {
@@ -1593,7 +1726,9 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                         height: 50.h,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: !_isAM ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.outline,
+                            color: !_isAM
+                                ? Theme.of(context).colorScheme.secondary
+                                : Theme.of(context).colorScheme.outline,
                             width: !_isAM ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(8.r),
@@ -1613,7 +1748,7 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                     ),
                   ],
                 ),
-                
+
                 SizedBox(width: 16.w),
 
                 // ⭐ 시간 NumberPicker 수정
@@ -1624,8 +1759,13 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                   infiniteLoop: true,
                   itemHeight: 50.h,
                   itemWidth: (60.w).clamp(50.0, 80.0),
-                  textStyle: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+                  textStyle: TextStyle(
+                      fontSize: 16.sp,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  selectedTextStyle: TextStyle(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface),
                   onChanged: (value) {
                     setState(() {
                       if (_hour == 11 && value == 12) {
@@ -1638,13 +1778,17 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                   },
                   decoration: BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: Theme.of(context).colorScheme.outline),
-                      bottom: BorderSide(color: Theme.of(context).colorScheme.outline),
+                      top: BorderSide(
+                          color: Theme.of(context).colorScheme.outline),
+                      bottom: BorderSide(
+                          color: Theme.of(context).colorScheme.outline),
                     ),
                   ),
                 ),
-                
-                Text(':', style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold)),
+
+                Text(':',
+                    style: TextStyle(
+                        fontSize: 24.sp, fontWeight: FontWeight.bold)),
 
                 // ⭐ 분 NumberPicker 수정
                 _TappableNumberPicker(
@@ -1655,8 +1799,13 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                   infiniteLoop: true,
                   itemHeight: 50.h,
                   itemWidth: (60.w).clamp(50.0, 80.0),
-                  textStyle: TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  selectedTextStyle: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface),
+                  textStyle: TextStyle(
+                      fontSize: 16.sp,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  selectedTextStyle: TextStyle(
+                      fontSize: 24.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface),
                   onChanged: (value) {
                     setState(() {
                       _minute = value;
@@ -1664,16 +1813,18 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                   },
                   decoration: BoxDecoration(
                     border: Border(
-                      top: BorderSide(color: Theme.of(context).colorScheme.outline),
-                      bottom: BorderSide(color: Theme.of(context).colorScheme.outline),
+                      top: BorderSide(
+                          color: Theme.of(context).colorScheme.outline),
+                      bottom: BorderSide(
+                          color: Theme.of(context).colorScheme.outline),
                     ),
                   ),
                 ),
               ],
             ),
-            
+
             SizedBox(height: 24.h),
-            
+
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -1693,7 +1844,8 @@ class _SamsungStyleTimePickerState extends State<_SamsungStyleTimePicker> {
                       hour24 = _hour == 12 ? 12 : _hour + 12;
                     }
 
-                    await widget.onTimeSelected(TimeOfDay(hour: hour24, minute: _minute), _dayOffset);
+                    await widget.onTimeSelected(
+                        TimeOfDay(hour: hour24, minute: _minute), _dayOffset);
                     if (mounted) Navigator.pop(context);
                   },
                   child: Text(context.l10n.commonOk),
@@ -1748,7 +1900,9 @@ class _TappableNumberPickerState extends State<_TappableNumberPicker> {
     super.initState();
     final initialIndex = widget.value - widget.minValue;
     _controller = FixedExtentScrollController(
-      initialItem: widget.infiniteLoop ? initialIndex + _infiniteOffset * _itemCount : initialIndex,
+      initialItem: widget.infiniteLoop
+          ? initialIndex + _infiniteOffset * _itemCount
+          : initialIndex,
     );
   }
 
@@ -1793,7 +1947,7 @@ class _TappableNumberPickerState extends State<_TappableNumberPicker> {
 
   void _handleTap(int targetValue) {
     final targetIndex = _valueToIndex(targetValue);
-    _controller.jumpToItem(targetIndex);  // ⭐ 즉시 점프 (애니메이션 없음)
+    _controller.jumpToItem(targetIndex); // ⭐ 즉시 점프 (애니메이션 없음)
     HapticFeedback.selectionClick();
     widget.onChanged(targetValue);
   }
@@ -1836,8 +1990,17 @@ class _TappableNumberPickerState extends State<_TappableNumberPicker> {
                 child: Text(
                   _formatNumber(value),
                   style: isSelected
-                      ? (widget.selectedTextStyle ?? TextStyle(fontSize: 24.sp, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface))
-                      : (widget.textStyle ?? TextStyle(fontSize: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                      ? (widget.selectedTextStyle ??
+                          TextStyle(
+                              fontSize: 24.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface))
+                      : (widget.textStyle ??
+                          TextStyle(
+                              fontSize: 16.sp,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant)),
                 ),
               ),
             );
@@ -1850,7 +2013,8 @@ class _TappableNumberPickerState extends State<_TappableNumberPicker> {
 }
 
 // ⭐ 2026-09-14 (출시전 감사 #11) - 근무명 검증 결과 → 사용자 안내 문구
-String _shiftNameIssueMessage(BuildContext context, ShiftNameIssue issue, String name) {
+String _shiftNameIssueMessage(
+    BuildContext context, ShiftNameIssue issue, String name) {
   switch (issue) {
     case ShiftNameIssue.empty:
       return context.l10n.onboardingEnterShiftName;

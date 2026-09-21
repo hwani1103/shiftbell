@@ -81,10 +81,14 @@ void main() {
       // (전날 19시~오늘 07시) 진행 중이라, ctx.date는 어제가 된다 - 그 시점까지의
       // 연속 야간은 4일째. 12시간 버킷(임계 3일)과 근무시간무관 연속근무(임계 7일 -
       // 여긴 4일이라 아직 미달) 둘 다 같은 사실을 가리키지만 여기선 버킷만 fire.
+      // ⭐ 2026-09-18 재설계 - 이 패턴의 개인 기준선은 12시간×5일/8일*7=52.5시간인데
+      // 이 7일 창은 위상상 5개 근무일을 다 담아 기본근무만 60시간(기준선보다 7.5시간
+      // 많음, 최소 임계값 6시간은 넘지만 15% 임계값(7.875시간)에는 근소하게 못 미침) -
+      // "총량과다"라는 시나리오 의도를 분명히 보여주려고 OT 2시간을 더해 확실히 넘긴다.
       final pattern = [_kNight, _kNight, _kNight, _kNight, _kNight, _kOff, _kOff, _kOff];
       final today = DateTime(2026, 9, 10);
       final a = analyzerFor(pattern, today, 4);
-      final b = briefingFor(a, DateTime(2026, 9, 10, 6, 45)); // 퇴근(07:00) 45분 전
+      final b = briefingFor(a, DateTime(2026, 9, 10, 6, 45), ot: {'2026-09-09': 120}); // 퇴근(07:00) 45분 전
 
       expect(b.level, ConditionLevel.highLoad);
       expectNoTopicDuplicates(b);

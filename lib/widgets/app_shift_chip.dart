@@ -48,6 +48,7 @@ class AppShiftChip extends StatelessWidget {
     this.enabled = true,
     this.selected = false,
     this.dense = false,
+    this.strongSelected = false,
   });
 
   final String label;
@@ -70,6 +71,10 @@ class AppShiftChip extends StatelessWidget {
   /// 근무명 태그와 완전히 동일한 크기.
   final bool dense;
 
+  /// 설정의 교대 패턴처럼 선택 상태가 설명 문구 없이도 즉시 보여야 하는 곳에서
+  /// 사용한다. 기본값은 기존 selected 디자인을 유지한다.
+  final bool strongSelected;
+
   @override
   Widget build(BuildContext context) {
     // ⭐ 2026-09-12(사용자 피드백) - "선택된 상태가 너무 연하게 보인다"(일정
@@ -89,9 +94,11 @@ class AppShiftChip extends StatelessWidget {
       fillColor = kAppChipFill.withValues(alpha: 0.6);
       textColor = kAppChipBorder.withValues(alpha: 0.45);
     } else if (selected) {
-      borderColor = kAppMainAccent;
-      fillColor = kAppMainAccent.withValues(alpha: 0.26);
-      textColor = kAppMainAccent;
+      borderColor = strongSelected ? const Color(0xFF263AA8) : kAppMainAccent;
+      fillColor = strongSelected
+          ? kAppMainAccent
+          : kAppMainAccent.withValues(alpha: 0.26);
+      textColor = strongSelected ? Colors.white : kAppMainAccent;
     } else {
       borderColor = kAppChipBorder;
       fillColor = kAppChipFill;
@@ -107,6 +114,15 @@ class AppShiftChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         // ⭐ 두꺼운 테두리 - 이 앱의 칩을 다른 앱과 구분 짓는 특색으로 삼기로 함.
         border: Border.all(color: borderColor, width: borderWidth),
+        boxShadow: selected && strongSelected
+            ? [
+                BoxShadow(
+                  color: kAppMainAccent.withValues(alpha: 0.35),
+                  blurRadius: 7,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: Text(
         label,

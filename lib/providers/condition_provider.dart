@@ -95,6 +95,17 @@ final todayConditionResultProvider = Provider<ConditionResult?>((ref) {
   );
 });
 
+/// ⭐ 2026-09-18 - "이 근무 패턴 자체가 구조적으로 EU/IOM 절대 기준을 넘는지"를
+/// todayConditionResultProvider가 이미 계산해둔 개인 기준선(weeklyBaselineMinutes)으로
+/// 재사용해서 만드는 조용한 배경 정보(ConditionLevel과 무관 - condition_rule_engine.dart의
+/// ScheduleLoadProfile 클래스 설명 참고). 화면(condition_tab.dart)은 이걸 "확인된 사실"
+/// 리스트가 아니라 카드 상단에 작은 회색 한 줄로만 보여준다.
+final scheduleLoadProfileProvider = Provider<ScheduleLoadProfile?>((ref) {
+  final result = ref.watch(todayConditionResultProvider);
+  if (result == null) return null;
+  return ConditionRuleEngine.scheduleLoadProfileFor(result.weeklyBaselineMinutes);
+});
+
 /// 이번 주(월~일) 패턴 요약.
 final currentWeekSummaryProvider = Provider<WeeklyPatternSummary?>((ref) {
   final analyzer = ref.watch(conditionAnalyzerProvider);

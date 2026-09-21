@@ -21,13 +21,14 @@
      minHeight/targetCellHeight 모두 2행 기준(110dp)으로, minWidth가 이미
      암시하던 3칸 기준에 맞춰 targetCellWidth도 3으로 맞춤. 이제 어떤 런처가
      어느 필드를 보든 항상 같은 3x2로 귀결되어야 함.
-     ⚠️ 사용자 실기기에서 이 변경 후 렌더링이 그대로/개선됐는지 확인 필요(런처별
-     실제 그리드 셀 물리적 높이는 앱 코드로 알 수 없어 100% 장담은 못 함). -->
+     ⭐ 2026-09-21 - 상태 줄 삭제로 세 요소를 가로 한 줄에 배치할 수 있게 되어
+     minHeight/targetCellHeight를 모두 1행 기준(40dp/1)으로 맞췄다. 너비는
+     세 요소가 긴 근무명에서도 겹치지 않도록 3칸(180dp)을 유지한다. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="150dp"
-    android:minHeight="110dp"
+    android:minWidth="180dp"
+    android:minHeight="40dp"
     android:targetCellWidth="3"
-    android:targetCellHeight="2"
+    android:targetCellHeight="1"
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/sleep_widget"
     android:resizeMode="none"

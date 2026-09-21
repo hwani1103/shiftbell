@@ -9,6 +9,11 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    # 출시전 감사 보관용 재현·진단 코드 - 실행 대상이 아니고 옛 SDK 기준이라 기본 분석 결과를 가림(2026-09-15 AUD-08)
+    - docs/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

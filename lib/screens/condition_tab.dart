@@ -26,6 +26,8 @@ import '../providers/tab_visibility_provider.dart';
 import '../services/condition/condition_rule_engine.dart';
 import '../services/condition/evidence_database.dart';
 import '../services/condition/recovery_briefing_engine.dart';
+import '../services/condition/shift_time_category.dart';
+import '../services/condition/sleep_by_category_stats.dart';
 import '../services/condition/sleep_day_slots.dart';
 import '../theme/app_colors.dart';
 import '../utils/sleep_format_util.dart';
@@ -143,6 +145,20 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody> with WidgetsBind
         // ⭐ 2026-09-15 - 확인을 미룬 자동 기록이 쌓이면 탭 위쪽이 카드로 뒤덮였음(재검토 #3). 최신 3건만 보이고
         // 나머지는 개수만 알림 - 앞의 카드를 처리하면 다음 것이 올라온다(자동 확정은 여전히 하지 않음).
         if (pending.isNotEmpty) ...[
+          // ⭐ P2 #7(2026-09-18, 사용자 요청) - 대기 카드가 2건 이상이면 화면에 보이는
+          // 만큼(최대 _kMaxPendingCards개)을 한 번에 "맞아요" 처리하는 버튼. 되돌릴 필요가
+          // 있으면 확인 뒤 "최근 수면 기록"에서 개별 수정·삭제하면 됨(별도 되돌리기 없음).
+          if (pending.length >= 2)
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => ref
+                    .read(sleepRecordProvider.notifier)
+                    .confirmAllPending(pending.take(_kMaxPendingCards).toList()),
+                icon: const Icon(Icons.done_all, size: 18),
+                label: const Text('보이는 기록 모두 확인'),
+              ),
+            ),
           for (final r in pending.take(_kMaxPendingCards)) _PendingSleepConfirmationCard(record: r),
           if (pending.length > _kMaxPendingCards)
             Padding(
@@ -155,9 +171,18 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody> with WidgetsBind
           const SizedBox(height: 16),
         ],
         // 근무시간이 하나도 없으면 오늘의 컨디션 대신 설정 안내 - 수면 기록(아래 미니 달력)은 그래도 남길 수 있음
-        if (setupNeeded) const _SetupNeededCard() else const _TodayConditionCard(),
+        // ⭐ 2026-09-21(사용자 지적) - 그동안 이 상태에서는 자동 수면 감지가 계속 돌아가 기록이 쌓이는데도
+        // 화면에는 설정 안내만 떠서 그 기록에 대해 한마디도 안 했음. 근무 일정 없이도 말할 수 있는 것
+        // (어제 수면·최근 7일 평균)만 추려서 위에 먼저 보여준다.
+        if (setupNeeded) ...[
+          const _SleepOnlySummaryCard(),
+          const _SetupNeededCard(),
+        ] else
+          const _TodayConditionCard(),
         const SizedBox(height: 16),
         const _SleepMiniCalendarCard(),
+        const SizedBox(height: 16),
+        const _SleepCategoryAveragesCard(),
         // ⭐ 2026-09-13 - 스크롤 맨 아래에 "사용하지 않기" 버튼
         const SizedBox(height: 28),
         DisableTabButton(
@@ -230,6 +255,10 @@ class _TodayConditionCardState extends ConsumerState<_TodayConditionCard> {
     final briefing = ref.watch(recoveryBriefingProvider);
     if (briefing == null) return const SizedBox.shrink();
     final evidenceIds = briefing.evidenceIds;
+    // ⭐ 2026-09-18 - "이 근무 패턴 자체가 구조적으로 EU/IOM 기준을 넘는지"는
+    // 스케줄이 안 바뀌면 매일 같은 값이라, 매번 반복되는 캐션(facts 리스트)이
+    // 아니라 카드 상단에 조용한 배경 정보 한 줄로만 보여준다(사용자 지적 참고).
+    final loadProfile = ref.watch(scheduleLoadProfileProvider);
 
     return Card(
       color: kAppMainAccent.withOpacity(0.06),
@@ -258,11 +287,18 @@ class _TodayConditionCardState extends ConsumerState<_TodayConditionCard> {
               briefing.situation,
               style: const TextStyle(fontSize: 13.5, height: 1.35, fontWeight: FontWeight.w600, color: Colors.black87),
             ),
+            if (loadProfile != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                loadProfile.note,
+                style: const TextStyle(fontSize: 11.5, height: 1.3, color: Colors.black45),
+              ),
+            ],
             const SizedBox(height: 14),
-            const _SectionLabel('확인된 사실'),
+            const _SectionLabel('최근 근무·수면'),
             const SizedBox(height: 6),
             if (briefing.facts.isEmpty)
-              const Text('아직 확인된 사실이 없어요.', style: TextStyle(fontSize: 13, color: Colors.black54))
+              const Text('아직 살펴볼 내용이 없어요.', style: TextStyle(fontSize: 13, color: Colors.black54))
             else
               for (final fact in briefing.facts) _FactRow(fact: fact),
             const SizedBox(height: 12),
@@ -279,6 +315,8 @@ class _TodayConditionCardState extends ConsumerState<_TodayConditionCard> {
               const SizedBox(height: 12),
               _LimitationBox(lines: briefing.limitations),
             ],
+            const SizedBox(height: 8),
+            const _GeneralGuidanceNote(),
             if (evidenceIds.isNotEmpty) ...[
               const SizedBox(height: 4),
               TextButton.icon(
@@ -386,6 +424,54 @@ class _ActionRow extends StatelessWidget {
             child: Text(action.text, style: const TextStyle(fontSize: 13.5, height: 1.4, color: Colors.black87)),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// ⭐ 2026-09-21(사용자 요청) - 문장마다 "근거 수준은 낮음"·"~로 보고돼요" 같은 단서를
+/// 달아 딱딱해지는 대신, 카드 전체에 해당하는 한 줄만 맨 아래에 조용히 둔다.
+class _GeneralGuidanceNote extends StatelessWidget {
+  const _GeneralGuidanceNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      '수면·교대근무 연구를 참고한 일반적인 안내예요(의학적 진단이 아니에요).',
+      style: TextStyle(fontSize: 11, height: 1.3, color: Colors.black38),
+    );
+  }
+}
+
+/// ⭐ 2026-09-21(사용자 지적, 항목 3) - 근무시간을 아직 안 넣은 상태 전용. 근무 일정이
+/// 없어도 계산되는 수면 사실(어제 수면·최근 7일 평균)만 추려서 보여준다 - 자동 감지는
+/// 그 상태에서도 계속 돌아가므로 "기록은 쌓이는데 앱은 아무 말도 안 한다"가 되지 않게 함.
+class _SleepOnlySummaryCard extends ConsumerWidget {
+  const _SleepOnlySummaryCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final briefing = ref.watch(recoveryBriefingProvider);
+    if (briefing == null) return const SizedBox.shrink();
+    final facts = briefing.facts
+        .where((f) => f.topic == BriefingTopic.sleepAmount || f.topic == BriefingTopic.sleepAverage)
+        .toList();
+    if (facts.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _SectionLabel('최근 수면'),
+              const SizedBox(height: 6),
+              for (final fact in facts) _FactRow(fact: fact),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -596,6 +682,78 @@ class _SleepMiniCalendarCardState extends ConsumerState<_SleepMiniCalendarCard> 
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── 근무 종류별 평균 수면 (P2 #6, 2026-09-18) ─────────────────────────────
+//
+// ⭐ 사용자 요청 - "야간 후 평균 4시간 40분, 주간 후 6시간 50분"처럼 근무표와 실제
+// 수면 기록을 둘 다 가진 이 앱만 만들 수 있는 통계. 표본 부족한 카테고리는 아예 안
+// 보임(sleep_by_category_stats.dart). 점수·등급화 없이 담백하게 숫자만 보여주고,
+// 권장 최소(7시간, EVIDENCE-011) 미만인 카테고리만 옅은 경고 아이콘을 붙인다 -
+// 새로운 판정을 만드는 게 아니라 이미 있는 기준(recommendedSleepMinMinutes)을
+// 재사용하는 것뿐이라 원칙 위반이 아니다.
+
+class _SleepCategoryAveragesCard extends ConsumerWidget {
+  const _SleepCategoryAveragesCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final averages = ref.watch(sleepCategoryAveragesProvider);
+    if (averages.isEmpty) return const SizedBox.shrink();
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('근무별 평균 수면', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 2),
+            const Text(
+              '최근 30일 기록 기준이에요. 표본이 3일 미만인 근무는 안 보여요.',
+              style: TextStyle(fontSize: 11.5, color: Colors.black45),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 16,
+              runSpacing: 10,
+              children: [for (final a in averages) _SleepCategoryAverageTile(average: a)],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SleepCategoryAverageTile extends StatelessWidget {
+  final SleepCategoryAverage average;
+  const _SleepCategoryAverageTile({required this.average});
+
+  @override
+  Widget build(BuildContext context) {
+    final low = average.averageMinutes < ConditionRuleEngine.recommendedSleepMinMinutes;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(average.category.label, style: const TextStyle(fontSize: 12.5, color: Colors.black54)),
+            if (low) ...[
+              const SizedBox(width: 3),
+              const Icon(Icons.info_outline, size: 12, color: Color(0xFFB26A00)),
+            ],
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          '${fmtDuration(Duration(minutes: average.averageMinutes))} 후',
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: low ? const Color(0xFFB26A00) : Colors.black87),
+        ),
+        Text('(${average.sampleDays}일 기준)', style: const TextStyle(fontSize: 10.5, color: Colors.black38)),
+      ],
     );
   }
 }

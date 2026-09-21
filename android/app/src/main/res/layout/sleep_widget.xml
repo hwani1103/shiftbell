@@ -1,44 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    ⭐ 실제 수면 기록 위젯(캘린더 위젯과 완전 별개). "오늘 근무 + 상태"를 각각
-    명시적인 줄로 보여주고(예: "오늘 근무: 야간" / "상태: 활동 중"), 토글 버튼 1개 대신
-    "수면"/"기상" 버튼 2개를 항상 나란히 보여준다(2026-09-01 재설계 -
+    ⭐ 실제 수면 기록 위젯(캘린더 위젯과 완전 별개). "오늘 근무" 한 줄 +
+    "수면"/"기상" 버튼 2개를 보여준다(2026-09-01 재설계 -
     SleepWidgetProvider.kt 참고, 수면기록_자동추정_설계.md 6장).
 
-    ⭐ 2026-09-01 후속13 - 사용자 요청 2건 반영:
-    1. "빨리 써야 하는 위젯이니 작게" - 전체적으로 padding/margin/텍스트 크기를
-       줄여서 3x2(180x110dp)로 커졌던 걸 다시 컴팩트하게(sleep_widget_info.xml도
-       같이 줄임). 실기기 검증은 아직 못 함 - 런처마다 그리드 셀 실제 크기가
-       달라서 "정확히 몇 x 몇"으로 딱 떨어진다고 보장은 못 함.
-    2. "근무명/상태 값을 캘린더 위젯처럼 색깔 있는 칩으로" - 근무명은
-       달력탭/캘린더 위젯과 동일하게 그 근무명에 배정된 색을 그대로 쓰고
-       (SleepWidgetProvider.kt가 CalendarWidgetScheduleResolver의 shiftColors를
-       재사용), 상태는 "활동중"(초록)/"수면중"(보라) 2색 중 하나를 코드에서
-       판정해서 배정. 칩 배경은 캘린더 위젯의 pillbg_*/pill_* 패턴과 동일하게
-       FrameLayout(ImageView 배경 + TextView 텍스트) 조합으로 구현.
-       "오늘 근무"/"상태" 라벨 텍스트 크기도 통일함(11sp로 동일).
+    ⭐ 2026-09-01 후속13 - "빨리 써야 하는 위젯이니 작게" 요청으로 한 번
+    컴팩트하게 줄였다가, 2026-09-13(2차)에 위젯 프레임 자체가 다시 3x2(150x110dp)로
+    커짐(sleep_widget_info.xml 참고 - 일부 런처에서 그리드 셀 크기가 안 맞아
+    레이아웃이 깨질 위험 때문에 프레임을 키운 것 - 내용물 크기는 그대로 둬서
+    한동안 여백이 많았음).
+
+    ⭐ 2026-09-21 - 상태 줄을 없앤 뒤 남은 세 요소(오늘 근무/수면/기상)를
+    가로 한 줄로 재배치했다. 메타데이터도 공식 셀 공식과 일치하는 3x1로
+    내려 작은 화면/구형 런처가 minHeight와 targetCellHeight 중 어느 쪽을
+    보더라도 같은 한 행으로 계산한다.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/sleep_widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_panel_light"
-    android:orientation="vertical"
-    android:padding="6dp"
+    android:orientation="horizontal"
+    android:padding="5dp"
     android:gravity="center_vertical">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1.45"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="start|center_vertical">
 
         <TextView
             android:id="@+id/sleep_shift_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="6dp"
-            android:text="오늘 근무"
+            android:layout_marginEnd="3dp"
+            android:text="오늘"
             android:textColor="#FF424242"
             android:textStyle="bold"
             android:textSize="11sp"/>
@@ -53,73 +51,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:id="@+id/sleep_status_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="6dp"
-            android:text="상태"
-            android:textColor="#FF424242"
-            android:textStyle="bold"
-            android:textSize="11sp"/>
-
-        <!-- ⭐ 2026-09-01 후속15 - 상태 칩(색상 배경 pill)이 일부 런처에서 계속
-             우측으로 쏠려 보이는 문제가 있어(런처의 위젯 뷰 캐싱 의심 - 근무명
-             칩은 구조가 한 번도 안 바뀌어서 멀쩡한데 상태 칩만 여러 번 바뀌어서
-             그런 것으로 추정) 사용자 요청으로 칩을 완전히 없애고 평범한 텍스트로
-             되돌림. 근무명 칩(sleep_shift_chip_bg/text)은 그대로 유지. -->
-        <TextView
-            android:id="@+id/sleep_status_value_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:maxEms="10"
-            android:text="활동중"
-            android:textColor="#FF212121"
-            android:textStyle="bold"
-            android:textSize="11sp"/>
-
-        <TextView
-            android:id="@+id/sleep_status_duration_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:text=""
-            android:textColor="#FF424242"
-            android:textSize="10sp"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:orientation="horizontal">
-
         <TextView
             android:id="@+id/sleep_button_sleep"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginEnd="6dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="3dp"
             android:background="@drawable/sleep_widget_button_bg"
             android:gravity="center"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
             android:maxLines="1"
-            android:text="🌙 수면"
+            android:text="수면"
             android:textColor="#FFFFFFFF"
             android:textSize="11sp"
             android:textStyle="bold"/>
@@ -131,14 +75,14 @@
             android:layout_weight="1"
             android:background="@drawable/sleep_widget_button_bg_inactive"
             android:gravity="center"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"
             android:maxLines="1"
-            android:text="☀️ 기상"
+            android:text="기상"
             android:textColor="#FFFFFFFF"
             android:textSize="11sp"
             android:textStyle="bold"/>
 
-    </LinearLayout>
+</LinearLayout>
 
 </LinearLayout>

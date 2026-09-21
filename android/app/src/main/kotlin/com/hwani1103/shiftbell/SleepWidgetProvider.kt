@@ -89,10 +89,10 @@ class SleepWidgetProvider : AppWidgetProvider() {
             }
             views.setFloat(R.id.sleep_widget_root, "setAlpha", 1f)
 
+            // ⭐ 2026-09-18 - "상태(활동중/수면중)" 줄 자체를 없앰(사용자 요청 - 위젯이
+            // 커진 만큼 근무명·버튼 두 요소만 크게 보여주는 쪽을 택함). 다만 "지금 자고
+            // 있다고 볼 수 있는가"는 여전히 계산해서 버튼 강조(sleeping)에만 쓴다.
             val state = currentSleepingState(context)
-            val (statusLabel, statusDuration) = statusValue(state)
-            views.setTextViewText(R.id.sleep_status_value_text, statusLabel)
-            views.setTextViewText(R.id.sleep_status_duration_text, statusDuration)
 
             // ⭐ 지금 의미 있는 쪽 버튼(수면 중이면 "기상", 아니면 "수면")을 강조색으로,
             // 반대쪽은 회색으로 - 지금 상태와 무엇을 눌러야 하는지를 명확히 함.
@@ -137,8 +137,9 @@ class SleepWidgetProvider : AppWidgetProvider() {
 
         private fun renderDisabled(views: RemoteViews) {
             views.setFloat(R.id.sleep_widget_root, "setAlpha", 0.4f)
-            views.setTextViewText(R.id.sleep_status_value_text, "컨디션 탭")
-            views.setTextViewText(R.id.sleep_status_duration_text, "활성화 후 사용 가능")
+            // ⭐ 2026-09-18 - 상태 줄이 없어졌으니, "왜 흐릿한지"는 근무명 라벨 자리에 대신 적는다.
+            views.setTextViewText(R.id.sleep_shift_label, "탭 꺼짐")
+            views.setViewVisibility(R.id.sleep_shift_chip_bg, android.view.View.GONE)
             views.setInt(R.id.sleep_button_sleep, "setBackgroundResource", R.drawable.sleep_widget_button_bg_inactive)
             views.setInt(R.id.sleep_button_wake, "setBackgroundResource", R.drawable.sleep_widget_button_bg_inactive)
             // ⭐ onClickPendingIntent를 아예 안 걸어서(버튼/루트 전부) 탭해도
@@ -199,10 +200,13 @@ class SleepWidgetProvider : AppWidgetProvider() {
         // 이번엔 칩을 없애는 대신 이 방식으로 구조적으로 해결함.
         private fun roundedChipBitmap(context: Context, color: Int, text: String, textColor: Int): Bitmap {
             val density = context.resources.displayMetrics.density
+            // ⭐ 2026-09-18 - 상태 줄을 없애고 근무명/버튼 두 요소만 남기면서 sleep_widget.xml을
+            // 한 단계 더 키움 - 같은 줄의 라벨(14sp)과 어울리도록 이 칩도 같이 키움.
             val textSizePx = 11f * context.resources.displayMetrics.scaledDensity
-            val paddingH = 8f * density
-            val paddingV = 2f * density
-            val radius = 6f * density
+            val paddingH = 6f * density
+            val paddingV = 3f * density
+            val radius = 7f * density
+            val maxWidth = 45f * density
 
             val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 this.color = textColor
@@ -211,8 +215,16 @@ class SleepWidgetProvider : AppWidgetProvider() {
                 this.textAlign = Paint.Align.LEFT
             }
             val metrics = textPaint.fontMetrics
-            val textWidth = textPaint.measureText(text)
-            val width = (textWidth + paddingH * 2).toInt().coerceAtLeast(1)
+            val maxTextWidth = maxWidth - paddingH * 2
+            var fittedText = text
+            var codePoints = fittedText.codePointCount(0, fittedText.length)
+            while (textPaint.measureText(fittedText) > maxTextWidth && codePoints > 1) {
+                codePoints--
+                val end = text.offsetByCodePoints(0, codePoints)
+                fittedText = text.substring(0, end) + "…"
+            }
+            val textWidth = textPaint.measureText(fittedText)
+            val width = (textWidth + paddingH * 2).coerceAtMost(maxWidth).toInt().coerceAtLeast(1)
             val height = (metrics.descent - metrics.ascent + paddingV * 2).toInt().coerceAtLeast(1)
 
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -226,7 +238,7 @@ class SleepWidgetProvider : AppWidgetProvider() {
             // ⭐ 텍스트를 세로 중앙에 정확히 배치 - baseline = 상단 여백 + 글자 자체의
             // ascent 크기(음수라 빼줌). 가로는 왼쪽 여백만큼만 띄우면 됨(Align.LEFT).
             val baseline = paddingV - metrics.ascent
-            canvas.drawText(text, paddingH, baseline, textPaint)
+            canvas.drawText(fittedText, paddingH, baseline, textPaint)
             return bitmap
         }
 
@@ -277,14 +289,6 @@ class SleepWidgetProvider : AppWidgetProvider() {
         // (요청: "상태 그냥 활동중, 수면중 그 두개만 보이고 몇시간 잤는지는 안
         // 보이게"). 그날 실제 수면시간/근무 연관 분류는 여전히 컨디션 탭·"최근
         // 수면 기록" 미니 달력이 정확하게 보여줌 - 그쪽만 보면 됨.
-        private fun statusValue(state: SleepingState): Pair<String, String> {
-            val label = when (state) {
-                SleepingState.MANUAL -> "수면중"
-                SleepingState.AUTO -> "수면중(추정)"
-                SleepingState.NONE -> "활동중"
-            }
-            return label to ""
-        }
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {

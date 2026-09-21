@@ -25,6 +25,7 @@ class AlarmOverlayService : Service() {
         const val ACTION_DISMISS_OVERLAY = "com.hwani1103.shiftbell.DISMISS_OVERLAY"
         const val ACTION_SNOOZE_OVERLAY = "com.hwani1103.shiftbell.SNOOZE_OVERLAY"
         const val EXTRA_ALARM_ID = "alarmId"
+        const val EXTRA_ALARM_DURATION = "alarmDuration"
     }
 
     private var windowManager: WindowManager? = null
@@ -122,8 +123,13 @@ class AlarmOverlayService : Service() {
 
         alarmId = newAlarmId
         ringRound = newRound
+        // ⭐ 2026-09-15 (출시 적합성 재검토 AUD-03) - 지속시간은 수신 때 확정한 값(복원 전 설정 스냅샷 우선, 종료 예약과 같은 값).
+        // 예전엔 loadAlarmInfo()가 현재 DB의 alarm_types.duration을 다시 읽어서, 스누즈 대기 중 복원으로 타입 설정이 바뀌면
+        // 오버레이 타이머가 네이티브 종료 예약보다 먼저(예: 10분 → 1분, 백업에 타입이 없으면 기본 3분) 이 회차를 끝낼 수 있었음.
+        alarmDuration = intent?.getIntExtra(EXTRA_ALARM_DURATION, -1)?.takeIf { it > 0 }
+            ?: CustomAlarmReceiver.ringDurationMinutes(applicationContext, newAlarmId)
 
-        // DB에서 알람 정보 조회
+        // DB에서 알람 표시 정보(시각·근무명) 조회
         loadAlarmInfo()
 
         // ⭐ Overlay 즉시 표시 (잠금 해제 상태에서만 사용)
@@ -168,18 +174,15 @@ class AlarmOverlayService : Service() {
 
     private fun loadAlarmInfo() {
         var cursor: android.database.Cursor? = null
-        var typeCursor: android.database.Cursor? = null
-        var db: android.database.sqlite.SQLiteDatabase? = null
 
         try {
             val dbHelper = DatabaseHelper.getInstance(applicationContext)
             // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 - DatabaseHelper.kt 상세 주석 참고.
-            db = dbHelper.getReadableDatabaseWithRetry() ?: return
-            val database = db
+            val database = dbHelper.getReadableDatabaseWithRetry() ?: return
 
             cursor = database.query(
                 "alarms",
-                arrayOf("time", "shift_type", "alarm_type_id"),
+                arrayOf("time", "shift_type"),
                 "id = ?",
                 arrayOf(alarmId.toString()),
                 null, null, null
@@ -188,28 +191,14 @@ class AlarmOverlayService : Service() {
             if (cursor.moveToFirst()) {
                 alarmTimeStr = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
                 alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
-                val alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
-
-                // alarm_type_id로 duration 조회
-                typeCursor = database.query(
-                    "alarm_types",
-                    arrayOf("duration"),
-                    "id = ?",
-                    arrayOf(alarmTypeId.toString()),
-                    null, null, null
-                )
-
-                if (typeCursor.moveToFirst()) {
-                    alarmDuration = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("duration"))
-                }
             }
+            // 지속시간은 onStartCommand에서 확정(AUD-03) - 여기서 DB로 다시 덮어쓰지 않음
 
             Log.d("AlarmOverlay", "✅ 알람 정보 로드: time=$alarmTimeStr, label=$alarmLabel, duration=${alarmDuration}분")
         } catch (e: Exception) {
             Log.e("AlarmOverlay", "❌ 알람 정보 로드 실패", e)
         } finally {
             // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
-            typeCursor?.close()
             cursor?.close()
         }
     }

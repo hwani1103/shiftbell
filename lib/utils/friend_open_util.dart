@@ -13,21 +13,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/friend_provider.dart';
 import '../screens/friend_calendar_view.dart';
+import 'blocking_progress.dart';
 
 /// 친구를 탭했을 때 - 캐시를 그대로 쓰지 않고 매번 Firestore에서 최신 스케줄을
 /// 다시 받아옴("구독처럼" 볼 때마다 최신을 보장). 로딩 중엔 잠깐 스피너만
 /// 띄우고(별도 화면 전환 없음), 끝나면 최신 데이터로 달력을 염 - 실패해도
 /// 캐시가 있으면 캐시로 열고, 캐시도 없으면 안내만 하고 끝냄(빈 화면 방지).
 Future<void> openFriendCalendar(BuildContext context, WidgetRef ref, FriendEntry friend) async {
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) => const Center(child: CircularProgressIndicator()),
+  // ⭐ 2026-09-15 (출시 적합성 재검토 AUD-01과 같은 패턴) - 예전엔 showDialog + Navigator.pop(context)라서
+  // 로딩 중 뒤로가기로 스피너가 먼저 닫히면 이 pop이 친구 목록·달력 화면을 대신 닫았음.
+  final refreshResult = await runWithBlockingProgress(
+    context,
+    () => ref.read(friendProvider.notifier).refreshFriend(friend.id, friend.ownerId),
   );
-  final refreshResult =
-      await ref.read(friendProvider.notifier).refreshFriend(friend.id, friend.ownerId);
   if (!context.mounted) return;
-  Navigator.pop(context); // 로딩 다이얼로그 닫기
 
   if (refreshResult == FriendRefreshResult.serverRemoved) {
     ScaffoldMessenger.of(context).showSnackBar(

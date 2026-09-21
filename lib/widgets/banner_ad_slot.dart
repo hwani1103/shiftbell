@@ -113,13 +113,21 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
             ),
 
           // 2) 실제 광고. 로드된 뒤에만 올림 - 로드 전/실패 시엔 위 배경만 보임.
+          //    ⭐ 2026-09-15 (AUD-07) - 슬롯보다 넓은 광고는 잘린 채 보이지 않게 아예 표시하지 않음
+          //    (실행 중 접기·멀티윈도우로 폭이 줄어든 경우 - 자리 높이는 그대로)
           if (_isLoaded && _bannerAd != null)
-            Center(
-              child: SizedBox(
-                width: _bannerAd!.size.width.toDouble(),
-                height: _bannerAd!.size.height.toDouble(),
-                child: AdWidget(ad: _bannerAd!),
-              ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final ad = _bannerAd!;
+                if (ad.size.width > constraints.maxWidth) return const SizedBox.shrink();
+                return Center(
+                  child: SizedBox(
+                    width: ad.size.width.toDouble(),
+                    height: ad.size.height.toDouble(),
+                    child: AdWidget(ad: ad),
+                  ),
+                );
+              },
             ),
 
           // 3) 영역 경계선. IgnorePointer + 위에 겹쳐 그리기라 높이에 영향 없음.

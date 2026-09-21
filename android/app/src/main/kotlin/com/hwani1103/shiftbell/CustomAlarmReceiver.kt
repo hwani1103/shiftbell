@@ -24,6 +24,61 @@ class CustomAlarmReceiver : BroadcastReceiver() {
         const val EXTRA_LABEL = "label"
         const val EXTRA_ID = "id"
         const val CHANNEL_ID = "shiftbell_alarm_v3"  // ⭐ 채널 ID 변경 + "알람" 키워드 제거
+
+        /**
+         * 이 알람 울림의 지속시간(분). 복원 전 재생 설정 스냅샷(G4 #19)이 있으면 그 값, 없으면 DB의 alarm_types.duration, 실패 시 3.
+         * ⭐ 2026-09-15 (AUD-03) - 수신 시 종료 예약·잠금화면과 해제 상태 오버레이가 모두 이 한 경로의 값을 쓰도록 companion으로 옮김.
+         */
+        fun ringDurationMinutes(context: Context, alarmId: Int): Int {
+            // ⭐ G4 #19 - 복원으로 alarm_types가 바뀌기 전의 설정(진행 중 알람 스냅샷)이 있으면 그것을 우선
+            RestoreGate.ringSnapshot(context, alarmId)?.let { return it.durationMinutes }
+            var alarmCursor: android.database.Cursor? = null
+            var typeCursor: android.database.Cursor? = null
+
+            try {
+                val dbHelper = DatabaseHelper.getInstance(context)
+                // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고).
+                val database = dbHelper.getReadableDatabaseWithRetry() ?: return 3
+
+                // 알람에서 alarm_type_id 조회
+                alarmCursor = database.query(
+                    "alarms",
+                    arrayOf("alarm_type_id"),
+                    "id = ?",
+                    arrayOf(alarmId.toString()),
+                    null, null, null
+                )
+
+                var alarmTypeId = 1  // 기본값
+                if (alarmCursor.moveToFirst()) {
+                    alarmTypeId = alarmCursor.getInt(alarmCursor.getColumnIndexOrThrow("alarm_type_id"))
+                }
+
+                // alarm_types에서 duration 조회
+                typeCursor = database.query(
+                    "alarm_types",
+                    arrayOf("duration"),
+                    "id = ?",
+                    arrayOf(alarmTypeId.toString()),
+                    null, null, null
+                )
+
+                var duration = 3  // 기본값 3분
+                if (typeCursor.moveToFirst()) {
+                    duration = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("duration"))
+                }
+
+                Log.d("CustomAlarmReceiver", "✅ DB duration: $duration 분")
+                return duration
+            } catch (e: Exception) {
+                Log.e("CustomAlarmReceiver", "❌ duration 조회 실패, 기본값 3분 사용", e)
+                return 3
+            } finally {
+                // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
+                alarmCursor?.close()
+                typeCursor?.close()
+            }
+        }
     }
     
     // CustomAlarmReceiver.kt - onReceive() 수정
@@ -178,7 +233,7 @@ override fun onReceive(context: Context, intent: Intent) {
         } else {
             if (canDrawOverlays(context)) {
                 Log.e("CustomAlarmReceiver", "✅ 잠금 해제 - Overlay 표시")
-                showOverlayWindow(context, id, label, ring.round)
+                showOverlayWindow(context, id, label, ring.round, durationMinutes)
             } else {
                 // ⭐ 2026-09-14 (#4) - 예전 폴백 알림(끄기 버튼 없음) 대신 이미 게시된 제어 알림(7777)으로 제어
                 Log.e("CustomAlarmReceiver", "⚠️ Overlay 권한 없음 - 제어 알림(7777)으로 제어")
@@ -234,66 +289,17 @@ override fun onReceive(context: Context, intent: Intent) {
     }
 }
 
-    // ⭐ DB에서 알람 타입의 duration 읽기
-    private fun getDurationFromDB(context: Context, alarmId: Int): Int {
-        // ⭐ G4 #19 - 복원으로 alarm_types가 바뀌기 전의 설정(진행 중 알람 스냅샷)이 있으면 그것을 우선
-        RestoreGate.ringSnapshot(context, alarmId)?.let { return it.durationMinutes }
-        var alarmCursor: android.database.Cursor? = null
-        var typeCursor: android.database.Cursor? = null
-        var db: android.database.sqlite.SQLiteDatabase? = null
+    // ⭐ DB에서 알람 타입의 duration 읽기 - 본문은 companion ringDurationMinutes()로 옮김(AUD-03)
+    private fun getDurationFromDB(context: Context, alarmId: Int): Int = ringDurationMinutes(context, alarmId)
 
-        try {
-            val dbHelper = DatabaseHelper.getInstance(context)
-            // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고).
-            db = dbHelper.getReadableDatabaseWithRetry() ?: return 3
-            val database = db
-
-            // 알람에서 alarm_type_id 조회
-            alarmCursor = database.query(
-                "alarms",
-                arrayOf("alarm_type_id"),
-                "id = ?",
-                arrayOf(alarmId.toString()),
-                null, null, null
-            )
-
-            var alarmTypeId = 1  // 기본값
-            if (alarmCursor.moveToFirst()) {
-                alarmTypeId = alarmCursor.getInt(alarmCursor.getColumnIndexOrThrow("alarm_type_id"))
-            }
-
-            // alarm_types에서 duration 조회
-            typeCursor = database.query(
-                "alarm_types",
-                arrayOf("duration"),
-                "id = ?",
-                arrayOf(alarmTypeId.toString()),
-                null, null, null
-            )
-
-            var duration = 3  // 기본값 3분
-            if (typeCursor.moveToFirst()) {
-                duration = typeCursor.getInt(typeCursor.getColumnIndexOrThrow("duration"))
-            }
-
-            Log.d("CustomAlarmReceiver", "✅ DB duration: $duration 분")
-            return duration
-        } catch (e: Exception) {
-            Log.e("CustomAlarmReceiver", "❌ duration 조회 실패, 기본값 3분 사용", e)
-            return 3
-        } finally {
-            // ⭐ db.close() 제거 (AlarmActionHelper.kt 상세 주석 참고)
-            alarmCursor?.close()
-            typeCursor?.close()
-        }
-    }
-    
-    private fun showOverlayWindow(context: Context, id: Int, label: String, round: Long) {
+    private fun showOverlayWindow(context: Context, id: Int, label: String, round: Long, duration: Int) {
         Log.e("CustomAlarmReceiver", "✅ Overlay 표시 시작")
-        
+
         val overlayIntent = Intent(context, AlarmOverlayService::class.java).apply {
             putExtra("alarmId", id)
             putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, round)
+            // ⭐ 2026-09-15 (AUD-03) - 종료 예약과 같은 지속시간을 넘김(오버레이가 DB를 다시 읽어 짧게 끝내지 않게)
+            putExtra(AlarmOverlayService.EXTRA_ALARM_DURATION, duration)
         }
         
         context.startService(overlayIntent)

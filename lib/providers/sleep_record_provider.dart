@@ -114,6 +114,21 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
     await refresh();
   }
 
+  /// ⭐ P2 #7(2026-09-18, 사용자 요청) - "보이는 기록 모두 확인" 일괄 처리. 여러 건을
+  /// confirmPending()으로 하나씩 부르면 매번 DB 갱신 후 `refresh()`가 전체 목록을
+  /// 다시 읽어와서(60일치) 건수만큼 DB 왕복이 반복된다 - 여기선 업데이트를 전부
+  /// 끝내고 마지막에 한 번만 refresh한다. 시각 수정 없이 "그대로 맞다"만 일괄
+  /// 처리하는 용도라 overrideStart/End는 안 받는다(수정이 필요하면 개별 카드의
+  /// [수정]을 쓰거나, 확인 뒤 "최근 수면 기록"에서 다시 고치면 됨).
+  Future<void> confirmAllPending(List<SleepRecord> records) async {
+    for (final record in records) {
+      final effectiveEnd = record.end;
+      if (effectiveEnd != null && !_isMeaningfulSleepDuration(record.start, effectiveEnd)) continue;
+      await DatabaseService.instance.updateSleepRecord(record.copyWith(status: SleepStatus.confirmed));
+    }
+    await refresh();
+  }
+
   /// "기록하지 않기" - 자동 감지 결과를 완전히 폐기.
   Future<void> discardPending(SleepRecord record) async {
     if (record.id == null) return;
