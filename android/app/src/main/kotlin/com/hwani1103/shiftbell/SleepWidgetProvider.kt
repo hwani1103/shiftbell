@@ -12,6 +12,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import android.os.Bundle
 import android.util.Log
 import android.widget.RemoteViews
 import java.util.Calendar
@@ -28,6 +29,12 @@ import java.util.Calendar
  * 후보를 만들어뒀으면 위젯도 "수면 중"으로 보여준다("추정"임을 문구로 구분).
  * [SleepingState] 참고 - MANUAL/AUTO를 합쳐 "지금 자고 있다고 볼 수 있는가"를 계산.
  *
+ * ⭐ 2026-09-22(사용자 요청) - 3x1 → **2x1**. 보여주는 것은 "오늘 근무명 · 수면 · 기상" 세
+ * 가지뿐이라 "오늘 근무" 같은 라벨은 뺐다(근무명 칩 자체가 곧 라벨). 오늘 배정된 근무가
+ * 없으면(불규칙 근무의 빈 날 등) 칩에 "근무없음". 폭이 좁은 화면에서도 겹치지 않도록
+ * 칩의 최대 폭을 런처가 알려주는 **실제 위젯 폭**(OPTION_APPWIDGET_MIN_WIDTH)에서 계산하고,
+ * 폭이 줄면 글자를 먼저 줄인 뒤에야 말줄임한다([roundedChipBitmap]).
+ *
  * 렌더링에서 발생하는 모든 예외는 이 안에서 잡아서 삼킨다 - CalendarWidgetProvider.kt와
  * 동일한 방어 원칙(위젯 렌더링 실패가 앱 전체를 끌고 내려가면 안 됨).
  */
@@ -42,6 +49,11 @@ class SleepWidgetProvider : AppWidgetProvider() {
         const val ACTION_WAKE = "com.hwani1103.shiftbell.SLEEP_WIDGET_WAKE"
 
         private const val UNSET_SENTINEL = "미설정"
+
+        // ⭐ 2x1의 공식 최소 폭 = 70*2-30 = 110dp(sleep_widget_info.xml). 런처가 폭을 못 알려주면
+        // 가장 좁은 경우를 가정해 절대 넘치지 않는 쪽으로 그린다.
+        private const val DEFAULT_WIDGET_WIDTH_DP = 110
+        private const val NO_SHIFT_LABEL = "근무없음"
 
         // ⭐ 2026-09-01 후속13(사용자 요청) - 근무명 칩은 달력탭/캘린더 위젯과 동일하게
         // 그 근무명에 배정된 색을 그대로 씀(shiftChip 참고). 상태는 처음엔 칩(색상
@@ -59,7 +71,7 @@ class SleepWidgetProvider : AppWidgetProvider() {
                 if (ids.isEmpty()) return
                 for (id in ids) {
                     try {
-                        manager.updateAppWidget(id, buildRemoteViews(context))
+                        manager.updateAppWidget(id, buildRemoteViews(context, widgetWidthDp(manager.getAppWidgetOptions(id))))
                     } catch (e: Exception) {
                         Log.e(TAG, "❌ 위젯($id) 렌더링 실패", e)
                     }
@@ -69,13 +81,22 @@ class SleepWidgetProvider : AppWidgetProvider() {
             }
         }
 
-        private fun buildRemoteViews(context: Context): RemoteViews {
+        /** 런처가 알려준 현재 위젯 폭(dp). 못 받으면 2x1 최소 폭으로 가정. */
+        private fun widgetWidthDp(options: Bundle?): Int {
+            val w = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0) ?: 0
+            return if (w > 0) w else DEFAULT_WIDGET_WIDTH_DP
+        }
+
+        private fun buildRemoteViews(context: Context, widthDp: Int): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.sleep_widget)
 
+            // ⭐ 칩이 차지할 수 있는 최대 폭 = 안쪽 폭의 약 42%. 나머지는 수면/기상 버튼이 나눠 쓰므로
+            // 좁은 화면에서 칩이 커져 버튼을 밀어내는 일이 없다(하한 34dp: "주간" 같은 두 글자는 항상 들어감).
+            val chipMaxDp = ((widthDp - 15) * 0.42f).coerceIn(34f, 64f)
             val (shiftLabel, shiftColor) = shiftChip(context)
             views.setImageViewBitmap(
                 R.id.sleep_shift_chip_bg,
-                roundedChipBitmap(context, shiftColor, shiftLabel, chipTextColorFor(shiftColor))
+                roundedChipBitmap(context, shiftColor, shiftLabel, chipTextColorFor(shiftColor), chipMaxDp)
             )
 
             // ⭐ 2026-09-13 - "컨디션 화면 사용하지 않기"로 그 탭을 숨기면, 이
@@ -137,8 +158,10 @@ class SleepWidgetProvider : AppWidgetProvider() {
 
         private fun renderDisabled(views: RemoteViews) {
             views.setFloat(R.id.sleep_widget_root, "setAlpha", 0.4f)
-            // ⭐ 2026-09-18 - 상태 줄이 없어졌으니, "왜 흐릿한지"는 근무명 라벨 자리에 대신 적는다.
+            // ⭐ 2026-09-18 - 상태 줄이 없어졌으니, "왜 흐릿한지"는 근무명 자리에 대신 적는다.
+            // 2026-09-22 - 평소엔 라벨이 없어서(레이아웃에서 gone) 이 경우에만 보이게 한다.
             views.setTextViewText(R.id.sleep_shift_label, "탭 꺼짐")
+            views.setViewVisibility(R.id.sleep_shift_label, android.view.View.VISIBLE)
             views.setViewVisibility(R.id.sleep_shift_chip_bg, android.view.View.GONE)
             views.setInt(R.id.sleep_button_sleep, "setBackgroundResource", R.drawable.sleep_widget_button_bg_inactive)
             views.setInt(R.id.sleep_button_wake, "setBackgroundResource", R.drawable.sleep_widget_button_bg_inactive)
@@ -168,15 +191,16 @@ class SleepWidgetProvider : AppWidgetProvider() {
         }
 
         // ⭐ "오늘 근무명" 칩(텍스트, 배경색) - CalendarWidgetScheduleResolver(기존,
-        // 수정 없음)를 읽기 전용으로 재사용. 라벨("오늘 근무")은 이제 레이아웃
-        // XML에 고정 텍스트로 있고, 여기선 칩 값(근무명)과 그 근무명에 배정된
-        // 색(schedule.shiftColors - 달력탭/캘린더 위젯과 동일한 소스)만 계산.
+        // 수정 없음)를 읽기 전용으로 재사용. 2026-09-22 - "오늘 근무" 라벨을 없애고 근무명
+        // 자체(주간/야간/휴무...)만 보여준다. 오늘 배정된 근무가 없으면(불규칙 근무의 빈 날 등)
+        // "근무없음". 색은 그 근무명에 배정된 색(schedule.shiftColors - 달력탭/캘린더
+        // 위젯과 동일한 소스).
         private fun shiftChip(context: Context): Pair<String, Int> {
             return try {
                 val schedule = CalendarWidgetScheduleResolver.readSchedule(context) ?: return "미설정" to NEUTRAL_CHIP_COLOR
                 val today = Calendar.getInstance()
                 val name = CalendarWidgetScheduleResolver.shiftForDate(schedule, today)
-                if (name == UNSET_SENTINEL) return "미배정" to NEUTRAL_CHIP_COLOR
+                if (name == UNSET_SENTINEL) return NO_SHIFT_LABEL to NEUTRAL_CHIP_COLOR
                 val color = schedule.shiftColors[name] ?: NEUTRAL_CHIP_COLOR
                 name to color
             } catch (e: Exception) {
@@ -198,24 +222,35 @@ class SleepWidgetProvider : AppWidgetProvider() {
         // 일치함. 상태 칩(statusValue)도 예전에 같은 종류의 문제(런처 캐싱)로
         // 결국 칩 자체를 없앴던 전례가 있음(위 NEUTRAL_CHIP_COLOR 주석 참고) -
         // 이번엔 칩을 없애는 대신 이 방식으로 구조적으로 해결함.
-        private fun roundedChipBitmap(context: Context, color: Int, text: String, textColor: Int): Bitmap {
+        private fun roundedChipBitmap(
+            context: Context,
+            color: Int,
+            text: String,
+            textColor: Int,
+            maxWidthDp: Float
+        ): Bitmap {
             val density = context.resources.displayMetrics.density
-            // ⭐ 2026-09-18 - 상태 줄을 없애고 근무명/버튼 두 요소만 남기면서 sleep_widget.xml을
-            // 한 단계 더 키움 - 같은 줄의 라벨(14sp)과 어울리도록 이 칩도 같이 키움.
-            val textSizePx = 11f * context.resources.displayMetrics.scaledDensity
-            val paddingH = 6f * density
+            val scaledDensity = context.resources.displayMetrics.scaledDensity
+            val paddingH = 5f * density
             val paddingV = 3f * density
-            val radius = 7f * density
-            val maxWidth = 45f * density
+            val maxWidth = maxWidthDp * density
+            val maxTextWidth = maxWidth - paddingH * 2
 
             val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 this.color = textColor
-                this.textSize = textSizePx
                 this.isFakeBoldText = true
                 this.textAlign = Paint.Align.LEFT
             }
-            val metrics = textPaint.fontMetrics
-            val maxTextWidth = maxWidth - paddingH * 2
+
+            // ⭐ 2026-09-22 - 폭이 모자라면 말줄임 전에 글자부터 줄인다(11sp → 최소 9sp). "근무없음"
+            // 같은 네 글자도 좁은 화면에서 끝까지 읽히게 하려는 것. 9sp에서도 넘칠 때만 "…"로 자른다.
+            var sizeSp = 11f
+            textPaint.textSize = sizeSp * scaledDensity
+            while (textPaint.measureText(text) > maxTextWidth && sizeSp > 9f) {
+                sizeSp -= 0.5f
+                textPaint.textSize = sizeSp * scaledDensity
+            }
+
             var fittedText = text
             var codePoints = fittedText.codePointCount(0, fittedText.length)
             while (textPaint.measureText(fittedText) > maxTextWidth && codePoints > 1) {
@@ -223,6 +258,8 @@ class SleepWidgetProvider : AppWidgetProvider() {
                 val end = text.offsetByCodePoints(0, codePoints)
                 fittedText = text.substring(0, end) + "…"
             }
+
+            val metrics = textPaint.fontMetrics
             val textWidth = textPaint.measureText(fittedText)
             val width = (textWidth + paddingH * 2).coerceAtMost(maxWidth).toInt().coerceAtLeast(1)
             val height = (metrics.descent - metrics.ascent + paddingV * 2).toInt().coerceAtLeast(1)
@@ -234,11 +271,13 @@ class SleepWidgetProvider : AppWidgetProvider() {
             bitmap.density = context.resources.displayMetrics.densityDpi
             val canvas = Canvas(bitmap)
             val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color }
+            // 알약 모양(수면/기상 버튼과 같은 결) - 반지름 = 높이의 절반.
+            val radius = height / 2f
             canvas.drawRoundRect(RectF(0f, 0f, width.toFloat(), height.toFloat()), radius, radius, bgPaint)
             // ⭐ 텍스트를 세로 중앙에 정확히 배치 - baseline = 상단 여백 + 글자 자체의
-            // ascent 크기(음수라 빼줌). 가로는 왼쪽 여백만큼만 띄우면 됨(Align.LEFT).
+            // ascent 크기(음수라 빼줌). 가로는 여백 안에서 가운데 정렬.
             val baseline = paddingV - metrics.ascent
-            canvas.drawText(fittedText, paddingH, baseline, textPaint)
+            canvas.drawText(fittedText, (width - textWidth) / 2f, baseline, textPaint)
             return bitmap
         }
 
@@ -294,10 +333,29 @@ class SleepWidgetProvider : AppWidgetProvider() {
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         for (id in appWidgetIds) {
             try {
-                appWidgetManager.updateAppWidget(id, buildRemoteViews(context))
+                appWidgetManager.updateAppWidget(
+                    id, buildRemoteViews(context, widgetWidthDp(appWidgetManager.getAppWidgetOptions(id)))
+                )
             } catch (e: Exception) {
                 Log.e(TAG, "❌ 위젯($id) onUpdate 렌더링 실패", e)
             }
+        }
+    }
+
+    /**
+     * ⭐ 2026-09-22 - 런처가 위젯 크기를 바꿔 알려줄 때(화면 회전, 그리드 설정 변경 등) 칩 폭을
+     * 새 폭에 맞춰 다시 그린다. 칩은 고정 px 비트맵이라 이걸 안 하면 폭이 줄었을 때 버튼을 민다.
+     */
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: Bundle
+    ) {
+        try {
+            appWidgetManager.updateAppWidget(appWidgetId, buildRemoteViews(context, widgetWidthDp(newOptions)))
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ 위젯($appWidgetId) 크기 변경 렌더링 실패", e)
         }
     }
 }

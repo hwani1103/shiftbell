@@ -5170,7 +5170,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ ${context.l10n.calendarDeleteAlarmFailed}: $e'),
+            content: Text('${context.l10n.calendarDeleteAlarmFailed}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -5432,14 +5432,14 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                   backgroundColor: Colors.orange,
                 )
               : SnackBar(
-                  content: Text('✅ ${context.l10n.statusShiftAssigned}')),
+                  content: Text(context.l10n.statusShiftAssigned)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ ${context.l10n.statusShiftAssignFailed}: $e'),
+            content: Text('${context.l10n.statusShiftAssignFailed}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -5470,7 +5470,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('❌ ${context.l10n.statusShiftChangeFailed}: $e'),
+            content: Text('${context.l10n.statusShiftChangeFailed}: $e'),
             backgroundColor: Colors.red,
           ),
         );

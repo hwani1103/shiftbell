@@ -75,7 +75,7 @@ object NotificationHelper {
 
         // 2단계: 8889 표시 (스누즈 결과)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle("$newTimeStr 로 연장되었습니다")
+            .setContentTitle("${newTimeStr}로 연장되었습니다")
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)  // ⭐ 알람시계 아이콘
             .setPriority(NotificationCompat.PRIORITY_LOW)

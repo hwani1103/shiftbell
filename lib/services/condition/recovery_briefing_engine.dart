@@ -487,7 +487,7 @@ RecoveryBriefing buildRecoveryBriefing({
           ? ' (출근 전 ${dur(preShiftSleep)} 포함)'
           : '';
       facts.add(BriefingFact(
-        '지난 24시간 수면 ${dur(last24hSleep)}$preNote${enough ? '' : ' — 권장 7시간보다 적어요'}',
+        '지난 24시간 수면 ${dur(last24hSleep)}$preNote${enough ? '' : ', 권장 7시간보다 적어요'}',
         tone: enough ? BriefingTone.good : BriefingTone.caution,
         evidenceIds: const [_eSleepAmount],
         topic: BriefingTopic.sleepAmount,
@@ -514,7 +514,7 @@ RecoveryBriefing buildRecoveryBriefing({
       final enough = sleepSinceLast >= target;
       final cannotReach = !enough && sleepSinceLast + canStillSleep < target;
       facts.add(BriefingFact(
-        '퇴근(${when(l.end!)}) 후 수면 ${dur(sleepSinceLast)}${cannotReach ? ' — 다음 출근 전까지 7시간을 채우긴 어려워요' : ''}',
+        '퇴근(${when(l.end!)}) 후 수면 ${dur(sleepSinceLast)}${cannotReach ? ', 다음 출근 전까지 7시간을 채우긴 어려워요' : ''}',
         tone: enough
             ? BriefingTone.good
             : (cannotReach ? BriefingTone.caution : BriefingTone.neutral),
@@ -536,7 +536,7 @@ RecoveryBriefing buildRecoveryBriefing({
     if (yesterdayTotal > 0) {
       final enough = yesterdayTotal >= target;
       facts.add(BriefingFact(
-        '어제(${y.month}/${y.day}) 수면 ${dur(yesterdayTotal)}${enough ? '' : ' — 권장 7시간보다 적어요'}',
+        '어제(${y.month}/${y.day}) 수면 ${dur(yesterdayTotal)}${enough ? '' : ', 권장 7시간보다 적어요'}',
         tone: enough ? BriefingTone.good : BriefingTone.caution,
         evidenceIds: const [_eSleepAmount],
         topic: BriefingTopic.sleepAmount,
@@ -558,11 +558,13 @@ RecoveryBriefing buildRecoveryBriefing({
     final age = today.difference(comparison.slot.date).inDays;
     final dayLabel = age == 1 ? '어제' : '그제';
     facts.add(BriefingFact(
-      '$dayLabel $categoryLabel 수면 ${dur(comparison.actual)} — 개인 평균 '
+      '$dayLabel $categoryLabel 수면 ${dur(comparison.actual)}, 개인 평균 '
       '${dur(comparison.average.averageMinutes)}보다 ${dur(comparison.deficit)} 적어요 '
       '(최근 30일 ${comparison.average.sampleDays}일 기준)',
       tone: BriefingTone.caution,
-      evidenceIds: const [_eSleepAmount],
+      // ⭐ 2026-09-22 - 근거 ID를 달지 않는다. 이 사실은 "내 기록끼리의 비교"라 순수 사실에 속하고,
+      // EVIDENCE-011(성인 7~9시간)은 절대 기준이라 이 비교의 근거가 아니다(달아 두면 "7시간 기준으로
+      // 판정했다"는 뜻으로 읽힘). 1시간이라는 차이 기준은 이 앱의 판단이다(도움말 근거 목록 머리말에 명시).
       topic: BriefingTopic.personalSleepBaseline,
     ));
     act(
@@ -570,6 +572,7 @@ RecoveryBriefing buildRecoveryBriefing({
         BriefingAction(
           'personal_sleep_baseline',
           '최근 $categoryLabel 수면이 평소보다 적었어요. 다음 수면 기회에는 다른 일정보다 회복할 시간을 조금 더 넉넉히 잡아보세요.',
+          // 조언(잠을 더 확보하기)은 성인 권장 수면 EVIDENCE-011이 뒷받침한다.
           evidenceIds: const [_eSleepAmount],
           topic: BriefingTopic.personalSleepBaseline,
         ));
@@ -593,7 +596,7 @@ RecoveryBriefing buildRecoveryBriefing({
       final short = gap < ConditionRuleEngine.minRecoveryMinutes;
       facts.add(BriefingFact(
         '근무 사이 회복시간 ${dur(gap)} (${when(gapFrom.end!)} 퇴근 → ${when(gapTo.start!)} 출근)'
-        '${short ? ' — 권장 최소 11시간보다 짧아요' : ''}',
+        '${short ? ', 권장 최소 11시간보다 짧아요' : ''}',
         tone: short ? BriefingTone.caution : BriefingTone.neutral,
         evidenceIds: short ? _eRecovery : const [],
         topic: BriefingTopic.recoveryGap,
@@ -632,7 +635,7 @@ RecoveryBriefing buildRecoveryBriefing({
             : '연속 야간 근무가 휴무 없이 매우 오래 이어지고 있음',
       );
       facts.add(BriefingFact(
-        severe ? '$text — 연속될수록 피로와 실수가 쌓이기 쉬워요' : text,
+        severe ? '$text. 연속될수록 피로와 실수가 쌓이기 쉬워요' : text,
         tone: severe ? BriefingTone.caution : BriefingTone.neutral,
         evidenceIds: severe ? _eNightStreak : const [],
         topic: BriefingTopic.nightStreak,
@@ -703,8 +706,8 @@ RecoveryBriefing buildRecoveryBriefing({
       facts.add(BriefingFact(
         ConditionRuleEngine.streakClause(
           workStreak,
-          normal: (days) => '$days일째 연속 근무 중이에요 — 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요',
-          capped: '휴무 없이 매우 오래 근무가 이어지고 있어요 — 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요',
+          normal: (days) => '$days일째 연속 근무 중이에요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요',
+          capped: '휴무 없이 매우 오래 근무가 이어지고 있어요. 쉬는 날 없이 이어지면 피로가 쌓이기 쉬워요',
         ),
         tone: BriefingTone.caution,
         evidenceIds: _eConsecutiveWorkdays,
@@ -756,7 +759,7 @@ RecoveryBriefing buildRecoveryBriefing({
     final baseline = base.weeklyBaselineMinutes!;
     final extra = loadIncrease.extraMinutes!;
     facts.add(BriefingFact(
-      '최근 7일 실근무시간 ${dur(weeklyTotal)} — 평소(주 ${dur(baseline)} 안팎)보다 ${dur(extra)} 많아요',
+      '최근 7일 실근무시간 ${dur(weeklyTotal)}, 평소(주 ${dur(baseline)} 안팎)보다 ${dur(extra)} 많아요',
       tone: BriefingTone.caution,
       evidenceIds: loadIncrease.severe ? _eOvertimeSevere : _eOvertime,
       topic: BriefingTopic.weeklyLoad,
@@ -789,7 +792,7 @@ RecoveryBriefing buildRecoveryBriefing({
         prev.category != ctx.category &&
         _isBackwardStep(prev.category, ctx.category)) {
       facts.add(BriefingFact(
-        '역방향 교대 전환(${prev.category.label} → ${ctx.category.label}) — 정방향보다 몸이 적응하기 어려운 편이에요',
+        '역방향 교대 전환(${prev.category.label} → ${ctx.category.label}). 정방향보다 몸이 적응하기 어려운 편이에요',
         tone: BriefingTone.caution,
         evidenceIds: _eDirection,
         topic: BriefingTopic.direction,
@@ -1003,7 +1006,7 @@ RecoveryBriefing buildRecoveryBriefing({
   if (avgRecent != null) {
     final low = avgRecent < target;
     facts.add(BriefingFact(
-      '최근 7일 평균 수면 ${dur(avgRecent)} (기록한 ${recordedDays.length}일 기준)${low ? ' — 권장 7시간보다 적어요' : ''}',
+      '최근 7일 평균 수면 ${dur(avgRecent)} (기록한 ${recordedDays.length}일 기준)${low ? ', 권장 7시간보다 적어요' : ''}',
       tone: low ? BriefingTone.caution : BriefingTone.neutral,
       evidenceIds: const [_eSleepAmount],
       topic: BriefingTopic.sleepAverage,

@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    ⭐ 실제 수면 기록 위젯(캘린더 위젯과 완전 별개). "오늘 근무" 한 줄 +
-    "수면"/"기상" 버튼 2개를 보여준다(2026-09-01 재설계 -
-    SleepWidgetProvider.kt 참고, 수면기록_자동추정_설계.md 6장).
+    ⭐ 실제 수면 기록 위젯(캘린더 위젯과 완전 별개) - 2x1. 한 줄에 [오늘 근무명] [수면] [기상].
+    SleepWidgetProvider.kt / 수면기록_자동추정_설계.md 6장 참고.
 
-    ⭐ 2026-09-01 후속13 - "빨리 써야 하는 위젯이니 작게" 요청으로 한 번
-    컴팩트하게 줄였다가, 2026-09-13(2차)에 위젯 프레임 자체가 다시 3x2(150x110dp)로
-    커짐(sleep_widget_info.xml 참고 - 일부 런처에서 그리드 셀 크기가 안 맞아
-    레이아웃이 깨질 위험 때문에 프레임을 키운 것 - 내용물 크기는 그대로 둬서
-    한동안 여백이 많았음).
-
-    ⭐ 2026-09-21 - 상태 줄을 없앤 뒤 남은 세 요소(오늘 근무/수면/기상)를
-    가로 한 줄로 재배치했다. 메타데이터도 공식 셀 공식과 일치하는 3x1로
-    내려 작은 화면/구형 런처가 minHeight와 targetCellHeight 중 어느 쪽을
-    보더라도 같은 한 행으로 계산한다.
+    ⭐ 2026-09-22(사용자 요청) - 3x1 → 2x1. "오늘 근무" 라벨을 없애고 근무명 칩 자체만 둔다.
+    폭이 110dp(2칸 공식 최소)까지 줄어도 겹치지 않게 만든 규칙:
+      - 칩은 wrap_content이고 최대 폭을 Kotlin이 실제 위젯 폭에서 계산해 비트맵에 반영한다.
+      - 수면/기상 버튼은 남은 폭을 weight 1:1로 나눠 쓰고, 글자는 autoSize로 알아서 줄어든다
+        (API 26 미만은 autoSize가 무시되므로 textSize 11sp를 같이 둔다).
+      - 세로 padding을 작게 잡아 글꼴 배율을 키운 기기에서도 40dp 높이 안에 들어온다.
+    sleep_shift_label은 "탭 꺼짐" 상태에서만 Kotlin이 보이게 한다(평소엔 gone).
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/sleep_widget_root"
@@ -21,68 +17,70 @@
     android:layout_height="match_parent"
     android:background="@drawable/widget_panel_light"
     android:orientation="horizontal"
-    android:padding="5dp"
+    android:paddingStart="6dp"
+    android:paddingEnd="6dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
     android:gravity="center_vertical">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/sleep_shift_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:maxLines="1"
+        android:text=""
+        android:textColor="#FF424242"
+        android:textStyle="bold"
+        android:textSize="10sp"
+        android:visibility="gone"/>
+
+    <!-- 배경 알약 + 글자를 SleepWidgetProvider.kt의 roundedChipBitmap()이 한 비트맵에 같이
+         그려서 넣음(텍스트를 별도 TextView로 겹치면 기기마다 정렬이 어긋났던 전례가 있음).
+         wrap_content로 비트맵 실제 크기 그대로 표시 - scaleType 없음. -->
+    <ImageView
+        android:id="@+id/sleep_shift_chip_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <TextView
+        android:id="@+id/sleep_button_sleep"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1.45"
-        android:orientation="horizontal"
-        android:gravity="start|center_vertical">
+        android:layout_weight="1"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="3dp"
+        android:background="@drawable/sleep_widget_button_bg"
+        android:gravity="center"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:maxLines="1"
+        android:text="수면"
+        android:textColor="#FFFFFFFF"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeMaxTextSize="12sp"
+        android:autoSizeStepGranularity="0.5sp"/>
 
-        <TextView
-            android:id="@+id/sleep_shift_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="3dp"
-            android:text="오늘"
-            android:textColor="#FF424242"
-            android:textStyle="bold"
-            android:textSize="11sp"/>
-
-        <!-- ⭐ 2026-09-13(2차) - 배경 알약 + 글자를 SleepWidgetProvider.kt의
-             roundedChipBitmap()이 한 비트맵에 같이 그려서 넣음(텍스트를 별도
-             TextView로 겹치던 방식은 기기마다 정렬이 어긋나는 문제가 있어
-             제거함 - 위 Kotlin 파일 주석 참고). wrap_content로 비트맵 실제
-             크기 그대로 표시 - scaleType 없음(늘리지 않음, 그린 그대로). -->
-        <ImageView
-            android:id="@+id/sleep_shift_chip_bg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:id="@+id/sleep_button_sleep"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="3dp"
-            android:background="@drawable/sleep_widget_button_bg"
-            android:gravity="center"
-            android:paddingTop="7dp"
-            android:paddingBottom="7dp"
-            android:maxLines="1"
-            android:text="수면"
-            android:textColor="#FFFFFFFF"
-            android:textSize="11sp"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/sleep_button_wake"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@drawable/sleep_widget_button_bg_inactive"
-            android:gravity="center"
-            android:paddingTop="7dp"
-            android:paddingBottom="7dp"
-            android:maxLines="1"
-            android:text="기상"
-            android:textColor="#FFFFFFFF"
-            android:textSize="11sp"
-            android:textStyle="bold"/>
-
-</LinearLayout>
+    <TextView
+        android:id="@+id/sleep_button_wake"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@drawable/sleep_widget_button_bg_inactive"
+        android:gravity="center"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
+        android:maxLines="1"
+        android:text="기상"
+        android:textColor="#FFFFFFFF"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="8sp"
+        android:autoSizeMaxTextSize="12sp"
+        android:autoSizeStepGranularity="0.5sp"/>
 
 </LinearLayout>

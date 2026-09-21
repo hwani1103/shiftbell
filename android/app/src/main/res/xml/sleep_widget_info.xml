@@ -1,33 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- ⭐ 실제 수면 기록 위젯 메타데이터 - 캘린더 위젯(calendar_widget_info.xml)과 완전
-     별개. 2026-09-01 - "오늘: OO / 상태: OO" 두 줄 + 버튼 2개(수면/기상)를 담기
-     위해 기존 2x1(110x40dp) 최소 크기에서 3x2(180x110dp)로 키웠었는데, "빨리
-     써야 하는 위젯인데 너무 커졌다"는 후속 피드백으로 sleep_widget.xml의
-     padding/텍스트 크기를 전부 줄여서 다시 컴팩트하게 만들었음.
+<!-- ⭐ 실제 수면 기록 위젯 메타데이터 - 캘린더 위젯(calendar_widget_info.xml)과 완전 별개.
 
-     ⭐ 2026-09-13 - "에뮬레이터/다른 폰에서 위젯이 위아래로 불필요하게 크다"는
-     사용자 신고로 재점검: 위 컴팩트화 때 sleep_widget.xml(내용물)만 줄이고 이
-     파일의 minWidth/minHeight는 "2x1과 3x2의 중간"(150x72dp)이라는 애매한
-     값으로 남겨뒀던 게 근본 원인이었음. 안드로이드 공식 그리드 셀 크기 공식은
-     `min = 70*n - 30`(n=칸 수)인데, 72dp는 1행(40dp) 기준을 넘고 2행(110dp)
-     기준에는 못 미쳐 - targetCellHeight="1"이라고 명시해도, 이 target 값을
-     지원 안 하는(구형 방식으로 minHeight만 보고 행 수를 역산하는) 런처는
-     72dp를 "2행이 필요하다"고 반올림해버림. 반면 target 값을 우선 적용하는
-     런처(사용자 실기기)는 선언한 대로 1행으로 딱 맞게 보여줬던 것 - 런처마다
-     서로 다른 걸 보게 되는 근본 원인이 바로 이 minHeight/targetCellHeight
-     불일치였음. 내용물이 실제로 3줄(근무/상태/버튼)이라 1행(40dp)에는 안
-     들어가는 게 이미 확인된 전례가 있으므로(그래서 원래 3x2로 키웠던 것),
-     "2행이 필요하다"는 쪽을 정직하게 선언하는 방향으로 통일함 -
-     minHeight/targetCellHeight 모두 2행 기준(110dp)으로, minWidth가 이미
-     암시하던 3칸 기준에 맞춰 targetCellWidth도 3으로 맞춤. 이제 어떤 런처가
-     어느 필드를 보든 항상 같은 3x2로 귀결되어야 함.
-     ⭐ 2026-09-21 - 상태 줄 삭제로 세 요소를 가로 한 줄에 배치할 수 있게 되어
-     minHeight/targetCellHeight를 모두 1행 기준(40dp/1)으로 맞췄다. 너비는
-     세 요소가 긴 근무명에서도 겹치지 않도록 3칸(180dp)을 유지한다. -->
+     ⭐ 프레임 크기 규칙(과거 버그의 교훈 - 바꾸기 전에 읽을 것): 안드로이드 공식 그리드 셀 공식은
+     `min = 70*n - 30`(n=칸 수)이다. minWidth/minHeight가 이 공식 값과 어긋나면(예: 예전의 72dp)
+     targetCellWidth/Height를 지원하는 런처와 minHeight만 보고 칸 수를 역산하는 구형 런처가 서로
+     다른 행 수로 해석해 런처마다 다른 크기가 보였다. 그래서 min 값과 target 값을 항상 같은 칸 수로
+     맞춘다.
+
+     ⭐ 2026-09-22 - 3x1(180x40) → **2x1(110x40)**. 보이는 것이 근무명/수면/기상 세 가지뿐이라
+     한 줄에 다 들어간다(sleep_widget.xml 참고). 좁은 화면에서 겹치지 않는 것은 이 파일이 아니라
+     레이아웃이 책임진다 - 칩 폭은 Kotlin이 런처가 알려준 실제 폭으로 계산한다. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="180dp"
+    android:minWidth="110dp"
     android:minHeight="40dp"
-    android:targetCellWidth="3"
+    android:targetCellWidth="2"
     android:targetCellHeight="1"
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/sleep_widget"

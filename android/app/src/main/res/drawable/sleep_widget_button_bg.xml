@@ -4,5 +4,6 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <solid android:color="#FF4662D6"/>
-    <corners android:radius="10dp"/>
+    <!-- 2026-09-22 - 알약 모양(반지름이 높이의 절반을 넘으면 안드로이드가 알아서 절반으로 자른다) -->
+    <corners android:radius="20dp"/>
 </shape>
