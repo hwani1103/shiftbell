@@ -30,10 +30,12 @@ class SleepCalendarFullScreen extends ConsumerStatefulWidget {
   const SleepCalendarFullScreen({super.key});
 
   @override
-  ConsumerState<SleepCalendarFullScreen> createState() => _SleepCalendarFullScreenState();
+  ConsumerState<SleepCalendarFullScreen> createState() =>
+      _SleepCalendarFullScreenState();
 }
 
-class _SleepCalendarFullScreenState extends ConsumerState<SleepCalendarFullScreen> {
+class _SleepCalendarFullScreenState
+    extends ConsumerState<SleepCalendarFullScreen> {
   late DateTime _month; // 보고 있는 달의 1일
   late Future<List<SleepRecord>> _recordsFuture;
 
@@ -45,14 +47,16 @@ class _SleepCalendarFullScreenState extends ConsumerState<SleepCalendarFullScree
     _recordsFuture = DatabaseService.instance.getSleepRecords();
   }
 
-  void _reload() => setState(() => _recordsFuture = DatabaseService.instance.getSleepRecords());
+  void _reload() => setState(
+      () => _recordsFuture = DatabaseService.instance.getSleepRecords());
 
   bool get _isCurrentMonth {
     final now = DateTime.now();
     return _month.year == now.year && _month.month == now.month;
   }
 
-  void _prevMonth() => setState(() => _month = DateTime(_month.year, _month.month - 1, 1));
+  void _prevMonth() =>
+      setState(() => _month = DateTime(_month.year, _month.month - 1, 1));
 
   void _nextMonth() {
     if (_isCurrentMonth) return; // 미래 달로는 넘어갈 수 없음
@@ -72,7 +76,11 @@ class _SleepCalendarFullScreenState extends ConsumerState<SleepCalendarFullScree
       ),
       body: Column(
         children: [
-          _MonthNavBar(month: _month, canGoNext: !_isCurrentMonth, onPrev: _prevMonth, onNext: _nextMonth),
+          _MonthNavBar(
+              month: _month,
+              canGoNext: !_isCurrentMonth,
+              onPrev: _prevMonth,
+              onNext: _nextMonth),
           const Divider(height: 1),
           Expanded(
             child: FutureBuilder<List<SleepRecord>>(
@@ -83,13 +91,22 @@ class _SleepCalendarFullScreenState extends ConsumerState<SleepCalendarFullScree
                 }
                 final now = DateTime.now();
                 final lastOfMonth = DateTime(_month.year, _month.month + 1, 0);
-                final rangeEnd = _isCurrentMonth ? DateTime(now.year, now.month, now.day) : lastOfMonth;
-                final days = buildSleepDaySlots(records: snapshot.data!, from: _month, to: rangeEnd, analyzer: analyzer);
+                final rangeEnd = _isCurrentMonth
+                    ? DateTime(now.year, now.month, now.day)
+                    : lastOfMonth;
+                final days = buildSleepDaySlots(
+                    records: snapshot.data!,
+                    from: _month,
+                    to: rangeEnd,
+                    analyzer: analyzer);
 
                 if (days.isEmpty) {
-                  return const Center(child: Text('이 달에는 표시할 날짜가 없어요.', style: TextStyle(color: Colors.black45)));
+                  return const Center(
+                      child: Text('이 달에는 표시할 날짜가 없어요.',
+                          style: TextStyle(color: Colors.black45)));
                 }
-                return _SleepMonthList(days: days, schedule: schedule, onChanged: _reload);
+                return _SleepMonthList(
+                    days: days, schedule: schedule, onChanged: _reload);
               },
             ),
           ),
@@ -104,7 +121,11 @@ class _MonthNavBar extends StatelessWidget {
   final bool canGoNext;
   final VoidCallback onPrev;
   final VoidCallback onNext;
-  const _MonthNavBar({required this.month, required this.canGoNext, required this.onPrev, required this.onNext});
+  const _MonthNavBar(
+      {required this.month,
+      required this.canGoNext,
+      required this.onPrev,
+      required this.onNext});
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +135,7 @@ class _MonthNavBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(onPressed: onPrev, icon: const Icon(Icons.chevron_left)),
-          SizedBox(
-            width: 140,
+          Expanded(
             child: Text(
               '${month.year}년 ${month.month}월',
               textAlign: TextAlign.center,
@@ -124,7 +144,8 @@ class _MonthNavBar extends StatelessWidget {
           ),
           IconButton(
             onPressed: canGoNext ? onNext : null,
-            icon: Icon(Icons.chevron_right, color: canGoNext ? null : Colors.black26),
+            icon: Icon(Icons.chevron_right,
+                color: canGoNext ? null : Colors.black26),
           ),
         ],
       ),
@@ -136,7 +157,8 @@ class _SleepMonthList extends StatefulWidget {
   final List<SleepDaySlots> days;
   final ShiftSchedule? schedule; // 근무명 표시 전용
   final VoidCallback onChanged;
-  const _SleepMonthList({required this.days, required this.schedule, required this.onChanged});
+  const _SleepMonthList(
+      {required this.days, required this.schedule, required this.onChanged});
 
   @override
   State<_SleepMonthList> createState() => _SleepMonthListState();
@@ -152,9 +174,11 @@ class _SleepMonthListState extends State<_SleepMonthList> {
       if (!mounted || !_controller.hasClients) return;
       // 이번달을 열었을 때 오늘(맨 아래)이 바로 보이게.
       final now = DateTime.now();
-      final isCurrentMonth =
-          widget.days.isNotEmpty && widget.days.last.date.month == now.month && widget.days.last.date.year == now.year;
-      if (isCurrentMonth) _controller.jumpTo(_controller.position.maxScrollExtent);
+      final isCurrentMonth = widget.days.isNotEmpty &&
+          widget.days.last.date.month == now.month &&
+          widget.days.last.date.year == now.year;
+      if (isCurrentMonth)
+        _controller.jumpTo(_controller.position.maxScrollExtent);
     });
   }
 
@@ -180,7 +204,8 @@ class _SleepMonthListState extends State<_SleepMonthList> {
       itemBuilder: (context, i) {
         final day = widget.days[i];
         final shiftName = widget.schedule?.getShiftForDate(day.date) ?? '—';
-        return _SleepDayListRow(day: day, shiftName: shiftName, onChanged: widget.onChanged);
+        return _SleepDayListRow(
+            day: day, shiftName: shiftName, onChanged: widget.onChanged);
       },
     );
   }
@@ -190,11 +215,14 @@ class _SleepDayListRow extends ConsumerWidget {
   final SleepDaySlots day;
   final String shiftName;
   final VoidCallback onChanged;
-  const _SleepDayListRow({required this.day, required this.shiftName, required this.onChanged});
+  const _SleepDayListRow(
+      {required this.day, required this.shiftName, required this.onChanged});
 
   bool get _isToday {
     final now = DateTime.now();
-    return day.date.year == now.year && day.date.month == now.month && day.date.day == now.day;
+    return day.date.year == now.year &&
+        day.date.month == now.month &&
+        day.date.day == now.day;
   }
 
   @override
@@ -202,9 +230,13 @@ class _SleepDayListRow extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _isToday ? kAppMainAccent.withOpacity(0.05) : Colors.grey.shade50,
+        color:
+            _isToday ? kAppMainAccent.withOpacity(0.05) : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _isToday ? kAppMainAccent.withOpacity(0.35) : Colors.grey.shade200),
+        border: Border.all(
+            color: _isToday
+                ? kAppMainAccent.withOpacity(0.35)
+                : Colors.grey.shade200),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,14 +245,19 @@ class _SleepDayListRow extends ConsumerWidget {
             children: [
               // ⭐ 2026-09-01 후속5 - "8/1 (토)만 진하다"는 피드백으로 날짜를 더
               // 눈에 띄게(14→16sp) 키움 - 나머지 텍스트 크기는 그대로 유지.
-              Text(fmtDateWeekday(day.date), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              Text(fmtDateWeekday(day.date),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w700)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   shiftName,
                   // ⭐ 2026-09-01 후속5 - 근무명(야간/휴무/주간 등)이 너무 흐리다는
                   // 피드백으로 black54 → black87 + 약간의 굵기로 진하게 함.
-                  style: const TextStyle(fontSize: 13, color: Colors.black87, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w500),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -228,13 +265,11 @@ class _SleepDayListRow extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (final category in SleepSlotCategory.values) ...[
-                if (category != SleepSlotCategory.values.first) const SizedBox(width: 8),
-                Expanded(
-                  child: _SlotChip(
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final textScale = MediaQuery.textScalerOf(context).scale(14) / 14;
+              final stacked = constraints.maxWidth < 300 || textScale > 1.3;
+              Widget chip(SleepSlotCategory category) => _SlotChip(
                     cardDate: day.date,
                     category: category,
                     record: day.forCategory(category),
@@ -248,10 +283,30 @@ class _SleepDayListRow extends ConsumerWidget {
                       );
                       onChanged();
                     },
-                  ),
-                ),
-              ],
-            ],
+                  );
+
+              if (stacked) {
+                return Column(
+                  children: [
+                    for (final category in SleepSlotCategory.values) ...[
+                      if (category != SleepSlotCategory.values.first)
+                        const SizedBox(height: 7),
+                      chip(category),
+                    ],
+                  ],
+                );
+              }
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final category in SleepSlotCategory.values) ...[
+                    if (category != SleepSlotCategory.values.first)
+                      const SizedBox(width: 8),
+                    Expanded(child: chip(category)),
+                  ],
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -296,12 +351,19 @@ class _SlotChip extends StatelessWidget {
             // 라벨(black38→black87)/빈 칸 placeholder(black38→black54) 모두 진하게.
             Text(
               category.label,
-              style: const TextStyle(fontSize: 10, color: Colors.black87, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w600),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             if (r == null)
-              const Text('+ 기록', style: TextStyle(fontSize: 12.5, color: Colors.black54, fontWeight: FontWeight.w500))
+              const Text('+ 기록',
+                  style: TextStyle(
+                      fontSize: 12.5,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w500))
             else ...[
               Builder(builder: (context) {
                 // ⭐ 2026-09-13(사용자 요청) - condition_tab.dart의 _SleepSlotCell과
@@ -311,11 +373,13 @@ class _SlotChip extends StatelessWidget {
                     ? '${fmtTimeOnly(r.start)} - ${fmtTimeOnly(r.end!)}'
                     : '${fmtTimeOnly(r.start)}~ 진행 중';
                 final startsOnDifferentDate = !_isSameDate(r.start, cardDate);
-                final displayText =
-                    startsOnDifferentDate ? '${r.start.month}/${r.start.day} $timeText' : timeText;
+                final displayText = startsOnDifferentDate
+                    ? '${r.start.month}/${r.start.day} $timeText'
+                    : timeText;
                 return Text(
                   displayText,
-                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 12.5, fontWeight: FontWeight.w600),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 );

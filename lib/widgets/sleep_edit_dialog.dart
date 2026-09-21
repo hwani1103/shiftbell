@@ -49,12 +49,14 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
     final date = await showDatePicker(
       context: sheetContext,
       initialDate: initial,
-      firstDate: DateTime.now().subtract(const Duration(days: 60)),
+      // 전체보기에서는 오래된 달도 탐색할 수 있으므로 편집 날짜도 같은 범위를 허용한다.
+      firstDate: DateTime(2000),
       lastDate: DateTime.now().add(const Duration(days: 1)),
     );
     if (date == null) return null;
     if (!sheetContext.mounted) return null;
-    final time = await showTimePicker(context: sheetContext, initialTime: TimeOfDay.fromDateTime(initial));
+    final time = await showTimePicker(
+        context: sheetContext, initialTime: TimeOfDay.fromDateTime(initial));
     if (time == null) return null;
     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
   }
@@ -63,7 +65,8 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.white,
-    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+    shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
     builder: (sheetContext) {
       return StatefulBuilder(
         builder: (sheetContext, setState) {
@@ -89,26 +92,36 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
           // 별개로 그만큼 더 밀어올려야 하므로).
           return SafeArea(
             top: false,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + MediaQuery.of(sheetContext).viewInsets.bottom),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2)),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(20, 12, 20,
+                    20 + MediaQuery.of(sheetContext).viewInsets.bottom),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 36,
+                        height: 4,
+                        decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            borderRadius: BorderRadius.circular(2)),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700), textAlign: TextAlign.center),
-                  const SizedBox(height: 18),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _TimeCard(
+                    const SizedBox(height: 14),
+                    Text(title,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w700),
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 18),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final textScale =
+                            MediaQuery.textScalerOf(context).scale(14) / 14;
+                        final stacked =
+                            constraints.maxWidth < 300 || textScale > 1.3;
+                        final startCard = _TimeCard(
                           icon: '🌙',
                           label: '취침',
                           time: start,
@@ -116,14 +129,8 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
                             final picked = await pick(sheetContext, start);
                             if (picked != null) setState(() => start = picked);
                           },
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 6),
-                        child: Icon(Icons.arrow_forward, color: Colors.black26, size: 18),
-                      ),
-                      Expanded(
-                        child: _TimeCard(
+                        );
+                        final endCard = _TimeCard(
                           icon: '☀️',
                           label: '기상',
                           time: end,
@@ -131,59 +138,89 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
                             final picked = await pick(sheetContext, end);
                             if (picked != null) setState(() => end = picked);
                           },
+                        );
+                        if (stacked) {
+                          return Column(
+                            children: [
+                              startCard,
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 4),
+                                child: Icon(Icons.arrow_downward,
+                                    color: Colors.black26, size: 18),
+                              ),
+                              endCard,
+                            ],
+                          );
+                        }
+                        return Row(
+                          children: [
+                            Expanded(child: startCard),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 6),
+                              child: Icon(Icons.arrow_forward,
+                                  color: Colors.black26, size: 18),
+                            ),
+                            Expanded(child: endCard),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 14),
+                    Center(
+                      child: Text(
+                        message,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: valid ? kAppMainAccent : Colors.red.shade400,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Center(
-                    child: Text(
-                      message,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: valid ? kAppMainAccent : Colors.red.shade400,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 22),
-                  // ⭐ 2026-09-01 후속5 - TextButton/ElevatedButton 임의 조합 대신
-                  // 앱 전역 공용 버튼(AppSecondButton - 고정 알람 편집 다이얼로그 등에서
-                  // 이미 쓰는 "취소/저장/삭제" 전용 위젯)으로 통일해서 앱 컨셉과
-                  // 색/모양이 어긋나지 않게 함. 후속 피드백으로 compact(패딩
-                  // 10/6, 폰트 12)가 "너무 작다"는 지적 - 기본 프리셋(24/14,
-                  // 15)보다는 작지만 compact보다 눈에 띄게 큰 중간 크기로 override.
-                  Row(
-                    children: [
-                      if (showDeleteButton) ...[
+                    const SizedBox(height: 22),
+                    // ⭐ 2026-09-01 후속5 - TextButton/ElevatedButton 임의 조합 대신
+                    // 앱 전역 공용 버튼(AppSecondButton - 고정 알람 편집 다이얼로그 등에서
+                    // 이미 쓰는 "취소/저장/삭제" 전용 위젯)으로 통일해서 앱 컨셉과
+                    // 색/모양이 어긋나지 않게 함. 후속 피드백으로 compact(패딩
+                    // 10/6, 폰트 12)가 "너무 작다"는 지적 - 기본 프리셋(24/14,
+                    // 15)보다는 작지만 compact보다 눈에 띄게 큰 중간 크기로 override.
+                    Wrap(
+                      alignment: WrapAlignment.end,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        if (showDeleteButton)
+                          AppSecondButton(
+                            variant: AppSecondButtonVariant.danger,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 18, vertical: 12),
+                            fontSize: 14,
+                            onPressed: () => Navigator.of(sheetContext)
+                                .pop(SleepSlotDeleted()),
+                            child: const Text('삭제'),
+                          ),
                         AppSecondButton(
-                          variant: AppSecondButtonVariant.danger,
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                          variant: AppSecondButtonVariant.neutral,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 12),
                           fontSize: 14,
-                          onPressed: () => Navigator.of(sheetContext).pop(SleepSlotDeleted()),
-                          child: const Text('삭제'),
+                          onPressed: () => Navigator.of(sheetContext).pop(),
+                          child: const Text('취소'),
                         ),
-                        const SizedBox(width: 8),
+                        AppSecondButton(
+                          variant: AppSecondButtonVariant.success,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 18, vertical: 12),
+                          fontSize: 14,
+                          onPressed: valid
+                              ? () => Navigator.of(sheetContext)
+                                  .pop(SleepSlotSaved(start, end))
+                              : null,
+                          child: const Text('저장'),
+                        ),
                       ],
-                      const Spacer(),
-                      AppSecondButton(
-                        variant: AppSecondButtonVariant.neutral,
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                        fontSize: 14,
-                        onPressed: () => Navigator.of(sheetContext).pop(),
-                        child: const Text('취소'),
-                      ),
-                      const SizedBox(width: 8),
-                      AppSecondButton(
-                        variant: AppSecondButtonVariant.success,
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                        fontSize: 14,
-                        onPressed: valid ? () => Navigator.of(sheetContext).pop(SleepSlotSaved(start, end)) : null,
-                        child: const Text('저장'),
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           );
@@ -198,7 +235,11 @@ class _TimeCard extends StatelessWidget {
   final String label;
   final DateTime time;
   final VoidCallback onTap;
-  const _TimeCard({required this.icon, required this.label, required this.time, required this.onTap});
+  const _TimeCard(
+      {required this.icon,
+      required this.label,
+      required this.time,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -216,9 +257,12 @@ class _TimeCard extends StatelessWidget {
           children: [
             Text(icon, style: const TextStyle(fontSize: 20)),
             const SizedBox(height: 4),
-            Text(label, style: const TextStyle(fontSize: 11, color: Colors.black45)),
+            Text(label,
+                style: const TextStyle(fontSize: 11, color: Colors.black45)),
             const SizedBox(height: 4),
-            Text(fmtDateTime(time), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+            Text(fmtDateTime(time),
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
           ],
         ),
       ),
@@ -246,9 +290,12 @@ Future<void> handleSleepSlotTap(
       title: '${category.label} 수정',
     );
     if (result is SleepSlotDeleted) {
-      if (record.id != null) await ref.read(sleepRecordProvider.notifier).deleteRecord(record.id!);
+      if (record.id != null)
+        await ref.read(sleepRecordProvider.notifier).deleteRecord(record.id!);
     } else if (result is SleepSlotSaved) {
-      await ref.read(sleepRecordProvider.notifier).updateTimes(record, start: result.start, end: result.end);
+      await ref
+          .read(sleepRecordProvider.notifier)
+          .updateTimes(record, start: result.start, end: result.end);
     }
     return;
   }
@@ -261,6 +308,8 @@ Future<void> handleSleepSlotTap(
     title: '${category.label} 기록',
   );
   if (result is SleepSlotSaved) {
-    await ref.read(sleepRecordProvider.notifier).addManual(start: result.start, end: result.end);
+    await ref
+        .read(sleepRecordProvider.notifier)
+        .addManual(start: result.start, end: result.end);
   }
 }

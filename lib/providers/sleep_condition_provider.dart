@@ -41,7 +41,8 @@ final recentSleepDaySlotsProvider = Provider<List<SleepDaySlots>>((ref) {
 
 /// 최근 수면 기록 각각에 대해 근무 겹침 분류(SleepRelation)를 같이 묶어서 제공.
 /// analyzer가 아직 없으면(스케줄/근무시간 미설정) 분류 없이 원본만 반환.
-final sleepRecordsWithRelationProvider = Provider<List<(SleepRecord, SleepRelation?)>>((ref) {
+final sleepRecordsWithRelationProvider =
+    Provider<List<(SleepRecord, SleepRelation?)>>((ref) {
   final records = ref.watch(sleepRecordProvider).value ?? const [];
   final analyzer = ref.watch(conditionAnalyzerProvider);
   if (analyzer == null) {
@@ -52,7 +53,8 @@ final sleepRecordsWithRelationProvider = Provider<List<(SleepRecord, SleepRelati
 
 /// "오늘의 컨디션"은 "지금 이 시각" 기준(근무 중·퇴근 후 몇 시간·출근까지 몇 시간)이라 날짜만 구독하면
 /// 화면을 켜 둔 동안 남은 시간이 멈춰 보인다. 탭이 보이는 동안만 1분마다 갱신(autoDispose - 탭을 떠나면 타이머도 멈춤).
-final briefingClockProvider = AutoDisposeNotifierProvider<BriefingClock, DateTime>(BriefingClock.new);
+final briefingClockProvider =
+    AutoDisposeNotifierProvider<BriefingClock, DateTime>(BriefingClock.new);
 
 class BriefingClock extends AutoDisposeNotifier<DateTime> {
   Timer? _timer;
@@ -60,20 +62,27 @@ class BriefingClock extends AutoDisposeNotifier<DateTime> {
   @override
   DateTime build() {
     _timer?.cancel();
-    _timer = Timer.periodic(const Duration(minutes: 1), (_) => state = appNow());
+    _timer =
+        Timer.periodic(const Duration(minutes: 1), (_) => state = appNow());
     ref.onDispose(() => _timer?.cancel());
     return appNow();
   }
 }
 
-/// ⭐ P2 #6(2026-09-18) - "근무 종류별 평균 수면"(야간/주간/오후 후, 휴무일). 스케줄이
-/// 없으면(analyzer null) 빈 목록 - condition_tab.dart는 빈 목록이면 섹션 자체를 숨긴다.
-final sleepCategoryAveragesProvider = Provider<List<SleepCategoryAverage>>((ref) {
+/// 근무 유형별 평균과 평균 산출까지 남은 표본 수를 함께 제공한다.
+final sleepCategoryStatsProvider = Provider<SleepCategoryStatsSnapshot>((ref) {
   final analyzer = ref.watch(conditionAnalyzerProvider);
-  if (analyzer == null) return const [];
+  if (analyzer == null) return const SleepCategoryStatsSnapshot.empty();
   final records = ref.watch(sleepRecordProvider).value ?? const <SleepRecord>[];
   final today = ref.watch(currentDateProvider);
-  return buildSleepCategoryAverages(records: records, analyzer: analyzer, now: today);
+  return buildSleepCategoryStats(
+      records: records, analyzer: analyzer, now: today);
+});
+
+/// 기존 사용처와 테스트를 위한 평균 목록 전용 파생 provider.
+final sleepCategoryAveragesProvider =
+    Provider<List<SleepCategoryAverage>>((ref) {
+  return ref.watch(sleepCategoryStatsProvider).averages;
 });
 
 /// "오늘의 컨디션" - 확인된 사실 / 추천 행동 / 판단 범위(recovery_briefing_engine.dart).
@@ -84,7 +93,8 @@ final recoveryBriefingProvider = Provider.autoDispose<RecoveryBriefing?>((ref) {
   if (analyzer == null || base == null) return null;
   final now = ref.watch(briefingClockProvider);
   final records = ref.watch(sleepRecordProvider).value ?? const <SleepRecord>[];
-  final otMinutes = ref.watch(recentOvertimeMinutesProvider).value ?? const <String, int>{};
+  final otMinutes =
+      ref.watch(recentOvertimeMinutesProvider).value ?? const <String, int>{};
   final pendingCount = ref.watch(pendingSleepRecordsProvider).length;
   return buildRecoveryBriefing(
     analyzer: analyzer,

@@ -48,6 +48,26 @@ class SleepCategoryAverage {
   int get averageMinutes => averageMainMinutes + averageNapMinutes;
 }
 
+/// 근무 유형별 수면 통계와 평균 산출까지 남은 표본 수를 함께 제공한다.
+class SleepCategoryStatsSnapshot {
+  final List<SleepCategoryAverage> averages;
+  final Map<ShiftTimeCategory, int> sampleDays;
+  final List<ShiftTimeCategory> categories;
+
+  const SleepCategoryStatsSnapshot({
+    required this.averages,
+    required this.sampleDays,
+    required this.categories,
+  });
+
+  const SleepCategoryStatsSnapshot.empty()
+      : averages = const [],
+        sampleDays = const {},
+        categories = const [];
+
+  int samplesFor(ShiftTimeCategory category) => sampleDays[category] ?? 0;
+}
+
 /// [now] 기준 최근 [lookbackDays]일(오늘은 아직 끝나지 않아 제외 - recovery_briefing_
 /// engine.dart의 최근 7일 평균 수면과 동일 관례)의 수면을, 그 수면이 "귀속된" 날짜
 /// (buildSleepDaySlots의 _attributedDay - 예: 야간 근무 다음날 아침 회복수면은 그
@@ -59,19 +79,42 @@ List<SleepCategoryAverage> buildSleepCategoryAverages({
   int lookbackDays = kCategoryStatsLookbackDays,
   int minSampleDays = kMinSampleDaysForCategoryAverage,
 }) {
+  return buildSleepCategoryStats(
+    records: records,
+    analyzer: analyzer,
+    now: now,
+    lookbackDays: lookbackDays,
+    minSampleDays: minSampleDays,
+  ).averages;
+}
+
+SleepCategoryStatsSnapshot buildSleepCategoryStats({
+  required List<SleepRecord> records,
+  required ShiftPatternAnalyzer analyzer,
+  required DateTime now,
+  int lookbackDays = kCategoryStatsLookbackDays,
+  int minSampleDays = kMinSampleDaysForCategoryAverage,
+}) {
   final today = DateTime(now.year, now.month, now.day);
   final from = today.subtract(Duration(days: lookbackDays));
   final to = today.subtract(const Duration(days: 1));
-  if (to.isBefore(from)) return const [];
+  if (to.isBefore(from)) return const SleepCategoryStatsSnapshot.empty();
 
-  final slots = buildSleepDaySlots(records: records, from: from, to: to, analyzer: analyzer);
+  final slots = buildSleepDaySlots(
+      records: records, from: from, to: to, analyzer: analyzer);
 
   final byCategory = <ShiftTimeCategory, List<({int main, int nap})>>{};
+  final knownCategories = <ShiftTimeCategory>{};
   for (final slot in slots) {
-    final main = slot.mainSleep?.durationMinutes ?? 0;
-    final nap = (slot.nap1?.durationMinutes ?? 0) + (slot.nap2?.durationMinutes ?? 0);
-    if (main + nap <= 0) continue; // 기록이 아예 없는 날은 표본에서 제외(0시간으로 세지 않음)
     final category = analyzer.instanceForDate(slot.date).category;
+    // 근무시간이 없는 날은 사용자가 해석할 수 있는 유형 평균이 아니므로 제외한다.
+    if (category == ShiftTimeCategory.unspecified) continue;
+    knownCategories.add(category);
+
+    final main = slot.mainSleep?.durationMinutes ?? 0;
+    final nap =
+        (slot.nap1?.durationMinutes ?? 0) + (slot.nap2?.durationMinutes ?? 0);
+    if (main + nap <= 0) continue; // 기록이 아예 없는 날은 표본에서 제외(0시간으로 세지 않음)
     (byCategory[category] ??= []).add((main: main, nap: nap));
   }
 
@@ -90,7 +133,23 @@ List<SleepCategoryAverage> buildSleepCategoryAverages({
   }
 
   // 화면 표시 순서 - 근무 흐름 순(주간→오후→야간)으로 보여주고 휴무를 마지막에.
-  const order = [ShiftTimeCategory.day, ShiftTimeCategory.evening, ShiftTimeCategory.night, ShiftTimeCategory.off];
-  result.sort((a, b) => order.indexOf(a.category).compareTo(order.indexOf(b.category)));
-  return result;
+  const order = [
+    ShiftTimeCategory.day,
+    ShiftTimeCategory.evening,
+    ShiftTimeCategory.night,
+    ShiftTimeCategory.off
+  ];
+  result.sort(
+      (a, b) => order.indexOf(a.category).compareTo(order.indexOf(b.category)));
+  final categories = knownCategories.toList()
+    ..sort((a, b) => order.indexOf(a).compareTo(order.indexOf(b)));
+  final sampleDays = <ShiftTimeCategory, int>{
+    for (final category in categories)
+      category: byCategory[category]?.length ?? 0,
+  };
+  return SleepCategoryStatsSnapshot(
+    averages: List.unmodifiable(result),
+    sampleDays: Map.unmodifiable(sampleDays),
+    categories: List.unmodifiable(categories),
+  );
 }
