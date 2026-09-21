@@ -3,6 +3,7 @@
 import 'data_revision_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/database_service.dart';
+import '../services/app_analytics.dart';
 
 // ⭐ 날짜별 OT(추가근무) 누적 시간 상태 관리 (date 'YYYY-MM-DD' -> 분)
 // date_memos와 동일한 패턴: 달이 바뀔 때 그 달 범위를 통째로 다시 불러와 캐시함
@@ -33,6 +34,7 @@ class OvertimeNotifier extends StateNotifier<Map<String, int>> {
   // ⭐ 30분 단위 증감. 성공 시 그 날짜의 새 누적 시간(분) 반환
   Future<int> adjust(String date, int deltaMinutes) async {
     final newTotal = await _db.adjustOvertime(date, deltaMinutes);
+    if (deltaMinutes > 0) AppAnalytics.track(AnalyticsEvent.otSaved);
     final newState = Map<String, int>.from(state);
     if (newTotal > 0) {
       newState[date] = newTotal;

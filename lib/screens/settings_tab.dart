@@ -42,6 +42,7 @@ import '../services/widget_refresh_service.dart';
 import '../widgets/disable_tab_button.dart';
 import '../services/backup_validator.dart';
 import 'restore_progress_screen.dart';
+import '../services/app_analytics.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar; // ⭐ 6번 기능: 스와이프 callback
@@ -101,7 +102,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
     final success = await BackupWatcher.instance.backupNow(force: true);
     if (!mounted) return;
     setState(() => _isBackingUp = false);
-    if (success) await _loadLastBackupAt();
+    if (success) {
+      AppAnalytics.track(AnalyticsEvent.backupCreated);
+      await _loadLastBackupAt();
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(success
@@ -913,9 +917,13 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                 title: Text(context.l10n.settingsHelp),
                 subtitle: Text(context.l10n.settingsHelpDesc),
                 trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const HelpScreen()),
-                ),
+                onTap: () {
+                  AppAnalytics.track(AnalyticsEvent.helpOpened);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const HelpScreen()),
+                  );
+                },
+                
               ),
 
               // 개인정보처리방침
@@ -2564,6 +2572,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
         }
       }
       await DatabaseService.instance.replaceAllAlarmTemplates(templates);
+      AppAnalytics.track(AnalyticsEvent.alarmTemplateSaved);
 
       // ⭐ 2026-08-25 - await 누락 수정. widget.onSave()(=_regenerateAllAlarms(),
       // 네이티브 diff 갱신 트리거 + 800ms 대기 + Flutter Provider 재조회까지

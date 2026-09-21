@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../constants/platform_channel.dart';
 import '../models/sleep_record.dart';
 import '../services/database_service.dart';
+import '../services/app_analytics.dart';
 
 /// ⭐ 2026-09-11(사용자 요청) - "장기간 폰을 안 만지면 몇 시든 무조건 수면으로
 /// 잡힌다"는 오탐 문제의 완화책. 근무 중/휴무일 조용한 활동처럼 일정만으로는
@@ -94,6 +95,7 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
       source: SleepSource.manual,
       status: SleepStatus.confirmed,
     ));
+    AppAnalytics.track(AnalyticsEvent.sleepRecordSaved, params: {'source': 'manual'});
     await refresh();
   }
 
@@ -111,6 +113,7 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
       status: SleepStatus.confirmed,
     );
     await DatabaseService.instance.updateSleepRecord(updated);
+    AppAnalytics.track(AnalyticsEvent.sleepRecordSaved, params: {'source': 'auto_confirmed'});
     await refresh();
   }
 

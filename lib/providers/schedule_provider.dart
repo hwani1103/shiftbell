@@ -11,6 +11,7 @@ import '../constants/platform_channel.dart';
 import '../services/widget_refresh_service.dart';
 import '../services/friend_sync_service.dart';
 import '../constants/alarm_limits.dart';
+import '../services/app_analytics.dart';
 
 
 final scheduleProvider = StateNotifierProvider<ScheduleNotifier, AsyncValue<ShiftSchedule?>>((ref) {
@@ -189,6 +190,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       newAssignedDates[dateStr] = newShiftType;
       await updateSchedule(_withAssignedDates(currentSchedule, newAssignedDates));
     }
+    AppAnalytics.track(AnalyticsEvent.shiftAssigned, params: {'count': 1});
   }
 
   Future<void> bulkAssignShift(List<DateTime> dates, String shiftType) async {
@@ -204,6 +206,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     }
 
     await updateSchedule(_withAssignedDates(currentSchedule, newAssignedDates));
+    AppAnalytics.track(AnalyticsEvent.shiftAssigned, params: {'count': dates.length});
   }
 
   Future<void> resetSchedule() async {

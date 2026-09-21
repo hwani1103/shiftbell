@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/date_memo.dart';
 import '../services/database_service.dart';
 import '../services/widget_refresh_service.dart';
+import '../services/app_analytics.dart';
 
 // ⭐ 메모 상태 관리 Provider
 class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
@@ -34,6 +35,7 @@ class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
     if (id == null) {
       return false;  // 최대 3개 초과
     }
+    AppAnalytics.track(AnalyticsEvent.memoSaved);
 
     // 상태 갱신
     await loadMemosForDate(date);

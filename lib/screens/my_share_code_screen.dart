@@ -17,6 +17,7 @@ import '../services/firebase_bootstrap.dart';
 import '../providers/schedule_provider.dart';
 import '../models/friend_schedule.dart';
 import '../l10n/l10n_extensions.dart';
+import '../services/app_analytics.dart';
 
 // ⭐ 트랙1(웹) 배포 도메인 - Firebase Hosting(shiftbell-29f31)에 실제 배포 완료
 // (2026-08-14, `firebase deploy --only hosting`). build/web을 다시 배포하려면
@@ -140,6 +141,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
         );
         return;
       }
+      AppAnalytics.track(AnalyticsEvent.friendShareStarted);
       final after = await FriendSyncService.instance.getShareState();
       if (!mounted) return;
       setState(() {

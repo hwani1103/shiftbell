@@ -1,0 +1,3 @@
+{ "name": "dashboard-tools", "private": true, "type": "module", "version": "1.0.0",
+  "description": "개발용 화면 검증 도구(배포되지 않음). 설치된 Chrome으로 스크린샷을 찍어 레이아웃을 확인한다.",
+  "dependencies": { "playwright-core": "^1.50.0" } }

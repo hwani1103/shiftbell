@@ -10,6 +10,7 @@ import '../models/friend_schedule.dart';
 import '../services/database_service.dart';
 import '../services/friend_share_service.dart';
 import '../services/friend_sync_service.dart';
+import '../services/app_analytics.dart';
 
 enum FriendAvailability { unknown, available, unconfirmed, invalid }
 
@@ -106,6 +107,7 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
         ? FriendAvailability.unconfirmed
         : FriendAvailability.available;
     await load();
+    AppAnalytics.track(AnalyticsEvent.friendAdded);
     return true;
   }
 

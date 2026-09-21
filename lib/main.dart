@@ -49,6 +49,7 @@ import 'l10n/l10n_extensions.dart';
 import 'utils/schedule_focus_request.dart';
 import 'providers/tab_visibility_provider.dart';
 import 'screens/startup_gate.dart';
+import 'services/app_analytics.dart';
 
 // ⭐ 2026-09-04 - MainScreen 바텀 네비게이션에서 "달력탭"을 가리키는 인덱스.
 // 탭 순서(다음알람/일정관리/달력/컨디션/설정)가 바뀔 때마다 이 값 하나만
@@ -483,6 +484,8 @@ class _MainScreenState extends ConsumerState<MainScreen>
       await UpdateService.checkAndShowReleaseNote(context);
       if (!mounted) return;
       UpdateService.checkForUpdate(context);
+      // 알람 사용량(끄기/연장/무응답)은 앱을 열 때 새로 쌓인 이력만 이벤트로 보낸다 - AlarmUsageAnalytics 참고
+      AlarmUsageAnalytics.reportNew();
     });
   }
 
@@ -627,6 +630,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
       UpdateService.checkForUpdate(context);
+      AlarmUsageAnalytics.reportNew();
       // ⭐ 2026-09-14 (T10 연결, G2-01) - 재개될 때마다 친구공유 대기 작업(dirty/stop_pending) 재시도
       _runFriendSync(
           'onAppResumed',
@@ -893,8 +897,13 @@ class _MainScreenState extends ConsumerState<MainScreen>
             final idx = visibleTabIndices.indexOf(_currentIndex);
             return idx < 0 ? 0 : idx;
           }(),
-          onTap: (visibleIndex) =>
-              setState(() => _currentIndex = visibleTabIndices[visibleIndex]),
+          onTap: (visibleIndex) {
+            final tab = visibleTabIndices[visibleIndex];
+            if (tab != _currentIndex && tab < kAnalyticsTabNames.length) {
+              AppAnalytics.track(AnalyticsEvent.tabSelected, params: {'tab': kAnalyticsTabNames[tab]});
+            }
+            setState(() => _currentIndex = tab);
+          },
           items: [for (final i in visibleTabIndices) _navItemFor(i, context)],
         ),
       ),

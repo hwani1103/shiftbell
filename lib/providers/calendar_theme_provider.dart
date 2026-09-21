@@ -6,6 +6,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/calendar_theme.dart';
+import '../services/app_analytics.dart';
 
 class CalendarThemeNotifier extends StateNotifier<CalendarThemeId> {
   CalendarThemeNotifier() : super(kDefaultCalendarThemeId);
@@ -15,6 +16,7 @@ class CalendarThemeNotifier extends StateNotifier<CalendarThemeId> {
   static const _prefsKey = 'calendar_theme_id';
 
   Future<void> setTheme(CalendarThemeId id) async {
+    if (state != id) AppAnalytics.track(AnalyticsEvent.calendarThemeChanged, params: {'theme': id.name});
     state = id;
     try {
       final prefs = await SharedPreferences.getInstance();

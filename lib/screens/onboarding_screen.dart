@@ -30,6 +30,7 @@ import '../services/alarm_generation_service.dart';
 import '../models/backup_payload.dart';
 import '../services/backup_storage_service.dart';
 import 'restore_backup_screen.dart';
+import '../services/app_analytics.dart';
 
 // 알람 설정 (시간 + 타입 + 전날/당일/다음날)
 class AlarmSetting {
@@ -1154,6 +1155,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     // 온보딩을 마치는 사람은 "방금 이 버전으로 막 시작한" 사람이니, 이 버전을
     // 기준선으로 남겨서 나중에 릴리즈 노트가 신규 유저에게 잘못 뜨지 않게 함.
     await UpdateService.markOnboardingBaselineVersion();
+    // 분류값(규칙적/불규칙)만 보낸다 - 근무표 내용은 보내지 않음
+    AppAnalytics.track(AnalyticsEvent.onboardingComplete, params: {'schedule_type': _isRegular! ? 'regular' : 'irregular'});
 
     // ⭐ 온보딩 완료 후 무조건 달력탭으로 이동
     if (mounted) {

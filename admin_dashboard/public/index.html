@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>교대시계 관리자</title>
+  <meta name="description" content="교대시계 운영 현황 대시보드">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="theme-color" content="#f2f4fa">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="교대시계 관리자">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+  <div id="app"><div class="splash"><div class="spin" aria-label="불러오는 중"></div></div></div>
+  <div id="layer"></div>
+  <noscript><p style="padding:24px;font-family:sans-serif">이 페이지는 JavaScript가 필요해요.</p></noscript>
+
+  <!-- Firebase SDK는 호스팅 예약 주소(/__/firebase/)에서 받는다: 별도 키·CDN 설정 없이 이 사이트가 속한 프로젝트로 자동 초기화됨 -->
+  <script src="/__/firebase/10.14.1/firebase-app-compat.js"></script>
+  <script src="/__/firebase/10.14.1/firebase-auth-compat.js"></script>
+  <script src="/__/firebase/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="/__/firebase/init.js"></script>
+  <script type="module" src="/assets/js/main.js"></script>
+</body>
+</html>

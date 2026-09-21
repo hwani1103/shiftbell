@@ -1,0 +1,14 @@
+node_modules/
+*.log
+# 서비스 계정 키·환경 파일은 절대 커밋하지 않는다
+service-account*.json
+*-adminsdk-*.json
+.env
+.env.*
+out/
+tools/shots/
+.emulator.rules
+.emulator.firebase.json
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

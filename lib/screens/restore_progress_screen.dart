@@ -16,6 +16,7 @@ import '../services/app_restart.dart';
 import '../services/backup_validator.dart';
 import '../services/restore_coordinator.dart';
 import '../theme/app_colors.dart';
+import '../services/app_analytics.dart';
 
 /// 화면이 닫히며 돌려주는 결과 - 둘 다 "데이터는 그대로"인 경우. 성공·미완료는 닫히지 않고 앱을 재시작함.
 enum RestoreProgressOutcome { invalid, failed }
@@ -42,6 +43,7 @@ class _RestoreProgressScreenState extends State<RestoreProgressScreen> {
   Future<void> _run() async {
     try {
       await RestoreCoordinator.instance.start(widget.payload, overwrite: true);
+      AppAnalytics.track(AnalyticsEvent.backupRestored);
       if (mounted) setState(() => _resultMessage = context.l10n.settingsRestoreFromBackupSuccessToast);
     } on BackupValidationException {
       if (mounted) Navigator.of(context).pop(RestoreProgressOutcome.invalid);

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/date_schedule.dart';
 import '../services/database_service.dart';
 import '../services/schedule_notification_service.dart';
+import '../services/app_analytics.dart';
 
 final dateScheduleProvider = StateNotifierProvider<DateScheduleNotifier,
     Map<String, List<DateSchedule>>>((ref) {
@@ -36,6 +37,8 @@ class DateScheduleNotifier extends StateNotifier<Map<String, List<DateSchedule>>
   /// (ScheduleNotificationService.syncForSchedule 참고). 일정 자체는 이미 저장된 상태.
   Future<({DateSchedule saved, bool notifyScheduled})> create(DateSchedule schedule) async {
     final saved = await _db.createSchedule(schedule);
+    // 알림 사용 여부만 분류값으로 보낸다 - 일정 내용·시각은 보내지 않음
+    AppAnalytics.track(AnalyticsEvent.scheduleCreated, params: {'notify': schedule.notifyEnabled ? 'on' : 'off'});
     final list = [...(state[schedule.date] ?? const <DateSchedule>[]), saved];
     state = {...state, schedule.date: list};
     // ⭐ 2026-09-12 - "일정에 맞춰서 알림받기". id가 확정된 뒤(saved)에만

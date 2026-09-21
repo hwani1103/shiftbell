@@ -1,0 +1,42 @@
+# 관리자 대시보드용 GA4 -> Firestore 동기화 (3시간마다). 서비스 계정 시크릿이 없으면 아무 것도 하지 않고 성공 처리한다.
+# 설정 방법은 admin_dashboard/README.md 의 "1회 설정" 참고. 시크릿 이름: GA4_SERVICE_ACCOUNT_JSON
+name: dashboard-sync
+
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: dashboard-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: admin_dashboard/sync
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: admin_dashboard/sync/package-lock.json
+      - run: npm ci
+      - name: 변환 로직 테스트
+        run: npm test
+      - name: GA4 -> Firestore 동기화
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.GA4_SERVICE_ACCOUNT_JSON }}
+          GA4_PROPERTY_ID: '553838010'
+          GA4_STREAM_ID: '15763725797'   # 플레이 출시 앱(android)만. dev·웹 스트림은 집계하지 않는다.
+          FIREBASE_PROJECT_ID: shiftbell-29f31
+        run: |
+          if [ -z "$SERVICE_ACCOUNT_JSON" ]; then
+            echo "GA4_SERVICE_ACCOUNT_JSON 시크릿이 없어 동기화를 건너뜁니다(README의 1회 설정을 먼저 하세요)."
+            exit 0
+          fi
+          node sync.mjs
