@@ -21,7 +21,6 @@ import androidx.core.app.NotificationManagerCompat
 object NotificationHelper {
 
     private const val CHANNEL_ID = "shiftbell_result_v3"
-    private const val CHANNEL_NAME = "결과 알림"
     private const val NOTIFICATION_ID_SNOOZE = 8889
     private const val DELETE_REQUEST_CODE = 9999
     private const val TAG = "NotificationHelper"
@@ -51,7 +50,7 @@ object NotificationHelper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                CHANNEL_NAME,
+                context.getString(R.string.channel_alarm_result),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "스누즈/타임아웃 결과"
@@ -75,7 +74,7 @@ object NotificationHelper {
 
         // 2단계: 8889 표시 (스누즈 결과)
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle("${newTimeStr}로 연장되었습니다")
+            .setContentTitle(context.getString(R.string.notif_snoozed_title, newTimeStr))
             .setContentText(label)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)  // ⭐ 알람시계 아이콘
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -192,7 +191,7 @@ object NotificationHelper {
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(label)
-            .setContentText("알람 울림 중")
+            .setContentText(context.getString(R.string.notif_ringing_content))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_CALL)  // ⭐ 삼성 시스템 스누즈 방지, full-screen 지원
             .setFullScreenIntent(screenPendingIntent, true)
@@ -206,9 +205,9 @@ object NotificationHelper {
             .setGroup("shiftbell_notifications")  // ⭐ 삼성 시스템 스누즈 방지
             .setGroupSummary(false)
             .setLocalOnly(true)  // ⭐ 삼성 시스템 스누즈 방지
-            .setStyle(NotificationCompat.BigTextStyle().bigText("알람 울림 중"))  // ⭐ 삼성 시스템 스누즈 방지
-            .addAction(android.R.drawable.ic_lock_idle_alarm, "5분 후", snoozePendingIntent)
-            .addAction(android.R.drawable.ic_delete, "알람 끄기", dismissPendingIntent)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(context.getString(R.string.notif_ringing_content)))  // ⭐ 삼성 시스템 스누즈 방지
+            .addAction(android.R.drawable.ic_lock_idle_alarm, context.getString(R.string.notif_action_snooze), snoozePendingIntent)
+            .addAction(android.R.drawable.ic_delete, context.getString(R.string.notif_action_dismiss), dismissPendingIntent)
             .build()
 
         try {

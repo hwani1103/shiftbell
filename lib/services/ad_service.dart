@@ -27,6 +27,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../constants/ad_config.dart';
 import '../constants/layout_limits.dart';
+import 'ad_consent_service.dart';
 
 class AdService {
   AdService._();
@@ -52,6 +53,14 @@ class AdService {
   /// 알람이 핵심이므로 - 광고 초기화가 실패했다고 앱 시작이 막히면 훨씬 나쁨.
   /// (DatabaseHelper.onDiskVersion()의 fail-open 판단과 같은 이유)
   static Future<void> warmUp() async {
+    // ⭐ 2026-09-22 - UMP 동의 수집(EEA/영국/스위스만 실제로 동작 - ad_consent_service.dart
+    // 참고)이 광고 SDK 초기화보다 먼저 끝나야 함. 실패해도 절대 던지지 않음.
+    try {
+      await AdConsentService.gatherConsent();
+    } catch (e) {
+      debugPrint('⚠️ 광고 동의 수집 실패 - 계속 진행: $e');
+    }
+
     try {
       await MobileAds.instance.initialize();
       _initialized = true;

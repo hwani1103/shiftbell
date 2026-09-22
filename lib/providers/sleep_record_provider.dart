@@ -15,6 +15,7 @@ import '../constants/platform_channel.dart';
 import '../models/sleep_record.dart';
 import '../services/database_service.dart';
 import '../services/app_analytics.dart';
+import '../services/condition/sleep_overlap.dart';
 
 /// ⭐ 2026-09-11(사용자 요청) - "장기간 폰을 안 만지면 몇 시든 무조건 수면으로
 /// 잡힌다"는 오탐 문제의 완화책. 근무 중/휴무일 조용한 활동처럼 일정만으로는
@@ -85,6 +86,15 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
 
   Future<void> refresh() => _load();
 
+  /// ⭐ 2026-09-22 (B-2) - [start]~[end]와 겹치는 확정 수면 기록(없으면 null). 화면 상태(최근 60일)가 아니라 DB에서
+  /// 그 앞뒤를 직접 읽는다 - 전체보기에서 오래된 달의 기록을 고칠 때도 맞게 판단하기 위함. 이틀보다 긴 기록은
+  /// 현실적으로 없어서 조회 창을 시작 2일 전부터로 둔다(진행 중 기록은 getSleepRecords가 항상 포함).
+  Future<SleepRecord?> findOverlap(DateTime start, DateTime end, {int? excludeId}) async {
+    final nearby = await DatabaseService.instance
+        .getSleepRecords(since: start.subtract(const Duration(days: 2)));
+    return findOverlappingSleep(nearby, start, end, excludeId: excludeId);
+  }
+
   /// 위젯 토글과 동일한 동작을 앱 안에서도 쓸 수 있게(주로 테스트/보조용) -
   /// 근무 중 여부와 무관하게 항상 허용(설계 문서 2장 - validation 없음).
   Future<void> addManual({required DateTime start, required DateTime end}) async {
@@ -101,12 +111,19 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
 
   /// 자동 감지 후보를 "맞아요"로 확정. 시작/종료 시각을 그대로 또는 사용자가 고친
   /// 값으로 확정한다(스펙 12장 [수정] 포함).
-  Future<void> confirmPending(SleepRecord record, {DateTime? overrideStart, DateTime? overrideEnd}) async {
+  ///
+  /// ⭐ 2026-09-22 (B-2) - 이미 확정된 다른 기록과 겹치면 확정하지 않고 그 기록을 돌려준다(화면이 안내).
+  /// 확정했거나 2분 미만이라 버린 경우는 null.
+  Future<SleepRecord?> confirmPending(SleepRecord record, {DateTime? overrideStart, DateTime? overrideEnd}) async {
     final effectiveStart = overrideStart ?? record.start;
     final effectiveEnd = overrideEnd ?? record.end;
     // M8 - 확정 결과가 2분 미만이면 버림(Kotlin의 AUTO 확정과 달리 여긴 근무중
     // 낮잠 등도 올 수 있어 2분 기준을 그대로 씀 - MANUAL과 동일).
-    if (effectiveEnd != null && !_isMeaningfulSleepDuration(effectiveStart, effectiveEnd)) return;
+    if (effectiveEnd != null && !_isMeaningfulSleepDuration(effectiveStart, effectiveEnd)) return null;
+    if (effectiveEnd != null) {
+      final conflict = await findOverlap(effectiveStart, effectiveEnd, excludeId: record.id);
+      if (conflict != null) return conflict;
+    }
     final updated = record.copyWith(
       start: overrideStart,
       end: overrideEnd,
@@ -115,6 +132,7 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
     await DatabaseService.instance.updateSleepRecord(updated);
     AppAnalytics.track(AnalyticsEvent.sleepRecordSaved, params: {'source': 'auto_confirmed'});
     await refresh();
+    return null;
   }
 
   /// ⭐ P2 #7(2026-09-18, 사용자 요청) - "보이는 기록 모두 확인" 일괄 처리. 여러 건을
@@ -123,13 +141,29 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
   /// 끝내고 마지막에 한 번만 refresh한다. 시각 수정 없이 "그대로 맞다"만 일괄
   /// 처리하는 용도라 overrideStart/End는 안 받는다(수정이 필요하면 개별 카드의
   /// [수정]을 쓰거나, 확인 뒤 "최근 수면 기록"에서 다시 고치면 됨).
-  Future<void> confirmAllPending(List<SleepRecord> records) async {
+  ///
+  /// ⭐ 2026-09-22 (B-2) - 이미 확정된 기록과 겹치는 것은 건너뛰고 그 개수를 돌려준다(화면이 안내). 한 번에 확정하는
+  /// 목록끼리 서로 겹치는 경우도 막기 위해, 앞에서 확정한 것을 비교 대상에 계속 더해 간다.
+  Future<int> confirmAllPending(List<SleepRecord> records) async {
+    var skipped = 0;
+    final confirmedNow = <SleepRecord>[];
     for (final record in records) {
       final effectiveEnd = record.end;
       if (effectiveEnd != null && !_isMeaningfulSleepDuration(record.start, effectiveEnd)) continue;
-      await DatabaseService.instance.updateSleepRecord(record.copyWith(status: SleepStatus.confirmed));
+      if (effectiveEnd != null) {
+        final conflict = await findOverlap(record.start, effectiveEnd, excludeId: record.id) ??
+            findOverlappingSleep(confirmedNow, record.start, effectiveEnd, excludeId: record.id);
+        if (conflict != null) {
+          skipped++;
+          continue;
+        }
+      }
+      final updated = record.copyWith(status: SleepStatus.confirmed);
+      await DatabaseService.instance.updateSleepRecord(updated);
+      confirmedNow.add(updated);
     }
     await refresh();
+    return skipped;
   }
 
   /// "기록하지 않기" - 자동 감지 결과를 완전히 폐기.

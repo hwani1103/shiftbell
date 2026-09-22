@@ -59,66 +59,77 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
+          // ⭐ 2026-09-22 - 예전엔 스크롤 없는 Column + Spacer라 작은 화면·큰 글자에서 넘치면 release에서
+          // 맨 아래 "허용" 버튼이 잘려 첫 화면에서 앞으로 갈 수 없었음. 설명은 스크롤, 버튼은 항상 하단 고정.
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 헤더
-              Text(
-                context.l10n.permissionGetStarted,
-                style: TextStyle(
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface,
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 헤더
+                      Text(
+                        context.l10n.permissionGetStarted,
+                        style: TextStyle(
+                          fontSize: 28.sp,
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        context.l10n.permissionIntro,
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          color: colorScheme.onSurfaceVariant,
+                          height: 1.5,
+                        ),
+                      ),
+                      SizedBox(height: 48.h),
+
+                      // 필수 권한 목록
+                      _buildPermissionItem(
+                        context: context,
+                        icon: Icons.notifications_active,
+                        iconColor: colorScheme.tertiary,
+                        title: context.l10n.permissionNotification,
+                        description: context.l10n.permissionNotificationDesc,
+                        required: true,
+                      ),
+                      SizedBox(height: 24.h),
+                      _buildPermissionItem(
+                        context: context,
+                        icon: Icons.phone_android,
+                        iconColor: Colors.green,
+                        title: context.l10n.permissionOverlay,
+                        description: context.l10n.permissionOverlayDesc,
+                        required: true,
+                      ),
+                      SizedBox(height: 24.h),
+                      _buildPermissionItem(
+                        context: context,
+                        icon: Icons.alarm_on,
+                        iconColor: Colors.orange,
+                        title: context.l10n.permissionExactAlarm,
+                        description: context.l10n.permissionExactAlarmDesc,
+                        required: true,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              SizedBox(height: 12.h),
-              Text(
-                context.l10n.permissionIntro,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: colorScheme.onSurfaceVariant,
-                  height: 1.5,
-                ),
-              ),
-              SizedBox(height: 48.h),
-
-              // 필수 권한 목록
-              _buildPermissionItem(
-                context: context,
-                icon: Icons.notifications_active,
-                iconColor: colorScheme.tertiary,
-                title: context.l10n.permissionNotification,
-                description: context.l10n.permissionNotificationDesc,
-                required: true,
-              ),
-              SizedBox(height: 24.h),
-              _buildPermissionItem(
-                context: context,
-                icon: Icons.phone_android,
-                iconColor: Colors.green,
-                title: context.l10n.permissionOverlay,
-                description: context.l10n.permissionOverlayDesc,
-                required: true,
-              ),
-              SizedBox(height: 24.h),
-              _buildPermissionItem(
-                context: context,
-                icon: Icons.alarm_on,
-                iconColor: Colors.orange,
-                title: context.l10n.permissionExactAlarm,
-                description: context.l10n.permissionExactAlarmDesc,
-                required: true,
-              ),
-
-              const Spacer(),
+              SizedBox(height: 16.h),
 
               // 하단 버튼
+              // 높이를 고정하지 않고 최소 높이만 둠 - 큰 글자에서 버튼 글자가 잘리지 않게(2026-09-22)
               SizedBox(
                 width: double.infinity,
-                height: 56.h,
                 child: ElevatedButton(
                   onPressed: _requestPermissions,
                   style: ElevatedButton.styleFrom(
+                    minimumSize: Size.fromHeight(56.h),
                     backgroundColor: colorScheme.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
@@ -137,9 +148,9 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
               SizedBox(height: 12.h),
               SizedBox(
                 width: double.infinity,
-                height: 56.h,
                 child: TextButton(
                   onPressed: _skipPermissions,
+                  style: TextButton.styleFrom(minimumSize: Size.fromHeight(56.h)),
                   child: Text(
                     context.l10n.commonNotNow,
                     style: TextStyle(
@@ -192,12 +203,15 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
             children: [
               Row(
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurface,
+                  // 영어·큰 글자에서 "필수" 칩과 같이 가로로 넘치지 않게(2026-09-22)
+                  Flexible(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: colorScheme.onSurface,
+                      ),
                     ),
                   ),
                   if (required) ...[

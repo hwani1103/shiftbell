@@ -160,10 +160,18 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
             Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
-                onPressed: () => ref
-                    .read(sleepRecordProvider.notifier)
-                    .confirmAllPending(
-                        pending.take(_kMaxPendingCards).toList()),
+                onPressed: () async {
+                  final skipped = await ref
+                      .read(sleepRecordProvider.notifier)
+                      .confirmAllPending(
+                          pending.take(_kMaxPendingCards).toList());
+                  // ⭐ 2026-09-22 (B-2) - 이미 확정된 기록과 겹쳐 건너뛴 게 있으면 알림(카드는 그대로 남음)
+                  if (skipped > 0 && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                            '$skipped건은 이미 기록된 수면과 겹쳐서 확인하지 않았어요. 남은 카드에서 "기록하지 않기"나 "수정"을 눌러 주세요.')));
+                  }
+                },
                 icon: const Icon(Icons.done_all, size: 18),
                 label: const Text('보이는 기록 모두 확인'),
               ),
@@ -605,11 +613,20 @@ class _PendingSleepConfirmationCard extends ConsumerWidget {
       title: '수면 시각 수정',
     );
     if (result is! SleepSlotSaved) return;
-    await ref.read(sleepRecordProvider.notifier).confirmPending(
+    final conflict = await ref.read(sleepRecordProvider.notifier).confirmPending(
           record,
           overrideStart: result.start,
           overrideEnd: result.end,
         );
+    if (context.mounted) _showConflict(context, conflict);
+  }
+
+  // ⭐ 2026-09-22 (B-2) - 이미 확정된 기록과 겹쳐 확정하지 않았으면 이유를 알림
+  void _showConflict(BuildContext context, SleepRecord? conflict) {
+    if (conflict == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(sleepOverlapMessage(conflict))),
+    );
   }
 
   @override
@@ -670,9 +687,12 @@ class _PendingSleepConfirmationCard extends ConsumerWidget {
                   child: const Text('수정'),
                 ),
                 ElevatedButton(
-                  onPressed: () => ref
-                      .read(sleepRecordProvider.notifier)
-                      .confirmPending(record),
+                  onPressed: () async {
+                    final conflict = await ref
+                        .read(sleepRecordProvider.notifier)
+                        .confirmPending(record);
+                    if (context.mounted) _showConflict(context, conflict);
+                  },
                   child: const Text('맞아요'),
                 ),
               ],
@@ -959,8 +979,10 @@ class _SleepCategoryAverageRow extends StatelessWidget {
                     color: Colors.black87),
               ),
             ),
+            // ⭐ 2026-09-22 사용자 지적 - "5시간 34분"만 있으면 평균인지 알기 어려움.
+            // "평균" 접두어를 붙여서 이 숫자가 평균값임을 바로 알 수 있게 함.
             Text(
-              fmtDuration(Duration(minutes: total)),
+              '평균 ${fmtDuration(Duration(minutes: total))}',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,

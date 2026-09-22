@@ -175,15 +175,37 @@ class MainActivity: FlutterActivity() {
             pending?.success(null) // 사용자가 취소함
             return
         }
-        try {
-            val content = contentResolver.openInputStream(uri)?.use { input ->
-                input.readBytes().toString(Charsets.UTF_8)
+        // ⭐ 2026-09-22 (B-1) - 예전엔 여기(UI 스레드)에서 readBytes()로 통째로 읽어서, 큰 파일을 고르면 "응답 없음"이나
+        // 메모리 부족이 날 수 있었음. 자동 탐지(readBackupFile)와 같이 백그라운드에서 읽고, 크기 상한(BackupFileReader)을
+        // 넘으면 읽지 않고 null - Dart는 지금처럼 "백업 파일이 아님"으로 안내함.
+        Thread {
+            val content = try {
+                val size = queryOpenableSize(uri)
+                if (size != null && size > BackupFileReader.MAX_BACKUP_BYTES) {
+                    Log.w("MainActivity", "⚠️ 수동 선택한 파일이 백업 상한보다 큼(${size}바이트) - 읽지 않음")
+                    null
+                } else {
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        BackupFileReader.readBoundedUtf8(input)
+                            ?: run { Log.w("MainActivity", "⚠️ 수동 선택한 파일이 백업 상한을 넘음 - 읽지 않음"); null }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "❌ 수동 선택한 백업 파일 읽기 실패", e)
+                null
             }
-            pending?.success(content)
-        } catch (e: Exception) {
-            Log.e("MainActivity", "❌ 수동 선택한 백업 파일 읽기 실패", e)
-            pending?.success(null)
+            runOnUiThread { pending?.success(content) }
+        }.start()
+    }
+
+    /** SAF 문서의 크기(바이트). 제공자가 알려주지 않으면 null - 그때는 읽으면서 상한을 검사함. */
+    private fun queryOpenableSize(uri: android.net.Uri): Long? = try {
+        contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.SIZE), null, null, null)?.use { c ->
+            val idx = c.getColumnIndex(android.provider.OpenableColumns.SIZE)
+            if (c.moveToFirst() && idx >= 0 && !c.isNull(idx)) c.getLong(idx) else null
         }
+    } catch (e: Exception) {
+        null
     }
 
     override fun onDestroy() {
@@ -842,6 +864,11 @@ override fun onNewIntent(intent: Intent) {
         // 봐도 "Dart 쪽에서 아예 호출을 안 한 것"과 "호출은 됐는데 여기서
         // 실패한 것"을 구분할 수 있음.
         Log.d("MainActivity", "💾 백업 저장 시도(content=${content.length}자, prevUri=$previousUriStr)")
+        // ⭐ 2026-09-22 (B-1) - 읽기 상한을 넘는 백업은 복원 때 읽지 못함. 쓰기는 절대 막지 않고(백업이 없는 게 더 나쁨) 알리기만 함.
+        val contentBytes = content.toByteArray(Charsets.UTF_8).size.toLong()
+        if (contentBytes > BackupFileReader.MAX_BACKUP_BYTES) {
+            Log.e("MainActivity", "❌ 백업 크기(${contentBytes}바이트)가 복원 읽기 상한을 넘음 - BackupFileReader.MAX_BACKUP_BYTES 재검토 필요")
+        }
 
         return try {
             val resolver = contentResolver
@@ -940,7 +967,8 @@ override fun onNewIntent(intent: Intent) {
             for ((id, name) in candidates.sortedByDescending { it.first }) {
                 val uri = ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, id)
                 val content = try {
-                    resolver.openInputStream(uri)?.use { input -> input.readBytes().toString(Charsets.UTF_8) }
+                    // 2026-09-22 (B-1) - 수동 선택과 같은 크기 상한(넘으면 이 후보를 건너뜀)
+                    resolver.openInputStream(uri)?.use { input -> BackupFileReader.readBoundedUtf8(input) }
                 } catch (e: Exception) {
                     Log.w("MainActivity", "⚠️ 백업 후보 읽기 실패($name) - 다음 후보 확인", e)
                     null

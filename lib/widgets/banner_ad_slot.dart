@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../constants/ad_config.dart';
+import '../services/ad_consent_service.dart';
 import '../services/ad_service.dart';
 
 class BannerAdSlot extends StatefulWidget {
@@ -42,7 +43,7 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
     _loadAd();
   }
 
-  void _loadAd() {
+  void _loadAd() async {
     final size = AdService.bannerAdSize;
 
     // 높이 계산에 실패했거나 SDK 초기화가 안 됐으면 광고를 만들지 않음.
@@ -56,6 +57,16 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
       debugPrint('⏭️ 배너 광고 생략(크기 미확정 또는 SDK 미초기화) - 자리만 확보함');
       return;
     }
+    // ⭐ 2026-09-22 - EEA/영국/스위스 등 UMP 동의가 필요한 사용자에게 동의 전
+    // 광고를 요청하지 않음(ad_consent_service.dart). AdService.warmUp()이 이미
+    // 첫 프레임 전에 동의 수집을 끝내놓으므로 여기선 캐시된 상태만 빠르게 읽음 -
+    // 한국 등 동의가 애초에 불필요한 지역은 이 값이 거의 즉시 true라 체감 지연 없음.
+    final allowed = await AdConsentService.canRequestAds();
+    if (!allowed) {
+      debugPrint('⏭️ 배너 광고 생략(광고 동의 미확보) - 자리만 확보함');
+      return;
+    }
+    if (!mounted) return;
 
     final ad = BannerAd(
       size: size,

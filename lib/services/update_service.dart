@@ -256,6 +256,8 @@ class UpdateService {
       context: context,
       barrierDismissible: true,  // 바깥 터치로 닫기 가능 (null 반환)
       builder: (context) => AlertDialog(
+        // ⭐ 2026-09-22 - 큰 글자·작은 화면에서 세로로 넘치지 않게 스크롤 허용(출시 직후 기존 사용자 전원이 보는 대화상자)
+        scrollable: true,
         backgroundColor: colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
@@ -264,7 +266,7 @@ class UpdateService {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 타이틀
+            // 타이틀 - 영어·큰 글자에서 가로로 넘치지 않게 Flexible(짧으면 지금처럼 가운데)
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -274,12 +276,15 @@ class UpdateService {
                   color: colorScheme.primary,
                 ),
                 SizedBox(width: 8.w),
-                Text(
-                  context.l10n.updateNewVersionAvailable,
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onSurface,
+                Flexible(
+                  child: Text(
+                    context.l10n.updateNewVersionAvailable,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ],

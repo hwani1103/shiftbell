@@ -29,7 +29,17 @@ class HelpSection {
   final IconData icon;
   final HelpTextOf titleKey;
   final List<HelpTopic> topics;
-  const HelpSection({required this.icon, required this.titleKey, required this.topics});
+  // ⭐ 2026-09-22(영어화 P0-2) - 수면·회복 탭 자체가 한국어 로케일에서만 존재해서
+  // (main.dart _showConditionTab) 그 탭을 설명하는 "수면·회복"/"수면 기록" 두
+  // 섹션도 영어에서는 통째로 숨김(build()의 isKorean 필터 참고) - 쓸 수도 없는
+  // 기능의 도움말만 남아 있으면 혼란스러움.
+  final bool koreanOnly;
+  const HelpSection({
+    required this.icon,
+    required this.titleKey,
+    required this.topics,
+    this.koreanOnly = false,
+  });
 }
 
 // ⭐ 순서 = 사용자가 앱을 처음 접했을 때 흐름(시작하기 → 근무 관리 → 알람 →
@@ -143,6 +153,7 @@ final List<HelpSection> _helpSections = [
   HelpSection(
     icon: Icons.self_improvement_outlined,
     titleKey: (l10n) => l10n.helpConditionSectionTitle,
+    koreanOnly: true,
     topics: [
       HelpTopic(
         titleKey: (l10n) => l10n.helpConditionWhatIsItTitle,
@@ -163,6 +174,7 @@ final List<HelpSection> _helpSections = [
   HelpSection(
     icon: Icons.bedtime_outlined,
     titleKey: (l10n) => l10n.helpSleepSectionTitle,
+    koreanOnly: true,
     topics: [
       HelpTopic(
         titleKey: (l10n) => l10n.helpSleepWidgetTitle,
@@ -285,11 +297,17 @@ class _HelpScreenState extends State<HelpScreen> {
     final l10n = context.l10n;
     final query = _query.trim().toLowerCase();
 
+    // ⭐ 2026-09-22(영어화 P0-2) - koreanOnly 섹션(수면·회복/수면 기록)은 한국어
+    // 로케일이 아니면 목차 자체에서 뺌 - 그 탭이 영어에는 없으므로.
+    final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+    final availableSections =
+        isKorean ? _helpSections : _helpSections.where((s) => !s.koreanOnly).toList();
+
     // 검색어가 있으면 섹션별로 제목이 매치하는 항목만 남기고, 매치가 하나도
     // 없는 섹션은 통째로 숨긴다.
     final visibleSections = query.isEmpty
-        ? _helpSections
-        : _helpSections
+        ? availableSections
+        : availableSections
             .map((s) {
               final matched = s.topics
                   .where((t) => t.titleKey(l10n).toLowerCase().contains(query))

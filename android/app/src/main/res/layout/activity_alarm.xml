@@ -93,7 +93,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="위로 스와이프해서 끄기"
+            android:text="@string/alarm_swipe_hint"
             android:textSize="16sp"
             android:textColor="#803B2E7A"/>
     </LinearLayout>
@@ -139,7 +139,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="5분 후"
+                    android:text="@string/alarm_snooze_label"
                     android:textSize="16sp"
                     android:textColor="#B33B2E7A"/>
             </LinearLayout>
@@ -181,7 +181,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:text="끄기"
+                    android:text="@string/alarm_dismiss_label"
                     android:textSize="16sp"
                     android:textColor="#B33B2E7A"/>
             </LinearLayout>

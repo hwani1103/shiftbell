@@ -583,6 +583,10 @@ class _MainScreenState extends ConsumerState<MainScreen>
       // 다시 추가했다가 배포 전 최종 점검을 마치고 이번에 완전히 제거함
       // (onboarding_popup_lab_screen.dart 파일 자체도 삭제 - 다른 lab 화면들과
       // 달리 이번 배포 직전 점검 전용 1회성 도구라 재사용 계획이 없음).
+      // ⭐ 2026-09-22 - "일정관리 디자인 실험실"(dev_lab/) 탭은 근무시간 표기
+      // 방식(반투명 영역 고정)과 헤더 그라데이션 색상을 확정하고 실제
+      // ScheduleManagementTab에 반영한 뒤 완전히 삭제함(dev_lab/ 폴더 자체도
+      // 삭제 - 재사용 계획 없음).
     ];
 
     // ⭐ _tabs가 이제 항상 고정 5칸이라(위 주석 참고) 사실상 트리거될 일은

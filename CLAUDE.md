@@ -121,6 +121,7 @@ flutter build appbundle --release --flavor prod --dart-define=ADMOB_BANNER_ID=<�
 - **`admin_dashboard/`** — 개인용 운영 현황 웹(Firebase Hosting 별도 사이트 `shiftbell-ops-29f31`, 무료 한도). **aab에 안 들어감**(pubspec assets 아님).
   구조·1회성 설정·보안은 `admin_dashboard/README.md`. GA4 속성 `553838010`의 **prod 안드로이드 스트림 `15763725797`만** 집계
   (dev `15763791924`·웹 `15763713126` 제외 — `sync/lib/ga4.mjs`, 테스트로 고정). 운영 반영(Auth 설정·관리자 계정·규칙 게시·호스팅 배포·시크릿)은 사용자가 직접 함
+- 알람 사용량 커서 `analytics_alarm_history_cursor`는 기기별 설정(`kDeviceLocalPreferenceKeys`) — 백업·복원 대상 아님(다른 기기 이력 ID와 안 맞음)
 - 앱 쪽은 `lib/services/app_analytics.dart`뿐: `AppAnalytics.track(AnalyticsEvent.x, params: {...})`. **파라미터에 내용(근무표·메모·시각·이름)을 넣지 말 것** —
   종류/개수/탭 이름 같은 분류값만(방침 문구와 일치해야 함). 웹·dev에서는 아무것도 안 보냄
 - 알람 끄기/연장/무응답은 Native 경로에 Firebase를 넣지 않고 `alarm_history`에서 **앱을 열 때** 새로 쌓인 것만 보냄(`AlarmUsageAnalytics.reportNew`) → 대시보드에는 며칠 지연될 수 있음
@@ -458,6 +459,7 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
 - **분류는 저장하지 않음**: 주 수면/낮잠은 조회 때 계산(2시간 이상이면 주 수면 후보, 근무와 겹치거나 오늘 야간 출근 전에 끝난 잠은 낮잠,
   후보가 여럿이면 가장 긴 것 - `sleep_day_slots.dart`). 어제 야간 퇴근 뒤 **오늘 21시 전**에 시작한 수면은 야간 근무일로 귀속(2026-09-06 재설계,
   예전 "퇴근 후 16시간" 문구는 낡은 것). 한 밤의 수면시간은 매칭되는 낮잠+메인 합계. 수면·회복 탭 확인 카드는 최신 3건만 표시(2026-09-15)
+- **겹침 규칙(2026-09-22, `sleep_overlap.dart`)**: 합계(지난 24시간 수면)는 구간 **합집합**으로 셈(겹친 시간 이중 계산 방지). 직접 입력·수정·"맞아요" 확정은 다른 **확정** 기록과 겹치면 막고 안내(수정 시트는 입력값 그대로 다시 열림, 일괄 확인은 겹치는 것만 건너뜀). 확인 대기 자동 후보는 직접 입력을 막지 않음. 하루 낮잠은 칸이 2개여도 합계·평균은 전부(`SleepDaySlots.allNaps`). ⚠️ 저장 계층에서 "주 수면 1+낮잠 2"를 강제하지 말 것(위젯·자동 감지 기록을 조용히 버리게 됨)
 - **완전 분리**: 감지는 `sleep_records`에만 쓰고 `ConditionRuleEngine`은 수면을 모름(수면은 `recovery_briefing_engine.dart`의 사실·행동에만 쓰임)
 - **손상 행 방어(2026-09-15, Q-07)**: `decodeSleepRecordRows` — 날짜가 깨진 행 하나 때문에 수면 목록 전체가 안 뜨던 문제, 깨진 행만 건너뛰고 로그(행은 지우지 않음)
 - **확인 카드 문구**: "이때 주무셨나요?" + "확인한 기록만 오늘의 컨디션에 반영, 아니면 기록하지 않기(다음부터 덜 잡힘)" — 확인을 미루면 분석에서 빠진다는 걸 알림(자동 확정은 여전히 금지)
@@ -498,6 +500,7 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
   구조상 불가능(서로의 행이 안 보임) — 접두어 분리는 "손으로 고를 때 구분"의 의미만 있음. selection 없는 전체 조회 + 이름 필터,
   행 URI 단위 삭제, SAF 수동 선택 제공은 그대로 유지
 - dev/prod 백업 파일명 분리(`ShiftBell_Backup_dev_`), 파일명에 패키지명 노출 금지
+- **읽기 크기 상한 16MB(2026-09-22, `BackupFileReader.kt`)**: SAF 수동 선택·자동 탐지 모두 상한을 넘으면 읽지 않고 null("백업 파일이 아님" 안내). SAF 읽기는 백그라운드 스레드. 쓰기는 상한을 넘어도 막지 않고 로그만(이력 증가는 연 1MB 안팎). 행 수·문자열 길이 상한은 정상 백업을 거부할 위험만 있어 두지 않음
 
 ### 옛 점검 리포트(08-14, 09-01, 09-04)에서 아직 남은 것
 - (Low) `ShiftTimeRange` 출퇴근을 같은 시각으로 입력하면 24시간으로 계산됨
@@ -512,7 +515,7 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
 - **1.0.23 출시 인수인계: `docs/release_audit/handoff_release_2026_09_21.md`** — 커밋·AdMob 실제 ID 주입·aab 빌드·Play 업로드·main 병합/태그·
   Firebase `latestVersionCode=25` 순서와 사용자/Claude 역할 구분. 새 세션은 이 문서부터 읽을 것.
 
-- `flutter analyze` — error는 `lib/web_main.dart`의 `dart:js_util` 1건(웹 전용), warning은 기존 미사용 import 등
+- `flutter analyze` — error 0(2026-09-22 `web_main.dart`의 `dart:js_util`은 웹 전용이라 ignore 주석 처리), warning은 기존 미사용 import 등
 - 자동 테스트: `flutter test`(Dart, `test/release_audit/g0~g2` 포함), `cd android && sh ./gradlew testDevDebugUnitTest`(Kotlin JUnit4+Robolectric,
   `robolectric.properties`로 SDK 34 고정). `integration_test/`는 호스트 RAM 6GB 한계로 2026-09-13에 제거함. 빌드·테스트는 한 번에 하나, 전에 `gradlew --stop`
 - 저장소 히스토리에 예전 logcat 덤프 86MB(팩 16MB)가 남아 있음(추적 해제됨)

@@ -50,7 +50,6 @@ class ScheduleNotificationReceiver : BroadcastReceiver() {
 
     companion object {
         private const val CHANNEL_ID = "schedule_notify_v2"
-        private const val CHANNEL_NAME = "일정 알림"
 
         const val EXTRA_ID = "schedule_id"
         const val EXTRA_DATE = "schedule_date"
@@ -108,7 +107,7 @@ class ScheduleNotificationReceiver : BroadcastReceiver() {
             // NotificationHelper.kt의 CHANNEL_ID("shiftbell_result_v3")는
             // 스누즈 결과 전용이라 여기서 재사용하지 않음 - 완전히 새 채널.
             val channel = NotificationChannel(
-                CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH
+                CHANNEL_ID, context.getString(R.string.channel_schedule_notify), NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "일정관리 탭에서 켠 일정 알림 - 소리/진동/무음은 이 채널 설정을 따름"
             }
@@ -144,6 +143,6 @@ class ScheduleNotificationReceiver : BroadcastReceiver() {
             .build()
 
         notificationManager.notify(notifyId, notification)
-        Log.d("ScheduleNotify", "📅 일정 알림 표시: id=$id date=$date time=$timeHeadline content=$content")
+        Log.d("ScheduleNotify", "📅 일정 알림 표시: id=$id date=$date time=$timeHeadline content=${content.length}자")
     }
 }

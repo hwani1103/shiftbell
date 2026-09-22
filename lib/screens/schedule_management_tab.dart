@@ -36,12 +36,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/calendar_theme.dart';
 import '../models/date_schedule.dart';
+import '../models/schedule_work_hours_band.dart';
 import '../models/shift_schedule.dart';
 import '../providers/calendar_theme_provider.dart';
+import '../providers/condition_shift_time_provider.dart';
 import '../providers/date_schedule_provider.dart';
-import '../providers/schedule_background_provider.dart';
 import '../providers/schedule_provider.dart';
 import '../services/memo_category_classifier.dart';
+import '../services/schedule_work_hours_band_resolver.dart';
 import '../theme/app_colors.dart';
 import '../utils/schedule_focus_request.dart';
 import '../providers/tab_visibility_provider.dart';
@@ -366,11 +368,20 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
         if (mounted) _activeFocusRequest = null;
       });
     }
-    // ⭐ 2026-08-27(2차) - "근무 칩/점 빼고는 전부 배경에 따라 유동적으로"
-    // 요청으로 헤더/날짜스트립도 이 스킴을 받아서 색을 맞춤(_buildHeader/
-    // _buildDateStrip에 scheme로 넘김) - 더 이상 "일단 배경만" 단계가 아님.
-    final scheme = _ScheduleColorScheme.of(
-        kScheduleBackgroundColors[ref.watch(scheduleBackgroundProvider)]);
+    // ⭐ 2026-09-22 - 배경색 선택 기능을 없애고 흰색으로 고정(요청). 파생색
+    // 계산(_ScheduleColorScheme.of)은 그대로 재사용 - 흰 배경 기준으로 헤더/
+    // 날짜스트립/칩 색이 항상 일관되게 나옴.
+    final scheme = _ScheduleColorScheme.of(Colors.white);
+
+    // ⭐ 2026-09-22 - "지금 근무 중인 시간대" 반투명 영역(schedule_work_hours_band_resolver.dart).
+    // 출퇴근 시각이 설정 안 됐거나(설정 → 근무시간 및 OT 설정) 휴무/미배정이면
+    // 조용히 빈 목록 - 이 날짜에는 아무 표시도 안 함.
+    final workHoursBands = resolveScheduleWorkHoursBands(
+      date: _selectedDate,
+      schedule: schedule,
+      shiftTimes: ref.watch(conditionShiftTimeProvider).value,
+      shiftColors: shiftColors,
+    );
 
     return GestureDetector(
       // ⭐ 2026-08-28 - 좌우 스와이프 = 다음날/이전날 이동으로 교체(예전엔
@@ -426,6 +437,7 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
                     dateKey: dateKey,
                     hasShiftToday: selectedHasShift,
                     focusMinutes: focusMinutes,
+                    workHoursBands: workHoursBands,
                     onSelectionModeChanged: (active) {
                       if (_childSelectionModeActive != active) {
                         setState(() => _childSelectionModeActive = active);
@@ -448,20 +460,41 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
   // ⭐ 2026-08-27(2차) - 텍스트/아이콘 색도 scheme.headerText로(요청: "검정색이
   // 아니라 검정색보다 약간 연한 색깔로, 그 영역 배경에 대비되게"). 근무명
   // 칩(_ShiftPill)은 예외라 scheme를 안 받고 그대로 둠.
+  // ⭐ 2026-09-22 - 오늘 근무가 있으면 이 헤더 배경을 그 근무 색 그라데이션으로
+  // 칠함(디자인 실험실의 "그라데이션 카드 히어로" 색상 처리를 가져옴 - 구조/배치
+  // 자체는 그대로 유지, 색만 다채롭게). 근무명 색은 사용자가 32색 팔레트에서
+  // 자유롭게 고르므로, 텍스트/아이콘 색은 고정하지 않고 그 근무 색의 밝기를
+  // 기준으로 매번 다시 계산해서(_ScheduleColorScheme.of 재사용 - 배경색 10종에
+  // 이미 쓰던 것과 같은 대비 공식) 어떤 색을 골라도 글자가 묻히지 않게 함.
+  // 근무 없음/미배정일 땐 예전 그대로 scheme.headerBg 평면색.
   Widget _buildHeader(String dateLabel, String shiftName, bool hasShift,
       Color? shiftColor, _ScheduleColorScheme scheme) {
+    final useGradient = hasShift && shiftColor != null;
+    final headerTextColor =
+        useGradient ? _ScheduleColorScheme.of(shiftColor).headerText : scheme.headerText;
     return Column(
       children: [
         Container(
             height: MediaQuery.of(context).padding.top, color: Colors.white),
         Container(
-          color: scheme.headerBg,
+          decoration: useGradient
+              ? BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      shiftColor.withValues(alpha: 0.85),
+                      shiftColor.withValues(alpha: 0.55),
+                    ],
+                  ),
+                )
+              : BoxDecoration(color: scheme.headerBg),
           padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 10.h),
           child: Row(
             children: [
               _MonthNavButton(
                   icon: Icons.chevron_left,
-                  color: scheme.headerText,
+                  color: headerTextColor,
                   onTap: () => _shiftMonth(-1)),
               Expanded(
                 child: Center(
@@ -476,7 +509,7 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
                         style: TextStyle(
                             fontSize: 15.5.sp,
                             fontWeight: FontWeight.w700,
-                            color: scheme.headerText),
+                            color: headerTextColor),
                       ),
                       if (hasShift)
                         _ShiftPill(shiftName: shiftName, color: shiftColor),
@@ -486,7 +519,7 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
               ),
               _MonthNavButton(
                   icon: Icons.chevron_right,
-                  color: scheme.headerText,
+                  color: headerTextColor,
                   onTap: () => _shiftMonth(1)),
             ],
           ),
@@ -495,21 +528,10 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
     );
   }
 
-  // ⭐ "그냥 숫자만" - 요일 라벨 없이 날짜 숫자만. 편집모드 토글이 없어져서
-  // 다시 전체 폭을 다 씀(트레일링 아이콘 자리 없앰).
-  // ⭐ 2026-08-27 - 맨 끝에 날짜 칩과 동일한 크기의 톱니바퀴 칩을 하나 추가함
-  // (요청) - 일정관리 전용 설정 화면(지금은 배경색 선택만) 진입점.
-  // ⭐ 2026-08-27(2차) - 컨테이너 배경 scheme.headerBg로, 날짜칩/설정칩은
-  // 공용 데코레이션(_scheduleChipDecoration)으로 통일(요청: "두 칩은
-  // 디자인적으로 100% 동일해야 함") - 배경은 scheme.mainBg(선택된 배경색
-  // 그대로), 텍스트/아이콘은 scheme.headerText(선택 안 된 상태 기준).
-  // ⭐ 2026-09-07 - 설정 칩이 날짜 목록의 "마지막 아이템"이라 30일/31일까지
-  // 스크롤해야만 보였음(요청: "화면 맨 우측에 항상 있게"). 스크롤되는
-  // ListView 밖으로 빼서 Row의 고정 트레일링 요소로 두고, 날짜칩과 똑같은
-  // _scheduleChipDecoration을 그대로 써서 이질감 없이 - 그 데코레이션 자체가
-  // 이미 입체감(그림자)을 주고 있어서, 스크롤 목록 위에 살짝 "떠 있는" 느낌이
-  // 자연스럽게 난다. 목록이 그 밑으로 지나갈 때 잘리는 느낌이 안 들도록
-  // 왼쪽에 배경색 그라데이션 페이드를 살짝 얹었다.
+  // ⭐ "그냥 숫자만" - 요일 라벨 없이 날짜 숫자만.
+  // ⭐ 2026-09-22 - 배경색 선택 기능 자체를 없애면서(요청 - 흰색 고정), 그
+  // 진입점이었던 우측 설정(톱니바퀴) 칩도 함께 제거함. 날짜 목록이 다시
+  // 전체 폭을 그대로 씀.
   Widget _buildDateStrip(int daysInMonth, _ScheduleColorScheme scheme) {
     final chipDecoration = _scheduleChipDecoration(scheme);
     return Container(
@@ -522,7 +544,7 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
               controller: _dateStripController,
               scrollDirection: Axis.horizontal,
               padding: EdgeInsets.only(
-                  left: 12.w, right: 6.w, top: 7.h, bottom: 7.h),
+                  left: 12.w, right: 12.w, top: 7.h, bottom: 7.h),
               itemCount: daysInMonth,
               separatorBuilder: (_, __) => SizedBox(width: _dateChipGap.w),
               itemBuilder: (context, index) {
@@ -571,46 +593,6 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
                   ),
                 );
               },
-            ),
-          ),
-          SizedBox(
-            width: _dateChipWidth.w + 16.w,
-            height: _dateChipHeight.h + 14.h,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // 목록이 설정칩 밑으로 지나갈 때 뚝 끊기지 않도록 배경색
-                // 그라데이션으로 살짝 페이드아웃.
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                          colors: [
-                            scheme.headerBg.withValues(alpha: 0),
-                            scheme.headerBg,
-                          ],
-                          stops: const [0.0, 0.35],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => const _ScheduleSettingsScreen())),
-                  child: Container(
-                    width: _dateChipWidth.w,
-                    height: _dateChipHeight.h,
-                    alignment: Alignment.center,
-                    decoration: chipDecoration,
-                    child: Icon(Icons.settings,
-                        size: 16.sp, color: scheme.headerText),
-                  ),
-                ),
-              ],
             ),
           ),
         ],
@@ -728,6 +710,10 @@ class _TimeAxisPicker extends ConsumerStatefulWidget {
   // 그리기 위해 부모(ScheduleManagementTab)로부터 그대로 내려받은 콜백.
   final VoidCallback onTabDisabled;
   final Future<void> Function() onTabDisableConfirmed;
+  // ⭐ 2026-09-22 - "지금 근무 중인 시간대" 반투명 영역(디자인 실험실에서
+  // 검증 후 확정, resolveScheduleWorkHoursBands가 계산). 빈 목록이면(대부분의
+  // 날짜 - 휴무/미배정/출퇴근 시각 미설정) 평소처럼 아무것도 안 그림.
+  final List<ScheduleWorkHoursBand> workHoursBands;
   const _TimeAxisPicker(
       {super.key,
       required this.hasShiftToday,
@@ -735,7 +721,8 @@ class _TimeAxisPicker extends ConsumerStatefulWidget {
       required this.onSelectionModeChanged,
       required this.onTabDisabled,
       required this.onTabDisableConfirmed,
-      this.focusMinutes});
+      this.focusMinutes,
+      this.workHoursBands = const []});
 
   @override
   ConsumerState<_TimeAxisPicker> createState() => _TimeAxisPickerState();
@@ -1249,6 +1236,75 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     _slotTops = tops;
   }
 
+  // ============================================================
+  // ⭐ 2026-09-22 - "지금 근무 중인 시간대" 반투명 영역. 디자인 실험실에서
+  // 10가지 표기 방식을 비교해 "①반투명 영역(상하단 구분선은 제거)"으로
+  // 확정, dev_lab/는 삭제하고 이 축에 직접 반영함. widget.workHoursBands가
+  // 비어 있으면(대부분의 날짜) 아래 두 메서드 모두 빈 리스트만 반환하므로
+  // 평소 렌더링에 영향이 없다. 이미 계산해둔 _slotTops(동적 슬롯 높이)를
+  // 그대로 이용해 실제 시간축 좌표에 정확히 겹쳐 그리고, 슬롯 경계가 아닌
+  // 임의 분(예: 09:15) 시각은 앞뒤 슬롯 사이를 선형보간한다.
+  double _yForMinutes(int minutes) {
+    final clamped = minutes.clamp(0, 24 * 60);
+    final slotFloat = clamped / 30.0;
+    final lower = slotFloat.floor().clamp(0, _slotCount);
+    final upper = (lower + 1).clamp(0, _slotCount);
+    final frac = slotFloat - lower;
+    return _edgePadding +
+        _slotTops[lower] +
+        (_slotTops[upper] - _slotTops[lower]) * frac;
+  }
+
+  // 배경 레이어(반투명 채움만, 테두리 선 없음) - 축 세로선 바로 위(=시각
+  // 숫자/일정 카드보다는 아래)에 그림.
+  List<Widget> _buildWorkHoursBandFills() {
+    if (widget.workHoursBands.isEmpty) return const [];
+    return [
+      for (final band in widget.workHoursBands)
+        Positioned(
+          left: 0,
+          right: 0,
+          top: _yForMinutes(band.startMinutes),
+          height: _yForMinutes(band.endMinutes) - _yForMinutes(band.startMinutes),
+          child: IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(color: band.color.withValues(alpha: 0.12)),
+            ),
+          ),
+        ),
+    ];
+  }
+
+  // 전경 레이어 - 각 구간의 맨 위 라인 우측에 근무명을 표기. ⚠️ 축의 정각
+  // 숫자(17.sp, 진하고 큼)가 아니라 일정 카드 자체의 시작~끝 시간 텍스트
+  // (_ScheduleRow._timeTextStyle - 14.sp + tabularFigures, 연한 timeText색)와
+  // 완전히 동일한 스타일이어야 함(2026-09-22 재확인 - 축 숫자와 맞췄더니
+  // "너무 크다"는 피드백, 비교 대상은 카드의 "07:00 AM" 텍스트였음).
+  List<Widget> _buildWorkHoursBandLabels(_ScheduleColorScheme scheme) {
+    if (widget.workHoursBands.isEmpty) return const [];
+    return [
+      for (final band in widget.workHoursBands)
+        Positioned(
+          top: _yForMinutes(band.startMinutes) - _hourTickBoxHeight / 2,
+          right: (13 * 7 / 8).w,
+          height: _hourTickBoxHeight,
+          child: IgnorePointer(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                band.shiftName,
+                style: GoogleFonts.quicksand(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    color: scheme.timeText),
+              ),
+            ),
+          ),
+        ),
+    ];
+  }
+
   // ⭐ 2026-08-31("D번") - 같은 슬롯의 일정이 1개면 예전과 동일하게 제자리에
   // 그대로 그림. 2개 이상이면 "카드 스택"으로 바꿈: 맨 앞(front) 하나만 전부
   // 보여주고, 나머지는 그 카드 우상단(1시 방향)에 작게(가장 작은 원 크기,
@@ -1580,19 +1636,35 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     // 계속 순환하게.
     final color =
         kScheduleBlockColors[_blocks.length % kScheduleBlockColors.length];
-    final created = await ref.read(dateScheduleProvider.notifier).create(
-          raw.copyWith(
-            date: widget.dateKey,
-            color: color,
-            createdAt: DateTime.now().toIso8601String(),
-          ),
-        );
+    // ⭐ 2026-09-22 - DB 쓰기가 실패하면 예전엔 시트만 닫히고 아무 반응이 없었음 - 실패를 알림.
+    // (알림 예약 실패는 syncForSchedule이 예외 없이 false로 돌려주므로 여기서 잡히는 건 DB 실패뿐)
+    final ({DateSchedule saved, bool notifyScheduled}) created;
+    try {
+      created = await ref.read(dateScheduleProvider.notifier).create(
+            raw.copyWith(
+              date: widget.dateKey,
+              color: color,
+              createdAt: DateTime.now().toIso8601String(),
+            ),
+          );
+    } catch (e) {
+      debugPrint('❌ 일정 저장 실패: $e');
+      _showSaveFailed();
+      return;
+    }
     // ⭐ 2026-09-14 (출시전 감사 #13) - 일정은 저장됐는데 알림 예약이 실패하면 조용히 넘어가지 않고 안내
     if (!created.notifyScheduled && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.scheduleNotifyRegisterFailed)),
       );
     }
+  }
+
+  void _showSaveFailed() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.commonSaveFailed)),
+    );
   }
 
   // ⭐ 기존 일정을 탭하면 - 같은 시트를 "수정 모드"로 열어서 저장/삭제 가능하게
@@ -1618,14 +1690,26 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     }
     final notifier = ref.read(dateScheduleProvider.notifier);
     if (result == _CreateBlockSheet.deleteSignal) {
-      await notifier.delete(block);
+      try {
+        await notifier.delete(block);
+      } catch (e) {
+        debugPrint('❌ 일정 삭제 실패: $e');
+        _showSaveFailed();
+      }
     } else if (result is DateSchedule) {
-      final notifyScheduled = await notifier.update(result.copyWith(
-        id: block.id,
-        date: block.date,
-        color: block.color,
-        createdAt: block.createdAt,
-      ));
+      final bool notifyScheduled;
+      try {
+        notifyScheduled = await notifier.update(result.copyWith(
+          id: block.id,
+          date: block.date,
+          color: block.color,
+          createdAt: block.createdAt,
+        ));
+      } catch (e) {
+        debugPrint('❌ 일정 수정 실패: $e');
+        _showSaveFailed();
+        return;
+      }
       // ⭐ 2026-09-14 (#13) - 알림 예약 실패 안내 (create와 동일)
       if (!notifyScheduled && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1868,11 +1952,9 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     // 날짜를 로드했는지"를 확인하고, 로드된 뒤 딱 한 번만 점프함.
     final isLoaded = providerState.containsKey(widget.dateKey);
     _blocks = providerState[widget.dateKey] ?? const [];
-    // ⭐ 2026-08-27(2차) - 축 시간 숫자 + 일정 시간/내용 텍스트 색이 배경색에
-    // 따라 유동적으로 바뀌게(요청) - 부모(_ScheduleManagementTabState)와
-    // 똑같은 배경값을 그대로 다시 watch해서 계산함(단일 소스, 같은 함수).
-    final scheme = _ScheduleColorScheme.of(
-        kScheduleBackgroundColors[ref.watch(scheduleBackgroundProvider)]);
+    // ⭐ 2026-09-22 - 배경색 고정(흰색) - 부모(_ScheduleManagementTabState)와
+    // 똑같은 계산을 그대로 다시 써서(단일 소스, 같은 함수) 색이 항상 일치함.
+    final scheme = _ScheduleColorScheme.of(Colors.white);
     // ⭐ 2026-09-08 - _readyToPaint 주석 참고. 최초 위치가 확정되기 전까지는
     // 이 축 전체를 투명하게 감춰서, "0에서 목표 위치로 튀는" 과정 자체가
     // 화면에 안 보이게 함(레이아웃 계산은 평소처럼 계속 돎 - Opacity는 paint만
@@ -2032,6 +2114,9 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
                             ),
                           ),
                         ),
+                        // ⭐ 2026-09-22 - "지금 근무 중인 시간대" 반투명 배경
+                        // (카드/숫자보다 아래) - 아래 _buildWorkHoursBandFills 참고.
+                        ..._buildWorkHoursBandFills(),
                         // ⭐ 2026-09-12 - 일정 알림을 탭해서 들어왔을 때 "여기예요"를
                         // 잠깐 밝게 보여주는 강조 밴드. _focusHighlightSlot이 null이면
                         // (평소 진입) 아무것도 안 그림 - IgnorePointer로 터치는 항상
@@ -2241,13 +2326,16 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
                           right: 16.w,
                           top: _edgePadding + _slotTops[_slotCount] + 28.h,
                           child: DisableTabButton(
-                            tabLabel: '일정관리',
+                            tabLabel: context.l10n.navScheduleManagement,
                             provider: scheduleTabEnabledProvider,
-                            extraNotice: '예정된 일정 알림도 모두 취소됩니다.',
+                            extraNotice: context.l10n.scheduleTabDisableExtraNotice,
                             onConfirmed: widget.onTabDisableConfirmed,
                             onDisabled: widget.onTabDisabled,
                           ),
                         ),
+                        // ⭐ 2026-09-22 - "지금 근무 중인 시간대" 라벨(카드보다
+                        // 위) - 아래 _buildWorkHoursBandLabels 주석 참고.
+                        ..._buildWorkHoursBandLabels(scheme),
                       ],
                     ),
                   ),
@@ -4099,91 +4187,6 @@ class _FineAdjustToggle extends StatelessWidget {
             color:
                 selected ? Colors.white : kAppChipBorder.withValues(alpha: 0.6),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// ============================================================
-// ⭐ 2026-08-27 - 일정관리 전용 설정 화면. 날짜 스트립 맨 끝 톱니바퀴에서
-// 진입(요청). 지금은 배경색 선택 하나만 - 다른 옵션은 나중에 추가.
-// ============================================================
-
-class _ScheduleSettingsScreen extends ConsumerWidget {
-  const _ScheduleSettingsScreen();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final selectedIndex = ref.watch(scheduleBackgroundProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.scheduleSettingsTitle),
-        backgroundColor: Colors.white,
-        foregroundColor: kAppChipBorder,
-        elevation: 0,
-      ),
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(context.l10n.scheduleBackgroundLabel,
-                style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w800,
-                    color: kAppChipBorder)),
-            SizedBox(height: 4.h),
-            Text(
-              context.l10n.scheduleBackgroundDescription,
-              style: TextStyle(
-                  fontSize: 12.sp,
-                  color: kAppChipBorder.withValues(alpha: 0.55)),
-            ),
-            SizedBox(height: 18.h),
-            Wrap(
-              spacing: 14.w,
-              runSpacing: 14.h,
-              children: [
-                for (int i = 0; i < kScheduleBackgroundColors.length; i++)
-                  GestureDetector(
-                    onTap: () => ref
-                        .read(scheduleBackgroundProvider.notifier)
-                        .setColorIndex(i),
-                    child: Container(
-                      width: 52.w,
-                      height: 52.w,
-                      decoration: BoxDecoration(
-                        color: kScheduleBackgroundColors[i],
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: i == selectedIndex
-                              ? kAppMainAccent
-                              : kAppChipBorder.withValues(alpha: 0.15),
-                          width: i == selectedIndex ? 3 : 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2)),
-                        ],
-                      ),
-                      child: i == selectedIndex
-                          ? Icon(Icons.check,
-                              color: kScheduleBackgroundColors[i]
-                                          .computeLuminance() >
-                                      0.5
-                                  ? Colors.black87
-                                  : Colors.white,
-                              size: 20.sp)
-                          : null,
-                    ),
-                  ),
-              ],
-            ),
-          ],
         ),
       ),
     );

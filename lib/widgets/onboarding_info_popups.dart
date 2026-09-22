@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_button.dart';
 import 'word_safe_spans.dart';
+import '../l10n/l10n_extensions.dart';
 
 const _kWelcomePopupShownKey = 'welcome_popup_shown';
 const _kShiftAssignTutorialShownKey = 'shift_assign_tutorial_shown';
@@ -50,7 +51,7 @@ const Duration kInfoPopupDelay = Duration(milliseconds: 700);
 Future<void> _showInfoPopupOnce(
   BuildContext context, {
   required String shownKey,
-  required _PopupContent Function() content,
+  required _PopupContent Function(BuildContext) content,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   if (prefs.getBool(shownKey) ?? false) return;
@@ -65,11 +66,13 @@ Future<void> _showInfoPopupOnce(
   await showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (context) => Dialog(
+    // ⭐ 2026-09-22(영어화) - content(dialogContext)로 바뀌어서 각 _PopupContent가
+    // context.l10n으로 로케일에 맞는 문구를 직접 고름(아래 WelcomePopupContent 등 참고).
+    builder: (dialogContext) => Dialog(
       backgroundColor: Colors.transparent,
       child: _InfoPopupCard(
-        content: content(),
-        onConfirm: () => Navigator.of(context).pop(),
+        content: content(dialogContext),
+        onConfirm: () => Navigator.of(dialogContext).pop(),
       ),
     ),
   );
@@ -221,33 +224,27 @@ class _PopupContent {
 /// 안 띄우고 카드만" 미리보기할 때도 재사용하려고 StatelessWidget이 아니라
 /// 데이터 객체 형태로 뺌 - WelcomePopupContent()/ShiftAssignTutorialContent()는
 /// 그 데이터를 담은 값일 뿐, 자기 자신을 그리지 않음(_InfoPopupCard가 그림).
+// ⭐ 2026-09-22(영어화) - 웰컴/근무배정/일정관리 탭 안내는 로케일과 무관하게 모든
+// 사용자가 보는 팝업이라 l10n(app_ko.arb/app_en.arb의 onboarding*Popup* 키)으로
+// 옮김. 컨디션 탭 안내(ConditionTabTutorialContent, 아래)만 그 탭 자체가 한국어
+// 로케일에서만 존재해서(main.dart _showConditionTab) 그대로 한국어 하드코딩.
 class WelcomePopupContent extends _PopupContent {
-  WelcomePopupContent()
+  WelcomePopupContent(BuildContext context)
       : super(
           emoji: '👋',
-          title: '교대시계를 설치해 주셔서\n감사합니다',
-          // ⭐ 2026-09-15 (사용자 요청) - 너무 간소화됐다는 피드백으로 기능 소개를 되살림. 문장 중간에 \n을 넣으면
-          // 화면 폭에 따라 어색하게 끊겨서 문단 사이에만 줄바꿈하고, 줄바꿈은 _InfoPopupCard의 wordSafeSpans에 맡김.
-          body: '처음 한 번만 근무표와 알람을 등록해 두면, '
-              '내 근무에 맞춰 정해진 시간에 알람이 자동으로 울려요.\n\n'
-              '📅  달력에서 날짜별 근무 한눈에 보기\n'
-              '🗓️  일정 관리와 일정 알림\n'
-              '🌙  수면·회복 관리\n'
-              '👥  친구와 근무표 공유',
-          buttonLabel: '시작하기',
+          title: context.l10n.onboardingWelcomePopupTitle,
+          body: context.l10n.onboardingWelcomePopupBody,
+          buttonLabel: context.l10n.onboardingWelcomePopupStartButton,
         );
 }
 
 class ShiftAssignTutorialContent extends _PopupContent {
-  ShiftAssignTutorialContent()
+  ShiftAssignTutorialContent(BuildContext context)
       : super(
           emoji: '📅',
-          title: '근무 배정, 이렇게 하면 돼요',
-          body: '불규칙 근무는 정해진 패턴이 없어서, 날짜마다 직접 근무를 지정해줘야 해요.\n\n'
-              '근무를 지정할 날짜를 길게 눌러 선택 모드로 들어간 뒤,'
-              ' 원하는 날짜들을 이어서 탭하고 하단의 근무명을 탭하여 근무를 지정하세요.\n\n'
-              '지정한 근무는 언제든 같은 방법으로 다시 바꿀 수 있어요.',
-          buttonLabel: '확인했어요',
+          title: context.l10n.onboardingShiftAssignPopupTitle,
+          body: context.l10n.onboardingShiftAssignPopupBody,
+          buttonLabel: context.l10n.commonGotIt,
         );
 }
 
@@ -262,7 +259,10 @@ class ShiftAssignTutorialContent extends _PopupContent {
 // 팝업 문구만 옛 이름으로 남아있으면 안 됨). 예전 본문의 "3."이 두 번 나오던
 // 오타도 이번에 같이 정리함.
 class ConditionTabTutorialContent extends _PopupContent {
-  ConditionTabTutorialContent()
+  // ⭐ 이 탭 자체가 한국어 로케일에서만 존재해서(main.dart _showConditionTab) 이
+  // 팝업도 항상 한국어 하드코딩 - context는 다른 세 팝업과 타입을 맞추기 위한
+  // 파라미터일 뿐 안 씀(CLAUDE.md "수면·회복 탭" 문구는 l10n 미적용 방침과 일치).
+  ConditionTabTutorialContent(BuildContext context)
       : super(
           emoji: '🌙',
           title: '수면·회복 탭, 이렇게 써보세요',
@@ -294,25 +294,12 @@ class ConditionTabTutorialContent extends _PopupContent {
 // ⭐ 2026-09-13 추가(사용자 요청) - 일정관리 탭에 처음 들어왔을 때, 세로
 // 시간축에서 일정을 만드는 방법과 지속시간/알림 옵션을 한 번에 설명하는 안내.
 class ScheduleTabTutorialContent extends _PopupContent {
-  ScheduleTabTutorialContent()
+  ScheduleTabTutorialContent(BuildContext context)
       : super(
           emoji: '🗓️',
-          title: '일정관리 탭, 이렇게 써보세요',
-          body: '1. 일정 만들기\n'
-              '오른쪽 아래 시계 아이콘을 탭하면 시간축 위에서 시각을 고를 수 있는 '
-              '모드로 바뀌어요. 원하는 시각에서 한 번 더 탭하면 그 시각으로 새 '
-              '일정을 만들 수 있어요.\n\n'
-              '2. 지속시간 설정\n'
-              '기본은 "지속시간 없음"(특정 시각 하나)이에요. "+"나 5분/30분/1시간 '
-              '버튼을 누르면 종료 시각이 있는 일정으로 바뀌어요.\n\n'
-              '3. 일정에 맞춰 알림받기\n'
-              '스위치를 켜면 정시 또는 5/10/30분 전에 가벼운 알림 1건을 받을 수 '
-              '있어요. 기존 "알람"(잠금화면/벨소리)과는 별개로, 시스템 알림 '
-              '설정을 그대로 따르는 알림이에요.\n\n'
-              '4. 지난 시각 표시\n'
-              '이미 지난 시각에 만든 일정은 느낌표(⚠) 아이콘으로 구분해서 '
-              '보여드려요.',
-          buttonLabel: '확인했어요',
+          title: context.l10n.onboardingScheduleTabPopupTitle,
+          body: context.l10n.onboardingScheduleTabPopupBody,
+          buttonLabel: context.l10n.commonGotIt,
         );
 }
 

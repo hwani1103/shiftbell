@@ -26,6 +26,9 @@
 // 일반 경로로 바꿔도 새로고침 시 404 걱정 없음. 기존에 이미 뿌려진 구형(#/?code=...)
 // 링크도 계속 동작하도록 _extractCode()의 프래그먼트 파싱은 그대로 남겨둠(폴백).
 import 'dart:html' as html;
+// 웹(dart2js) 전용 라이브러리라 앱 기준 분석에서만 "없음"으로 잡힌다. 웹 빌드에서는 정상 - js_interop 전환은
+// 설치 버튼 동작을 브라우저에서 다시 확인해야 해서 보류(2026-09-22).
+// ignore: uri_does_not_exist
 import 'dart:js_util' as js_util;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,6 +40,7 @@ import 'services/friend_share_service.dart';
 import 'services/friend_sync_service.dart';
 import 'services/firebase_bootstrap.dart';
 import 'screens/friend_calendar_view.dart';
+import 'screens/privacy_policy_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'l10n/l10n_extensions.dart';
@@ -206,11 +210,148 @@ class ShiftBellWebViewApp extends StatelessWidget {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
-          home: const _WebViewRouter(),
+          home: const _WebEntryRouter(),
         );
       },
     );
   }
+}
+
+/// The public root is a small developer site.  Friend links always contain a
+/// share code, so they continue into [_WebViewRouter] unchanged.  A standalone
+/// install with no URL code deliberately retains its old "open last shared
+/// calendar" behavior.
+class _WebEntryRouter extends StatelessWidget {
+  const _WebEntryRouter();
+
+  @override
+  Widget build(BuildContext context) {
+    final uri = Uri.base;
+    if (uri.path == '/privacy') return const PrivacyPolicyScreen();
+    if (_hasShareCode(uri) || _isStandalonePwa()) return const _WebViewRouter();
+    return const _DeveloperLandingPage();
+  }
+}
+
+bool _hasShareCode(Uri uri) {
+  if (uri.queryParameters.containsKey('code')) return true;
+  if (uri.fragment.contains('code=')) return true;
+  return RegExp(r'(SB2:[^\s&"]+)').hasMatch(Uri.decodeFull(uri.toString()));
+}
+
+class _DeveloperLandingPage extends StatelessWidget {
+  const _DeveloperLandingPage();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: const Color(0xFFF6F7FF),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 620),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(24, 52, 24, 32),
+              children: [
+                const Icon(Icons.access_time_filled_rounded,
+                    color: Color(0xFF4662D6), size: 52),
+                const SizedBox(height: 20),
+                Text('교대시계',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: const Color(0xFF1D275B),
+                    )),
+                const SizedBox(height: 12),
+                Text(
+                  '교대근무자를 위한 일정 관리와 알람 앱입니다.\n근무 일정과 수면 리듬을 한곳에서 편하게 관리해 보세요.',
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(height: 1.55),
+                ),
+                const SizedBox(height: 32),
+                const _InfoCard(
+                  icon: Icons.people_alt_outlined,
+                  title: '친구와 근무 일정 공유',
+                  body: '친구에게 받은 공유 링크는 그대로 열면 최신 근무 일정을 확인할 수 있습니다.',
+                ),
+                const SizedBox(height: 14),
+                _InfoCard(
+                  icon: Icons.privacy_tip_outlined,
+                  title: '개인정보처리방침',
+                  body: '앱의 데이터 처리와 광고·분석 이용 안내를 확인할 수 있습니다.',
+                  actionLabel: '개인정보처리방침 보기',
+                  onAction: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(builder: (_) => const PrivacyPolicyScreen()),
+                  ),
+                ),
+                const SizedBox(height: 28),
+                FilledButton.icon(
+                  onPressed: openPlayStore,
+                  icon: const Icon(Icons.shop_outlined),
+                  label: const Text('Google Play에서 교대시계 보기'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    backgroundColor: const Color(0xFF4662D6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String body;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  const _InfoCard({
+    required this.icon,
+    required this.title,
+    required this.body,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  @override
+  Widget build(BuildContext context) => Card(
+        elevation: 0,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: Color(0xFFE1E5F7)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: const Color(0xFF4662D6)),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 6),
+                    Text(body, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.45)),
+                    if (actionLabel != null) ...[
+                      const SizedBox(height: 8),
+                      TextButton(onPressed: onAction, child: Text(actionLabel!)),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 }
 
 // ⭐ 브라우저 주소창의 code 파라미터(없으면 localStorage 폴백)를 ownerId로 풀어서

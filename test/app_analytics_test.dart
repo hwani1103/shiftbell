@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/services/app_analytics.dart';
+import 'package:shiftbell/services/backup_policy.dart';
 
 /// 대시보드(admin_dashboard)가 보여 주는 이벤트 목록과 앱이 실제로 보내는 이벤트 목록이
 /// 어긋나면(이름 변경·추가 후 한쪽만 고침) 대시보드에 "이름 없는 이벤트"가 뜨거나 항목이 비어 있게 된다.
@@ -134,5 +135,9 @@ void main() {
       expect(sent, isEmpty);
       expect((await SharedPreferences.getInstance()).getInt(AlarmUsageAnalytics.cursorKey), 5);
     });
+  });
+
+  test('통계 커서는 기기별 설정이라 백업·복원 대상이 아니다', () {
+    expect(isBackupPreferenceKey(AlarmUsageAnalytics.cursorKey), isFalse);
   });
 }

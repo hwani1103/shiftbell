@@ -160,6 +160,12 @@ class SleepDetectionReceiver : BroadcastReceiver() {
         fun checkNow(context: Context) {
             // ⭐ G4 #19 / G3 연결 요청 #2 - 복원 중엔 수면 기록 쓰기·감지 재예약을 미룸(복원 완료 뒤 앱 재개·Guard에서 다시 판정)
             if (RestoreGate.shouldDefer(context, "sleepDetection")) return
+            // ⭐ 2026-09-22(영어화 P0-2) - 로케일이 한국어가 아니거나 탭이 꺼져 있으면 판정 자체를
+            // 건너뜀(SleepDetectionScheduler.ensureScheduled가 다음 예약도 취소함 - finally 참고).
+            if (!SleepDetectionScheduler.isSleepDetectionEnabled(context)) {
+                SleepDetectionScheduler.cancel(context)
+                return
+            }
             try {
                 handle(context)
             } catch (e: Exception) {

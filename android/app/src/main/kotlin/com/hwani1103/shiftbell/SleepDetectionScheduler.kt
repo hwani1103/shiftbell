@@ -7,6 +7,7 @@ import android.content.Intent
 import android.util.Log
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 /**
  * ⭐ 실제 수면 기록/자동 추정("C번 요구사항") - 화면 on/off를 상시 감시하는 대신,
@@ -24,7 +25,25 @@ object SleepDetectionScheduler {
     private const val REQUEST_CODE = 0x53_4C_45_50 // "SLEP"의 대략적 hex, 다른 알람과 충돌 방지용 고유 코드
     private const val SAMPLE_INTERVAL_MINUTES = 20L
 
+    // ⭐ 2026-09-22(영어화 P0-2) - 수면·회복 탭(Flutter condition_tab.dart)은 한국어 로케일에서만
+    // 존재하고(main.dart _showConditionTab) 그 탭이 꺼져 있으면(설정 → "수면·회복 화면 사용하지
+    // 않기") 기록을 볼 방법도 없다. 그런데 이 스케줄러는 그 둘과 무관하게 항상 20분마다 기기를
+    // 깨워 sleep_records에 기록해 왔음 - 영어 사용자는 자기가 쓰지도 보지도 못하는 기능이 매일 밤
+    // 배터리를 쓰고 데이터를 쌓고 있었던 것(개인정보처리방침에도 없는 상태로 수집되는 셈). 로케일이
+    // 한국어가 아니거나 탭이 꺼져 있으면 예약하지 않고, 이미 잡혀 있던 다음 체크도 취소한다.
+    // SleepWidgetProvider.isConditionTabEnabled와 같은 파일/키를 읽음(Flutter shared_preferences
+    // 플러그인 - DP 아닌 일반 prefs, 잠금 해제 전이라 아직 못 읽으면 기본값 true로 안전하게 폴백).
+    fun isSleepDetectionEnabled(context: Context): Boolean {
+        if (Locale.getDefault().language != "ko") return false
+        val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+        return prefs.getBoolean("flutter.condition_tab_enabled", true)
+    }
+
     fun ensureScheduled(context: Context) {
+        if (!isSleepDetectionEnabled(context)) {
+            cancel(context)
+            return
+        }
         try {
             val now = System.currentTimeMillis()
             val window = SleepScheduleResolver.computeWindowForNow(context, now)
@@ -70,9 +89,7 @@ object SleepDetectionScheduler {
         Log.d(TAG, "⏰ 수면 감지 다음 체크 예약: ${Date(atMillis)}")
     }
 
-    /** 재부팅 등으로 완전히 멈춰야 할 때만 사용(1차 버전에선 호출부 없음 - 항상
-     * ensureScheduled가 알아서 최신 상태로 재예약하므로 명시적 정지가 필요 없음).
-     * 향후 "자동 감지 끄기" 설정이 생기면 이 함수를 호출하면 됨. */
+    /** 감지를 완전히 멈출 때(위 [isSleepDetectionEnabled]가 false일 때 [ensureScheduled]가 호출). */
     fun cancel(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(buildPendingIntent(context))

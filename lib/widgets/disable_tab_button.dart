@@ -62,23 +62,23 @@ class DisableTabButton extends ConsumerWidget {
   });
 
   Future<void> _confirm(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('$tabLabel 화면 사용하지 않기'),
+        title: Text(l10n.disableTabButtonLabel(tabLabel)),
         content: Text(
-          '확인 버튼을 누르면 화면 하단의 목록에서 사라집니다.\n'
-          '설정에서 다시 원복할 수 있습니다.'
+          '${l10n.disableTabDialogBody}'
           '${extraNotice != null ? '\n$extraNotice' : ''}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('취소'),
+            child: Text(l10n.commonCancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('확인'),
+            child: Text(l10n.commonOk),
           ),
         ],
       ),
@@ -124,7 +124,7 @@ class DisableTabButton extends ConsumerWidget {
                       size: 16, color: Colors.red.shade400),
                   const SizedBox(width: 6),
                   Text(
-                    '$tabLabel 화면 사용하지 않기',
+                    context.l10n.disableTabButtonLabel(tabLabel),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,

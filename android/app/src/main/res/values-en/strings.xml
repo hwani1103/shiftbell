@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ⭐ 2026-09-22(영어화 P0) - 네이티브(Kotlin/XML) 쪽은 Flutter l10n(ARB)을 안 거치므로
+         별도로 영어 리소스를 둠. res/values/strings.xml과 반드시 같은 키 집합을 유지할 것 -
+         새 키를 추가하면 여기도 같이 추가(이 파일이 없으면 그 키만 조용히 한국어로 보임). -->
+    <string name="calendar_widget_description">See last, this, and next week\'s shifts right on your home screen.</string>
+    <string name="sleep_widget_description">Log bedtime/wake-up with one tap.</string>
+
+    <string name="app_widget_calendar_label">Shiftbell Calendar</string>
+    <string name="app_widget_sleep_label">Shiftbell Sleep</string>
+
+    <string name="alarm_swipe_hint">Swipe up to dismiss</string>
+    <string name="alarm_snooze_label">Snooze 5m</string>
+    <string name="alarm_dismiss_label">Dismiss</string>
+
+    <string name="channel_alarm_result">Result notice</string>
+    <string name="channel_alarm_guard">Upcoming alarm notice</string>
+    <string name="channel_schedule_notify">Schedule notifications</string>
+    <string name="channel_restore_notify">Backup restore notice</string>
+
+    <string name="notif_ringing_content">Alarm ringing</string>
+    <string name="notif_action_snooze">Snooze 5m</string>
+    <string name="notif_action_dismiss">Dismiss alarm</string>
+    <string name="notif_snoozed_title">Snoozed to %1$s</string>
+
+    <string name="notif_guard_title">Your alarm will ring soon (%1$s)</string>
+
+    <string name="notif_restore_title">Backup restore didn\'t finish</string>
+    <string name="notif_restore_text">Alarms are using your current data for now. Open the app to finish restoring.</string>
+</resources>

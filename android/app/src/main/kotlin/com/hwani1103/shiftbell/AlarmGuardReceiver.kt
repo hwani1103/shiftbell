@@ -264,7 +264,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         )
 
         val notification = NotificationCompat.Builder(context, TWENTY_MIN_CHANNEL_ID)
-            .setContentTitle("잠시 후 알람이 울립니다 (${alarm.time})")
+            .setContentTitle(context.getString(R.string.notif_guard_title, alarm.time))
             .setContentText(alarm.shiftType)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -291,7 +291,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // ⭐ 무음 Notification: 소리/진동 없이 조용하게 표시
             val channel = NotificationChannel(
                 TWENTY_MIN_CHANNEL_ID,
-                "사전 알림",  // ⭐ "알람" 키워드 제거 (삼성 시스템 스누즈 방지)
+                context.getString(R.string.channel_alarm_guard),  // ⭐ "알람" 키워드 제거 (삼성 시스템 스누즈 방지)
                 NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
             ).apply {
                 description = "20분 전 사전 알림"

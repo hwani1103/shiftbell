@@ -27,6 +27,7 @@ import 'shift_time_category.dart';
 import 'sleep_by_category_stats.dart';
 import 'sleep_day_slots.dart';
 import 'sleep_opportunity.dart' show graceAdjustedShiftEnd;
+import 'sleep_overlap.dart';
 
 enum BriefingTone { neutral, good, caution }
 
@@ -232,10 +233,9 @@ bool _isBackwardStep(ShiftTimeCategory from, ShiftTimeCategory to) {
   return (order.indexOf(to) - order.indexOf(from)) % 3 == 2;
 }
 
+// ⭐ 2026-09-22 - 낮잠은 화면 칸(2개)이 아니라 그날 귀속된 전부를 센다(위젯·자동 감지로 3개 이상일 수 있음)
 int _slotTotal(SleepDaySlots s) =>
-    (s.mainSleep?.durationMinutes ?? 0) +
-    (s.nap1?.durationMinutes ?? 0) +
-    (s.nap2?.durationMinutes ?? 0);
+    (s.mainSleep?.durationMinutes ?? 0) + s.napMinutes;
 
 class _RankedAction {
   final int rank;
@@ -364,16 +364,9 @@ RecoveryBriefing buildRecoveryBriefing({
           r.end != null &&
           r.end!.isAfter(r.start))
       .toList();
-  int sleptBetween(DateTime from, DateTime until) {
-    if (!until.isAfter(from)) return 0;
-    var total = 0;
-    for (final r in confirmed) {
-      final s = r.start.isAfter(from) ? r.start : from;
-      final e = r.end!.isBefore(until) ? r.end! : until;
-      if (e.isAfter(s)) total += e.difference(s).inMinutes;
-    }
-    return total;
-  }
+  // ⭐ 2026-09-22 - 겹친 기록의 겹친 시간을 두 번 세지 않도록 합집합으로 계산(sleep_overlap.dart 참고)
+  int sleptBetween(DateTime from, DateTime until) =>
+      mergedSleepMinutesBetween(confirmed, from, until);
 
   final hasRecentRecords = confirmed
       .any((r) => r.end!.isAfter(now.subtract(const Duration(days: 14))));
@@ -401,7 +394,7 @@ RecoveryBriefing buildRecoveryBriefing({
     var total = 0;
     for (final slot in slotsIncludingToday) {
       if (slot.date != inst.date) continue;
-      for (final r in [slot.mainSleep, slot.nap1, slot.nap2]) {
+      for (final r in [slot.mainSleep, ...slot.allNaps]) {
         if (r?.end == null || r!.end!.isAfter(inst.start!)) continue;
         total += r.durationMinutes ?? 0;
       }

@@ -281,35 +281,49 @@ Future<void> handleSleepSlotTap(
   required SleepSlotCategory category,
   required SleepRecord? record,
 }) async {
-  if (record != null) {
+  final notifier = ref.read(sleepRecordProvider.notifier);
+  final defaults = record == null ? defaultSleepSlotTimes(date, category) : null;
+  var start = record?.start ?? defaults!.start;
+  var end = record != null ? (record.end ?? DateTime.now()) : defaults!.end;
+
+  // ⭐ 2026-09-22 (B-2) - 다른 확정 기록과 겹치면 저장하지 않고 안내한 뒤, 사용자가 입력한 시각 그대로 시트를
+  // 다시 연다(입력을 잃지 않게). 겹침은 sleep_overlap.dart 규칙 - 근무시간과의 겹침은 여전히 검사하지 않는다.
+  while (true) {
     final result = await showSleepSlotEditDialog(
       context,
-      initialStart: record.start,
-      initialEnd: record.end ?? DateTime.now(),
-      showDeleteButton: true,
-      title: '${category.label} 수정',
+      initialStart: start,
+      initialEnd: end,
+      showDeleteButton: record != null,
+      title: record != null ? '${category.label} 수정' : '${category.label} 기록',
     );
     if (result is SleepSlotDeleted) {
-      if (record.id != null)
-        await ref.read(sleepRecordProvider.notifier).deleteRecord(record.id!);
-    } else if (result is SleepSlotSaved) {
-      await ref
-          .read(sleepRecordProvider.notifier)
-          .updateTimes(record, start: result.start, end: result.end);
+      if (record?.id != null) await notifier.deleteRecord(record!.id!);
+      return;
     }
-    return;
-  }
+    if (result is! SleepSlotSaved) return;
 
-  final defaults = defaultSleepSlotTimes(date, category);
-  final result = await showSleepSlotEditDialog(
-    context,
-    initialStart: defaults.start,
-    initialEnd: defaults.end,
-    title: '${category.label} 기록',
-  );
-  if (result is SleepSlotSaved) {
-    await ref
-        .read(sleepRecordProvider.notifier)
-        .addManual(start: result.start, end: result.end);
+    final conflict = await notifier.findOverlap(result.start, result.end, excludeId: record?.id);
+    if (conflict == null) {
+      if (record != null) {
+        await notifier.updateTimes(record, start: result.start, end: result.end);
+      } else {
+        await notifier.addManual(start: result.start, end: result.end);
+      }
+      return;
+    }
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(sleepOverlapMessage(conflict))),
+    );
+    start = result.start;
+    end = result.end;
   }
+}
+
+/// 겹침 안내 문구(수면·회복 탭은 한국어 하드코딩 정책 - CLAUDE.md "출퇴근 시각 입력" 절).
+String sleepOverlapMessage(SleepRecord conflict) {
+  final what = conflict.end != null
+      ? '이미 기록된 수면(${fmtDateTime(conflict.start)}~${fmtTimeOnly(conflict.end!)})'
+      : '진행 중인 수면(${fmtDateTime(conflict.start)}부터)';
+  return '$what과 시간이 겹쳐요. 시각을 고치거나 그 기록을 먼저 수정해 주세요.';
 }

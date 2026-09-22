@@ -112,8 +112,7 @@ SleepCategoryStatsSnapshot buildSleepCategoryStats({
     knownCategories.add(category);
 
     final main = slot.mainSleep?.durationMinutes ?? 0;
-    final nap =
-        (slot.nap1?.durationMinutes ?? 0) + (slot.nap2?.durationMinutes ?? 0);
+    final nap = slot.napMinutes; // 칸 2개가 아니라 그날 낮잠 전부(2026-09-22)
     if (main + nap <= 0) continue; // 기록이 아예 없는 날은 표본에서 제외(0시간으로 세지 않음)
     (byCategory[category] ??= []).add((main: main, nap: nap));
   }

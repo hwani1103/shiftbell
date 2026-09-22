@@ -43,6 +43,7 @@ import '../widgets/disable_tab_button.dart';
 import '../services/backup_validator.dart';
 import 'restore_progress_screen.dart';
 import '../services/app_analytics.dart';
+import '../services/ad_consent_service.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar; // ⭐ 6번 기능: 스와이프 callback
@@ -63,10 +64,18 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
   DateTime? _lastBackupAt;
   bool _isRestoringFromBackup = false;
 
+  // ⭐ 2026-09-22 - UMP 동의(EEA/영국/스위스)를 받은 사용자에게만 "광고 개인정보
+  // 설정" 진입점을 보여줌 - ad_consent_service.dart 참고. 한국 등 그 외 지역은
+  // 이 값이 항상 false라 진입점 자체가 안 보임(기존 화면에 아무 변화 없음).
+  bool _showAdPrivacyOption = false;
+
   @override
   void initState() {
     super.initState();
     _loadLastBackupAt();
+    AdConsentService.isPrivacyOptionsRequired().then((required) {
+      if (mounted) setState(() => _showAdPrivacyOption = required);
+    });
     // ⭐ 2026-09-11(사용자 신고 - "자동백업이 안 되고 있는 것 같다") - 이 화면은
     // MainScreen이 `_tabs[_currentIndex]`로 탭을 매번 새로 만드는 구조라(main.dart
     // 참고) 다른 탭으로 갔다가 다시 오면 initState가 새로 돌아 항상 최신값을
@@ -690,8 +699,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                   tileColor: Colors.white,
                   leading: Icon(Icons.event_note_outlined,
                       color: Theme.of(context).colorScheme.tertiary),
-                  title: const Text('일정관리 화면 사용하기'),
-                  subtitle: const Text('하단 탭에 일정관리 화면을 다시 표시합니다'),
+                  title: Text(context.l10n.settingsScheduleTabReenableTitle),
+                  subtitle: Text(context.l10n.settingsScheduleTabReenableSubtitle),
                   trailing: Icon(Icons.chevron_right),
                   // ⭐ 2026-09-13 - 숨기는 동안 취소됐던 일정 알림들을 원래
                   // 상태로 그대로 복원(main.dart의 DisableTabButton onConfirmed
@@ -935,6 +944,18 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                 onTap: () => Navigator.of(context).push(MaterialPageRoute(
                     builder: (_) => const PrivacyPolicyScreen())),
               ),
+
+              // ⭐ 2026-09-22 - EEA/영국/스위스 UMP 동의를 받은 사용자만(그 외
+              // 지역은 _showAdPrivacyOption이 항상 false) 동의 폼을 다시 열어
+              // 선택을 바꾸거나 철회할 수 있는 진입점.
+              if (_showAdPrivacyOption)
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(Icons.ads_click, color: Colors.teal),
+                  title: Text(context.l10n.settingsAdPrivacy),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () => AdConsentService.showPrivacyOptionsForm(),
+                ),
             ],
           );
         },
@@ -2584,6 +2605,17 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
       // 있도록 보장 - "저장" 버튼이 그만큼(최대 800ms+α) 살짝 늦게 닫히지만,
       // 그 대신 뒤 화면에서 빈 상태를 볼 가능성이 사라짐.
       await widget.onSave();
+    } catch (e) {
+      // ⭐ 2026-09-22 - 예전엔 catch가 없어 실패해도 저장 버튼이 아무 일도 안 한 것처럼 보였음. 템플릿 저장은
+      // 트랜잭션이라 실패하면 그대로 롤백되므로, 화면을 닫지 않고 입력을 유지한 채 다시 누를 수 있게 함.
+      debugPrint('❌ 고정 알람 저장 실패: $e');
+      if (mounted) {
+        setState(() => _isSaving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.commonSaveFailed)),
+        );
+      }
+      return;
     } finally {
       // ⭐ 정상 흐름에선 이 직후 화면이 pop되면서 위젯이 dispose되지만, 혹시
       // pop 전에 위젯이 이미 unmount됐거나 위 작업 중 예외가 났을 때를 대비해

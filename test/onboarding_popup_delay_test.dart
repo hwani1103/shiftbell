@@ -8,20 +8,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shiftbell/l10n/generated/app_localizations.dart';
 import 'package:shiftbell/widgets/onboarding_info_popups.dart';
 
 const _kScheduleKey = 'schedule_tab_tutorial_shown';
 // 팝업 제목은 wordSafeSpans로 그려지는 Text.rich라 문자열 검색이 안 맞는다 - Dialog 유무로 판단.
 final _popup = find.byType(Dialog);
 
+// ⭐ 2026-09-22(영어화) - 팝업 내용이 l10n(context.l10n)을 쓰도록 바뀌어서, 이 테스트의
+// MaterialApp도 AppLocalizations delegate가 있어야 함(없으면 AppLocalizations.of(context)가
+// null → context.l10n에서 null-check 에러). locale을 'ko'로 고정해서 아래 "확인했어요" 문자열
+// 검색 등 기존 한국어 기준 단언은 그대로 유지.
+Widget _wrap(Widget child, {Locale locale = const Locale('ko')}) => MaterialApp(
+      locale: locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: child,
+    );
+
 Future<BuildContext> _pumpHost(WidgetTester tester) async {
   late BuildContext ctx;
-  await tester.pumpWidget(MaterialApp(
-    home: Builder(builder: (c) {
-      ctx = c;
-      return const Scaffold(body: SizedBox.expand());
-    }),
-  ));
+  await tester.pumpWidget(_wrap(Builder(builder: (c) {
+    ctx = c;
+    return const Scaffold(body: SizedBox.expand());
+  })));
   return ctx;
 }
 
@@ -62,7 +72,7 @@ void main() {
     await tester.pump();
 
     // 지연 도중 사용자가 다른 탭으로 옮겨 이 화면(위젯)이 dispose된 상황
-    await tester.pumpWidget(const MaterialApp(home: Scaffold(body: SizedBox.expand())));
+    await tester.pumpWidget(_wrap(const Scaffold(body: SizedBox.expand())));
     await tester.pump(kInfoPopupDelay + const Duration(seconds: 1));
 
     expect(_popup, findsNothing);
@@ -87,5 +97,29 @@ void main() {
     await maybeShowShiftAssignTutorial(ctx, isRegular: true);
     await tester.pump(kInfoPopupDelay + const Duration(seconds: 1));
     expect(_popup, findsNothing);
+  });
+
+  // ⭐ 2026-09-22(영어화 P0) - 웰컴/근무배정/일정관리 탭 안내가 영어 로케일에서도 깨지지 않고
+  // 실제 영어 문구(l10n)로 뜨는지 확인. 웰컴 팝업 본문은 수면·회복 탭이 영어에 없으므로 그
+  // 기능을 언급하면 안 됨(onboarding_info_popups.dart WelcomePopupContent 참고).
+  testWidgets('영어 로케일에서는 웰컴 팝업이 영어 문구로 뜨고 수면·회복 탭을 언급하지 않는다',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    late BuildContext ctx;
+    await tester.pumpWidget(_wrap(
+      Builder(builder: (c) {
+        ctx = c;
+        return const Scaffold(body: SizedBox.expand());
+      }),
+      locale: const Locale('en'),
+    ));
+
+    maybeShowWelcomePopup(ctx);
+    await tester.pump();
+    await tester.pump(kInfoPopupDelay + const Duration(milliseconds: 500));
+
+    expect(_popup, findsOneWidget);
+    expect(find.text('Get Started'), findsOneWidget);
+    expect(find.textContaining('Sleep'), findsNothing);
   });
 }

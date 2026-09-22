@@ -144,7 +144,7 @@
             android:name=".CalendarWidgetProvider"
             android:enabled="true"
             android:exported="true"
-            android:label="교대시계 달력">
+            android:label="@string/app_widget_calendar_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
@@ -159,7 +159,7 @@
             android:name=".SleepWidgetProvider"
             android:enabled="true"
             android:exported="true"
-            android:label="교대시계 수면기록">
+            android:label="@string/app_widget_sleep_label">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>

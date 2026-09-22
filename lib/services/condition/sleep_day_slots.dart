@@ -223,7 +223,17 @@ class SleepDaySlots {
   final SleepRecord? nap1;
   final SleepRecord? nap2;
 
-  const SleepDaySlots({required this.date, this.mainSleep, this.nap1, this.nap2});
+  /// 그날 귀속된 낮잠 전부(시작 시각 순). 화면 칸은 [nap1]/[nap2] 두 개뿐이지만, 위젯·자동 감지로 3개 이상
+  /// 생길 수 있어 합계·평균은 이 목록으로 센다(2026-09-22 - 예전엔 칸 2개만 더해서 24시간 합계와 어긋났음).
+  final List<SleepRecord> naps;
+
+  const SleepDaySlots({required this.date, this.mainSleep, this.nap1, this.nap2, this.naps = const []});
+
+  /// [naps]를 안 넘긴(직접 만든) 경우에도 칸 두 개로 동작하게 폴백.
+  List<SleepRecord> get allNaps =>
+      naps.isNotEmpty ? naps : [if (nap1 != null) nap1!, if (nap2 != null) nap2!];
+
+  int get napMinutes => allNaps.fold(0, (sum, r) => sum + (r.durationMinutes ?? 0));
 
   bool get isEmpty => mainSleep == null && nap1 == null && nap2 == null;
 
@@ -300,6 +310,7 @@ List<SleepDaySlots> buildSleepDaySlots({
       mainSleep: main,
       nap1: naps.isNotEmpty ? naps[0] : null,
       nap2: naps.length > 1 ? naps[1] : null,
+      naps: List.unmodifiable(naps),
     ));
   }
   return result;

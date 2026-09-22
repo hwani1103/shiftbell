@@ -36,6 +36,7 @@ import '../providers/friend_provider.dart';
 import 'friend_list_screen.dart';
 import '../utils/friend_open_util.dart';
 import '../utils/blocking_progress.dart';
+import '../utils/lunar_calendar_util.dart';
 
 // ⭐ 공휴일 판정 로직은 utils/holiday_util.dart로 이동함 (friend_calendar_view.dart도
 // 똑같은 공휴일 표시가 필요해져서 공용화 - 두 파일 이름만 다르게 감싸서 기존 호출부
@@ -45,6 +46,38 @@ import '../utils/blocking_progress.dart';
 String? _getHolidayName(DateTime date, BuildContext context) =>
     getHolidayName(date,
         isKorean: Localizations.localeOf(context).languageCode == 'ko');
+
+// ⭐ 2026-09-22 음력 표기 - 매주 수요일 자리에만 보여주되, 그 날이 빨간날(일요일/공휴일)이면
+// 겹치지 않게 화→목→월→금→일→토 순서로 옆으로 밀어 빨간날이 아닌 첫 날을 찾음(사용자
+// 결정: 화수목 다 빨간날이면 월/금, 월~금 다 빨간날이면 일/토, 그마저 다 빨간날이면 그
+// 주는 표기 안 함). 일요일은 이 앱 규칙상 공휴일 여부와 무관하게 항상 빨간날 취급이라
+// (_getHolidayName와 별개로 weekday==sunday만으로 red 판정, _themedCellData 참고)
+// 사실상 이 일/토 단계는 항상 토요일로 수렴함 - 그래도 로직은 대칭으로 둠.
+// 이 함수는 순수하게 "그 주(일~토)에서 음력을 표기할 날짜가 며칠인지"만 계산 - 실제
+// 그 날이 오늘 그리는 셀(day)과 같은지는 호출부에서 비교.
+DateTime? _lunarLabelDateForWeek(DateTime anyDayInWeek, BuildContext context) {
+  final normalized =
+      DateTime(anyDayInWeek.year, anyDayInWeek.month, anyDayInWeek.day);
+  final daysSinceSunday = normalized.weekday % 7; // Dart: 월=1..일=7 → 일=0
+  final sunday = normalized.subtract(Duration(days: daysSinceSunday));
+  bool isRed(DateTime d) =>
+      d.weekday == DateTime.sunday || _getHolidayName(d, context) != null;
+
+  final wed = sunday.add(const Duration(days: 3));
+  if (!isRed(wed)) return wed;
+  final tue = sunday.add(const Duration(days: 2));
+  if (!isRed(tue)) return tue;
+  final thu = sunday.add(const Duration(days: 4));
+  if (!isRed(thu)) return thu;
+  final mon = sunday.add(const Duration(days: 1));
+  if (!isRed(mon)) return mon;
+  final fri = sunday.add(const Duration(days: 5));
+  if (!isRed(fri)) return fri;
+  if (!isRed(sunday)) return sunday;
+  final sat = sunday.add(const Duration(days: 6));
+  if (!isRed(sat)) return sat;
+  return null; // 일주일 내내 빨간날이면 이번 주는 음력 표기 없음
+}
 
 // ⭐ 테마별 헤더/요일행 표기에 쓰는 공용 상수 - calendar_theme_lab_screen.dart의
 // 동명 상수(그 파일 안에서만 쓰이는 private const)와 값은 같지만 별도 파일이라
@@ -84,6 +117,18 @@ const List<String> _monthEn3 = [
 // _buildThemedHeaderTitle 등). 근무색 자체는 kDiaryPalette(calendar_theme.dart)를
 // 따로 쓰고, 이 색은 "테마 톤"(따뜻한 앰버)만 담당.
 const Color _diaryAccent = Color(0xFFCB8A4E);
+
+// ⭐ 2026-09-22 음력 표기(메인 달력, 매주 수요일 자리에 "(4.14)" 형태) 글자 크기 -
+// 조정하고 싶으면 이 숫자만 바꾸면 됨(모든 테마 공통, .sp 적용 전 기준값).
+// 색상은 조정 대상 아님(상세팝업의 "(없음)" 텍스트와 같은 colorScheme.onSurfaceVariant
+// 고정 - _lunarCellTextStyle 참고). 표기 위치·표시 요일 결정 로직은 _lunarLabelDateForWeek 참고.
+const double kLunarCellFontSize = 7.0;
+
+// ⭐ 2026-09-22 소프트카드 테마(CalendarThemeId.materialCard, _theme2Cell)의 "이번 달"
+// 셀 배경색 - "다른 날들이 하얀색이라 칙칙해 보인다"는 지적으로 중립 회색(옛 값
+// 0xFFF1F2F6)에서 밝은 파스텔톤으로 교체. 조정하고 싶으면 이 색만 바꾸면 됨 - 반투명도
+// (border/boxShadow)·outside(다른 달) 셀 스타일·그 위에 얹히는 근무명 배지 등은 그대로.
+const Color kMaterialCardCurrentMonthCellColor = Color(0xFFF3F7F9);
 
 // ⭐ 2026-09-01 - "빨간날(일요일/공휴일)이 오늘이면 원형 배지 안에서 숫자색이
 // 흰색으로 바뀌어 버려서 '빨간날'이라는 신호가 사라진다"는 지적 - 메인·화이트/
@@ -3117,6 +3162,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
     Color shiftTextColor,
     bool red,
     String? holidayName,
+    String? lunarText,
     List<String> memos
   }) _themedCellData(DateTime day, ShiftSchedule schedule) {
     final shiftText = schedule.getShiftForDate(day);
@@ -3128,6 +3174,20 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
         hasShift ? _getShiftTextColor(shiftText, schedule) : Colors.transparent;
     final holidayName = _getHolidayName(day, context);
     final red = day.weekday == DateTime.sunday || holidayName != null;
+    // ⭐ 2026-09-22 음력 표기 - 빨간날 자리와 겹치면 안 되므로 holidayName이 없을 때만,
+    // 그리고 이 날이 그 주의 "음력 표기 날"로 뽑힌 날일 때만 채움(_lunarLabelDateForWeek).
+    // ⚠️ 2026-09-22 버그 수정 - 상세팝업(음력 X)은 한국어 로케일 조건이 있었는데 여기(메인
+    // 달력 셀)는 빠뜨려서 영어 로케일에도 "(4.14)"가 그대로 보이던 문제. 공휴일 표시와
+    // 동일한 기준(languageCode == 'ko')으로 맞춤.
+    String? lunarText;
+    if (holidayName == null &&
+        Localizations.localeOf(context).languageCode == 'ko') {
+      final labelDay = _lunarLabelDateForWeek(day, context);
+      if (labelDay != null && isSameDay(labelDay, day)) {
+        final lunar = solarToLunar(day);
+        if (lunar != null) lunarText = formatLunarDateCompact(lunar);
+      }
+    }
     final dateStr = day.toIso8601String().split('T')[0];
     final memos =
         ref.watch(memoProvider)[dateStr]?.map((m) => m.memoText).toList() ??
@@ -3139,9 +3199,20 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
       shiftTextColor: shiftTextColor,
       red: red,
       holidayName: holidayName,
+      lunarText: lunarText,
       memos: memos,
     );
   }
+
+  // ⭐ 음력 표기(메인 달력) 공통 스타일 - 모든 테마가 동일하게 씀(사용자 요청: "폰트
+  // 디자인은 모든 테마가 동일"). 크기는 kLunarCellFontSize 하나로 조정, 색은 상세팝업의
+  // "(없음)" 텍스트와 같은 onSurfaceVariant 고정.
+  TextStyle _lunarCellTextStyle() => TextStyle(
+        fontSize: kLunarCellFontSize.sp,
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        fontWeight: FontWeight.w500,
+        height: 1.1,
+      );
 
   // ⭐ "메모/빨간날 글자가 셀 밖으로 넘치면 가위로 자른 듯 반쪽 글자가 보인다"는
   // 지적 - TextOverflow.clip/ellipsis는 픽셀 경계에서 그냥 잘라버려서 마지막
@@ -3291,7 +3362,9 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                       fontSize: 7.7.sp,
                       color: Colors.red.shade400,
                       fontWeight: FontWeight.bold,
-                      height: 1.1)),
+                      height: 1.1))
+            else if (d.lunarText != null)
+              _fitText(d.lunarText!, _lunarCellTextStyle()),
             // 🔧 메모 시작 위치(날짜/빨간날 ↔ 첫 메모 사이 간격) - 이 SizedBox
             // 높이가 곧 "메모가 위에서 얼마나 아래서 시작하는가"임. 빨간날이 없는
             // 날은 날짜 숫자 바로 아래가 이 간격이 되고, 빨간날이 있는 날은
@@ -3343,13 +3416,14 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
             // 얹는 방식이었는데, 수학적으로는 흰색과 거의 구분 안 가야 정상이지만
             // 실기기에서는 그 미세한 파란기가 오히려 "탁하다"는 인상을 준 것으로
             // 보임(알파 블렌딩 미세값보다, 색상 자체가 채도 있는 톤이라 그런 것 -
-            // 요청대로 알파를 더 낮추는 대신 아예 채도 없는 연회색 고정값으로
-            // 교체). 순백(스캐폴드 배경)보다는 한 톤 어둡게 구분되면서도 진해
-            // 보이지 않는 중립 연회색(#F1F2F6) 고정값 사용 - outside(다른 달)
-            // 셀 스타일은 그대로 둠.
+            // 요청대로 알파를 더 낮추는 대신 아예 채도 없는 연회색 고정값(#F1F2F6)으로
+            // 교체. outside(다른 달) 셀 스타일은 그대로 둠.
+            // ⭐ 2026-09-22 - "다른 날들이 하얀색이라 F1F2F6이 칙칙해 보인다"는 재지적으로
+            // kMaterialCardCurrentMonthCellColor(밝은 파스텔 블루)로 다시 교체(불투명 고정색
+            // 방식 자체는 유지 - 그 위에 근무명 배지 등이 그대로 렌더링됨).
             color: isOutside
                 ? colorScheme.surfaceVariant.withOpacity(0.15)
-                : const Color(0xFFF1F2F6),
+                : kMaterialCardCurrentMonthCellColor,
             borderRadius: BorderRadius.circular(6.r),
             border: isToday
                 ? Border.all(color: Colors.indigo.shade400, width: 1.4)
@@ -3410,7 +3484,9 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                         fontSize: 7.sp,
                         color: Colors.red.shade600,
                         fontWeight: FontWeight.bold,
-                        height: 1.0)),
+                        height: 1.0))
+              else if (d.lunarText != null)
+                _fitText(d.lunarText!, _lunarCellTextStyle()),
               // 🔧 메모 시작 위치(날짜/빨간날 ↔ 첫 메모 간격) = 이 SizedBox 높이.
               SizedBox(height: 3.5.h),
               // 🔧 메모 목록 - 최대 3개, fontSize: 7.5.sp. 메모끼리 간격은 Padding
@@ -3485,7 +3561,9 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                           TextStyle(
                               fontSize: 7.5.sp,
                               color: Colors.red.shade600,
-                              fontWeight: FontWeight.bold))),
+                              fontWeight: FontWeight.bold)))
+                else if (d.lunarText != null)
+                  Expanded(child: _fitText(d.lunarText!, _lunarCellTextStyle())),
               ],
             ),
             // 🔧 근무명 배지(날짜 줄 바로 아래) - 크기: fontSize: 7.5.sp, 위아래
@@ -3613,7 +3691,9 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                       fontSize: 7.5.sp,
                       color: Colors.red.shade400,
                       fontWeight: FontWeight.bold,
-                      height: 1.0)),
+                      height: 1.0))
+            else if (d.lunarText != null)
+              _fitText(d.lunarText!, _lunarCellTextStyle()),
             // 🔧 메모 시작 위치 - 메모가 있을 때만 이 간격(1.2.h)이 붙음(메모가
             // 없으면 이 SizedBox 자체가 안 생김 - if로 감싸져 있음).
             if (d.memos.isNotEmpty) SizedBox(height: 1.2.h),
@@ -3683,7 +3763,9 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                 TextStyle(
                     fontSize: 6.sp,
                     color: Colors.red.shade400,
-                    fontWeight: FontWeight.bold)),
+                    fontWeight: FontWeight.bold))
+          else if (d.lunarText != null)
+            _fitText(d.lunarText!, _lunarCellTextStyle()),
           // 🔧 메모 목록 - 최대 3개, fontSize: 7.8.sp("너무 연하고 작다"는
           // 지적으로 7.sp→7.8.sp, 색도 onSurfaceVariant→grey.shade700로 진하게
           // 바꾼 이력). 메모끼리 간격을 조절하는 별도 Padding이 없음 - 필요하면
@@ -3766,7 +3848,14 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
               Padding(
                   padding: EdgeInsets.only(top: 0.8.h),
                   child: _themeChip(
-                      d.holidayName!, Colors.red.shade50, Colors.red.shade400)),
+                      d.holidayName!, Colors.red.shade50, Colors.red.shade400))
+            // ⭐ 음력은 칩(색 배경) 없이 공용 스타일 그대로 - "폰트 디자인은 모든
+            // 테마가 동일"해야 해서 이 테마만의 칩 배경을 입히지 않음. 위치(칩이
+            // 있었을 자리)만 동일한 top 여백으로 맞춤.
+            else if (d.lunarText != null)
+              Padding(
+                  padding: EdgeInsets.only(top: 0.8.h),
+                  child: _fitText(d.lunarText!, _lunarCellTextStyle())),
             // 🔧 메모 목록 - 최대 3개, 칩 사이 간격 = Padding top: 0.8.h.
             ...d.memos.take(3).map((m) => Padding(
                 padding: EdgeInsets.only(top: 0.8.h),
@@ -3862,6 +3951,14 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                       fontSize: 7.5.sp,
                       color: Colors.red.shade400,
                       fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.right),
+            )
+          else if (d.lunarText != null)
+            Positioned(
+              top: 18.h,
+              left: 2.w,
+              right: 2.w,
+              child: _fitText(d.lunarText!, _lunarCellTextStyle(),
                   textAlign: TextAlign.right),
             ),
           // 🔧 메모 목록 - 이 테마만 "아래에서부터" 시작함(다른 8개는 위에서부터
@@ -4040,6 +4137,15 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                           fontSize: 8.sp,
                           color: const Color(0xFFC0392B),
                           fontWeight: FontWeight.w700)),
+                )
+              // ⭐ 2026-09-22 사용자 지적 - 공휴일 Container는 "위 박스와 한 몸처럼"
+              // 보이려고 일부러 아래 테두리선을 그었지만(위 주석 참고), 음력은 그
+              // 의도가 아니라서 테두리 없이 텍스트만.
+              else if (d.lunarText != null)
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 0.h),
+                  child: _fitText(d.lunarText!, _lunarCellTextStyle()),
                 ),
               // 🔧 메모 3개 - 테두리 없음, 남는 공간을 채움(Expanded).
               Expanded(
@@ -4176,6 +4282,12 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                     '${day.year}-${day.month.toString().padLeft(2, '0')}-${day.day.toString().padLeft(2, '0')}';
                 final memos = ref.watch(memoProvider)[dateStr] ?? [];
                 final memoCount = memos.length;
+                // ⭐ 2026-09-22 음력 - 공휴일이 없을 때만, 그리고 이 주의 "음력 표기 날"일
+                // 때만 계산(_themedCellData가 이미 그 판정을 하므로 재사용 - 두 번 안
+                // 만들려고 여기서 한 번만 불러 변수로 둠).
+                final lunarText = _getHolidayName(day, context) == null
+                    ? _themedCellData(day, schedule).lunarText
+                    : null;
 
                 return Stack(
                   children: [
@@ -4209,6 +4321,26 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                                         ? Colors.red.shade300
                                         : Colors.red),
                               ),
+                            ),
+                          ),
+                        ),
+                      )
+                    // ⭐ 2026-09-22 음력 - 빨간날 자리와 완전히 같은 위치(top:0)에,
+                    // 공휴일이 없을 때만 표기. 폰트는 이 테마 전용이 아니라 모든
+                    // 테마 공용 스타일(_lunarCellTextStyle).
+                    else if (lunarText != null)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 11.h,
+                          padding: EdgeInsets.symmetric(horizontal: 1.w),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              lunarText,
+                              style: _lunarCellTextStyle(),
                             ),
                           ),
                         ),
@@ -4406,13 +4538,47 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                       // (근무 변경으로 "기존→현재" 뱃지까지 늘어나면 OT 넣을 폭이 기기에
                       // 따라 빠듯할 수 있어서 - 예: 3시간30분처럼 글자 길 때 - 다시 날짜 줄로
                       // 되돌림. 이 줄은 항상 폭이 일정해서(뱃지 안 늘어남) 더 안전함.)
+                      // ⭐ 2026-09-22 음력 날짜 - 날짜 텍스트 바로 아래 붙여야 해서(사용자
+                      // 지적: 예전엔 Row 전체가 crossAxisAlignment.center라 OT 버튼
+                      // 묶음이 날짜 텍스트보다 훨씬 키가 커서, 그 아래에 형제로 둔 음력
+                      // 줄이 실제로는 날짜보다 OT 버튼 쪽에 더 붙어 보였음) 날짜 텍스트를
+                      // Column으로 감싸 그 안에 음력 줄을 넣음. OT 버튼(_buildOvertimeToggle)이
+                      // 이 Row에서 가장 키가 큰 요소라 Row 정렬을 center→start로 바꿔도
+                      // OT 버튼 자체의 위치는 그대로(가장 큰 자식은 top/center 정렬이
+                      // 결과적으로 같음) - 날짜+음력 묶음만 위쪽으로 붙게 됨.
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '${DateFormat.MMMd(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(day)} (${_getWeekday(day, context)})',
-                            style: TextStyle(
-                                fontSize: 24.sp, fontWeight: FontWeight.bold),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '${DateFormat.MMMd(Localizations.localeOf(context).languageCode == 'ko' ? 'ko' : 'en').format(day)} (${_getWeekday(day, context)})',
+                                style: TextStyle(
+                                    fontSize: 24.sp,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              // ⭐ 상세팝업의 "(없음)"과 같은 스타일(fontSize: 14.sp,
+                              // colorScheme.onSurfaceVariant)로 톤을 맞춤. 공휴일
+                              // 표시와 동일하게 한국어 로케일에서만 보임
+                              // (holiday_util.dart의 isKorean 분기와 같은 기준).
+                              if (Localizations.localeOf(context)
+                                          .languageCode ==
+                                      'ko' &&
+                                  solarToLunar(day) != null)
+                                Padding(
+                                  padding: EdgeInsets.only(top: 1.h),
+                                  child: Text(
+                                    formatLunarDateFull(solarToLunar(day)!),
+                                    style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant),
+                                  ),
+                                ),
+                            ],
                           ),
                           Spacer(),
                           _buildOvertimeToggle(dateStr),

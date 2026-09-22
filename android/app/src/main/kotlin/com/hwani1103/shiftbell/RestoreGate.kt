@@ -118,7 +118,7 @@ object RestoreGate {
             val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 nm.createNotificationChannel(
-                    NotificationChannel(NOTIFY_CHANNEL_ID, "백업 복원 안내", NotificationManager.IMPORTANCE_DEFAULT)
+                    NotificationChannel(NOTIFY_CHANNEL_ID, context.getString(R.string.channel_restore_notify), NotificationManager.IMPORTANCE_DEFAULT)
                 )
             }
             val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
@@ -127,11 +127,12 @@ object RestoreGate {
             val contentIntent = launch?.let {
                 PendingIntent.getActivity(context, NOTIFY_ID, it, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             }
+            val restoreText = context.getString(R.string.notif_restore_text)
             val notification = NotificationCompat.Builder(context, NOTIFY_CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
-                .setContentTitle("백업 복원이 완료되지 않았어요")
-                .setContentText("알람은 지금 데이터 기준으로 동작해요. 앱을 열어 복원을 마무리해 주세요.")
-                .setStyle(NotificationCompat.BigTextStyle().bigText("알람은 지금 데이터 기준으로 동작해요. 앱을 열어 복원을 마무리해 주세요."))
+                .setContentTitle(context.getString(R.string.notif_restore_title))
+                .setContentText(restoreText)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(restoreText))
                 .setAutoCancel(true)
                 .apply { if (contentIntent != null) setContentIntent(contentIntent) }
                 .build()
