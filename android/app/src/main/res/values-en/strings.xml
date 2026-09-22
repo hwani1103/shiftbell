@@ -6,8 +6,8 @@
     <string name="calendar_widget_description">See last, this, and next week\'s shifts right on your home screen.</string>
     <string name="sleep_widget_description">Log bedtime/wake-up with one tap.</string>
 
-    <string name="app_widget_calendar_label">Shiftbell Calendar</string>
-    <string name="app_widget_sleep_label">Shiftbell Sleep</string>
+    <string name="app_widget_calendar_label">ShiftBell Calendar</string>
+    <string name="app_widget_sleep_label">ShiftBell Sleep</string>
 
     <string name="alarm_swipe_hint">Swipe up to dismiss</string>
     <string name="alarm_snooze_label">Snooze 5m</string>
@@ -27,4 +27,15 @@
 
     <string name="notif_restore_title">Backup restore didn\'t finish</string>
     <string name="notif_restore_text">Alarms are using your current data for now. Open the app to finish restoring.</string>
+
+    <string name="widget_setup_schedule_first">Set up your shift schedule in the app first</string>
+    <string-array name="widget_weekday_labels">
+        <item>S</item><item>M</item><item>T</item><item>W</item><item>T</item><item>F</item><item>S</item>
+    </string-array>
+    <string name="sleep_widget_sleep">Sleep</string>
+    <string name="sleep_widget_wake">Wake</string>
+    <string name="sleep_widget_no_shift">No shift</string>
+    <string name="sleep_widget_not_set">Not set</string>
+    <string name="sleep_widget_unknown">Unknown</string>
+    <string name="sleep_widget_tab_off">Tab off</string>
 </resources>

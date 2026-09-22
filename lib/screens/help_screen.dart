@@ -22,7 +22,13 @@ typedef HelpTextOf = String Function(AppLocalizations l10n);
 class HelpTopic {
   final HelpTextOf titleKey;
   final HelpTextOf bodyKey;
-  const HelpTopic({required this.titleKey, required this.bodyKey});
+  // 2026-09-22 - 한국어에서만 동작하는 기능(일정 아이콘 자동분류)의 항목은 영어에서 숨김.
+  final bool koreanOnly;
+  const HelpTopic({
+    required this.titleKey,
+    required this.bodyKey,
+    this.koreanOnly = false,
+  });
 }
 
 class HelpSection {
@@ -147,6 +153,8 @@ final List<HelpSection> _helpSections = [
       HelpTopic(
         titleKey: (l10n) => l10n.helpScheduleTabAutoCategoryTitle,
         bodyKey: (l10n) => l10n.helpScheduleTabAutoCategoryBody,
+        // 자동분류 모델이 한국어 전용 - 영어에서는 분류 없이 기본 도형 아이콘만 순서대로 붙음
+        koreanOnly: true,
       ),
     ],
   ),
@@ -300,8 +308,16 @@ class _HelpScreenState extends State<HelpScreen> {
     // ⭐ 2026-09-22(영어화 P0-2) - koreanOnly 섹션(수면·회복/수면 기록)은 한국어
     // 로케일이 아니면 목차 자체에서 뺌 - 그 탭이 영어에는 없으므로.
     final isKorean = Localizations.localeOf(context).languageCode == 'ko';
-    final availableSections =
-        isKorean ? _helpSections : _helpSections.where((s) => !s.koreanOnly).toList();
+    final availableSections = isKorean
+        ? _helpSections
+        : _helpSections
+            .where((s) => !s.koreanOnly)
+            .map((s) => HelpSection(
+                  icon: s.icon,
+                  titleKey: s.titleKey,
+                  topics: s.topics.where((t) => !t.koreanOnly).toList(),
+                ))
+            .toList();
 
     // 검색어가 있으면 섹션별로 제목이 매치하는 항목만 남기고, 매치가 하나도
     // 없는 섹션은 통째로 숨긴다.

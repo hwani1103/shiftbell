@@ -797,6 +797,9 @@ class _MainScreenState extends ConsumerState<MainScreen>
       case 3:
         return const BottomNavigationBarItem(
             icon: Icon(Icons.self_improvement), label: '수면·회복');
+      case 4:
+        return BottomNavigationBarItem(
+            icon: const Icon(Icons.settings), label: context.l10n.navSettings);
       default:
         return BottomNavigationBarItem(
             icon: const Icon(Icons.settings), label: context.l10n.navSettings);
@@ -904,7 +907,8 @@ class _MainScreenState extends ConsumerState<MainScreen>
           onTap: (visibleIndex) {
             final tab = visibleTabIndices[visibleIndex];
             if (tab != _currentIndex && tab < kAnalyticsTabNames.length) {
-              AppAnalytics.track(AnalyticsEvent.tabSelected, params: {'tab': kAnalyticsTabNames[tab]});
+              AppAnalytics.track(AnalyticsEvent.tabSelected,
+                  params: {'tab': kAnalyticsTabNames[tab]});
             }
             setState(() => _currentIndex = tab);
           },

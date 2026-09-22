@@ -36,4 +36,17 @@
     <!-- ⭐ 복원 미완료 안내 -->
     <string name="notif_restore_title">백업 복원이 완료되지 않았어요</string>
     <string name="notif_restore_text">알람은 지금 데이터 기준으로 동작해요. 앱을 열어 복원을 마무리해 주세요.</string>
+
+    <!-- ⭐ 2026-09-22(영어화) - 홈 위젯 문구. 예전엔 레이아웃·Kotlin에 한국어로 박혀 있어 영어에서도 한글로 보였음 -->
+    <string name="widget_setup_schedule_first">앱에서 근무 스케줄을 먼저 설정해주세요</string>
+    <!-- 달력 위젯 요일 머리글, 일요일부터 -->
+    <string-array name="widget_weekday_labels">
+        <item>일</item><item>월</item><item>화</item><item>수</item><item>목</item><item>금</item><item>토</item>
+    </string-array>
+    <string name="sleep_widget_sleep">수면</string>
+    <string name="sleep_widget_wake">기상</string>
+    <string name="sleep_widget_no_shift">근무없음</string>
+    <string name="sleep_widget_not_set">미설정</string>
+    <string name="sleep_widget_unknown">정보 없음</string>
+    <string name="sleep_widget_tab_off">탭 꺼짐</string>
 </resources>

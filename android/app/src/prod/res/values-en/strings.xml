@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- main의 values-en이 있어서 lint(MissingTranslation)가 영어 번역도 요구함 - 기본값과 같음 -->
+    <string name="app_name">ShiftBell</string>
+</resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 런처 앱 이름: 기본값은 ../values/strings.xml, 한국어만 여기서 덮어씀 -->
+    <string name="app_name">교대시계</string>
+</resources>

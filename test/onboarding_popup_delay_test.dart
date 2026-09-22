@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/l10n/generated/app_localizations.dart';
+import 'package:shiftbell/widgets/app_button.dart';
 import 'package:shiftbell/widgets/onboarding_info_popups.dart';
 
 const _kScheduleKey = 'schedule_tab_tutorial_shown';
@@ -37,7 +38,8 @@ Future<BuildContext> _pumpHost(WidgetTester tester) async {
 
 void main() {
   test('지연 시간은 "아주 약간"의 범위(0.4~1초)', () {
-    expect(kInfoPopupDelay, greaterThanOrEqualTo(const Duration(milliseconds: 400)));
+    expect(kInfoPopupDelay,
+        greaterThanOrEqualTo(const Duration(milliseconds: 400)));
     expect(kInfoPopupDelay, lessThanOrEqualTo(const Duration(seconds: 1)));
   });
 
@@ -99,11 +101,46 @@ void main() {
     expect(_popup, findsNothing);
   });
 
+  testWidgets('네 가지 웰컴 안내는 각각 처음 한 번만 표시된다', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final ctx = await _pumpHost(tester);
+
+    final popups = <Future<void> Function()>[
+      () => maybeShowWelcomePopup(ctx),
+      () => maybeShowShiftAssignTutorial(ctx, isRegular: false),
+      () => maybeShowConditionTabTutorial(ctx),
+      () => maybeShowScheduleTabTutorial(ctx),
+    ];
+
+    for (final show in popups) {
+      final first = show();
+      await tester.pump(kInfoPopupDelay + const Duration(milliseconds: 500));
+      expect(_popup, findsOneWidget);
+      await tester.tap(find.byType(AppButton));
+      await tester.pumpAndSettle();
+      await first;
+
+      await show();
+      await tester.pump(kInfoPopupDelay + const Duration(milliseconds: 500));
+      expect(_popup, findsNothing);
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    for (final key in const [
+      'welcome_popup_shown',
+      'shift_assign_tutorial_shown',
+      'condition_tab_tutorial_shown',
+      'schedule_tab_tutorial_shown',
+    ]) {
+      expect(prefs.getBool(key), isTrue,
+          reason: '$key should be recorded once');
+    }
+  });
+
   // ⭐ 2026-09-22(영어화 P0) - 웰컴/근무배정/일정관리 탭 안내가 영어 로케일에서도 깨지지 않고
   // 실제 영어 문구(l10n)로 뜨는지 확인. 웰컴 팝업 본문은 수면·회복 탭이 영어에 없으므로 그
   // 기능을 언급하면 안 됨(onboarding_info_popups.dart WelcomePopupContent 참고).
-  testWidgets('영어 로케일에서는 웰컴 팝업이 영어 문구로 뜨고 수면·회복 탭을 언급하지 않는다',
-      (tester) async {
+  testWidgets('영어 로케일에서는 웰컴 팝업이 영어 문구로 뜨고 수면·회복 탭을 언급하지 않는다', (tester) async {
     SharedPreferences.setMockInitialValues({});
     late BuildContext ctx;
     await tester.pumpWidget(_wrap(

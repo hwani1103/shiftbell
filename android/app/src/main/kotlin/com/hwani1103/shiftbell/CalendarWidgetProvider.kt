@@ -69,7 +69,6 @@ class CalendarWidgetProvider : AppWidgetProvider() {
         private const val PILL_TEXT_DARK = "#FF212121"
         private const val PILL_TEXT_LIGHT = "#FFFFFFFF"
 
-        private val WEEKDAY_LABELS = arrayOf("일", "월", "화", "수", "목", "금", "토")
 
         // ⭐ 즉시 갱신 요청 (Flutter 저장 직후, 또는 AlarmGuardReceiver 하트비트에서 호출)
         fun requestUpdate(context: Context) {
@@ -148,8 +147,10 @@ class CalendarWidgetProvider : AppWidgetProvider() {
 
             val headerTextColor = Color.parseColor(LIGHT_HEADER_TEXT)
             val headerIds = intArrayOf(R.id.hdr_0, R.id.hdr_1, R.id.hdr_2, R.id.hdr_3, R.id.hdr_4, R.id.hdr_5, R.id.hdr_6)
+            // 2026-09-22 - 로케일별 리소스(values/values-en)에서 읽음(예전 하드코딩 한글 배열은 영어에서도 한글로 보였음)
+            val weekdayLabels = context.resources.getStringArray(R.array.widget_weekday_labels)
             for (c in 0..6) {
-                views.setTextViewText(headerIds[c], WEEKDAY_LABELS[c])
+                views.setTextViewText(headerIds[c], weekdayLabels[c])
                 views.setTextColor(headerIds[c], headerTextColor)
             }
 

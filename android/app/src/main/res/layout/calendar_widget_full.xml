@@ -20,7 +20,7 @@
         android:gravity="center"
         android:textSize="12sp"
         android:visibility="gone"
-        android:text="앱에서 근무 스케줄을 먼저 설정해주세요"/>
+        android:text="@string/widget_setup_schedule_first"/>
     <LinearLayout
         android:id="@+id/widget_content"
         android:layout_width="match_parent"

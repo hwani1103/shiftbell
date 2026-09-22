@@ -11,7 +11,8 @@ import 'firebase_bootstrap.dart';
 
 class UpdateService {
   static const String _notifiedVersionKey = 'notified_update_version';
-  static const String _playStoreUrl = 'https://play.google.com/store/apps/details?id=com.hwani1103.shiftbell';
+  static const String _playStoreUrl =
+      'https://play.google.com/store/apps/details?id=com.hwani1103.shiftbell';
 
   // ⭐ 2026-08-20 "업데이트가 있다는 안내가 안 뜬다" 버그 재설계 - 원래는 Google Play
   // In-App Update API(패키지 in_app_update)로 "새 버전이 있는지"를 물어봤는데, 이 API는
@@ -50,7 +51,11 @@ class UpdateService {
   // ⭐ 2026-09-21(사용자 결정) - 1.0.23은 "이번 업데이트는 꼭 확인해주세요" 안내를 띄우지 않음(불필요).
   // 빈 문자열이면 checkAndShowReleaseNote가 즉시 반환하고 "새 버전이 있어요" 안내만 동작함. 다음에 릴리즈 노트를
   // 다시 쓰려면 이 값을 그 버전 문자열로 바꾸고 l10n의 updateReleaseNoteTitle/Body를 새로 쓸 것.
-  static const String _releaseNoteVersion = '';
+  // 앱 버전과 별개인 이번 공지 전용 ID. 이 값을 본 기기에는 다시 표시하지 않는다.
+  // 신규 설치는 온보딩 완료 시 markOnboardingBaselineVersion()이 같은 값을 기록해
+  // 업데이트 사용자가 아닌데 공지를 보는 일을 막는다.
+  static const String _releaseNoteVersion =
+      '2026-09-schedule-sleep-recovery-release';
   static const String _releaseNoteSeenKey = 'release_note_seen_version';
 
   // ⭐ 2026-08-20 "기존 유저인데도 업데이트 후 안내가 안 뜬다" 버그 수정 - 예전엔
@@ -69,7 +74,8 @@ class UpdateService {
   // 이 함수를 통과한 적 있는 유저 둘 중 하나 - 어느 쪽이든 "신규 설치 첫 실행"은
   // 아니므로 안내를 보여줘도 안전함(뒤이어 항상 현재 버전으로 값을 채워두므로, 순수
   // 신규 설치는 온보딩 시점에 이미 채워져 있어 아래 "같으면 스킵" 조건에 걸림).
-  static const String _lastSeenAppVersionKey = 'release_note_last_seen_app_version';
+  static const String _lastSeenAppVersionKey =
+      'release_note_last_seen_app_version';
 
   /// 온보딩을 막 끝낸 신규 설치 유저 전용 - "나는 이 버전으로 막 시작했다"는 기준선을
   /// 남겨서, 이후 checkAndShowReleaseNote가 이 사용자에게 "업데이트 후 첫 실행" 안내를
@@ -91,7 +97,7 @@ class UpdateService {
       final prefs = await SharedPreferences.getInstance();
 
       final lastSeenVersion = prefs.getString(_lastSeenAppVersionKey);
-      if (lastSeenVersion == _releaseNoteVersion) return;  // 이미 이 버전 기준선/안내를 지남
+      if (lastSeenVersion == _releaseNoteVersion) return; // 이미 이 버전 기준선/안내를 지남
 
       // ⭐ 먼저 기록해서, 다이얼로그 표시 중 문제가 생겨도 다음 실행 때 또 뜨지 않게 함
       await prefs.setString(_lastSeenAppVersionKey, _releaseNoteVersion);
@@ -118,6 +124,7 @@ class UpdateService {
       context: context,
       barrierDismissible: true,
       builder: (context) => AlertDialog(
+        scrollable: true,
         backgroundColor: colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
@@ -151,7 +158,7 @@ class UpdateService {
             SizedBox(height: 18.h),
             Text(
               context.l10n.updateReleaseNoteBody,
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.start,
               style: TextStyle(
                 fontSize: 14.sp,
                 color: colorScheme.onSurfaceVariant,
@@ -174,7 +181,8 @@ class UpdateService {
                 ),
                 child: Text(
                   context.l10n.commonGotIt,
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                  style:
+                      TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -193,36 +201,39 @@ class UpdateService {
   ///    버전이 나오면 그때는 다시 뜸(버전별로 독립적으로 관리됨).
   /// 2. Firestore 조회 자체가 실패해도(오프라인, Firebase 미설정 등) 앱 사용엔 영향 없음.
   static Future<void> checkForUpdate(BuildContext context) async {
-    if (!firebaseReady) return;  // 친구공유와 동일한 방어 - Firebase 미설정 시 조용히 스킵
+    if (!firebaseReady) return; // 친구공유와 동일한 방어 - Firebase 미설정 시 조용히 스킵
 
     try {
       final prefs = await SharedPreferences.getInstance();
 
       final lastCheckedMs = prefs.getInt(_lastCheckedAtKey);
       if (lastCheckedMs != null) {
-        final elapsed = DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(lastCheckedMs));
+        final elapsed = DateTime.now()
+            .difference(DateTime.fromMillisecondsSinceEpoch(lastCheckedMs));
         if (elapsed < _checkCooldown) return;
       }
-      await prefs.setInt(_lastCheckedAtKey, DateTime.now().millisecondsSinceEpoch);
+      await prefs.setInt(
+          _lastCheckedAtKey, DateTime.now().millisecondsSinceEpoch);
 
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersionCode = int.tryParse(packageInfo.buildNumber) ?? 0;
-      if (currentVersionCode == 0) return;  // 버전 정보를 못 읽으면 비교 자체가 무의미 - 스킵
+      if (currentVersionCode == 0) return; // 버전 정보를 못 읽으면 비교 자체가 무의미 - 스킵
 
       final doc = await FirebaseFirestore.instance.doc(_appConfigDocPath).get();
       final data = doc.data();
-      if (data == null) return;  // 문서가 아직 없음(개발자가 아직 안 만듦) - 조용히 스킵
+      if (data == null) return; // 문서가 아직 없음(개발자가 아직 안 만듦) - 조용히 스킵
 
       // ⭐ 2026-09-12(사용자 요청) - 강제 업데이트 기능 자체를 안 쓰기로 함(제거).
       // app_config/android 문서에 minSupportedVersionCode/forceUpdateTitle/
       // forceUpdateMessage 필드가 남아있어도 이제 아무 의미 없음 - 그냥 무시됨.
 
-      final latestVersionCode = (data['latestVersionCode'] as num?)?.toInt() ?? 0;
-      if (latestVersionCode <= currentVersionCode) return;  // 이미 최신 - 안내 불필요
+      final latestVersionCode =
+          (data['latestVersionCode'] as num?)?.toInt() ?? 0;
+      if (latestVersionCode <= currentVersionCode) return; // 이미 최신 - 안내 불필요
 
       // 이미 이 버전에 대해 알림했는지 체크 (위에서 얻은 prefs 재사용)
       final notifiedVersion = prefs.getInt(_notifiedVersionKey) ?? 0;
-      if (latestVersionCode <= notifiedVersion) return;  // 이 버전은 이미 안내함(요구사항 1)
+      if (latestVersionCode <= notifiedVersion) return; // 이 버전은 이미 안내함(요구사항 1)
 
       if (context.mounted) {
         final result = await _showUpdateDialog(context);
@@ -250,11 +261,10 @@ class UpdateService {
   /// 반환값: null = dismiss(백버튼/바깥터치), false = "나중에", true = "업데이트"
   static Future<bool?> _showUpdateDialog(BuildContext context) async {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return await showDialog<bool?>(
       context: context,
-      barrierDismissible: true,  // 바깥 터치로 닫기 가능 (null 반환)
+      barrierDismissible: true, // 바깥 터치로 닫기 가능 (null 반환)
       builder: (context) => AlertDialog(
         // ⭐ 2026-09-22 - 큰 글자·작은 화면에서 세로로 넘치지 않게 스크롤 허용(출시 직후 기존 사용자 전원이 보는 대화상자)
         scrollable: true,

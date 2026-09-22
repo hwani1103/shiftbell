@@ -17,6 +17,13 @@ import '../providers/work_hours_settings_provider.dart';
 import '../widgets/tappable_number_picker.dart';
 import '../l10n/l10n_extensions.dart';
 
+/// 구버전의 총 근무시간은 있지만 새 출퇴근 시각은 아직 없는 경우만 안내한다.
+/// 시각을 저장하면 [range]가 생기므로 별도 플래그를 저장하지 않아도 즉시 사라진다.
+bool needsLegacyClockTimeHint(
+    int legacyDurationMinutes, ShiftTimeRange? range) {
+  return range == null && legacyDurationMinutes > 0;
+}
+
 class WorkHoursSettingsScreen extends ConsumerStatefulWidget {
   const WorkHoursSettingsScreen({super.key});
 
@@ -198,6 +205,12 @@ class _WorkHoursSettingsScreenState
   Widget _buildShiftTimeTile(
       ShiftSchedule schedule, String shift, ShiftTimeRange? range) {
     final colorScheme = Theme.of(context).colorScheme;
+    // 구버전은 출퇴근 시각 없이 총 근무시간만 저장했다. 그 값은 계산에 계속
+    // 사용하되 시각을 임의로 추정하지 않고, 사용자가 새 시각 입력을 마칠 때까지만
+    // 기존 시간과 보완 안내를 함께 보여준다.
+    final legacyDurationMinutes = schedule.shiftDurations?[shift] ?? 0;
+    final needsClockTimeMigration =
+        needsLegacyClockTimeHint(legacyDurationMinutes, range);
 
     return Container(
       margin: EdgeInsets.only(bottom: 8.h),
@@ -235,7 +248,9 @@ class _WorkHoursSettingsScreenState
                 ),
                 child: Text(
                   range == null
-                      ? context.l10n.commonNotSet
+                      ? (needsClockTimeMigration
+                          ? _formatDuration(legacyDurationMinutes)
+                          : context.l10n.commonNotSet)
                       : _formatDuration(range.durationMinutes),
                   maxLines: 1,
                   style: TextStyle(
@@ -276,6 +291,27 @@ class _WorkHoursSettingsScreenState
               ],
             ],
           ),
+          if (needsClockTimeMigration) ...[
+            SizedBox(height: 6.h),
+            Row(
+              key: ValueKey('legacy-shift-time-hint-$shift'),
+              children: [
+                Icon(Icons.info_outline_rounded,
+                    size: 14.sp, color: colorScheme.primary),
+                SizedBox(width: 5.w),
+                Expanded(
+                  child: Text(
+                    context.l10n.workHoursLegacyClockTimeHint,
+                    style: TextStyle(
+                      fontSize: 11.5.sp,
+                      color: colorScheme.onSurfaceVariant,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           SizedBox(height: 10.h),
           Row(
             children: [

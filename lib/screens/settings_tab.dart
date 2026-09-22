@@ -716,7 +716,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                     await ScheduleNotificationService.restoreAllForTabEnable();
                   },
                 ),
-              if (!ref.watch(conditionTabEnabledProvider))
+              // 수면·회복 탭은 한국어에서만 존재 - 끈 뒤 기기 언어를 영어로 바꾸면 한글 항목이 남던 것 방지
+              if (Localizations.localeOf(context).languageCode == 'ko' &&
+                  !ref.watch(conditionTabEnabledProvider))
                 ListTile(
                   tileColor: Colors.white,
                   leading: Icon(Icons.self_improvement,

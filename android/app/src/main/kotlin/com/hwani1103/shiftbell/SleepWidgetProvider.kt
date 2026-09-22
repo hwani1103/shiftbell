@@ -53,7 +53,6 @@ class SleepWidgetProvider : AppWidgetProvider() {
         // ⭐ 2x1의 공식 최소 폭 = 70*2-30 = 110dp(sleep_widget_info.xml). 런처가 폭을 못 알려주면
         // 가장 좁은 경우를 가정해 절대 넘치지 않는 쪽으로 그린다.
         private const val DEFAULT_WIDGET_WIDTH_DP = 110
-        private const val NO_SHIFT_LABEL = "근무없음"
 
         // ⭐ 2026-09-01 후속13(사용자 요청) - 근무명 칩은 달력탭/캘린더 위젯과 동일하게
         // 그 근무명에 배정된 색을 그대로 씀(shiftChip 참고). 상태는 처음엔 칩(색상
@@ -105,7 +104,7 @@ class SleepWidgetProvider : AppWidgetProvider() {
             // 위젯 전체를 반투명(비활성 느낌)으로 바꾸고, 버튼도 눌러도
             // 반응 없게 만들며, 상태 줄에 이유를 적어준다.
             if (!isConditionTabEnabled(context)) {
-                renderDisabled(views)
+                renderDisabled(context, views)
                 return views
             }
             views.setFloat(R.id.sleep_widget_root, "setAlpha", 1f)
@@ -156,11 +155,11 @@ class SleepWidgetProvider : AppWidgetProvider() {
             return prefs.getBoolean("flutter.condition_tab_enabled", true)
         }
 
-        private fun renderDisabled(views: RemoteViews) {
+        private fun renderDisabled(context: Context, views: RemoteViews) {
             views.setFloat(R.id.sleep_widget_root, "setAlpha", 0.4f)
             // ⭐ 2026-09-18 - 상태 줄이 없어졌으니, "왜 흐릿한지"는 근무명 자리에 대신 적는다.
             // 2026-09-22 - 평소엔 라벨이 없어서(레이아웃에서 gone) 이 경우에만 보이게 한다.
-            views.setTextViewText(R.id.sleep_shift_label, "탭 꺼짐")
+            views.setTextViewText(R.id.sleep_shift_label, context.getString(R.string.sleep_widget_tab_off))
             views.setViewVisibility(R.id.sleep_shift_label, android.view.View.VISIBLE)
             views.setViewVisibility(R.id.sleep_shift_chip_bg, android.view.View.GONE)
             views.setInt(R.id.sleep_button_sleep, "setBackgroundResource", R.drawable.sleep_widget_button_bg_inactive)
@@ -197,15 +196,15 @@ class SleepWidgetProvider : AppWidgetProvider() {
         // 위젯과 동일한 소스).
         private fun shiftChip(context: Context): Pair<String, Int> {
             return try {
-                val schedule = CalendarWidgetScheduleResolver.readSchedule(context) ?: return "미설정" to NEUTRAL_CHIP_COLOR
+                val schedule = CalendarWidgetScheduleResolver.readSchedule(context) ?: return context.getString(R.string.sleep_widget_not_set) to NEUTRAL_CHIP_COLOR
                 val today = Calendar.getInstance()
                 val name = CalendarWidgetScheduleResolver.shiftForDate(schedule, today)
-                if (name == UNSET_SENTINEL) return NO_SHIFT_LABEL to NEUTRAL_CHIP_COLOR
+                if (name == UNSET_SENTINEL) return context.getString(R.string.sleep_widget_no_shift) to NEUTRAL_CHIP_COLOR
                 val color = schedule.shiftColors[name] ?: NEUTRAL_CHIP_COLOR
                 name to color
             } catch (e: Exception) {
                 Log.e(TAG, "❌ 근무명 계산 실패", e)
-                "정보 없음" to NEUTRAL_CHIP_COLOR
+                context.getString(R.string.sleep_widget_unknown) to NEUTRAL_CHIP_COLOR
             }
         }
 

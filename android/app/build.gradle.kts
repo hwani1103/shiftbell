@@ -73,13 +73,13 @@ android {
         create("prod") {
             dimension = "env"
             // applicationId 접미사 없음 - 지금 Play Store에 올라가 있는 앱과 동일
-            resValue("string", "app_name", "교대시계")
+            // 런처 이름(app_name): src/prod/res/values = ShiftBell(영어·기타 언어), values-ko = 교대시계
         }
         create("dev") {
             dimension = "env"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
-            resValue("string", "app_name", "교대시계 (테스트)")
+            // 런처 이름(app_name): src/dev/res/values = ShiftBell (Test), values-ko = 교대시계 (테스트)
             manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
             manifestPlaceholders["analyticsCollectionEnabled"] = "false"
         }

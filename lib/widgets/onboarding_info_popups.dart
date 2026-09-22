@@ -59,7 +59,8 @@ Future<void> _showInfoPopupOnce(
   await Future<void>.delayed(kInfoPopupDelay);
 
   if (!context.mounted) return; // 기다리는 사이 탭을 옮겨 화면이 사라짐
-  if (ModalRoute.of(context)?.isCurrent == false) return; // 다른 화면/대화상자가 이미 위에 있음
+  if (ModalRoute.of(context)?.isCurrent == false)
+    return; // 다른 화면/대화상자가 이미 위에 있음
 
   await prefs.setBool(shownKey, true);
   if (!context.mounted) return;
@@ -101,7 +102,8 @@ Future<void> maybeShowShiftAssignTutorial(BuildContext context,
 /// 컨디션 탭(condition_tab.dart) `_ConditionBodyState`가 최초 build 시 부르는
 /// 함수 - 이미 봤으면 아무 것도 안 함. setupNeeded 여부와 무관하게 항상 뜸(설정이
 /// 안 돼 있으면 그 자체가 이 안내의 1번 내용이므로).
-Future<void> maybeShowConditionTabTutorial(BuildContext context) => _showInfoPopupOnce(
+Future<void> maybeShowConditionTabTutorial(BuildContext context) =>
+    _showInfoPopupOnce(
       context,
       shownKey: _kConditionTabTutorialShownKey,
       content: ConditionTabTutorialContent.new,
@@ -110,7 +112,8 @@ Future<void> maybeShowConditionTabTutorial(BuildContext context) => _showInfoPop
 /// 일정관리 탭(schedule_management_tab.dart)이 최초 build 시 부르는 함수 -
 /// 이미 봤으면 아무 것도 안 함. 컨디션 탭의 maybeShowConditionTabTutorial과
 /// 완전히 동일한 패턴(같은 카드/버튼 디자인, 평생 1회).
-Future<void> maybeShowScheduleTabTutorial(BuildContext context) => _showInfoPopupOnce(
+Future<void> maybeShowScheduleTabTutorial(BuildContext context) =>
+    _showInfoPopupOnce(
       context,
       shownKey: _kScheduleTabTutorialShownKey,
       content: ScheduleTabTutorialContent.new,
