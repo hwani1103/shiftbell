@@ -1,5 +1,6 @@
 package com.hwani1103.shiftbell
 
+import android.content.Context
 import java.util.Calendar
 
 /**
@@ -39,14 +40,40 @@ object CalendarWidgetHolidays {
         "2029-05-21", "2029-09-21", "2029-09-22", "2029-09-23", "2029-09-24"
     )
 
-    fun isHoliday(cal: Calendar): Boolean {
+    /**
+     * ⭐ 2026-09-23 (1.0.24 D) - Firebase 원격 변경분(holiday_sync_service.dart가 채널 setHolidayOverrides로 넘겨 줌).
+     * add = 공휴일로 추가할 날짜, remove = 하드코딩 목록에서 뺄 날짜(yyyy-MM-dd). 없으면 하드코딩 목록만 사용.
+     */
+    data class Overrides(val add: Set<String> = emptySet(), val remove: Set<String> = emptySet()) {
+        companion object { val EMPTY = Overrides() }
+    }
+
+    private const val PREFS = "holiday_overrides"
+
+    fun saveOverrides(context: Context, add: Collection<String>, remove: Collection<String>) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+            .putStringSet("add", add.toSet())
+            .putStringSet("remove", remove.toSet())
+            .apply()
+    }
+
+    fun overrides(context: Context): Overrides = try {
+        val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        Overrides(p.getStringSet("add", emptySet())!!.toSet(), p.getStringSet("remove", emptySet())!!.toSet())
+    } catch (e: Exception) {
+        Overrides.EMPTY
+    }
+
+    fun isHoliday(cal: Calendar, overrides: Overrides = Overrides.EMPTY): Boolean {
         val month = cal.get(Calendar.MONTH) + 1
         val day = cal.get(Calendar.DAY_OF_MONTH)
+        val year = cal.get(Calendar.YEAR)
+        val dateKey = "%04d-%02d-%02d".format(year, month, day)
+        if (dateKey in overrides.add) return true
+        if (dateKey in overrides.remove) return false
+
         val fixedKey = "%02d-%02d".format(month, day)
         if (FIXED_HOLIDAYS.contains(fixedKey)) return true
-
-        val year = cal.get(Calendar.YEAR)
-        val lunarKey = "%04d-%02d-%02d".format(year, month, day)
-        return LUNAR_HOLIDAYS.contains(lunarKey)
+        return LUNAR_HOLIDAYS.contains(dateKey)
     }
 }

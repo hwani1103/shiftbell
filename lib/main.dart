@@ -1,3 +1,4 @@
+import 'services/holiday_sync_service.dart';
 import 'services/friend_sync_service.dart';
 import 'services/restore_coordinator.dart';
 import 'screens/restore_interrupted_screen.dart';
@@ -151,6 +152,8 @@ Future<CalendarThemeId> _initializeApp() async {
   // DB 열기 + 마이그레이션(#1/#8 - 실패를 삼키지 않음). 실패 후 다시 부르면 새로 시도함.
   await DatabaseService.instance.database;
   await AlarmService().initialize();
+  // ⭐ 2026-09-23 (1.0.24 D) - 마지막으로 받은 공휴일 원격 변경분(네트워크 없음, 실패해도 하드코딩 목록)
+  await HolidaySyncService.instance.loadCached();
 
   // ── 선택 (없어도 알람/달력 핵심 기능은 동작) ──
   // ⭐ Phase 4 - 메모/일정 카테고리 자동분류 모델(~2.2MB JSON) 미리 로드.

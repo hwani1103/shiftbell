@@ -267,6 +267,8 @@ class CalendarWidgetProvider : AppWidgetProvider() {
             // 없어서 근무색 알약과 달리 정적 drawable 리소스 하나로 충분함)
             val memoBg = R.drawable.widget_memo_bg_light
             val memoTextColor = normalTextColor
+            // ⭐ 2026-09-23 (1.0.24 D) - 공휴일 원격 변경분(없으면 하드코딩 목록만)
+            val holidayOverrides = CalendarWidgetHolidays.overrides(context)
 
             for (r in 0 until rowCount) {
                 for (c in 0..6) {
@@ -275,7 +277,7 @@ class CalendarWidgetProvider : AppWidgetProvider() {
                     val isSunday = c == 0  // 항상 0열 = 일요일 (창이 항상 일요일부터 시작)
                     // ⭐ 일요일이 아니어도 공휴일이면 숫자가 빨간색이어야 함 (예: 공휴일인 금요일).
                     // 달력탭처럼 이름 텍스트까지는 안 보여줘도, 숫자 색만큼은 반영함.
-                    val isRedDay = isSunday || CalendarWidgetHolidays.isHoliday(cal)
+                    val isRedDay = isSunday || CalendarWidgetHolidays.isHoliday(cal, holidayOverrides)
                     // ⭐ 위젯엔 달력탭 같은 "보고 있는 달" 개념이 없어서, 실제 오늘이 속한
                     // 달을 기준으로 "이번 달이 아닌 날짜"(전주/다음주가 다른 달로 걸치는 경우)를 판단
                     val isOutsideMonth = !isSameMonth(cal, today)

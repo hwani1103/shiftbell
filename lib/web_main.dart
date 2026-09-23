@@ -25,6 +25,7 @@
 // hosting rewrite가 이미 모든 경로를 index.html로 돌려주게 돼있어서("source": "**")
 // 일반 경로로 바꿔도 새로고침 시 404 걱정 없음. 기존에 이미 뿌려진 구형(#/?code=...)
 // 링크도 계속 동작하도록 _extractCode()의 프래그먼트 파싱은 그대로 남겨둠(폴백).
+import 'services/holiday_sync_service.dart';
 import 'dart:html' as html;
 // 웹(dart2js) 전용 라이브러리라 앱 기준 분석에서만 "없음"으로 잡힌다. 웹 빌드에서는 정상 - js_interop 전환은
 // 설치 버튼 동작을 브라우저에서 다시 확인해야 해서 보류(2026-09-22).
@@ -187,6 +188,8 @@ void main() async {
   // Firebase만 초기화하면 됨. 플레이스홀더 상태면 조용히 실패하고 아래 라우터가
   // "동기화 실패" 화면을 보여줌 (firebase_bootstrap.dart 참고).
   await initFirebase();
+  // ⭐ 2026-09-23 (1.0.24 D) - 공휴일 원격 변경분(친구 달력 빨간날). 실패하면 하드코딩 목록.
+  if (firebaseReady) await HolidaySyncService.instance.loadForWeb();
   runApp(const ShiftBellWebViewApp());
 }
 

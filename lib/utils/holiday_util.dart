@@ -89,6 +89,12 @@ const Map<String, String> lunarHolidays = {
 String? getHolidayName(DateTime date, {required bool isKorean}) {
   if (!isKorean) return null;
 
+  // 0. ⭐ 2026-09-23 (1.0.24 D) - Firebase에서 받은 원격 변경분이 우선(추가·이름 변경 → remove보다 먼저, 삭제 → 없음)
+  final dateKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  final remoteName = HolidayOverrides.current.add[dateKey];
+  if (remoteName != null) return remoteName;
+  if (HolidayOverrides.current.remove.contains(dateKey)) return null;
+
   // 1. 고정 공휴일 체크 (매년 동일)
   final fixedKey = '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   if (fixedHolidays.containsKey(fixedKey)) {
@@ -98,4 +104,56 @@ String? getHolidayName(DateTime date, {required bool isKorean}) {
   // 2. 음력/변동 공휴일 체크 (연도별)
   final lunarKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   return lunarHolidays[lunarKey];
+}
+
+
+/// ⭐ 2026-09-23 (1.0.24 D) - 공휴일 원격 변경분. Firestore `app_config/holidays_kr` 문서
+/// `{version: 3, add: {"2027-06-03": "지방선거"}, remove: ["2026-06-03"]}`를 받아 둔 것(holiday_sync_service.dart).
+/// 하드코딩 목록은 안전망으로 그대로 두고 그 위에 add/remove를 덮어씀 - 앱 업데이트 없이 대체·임시공휴일 대응.
+class HolidayOverrides {
+  final int version;
+  final Map<String, String> add;
+  final Set<String> remove;
+
+  const HolidayOverrides({this.version = 0, this.add = const {}, this.remove = const {}});
+
+  static const empty = HolidayOverrides();
+
+  /// 앱 전체가 보는 현재 값(달력·친구 달력·웹 뷰어). 시작 시 캐시에서, 새 버전을 받으면 교체.
+  static HolidayOverrides current = empty;
+
+  static final _dateKey = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+
+  static bool _validDate(String k) {
+    if (!_dateKey.hasMatch(k)) return false;
+    final d = DateTime.tryParse(k);
+    return d != null &&
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}' == k;
+  }
+
+  /// Firestore·캐시 JSON → 값. 형식이 틀린 항목은 버리고(앱이 절대 죽지 않게) 나머지만 씀.
+  static HolidayOverrides fromJson(Map<String, dynamic>? json) {
+    if (json == null) return empty;
+    final rawVersion = json['version'];
+    final version = rawVersion is num ? rawVersion.toInt() : 0;
+    final add = <String, String>{};
+    final rawAdd = json['add'];
+    if (rawAdd is Map) {
+      rawAdd.forEach((k, v) {
+        if (k is String && _validDate(k) && v is String && v.trim().isNotEmpty) {
+          add[k] = v.trim().length > 20 ? v.trim().substring(0, 20) : v.trim();
+        }
+      });
+    }
+    final remove = <String>{};
+    final rawRemove = json['remove'];
+    if (rawRemove is List) {
+      for (final k in rawRemove) {
+        if (k is String && _validDate(k)) remove.add(k);
+      }
+    }
+    return HolidayOverrides(version: version, add: add, remove: remove);
+  }
+
+  Map<String, dynamic> toJson() => {'version': version, 'add': add, 'remove': remove.toList()..sort()};
 }

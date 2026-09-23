@@ -1,5 +1,7 @@
 // lib/services/update_service.dart
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -8,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/l10n_extensions.dart';
 import 'firebase_bootstrap.dart';
+import 'holiday_sync_service.dart';
 
 class UpdateService {
   static const String _notifiedVersionKey = 'notified_update_version';
@@ -222,6 +225,9 @@ class UpdateService {
       final doc = await FirebaseFirestore.instance.doc(_appConfigDocPath).get();
       final data = doc.data();
       if (data == null) return; // 문서가 아직 없음(개발자가 아직 안 만듦) - 조용히 스킵
+
+      // ⭐ 2026-09-23 (1.0.24 D) - 공휴일 원격 변경 안내 번호. 캐시보다 클 때만 holidays 문서를 1번 더 읽음(기다리지 않음)
+      unawaited(HolidaySyncService.instance.syncIfNeeded(data['holidaysVersion']));
 
       // ⭐ 2026-09-12(사용자 요청) - 강제 업데이트 기능 자체를 안 쓰기로 함(제거).
       // app_config/android 문서에 minSupportedVersionCode/forceUpdateTitle/

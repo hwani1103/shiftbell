@@ -619,6 +619,15 @@ override fun onNewIntent(intent: Intent) {
                     }
                 }
                 // ⭐ 2026-09-23 (1.0.24 C) - 진단 기록(Dart 쪽 이벤트)과 "문제 신고용 진단 파일" 내보내기+공유
+                // ⭐ 2026-09-23 (1.0.24 D) - 공휴일 원격 변경분을 홈 위젯에 반영(날짜 목록만)
+                "setHolidayOverrides" -> {
+                    CalendarWidgetHolidays.saveOverrides(
+                        applicationContext,
+                        call.argument<List<String>>("add") ?: emptyList(),
+                        call.argument<List<String>>("remove") ?: emptyList()
+                    )
+                    result.success(null)
+                }
                 "diagLog" -> {
                     val event = call.argument<String>("event") ?: "DART"
                     val fields = (call.argument<Map<String, Any?>>("fields") ?: emptyMap()).entries.map { it.key to it.value }

@@ -32,6 +32,8 @@ const Set<String> kDeviceLocalPreferenceKeys = {
   'backup_last_saved_at_auto',
   'backup_last_saved_at_manual',
   'backup_slot_format_v2',
+  // 1.0.24 D - 공휴일 원격 변경분 캐시(서버에서 다시 받는 값)
+  'holiday_overrides_json',
   // OS 권한은 설치마다 다시 받아야 함(복원 후 권한 화면 판단은 복원 흐름이 직접 함)
   'permissions_requested',
   // 업데이트 안내 dedupe - 설치·버전별
