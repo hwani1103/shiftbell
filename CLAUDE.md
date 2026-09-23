@@ -35,7 +35,7 @@ dev에는 출시전 감사(G0~G5)가 반영된 `1.0.23+25`가 준비 중.
   - Analytics는 `FirebaseOptions`만으로 안 되고 `google-services.json`(prod/dev 두 패키지 등록) +
     `com.google.gms.google-services` Gradle 플러그인이 필요함(한 번 뺐다가 `E FA: Missing google_app_id`로 다시 붙임)
   - dev flavor는 dev 앱 ID(`DefaultFirebaseOptions.androidDev`)로 초기화하고 **Analytics 수집을 끔** — 운영 DAU 오염 방지(#29)
-  - `friend_schedules` 친구 근무표(익명 UID 문서) / `app_config` 업데이트 안내(읽기 전용) / `health_tips`(규칙에 읽기 허용은 남아 있지만 2026-09-15 범용 Tip 삭제 후 앱은 읽지 않음)
+  - `friend_schedules` 친구 근무표(익명 UID 문서) / `app_config` 업데이트 안내(읽기 전용) / `health_tips`는 2026-09-15 범용 Tip 삭제로 앱이 읽지 않고 규칙에서도 빠짐(콘솔 게시본 = 저장소 `firestore.rules`, 2026-09-23 대조)
   - 규칙: `firestore.rules` — 콘솔 배포는 사용자가 직접 함. 규칙은 소유권·list 차단만 있고 필드 형식·크기 검증은 없음(D7로 이번 출시 미채택)
 - **AdMob** 배너 — 실제 ID는 소스에 없음(아래 "광고")
 - **i18n** — 한국어(원본) / 영어. `lib/l10n/app_ko.arb`(템플릿) + `app_en.arb`
@@ -416,7 +416,7 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
   화면 관례값. 시각 없는 근무가 끼면 직전/다음 근무를 단정 안 함. 건강 기준·조언은 근거 ID 필수(기록 안내 `record_sleep`만 예외, 테스트가
   강제). facts/actions는 `BriefingTopic` 기준으로 dedup됨(위 문구 품질 재검토 참고). 화면은 1분 시계
   (`briefingClockProvider`, autoDispose)로 남은 시간 갱신, "근거 보기"로 출처 표시
-- **범용 건강 Tip 삭제(2026-09-15)**: 개인화되지 않는 날짜 로테이션 팁이라 제거(`health_tip_provider`·`health_tips_catalog`·`HealthTip` 삭제, Firestore 규칙은 그대로)
+- **범용 건강 Tip 삭제(2026-09-15)**: 개인화되지 않는 날짜 로테이션 팁이라 제거(`health_tip_provider`·`health_tips_catalog`·`HealthTip` 삭제, Firestore 규칙 블록도 제거됨)
 - **출퇴근 시각 입력**은 설정 → 근무시간 및 OT 설정. 한 근무라도 입력돼 있으면 오늘의 컨디션 표시(없으면 설정 안내 카드 + "근무시간 입력하기" 버튼, 수면 기록은 가능).
   이 탭 문구는 한국어 하드코딩(1차, l10n 미적용 — 영어 로케일에선 탭 자체가 안 보임)
 - 남은 과제: 실데이터로 임계값 튜닝(특히 RULE_CONSECUTIVE_WORKDAYS의 7일/10일, v4 개인 기준선 증가폭의 15%/25%/6h/12h,
