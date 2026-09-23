@@ -86,6 +86,8 @@ flutter build appbundle --release --flavor prod --dart-define=ADMOB_BANNER_ID=<�
 - 달력 탭, 전체 근무표(`all_shifts_view`, 전체 조 설정은 다시 편집 가능), 날짜별 근무 변경
 - **달력 테마 9종** (`lib/models/calendar_theme.dart`) — **앱에만 반영, 홈 위젯은 라이트 고정**(아래 설계 기록 참고)
 - 근무명 색상 직접 지정(`effectiveShiftColors()`), 근무명 입력은 쉼표·"미설정"·"없음"·중복 차단, 맞교환 rename 지원(#11/#12)
+- **셀 줄 맞춤(2026-09-23)**: 실험 테마 셀은 근무 칩·빨간날/음력 줄을 내용이 없어도 같은 높이로 비워 둠(`_redDaySlot`, `Visibility(maintainSize)`) —
+  같은 주에서 메모 시작 줄이 날마다 틀어지지 않게. 다크 그리드의 오늘 표시는 셀 전체 노란 배경 → 날짜 숫자만 네이비 사각 배지
 - 날짜별 **메모**, **OT/특근**, 근로시간·급여 산정(`work_hours_calculator.dart`)
 - 공휴일 표시 (`holiday_util.dart` + `CalendarWidgetHolidays.kt` — **둘 다 같이 갱신**, 영어 로케일에서는 공휴일 표시 안 함)
 

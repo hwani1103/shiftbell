@@ -810,7 +810,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(color: const Color(0xFFB0BEC5), width: 1),
-          color: outside ? const Color(0xFFFAFAFA) : (today ? const Color(0xFFFFF9C4) : Colors.white),
+          color: outside ? const Color(0xFFFAFAFA) : Colors.white,
         ),
         padding: EdgeInsets.all(2.w),
         child: Column(
@@ -825,7 +825,16 @@ extension _Theme4 on _CalendarThemeLabScreenState {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('${day.day}', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: outside ? Colors.grey.shade400 : (red ? Colors.red.shade600 : const Color(0xFF263238)))),
+                // ⭐ 2026-09-23 - 오늘은 셀 전체 노란 배경 대신 숫자만 네이비 사각 배지(메인 달력과 동일).
+                Container(
+                  height: 15.w,
+                  constraints: BoxConstraints(minWidth: 15.w),
+                  padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+                  margin: EdgeInsets.only(right: 1.5.w),
+                  alignment: Alignment.center,
+                  decoration: today && !outside ? BoxDecoration(color: const Color(0xFF263238), borderRadius: BorderRadius.circular(2.r)) : null,
+                  child: Text('${day.day}', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: outside ? Colors.grey.shade400 : today ? (red ? Colors.red.shade200 : Colors.white) : (red ? Colors.red.shade600 : const Color(0xFF263238)))),
+                ),
                 if (_mockHolidayNameFor(context, day) != null)
                   Expanded(
                     child: Text(_mockHolidayNameFor(context, day)!, style: TextStyle(fontSize: 5.5.sp, color: Colors.red.shade600, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),

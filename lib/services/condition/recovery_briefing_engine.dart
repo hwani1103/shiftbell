@@ -175,7 +175,7 @@ const BriefingAction _mealAction = BriefingAction(
 );
 const BriefingAction _recordSleepAction = BriefingAction(
   'record_sleep',
-  '잠을 잤다면 아래 "최근 수면 기록"에 남겨주세요. 기록이 있어야 실제 수면까지 반영해서 알려드릴 수 있어요.',
+  '아래 "최근 수면 기록"에 수면 시간을 남겨주세요. 기록이 쌓이면 실제로 잔 시간을 바탕으로 더 정확하게 알려드릴게요.',
 );
 
 DateTime _day(DateTime d) => DateTime(d.year, d.month, d.day);

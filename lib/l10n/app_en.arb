@@ -285,7 +285,7 @@
   "backupRestoreManualPickLink": "Load a previous backup",
   "onboardingHasBackupTitle": "Used this app before?",
   "onboardingHasBackupLoadButton": "Load",
-  "backupRestoreManualPickHint": "Download → ShiftBell → a file starting with ShiftBell_Backup_ (if there are several, the latest date and time)",
+  "backupRestoreManualPickHint": "Pick up where you left off with the backup file in Download/ShiftBell.",
   "backupRestoreManualPickInvalidToast": "That doesn't look like a valid backup file. Please pick a file starting with ShiftBell_Backup_.",
   "backupRestoreInvalidToast": "This backup file didn't pass the content check, so nothing was restored. Your current data is unchanged.",
   "backupRestoreIncompleteToast": "The restore couldn't finish. Alarms have been set again based on your current data. Open the app again to complete it.",

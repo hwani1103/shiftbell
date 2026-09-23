@@ -3214,6 +3214,40 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
         height: 1.1,
       );
 
+  // 실제 Text가 그려질 한 줄 높이(기본 글꼴·글자 크기 배율 반영).
+  double _lineHeightOf(TextStyle style) {
+    final tp = TextPainter(
+        text: TextSpan(
+            text: '가9', style: DefaultTextStyle.of(context).style.merge(style)),
+        textDirection: TextDirection.ltr,
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1)
+      ..layout();
+    return tp.height;
+  }
+
+  // ⭐ 2026-09-23 - "음력/빨간날이 있는 날과 없는 날의 메모 줄이 안 맞는다"는 지적.
+  // 빨간날 이름·음력 줄을 있을 때만 그리면 그 줄 높이만큼 아래 메모가 날마다 위아래로
+  // 틀어짐 - 이제 이 줄은 내용이 없어도 항상 같은 높이(빨간날/음력 중 큰 쪽)를 차지해서,
+  // 같은 주의 셀들이 "날짜 · 근무 · 빨간날/음력 · 메모" 줄을 똑같이 나눠 씀.
+  Widget _redDaySlot(String? holidayName, String? lunarText,
+      TextStyle holidayStyle,
+      {TextAlign textAlign = TextAlign.center, double extraHeight = 0}) {
+    final lunarStyle = _lunarCellTextStyle();
+    final holidayH = _lineHeightOf(holidayStyle);
+    final lunarH = _lineHeightOf(lunarStyle);
+    final height = (holidayH > lunarH ? holidayH : lunarH) + extraHeight;
+    return SizedBox(
+      width: double.infinity,
+      height: height,
+      child: holidayName != null
+          ? _fitText(holidayName, holidayStyle, textAlign: textAlign)
+          : (lunarText != null
+              ? _fitText(lunarText, lunarStyle, textAlign: textAlign)
+              : null),
+    );
+  }
+
   // ⭐ "메모/빨간날 글자가 셀 밖으로 넘치면 가위로 자른 듯 반쪽 글자가 보인다"는
   // 지적 - TextOverflow.clip/ellipsis는 픽셀 경계에서 그냥 잘라버려서 마지막
   // 글자가 반쪽만 그려질 수 있음(생략 부호 "..."도 원치 않는다고 함: "..." 없이
@@ -3328,7 +3362,8 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                     overflow: TextOverflow.ellipsis),
               )
             else
-              SizedBox(height: 12.h),
+              // 배지(11.h) + 위 margin(첫 줄은 0)과 같은 높이.
+              SizedBox(height: isFirstRow ? 11.h : 12.h),
             // 🔧 근무명 배지 ↔ 날짜 숫자 사이 간격.
             SizedBox(height: 0.3.h),
             // 🔧 날짜 숫자 - 크기: fontSize: 11.sp / 위치: 18x18 정사각 박스 안에서
@@ -3355,16 +3390,14 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
             // 고정(별도 좌표 없음) - 더 아래로 내리려면 위에 SizedBox를 하나
             // 추가하거나, 날짜 숫자보다 위로 올리려면 이 if 블록 자체를 날짜
             // Container보다 앞으로 옮기면 됨.
-            if (d.holidayName != null)
-              _fitText(
-                  d.holidayName!,
-                  TextStyle(
-                      fontSize: 7.7.sp,
-                      color: Colors.red.shade400,
-                      fontWeight: FontWeight.bold,
-                      height: 1.1))
-            else if (d.lunarText != null)
-              _fitText(d.lunarText!, _lunarCellTextStyle()),
+            _redDaySlot(
+                d.holidayName,
+                d.lunarText,
+                TextStyle(
+                    fontSize: 7.7.sp,
+                    color: Colors.red.shade400,
+                    fontWeight: FontWeight.bold,
+                    height: 1.1)),
             // 🔧 메모 시작 위치(날짜/빨간날 ↔ 첫 메모 사이 간격) - 이 SizedBox
             // 높이가 곧 "메모가 위에서 얼마나 아래서 시작하는가"임. 빨간날이 없는
             // 날은 날짜 숫자 바로 아래가 이 간격이 되고, 빨간날이 있는 날은
@@ -3477,16 +3510,14 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                   )),
               // 🔧 빨간날 이름 - 크기: fontSize: 6.sp, 색: red.shade600. 위치는
               // 날짜 숫자 바로 아래 고정(Column 순서).
-              if (d.holidayName != null)
-                _fitText(
-                    d.holidayName!,
-                    TextStyle(
-                        fontSize: 7.sp,
-                        color: Colors.red.shade600,
-                        fontWeight: FontWeight.bold,
-                        height: 1.0))
-              else if (d.lunarText != null)
-                _fitText(d.lunarText!, _lunarCellTextStyle()),
+              _redDaySlot(
+                  d.holidayName,
+                  d.lunarText,
+                  TextStyle(
+                      fontSize: 7.sp,
+                      color: Colors.red.shade600,
+                      fontWeight: FontWeight.bold,
+                      height: 1.0)),
               // 🔧 메모 시작 위치(날짜/빨간날 ↔ 첫 메모 간격) = 이 SizedBox 높이.
               SizedBox(height: 3.5.h),
               // 🔧 메모 목록 - 최대 3개, fontSize: 7.5.sp. 메모끼리 간격은 Padding
@@ -3529,9 +3560,12 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
         // 이랬나"의 답은 "네, kAppSurface를 계속 이렇게 썼었음").
         decoration: BoxDecoration(
           border: Border.all(color: Colors.grey.shade600, width: 0.6),
+          // ⭐ 2026-09-23 - 오늘을 셀 전체 노란 배경(0xFFFFF9C4)으로 칠하던 것을
+          // "별로"라는 지적으로 날짜 숫자만 헤더와 같은 네이비 사각 배지로 감싸는
+          // 방식으로 바꿈(아래 Row 참고) - 셀 배경은 다른 날과 같은 흰색.
           color: isOutside
               ? colorScheme.surfaceVariant.withOpacity(0.3)
-              : (isToday ? const Color(0xFFFFF9C4) : Colors.white),
+              : Colors.white,
         ),
         padding: EdgeInsets.all(2.w),
         child: Column(
@@ -3545,15 +3579,34 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('${day.day}',
-                    style: TextStyle(
-                        fontSize: 10.sp,
-                        fontWeight: FontWeight.bold,
-                        color: isOutside
-                            ? colorScheme.onSurfaceVariant.withOpacity(0.5)
-                            : (d.red
-                                ? Colors.red.shade600
-                                : colorScheme.onSurface))),
+                // 🔧 날짜 숫자 박스 - 오늘이든 아니든 같은 크기(높이 15.w)라 오늘만
+                // 줄이 두꺼워지지 않음. 오늘이면 헤더색(0xFF263238) 사각 배지 +
+                // 흰 숫자, 빨간날이면 네이비 위에서도 잘 읽히는 연한 빨강(red.shade200).
+                Container(
+                  height: 15.w,
+                  constraints: BoxConstraints(minWidth: 15.w),
+                  padding: EdgeInsets.symmetric(horizontal: 1.5.w),
+                  margin: EdgeInsets.only(right: 1.5.w),
+                  alignment: Alignment.center,
+                  decoration: isToday && !isOutside
+                      ? BoxDecoration(
+                          color: const Color(0xFF263238),
+                          borderRadius: BorderRadius.circular(2.r))
+                      : null,
+                  child: Text('${day.day}',
+                      style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.bold,
+                          color: isOutside
+                              ? colorScheme.onSurfaceVariant.withOpacity(0.5)
+                              : isToday
+                                  ? (d.red
+                                      ? Colors.red.shade200
+                                      : Colors.white)
+                                  : (d.red
+                                      ? Colors.red.shade600
+                                      : colorScheme.onSurface))),
+                ),
                 if (d.holidayName != null)
                   Expanded(
                       child: _fitText(
@@ -3567,11 +3620,15 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
               ],
             ),
             // 🔧 근무명 배지(날짜 줄 바로 아래) - 크기: fontSize: 7.5.sp, 위아래
-            // 여백은 margin vertical: 1.h. 근무 없는 날은 이 자리를 아예 안
-            // 그리므로(else 분기 없음) 그날 셀만 근무명 배지 높이만큼 짧아짐 -
-            // 다른 테마와 달리 높이를 맞추는 SizedBox가 없다는 점 주의.
-            if (d.hasShift)
-              Container(
+            // 여백은 margin vertical: 1.h. ⭐ 2026-09-23 - 예전엔 근무 없는 날 이
+            // 자리를 아예 안 그려서 그날만 메모가 위로 올라붙었음 - 이제 보이지만
+            // 않을 뿐 같은 높이를 차지함(Visibility maintainSize).
+            Visibility(
+              visible: d.hasShift,
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              child: Container(
                 margin: EdgeInsets.symmetric(vertical: 0.2.h),
                 padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.2.h),
                 width: double.infinity,
@@ -3585,6 +3642,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                     overflow: TextOverflow.clip,
                     textAlign: TextAlign.center),
               ),
+            ),
             // 🔧 메모 시작 위치(근무명 배지 ↔ 첫 메모 간격) = 이 SizedBox 높이.
             SizedBox(height: 4.0.h),
             // 🔧 메모 목록 - 최대 3개, fontSize: 8.5.sp, 왼쪽 정렬("· "로 시작하는
@@ -3684,16 +3742,14 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
               ),
             ),
             // 🔧 빨간날 이름 - 크기: fontSize: 6.sp, 날짜 숫자 바로 아래 고정.
-            if (d.holidayName != null)
-              _fitText(
-                  d.holidayName!,
-                  TextStyle(
-                      fontSize: 7.5.sp,
-                      color: Colors.red.shade400,
-                      fontWeight: FontWeight.bold,
-                      height: 1.0))
-            else if (d.lunarText != null)
-              _fitText(d.lunarText!, _lunarCellTextStyle()),
+            _redDaySlot(
+                d.holidayName,
+                d.lunarText,
+                TextStyle(
+                    fontSize: 7.5.sp,
+                    color: Colors.red.shade400,
+                    fontWeight: FontWeight.bold,
+                    height: 1.0)),
             // 🔧 메모 시작 위치 - 메모가 있을 때만 이 간격(1.2.h)이 붙음(메모가
             // 없으면 이 SizedBox 자체가 안 생김 - if로 감싸져 있음).
             if (d.memos.isNotEmpty) SizedBox(height: 1.2.h),
@@ -3757,15 +3813,13 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
             SizedBox(height: 7.0.h),
           // 🔧 빨간날 이름 - 크기: fontSize: 6.sp, 막대 바로 아래 고정. 별도
           // 시작 간격 SizedBox가 없어서 막대 margin(2.h)이 곧 이 간격임.
-          if (d.holidayName != null)
-            _fitText(
-                d.holidayName!,
-                TextStyle(
-                    fontSize: 6.sp,
-                    color: Colors.red.shade400,
-                    fontWeight: FontWeight.bold))
-          else if (d.lunarText != null)
-            _fitText(d.lunarText!, _lunarCellTextStyle()),
+          _redDaySlot(
+              d.holidayName,
+              d.lunarText,
+              TextStyle(
+                  fontSize: 6.sp,
+                  color: Colors.red.shade400,
+                  fontWeight: FontWeight.bold)),
           // 🔧 메모 목록 - 최대 3개, fontSize: 7.8.sp("너무 연하고 작다"는
           // 지적으로 7.sp→7.8.sp, 색도 onSurfaceVariant→grey.shade700로 진하게
           // 바꾼 이력). 메모끼리 간격을 조절하는 별도 Padding이 없음 - 필요하면
@@ -3839,23 +3893,41 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
             // 크기(7.5.sp)와 칩 모양(패딩/둥근 모서리)이 셋 다 동일함. 순서가
             // 곧 화면 순서(근무명 → 빨간날 → 메모)이고, 칩끼리 간격은 각 칩의
             // margin bottom(0.6.h, _themeChip 안) + 다음 칩 앞의 Padding top(0.8.h).
-            if (d.hasShift)
-              _themeChip(d.shiftText, d.shiftColor, d.shiftTextColor),
+            // ⭐ 2026-09-23 - 근무 칩·빨간날/음력 줄은 내용이 없어도 같은 높이를
+            // 차지함("음력이 있는 수요일에 메모를 적으면 옆 날들과 줄이 안 맞는다"
+            // 지적 - 예전엔 없는 줄을 아예 안 그려서 메모가 날마다 위아래로 틀어졌음).
+            Visibility(
+              visible: d.hasShift,
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              child: _themeChip(d.shiftText, d.shiftColor, d.shiftTextColor),
+            ),
             // 🔧 빨간날도 칩 형태(배경 red.shade50 / 글자 red.shade400) - 글자
             // 크기는 _themeChip 공용값(7.5.sp)이라 근무명/메모와 따로 못 바꿈
             // (따로 바꾸려면 _themeChip에 fontSize 파라미터를 추가해야 함).
-            if (d.holidayName != null)
-              Padding(
-                  padding: EdgeInsets.only(top: 0.8.h),
-                  child: _themeChip(
-                      d.holidayName!, Colors.red.shade50, Colors.red.shade400))
             // ⭐ 음력은 칩(색 배경) 없이 공용 스타일 그대로 - "폰트 디자인은 모든
-            // 테마가 동일"해야 해서 이 테마만의 칩 배경을 입히지 않음. 위치(칩이
-            // 있었을 자리)만 동일한 top 여백으로 맞춤.
-            else if (d.lunarText != null)
-              Padding(
-                  padding: EdgeInsets.only(top: 0.8.h),
-                  child: _fitText(d.lunarText!, _lunarCellTextStyle())),
+            // 테마가 동일"해야 해서 이 테마만의 칩 배경을 입히지 않음. 칩과 같은
+            // 높이의 자리 안에서 세로 가운데.
+            Padding(
+              padding: EdgeInsets.only(top: 0.8.h),
+              child: SizedBox(
+                width: double.infinity,
+                height: _themeChipHeight(),
+                child: d.holidayName != null
+                    ? _themeChip(
+                        d.holidayName!, Colors.red.shade50, Colors.red.shade400)
+                    : (d.lunarText != null
+                        ? Padding(
+                            padding: EdgeInsets.only(bottom: 0.6.h),
+                            child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: _fitText(
+                                    d.lunarText!, _lunarCellTextStyle())),
+                          )
+                        : null),
+              ),
+            ),
             // 🔧 메모 목록 - 최대 3개, 칩 사이 간격 = Padding top: 0.8.h.
             ...d.memos.take(3).map((m) => Padding(
                 padding: EdgeInsets.only(top: 0.8.h),
@@ -3870,6 +3942,16 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
   // 🔧 근무명/빨간날/메모가 공유하는 칩 위젯 - 글자 크기: fontSize: 7.5.sp(전체
   // 공통), 칩 자체 크기: padding horizontal 3.w/vertical 1.1.h, 모서리: 2.5.r,
   // 칩 아래 간격: margin bottom 0.6.h.
+  TextStyle _themeChipTextStyle(Color fg) => TextStyle(
+      fontSize: 7.sp, color: fg, fontWeight: FontWeight.w600, height: 1.1);
+
+  // 칩 하나가 차지하는 전체 높이(글자 줄 + 위아래 padding + 아래 margin).
+  double _themeChipHeight() {
+    final textH = _lineHeightOf(_themeChipTextStyle(Colors.black));
+    final lunarH = _lineHeightOf(_lunarCellTextStyle());
+    return (textH > lunarH ? textH : lunarH) + 2 * 1.1.h + 0.6.h;
+  }
+
   Widget _themeChip(String text, Color bg, Color fg) {
     return Container(
       width: double.infinity,
@@ -3877,13 +3959,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
       padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.1.h),
       decoration:
           BoxDecoration(color: bg, borderRadius: BorderRadius.circular(2.5.r)),
-      child: _fitText(
-          text,
-          TextStyle(
-              fontSize: 7.sp,
-              color: fg,
-              fontWeight: FontWeight.w600,
-              height: 1.1)),
+      child: _fitText(text, _themeChipTextStyle(fg)),
     );
   }
 
@@ -4030,6 +4106,15 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
     final dateColor = isOutside
         ? colorScheme.onSurfaceVariant.withOpacity(0.4)
         : (d.red ? const Color(0xFFC0392B) : const Color(0xFF4A4038));
+    final holidayStyle = TextStyle(
+        fontSize: 8.sp,
+        color: const Color(0xFFC0392B),
+        fontWeight: FontWeight.w700);
+    final holidayLineH = _lineHeightOf(holidayStyle);
+    final lunarLineH = _lineHeightOf(_lunarCellTextStyle());
+    // 빨간날 줄 아래 테두리(0.8)까지 포함한 높이.
+    final redDayLineHeight =
+        (holidayLineH > lunarLineH ? holidayLineH : lunarLineH) + 0.8;
     return ClipRect(
       child: Container(
         width: double.infinity,
@@ -4124,29 +4209,26 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
               ),
               // 🔧 빨간날(공휴일) - 있을 때만, 흰 배경 + 빨간 글씨. 이 줄 자체도
               // 아래쪽 테두리를 그어서 위 박스와 한 몸처럼 보이게 함.
-              if (d.holidayName != null)
-                Container(
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                      border: Border(
-                          bottom: BorderSide(color: borderColor, width: 0.8))),
-                  padding: EdgeInsets.symmetric(vertical: 0.h),
-                  child: _fitText(
-                      d.holidayName!,
-                      TextStyle(
-                          fontSize: 8.sp,
-                          color: const Color(0xFFC0392B),
-                          fontWeight: FontWeight.w700)),
-                )
               // ⭐ 2026-09-22 사용자 지적 - 공휴일 Container는 "위 박스와 한 몸처럼"
               // 보이려고 일부러 아래 테두리선을 그었지만(위 주석 참고), 음력은 그
               // 의도가 아니라서 테두리 없이 텍스트만.
-              else if (d.lunarText != null)
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 0.h),
-                  child: _fitText(d.lunarText!, _lunarCellTextStyle()),
-                ),
+              // ⭐ 2026-09-23 - 이 줄은 빨간날/음력이 없는 날도 같은 높이를 비워 둠
+              // (메모 시작 줄을 같은 주의 셀끼리 맞추려고 - _redDaySlot 주석 참고).
+              SizedBox(
+                width: double.infinity,
+                height: redDayLineHeight,
+                child: d.holidayName != null
+                    ? Container(
+                        decoration: const BoxDecoration(
+                            border: Border(
+                                bottom: BorderSide(
+                                    color: borderColor, width: 0.8))),
+                        child: _fitText(d.holidayName!, holidayStyle),
+                      )
+                    : (d.lunarText != null
+                        ? _fitText(d.lunarText!, _lunarCellTextStyle())
+                        : null),
+              ),
               // 🔧 메모 3개 - 테두리 없음, 남는 공간을 채움(Expanded).
               Expanded(
                 child: Padding(
