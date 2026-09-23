@@ -57,7 +57,10 @@ Firebase Hosting + Auth + Firestore 무료 한도 안에서 동작하고, **앱 
 
 콘솔/배포 작업은 직접 하는 것을 전제로 적었습니다. 운영 프로젝트(`shiftbell-29f31`)를 건드리는 단계라 자동으로 하지 않았습니다.
 
-1. **Firebase 콘솔 → Authentication → 로그인 방법**: "이메일/비밀번호" 사용 설정, **"사용자 가입 허용" 끄기**
+1. **Firebase 콘솔 → Authentication → 로그인 방법**: "이메일/비밀번호" 사용 설정.
+   ⚠️ **설정 → 사용자 작업의 "생성 사용 설정(가입)"은 반드시 켜 둘 것.** 끄면 익명 가입까지 막혀(`ADMIN_ONLY_OPERATION`)
+   앱의 친구 공유가 새 설치·재설치 기기에서 동작하지 않는다(2026-09-23 실제로 발생 후 복구). 켜 둬도 대시보드는 안전함 —
+   규칙이 관리자 이메일 + `email_verified`를 요구하고, 관리자 이메일은 이미 등록돼 있어 다른 사람이 같은 이메일로 가입할 수 없다
 2. **호스팅 사이트 추가**: 콘솔 → Hosting → "다른 사이트 추가" → 사이트 ID `shiftbell-ops-29f31`
 3. **Firestore 규칙 반영**: 루트 `firestore.rules`의 `match /dashboard/{document}` 블록을 콘솔 규칙에 붙여 넣고 게시
    (또는 `firebase deploy --only firestore:rules` — 콘솔 규칙과 다르지 않은지 먼저 비교할 것)
@@ -100,7 +103,7 @@ Dart 쪽 이벤트 이름과 이 사이트의 이벤트 목록(`public/assets/js
 | 증상 | 확인 |
 |------|------|
 | 로그인 후 "권한이 없어요" | 계정이 `admin-user.mjs`로 만들어졌는지(emailVerified), 규칙이 게시됐는지, 이메일 철자 |
-| 데이터가 전부 비어 있음 | 동기화를 한 번이라도 돌렸는지(`dashboard/summary` 문서 존재), 아직 Analytics 포함 버전 배포 전인지 |
+| 데이터가 전부 비어 있음 | 동기화를 한 번이라도 돌렸는지(`dashboard/summary` 문서 존재), 아직 Analytics 포함 버전 배포 전인지(이 경우 동기화는 성공하고 "아직 집계된 날짜가 없어요"가 뜸 — 기존 데이터가 있는데 0건이 오면 덮어쓰지 않고 실패) |
 | 사용자 행동이 비어 있고 세션·DAU만 있음 | 계측이 들어간 버전(1.0.23+)이 배포됐는지 — 이전 버전은 이벤트를 보내지 않음 |
 | 광고 노출·수익이 0 | AdMob ↔ Firebase 연결, prod release 빌드에서만 실광고 요청 |
 | 동기화가 403 | 서비스 계정이 GA4 속성에 뷰어로 추가됐는지, Analytics Data API가 켜져 있는지 |

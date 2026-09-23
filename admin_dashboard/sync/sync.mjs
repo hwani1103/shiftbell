@@ -68,14 +68,23 @@ async function fetchReal() {
   return docs;
 }
 
-async function writeFirestore(docs) {
+async function openFirestore() {
   const { initializeApp, cert, applicationDefault } = await import('firebase-admin/app');
   const { getFirestore } = await import('firebase-admin/firestore');
   const opts = { projectId };
   if (!env.FIRESTORE_EMULATOR_HOST) {
     opts.credential = env.SERVICE_ACCOUNT_JSON ? cert(JSON.parse(env.SERVICE_ACCOUNT_JSON)) : applicationDefault();
   }
-  const db = getFirestore(initializeApp(opts));
+  return getFirestore(initializeApp(opts));
+}
+
+/** 이미 Firestore에 저장된 일별 데이터 일수(없으면 0). */
+async function storedDays(db) {
+  const snap = await db.collection('dashboard').doc('series').get();
+  return snap.exists ? (snap.data()?.dates?.length ?? 0) : 0;
+}
+
+async function writeFirestore(db, docs) {
   const col = db.collection('dashboard');
   await Promise.all([
     col.doc('summary').set(docs.summary),
@@ -95,9 +104,22 @@ const started = Date.now();
 try {
   const docs = args.mock ? buildMockDocs() : await fetchReal();
   const n = docs.series.dates.length;
-  if (!args.mock && n === 0) throw new Error('GA4에서 받은 일별 데이터가 0건입니다. 스트림 ID/속성 접근 권한을 확인하세요.');
-  if (args.out) await writeFiles(docs, args.out);
-  else await writeFirestore(docs);
+  // ⭐ 2026-09-23 - GA4 조회는 성공했는데 0건인 경우(권한 문제면 runReport가 403으로 먼저 던짐):
+  //  - 이미 쌓인 데이터가 있으면 빈 값으로 덮어쓰지 않고 실패 처리(스트림 ID 오설정 등 이상 신호)
+  //  - 처음부터 없으면(출시 버전 데이터가 아직 안 들어옴) 빈 문서를 써서 대시보드가 "아직 집계된 날짜가 없어요"를
+  //    보여주게 하고 성공 처리 - 예전엔 여기서 매번 실패해 출시 전까지 3시간마다 Actions 실패가 쌓였음
+  if (args.out) {
+    if (!args.mock && n === 0) throw new Error('GA4에서 받은 일별 데이터가 0건입니다. 스트림 ID/속성 접근 권한을 확인하세요.');
+    await writeFiles(docs, args.out);
+  } else {
+    const db = await openFirestore();
+    if (!args.mock && n === 0) {
+      const prev = await storedDays(db);
+      if (prev > 0) throw new Error(`GA4에서 받은 일별 데이터가 0건인데 기존 문서에는 ${prev}일치가 있어 덮어쓰지 않았습니다. 스트림 ID/속성 접근 권한을 확인하세요.`);
+      console.log('ℹ️ 출시 버전(prod 스트림) 데이터가 아직 없어 빈 문서로 기록합니다 - 대시보드에는 "아직 집계된 날짜가 없어요"가 표시됩니다.');
+    }
+    await writeFirestore(db, docs);
+  }
   const k = docs.summary.kpi;
   console.log(`✅ 동기화 완료(${args.mock ? '모의' : 'GA4'}) - ${n}일치, 최신 ${docs.summary.latest}, DAU ${k?.dau ?? '-'}, MAU ${k?.mau ?? '-'}, ${Date.now() - started}ms`);
   if (!args.mock) console.log(`   속성 ${propertyId} · 스트림 ${streamId}(출시 앱만 집계)`);

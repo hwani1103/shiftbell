@@ -129,7 +129,8 @@ flutter build appbundle --release --flavor prod --dart-define=ADMOB_BANNER_ID=<�
 - 알람 끄기/연장/무응답은 Native 경로에 Firebase를 넣지 않고 `alarm_history`에서 **앱을 열 때** 새로 쌓인 것만 보냄(`AlarmUsageAnalytics.reportNew`) → 대시보드에는 며칠 지연될 수 있음
 - ⚠️ 이벤트를 추가/개명하면 `AnalyticsEvent.all`과 `admin_dashboard/public/assets/js/labels.js` `EVENT_META`(+`mock.js`)를 같이 고칠 것 — `test/app_analytics_test.dart`가 두 목록 일치를 검사
 - 대시보드 읽기 규칙은 루트 `firestore.rules`의 `dashboard/{doc}`(관리자 이메일 + `email_verified`). **콘솔에서 규칙을 게시할 때 이 블록이 빠지지 않게** 할 것(규칙 파일이 프로젝트에 하나뿐이라 대시보드도 이 저장소에 둠)
-- Firebase 인증은 비밀번호 6자 이상(4자리 불가). 관리자 계정은 `sync/admin-user.mjs`(emailVerified:true)로만 만들고, 콘솔의 "사용자 가입 허용"은 끌 것
+- Firebase 인증은 비밀번호 6자 이상(4자리 불가). 관리자 계정은 `sync/admin-user.mjs`(emailVerified:true)로만 만듦. ⚠️ 콘솔 Authentication → 설정 → 사용자 작업의 **"생성 사용 설정(가입)"은 켜 둘 것** — 끄면 익명 가입도 막혀 친구 공유가 새 기기에서 깨짐(2026-09-23 발생·복구, 규칙이 email_verified로 대시보드를 지키므로 켜도 안전)
+- 동기화: GitHub Actions `dashboard-sync`(3시간마다) + Secret `GA4_SERVICE_ACCOUNT_JSON` = 전용 서비스 계정 `dashboard-sync@`(GA4 뷰어 + Cloud Datastore 사용자, 2026-09-23 등록). prod 데이터가 0건이면 빈 문서를 쓰고 성공(기존 데이터가 있으면 덮어쓰지 않고 실패)
 
 ### 수면·회복 탭 (구 컨디션 매니저, 2026-09-15 범위 축소)
 `lib/screens/condition_tab.dart` + `lib/services/condition/*` — 하단 탭 이름은 "수면·회복"(클래스·provider·저장 키 `condition_tab_enabled`는 호환 위해 그대로).
