@@ -75,9 +75,10 @@ class HolidaySyncService {
   }
 
   /// 웹 뷰어용 - 캐시 없이 페이지를 열 때 1번 읽음.
+  /// runApp 전에 기다리므로 3초 상한 - 느린 망에서 첫 화면이 이 값 때문에 늦어지지 않게(넘으면 하드코딩 목록).
   Future<void> loadForWeb() async {
     try {
-      final doc = await FirebaseFirestore.instance.doc(docPath).get();
+      final doc = await FirebaseFirestore.instance.doc(docPath).get().timeout(const Duration(seconds: 3));
       HolidayOverrides.current = HolidayOverrides.fromJson(doc.data());
     } catch (e) {
       debugPrint('⚠️ 웹 공휴일 원격 값 읽기 실패(하드코딩 목록 사용): $e');
