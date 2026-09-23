@@ -80,9 +80,13 @@ class CustomAlarmPresetBar extends ConsumerWidget {
     return LayoutBuilder(builder: (context, constraints) {
       final editW = 24.w;
       final gap = 3.w;
-      final chipW = ((constraints.maxWidth - editW - gap * kCustomAlarmPresetCount) / kCustomAlarmPresetCount)
-          .clamp(18.0, 64.0);
-      return Row(
+      final minChip = 34.w;
+      final fitted = (constraints.maxWidth - editW - gap * kCustomAlarmPresetCount) / kCustomAlarmPresetCount;
+      // 헤더에 다른 버튼이 있는 테마(언더라인·매거진)처럼 자리가 모자라면 칸을 최소 폭으로 두고 가로 스크롤
+      final scrolls = fitted < minChip;
+      final chipW = scrolls ? minChip : fitted.clamp(minChip, 64.0);
+      final row = Row(
+        mainAxisSize: scrolls ? MainAxisSize.min : MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           for (var i = 0; i < kCustomAlarmPresetCount; i++) ...[
@@ -102,6 +106,7 @@ class CustomAlarmPresetBar extends ConsumerWidget {
           ),
         ],
       );
+      return scrolls ? SingleChildScrollView(scrollDirection: Axis.horizontal, child: row) : row;
     });
   }
 

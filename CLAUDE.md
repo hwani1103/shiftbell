@@ -90,6 +90,11 @@ flutter build appbundle --release --flavor prod --dart-define=ADMOB_BANNER_ID=<�
   같은 주에서 메모 시작 줄이 날마다 틀어지지 않게. 다크 그리드의 오늘 표시는 셀 전체 노란 배경 → 날짜 숫자만 네이비 사각 배지
 - 날짜별 **메모**, **OT/특근**, 근로시간·급여 산정(`work_hours_calculator.dart`)
 - 공휴일 표시 (`holiday_util.dart` + `CalendarWidgetHolidays.kt` — **둘 다 같이 갱신**, 영어 로케일에서는 공휴일 표시 안 함)
+  - **1.0.24~ 원격 갱신**: Firestore `app_config/holidays_kr`(`version`, `add` map, `remove` array)를 하드코딩 목록 위에 덮어씀(`HolidayOverrides`, `holiday_sync_service.dart`).
+    업데이트 확인이 이미 읽는 `app_config/android.holidaysVersion`이 캐시보다 클 때만 1회 읽음 → 앱·친구 달력·웹 뷰어·위젯(채널 `setHolidayOverrides`) 반영. 운영 절차는 `업데이트_가이드.md` 2절
+- **커스텀 알람 프리셋(1.0.24)**: 달력 헤더 제목 오른쪽 5칸(`custom_alarm_widgets.dart`, 설정값 `custom_alarm_presets`). 칸 탭 → 할당 모드(날짜 탭) / 길게 눌러 날짜로 드래그.
+  `CustomAlarmService.assign`이 트랜잭션 안에서 검증(지난 시각·같은 분·하루 5개=고정+커스텀 합산) 후 `alarms.type='custom'`(shift_type NULL, 생성원장 `custom_preset`) → 커밋 뒤 `scheduleNativeAlarm`. 실패 시 행 되돌림.
+  갱신 엔진은 custom을 건드리지 않고 재부팅 때 재등록(#26). 네이티브 화면은 shift_type NULL을 "알람"으로 표시(의도)
 
 ### 홈 화면 위젯
 - `CalendarWidgetProvider.kt` — 달력 + 근무색 + 메모. 라이트 고정 렌더링
@@ -148,7 +153,9 @@ flutter build appbundle --release --flavor prod --dart-define=ADMOB_BANNER_ID=<�
   (파생 데이터 테이블만 제외 목록에 추가할 것)
 - **자동 백업** `backup_watcher.dart`: 시작·재개·배경 전환 때 내용 지문이 다를 때만, single flight, isolate 인코딩,
   네이티브 백그라운드 I/O, MediaStore `IS_PENDING`으로 완성 후 공개(#18). 복원 중/중단 작업이 있으면 안 씀
-- **저장소**: MediaStore `Download/ShiftBell/ShiftBell_Backup[_dev]_YYMMDD_HHmm.json`(2026-09-17 시각 추가 — 아래 “설계 기록 › 백업” 참고) — **최신 + 직전 정상본 1개**만 남김(X-07).
+- **저장소**: MediaStore `Download/ShiftBell/ShiftBell_Backup[_dev]_{manual|auto}_yyMMdd_HHmmss.json` — **1.0.24~ 두 슬롯: 직접 백업 1개 + 자동 백업 1개**,
+  새로 쓰면 같은 종류만 교체(`BackupFileNaming.kt`, 공개 전 다시 읽어 확인). 1.0.23의 "최신 + 직전 정상본(X-07)" 규칙과 옛 형식 파일은 첫 새 자동 백업 때 정리.
+  (예전: `ShiftBell_Backup[_dev]_YYMMDD_HHmm.json`, 최신 + 직전 1개)
   자동 탐지는 최신순 후보를 디코딩·근무표 존재·스키마 검증까지 통과한 첫 파일로 고름. Android 10 미만 미지원. 평문(D9 — 안내로 대응)
 - **복원** `restore_coordinator.dart`: 검증(`backup_validator.dart`) → DP 작업 사본 → 네이티브 잠금(`RestoreGate.kt`) →
   옛 OS 예약 취소(`RestoreOs.kt`) → DB 교체(원본 테이블 교체·백업에 없는 원본 테이블은 비움, **이력은 자연키 병합**,
@@ -514,6 +521,10 @@ logcat `DatabaseHelper`/`DbMigrationRunner`의 `❌` 또는 `디스크 DB(vN)가
 ---
 
 ## 알려진 상태 / 문서 위치
+
+- **1.0.24 작업(dev, 2026-09-23~)**: 계획·결정 `docs/next_version/1.0.24_구현계획.md`. 문제 신고용 진단 파일(`DiagLog.kt`/`DiagReport.kt`, 해석 `docs/진단로그_해석_매뉴얼.md` —
+  새 진단 이벤트를 추가하면 매뉴얼 표도 같이). 웹 뷰어 호스팅 캐시: 정적 파일 하루, 진입 파일 no-cache(Firebase Hosting은 조건부 요청에 304를 안 줌 — 확인함).
+  출시 때: 버전 1.0.24+26, 외부 개인정보처리방침 페이지(hwani1103.github.io/shiftbell-privacy)에 앱 내 방침의 "진단 파일" 문단 반영, 필요 시 `app_config/holidays_kr` 생성.
 
 - **1.0.23 출시 인수인계: `docs/release_audit/handoff_release_2026_09_21.md`** — 커밋·AdMob 실제 ID 주입·aab 빌드·Play 업로드·main 병합/태그·
   Firebase `latestVersionCode=25` 순서와 사용자/Claude 역할 구분. 새 세션은 이 문서부터 읽을 것.
