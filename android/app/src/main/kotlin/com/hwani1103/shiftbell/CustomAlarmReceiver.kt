@@ -105,7 +105,16 @@ override fun onReceive(context: Context, intent: Intent) {
     } else {
         null
     }
-    when (AlarmWakeScheduler.decideOnReceive(context, id, expectedAt)) {
+    val decision = AlarmWakeScheduler.decideOnReceive(context, id, expectedAt)
+    val screenOn = try {
+        (context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager).isInteractive
+    } catch (e: Exception) { null }
+    DiagLog.log(context, if (decision == AlarmWakeScheduler.ReceiveDecision.RING) "ALARM_FIRED" else "ALARM_STALE_IGNORED",
+        "id" to id,
+        "delayMs" to (expectedAt?.let { System.currentTimeMillis() - it }),
+        "decision" to decision.name,
+        "screenOn" to screenOn)
+    when (decision) {
         AlarmWakeScheduler.ReceiveDecision.SKIP_NO_ROW -> {
             Log.e("CustomAlarmReceiver", "⚠️ DB에 없는 알람(id=$id) - 재생 건너뜀 (이미 취소/수정됨)")
             return

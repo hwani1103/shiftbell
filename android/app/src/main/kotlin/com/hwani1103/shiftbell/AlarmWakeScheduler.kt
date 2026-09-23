@@ -166,6 +166,7 @@ object AlarmWakeScheduler {
         if (!found.exists) {
             Log.d(TAG, "⏭️ 예약 버림(행 없음): id=$id")
             clearFailure(context, id)
+            DiagLog.log(context, "SCHEDULE_SKIP", "id" to id, "why" to "no_row")
             return Outcome.SKIPPED_STALE
         }
         val row = found.row
@@ -180,10 +181,13 @@ object AlarmWakeScheduler {
         return try {
             scheduleFn(context, id, timestamp, label)
             clearFailure(context, id)
+            DiagLog.log(context, "SCHEDULE_OK", "id" to id, "at" to DiagLog.format(normalize(timestamp), "", emptyList()).substringBefore(" |"))
             Outcome.SCHEDULED
         } catch (e: Exception) {
             Log.e(TAG, "❌ 기상 알람 OS 예약 실패(재시도 목록에 기록): id=$id", e)
             recordFailure(context, id)
+            DiagLog.log(context, "SCHEDULE_FAIL", "id" to id,
+                "reason" to (if (e is SecurityException) "exact_alarm_permission" else e.javaClass.simpleName))
             Outcome.FAILED
         }
     }
@@ -198,10 +202,13 @@ object AlarmWakeScheduler {
     ): Outcome = try {
         scheduleFn(context, id, timestamp, label)
         recordFailure(context, id)
+        DiagLog.log(context, "SCHEDULE_OK", "id" to id, "verified" to false)
         Outcome.SCHEDULED
     } catch (e: Exception) {
         Log.e(TAG, "❌ 미확인 기상 알람 OS 예약 실패: id=$id", e)
         recordFailure(context, id)
+        DiagLog.log(context, "SCHEDULE_FAIL", "id" to id, "verified" to false,
+            "reason" to (if (e is SecurityException) "exact_alarm_permission" else e.javaClass.simpleName))
         Outcome.FAILED
     }
 
@@ -240,6 +247,7 @@ object AlarmWakeScheduler {
             return Outcome.FAILED
         }
         clearFailure(context, id)
+        DiagLog.log(context, "CANCEL", "id" to id)
         return Outcome.CANCELLED
     }
 

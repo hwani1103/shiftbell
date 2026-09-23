@@ -118,9 +118,11 @@ object AlarmRefreshEngine {
         }
         return try {
             doRefresh(context)
+            DiagLog.log(context, "REFRESH_DONE")
             true
         } catch (e: Exception) {
             Log.e(TAG, "❌ 갱신 실패", e)
+            DiagLog.log(context, "REFRESH_FAIL", "error" to e.javaClass.simpleName, "msg" to e.message)
             false
         } finally {
             RefreshLockManager.release(context, owner)

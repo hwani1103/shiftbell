@@ -3,6 +3,7 @@
 // 친구 공유의 로컬 의도와 Firestore 제출을 한 곳에서 직렬화한다. Firestore의
 // offline write Future는 서버 ACK까지 오래 끝나지 않을 수 있으므로 제한 시간 뒤에도
 // dirty를 유지하고 다음 작업(특히 공유 중지)을 제출한다. 제한 시간은 제출 취소가 아니다.
+import 'diag_log.dart';
 import 'dart:async';
 import 'dart:convert';
 
@@ -284,6 +285,7 @@ class FriendSyncService {
       return FriendSyncOutcome.pending;
     } catch (error) {
       print('⚠️ 친구공유 $label 제출 실패: $error');
+      DiagLog.log('SHARE_SYNC_FAIL', {'op': label, 'error': error.runtimeType.toString()});
       return FriendSyncOutcome.rejected;
     }
   }

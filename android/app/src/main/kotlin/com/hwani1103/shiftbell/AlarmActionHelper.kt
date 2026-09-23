@@ -80,7 +80,7 @@ object AlarmActionHelper {
                         val dayOffsetIdx = cursor.getColumnIndex("day_offset")
                         val dayOffset = if (dayOffsetIdx >= 0) cursor.getInt(dayOffsetIdx) else 0
                         if (time != null && date != null) {
-                            insertHistory(db, alarmId, date, time, shiftType, dayOffset, dismissType)
+                            insertHistory(context, db, alarmId, date, time, shiftType, dayOffset, dismissType)
                         }
                     } else {
                         Log.d(TAG, "⚠️ dismiss: DB에 알람 없음 (이미 삭제됨) id=$alarmId")
@@ -184,7 +184,7 @@ object AlarmActionHelper {
                 }
 
                 if (originalTime.isNotEmpty() && originalDate.isNotEmpty()) {
-                    insertHistory(db, alarmId, originalDate, originalTime, shiftType, dayOffset, "snoozed")
+                    insertHistory(context, db, alarmId, originalDate, originalTime, shiftType, dayOffset, "snoozed")
                 }
                 // ⭐ 스누즈도 "새로 예약된 인스턴스"이므로 생성 이력 원장에 남김
                 insertCreationLog(db, alarmId, dateStr, timeStr, shiftType, alarmTypeId, dayOffset, "snoozed")
@@ -351,7 +351,7 @@ object AlarmActionHelper {
         notifyFlutter(context)
     }
 
-    private fun insertHistory(db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {
+    private fun insertHistory(context: Context, db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {
         val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
@@ -365,6 +365,7 @@ object AlarmActionHelper {
             put("day_offset", dayOffset)
         }
         db.insert("alarm_history", null, values)
+        DiagLog.log(context, "ALARM_END", "id" to alarmId, "type" to dismissType)
     }
 
     private fun insertCreationLog(db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, alarmTypeId: Int, dayOffset: Int, source: String) {

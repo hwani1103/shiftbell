@@ -1,3 +1,4 @@
+import '../services/diag_log.dart';
 import '../providers/data_revision_provider.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -946,6 +947,24 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                   );
                 },
                 
+              ),
+
+              // ⭐ 2026-09-23 (1.0.24 C) - 문제 신고용 진단 파일(권한·백그라운드 제한 상태 + 알람·백업 기록, 개인 내용 제외)
+              ListTile(
+                tileColor: Colors.white,
+                leading: Icon(Icons.bug_report_outlined,
+                    color: Theme.of(context).colorScheme.secondary),
+                title: Text(context.l10n.settingsDiagTitle),
+                subtitle: Text(context.l10n.settingsDiagDesc),
+                trailing: Icon(Icons.chevron_right),
+                onTap: () async {
+                  final ok = await DiagLog.exportAndShare(
+                      chooserTitle: context.l10n.settingsDiagChooser);
+                  if (!ok && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(context.l10n.settingsDiagFailed)));
+                  }
+                },
               ),
 
               // 개인정보처리방침

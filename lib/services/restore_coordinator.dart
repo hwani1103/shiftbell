@@ -44,6 +44,7 @@ import '../constants/platform_channel.dart';
 import '../models/backup_payload.dart';
 import 'backup_policy.dart';
 import 'backup_validator.dart';
+import 'diag_log.dart';
 import 'database_service.dart';
 import 'friend_sync_service.dart';
 import 'widget_refresh_service.dart';
@@ -279,9 +280,15 @@ class RestoreCoordinator {
 
   Future<void> _advance(RestoreJob job, RestorePhase target, Future<void> Function() step) async {
     if (job.phase.index >= target.index) return;
-    await step();
+    try {
+      await step();
+    } catch (e) {
+      DiagLog.log('RESTORE_STEP', {'step': target.name, 'result': 'fail', 'error': e.runtimeType.toString()});
+      rethrow;
+    }
     job.phase = target;
     await _saveJob(job);
+    DiagLog.log('RESTORE_STEP', {'step': target.name, 'result': 'ok'});
   }
 
   Future<_Carry> _prepareCarry(String token) async {

@@ -24,6 +24,7 @@ import 'backup_policy.dart';
 import 'backup_service.dart';
 import 'backup_storage_service.dart';
 import 'database_service.dart';
+import 'diag_log.dart';
 import 'restore_coordinator.dart';
 
 /// isolate에서 실행 - 파일 내용(JSON)과 내용 지문을 함께 계산.
@@ -110,6 +111,7 @@ class BackupWatcher {
     try {
       if (await _restoreInProgress()) {
         debugPrint('🗄️ [backup] 스킵 - 백업 복원 진행 중/중단된 복원 작업 있음');
+        DiagLog.log('BACKUP_SKIP', {'kind': kind.channelArg, 'reason': 'restore_in_progress'});
         return !manual;
       }
 
@@ -119,6 +121,7 @@ class BackupWatcher {
         final scheduleRows = await db.query('shift_schedule', limit: 1);
         if (scheduleRows.isEmpty) {
           debugPrint('🗄️ [backup] 스킵 - shift_schedule 비어있음');
+          DiagLog.log('BACKUP_SKIP', {'kind': kind.channelArg, 'reason': 'empty_schedule'});
           return true;
         }
       }
@@ -132,6 +135,7 @@ class BackupWatcher {
           prefs.getBool(kSlotFormatKey) == true &&
           prefs.getString(_kLastContentHashKey) == fingerprint) {
         debugPrint('🗄️ [backup] 스킵 - 내용 변경 없음');
+        DiagLog.log('BACKUP_SKIP', {'kind': kind.channelArg, 'reason': 'same_content'});
         return true;
       }
 
@@ -155,6 +159,7 @@ class BackupWatcher {
     } catch (e, st) {
       // 백업(특히 자동 트리거) 실패가 앱 사용을 방해하면 안 됨 - 로그만 남김
       debugPrint('🗄️ [backup] ❌ 예외로 실패: $e\n$st');
+      DiagLog.log('BACKUP_EXCEPTION', {'kind': kind.channelArg, 'error': e.runtimeType.toString()});
       return false;
     }
   }

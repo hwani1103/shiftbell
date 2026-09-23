@@ -16,6 +16,7 @@ class DirectBootReceiver : BroadcastReceiver() {
     
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
+        DiagLog.log(context, "SYSTEM_EVENT", "action" to action?.substringAfterLast('.'))
         // ⭐ 2026-09-14 (출시전 감사 V6, G1) - 예전엔 LOCKED_BOOT_COMPLETED만 처리했음:
         //  - BOOT_COMPLETED: LOCKED_BOOT가 안 오는 기기/경로(파일 기반 암호화 없음 등)에서 재부팅 후 재예약이 빠질 수 있음
         //  - MY_PACKAGE_REPLACED: 업데이트 직후 앱을 열기 전까지 새 정책(#26 등)으로 갱신·재예약이 안 됨

@@ -618,6 +618,29 @@ override fun onNewIntent(intent: Intent) {
                         }.start()
                     }
                 }
+                // ⭐ 2026-09-23 (1.0.24 C) - 진단 기록(Dart 쪽 이벤트)과 "문제 신고용 진단 파일" 내보내기+공유
+                "diagLog" -> {
+                    val event = call.argument<String>("event") ?: "DART"
+                    val fields = (call.argument<Map<String, Any?>>("fields") ?: emptyMap()).entries.map { it.key to it.value }
+                    DiagLog.log(applicationContext, event, *fields.toTypedArray())
+                    result.success(null)
+                }
+                "exportDiagnostics" -> {
+                    val title = call.argument<String>("chooserTitle") ?: "ShiftBell"
+                    Thread {
+                        val uri = DiagReport.export(applicationContext)
+                        runOnUiThread {
+                            if (uri != null) {
+                                try {
+                                    DiagReport.share(this, uri, title)
+                                } catch (e: Exception) {
+                                    Log.w("MainActivity", "공유 시트 열기 실패(파일은 저장됨)", e)
+                                }
+                            }
+                            result.success(uri?.toString())
+                        }
+                    }.start()
+                }
                 "readBackupFile" -> {
                     // ⭐ 2026-09-14 (교차 검토 X-07) - skip = 형식은 맞았지만 Dart 검증에서 걸러진 최신 후보 수(다음 후보를 요청)
                     val skip = call.argument<Int>("skip") ?: 0
@@ -885,6 +908,7 @@ override fun onNewIntent(intent: Intent) {
             val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
             if (uri == null) {
                 Log.w("MainActivity", "❌ 백업 저장 실패 - insert()가 null 반환(name=$displayName)")
+                DiagLog.log(applicationContext, "BACKUP_WRITE_FAIL", "kind" to kind.token, "reason" to "insert_null")
                 return false
             }
             val completed = try {
@@ -915,6 +939,7 @@ override fun onNewIntent(intent: Intent) {
                 } catch (e: Exception) {
                     Log.e("MainActivity", "⚠️ 미완성 백업 파일 삭제 실패", e)
                 }
+                DiagLog.log(applicationContext, "BACKUP_WRITE_FAIL", "kind" to kind.token, "reason" to "write_or_verify")
                 return false
             }
 
@@ -923,9 +948,11 @@ override fun onNewIntent(intent: Intent) {
             cleanupOldBackupFiles(resolver, kind, uri, previousUriStr)
 
             Log.d("MainActivity", "✅ 백업 파일 저장 완료(${kind.token}): $uri ($displayName)")
+            DiagLog.log(applicationContext, "BACKUP_WRITE_OK", "kind" to kind.token, "bytes" to bytes.size)
             true
         } catch (e: Exception) {
             Log.e("MainActivity", "❌ 백업 파일 저장 실패", e)
+            DiagLog.log(applicationContext, "BACKUP_WRITE_FAIL", "kind" to kind.token, "reason" to e.javaClass.simpleName)
             false
         }
     }

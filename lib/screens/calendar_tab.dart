@@ -42,6 +42,7 @@ import '../providers/custom_alarm_preset_provider.dart';
 import '../services/custom_alarm_service.dart';
 import '../services/app_analytics.dart';
 import '../widgets/custom_alarm_widgets.dart';
+import '../services/diag_log.dart';
 
 // ⭐ 공휴일 판정 로직은 utils/holiday_util.dart로 이동함 (friend_calendar_view.dart도
 // 똑같은 공휴일 표시가 필요해져서 공용화 - 두 파일 이름만 다르게 감싸서 기존 호출부
@@ -3262,6 +3263,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
         CustomAlarmAssignResult.emptyPreset => 'empty_preset',
       },
     });
+    DiagLog.log('CUSTOM_ALARM_ASSIGN', {'result': outcome.result.name, 'id': outcome.alarmId});
     if (outcome.result == CustomAlarmAssignResult.scheduled) {
       await ref.read(alarmNotifierProvider.notifier).refresh();
     }
