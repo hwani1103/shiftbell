@@ -352,7 +352,8 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
           SizedBox(width: 12.w),
 
           // 근무 타입
-          if (alarm.shiftType != null)
+          // ⭐ 2026-09-23 (1.0.24 B) - 커스텀 알람은 근무명이 없으므로 "커스텀 알람"으로 표시
+          if (alarm.shiftType != null || alarm.type == 'custom')
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
               decoration: BoxDecoration(
@@ -360,7 +361,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Text(
-                alarm.shiftType!,
+                alarm.shiftType ?? context.l10n.customAlarmLabel,
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
@@ -643,11 +644,11 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
             SizedBox(height: 16.h),
 
-            if (alarm.shiftType != null)
+            if (alarm.shiftType != null || alarm.type == 'custom')
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
-                child: Text(alarm.shiftType!, style: TextStyle(fontSize: 14.sp, color: kAppChipBorder, fontWeight: FontWeight.w600)),
+                child: Text(alarm.shiftType ?? context.l10n.customAlarmLabel, style: TextStyle(fontSize: 14.sp, color: kAppChipBorder, fontWeight: FontWeight.w600)),
               ),
 
             SizedBox(height: 28.h),

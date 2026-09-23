@@ -37,6 +37,11 @@ import 'friend_list_screen.dart';
 import '../utils/friend_open_util.dart';
 import '../utils/blocking_progress.dart';
 import '../utils/lunar_calendar_util.dart';
+import '../models/custom_alarm_preset.dart';
+import '../providers/custom_alarm_preset_provider.dart';
+import '../services/custom_alarm_service.dart';
+import '../services/app_analytics.dart';
+import '../widgets/custom_alarm_widgets.dart';
 
 // ⭐ 공휴일 판정 로직은 utils/holiday_util.dart로 이동함 (friend_calendar_view.dart도
 // 똑같은 공휴일 표시가 필요해져서 공용화 - 두 파일 이름만 다르게 감싸서 기존 호출부
@@ -160,6 +165,12 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
 
   bool _isMultiSelectMode = false;
   Set<DateTime> _selectedDates = {};
+
+  // ⭐ 2026-09-23 (1.0.24 B) - 커스텀 알람 할당 모드. 헤더 5칸 중 하나를 누르면 그 칸 번호가 들어가고,
+  // 이 동안 날짜 탭 = 그 날짜에 알람 추가(상세 팝업·길게 눌러 다중 선택은 잠시 끔). null이면 평소 동작.
+  int? _assignPresetIndex;
+  // 커스텀 알람이 있는 날짜('yyyy-MM-dd') - 달력 칸 🔔 표시용. build()에서 alarmNotifierProvider로 갱신.
+  Set<String> _customAlarmDayKeys = const {};
 
   // _loadSchedule() 메서드 삭제 (Provider가 자동으로 관리)
 
@@ -468,6 +479,11 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
         }
 
         final theme = ref.watch(calendarThemeProvider);
+        // ⭐ 2026-09-23 (1.0.24 B) - 커스텀 알람이 있는 날짜(🔔 표시). 내용이 같으면 provider가 상태를 안 바꿔 불필요한 리빌드 없음.
+        _customAlarmDayKeys = {
+          for (final a in ref.watch(alarmNotifierProvider).valueOrNull ?? const [])
+            if (a.type == 'custom' && a.date != null) _dayKey(a.date!)
+        };
         final reclaimsSixthRow = _themeReclaimsSixthRow(theme);
         // ⭐ 2026-09-05 - 6번째 줄 마지막 3칸(목/금/토)에 일정공유/전체 조 근무표/
         // 오늘 버튼(다이어리 + 범례 없는 나머지 5개 테마, _themeReclaimsSixthRowButtons
@@ -558,6 +574,30 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                                               ],
                                             )
                                           : _buildThemedHeaderTitle(theme),
+                                      // ⭐ 2026-09-23 (1.0.24 B) - 제목 오른쪽 빈 공간에 커스텀 알람 5칸
+                                      if (!_isMultiSelectMode)
+                                        Expanded(
+                                          child: Padding(
+                                            padding:
+                                                EdgeInsets.only(left: 8.w),
+                                            child: CustomAlarmPresetBar(
+                                              selectedIndex: _assignPresetIndex,
+                                              onDarkHeader: theme ==
+                                                      CalendarThemeId
+                                                          .boldGrid ||
+                                                  theme ==
+                                                      CalendarThemeId.mainDark,
+                                              onSelect: (i) => setState(() =>
+                                                  _assignPresetIndex =
+                                                      _assignPresetIndex == i
+                                                          ? null
+                                                          : i),
+                                              onEdit: () =>
+                                                  showCustomAlarmPresetEditor(
+                                                      context, ref),
+                                            ),
+                                          ),
+                                        ),
                                       if (!_isMultiSelectMode)
                                         _buildThemedHeaderButtons(
                                             theme, schedule),
@@ -806,6 +846,11 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                                             _focusedDay = focusedDay;
                                           });
 
+                                          if (_assignPresetIndex != null &&
+                                              !_isMultiSelectMode) {
+                                            _assignCustomAlarm(selectedDay);
+                                            return;
+                                          }
                                           if (_isMultiSelectMode) {
                                             _toggleDateSelection(selectedDay);
                                           } else {
@@ -836,6 +881,10 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                                             return;
                                           }
 
+                                          // 커스텀 알람 할당 중에는 다중 선택으로 넘어가지 않음
+                                          if (_assignPresetIndex != null) {
+                                            return;
+                                          }
                                           if (!_isMultiSelectMode) {
                                             _enterMultiSelectMode(selectedDay);
                                           }
@@ -851,6 +900,15 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                                       ),
                                     ),
 
+                                    // ⭐ 2026-09-23 (1.0.24 B) - 할당 모드 안내줄. 요일 줄(28.h)을 잠시 덮음(요일 줄은 누를 곳이 없어 안전).
+                                    if (_assignPresetIndex != null)
+                                      Positioned(
+                                        top: 0,
+                                        left: 6.w,
+                                        right: 6.w,
+                                        height: 28.h,
+                                        child: _buildAssignModeBanner(),
+                                      ),
                                     // ⭐ 6번째 줄 화~토 (원래 빈 공간이었던 곳) - 이 자리를 재활용하는
                                     // 테마(메인·화이트/다크 = OT/주별근무시간 카드, 8/10번 = 범례)만
                                     // 그려줌. 나머지 7개 테마는 6번째 줄도 그냥 평범한 다음 달
@@ -3109,6 +3167,125 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
   Widget _buildThemedCell(DateTime day, bool isToday, bool isOutside,
       ShiftSchedule schedule, DateTime focusedDay,
       {bool isSelected = false}) {
+    return _decorateCustomAlarmCell(
+        day,
+        isOutside,
+        _buildThemedCellCore(day, isToday, isOutside, schedule, focusedDay,
+            isSelected: isSelected));
+  }
+
+  // ⭐ 2026-09-23 (1.0.24 B) - 모든 테마 셀 공통 장식: 커스텀 알람이 있는 날 🔔 작은 표시 + 헤더 칸을 끌어다
+  // 놓을 수 있는 자리(이번 달 날짜만). 셀 디자인 자체는 건드리지 않고 겉에서만 감쌈.
+  Widget _decorateCustomAlarmCell(DateTime day, bool isOutside, Widget cell) {
+    final key = _dayKey(day);
+    final withMark = _customAlarmDayKeys.contains(key)
+        ? Stack(fit: StackFit.passthrough, children: [
+            cell,
+            Positioned(
+              top: 1.h,
+              right: 2.w,
+              child: IgnorePointer(
+                child: Icon(Icons.alarm,
+                    size: 9.sp,
+                    color: Theme.of(context).colorScheme.primary),
+              ),
+            ),
+          ])
+        : cell;
+    if (isOutside) return withMark;
+    return DragTarget<int>(
+      onWillAcceptWithDetails: (_) => !_isMultiSelectMode,
+      onAcceptWithDetails: (details) =>
+          _assignCustomAlarm(day, presetIndex: details.data),
+      builder: (context, candidates, _) => candidates.isEmpty
+          ? withMark
+          : DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Theme.of(context).colorScheme.primary,
+                      width: 2)),
+              child: withMark,
+            ),
+    );
+  }
+
+  static String _dayKey(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+
+  Widget _buildAssignModeBanner() {
+    final presets = ref.watch(customAlarmPresetsProvider);
+    final idx = _assignPresetIndex!;
+    final time = idx < presets.length ? (presets[idx].time ?? '') : '';
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w),
+      decoration: BoxDecoration(
+        color: scheme.primary,
+        borderRadius: BorderRadius.circular(6.r),
+      ),
+      child: Row(children: [
+        Icon(Icons.touch_app, size: 14.sp, color: scheme.onPrimary),
+        SizedBox(width: 6.w),
+        Expanded(
+          child: Text(context.l10n.customAlarmAssignHint(time),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12.sp, color: scheme.onPrimary, fontWeight: FontWeight.w600)),
+        ),
+        GestureDetector(
+          onTap: () => setState(() => _assignPresetIndex = null),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+            child: Text(context.l10n.commonDone,
+                style: TextStyle(fontSize: 12.sp, color: scheme.onPrimary, fontWeight: FontWeight.bold)),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  /// 커스텀 알람 할당(탭 할당 모드 또는 드래그). 결과는 스낵바로 안내, 성공이면 [되돌리기] 제공.
+  Future<void> _assignCustomAlarm(DateTime day, {int? presetIndex}) async {
+    final idx = presetIndex ?? _assignPresetIndex;
+    if (idx == null) return;
+    final presets = ref.read(customAlarmPresetsProvider);
+    if (idx >= presets.length) return;
+    final outcome = await CustomAlarmService.instance.assign(day, presets[idx]);
+    AppAnalytics.track(AnalyticsEvent.customAlarmAssigned, params: {
+      'result': switch (outcome.result) {
+        CustomAlarmAssignResult.scheduled => 'scheduled',
+        CustomAlarmAssignResult.past => 'past',
+        CustomAlarmAssignResult.duplicate => 'duplicate',
+        CustomAlarmAssignResult.dailyLimit => 'daily_limit',
+        CustomAlarmAssignResult.scheduleFailed => 'schedule_failed',
+        CustomAlarmAssignResult.emptyPreset => 'empty_preset',
+      },
+    });
+    if (outcome.result == CustomAlarmAssignResult.scheduled) {
+      await ref.read(alarmNotifierProvider.notifier).refresh();
+    }
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    final id = outcome.alarmId;
+    messenger.showSnackBar(SnackBar(
+      content: Text(customAlarmOutcomeMessage(context, outcome)),
+      duration: const Duration(seconds: 5),
+      action: outcome.result == CustomAlarmAssignResult.scheduled && id != null
+          ? SnackBarAction(
+              label: context.l10n.customAlarmUndo,
+              onPressed: () => ref
+                  .read(alarmNotifierProvider.notifier)
+                  .deleteAlarm(id, outcome.ringAt),
+            )
+          : null,
+    ));
+  }
+
+  Widget _buildThemedCellCore(DateTime day, bool isToday, bool isOutside,
+      ShiftSchedule schedule, DateTime focusedDay,
+      {bool isSelected = false}) {
     final theme = ref.watch(calendarThemeProvider);
     if (theme == CalendarThemeId.mainWhite ||
         theme == CalendarThemeId.mainDark) {
@@ -4952,6 +5129,9 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
                         },
                       ),
 
+                      // ⭐ 2026-09-23 (1.0.24 B) - 이 날짜의 커스텀 알람(있을 때만 표시, 삭제 가능)
+                      CustomAlarmDayList(day: day),
+
                       SizedBox(height: 20.h),
 
                       // ⭐ 메모 입력창 (라벨과 같은 라인)
@@ -5503,6 +5683,7 @@ class _CalendarTabState extends ConsumerState<CalendarTab> {
 
   void _enterMultiSelectMode(DateTime firstDate) {
     setState(() {
+      _assignPresetIndex = null;
       _isMultiSelectMode = true;
       _selectedDates.clear();
       _selectedDates.add(firstDate);

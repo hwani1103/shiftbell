@@ -58,10 +58,12 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
     with WidgetsBindingObserver {
   // ⭐ 사용자 데이터 백업("A번 요구사항") - 설정 탭 진입점(Layer 4). 저장/복구
   // 로직 자체는 BackupWatcher(자동 트리거와 동일 코드 경로 - "지금 백업"도 그냥
-  // force:true로 그 함수를 부르는 것뿐)에 있고, 여기선 버튼 상태/마지막 백업
+  // manual:true로 "직접 백업" 슬롯에 쓰는 것뿐)에 있고, 여기선 버튼 상태/마지막 백업
   // 시각 표시만 관리함.
   bool _isBackingUp = false;
-  DateTime? _lastBackupAt;
+  // ⭐ 2026-09-23 (1.0.24 A) - 직접/자동 두 슬롯의 마지막 저장 시각
+  DateTime? _lastManualBackupAt;
+  DateTime? _lastAutoBackupAt;
   bool _isRestoringFromBackup = false;
 
   // ⭐ 2026-09-22 - UMP 동의(EEA/영국/스위스)를 받은 사용자에게만 "광고 개인정보
@@ -101,14 +103,19 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
   }
 
   Future<void> _loadLastBackupAt() async {
-    final at = await BackupWatcher.instance.lastSavedAt();
-    if (mounted) setState(() => _lastBackupAt = at);
+    final at = await BackupWatcher.instance.lastSavedAtBySlot();
+    if (mounted) {
+      setState(() {
+        _lastManualBackupAt = at.manual;
+        _lastAutoBackupAt = at.auto;
+      });
+    }
   }
 
   Future<void> _backupNow() async {
     if (_isBackingUp) return;
     setState(() => _isBackingUp = true);
-    final success = await BackupWatcher.instance.backupNow(force: true);
+    final success = await BackupWatcher.instance.backupNow(manual: true);
     if (!mounted) return;
     setState(() => _isBackingUp = false);
     if (success) {
@@ -783,10 +790,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
               SizedBox(height: 24.h),
               Divider(),
 
-              // ⭐ 사용자 데이터 백업("A번 요구사항") - 지금 기기(MediaStore)에
-              // 백업 하나를 저장. 자동 백업(BackupWatcher, main.dart 참고)도 같은
-              // 코드 경로를 쓰므로 여기 표시되는 "마지막 백업"은 수동/자동 구분
-              // 없이 항상 최신임.
+              // ⭐ 사용자 데이터 백업("A번 요구사항") - 누르면 "직접 백업" 슬롯에 저장.
+              // ⭐ 2026-09-23 (1.0.24 A) - 자동 백업(BackupWatcher)은 별도의 "자동 백업" 슬롯에
+              // 쓰므로 서로 덮어쓰지 않음. 아래 설명줄에 두 슬롯의 마지막 저장 시각을 따로 보여줌.
               ListTile(
                 tileColor: Colors.white,
                 leading: Icon(Icons.backup_outlined,
@@ -795,10 +801,15 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                 subtitle: Text(
                   _isBackingUp
                       ? context.l10n.settingsDataBackupInProgress
-                      : (_lastBackupAt != null
-                          ? context.l10n.settingsDataBackupLastSavedAt(
-                              _formatBackupDate(_lastBackupAt!))
-                          : context.l10n.settingsDataBackupNeverSaved),
+                      : (_lastManualBackupAt == null && _lastAutoBackupAt == null
+                          ? context.l10n.settingsDataBackupNeverSaved
+                          : context.l10n.settingsDataBackupSlots(
+                              _lastManualBackupAt != null
+                                  ? _formatBackupDate(_lastManualBackupAt!)
+                                  : context.l10n.settingsDataBackupSlotNone,
+                              _lastAutoBackupAt != null
+                                  ? _formatBackupDate(_lastAutoBackupAt!)
+                                  : context.l10n.settingsDataBackupSlotNone)),
                 ),
                 trailing: _isBackingUp
                     ? SizedBox(

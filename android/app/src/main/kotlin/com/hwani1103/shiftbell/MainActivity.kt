@@ -95,10 +95,9 @@ class MainActivity: FlutterActivity() {
     // "… (1).json", "(2).json"으로 이름을 바꿔 버렸음(실기기에 12개가 쌓인 것을 확인). 분 단위까지 넣으면
     // 이름 충돌 자체가 거의 안 생기고, 사용자가 파일 선택기에서 직접 고를 때 어느 게 최신인지 바로 보임.
     // (시각 없는 옛 파일명 "…_YYMMDD.json"도 접두어는 그대로라 탐지·정리 대상에서 빠지지 않음)
-    private fun buildBackupDisplayName(): String {
-        val fmt = java.text.SimpleDateFormat("yyMMdd_HHmm", java.util.Locale.US)
-        return "$BACKUP_DISPLAY_NAME_PREFIX${fmt.format(java.util.Date())}.json"
-    }
+    // ⭐ 2026-09-23 (1.0.24 A) - 직접/자동 두 슬롯 + 초 단위. 규칙은 BackupFileNaming.kt(단위 테스트로 고정).
+    private fun buildBackupDisplayName(kind: BackupFileNaming.Kind): String =
+        BackupFileNaming.displayName(BACKUP_DISPLAY_NAME_PREFIX, kind)
 
     // ⭐⭐ 2026-09-17 정정(실기기 R5KL20DHWAE에서 adb로 직접 확인) - 아래 주석들이 "owner_package_name이 NULL로
     // 남는 삼성 OEM 버그"로 추정해 둔 부분은 **틀렸다**. 실제 원인은 안드로이드의 정상 동작임:
@@ -608,11 +607,13 @@ override fun onNewIntent(intent: Intent) {
                 // ⭐ 2026-09-14 (G4 #2) - MediaStore 파일 I/O를 메인 스레드 밖에서 실행(백업이 커져도 UI가 멈추지 않게)
                 "writeBackupFile" -> {
                     val content = call.argument<String>("content")
+                    // ⭐ 2026-09-23 (1.0.24 A) - "manual"(설정의 데이터 백업) / "auto"(자동 백업). 없으면 auto.
+                    val kind = BackupFileNaming.Kind.fromChannelArg(call.argument<String>("kind"))
                     if (content == null) {
                         result.success(false)
                     } else {
                         Thread {
-                            val ok = writeBackupFile(content)
+                            val ok = writeBackupFile(content, kind)
                             runOnUiThread { result.success(ok) }
                         }.start()
                     }
@@ -852,29 +853,29 @@ override fun onNewIntent(intent: Intent) {
     // 검증된 "기억해둔 URI 직접 삭제" 경로(옛 deleteBackupFile() 로직, 아래
     // cleanupOldBackupFiles로 분리함)를 그대로 재사용함 - 새 URI를 기억하기 전에
     // 옛 URI를 먼저 읽어만 둠.
-    private fun writeBackupFile(content: String): Boolean {
+    // ⭐ 2026-09-23 (1.0.24 A) - 두 슬롯(직접 1 + 자동 1). 같은 종류의 옛 파일만 교체하고 다른 종류는 절대 안 건드림.
+    //  예전의 "최신 + 직전 1개(X-07)" 보존 대신, 새 파일을 공개하기 전에 **다시 읽어 완결성을 확인**하는 단계를 넣음
+    //  (쓰기 도중 잘림·손상된 파일이 직전 정상본을 밀어내지 않게). 확인 실패면 새 파일을 지우고 옛 파일을 그대로 둠.
+    private fun writeBackupFile(content: String, kind: BackupFileNaming.Kind): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             Log.w("MainActivity", "⚠️ 백업 저장 스킵 - Android 10(Q) 미만")
             return false
         }
         val prefs = getSharedPreferences("backup_prefs", Context.MODE_PRIVATE)
-        val previousUriStr = prefs.getString("last_backup_uri", null)
-        // ⭐ 2026-09-11 - 자동 백업이 조용히 안 되는 문제 재점검용 로그. 이 함수는
-        // MethodChannel을 타고 native까지 도달했다는 뜻이라, 이 로그 한 줄만
-        // 봐도 "Dart 쪽에서 아예 호출을 안 한 것"과 "호출은 됐는데 여기서
-        // 실패한 것"을 구분할 수 있음.
-        Log.d("MainActivity", "💾 백업 저장 시도(content=${content.length}자, prevUri=$previousUriStr)")
+        val slotKey = "last_backup_uri_${kind.token}"
+        val previousUriStr = prefs.getString(slotKey, null)
+        // ⭐ 2026-09-11 - 자동 백업이 조용히 안 되는 문제 재점검용 로그(네이티브 도달 여부 구분).
+        Log.d("MainActivity", "💾 백업 저장 시도(kind=${kind.token}, content=${content.length}자, prevUri=$previousUriStr)")
         // ⭐ 2026-09-22 (B-1) - 읽기 상한을 넘는 백업은 복원 때 읽지 못함. 쓰기는 절대 막지 않고(백업이 없는 게 더 나쁨) 알리기만 함.
-        val contentBytes = content.toByteArray(Charsets.UTF_8).size.toLong()
-        if (contentBytes > BackupFileReader.MAX_BACKUP_BYTES) {
-            Log.e("MainActivity", "❌ 백업 크기(${contentBytes}바이트)가 복원 읽기 상한을 넘음 - BackupFileReader.MAX_BACKUP_BYTES 재검토 필요")
+        val bytes = content.toByteArray(Charsets.UTF_8)
+        if (bytes.size.toLong() > BackupFileReader.MAX_BACKUP_BYTES) {
+            Log.e("MainActivity", "❌ 백업 크기(${bytes.size}바이트)가 복원 읽기 상한을 넘음 - BackupFileReader.MAX_BACKUP_BYTES 재검토 필요")
         }
 
         return try {
             val resolver = contentResolver
-            val displayName = buildBackupDisplayName()
-            // ⭐ 2026-09-14 (G4 #18) - 쓰는 동안 IS_PENDING=1로 숨겨 두고, 끝까지 쓴 뒤에만 공개(0). 중간 실패면 그 행을 지워서
-            // 미완성 파일이 "최신 백업"으로 잡히거나 직전 정상 백업을 가리지 않게 함(직전 정상본은 아래에서 성공 뒤에만 정리).
+            val displayName = buildBackupDisplayName(kind)
+            // ⭐ 2026-09-14 (G4 #18) - 쓰는 동안 IS_PENDING=1로 숨겨 두고, 끝까지 쓰고 확인한 뒤에만 공개(0).
             val values = ContentValues().apply {
                 put(MediaStore.Downloads.DISPLAY_NAME, displayName)
                 put(MediaStore.Downloads.MIME_TYPE, "application/json")
@@ -890,13 +891,22 @@ override fun onNewIntent(intent: Intent) {
                 val stream = resolver.openOutputStream(uri)
                     ?: throw IllegalStateException("openOutputStream()이 null 반환(uri=$uri)")
                 stream.use { out ->
-                    out.write(content.toByteArray(Charsets.UTF_8))
+                    out.write(bytes)
                     out.flush()
+                }
+                // 공개 전에 다시 읽어 확인 - 길이가 같고 백업 JSON 형식이어야 함.
+                // 읽기 상한을 넘는 백업은 어차피 다시 읽을 수 없으므로(위 B-1 로그) 확인을 건너뛰고 쓰기만 보장.
+                if (bytes.size.toLong() <= BackupFileReader.MAX_BACKUP_BYTES) {
+                    val readBack = resolver.openInputStream(uri)?.use { input -> BackupFileReader.readBoundedUtf8(input) }
+                        ?: throw IllegalStateException("다시 읽기 실패(uri=$uri)")
+                    if (readBack.length != content.length || !looksLikeCompleteBackup(readBack)) {
+                        throw IllegalStateException("다시 읽은 백업이 원본과 다름(${readBack.length}/${content.length}자)")
+                    }
                 }
                 val publish = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
                 resolver.update(uri, publish, null, null) > 0
             } catch (e: Exception) {
-                Log.e("MainActivity", "❌ 백업 파일 쓰기 중 실패 - 미완성 파일 삭제", e)
+                Log.e("MainActivity", "❌ 백업 파일 쓰기/확인 실패 - 미완성 파일 삭제(옛 백업은 유지)", e)
                 false
             }
             if (!completed) {
@@ -908,18 +918,11 @@ override fun onNewIntent(intent: Intent) {
                 return false
             }
 
-            // ⭐ 새 백업이 실제로 저장에 성공한 뒤에만: 다음 write() 때 지울 URI를
-            // 갱신하고, 옛 백업(방금 저장한 새 백업이 아니라 그 이전 것)을 지움.
-            // ⭐ 2026-09-14 (교차 검토 X-07) - 직전 정상 백업 1개는 남김(새 파일이 나중에 손상·오판돼도 되돌아갈 곳).
-            // 지우는 건 그보다 이전 것. "백업 = 파일 하나" 원칙을 "최신 + 직전 1개"로 바꿈.
-            val olderUriStr = prefs.getString("prev_backup_uri", null)
-            prefs.edit()
-                .putString("last_backup_uri", uri.toString())
-                .putString("prev_backup_uri", previousUriStr)
-                .apply()
-            cleanupOldBackupFiles(resolver, olderUriStr, keepUris = listOfNotNull(uri.toString(), previousUriStr))
+            // 새 백업이 안전하게 공개된 뒤에만 이 슬롯 기억을 바꾸고 같은 종류의 옛 파일을 정리
+            prefs.edit().putString(slotKey, uri.toString()).apply()
+            cleanupOldBackupFiles(resolver, kind, uri, previousUriStr)
 
-            Log.d("MainActivity", "✅ 백업 파일 저장 완료: $uri")
+            Log.d("MainActivity", "✅ 백업 파일 저장 완료(${kind.token}): $uri ($displayName)")
             true
         } catch (e: Exception) {
             Log.e("MainActivity", "❌ 백업 파일 저장 실패", e)
@@ -1019,31 +1022,43 @@ override fun onNewIntent(intent: Intent) {
         false
     }
 
-    // ⭐ 2026-09-14 (출시전 교차 검토 X-07) - [deleteUriStr]은 기억해 둔 "그보다 이전" 백업(직접 삭제), [keepUris]는 방금 쓴 새 백업과
-    // 직전 백업. 스캔 정리에서도 두 개는 남기고, 직전 백업을 기억하지 못하는 경우(재설치·이 수정 이전 설치)에는 스캔에서 가장 최근
-    // 것 하나를 직전 백업으로 남김.
+    // ⭐ 2026-09-23 (1.0.24 A) - 슬롯 정리. 1) 이 슬롯이 기억해 둔 옛 URI를 직접 삭제(쿼리 불필요 - 가장 확실한 경로)
+    //  2) 이 설치본이 소유한 파일 전체 스캔(selection 없음 - 2026-09-01 OEM 주석 참고)에서 BackupFileNaming.idsToDelete 규칙대로 삭제:
+    //     같은 종류의 다른 파일 + (자동 백업일 때만) 1.0.23 이하 옛 형식 파일. 다른 종류는 절대 삭제하지 않음.
+    //  3) 자동 백업일 때 옛 형식의 기억 URI(last_backup_uri/prev_backup_uri)도 지우고 키를 정리(이관 완료).
+    //  실패해도 무해 - 다음 백업 때 다시 정리됨. 재설치 이전 설치본의 파일은 소유권이 없어 보이지 않으므로 대상이 아님(사양).
     private fun cleanupOldBackupFiles(
         resolver: android.content.ContentResolver,
-        deleteUriStr: String?,
-        keepUris: List<String>
+        kind: BackupFileNaming.Kind,
+        newUri: android.net.Uri,
+        previousUriStr: String?
     ) {
         var deleted = 0
+        val newId = try { ContentUris.parseId(newUri) } catch (e: Exception) { -1L }
 
-        // 1) 기억해둔 옛 URI를 직접 지움 - 쿼리를 안 타서 owner_package_name 버그의 영향을 안 받는, 이 기기에서 실제로 동작하는 경로.
-        if (deleteUriStr != null && deleteUriStr !in keepUris) {
+        if (previousUriStr != null && previousUriStr != newUri.toString()) {
             try {
-                deleted += resolver.delete(android.net.Uri.parse(deleteUriStr), null, null)
+                deleted += resolver.delete(android.net.Uri.parse(previousUriStr), null, null)
             } catch (e: Exception) {
-                Log.e("MainActivity", "⚠️ 옛 백업 파일 삭제 실패(무시 - 다음 백업 때 재시도됨)", e)
+                Log.e("MainActivity", "⚠️ 같은 슬롯의 옛 백업 삭제 실패(무시 - 다음 백업 때 재시도됨)", e)
             }
         }
 
-        // 2) selection 없는 전체 스캔 - 이 버그가 없는 다른 기기(또는 재설치로 기억이 끊긴 이전 설치)에서 나머지 잔여 파일 정리.
+        if (kind == BackupFileNaming.Kind.AUTO) {
+            val legacyPrefs = getSharedPreferences("backup_prefs", Context.MODE_PRIVATE)
+            for (key in listOf("last_backup_uri", "prev_backup_uri")) {
+                val legacy = legacyPrefs.getString(key, null) ?: continue
+                try {
+                    deleted += resolver.delete(android.net.Uri.parse(legacy), null, null)
+                } catch (e: Exception) {
+                    Log.w("MainActivity", "⚠️ 옛 형식 백업 삭제 실패($key, 무시)", e)
+                }
+            }
+            legacyPrefs.edit().remove("last_backup_uri").remove("prev_backup_uri").apply()
+        }
+
         try {
-            val keepIds = keepUris.mapNotNull {
-                try { ContentUris.parseId(android.net.Uri.parse(it)) } catch (e: Exception) { null }
-            }.toSet()
-            val others = mutableListOf<Long>()
+            val files = mutableListOf<Pair<Long, String>>()
             resolver.query(
                 MediaStore.Downloads.EXTERNAL_CONTENT_URI,
                 arrayOf(MediaStore.Downloads._ID, MediaStore.Downloads.DISPLAY_NAME),
@@ -1053,23 +1068,18 @@ override fun onNewIntent(intent: Intent) {
                 val nameIdx = cursor.getColumnIndexOrThrow(MediaStore.Downloads.DISPLAY_NAME)
                 while (cursor.moveToNext()) {
                     val name = cursor.getString(nameIdx) ?: continue
-                    val id = cursor.getLong(idIdx)
-                    if (name.startsWith(BACKUP_DISPLAY_NAME_PREFIX) && id !in keepIds) {
-                        others.add(id)
-                    }
+                    files += cursor.getLong(idIdx) to name
                 }
             }
-            val newestFirst = others.sortedDescending()  // _ID가 큰 쪽 = 가장 최근 삽입
-            val idsToDelete = if (keepIds.size >= 2) newestFirst else newestFirst.drop(1)
-            for (id in idsToDelete) {
+            for (id in BackupFileNaming.idsToDelete(BACKUP_DISPLAY_NAME_PREFIX, kind, newId, files)) {
                 val uri = ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI, id)
                 deleted += resolver.delete(uri, null, null)
             }
         } catch (e: Exception) {
-            Log.e("MainActivity", "⚠️ 백업 파일 전체 스캔 삭제 실패(무시)", e)
+            Log.e("MainActivity", "⚠️ 백업 파일 전체 스캔 정리 실패(무시)", e)
         }
 
-        Log.d("MainActivity", "🗑️ 기존 백업 파일 정리: 총 ${deleted}개 삭제")
+        Log.d("MainActivity", "🗑️ 옛 백업 파일 정리(${kind.token}): 총 ${deleted}개 삭제")
     }
 
     private fun requestOverlayPermission() {

@@ -14,21 +14,31 @@ import '../models/backup_payload.dart';
 import 'backup_validator.dart';
 import 'database_service.dart';
 
+/// ⭐ 2026-09-23 (1.0.24 A) - 백업 파일 슬롯. 직접(설정의 "데이터 백업")과 자동이 각각 1개씩만 남고,
+/// 새로 만들면 **같은 종류만** 교체됨(네이티브 BackupFileNaming.kt).
+enum BackupKind {
+  manual('manual'),
+  auto('auto');
+
+  const BackupKind(this.channelArg);
+  final String channelArg;
+}
+
 class BackupStorageService {
   BackupStorageService._();
   static final BackupStorageService instance = BackupStorageService._();
 
   static const _channel = kAlarmChannel;
 
-  /// 자동 탐지에서 최신순으로 확인할 최대 후보 수(네이티브는 최신 + 직전 정상본을 남기지만, 옛 설치의 잔여 파일까지 고려).
+  /// 자동 탐지에서 최신순으로 확인할 최대 후보 수(네이티브는 직접·자동 슬롯 2개를 남기지만, 1.0.23 이하 옛 형식 파일까지 고려).
   static const _maxCandidates = 5;
 
-  /// 백업 JSON 문자열을 기기 저장소에 씀. 성공하면 네이티브가 최신 + 직전 백업 1개만 남기고 정리함.
+  /// 백업 JSON 문자열을 [kind] 슬롯에 씀. 네이티브가 공개 전에 다시 읽어 확인하고, 성공하면 같은 종류의 옛 파일만 정리함.
   /// Android 10(Q) 미만 기기에서는 지원 안 함 - false 반환.
-  Future<bool> write(String jsonContent) async {
+  Future<bool> write(String jsonContent, {required BackupKind kind}) async {
     try {
-      final result = await _channel
-          .invokeMethod<bool>('writeBackupFile', {'content': jsonContent});
+      final result = await _channel.invokeMethod<bool>(
+          'writeBackupFile', {'content': jsonContent, 'kind': kind.channelArg});
       return result ?? false;
     } catch (e) {
       return false;

@@ -28,6 +28,10 @@ const Set<String> kDeviceLocalPreferenceKeys = {
   'backup_last_data_version',
   'backup_last_saved_at',
   'backup_last_content_hash',
+  // 1.0.24 A - 직접/자동 슬롯별 마지막 저장 시각, 두 슬롯 형식 전환 여부
+  'backup_last_saved_at_auto',
+  'backup_last_saved_at_manual',
+  'backup_slot_format_v2',
   // OS 권한은 설치마다 다시 받아야 함(복원 후 권한 화면 판단은 복원 흐름이 직접 함)
   'permissions_requested',
   // 업데이트 안내 dedupe - 설치·버전별
@@ -69,6 +73,8 @@ const Map<String, BackupPrefType> kBackupPreferenceTypes = {
   'shift_assign_tutorial_shown': BackupPrefType.boolean,
   'condition_tab_tutorial_shown': BackupPrefType.boolean,
   'schedule_tab_tutorial_shown': BackupPrefType.boolean,
+  // 1.0.24 B - 달력 상단 커스텀 알람 5칸(JSON 문자열, custom_alarm_preset.dart)
+  'custom_alarm_presets': BackupPrefType.string,
 };
 
 bool backupPrefValueMatches(BackupPrefType type, Object? value) => switch (type) {

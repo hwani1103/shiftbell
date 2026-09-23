@@ -40,12 +40,14 @@ abstract final class AnalyticsEvent {
   static const friendAdded = 'friend_added';
   static const tabSelected = 'tab_selected';
   static const helpOpened = 'help_opened';
+  /// 1.0.24 B - 커스텀 알람 프리셋을 날짜에 할당(파라미터 result = scheduled/past/duplicate/daily_limit/schedule_failed, 시각은 보내지 않음)
+  static const customAlarmAssigned = 'custom_alarm_assigned';
 
   /// 대시보드 EVENT_META와 대조하는 전체 목록(테스트용).
   static const all = <String>[
     onboardingComplete, backupCreated, backupRestored, alarmTemplateSaved, alarmDismissed, alarmSnoozed,
     alarmNoResponse, shiftAssigned, calendarThemeChanged, memoSaved, otSaved, scheduleCreated, sleepRecordSaved,
-    friendShareStarted, friendAdded, tabSelected, helpOpened,
+    friendShareStarted, friendAdded, tabSelected, helpOpened, customAlarmAssigned,
   ];
 }
 

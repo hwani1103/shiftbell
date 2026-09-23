@@ -22,6 +22,7 @@ export const EVENT_META = {
   backup_restored: { label: '백업 복원', icon: '♻️', group: '백업' },
   backup_created: { label: '백업 생성(직접)', icon: '💾', group: '백업' },
   alarm_template_saved: { label: '고정 알람 저장', icon: '⏰', group: '알람' },
+  custom_alarm_assigned: { label: '커스텀 알람 할당', icon: '🗓️', group: '알람', desc: '달력 상단 커스텀 알람을 날짜에 놓은 횟수(거부된 시도 포함 - result 값으로 구분).' },
   alarm_dismissed: { label: '알람 끄기', icon: '🔕', group: '알람', desc: '울린 알람을 끈 횟수. 알람이 실제로 쓰이는 정도를 보여 줘요.' },
   alarm_snoozed: { label: '알람 5분 연장', icon: '😴', group: '알람' },
   alarm_no_response: { label: '알람 무응답 종료', icon: '⌛', group: '알람', desc: '끄지 않아 자동 종료된 알람 횟수. 많으면 알람이 잘 안 들리거나 헛울림이 잦다는 신호예요.' },
