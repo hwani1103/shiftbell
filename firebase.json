@@ -12,7 +12,15 @@
     "headers": [
       {
         "source": "**",
-        "headers": [{"key": "Cache-Control", "value": "no-cache, no-store, must-revalidate"}]
+        "headers": [{"key": "Cache-Control", "value": "no-cache"}]
+      },
+      {
+        "source": "**/*.@(js|mjs|wasm|json|png|jpg|svg|ico|otf|ttf|woff|woff2|bin|frag)",
+        "headers": [{"key": "Cache-Control", "value": "public, max-age=86400"}]
+      },
+      {
+        "source": "**/@(flutter_bootstrap.js|flutter.js|flutter_service_worker.js|version.json|manifest.json)",
+        "headers": [{"key": "Cache-Control", "value": "no-cache"}]
       }
     ]
   }
