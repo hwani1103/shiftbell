@@ -9,7 +9,7 @@ export async function loadDocs({ demo = false } = {}) {
     return buildMockDocs();
   }
   const col = firebase.firestore().collection('dashboard');
-  const [s, ser, ev] = await Promise.all(['summary', 'series', 'events'].map((id) => col.doc(id).get()));
+  const [s, ser, ev] = await Promise.all(['summary', 'series', 'events'].map((id) => col.doc(id).get({ source: 'server' })));
   if (!s.exists) throw Object.assign(new Error('아직 동기화된 데이터가 없어요.'), { code: 'no-data' });
   return {
     summary: s.data(),

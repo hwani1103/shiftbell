@@ -2,7 +2,7 @@
 // 화면 조각을 만드는 곳. HTML 문자열을 돌려주는 함수와, 붙인 뒤 차트를 그리는 mountCharts()로 나뉜다.
 
 import { lineChart, barChart, sparkline, donut, hbarList } from './charts.js';
-import { fmtInt, fmtCompact, fmtPct, fmtDur, fmtMoney, fmtMD, fmtLong, relTime, deltaInfo, sum, avg, bucketize, esc } from './format.js';
+import { fmtInt, fmtCompact, fmtPct, fmtDur, fmtMoney, fmtMD, fmtLong, relTime, deltaInfo, sum, avg, bucketize, esc, dataCutoffLabel } from './format.js';
 import { eventMeta, isSystemEvent, BREAKDOWNS, localizeName, osLabel, COLORS } from './labels.js';
 
 export const RANGES = [7, 30, 100, 365];
@@ -72,7 +72,7 @@ export function kpiGrid(docs, view) {
       note: `${label} 평균 ${fmtInt(avg(dauCur))}명`, delta: deltaChip(dauDelta), spark: sparkline(dauCur, COLORS.dau) })}
     ${kpi({ label: '월간 활성(MAU)', color: COLORS.mau, value: fmtInt(mauNow), unit: '명',
       note: '최근 28일 기준', delta: deltaChip(mauDelta), spark: sparkline(view.cur('mau'), COLORS.mau) })}
-    ${kpi({ label: `신규 설치 (${label})`, color: COLORS.install, value: fmtInt(sum(inst)), unit: '건',
+    ${kpi({ label: `첫 실행 (${label})`, color: COLORS.install, value: fmtInt(sum(inst)), unit: '건',
       note: `하루 평균 ${(sum(inst) / Math.max(1, view.len)).toFixed(1)}건`, delta: deltaChip(instDelta), spark: sparkline(inst, COLORS.install) })}
     ${kpi({ label: '사용 정착도', color: COLORS.wau, value: fmtPct(stick, 0).replace('%', ''), unit: '%',
       note: `DAU÷MAU · 평균 ${fmtPct(stickAvg, 0)}`, delta: '', spark: sparkline(view.cur('dau').map((d, i) => (view.cur('mau')[i] > 0 ? d / view.cur('mau')[i] : 0)), COLORS.wau) })}
@@ -90,9 +90,9 @@ export function insights(docs, view) {
   if (d?.pct != null) line += `, 직전 7일 평균(${fmtInt(base)}명)보다 <b>${d.pct >= 0 ? '+' : ''}${(d.pct * 100).toFixed(0)}%</b>`;
   out.push(`${line}이에요.`);
   const inst = sum(view.cur('installs')); const rem = sum(view.cur('uninstalls'));
-  out.push(`최근 ${view.len}일 신규 설치 <b>${fmtInt(inst)}건</b>, 삭제 <b>${fmtInt(rem)}건</b>(순증 <b>${inst - rem >= 0 ? '+' : ''}${fmtInt(inst - rem)}</b>).`);
+  out.push(`최근 ${view.len}일 첫 실행 <b>${fmtInt(inst)}건</b>, 감지된 삭제 <b>${fmtInt(rem)}건</b>이에요.`);
   const c = docs.summary.cohort;
-  if (c && c.days.length > 7) out.push(`설치 다음 날 다시 쓰는 비율 <b>${fmtPct(c.days[1], 0)}</b>, 7일 뒤에도 쓰는 비율 <b>${fmtPct(c.days[7], 0)}</b>이에요.`);
+  if (c && c.days.length > 7) out.push(`첫 세션 다음 날 다시 쓰는 비율 <b>${fmtPct(c.days[1], 0)}</b>, 7일 뒤에도 쓰는 비율 <b>${fmtPct(c.days[7], 0)}</b>이에요.`);
   else {
     const top = topEvent(docs, view);
     if (top) out.push(`가장 많이 쓰인 기능은 <b>${esc(eventMeta(top.name).label)}</b>(${fmtInt(top.total)}회)예요.`);
@@ -103,7 +103,7 @@ export function insights(docs, view) {
 function topEvent(docs, view) {
   let best = null;
   for (const name of Object.keys(docs.events.series ?? {})) {
-    if (isSystemEvent(name)) continue;
+    if (isSystemEvent(name) || name === 'auto_backup_created' || name === 'tab_selected') continue;
     const total = sum(eventRange(docs, view, name));
     if (total > 0 && (!best || total > best.total)) best = { name, total };
   }
@@ -130,12 +130,12 @@ export function usersCard(view, visible) {
 const bucketSize = (len) => (len <= 30 ? 1 : 7);
 
 export function installsCard(view) {
-  const inst = sum(view.cur('installs')); const rem = sum(view.cur('uninstalls')); const net = inst - rem;
+  const inst = sum(view.cur('installs')); const rem = sum(view.cur('uninstalls'));
   const b = bucketSize(view.len);
-  return `<section class="card span-4"><div class="card-h"><div><h2>설치 · 삭제</h2><p>${b === 1 ? '하루 단위' : '주 단위 합계'} · 설치는 앱 첫 실행 기준</p></div></div>
+  return `<section class="card span-4"><div class="card-h"><div><h2>첫 실행 · 삭제</h2><p>${b === 1 ? '하루 단위' : '주 단위 합계'} · GA4 자동 이벤트</p></div></div>
     <div id="ch-installs" style="min-height:200px"></div>
-    <div class="stats"><div class="stat"><b>${fmtInt(inst)}</b><span>설치</span></div><div class="stat"><b>${fmtInt(rem)}</b><span>삭제</span></div><div class="stat ${net >= 0 ? 'pos' : 'neg'}"><b>${net >= 0 ? '+' : ''}${fmtInt(net)}</b><span>순증</span></div></div>
-    <p class="sub" style="margin:10px 0 0">삭제는 구글이 감지한 경우만 집계돼 실제보다 적을 수 있어요.</p></section>`;
+    <div class="stats"><div class="stat"><b>${fmtInt(inst)}</b><span>첫 실행</span></div><div class="stat"><b>${fmtInt(rem)}</b><span>감지된 삭제</span></div></div>
+    <p class="sub" style="margin:10px 0 0">첫 실행에는 Analytics 도입 업데이트가 포함될 수 있어 신규 설치와 다릅니다. 삭제는 실제보다 적을 수 있어요.</p></section>`;
 }
 
 export function engagementCard(view) {
@@ -152,13 +152,13 @@ export function retentionCard(docs) {
   const c = docs.summary.cohort;
   let body;
   if (!c) {
-    body = `<div class="empty"><div class="em">🌱</div><b>아직 계산할 만큼 사용자가 쌓이지 않았어요</b><p>설치한 지 2주가 지난 사용자가 생기면 “설치 후 며칠 뒤에도 쓰는지”가 여기에 나타나요.</p></div>`;
+    body = `<div class="empty"><div class="em">🌱</div><b>아직 계산할 만큼 사용자가 쌓이지 않았어요</b><p>첫 세션 이후 2주가 지난 사용자가 생기면 재방문율이 나타나요.</p></div>`;
   } else {
     const pick = [[1, '1일 뒤'], [3, '3일 뒤'], [7, '7일 뒤'], [14, '14일 뒤']].filter(([d]) => c.days[d] != null);
     body = `<div class="ret">${pick.map(([d, name]) => `<div><div class="col"><i style="height:${Math.max(3, c.days[d] * 100)}%"></i></div><b>${fmtPct(c.days[d], 0)}</b><span>${name}</span></div>`).join('')}</div>
       <p class="sub" style="margin:12px 0 0">${esc(fmtMD(c.from))} ~ ${esc(fmtMD(c.to))}에 처음 쓴 ${fmtInt(c.size)}명 기준</p>`;
   }
-  return `<section class="card span-6"><div class="card-h"><div><h2>다시 쓰는 비율(리텐션)</h2><p>설치한 사용자가 며칠 뒤에도 앱을 여는 비율</p></div></div>${body}</section>`;
+  return `<section class="card span-6"><div class="card-h"><div><h2>다시 쓰는 비율(리텐션)</h2><p>첫 세션 사용자가 며칠 뒤에도 앱을 여는 비율</p></div></div>${body}</section>`;
 }
 
 export function adsCard(docs, view) {
@@ -178,19 +178,22 @@ export function adsCard(docs, view) {
 const GROUP_ORDER = ['시작', '알람', '달력', '일정', '수면', '공유', '백업', '사용', '기타'];
 
 function eventRows(docs, view, { group, includeSystem }) {
-  const users30 = new Map((docs.summary.events ?? []).map((e) => [e.name, e.users]));
+  const rangeSummary = Object.values(docs.summary.eventsByRange ?? {}).find((s) =>
+    s?.from === view.dates[0] && s?.to === view.dates[view.len - 1]);
+  const summaries = new Map((rangeSummary?.events ?? []).map((e) => [e.name, e]));
   const rows = [];
   for (const name of Object.keys(docs.events.series ?? {})) {
     const meta = eventMeta(name);
     const system = meta.group === 'system';
     if (system && !includeSystem) continue;
     if (group !== 'all' && meta.group !== group) continue;
-    // 탭 이동은 다른 기능보다 수십 배 많아 순위 막대를 점으로 만든다 - 전체 순위에서는 빼고 '사용' 분류에서만 보여 준다.
-    if (group === 'all' && name === 'tab_selected') continue;
+    if (name === 'tab_selected' || (group === 'all' && name === 'auto_backup_created')) continue;
     const arr = eventRange(docs, view, name);
     const total = sum(arr);
     if (total <= 0) continue;
-    rows.push({ name, meta, total, perDay: total / Math.max(1, view.len), users: users30.get(name) });
+    const summary = summaries.get(name);
+    const users = summary?.count === total && summary.users <= total ? summary.users : null;
+    rows.push({ name, meta, total, perDay: total / Math.max(1, view.len), users });
   }
   return rows.sort((a, b) => b.total - a.total);
 }
@@ -205,16 +208,20 @@ export function behaviorCard(docs, view, ui) {
   const max = rows.length ? rows[0].total : 1;
   const tabHtml = hasCustom ? `<div class="tabs" role="group" aria-label="분류">${tabs.map((g) =>
     `<button class="tab" data-action="evgroup" data-key="${g}" aria-pressed="${ui.evGroup === g}">${g === 'all' ? '전체' : g}</button>`).join('')}</div>` : '';
+  const shownRows = ui.evExpanded ? rows : rows.slice(0, 5);
   const list = rows.length
-    ? hbarList(rows.map((r, i) => ({
+    ? hbarList(shownRows.map((r, i) => ({
       label: r.meta.label, icon: r.meta.icon, value: r.total, display: `${fmtInt(r.total)}회`,
-      sub: `하루 평균 ${r.perDay < 10 ? r.perDay.toFixed(1) : fmtInt(r.perDay)}회${r.users != null ? ` · 최근 30일 ${fmtInt(r.users)}명이 사용` : ''}`,
+      sub: `하루 평균 ${r.perDay < 10 ? r.perDay.toFixed(1) : fmtInt(r.perDay)}회${r.users != null ? ` · 같은 기간 ${fmtInt(r.users)}명이 사용` : ''}`,
       color: COLORS.palette[i % COLORS.palette.length], attrs: `data-action="event" data-event="${esc(r.name)}" tabindex="0" role="button" aria-label="${esc(r.meta.label)} 자세히"`,
     })), { max })
     : `<div class="empty"><div class="em">🧭</div><b>이 기간에 기록된 이벤트가 없어요</b><p>다른 기간이나 분류를 골라 보세요.</p></div>`;
   const notice = hasCustom ? '' : `<div class="notice" style="margin-bottom:14px"><span class="ic">🚀</span><div><b>사용자 행동 이벤트는 다음 업데이트부터 쌓여요.</b><br>알람·달력·일정·수면 같은 기능 사용량은 계측이 들어간 버전을 배포한 뒤부터 보여요. 지금은 기본 이벤트만 표시돼요.</div></div>`;
   const toggle = hasCustom ? `<button class="chip" style="--c:#94A3B8" data-action="evsystem" aria-pressed="${ui.evSystem}"><i style="background:#94A3B8"></i>기본 이벤트 포함</button>` : '';
-  return `<section class="card span-7"><div class="card-h"><div><h2>사용자 행동</h2><p>${view.len}일 동안 기능별 사용 횟수 · 눌러서 추이 보기</p></div>${toggle}</div>${notice}${tabHtml}${list}</section>`;
+  const expand = rows.length > 5 ? `<button class="chip" data-action="evexpand" aria-expanded="${ui.evExpanded}">${ui.evExpanded ? '상위 5개만 보기' : `전체 ${rows.length}개 보기`}</button>` : '';
+  const web = docs.summary.webFriendViews;
+  const webSummary = web ? `<div class="stats" style="margin-top:16px"><div class="stat"><b>${fmtInt(web.count)}</b><span>웹 친구 근무표 열람 · 최근 30일</span></div><div class="stat"><b>${fmtInt(web.users)}</b><span>웹 열람 사용자 · 최근 30일</span></div></div>` : '';
+  return `<section class="card span-7"><div class="card-h"><div><h2>사용자 행동</h2><p>${view.len}일 동안 기능별 사용 횟수 · 눌러서 추이 보기</p></div>${toggle}</div>${notice}${tabHtml}${list}${expand}${webSummary}</section>`;
 }
 
 // ───────────────────────── 분포 ─────────────────────────
@@ -239,9 +246,11 @@ export function distCard(docs, ui) {
 
 export function footerNote(docs) {
   const s = docs.summary;
-  return `<div class="foot span-12">데이터 기준: Google Analytics 4 · 플레이 스토어 <b>출시 버전만</b> 집계(개발용 앱 제외)<br>
-    마지막 동기화 ${esc(relTime(s.updatedAt))} · 데이터는 ${esc(s.latest ? fmtLong(s.latest) : '-')}까지 확정<br>
-    구글 처리 지연 때문에 최근 1~2일 값은 나중에 조금 바뀔 수 있어요.${s.source === 'mock' ? '<br><b>※ 지금 보이는 건 데모(모의) 데이터입니다.</b>' : ''}</div>`;
+  return `<div class="foot span-12">데이터 기준: Google Analytics 4 · 플레이 스토어 <b>출시 버전만</b> 집계(개발용 앱 제외) · 스트림 ${esc(s.streamId ?? '-')}<br>
+    마지막 동기화 ${esc(relTime(s.updatedAt))} (${esc(s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : '-')}) · 데이터 기준일 ${esc(s.latest ? fmtLong(s.latest) : '-')} · ${dataCutoffLabel(s.latest)}<br>
+    서버 집계: 매일 한국 시간 00:17·03:17·06:17·09:17·12:17·15:17·18:17·21:17 예약(실행 지연 가능).<br>
+    화면: 열어 둔 동안 약 10~11분마다 재조회하며, 새로고침 버튼은 저장된 최신 집계를 다시 읽습니다.<br>
+    오늘 수치는 잠정치입니다. GA4 처리에 보통 2~6시간이 걸리고 최근 24~48시간 값은 보정될 수 있어요.${s.source === 'mock' ? '<br><b>※ 지금 보이는 건 데모(모의) 데이터입니다.</b>' : ''}</div>`;
 }
 
 export function skeleton() {
@@ -273,10 +282,10 @@ export function mountCharts(root, docs, view, ui) {
     const inst = bucketize(view.dates, view.cur('installs'), b, 'sum');
     const rem = bucketize(view.dates, view.cur('uninstalls'), b, 'sum');
     charts.push(barChart($('#ch-installs'), {
-      title: '설치와 삭제', height: 206,
+      title: '첫 실행과 삭제', height: 206,
       labels: inst.dates.map((d) => fmtMD(d)),
       tips: inst.spans.map(([a, z]) => (a === z ? fmtLong(a) : `${fmtMD(a)} ~ ${fmtMD(z)}`)),
-      groups: [{ key: 'i', label: '설치', color: COLORS.install, values: inst.values }, { key: 'u', label: '삭제', color: COLORS.uninstall, values: rem.values }],
+      groups: [{ key: 'i', label: '첫 실행', color: COLORS.install, values: inst.values }, { key: 'u', label: '삭제', color: COLORS.uninstall, values: rem.values }],
       valueFmt: (v) => `${fmtInt(v)}건`,
     }));
   }

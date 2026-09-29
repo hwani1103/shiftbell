@@ -48,6 +48,11 @@ export const fmtMonth = (s) => `${parseYmd(s).m}월`;
 export const fmtLong = (s) => { const p = parseYmd(s); return `${p.m}월 ${p.d}일 (${WEEKDAYS[p.wd]})`; };
 export const fmtFull = (s) => { const p = parseYmd(s); return `${p.y}년 ${p.m}월 ${p.d}일 (${WEEKDAYS[p.wd]})`; };
 
+export const todayKst = () => new Intl.DateTimeFormat('sv-SE', {
+  timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+}).format(new Date());
+export const dataCutoffLabel = (latest) => latest === todayKst() ? '오늘 잠정치 포함' : '오늘 데이터 대기 중';
+
 /** "3분 전", "2시간 전", "어제" 식 상대 시간. */
 export function relTime(iso, now = Date.now()) {
   const t = Date.parse(iso);

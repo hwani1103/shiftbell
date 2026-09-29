@@ -32,19 +32,34 @@ const CUSTOM_RATES = {
   alarm_dismissed: 1.05,
   alarm_snoozed: 0.22,
   alarm_no_response: 0.04,
-  tab_selected: 3.6,
   memo_saved: 0.16,
   shift_assigned: 0.14,
   schedule_created: 0.11,
   sleep_record_saved: 0.09,
+  sleep_record_edited: 0.015,
+  sleep_record_deleted: 0.006,
+  sleep_estimate_rejected: 0.008,
   alarm_template_saved: 0.05,
+  custom_alarm_assigned: 0.06,
   ot_saved: 0.045,
   calendar_theme_changed: 0.03,
   help_opened: 0.02,
   backup_created: 0.018,
   friend_added: 0.012,
   friend_share_started: 0.008,
+  friend_calendar_opened: 0.045,
   backup_restored: 0.004,
+  memo_edited: 0.025,
+  memo_deleted: 0.012,
+  schedule_edited: 0.018,
+  schedule_deleted: 0.009,
+  schedule_notification_changed: 0.028,
+  auto_backup_created: 0.035,
+  alarm_history_cleared: 0.002,
+  all_shifts_opened: 0.06,
+  shift_name_changed: 0.005,
+  shift_color_changed: 0.006,
+  alarm_sound_changed: 0.004,
 };
 
 /**
@@ -118,11 +133,19 @@ export function buildMockDocs({ today = '2026-09-22', days = 400, seed = 2026092
   const events = { schema: SCHEMA, dates, series: evSeries, totals };
 
   const sum = (arr, from = n - 30) => arr.slice(from).reduce((a, b) => a + b, 0);
-  const users30 = (name) => Math.min(mau[n - 1], Math.round(sum(evSeries[name]) / (name === 'tab_selected' ? 9 : name === 'alarm_dismissed' ? 14 : 3) + 1));
+  const users30 = (name) => Math.min(sum(evSeries[name]), mau[n - 1], Math.round(sum(evSeries[name]) / (name === 'alarm_dismissed' ? 14 : 3) + 1));
   const eventSummary = Object.keys(evSeries)
     .map((name) => ({ name, count: sum(evSeries[name]), users: users30(name) }))
     .filter((e) => e.count > 0)
     .sort((a, b) => b.count - a.count);
+  const eventsByRange = Object.fromEntries([7, 30, 100, 365].map((range) => {
+    const from = Math.max(0, n - range);
+    const events = Object.keys(evSeries).map((name) => {
+      const count = sum(evSeries[name], from);
+      return { name, count, users: Math.min(count, mau[n - 1], Math.round(count / (name === 'alarm_dismissed' ? 14 : 3) + 1)) };
+    }).filter((e) => e.count > 0);
+    return [range, { from: dates[from], to: dates[n - 1], events }];
+  }));
 
   const pct = (list, total) => list.map(([name, share]) => ({ name, users: Math.round(total * share) }));
   const total = mau[n - 1];
@@ -156,6 +179,8 @@ export function buildMockDocs({ today = '2026-09-22', days = 400, seed = 2026092
       device: pct([['SM-S928N', 0.18], ['SM-S918N', 0.15], ['SM-S938N', 0.12], ['SM-A546S', 0.09], ['SM-F946N', 0.06], ['Pixel 8', 0.03]], total),
     },
     events: eventSummary,
+    eventsByRange,
+    webFriendViews: { count: Math.round(dau[n - 1] * 0.13), users: Math.round(dau[n - 1] * 0.07) },
     flags: { ads: true, customEvents: true },
   };
   return { summary, series, events };
