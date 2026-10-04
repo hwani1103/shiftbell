@@ -3640,8 +3640,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   double get _mainBadgeHeight => _shiftBadgeHeight(
       TextStyle(fontSize: 11.sp, height: 1.15), _isFoldCalendar ? 15.h : 18.h);
   Widget _memoText(int count, String text, TextStyle style,
-      {TextAlign textAlign = TextAlign.center}) {
-    final target =
+      {TextAlign textAlign = TextAlign.center, double? scaleOverride}) {
+    final target = scaleOverride ??
         CalendarMemoSizing.scaleFor(MediaQuery.sizeOf(context), count);
     Widget label(TextStyle resolved) => CompleteCellMemoText(text,
         style: resolved, textAlign: textAlign);
@@ -4857,6 +4857,11 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Widget _themeDiaryCell(
       DateTime day, bool isToday, bool isOutside, ShiftSchedule schedule) {
     final d = _themedCellData(day, schedule);
+    final window = MediaQuery.sizeOf(context);
+    // Diary's reserved annotation row leaves less room for three memos than
+    // other themes. Keep sparse cover cells closer to that three-memo size.
+    final balanceCoverMemos = CalendarMemoSizing.appliesTo(window) &&
+        window.width < 600 && window.height > window.width;
     final colorScheme = Theme.of(context).colorScheme;
     const borderColor = Color(0xFFE4D9C9); // 따뜻한 크림 라인(무채색 회색 대신)
     final dateColor = isOutside
@@ -5027,7 +5032,14 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                         TextStyle(
                                             fontSize: 7.5.sp,
                                             color: const Color(0xFF1A1A1A),
-                                            fontWeight: FontWeight.w600)),
+                                            fontWeight: FontWeight.w600),
+                                        scaleOverride: balanceCoverMemos
+                                            ? switch (d.memos.length) {
+                                                1 => 1.2,
+                                                2 => 1.1,
+                                                _ => 1.0,
+                                              }
+                                            : null),
                                   ))
                               .toList(),
                         ),

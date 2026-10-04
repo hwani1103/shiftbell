@@ -18,7 +18,7 @@ README.md는 입구, CLAUDE.md는 개발 규칙이다. 진행 상태·남은 일
 
 지금 상태
 - 다음 세션 시작점: V절 기준과 W절 Fold8 결과. Fold8 Ultra는 사용자 확인 완료, Fold8은 실제 커버/내부 레이아웃 검증·수정·갤러리 작성 완료. 남은 기기는 Flip8/Flip4이며 아직 미검증이다. 주요 캡처1.0/1.3, 중간1.1/1.2는 필요한 부분만 확인한다.
-- 최신 추가 수정(W절): Fold8 커버 Diary의 메모가 지나치게 축소되는 문제를 카드 전체 맞춤으로 수정. 최종 dev APK SHA256 AFF474CD727226D74D31DDA7AEA8ACEE428A7E799140DCB12BBCE7284896AF15. U절 main white/dark 여백 결정도 포함하며 각 캡처 manifest에 실제 촬영 APK 해시를 보존한다.
+- 최신 추가 수정(W절): Fold8 커버 Diary의 카드 맞춤 후, 사용자 피드백에 따라 메모1개/2개 확대 비율을1.5/1.25에서1.2/1.1로 낮췄다. 3개 크기와 펼침·다른 테마는 유지. 최신 dev APK SHA256 0956477DB8A552EB582C615D4C59192E9244893302742ED6BFC7363C4AFE387E. 각 캡처 manifest에 실제 촬영 APK 해시를 보존한다.
 - Fold8 Ultra의 최신 레이아웃을 한글10/영어 지원6 테마×접힘/펼침×1.0/1.3로 검사했다. 달력64·전체근무표16·공유 웹16 = 96장과 웹1.3 하단2장을 육안 검토한 뒤 기존 갤러리 캡처를 전부 교체했다. 1.1/1.2와 오래된 ko-KR/en-US/numbered_v2/fixes 원본 폴더는 제거했다. 현재 화면비교.html에는 두 배율만 남는다.
 - 모든 테마 메모의 공통 좌우 안전 여백2dp, underline 접힘 총6dp/펼침 메모 영역 총7dp. 패딩을 뺀 공간 안에서 완전한 글자만 표시하고 말줄임표·부분 글자 잘림을 방지한다. underline/editorial의 년월+버튼4개는 기기별 분기 없이 공통 행이며 Fold 접힘/펼침에서 확인했다.
 - 갤러리의 달력 APK는 986C1C7956597F13116F1DA6116F629CF89667E6C21E6A6D692C3DFD833104B0. 이후 달력 소스는 그대로 두고 잠금 스누즈 충돌 안내 리소스 KO/EN 두 문장만 줄였다. 최종 APK는 937936AE543A34C219E5B92D5BB96911BC106EACABE51128AF71A9F4C56CA9BE; SRTL과 USB S26에 데이터 보존 설치. 캡처 APK와 최종 APK의 차이를 숨기지 않는다.
@@ -1483,3 +1483,11 @@ Fold8 연결 착수 — 2026-10-04 18:00 KST (당시 기록, 재연결 후 완�
 - 도구: srtl_gallery.py의 기기/출력 경로 환경변수·빈 갤러리 방지·추가 증거 링크, srtl_web_layouts.mjs 지정 번호 재촬영, srtl_web_scroll_check.mjs 실제 PNG 크기 기준 스와이프, srtl_foldable_followup.py 중간 배율·자세 전환·근무표 하단 검사. Python/Node 문법 및 git diff 검사 통과.
 - 웹은 실제 FriendCalendarView를 사용하는 로컬 fixture이며 운영 공유/설치 PWA 검증은 아니다. Chrome CanvasKit semantics 미제공 시 원본 육안으로 언어를 확인했고 브라우저 실행 오류는 없었다. 사용자 최종 가독성 승인을 대신하지 않는다. 기능 잔여49개는 그대로이고 Flip8/Flip4는 아직 미검증이다.
 - 종료 상태: Fold8 한국어/글자1.0/접힘/mainWhite 달력, 합성 fixture 유지. 충전 화면유지7, Awake/mStayOn=true 확인. 개인 USB 폰에는 fixture나 변경을 적용하지 않았다. 다음 연결 기기는 V절 기준으로 Flip8 또는 Flip4를 진행한다.
+
+Fold8 Diary 개수별 메모 균형 추가 조정 — 사용자 실제 화면 피드백
+- 접힘 Diary의1개/2개 메모가3개보다 지나치게 커 보인다는 요청. mainWhite/minimal/materialCard와 같은 fixture를 비교했다. 기존 개수별1.5/1.25 확대와 Diary의 날짜·공휴일 예약 영역, 메모 묶음 높이 맞춤이 합쳐져 sparse 셀과3개 셀의 차이가 두드러졌다.
+- Diary의 짧고 넓은 커버 조건(CalendarMemoSizing 적용 + width<600 + 세로)에서만1개1.2,2개1.1,3개1.0으로 조정. 명목 확대 비율은 기존 대비1개20%,2개12% 감소. 공통 정책·다른 테마·펼침·3개 글자 크기·날짜/근무명은 유지했다.
+- 실제 비교16조합: 한영×mainWhite/minimal/materialCard/Diary×1.0/1.3, 메모 안전 여백·완전한 글자·클립 기하 검사 및 원본 검토 통과. 조정 후 KO Diary 화면상 텍스트 줄 높이(1/2/3개)는1.0에서11.55/10.72/9.48dp,1.3에서12.58/11.18/10.43dp. 글꼴 명목 크기와 화면 변환 후 높이는 구분한다.
+- 증거: build/srtl_2026-10-04_diary_balance/diary_balance_checks.json 및 before_*/balance_* 원본. 갤러리의 접힘 Diary037/039×두 배율4장 교체, 다른 주요92장 유지. 중간1.1/1.2 Diary 한영4장도 검사·검토 후 새 조정본으로 교체했다(diary_balance_checks_intermediate.json). 기존 승인 Ultra 자료는 유지.
+- 새 dev APK0956477DB8A552EB582C615D4C59192E9244893302742ED6BFC7363C4AFE387E 빌드·설치 성공, 공통 메모/기기별 크기 기존 테스트10개 통과. 이전 W절 AFF474… APK는 이번 추가 조정 전 이력이다. 기능 원장49개 집계는 동일하다.
+- 추가 조정 종료 시 사용자 확인용으로 한국어 Diary·접힘·글자1.3 화면을 남겼다.
