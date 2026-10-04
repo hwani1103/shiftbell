@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftbell/models/calendar_theme.dart';
 import 'package:shiftbell/widgets/wide_calendar_cell.dart';
+import 'package:shiftbell/widgets/complete_cell_memo_text.dart';
 
 void main() {
   test('Fold inner windows use split cells; covers retain original renderers',
@@ -71,8 +72,10 @@ void main() {
           }
           expect(dateRect.overlaps(annotationRect), isFalse);
           expect(dateRect.right, lessThanOrEqualTo(52));
-          final memo = find.byWidgetPredicate(
-              (w) => w is Text && (w.data?.contains('첫번째메모') ?? false));
+          final memo = find.byWidgetPredicate((w) =>
+              w is CompleteCellMemoText && w.text == '첫번째메모가매우긴경우에도');
+          final renderedMemo = find.descendant(
+              of: memo, matching: find.byType(Text));
           expect(tester.getRect(memo).left, greaterThanOrEqualTo(52));
           expect(tester.getRect(memo).bottom, lessThanOrEqualTo(57));
           final shift = find.byKey(const ValueKey('shift-badge-text'));
@@ -92,7 +95,7 @@ void main() {
             expect(corner.width, corner.height);
           }
           if (theme == CalendarThemeId.diary) {
-            expect(tester.widget<Text>(memo).data, isNot(startsWith('· ')));
+            expect(tester.widget<Text>(renderedMemo).data, isNot(startsWith('· ')));
             final decoration =
                 tester.widget<Container>(band).decoration! as BoxDecoration;
             expect(decoration.borderRadius,
@@ -112,7 +115,7 @@ void main() {
           }
           expect(tester.getRect(shift).center.dy,
               closeTo(tester.getRect(band).center.dy, .01));
-          expect(tester.widget<Text>(memo).style!.fontSize!,
+          expect(tester.widget<Text>(renderedMemo).style!.fontSize!,
               lessThanOrEqualTo(tester.widget<Text>(shift).style!.fontSize!));
           if (scale == 1.3) bandAtMaximum = tester.getSize(band).height;
           if (scale > 1.3) {

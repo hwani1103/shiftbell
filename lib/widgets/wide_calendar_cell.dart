@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'english_calendar_label.dart';
 import '../models/calendar_theme.dart';
 import 'fold_calendar_text_scale.dart';
+import 'complete_cell_memo_text.dart';
 
 /// Fold inner cells: keep typography responsive without stacking every
 /// field vertically. Cover screens never enter this renderer.
@@ -176,7 +177,7 @@ class WideCalendarCell extends StatelessWidget {
         var dateSize = 14.0;
         var memoThreeSize = 8.4;
         // A height-only fit handles unusually short windows. Never shrink a
-        // memo because its text is long: the right column uses ellipsis.
+        // memo because its text is long: the right column shows complete glyphs.
         final topInset = initial ? 2.0 : 0.0;
         double headerHeight() => diary
             ? math.max(lineHeight(shiftSize, shift: true) + 3,
@@ -406,9 +407,18 @@ class WideCalendarCell extends StatelessWidget {
                                                   borderRadius:
                                                       BorderRadius.circular(3))
                                               : null,
-                                          child: label(memo, memoSize, muted,
-                                              fixed: wrapAnnotations,
-                                              align: diary || bold || editorial
+                                          child: CompleteCellMemoText(memo,
+                                              style: TextStyle(
+                                                  fontSize: memoSize,
+                                                  height: 1.15,
+                                                  color: muted,
+                                                  fontWeight: FontWeight.w600,
+                                                  leadingDistribution:
+                                                      TextLeadingDistribution.even),
+                                              textScaler: wrapAnnotations
+                                                  ? TextScaler.noScaling
+                                                  : scaler,
+                                              textAlign: diary || bold || editorial
                                                   ? TextAlign.left
                                                   : TextAlign.center)),
                                     )))

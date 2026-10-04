@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftbell/models/calendar_theme.dart';
 import 'package:shiftbell/widgets/wide_calendar_cell.dart';
+import 'package:shiftbell/widgets/complete_cell_memo_text.dart';
 
 void main() {
   setUpAll(() async {
@@ -91,11 +92,13 @@ void main() {
               }
               final date = tester.getRect(find.text('29'));
               expect(rect.overlaps(date), isFalse);
-              final memo = find.byWidgetPredicate(
-                  (w) => w is Text && (w.data?.contains('첫메모') ?? false));
+              final memo = find.byWidgetPredicate((w) =>
+                  w is CompleteCellMemoText && w.text == '첫메모가긴경우');
               expect(tester.getRect(memo).left, greaterThanOrEqualTo(split));
-              final memoText = tester.widget<Text>(memo);
-              expect(memoText.data, '첫메모가긴경우');
+              final memoText = tester.widget<Text>(find.descendant(
+                  of: memo, matching: find.byType(Text)));
+              expect('첫메모가긴경우'.startsWith(memoText.data!), isTrue);
+              expect(memoText.data, isNot(contains('...')));
               expect(memoText.textScaler!.scale(1), 1);
               expect(memoText.style!.fontSize,
                   lessThanOrEqualTo(count <= 2 ? 10.5 : 8.4));

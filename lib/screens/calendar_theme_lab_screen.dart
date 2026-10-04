@@ -1,5 +1,6 @@
 // lib/screens/calendar_theme_lab_screen.dart
 import '../widgets/semantics_table_boundary.dart';
+import '../widgets/complete_cell_memo_text.dart';
 //
 // ⭐ 테스트 전용 탭 - 메인 달력탭 디자인 후보 10개를 나란히 비교해보기 위한
 // 프로토타입 공간. 실제 배포판에서는 설정에서 테마를 고르면 메인 달력탭 자체의
@@ -501,7 +502,7 @@ extension _Theme1 on _CalendarThemeLabScreenState {
             // ⭐ 메모끼리 간격도 한 번 더 살짝 키움(0.8h→1.h).
             ...memos.take(3).toList().asMap().entries.map((e) => Padding(
               padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.h, left: 1.w, right: 1.w),
-              child: Text(e.value, style: TextStyle(fontSize: 7.sp, color: Colors.grey.shade700, fontWeight: FontWeight.w600, height: 1.1), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+              child: CompleteCellMemoText(e.value, style: TextStyle(fontSize: 7.sp, color: Colors.grey.shade700, fontWeight: FontWeight.w600, height: 1.1), textAlign: TextAlign.center),
             )),
           ],
           ),
@@ -680,7 +681,7 @@ extension _Theme2 on _CalendarThemeLabScreenState {
               // 세로 초과를 안 만들면서 "줄 사이 간격"만 명시적으로 벌림.
               ...memos.take(3).toList().asMap().entries.map((e) => Padding(
                 padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.h),
-                child: Text(e.value, style: TextStyle(fontSize: 7.5.sp, color: Colors.grey.shade700, fontWeight: FontWeight.w600, height: 1.0), maxLines: 1, overflow: TextOverflow.ellipsis),
+                child: CompleteCellMemoText(e.value, style: TextStyle(fontSize: 7.5.sp, color: Colors.grey.shade700, fontWeight: FontWeight.w600, height: 1.0)),
               )),
               const Spacer(),
             ],
@@ -857,7 +858,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
             // 간격은 지금 그대로 두고(요청대로), 폰트만 더 키워서 그 여백을 씀
             // (7sp→8.5sp).
             SizedBox(height: 1.h),
-            ...memos.take(3).map((m) => Text(m, style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w600, color: const Color(0xFF37474F)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+            ...memos.take(3).map((m) => CompleteCellMemoText(m, style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w600, color: const Color(0xFF37474F)))),
           ],
         ),
       ),
@@ -990,7 +991,7 @@ extension _Theme5 on _CalendarThemeLabScreenState {
             SizedBox(height: 1.2.h),
             ...memos.take(3).toList().asMap().entries.map((e) => Padding(
               padding: EdgeInsets.only(top: e.key == 0 ? 0 : 2.h),
-              child: Text(e.value, style: TextStyle(fontSize: 7.sp, color: Colors.grey.shade600, fontWeight: FontWeight.w600, height: 1.0), maxLines: 1, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+              child: CompleteCellMemoText(e.value, style: TextStyle(fontSize: 7.sp, color: Colors.grey.shade600, fontWeight: FontWeight.w600, height: 1.0), textAlign: TextAlign.center),
             )),
           ],
         ),
@@ -1121,7 +1122,7 @@ extension _Theme8 on _CalendarThemeLabScreenState {
           ),
           if (_mockHolidayNameFor(context, day) != null)
             Text(_mockHolidayNameFor(context, day)!, style: TextStyle(fontSize: 6.sp, color: Colors.red.shade400, fontWeight: FontWeight.bold), maxLines: 1, overflow: TextOverflow.ellipsis),
-          ...memos.take(3).map((m) => Text(m, style: TextStyle(fontSize: 7.sp, color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          ...memos.take(3).map((m) => CompleteCellMemoText(m, style: TextStyle(fontSize: 7.sp, color: Colors.grey.shade600))),
         ],
         ),
       ),
@@ -1289,7 +1290,7 @@ extension _Theme9 on _CalendarThemeLabScreenState {
                 ),
               ...memos.take(3).map((m) => Padding(
                 padding: EdgeInsets.only(top: 0.8.h),
-                child: _chip(m, Colors.grey.shade200, Colors.black87),
+                child: _chip(m, Colors.grey.shade200, Colors.black87, memo: true),
               )),
             ],
           ),
@@ -1298,7 +1299,7 @@ extension _Theme9 on _CalendarThemeLabScreenState {
     );
   }
 
-  Widget _chip(String text, Color bg, Color fg) {
+  Widget _chip(String text, Color bg, Color fg, {bool memo = false}) {
     return Container(
       width: double.infinity,
       margin: EdgeInsets.only(bottom: 0.6.h),
@@ -1308,7 +1309,9 @@ extension _Theme9 on _CalendarThemeLabScreenState {
       // 안 됐음. 1.1로 고정해서 칩 5개가 쌓여도 계산 가능한 만큼만 차지하게 함.
       // ⭐ "너무 작다"는 피드백으로 5.8sp→7.5sp, 패딩도 같이 키워서 셀 바닥까지
       // 최대한 채움 - ClipRect가 안전망이라 커져서 못 들어가도 조용히 잘릴 뿐임.
-      child: Text(text, style: TextStyle(fontSize: 7.5.sp, color: fg, fontWeight: FontWeight.w600, height: 1.1), maxLines: 1, overflow: TextOverflow.ellipsis),
+      child: memo
+          ? CompleteCellMemoText(text, style: TextStyle(fontSize: 7.5.sp, color: fg, fontWeight: FontWeight.w600, height: 1.1))
+          : Text(text, style: TextStyle(fontSize: 7.5.sp, color: fg, fontWeight: FontWeight.w600, height: 1.1), maxLines: 1, overflow: TextOverflow.ellipsis),
     );
   }
 }
@@ -1442,7 +1445,7 @@ extension _Theme10 on _CalendarThemeLabScreenState {
                 children: [
                   ...memos.take(3).toList().asMap().entries.map((e) => Padding(
                     padding: EdgeInsets.only(top: e.key == 0 ? 0 : 1.2.h),
-                    child: Text(e.value, style: TextStyle(fontSize: 7.5.sp, color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    child: CompleteCellMemoText(e.value, style: TextStyle(fontSize: 7.5.sp, color: Colors.grey.shade600)),
                   )),
                 ],
               ),
@@ -1840,9 +1843,9 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
                           border: Border.all(color: isDark ? colorScheme.primary.withOpacity(0.5) : colorScheme.outline, width: 0.5),
                           borderRadius: BorderRadius.circular(2.r),
                         ),
-                        child: Text(m, textAlign: TextAlign.center, style: TextStyle(
+                        child: CompleteCellMemoText(m, textAlign: TextAlign.center, style: TextStyle(
                           fontSize: 8.sp, color: colorScheme.onSurface, fontWeight: FontWeight.w500, height: 1.0,
-                        ), maxLines: 1, overflow: TextOverflow.clip),
+                        )),
                       )).toList(),
                     ),
                   ),

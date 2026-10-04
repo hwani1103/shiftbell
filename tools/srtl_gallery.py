@@ -7,7 +7,7 @@ for directory in [root/'numbered_v3', *sorted(root.glob('scale_*'))]:
     manifest=directory/'manifest.json'
     if not manifest.exists():continue
     for row in json.loads(manifest.read_text(encoding='utf-8')).get('captures',[]):
-        if row.get('status')!='captured':continue
+        if row.get('status') not in ('captured','reviewed_pass'):continue
         rows.append({**row,'path':directory.name+'/'+row['filename']})
 html='''<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Fold8 Ultra 원본 화면 비교</title><style>

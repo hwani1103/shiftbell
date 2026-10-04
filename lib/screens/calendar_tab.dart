@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import '../widgets/fold_calendar_text_scale.dart';
 import '../widgets/english_calendar_label.dart';
 import '../widgets/calendar_memo_sizing.dart';
+import '../widgets/complete_cell_memo_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -3639,16 +3640,11 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   double get _mainBadgeHeight => _shiftBadgeHeight(
       TextStyle(fontSize: 11.sp, height: 1.15), _isFoldCalendar ? 15.h : 18.h);
   Widget _memoText(int count, String text, TextStyle style,
-      {TextAlign textAlign = TextAlign.center, bool ellipsis = false}) {
+      {TextAlign textAlign = TextAlign.center}) {
     final target =
         CalendarMemoSizing.scaleFor(MediaQuery.sizeOf(context), count);
-    Widget label(TextStyle resolved) => ellipsis
-        ? Text(text,
-            style: resolved,
-            textAlign: textAlign,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis)
-        : _fitText(text, resolved, textAlign: textAlign);
+    Widget label(TextStyle resolved) => CompleteCellMemoText(text,
+        style: resolved, textAlign: textAlign);
     if (target == 1) return label(style);
     return Builder(builder: (context) {
       final inheritedStyle = DefaultTextStyle.of(context).style.merge(style);
@@ -5325,7 +5321,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                   fontWeight: FontWeight.w500,
                                   height: 1.0,
                                 ),
-                                ellipsis: true,
                               ),
                             );
                           }).toList(),
