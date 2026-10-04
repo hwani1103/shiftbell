@@ -1,0 +1,30 @@
+{
+  "device": "SM-S948N",
+  "completedIds": [
+    "ALARM-002",
+    "HUMAN-002",
+    "HUMAN-003",
+    "HUMAN-004",
+    "HUMAN-005"
+  ],
+  "waitingIds": [
+    "RING-020",
+    "HUMAN-001",
+    "FRIEND-025",
+    "DEV2-005",
+    "START-002"
+  ],
+  "userDirectIds": [
+    "RING-020",
+    "HUMAN-001"
+  ],
+  "managedRows": 168,
+  "completedRows": 151,
+  "sourceRowsPreserved": 202,
+  "renameExistingIds": [
+    "REFRESH-011",
+    "FRIEND-003"
+  ],
+  "webRefreshRequired": true,
+  "evidenceRoot": "build\\device_remaining_2026-10-04"
+}
