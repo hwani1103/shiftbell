@@ -17,8 +17,8 @@ README.md는 입구, CLAUDE.md는 개발 규칙이다. 진행 상태·남은 일
 - 기본 잠금 알람·날짜 전환·일반 재부팅은 일상 조건이므로 대표 검사만 유지한다. USB 충전 화면유지 요청에 따라 현재 폰을 잠그거나 재부팅하지 않는다.
 
 지금 상태
-- 다음 세션 시작점: V절 인수인계. Fold8 Ultra는 사용자 확인 완료. 다음 연결 기기의 Flip8/Fold8/Flip4 레이아웃을 진행하며 주요 캡처는1.0/1.3,1.1/1.2는 필요 부분만 확인·필요시 증거 촬영한다.
-- 최신 추가 수정(U절): main white/dark 접힘 메모의 중복 좌우 패딩만 제거. KO/EN×1.0/1.3 해당8장을 다시 검토·교체했다. 최신 APK 6A0114ABAF7F848663415BB4A9C2CD5D387E4A2B9F644E13EF754CDE85803CFA. S/T절 전체 재촬영 때의 APK와 구분하며 각 캡처 manifest에 실제 해시를 보존한다.
+- 다음 세션 시작점: V절 기준과 W절 Fold8 결과. Fold8 Ultra는 사용자 확인 완료, Fold8은 실제 커버/내부 레이아웃 검증·수정·갤러리 작성 완료. 남은 기기는 Flip8/Flip4이며 아직 미검증이다. 주요 캡처1.0/1.3, 중간1.1/1.2는 필요한 부분만 확인한다.
+- 최신 추가 수정(W절): Fold8 커버 Diary의 메모가 지나치게 축소되는 문제를 카드 전체 맞춤으로 수정. 최종 dev APK SHA256 AFF474CD727226D74D31DDA7AEA8ACEE428A7E799140DCB12BBCE7284896AF15. U절 main white/dark 여백 결정도 포함하며 각 캡처 manifest에 실제 촬영 APK 해시를 보존한다.
 - Fold8 Ultra의 최신 레이아웃을 한글10/영어 지원6 테마×접힘/펼침×1.0/1.3로 검사했다. 달력64·전체근무표16·공유 웹16 = 96장과 웹1.3 하단2장을 육안 검토한 뒤 기존 갤러리 캡처를 전부 교체했다. 1.1/1.2와 오래된 ko-KR/en-US/numbered_v2/fixes 원본 폴더는 제거했다. 현재 화면비교.html에는 두 배율만 남는다.
 - 모든 테마 메모의 공통 좌우 안전 여백2dp, underline 접힘 총6dp/펼침 메모 영역 총7dp. 패딩을 뺀 공간 안에서 완전한 글자만 표시하고 말줄임표·부분 글자 잘림을 방지한다. underline/editorial의 년월+버튼4개는 기기별 분기 없이 공통 행이며 Fold 접힘/펼침에서 확인했다.
 - 갤러리의 달력 APK는 986C1C7956597F13116F1DA6116F629CF89667E6C21E6A6D692C3DFD833104B0. 이후 달력 소스는 그대로 두고 잠금 스누즈 충돌 안내 리소스 KO/EN 두 문장만 줄였다. 최종 APK는 937936AE543A34C219E5B92D5BB96911BC106EACABE51128AF71A9F4C56CA9BE; SRTL과 USB S26에 데이터 보존 설치. 캡처 APK와 최종 APK의 차이를 숨기지 않는다.
@@ -48,6 +48,7 @@ S: Fold8 Ultra 전체 재촬영·메모 여백·현재 갤러리
 T: 가치 재선정2건·충돌 안내 개선·최신 집계
 U: main white/dark 접힘 메모 공간 확대·8장 교체
 V: 다음 세션 인수인계 — Flip8/Fold8/Flip4
+W: Fold8 커버/내부 검증 완료·Diary 수정·96+10장 증거
 
 [A. Astra 재검토 후보 대조 — 2026-10-04 정정]
 
@@ -1461,3 +1462,24 @@ Fold8 Ultra에서 배운 필수 확인 기준
 - 참고 원본: artifacts/srtl_2026-10-03/Fold8Ultra/화면비교.html. 전체 재촬영 증거 build/srtl_2026-10-04_recapture, 마지막 메인 여백8장 증거 build/srtl_2026-10-04_main_spacing. 기존 .tmp 스크립트는 경로·기기·건수 가정이 있으므로 무검토 재실행 금지.
 - 작업 완료 시 최신 문서에 기기별 실제 검사·수정·캡처 위치·미지원 사유를 갱신하고 dev에 변경을 반영한다. 테스트하지 않은 기기를 완료로 표시하지 않는다.
 - 인수인계 작성 당시 worktree에 사용자 측 docs/이거읽고진행해.txt 삭제가 관찰됐다. 이 작업에서 만든 삭제가 아니므로 복구하거나 임의 커밋하지 않았다.
+
+Fold8 연결 착수 — 2026-10-04 18:00 KST (당시 기록, 재연결 후 완료 결과는 W절)
+- 사용자 90분 SRTL 제공으로 localhost:32078의 SM-F971N(Android17)을 확인. 지원 상태 CLOSED=0/OPENED=3을 실제 조회했다. 당시 wm 보고값은1248×1972/density420이며 활성 화면별 px/dp 대조 전이므로 커버/내부 확정 치수로 쓰지 않는다. 원래 font_scale=1.08.
+- 최신 dev APK(6A0114ABAF7F848663415BB4A9C2CD5D387E4A2B9F644E13EF754CDE85803CFA) install -r 성공, dev 시작/core616ms·DB/Firebase 초기화 로그 확인. SRTL 충전 화면유지 설정7 적용 명령을 보냈지만 적용 후 상태는 미확인.
+- 직후 VM 포트와 일반 adb shell이 응답하지 않았고, 해당 주소만 재연결했으나 failed to connect/offline. Flutter attach도 error: closed로 종료. 사용자에게 SRTL 플레이어/Remote Debug Bridge 확인을 요청했다. 화면검사·합성 fixture 준비 성공·캡처·레이아웃 PASS는 아직0이며 앱 결함으로 판정하지 않는다.
+- tools/srtl_gallery.py를 SRTL_DEVICE_NAME/SRTL_CAPTURE_ROOT로 기기별 출력하도록 수정하고 빈 결과의 갤러리 덮어쓰기와 미촬영 웹 하단 링크를 방지했다. Python 문법검사 통과. 기존 Fold8 Ultra 이미지/갤러리는 변경하지 않았다.
+- 재연결 후 새 serial/VM 주소로 이어갈 것. 출력 예정 artifacts/srtl_2026-10-04/Fold8, 원시 증거 build/srtl_2026-10-04_fold8. 현재 dev HEAD6c3f47f이며 기존 사용자 문서 삭제는 그대로 보존한다. 기능 잔여49개와 Fold8 미검증 상태는 유지.
+- 사용자 연결 확인 후 재조회에서 device 복귀 및 shell echo/model/PID29131 응답을 확인했다. 그러나 Flutter attach 이후 VM HTTP와 일반 shell이 다시 멈췄다. 실행한 attach/대기 명령을 종료하고 단독 shell 및 해당 serial reconnect/connect를 시도했으나 응답 없음/failed to connect. PC rdb 프로세스와32078 LISTEN은 살아 있어 SRTL 플레이어 단절로 단정하지 않는다. 간헐적 ADB 전달 문제로 기록하며 Remote Debug Bridge 재시작을 요청했다. 화면검사 완료로 가산할 증거는 없다.
+
+[W. 2026-10-04 Fold8 커버/내부 레이아웃 완료]
+- 사용자 재연결 후 localhost:32078의 ADB/VM이 정상 응답하여 V절 작업을 완료했다. SM-F971N/Android17, 실제 커버1248×1972px =475.43×751.24dp, 내부2448×1848px =932.57×704dp, DPR2.625. CLOSED0/OPENED3을 직접 전환하고 원본과 Flutter View 치수를 대조했다.
+- 발견·수정: 커버 Diary에서 날짜/공휴일 헤더가 높이를 차지하면 메모 영역만 과도하게 축소되어 글자가 매우 작아졌다. CalendarMemoSizing 적용 화면의 Diary는 카드 전체 높이를 먼저 맞추도록 _fitOriginalThemeCell을 수정했다. 공통 메모2dp와 완전한 글자 단위 표시를 유지한다. 기존 Ultra의 길고 좁은 커버는 조건에서 제외되고 내부 WideCalendarCell 경로도 변경하지 않았다. Ultra 실기기를 이번에 재시험한 것으로 기록하지 않는다.
+- 주요 원본96장: 한글10/영어 지원6 달력×접힘/펼침×1.0/1.3=64, 전체 조 근무표 공통/개별16, 친구 공유 웹16. 전부 육안 검토하여 reviewed_pass로 기록했다. 영어 미지원4테마×2자세×2배율=16슬롯은 사유를 적은 N/A이며96장에 포함하지 않는다. 번호표001~056을 유지했다.
+- 달력64조합의 메모·변환 좌표·안전 여백·헤더 기하 검사를 통과했다. minimal/materialCard 가장자리, underline 날짜 간 구분, underline/editorial 년월+4버튼 같은 행, main white/dark 메모 공간도 원본으로 확인했다. 영어 달력/웹에 한국 공휴일 이름이 표시되지 않았다.
+- 중간 배율: KO Diary/underline/editorial 및 EN Diary×1.1/1.2=8조합 기하 통과. 수정한 Diary만 한영×두 배율4장을 추가 보존했다. 접힘→펼침→접힘에서 2026-10월과 선택12일 유지. 전체근무표 한영×접힘/펼침1.3의 마지막31일·마지막 조 접근4장, 공유 웹 한영 접힘1.3 하단2장도 검토했다. 주요96장 외 추가10장이다.
+- 갤러리: artifacts/srtl_2026-10-04/Fold8/화면비교.html. numbered_v3는1.0, scale_1.3은1.3, web_bottom2장, supplemental8장. 루트 manifest.json에96장+추가10장 SHA256/치수/검토 상태와 N/A16슬롯을 모았다. 모든 PNG 해시와 실제 크기를 대조했다. 기존 Fold8 Ultra 승인96+2장 및 다른 기기 자료는 변경하지 않았다.
+- 최종 dev debug APK SHA256 AFF474CD727226D74D31DDA7AEA8ACEE428A7E799140DCB12BBCE7284896AF15, 빌드·SRTL 설치 성공. 네이티브80장 중 수정 영향 없는 KO 커버9테마×두 배율18장은 최초 APK6A0114AB…의 원본을 유지하고 나머지62장(수정 Diary8장 포함)은 최종 APK로 촬영했다. 웹16장은 별도 main.dart.js 해시를 보존한다. 모두 최종 APK로 촬영한 것으로 취급하지 않는다.
+- 검증: complete_cell_memo_text/wide_calendar_cell/ultra_calendar_cell27개와 calendar_memo_sizing4개, 총31개 테스트 통과. 원시 증거 build/srtl_2026-10-04_fold8/verified_*.json64개, extra_checks.json, remaining_capture.log, followup.log. 수정 전 diary_1_3_diagnostic.png와 수정 후 diary_candidate2.png를 보존했다.
+- 도구: srtl_gallery.py의 기기/출력 경로 환경변수·빈 갤러리 방지·추가 증거 링크, srtl_web_layouts.mjs 지정 번호 재촬영, srtl_web_scroll_check.mjs 실제 PNG 크기 기준 스와이프, srtl_foldable_followup.py 중간 배율·자세 전환·근무표 하단 검사. Python/Node 문법 및 git diff 검사 통과.
+- 웹은 실제 FriendCalendarView를 사용하는 로컬 fixture이며 운영 공유/설치 PWA 검증은 아니다. Chrome CanvasKit semantics 미제공 시 원본 육안으로 언어를 확인했고 브라우저 실행 오류는 없었다. 사용자 최종 가독성 승인을 대신하지 않는다. 기능 잔여49개는 그대로이고 Flip8/Flip4는 아직 미검증이다.
+- 종료 상태: Fold8 한국어/글자1.0/접힘/mainWhite 달력, 합성 fixture 유지. 충전 화면유지7, Awake/mStayOn=true 확인. 개인 USB 폰에는 fixture나 변경을 적용하지 않았다. 다음 연결 기기는 V절 기준으로 Flip8 또는 Flip4를 진행한다.

@@ -9,6 +9,7 @@ const scale=process.env.SRTL_SCALE || '1.0';
 const buildDir=process.env.SRTL_WEB_BUILD || 'build/srtl_web_fixture';
 const dest=`${process.env.SRTL_CAPTURE_ROOT || 'artifacts/srtl_2026-10-03'}/${device}/${process.env.SRTL_CAPTURE_SET || 'numbered_v2'}/`;
 const catalog=JSON.parse(fs.readFileSync('artifacts/srtl_2026-10-03/capture_catalog.json','utf8'));
+const selectedNumbers=new Set((process.env.SRTL_CAPTURE_NUMBERS || '').split(',').filter(Boolean).map(n=>n.trim().padStart(3,'0')));
 fs.mkdirSync(dest,{recursive:true});
 const adb='C:/Users/Administrator/AppData/Local/Android/sdk/platform-tools/adb.exe';
 const serial=process.env.SHIFTBELL_AUDIT_SERIAL;
@@ -28,6 +29,8 @@ try{
   run('shell','cmd','device_state','state',state==='closed'?'0':'3');await sleep(2500);
   run('shell','input','keyevent','KEYCODE_WAKEUP');run('shell','wm','dismiss-keyguard');
   for(const lang of ['ko','en'])for(const pwa of [0,1]){
+   const row=catalog.captures.find(r=>r.screen==='friend' && r.variant===`pwa${pwa}` && r.posture===state && r.language===(lang==='ko'?'ko-KR':'en-US'));
+   if(selectedNumbers.size && !selectedNumbers.has(row.number))continue;
    const name=`friend_web_${lang}_${state}_pwa${pwa}`;
    const url=`${base}?lang=${lang}&pwa=${pwa}&scale=${scale}`;
    await send('Page.bringToFront');
@@ -55,7 +58,6 @@ try{
    if(start<0)throw Error('Missing PNG');fs.writeFileSync(out+name+'.png',data.subarray(start));
    const metrics=await send('Runtime.evaluate',{expression:'JSON.stringify({url:location.href,width:innerWidth,height:innerHeight,dpr:devicePixelRatio})',returnByValue:true});
    fs.writeFileSync(out+name+'.json',JSON.stringify({metrics:metrics.result.value,errors},null,2));console.log(name,metrics.result.value);
-   const row=catalog.captures.find(r=>r.screen==='friend' && r.variant===`pwa${pwa}` && r.posture===state && r.language===(lang==='ko'?'ko-KR':'en-US'));
    fs.writeFileSync(dest+row.filename,data.subarray(start));
    const manifestPath=dest+'manifest.json';
    const manifest=fs.existsSync(manifestPath)?JSON.parse(fs.readFileSync(manifestPath,'utf8')):{device,serial,captures:[]};

@@ -3721,9 +3721,14 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   Widget _fitOriginalThemeCell(CalendarThemeId theme, Widget cell) {
     final layout = AppLayout.of(context);
-    if (theme == CalendarThemeId.diary ||
-        (!layout.usesBoundedCalendar &&
-            MediaQuery.sizeOf(context).width > 430)) {
+    if (theme == CalendarThemeId.diary &&
+        !CalendarMemoSizing.appliesTo(MediaQuery.sizeOf(context))) {
+      return cell;
+    }
+    // Diary's date/annotation header can consume the memo area even on a
+    // wider cover screen. Fit its whole card before the memo-only fallback.
+    if (theme != CalendarThemeId.diary && !layout.usesBoundedCalendar &&
+        MediaQuery.sizeOf(context).width > 430) {
       return cell;
     }
     if (layout.usesBoundedCalendar) {

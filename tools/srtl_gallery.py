@@ -1,7 +1,10 @@
 """Offline review index: original device PNGs, filterable without a server."""
 import json
+import os
+from html import escape
 from pathlib import Path
-root=Path('artifacts/srtl_2026-10-03/Fold8Ultra')
+device=os.environ.get('SRTL_DEVICE_NAME','Fold8Ultra')
+root=Path(os.environ.get('SRTL_CAPTURE_ROOT','artifacts/srtl_2026-10-03'))/device
 rows=[]
 for directory in [root/'numbered_v3', root/'scale_1.3']:
     manifest=directory/'manifest.json'
@@ -23,5 +26,17 @@ body{margin:0;background:#edf0f5;color:#202635;font:15px system-ui,sans-serif}he
 <span id="count"></span></header><main id="grid"></main>
 <dialog id="dialog"><button id="close">닫기</button><button id="fit">화면 맞춤 / 원본 크기</button><a id="original" target="_blank">원본 PNG 열기</a><div id="view" class="fit"><img id="large"></div></dialog>
 <script>const rows=DATA;const $=id=>document.getElementById(id);function render(){const chosen=rows.filter(r=>String(r.font_scale||'1.0')===$('scale').value&&(!$('lang').value||r.language===$('lang').value)&&(!$('posture').value||r.posture===$('posture').value)&&(!$('screen').value||r.screen===$('screen').value)).sort((a,b)=>a.number.localeCompare(b.number));$('grid').replaceChildren();$('count').textContent=chosen.length+'장';for(const r of chosen){const article=document.createElement('article'),h=document.createElement('h2'),im=document.createElement('img'),p=document.createElement('p');h.textContent=r.number+' · '+r.variant+' · '+r.language+' · '+(r.posture==='open'?'펼침':'접힘');im.src=r.path;im.loading='lazy';im.alt=h.textContent;p.className='meta';p.textContent='배율 '+r.font_scale+' · '+(r.pixels||[]).join(' × ');im.onclick=()=>{$('large').src=r.path;$('original').href=r.path;$('view').className='fit';$('dialog').showModal()};article.append(h,im,p);$('grid').append(article)}}for(const id of ['scale','lang','posture','screen'])$(id).onchange=render;$('close').onclick=()=>$('dialog').close();$('fit').onclick=()=>$('view').classList.toggle('fit');render();</script></html>'''
+html=html.replace('Fold8 Ultra',escape(device))
+html=html.replace('2026-10-04 메모 여백 수정 후 1.0·1.3 전체 재촬영본입니다.',
+                  '글자 배율 1.0·1.3 화면 비교 자료입니다.')
+for language,label in [('ko','한글'),('en','영어')]:
+    relative=f'web_bottom/friend_web_{language}_closed_1.3_bottom.png'
+    if not (root/relative).exists():
+        html=html.replace(f'<a href="{relative}">{label}</a>',f'{label} 미촬영')
+assert rows, 'No captures; do not replace the gallery with an empty page'
+supplemental=sorted((root/'supplemental').glob('*.png'))
+if supplemental:
+    links=' · '.join(f'<a href="supplemental/{escape(p.name)}" target="_blank">{escape(p.stem)}</a>' for p in supplemental)
+    html=html.replace('<select id="scale">',f'<details><summary>추가 확인 원본</summary><p>{links}</p></details><select id="scale">')
 (root/'화면비교.html').write_text(html.replace('DATA',json.dumps(rows,ensure_ascii=False)),encoding='utf-8')
 print('Gallery:',len(rows),'images')

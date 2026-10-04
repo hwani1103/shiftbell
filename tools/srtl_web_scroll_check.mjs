@@ -19,7 +19,11 @@ try{
  for(const lang of ['ko','en']){
   await send('Page.bringToFront');
   await send('Page.navigate',{url:`http://127.0.0.1:${port}/?lang=${lang}&pwa=1&scale=1.3`});await sleep(7000);
-  run('shell','input','swipe','530','1900','530','700','500');await sleep(1000);
+  const screen=run('exec-out','screencap','-p');
+  const pngStart=screen.indexOf(Buffer.from([137,80,78,71,13,10,26,10]));
+  if(pngStart<0)throw Error('Missing PNG before scroll');
+  const width=screen.readUInt32BE(pngStart+16),height=screen.readUInt32BE(pngStart+20);
+  run('shell','input','swipe',String(Math.round(width*.5)),String(Math.round(height*.8)),String(Math.round(width*.5)),String(Math.round(height*.35)),'500');await sleep(1000);
   const bytes=run('exec-out','screencap','-p');
   fs.writeFileSync(`${out}/friend_web_${lang}_closed_1.3_${suffix}.png`,bytes.subarray(bytes.indexOf(Buffer.from([137,80,78,71,13,10,26,10]))));
   console.log(lang,'bottom captured; visual review required');
