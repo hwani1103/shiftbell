@@ -5299,7 +5299,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                               width: double.infinity,
                               margin: EdgeInsets.only(bottom: _mainMemoGap),
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 2.w,
                                   vertical: _mainMemoVerticalPadding),
                               decoration: BoxDecoration(
                                 color: isDarkMode
