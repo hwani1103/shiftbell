@@ -48,6 +48,24 @@ import 'restore_progress_screen.dart';
 import '../services/app_analytics.dart';
 import '../services/ad_consent_service.dart';
 
+/// Existing reset confirmation, shared with its narrow-screen regression test.
+Widget buildScheduleResetConfirmation(BuildContext context) => AlertDialog(
+        title: Text(context.l10n.shiftResetSchedule),
+        content: Text(context.l10n.settingsResetScheduleConfirm),
+        actions: [
+          AppSecondButton(
+            variant: AppSecondButtonVariant.neutral,
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.commonCancel),
+          ),
+          AppSecondButton(
+            variant: AppSecondButtonVariant.danger,
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(context.l10n.commonReset),
+          ),
+        ],
+      );
+
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar; // ⭐ 6번 기능: 스와이프 callback
 
@@ -271,22 +289,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
   Future<void> _resetSchedule() async {
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.shiftResetSchedule),
-        content: Text(context.l10n.settingsResetScheduleConfirm),
-        actions: [
-          AppSecondButton(
-            variant: AppSecondButtonVariant.neutral,
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(context.l10n.commonCancel),
-          ),
-          AppSecondButton(
-            variant: AppSecondButtonVariant.danger,
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(context.l10n.commonReset),
-          ),
-        ],
-      ),
+      builder: buildScheduleResetConfirmation,
     );
 
     if (confirm == true) {

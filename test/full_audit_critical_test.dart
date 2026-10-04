@@ -18,6 +18,7 @@ import 'package:shiftbell/services/backup_watcher.dart';
 import 'package:shiftbell/services/custom_alarm_service.dart';
 import 'package:shiftbell/services/database_service.dart';
 import 'package:shiftbell/services/firebase_bootstrap.dart';
+import 'package:shiftbell/services/friend_sync_service.dart';
 import 'package:shiftbell/services/restore_coordinator.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -146,6 +147,8 @@ void main() {
   });
 
   test('AUD-A01b schedule reset commits deletion before Native cancellation', () async {
+    SharedPreferences.setMockInitialValues({'friend_share_enabled':true,
+      'friend_share_my_name':'Owner', 'friend_share_generation':3});
     await service.insertAlarm(Alarm.fromMap(row(42, 'custom', DateTime.now().add(const Duration(days: 1)))));
     await service.insertAlarmTemplate(shiftType: 'Day', time: '07:00', alarmTypeId: 1);
     onCancelAlarm = () async {
@@ -156,6 +159,10 @@ void main() {
     addTearDown(notifier.dispose);
     await notifier.refresh();
     await notifier.resetSchedule();
+    expect((await FriendSyncService.instance.getShareState()).intent,
+      FriendShareIntent.stopPending, reason: 'Offline reset persists revocation');
+    await FriendSyncService.instance.onAppStarted(null);
+    expect(await FriendSyncService.instance.isSharingEnabled(), false);
     expect(calls.where((c) => c.method == 'cancelNativeAlarm'), hasLength(1));
     expect(await db.query('alarms'), isEmpty);
   });

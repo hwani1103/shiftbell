@@ -2,6 +2,7 @@
 // 테스트 호스트는 Firebase 미초기화(firebaseReady=false)라 제출 결과가 항상 pending이다.
 // 서버 ACK 확인·5초 timeout 후 늦은 ACK·rejected 경로는 Firestore 주입 지점이 없어 여기서 실행하지 못함(NOT_RUN, S9).
 import 'package:flutter/widgets.dart';
+import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/models/shift_schedule.dart';
@@ -43,6 +44,13 @@ void main() {
   });
 
   Future<SharedPreferences> prefs() => SharedPreferences.getInstance();
+
+  Future<void> acknowledgeLocalForLegacyTest(SharedPreferences p, {bool dirty = false}) async {
+    final record = jsonDecode(p.getString('friend_share_state_v2')!) as Map<String, dynamic>;
+    record['confirmed'] = record['desired'];
+    record['dirty'] = dirty;
+    await p.setString('friend_share_state_v2', jsonEncode(record));
+  }
 
   test('F-S01 새 설치: off·회차 0·dirty 없음, intent off 영속', () async {
     final s = await svc.getShareState();
@@ -100,7 +108,7 @@ void main() {
     final s = await svc.getShareState();
     expect((s.intent, s.generation), (FriendShareIntent.off, 0));
     final p = await prefs();
-    expect((p.getString(kName), p.getBool(kEnabled)), (null, null));
+    expect((p.getString(kName), p.getBool(kEnabled)), (null, false));
 
     // 빈 이름 검사는 Firebase 접근보다 먼저 - 준비된 상태여도 네트워크/인증을 건드리지 않고 null
     firebaseReady = true;
@@ -137,6 +145,8 @@ void main() {
     await p.setString(kConfirmed, d1);
     await p.setBool(kDirty, false);
 
+    await acknowledgeLocalForLegacyTest(p);
+
     await svc.syncIfEnabled(_schedule({'2026-09-21': '주', '2026-09-20': '휴'}));
     expect(p.getBool(kDirty), isFalse, reason: '키 순서만 다른 동일 내용');
     expect(p.getString(kDesired), d1);
@@ -152,6 +162,7 @@ void main() {
     await svc.syncIfEnabled(_schedule());
     final p = await prefs();
     await p.setString(kConfirmed, p.getString(kDesired)!);
+    await acknowledgeLocalForLegacyTest(p, dirty: true);
     // dirty=true 그대로 → 재개 시 다시 제출 시도(준비 전이라 pending) 후에도 dirty 유지
     await svc.onAppResumed(_schedule());
     expect(p.getBool(kDirty), isTrue);
@@ -204,7 +215,7 @@ void main() {
     expect(await svc.fetchByOwnerId('abc'), isNull);
   });
 
-  test('F-S15 공유 상태 키 7개는 전부 백업 제외 목록에 있음 (G4 인계)', () {
-    expect(FriendSyncService.backupExcludedPreferenceKeys, {kEnabled, kName, kIntent, kDirty, kGen, kDesired, kConfirmed});
+  test('F-S15 공유 상태와 원자적 v2 기록은 전부 백업 제외 목록에 있음 (G4 인계)', () {
+    expect(FriendSyncService.backupExcludedPreferenceKeys, {kEnabled, kName, kIntent, kDirty, kGen, kDesired, kConfirmed, 'friend_share_state_v2'});
   });
 }

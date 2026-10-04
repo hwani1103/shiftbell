@@ -18,10 +18,73 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /friend_schedules/{ownerId} {
+      function owner() {
+        return request.auth != null && request.auth.uid == ownerId;
+      }
+      function v2(data) {
+        return data.get('protocolVersion', 0) == 2;
+      }
+      function validSchedule(data) {
+        return data.keys().hasAll(['ownerName', 'isRegular', 'updatedAt'])
+          && data.ownerName is string
+          && (data.ownerName.size() <= 80 ||
+              (!v2(data) && resource != null &&
+               data.ownerName == resource.data.get('ownerName', null)))
+          && data.isRegular is bool
+          && data.updatedAt is timestamp
+          && (data.get('pattern', null) == null ||
+              (data.pattern is list && data.pattern.size() <= 128))
+          && (data.get('todayIndex', null) == null || data.todayIndex is int)
+          && (data.get('startDate', null) == null ||
+              (data.startDate is string && data.startDate.size() <= 64))
+          && (data.get('shiftColors', null) == null ||
+              (data.shiftColors is map && data.shiftColors.size() <= 5000))
+          && (data.get('assignedDates', null) == null ||
+              (data.assignedDates is map && data.assignedDates.size() <= 5000))
+          && (!data.isRegular || (data.pattern is list && data.pattern.size() > 0
+              && data.todayIndex is int && data.todayIndex >= 0
+              && data.todayIndex < data.pattern.size() && data.startDate is string));
+      }
+      function validLegacy(data) {
+        return !('protocolVersion' in data)
+          && data.keys().hasOnly(['ownerName', 'isRegular', 'pattern', 'todayIndex',
+              'startDate', 'shiftColors', 'assignedDates', 'generation', 'revoked', 'updatedAt'])
+          && validSchedule(data)
+          && (data.get('generation', null) == null ||
+              (data.generation is int && data.generation >= 0))
+          && (data.get('revoked', null) == null || data.revoked is bool);
+      }
+      function validV2(data) {
+        return v2(data)
+          && data.keys().hasAll(['protocolVersion', 'session', 'generation', 'revision', 'revoked', 'updatedAt'])
+          && data.session is string && data.session.size() == 36
+          && data.generation is int && data.generation >= 1
+          && data.generation <= 9007199254740991
+          && data.revision is int && data.revision >= 1
+          && data.revision <= 9007199254740991
+          && data.revoked is bool && data.updatedAt == request.time
+          && (data.revoked
+            ? data.keys().hasOnly(['protocolVersion', 'session', 'generation', 'revision', 'revoked', 'updatedAt'])
+            : data.keys().hasOnly(['protocolVersion', 'session', 'generation', 'revision', 'revoked', 'updatedAt',
+                'ownerName', 'isRegular', 'pattern', 'todayIndex', 'startDate', 'shiftColors', 'assignedDates'])
+              && validSchedule(data));
+      }
+      function validTransition(next) {
+        let old = resource.data;
+        return !v2(old)
+          ? next.generation > old.get('generation', 0)
+          : ((next.generation == old.generation && next.session == old.session
+                && next.revision > old.revision && (!old.revoked || next.revoked))
+              || (next.generation > old.generation && next.session != old.session));
+      }
       allow get: if true;
       allow list: if false;
-      allow create, update: if request.auth != null && request.auth.uid == ownerId;
-      allow delete: if request.auth != null && request.auth.uid == ownerId;
+      allow create: if owner() && (validLegacy(request.resource.data) || validV2(request.resource.data));
+      // Upgrade each owner's document in place: existing SB2 links and old readers
+      // still work. Once upgraded, neither a legacy overwrite nor delete can undo it.
+      allow update: if owner() && ((!v2(resource.data) && validLegacy(request.resource.data))
+        || (validV2(request.resource.data) && validTransition(request.resource.data)));
+      allow delete: if owner() && !v2(resource.data);
     }
 
     // ⭐ 2026-08-20 추가 - "새 버전이 있어요" 안내를 Play In-App Update API(전파 지연에

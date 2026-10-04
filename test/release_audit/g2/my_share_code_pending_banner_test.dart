@@ -1,6 +1,7 @@
 // T13 G2 테스트 - 공유 화면 대기 상태 안내·재시도 (G2-02 연결 4a8f67e, #24 "실패/대기를 사실대로 표시")
 // Firebase 미초기화 호스트: 공유 중(active)이어도 ownerId를 못 받아 연결 실패 카드가 함께 보이는 상태까지만 재현 가능.
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -19,9 +20,7 @@ import '../g0/g0_support.dart';
 void main() {
   final l10n = lookupAppLocalizations(const Locale('ko'));
 
-  // FriendSyncService는 싱글톤이고 직렬 큐 꼬리(_serialTail)가 처음 만들어진 zone에 묶인다.
-  // 첫 testWidgets의 FakeAsync zone에서 만들어지면 그 테스트가 끝난 뒤 큐 콜백이 영영 안 돌아
-  // 다음 테스트의 재시도가 멈춤(테스트 하네스 한정 - 앱은 zone이 하나). 실제 zone에서 먼저 생성해 둔다.
+  // Keep the shared service available across widget lifecycles.
   late Directory dir;
   setUpAll(() async {
     FriendSyncService.instance;
@@ -114,6 +113,9 @@ void main() {
 
   testWidgets('F-W04 active+반영 완료(dirty false): 대기 안내 없음', (tester) async {
     await pumpScreen(tester, {
+      'friend_share_state_v2': jsonEncode({'intent':'active', 'generation':1,
+        'session':'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa', 'revision':1,
+        'dirty':false, 'explicitStart':false, 'name':'홍', 'desired':'confirmed', 'confirmed':'confirmed'}),
       'friend_share_intent': 'active', 'friend_share_enabled': true,
       'friend_share_generation': 1, 'friend_share_dirty': false, 'friend_share_my_name': '홍',
     });

@@ -210,6 +210,10 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
 
   Future<void> resetSchedule() async {
     try {
+      // Persist stop_pending before deleting local data. Even if reset/native
+      // cancellation fails or the process exits, the old schedule stays private
+      // once the pending server revocation is acknowledged. Never auto-resume.
+      await FriendSyncService.instance.stopSharing();
       // Delete rows/templates atomically before Native cancelIfGone checks them.
       final removedIds = await DatabaseService.instance.deleteAllAlarms(
         clearTemplates: true,
