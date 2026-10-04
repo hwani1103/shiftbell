@@ -353,9 +353,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 onGenerateTitle: (context) => context.l10n.appTitle,
                 // ⭐ 영어 현지화 인프라 - flutter_localizations(SDK) + 이 앱의
                 // AppLocalizations(lib/l10n/app_ko.arb, app_en.arb에서 생성).
-                // 기본은 기기 로케일을 그대로 따름(localeResolutionCallback 없음
-                // → Flutter가 supportedLocales 중 기기 로케일과 가장 잘 맞는 걸
-                // 자동 선택하고, 지원 안 하는 로케일이면 첫 번째=ko로 폴백).
+                // 한국어 기기는 한국어, 그 외 기기는 영어로 선택한다.
+                // 영국 등 일부 지역은 영어권 날짜 형식과 월요일 시작을 적용한다.
                 localizationsDelegates: const [
                   AppLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,

@@ -415,6 +415,18 @@ void main() {
 
   test('release regional defaults do not equate English with the US', () {
     for (final locale in [
+      const Locale('en', 'US'),
+      const Locale('en', 'GB'),
+      const Locale('en', 'ZA'),
+      const Locale('en', 'AE'),
+      const Locale('en', 'PH'),
+      const Locale('af', 'ZA'),
+      const Locale('ar', 'AE'),
+      const Locale('fil', 'PH'),
+    ]) {
+      expect(resolveReleaseLocale([locale], locales).languageCode, 'en');
+    }
+    for (final locale in [
       const Locale('en', 'GB'),
       const Locale('en', 'IE'),
       const Locale('fr', 'FR')

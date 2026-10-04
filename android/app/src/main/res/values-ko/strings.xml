@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alarm_type_sound_vibration_short">소리+진동</string>
+    <string name="alarm_type_vibration_short">진동</string>
+    <string name="alarm_type_silent_short">무음</string>
+    <string name="snooze_collision_message">%1$s 알람(%2$s)이 있어 미루지 않고 종료했어요.</string>
+    <!-- ⭐ 홈 화면 위젯 목록(길게 눌러 위젯 추가)에 노출되는 설명 문구 -->
+    <string name="calendar_widget_description">전주/이번주/다음주 근무 일정을 홈 화면에서 바로 볼 수 있어요.</string>
+    <!-- ⭐ 실제 수면 기록 위젯(캘린더 위젯과 별개) - 취침/기상 원터치 토글 -->
+    <string name="sleep_widget_description">버튼으로 취침/기상을 기록해요.</string>
+    <string name="sleep_widget_brand">교대시계</string>
+
+    <!-- Korean labels override the English default for Korean device locales. -->
+    <string name="app_widget_calendar_label">교대시계 달력</string>
+    <string name="app_widget_sleep_label">교대시계 수면기록</string>
+
+    <!-- ⭐ 알람 울림 화면(activity_alarm.xml) - 스와이프 안내/버튼 아래 라벨.
+         "09:30"/"주간" 같은 다른 TextView는 Kotlin이 실제 값으로 setText하는
+         디자인 placeholder라 번역 대상 아님(AlarmActivity.kt 참고). -->
+    <string name="alarm_swipe_hint">위로 스와이프해서 끄기</string>
+    <string name="alarm_snooze_label">5분 후</string>
+    <string name="alarm_dismiss_label">끄기</string>
+    <string name="one_tap_alarm_label">원터치 알람</string>
+
+    <!-- ⭐ 알림 채널 이름(설정 → 앱 → 알림 화면에 그대로 노출됨) -->
+    <string name="channel_alarm_result">결과 알림</string>
+    <string name="channel_alarm_guard">사전 알림</string>
+    <string name="channel_schedule_notify">일정 알림</string>
+    <string name="channel_restore_notify">백업 복원 안내</string>
+
+    <!-- ⭐ 알람 울림 중 제어 알림(7777) -->
+    <string name="notif_ringing_content">알람 울림 중</string>
+    <string name="notif_action_snooze">5분 후</string>
+    <string name="notif_action_dismiss">알람 끄기</string>
+    <!-- %1$s = 연장된 새 시각(예: "07:05") -->
+    <string name="notif_snoozed_title">%1$s로 연장되었습니다</string>
+
+    <!-- ⭐ 20분 전 사전 알림. %1$s = 알람 시각(예: "07:00") -->
+    <string name="notif_guard_title">잠시 후 알람이 울립니다 (%1$s)</string>
+
+    <!-- ⭐ 복원 미완료 안내 -->
+    <string name="notif_restore_title">백업 복원이 완료되지 않았어요</string>
+    <string name="notif_restore_text">알람은 지금 데이터 기준으로 동작해요. 앱을 열어 복원을 마무리해 주세요.</string>
+
+    <!-- ⭐ 2026-09-22(영어화) - 홈 위젯 문구. 예전엔 레이아웃·Kotlin에 한국어로 박혀 있어 영어에서도 한글로 보였음 -->
+    <string name="widget_setup_schedule_first">앱에서 근무 스케줄을 먼저 설정해주세요</string>
+    <!-- 달력 위젯 요일 머리글, 일요일부터 -->
+    <string-array name="widget_weekday_labels">
+        <item>일</item><item>월</item><item>화</item><item>수</item><item>목</item><item>금</item><item>토</item>
+    </string-array>
+    <string name="sleep_widget_sleep">수면</string>
+    <string name="sleep_widget_wake">기상</string>
+    <string name="sleep_widget_no_shift">근무없음</string>
+    <string name="sleep_widget_not_set">미설정</string>
+    <string name="sleep_widget_unknown">정보 없음</string>
+    <string name="sleep_widget_tab_off">탭 꺼짐</string>
+    <string name="widget_no_shift">없음</string>
+    <string name="alarm_default_label">알람</string>
+    <string name="channel_guard_description">20분 전 사전 알림</string>
+    <string name="channel_result_description">스누즈/타임아웃 결과</string>
+    <string name="channel_ring_description">근무 시간 알림</string>
+    <string name="widget_preview_day">주간</string>
+    <string name="widget_preview_night">야간</string>
+    <string name="widget_preview_off">휴무</string>
+    <string name="widget_weekday_0">일</string>
+    <string name="widget_weekday_1">월</string>
+    <string name="widget_weekday_2">화</string>
+    <string name="widget_weekday_3">수</string>
+    <string name="widget_weekday_4">목</string>
+    <string name="widget_weekday_5">금</string>
+    <string name="widget_weekday_6">토</string>
+    <string name="alarm_clock_first">%1$s (첫 번째)</string>
+    <string name="alarm_clock_second">%1$s (두 번째)</string>
+</resources>
