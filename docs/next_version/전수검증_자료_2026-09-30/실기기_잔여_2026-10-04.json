@@ -14,10 +14,7 @@
     "DEV2-005",
     "START-002"
   ],
-  "userDirectIds": [
-    "RING-020",
-    "HUMAN-001"
-  ],
+  "userDirectIds": [],
   "managedRows": 168,
   "completedRows": 151,
   "sourceRowsPreserved": 202,
@@ -26,5 +23,11 @@
     "FRIEND-003"
   ],
   "webRefreshRequired": true,
-  "evidenceRoot": "build\\device_remaining_2026-10-04"
+  "evidenceRoot": "build\\device_remaining_2026-10-04",
+  "prodConfirmationReusableIds": [
+    "RING-020",
+    "HUMAN-001"
+  ],
+  "audioRetestRequiredFromDiff": false,
+  "audioDiffEvidence": "알람_음향_diff_2026-10-04.json"
 }

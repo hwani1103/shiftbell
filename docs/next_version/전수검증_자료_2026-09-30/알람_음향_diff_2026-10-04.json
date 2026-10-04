@@ -1,0 +1,58 @@
+{
+  "productionRef": "v1.0.23",
+  "productionVersion": "1.0.23+25",
+  "devRef": "942b97c718c66dd8714ec5bc1fcb7c017fe49636",
+  "identicalAudioCore": [
+    {
+      "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmPlayer.kt",
+      "productionBlobOrTree": "9a86f1a186681acd7f5e49e6148c636d08b5cbc1",
+      "devBlobOrTree": "9a86f1a186681acd7f5e49e6148c636d08b5cbc1",
+      "identical": true
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmStreamVolume.kt",
+      "productionBlobOrTree": "97498c4e62bd0042f61733bb0067f0a9a2caa02f",
+      "devBlobOrTree": "97498c4e62bd0042f61733bb0067f0a9a2caa02f",
+      "identical": true
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/VolumeCalibration.kt",
+      "productionBlobOrTree": "61796a686a5bf7e0c9c750400c0ed97a4230b150",
+      "devBlobOrTree": "61796a686a5bf7e0c9c750400c0ed97a4230b150",
+      "identical": true
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/RingingAlarmTracker.kt",
+      "productionBlobOrTree": "47b92453a0805b4d8e50a0577f33cb373b6374a2",
+      "devBlobOrTree": "47b92453a0805b4d8e50a0577f33cb373b6374a2",
+      "identical": true
+    },
+    {
+      "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/RestoreGate.kt",
+      "productionBlobOrTree": "fa61bd7ec435012cbe4dfb7cb602e606d554b2c3",
+      "devBlobOrTree": "fa61bd7ec435012cbe4dfb7cb602e606d554b2c3",
+      "identical": true
+    },
+    {
+      "path": "android/app/src/main/res/raw",
+      "productionBlobOrTree": "22805e9157d7a9f263fe1cdcbe3c423828b1dd25",
+      "devBlobOrTree": "22805e9157d7a9f263fe1cdcbe3c423828b1dd25",
+      "identical": true
+    },
+    {
+      "path": "lib/models/alarm_type.dart",
+      "productionBlobOrTree": "22da19fd231400ed34317a1cbe2a109d8561c2c0",
+      "devBlobOrTree": "22da19fd231400ed34317a1cbe2a109d8561c2c0",
+      "identical": true
+    }
+  ],
+  "changedSurroundingFlows": [
+    "snooze collision",
+    "cover display control",
+    "alarm layout/localization",
+    "alarm timestamp/booking"
+  ],
+  "noNewFullAudioRetestRequiredByDiff": true,
+  "priorProdConfirmationReusableOnlyForSameDeviceOsAndAudioConditions": true,
+  "unobservedAudioFeelNotMarkedPass": true
+}
