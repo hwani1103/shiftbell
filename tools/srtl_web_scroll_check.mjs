@@ -7,6 +7,8 @@ const run=(...args)=>execFileSync(adb,['-s',serial,...args],{maxBuffer:20*1024*1
 const out=process.env.SHIFTBELL_AUDIT_OUT || 'build/srtl_2026-10-03_ultra_final';
 const port=process.env.SRTL_WEB_PORT || '8095';
 const suffix=process.env.SRTL_SCROLL_SUFFIX || 'bottom';
+const posture=process.env.SRTL_POSTURE || 'closed';
+if(!['closed','open'].includes(posture))throw Error('Invalid SRTL_POSTURE');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const tabs=await (await fetch('http://127.0.0.1:9222/json')).json();
 const tab=tabs.find(t=>t.url.startsWith(`http://127.0.0.1:${port}/`));
@@ -15,7 +17,7 @@ ws.onmessage=({data})=>{const m=JSON.parse(data);if(m.id){pending.get(m.id)?.(m)
 await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j});
 function send(method,params={}){return new Promise((r,j)=>{const n=++id;const timer=setTimeout(()=>j(Error('timeout')),15000);pending.set(n,m=>{clearTimeout(timer);m.error?j(Error(JSON.stringify(m.error))):r(m.result)});ws.send(JSON.stringify({id:n,method,params}));});}
 try{
- run('shell','cmd','device_state','state','0');await sleep(3000);
+ run('shell','cmd','device_state','state',posture==='open'?'3':'0');await sleep(3000);
  for(const lang of ['ko','en']){
   await send('Page.bringToFront');
   await send('Page.navigate',{url:`http://127.0.0.1:${port}/?lang=${lang}&pwa=1&scale=1.3`});await sleep(7000);
@@ -25,7 +27,7 @@ try{
   const width=screen.readUInt32BE(pngStart+16),height=screen.readUInt32BE(pngStart+20);
   run('shell','input','swipe',String(Math.round(width*.5)),String(Math.round(height*.8)),String(Math.round(width*.5)),String(Math.round(height*.35)),'500');await sleep(1000);
   const bytes=run('exec-out','screencap','-p');
-  fs.writeFileSync(`${out}/friend_web_${lang}_closed_1.3_${suffix}.png`,bytes.subarray(bytes.indexOf(Buffer.from([137,80,78,71,13,10,26,10]))));
+  fs.writeFileSync(`${out}/friend_web_${lang}_${posture}_1.3_${suffix}.png`,bytes.subarray(bytes.indexOf(Buffer.from([137,80,78,71,13,10,26,10]))));
   console.log(lang,'bottom captured; visual review required');
  }
 }finally{ws.close();}

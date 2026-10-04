@@ -26,6 +26,7 @@ function send(method,params={}){return new Promise((resolve,reject)=>{const n=++
 try{
  await send('Page.enable');await send('Runtime.enable');
  for(const state of ['closed','open']){
+  if(process.env.SRTL_POSTURE && process.env.SRTL_POSTURE!==state)continue;
   run('shell','cmd','device_state','state',state==='closed'?'0':'3');await sleep(2500);
   run('shell','input','keyevent','KEYCODE_WAKEUP');run('shell','wm','dismiss-keyguard');
   for(const lang of ['ko','en'])for(const pwa of [0,1]){
