@@ -8,7 +8,7 @@ README.md는 입구, CLAUDE.md는 개발 규칙이다. 진행 상태·남은 일
 
 지금 상태
 - SRTL 예약 불가, 연결 대기. 6묶음 캡처 교체 요청 유지. 사용자 연결 USB의 화면 켜짐 검사와 PC 검토를 진행했고 결과는 I·J절이다.
-- 최신 dev APK 빌드 성공, USB SM-S948N 데이터 유지 설치/일부 잔여 검증 완료. Fold8 Ultra 설치/교체 캡처는 미실행. SHA256 937035C89B5FED9E1EA69A747804C82F948CF754A9D300AA1ECFE7449BC74422.
+- 일반 dev APK로 원복 설치/정확알람 허용 확인. SHA256 860C98741CBC39FBA9000EB301961FD45610FD8CAFC7A80F6D727BD2590A96F1. L·M절 추가검증/원본복구 완료, 별도 인증격리 시험 진행 중. Fold8 Ultra 교체 캡처 미실행.
 - Fold8 Ultra 대상 23번호 × 1.0/1.3 = 46장. 고정 fixture로 재현, 직접 검토 후 해당 기존 문제 캡처 교체. 예상 연결 30분, 결함 수정 필요 시 별도 시간.
 - 기존 기능 원장 202행의 완료/부분/기기대기/직접/정책 구분과 증거 한계는 유지한다. 문서 통합을 시험 완료로 세지 않는다.
 
@@ -23,6 +23,8 @@ G: 화면 체크리스트 항목 색인
 H: 문서 통합·삭제 기록
 I: 2026-10-04 초기 PC·USB 검사·서버 규칙 검토
 J: 2026-10-04 추가 전수 잔여 검사·제품 결함2건 수정·최종 원복
+K: 운영 공유웹 실제 배포·영어/오류복구 검증
+L: 메모 즉시편집·실제 DB오류/권한실패 검증(진행 중)
 
 [A. Astra 재검토 후보 대조 — 2026-10-04 정정]
 
@@ -48,7 +50,7 @@ A3. SQLite 근무표와 SharedPreferences 조 설정 사이 중단 — 옛 결�
 - 현재 DB v26은 근무표와 team_schedule_config를 같은 SQLite 트랜잭션에 저장한다. SQL 실패 롤백, 오래된 편집 거절, 커밋 전 PID 종료·재시작 후 일관성/DBOS9 확인을 완료했다.
 - 근거: build/srtl_2026-10-03_ultra/team_atomic_rollback.log, team_atomic_verify.log 및 로컬 회귀.
 - 옛 Astra 문서의 'durable journal 미해결', '새 구조의 SRTL 종료 미실행'은 폐기된 상태다. 두 저장소 결함을 다시 미해결로 되살리지 않는다.
-- DB 커밋 이후 OS 일부 예약 실패는 별개 REFRESH-015 잔여다. DB 트랜잭션을 OS까지 포함한 원자성으로 설명하지 않는다.
+- DB 커밋 이후 OS 일부 예약 실패 REFRESH-015는 L절 실제 Native/OS 실패주입·재시도로 완료했다. DB 트랜잭션을 OS까지 포함한 원자성으로 설명하지 않는다.
 
 A4. DST·시간대 이동·스누즈·재부팅 — 수정 완료와 잔여 조합 구분
 - API33 격리 에뮬레이터 NY→London에서 시간대 이동으로 과거가 된 fixed의 OS 예약이 남는 DB10/OS11 결함을 재현했다. 스누즈 절대시각 결함과 별개다.
@@ -441,13 +443,13 @@ Flip 커버 기능 잔여를 이 목록에 떠넘기지 말고 별도 기기 확
 아래는 기능 원장과 증거 파일에서 생성한 최신 목록이다. 기존 문서의 숫자보다 이 목록을 우선한다.
 
 [원장 재집계]
-202행 = 완료 129 + 제외 11 + 미종결 62. I절 초기5행에 이어 J절에서 잔여11행 추가 완료. 과거 PASS 재검증과 접근성 수정은 중복 가산하지 않는다.
-상태별: PASS 118, 부분 확인 40, 해당 없음 9, 수정 후 PASS 9, PASS(현 정책) 2, 기기연결대기 13, 검토 필요 1, 수정 후 부분 확인 3, 취소(기능삭제) 2, 직접확인대기 5
+202행 = 완료 141 + 제외 11 + 미종결 50. I절 초기5행에 이어 J절에서 잔여11행 추가 완료. 과거 PASS 재검증과 접근성 수정은 중복 가산하지 않는다.
+상태별: PASS 127, 부분 확인 32, 해당 없음 9, 수정 후 PASS 12, PASS(현 정책) 2, 기기연결대기 11, 검토 필요 1, 수정 후 부분 확인 1, 취소(기능삭제) 2, 직접확인대기 5
 이전 SRTL 대조에서 보완 증거를 18행에 연결했다. RING-019는 부분→PASS, RING-004는 기기대기→부분 확인.
 DELETE-001은 울림중 전체삭제 수정 후 실제 재검증 근거를 더해 수정 후 PASS로 변경.
 이전 SRTL 기능 검사의 상당수는 이미 PASS인 행의 추가 증거 또는 새 조별규칙 기능이다.
-미종결62행은 새로62개 전체 시나리오를 처음부터 실행한다는 뜻이 아니다. 부분행의 빠진 조건만 아래에 남겼다.
-미종결 구분: 부분43 / 기기대기13 / 사용자직접5 / 정책1. DEV2-003은 없는 공유시트 하위조건 N/A 정정으로 닫았다.
+미종결50행은 새로50개 전체 시나리오를 처음부터 실행한다는 뜻이 아니다. 부분행의 빠진 조건만 아래에 남겼다.
+미종결 구분: 부분33 / 기기대기11 / 사용자직접5 / 정책1. 부분행의 남은 조건만 실행한다.
 후속 SRTL 레이아웃 세션의 필수 기능 재실행 수는 0이다. 남은 기능 검사는 아래 별도 세션에 배정한다.
 이전 SRTL 집계 원칙: 기존112 PASS에 겹친 재검증을 중복 가산하지 않고, 3종/경계/UI 전체조건 중 일부만 한 행은 정직하게 부분으로 유지했기 때문이다.
 원장 원본 보존: build/handoff_reconcile_2026-10-04/functional_inventory_before.csv
@@ -531,7 +533,7 @@ REFRESH-018 | PASS | 같은 실제 시각 전날/당일/다음날 템플릿 경�
   build/srtl_2026-10-03_ultra/team_switch_A.log
 설정에서 내 스케줄 변경 시 전체조 삭제/취소 완료 증거는 보존했다(문서 압축 원본 SRTL_재연결_대기_2026-10-03.txt).
 옛 prefs/DB 조 저장 불일치 결함은 DB v26 단일 트랜잭션과 위 rollback/kill/restart 증거로 후속 보완됐다.
-단 커밋 직후 OS 일부 예약 실패는 REFRESH-015에 별도 남아 있으며 이를 해결 완료로 합치지 않는다.
+당시 남은 커밋 직후 OS 일부 실패는 L절 REFRESH-015에서 후속 검증했다.
 
 [실제 잔여 기능 목록 — ID별 현재 상태·방법·의도·위험]
 
@@ -585,21 +587,6 @@ F05 | ONETAP-004
   ONETAP-004 [부분 확인] 달력 원터치 패널 / 설정 칸 / 월말 밤에 내일 할당
     완료 기준: 다음 달 1일로 assigned_day/예약 일치
     기존 완료/제약: 부분 확인: 2026-10-02 API33 실제5월31일/12월31일23:50에서 내일00:00/23:59 할당. 날짜·assigned_day·실제 OS2 일치. 원터치 패널 경계날 UI 탭은 미완. onetap_month/year_boundary_*
-
-F09 | ONETAP-014 ONETAP-015 REFRESH-015
-담당/환경: Codex·전용 실패주입 환경
-남은 조건: 실제 Native/OS 예약 실패 및 일부 성공 후 재시도
-방법: 일회성 dev 실패주입 지점으로 원터치 생성, 삭제 후 대체고정, DB커밋후 일부OS실패를 각각 재현. 실패안내·롤백·성공ID 중복없음·재시도 복구 확인. 개인폰 권한을 무작정 끄지 않음.
-의도/실패 위험: DB에는 있지만 OS에 없는 알람, 성공으로 거짓 표시, 이미 성공한 예약의 중복.
-  ONETAP-014 [부분 확인] 달력 원터치 패널 / 설정 칸 / 원터치 생성 중 Native 예약 예외
-    완료 기준: 실패 안내; 알람 행·생성 로그 롤백
-    기존 완료/제약: 부분 확인: 로컬 MethodChannel에서 scheduleNativeAlarm 예외를 주입하자 scheduleFailed, DB 알람·생성 원장·이력0, 같은 슬롯 재시도 성공. 실기기 SCHEDULE_EXACT_ALARM appop ignore는 USE_EXACT_ALARM 때문에 실제 거부되지 않아 Native 실패 경로는 미확인; 설정/시험 알람 원복
-  ONETAP-015 [부분 확인] 달력 원터치 패널 / 설정 칸 / 원터치 삭제 뒤 대체 고정 예약 실패
-    완료 기준: 실패/일부실패 안내, 재시도 경로; 성공으로 오표시 안 함
-    기존 완료/제약: 부분 확인: 2026-10-02 추가 로컬 SQLite+채널 실패 주입1PASS. 원터치 삭제 이력1, 대체 고정 행1 유지, reservationFailed=true/fixedReplacement=false 및 Native 재시도 요청 확인. 실제 기기 예약 거부 UI는 미완. replacement_failure_test.log
-  REFRESH-015 [기기연결대기] 달력 근무 수정 / 설정 / 갱신 엔진 / DB 커밋 직후 OS 예약 일부 실패
-    완료 기준: 실패 ID 추적·재시도; 이미 성공한 ID 중복 없음
-    기존 완료/제약: 
 
 F11 | RING-001
 담당/환경: Codex·기기 기능 세션
@@ -676,15 +663,6 @@ F18 | REFRESH-003
     완료 기준: 고정만 필요한 diff; 원터치/스누즈 보존; DB 예정 epoch와 OS 예약 대응; 중복/부활 없음
     기존 완료/제약: 
 
-F19 | REFRESH-006
-담당/환경: Codex·권한 통제 기기
-남은 조건: 다른 OS/설치 조건의 실제 정확한 알람 권한 거부→재허용. 현 USB는 시스템 허용 스위치 비활성(J절).
-방법: 현재 USE_EXACT_ALARM 정책에서 실제 권한 박탈 가능한 OS/설치조건인지 먼저 확인. 불가능하면 appop ignore를 성공한 거부로 세지 말고 적용불가 근거를 남김. 가능한 환경에서 혼합예약 복구 확인.
-의도/실패 위험: 권한 재허용 후 일부 알람 미예약 또는 잘못된 시험설계.
-  REFRESH-006 [기기연결대기] 정확한 알람 권한 재허용 / 고정·원터치·스누즈·개별 삭제/종류 예외가 섞인 데이터 준비→트리거
-    완료 기준: 고정만 필요한 diff; 원터치/스누즈 보존; DB 예정 epoch와 OS 예약 대응; 중복/부활 없음
-    기존 완료/제약: 
-
 F22 | DST-001 DST-002 DST-003 DST-004 DST-005
 담당/환경: Codex·격리 날짜/시간대 환경
 남은 조건: DST 경계의 잠금/오버레이/알림 UI별 실제 회차
@@ -721,14 +699,11 @@ F23 | DST-006 DST-007 DST-008
     완료 기준: 이월·재예약 시 offset 보존; 첫 시각이 둘째로 밀리지 않음
     기존 완료/제약: 부분 확인: 2026-10-02 첫 회차01:04-04 스누즈 실제 백업 덮어쓰기→격리 API33 실제 재부팅 후 ID54/epoch1793509440000 DB·OS 보존. 일반 프로세스 종료 전용 경로는 별도 미완. dst_restore_*/dst_boot_result.json
 
-F24 | BACKUP-005 BACKUP-006
+F24 | BACKUP-006
 담당/환경: Codex·격리 저장 실패 환경
 남은 조건: 파일 교체 단계 실패·공간 부족·검증 읽기 실패의 실제 저장 경로
 방법: 구형단일슬롯→두슬롯 및 MediaStore 교체 실패를 테스트 전용 자료로 주입. 기존 정상파일 hash/성공시각 유지 확인. 개인폰 공간 강제고갈 금지.
 의도/실패 위험: 정상백업 소실 또는 실패했는데 마지막 성공시각 갱신.
-  BACKUP-005 [부분 확인] 설정 백업/복원 및 중단 복구 / 이전 단일슬롯 형식→첫 두슬롯 저장
-    완료 기준: 성공 후에만 구파일 정리; 실패 시 정상 사본 유지
-    기존 완료/제약: 부분 확인: 2026-10-02 구버전 저장시각 fallback/slot_v2 메타 이행 실기기 통과. 실제 옛 파일 삭제 조건은 미완. backup_changes_and_queue
   BACKUP-006 [부분 확인] 설정 백업/복원 및 중단 복구 / MediaStore 쓰기 실패·공간 부족·검증 읽기 실패
     완료 기준: 이전 정상 파일 유지; 마지막 성공시각/지문 거짓 갱신 없음
     기존 완료/제약: 부분 확인: 16MB 초과 실제 저장 검증 실패 시 기존 두 슬롯 SHA256 불변·성공시각 불변. 저장소 가득참/권한회수 별도
@@ -757,23 +732,11 @@ F26 | BACKUP-017 BACKUP-018 BACKUP-021
     완료 기준: 실패 안내·작업 파일 보존·잠금 해제·재시도 가능
     기존 완료/제약: 부분 확인: 실제 Native 고정 INSERT 실패로 최종 재조정 실패→prefsApplied job 보존·잠금 해제. safeEnd도 실패 시 job 보존, 오류 제거 후 resume 및 DB/OS16 일치. OS 초기 정리 실패 별도
 
-F27 | FRIEND-002 FRIEND-005 FRIEND-008 FRIEND-009 FRIEND-010
+F27 | FRIEND-010
 담당/환경: Codex·서버/수신자 별도 세션
 남은 조건: 이미 서버서비스로 확인한 변경/ACK/세대/실패/캐시의 실제 앱→수신앱·웹 연결
 방법: 원장 ID별 순서(변경·복원·중지·재시작·실패·pull to refresh)대로 테스트 계정/코드 사용. 실제 업로드와 수신화면을 같이 대조하고 읽기수도 기록. 로컬fixture로 대체 금지.
 의도/실패 위험: 늦은 응답이 공유를 부활시키거나 수신자에 오래된 근무표가 최신처럼 보일 위험.
-  FRIEND-002 [부분 확인] 내 공유코드 / 친구목록 / 수신자 앱·웹 / 공유 활성→근무 A→B→A
-    완료 기준: 최종 스냅샷과 수신자 달력 일치; 불필요 같은 payload 업로드 생략
-    기존 완료/제약: 부분 확인: 2026-10-02 실기기 실제 서버에 동일세대 A→B→A 패턴/날짜배정 업로드, 서버 강제조회·수신자 디코딩·dirty=false 일치. 서버 시험문서 삭제. 근무편집 UI 연속경로는 별도 미완. friend_actual_server_aba
-  FRIEND-005 [부분 확인] 내 공유코드 / 친구목록 / 수신자 앱·웹 / 공유 활성→백업 복원
-    완료 기준: 현재 공유 의도 유지; 복원한 패턴 dirty 재업로드
-    기존 완료/제약: 부분 확인: 본인 dev 문서에서 실제 서버 ACK/변경/오프라인/중지재시도/민감필드 제외 확인. 수신자 별도 앱·웹 화면과 모든 순서까지 완료 아님
-  FRIEND-008 [부분 확인] 내 공유코드 / 친구목록 / 수신자 앱·웹 / 업로드 ACK 대기 중 공유 중지
-    완료 기준: 뒤늦은 ACK가 active를 부활시키지 않음
-    기존 완료/제약: 부분 확인: 본인 dev 문서에서 실제 서버 ACK/변경/오프라인/중지재시도/민감필드 제외 확인. 수신자 별도 앱·웹 화면과 모든 순서까지 완료 아님
-  FRIEND-009 [부분 확인] 내 공유코드 / 친구목록 / 수신자 앱·웹 / 중지→즉시 다시 시작→오래된 응답
-    완료 기준: generation 순서 유지; 최신 의도만 유효
-    기존 완료/제약: 부분 확인: 본인 dev 문서에서 실제 서버 ACK/변경/오프라인/중지재시도/민감필드 제외 확인. 수신자 별도 앱·웹 화면과 모든 순서까지 완료 아님
   FRIEND-010 [부분 확인] 내 공유코드 / 친구목록 / 수신자 앱·웹 / 업로드 실패/권한거부/타임아웃
     완료 기준: dirty 유지·확정 상태 거짓 갱신 없음; 재시도 수렴
     기존 완료/제약: 부분 확인: 본인 dev 문서에서 실제 서버 ACK/변경/오프라인/중지재시도/민감필드 제외 확인. 수신자 별도 앱·웹 화면과 모든 순서까지 완료 아님
@@ -787,7 +750,7 @@ F28 | FRIEND-004
     완료 기준: 빈 중간 상태와 새 패턴의 서버 갱신 시점을 기록; 과거 표를 최신이라고 표시하지 않음
     기존 완료/제약: 검토 필요: 스케줄 null에 syncIfEnabled 호출 시 서버 이전 근무표 잔존 확인; 초기화 때 공유 중지 정책 결정 필요
 
-F29 | FRIEND-022 FRIEND-023 FRIEND-024 FRIEND-025
+F29 | FRIEND-022 FRIEND-025
 담당/환경: Codex·운영 공유웹/인증/PWA
 남은 조건: 인증실패복구와 실제 Hosting 배포후 첫열기/재방문/오류/기존PWA 캐시
 방법: 친구 공유웹의 실제 배포 버전을 확인하고 테스트 코드로 인증실패→회복, 기존탭/새탭/?code 보존, 삭제코드/오프라인→재시도, 실제PWA설치/업데이트를 대조. 관리자웹 차트배포와 무관.
@@ -795,12 +758,6 @@ F29 | FRIEND-022 FRIEND-023 FRIEND-024 FRIEND-025
   FRIEND-022 [기기연결대기] 내 공유코드 / 친구목록 / 수신자 앱·웹 / 익명 인증 준비 실패 후 회복
     완료 기준: 알람/달력 사용 가능; 공유 재시도 시 준비 상태 반영
     기존 완료/제약: 
-  FRIEND-023 [수정 후 부분 확인] 내 공유코드 / 친구목록 / 수신자 앱·웹 / 웹 링크 첫 열기/재방문/새 탭
-    완료 기준: 현재 서버 데이터 표시; 로딩 무한대기 없음
-    기존 완료/제약: 수정 후 부분 확인: 2026-10-02 공개 웹 현재 버전은 새 탭 첫 조회 정상이나 Flutter 라우터가 ?code=를 지워 새로고침 시 근무표가 사라짐. web_main 초기 라우트에 URL 보존 수정. 로컬 새 웹빌드에서 코드 URL/색상/근무표 새로고침 유지 확인; 운영 배포 뒤 재검증 필요. web_local_reload_*
-  FRIEND-024 [수정 후 부분 확인] 내 공유코드 / 친구목록 / 수신자 앱·웹 / 웹 링크 삭제된 코드/손상 코드/네트워크 오류
-    완료 기준: 명확한 오류·재시도; 캐시를 최신이라고 오해시키지 않음
-    기존 완료/제약: 수정 후 부분 확인: 2026-10-02 공개 웹 네트워크 차단 시 오류 안내 확인. 로컬 수정 웹빌드에서 차단→오류→차단 해제→새로고침 후 동일 근무표 복귀, ?code= 유지. 운영 배포 뒤 재검증 필요. web_local_blocked_*
   FRIEND-025 [기기연결대기] 내 공유코드 / 친구목록 / 수신자 앱·웹 / 웹 배포 후 기존 열린 탭·PWA
     완료 기준: 정적 캐시와 근무표 최신성 분리; 새 자산·아이콘 실제 갱신 확인
     기존 완료/제약: 
@@ -814,7 +771,7 @@ F30 | START-001
     완료 기준: 각 3회 정도, Android TotalTime·core ready·첫 사용 프레임 기록; 반복 원인 없이 추가 실행 안 함
     기존 완료/제약: 부분 확인: 2026-10-03 수정 APK 업데이트 설치 및 dev 프로세스 콜드6회 측정. 원본 보존 위해 이 폰 앱 삭제 첫설치는 하지 않음; 이전격리재설치 기록 별도. startup_*
 
-F31 | START-002 START-003 START-004 START-005
+F31 | START-002 START-004 START-005
 담당/환경: Codex·격리 지연/오류/성능 환경
 남은 조건: 실제 외부 네트워크/DB실패/광고 지연/배포환경 제보 재현
 방법: 기존 로컬모의/SQLite/USB측정 PASS를 반복하지 않음. 실제 실패주입이 필요한 잔여와 운영성능 제보를 구분해 한 원인당 필요한 측정만 수행.
@@ -822,9 +779,6 @@ F31 | START-002 START-003 START-004 START-005
   START-002 [수정 후 부분 확인] 앱 시작 / 온라인 / 비행기모드 / 느린 네트워크에서 시작
     완료 기준: Firebase 최대10초 경로와 DB/광고 layout 시간을 구분; 제보 원인 확정은 실제 증거 필요
     기존 완료/제약: 수정 후 부분 확인: 2026-10-02 격리 API33 온라인 콜드 시작 am start-W 3086ms, 비행기모드 콜드 시작 3048ms. 오프라인에서 Jua 원격 폰트 실패의 처리되지 않은 오류 재현 후 공식 OFL 폰트 앱 자산에 포함. 새APK 오프라인 재시작/Startup core ready, 폰트 예외 없음; 로컬 네트워크금지 폰트로드1PASS. 느린 네트워크·제보자의 운영기기 재현은 미완.
-  START-003 [부분 확인] 앱 시작 / DB 오류 / DB open 미완료→재시도→늦게 온 이전 결과
-    완료 기준: 15초 진행·45초 재시도 정책, 오래된 초기화 결과 무시
-    기존 완료/제약: 부분 확인: 2026-10-03 로컬 실제 SQLite 공유 open 실패→재시도 및 gate 이전 시도 늦은 성공/오류·dispose·크기변경 통과. 실기기 DB open 고장 강제 주입은 하지 않음. startup_database_retry/startup_gate_test
   START-004 [부분 확인] 앱 시작 / UMP 동의 / SDK 초기화 장기 지연
     완료 기준: 핵심 화면 사용 가능; 늦은 광고는 현재 창 폭 사용
     기존 완료/제약: 부분 확인: 2026-10-03 UMP 지연/실패와 SDK 초기화 virtual1분 지연 동안 핵심화면 탭/늦은 광고 현재 폭/폐기 후 결과 통과. 실제 광고사업자 지연 강제 주입 아님. ad_sdk_delay/ad_startup_layout
@@ -947,8 +901,8 @@ ONETAP-010 | PASS | 고정 먼저 생성→동일 분 원터치 | 후속: 재실
 ONETAP-011 | PASS | 원터치 먼저 생성→고정 템플릿 추가 | 후속: 재실행하지 않음
 ONETAP-012 | PASS | 가려진 고정 존재→원터치 개별 삭제 | 후속: 재실행하지 않음
 ONETAP-013 | PASS | 가려진 고정 변경/삭제→원터치 삭제 | 후속: 재실행하지 않음
-ONETAP-014 | 부분 확인 | 원터치 생성 중 Native 예약 예외 | 후속: Codex·전용 실패주입 환경
-ONETAP-015 | 부분 확인 | 원터치 삭제 뒤 대체 고정 예약 실패 | 후속: Codex·전용 실패주입 환경
+ONETAP-014 | 수정 후 PASS | 원터치 생성 중 Native 예약 예외 | 후속: 재실행하지 않음
+ONETAP-015 | PASS | 원터치 삭제 뒤 대체 고정 예약 실패 | 후속: 재실행하지 않음
 ONETAP-016 | PASS | 원터치 울림 중 설정 칸 삭제 | 후속: 재실행하지 않음
 ONETAP-017 | PASS | 구 dev preset_slot 없는 custom 행과 새 칸 혼재→칸 삭제 | 후속: 재실행하지 않음
 ONETAP-018 | PASS | 패널 선택 상태에서 뒤로가기 두 번 | 후속: 재실행하지 않음
@@ -986,7 +940,7 @@ REFRESH-002 | PASS | 고정·원터치·스누즈·개별 삭제/종류 예외�
 REFRESH-003 | 기기연결대기 | 고정·원터치·스누즈·개별 삭제/종류 예외가 섞인 데이터 준비→트리거 | 후속: 사용자+Codex 공동
 REFRESH-004 | PASS | 고정·원터치·스누즈·개별 삭제/종류 예외가 섞인 데이터 준비→트리거 | 후속: 재실행하지 않음
 REFRESH-005 | PASS | 고정·원터치·스누즈·개별 삭제/종류 예외가 섞인 데이터 준비→트리거 | 후속: 재실행하지 않음
-REFRESH-006 | 기기연결대기 | 고정·원터치·스누즈·개별 삭제/종류 예외가 섞인 데이터 준비→트리거 | 후속: Codex·권한 통제 기기
+REFRESH-006 | PASS | 고정·원터치·스누즈·개별 삭제/종류 예외가 섞인 데이터 준비→트리거 | 후속: 재실행하지 않음
 REFRESH-007 | 수정 후 PASS | 고정·원터치·스누즈·개별 삭제/종류 예외가 섞인 데이터 준비→트리거 | 후속: 재실행하지 않음
 REFRESH-008 | PASS | 고정·원터치·스누즈·개별 삭제/종류 예외가 섞인 데이터 준비→트리거 | 후속: 재실행하지 않음
 REFRESH-009 | PASS | 날짜 근무 A→B→A | 후속: 재실행하지 않음
@@ -995,7 +949,7 @@ REFRESH-011 | 수정 후 PASS | 근무명 A/B 맞교환 | 후속: 재실행하�
 REFRESH-012 | PASS | 여러 날짜 일괄배정과 Native 갱신 경합 | 후속: 재실행하지 않음
 REFRESH-013 | PASS | 동일 설정으로 연속 갱신 | 후속: 재실행하지 않음
 REFRESH-014 | 수정 후 PASS | 고정 생성 중 DB 실패 | 후속: 재실행하지 않음
-REFRESH-015 | 기기연결대기 | DB 커밋 직후 OS 예약 일부 실패 | 후속: Codex·전용 실패주입 환경
+REFRESH-015 | PASS | DB 커밋 직후 OS 예약 일부 실패 | 후속: 재실행하지 않음
 REFRESH-016 | PASS | 10일 롤링 마지막 날·11일째 및 전후날 기여 | 후속: 재실행하지 않음
 REFRESH-017 | PASS | 개별 override 29/30/31일 경과 | 후속: 재실행하지 않음
 REFRESH-018 | PASS | 같은 실제 시각 전날/당일/다음날 템플릿 경쟁 | 후속: 재실행하지 않음
@@ -1014,7 +968,7 @@ BACKUP-001 | PASS | 직접→자동→직접→자동 저장 | 후속: 재실행
 BACKUP-002 | PASS | 직접/자동 동시 요청 및 저장 중 추가 변경 | 후속: 재실행하지 않음
 BACKUP-003 | PASS | 백업 내용 동일→설정만 변경→메모만 변경 | 후속: 재실행하지 않음
 BACKUP-004 | PASS | 스케줄 초기화 직후 자동 백업 | 후속: 재실행하지 않음
-BACKUP-005 | 부분 확인 | 이전 단일슬롯 형식→첫 두슬롯 저장 | 후속: Codex·격리 저장 실패 환경
+BACKUP-005 | PASS | 이전 단일슬롯 형식→첫 두슬롯 저장 | 후속: 재실행하지 않음
 BACKUP-006 | 부분 확인 | MediaStore 쓰기 실패·공간 부족·검증 읽기 실패 | 후속: Codex·격리 저장 실패 환경
 BACKUP-007 | 부분 확인 | 파일 선택 취소·권한 취소 | 후속: Codex·기기 기능 세션
 BACKUP-008 | 수정 후 PASS | 잘린 JSON·빈 파일·초과 크기·지원하지 않는 버전 | 후속: 재실행하지 않음
@@ -1042,14 +996,14 @@ BACKUP-029 | PASS | dbApplied 단계 이후 dev 프로세스 종료→재시작�
 BACKUP-030 | PASS | prefsApplied 단계 이후 dev 프로세스 종료→재시작→이어서 복원 / 현재 데이터로 계속 | 후속: 재실행하지 않음
 BACKUP-031 | PASS | osReconciled 단계 이후 dev 프로세스 종료→재시작→이어서 복원 / 현재 데이터로 계속 | 후속: 재실행하지 않음
 FRIEND-001 | PASS | 공유 off→이름 입력→공유 시작→코드 복사 | 후속: 재실행하지 않음
-FRIEND-002 | 부분 확인 | 공유 활성→근무 A→B→A | 후속: Codex·서버/수신자 별도 세션
+FRIEND-002 | PASS | 공유 활성→근무 A→B→A | 후속: 재실행하지 않음
 FRIEND-003 | PASS | 공유 활성→날짜별 예외/색상/근무명 변경 | 후속: 재실행하지 않음
 FRIEND-004 | 검토 필요 | 공유 활성→전체 스케줄 초기화→새 패턴 생성 | 후속: 사용자 정책 결정
-FRIEND-005 | 부분 확인 | 공유 활성→백업 복원 | 후속: Codex·서버/수신자 별도 세션
+FRIEND-005 | PASS | 공유 활성→백업 복원 | 후속: 재실행하지 않음
 FRIEND-006 | PASS | 공유 중지 온라인→수신자 새로고침 | 후속: 재실행하지 않음
 FRIEND-007 | PASS | 공유 중지 오프라인→앱 종료→온라인 재시작 | 후속: 재실행하지 않음
-FRIEND-008 | 부분 확인 | 업로드 ACK 대기 중 공유 중지 | 후속: Codex·서버/수신자 별도 세션
-FRIEND-009 | 부분 확인 | 중지→즉시 다시 시작→오래된 응답 | 후속: Codex·서버/수신자 별도 세션
+FRIEND-008 | PASS | 업로드 ACK 대기 중 공유 중지 | 후속: 재실행하지 않음
+FRIEND-009 | PASS | 중지→즉시 다시 시작→오래된 응답 | 후속: 재실행하지 않음
 FRIEND-010 | 부분 확인 | 업로드 실패/권한거부/타임아웃 | 후속: Codex·서버/수신자 별도 세션
 FRIEND-011 | PASS | 친구 코드 잘못된 prefix·슬래시·빈값·중복 | 후속: 재실행하지 않음
 FRIEND-012 | PASS | 친구 추가 연타/동시 같은 코드 | 후속: 재실행하지 않음
@@ -1063,14 +1017,14 @@ FRIEND-019 | PASS | 2분 이내 왕복→pull to refresh | 후속: 재실행하�
 FRIEND-020 | PASS | 친구 전체 조회 중 항목 삭제 | 후속: 재실행하지 않음
 FRIEND-021 | PASS | 한국어 공유 중→영어 오프라인→온라인 | 후속: 재실행하지 않음
 FRIEND-022 | 기기연결대기 | 익명 인증 준비 실패 후 회복 | 후속: Codex·운영 공유웹/인증/PWA
-FRIEND-023 | 수정 후 부분 확인 | 웹 링크 첫 열기/재방문/새 탭 | 후속: Codex·운영 공유웹/인증/PWA
-FRIEND-024 | 수정 후 부분 확인 | 웹 링크 삭제된 코드/손상 코드/네트워크 오류 | 후속: Codex·운영 공유웹/인증/PWA
+FRIEND-023 | 수정 후 PASS | 웹 링크 첫 열기/재방문/새 탭 | 후속: 재실행하지 않음
+FRIEND-024 | 수정 후 PASS | 웹 링크 삭제된 코드/손상 코드/네트워크 오류 | 후속: 재실행하지 않음
 FRIEND-025 | 기기연결대기 | 웹 배포 후 기존 열린 탭·PWA | 후속: Codex·운영 공유웹/인증/PWA
 FRIEND-026 | PASS | 규칙 다른 UID 쓰기·삭제·전체 목록 query | 후속: 재실행하지 않음
 FRIEND-027 | PASS | 공유 payload에 메모/일정/알람시각·진단 민감정보 | 후속: 재실행하지 않음
 START-001 | 부분 확인 | 첫 설치 / 업데이트 후 첫 실행 / 두 번째 콜드 / warm resume를 분리 측정 | 후속: Codex·격리 release/시작 측정
 START-002 | 수정 후 부분 확인 | 온라인 / 비행기모드 / 느린 네트워크에서 시작 | 후속: Codex·격리 지연/오류/성능 환경
-START-003 | 부분 확인 | DB 오류 / DB open 미완료→재시도→늦게 온 이전 결과 | 후속: Codex·격리 지연/오류/성능 환경
+START-003 | PASS | DB 오류 / DB open 미완료→재시도→늦게 온 이전 결과 | 후속: 재실행하지 않음
 START-004 | 부분 확인 | UMP 동의 / SDK 초기화 장기 지연 | 후속: Codex·격리 지연/오류/성능 환경
 START-005 | 부분 확인 | 큰 DB 이력 / 폰트 첫 다운로드 / 분류기 첫 로딩 | 후속: Codex·격리 지연/오류/성능 환경
 START-006 | 기기연결대기 | 시작 중 접힘→펼침 / 다른 앱 전환 | 후속: Codex·별도 시작 전환 검사
@@ -1617,3 +1571,55 @@ USB SM-S948N의 dev 앱으로 실행했다. 에뮬레이터는 사용하지 않�
 - Wasm 비호환 dry-run 및 CupertinoIcons 폰트 경고가 있으나 JavaScript release 빌드는 exit0으로 성공했다. 실제 새 산출물의 브라우저 검증·운영 배포는 아직 실행하지 않았다. FRIEND-023/024와 미종결62는 유지한다.
 - 빌드 로그: build/usb_audit_2026-10-04/web_release_build.log. 관리자 대시보드 변환 테스트도 12개 PASS.
 - GitHub dev 보존 범위: 누적 소스·테스트·최신 문서 및 원장. build/.tmp/artifacts와 기기 진단 ZIP은 로컬 보존하고 커밋에서 제외한다. 원장 CSV 원문에 포함된 CR/공백 관련 diff-check 경고는 실행 실패와 구분하고 증거 원문은 유지한다.
+
+
+[K. 2026-10-04 웹 실제 배포·배포 후 검증 / Sol 후속 진행]
+- 사용자 "검증하고 배포까지" 승인에 따라 firebase deploy --only hosting --project shiftbell-29f31 --non-interactive 성공. Hosting 76파일 배포, Firestore rules/앱스토어 배포는 하지 않았다.
+- https://shiftbell-29f31.web.app 운영 main.dart.js SHA256 FC9A342E0817DD11ED4ED4E57233125223DBBD83999F3E510556751EC8578191. main.dart.js/bootstrap/index의 운영 응답이 로컬 검증 빌드와 바이트까지 일치, /privacy rewrite 200/index 일치.
+- 실기기 Chrome 로컬 최신 빌드 및 배포 후 운영 각각: 첫 열기→새로고침 code 유지·근무표 표시, Firestore 요청 차단→오류 안내→차단 해제/새로고침→같은 근무표 복귀 확인. 시험 서버 문서 삭제 후 기존 공유코드 재열기는 오류 안내. FRIEND-023/024를 수정 후 PASS로 마감, 완료131/제외11/미종결60.
+- 영어 확인: 같은 합성 영어 근무명을 KO 웹으로 열면 한국 공휴일이 표시되는 것이 정상이다. en-US 브라우저 언어로 운영 웹을 열어 10/3·5·9 한국 공휴일 이름 없음/날짜 검정, 일요일만 빨강 확인. 코드도 getHolidayName(isKorean:false)에서 null 반환. deploy_live_english.png.
+- 합성 서버 문서·익명 계정·로컬 토큰 삭제 완료. 시험 중 인증 만료로 삭제 401이 한 번 발생했으나 해당 임시 계정 토큰만 갱신 후 삭제 성공. 실패한 첫 삭제를 완료 근거로 쓰지 않았다.
+- J절 및 짧은 단위1/2의 웹 미배포/오류 재현은 배포 전 이력이며, 현재 웹 상태는 K절이 기준이다. 기존 설치 PWA 업데이트/인증 준비 실패는 별도 FRIEND-025/022 잔여다.
+- 다음 순서(사용자 지정): Sol로 가능한 기능 검증·수정 모두 → 미해결 복원/공유 경합·서버 정책 교차 검토 묶음 → UI 레이아웃. Astra 필수로 확정된 행은 현재0개이며 모델 변경이 기기 증거를 대체하지 않는다.
+- USB 충전 유지 재확인: USB powered:true, mWakefulness:Awake, mStayOn:true, stay-on15, 화면 timeout600000ms. 잠금·시계 변경·재부팅 없이 진행한다.
+
+
+[L. 2026-10-04 메모 개선 및 실제 오류·권한 검증 / Sol 진행 중]
+- 사용자 요청 메모 UX를 달력/목록 공통 sheet로 구현: 최초 삭제 활성/수정 비활성, 본문 탭 즉시 편집·키보드, 사용자 변경1회부터 저장 활성(원문 비교 안 함), 편집 중에도 삭제 활성. 빈 내용 저장 검증, controller 수명/중복 저장·삭제 처리.
+- 호스트5검사(KO/EN·포커스·원문 되돌림·보기/편집 삭제·빈 내용)와 실제 USB 합성메모 생성→탭/IME→입력/저장→재진입/편집/삭제 통과. 시험메모 제거. memo_detail_result.json/memo_detail_* 및 memo_detail_final_test.log.
+- dev manifest에서 USE_EXACT_ALARM 선언만 일시 제외하여 실제 SCHEDULE_EXACT_ALARM 스위치 사용. 일반 APK 재설치 전 임시 manifest 제거 예정. J절 권한 거부 불가는 원래 manifest 조건의 이전 관찰.
+- START-003 주입은 SQLite 버전 불일치다. Windows adb stdin 바이너리 절단을 adb push+앱 소유 파일 복사/SHA 대조로 교정했다. 원본 canonical DB 복구·전체테이블 동일 확인. 물리적 디스크 손상 복원 전체로 확대하지 않는다.
+- ONETAP-014 수정 후 PASS: 실제 정확알람 권한 거부/달력 터치로 Native 실패 재현. 최초 DB0/OS1 대체예약 잔류 수정: 행·생성로그 롤백 후 Native 취소. 수정 APK 실패안내 및 DB0/OS0, 이력0 확인. 호스트14PASS.
+  근거: build/usb_audit_2026-10-04/permission_before_fix/*; permission_failure_result.json; permission_failure_*; one_tap_rollback_test.log
+- ONETAP-015 PASS: 실제 권한 거부 중 현재 카드 끄기→삭제. custom125 삭제/취소이력, 대체fixed138 유지, 실패 안내. 실제 재허용 후 같은12행/OS12 수렴.
+  근거: build/usb_audit_2026-10-04/replacement_failure_result.json; replacement_failure_message.png; replacement_recovered*
+- REFRESH-006 PASS: USE_EXACT_ALARM만 뺀 임시 dev APK에서 시스템 스위치 실제 거부→재허용. fixed/custom/snooze12행·skip/set_type·ID 불변, OS12 복구. 내부 permission flag 모의 아님.
+  근거: build/usb_audit_2026-10-04/permission_mixed_result.json; permission_mixed_*; exact_switch_*.xml
+- START-003 PASS: 실제 SQLite user_version 불일치 open 실패→오류 화면→헤더 복구→실제 다시시도 터치로 같은PID 복귀. 원본테이블 동일. 기존 호스트15/45초 정책·늦은 이전결과 무시와 결합.
+  근거: build/usb_audit_2026-10-04/startup_db_failure_retry/result.json; startup_db_failure_retry/device.log; startup_db_failure_retry/*.png
+- 이번4행 추가로 완료135/제외11/미종결56. 시험용12알람은 후속검사 진행 중이며 최종 원복 확인과 구분. USB 충전 Awake/stay-on15 유지, 잠금·시계·재부팅 변경 없음.
+
+L절 후속 Native 계측 검증
+- REFRESH-015 PASS: 실제 USB Native 엔진의 기존 실패주입 seam에서 2번째 OS 등록만 예외. 커밋 후 호출 검증, DB12 유지/실제 OS11, 실패ID1 추적→재시도 후 OS12 및 중복0. 일반 권한 전체거부 시험과 구분.
+  근거: build/usb_audit_2026-10-04/native_partial_result.json; native_partial_instrumentation.log; native_partial*_alarmmanager.txt
+- BACKUP-005 PASS: 실제 Native writer/MediaStore를 고유 시험 접두어·별도 prefs로 실행. 검증 실패에는 기존4파일·메타 동일. 직접저장 성공에는 옛2파일/자동 유지; 자동저장 성공 후에만 옛2파일과 이전자동 제거, 직접슬롯 유지. 원래 사용자 백업 hash/메타 불변, 시험파일 제거.
+  근거: build/usb_audit_2026-10-04/native_backup_storage_result.json; native_backup_storage.log
+- BACKUP-006 추가: 실제 pending 시험파일 제거로 저장 실패 시 이전 정상 두슬롯 hash/메타 불변 확인. 공간 부족은 개인폰 강제고갈 없이 만들 수 있는 격리 환경 잔여로 유지한다. 실제 저장경로 검증 실패와 물리적 저장소 고갈을 같은 것으로 세지 않는다.
+- 시험 APK 러너는 androidTestDev에만 포함된다. 일반/운영 APK에는 실패 주입을 추가하지 않았다. 권한시험용 임시 dev manifest 제거 후 일반 APK 빌드·설치 진행.
+- 권한·부분 실패 시험 알람12개 제거, 원본 전체 DB테이블 동일/DB0 OS0 복구 확인. 현재 완료137/제외11/미종결54.
+
+
+[M. 2026-10-04 실제 송신 앱·운영 수신웹 연결 검증]
+- FRIEND-002 PASS: 실제 공유시작 UI→달력 날짜 길게누르기/근무변경 A→B→A. 실제 서버 문서와 매단계 운영 웹 날짜4 표시 일치. 같은 payload 재요청 시 서버 updatedAt/generation 불변.
+  근거: build/usb_audit_2026-10-04/sender_A.json; sender_B.json; sender_A_again.json; sender_before_dedupe.json; sender_after_dedupe.json; sender_receiver_A*; sender_receiver_B*
+- FRIEND-005 PASS: 공유active 세대4에서 실제 RestoreCoordinator로 합성B→백업A 덮어쓰기/Native 재조정 완료. 현재 이름·세대·공유의도 유지, 복원된 A 재업로드 ACK/운영 수신웹 일치. SAF 권한회수 검사는 별도.
+  근거: build/usb_audit_2026-10-04/sender_restored.json; sender_actual_backup_restore*; sender_restored_os*; sender_receiver_restored*
+- FRIEND-008 PASS: Firestore SDK 실제 전송 보류→이름 제출 UI로 active/dirty/ACK대기→공유중지/중지확인 UI→stopPending. 네트워크 재개 후 늦은ACK/delete에도 off/dirtyfalse/서버문서없음. 수신 웹 오류 안내 확인.
+  근거: build/usb_audit_2026-10-04/sender_upload_waiting.png; sender_stop_waiting.png; sender_ack_stopped.json; sender_receiver_stopped*
+- FRIEND-009 PASS: 실제 전송 보류 상태에서 시작UI 세대3→중지UI→즉시재시작UI 세대4. 이전 응답 미도착 상태를 확인하고 전송 재개. 최신세대4/이름만 active 확정, 수신웹 최신내용 일치.
+  근거: build/usb_audit_2026-10-04/sender_ack_old_start*; sender_ack_latest_start*; sender_ack_restarted.json; sender_receiver_restarted*
+- FRIEND-010은 전송 보류/5초 대기/dirty/재시도 수렴을 추가 확인했으나 서버 permission-denied 경로는 별도 잔여로 유지한다.
+- 시작 전 기존 공유 off/서버 문서 부재 확인. 초기 준비 스크립트의 id없는 update로 원래 근무표가 읽힌 첫 시험 문서는 바로 삭제 확인하고, 합성 행의 저장/재조회 일치를 추가한 뒤 A/B/A 증거를 다시 수집했다. 이후 합성자료와 초기 잘못된 준비를 혼합해 PASS로 세지 않았다.
+- 최종 공유 중지/서버문서 삭제를 확인한 다음 전체 원본 백업 복원, 원래 공유7키 복구, 기존 익명 계정 유지. 전체 DB테이블 동일/DB0 OS0 확인. sender_cleanup_result.json. 원래 Chrome 탭은 유지하고 새 시험 탭만 닫았다.
+- 일반 dev APK에서 임시 권한 manifest 제거, SCHEDULE_EXACT_ALARM app-op 기본값 복구/실제 정확권한 true 확인. 메모·원터치 수정4파일 최종 analyze: No issues found. memo_alarm_final_analyze.log.
+- 현재 완료141/제외11/미종결50. 인증 첫실패→복구는 원래 계정에 영향을 주지 않는 별도 패키지로 후속 검증 준비 중.

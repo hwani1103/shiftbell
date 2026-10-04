@@ -77,6 +77,7 @@ android {
         }
         create("dev") {
             dimension = "env"
+            testInstrumentationRunner = "com.hwani1103.shiftbell.DevAlarmAuditInstrumentation"
             applicationIdSuffix = ".dev"
             versionNameSuffix = "-dev"
             // 런처 이름(app_name): src/dev/res/values = ShiftBell (Test), values-ko = 교대시계 (테스트)

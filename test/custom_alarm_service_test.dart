@@ -172,9 +172,17 @@ void main() {
     test('Native 예약 실패 시 원터치 행과 생성 원장을 지우고 재시도를 허용한다', () async {
       final today = DateTime.now();
       final tomorrow = DateTime(today.year, today.month, today.day + 1);
+      final fallbackReservations = <int>{};
       messenger.setMockMethodCallHandler(kAlarmChannel, (call) async {
         if (call.method == 'scheduleNativeAlarm') {
+          fallbackReservations.add(call.arguments['id'] as int);
           throw PlatformException(code: 'SCHEDULE_DENIED');
+        }
+        if (call.method == 'cancelNativeAlarm') {
+          final id = call.arguments['id'] as int;
+          expect(await db.query('alarms', where: 'id = ?', whereArgs: [id]), isEmpty,
+              reason: 'Native cancellation must follow the committed DB rollback');
+          fallbackReservations.remove(id);
         }
         return null;
       });
@@ -182,6 +190,7 @@ void main() {
         final failed = await CustomAlarmService.instance.assign(
             tomorrow, const CustomAlarmPreset(time: '23:11'), 1);
         expect(failed.result, CustomAlarmAssignResult.scheduleFailed);
+        expect(fallbackReservations, isEmpty);
         expect(await db.query('alarms', where: 'id = ?', whereArgs: [failed.alarmId]), isEmpty);
         expect(await db.query('alarm_creation_log',
             where: 'alarm_id = ?', whereArgs: [failed.alarmId]), isEmpty);

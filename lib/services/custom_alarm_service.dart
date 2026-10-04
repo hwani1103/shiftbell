@@ -138,9 +138,16 @@ class CustomAlarmService {
     try {
       await AlarmService().scheduleAlarm(id: id!, dateTime: ringAt, label: '원터치 알람');
     } catch (_) {
-      // 예약 실패 - 행만 조용히 되돌림(이력 없음: 사용자가 만든 적이 없는 것과 같게). 생성 원장은 append-only라 그대로 둠.
+      // 정확 예약이 거부돼도 Native가 비정확 대체 예약을 만들었을 수 있다.
+      // DB를 먼저 되돌린 뒤 취소해야 Native의 행 재확인이 재예약하지 않는다.
       await DatabaseService.instance.deleteAlarm(id!, createHistory: false);
       await db.delete('alarm_creation_log', where: 'alarm_id = ?', whereArgs: [id]);
+      try {
+        await AlarmService().cancelAlarm(id!);
+      } catch (_) {
+        // Native 예약 실패 목록이 다음 갱신에서 DB에 없는 ID를 다시 취소한다.
+        // 최초 예약 실패는 계속 scheduleFailed로 사용자에게 안내한다.
+      }
       return CustomAlarmAssignOutcome(CustomAlarmAssignResult.scheduleFailed, ringAt, alarmId: id);
     }
     return CustomAlarmAssignOutcome(CustomAlarmAssignResult.scheduled, ringAt, alarmId: id);

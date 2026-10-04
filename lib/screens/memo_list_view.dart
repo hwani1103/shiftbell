@@ -1,3 +1,4 @@
+import '../widgets/memo_detail_sheet.dart';
 import '../widgets/adaptive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,7 +8,6 @@ import '../providers/memo_provider.dart';
 import '../models/date_memo.dart';
 import '../l10n/l10n_extensions.dart';
 import '../utils/weekday_util.dart';
-import '../widgets/app_second_button.dart';
 
 // ⭐ 2026-09-03 - "화면이 후지다"는 피드백으로 전면 재구성(레이아웃만 - 검색
 // 기능/Provider 계약은 그대로 유지). 기존엔 연도 헤더 하나에 그 해 전체 날짜가
@@ -397,158 +397,13 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
     return Text.rich(TextSpan(style: baseStyle, children: spans));
   }
 
-  // ⭐ 메모 상세/수정/삭제 - sleep_edit_dialog.dart와 같은 톤(바텀시트 + SafeArea +
-  // AppSecondButton)으로 통일. calendar_tab.dart의 옛 AlertDialog 팝업(_showMemoDetailPopup)과
-  // 기능은 동일(보기/수정/삭제)하되 이 화면 전용으로 새로 구성 - 다른 파일의
-  // private 다이얼로그라 직접 재사용은 못 함.
   void _showMemoActionSheet(BuildContext context, DateTime date, String dateStr, DateMemo memo) {
-    final editController = TextEditingController(text: memo.memoText);
-    bool isEditing = false;
-
-    showModalBottomSheet(
+    showMemoDetailSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (sheetContext, setSheetState) {
-            final colorScheme = Theme.of(sheetContext).colorScheme;
-            return Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(sheetContext).viewInsets.bottom),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Container(
-                          width: 36.w,
-                          height: 4.h,
-                          margin: EdgeInsets.only(bottom: 16.h),
-                          decoration: BoxDecoration(
-                            color: colorScheme.outline,
-                            borderRadius: BorderRadius.circular(2.r),
-                          ),
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Icon(Icons.event_note_rounded, size: 18.sp, color: colorScheme.primary),
-                          SizedBox(width: 6.w),
-                          Text(
-                            _dateLabel(sheetContext, date),
-                            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: colorScheme.primary),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-                      if (isEditing)
-                        TextField(
-                          controller: editController,
-                          autofocus: true,
-                          maxLines: 5,
-                          minLines: 2,
-                          decoration: InputDecoration(
-                            hintText: sheetContext.l10n.calendarMemoContent,
-                            contentPadding: EdgeInsets.all(12.w),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                              borderSide: BorderSide(color: colorScheme.outline),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.r),
-                              borderSide: BorderSide(color: colorScheme.primary, width: 2),
-                            ),
-                          ),
-                          style: TextStyle(fontSize: 14.sp),
-                        )
-                      else
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(14.w),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surface,
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                          child: Text(
-                            memo.memoText,
-                            style: TextStyle(fontSize: 14.sp, color: colorScheme.onSurface, height: 1.5),
-                          ),
-                        ),
-                      SizedBox(height: 16.h),
-                      Row(
-                        children: [
-                          if (isEditing) ...[
-                            Expanded(
-                              child: AppSecondButton(
-                                variant: AppSecondButtonVariant.neutral,
-                                onPressed: () {
-                                  setSheetState(() {
-                                    isEditing = false;
-                                    editController.text = memo.memoText;
-                                  });
-                                },
-                                child: Text(sheetContext.l10n.commonCancel),
-                              ),
-                            ),
-                            SizedBox(width: 10.w),
-                            Expanded(
-                              child: AppSecondButton(
-                                variant: AppSecondButtonVariant.success,
-                                onPressed: () async {
-                                  if (editController.text.trim().isEmpty) {
-                                    ScaffoldMessenger.of(sheetContext).showSnackBar(
-                                      SnackBar(content: Text(sheetContext.l10n.statusEnterMemoContent)),
-                                    );
-                                    return;
-                                  }
-                                  FocusScope.of(sheetContext).unfocus();
-                                  await ref.read(memoProvider.notifier).updateMemo(
-                                        memo.id!,
-                                        dateStr,
-                                        editController.text.trim(),
-                                      );
-                                  if (sheetContext.mounted) Navigator.of(sheetContext).pop();
-                                },
-                                child: Text(sheetContext.l10n.commonSave),
-                              ),
-                            ),
-                          ] else ...[
-                            Expanded(
-                              child: AppSecondButton(
-                                variant: AppSecondButtonVariant.danger,
-                                onPressed: () async {
-                                  await ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr);
-                                  if (sheetContext.mounted) Navigator.of(sheetContext).pop();
-                                },
-                                child: Text(sheetContext.l10n.commonDelete),
-                              ),
-                            ),
-                            SizedBox(width: 10.w),
-                            Expanded(
-                              child: AppSecondButton(
-                                variant: AppSecondButtonVariant.primary,
-                                onPressed: () {
-                                  setSheetState(() => isEditing = true);
-                                },
-                                child: Text(sheetContext.l10n.commonEdit),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    ).whenComplete(() => editController.dispose());
+      dateLabel: _dateLabel(context, date),
+      text: memo.memoText,
+      onSave: (text) => ref.read(memoProvider.notifier).updateMemo(memo.id!, dateStr, text),
+      onDelete: () => ref.read(memoProvider.notifier).deleteMemo(memo.id!, dateStr),
+    );
   }
 }
