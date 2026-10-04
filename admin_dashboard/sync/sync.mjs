@@ -20,7 +20,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { buildMockDocs } from '../public/assets/js/mock.js';
 import { Ga4, DEFAULTS, makeAuthClient } from './lib/ga4.mjs';
-import { buildDocs } from './lib/transform.mjs';
+import { buildDocs, table, ymd } from './lib/transform.mjs';
 
 const { values: args } = parseArgs({
   options: {
@@ -42,16 +42,25 @@ const daysAgo = (n) => { const d = new Date(); d.setUTCDate(d.getUTCDate() - n);
 async function fetchReal() {
   const auth = makeAuthClient({ serviceAccountJson: env.SERVICE_ACCOUNT_JSON, keyFile: env.GOOGLE_APPLICATION_CREDENTIALS });
   const ga = new Ga4({ auth, propertyId, streamId });
+  const webGa = new Ga4({ auth, propertyId, streamId: env.GA4_WEB_STREAM_ID || DEFAULTS.webStreamId });
   const cohortRange = { from: iso(daysAgo(45)), to: iso(daysAgo(15)) };
 
-  // 핵심 3개는 실패하면 동기화 자체를 중단(빈 문서로 덮어쓰지 않기 위함)
-  const [core, eventsDaily, eventsSummary] = await Promise.all([
+  // 핵심 리포트는 실패하면 동기화 자체를 중단(빈 문서로 덮어쓰지 않기 위함)
+  const [core, eventsDaily] = await Promise.all([
     ga.runReport(ga.coreDaily(days)),
     ga.runReport(ga.eventsDaily(days)),
-    ga.runReport(ga.eventsSummary()),
   ]);
+  const dates = table(core).map((r) => ymd(r.d[0]));
+  const eventRanges = [7, 30, 100, 365];
+  const eventsByRange = Object.fromEntries(await Promise.all(eventRanges.map(async (range) => {
+    const from = dates[Math.max(0, dates.length - range)];
+    const to = dates[dates.length - 1];
+    if (!from || !to) return [range, null];
+    const report = await ga.runReport(ga.eventsSummary(from, to));
+    return [range, { from, to, report }];
+  })));
   // 나머지는 실패해도 대시보드 일부만 비워 두고 계속한다
-  const [ads, appVersion, os, language, country, device, cohort] = await Promise.all([
+  const [ads, appVersion, os, language, country, device, cohort, webFriendViews] = await Promise.all([
     ga.tryReport('광고', ga.adsDaily(days)),
     ga.tryReport('앱 버전 분포', ga.breakdown('appVersion')),
     ga.tryReport('OS 분포', ga.breakdown('operatingSystemVersion')),
@@ -59,9 +68,10 @@ async function fetchReal() {
     ga.tryReport('국가 분포', ga.breakdown('country')),
     ga.tryReport('기기 분포', ga.breakdown('deviceModel')),
     ga.tryReport('리텐션', ga.cohort({ ...cohortRange, endOffset: 14 })),
+    webGa.tryReport('웹 친구 근무표 열람', webGa.webFriendViews()),
   ]);
   const docs = buildDocs({
-    raw: { core, ads, eventsDaily, eventsSummary, appVersion, os, language, country, device, cohort },
+    raw: { core, ads, eventsDaily, eventsByRange, appVersion, os, language, country, device, cohort, webFriendViews },
     meta: { now: new Date(), propertyId, streamId, cohortRange, source: 'ga4' },
   });
   docs.summary.currency = core?.metadata?.currencyCode || 'USD';

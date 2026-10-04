@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { buildDocs, buildCohort, buildSeries, table, ymd, buildEvents } from '../lib/transform.mjs';
 import { streamFilter, withStream, Ga4, DEFAULTS } from '../lib/ga4.mjs';
 import { buildMockDocs, addDays } from '../../public/assets/js/mock.js';
+import { behaviorCard, computeView } from '../../public/assets/js/views.js';
 
 const row = (dims, mets) => ({ dimensionValues: dims.map((value) => ({ value })), metricValues: mets.map((value) => ({ value: String(value) })) });
 const headers = (names) => names.map((name) => ({ name, type: 'TYPE_INTEGER' }));
@@ -68,12 +69,12 @@ test('buildSeries: 광고 리포트가 있으면 그 값을 쓰고, 전부 0이�
   assert.equal(r.series.adRevenue[1], 0.1235);
 });
 
-test('buildEvents: 상위 N개 + 항상 보관(first_open 등)만 남기고 합계를 계산', () => {
+test('buildEvents: 상위 N개 밖의 실제 기능도 보관한다', () => {
   const dates = ['2026-09-19', '2026-09-20', '2026-09-21'];
   const ev = buildEvents({ eventsDaily, dates, keep: 2 });
   assert.ok(ev.series.alarm_dismissed, '상위 2개(ad_impression 80, alarm_dismissed 73)는 남는다');
   assert.ok(ev.series.first_open && ev.series.app_remove && ev.series.ad_impression, '항상 보관 목록');
-  assert.equal(ev.series.rare_event, undefined, '드문 이벤트는 잘린다');
+  assert.ok(ev.series.rare_event, '드문 사용자 기능도 전체 보기에 남는다');
   assert.equal(ev.totals.alarm_dismissed, 73);
 });
 
@@ -105,15 +106,65 @@ test('buildDocs: summary KPI는 마지막 날 기준이고 사용자 정의 이�
   assert.equal(docs.summary.streamId, '15763725797');
   assert.deepEqual(docs.summary.events[0], { name: 'first_open', count: 10, users: 8 });
   assert.equal(docs.summary.cohort, null);
+  assert.equal(docs.summary.webFriendViews, null);
+});
+
+test('사용자 행동의 사용자 수는 횟수와 동일한 날짜 범위에서만 표시한다', () => {
+  const dates = Array.from({ length: 31 }, (_, i) => addDays('2026-09-21', i - 30));
+  const docs = {
+    series: { dates },
+    events: { series: { alarm_dismissed: dates.map(() => 1) } },
+    summary: { flags: { customEvents: true }, eventsByRange: {
+      7: { from: dates[24], to: dates[30], events: [{ name: 'alarm_dismissed', count: 7, users: 3 }] },
+      30: { from: dates[1], to: dates[30], events: [{ name: 'alarm_dismissed', count: 30, users: 9 }] },
+    } },
+  };
+  const ui = { evGroup: 'all', evSystem: false, evExpanded: false };
+  const seven = behaviorCard(docs, computeView(docs, 7), ui);
+  assert.match(seven, /7일 동안/);
+  assert.match(seven, /같은 기간 3명이 사용/);
+  assert.doesNotMatch(seven, /9명이 사용/);
+  const thirty = behaviorCard(docs, computeView(docs, 30), ui);
+  assert.match(thirty, /같은 기간 9명이 사용/);
+  docs.summary.eventsByRange[30].events[0].count = 8;
+  assert.doesNotMatch(behaviorCard(docs, computeView(docs, 30), ui), /명이 사용/);
+  docs.summary.eventsByRange[30].events[0].count = 30;
+  docs.summary.eventsByRange[30].from = dates[0];
+  assert.doesNotMatch(behaviorCard(docs, computeView(docs, 30), ui), /명이 사용/);
+});
+
+test('동기화 결과에 기간별 사용자 수와 해당 날짜를 함께 저장한다', () => {
+  const docs = buildDocs({
+    raw: { core, eventsDaily, eventsByRange: {
+      7: { from: '2026-09-19', to: '2026-09-21', report: { rows: [row(['alarm_dismissed'], [73, 6])] } },
+    } },
+    meta: { now: new Date('2026-09-22T03:00:00Z'), propertyId: '553838010', streamId: '15763725797', cohortRange: { from: 'a', to: 'b' } },
+  });
+  assert.deepEqual(docs.summary.eventsByRange[7], {
+    from: '2026-09-19', to: '2026-09-21', events: [{ name: 'alarm_dismissed', count: 73, users: 6 }],
+  });
+});
+
+test('웹 친구 열람은 앱 이벤트 목록과 분리해 요약한다', () => {
+  const docs = buildDocs({
+    raw: { core, eventsDaily, eventsSummary: null, webFriendViews: { rows: [row(['friend_view_web'], [19, 7])] } },
+    meta: { now: new Date('2026-09-22T03:00:00Z'), propertyId: '553838010', streamId: '15763725797', cohortRange: { from: 'a', to: 'b' } },
+  });
+  assert.deepEqual(docs.summary.webFriendViews, { count: 19, users: 7 });
+  assert.equal(docs.events.series.friend_view_web, undefined);
 });
 
 test('출시 앱만 집계: 모든 리포트에 streamId 필터가 걸린다(dev·웹 스트림 제외)', () => {
   const ga = new Ga4({ auth: null, propertyId: DEFAULTS.propertyId, streamId: DEFAULTS.streamId });
-  const reports = [ga.coreDaily(30), ga.adsDaily(30), ga.eventsDaily(30), ga.eventsSummary(), ga.breakdown('appVersion'),
+  const reports = [ga.coreDaily(30), ga.adsDaily(30), ga.eventsDaily(30), ga.eventsSummary('2026-08-23', '2026-09-21'), ga.breakdown('appVersion'),
     ga.cohort({ from: '2026-08-01', to: '2026-08-15' })];
   for (const r of reports) {
     assert.deepEqual(r.dimensionFilter, streamFilter('15763725797'));
   }
+  for (const r of reports.slice(0, 3)) {
+    assert.equal(r.dateRanges[0].endDate, 'today', '3시간 동기화에 오늘 잠정치를 포함한다');
+  }
+  assert.deepEqual(reports[3].dateRanges, [{ startDate: '2026-08-23', endDate: '2026-09-21' }]);
   assert.equal(DEFAULTS.streamId, '15763725797');
   assert.notEqual(DEFAULTS.streamId, '15763791924', 'dev 스트림이면 안 된다');
   const combined = withStream('15763725797', { filter: { fieldName: 'eventName', stringFilter: { value: 'x' } } });

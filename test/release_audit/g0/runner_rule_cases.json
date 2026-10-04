@@ -19,7 +19,7 @@
     {"name": "migrations 중간 버전 누락 거부", "mutation": {"remove_migration_version": 13}, "expect": "reject"},
     {"name": "migrations 버전 중복 거부", "mutation": {"duplicate_migration_version": 13}, "expect": "reject"},
     {"name": "migrations 한 항목 두 문장 거부", "mutation": {"migration_append": {"version": 24, "sql": "CREATE INDEX IF NOT EXISTS idx_a ON friends(name); DROP TABLE friends"}}, "expect": "reject"},
-    {"name": "targetVersion보다 migrations가 모자라면 거부", "mutation": {"set_target_version": 25}, "expect": "reject"},
+    {"name": "targetVersion보다 migrations가 모자라면 거부", "mutation": {"set_target_version": 27}, "expect": "reject"},
     {"name": "format 2 거부", "mutation": {"set_format": 2}, "expect": "reject"}
   ]
 }

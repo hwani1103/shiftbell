@@ -79,10 +79,10 @@ test('FS-08 app_config get 허용, list·write 거부', async () => {
   await assertFails(getDocs(collection(anon(), 'app_config')));
   await assertFails(setDoc(doc(asOwner(), 'app_config', 'version'), { latestVersionCode: 99 }));
 });
-test('FS-09 health_tips get·list 허용, write 거부', async () => {
+test('FS-09 삭제된 health_tips는 get·list·write 모두 거부', async () => {
   await seed('health_tips/t1', { icon: 'a', title: 'b', content: 'c' });
-  await assertSucceeds(getDoc(doc(anon(), 'health_tips', 't1')));
-  await assertSucceeds(getDocs(collection(anon(), 'health_tips')));
+  await assertFails(getDoc(doc(anon(), 'health_tips', 't1')));
+  await assertFails(getDocs(collection(anon(), 'health_tips')));
   await assertFails(setDoc(doc(asOwner(), 'health_tips', 't2'), { icon: 'x' }));
   await assertFails(deleteDoc(doc(asOwner(), 'health_tips', 't1')));
 });

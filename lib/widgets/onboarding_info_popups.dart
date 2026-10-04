@@ -27,6 +27,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app_button.dart';
+import 'soft_info_dialog.dart';
 import 'word_safe_spans.dart';
 import '../l10n/l10n_extensions.dart';
 
@@ -52,6 +53,7 @@ Future<void> _showInfoPopupOnce(
   BuildContext context, {
   required String shownKey,
   required _PopupContent Function(BuildContext) content,
+  bool Function()? canShow,
 }) async {
   final prefs = await SharedPreferences.getInstance();
   if (prefs.getBool(shownKey) ?? false) return;
@@ -62,9 +64,10 @@ Future<void> _showInfoPopupOnce(
   if (ModalRoute.of(context)?.isCurrent == false)
     return; // 다른 화면/대화상자가 이미 위에 있음
 
+  if ((prefs.getBool(shownKey) ?? false) || canShow?.call() == false) return;
   await prefs.setBool(shownKey, true);
   if (!context.mounted) return;
-  await showDialog(
+  await showSoftInfoDialog(
     context: context,
     barrierDismissible: false,
     // ⭐ 2026-09-22(영어화) - content(dialogContext)로 바뀌어서 각 _PopupContent가
@@ -262,8 +265,8 @@ class ShiftAssignTutorialContent extends _PopupContent {
 // 팝업 문구만 옛 이름으로 남아있으면 안 됨). 예전 본문의 "3."이 두 번 나오던
 // 오타도 이번에 같이 정리함.
 class ConditionTabTutorialContent extends _PopupContent {
-  // ⭐ 이 탭 자체가 한국어 로케일에서만 존재해서(main.dart _showConditionTab) 이
-  // 팝업도 항상 한국어 하드코딩 - context는 다른 세 팝업과 타입을 맞추기 위한
+  // 한국어 화면(condition_tab.dart)에서만 부르는 팝업이라 한국어 문장을 사용한다.
+  // context는 다른 세 팝업과 타입을 맞추기 위한
   // 파라미터일 뿐 안 씀(CLAUDE.md "수면·회복 탭" 문구는 l10n 미적용 방침과 일치).
   ConditionTabTutorialContent(BuildContext context)
       : super(
@@ -312,3 +315,22 @@ class ScheduleTabTutorialContent extends _PopupContent {
 // 탭을 배포 전 최종 점검 후 완전히 제거하면서 같이 정리함. 실제 팝업에 쓰이는
 // WelcomePopupContent/ShiftAssignTutorialContent/ConditionTabTutorialContent와
 // 그걸 띄우는 maybeShow* 함수들은 이 파일 위쪽에 그대로 남아있음(영향 없음).
+
+Future<void> maybeShowOneTouchAlarmTutorial(BuildContext context,
+        {bool Function()? canShow}) =>
+    _showInfoPopupOnce(
+      context,
+      shownKey: 'one_touch_alarm_tutorial_shown',
+      canShow: canShow,
+      content: (context) {
+        final ko = Localizations.localeOf(context).languageCode == 'ko';
+        return _PopupContent(
+          emoji: '⏰',
+          title: ko ? '원터치 알람이 추가됐어요' : 'Meet one-tap alarms',
+          body: ko
+              ? '자주 쓰는 시각과 울림 방식(소리·진동·무음)을 저장해 두세요. 필요할 때 오늘이나 내일에 빠르게 알람을 추가할 수 있어요.\n\n근무마다 반복되는 고정 알람 외에, 가끔 필요한 알람을 설정할 때 편리해요.\n\n같은 시각의 고정 알람이 있으면 중복으로 추가하지 않아요.'
+              : 'Save the times and sound settings you use often, then quickly add an alarm for today or tomorrow.\n\nUse these for occasional alarms alongside your regular shift alarms.\n\nIf a fixed alarm is already set for that time, no duplicate is added.',
+          buttonLabel: context.l10n.commonGotIt,
+        );
+      },
+    );

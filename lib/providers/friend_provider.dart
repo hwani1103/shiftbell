@@ -57,6 +57,7 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
 
   Future<void> load() async {
     final rows = await _db.getAllFriends();
+    if (!mounted) return;
     state = rows.map((row) {
       final rawJson = row['data_json'] as String?;
       return FriendEntry(
@@ -160,6 +161,7 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
     // 화면 첫 frame의 자동 새로고침이 SQLite 초기 load보다 먼저 빈 state를 보는
     // 경합을 막는다.
     await _initialLoad;
+    if (!mounted) return;
     if (!force && _lastRefreshAllAt != null &&
         DateTime.now().difference(_lastRefreshAllAt!) < _refreshAllThrottle) {
       return;
@@ -167,8 +169,10 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
     _lastRefreshAllAt = DateTime.now();
     final snapshot = List<FriendEntry>.from(state);
     for (final friend in snapshot) {
+      if (!mounted) return;
       await _refreshWithoutLoad(friend.id, friend.ownerId);
     }
+    if (!mounted) return;
     // 친구마다 전체 SQLite 목록을 다시 읽지 않고 모든 fetch/update 뒤 한 번만 읽는다.
     await load();
   }

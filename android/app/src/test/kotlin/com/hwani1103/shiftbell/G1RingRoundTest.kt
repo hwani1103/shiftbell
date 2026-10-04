@@ -31,6 +31,9 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowMediaPlayer
 import org.robolectric.shadows.util.DataSource
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
 class G1RingRoundTest {
@@ -85,6 +88,25 @@ class G1RingRoundTest {
         dbHelper.writableDatabase.rawQuery(
             "SELECT dismiss_type FROM alarm_history WHERE alarm_id = ? ORDER BY id", arrayOf(id.toString())
         ).use { c -> buildList { while (c.moveToNext()) add(c.getString(0)) } }
+
+    @Test
+    fun `5분 후 같은 분에 다른 알람이 있으면 스누즈 대신 현재 알람을 종료한다`() {
+        val db = dbHelper.writableDatabase
+        val target = System.currentTimeMillis() + 5 * 60_000L
+        val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+        val minute = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US).format(Date(target))
+        db.execSQL("UPDATE alarms SET date = ?, time = ?, type = 'custom', shift_type = NULL, preset_slot = 0 WHERE id = 7",
+            arrayOf(format.format(Date(System.currentTimeMillis())), "07:00"))
+        db.execSQL("UPDATE alarms SET date = ?, alarm_type_id = 3 WHERE id = 8",
+            arrayOf("${minute}:00"))
+
+        val result = AlarmActionHelper.snooze(context, 7)
+
+        assertTrue(result?.collisionMessage?.isNotEmpty() == true)
+        assertEquals(0, alarmRows(7))
+        assertEquals(1, alarmRows(8))
+        assertEquals(listOf("snooze_skipped_existing_alarm"), history(7))
+    }
 
     private fun ringTimeouts(): List<Intent> {
         val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

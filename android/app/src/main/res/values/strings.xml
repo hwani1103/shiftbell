@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="alarm_type_sound_vibration_short">소리+진동</string>
+    <string name="alarm_type_vibration_short">진동</string>
+    <string name="alarm_type_silent_short">무음</string>
+    <string name="snooze_collision_message">%1$s에 이미 알람(%2$s)이 있어 5분 후 알람은 추가하지 않았어요. 현재 알람은 종료됩니다.</string>
     <!-- ⭐ 홈 화면 위젯 목록(길게 눌러 위젯 추가)에 노출되는 설명 문구 -->
     <string name="calendar_widget_description">전주/이번주/다음주 근무 일정을 홈 화면에서 바로 볼 수 있어요.</string>
     <!-- ⭐ 실제 수면 기록 위젯(캘린더 위젯과 별개) - 취침/기상 원터치 토글 -->
     <string name="sleep_widget_description">버튼으로 취침/기상을 기록해요.</string>
+    <string name="sleep_widget_brand">교대시계</string>
 
     <!-- ⭐ 2026-09-22(영어화 P0) - 위젯 목록에 뜨는 위젯 이름(AndroidManifest.xml의
          android:label). 값 자체를 직접 값-en에서 오버라이드. -->
@@ -16,6 +21,7 @@
     <string name="alarm_swipe_hint">위로 스와이프해서 끄기</string>
     <string name="alarm_snooze_label">5분 후</string>
     <string name="alarm_dismiss_label">끄기</string>
+    <string name="one_tap_alarm_label">원터치 알람</string>
 
     <!-- ⭐ 알림 채널 이름(설정 → 앱 → 알림 화면에 그대로 노출됨) -->
     <string name="channel_alarm_result">결과 알림</string>
@@ -49,4 +55,21 @@
     <string name="sleep_widget_not_set">미설정</string>
     <string name="sleep_widget_unknown">정보 없음</string>
     <string name="sleep_widget_tab_off">탭 꺼짐</string>
+    <string name="widget_no_shift">없음</string>
+    <string name="alarm_default_label">알람</string>
+    <string name="channel_guard_description">20분 전 사전 알림</string>
+    <string name="channel_result_description">스누즈/타임아웃 결과</string>
+    <string name="channel_ring_description">근무 시간 알림</string>
+    <string name="widget_preview_day">주간</string>
+    <string name="widget_preview_night">야간</string>
+    <string name="widget_preview_off">휴무</string>
+    <string name="widget_weekday_0">일</string>
+    <string name="widget_weekday_1">월</string>
+    <string name="widget_weekday_2">화</string>
+    <string name="widget_weekday_3">수</string>
+    <string name="widget_weekday_4">목</string>
+    <string name="widget_weekday_5">금</string>
+    <string name="widget_weekday_6">토</string>
+    <string name="alarm_clock_first">%1$s (첫 번째)</string>
+    <string name="alarm_clock_second">%1$s (두 번째)</string>
 </resources>

@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import '../l10n/l10n_extensions.dart';
+import '../utils/alarm_wall_time.dart';
 
 class AlarmHistory {
   final int? id;
@@ -33,7 +34,7 @@ class AlarmHistory {
   static DateTime _parseDate(dynamic value) {
     if (value == null) return DateTime.now();
     try {
-      return DateTime.parse(value.toString());
+      return parseAlarmDate(value.toString());
     } catch (e) {
       print('⚠️ DateTime 파싱 실패: $value');
       return DateTime.now();

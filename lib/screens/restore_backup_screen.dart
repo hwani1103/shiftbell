@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+import '../widgets/adaptive_layout.dart';
 // lib/screens/restore_backup_screen.dart
 //
 // ⭐ 사용자 데이터 백업("A번 요구사항") - 복구 UX(Layer 3). InitialRouter가
@@ -219,6 +221,7 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
   }
 
   String _formatDate(DateTime dt) {
+    if (!context.usesKoreanFeatures) return DateFormat.yMMMd(Localizations.localeOf(context).toString()).add_Hm().format(dt);
     final h = dt.hour.toString().padLeft(2, '0');
     final m = dt.minute.toString().padLeft(2, '0');
     return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')} $h:$m';
@@ -231,7 +234,7 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
       canPop: !_restoring,
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: SafeArea(
+        body: AdaptiveFormBody(child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -280,7 +283,7 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
               ],
             ),
           ),
-        ),
+        )),
       ),
     );
   }

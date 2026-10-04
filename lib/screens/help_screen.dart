@@ -1,3 +1,4 @@
+import '../widgets/adaptive_layout.dart';
 // lib/screens/help_screen.dart
 //
 // ⭐ 2026-09-03 - 설정 탭 "도움말"을 4항목짜리 AlertDialog에서 전면 재작성.
@@ -77,6 +78,8 @@ final List<HelpSection> _helpSections = [
         titleKey: (l10n) => l10n.helpShiftChangeShiftTitle,
         bodyKey: (l10n) => l10n.helpShiftChangeShiftBody,
       ),
+      HelpTopic(titleKey: (l10n) => l10n.helpCalendarTextSizeTitle,
+        bodyKey: (l10n) => l10n.helpCalendarTextSizeBody),
       HelpTopic(
         titleKey: (l10n) => l10n.helpShiftShiftColorsTitle,
         bodyKey: (l10n) => l10n.helpShiftShiftColorsBody,
@@ -95,6 +98,8 @@ final List<HelpSection> _helpSections = [
     icon: Icons.alarm_outlined,
     titleKey: (l10n) => l10n.helpAlarmSectionTitle,
     topics: [
+      HelpTopic(koreanOnly: true, titleKey: (l10n) => l10n.helpOneTapTitle,
+        bodyKey: (l10n) => l10n.helpOneTapBody),
       HelpTopic(
         titleKey: (l10n) => l10n.helpAlarmTemplatesTitle,
         bodyKey: (l10n) => l10n.helpAlarmTemplatesBody,
@@ -120,6 +125,7 @@ final List<HelpSection> _helpSections = [
     icon: Icons.calendar_month_outlined,
     titleKey: (l10n) => l10n.helpCalendarSectionTitle,
     topics: [
+      HelpTopic(titleKey: (l10n) => l10n.helpCalendarLocaleTitle, bodyKey: (l10n) => l10n.helpCalendarLocaleBody),
       HelpTopic(
         titleKey: (l10n) => l10n.helpCalendarThemesTitle,
         bodyKey: (l10n) => l10n.helpCalendarThemesBody,
@@ -141,6 +147,7 @@ final List<HelpSection> _helpSections = [
   HelpSection(
     icon: Icons.checklist_outlined,
     titleKey: (l10n) => l10n.helpScheduleTabSectionTitle,
+    koreanOnly: true,
     topics: [
       HelpTopic(
         titleKey: (l10n) => l10n.helpScheduleTabWhatIsItTitle,
@@ -201,6 +208,7 @@ final List<HelpSection> _helpSections = [
   HelpSection(
     icon: Icons.group_outlined,
     titleKey: (l10n) => l10n.helpFriendSectionTitle,
+    koreanOnly: true,
     topics: [
       HelpTopic(
         titleKey: (l10n) => l10n.helpFriendWhatIsItTitle,
@@ -253,6 +261,8 @@ final List<HelpSection> _helpSections = [
     icon: Icons.help_outline,
     titleKey: (l10n) => l10n.helpTroubleshootSectionTitle,
     topics: [
+      HelpTopic(titleKey: (l10n) => l10n.helpDiagnosticTitle,
+        bodyKey: (l10n) => l10n.helpDiagnosticBody),
       HelpTopic(
         titleKey: (l10n) => l10n.helpTroubleshootAlarmIssueTitle,
         bodyKey: (l10n) => l10n.helpTroubleshootAlarmIssueBody,
@@ -276,6 +286,7 @@ final List<HelpSection> _helpSections = [
         bodyKey: (l10n) => l10n.helpTroubleshootBackupFileMissingBody,
       ),
       HelpTopic(
+        koreanOnly: true,
         titleKey: (l10n) => l10n.helpTroubleshootFriendDisconnectedTitle,
         bodyKey: (l10n) => l10n.helpTroubleshootFriendDisconnectedBody,
       ),
@@ -341,7 +352,7 @@ class _HelpScreenState extends State<HelpScreen> {
         foregroundColor: Colors.black87,
         elevation: 0.5,
       ),
-      body: SafeArea(
+      body: AdaptiveFormBody(child: SafeArea(
         top: false,
         child: Column(
           children: [
@@ -388,7 +399,7 @@ class _HelpScreenState extends State<HelpScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }
@@ -491,7 +502,7 @@ class HelpDetailScreen extends StatelessWidget {
         foregroundColor: Colors.black87,
         elevation: 0.5,
       ),
-      body: SingleChildScrollView(
+      body: AdaptiveFormBody(child: SingleChildScrollView(
         padding: EdgeInsets.all(20.w),
         child: Container(
           width: double.infinity,
@@ -515,7 +526,7 @@ class HelpDetailScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      )),
     );
   }
 }

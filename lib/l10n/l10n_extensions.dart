@@ -9,5 +9,8 @@ import 'package:flutter/widgets.dart';
 import 'generated/app_localizations.dart';
 
 extension AppLocalizationsX on BuildContext {
-  AppLocalizations get l10n => AppLocalizations.of(this)!;
+  AppLocalizations get l10n => AppLocalizations.of(this);
+
+  /// Release scope follows the resolved app language, not the user's location.
+  bool get usesKoreanFeatures => Localizations.localeOf(this).languageCode == 'ko';
 }

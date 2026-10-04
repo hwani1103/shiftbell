@@ -19,15 +19,30 @@ import androidx.core.app.NotificationManagerCompat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 
 /**
- * ⭐ 2026-09-23 (1.0.24 C) - "문제 신고용 진단 파일" 만들기. 내보내는 순간의 상태 스냅샷 + DiagLog 기록을 텍스트 파일 하나로
- * Download/ShiftBell/ShiftBell_Diag[_dev]_yyMMdd_HHmmss.txt 에 저장(이 종류는 항상 최신 1개만 유지)하고, 공유 시트를 띄울 URI를 돌려줌.
+ * 상태 스냅샷 + DiagLog 기록을 Download/ShiftBell/log/ShiftBell_Diag[_dev]_yyMMdd_HHmmss.txt에
+ * 자동 저장한다. 항상 최신 파일 하나만 유지하고 외부로 전송하지 않는다.
  * 스냅샷 항목의 의미·판정 기준은 docs/진단로그_해석_매뉴얼.md 참고.
  */
 object DiagReport {
     private const val TAG = "DiagReport"
-    private const val RELATIVE_PATH = "Download/ShiftBell/"
+    private const val RELATIVE_PATH = "Download/ShiftBell/log/"
+    private val refreshExecutor = ScheduledThreadPoolExecutor(1) { task ->
+        Thread(task, "shiftbell-diag-refresh").apply { isDaemon = true }
+    }.apply { removeOnCancelPolicy = true }
+    private var pendingRefresh: ScheduledFuture<*>? = null
+
+    /** 마지막 진단 기록 뒤 1초가 지나면 파일 갱신을 시도한다. 연속 기록은 합친다. */
+    @Synchronized fun scheduleRefresh(context: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) return
+        pendingRefresh?.cancel(false)
+        val appContext = context.applicationContext
+        pendingRefresh = refreshExecutor.schedule({ export(appContext) }, 1, TimeUnit.SECONDS)
+    }
 
     private fun prefix(context: Context) =
         if (context.packageName.endsWith(".dev")) "ShiftBell_Diag_dev_" else "ShiftBell_Diag_"
@@ -195,7 +210,6 @@ object DiagReport {
                 ?: run { resolver.delete(uri, null, null); return null }
             resolver.update(uri, ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }, null, null)
             deleteOthers(context, ContentUris.parseId(uri))
-            DiagLog.log(context, "DIAG_EXPORTED", "bytes" to content.length)
             uri
         } catch (e: Exception) {
             Log.e(TAG, "진단 파일 저장 실패", e)
@@ -220,17 +234,6 @@ object DiagReport {
         } catch (e: Exception) {
             Log.w(TAG, "이전 진단 파일 정리 실패(무시)", e)
         }
-    }
-
-    /** 공유 시트(카카오톡·메일 등). */
-    fun share(context: Context, uri: Uri, chooserTitle: String) {
-        val send = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_SUBJECT, "ShiftBell 진단 파일")
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        context.startActivity(Intent.createChooser(send, chooserTitle).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
 }

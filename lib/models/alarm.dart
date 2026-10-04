@@ -1,3 +1,5 @@
+import '../utils/alarm_wall_time.dart';
+
 class Alarm {
   final int? id;
   final String time; // HH:mm
@@ -5,6 +7,9 @@ class Alarm {
   final String type; // 'fixed' or 'custom'
   final int alarmTypeId;
   final String? shiftType;
+  /// 원터치 설정 칸(0..4). 스누즈 후에도 출처와 연결을 보존한다.
+  final int? presetSlot;
+  final String? assignedDay;
 
   /// ⭐ 이 알람의 "주인"인 근무(shiftType)가 배정된 날짜 기준으로 -1(전날)/0(당일)/
   /// 1(다음날) 중 언제 울리는지. date는 항상 실제로 울리는 날짜(이미 오프셋이
@@ -19,6 +24,8 @@ class Alarm {
     required this.type,
     required this.alarmTypeId,
     this.shiftType,
+    this.presetSlot,
+    this.assignedDay,
     this.dayOffset = 0,
   });
 
@@ -27,20 +34,25 @@ class Alarm {
   DateTime? parseDate(dynamic value) {
     if (value == null) return null;
     try {
-      return DateTime.parse(value.toString());
+      return parseAlarmDate(value.toString());
     } catch (e) {
       print('⚠️ 알람 날짜 파싱 실패: $value');
       return null;
     }
   }
 
+  final date = parseDate(map['date']);
   return Alarm(
     id: map['id'],
-    time: map['time'],
-    date: parseDate(map['date']),  // ⭐ 변경
+    time: map['type'] == 'snoozed' && date != null
+        ? '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}'
+        : map['time'],
+    date: date,
     type: map['type'],
     alarmTypeId: map['alarm_type_id'],
     shiftType: map['shift_type'],
+    presetSlot: map['preset_slot'] as int?,
+    assignedDay: map['assigned_day'] as String?,
     dayOffset: map['day_offset'] ?? 0,
   );
 }
@@ -49,10 +61,13 @@ class Alarm {
     return {
       'id': id,
       'time': time,
-      'date': date?.toIso8601String(),
+      'date': date == null ? null : type == 'snoozed'
+          ? alarmInstantForStorage(date!) : date!.toIso8601String(),
       'type': type,
       'alarm_type_id': alarmTypeId,
       'shift_type': shiftType,
+      'preset_slot': presetSlot,
+      'assigned_day': assignedDay,
       'day_offset': dayOffset,
     };
   }
@@ -79,9 +94,11 @@ class Alarm {
         other.type == type &&
         other.alarmTypeId == alarmTypeId &&
         other.shiftType == shiftType &&
+        other.presetSlot == presetSlot &&
+        other.assignedDay == assignedDay &&
         other.dayOffset == dayOffset;
   }
 
   @override
-  int get hashCode => Object.hash(id, time, date, type, alarmTypeId, shiftType, dayOffset);
+  int get hashCode => Object.hash(id, time, date, type, alarmTypeId, shiftType, dayOffset, presetSlot, assignedDay);
 }

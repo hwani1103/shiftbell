@@ -128,6 +128,7 @@ class MainActivity: FlutterActivity() {
     // 무관하게 항상 동작함.
     private val REQUEST_CODE_PICK_BACKUP_FILE = 9081
     private var pendingBackupPickResult: MethodChannel.Result? = null
+    @Volatile private var alarmRecoveryComplete = false
 
     // ⭐ 갱신 요청 수신용 Receiver
     private val refreshReceiver = object : BroadcastReceiver() {
@@ -143,6 +144,7 @@ class MainActivity: FlutterActivity() {
         window.setBackgroundDrawableResource(android.R.color.transparent)
 
         super.onCreate(savedInstanceState)
+        DiagReport.scheduleRefresh(applicationContext)
 
         // ⭐ BroadcastReceiver 등록은 onResume으로 이동 예정
         val filter = IntentFilter("com.hwani1103.shiftbell.FLUTTER_REFRESH")
@@ -176,7 +178,8 @@ class MainActivity: FlutterActivity() {
         }
         // ⭐ 2026-09-22 (B-1) - 예전엔 여기(UI 스레드)에서 readBytes()로 통째로 읽어서, 큰 파일을 고르면 "응답 없음"이나
         // 메모리 부족이 날 수 있었음. 자동 탐지(readBackupFile)와 같이 백그라운드에서 읽고, 크기 상한(BackupFileReader)을
-        // 넘으면 읽지 않고 null - Dart는 지금처럼 "백업 파일이 아님"으로 안내함.
+        // 넘으면 읽지 않음. null은 사용자 취소에만 사용하고, 읽기 실패는 빈 문자열로
+        // 전달해 Dart의 백업 검증 오류 안내가 표시되도록 함.
         Thread {
             val content = try {
                 val size = queryOpenableSize(uri)
@@ -193,7 +196,7 @@ class MainActivity: FlutterActivity() {
                 Log.e("MainActivity", "❌ 수동 선택한 백업 파일 읽기 실패", e)
                 null
             }
-            runOnUiThread { pending?.success(content) }
+            runOnUiThread { pending?.success(content ?: "") }
         }.start()
     }
 
@@ -223,6 +226,7 @@ class MainActivity: FlutterActivity() {
     // ✅ 변경
 override fun onResume() {
     super.onResume()
+    ReleaseLocalePolicy.syncSleepWidget(this)
     // ⭐ CRITICAL FIX: triggerCheck()는 DB를 동기적으로(블로킹) 읽음. onResume()은
     // 메인 스레드에서 실행되는데, 여기서 바로 부르면 - 특히 설치 직후 첫 실행처럼
     // Dart(sqflite)가 같은 DB 파일을 동시에 처음 생성하고 있는 순간과 겹치면 -
@@ -232,6 +236,12 @@ override fun onResume() {
     // 있어서 경합 자체가 없음 - "설치 직후 딱 한 번만" 증상과 정확히 일치함.
     // 20분 전 알림/다음 wakeup 예약은 UI 렌더링과 무관하니 백그라운드 스레드로 옮김.
     Thread {
+        // 강제중지는 OS 예약을 지우지만 오늘의 갱신 완료 표시는 남긴다.
+        // 첫 재개 시 전체 미래 예약을 다시 맞춘다. 화면 로딩은 기다리지 않으며,
+        // 복원 잠금/갱신 경합으로 미완료이면 다음 재개에서 재시도한다.
+        if (!alarmRecoveryComplete) {
+            alarmRecoveryComplete = AlarmRefreshEngine.refresh(applicationContext)
+        }
         AlarmGuardReceiver.triggerCheck(this)
         // 강제 종료 뒤 사용자가 앱을 다시 열었거나 제조사 절전 정책이 예약을
         // 정리한 경우에도 DB의 모든 미래 일정 알림을 다시 건다. 같은 id의
@@ -336,6 +346,9 @@ override fun onNewIntent(intent: Intent) {
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
         methodChannel?.setMethodCallHandler { call, result ->
             when (call.method) {
+                "getUse24HourFormat" -> {
+                    result.success(android.text.format.DateFormat.is24HourFormat(this))
+                }
                 "scheduleGuardWakeup" -> {
                     scheduleGuardWakeup()
                     result.success(null)
@@ -347,7 +360,7 @@ override fun onNewIntent(intent: Intent) {
                 "scheduleNativeAlarm" -> {
                     val id = call.argument<Int>("id") ?: 0
                     val timestamp = call.argument<Long>("timestamp") ?: 0L
-                    val label = call.argument<String>("label") ?: "알람"
+                    val label = call.argument<String>("label") ?: getString(R.string.alarm_default_label)
                     val soundType = call.argument<String>("soundType") ?: "loud"
                     
                     // ⭐ 2026-09-14 (출시전 감사 #13) - 등록 실패(정확한 알람 권한 없음 등)를 성공으로 돌려주지
@@ -469,6 +482,16 @@ override fun onNewIntent(intent: Intent) {
                 "forceNativeRefresh" -> {
                     forceNativeRefresh()
                     result.success(null)
+                }
+                "forceNativeRefreshAndWait" -> {
+                    Thread {
+                        try {
+                            val completed = AlarmRefreshEngine.refresh(applicationContext)
+                            runOnUiThread { result.success(completed) }
+                        } catch (e: Exception) {
+                            runOnUiThread { result.error("ALARM_REFRESH_FAILED", e.message, null) }
+                        }
+                    }.start()
                 }
                 "triggerGuardCheck" -> {
                     triggerGuardCheck()
@@ -618,8 +641,7 @@ override fun onNewIntent(intent: Intent) {
                         }.start()
                     }
                 }
-                // ⭐ 2026-09-23 (1.0.24 C) - 진단 기록(Dart 쪽 이벤트)과 "문제 신고용 진단 파일" 내보내기+공유
-                // ⭐ 2026-09-23 (1.0.24 D) - 공휴일 원격 변경분을 홈 위젯에 반영(날짜 목록만)
+                // 진단 기록(Dart 쪽 이벤트). 파일은 DiagLog가 자동으로 갱신한다.
                 "setHolidayOverrides" -> {
                     CalendarWidgetHolidays.saveOverrides(
                         applicationContext,
@@ -633,22 +655,6 @@ override fun onNewIntent(intent: Intent) {
                     val fields = (call.argument<Map<String, Any?>>("fields") ?: emptyMap()).entries.map { it.key to it.value }
                     DiagLog.log(applicationContext, event, *fields.toTypedArray())
                     result.success(null)
-                }
-                "exportDiagnostics" -> {
-                    val title = call.argument<String>("chooserTitle") ?: "ShiftBell"
-                    Thread {
-                        val uri = DiagReport.export(applicationContext)
-                        runOnUiThread {
-                            if (uri != null) {
-                                try {
-                                    DiagReport.share(this, uri, title)
-                                } catch (e: Exception) {
-                                    Log.w("MainActivity", "공유 시트 열기 실패(파일은 저장됨)", e)
-                                }
-                            }
-                            result.success(uri?.toString())
-                        }
-                    }.start()
                 }
                 "readBackupFile" -> {
                     // ⭐ 2026-09-14 (교차 검토 X-07) - skip = 형식은 맞았지만 Dart 검증에서 걸러진 최신 후보 수(다음 후보를 요청)
@@ -898,10 +904,12 @@ override fun onNewIntent(intent: Intent) {
         val previousUriStr = prefs.getString(slotKey, null)
         // ⭐ 2026-09-11 - 자동 백업이 조용히 안 되는 문제 재점검용 로그(네이티브 도달 여부 구분).
         Log.d("MainActivity", "💾 백업 저장 시도(kind=${kind.token}, content=${content.length}자, prevUri=$previousUriStr)")
-        // ⭐ 2026-09-22 (B-1) - 읽기 상한을 넘는 백업은 복원 때 읽지 못함. 쓰기는 절대 막지 않고(백업이 없는 게 더 나쁨) 알리기만 함.
+        // 복원 가능한 크기만 저장한다. 상한 초과본을 공개하면 기존 정상 슬롯을 잃을 수 있다.
         val bytes = content.toByteArray(Charsets.UTF_8)
         if (bytes.size.toLong() > BackupFileReader.MAX_BACKUP_BYTES) {
-            Log.e("MainActivity", "❌ 백업 크기(${bytes.size}바이트)가 복원 읽기 상한을 넘음 - BackupFileReader.MAX_BACKUP_BYTES 재검토 필요")
+            Log.e("MainActivity", "❌ 백업 크기(${bytes.size}바이트)가 복원 읽기 상한을 넘음 - 기존 백업 유지")
+            DiagLog.log(applicationContext, "BACKUP_WRITE_FAIL", "kind" to kind.token, "reason" to "too_large")
+            return false
         }
 
         return try {
@@ -927,14 +935,11 @@ override fun onNewIntent(intent: Intent) {
                     out.write(bytes)
                     out.flush()
                 }
-                // 공개 전에 다시 읽어 확인 - 길이가 같고 백업 JSON 형식이어야 함.
-                // 읽기 상한을 넘는 백업은 어차피 다시 읽을 수 없으므로(위 B-1 로그) 확인을 건너뛰고 쓰기만 보장.
-                if (bytes.size.toLong() <= BackupFileReader.MAX_BACKUP_BYTES) {
-                    val readBack = resolver.openInputStream(uri)?.use { input -> BackupFileReader.readBoundedUtf8(input) }
-                        ?: throw IllegalStateException("다시 읽기 실패(uri=$uri)")
-                    if (readBack.length != content.length || !looksLikeCompleteBackup(readBack)) {
-                        throw IllegalStateException("다시 읽은 백업이 원본과 다름(${readBack.length}/${content.length}자)")
-                    }
+                // 공개 전에 다시 읽어 원문 전체와 백업 형식을 확인한다. 같은 길이의 변조도 거부한다.
+                val readBack = resolver.openInputStream(uri)?.use { input -> BackupFileReader.readBoundedUtf8(input) }
+                    ?: throw IllegalStateException("다시 읽기 실패(uri=$uri)")
+                if (readBack != content || !looksLikeCompleteBackup(readBack)) {
+                    throw IllegalStateException("다시 읽은 백업이 원본과 다름(${readBack.length}/${content.length}자)")
                 }
                 val publish = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
                 resolver.update(uri, publish, null, null) > 0
@@ -953,7 +958,13 @@ override fun onNewIntent(intent: Intent) {
             }
 
             // 새 백업이 안전하게 공개된 뒤에만 이 슬롯 기억을 바꾸고 같은 종류의 옛 파일을 정리
-            prefs.edit().putString(slotKey, uri.toString()).apply()
+            // 정리 전에 새 슬롯 URI를 디스크에 확정한다. 비동기 apply() 뒤 즉시
+            // 옛 파일을 지우면 프로세스 종료 시 새 파일의 기억 URI만 유실될 수 있다.
+            if (!prefs.edit().putString(slotKey, uri.toString()).commit()) {
+                Log.e("MainActivity", "❌ 새 백업 URI 저장 실패 - 옛 슬롯 유지")
+                DiagLog.log(applicationContext, "BACKUP_WRITE_FAIL", "kind" to kind.token, "reason" to "slot_uri_commit")
+                return false
+            }
             cleanupOldBackupFiles(resolver, kind, uri, previousUriStr)
 
             Log.d("MainActivity", "✅ 백업 파일 저장 완료(${kind.token}): $uri ($displayName)")

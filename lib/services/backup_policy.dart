@@ -32,8 +32,10 @@ const Set<String> kDeviceLocalPreferenceKeys = {
   'backup_last_saved_at_auto',
   'backup_last_saved_at_manual',
   'backup_slot_format_v2',
-  // 1.0.24 D - 공휴일 원격 변경분 캐시(서버에서 다시 받는 값)
+  // 공휴일 원격 캐시와 기기별 분산 조회 시각은 복원 대상이 아님.
   'holiday_overrides_json',
+  'holiday_next_check_at_ms',
+  'holiday_next_check_v2_at_ms',
   // OS 권한은 설치마다 다시 받아야 함(복원 후 권한 화면 판단은 복원 흐름이 직접 함)
   'permissions_requested',
   // 업데이트 안내 dedupe - 설치·버전별
@@ -41,6 +43,7 @@ const Set<String> kDeviceLocalPreferenceKeys = {
   'release_note_last_seen_app_version',
   'release_note_seen_version',
   'update_check_last_checked_at',
+  'play_update_last_checked_at',
   // 웹 뷰어 전용
   'shiftbell_last_owner_id',
   // 사용 통계 - 이 기기 alarm_history의 어디까지 보냈는지(AlarmUsageAnalytics.cursorKey). 다른 기기로 옮겨지면 그 기기의
@@ -118,7 +121,9 @@ Map<String, dynamic> _sortedMap(Map<String, dynamic> map) {
 /// 변경 감지용 64비트 FNV-1a(UTF-8) + 길이. 암호학적 용도 아님 - "같은 내용인지"만 판단.
 String contentFingerprint(String content) {
   final bytes = utf8.encode(content);
-  var hash = -3750763034362895579; // 0xcbf29ce484222325 (64비트 부호 있는 표현)
+  // 모바일 전용 계산이지만 공유 웹의 간접 import에도 파싱된다.
+  // JS가 표현할 수 없는 정수 리터럴 때문에 웹 빌드까지 실패하지 않게 한다.
+  var hash = int.parse('-3750763034362895579'); // 0xcbf29ce484222325
   const prime = 1099511628211; // 0x100000001b3
   for (final b in bytes) {
     hash ^= b;

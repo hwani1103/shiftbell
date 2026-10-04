@@ -1,48 +1,24 @@
+import '../widgets/soft_info_dialog.dart';
 // lib/services/update_service.dart
-
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../l10n/l10n_extensions.dart';
-import 'firebase_bootstrap.dart';
-import 'holiday_sync_service.dart';
 
 class UpdateService {
   static const String _notifiedVersionKey = 'notified_update_version';
   static const String _playStoreUrl =
       'https://play.google.com/store/apps/details?id=com.hwani1103.shiftbell';
 
-  // ⭐ 2026-08-20 "업데이트가 있다는 안내가 안 뜬다" 버그 재설계 - 원래는 Google Play
-  // In-App Update API(패키지 in_app_update)로 "새 버전이 있는지"를 물어봤는데, 이 API는
-  // Play가 그 기기에 새 버전을 실제로 "전파"해야만 응답이 오는 구조라(배포 직후 몇 시간~
-  // 하루 지연 흔함 + 단계적 배포 비율에 걸리면 그 비율 밖 기기는 영영 응답 안 옴) 앱
-  // 코드로는 못 고치는 근본 한계가 있었음. 그래서 "새 버전이 있는지" 판단 자체를 Play가
-  // 아니라 우리가 직접 통제하는 Firestore 문서(app_config/android)로 옮김 - 이 문서 값을
-  // 개발자가 배포 직후 바로 갱신하면, 전파 지연 없이 즉시 전 사용자에게 반영됨. 실제
-  // "업데이트하기" 액션은 여전히 Play 스토어로 보냄(_openPlayStore) - 판단만 우리 손으로
-  // 옮긴 것.
-  static const String _appConfigDocPath = 'app_config/android';
-
-  // ⭐ 콜드 스타트뿐 아니라 앱이 포그라운드로 복귀할 때마다도 불림(main.dart의
-  // didChangeAppLifecycleState 참고). Firestore 문서 읽기 자체는 가볍지만(캐시도 됨)
-  // 탭 전환하듯 앱을 들락날락하는 사용자가 매번 읽기 호출을 타는 건 낭비라, 마지막 체크
-  // 이후 이 시간 안이면 그냥 건너뜀 - "버전당 1번만 알림"이라는 정책과는 별개로,
-  // 순수하게 "체크 자체"를 너무 자주 하지 않기 위한 쿨다운.
-  static const String _lastCheckedAtKey = 'update_check_last_checked_at';
-  // ⭐ 2026-09-11(사용자 요청 - Firestore 무료 티어 비용 점검) - 30분은 "새
-  // 버전이 있는지" 체크치고는 불필요하게 잦음(latestVersionCode는 개발자가
-  // 배포 직후 손으로 딱 한 번 바꾸는 값이라, 그 몇 시간 안에만 반영돼도
-  // 충분함). 기능(정책 1의 "버전당 1번만 알림")은 전혀 안 바뀌고 순회
-  // 빈도만 줄어듦 - 앱을 하루에 여러 번 여는 사용자의 문서 읽기 횟수가
-  // 최대 1/12로 줄어들어(기존 최악 48회/일 → 4회/일) Firestore 읽기 쿼터
-  // 여유를 더 확보함(app_config는 애초에 문서 1개뿐이라 지금도 무료 티어
-  // 대비 미미하지만, 사용자가 많아졌을 때의 여유를 미리 늘려두는 것).
+  // Play가 이 기기에 제공하는 버전만 안내한다. 단계적 배포 대상이 아니거나
+  // Play 반영 전이면 UPDATE_AVAILABLE이 아니므로 Firestore로 앞서 알리지 않는다.
+  // 콜드 스타트와 포그라운드 복귀에 호출되지만 Play 조회는 6시간 간격으로 제한한다.
+  static const String _lastCheckedAtKey = 'play_update_last_checked_at';
   static const Duration _checkCooldown = Duration(hours: 6);
+  static bool _checkInProgress = false;
 
   // ⭐ 이번 릴리즈 전용 "업데이트 후 첫 실행" 안내 문구.
   // 아래 _showUpdateDialog(업데이트 하기 "전" 구버전에서 뜨는 안내)와 달리, 이건
@@ -123,7 +99,7 @@ class UpdateService {
   static Future<void> _showReleaseNoteDialog(BuildContext context) async {
     final colorScheme = Theme.of(context).colorScheme;
 
-    await showDialog<void>(
+    await showSoftInfoDialog<void>(
       context: context,
       barrierDismissible: true,
       builder: (context) => AlertDialog(
@@ -202,9 +178,10 @@ class UpdateService {
   /// 1. 새 버전이 있으면 기존 유저에게 "딱 1번"만 안내 - 사용자가 "나중에"로 명시적으로
   ///    닫으면, 그 버전에 대해서는 다시는 안 뜸(아래 notifiedVersion 저장). 더 새로운
   ///    버전이 나오면 그때는 다시 뜸(버전별로 독립적으로 관리됨).
-  /// 2. Firestore 조회 자체가 실패해도(오프라인, Firebase 미설정 등) 앱 사용엔 영향 없음.
+  /// 2. Play 조회가 실패해도 앱 사용엔 영향 없음.
   static Future<void> checkForUpdate(BuildContext context) async {
-    if (!firebaseReady) return; // 친구공유와 동일한 방어 - Firebase 미설정 시 조용히 스킵
+    if (_checkInProgress) return;
+    _checkInProgress = true;
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -215,27 +192,12 @@ class UpdateService {
             .difference(DateTime.fromMillisecondsSinceEpoch(lastCheckedMs));
         if (elapsed < _checkCooldown) return;
       }
+      final info = await InAppUpdate.checkForUpdate();
       await prefs.setInt(
           _lastCheckedAtKey, DateTime.now().millisecondsSinceEpoch);
-
-      final packageInfo = await PackageInfo.fromPlatform();
-      final currentVersionCode = int.tryParse(packageInfo.buildNumber) ?? 0;
-      if (currentVersionCode == 0) return; // 버전 정보를 못 읽으면 비교 자체가 무의미 - 스킵
-
-      final doc = await FirebaseFirestore.instance.doc(_appConfigDocPath).get();
-      final data = doc.data();
-      if (data == null) return; // 문서가 아직 없음(개발자가 아직 안 만듦) - 조용히 스킵
-
-      // ⭐ 2026-09-23 (1.0.24 D) - 공휴일 원격 변경 안내 번호. 캐시보다 클 때만 holidays 문서를 1번 더 읽음(기다리지 않음)
-      unawaited(HolidaySyncService.instance.syncIfNeeded(data['holidaysVersion']));
-
-      // ⭐ 2026-09-12(사용자 요청) - 강제 업데이트 기능 자체를 안 쓰기로 함(제거).
-      // app_config/android 문서에 minSupportedVersionCode/forceUpdateTitle/
-      // forceUpdateMessage 필드가 남아있어도 이제 아무 의미 없음 - 그냥 무시됨.
-
-      final latestVersionCode =
-          (data['latestVersionCode'] as num?)?.toInt() ?? 0;
-      if (latestVersionCode <= currentVersionCode) return; // 이미 최신 - 안내 불필요
+      if (info.updateAvailability != UpdateAvailability.updateAvailable) return;
+      final latestVersionCode = info.availableVersionCode;
+      if (latestVersionCode == null || latestVersionCode <= 0) return;
 
       // 이미 이 버전에 대해 알림했는지 체크 (위에서 얻은 prefs 재사용)
       final notifiedVersion = prefs.getInt(_notifiedVersionKey) ?? 0;
@@ -258,8 +220,9 @@ class UpdateService {
         // 버튼(나중에/업데이트) 클릭만 "의도적"으로 취급함)
       }
     } catch (e) {
-      // 업데이트 체크 실패해도 앱 사용에는 문제 없음
-      debugPrint('업데이트 체크 실패: $e');
+      debugPrint('Play 업데이트 확인 실패: $e');
+    } finally {
+      _checkInProgress = false;
     }
   }
 

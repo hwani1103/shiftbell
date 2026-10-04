@@ -1,3 +1,5 @@
+import '../utils/alarm_wall_time.dart';
+import '../constants/shift_name_limits.dart';
 // lib/services/database_service.dart
 
 import 'package:sqflite/sqflite.dart';
@@ -6,6 +8,8 @@ import '../constants/platform_channel.dart';
 import '../models/alarm_type.dart';
 import '../models/alarm.dart';
 import '../models/shift_schedule.dart';
+import '../models/team_schedule_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/alarm_template.dart';
 import 'dart:convert';
 import 'dart:async';
@@ -94,7 +98,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 24,  // v24: alarm_overrides 추가 (개별 알람 예외) - DatabaseHelper.kt, migrations.json targetVersion과 같아야 함(빌드 검사)
+      version: 26,  // v26: full roster and main schedule commit together.
       onCreate: _onCreate,
       onUpgrade: (db, oldVersion, newVersion) =>
           DbMigrationRunner.migrate(db, script, oldVersion, newVersion),
@@ -143,6 +147,7 @@ class DatabaseService {
   // conflictAlgorithm.ignore 사용. 실제로 Native/Flutter DB 버전 불일치 레이스로 이
   // 함수가 두 번 불려서 "table date_overtime already exists"로 앱이 죽은 적이 있었음.
   Future<void> _onCreate(Database db, int version) async {
+    await db.execute('CREATE TABLE IF NOT EXISTS team_schedule_config(id INTEGER PRIMARY KEY CHECK (id = 1), config TEXT)');
     await db.execute('''
       CREATE TABLE IF NOT EXISTS alarm_types(
         id INTEGER PRIMARY KEY,
@@ -181,6 +186,8 @@ class DatabaseService {
         alarm_type_id INTEGER NOT NULL,
         shift_type TEXT,
         day_offset INTEGER NOT NULL DEFAULT 0,
+        preset_slot INTEGER,
+        assigned_day TEXT,
         FOREIGN KEY (alarm_type_id) REFERENCES alarm_types(id)
       )
     ''');
@@ -194,6 +201,7 @@ class DatabaseService {
         day_offset INTEGER NOT NULL DEFAULT 0
       )
     ''');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_alarms_preset_slot ON alarms(preset_slot, assigned_day)');
 
     // ⭐ 신규: 알람 이력 테이블
   await db.execute('''
@@ -430,7 +438,7 @@ class DatabaseService {
   // 호출부가 이미 트랜잭션 안에 있으므로 여기선 그냥 insert만 함.
   Future<void> logAlarmCreation(DatabaseExecutor txn, int alarmId, Alarm alarm, String source) async {
     if (alarm.date == null) return;
-    final dateStr = alarm.date!.toIso8601String();
+    final dateStr = alarm.toMap()['date'];
     await txn.insert('alarm_creation_log', {
       'alarm_id': alarmId,
       'scheduled_date': dateStr,
@@ -438,7 +446,7 @@ class DatabaseService {
       'shift_type': alarm.shiftType,
       'alarm_type_id': alarm.alarmTypeId,
       'source': source,
-      'created_at': DateTime.now().toIso8601String(),
+      'created_at': alarmInstantForStorage(DateTime.now()),
       'day_offset': alarm.dayOffset,
     });
   }
@@ -469,23 +477,25 @@ class DatabaseService {
     final dateStr = date.toIso8601String().split('T')[0];
     final maps = await db.query(
       'alarms',
-      where: 'date LIKE ?',
+      where: "type = 'snoozed' OR date LIKE ?",
       whereArgs: ['$dateStr%'],
     );
-    return maps.map((map) => Alarm.fromMap(map)).toList();
+    return maps.map((map) => Alarm.fromMap(map))
+        .where((a) => a.date != null && a.date!.year == date.year &&
+            a.date!.month == date.month && a.date!.day == date.day).toList();
   }
   
   Future<List<Alarm>> getNextAlarms({int limit = 10}) async {
     final db = await database;
-    final now = DateTime.now().toIso8601String();
-    final maps = await db.query(
-      'alarms',
-      where: 'date > ?',
-      whereArgs: [now],
-      orderBy: 'date ASC',
-      limit: limit,
-    );
-    return maps.map((map) => Alarm.fromMap(map)).toList();
+    final now = _now;
+    // During the first repeated hour, e.g. 01:30 standard time can still be
+    // ahead of 01:45 daylight time. Compare instants, not local SQL strings.
+    final maps = await db.query('alarms', where: "type = 'snoozed' OR date >= ?",
+        whereArgs: [_dateKey(now)], orderBy: 'date ASC');
+    final future = maps.map(Alarm.fromMap)
+        .where((alarm) => alarm.date != null && alarm.date!.isAfter(now)).toList()
+      ..sort((a, b) => a.date!.compareTo(b.date!));
+    return future.take(limit).toList();
   }
   
   Future<int> updateAlarm(Alarm alarm) async {
@@ -538,11 +548,11 @@ class DatabaseService {
                 'alarm_id': id,
                 'scheduled_time': scheduledTime,
                 'scheduled_date': scheduledDate,
-                'actual_ring_time': DateTime.now().toIso8601String(),
+                'actual_ring_time': alarmInstantForStorage(DateTime.now()),
                 'dismiss_type': dismissType,  // ⭐ 파라미터 사용
                 'snooze_count': 0,
                 'shift_type': shiftType,
-                'created_at': DateTime.now().toIso8601String(),
+                'created_at': alarmInstantForStorage(DateTime.now()),
                 'day_offset': dayOffset,
               });
               final historyText = dismissType == 'swiped' ? '알람 확인' : '알람 제거';
@@ -570,6 +580,36 @@ class DatabaseService {
 
     return deletedCount;
   }
+
+  /// 원터치 설정 칸 삭제: 연결된 미래 행과 삭제 이력을 한 트랜잭션에서 처리한다.
+  /// 울림이 시작된 행(date <= now)은 건드리지 않는다.
+  Future<List<Alarm>> deleteFutureOneTapSlot(int slot) async {
+    final db = await database;
+    final instant = DateTime.now();
+    final now = alarmInstantForStorage(instant);
+    return db.transaction((txn) async {
+      final rows = await txn.query('alarms',
+          where: "preset_slot = ? AND type IN ('custom', 'snoozed')",
+          whereArgs: [slot]);
+      final alarms = rows.map(Alarm.fromMap)
+          .where((alarm) => alarm.date?.isAfter(instant) ?? false).toList();
+      for (final alarm in alarms) {
+        await txn.insert('alarm_history', {
+          'alarm_id': alarm.id,
+          'scheduled_time': alarm.time,
+          'scheduled_date': alarm.toMap()['date'],
+          'actual_ring_time': now,
+          'dismiss_type': 'cancelled_before_ring',
+          'snooze_count': 0,
+          'shift_type': alarm.shiftType,
+          'created_at': now,
+          'day_offset': alarm.dayOffset,
+        });
+        await txn.delete('alarms', where: 'id = ?', whereArgs: [alarm.id]);
+      }
+      return alarms;
+    });
+  }
   
   Future<int> saveShiftSchedule(ShiftSchedule schedule) async {
     final db = await database;
@@ -583,6 +623,82 @@ class DatabaseService {
       );
       await deleteOverridesForChangedAssignments(txn, before, schedule);
       return id;
+    });
+  }
+
+  /// A null row prevents stale legacy preferences from resurrecting a reset roster.
+  Future<TeamScheduleConfig?> getTeamScheduleConfig() async {
+    final db = await database;
+    final prefs = await SharedPreferences.getInstance();
+    return db.transaction((txn) async {
+      final rows = await txn.query('team_schedule_config');
+      if (rows.isNotEmpty) return _decodeTeams(rows.first['config']);
+      final schedule = await _readScheduleForUpdate(txn, null);
+      final old = TeamScheduleConfig.read(prefs);
+      final migrated = old != null && schedule?.pattern?.isNotEmpty == true
+          ? old.materialize(schedule!.pattern!) : null;
+      await _writeTeams(txn, migrated);
+      return migrated;
+    });
+  }
+
+  TeamScheduleConfig? _decodeTeams(Object? raw) => raw == null ? null :
+      TeamScheduleConfig.fromJson(jsonDecode(raw as String) as Map<String, dynamic>);
+
+  Future<void> _writeTeams(DatabaseExecutor db, TeamScheduleConfig? config) async {
+    if (config != null) TeamScheduleConfig.fromJson(config.toJson());
+    await db.insert('team_schedule_config', {
+      'id': 1, 'config': config == null ? null : jsonEncode(config.toJson()),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<void> saveTeamScheduleConfig(TeamScheduleConfig? config) async {
+    final db = await database;
+    await db.transaction((txn) async {
+      if (config != null) {
+        final schedule = await _readScheduleForUpdate(txn, null);
+        if (schedule == null || !schedule.shiftTypes.toSet().containsAll(config.referencedShifts)) {
+          throw StateError('Shift names changed; reopen setup.');
+        }
+        final mine = config.rules[config.myTeam]!;
+        final today = _now;
+        if (jsonEncode(mine.shifts) != jsonEncode(schedule.pattern) ||
+            mine.indexOn(today) != schedule.getPatternIndexForDate(today)) {
+          throw StateError('Your schedule changed; reopen setup.');
+        }
+      }
+      await _writeTeams(txn, config);
+    });
+  }
+
+  /// Main calendar and roster commit atomically before native alarm refresh.
+  Future<void> applyTeamScheduleChange({required ShiftSchedule before,
+      required ShiftSchedule after, required TeamScheduleConfig? expectedTeams,
+      required TeamScheduleConfig? nextTeams}) async {
+    await getTeamScheduleConfig();
+    final db = await database;
+    await db.transaction((txn) async {
+      final current = await _readScheduleForUpdate(txn, before.id);
+      final rows = await txn.query('team_schedule_config');
+      final teams = _decodeTeams(rows.first['config']);
+      if (jsonEncode(current?.toMap()) != jsonEncode(before.toMap()) ||
+          jsonEncode(teams?.toJson()) != jsonEncode(expectedTeams?.materialize(before.pattern!).toJson())) {
+        throw StateError('Schedule changed; reopen the editor.');
+      }
+      if (!after.shiftTypes.toSet().containsAll(after.pattern ?? [])) {
+        throw StateError('Unknown shift in team rule');
+      }
+      if (nextTeams != null) {
+        final rule = nextTeams.rules[nextTeams.myTeam]!;
+        if (!after.shiftTypes.toSet().containsAll(nextTeams.referencedShifts) ||
+            jsonEncode(rule.shifts) != jsonEncode(after.pattern) ||
+            rule.indexOn(TeamScheduleConfig.baseDate) != after.getPatternIndexForDate(TeamScheduleConfig.baseDate)) {
+          throw StateError('Roster/main schedule mismatch');
+        }
+      }
+      await txn.update('shift_schedule', after.toMap(), where: 'id = ?', whereArgs: [before.id]);
+      await deleteOverridesForChangedAssignments(txn, before, after);
+      await _writeTeams(txn, nextTeams);
     });
   }
 
@@ -639,12 +755,16 @@ class DatabaseService {
   //     알람 완전 삭제"): 대체 스케줄 없이 그냥 지우는 것이므로 'superseded'로
   //     남으면 "일정 변경"이라고 오해를 줌 - 이 호출부만 'cancelled_before_ring'
   //     (알람 제거)을 넘겨서 씀.
-  Future<void> deleteAllAlarms({String dismissType = 'superseded'}) async {
+  Future<List<int>> deleteAllAlarms({
+    String dismissType = 'superseded',
+    bool clearTemplates = false,
+    bool resetSchedule = false,
+  }) async {
     final db = await database;
 
-    await db.transaction((txn) async {
+    final removedIds = await db.transaction((txn) async {
       final toRemove = await txn.query('alarms');
-      final now = DateTime.now().toIso8601String();
+      final now = alarmInstantForStorage(DateTime.now());
 
       for (final row in toRemove) {
         final date = row['date'] as String?;
@@ -665,9 +785,25 @@ class DatabaseService {
       }
 
       await txn.delete('alarms');
+      if (clearTemplates || resetSchedule) {
+        // Native refresh must never see empty alarms with old templates.
+        await txn.delete('shift_alarm_templates');
+        await _deleteFutureOverrides(txn);
+      }
+      if (resetSchedule) {
+        // Keep the existing reset policy, but commit the complete reset before
+        // any asynchronous OS calls so a process exit cannot leave half a roster.
+        await txn.delete('shift_schedule');
+        await _writeTeams(txn, null);
+        await txn.delete('alarm_overrides');
+        await txn.delete('alarm_history');
+        await txn.delete('alarm_creation_log');
+      }
+      return toRemove.map((row) => row['id'] as int).toList();
     });
 
     print('🗑️ 모든 알람 삭제 완료 (이력 기록 후 삭제)');
+    return removedIds;
   }
 
   // ⭐ 자동 생성분(type='fixed')만 삭제 (이력은 유지, 스누즈 중인 알람은 절대 건드리지 않음)
@@ -709,7 +845,7 @@ class DatabaseService {
     await db.transaction((txn) async {
       await txn.delete('shift_alarm_templates');
       // ⭐ 2026-09-14 (#31 D12) - 모든 근무의 템플릿이 사라졌으므로 미래 개별 예외도 같은 트랜잭션에서 삭제
-      await txn.delete('alarm_overrides', where: 'slot_time > ?', whereArgs: [alarmSlotTime(_now)]);
+      await _deleteFutureOverrides(txn);
     });
     print('🗑️ 모든 알람 템플릿 삭제 완료');
   }
@@ -792,9 +928,11 @@ class DatabaseService {
   Future<void> renameShiftAtomic({
     required Map<String, String> renamedShifts,
     required ShiftSchedule newSchedule,
+    ShiftSchedule? expectedSchedule,
+    Set<String> deletedShifts = const {},
   }) async {
     final changes = Map<String, String>.fromEntries(renamedShifts.entries.where((e) => e.key != e.value));
-    if (changes.isEmpty) return;
+    if (changes.isEmpty && expectedSchedule == null) return;
 
     // ⭐ 2026-09-14 (출시전 감사 #11/#12, G1) - 화면 검사와 별개로 저장 직전에 한 번 더 막음: 새 이름 형식(쉼표·예약어 등),
     // 변경 "후" 근무 목록의 중복(두 근무가 같은 이름이 되면 참조가 합쳐짐). 거부하면 아무것도 바꾸지 않음.
@@ -803,13 +941,47 @@ class DatabaseService {
       if (issue != null) throw ArgumentError('근무명 형식 오류(${issue.name}): $newName');
     }
     final finalNames = newSchedule.shiftTypes;
+    if (expectedSchedule != null) {
+      if (finalNames.isEmpty ||
+          (finalNames.length > kMaxShiftTypes &&
+           finalNames.length > expectedSchedule.shiftTypes.length)) {
+        throw ArgumentError('Invalid shift count');
+      }
+      for (final name in finalNames) {
+        if (!expectedSchedule.shiftTypes.contains(name) && validateShiftName(name) != null) {
+          throw ArgumentError('Invalid shift name');
+        }
+      }
+    }
     if (finalNames.toSet().length != finalNames.length) {
       throw ArgumentError('근무명 변경 결과에 중복 이름이 있음: $finalNames');
     }
 
+    await getTeamScheduleConfig();
     final db = await database;
 
     await db.transaction((txn) async {
+      if (expectedSchedule != null) {
+        final rows = await txn.query('shift_schedule', where: 'id = ?',
+            whereArgs: [expectedSchedule.id]);
+        if (rows.isEmpty || jsonEncode(ShiftSchedule.fromMap(rows.single).toMap()) !=
+            jsonEncode(expectedSchedule.toMap())) {
+          throw StateError('Schedule changed; reopen the editor and try again.');
+        }
+        final used = await _referencedShiftNames(txn, expectedSchedule);
+        if (deletedShifts.any(used.contains)) {
+          throw StateError('A shift in use cannot be deleted.');
+        }
+        final expectedNames = expectedSchedule.shiftTypes
+            .where((s) => !deletedShifts.contains(s))
+            .map((s) => changes[s] ?? s).toSet();
+        if (!finalNames.toSet().containsAll(expectedNames)) {
+          throw ArgumentError('Missing shift names');
+        }
+        for (final shift in deletedShifts) {
+          await txn.delete('condition_shift_times', where: 'shift_name = ?', whereArgs: [shift]);
+        }
+      }
       // ⭐ #12 - 2단계 rename: 바뀌는 옛 이름을 전부 서로 겹치지 않는 임시 이름으로 먼저 옮긴 뒤 새 이름으로.
       // 예전엔 한 번에 old→new로 바꿔서 A↔B 맞바꾸기에서 "A→B" 순간 원래 B 행과 합쳐지고 이어서 "B→A"가 둘 다 A로
       // 만들었음(condition_shift_times는 B 행을 지워버림) - 서로 다른 근무의 알람·템플릿·이력·출퇴근시각·예외가 뒤섞였음.
@@ -826,6 +998,9 @@ class DatabaseService {
       }
 
       // shift_schedule 행(패턴/근무명 목록/색상/근무변경/근로시간) 업데이트
+      final rosterRows = await txn.query('team_schedule_config');
+      final roster = rosterRows.isEmpty ? null : _decodeTeams(rosterRows.first['config']);
+      if (roster != null) await _writeTeams(txn, roster.renameShifts(changes));
       await txn.update(
         'shift_schedule',
         newSchedule.toMap(),
@@ -833,6 +1008,27 @@ class DatabaseService {
         whereArgs: [newSchedule.id],
       );
     });
+  }
+
+  Future<Set<String>> referencedShiftNames(ShiftSchedule schedule) async {
+    await getTeamScheduleConfig();
+    return _referencedShiftNames(await database, schedule);
+  }
+
+  Future<Set<String>> _referencedShiftNames(DatabaseExecutor db, ShiftSchedule schedule) async {
+    final names = <String>{...?(schedule.pattern), ...?(schedule.assignedDates?.values)};
+    final rosterRows = await db.query('team_schedule_config');
+    if (rosterRows.isNotEmpty) names.addAll(_decodeTeams(rosterRows.first['config'])?.referencedShifts ?? {});
+    // Historical assignments and alarm references also protect a name. Color
+    // and duration preferences alone are not uses and can be discarded.
+    for (final table in ['alarms', 'shift_alarm_templates', 'alarm_history',
+      'alarm_creation_log', 'alarm_overrides']) {
+      final rows = await db.query(table, columns: ['shift_type'], distinct: true);
+      names.addAll(rows.map((r) => r['shift_type']).whereType<String>());
+    }
+    final origins = await db.query('alarm_overrides', columns: ['origin_shift'], distinct: true);
+    names.addAll(origins.map((r) => r['origin_shift']).whereType<String>());
+    return names;
   }
 
   /// 근무명을 참조하는 모든 테이블에서 [from] → [to]. renameShiftAtomic의 트랜잭션 안에서만 호출.
@@ -882,7 +1078,7 @@ class DatabaseService {
     final dateStr = row['date'] as String?;
     final shiftType = row['shift_type'] as String?;
     if (dateStr == null || shiftType == null) return;
-    final ringAt = DateTime.tryParse(dateStr);
+    final ringAt = tryParseAlarmDate(dateStr);
     if (ringAt == null || !ringAt.isAfter(_now)) return;
     final dayOffset = row['day_offset'] as int? ?? 0;
     // 전날(-1) 알람의 배정일은 다음날, 다음날(+1) 알람의 배정일은 전날
@@ -958,11 +1154,23 @@ class DatabaseService {
     return {...a.keys, ...b.keys}.where((s) => a[s] != b[s]).toSet();
   }
 
+  Future<void> _deleteFutureOverrides(DatabaseExecutor txn, {String? shift}) async {
+    final now = _now;
+    final rows = await txn.query('alarm_overrides', columns: ['id', 'slot_time'],
+        where: shift == null ? null : 'origin_shift = ?',
+        whereArgs: shift == null ? null : [shift]);
+    for (final row in rows) {
+      final at = tryParseAlarmDate(row['slot_time'] as String?);
+      if (at != null && at.isAfter(now)) {
+        await txn.delete('alarm_overrides', where: 'id = ?', whereArgs: [row['id']]);
+      }
+    }
+  }
+
   Future<void> _deleteFutureOverridesForShifts(DatabaseExecutor txn, Set<String> shifts) async {
     if (shifts.isEmpty) return;
-    final nowSlot = alarmSlotTime(_now);
     for (final shift in shifts) {
-      await txn.delete('alarm_overrides', where: 'origin_shift = ? AND slot_time > ?', whereArgs: [shift, nowSlot]);
+      await _deleteFutureOverrides(txn, shift: shift);
     }
   }
 
@@ -1010,7 +1218,8 @@ Future<List<AlarmHistory>> getAllAlarmHistory() async {
     'alarm_history',
     orderBy: 'scheduled_date ASC, scheduled_time ASC, created_at DESC',
   );
-  return maps.map((map) => AlarmHistory.fromMap(map)).toList();
+  return maps.map((map) => AlarmHistory.fromMap(map)).toList()
+    ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 }
 
 // ⭐ 신규: 이력 통계

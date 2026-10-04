@@ -64,6 +64,7 @@ dependencies:
   audioplayers: ^5.2.1
 
   # 앱 업데이트 체크
+  in_app_update: ^4.2.5
   package_info_plus: ^8.1.2
   url_launcher: ^6.2.1
 
@@ -106,6 +107,8 @@ dev_dependencies:
   # (android/app/src/test/)는 이 문제와 무관해 그대로 유지.
   flutter_lints: ^3.0.0
   flutter_launcher_icons: ^0.14.3
+  # Existing launcher artwork packaging for web and maskable icons.
+  image: ^4.8.0
   sqflite_common_ffi: ^2.4.0+3
 
 flutter:
@@ -117,10 +120,7 @@ flutter:
   # assets:
   #   - assets/sounds/  # 제거: res/raw만 사용
 
-  # ⭐ 2026-08-25 - 아이콘 픽커(ui_theme_lab_screen.dart)에서 "실제로 설치된
-  # 아이콘"을 그대로 불러와 기준 삼아 보여주기 위해 등록. 아이콘을 다시 바꿀
-  # 때 assets/icon/gen_icon.py로 재생성하면 이 자산도 자동으로 최신 걸 가리킴
-  # (파일 경로가 그대로라서 - 임시 화면 다 쓰고 나면 이 항목도 같이 지울 것).
+  # 앱 아이콘은 일정관리 화면의 미리보기에도 사용한다.
   assets:
     # ⭐ 2026-09-14 (G0, 출시전_코드감사_검토결과_v4 #1) - DB 스키마 SQL 단일 원본.
     # Dart(rootBundle)와 Native(APK의 flutter_assets/assets/db/migrations.json)가 같이 읽음 -
@@ -128,6 +128,9 @@ flutter:
     - assets/db/migrations.json
     - assets/icon/app_icon_foreground.png
     - assets/icon/app_icon.png
+    # 일정관리의 Jua 글꼴을 오프라인에서도 로드한다. 라이선스: assets/fonts/OFL-Jua.txt.
+    - assets/fonts/Jua-Regular.ttf
+    - assets/fonts/OFL-Jua.txt
     # ⭐ 2026-08-27 - 메모 자동분류(ml/, 메모_자동분류_ML_계획.md) Phase 5용 카테고리
     # 아이콘. Lucide(오픈소스, ISC License) 라인 아이콘 그대로. 매핑/출처는
     # assets/icons/memo_category/README.md 참고. (2026-08-27 10종 -> 2026-09-01

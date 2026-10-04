@@ -97,6 +97,25 @@ class G1WakeSyncTest {
     // ───────────────────────────── 수신 시 예정 시각 대조
 
     @Test
+    fun `offset timestamp fractions use the same second for DB and OS`() {
+        val timestamp = at(60_000) + 868
+        insertAlarm(97, timestamp)
+        dbHelper.writableDatabase.update("alarms", ContentValues().apply {
+            put("type", "snoozed")
+            put("date", java.time.Instant.ofEpochMilli(timestamp).toString())
+        }, "id=?", arrayOf("97"))
+        assertEquals(AlarmWakeScheduler.Outcome.SCHEDULED,
+            AlarmWakeScheduler.scheduleIfCurrent(context, dbHelper.writableDatabase,
+                97, timestamp, "Night"))
+        assertEquals(AlarmWakeScheduler.ReceiveDecision.RING,
+            AlarmWakeScheduler.decideOnReceive(context, 97,
+                AlarmWakeScheduler.normalize(timestamp)))
+        assertEquals(AlarmWakeScheduler.ReceiveDecision.SKIP_RESCHEDULED,
+            AlarmWakeScheduler.decideOnReceive(context, 97,
+                AlarmWakeScheduler.normalize(timestamp) - 1000))
+    }
+
+    @Test
     fun `#27 수신 - DB에 행이 없으면 울리지 않는다`() {
         val expectedAt = at(0)
         assertEquals(

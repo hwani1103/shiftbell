@@ -1,7 +1,7 @@
 // android/app/src/test/kotlin/com/hwani1103/shiftbell/G0NativeMigrationTest.kt
 //
 // G0(T03) Native(DatabaseHelper + DbMigrationRunner) 마이그레이션 검증 - Robolectric 실제 SQLite.
-// 케이스 이름은 T01 expected.md 표를 따르고, 구조 기준은 Dart _onCreate로 만든 v24_oncreate_schema.json.
+// 케이스 이름은 T01 expected.md 표를 따르고, 구조 기준은 Dart _onCreate로 만든 현재 스냅샷(v25)이다.
 // 제품과 같은 진입점(DatabaseHelper.getWritableDatabaseWithRetry → 게이트 → SQLiteOpenHelper open)을 쓴다.
 // Robolectric엔 flutter_assets가 없으므로 SQL 원본은 저장소 assets/db/migrations.json을 overrideForTest로 주입.
 package com.hwani1103.shiftbell
@@ -97,7 +97,7 @@ class G0NativeMigrationTest {
                     continue
                 }
                 val problems = ArrayList<String>()
-                if (db.version != 24) problems.add("user_version=${db.version}")
+                if (db.version != 26) problems.add("user_version=${db.version}")
                 val data = G0TestSupport.dumpTables(db)
                 problems += G0TestSupport.diffExpectedData(data, expected(fx.getString("expected")))
                 if (schemaCanonical(db) != G0TestSupport.canonical(reference)) {
@@ -136,7 +136,7 @@ class G0NativeMigrationTest {
         useScript(G0TestSupport.repoScriptJson())
         val db = helper().getWritableDatabaseWithRetry()
         assertNotNull(db)
-        assertEquals(24, db!!.version)
+        assertEquals(26, db!!.version)
         assertEquals(emptyList<String>(), G0TestSupport.diffExpectedData(G0TestSupport.dumpTables(db), expected("v12.json")))
     }
 
@@ -158,7 +158,7 @@ class G0NativeMigrationTest {
         installFixture("variant_v23_stamped24_missing.db")
         val db = helper().getWritableDatabaseWithRetry()
         assertNotNull(db)
-        assertEquals(24, db!!.version)
+        assertEquals(26, db!!.version)
         assertEquals(G0TestSupport.canonical(reference), schemaCanonical(db))
         assertEquals(
             emptyList<String>(),
@@ -178,7 +178,7 @@ class G0NativeMigrationTest {
                 "실패한 repair 트랜잭션의 CREATE TABLE도 롤백돼야 함",
                 G0TestSupport.query(raw, "SELECT name FROM sqlite_master WHERE type='table' AND name='alarm_overrides'").isEmpty()
             )
-            assertEquals(24, raw.version)
+            assertEquals(26, raw.version)
         }
     }
 
@@ -191,8 +191,9 @@ class G0NativeMigrationTest {
     }
 
     @Test
-    fun futureVersion_25_gateSkips_andOnDowngradeThrows_versionAndDataUnchanged() {
+    fun futureVersion_27_gateSkips_andOnDowngradeThrows_versionAndDataUnchanged() {
         installFixture("variant_v23_stamped25.db")
+        withRaw { it.version = 27 }
         val before = withRaw { dataCanonical(it) }
         assertNull(helper().getWritableDatabaseWithRetry())
         try {
@@ -202,7 +203,7 @@ class G0NativeMigrationTest {
             // 기대
         }
         withRaw {
-            assertEquals(25, it.version)
+            assertEquals(27, it.version)
             assertEquals(before, dataCanonical(it))
         }
     }
@@ -249,7 +250,7 @@ class G0NativeMigrationTest {
         installFixture("v18.db")
         val db = helper().getWritableDatabaseWithRetry()
         assertNotNull("자산 원본으로 v18 → v24", db)
-        assertEquals(24, db!!.version)
+        assertEquals(26, db!!.version)
         assertEquals(emptyList<String>(), G0TestSupport.diffExpectedData(G0TestSupport.dumpTables(db), expected("v18.json")))
         println("G0 Robolectric sqlite_version=" + G0TestSupport.query(db, "SELECT sqlite_version() AS v").first()["v"])
     }
@@ -262,19 +263,19 @@ class G0NativeMigrationTest {
         // SQLiteOpenHelper가 잠금 밖에서 v18을 읽었지만, 잠금을 잡은 시점엔 이미 Flutter가 v24로 올린 상황
         db.beginTransaction()
         try {
-            helper().onUpgrade(db, 18, 24)
+            helper().onUpgrade(db, 18, 26)
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()
         }
         assertEquals(before, dataCanonical(db))
-        assertEquals(24, db.version)
+        assertEquals(26, db.version)
 
-        db.version = 25
+        db.version = 27
         try {
             db.beginTransaction()
             try {
-                helper().onUpgrade(db, 18, 24)
+                helper().onUpgrade(db, 18, 26)
                 fail("잠금 후 버전이 더 높으면 예외")
             } finally {
                 db.endTransaction()

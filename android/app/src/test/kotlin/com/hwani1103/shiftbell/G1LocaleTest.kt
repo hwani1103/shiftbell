@@ -105,12 +105,13 @@ class G1LocaleTest {
             val stored = dbHelper.writableDatabase.rawQuery("SELECT date, time FROM alarms WHERE id = 7", null).use {
                 it.moveToFirst(); it.getString(0) to it.getString(1)
             }
-            assertTrue("$locale 스누즈 저장 날짜: ${stored.first}", asciiDateTime.matches(stored.first))
+            assertTrue("$locale 스누즈 저장 날짜: ${stored.first}",
+                Regex("""^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+09:00$""").matches(stored.first))
             assertEquals("$locale 그레고리력 연도", Calendar.getInstance(Locale.US).get(Calendar.YEAR).toString(), stored.first.substring(0, 4))
             assertTrue("$locale 스누즈 저장 시각: ${stored.second}", Regex("""^\d{2}:\d{2}$""").matches(stored.second))
 
             Locale.setDefault(Locale.US)
-            val expectedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(stored.first)!!.time
+            val expectedAt = java.time.OffsetDateTime.parse(stored.first).toInstant().toEpochMilli()
             Locale.setDefault(locale)
             assertEquals("$locale 수신 판정", AlarmWakeScheduler.ReceiveDecision.RING,
                 AlarmWakeScheduler.decideOnReceive(context, 7, expectedAt))

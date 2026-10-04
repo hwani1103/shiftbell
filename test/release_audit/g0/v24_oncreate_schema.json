@@ -330,6 +330,13 @@
    },
    {
     "dflt": null,
+    "name": "assigned_day",
+    "notnull": 0,
+    "pk": 0,
+    "type": "TEXT"
+   },
+   {
+    "dflt": null,
     "name": "date",
     "notnull": 0,
     "pk": 0,
@@ -347,6 +354,13 @@
     "name": "id",
     "notnull": 0,
     "pk": 1,
+    "type": "INTEGER"
+   },
+   {
+    "dflt": null,
+    "name": "preset_slot",
+    "notnull": 0,
+    "pk": 0,
     "type": "INTEGER"
    },
    {
@@ -378,7 +392,17 @@
     "to": "id"
    }
   ],
-  "indexes": []
+  "indexes": [
+   {
+    "columns": [
+     "preset_slot",
+     "assigned_day"
+    ],
+    "origin": "c",
+    "partial": 0,
+    "unique": 0
+   }
+  ]
  },
  "condition_shift_times": {
   "columns": [
@@ -931,5 +955,25 @@
     "unique": 0
    }
   ]
+ },
+ "team_schedule_config": {
+  "columns": [
+   {
+    "name": "config",
+    "type": "TEXT",
+    "notnull": 0,
+    "dflt": null,
+    "pk": 0
+   },
+   {
+    "name": "id",
+    "type": "INTEGER",
+    "notnull": 0,
+    "dflt": null,
+    "pk": 1
+   }
+  ],
+  "indexes": [],
+  "foreign_keys": []
  }
 }

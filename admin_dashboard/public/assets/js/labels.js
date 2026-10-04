@@ -3,8 +3,22 @@
 
 /** group: 화면에서 묶어 보여 주는 분류. system=구글이 자동 수집하는 기본 이벤트 */
 export const EVENT_META = {
+
+  one_tap_opened: { label: '원터치 패널 열기', icon: '•', group: '알람', desc: '원터치 알람 버튼으로 패널을 연 횟수.' },
+  one_tap_closed: { label: '원터치 패널 닫기', icon: '•', group: '알람', desc: '뒤로가기·달력 탭·할당 완료로 패널을 닫은 횟수.' },
+  one_tap_preset_editor_opened: { label: '원터치 설정창 열기', icon: '•', group: '알람', desc: '추가 또는 수정 설정창을 연 횟수.' },
+  one_tap_preset_saved: { label: '원터치 설정 추가', icon: '•', group: '알람', desc: '새 원터치 시각·울림 설정 저장 완료 횟수. 실제 시각은 수집하지 않습니다.' },
+  one_tap_preset_updated: { label: '원터치 설정 수정', icon: '•', group: '알람', desc: '기존 원터치 설정 변경 저장 완료 횟수.' },
+  one_tap_preset_deleted: { label: '원터치 설정 삭제', icon: '•', group: '알람', desc: '원터치 설정 삭제 완료 횟수.' },
+  one_tap_preset_cancelled: { label: '원터치 설정 취소', icon: '•', group: '알람', desc: '설정창에서 저장 없이 나간 횟수.' },
+  one_tap_preset_blocked: { label: '원터치 수정 제한', icon: '•', group: '알람', desc: '미래 날짜에 이미 추가한 설정의 수정을 차단한 횟수.' },
+  one_tap_preset_selected: { label: '원터치 시각 선택', icon: '•', group: '알람', desc: '저장된 시각을 골라 날짜 선택으로 넘어간 횟수.' },
+  one_tap_assigned: { label: '원터치 예약 완료', icon: '•', group: '알람', desc: '실제 날짜에 예약 성공한 횟수. 예약 시도 전체와 구분됩니다.' },
+  one_tap_assign_rejected: { label: '원터치 예약 거부·실패', icon: '•', group: '알람', desc: '중복·지난 시각·예약 실패 등으로 추가하지 못한 횟수.' },
+  one_tap_alarm_deleted: { label: '원터치 날짜 알람 삭제', icon: '•', group: '알람', desc: '날짜에 추가된 원터치 알람의 삭제 완료 횟수.' },
+
   // ── 기본(자동 수집) ──
-  first_open: { label: '앱 설치(첫 실행)', icon: '📲', group: 'system', desc: '앱을 처음 실행한 횟수. 설치 수로 봅니다(재설치 포함).' },
+  first_open: { label: '첫 실행(first_open)', icon: '📲', group: 'system', desc: 'GA4 첫 실행 이벤트. 재설치와 Analytics 도입 버전으로 업데이트한 기존 사용자도 포함될 수 있어 순수 신규 설치 수와 다릅니다.' },
   app_remove: { label: '앱 삭제', icon: '🗑️', group: 'system', desc: '기기에서 앱이 삭제된 횟수. 구글 집계 특성상 실제보다 적을 수 있어요.' },
   session_start: { label: '세션 시작', icon: '▶️', group: 'system', desc: '앱을 켜서 사용을 시작한 횟수.' },
   screen_view: { label: '화면 조회', icon: '🖥️', group: 'system' },
@@ -22,7 +36,7 @@ export const EVENT_META = {
   backup_restored: { label: '백업 복원', icon: '♻️', group: '백업' },
   backup_created: { label: '백업 생성(직접)', icon: '💾', group: '백업' },
   alarm_template_saved: { label: '고정 알람 저장', icon: '⏰', group: '알람' },
-  custom_alarm_assigned: { label: '커스텀 알람 할당', icon: '🗓️', group: '알람', desc: '달력 상단 커스텀 알람을 날짜에 놓은 횟수(거부된 시도 포함 - result 값으로 구분).' },
+  custom_alarm_assigned: { label: '원터치 예약 시도 전체', icon: '🗓️', group: '알람', desc: '원터치 예약 시도 횟수(성공·거부 포함). 예약 완료와 거부 항목에서 결과를 따로 볼 수 있어요.' },
   alarm_dismissed: { label: '알람 끄기', icon: '🔕', group: '알람', desc: '울린 알람을 끈 횟수. 알람이 실제로 쓰이는 정도를 보여 줘요.' },
   alarm_snoozed: { label: '알람 5분 연장', icon: '😴', group: '알람' },
   alarm_no_response: { label: '알람 무응답 종료', icon: '⌛', group: '알람', desc: '끄지 않아 자동 종료된 알람 횟수. 많으면 알람이 잘 안 들리거나 헛울림이 잦다는 신호예요.' },
@@ -34,8 +48,22 @@ export const EVENT_META = {
   sleep_record_saved: { label: '수면 기록 저장', icon: '🌙', group: '수면' },
   friend_share_started: { label: '친구 공유 시작', icon: '👥', group: '공유' },
   friend_added: { label: '친구 추가', icon: '🤝', group: '공유' },
-  tab_selected: { label: '탭 이동', icon: '🧭', group: '사용' },
   help_opened: { label: '도움말 열람', icon: '❓', group: '사용' },
+  memo_edited: { label: '메모 수정', icon: '✏️', group: '달력' },
+  memo_deleted: { label: '메모 삭제', icon: '🗑️', group: '달력' },
+  schedule_edited: { label: '일정 수정', icon: '✏️', group: '일정' },
+  schedule_deleted: { label: '일정 삭제', icon: '🗑️', group: '일정' },
+  schedule_notification_changed: { label: '일정 알림 변경', icon: '🔔', group: '일정' },
+  auto_backup_created: { label: '백업 생성(자동)', icon: '💾', group: '백업' },
+  alarm_history_cleared: { label: '알람 이력 전체 삭제', icon: '🗑️', group: '알람' },
+  all_shifts_opened: { label: '전체 근무표 열기', icon: '📋', group: '달력' },
+  shift_name_changed: { label: '근무명 변경', icon: '🏷️', group: '달력' },
+  shift_color_changed: { label: '근무 색상 변경', icon: '🎨', group: '달력' },
+  alarm_sound_changed: { label: '알람음 변경', icon: '🎵', group: '알람' },
+  friend_calendar_opened: { label: '친구 근무표 열기(앱)', icon: '👥', group: '공유' },
+  sleep_record_edited: { label: '수면 기록 수정', icon: '✏️', group: '수면' },
+  sleep_record_deleted: { label: '수면 기록 삭제', icon: '🗑️', group: '수면' },
+  sleep_estimate_rejected: { label: '자동 수면 추정 거부', icon: '🚫', group: '수면' },
 };
 
 export function eventMeta(name) {

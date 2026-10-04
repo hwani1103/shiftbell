@@ -93,7 +93,10 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // (diff 엔진의 "안 바뀐 알람도 재등록" 로직이 새 시간대 기준으로 다시
             // 계산된 절대 시각으로 OS 알람을 고쳐 씀).
             Log.d("AlarmGuardReceiver", "🌐 시계/시간대 변경 감지 - 강제 전체 갱신")
-            AlarmRefreshEngine.refresh(context)
+            AlarmRefreshEngine.refresh(
+                context,
+                cancelPastFixedOnZoneChange = intent.action == Intent.ACTION_TIMEZONE_CHANGED
+            )
             // ⭐ 2026-09-14 (출시전 감사 #10) - 일정 알림도 절대 시각(epoch ms)으로 예약돼 있어 시간대가 바뀌면 옛 시각에 울렸음.
             // DB 기준으로 다시 계산해 걸고, 지난 일정의 옛 예약은 지움(탭 숨김 상태면 걸지 않음 - #5)
             ScheduleNotificationScheduler.rescheduleAllFromDb(context)
@@ -294,7 +297,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
                 context.getString(R.string.channel_alarm_guard),  // ⭐ "알람" 키워드 제거 (삼성 시스템 스누즈 방지)
                 NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
             ).apply {
-                description = "20분 전 사전 알림"
+                description = context.getString(R.string.channel_guard_description)
                 enableVibration(false)
                 setSound(null, null)
                 setShowBadge(true)
@@ -311,36 +314,37 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             val dbHelper = DatabaseHelper.getInstance(context)
             db = dbHelper.getReadableDatabaseWithRetry() ?: return null  // ⭐ 재시도 로직 사용
 
+            val nowMillis = System.currentTimeMillis()
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
                 Locale.US
-            ).format(Date())
+            ).format(Date(nowMillis))
 
             cursor = db.query(
                 "alarms",
                 null,
-                "date > ?",
-                arrayOf(now),
+                "(type = 'snoozed' OR date >= ?)",
+                arrayOf(now.substring(0, 10)),
                 null,
                 null,
-                "date ASC, id ASC",  // ⭐ 동일 시각일 때 낮은 ID 우선
-                "1"
+                "date ASC, id ASC"
             )
 
             var alarm: AlarmData? = null
 
-            if (cursor.moveToFirst()) {
+            while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
-                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+                    ?: if (cursor.getString(cursor.getColumnIndexOrThrow("type")) == "custom" ||
+                        !cursor.isNull(cursor.getColumnIndexOrThrow("preset_slot")))
+                        context.getString(R.string.one_tap_alarm_label) else context.getString(R.string.alarm_default_label)
 
-                val timestamp = SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ss",
-                    Locale.US
-                ).parse(dateStr)?.time
+                val timestamp = AlarmWakeScheduler.parse(dateStr)
 
-                if (timestamp != null) {
-                    val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
+                if (timestamp != null && timestamp > nowMillis &&
+                    (alarm == null || timestamp < alarm.timestamp)) {
+                    val time = AlarmInstant.display(context, timestamp)
                     alarm = AlarmData(id, timestamp, time, shiftType)
                 }
             }

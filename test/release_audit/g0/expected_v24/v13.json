@@ -80,7 +80,9 @@
     "id": 101,
     "shift_type": "Day",
     "time": "06:30",
-    "type": "fixed"
+    "type": "fixed",
+    "assigned_day": null,
+    "preset_slot": null
    },
    {
     "alarm_type_id": 2,
@@ -89,7 +91,9 @@
     "id": 103,
     "shift_type": "Day",
     "time": "06:35",
-    "type": "snoozed"
+    "type": "snoozed",
+    "assigned_day": null,
+    "preset_slot": null
    },
    {
     "alarm_type_id": 41,
@@ -98,7 +102,9 @@
     "id": 102,
     "shift_type": null,
     "time": "08:10",
-    "type": "custom"
+    "type": "custom",
+    "assigned_day": null,
+    "preset_slot": null
    }
   ],
   "condition_shift_times": [],
@@ -153,7 +159,8 @@
    }
   ],
   "sleep_expected_bedtime": [],
-  "sleep_records": []
+  "sleep_records": [],
+  "team_schedule_config": []
  },
  "user_version": 24
 }

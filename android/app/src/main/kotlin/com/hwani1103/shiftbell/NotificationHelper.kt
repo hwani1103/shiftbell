@@ -53,7 +53,7 @@ object NotificationHelper {
                 context.getString(R.string.channel_alarm_result),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "스누즈/타임아웃 결과"
+                description = context.getString(R.string.channel_result_description)
                 enableVibration(false)
                 setSound(null, null)
                 setShowBadge(false)
@@ -109,13 +109,16 @@ object NotificationHelper {
      *  - 7777은 잠금화면에서 홈을 눌렀을 때만 게시됐음
      * 이제 CustomAlarmReceiver가 소리와 동시에 이 알림을 올리고(전체화면 인텐트 + 탭하면 알람 화면 +
      * 끄기/5분 후 버튼), 화면·오버레이는 그다음에 시도함. 알림은 끄기·스누즈·인계·타임아웃에서만 지움
-     * (AlarmActionHelper.closeRingUi 등) - 화면이 떠도 지우지 않아 홈으로 나가도 제어 수단이 남음.
+     * (AlarmActionHelper.closeRingUi 등). 커버 전용 화면에서는 중복 배너를 제거하기 위해
+     * 같은 ID의 LOW/STATUS 제어 알림으로 교체하며 끄기/스누즈 액션은 유지한다.
+     * 커버 화면에서 벗어나면 기존 채널로 복원하되 전체화면을 다시 강제로 열지는 않는다.
      * 버튼은 전부 (ID, 회차)를 담아 #3 회차 관문(AlarmActionHelper.claimRingEnd)을 통과함.
      * 알림 권한까지 꺼져 있으면 보이지 않음 → 그 경우의 끄기 수단은 화면·오버레이와 #3 자동 종료뿐(잔여 위험).
      * 삼성 "시스템 스누즈" 회피용 설정(CATEGORY_CALL·그룹·localOnly·BigTextStyle, 채널명에 "알람" 없음)은
      * 기존 폴백 알림 그대로 유지.
      */
-    fun showRingControlNotification(context: Context, alarmId: Int, round: Long, label: String, durationMinutes: Int) {
+    fun showRingControlNotification(context: Context, alarmId: Int, round: Long, label: String, durationMinutes: Int,
+                                    coverVisible: Boolean = false, launchFullScreen: Boolean = true) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         // 게시 전 상태 점검 - 막혀 있어도 게시는 시도하고(권한이 나중에 켜질 수 있음) 로그로 원인을 남김
@@ -138,7 +141,7 @@ object NotificationHelper {
                 "Shiftbell",  // ⭐ "알람" 제거 (삼성 시스템 스누즈 방지)
                 NotificationManager.IMPORTANCE_HIGH  // fullScreenIntent를 위해 HIGH 유지
             ).apply {
-                description = "근무 시간 알림"
+                description = context.getString(R.string.channel_ring_description)
                 enableVibration(false)
                 setSound(null, null)  // 알림 자체는 무음 - 소리는 AlarmPlayer
             }
@@ -188,13 +191,27 @@ object NotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        if (coverVisible && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!RingingAlarmTracker.isCurrent(context, alarmId, round)) return
+            if (notificationManager.getNotificationChannel(channelId)?.importance == NotificationManager.IMPORTANCE_NONE) return
+            // Keep dismiss/snooze in the notification shade, without a duplicate cover banner.
+            val coverChannel = "shiftbell_cover_controls"
+            notificationManager.createNotificationChannel(NotificationChannel(
+                coverChannel, "Shiftbell", NotificationManager.IMPORTANCE_LOW
+            ).apply { setSound(null, null); enableVibration(false) })
+            if (notificationManager.activeNotifications.any {
+                    it.id == RING_CONTROL_ID && it.notification.channelId != coverChannel
+                }) notificationManager.cancel(RING_CONTROL_ID)
+            channelId = coverChannel
+        }
+
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setContentTitle(label)
             .setContentText(context.getString(R.string.notif_ringing_content))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_CALL)  // ⭐ 삼성 시스템 스누즈 방지, full-screen 지원
-            .setFullScreenIntent(screenPendingIntent, true)
+            .setPriority(if (coverVisible) NotificationCompat.PRIORITY_LOW else NotificationCompat.PRIORITY_HIGH)
+            .setCategory(if (coverVisible) NotificationCompat.CATEGORY_STATUS else NotificationCompat.CATEGORY_CALL)
+            .apply { if (!coverVisible && launchFullScreen) setFullScreenIntent(screenPendingIntent, true) }
             .setContentIntent(screenPendingIntent)
             // 알림을 치우는 것도 "알람 확인"(끄기)으로 취급 - 기존 7777과 같은 규칙
             .setDeleteIntent(dismissPendingIntent)

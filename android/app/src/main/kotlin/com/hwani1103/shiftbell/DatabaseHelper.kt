@@ -76,7 +76,7 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // 못 읽었음(C01). 이제 onUpgrade가 Flutter와 같은 SQL 원본(assets/db/migrations.json)을
         // DbMigrationRunner로 실행함. 이 값은 여전히 database_service.dart의 version:,
         // migrations.json의 targetVersion과 같아야 하고 checkDartKotlinSync가 빌드 때 검사함.
-        private const val DATABASE_VERSION = 24
+        private const val DATABASE_VERSION = 26
         private const val TAG = "DatabaseHelper"
 
         @Volatile
@@ -301,7 +301,7 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
 
         return try {
             val dateStr = java.text.SimpleDateFormat(
-                "yyyy-MM-dd'T'HH:mm:ss",
+                "yyyy-MM-dd'T'HH:mm",
                 java.util.Locale.US  // ⭐ 2026-09-14 (출시전 심층 검토 R-03) - DB 날짜 문자열은 Locale.US(#17)
             ).format(java.util.Date(targetTimestamp))
 
@@ -309,7 +309,7 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
                 db.query(
                     "alarms",
                     arrayOf("id"),
-                    "date = ? AND id != ?",
+                    "substr(date, 1, 16) = ? AND id != ?",
                     arrayOf(dateStr, excludeId.toString()),
                     null, null, null
                 )
@@ -317,7 +317,7 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
                 db.query(
                     "alarms",
                     arrayOf("id"),
-                    "date = ?",
+                    "substr(date, 1, 16) = ?",
                     arrayOf(dateStr),
                     null, null, null
                 )

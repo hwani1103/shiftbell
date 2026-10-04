@@ -129,43 +129,41 @@ class DirectBootReceiver : BroadcastReceiver() {
             // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고).
             db = dbHelper.getReadableDatabaseWithRetry() ?: return null
 
+            val nowMillis = System.currentTimeMillis()
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
                 Locale.US
-            ).format(Date())
+            ).format(Date(nowMillis))
 
             Log.d("DirectBoot", "현재 시각: $now")
 
             cursor = db.query(
                 "alarms",
                 null,
-                "date > ?",
-                arrayOf(now),
+                "(type = 'snoozed' OR date >= ?)",
+                arrayOf(now.substring(0, 10)),
                 null,
                 null,
-                "date ASC",
-                "1"
+                "date ASC, id ASC"
             )
 
             var alarm: AlarmData? = null
 
-            if (cursor.moveToFirst()) {
+            while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
                 val time = cursor.getString(cursor.getColumnIndexOrThrow("time"))
-                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+                    ?: if (cursor.getString(cursor.getColumnIndexOrThrow("type")) == "custom")
+                        context.getString(R.string.one_tap_alarm_label) else context.getString(R.string.alarm_default_label)
 
-                val timestamp = SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ss",
-                    Locale.US
-                ).parse(dateStr)?.time
+                val timestamp = AlarmWakeScheduler.parse(dateStr)
 
-                if (timestamp != null) {
+                if (timestamp != null && timestamp > nowMillis &&
+                    (alarm == null || timestamp < alarm.timestamp)) {
                     alarm = AlarmData(id, timestamp, time, shiftType)
                     Log.d("DirectBoot", "✅ 다음 알람 조회: $time ($shiftType)")
                 }
-            } else {
-                Log.d("DirectBoot", "⚠️ DB에 알람 없음")
             }
 
             alarm

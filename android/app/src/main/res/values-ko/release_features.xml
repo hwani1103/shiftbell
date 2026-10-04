@@ -1,0 +1,3 @@
+<resources>
+    <bool name="sleep_widget_available">true</bool>
+</resources>

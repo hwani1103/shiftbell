@@ -1,4 +1,5 @@
 // lib/screens/calendar_theme_lab_screen.dart
+import '../widgets/semantics_table_boundary.dart';
 //
 // ⭐ 테스트 전용 탭 - 메인 달력탭 디자인 후보 10개를 나란히 비교해보기 위한
 // 프로토타입 공간. 실제 배포판에서는 설정에서 테마를 고르면 메인 달력탭 자체의
@@ -130,7 +131,7 @@ String _dateKey(DateTime d) =>
 bool _isOutsideAugust(DateTime d) => d.month != 8;
 bool _isSunday(DateTime d) => d.weekday == DateTime.sunday;
 bool _isHoliday(DateTime d) => _dateKey(d) == _mockHolidayKey;
-bool _isRedDay(DateTime d) => _isSunday(d) || _isHoliday(d);
+bool _isRedDay(BuildContext context, DateTime d) => _isSunday(d) || (context.usesKoreanFeatures && _isHoliday(d));
 
 bool _isToday(DateTime d) {
   final now = DateTime.now();
@@ -138,9 +139,9 @@ bool _isToday(DateTime d) {
 }
 
 // ⭐ 2026년 8월을 덮는 6주(일~토) x 7 = 42일 그리드 (7/26 ~ 9/5)
-List<DateTime> _augustGridDays() {
+List<DateTime> _augustGridDays([int firstWeekday = 0]) {
   final firstOfMonth = DateTime(2026, 8, 1);
-  final daysFromSunday = firstOfMonth.weekday % 7; // Dart weekday: 일=7 -> %7=0, 월=1..토=6
+  final daysFromSunday = (firstOfMonth.weekday - firstWeekday) % 7; // Dart weekday: 일=7 -> %7=0, 월=1..토=6
   final gridStart = firstOfMonth.subtract(Duration(days: daysFromSunday));
   return List.generate(42, (i) => gridStart.add(Duration(days: i)));
 }
@@ -195,7 +196,7 @@ List<_WeekSummary> _mockWeekSummaries() {
 
 int get _mockMonthlyOtTotal => _mockOtMinutes.values.fold(0, (a, b) => a + b);
 
-// ⭐ 영어 현지화: _weekdayKr(로케일에 따라 바뀌어야 함)는 weekdayLabel(context, i)로
+// ⭐ 영어 현지화: _weekdayKr(로케일에 따라 바뀌어야 함)는 weekdayLabel(context, _weekdayIndex(i))로
 // 대체되어 제거됨(플레이북 2/3번 섹션). _weekdayEn3/_weekdayEn1은 일부 테마가 항상
 // 영어 약자로 보이도록 의도한 디자인 선택이라 로케일과 무관하게 그대로 둠.
 const _weekdayEn3 = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -219,7 +220,8 @@ class CalendarThemeLabScreen extends StatefulWidget {
 class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
   late final _pageController = PageController(initialPage: widget.initialPage);
 
-  final List<DateTime> _days = _augustGridDays();
+  int _weekdayIndex(int column) => (column + MaterialLocalizations.of(context).firstDayOfWeekIndex) % 7;
+  List<DateTime> get _days => _augustGridDays(MaterialLocalizations.of(context).firstDayOfWeekIndex);
   final List<_WeekSummary> _weeks = _mockWeekSummaries();
 
   // ⭐ 영어 현지화: kMainShiftNames가 mockShiftNames(BuildContext)로 바뀌면서
@@ -390,11 +392,11 @@ extension _Theme1 on _CalendarThemeLabScreenState {
             children: List.generate(7, (i) => Expanded(
               child: Center(
                 child: Text(
-                  _weekdayEn3[i],
+                  _weekdayEn3[_weekdayIndex(i)],
                   style: TextStyle(
                     fontSize: 10.5.sp,
                     fontWeight: FontWeight.w600,
-                    color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500,
+                    color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500,
                   ),
                 ),
               ),
@@ -428,7 +430,7 @@ extension _Theme1 on _CalendarThemeLabScreenState {
     final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
-    final red = _isRedDay(day);
+    final red = _isRedDay(context, day);
     final numColor = outside
         ? Colors.grey.shade300
         : (red ? Colors.red.shade400 : Colors.black87);
@@ -580,7 +582,7 @@ extension _Theme2 on _CalendarThemeLabScreenState {
             child: Row(
               children: List.generate(7, (i) => Expanded(
                 child: Center(
-                  child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade700)),
+                  child: Text(weekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade700)),
                 ),
               )),
             ),
@@ -610,7 +612,7 @@ extension _Theme2 on _CalendarThemeLabScreenState {
     final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
-    final red = _isRedDay(day);
+    final red = _isRedDay(context, day);
 
     return GestureDetector(
       onTap: () => _tapDay(day),
@@ -755,7 +757,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 10.h),
           child: Row(
             children: [
-              Text('2026-08', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'monospace')),
+              Text(context.usesKoreanFeatures ? '2026-08' : 'Aug 2026', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'monospace')),
               const Spacer(),
               _gridHeaderBtn(context.l10n.shiftFullSchedule, _openAllShifts),
               SizedBox(width: 8.w),
@@ -768,7 +770,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(vertical: 4.h),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.redAccent.shade100 : Colors.white70))),
+              child: Center(child: Text(_weekdayEn3[_weekdayIndex(i)], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.redAccent.shade100 : Colors.white70))),
             )),
           ),
         ),
@@ -802,7 +804,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
     final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
-    final red = _isRedDay(day);
+    final red = _isRedDay(context, day);
 
     return GestureDetector(
       onTap: () => _tapDay(day),
@@ -855,7 +857,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
             // 간격은 지금 그대로 두고(요청대로), 폰트만 더 키워서 그 여백을 씀
             // (7sp→8.5sp).
             SizedBox(height: 1.h),
-            ...memos.take(3).map((m) => Text('· $m', style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w600, color: const Color(0xFF37474F)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+            ...memos.take(3).map((m) => Text(m, style: TextStyle(fontSize: 8.5.sp, fontWeight: FontWeight.w600, color: const Color(0xFF37474F)), maxLines: 1, overflow: TextOverflow.ellipsis)),
           ],
         ),
       ),
@@ -908,7 +910,7 @@ extension _Theme5 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 8.w),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(weekdayLabel(context, i), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
+              child: Center(child: Text(weekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
             )),
           ),
         ),
@@ -934,7 +936,7 @@ extension _Theme5 on _CalendarThemeLabScreenState {
     final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
-    final red = _isRedDay(day);
+    final red = _isRedDay(context, day);
     final numColor = outside ? Colors.grey.shade300 : (red ? Colors.red.shade400 : Colors.black87);
 
     return GestureDetector(
@@ -1038,7 +1040,7 @@ extension _Theme8 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(_weekdayEn1[i], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade400))),
+              child: Center(child: Text(_weekdayEn1[_weekdayIndex(i)], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade400))),
             )),
           ),
         ),
@@ -1087,7 +1089,7 @@ extension _Theme8 on _CalendarThemeLabScreenState {
     final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
-    final red = _isRedDay(day);
+    final red = _isRedDay(context, day);
 
     return GestureDetector(
       onTap: () => _tapDay(day),
@@ -1208,7 +1210,7 @@ extension _Theme9 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
+              child: Center(child: Text(_weekdayEn3[_weekdayIndex(i)], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
             )),
           ),
         ),
@@ -1234,7 +1236,7 @@ extension _Theme9 on _CalendarThemeLabScreenState {
     final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
-    final red = _isRedDay(day);
+    final red = _isRedDay(context, day);
 
     return GestureDetector(
       onTap: () => _tapDay(day),
@@ -1328,9 +1330,9 @@ extension _Theme10 on _CalendarThemeLabScreenState {
               SizedBox(width: 8.w),
               Padding(padding: EdgeInsets.only(bottom: 3.h), child: Text('2026', style: TextStyle(fontSize: 12.sp, fontFamily: 'serif', color: Colors.grey.shade500))),
               const Spacer(),
-              GestureDetector(onTap: _openAllShifts, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+              GestureDetector(onTap: _openAllShifts, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400))),
               SizedBox(width: 10.w),
-              GestureDetector(onTap: _tapToday, child: Text(context.l10n.commonToday, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+              GestureDetector(onTap: _tapToday, child: Text(context.l10n.commonToday, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400))),
             ],
           ),
         ),
@@ -1338,9 +1340,9 @@ extension _Theme10 on _CalendarThemeLabScreenState {
           children: List.generate(7, (i) => Expanded(
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 3.h),
-              color: i == 0 ? Colors.red.shade50 : (i == 6 ? Colors.blue.shade50 : Colors.grey.shade100),
+              color: _weekdayIndex(i) == 0 ? Colors.red.shade50 : (i == 6 ? Colors.blue.shade50 : Colors.grey.shade100),
               alignment: Alignment.center,
-              child: Text(_weekdayEn3[i], style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: i == 0 ? Colors.red.shade400 : Colors.grey.shade600)),
+              child: Text(_weekdayEn3[_weekdayIndex(i)], style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade600)),
             ),
           )),
         ),
@@ -1385,7 +1387,7 @@ extension _Theme10 on _CalendarThemeLabScreenState {
     final shift = _mockShiftFor(context, day);
     final memos = _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
-    final red = _isRedDay(day);
+    final red = _isRedDay(context, day);
 
     return GestureDetector(
       onTap: () => _tapDay(day),
@@ -1597,21 +1599,25 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
               ),
             ),
             Expanded(
-              child: Stack(
+              child: LayoutBuilder(builder: (context, constraints) {
+                final rowH = (constraints.maxHeight - 28.h) / 6;
+                return Stack(
                 children: [
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 6.w),
-                    child: TableCalendar(
+                    child: SemanticsTableBoundary(child: TableCalendar(
+                      shouldFillViewport: true,
                       // ⭐ 8월 안에서만 움직이게 고정(다른 테마들과 동일한 "2026년 8월
                       // 고정" 원칙) - firstDay==lastDay 같은 달이라 스와이프해도
                       // 페이지가 하나뿐이라 자연스럽게 다른 달로 못 넘어감.
                       firstDay: DateTime(2026, 8, 1),
                       lastDay: DateTime(2026, 8, 31),
                       focusedDay: DateTime(2026, 8, 15),
-                      locale: 'ko_KR',
+                      locale: Localizations.localeOf(context).toString(),
+                      startingDayOfWeek: MaterialLocalizations.of(context).firstDayOfWeekIndex == 1 ? StartingDayOfWeek.monday : StartingDayOfWeek.sunday,
                       headerVisible: false,
                       sixWeekMonthsEnforced: true,
-                      rowHeight: 83.h,
+                      rowHeight: rowH,
                       daysOfWeekHeight: 28.h,
                       daysOfWeekStyle: DaysOfWeekStyle(
                         weekdayStyle: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
@@ -1634,7 +1640,7 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
                         if (_isMainSixthRowReclaimed(selectedDay)) return;
                         _tapDay(selectedDay);
                       },
-                    ),
+                    )),
                   ),
                   // ⭐ 6번째 줄 화~토(항상 다음 달 스필오버라 실질적으로 빈 칸) 재활용 -
                   // 진짜 달력탭의 _buildMonthlyOvertimeCard()와 동일한 기법/구성
@@ -1644,10 +1650,10 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
                   // 없앰 - 아래 별도의 "6번째 줄 맨 밑 선"이 전체 폭에 한 줄만
                   // 그어주므로 카드는 배경색만 깔면 충분함.
                   Positioned(
-                    top: 28.h + 83.h * 5,
+                    top: 28.h + rowH * 5,
                     left: 6.w,
                     right: 6.w,
-                    height: 83.h,
+                    height: rowH,
                     child: Row(
                       children: [
                         Expanded(flex: 2, child: IgnorePointer(child: SizedBox())),
@@ -1704,14 +1710,15 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
                   // 칸까지 포함) - table_calendar 렌더링에 의존하지 않는 확실한
                   // 방법.
                   Positioned(
-                    top: 28.h + 83.h * 6 - 1,
+                    top: 28.h + rowH * 6 - 1,
                     left: 6.w,
                     right: 6.w,
                     height: 1,
                     child: Container(color: isDark ? colorScheme.onSurface.withOpacity(0.4) : colorScheme.onSurface.withOpacity(0.15)),
                   ),
                 ],
-              ),
+              );
+              }),
             ),
             SizedBox(height: 6.h),
           ],
@@ -1741,7 +1748,7 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
   // table_calendar 콜백엔 "몇 번째 줄인지"가 안 넘어와서, 날짜 자체로 판별함:
   // 8월 그리드의 6번째 줄은 8/30(일)~9/5(토)이므로 화(9/1)~토(9/5)가 대상.
   bool _isMainSixthRowReclaimed(DateTime day) {
-    return day.year == 2026 && day.month == 9 && day.day >= 1 && day.day <= 5;
+    return _days.skip(37).any((d) => d.year == day.year && d.month == day.month && d.day == day.day);
   }
 
   // ⭐ calendar_tab.dart의 _buildDateCell을 최대한 그대로 재현 - 근무 배지(맨
@@ -1880,8 +1887,8 @@ extension _ThemeDiary on _CalendarThemeLabScreenState {
             children: List.generate(7, (i) => Expanded(
               child: Center(
                 child: Text(
-                  weekdayLabel(context, i),
-                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: i == 0 ? const Color(0xFFD9534F) : const Color(0xFF8A6F5C)),
+                  weekdayLabel(context, _weekdayIndex(i)),
+                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: _weekdayIndex(i) == 0 ? const Color(0xFFD9534F) : const Color(0xFF8A6F5C)),
                 ),
               ),
             )),
@@ -1927,7 +1934,7 @@ extension _ThemeDiary on _CalendarThemeLabScreenState {
     final outside = _isOutsideAugust(day);
     final shift = _mockShiftFor(context, day);
     final today = _isToday(day);
-    final red = _isRedDay(day);
+    final red = _isRedDay(context, day);
     final holidayName = _mockHolidayNameFor(context, day);
     final dateColor = outside ? Colors.grey.shade300 : (red ? const Color(0xFFC0392B) : const Color(0xFF4A4038));
     return GestureDetector(

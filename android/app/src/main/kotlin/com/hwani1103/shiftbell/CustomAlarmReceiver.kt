@@ -87,7 +87,7 @@ override fun onReceive(context: Context, intent: Intent) {
     Log.e("CustomAlarmReceiver", "========== 알람 수신! ==========")
 
     val soundType = intent.getStringExtra(EXTRA_SOUND_TYPE) ?: "loud"
-    val label = intent.getStringExtra(EXTRA_LABEL) ?: "알람"
+    val label = intent.getStringExtra(EXTRA_LABEL) ?: context.getString(R.string.alarm_default_label)
     val id = intent.getIntExtra(EXTRA_ID, 0)
 
     Log.e("CustomAlarmReceiver", "ID: $id, Label: $label")
@@ -249,6 +249,11 @@ override fun onReceive(context: Context, intent: Intent) {
             }
         }
     }, 500)
+    Handler(Looper.getMainLooper()).postDelayed({
+        if (RingingAlarmTracker.isCurrent(context, id, ring.round)) {
+            CoverAlarmDisplay.followRing(context, id, ring.round, durationMinutes)
+        }
+    }, 650)
 }
     
     // ⭐ 2026-09-14 (#27) - alarmExistsInDb()는 AlarmWakeScheduler.decideOnReceive()로 대체됨

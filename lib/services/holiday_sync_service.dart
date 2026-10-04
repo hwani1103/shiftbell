@@ -1,23 +1,19 @@
-// lib/services/holiday_sync_service.dart
-//
-// ⭐ 2026-09-23 (1.0.24 D) - 공휴일 원격 갱신. 대체·임시공휴일이 갑자기 생겨도 앱 업데이트 없이 Firebase에서 고치면 반영된다.
-//
-// 흐름(Firestore 읽기를 최소로):
-//  1. 앱 시작 → [loadCached]: 마지막으로 받은 변경분을 SharedPreferences에서 읽어 HolidayOverrides.current에 적용(네트워크 없음)
-//  2. 업데이트 안내 확인(update_service.dart, 기기당 6시간에 최대 1번)이 이미 읽는 `app_config/android` 문서의
-//     `holidaysVersion` 숫자만 비교 → 캐시 버전보다 클 때만 [syncIfNeeded]가 `app_config/holidays_kr`를 **1번** 읽음
-//  3. 받은 값 저장 → 달력(Dart)에 즉시 적용 → 홈 위젯용 날짜 목록을 네이티브에 넘기고 위젯 갱신
-// 보안 규칙: 기존 `match /app_config/{document}`(get만 허용, write 거부)로 충분 - 규칙 변경 없음.
-// 운영 방법: docs/next_version/1.0.24_구현계획.md D절, 업데이트_가이드.md "공휴일".
+// App-only holiday overrides. The web viewer uses the bundled holiday list.
+// Each installation draws its first check date from a 7-day window, then
+// checks again 14 days after a successful read. This spreads reads over time;
+// it does not enforce a global daily quota.
 
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/platform_channel.dart';
 import '../utils/holiday_util.dart';
+import 'firebase_bootstrap.dart';
 import 'widget_refresh_service.dart';
 
 class HolidaySyncService {
@@ -25,44 +21,86 @@ class HolidaySyncService {
   static final HolidaySyncService instance = HolidaySyncService._();
 
   static const cachePrefKey = 'holiday_overrides_json';
+  // New key resets the old dev-only 30-day schedule when this policy ships.
+  static const nextCheckPrefKey = 'holiday_next_check_v2_at_ms';
+  static const _oldNextCheckPrefKey = 'holiday_next_check_at_ms';
   static const docPath = 'app_config/holidays_kr';
+  static const firstCheckWindow = Duration(days: 7);
+  static const checkInterval = Duration(days: 14);
+  static const retryInterval = Duration(days: 1);
 
-  /// 시작 시 캐시 적용. 실패해도 하드코딩 목록으로 계속 동작.
+  bool _checkInProgress = false;
+
+  /// Show the last verified result while offline or before the first check.
   Future<void> loadCached() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(cachePrefKey);
       if (raw == null) return;
-      HolidayOverrides.current = HolidayOverrides.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      HolidayOverrides.current =
+          HolidayOverrides.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+      await _applyToNative(HolidayOverrides.current);
     } catch (e) {
-      debugPrint('⚠️ 공휴일 캐시 읽기 실패(하드코딩 목록 사용): $e');
+      debugPrint('공휴일 캐시 읽기 실패(기본 목록 사용): $e');
     }
   }
 
-  /// [remoteVersion]은 `app_config/android.holidaysVersion`. 캐시보다 클 때만 문서를 읽어 적용.
-  Future<void> syncIfNeeded(Object? remoteVersion) async {
-    if (remoteVersion is! num) return;
-    final version = remoteVersion.toInt();
-    if (version <= HolidayOverrides.current.version) return;
+  /// No read on every launch: first check is spread over 7 days; after a
+  /// successful read the next one is 14 days later. Failures retry in 1-2 days.
+  Future<void> refreshIfDue() async {
+    if (kIsWeb || !firebaseReady || _checkInProgress ||
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode != 'ko') return;
+    _checkInProgress = true;
     try {
-      final doc = await FirebaseFirestore.instance.doc(docPath).get();
-      final data = doc.data();
-      if (data == null) return;
-      final overrides = HolidayOverrides.fromJson(data);
-      // 문서의 version이 안내 번호보다 낮으면(수정 도중) 이번엔 적용하지 않고 다음 확인 때 다시
-      if (overrides.version < version) return;
-      await apply(overrides);
+      final prefs = await SharedPreferences.getInstance();
+      final nowMs = DateTime.now().millisecondsSinceEpoch;
+      final dueMs = prefs.getInt(nextCheckPrefKey);
+      if (dueMs == null) {
+        await prefs.setInt(
+          nextCheckPrefKey,
+          nowMs + Random().nextInt(firstCheckWindow.inMilliseconds),
+        );
+        await prefs.remove(_oldNextCheckPrefKey);
+        return;
+      }
+      if (nowMs < dueMs) return;
+
+      try {
+        // A server read is required here: an offline SDK cache must not mark
+        // this installation as checked for another 14 days.
+        final doc = await FirebaseFirestore.instance
+            .doc(docPath)
+            .get(const GetOptions(source: Source.server));
+        await apply(HolidayOverrides.fromJson(doc.data()));
+        await prefs.setInt(
+          nextCheckPrefKey,
+          DateTime.now().millisecondsSinceEpoch + checkInterval.inMilliseconds,
+        );
+      } catch (e) {
+        await prefs.setInt(
+          nextCheckPrefKey,
+          DateTime.now().millisecondsSinceEpoch + retryInterval.inMilliseconds +
+              Random().nextInt(retryInterval.inMilliseconds),
+        );
+        debugPrint('공휴일 조회 실패(1~2일 뒤 재시도): $e');
+      }
     } catch (e) {
-      debugPrint('⚠️ 공휴일 원격 갱신 실패(다음 확인 때 재시도): $e');
+      debugPrint('공휴일 확인 일정 처리 실패: $e');
+    } finally {
+      _checkInProgress = false;
     }
   }
 
-  /// 저장 + 달력 적용 + 위젯(네이티브) 반영.
   Future<void> apply(HolidayOverrides overrides) async {
-    HolidayOverrides.current = overrides;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(cachePrefKey, jsonEncode(overrides.toJson()));
-    if (kIsWeb) return;
+    if (!await prefs.setString(cachePrefKey, jsonEncode(overrides.toJson()))) {
+      throw StateError('Holiday override cache could not be saved');
+    }
+    HolidayOverrides.current = overrides;
+    await _applyToNative(overrides);
+  }
+
+  Future<void> _applyToNative(HolidayOverrides overrides) async {
     try {
       await kAlarmChannel.invokeMethod('setHolidayOverrides', {
         'add': overrides.add.keys.toList(),
@@ -70,18 +108,7 @@ class HolidaySyncService {
       });
       await WidgetRefreshService.refresh();
     } catch (e) {
-      debugPrint('⚠️ 위젯 공휴일 반영 실패: $e');
-    }
-  }
-
-  /// 웹 뷰어용 - 캐시 없이 페이지를 열 때 1번 읽음.
-  /// runApp 전에 기다리므로 3초 상한 - 느린 망에서 첫 화면이 이 값 때문에 늦어지지 않게(넘으면 하드코딩 목록).
-  Future<void> loadForWeb() async {
-    try {
-      final doc = await FirebaseFirestore.instance.doc(docPath).get().timeout(const Duration(seconds: 3));
-      HolidayOverrides.current = HolidayOverrides.fromJson(doc.data());
-    } catch (e) {
-      debugPrint('⚠️ 웹 공휴일 원격 값 읽기 실패(하드코딩 목록 사용): $e');
+      debugPrint('위젯 공휴일 반영 실패: $e');
     }
   }
 }

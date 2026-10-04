@@ -11,7 +11,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftbell/constants/platform_channel.dart';
 import 'package:shiftbell/services/database_service.dart';
@@ -42,7 +41,7 @@ void main() {
 
     final fixture = await openDatabase(
       path,
-      version: 24,
+      version: 26,
       singleInstance: false,
       onCreate: (db, version) async {
         await db.execute('''
@@ -94,7 +93,7 @@ void main() {
     await raw.close();
 
     reopened = await DatabaseService.instance.database;
-    final ids = (await reopened!.rawQuery(
+    final ids = (await reopened.rawQuery(
       'SELECT id FROM alarm_types WHERE is_preset = 1 ORDER BY id',
     ))
         .map((row) => row['id'])

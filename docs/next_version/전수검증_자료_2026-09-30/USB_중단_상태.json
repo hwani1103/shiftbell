@@ -1,0 +1,29 @@
+{
+  "status": "사용자 요청으로 중단; 최종 빌드/전체 완료 아님",
+  "automated_unique_pass": 862,
+  "latest_changes": "전체삭제/초기화/온보딩 순서, 친구 SafeArea, Overtime 문구는 소스+hot reload 검증; 디스크 APK 재빌드 필요",
+  "device_final": {
+    "alarms": 0,
+    "os_wake_alarms": 0,
+    "templates": 0,
+    "friends": 0,
+    "history": 121,
+    "pending_restore": false,
+    "share": "off;dirty=false",
+    "network": "enabled",
+    "locale": "en-US",
+    "clock": "12",
+    "stay_on": "0",
+    "screen_off_timeout": 600000
+  },
+  "source_sha256": {
+    "lib/providers/alarm_provider.dart": "7fd10064c4e125549ebd8fa46b90f090abd2142a4dd9d5188b6f6f60035510a1",
+    "lib/providers/schedule_provider.dart": "9389a8d343cbfb1b2220de0c8e4ed4546ba74bedd42c047269a8f3a9c13e353b",
+    "lib/services/database_service.dart": "caf62c7483e2b84510980145b040123be0e2c2bfab1dd62e0efbeb08b79a0791",
+    "lib/screens/onboarding_screen.dart": "5a7a5c66252ad219107008850596c9c0b7a0d3cb7e25abc7226ff7d9a425d346",
+    "lib/screens/settings_tab.dart": "5c7880b58e20f7438ff228285cef4fbb2e0cd0e3dde06bf2887ba2e8e984a5d4",
+    "lib/screens/friend_list_screen.dart": "1728d965d45ec72cb5ba280994658b6bcb376cff062f7e9a6f3fb99f9cf2f884",
+    "lib/l10n/app_en.arb": "6d5813d28d5fbca06ffad0f34cecdbb3179ab8ebaffc90b15953666fa1ec00c7"
+  },
+  "existing_apk_sha256_not_latest_source": "76d6954183c3272933b4ae1b097d7df9e0d8e7ea33e822bcfd52363255c7934c"
+}

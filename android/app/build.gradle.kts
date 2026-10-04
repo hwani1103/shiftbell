@@ -220,6 +220,41 @@ val checkDartKotlinSync = tasks.register("checkDartKotlinSync") {
             dartRegex = Regex("""kAlarmRefreshWindowDays\s*=\s*(\d+);"""),
             hint = "AlarmRefreshEngine.kt의 DAYS_AHEAD를 alarm_limits.dart의 kAlarmRefreshWindowDays와 같은 값으로 맞추세요."
         )
+
+        for ((label, nativeName, dartName) in listOf(
+            Triple("알람 전날 offset", "OFFSET_BEFORE", "kAlarmDayBefore"),
+            Triple("알람 당일 offset", "OFFSET_SAME", "kAlarmDaySame"),
+            Triple("알람 다음날 offset", "OFFSET_AFTER", "kAlarmDayAfter"),
+        )) {
+            checkPair(
+                label = label,
+                kotlinFile = file("src/main/kotlin/com/hwani1103/shiftbell/AlarmRefreshEngine.kt"),
+                kotlinRegex = Regex("""$nativeName\s*=\s*(-?\d+)"""),
+                dartFile = File(repoRoot, "lib/constants/alarm_day_offset.dart"),
+                dartRegex = Regex("""$dartName\s*=\s*(-?\d+);"""),
+                hint = "알람의 전날/당일/다음날 offset 상수를 Dart와 Kotlin에서 동일하게 유지하세요."
+            )
+        }
+
+        // 수면 감지 창은 두 언어에서 계산한다. 핵심 경계값이 바뀔 때 한쪽만
+        // 수정하는 실수를 빌드 단계에서 막는다(분기 로직은 별도 fixture 검증).
+        val nativeSleep = file("src/main/kotlin/com/hwani1103/shiftbell/SleepScheduleResolver.kt")
+        val dartSleep = File(repoRoot, "lib/services/condition/sleep_opportunity.dart")
+        for ((label, nativeName, dartName) in listOf(
+            Triple("수면창 야간 퇴근 전 여유(분)", "NIGHT_SHIFT_PRE_END_MINUTES", "kNightShiftPreEndMinutes"),
+            Triple("수면창 일반 시작 시각(시)", "FLAT_SLEEP_START_HOUR", "kFlatSleepStartHour"),
+            Triple("수면창 최대 길이(시)", "WINDOW_MAX_HOURS", "kSleepTrackingWindowMaxHours"),
+            Triple("야간 출근 전 낮잠 선행(시)", "PRE_SHIFT_NAP_LEAD_HOURS", "kPreShiftNapLeadHours"),
+        )) {
+            checkPair(
+                label = label,
+                kotlinFile = nativeSleep,
+                kotlinRegex = Regex("""$nativeName\s*=\s*(\d+)L?"""),
+                dartFile = dartSleep,
+                dartRegex = Regex("""$dartName\s*=\s*(\d+);"""),
+                hint = "SleepScheduleResolver.kt와 sleep_opportunity.dart의 수면 감지 경계값을 함께 수정하세요."
+            )
+        }
     }
 }
 

@@ -17,8 +17,8 @@
 // 모르는 첫 프레임 → 높이를 아는 다음 프레임"으로 한 번 튐. 그 튐 자체가 여기서
 // 막으려는 현상이므로, 앱이 첫 화면을 그리기 전에 미리 구해서 캐시해둠.
 //
-// 이 앱은 세로 모드 전용(AndroidManifest에서 MainActivity가 portrait 고정)이라
-// 화면 폭이 실행 중에 바뀌지 않고, 따라서 이 값도 한 번 구하면 계속 유효함.
+// 여기서는 첫 화면의 크기만 예열한다. 실행 중 창 크기가 바뀌면
+// BannerAdSlot이 실제 슬롯 폭과 방향으로 크기를 다시 계산한다.
 
 import 'dart:ui' as ui;
 
@@ -26,7 +26,6 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../constants/ad_config.dart';
-import '../constants/layout_limits.dart';
 import 'ad_consent_service.dart';
 
 class AdService {
@@ -35,24 +34,45 @@ class AdService {
   static double? _bannerHeight;
   static AdSize? _bannerAdSize;
   static bool _initialized = false;
+  static Future<void>? _warmUpFuture;
 
-  /// 배너가 차지할 높이(dp). [warmUp]이 끝나기 전이거나 계산에 실패했으면
+  /// 배너가 차지할 높이(dp). [prepareLayout]이 끝나기 전이거나 계산에 실패했으면
   /// [kBannerAdFallbackHeight]를 돌려줌 - null을 절대 반환하지 않으므로 호출부에서
   /// "높이를 모르는 상태"를 따로 처리할 필요가 없음(=레이아웃이 비는 순간이 없음).
   static double get bannerHeight => _bannerHeight ?? kBannerAdFallbackHeight;
 
-  /// 실제 배너를 만들 때 쓸 AdSize. [warmUp] 실패 시 null이면 배너를 만들지 않고
+  /// 실제 배너를 만들 때 쓸 AdSize. [prepareLayout] 실패 시 null이면 배너를 만들지 않고
   /// 자리만 확보함(높이는 위 [bannerHeight]로 이미 확보되어 있음).
   static AdSize? get bannerAdSize => _bannerAdSize;
 
   static bool get isInitialized => _initialized;
 
-  /// 앱 시작 시 한 번 호출. SDK를 초기화하고 배너 높이를 미리 계산해 캐시함.
+  /// Measure the actual slot after fold/unfold, rotation or split-window resize.
+  static Future<AdSize?> sizeForSlot(int width, Orientation orientation) async {
+    if (width <= 0) return null;
+    try {
+      // Fit the actual slot after folding/unfolding. Use the standard anchored
+      // format, not Large, and keep the full SDK height without clipping.
+      // ignore: deprecated_member_use
+      final size =
+          await AdSize.getAnchoredAdaptiveBannerAdSize(orientation, width);
+      debugPrint('배너 슬롯 측정: $width dp / $orientation -> '
+          '${size?.width}×${size?.height} dp');
+      return size;
+    } catch (e) {
+      debugPrint('배너 크기 계산 실패 ($width, $orientation): $e');
+      return null;
+    }
+  }
+
+  /// 첫 화면 이후 동의 수집과 SDK 초기화를 한 번만 실행한다.
   ///
   /// ⭐ 실패해도 절대 예외를 밖으로 던지지 않음. 광고는 이 앱의 부가 기능이고,
   /// 알람이 핵심이므로 - 광고 초기화가 실패했다고 앱 시작이 막히면 훨씬 나쁨.
   /// (DatabaseHelper.onDiskVersion()의 fail-open 판단과 같은 이유)
-  static Future<void> warmUp() async {
+  static Future<void> warmUp() => _warmUpFuture ??= _initializeSdk();
+
+  static Future<void> _initializeSdk() async {
     // ⭐ 2026-09-22 - UMP 동의 수집(EEA/영국/스위스만 실제로 동작 - ad_consent_service.dart
     // 참고)이 광고 SDK 초기화보다 먼저 끝나야 함. 실패해도 절대 던지지 않음.
     try {
@@ -66,25 +86,24 @@ class AdService {
       _initialized = true;
     } catch (e) {
       debugPrint('⚠️ AdMob 초기화 실패 - 광고 없이 계속 진행: $e');
-      // 초기화가 실패해도 높이 계산은 시도해봄(실패하면 fallback으로 감).
+      // 슬롯 높이는 SDK 초기화와 별도로 계산한다.
     }
+  }
 
+  /// Local SDK geometry only: consent/network must never gate the first screen.
+  static Future<void> prepareLayout() async {
     try {
       // MediaQuery는 아직 위젯 트리가 없어서 못 씀 - 플랫폼에서 직접 논리 픽셀 폭을
-      // 구함. 세로 고정이라 이 값은 실행 중에 바뀌지 않음.
+      // 구함. 이후 창 크기 변경은 BannerAdSlot에서 처리한다.
       final view = ui.PlatformDispatcher.instance.implicitView;
       if (view == null) {
         debugPrint('⚠️ 화면 정보를 못 읽음 - 배너 높이 fallback 사용');
         return;
       }
-      // ⭐ 2026-09-15 (출시 적합성 재검토 AUD-07) - 앱 내용은 main.dart에서 최대 kAppMaxContentWidth(500dp)로 제한되는데
-      // 광고는 기기 전체 폭으로 요청해서 600/840dp 화면에서 슬롯보다 넓은 광고를 요청했음. 슬롯 폭 이하로 요청.
-      // (접기/펼치기·멀티윈도우로 실행 중 폭이 줄면 BannerAdSlot이 넘치는 광고를 표시하지 않음)
+      // 앱은 전체 창 폭을 사용한다. 첫 슬롯의 예상 폭도 창 폭과 같다.
       final screenWidthDp =
           (view.physicalSize.width / view.devicePixelRatio).truncate();
-      final contentWidthDp = screenWidthDp < kAppMaxContentWidth
-          ? screenWidthDp
-          : kAppMaxContentWidth.truncate();
+      final contentWidthDp = screenWidthDp;
       // 세 광고 대상 탭 모두 하단의 동일한 전체 폭 슬롯을 공유한다.
       final widthDp = contentWidthDp;
       if (widthDp <= 0) {
@@ -102,13 +121,12 @@ class AdService {
       // (사용자 확인). deprecated 표시는 있지만 네이티브 채널 메서드명이 예전
       // "AdSize#getAnchoredAdaptiveBannerAdSize"와 완전히 동일해서(패키지 소스로
       // 직접 확인) 예전과 정확히 같은(더 작은) 크기를 계산함 - 지금 이 앱엔 이 크기가
-      // 맞으므로 의도적으로 deprecated API를 계속 씀. 세로 고정 앱이라 orientation은
-      // 항상 portrait으로 고정해서 넘김.
-      // ignore: deprecated_member_use
-      final size = await AdSize.getAnchoredAdaptiveBannerAdSize(
-        Orientation.portrait,
-        widthDp,
-      );
+      // 맞으므로 의도적으로 deprecated API를 계속 씀. 현재 창 방향을 넘긴다.
+      final size = await sizeForSlot(
+          widthDp,
+          view.physicalSize.width > view.physicalSize.height
+              ? Orientation.landscape
+              : Orientation.portrait);
 
       if (size == null) {
         debugPrint(

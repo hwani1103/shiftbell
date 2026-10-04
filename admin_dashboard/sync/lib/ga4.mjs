@@ -13,6 +13,7 @@ import { GoogleAuth } from 'google-auth-library';
 export const DEFAULTS = {
   propertyId: '553838010',
   streamId: '15763725797',
+  webStreamId: '15763713126',
 };
 
 const SCOPE = 'https://www.googleapis.com/auth/analytics.readonly';
@@ -84,7 +85,7 @@ export class Ga4 {
   /** 일별 핵심 지표(활성 사용자 1/7/28일, 신규, 세션, 참여시간). */
   coreDaily(days) {
     return {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'yesterday' }],
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
       dimensions: [{ name: 'date' }],
       metrics: [
         { name: 'active1DayUsers' },
@@ -104,7 +105,7 @@ export class Ga4 {
   /** 일별 광고 지표. AdMob이 GA4에 연결돼 있지 않으면 값이 0이거나 오류가 난다(그땐 null 처리). */
   adsDaily(days) {
     return {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'yesterday' }],
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
       dimensions: [{ name: 'date' }],
       metrics: [{ name: 'publisherAdImpressions' }, { name: 'publisherAdClicks' }, { name: 'totalAdRevenue' }],
       dimensionFilter: streamFilter(this.streamId),
@@ -117,7 +118,7 @@ export class Ga4 {
   /** 일별 × 이벤트별 횟수(설치=first_open, 삭제=app_remove, 사용자 행동 이벤트 전부). */
   eventsDaily(days) {
     return {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'yesterday' }],
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
       dimensions: [{ name: 'date' }, { name: 'eventName' }],
       metrics: [{ name: 'eventCount' }],
       dimensionFilter: streamFilter(this.streamId),
@@ -126,15 +127,28 @@ export class Ga4 {
     };
   }
 
-  /** 최근 30일 이벤트 요약(횟수 + 실행한 사용자 수). */
-  eventsSummary() {
+  /** 지정한 날짜 범위의 이벤트 횟수와 실행한 사용자 수(양끝 날짜 포함). */
+  eventsSummary(startDate, endDate) {
     return {
-      dateRanges: [{ startDate: '30daysAgo', endDate: 'yesterday' }],
+      dateRanges: [{ startDate, endDate }],
       dimensions: [{ name: 'eventName' }],
       metrics: [{ name: 'eventCount' }, { name: 'totalUsers' }],
       dimensionFilter: streamFilter(this.streamId),
       orderBys: [{ metric: { metricName: 'eventCount' }, desc: true }],
-      limit: '100',
+      limit: '500',
+    };
+  }
+
+  /** 웹 뷰어 성공 열람만. 앱 DAU/기능 순위와 섞지 않는다. */
+  webFriendViews() {
+    return {
+      dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+      dimensions: [{ name: 'eventName' }],
+      metrics: [{ name: 'eventCount' }, { name: 'totalUsers' }],
+      dimensionFilter: withStream(this.streamId, {
+        filter: { fieldName: 'eventName', stringFilter: { matchType: 'EXACT', value: 'friend_view_web' } },
+      }),
+      limit: '1',
     };
   }
 

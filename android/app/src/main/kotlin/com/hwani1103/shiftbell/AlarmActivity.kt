@@ -26,6 +26,10 @@ import androidx.core.app.NotificationCompat
 import kotlin.math.abs
 
 class AlarmActivity : AppCompatActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppTextScale.context(newBase))
+    }
+
     companion object {
         /**
          * ⭐ 2026-09-14 (출시전 감사 #4) - 지금 화면에 떠 있는 울림 회차. 제어 알림의 전체화면 인텐트가 먼저
@@ -50,6 +54,7 @@ class AlarmActivity : AppCompatActivity() {
 
     // ⭐ 의도적 종료 플래그 (timeout/dismiss/snooze 중에는 7777 생성 방지)
     private var isIntentionalExit: Boolean = false
+    private var quietCoverControls: Boolean = false
 
     // ⭐ Notification에서 Activity 종료 신호 수신
     private val finishReceiver = object : BroadcastReceiver() {
@@ -87,14 +92,27 @@ class AlarmActivity : AppCompatActivity() {
         // DB에서 알람 정보 로드
         loadAlarmInfo()
 
-        setContentView(R.layout.activity_alarm)
-        setupUI()
+        val onCover = CoverAlarmDisplay.supported(this) &&
+            windowManager.defaultDisplay.displayId != android.view.Display.DEFAULT_DISPLAY
+        if (onCover) {
+            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            setContentView(CoverAlarmLayout.create(this, alarmTimeStr, ::dismissAlarm, ::snoozeAlarm))
+            quietCoverControls = true
+            NotificationHelper.showRingControlNotification(this, alarmId, ringRound, alarmLabel, alarmDuration,
+                coverVisible = true)
+            Log.i("CoverAlarm", "AlarmActivity on cover display=${windowManager.defaultDisplay.displayId}")
+        } else {
+            setContentView(R.layout.activity_alarm)
+            setupUI()
+            AlarmResponsiveLayout.install(findViewById(R.id.rootLayout))
 
-        gestureDetector = GestureDetectorCompat(this, SwipeGestureListener())
+            gestureDetector = GestureDetectorCompat(this, SwipeGestureListener())
 
-        findViewById<ConstraintLayout>(R.id.rootLayout).setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-            true
+            findViewById<ConstraintLayout>(R.id.rootLayout).setOnTouchListener { _, event ->
+                gestureDetector.onTouchEvent(event)
+                true
+            }
         }
 
         // ⭐ 종료 신호 리시버 등록
@@ -120,7 +138,7 @@ class AlarmActivity : AppCompatActivity() {
 
             cursor = database.query(
                 "alarms",
-                arrayOf("time", "shift_type"),
+                arrayOf("time", "shift_type", "type", "preset_slot"),
                 "id = ?",
                 arrayOf(alarmId.toString()),
                 null, null, null
@@ -128,7 +146,10 @@ class AlarmActivity : AppCompatActivity() {
 
             if (cursor.moveToFirst()) {
                 alarmTimeStr = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
-                alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+                    ?: if (cursor.getString(cursor.getColumnIndexOrThrow("type")) == "custom" ||
+                        !cursor.isNull(cursor.getColumnIndexOrThrow("preset_slot")))
+                        getString(R.string.one_tap_alarm_label) else getString(R.string.alarm_default_label)
             }
 
             Log.d("AlarmActivity", "✅ 알람 정보 로드: time=$alarmTimeStr, label=$alarmLabel")
@@ -344,7 +365,7 @@ private fun dismissAlarm() {
 
         // ⭐ 네이티브 알람 재등록 + DB 갱신 + 이력/생성로그 기록을 하나의 트랜잭션으로 (AlarmActionHelper)
         val result = AlarmActionHelper.snooze(applicationContext, alarmId)
-        if (result != null) {
+        if (result != null && result.collisionMessage == null) {
             // ⭐ 연장 Notification 표시
             NotificationHelper.showUpdatedNotification(applicationContext, result.newTimeStr, result.shiftType)
         } else {
@@ -409,6 +430,11 @@ private fun dismissAlarm() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (quietCoverControls && !isIntentionalExit &&
+            RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) {
+            NotificationHelper.showRingControlNotification(applicationContext, alarmId, ringRound, alarmLabel, alarmDuration,
+                launchFullScreen = false)
+        }
         if (visibleRing == RingingAlarmTracker.ActiveRing(alarmId, ringRound)) visibleRing = null
         cancelTimeoutTimer()
         swipeHintAnimator?.cancel()

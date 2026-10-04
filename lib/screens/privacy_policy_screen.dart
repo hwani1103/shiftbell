@@ -1,3 +1,4 @@
+import '../widgets/adaptive_layout.dart';
 // lib/screens/privacy_policy_screen.dart
 //
 // ⭐ 2026-09-07 - 개인정보처리방침 화면 전면 재작성(사용자 요청). 예전엔 설정 탭에서
@@ -92,7 +93,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
         foregroundColor: Colors.black87,
         elevation: 0.5,
       ),
-      body: SafeArea(
+      body: AdaptiveFormBody(child: SafeArea(
         top: false,
         child: ListView(
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 28.h),
@@ -161,7 +162,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }

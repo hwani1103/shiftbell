@@ -20,8 +20,8 @@ import java.util.*
  * 따로 관리해서 하루가 바뀐 직후 둘 다 "갱신 필요"라고 판단 → 거의 동시에 두 번 실행되며
  * 알람이 사라지는 race condition이 있었음.
  *
- * 지금은 이 객체가 유일하게 alarms(type='fixed') 테이블을 변경함:
- *  - Dart는 더 이상 자체적으로 삭제/재생성하지 않고 이 엔진을 트리거만 함
+ * 자정·부팅·앱 복귀 자동 갱신은 이 엔진이 맡는다. Dart는 근무/템플릿을 직접
+ * 수정하는 경로에서 같은 고정 알람 계산을 트랜잭션 안에 수행한다.
  *  - 전체 삭제 후 재생성이 아니라 "있어야 할 것 vs 지금 있는 것"을 diff해서
  *    바뀐 것만 건드림 → 스누즈 중인 알람(type='snoozed')은애초에 대상이 아니고,
  *    바뀌지 않은 미래 알람은 취소/재등록 자체를 안 하니 원자성 문제도 크게 줄어듦.
@@ -37,15 +37,18 @@ object AlarmRefreshEngine {
     // 비교·파싱이 어긋나 배정일 조회·알람 diff·예외 슬롯이 조용히 틀어졌음. 사용자에게 보여주는 표시용 형식은 제외.
     private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
     private const val DAYS_AHEAD = 10
+    private const val OFFSET_BEFORE = -1
+    private const val OFFSET_SAME = 0
+    private const val OFFSET_AFTER = 1
 
     // ⭐ 2026-09-14 (출시전 감사 #26 P1) - 생성 정책 버전. 불규칙 자동 생성·템플릿 0개 정리가 들어간 첫 버전 = 1.
     // alarm_state에 기록된 값이 이보다 낮으면 "오늘 이미 갱신함"과 무관하게 한 번 강제 갱신(AlarmRefreshUtil),
     // 기록은 갱신이 성공한 뒤에만(markRefreshed). 정책을 또 바꾸면 값을 올릴 것.
-    internal const val REFRESH_POLICY_VERSION = 1
+    internal const val REFRESH_POLICY_VERSION = 2
     internal const val KEY_REFRESH_POLICY_VERSION = "refresh_policy_version"
+    private const val KEY_LAST_REFRESH_TIME_ZONE = "last_alarm_refresh_time_zone"
 
     // ⭐ 2026-09-14 (#31/D11) - alarm_overrides 슬롯 시각 형식(contracts §1.1, Locale.US)과 보관 기간
-    private const val SLOT_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
     private const val OVERRIDE_RETENTION_DAYS = 30
 
     // ⭐ 2026-09-12 - 아래 세 data class(ScheduleData/DesiredAlarm/TemplateEntry)와
@@ -103,7 +106,7 @@ object AlarmRefreshEngine {
      * 갱신이 끝까지 실행됐으면 true. 복원 잠금으로 미뤘거나, 다른 갱신과 겹쳐 건너뛰었거나, 예외면 false.
      * ⭐ 2026-09-14 (교차 검토 X-06) - 복원 최종 재조정이 이 결과로 "실제로 재계산됐는지"를 확인함(다른 호출부는 무시해도 됨).
      */
-    fun refresh(context: Context, ownerToken: String? = null): Boolean {
+    fun refresh(context: Context, ownerToken: String? = null, cancelPastFixedOnZoneChange: Boolean = false): Boolean {
         // ⭐ 2026-09-14 (G4 #19) - 백업 복원 중이면 쓰지 않음. 복원 owner가 마지막에 토큰으로 직접 부름(RestoreOs.reconcileOs)
         if (RestoreGate.shouldDefer(context, "refresh", ownerToken)) return false
         // ⭐ owner를 호출마다 고유하게(UUID) 생성해야 함. 예전엔 "AlarmRefreshEngine"
@@ -117,12 +120,12 @@ object AlarmRefreshEngine {
             return false
         }
         return try {
-            doRefresh(context)
+            doRefresh(context, cancelPastFixedOnZoneChange = cancelPastFixedOnZoneChange)
             DiagLog.log(context, "REFRESH_DONE")
-            true
+            AlarmWakeScheduler.failedIds(context).isEmpty()
         } catch (e: Exception) {
             Log.e(TAG, "❌ 갱신 실패", e)
-            DiagLog.log(context, "REFRESH_FAIL", "error" to e.javaClass.simpleName, "msg" to e.message)
+            DiagLog.log(context, "REFRESH_FAIL", "error" to e.javaClass.simpleName)
             false
         } finally {
             RefreshLockManager.release(context, owner)
@@ -151,7 +154,8 @@ object AlarmRefreshEngine {
     internal fun doRefresh(
         context: Context,
         scheduleNativeAlarmOverride: ((Context, Int, Long, String) -> Unit)? = null,
-        nowMillis: Long = System.currentTimeMillis()
+        nowMillis: Long = System.currentTimeMillis(),
+        cancelPastFixedOnZoneChange: Boolean = false
     ) {
         val scheduleFn: (Context, Int, Long, String) -> Unit =
             scheduleNativeAlarmOverride ?: { c, id, t, label -> AlarmWakeScheduler.scheduleRaw(c, id, t, label) }
@@ -168,6 +172,7 @@ object AlarmRefreshEngine {
         AlarmWakeScheduler.retryFailed(context)
 
         val toCancel = mutableListOf<Int>()
+        val pastFixedToCancel = mutableListOf<Int>()
         val toSchedule = mutableListOf<AlarmWakeScheduler.WakeRow>()
         var addedCount = 0
         var removedCount = 0
@@ -186,11 +191,23 @@ object AlarmRefreshEngine {
 
             val templates = readTemplates(db)
             val overrides = readOverrides(db)
+            // 먼저 저장된 원터치 알람이 같은 시각을 차지하면 고정 알람 행을 만들지 않는다.
+            // 기존에 겹쳐 생성된 고정 행도 diff의 toRemove로 정리된다.
+            val occupiedByCustom = readFutureCustomTimes(db, nowMillis)
             val desired = computeDesiredAlarms(schedule, templates, overrides, nowMillis)
+                .filterNot { it.timestamp in occupiedByCustom }
             val existing = readExistingFixedAlarms(db, nowMillis)
             val existingByKey = existing.associateBy { it.key() }
             val desiredKeys = desired.map { it.key() }.toSet()
             val activeRingId = RingingAlarmTracker.current(context)?.alarmId
+
+            // A time-zone move can make a fixed row's local wall time past while its old
+            // AlarmManager reservation is still in the future. Keep the DB row/history;
+            // cancel only that obsolete OS reservation after the transaction commits.
+            if (cancelPastFixedOnZoneChange || hasTimeZoneChangedSinceRefresh(context)) {
+                pastFixedToCancel += readPastFixedAlarmIds(db, nowMillis)
+                    .filter { it != activeRingId }
+            }
 
             val toAdd = desired.filter { it.key() !in existingByKey.keys }
             val toRemove = existing.filter { it.key() !in desiredKeys && it.id != activeRingId }
@@ -210,11 +227,9 @@ object AlarmRefreshEngine {
                     put("shift_type", item.shiftType)
                     put("day_offset", item.dayOffset)
                 }
-                val rowId = db.insert("alarms", null, values)
-                if (rowId == -1L || rowId > Int.MAX_VALUE) {
-                    Log.e(TAG, "❌ DB 삽입 실패/오버플로우: $item")
-                    continue
-                }
+                // A failed replacement must roll back removals in this same transaction.
+                val rowId = db.insertOrThrow("alarms", null, values)
+                check(rowId in 1..Int.MAX_VALUE.toLong()) { "Alarm ID overflow: $rowId" }
                 val alarmId = rowId.toInt()
                 insertCreationLog(db, alarmId, item.dateStr, item.time, item.shiftType, item.alarmTypeId, item.dayOffset, "auto")
                 toSchedule += AlarmWakeScheduler.WakeRow(alarmId, item.timestamp, item.shiftType)
@@ -228,12 +243,16 @@ object AlarmRefreshEngine {
             // AlarmManager 등록 자체는 DB를 안 건드리는 가벼운 작업이라 매번 다시 걸어도 무해함.
             for (item in desired) {
                 val existingId = existingByKey[item.key()]?.id ?: continue  // toAdd는 위에서 이미 넣음
+                if (existingByKey[item.key()]?.time != item.time) {
+                    db.update("alarms", ContentValues().apply { put("time", item.time) },
+                        "id = ?", arrayOf(existingId.toString()))
+                }
                 toSchedule += AlarmWakeScheduler.WakeRow(existingId, item.timestamp, item.shiftType)
                 rearmCount++
             }
             // ⭐ 2026-09-14 (#26) - fixed가 아닌 미래 알람(custom·snoozed)도 OS에 다시 등록. 예전엔 불규칙 스케줄에서만
             // 했고(reRegisterExistingAlarms), 규칙 근무는 재부팅 뒤 이 엔진만 돌면 이 알람들이 빠졌음.
-            val others = readOtherFutureAlarms(db, nowMillis)
+            val others = readOtherFutureAlarms(context, db, nowMillis)
             toSchedule += others
             rearmCount += others.size
             removedCount = toRemove.size
@@ -245,6 +264,11 @@ object AlarmRefreshEngine {
 
         // ── 커밋 뒤 OS 반영 (반영 직전 재확인은 AlarmWakeScheduler) ──
         for (id in toCancel) AlarmWakeScheduler.cancelIfGone(context, db, id)
+        for (id in pastFixedToCancel) {
+            if (RingingAlarmTracker.current(context)?.alarmId != id) {
+                AlarmWakeScheduler.cancelIfGone(context, db, id)
+            }
+        }
         var failures = 0
         for (row in toSchedule) {
             val outcome = AlarmWakeScheduler.scheduleIfCurrent(context, db, row.id, row.timestamp, row.label, scheduleFn)
@@ -290,7 +314,7 @@ object AlarmRefreshEngine {
                 return null
             } ?: return null
 
-            val startCal = Calendar.getInstance().apply {
+            val startCal = Calendar.getInstance(Locale.US).apply {
                 time = parsedStart
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
@@ -342,11 +366,12 @@ object AlarmRefreshEngine {
     private fun readExistingFixedAlarms(db: SQLiteDatabase, nowMillis: Long): List<ExistingAlarm> {
         val result = mutableListOf<ExistingAlarm>()
         val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date(nowMillis))
-        db.query("alarms", null, "type = ? AND date > ?", arrayOf("fixed", now), null, null, null).use { cursor ->
+        db.query("alarms", null, "type = ? AND date >= ?", arrayOf("fixed", now.substring(0, 10)), null, null, null).use { cursor ->
             val dayOffsetIdx = cursor.getColumnIndex("day_offset")
             while (cursor.moveToNext()) {
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date")) ?: continue
                 val timestamp = parseStoredDate(dateStr) ?: continue
+                if (timestamp <= nowMillis) continue
                 result.add(
                     ExistingAlarm(
                         id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
@@ -361,6 +386,30 @@ object AlarmRefreshEngine {
             }
         }
         return result
+    }
+
+    private fun readPastFixedAlarmIds(db: SQLiteDatabase, nowMillis: Long): List<Int> {
+        val result = mutableListOf<Int>()
+        db.query("alarms", arrayOf("id", "date"), "type = ?", arrayOf("fixed"), null, null, null).use { cursor ->
+            while (cursor.moveToNext()) {
+                val timestamp = cursor.getString(1)?.let { parseStoredDate(it) } ?: continue
+                // A zone change cannot move a future reservation more than 26 hours
+                // behind its stored local time. Avoid revisiting older fixed history.
+                if (timestamp <= nowMillis && timestamp > nowMillis - 27L * 60 * 60 * 1000) {
+                    result += cursor.getInt(0)
+                }
+            }
+        }
+        return result
+    }
+
+    private fun hasTimeZoneChangedSinceRefresh(context: Context): Boolean {
+        val deviceContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.createDeviceProtectedStorageContext()
+        } else context
+        val previous = deviceContext.getSharedPreferences("alarm_state", Context.MODE_PRIVATE)
+            .getString(KEY_LAST_REFRESH_TIME_ZONE, null)
+        return previous != null && previous != TimeZone.getDefault().id
     }
 
     // ⭐ 순수 연/월/일만으로 계산하는 Julian Day Number - 시간대/서머타임과 완전히
@@ -382,7 +431,7 @@ object AlarmRefreshEngine {
     // 남는 문자(.000)는 무시하므로 하나의 포맷터로 두 형식 다 안전하게 처리 가능.
     private fun parseStoredDate(dateStr: String): Long? {
         return try {
-            SimpleDateFormat(DATE_FORMAT, Locale.US).parse(dateStr)?.time
+            AlarmWakeScheduler.parse(dateStr)
         } catch (e: Exception) {
             Log.e(TAG, "❌ 저장된 날짜 파싱 실패: $dateStr", e)
             null
@@ -400,7 +449,7 @@ object AlarmRefreshEngine {
             // 나라/시간대에서는 daysDiff가 정수가 아니게 되어 .toInt() 절삭 시
             // 패턴 인덱스가 하루씩 밀릴 수 있음. 순수 연/월/일 기반 Julian Day
             // Number로 계산하면 시간대/DST와 완전히 무관하게 항상 정확함.
-            val startCal = Calendar.getInstance().apply { timeInMillis = schedule.startDateMillis }
+            val startCal = Calendar.getInstance(Locale.US).apply { timeInMillis = schedule.startDateMillis }
             val daysDiff = julianDayNumber(targetDate) - julianDayNumber(startCal)
             val idx = ((schedule.todayIndex + daysDiff) % schedule.pattern.size + schedule.pattern.size) % schedule.pattern.size
             schedule.pattern[idx]
@@ -426,13 +475,13 @@ object AlarmRefreshEngine {
         nowMillis: Long = System.currentTimeMillis()
     ): List<DesiredAlarm> {
         val result = mutableListOf<DesiredAlarm>()
-        val today = Calendar.getInstance().apply { timeInMillis = nowMillis }
+        val today = Calendar.getInstance(Locale.US).apply { timeInMillis = nowMillis }
         val now = nowMillis
-        val slotFormat = SimpleDateFormat(SLOT_FORMAT, Locale.US)
+        val slotFormat = SimpleDateFormat(DATE_FORMAT, Locale.US)
         val dayKeyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
         val fullFormat = SimpleDateFormat(DATE_FORMAT, Locale.US)
 
-        fun dateAt(base: Calendar, dayDelta: Int): Calendar = Calendar.getInstance().apply {
+        fun dateAt(base: Calendar, dayDelta: Int): Calendar = Calendar.getInstance(Locale.US).apply {
             timeInMillis = base.timeInMillis
             add(Calendar.DAY_OF_MONTH, dayDelta)
         }
@@ -454,17 +503,16 @@ object AlarmRefreshEngine {
                 val shiftTemplates = templates[shiftType] ?: return
                 for (entry in shiftTemplates) {
                     if (entry.dayOffset != offset) continue
-                    if (byTime.containsKey(entry.time)) continue
 
                     val timeParts = entry.time.split(":")
                     if (timeParts.size < 2) continue
-                    val alarmCal = Calendar.getInstance().apply {
-                        timeInMillis = targetDate.timeInMillis
-                        set(Calendar.HOUR_OF_DAY, timeParts[0].toInt())
-                        set(Calendar.MINUTE, timeParts[1].toInt())
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
+                    val alarmCal = Calendar.getInstance(Locale.US).apply {
+                        timeInMillis = AlarmWallTime.resolve(
+                            targetDate.get(Calendar.YEAR), targetDate.get(Calendar.MONTH) + 1,
+                            targetDate.get(Calendar.DAY_OF_MONTH), timeParts[0].toInt(), timeParts[1].toInt())
                     }
+                    val resolvedTime = SimpleDateFormat("HH:mm", Locale.US).format(alarmCal.time)
+                    if (byTime.containsKey(resolvedTime)) continue
 
                     // ⭐ CRITICAL FIX: readExistingFixedAlarms()는 "date > now"로 조회하는데
                     // 여기는 "now - 60초"까지 봐줬음 - 그래서 방금(60초 이내) 울린/지나간
@@ -475,9 +523,9 @@ object AlarmRefreshEngine {
                     // existing과 완전히 같은 기준(> now)으로 맞춤.
                     if (alarmCal.timeInMillis <= now) continue
 
-                    byTime[entry.time] = DesiredAlarm(
+                    byTime[resolvedTime] = DesiredAlarm(
                         dateStr = fullFormat.format(alarmCal.time),
-                        time = entry.time,
+                        time = resolvedTime,
                         shiftType = shiftType,
                         alarmTypeId = entry.alarmTypeId,
                         dayOffset = offset,
@@ -486,9 +534,9 @@ object AlarmRefreshEngine {
                 }
             }
 
-            addFrom(sameDayShift, 0)
-            addFrom(dayBeforeContributor, -1)
-            addFrom(dayAfterContributor, 1)
+            addFrom(sameDayShift, OFFSET_SAME)
+            addFrom(dayBeforeContributor, OFFSET_BEFORE)
+            addFrom(dayAfterContributor, OFFSET_AFTER)
 
             for (alarm in byTime.values) {
                 val override = overrides[slotKey(slotFormat.format(Date(alarm.timestamp)), alarm.shiftType, alarm.dayOffset)]
@@ -506,6 +554,17 @@ object AlarmRefreshEngine {
 
     // ⭐ 2026-09-14 (#16/#27/#20) - 이 엔진 전용 cancelNativeAlarm/scheduleNativeAlarm은 AlarmWakeScheduler로 통합됨
 
+    private fun readFutureCustomTimes(db: SQLiteDatabase, nowMillis: Long): Set<Long> {
+        val result = mutableSetOf<Long>()
+        db.query("alarms", arrayOf("date"), "type = ?", arrayOf("custom"), null, null, null).use { cursor ->
+            while (cursor.moveToNext()) {
+                val timestamp = cursor.getString(0)?.let { parseStoredDate(it) } ?: continue
+                if (timestamp > nowMillis) result.add(timestamp)
+            }
+        }
+        return result
+    }
+
     private fun insertHistory(db: SQLiteDatabase, alarmId: Int, dateStr: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {
         val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date())
         val values = ContentValues().apply {
@@ -519,7 +578,7 @@ object AlarmRefreshEngine {
             put("created_at", now)
             put("day_offset", dayOffset)
         }
-        db.insert("alarm_history", null, values)
+        db.insertOrThrow("alarm_history", null, values)
     }
 
     private fun insertCreationLog(db: SQLiteDatabase, alarmId: Int, dateStr: String, time: String, shiftType: String, alarmTypeId: Int, dayOffset: Int, source: String) {
@@ -534,19 +593,22 @@ object AlarmRefreshEngine {
             put("created_at", now)
             put("day_offset", dayOffset)
         }
-        db.insert("alarm_creation_log", null, values)
+        db.insertOrThrow("alarm_creation_log", null, values)
     }
 
     // ⭐ 2026-09-14 (출시전 감사 #26) - fixed가 아닌 미래 알람(custom·snoozed). 불규칙 전용이던
     // reRegisterExistingAlarms()를 대체 - 이제 규칙·불규칙 모두 커밋 뒤 AlarmWakeScheduler로 재등록.
-    private fun readOtherFutureAlarms(db: SQLiteDatabase, nowMillis: Long): List<AlarmWakeScheduler.WakeRow> {
+    private fun readOtherFutureAlarms(context: Context, db: SQLiteDatabase, nowMillis: Long): List<AlarmWakeScheduler.WakeRow> {
         val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date(nowMillis))
         val result = mutableListOf<AlarmWakeScheduler.WakeRow>()
-        db.query("alarms", arrayOf("id", "date", "shift_type"), "type != ? AND date > ?", arrayOf("fixed", now),
+        db.query("alarms", arrayOf("id", "date", "shift_type", "type", "preset_slot"), "type != ? AND (type = 'snoozed' OR date >= ?)", arrayOf("fixed", now.substring(0, 10)),
             null, null, null).use { c ->
             while (c.moveToNext()) {
                 val timestamp = c.getString(1)?.let { parseStoredDate(it) } ?: continue
-                result += AlarmWakeScheduler.WakeRow(c.getInt(0), timestamp, c.getString(2) ?: "알람")
+                if (timestamp <= nowMillis) continue
+                val label = c.getString(2) ?: if (c.getString(3) == "custom" || !c.isNull(4))
+                    context.getString(R.string.one_tap_alarm_label) else context.getString(R.string.alarm_default_label)
+                result += AlarmWakeScheduler.WakeRow(c.getInt(0), timestamp, label)
             }
         }
         return result
@@ -570,12 +632,12 @@ object AlarmRefreshEngine {
 
     // ⭐ 2026-09-14 (D11) - 슬롯 시각이 30일 "이상" 지난 예외만 정리. alarm_history/alarm_creation_log는 절대 대상 아님.
     private fun cleanupOldOverrides(db: SQLiteDatabase, nowMillis: Long): Int {
-        val cutoff = Calendar.getInstance().apply {
+        val cutoff = Calendar.getInstance(Locale.US).apply {
             timeInMillis = nowMillis
             add(Calendar.DAY_OF_MONTH, -OVERRIDE_RETENTION_DAYS)
         }
         return db.delete("alarm_overrides", "slot_time <= ?",
-            arrayOf(SimpleDateFormat(SLOT_FORMAT, Locale.US).format(cutoff.time)))
+            arrayOf(SimpleDateFormat(DATE_FORMAT, Locale.US).format(cutoff.time)))
     }
 
     // ⭐ alarm_creation_log는 여기서 정리 안 함 (의도적).
@@ -592,6 +654,7 @@ object AlarmRefreshEngine {
             prefs.edit()
                 .putLong("last_alarm_refresh", System.currentTimeMillis())
                 .putInt(KEY_REFRESH_POLICY_VERSION, REFRESH_POLICY_VERSION)  // #26 P1 - 성공한 갱신 뒤에만
+                .putString(KEY_LAST_REFRESH_TIME_ZONE, TimeZone.getDefault().id)
                 .apply()
         } catch (e: Exception) {
             Log.e(TAG, "갱신 표시 실패", e)

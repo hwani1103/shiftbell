@@ -36,59 +36,66 @@
             android:paddingBottom="2dp">
             <TextView
                 android:id="@+id/hdr_0"
+                android:text="@string/widget_weekday_0"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
+                android:textSize="@dimen/calendar_widget_weekday_size"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_1"
+                android:text="@string/widget_weekday_1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
+                android:textSize="@dimen/calendar_widget_weekday_size"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_2"
+                android:text="@string/widget_weekday_2"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
+                android:textSize="@dimen/calendar_widget_weekday_size"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_3"
+                android:text="@string/widget_weekday_3"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
+                android:textSize="@dimen/calendar_widget_weekday_size"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_4"
+                android:text="@string/widget_weekday_4"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
+                android:textSize="@dimen/calendar_widget_weekday_size"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_5"
+                android:text="@string/widget_weekday_5"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
+                android:textSize="@dimen/calendar_widget_weekday_size"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/hdr_6"
+                android:text="@string/widget_weekday_6"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
+                android:textSize="@dimen/calendar_widget_weekday_size"
                 android:textStyle="bold"/>
         </LinearLayout>
             <LinearLayout
@@ -115,6 +122,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_0"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -208,6 +216,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_1"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -301,6 +310,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_2"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -394,6 +404,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_3"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -487,6 +498,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_4"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -580,6 +592,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_5"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -673,6 +686,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_6"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -772,6 +786,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_0"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -865,6 +880,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_1"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -958,6 +974,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_2"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1051,6 +1068,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_3"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1144,6 +1162,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_4"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1237,6 +1256,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_5"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1330,6 +1350,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_6"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1429,6 +1450,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_0"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1522,6 +1544,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_1"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1615,6 +1638,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_2"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1708,6 +1732,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_3"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1801,6 +1826,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_4"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1894,6 +1920,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_5"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1987,6 +2014,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_6"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2086,6 +2114,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_3_0"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2179,6 +2208,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_3_1"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2272,6 +2302,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_3_2"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2365,6 +2396,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_3_3"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2458,6 +2490,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_3_4"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2551,6 +2584,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_3_5"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2644,6 +2678,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_3_6"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2743,6 +2778,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_4_0"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2836,6 +2872,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_4_1"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2929,6 +2966,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_4_2"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3022,6 +3060,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_4_3"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3115,6 +3154,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_4_4"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3208,6 +3248,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_4_5"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3301,6 +3342,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_4_6"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3400,6 +3442,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_5_0"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3493,6 +3536,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_5_1"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3586,6 +3630,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_5_2"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3679,6 +3724,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_5_3"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3772,6 +3818,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_5_4"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3865,6 +3912,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_5_5"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -3958,6 +4006,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_5_6"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"

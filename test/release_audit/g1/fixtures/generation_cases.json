@@ -167,6 +167,33 @@
       ]
     },
     {
+      "id": "EXACT_NOW_AND_OUTSIDE_ORIGIN",
+      "now": "2026-09-14T10:30:00",
+      "schedule": {
+        "mode": "irregular",
+        "start_date": null,
+        "today_index": null,
+        "pattern": [],
+        "assigned_dates": {"2026-09-14": "DAY", "2026-09-24": "EARLY"}
+      },
+      "templates": [
+        {"shift_type": "DAY", "time": "10:30", "day_offset": 0, "alarm_type_id": 1},
+        {"shift_type": "DAY", "time": "10:31", "day_offset": 0, "alarm_type_id": 1},
+        {"shift_type": "EARLY", "time": "05:00", "day_offset": -1, "alarm_type_id": 2}
+      ],
+      "template_query_result": "success",
+      "overrides": [],
+      "existing_alarm_rows": [],
+      "active_ring_id": null,
+      "expected_generation_slots": [
+        {"slot_time": "2026-09-14T10:31:00", "shift_type": "DAY", "day_offset": 0, "alarm_type_id": 1},
+        {"slot_time": "2026-09-23T05:00:00", "shift_type": "EARLY", "day_offset": -1, "alarm_type_id": 2}
+      ],
+      "expected_excluded": [
+        {"slot_time": "2026-09-14T10:30:00", "reason": "at_now"}
+      ]
+    },
+    {
       "id": "IDEMPOTENT_EXACT_EXISTING",
       "now": "2026-09-14T10:30:00",
       "schedule": {

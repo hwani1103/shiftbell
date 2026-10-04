@@ -42,6 +42,7 @@ import 'package:sqflite/sqflite.dart';
 
 import '../constants/platform_channel.dart';
 import '../models/backup_payload.dart';
+import '../utils/alarm_wall_time.dart';
 import 'backup_policy.dart';
 import 'backup_validator.dart';
 import 'diag_log.dart';
@@ -248,6 +249,9 @@ class RestoreCoordinator {
     if (_running) throw StateError('restore already running');
     _running = true;
     final token = _newToken();
+    // A failed DB step reconciles the old DB before releasing the lock. Those
+    // recreated reservations must be cleared again before a resumed DB replace.
+    final reclearBeforeDbReplace = job.phase == RestorePhase.osCleared;
     try {
       if (!await _acquire(token)) throw StateError('restore lock not acquired');
       try {
@@ -256,7 +260,14 @@ class RestoreCoordinator {
           final carry = await _prepareCarry(token);
           await _channel.invokeMethod('restoreClearOs', {'token': token, 'keepIds': carry.carryIds.toList()});
         });
-        await _advance(job, RestorePhase.dbApplied, () => _applyDb(job, payload, token));
+        await _advance(job, RestorePhase.dbApplied, () async {
+          if (reclearBeforeDbReplace) {
+            final carry = await _prepareCarry(token);
+            await _channel.invokeMethod('restoreClearOs',
+                {'token': token, 'keepIds': carry.carryIds.toList()});
+          }
+          await _applyDb(job, payload, token);
+        });
         await _advance(job, RestorePhase.prefsApplied, () => _applyPrefs(payload));
         await _advance(job, RestorePhase.osReconciled, () => _reconcile(token));
       } catch (e, st) {
@@ -349,10 +360,13 @@ class RestoreCoordinator {
     final ids = nativeCarryIds.toList();
     final idClause = ids.isEmpty ? '' : ' OR id IN (${List.filled(ids.length, '?').join(',')})';
     final rows = await db.rawQuery(
-      "SELECT id FROM alarms WHERE (type = 'snoozed' AND date > ?)$idClause",
-      [_dbString(DateTime.now().subtract(_snoozeCarryLookback)), ...ids],
+      "SELECT id, date FROM alarms WHERE type = 'snoozed'$idClause",
+      ids,
     );
-    return rows.map((r) => r['id'] as int).toSet();
+    final cutoff = DateTime.now().subtract(_snoozeCarryLookback);
+    return rows.where((r) => nativeCarryIds.contains(r['id']) ||
+        (tryParseAlarmDate(r['date'] as String?)?.isAfter(cutoff) ?? false))
+        .map((r) => r['id'] as int).toSet();
   }
 
   Future<void> _replaceInTxn(Transaction txn, RestoreJob job, BackupPayload payload, _Carry prepared) async {

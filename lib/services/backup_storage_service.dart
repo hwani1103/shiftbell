@@ -78,7 +78,7 @@ class BackupStorageService {
   /// ⭐ 2026-09-01 - [read]의 자동 탐지(MediaStore 쿼리)가 실기기에서 실패하는 것이 확인돼 추가한
   /// 수동 대안. 시스템 파일 선택기(SAF)를 띄워 사용자가 Download/ShiftBell/의 백업 파일을 직접
   /// 고르게 함 - 사용자가 명시적으로 고른 파일은 그 자리에서 접근 권한을 받으므로 소유권 메타데이터와
-  /// 무관하게 항상 동작함. 사용자가 취소하거나 읽기 실패하면 null.
+  /// 무관하게 항상 동작함. 취소는 null, 읽기 실패는 검증 오류 안내용 빈 문자열.
   ///
   /// ⭐ 2026-09-17 정정 - 자동 탐지가 실패하는 진짜 이유는 그동안 적어 둔 "삼성 OEM 버그"가 아니라,
   /// 앱을 삭제하면 MediaStore가 그 앱이 만든 행의 owner_package_name을 비우기 때문이다(파일은 남음).
@@ -89,7 +89,7 @@ class BackupStorageService {
     try {
       return await _channel.invokeMethod<String>('pickBackupFile');
     } catch (e) {
-      return null;
+      return '';
     }
   }
 }

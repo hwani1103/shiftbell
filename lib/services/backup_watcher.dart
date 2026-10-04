@@ -20,6 +20,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/platform_channel.dart';
+import 'app_analytics.dart';
 import 'backup_policy.dart';
 import 'backup_service.dart';
 import 'backup_storage_service.dart';
@@ -149,6 +150,7 @@ class BackupWatcher {
       if (manual) {
         await prefs.setString(kLastSavedAtManualKey, now);
       } else {
+        AppAnalytics.track(AnalyticsEvent.autoBackupCreated);
         await prefs.setString(_kLastContentHashKey, fingerprint);
         await prefs.setString(kLastSavedAtAutoKey, now);
         await prefs.setBool(kSlotFormatKey, true);

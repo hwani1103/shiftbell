@@ -12,6 +12,11 @@
 {{flutter_js}}
 {{flutter_build_config}}
 
+// 기존 하루짜리 HTTP 캐시에 남은 장애 버전 대신 수정 번들을 가져온다.
+for (const build of _flutter.buildConfig.builds) {
+  if (build.mainJsPath) build.mainJsPath += '?v=share-fix-20260930';
+}
+
 _flutter.loader.load({
   onEntrypointLoaded: async function (engineInitializer) {
     const appRunner = await engineInitializer.initializeEngine({

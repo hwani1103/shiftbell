@@ -25,13 +25,14 @@
 // hosting rewrite가 이미 모든 경로를 index.html로 돌려주게 돼있어서("source": "**")
 // 일반 경로로 바꿔도 새로고침 시 404 걱정 없음. 기존에 이미 뿌려진 구형(#/?code=...)
 // 링크도 계속 동작하도록 _extractCode()의 프래그먼트 파싱은 그대로 남겨둠(폴백).
-import 'services/holiday_sync_service.dart';
 import 'dart:html' as html;
 // 웹(dart2js) 전용 라이브러리라 앱 기준 분석에서만 "없음"으로 잡힌다. 웹 빌드에서는 정상 - js_interop 전환은
 // 설치 버튼 동작을 브라우저에서 다시 확인해야 해서 보류(2026-09-22).
 // ignore: uri_does_not_exist
 import 'dart:js_util' as js_util;
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'widgets/app_text_scale.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -47,6 +48,7 @@ import 'l10n/generated/app_localizations.dart';
 import 'l10n/l10n_extensions.dart';
 
 const _kLastOwnerIdStorageKey = 'shiftbell_last_owner_id';
+late final Uri _initialWebUri;
 
 /// M5에서 씀 - 홈 화면에 설치된 PWA를 아이콘으로 재실행했을 때만 true.
 /// 일반 브라우저 탭(공유/키오스크 환경 포함)에서는 항상 false.
@@ -109,7 +111,8 @@ void _bounceToRealBrowserIfInAppBrowser() {
     if (!ua.contains('android')) return;
     final currentUrl = html.window.location.href;
     final withoutScheme = currentUrl.replaceFirst(RegExp(r'^https?://'), '');
-    final intentUrl = 'intent://$withoutScheme#Intent;scheme=https;package=com.android.chrome;'
+    final intentUrl =
+        'intent://$withoutScheme#Intent;scheme=https;package=com.android.chrome;'
         'S.browser_fallback_url=${Uri.encodeComponent(currentUrl)};end';
     html.window.location.href = intentUrl;
 
@@ -122,7 +125,8 @@ void _bounceToRealBrowserIfInAppBrowser() {
     // (자동 재시도는 불가능 - 이 페이지 자체가 스토어로 넘어가며 사라지므로).
     Future.delayed(const Duration(milliseconds: 1500), () {
       if (html.document.visibilityState == 'visible') {
-        html.window.location.href = 'https://play.google.com/store/apps/details?id=com.android.chrome';
+        html.window.location.href =
+            'https://play.google.com/store/apps/details?id=com.android.chrome';
       }
     });
   } catch (_) {
@@ -171,6 +175,9 @@ Future<void> triggerInstallPrompt() async {
 }
 
 void main() async {
+  // MaterialApp may normalize the browser URL to '/'. Retain the original
+  // share link across viewport, text-scale and install-banner rebuilds.
+  _initialWebUri = Uri.base;
   // ⭐ Firebase 초기화 등 무거운 작업을 하기 전에 먼저 시도 - 튕겨나갈 거면
   // 그 작업들이 낭비이기도 하고, 최대한 빨리 진짜 브라우저로 넘어가는 게
   // 사용자 체감상 더 매끄러움.
@@ -188,8 +195,6 @@ void main() async {
   // Firebase만 초기화하면 됨. 플레이스홀더 상태면 조용히 실패하고 아래 라우터가
   // "동기화 실패" 화면을 보여줌 (firebase_bootstrap.dart 참고).
   await initFirebase();
-  // ⭐ 2026-09-23 (1.0.24 D) - 공휴일 원격 변경분(친구 달력 빨간날). 실패하면 하드코딩 목록.
-  if (firebaseReady) await HolidaySyncService.instance.loadForWeb();
   runApp(const ShiftBellWebViewApp());
 }
 
@@ -203,7 +208,8 @@ class ShiftBellWebViewApp extends StatelessWidget {
       minTextAdapt: true,
       builder: (context, child) {
         return MaterialApp(
-          onGenerateTitle: (context) => '${context.l10n.appTitle} - ${context.l10n.friendShareTitle}',
+          onGenerateTitle: (context) =>
+              '${context.l10n.appTitle} - ${context.l10n.friendShareTitle}',
           debugShowCheckedModeBanner: false,
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -213,6 +219,24 @@ class ShiftBellWebViewApp extends StatelessWidget {
           ],
           supportedLocales: AppLocalizations.supportedLocales,
           theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
+          builder: (context, child) => AppTextScale(child: child!),
+          // Preserve the actual link in browser history as well as in memory.
+          // A route named '/' discards ?code=..., so a reload opens the landing
+          // page even though the first load displayed the shared calendar.
+          onGenerateInitialRoutes: (_) => [
+            MaterialPageRoute<void>(
+              settings: RouteSettings(
+                name: Uri(
+                  path: _initialWebUri.path.isEmpty ? '/' : _initialWebUri.path,
+                  query: _initialWebUri.hasQuery ? _initialWebUri.query : null,
+                  fragment: _initialWebUri.hasFragment
+                      ? _initialWebUri.fragment
+                      : null,
+                ).toString(),
+              ),
+              builder: (_) => const _WebEntryRouter(),
+            ),
+          ],
           home: const _WebEntryRouter(),
         );
       },
@@ -229,7 +253,7 @@ class _WebEntryRouter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final uri = Uri.base;
+    final uri = _initialWebUri;
     if (uri.path == '/privacy') return const PrivacyPolicyScreen();
     if (_hasShareCode(uri) || _isStandalonePwa()) return const _WebViewRouter();
     return const _DeveloperLandingPage();
@@ -285,7 +309,8 @@ class _DeveloperLandingPage extends StatelessWidget {
                   body: '앱의 데이터 처리와 광고·분석 이용 안내를 확인할 수 있습니다.',
                   actionLabel: '개인정보처리방침 보기',
                   onAction: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const PrivacyPolicyScreen()),
+                    MaterialPageRoute<void>(
+                        builder: (_) => const PrivacyPolicyScreen()),
                   ),
                 ),
                 const SizedBox(height: 28),
@@ -341,12 +366,21 @@ class _InfoCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+                    Text(title,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700)),
                     const SizedBox(height: 6),
-                    Text(body, style: Theme.of(context).textTheme.bodyMedium?.copyWith(height: 1.45)),
+                    Text(body,
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(height: 1.45)),
                     if (actionLabel != null) ...[
                       const SizedBox(height: 8),
-                      TextButton(onPressed: onAction, child: Text(actionLabel!)),
+                      TextButton(
+                          onPressed: onAction, child: Text(actionLabel!)),
                     ],
                   ],
                 ),
@@ -370,14 +404,15 @@ class _WebViewRouterState extends State<_WebViewRouter> {
   late final Future<_LoadResult> _future = _load();
 
   String? _extractCode() {
-    final uri = Uri.base;
+    final uri = _initialWebUri;
     // ⭐ 일반 쿼리(?code=...)와 해시 라우팅(#/?code=...) 둘 다 지원.
     if (uri.queryParameters.containsKey('code')) {
       return uri.queryParameters['code'];
     }
     final fragment = uri.fragment; // 예: "/?code=SB2:xxxx"
     if (fragment.contains('code=')) {
-      final fragUri = Uri.tryParse(fragment.startsWith('/') ? fragment : '/$fragment');
+      final fragUri =
+          Uri.tryParse(fragment.startsWith('/') ? fragment : '/$fragment');
       final fromFragment = fragUri?.queryParameters['code'];
       if (fromFragment != null) return fromFragment;
     }
@@ -412,7 +447,8 @@ class _WebViewRouterState extends State<_WebViewRouter> {
           // localStorage 접근 자체가 막힌 브라우저 설정 등 - 그냥 폴백 없이 진행.
         }
       }
-      if (ownerId == null) return _LoadResult.invalidLink(context.l10n.friendLinkMissingCode);
+      if (ownerId == null)
+        return _LoadResult.invalidLink(context.l10n.friendLinkMissingCode);
     }
 
     final data = await FriendSyncService.instance.fetchByOwnerId(ownerId);
@@ -424,6 +460,13 @@ class _WebViewRouterState extends State<_WebViewRouter> {
       html.window.localStorage[_kLastOwnerIdStorageKey] = ownerId;
     } catch (_) {}
 
+    // 웹 스트림의 집계만 사용한다. 공유 코드·친구 이름은 이벤트에 넣지 않는다.
+    try {
+      final tracker = analytics;
+      if (tracker != null)
+        unawaited(tracker.logEvent(name: 'friend_view_web').catchError((_) {}));
+    } catch (_) {}
+
     return _LoadResult.success(data);
   }
 
@@ -433,11 +476,13 @@ class _WebViewRouterState extends State<_WebViewRouter> {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         }
         final result = snapshot.data;
         if (result == null || result.data == null) {
-          return _InvalidLinkPage(reason: result?.reason ?? context.l10n.friendUnknownError);
+          return _InvalidLinkPage(
+              reason: result?.reason ?? context.l10n.friendUnknownError);
         }
         // ⭐ deferredInstallPrompt는 페이지 로드 후 비동기로 값이 채워질 수
         // 있어서(브라우저가 판단하는 타이밍), ValueListenableBuilder로 감싸서
@@ -483,9 +528,14 @@ class _InvalidLinkPage extends StatelessWidget {
             children: [
               Icon(Icons.link_off, size: 48.sp, color: Colors.grey),
               SizedBox(height: 16.h),
-              Text(context.l10n.friendCouldNotLoad, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+              Text(context.l10n.friendCouldNotLoad,
+                  style:
+                      TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
               SizedBox(height: 8.h),
-              Text(reason, textAlign: TextAlign.center, style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600)),
+              Text(reason,
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(fontSize: 13.sp, color: Colors.grey.shade600)),
             ],
           ),
         ),
@@ -496,7 +546,8 @@ class _InvalidLinkPage extends StatelessWidget {
 
 // ⭐ "앱 설치하고 실시간으로 보기" 버튼에서 쓸 스토어 링크. 실제 배포 후 이
 // 값만 실제 Play Store URL로 바꾸면 됨 (funnel 3단계 - 웹→앱 설치 유도).
-const String kPlayStoreUrl = 'https://play.google.com/store/apps/details?id=com.hwani1103.shiftbell';
+const String kPlayStoreUrl =
+    'https://play.google.com/store/apps/details?id=com.hwani1103.shiftbell';
 
 Future<void> openPlayStore() async {
   final uri = Uri.parse(kPlayStoreUrl);

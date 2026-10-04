@@ -89,3 +89,12 @@ __pycache__/
 /*.png
 /*.xml
 /alarm_dump.txt
+
+# Local shared-calendar diagnostics and private verification captures
+/.tmp/share-diagnosis/
+/android/wear/build/
+
+# Local audit work, device captures, and archived diagnostic logs
+/.tmp/
+/artifacts/
+/docs/next_version/전수검증_자료_2026-09-30/*.zip

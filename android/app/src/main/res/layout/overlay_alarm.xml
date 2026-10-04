@@ -49,10 +49,15 @@
                  흰 글자가 묻히지 않게 하는 안전장치. -->
             <TextView
                 android:id="@+id/timeText"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="09:30"
                 android:textSize="50sp"
+                android:maxLines="1"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="28sp"
+                android:autoSizeMaxTextSize="50sp"
+                android:autoSizeStepGranularity="1sp"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium"

@@ -1,6 +1,7 @@
 // T13 G2 테스트 - FriendSyncService 로컬 공유 상태 머신 (#21·#24·#30 F)
 // 테스트 호스트는 Firebase 미초기화(firebaseReady=false)라 제출 결과가 항상 pending이다.
 // 서버 ACK 확인·5초 timeout 후 늦은 ACK·rejected 경로는 Firestore 주입 지점이 없어 여기서 실행하지 못함(NOT_RUN, S9).
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/models/shift_schedule.dart';
@@ -28,14 +29,18 @@ ShiftSchedule _schedule([Map<String, String> assigned = const {'2026-09-20': '�
 const _active = <String, Object>{kIntent: 'active', kEnabled: true, kGen: 1, kDirty: false, kName: '홍'};
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  final binding = TestWidgetsFlutterBinding.ensureInitialized();
   final svc = FriendSyncService.instance;
 
   setUp(() {
+    binding.platformDispatcher.localeTestValue = const Locale('ko', 'KR');
     firebaseReady = false;
     SharedPreferences.setMockInitialValues({});
   });
-  tearDown(() => firebaseReady = false);
+  tearDown(() {
+    firebaseReady = false;
+    binding.platformDispatcher.clearLocaleTestValue();
+  });
 
   Future<SharedPreferences> prefs() => SharedPreferences.getInstance();
 

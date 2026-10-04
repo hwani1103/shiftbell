@@ -155,9 +155,15 @@
 
         <!-- ⭐ 실제 수면 기록 위젯("C번 요구사항", 캘린더 위젯과 완전 별개).
              exported=true 필요(런처가 APPWIDGET_UPDATE를 보냄) - 표준 위젯 요구사항. -->
+        <receiver android:name=".ReleaseLocaleReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.LOCALE_CHANGED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+            </intent-filter>
+        </receiver>
         <receiver
             android:name=".SleepWidgetProvider"
-            android:enabled="true"
+            android:enabled="@bool/sleep_widget_available"
             android:exported="true"
             android:label="@string/app_widget_sleep_label">
             <intent-filter>

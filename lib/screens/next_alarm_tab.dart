@@ -1,3 +1,7 @@
+import '../utils/alarm_clock_label.dart';
+import 'package:intl/intl.dart';
+import '../widgets/adaptive_layout.dart';
+import '../constants/layout_limits.dart';
 // lib/screens/next_alarm_tab.dart
 
 import 'dart:async';
@@ -9,13 +13,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/alarm.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/alarm_provider.dart';
+import '../services/custom_alarm_service.dart';
 import '../l10n/l10n_extensions.dart';
 import '../utils/weekday_util.dart';
 import '../constants/platform_channel.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_second_button.dart';
 import '../widgets/app_third_button.dart';
-
 
 class NextAlarmTab extends ConsumerStatefulWidget {
   const NextAlarmTab({super.key});
@@ -37,7 +41,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
     // 타이머로 알아서 갱신하고 있어서 완전히 중복이었고, 오히려 이 탭 레벨
     // setState()가 매분 파도 배경까지 통째로 재구성시키는(=깜빡임 재보고의
     // 유력한 원인) 부작용만 있었음. 그래서 제거 - "남은 시간"류 텍스트 갱신은
-        // 전부 그 텍스트를 실제로 그리는 좁은 범위의 위젯이 알아서 책임지도록 함.
+    // 전부 그 텍스트를 실제로 그리는 좁은 범위의 위젯이 알아서 책임지도록 함.
     // ⭐ 오버레이/잠금화면에서 알람을 끄기/스누즈하면 Native가 브로드캐스트로
     // Flutter에 갱신 신호를 보내긴 하는데, 그 경로(브로드캐스트 → MethodChannel →
     // Provider)가 여러 단계를 거치다 보니 타이밍에 따라 이 탭이 바로 못 따라갈 수
@@ -57,9 +61,40 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   }
 
   Future<void> _dismissAlarm(int id, DateTime? date) async {
+    final alarms =
+        ref.read(alarmNotifierProvider).valueOrNull ?? const <Alarm>[];
+    final alarm = alarms.where((a) => a.id == id).firstOrNull;
+    if ((alarm?.type == 'custom' || alarm?.presetSlot != null) &&
+        date != null) {
+      final fixed =
+          await CustomAlarmService.instance.previewFixedReplacement(date);
+      if (!mounted) return;
+      final ko = Localizations.localeOf(context).languageCode == 'ko';
+      final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+                content: Text(fixed == null
+                    ? (ko
+                        ? '원터치 알람을 삭제하면 이 시각에 알람이 남지 않습니다. 삭제할까요?'
+                        : 'No alarm will remain at this time. Delete the one-tap alarm?')
+                    : (ko
+                        ? '원터치 알람을 삭제하면 ${fixed.shiftType} 고정 알람을 다시 예약합니다. 삭제할까요?'
+                        : 'Deleting this one-tap alarm will restore the ${fixed.shiftType} fixed alarm. Continue?')),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(dialogContext, false),
+                      child: Text(context.l10n.commonCancel)),
+                  TextButton(
+                      onPressed: () => Navigator.pop(dialogContext, true),
+                      child: Text(context.l10n.commonDelete)),
+                ],
+              ));
+      if (confirmed != true) return;
+    }
     // ⭐ 2026-09-14 (출시전 감사 #14) - 여기서 먼저 'dismissOverlay'를 보내던 호출 제거. 울리는 중이면 deleteAlarm()이 Native 'stopRingingAlarm'으로 오버레이까지 닫음.
     // 먼저 보내면 오버레이가 울림을 끝낸 뒤라 삭제 이력이 'cancelled_before_ring'으로 잘못 남음.
-    await ref.read(alarmNotifierProvider.notifier).deleteAlarm(id, date);
+    final deletion =
+        await ref.read(alarmNotifierProvider.notifier).deleteAlarm(id, date);
 
     try {
       await platform.invokeMethod('cancelNotification');
@@ -76,9 +111,18 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.l10n.alarmCanceledToast),
+          content: Text(deletion.reservationFailed
+              ? (Localizations.localeOf(context).languageCode == 'ko'
+                  ? '원터치 알람은 삭제됐지만 고정 알람 예약에 실패했습니다. 다시 갱신합니다.'
+                  : 'One-tap alarm deleted, but fixed alarm scheduling failed. Refresh will retry.')
+              : deletion.fixedReplacement
+                  ? (Localizations.localeOf(context).languageCode == 'ko'
+                      ? '원터치 알람을 삭제하고 고정 알람을 예약했습니다.'
+                      : 'One-tap alarm deleted and fixed alarm scheduled.')
+                  : context.l10n.alarmCanceledToast),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
         ),
       );
     }
@@ -90,27 +134,27 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
 
     // ⭐ 2026-08-28 - 좌우 스와이프로 달력탭 이동하는 기능 제거(안 써서).
     return Scaffold(
-        // ⭐ 2026-08-25 - Colors.transparent → kAppWaveGradientFallback으로 변경.
-        // 화면이 불규칙하게 "하얗게 깜빡인다"는 재보고 - 원인은 위 _NextAlarmTabState의
-        // 중복 60초 전체 리빌드 타이머(제거함, initState 참고)로 보이지만, 그거랑
-        // 별개로 최소한의 안전장치를 걸어둠: Scaffold 배경이 투명이면 그 뒤 앱 루트의
-        // 흰 배경(main.dart)이 그대로 비치니, 무슨 이유로든 파도 배경이 그 프레임에
-        // 아직 안 그려진 경우 "하얀 화면"처럼 보일 수 있음. 파도 그라데이션과 톤이
-        // 비슷한 색을 기본값으로 깔아두면 최악의 경우에도 흰색이 아니라 비슷한
-        // 색만 살짝 비쳐서 훨씬 덜 튐.
-        backgroundColor: kAppWaveGradientFallback,
-        // ⭐ 2026-08-25 - 정적 그라데이션 대신 잠금화면/오버레이(WaveGradientView.kt)와
-        // 동일한 "각도가 계속 회전하는" 파도 애니메이션을 Flutter 쪽에도 이식.
-        // 네이티브는 커스텀 View.onDraw()에서 매 프레임 LinearGradient(Shader)를
-        // 다시 그리는 방식이지만, Flutter는 AnimationController + Alignment 회전으로
-        // 같은 효과를 냄(13초 주기, 대비를 높인 동일 팔레트 - kAppWaveGradientColors).
-        // SizedBox.expand로 명시적으로 꽉 채움 - 스크롤 콘텐츠가 화면보다 짧을 때
-        // 그 아래로 흰 배경(바깥 Scaffold 기본색)이 비쳐 보이던 문제 방지(광고
-        // 슬롯처럼 보였다는 피드백의 원인).
-        body: SizedBox.expand(
-          child: _WaveGradientBackground(
-            child: nextAlarmAsync.when(
-            loading: () => const SizedBox.shrink(),  // ⭐ 로딩 인디케이터 제거
+      // ⭐ 2026-08-25 - Colors.transparent → kAppWaveGradientFallback으로 변경.
+      // 화면이 불규칙하게 "하얗게 깜빡인다"는 재보고 - 원인은 위 _NextAlarmTabState의
+      // 중복 60초 전체 리빌드 타이머(제거함, initState 참고)로 보이지만, 그거랑
+      // 별개로 최소한의 안전장치를 걸어둠: Scaffold 배경이 투명이면 그 뒤 앱 루트의
+      // 흰 배경(main.dart)이 그대로 비치니, 무슨 이유로든 파도 배경이 그 프레임에
+      // 아직 안 그려진 경우 "하얀 화면"처럼 보일 수 있음. 파도 그라데이션과 톤이
+      // 비슷한 색을 기본값으로 깔아두면 최악의 경우에도 흰색이 아니라 비슷한
+      // 색만 살짝 비쳐서 훨씬 덜 튐.
+      backgroundColor: kAppWaveGradientFallback,
+      // ⭐ 2026-08-25 - 정적 그라데이션 대신 잠금화면/오버레이(WaveGradientView.kt)와
+      // 동일한 "각도가 계속 회전하는" 파도 애니메이션을 Flutter 쪽에도 이식.
+      // 네이티브는 커스텀 View.onDraw()에서 매 프레임 LinearGradient(Shader)를
+      // 다시 그리는 방식이지만, Flutter는 AnimationController + Alignment 회전으로
+      // 같은 효과를 냄(13초 주기, 대비를 높인 동일 팔레트 - kAppWaveGradientColors).
+      // SizedBox.expand로 명시적으로 꽉 채움 - 스크롤 콘텐츠가 화면보다 짧을 때
+      // 그 아래로 흰 배경(바깥 Scaffold 기본색)이 비쳐 보이던 문제 방지(광고
+      // 슬롯처럼 보였다는 피드백의 원인).
+      body: SizedBox.expand(
+        child: _WaveGradientBackground(
+          child: nextAlarmAsync.when(
+            loading: () => const SizedBox.shrink(), // ⭐ 로딩 인디케이터 제거
             error: (error, stack) => _buildEmptyState(),
             data: (nextAlarm) {
               if (nextAlarm == null) {
@@ -122,9 +166,9 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 onShowAllAlarms: () => _showAllAlarmsSheet(context),
               );
             },
-            ),
           ),
         ),
+      ),
     );
   }
 
@@ -207,7 +251,8 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 final colorScheme = Theme.of(context).colorScheme;
 
                 return Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -238,12 +283,15 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                       // 알람 목록
                       Expanded(
                         child: alarmsAsync.when(
-                          loading: () => Center(child: CircularProgressIndicator()),
-                          error: (_, __) => Center(child: Text(context.l10n.statusErrorOccurred)),
+                          loading: () =>
+                              Center(child: CircularProgressIndicator()),
+                          error: (_, __) => Center(
+                              child: Text(context.l10n.statusErrorOccurred)),
                           data: (alarms) {
                             final now = DateTime.now();
                             final futureAlarms = alarms
-                                .where((a) => a.date != null && a.date!.isAfter(now))
+                                .where((a) =>
+                                    a.date != null && a.date!.isAfter(now))
                                 .toList()
                               ..sort((a, b) => a.date!.compareTo(b.date!));
 
@@ -278,7 +326,8 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                                 // ⭐ 이 itemBuilder가 제공하는 자기 자신의 context를 씀
                                 // (바깥 State의 context가 아니라, 이 목록 항목 자체의
                                 // context - 항목이 화면에 남아있는 한 항상 유효함).
-                                return _buildAlarmListItem(itemContext, alarm, index == 0);
+                                return _buildAlarmListItem(
+                                    itemContext, alarm, index == 0);
                               },
                             );
                           },
@@ -308,17 +357,22 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
     // 시각적 변화(점 구분자)가 새로 생기는 회귀였음. 순수 숫자 M/d 표기는 두
     // 언어 다 같은 순서(월/일)라 로케일 분기 없이 고정 "8/15" 형식으로 통일함
     // (work_hours_settings_provider.dart의 periodRangeShort와 동일한 판단).
-    final dateStr = '${date.month}/${date.day} (${weekdayLabel(context, weekdayIndexOf(date))})';
-    final timeStr = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    final dateStr =
+        context.usesKoreanFeatures ? '${date.month}/${date.day} (${weekdayLabel(context, weekdayIndexOf(date))})' : DateFormat.MMMEd(Localizations.localeOf(context).toString()).format(date);
+    final timeStr =
+        '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 
     return Container(
       margin: EdgeInsets.only(bottom: 10.h),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       decoration: BoxDecoration(
-        color: isNext ? colorScheme.primary.withOpacity(0.1) : colorScheme.surface,
+        color:
+            isNext ? colorScheme.primary.withOpacity(0.1) : colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
-          color: isNext ? colorScheme.primary.withOpacity(0.3) : colorScheme.outline.withOpacity(0.3),
+          color: isNext
+              ? colorScheme.primary.withOpacity(0.3)
+              : colorScheme.outline.withOpacity(0.3),
           width: isNext ? 1.5 : 1,
         ),
       ),
@@ -328,7 +382,10 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
           Container(
             width: 75.w,
             child: Text(
-              dateStr,
+              [dateStr,
+                if (alarm.type == 'snoozed') context.l10n.alarmSnoozedLabel,
+                if (alarmClockLabel(context, date) case final String label) label,
+              ].join('\n'),
               style: TextStyle(
                 fontSize: 13.sp,
                 color: colorScheme.onSurfaceVariant,
@@ -351,13 +408,26 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
           ),
           SizedBox(width: 12.w),
 
+          // 좁은 창과 큰 글자에서는 근무명/알람 종류를 두 줄로 배치한다.
+          // 날짜와 시각의 고정 폭 뒤에 남은 공간만 사용해 목록 우측 넘침을 막는다.
+          Expanded(
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8.w,
+              runSpacing: 6.h,
+              children: [
           // 근무 타입
           // ⭐ 2026-09-23 (1.0.24 B) - 커스텀 알람은 근무명이 없으므로 "커스텀 알람"으로 표시
-          if (alarm.shiftType != null || alarm.type == 'custom')
+          if (alarm.shiftType != null ||
+              alarm.type == 'custom' ||
+              alarm.presetSlot != null)
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
               decoration: BoxDecoration(
-                color: isNext ? colorScheme.primary.withOpacity(0.2) : colorScheme.surfaceVariant,
+                color: isNext
+                    ? colorScheme.primary.withOpacity(0.2)
+                    : colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Text(
@@ -365,12 +435,12 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
-                  color: isNext ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                  color: isNext
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
-
-          Spacer(),
 
           // 알람 타입 표시 (소리/진동/무음)
           Container(
@@ -383,22 +453,30 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  alarm.alarmTypeId == 1 ? Icons.volume_up :
-                  alarm.alarmTypeId == 2 ? Icons.vibration :
-                  Icons.volume_off,
+                  alarm.alarmTypeId == 1
+                      ? Icons.volume_up
+                      : alarm.alarmTypeId == 2
+                          ? Icons.vibration
+                          : Icons.volume_off,
                   size: 14.sp,
                   color: isNext ? colorScheme.surface : colorScheme.onSurface,
                 ),
                 SizedBox(width: 5.w),
-                Text(
-                  alarm.alarmTypeId == 1 ? context.l10n.alarmSoundShort :
-                  alarm.alarmTypeId == 2 ? context.l10n.alarmVibration : context.l10n.alarmSilent,
+                Flexible(child: Text(
+                  alarm.alarmTypeId == 1
+                      ? context.l10n.alarmSoundShort
+                      : alarm.alarmTypeId == 2
+                          ? context.l10n.alarmVibration
+                          : context.l10n.alarmSilent,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                     color: isNext ? colorScheme.surface : colorScheme.onSurface,
                   ),
-                ),
+                )),
+              ],
+            ),
+          ),
               ],
             ),
           ),
@@ -420,7 +498,8 @@ class _AlarmDisplayWidget extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<_AlarmDisplayWidget> createState() => _AlarmDisplayWidgetState();
+  ConsumerState<_AlarmDisplayWidget> createState() =>
+      _AlarmDisplayWidgetState();
 }
 
 class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
@@ -483,7 +562,8 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     super.dispose();
   }
 
-  Map<String, dynamic> _getTimeUntilData(BuildContext context, DateTime alarmTime) {
+  Map<String, dynamic> _getTimeUntilData(
+      BuildContext context, DateTime alarmTime) {
     final now = DateTime.now();
     final diff = alarmTime.difference(now);
 
@@ -539,7 +619,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
       return context.l10n.commonTomorrow;
     } else {
       // ⭐ 위 _buildAlarmListItem과 동일한 이유로 고정 숫자 M/d 형식 사용.
-      return '${alarmDate.month}/${alarmDate.day} (${weekdayLabel(context, weekdayIndexOf(alarmDate))})';
+      return context.usesKoreanFeatures ? '${alarmDate.month}/${alarmDate.day} (${weekdayLabel(context, weekdayIndexOf(alarmDate))})' : DateFormat.MMMEd(Localizations.localeOf(context).toString()).format(alarmDate);
     }
   }
 
@@ -557,7 +637,12 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     }
 
     final timeData = _getTimeUntilData(context, alarm.date!);
-    final dateLabel = _getDateLabel(context, alarm.date!);
+    final statusLabel = [
+      if (alarm.type == 'snoozed') context.l10n.alarmSnoozedLabel,
+      if (alarmClockLabel(context, alarm.date!) case final String label) label,
+    ].join(' · ');
+    final dateLabel = [_getDateLabel(context, alarm.date!),
+      if (statusLabel.isNotEmpty) statusLabel].join('\n');
 
     // ⭐ 2026-08-25 4차 수정 - (1) 링 색은 "임박" 여부와 무관하게 항상
     // kAppRingAccent 고정(전엔 임박 시 tertiary(주황)로 바뀌게 했는데, 이건
@@ -568,8 +653,23 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
     final isImminent = timeData['isImminent'] as bool;
     final onCardColor = isImminent ? colorScheme.tertiary : kAppChipBorder;
     const typeIds = [1, 2, 3];
-    final typeIcons = [Icons.volume_up_rounded, Icons.vibration_rounded, Icons.notifications_off_rounded];
-    final typeLabels = [context.l10n.alarmSoundVibration, context.l10n.alarmVibration, context.l10n.alarmSilent];
+    final typeIcons = [
+      Icons.volume_up_rounded,
+      Icons.vibration_rounded,
+      Icons.notifications_off_rounded
+    ];
+    final typeLabels = [
+      context.l10n.alarmSoundVibration,
+      context.l10n.alarmVibration,
+      context.l10n.alarmSilent
+    ];
+    final layout = AppLayout.of(context);
+    final ringSize = layout.isWide
+        ? math.min(layout.isSquare ? 360.0 : 300.0,
+            (layout.window.width - 80) * (layout.isSquare ? 0.5 : 4 / 9))
+        : layout.isShortCover
+            ? 190.w
+            : 238.w;
 
     return SafeArea(
       // ⭐ 2026-08-25 3차 수정 - ScrollConfiguration(overscroll:false)로 Material3
@@ -583,183 +683,296 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
       // 그대로 정상 스크롤되게 함 - 안전장치는 유지.
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(overscroll: false),
-        child: SingleChildScrollView(
-        physics: const _NoTinyOverflowScrollPhysics(),
-        padding: EdgeInsets.fromLTRB(24.w, 32.h, 24.w, 28.h),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Text(context.l10n.alarmUpNext, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700, color: kAppChipBorder)),
-              ],
-            ),
-            SizedBox(height: 24.h),
-
-            // ⭐ "UI 테마" 탭에서 확정한 카운트다운 링. 알람 12시간 전부터
-            // 채워지기 시작해서 알람 시각에 근접함(=임박 표시). 알람이 실제로
-            // 울리기 전에는 절대 100%로 보이지 않도록 최대 96%까지만 채움
-            // (_CountdownRing 참고 - 12시간짜리 창의 마지막 1분은 수학적으로도
-            // 99.86%라 육안으로는 꽉 찬 것처럼 보였던 문제 수정). 화면을 보고
-            // 있는 동안 15초 간격으로 계속 조금씩 움직이고, 탭을 나갔다
-            // 들어와도 리셋되지 않음(progress는 항상 "지금 vs 알람 시각"의
-            // 순수 계산값이라 위젯이 언제 새로 만들어졌는지와 무관).
-            SizedBox(
-              width: 238.w,
-              height: 238.w,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  _CountdownRing(
-                    size: 238.w,
-                    strokeWidth: 14.w,
-                    alarmTime: alarm.date!,
-                    color: kAppRingAccent,
-                    trackColor: kAppChipBorder.withOpacity(0.15),
-                  ),
-                  Container(
-                    width: 188.w,
-                    height: 188.w,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.18), blurRadius: 14, offset: const Offset(0, 6))],
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+        child: LayoutBuilder(
+            builder: (context, viewport) => AdaptiveHeroViewport(
+                  physics: const _NoTinyOverflowScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(
+                      24.w,
+                      AppLayout.of(context).isShortCover ? 12.h : 32.h,
+                      24.w,
+                      28.h),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                        minHeight: layout.isWide
+                            ? math.max(0, viewport.maxHeight - 60.h)
+                            : 0),
+                    child: AdaptiveHeroLayout(
+                      splitIndex: (alarm.shiftType != null ||
+                              alarm.type == 'custom' ||
+                              alarm.presetSlot != null)
+                          ? 6
+                          : 5,
                       children: [
-                        Container(
-                          padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 4.h),
-                          decoration: BoxDecoration(color: colorScheme.primary.withOpacity(0.12), borderRadius: BorderRadius.circular(20.r)),
-                          child: Text(dateLabel, style: TextStyle(fontSize: 12.sp, color: colorScheme.primary, fontWeight: FontWeight.w700)),
+                        Row(
+                          children: [
+                            Text(context.l10n.alarmUpNext,
+                                style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: kAppChipBorder)),
+                          ],
                         ),
-                        SizedBox(height: 7.h),
-                        Text(timeStr, style: TextStyle(fontSize: 33.sp, fontWeight: FontWeight.w800, color: colorScheme.primary)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+                        SizedBox(height: 24.h),
 
-            SizedBox(height: 16.h),
-
-            if (alarm.shiftType != null || alarm.type == 'custom')
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
-                child: Text(alarm.shiftType ?? context.l10n.customAlarmLabel, style: TextStyle(fontSize: 14.sp, color: kAppChipBorder, fontWeight: FontWeight.w600)),
-              ),
-
-            SizedBox(height: 28.h),
-
-            IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // 남은 시간 카드
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.all(16.w),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.timer_outlined, size: 21.sp, color: onCardColor),
-                          SizedBox(height: 9.h),
-                          Text(context.l10n.alarmUntil, style: TextStyle(fontSize: 11.sp, color: kAppChipBorder.withOpacity(0.6))),
-                          SizedBox(height: 2.h),
-                          Text(timeData['text'] as String, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w800, color: onCardColor)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 14.w),
-                  // 알람 타입 선택 카드
-                  Expanded(
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 14.h),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(3, (i) {
-                          final selected = alarm.alarmTypeId == typeIds[i];
-                          return Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4.h),
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () => _onTypeSelected(alarm.id!, typeIds[i]),
-                              child: Row(
+                        // ⭐ "UI 테마" 탭에서 확정한 카운트다운 링. 알람 12시간 전부터
+                        // 채워지기 시작해서 알람 시각에 근접함(=임박 표시). 알람이 실제로
+                        // 울리기 전에는 절대 100%로 보이지 않도록 최대 96%까지만 채움
+                        // (_CountdownRing 참고 - 12시간짜리 창의 마지막 1분은 수학적으로도
+                        // 99.86%라 육안으로는 꽉 찬 것처럼 보였던 문제 수정). 화면을 보고
+                        // 있는 동안 15초 간격으로 계속 조금씩 움직이고, 탭을 나갔다
+                        // 들어와도 리셋되지 않음(progress는 항상 "지금 vs 알람 시각"의
+                        // 순수 계산값이라 위젯이 언제 새로 만들어졌는지와 무관).
+                        SizedBox(
+                            width: ringSize,
+                            height: ringSize,
+                            child: FittedBox(
+                                child: SizedBox(
+                              width: 238.w,
+                              height: 238.w,
+                              child: Stack(
+                                alignment: Alignment.center,
                                 children: [
-                                  Container(
-                                    width: 26.w,
-                                    height: 26.w,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(color: selected ? colorScheme.primary : Colors.transparent, shape: BoxShape.circle),
-                                    child: Icon(typeIcons[i], size: 14.sp, color: selected ? Colors.white : kAppChipBorder.withOpacity(0.4)),
+                                  _CountdownRing(
+                                    size: 238.w,
+                                    strokeWidth: 14.w,
+                                    alarmTime: alarm.date!,
+                                    color: kAppRingAccent,
+                                    trackColor:
+                                        kAppChipBorder.withOpacity(0.15),
                                   ),
-                                  SizedBox(width: 7.w),
-                                  Expanded(
-                                    child: Text(
-                                      typeLabels[i],
-                                      style: TextStyle(fontSize: 11.sp, color: kAppChipBorder.withOpacity(selected ? 0.9 : 0.5), fontWeight: selected ? FontWeight.w700 : FontWeight.w400),
+                                  Container(
+                                    width: 188.w,
+                                    height: 188.w,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.18),
+                                            blurRadius: 14,
+                                            offset: const Offset(0, 6))
+                                      ],
                                     ),
+                                    child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 11.w,
+                                                  vertical: 4.h),
+                                              decoration: BoxDecoration(
+                                                  color: colorScheme.primary
+                                                      .withOpacity(0.12),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          20.r)),
+                                              child: Text(dateLabel, textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                      fontSize: 12.sp,
+                                                      color:
+                                                          colorScheme.primary,
+                                                      fontWeight:
+                                                          FontWeight.w700)),
+                                            ),
+                                            SizedBox(height: 7.h),
+                                            Text(timeStr,
+                                                style: TextStyle(
+                                                    fontSize: 33.sp,
+                                                    fontWeight: FontWeight.w800,
+                                                    color:
+                                                        colorScheme.primary)),
+                                          ],
+                                        )),
                                   ),
                                 ],
                               ),
+                            ))),
+
+                        SizedBox(height: 16.h),
+
+                        if (alarm.shiftType != null ||
+                            alarm.type == 'custom' ||
+                            alarm.presetSlot != null)
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 14.w, vertical: 6.h),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20.r)),
+                            child: Text(
+                                alarm.shiftType ??
+                                    context.l10n.customAlarmLabel,
+                                style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: kAppChipBorder,
+                                    fontWeight: FontWeight.w600)),
+                          ),
+
+                        SizedBox(height: 28.h),
+
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // 남은 시간 카드
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.all(16.w),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                          BorderRadius.circular(20.r)),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.timer_outlined,
+                                          size: 21.sp, color: onCardColor),
+                                      SizedBox(height: 9.h),
+                                      Text(context.l10n.alarmUntil,
+                                          style: TextStyle(
+                                              fontSize: 11.sp,
+                                              color: kAppChipBorder
+                                                  .withOpacity(0.6))),
+                                      SizedBox(height: 2.h),
+                                      Wrap(
+                                        spacing: 4.w,
+                                        children: (timeData['text'] as String)
+                                            .split(' ')
+                                            .map((part) => Text(part,
+                                                style: TextStyle(
+                                                    fontSize: 15.sp,
+                                                    fontWeight: FontWeight.w800,
+                                                    color: onCardColor)))
+                                            .toList(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 14.w),
+                              // 알람 타입 선택 카드
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w, vertical: 14.h),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                          BorderRadius.circular(20.r)),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: List.generate(3, (i) {
+                                      final selected =
+                                          alarm.alarmTypeId == typeIds[i];
+                                      return Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 4.h),
+                                        child: GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTap: () => _onTypeSelected(
+                                              alarm.id!, typeIds[i]),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                width: 26.w,
+                                                height: 26.w,
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                    color: selected
+                                                        ? colorScheme.primary
+                                                        : Colors.transparent,
+                                                    shape: BoxShape.circle),
+                                                child: Icon(typeIcons[i],
+                                                    size: 14.sp,
+                                                    color: selected
+                                                        ? Colors.white
+                                                        : kAppChipBorder
+                                                            .withOpacity(0.4)),
+                                              ),
+                                              SizedBox(width: 7.w),
+                                              Expanded(
+                                                child: Text(
+                                                  typeLabels[i],
+                                                  style: TextStyle(
+                                                      fontSize: 11.sp,
+                                                      color: kAppChipBorder
+                                                          .withOpacity(selected
+                                                              ? 0.9
+                                                              : 0.5),
+                                                      fontWeight: selected
+                                                          ? FontWeight.w700
+                                                          : FontWeight.w400),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 26.h),
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: AppThirdButton(
+                            onPressed: widget.onShowAllAlarms,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.list_rounded, size: 18),
+                                SizedBox(width: 7.w),
+                                Flexible(
+                                  child: Text(context.l10n.alarmViewAllRegistered,
+                                      textAlign: TextAlign.center),
+                                ),
+                              ],
                             ),
-                          );
-                        }),
-                      ),
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        SizedBox(
+                          width: double.infinity,
+                          child: AppSecondButton(
+                            variant: AppSecondButtonVariant.danger,
+                            onPressed: widget.onDismiss,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.alarm_off_rounded, size: 18),
+                                SizedBox(width: 7.w),
+                                Flexible(
+                                  child: Text(context.l10n.alarmTurnOffThis,
+                                      textAlign: TextAlign.center),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 26.h),
-
-            SizedBox(
-              width: double.infinity,
-              child: AppThirdButton(
-                onPressed: widget.onShowAllAlarms,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.list_rounded, size: 18),
-                    SizedBox(width: 7.w),
-                    Text(context.l10n.alarmViewAllRegistered),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: 12.h),
-            SizedBox(
-              width: double.infinity,
-              child: AppSecondButton(
-                variant: AppSecondButtonVariant.danger,
-                onPressed: widget.onDismiss,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.alarm_off_rounded, size: 18),
-                    SizedBox(width: 7.w),
-                    Text(context.l10n.alarmTurnOffThis),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        ),
+                )),
       ),
     );
   }
 
   Future<void> _onTypeSelected(int alarmId, int typeId) async {
     if (!mounted) return;
-    await ref.read(alarmNotifierProvider.notifier).updateAlarmType(alarmId, typeId);
+    await ref
+        .read(alarmNotifierProvider.notifier)
+        .updateAlarmType(alarmId, typeId);
     if (!mounted) return;
   }
 
@@ -780,7 +993,12 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 /// 간격도 눈으로는 완전히 매끄럽게 보이고, 화면이 켜져 있는 몇 시간 내내
 /// 매 프레임(60fps)을 다시 그리는 것보다 배터리 부담이 훨씬 적음.
 class _CountdownRing extends StatefulWidget {
-  const _CountdownRing({required this.size, required this.strokeWidth, required this.alarmTime, required this.color, required this.trackColor});
+  const _CountdownRing(
+      {required this.size,
+      required this.strokeWidth,
+      required this.alarmTime,
+      required this.color,
+      required this.trackColor});
 
   final double size;
   final double strokeWidth;
@@ -834,13 +1052,21 @@ class _CountdownRingState extends State<_CountdownRing> {
   Widget build(BuildContext context) {
     return CustomPaint(
       size: Size(widget.size, widget.size),
-      painter: _RingPainter(progress: _progress, color: widget.color, trackColor: widget.trackColor, strokeWidth: widget.strokeWidth),
+      painter: _RingPainter(
+          progress: _progress,
+          color: widget.color,
+          trackColor: widget.trackColor,
+          strokeWidth: widget.strokeWidth),
     );
   }
 }
 
 class _RingPainter extends CustomPainter {
-  _RingPainter({required this.progress, required this.color, required this.trackColor, required this.strokeWidth});
+  _RingPainter(
+      {required this.progress,
+      required this.color,
+      required this.trackColor,
+      required this.strokeWidth});
 
   final double progress; // 0..1
   final Color color;
@@ -866,11 +1092,15 @@ class _RingPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
     final sweep = 2 * math.pi * progress;
     // -pi/2 = 12시 방향에서 시작, 시계 방향으로 sweep만큼 채움.
-    canvas.drawArc(Rect.fromCircle(center: center, radius: radius), -math.pi / 2, sweep, false, fillPaint);
+    canvas.drawArc(Rect.fromCircle(center: center, radius: radius),
+        -math.pi / 2, sweep, false, fillPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _RingPainter oldDelegate) => oldDelegate.progress != progress || oldDelegate.color != color || oldDelegate.trackColor != trackColor;
+  bool shouldRepaint(covariant _RingPainter oldDelegate) =>
+      oldDelegate.progress != progress ||
+      oldDelegate.color != color ||
+      oldDelegate.trackColor != trackColor;
 }
 
 // ⭐ 2026-08-25 추가 - 잠금화면/오버레이(WaveGradientView.kt)와 같은 "각도가
@@ -886,10 +1116,12 @@ class _WaveGradientBackground extends StatefulWidget {
   const _WaveGradientBackground({required this.child});
 
   @override
-  State<_WaveGradientBackground> createState() => _WaveGradientBackgroundState();
+  State<_WaveGradientBackground> createState() =>
+      _WaveGradientBackgroundState();
 }
 
-class _WaveGradientBackgroundState extends State<_WaveGradientBackground> with SingleTickerProviderStateMixin {
+class _WaveGradientBackgroundState extends State<_WaveGradientBackground>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override
@@ -897,7 +1129,9 @@ class _WaveGradientBackgroundState extends State<_WaveGradientBackground> with S
     super.initState();
     // 네이티브(WaveGradientView.kt)와 동일한 8초 회전 주기(2026-09-13 - "조금
     // 더 빠르게" 피드백으로 13초 → 8초, 둘 다 같이 바꿈).
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 8))..repeat();
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 8))
+          ..repeat();
   }
 
   @override

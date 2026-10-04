@@ -110,4 +110,31 @@ void main() {
     expect(await rowCount('alarm_history'), 0);
     expect(await rowCount('alarm_creation_log'), 0);
   });
+
+  test('먼저 저장한 원터치 시각에는 고정 알람을 생성하지 않는다', () async {
+    final now = DateTime(2026, 9, 23, 6);
+    final ringAt = DateTime(2026, 9, 23, 7);
+    await db.insert('shift_alarm_templates', {
+      'shift_type': 'DAY', 'time': '07:00', 'alarm_type_id': 1, 'day_offset': 0,
+    });
+    final customId = await db.insert('alarms', {
+      'time': '07:00', 'date': ringAt.toIso8601String(), 'type': 'custom',
+      'alarm_type_id': 1, 'shift_type': null, 'day_offset': 0,
+    });
+    final staleFixedId = await db.insert('alarms', {
+      'time': '07:00', 'date': ringAt.toIso8601String(), 'type': 'fixed',
+      'alarm_type_id': 1, 'shift_type': 'DAY', 'day_offset': 0,
+    });
+    final schedule = ShiftSchedule(
+      isRegular: false, shiftTypes: const ['DAY'],
+      assignedDates: const {'2026-09-23': 'DAY'},
+    );
+    final result = await db.transaction((txn) => regenerateFixedAlarmsForDatesTxn(
+      txn: txn, schedule: schedule, dates: {DateTime(2026, 9, 23)}, nowOverride: now,
+    ));
+    expect(result.skippedByCustom, 1);
+    expect(result.cancelIds, [staleFixedId]);
+    expect(result.scheduled, isEmpty);
+    expect((await db.query('alarms')).single['id'], customId);
+  });
 }

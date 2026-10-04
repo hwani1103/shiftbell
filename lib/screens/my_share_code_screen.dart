@@ -1,3 +1,4 @@
+import '../widgets/adaptive_layout.dart';
 // screens/my_share_code_screen.dart
 //
 // ⭐ "내 근무표 공유하기" - 친구공유 v1(Firestore). 예전엔 코드를 누를 때마다 그 순간의
@@ -280,7 +281,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: Text(context.l10n.friendShareMyScheduleTitle, style: TextStyle(fontSize: 18.sp))),
-      body: _loading
+      body: AdaptiveFormBody(child: _loading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: EdgeInsets.all(20.w),
@@ -404,7 +405,7 @@ class _MyShareCodeScreenState extends ConsumerState<MyShareCodeScreen> {
                   ],
                 ],
               ),
-            ),
+            )),
     );
   }
 }
@@ -435,7 +436,11 @@ class _CopyBox extends StatelessWidget {
           ),
         ),
         SizedBox(width: 8.w),
-        IconButton(onPressed: onCopy, icon: Icon(Icons.copy, size: 18.sp)),
+        IconButton(
+          tooltip: context.l10n.commonCopy,
+          onPressed: onCopy,
+          icon: Icon(Icons.copy, size: 18.sp),
+        ),
       ],
     );
   }

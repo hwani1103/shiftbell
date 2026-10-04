@@ -1,3 +1,4 @@
+import '../widgets/adaptive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,7 +82,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
     final isKorean = Localizations.localeOf(context).languageCode == 'ko';
     final weekday = weekdayLabel(context, weekdayIndexOf(date));
     if (isKorean) return '${date.month}월 ${date.day}일 ($weekday)';
-    return '${DateFormat.MMMd('en').format(date)} ($weekday)';
+    return '${DateFormat.MMMd(Localizations.localeOf(context).toString()).format(date)} ($weekday)';
   }
 
   @override
@@ -104,7 +105,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
         title: Text(context.l10n.calendarMemoAll, style: TextStyle(fontSize: 18.sp)),
         elevation: 0,
       ),
-      body: Column(
+      body: AdaptiveFormBody(child: Column(
         children: [
           _buildSearchHeader(context, colorScheme, totalCount, matchedCount),
           Expanded(
@@ -137,7 +138,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
                   ),
           ),
         ],
-      ),
+      )),
     );
   }
 

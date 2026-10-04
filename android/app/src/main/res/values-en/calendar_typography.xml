@@ -1,0 +1,9 @@
+<resources>
+    <style name="CalendarWidgetShiftLabel">
+        <item name="android:autoSizeTextType">uniform</item>
+        <item name="android:autoSizeMinTextSize">8sp</item>
+        <item name="android:autoSizeMaxTextSize">9sp</item>
+        <item name="android:autoSizeStepGranularity">0.5sp</item>
+    </style>
+    <dimen name="calendar_widget_weekday_size">10sp</dimen>
+</resources>

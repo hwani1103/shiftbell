@@ -6,7 +6,6 @@ import '../models/shift_schedule.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
 import '../services/alarm_generation_service.dart';
-import 'package:flutter/services.dart';
 import '../constants/platform_channel.dart';
 import '../services/widget_refresh_service.dart';
 import '../services/friend_sync_service.dart';
@@ -211,15 +210,15 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
 
   Future<void> resetSchedule() async {
     try {
-      // 1. 모든 알람 가져오기
-      final alarms = await DatabaseService.instance.getAllAlarms();
-
-      // 2. Native 알람 모두 취소
-      for (var alarm in alarms) {
-        if (alarm.id != null) {
-          await AlarmService().cancelAlarm(alarm.id!);
-          print('✅ Native 알람 취소: DB ID ${alarm.id}');
-        }
+      // Delete rows/templates atomically before Native cancelIfGone checks them.
+      final removedIds = await DatabaseService.instance.deleteAllAlarms(
+        clearTemplates: true,
+        resetSchedule: true,
+      );
+      for (final id in removedIds) {
+        await kAlarmChannel.invokeMethod<bool>('stopRingingAlarm', {'alarmId': id});
+        await AlarmService().cancelAlarm(id);
+        print('✅ Native 알람 취소: DB ID $id');
       }
 
       // 3. 모든 Notification 삭제
@@ -247,19 +246,10 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
         print('⚠️ AlarmGuardReceiver 취소 실패: $e');
       }
 
-      // 5. DB 삭제 (알람은 이력 기록 후 삭제)
-      await DatabaseService.instance.deleteAllAlarms();
-
       // 5-1. ⭐ "초기화" 버튼을 누른 경우에 한해서만 이력/생성로그도 함께 삭제.
       // (다른 모든 삭제 경로는 이력을 영구 보존하지만, 스케줄 자체를 완전히
       // 새로 시작하는 이 경우는 예외 - 이전 근무 패턴의 이력이 남아있으면 혼란스러움)
-      await DatabaseService.instance.resetAllAlarmHistoryAndLog();
-
-      final db = await DatabaseService.instance.database;
-      await db.delete('shift_schedule');
-      await db.delete('shift_alarm_templates');
-      // ⭐ 2026-09-14 (#31) - 근무표·템플릿을 모두 지우는 초기화이므로 개별 알람 예외도 함께 삭제
-      await db.delete('alarm_overrides');
+      // Schedule, roster, overrides and history were reset in the same DB commit.
 
       state = const AsyncValue.data(null);
       _notifyScheduleChanged();

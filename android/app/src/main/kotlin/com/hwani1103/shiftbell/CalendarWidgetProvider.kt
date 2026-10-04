@@ -149,8 +149,10 @@ class CalendarWidgetProvider : AppWidgetProvider() {
             val headerIds = intArrayOf(R.id.hdr_0, R.id.hdr_1, R.id.hdr_2, R.id.hdr_3, R.id.hdr_4, R.id.hdr_5, R.id.hdr_6)
             // 2026-09-22 - 로케일별 리소스(values/values-en)에서 읽음(예전 하드코딩 한글 배열은 영어에서도 한글로 보였음)
             val weekdayLabels = context.resources.getStringArray(R.array.widget_weekday_labels)
+            val firstWeekday = ReleaseLocalePolicy.firstDayOfWeek(context)
+            val firstColumn = firstWeekday - Calendar.SUNDAY
             for (c in 0..6) {
-                views.setTextViewText(headerIds[c], weekdayLabels[c])
+                views.setTextViewText(headerIds[c], weekdayLabels[(c + firstColumn) % 7])
                 views.setTextColor(headerIds[c], headerTextColor)
             }
 
@@ -164,10 +166,10 @@ class CalendarWidgetProvider : AppWidgetProvider() {
             // 대신 Calendar.DAY_OF_WEEK(일=1~토=7)를 쓰지만 "일요일까지 며칠 전인지"는 동일함).
             val windowStart = if (isLarge) {
                 val firstOfMonth = (today.clone() as Calendar).apply { set(Calendar.DAY_OF_MONTH, 1) }
-                val daysFromSunday = firstOfMonth.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
+                val daysFromSunday = (firstOfMonth.get(Calendar.DAY_OF_WEEK) - firstWeekday + 7) % 7
                 (firstOfMonth.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, -daysFromSunday) }
             } else {
-                val daysSinceSunday = today.get(Calendar.DAY_OF_WEEK) - Calendar.SUNDAY
+                val daysSinceSunday = (today.get(Calendar.DAY_OF_WEEK) - firstWeekday + 7) % 7
                 (today.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, -daysSinceSunday - 7) }
             }
             val windowEnd = (windowStart.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, rowCount * 7 - 1) }
@@ -274,10 +276,9 @@ class CalendarWidgetProvider : AppWidgetProvider() {
                 for (c in 0..6) {
                     val cal = (windowStart.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, r * 7 + c) }
                     val isToday = isSameDay(cal, today)
-                    val isSunday = c == 0  // 항상 0열 = 일요일 (창이 항상 일요일부터 시작)
                     // ⭐ 일요일이 아니어도 공휴일이면 숫자가 빨간색이어야 함 (예: 공휴일인 금요일).
                     // 달력탭처럼 이름 텍스트까지는 안 보여줘도, 숫자 색만큼은 반영함.
-                    val isRedDay = isSunday || CalendarWidgetHolidays.isHoliday(cal, holidayOverrides)
+                    val isRedDay = ReleaseLocalePolicy.isCalendarRedDay(context, cal, holidayOverrides)
                     // ⭐ 위젯엔 달력탭 같은 "보고 있는 달" 개념이 없어서, 실제 오늘이 속한
                     // 달을 기준으로 "이번 달이 아닌 날짜"(전주/다음주가 다른 달로 걸치는 경우)를 판단
                     val isOutsideMonth = !isSameMonth(cal, today)
@@ -298,7 +299,8 @@ class CalendarWidgetProvider : AppWidgetProvider() {
                     if (hasShift) {
                         val bitmap = pillBitmapCache.getOrPut(pillColor) { roundedPillBitmap(pillColor) }
                         views.setImageViewBitmap(cellPillBgIds[r][c], bitmap)
-                        views.setTextViewText(cellPillIds[r][c], shiftType)
+                        views.setTextViewText(cellPillIds[r][c],
+                            if (shiftType == "없음") context.getString(R.string.widget_no_shift) else shiftType)
                         views.setTextColor(cellPillIds[r][c], pillTextColorFor(pillColor))
                     } else {
                         views.setImageViewResource(cellPillBgIds[r][c], 0)  // ⭐ 배경 비움 (미설정인 날)

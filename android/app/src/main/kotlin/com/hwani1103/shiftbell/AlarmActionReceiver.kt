@@ -73,7 +73,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 AlarmPlayer.getInstance(context).stopAlarm()
                 AlarmActionHelper.closeRingUi(context, alarmId)
                 val result = AlarmActionHelper.snooze(context, alarmId)
-                if (result != null) {
+                if (result != null && result.collisionMessage == null) {
                     NotificationHelper.showUpdatedNotification(context, result.newTimeStr, result.shiftType)
                 } else {
                     Log.e("AlarmAction", "❌ 알림에서 스누즈 실패(알람 정보 없음): ID=$alarmId")

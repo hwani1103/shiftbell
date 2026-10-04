@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- ⭐ 실제 수면 기록 위젯 전용 토글 버튼 배경. 색은 app_colors.dart kAppMainAccent와
      동일값(0xFF4662D6)으로 맞춤 - 앱 본체와 같은 톤. -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <solid android:color="#FF4662D6"/>
-    <!-- 2026-09-22 - 알약 모양(반지름이 높이의 절반을 넘으면 안드로이드가 알아서 절반으로 자른다) -->
-    <corners android:radius="20dp"/>
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Keep the label and touch bounds; inset only the visible button. -->
+    <item android:left="2dp" android:right="2dp"
+        android:top="3dp" android:bottom="3dp">
+        <shape android:shape="rectangle">
+            <solid android:color="#FF4662D6"/>
+            <corners android:radius="20dp"/>
+        </shape>
+    </item>
+</layer-list>

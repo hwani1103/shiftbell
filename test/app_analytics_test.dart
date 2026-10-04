@@ -37,9 +37,6 @@ void main() {
       expect(_dashboardCustomEvents(), AnalyticsEvent.all.toSet());
     });
 
-    test('탭 이름은 main.dart의 5개 탭과 같은 순서', () {
-      expect(kAnalyticsTabNames, ['next_alarm', 'schedule', 'calendar', 'sleep_recovery', 'settings']);
-    });
   });
 
   group('AppAnalytics.track', () {

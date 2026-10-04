@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 // 출시전 감사 G1 #11 / #12 / #28 (docs/release_audit/g1/handoff.md)
 //  - #11 근무명 입력 검증(쉼표·예약어·빈 이름·길이·중복), 저장된 값은 D6 로그용 탐지만
 //  - #12 근무명 맞바꾸기·순환 rename이 참조를 섞지 않음(2단계), 형식 오류·최종 중복 거부, 중간 실패 롤백
@@ -15,11 +16,20 @@ import '../g0/g0_support.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
 
   group('#11 validateShiftName', () {
     test('정상 이름', () => expect(validateShiftName('주간', otherNames: ['야간']), isNull));
     test('빈 이름', () => expect(validateShiftName('   '), ShiftNameIssue.empty));
-    test('길이 초과', () => expect(validateShiftName('12345678901'), ShiftNameIssue.tooLong));
+    test('real shift names and 16 character boundary', () {
+      for (final name in ['Night Shift', 'Afternoon Shift',
+        'Twilight Shift', 'Sleepover Shift',
+        '1234567890123456']) {
+        expect(validateShiftName(name), isNull, reason: name);
+      }
+      expect(validateShiftName('12345678901234567'), ShiftNameIssue.tooLong);
+      expect(validateShiftName('Permanent Night Shift'), ShiftNameIssue.tooLong);
+    });
     test('쉼표', () => expect(validateShiftName('주,간'), ShiftNameIssue.comma));
     test('예약어 미설정', () => expect(validateShiftName('미설정'), ShiftNameIssue.reserved));
     test('예약어 없음', () => expect(validateShiftName(' 없음 '), ShiftNameIssue.reserved));
@@ -233,4 +243,56 @@ void main() {
       expect(await times(), isEmpty);
     });
   });
+  group('shift catalog edits', () {
+    test('unused removal and addition persist even without a rename', () async {
+      await saveSchedule(['A', 'Unused']);
+      final before = (await service.getShiftSchedule())!;
+      final after = ShiftSchedule(id: before.id, isRegular: false,
+        shiftTypes: ['A', 'Extra'], assignedDates: {});
+      await service.renameShiftAtomic(renamedShifts: {}, newSchedule: after,
+        expectedSchedule: before, deletedShifts: {'Unused'});
+      expect((await service.getShiftSchedule())!.shiftTypes, ['A', 'Extra']);
+    });
+    for (final use in ['pattern', 'assigned', 'history', 'template']) {
+      test('cannot delete a shift used by $use; transaction leaves schedule intact', () async {
+        await service.saveShiftSchedule(ShiftSchedule(isRegular: use == 'pattern',
+          shiftTypes: ['A', 'Leave'], pattern: use == 'pattern' ? ['Leave'] : null,
+          assignedDates: use == 'assigned' ? {'2020-01-01':'Leave'} : {}));
+        if (use == 'history' || use == 'template') {
+          await seedReferences(['Leave']);
+          for (final table in ['alarms', 'shift_alarm_templates', 'alarm_history',
+            'alarm_creation_log', 'alarm_overrides', 'condition_shift_times']) {
+            if (table != (use == 'history' ? 'alarm_history' : 'shift_alarm_templates')) await db.delete(table);
+          }
+        }
+        final before = (await service.getShiftSchedule())!;
+        expect(await service.referencedShiftNames(before), contains('Leave'));
+        await expectLater(service.renameShiftAtomic(renamedShifts: {},
+          newSchedule: ShiftSchedule(id: before.id, isRegular: false, shiftTypes: ['A']),
+          expectedSchedule: before, deletedShifts: {'Leave'}), throwsStateError);
+        expect((await service.getShiftSchedule())!.shiftTypes, ['A','Leave']);
+      });
+    }
+    test('stale editor cannot overwrite a new assignment', () async {
+      await saveSchedule(['A', 'Leave']);
+      final before = (await service.getShiftSchedule())!;
+      await db.update('shift_schedule', {'assigned_dates':'{"2026-10-01":"Leave"}'});
+      await expectLater(service.renameShiftAtomic(renamedShifts: {},
+        newSchedule: ShiftSchedule(id: before.id, isRegular: false, shiftTypes: ['A']),
+        expectedSchedule: before, deletedShifts: {'Leave'}), throwsStateError);
+      expect((await service.getShiftSchedule())!.assignedDates!.values, contains('Leave'));
+    });
+    test('thirteenth shift allowed, fourteenth rejected', () async {
+      await saveSchedule(List.generate(12, (i) => 'S$i'));
+      var before = (await service.getShiftSchedule())!;
+      await service.renameShiftAtomic(renamedShifts: {}, expectedSchedule: before,
+        newSchedule: ShiftSchedule(id: before.id, isRegular: false,
+          shiftTypes: [...before.shiftTypes, 'S12']));
+      before = (await service.getShiftSchedule())!;
+      await expectLater(service.renameShiftAtomic(renamedShifts: {}, expectedSchedule: before,
+        newSchedule: ShiftSchedule(id: before.id, isRegular: false,
+          shiftTypes: [...before.shiftTypes, 'S13'])), throwsArgumentError);
+    });
+  });
+
 }

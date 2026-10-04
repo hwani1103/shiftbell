@@ -38,6 +38,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_colors.dart';
+import 'shift_label_layout.dart';
 
 class AppShiftChip extends StatelessWidget {
   const AppShiftChip({
@@ -49,6 +50,9 @@ class AppShiftChip extends StatelessWidget {
     this.selected = false,
     this.dense = false,
     this.strongSelected = false,
+    this.cellColor,
+    this.cellTextStyle,
+    this.wrapLabel = false,
   });
 
   final String label;
@@ -74,6 +78,12 @@ class AppShiftChip extends StatelessWidget {
   /// 설정의 교대 패턴처럼 선택 상태가 설명 문구 없이도 즉시 보여야 하는 곳에서
   /// 사용한다. 기본값은 기존 selected 디자인을 유지한다.
   final bool strongSelected;
+
+  /// A bounded timetable cell uses the same silhouette with its shift color.
+  final Color? cellColor;
+  final TextStyle? cellTextStyle;
+  /// Only the horizontally scrolling full timetable opts into two lines.
+  final bool wrapLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -106,14 +116,18 @@ class AppShiftChip extends StatelessWidget {
     }
 
     final chipBody = Container(
-      padding: dense
-          ? EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h)
-          : EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
+      padding: cellTextStyle != null
+          ? const EdgeInsets.all(3)
+          : dense
+              ? EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h)
+              : EdgeInsets.symmetric(horizontal: 16.w, vertical: 5.h),
       decoration: BoxDecoration(
-        color: fillColor,
+        color: cellColor ?? fillColor,
         borderRadius: BorderRadius.circular(radius),
         // ⭐ 두꺼운 테두리 - 이 앱의 칩을 다른 앱과 구분 짓는 특색으로 삼기로 함.
-        border: Border.all(color: borderColor, width: borderWidth),
+        border: Border.all(
+            color: cellColor?.withValues(alpha: 0.8) ?? borderColor,
+            width: borderWidth),
         boxShadow: selected && strongSelected
             ? [
                 BoxShadow(
@@ -124,14 +138,23 @@ class AppShiftChip extends StatelessWidget {
               ]
             : null,
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: dense ? 12.sp : 14.sp,
-          fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-          color: textColor,
-        ),
-      ),
+      child: cellTextStyle != null
+          ? (wrapLabel
+              ? ShiftLabel(label: label, style: cellTextStyle!)
+              : Center(child: FittedBox(fit: BoxFit.scaleDown,
+                  child: Text(label, style: cellTextStyle!, maxLines: 1,
+                      softWrap: false))))
+          : Text(
+              label,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: dense ? 12.sp : 14.sp,
+                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                color: textColor,
+              ),
+            ),
     );
 
     // onTap이 있으면 InkWell로 감싸 눌림 효과를 줌 - 칩의 둥근 모서리와

@@ -1,6 +1,7 @@
 // lib/providers/work_hours_settings_provider.dart
 
 import 'data_revision_provider.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -97,7 +98,7 @@ class WorkHoursSettings {
   // ⭐ 영어 현지화: 날짜 부분은 숫자 슬래시("M/d")라 언어와 무관하게 그대로 써도
   // 되지만(미국식도 M/d 순서라 겹침), "년"/"기준" 같은 단어는 언어별로 갈아끼워야
   // 함 - isKorean만 받아서 나머지 구조(범위 계산)는 그대로 재사용.
-  String periodLabel(DateTime anchorMonth, {required bool isKorean}) {
+  String periodLabel(DateTime anchorMonth, {required bool isKorean, String locale = 'en_US'}) {
     final range = periodForMonth(anchorMonth);
     final s = range.start;
     final e = range.end;
@@ -110,17 +111,20 @@ class WorkHoursSettings {
       return '$sy년 ${s.month}/${s.day} ~ $ey년 ${e.month}/${e.day} 기준';
     }
     if (s.year == e.year) {
-      return 'as of ${s.month}/${s.day} ~ ${e.month}/${e.day}, ${s.year}';
+      return '${DateFormat.MMMd(locale).format(s)} – ${DateFormat.yMMMd(locale).format(e)}';
     }
-    return 'as of ${s.month}/${s.day}, ${s.year} ~ ${e.month}/${e.day}, ${e.year}';
+    return '${DateFormat.yMMMd(locale).format(s)} – ${DateFormat.yMMMd(locale).format(e)}';
   }
 
   // ⭐ 설정 화면 미리보기용 - 연도/"기준" 접미사 없이 짧게 "7/21 ~ 8/20" 형태만.
   // 숫자 슬래시 형식이라 언어 분기 불필요(한국/미국 둘 다 M/d 순서).
-  String periodRangeShort(DateTime anchorMonth) {
+  String periodRangeShort(DateTime anchorMonth, {String? locale}) {
     final range = periodForMonth(anchorMonth);
     final s = range.start;
     final e = range.end;
+    if (locale != null && !locale.startsWith('ko')) {
+      return '${DateFormat.MMMd(locale).format(s)} – ${DateFormat.MMMd(locale).format(e)}';
+    }
     return '${s.month}/${s.day} ~ ${e.month}/${e.day}';
   }
 }

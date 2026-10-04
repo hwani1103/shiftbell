@@ -1,0 +1,9 @@
+<resources>
+    <string name="widget_weekday_0">Mon</string>
+    <string name="widget_weekday_1">Tue</string>
+    <string name="widget_weekday_2">Wed</string>
+    <string name="widget_weekday_3">Thu</string>
+    <string name="widget_weekday_4">Fri</string>
+    <string name="widget_weekday_5">Sat</string>
+    <string name="widget_weekday_6">Sun</string>
+</resources>

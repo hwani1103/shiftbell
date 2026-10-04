@@ -1,9 +1,9 @@
 {
   "@@locale": "ko",
-
   "appTitle": "교대시계",
-  "@appTitle": {"description": "앱 표시 이름 (MaterialApp title, 스플래시)"},
-
+  "@appTitle": {
+    "description": "앱 표시 이름 (MaterialApp title, 스플래시)"
+  },
   "commonOk": "확인",
   "commonCancel": "취소",
   "commonSave": "저장",
@@ -39,19 +39,23 @@
   "commonLater": "나중에",
   "commonSaveFailed": "저장하지 못했어요. 잠시 후 다시 시도해 주세요.",
   "commonUpdate": "업데이트",
-
   "navNextAlarm": "다음알람",
   "navCalendar": "달력",
   "navFriendShare": "일정공유",
   "navScheduleManagement": "일정관리",
   "disableTabButtonLabel": "{tab} 화면 사용하지 않기",
-  "@disableTabButtonLabel": {"placeholders": {"tab": {"type": "String"}}},
+  "@disableTabButtonLabel": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
   "disableTabDialogBody": "확인 버튼을 누르면 화면 하단의 목록에서 사라집니다.\n설정에서 다시 원복할 수 있습니다.",
   "scheduleTabDisableExtraNotice": "예정된 일정 알림도 모두 취소됩니다.",
   "settingsScheduleTabReenableTitle": "일정관리 화면 사용하기",
   "settingsScheduleTabReenableSubtitle": "하단 탭에 일정관리 화면을 다시 표시합니다",
   "navSettings": "설정",
-
   "shiftWork": "교대 근무",
   "shiftPattern": "교대 패턴",
   "settingsPatternTodayMarker": "· 진한 칩이 오늘",
@@ -77,7 +81,6 @@
   "shiftPayday": "급여 산정일",
   "shiftChangeSchedule": "스케줄 변경",
   "shiftResetSchedule": "스케줄 초기화",
-
   "alarmTitle": "알람",
   "alarmNext": "다음 알람",
   "alarmUntil": "알람까지",
@@ -109,19 +112,55 @@
   "alarmSupersededByNextAlarm": "다음 알람으로 자동 종료",
   "alarmRingingSoon": "곧 울립니다",
   "alarmRemainingDaysHours": "{days}일 {hours}시간",
-  "@alarmRemainingDaysHours": {"placeholders": {"days": {"type": "int"}, "hours": {"type": "int"}}},
+  "@alarmRemainingDaysHours": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "alarmRemainingHoursMinutes": "{hours}시간 {minutes}분",
-  "@alarmRemainingHoursMinutes": {"placeholders": {"hours": {"type": "int"}, "minutes": {"type": "int"}}},
+  "@alarmRemainingHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "alarmRemainingMinutes": "{minutes}분",
-  "@alarmRemainingMinutes": {"placeholders": {"minutes": {"type": "int"}}},
+  "@alarmRemainingMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "alarmUpNext": "다음 알람",
   "alarmNoneUpcoming": "예정된 알람이 없습니다",
   "alarmNoneRegistered": "등록된 알람이 없습니다",
   "alarmEmptyStateHint": "설정 탭에서 교대 스케줄을 설정하고\n알람을 지정하면 자동으로 알람이 생성됩니다",
   "alarmRemainingDays": "{days}일",
-  "@alarmRemainingDays": {"placeholders": {"days": {"type": "int"}}},
+  "@alarmRemainingDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "alarmRemainingHours": "{hours}시간",
-  "@alarmRemainingHours": {"placeholders": {"hours": {"type": "int"}}},
+  "@alarmRemainingHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
   "alarmViewAllRegistered": "등록된 모든 알람 보기",
   "alarmSoundShort": "소리",
   "alarmDeleteAllPermanently": "모든 알람 완전 삭제",
@@ -133,12 +172,23 @@
   "alarmCountPast": "과거",
   "alarmDuration": "시간",
   "alarmDurationMinutes": "{minutes}분",
-  "@alarmDurationMinutes": {"placeholders": {"minutes": {"type": "int"}}},
-
+  "@alarmDurationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "calendarTheme": "달력 테마",
   "calendarSelectDate": "날짜 선택",
   "calendarNSelected": "{count}개 선택",
-  "@calendarNSelected": {"placeholders": {"count": {"type": "int"}}},
+  "@calendarNSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "calendarMemo": "메모",
   "calendarMemoAll": "메모 모아보기",
   "calendarMemoEnter": "메모 입력",
@@ -147,43 +197,114 @@
   "calendarMemoNone": "메모가 없습니다",
   "calendarSearchNoResults": "검색 결과가 없습니다",
   "calendarMemoTotalCount": "총 {count}개의 메모",
-  "@calendarMemoTotalCount": {"placeholders": {"count": {"type": "int"}}},
+  "@calendarMemoTotalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "calendarMemoSearchResultCount": "검색 결과 {count}개",
-  "@calendarMemoSearchResultCount": {"placeholders": {"count": {"type": "int"}}},
+  "@calendarMemoSearchResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "calendarTapToAddMoreDates": "탭하여 날짜 추가 선택",
   "calendarFriendQuickAccessLabel": "친구",
   "calendarTapDateToEnter": "(해당 날짜 탭하여 입력)",
   "calendarMonthlyOtTitle": "{month} 누적 OT",
-  "@calendarMonthlyOtTitle": {"placeholders": {"month": {"type": "String"}}},
+  "@calendarMonthlyOtTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
   "calendarOtTotal": "총 {total}",
-  "@calendarOtTotal": {"placeholders": {"total": {"type": "String"}}},
+  "@calendarOtTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "calendarMonthlyWorkTotal": "* {month} 총 근무(예정) 시간: {total}",
-  "@calendarMonthlyWorkTotal": {"placeholders": {"month": {"type": "String"}, "total": {"type": "String"}}},
+  "@calendarMonthlyWorkTotal": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "calendarSetWorkHoursInSettingsHint": "(설정 탭에서 근무별 근무시간을 설정해주세요.)",
   "calendarNoOtRegistered": "등록된 OT가 없습니다",
   "calendarWeeklyWorkHoursTitle": "{month} 주간 누적 근무(예정) 시간",
-  "@calendarWeeklyWorkHoursTitle": {"placeholders": {"month": {"type": "String"}}},
+  "@calendarWeeklyWorkHoursTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
   "calendarWeeklyBasisHint": "매주 월요일 ~ 일요일 기준 (OT 포함)",
   "calendarSetScheduleFirst": "근무 스케줄을 먼저 설정해주세요",
   "calendarSpecifyWorkHoursInSettings": "설정에서 근무별 근무시간을 지정해주세요.",
   "calendarShiftDayCount": "{shift} {days}일",
-  "@calendarShiftDayCount": {"placeholders": {"shift": {"type": "String"}, "days": {"type": "int"}}},
+  "@calendarShiftDayCount": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "calendarShiftLabel": "근무 :",
   "calendarFixedAlarmLabel": "고정 알람 :",
   "calendarAutoGeneratedWithinDays": "{days}일 이내가 되면 자동 생성됩니다",
-  "@calendarAutoGeneratedWithinDays": {"placeholders": {"days": {"type": "int"}}},
+  "@calendarAutoGeneratedWithinDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "calendarMemoColonLabel": "메모 :",
   "calendarSelectAlarmType": "알람 타입 선택",
   "calendarAlarmAt": "{time} 알람",
-  "@calendarAlarmAt": {"placeholders": {"time": {"type": "String"}}},
+  "@calendarAlarmAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "calendarDeleteAlarmTitle": "알람 삭제",
   "calendarDeleteAlarmConfirm": "{time} 알람을 삭제하시겠습니까?",
-  "@calendarDeleteAlarmConfirm": {"placeholders": {"time": {"type": "String"}}},
+  "@calendarDeleteAlarmConfirm": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "calendarDeleteAlarmFailed": "알람 삭제 실패",
   "calendarBulkChangeShiftTitle": "{count}일 근무 변경",
-  "@calendarBulkChangeShiftTitle": {"placeholders": {"count": {"type": "int"}}},
+  "@calendarBulkChangeShiftTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "calendarMemoDetailTitle": "메모 상세",
-
   "onboardingCreateSchedule": "교대근무 스케줄 생성",
   "onboardingFixedPatternQuestion": "고정적으로 순환하는 교대 근무인가요?",
   "onboardingYesRegular": "예 - 규칙적",
@@ -191,15 +312,22 @@
   "onboardingCheckShiftTypes": "근무 형태를 확인하세요",
   "onboardingAddIfMissing": "없다면 추가 가능합니다",
   "onboardingShiftLimitHint": "(최대 {max}개까지 추가 가능하며 {chars}글자로 제한됩니다.)",
-  "@onboardingShiftLimitHint": {"placeholders": {"max": {"type": "int"}, "chars": {"type": "int"}}},
+  "@onboardingShiftLimitHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
   "onboardingUsableEvenIfNotInPattern": "근무 패턴에 포함되지 않더라도 사용 가능해요.",
-
-  "onboardingShiftNameTitle": "내 교대 패턴에 해당되는 근무명 선택",
-  "onboardingShiftNameSubHint": "내 교대근무에 사용하는 근무명을 모두 선택해 주세요.\n정기 패턴에 포함되지 않더라도 가끔씩 사용되는 근무명을 함께 선택해 두면, 나중에 달력에서 날짜를 길게 탭하여 해당 근무로 간편하게 변경할 수 있어요",
+  "onboardingShiftNameTitle": "내 교대근무에 사용하는 근무명을 모두 선택해 주세요.",
+  "onboardingShiftNameSubHint": "연차나 휴가처럼 가끔 쓰는 근무도 함께 두면, 나중에 달력에서 간편하게 변경할 수 있어요.\n\n쓰지 않는 근무명은 ×로 지우고, 목록에 없는 근무명은 + 추가로 만들어 주세요.",
   "onboardingSwitchToIrregularPrefix": "만약 교대 패턴이 규칙적이지 않다면, ",
   "onboardingSwitchToIrregularLink": "여기",
   "onboardingSwitchToIrregularSuffix": " 를 눌러주세요.",
-
   "onboardingSelectAllInPattern": "실제 근무 패턴에 포함되는 근무를 모두 선택해주세요",
   "onboardingTapToCompletePattern": "버튼을 탭해서 패턴을 완성해주세요",
   "onboardingPatternHint": "(최대 40일 · 아래에 추가된 칸을 탭하면 삭제됩니다.)",
@@ -209,31 +337,73 @@
   "onboardingNoPattern": "패턴 없음",
   "onboardingAddShiftName": "근무명 추가",
   "onboardingShiftNameHint": "근무명 (최대 {chars}글자)",
-  "@onboardingShiftNameHint": {"placeholders": {"chars": {"type": "int"}}},
+  "@onboardingShiftNameHint": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
   "onboardingSetFixedAlarmPerShift": "근무별 고정 알람을 설정하세요",
   "onboardingMaxAlarmsPerShift": "각 근무당 최대 {max}개까지 설정 가능합니다.",
-  "@onboardingMaxAlarmsPerShift": {"placeholders": {"max": {"type": "int"}}},
+  "@onboardingMaxAlarmsPerShift": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "onboardingCanChangeInSettings": "고정 알람은 해당 근무일 당일, 전날, 다음날에 모두 설정 가능해요.",
   "onboardingAlarmOptional": "알람은 지금 설정하지 않고 넘어가도 괜찮아요",
   "onboardingFinishSetup": "설정 완료",
   "onboardingSaving": "근무표를 만드는 중...",
   "onboardingSaveFailed": "저장하지 못했습니다. 잠시 후 다시 시도해주세요.",
   "onboardingTapToSet": "탭하여 설정",
-  "onboardingTodayShiftQuestion": "오늘({date})은 어떤 근무인가요?",
-  "@onboardingTodayShiftQuestion": {"placeholders": {"date": {"type": "String"}}},
+  "onboardingTodayShiftQuestion": "오늘({date})은\n어떤 근무인가요?",
+  "@onboardingTodayShiftQuestion": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingAllSet": "설정 완료!",
   "onboardingNeedAtLeastOneShift": "최소 1개의 근무 형태는 있어야 합니다",
   "onboardingEnterShiftName": "근무명을 입력해주세요",
   "onboardingCharLimitError": "{chars}글자 이하로 입력해주세요",
-  "@onboardingCharLimitError": {"placeholders": {"chars": {"type": "int"}}},
+  "@onboardingCharLimitError": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
   "onboardingDuplicateShiftName": "이미 존재하는 근무명입니다",
   "shiftNameCommaNotAllowed": "근무명에는 쉼표(,)를 쓸 수 없어요",
   "shiftNameReserved": "\"{name}\"은(는) 앱에서 따로 쓰는 이름이라 근무명으로 쓸 수 없어요",
-  "@shiftNameReserved": {"placeholders": {"name": {"type": "String"}}},
+  "@shiftNameReserved": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingFixedAlarmDialogTitle": "{shift} 고정 알람",
-  "@onboardingFixedAlarmDialogTitle": {"placeholders": {"shift": {"type": "String"}}},
+  "@onboardingFixedAlarmDialogTitle": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingFixedAlarmMaxHint": "근무별 알람 {max}개까지 등록 가능",
-  "@onboardingFixedAlarmMaxHint": {"placeholders": {"max": {"type": "int"}}},
+  "@onboardingFixedAlarmMaxHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "onboardingWelcomePopupTitle": "교대시계를 설치해 주셔서\n감사합니다",
   "onboardingWelcomePopupBody": "처음 한 번만 근무표와 알람을 등록해 두면, 내 근무에 맞춰 정해진 시간에 알람이 자동으로 울려요.\n\n📅  달력에서 날짜별 근무 한눈에 보기\n🗓️  일정 관리와 일정 알림\n🌙  수면·회복 관리\n👥  친구와 근무표 공유",
   "onboardingWelcomePopupStartButton": "시작하기",
@@ -242,8 +412,13 @@
   "onboardingScheduleTabPopupTitle": "일정관리 탭, 이렇게 써보세요",
   "onboardingScheduleTabPopupBody": "1. 일정 만들기\n오른쪽 아래 시계 아이콘을 탭하면 시간축 위에서 시각을 고를 수 있는 모드로 바뀌어요. 원하는 시각에서 한 번 더 탭하면 그 시각으로 새 일정을 만들 수 있어요.\n\n2. 지속시간 설정\n기본은 \"지속시간 없음\"(특정 시각 하나)이에요. \"+\"나 5분/30분/1시간 버튼을 누르면 종료 시각이 있는 일정으로 바뀌어요.\n\n3. 일정에 맞춰 알림받기\n알림받기 스위치를 켜면 원하는 시간에 휴대폰 알림을 받을 수 있어요. 알림 소리는 시스템 설정과 동일해요.",
   "alarmAlreadyExistsAtTime": "이미 {time} 알람이 존재합니다.",
-  "@alarmAlreadyExistsAtTime": {"placeholders": {"time": {"type": "String"}}},
-
+  "@alarmAlreadyExistsAtTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "settingsShiftManagement": "교대 근무 스케줄 관리",
   "settingsShiftManagementEditButton": "편집",
   "settingsNotSet": "설정 안 됨",
@@ -258,58 +433,120 @@
   "settingsPeriodStartBasis": "시작일 기준",
   "settingsPeriodEndBasis": "종료일 기준",
   "settingsPreviewThisMonth": "미리보기: 이번 달 기준 {range}",
-  "@settingsPreviewThisMonth": {"placeholders": {"range": {"type": "String"}}},
+  "@settingsPreviewThisMonth": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
   "settingsFriendShareDesc": "공유 코드로 친구와 서로의 일정 확인",
-  "settingsRenameShiftDesc": "근무 이름을 변경합니다",
+  "settingsRenameShiftDesc": "근무명을 수정하거나 추가/삭제합니다.",
   "settingsEditShiftNameDesc": "근무 이름을 수정합니다",
   "settingsChangeAlarmTimeDesc": "근무별 알람 시간을 변경합니다",
-  "settingsChangeScheduleDesc": "조 변경 등 동일 패턴에서의 스케줄을 변경합니다",
+  "settingsChangeScheduleDesc": "내 근무 스케줄을 변경합니다.",
   "settingsAlarmHistoryDesc": "생성됐던 모든 알람과 그 결과 확인",
   "settingsMemoAllDesc": "전체 메모 확인 및 검색",
   "settingsDeleteAllAlarmsDesc": "등록된 모든 알람 삭제",
   "settingsDataBackupTitle": "데이터 백업",
   "settingsDataBackupDesc": "지금 기기에 근무표·알람·메모 등을 백업해요",
   "settingsDataBackupLastSavedAt": "마지막 백업: {date}",
-  "@settingsDataBackupLastSavedAt": {"placeholders": {"date": {"type": "String"}}},
+  "@settingsDataBackupLastSavedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "settingsDataBackupNeverSaved": "아직 백업한 적 없어요",
   "settingsDataBackupSlots": "직접 백업: {manual}\n자동 백업: {auto}",
-  "@settingsDataBackupSlots": {"placeholders": {"manual": {"type": "String"}, "auto": {"type": "String"}}},
+  "@settingsDataBackupSlots": {
+    "placeholders": {
+      "manual": {
+        "type": "String"
+      },
+      "auto": {
+        "type": "String"
+      }
+    }
+  },
   "settingsDataBackupSlotNone": "없음",
-  "settingsDiagTitle": "문제 신고용 진단 파일",
-  "settingsDiagDesc": "알람이 안 울리거나 백업이 안 될 때 만들어 보내 주세요. 메모·근무명 같은 내용은 들어가지 않아요",
-  "settingsDiagChooser": "진단 파일 보내기",
-  "settingsDiagFailed": "진단 파일을 만들지 못했어요(Android 10 이상 필요)",
-  "customAlarmLabel": "커스텀 알람",
-  "customAlarmEditTooltip": "커스텀 알람 편집",
-  "customAlarmEditorTitle": "커스텀 알람",
-  "customAlarmEditorDesc": "자주 쓰는 시각을 5칸까지 저장해 두세요. 칸을 누른 뒤 달력 날짜를 누르거나, 칸을 길게 눌러 날짜로 끌어다 놓으면 그 날짜에 알람이 한 번 추가돼요.",
+  "customAlarmLabel": "원터치 알람",
+  "customAlarmEditTooltip": "원터치 알람 편집",
+  "customAlarmEditorTitle": "원터치 알람 설정",
+  "customAlarmEditorDesc": "시각과 울림 방식을 5칸까지 저장하세요. 오늘·내일에만 할당할 수 있고, 한 칸은 같은 날짜에 한 번만 할당됩니다. 할당된 칸은 날짜별 알람을 삭제하기 전까지 수정할 수 없습니다.",
   "customAlarmSlotEmpty": "비어 있음",
   "customAlarmSlotClear": "비우기",
   "customAlarmAssignHint": "날짜를 누르면 {time} 알람이 추가돼요",
-  "@customAlarmAssignHint": {"placeholders": {"time": {"type": "String"}}},
+  "@customAlarmAssignHint": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "customAlarmScheduledToday": "오늘 {time}에 알람이 예약됐어요",
-  "@customAlarmScheduledToday": {"placeholders": {"time": {"type": "String"}}},
+  "@customAlarmScheduledToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "customAlarmScheduledOn": "{date} {time}에 알람이 예약됐어요",
-  "@customAlarmScheduledOn": {"placeholders": {"date": {"type": "String"}, "time": {"type": "String"}}},
+  "@customAlarmScheduledOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "customAlarmScheduledSoon": "{minutes}분 후에 알람이 울려요",
-  "@customAlarmScheduledSoon": {"placeholders": {"minutes": {"type": "int"}}},
+  "@customAlarmScheduledSoon": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "customAlarmPast": "이미 지난 시각이라 알람을 만들지 않았어요",
+  "customAlarmOutsideWindow": "원터치 알람은 오늘과 내일에만 만들 수 있어요",
   "customAlarmDuplicate": "그 날짜 {time}에 이미 알람이 있어요",
-  "@customAlarmDuplicate": {"placeholders": {"time": {"type": "String"}}},
-  "customAlarmDailyLimit": "하루에 알람은 최대 {count}개까지 등록할 수 있어요",
-  "@customAlarmDailyLimit": {"placeholders": {"count": {"type": "int"}}},
-  "customAlarmScheduleFailed": "알람을 예약하지 못했어요. 정확한 알람 권한을 확인해 주세요",
+  "@customAlarmDuplicate": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "customAlarmScheduleFailed": "알람을 실제 기기에 예약하지 못했어요. 잠시 뒤 다시 시도해 주세요",
   "customAlarmUndo": "되돌리기",
-  "customAlarmDeleted": "커스텀 알람을 삭제했어요",
-  "customAlarmDeleteConfirm": "{time} 커스텀 알람을 삭제할까요?",
-  "@customAlarmDeleteConfirm": {"placeholders": {"time": {"type": "String"}}},
+  "customAlarmDeleted": "원터치 알람을 삭제했어요",
+  "customAlarmDeleteConfirm": "{time} 원터치 알람을 삭제할까요?",
+  "fixedAlarmSkippedByOneTap": "같은 시각의 원터치 알람이 먼저 설정돼 있어 고정 알람은 만들지 않았어요",
+  "@customAlarmDeleteConfirm": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "settingsDataBackupInProgress": "백업하는 중...",
-  "settingsDataBackupSuccessToast": "백업이 다운로드/ShiftBell 폴더에 저장되었어요. 앱을 지워도 이 파일은 남아서 재설치 후 복구에 쓸 수 있어요.",
+  "settingsDataBackupSuccessToast": "백업이 Download/ShiftBell에 저장되었어요. 재설치 후에는 첫 화면에서 이 파일을 직접 선택해 복구하세요.",
   "settingsDataBackupFailedToast": "백업에 실패했어요(Android 10 이상 필요, 또는 일시적 오류)",
   "backupRestoreFoundTitle": "이 백업으로 복구할까요?",
   "backupRestoreFoundDesc": "복구하면 근무표·알람·메모 등 데이터를 그대로 이어서 사용할 수 있어요.",
   "backupRestoreLastSavedAt": "백업 시각: {date}",
-  "@backupRestoreLastSavedAt": {"placeholders": {"date": {"type": "String"}}},
+  "@backupRestoreLastSavedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "backupRestoreButton": "복구하기",
   "backupRestoreSkipButton": "새로 시작하기",
   "backupRestoreInProgress": "복구하는 중...",
@@ -336,7 +573,13 @@
   "settingsRestoreFromBackupPickButton": "파일 선택하기",
   "settingsRestoreFromBackupConfirmTitle": "이 백업으로 복구할까요?",
   "settingsRestoreFromBackupConfirmBody": "{date}에 저장된 백업이에요. 복구하면 지금 이 기기의 데이터는 모두 사라지고 이 백업 내용으로 바뀝니다.",
-  "@settingsRestoreFromBackupConfirmBody": {"placeholders": {"date": {"type": "String"}}},
+  "@settingsRestoreFromBackupConfirmBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "settingsRestoreFromBackupConfirmButton": "복구하기",
   "settingsRestoreFromBackupInProgress": "복구하는 중...",
   "settingsRestoreFromBackupSuccessToast": "복구 완료! 앱을 다시 시작할게요.",
@@ -357,35 +600,59 @@
   "statusDeleteFailed": "삭제 실패",
   "settingsScheduleChanging": "스케줄 변경 중...",
   "settingsScheduleChangeFailedWithError": "스케줄 변경 실패: {error}",
-  "@settingsScheduleChangeFailedWithError": {"placeholders": {"error": {"type": "String"}}},
+  "@settingsScheduleChangeFailedWithError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "settingsAllTeamsRegularOnly": "이 기능은 규칙적 근무 패턴이 설정된 경우에만 사용할 수 있습니다.",
   "settingsEditShiftNameTitle": "근무명 수정",
   "settingsEditFixedAlarmTitle": "고정 알람 수정",
   "settingsEditShiftColorTitle": "근무명 색상 변경",
   "settingsEditShiftColorDesc": "근무별 색상을 변경합니다",
   "settingsShiftFixedAlarmTitle": "{shift} 고정 알람",
-  "@settingsShiftFixedAlarmTitle": {"placeholders": {"shift": {"type": "String"}}},
+  "@settingsShiftFixedAlarmTitle": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
   "settingsFixedAlarmRegisterLimit": "근무별 알람 {max}개까지 등록 가능",
-  "@settingsFixedAlarmRegisterLimit": {"placeholders": {"max": {"type": "int"}}},
+  "@settingsFixedAlarmRegisterLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "settingsColorPickerTitle": "\"{shift}\" 색상 선택",
-  "@settingsColorPickerTitle": {"placeholders": {"shift": {"type": "String"}}},
+  "@settingsColorPickerTitle": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
   "settingsSelectTodayShiftFromPattern": "패턴에서 오늘 근무를 선택하세요",
-  "settingsScheduleChangeWarning": "기존 알람이 삭제되고 새로운 스케줄로 10일치 알람이 생성됩니다.",
+  "settingsScheduleChangeWarning": "앞으로 10일간의 고정알람을\n새 스케줄에 맞춰 갱신합니다.\n원터치 알람과 알람 이력은\n그대로 유지됩니다.",
   "settingsScheduleChangedRedoAllTeamsHint": "스케줄 변경 시 전체 근무표도 다시 설정해주세요.",
-  "settingsResetScheduleConfirm": "교대 스케줄과 알람을 모두 초기화할까요?\n(전체 교대조 근무표도 초기화됩니다.)",
+  "settingsResetScheduleConfirm": "교대 스케줄과 알람을 모두 초기화할까요?\n\n전체 조 근무표와 알람 이력, 생성 기록도 삭제됩니다.",
   "privacyIntro": "교대시계는 개발자가 운영하는 별도 서버 없이 동작하며, 앱에서 만드는 데이터는 기본적으로 사용자의 기기 안에 저장됩니다. 아래에서 무엇이 기기에 저장되고, 어떤 경우에 어떤 정보가 Google 서비스로 전송되는지 안내드립니다.",
   "privacyNoCollectionTitle": "기본 - 기기 안에 저장되는 데이터",
-  "privacyNoCollectionBody": "근무 스케줄, 알람 설정과 알람 기록, 메모/일정, 근무시간·OT, 수면 기록, 친구 목록 등 앱에서 만드는 데이터는 사용자의 기기 안에 저장되며 개발자에게 전송되지 않습니다. 자동 수면 추정도 화면이 켜져 있는지, 충전 중인지만 기기 안에서 확인하고 그 결과를 밖으로 보내지 않습니다.\n\n다만 아래 '사용 통계', '일정공유', '광고' 항목에 적힌 범위의 정보는 Google 서비스로 전송됩니다.\n\n문제가 생겼을 때 설정의 '문제 신고용 진단 파일'을 직접 만들어 보내실 수 있어요. 이 파일에는 기기·Android 버전, 권한과 배터리 설정 상태, 알람 예약·울림 기록, 백업 기록이 들어가며 메모·일정 내용, 근무명, 친구 이름은 들어가지 않아요. 기록은 기기 안에만 저장되고, 사용자가 직접 보낼 때만 전달돼요.",
+  "privacyNoCollectionBody": "근무 스케줄, 알람 설정과 알람 기록, 메모/일정, 근무시간·OT, 수면 기록, 친구 목록 등 앱에서 만드는 데이터는 사용자의 기기 안에 저장되며 개발자에게 전송되지 않습니다. 자동 수면 추정도 화면이 켜져 있는지, 충전 중인지만 기기 안에서 확인하고 그 결과를 밖으로 보내지 않습니다.\n\n다만 아래 '사용 통계', '일정공유', '광고' 항목에 적힌 범위의 정보는 Google 서비스로 전송됩니다.\n\n진단 파일은 Android 10 이상에서 기기 안의 Download/ShiftBell/log 폴더에 자동 저장·갱신됩니다. 이 파일에는 기기·Android 버전, 권한과 배터리 설정 상태, 알람 예약·울림 기록, 백업 기록이 들어가며 메모·일정 내용, 근무명, 친구 이름은 들어가지 않아요. 앱이 이 파일을 자동으로 전송하지 않으며, 필요할 때 사용자가 직접 찾아 보내실 수 있어요.",
   "privacyAnalyticsTitle": "사용 통계(Google Firebase Analytics)",
-  "privacyAnalyticsBody": "앱을 개선하기 위해 Google Firebase Analytics가 앱 실행·화면 이용 같은 이용 기록, 앱 버전, 기기 종류·OS 버전, 대략적인 지역 정보와 앱 설치별 식별자를 자동으로 수집합니다. 또 어떤 기능이 얼마나 쓰이는지 알 수 있도록 탭 이동, 알람 끄기·5분 연장 횟수, 메모·일정·수면 기록·백업 같은 기능을 사용한 횟수만 함께 기록합니다. 근무표·메모·수면 기록·알람 시각 같은 앱 데이터의 내용은 통계에 넣지 않습니다. 수집된 통계는 Google의 개인정보처리방침에 따라 처리됩니다.",
+  "privacyAnalyticsBody": "앱을 개선하기 위해 Google Firebase Analytics가 앱 실행·화면 이용 같은 이용 기록, 앱 버전, 기기 종류·OS 버전, 대략적인 지역 정보와 앱 설치별 식별자를 자동으로 수집합니다. 또 어떤 기능이 얼마나 쓰이는지 알 수 있도록 알람 끄기·5분 연장 횟수, 메모·일정·수면 기록·백업 같은 기능을 사용한 횟수만 함께 기록합니다. 웹 뷰어에서 친구 근무표를 정상적으로 연 횟수는 앱 사용과 별도로 집계하며, 공유 코드나 친구 이름은 이 이벤트에 넣지 않습니다. 근무표·메모·수면 기록·알람 시각 같은 앱 데이터의 내용은 통계에 넣지 않습니다. 수집된 통계는 Google의 개인정보처리방침에 따라 처리됩니다.",
   "privacyFirebaseTitle": "일정공유 기능을 쓰는 경우(Google Firebase)",
-  "privacyFirebaseBody": "'일정공유'를 켜면 친구에게 보여줄 이름과 근무 스케줄(근무 패턴·시작일·근무별 색상·날짜별 근무 변경)이 Google Firebase 서버에 저장되고, 공유 코드나 링크를 가진 사람은 누구나 볼 수 있습니다. 이를 위해 앱이 자동으로 만드는 익명 식별자가 함께 쓰이며, 메모·OT·수면 기록·알람 설정은 전송하지 않습니다.\n\n공유를 중지하면 기기에서는 바로 꺼지고 서버에 삭제 요청이 전송됩니다. 인터넷에 연결되어 있지 않으면 연결된 뒤 다시 보내며, 그 전까지는 친구가 이전 근무표를 볼 수 있습니다. 친구 기기에 이미 받아 둔 근무표나 캡처는 회수할 수 없습니다.\n\n앱을 삭제하고 다시 설치하면 새 익명 식별자가 만들어져, 이전에 공유한 데이터를 앱에서 지울 수 없게 됩니다. 재설치 전에 공유를 중지해 주세요.\n\n업데이트 안내를 보여주기 위해 Firebase의 공개 설정 값을 읽기도 하지만, 이때 앱 데이터를 보내지는 않습니다.",
+  "privacyFirebaseBody": "'일정공유'를 켜면 친구에게 보여줄 이름과 근무 스케줄(근무 패턴·시작일·근무별 색상·날짜별 근무 변경)이 Google Firebase 서버에 저장되고, 공유 코드나 링크를 가진 사람은 누구나 볼 수 있습니다. 이를 위해 앱이 자동으로 만드는 익명 식별자가 함께 쓰이며, 메모·OT·수면 기록·알람 설정은 전송하지 않습니다.\n\n공유를 중지하면 기기에서는 바로 꺼지고 서버에 삭제 요청이 전송됩니다. 인터넷에 연결되어 있지 않으면 연결된 뒤 다시 보내며, 그 전까지는 친구가 이전 근무표를 볼 수 있습니다. 친구 기기에 이미 받아 둔 근무표나 캡처는 회수할 수 없습니다.\n\n앱을 삭제하고 다시 설치하면 새 익명 식별자가 만들어져, 이전에 공유한 데이터를 앱에서 지울 수 없게 됩니다. 재설치 전에 공유를 중지해 주세요.\n\n한국 공휴일 변경분을 확인하려고 Firebase의 공개 문서를 드물게 읽습니다. 이 조회에 근무표·수면 기록 등 앱 내용은 보내지 않습니다. 업데이트 가능 여부는 Google Play에서 확인합니다.",
   "privacyAdsTitle": "광고 제공(Google AdMob)",
   "privacyAdsBody": "앱 화면 일부에 Google AdMob 배너 광고가 표시됩니다. 광고 제공과 성과 측정을 위해 Google이 광고 식별자 등 기기 정보를 수집할 수 있으며, 이는 앱이 아닌 Google의 개인정보처리방침에 따릅니다. 앱은 근무표·메모 같은 앱 데이터를 광고 요청에 넣지 않습니다.",
   "privacyPermissionsTitle": "앱이 요청하는 권한",
   "privacyPermissionsBody": "• 알림: 알람 사전 안내, 알람 상태 표시, 일정 알림\n• 다른 앱 위에 표시: 다른 앱 사용 중에도 알람 화면을 띄우기 위함\n• 정확한 알람: 설정한 시각에 오차 없이 알람이 울리게 하기 위함\n\n권한을 허용하지 않아도 앱은 계속 쓸 수 있지만, 위 기능 중 일부가 제한될 수 있습니다.",
   "privacyDataRetentionTitle": "데이터 보관 및 삭제",
-  "privacyDataRetentionBody": "기기 안의 데이터는 앱을 삭제하면 함께 삭제됩니다.\n\n단, '백업' 기능(자동 백업 포함)으로 만든 파일은 기기의 다운로드/ShiftBell 폴더에 남아 앱을 삭제해도 지워지지 않습니다. 이 파일은 암호화되지 않았고 근무표·알람 기록·메모/일정·OT·수면 기록·친구 목록 등이 들어 있으니 다른 사람에게 보내지 않도록 주의하고, 필요 없으면 파일 관리자에서 직접 삭제해 주세요. 백업 파일은 자동으로 외부에 전송되지 않지만, 클라우드 동기화 폴더 등으로 옮기면 그 서비스의 정책이 적용됩니다.\n\n백업은 Android 10 이상에서만 지원됩니다. 앱을 삭제하고 다시 설치하면 이전 백업을 자동으로 찾지 못하므로, 첫 화면의 '기존에 쓰시던 분이라면'에서 '불러오기'를 눌러 파일을 직접 골라야 합니다.\n\n일정공유 데이터의 삭제는 위 '일정공유' 안내를, 사용 통계·광고 데이터의 보관은 Google의 정책을 따릅니다.",
+  "privacyDataRetentionBody": "기기 안의 데이터는 앱을 삭제하면 함께 삭제됩니다.\n\n단, '백업' 기능(자동 백업 포함)으로 만든 파일은 기기의 다운로드/ShiftBell 폴더에 남아 앱을 삭제해도 지워지지 않습니다. 이 파일은 암호화되지 않았고 근무표·알람 기록·메모/일정·OT·수면 기록·친구 목록 등이 들어 있으니 다른 사람에게 보내지 않도록 주의하고, 필요 없으면 파일 관리자에서 직접 삭제해 주세요. 백업 파일은 자동으로 외부에 전송되지 않지만, 클라우드 동기화 폴더 등으로 옮기면 그 서비스의 정책이 적용됩니다.\n\nDownload/ShiftBell/log의 진단 파일도 앱 삭제 후 남을 수 있습니다. 이 파일에는 기기 정보, 권한 상태, 알람·백업 기록이 들어 있으므로 필요 없으면 파일 관리자에서 직접 삭제해 주세요.\n\n백업은 Android 10 이상에서만 지원됩니다. 앱을 삭제하고 다시 설치하면 이전 백업을 자동으로 찾지 못하므로, 첫 화면의 '기존에 쓰시던 분이라면'에서 '불러오기'를 눌러 파일을 직접 골라야 합니다.\n\n일정공유 데이터의 삭제는 위 '일정공유' 안내를, 사용 통계·광고 데이터의 보관은 Google의 정책을 따릅니다.",
   "privacyChildrenTitle": "아동 대상 서비스가 아닙니다",
   "privacyChildrenBody": "본 앱은 만 14세 미만 아동을 대상으로 하지 않으며, 아동의 개인정보를 의도적으로 수집하지 않습니다.",
   "privacyContactTitle": "문의처",
@@ -402,16 +669,36 @@
   "workHoursPeriodBasisDesc": "이번 달의 총 근무시간을 산정할 기준을 정합니다.",
   "workHoursDurationExcluded": "0시간 (근무시간 미포함)",
   "workHoursDurationHoursOnly": "{h}시간",
-  "@workHoursDurationHoursOnly": {"placeholders": {"h": {"type": "int"}}},
+  "@workHoursDurationHoursOnly": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      }
+    }
+  },
   "workHoursDurationHoursMinutes": "{h}시간 {m}분",
-  "@workHoursDurationHoursMinutes": {"placeholders": {"h": {"type": "int"}, "m": {"type": "int"}}},
+  "@workHoursDurationHoursMinutes": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
   "workHoursEditDialogTitle": "\"{shift}\" 기본 근무시간",
-  "@workHoursEditDialogTitle": {"placeholders": {"shift": {"type": "String"}}},
+  "@workHoursEditDialogTitle": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
   "workHoursUnitHourLabel": "시간",
   "workHoursUnitMinuteLabel": "분",
   "workHoursCutoffDayPrefix": "매월",
   "workHoursCutoffDaySuffix": "일",
-
   "friendShareTitle": "일정 공유",
   "friendShareMyScheduleTitle": "내 일정 공유하기",
   "friendAdd": "친구 추가",
@@ -426,10 +713,22 @@
   "friendShowingCachedSchedule": "최신 정보를 못 받아와서, 이전에 저장된 근무표를 보여드려요",
   "friendNoneAddedYet": "아직 추가한 친구가 없어요",
   "friendScheduleOf": "{name}님의 교대 스케줄",
-  "@friendScheduleOf": {"placeholders": {"name": {"type": "String"}}},
+  "@friendScheduleOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "friendRemove": "친구 삭제",
   "friendRemoveConfirm": "{name}님을 목록에서 삭제할까요?",
-  "@friendRemoveConfirm": {"placeholders": {"name": {"type": "String"}}},
+  "@friendRemoveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "friendDisplayNameTitle": "친구에게 보여줄 이름",
   "friendEnterDisplayName": "친구에게 보여줄 이름을 입력하세요",
   "friendShareIncludesSchedule": "내 근무 스케줄과 근무 변경 사항이 공유됩니다.",
@@ -459,7 +758,13 @@
   "friendInstallApp": "앱 설치",
   "friendDefaultDisplayName": "친구",
   "friendLastSyncedAt": "마지막 동기화: {date}",
-  "@friendLastSyncedAt": {"placeholders": {"date": {"type": "String"}}},
+  "@friendLastSyncedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
   "friendServerNotReady": "아직 친구공유 서버 연결 전이에요. 잠시 후 다시 시도해주세요",
   "friendScheduleNotSet": "아직 근무 스케줄이 설정되지 않았어요",
   "friendStartSharingFailed": "공유 시작에 실패했어요. 네트워크 연결을 확인하고 다시 시도해주세요",
@@ -471,10 +776,21 @@
   "friendCodeCopied": "코드를 복사했어요",
   "friendLinkCopied": "링크를 복사했어요",
   "friendShareMessage": "{name}님의 교대 스케줄을 공유해요! 🗓️\n\n▶ 앱 없이 바로 보기: {link}\n\n▶ 교대시계 앱 사용 중이면 \"친구 추가\"에 아래 코드를 붙여넣어주세요.\n\n{code}",
-  "@friendShareMessage": {"placeholders": {"name": {"type": "String"}, "link": {"type": "String"}, "code": {"type": "String"}}},
+  "@friendShareMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "friendNameHintExample": "친구 이름 입력",
   "friendShareChannelsExplainer": "앱이 없는 친구에게는 링크로, 앱을 쓰는 친구에게는 코드로 공유할 수 있어요.",
-
   "permissionGetStarted": "교대시계 시작하기",
   "permissionIntro": "알람이 정확하게 울리려면 아래 권한이 필요해요",
   "permissionNotification": "알림",
@@ -490,7 +806,6 @@
   "permissionSomeDeniedDesc": "앱을 계속 사용할 수 있지만 알람이 정확히 울리지 않을 수 있어요.",
   "permissionCanAllowLater": "설정에서 언제든지 권한을 허용할 수 있어요.",
   "permissionRequiredNotGranted": "필수 권한 미허용",
-
   "statusDataLoadFailed": "데이터 로드 실패",
   "statusNoSchedule": "스케줄이 없습니다",
   "statusErrorOccurred": "에러 발생",
@@ -500,8 +815,12 @@
   "alarmSchedulePartialFailed": "근무는 저장됐지만 알람 {total}개 중 {failed}개를 등록하지 못했어요. 정확한 알람 권한을 확인한 뒤 근무를 다시 저장해 주세요.",
   "@alarmSchedulePartialFailed": {
     "placeholders": {
-      "failed": {"type": "int"},
-      "total": {"type": "int"}
+      "failed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "scheduleNotifyRegisterFailed": "일정은 저장됐지만 알림을 예약하지 못했어요. 정확한 알람 권한을 확인한 뒤 일정을 다시 저장해 주세요.",
@@ -509,7 +828,9 @@
   "permissionStatusUnknown": "{name}(확인 불가)",
   "@permissionStatusUnknown": {
     "placeholders": {
-      "name": {"type": "String"}
+      "name": {
+        "type": "String"
+      }
     }
   },
   "statusShiftNameUpdated": "근무명이 변경되었습니다",
@@ -518,14 +839,25 @@
   "statusScheduleUpdated": "스케줄이 변경되었습니다",
   "statusEnterMemoContent": "메모 내용을 입력해주세요",
   "statusMemoLimit": "메모는 {max}개만 등록 가능합니다",
-  "@statusMemoLimit": {"placeholders": {"max": {"type": "int"}}},
+  "@statusMemoLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "statusOneCharOnly": "한 글자만 입력 가능합니다.",
   "statusFullTeamScheduleTitle": "전체 교대조 근무표 작성",
   "statusPatternDayCycle": "교대 패턴 (총 {days}일 주기)",
-  "@statusPatternDayCycle": {"placeholders": {"days": {"type": "int"}}},
-
+  "@statusPatternDayCycle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "allTeamsSetupRosterLabel": "조 이름",
-  "allTeamsSetupRosterHint": "전체 조 이름을 먼저 정합니다. 필요하면 수정 버튼을 눌러 원하는 이름으로 바꿔주세요.",
+  "allTeamsSetupRosterHint": "근무표에 사용할 모든 조를 정합니다. 수정에서 조를 추가·삭제하거나 이름을 바꿀 수 있습니다.",
   "allTeamsSetupMyTeamLabel": "내 조",
   "allTeamsSetupMyTeamPickHint": "이 중에서 내 조를 골라주세요.",
   "allTeamsSetupOtherTeamsLabel": "다른 조",
@@ -542,8 +874,13 @@
   "alarmHistoryDeleteAllDesc": "모든 알람 이력이 삭제됩니다.",
   "alarmHistoryDeletedToast": "모든 알람 이력이 삭제되었습니다",
   "alarmHistoryDeleteFailed": "이력 삭제 실패: {error}",
-  "@alarmHistoryDeleteFailed": {"placeholders": {"error": {"type": "String"}}},
-
+  "@alarmHistoryDeleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "themeMainWhite": "메인테마 - 화이트",
   "themeMainDark": "메인테마 - 다크",
   "themeMinimal": "심플 라인",
@@ -557,44 +894,81 @@
   "themeSwipeToChoose": "좌우로 넘겨서 골라보세요",
   "themeCurrentlyApplied": "현재 적용된 테마",
   "themeApplyThis": "이 테마로 적용",
-
   "soundDefault": "기본알람음",
   "soundBellN": "알람벨 {n}",
-  "@soundBellN": {"placeholders": {"n": {"type": "int"}}},
+  "@soundBellN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
   "soundFileNotFound": "알람음 파일을 찾을 수 없습니다",
-
   "splashTitle": "교대시계",
   "splashTagline": "교대 스케줄 확인 및 자동 알람 생성",
-
   "updateNewVersionAvailable": "새 버전이 있어요!",
   "updateRecommendMessage": "새 버전으로 업데이트하는 걸\n권해요.",
   "updateDataPreservedHint": "(저장된 정보는 그대로 유지됩니다)",
   "updateReleaseNoteTitle": "교대시계 업데이트 노트",
   "updateReleaseNoteBody": "1. 개인 일정 관리\n근무 일정과 함께 약속이나 할 일을 시간별로 관리할 수 있어요.\n\n2. 수면 회복\n근무시간과 수면 데이터를 바탕으로 교대근무자의 컨디션 회복을 모니터링하고, 확인된 정보와 권장 행동을 안내해요.\n\n3. 데이터 백업\n데이터 백업 기능이 추가되었고, 중요한 데이터는 자동으로 백업돼요.\n\n사용 중 궁금한 점이나 불편한 점은 카카오톡 오픈채팅에서 ‘교대시계 앱’을 검색해 문의해주세요.\n\n꾸준히 사용해주셔서 감사합니다. 도움이 되셨다면 플레이스토어 리뷰도 부탁드립니다!",
-
   "allTeamsNotConfigured": "전체 교대조 근무표가\n설정되지 않았습니다",
   "allTeamsCreateButton": "전체 교대조 근무표 만들기",
   "allTeamsThisMonthButton": "이번 달",
   "statusErrorWithDetail": "에러 발생: {error}",
-  "@statusErrorWithDetail": {"placeholders": {"error": {"type": "String"}}},
+  "@statusErrorWithDetail": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "themeLabMockDayShiftLong": "주간근무",
   "themeLabPreviewFixedMonthNotice": "이 미리보기는 2026년 8월로 고정되어 있어요",
   "themeLabPreviewSheetTitle": "{date} ({weekday})",
-  "@themeLabPreviewSheetTitle": {"placeholders": {"date": {"type": "String"}, "weekday": {"type": "String"}}},
+  "@themeLabPreviewSheetTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
   "themeLabPreviewShiftLabel": "근무: {shift}",
-  "@themeLabPreviewShiftLabel": {"placeholders": {"shift": {"type": "String"}}},
+  "@themeLabPreviewShiftLabel": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
   "themeLabPreviewMemoCount": "{count, plural, =1{메모 1개} other{메모 {count}개}}: {memos}",
-  "@themeLabPreviewMemoCount": {"placeholders": {"count": {"type": "int"}, "memos": {"type": "String"}}},
+  "@themeLabPreviewMemoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "memos": {
+        "type": "String"
+      }
+    }
+  },
   "themeLabPreviewSheetHint": "실제 앱에서는 이 자리에서 메모/OT를 확인하고 수정할 수 있어요.",
   "themeLabOtDetailNotice": "실제 앱에서는 여기를 탭하면 OT 상세 목록이 열려요",
   "dismissAlarmConfirmed": "알람 확인",
   "dismissSnoozed5Min": "5분 연장",
   "dismissNoResponse": "무응답",
   "dismissAlarmRemoved": "알람 제거",
-
   "scheduleDuplicateTimeSlot": "이미 같은 시간대의 일정이 있어요. 그 일정에 내용을 함께 적어주세요.",
   "scheduleMaxPerSlot": "이 시간대에는 일정을 최대 {count}개까지만 만들 수 있어요",
-  "@scheduleMaxPerSlot": {"placeholders": {"count": {"type": "int"}}},
+  "@scheduleMaxPerSlot": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "scheduleDeleteConfirmTitle": "일정을 삭제할까요?",
   "scheduleDeleteConfirmBody": "삭제한 일정은 되돌릴 수 없어요.",
   "scheduleEditTitle": "일정 수정",
@@ -607,15 +981,20 @@
   "scheduleNotifyOffsetQuestion": "몇 분 전에 알려드릴까요?",
   "scheduleNotifyOffsetOnTime": "정시",
   "scheduleNotifyOffsetBefore": "{minutes}분 전",
-  "@scheduleNotifyOffsetBefore": {"placeholders": {"minutes": {"type": "int"}}},
+  "@scheduleNotifyOffsetBefore": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
   "scheduleNotifyPastTimeWarning": "이미 지난 시각이라 알림이 울리지 않아요. 시간을 바꿔주세요.",
   "scheduleCreateButton": "생성",
-
   "helpSearchHint": "궁금한 내용 검색",
   "helpEmptySearchResult": "검색 결과가 없어요",
   "helpStartSectionTitle": "시작하기",
   "helpStartOnboardingTitle": "처음 실행했을 때 화면들",
-  "helpStartOnboardingBody": "앱을 처음 열면 알림, 정확한 알람, 다른 앱 위에 표시 같은 권한을 차례로 안내해요. 잠금 화면에서도 알람이 정해진 시각에 울리려면 꼭 필요한 권한이라, 하나라도 거부하면 알람이 늦게 울리거나 아예 울리지 않을 수 있어요.\n\n권한을 허용하고 나면 근무 스케줄을 만드는 화면으로 넘어가요.",
+  "helpStartOnboardingBody": "앱을 처음 열면 알림, 정확한 알람, 다른 앱 위에 표시 같은 권한을 차례로 안내해요. 잠금 화면에서도 알람이 정해진 시각에 울리려면 꼭 필요한 권한이라, 하나라도 거부하면 알람이 늦게 울리거나 아예 울리지 않을 수 있어요.\n\n권한을 허용하고 나면 근무 스케줄을 만드는 화면으로 넘어가요.\n\n기본 근무명은 주간·야간·오전·오후·휴무·연차예요. 쓰지 않는 이름은 ×로 지우고 + 추가로 새 이름을 만들 수 있어요. 첫 화면 아래에서 백업 데이터를 불러올 수도 있어요.",
   "helpStartScheduleTypesTitle": "규칙적 근무 vs 불규칙 근무",
   "helpStartScheduleTypesBody": "근무 스케줄은 두 가지 방식으로 만들 수 있어요.\n\n규칙적 근무는 \"주간-주간-야간-야간-비번-비번-휴무\"처럼 정해진 패턴이 시작일부터 계속 반복되는 방식이에요. 패턴과 시작일만 정해 두면 이후 날짜는 앱이 알아서 채워 줘요.\n\n불규칙 근무는 반복되는 패턴이 없어서 날짜마다 근무를 직접 정하는 방식이에요. 달력에서 날짜를 길게 눌러 하루 또는 여러 날의 근무를 지정할 수 있어요.",
   "helpShiftSectionTitle": "근무 관리",
@@ -637,7 +1016,7 @@
   "helpAlarmAlarmNotRingingTitle": "알람이 안 울릴 때 확인할 것",
   "helpAlarmAlarmNotRingingBody": "가장 흔한 원인은 권한이에요. 설정에서 이 앱의 \"정확한 알람\", \"알림\", \"다른 앱 위에 표시\" 권한이 켜져 있는지, 배터리 최적화 대상에서 이 앱이 빠져 있는지 확인해 보세요.\n\n그다음으로 흔한 원인은 근무나 알람 설정이에요. 그날 근무가 실제로 배정돼 있는지, 그 근무에 고정 알람이 등록돼 있는지 확인해 보세요. 근무만 배정하고 고정 알람을 만들지 않으면 알람은 울리지 않아요.",
   "helpAlarmAlarmHistoryTitle": "전체 알람 내역 확인하기",
-  "helpAlarmAlarmHistoryBody": "지금까지 울린 알람과 그 결과는 설정 → 알람 이력에서 볼 수 있어요.",
+  "helpAlarmAlarmHistoryBody": "지금까지 울린 알람과 그 결과는 설정 → 알람 이력에서 볼 수 있어요.\n\n5분 연장은 버튼을 누른 시점부터 5분 뒤에 다시 울리도록 예약합니다. 서머타임으로 시계가 바뀌어도 같습니다. 시계가 뒤로 돌아가 같은 시각이 두 번 오는 날에는 다음 알람과 이력에 ‘첫 번째 시각’ 또는 ‘두 번째 시각’을 표시합니다.",
   "helpCalendarSectionTitle": "달력 & 홈 화면 위젯",
   "helpCalendarThemesTitle": "달력 테마 바꾸기",
   "helpCalendarThemesBody": "달력 색상 테마를 10종 중에서 고를 수 있어요. 앱 안의 달력에 적용되고, 홈 화면 위젯은 항상 밝은 기본 색으로 표시돼요.",
@@ -663,7 +1042,7 @@
   "helpConditionSetupNeededBody": "이 기능을 쓰려면 설정 → 근무시간 및 OT 설정에서 최소 하나의 근무명에 대해 출퇴근 시각을 입력해둬야 해요. 하나도 입력돼 있지 않으면 오늘의 컨디션은 나오지 않고, 수면 기록만 남길 수 있어요. 전부 다 채울 필요는 없고, 지금 쓰고 있는 근무명 중 하나만 입력해도 동작해요.",
   "helpSleepSectionTitle": "수면 기록",
   "helpSleepWidgetTitle": "수면 기록 위젯이란",
-  "helpSleepWidgetBody": "홈 화면에 수면 위젯을 올려 두고, 자기 전에 \"수면\", 일어난 뒤에 \"기상\" 버튼을 눌러 간단히 기록해 보세요. 위젯에는 오늘의 근무명도 함께 보여요.\n\n기록한 수면은 수면·회복 탭에서 근무 일정과 함께 살펴보고, 지금 챙길 일을 안내받는 데 쓰여요.",
+  "helpSleepWidgetBody": "홈 화면에 수면 위젯을 올려 두고, 자기 전에 \"수면\", 일어난 뒤에 \"기상\" 버튼을 눌러 간단히 기록해 보세요. 위젯에는 오늘의 근무명도 함께 보여요.\n\n기록한 수면은 수면·회복 탭에서 근무 일정과 함께 살펴보고, 지금 챙길 일을 안내받는 데 쓰여요.\n\n야간 근무 중에 잔 잠은 낮잠으로 구분하고, 자정이 지나도 그 근무가 시작된 날짜에 기록해요. 예를 들어 27일 19시~28일 07시 근무 중 28일 00~02시에 잤다면 27일 낮잠으로 표시돼요.",
   "helpSleepAutoDetectTitle": "자동으로 수면을 추정해주는 기능",
   "helpSleepAutoDetectBody": "위젯을 누르지 않아도, 근무 일정과 폰을 오래 만지지 않은 시간을 바탕으로 앱이 \"이때 주무셨을 것 같다\"고 추정해요. 퇴근 후 잠과 밤잠, 그리고 야간 근무 출근 전에 잔 낮잠까지 찾아요. 근무 중에 잔 잠은 자동으로 잡지 않아서 위젯으로 직접 기록해야 해요.\n\n추정한 기록은 항상 추정일 뿐이라, \"맞아요\"로 확인해야 정식 기록이 돼요.",
   "helpSleepMiniCalendarTitle": "최근 수면 기록 확인/수정하기",
@@ -699,15 +1078,87 @@
   "helpTroubleshootBackupFileMissingBody": "기기의 파일 관리 앱에서 Download/ShiftBell 폴더를 직접 확인해 보세요. 폴더가 없다면 아직 백업이 한 번도 만들어지지 않았다는 뜻이니, 설정의 \"데이터 백업\"을 눌러 하나 만들어 두세요.",
   "helpTroubleshootFriendDisconnectedTitle": "친구 근무표가 며칠째 안 바뀌어요",
   "helpTroubleshootFriendDisconnectedBody": "에러 없이 근무표만 그대로 멈춰 있다면, 대부분 친구가 앱을 재설치한 경우예요. 재설치하면 내부 계정이 새로 만들어져 기존 연결이 끊기는데, 이때는 화면에 아무 안내도 뜨지 않고 재설치 전 마지막 모습이 계속 보여요.\n\n친구 근무표 화면 위쪽의 \"마지막 동기화\" 시간이 계속 옛날 날짜인지 확인해 보세요. 그렇다면 친구에게 새 공유 코드를 받아서, 기존 항목을 지우고 새 코드로 다시 추가하면 돼요.",
-
   "startupFailedTitle": "앱을 시작하지 못했어요",
-  "@startupFailedTitle": {"description": "앱 시작 초기화(DB 열기·마이그레이션 등) 실패 화면 제목 - lib/screens/startup_gate.dart (출시전 감사 V4)"},
+  "@startupFailedTitle": {
+    "description": "앱 시작 초기화(DB 열기·마이그레이션 등) 실패 화면 제목 - lib/screens/startup_gate.dart (출시전 감사 V4)"
+  },
   "startupFailedBody": "앱을 준비하는 중 문제가 생겼어요. 기기 저장공간이 부족하지 않은지 확인한 뒤 다시 시도해주세요. 계속 같은 화면이 나오면 기기를 다시 시작해보세요.",
-  "@startupFailedBody": {"description": "시작 실패 화면 본문. 원인 원문은 보여주지 않음(릴리스)"},
+  "@startupFailedBody": {
+    "description": "시작 실패 화면 본문. 원인 원문은 보여주지 않음(릴리스)"
+  },
   "startupRetry": "다시 시도",
-  "@startupRetry": {"description": "시작 실패 화면의 재시도 버튼"},
+  "@startupRetry": {
+    "description": "시작 실패 화면의 재시도 버튼"
+  },
   "startupSlowMessage": "앱을 준비하고 있어요. 잠시만 기다려주세요.",
   "startupStalledMessage": "준비가 평소보다 오래 걸리고 있어요. 다시 시도해도 계속 이 화면이면 앱을 완전히 종료한 뒤 다시 열어주세요.",
-  "@startupStalledMessage": {"description": "시작 초기화가 끝나지 않고 멈췄을 때(stallThreshold) 다시 시도 버튼과 함께 표시 - 출시전 감사 R0-02"},
-  "@startupSlowMessage": {"description": "시작 초기화가 오래 걸릴 때 표시(업데이트 직후 DB 마이그레이션 등)"}
+  "@startupStalledMessage": {
+    "description": "시작 초기화가 끝나지 않고 멈췄을 때(stallThreshold) 다시 시도 버튼과 함께 표시 - 출시전 감사 R0-02"
+  },
+  "@startupSlowMessage": {
+    "description": "시작 초기화가 오래 걸릴 때 표시(업데이트 직후 DB 마이그레이션 등)"
+  },
+  "shiftAnnualLeave": "연차",
+  "onboardingBackupTitle": "백업 데이터 불러오기",
+  "onboardingBackupDesc": "Download/ShiftBell 폴더의 백업 파일로 초기화해요.",
+  "helpOneTapTitle": "원터치 알람: 자주 쓰는 시각을 빠르게 추가하기",
+  "helpOneTapBody": "달력 위의 원터치 알람 버튼을 누르고 +로 시각과 울림 방식(소리+진동·진동·무음)을 저장해 주세요. 처음에는 한 칸만 보이고, 저장할 때마다 다음 추가 칸이 나타나요. 최대 5개까지 저장할 수 있어요.\n\n저장된 시각을 누른 뒤 오늘 또는 내일을 선택하면 알람이 예약되고 원터치 화면이 닫혀요. 예약 결과는 화면 아래에 잠깐 표시돼요. 이미 지난 시각이나 다른 알람과 같은 시각에는 추가하지 않아요.\n\n목록을 보고 있을 때 달력을 누르면 원터치 화면이 닫혀요. 시각을 고른 상태에서는 뒤로가기로 목록에 돌아갈 수 있어요.\n\n시각을 선택하면 수정·삭제 버튼이 나타나요. 미래 날짜에 이미 추가한 설정은 먼저 해당 알람을 삭제해야 수정할 수 있어요. 날짜의 알람만 지우려면 달력에서 그 날짜를 열고 원터치 알람 옆 ×를 누르세요. 설정을 통째로 지우면 연결된 알람도 삭제돼요. 삭제 후 고정 알람이 다시 예약될 수 있으며 확인창에서 안내해요.",
+  "helpCalendarTextSizeTitle": "달력 글자 크기와 화면 크기",
+  "helpCalendarTextSizeBody": "달력은 휴대폰과 폴더블 화면 크기에 맞춰 배치돼요. 시스템 글자 크기는 셀이 심하게 깨지지 않도록 달력에서 최대 1.3배까지만 반영해요.\n\n이벤트캘린더·컬러뱃지·소프트카드·심플라인은 근무명을 기본부터 크게 표시해요. 시스템 글자를 작게 하면 줄어들지만, 기본 크기보다 더 커지지는 않아요. 날짜·메모 등 다른 요소는 각 테마의 배치를 따라요.\n\n날짜를 눌러 연 상세창에 내용이 많으면 위아래로 스크롤할 수 있어요. 메모는 하루 최대 3개이며, 긴 내용은 메모를 눌러 확인하세요.",
+  "helpDiagnosticTitle": "문제 신고용 진단 파일 찾기",
+  "helpDiagnosticBody": "알람이나 백업에 문제가 있었다면 파일 관리자에서 Download/ShiftBell/log 폴더를 확인해 주세요(Android 10 이상). 앱이 진단 파일을 기기 안에 자동으로 저장하고 갱신해요.\n\n기기·Android 버전, 권한·배터리 설정 상태, 알람 예약·울림과 백업 처리 기록이 들어 있어요. 메모·일정 내용이나 근무명·친구 이름은 포함하지 않아요. 자동으로 개발자에게 전송되지는 않으며, 문의할 때 필요하면 직접 첨부해 주세요. 앱을 삭제해도 파일이 남을 수 있으니 필요 없으면 파일 관리자에서 지워 주세요.",
+  "helpCalendarLocaleTitle": "날짜와 공휴일 표시",
+  "helpCalendarLocaleBody": "한국어 달력은 일요일부터 시작하며 한국 공휴일과 음력을 표시합니다. 영어에서는 지역에 따라 주 시작 요일이 달라지며 이번 버전에는 공휴일과 음력을 표시하지 않습니다. 주간 근무시간 집계는 월요일부터 일요일 기준을 유지합니다.",
+  "alarmSnoozedLabel": "스누즈 중",
+  "alarmClockFirstOccurrence": "첫 번째 시각",
+  "alarmClockSecondOccurrence": "두 번째 시각",
+  "shiftNameInUse": "사용 중인 근무는 이름만 수정할 수 있습니다.",
+  "scheduleOutsideTeamsConfirm": "선택한 위치는 전체 근무표의 어느 조와도 일치하지 않습니다. 계속하면 전체 근무표가 삭제되어 다시 설정해야 합니다. 근무 스케줄을 변경할까요?",
+  "scheduleMyTeam": "내 조",
+  "scheduleTeamsAtToday": "오늘을 기준으로 각 조가 배정된 패턴 위치입니다.",
+  "scheduleTeamChanged": "{from}조에서 {to}조의 스케줄로 변경되었습니다.",
+  "@scheduleTeamChanged": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "teamSetupModeTitle": "설정 방식을 선택해 주세요",
+  "teamSetupShared": "모든 조가 같은 패턴 사용",
+  "teamSetupSharedHint": "하나의 근무 패턴에 각 조를 배정합니다.",
+  "teamSetupIndividual": "조별로 다른 패턴 사용",
+  "teamSetupIndividualHint": "조마다 순환 패턴 또는\n요일별 근무를 설정합니다.",
+  "teamRuleBase": "기본 패턴 사용",
+  "teamRuleCycle": "다른 순환 패턴",
+  "teamRuleWeekly": "요일별 근무",
+  "teamRuleTitle": "근무 규칙 설정",
+  "teamRuleLocked": "내 달력과 연결됨 · 변경할 수 없음",
+  "teamRuleMissing": "근무 규칙을 설정해 주세요",
+  "teamRuleEdit": "설정",
+  "teamRulePatternHint": "근무 칩을 순서대로 눌러 패턴을 만드세요.\n입력한 칩을 누르면 해당 위치를 삭제합니다.",
+  "teamRuleAllShiftsHint": "설정에 등록된 모든 근무명을 사용할 수 있습니다.",
+  "teamRuleWeeklyHint": "근무 칩을 선택한 뒤 배정할 요일을 누르세요.\n월요일부터 일요일까지 모두 배정해 주세요.",
+  "teamRulePositionHint": "아래 패턴에서 기준 날짜의 위치를 선택해 주세요.",
+  "teamRuleComplete": "설정 완료",
+  "teamRuleReview": "전체근무표 미리보기",
+  "teamRuleReviewHint": "각 조의 근무를 확인해 주세요.\n저장한 뒤에는 내 소속 조만 변경할 수 있습니다.\n근무 규칙을 수정하려면 전체근무표를 다시 만들어야 합니다.",
+  "teamRuleUnset": "미배정",
+  "teamRuleResetCycle": "패턴 비우기",
+  "teamRuleChooseTeam": "변경하실 조를 선택해 주세요.",
+  "teamRuleCurrentTeam": "현재 내 조",
+  "teamRuleWeeklyLabel": "월 · 화 · 수 · 목 · 금 · 토 · 일",
+  "teamScheduleResetConfirm": "내 스케줄을 변경하고\n고정알람을 재설정합니다.\n설정된 전체근무표는 삭제됩니다.\n\n전체근무표를 유지하고\n소속 조만 변경하려면\n전체근무표 → 편집 → 내 조 변경을\n이용해 주세요.",
+  "teamSwitchAction": "내 조 변경",
+  "teamRuleOverlapHint": "조 사이의 근무 중복이나 공백을 허용합니다.",
+  "teamRuleMonday": "월",
+  "teamRuleTuesday": "화",
+  "teamRuleWednesday": "수",
+  "teamRuleThursday": "목",
+  "teamRuleFriday": "금",
+  "teamRuleSaturday": "토",
+  "teamRuleSunday": "일"
 }

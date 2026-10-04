@@ -47,10 +47,13 @@ object RestoreOs {
         val state = RingingAlarmTracker.carryState(context)
         val activeRingId = state.active?.alarmId
         val carryIds = linkedSetOf<Int>()
-        db.rawQuery(
-            "SELECT id FROM alarms WHERE type = 'snoozed' AND date > ?",
-            arrayOf(dbString(System.currentTimeMillis() - SNOOZE_CARRY_LOOKBACK_MS))
-        ).use { c -> while (c.moveToNext()) carryIds.add(c.getInt(0)) }
+        val carryCutoff = System.currentTimeMillis() - SNOOZE_CARRY_LOOKBACK_MS
+        db.rawQuery("SELECT id, date FROM alarms WHERE type = 'snoozed'", null).use { c ->
+            while (c.moveToNext()) {
+                val at = AlarmWakeScheduler.parse(c.getString(1) ?: continue) ?: continue
+                if (at > carryCutoff) carryIds.add(c.getInt(0))
+            }
+        }
         activeRingId?.let { carryIds.add(it) }
         carryIds.addAll(state.endingIds)
 
@@ -117,14 +120,15 @@ object RestoreOs {
             ?: throw IllegalStateException("DB not ready")
         var scheduled = 0
         var failures = 0
+        val nowMillis = System.currentTimeMillis()
         db.rawQuery(
-            "SELECT id, date, shift_type FROM alarms WHERE type IN ('custom', 'snoozed') AND date > ?",
-            arrayOf(dbString(System.currentTimeMillis()))
+            "SELECT id, date, shift_type FROM alarms WHERE type IN ('custom', 'snoozed')", null
         ).use { c ->
             while (c.moveToNext()) {
                 val id = c.getInt(0)
                 val timestamp = AlarmWakeScheduler.parse(c.getString(1) ?: continue) ?: continue
-                val label = c.getString(2) ?: "알람"
+                if (timestamp <= nowMillis) continue
+                val label = c.getString(2) ?: context.getString(R.string.alarm_default_label)
                 if (AlarmWakeScheduler.scheduleIfCurrent(context, db, id, timestamp, label) ==
                     AlarmWakeScheduler.Outcome.FAILED) failures++ else scheduled++
             }

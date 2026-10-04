@@ -13,12 +13,22 @@ class PermissionWarningBanner extends StatefulWidget {
 class _PermissionWarningBannerState extends State<PermissionWarningBanner> with WidgetsBindingObserver {
   bool _showBanner = false;
   List<String> _missingPermissions = [];
+  Locale? _permissionLocale;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkPermissions();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final locale = Localizations.localeOf(context);
+    if (_permissionLocale != locale) {
+      _permissionLocale = locale;
+      _checkPermissions();
+    }
   }
 
   @override

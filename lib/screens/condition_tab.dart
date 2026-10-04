@@ -1,3 +1,5 @@
+import '../widgets/adaptive_layout.dart';
+import '../constants/layout_limits.dart';
 // lib/screens/condition_tab.dart
 //
 // ⭐ 수면·회복 탭(구 "컨디션" 탭). 하단 탭·앱바 이름만 바뀌었고 클래스·provider·저장 키(condition_tab_enabled)는
@@ -10,8 +12,8 @@
 //    날짜 시드 문구 조합(today_forecast_engine.dart)
 //  - 근무시간을 아직 안 넣었어도 수면 기록은 남길 수 있게 함(예전엔 안내 문구와 Tip만 보였음)
 //
-// ⭐ 1차 버전이라 l10n 키를 새로 안 만들고 한국어 문자열을 직접 씀(영어 로케일에서는 이 탭 자체가 안 보임 - main.dart
-// _showConditionTab). 이 화면은 사용자를 겁주지 않는 방향 - 점수·진단 없이 "무엇이 확인됐고, 무엇을 하면 되는지".
+// 한국어 화면의 문장은 한국어 전용이며, 영어 로케일은 english_condition_tab.dart를 사용한다.
+// 이 화면은 점수·진단 없이 "무엇이 확인됐고, 무엇을 하면 되는지" 보여준다.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -146,7 +148,7 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
     final setupNeeded = ref.watch(conditionSetupNeededProvider);
     final pending = ref.watch(pendingSleepRecordsProvider);
 
-    return ListView(
+    return AdaptiveSectionList(
       // ⭐ 2026-09-13(3차) - 아래 여백은 일정관리 탭과 같은 12.h(사용하지 않기 버튼과 광고 영역 사이 거리)
       padding: EdgeInsets.fromLTRB(16, 16, 16, 12.h),
       children: [
@@ -193,8 +195,14 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
         // 화면에는 설정 안내만 떠서 그 기록에 대해 한마디도 안 했음. 근무 일정 없이도 말할 수 있는 것
         // (어제 수면·최근 7일 평균)만 추려서 위에 먼저 보여준다.
         if (setupNeeded) ...[
-          const _SleepOnlySummaryCard(),
-          const _SetupNeededCard(),
+          if (AppLayout.of(context).isWide)
+            const Column(mainAxisSize: MainAxisSize.min, children: [
+              _SleepOnlySummaryCard(), _SetupNeededCard(),
+            ])
+          else ...[
+            const _SleepOnlySummaryCard(),
+            const _SetupNeededCard(),
+          ],
         ] else
           const _TodayConditionCard(),
         const SizedBox(height: 16),
@@ -759,7 +767,9 @@ class _SleepMiniCalendarCardState
             ),
             const SizedBox(height: 10),
             SizedBox(
-              height: 208,
+              // Three sleep slots must retain their label, time and duration
+              // lines when accessibility text grows.
+              height: 208 * (MediaQuery.textScalerOf(context).scale(11) / 11).clamp(1.0, double.infinity),
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 reverse: true,

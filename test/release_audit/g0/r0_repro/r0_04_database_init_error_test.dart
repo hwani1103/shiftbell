@@ -12,7 +12,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftbell/constants/platform_channel.dart';
 import 'package:shiftbell/services/database_service.dart';
@@ -33,7 +32,7 @@ void main() {
 
     final futureDb = await openDatabase(
       path,
-      version: 25,
+      version: 27,
       singleInstance: false,
       onCreate: (db, version) async {
         await db.execute('CREATE TABLE marker(id INTEGER PRIMARY KEY, value TEXT)');
@@ -66,7 +65,7 @@ void main() {
     );
     await guarded;
 
-    expect(awaitedError, isNotNull, reason: 'v25 → v24 다운그레이드는 호출자에게 실패해야 함');
+    expect(awaitedError, isNotNull, reason: 'v27 → v26 다운그레이드는 호출자에게 실패해야 함');
     expect(
       uncaughtErrors,
       isEmpty,

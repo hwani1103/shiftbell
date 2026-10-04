@@ -20,6 +20,7 @@ import '../models/shift_schedule.dart';
 import '../providers/calendar_theme_provider.dart';
 import '../providers/schedule_provider.dart';
 import 'calendar_theme_lab_screen.dart';
+import '../widgets/fold_calendar_text_scale.dart';
 
 class CalendarThemePickerScreen extends ConsumerStatefulWidget {
   // ⭐ "테마로 적용 누르면 바로 메인 달력탭으로 넘어가게" 요청 - 이 화면은
@@ -39,13 +40,26 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
   // 스케일/높이를 계산해서 "가운데 크게, 양옆 작고 살짝 위로 뜬" 원근감을 냄.
   late final PageController _pageController;
   late int _previewIndex;
+  bool _controllerReady = false;
+  String? _language;
+  List<CalendarThemeId> get _themes => context.availableCalendarThemes;
 
   @override
-  void initState() {
-    super.initState();
-    final current = ref.read(calendarThemeProvider);
-    _previewIndex = kAllCalendarThemeIds.indexOf(current);
-    _pageController = PageController(viewportFraction: 0.62, initialPage: _previewIndex);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final language = Localizations.localeOf(context).languageCode;
+    if (_controllerReady && language == _language) return;
+    _language = language;
+    final current = context.availableCalendarTheme(ref.read(calendarThemeProvider));
+    _previewIndex = _themes.indexOf(current);
+    if (!_controllerReady) {
+      _controllerReady = true;
+      _pageController = PageController(viewportFraction: 0.62, initialPage: _previewIndex);
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _pageController.hasClients) _pageController.jumpToPage(_previewIndex);
+      });
+    }
   }
 
   @override
@@ -56,7 +70,7 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
 
   @override
   Widget build(BuildContext context) {
-    final selected = ref.watch(calendarThemeProvider);
+    final selected = context.availableCalendarTheme(ref.watch(calendarThemeProvider));
     final deviceSize = MediaQuery.sizeOf(context);
 
     return Scaffold(
@@ -69,7 +83,7 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
         children: [
           SizedBox(height: 12.h),
           Text(
-            kAllCalendarThemeIds[_previewIndex].label(context),
+            _themes[_previewIndex].label(context),
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 4.h),
@@ -80,7 +94,7 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
           Expanded(
             child: PageView.builder(
               controller: _pageController,
-              itemCount: kAllCalendarThemeIds.length,
+              itemCount: _themes.length,
               onPageChanged: (i) => setState(() => _previewIndex = i),
               itemBuilder: (context, index) {
                 return AnimatedBuilder(
@@ -99,7 +113,7 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
                       child: Transform.scale(scale: scale, child: child),
                     );
                   },
-                  child: _themeCard(index, deviceSize, isSelected: kAllCalendarThemeIds[index] == selected),
+                  child: _themeCard(index, deviceSize, isSelected: _themes[index] == selected),
                 );
               },
             ),
@@ -111,7 +125,7 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () async {
-                  final themeId = kAllCalendarThemeIds[_previewIndex];
+                  final themeId = _themes[_previewIndex];
                   await ref.read(calendarThemeProvider.notifier).setTheme(themeId);
                   // ⭐ 위젯(Native)은 여전히 DB의 shift_colors 컬럼을 직접 읽으므로
                   // (android/.../CalendarWidgetScheduleResolver.kt - 이 부분은 아직
@@ -157,7 +171,7 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
                 },
                 style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14.h)),
                 child: Text(
-                  kAllCalendarThemeIds[_previewIndex] == selected
+                  _themes[_previewIndex] == selected
                       ? context.l10n.themeCurrentlyApplied
                       : context.l10n.themeApplyThis,
                   style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
@@ -228,7 +242,8 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
                 child: SizedBox(
                   width: deviceSize.width,
                   height: bodyHeight,
-                  child: CalendarThemeLabScreen(initialPage: index),
+                  child: FoldCalendarTextScale(
+                    child: CalendarThemeLabScreen(initialPage: kAllCalendarThemeIds.indexOf(_themes[index]))),
                 ),
               ),
             ),

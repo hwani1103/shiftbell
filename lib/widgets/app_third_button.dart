@@ -47,7 +47,9 @@ class AppThirdButton extends StatelessWidget {
             borderRadius: _radius,
             color: _enabled ? const Color(0xFFFCFCFD) : const Color(0xFFF2F2F3),
             border: Border.all(
-              color: _enabled ? kAppChipBorder.withValues(alpha: 0.25) : const Color(0xFFDADFE6),
+              color: _enabled
+                  ? kAppChipBorder.withValues(alpha: 0.25)
+                  : const Color(0xFFDADFE6),
               width: 1.2,
             ),
           ),
@@ -63,17 +65,24 @@ class AppThirdButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  DefaultTextStyle.merge(
+                  Flexible(
+                      child: DefaultTextStyle.merge(
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: _enabled ? const Color(0xFF20242B) : const Color(0xFFAEB4BD),
+                      color: _enabled
+                          ? const Color(0xFF20242B)
+                          : const Color(0xFFAEB4BD),
                       fontSize: compact ? 12 : 14,
                       fontWeight: FontWeight.w600,
                     ),
                     child: IconTheme.merge(
-                      data: IconThemeData(color: _enabled ? const Color(0xFF20242B) : const Color(0xFFAEB4BD)),
+                      data: IconThemeData(
+                          color: _enabled
+                              ? const Color(0xFF20242B)
+                              : const Color(0xFFAEB4BD)),
                       child: child,
                     ),
-                  ),
+                  )),
                 ],
               ),
             ),

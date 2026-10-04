@@ -48,23 +48,39 @@ object ScheduleNotificationScheduler {
     // 쓰는 곳: MainActivity(탭 숨김·복원 채널, 앱 시작 동기화 syncScheduleTabEnabled). 기본값 true(기존 사용자 동작 유지).
     private const val PREFS_NAME = "alarm_state"
     internal const val KEY_TAB_ENABLED = "schedule_tab_enabled"
+    private const val KEY_LAST_EFFECTIVE = "schedule_tab_last_effective"
 
     private fun prefs(context: Context) = (
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) context.createDeviceProtectedStorageContext() else context
     ).getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    fun isTabEnabled(context: Context): Boolean = prefs(context).getBoolean(KEY_TAB_ENABLED, true)
+    fun isTabEnabled(context: Context): Boolean =
+        ReleaseLocalePolicy.koreanFeatures(context) && prefs(context).getBoolean(KEY_TAB_ENABLED, true)
 
     fun setTabEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_TAB_ENABLED, enabled).commit()
+        prefs(context).edit()
+            .putBoolean(KEY_TAB_ENABLED, enabled)
+            .putBoolean(KEY_LAST_EFFECTIVE, ReleaseLocalePolicy.koreanFeatures(context) && enabled)
+            .commit()
     }
 
-    /** 앱 시작 시 Flutter 값과 맞춤 - 값이 바뀐 경우에만 예약을 거두거나 되살림. */
+    /** 앱 시작·언어 전환 때 최종 실제 노출 상태와 맞춤. */
     fun syncTabEnabled(context: Context, enabled: Boolean) {
-        val previous = isTabEnabled(context)
+        // 현재 locale로 previous를 계산하면 KO→EN 직후 이미 false여서 기존 KO 예약을
+        // 취소하지 못한다. 직전 동기화의 유효 상태를 별도로 저장해 locale 변화를 포착한다.
+        // 구버전에는 이 키가 없으므로 저장된 탭 의도를 초기값으로 사용한다.
+        val state = prefs(context)
+        val previous = state.getBoolean(
+            KEY_LAST_EFFECTIVE, state.getBoolean(KEY_TAB_ENABLED, true)
+        )
         setTabEnabled(context, enabled)
-        if (previous == enabled) return
-        if (enabled) rescheduleAllFromDb(context) else cancelAllFromDb(context)
+        val effective = isTabEnabled(context)
+        if (previous == effective) return
+        if (effective) rescheduleAllFromDb(context) else cancelAllFromDb(context)
+    }
+
+    fun syncLocale(context: Context) {
+        syncTabEnabled(context, prefs(context).getBoolean(KEY_TAB_ENABLED, true))
     }
 
     fun schedule(

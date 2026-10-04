@@ -123,12 +123,15 @@ class DisableTabButton extends ConsumerWidget {
                   Icon(Icons.visibility_off_outlined,
                       size: 16, color: Colors.red.shade400),
                   const SizedBox(width: 6),
-                  Text(
-                    context.l10n.disableTabButtonLabel(tabLabel),
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.red.shade400,
+                  Flexible(
+                    child: Text(
+                      context.l10n.disableTabButtonLabel(tabLabel),
+                      softWrap: true,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red.shade400,
+                      ),
                     ),
                   ),
                 ],

@@ -1,6 +1,11 @@
+import '../utils/alarm_wall_time.dart';
+import '../utils/alarm_clock_label.dart';
+import 'package:intl/intl.dart';
+import '../widgets/adaptive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/database_service.dart';
+import '../services/app_analytics.dart';
 import '../models/alarm_history.dart';
 import '../l10n/l10n_extensions.dart';
 import '../utils/weekday_util.dart';
@@ -28,6 +33,7 @@ class AlarmWithHistory {
   final AlarmHistory? latestHistory;
   final bool isFuture;
   final int dayOffset;
+  final bool isOneTap;
 
   AlarmWithHistory({
     required this.date,
@@ -36,10 +42,9 @@ class AlarmWithHistory {
     this.latestHistory,
     required this.isFuture,
     this.dayOffset = 0,
+    this.isOneTap = false,
   });
 
-  // 유니크 키 생성 (날짜 + 시간)
-  String get uniqueKey => '${date.year}-${date.month}-${date.day}_$time';
 }
 
 class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
@@ -60,14 +65,23 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
     try {
       final now = DateTime.now();
 
-      // 1. 모든 알람 이력 가져오기
+      // 1. 생성 원장으로 출처를 먼저 확정. 스누즈도 같은 원본 ID를 유지한다.
+      final creationLogs = await DatabaseService.instance.getAlarmCreationLog(limit: 5000);
+      final db = await DatabaseService.instance.database;
+      final oneTapIds = (await db.rawQuery(
+          "SELECT DISTINCT alarm_id FROM alarm_creation_log WHERE source = 'custom_preset'"))
+          .map((row) => row['alarm_id']).toSet();
+      String keyFor(int id, DateTime date, String time) =>
+          '${id}_${date.millisecondsSinceEpoch ~/ 1000}';
+
+      // 2. 모든 알람 이력 가져오기
       final allHistory = await DatabaseService.instance.getAllAlarmHistory();
 
-      // 2. 유니크 알람별로 그룹화 (날짜 + 시간 기준)
+      // 원본 ID와 예약 회차별로 그룹화. 같은 분의 대체 알람은 서로 다른 ID다.
       final Map<String, AlarmWithHistory> alarmMap = {};
 
       for (var history in allHistory) {
-        final key = '${history.scheduledDate.year}-${history.scheduledDate.month}-${history.scheduledDate.day}_${history.scheduledTime}';
+        final key = keyFor(history.alarmId, history.scheduledDate, history.scheduledTime);
 
         // 이미 존재하면 최신 이력으로 업데이트 (created_at DESC로 정렬되어 첫 번째가 최신)
         if (!alarmMap.containsKey(key)) {
@@ -78,6 +92,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
             latestHistory: history,
             isFuture: history.scheduledDate.isAfter(DateTime(now.year, now.month, now.day)),
             dayOffset: history.dayOffset,
+            isOneTap: oneTapIds.contains(history.alarmId),
           );
         }
       }
@@ -87,22 +102,29 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       // 수정되거나 삭제되는 순간 화면에서도 같이 사라져서 "생성된 적은 있었다"는
       // 사실 자체를 확인할 수 없었음. alarm_creation_log는 영구 보존되므로, 아직
       // 결과가 없는(=아직 안 울렸거나 예정된) 알람도 계속 남아서 보임.
-      final creationLogs = await DatabaseService.instance.getAlarmCreationLog(limit: 5000);
-
       for (var log in creationLogs) {
         final dateRaw = log['scheduled_date'];
         if (dateRaw == null) continue;
         DateTime? date;
         try {
-          date = DateTime.parse(dateRaw.toString());
+          date = parseAlarmDate(dateRaw.toString());
         } catch (e) {
           continue;
         }
         final time = log['scheduled_time']?.toString() ?? '00:00';
-        final key = '${date.year}-${date.month}-${date.day}_$time';
+        final alarmId = log['alarm_id'] as int;
+        final key = keyFor(alarmId, date, time);
+        final oneTap = oneTapIds.contains(alarmId);
 
         // 이미 이력(결과)이 있으면 건너뛰기 (이력이 우선)
-        if (!alarmMap.containsKey(key)) {
+        if (alarmMap.containsKey(key)) {
+          final existing = alarmMap[key]!;
+          if (oneTap && !existing.isOneTap) {
+            alarmMap[key] = AlarmWithHistory(date: existing.date, time: existing.time,
+                shiftType: existing.shiftType, latestHistory: existing.latestHistory,
+                isFuture: existing.isFuture, dayOffset: existing.dayOffset, isOneTap: true);
+          }
+        } else {
           alarmMap[key] = AlarmWithHistory(
             date: date,
             time: time,
@@ -110,6 +132,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
             latestHistory: null,
             isFuture: date.isAfter(DateTime(now.year, now.month, now.day)),
             dayOffset: (log['day_offset'] as int?) ?? 0,
+            isOneTap: oneTap,
           );
         }
       }
@@ -135,6 +158,10 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
   }
 
   String _formatDateTime(BuildContext context, DateTime date, String time) {
+    time = '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    if (!context.usesKoreanFeatures) {
+      return '${DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(date)} $time';
+    }
     // 요일 라벨 (로케일 인식)
     final weekday = weekdayLabel(context, weekdayIndexOf(date));
 
@@ -162,6 +189,10 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         return context.l10n.alarmScheduleChanged;
       case 'superseded_by_next_alarm':
         return context.l10n.alarmSupersededByNextAlarm;
+      case 'snooze_skipped_existing_alarm':
+        return Localizations.localeOf(context).languageCode == 'ko'
+            ? '5분 후에 다른 알람이 있어 종료'
+            : 'Dismissed: another alarm at snooze time';
       default:
         return context.l10n.commonOther;
     }
@@ -240,6 +271,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         // 테스트용으로 만들어졌던 것)은 alarm_creation_log가 그대로 남아서 이
         // 화면이 다시 채워져 버렸었음 - 그 함수 대신 이걸 씀.
         await DatabaseService.instance.resetAllAlarmHistoryAndLog();
+        AppAnalytics.track(AnalyticsEvent.alarmHistoryCleared);
         await _loadData();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -278,7 +310,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       // 여백이 맞았지만 뷰포트 자체는 화면 맨 밑까지 그대로라 - 스크롤 중간에
       // 화면 맨 아래에 걸리는 카드는 네비게이션 바 밑에 깔려서 그려지고 있었음.
       // SafeArea는 뷰포트 자체를 줄여주므로 이 문제를 근본적으로 해결함.
-      body: SafeArea(
+      body: AdaptiveFormBody(child: SafeArea(
         top: false,
         child: Column(
           children: [
@@ -306,7 +338,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
             Expanded(child: _buildBody(context, colorScheme)),
           ],
         ),
-      ),
+      )),
     );
   }
 
@@ -374,10 +406,16 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                       fontWeight: FontWeight.bold,
                                       color: isFuture ? colorScheme.primary : colorScheme.onSurface,
                                     ),
-                                    maxLines: 1,
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  if (alarmWithHistory.shiftType != null) ...[
+                                  if (alarmClockLabel(context, alarmWithHistory.date) case final String occurrence)
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 3.h),
+                                      child: Text(occurrence, style: TextStyle(
+                                        fontSize: 12.sp, color: colorScheme.onSurfaceVariant)),
+                                    ),
+                                  if (alarmWithHistory.shiftType != null || alarmWithHistory.isOneTap) ...[
                                     SizedBox(height: 4.h),
                                     // ⭐ 근무명 옆에 전날/당일/다음날 Chip - 같은 근무라도
                                     // 어느 오프셋으로 만든 알람이었는지 이력에서 구분되게 함.
@@ -386,7 +424,9 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                       children: [
                                         Flexible(
                                           child: Text(
-                                            alarmWithHistory.shiftType!,
+                                            alarmWithHistory.isOneTap
+                                                ? context.l10n.customAlarmLabel
+                                                : alarmWithHistory.shiftType!,
                                             style: TextStyle(
                                               fontSize: 12.sp,
                                               color: colorScheme.onSurfaceVariant,
@@ -396,7 +436,8 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                           ),
                                         ),
                                         SizedBox(width: 6.w),
-                                        DayOffsetBadge(dayOffset: alarmWithHistory.dayOffset),
+                                        if (!alarmWithHistory.isOneTap)
+                                          DayOffsetBadge(dayOffset: alarmWithHistory.dayOffset),
                                       ],
                                     ),
                                   ],

@@ -100,6 +100,9 @@ class ShiftPatternAnalyzer {
 
   DateTime _dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
+  DateTime _calendarDay(DateTime d, int offset) =>
+      DateTime(d.year, d.month, d.day + offset);
+
   /// 특정 날짜의 ShiftInstance 계산.
   ShiftInstance instanceForDate(DateTime date) {
     final d = _dayOnly(date);
@@ -118,10 +121,17 @@ class ShiftPatternAnalyzer {
       return ShiftInstance(date: d, shiftName: name, category: ShiftTimeCategory.unspecified);
     }
 
-    final start = d.add(Duration(minutes: range.startMinutes));
-    final end = range.crossesMidnight
-        ? d.add(Duration(days: 1, minutes: range.endMinutes))
-        : d.add(Duration(minutes: range.endMinutes));
+    // 입력은 현지 시계 시각이다. 자정부터 Duration을 더하면 DST 전환일에
+    // 07:00 근무가 08:00처럼 표시될 수 있으므로 달력 필드로 만든다.
+    DateTime atLocalClock(int dayOffset, int minutes) => DateTime(
+          d.year,
+          d.month,
+          d.day + dayOffset,
+          minutes ~/ 60,
+          minutes % 60,
+        );
+    final start = atLocalClock(0, range.startMinutes);
+    final end = atLocalClock(range.crossesMidnight ? 1 : 0, range.endMinutes);
 
     return ShiftInstance(
       date: d,
@@ -137,7 +147,7 @@ class ShiftPatternAnalyzer {
     final result = <ShiftInstance>[];
     final s = _dayOnly(start);
     final e = _dayOnly(end);
-    for (var d = s; !d.isAfter(e); d = d.add(const Duration(days: 1))) {
+    for (var d = s; !d.isAfter(e); d = _calendarDay(d, 1)) {
       result.add(instanceForDate(d));
     }
     return result;
@@ -174,7 +184,7 @@ class ShiftPatternAnalyzer {
     var d = _dayOnly(date);
     while (count < maxLookbackDays && instanceForDate(d).category == ShiftTimeCategory.night) {
       count++;
-      d = d.subtract(const Duration(days: 1));
+      d = _calendarDay(d, -1);
     }
     return (days: count, capped: count >= maxLookbackDays);
   }
@@ -187,7 +197,7 @@ class ShiftPatternAnalyzer {
     var d = _dayOnly(date);
     while (count < maxLookbackDays && instanceForDate(d).isWorkDay) {
       count++;
-      d = d.subtract(const Duration(days: 1));
+      d = _calendarDay(d, -1);
     }
     return (days: count, capped: count >= maxLookbackDays);
   }
@@ -204,7 +214,7 @@ class ShiftPatternAnalyzer {
       final duration = inst.durationMinutes;
       if (!inst.isWorkDay || duration == null || duration < thresholdMinutes) break;
       count++;
-      d = d.subtract(const Duration(days: 1));
+      d = _calendarDay(d, -1);
     }
     return (days: count, capped: count >= maxLookbackDays);
   }
@@ -216,7 +226,7 @@ class ShiftPatternAnalyzer {
   ({DateTime end, DateTime start})? recoveryWindowContaining(DateTime date, {int lookbackDays = 14, int lookaheadDays = 14}) {
     ShiftInstance? lastWork;
     for (var i = 0; i <= lookbackDays; i++) {
-      final inst = instanceForDate(date.subtract(Duration(days: i)));
+      final inst = instanceForDate(_calendarDay(date, -i));
       if (inst.isWorkDay && inst.end != null) {
         lastWork = inst;
         break;
@@ -227,7 +237,7 @@ class ShiftPatternAnalyzer {
     ShiftInstance? nextWork;
     // 다음 근무는 lastWork 당일 다음날부터 탐색(당일 자체가 lastWork일 수 있으므로)
     for (var i = 1; i <= lookaheadDays; i++) {
-      final inst = instanceForDate(lastWork.date.add(Duration(days: i)));
+      final inst = instanceForDate(_calendarDay(lastWork.date, i));
       if (inst.isWorkDay && inst.start != null) {
         nextWork = inst;
         break;
@@ -338,7 +348,7 @@ class ShiftPatternAnalyzer {
     var knownDays = 0;
     var totalMinutes = 0;
     for (var i = 1; i <= irregularLookbackDays; i++) {
-      final day = d.subtract(Duration(days: i));
+      final day = _calendarDay(d, -i);
       final name = schedule.getShiftForDate(day);
       if (name == kUnsetShiftSentinel) continue;
       knownDays++;
@@ -351,7 +361,7 @@ class ShiftPatternAnalyzer {
   /// weekStart(월요일)~weekStart+6(일요일)의 패턴 요약.
   WeeklyPatternSummary weeklySummary(DateTime weekStart) {
     final start = _dayOnly(weekStart);
-    final end = start.add(const Duration(days: 6));
+    final end = _calendarDay(start, 6);
     final instances = instancesForRange(start, end);
 
     final counts = <ShiftTimeCategory, int>{

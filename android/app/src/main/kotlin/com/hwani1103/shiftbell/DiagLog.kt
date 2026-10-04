@@ -10,11 +10,11 @@ import java.util.Locale
 
 /**
  * ⭐ 2026-09-23 (1.0.24 C) - 문제 진단 기록. 사용자가 "알람이 안 울렸어요/백업이 안 돼요"라고 알려올 때,
- * 설정의 "문제 신고용 진단 파일 만들기"로 내보낸 파일 하나로 **권한 / 제조사·OS 백그라운드 제한 / 앱 코드 결함**을 가르기 위함.
+ * Download/ShiftBell/log의 최신 진단 파일 하나로 **권한 / 제조사·OS 백그라운드 제한 / 앱 코드 결함**을 가르기 위함.
  * 해석 방법은 docs/진단로그_해석_매뉴얼.md(이벤트 이름 ↔ 이 파일을 부르는 소스 위치 표 포함).
  *
  * 규칙
- *  - **기기 안에만** 기록(Device Protected 저장소 → 잠금 해제 전 알람 경로에서도 기록 가능). 외부 전송은 사용자가 직접 내보낼 때뿐.
+ *  - Device Protected 저장소에 먼저 기록(잠금 해제 전 알람 경로 지원). 공유 폴더의 파일은 백그라운드에서 갱신하며 자동 전송하지 않음.
  *  - 파일 2개(diag_0.log/diag_1.log)를 번갈아 씀. 쓰는 파일이 [MAX_FILE_BYTES]를 넘으면 다른 파일을 비우고 넘어감 → 총 약 512KB 상한.
  *  - 한 줄 형식: `2026-09-23T06:59:58.120+0900 | EVENT | key=value key=value`
  *  - **기록 금지**: 메모·일정 내용, 근무명, 친구 이름, 공유 코드. 알람은 ID·시각·종류만.
@@ -65,6 +65,7 @@ object DiagLog {
                 // 같은 밀리초 안에 두 파일이 바뀌어도 순서가 흔들리지 않게 현재 파일 시각을 명시
                 current.setLastModified(maxOf(clock(), (if (current == a) b else a).lastModified() + 1))
             }
+            DiagReport.scheduleRefresh(context)
         } catch (e: Exception) {
             Log.w(TAG, "진단 기록 실패(무시): $event", e)
         }
@@ -77,6 +78,6 @@ object DiagLog {
             listOf(a, b).filter { it.exists() }.sortedBy { it.lastModified() }.joinToString("") { it.readText() }
         }
     } catch (e: Exception) {
-        "(진단 기록을 읽지 못함: ${e.message})\n"
+        "(진단 기록을 읽지 못함: ${e.javaClass.simpleName})\n"
     }
 }

@@ -82,6 +82,24 @@ extension CalendarThemeIdX on CalendarThemeId {
 
 const kDefaultCalendarThemeId = CalendarThemeId.mainWhite;
 
+const kEnglishCalendarThemeIds = [
+  CalendarThemeId.mainWhite,
+  CalendarThemeId.mainDark,
+  CalendarThemeId.minimal,
+  CalendarThemeId.materialCard,
+  CalendarThemeId.diary,
+  CalendarThemeId.boldGrid,
+];
+
+extension CalendarThemeLocale on BuildContext {
+  List<CalendarThemeId> get availableCalendarThemes =>
+      usesKoreanFeatures ? kAllCalendarThemeIds : kEnglishCalendarThemeIds;
+
+  // Keep the saved Korean choice intact when switching app languages.
+  CalendarThemeId availableCalendarTheme(CalendarThemeId saved) =>
+      availableCalendarThemes.contains(saved) ? saved : kDefaultCalendarThemeId;
+}
+
 // ⭐ 캐러셀/위젯 등에서 순서대로 순회할 때 쓰는 고정 목록. 2026-09-05 이전엔
 // CalendarThemeId.values(선언 순서 그대로)를 그냥 썼는데, "달력 테마 캐러셀
 // 순서를 재배치해달라"는 요청(다이어리를 4~5번째로, 범례가 필수인 언더라인/

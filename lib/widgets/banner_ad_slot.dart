@@ -4,8 +4,8 @@
 //
 // 이 위젯의 계약(이 두 가지는 앞으로도 반드시 지켜야 함):
 //
-// 1) **항상 정확히 같은 높이를 차지한다.** 광고 로드 성공/실패/로딩중/미표시와 무관하게
-//    AdService.bannerHeight 그대로. 광고가 없다고 높이가 0이 되면 달력이 위아래로
+// 1) **같은 창 크기에서는 높이를 유지한다.** 광고 로드 성공/실패/로딩중/미표시와 무관하다.
+//    접힘·펼침으로 슬롯 폭이 바뀔 때만 SDK의 새 크기를 반영한다. 광고가 없다고 높이가 0이 되면 달력이 위아래로
 //    튀는데, 그걸 막는 게 이 위젯의 존재 이유임.
 //
 // 2) **한 번 만들어지면 탭을 옮겨도 파괴되지 않는다.** main.dart에서 이 위젯을
@@ -19,6 +19,7 @@
 // "안에" 그려지므로 켜고 꺼도 레이아웃은 완전히 동일함 - 즉 지금 이 색 영역을 기준으로
 // 달력 크기를 잡아두면, 나중에 실제 광고를 켰을 때 그대로 맞음.
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -36,15 +37,31 @@ class BannerAdSlot extends StatefulWidget {
 class _BannerAdSlotState extends State<BannerAdSlot> {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
+  double _height = AdService.bannerHeight;
+  int _generation = 0;
+  int? _width;
+  Orientation? _orientation;
+  Timer? _resizeTimer;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadAd();
+  void _scheduleSize(int width, Orientation orientation) {
+    if (_width == width && _orientation == orientation) return;
+    _width = width;
+    _orientation = orientation;
+    final generation = ++_generation;
+    _resizeTimer?.cancel();
+    // Wait until fold animation settles; don't request an ad per animation frame.
+    _resizeTimer = Timer(const Duration(milliseconds: 200),
+        () => _loadAd(width, orientation, generation));
   }
 
-  void _loadAd() async {
-    final size = AdService.bannerAdSize;
+  Future<void> _loadAd(int width, Orientation orientation, int generation) async {
+    if (!mounted || generation != _generation) return;
+    final old = _bannerAd;
+    setState(() { _bannerAd = null; _isLoaded = false; });
+    await old?.dispose();
+    final size = await AdService.sizeForSlot(width, orientation);
+    if (!mounted || generation != _generation) return;
+    if (size != null) setState(() => _height = size.height.toDouble());
 
     // 높이 계산에 실패했거나 SDK 초기화가 안 됐으면 광고를 만들지 않음.
     // 자리(높이)는 아래 build에서 fallback 높이로 이미 확보되므로 레이아웃엔 영향 없음.
@@ -53,20 +70,24 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
       debugPrint('⏭️ 배너 광고 생략(운영 광고 ID 미설정) - 자리만 확보함');
       return;
     }
+    // Wait here, outside the app startup gate. A late SDK/consent response must
+    // still load the ad; fold/resize/dispose invalidates obsolete requests.
+    await AdService.warmUp();
+    if (!mounted || generation != _generation) return;
     if (size == null || !AdService.isInitialized) {
       debugPrint('⏭️ 배너 광고 생략(크기 미확정 또는 SDK 미초기화) - 자리만 확보함');
       return;
     }
     // ⭐ 2026-09-22 - EEA/영국/스위스 등 UMP 동의가 필요한 사용자에게 동의 전
-    // 광고를 요청하지 않음(ad_consent_service.dart). AdService.warmUp()이 이미
-    // 첫 프레임 전에 동의 수집을 끝내놓으므로 여기선 캐시된 상태만 빠르게 읽음 -
+    // 광고를 요청하지 않음(ad_consent_service.dart). 위 warmUp 완료 후에만
+    // 동의 상태를 읽고 광고를 요청한다.
     // 한국 등 동의가 애초에 불필요한 지역은 이 값이 거의 즉시 true라 체감 지연 없음.
     final allowed = await AdConsentService.canRequestAds();
     if (!allowed) {
       debugPrint('⏭️ 배너 광고 생략(광고 동의 미확보) - 자리만 확보함');
       return;
     }
-    if (!mounted) return;
+    if (!mounted || generation != _generation) return;
 
     final ad = BannerAd(
       size: size,
@@ -74,14 +95,14 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (_) {
-          if (!mounted) return;
+          if (!mounted || generation != _generation) return;
           setState(() => _isLoaded = true);
         },
         onAdFailedToLoad: (ad, error) {
           debugPrint('⚠️ 배너 광고 로드 실패(자리는 그대로 유지됨): $error');
           ad.dispose();
-          if (!mounted) return;
-          setState(() => _isLoaded = false);
+          if (!mounted || generation != _generation) return;
+          setState(() { _bannerAd = null; _isLoaded = false; });
         },
       ),
     );
@@ -92,16 +113,20 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
 
   @override
   void dispose() {
+    ++_generation;
+    _resizeTimer?.cancel();
     _bannerAd?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final height = AdService.bannerHeight;
-
+    return LayoutBuilder(builder: (context, constraints) {
+    final height = _height;
+    final orientation = MediaQuery.orientationOf(context);
+    _scheduleSize(constraints.maxWidth.floor(), orientation);
     return SizedBox(
-      // ⭐ 이 높이가 이 위젯의 전부. 아래 내용물이 무엇이든 이 값은 안 변함.
+      // 로드 상태로 높이를 바꾸지 않는다. 창 크기에 따른 측정값만 반영한다.
       height: height,
       width: double.infinity,
       child: Stack(
@@ -153,5 +178,6 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
         ],
       ),
     );
+    });
   }
 }

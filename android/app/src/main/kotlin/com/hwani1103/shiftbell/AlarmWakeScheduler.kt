@@ -126,17 +126,22 @@ object AlarmWakeScheduler {
     }
 
     internal fun parse(dateStr: String): Long? = try {
-        SimpleDateFormat(DATE_FORMAT, Locale.US).parse(dateStr)?.time
+        if (AlarmInstant.hasOffset(dateStr)) AlarmInstant.parse(dateStr)
+        else SimpleDateFormat(DATE_FORMAT, Locale.US).parse(dateStr)?.time
     } catch (e: Exception) {
         Log.e(TAG, "❌ 알람 날짜 파싱 실패: $dateStr", e)
         null
     }
 
-    private fun lookup(db: SQLiteDatabase, id: Int): Lookup {
-        db.query("alarms", arrayOf("date", "shift_type"), "id = ?", arrayOf(id.toString()), null, null, null).use { c ->
+    private fun lookup(context: Context, db: SQLiteDatabase, id: Int): Lookup {
+        db.query("alarms", arrayOf("date", "shift_type", "type", "preset_slot"), "id = ?", arrayOf(id.toString()), null, null, null).use { c ->
             if (!c.moveToFirst()) return Lookup(false, null)
             val timestamp = c.getString(0)?.let { parse(it) } ?: return Lookup(true, null)
-            return Lookup(true, WakeRow(id, timestamp, c.getString(1) ?: "알람"))
+            val label = c.getString(1) ?: if (c.getString(2) == "custom" || !c.isNull(3))
+                context.getString(R.string.one_tap_alarm_label) else context.getString(R.string.alarm_default_label)
+            // Offset-bearing Dart/backup dates can retain fractional seconds.
+            // Both DB comparisons and OS intents use the same second precision.
+            return Lookup(true, WakeRow(id, normalize(timestamp), label))
         }
     }
 
@@ -158,7 +163,7 @@ object AlarmWakeScheduler {
             return scheduleUnverified(context, id, timestamp, label, scheduleFn)
         }
         val found = try {
-            lookup(db, id)
+            lookup(context, db, id)
         } catch (e: Exception) {
             Log.e(TAG, "예약 전 행 확인 실패 - 우선 예약 후 재확인: id=$id", e)
             return scheduleUnverified(context, id, timestamp, label, scheduleFn)
@@ -179,7 +184,7 @@ object AlarmWakeScheduler {
             return Outcome.SKIPPED_STALE
         }
         return try {
-            scheduleFn(context, id, timestamp, label)
+            scheduleFn(context, id, timestamp, row.label)
             clearFailure(context, id)
             DiagLog.log(context, "SCHEDULE_OK", "id" to id, "at" to DiagLog.format(normalize(timestamp), "", emptyList()).substringBefore(" |"))
             Outcome.SCHEDULED
@@ -223,7 +228,7 @@ object AlarmWakeScheduler {
             return Outcome.FAILED
         }
         val found = try {
-            lookup(db, id)
+            lookup(context, db, id)
         } catch (e: Exception) {
             Log.e(TAG, "취소 전 행 확인 실패 - 현재 예약 보존: id=$id", e)
             recordFailure(context, id)
@@ -264,7 +269,7 @@ object AlarmWakeScheduler {
             null
         } ?: return ReceiveDecision.RING
         val found = try {
-            lookup(db, id)
+            lookup(context, db, id)
         } catch (e: Exception) {
             Log.e(TAG, "수신 판정 행 조회 실패 - 울림: id=$id", e)
             return ReceiveDecision.RING
@@ -316,7 +321,7 @@ object AlarmWakeScheduler {
         Log.d(TAG, "🔁 OS 반영 실패 재시도: $ids")
         for (id in ids) {
             val found = try {
-                lookup(db, id)
+                lookup(context, db, id)
             } catch (e: Exception) {
                 Log.e(TAG, "재시도 행 조회 실패: id=$id", e)
                 continue

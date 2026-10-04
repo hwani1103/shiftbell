@@ -20,9 +20,11 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "ko-rKR") // Exercise scheduling, not the English feature gate.
 class G1ScheduleResultTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()

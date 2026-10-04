@@ -1,3 +1,4 @@
+import '../widgets/adaptive_layout.dart';
 // screens/friend_list_screen.dart
 //
 // ⭐ 일정 공유 메인 화면(구 "친구 공유") - 메인 바텀 네비게이션 4번째 탭으로 승격됨
@@ -61,38 +62,48 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(context.l10n.friendAdd, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+          title: Text(context.l10n.friendAdd,
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${context.l10n.friendName} ${context.l10n.friendNameOptionalHint}', style: TextStyle(fontSize: 12.sp)),
+              Text(
+                  '${context.l10n.friendName} ${context.l10n.friendNameOptionalHint}',
+                  style: TextStyle(fontSize: 12.sp)),
               SizedBox(height: 6.h),
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
                   hintText: context.l10n.friendNameHintExample,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.r)),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                 ),
               ),
               SizedBox(height: 14.h),
-              Text(context.l10n.friendShareCodeFromFriend, style: TextStyle(fontSize: 12.sp)),
+              Text(context.l10n.friendShareCodeFromFriend,
+                  style: TextStyle(fontSize: 12.sp)),
               SizedBox(height: 6.h),
               TextField(
                 controller: codeController,
                 maxLines: 3,
                 decoration: InputDecoration(
                   hintText: 'SB2:...',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.r)),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
                 ),
                 style: TextStyle(fontSize: 11.sp, fontFamily: 'monospace'),
               ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: Text(context.l10n.commonCancel)),
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(context.l10n.commonCancel)),
             ElevatedButton(
               onPressed: () async {
                 final ok = await ref.read(friendProvider.notifier).addFriend(
@@ -102,7 +113,10 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(ok ? context.l10n.friendAddedToast : context.l10n.friendInvalidCodeOrDuplicate)),
+                    SnackBar(
+                        content: Text(ok
+                            ? context.l10n.friendAddedToast
+                            : context.l10n.friendInvalidCodeOrDuplicate)),
                   );
                 }
               },
@@ -118,7 +132,8 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
   // 대체 안내 → FriendCalendarView로 이동)을 메인 달력탭의 "친구 일정 바로가기"
   // 버튼도 그대로 써야 해서 utils/friend_open_util.dart로 뺌 - 아래 호출부만
   // 그대로 유지(동작 변경 없음).
-  Future<void> _openFriend(BuildContext context, WidgetRef ref, FriendEntry friend) =>
+  Future<void> _openFriend(
+          BuildContext context, WidgetRef ref, FriendEntry friend) =>
       openFriendCalendar(context, ref, friend);
 
   @override
@@ -129,7 +144,8 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
     return GestureDetector(
       // ⭐ 6번 기능: 좌→우 스와이프로 달력탭 이동 (settings_tab.dart와 동일한 방향/임계값)
       onHorizontalDragEnd: (details) {
-        if (widget.onSwipeToCalendar != null && details.primaryVelocity != null) {
+        if (widget.onSwipeToCalendar != null &&
+            details.primaryVelocity != null) {
           // 좌→우 스와이프 (velocity > 0)
           if (details.primaryVelocity! > 500) {
             widget.onSwipeToCalendar!();
@@ -137,116 +153,159 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
         }
       },
       child: Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.friendShareTitle, style: TextStyle(fontSize: 18.sp)),
-        // ⭐ 상단 새로고침 버튼 삭제 - initState의 자동 새로고침 + 아래
-        // RefreshIndicator(당겨서 새로고침)로 충분하고, 버튼이 있으면 사용자가
-        // 습관적으로 눌러 불필요한 Firestore 읽기가 반복되기 쉬웠음.
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 16.w, 16.w, 4.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyShareCodeScreen())),
-                  icon: Icon(Icons.qr_code, size: 18.sp),
-                  label: Text(context.l10n.friendShareMyScheduleTitle, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                  style: OutlinedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12.h)),
-                ),
-                SizedBox(height: 6.h),
-                Text(
-                  context.l10n.friendShareChannelsExplainer,
-                  style: TextStyle(fontSize: 12.5.sp, color: colorScheme.onSurfaceVariant),
-                ),
-                SizedBox(height: 16.h),
-                ElevatedButton.icon(
-                  onPressed: () => _showAddFriendDialog(context, ref),
-                  icon: Icon(Icons.person_add_alt, size: 18.sp),
-                  label: Text(context.l10n.friendAdd, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                  style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 12.h)),
-                ),
-                SizedBox(height: 6.h),
-                Text(
-                  context.l10n.friendEnterShareCode,
-                  style: TextStyle(fontSize: 12.5.sp, color: colorScheme.onSurfaceVariant),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 8.h),
-          const Divider(height: 1),
-          Expanded(
-            child: friends.isEmpty
-                ? Center(
-                    child: Text(context.l10n.friendNoneAddedYet, style: TextStyle(fontSize: 14.sp, color: colorScheme.outline)),
-                  )
-                : RefreshIndicator(
-                    // ⭐ 당겨서 새로고침은 사용자가 명시적으로 요청한 액션이라
-                    // force:true로 스로틀 무시하고 항상 새로 받아옴.
-                    onRefresh: () => ref.read(friendProvider.notifier).refreshAll(force: true),
-                    child: ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                      itemCount: friends.length,
-                      itemBuilder: (context, index) {
-                        final friend = friends[index];
-                        final displayName = friend.name.isEmpty ? context.l10n.friendDefaultDisplayName : friend.name;
-                        return Card(
-                          margin: EdgeInsets.symmetric(vertical: 4.h),
-                          child: ListTile(
-                            title: Text(
-                              context.l10n.friendScheduleOf(displayName),
-                              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
-                            ),
-                            subtitle: friend.availability ==
-                                    FriendAvailability.unconfirmed
-                                ? Text(
-                                    friend.data == null
-                                        ? context.l10n.friendLoadFailedCheckNetwork
-                                        : context.l10n.friendShowingCachedSchedule,
-                                    style: TextStyle(
-                                        fontSize: 11.5.sp,
-                                        color: colorScheme.onSurfaceVariant),
-                                  )
-                                : friend.availability ==
-                                        FriendAvailability.invalid
-                                    ? Text(
-                                        context.l10n.friendLoadFailedDetailed,
-                                        style: TextStyle(
-                                            fontSize: 11.5.sp,
-                                            color: colorScheme.error),
-                                      )
-                                    : null,
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete_outline, color: colorScheme.error),
-                              onPressed: () async {
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text(context.l10n.friendRemove),
-                                    content: Text(context.l10n.friendRemoveConfirm(displayName)),
-                                    actions: [
-                                      TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.commonCancel)),
-                                      TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.commonDelete)),
-                                    ],
-                                  ),
-                                );
-                                if (confirm == true) {
-                                  await ref.read(friendProvider.notifier).removeFriend(friend.id);
-                                }
-                              },
-                            ),
-                            onTap: () => _openFriend(context, ref, friend),
-                          ),
-                        );
-                      },
-                    ),
+        appBar: AppBar(
+          title: Text(context.l10n.friendShareTitle,
+              style: TextStyle(fontSize: 18.sp)),
+          // ⭐ 상단 새로고침 버튼 삭제 - initState의 자동 새로고침 + 아래
+          // RefreshIndicator(당겨서 새로고침)로 충분하고, 버튼이 있으면 사용자가
+          // 습관적으로 눌러 불필요한 Firestore 읽기가 반복되기 쉬웠음.
+        ),
+        body: SafeArea(top: false, child: AdaptiveFormBody(child: Column(
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                  maxHeight: MediaQuery.sizeOf(context).height * 0.52),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 16.w, 16.w, 4.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const MyShareCodeScreen())),
+                        icon: Icon(Icons.qr_code, size: 18.sp),
+                        label: Text(context.l10n.friendShareMyScheduleTitle,
+                            style: TextStyle(
+                                fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                        style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 12.h)),
+                      ),
+                      SizedBox(height: 6.h),
+                      Text(
+                        context.l10n.friendShareChannelsExplainer,
+                        style: TextStyle(
+                            fontSize: 12.5.sp,
+                            color: colorScheme.onSurfaceVariant),
+                      ),
+                      SizedBox(height: 16.h),
+                      ElevatedButton.icon(
+                        onPressed: () => _showAddFriendDialog(context, ref),
+                        icon: Icon(Icons.person_add_alt, size: 18.sp),
+                        label: Text(context.l10n.friendAdd,
+                            style: TextStyle(
+                                fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                        style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 12.h)),
+                      ),
+                      SizedBox(height: 6.h),
+                      Text(
+                        context.l10n.friendEnterShareCode,
+                        style: TextStyle(
+                            fontSize: 12.5.sp,
+                            color: colorScheme.onSurfaceVariant),
+                      ),
+                    ],
                   ),
-          ),
-        ],
-      ),
+                ),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            const Divider(height: 1),
+            Expanded(
+              child: friends.isEmpty
+                  ? Center(
+                      child: Text(context.l10n.friendNoneAddedYet,
+                          style: TextStyle(
+                              fontSize: 14.sp, color: colorScheme.outline)),
+                    )
+                  : RefreshIndicator(
+                      // ⭐ 당겨서 새로고침은 사용자가 명시적으로 요청한 액션이라
+                      // force:true로 스로틀 무시하고 항상 새로 받아옴.
+                      onRefresh: () => ref
+                          .read(friendProvider.notifier)
+                          .refreshAll(force: true),
+                      child: ListView.builder(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 12.w, vertical: 8.h),
+                        itemCount: friends.length,
+                        itemBuilder: (context, index) {
+                          final friend = friends[index];
+                          final displayName = friend.name.isEmpty
+                              ? context.l10n.friendDefaultDisplayName
+                              : friend.name;
+                          return Card(
+                            margin: EdgeInsets.symmetric(vertical: 4.h),
+                            child: ListTile(
+                              title: Text(
+                                context.l10n.friendScheduleOf(displayName),
+                                style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              subtitle: friend.availability ==
+                                      FriendAvailability.unconfirmed
+                                  ? Text(
+                                      friend.data == null
+                                          ? context
+                                              .l10n.friendLoadFailedCheckNetwork
+                                          : context
+                                              .l10n.friendShowingCachedSchedule,
+                                      style: TextStyle(
+                                          fontSize: 11.5.sp,
+                                          color: colorScheme.onSurfaceVariant),
+                                    )
+                                  : friend.availability ==
+                                          FriendAvailability.invalid
+                                      ? Text(
+                                          context.l10n.friendLoadFailedDetailed,
+                                          style: TextStyle(
+                                              fontSize: 11.5.sp,
+                                              color: colorScheme.error),
+                                        )
+                                      : null,
+                              trailing: IconButton(
+                                icon: Icon(Icons.delete_outline,
+                                    color: colorScheme.error),
+                                onPressed: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text(context.l10n.friendRemove),
+                                      content: Text(context.l10n
+                                          .friendRemoveConfirm(displayName)),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, false),
+                                            child: Text(
+                                                context.l10n.commonCancel)),
+                                        TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, true),
+                                            child: Text(
+                                                context.l10n.commonDelete)),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm == true) {
+                                    await ref
+                                        .read(friendProvider.notifier)
+                                        .removeFriend(friend.id);
+                                  }
+                                },
+                              ),
+                              onTap: () => _openFriend(context, ref, friend),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+            ),
+          ],
+        ))),
       ),
     );
   }

@@ -6,7 +6,7 @@ import {
 } from './views.js';
 import * as auth from './auth.js';
 import { loadDocs } from './store.js';
-import { esc, relTime, fmtLong } from './format.js';
+import { esc, relTime, fmtLong, dataCutoffLabel } from './format.js';
 
 const root = document.getElementById('app');
 const layer = document.getElementById('layer');
@@ -22,8 +22,8 @@ const store = {
 
 const ui = {
   range: RANGES.includes(Number(store.get('range'))) ? Number(store.get('range')) : 30,
-  visible: { dau: true, wau: true, mau: true },
-  dist: 'appVersion', evGroup: 'all', evSystem: false,
+  visible: { dau: true, mau: true },
+  dist: 'appVersion', evGroup: 'all', evSystem: false, evExpanded: false,
 };
 let docs = null; let user = null; let charts = []; let loading = false; let error = null; let loadedAt = 0; let sheetChart = null;
 
@@ -93,10 +93,10 @@ function destroyCharts() { charts.forEach((c) => c.destroy()); charts = []; }
 
 function headerHtml(view) {
   const s = docs?.summary;
-  const stale = s ? Date.now() - Date.parse(s.updatedAt) > 36 * 3600 * 1000 : false;
+  const stale = s ? Date.now() - Date.parse(s.updatedAt) > 6 * 3600 * 1000 : false;
   const latest = s?.latest ? fmtLong(s.latest) : '-';
   return `<header class="topbar"><div class="wrap">
-    <div class="bar1">${brandMark}<div class="titles"><b>교대시계 관리자</b><small>Play 출시 버전 · ${esc(latest)}까지 확정</small></div>
+    <div class="bar1">${brandMark}<div class="titles"><b>교대시계 관리자</b><small>Play 출시 버전 · ${esc(latest)}까지 집계 · ${dataCutoffLabel(s?.latest)}</small></div>
       <button class="icon-btn${loading ? ' spinning' : ''}" data-action="refresh" aria-label="새로고침">${ICONS.refresh}</button>
       <button class="avatar" data-action="menu" aria-label="계정 메뉴">${esc(initialOf(user?.email))}</button></div>
     <div class="bar2"><div class="seg" role="group" aria-label="조회 기간">${RANGES.map((r) => `<button data-action="range" data-key="${r}" aria-pressed="${ui.range === r}">${r}일</button>`).join('')}</div>
@@ -124,7 +124,7 @@ function renderApp() {
   const y = window.scrollY;
   const view = computeView(docs, ui.range);
   if (!view.n) {
-    root.innerHTML = headerHtml(view) + emptyState('🌱', '아직 집계된 날짜가 없어요', '출시된 버전에서 앱이 실행되면 하루 이내에 데이터가 들어와요.');
+    root.innerHTML = headerHtml(view) + emptyState('🌱', '아직 집계된 날짜가 없어요', '출시 앱의 통계가 GA4에서 처리되고 다음 서버 집계가 완료되면 표시돼요.');
     return;
   }
   root.innerHTML = headerHtml(view) + `<main class="wrap">
@@ -215,6 +215,7 @@ function handle(action, el) {
       break;
     }
     case 'refresh': loadData(); break;
+    case 'evexpand': ui.evExpanded = !ui.evExpanded; renderApp(); break;
     case 'menu': openMenu(); break;
     case 'pwd': closeSheet(); openPassword(); break;
     case 'logout': closeSheet(); auth.signOut(); break;
@@ -242,6 +243,9 @@ root.addEventListener('keydown', (e) => {
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && user && docs && Date.now() - loadedAt > 10 * 60 * 1000) loadData();
 });
+setInterval(() => {
+  if (document.visibilityState === 'visible' && user && docs && !loading && Date.now() - loadedAt > 10 * 60 * 1000) loadData();
+}, 60 * 1000);
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', applyTheme);
 
 // ───────────────────────── 시작 ─────────────────────────

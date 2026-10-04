@@ -133,7 +133,8 @@ class AppSecondButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  DefaultTextStyle.merge(
+                  Flexible(
+                      child: DefaultTextStyle.merge(
                     style: TextStyle(
                       color: _enabled ? _textColor : const Color(0xFF6B7280),
                       fontSize: fontSize ?? (compact ? 12 : 15),
@@ -143,7 +144,7 @@ class AppSecondButton extends StatelessWidget {
                       data: IconThemeData(color: _enabled ? _textColor : const Color(0xFF6B7280)),
                       child: child,
                     ),
-                  ),
+                  )),
                 ],
               ),
             ),

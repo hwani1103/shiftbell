@@ -32,6 +32,7 @@ package com.hwani1103.shiftbell
 
 import android.content.ContentValues
 import android.content.Context
+import android.app.AlarmManager
 import androidx.test.core.app.ApplicationProvider
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -41,9 +42,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(RobolectricTestRunner::class)
@@ -65,6 +69,7 @@ class AlarmRefreshEngineH2Test {
         // ⭐ 이전 테스트 메서드가 남긴 낡은 싱글턴(무효화된 커넥션 포인터)을 정리 -
         // DatabaseHelper.resetInstanceForTest() 주석 참고.
         DatabaseHelper.resetInstanceForTest()
+        RingingAlarmTracker.resetMemoryForTest()
         context = ApplicationProvider.getApplicationContext()
         dbHelper = DatabaseHelper.getInstance(context)
         seedMinimalDatabase()
@@ -72,6 +77,7 @@ class AlarmRefreshEngineH2Test {
 
     @After
     fun tearDown() {
+        RingingAlarmTracker.resetMemoryForTest()
         DatabaseHelper.resetInstanceForTest()
     }
 
@@ -130,6 +136,121 @@ class AlarmRefreshEngineH2Test {
                 "DB 버전/경로 불일치로 doRefresh가 조용히 스킵했다는 뜻(테스트 자체의 문제)",
             count >= minExpectedAlarms
         )
+    }
+
+    @Test
+    fun `time zone refresh cancels an old fixed OS reservation without deleting its DB row`() {
+        val id = 7000
+        val oldLocalTime = dateFormat.format(Date(System.currentTimeMillis() - 86_400_000L))
+        val db = dbHelper.writableDatabase
+        db.insert("alarms", null, ContentValues().apply {
+            put("id", id)
+            put("time", "07:00")
+            put("date", oldLocalTime)
+            put("type", "fixed")
+            put("alarm_type_id", 1)
+            put("shift_type", "주간")
+            put("day_offset", 0)
+        })
+        // Models the old time zone's still-future AlarmManager reservation.
+        AlarmWakeScheduler.scheduleRaw(context, id, System.currentTimeMillis() + 3_600_000L, "주간")
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        fun hasOldReservation() = shadowOf(manager).scheduledAlarms.any { alarm ->
+            alarm.operation?.let { shadowOf(it).savedIntent.data?.toString() } == "shiftbell://alarm/$id"
+        }
+        assertTrue(hasOldReservation())
+
+        AlarmRefreshEngine.doRefresh(context, scheduleNativeAlarmOverride = { _, _, _, _ -> })
+        assertTrue("ordinary refresh preserves late-delivery policy", hasOldReservation())
+
+        AlarmRefreshEngine.doRefresh(
+            context,
+            scheduleNativeAlarmOverride = { _, _, _, _ -> },
+            cancelPastFixedOnZoneChange = true
+        )
+        assertTrue(!hasOldReservation())
+        db.rawQuery("SELECT COUNT(*) FROM alarms WHERE id = ?", arrayOf(id.toString())).use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(1, cursor.getInt(0))
+        }
+
+        // The next app refresh must also recover if Android's zone broadcast was missed.
+        AlarmWakeScheduler.scheduleRaw(context, id, System.currentTimeMillis() + 3_600_000L, "주간")
+        val previousZone = if (TimeZone.getDefault().id == "Pacific/Honolulu") "Europe/London" else "Pacific/Honolulu"
+        context.createDeviceProtectedStorageContext()
+            .getSharedPreferences("alarm_state", Context.MODE_PRIVATE)
+            .edit().putString("last_alarm_refresh_time_zone", previousZone).commit()
+        AlarmRefreshEngine.doRefresh(context, scheduleNativeAlarmOverride = { _, _, _, _ -> })
+        assertTrue("a missed zone broadcast is detected on the next refresh", !hasOldReservation())
+    }
+
+    @Test
+    fun `zone cleanup preserves custom snoozed and old history while cancelling recent fixed only`() {
+        val db = dbHelper.writableDatabase
+        val now = System.currentTimeMillis()
+        val cases = listOf(Triple(7100, "fixed", 24), Triple(7101, "custom", 24),
+            Triple(7102, "snoozed", 24), Triple(7103, "fixed", 48), Triple(7104, "fixed", 24))
+        for ((id, type, hours) in cases) {
+            db.insert("alarms", null, ContentValues().apply {
+                put("id", id)
+                put("time", "07:00")
+                put("date", dateFormat.format(Date(now - hours * 3_600_000L)))
+                put("type", type)
+                put("alarm_type_id", 1)
+                put("shift_type", "주간")
+                put("day_offset", 0)
+            })
+            AlarmWakeScheduler.scheduleRaw(context, id, now + 3_600_000L, "주간")
+        }
+        RingingAlarmTracker.startRing(context, 7104)
+        val before = db.rawQuery("SELECT COUNT(*) FROM alarm_history", null).use {
+            it.moveToFirst(); it.getInt(0)
+        }
+        AlarmRefreshEngine.doRefresh(context, scheduleNativeAlarmOverride = { _, _, _, _ -> },
+            nowMillis = now, cancelPastFixedOnZoneChange = true)
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val uris = shadowOf(manager).scheduledAlarms.mapNotNull {
+            it.operation?.let { operation -> shadowOf(operation).savedIntent.data?.toString() }
+        }.toSet()
+        assertTrue("recent fixed must be cancelled", "shiftbell://alarm/7100" !in uris)
+        for (id in listOf(7101, 7102, 7103, 7104)) {
+            assertTrue("unrelated reservation $id remains", "shiftbell://alarm/$id" in uris)
+        }
+        db.rawQuery("SELECT COUNT(*) FROM alarms WHERE id BETWEEN 7100 AND 7104", null).use {
+            it.moveToFirst(); assertEquals(5, it.getInt(0))
+        }
+        db.rawQuery("SELECT COUNT(*) FROM alarm_history", null).use {
+            it.moveToFirst(); assertEquals(before, it.getInt(0))
+        }
+    }
+
+    @Test
+    fun `원터치 알람이 먼저 있으면 같은 시각의 고정 알람은 생성하지 않는다`() {
+        val tomorrow = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 7)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val ringAt = dateFormat.format(tomorrow.time)
+        val db = dbHelper.writableDatabase
+        db.insert("alarms", null, ContentValues().apply {
+            put("time", "07:00")
+            put("date", ringAt)
+            put("type", "custom")
+            put("alarm_type_id", 1)
+            putNull("shift_type")
+            put("day_offset", 0)
+        })
+
+        AlarmRefreshEngine.doRefresh(context, scheduleNativeAlarmOverride = { _, _, _, _ -> })
+
+        db.rawQuery("SELECT type FROM alarms WHERE date = ?", arrayOf(ringAt)).use { cursor ->
+            assertTrue(cursor.moveToFirst())
+            assertEquals("custom", cursor.getString(0))
+            assertTrue(!cursor.moveToNext())
+        }
     }
 
     @Test

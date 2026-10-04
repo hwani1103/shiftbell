@@ -74,8 +74,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
-                android:text="월"
+                android:textSize="@dimen/calendar_widget_weekday_size"
+                android:text="@string/widget_weekday_0"
                 android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
@@ -84,8 +84,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
-                android:text="화"
+                android:textSize="@dimen/calendar_widget_weekday_size"
+                android:text="@string/widget_weekday_1"
                 android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
@@ -94,8 +94,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
-                android:text="수"
+                android:textSize="@dimen/calendar_widget_weekday_size"
+                android:text="@string/widget_weekday_2"
                 android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
@@ -104,8 +104,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
-                android:text="목"
+                android:textSize="@dimen/calendar_widget_weekday_size"
+                android:text="@string/widget_weekday_3"
                 android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
@@ -114,8 +114,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
-                android:text="금"
+                android:textSize="@dimen/calendar_widget_weekday_size"
+                android:text="@string/widget_weekday_4"
                 android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
@@ -124,8 +124,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
-                android:text="토"
+                android:textSize="@dimen/calendar_widget_weekday_size"
+                android:text="@string/widget_weekday_5"
                 android:textColor="#FF000000"
                 android:textStyle="bold"/>
             <TextView
@@ -134,8 +134,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="13sp"
-                android:text="일"
+                android:textSize="@dimen/calendar_widget_weekday_size"
+                android:text="@string/widget_weekday_6"
                 android:textColor="#FF000000"
                 android:textStyle="bold"/>
         </LinearLayout>
@@ -164,6 +164,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_0"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -171,7 +172,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="주간"
+                            android:text="@string/widget_preview_day"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -262,6 +263,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_1"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -269,7 +271,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="야간"
+                            android:text="@string/widget_preview_night"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -360,6 +362,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_2"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -367,7 +370,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="휴무"
+                            android:text="@string/widget_preview_off"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -458,6 +461,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_3"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -465,7 +469,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="주간"
+                            android:text="@string/widget_preview_day"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -556,6 +560,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_4"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -563,7 +568,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="야간"
+                            android:text="@string/widget_preview_night"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -654,6 +659,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_5"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -661,7 +667,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="휴무"
+                            android:text="@string/widget_preview_off"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -752,6 +758,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_0_6"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -759,7 +766,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="주간"
+                            android:text="@string/widget_preview_day"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -856,6 +863,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_0"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -863,7 +871,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="야간"
+                            android:text="@string/widget_preview_night"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -954,6 +962,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_1"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -961,7 +970,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="휴무"
+                            android:text="@string/widget_preview_off"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -1052,6 +1061,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_2"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1059,7 +1069,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="주간"
+                            android:text="@string/widget_preview_day"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -1150,6 +1160,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_3"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1157,7 +1168,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="야간"
+                            android:text="@string/widget_preview_night"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -1248,6 +1259,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_4"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1255,7 +1267,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="휴무"
+                            android:text="@string/widget_preview_off"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -1346,6 +1358,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_5"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1353,7 +1366,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="주간"
+                            android:text="@string/widget_preview_day"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -1444,6 +1457,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_1_6"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1451,7 +1465,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="야간"
+                            android:text="@string/widget_preview_night"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -1548,6 +1562,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_0"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1555,7 +1570,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="휴무"
+                            android:text="@string/widget_preview_off"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -1646,6 +1661,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_1"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1653,7 +1669,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="주간"
+                            android:text="@string/widget_preview_day"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -1744,6 +1760,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_2"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1751,7 +1768,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="야간"
+                            android:text="@string/widget_preview_night"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -1842,6 +1859,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_3"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1849,7 +1867,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="휴무"
+                            android:text="@string/widget_preview_off"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -1940,6 +1958,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_4"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -1947,7 +1966,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="주간"
+                            android:text="@string/widget_preview_day"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -2038,6 +2057,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_5"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2045,7 +2065,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="야간"
+                            android:text="@string/widget_preview_night"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>
@@ -2136,6 +2156,7 @@
                             android:scaleType="fitXY"/>
                         <TextView
                             android:id="@+id/pill_2_6"
+                            style="@style/CalendarWidgetShiftLabel"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -2143,7 +2164,7 @@
                             android:textStyle="bold"
                             android:maxLines="1"
                             android:includeFontPadding="false"
-                            android:text="휴무"
+                            android:text="@string/widget_preview_off"
                             android:textColor="#FFFFFFFF"
                             android:ellipsize="end"/>
                     </FrameLayout>

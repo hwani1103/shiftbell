@@ -69,7 +69,7 @@ function xLabels(dates, innerW) {
     const step = Math.max(1, Math.ceil(idx.length / maxLabels));
     return idx.filter((_, k) => k % step === 0).map((i) => ({ i, text: fmtMonth(dates[i]) }));
   }
-  if (n <= maxLabels) return dates.map((d, i) => ({ i, text: fmtMD(d) }));
+  if (n <= 7 || n <= maxLabels) return dates.map((d, i) => ({ i, text: fmtMD(d) }));
   const step = Math.ceil((n - 1) / (maxLabels - 1));
   const out = [];
   for (let i = 0; i < n; i += step) out.push({ i, text: fmtMD(dates[i]) });
@@ -91,6 +91,7 @@ function placeTip(tip, host, x) {
 export function lineChart(el, opt) {
   let o = opt;
   let first = true;
+  let selectedDate = null;
   el.classList.add('chart');
 
   function draw() {
@@ -149,11 +150,9 @@ export function lineChart(el, opt) {
     const xh = el.querySelector('.xh');
     const pts = [...el.querySelectorAll('.pt')];
     const hit = el.querySelector('.hit');
-    const show = (ev) => {
+    const showIndex = (i) => {
       if (n === 0) return;
-      const r = el.getBoundingClientRect();
-      const px = ev.clientX - r.left;
-      const i = clamp(Math.round(((px - m.l) / iw) * (n - 1)), 0, n - 1);
+      selectedDate = o.dates[i];
       const x = X(i);
       xh.setAttribute('x1', x); xh.setAttribute('x2', x); xh.style.display = '';
       let rows = '';
@@ -165,11 +164,25 @@ export function lineChart(el, opt) {
       tip.innerHTML = `<div class="td">${esc(fmtLong(o.dates[i]))}</div>${rows}`;
       placeTip(tip, el, x);
     };
-    const hide = () => { xh.style.display = 'none'; pts.forEach((p) => { p.style.display = 'none'; }); tip.hidden = true; };
-    hit.addEventListener('pointermove', show);
-    hit.addEventListener('pointerdown', show);
-    hit.addEventListener('pointerleave', hide);
-    hit.addEventListener('pointercancel', hide);
+    const show = (ev) => {
+      const r = el.getBoundingClientRect();
+      const px = (ev.clientX - r.left) * W / r.width;
+      showIndex(clamp(Math.round(((px - m.l) / iw) * (n - 1)), 0, n - 1));
+    };
+    hit.addEventListener('pointerdown', (ev) => {
+      hit.setPointerCapture(ev.pointerId);
+      show(ev);
+    });
+    hit.addEventListener('pointermove', (ev) => {
+      if (hit.hasPointerCapture(ev.pointerId)) show(ev);
+    });
+    hit.addEventListener('pointerup', (ev) => {
+      if (hit.hasPointerCapture(ev.pointerId)) hit.releasePointerCapture(ev.pointerId);
+    });
+    // Keep the selected day visible after release, leave, cancel and resizing.
+    const previous = o.dates.indexOf(selectedDate);
+    if (previous >= 0) showIndex(previous);
+
   }
 
   const ro = new ResizeObserver(() => { if (el.isConnected) draw(); });

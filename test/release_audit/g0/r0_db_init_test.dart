@@ -43,7 +43,7 @@ void main() {
     // 실패 후 Completer가 비워져 다음 호출이 새로 시도해야 함(Android가 아닌 경로 = 호스트 테스트 경로)
     DatabaseService.debugIsAndroidOverride = false;
     final db = await DatabaseService.instance.database;
-    expect(await db.getVersion(), 24);
+    expect(await db.getVersion(), 26);
     expect(File('${dir.path}/shiftbell.db').existsSync(), isTrue);
 
     // 이미 열린 뒤에는 같은 인스턴스

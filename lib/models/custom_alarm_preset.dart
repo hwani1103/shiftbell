@@ -1,9 +1,9 @@
 // lib/models/custom_alarm_preset.dart
 //
-// ⭐ 2026-09-23 (1.0.24 B) - 달력 상단 "커스텀 알람" 5칸. 한 칸 = 시각 + 알람 종류(alarm_types의 1=소리+진동, 2=진동, 3=무음).
-// 이 값은 "재사용할 틀"일 뿐이고, 날짜에 할당하는 순간 alarms 테이블에 type='custom' 1회 알람이 생긴다
-// (custom_alarm_service.dart). 틀 자체는 SharedPreferences(설정값)라 DB 마이그레이션이 필요 없고,
-// 백업·복원에는 설정 키로 자동 포함된다(backup_policy.dart kBackupPreferenceTypes에 등록).
+// 달력 상단 "원터치 알람 설정" 5칸. 한 칸 = 시각 + 알람 종류(1=소리+진동, 2=진동, 3=무음).
+// 날짜에 할당하면 alarms.type='custom' 1회 알람이 생기며 preset_slot/assigned_day로 연결된다.
+// 한 칸은 같은 날짜에 한 번만 할당할 수 있고, 할당된 칸은 수정할 수 없다.
+// 설정값은 SharedPreferences에, 연결은 DB에 저장하며 둘 다 백업·복원 대상이다.
 
 import 'dart:convert';
 

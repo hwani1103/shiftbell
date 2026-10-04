@@ -76,8 +76,8 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
       // 봐야 해서 30일 → 60일로 넓힘(sleep_history.dart/today_forecast_engine.dart
       // 참고). 그 외 화면(최근 수면 기록 리스트 등)은 원래도 "최근 N개/N일"만
       // 뽑아 쓰므로 더 넓게 가져와도 영향 없음.
-      final records = await DatabaseService.instance
-          .getSleepRecords(since: DateTime.now().subtract(const Duration(days: 60)));
+      final records = await DatabaseService.instance.getSleepRecords(
+          since: DateTime.now().subtract(const Duration(days: 60)));
       state = AsyncValue.data(records);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -89,7 +89,8 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
   /// ⭐ 2026-09-22 (B-2) - [start]~[end]와 겹치는 확정 수면 기록(없으면 null). 화면 상태(최근 60일)가 아니라 DB에서
   /// 그 앞뒤를 직접 읽는다 - 전체보기에서 오래된 달의 기록을 고칠 때도 맞게 판단하기 위함. 이틀보다 긴 기록은
   /// 현실적으로 없어서 조회 창을 시작 2일 전부터로 둔다(진행 중 기록은 getSleepRecords가 항상 포함).
-  Future<SleepRecord?> findOverlap(DateTime start, DateTime end, {int? excludeId}) async {
+  Future<SleepRecord?> findOverlap(DateTime start, DateTime end,
+      {int? excludeId}) async {
     final nearby = await DatabaseService.instance
         .getSleepRecords(since: start.subtract(const Duration(days: 2)));
     return findOverlappingSleep(nearby, start, end, excludeId: excludeId);
@@ -97,7 +98,8 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
 
   /// 위젯 토글과 동일한 동작을 앱 안에서도 쓸 수 있게(주로 테스트/보조용) -
   /// 근무 중 여부와 무관하게 항상 허용(설계 문서 2장 - validation 없음).
-  Future<void> addManual({required DateTime start, required DateTime end}) async {
+  Future<void> addManual(
+      {required DateTime start, required DateTime end}) async {
     if (!_isMeaningfulSleepDuration(start, end)) return; // M8 - 2분 미만은 버림
     await DatabaseService.instance.insertSleepRecord(SleepRecord(
       start: start,
@@ -105,7 +107,8 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
       source: SleepSource.manual,
       status: SleepStatus.confirmed,
     ));
-    AppAnalytics.track(AnalyticsEvent.sleepRecordSaved, params: {'source': 'manual'});
+    AppAnalytics.track(AnalyticsEvent.sleepRecordSaved,
+        params: {'source': 'manual'});
     await refresh();
   }
 
@@ -114,14 +117,17 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
   ///
   /// ⭐ 2026-09-22 (B-2) - 이미 확정된 다른 기록과 겹치면 확정하지 않고 그 기록을 돌려준다(화면이 안내).
   /// 확정했거나 2분 미만이라 버린 경우는 null.
-  Future<SleepRecord?> confirmPending(SleepRecord record, {DateTime? overrideStart, DateTime? overrideEnd}) async {
+  Future<SleepRecord?> confirmPending(SleepRecord record,
+      {DateTime? overrideStart, DateTime? overrideEnd}) async {
     final effectiveStart = overrideStart ?? record.start;
     final effectiveEnd = overrideEnd ?? record.end;
     // M8 - 확정 결과가 2분 미만이면 버림(Kotlin의 AUTO 확정과 달리 여긴 근무중
     // 낮잠 등도 올 수 있어 2분 기준을 그대로 씀 - MANUAL과 동일).
-    if (effectiveEnd != null && !_isMeaningfulSleepDuration(effectiveStart, effectiveEnd)) return null;
+    if (effectiveEnd != null &&
+        !_isMeaningfulSleepDuration(effectiveStart, effectiveEnd)) return null;
     if (effectiveEnd != null) {
-      final conflict = await findOverlap(effectiveStart, effectiveEnd, excludeId: record.id);
+      final conflict =
+          await findOverlap(effectiveStart, effectiveEnd, excludeId: record.id);
       if (conflict != null) return conflict;
     }
     final updated = record.copyWith(
@@ -130,7 +136,8 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
       status: SleepStatus.confirmed,
     );
     await DatabaseService.instance.updateSleepRecord(updated);
-    AppAnalytics.track(AnalyticsEvent.sleepRecordSaved, params: {'source': 'auto_confirmed'});
+    AppAnalytics.track(AnalyticsEvent.sleepRecordSaved,
+        params: {'source': 'auto_confirmed'});
     await refresh();
     return null;
   }
@@ -149,10 +156,13 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
     final confirmedNow = <SleepRecord>[];
     for (final record in records) {
       final effectiveEnd = record.end;
-      if (effectiveEnd != null && !_isMeaningfulSleepDuration(record.start, effectiveEnd)) continue;
+      if (effectiveEnd != null &&
+          !_isMeaningfulSleepDuration(record.start, effectiveEnd)) continue;
       if (effectiveEnd != null) {
-        final conflict = await findOverlap(record.start, effectiveEnd, excludeId: record.id) ??
-            findOverlappingSleep(confirmedNow, record.start, effectiveEnd, excludeId: record.id);
+        final conflict = await findOverlap(record.start, effectiveEnd,
+                excludeId: record.id) ??
+            findOverlappingSleep(confirmedNow, record.start, effectiveEnd,
+                excludeId: record.id);
         if (conflict != null) {
           skipped++;
           continue;
@@ -177,10 +187,13 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
   /// ⭐ 2026-09-01 - "최근 수면 기록" 미니 달력 카드/전체보기 화면에서 이미 저장된
   /// 기록(수동이든, 확정된 자동이든 무관)의 취침/기상 시각을 직접 고쳐 쓸 때 씀 -
   /// confirmPending과 달리 status는 그대로 두고 시각만 갱신한다.
-  Future<void> updateTimes(SleepRecord record, {required DateTime start, required DateTime end}) async {
+  Future<void> updateTimes(SleepRecord record,
+      {required DateTime start, required DateTime end}) async {
     if (record.id == null) return;
     if (!_isMeaningfulSleepDuration(start, end)) return; // M8 - 2분 미만은 버림
-    await DatabaseService.instance.updateSleepRecord(record.copyWith(start: start, end: end));
+    await DatabaseService.instance
+        .updateSleepRecord(record.copyWith(start: start, end: end));
+    AppAnalytics.track(AnalyticsEvent.sleepRecordEdited);
     await refresh();
   }
 
@@ -192,6 +205,12 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
     final matches = current.where((r) => r.id == id);
     if (matches.isNotEmpty) await _notifyAutoRejection(matches.first);
     await DatabaseService.instance.deleteSleepRecord(id);
+    final deleted = matches.isNotEmpty ? matches.first : null;
+    if (deleted?.status == SleepStatus.confirmed) {
+      AppAnalytics.track(AnalyticsEvent.sleepRecordDeleted);
+    } else if (deleted?.status == SleepStatus.pendingConfirmation) {
+      AppAnalytics.track(AnalyticsEvent.sleepEstimateRejected);
+    }
     await refresh();
   }
 }
@@ -199,5 +218,7 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
 /// 화면 상단 확인 카드에 쓸 PENDING_CONFIRMATION 목록만 뽑아낸 파생 provider.
 final pendingSleepRecordsProvider = Provider<List<SleepRecord>>((ref) {
   final records = ref.watch(sleepRecordProvider).value ?? const [];
-  return records.where((r) => r.status == SleepStatus.pendingConfirmation).toList();
+  return records
+      .where((r) => r.status == SleepStatus.pendingConfirmation)
+      .toList();
 });

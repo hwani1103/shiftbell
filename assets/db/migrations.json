@@ -10,7 +10,7 @@
     "_onCreate(신규 설치)는 이 파일을 쓰지 않고 Dart 코드에 따로 있다 - 테스트에서 '마이그레이션 결과 == 신규 설치 결과'를 독립적으로 비교하기 위함."
   ],
   "format": 1,
-  "targetVersion": 24,
+  "targetVersion": 26,
   "migrations": [
     {
       "version": 2,
@@ -193,12 +193,29 @@
         "CREATE INDEX IF NOT EXISTS idx_alarm_overrides_origin_date ON alarm_overrides(origin_date)",
         "CREATE INDEX IF NOT EXISTS idx_alarm_overrides_origin_shift ON alarm_overrides(origin_shift)"
       ]
+    },
+    {
+      "version": 25,
+      "note": "원터치 설정 칸과 날짜별 할당의 영속 연결",
+      "sql": [
+        "ALTER TABLE alarms ADD COLUMN preset_slot INTEGER",
+        "ALTER TABLE alarms ADD COLUMN assigned_day TEXT",
+        "CREATE INDEX IF NOT EXISTS idx_alarms_preset_slot ON alarms(preset_slot, assigned_day)"
+      ]
+    },
+    {
+      "version": 26,
+      "note": "전체근무표 독립 규칙과 내 조 연결의 원자적 저장",
+      "sql": [
+        "CREATE TABLE IF NOT EXISTS team_schedule_config(id INTEGER PRIMARY KEY CHECK (id = 1), config TEXT)"
+      ]
     }
   ],
   "repair": [
+    "CREATE TABLE IF NOT EXISTS team_schedule_config(id INTEGER PRIMARY KEY CHECK (id = 1), config TEXT)",
     "CREATE TABLE IF NOT EXISTS alarm_types(id INTEGER PRIMARY KEY, name TEXT NOT NULL, emoji TEXT NOT NULL, sound_file TEXT NOT NULL, volume REAL NOT NULL, vibration_strength INTEGER DEFAULT 2, is_preset INTEGER NOT NULL, duration INTEGER DEFAULT 10)",
     "CREATE TABLE IF NOT EXISTS shift_schedule(id INTEGER PRIMARY KEY, is_regular INTEGER NOT NULL, pattern TEXT, today_index INTEGER, shift_types TEXT NOT NULL, active_shift_types TEXT, start_date TEXT, shift_colors TEXT, custom_shift_colors TEXT, assigned_dates TEXT, shift_durations TEXT)",
-    "CREATE TABLE IF NOT EXISTS alarms(id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT NOT NULL, date TEXT, type TEXT NOT NULL, alarm_type_id INTEGER NOT NULL, shift_type TEXT, day_offset INTEGER NOT NULL DEFAULT 0, FOREIGN KEY (alarm_type_id) REFERENCES alarm_types(id))",
+    "CREATE TABLE IF NOT EXISTS alarms(id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT NOT NULL, date TEXT, type TEXT NOT NULL, alarm_type_id INTEGER NOT NULL, shift_type TEXT, day_offset INTEGER NOT NULL DEFAULT 0, preset_slot INTEGER, assigned_day TEXT, FOREIGN KEY (alarm_type_id) REFERENCES alarm_types(id))",
     "CREATE TABLE IF NOT EXISTS shift_alarm_templates(id INTEGER PRIMARY KEY AUTOINCREMENT, shift_type TEXT NOT NULL, time TEXT NOT NULL, alarm_type_id INTEGER NOT NULL, day_offset INTEGER NOT NULL DEFAULT 0)",
     "CREATE TABLE IF NOT EXISTS alarm_history(id INTEGER PRIMARY KEY AUTOINCREMENT, alarm_id INTEGER NOT NULL, scheduled_time TEXT NOT NULL, scheduled_date TEXT NOT NULL, actual_ring_time TEXT NOT NULL, dismiss_type TEXT NOT NULL, snooze_count INTEGER DEFAULT 0, shift_type TEXT, created_at TEXT NOT NULL, day_offset INTEGER NOT NULL DEFAULT 0)",
     "CREATE TABLE IF NOT EXISTS date_memos(id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, memo_text TEXT NOT NULL, order_index INTEGER NOT NULL, created_at TEXT NOT NULL)",
@@ -219,6 +236,8 @@
     "ALTER TABLE alarm_types ADD COLUMN vibration_strength INTEGER DEFAULT 2",
     "ALTER TABLE shift_alarm_templates ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE alarms ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE alarms ADD COLUMN preset_slot INTEGER",
+    "ALTER TABLE alarms ADD COLUMN assigned_day TEXT",
     "ALTER TABLE alarm_history ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE alarm_creation_log ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE date_schedules ADD COLUMN notify_enabled INTEGER NOT NULL DEFAULT 0",
@@ -230,6 +249,7 @@
     "CREATE INDEX IF NOT EXISTS idx_date_overtime_date ON date_overtime(date)",
     "CREATE INDEX IF NOT EXISTS idx_sleep_records_start ON sleep_records(start_time)",
     "CREATE INDEX IF NOT EXISTS idx_alarm_overrides_origin_date ON alarm_overrides(origin_date)",
-    "CREATE INDEX IF NOT EXISTS idx_alarm_overrides_origin_shift ON alarm_overrides(origin_shift)"
+    "CREATE INDEX IF NOT EXISTS idx_alarm_overrides_origin_shift ON alarm_overrides(origin_shift)",
+    "CREATE INDEX IF NOT EXISTS idx_alarms_preset_slot ON alarms(preset_slot, assigned_day)"
   ]
 }

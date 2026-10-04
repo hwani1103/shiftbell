@@ -101,7 +101,7 @@ export function buildSeries({ core, ads, eventsDaily }) {
   return { series, adsAvailable };
 }
 
-/** 이벤트별 일별 횟수(상위 keep개 + 항상 보관 목록). */
+/** 이벤트별 일별 횟수(상위 keep개 + 사용자 기능 이벤트 + 항상 보관 목록). */
 export function buildEvents({ eventsDaily, dates, keep = 40 }) {
   const pos = new Map(dates.map((d, i) => [d, i]));
   const byName = new Map();
@@ -115,6 +115,9 @@ export function buildEvents({ eventsDaily, dates, keep = 40 }) {
   const totals = [...byName.entries()].map(([name, arr]) => [name, arr.reduce((a, b) => a + b, 0)]);
   totals.sort((a, b) => b[1] - a[1]);
   const chosen = new Set(totals.slice(0, keep).map(([n]) => n));
+  for (const [name] of totals) {
+    if (!AUTO_EVENTS.has(name) && !name.startsWith('firebase_')) chosen.add(name);
+  }
   ALWAYS_KEEP.forEach((n) => { if (byName.has(n)) chosen.add(n); });
   const out = { schema: SCHEMA, dates, series: {}, totals: {} };
   for (const [name, total] of totals) {
@@ -176,6 +179,11 @@ export function buildDocs({ raw, meta }) {
   const { series, adsAvailable } = buildSeries({ core: raw.core, ads: raw.ads, eventsDaily: raw.eventsDaily });
   const events = buildEvents({ eventsDaily: raw.eventsDaily, dates: series.dates });
   const eventSummary = buildEventSummary(raw.eventsSummary);
+  const eventsByRange = Object.fromEntries(Object.entries(raw.eventsByRange ?? {})
+    .filter(([, value]) => value)
+    .map(([range, value]) => [range, {
+      from: value.from, to: value.to, events: buildEventSummary(value.report),
+    }]));
   const hasCustomEvents = Object.keys(events.series).some((n) => !AUTO_EVENTS.has(n) && !n.startsWith('firebase_'));
   const summary = {
     schema: SCHEMA,
@@ -195,6 +203,11 @@ export function buildDocs({ raw, meta }) {
       device: buildBreakdown(raw.device),
     },
     events: eventSummary,
+    eventsByRange,
+    webFriendViews: raw.webFriendViews == null ? null : {
+      count: table(raw.webFriendViews)[0]?.m[0] ?? 0,
+      users: table(raw.webFriendViews)[0]?.m[1] ?? 0,
+    },
     flags: { ads: adsAvailable, customEvents: hasCustomEvents },
   };
   return { summary, series, events };

@@ -27,7 +27,7 @@ void main() {
   DbMigrationScript mutated(Map<String, dynamic> mutation) =>
       DbMigrationScript.parse(jsonEncode(applyMutation(loadRepoScriptJson(), mutation)));
 
-  test('MIG-ALL + REOPEN: v1~v23 fixture를 v24로 올리면 기대 데이터·기준 구조와 같고, 다시 열어도 변화 0', () async {
+  test('MIG-ALL + REOPEN: v1~v23 fixture를 v25로 올리면 기대 데이터·기준 구조와 같고, 다시 열어도 변화 0', () async {
     final script = loadRepoScript();
     final failures = <String>[];
     for (final fx in fixtureIndex()) {
@@ -41,7 +41,7 @@ void main() {
         await db.close();
 
         final problems = <String>[
-          if (version != 24) 'user_version=$version',
+          if (version != 26) 'user_version=$version',
           ...diffExpectedData(data, readJson('expected_v24/${fx['expected']}')),
           if (canonicalJson(schema) != canonicalJson(referenceSchema)) 'schema != v24_oncreate_schema.json: ${_schemaDiff(schema, referenceSchema)}',
         ];
@@ -57,6 +57,38 @@ void main() {
       }
     }
     expect(failures, isEmpty, reason: failures.join('\n\n'));
+  });
+
+  test('실제 v24 구조에서 v25 업그레이드: 기존 알람·영구 이력 보존, 실패 시 전체 롤백', () async {
+    final script = loadRepoScript();
+    final path = await copyFixture('v23.db', tmp);
+    var raw = await openRaw(path);
+    for (final sql in script.migrations[24]!) {
+      await raw.execute(sql);
+    }
+    await raw.execute('PRAGMA user_version = 24');
+    final beforeSchema = canonicalJson(await schemaSnapshot(raw));
+    final beforeData = canonicalJson(await dumpTables(raw));
+    await raw.close();
+
+    final broken = mutated({
+      'migration_append': {'version': 25, 'sql': 'CREATE TABLE alarms(x INTEGER)'}
+    });
+    await expectLater(openLikeProduct(path, broken), throwsA(anything));
+    raw = await openRaw(path);
+    expect(await raw.getVersion(), 24);
+    expect(canonicalJson(await schemaSnapshot(raw)), beforeSchema);
+    expect(canonicalJson(await dumpTables(raw)), beforeData);
+    await raw.close();
+
+    final db = await openLikeProduct(path, script);
+    expect(await db.getVersion(), 26);
+    expect(canonicalJson(await schemaSnapshot(db)), canonicalJson(referenceSchema));
+    expect(diffExpectedData(await dumpTables(db), readJson('expected_v24/v23.json')), isEmpty);
+    final columns = (await db.rawQuery('PRAGMA table_info(alarms)'))
+        .map((column) => column['name']).toSet();
+    expect(columns, containsAll(['preset_slot', 'assigned_day']));
+    await db.close();
   });
 
   test('음성 대조: fixture가 23개이고, 비교기가 틀린 기대값·다른 구조를 실제로 잡아냄', () async {
@@ -81,7 +113,7 @@ void main() {
     await raw.close();
   });
 
-  test('ROLLBACK: v12→v24 중 v20에서 SQL 실패 → 스키마·데이터·user_version 전부 시작 상태, 원인 제거 후 성공', () async {
+  test('ROLLBACK: v12→v25 중 v20에서 SQL 실패 → 스키마·데이터·user_version 전부 시작 상태, 원인 제거 후 성공', () async {
     final path = await copyFixture('v12.db', tmp);
     var raw = await openRaw(path);
     final beforeSchema = canonicalJson(await schemaSnapshot(raw));
@@ -100,7 +132,7 @@ void main() {
     await raw.close();
 
     final db = await openLikeProduct(path, loadRepoScript());
-    expect(await db.getVersion(), 24);
+    expect(await db.getVersion(), 26);
     expect(diffExpectedData(await dumpTables(db), readJson('expected_v24/v12.json')), isEmpty);
     await db.close();
   });
@@ -125,7 +157,7 @@ void main() {
   test('MISSING-COLUMN: 버전만 24로 선행하고 컬럼·인덱스·테이블이 빠진 DB를 repair가 채우고 데이터 보존', () async {
     final path = await copyFixture('variant_v23_stamped24_missing.db', tmp);
     final db = await openLikeProduct(path, loadRepoScript());
-    expect(await db.getVersion(), 24);
+    expect(await db.getVersion(), 26);
     expect(canonicalJson(await schemaSnapshot(db)), canonicalJson(referenceSchema));
     expect(diffExpectedData(await dumpTables(db), readJson('expected_v24/variant_v23_stamped24_missing.json')), isEmpty);
     await db.close();
@@ -160,16 +192,17 @@ void main() {
     await raw.close();
   });
 
-  test('FUTURE-VERSION: user_version 25 DB는 다운그레이드 거부, 버전·데이터 무변경', () async {
+  test('FUTURE-VERSION: user_version 27 DB는 다운그레이드 거부, 버전·데이터 무변경', () async {
     final path = await copyFixture('variant_v23_stamped25.db', tmp);
     var raw = await openRaw(path);
+    await raw.execute('PRAGMA user_version = 27');
     final before = canonicalJson(await dumpTables(raw));
     await raw.close();
 
     await expectLater(openLikeProduct(path, loadRepoScript()), throwsA(isA<DbMigrationException>()));
 
     raw = await openRaw(path);
-    expect(await raw.getVersion(), 25);
+    expect(await raw.getVersion(), 27);
     expect(canonicalJson(await dumpTables(raw)), before);
     await raw.close();
   });

@@ -6,6 +6,7 @@
 import 'diag_log.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -60,6 +61,9 @@ class FriendFetchResult {
 class FriendSyncService {
   FriendSyncService._();
   static final instance = FriendSyncService._();
+
+  bool get _sharingAvailable =>
+      WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'ko';
 
   static const _kEnabledKey = 'friend_share_enabled';
   static const _kMyNameKey = 'friend_share_my_name';
@@ -295,6 +299,7 @@ class FriendSyncService {
     String ownerName,
     int generation,
   ) {
+    if (!_sharingAvailable) return Future.value(FriendSyncOutcome.skipped);
     final payload = _activePayload(schedule, ownerName, generation);
     if (!_validActivePayload(payload)) {
       print('⚠️ 친구공유 업로드 거부: 허용 범위를 벗어난 스케줄 데이터');
@@ -304,7 +309,7 @@ class FriendSyncService {
     return _enqueue(() async {
       final state = await getShareState();
       final prefs = await SharedPreferences.getInstance();
-      if (state.intent != FriendShareIntent.active ||
+      if (!_sharingAvailable || state.intent != FriendShareIntent.active ||
           state.generation != generation ||
           prefs.getString(_kDesiredFingerprintKey) != fingerprint) {
         return FriendSyncOutcome.skipped;
@@ -317,7 +322,7 @@ class FriendSyncService {
       // 들어왔다면 옛 payload를 SDK에 넘기지 않는다.
       final latest = await getShareState();
       final latestPrefs = await SharedPreferences.getInstance();
-      if (latest.intent != FriendShareIntent.active ||
+      if (!_sharingAvailable || latest.intent != FriendShareIntent.active ||
           latest.generation != generation ||
           latestPrefs.getString(_kDesiredFingerprintKey) != fingerprint) {
         return FriendSyncOutcome.skipped;
@@ -338,6 +343,7 @@ class FriendSyncService {
     required ShiftSchedule schedule,
     required String ownerName,
   }) async {
+    if (!_sharingAvailable) return null;
     final normalizedName = FriendScheduleData.clampOwnerName(ownerName.trim());
     if (normalizedName.isEmpty || !firebaseReady) return null;
     final ownerId = await getOrCreateOwnerId();
@@ -368,6 +374,10 @@ class FriendSyncService {
 
   Future<void> syncIfEnabled(ShiftSchedule? schedule) async {
     try {
+      if (!_sharingAvailable) {
+        if ((await getShareState()).isActive) await stopSharing();
+        return;
+      }
       if (schedule == null) return;
       final state = await getShareState();
       if (state.intent != FriendShareIntent.active) return;
@@ -450,6 +460,10 @@ class FriendSyncService {
 
   Future<void> retryPending(ShiftSchedule? currentSchedule) async {
     final state = await getShareState();
+    if (!_sharingAvailable && state.isActive) {
+      await stopSharing();
+      return;
+    }
     if (state.intent == FriendShareIntent.stopPending) {
       await _submitStop(state.generation);
       return;

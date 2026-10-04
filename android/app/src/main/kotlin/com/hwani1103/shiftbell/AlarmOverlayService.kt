@@ -21,6 +21,29 @@ import android.util.Log
 
 class AlarmOverlayService : Service() {
 
+    private fun adaptiveOverlayWidth(): Int {
+        val density = resources.displayMetrics.density
+        val width = resources.configuration.screenWidthDp
+        return if (width <= 500) WindowManager.LayoutParams.MATCH_PARENT
+        else (minOf(width - 32, 720) * density).toInt()
+    }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        val view = overlayView ?: return
+        if (!isOverlayVisible) return
+        // Reinflate from the new bounded font configuration; keep the active
+        // ring and its original timeout untouched while the window changes.
+        if (view.resources.configuration.fontScale != newConfig.fontScale.coerceAtMost(AppTextScale.MAX_SCALE)) {
+            removeOverlay()
+            showOverlay()
+            return
+        }
+        val params = view.layoutParams as? WindowManager.LayoutParams ?: return
+        params.width = adaptiveOverlayWidth()
+        windowManager?.updateViewLayout(view, params)
+    }
+
     companion object {
         const val ACTION_DISMISS_OVERLAY = "com.hwani1103.shiftbell.DISMISS_OVERLAY"
         const val ACTION_SNOOZE_OVERLAY = "com.hwani1103.shiftbell.SNOOZE_OVERLAY"
@@ -182,7 +205,7 @@ class AlarmOverlayService : Service() {
 
             cursor = database.query(
                 "alarms",
-                arrayOf("time", "shift_type"),
+                arrayOf("time", "shift_type", "type", "preset_slot"),
                 "id = ?",
                 arrayOf(alarmId.toString()),
                 null, null, null
@@ -190,7 +213,10 @@ class AlarmOverlayService : Service() {
 
             if (cursor.moveToFirst()) {
                 alarmTimeStr = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
-                alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+                    ?: if (cursor.getString(cursor.getColumnIndexOrThrow("type")) == "custom" ||
+                        !cursor.isNull(cursor.getColumnIndexOrThrow("preset_slot")))
+                        getString(R.string.one_tap_alarm_label) else getString(R.string.alarm_default_label)
             }
             // 지속시간은 onStartCommand에서 확정(AUD-03) - 여기서 DB로 다시 덮어쓰지 않음
 
@@ -281,7 +307,7 @@ class AlarmOverlayService : Service() {
             windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
             // Overlay View 생성
-            overlayView = LayoutInflater.from(this).inflate(R.layout.overlay_alarm, null)
+            overlayView = LayoutInflater.from(AppTextScale.context(this)).inflate(R.layout.overlay_alarm, null)
 
             // ⭐ 알람 설정 시간 표시 (현재 시간 아님!)
             val timeText = overlayView?.findViewById<TextView>(R.id.timeText)
@@ -330,7 +356,7 @@ class AlarmOverlayService : Service() {
 
         try {
             val params = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
+                adaptiveOverlayWidth(),
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
@@ -426,7 +452,7 @@ class AlarmOverlayService : Service() {
         // AlarmActionHelper.snooze 내부의 finishUp()이 브로드캐스트로 갱신 신호를 보내므로,
         // 앱이 실행 중이면 포그라운드로 끌어오지 않아도 다음에 열었을 때 최신 상태로 보임.
         val result = AlarmActionHelper.snooze(applicationContext, alarmId)
-        if (result != null) {
+        if (result != null && result.collisionMessage == null) {
             NotificationHelper.showUpdatedNotification(applicationContext, result.newTimeStr, result.shiftType)
         } else {
             Log.e("AlarmOverlay", "❌ 알람 정보 없음: ID=$alarmId")

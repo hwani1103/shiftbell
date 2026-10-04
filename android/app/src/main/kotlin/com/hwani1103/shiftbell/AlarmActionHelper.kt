@@ -7,6 +7,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.util.Log
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -29,7 +32,7 @@ object AlarmActionHelper {
     // 비교·파싱이 어긋나 배정일 조회·알람 diff·예외 슬롯이 조용히 틀어졌음. 사용자에게 보여주는 표시용 형식은 제외.
     private const val DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss"
 
-    data class SnoozeResult(val newTimeStr: String, val shiftType: String)
+    data class SnoozeResult(val newTimeStr: String, val shiftType: String, val collisionMessage: String? = null)
 
     /**
      * 알람을 완전히 종료 (끄기/타임아웃 공용).
@@ -131,7 +134,7 @@ object AlarmActionHelper {
 
         try {
             var alarmTypeId = 1
-            var shiftType = "알람"
+            var shiftType = context.getString(R.string.alarm_default_label)
             var originalTime = ""
             var originalDate = ""
             var dayOffset = 0
@@ -141,7 +144,10 @@ object AlarmActionHelper {
                 if (cursor.moveToFirst()) {
                     found = true
                     alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
-                    shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                    shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+                        ?: if (cursor.getString(cursor.getColumnIndexOrThrow("type")) == "custom" ||
+                            !cursor.isNull(cursor.getColumnIndexOrThrow("preset_slot")))
+                            context.getString(R.string.one_tap_alarm_label) else context.getString(R.string.alarm_default_label)
                     originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
                     originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date")) ?: ""
                     val dayOffsetIdx = cursor.getColumnIndex("day_offset")
@@ -154,21 +160,35 @@ object AlarmActionHelper {
                 return null
             }
 
-            // ⭐ 시간 충돌 시 최대 +5분까지 뒤로 조정 (기존 여러 구현에 흩어져 있던 로직 통일)
-            var adjustedMinutes = minutes
-            var newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
-            val maxAdjustment = minutes + 5
-            while (dbHelper.isTimeConflict(db, newTimestamp, alarmId) && adjustedMinutes < maxAdjustment) {
-                adjustedMinutes++
-                newTimestamp = System.currentTimeMillis() + (adjustedMinutes * 60 * 1000)
-                Log.d(TAG, "⚠️ 시간 충돌 감지 → ${adjustedMinutes}분 후로 조정")
+            // 같은 실제 날짜·분에 다른 알람이 있으면 현재 알람만 종료한다. 시간을 임의로 미루지 않는다.
+            var newTimestamp = System.currentTimeMillis() + (minutes * 60 * 1000)
+            db.rawQuery(
+                "SELECT alarm_type_id, date FROM alarms WHERE id != ?",
+                arrayOf(alarmId.toString())
+            ).use { conflict ->
+                while (conflict.moveToNext()) {
+                    val otherAt = AlarmWakeScheduler.parse(conflict.getString(1) ?: continue) ?: continue
+                    if (otherAt / 60000 != newTimestamp / 60000) continue
+                    val typeName = when (conflict.getInt(0)) {
+                        2 -> context.getString(R.string.alarm_type_vibration_short)
+                        3 -> context.getString(R.string.alarm_type_silent_short)
+                        else -> context.getString(R.string.alarm_type_sound_vibration_short)
+                    }
+                    val timeText = AlarmInstant.display(context, newTimestamp)
+                    val message = context.getString(R.string.snooze_collision_message, timeText, typeName)
+                    dismissInternal(context, alarmId, "snooze_skipped_existing_alarm")
+                    Handler(Looper.getMainLooper()).post {
+                        Toast.makeText(context.applicationContext, message, Toast.LENGTH_LONG).show()
+                    }
+                    return SnoozeResult(timeText, shiftType, message)
+                }
             }
 
             // ⭐ 2026-09-14 (출시전 감사 #16/#27) - OS 예약은 DB 커밋 뒤로 옮김(아래). 새 시각은 초 단위로 맞춰
             // DB 문자열·수신 시 예정 시각 대조와 정확히 일치하게 함
             newTimestamp = AlarmWakeScheduler.normalize(newTimestamp)
 
-            val dateStr = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date(newTimestamp))
+            val dateStr = AlarmInstant.format(newTimestamp)
             val timeStr = SimpleDateFormat("HH:mm", Locale.US).format(Date(newTimestamp))
 
             db.beginTransaction()
@@ -194,7 +214,7 @@ object AlarmActionHelper {
                 db.endTransaction()
             }
 
-            result = SnoozeResult(timeStr, shiftType)
+            result = SnoozeResult(AlarmInstant.display(context, newTimestamp), shiftType)
             // ⭐ #16 - 커밋 뒤 OS 반영(행 재확인). 실패하면 AlarmWakeScheduler가 기록해 다음 트리거에 재시도
             if (AlarmWakeScheduler.scheduleIfCurrent(context, db, alarmId, newTimestamp, shiftType) ==
                 AlarmWakeScheduler.Outcome.FAILED) {
@@ -352,7 +372,7 @@ object AlarmActionHelper {
     }
 
     private fun insertHistory(context: Context, db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {
-        val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date())
+        val now = AlarmInstant.format(System.currentTimeMillis())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
             put("scheduled_time", time)
@@ -369,7 +389,7 @@ object AlarmActionHelper {
     }
 
     private fun insertCreationLog(db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, alarmTypeId: Int, dayOffset: Int, source: String) {
-        val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date())
+        val now = AlarmInstant.format(System.currentTimeMillis())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
             put("scheduled_date", date)

@@ -1,3 +1,4 @@
+import '../widgets/adaptive_layout.dart';
 // lib/screens/restore_interrupted_screen.dart
 //
 // ⭐ 2026-09-14 (출시전 감사 G4 #19) - 앱 시작 시 중단된 백업 복원 작업(RestoreCoordinator 작업 기록)이 남아 있으면
@@ -80,7 +81,7 @@ class _RestoreInterruptedScreenState extends State<RestoreInterruptedScreen> {
       canPop: false,
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: SafeArea(
+        body: AdaptiveFormBody(child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -136,7 +137,7 @@ class _RestoreInterruptedScreenState extends State<RestoreInterruptedScreen> {
               ],
             ),
           ),
-        ),
+        )),
       ),
     );
   }
