@@ -98,3 +98,6 @@ __pycache__/
 /.tmp/
 /artifacts/
 /docs/next_version/전수검증_자료_2026-09-30/*.zip
+
+# Machine-local Android CLI executable used for device verification
+/.tools/android-cli/
