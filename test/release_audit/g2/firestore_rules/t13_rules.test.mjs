@@ -105,7 +105,7 @@ test('FS-12 구버전 앱 형식(generation 없음) 소유자 set 허용', async
 });
 
 // ── 기존 OBS 결함의 회귀: 형식/크기 제한과 v2 중지 기록 보호 ──
-// 아래는 "허용된다"가 현재 사실이라 assertSucceeds로 기록한다. D7 rules 채택 시 거부로 뒤집혀야 하는 행.
+// 수정 전 허용됐던 요청을 assertFails로 검사한다. 운영 적용 증거는 최신 문서 Z절.
 test('FS-OBS-1 형식 위반 소유자 write 거부', async () => {
   await assertFails(setDoc(doc(asOwner(), 'friend_schedules', OWNER),
     { ownerName: 12345, isRegular: 'yes', pattern: 'not-a-list', evil: { nested: true } }));
