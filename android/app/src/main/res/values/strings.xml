@@ -3,7 +3,7 @@
     <string name="alarm_type_sound_vibration_short">소리+진동</string>
     <string name="alarm_type_vibration_short">진동</string>
     <string name="alarm_type_silent_short">무음</string>
-    <string name="snooze_collision_message">%1$s에 이미 알람(%2$s)이 있어 5분 후 알람은 추가하지 않았어요. 현재 알람은 종료됩니다.</string>
+    <string name="snooze_collision_message">%1$s 알람(%2$s)이 있어 미루지 않고 종료했어요.</string>
     <!-- ⭐ 홈 화면 위젯 목록(길게 눌러 위젯 추가)에 노출되는 설명 문구 -->
     <string name="calendar_widget_description">전주/이번주/다음주 근무 일정을 홈 화면에서 바로 볼 수 있어요.</string>
     <!-- ⭐ 실제 수면 기록 위젯(캘린더 위젯과 별개) - 취침/기상 원터치 토글 -->

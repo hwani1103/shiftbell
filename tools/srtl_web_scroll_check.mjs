@@ -4,7 +4,7 @@ const adb='C:/Users/Administrator/AppData/Local/Android/sdk/platform-tools/adb.e
 const serial=process.env.SHIFTBELL_AUDIT_SERIAL;
 if(!serial?.startsWith('localhost:'))throw Error('Explicit SRTL serial required');
 const run=(...args)=>execFileSync(adb,['-s',serial,...args],{maxBuffer:20*1024*1024});
-const out='build/srtl_2026-10-03_ultra_final';
+const out=process.env.SHIFTBELL_AUDIT_OUT || 'build/srtl_2026-10-03_ultra_final';
 const port=process.env.SRTL_WEB_PORT || '8095';
 const suffix=process.env.SRTL_SCROLL_SUFFIX || 'bottom';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));

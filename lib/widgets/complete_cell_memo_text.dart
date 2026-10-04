@@ -15,7 +15,11 @@ class CompleteCellMemoText extends StatelessWidget {
   final TextScaler? textScaler;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
+  Widget build(BuildContext context) => Padding(
+      // Keep glyph ink away from the cell/card edge, even at fractional pixels.
+      // Measure after padding so the last character is omitted, never clipped.
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: LayoutBuilder(
         builder: (context, bounds) {
           final width = bounds.maxWidth;
           final height = bounds.maxHeight;
@@ -25,8 +29,10 @@ class CompleteCellMemoText extends StatelessWidget {
 
           bool fits(int count) {
             final painter = TextPainter(
-              text: TextSpan(text: clusters.take(count).join(), style: resolvedStyle),
+              text: TextSpan(
+                  text: clusters.take(count).join(), style: resolvedStyle),
               textDirection: Directionality.of(context),
+              locale: Localizations.maybeLocaleOf(context),
               textScaler: scaler,
               maxLines: 1,
             )..layout();
@@ -50,10 +56,10 @@ class CompleteCellMemoText extends StatelessWidget {
           return Text(clusters.take(low).join(),
               style: resolvedStyle,
               textAlign: textAlign,
-              textScaler: textScaler,
+              textScaler: scaler,
               maxLines: 1,
               softWrap: false,
               overflow: TextOverflow.clip);
         },
-      );
+      ));
 }

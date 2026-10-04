@@ -4546,7 +4546,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           // 지적으로 7.sp→7.8.sp, 색도 onSurfaceVariant→grey.shade700로 진하게
           // 바꾼 이력). 메모 사이만 고정 1dp를 추가한다.
           ...d.memos.take(3).toList().asMap().entries.map((e) => Padding(
-              padding: EdgeInsets.only(left: 3, right: 3, top: e.key == 0 ? 0 : 1),
+              padding: EdgeInsets.only(left: 4, right: 4, top: e.key == 0 ? 0 : 1),
               child: _memoText(
                   d.memos.length,
                   e.value,

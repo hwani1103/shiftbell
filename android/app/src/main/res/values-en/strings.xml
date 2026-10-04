@@ -3,7 +3,7 @@
     <string name="alarm_type_sound_vibration_short">sound + vibration</string>
     <string name="alarm_type_vibration_short">vibration</string>
     <string name="alarm_type_silent_short">silent</string>
-    <string name="snooze_collision_message">An alarm (%2$s) is already set for %1$s. No snooze was added, and this alarm is dismissed.</string>
+    <string name="snooze_collision_message">Alarm (%2$s) at %1$s. Dismissed without snoozing.</string>
     <!-- ⭐ 2026-09-22(영어화 P0) - 네이티브(Kotlin/XML) 쪽은 Flutter l10n(ARB)을 안 거치므로
          별도로 영어 리소스를 둠. res/values/strings.xml과 반드시 같은 키 집합을 유지할 것 -
          새 키를 추가하면 여기도 같이 추가(이 파일이 없으면 그 키만 조용히 한국어로 보임). -->

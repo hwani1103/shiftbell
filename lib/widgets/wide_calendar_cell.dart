@@ -392,7 +392,7 @@ class WideCalendarCell extends StatelessWidget {
                 Expanded(
                     flex: 6,
                     child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        padding: EdgeInsets.symmetric(horizontal: underline ? 5 : 3),
                         child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: visibleMemos

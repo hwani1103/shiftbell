@@ -7,7 +7,7 @@ const port=process.env.SRTL_WEB_PORT || '8094';
 const base=`http://127.0.0.1:${port}/`;
 const scale=process.env.SRTL_SCALE || '1.0';
 const buildDir=process.env.SRTL_WEB_BUILD || 'build/srtl_web_fixture';
-const dest=`artifacts/srtl_2026-10-03/${device}/${process.env.SRTL_CAPTURE_SET || 'numbered_v2'}/`;
+const dest=`${process.env.SRTL_CAPTURE_ROOT || 'artifacts/srtl_2026-10-03'}/${device}/${process.env.SRTL_CAPTURE_SET || 'numbered_v2'}/`;
 const catalog=JSON.parse(fs.readFileSync('artifacts/srtl_2026-10-03/capture_catalog.json','utf8'));
 fs.mkdirSync(dest,{recursive:true});
 const adb='C:/Users/Administrator/AppData/Local/Android/sdk/platform-tools/adb.exe';
@@ -40,6 +40,17 @@ try{
    if(actualUrl.result.value!==url)throw Error('Capture page changed: '+actualUrl.result.value);
    const visible=await send('Runtime.evaluate',{expression:'document.visibilityState',returnByValue:true});
    if(visible.result.value!=='visible')throw Error('Capture tab is not visible');
+   await send('Runtime.evaluate',{expression:'(()=>{function visit(r){r.querySelector("flt-semantics-placeholder")?.click();for(const e of r.querySelectorAll("*")){if(e.shadowRoot)visit(e.shadowRoot)}}visit(document)})()'});
+   await sleep(500);
+   const rendered=await send('Runtime.evaluate',{expression:'document.body.innerText',returnByValue:true});
+   const renderedText=rendered.result?.value || '';
+   // Mobile CanvasKit may keep semantics disabled without a screen reader.
+   // Record that limitation; final PNGs still require visual language review.
+   const scene=await send('Runtime.evaluate',{expression:'(()=>{let n=0;function visit(r){n+=r.querySelectorAll("canvas").length;for(const e of r.querySelectorAll("*")){if(e.shadowRoot)visit(e.shadowRoot)}}visit(document);return n})()',returnByValue:true});
+   if(!scene.result?.value)throw Error('Flutter canvas not rendered');
+   if(renderedText && !renderedText.includes(lang==='ko'?'교대근무 동료의 일정':'Colleague Work Schedule'))throw Error('Expected localized calendar missing: '+renderedText);
+   if(lang==='en' && /개천절|한글날|대체공휴일/.test(renderedText))throw Error('Korean holiday in English calendar');
+   if(errors.length)throw Error('Browser runtime exception: '+JSON.stringify(errors));
    const data=run('exec-out','screencap','-p');const start=data.indexOf(Buffer.from([137,80,78,71,13,10,26,10]));
    if(start<0)throw Error('Missing PNG');fs.writeFileSync(out+name+'.png',data.subarray(start));
    const metrics=await send('Runtime.evaluate',{expression:'JSON.stringify({url:location.href,width:innerWidth,height:innerHeight,dpr:devicePixelRatio})',returnByValue:true});
@@ -52,7 +63,7 @@ try{
    manifest.captures.push({...row,font_scale:scale,status:'captured',source:'local production-widget fixture; explicit MediaQuery scale; no live sharing/PWA installation claim',
      sha256:createHash('sha256').update(data.subarray(start)).digest('hex'),
      web_build_sha256:createHash('sha256').update(fs.readFileSync(buildDir+'/main.dart.js')).digest('hex'),
-     metrics:JSON.parse(metrics.result.value),errors});
+     metrics:JSON.parse(metrics.result.value),renderedText,textVerification:renderedText?'semantic text checked':'visual review required; semantics unavailable',errors});
    fs.writeFileSync(manifestPath,JSON.stringify(manifest,null,2));
   }
  }
