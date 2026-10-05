@@ -21,6 +21,7 @@ import android.os.Vibrator
 import androidx.test.core.app.ApplicationProvider
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -36,6 +37,7 @@ import java.util.Date
 import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
+@org.robolectric.annotation.LooperMode(org.robolectric.annotation.LooperMode.Mode.PAUSED)
 class G1RingRoundTest {
 
     private lateinit var context: Context
@@ -50,7 +52,10 @@ class G1RingRoundTest {
         val deviceContext = context.createDeviceProtectedStorageContext()
         // 오늘 이미 갱신한 것으로 둬서 dismiss/수신 경로의 AlarmRefreshUtil이 비동기 갱신으로 alarms를 바꾸지 않게 함
         deviceContext.getSharedPreferences("alarm_state", Context.MODE_PRIVATE).edit()
-            .putLong("last_alarm_refresh", System.currentTimeMillis()).commit()
+            .clear()
+            .putLong("last_alarm_refresh", System.currentTimeMillis())
+            .putInt(AlarmRefreshEngine.KEY_REFRESH_POLICY_VERSION, AlarmRefreshEngine.REFRESH_POLICY_VERSION)
+            .commit()
 
         val dbFile = deviceContext.getDatabasePath("shiftbell.db")
         for (suffix in listOf("", "-wal", "-shm", "-journal")) java.io.File(dbFile.path + suffix).delete()
@@ -115,6 +120,85 @@ class G1RingRoundTest {
             .filter { it.action == AlarmActionReceiver.ACTION_RING_TIMEOUT }
     }
 
+    @Test
+    fun `watchdog ends one-minute ring even if OS timeout is removed`() {
+        val ring = RingingAlarmTracker.startRing(context, 7)
+        AlarmActionHelper.scheduleRingTimeout(context, ring, 1)
+        assertTrue(RingTimeoutController.isHoldingWakeLock)
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val pending = AlarmActionHelper.ringTimeoutPendingIntent(context, 7, ring.round,
+            android.app.PendingIntent.FLAG_NO_CREATE)!!
+        am.cancel(pending)
+        shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(59))
+        assertEquals(ring, RingingAlarmTracker.current(context))
+        shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(1))
+        assertNull(RingingAlarmTracker.current(context))
+        assertNull(RingTimeoutController.remaining(ring))
+        assertFalse(RingTimeoutController.isHoldingWakeLock)
+        assertEquals(listOf("timeout"), history(7))
+        assertEquals(0, alarmRows(7))
+    }
+
+    @Test
+    fun `three-minute setting is honored and reopening never extends deadline`() {
+        val ring = RingingAlarmTracker.startRing(context, 7)
+        AlarmActionHelper.scheduleRingTimeout(context, ring, 3)
+        shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(120))
+        val remaining = RingTimeoutController.remaining(ring)
+        AlarmActionHelper.scheduleRingTimeout(context, ring, 10)
+        assertEquals(remaining, RingTimeoutController.remaining(ring))
+        shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(59))
+        assertEquals(ring, RingingAlarmTracker.current(context))
+        shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(1))
+        assertNull(RingingAlarmTracker.current(context))
+        assertEquals(listOf("timeout"), history(7))
+    }
+
+    @Test
+    fun `old deadline cannot stop a newer ring of the same alarm`() {
+        val first = RingingAlarmTracker.startRing(context, 7)
+        AlarmActionHelper.scheduleRingTimeout(context, first, 1)
+        shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(30))
+        assertTrue(AlarmActionHelper.claimRingEnd(context, 7, first.round))
+        val second = RingingAlarmTracker.startRing(context, 7)
+        AlarmActionHelper.scheduleRingTimeout(context, second, 3)
+        AlarmActionReceiver().onReceive(context, timeoutIntent(7, first.round))
+        shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofSeconds(31))
+        assertEquals(second, RingingAlarmTracker.current(context))
+        assertTrue(history(7).isEmpty())
+        assertTrue(RingTimeoutController.remaining(second)!! > 140_000)
+    }
+
+    @Test
+    fun `manual dismiss cancels watchdog and late timeout cannot duplicate history`() {
+        val ring = RingingAlarmTracker.startRing(context, 7)
+        AlarmActionHelper.scheduleRingTimeout(context, ring, 1)
+        val request = timeoutIntent(7, ring.round).apply {
+            action = AlarmActionReceiver.ACTION_DISMISS_FROM_NOTIFICATION
+        }
+        AlarmActionReceiver().onReceive(context, request)
+        assertNull(RingTimeoutController.remaining(ring))
+        assertFalse(RingTimeoutController.isHoldingWakeLock)
+        shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofMinutes(2))
+        AlarmActionReceiver().onReceive(context, timeoutIntent(7, ring.round))
+        assertEquals(listOf("swiped"), history(7))
+    }
+
+    @Test
+    fun `OS backup uses elapsed wakeup and persisted old round is not live after restart`() {
+        val ring = RingingAlarmTracker.startRing(context, 7)
+        AlarmActionHelper.scheduleRingTimeout(context, ring, 1)
+        val am = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarm = shadowOf(am).scheduledAlarms.first {
+            it.operation?.let { pi -> shadowOf(pi).savedIntent.action } == AlarmActionReceiver.ACTION_RING_TIMEOUT
+        }
+        assertEquals(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarm.type)
+        RingingAlarmTracker.resetMemoryForTest()
+        assertEquals(ring, RingingAlarmTracker.current(context))
+        assertFalse(RingingAlarmTracker.isLiveRing(context))
+        assertNull(RingTimeoutController.remaining(ring))
+    }
+
     private fun timeoutIntent(alarmId: Int, round: Long) =
         Intent(context, AlarmActionReceiver::class.java).apply {
             action = AlarmActionReceiver.ACTION_RING_TIMEOUT
@@ -122,9 +206,98 @@ class G1RingRoundTest {
             putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, round)
         }
 
+    @Test
+    fun `app card shares notification dismiss and never rearms on resume`() {
+        val activity = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup()
+        val ring = RingingAlarmTracker.startRing(context, 7)
+        AlarmActionHelper.scheduleRingTimeout(context, ring, 3)
+        try {
+            InAppAlarmController.resume(activity.get())
+            shadowOf(android.os.Looper.getMainLooper()).idle()
+            val card = org.robolectric.shadows.ShadowDialog.getLatestDialog()
+            assertTrue(card.isShowing)
+            assertTrue(card.findViewById<android.widget.Button>(R.id.dismissButton) != null)
+            val remaining = RingTimeoutController.remaining(ring)
+            val deadline = android.os.SystemClock.elapsedRealtime() + remaining!!
+            InAppAlarmController.pause(activity.get())
+            assertFalse(card.isShowing)
+            InAppAlarmController.resume(activity.get())
+            shadowOf(android.os.Looper.getMainLooper()).idle()
+            assertEquals(deadline, android.os.SystemClock.elapsedRealtime() + RingTimeoutController.remaining(ring)!!)
+            val reopened = org.robolectric.shadows.ShadowDialog.getLatestDialog()
+            val request = timeoutIntent(7, ring.round).apply {
+                action = AlarmActionReceiver.ACTION_DISMISS_FROM_NOTIFICATION
+            }
+            AlarmActionReceiver().onReceive(context, request)
+            shadowOf(android.os.Looper.getMainLooper()).idle()
+            assertFalse(reopened.isShowing)
+            assertEquals(listOf("swiped"), history(7))
+        } finally {
+            InAppAlarmController.pause(activity.get())
+            activity.pause().stop().destroy()
+        }
+    }
+
+    @Test
+    fun `app snooze uses same round and cancels old watchdog`() {
+        val activity = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup()
+        val ring = RingingAlarmTracker.startRing(context, 7)
+        AlarmActionHelper.scheduleRingTimeout(context, ring, 1)
+        try {
+            InAppAlarmController.resume(activity.get())
+            shadowOf(android.os.Looper.getMainLooper()).idle()
+            val card = org.robolectric.shadows.ShadowDialog.getLatestDialog()
+            card.findViewById<android.widget.Button>(R.id.snoozeButton).performClick()
+            shadowOf(android.os.Looper.getMainLooper()).idle()
+            assertFalse(card.isShowing)
+            assertNull(RingingAlarmTracker.current(context))
+            assertFalse(RingTimeoutController.isHoldingWakeLock)
+            assertNull(RingTimeoutController.remaining(ring))
+            assertEquals(1, alarmRows(7))
+            assertEquals(1, history(7).size)
+            AlarmActionReceiver().onReceive(context, timeoutIntent(7, ring.round))
+            assertEquals(1, alarmRows(7))
+        } finally {
+            InAppAlarmController.pause(activity.get())
+            activity.pause().stop().destroy()
+        }
+    }
+
     private fun alarmIntent(id: Int) = Intent(context, CustomAlarmReceiver::class.java).apply {
         putExtra(CustomAlarmReceiver.EXTRA_ID, id)
         putExtra(CustomAlarmReceiver.EXTRA_LABEL, "주간")
+    }
+
+    @Test
+    fun `same ID new round replaces external card without duplicating app card`() {
+        org.robolectric.shadows.ShadowSettings.setCanDrawOverlays(true)
+        val service = org.robolectric.Robolectric.buildService(AlarmOverlayService::class.java).create()
+        val activity = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup()
+        fun show(ring: RingingAlarmTracker.ActiveRing) {
+            AlarmActionHelper.scheduleRingTimeout(context, ring, 3)
+            service.get().onStartCommand(Intent(context, AlarmOverlayService::class.java).apply {
+                putExtra("alarmId", ring.alarmId)
+                putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, ring.round)
+                putExtra(AlarmOverlayService.EXTRA_ALARM_DURATION, 3)
+            }, 0, 1)
+            shadowOf(android.os.Looper.getMainLooper()).idle()
+        }
+        try {
+            val first = RingingAlarmTracker.startRing(context, 7)
+            show(first)
+            assertEquals(first, AlarmOverlayService.visibleRing)
+            assertTrue(AlarmActionHelper.claimRingEnd(context, 7, first.round))
+            val second = RingingAlarmTracker.startRing(context, 7)
+            show(second)
+            assertEquals(second, AlarmOverlayService.visibleRing)
+            InAppAlarmController.resume(activity.get())
+            shadowOf(android.os.Looper.getMainLooper()).idle()
+            assertNull(org.robolectric.shadows.ShadowDialog.getLatestDialog())
+        } finally {
+            InAppAlarmController.pause(activity.get())
+            activity.pause().stop().destroy()
+            service.destroy()
+        }
     }
 
     // ───────────────────────────── #3 회차 토큰
@@ -239,6 +412,29 @@ class G1RingRoundTest {
     }
 
     // ───────────────────────────── #4 제어 알림
+
+    @Test
+    fun `notification tokens stay bound to their original ring after same ID rings again`() {
+        CustomAlarmReceiver().onReceive(context, alarmIntent(7))
+        val first = RingingAlarmTracker.current(context)!!
+        val old = controlNotification()!!
+        assertTrue(AlarmActionHelper.claimRingEnd(context, 7, first.round))
+        val next = RingingAlarmTracker.startRing(context, 7)
+        NotificationHelper.showRingControlNotification(context, 7, next.round, "Day", 3)
+        val current = controlNotification()!!
+        assertNotEquals(old.contentIntent, current.contentIntent)
+        for (index in old.actions.indices) {
+            val token = old.actions[index].actionIntent
+            assertNotEquals(token, current.actions[index].actionIntent)
+            val intent = shadowOf(token).savedIntent
+            assertEquals(first.round, intent.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, -1))
+            AlarmActionReceiver().onReceive(context, intent)
+            assertEquals(next, RingingAlarmTracker.current(context))
+        }
+        NotificationHelper.showRingControlNotification(context, 7, next.round, "Day", 3,
+            coverVisible = true, launchFullScreen = false)
+        assertEquals(current.actions[1].actionIntent, controlNotification()!!.actions[1].actionIntent)
+    }
 
     private fun controlNotification(): Notification? {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

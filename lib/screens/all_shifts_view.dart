@@ -319,7 +319,7 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
                                       child: FittedBox(
                                         fit: BoxFit.scaleDown,
                                         child: Text(
-                                        Localizations.localeOf(context).languageCode == 'en'
+                                        !context.usesKoreanFeatures
                                             ? context.l10n.allTeamsThisMonthButton.replaceFirst(' ', '\n')
                                             : context.l10n.allTeamsThisMonthButton,
                                         style: TextStyle(

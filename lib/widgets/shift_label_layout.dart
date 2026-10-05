@@ -55,21 +55,24 @@ String wrapShiftLabel(
     return '${chars.take(split).join()}\n${chars.skip(split).join()}';
   }
   if (measure(name) <= width) return name;
-  var best = 1;
+  int? best;
   var score = double.infinity;
   for (var i = 1; i < chars.length; i++) {
+    // Keep Latin words intact, including short names such as Folga and Frei.
+    // The enclosing FittedBox handles a word wider than the cell.
+    final wordBreak = chars[i - 1] == ' ' || chars[i] == ' ';
+    if (!wordBreak) continue;
     final left = chars.take(i).join().trimRight();
     final right = chars.skip(i).join().trimLeft();
     if (left.isEmpty || right.isEmpty) continue;
     final maxWidth = math.max(measure(left), measure(right));
-    // Prefer an existing word break when both words fit without shrinking.
-    final wordBreak = chars[i - 1] == ' ' || chars[i] == ' ';
-    final candidate = maxWidth + (wordBreak ? 0 : width);
+    final candidate = maxWidth;
     if (candidate < score) {
       score = candidate;
       best = i;
     }
   }
+  if (best == null) return name;
   return '${chars.take(best).join().trimRight()}\n${chars.skip(best).join().trimLeft()}';
 }
 

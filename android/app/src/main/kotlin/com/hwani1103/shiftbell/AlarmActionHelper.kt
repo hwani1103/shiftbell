@@ -258,6 +258,7 @@ object AlarmActionHelper {
      */
     fun claimRingEnd(context: Context, alarmId: Int, round: Long): Boolean {
         if (!RingingAlarmTracker.endIfCurrent(context, alarmId, round)) return false
+        RingTimeoutController.cancel(RingingAlarmTracker.ActiveRing(alarmId, round))
         cancelRingTimeout(context, alarmId, round)
         return true
     }
@@ -265,6 +266,7 @@ object AlarmActionHelper {
     /** 회차를 모르는 "지금 이 알람" 요청용(앱에서 삭제·외부 오버레이 종료) - 활성 울림의 ID가 같을 때만 끝냄. */
     fun claimCurrentRingOf(context: Context, alarmId: Int): Boolean {
         val ring = RingingAlarmTracker.endCurrentOf(context, alarmId) ?: return false
+        RingTimeoutController.cancel(ring)
         cancelRingTimeout(context, ring.alarmId, ring.round)
         return true
     }
@@ -287,6 +289,7 @@ object AlarmActionHelper {
 
     /** 화면 밖에서 울림을 끝냈을 때(종료 예약·앱 삭제) 떠 있는 잠금화면/오버레이/울림 알림을 닫음. */
     fun closeRingUi(context: Context, alarmId: Int) {
+        InAppAlarmController.changed()
         try {
             context.sendBroadcast(Intent("FINISH_ALARM_ACTIVITY").apply {
                 setPackage(context.packageName)
@@ -296,6 +299,7 @@ object AlarmActionHelper {
             context.sendBroadcast(Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
                 setPackage(context.packageName)
                 putExtra(AlarmOverlayService.EXTRA_ALARM_ID, alarmId)
+                putExtra("completedRingOnly", true)
             })
         } catch (e: Exception) {
             Log.e(TAG, "❌ 울림 화면 종료 신호 실패: id=$alarmId", e)
@@ -313,30 +317,31 @@ object AlarmActionHelper {
 
     /** 이 회차의 자동 종료를 예약. 같은 알람의 다른 회차 예약과는 data URI로 구분됨. */
     fun scheduleRingTimeout(context: Context, ring: RingingAlarmTracker.ActiveRing, durationMinutes: Int) {
+        if (!RingingAlarmTracker.isCurrent(context, ring.alarmId, ring.round)) return
         val minutes = durationMinutes.coerceAtLeast(1)
-        val triggerAt = System.currentTimeMillis() + minutes * 60_000L
+        val triggerAt = RingTimeoutController.start(context, ring, minutes)
         try {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val pendingIntent = ringTimeoutPendingIntent(context, ring.alarmId, ring.round, PendingIntent.FLAG_UPDATE_CURRENT)
                 ?: throw IllegalStateException("PendingIntent 생성 실패")
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pendingIntent)
                 } else {
-                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
+                    alarmManager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pendingIntent)
                 }
             } catch (e: SecurityException) {
                 // 정확한 알람 권한이 꺼진 경우 - 조금 늦더라도 끝나긴 하도록 비정확 예약으로 대체
                 Log.w(TAG, "⚠️ 정확한 종료 예약 불가 - 비정확 예약으로 대체", e)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pendingIntent)
                 } else {
-                    alarmManager.set(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
+                    alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, pendingIntent)
                 }
             }
             Log.d(TAG, "⏱️ 울림 종료 예약: id=${ring.alarmId} 회차=${ring.round} ${minutes}분 후")
         } catch (e: Exception) {
-            // 예약 실패 시에도 화면·오버레이 타이머는 남아 있음(그래서 아직 제거하지 않음)
+            // OS 예약 실패 시에도 화면과 독립적인 RingTimeoutController는 계속 동작함.
             Log.e(TAG, "❌ 울림 종료 예약 실패: $ring", e)
         }
     }

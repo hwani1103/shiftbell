@@ -1,0 +1,1198 @@
+{
+  "@@locale": "de",
+  "appTitle": "ShiftBell",
+  "commonOk": "OK",
+  "commonCancel": "Abbrechen",
+  "commonSave": "Speichern",
+  "commonDelete": "Löschen",
+  "commonEdit": "Bearbeiten",
+  "commonAdd": "Hinzufügen",
+  "commonDone": "Fertig",
+  "commonNext": "Weiter",
+  "commonClose": "Schließen",
+  "commonReset": "Zurücksetzen",
+  "commonChange": "Ändern",
+  "commonContinue": "Fortfahren",
+  "commonNotNow": "Jetzt nicht",
+  "commonGoToSettings": "Einstellungen öffnen",
+  "commonRefresh": "Aktualisieren",
+  "commonGoBack": "Zurück",
+  "commonGetStarted": "Loslegen",
+  "commonShare": "Teilen",
+  "commonCopy": "Kopieren",
+  "commonNotSet": "Nicht festgelegt",
+  "commonNone": "Keine",
+  "commonDeletePermanently": "Endgültig löschen",
+  "commonPrevious": "Ursprünglich",
+  "commonCurrent": "Aktuell",
+  "commonOther": "Andere",
+  "commonToday": "Heute",
+  "commonTomorrow": "Morgen",
+  "commonView": "Ansehen",
+  "commonSelectTime": "Uhrzeit wählen",
+  "commonAm": "AM",
+  "commonPm": "PM",
+  "commonGotIt": "Verstanden",
+  "commonLater": "Später",
+  "commonSaveFailed": "Speichern fehlgeschlagen. Bitte versuche es gleich noch einmal.",
+  "commonUpdate": "Aktualisieren",
+  "navNextAlarm": "Nächster Wecker",
+  "navCalendar": "Kalender",
+  "navFriendShare": "Teilen",
+  "navScheduleManagement": "Termine",
+  "disableTabButtonLabel": "Ansicht „{tab}“ ausblenden",
+  "@disableTabButtonLabel": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
+  "disableTabDialogBody": "Diese Ansicht wird in der unteren Navigation ausgeblendet. Du kannst sie in den Einstellungen wieder einblenden.",
+  "scheduleTabDisableExtraNotice": "Geplante Terminerinnerungen werden ebenfalls deaktiviert.",
+  "settingsScheduleTabReenableTitle": "Termine einblenden",
+  "settingsScheduleTabReenableSubtitle": "Terminansicht wieder in der unteren Navigation anzeigen",
+  "navSettings": "Einstellungen",
+  "shiftWork": "Schichtarbeit",
+  "shiftPattern": "Schichtfolge",
+  "settingsPatternTodayMarker": "· heute markiert",
+  "shiftName": "Schichtname",
+  "shiftType": "Schichtart",
+  "shiftDayOff": "Frei",
+  "shiftDay": "Tag",
+  "shiftNight": "Nacht",
+  "shiftMorning": "Früh",
+  "shiftAfternoon": "Spät",
+  "shiftOnCall": "Bereitschaft",
+  "shiftOff": "Frei",
+  "shiftChange": "Schicht ändern",
+  "shiftTeam": "Team",
+  "shiftRegularPattern": "Fester Schichtzyklus",
+  "shiftIrregularPattern": "Ohne festen Zyklus",
+  "shiftSchedule": "Schichtplan",
+  "shiftFullSchedule": "Alle Teams",
+  "shiftWorkHours": "Arbeitszeiten",
+  "shiftOt": "Überstunden",
+  "shiftThisMonthOt": "Überstunden im Monat",
+  "shiftWeeklyWorkHours": "Wochenarbeitszeit",
+  "shiftPayday": "Stichtag",
+  "shiftChangeSchedule": "Schichtplan ändern",
+  "shiftResetSchedule": "Schichtplan zurücksetzen",
+  "alarmTitle": "Wecker",
+  "alarmNext": "Nächster Wecker",
+  "alarmUntil": "Zeit bis zum Wecker",
+  "alarmRegistered": "Geplante Wecker",
+  "alarmFixed": "Schichtwecker",
+  "alarmType": "Weckmodus",
+  "alarmSound": "Weckton",
+  "alarmSoundManage": "Ton und Vibration",
+  "alarmSoundChoose": "Weckton wählen",
+  "alarmSoundVibration": "Ton + Vibration",
+  "alarmVibration": "Vibration",
+  "alarmSilent": "Lautlos",
+  "alarmVibrationWeak": "Schwach",
+  "alarmVibrationStrong": "Stark",
+  "alarmIntensity": "Stärke",
+  "alarmVolume": "Lautstärke",
+  "alarmHistory": "Weckerverlauf",
+  "alarmDismissed": "Ausgeschaltet",
+  "alarmRemoved": "Wecker entfernt",
+  "alarmSnooze5Min": "5 Min. später",
+  "alarmNoResponse": "Verpasst",
+  "alarmScheduleChanged": "Schichtplan geändert",
+  "alarmTurnOffThis": "Diesen Wecker ausschalten",
+  "alarmDuplicate": "Doppelter Wecker",
+  "alarmAdd": "Wecker hinzufügen",
+  "alarmDayBefore": "Vortag",
+  "alarmDaySame": "Schichttag",
+  "alarmDayAfter": "Folgetag",
+  "alarmSupersededByNextAlarm": "Beim Start des nächsten Weckers beendet",
+  "alarmRingingSoon": "Klingelt gleich",
+  "alarmRemainingDaysHours": "{days, plural, =1{1 Tag} other{{days} Tage}} {hours, plural, =1{1 Stunde} other{{hours} Stunden}}",
+  "@alarmRemainingDaysHours": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmRemainingHoursMinutes": "{hours, plural, =1{1 Stunde} other{{hours} Stunden}} {minutes, plural, =1{1 Minute} other{{minutes} Minuten}}",
+  "@alarmRemainingHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmRemainingMinutes": "{minutes, plural, =1{1 Minute} other{{minutes} Minuten}}",
+  "@alarmRemainingMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmUpNext": "Nächster Wecker",
+  "alarmNoneUpcoming": "Keine bevorstehenden Wecker",
+  "alarmNoneRegistered": "Keine Wecker geplant",
+  "alarmEmptyStateHint": "Richte deine Schichten in den Einstellungen ein\nund füge für jede Schicht einen Wecker hinzu.",
+  "alarmRemainingDays": "{days, plural, =1{1 Tag} other{{days} Tage}}",
+  "@alarmRemainingDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmRemainingHours": "{hours, plural, =1{1 Stunde} other{{hours} Stunden}}",
+  "@alarmRemainingHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmViewAllRegistered": "Alle Wecker ansehen",
+  "alarmSoundShort": "Ton",
+  "alarmDeleteAllPermanently": "Alle Wecker endgültig löschen",
+  "alarmDeletedToast": "Wecker gelöscht",
+  "alarmUpdatedToast": "Wecker aktualisiert",
+  "alarmCanceledToast": "Wecker deaktiviert",
+  "alarmCountAll": "Alle",
+  "alarmCountFuture": "Bevorstehend",
+  "alarmCountPast": "Vergangen",
+  "alarmDuration": "Klingeldauer",
+  "alarmDurationMinutes": "{minutes, plural, =1{1 Min.} other{{minutes} Min.}}",
+  "@alarmDurationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarTheme": "Kalenderdesign",
+  "calendarSelectDate": "Datum wählen",
+  "calendarNSelected": "{count, plural, =1{1 ausgewählt} other{{count} ausgewählt}}",
+  "@calendarNSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarMemo": "Notiz",
+  "calendarMemoAll": "Alle Notizen",
+  "calendarMemoEnter": "Notiz",
+  "calendarMemoContent": "Notiztext",
+  "calendarMemoSearch": "Notizen suchen",
+  "calendarMemoNone": "Keine Notizen",
+  "calendarSearchNoResults": "Keine Suchergebnisse",
+  "calendarMemoTotalCount": "{count, plural, =1{1 Notiz} other{{count} Notizen}}",
+  "@calendarMemoTotalCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarMemoSearchResultCount": "{count, plural, =1{1 Ergebnis} other{{count} Ergebnisse}}",
+  "@calendarMemoSearchResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarTapToAddMoreDates": "Tippe auf weitere Tage, um sie auszuwählen",
+  "calendarFriendQuickAccessLabel": "Freunde",
+  "calendarTapDateToEnter": "Tippe auf einen Tag, um Überstunden einzutragen",
+  "calendarMonthlyOtTitle": "Überstunden im {month}",
+  "@calendarMonthlyOtTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarOtTotal": "Gesamt: {total}",
+  "@calendarOtTotal": {
+    "placeholders": {
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarMonthlyWorkTotal": "Geplante Arbeitszeit im {month}: {total}",
+  "@calendarMonthlyWorkTotal": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarSetWorkHoursInSettingsHint": "Lege die Zeiten jeder Schicht in den Einstellungen fest.",
+  "calendarNoOtRegistered": "Keine Überstunden erfasst",
+  "calendarWeeklyWorkHoursTitle": "Wochenarbeitszeit im {month}",
+  "@calendarWeeklyWorkHoursTitle": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarWeeklyBasisHint": "Jeweils Montag bis Sonntag (einschließlich Überstunden)",
+  "calendarSetScheduleFirst": "Richte zuerst deinen Schichtplan ein",
+  "calendarSpecifyWorkHoursInSettings": "Lege die Arbeitszeiten je Schicht in den Einstellungen fest.",
+  "calendarShiftDayCount": "{shift}: {days, plural, =1{1 Tag} other{{days} Tage}}",
+  "@calendarShiftDayCount": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      },
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarShiftLabel": "Schicht:",
+  "calendarFixedAlarmLabel": "Schichtwecker:",
+  "calendarAutoGeneratedWithinDays": "Wecker werden automatisch eingerichtet, sobald dieser Tag weniger als {days, plural, =1{1 Tag} other{{days} Tage}} entfernt ist.",
+  "@calendarAutoGeneratedWithinDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarMemoColonLabel": "Notiz:",
+  "calendarSelectAlarmType": "Weckmodus wählen",
+  "calendarAlarmAt": "Wecker um {time}",
+  "@calendarAlarmAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarDeleteAlarmTitle": "Wecker löschen",
+  "calendarDeleteAlarmConfirm": "Wecker um {time} löschen?",
+  "@calendarDeleteAlarmConfirm": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "calendarDeleteAlarmFailed": "Wecker konnte nicht gelöscht werden",
+  "calendarBulkChangeShiftTitle": "{count, plural, =1{Schicht für 1 Tag ändern} other{Schicht für {count} Tage ändern}}",
+  "@calendarBulkChangeShiftTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "calendarMemoDetailTitle": "Notizdetails",
+  "onboardingCreateSchedule": "Schichten einrichten",
+  "onboardingFixedPatternQuestion": "Wiederholen sich deine Schichten in einer festen Folge?",
+  "onboardingYesRegular": "Ja, sie wiederholen sich",
+  "onboardingNoIrregular": "Nein, kein fester Zyklus",
+  "onboardingCheckShiftTypes": "Prüfe deine Schichtarten",
+  "onboardingAddIfMissing": "Bei Bedarf kannst du weitere hinzufügen",
+  "onboardingShiftLimitHint": "Bis zu {max} Schichtarten · je {chars} Zeichen",
+  "@onboardingShiftLimitHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingUsableEvenIfNotInPattern": "Du kannst sie auch außerhalb deiner festen Schichtfolge verwenden.",
+  "onboardingShiftNameTitle": "Welche Schichten und freien Tage brauchst du?",
+  "onboardingShiftNameSubHint": "Nimm auch freie Tage und Urlaub auf. Du kannst sie später im Kalender zuweisen, auch außerhalb deines Zyklus.\n\nMit × entfernst du Namen, mit + Hinzufügen ergänzt du sie.",
+  "onboardingSwitchToIrregularPrefix": "Wenn deine Schichten keiner festen Folge entsprechen, tippe ",
+  "onboardingSwitchToIrregularLink": "hier",
+  "onboardingSwitchToIrregularSuffix": ".",
+  "onboardingSelectAllInPattern": "Wähle die Schichten für deinen Zyklus",
+  "onboardingTapToCompletePattern": "Stelle deine Schichtfolge zusammen",
+  "onboardingPatternHint": "(Bis zu 40 Tage · tippe unten auf eine Schicht, um sie zu entfernen.)",
+  "onboardingPatternHowTo": "Tippe die Schichten in der Reihenfolge an, in der sie sich wiederholen.\nZum Beispiel: Tag, Tag, Frei, Frei, Nacht, Nacht, Frei, Frei.",
+  "onboardingIrregularChoiceTitle": "Schichten einzelnen Tagen zuweisen",
+  "onboardingIrregularChoiceDescription": "Wähle dies, wenn deine Schichten keinen festen Zyklus haben",
+  "onboardingNoPattern": "Keine feste Folge",
+  "onboardingAddShiftName": "Schichtname hinzufügen",
+  "onboardingShiftNameHint": "Schichtname (max. {chars} Zeichen)",
+  "@onboardingShiftNameHint": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSetFixedAlarmPerShift": "Wecker je Schicht einstellen",
+  "onboardingMaxAlarmsPerShift": "Bis zu {max} je Schicht",
+  "@onboardingMaxAlarmsPerShift": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingCanChangeInSettings": "Schichtwecker können am Schichttag, am Vortag oder am Folgetag klingeln.",
+  "onboardingAlarmOptional": "Du kannst die Wecker auch später einstellen",
+  "onboardingFinishSetup": "Einrichtung abschließen",
+  "onboardingSaving": "Dein Schichtplan wird erstellt …",
+  "onboardingSaveFailed": "Deine Einstellungen konnten nicht gespeichert werden. Bitte versuche es erneut.",
+  "onboardingTapToSet": "Zum Einstellen tippen",
+  "onboardingTodayShiftQuestion": "Wo im Schichtzyklus bist du heute ({date})?",
+  "@onboardingTodayShiftQuestion": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingAllSet": "Alles bereit!",
+  "onboardingNeedAtLeastOneShift": "Du brauchst mindestens eine Schichtart",
+  "onboardingEnterShiftName": "Gib einen Schichtnamen ein",
+  "onboardingCharLimitError": "Bitte höchstens {chars} Zeichen eingeben",
+  "@onboardingCharLimitError": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingDuplicateShiftName": "Dieser Schichtname ist bereits vorhanden",
+  "shiftNameCommaNotAllowed": "Schichtnamen dürfen keine Kommas (,) enthalten",
+  "shiftNameReserved": "„{name}“ ist für die App reserviert und kann nicht als Schichtname verwendet werden",
+  "onboardingFixedAlarmDialogTitle": "Wecker für {shift}",
+  "@onboardingFixedAlarmDialogTitle": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingFixedAlarmMaxHint": "Bis zu {max} Wecker je Schicht",
+  "@onboardingFixedAlarmMaxHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingWelcomePopupTitle": "Willkommen bei ShiftBell",
+  "onboardingWelcomePopupBody": "Richte deine Schichten und Wecker ein. ShiftBell plant deine Wecker passend zu deinem Schichtplan.\n\n📅  Schichten auf einen Blick\n⏰  Wecker für jede Schicht\n📝  Notizen und Überstunden erfassen\n💾  Daten auf deinem Gerät sichern",
+  "onboardingWelcomePopupStartButton": "Loslegen",
+  "onboardingShiftAssignPopupTitle": "So weist du Schichten zu",
+  "onboardingShiftAssignPopupBody": "Schichten ohne festen Zyklus musst du jedem Tag selbst zuweisen.\n\nHalte einen Tag gedrückt, um den Auswahlmodus zu öffnen. Tippe auf die gewünschten Tage und dann unten auf einen Schichtnamen.\n\nAuf dieselbe Weise kannst du zugewiesene Schichten jederzeit ändern.",
+  "onboardingScheduleTabPopupTitle": "So verwendest du die Terminansicht",
+  "onboardingScheduleTabPopupBody": "1. Termin erstellen\nTippe unten rechts auf das Uhrsymbol, um eine Uhrzeit auf der Zeitachse auszuwählen. Tippe dann auf die gewünschte Uhrzeit, um dort einen Termin zu erstellen.\n\n2. Dauer festlegen\nNeue Termine haben zunächst keine Dauer, sondern nur einen Zeitpunkt. Mit „+“ oder den Schaltflächen 5 Min./30 Min./1 Std. legst du eine Endzeit fest.\n\n3. Benachrichtigung erhalten\nAktiviere die Benachrichtigung, um zur gewählten Zeit erinnert zu werden. Der Benachrichtigungston richtet sich nach deinen Systemeinstellungen.",
+  "alarmAlreadyExistsAtTime": "Für {time} ist bereits ein Wecker vorhanden.",
+  "@alarmAlreadyExistsAtTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsShiftManagement": "Schichtplan verwalten",
+  "settingsShiftManagementEditButton": "Bearbeiten",
+  "settingsNotSet": "Nicht festgelegt",
+  "settingsWorkHoursAndOt": "Arbeitszeit und Überstunden",
+  "settingsWorkHoursAndOtDesc": "Schichtzeiten und Zeitraum für die Monatsübersicht",
+  "settingsDefaultWorkHoursPerShift": "Arbeitszeiten je Schicht",
+  "settingsMonthlyPeriodBasis": "Monatszeitraum",
+  "settingsCalendarMonthBasis": "Kalendermonat",
+  "settingsCalendarMonthBasisDesc": "Vom ersten bis zum letzten Tag des Monats",
+  "settingsPaydayBasis": "Zeitraum selbst festlegen",
+  "settingsPaydayBasisDesc": "Monatswerte anhand eines Stichtags berechnen",
+  "settingsPeriodStartBasis": "Beginn am",
+  "settingsPeriodEndBasis": "Ende am",
+  "settingsPreviewThisMonth": "Zeitraum für diesen Monat: {range}",
+  "@settingsPreviewThisMonth": {
+    "placeholders": {
+      "range": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsFriendShareDesc": "Schichtpläne mit Freunden per Code teilen",
+  "settingsRenameShiftDesc": "Schichtnamen bearbeiten, hinzufügen oder löschen.",
+  "settingsEditShiftNameDesc": "Namen dieser Schicht ändern",
+  "settingsChangeAlarmTimeDesc": "Weckzeit je Schicht ändern",
+  "settingsChangeScheduleDesc": "Deinen Schichtplan ändern.",
+  "settingsAlarmHistoryDesc": "Wecker und ihren Status ansehen",
+  "settingsMemoAllDesc": "Alle Notizen ansehen und durchsuchen",
+  "settingsDeleteAllAlarmsDesc": "Alle geplanten Wecker löschen",
+  "settingsDataBackupTitle": "Daten sichern",
+  "settingsDataBackupDesc": "Schichtplan, Wecker, Notizen und mehr auf diesem Gerät sichern",
+  "settingsDataBackupLastSavedAt": "Letzte Sicherung: {date}",
+  "@settingsDataBackupLastSavedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDataBackupNeverSaved": "Noch keine Sicherung",
+  "settingsDataBackupSlots": "Manuell: {manual}\nAutomatisch: {auto}",
+  "@settingsDataBackupSlots": {
+    "placeholders": {
+      "manual": {
+        "type": "String"
+      },
+      "auto": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDataBackupSlotNone": "Keine",
+  "customAlarmLabel": "Schnellwecker",
+  "customAlarmEditTooltip": "Schnellwecker bearbeiten",
+  "customAlarmEditorTitle": "Schnellwecker einstellen",
+  "customAlarmEditorDesc": "Speichere bis zu 5 Vorlagen mit Uhrzeit und Weckmodus. Jede Vorlage lässt sich einmal pro Tag für heute oder morgen verwenden. Um eine bereits verwendete Vorlage zu bearbeiten, lösche zuerst die zugehörigen geplanten Wecker.",
+  "customAlarmSlotEmpty": "Leer",
+  "customAlarmSlotClear": "Leeren",
+  "customAlarmAssignHint": "Tippe auf einen Tag, um einen Wecker um {time} hinzuzufügen",
+  "@customAlarmAssignHint": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "customAlarmScheduledToday": "Wecker für heute um {time} eingestellt",
+  "@customAlarmScheduledToday": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "customAlarmScheduledOn": "Wecker für {date} um {time} eingestellt",
+  "@customAlarmScheduledOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "customAlarmScheduledSoon": "Der Wecker klingelt in {minutes} Min.",
+  "@customAlarmScheduledSoon": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "customAlarmPast": "Diese Uhrzeit ist bereits vorbei. Es wurde kein Wecker hinzugefügt.",
+  "customAlarmOutsideWindow": "Schnellwecker können nur für heute oder morgen eingestellt werden",
+  "customAlarmDuplicate": "An diesem Tag gibt es bereits einen Wecker um {time}",
+  "@customAlarmDuplicate": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "customAlarmScheduleFailed": "Der Wecker konnte auf diesem Gerät nicht geplant werden. Bitte versuche es gleich erneut.",
+  "customAlarmUndo": "Rückgängig",
+  "customAlarmDeleted": "Schnellwecker gelöscht",
+  "customAlarmDeleteConfirm": "Schnellwecker um {time} löschen?",
+  "fixedAlarmSkippedByOneTap": "Für dieselbe Uhrzeit wurde zuerst ein Schnellwecker eingestellt. Der Schichtwecker wurde deshalb übersprungen.",
+  "@customAlarmDeleteConfirm": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDataBackupInProgress": "Daten werden gesichert …",
+  "settingsDataBackupSuccessToast": "Sicherung in Download/ShiftBell gespeichert. Nach einer Neuinstallation kannst du diese Datei beim Einrichten der App wiederherstellen.",
+  "settingsDataBackupFailedToast": "Sicherung fehlgeschlagen. Dafür ist mindestens Android 10 nötig. Ist dein Gerät geeignet, versuche es bitte erneut.",
+  "backupRestoreFoundTitle": "Diese Sicherung wiederherstellen?",
+  "backupRestoreFoundDesc": "Stelle Schichtplan, Wecker, Notizen und weitere gespeicherte Daten aus dieser Sicherung wieder her.",
+  "backupRestoreLastSavedAt": "Gesichert am: {date}",
+  "@backupRestoreLastSavedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestoreButton": "Wiederherstellen",
+  "backupRestoreSkipButton": "Neu beginnen",
+  "backupRestoreInProgress": "Wiederherstellung läuft …",
+  "backupRestoreFailedToast": "Wiederherstellung fehlgeschlagen. Bitte versuche es erneut.",
+  "backupRestoreEmptyToast": "Diese Sicherung enthält keinen Schichtplan. Richte zunächst deine Schichten ein.",
+  "backupRestoreManualPickLink": "Sicherungsdatei auswählen",
+  "onboardingHasBackupTitle": "ShiftBell schon genutzt?",
+  "onboardingHasBackupLoadButton": "Wiederherstellen",
+  "backupRestoreManualPickHint": "Mit einer Sicherung aus Download/ShiftBell kannst du dort weitermachen, wo du aufgehört hast.",
+  "backupRestoreManualPickInvalidToast": "Diese Datei scheint keine gültige Sicherung zu sein. Wähle eine Datei, deren Name mit ShiftBell_Backup_ beginnt.",
+  "backupRestoreInvalidToast": "Die Sicherung konnte nicht geprüft werden. Es wurde nichts wiederhergestellt; deine aktuellen Daten bleiben unverändert.",
+  "backupRestoreIncompleteToast": "Die Wiederherstellung konnte nicht abgeschlossen werden. Wecker wurden anhand deiner aktuellen Daten erneut eingerichtet. Öffne die App erneut, um fortzufahren.",
+  "settingsRestoreFromBackupEmptyToast": "Diese Sicherung enthält keinen Schichtplan und wurde nicht geladen. Deine aktuellen Daten bleiben unverändert.",
+  "restoreInterruptedTitle": "Wiederherstellung nicht abgeschlossen",
+  "restoreInterruptedDesc": "Eine frühere Wiederherstellung wurde unterbrochen. Wenn du fortfährst, werden deine Daten durch die Sicherung ersetzt. Änderungen seit der Unterbrechung werden überschrieben. Du kannst auch deine aktuellen Daten behalten. In beiden Fällen werden die Wecker anhand der gewählten Daten neu eingerichtet.",
+  "restoreInterruptedResumeButton": "Wiederherstellung fortsetzen",
+  "restoreInterruptedKeepButton": "Aktuelle Daten behalten",
+  "restoreInterruptedCopyLost": "Die Sicherungsdatei ist nicht mehr verfügbar. Die Wiederherstellung kann nicht fortgesetzt werden. Wecker werden anhand deiner aktuellen Daten neu eingerichtet.",
+  "restoreInterruptedInProgress": "Wird verarbeitet …",
+  "settingsRestoreFromBackupTitle": "Daten wiederherstellen",
+  "settingsRestoreFromBackupDesc": "Aktuelle Daten durch eine Sicherung ersetzen",
+  "settingsRestoreFromBackupWarningTitle": "Daten wiederherstellen",
+  "settingsRestoreFromBackupWarningBody": "Deine aktuellen App-Daten, einschließlich Schichten, Weckern, Notizen und Überstunden, werden durch die gewählte Sicherung ersetzt. Dies kann nicht rückgängig gemacht werden.\n\nWähle eine Datei unter Download → ShiftBell.\n\nSicherungsnamen beginnen mit ShiftBell_Backup_manual_ oder ShiftBell_Backup_auto_ und enden mit Datum und Uhrzeit, zum Beispiel ShiftBell_Backup_auto_260917_060412.json. Wähle die neueste Datei oder die gewünschte Version. Vor dem Fortfahren kannst du den Speicherzeitpunkt prüfen.",
+  "settingsRestoreFromBackupPickButton": "Datei wählen",
+  "settingsRestoreFromBackupConfirmTitle": "Diese Sicherung wiederherstellen?",
+  "settingsRestoreFromBackupConfirmBody": "Diese Sicherung wurde am {date} gespeichert. Ihr Inhalt ersetzt die aktuellen Daten der App.",
+  "@settingsRestoreFromBackupConfirmBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsRestoreFromBackupConfirmButton": "Wiederherstellen",
+  "settingsRestoreFromBackupInProgress": "Wiederherstellung läuft …",
+  "settingsRestoreFromBackupSuccessToast": "Wiederhergestellt! Die App wird neu gestartet.",
+  "restoreWaitingAlarmEnd": "Ein Wecker klingelt. Die App startet neu, sobald er beendet ist.",
+  "restoreDoNotLeave": "Schließe die App nicht und bleibe auf dieser Seite, bis die Wiederherstellung abgeschlossen ist.",
+  "settingsRestoreFromBackupFailedToast": "Wiederherstellung fehlgeschlagen. Bitte versuche es erneut.",
+  "settingsHelp": "Hilfe",
+  "settingsHelpDesc": "So verwendest du die App",
+  "settingsPrivacyPolicy": "Datenschutz",
+  "settingsAdPrivacy": "Datenschutz für Werbung",
+  "settingsActionCannotBeUndone": "Diese Aktion kann nicht rückgängig gemacht werden.",
+  "settingsMustRecreateAlarms": "Du musst deine Wecker neu erstellen, um sie wieder zu nutzen.",
+  "settingsAlarmSoundSettings": "Ton und Vibration",
+  "settingsAlarmSoundManageDesc": "Ton mit Vibration, nur Vibration oder lautlos wählen",
+  "settingsIncludesVibration": "Mit Vibration",
+  "settingsAllAlarmsWillBeDeleted": "Alle geplanten Wecker werden gelöscht.",
+  "settingsAllAlarmsDeletedToast": "Alle Wecker wurden endgültig gelöscht",
+  "statusDeleteFailed": "Löschen fehlgeschlagen",
+  "settingsScheduleChanging": "Schichtplan wird geändert …",
+  "settingsScheduleChangeFailedWithError": "Schichtplan konnte nicht geändert werden: {error}",
+  "@settingsScheduleChangeFailedWithError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAllTeamsRegularOnly": "Teampläne sind nur mit einem festen Schichtzyklus verfügbar.",
+  "settingsEditShiftNameTitle": "Schichtname bearbeiten",
+  "settingsEditFixedAlarmTitle": "Schichtwecker bearbeiten",
+  "settingsEditShiftColorTitle": "Schichtfarbe ändern",
+  "settingsEditShiftColorDesc": "Farbe jeder Schicht ändern",
+  "settingsShiftFixedAlarmTitle": "Wecker für {shift}",
+  "@settingsShiftFixedAlarmTitle": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsFixedAlarmRegisterLimit": "Bis zu {max} Wecker je Schicht",
+  "@settingsFixedAlarmRegisterLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsColorPickerTitle": "Farbe für „{shift}“ wählen",
+  "@settingsColorPickerTitle": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSelectTodayShiftFromPattern": "Wähle die heutige Schicht aus deiner Schichtfolge",
+  "settingsScheduleChangeWarning": "Schichtwecker für die nächsten 10 Tage folgen dem neuen Plan.\nSchnellwecker und der bisherige Weckerverlauf bleiben erhalten.",
+  "settingsScheduleChangedRedoAllTeamsHint": "Wenn du einen Plan für alle Teams verwendest, richte auch diesen neu ein.",
+  "settingsResetScheduleSharingFailed": "Dein Schichtplan wurde zurückgesetzt. Der zuvor geteilte Plan kann aber noch sichtbar sein. Sobald die App wieder funktioniert, öffne Schichtplan teilen → Meinen Plan teilen → Teilen beenden.",
+  "settingsResetScheduleConfirm": "Deinen Schichtplan und alle Wecker zurücksetzen?\n\nAlle Teampläne sowie der Wecker- und Erstellungsverlauf werden ebenfalls gelöscht. Das Teilen deines Plans wird beendet. Ohne Internetverbindung wird die Freigabe nach dem Wiederverbinden beendet; bis dahin kann der zuvor geteilte Plan noch sichtbar sein.",
+  "privacyIntro": "Deine Schicht- und Weckerdaten werden auf deinem Gerät gespeichert. ShiftBell nutzt auch Google-Dienste für Nutzungsstatistiken und Werbung. Diese Erklärung beschreibt diese Dienste, lokale Dateien und Daten aus Funktionen, die du vor dem Wechsel zu dieser Sprachversion verwendet hast.",
+  "privacyNoCollectionTitle": "Auf deinem Gerät gespeicherte Daten",
+  "privacyNoCollectionBody": "Deine Schichten, Weckereinstellungen und der Weckerverlauf, Notizen, Arbeitszeiten und Überstunden werden in der lokalen Datenbank der App gespeichert. Diese Inhalte werden weder in Analyseereignisse noch in Werbeanfragen aufgenommen.\n\nTerminverwaltung, Schlaferfassung und Teilen sind nur in der koreanischen Sprachversion verfügbar. Ein Sprachwechsel löscht keine zuvor auf Koreanisch erstellten Daten. Sie können in der Datenbank und in Sicherungen erhalten bleiben. Die automatische Schlaferkennung ist außerhalb der koreanischen Sprachversion deaktiviert.\n\nAb Android 10 werden Diagnosedateien lokal in Download/ShiftBell/log gespeichert. Sie enthalten Geräte- und Android-Versionen, Berechtigungen, Akkueinstellungen sowie Verarbeitungsprotokolle für Wecker und Sicherungen. Notiz- und Termininhalte, Schichtnamen und Namen von Freunden sind ausgeschlossen. Die App versendet diese Dateien nicht automatisch.",
+  "privacyAnalyticsTitle": "Nutzungsstatistiken (Google Firebase Analytics)",
+  "privacyAnalyticsBody": "Google Firebase Analytics erfasst Nutzungs- und Geräteinformationen, zum Beispiel App-Starts, Seitenaufrufe, App- und Betriebssystemversionen, Gerätemodell, ungefähre Region und eine Installationskennung. ShiftBell erfasst außerdem die Nutzung einzelner Funktionen, etwa das Ausschalten oder Verschieben eines Weckers, das Speichern einer Notiz oder das Erstellen einer Sicherung.\n\nDiese Ereignisse enthalten keine Schichtnamen, Weckzeiten, Notiztexte oder sonstigen Inhalte des Schichtplans. Die Statistiken werden gemäß der Datenschutzerklärung von Google verarbeitet.",
+  "privacyFirebaseTitle": "Google-Dienste und frühere Freigaben",
+  "privacyFirebaseBody": "Das Teilen ist nur in der koreanischen Sprachversion verfügbar. War es vor dem Sprachwechsel aktiviert, beendet ShiftBell neue Uploads und fordert die Löschung des zuvor geteilten Plans an. Ohne Internetverbindung wird die Löschung beim nächsten Verbindungsaufbau erneut versucht. Bis der Server die Löschung bestätigt, kann ein alter Link noch den zuvor geteilten Plan anzeigen. Kopien oder Screenshots anderer Personen können nicht zurückgerufen werden.\n\nGeteilte Daten umfassen den Anzeigenamen, die Schichtfolge, das Startdatum, Schichtfarben und tagesbezogene Schichtänderungen. Notizen, Überstunden, Weckereinstellungen und Schlafdaten gehören nicht dazu. Für das Teilen wird eine anonyme Firebase-Kennung verwendet. Nach einer Neuinstallation können Daten einer früheren Kennung über die App nicht mehr zugänglich sein.\n\nDie Verfügbarkeit von Updates wird über Google Play geprüft. In der koreanischen Sprachversion werden Feiertage über ein öffentliches Firebase-Dokument aktualisiert. Dabei werden keine Schicht- oder Notizinhalte gesendet.",
+  "privacyAdsTitle": "Werbung (Google AdMob)",
+  "privacyAdsBody": "ShiftBell zeigt Bannerwerbung von Google AdMob. Das Werbe-SDK kann Gerätekennungen, IP-Adressen, App-Interaktionen und Diagnosedaten verarbeiten, um Werbung bereitzustellen und zu messen. ShiftBell nimmt deinen Schichtplan, deine Weckzeiten und Notizinhalte nicht in Werbeanfragen auf.\n\nWenn das Einwilligungssystem von Google es verlangt, fragt die App nach deinen Werbepräferenzen. Sofern verfügbar, kannst du diese unter Datenschutz für Werbung in den Einstellungen prüfen. Wie Google diese Informationen verarbeitet, beschreibt die Datenschutzerklärung von Google.",
+  "privacyPermissionsTitle": "Angeforderte Berechtigungen",
+  "privacyPermissionsBody": "• Benachrichtigungen: Weckerstatus und Erinnerungen vor Weckern anzeigen.\n• Über anderen Apps einblenden: die Weckeransicht während der Nutzung anderer Apps anzeigen.\n• Genaue Alarme: Wecker zur eingestellten Uhrzeit planen.\n\nDu kannst diese Berechtigungen in den Android-Einstellungen prüfen. Wenn du sie ablehnst, können Weckerbenachrichtigungen eingeschränkt sein oder Wecker nicht wie erwartet funktionieren.",
+  "privacyDataRetentionTitle": "Aufbewahrung und Löschung",
+  "privacyDataRetentionBody": "Beim Deinstallieren wird die lokale Datenbank der App entfernt. Sicherungen und Diagnosedateien in Download/ShiftBell können erhalten bleiben. Lösche sie mit deinem Dateimanager, wenn du sie nicht mehr brauchst.\n\nSicherungen sind nicht verschlüsselt. Sie können alle lokalen Daten enthalten, auch Einträge aus zuvor auf Koreanisch verwendeten Funktionen. Bewahre sie vertraulich auf. Die App lädt diese Dateien niemals automatisch hoch. Wenn du sie in einen Cloud-Dienst kopierst oder an jemanden sendest, kontrolliert dieser Dienst oder Empfänger die Kopie.\n\nDie App behält je eine manuelle und eine automatische Sicherung. Eine neue Datei ersetzt die vorherige Datei derselben Art.\n\nFür zuvor geteilte Daten gilt der Abschnitt „Google-Dienste und frühere Freigaben“. Für Analyse- und Werbedaten gelten die Aufbewahrungsrichtlinien von Google.",
+  "privacyChildrenTitle": "Nicht für Kinder bestimmt",
+  "privacyChildrenBody": "Diese App richtet sich nicht an Kinder unter 14 Jahren. Wir erfassen wissentlich keine personenbezogenen Daten von Kindern.",
+  "privacyContactTitle": "Kontakt",
+  "privacyContactBody": "Bei Fragen zur App oder zum Datenschutz:\nlowvibe07@gmail.com",
+  "privacyEffectiveDate": "Zuletzt aktualisiert: 5. Oktober 2026.",
+  "workHoursNoScheduleYet": "Richte zuerst deinen Schichtplan ein",
+  "workHoursShiftChangeOtTitle": "Mehrstunden durch Schichtänderungen",
+  "workHoursShiftChangeOtDesc": "Wird eine Schicht in deinem festen Zyklus länger, zählt die zusätzliche Zeit als Überstunden. Wechselst du von 8 auf 12 Stunden, sind das 4 Überstunden. Wird ein freier Tag zur 8-Stunden-Schicht, zählen 8 Stunden.\n\nDie Wochen- und Monatssummen verwenden immer die geänderten Schichtzeiten. Diese Einstellung betrifft nur die Überstundenübersicht.",
+  "workHoursDefaultDurationDesc": "Gib die üblichen Anfangs- und Endzeiten jeder Schicht ein. Daraus berechnet ShiftBell die geplante Arbeitszeit und die Wochen- und Monatssummen.",
+  "workHoursShiftTimeClockIn": "Beginn",
+  "workHoursShiftTimeClockOut": "Ende",
+  "workHoursResetShiftTime": "Anfangs- und Endzeit löschen",
+  "workHoursLegacyClockTimeHint": "Die bisher gespeicherte Arbeitsdauer gilt weiter. Gib Anfangs- und Endzeiten ein, um sie zu aktualisieren.",
+  "workHoursPeriodBasisDesc": "Legt den Zeitraum für die Berechnung der monatlichen Arbeitszeit fest.",
+  "workHoursDurationExcluded": "0 Stunden (zählt nicht als Arbeitszeit)",
+  "workHoursDurationHoursOnly": "{h, plural, =1{1 Stunde} other{{h} Stunden}}",
+  "@workHoursDurationHoursOnly": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      }
+    }
+  },
+  "workHoursDurationHoursMinutes": "{h, plural, =1{1 Stunde} other{{h} Stunden}} {m, plural, =1{1 Minute} other{{m} Minuten}}",
+  "@workHoursDurationHoursMinutes": {
+    "placeholders": {
+      "h": {
+        "type": "int"
+      },
+      "m": {
+        "type": "int"
+      }
+    }
+  },
+  "workHoursEditDialogTitle": "Arbeitszeit für {shift}",
+  "@workHoursEditDialogTitle": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "workHoursUnitHourLabel": "Stunden",
+  "workHoursUnitMinuteLabel": "Minuten",
+  "workHoursCutoffDayPrefix": "Tag",
+  "workHoursCutoffDaySuffix": "jedes Monats",
+  "friendShareTitle": "Schichtplan teilen",
+  "friendShareMyScheduleTitle": "Meinen Plan teilen",
+  "friendAdd": "Freund hinzufügen",
+  "friendName": "Name des Freundes",
+  "friendNameOptionalHint": "Optional · ohne Eingabe wird der geteilte Name verwendet",
+  "friendShareCodeFromFriend": "Freigabecode deines Freundes",
+  "friendEnterShareCode": "Füge den Code deines Freundes ein, um seinen Schichtplan anzusehen",
+  "friendCanCheckAnytime": "Du kannst den Schichtplan deines Freundes jederzeit ansehen.",
+  "friendAddedToast": "Freund hinzugefügt",
+  "friendInvalidCodeOrDuplicate": "Ungültiger Code oder Freund bereits hinzugefügt",
+  "friendLoadFailedCheckNetwork": "Schichtplan konnte nicht geladen werden. Prüfe deine Verbindung.",
+  "friendShowingCachedSchedule": "Aktuelle Daten konnten nicht geladen werden. Ein zuvor gespeicherter Plan wird angezeigt.",
+  "friendNoneAddedYet": "Noch keine Freunde hinzugefügt",
+  "friendScheduleOf": "Schichtplan von {name}",
+  "@friendScheduleOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendRemove": "Freund entfernen",
+  "friendRemoveConfirm": "{name} aus deiner Liste entfernen?",
+  "@friendRemoveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendDisplayNameTitle": "Anzeigename",
+  "friendEnterDisplayName": "Gib den Namen ein, den deine Freunde sehen sollen",
+  "friendShareIncludesSchedule": "Dein Schichtplan und deine Schichtänderungen werden geteilt.",
+  "friendShareExcludesExtras": "Notizen, Überstunden, Arbeitszeiten und Weckereinstellungen werden nicht geteilt.",
+  "friendStartSharing": "Teilen starten",
+  "friendStopSharing": "Teilen beenden",
+  "friendStopSharingConfirm": "Wenn du das Teilen beendest, können deine Freunde deinen Plan nicht mehr ansehen. Ohne Internet wird er nach dem Wiederverbinden vom Server entfernt. Bereits auf Geräten deiner Freunde gespeicherte Daten können nicht zurückgerufen werden. Fortfahren?",
+  "friendRestartSharingHint": "(Tippe hier auf „Teilen starten“, um erneut zu teilen. Dein bisheriger Code und Link funktionieren dann wieder.)",
+  "friendMyShareCode": "Für Freunde mit der App (Code)",
+  "friendShareCodeInstructions": "Dein Freund fügt diesen Code unter „Freund hinzufügen“ in der App ein. Dann kann er deinen Plan sehen.",
+  "friendShareWithoutApp": "Für Freunde ohne die App (Link)",
+  "friendShareLinkHint": "Mit diesem Link können sie deinen Plan sofort ansehen, ohne etwas zu installieren.",
+  "friendInstallShortcutHint": "Tippe auf das Installationssymbol in der Adressleiste, um eine Verknüpfung zum Startbildschirm hinzuzufügen.",
+  "friendDisplayNameUpdated": "Anzeigename aktualisiert",
+  "friendDisplayNameUpdateFailed": "Name konnte nicht aktualisiert werden. Prüfe deine Verbindung.",
+  "friendEnterDisplayNameError": "Gib den Namen ein, den deine Freunde sehen sollen",
+  "friendConnectionFailed": "Verbindung fehlgeschlagen. Prüfe dein Netzwerk und öffne diese Seite erneut.",
+  "friendCouldNotLoad": "Laden fehlgeschlagen",
+  "friendLinkMissingCode": "Im Link fehlt der Freigabecode.",
+  "friendLoadFailedDetailed": "Der Plan konnte nicht geladen werden. Der Link ist möglicherweise veraltet, das Teilen wurde beendet oder es gibt ein Verbindungsproblem.",
+  "friendUnknownError": "Ein unbekannter Fehler ist aufgetreten.",
+  "friendInstallForHomeScreen": "Tippe auf die Installationsschaltfläche in der Adressleiste, um den Plan direkt vom Startbildschirm zu öffnen.",
+  "friendOpenInBrowserHint": "Öffne diese Seite in Chrome oder einem anderen Browser, um sie zu installieren. Wähle im Menü oben rechts „Im Browser öffnen“.",
+  "friendQuickInstallHint": "Füge eine Verknüpfung zum Startbildschirm hinzu, um den Plan schneller zu öffnen",
+  "friendQuickInstallButton": "Verknüpfung hinzufügen",
+  "friendWebAppTagline": "Schichten einfach erfassen und Wecker automatisch planen",
+  "friendInstallApp": "App installieren",
+  "friendDefaultDisplayName": "Freund",
+  "friendLastSyncedAt": "Zuletzt synchronisiert: {date}",
+  "@friendLastSyncedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "friendServerNotReady": "Noch keine Verbindung zum Freigabeserver. Bitte versuche es gleich erneut.",
+  "friendScheduleNotSet": "Dein Schichtplan ist noch nicht eingerichtet",
+  "friendStartSharingFailed": "Teilen konnte nicht gestartet werden. Prüfe deine Verbindung und versuche es erneut.",
+  "friendSyncPendingBanner": "Dein aktueller Plan wurde noch nicht geteilt. ShiftBell versucht es automatisch erneut, sobald du online bist.",
+  "friendStopPendingBanner": "Das Beenden der Freigabe ist noch nicht bestätigt. Der zuvor geteilte Plan kann weiterhin sichtbar sein.",
+  "friendRetrySync": "Erneut versuchen",
+  "friendSyncPendingToast": "Vom Server noch nicht bestätigt. Wird automatisch erneut gesendet, sobald du online bist.",
+  "friendStopSharingAction": "Beenden",
+  "friendCodeCopied": "Code kopiert",
+  "friendLinkCopied": "Link kopiert",
+  "friendShareMessage": "Schichtplan von {name} 🗓️\n\nHier ansehen: {link}\n\nOder diesen Code in ShiftBell unter „Freund hinzufügen“ einfügen:\n\n{code}",
+  "@friendShareMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "friendNameHintExample": "Namen des Freundes eingeben",
+  "friendShareChannelsExplainer": "Sende Freunden ohne App einen Link und Freunden mit App einen Code.",
+  "permissionGetStarted": "Mit ShiftBell loslegen",
+  "permissionIntro": "Mit diesen Berechtigungen kann ShiftBell dich zuverlässig wecken und die Weckeransicht anzeigen.",
+  "permissionNotification": "Benachrichtigungen",
+  "permissionNotificationDesc": "Weckerbenachrichtigungen und Erinnerungen anzeigen",
+  "permissionOverlay": "Über anderen Apps einblenden",
+  "permissionOverlayDesc": "Weckeransicht während der Nutzung anderer Apps anzeigen",
+  "permissionExactAlarm": "Genaue Alarme",
+  "permissionExactAlarmDesc": "Damit Wecker genau zur eingestellten Uhrzeit klingeln",
+  "permissionAllow": "Berechtigungen erteilen",
+  "permissionRequired": "Erforderlich",
+  "permissionRecommended": "Empfohlen",
+  "permissionSomeDenied": "Einige Berechtigungen fehlen",
+  "permissionSomeDeniedDesc": "Du kannst die App weiter nutzen. Einige Weckerfunktionen sind ohne die entsprechenden Berechtigungen eingeschränkt.",
+  "permissionCanAllowLater": "Du kannst die Berechtigungen jederzeit in den Einstellungen erteilen.",
+  "permissionRequiredNotGranted": "Erforderliche Berechtigungen fehlen",
+  "statusDataLoadFailed": "Daten konnten nicht geladen werden",
+  "statusNoSchedule": "Kein Schichtplan gefunden",
+  "statusErrorOccurred": "Ein Fehler ist aufgetreten",
+  "statusShiftAssigned": "Schicht zugewiesen",
+  "statusShiftAssignFailed": "Schicht konnte nicht zugewiesen werden",
+  "statusShiftChangeFailed": "Schicht konnte nicht geändert werden",
+  "alarmSchedulePartialFailed": "Schicht gespeichert, aber {failed} von {total} Weckern konnten nicht geplant werden. Prüfe die Berechtigung für genaue Alarme und speichere die Schicht erneut.",
+  "scheduleNotifyRegisterFailed": "Termin gespeichert, aber die Erinnerung konnte nicht geplant werden. Prüfe die Berechtigung für genaue Alarme und speichere den Termin erneut.",
+  "scheduleTabSyncFailed": "Die Ansichtseinstellung konnte nicht geändert werden. Bitte versuche es gleich erneut.",
+  "permissionStatusUnknown": "{name} (Status unbekannt)",
+  "statusShiftNameUpdated": "Schichtname aktualisiert",
+  "statusShiftColorUpdated": "Schichtfarbe aktualisiert",
+  "statusColorAlreadyUsed": "Diese Farbe wird bereits für eine andere Schicht verwendet",
+  "statusScheduleUpdated": "Schichtplan aktualisiert",
+  "statusEnterMemoContent": "Gib einen Notiztext ein",
+  "statusMemoLimit": "Du kannst bis zu {max} Notizen speichern",
+  "@statusMemoLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "statusOneCharOnly": "Nur ein Zeichen erlaubt.",
+  "statusFullTeamScheduleTitle": "Teampläne einrichten",
+  "statusPatternDayCycle": "Schichtfolge ({days}-Tage-Zyklus)",
+  "@statusPatternDayCycle": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "allTeamsSetupRosterLabel": "Teamnamen",
+  "allTeamsSetupRosterHint": "Lege alle Teams für diesen Plan fest. Unter Bearbeiten kannst du Teams hinzufügen, entfernen oder umbenennen.",
+  "allTeamsSetupMyTeamLabel": "Mein Team",
+  "allTeamsSetupMyTeamPickHint": "Wähle dein Team aus.",
+  "allTeamsSetupOtherTeamsLabel": "Andere Teams",
+  "allTeamsSetupOtherTeamsHint": "Wähle alle weiteren Teams aus, die in diesem Plan vorkommen.",
+  "allTeamsSetupPickMyTeamFirstHint": "Wähle zuerst dein Team.",
+  "allTeamsSetupAssignSectionLabel": "Schichten zuweisen",
+  "allTeamsSetupAssignHint": "Tippe auf ein Team und dann auf die Position seiner heutigen Schicht.",
+  "allTeamsSetupDuplicateNameError": "Dieser Teamname wird bereits verwendet.",
+  "allTeamsSetupMinOtherTeamHint": "Wähle mindestens ein weiteres Team.",
+  "allTeamsSetupEditTooltip": "Teampläne bearbeiten",
+  "alarmHistoryEmpty": "Kein Weckerverlauf",
+  "alarmHistoryDeleteAllTitle": "Gesamten Verlauf löschen",
+  "alarmHistoryTestOnlyWarning": "⚠️ Alle hier angezeigten Einträge werden endgültig gelöscht.",
+  "alarmHistoryDeleteAllDesc": "Der gesamte Weckerverlauf wird gelöscht.",
+  "alarmHistoryDeletedToast": "Gesamter Weckerverlauf gelöscht",
+  "alarmHistoryDeleteFailed": "Verlauf konnte nicht gelöscht werden: {error}",
+  "@alarmHistoryDeleteFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "themeMainWhite": "Klassisch hell",
+  "themeMainDark": "Klassisch dunkel",
+  "themeMinimal": "Klare Linien",
+  "themeMaterialCard": "Sanfte Karten",
+  "themeBoldGrid": "Dunkles Raster",
+  "themeInitialBadge": "Farbmarken",
+  "themeUnderline": "Schlicht unterstrichen",
+  "themeEventChip": "Terminkalender",
+  "themeEditorial": "Magazin",
+  "themeDiary": "Tagebuch",
+  "themeSwipeToChoose": "Zum Auswählen nach links oder rechts wischen",
+  "themeCurrentlyApplied": "Aktuelles Design",
+  "themeApplyThis": "Design anwenden",
+  "soundDefault": "Standard",
+  "soundBellN": "Weckton {n}",
+  "@soundBellN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "soundFileNotFound": "Datei für den Weckton nicht gefunden",
+  "splashTitle": "ShiftBell",
+  "splashTagline": "Schichten und Wecker im Einklang",
+  "updateNewVersionAvailable": "Neue Version verfügbar!",
+  "updateRecommendMessage": "Aktualisiere ShiftBell auf die neueste Version.",
+  "updateDataPreservedHint": "Deine gespeicherten Daten bleiben erhalten.",
+  "updateReleaseNoteTitle": "Neues in ShiftBell",
+  "updateReleaseNoteBody": "Dieses Update verbessert Schichtkalender, Wecker und lokale Sicherungen.\n\nDanke, dass du ShiftBell verwendest.",
+  "allTeamsNotConfigured": "Teampläne sind noch nicht eingerichtet",
+  "allTeamsCreateButton": "Teams einrichten",
+  "allTeamsThisMonthButton": "Dieser Monat",
+  "statusErrorWithDetail": "Ein Fehler ist aufgetreten: {error}",
+  "@statusErrorWithDetail": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "themeLabMockDayShiftLong": "Tagschicht",
+  "themeLabPreviewFixedMonthNotice": "Diese Vorschau zeigt immer August 2026",
+  "themeLabPreviewSheetTitle": "{date} ({weekday})",
+  "@themeLabPreviewSheetTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "themeLabPreviewShiftLabel": "Schicht: {shift}",
+  "@themeLabPreviewShiftLabel": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "themeLabPreviewMemoCount": "{count, plural, =1{1 Notiz} other{{count} Notizen}}: {memos}",
+  "@themeLabPreviewMemoCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "memos": {
+        "type": "String"
+      }
+    }
+  },
+  "themeLabPreviewSheetHint": "In der App kannst du hier Notizen und Überstunden ansehen und bearbeiten.",
+  "themeLabOtDetailNotice": "In der App öffnet ein Tippen hier die Überstundenliste",
+  "dismissAlarmConfirmed": "Ausgeschaltet",
+  "dismissSnoozed5Min": "Um 5 Minuten verschoben",
+  "dismissNoResponse": "Verpasst",
+  "dismissAlarmRemoved": "Wecker entfernt",
+  "scheduleDuplicateTimeSlot": "Zu dieser Uhrzeit gibt es bereits einen Termin. Ergänze deine Notiz dort.",
+  "scheduleMaxPerSlot": "Du kannst bis zu {count} Termine zu dieser Uhrzeit anlegen",
+  "@scheduleMaxPerSlot": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleDeleteConfirmTitle": "Diesen Termin löschen?",
+  "scheduleDeleteConfirmBody": "Gelöschte Termine können nicht wiederhergestellt werden.",
+  "scheduleEditTitle": "Termin bearbeiten",
+  "scheduleNewTitle": "Neuer Termin",
+  "scheduleContentFieldLabel": "Details",
+  "scheduleTimeSectionLabel": "Uhrzeit",
+  "scheduleNotifySectionLabel": "Benachrichtigung",
+  "scheduleNotifyToggleLabel": "An diesen Termin erinnern",
+  "scheduleNotifyDescription": "Du erhältst eine Benachrichtigung. Ton, Vibration oder Lautlosmodus richten sich nach deinen Geräteeinstellungen.",
+  "scheduleNotifyOffsetQuestion": "Wann erinnern?",
+  "scheduleNotifyOffsetOnTime": "Zur Startzeit",
+  "scheduleNotifyOffsetBefore": "{minutes} Min. vorher",
+  "@scheduleNotifyOffsetBefore": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleNotifyPastTimeWarning": "Diese Uhrzeit ist bereits vorbei. Die Benachrichtigung wird nicht ausgelöst. Bitte ändere die Uhrzeit.",
+  "scheduleCreateButton": "Erstellen",
+  "helpSearchHint": "Hilfe durchsuchen",
+  "helpEmptySearchResult": "Keine Ergebnisse gefunden",
+  "helpStartSectionTitle": "Erste Schritte",
+  "helpStartOnboardingTitle": "Die Einrichtung beim ersten Start",
+  "helpStartOnboardingBody": "Erlaube Benachrichtigungen, genaue Alarme und das Einblenden über anderen Apps, damit ShiftBell dich zuverlässig wecken kann. Wähle dann, ob sich deine Schichten wiederholen, ergänze ihre Namen und richte die benötigten Wecker ein. Du kannst Wecker überspringen und später in den Einstellungen hinzufügen.\n\nEntferne ungenutzte Schichtnamen mit × und ergänze fehlende Namen mit + Hinzufügen. Wenn du ShiftBell schon verwendet hast, kannst du unter Daten wiederherstellen eine Sicherungsdatei wiederherstellen.",
+  "helpStartScheduleTypesTitle": "Fester Zyklus oder wechselnde Schichten",
+  "helpStartScheduleTypesBody": "Ein fester Schichtplan wiederholt sich, zum Beispiel Tag, Tag, Nacht, Nacht, Frei, Frei. Erstelle die Folge und wähle die heutige Position darin. ShiftBell trägt zukünftige Tage automatisch ein.\n\nOhne festen Zyklus weist du jedem Tag selbst eine Schicht zu. Halte einen Tag gedrückt, wähle weitere Tage aus und tippe auf die gewünschte Schicht.",
+  "helpShiftSectionTitle": "Schichten verwalten",
+  "helpShiftIrregularAssignTitle": "Schichten ohne festen Zyklus zuweisen",
+  "helpShiftIrregularAssignBody": "Halte im Kalender einen Tag gedrückt und wähle die Schicht für diesen oder mehrere Tage aus. Die Auswahl gilt nur für die gewählten Tage und wiederholt sich nicht automatisch.\n\nWenn du Schichten einige Tage im Voraus zuweist, werden die passenden Wecker automatisch vorbereitet.",
+  "helpShiftChangeShiftTitle": "Schicht an einem bestimmten Tag ändern",
+  "helpShiftChangeShiftBody": "Mit oder ohne festen Zyklus kannst du einzelne Tage ändern. Halte den Tag im Kalender gedrückt und wähle eine andere Schicht. Die Wecker werden automatisch an die neue Schicht angepasst.",
+  "helpShiftShiftColorsTitle": "Schichtfarben anpassen",
+  "helpShiftShiftColorsBody": "Jedes Kalenderdesign hat Standardfarben für die Schichten. Du kannst sie für einzelne Schichtnamen ändern. Wähle dazu den Namen in den Schichteinstellungen und eine Farbe. Deine Auswahl hat Vorrang vor der Standardfarbe des Designs.",
+  "helpShiftAllShiftsTitle": "Andere Teams in deinem Schichtzyklus ansehen",
+  "helpShiftAllShiftsBody": "Tippe im Kalender auf Alle Teams, um die Schichtpläne zu vergleichen. Lege die Teamnamen fest und wähle dein Team. Du kannst allen Teams denselben Zyklus mit unterschiedlichen Startpositionen zuweisen oder für jedes Team einen eigenen Zyklus oder Wochenplan erstellen.\n\nDie Pläne werden auf deinem Gerät berechnet. Es werden keine Konten von Kollegen verbunden oder deren Schichtpläne heruntergeladen.",
+  "helpShiftTeamChangeTitle": "Wenn du das Team wechselst",
+  "helpShiftTeamChangeBody": "Wenn du Teampläne eingerichtet hast, öffne Alle Teams → Bearbeiten → Mein Team wechseln und wähle dein neues Team. Deine Schichtwecker richten sich danach nach dessen Plan. Manuelle Änderungen an einzelnen Tagen werden gelöscht; die Teampläne bleiben erhalten.\n\nMöchtest du stattdessen deine Position im Schichtzyklus ändern, öffne Einstellungen → Bearbeiten → Schichtplan ändern. Lies vor dem Speichern die Bestätigung.",
+  "helpAlarmSectionTitle": "Wecker",
+  "helpAlarmTemplatesTitle": "Wecker für eine Schicht einstellen",
+  "helpAlarmTemplatesBody": "Du kannst in den Einstellungen bis zu fünf Wecker je Schicht hinzufügen. Jeder Wecker hat eine eigene Uhrzeit und Toneinstellung und kann am Schichttag, am Vortag oder am Folgetag klingeln.\n\nShiftBell plant kommende Wecker automatisch. Ohne festen Zyklus solltest du deine Schichten im Voraus zuweisen, damit ihre Wecker geplant werden können.\n\nWeckerlisten verwenden das 24-Stunden-Format. Der Zeiteditor folgt der 12- oder 24-Stunden-Einstellung deines Geräts. Im 12-Stunden-Format bedeutet 12 AM Mitternacht und 12 PM Mittag.\n\nSchichtwecker folgen der aktuellen Zeitzone deines Geräts. Überspringt die Zeitumstellung eine Uhrzeit, wird der Wecker um die Zeitdifferenz nach hinten verschoben, zum Beispiel von 02:30 auf 03:30 bei einer Stunde. Kommt eine Uhrzeit zweimal vor, klingelt er einmal beim zweiten Vorkommen. Wecker, die auf denselben Zeitpunkt fallen, werden zusammengefasst.",
+  "helpAlarmSoundVolumeTitle": "Wecktöne und Lautstärke",
+  "helpAlarmSoundVolumeBody": "Wähle aus 7 integrierten Wecktönen oder dem Systemweckton deines Geräts. Da Lautsprecher unterschiedlich sind, passt die App die Lautstärke automatisch an. Wenn sie trotzdem nicht passt, probiere in den Weckereinstellungen einen anderen Ton.",
+  "helpAlarmAlarmNotRingingTitle": "Wenn ein Wecker nicht klingelt",
+  "helpAlarmAlarmNotRingingBody": "Prüfe zuerst, ob genaue Alarme für ShiftBell erlaubt sind. Benachrichtigungen und das Einblenden über anderen Apps helfen dir, Wecker zu sehen und zu bedienen. Prüfe auch die Akkubeschränkungen deines Handys.\n\nDem betreffenden Tag muss eine Schicht mit einem eingerichteten Wecker zugewiesen sein. Kontrolliere außerdem Ton, Lautstärke und Vibration.",
+  "helpAlarmAlarmHistoryTitle": "Weckerverlauf ansehen",
+  "helpAlarmAlarmHistoryBody": "Unter Einstellungen → Weckerverlauf siehst du die Wecker und ihre Ergebnisse.\n\nDie Schlummerfunktion verschiebt den Wecker um fünf Minuten ab dem Antippen, auch bei einer Zeitumstellung. Wenn eine Stunde beim Zurückstellen zweimal vorkommt, unterscheiden „Erstes Vorkommen“ und „Zweites Vorkommen“ die beiden Zeiten in kommenden Weckern und im Verlauf.",
+  "helpCalendarSectionTitle": "Kalender und Widget",
+  "helpCalendarThemesTitle": "Kalenderdesign ändern",
+  "helpCalendarThemesBody": "Unter Einstellungen → Kalenderdesign stehen sechs Designs zur Wahl: Klassisch hell, Klassisch dunkel, Klare Linien, Sanfte Karten, Tagebuch und Dunkles Raster.\n\nDas Design gilt für den Kalender in der App. Das Widget auf dem Startbildschirm behält seine helle Darstellung.",
+  "helpCalendarOtTitle": "Überstunden erfassen und ansehen",
+  "helpCalendarOtBody": "Tippe im Kalender auf einen Tag, um Überstunden einzutragen. Sie fließen in die wöchentliche und monatliche Arbeitszeit ein.\n\nEine Woche zählt immer von Montag bis Sonntag. Für die Monatswerte gilt der in den Einstellungen gewählte Zeitraum. Die App addiert Arbeitsstunden; sie erstellt keine Lohnabrechnung.",
+  "helpCalendarWorkHoursPayTitle": "Wöchentliche und monatliche Arbeitszeit",
+  "helpCalendarWorkHoursPayBody": "Gib die üblichen Anfangs- und Endzeiten jeder Schicht in den Einstellungen ein. Daraus und aus deinen Überstundeneinträgen berechnet ShiftBell die Wochen- und Monatssummen.\n\nBei einem festen Zyklus kannst du zusätzliche Stunden durch Schichtänderungen auch in der Überstundenübersicht berücksichtigen. Es zählt nur die Verlängerung gegenüber der ursprünglichen Schicht, nicht die gesamte Dauer der neuen Schicht.",
+  "helpCalendarHomeWidgetTitle": "Widget zum Startbildschirm hinzufügen",
+  "helpCalendarHomeWidgetBody": "Halte den Startbildschirm gedrückt, öffne Widgets und füge ShiftBell Kalender hinzu. Es zeigt Schichtnamen und bis zu drei Notizen je Tag. Durch Ändern der Größe wechselst du zwischen drei Wochen und einem ganzen Monat.\n\nDie Reihenfolge der Wochentage folgt derselben regionalen Vorgabe wie die App. Feiertage und Monddaten werden außerhalb der koreanischen Sprachversion nicht angezeigt.",
+  "helpScheduleTabSectionTitle": "Terminansicht",
+  "helpScheduleTabWhatIsItTitle": "Was unterscheidet die Terminansicht?",
+  "helpScheduleTabWhatIsItBody": "Eine Kalendernotiz gilt für den ganzen Tag. In der Terminansicht haben Einträge eine feste Uhrzeit sowie bei Bedarf eine Endzeit und eine Erinnerung. So kannst du beispielsweise einen Arzttermin vor der Arbeit oder eine Verabredung nach der Schicht eintragen.",
+  "helpScheduleTabCreateEditTitle": "Termine erstellen und bearbeiten",
+  "helpScheduleTabCreateEditBody": "Tippe unten rechts auf das Uhrsymbol, um eine Zeit auszuwählen. Tippe dann auf die gewünschte Uhrzeit, um einen neuen Termin anzulegen.",
+  "helpScheduleTabAutoCategoryTitle": "Wie passende Symbole ausgewählt werden",
+  "helpScheduleTabAutoCategoryBody": "Die App erkennt den eingegebenen Text und wählt automatisch ein passendes Symbol. Wenn keine passende Zuordnung gefunden wird, erscheint ein Standardsymbol.",
+  "helpConditionSectionTitle": "Schlaf und Erholung",
+  "helpConditionWhatIsItTitle": "Was bietet die Ansicht Schlaf und Erholung?",
+  "helpConditionWhatIsItBody": "Hier kannst du erkannte Schlafzeiten prüfen, Schlafphasen hinzufügen und bestätigte Einträge ansehen. Die Ansicht zeigt aufgezeichnete Zeiten und Dauern, ohne Gesundheitsbewertung oder medizinische Diagnose. Prüfe automatische Schätzungen, bevor du sie bestätigst.",
+  "helpConditionEvidenceListTitle": "Quellen zu Schlaf und Erholung",
+  "helpConditionEvidenceListBody": "Die Hinweise unter Schlaf und Erholung stützen sich auf die folgenden 14 Quellen. Einige Schwellenwerte, etwa für aufeinanderfolgende Arbeitstage oder Vergleiche mit deinem eigenen Durchschnitt, wurden für diese App festgelegt und haben keine gesonderte Quelle.\n\nEVIDENCE-001 · Richtung des Schichtwechsels — Eine Vorwärtsrotation (Tag→Spät→Nacht) wird als leichter anpassbar beschrieben als eine Rückwärtsrotation. (NIOSH)\n\nEVIDENCE-002 · Mindestruhezeit zwischen Schichten — Empfohlen werden mindestens 11 Stunden Ruhe zwischen zwei Schichten. (Knauth & Hornberger, zitiert in NIOSH, Modul 5)\n\nEVIDENCE-003 · Mindestruhezeit zwischen Schichten (rechtlicher Standard) — Pro 24 Stunden müssen Beschäftigte mindestens 11 zusammenhängende Stunden Ruhe erhalten. (EU-Arbeitszeitrichtlinie, Art. 3)\n\nEVIDENCE-004 · Lange Schichten und Unfallrisiko — Gegenüber einer 8-Stunden-Schicht wird das relative Risiko bei 10 Stunden auf etwa +13 % und bei 12 Stunden auf +27 % modelliert. (Folkard & Lombardi, 2006)\n\nEVIDENCE-005 · Freie Tage nach aufeinanderfolgenden Schichten — Empfohlen werden 1–2 freie Tage nach fünf 8-Stunden- oder vier 10-Stunden-Schichten sowie zwei freie Tage nach drei 12-Stunden-Schichten. Von einer starken Bündelung der Arbeit auf wenige Tage mit anschließender längerer Freizeit wird ebenfalls abgeraten. (NIOSH)\n\nEVIDENCE-006 · Schlaf nach einer Nachtschicht — Schlaf nach der Nachtschicht sollte Vorrang haben. (NIOSH)\n\nEVIDENCE-007 · Nickerchen vor einer Nachtschicht — Können unter bestimmten Bedingungen helfen; die Leitlinie stuft die Evidenz jedoch als sehr niedrig ein. Auf Benommenheit direkt nach dem Aufwachen achten. (AASM, 2025)\n\nEVIDENCE-008 · Koffein und Schlaf — Koffein selbst sechs Stunden vor dem Schlafengehen verkürzte die Gesamtschlafzeit deutlich um mehr als eine Stunde. (Drake et al., 2013)\n\nEVIDENCE-009 · Licht auf dem Heimweg nach der Nachtschicht — Weniger helles Licht kann den späteren Schlaf fördern. Sicherheit hat jedoch Vorrang, wenn Müdigkeit sicheres Fahren verhindert. (NIOSH)\n\nEVIDENCE-010 · Essen in der Nachtschicht — Empfohlen werden weniger Essen zwischen Mitternacht und 6 Uhr sowie leichte Mahlzeiten. (NIOSH)\n\nEVIDENCE-011 · Schlafempfehlung für Erwachsene — Für Erwachsene von 18 bis 64 Jahren werden 7–9 Stunden Schlaf empfohlen. (National Sleep Foundation, 2015)\n\nEVIDENCE-012 · Maximale Wochenarbeitszeit (rechtlicher Standard) — Die durchschnittliche Wochenarbeitszeit einschließlich Überstunden darf 48 Stunden nicht überschreiten. (EU-Arbeitszeitrichtlinie, Art. 6)\n\nEVIDENCE-013 · Aufeinanderfolgende Nachtschichten und Unfallrisiko — Das relative Unfall- und Verletzungsrisiko steigt mit jeder weiteren Nachtschicht: etwa +6 % in der zweiten, +17 % in der dritten und +36 % in der vierten Nacht. Der Anstieg ist stärker als bei aufeinanderfolgenden Tag- oder Spätschichten. (Folkard & Tucker, 2003)\n\nEVIDENCE-014 · Kumulierte Wochenarbeitszeit — Für Pflegekräfte werden höchstens 12 Arbeitsstunden in 24 Stunden und 60 Stunden in sieben Tagen empfohlen. Ein systematischer Review von 2014 verband mehr als 40 Wochenstunden mit geringerer Patientensicherheit. (IOM, 2004; zitiert in NIOSH, Modul 5)",
+  "helpConditionSetupNeededTitle": "Erforderliche Einrichtung",
+  "helpConditionSetupNeededBody": "Gib zuerst unter Einstellungen → Arbeitszeit und Überstunden für mindestens eine Schicht Beginn und Ende ein. Bis dahin erscheint die heutige Einschätzung nicht, Schlaf kannst du aber bereits erfassen. Du musst nicht alle Schichten einrichten; eine aktuell verwendete reicht aus.",
+  "helpSleepSectionTitle": "Schlaferfassung",
+  "helpSleepWidgetTitle": "Was ist das Schlaf-Widget?",
+  "helpSleepWidgetBody": "Füge das Schlaf-Widget zum Startbildschirm hinzu. Tippe beim Schlafengehen auf Schlafen und nach dem Aufstehen auf Wach. Das Widget zeigt auch deine heutige Schicht.\n\nDeine Schlafaufzeichnungen erscheinen zusammen mit deinem Schichtplan unter Schlaf und Erholung.",
+  "helpSleepAutoDetectTitle": "Automatische Schlafschätzung",
+  "helpSleepAutoDetectBody": "ShiftBell schätzt mögliche Schlafzeiten anhand deines Schichtplans und längerer Phasen mit ausgeschaltetem Bildschirm. Dazu zählen Schlaf nach der Arbeit, Nachtschlaf und Nickerchen vor einer Nachtschicht. Schlaf während einer Schicht wird nicht automatisch geschätzt; erfasse ihn über das Widget.\n\nErst wenn du eine Schätzung geprüft und bestätigt hast, zählt sie als bestätigter Schlafeintrag.",
+  "helpSleepMiniCalendarTitle": "Schlafdaten prüfen und bearbeiten",
+  "helpSleepMiniCalendarBody": "Der kleine Kalender „Letzter Schlaf“ unter Schlaf und Erholung zeigt bestätigte Einträge je Tag. Tippe auf einen Bereich, um dort einen Eintrag zu erstellen, zu bearbeiten oder zu löschen. Unter Alle ansehen kannst du ältere Monate durchblättern.\n\nDarunter zeigt „Mein Schlaf je Schicht“ die durchschnittliche Schlafdauer jeder Schichtart, getrennt nach Hauptschlaf und Nickerchen.",
+  "helpFriendSectionTitle": "Mit Freunden teilen",
+  "helpFriendWhatIsItTitle": "Was bedeutet Teilen mit Freunden?",
+  "helpFriendWhatIsItBody": "Du kannst deinen Schichtplan teilen, damit andere ihn ansehen können, oder einen mit dir geteilten Plan ansehen. Auch Personen ohne App können deinen Plan öffnen.",
+  "helpFriendShareCodeTitle": "Freigabecode erstellen und teilen",
+  "helpFriendShareCodeBody": "Tippe im Kalender auf Freunde und dann auf Meinen Plan teilen, um deinen Code zu erhalten. Die andere Person trägt ihn in ihrer App ein und kann deinen Plan sehen.",
+  "helpFriendViewFriendTitle": "Schichtplan eines Freundes mit Code ansehen",
+  "helpFriendViewFriendBody": "Füge den Code deines Freundes in der Freundesliste hinzu. Sein Schichtplan erscheint dann als Kalender in deiner App.",
+  "helpFriendReinstallNoteTitle": "Was bei einer Neuinstallation passiert",
+  "helpFriendReinstallNoteBody": "Eine Neuinstallation erzeugt intern ein neues Konto. Dadurch werden bisherige Freigabeverbindungen unterbrochen. Erstelle einen neuen Code und sende ihn erneut, um die Verbindung wiederherzustellen.\n\nDeine Freunde sehen keine Fehlermeldung, sondern weiterhin den Stand vor der Neuinstallation. Informiere sie deshalb, wenn du die App neu installierst.",
+  "helpBackupSectionTitle": "Sichern und Wiederherstellen",
+  "helpBackupDataStorageTitle": "Wo werden meine Daten gespeichert?",
+  "helpBackupDataStorageBody": "Schichten, Wecker, Weckerverlauf, Notizen und Arbeitszeitdaten werden auf deinem Gerät gespeichert. Sicherungen sind lokale Dateien in Download/ShiftBell. Sie werden nicht automatisch hochgeladen.\n\nNutzungsstatistiken und Werbung verwenden Google-Dienste. Welche Informationen diese verarbeiten, steht in der Datenschutzerklärung. Daten aus früher auf Koreanisch verwendeten Funktionen können lokal und in Sicherungen erhalten bleiben, auch wenn diese Funktionen in anderen Sprachversionen ausgeblendet sind.",
+  "helpBackupAutoBackupTitle": "Wann wird automatisch gesichert?",
+  "helpBackupAutoBackupBody": "ShiftBell prüft beim Öffnen, bei der Rückkehr zur App und beim Verlassen, ob sich Daten geändert haben. Falls ja, wird eine automatische Sicherung in Download/ShiftBell auf deinem Gerät gespeichert. Über Daten sichern in den Einstellungen kannst du auch selbst eine Sicherung erstellen.\n\nEs wird je eine manuelle und eine automatische Sicherung aufbewahrt. Eine neue Sicherung ersetzt nur die Datei derselben Art. Dafür ist mindestens Android 10 erforderlich.",
+  "helpBackupRestoreTitle": "Nach Neuinstallation oder Gerätewechsel wiederherstellen",
+  "helpBackupRestoreBody": "Wähle auf dem ersten Bildschirm oder in den Einstellungen Daten wiederherstellen und dann eine Datei aus Download/ShiftBell. Prüfe vorher den Speicherzeitpunkt: Die Sicherung ersetzt die aktuellen App-Daten.\n\nFür einen Gerätewechsel kopierst du die Datei zuerst auf das neue Handy. Prüfe nach der Wiederherstellung Schichten, kommende Wecker und Weckerberechtigungen.",
+  "helpBackupRestoreManualTitle": "Wenn deine Sicherung nicht automatisch gefunden wird",
+  "helpBackupRestoreManualBody": "Wähle nach der Neuinstallation Daten wiederherstellen und suche die frühere Sicherung in der Dateiauswahl. Android kann verhindern, dass eine neue Installation alte Dateien automatisch findet.",
+  "helpBackupRestoreOldBackupFailTitle": "Sehr alte Sicherungen lassen sich eventuell nicht laden",
+  "helpBackupRestoreOldBackupFailBody": "Eine Sicherung aus einer deutlich älteren App-Version kann ein Datenformat verwenden, das sich nicht mehr wiederherstellen lässt. Ein erneuter Versuch mit derselben Datei hilft dann möglicherweise nicht.\n\nErstelle vor einer Neuinstallation oder einem Gerätewechsel unter Daten sichern eine aktuelle Sicherung. Kopiere sie an einen sicheren Ort, bevor du dein Handy zurücksetzt oder ersetzt.",
+  "helpTroubleshootSectionTitle": "Probleme lösen",
+  "helpTroubleshootAlarmIssueTitle": "Mein Wecker hat nicht geklingelt",
+  "helpTroubleshootAlarmIssueBody": "Prüfe die Berechtigungen für genaue Alarme, Benachrichtigungen und das Einblenden über anderen Apps sowie die Akkubeschränkungen deines Handys. Dem Tag muss eine Schicht mit einem Wecker zugewiesen sein. Kontrolliere auch, ob Ton oder Vibration eingeschaltet ist.",
+  "helpTroubleshootForceStopTitle": "Ich habe „Beenden erzwingen“ verwendet",
+  "helpTroubleshootForceStopBody": "„Beenden erzwingen“ unter Android-Einstellungen → Apps hebt die geplanten Wecker von ShiftBell auf. Öffne ShiftBell vor deinem nächsten Wecker erneut, damit kommende Wecker wieder eingerichtet werden. Bereits verstrichene Wecker werden nicht nachgeholt.\n\nDas Verlassen der App oder Entfernen aus der Übersicht der letzten Apps hebt Wecker nicht selbst auf. Manche Handys schränken die Hintergrundnutzung jedoch zusätzlich ein.",
+  "helpTroubleshootWidgetIssueTitle": "Das Widget aktualisiert sich nicht",
+  "helpTroubleshootWidgetIssueBody": "Entferne das Widget und füge es erneut hinzu. Bleibt es unverändert, öffne die App einmal und prüfe es danach wieder auf dem Startbildschirm.",
+  "helpTroubleshootBackupFileMissingTitle": "Ich finde meine Sicherungsdatei nicht",
+  "helpTroubleshootBackupFileMissingBody": "Suche mit dem Dateimanager deines Handys im Ordner Download/ShiftBell. Wenn dort keine Sicherung liegt, kannst du über Daten sichern in den Einstellungen eine neue erstellen.",
+  "helpTroubleshootFriendDisconnectedTitle": "Der Plan meines Freundes ändert sich seit Tagen nicht",
+  "helpTroubleshootFriendDisconnectedBody": "Prüfe im Schichtplan deines Freundes den Zeitpunkt unter Zuletzt synchronisiert. Ein älterer Stand kann bedeuten, dass Änderungen noch nicht übertragen wurden oder die App neu installiert wurde.\n\nBitte deinen Freund, ShiftBell mit Internetverbindung zu öffnen und die Freigabe zu prüfen. Nach einer Neuinstallation brauchst du einen neuen Code. Entferne dann den alten Eintrag und füge den neuen Code hinzu.",
+  "startupFailedTitle": "App konnte nicht gestartet werden",
+  "startupFailedBody": "Beim Vorbereiten der App ist ein Fehler aufgetreten. Prüfe, ob auf deinem Gerät genügend Speicher frei ist, und versuche es erneut. Bleibt das Problem bestehen, starte dein Gerät neu.",
+  "startupRetry": "Erneut versuchen",
+  "startupSlowMessage": "Die App wird vorbereitet. Bitte warte einen Moment.",
+  "startupStalledMessage": "Dies dauert länger als üblich. Wenn diese Seite auch nach einem erneuten Versuch bleibt, schließe die App vollständig und öffne sie neu.",
+  "shiftAnnualLeave": "Urlaub",
+  "onboardingBackupTitle": "Daten wiederherstellen",
+  "onboardingBackupDesc": "Mit einer Sicherungsdatei aus Download/ShiftBell beginnen.",
+  "helpOneTapTitle": "Schnellwecker: gespeicherte Uhrzeit schnell hinzufügen",
+  "helpOneTapBody": "Tippe oberhalb des Kalenders auf Schnellwecker und dann auf +, um eine Uhrzeit und einen Weckmodus zu speichern: Ton mit Vibration, nur Vibration oder lautlos. Es erscheint jeweils ein freier Platz, bis zu fünf Vorlagen.\n\nWähle eine gespeicherte Uhrzeit und dann heute oder morgen. Nach dem Planen schließt sich die Auswahl und eine kurze Bestätigung erscheint. Vergangene oder bereits belegte Uhrzeiten werden abgelehnt.\n\nTippe während der Vorlagenauswahl auf den Kalender, um sie zu schließen. Nach Auswahl einer Vorlage führt Zurück wieder zur Liste.\n\nEine ausgewählte Vorlage lässt sich bearbeiten oder löschen. Solange sie zukünftigen Weckern zugewiesen ist, musst du diese zuerst entfernen, um sie zu bearbeiten. Einzelne Wecker entfernst du am jeweiligen Tag mit × neben dem Schnellwecker. Das Löschen einer Vorlage entfernt auch ihre zugewiesenen Wecker. Die Bestätigung erklärt, ob ein Schichtwecker wiederhergestellt wird.",
+  "helpCalendarTextSizeTitle": "Kalendertext und Bildschirmgrößen",
+  "helpCalendarTextSizeBody": "Der Kalender passt sich an verschiedene Bildschirmgrößen an, auch an Außen- und Innendisplays von Falthandys. Lange Schichtnamen und Notizen werden bei Bedarf gekürzt. Tippe auf einen Tag oder eine Notiz, um den vollständigen Text zu lesen. Pro Tag sind bis zu drei Notizen möglich.\n\nKlare Linien und Sanfte Karten zeigen Schichtnamen standardmäßig größer an. Die Schriftvergrößerung ist im Kalender begrenzt, damit Datum, Schichten und Notizen in die Felder passen.",
+  "helpDiagnosticTitle": "Diagnosedatei für eine Problemmeldung finden",
+  "helpDiagnosticBody": "Prüfe bei Wecker- oder Sicherungsproblemen im Dateimanager Download/ShiftBell/log (ab Android 10). Diagnosedateien werden lokal gespeichert und aktualisiert.\n\nSie enthalten Geräte- und Android-Versionen, Berechtigungen, Akkueinstellungen sowie Verarbeitungsprotokolle für Wecker und Sicherungen. Notiz- und Termininhalte, Schichtnamen und Namen von Freunden sind ausgeschlossen. Dateien werden nicht automatisch gesendet. Du kannst sie bei einer Supportanfrage anhängen. Nach dem Deinstallieren können sie erhalten bleiben; lösche sie im Dateimanager, wenn du sie nicht mehr brauchst.",
+  "helpCalendarLocaleTitle": "Datum, Wochenenden und Feiertage",
+  "helpCalendarLocaleBody": "In der deutschen Sprachversion beginnt die Kalenderwoche am Montag. Datumsangaben folgen dem deutschen Format.\n\nDeutsche Feiertage werden in dieser Version weder im Kalender noch im Widget angezeigt. Rote Sonntage kennzeichnen das Wochenende, nicht einen Feiertag. Auch koreanische Mondkalenderdaten werden ausgeblendet. Deine Schichten und Wecker richten sich weiterhin nach deinem Plan.\n\nDie wöchentliche Arbeitszeit wird immer von Montag bis Sonntag berechnet. Ein Feiertag oder Wochenende macht eine eingetragene Schicht nicht automatisch zu einem freien Tag.",
+  "alarmSnoozedLabel": "Verschoben",
+  "alarmClockFirstOccurrence": "Erstes Vorkommen",
+  "alarmClockSecondOccurrence": "Zweites Vorkommen",
+  "shiftNameInUse": "Verwendete Schichten können nur umbenannt werden.",
+  "scheduleOutsideTeamsConfirm": "Die gewählte Position gehört zu keinem Team im Gesamtplan. Wenn du fortfährst, wird der Gesamtplan gelöscht und muss neu eingerichtet werden. Schichtplan ändern?",
+  "scheduleMyTeam": "Mein Team",
+  "scheduleTeamsAtToday": "Teampositionen im Zyklus am heutigen Tag.",
+  "scheduleTeamChanged": "Du bist von Team {from} zu Team {to} gewechselt.",
+  "@scheduleTeamChanged": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "teamSetupModeTitle": "Teams einrichten",
+  "teamSetupShared": "Alle Teams nutzen dieselbe Folge",
+  "teamSetupSharedHint": "Weise jedem Team eine Position im gemeinsamen Zyklus zu.",
+  "teamSetupIndividual": "Eigene Folge für jedes Team",
+  "teamSetupIndividualHint": "Gib jedem Team einen eigenen Zyklus oder Wochenplan.",
+  "teamRuleBase": "Grundzyklus verwenden",
+  "teamRuleCycle": "Anderen Zyklus verwenden",
+  "teamRuleWeekly": "Nach Wochentag zuweisen",
+  "teamRuleTitle": "Schichtfolge festlegen",
+  "teamRuleLocked": "Mit meinem Kalender verknüpft · schreibgeschützt",
+  "teamRuleMissing": "Schichtfolge für dieses Team festlegen",
+  "teamRuleEdit": "Einrichten",
+  "teamRulePatternHint": "Tippe Schichten der Reihe nach an, um einen Zyklus zu erstellen.\nTippe auf einen eingefügten Eintrag, um ihn zu entfernen.",
+  "teamRuleAllShiftsHint": "Alle in den Einstellungen angelegten Schichtnamen sind verfügbar.",
+  "teamRuleWeeklyHint": "Wähle eine Schicht und tippe dann auf einen Wochentag.\nWeise allen sieben Tagen eine Schicht zu.",
+  "teamRulePositionHint": "Wähle die Position im Zyklus für diesen Tag.",
+  "teamRuleComplete": "Fertig",
+  "teamRuleReview": "Vorschau aller Teampläne",
+  "teamRuleReviewHint": "Prüfe die Schichten aller Teams vor dem Speichern. Du kannst dein Team später wechseln. Um eine Schichtfolge zu ändern, musst du die Teampläne neu einrichten.",
+  "teamRuleUnset": "Nicht zugewiesen",
+  "teamRuleResetCycle": "Zyklus leeren",
+  "teamRuleChooseTeam": "Wähle das Team, zu dem du wechseln möchtest.",
+  "teamRuleCurrentTeam": "Mein aktuelles Team",
+  "teamRuleWeeklyLabel": "Mo · Di · Mi · Do · Fr · Sa · So",
+  "teamScheduleResetConfirm": "Dein Schichtplan wird geändert und die Schichtwecker werden angepasst. Dabei werden die Teampläne gelöscht.\n\nUm die Teampläne zu behalten und nur das Team zu wechseln, öffne Alle Teams → Bearbeiten → Mein Team wechseln.",
+  "teamSwitchAction": "Mein Team wechseln",
+  "teamRuleOverlapHint": "Teams können dieselbe Schicht oder gemeinsame freie Tage haben.",
+  "teamRuleMonday": "Mo",
+  "teamRuleTuesday": "Di",
+  "teamRuleWednesday": "Mi",
+  "teamRuleThursday": "Do",
+  "teamRuleFriday": "Fr",
+  "teamRuleSaturday": "Sa",
+  "teamRuleSunday": "So",
+  "teamEditTitle": "Gesamtplan bearbeiten",
+  "teamEditChangedQuestion": "Hat sich dein Team geändert?",
+  "teamEditRecreateTitle": "Gesamtplan neu erstellen",
+  "teamEditRecreateHint": "Wenn Teampositionen falsch eingerichtet wurden.",
+  "teamEditRecreateConfirm": "Den aktuellen Gesamtplan löschen und neu erstellen?\nDeine Schichten und Wecker bleiben unverändert.",
+  "teamEditPositionsOn": "Teampositionen am {date}",
+  "@teamEditPositionsOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "teamEditSwitchConfirm": "Von Team {from} zu Team {to} wechseln?\n\nDeine Schichtwecker folgen dann dem Plan von Team {to}. Manuelle Änderungen an einzelnen Tagen werden gelöscht.\n\nDie Teampläne bleiben erhalten.",
+  "@teamEditSwitchConfirm": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "teamEditSwitchPreview": "Dein Schichtplan wechselt von Team {from} zu Team {to}.",
+  "@teamEditSwitchPreview": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "alarmSnoozeCollisionResult": "Beendet: anderer Wecker in 5 Minuten",
+  "alarmRefreshUnconfirmed": "Die Aktualisierung der Wecker konnte nicht bestätigt werden. Bitte prüfe sie erneut.",
+  "scheduleRefreshUnconfirmed": "Der Schichtplan wurde gespeichert, aber die Planung der Wecker konnte nicht bestätigt werden.",
+  "oneTapDeleteNoAlarmConfirm": "Für diese Uhrzeit bleibt kein Wecker übrig. Schnellwecker löschen?",
+  "oneTapDeleteRestoreConfirm": "Beim Löschen wird der Schichtwecker für {shift} wiederhergestellt. Fortfahren?",
+  "@oneTapDeleteRestoreConfirm": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "oneTapDeleteNoAlarmDetail": "Für diese Uhrzeit bleibt kein Wecker übrig.",
+  "oneTapDeleteRestoreDetail": "Nach dem Löschen wird der Schichtwecker für {shift} wiederhergestellt.",
+  "@oneTapDeleteRestoreDetail": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "oneTapDeletedRefreshRetry": "Schnellwecker gelöscht. Der Schichtwecker konnte noch nicht wiederhergestellt werden. ShiftBell versucht es bei der nächsten Aktualisierung der Wecker erneut.",
+  "oneTapDeletedFixedRestored": "Schnellwecker gelöscht. Schichtwecker wiederhergestellt.",
+  "teamEditChooseTeam": "Wähle das Team, zu dem du wechseln möchtest.",
+  "durationCompactHours": "{hours} Std.",
+  "@durationCompactHours": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "durationCompactMinutes": "{minutes} Min.",
+  "@durationCompactMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
+}

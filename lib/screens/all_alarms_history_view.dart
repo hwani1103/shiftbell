@@ -190,9 +190,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       case 'superseded_by_next_alarm':
         return context.l10n.alarmSupersededByNextAlarm;
       case 'snooze_skipped_existing_alarm':
-        return Localizations.localeOf(context).languageCode == 'ko'
-            ? '5분 후에 다른 알람이 있어 종료'
-            : 'Dismissed: another alarm at snooze time';
+        return context.l10n.alarmSnoozeCollisionResult;
       default:
         return context.l10n.commonOther;
     }

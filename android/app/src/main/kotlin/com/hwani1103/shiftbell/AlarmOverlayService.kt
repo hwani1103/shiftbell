@@ -45,6 +45,8 @@ class AlarmOverlayService : Service() {
     }
 
     companion object {
+        var visibleRing: RingingAlarmTracker.ActiveRing? = null
+            private set
         const val ACTION_DISMISS_OVERLAY = "com.hwani1103.shiftbell.DISMISS_OVERLAY"
         const val ACTION_SNOOZE_OVERLAY = "com.hwani1103.shiftbell.SNOOZE_OVERLAY"
         const val EXTRA_ALARM_ID = "alarmId"
@@ -67,6 +69,8 @@ class AlarmOverlayService : Service() {
     private val overlayActionReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val targetAlarmId = intent.getIntExtra(EXTRA_ALARM_ID, -1)
+            if (intent.getBooleanExtra("completedRingOnly", false) &&
+                RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) return
 
             // 현재 Overlay의 알람 ID와 일치하는 경우에만 처리
             if (targetAlarmId != alarmId && targetAlarmId != -1) {
@@ -139,7 +143,7 @@ class AlarmOverlayService : Service() {
         // 덮어썼었음 - prepareOverlay()가 "overlayView가 이미 있으면 재사용"하기
         // 때문에 화면엔 옛 시간/근무명이 계속 보이는데 버튼은 새 알람 것에 연결되는
         // 표시 불일치가 생겼음. 뷰를 통째로 제거해서 다시 그리게 함.
-        if (isOverlayVisible && alarmId != 0 && alarmId != newAlarmId) {
+        if (isOverlayVisible && alarmId != 0 && (alarmId != newAlarmId || ringRound != newRound)) {
             Log.d("AlarmOverlay", "⏰ 다른 알람($alarmId) 표시 중에 새 알람($newAlarmId) 도착 - Overlay 새로 그림")
             removeOverlay()
         }
@@ -244,7 +248,8 @@ class AlarmOverlayService : Service() {
             timeoutAlarm()
         }
 
-        timeoutHandler?.postDelayed(timeoutRunnable!!, (alarmDuration * 60 * 1000).toLong())
+        val remaining = RingTimeoutController.remaining(RingingAlarmTracker.ActiveRing(alarmId, ringRound)) ?: return
+        timeoutHandler?.postDelayed(timeoutRunnable!!, remaining)
         Log.d("AlarmOverlay", "⏱️ 타임아웃 타이머 시작: ${alarmDuration}분")
     }
 
@@ -389,6 +394,8 @@ class AlarmOverlayService : Service() {
             // 화면에 추가
             windowManager?.addView(overlayView, params)
             isOverlayVisible = true
+            visibleRing = RingingAlarmTracker.ActiveRing(alarmId, ringRound)
+            InAppAlarmController.changed()
 
             Log.d("AlarmOverlay", "✅ Overlay Window 표시 완료!")
         } catch (e: Exception) {
@@ -470,6 +477,10 @@ class AlarmOverlayService : Service() {
     }
 
     private fun removeOverlay() {
+        if (visibleRing == RingingAlarmTracker.ActiveRing(alarmId, ringRound)) {
+            visibleRing = null
+            InAppAlarmController.changed()
+        }
         try {
             if (overlayView != null) {
                 if (isOverlayVisible) {

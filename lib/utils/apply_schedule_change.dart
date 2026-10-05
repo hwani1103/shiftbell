@@ -123,9 +123,7 @@ Future<bool> applyScheduleChange(
         SnackBar(
           content: Text(
             !refreshCompleted
-                ? (Localizations.localeOf(context).languageCode == 'ko'
-                    ? '근무표는 저장됐지만 알람 예약 완료를 확인하지 못했습니다. 다시 확인해 주세요.'
-                    : 'The schedule was saved, but alarm scheduling could not be confirmed.')
+                ? context.l10n.scheduleRefreshUnconfirmed
                 : '$successMessage'
                     '${skippedSlots.isEmpty ? '' : ' · ${context.l10n.fixedAlarmSkippedByOneTap} '
                         '${skippedSlots.map((d) => '${d.month}/${d.day} '

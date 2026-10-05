@@ -268,15 +268,17 @@ class AlarmTimePickerState extends State<AlarmTimePicker>
             ],
             SizedBox(height: 24.h),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            OverflowBar(
+              alignment: MainAxisAlignment.end,
+              overflowAlignment: OverflowBarAlignment.end,
+              spacing: 8.w,
+              overflowSpacing: 8.h,
               children: [
                 AppSecondButton(
                   variant: AppSecondButtonVariant.neutral,
                   onPressed: () => Navigator.pop(context),
                   child: Text(context.l10n.commonCancel),
                 ),
-                SizedBox(width: 8.w),
                 AppSecondButton(
                   variant: AppSecondButtonVariant.success,
                   onPressed: () async {

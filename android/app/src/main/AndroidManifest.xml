@@ -163,7 +163,7 @@
         </receiver>
         <receiver
             android:name=".SleepWidgetProvider"
-            android:enabled="@bool/sleep_widget_available"
+            android:enabled="true"
             android:exported="true"
             android:label="@string/app_widget_sleep_label">
             <intent-filter>

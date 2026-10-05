@@ -69,17 +69,12 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
       final fixed =
           await CustomAlarmService.instance.previewFixedReplacement(date);
       if (!mounted) return;
-      final ko = Localizations.localeOf(context).languageCode == 'ko';
       final confirmed = await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
                 content: Text(fixed == null
-                    ? (ko
-                        ? '원터치 알람을 삭제하면 이 시각에 알람이 남지 않습니다. 삭제할까요?'
-                        : 'No alarm will remain at this time. Delete the one-tap alarm?')
-                    : (ko
-                        ? '원터치 알람을 삭제하면 ${fixed.shiftType} 고정 알람을 다시 예약합니다. 삭제할까요?'
-                        : 'Deleting this one-tap alarm will restore the ${fixed.shiftType} fixed alarm. Continue?')),
+                    ? context.l10n.oneTapDeleteNoAlarmConfirm
+                    : context.l10n.oneTapDeleteRestoreConfirm(fixed.shiftType)),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(dialogContext, false),
@@ -112,13 +107,9 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(deletion.reservationFailed
-              ? (Localizations.localeOf(context).languageCode == 'ko'
-                  ? '원터치 알람은 삭제됐지만 고정 알람 예약에 실패했습니다. 다시 갱신합니다.'
-                  : 'One-tap alarm deleted, but fixed alarm scheduling failed. Refresh will retry.')
+              ? context.l10n.oneTapDeletedRefreshRetry
               : deletion.fixedReplacement
-                  ? (Localizations.localeOf(context).languageCode == 'ko'
-                      ? '원터치 알람을 삭제하고 고정 알람을 예약했습니다.'
-                      : 'One-tap alarm deleted and fixed alarm scheduled.')
+                  ? context.l10n.oneTapDeletedFixedRestored
                   : context.l10n.alarmCanceledToast),
           behavior: SnackBarBehavior.floating,
           shape:

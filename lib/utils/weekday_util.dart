@@ -18,6 +18,7 @@
 // 시작, ISO 8601)은 이번 영어 현지화 범위에서 다루지 않음 - 필요해지면
 // Localizations.localeOf(context).countryCode로 분기 추가 가능(보고서 2-4번 결정).
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 // index: 0=일/Sun, 1=월/Mon, 2=화/Tue, 3=수/Wed, 4=목/Thu, 5=금/Fri, 6=토/Sat
 // (date.weekday % 7 과 정렬 맞음: DateTime.weekday는 월=1~일=7이라 7%7=0)
@@ -29,9 +30,34 @@ const List<String> kWeekdayEnNarrow = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 /// 대체). [narrow]=true면 영어 로케일에서 한 글자로 줄임(한국어는 원래 한 글자라
 /// narrow 여부와 무관하게 항상 한 글자).
 String weekdayLabel(BuildContext context, int index, {bool narrow = false}) {
-  final isKorean = Localizations.localeOf(context).languageCode == 'ko';
-  if (isKorean) return kWeekdayKo[index];
+  final language = Localizations.localeOf(context).languageCode;
+  if (language == 'ko') return kWeekdayKo[index];
+  if (language == 'de') {
+    return narrow ? const ['S', 'M', 'D', 'M', 'D', 'F', 'S'][index]
+        : const ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][index];
+  }
+  if (language == 'pt') {
+    return narrow ? const ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'][index]
+        : const ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][index];
+  }
+  if (language == 'hi') {
+    // Keep a complete, recognizable abbreviation; do not split a conjunct.
+    return const ['रवि', 'सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि'][index];
+  }
   return narrow ? kWeekdayEnNarrow[index] : kWeekdayEnShort[index];
+}
+
+/// Preserve the existing Korean themes' decorative English, while new release
+/// languages use their own day and month labels.
+String calendarWeekdayLabel(BuildContext context, int index, {bool narrow = false}) =>
+    Localizations.localeOf(context).languageCode == 'ko'
+        ? (narrow ? kWeekdayEnNarrow[index] : kWeekdayEnShort[index])
+        : weekdayLabel(context, index, narrow: narrow);
+
+String calendarMonthName(BuildContext context, DateTime date, {bool full = false}) {
+  final locale = Localizations.localeOf(context);
+  final code = locale.languageCode == 'ko' ? 'en' : locale.toString();
+  return (full ? DateFormat.MMMM(code) : DateFormat.MMM(code)).format(date);
 }
 
 /// DateTime.weekday(월=1~일=7)를 위 배열 인덱스(일=0~토=6)로 변환.

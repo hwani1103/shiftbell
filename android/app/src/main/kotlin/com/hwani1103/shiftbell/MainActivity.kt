@@ -211,6 +211,7 @@ class MainActivity: FlutterActivity() {
     }
 
     override fun onDestroy() {
+        InAppAlarmController.pause(this)
         // ⭐ 2026-09-15 (전체 코드 점검 Q-03) - 미리듣기 중 앱이 종료되면 50%로 바꾼 시스템 알람
         // 볼륨이 복원되지 않고 남았음(다른 시계 앱 알람 음량까지 바뀜).
         stopPreviewSound()
@@ -226,6 +227,7 @@ class MainActivity: FlutterActivity() {
     // ✅ 변경
 override fun onResume() {
     super.onResume()
+    InAppAlarmController.resume(this)
     ReleaseLocalePolicy.syncSleepWidget(this)
     // ⭐ CRITICAL FIX: triggerCheck()는 DB를 동기적으로(블로킹) 읽음. onResume()은
     // 메인 스레드에서 실행되는데, 여기서 바로 부르면 - 특히 설치 직후 첫 실행처럼
@@ -262,6 +264,11 @@ override fun onResume() {
 }
     
     // ✅ 변경
+override fun onPause() {
+    InAppAlarmController.pause(this)
+    super.onPause()
+}
+
 override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
     handleStopAlarmIntent(intent)
@@ -346,6 +353,15 @@ override fun onNewIntent(intent: Intent) {
         methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
         methodChannel?.setMethodCallHandler { call, result ->
             when (call.method) {
+                "isTabletLayoutDevice" -> {
+                    // Positive device category only: unfolded phones must keep
+                    // their existing keyboard and sheet layout.
+                    result.success(
+                        packageManager.hasSystemFeature("com.samsung.feature.device_category_tablet") &&
+                            !packageManager.hasSystemFeature("com.samsung.feature.device_category_phone") &&
+                            !packageManager.hasSystemFeature("android.hardware.sensor.hinge_angle")
+                    )
+                }
                 "getUse24HourFormat" -> {
                     result.success(android.text.format.DateFormat.is24HourFormat(this))
                 }

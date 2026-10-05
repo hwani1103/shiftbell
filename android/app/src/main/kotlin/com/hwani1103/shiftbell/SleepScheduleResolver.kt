@@ -69,9 +69,10 @@ object SleepScheduleResolver {
 
     // ⭐ lib/utils/shift_name_util.dart의 isRestShiftName()과 동일 로직 유지할 것.
     fun isRestShiftName(name: String): Boolean {
+        if (name.trim() == "छुट्टी" || name.trim() == "अवकाश") return true
         if (name.contains("휴")) return true
-        val lower = name.lowercase()
-        return lower.contains("off") || lower.contains("rest") || lower.contains("holiday")
+        return Regex("\\b(off|rest|holiday|leave|vacation|pto|frei|urlaub|folga|férias|ferias)\\b",
+            RegexOption.IGNORE_CASE).containsMatchIn(name)
     }
 
     // ⭐ shift_time_category.dart의 classifyByStartMinutes()와 동일 로직 유지할 것

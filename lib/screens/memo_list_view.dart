@@ -75,7 +75,7 @@ class _MemoListViewState extends ConsumerState<MemoListView> {
     final month = int.parse(monthKey.substring(5, 7));
     final isKorean = Localizations.localeOf(context).languageCode == 'ko';
     if (isKorean) return '$year년 $month월';
-    return DateFormat.yMMMM('en').format(DateTime(year, month));
+    return DateFormat.yMMMM(Localizations.localeOf(context).toString()).format(DateTime(year, month));
   }
 
   String _dateLabel(BuildContext context, DateTime date) {

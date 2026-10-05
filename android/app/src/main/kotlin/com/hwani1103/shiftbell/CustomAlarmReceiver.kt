@@ -185,6 +185,7 @@ override fun onReceive(context: Context, intent: Intent) {
             // 없어서 그냥 무시되니 항상 보내도 안전함.
             val dismissOverlayIntent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
                 putExtra(AlarmOverlayService.EXTRA_ALARM_ID, previousRingingId)
+                putExtra("completedRingOnly", true)
                 setPackage(context.packageName)
             }
             context.sendBroadcast(dismissOverlayIntent)
@@ -240,7 +241,9 @@ override fun onReceive(context: Context, intent: Intent) {
                 showAlarmActivity(context, id, label, ring.round, durationMinutes)
             }
         } else {
-            if (canDrawOverlays(context)) {
+            if (InAppAlarmController.isHostVisible) {
+                InAppAlarmController.changed()
+            } else if (canDrawOverlays(context)) {
                 Log.e("CustomAlarmReceiver", "✅ 잠금 해제 - Overlay 표시")
                 showOverlayWindow(context, id, label, ring.round, durationMinutes)
             } else {

@@ -1313,27 +1313,23 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                   children: [
                     Icon(Icons.add, size: 16.sp),
                     SizedBox(width: 4.w),
-                    Text(context.l10n.alarmAdd),
+                    Flexible(child: Text(context.l10n.alarmAdd, textAlign: TextAlign.center)),
                   ],
                 ),
               ),
             ),
             SizedBox(height: 8.h),
-            Row(
-              // ⭐ 2026-08-25 버그 수정 - mainAxisSize.min이면 이 Row가 부모
-              // Column(crossAxisAlignment.start)의 왼쪽에 내용물 크기만큼만
-              // 붙어버려서, Row 내부의 mainAxisAlignment.end가 아무 효과가
-              // 없었음(끝까지 밀 "남는 공간" 자체가 없으므로). 기본값(max)으로
-              // 두면 Row가 가로폭 전체를 차지해서 end가 정상적으로 오른쪽 끝에
-              // 붙임.
-              mainAxisAlignment: MainAxisAlignment.end,
+            OverflowBar(
+              alignment: MainAxisAlignment.end,
+              overflowAlignment: OverflowBarAlignment.end,
+              spacing: 8.w,
+              overflowSpacing: 8.h,
               children: [
                 AppSecondButton(
                   variant: AppSecondButtonVariant.neutral,
                   onPressed: () => Navigator.pop(context),
                   child: Text(context.l10n.commonCancel),
                 ),
-                SizedBox(width: 8.w),
                 AppSecondButton(
                   variant: AppSecondButtonVariant.success,
                   // ⭐ 2026-08-24 버그 수정 - 예전엔 _alarms.isEmpty일 때

@@ -162,6 +162,10 @@ object NotificationHelper {
         }
 
         val screenIntent = Intent(context, AlarmActivity::class.java).apply {
+            // Extras do not participate in PendingIntent identity. Without a
+            // round-specific URI, UPDATE_CURRENT retargets an old button token
+            // to the next ring (including the same alarm after snoozing).
+            data = android.net.Uri.parse("shiftbell://ring-control/$alarmId/$round/screen")
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_NO_USER_ACTION
             putExtra("alarmId", alarmId)
             putExtra("label", label)
@@ -176,6 +180,7 @@ object NotificationHelper {
             context, alarmId + 10000,
             Intent(context, AlarmActionReceiver::class.java).apply {
                 action = AlarmActionReceiver.ACTION_DISMISS_FROM_NOTIFICATION
+                data = android.net.Uri.parse("shiftbell://ring-control/$alarmId/$round/dismiss")
                 putExtra(AlarmActionReceiver.EXTRA_ALARM_ID, alarmId)
                 putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, round)
             },
@@ -185,6 +190,7 @@ object NotificationHelper {
             context, alarmId + 20000,
             Intent(context, AlarmActionReceiver::class.java).apply {
                 action = AlarmActionReceiver.ACTION_SNOOZE_FROM_NOTIFICATION
+                data = android.net.Uri.parse("shiftbell://ring-control/$alarmId/$round/snooze")
                 putExtra(AlarmActionReceiver.EXTRA_ALARM_ID, alarmId)
                 putExtra(AlarmActionReceiver.EXTRA_RING_ROUND, round)
             },

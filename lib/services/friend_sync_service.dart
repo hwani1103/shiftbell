@@ -127,6 +127,7 @@ class FriendSyncService {
     _localKey,
   };
   Future<void>? _localTail;
+  bool _localCacheNeedsReload = false;
   Future<void>? _networkTail;
   Future<String?>? _ownerIdInFlight;
   CollectionReference<Map<String, dynamic>> get _col =>
@@ -147,6 +148,10 @@ class FriendSyncService {
 
   Future<_LocalShare> _load() async {
     final prefs = await SharedPreferences.getInstance();
+    if (_localCacheNeedsReload) {
+      await prefs.reload();
+      _localCacheNeedsReload = false;
+    }
     final encoded = prefs.getString(_localKey);
     // Corrupt state is an error, never an excuse to silently create a new session.
     if (encoded != null) {
@@ -179,8 +184,15 @@ class FriendSyncService {
     final prefs = await SharedPreferences.getInstance();
     // One preference write commits intent, session, revision and payload identity.
     // Legacy keys are compatibility mirrors, never the new writer's source of truth.
-    if (!await prefs.setString(_localKey, jsonEncode(state.toJson()))) {
-      throw StateError('Could not persist sharing intent');
+    try {
+      if (!await prefs.setString(_localKey, jsonEncode(state.toJson()))) {
+        throw StateError('Could not persist sharing intent');
+      }
+    } catch (_) {
+      // SharedPreferences updates memory before the write completes.
+      // Reload before trusting local state after a failed write.
+      _localCacheNeedsReload = true;
+      rethrow;
     }
     await prefs.setString(
         'friend_share_intent',

@@ -200,8 +200,6 @@ int get _mockMonthlyOtTotal => _mockOtMinutes.values.fold(0, (a, b) => a + b);
 // ⭐ 영어 현지화: _weekdayKr(로케일에 따라 바뀌어야 함)는 weekdayLabel(context, _weekdayIndex(i))로
 // 대체되어 제거됨(플레이북 2/3번 섹션). _weekdayEn3/_weekdayEn1은 일부 테마가 항상
 // 영어 약자로 보이도록 의도한 디자인 선택이라 로케일과 무관하게 그대로 둠.
-const _weekdayEn3 = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const _weekdayEn1 = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 // ============================================================
 // ⭐ 메인 화면 - PageView로 10개 테마를 스와이프 비교
@@ -339,7 +337,7 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
               ]),
               if (ot > 0) ...[
                 SizedBox(height: 4.h),
-                Text('OT: ${formatOvertimeMinutes(context, ot)}', style: TextStyle(fontSize: 13.sp, color: Colors.indigo)),
+                Text('${context.l10n.shiftOt}: ${formatOvertimeMinutes(context, ot)}', style: TextStyle(fontSize: 13.sp, color: Colors.indigo)),
               ],
               if (memos.isNotEmpty) ...[
                 SizedBox(height: 4.h),
@@ -378,11 +376,11 @@ extension _Theme1 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
           child: Row(
             children: [
-              Text('Aug 2026', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600, color: Colors.black87)),
+              Text('${calendarMonthName(context, DateTime(2026, 8))} 2026', style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600, color: Colors.black87)),
               const Spacer(),
               _thinTextButton(context.l10n.shiftFullSchedule, _openAllShifts),
               SizedBox(width: 12.w),
-              _thinTextButton('Today', _tapToday),
+              _thinTextButton(context.usesKoreanFeatures ? 'Today' : context.l10n.commonToday, _tapToday),
             ],
           ),
         ),
@@ -393,7 +391,7 @@ extension _Theme1 on _CalendarThemeLabScreenState {
             children: List.generate(7, (i) => Expanded(
               child: Center(
                 child: Text(
-                  _weekdayEn3[_weekdayIndex(i)],
+                  calendarWeekdayLabel(context, _weekdayIndex(i)),
                   style: TextStyle(
                     fontSize: 10.5.sp,
                     fontWeight: FontWeight.w600,
@@ -758,11 +756,11 @@ extension _Theme4 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 10.h),
           child: Row(
             children: [
-              Text(context.usesKoreanFeatures ? '2026-08' : 'Aug 2026', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'monospace')),
+              Text(context.usesKoreanFeatures ? '2026-08' : '${calendarMonthName(context, DateTime(2026, 8))} 2026', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'monospace')),
               const Spacer(),
               _gridHeaderBtn(context.l10n.shiftFullSchedule, _openAllShifts),
               SizedBox(width: 8.w),
-              _gridHeaderBtn('TODAY', _tapToday),
+              _gridHeaderBtn(context.usesKoreanFeatures ? 'TODAY' : context.l10n.commonToday.toUpperCase(), _tapToday),
             ],
           ),
         ),
@@ -771,7 +769,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(vertical: 4.h),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(_weekdayEn3[_weekdayIndex(i)], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.redAccent.shade100 : Colors.white70))),
+              child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.redAccent.shade100 : Colors.white70))),
             )),
           ),
         ),
@@ -1041,7 +1039,7 @@ extension _Theme8 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(_weekdayEn1[_weekdayIndex(i)], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade400))),
+              child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i), narrow: true), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade400))),
             )),
           ),
         ),
@@ -1211,7 +1209,7 @@ extension _Theme9 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(_weekdayEn3[_weekdayIndex(i)], style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
+              child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
             )),
           ),
         ),
@@ -1329,7 +1327,7 @@ extension _Theme10 on _CalendarThemeLabScreenState {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('August', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w700, fontFamily: 'serif', color: Colors.black87)),
+              Text(calendarMonthName(context, DateTime(2026, 8), full: true), style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w700, fontFamily: 'serif', color: Colors.black87)),
               SizedBox(width: 8.w),
               Padding(padding: EdgeInsets.only(bottom: 3.h), child: Text('2026', style: TextStyle(fontSize: 12.sp, fontFamily: 'serif', color: Colors.grey.shade500))),
               const Spacer(),
@@ -1345,7 +1343,7 @@ extension _Theme10 on _CalendarThemeLabScreenState {
               padding: EdgeInsets.symmetric(vertical: 3.h),
               color: _weekdayIndex(i) == 0 ? Colors.red.shade50 : (i == 6 ? Colors.blue.shade50 : Colors.grey.shade100),
               alignment: Alignment.center,
-              child: Text(_weekdayEn3[_weekdayIndex(i)], style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade600)),
+              child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade600)),
             ),
           )),
         ),
@@ -1587,11 +1585,10 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
               padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
               child: Row(
                 children: [
-                  Text(
+                  Expanded(child: Text(
                     DateFormat.yMMMM(Localizations.localeOf(context).toString()).format(DateTime(2026, 8, 1)),
                     style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurface),
-                  ),
-                  const Spacer(),
+                  )),
                   // ⭐ "원래 버튼 이미지가 있었는데 텍스트만 남았다"는 피드백 -
                   // 진짜 달력탭(_buildCalendarHeader 부분)의 버튼 스타일을
                   // 그대로 재현함: primaryContainer 배경 + 옅은 테두리의 알약형.
@@ -1673,12 +1670,17 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
                                     ),
                                     child: Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 10.w),
-                                      child: Row(
-                                        children: [
-                                          Text(context.l10n.shiftThisMonthOt, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant)),
-                                          SizedBox(width: 6.w),
-                                          Text(formatOvertimeMinutes(context, _mockMonthlyOtTotal), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant)),
-                                        ],
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        alignment: Alignment.centerLeft,
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(context.l10n.shiftThisMonthOt, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant)),
+                                            SizedBox(width: 6.w),
+                                            Text(formatOvertimeMinutes(context, _mockMonthlyOtTotal), style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: colorScheme.onSurfaceVariant)),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -1691,8 +1693,11 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
                                       padding: EdgeInsets.symmetric(horizontal: 10.w),
                                       child: Row(
                                         children: [
-                                          Text(context.l10n.shiftWeeklyWorkHours, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant)),
-                                          const Spacer(),
+                                          Expanded(child: FittedBox(
+                                            fit: BoxFit.scaleDown,
+                                            alignment: Alignment.centerLeft,
+                                            child: Text(context.l10n.shiftWeeklyWorkHours, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w600, color: colorScheme.onSurfaceVariant)),
+                                          )),
                                           Icon(Icons.chevron_right, size: 16.sp, color: colorScheme.onSurfaceVariant),
                                         ],
                                       ),
@@ -1875,11 +1880,11 @@ extension _ThemeDiary on _CalendarThemeLabScreenState {
           child: Row(
             children: [
               Container(width: 7.w, height: 7.w, margin: EdgeInsets.only(right: 7.w), decoration: const BoxDecoration(color: Color(0xFFCB8A4E), shape: BoxShape.circle)),
-              Text('August 2026', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500, letterSpacing: 0.2, color: const Color(0xFF4A4038))),
+              Text('${calendarMonthName(context, DateTime(2026, 8), full: true)} 2026', style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w500, letterSpacing: 0.2, color: const Color(0xFF4A4038))),
               const Spacer(),
               _diaryHeaderBtn(context.l10n.shiftFullSchedule, _openAllShifts),
               SizedBox(width: 8.w),
-              _diaryHeaderBtn('Today', _tapToday),
+              _diaryHeaderBtn(context.usesKoreanFeatures ? 'Today' : context.l10n.commonToday, _tapToday),
             ],
           ),
         ),

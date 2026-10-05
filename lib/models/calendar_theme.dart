@@ -153,6 +153,18 @@ List<String> mockShiftNames(BuildContext context) {
       '특근'
     ];
   }
+  if (Localizations.localeOf(context).languageCode == 'de') {
+    return const ['Tag', 'Nacht', 'Früh', 'Spät', 'Frei', 'Bereitschaft',
+      'Extra', 'Reserve', 'Homeoffice', 'Dienstreise', 'Schulung', 'Sonderdienst'];
+  }
+  if (Localizations.localeOf(context).languageCode == 'pt') {
+    return const ['Dia', 'Noite', 'Manhã', 'Tarde', 'Folga', 'Plantão',
+      'Extra', 'Sobreaviso', 'Remoto', 'Viagem', 'Treinamento', 'Especial'];
+  }
+  if (Localizations.localeOf(context).languageCode == 'hi') {
+    return const ['दिन', 'रात', 'सुबह', 'दोपहर', 'छुट्टी', 'ऑन-कॉल',
+      'अतिरिक्त', 'स्टैंडबाय', 'घर से काम', 'दौरा', 'ट्रेनिंग', 'विशेष'];
+  }
   return const [
     'Day',
     'Night',

@@ -208,12 +208,17 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
     AppAnalytics.track(AnalyticsEvent.shiftAssigned, params: {'count': dates.length});
   }
 
-  Future<void> resetSchedule() async {
+  /// Returns whether the separate sharing-stop request was locally saved.
+  Future<bool> resetSchedule() async {
     try {
-      // Persist stop_pending before deleting local data. Even if reset/native
-      // cancellation fails or the process exits, the old schedule stays private
-      // once the pending server revocation is acknowledged. Never auto-resume.
-      await FriendSyncService.instance.stopSharing();
+      // Sharing failure must not prevent resetting the user's local schedule.
+      var sharingStopSaved = true;
+      try {
+        await FriendSyncService.instance.stopSharing();
+      } catch (error) {
+        sharingStopSaved = false;
+        print('⚠️ 공유 중지 저장 실패; 스케줄 초기화는 계속 진행: $error');
+      }
       // Delete rows/templates atomically before Native cancelIfGone checks them.
       final removedIds = await DatabaseService.instance.deleteAllAlarms(
         clearTemplates: true,
@@ -259,6 +264,7 @@ class ScheduleNotifier extends StateNotifier<AsyncValue<ShiftSchedule?>> {
       _notifyScheduleChanged();
       WidgetRefreshService.refresh();  // ⭐ 홈 화면 위젯도 초기화 반영
       print('🗑️ 교대근무 초기화 완료');
+      return sharingStopSaved;
     } catch (e) {
       print('❌ 교대근무 초기화 실패: $e');
       rethrow;

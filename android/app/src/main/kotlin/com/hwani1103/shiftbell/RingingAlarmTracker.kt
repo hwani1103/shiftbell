@@ -220,6 +220,7 @@ object RingingAlarmTracker {
 
     /** 테스트 전용 - 프로세스 재시작처럼 메모리 값을 버림(저장된 값은 유지). */
     internal fun resetMemoryForTest() = synchronized(lock) {
+        RingTimeoutController.clear()
         loaded = false
         counter = 0L
         active = null

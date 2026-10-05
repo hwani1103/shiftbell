@@ -1,5 +1,6 @@
 import '../constants/layout_limits.dart';
 import '../widgets/adaptive_layout.dart';
+import '../widgets/tablet_keyboard_viewport.dart';
 // lib/screens/schedule_management_tab.dart
 //
 // ⭐ 2026-08-25 추가, 같은 날 다섯 번째 재작업 - "일정관리" 탭.
@@ -3217,7 +3218,9 @@ String _scheduleTimeLabel(int startMinutes, int? durationMinutes) {
 Future<T?> _showFixedBottomSheet<T>(
   BuildContext context, {
   required WidgetBuilder builder,
-}) {
+}) async {
+  final tablet = await isTabletLayoutDevice();
+  if (!context.mounted) return null;
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: true,
@@ -3225,17 +3228,21 @@ Future<T?> _showFixedBottomSheet<T>(
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 220),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
-      return Align(
-        alignment: Alignment.bottomCenter,
-        child: Material(
-          type: MaterialType.transparency,
-          child: SizedBox(
-            width: AppLayout.of(dialogContext).isWide
-                ? AppLayout.of(dialogContext).sheetWidth
-                : double.infinity,
-            child: builder(dialogContext),
-          ),
-        ),
+      return TabletKeyboardViewport(
+        enabled: tablet,
+        child: Builder(
+            builder: (sheetContext) => Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: SizedBox(
+                      width: AppLayout.of(dialogContext).isWide
+                          ? AppLayout.of(dialogContext).sheetWidth
+                          : double.infinity,
+                      child: builder(sheetContext),
+                    ),
+                  ),
+                )),
       );
     },
     transitionBuilder: (dialogContext, animation, secondaryAnimation, child) {

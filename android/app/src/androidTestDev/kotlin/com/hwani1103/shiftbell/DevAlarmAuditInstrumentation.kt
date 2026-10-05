@@ -21,6 +21,21 @@ class DevAlarmAuditInstrumentation : Instrumentation() {
         val result = Bundle()
         try {
             check(targetContext.packageName == "com.hwani1103.shiftbell.dev")
+            if (arguments.getString("action") == "alarm_layout") {
+                result.putString("stream", DevAlarmLayoutAudit.run(this).toString() + "\n")
+                finish(Activity.RESULT_OK, result)
+                return
+            }
+            if (arguments.getString("action") == "ring_snooze") {
+                result.putString("stream", DevRingWatchdogAudit.snooze(this).toString() + "\n")
+                finish(Activity.RESULT_OK, result)
+                return
+            }
+            if (arguments.getString("action") == "ring_watchdog") {
+                result.putString("stream", DevRingWatchdogAudit.run(this).toString() + "\n")
+                finish(Activity.RESULT_OK, result)
+                return
+            }
             if (arguments.getString("action") == "backup_storage") {
                 val report = DevBackupStorageAudit.run(this)
                 result.putString("stream", report.toString() + "\n")

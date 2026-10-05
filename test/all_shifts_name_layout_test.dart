@@ -102,7 +102,7 @@ void main() {
         if (names.first == '주간근무') expect(find.text('주간\n근무'), findsWidgets);
         if (names.first == 'Afternoon Shift') {
           expect(find.text('Afternoon\nShift'), findsWidgets);
-          expect(find.text('WWWWWWWW\nWWWWWWWW'), findsWidgets);
+          expect(find.text('WWWWWWWWWWWWWWWW'), findsWidgets);
         }
         for (final team in ['A', 'B', 'C', 'D']) {
           final label = tester.getRect(find.text(team).first);

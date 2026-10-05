@@ -1,6 +1,7 @@
 import '../widgets/team_assignment_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import '../services/database_service.dart';
 import '../widgets/team_rule_card.dart';
 import '../l10n/l10n_extensions.dart';
@@ -40,7 +41,7 @@ class _TeamScheduleEditScreenState
     return await showDialog<bool>(
             context: context,
             builder: (context) => ShiftEditorDialog(
-                    title: Text(_ko ? '전체근무표 편집' : 'Edit full team schedule'),
+                    title: Text(context.l10n.teamEditTitle),
                     content: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,9 +70,7 @@ class _TeamScheduleEditScreenState
     final team = _selected;
     if (_busy || team == null || team == widget.teams.myTeam) return;
     setState(() => _busy = true);
-    final accepted = await _confirm(_ko
-        ? '${widget.teams.myTeam}조에서 $team조로 내 근무를 변경합니다.\n\n현재 등록된 고정알람도\n$team조의 스케줄로 전부 재설정됩니다.\n\n수동으로 변경한 근무는 초기화됩니다.\n\n전체근무표는 유지됩니다.'
-        : 'Change your team from ${widget.teams.myTeam} to $team?\n\nFixed alarms will use\nteam $team\'s schedule.\n\nManual shift changes will be cleared.\n\nThe full team schedule will be preserved.');
+    final accepted = await _confirm(context.l10n.teamEditSwitchConfirm(widget.teams.myTeam, team));
     if (!mounted) return;
     if (!accepted) {
       setState(() => _busy = false);
@@ -98,9 +97,7 @@ class _TeamScheduleEditScreenState
     if (_busy) return;
     setState(() => _busy = true);
     final accepted = await _confirm(
-        _ko
-            ? '현재의 전체근무표를 삭제하고 다시 만듭니다.\n내 근무와 알람은 변경되지 않습니다.'
-            : 'Delete the current full team schedule and create it again?\nYour shifts and alarms will stay the same.',
+        context.l10n.teamEditRecreateConfirm,
         destructive: true);
     if (!mounted) return;
     if (!accepted) {
@@ -120,7 +117,7 @@ class _TeamScheduleEditScreenState
   }
 
   Widget _recreateAction({bool compact = false}) {
-    final title = _ko ? '전체근무표 다시 만들기' : 'Recreate the full team schedule';
+    final title = context.l10n.teamEditRecreateTitle;
     if (compact) {
       return TextButton.icon(
         key: const ValueKey('team-edit-recreate'),
@@ -134,9 +131,7 @@ class _TeamScheduleEditScreenState
         child: ListTile(
       key: const ValueKey('team-edit-recreate'),
       title: Text(title),
-      subtitle: Text(_ko
-          ? '전체근무표가 잘못 설정되어 각 조의 근무를 다시 입력해야 하는 경우'
-          : 'Use this if team positions were set incorrectly.'),
+      subtitle: Text(context.l10n.teamEditRecreateHint),
       trailing: const Icon(Icons.restart_alt),
       onTap: _busy ? null : _recreate,
     ));
@@ -156,13 +151,13 @@ class _TeamScheduleEditScreenState
         canPop: !_busy,
         child: Scaffold(
           appBar:
-              AppBar(title: Text(_ko ? '전체근무표 편집' : 'Edit full team schedule')),
+              AppBar(title: Text(context.l10n.teamEditTitle)),
           body: AdaptiveFormBody(
               child: SafeArea(
                   child: Column(children: [
             Expanded(
                 child: ListView(padding: const EdgeInsets.all(20), children: [
-              Text(_ko ? '근무 조가 바뀌었나요?' : 'Has your team changed?',
+              Text(context.l10n.teamEditChangedQuestion,
                   style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 16),
               Card(
@@ -180,9 +175,9 @@ class _TeamScheduleEditScreenState
               )),
               if (_showTeams) ...[
                 const SizedBox(height: 20),
-                Text(_ko
-                    ? '${widget.date.month}/${widget.date.day} 기준 각 조의 근무'
-                    : 'Team positions on ${widget.date.month}/${widget.date.day}'),
+                Text(context.l10n.teamEditPositionsOn(_ko
+                    ? '${widget.date.month}/${widget.date.day}'
+                    : DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(widget.date))),
                 const SizedBox(height: 12),
                 if (widget.teams.individual) ...[
                   for (final team in widget.teams.names)
@@ -212,15 +207,11 @@ class _TeamScheduleEditScreenState
                     keyPrefix: 'team-switch-slot',
                   ),
                 const SizedBox(height: 16),
-                Text(_ko
-                    ? '변경하실 조를 선택해주세요.'
-                    : 'Select the team you want to change to.'),
+                Text(context.l10n.teamEditChooseTeam),
                 if (_selected != null) ...[
                   const SizedBox(height: 12),
                   Text(
-                      _ko
-                          ? '현재 근무조 (${widget.teams.myTeam}조)에서 $_selected조로 근무스케줄을 변경합니다.'
-                          : 'Your work schedule will change from team ${widget.teams.myTeam} to team $_selected.',
+                      context.l10n.teamEditSwitchPreview(widget.teams.myTeam, _selected!),
                       style: const TextStyle(
                           color: Colors.indigo,
                           fontWeight: FontWeight.w600,

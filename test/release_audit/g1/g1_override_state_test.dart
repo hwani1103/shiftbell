@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/models/shift_schedule.dart';
 import 'package:shiftbell/services/database_service.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -44,6 +45,7 @@ void main() {
   });
 
   setUp(() async {
+    SharedPreferences.setMockInitialValues({});
     for (final t in ['alarm_overrides', 'alarms', 'shift_alarm_templates', 'shift_schedule', 'alarm_history', 'alarm_creation_log']) {
       await db.delete(t);
     }

@@ -60,7 +60,8 @@ class AlarmActivity : AppCompatActivity() {
     private val finishReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val targetAlarmId = intent.getIntExtra("alarmId", -1)
-            if (targetAlarmId == alarmId) {
+            if (targetAlarmId == alarmId &&
+                !RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) {
                 Log.d("AlarmActivity", "📡 종료 신호 수신 → Activity 종료")
                 finish()
             }
@@ -170,7 +171,8 @@ class AlarmActivity : AppCompatActivity() {
             timeoutAlarm()
         }
         
-        timeoutHandler?.postDelayed(timeoutRunnable!!, (alarmDuration * 60 * 1000).toLong())
+        val remaining = RingTimeoutController.remaining(RingingAlarmTracker.ActiveRing(alarmId, ringRound)) ?: return
+        timeoutHandler?.postDelayed(timeoutRunnable!!, remaining)
         
         Log.d("AlarmActivity", "⏱️ 타임아웃 타이머 시작: ${alarmDuration}분")
     }
@@ -428,6 +430,20 @@ private fun dismissAlarm() {
         // 아무 동작도 하지 않음
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) {
+            visibleRing = RingingAlarmTracker.ActiveRing(alarmId, ringRound)
+        }
+        InAppAlarmController.changed()
+    }
+
+    override fun onPause() {
+        if (visibleRing == RingingAlarmTracker.ActiveRing(alarmId, ringRound)) visibleRing = null
+        InAppAlarmController.changed()
+        super.onPause()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         if (quietCoverControls && !isIntentionalExit &&
@@ -436,6 +452,7 @@ private fun dismissAlarm() {
                 launchFullScreen = false)
         }
         if (visibleRing == RingingAlarmTracker.ActiveRing(alarmId, ringRound)) visibleRing = null
+        InAppAlarmController.changed()
         cancelTimeoutTimer()
         swipeHintAnimator?.cancel()
         swipeHintAnimator = null

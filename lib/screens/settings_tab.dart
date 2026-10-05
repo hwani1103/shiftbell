@@ -293,20 +293,33 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
     );
 
     if (confirm == true) {
-      await ref.read(scheduleProvider.notifier).resetSchedule();
+      final sharingStopSaved =
+          await ref.read(scheduleProvider.notifier).resetSchedule();
 
       // ⭐ 전체 교대조 근무표 데이터 초기화
       // ⭐ 2026-09-05 - 'all_teams_indices'는 어디서도 안 쓰는 죽은 키였음(실제
       // 저장 키는 all_teams_offsets) - 지워도 orphan으로 안 남게 실제 키로 교체.
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('all_teams_names');
-      await prefs.remove('all_teams_offsets');
-      await prefs.remove('all_teams_my_team');
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('all_teams_names');
+        await prefs.remove('all_teams_offsets');
+        await prefs.remove('all_teams_my_team');
+      } catch (_) {
+        // The authoritative roster was already cleared in the DB transaction.
+      }
 
       if (mounted) {
+        final messenger = ScaffoldMessenger.of(context);
+        final sharingWarning = context.l10n.settingsResetScheduleSharingFailed;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => OnboardingScreen()),
         );
+        if (!sharingStopSaved) {
+          messenger.showSnackBar(SnackBar(
+            content: Text(sharingWarning),
+            duration: const Duration(seconds: 8),
+          ));
+        }
       }
     }
   }
@@ -1304,9 +1317,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(!refreshCompleted
-              ? (Localizations.localeOf(context).languageCode == 'ko'
-                  ? '알람 갱신 완료를 확인하지 못했습니다. 다시 확인해 주세요.'
-                  : 'Alarm refresh could not be confirmed. Please check again.')
+              ? context.l10n.alarmRefreshUnconfirmed
               : skippedSlots.isNotEmpty
                   ? '${context.l10n.fixedAlarmSkippedByOneTap} '
                       '${skippedSlots.map((d) => '${d.month}/${d.day} '
@@ -1463,7 +1474,8 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                         : context.l10n.alarmSilent,
                 style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
                 children: [
-                  if (type.isSound)
+                  // Other locales already name vibration in the heading.
+                  if (type.isSound && context.usesKoreanFeatures)
                     TextSpan(
                       text: ' (${context.l10n.settingsIncludesVibration})',
                       style: TextStyle(
@@ -1988,6 +2000,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
       }).toList();
     }
 
+    if (!mounted) return;
     setState(() {
       _shiftAlarms = loadedAlarms;
       // ⭐ deep copy - _shiftAlarms의 각 List를 이후 수정해도(추가/삭제/변경)
@@ -2140,11 +2153,16 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
         padding: EdgeInsets.all(12.w),
         child: Column(
           children: [
-            Text(
-              shift,
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                shift,
+                maxLines: 1,
+                softWrap: false,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             SizedBox(height: 12.h),
@@ -2450,7 +2468,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                   children: [
                     Icon(Icons.add, size: 16.sp),
                     SizedBox(width: 4.w),
-                    Text(context.l10n.alarmAdd),
+                    Flexible(child: Text(context.l10n.alarmAdd, textAlign: TextAlign.center)),
                   ],
                 ),
               ),

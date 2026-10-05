@@ -112,7 +112,7 @@ class _MemoDetailSheetState extends State<_MemoDetailSheet> {
                   key: const ValueKey('memo-detail-editor'),
                   controller: _controller,
                   autofocus: true,
-                  minLines: 2,
+                  minLines: 1,
                   maxLines: 5,
                   // Editing is an interaction flag, not a comparison with the
                   // original text. Undoing back to the original still enables Save.

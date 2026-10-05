@@ -1,3 +1,4 @@
+import '../widgets/calendar_footer_actions.dart';
 import '../widgets/memo_detail_sheet.dart';
 import '../widgets/calendar_header_actions.dart';
 import '../widgets/semantics_table_boundary.dart';
@@ -104,30 +105,6 @@ DateTime? _lunarLabelDateForWeek(DateTime anyDayInWeek, BuildContext context) {
 // weekdayLabel(context, i)로 통일됨(사용부 참고) - 이 배열은 삭제. 아래
 // _weekdayEn3/_weekdayEn1은 "그 테마 디자인 자체가 항상 영어 약자로 보이는"
 // 의도적 스타일이라 로케일과 무관하게 그대로 둠.
-const List<String> _weekdayEn3 = [
-  'Sun',
-  'Mon',
-  'Tue',
-  'Wed',
-  'Thu',
-  'Fri',
-  'Sat'
-];
-const List<String> _weekdayEn1 = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-const List<String> _monthEn3 = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec'
-];
 
 // ⭐ 다이어리 테마(CalendarThemeId.diary) 전용 포인트 컬러 - 헤더 점 장식/오늘
 // 표시/빨간날 텍스트 등 이 테마 안 여러 곳에서 공유해서 씀(_themeDiaryCell,
@@ -336,7 +313,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
     // ⭐ 영어 현지화: '$year년'/'$month월' 조립은 로케일에 따라 표기가 달라져야 함
     final isKorean = Localizations.localeOf(context).languageCode == 'ko';
-    final monthFormat = DateFormat.MMM(isKorean ? 'ko' : 'en');
+    final monthFormat = DateFormat.MMM(Localizations.localeOf(context).toString());
 
     showDialog(
       context: context,
@@ -1729,7 +1706,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                         ? '${entry.fromShift} → ${entry.toShift} (${formatOvertimeMinutes(context, entry.impliedMinutes)})${hasManual ? ',' : ''}'
                                         : null;
                                     final manualLabel = hasManual
-                                        ? '+ OT ${formatOvertimeMinutes(context, entry.manualMinutes)}'
+                                        ? '+ ${context.l10n.shiftOt} ${formatOvertimeMinutes(context, entry.manualMinutes)}'
                                         : null;
 
                                     return Container(
@@ -1947,7 +1924,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                                   e.key, e.value))
                                           .join(', ');
                                       final otSuffix = s.otMinutes > 0
-                                          ? ', OT ${formatOvertimeMinutes(context, s.otMinutes)}'
+                                          ? ', ${context.l10n.shiftOt} ${formatOvertimeMinutes(context, s.otMinutes)}'
                                           : '';
 
                                       return Container(
@@ -2053,7 +2030,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'OT',
+                  context.l10n.shiftOt,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -2469,12 +2446,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     // 따라 표기가 달라져야 함 - materialCard/mainWhite/mainDark에서 사용.
     final isKorean = Localizations.localeOf(context).languageCode == 'ko';
     final shortMonthLabel =
-        DateFormat.MMM(isKorean ? 'ko' : 'en').format(_focusedDay);
+        DateFormat.MMM(Localizations.localeOf(context).toString()).format(_focusedDay);
     switch (theme) {
       case CalendarThemeId.minimal:
         return GestureDetector(
             onTap: _showMonthYearPicker,
-            child: Text('${_monthEn3[m - 1]} $y',
+            child: Text('${calendarMonthName(context, _focusedDay)} $y',
                 style: TextStyle(
                     fontSize: 17.sp,
                     fontWeight: FontWeight.w600,
@@ -2520,7 +2497,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         return GestureDetector(
           onTap: _showMonthYearPicker,
           child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Text(_monthEn3[m - 1].toUpperCase(),
+            Text(calendarMonthName(context, _focusedDay).toUpperCase(),
                 style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
@@ -2552,7 +2529,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               children: [
                 // ⭐ 2026-09-05 - "September"처럼 다 풀어 쓰면 공간이 부족해서 3글자
                 // 약어("Sep")로 - _monthEn3(minimal/underline과 공유).
-                Text(_monthEn3[m - 1],
+                Text(calendarMonthName(context, _focusedDay),
                     style: TextStyle(
                         fontSize: 22.sp,
                         fontWeight: FontWeight.w700,
@@ -2577,7 +2554,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             Text(
                 isKorean
                     ? '$y년 $m월'
-                    : DateFormat.yMMMM('en').format(_focusedDay),
+                    : DateFormat.yMMMM(Localizations.localeOf(context).toString()).format(_focusedDay),
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
             SizedBox(width: 4.w),
             Icon(Icons.arrow_drop_down,
@@ -2602,7 +2579,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 decoration:
                     BoxDecoration(color: _diaryAccent, shape: BoxShape.circle)),
             Text(
-              isKorean ? '$y년 $m월' : DateFormat.yMMMM('en').format(_focusedDay),
+              isKorean ? '$y년 $m월' : DateFormat.yMMMM(Localizations.localeOf(context).toString()).format(_focusedDay),
               style: TextStyle(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w500,
@@ -2940,7 +2917,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           // ⭐ 2026-09-01 - "요일(Mon/Tue) 글자색이 너무 연한 회색"이라는 지적으로
           // grey.shade500 → grey.shade700로 한 단계 더 진하게(materialCard 테마의
           // 요일 색과 동일한 톤).
-          child: Text(_weekdayEn3[i],
+          child: Text(calendarWeekdayLabel(context, i),
               style: TextStyle(
                   fontSize: 10.5.sp,
                   fontWeight: FontWeight.w600,
@@ -2958,7 +2935,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         return Container(
             color: const Color(0xFF37474F),
             alignment: Alignment.center,
-            child: Text(_weekdayEn3[i],
+            child: Text(calendarWeekdayLabel(context, i),
                 style: TextStyle(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.bold,
@@ -2974,7 +2951,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                         i == 0 ? Colors.red.shade400 : Colors.grey.shade500)));
       case CalendarThemeId.underline:
         return Center(
-            child: Text(_weekdayEn1[i],
+            child: Text(calendarWeekdayLabel(context, i, narrow: true),
                 style: TextStyle(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.w600,
@@ -2982,7 +2959,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                         i == 0 ? Colors.red.shade400 : Colors.grey.shade400)));
       case CalendarThemeId.eventChip:
         return Center(
-            child: Text(_weekdayEn3[i],
+            child: Text(calendarWeekdayLabel(context, i),
                 style: TextStyle(
                     fontSize: 10.sp,
                     fontWeight: FontWeight.bold,
@@ -2994,7 +2971,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               ? Colors.red.shade50
               : (i == 6 ? Colors.blue.shade50 : Colors.grey.shade100),
           alignment: Alignment.center,
-          child: Text(_weekdayEn3[i],
+          child: Text(calendarWeekdayLabel(context, i),
               style: TextStyle(
                   fontSize: 9.5.sp,
                   fontWeight: FontWeight.bold,
@@ -3105,25 +3082,19 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           horizontal: 12.w, vertical: (_isFoldCalendar ? 5 : 8).h),
       decoration: BoxDecoration(
           color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8.r)),
-      child: Row(
-        children: [
+      child: CalendarFooterActions(
+        onMonthly: () => _showMonthlyOvertimeSheet(summary.period),
+        onWeekly: _showWeeklyWorkHoursSheet,
+        monthly: Row(children: [
           Icon(Icons.access_time, size: 13.sp, color: primary.withOpacity(0.6)),
           SizedBox(width: 5.w),
-          GestureDetector(
-            onTap: () => _showMonthlyOvertimeSheet(summary.period),
-            child: Text('${context.l10n.shiftThisMonthOt} $otText',
-                style: TextStyle(fontSize: 11.sp, color: Colors.black87)),
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: _showWeeklyWorkHoursSheet,
-            child: Text('${context.l10n.shiftWeeklyWorkHours} ›',
-                style: TextStyle(
-                    fontSize: 11.sp,
-                    color: primary,
-                    fontWeight: FontWeight.w600)),
-          ),
-        ],
+          Flexible(child: Text('${context.l10n.shiftThisMonthOt} $otText',
+              style: TextStyle(fontSize: 11.sp, color: Colors.black87))),
+        ]),
+        weekly: Text('${context.l10n.shiftWeeklyWorkHours} ›',
+            textAlign: TextAlign.right,
+            style: TextStyle(fontSize: 11.sp, color: primary,
+                fontWeight: FontWeight.w600)),
       ),
     );
   }
@@ -3197,26 +3168,16 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       color: const Color(0xFFECEFF1),
       padding: EdgeInsets.symmetric(
           horizontal: 14.w, vertical: (_isFoldCalendar ? 5 : 8).h),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => _showMonthlyOvertimeSheet(summary.period),
-            child: Text('${context.l10n.shiftThisMonthOt} $otText',
-                style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF263238))),
-          ),
-          SizedBox(width: 14.w),
-          GestureDetector(
-            onTap: _showWeeklyWorkHoursSheet,
-            child: Text('${context.l10n.shiftWeeklyWorkHours} ▸',
-                style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF00695C))),
-          ),
-        ],
+      child: CalendarFooterActions(
+        onMonthly: () => _showMonthlyOvertimeSheet(summary.period),
+        onWeekly: _showWeeklyWorkHoursSheet,
+        monthly: Text('${context.l10n.shiftThisMonthOt} $otText',
+            style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold,
+                color: const Color(0xFF263238))),
+        weekly: Text('${context.l10n.shiftWeeklyWorkHours} ▸',
+            textAlign: TextAlign.right,
+            style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold,
+                color: const Color(0xFF00695C))),
       ),
     );
   }
@@ -6222,7 +6183,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         ? await CustomAlarmService.instance.previewFixedReplacement(alarm.date!)
         : null;
     if (!mounted) return;
-    final ko = Localizations.localeOf(context).languageCode == 'ko';
     showDialog(
       context: context,
       builder: (context) {
@@ -6233,7 +6193,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           ),
           content: Text(
             '${context.l10n.calendarDeleteAlarmConfirm(alarm.time)}'
-            '${(alarm.type == 'custom' || alarm.presetSlot != null) ? (replacement == null ? (ko ? '\n삭제하면 이 시각에 알람이 남지 않습니다.' : '\nNo alarm will remain at this time.') : (ko ? '\n삭제 후 ${replacement.shiftType} 고정 알람을 다시 예약합니다.' : '\nThe ${replacement.shiftType} fixed alarm will be scheduled after deletion.')) : ''}',
+            '${(alarm.type == 'custom' || alarm.presetSlot != null) ? '\n${replacement == null ? context.l10n.oneTapDeleteNoAlarmDetail : context.l10n.oneTapDeleteRestoreDetail(replacement.shiftType)}' : ''}',
             style: TextStyle(fontSize: 14.sp),
           ),
           actions: [
@@ -6302,13 +6262,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(deletion.reservationFailed
-              ? (Localizations.localeOf(context).languageCode == 'ko'
-                  ? '원터치 알람은 삭제됐지만 고정 알람 예약에 실패했습니다. 다시 갱신합니다.'
-                  : 'One-tap alarm deleted, but fixed alarm scheduling failed. Refresh will retry.')
+              ? context.l10n.oneTapDeletedRefreshRetry
               : deletion.fixedReplacement
-                  ? (Localizations.localeOf(context).languageCode == 'ko'
-                      ? '원터치 알람을 삭제하고 고정 알람을 예약했습니다.'
-                      : 'One-tap alarm deleted and fixed alarm scheduled.')
+                  ? context.l10n.oneTapDeletedFixedRestored
                   : context.l10n.alarmDeletedToast),
           behavior: SnackBarBehavior.floating,
           shape:

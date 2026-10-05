@@ -29,6 +29,20 @@ void main() {
         'WWWWWWWWWW');
   });
 
+  test('Latin shift names wrap only between words, even in narrow cells', () {
+    const style = TextStyle(fontSize: 13);
+    for (final scale in [1.0, 1.3]) {
+      for (final name in ['Folga', 'Férias', 'Nachtschicht', 'WWWWWWWWWWWWWWWW']) {
+        expect(wrapShiftLabel(name, 24, style, TextScaler.linear(scale)), name);
+      }
+      for (final name in ['Turno da noite', 'Morning Support', 'Langer Frühdienst']) {
+        final wrapped = wrapShiftLabel(name, 24, style, TextScaler.linear(scale));
+        expect(wrapped.replaceAll('\n', ' '), name);
+        expect(wrapped.split('\n').length, 2);
+      }
+    }
+  });
+
   for (final locale in [const Locale('ko'), const Locale('en')]) {
     for (final size in [
       const Size(320, 568),

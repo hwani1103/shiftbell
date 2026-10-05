@@ -154,6 +154,9 @@ Future<CalendarThemeId> _initializeApp() async {
   await initializeDateFormatting('ko_KR', null);
   await initializeDateFormatting('en_US', null);
   await initializeDateFormatting('en_GB', null);
+  await initializeDateFormatting('de_DE', null);
+  await initializeDateFormatting('pt_BR', null);
+  await initializeDateFormatting('hi_IN', null);
   // DB 열기 + 마이그레이션(#1/#8 - 실패를 삼키지 않음). 실패 후 다시 부르면 새로 시도함.
   await DatabaseService.instance.database;
   await AlarmService().initialize();
@@ -361,7 +364,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
-                supportedLocales: const [Locale('ko'), Locale('en', 'US'), Locale('en', 'GB')],
+                supportedLocales: const [Locale('ko'), Locale('en', 'US'), Locale('en', 'GB'), Locale('de', 'DE'), Locale('pt', 'BR'), Locale('hi', 'IN')],
                 localeListResolutionCallback: resolveReleaseLocale,
                 theme: AppTheme.lightTheme,
                 // 모든 화면에 최대 너비 제한 적용

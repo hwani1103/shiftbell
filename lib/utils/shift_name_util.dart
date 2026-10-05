@@ -9,6 +9,7 @@
 // 흔히 쓰이는 표현들은 커버함. (교대시계_영어화_현지화_보고서_영문판.md 참고)
 bool isRestShiftName(String name) {
   if (name.contains('휴')) return true;
-  return RegExp(r'\b(off|rest|holiday|leave|vacation|pto)\b', caseSensitive: false)
+  if (name.trim() == 'छुट्टी' || name.trim() == 'अवकाश') return true;
+  return RegExp(r'\b(off|rest|holiday|leave|vacation|pto|frei|urlaub|folga|férias|ferias)\b', caseSensitive: false)
       .hasMatch(name);
 }

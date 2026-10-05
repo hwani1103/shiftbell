@@ -112,4 +112,26 @@ void main() {
     await t.pumpAndSettle();
     expect(t.takeException(), isNull);
   });
+
+  testWidgets('editor grows for a second line and shrinks back to one',
+      (t) async {
+    await open(t, save: (_) async {}, delete: () async {});
+    await t.tap(content);
+    await t.pumpAndSettle();
+    final editable = find.byType(EditableText);
+    final oneLineHeight = t.getSize(editable).height;
+    expect(enabled(t, save), isFalse);
+
+    await t.enterText(editor, 'first line\nsecond line');
+    await t.pumpAndSettle();
+    expect(t.getSize(editable).height, greaterThan(oneLineHeight));
+    expect(enabled(t, save), isTrue);
+
+    await t.enterText(editor, 'one line again');
+    await t.pumpAndSettle();
+    expect(t.getSize(editable).height, closeTo(oneLineHeight, 0.01));
+    expect(t.testTextInput.isVisible, isTrue);
+    expect(enabled(t, delete), isTrue);
+    expect(t.takeException(), isNull);
+  });
 }

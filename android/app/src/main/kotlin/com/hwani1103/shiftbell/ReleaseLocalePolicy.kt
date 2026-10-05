@@ -19,9 +19,11 @@ object ReleaseLocalePolicy {
         "DK", "EE", "ES", "FI", "FR", "GR", "HR", "HU", "IS", "IT", "LI",
         "LT", "LU", "LV", "MC", "NL", "NO", "PL", "RO", "RS", "SE", "SI", "SK"
     )
-    fun firstDayOfWeek(context: Context): Int =
-        if (!koreanFeatures(context) && locale(context).country in mondayRegions)
-            Calendar.MONDAY else Calendar.SUNDAY
+    fun firstDayOfWeek(context: Context): Int = when (locale(context).language) {
+        "de" -> Calendar.MONDAY
+        "pt", "ko", "hi" -> Calendar.SUNDAY
+        else -> if (locale(context).country in mondayRegions) Calendar.MONDAY else Calendar.SUNDAY
+    }
 
     fun isCalendarRedDay(context: Context, day: Calendar,
         overrides: CalendarWidgetHolidays.Overrides = CalendarWidgetHolidays.Overrides.EMPTY): Boolean =
@@ -29,6 +31,9 @@ object ReleaseLocalePolicy {
             (koreanFeatures(context) && CalendarWidgetHolidays.isHoliday(day, overrides))
 
     fun syncSleepWidget(context: Context) {
+        // Manifest enabled cannot vary by locale. Keep the shipped enabled
+        // default so updating Korean installs does not disable their widgets.
+        // Hide it outside Korean on app resume, locale change/package replacement.
         val manager = context.packageManager
         val component = ComponentName(context, SleepWidgetProvider::class.java)
         val target = if (koreanFeatures(context)) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
