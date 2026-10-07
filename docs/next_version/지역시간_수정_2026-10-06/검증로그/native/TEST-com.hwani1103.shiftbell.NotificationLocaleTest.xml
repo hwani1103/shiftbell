@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.hwani1103.shiftbell.NotificationLocaleTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-05T23:36:16" hostname="TZJIRTGG0A8S7A6" time="0.41">
+  <properties/>
+  <testcase name="ring refresh preserves its round and cannot revive dismissed or ended controls" classname="com.hwani1103.shiftbell.NotificationLocaleTest" time="0.153"/>
+  <testcase name="locale refresh does not create channels or notifications or unblock an existing channel" classname="com.hwani1103.shiftbell.NotificationLocaleTest" time="0.11"/>
+  <testcase name="four notification kinds translate while preserving user content and intents" classname="com.hwani1103.shiftbell.NotificationLocaleTest" time="0.147"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

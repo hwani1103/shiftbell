@@ -1,0 +1,106 @@
+{
+  "baseline_commit": "080ca5913dbe9787c15fa7d60baca95b805075ed",
+  "applied_commit": null,
+  "date": "2026-10-05",
+  "counts": {
+    "en": {
+      "유지": 715,
+      "수정": 21
+    },
+    "pt": {
+      "유지": 722,
+      "수정": 14
+    },
+    "de": {
+      "유지": 722,
+      "수정": 14
+    },
+    "hi": {
+      "유지": 717,
+      "수정": 19
+    }
+  },
+  "resource_checks": {
+    "errors": [],
+    "languages": {
+      "en": {
+        "arb_messages": 681,
+        "android_strings": 48,
+        "android_weekday_items": 7,
+        "same_as_english_for_manual_review": []
+      },
+      "pt": {
+        "arb_messages": 681,
+        "android_strings": 48,
+        "android_weekday_items": 7,
+        "same_as_english_for_manual_review": [
+          "commonAm",
+          "splashTitle",
+          "alarmVolume",
+          "commonPrevious",
+          "onboardingSwitchToIrregularSuffix",
+          "commonPm",
+          "appTitle",
+          "alarmDurationMinutes",
+          "themeLabPreviewSheetTitle",
+          "calendarOtTotal",
+          "commonOk"
+        ]
+      },
+      "de": {
+        "arb_messages": 681,
+        "android_strings": 48,
+        "android_weekday_items": 7,
+        "same_as_english_for_manual_review": [
+          "commonAm",
+          "splashTitle",
+          "scheduleContentFieldLabel",
+          "onboardingSwitchToIrregularSuffix",
+          "commonPm",
+          "appTitle",
+          "themeLabPreviewSheetTitle",
+          "shiftTeam",
+          "alarmVibration",
+          "commonOk"
+        ]
+      },
+      "hi": {
+        "arb_messages": 681,
+        "android_strings": 48,
+        "android_weekday_items": 7,
+        "same_as_english_for_manual_review": [
+          "commonAm",
+          "splashTitle",
+          "commonPm",
+          "appTitle",
+          "themeLabPreviewSheetTitle"
+        ]
+      }
+    },
+    "limits": "Structure only. ICU generation, semantic review and device layout review are separate."
+  },
+  "native_tests": {
+    "name": "com.hwani1103.shiftbell.ReleaseLanguagesTest",
+    "tests": "4",
+    "skipped": "0",
+    "failures": "0",
+    "errors": "0",
+    "timestamp": "2026-10-05T06:11:54",
+    "hostname": "TZJIRTGG0A8S7A6",
+    "time": "7.552"
+  },
+  "sha256": {
+    "lib/l10n/app_ko.arb": "2bf3f46287ea60ce38246768304598bb6512db09c1d7e1f8aad7f176a77cf067",
+    "lib/l10n/app_en.arb": "755cbd9b19c2591df37e17293ebc4a03723a5a51ba1167374b2b1ec4b489e6ba",
+    "lib/l10n/app_pt.arb": "ff6dcb576c3350140d8d91caeba19e3839a7dc0a438166181bb15a8d5782c2c4",
+    "lib/l10n/app_de.arb": "df9031f4c2ec3b094b0eeeee6dd0b42f137bc10ac34c43fd50b00f331fc805c6",
+    "lib/l10n/app_hi.arb": "98ae90bb250cdfe7cec51427ac354dd1ce0be1ce1097f4e388f628a1bb3aff2c",
+    "android/app/src/main/res/values/strings.xml": "965320912befff4543a8994ef7a5f24a340d349b58e8ceb8bd119aac326b7833",
+    "android/app/src/main/res/values-ko/strings.xml": "76edb19c74e118f69c07b350901325acf850ab618aa145da30386dae6cbddb0e",
+    "android/app/src/main/res/values-pt/strings.xml": "30aafeb1f9012822ea6cfa50d37502b7a0256e0bf5bdc7e483e9c776359bffdd",
+    "android/app/src/main/res/values-de/strings.xml": "330b9345bd7990f9ed5686a4bc85926b567669b1d24f593219fd0cc8dd082b41",
+    "android/app/src/main/res/values-hi/strings.xml": "72ea77d7019343fcbf857b791d3c7fc7a80881dd446c39aec71548511424270f",
+    "lib/widgets/schedule_change_dialog.dart": "1a8d34c023bf6e93e880a70f583d3b472421b67e09a4894c765799eba00a2151",
+    "tools/audit_l10n_resources.py": "bb3774d6b0decb64d728b642b829decb3560ef2aa0275476829a4c128a614d60"
+  }
+}

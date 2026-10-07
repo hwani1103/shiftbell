@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.hwani1103.shiftbell.EnglishReleaseTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-05T23:35:47" hostname="TZJIRTGG0A8S7A6" time="0.554">
+  <properties/>
+  <testcase name="weekdayOrderAndRemovedFeaturesFollowTheAppLocale" classname="com.hwani1103.shiftbell.EnglishReleaseTest" time="0.554"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

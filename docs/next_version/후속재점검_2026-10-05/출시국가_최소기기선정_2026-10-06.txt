@@ -1,0 +1,153 @@
+ShiftBell 해외 출시국가의 최소 제조사/OS 검증 대상 — 2026-10-06
+
+후속 실행 계획: 제조사별_핵심기능_최종테스트계획_2026-10-06.txt.
+사용자 요청에 따라 레이아웃을 제외하고 과거 결과를 대조한 실제 남은 기능/제조사 우선순위/유료 합산 시간은 위 후속 계획을 따른다. 이 문서의 6계열은 모두 신규 전체검사를 반복하라는 뜻이 아니다.
+
+대상: 미국, 영국, 남아공, 필리핀, UAE, 독일, 브라질, 인도. 삼성은 사용자 실기기 검증 완료 전제다. Huawei의 별도 앱스토어 환경은 기존 요청대로 이번 선정에서 제외한다.
+
+추천 결론
+기본 4계열: Xiaomi, vivo, OPPO, Motorola.
+현재 목표 8개국에서 눈에 띄는 미검증 OS를 함께 줄이려면 HONOR와 Infinix를 추가하여 삼성 제외 총6계열, 각 대표 기기 1대가 최소 권장 묶음이다.
+이는 무조건 지켜야 할 출시 허가 조건이 아니라 점유율과 알람 동작의 OS 차이에 따른 검증 우선순위 제안이다. 4계열만 먼저 검사하면 남아공 HONOR 및 필리핀 Infinix의 별도 환경은 남는다. 네 계열만으로 모든 주요 환경을 대표한다고 기록하지 않는다.
+브랜드마다 여러 모델을 모두 검사하는 목록에서 Xiaomi/Redmi/POCO를 묶고 realme/OnePlus/Pixel 독립 검증을 후순위로 내려 중복을 줄인 것이다. 최소 숫자를 맞추려고 별개의 OS를 같은 것으로 취급하지 않는다.
+
+선정 방법
+- 2026년9월 Statcounter mobile vendor 자료의 전체 모바일 웹 사용 비중을 8개국에서 확인했다.
+- 한 목표 국가에서 약5% 이상인 제조사를 우선 후보로 본 뒤 OS 계열 중복/알람·백그라운드·잠금화면 차이/기존 실측 이력을 고려했다. 수학적으로 유일한 최소해나 사용자 수 커버리지 계산이 아니다.
+- Statcounter는 웹 페이지뷰 표본이다. 출하량/설치 기기 대수/Android만의 점유율/ShiftBell 잠재 사용자 수와 구별한다. Unknown 및 표시되지 않은 하위 브랜드가 있고 최근 월 수치는 수정될 수 있다. Android 점유율로 다시 나누어 95% 커버리지 등의 수치를 만들지 않았다.
+- OS 묶음은 검사 우선순위를 정하기 위한 엔지니어링 판단이다. 서로 다른 브랜드/버전의 PASS를 자동 이월하지 않는다.
+
+최소6계열과 현재 검사 수단
+1. Xiaomi / Redmi / POCO — HyperOS 및 기존 MIUI
+   대표 중요도: 독일21.40%, 브라질14.29%, UAE15.23%, 인도14.76%, 필리핀10.56%.
+   추가 창 열기/백그라운드/전체화면의 실제 제조사 설정이 이번 기능의 직접 동기다.
+   현재 스트리밍 후보 Xiaomi14 houji/35. 먼저 최신 APK로 네 권한/복귀/잠금 알람을 집중 재검증한다.
+   같은 HyperOS 세대와 지역 ROM에서 Redmi/POCO 브랜드만 바꾸는 검사는 후순위. Android 버전, MIUI→HyperOS 변경, Global/인도/EEA/중국 ROM, 저RAM/절전 정책 차이는 별도 가치가 있으므로 전부 동일하다고 말하지 않는다.
+
+2. vivo / iQOO — 기기에 따라 Funtouch OS / OriginOS
+   인도21.25%, 필리핀10.13%, UAE6.81%.
+   OPPO와 다른 제조사 환경으로 유지한다. 그룹 출신/외형 유사만으로 OPPO 결과를 이월하지 않는다.
+   Google 공식 문서는 vivo Partner Lab을 지원 대상으로 명시하지만 현재 프로젝트/CLI/공개 카탈로그에는 선택 가능한 vivo가 없다. 유료 연결 가능 모델로 확정할 수 없다.
+   확보한다면 출시국용 Google Play/GMS 포함 Global 또는 인도판으로 확인한다. 중국 ROM의 성공을 이 기기들의 성공으로 기록하지 않는다. 대여/협력 테스터의 실기기 + ADB 또는 실제 선택 가능한 제조사 클라우드가 대안이며 후자의 계정/ADB 가능 여부는 별도 확인이 필요하다.
+   OriginOS는 2025년10월 글로벌 발표되었으므로 'vivo 해외판은 전부 Funtouch'라고 고정하지 않는다.
+
+3. OPPO — ColorOS
+   인도15.06%, 필리핀12.93%, UAE7.01%.
+   현재 A38 OP5759L1/34, A79 5G OP573DL1/34 스트리밍 후보.
+   OPPO를 먼저 보고 관련 계열 realme 일반 UI / OnePlus는 후순위로 둔다. OnePlus 공식 과거 안내는 OxygenOS/ColorOS 코드베이스 통합을 설명한다. UI/절전/지역/버전까지 같다는 뜻은 아니다.
+   realme C53은 공식 출시 스펙상 realme UI T Edition이며, 일반 realme UI나 ColorOS와 완전히 같은 환경이라고 가정하지 않는다. 현재 스트리밍 /35 실제 이미지의 OS 성격은 연결 후 확인해야 한다. 인도에서 realme8.87%이므로 여유가 생기면 저가형 T/S/Go 계열을 다음 표본으로 추가할 가치가 있다.
+
+4. Motorola — Motorola Android 환경
+   브라질16.08%, 인도6.50%, 미국3.49%, 영국3.37%.
+   브라질을 위해 대표 한 대를 유지한다. Android 표준 경로 성격이 강하더라도 Motorola 잠금 표시/알림/절전 차이까지 Pixel이 검증했다고 간주하지 않는다.
+   현재 moto g05 lamul/35, moto g34 5G fogos/34 등. 권한4개 목적에는 Android14+를 선택한다.
+
+5. Infinix — XOS
+   필리핀10.64%. 필리핀을 실제 출시 대상에 포함하므로 빠뜨리기 아까운 별도 환경이다.
+   스트리밍 NOTE50 Pro+ transsion_lab_infinix-x6856/35가 목록에 있다. Partner Lab 조건/실제 예약 성공/지역 ROM은 연결 때 확인한다.
+   SMART8 /33도 있지만 API34+ 전체화면 권한 UI까지 검사하려는 이번 목적에는 /35를 우선한다.
+   TECNO/itel은 같은 Transsion 기업 계열이지만 TECNO HiOS와 Infinix XOS가 동일하다고 증명된 것은 아니다. 첫 묶음에서는 목표국 비중이 직접 확인된 Infinix를 대표로 선택하고 TECNO는 후순위로 둔다. 대체 PASS로 기록하지 않는다.
+
+6. HONOR — MagicOS
+   남아공8.80%, UAE5.03%. Huawei 제외 조건으로 HONOR까지 자동 제외하지 않는다. 국제 HONOR의 GMS/Google Play 지원은 공식 자료에서 확인했다.
+   log-it Partner Device Labs에 HONOR Lab은 표시되지만 현재 읽은 CLI에서 구체적 예약 모델은 미확인. 활성화/모델 노출/예약은 실행하지 않았다. 연결 가능한 Global/GMS 모델을 확인하거나 대여 기기로 검증한다.
+
+독립 검사 후순위/생략 이유
+- Redmi/POCO: 동일 HyperOS 계열을 우선 대표. 모델/ROM 차이 확인 후 추가한다.
+- realme/OnePlus: OPPO 우선 검사 후 별도 예외가 있을 때 추가. realme T/S/Go 버전은 일반 UI와 구별한다.
+- Pixel: 미국3.16%, 영국3.81%, 독일1.46%의 의미는 있지만 제한된 최초 제조사 검증 묶음에서는 후순위. Android 표준 동작 기준/API 새 버전 검증용으로 유용하다. Motorola와 100% 동일하다고 설명하지 않는다. Google 공식 권한의 공통 코드/기존 Pixel 실측/이번 호스트 검사를 활용하고, Pixel 기기 결과는 해당 APK/OS만의 기록으로 남긴다.
+- TECNO/itel: 기업 계열로 Infinix 우선 표본을 선택한 것이며 별도 OS 차이를 제거한 것은 아니다.
+- Sony/ASUS/Nothing 등: 이번8개국의 먼저 읽은 주요 브랜드/표시상위 자료에서 핵심 묶음보다 우선할 근거가 약하다. 실제 설치자/Crashlytics 기기 분포가 나오면 추가한다. 브랜드 전부의 점유율을 정확히0으로 계산하지 않는다.
+
+기존 검사 이력을 활용한 추가 작업 순서
+- 아래6계열은 처음부터 모두 다시 검사하라는 목록이 아니다. 이미 검사한 기본 기능은 해당 APK/OS의 기존 증거를 유지하고, 변경된 P0 기능과 미검증 조건만 후속으로 검사한다.
+- 최신 권한 APK 재검증: Xiaomi 최우선.
+- 새 제조사 환경 확보: vivo → Infinix → HONOR.
+- 이전 Motorola/OPPO/Pixel의 기기 경험은 경로 조사 시간 절약에 활용하되 현재 APK의 권한4개 실기기 PASS로 자동 이월하지 않는다.
+- 전체 대표 묶음 후에는 OS 이름·Android API·지역 ROM·저RAM 대표 여부로 남은 차이를 찾는다. 같은 브랜드 기기를 여러 대 반복하는 것보다 다른 주요 OS와 새 Android API의 추가 표본이 우선이다.
+
+이미 실기기 검증한 목록 — 중복 전체검사 제외
+기록 근거: 교대시계_최신문서.txt의 W~AB, AD, AF, AG, AH, AJ절. 기존 결과를 최신 APK의 전체 PASS로 바꿔 기록하지 않는다.
+
+삼성
+- 사용자 연결 실기기에서 보강 기능까지 테스트 OK 보고. 기존 문서에도 S26, Fold8, Flip8, Flip4 계열의 레이아웃/대표 기능 실측 기록이 있다. 모든 삼성 모델에서 모든 기능을 검사했다는 뜻은 아니다.
+- 이번 최소 제조사 선정에서는 삼성 기본 기능 전체검사를 추가하지 않는다.
+
+Xiaomi 14 / 23127PN0CG / Android15
+- 보강 APK로 자연 자정 롤링 갱신·예외 유지·DB/OS 예약 정합성 확인.
+- 알림/오버레이 동시 거부 자동 종료, 앱 진입 제어 카드의 끄기/+5분 및 자연 재울림, 울림 중 시계 변경에도 독립 종료 확인.
+- 추가 제조사 권한을 실제 UI에서 허용한 뒤 PIN 잠금 전체화면 AlarmActivity 표시 확인. 오버레이 X 종료 확인.
+- 남은 항목: 새 네 권한 온보딩/제조사 설정 진입/복귀 재검사, 추가 권한 허용 후 잠금 전체화면의 Dismiss/+5분 실제 조작. 기존 잠금 Dismiss 시도는 종료 증거가 없어 미검증이며 실패 확정은 아니다.
+- 기본 달력/자정/자동 종료/앱 내 제어 전체를 처음부터 반복하는 대신, 현재 변경과 연결된 권한·잠금 제어에 시간을 집중한다.
+
+Motorola moto g34 5G / Android14
+- 영어 달력/다음 알람/오버레이 표시, 자연 자정 갱신·예외 보존·예약 정합성, 오버레이 거부 시 자동 종료 확인.
+- 알림 +5분 실제 탭과 자연 재울림, PIN 잠금 전체화면 및 실제 Dismiss 종료 확인.
+- 동시 두 권한 거부 시험은 fixture 저장 실패로 무효. 오버레이 자체 끄기 탭·재부팅·장시간 Doze·위젯은 미검증.
+- 당시 APK에는 후속 독립 종료/앱 내부 제어가 없었다. 기본 기능 전체검사는 중복 제외하고, 새 후보 P0 변경 검증이 필요할 때 변경 항목만 선정한다.
+
+OPPO A38 / CPH2579 / Android14
+- 영어 달력/다음 알람/홈 위젯, 자연 자정 갱신·예외 보존·예약 정합성 확인.
+- 알림 +5분→자연 재울림→오버레이 X 종료, PIN 잠금 전체화면 Dismiss 종료 확인.
+- 알림/오버레이 동시 거부 1분 자동 종료 확인. 실제 재부팅 복원/장시간 절전은 미검증.
+- 당시 APK에는 후속 보강이 없었다. 기본 기능 전체검사는 중복 제외한다.
+
+Google Pixel 8a / Android15
+- OPPO와 같은 범위의 자정 갱신/알람/스누즈 재울림/오버레이 끄기/잠금 Dismiss/두 권한 거부 자동 종료/영어 위젯 확인.
+- 별도 후속 짧은 연결에서 일반 앱 UID로 개별 전체화면 알림 설정 화면에 진입하는 표준 Intent 경로 확인. 실제 ShiftBell 새 온보딩 버튼의 PASS는 아니다.
+- 재부팅 복원/장시간 절전 및 최신 네 권한 UI의 실기기 검증은 미검증. 기본 기능 전체검사는 중복 제외한다.
+
+이 기록의 공통 한계
+- 클라우드 기기의 소리/진동은 MediaPlayer 재생과 진동 API 등 로그로 확인했다. 물리 스피커 청취·진동 촉감 검증으로 기록하지 않는다.
+- Motorola/OPPO/Pixel의 과거 준비 과정에는 ADB로 FSI를 허용한 조건이 있어 소비자 최초 설치 기본 허용의 근거로 쓰지 않는다.
+- 최신 네 권한 APK는 이번 무료 예약 실패로 실기기 NOT_RUN이다. 정적/호스트 검사를 실기기 PASS로 기록하지 않는다.
+- 위 미검증 항목은 재시험이 아니라 아직 확보하지 못한 증거다. P0 회귀기준과 최종 코드 차이에 따라 필요한 범위만 계획한다.
+
+새로 검증할 제조사
+- vivo: 연결 시도만 했으며 예약/앱 실기기 테스트는 없음. 우선순위1.
+- Infinix: 카탈로그 확인만 했으며 앱 실기기 테스트는 없음. 필리핀 보완 우선순위2.
+- HONOR: Lab 표시 확인만 했으며 앱 실기기 테스트는 없음. 남아공/UAE 보완 우선순위3.
+- realme/OnePlus/Redmi/POCO/TECNO: 별도 실기기 PASS 없음. 이번 최소 묶음에서는 후순위이며 관련 계열 결과를 해당 브랜드의 PASS로 표기하지 않는다.
+
+추가 작업의 실제 최소 묶음
+1) Xiaomi14: 새 권한 흐름과 남은 잠금화면 제어 집중 재검증.
+2) vivo: 새 제조사 기본 기능 검증.
+3) 필요 예산/접근 확보 시 Infinix, HONOR 각각 대표1대 신규 검증.
+4) 기존 Moto/OPPO/Pixel: 전체30분 기본검사 재실행 제외. 최종 후보에 영향을 주는 미검증 P0 변경은 대표 기기에서 필요한 항목만 확인한다.
+
+각 대표 기기 공통 최소 항목
+권한별 초기 상태/개별 설정 진입/미변경·허용 후 복귀/외부 취소/알람 채널 차단, 잠금 실제 울림과 표시, 끄기, 5분 후 및 재울림, native 자동 종료, 앱 내부 알람 제어, 백그라운드 재등록.
+설정 UI와 실제 기능을 따로 판정한다. 설치/빌드/호스트 검사는 실제 잠금 알람 PASS가 아니다. 저전력 장시간/재부팅/제조사 절전·자동시작은 짧은 스트리밍 검사로 모두 보장하지 않는다.
+에뮬레이터/기기 이름 변경은 해당 제조사 firmware 정책 재현 수단이 아니다. 실제 OEM firmware인 원격 실기기, 대여 실기기, 실제 사용자의 테스트 기기를 사용한다.
+
+2026년9월 국가별 원자료 요약(전체 모바일 웹 사용 %, 표시 상위6)
+US: Apple53.58 Samsung28.11 Xiaomi5.89 Motorola3.49 Google3.16 Unknown2.10
+UK: Apple46.87 Samsung35.06 Xiaomi4.10 Google3.81 Motorola3.37 Unknown1.49
+DE: Samsung39.34 Apple27.63 Xiaomi21.40 Unknown3.96 Huawei1.54 Google1.46
+BR: Samsung29.30 Apple21.21 Motorola16.08 Unknown15.53 Xiaomi14.29 OPPO1.05
+IN: vivo21.25 OPPO15.06 Xiaomi14.76 Samsung12.38 realme8.87 Motorola6.50
+PH: Apple13.47 OPPO12.93 Samsung12.03 Infinix10.64 Xiaomi10.56 vivo10.13
+ZA: Samsung49.75 Apple18.57 HONOR8.80 Huawei8.04 Xiaomi3.85 OPPO2.88
+UAE: Apple26.68 Samsung23.06 Xiaomi15.23 OPPO7.01 vivo6.81 HONOR5.03
+
+참조(모두2026-10-06 조회)
+https://gs.statcounter.com/vendor-market-share/mobile/united-states-of-america
+https://gs.statcounter.com/vendor-market-share/mobile/united-kingdom
+https://gs.statcounter.com/vendor-market-share/mobile/germany
+https://gs.statcounter.com/vendor-market-share/mobile/brazil
+https://gs.statcounter.com/vendor-market-share/mobile/india
+https://gs.statcounter.com/vendor-market-share/mobile/philippines
+https://gs.statcounter.com/vendor-market-share/mobile/south-africa
+https://gs.statcounter.com/vendor-market-share/mobile/united-arab-emirates
+https://gs.statcounter.com/faq (표본/페이지뷰/수정 가능성)
+https://www.mi.com/global/hyperos (Global Xiaomi/Redmi/POCO, 모델/지역별 차이)
+https://community.oneplus.com/thread/1499131 (OnePlus 경영진 코드베이스 통합 안내)
+https://www.realme.com/global/realme-c53/specs (realme UI T Edition 출시 스펙)
+https://www.vivo.com/cl/about-vivo/news/mundial (OriginOS 글로벌 발표)
+https://www.honor.com/fr/honor-gms/ (국제 GMS/Google Play)
+https://www.infinixmobility.com/note-50 (XOS 제품 환경)
+https://developer.android.com/studio/run/android-device-streaming (vivo 포함 공식 Partner Labs 안내)
+https://docs.cloud.google.com/developer-device-platform/device-catalog
+현재 프로젝트 CLI 원시 목록: build/permission_recheck_2026-10-06/streaming_models_log-it.txt
+Partner Labs 실제 페이지: https://console.cloud.google.com/omnilab/partner-lab?project=log-it-3d269
+무료 재시도/코드·호스트 결과: 권한검토_무료연결시도_2026-10-06.txt

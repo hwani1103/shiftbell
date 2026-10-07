@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-06",
+  "scope": "research and verification only; no production edit",
+  "dart_existing_functional": {
+    "dst": 12,
+    "holiday": 5,
+    "clock_format_non_layout": 5
+  },
+  "research_probes": {
+    "count": 4,
+    "wall_clock_cases": 15,
+    "regional_configurations": 12,
+    "web_locales": 4,
+    "dst_summary_boundaries": 6,
+    "meaning": "PASS means observed behavior reproduced; includes two confirmed product defects, not acceptance PASS"
+  },
+  "native": {
+    "AlarmDstTest": 3,
+    "AlarmSnoozeDstTest": 8
+  },
+  "new_findings": [
+    "C01 public web weekday English and Sunday forcing",
+    "C02 DST date traversal omission/duplication",
+    "C03 regional defaults collapse"
+  ],
+  "prior_source_hash_differences": [],
+  "layout": "NOT_RUN user excluded",
+  "device": "NOT_RUN",
+  "live_firebase": "NOT_RUN",
+  "build": "No new app build; focused native unit-test compilation only",
+  "evidence_sha256": {
+    "country_clock_format.log": "2f90ea3e0ce4e5e8c83f2e23d5222a65b82c6539e53a38085aba5f2558da3316",
+    "country_conventions_audit.log": "b45be5a96d3f26befb12e41f79cb7f553c678bfb603804c80b175f0744c91d6f",
+    "country_conventions_probe_final.log": "954e652916cbf1260d6ff60f640f51f5774118f7533e9d3b998b007549c89f3b",
+    "country_native_dst.log": "f6f6d39d373f6661205b8c17d430afafacff1e663c110ceaffd5f21d0cff5266",
+    "TEST-com.hwani1103.shiftbell.AlarmDstTest.xml": "efbfc25faa510830a0dd7fbe9e26e1264a83d0fd773d8ab014f20599a4101ddb",
+    "TEST-com.hwani1103.shiftbell.AlarmSnoozeDstTest.xml": "32234d3361d9316beed9069abcb2d228e2b58d23fcc5cf20c3c95c3201d3fc93"
+  }
+}

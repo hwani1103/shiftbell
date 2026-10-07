@@ -1,0 +1,91 @@
+후속 기능·호출 도달 근거 — 2026-10-05
+
+기준
+외국어(pt-BR, de, en, hi)는 아직 설치자가 없는 첫 출시다. 이전 한국어 이용/데이터별 예외를 제품 안내에 두지 않는다.
+한국어 기능·원문·사용자 입력·DB·백업 자료를 삭제하거나 외국어 표시를 위해 덮어쓰지 않는다.
+정적 도달 추적, 호스트 Flutter 기능 검사, Robolectric, 빌드와 실기기 관찰은 서로 다르다. 이 문서는 실기기 완료 기록이 아니다.
+
+F01 개인 일정 관리
+main.dart의 _setupTabsAndPrewarm 및 visibleTabIndices: 한국어에서만 일정 탭(index 1) 생성/선택.
+ScheduleManagementTab의 공개 래퍼는 한국어인 경우에만 _KoreanScheduleManagementTab을 생성한다. 외국어 직접 진입에서 initState가 실행되지 않는다.
+언어가 바뀌면 내부 상태를 제거한다. 열린 생성/수정 시트와 DisableTabButton도 context.usesKoreanFeatures로 차단한다.
+schedule* 개인 일정 생성/편집/알림 리소스, 탭 켜기/끄기 안내, 일정 튜토리얼, 도움말은 한국어 전용 Copy로 이동.
+ScheduleNotificationScheduler.effectiveEnabled와 수신기가 한국어 조건을 검사한다. 해외의 근무 배정/팀 스케줄/근무 변경은 다른 기능이므로 공통 번역을 보존한다.
+
+F02 수면·회복 및 수면 위젯
+main.dart는 한국어에서만 ConditionTab(index 3)와 관련 prewarm을 구성한다. ConditionTab은 루트 build에서 한국어를 검사한다.
+SleepCalendarFullScreen도 진입 래퍼에서 검사한다. 외국어에서는 수면 DB Future를 시작하지 않는다. 수면 입력 시트는 진입/재빌드에서 검사한다.
+EnglishConditionTab에는 제품 호출/라우트가 없다. 예전 개발 레이아웃 테스트만 참조한다. 불필요한 영어 화면과 기록/삭제 콜백은 철회하고 타입 호환용 중립 종료 화면만 남겼다.
+SleepDetectionScheduler, SleepWidgetActionReceiver, SleepWidgetProvider의 동작 조건은 한국어다.
+Manifest의 수면 위젯 receiver는 초기 disabled. ReleaseLocalePolicy.syncSleepWidget은 한국어일 때 enable, 외국어일 때 disable한다.
+한국어에서 외국어로 바뀌는 경우 이미 고정된 위젯은 전용 중립 XML(app_name/달력 진입)로 갱신한다. 한국어 수면 XML/11개 native 전용 문구를 외국어에서 inflate하지 않는다.
+실제 런처의 고정 위젯 제거·캐싱·갱신은 이번 실기기 미검증이다. native API/도달 추적만으로 모든 런처 성공을 확정하지 않는다.
+
+F03 앱 안 친구 공유와 별도 공개 웹
+설정의 친구 진입은 한국어 전용이다. FriendListScreen/MyShareCodeScreen 공개 래퍼는 외국어에서 내부 State/initState를 생성하지 않는다.
+기존 단순 build 차단만으로는 초기 DB/공유 상태 읽기가 실행되는 문제가 새 검사에서 발견되어 래퍼로 보강했다.
+친구 조회/추가 Provider는 네트워크 시작 전/후 언어를 검사한다. 늦은 결과가 외국어 전환 뒤 친구 캐시를 갱신/삭제하지 않는다. 사용자 데이터 자체는 보존한다.
+FriendSyncService의 공유 사용 조건도 한국어다. fetchByOwnerIdDetailed 자체는 공개 웹이 쓰므로 무조건 한국어로 막지 않는다.
+FriendCalendarView: publicWebViewer=false인 앱 화면은 한국어로 제한한다. web_main의 링크 화면은 publicWebViewer=true다.
+3차의 FriendCalendarView blanket 차단은 공개 웹까지 막는 회귀였다. 공개 웹 달력은 유지했고 독립 빌드/호스트 화면 타입 검사를 수행한다.
+공개 웹에 필요한 friend* 13개(제목/상태·실패/링크/설치/동기화 시각)는 공통에 남긴다. friendName은 위젯/모델 필드 참조였으며 번역 getter 호출이 아니다.
+공개 루트/개인정보 페이지도 외국어 진입 가능하다. 루트 한국어 하드코딩 6개는 common ARB로 분리하여 제공 기능을 설명한다.
+실제 Firebase 링크 조회, 인증·네트워크·브라우저 설치 UI는 이번 실측 미수행이다. 빌드/위젯 검사가 네트워크 성공을 증명하지 않는다.
+
+F04 원터치 알람과 fixedAlarmSkippedByOneTap
+신규 원터치 생성: 달력 원터치 패널/프리셋 편집/날짜 추가가 한국어 조건으로만 열린다. 별도 패널·편집 함수·열린 확인창에도 검사한다.
+alarm_generation_service.dart의 skippedByCustom/skippedSlots는 실제 type='custom' 충돌을 집계한다. 외국어 신규 정상 경로는 해당 알람을 만들지 못한다.
+시작 시 표시 4곳(calendar 2, settings 1, apply_schedule_change 1)은 충돌 조건으로 분기했으며, 표시 코드가 직접 언어로 막힌 것은 아니었다.
+3차의 “다른 알람” 일반화 4건은 조건이 발생하지 않는 신규 외국어에 불필요했다. 이번에는 외국어 키를 삭제하고 원문을 한국어 전용 Copy에 그대로 보존한다.
+추가로 4개 표시 위치에도 한국어 조건을 명시했다. 기존 조건 구조와 새 방어 조건을 혼동하지 않는다.
+유사 항목: customAlarm* 생성/삭제/편집/중복·과거·실패, oneTap* 대체/삭제 경고, 원터치 튜토리얼·도움말, native one_tap_alarm_label.
+원터치 화면의 불필요한 영어 하드코딩 25개를 제거했다. 한국어 설명·설정·알람 데이터는 유지한다.
+네이티브 공통 울림/알람 제어는 사용자 알람을 계속 제어해야 한다. KoreanFeatureStrings.oneTapLabel은 한국어에서만 전용 R.string을 읽고 외국어는 기존 공통 alarm_default_label을 사용한다.
+이는 외국어에 원터치 사용법/데이터 예외를 소개하는 번역을 만드는 것이 아니다. 저장된 사용자 label을 재번역/삭제하지 않는다.
+실제 다른 근무 알람도 가능한 스누즈 충돌은 F04와 다르다. snooze_collision_message/alarmSnoozeCollisionResult/도움말은 유지한다.
+삭제 후 재예약 실패는 외국어에도 실제 공통 실패 결과다. ko는 원터치 상세 안내, 외국어는 alarmRefreshUnconfirmed를 표시하며 성공 토스트로 삼키지 않는다.
+
+F05 한국 공휴일·음력·Firebase 자동 조회
+holiday_util의 isKorean, 앱/공유 달력·테마 미리보기의 한국어 검사, native ReleaseLocalePolicy.isCalendarRedDay가 공휴일 표시를 제한한다.
+외국어에는 일요일의 주말 색과 자신의 근무·알람만 유지한다. Locale 도움말의 남은 공휴일 제목/마지막 문장을 네 언어에서 교정했다.
+HolidaySyncService.refreshIfDue는 웹/초기화 상태/진행 상태/플랫폼 한국어 조건을 Firebase doc 읽기 전에 검사한다.
+설정 읽기 후 Firebase 요청 직전 및 응답 후 적용 직전에도 재검사한다. 한국어에서 시작해 이미 전송한 요청을 사후 취소했다는 주장은 하지 않는다.
+loadCached는 외국어에서 한국 공휴일 native 갱신을 시작하지 않는다. 기존 캐시와 사용자 데이터는 삭제하지 않는다.
+외국어 신규 상태에서 loadCached/refreshIfDue가 확인 일정 prefs를 만들지 않는 것을 자동 확인했다. 실제 서버의 네트워크 0회 측정은 이번 미수행이다.
+
+F06 달력 테마 4종
+한국어 10종 중 initialBadge/eventChip/underline/editorial은 한국어만 제공한다.
+외국어는 mainWhite/mainDark/minimal/materialCard/diary/boldGrid 6종이다.
+선택 목록/label/fallback/직접 ThemeLab 초기 페이지·열린 페이지의 언어 변경을 제한한다. 외국어에 저장된 비제공 index를 설명하는 문구는 만들지 않는다.
+저장된 한국어 선택 자체는 수정하지 않고 현재 외국어 표시에서 mainWhite를 적용한다. 외국어에 전용 테마 번역을 남기지 않는다.
+공통 CalendarHeaderActions의 Teams/TODAY 하드코딩을 기존 번역으로 연결했다. 친구/원터치 콜백이 직접 전달되어도 해결된 locale이 외국어이면 노출하지 않는다.
+크기/텍스트 배치/캡처/기기별 테마 레이아웃 검증은 이 작업의 범위가 아니다.
+
+F07 한국어 문의
+settings/contact와 개인정보 문의의 한국어 전용 Kakao/Tistory 경로를 기존 언어 조건으로 유지한다. 외국어는 이메일 문의다.
+공개 웹 개인정보 페이지는 언어별 common 정책을 사용한다. 광고·통계와 제공 기능의 로컬 파일 설명을 보존한다.
+
+공통 제공 기능과 한국어 전용 정보 분기
+스케줄 초기화: 한국어는 기존 공유 중지 설명/실패 경고를 유지한다. 네 외국어에는 근무표·팀표·알람·이력·생성 기록 초기화만 설명한다.
+settingsResetScheduleSharingFailed는 한국어에서만 평가/표시한다. 외국어에서 eager getter가 호출되는 회귀를 실제 초기화 검사로 발견/수정했다.
+전체 알람 삭제: 근무별 템플릿 삭제/이력 유지 설명 보존, 원터치 프리셋 설명은 한국어에만 남긴다.
+근무 변경: 향후 10일 근무 알람 갱신·이력 유지 보존, 원터치 충돌 상세는 한국어 조건으로만 표시한다.
+복원: 현재 데이터 교체, 알람/생성 이력 병합, 울림/스누즈 유지, 불완료/재예약 실패 안내는 실제 공통 동작이므로 유지한다. 이전 한국어 데이터별 안내는 추가하지 않는다.
+native 예외/DB 예외가 한국어를 포함할 수 있다. 외국어 실패 표시에는 localizedErrorDetail로 공통 번역을 사용하고 원래 내부 원인은 로그에 남긴다.
+main 언어 변경 시 기존 언어로 생성된 일시적 SnackBar를 지운다. 열려 있는 한국어 전용 도움말/시트는 현재 locale을 다시 확인한다.
+
+리소스 구조·fallback
+common ARB는 5개 언어에서 같은 507개 API만 생성한다. ko 전용 199개는 별도 messages_ko.json/KoreanOnlyCopy로 생성하며 외국어 접근은 StateError다.
+한국어 template에 전용 키를 남겨 foreign getter가 한국어를 자동 대체하는 구조가 아니다. common equality/ICU 변수 검사는 유지한다.
+native common 37문자열+7배열 항목은 모든 언어가 동일하다. ko 전용 11개는 dedicated XML에 있으며 실제 native 소비자는 기능 조건을 검사한다.
+untranslated 보고서는 {}다. 빈 번역 문자열로 숨기지 않았다. CSV 삭제 행의 비어 있는 '변경 후'는 키가 없다는 기록이고 제품 리소스에 빈 문자열을 넣었다는 뜻이 아니다.
+공개 웹 MaterialApp에도 앱과 같은 releaseSupportedLocales/resolveReleaseLocale를 연결했다. 기본 첫 locale(ko)로 자동 대체되는 위험을 제거했다. 지원하지 않는 언어/locale 없음은 영어, 지역 규칙은 앱과 같다.
+미참조 69개와 추가 미사용 안내는 직접 호출만으로 삭제 결론을 내리지 않았다. 생성 API·전체 소스 사용·고정 help topic callback·사용 가능한 컴포넌트·별도 web entry·동적 ARB 접근 없음까지 대조하고 한국어 원본을 보존한다.
+하드코딩_전수검색목록.csv는 개발 로그/데이터/주석까지 포함한 검색 후보다. 개별 행이 곧 사용자 표시/삭제 확정은 아니다. 실제 UI 후보는 위 진입/소비 경로와 함께 판정한다.
+
+하드코딩 재분류
+하드코딩_도달판정.csv는 시작 시 1,580행/최종 소스 1,578행을 데이터/개발 로그/한국어 기능/표시 조건으로 추적한 후속 근거다. 검색 후보 자체를 삭제 확정으로 쓰지 않았다. 근무시간 기간·미리보기 근무명·요일·음력·TextPainter 표본·debug 광고 영역·테스트 알람·기술 진단 파일까지 구별했다.
+알람 Activity/Overlay DB 조회 실패의 초기 한국어 label 두 곳은 공통 alarm_default_label로 정리한다. 정상 사용자 근무명/울림 제어는 보존한다.
+진단 파일은 내부 기술 보고와 원인 로그이며 한국어 기록을 포함한다. 이는 외국어 사용자에게 미제공 기능 안내를 표시하는 제품 UI가 아니다. 현지화된 개인정보/도움말의 진단 파일 설명은 유지하며 파일 자체의 현지화 완료로 판정하지 않는다.
+
+F05 최종 비동기 경계 보강: 캐시 prefs await 뒤/조회 일정 prefs await 뒤/실패 retry 저장 전/apply 앞뒤/native 적용 직전에도 한국어를 검사한다. 외국어 직접 apply는 기존 HolidayOverrides/캐시를 바꾸지 않고, 한국어 apply는 캐시 저장과 native 적용을 유지하는 회귀 검사로 대조한다. 이미 전송된 KO 요청 사후 취소 주장은 그대로 제외한다.

@@ -1,0 +1,65 @@
+권한 구현 재검토 및 무료 스트리밍 재시도 — 2026-10-06 KST
+
+범위
+현재 APK와 권한 구현을 읽고 무료 Firebase 연결을 재시도했다. 사용자 요청으로 이번에는 레이아웃도 호스트에서 확인했다. 제품 소스 수정/재빌드/USB 실기기 조작/유료 예약은 하지 않았다. 기존 1·2·3차 및 후속 검토 기록은 보존한다.
+
+검토 대상 APK
+build/app/outputs/flutter-apk/app-dev-release.apk
+85,078,340 bytes; modified UTC 2026-10-05T10:00:03.476122Z
+SHA256 16d710a45ed60c03ceaef3fe950391f3325ed71057766e8931a08f139ef7135e
+build/permission_recheck_2026-10-06/tested-dev-release.apk에 같은 파일을 조사용으로 고정했다. 파일명은 예정된 테스트 대상을 뜻하며 기기 설치 완료를 뜻하지 않는다.
+어제 검증_명세.json의 APK와 동일하다. 최종_소스리소스_해시.json 399개가 현재와 모두 일치했다. 결과: build/permission_recheck_2026-10-06/source_hash_comparison.json.
+
+코드 검토
+1. PermissionSettings.kt: 알림/오버레이/정확한 알람/전체화면과 알람 제어 채널을 별도로 읽는다. API31 미만 exact 및 API34 미만 fullscreen은 notApplicable. 예외는 unknown. 설정 호출 성공을 허용으로 저장하지 않는다.
+2. 현재 flavor의 packageName과 UID로 설정을 연다. 표준 Intent를 기본으로 하며 Xiaomi/Redmi/POCO + 실제 securitycenter 존재 시 OEM 안내를 사용한다. OEM Action 실패 시 앱 정보 fallback이 있다. 고정 숫자 비공개 권한을 강제로 열지 않는다.
+3. Flutter PermissionController는 resumed 재조회와 이전 비동기 조회의 늦은 반영을 방지한다. 온보딩/메인 배너/설정에서 네 상태와 별도 채널을 사용한다.
+4. 채널 판단의 legacy OR는 NotificationHelper의 기존 alarm_control 실제 제어 알림 fallback과 일치한다. 채널 importance가 NONE이 아닌지를 읽는 것으로, 모든 상황의 HIGH 우선순위/잠금 표시 성공을 보증하는 검사는 아니다.
+5. Xiaomi 안내는 OEM 추가 설정명, 뒤로 가기 복귀, 표준 전체화면 설정 버튼을 제공한다. canUseFullScreenIntent는 표준 FSI 검사이며 모든 ROM의 OEM 권한을 독립적으로 읽는 검사가 아니다. 네 항목 허용 표시를 실제 잠금 알람 성공으로 간주하지 않는다.
+6. 검토한 범위에서 확정된 코드 결함은 발견하지 못했다. OEM 설정 화면 진입과 실물 잠금 표시의 적합성은 이번 APK로 NOT_RUN이다.
+
+이번 자동/호스트 검증
+- 기존 test/permission_state_test.dart: 11개 PASS. 설정 열기/연타/변경 없는 복귀/unknown/겹친 조회/5언어 복귀/Xiaomi 안내/별도 채널 배너.
+- 조사용 build/permission_recheck_2026-10-06/permission_review_test.dart: 11개 PASS.
+  ko/en/pt-BR/de/hi × (360×800, 글자1.0 / 320×640, 글자1.3) 10조건에서 최초 권한 화면과 Xiaomi 안내 시트의 스크롤/버튼 접근 및 Flutter 오류 확인.
+  추가 1개는 미허용 상태에서 다음→경고→설정 시트→닫기→온보딩 복귀 확인. dialog context 사용 후보는 이 호스트 경로에서 오류 재현되지 않았다.
+- 미리보기 PNG 40장 생성. 영어/독일어 확대/한국어/힌디어 표본을 직접 시각 확인했다. 표본에서 텍스트 겹침이나 버튼 잘림을 발견하지 못했다. 좁은 확대 화면은 스크롤이 필요하며 하단 설정/닫기 버튼에 접근 가능했다.
+- Windows 대체 글꼴(Segoe UI, Malgun, Nirmala)을 사용한 호스트 렌더링이다. 실제 Android 폰트·OS 바·OEM 화면·APK 실기기 레이아웃 PASS가 아니다. 1.3보다 큰 배율, 다크 모드, 모든 화면/글꼴은 이번 표본에 포함하지 않았다.
+- 최초 캡처 기다림과 호스트 한국어/힌디어 글꼴 미리보기 문제는 조사 파일에서 수정 후 재실행했다. 제품 폰트는 수정하지 않았다. 초기 로그도 보존했다.
+- 이번 앱 소스/리소스 변경이 없어 생성/전체 빌드를 다시 수행하지 않았다. 기존 P0 전체 자동 결과 101/12는 어제 기록이며 이번 실행 결과 11/11과 구분한다.
+
+무료 연결 시도 및 차단
+A shiftbell-devicecheck-a-7f2k5: Firebase ACTIVE, billingEnabled=false, billingAccountName="", sessions 없음. Xiaomi houji/35 TTL300 새 API 예약 429 RESOURCE_EXHAUSTED, Insufficient device quota remaining.
+B shiftbell-devicecheck-b-9r4m2: 같은 무료/결제 미연결 상태 확인. Xiaomi TTL300 예약 같은 429.
+C shiftbell-device-test-c: 같은 무료/결제 미연결 상태 확인. CLI 15분 예약은 FAILED_PRECONDITION. 이후 새 API TTL300 예약은 429 할당량 부족.
+C 감사 로그: devicestreaming.deviceSessions.create granted=true인데 서버 code9/code8로 실패. 사용자 IAM 권한 거부와 구분한다. 이후 세션 목록도 비어 있다.
+첫 전제조건 실패의 세부 원인은 응답에서 확인되지 않았다. 실패 요청이 무료 예약분을 잡아 둔 것인지/새 프로젝트 초기화인지/플랫폼 문제인지는 확정하지 않는다. 기존 실패에서 시간이 지난 뒤에도 이번 무료 연결은 해결되지 않았다.
+기기 예약 ID/ADB 연결/설치/잠금 알람/실제 설정 off-on/실기기 캡처는 이번 모두 NOT_RUN. 유료 스트리밍을 시작하지 않았다.
+어제 initializeSettings(기본 GCS 결과 버킷 생성 및 프로젝트 역할별 접근 설정)는 자동 승인 검토에서 별도 리소스/권한 범위 승인이 없다는 이유로 거절됐던 경로다. 이번에 재실행하거나 다른 경로로 우회하지 않았다. 이것이 무료 연결을 고친다는 증거도 없다.
+원시 증거: build/permission_recheck_2026-10-06의 *_state.json, *_newcreate.json, *_inspect.json, xiaomi_c/session.json 및 cli_create.log.
+
+현재 기기 가용성 재확인
+무료 C Firebase Test Lab 콘솔 카탈로그, 공식 공개 DDP 카탈로그, log-it CLI device remote models를 읽었다. log-it에서는 카탈로그 조회만 수행했다.
+- Xiaomi 14 houji/35
+- OPPO A38 OP5759L1/34, A79 5G OP573DL1/34
+- realme C53 RE58C2/35, RMX3231/30
+- Motorola moto g05 lamul/35, moto g34 5G fogos/34 등
+- Pixel 8a akita/34,35 및 다수 모델
+- Infinix SMART 8 /33, 제휴 모델 NOTE 50 Pro+ transsion_lab_infinix-x6856/35
+- TECNO 제휴 POVA7/35, POVA7 Ultra/35, Spark Go2/35 등
+- log-it Partner Device Labs 실제 페이지에는 Transsion/HONOR만 표시. 토글은 변경하지 않았다. HONOR의 예약 가능한 구체 모델은 이번 CLI 목록에서 미확인.
+- vivo는 공식 Android Device Streaming 지원 파트너로 소개되어 있으나 현재 읽은 프로젝트 CLI 목록/일반 카탈로그/제휴 설정 페이지에서 선택할 vivo 기기나 vivo Lab을 찾지 못했다. 서비스 전체에서 영구 미지원이라는 결론이 아니다. 유료 30분을 사용하면 vivo가 나온다는 보장도 없다.
+카탈로그 존재와 현재 예약 성공은 별개다. 실제 예약 대기/ROM/기기 가용성은 연결 때 확인한다.
+
+사용자에게 제시한 유료 검증 계획 — 실행 승인 아님
+무료 소진 프로젝트에서 30분 × USD0.15 = USD4.50(공식 단가 기준; 적용 세금 등 별도).
+한 Xiaomi를 대상으로 APK/초기 상태 약3분, 권한 경로/거절·허용·복귀 약10분, 영어 중심·긴 번역·큰 글자 약5분, 잠금 알람/끄기/자동 종료 약10분, 반환·로그 여유. 스누즈 재울림은 진행 속도에 따라 추가. 여러 제조사 완료를 보장하지 않는다.
+
+다음 작업
+권한 화면의 코드/호스트 결과는 양호하다. 이번 APK의 Xiaomi OEM 화면 진입→Always allow→앱 복귀 상태→실제 잠금 알람은 실기기 미검증으로 유지한다. 이후 새로운 무료 가능 프로젝트 또는 명시적으로 허용된 유료 한도 안에서 먼저 수행할 P0다. 연결 시 사용자 USB Samsung과 localhost 스트리밍 serial을 분리한다.
+국가별 최소 제조사 선정은 같은 폴더의 출시국가_최소기기선정_2026-10-06.txt를 참조한다.
+
+공식 근거(2026-10-06 조회)
+https://firebase.google.com/docs/test-lab/usage-quotas-pricing (Spark 월30분, Blaze 추가분 USD0.15/분)
+https://developer.android.com/studio/run/android-device-streaming (vivo 포함 Partner Labs, 표준 ADB SSL, 실제 프로젝트 실험실 활성화)
+https://docs.cloud.google.com/developer-device-platform/device-catalog (Products Streaming 구분)

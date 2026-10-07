@@ -1,0 +1,46 @@
+조회일 2026-10-06. 아래는 국가/관습 사실의 출처이며 제품 기능 추천은 별도 추론.
+S01 Unicode CLDR supplementalData weekData/timeData (현행 main; 추후 변동 가능)
+https://raw.githubusercontent.com/unicode-org/cldr/main/common/supplemental/supplementalData.xml
+S02 미국 NIST DST 적용·예외
+https://www.nist.gov/pml/time-and-frequency-division/popular-links/daylight-saving-time-dst
+S03 영국 시계 변경
+https://www.gov.uk/when-do-the-clocks-change
+S04 독일 PTB CET/CEST 및 전환
+https://www.ptb.de/cms/en/ptb/fachabteilungen/abt4/fb-44/ag-441/realisation-of-legal-time-in-germany.html
+S05 브라질 Observatorio Nacional DST 폐지령
+https://www.gov.br/observatorio/pt-br/assuntos/areas-de-atuacao/tempo-e-frequencia/horario-de-verao
+S06 IANA 현재 시간대 규칙: Manila/Dubai/Kolkata/Johannesburg 및 브라질 지역
+https://data.iana.org/time-zones/tzdb/asia
+https://data.iana.org/time-zones/tzdb/africa
+https://data.iana.org/time-zones/tzdb/southamerica
+S07 Dart DateTime.add 공식: DST 때 24시간 더하기는 달력 날짜 순회와 다름
+https://api.dart.dev/dart-core/DateTime/add.html
+S08 지역 날짜: 남아공 en_ZA / 인도 영어 en_IN Gregorian formats
+https://raw.githubusercontent.com/unicode-org/cldr/main/common/main/en_ZA.xml
+https://www.unicode.org/cldr/charts/49/by_type/date_%26_time.gregorian.html
+S09 미국 DOL: 집계 workweek는 calendar week와 다를 수 있음
+https://www.dol.gov/agencies/whd/overtime/
+S10 미국 OPM: 연방직원 공휴일의 적용 범위
+https://www.opm.gov/policy-data-oversight/pay-leave/pay-administration/fact-sheets/holidays-work-schedules-and-pay/
+S11 영국 지역별 bank holiday
+https://www.gov.uk/bank-holidays
+S12 남아공 공식 공휴일·일요일 대체 월요일
+https://www.gov.za/about-sa/public-holidays
+S13 필리핀 대통령 공고: regular/special non-working/special working 구분
+https://elibrary.judiciary.gov.ph/thebookshelf/showdocs/7/99678
+S14 UAE 공식: 공공근무주/라마단 근무시간/달관측 공휴일
+https://u.ae/en/information-and-services/jobs/working-in-uae-government-sector/working-hours-in-the-public-sector
+https://u.ae/en/information-and-services/jobs/employment-in-the-private-sector/working-hours
+https://u.ae/en/information-and-services/public-holidays-and-religious-affairs/public-holidays
+S15 Bundesbank 2026 공휴일의 일부 주 적용 차이. 은행 영업일 자체를 일반 휴무로 적용하면 안 됨.
+https://www.bundesbank.de/resource/blob/764518/36164b50ec05e7fceb1df9ed3374b012/mL/feiertage-in-deutschland-1-data.pdf
+S16 브라질 정부 SOUGOV 실제12x36 근무표 생성 안내. 전체 근로자의 보편 관습이라는 뜻 아님.
+https://www.gov.br/servidor/pt-br/acesso-a-informacao/faq/sou-gov.br/frequencia/perfil-lider/como-cadastrar-escala-de-trabalho
+S17 브라질 공공시스템 국가/주/시 공휴일·ponto facultativo 데이터
+https://www.sirc.gov.br/feriados-e-indisponibilidades-sirc/
+S18 인도 공식 state/union territory holiday calendar
+https://www.india.gov.in/calendar
+
+검색 결과/공식 본문을 대조했으며, 법률/급여 적용의 완전한 현지 법률 검토가 아니다.
+현지 근로자 인터뷰·원어민 관습 실측 없음. UI 선호는 CLDR 기본값과 제품 판단을
+구분했다. 후기/Reddit를 국가 관습의 근거로 사용하지 않았다.

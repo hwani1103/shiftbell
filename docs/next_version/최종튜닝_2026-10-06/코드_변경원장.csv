@@ -1,0 +1,11 @@
+﻿후보,대상,변경,보존·검증
+U03,lib/screens/work_hours_settings_screen.dart,구형 시간 안내를 koOnly로 읽고 한국어 조건 추가,임시 DB 480분 불변; ko→외국어→ko 문구 검사
+U11,lib/screens/help_screen.dart,구형 버전 백업 항목 koreanOnly 및 전용 Copy,"한국어 검색/상세 유지, 외국어 검색/열린 상세 차단"
+U09,lib/web_main.dart; lib/widgets/public_web_load_failure.dart,"비동기 결과에 실패 enum 저장, build 시 번역",실패3종 및 완료 전후 언어 전환; 서버/공유 원문 불변
+U10,web/index.html; web/manifest.json; web/l10n/metadata_ko.json; generated web assets,초기 브랜드와 locale bootstrap/언어별 manifest,한국어 원문 보존; primary8종·언어 변경 Node 검사; 실제 설치 NOT_RUN
+U10,"android/app/src/{dev,prod}/res/values-{pt,de,hi}/strings.xml",app_name 브랜드 6개 명시,기존 ko/en/default 보존; 구조 검사 및 native locale-list 호스트
+U12,lib/screens/all_teams_setup_screen.dart; lib/screens/team_schedule_edit_screen.dart,raw exception 변수→localizedErrorDetail; 원인 debug 로그,한국어 상세/저장 동작 불변; 언어별 오류 표시 검사
+U14,NotificationLocale.kt; NotificationHelper.kt; AlarmGuardReceiver.kt; RestoreGate.kt; ReleaseLocalePolicy.kt; MainActivity.kt,기존 알림 제작 문구/기존 채널 이름을 현재 locale로 갱신,"새 알림/새 채널/차단해제 없음; PendingIntent/사용자 내용 보존, fullscreen 재실행 금지"
+U14,InAppAlarmController.kt; AlarmOverlayService.kt; RingingAlarmTracker.kt; AppTextScale.kt,열린 제어 UI locale 갱신; 부모 locale 명시; 같은 live 회차 아래 알림 갱신,회차/원래 deadline/DB/예약 보존; G1/Cover 기능 회귀; 기기 미검증
+U15,android/app/src/main/res/layout/activity_alarm.xml; overlay_alarm.xml,snooze/dismiss Button에 기존 현지화 접근성 이름 연결,시각 배치/크기 불변; InApp 열린 창 locale 변경 기능 검사
+검사,tools/check_critical_release.ps1; tools/audit_l10n_resources.py; test/final_locale_tuning_test.dart; native tests,새 생성기·외국어 앱 이름·언어 전환 기능 검사 연결,레이아웃 테스트 추가/실행 없음

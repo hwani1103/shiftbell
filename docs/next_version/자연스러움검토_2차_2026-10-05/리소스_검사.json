@@ -1,0 +1,59 @@
+{
+  "errors": [],
+  "languages": {
+    "en": {
+      "arb_messages": 681,
+      "android_strings": 48,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": []
+    },
+    "pt": {
+      "arb_messages": 681,
+      "android_strings": 48,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "alarmDurationMinutes",
+        "calendarOtTotal",
+        "commonPm",
+        "onboardingSwitchToIrregularSuffix",
+        "themeLabPreviewSheetTitle",
+        "splashTitle",
+        "commonAm",
+        "commonOk",
+        "alarmVolume",
+        "commonPrevious",
+        "appTitle"
+      ]
+    },
+    "de": {
+      "arb_messages": 681,
+      "android_strings": 48,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "commonPm",
+        "onboardingSwitchToIrregularSuffix",
+        "themeLabPreviewSheetTitle",
+        "splashTitle",
+        "alarmVibration",
+        "commonAm",
+        "commonOk",
+        "shiftTeam",
+        "scheduleContentFieldLabel",
+        "appTitle"
+      ]
+    },
+    "hi": {
+      "arb_messages": 681,
+      "android_strings": 48,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "commonPm",
+        "themeLabPreviewSheetTitle",
+        "splashTitle",
+        "commonAm",
+        "appTitle"
+      ]
+    }
+  },
+  "limits": "Structure only. ICU generation, semantic review and device layout review are separate."
+}

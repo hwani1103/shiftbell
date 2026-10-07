@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.hwani1103.shiftbell.CoverAlarmNotificationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-05T22:36:56" hostname="TZJIRTGG0A8S7A6" time="8.307">
+  <properties/>
+  <testcase name="staleCoverCannotReplaceNewRingNotification" classname="com.hwani1103.shiftbell.CoverAlarmNotificationTest" time="8.09"/>
+  <testcase name="quietCoverKeepsActionsAndUnfoldRestoresOriginalChannelWithoutLaunchingAgain" classname="com.hwani1103.shiftbell.CoverAlarmNotificationTest" time="0.217"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

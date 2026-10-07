@@ -1,0 +1,26 @@
+[
+  {
+    "언어": "전체",
+    "코드": "android\\app\\src\\main\\kotlin\\com\\hwani1103\\shiftbell\\AlarmActivity.kt",
+    "수정 후보": "한국어 필드 초기값을 비표시 초기 상태로 두고 loadAlarmInfo 진입에서 localized alarm_default_label 설정",
+    "변경 전": "private var alarmLabel: String = \"알람\"",
+    "이유": "DB 실패/행 없음에도 알람 표시/제어는 외국어에서 도달 가능. service 재사용 시 기존 label도 남을 수 있음. 사용자 shift_type 조회값은 보존.",
+    "기존 결정과 차이": "3차 및 앞선 원터치 fallback 가드는 정상 DB row 분기만 다뤘음. 이 후속은 DB 실패/없음의 default 초기화.",
+    "출처": "loadAlarmInfo→setupUI/showOverlay/NotificationHelper 제어; Korean 기본은 alarm_default_label과 일치",
+    "판정": "수정: 사용자 라벨 조회 성공은 그대로. DB 없음/읽기 실패/행 없음이면 해당 언어의 공통 기본 라벨",
+    "변경 후": "private var alarmLabel: String = \"\"; loadAlarmInfo 진입의 alarmLabel = getString(R.string.alarm_default_label)",
+    "현재 코드 위치": "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt"
+  },
+  {
+    "언어": "전체",
+    "코드": "android\\app\\src\\main\\kotlin\\com\\hwani1103\\shiftbell\\AlarmOverlayService.kt",
+    "수정 후보": "한국어 필드 초기값을 비표시 초기 상태로 두고 loadAlarmInfo 진입에서 localized alarm_default_label 설정",
+    "변경 전": "private var alarmLabel: String = \"알람\"",
+    "이유": "DB 실패/행 없음에도 알람 표시/제어는 외국어에서 도달 가능. service 재사용 시 기존 label도 남을 수 있음. 사용자 shift_type 조회값은 보존.",
+    "기존 결정과 차이": "3차 및 앞선 원터치 fallback 가드는 정상 DB row 분기만 다뤘음. 이 후속은 DB 실패/없음의 default 초기화.",
+    "출처": "loadAlarmInfo→setupUI/showOverlay/NotificationHelper 제어; Korean 기본은 alarm_default_label과 일치",
+    "판정": "수정: 사용자 라벨 조회 성공은 그대로. DB 없음/읽기 실패/행 없음이면 해당 언어의 공통 기본 라벨",
+    "변경 후": "private var alarmLabel: String = \"\"; loadAlarmInfo 진입의 alarmLabel = getString(R.string.alarm_default_label)",
+    "현재 코드 위치": "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmOverlayService.kt"
+  }
+]

@@ -1,0 +1,9 @@
+{
+    "requested_by_user":  true,
+    "scheduled_at":  "2026-10-05T19:07:59.7942237+09:00",
+    "delay_seconds":  120,
+    "action":  "shutdown.exe /s /t 0",
+    "force_close":  false,
+    "helper_pid":  4072,
+    "status":  "SCHEDULED_AFTER_REPORT"
+}

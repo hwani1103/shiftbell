@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.hwani1103.shiftbell.ReleaseLanguagesTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-05T07:31:55" hostname="TZJIRTGG0A8S7A6" time="13.181">
+  <properties/>
+  <testcase name="Hindi alarm controls and widget weekdays use Hindi resources" classname="com.hwani1103.shiftbell.ReleaseLanguagesTest" time="12.17"/>
+  <testcase name="rest-name matching agrees with Dart and avoids substring false positives" classname="com.hwani1103.shiftbell.ReleaseLanguagesTest" time="0.211"/>
+  <testcase name="German alarm controls and widget weekdays use German resources" classname="com.hwani1103.shiftbell.ReleaseLanguagesTest" time="0.223"/>
+  <testcase name="Brazilian alarm controls and widget weekdays use Portuguese resources" classname="com.hwani1103.shiftbell.ReleaseLanguagesTest" time="0.262"/>
+  <testcase name="sleep widget is absent on fresh install and only enabled for Korean" classname="com.hwani1103.shiftbell.ReleaseLanguagesTest" time="0.31"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

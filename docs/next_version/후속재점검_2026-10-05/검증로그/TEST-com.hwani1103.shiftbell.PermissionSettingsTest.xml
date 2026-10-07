@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.hwani1103.shiftbell.PermissionSettingsTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-05T09:48:45" hostname="TZJIRTGG0A8S7A6" time="44.934">
+  <properties/>
+  <testcase name="activity not found and security exceptions fall back and double failure stays false" classname="com.hwani1103.shiftbell.PermissionSettingsTest" time="12.938"/>
+  <testcase name="manufacturer normalization is confined to Xiaomi family" classname="com.hwani1103.shiftbell.PermissionSettingsTest" time="0.476"/>
+  <testcase name="Android 13 checks exact alarms but does not offer fullscreen settings" classname="com.hwani1103.shiftbell.PermissionSettingsTest" time="15.687"/>
+  <testcase name="standard and OEM intents target the running flavor without task flags" classname="com.hwani1103.shiftbell.PermissionSettingsTest" time="3.8"/>
+  <testcase name="older Android does not request exact or fullscreen permissions" classname="com.hwani1103.shiftbell.PermissionSettingsTest" time="11.117"/>
+  <testcase name="channel denial does not become app notification or fullscreen denial" classname="com.hwani1103.shiftbell.PermissionSettingsTest" time="0.915"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

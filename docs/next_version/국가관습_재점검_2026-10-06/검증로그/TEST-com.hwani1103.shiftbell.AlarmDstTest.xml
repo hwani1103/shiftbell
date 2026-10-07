@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.hwani1103.shiftbell.AlarmDstTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-05T23:08:24" hostname="TZJIRTGG0A8S7A6" time="10.513">
+  <properties/>
+  <testcase name="changingTimeZoneKeepsLocalClockAndChangesScheduledInstant" classname="com.hwani1103.shiftbell.AlarmDstTest" time="10.118"/>
+  <testcase name="gapCollisionProducesOneAlarmAndRepeatedHourUsesTheFutureOccurrence" classname="com.hwani1103.shiftbell.AlarmDstTest" time="0.232"/>
+  <testcase name="sharedFixturesAgreeAcrossGenerationStorageAndDayOffsets" classname="com.hwani1103.shiftbell.AlarmDstTest" time="0.163"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

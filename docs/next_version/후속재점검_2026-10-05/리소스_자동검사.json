@@ -1,0 +1,57 @@
+{
+  "errors": [],
+  "languages": {
+    "en": {
+      "arb_messages": 507,
+      "android_strings": 37,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": []
+    },
+    "pt": {
+      "arb_messages": 507,
+      "android_strings": 37,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "alarmDurationMinutes",
+        "splashTitle",
+        "commonPm",
+        "themeLabPreviewSheetTitle",
+        "commonPrevious",
+        "calendarOtTotal",
+        "appTitle",
+        "commonOk",
+        "commonAm",
+        "alarmVolume"
+      ]
+    },
+    "de": {
+      "arb_messages": 507,
+      "android_strings": 37,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "splashTitle",
+        "commonPm",
+        "themeLabPreviewSheetTitle",
+        "alarmVibration",
+        "appTitle",
+        "commonOk",
+        "commonAm"
+      ]
+    },
+    "hi": {
+      "arb_messages": 507,
+      "android_strings": 37,
+      "android_weekday_items": 7,
+      "same_as_english_for_manual_review": [
+        "splashTitle",
+        "commonPm",
+        "themeLabPreviewSheetTitle",
+        "appTitle",
+        "commonAm"
+      ]
+    }
+  },
+  "limits": "Structure only. ICU generation, semantic review and device layout review are separate.",
+  "korean_preserved_scoped_messages": 199,
+  "native_korean_only_messages": 11
+}

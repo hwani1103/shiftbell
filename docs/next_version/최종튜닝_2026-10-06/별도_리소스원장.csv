@@ -1,0 +1,12 @@
+﻿후보,언어,파일,키,변경 전 구조,변경 후,사유
+U10,pt,android/app/src/dev/res/values-pt/strings.xml,app_name,지역 파일 없음; 기본 브랜드에 의존,ShiftBell (Test),동일 브랜드 명시; 한국어/기존 default/en 원문 불변
+U10,de,android/app/src/dev/res/values-de/strings.xml,app_name,지역 파일 없음; 기본 브랜드에 의존,ShiftBell (Test),동일 브랜드 명시; 한국어/기존 default/en 원문 불변
+U10,hi,android/app/src/dev/res/values-hi/strings.xml,app_name,지역 파일 없음; 기본 브랜드에 의존,ShiftBell (Test),동일 브랜드 명시; 한국어/기존 default/en 원문 불변
+U10,pt,android/app/src/prod/res/values-pt/strings.xml,app_name,지역 파일 없음; 기본 브랜드에 의존,ShiftBell,동일 브랜드 명시; 한국어/기존 default/en 원문 불변
+U10,de,android/app/src/prod/res/values-de/strings.xml,app_name,지역 파일 없음; 기본 브랜드에 의존,ShiftBell,동일 브랜드 명시; 한국어/기존 default/en 원문 불변
+U10,hi,android/app/src/prod/res/values-hi/strings.xml,app_name,지역 파일 없음; 기본 브랜드에 의존,ShiftBell,동일 브랜드 명시; 한국어/기존 default/en 원문 불변
+U10,ko,web/manifest_ko.json,name / short_name / description,언어별 manifest 없음; 공통 한국어 manifest 사용,"{""name"": ""교대시계 - 일정 공유"", ""short_name"": ""교대시계"", ""description"": ""친구의 교대 근무 일정을 앱 없이 바로 확인하는 웹 뷰어""}",생성기 소유; 검토된 common 문구 재사용. 한국어 metadata 원문 별도 보존
+U10,pt,web/manifest_pt.json,name / short_name / description,언어별 manifest 없음; 공통 한국어 manifest 사용,"{""name"": ""ShiftBell - Compartilhar escala"", ""short_name"": ""ShiftBell"", ""description"": ""Abra um link compartilhado para ver a escala atualizada.""}",생성기 소유; 검토된 common 문구 재사용. 한국어 metadata 원문 별도 보존
+U10,de,web/manifest_de.json,name / short_name / description,언어별 manifest 없음; 공통 한국어 manifest 사용,"{""name"": ""ShiftBell - Schichtplan teilen"", ""short_name"": ""ShiftBell"", ""description"": ""Öffne einen geteilten Link, um den aktuellen Schichtplan anzusehen.""}",생성기 소유; 검토된 common 문구 재사용. 한국어 metadata 원문 별도 보존
+U10,en,web/manifest_en.json,name / short_name / description,언어별 manifest 없음; 공통 한국어 manifest 사용,"{""name"": ""ShiftBell - Schedule Sharing"", ""short_name"": ""ShiftBell"", ""description"": ""Open a shared link to view the latest shift schedule.""}",생성기 소유; 검토된 common 문구 재사용. 한국어 metadata 원문 별도 보존
+U10,hi,web/manifest_hi.json,name / short_name / description,언어별 manifest 없음; 공통 한국어 manifest 사용,"{""name"": ""ShiftBell - शेड्यूल शेयर करें"", ""short_name"": ""ShiftBell"", ""description"": ""शेयर किया गया लिंक खोलकर नया शिफ्ट शेड्यूल देखें।""}",생성기 소유; 검토된 common 문구 재사용. 한국어 metadata 원문 별도 보존

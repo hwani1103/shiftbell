@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.hwani1103.shiftbell.AlarmSnoozeDstTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-05T23:08:35" hostname="TZJIRTGG0A8S7A6" time="22.554">
+  <properties/>
+  <testcase name="newYorkFirstHour" classname="com.hwani1103.shiftbell.AlarmSnoozeDstTest" time="15.042"/>
+  <testcase name="ordinarySeoul" classname="com.hwani1103.shiftbell.AlarmSnoozeDstTest" time="1.295"/>
+  <testcase name="sameClockDifferentOccurrenceDoesNotCollide" classname="com.hwani1103.shiftbell.AlarmSnoozeDstTest" time="0.918"/>
+  <testcase name="londonClockBack" classname="com.hwani1103.shiftbell.AlarmSnoozeDstTest" time="1.514"/>
+  <testcase name="newYorkClockBack" classname="com.hwani1103.shiftbell.AlarmSnoozeDstTest" time="1.336"/>
+  <testcase name="springJump" classname="com.hwani1103.shiftbell.AlarmSnoozeDstTest" time="0.918"/>
+  <testcase name="londonFirstHour" classname="com.hwani1103.shiftbell.AlarmSnoozeDstTest" time="0.862"/>
+  <testcase name="sameInstantDifferentOffsetStillCollides" classname="com.hwani1103.shiftbell.AlarmSnoozeDstTest" time="0.667"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Oct 05, 2026 7:08:43 PM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[5][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[5] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Intent = Intent { act=com.hwani1103.shiftbell.REFRESH_ALARMS pkg=com.hwani1103.shiftbell.dev }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmRefreshReceiver@14f6a8b8], context=[android.app.ContextImpl@4b312e7], intentFilter=[android.content.IntentFilter@25d2d299]]]
+Intent = Intent { cmp=com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.AlarmGuardReceiver }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmGuardReceiver@777f81bf], context=[android.app.ContextImpl@4b312e7], intentFilter=[android.content.IntentFilter@51802c09]]]
+Intent = Intent { act=com.hwani1103.shiftbell.FLUTTER_REFRESH }; Matching wrappers: []
+Oct 06, 2026 8:08:45 AM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[7][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[7] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Oct 06, 2026 8:08:51 AM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[16][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[16] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Intent = Intent { act=com.hwani1103.shiftbell.REFRESH_ALARMS pkg=com.hwani1103.shiftbell.dev }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmRefreshReceiver@4ebd5ad6], context=[android.app.ContextImpl@75ec6932], intentFilter=[android.content.IntentFilter@3a0c1816]]]
+Intent = Intent { cmp=com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.AlarmGuardReceiver }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmGuardReceiver@785771c9], context=[android.app.ContextImpl@75ec6932], intentFilter=[android.content.IntentFilter@6ee42208]]]
+Intent = Intent { act=com.hwani1103.shiftbell.FLUTTER_REFRESH }; Matching wrappers: []
+Oct 06, 2026 8:08:51 AM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[18][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[18] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Oct 05, 2026 7:08:52 PM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[23][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[23] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Intent = Intent { act=com.hwani1103.shiftbell.REFRESH_ALARMS pkg=com.hwani1103.shiftbell.dev }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmRefreshReceiver@15d0d641], context=[android.app.ContextImpl@726bc6af], intentFilter=[android.content.IntentFilter@8d19042]]]
+Intent = Intent { cmp=com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.AlarmGuardReceiver }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmGuardReceiver@721053ab], context=[android.app.ContextImpl@726bc6af], intentFilter=[android.content.IntentFilter@5e62bdf8]]]
+Intent = Intent { act=com.hwani1103.shiftbell.FLUTTER_REFRESH }; Matching wrappers: []
+Oct 06, 2026 12:08:53 AM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[29][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[29] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Oct 06, 2026 12:08:53 AM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[31][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[31] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Intent = Intent { act=com.hwani1103.shiftbell.REFRESH_ALARMS pkg=com.hwani1103.shiftbell.dev }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmRefreshReceiver@1b83ef27], context=[android.app.ContextImpl@6093aae], intentFilter=[android.content.IntentFilter@6af156e3]]]
+Intent = Intent { cmp=com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.AlarmGuardReceiver }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmGuardReceiver@3c578e69], context=[android.app.ContextImpl@6093aae], intentFilter=[android.content.IntentFilter@73440f07]]]
+Intent = Intent { act=com.hwani1103.shiftbell.FLUTTER_REFRESH }; Matching wrappers: []
+Oct 06, 2026 8:08:53 AM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[33][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[33] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Oct 05, 2026 7:08:54 PM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[38][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[38] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Oct 05, 2026 7:08:54 PM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[40][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[40] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Intent = Intent { act=com.hwani1103.shiftbell.REFRESH_ALARMS pkg=com.hwani1103.shiftbell.dev }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmRefreshReceiver@63279b5c], context=[android.app.ContextImpl@1a9e34d8], intentFilter=[android.content.IntentFilter@485ef4e0]]]
+Intent = Intent { cmp=com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.AlarmGuardReceiver }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmGuardReceiver@1d0e4a95], context=[android.app.ContextImpl@1a9e34d8], intentFilter=[android.content.IntentFilter@765d9518]]]
+Intent = Intent { act=com.hwani1103.shiftbell.FLUTTER_REFRESH }; Matching wrappers: []
+Oct 06, 2026 8:08:55 AM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[41][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[41] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Oct 05, 2026 7:08:55 PM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[46][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[46] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Intent = Intent { act=com.hwani1103.shiftbell.REFRESH_ALARMS pkg=com.hwani1103.shiftbell.dev }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmRefreshReceiver@20abdfd0], context=[android.app.ContextImpl@3b0bd9c7], intentFilter=[android.content.IntentFilter@28de83f6]]]
+Intent = Intent { cmp=com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.AlarmGuardReceiver }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmGuardReceiver@38fc64d], context=[android.app.ContextImpl@3b0bd9c7], intentFilter=[android.content.IntentFilter@fea9184]]]
+Intent = Intent { act=com.hwani1103.shiftbell.FLUTTER_REFRESH }; Matching wrappers: []
+Oct 06, 2026 8:08:55 AM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[48][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[48] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Oct 06, 2026 12:08:56 AM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[53][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[53] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Intent = Intent { act=com.hwani1103.shiftbell.REFRESH_ALARMS pkg=com.hwani1103.shiftbell.dev }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmRefreshReceiver@3d993b2], context=[android.app.ContextImpl@77da2390], intentFilter=[android.content.IntentFilter@5577bfeb]]]
+Intent = Intent { cmp=com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.AlarmGuardReceiver }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmGuardReceiver@5aeb3751], context=[android.app.ContextImpl@77da2390], intentFilter=[android.content.IntentFilter@4aed3c05]]]
+Intent = Intent { act=com.hwani1103.shiftbell.FLUTTER_REFRESH }; Matching wrappers: []
+Oct 06, 2026 8:08:56 AM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[55][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[55] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Oct 05, 2026 7:08:57 PM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[60][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[60] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Oct 05, 2026 7:08:57 PM com.almworks.sqlite4java.Internal log
+WARNING: [sqlite] [PRAGMA journal_mode=MEMORY]DB[62][C]: exception when clearing
+com.almworks.sqlite4java.SQLiteBusyException: [5] DB[62] reset [database is locked]
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1432)
+	at com.almworks.sqlite4java.SQLiteConnection.throwResult(SQLiteConnection.java:1409)
+	at com.almworks.sqlite4java.SQLiteConnection.cacheStatementHandle(SQLiteConnection.java:1338)
+	at com.almworks.sqlite4java.SQLiteConnection.access$900(SQLiteConnection.java:51)
+	at com.almworks.sqlite4java.SQLiteConnection$CachedController.dispose(SQLiteConnection.java:1733)
+	at com.almworks.sqlite4java.SQLiteStatement.dispose(SQLiteStatement.java:187)
+	at org.robolectric.shadows.ShadowLegacySQLiteConnection$Connections.lambda$finalizeStmt$3(ShadowLegacySQLiteConnection.java:416)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+Intent = Intent { act=com.hwani1103.shiftbell.REFRESH_ALARMS pkg=com.hwani1103.shiftbell.dev }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmRefreshReceiver@130b2d75], context=[android.app.ContextImpl@4e2e6405], intentFilter=[android.content.IntentFilter@1114cae5]]]
+Intent = Intent { cmp=com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.AlarmGuardReceiver }; Matching wrappers: [Wrapper[receiver=[com.hwani1103.shiftbell.AlarmGuardReceiver@264c9720], context=[android.app.ContextImpl@4e2e6405], intentFilter=[android.content.IntentFilter@1bffd1a0]]]
+Intent = Intent { act=com.hwani1103.shiftbell.FLUTTER_REFRESH }; Matching wrappers: []
+]]></system-err>
+</testsuite>
