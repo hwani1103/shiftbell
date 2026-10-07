@@ -302,15 +302,15 @@ void main() {
                       onToday: () {},
                       onAllShifts: () {},
                       onFriends: () {},
-                      onOneTap: () {},
+
                       isKorean: true,
                       editorial: editorial))),
           width: 320);
       final buttons = find.byType(TextButton);
       expect(buttons, findsNWidgets(3));
-      expect(find.byIcon(Icons.alarm_add_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.alarm_add_rounded), findsNothing);
       expect(find.text('원터치'), findsNothing);
-      final first = tester.getRect(find.byKey(const ValueKey('one-tap-open')));
+      final first = tester.getRect(buttons.first);
       expect(first.height, greaterThanOrEqualTo(44));
       for (var i = 0; i < 3; i++) {
         final rect = tester.getRect(buttons.at(i));

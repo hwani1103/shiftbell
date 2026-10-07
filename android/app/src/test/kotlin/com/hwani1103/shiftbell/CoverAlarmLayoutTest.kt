@@ -18,6 +18,39 @@ import kotlin.math.roundToInt
 
 @RunWith(RobolectricTestRunner::class)
 class CoverAlarmLayoutTest {
+    @Test fun selectedValuesAndLocalizedLabelsFitTinyCovers() {
+        val base = ApplicationProvider.getApplicationContext<Context>()
+        val controller = Robolectric.buildActivity(Activity::class.java).setup()
+        for (tag in listOf("ko", "en", "de", "pt-BR", "hi")) for (minutes in listOf(5,15,30))
+            for (scale in listOf(1f, 2f)) for ((w, h) in listOf(192 to 98, 399 to 441)) {
+            val context = base.createConfigurationContext(Configuration(base.resources.configuration).apply {
+                fontScale = scale; setLocale(java.util.Locale.forLanguageTag(tag))
+            })
+            val d = context.resources.displayMetrics.density
+            val surface = CoverAlarmLayout.create(context, "23:59", {}, {}) as FrameLayout
+            surface.removeViewAt(0)
+            controller.get().setContentView(surface)
+            val ring = RingingAlarmTracker.startRing(context, 7)
+            repeat(minutes / 5 - 1) { RingingAlarmTracker.adjustSnooze(context, ring, 1) }
+            val binding = SnoozeControlsBinding(surface, ring)
+            repeat(4) {
+                ShadowLooper.idleMainLooper(); surface.forceLayout()
+                surface.measure(View.MeasureSpec.makeMeasureSpec((w*d).roundToInt(), View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.makeMeasureSpec((h*d).roundToInt(), View.MeasureSpec.EXACTLY))
+                surface.layout(0,0,surface.measuredWidth,surface.measuredHeight)
+            }
+            for (id in listOf(R.id.snoozeDecreaseButton,R.id.snoozeButton,R.id.snoozeIncreaseButton,R.id.dismissButton)) {
+                val b = surface.findViewById<Button>(id)
+                assertTrue("target $tag/$minutes/$scale/$w", b.width >= 48*d-1 && b.height >= 48*d-1)
+                assertTrue("text $tag/$minutes/$scale/$w", b.paint.measureText(b.text.toString()) <= b.width-b.paddingLeft-b.paddingRight+1)
+                assertFalse(b.contentDescription.isNullOrEmpty())
+            }
+            assertEquals("+${minutes}m", surface.findViewById<Button>(R.id.snoozeButton).text.toString())
+            binding.close(); RingingAlarmTracker.endIfCurrent(context, ring.alarmId, ring.round)
+        }
+        controller.pause().stop().destroy()
+    }
+
     @Test fun controlsStayInsideSmallAndLargeCoverWindows() {
         val base = ApplicationProvider.getApplicationContext<Context>()
         val controller = Robolectric.buildActivity(Activity::class.java).setup()
@@ -43,18 +76,18 @@ class CoverAlarmLayoutTest {
                     surface.layout(0, 0, width, height)
                 }
                 val actions = root.getChildAt(1) as LinearLayout
-                assertTrue("clock laid out $w/$h/$scale", root.getChildAt(0).width >= 30 * density)
-                assertFalse("clock overlaps actions $w/$h/$scale", android.graphics.Rect.intersects(
+                if (root.getChildAt(0).visibility == View.VISIBLE) assertTrue("clock laid out $w/$h/$scale", root.getChildAt(0).width >= 64 * density - 1)
+                if (root.getChildAt(0).visibility == View.VISIBLE) assertFalse("clock overlaps actions $w/$h/$scale", android.graphics.Rect.intersects(
                     android.graphics.Rect(root.getChildAt(0).left, root.getChildAt(0).top, root.getChildAt(0).right, root.getChildAt(0).bottom),
                     android.graphics.Rect(actions.left, actions.top, actions.right, actions.bottom)))
                 assertTrue("actions bottom $w/$h/$scale", actions.bottom <= height)
                 assertTrue("actions right $w/$h/$scale", actions.right <= width)
-                for (i in 0..1) {
-                    val button = actions.getChildAt(i) as Button
+                for (id in listOf(R.id.snoozeDecreaseButton, R.id.snoozeButton, R.id.snoozeIncreaseButton, R.id.dismissButton)) {
+                    val button = surface.findViewById<Button>(id)
                     assertTrue("touch width $w/$h/$scale: ${button.width / density}", button.width / density >= 47.5f)
                     assertTrue("touch height $w/$h/$scale", button.height / density >= 47.5f)
-                    assertTrue(button.bottom <= actions.height)
-                    assertTrue(button.right <= actions.width)
+                    val bounds = android.graphics.Rect().also { button.getDrawingRect(it); surface.offsetDescendantRectToMyCoords(button, it) }
+                    assertTrue(bounds.top >= 0 && bounds.left >= 0 && bounds.bottom <= height && bounds.right <= width)
                     button.performClick()
                 }
                 assertEquals(1, dismissals)

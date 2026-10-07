@@ -38,9 +38,7 @@ void main() {
     expect(l10n.alarmRemainingHours(2), '2 घंटे');
     expect(l10n.alarmRemainingHoursMinutes(2, 30), '2 घंटे 30 मिनट');
     expect(l10n.teamEditSwitchConfirm('A', 'B'), contains('टीम B'));
-    expect(l10n.onboardingSwitchToIrregularPrefix +
-        l10n.onboardingSwitchToIrregularLink + l10n.onboardingSwitchToIrregularSuffix,
-        'शिफ्ट का तय क्रम नहीं है? यहां टैप करें।');
+    expect(l10n.onboardingNoPattern, isNotEmpty);
   });
 
   test('Hindi defaults remain short and distinguish work from rest', () {

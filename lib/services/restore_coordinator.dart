@@ -44,6 +44,8 @@ import '../constants/platform_channel.dart';
 import '../models/backup_payload.dart';
 import '../utils/alarm_wall_time.dart';
 import 'backup_policy.dart';
+import 'snooze_settings_service.dart';
+import 'fixed_alarm_occurrence.dart';
 import 'backup_validator.dart';
 import 'diag_log.dart';
 import 'database_service.dart';
@@ -117,6 +119,7 @@ class RestoreCoordinator {
   static const _maxCarryAttempts = 5;
   static const _snoozeCarryLookback = Duration(hours: 1);
   static const _historyKeys = {
+    'fixed_alarm_consumptions': ['slot_time', 'shift_type', 'day_offset'],
     'alarm_history': ['alarm_id', 'scheduled_date', 'scheduled_time', 'actual_ring_time', 'dismiss_type'],
     'alarm_creation_log': ['alarm_id', 'scheduled_date', 'scheduled_time', 'source', 'created_at'],
   };
@@ -395,15 +398,32 @@ class RestoreCoordinator {
     for (final entry in _historyKeys.entries) {
       if (!known.contains(entry.key)) continue;
       final keyCols = entry.value;
+      // A signed offset must not merge into a shift-name suffix (Night- / +1
+      // versus Night / -1). Preserve the legacy keys for other history tables.
+      String naturalKey(Map<String, Object?> row) =>
+          entry.key == 'fixed_alarm_consumptions'
+              ? jsonEncode(keyCols.map((c) => row[c]).toList())
+              : keyCols.map((c) => '${row[c]}').join('');
       final existing = await txn.query(entry.key, columns: keyCols);
-      final seen = existing.map((r) => keyCols.map((c) => '${r[c]}').join('')).toSet();
+      final seen = existing.map(naturalKey).toSet();
       for (final row in payload.tables[entry.key] ?? const <Map<String, dynamic>>[]) {
-        final key = keyCols.map((c) => '${row[c]}').join('');
-        if (!seen.add(key)) continue;
+        final key = naturalKey(row);
+        if (!seen.add(key)) {
+          // A newer backup may know the nominal slot missing from an old copy.
+          if (entry.key == 'alarm_history' && row['fixed_slot_time'] != null) {
+            await txn.update(entry.key, {'fixed_slot_time': row['fixed_slot_time']},
+                where: '${keyCols.map((c) => '$c = ?').join(' AND ')} AND fixed_slot_time IS NULL',
+                whereArgs: keyCols.map((c) => row[c]).toList());
+          }
+          continue;
+        }
         final copy = Map<String, dynamic>.from(row)..remove('id');
         await txn.insert(entry.key, copy);
       }
     }
+
+    // Older backups have history but no durable consumption ledger.
+    await materializeConsumedHistory(txn);
 
     // alarms: 진행 중 행은 원래 ID 그대로 이월, 백업의 미래 custom은 (필요하면 매핑된) ID로 삽입
     await txn.delete('alarms');
@@ -432,7 +452,7 @@ class RestoreCoordinator {
       if (!await prefs.remove(key)) throw StateError('preference remove failed: $key');
     }
     for (final entry in payload.preferences.entries) {
-      if (!isBackupPreferenceKey(entry.key)) continue;
+      if (!isBackupPreferenceKey(entry.key) || entry.key == SnoozeSettingsService.backupKey) continue;
       final value = entry.value;
       final bool ok;
       if (value is bool) {
@@ -449,6 +469,10 @@ class RestoreCoordinator {
         continue;
       }
       if (!ok) throw StateError('preference write failed: ${entry.key}');
+    }
+    if (Platform.isAndroid) {
+      final raw = payload.preferences[SnoozeSettingsService.backupKey];
+      await SnoozeSettingsService.save(raw is int && SnoozeSettingsService.choices.contains(raw) ? raw : 5);
     }
   }
 

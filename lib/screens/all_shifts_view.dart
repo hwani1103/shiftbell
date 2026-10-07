@@ -286,7 +286,7 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
                   loading: () => Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(
                       child: Text(context.l10n
-                          .statusErrorWithDetail(error.toString()))),
+                          .statusErrorWithDetail(context.localizedErrorDetail(error)))),
                   data: (schedule) => SafeArea(
                     child: Column(
                       children: [

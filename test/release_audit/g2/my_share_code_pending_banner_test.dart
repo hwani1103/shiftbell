@@ -1,3 +1,4 @@
+import 'package:shiftbell/l10n/korean_only_copy.dart';
 // T13 G2 테스트 - 공유 화면 대기 상태 안내·재시도 (G2-02 연결 4a8f67e, #24 "실패/대기를 사실대로 표시")
 // Firebase 미초기화 호스트: 공유 중(active)이어도 ownerId를 못 받아 연결 실패 카드가 함께 보이는 상태까지만 재현 가능.
 import 'dart:io';
@@ -18,7 +19,6 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import '../g0/g0_support.dart';
 
 void main() {
-  final l10n = lookupAppLocalizations(const Locale('ko'));
 
   // Keep the shared service available across widget lifecycles.
   late Directory dir;
@@ -59,10 +59,10 @@ void main() {
 
   testWidgets('F-W01 off: 대기 안내 없음, 공유 시작 버튼', (tester) async {
     await pumpScreen(tester, {});
-    expect(find.text(l10n.friendStartSharing), findsOneWidget);
-    expect(find.text(l10n.friendStopPendingBanner), findsNothing);
-    expect(find.text(l10n.friendSyncPendingBanner), findsNothing);
-    expect(find.text(l10n.friendRetrySync), findsNothing);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendStartSharing), findsOneWidget);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendStopPendingBanner), findsNothing);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendSyncPendingBanner), findsNothing);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendRetrySync), findsNothing);
   });
 
   testWidgets('F-W02 stop_pending: 중지 대기 안내 표시(삭제 완료로 표시 안 함), 재시도 후에도 대기면 토스트·안내 유지', (tester) async {
@@ -70,12 +70,12 @@ void main() {
       'friend_share_intent': 'stop_pending', 'friend_share_enabled': false,
       'friend_share_generation': 2, 'friend_share_dirty': true,
     });
-    expect(find.text(l10n.friendStopPendingBanner), findsOneWidget);
-    expect(find.text(l10n.friendSyncPendingBanner), findsNothing);
-    expect(find.text(l10n.friendStartSharing), findsOneWidget);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendStopPendingBanner), findsOneWidget);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendSyncPendingBanner), findsNothing);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendStartSharing), findsOneWidget);
 
-    await tester.ensureVisible(find.text(l10n.friendRetrySync));
-    await tester.tap(find.text(l10n.friendRetrySync));
+    await tester.ensureVisible(find.text(KoreanOnlyCopy.forLocale('ko').friendRetrySync));
+    await tester.tap(find.text(KoreanOnlyCopy.forLocale('ko').friendRetrySync));
     for (var i = 0; i < 5; i++) {
       await tester.pump();
     }
@@ -91,8 +91,8 @@ void main() {
         .widgetList<Text>(find.descendant(of: find.byType(SnackBar), matching: find.byType(Text), skipOffstage: false))
         .map((t) => t.data)
         .toList();
-    expect(snackTexts, contains(l10n.friendSyncPendingToast));
-    expect(find.text(l10n.friendStopPendingBanner), findsOneWidget);
+    expect(snackTexts, contains(KoreanOnlyCopy.forLocale('ko').friendSyncPendingToast));
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendStopPendingBanner), findsOneWidget);
     final state = await FriendSyncService.instance.getShareState();
     expect(state.intent, FriendShareIntent.stopPending);
     expect(state.generation, 2);
@@ -105,10 +105,10 @@ void main() {
       'friend_share_intent': 'active', 'friend_share_enabled': true,
       'friend_share_generation': 1, 'friend_share_dirty': true, 'friend_share_my_name': '홍',
     });
-    expect(find.text(l10n.friendSyncPendingBanner), findsOneWidget);
-    expect(find.text(l10n.friendStopPendingBanner), findsNothing);
-    expect(find.text(l10n.friendConnectionFailed), findsOneWidget);
-    expect(find.text(l10n.friendStartSharing), findsNothing);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendSyncPendingBanner), findsOneWidget);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendStopPendingBanner), findsNothing);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendConnectionFailed), findsOneWidget);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendStartSharing), findsNothing);
   });
 
   testWidgets('F-W04 active+반영 완료(dirty false): 대기 안내 없음', (tester) async {
@@ -119,12 +119,12 @@ void main() {
       'friend_share_intent': 'active', 'friend_share_enabled': true,
       'friend_share_generation': 1, 'friend_share_dirty': false, 'friend_share_my_name': '홍',
     });
-    expect(find.text(l10n.friendSyncPendingBanner), findsNothing);
-    expect(find.text(l10n.friendRetrySync), findsNothing);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendSyncPendingBanner), findsNothing);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendRetrySync), findsNothing);
   });
 
   testWidgets('F-W05 legacy enabled만 있는 설치: active·dirty로 올라가 반영 대기 안내', (tester) async {
     await pumpScreen(tester, {'friend_share_enabled': true, 'friend_share_my_name': '홍'});
-    expect(find.text(l10n.friendSyncPendingBanner), findsOneWidget);
+    expect(find.text(KoreanOnlyCopy.forLocale('ko').friendSyncPendingBanner), findsOneWidget);
   });
 }

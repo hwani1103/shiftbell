@@ -22,6 +22,7 @@ import 'blocking_progress.dart';
 /// 캐시가 있으면 캐시로 열고, 캐시도 없으면 안내만 하고 끝냄(빈 화면 방지).
 Future<void> openFriendCalendar(
     BuildContext context, WidgetRef ref, FriendEntry friend) async {
+  if (!context.usesKoreanFeatures) return;
   // ⭐ 2026-09-15 (출시 적합성 재검토 AUD-01과 같은 패턴) - 예전엔 showDialog + Navigator.pop(context)라서
   // 로딩 중 뒤로가기로 스피너가 먼저 닫히면 이 pop이 친구 목록·달력 화면을 대신 닫았음.
   final refreshResult = await runWithBlockingProgress(
@@ -30,7 +31,7 @@ Future<void> openFriendCalendar(
         .read(friendProvider.notifier)
         .refreshFriend(friend.id, friend.ownerId),
   );
-  if (!context.mounted) return;
+  if (!context.mounted || !context.usesKoreanFeatures) return;
 
   if (refreshResult == FriendRefreshResult.serverRemoved) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -43,16 +44,16 @@ Future<void> openFriendCalendar(
   final latest = updatedList.isEmpty ? friend : updatedList.first;
   if (latest.data == null) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.friendLoadFailedCheckNetwork)),
+      SnackBar(content: Text(context.koOnly.friendLoadFailedCheckNetwork)),
     );
     return;
   }
   if (refreshResult != FriendRefreshResult.refreshed) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.friendShowingCachedSchedule)),
+      SnackBar(content: Text(context.koOnly.friendShowingCachedSchedule)),
     );
   }
-  if (!context.mounted) return;
+  if (!context.mounted || !context.usesKoreanFeatures) return;
   final displayName =
       latest.name.isEmpty ? context.l10n.friendDefaultDisplayName : latest.name;
   // ⭐ 2026-09-11(사용자 요청) - 로딩은 이미 위 스피너 다이얼로그가 다 떠안고

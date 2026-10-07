@@ -4,6 +4,7 @@ import 'data_revision_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/database_service.dart';
 import '../services/app_analytics.dart';
+import '../utils/calendar_dates.dart';
 
 // ⭐ 날짜별 OT(추가근무) 누적 시간 상태 관리 (date 'YYYY-MM-DD' -> 분)
 // date_memos와 동일한 패턴: 달이 바뀔 때 그 달 범위를 통째로 다시 불러와 캐시함
@@ -24,7 +25,7 @@ class OvertimeNotifier extends StateNotifier<Map<String, int>> {
     // ⭐ 범위 안의 날짜는 전부 최신 상태로 교체해야 함(0이 된 날짜는 DB에 row가
     // 없으므로 data에도 없는데, 캐시에 예전 값이 남아있으면 안 지워지는 문제 방지)
     final newState = Map<String, int>.from(state);
-    for (var d = startDate; !d.isAfter(endDate); d = d.add(const Duration(days: 1))) {
+    for (final d in calendarDaysInclusive(startDate, endDate)) {
       newState.remove(_dateKey(d));
     }
     newState.addAll(data);
@@ -72,9 +73,7 @@ class OvertimeNotifier extends StateNotifier<Map<String, int>> {
   // 호출 전에 loadForRange(start, end)로 캐시가 그 기간을 덮고 있어야 정확함.
   int getRangeTotal(DateTime start, DateTime end) {
     var total = 0;
-    for (var d = DateTime(start.year, start.month, start.day);
-        !d.isAfter(DateTime(end.year, end.month, end.day));
-        d = d.add(const Duration(days: 1))) {
+    for (final d in calendarDaysInclusive(start, end)) {
       total += state[_dateKey(d)] ?? 0;
     }
     return total;
@@ -83,9 +82,7 @@ class OvertimeNotifier extends StateNotifier<Map<String, int>> {
   // ⭐ 임의 기간의 날짜별 OT 목록 (날짜 오름차순)
   List<MapEntry<String, int>> getRangeEntries(DateTime start, DateTime end) {
     final result = <MapEntry<String, int>>[];
-    for (var d = DateTime(start.year, start.month, start.day);
-        !d.isAfter(DateTime(end.year, end.month, end.day));
-        d = d.add(const Duration(days: 1))) {
+    for (final d in calendarDaysInclusive(start, end)) {
       final key = _dateKey(d);
       if (state.containsKey(key)) result.add(MapEntry(key, state[key]!));
     }

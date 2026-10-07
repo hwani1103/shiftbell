@@ -45,6 +45,9 @@ extension CalendarThemeIdX on CalendarThemeId {
   // 메서드로 바꿈 - 호출부(settings_tab.dart, calendar_theme_picker_screen.dart)도
   // 함께 갱신함.
   String label(BuildContext context) {
+    if (!context.usesKoreanFeatures && !kEnglishCalendarThemeIds.contains(this)) {
+      return kDefaultCalendarThemeId.label(context);
+    }
     final l10n = context.l10n;
     switch (this) {
       case CalendarThemeId.mainWhite:
@@ -58,13 +61,13 @@ extension CalendarThemeIdX on CalendarThemeId {
       case CalendarThemeId.boldGrid:
         return l10n.themeBoldGrid;
       case CalendarThemeId.initialBadge:
-        return l10n.themeInitialBadge;
+        return KoreanOnlyCopy.fromLocalizations(l10n).themeInitialBadge;
       case CalendarThemeId.underline:
-        return l10n.themeUnderline;
+        return KoreanOnlyCopy.fromLocalizations(l10n).themeUnderline;
       case CalendarThemeId.eventChip:
-        return l10n.themeEventChip;
+        return KoreanOnlyCopy.fromLocalizations(l10n).themeEventChip;
       case CalendarThemeId.editorial:
-        return l10n.themeEditorial;
+        return KoreanOnlyCopy.fromLocalizations(l10n).themeEditorial;
       case CalendarThemeId.diary:
         return l10n.themeDiary;
     }

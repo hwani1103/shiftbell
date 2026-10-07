@@ -100,7 +100,7 @@ class G1RingRoundTest {
         val target = System.currentTimeMillis() + 5 * 60_000L
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
         val minute = SimpleDateFormat("yyyy-MM-dd'T'HH:mm", Locale.US).format(Date(target))
-        db.execSQL("UPDATE alarms SET date = ?, time = ?, type = 'custom', shift_type = NULL, preset_slot = 0 WHERE id = 7",
+        db.execSQL("UPDATE alarms SET date = ?, time = ?, type = 'custom', shift_type = NULL WHERE id = 7",
             arrayOf(format.format(Date(System.currentTimeMillis())), "07:00"))
         db.execSQL("UPDATE alarms SET date = ?, alarm_type_id = 3 WHERE id = 8",
             arrayOf("${minute}:00"))
@@ -217,6 +217,8 @@ class G1RingRoundTest {
             val card = org.robolectric.shadows.ShadowDialog.getLatestDialog()
             assertTrue(card.isShowing)
             assertTrue(card.findViewById<android.widget.Button>(R.id.dismissButton) != null)
+            assertTrue("Underlying settings must receive outside-card taps while ringing",
+                card.window!!.attributes.flags and android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL != 0)
             val remaining = RingTimeoutController.remaining(ring)
             val deadline = android.os.SystemClock.elapsedRealtime() + remaining!!
             InAppAlarmController.pause(activity.get())
@@ -263,9 +265,58 @@ class G1RingRoundTest {
         }
     }
 
+    @Test
+    fun `open app controls change language without rearming the ring deadline`() {
+        val activity = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup()
+        val ring = RingingAlarmTracker.startRing(context, 7)
+        AlarmActionHelper.scheduleRingTimeout(context, ring, 3)
+        val deadline = android.os.SystemClock.elapsedRealtime() + RingTimeoutController.remaining(ring)!!
+        try {
+            InAppAlarmController.resume(activity.get())
+            shadowOf(android.os.Looper.getMainLooper()).idle()
+            val originalCard = org.robolectric.shadows.ShadowDialog.getLatestDialog()
+            repeat(2) { originalCard.findViewById<android.widget.Button>(R.id.snoozeIncreaseButton).performClick() }
+            assertEquals("+15m", originalCard.findViewById<android.widget.TextView>(R.id.snoozeValueText).text.toString())
+            assertTrue(originalCard === org.robolectric.shadows.ShadowDialog.getLatestDialog())
+            for (tag in listOf("pt-BR", "de", "en", "hi")) {
+                // Change the simulated system configuration, so contexts newly
+                // created by AppTextScale inherit the same locale as the host.
+                org.robolectric.RuntimeEnvironment.setQualifiers("+" + tag.replace("-", "-r"))
+                val a = activity.get()
+                InAppAlarmController.changed()
+                shadowOf(android.os.Looper.getMainLooper()).idle()
+                val card = org.robolectric.shadows.ShadowDialog.getLatestDialog()
+                assertTrue(card.isShowing)
+                assertEquals(a.getString(R.string.alarm_dismiss_label), card.findViewById<android.widget.Button>(R.id.dismissButton).contentDescription)
+                assertEquals(SnoozeText.description(a, 15), card.findViewById<android.widget.Button>(R.id.snoozeButton).contentDescription)
+                assertEquals(ring, RingingAlarmTracker.current(context))
+                assertEquals(deadline, android.os.SystemClock.elapsedRealtime() + RingTimeoutController.remaining(ring)!!)
+            }
+        } finally {
+            InAppAlarmController.pause(activity.get())
+            activity.pause().stop().destroy()
+        }
+    }
+
     private fun alarmIntent(id: Int) = Intent(context, CustomAlarmReceiver::class.java).apply {
         putExtra(CustomAlarmReceiver.EXTRA_ID, id)
         putExtra(CustomAlarmReceiver.EXTRA_LABEL, "주간")
+    }
+
+    @Test fun `visible FSI suppresses the delayed overlay even when already unlocked`() {
+        org.robolectric.shadows.ShadowSettings.setCanDrawOverlays(true)
+        val manager = context.getSystemService(Context.KEYGUARD_SERVICE) as android.app.KeyguardManager
+        shadowOf(manager).setKeyguardLocked(false)
+        val app = shadowOf(context as android.app.Application)
+        app.clearStartedServices()
+        CustomAlarmReceiver().onReceive(context, alarmIntent(7))
+        val ring = RingingAlarmTracker.current(context)!!
+        AlarmActivity.visibleRing = ring
+        try {
+            shadowOf(android.os.Looper.getMainLooper()).idleFor(java.time.Duration.ofMillis(501))
+            assertNull(app.nextStartedService)
+            assertEquals(ring, RingingAlarmTracker.current(context))
+        } finally { AlarmActivity.visibleRing = null }
     }
 
     @Test
@@ -293,7 +344,18 @@ class G1RingRoundTest {
             InAppAlarmController.resume(activity.get())
             shadowOf(android.os.Looper.getMainLooper()).idle()
             assertNull(org.robolectric.shadows.ShadowDialog.getLatestDialog())
+            RingSnoozeController.adjust(context, second, 1)
+            val deadline = RingTimeoutController.remaining(second)
+            AlarmOverlayService.yieldToActivity(first)
+            assertEquals(second, AlarmOverlayService.visibleRing)
+            AlarmActivity.visibleRing = second
+            AlarmOverlayService.yieldToActivity(second)
+            assertNull(AlarmOverlayService.visibleRing)
+            assertEquals(second, RingingAlarmTracker.current(context))
+            assertEquals(10, RingingAlarmTracker.selectionForLiveRing(context, second)!!.minutes)
+            assertEquals(deadline, RingTimeoutController.remaining(second))
         } finally {
+            AlarmActivity.visibleRing = null
             InAppAlarmController.pause(activity.get())
             activity.pause().stop().destroy()
             service.destroy()
@@ -420,7 +482,7 @@ class G1RingRoundTest {
         val old = controlNotification()!!
         assertTrue(AlarmActionHelper.claimRingEnd(context, 7, first.round))
         val next = RingingAlarmTracker.startRing(context, 7)
-        NotificationHelper.showRingControlNotification(context, 7, next.round, "Day", 3)
+        NotificationHelper.postInitialRing(context, 7, next.round, "Day", 3)
         val current = controlNotification()!!
         assertNotEquals(old.contentIntent, current.contentIntent)
         for (index in old.actions.indices) {
@@ -431,14 +493,14 @@ class G1RingRoundTest {
             AlarmActionReceiver().onReceive(context, intent)
             assertEquals(next, RingingAlarmTracker.current(context))
         }
-        NotificationHelper.showRingControlNotification(context, 7, next.round, "Day", 3,
-            coverVisible = true, launchFullScreen = false)
+        NotificationHelper.ensureRingControls(context, 7, next.round, "Day", 3,
+            NotificationHelper.RingNoticeReason.COVER_ENTER)
         assertEquals(current.actions[1].actionIntent, controlNotification()!!.actions[1].actionIntent)
     }
 
     private fun controlNotification(): Notification? {
         val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        return shadowOf(nm).getNotification(NotificationHelper.RING_CONTROL_ID)
+        return shadowOf(nm).allNotifications.firstOrNull { it.extras.getString("shiftbell.copy.kind") == "ring" }
     }
 
     private fun alarmType(id: Int): String? =
@@ -456,7 +518,7 @@ class G1RingRoundTest {
         assertTrue("전체화면 인텐트", n.fullScreenIntent != null)
         val actions = n.actions.map { shadowOf(it.actionIntent).savedIntent }
         assertEquals(
-            listOf(AlarmActionReceiver.ACTION_SNOOZE_FROM_NOTIFICATION, AlarmActionReceiver.ACTION_DISMISS_FROM_NOTIFICATION),
+            listOf(RingControlNotification.ACTION_EXECUTE, AlarmActionReceiver.ACTION_DISMISS_FROM_NOTIFICATION),
             actions.map { it.action }
         )
         actions.forEach { assertEquals(ring.round, it.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, -99)) }

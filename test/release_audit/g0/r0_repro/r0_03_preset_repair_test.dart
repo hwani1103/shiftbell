@@ -41,7 +41,7 @@ void main() {
 
     final fixture = await openDatabase(
       path,
-      version: 26,
+      version: 28,
       singleInstance: false,
       onCreate: (db, version) async {
         await db.execute('''

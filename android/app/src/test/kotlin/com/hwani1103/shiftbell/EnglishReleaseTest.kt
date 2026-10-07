@@ -29,8 +29,8 @@ class EnglishReleaseTest {
     @Test fun weekdayOrderAndRemovedFeaturesFollowTheAppLocale() {
         for ((tag, first) in listOf("en-US" to Calendar.SUNDAY,
             "en-GB" to Calendar.MONDAY, "en-ZA" to Calendar.SUNDAY,
-            "en-AE" to Calendar.SUNDAY, "en-PH" to Calendar.SUNDAY,
-            "af-ZA" to Calendar.SUNDAY, "ar-AE" to Calendar.SUNDAY,
+            "en-AE" to Calendar.MONDAY, "en-PH" to Calendar.SUNDAY,
+            "af-ZA" to Calendar.SUNDAY, "ar-AE" to Calendar.MONDAY,
             "fil-PH" to Calendar.SUNDAY, "en-IE" to Calendar.MONDAY)) {
             val ctx = context(tag)
             assertEquals(first, ReleaseLocalePolicy.firstDayOfWeek(ctx))

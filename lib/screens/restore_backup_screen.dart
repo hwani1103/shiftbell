@@ -148,7 +148,7 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
       // 권한 화면을 타게 함.
       final permissions = await PermissionService().checkPermissions();
       final osPermissionsGranted =
-          permissions['notification']! && permissions['overlay']! && permissions['exactAlarm']!;
+          permissions.values.every((granted) => granted);
 
       if (!mounted) return;
 

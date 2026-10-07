@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' show Locale;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,7 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/constants/platform_channel.dart';
 import 'package:shiftbell/models/alarm.dart';
 import 'package:shiftbell/models/backup_payload.dart';
-import 'package:shiftbell/models/custom_alarm_preset.dart';
 import 'package:shiftbell/models/shift_schedule.dart';
 import 'package:shiftbell/providers/alarm_provider.dart';
 import 'package:shiftbell/providers/friend_provider.dart';
@@ -15,7 +15,6 @@ import 'package:shiftbell/providers/schedule_provider.dart';
 import 'package:shiftbell/services/backup_service.dart';
 import 'package:shiftbell/services/backup_validator.dart';
 import 'package:shiftbell/services/backup_watcher.dart';
-import 'package:shiftbell/services/custom_alarm_service.dart';
 import 'package:shiftbell/services/database_service.dart';
 import 'package:shiftbell/services/firebase_bootstrap.dart';
 import 'package:shiftbell/services/friend_sync_service.dart';
@@ -98,7 +97,8 @@ void main() {
     if (await restore.hasPendingJob()) await restore.safeEnd();
     await db.execute('DROP TRIGGER IF EXISTS audit_restore_failure');
     for (final table in ['alarms', 'alarm_history', 'alarm_creation_log',
-      'shift_schedule', 'shift_alarm_templates', 'alarm_overrides', 'friends', 'date_memos']) {
+      'shift_schedule', 'shift_alarm_templates', 'alarm_overrides', 'friends', 'date_memos',
+      'fixed_alarm_consumptions']) {
       await db.delete(table);
     }
   });
@@ -135,15 +135,6 @@ void main() {
     expect(await db.query('alarm_creation_log'), hasLength(3));
     expect(calls.where((c) => c.method == 'cancelNativeAlarm').map((c) => (c.arguments as Map)['id']).toSet(), ids);
     expect(await db.query('shift_alarm_templates'), isEmpty);
-  });
-
-  test('AUD-A02 one-tap native scheduling failure rolls back row and creation log', () async {
-    failMethod = 'scheduleNativeAlarm';
-    final tomorrow = DateTime.now().add(const Duration(days: 1));
-    final result = await CustomAlarmService.instance.assign(tomorrow, const CustomAlarmPreset(time: '07:00'), 0);
-    expect(result.result, isNot(CustomAlarmAssignResult.scheduled));
-    expect(await db.query('alarms'), isEmpty);
-    expect(await db.query('alarm_creation_log'), isEmpty);
   });
 
   test('AUD-A01b schedule reset commits deletion before Native cancellation', () async {
@@ -183,14 +174,14 @@ void main() {
 
   test('AUD-A03 custom type change then delete preserves source log without fixed override', () async {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
-    final result = await CustomAlarmService.instance.assign(tomorrow, const CustomAlarmPreset(time: '07:00'), 0);
+    final alarmId = await service.insertAlarm(Alarm.fromMap(row(42, 'custom', tomorrow)));
     final notifier = AlarmNotifier();
     addTearDown(notifier.dispose);
     await notifier.refresh();
-    await notifier.updateAlarmType(result.alarmId!, 2);
+    await notifier.updateAlarmType(alarmId, 2);
     expect((await db.query('alarms')).single['alarm_type_id'], 2);
     expect(await db.query('alarm_overrides'), isEmpty);
-    await notifier.deleteAlarm(result.alarmId!, result.ringAt);
+    await notifier.deleteAlarm(alarmId, tomorrow);
     expect(await db.query('alarms'), isEmpty);
     expect(await db.query('alarm_history'), hasLength(1));
     expect(await db.query('alarm_creation_log'), hasLength(1));
@@ -459,6 +450,9 @@ void main() {
   });
 
   test('AUD-F01 100 offline friends retain cache and database counts after refresh rename delete', () async {
+    final dispatcher = TestWidgetsFlutterBinding.instance.platformDispatcher;
+    dispatcher.localeTestValue = const Locale('ko');
+    addTearDown(dispatcher.clearLocaleTestValue);
     for (var i = 0; i < 100; i++) {
       await service.insertFriend(name: 'Friend $i', ownerId: 'audit_$i', dataJson: null);
     }
@@ -473,5 +467,82 @@ void main() {
     await notifier.removeFriend(last.id);
     expect(await db.query('friends'), hasLength(99));
     expect(notifier.state, hasLength(99));
+  });
+
+  test('TZ-B01 consumed state round-trips after visible history was cleared', () async {
+    await db.insert('fixed_alarm_consumptions', {'slot_time': '2026-10-05T16:40:00',
+      'shift_type': 'Night', 'day_offset': 0, 'recorded_at': '2026-10-05T07:40:34Z'});
+    final data = await BackupService.instance.exportAll();
+    expect(data.tables['fixed_alarm_consumptions'], hasLength(1));
+    expect(await BackupValidator.validate(data, db), isEmpty);
+    await db.delete('fixed_alarm_consumptions');
+    await restore.start(data, overwrite: true);
+    await restore.start(data, overwrite: true);
+    expect(await db.query('fixed_alarm_consumptions'), hasLength(1));
+    expect(await db.query('alarm_history'), isEmpty);
+  });
+
+  test('TZ-B02 old backup history supplies consumed state without suppressing custom history', () async {
+    final history = <String, dynamic>{'id': 1, 'alarm_id': 43,
+      'scheduled_date': '2026-10-05T16:40:00', 'scheduled_time': '16:40',
+      'shift_type': 'Night', 'day_offset': 0, 'actual_ring_time': '2026-10-05T16:40:34',
+      'created_at': '2026-10-05T16:40:34', 'dismiss_type': 'swiped', 'snooze_count': 0};
+    final data = await payload();
+    data.tables['alarm_history'] = [history];
+    data.tables['alarm_creation_log'] = [{
+      'id': 1, 'alarm_id': 43, 'scheduled_date': history['scheduled_date'],
+      'scheduled_time': '16:40', 'shift_type': 'Night', 'day_offset': 0,
+      'alarm_type_id': 1, 'source': 'auto', 'created_at': '2026-10-01T00:00:00',
+    }];
+    await restore.start(data, overwrite: true);
+    expect((await db.query('fixed_alarm_consumptions')).single['slot_time'], '2026-10-05T16:40:00');
+    await restore.start(await payload(), overwrite: true);
+    expect(await db.query('fixed_alarm_consumptions'), hasLength(1),
+      reason: 'An older backup with no ledger must not erase locally consumed slots');
+  });
+
+  test('TZ-B03 newer backup enriches an identical legacy history with its nominal DST slot', () async {
+    final history = <String, dynamic>{'id': 1, 'alarm_id': 43,
+      'scheduled_date': '2026-03-08T03:30:00', 'scheduled_time': '03:30',
+      'shift_type': 'Night', 'day_offset': 0, 'actual_ring_time': '2026-03-08T03:30:34',
+      'created_at': '2026-03-08T03:30:34', 'dismiss_type': 'swiped', 'snooze_count': 0};
+    await db.insert('alarm_history', history);
+    final data = await payload();
+    data.tables['alarm_history'] = [{...history, 'fixed_slot_time': '2026-03-08T02:30:00'}];
+    await restore.start(data, overwrite: true);
+    expect((await db.query('alarm_history')).single['fixed_slot_time'], '2026-03-08T02:30:00');
+    expect((await db.query('fixed_alarm_consumptions')).single['slot_time'], '2026-03-08T02:30:00');
+  });
+
+  test('TZ-B04 restore carries snooze origin and target without replacing the consumed ledger', () async {
+    final target = DateTime.now().add(const Duration(minutes: 15));
+    final alarm = Alarm(id: 43, time: '07:15', date: target, type: 'snoozed',
+      alarmTypeId: 1, shiftType: 'Night', fixedSlotTime: '2026-10-05T16:40:00');
+    await db.insert('alarms', alarm.toMap());
+    await db.insert('fixed_alarm_consumptions', {'slot_time': alarm.fixedSlotTime,
+      'shift_type': 'Night', 'day_offset': 0, 'recorded_at': '2026-10-05T07:40:34Z'});
+    await restore.start(await payload(), overwrite: true);
+    final carried = (await db.query('alarms')).single;
+    expect(carried['id'], 43);
+    expect(carried['date'], alarm.toMap()['date']);
+    expect(carried['fixed_slot_time'], alarm.fixedSlotTime);
+    expect(await db.query('fixed_alarm_consumptions'), hasLength(1));
+  });
+
+  test('TZ-B05 consumed backup keys distinguish shift suffix from signed day offset', () async {
+    for (final pair in [('Night-', 1), ('Night', -1)]) {
+      await db.insert('fixed_alarm_consumptions', {
+        'slot_time': '2026-10-05T16:40:00', 'shift_type': pair.$1,
+        'day_offset': pair.$2, 'recorded_at': '2026-10-05T07:40:34Z',
+      });
+    }
+    final data = await BackupService.instance.exportAll();
+    expect(await BackupValidator.validate(data, db), isEmpty);
+    await db.delete('fixed_alarm_consumptions');
+    await restore.start(data, overwrite: true);
+    await restore.start(data, overwrite: true);
+    final rows = await db.query('fixed_alarm_consumptions');
+    expect(rows.map((r) => (r['shift_type'], r['day_offset'])).toSet(),
+        {('Night-', 1), ('Night', -1)});
   });
 }

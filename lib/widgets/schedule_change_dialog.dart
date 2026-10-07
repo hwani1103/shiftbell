@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/team_schedule_config.dart';
 import 'app_second_button.dart';
@@ -67,7 +68,10 @@ class _ScheduleChangeDialogState extends State<ScheduleChangeDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(context.l10n.onboardingTodayShiftQuestion(
-                  '${widget.date.month}/${widget.date.day}')),
+                  context.usesKoreanFeatures
+                      ? '${widget.date.month}/${widget.date.day}'
+                      : DateFormat.MMMd(Localizations.localeOf(context).toString())
+                          .format(widget.date))),
               const SizedBox(height: 8),
               Text(context.l10n.settingsSelectTodayShiftFromPattern),
               const SizedBox(height: 16),

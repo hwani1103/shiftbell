@@ -23,13 +23,11 @@ class CalendarHeaderActions extends StatelessWidget {
       required this.onToday,
       required this.onAllShifts,
       required this.onFriends,
-      required this.onOneTap,
       required this.isKorean,
       required this.editorial});
   final VoidCallback onToday;
   final VoidCallback? onAllShifts;
   final VoidCallback? onFriends;
-  final VoidCallback? onOneTap;
   final bool isKorean;
   final bool editorial;
 
@@ -40,7 +38,6 @@ class CalendarHeaderActions extends StatelessWidget {
     final border = color.withValues(alpha: editorial ? 0.20 : 0.14);
     final compact = bounds.maxWidth < 280;
     final height = bounds.hasBoundedHeight ? bounds.maxHeight.clamp(0.0, 46.0) : 46.0;
-    final iconWidth = compact ? 32.0 : 46.0;
     final gap = compact ? 3.0 : 6.0;
     Widget button(String label, VoidCallback action, {Key? key}) => TextButton(
           key: key,
@@ -65,30 +62,16 @@ class CalendarHeaderActions extends StatelessWidget {
     return Align(alignment: Alignment.centerRight, child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 340),
       child: SizedBox(height: height, child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      if (onOneTap != null)
-        SizedBox(width: iconWidth, child: IconButton(
-          key: const ValueKey('one-tap-open'),
-          tooltip: context.l10n.customAlarmLabel,
-          onPressed: onOneTap,
-          icon: const Icon(Icons.alarm_add_rounded),
-          iconSize: compact ? 21 : 24,
-          color: color,
-          style: IconButton.styleFrom(backgroundColor: background,
-            side: BorderSide(color: border),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-          constraints: BoxConstraints(minWidth: iconWidth, minHeight: height),
-          padding: const EdgeInsets.all(3),
-        )),
       if (onAllShifts != null) ...[
         SizedBox(width: gap),
-        Expanded(child: button(isKorean ? '전체 조\n근무표' : 'Teams', onAllShifts!)),
+        Expanded(child: button(context.usesKoreanFeatures ? '전체 조\n근무표' : context.l10n.shiftFullSchedule, onAllShifts!)),
       ],
-      if (onFriends != null) ...[
+      if (onFriends != null && context.usesKoreanFeatures) ...[
         SizedBox(width: gap),
-        Expanded(child: button(isKorean ? '일정공유' : 'Share', onFriends!)),
+        Expanded(child: button('일정공유', onFriends!)),
       ],
       SizedBox(width: gap),
-      Expanded(child: button('TODAY', onToday)),
+      Expanded(child: button(context.usesKoreanFeatures ? 'TODAY' : context.l10n.commonToday.toUpperCase(), onToday)),
     ]))));
   });
 }

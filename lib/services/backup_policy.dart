@@ -20,10 +20,15 @@ const Set<String> kBackupSystemTables = {'android_metadata', 'sqlite_sequence'};
 const String kBackupAlarmsTable = 'alarms';
 
 /// 영구 보존 이력 - 복원 시 비우고 교체하지 않고 자연키 기준 중복 제외 병합(#19, 이력 영구 보존 규칙).
-const Set<String> kBackupHistoryTables = {'alarm_history', 'alarm_creation_log'};
+const Set<String> kBackupHistoryTables = {
+  'alarm_history', 'alarm_creation_log', 'fixed_alarm_consumptions',
+};
 
 /// 이 기기(설치)에만 의미 있는 설정 - export하지 않고, 옛 백업에 들어 있어도 import하지 않음.
 const Set<String> kDeviceLocalPreferenceKeys = {
+  // Removed, unreleased development preferences are neither exported nor restored.
+  'custom_alarm_presets',
+  'one_touch_alarm_tutorial_shown',
   // 자동백업 상태(설치별)
   'backup_last_data_version',
   'backup_last_saved_at',
@@ -62,6 +67,7 @@ bool isBackupPreferenceKey(String key) =>
 enum BackupPrefType { boolean, integer, real, string, stringList }
 
 const Map<String, BackupPrefType> kBackupPreferenceTypes = {
+  'default_snooze_minutes': BackupPrefType.integer,
   'schedule_tab_enabled': BackupPrefType.boolean,
   'condition_tab_enabled': BackupPrefType.boolean,
   'calendar_theme_id': BackupPrefType.string,
@@ -78,8 +84,6 @@ const Map<String, BackupPrefType> kBackupPreferenceTypes = {
   'shift_assign_tutorial_shown': BackupPrefType.boolean,
   'condition_tab_tutorial_shown': BackupPrefType.boolean,
   'schedule_tab_tutorial_shown': BackupPrefType.boolean,
-  // 1.0.24 B - 달력 상단 커스텀 알람 5칸(JSON 문자열, custom_alarm_preset.dart)
-  'custom_alarm_presets': BackupPrefType.string,
 };
 
 bool backupPrefValueMatches(BackupPrefType type, Object? value) => switch (type) {

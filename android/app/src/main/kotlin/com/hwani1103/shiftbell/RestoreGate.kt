@@ -129,6 +129,7 @@ object RestoreGate {
             }
             val restoreText = context.getString(R.string.notif_restore_text)
             val notification = NotificationCompat.Builder(context, NOTIFY_CHANNEL_ID)
+                .addExtras(NotificationLocale.metadata(context, "restore"))
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
                 .setContentTitle(context.getString(R.string.notif_restore_title))
                 .setContentText(restoreText)

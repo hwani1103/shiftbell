@@ -1,5 +1,11 @@
 import 'package:flutter/widgets.dart';
 
+const releaseSupportedLocales = [
+  Locale('ko'), Locale('en', 'US'), Locale('en', 'GB'),
+  Locale('en', 'ZA'), Locale('en', 'IN'), Locale('en', 'AE'), Locale('en', 'PH'),
+  Locale('de', 'DE'), Locale('pt', 'BR'), Locale('hi', 'IN'),
+];
+
 /// Release languages and regional Material date/time picker defaults.
 /// Portuguese copy is Brazilian. Public holidays remain Korean-only.
 Locale resolveReleaseLocale(List<Locale>? locales, Iterable<Locale> supported) {
@@ -8,6 +14,12 @@ Locale resolveReleaseLocale(List<Locale>? locales, Iterable<Locale> supported) {
   if (device.languageCode == 'de') return const Locale('de', 'DE');
   if (device.languageCode == 'pt') return const Locale('pt', 'BR');
   if (device.languageCode == 'hi') return const Locale('hi', 'IN');
+  // Share English copy without losing the release country's date conventions.
+  // This also applies when an unsupported primary language falls back to English.
+  const englishRegions = {'US', 'GB', 'ZA', 'IN', 'AE', 'PH'};
+  if (englishRegions.contains(device.countryCode)) {
+    return Locale('en', device.countryCode);
+  }
   const mondayRegions = {
     'GB',
     'IE',

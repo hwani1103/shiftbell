@@ -11,15 +11,10 @@
   "commonNext": "Avançar",
   "commonClose": "Fechar",
   "commonReset": "Redefinir",
-  "commonChange": "Alterar",
   "commonContinue": "Continuar",
   "commonNotNow": "Agora não",
   "commonGoToSettings": "Abrir configurações",
-  "commonRefresh": "Atualizar",
   "commonGoBack": "Voltar",
-  "commonGetStarted": "Começar",
-  "commonShare": "Compartilhar",
-  "commonCopy": "Copiar",
   "commonNotSet": "Não definido",
   "commonNone": "Nenhum",
   "commonDeletePermanently": "Excluir permanentemente",
@@ -38,24 +33,8 @@
   "commonUpdate": "Atualizar",
   "navNextAlarm": "Próximo alarme",
   "navCalendar": "Calendário",
-  "navFriendShare": "Compartilhar",
-  "navScheduleManagement": "Agenda",
-  "disableTabButtonLabel": "Ocultar {tab}",
-  "@disableTabButtonLabel": {
-    "placeholders": {
-      "tab": {
-        "type": "String"
-      }
-    }
-  },
-  "disableTabDialogBody": "Esta aba ficará oculta na barra inferior. Você pode exibi-la novamente nas Configurações.",
-  "scheduleTabDisableExtraNotice": "Os lembretes dos compromissos também serão cancelados.",
-  "settingsScheduleTabReenableTitle": "Mostrar Agenda",
-  "settingsScheduleTabReenableSubtitle": "Exibir a aba Agenda na barra inferior",
   "navSettings": "Configurações",
-  "shiftWork": "Trabalho em turnos",
   "shiftPattern": "Ciclo de turnos",
-  "settingsPatternTodayMarker": "· hoje em destaque",
   "shiftName": "Nome do turno",
   "shiftType": "Tipo de turno",
   "shiftDayOff": "Folga",
@@ -66,24 +45,16 @@
   "shiftOnCall": "Plantão",
   "shiftOff": "Folga",
   "shiftChange": "Alterar turno",
-  "shiftTeam": "Equipe",
-  "shiftRegularPattern": "Escala com ciclo fixo",
-  "shiftIrregularPattern": "Escala sem ciclo fixo",
   "shiftSchedule": "Escala",
   "shiftFullSchedule": "Equipes",
-  "shiftWorkHours": "Horas de trabalho",
   "shiftOt": "Horas extras",
   "shiftThisMonthOt": "Horas extras do mês",
   "shiftWeeklyWorkHours": "Horas na semana",
-  "shiftPayday": "Dia de referência",
   "shiftChangeSchedule": "Alterar escala",
   "shiftResetSchedule": "Redefinir escala",
   "alarmTitle": "Alarme",
-  "alarmNext": "Próximo alarme",
   "alarmUntil": "Tempo até o alarme",
   "alarmRegistered": "Alarmes agendados",
-  "alarmFixed": "Alarme de turno",
-  "alarmType": "Tipo de alarme",
   "alarmSound": "Som do alarme",
   "alarmSoundManage": "Som e vibração",
   "alarmSoundChoose": "Escolher som do alarme",
@@ -96,8 +67,6 @@
   "alarmVolume": "Volume",
   "alarmHistory": "Histórico de alarmes",
   "alarmDismissed": "Desligado",
-  "alarmRemoved": "Alarme removido",
-  "alarmSnooze5Min": "Adiar por 5 minutos",
   "alarmNoResponse": "Não atendido",
   "alarmScheduleChanged": "Escala alterada",
   "alarmTurnOffThis": "Desligar este alarme",
@@ -164,9 +133,6 @@
   "alarmDeletedToast": "Alarme excluído",
   "alarmUpdatedToast": "Alarme atualizado",
   "alarmCanceledToast": "Alarme cancelado",
-  "alarmCountAll": "Todos",
-  "alarmCountFuture": "Próximos",
-  "alarmCountPast": "Anteriores",
   "alarmDuration": "Tempo de toque",
   "alarmDurationMinutes": "{minutes, plural, =1{1 min} other{{minutes} min}}",
   "@alarmDurationMinutes": {
@@ -186,7 +152,6 @@
       }
     }
   },
-  "calendarMemo": "Nota",
   "calendarMemoAll": "Todas as notas",
   "calendarMemoEnter": "Escrever nota",
   "calendarMemoContent": "Nota",
@@ -210,8 +175,6 @@
     }
   },
   "calendarTapToAddMoreDates": "Toque para selecionar mais datas",
-  "calendarFriendQuickAccessLabel": "Amigos",
-  "calendarTapDateToEnter": "Toque em uma data para adicionar horas extras",
   "calendarMonthlyOtTitle": "Horas extras de {month}",
   "@calendarMonthlyOtTitle": {
     "placeholders": {
@@ -301,31 +264,9 @@
       }
     }
   },
-  "calendarMemoDetailTitle": "Detalhes da nota",
   "onboardingCreateSchedule": "Configure seus turnos",
-  "onboardingFixedPatternQuestion": "Seus turnos seguem um ciclo fixo?",
-  "onboardingYesRegular": "Sim, seguem um ciclo",
-  "onboardingNoIrregular": "Não, eles variam",
-  "onboardingCheckShiftTypes": "Confira os tipos de turno",
-  "onboardingAddIfMissing": "Você pode adicionar outros se precisar",
-  "onboardingShiftLimitHint": "Até {max} tipos de turno · {chars} caracteres por nome",
-  "@onboardingShiftLimitHint": {
-    "placeholders": {
-      "max": {
-        "type": "int"
-      },
-      "chars": {
-        "type": "int"
-      }
-    }
-  },
-  "onboardingUsableEvenIfNotInPattern": "Você pode usá-los mesmo que não façam parte do seu ciclo.",
   "onboardingShiftNameTitle": "Quais turnos e folgas você precisa?",
   "onboardingShiftNameSubHint": "Inclua também folgas e férias para usar no calendário.\n\nToque em × para remover ou em + Adicionar para criar um nome.",
-  "onboardingSwitchToIrregularPrefix": "Se seus turnos não seguem um ciclo fixo, toque ",
-  "onboardingSwitchToIrregularLink": "aqui",
-  "onboardingSwitchToIrregularSuffix": ".",
-  "onboardingSelectAllInPattern": "Selecione todos os turnos do seu ciclo",
   "onboardingTapToCompletePattern": "Monte seu ciclo de turnos",
   "onboardingPatternHint": "(Até 40 dias · toque em um turno no ciclo abaixo para removê-lo.)",
   "onboardingPatternHowTo": "Toque nos turnos na ordem em que se repetem.\nPor exemplo: Dia, Dia, Folga, Folga, Noite, Noite, Folga, Folga.",
@@ -333,14 +274,6 @@
   "onboardingIrregularChoiceDescription": "Escolha esta opção se seus turnos não seguem um ciclo",
   "onboardingNoPattern": "Sem ciclo fixo",
   "onboardingAddShiftName": "Adicionar nome de turno",
-  "onboardingShiftNameHint": "Nome do turno (até {chars} caracteres)",
-  "@onboardingShiftNameHint": {
-    "placeholders": {
-      "chars": {
-        "type": "int"
-      }
-    }
-  },
   "onboardingSetFixedAlarmPerShift": "Defina alarmes para cada turno",
   "onboardingMaxAlarmsPerShift": "Até {max} por turno",
   "@onboardingMaxAlarmsPerShift": {
@@ -364,7 +297,6 @@
       }
     }
   },
-  "onboardingAllSet": "Tudo pronto!",
   "onboardingNeedAtLeastOneShift": "É necessário ter pelo menos um tipo de turno",
   "onboardingEnterShiftName": "Digite um nome de turno",
   "onboardingCharLimitError": "Use no máximo {chars} caracteres",
@@ -399,8 +331,6 @@
   "onboardingWelcomePopupStartButton": "Começar",
   "onboardingShiftAssignPopupTitle": "Como definir os turnos",
   "onboardingShiftAssignPopupBody": "Turnos sem ciclo fixo precisam ser definidos manualmente para cada data.\n\nMantenha uma data pressionada para entrar no modo de seleção, toque nas datas desejadas e depois no nome do turno na parte inferior.\n\nVocê pode alterar um turno definido da mesma forma a qualquer momento.",
-  "onboardingScheduleTabPopupTitle": "Como usar a aba Agenda",
-  "onboardingScheduleTabPopupBody": "1. Criar um compromisso\nToque no ícone de relógio no canto inferior direito para escolher um horário na linha do tempo. Depois, toque no horário desejado para criar um compromisso.\n\n2. Definir uma duração\nPor padrão, o compromisso fica sem duração, com apenas um horário. Toque em + ou nos botões 5 min/30 min/1 h para definir o horário de término.\n\n3. Receber uma notificação\nAtive a opção de notificação para receber um aviso no horário escolhido. O som segue as configurações do sistema.",
   "alarmAlreadyExistsAtTime": "Já existe um alarme às {time}.",
   "@alarmAlreadyExistsAtTime": {
     "placeholders": {
@@ -430,24 +360,13 @@
       }
     }
   },
-  "settingsFriendShareDesc": "Compartilhe escalas com amigos por código ou link",
   "settingsRenameShiftDesc": "Edite, adicione ou exclua nomes de turno.",
-  "settingsEditShiftNameDesc": "Editar o nome deste turno",
   "settingsChangeAlarmTimeDesc": "Alterar o horário do alarme de cada turno",
   "settingsChangeScheduleDesc": "Altere sua escala de trabalho.",
   "settingsAlarmHistoryDesc": "Consulte os alarmes e a situação de cada um",
   "settingsMemoAllDesc": "Veja e busque todas as notas",
   "settingsDeleteAllAlarmsDesc": "Excluir todos os alarmes agendados",
   "settingsDataBackupTitle": "Fazer backup",
-  "settingsDataBackupDesc": "Salve sua escala, alarmes, notas e outros dados neste aparelho",
-  "settingsDataBackupLastSavedAt": "Último backup: {date}",
-  "@settingsDataBackupLastSavedAt": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "settingsDataBackupNeverSaved": "Nenhum backup ainda",
   "settingsDataBackupSlots": "Backup manual: {manual}\nBackup automático: {auto}",
   "@settingsDataBackupSlots": {
@@ -461,69 +380,6 @@
     }
   },
   "settingsDataBackupSlotNone": "Nenhum",
-  "customAlarmLabel": "Alarme rápido",
-  "customAlarmEditTooltip": "Editar alarmes rápidos",
-  "customAlarmEditorTitle": "Configurar alarmes rápidos",
-  "customAlarmEditorDesc": "Salve até 5 opções de alarme, cada uma com horário e tipo de alerta. Use cada opção uma vez por dia, para hoje ou amanhã. Para editar uma opção em uso, exclua primeiro os alarmes agendados com ela.",
-  "customAlarmSlotEmpty": "Vazio",
-  "customAlarmSlotClear": "Limpar",
-  "customAlarmAssignHint": "Toque em uma data para adicionar um alarme às {time}",
-  "@customAlarmAssignHint": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduledToday": "Alarme definido para hoje às {time}",
-  "@customAlarmScheduledToday": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduledOn": "Alarme definido para {date} às {time}",
-  "@customAlarmScheduledOn": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduledSoon": "O alarme tocará em {minutes} min",
-  "@customAlarmScheduledSoon": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
-  "customAlarmPast": "Esse horário já passou. Nenhum alarme foi adicionado.",
-  "customAlarmOutsideWindow": "Alarmes rápidos só podem ser definidos para hoje ou amanhã",
-  "customAlarmDuplicate": "Já existe um alarme às {time} nessa data",
-  "@customAlarmDuplicate": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduleFailed": "Não foi possível agendar o alarme neste aparelho. Tente novamente em instantes.",
-  "customAlarmUndo": "Desfazer",
-  "customAlarmDeleted": "Alarme rápido excluído",
-  "customAlarmDeleteConfirm": "Excluir o alarme rápido das {time}?",
-  "fixedAlarmSkippedByOneTap": "Já havia um alarme rápido para esse horário, por isso o alarme de turno não foi criado.",
-  "@customAlarmDeleteConfirm": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
   "settingsDataBackupInProgress": "Fazendo backup...",
   "settingsDataBackupSuccessToast": "Backup salvo em Download/ShiftBell. Após reinstalar, escolha esse arquivo na primeira tela para restaurar os dados.",
   "settingsDataBackupFailedToast": "Não foi possível salvar o backup. É necessário Android 10 ou superior. Se o aparelho for compatível, tente novamente.",
@@ -542,27 +398,23 @@
   "backupRestoreInProgress": "Restaurando...",
   "backupRestoreFailedToast": "Falha ao restaurar. Tente novamente.",
   "backupRestoreEmptyToast": "Este backup não contém uma escala. Comece configurando seus turnos.",
-  "backupRestoreManualPickLink": "Escolher arquivo de backup",
-  "onboardingHasBackupTitle": "Já usou o ShiftBell?",
-  "onboardingHasBackupLoadButton": "Restaurar",
-  "backupRestoreManualPickHint": "Continue de onde parou com o arquivo de backup em Download/ShiftBell.",
   "backupRestoreManualPickInvalidToast": "Esse arquivo não parece ser um backup válido. Escolha um arquivo cujo nome comece com ShiftBell_Backup_.",
   "backupRestoreInvalidToast": "Não foi possível validar este backup. Nada foi restaurado e seus dados atuais continuam iguais.",
-  "backupRestoreIncompleteToast": "A restauração não foi concluída. Os alarmes foram reagendados com seus dados atuais. Abra o app novamente para concluir.",
+  "backupRestoreIncompleteToast": "A restauração não foi concluída. O reagendamento dos alarmes também pode estar incompleto. Tente novamente e confira os próximos alarmes.",
   "settingsRestoreFromBackupEmptyToast": "Este backup não contém uma escala e não foi carregado. Seus dados atuais não foram alterados.",
   "restoreInterruptedTitle": "Restauração interrompida",
-  "restoreInterruptedDesc": "Uma restauração anterior não foi concluída. Se continuar, o backup substituirá os dados atuais, inclusive as alterações feitas desde a interrupção.\n\nVocê pode continuar a restauração ou manter os dados atuais. Os alarmes serão agendados com os dados que escolher.",
+  "restoreInterruptedDesc": "Uma restauração anterior não foi concluída. Continue para terminar as etapas restantes ou mantenha os dados atuais. Continuar pode sobrescrever mudanças feitas após a interrupção. O histórico de alarmes e os registros de criação são mesclados; alarmes tocando ou adiados são mantidos.\n\nAs duas opções reagendam os alarmes com os dados resultantes. Confira os próximos alarmes ao terminar.",
   "restoreInterruptedResumeButton": "Continuar restauração",
   "restoreInterruptedKeepButton": "Manter dados atuais",
   "restoreInterruptedCopyLost": "O arquivo de backup não está mais disponível e a restauração não pode continuar. Os alarmes serão reagendados com seus dados atuais.",
   "restoreInterruptedInProgress": "Processando...",
   "settingsRestoreFromBackupTitle": "Restaurar backup",
-  "settingsRestoreFromBackupDesc": "Substituir os dados atuais por um backup",
+  "settingsRestoreFromBackupDesc": "Substituir a escala e outros dados salvos por um backup",
   "settingsRestoreFromBackupWarningTitle": "Restaurar backup",
-  "settingsRestoreFromBackupWarningBody": "Os dados atuais do app, incluindo turnos, alarmes, notas e horas extras, serão substituídos pelo backup escolhido. Isso não pode ser desfeito.\n\nEscolha um arquivo em Download → ShiftBell.\n\nOs nomes começam com ShiftBell_Backup_manual_ ou ShiftBell_Backup_auto_ e terminam com data e hora, por exemplo: ShiftBell_Backup_auto_260917_060412.json. Escolha o arquivo mais recente ou a versão que deseja restaurar. Você poderá conferir quando ele foi salvo antes de continuar.",
+  "settingsRestoreFromBackupWarningBody": "Sua escala, notas, horas extras e outros dados e configurações salvos serão substituídos pelo backup escolhido. Isso não pode ser desfeito. O histórico de alarmes e os registros de criação serão mesclados com os do backup. Alarmes tocando ou adiados serão mantidos.\n\nEscolha um arquivo em Download → ShiftBell.\n\nOs nomes começam com ShiftBell_Backup_manual_ ou ShiftBell_Backup_auto_ e terminam com data e hora, por exemplo: ShiftBell_Backup_auto_260917_060412.json. Escolha o arquivo mais recente ou a versão que deseja restaurar. Você poderá conferir quando ele foi salvo antes de continuar.",
   "settingsRestoreFromBackupPickButton": "Escolher arquivo",
   "settingsRestoreFromBackupConfirmTitle": "Restaurar este backup?",
-  "settingsRestoreFromBackupConfirmBody": "Este backup foi salvo em {date}. A restauração substituirá os dados atuais do app pelo conteúdo deste backup.",
+  "settingsRestoreFromBackupConfirmBody": "Este backup foi salvo em {date}. Ele substituirá sua escala, notas, horas extras e outros dados e configurações salvos. O histórico de alarmes e os registros de criação serão mesclados. Alarmes tocando ou adiados serão mantidos.",
   "@settingsRestoreFromBackupConfirmBody": {
     "placeholders": {
       "date": {
@@ -585,7 +437,7 @@
   "settingsAlarmSoundSettings": "Som e vibração",
   "settingsAlarmSoundManageDesc": "Escolha som com vibração, só vibração ou modo silencioso",
   "settingsIncludesVibration": "Inclui vibração",
-  "settingsAllAlarmsWillBeDeleted": "Todos os alarmes agendados serão excluídos.",
+  "settingsAllAlarmsWillBeDeleted": "Todos os alarmes e as configurações de alarme de cada turno serão excluídos. O histórico de alarmes será mantido.",
   "settingsAllAlarmsDeletedToast": "Todos os alarmes foram excluídos permanentemente",
   "statusDeleteFailed": "Falha ao excluir",
   "settingsScheduleChanging": "Alterando escala...",
@@ -627,23 +479,21 @@
     }
   },
   "settingsSelectTodayShiftFromPattern": "Selecione o turno de hoje no ciclo",
-  "settingsScheduleChangeWarning": "Os alarmes de turno dos próximos 10 dias seguirão a nova escala.\nAlarmes rápidos e o histórico existente serão mantidos.",
-  "settingsScheduleChangedRedoAllTeamsHint": "Se você usa a escala de todas as equipes, configure-a novamente também.",
-  "settingsResetScheduleSharingFailed": "Sua escala foi redefinida, mas a escala compartilhada antes pode continuar visível. Quando o app voltar a funcionar, acesse Compartilhar escala → Compartilhar minha escala → Parar de compartilhar.",
-  "settingsResetScheduleConfirm": "Redefinir sua escala e todos os alarmes?\n\nAs escalas de todas as equipes e os históricos de alarmes e de criação também serão excluídos. O compartilhamento da escala será encerrado. Sem internet, isso ocorrerá após a reconexão; até lá, a escala compartilhada anteriormente pode continuar visível.",
-  "privacyIntro": "Os dados de turnos e alarmes são armazenados no seu aparelho. O ShiftBell também usa serviços do Google para estatísticas de uso e publicidade. Esta política explica esses serviços, os arquivos locais e os dados mantidos de recursos usados antes da mudança para esta versão de idioma.",
+  "settingsScheduleChangeWarning": "Os alarmes fixos dos próximos 10 dias serão atualizados para a nova escala. As sonecas agendadas e o histórico de alarmes serão mantidos.",
+  "settingsResetScheduleConfirm": "Redefinir sua escala de turnos e todos os alarmes?\n\nAs escalas de todas as equipes, o histórico e os registros de criação de alarmes também serão excluídos.",
+  "privacyIntro": "Os dados de turnos e alarmes são armazenados no seu aparelho. O ShiftBell também usa serviços do Google para estatísticas de uso e publicidade. Esta política explica esses serviços e os arquivos locais.",
   "privacyNoCollectionTitle": "Dados armazenados no seu aparelho",
-  "privacyNoCollectionBody": "Seus turnos, configurações e histórico de alarmes, notas, horários de trabalho e horas extras ficam no banco de dados local do app. Esses conteúdos não são incluídos nos eventos de análise nem nas solicitações de anúncios.\n\nAgenda, registro de sono e compartilhamento estão disponíveis apenas na versão em coreano. Mudar o idioma não apaga os registros criados anteriormente nesses recursos. Eles podem permanecer no banco de dados e nos backups. A estimativa automática de sono fica desativada fora da versão em coreano.\n\nNo Android 10 ou superior, arquivos de diagnóstico são salvos localmente em Download/ShiftBell/log. Eles incluem versões do aparelho e do Android, permissões, configurações de bateria e registros do processamento de alarmes e backups. Conteúdo de notas e compromissos, nomes de turnos e de amigos não são incluídos. O app não envia esses arquivos automaticamente.",
+  "privacyNoCollectionBody": "Seus turnos, configurações e histórico de alarmes, notas, horários de trabalho e horas extras ficam no banco de dados local do app. Esses conteúdos não são incluídos nos eventos de análise nem nas solicitações de anúncios.\n\nNo Android 10 ou superior, arquivos de diagnóstico são salvos localmente em Download/ShiftBell/log. Eles incluem versões do aparelho e do Android, permissões, configurações de bateria e registros do processamento de alarmes e backups. Conteúdo de notas e nomes de turnos não são incluídos. O app não envia esses arquivos automaticamente.",
   "privacyAnalyticsTitle": "Estatísticas de uso (Google Firebase Analytics)",
   "privacyAnalyticsBody": "O Google Firebase Analytics coleta informações de uso e do aparelho, como aberturas do app, telas visitadas, versões do app e do sistema, modelo do aparelho, região aproximada e um identificador de instalação. O ShiftBell também registra o uso de recursos, como desligar ou adiar um alarme, salvar uma nota ou criar um backup.\n\nEsses eventos não incluem nomes de turnos, horários de alarmes, textos de notas nem outros conteúdos da escala. As estatísticas são processadas conforme a política de privacidade do Google.",
-  "privacyFirebaseTitle": "Serviços do Google e compartilhamentos anteriores",
-  "privacyFirebaseBody": "O compartilhamento está disponível apenas na versão em coreano. Se estava ativo antes da mudança de idioma, o ShiftBell interrompe novos envios e solicita a exclusão da escala compartilhada. Sem internet, a exclusão é tentada novamente quando o app consegue se conectar. Até a confirmação do servidor, um link antigo pode continuar mostrando a escala anterior. Cópias ou capturas de tela de outras pessoas não podem ser recuperadas ou apagadas pelo app.\n\nOs dados compartilhados incluem nome de exibição, ciclo de turnos, data inicial, cores e alterações de turno por data. Não incluem notas, horas extras, configurações de alarmes nem registros de sono. O compartilhamento usa um identificador anônimo do Firebase. Uma reinstalação pode impedir o acesso pelo app aos dados associados ao identificador anterior.\n\nA disponibilidade de atualizações é verificada pelo Google Play. Na versão em coreano, as atualizações de feriados usam um documento público do Firebase, sem enviar conteúdos de turnos ou notas nessa solicitação.",
+  "privacyFirebaseTitle": "Atualizações do app",
+  "privacyFirebaseBody": "A disponibilidade de atualizações do app é verificada pelo Google Play.",
   "privacyAdsTitle": "Publicidade (Google AdMob)",
   "privacyAdsBody": "O ShiftBell exibe anúncios em banner do Google AdMob. O SDK de publicidade pode processar identificadores do aparelho, endereços IP, interações com o app e diagnósticos para fornecer e medir anúncios. O ShiftBell não inclui sua escala, horários de alarmes nem conteúdos de notas nas solicitações de anúncios.\n\nQuando exigido pelo sistema de consentimento do Google, o app solicita suas preferências de publicidade. Quando disponível, use Privacidade dos anúncios nas configurações para revisá-las. A política de privacidade do Google explica como essas informações são tratadas.",
   "privacyPermissionsTitle": "Permissões solicitadas pelo app",
-  "privacyPermissionsBody": "• Notificações: mostrar o estado dos alarmes e lembretes antes de tocarem.\n• Exibir sobre outros apps: mostrar a tela de alarme durante o uso de outros apps.\n• Alarmes exatos: agendar alarmes para o horário definido.\n\nVocê pode revisar essas permissões nas configurações do Android. Negá-las pode limitar as notificações ou impedir que os alarmes funcionem como esperado.",
+  "privacyPermissionsBody": "• Notificações: mostrar o estado dos alarmes e lembretes antes de tocarem.\n• Exibir sobre outros apps: mostrar a tela de alarme durante o uso de outros apps.\n• Alarmes exatos: agendar alarmes para o horário definido.\n\nVocê pode revisar essas permissões nas configurações do Android. Negá-las pode limitar as notificações ou impedir que os alarmes funcionem como esperado.\n\n• Tela de bloqueio: permitir notificações em tela cheia para mostrar a tela do alarme com o celular bloqueado.",
   "privacyDataRetentionTitle": "Retenção e exclusão de dados",
-  "privacyDataRetentionBody": "Desinstalar o app remove seu banco de dados local. Arquivos de backup e diagnóstico salvos em Download/ShiftBell podem permanecer. Exclua-os pelo gerenciador de arquivos quando não forem mais necessários.\n\nOs backups não são criptografados. Eles podem conter todos os dados locais, inclusive registros de recursos usados anteriormente em coreano. Mantenha-os privados. O app nunca envia esses arquivos automaticamente. Se você os copiar para a nuvem ou enviar a alguém, o serviço ou destinatário controlará essa cópia.\n\nO app mantém um backup manual e um automático. Um novo arquivo substitui o anterior do mesmo tipo.\n\nOs dados compartilhados anteriormente são tratados conforme a seção Serviços do Google e compartilhamentos anteriores. As políticas do Google se aplicam à retenção dos dados de análise e publicidade.",
+  "privacyDataRetentionBody": "Desinstalar o app remove seu banco de dados local. Arquivos de backup e diagnóstico salvos em Download/ShiftBell podem permanecer. Exclua-os pelo gerenciador de arquivos quando não forem mais necessários.\n\nOs backups não são criptografados. Eles podem conter todos os dados locais. Mantenha-os privados. O app nunca envia esses arquivos automaticamente. Se você os copiar para a nuvem ou enviar a alguém, o serviço ou destinatário controlará essa cópia.\n\nO app mantém um backup manual e um automático. Um novo arquivo substitui o anterior do mesmo tipo.\n\nAs políticas do Google se aplicam à retenção dos dados de análise e publicidade.",
   "privacyChildrenTitle": "Não destinado a crianças",
   "privacyChildrenBody": "Este app não é destinado a menores de 14 anos, e não coletamos intencionalmente informações pessoais de crianças.",
   "privacyContactTitle": "Contato",
@@ -656,9 +506,7 @@
   "workHoursShiftTimeClockIn": "Início",
   "workHoursShiftTimeClockOut": "Término",
   "workHoursResetShiftTime": "Limpar início e término",
-  "workHoursLegacyClockTimeHint": "A duração salva anteriormente continua valendo. Informe o início e o término para atualizá-la.",
   "workHoursPeriodBasisDesc": "Escolha quais datas entram no total de horas de cada mês.",
-  "workHoursDurationExcluded": "0 horas (não conta como tempo de trabalho)",
   "workHoursDurationHoursOnly": "{h, plural, =1{1 hora} other{{h} horas}}",
   "@workHoursDurationHoursOnly": {
     "placeholders": {
@@ -678,31 +526,9 @@
       }
     }
   },
-  "workHoursEditDialogTitle": "Horas do turno {shift}",
-  "@workHoursEditDialogTitle": {
-    "placeholders": {
-      "shift": {
-        "type": "String"
-      }
-    }
-  },
-  "workHoursUnitHourLabel": "horas",
-  "workHoursUnitMinuteLabel": "minutos",
   "workHoursCutoffDayPrefix": "Dia",
   "workHoursCutoffDaySuffix": "de cada mês",
   "friendShareTitle": "Compartilhar escala",
-  "friendShareMyScheduleTitle": "Compartilhar minha escala",
-  "friendAdd": "Adicionar amigo",
-  "friendName": "Nome do amigo",
-  "friendNameOptionalHint": "Opcional · deixe em branco para usar o nome compartilhado",
-  "friendShareCodeFromFriend": "Código do amigo",
-  "friendEnterShareCode": "Cole o código enviado pelo seu amigo para ver a escala dele",
-  "friendCanCheckAnytime": "Você pode consultar a escala do seu amigo a qualquer momento.",
-  "friendAddedToast": "Amigo adicionado",
-  "friendInvalidCodeOrDuplicate": "Código inválido ou amigo já adicionado",
-  "friendLoadFailedCheckNetwork": "Não foi possível carregar a escala. Verifique sua conexão.",
-  "friendShowingCachedSchedule": "Não foi possível obter os dados mais recentes. Exibindo uma escala salva anteriormente.",
-  "friendNoneAddedYet": "Nenhum amigo adicionado ainda",
   "friendScheduleOf": "Escala de {name}",
   "@friendScheduleOf": {
     "placeholders": {
@@ -711,37 +537,10 @@
       }
     }
   },
-  "friendRemove": "Remover amigo",
-  "friendRemoveConfirm": "Remover {name} da sua lista?",
-  "@friendRemoveConfirm": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "friendDisplayNameTitle": "Nome de exibição",
-  "friendEnterDisplayName": "Digite o nome que seus amigos verão",
-  "friendShareIncludesSchedule": "Sua escala e as alterações de turno são compartilhadas.",
-  "friendShareExcludesExtras": "Notas, horas extras, horários de trabalho e configurações de alarmes não são compartilhados.",
-  "friendStartSharing": "Começar a compartilhar",
-  "friendStopSharing": "Parar de compartilhar",
-  "friendStopSharingConfirm": "Se parar de compartilhar, seus amigos não poderão mais ver sua escala. Sem internet, ela será removida do servidor após a reconexão. Dados já baixados pelos amigos não podem ser apagados pelo app. Continuar?",
-  "friendRestartSharingHint": "(Para compartilhar novamente, toque em \"Começar a compartilhar\" aqui. Seu código e link voltarão a funcionar.)",
-  "friendMyShareCode": "Para amigos com o app (código)",
-  "friendShareCodeInstructions": "Basta seu amigo colar este código em \"Adicionar amigo\" no app para ver sua escala.",
-  "friendShareWithoutApp": "Para amigos sem o app (link)",
-  "friendShareLinkHint": "Ao abrir este link, eles podem ver sua escala sem instalar nada.",
-  "friendInstallShortcutHint": "Toque no ícone de instalação na barra de endereço para adicionar um atalho à tela inicial.",
-  "friendDisplayNameUpdated": "Nome de exibição atualizado",
-  "friendDisplayNameUpdateFailed": "Não foi possível atualizar o nome. Verifique sua conexão.",
-  "friendEnterDisplayNameError": "Digite o nome que seus amigos verão",
-  "friendConnectionFailed": "Falha na conexão. Verifique sua rede e abra esta tela novamente.",
   "friendCouldNotLoad": "Não foi possível carregar",
   "friendLinkMissingCode": "O link não contém um código de compartilhamento.",
   "friendLoadFailedDetailed": "Não foi possível carregar a escala. O link pode estar desatualizado, o compartilhamento pode ter sido encerrado ou pode haver um problema de conexão.",
   "friendUnknownError": "Ocorreu um erro desconhecido.",
-  "friendInstallForHomeScreen": "Toque no botão de instalação na barra de endereço para acessar direto da tela inicial.",
   "friendOpenInBrowserHint": "Abra no Chrome ou em outro navegador para instalar. No menu do canto superior direito, escolha \"Abrir no navegador\".",
   "friendQuickInstallHint": "Adicione à tela inicial para abrir mais rápido na próxima vez",
   "friendQuickInstallButton": "Adicionar atalho",
@@ -756,32 +555,6 @@
       }
     }
   },
-  "friendServerNotReady": "Ainda não há conexão com o servidor de compartilhamento. Tente novamente em instantes.",
-  "friendScheduleNotSet": "Sua escala ainda não foi configurada",
-  "friendStartSharingFailed": "Não foi possível começar a compartilhar. Verifique sua conexão e tente novamente.",
-  "friendSyncPendingBanner": "Sua escala atualizada ainda não foi compartilhada. O ShiftBell tentará novamente quando houver conexão.",
-  "friendStopPendingBanner": "O fim do compartilhamento ainda não foi confirmado. A escala compartilhada antes pode continuar visível.",
-  "friendRetrySync": "Tentar novamente",
-  "friendSyncPendingToast": "O servidor ainda não confirmou. O envio será repetido automaticamente quando houver conexão.",
-  "friendStopSharingAction": "Parar",
-  "friendCodeCopied": "Código copiado",
-  "friendLinkCopied": "Link copiado",
-  "friendShareMessage": "Veja a escala de {name} 🗓️\n\nAbra o link: {link}\n\nOu cole este código em Adicionar amigo no ShiftBell:\n\n{code}",
-  "@friendShareMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "link": {
-        "type": "String"
-      },
-      "code": {
-        "type": "String"
-      }
-    }
-  },
-  "friendNameHintExample": "Digite o nome do amigo",
-  "friendShareChannelsExplainer": "Envie um link para amigos sem o app ou um código para quem já tem o app.",
   "permissionGetStarted": "Comece a usar o ShiftBell",
   "permissionIntro": "Permita que o ShiftBell toque os alarmes no horário certo e mostre os controles na tela.",
   "permissionNotification": "Notificações",
@@ -790,22 +563,15 @@
   "permissionOverlayDesc": "Mostrar a tela de alarme enquanto você usa outros apps",
   "permissionExactAlarm": "Alarmes exatos",
   "permissionExactAlarmDesc": "Necessário para o alarme tocar no horário exato definido",
-  "permissionAllow": "Conceder permissões",
-  "permissionRequired": "Necessária",
-  "permissionRecommended": "Recomendada",
-  "permissionSomeDenied": "Algumas permissões foram negadas",
+  "permissionSomeDenied": "Algumas permissões precisam de atenção",
   "permissionSomeDeniedDesc": "Você pode continuar usando o app, mas alguns recursos dos alarmes dependem dessas permissões.",
   "permissionCanAllowLater": "Você pode conceder as permissões nas configurações a qualquer momento.",
-  "permissionRequiredNotGranted": "Permissões necessárias não concedidas",
-  "statusDataLoadFailed": "Não foi possível carregar os dados",
+  "permissionRequiredNotGranted": "Confira as permissões do alarme",
   "statusNoSchedule": "Nenhuma escala encontrada",
   "statusErrorOccurred": "Ocorreu um erro",
   "statusShiftAssigned": "Turno definido",
   "statusShiftAssignFailed": "Não foi possível definir o turno",
-  "statusShiftChangeFailed": "Não foi possível alterar o turno",
-  "alarmSchedulePartialFailed": "Turno salvo, mas {failed} de {total} alarmes não puderam ser agendados. Verifique a permissão de alarmes exatos e salve o turno novamente.",
-  "scheduleNotifyRegisterFailed": "Compromisso salvo, mas o lembrete não pôde ser agendado. Verifique a permissão de alarmes exatos e salve o compromisso novamente.",
-  "scheduleTabSyncFailed": "Não foi possível alterar a configuração da tela. Tente novamente em instantes.",
+  "alarmSchedulePartialFailed": "Turno salvo, mas {failed, plural, =1{1 de {total} alarmes não pôde ser agendado} other{{failed} de {total} alarmes não puderam ser agendados}}. Verifique a permissão de alarmes exatos e salve o turno novamente.",
   "permissionStatusUnknown": "{name} (estado desconhecido)",
   "statusShiftNameUpdated": "Nome do turno atualizado",
   "statusShiftColorUpdated": "Cor do turno atualizada",
@@ -822,7 +588,7 @@
   },
   "statusOneCharOnly": "Apenas um caractere permitido.",
   "statusFullTeamScheduleTitle": "Configurar escalas de equipes",
-  "statusPatternDayCycle": "Ciclo de turnos ({days} dias)",
+  "statusPatternDayCycle": "Ciclo de turnos ({days, plural, =1{1 dia} other{{days} dias}})",
   "@statusPatternDayCycle": {
     "placeholders": {
       "days": {
@@ -834,18 +600,14 @@
   "allTeamsSetupRosterHint": "Defina todas as equipes desta escala. Toque em Editar para adicionar, remover ou renomear equipes.",
   "allTeamsSetupMyTeamLabel": "Minha equipe",
   "allTeamsSetupMyTeamPickHint": "Escolha qual é a sua equipe.",
-  "allTeamsSetupOtherTeamsLabel": "Outras equipes",
-  "allTeamsSetupOtherTeamsHint": "Selecione todas as outras equipes usadas nesta escala.",
-  "allTeamsSetupPickMyTeamFirstHint": "Escolha sua equipe primeiro.",
   "allTeamsSetupAssignSectionLabel": "Definir turnos",
   "allTeamsSetupAssignHint": "Escolha uma equipe e marque a posição dela no ciclo de hoje.",
   "allTeamsSetupDuplicateNameError": "Este nome de equipe já está em uso.",
-  "allTeamsSetupMinOtherTeamHint": "Selecione pelo menos mais uma equipe.",
   "allTeamsSetupEditTooltip": "Editar escalas de equipes",
   "alarmHistoryEmpty": "Nenhum histórico de alarmes",
   "alarmHistoryDeleteAllTitle": "Excluir todo o histórico",
   "alarmHistoryTestOnlyWarning": "⚠️ Todos os registros desta tela serão excluídos permanentemente.",
-  "alarmHistoryDeleteAllDesc": "Todo o histórico de alarmes será excluído.",
+  "alarmHistoryDeleteAllDesc": "Todo o histórico de alarmes e os registros de criação serão excluídos. Isso não cancela os alarmes agendados.",
   "alarmHistoryDeletedToast": "Todo o histórico de alarmes foi excluído",
   "alarmHistoryDeleteFailed": "Não foi possível excluir o histórico: {error}",
   "@alarmHistoryDeleteFailed": {
@@ -860,10 +622,6 @@
   "themeMinimal": "Linhas simples",
   "themeMaterialCard": "Cartões suaves",
   "themeBoldGrid": "Grade escura",
-  "themeInitialBadge": "Marcadores coloridos",
-  "themeUnderline": "Sublinhado simples",
-  "themeEventChip": "Calendário de eventos",
-  "themeEditorial": "Revista",
   "themeDiary": "Diário",
   "themeSwipeToChoose": "Deslize para os lados para escolher",
   "themeCurrentlyApplied": "Tema atual",
@@ -934,41 +692,11 @@
   "dismissSnoozed5Min": "Adiado por 5 minutos",
   "dismissNoResponse": "Não atendido",
   "dismissAlarmRemoved": "Alarme removido",
-  "scheduleDuplicateTimeSlot": "Já existe um compromisso neste horário. Adicione sua nota a ele.",
-  "scheduleMaxPerSlot": "Você pode criar até {count} compromissos neste horário",
-  "@scheduleMaxPerSlot": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "scheduleDeleteConfirmTitle": "Excluir este compromisso?",
-  "scheduleDeleteConfirmBody": "Compromissos excluídos não podem ser recuperados.",
-  "scheduleEditTitle": "Editar compromisso",
-  "scheduleNewTitle": "Novo compromisso",
-  "scheduleContentFieldLabel": "Detalhes",
-  "scheduleTimeSectionLabel": "Horário",
-  "scheduleNotifySectionLabel": "Notificação",
-  "scheduleNotifyToggleLabel": "Lembrar deste compromisso",
-  "scheduleNotifyDescription": "Você receberá uma notificação que segue a configuração de som, vibração ou silêncio do aparelho.",
-  "scheduleNotifyOffsetQuestion": "Quando lembrar?",
-  "scheduleNotifyOffsetOnTime": "No início",
-  "scheduleNotifyOffsetBefore": "{minutes} min antes",
-  "@scheduleNotifyOffsetBefore": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
-  "scheduleNotifyPastTimeWarning": "O horário do lembrete já passou. Escolha um horário futuro para receber a notificação.",
-  "scheduleCreateButton": "Criar",
   "helpSearchHint": "Buscar na ajuda",
   "helpEmptySearchResult": "Nenhum resultado encontrado",
   "helpStartSectionTitle": "Primeiros passos",
   "helpStartOnboardingTitle": "Configuração inicial",
-  "helpStartOnboardingBody": "Permita notificações, alarmes exatos e exibição sobre outros apps para que o ShiftBell possa alertar você de forma confiável. Depois, escolha se seus turnos seguem um ciclo, adicione os nomes e defina os alarmes necessários. Você pode pular os alarmes e adicioná-los depois nas configurações.\n\nRemova nomes que não usa com × e adicione os que faltam com + Adicionar. Se já usou o ShiftBell, escolha Restaurar backup para restaurar um arquivo.",
+  "helpStartOnboardingBody": "Permita notificações, alarmes exatos e exibição sobre outros apps para que o ShiftBell possa alertar você de forma confiável. Depois, escolha se seus turnos seguem um ciclo, adicione os nomes e defina os alarmes necessários. Você pode pular os alarmes e adicioná-los depois nas configurações.\n\nRemova nomes que não usa com × e adicione os que faltam com + Adicionar. Se já usou o ShiftBell, escolha Restaurar backup para restaurar um arquivo.\n\nAbra Configurações → Permissões do alarme no ShiftBell para conferir cada permissão, incluindo a tela de bloqueio. Volte ao app após configurar. Na primeira configuração, toque em Avançar quando terminar.",
   "helpStartScheduleTypesTitle": "Escalas com ou sem ciclo fixo",
   "helpStartScheduleTypesBody": "Uma escala fixa segue um ciclo, como Dia, Dia, Noite, Noite, Folga, Folga. Monte o ciclo e selecione a posição de hoje. O ShiftBell preenche as próximas datas automaticamente.\n\nEm uma escala sem ciclo fixo, defina os turnos por data. Mantenha uma data pressionada, selecione outras datas se quiser e escolha um turno.",
   "helpShiftSectionTitle": "Gerenciar turnos",
@@ -988,9 +716,9 @@
   "helpAlarmSoundVolumeTitle": "Sons e volume dos alarmes",
   "helpAlarmSoundVolumeBody": "Escolha entre 7 sons integrados ou o som de alarme do sistema. Como os alto-falantes variam entre aparelhos, o app ajusta o volume automaticamente. Se ainda não estiver adequado, experimente outro som nas configurações do alarme.",
   "helpAlarmAlarmNotRingingTitle": "Se um alarme não tocar",
-  "helpAlarmAlarmNotRingingBody": "Confira se a permissão de alarmes exatos está ativada para o ShiftBell. Verifique também as permissões de notificações e de exibição sobre outros apps, que permitem ver e controlar os alarmes. Confira as restrições de bateria do aparelho.\n\nA data precisa ter um turno definido, e esse turno precisa ter um alarme. Verifique também o som, o volume e a vibração.",
+  "helpAlarmAlarmNotRingingBody": "Confira se a permissão de alarmes exatos está ativada para o ShiftBell. Verifique também as permissões de notificações e de exibição sobre outros apps, que permitem ver e controlar os alarmes. Confira as restrições de bateria do aparelho.\n\nA data precisa ter um turno definido, e esse turno precisa ter um alarme. Verifique também o som, o volume e a vibração.\n\nAbra Configurações → Permissões do alarme no ShiftBell para conferir cada permissão, incluindo a tela de bloqueio. Volte ao app após configurar. Na primeira configuração, toque em Avançar quando terminar.",
   "helpAlarmAlarmHistoryTitle": "Ver o histórico de alarmes",
-  "helpAlarmAlarmHistoryBody": "Em Configurações → Histórico de alarmes, você pode ver os alarmes e seus resultados.\n\nAdiar faz o alarme tocar cinco minutos após o toque no botão, mesmo durante mudanças de horário. Quando uma hora se repete ao atrasar o relógio, \"Primeira ocorrência\" e \"Segunda ocorrência\" distinguem os dois horários nos próximos alarmes e no histórico.",
+  "helpAlarmAlarmHistoryBody": "Em Configurações → Histórico de alarmes, você pode ver os alarmes e seus resultados.\n\nAdiar faz o alarme tocar cinco minutos após o toque no botão, mesmo durante mudanças de horário. Quando uma hora se repete ao atrasar o relógio, \"Primeira ocorrência\" e \"Segunda ocorrência\" distinguem os dois horários nos próximos alarmes e no histórico.\n\nSe já houver outro alarme para o horário do adiamento, o alarme atual será encerrado sem ser adiado. O outro alarme será mantido.",
   "helpCalendarSectionTitle": "Calendário e widget",
   "helpCalendarThemesTitle": "Alterar o tema do calendário",
   "helpCalendarThemesBody": "Em Configurações → Tema do calendário, escolha entre seis temas: Clássico claro, Clássico escuro, Linhas simples, Cartões suaves, Diário e Grade escura.\n\nOs temas se aplicam ao calendário dentro do app. O widget da tela inicial mantém a aparência clara.",
@@ -999,59 +727,25 @@
   "helpCalendarWorkHoursPayTitle": "Consultar horas semanais e mensais",
   "helpCalendarWorkHoursPayBody": "Informe os horários habituais de início e término de cada turno em Configurações. O ShiftBell usa esses horários e as horas extras registradas para calcular os totais da semana e do mês.\n\nEm uma escala com ciclo fixo, você também pode incluir no resumo de horas extras o aumento de duração causado por uma alteração de turno. Conta apenas a diferença em relação ao turno original, não a duração inteira do novo turno.",
   "helpCalendarHomeWidgetTitle": "Adicionar o widget à tela inicial",
-  "helpCalendarHomeWidgetBody": "Mantenha a tela inicial pressionada, abra Widgets e adicione Calendário ShiftBell. Ele mostra nomes de turnos e até três notas por data. Redimensione para alternar entre três semanas e um mês inteiro.\n\nA ordem dos dias da semana segue o mesmo padrão regional do app. Feriados e datas lunares não são exibidos fora da versão em coreano.",
-  "helpScheduleTabSectionTitle": "Aba Agenda",
-  "helpScheduleTabWhatIsItTitle": "Qual é a diferença da aba Agenda?",
-  "helpScheduleTabWhatIsItBody": "As notas do calendário valem para o dia inteiro. Os compromissos da Agenda têm um horário definido e podem incluir término e lembrete. Use a Agenda para consultas, tarefas ou planos antes e depois do trabalho.",
-  "helpScheduleTabCreateEditTitle": "Criar e editar compromissos",
-  "helpScheduleTabCreateEditBody": "Toque no ícone de relógio no canto inferior direito para escolher um horário. Depois, toque no horário desejado para abrir a tela de novo compromisso.",
-  "helpScheduleTabAutoCategoryTitle": "Como os ícones são escolhidos",
-  "helpScheduleTabAutoCategoryBody": "O app analisa o texto digitado e adiciona um ícone correspondente. Se não encontrar uma boa correspondência, usa um ícone padrão.",
-  "helpConditionSectionTitle": "Sono e recuperação",
-  "helpConditionWhatIsItTitle": "O que é a aba Sono e recuperação?",
-  "helpConditionWhatIsItBody": "Nesta tela, você pode revisar o sono detectado, adicionar períodos de sono e ver os registros confirmados. Ela mostra horários e durações registrados, sem fornecer uma pontuação de saúde ou diagnóstico médico. Revise as estimativas automáticas antes de confirmá-las.",
-  "helpConditionEvidenceListTitle": "Fontes de Sono e recuperação",
-  "helpConditionEvidenceListBody": "As orientações da aba Sono e recuperação usam as 14 fontes abaixo. Alguns limites, como dias consecutivos de trabalho ou comparações com sua própria média, foram definidos pelo app e não têm uma fonte separada.\n\nEVIDENCE-001 · Direção da rotação de turnos — A rotação para a frente (dia→tarde→noite) é descrita como mais fácil de adaptar do que a rotação inversa. (NIOSH)\n\nEVIDENCE-002 · Descanso mínimo entre turnos — Recomenda pelo menos 11 horas de descanso entre dois turnos. (Knauth e Hornberger, citados no Módulo 5 do NIOSH)\n\nEVIDENCE-003 · Descanso mínimo entre turnos (norma legal) — Cada trabalhador deve ter pelo menos 11 horas consecutivas de descanso a cada 24 horas. (Diretiva da UE sobre tempo de trabalho, art. 3)\n\nEVIDENCE-004 · Turnos longos e risco de acidentes — Em comparação com um turno de 8 horas, o risco relativo é estimado em cerca de +13% para 10 horas e +27% para 12 horas. (Folkard e Lombardi, 2006)\n\nEVIDENCE-005 · Folgas após turnos consecutivos — Recomenda 1–2 dias de folga após cinco turnos de 8 horas ou quatro de 10 horas, e dois dias após três turnos de 12 horas. Também desaconselha concentrar muitas horas de trabalho em poucos dias para depois tirar vários dias de folga. (NIOSH)\n\nEVIDENCE-006 · Sono após um turno noturno — Recomenda priorizar o sono após o turno noturno. (NIOSH)\n\nEVIDENCE-007 · Cochilo antes de um turno noturno — Pode ajudar em certas condições, mas a própria diretriz classifica a evidência como muito baixa. Atenção à sonolência logo após acordar. (AASM, 2025)\n\nEVIDENCE-008 · Cafeína e sono — Mesmo consumida seis horas antes de dormir, a cafeína reduziu significativamente o tempo total de sono em mais de uma hora. (Drake et al., 2013)\n\nEVIDENCE-009 · Luz no trajeto para casa após o turno noturno — Reduzir a exposição à luz intensa pode ajudar o sono posterior. A segurança vem primeiro se a sonolência impedir uma direção segura. (NIOSH)\n\nEVIDENCE-010 · Alimentação no turno noturno — Recomenda comer menos entre meia-noite e 6h e preferir refeições leves. (NIOSH)\n\nEVIDENCE-011 · Sono recomendado para adultos — Para adultos de 18 a 64 anos, a recomendação é de 7–9 horas. (National Sleep Foundation, 2015)\n\nEVIDENCE-012 · Jornada semanal máxima (norma legal) — A média semanal de trabalho, incluindo horas extras, não deve ultrapassar 48 horas. (Diretiva da UE sobre tempo de trabalho, art. 6)\n\nEVIDENCE-013 · Noites consecutivas e risco de acidentes — O risco relativo de acidentes e lesões aumenta a cada turno noturno consecutivo: cerca de +6% na segunda noite, +17% na terceira e +36% na quarta. O aumento é maior do que em turnos diurnos ou vespertinos consecutivos. (Folkard e Tucker, 2003)\n\nEVIDENCE-014 · Horas acumuladas na semana — Recomenda limitar o trabalho de profissionais de enfermagem a 12 horas em 24 horas e a 60 horas em sete dias. Uma revisão sistemática de 2014 associou jornadas acima de 40 horas semanais a menor segurança dos pacientes. (IOM, 2004; citado no Módulo 5 do NIOSH)",
-  "helpConditionSetupNeededTitle": "Configuração necessária",
-  "helpConditionSetupNeededBody": "Informe os horários de início e término de pelo menos um turno em Configurações → Horários e horas extras. Até lá, a avaliação do dia não aparece, mas você já pode registrar o sono. Basta configurar um turno que você esteja usando.",
-  "helpSleepSectionTitle": "Registro de sono",
-  "helpSleepWidgetTitle": "O que é o widget de sono?",
-  "helpSleepWidgetBody": "Adicione o widget de sono à tela inicial. Toque em Dormir ao se deitar e em Acordar ao levantar. O widget também mostra o turno de hoje.\n\nSeus registros aparecem na aba Sono e recuperação junto com sua escala.",
-  "helpSleepAutoDetectTitle": "Estimativa automática de sono",
-  "helpSleepAutoDetectBody": "O ShiftBell estima possíveis períodos de sono com base na sua escala e no tempo em que a tela do celular ficou apagada. Ele procura sono após o trabalho, sono à noite e cochilos antes de um turno noturno. O sono durante um turno não é estimado automaticamente; registre-o pelo widget.\n\nA estimativa só entra nos registros confirmados depois que você a revisar e confirmar.",
-  "helpSleepMiniCalendarTitle": "Revisar e editar registros de sono",
-  "helpSleepMiniCalendarBody": "O minicalendário de sono recente na aba Sono e recuperação mostra os registros confirmados por dia. Toque em um espaço para criar, editar ou excluir um registro. Para registros antigos, use Ver todos e navegue por mês.\n\nAbaixo, Meu sono por turno mostra a média de sono de cada tipo de turno, separando sono principal e cochilos.",
-  "helpFriendSectionTitle": "Compartilhar com amigos",
-  "helpFriendWhatIsItTitle": "O que é compartilhar com amigos?",
-  "helpFriendWhatIsItBody": "Você pode compartilhar sua escala para outras pessoas consultarem ou ver uma escala compartilhada com você. Também é possível compartilhar com quem não tem o app.",
-  "helpFriendShareCodeTitle": "Gerar e compartilhar seu código",
-  "helpFriendShareCodeBody": "Toque em Amigos no calendário e depois em Compartilhar minha escala para obter seu código. Envie-o à outra pessoa, que poderá cadastrá-lo no app para ver sua escala.",
-  "helpFriendViewFriendTitle": "Ver a escala de um amigo pelo código",
-  "helpFriendViewFriendBody": "Se recebeu o código de um amigo, adicione-o na lista de amigos. A escala aparecerá como um calendário no seu app.",
-  "helpFriendReinstallNoteTitle": "O que acontece ao reinstalar o app",
-  "helpFriendReinstallNoteBody": "Reinstalar o app cria uma nova conta interna, interrompendo as conexões de compartilhamento anteriores. Para reconectar, gere um novo código e envie-o novamente.\n\nSeu amigo não verá um erro; a tela continuará mostrando a escala como estava antes da reinstalação. Como ele não tem como perceber isso sozinho, avise se você reinstalar o app.",
+  "helpCalendarHomeWidgetBody": "Mantenha a tela inicial pressionada, abra Widgets e adicione Calendário ShiftBell. Ele mostra nomes de turnos e até três notas por data. Redimensione para alternar entre três semanas e um mês inteiro.\n\nA ordem dos dias da semana segue o mesmo padrão regional do app.",
   "helpBackupSectionTitle": "Backup e restauração",
   "helpBackupDataStorageTitle": "Onde meus dados ficam salvos?",
-  "helpBackupDataStorageBody": "Turnos, alarmes, histórico, notas e registros de horas de trabalho são salvos no seu aparelho. Os backups são arquivos locais em Download/ShiftBell e não são enviados automaticamente.\n\nEstatísticas de uso e publicidade usam serviços do Google. Consulte a política de privacidade para saber quais informações são processadas. Dados de recursos usados antes em coreano podem permanecer no aparelho e nos backups, mesmo que esses recursos fiquem ocultos em outros idiomas.",
+  "helpBackupDataStorageBody": "Turnos, alarmes, histórico, notas e registros de horas de trabalho são salvos no seu aparelho. Os backups são arquivos locais em Download/ShiftBell e não são enviados automaticamente.\n\nEstatísticas de uso e publicidade usam serviços do Google. Consulte a política de privacidade para saber quais informações são processadas.",
   "helpBackupAutoBackupTitle": "Quando o backup automático é feito?",
   "helpBackupAutoBackupBody": "O ShiftBell verifica se houve mudanças ao abrir, voltar ou sair do app. Se os dados mudaram, salva um backup automático em Download/ShiftBell, no seu aparelho. Você também pode tocar em Fazer backup nas Configurações.\n\nO app mantém um backup manual e um automático. Cada novo backup substitui apenas o anterior do mesmo tipo. É necessário Android 10 ou superior.",
   "helpBackupRestoreTitle": "Restaurar após reinstalar ou trocar de aparelho",
-  "helpBackupRestoreBody": "Escolha Restaurar backup na primeira tela ou nas configurações e selecione um arquivo em Download/ShiftBell. Confira a data antes de restaurar: o backup substitui os dados atuais do app.\n\nPara mudar de aparelho, copie o arquivo para o novo celular primeiro. Após restaurar, confira os turnos, próximos alarmes e permissões.",
+  "helpBackupRestoreBody": "Escolha Restaurar backup na primeira tela ou nas configurações e selecione um arquivo em Download/ShiftBell. Confira a data antes de restaurar: ele substitui sua escala, notas, horas extras e outros dados e configurações salvos.\n\nO histórico de alarmes e os registros de criação são mesclados com os do backup. Alarmes tocando ou adiados são mantidos.\n\nPara mudar de aparelho, copie o arquivo para o novo celular primeiro. Após restaurar, confira os turnos, próximos alarmes e permissões.",
   "helpBackupRestoreManualTitle": "Se o backup não for encontrado automaticamente",
   "helpBackupRestoreManualBody": "Após reinstalar, escolha Restaurar backup e selecione o arquivo anterior pelo seletor de arquivos. O Android pode impedir que a nova instalação encontre automaticamente os arquivos da anterior.",
-  "helpBackupRestoreOldBackupFailTitle": "Backups muito antigos podem não ser restaurados",
-  "helpBackupRestoreOldBackupFailBody": "Um backup de uma versão muito antiga do ShiftBell pode usar um formato que não seja mais compatível. Nesse caso, tentar novamente com o mesmo arquivo pode não resolver.\n\nAntes de trocar de aparelho ou reinstalar, toque em Fazer backup nas Configurações. Guarde uma cópia em um local seguro antes de restaurar o celular para as configurações de fábrica ou trocar de aparelho.",
   "helpTroubleshootSectionTitle": "Solução de problemas",
   "helpTroubleshootAlarmIssueTitle": "Meu alarme não tocou",
-  "helpTroubleshootAlarmIssueBody": "Confira as permissões de alarmes exatos, notificações e exibição sobre outros apps, além das restrições de bateria do aparelho. Depois, verifique se a data tem um turno com alarme e se o som ou a vibração está ativado.",
+  "helpTroubleshootAlarmIssueBody": "Confira as permissões de alarmes exatos, notificações e exibição sobre outros apps, além das restrições de bateria do aparelho. Depois, verifique se a data tem um turno com alarme e se o som ou a vibração está ativado.\n\nAbra Configurações → Permissões do alarme no ShiftBell para conferir cada permissão, incluindo a tela de bloqueio. Volte ao app após configurar. Na primeira configuração, toque em Avançar quando terminar.",
   "helpTroubleshootForceStopTitle": "Forcei a parada do app nas configurações",
   "helpTroubleshootForceStopBody": "Usar Forçar parada em Configurações do Android → Apps cancela os alarmes agendados pelo ShiftBell. Abra o app de novo antes do próximo alarme para reagendar os horários futuros. Alarmes cujo horário já passou não tocarão depois.\n\nSair do app ou removê-lo da lista de recentes não cancela os alarmes por si só. Alguns aparelhos, porém, impõem restrições adicionais ao funcionamento em segundo plano.",
   "helpTroubleshootWidgetIssueTitle": "O widget não atualiza",
   "helpTroubleshootWidgetIssueBody": "Remova o widget e adicione-o novamente. Se continuar igual, abra o app uma vez, volte à tela inicial e confira.",
   "helpTroubleshootBackupFileMissingTitle": "Não encontro meu arquivo de backup",
   "helpTroubleshootBackupFileMissingBody": "Procure na pasta Download/ShiftBell usando o gerenciador de arquivos do celular. Se não houver um backup, toque em Fazer backup nas Configurações para criar um.",
-  "helpTroubleshootFriendDisconnectedTitle": "A escala do meu amigo não muda há dias",
-  "helpTroubleshootFriendDisconnectedBody": "Confira a Última sincronização na escala do seu amigo. Uma data antiga pode indicar que as mudanças ainda não foram sincronizadas ou que ele reinstalou o app.\n\nPeça que ele abra o ShiftBell com internet e confira o compartilhamento. Se reinstalou o app, peça um novo código, remova o cadastro antigo e adicione o novo.",
   "startupFailedTitle": "Não foi possível iniciar o app",
   "startupFailedBody": "Ocorreu um problema ao preparar o app. Verifique se há espaço livre suficiente no aparelho e tente novamente. Se persistir, reinicie o aparelho.",
   "startupRetry": "Tentar novamente",
@@ -1060,21 +754,16 @@
   "shiftAnnualLeave": "Férias",
   "onboardingBackupTitle": "Restaurar backup",
   "onboardingBackupDesc": "Recupere seus dados de um arquivo em Download/ShiftBell.",
-  "helpOneTapTitle": "Alarmes rápidos: adicionar um horário salvo",
-  "helpOneTapBody": "Toque no botão de alarme rápido acima do calendário e depois em + para salvar um horário e um tipo de alerta: som com vibração, só vibração ou silencioso. Uma opção vazia aparece por vez, até o limite de cinco.\n\nEscolha um horário salvo e depois hoje ou amanhã. Após agendar, o painel fecha e aparece uma confirmação breve. Horários passados ou já ocupados por outro alarme são rejeitados.\n\nToque no calendário enquanto a lista estiver aberta para fechar o painel. Depois de selecionar uma opção, Voltar retorna à lista.\n\nAo selecionar uma opção, aparecem Editar e Excluir. Uma opção com alarmes futuros só pode ser editada após removê-los. Para excluir um alarme individual, abra sua data e toque em × ao lado dele. Excluir uma opção também exclui os alarmes atribuídos a ela. A confirmação informa se um alarme de turno será restaurado.",
   "helpCalendarTextSizeTitle": "Texto do calendário e tamanho da tela",
   "helpCalendarTextSizeBody": "O calendário se adapta a diferentes tamanhos de tela, incluindo as telas externa e interna de celulares dobráveis. Nomes de turnos e notas longas podem aparecer cortados. Toque em uma data ou nota para ler o texto completo. Cada dia aceita até três notas.\n\nLinhas simples e Cartões suaves mostram os nomes dos turnos maiores por padrão. A ampliação do texto no calendário tem um limite para que datas, turnos e notas caibam nos espaços.",
   "helpDiagnosticTitle": "Encontrar um arquivo de diagnóstico",
-  "helpDiagnosticBody": "Para problemas com alarmes ou backups, confira Download/ShiftBell/log no gerenciador de arquivos (Android 10 ou superior). Os diagnósticos são salvos e atualizados localmente.\n\nEles incluem versões do aparelho e do Android, permissões, configurações de bateria e registros do processamento de alarmes e backups. Conteúdo de notas e compromissos, nomes de turnos e de amigos não são incluídos. Os arquivos não são enviados automaticamente. Você pode anexá-los ao entrar em contato com o suporte. Eles podem permanecer após desinstalar; remova-os pelo gerenciador de arquivos quando não precisar mais.",
-  "helpCalendarLocaleTitle": "Datas, fins de semana e feriados",
-  "helpCalendarLocaleBody": "Na versão em português do Brasil, a semana no calendário começa no domingo, e as datas seguem o formato brasileiro.\n\nOs feriados brasileiros ainda não aparecem no calendário nem no widget. O domingo em vermelho indica o fim de semana, não um feriado. As datas do calendário lunar coreano também ficam ocultas. Seus turnos e alarmes continuam seguindo sua escala.\n\nO cálculo das horas semanais sempre considera segunda a domingo. Feriados e fins de semana não transformam um turno em folga automaticamente.",
+  "helpDiagnosticBody": "Para problemas com alarmes ou backups, confira Download/ShiftBell/log no gerenciador de arquivos (Android 10 ou superior). Os diagnósticos são salvos e atualizados localmente.\n\nEles incluem versões do aparelho e do Android, permissões, configurações de bateria e registros do processamento de alarmes e backups. Conteúdo de notas e nomes de turnos não são incluídos. Os arquivos não são enviados automaticamente. Você pode anexá-los ao entrar em contato com o suporte. Eles podem permanecer após desinstalar; remova-os pelo gerenciador de arquivos quando não precisar mais.",
+  "helpCalendarLocaleTitle": "Datas e início da semana",
+  "helpCalendarLocaleBody": "Na versão em português do Brasil, a semana no calendário começa no domingo, e as datas seguem o formato brasileiro.\n\nO domingo em vermelho indica o fim de semana. Seus turnos e alarmes seguem sua escala.\n\nO cálculo das horas semanais sempre considera segunda a domingo. O fim de semana não transforma um turno em folga automaticamente.",
   "alarmSnoozedLabel": "Adiado",
   "alarmClockFirstOccurrence": "Primeira ocorrência",
   "alarmClockSecondOccurrence": "Segunda ocorrência",
   "shiftNameInUse": "Turnos em uso só podem ser renomeados.",
-  "scheduleOutsideTeamsConfirm": "A posição selecionada não corresponde a nenhuma equipe da escala completa. Ao continuar, essa escala será excluída e precisará ser configurada novamente. Alterar sua escala?",
-  "scheduleMyTeam": "Minha equipe",
-  "scheduleTeamsAtToday": "Posições das equipes no ciclo de hoje.",
   "scheduleTeamChanged": "Você mudou da equipe {from} para a equipe {to}.",
   "@scheduleTeamChanged": {
     "placeholders": {
@@ -1097,7 +786,6 @@
   "teamRuleTitle": "Definir escala",
   "teamRuleLocked": "Vinculado ao meu calendário · somente leitura",
   "teamRuleMissing": "Configure a escala desta equipe",
-  "teamRuleEdit": "Configurar",
   "teamRulePatternHint": "Toque nos turnos em ordem para montar um ciclo.\nToque em um turno inserido para remover essa posição.",
   "teamRuleAllShiftsHint": "Todos os nomes de turno cadastrados nas configurações estão disponíveis.",
   "teamRuleWeeklyHint": "Escolha um turno e toque no dia da semana para defini-lo.\nPreencha os sete dias.",
@@ -1107,7 +795,6 @@
   "teamRuleReviewHint": "Confira os turnos de cada equipe antes de salvar. Você pode mudar de equipe depois. Para alterar um ciclo ou uma escala semanal, será preciso configurar as equipes novamente.",
   "teamRuleUnset": "Não definido",
   "teamRuleResetCycle": "Limpar ciclo",
-  "teamRuleChooseTeam": "Selecione a equipe para a qual deseja mudar.",
   "teamRuleCurrentTeam": "Minha equipe atual",
   "teamRuleWeeklyLabel": "Seg · Ter · Qua · Qui · Sex · Sáb · Dom",
   "teamScheduleResetConfirm": "Sua escala será alterada e os alarmes de turno serão atualizados. A escala das equipes será excluída.\n\nPara manter as escalas e mudar apenas de equipe, acesse Equipes → Editar → Mudar minha equipe.",
@@ -1123,9 +810,9 @@
   "teamEditTitle": "Editar escala completa",
   "teamEditChangedQuestion": "Sua equipe mudou?",
   "teamEditRecreateTitle": "Recriar escala completa",
-  "teamEditRecreateHint": "Use se as posições das equipes foram definidas incorretamente.",
+  "teamEditRecreateHint": "Use para alterar posições, ciclos ou escalas semanais das equipes.",
   "teamEditRecreateConfirm": "Excluir a escala completa atual e criá-la novamente?\nSeus turnos e alarmes não serão alterados.",
-  "teamEditPositionsOn": "Posições das equipes em {date}",
+  "teamEditPositionsOn": "Turnos das equipes em {date}",
   "@teamEditPositionsOn": {
     "placeholders": {
       "date": {
@@ -1158,26 +845,6 @@
   "alarmSnoozeCollisionResult": "Encerrado: já havia outro alarme para 5 minutos depois",
   "alarmRefreshUnconfirmed": "Não foi possível confirmar a atualização dos alarmes. Verifique novamente.",
   "scheduleRefreshUnconfirmed": "A escala foi salva, mas não foi possível confirmar o agendamento dos alarmes.",
-  "oneTapDeleteNoAlarmConfirm": "Não restará nenhum alarme neste horário. Excluir o alarme rápido?",
-  "oneTapDeleteRestoreConfirm": "Excluir este alarme rápido restaurará o alarme de turno de {shift}. Continuar?",
-  "@oneTapDeleteRestoreConfirm": {
-    "placeholders": {
-      "shift": {
-        "type": "String"
-      }
-    }
-  },
-  "oneTapDeleteNoAlarmDetail": "Não restará nenhum alarme neste horário.",
-  "oneTapDeleteRestoreDetail": "O alarme de turno de {shift} será agendado após a exclusão.",
-  "@oneTapDeleteRestoreDetail": {
-    "placeholders": {
-      "shift": {
-        "type": "String"
-      }
-    }
-  },
-  "oneTapDeletedRefreshRetry": "Alarme rápido excluído. O alarme de turno ainda não foi restaurado; o ShiftBell tentará novamente ao atualizar os alarmes.",
-  "oneTapDeletedFixedRestored": "Alarme rápido excluído. Alarme de turno restaurado.",
   "teamEditChooseTeam": "Escolha a equipe para a qual você quer mudar.",
   "durationCompactHours": "{hours} h",
   "@durationCompactHours": {
@@ -1194,5 +861,43 @@
         "type": "int"
       }
     }
-  }
+  },
+  "permissionFullScreen": "Alarme na tela de bloqueio",
+  "permissionFullScreenDesc": "Mostra a tela do alarme quando o celular está bloqueado. Permita notificações em tela cheia.",
+  "permissionGranted": "Permitido",
+  "permissionNeedsSettings": "Precisa de configuração",
+  "permissionUnknown": "Não foi possível verificar",
+  "permissionNotApplicable": "Não requer configuração separada nesta versão do Android",
+  "permissionSettingsTitle": "Permissões do alarme",
+  "permissionReturnGuide": "Depois de configurar, volte ao ShiftBell com o botão Voltar do sistema. Vamos verificar as permissões novamente. Os nomes podem variar conforme o aparelho, a versão do sistema e o idioma das configurações.",
+  "permissionOpenFailed": "Não foi possível abrir as configurações. Nas configurações do celular, busque a permissão que quer alterar e selecione ShiftBell. Para notificações, acesse Apps → ShiftBell → Notificações. Os nomes podem variar conforme o aparelho.",
+  "permissionOverlayRouteGuide": "Se aparecer uma lista de apps, selecione ShiftBell e permita a exibição sobre outros apps.",
+  "permissionAlarmChannelBlocked": "As notificações de controle do alarme estão bloqueadas",
+  "permissionAlarmChannelUnknown": "Não foi possível verificar o canal de controle do alarme",
+  "permissionLockScreenHelp": "O alarme não aparece na tela de bloqueio?",
+  "permissionLockScreenHelpBody": "Confira as permissões do alarme e as restrições de bateria e de execução em segundo plano. Para testar, configure um alarme de turno para daqui a alguns minutos e bloqueie o celular. As permissões permitidas não garantem a exibição em todos os aparelhos.",
+  "permissionXiaomiTitle": "Alarme na tela de bloqueio da Xiaomi",
+  "permissionXiaomiBody": "Na Xiaomi, pode ser necessária uma configuração adicional. Em Outras permissões (Other permissions), selecione Abrir novas janelas em segundo plano (Open new windows while running in the background) e escolha Sempre permitir (Always allow). Esses nomes são orientações e podem variar.",
+  "permissionOpenOemSettings": "Abrir configurações de permissões",
+  "permissionOpenFullScreenSettings": "Abrir configurações de tela cheia",
+  "permissionStillDenied": "Ainda não permitido",
+  "publicWebIntroBody": "Um app para seus turnos e alarmes. Organize sua escala, notas e horas de trabalho em um só lugar.",
+  "publicWebShareTitle": "Ver um calendário de turnos compartilhado",
+  "publicWebShareBody": "Abra um link compartilhado para ver a escala atualizada.",
+  "publicWebPrivacyBody": "Veja como o app usa dados, publicidade e estatísticas.",
+  "publicWebPrivacyAction": "Ver política de privacidade",
+  "publicWebStoreButton": "Ver ShiftBell no Google Play",
+  "defaultSnoozeTitle": "Tempo padrão de soneca",
+  "defaultSnoozeDescription": "Vale para todos os alarmes. Enquanto o alarme toca, use −/+ para escolher de 5 a 30 minutos. Alterações aqui também valem imediatamente para o alarme atual.",
+  "defaultSnoozeMinutes": "{minutes} min",
+  "defaultSnoozeError": "Não foi possível carregar ou salvar a configuração. Tente novamente.",
+  "defaultSnoozeRetry": "Tentar novamente",
+  "@defaultSnoozeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmDefaultLabel": "Alarme"
 }

@@ -1,0 +1,15 @@
+(() async {
+  final d=await DatabaseService.instance.database;
+  final ids=[159,160,161,162,163];
+  final before=<String,dynamic>{};
+  for(final table in ['alarms','alarm_history','alarm_creation_log']){
+    before[table]=await d.query(table,where:(table=='alarms'?'id':'alarm_id')+' IN (159,160,161,162,163)');
+  }
+  for(final id in ids){
+    await d.delete('alarms',where:'id=?',whereArgs:[id]);
+    await kAlarmChannel.invokeMethod('cancelNativeAlarm',{'id':id});
+    await d.delete('alarm_history',where:'alarm_id=?',whereArgs:[id]);
+    await d.delete('alarm_creation_log',where:'alarm_id=?',whereArgs:[id]);
+  }
+  return jsonEncode({'removedTestRows':before,'remainingTestAlarms':await d.query('alarms',where:'id IN (159,160,161,162,163)')});
+})()

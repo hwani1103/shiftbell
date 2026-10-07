@@ -11,15 +11,10 @@
   "commonNext": "आगे",
   "commonClose": "बंद करें",
   "commonReset": "रीसेट करें",
-  "commonChange": "बदलें",
   "commonContinue": "जारी रखें",
   "commonNotNow": "अभी नहीं",
   "commonGoToSettings": "सेटिंग खोलें",
-  "commonRefresh": "रीफ़्रेश करें",
   "commonGoBack": "वापस जाएं",
-  "commonGetStarted": "शुरू करें",
-  "commonShare": "शेयर करें",
-  "commonCopy": "कॉपी करें",
   "commonNotSet": "सेट नहीं है",
   "commonNone": "कोई नहीं",
   "commonDeletePermanently": "हमेशा के लिए हटाएं",
@@ -38,24 +33,8 @@
   "commonUpdate": "अपडेट करें",
   "navNextAlarm": "अगला अलार्म",
   "navCalendar": "कैलेंडर",
-  "navFriendShare": "शेयर करें",
-  "navScheduleManagement": "निजी काम",
-  "disableTabButtonLabel": "{tab} छिपाएं",
-  "@disableTabButtonLabel": {
-    "placeholders": {
-      "tab": {
-        "type": "String"
-      }
-    }
-  },
-  "disableTabDialogBody": "यह टैब नीचे के मेन्यू से छिप जाएगा। इसे सेटिंग से फिर दिखा सकते हैं।",
-  "scheduleTabDisableExtraNotice": "आपके निजी कामों के रिमाइंडर भी बंद हो जाएंगे।",
-  "settingsScheduleTabReenableTitle": "निजी काम टैब दिखाएं",
-  "settingsScheduleTabReenableSubtitle": "निजी काम को नीचे के मेन्यू में वापस लाएं",
   "navSettings": "सेटिंग",
-  "shiftWork": "शिफ्ट में काम",
   "shiftPattern": "शिफ्ट का क्रम",
-  "settingsPatternTodayMarker": "⬆ आज की शिफ्ट अलग रंग में है",
   "shiftName": "शिफ्ट का नाम",
   "shiftType": "शिफ्ट का प्रकार",
   "shiftDayOff": "छुट्टी",
@@ -66,24 +45,16 @@
   "shiftOnCall": "ऑन-कॉल",
   "shiftOff": "छुट्टी",
   "shiftChange": "शिफ्ट बदलें",
-  "shiftTeam": "टीम",
-  "shiftRegularPattern": "दोहराने वाला शिफ्ट क्रम",
-  "shiftIrregularPattern": "हर तारीख की अलग शिफ्ट",
   "shiftSchedule": "शिफ्ट शेड्यूल",
   "shiftFullSchedule": "सभी टीमें",
-  "shiftWorkHours": "काम के घंटे",
   "shiftOt": "ओवरटाइम",
   "shiftThisMonthOt": "इस महीने का ओवरटाइम",
   "shiftWeeklyWorkHours": "हफ़्ते के काम के घंटे",
-  "shiftPayday": "गणना की अंतिम तारीख",
   "shiftChangeSchedule": "शेड्यूल बदलें",
   "shiftResetSchedule": "शेड्यूल रीसेट करें",
   "alarmTitle": "अलार्म",
-  "alarmNext": "अगला अलार्म",
   "alarmUntil": "अलार्म बजने में बाकी",
   "alarmRegistered": "सेट किए गए अलार्म",
-  "alarmFixed": "शिफ्ट का अलार्म",
-  "alarmType": "अलार्म का प्रकार",
   "alarmSound": "अलार्म की आवाज़",
   "alarmSoundManage": "आवाज़ और वाइब्रेशन",
   "alarmSoundChoose": "अलार्म की आवाज़ चुनें",
@@ -96,8 +67,6 @@
   "alarmVolume": "वॉल्यूम",
   "alarmHistory": "अलार्म का इतिहास",
   "alarmDismissed": "बंद किया गया",
-  "alarmRemoved": "अलार्म हटाया गया",
-  "alarmSnooze5Min": "5 मिनट बाद फिर बजाएं",
   "alarmNoResponse": "छूट गया",
   "alarmScheduleChanged": "शेड्यूल बदल गया",
   "alarmTurnOffThis": "यह अलार्म बंद करें",
@@ -164,9 +133,6 @@
   "alarmDeletedToast": "अलार्म हटा दिया गया",
   "alarmUpdatedToast": "अलार्म अपडेट हो गया",
   "alarmCanceledToast": "अलार्म रद्द कर दिया गया",
-  "alarmCountAll": "सभी",
-  "alarmCountFuture": "आने वाले",
-  "alarmCountPast": "पिछले",
   "alarmDuration": "कितनी देर बजे",
   "alarmDurationMinutes": "{minutes, plural, =1{1 मिनट} other{{minutes} मिनट}}",
   "@alarmDurationMinutes": {
@@ -186,7 +152,6 @@
       }
     }
   },
-  "calendarMemo": "नोट",
   "calendarMemoAll": "सभी नोट",
   "calendarMemoEnter": "नोट लिखें",
   "calendarMemoContent": "नोट",
@@ -210,8 +175,6 @@
     }
   },
   "calendarTapToAddMoreDates": "और तारीखें चुनने के लिए टैप करें",
-  "calendarFriendQuickAccessLabel": "दोस्त",
-  "calendarTapDateToEnter": "ओवरटाइम जोड़ने के लिए तारीख पर टैप करें",
   "calendarMonthlyOtTitle": "{month} का ओवरटाइम",
   "@calendarMonthlyOtTitle": {
     "placeholders": {
@@ -301,46 +264,16 @@
       }
     }
   },
-  "calendarMemoDetailTitle": "नोट का विवरण",
   "onboardingCreateSchedule": "अपनी शिफ्ट सेट करें",
-  "onboardingFixedPatternQuestion": "क्या आपकी शिफ्ट एक तय क्रम में दोहराती हैं?",
-  "onboardingYesRegular": "हां, तय क्रम है",
-  "onboardingNoIrregular": "नहीं, बदलती रहती हैं",
-  "onboardingCheckShiftTypes": "अपनी शिफ्ट के प्रकार देखें",
-  "onboardingAddIfMissing": "ज़रूरत हो तो और जोड़ सकते हैं",
-  "onboardingShiftLimitHint": "अधिकतम {max} प्रकार · हर नाम में {chars} अक्षर",
-  "@onboardingShiftLimitHint": {
-    "placeholders": {
-      "max": {
-        "type": "int"
-      },
-      "chars": {
-        "type": "int"
-      }
-    }
-  },
-  "onboardingUsableEvenIfNotInPattern": "इन्हें अपने सामान्य क्रम से अलग तारीखों पर भी लगा सकते हैं।",
   "onboardingShiftNameTitle": "अपनी शिफ्ट और छुट्टियां जोड़ें",
-  "onboardingShiftNameSubHint": "साप्ताहिक छुट्टी और अवकाश भी जोड़ें। बाद में इन्हें तारीखों पर लगा सकते हैं।\n\nहटाने के लिए × या नया नाम बनाने के लिए + जोड़ें पर टैप करें।",
-  "onboardingSwitchToIrregularPrefix": "शिफ्ट का तय क्रम नहीं है? ",
-  "onboardingSwitchToIrregularLink": "यहां",
-  "onboardingSwitchToIrregularSuffix": " टैप करें।",
-  "onboardingSelectAllInPattern": "दोहराए जाने वाले क्रम की शिफ्ट चुनें",
+  "onboardingShiftNameSubHint": "छुट्टी और अवकाश भी जोड़ें। बाद में इन्हें तारीखों पर लगा सकते हैं।\n\nहटाने के लिए × या नया नाम बनाने के लिए + जोड़ें पर टैप करें।",
   "onboardingTapToCompletePattern": "अपनी शिफ्ट का क्रम बनाएं",
   "onboardingPatternHint": "(अधिकतम 40 दिन · नीचे किसी शिफ्ट पर टैप करके उसे क्रम से हटाएं।)",
-  "onboardingPatternHowTo": "जिस क्रम में शिफ्ट दोहराती हैं, उसी क्रम में टैप करें।\nजैसे: दिन, दिन, छुट्टी, छुट्टी, रात, रात, छुट्टी, छुट्टी।",
+  "onboardingPatternHowTo": "जिस क्रम में शिफ्ट दोहराई जाती हैं, उसी क्रम में टैप करें।\nजैसे: दिन, दिन, छुट्टी, छुट्टी, रात, रात, छुट्टी, छुट्टी।",
   "onboardingIrregularChoiceTitle": "तारीख के हिसाब से शिफ्ट लगाएं",
   "onboardingIrregularChoiceDescription": "शिफ्ट का तय क्रम न हो तो यह विकल्प चुनें",
   "onboardingNoPattern": "कोई तय क्रम नहीं",
   "onboardingAddShiftName": "शिफ्ट का नाम जोड़ें",
-  "onboardingShiftNameHint": "शिफ्ट का नाम (अधिकतम {chars} अक्षर)",
-  "@onboardingShiftNameHint": {
-    "placeholders": {
-      "chars": {
-        "type": "int"
-      }
-    }
-  },
   "onboardingSetFixedAlarmPerShift": "हर शिफ्ट के लिए अलार्म सेट करें",
   "onboardingMaxAlarmsPerShift": "हर शिफ्ट के लिए अधिकतम {max}",
   "@onboardingMaxAlarmsPerShift": {
@@ -364,7 +297,6 @@
       }
     }
   },
-  "onboardingAllSet": "सब तैयार है!",
   "onboardingNeedAtLeastOneShift": "कम से कम एक शिफ्ट का प्रकार ज़रूरी है",
   "onboardingEnterShiftName": "शिफ्ट का नाम दर्ज करें",
   "onboardingCharLimitError": "अधिकतम {chars} अक्षर दर्ज करें",
@@ -399,8 +331,6 @@
   "onboardingWelcomePopupStartButton": "शुरू करें",
   "onboardingShiftAssignPopupTitle": "कैलेंडर में शिफ्ट कैसे लगाएं",
   "onboardingShiftAssignPopupBody": "शिफ्ट का तय क्रम नहीं है तो कैलेंडर में तारीख के हिसाब से शिफ्ट लगाएं।\n\nकिसी तारीख को दबाकर रखें। फिर दूसरी तारीखें चुनने के लिए उन पर टैप करें। नीचे शिफ्ट के नाम पर टैप करने से वह सभी चुनी गई तारीखों पर लग जाएगी।\n\nपहले से लगी शिफ्ट भी इसी तरह बदल सकते हैं।",
-  "onboardingScheduleTabPopupTitle": "निजी काम टैब का इस्तेमाल",
-  "onboardingScheduleTabPopupBody": "1. काम जोड़ें\nनीचे दाईं ओर घड़ी के आइकन पर टैप करें। फिर टाइमलाइन में समय चुनकर काम जोड़ें।\n\n2. खत्म होने का समय चुनें\nशुरुआत में काम के खत्म होने का समय तय नहीं होता। + या 5 मिनट, 30 मिनट और 1 घंटा बटन से इसे सेट करें।\n\n3. रिमाइंडर लगाएं\nसूचना चालू करें और याद दिलाने का समय चुनें। रिमाइंडर की आवाज़ आपके डिवाइस की सूचना सेटिंग के अनुसार होगी।",
   "alarmAlreadyExistsAtTime": "{time} पर पहले से एक अलार्म है।",
   "@alarmAlreadyExistsAtTime": {
     "placeholders": {
@@ -419,7 +349,7 @@
   "settingsCalendarMonthBasis": "पूरा कैलेंडर महीना",
   "settingsCalendarMonthBasisDesc": "महीने की पहली से आखिरी तारीख तक",
   "settingsPaydayBasis": "अपनी मासिक अवधि चुनें",
-  "settingsPaydayBasisDesc": "चुनी गई तारीख से हर महीने का कुल समय",
+  "settingsPaydayBasisDesc": "चुनी हुई संदर्भ तारीख के आधार पर महीने का कुल समय",
   "settingsPeriodStartBasis": "अवधि की पहली तारीख",
   "settingsPeriodEndBasis": "अवधि की आखिरी तारीख",
   "settingsPreviewThisMonth": "इस महीने की अवधि: {range}",
@@ -430,24 +360,13 @@
       }
     }
   },
-  "settingsFriendShareDesc": "कोड या लिंक से दोस्तों के साथ शेड्यूल शेयर करें",
   "settingsRenameShiftDesc": "शिफ्ट के नाम बदलें, जोड़ें या हटाएं।",
-  "settingsEditShiftNameDesc": "इस शिफ्ट का नाम बदलें",
   "settingsChangeAlarmTimeDesc": "हर शिफ्ट के अलार्म का समय बदलें",
   "settingsChangeScheduleDesc": "अपना शिफ्ट शेड्यूल बदलें।",
-  "settingsAlarmHistoryDesc": "पिछले अलार्म और उनकी स्थिति देखें",
+  "settingsAlarmHistoryDesc": "अलार्म और उनकी स्थिति देखें",
   "settingsMemoAllDesc": "सभी नोट देखें और खोजें",
   "settingsDeleteAllAlarmsDesc": "सभी सेट किए गए अलार्म हटाएं",
   "settingsDataBackupTitle": "डेटा का बैकअप लें",
-  "settingsDataBackupDesc": "शेड्यूल, अलार्म, नोट और बाकी डेटा इसी डिवाइस पर सेव करें",
-  "settingsDataBackupLastSavedAt": "आखिरी बैकअप: {date}",
-  "@settingsDataBackupLastSavedAt": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "settingsDataBackupNeverSaved": "अभी कोई बैकअप नहीं है",
   "settingsDataBackupSlots": "खुद लिया गया बैकअप: {manual}\nअपने आप लिया गया बैकअप: {auto}",
   "@settingsDataBackupSlots": {
@@ -461,69 +380,6 @@
     }
   },
   "settingsDataBackupSlotNone": "कोई नहीं",
-  "customAlarmLabel": "एक टैप अलार्म",
-  "customAlarmEditTooltip": "एक टैप अलार्म बदलें",
-  "customAlarmEditorTitle": "एक टैप अलार्म की सेटिंग",
-  "customAlarmEditorDesc": "समय और आवाज़ के साथ अधिकतम 5 अलार्म विकल्प सेव करें। हर विकल्प से आज या कल के लिए रोज़ एक अलार्म लगा सकते हैं। इस्तेमाल हो रहे विकल्प को बदलने से पहले उससे लगाए गए अलार्म हटाएं।",
-  "customAlarmSlotEmpty": "खाली",
-  "customAlarmSlotClear": "हटाएं",
-  "customAlarmAssignHint": "{time} का अलार्म लगाने के लिए तारीख पर टैप करें",
-  "@customAlarmAssignHint": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduledToday": "आज {time} का अलार्म लग गया",
-  "@customAlarmScheduledToday": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduledOn": "{date} को {time} का अलार्म लग गया",
-  "@customAlarmScheduledOn": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduledSoon": "अलार्म {minutes} मिनट में बजेगा",
-  "@customAlarmScheduledSoon": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
-  "customAlarmPast": "यह समय बीत चुका है, इसलिए अलार्म नहीं लगाया गया",
-  "customAlarmOutsideWindow": "एक टैप अलार्म सिर्फ आज या कल के लिए लगा सकते हैं",
-  "customAlarmDuplicate": "उस तारीख को {time} पर पहले से अलार्म है",
-  "@customAlarmDuplicate": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduleFailed": "इस डिवाइस पर अलार्म सेट नहीं हो सका। थोड़ी देर बाद फिर कोशिश करें।",
-  "customAlarmUndo": "वापस लें",
-  "customAlarmDeleted": "एक टैप अलार्म हटा दिया गया",
-  "customAlarmDeleteConfirm": "{time} का एक टैप अलार्म हटाएं?",
-  "fixedAlarmSkippedByOneTap": "इसी समय एक टैप अलार्म पहले से लगा था, इसलिए शिफ्ट का अलार्म नहीं लगाया गया",
-  "@customAlarmDeleteConfirm": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
   "settingsDataBackupInProgress": "बैकअप लिया जा रहा है…",
   "settingsDataBackupSuccessToast": "बैकअप Download/ShiftBell में सेव हो गया। ऐप दोबारा इंस्टॉल करने पर पहली स्क्रीन से यह फ़ाइल चुनकर डेटा वापस ला सकते हैं।",
   "settingsDataBackupFailedToast": "बैकअप सेव नहीं हुआ। इसके लिए Android 10 या नया संस्करण चाहिए। आपके डिवाइस में यह सुविधा है तो फिर कोशिश करें।",
@@ -542,27 +398,23 @@
   "backupRestoreInProgress": "डेटा वापस लाया जा रहा है…",
   "backupRestoreFailedToast": "डेटा वापस नहीं आ सका। फिर कोशिश करें।",
   "backupRestoreEmptyToast": "इस बैकअप में शिफ्ट शेड्यूल नहीं है। पहले अपनी शिफ्ट सेट करें।",
-  "backupRestoreManualPickLink": "बैकअप फ़ाइल चुनें",
-  "onboardingHasBackupTitle": "पहले भी यह ऐप इस्तेमाल किया है?",
-  "onboardingHasBackupLoadButton": "डेटा वापस लाएं",
-  "backupRestoreManualPickHint": "Download/ShiftBell की बैकअप फ़ाइल से अपना पुराना डेटा वापस लाएं।",
   "backupRestoreManualPickInvalidToast": "ShiftBell की बैकअप फ़ाइल चुनें। इसका नाम ShiftBell_Backup_ से शुरू होता है।",
   "backupRestoreInvalidToast": "इस बैकअप की जांच सफल नहीं हुई। कोई डेटा वापस नहीं लाया गया और आपका मौजूदा डेटा वैसा ही है।",
-  "backupRestoreIncompleteToast": "डेटा वापस लाने की प्रक्रिया पूरी नहीं हुई। मौजूदा डेटा के अनुसार अलार्म फिर सेट कर दिए गए हैं। प्रक्रिया पूरी करने के लिए ऐप दोबारा खोलें।",
+  "backupRestoreIncompleteToast": "डेटा वापस लाने की प्रक्रिया पूरी नहीं हुई। अलार्म दोबारा सेट करने का काम भी अधूरा हो सकता है। फिर कोशिश करें और आने वाले अलार्म जांचें।",
   "settingsRestoreFromBackupEmptyToast": "इस बैकअप में शिफ्ट शेड्यूल नहीं है, इसलिए इसे लोड नहीं किया गया। मौजूदा डेटा वैसा ही है।",
   "restoreInterruptedTitle": "डेटा वापस लाना बीच में रुक गया",
-  "restoreInterruptedDesc": "पिछली बार बैकअप से डेटा वापस लाने की प्रक्रिया पूरी नहीं हुई। जारी रखने पर मौजूदा डेटा की जगह उस बैकअप का डेटा आ जाएगा। प्रक्रिया रुकने के बाद किए गए बदलाव भी बदल जाएंगे।\n\nआप प्रक्रिया जारी रख सकते हैं या मौजूदा डेटा रख सकते हैं। अलार्म आपके चुने हुए डेटा के अनुसार सेट होंगे।",
+  "restoreInterruptedDesc": "पिछली बार डेटा वापस लाने की प्रक्रिया पूरी नहीं हुई। बचे हुए चरण पूरे करें या मौजूदा डेटा रखें। जारी रखने पर प्रक्रिया रुकने के बाद किए गए बदलाव मिट सकते हैं। अलार्म का इतिहास और अलार्म बनने के रिकॉर्ड जोड़ दिए जाते हैं; अभी बज रहे या स्नूज़ किए गए अलार्म बने रहते हैं।\n\nदोनों विकल्पों में अंत में बचे डेटा के अनुसार अलार्म फिर सेट किए जाते हैं। प्रक्रिया पूरी होने के बाद आने वाले अलार्म जांचें।",
   "restoreInterruptedResumeButton": "प्रक्रिया जारी रखें",
   "restoreInterruptedKeepButton": "मौजूदा डेटा रखें",
   "restoreInterruptedCopyLost": "बैकअप फ़ाइल अब उपलब्ध नहीं है, इसलिए प्रक्रिया जारी नहीं रख सकते। मौजूदा डेटा के अनुसार अलार्म फिर सेट होंगे।",
   "restoreInterruptedInProgress": "प्रक्रिया चल रही है…",
   "settingsRestoreFromBackupTitle": "बैकअप से डेटा वापस लाएं",
-  "settingsRestoreFromBackupDesc": "मौजूदा डेटा की जगह बैकअप का डेटा लाएं",
+  "settingsRestoreFromBackupDesc": "शेड्यूल और दूसरे सेव किए गए डेटा की जगह बैकअप का डेटा लाएं",
   "settingsRestoreFromBackupWarningTitle": "बैकअप से डेटा वापस लाएं",
-  "settingsRestoreFromBackupWarningBody": "आपके मौजूदा ऐप डेटा—शिफ्ट, अलार्म, नोट और ओवरटाइम सहित—की जगह चुने गए बैकअप का डेटा आ जाएगा। इसे वापस नहीं किया जा सकता।\n\nDownload → ShiftBell में फ़ाइल चुनें।\n\nबैकअप का नाम ShiftBell_Backup_manual_ या ShiftBell_Backup_auto_ से शुरू होता है और अंत में तारीख व समय होता है। जैसे: ShiftBell_Backup_auto_260917_060412.json। सबसे नई फ़ाइल या जिस समय का डेटा चाहिए, वह फ़ाइल चुनें। आगे बढ़ने से पहले बैकअप का समय देख सकते हैं।",
+  "settingsRestoreFromBackupWarningBody": "आपके शिफ्ट शेड्यूल, नोट, ओवरटाइम और बाकी सेव किए गए डेटा व सेटिंग की जगह चुने हुए बैकअप का डेटा आएगा। इसे वापस नहीं किया जा सकता। अलार्म का इतिहास और अलार्म बनने के रिकॉर्ड बैकअप के रिकॉर्ड के साथ जोड़ दिए जाएंगे। अभी बज रहे या स्नूज़ किए गए अलार्म बने रहेंगे।\n\nDownload → ShiftBell में फ़ाइल चुनें।\n\nबैकअप का नाम ShiftBell_Backup_manual_ या ShiftBell_Backup_auto_ से शुरू होता है और अंत में तारीख व समय होता है। जैसे: ShiftBell_Backup_auto_260917_060412.json। सबसे नई फ़ाइल या जिस समय का डेटा चाहिए, वह फ़ाइल चुनें। आगे बढ़ने से पहले बैकअप का समय देख सकते हैं।",
   "settingsRestoreFromBackupPickButton": "फ़ाइल चुनें",
   "settingsRestoreFromBackupConfirmTitle": "इस बैकअप से डेटा वापस लाएं?",
-  "settingsRestoreFromBackupConfirmBody": "यह बैकअप {date} को सेव हुआ था। ऐप के मौजूदा डेटा की जगह इस बैकअप का डेटा आ जाएगा।",
+  "settingsRestoreFromBackupConfirmBody": "यह बैकअप {date} को सेव हुआ था। यह आपके शिफ्ट शेड्यूल, नोट, ओवरटाइम और बाकी सेव किए गए डेटा व सेटिंग की जगह लेगा। अलार्म का इतिहास और अलार्म बनने के रिकॉर्ड जोड़ दिए जाएंगे। अभी बज रहे या स्नूज़ किए गए अलार्म बने रहेंगे।",
   "@settingsRestoreFromBackupConfirmBody": {
     "placeholders": {
       "date": {
@@ -585,7 +437,7 @@
   "settingsAlarmSoundSettings": "आवाज़ और वाइब्रेशन",
   "settingsAlarmSoundManageDesc": "आवाज़, वाइब्रेशन या साइलेंट मोड चुनें",
   "settingsIncludesVibration": "वाइब्रेशन भी चालू",
-  "settingsAllAlarmsWillBeDeleted": "सभी सेट किए गए अलार्म हट जाएंगे।",
+  "settingsAllAlarmsWillBeDeleted": "सभी अलार्म और हर शिफ्ट की अलार्म सेटिंग हट जाएंगी। अलार्म का इतिहास बना रहेगा।",
   "settingsAllAlarmsDeletedToast": "सभी अलार्म हमेशा के लिए हटा दिए गए",
   "statusDeleteFailed": "हटाया नहीं जा सका",
   "settingsScheduleChanging": "शेड्यूल बदला जा रहा है…",
@@ -627,23 +479,21 @@
     }
   },
   "settingsSelectTodayShiftFromPattern": "क्रम में आज की शिफ्ट चुनें",
-  "settingsScheduleChangeWarning": "अगले 10 दिनों के शिफ्ट अलार्म नए शेड्यूल के अनुसार बदल जाएंगे।\nएक टैप अलार्म और अलार्म का इतिहास बना रहेगा।",
-  "settingsScheduleChangedRedoAllTeamsHint": "अगर आप टीमों के शेड्यूल इस्तेमाल करते हैं, तो इस बदलाव के बाद उन्हें फिर सेट करें।",
-  "settingsResetScheduleSharingFailed": "आपका शेड्यूल रीसेट हो गया, लेकिन पुराना शेयर किया गया शेड्यूल अभी दिख सकता है। ऐप फिर ठीक से काम करने लगे तो शेड्यूल शेयर करें → मेरा शेड्यूल शेयर करें → शेयर करना बंद करें पर जाएं।",
-  "settingsResetScheduleConfirm": "अपना शिफ्ट शेड्यूल और सभी अलार्म रीसेट करें?\n\nसभी टीमों के शेड्यूल, अलार्म का इतिहास और अलार्म बनने के रिकॉर्ड भी हट जाएंगे। शेड्यूल शेयर करना भी बंद होगा। इंटरनेट न होने पर दोबारा कनेक्ट होने के बाद शेयर करना बंद होगा; तब तक पुराना शेड्यूल दिख सकता है।",
-  "privacyIntro": "आपकी शिफ्ट और अलार्म का डेटा आपके डिवाइस पर सेव होता है। ShiftBell इस्तेमाल के आंकड़ों और विज्ञापनों के लिए Google की सेवाएं भी इस्तेमाल करता है। यह नीति इन सेवाओं, स्थानीय फ़ाइलों और हिंदी में बदलने से पहले इस्तेमाल की गई सुविधाओं के बचे हुए डेटा की जानकारी देती है।",
+  "settingsScheduleChangeWarning": "अगले 10 दिनों के तय अलार्म नए शेड्यूल के अनुसार अपडेट होंगे। स्नूज़ किए गए अलार्म और अलार्म इतिहास बने रहेंगे।",
+  "settingsResetScheduleConfirm": "अपना शिफ्ट शेड्यूल और सभी अलार्म रीसेट करें?\n\nसभी टीमों के शेड्यूल, अलार्म का इतिहास और अलार्म बनाने के रिकॉर्ड भी हट जाएंगे।",
+  "privacyIntro": "आपकी शिफ्ट और अलार्म का डेटा आपके डिवाइस पर सेव होता है। ShiftBell इस्तेमाल के आंकड़ों और विज्ञापनों के लिए Google की सेवाएं भी इस्तेमाल करता है। यह नीति इन सेवाओं और स्थानीय फ़ाइलों की जानकारी देती है।",
   "privacyNoCollectionTitle": "आपके डिवाइस पर सेव होने वाला डेटा",
-  "privacyNoCollectionBody": "आपकी शिफ्ट, अलार्म सेटिंग और इतिहास, नोट, काम के घंटे और ओवरटाइम ऐप के स्थानीय डेटाबेस में सेव होते हैं। इनकी सामग्री इस्तेमाल के आंकड़ों या विज्ञापन अनुरोधों में शामिल नहीं की जाती।\n\nनिजी काम टैब, नींद की ट्रैकिंग और शेड्यूल शेयर करना हिंदी में उपलब्ध नहीं हैं। भाषा बदलने से कोरियाई में इन सुविधाओं का इस्तेमाल करते समय बनाए गए रिकॉर्ड नहीं मिटते। वे डेटाबेस और बैकअप में रह सकते हैं। हिंदी में नींद का अपने आप अनुमान लगाना बंद रहता है।\n\nAndroid 10 या नए संस्करण पर समस्या जांचने की फ़ाइलें Download/ShiftBell/log में स्थानीय रूप से सेव होती हैं। इनमें डिवाइस और Android के संस्करण, अनुमतियां, बैटरी सेटिंग तथा अलार्म और बैकअप प्रक्रिया के रिकॉर्ड होते हैं। नोट या निजी काम की सामग्री, शिफ्ट के नाम और दोस्तों के नाम शामिल नहीं होते। ऐप इन फ़ाइलों को अपने आप नहीं भेजता।",
+  "privacyNoCollectionBody": "आपकी शिफ्ट, अलार्म सेटिंग और इतिहास, नोट, काम के घंटे और ओवरटाइम ऐप के स्थानीय डेटाबेस में सेव होते हैं। इनकी सामग्री इस्तेमाल के आंकड़ों या विज्ञापन अनुरोधों में शामिल नहीं की जाती।\n\nAndroid 10 या नए संस्करण पर समस्या जांचने की फ़ाइलें Download/ShiftBell/log में स्थानीय रूप से सेव होती हैं। इनमें डिवाइस और Android के संस्करण, अनुमतियां, बैटरी सेटिंग तथा अलार्म और बैकअप प्रक्रिया के रिकॉर्ड होते हैं। नोट की सामग्री और शिफ्ट के नाम शामिल नहीं होते। ऐप इन फ़ाइलों को अपने आप नहीं भेजता।",
   "privacyAnalyticsTitle": "इस्तेमाल के आंकड़े (Google Firebase Analytics)",
   "privacyAnalyticsBody": "Google Firebase Analytics ऐप खोलने, स्क्रीन देखने, ऐप और ऑपरेटिंग सिस्टम के संस्करण, डिवाइस मॉडल, अनुमानित क्षेत्र और इंस्टॉलेशन पहचानकर्ता जैसी जानकारी इकट्ठा करता है। ShiftBell अलार्म बंद करने या स्नूज़ करने, नोट सेव करने और बैकअप बनाने जैसी सुविधाओं के इस्तेमाल के रिकॉर्ड भी भेजता है।\n\nइन रिकॉर्ड में शिफ्ट के नाम, अलार्म का समय, नोट का पाठ या शेड्यूल की दूसरी सामग्री शामिल नहीं होती। इन आंकड़ों पर Google की निजता नीति लागू होती है।",
-  "privacyFirebaseTitle": "Google सेवाएं और पहले शेयर किया गया डेटा",
-  "privacyFirebaseBody": "हिंदी में शेयर करने की सुविधा उपलब्ध नहीं है। भाषा बदलने से पहले शेयर करना चालू था तो ShiftBell नए अपलोड रोकता है और पहले शेयर किए गए शेड्यूल को हटाने का अनुरोध करता है। इंटरनेट न होने पर ऐप कनेक्ट होने के बाद फिर कोशिश करता है। सर्वर से हटाने की पुष्टि मिलने तक पुराने लिंक पर पिछला शेड्यूल दिख सकता है। दूसरों के पास मौजूद कॉपी या स्क्रीनशॉट वापस नहीं लिए जा सकते।\n\nपहले शेयर किए गए डेटा में दिखाया जाने वाला नाम, शिफ्ट का क्रम, शुरुआत की तारीख, शिफ्ट के रंग और किसी खास तारीख की शिफ्ट में बदलाव शामिल होते हैं। नोट, ओवरटाइम, अलार्म सेटिंग या नींद के रिकॉर्ड शामिल नहीं होते। शेयर करने के लिए Firebase का अनाम पहचानकर्ता इस्तेमाल होता है। ऐप दोबारा इंस्टॉल करने पर पुराने पहचानकर्ता से जुड़े डेटा तक ऐप से पहुंच खो सकती है।\n\nऐप अपडेट की उपलब्धता Google Play से जांची जाती है। कोरियाई भाषा में कोरियाई छुट्टियों के अपडेट के लिए सार्वजनिक Firebase दस्तावेज़ इस्तेमाल होता है। इस अनुरोध में शिफ्ट या नोट की सामग्री नहीं भेजी जाती।",
+  "privacyFirebaseTitle": "ऐप अपडेट",
+  "privacyFirebaseBody": "ऐप अपडेट की उपलब्धता Google Play से जांची जाती है।",
   "privacyAdsTitle": "विज्ञापन (Google AdMob)",
   "privacyAdsBody": "ShiftBell में Google AdMob के बैनर विज्ञापन दिखते हैं। विज्ञापन दिखाने और उनके प्रदर्शन को मापने के लिए विज्ञापन SDK डिवाइस पहचानकर्ता, IP पते, ऐप में गतिविधि और समस्या जांच की जानकारी का उपयोग कर सकता है। ShiftBell विज्ञापन अनुरोधों में आपका शिफ्ट शेड्यूल, अलार्म का समय या नोट की सामग्री शामिल नहीं करता।\n\nजहां Google की सहमति प्रणाली के अनुसार ज़रूरी हो, ऐप विज्ञापनों के बारे में आपकी पसंद पूछता है। उपलब्ध होने पर सेटिंग में विज्ञापन की निजता सेटिंग से अपनी पसंद देख या बदल सकते हैं। Google इस जानकारी का उपयोग कैसे करता है, यह उसकी निजता नीति में बताया गया है।",
   "privacyPermissionsTitle": "ऐप को किन अनुमतियों की ज़रूरत है",
-  "privacyPermissionsBody": "• सूचनाएं: अलार्म की स्थिति और पहले से याद दिलाने वाली सूचना दिखाने के लिए।\n• दूसरे ऐप्स के ऊपर दिखाना: दूसरे ऐप इस्तेमाल करते समय अलार्म स्क्रीन दिखाने के लिए।\n• सटीक अलार्म: तय समय पर अलार्म बजाने के लिए।\n\nAndroid की सेटिंग में ये अनुमतियां देख सकते हैं। अनुमति न देने पर अलार्म की सूचनाएं सीमित हो सकती हैं या अलार्म अपेक्षा के अनुसार काम नहीं कर सकते।",
+  "privacyPermissionsBody": "• सूचनाएं: अलार्म की स्थिति और पहले से याद दिलाने वाली सूचना दिखाने के लिए।\n• दूसरे ऐप्स के ऊपर दिखाना: दूसरे ऐप इस्तेमाल करते समय अलार्म स्क्रीन दिखाने के लिए।\n• सटीक अलार्म: तय समय पर अलार्म बजाने के लिए।\n\nAndroid की सेटिंग में ये अनुमतियां देख सकते हैं। अनुमति न देने पर अलार्म की सूचनाएं सीमित हो सकती हैं या अलार्म अपेक्षा के अनुसार काम नहीं कर सकते।\n\n• लॉक स्क्रीन: फ़ोन लॉक होने पर अलार्म स्क्रीन दिखाने के लिए फ़ुल-स्क्रीन सूचनाओं की अनुमति।",
   "privacyDataRetentionTitle": "डेटा रखना और हटाना",
-  "privacyDataRetentionBody": "ऐप अनइंस्टॉल करने पर उसका स्थानीय डेटाबेस हट जाता है। Download/ShiftBell में सेव बैकअप और समस्या जांच की फ़ाइलें रह सकती हैं। ज़रूरत न होने पर इन्हें फ़ाइल मैनेजर से हटाएं।\n\nबैकअप एन्क्रिप्टेड नहीं होते। इनमें आपका पूरा स्थानीय डेटा हो सकता है, जिसमें कोरियाई में पहले इस्तेमाल की गई सुविधाओं के रिकॉर्ड भी शामिल हैं। इन्हें सुरक्षित रखें। ऐप इन फ़ाइलों को अपने आप अपलोड नहीं करता। अगर आप इन्हें किसी क्लाउड सेवा पर रखते हैं या किसी को भेजते हैं, तो उस कॉपी का नियंत्रण उस सेवा या व्यक्ति के पास होगा।\n\nऐप खुद लिया गया एक बैकअप और अपने आप लिया गया एक बैकअप रखता है। उसी प्रकार का नया बैकअप पुराने की जगह लेता है।\n\nपहले शेयर किए गए डेटा के बारे में ‘Google सेवाएं और पहले शेयर किया गया डेटा’ देखें। इस्तेमाल के आंकड़ों और विज्ञापन डेटा को रखने पर Google की नीतियां लागू होती हैं।",
+  "privacyDataRetentionBody": "ऐप अनइंस्टॉल करने पर उसका स्थानीय डेटाबेस हट जाता है। Download/ShiftBell में सेव बैकअप और समस्या जांच की फ़ाइलें रह सकती हैं। ज़रूरत न होने पर इन्हें फ़ाइल मैनेजर से हटाएं।\n\nबैकअप एन्क्रिप्टेड नहीं होते। इनमें आपका पूरा स्थानीय डेटा हो सकता है। इन्हें सुरक्षित रखें। ऐप इन फ़ाइलों को अपने आप अपलोड नहीं करता। अगर आप इन्हें किसी क्लाउड सेवा पर रखते हैं या किसी को भेजते हैं, तो उस कॉपी का नियंत्रण उस सेवा या व्यक्ति के पास होगा।\n\nऐप खुद लिया गया एक बैकअप और अपने आप लिया गया एक बैकअप रखता है। उसी प्रकार का नया बैकअप पुराने की जगह लेता है।\n\nइस्तेमाल के आंकड़ों और विज्ञापन डेटा को रखने पर Google की नीतियां लागू होती हैं।",
   "privacyChildrenTitle": "बच्चों के लिए नहीं है",
   "privacyChildrenBody": "यह ऐप 14 साल से कम उम्र के बच्चों के लिए नहीं है। हम जानबूझकर बच्चों की निजी जानकारी इकट्ठा नहीं करते।",
   "privacyContactTitle": "संपर्क",
@@ -656,9 +506,7 @@
   "workHoursShiftTimeClockIn": "शुरू",
   "workHoursShiftTimeClockOut": "खत्म",
   "workHoursResetShiftTime": "शुरू और खत्म होने का समय हटाएं",
-  "workHoursLegacyClockTimeHint": "पहले सेव किए गए घंटे अभी लागू हैं। बदलने के लिए शुरू और खत्म होने का समय दर्ज करें।",
   "workHoursPeriodBasisDesc": "महीने के कुल काम के घंटों में कौन-सी तारीखें गिननी हैं, चुनें।",
-  "workHoursDurationExcluded": "0 घंटे (काम के समय में नहीं गिना जाएगा)",
   "workHoursDurationHoursOnly": "{h, plural, =1{1 घंटा} other{{h} घंटे}}",
   "@workHoursDurationHoursOnly": {
     "placeholders": {
@@ -678,31 +526,9 @@
       }
     }
   },
-  "workHoursEditDialogTitle": "{shift} के काम के घंटे",
-  "@workHoursEditDialogTitle": {
-    "placeholders": {
-      "shift": {
-        "type": "String"
-      }
-    }
-  },
-  "workHoursUnitHourLabel": "घंटे",
-  "workHoursUnitMinuteLabel": "मिनट",
   "workHoursCutoffDayPrefix": "हर महीने की",
   "workHoursCutoffDaySuffix": "तारीख",
   "friendShareTitle": "शेड्यूल शेयर करें",
-  "friendShareMyScheduleTitle": "मेरा शेड्यूल शेयर करें",
-  "friendAdd": "दोस्त जोड़ें",
-  "friendName": "दोस्त का नाम",
-  "friendNameOptionalHint": "वैकल्पिक · खाली छोड़ने पर शेयर किया गया नाम दिखेगा",
-  "friendShareCodeFromFriend": "दोस्त का शेयर कोड",
-  "friendEnterShareCode": "दोस्त का शेड्यूल देखने के लिए उनका भेजा कोड पेस्ट करें",
-  "friendCanCheckAnytime": "दोस्त का शेड्यूल कभी भी देख सकते हैं।",
-  "friendAddedToast": "दोस्त जुड़ गया",
-  "friendInvalidCodeOrDuplicate": "कोड सही नहीं है या दोस्त पहले से जुड़ा है",
-  "friendLoadFailedCheckNetwork": "शेड्यूल लोड नहीं हुआ। इंटरनेट कनेक्शन जांचें।",
-  "friendShowingCachedSchedule": "नई जानकारी नहीं मिली। पहले सेव किया गया शेड्यूल दिख रहा है।",
-  "friendNoneAddedYet": "अभी कोई दोस्त नहीं जोड़ा है",
   "friendScheduleOf": "{name} का शिफ्ट शेड्यूल",
   "@friendScheduleOf": {
     "placeholders": {
@@ -711,37 +537,10 @@
       }
     }
   },
-  "friendRemove": "दोस्त हटाएं",
-  "friendRemoveConfirm": "{name} को अपनी सूची से हटाएं?",
-  "@friendRemoveConfirm": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "friendDisplayNameTitle": "दिखाया जाने वाला नाम",
-  "friendEnterDisplayName": "दोस्तों को दिखने वाला अपना नाम दर्ज करें",
-  "friendShareIncludesSchedule": "आपका शिफ्ट शेड्यूल और शिफ्ट में किए गए बदलाव शेयर होंगे।",
-  "friendShareExcludesExtras": "नोट, ओवरटाइम, काम के घंटे और अलार्म सेटिंग शेयर नहीं होंगे।",
-  "friendStartSharing": "शेयर करना शुरू करें",
-  "friendStopSharing": "शेयर करना बंद करें",
-  "friendStopSharingConfirm": "शेयर करना बंद करने पर दोस्त आपका शेड्यूल नहीं देख सकेंगे। इंटरनेट न होने पर कनेक्शन लौटने के बाद शेड्यूल सर्वर से हटेगा। दोस्तों के डिवाइस पर पहले से डाउनलोड की गई जानकारी वापस नहीं ली जा सकती। जारी रखें?",
-  "friendRestartSharingHint": "(दोबारा शेयर करने के लिए यहां ‘शेयर करना शुरू करें’ पर टैप करें। पुराना कोड और लिंक फिर काम करेंगे।)",
-  "friendMyShareCode": "शेयर कोड · ऐप इस्तेमाल करने वालों के लिए",
-  "friendShareCodeInstructions": "आपका दोस्त ‘दोस्त जोड़ें’ में यह कोड पेस्ट करके आपका शेड्यूल देख सकता है।",
-  "friendShareWithoutApp": "शेयर लिंक · ऐप की ज़रूरत नहीं",
-  "friendShareLinkHint": "इस लिंक से शेड्यूल तुरंत देख सकते हैं। ऐप इंस्टॉल करना ज़रूरी नहीं।",
-  "friendInstallShortcutHint": "होम स्क्रीन पर शॉर्टकट जोड़ने के लिए एड्रेस बार के इंस्टॉल आइकन पर टैप करें।",
-  "friendDisplayNameUpdated": "दिखाया जाने वाला नाम बदल गया",
-  "friendDisplayNameUpdateFailed": "नाम नहीं बदल सका। इंटरनेट कनेक्शन जांचें।",
-  "friendEnterDisplayNameError": "दोस्तों को दिखने वाला अपना नाम दर्ज करें",
-  "friendConnectionFailed": "कनेक्शन नहीं हुआ। इंटरनेट जांचकर यह स्क्रीन फिर खोलें।",
   "friendCouldNotLoad": "लोड नहीं हो सका",
   "friendLinkMissingCode": "लिंक में शेयर कोड नहीं है।",
   "friendLoadFailedDetailed": "शेड्यूल लोड नहीं हुआ। लिंक पुराना हो सकता है, शेयर करना बंद हो चुका हो सकता है या इंटरनेट में समस्या हो सकती है।",
   "friendUnknownError": "कोई अनजान समस्या आ गई।",
-  "friendInstallForHomeScreen": "होम स्क्रीन से सीधे खोलने के लिए एड्रेस बार के इंस्टॉल बटन पर टैप करें।",
   "friendOpenInBrowserHint": "इंस्टॉल करने के लिए इसे Chrome या किसी दूसरे ब्राउज़र में खोलें। ऊपर दाईं ओर मेन्यू में ‘ब्राउज़र में खोलें’ चुनें।",
   "friendQuickInstallHint": "अगली बार जल्दी खोलने के लिए होम स्क्रीन पर जोड़ें",
   "friendQuickInstallButton": "शॉर्टकट जोड़ें",
@@ -756,32 +555,6 @@
       }
     }
   },
-  "friendServerNotReady": "शेयरिंग सर्वर से अभी कनेक्शन नहीं हुआ। थोड़ी देर बाद फिर कोशिश करें।",
-  "friendScheduleNotSet": "आपका शिफ्ट शेड्यूल अभी सेट नहीं है",
-  "friendStartSharingFailed": "शेयर करना शुरू नहीं हुआ। इंटरनेट जांचकर फिर कोशिश करें।",
-  "friendSyncPendingBanner": "आपका नया शेड्यूल अभी शेयर नहीं हुआ है। इंटरनेट आने पर ShiftBell अपने आप फिर कोशिश करेगा।",
-  "friendStopPendingBanner": "शेयर करना बंद होने की पुष्टि अभी नहीं मिली है। पुराना शेड्यूल अब भी दिख सकता है।",
-  "friendRetrySync": "फिर कोशिश करें",
-  "friendSyncPendingToast": "शेयर होने की पुष्टि अभी नहीं मिली है। इंटरनेट आने पर ShiftBell अपने आप फिर कोशिश करेगा।",
-  "friendStopSharingAction": "बंद करें",
-  "friendCodeCopied": "कोड कॉपी हो गया",
-  "friendLinkCopied": "लिंक कॉपी हो गया",
-  "friendShareMessage": "{name} का शिफ्ट शेड्यूल देखें 🗓️\n\nयह लिंक खोलें: {link}\n\nया ShiftBell में ‘दोस्त जोड़ें’ पर यह कोड पेस्ट करें:\n\n{code}",
-  "@friendShareMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "link": {
-        "type": "String"
-      },
-      "code": {
-        "type": "String"
-      }
-    }
-  },
-  "friendNameHintExample": "दोस्त का नाम दर्ज करें",
-  "friendShareChannelsExplainer": "जिन दोस्तों के पास ऐप नहीं है, उन्हें लिंक भेजें। ऐप इस्तेमाल करने वालों को कोड भेजें।",
   "permissionGetStarted": "ShiftBell के साथ शुरू करें",
   "permissionIntro": "अलार्म ठीक से काम करें, इसके लिए ये अनुमतियां दें।",
   "permissionNotification": "सूचनाएं",
@@ -790,22 +563,15 @@
   "permissionOverlayDesc": "दूसरे ऐप इस्तेमाल करते समय अलार्म स्क्रीन दिखाएं",
   "permissionExactAlarm": "सटीक अलार्म",
   "permissionExactAlarmDesc": "अलार्म को आपके तय समय पर बजाने के लिए ज़रूरी",
-  "permissionAllow": "अनुमतियां दें",
-  "permissionRequired": "ज़रूरी",
-  "permissionRecommended": "सुझाया गया",
-  "permissionSomeDenied": "कुछ अनुमतियां नहीं मिलीं",
+  "permissionSomeDenied": "कुछ अनुमतियों की जांच करनी है",
   "permissionSomeDeniedDesc": "संबंधित अनुमतियां मिलने तक अलार्म की कुछ सुविधाएं अपेक्षा के अनुसार काम नहीं कर सकतीं।",
   "permissionCanAllowLater": "सेटिंग में कभी भी अनुमतियां दे सकते हैं।",
-  "permissionRequiredNotGranted": "ज़रूरी अनुमतियां नहीं मिलीं",
-  "statusDataLoadFailed": "डेटा लोड नहीं हुआ",
+  "permissionRequiredNotGranted": "अलार्म की अनुमतियां जांचें",
   "statusNoSchedule": "कोई शेड्यूल नहीं मिला",
   "statusErrorOccurred": "कोई समस्या आ गई",
   "statusShiftAssigned": "शिफ्ट लगा दी गई",
   "statusShiftAssignFailed": "शिफ्ट नहीं लग सकी",
-  "statusShiftChangeFailed": "शिफ्ट नहीं बदल सकी",
-  "alarmSchedulePartialFailed": "शिफ्ट सेव हो गई, लेकिन {total} में से {failed} अलार्म सेट नहीं हुए। सटीक अलार्म की अनुमति जांचकर शिफ्ट फिर सेव करें।",
-  "scheduleNotifyRegisterFailed": "काम सेव हो गया, लेकिन रिमाइंडर सेट नहीं हुआ। सटीक अलार्म की अनुमति जांचकर काम फिर सेव करें।",
-  "scheduleTabSyncFailed": "स्क्रीन की सेटिंग नहीं बदल सकी। थोड़ी देर बाद फिर कोशिश करें।",
+  "alarmSchedulePartialFailed": "शिफ्ट सेव हो गई, लेकिन {failed, plural, =1{{total} में से 1 अलार्म सेट नहीं हुआ} other{{total} में से {failed} अलार्म सेट नहीं हुए}}। सटीक अलार्म की अनुमति जांचकर शिफ्ट फिर सेव करें।",
   "permissionStatusUnknown": "{name} (स्थिति पता नहीं है)",
   "statusShiftNameUpdated": "शिफ्ट का नाम बदल गया",
   "statusShiftColorUpdated": "शिफ्ट का रंग बदल गया",
@@ -834,18 +600,14 @@
   "allTeamsSetupRosterHint": "जिन टीमों को देखना है, उन्हें जोड़ें। टीम जोड़ने, हटाने या नाम बदलने के लिए ‘बदलें’ पर टैप करें।",
   "allTeamsSetupMyTeamLabel": "मेरी टीम",
   "allTeamsSetupMyTeamPickHint": "इनमें से अपनी टीम चुनें।",
-  "allTeamsSetupOtherTeamsLabel": "दूसरी टीमें",
-  "allTeamsSetupOtherTeamsHint": "साथ में दिखाने के लिए दूसरी टीमें चुनें।",
-  "allTeamsSetupPickMyTeamFirstHint": "पहले अपनी टीम चुनें।",
   "allTeamsSetupAssignSectionLabel": "शिफ्ट लगाएं",
   "allTeamsSetupAssignHint": "टीम चुनें, फिर शिफ्ट क्रम में आज उसकी स्थिति चुनें।",
   "allTeamsSetupDuplicateNameError": "यह टीम नाम पहले से मौजूद है।",
-  "allTeamsSetupMinOtherTeamHint": "कम से कम एक दूसरी टीम चुनें।",
   "allTeamsSetupEditTooltip": "टीमों के शेड्यूल बदलें",
   "alarmHistoryEmpty": "अलार्म का कोई इतिहास नहीं है",
   "alarmHistoryDeleteAllTitle": "पूरा इतिहास हटाएं",
   "alarmHistoryTestOnlyWarning": "⚠️ यहां दिखने वाले सभी रिकॉर्ड हमेशा के लिए हट जाएंगे।",
-  "alarmHistoryDeleteAllDesc": "अलार्म का पूरा इतिहास हट जाएगा।",
+  "alarmHistoryDeleteAllDesc": "अलार्म का पूरा इतिहास और अलार्म बनने के रिकॉर्ड हट जाएंगे। इससे सेट किए गए अलार्म रद्द नहीं होंगे।",
   "alarmHistoryDeletedToast": "अलार्म का पूरा इतिहास हटा दिया गया",
   "alarmHistoryDeleteFailed": "इतिहास नहीं हट सका: {error}",
   "@alarmHistoryDeleteFailed": {
@@ -860,10 +622,6 @@
   "themeMinimal": "सिंपल लाइन",
   "themeMaterialCard": "सॉफ्ट कार्ड",
   "themeBoldGrid": "डार्क ग्रिड",
-  "themeInitialBadge": "कलर बैज",
-  "themeUnderline": "मिनिमल अंडरलाइन",
-  "themeEventChip": "इवेंट कैलेंडर",
-  "themeEditorial": "मैगज़ीन",
   "themeDiary": "डायरी",
   "themeSwipeToChoose": "चुनने के लिए बाएं या दाएं स्वाइप करें",
   "themeCurrentlyApplied": "मौजूदा थीम",
@@ -934,48 +692,18 @@
   "dismissSnoozed5Min": "5 मिनट के लिए स्नूज़ किया गया",
   "dismissNoResponse": "छूट गया",
   "dismissAlarmRemoved": "अलार्म हटा दिया गया",
-  "scheduleDuplicateTimeSlot": "इस समय पहले से एक काम है। अपना नोट उसी में जोड़ें।",
-  "scheduleMaxPerSlot": "इस समय अधिकतम {count} काम जोड़ सकते हैं",
-  "@scheduleMaxPerSlot": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "scheduleDeleteConfirmTitle": "यह काम हटाएं?",
-  "scheduleDeleteConfirmBody": "यह काम हमेशा के लिए हट जाएगा।",
-  "scheduleEditTitle": "काम बदलें",
-  "scheduleNewTitle": "नया काम",
-  "scheduleContentFieldLabel": "विवरण",
-  "scheduleTimeSectionLabel": "समय",
-  "scheduleNotifySectionLabel": "सूचना",
-  "scheduleNotifyToggleLabel": "याद दिलाएं",
-  "scheduleNotifyDescription": "एक सूचना मिलेगी। आवाज़, वाइब्रेशन या साइलेंट मोड डिवाइस की सेटिंग के अनुसार होगा।",
-  "scheduleNotifyOffsetQuestion": "कब याद दिलाएं?",
-  "scheduleNotifyOffsetOnTime": "शुरू होने पर",
-  "scheduleNotifyOffsetBefore": "{minutes} मिनट पहले",
-  "@scheduleNotifyOffsetBefore": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
-  "scheduleNotifyPastTimeWarning": "याद दिलाने का समय बीत चुका है। सूचना पाने के लिए आगे का समय चुनें।",
-  "scheduleCreateButton": "जोड़ें",
   "helpSearchHint": "मदद में खोजें",
   "helpEmptySearchResult": "कोई नतीजा नहीं मिला",
   "helpStartSectionTitle": "शुरुआत करें",
   "helpStartOnboardingTitle": "ShiftBell कैसे सेट करें",
-  "helpStartOnboardingBody": "अलार्म ठीक से काम करें, इसके लिए सूचनाओं, सटीक अलार्म और दूसरे ऐप्स के ऊपर दिखाने की अनुमति दें। फिर चुनें कि आपकी शिफ्ट एक तय क्रम में दोहराती हैं या नहीं। शिफ्ट के नाम जोड़ें और ज़रूरत के अनुसार अलार्म सेट करें। अलार्म अभी छोड़कर बाद में सेटिंग से भी जोड़ सकते हैं।\n\nजिन शिफ्ट नामों की ज़रूरत नहीं है, उन्हें × से हटाएं। नए नाम + जोड़ें से बनाएं। पहले ShiftBell इस्तेमाल किया है तो ‘बैकअप से डेटा वापस लाएं’ चुनकर अपनी बैकअप फ़ाइल खोलें।",
-  "helpStartScheduleTypesTitle": "तय क्रम और बदलती शिफ्ट में अंतर",
-  "helpStartScheduleTypesBody": "तय क्रम वाली शिफ्ट एक चक्र में दोहराती हैं, जैसे दिन, दिन, रात, रात, छुट्टी, छुट्टी। यह क्रम बनाएं और उसमें आज की स्थिति चुनें। ShiftBell आगे की तारीखें अपने आप भर देगा।\n\nशिफ्ट का तय क्रम न हो तो तारीखों पर खुद शिफ्ट लगाएं। किसी तारीख को दबाकर रखें, दूसरी तारीखें भी चुनें और शिफ्ट पर टैप करें।",
+  "helpStartOnboardingBody": "अलार्म ठीक से काम करें, इसके लिए सूचनाओं, सटीक अलार्म और दूसरे ऐप्स के ऊपर दिखाने की अनुमति दें। फिर चुनें कि आपकी शिफ्ट एक तय क्रम में दोहराई जाती हैं या नहीं। शिफ्ट के नाम जोड़ें और ज़रूरत के अनुसार अलार्म सेट करें। अलार्म अभी छोड़कर बाद में सेटिंग से भी जोड़ सकते हैं।\n\nजिन शिफ्ट नामों की ज़रूरत नहीं है, उन्हें × से हटाएं। नए नाम + जोड़ें से बनाएं। पहले ShiftBell इस्तेमाल किया है तो ‘बैकअप से डेटा वापस लाएं’ चुनकर अपनी बैकअप फ़ाइल खोलें।\n\nShiftBell में सेटिंग → अलार्म की अनुमतियाँ खोलकर हर अनुमति जांचें, जिसमें लॉक स्क्रीन पर दिखाना भी शामिल है। सेटिंग बदलने के बाद ऐप में वापस आएं। पहली बार सेट करते समय तैयार होने पर आगे पर टैप करें।",
+  "helpStartScheduleTypesTitle": "तय क्रम वाली और बिना तय क्रम वाली शिफ्ट",
+  "helpStartScheduleTypesBody": "तय क्रम वाली शिफ्ट एक चक्र में दोहराई जाती हैं, जैसे दिन, दिन, रात, रात, छुट्टी, छुट्टी। यह क्रम बनाएं और उसमें आज की स्थिति चुनें। ShiftBell आगे की तारीखें अपने आप भर देगा।\n\nशिफ्ट का तय क्रम न हो तो तारीखों पर खुद शिफ्ट लगाएं। किसी तारीख को दबाकर रखें, दूसरी तारीखें भी चुनें और शिफ्ट पर टैप करें।",
   "helpShiftSectionTitle": "शिफ्ट का प्रबंधन",
   "helpShiftIrregularAssignTitle": "तय क्रम न हो तो शिफ्ट कैसे लगाएं",
   "helpShiftIrregularAssignBody": "कैलेंडर में किसी तारीख को दबाकर रखें। ज़रूरत की दूसरी तारीखें चुनें और फिर शिफ्ट चुनें। शिफ्ट सिर्फ चुनी गई तारीखों पर लगेगी।\n\nआने वाली शिफ्ट पहले से दर्ज करें, ताकि ShiftBell उनके अलार्म सेट कर सके।",
   "helpShiftChangeShiftTitle": "किसी एक दिन की शिफ्ट बदलना",
-  "helpShiftChangeShiftBody": "तय क्रम हो या बदलती शिफ्ट, किसी भी तारीख की शिफ्ट अलग से बदल सकते हैं। कैलेंडर में तारीख को दबाकर रखें और दूसरी शिफ्ट चुनें। उस दिन के अलार्म नई शिफ्ट के हिसाब से अपने आप बदल जाएंगे।",
+  "helpShiftChangeShiftBody": "शिफ्ट का तय क्रम हो या न हो, किसी भी तारीख की शिफ्ट अलग से बदल सकते हैं। कैलेंडर में तारीख को दबाकर रखें और दूसरी शिफ्ट चुनें। उस दिन के अलार्म नई शिफ्ट के हिसाब से अपने आप बदल जाएंगे।",
   "helpShiftShiftColorsTitle": "शिफ्ट के रंग चुनना",
   "helpShiftShiftColorsBody": "हर कैलेंडर थीम में शिफ्ट के रंग पहले से तय होते हैं। किसी शिफ्ट का अलग रंग चाहिए तो शिफ्ट सेटिंग में उसका नाम चुनकर रंग बदलें। आपका चुना रंग थीम के रंग की जगह दिखेगा।",
   "helpShiftAllShiftsTitle": "दूसरी टीमों की शिफ्ट देखना",
@@ -986,11 +714,11 @@
   "helpAlarmTemplatesTitle": "किसी शिफ्ट के लिए अलार्म लगाना",
   "helpAlarmTemplatesBody": "सेटिंग में हर शिफ्ट के लिए अधिकतम पांच अलार्म जोड़ें। हर अलार्म का समय और आवाज़ अलग चुन सकते हैं। यह शिफ्ट वाले दिन, एक दिन पहले या अगले दिन बज सकता है।\n\nतारीख आगे बढ़ने पर ShiftBell आने वाले अलार्म अपने आप तैयार करता है। शिफ्ट का तय क्रम नहीं है तो शिफ्ट पहले से दर्ज करें, ताकि उनके अलार्म सेट हो सकें।\n\nअलार्म सूची में समय 24 घंटे के प्रारूप में दिखता है। समय चुनने की स्क्रीन डिवाइस की 12 या 24 घंटे वाली सेटिंग के अनुसार होती है। 12 घंटे के प्रारूप में 12 AM आधी रात और 12 PM दोपहर है।\n\nशिफ्ट के अलार्म डिवाइस के मौजूदा समय क्षेत्र के अनुसार चलते हैं। डेलाइट सेविंग के कारण कोई समय छूट जाए तो अलार्म घड़ी में हुए बदलाव जितना आगे खिसकता है। जैसे एक घंटा आगे होने पर 02:30 का अलार्म 03:30 पर बजेगा। घड़ी पीछे होने से एक समय दो बार आए तो अलार्म दूसरी बार उस समय पर एक बार बजेगा। एक ही वास्तविक समय पर पड़ने वाले अलार्म मिला दिए जाते हैं।",
   "helpAlarmSoundVolumeTitle": "अलार्म की आवाज़ और वॉल्यूम चुनना",
-  "helpAlarmSoundVolumeBody": "ऐप की 7 आवाज़ों या डिवाइस की सिस्टम अलार्म आवाज़ों में से चुन सकते हैं। हर डिवाइस का स्पीकर अलग होता है, इसलिए ऐप वॉल्यूम अपने आप समायोजित करता है। फिर भी आवाज़ ठीक न लगे तो अलार्म सेटिंग में दूसरी आवाज़ चुनें।",
+  "helpAlarmSoundVolumeBody": "ऐप की 7 आवाज़ों या डिवाइस की डिफ़ॉल्ट अलार्म आवाज़ में से चुन सकते हैं। हर डिवाइस का स्पीकर अलग होता है, इसलिए ऐप वॉल्यूम अपने आप समायोजित करता है। फिर भी आवाज़ ठीक न लगे तो अलार्म सेटिंग में दूसरी आवाज़ चुनें।",
   "helpAlarmAlarmNotRingingTitle": "अलार्म न बजे तो क्या करें",
-  "helpAlarmAlarmNotRingingBody": "जांचें कि ShiftBell को सटीक अलार्म की अनुमति मिली है। अलार्म देखने और नियंत्रित करने के लिए सूचनाओं तथा दूसरे ऐप्स के ऊपर दिखाने की अनुमति भी जांचें। फ़ोन की बैटरी पाबंदियां भी देखें।\n\nउस तारीख पर शिफ्ट और उस शिफ्ट के लिए अलार्म होना चाहिए। अलार्म की आवाज़, वॉल्यूम और वाइब्रेशन सेटिंग भी जांचें।",
+  "helpAlarmAlarmNotRingingBody": "जांचें कि ShiftBell को सटीक अलार्म की अनुमति मिली है। अलार्म देखने और नियंत्रित करने के लिए सूचनाओं तथा दूसरे ऐप्स के ऊपर दिखाने की अनुमति भी जांचें। फ़ोन की बैटरी पाबंदियां भी देखें।\n\nउस तारीख पर शिफ्ट और उस शिफ्ट के लिए अलार्म होना चाहिए। अलार्म की आवाज़, वॉल्यूम और वाइब्रेशन सेटिंग भी जांचें।\n\nShiftBell में सेटिंग → अलार्म की अनुमतियाँ खोलकर हर अनुमति जांचें, जिसमें लॉक स्क्रीन पर दिखाना भी शामिल है। सेटिंग बदलने के बाद ऐप में वापस आएं। पहली बार सेट करते समय तैयार होने पर आगे पर टैप करें।",
   "helpAlarmAlarmHistoryTitle": "अलार्म का इतिहास देखना",
-  "helpAlarmAlarmHistoryBody": "सेटिंग → अलार्म का इतिहास में हर अलार्म और उसका नतीजा देख सकते हैं।\n\nस्नूज़ पर टैप करने के पांच मिनट बाद अलार्म फिर बजता है, भले ही इस बीच घड़ी का समय बदले। घड़ी पीछे होने से एक घंटा दो बार आए तो आने वाले अलार्म और इतिहास में ‘पहली बार’ और ‘दूसरी बार’ से दोनों समय अलग पहचाने जाते हैं।",
+  "helpAlarmAlarmHistoryBody": "सेटिंग → अलार्म का इतिहास में हर अलार्म और उसका नतीजा देख सकते हैं।\n\n‘5 मिनट बाद’ (स्नूज़) पर टैप करने के पांच मिनट बाद अलार्म फिर बजता है, भले ही इस बीच घड़ी का समय बदले। घड़ी पीछे होने से एक घंटा दो बार आए तो आने वाले अलार्म और इतिहास में ‘पहली बार’ और ‘दूसरी बार’ से दोनों समय अलग पहचाने जाते हैं।\n\nस्नूज़ के समय पहले से दूसरा अलार्म हो तो मौजूदा अलार्म स्नूज़ किए बिना बंद हो जाता है। दूसरा अलार्म बना रहता है।",
   "helpCalendarSectionTitle": "कैलेंडर और होम स्क्रीन विजेट",
   "helpCalendarThemesTitle": "कैलेंडर की थीम बदलना",
   "helpCalendarThemesBody": "सेटिंग → कैलेंडर थीम में छह थीम हैं: क्लासिक लाइट, क्लासिक डार्क, सिंपल लाइन, सॉफ्ट कार्ड, डायरी और डार्क ग्रिड।\n\nथीम ऐप के कैलेंडर पर लागू होती है। होम स्क्रीन विजेट हल्के रंग में ही रहता है।",
@@ -999,59 +727,25 @@
   "helpCalendarWorkHoursPayTitle": "हफ़्ते और महीने के काम के घंटे देखना",
   "helpCalendarWorkHoursPayBody": "सेटिंग में हर शिफ्ट के शुरू और खत्म होने का सामान्य समय दर्ज करें। ShiftBell इन्हीं समयों और दर्ज ओवरटाइम से हफ़्ते व महीने के कुल घंटे निकालता है।\n\nतय क्रम वाली शिफ्ट में बदलाव से बढ़े घंटे भी ओवरटाइम में जोड़ सकते हैं। सिर्फ मूल शिफ्ट से बढ़ा हुआ समय गिना जाता है, नई शिफ्ट का पूरा समय नहीं।",
   "helpCalendarHomeWidgetTitle": "होम स्क्रीन पर विजेट जोड़ना",
-  "helpCalendarHomeWidgetBody": "होम स्क्रीन को दबाकर रखें, विजेट खोलें और ShiftBell कैलेंडर जोड़ें। इसमें हर तारीख पर शिफ्ट का नाम और अधिकतम तीन नोट दिखते हैं। आकार बदलकर तीन हफ़्ते या पूरा महीना दिखा सकते हैं।\n\nहफ़्ते के दिनों का क्रम ऐप की तरह क्षेत्रीय डिफ़ॉल्ट के अनुसार होता है। हिंदी में सार्वजनिक छुट्टियां और चंद्र कैलेंडर की तारीखें नहीं दिखतीं।",
-  "helpScheduleTabSectionTitle": "निजी काम टैब",
-  "helpScheduleTabWhatIsItTitle": "निजी काम टैब कैसे अलग है?",
-  "helpScheduleTabWhatIsItBody": "कैलेंडर के नोट पूरे दिन के लिए होते हैं। निजी काम टैब में हर काम का तय समय होता है। चाहें तो खत्म होने का समय और रिमाइंडर भी जोड़ें। इसे अपॉइंटमेंट, ज़रूरी काम या शिफ्ट से पहले और बाद की योजनाओं के लिए इस्तेमाल करें।",
-  "helpScheduleTabCreateEditTitle": "काम जोड़ना और बदलना",
-  "helpScheduleTabCreateEditBody": "नीचे दाईं ओर घड़ी के आइकन पर टैप करें। फिर टाइमलाइन में समय चुनकर काम जोड़ें।",
-  "helpScheduleTabAutoCategoryTitle": "काम के साथ आइकन कैसे चुना जाता है",
-  "helpScheduleTabAutoCategoryBody": "ऐप आपके लिखे विवरण के आधार पर मिलता-जुलता आइकन अपने आप लगाता है। सही मेल न मिलने पर सामान्य आकृति वाला आइकन दिखता है।",
-  "helpConditionSectionTitle": "नींद और आराम",
-  "helpConditionWhatIsItTitle": "नींद और आराम टैब क्या है?",
-  "helpConditionWhatIsItBody": "इस स्क्रीन पर अनुमानित नींद की जांच कर सकते हैं, सोने का समय जोड़ सकते हैं और पुष्टि किए गए रिकॉर्ड देख सकते हैं। इसमें दर्ज समय और अवधि दिखती है। यह स्वास्थ्य स्कोर या चिकित्सा निदान नहीं देता। अपने आप बने अनुमान की पुष्टि करने से पहले उसे जांचें।",
-  "helpConditionEvidenceListTitle": "नींद और आराम की जानकारी के स्रोत",
-  "helpConditionEvidenceListBody": "नींद और आराम टैब की जानकारी नीचे दिए 14 स्रोतों पर आधारित है। लगातार काम के दिन या आपके अपने औसत से तुलना जैसी कुछ सीमाएं ऐप ने तय की हैं; उनके अलग स्रोत नहीं हैं।\n\nEVIDENCE-001 · शिफ्ट बदलने की दिशा — आगे बढ़ता क्रम (दिन→शाम→रात), पीछे जाने वाले क्रम से अपनाने में आसान बताया गया है। (NIOSH)\n\nEVIDENCE-002 · शिफ्टों के बीच न्यूनतम आराम — दो शिफ्टों के बीच कम से कम 11 घंटे आराम की सलाह। (Knauth & Hornberger, NIOSH Module 5 में उद्धृत)\n\nEVIDENCE-003 · शिफ्टों के बीच न्यूनतम आराम का कानूनी मानक — हर 24 घंटे में लगातार कम से कम 11 घंटे आराम। यह यूरोपीय संघ का मानक है। (EU Working Time Directive, अनुच्छेद 3)\n\nEVIDENCE-004 · लंबी शिफ्ट और चोट या दुर्घटना का जोखिम — 8 घंटे की शिफ्ट की तुलना में मॉडल के अनुसार सापेक्ष जोखिम 10 घंटे की शिफ्ट में लगभग 13% और 12 घंटे में 27% अधिक है। (Folkard & Lombardi, 2006)\n\nEVIDENCE-005 · लगातार शिफ्टों के बाद आराम — 8 घंटे की 5 शिफ्टों या 10 घंटे की 4 शिफ्टों के बाद 1–2 दिन और 12 घंटे की 3 शिफ्टों के बाद 2 दिन आराम की सलाह। कुछ दिनों में बहुत काम समेटकर फिर कई दिन छुट्टी लेने से भी बचने को कहा गया है। (NIOSH)\n\nEVIDENCE-006 · रात की शिफ्ट के बाद नींद — रात की शिफ्ट के बाद सोने को प्राथमिकता देने की सलाह। (NIOSH)\n\nEVIDENCE-007 · रात की शिफ्ट से पहले झपकी — कुछ स्थितियों में मददगार हो सकती है, लेकिन दिशानिर्देश में प्रमाण का स्तर बहुत कम बताया गया है। जागने के तुरंत बाद सुस्ती का ध्यान रखें। (AASM, 2025)\n\nEVIDENCE-008 · कैफ़ीन और नींद — सोने से 6 घंटे पहले ली गई कैफ़ीन से भी अध्ययन में कुल नींद एक घंटे से अधिक कम हुई। (Drake et al., 2013)\n\nEVIDENCE-009 · रात की शिफ्ट से घर लौटते समय रोशनी — तेज़ रोशनी कम करने से बाद की नींद में मदद मिल सकती है। लेकिन इतनी नींद आ रही हो कि सुरक्षित गाड़ी न चला सकें तो सुरक्षा पहले है। (NIOSH)\n\nEVIDENCE-010 · रात की शिफ्ट में भोजन — आधी रात से सुबह 6 बजे तक कम खाने और हल्का भोजन लेने की सलाह। (NIOSH)\n\nEVIDENCE-011 · वयस्कों की नींद — 18–64 साल के वयस्कों के लिए 7–9 घंटे नींद की सलाह। (National Sleep Foundation, 2015)\n\nEVIDENCE-012 · हफ़्ते के काम के घंटों का कानूनी मानक — ओवरटाइम सहित औसत साप्ताहिक काम 48 घंटे से अधिक नहीं होना चाहिए। यह यूरोपीय संघ का मानक है। (EU Working Time Directive, अनुच्छेद 6)\n\nEVIDENCE-013 · लगातार रात की शिफ्ट और दुर्घटना का जोखिम — हर अगली रात के साथ दुर्घटना या चोट का सापेक्ष जोखिम बढ़ता है: दूसरी रात लगभग 6%, तीसरी पर 17% और चौथी पर 36%। लगातार दिन या शाम की शिफ्टों से यह बढ़ोतरी अधिक तेज़ है। (Folkard & Tucker, 2003)\n\nEVIDENCE-014 · हफ़्ते के कुल काम के घंटे — नर्सों के लिए 24 घंटे में 12 और 7 दिनों में 60 घंटे तक काम सीमित रखने की सलाह। 2014 की व्यवस्थित समीक्षा में हफ़्ते में 40 घंटे से अधिक काम का संबंध कम रोगी सुरक्षा से मिला। (IOM, 2004; NIOSH Module 5 में उद्धृत)",
-  "helpConditionSetupNeededTitle": "इस टैब के लिए पहले क्या सेट करें",
-  "helpConditionSetupNeededBody": "पहले सेटिंग → काम के घंटे और ओवरटाइम में कम से कम एक शिफ्ट के शुरू और खत्म होने का समय दर्ज करें। तब तक आज की स्थिति नहीं दिखेगी, लेकिन नींद दर्ज कर सकते हैं। सभी शिफ्ट भरना ज़रूरी नहीं; अभी इस्तेमाल हो रही एक शिफ्ट काफ़ी है।",
-  "helpSleepSectionTitle": "नींद की ट्रैकिंग",
-  "helpSleepWidgetTitle": "नींद दर्ज करने वाला विजेट क्या है?",
-  "helpSleepWidgetBody": "होम स्क्रीन पर नींद का विजेट जोड़ें। सोते समय ‘सोने जा रहे हैं’ और उठने पर ‘जाग गए’ पर टैप करें। विजेट में आज की शिफ्ट भी दिखती है।\n\nनींद और आराम टैब में आपके नींद के रिकॉर्ड शिफ्ट शेड्यूल के साथ दिखते हैं।",
-  "helpSleepAutoDetectTitle": "नींद का अपने आप अनुमान लगाना",
-  "helpSleepAutoDetectBody": "ShiftBell आपके शिफ्ट शेड्यूल और फ़ोन की स्क्रीन बंद रहने के समय से नींद का अनुमान लगाता है। इसमें काम के बाद की नींद, रात की नींद और रात की शिफ्ट से पहले की झपकी देखी जाती है। शिफ्ट के दौरान नींद का अपने आप अनुमान नहीं लगता; उसे विजेट से दर्ज करें।\n\nआपके जांचने और पुष्टि करने के बाद ही अनुमान पक्के नींद रिकॉर्ड के रूप में सेव होते हैं।",
-  "helpSleepMiniCalendarTitle": "हाल की नींद देखना और बदलना",
-  "helpSleepMiniCalendarBody": "नींद और आराम टैब के ‘हाल की नींद’ छोटे कैलेंडर में तारीख के अनुसार पुष्टि किए गए रिकॉर्ड दिखते हैं। किसी खाने पर टैप करके रिकॉर्ड जोड़ें, बदलें या हटाएं। पुराने रिकॉर्ड महीने के हिसाब से देखने के लिए ‘सभी देखें’ चुनें।\n\nनीचे ‘शिफ्ट के हिसाब से मेरी नींद’ में हर शिफ्ट की औसत नींद, मुख्य नींद और झपकी के रूप में अलग दिखती है।",
-  "helpFriendSectionTitle": "दोस्तों से शेयर करना",
-  "helpFriendWhatIsItTitle": "दोस्तों से शेयर करना क्या है?",
-  "helpFriendWhatIsItBody": "अपना शिफ्ट शेड्यूल दोस्तों या किसी और को दिखा सकते हैं और दूसरों का शेयर किया शेड्यूल देख सकते हैं। जिनके पास ऐप नहीं है, उनके साथ भी आसानी से शेयर कर सकते हैं।",
-  "helpFriendShareCodeTitle": "शेयर कोड बनाना और भेजना",
-  "helpFriendShareCodeBody": "कैलेंडर टैब में ‘दोस्त’, फिर ‘मेरा शेड्यूल शेयर करें’ पर टैप करके कोड लें। यह कोड दूसरे व्यक्ति को भेजें। वे अपने ऐप में इसे जोड़कर आपका शेड्यूल देख सकते हैं।",
-  "helpFriendViewFriendTitle": "कोड से दोस्त का शेड्यूल देखना",
-  "helpFriendViewFriendBody": "दोस्त का कोड मिला है तो दोस्तों की सूची में उसे दर्ज करके दोस्त जोड़ें। उनका शेड्यूल आपके ऐप में कैलेंडर के रूप में दिखेगा।",
-  "helpFriendReinstallNoteTitle": "ऐप दोबारा इंस्टॉल करने पर क्या होता है",
-  "helpFriendReinstallNoteBody": "ShiftBell दोबारा इंस्टॉल करने के बाद नया कोड या लिंक शेयर करना होगा। पुराना कोड नए इंस्टॉलेशन से नहीं जुड़ता।\n\nपुराना कोड इस्तेमाल करने वाले को बिना किसी त्रुटि संदेश के आपका पहले शेयर किया हुआ शेड्यूल दिख सकता है। उन्हें बताएं और पुराने कोड की जगह नया कोड जोड़ने को कहें।",
+  "helpCalendarHomeWidgetBody": "होम स्क्रीन को दबाकर रखें, विजेट खोलें और ShiftBell कैलेंडर जोड़ें। इसमें हर तारीख पर शिफ्ट का नाम और अधिकतम तीन नोट दिखते हैं। आकार बदलकर तीन हफ़्ते या पूरा महीना दिखा सकते हैं।\n\nहफ़्ते के दिनों का क्रम ऐप की तरह क्षेत्रीय डिफ़ॉल्ट के अनुसार होता है।",
   "helpBackupSectionTitle": "बैकअप और डेटा वापस लाना",
   "helpBackupDataStorageTitle": "मेरा डेटा कहां सेव होता है?",
-  "helpBackupDataStorageBody": "आपकी शिफ्ट, अलार्म, अलार्म का इतिहास, नोट और काम के घंटों के रिकॉर्ड आपके डिवाइस पर सेव होते हैं। बैकअप Download/ShiftBell की स्थानीय फ़ाइलें हैं। वे अपने आप अपलोड नहीं होतीं।\n\nइस्तेमाल के आंकड़ों और विज्ञापनों के लिए Google की सेवाएं इस्तेमाल होती हैं। वे कौन-सी जानकारी इस्तेमाल करती हैं, यह निजता नीति में देखें। कोरियाई में पहले इस्तेमाल की गई सुविधाओं का डेटा स्थानीय स्टोरेज और बैकअप में रह सकता है, भले ही हिंदी में वे सुविधाएं छिपी हों।",
+  "helpBackupDataStorageBody": "आपकी शिफ्ट, अलार्म, अलार्म का इतिहास, नोट और काम के घंटों के रिकॉर्ड आपके डिवाइस पर सेव होते हैं। बैकअप Download/ShiftBell की स्थानीय फ़ाइलें हैं। वे अपने आप अपलोड नहीं होतीं।\n\nइस्तेमाल के आंकड़ों और विज्ञापनों के लिए Google की सेवाएं इस्तेमाल होती हैं। वे कौन-सी जानकारी इस्तेमाल करती हैं, यह निजता नीति में देखें।",
   "helpBackupAutoBackupTitle": "अपने आप बैकअप कब लिया जाता है?",
   "helpBackupAutoBackupBody": "ऐप खोलने, वापस आने या बाहर जाने पर ShiftBell डेटा में बदलाव जांचता है। बदलाव हो तो डिवाइस के Download/ShiftBell में अपने आप बैकअप सेव करता है। सेटिंग में ‘डेटा का बैकअप लें’ भी चुन सकते हैं।\n\nखुद लिया गया एक और अपने आप लिया गया एक बैकअप रखा जाता है। नया बैकअप सिर्फ उसी प्रकार की पुरानी फ़ाइल बदलता है। बैकअप के लिए Android 10 या नया संस्करण ज़रूरी है।",
   "helpBackupRestoreTitle": "दोबारा इंस्टॉल करने या फ़ोन बदलने पर डेटा वापस लाना",
-  "helpBackupRestoreBody": "पहली स्क्रीन या सेटिंग में ‘बैकअप से डेटा वापस लाएं’ चुनें। फिर Download/ShiftBell से बैकअप फ़ाइल चुनें। पहले उसके सेव होने का समय देखें: बैकअप का डेटा ऐप के मौजूदा डेटा की जगह लेगा।\n\nदूसरे फ़ोन पर जाने के लिए पहले फ़ाइल उस फ़ोन पर कॉपी करें। डेटा वापस आने के बाद अपनी शिफ्ट, आने वाले अलार्म और अलार्म की अनुमतियां जांचें।",
+  "helpBackupRestoreBody": "पहली स्क्रीन या सेटिंग में ‘बैकअप से डेटा वापस लाएं’ चुनें। फिर Download/ShiftBell से बैकअप फ़ाइल चुनें। पहले उसके सेव होने का समय देखें: यह आपके शेड्यूल, नोट, ओवरटाइम और बाकी सेव किए गए डेटा व सेटिंग की जगह लेगा।\n\nअलार्म का इतिहास और अलार्म बनने के रिकॉर्ड बैकअप के रिकॉर्ड के साथ जोड़ दिए जाते हैं। अभी बज रहे या स्नूज़ किए गए अलार्म बने रहते हैं।\n\nदूसरे फ़ोन पर जाने के लिए पहले फ़ाइल उस फ़ोन पर कॉपी करें। डेटा वापस आने के बाद अपनी शिफ्ट, आने वाले अलार्म और अलार्म की अनुमतियां जांचें।",
   "helpBackupRestoreManualTitle": "बैकअप अपने आप न मिले तो",
   "helpBackupRestoreManualBody": "ऐप दोबारा इंस्टॉल करने के बाद ‘बैकअप से डेटा वापस लाएं’ चुनें और फ़ाइल चुनने वाली स्क्रीन से पुराना बैकअप खोलें। हो सकता है कि Android नए इंस्टॉलेशन को पुराने इंस्टॉलेशन की फ़ाइलें अपने आप खोजने की अनुमति न दे।",
-  "helpBackupRestoreOldBackupFailTitle": "बहुत पुराना बैकअप काम न करे तो",
-  "helpBackupRestoreOldBackupFailBody": "ShiftBell के बहुत पुराने संस्करण का बैकअप ऐसे प्रारूप में हो सकता है जिसे अब वापस नहीं लाया जा सके। उसी फ़ाइल से दोबारा कोशिश करने पर भी समस्या रह सकती है।\n\nफ़ोन बदलने या ऐप दोबारा इंस्टॉल करने से पहले सेटिंग में ‘डेटा का बैकअप लें’ से नया बैकअप बनाएं। फ़ोन रीसेट करने या बदलने से पहले फ़ाइल सुरक्षित जगह कॉपी करें।",
   "helpTroubleshootSectionTitle": "समस्या का समाधान",
   "helpTroubleshootAlarmIssueTitle": "मेरा अलार्म नहीं बजा",
-  "helpTroubleshootAlarmIssueBody": "सटीक अलार्म, सूचनाओं और दूसरे ऐप्स के ऊपर दिखाने की अनुमतियां तथा फ़ोन की बैटरी पाबंदियां जांचें। फिर देखें कि उस तारीख पर शिफ्ट लगी है, शिफ्ट के लिए अलार्म है और आवाज़ या वाइब्रेशन चालू है।",
+  "helpTroubleshootAlarmIssueBody": "सटीक अलार्म, सूचनाओं और दूसरे ऐप्स के ऊपर दिखाने की अनुमतियां तथा फ़ोन की बैटरी पाबंदियां जांचें। फिर देखें कि उस तारीख पर शिफ्ट लगी है, शिफ्ट के लिए अलार्म है और आवाज़ या वाइब्रेशन चालू है।\n\nShiftBell में सेटिंग → अलार्म की अनुमतियाँ खोलकर हर अनुमति जांचें, जिसमें लॉक स्क्रीन पर दिखाना भी शामिल है। सेटिंग बदलने के बाद ऐप में वापस आएं। पहली बार सेट करते समय तैयार होने पर आगे पर टैप करें।",
   "helpTroubleshootForceStopTitle": "फ़ोन की सेटिंग से ऐप को ज़बरदस्ती रोक दिया",
   "helpTroubleshootForceStopBody": "Android सेटिंग → ऐप्स में ‘ज़बरदस्ती रोकें’ इस्तेमाल करने पर ShiftBell के सेट किए गए अलार्म रद्द हो जाते हैं। अगले अलार्म से पहले ShiftBell फिर खोलें, ताकि आने वाले अलार्म दोबारा सेट हो सकें। जिनका समय बीत गया है, वे बाद में नहीं बजेंगे।\n\nसिर्फ ऐप से बाहर जाने या हाल के ऐप्स से हटाने पर अलार्म रद्द नहीं होते। हालांकि कुछ फ़ोन बैकग्राउंड में अतिरिक्त पाबंदियां लगाते हैं।",
   "helpTroubleshootWidgetIssueTitle": "विजेट अपडेट नहीं हो रहा",
   "helpTroubleshootWidgetIssueBody": "विजेट हटाकर फिर जोड़ें। फिर भी बदलाव न दिखे तो ऐप एक बार खोलें और होम स्क्रीन पर वापस जाकर जांचें।",
   "helpTroubleshootBackupFileMissingTitle": "बैकअप फ़ाइल नहीं मिल रही",
   "helpTroubleshootBackupFileMissingBody": "फ़ोन के फ़ाइल मैनेजर में Download/ShiftBell देखें। बैकअप न मिले तो सेटिंग में ‘डेटा का बैकअप लें’ से नया बनाएं।",
-  "helpTroubleshootFriendDisconnectedTitle": "दोस्त का शेड्यूल कई दिनों से नहीं बदला",
-  "helpTroubleshootFriendDisconnectedBody": "दोस्त के शेड्यूल में आखिरी सिंक का समय देखें। पुराना समय दिखने का मतलब हो सकता है कि बदलाव सिंक नहीं हुए या दोस्त ने ऐप दोबारा इंस्टॉल किया है।\n\nउन्हें इंटरनेट चालू करके ऐप खोलने और शेयरिंग जांचने को कहें। ऐप दोबारा इंस्टॉल किया है तो नया कोड लें, पुरानी एंट्री हटाएं और दोस्त को फिर जोड़ें।",
   "startupFailedTitle": "ऐप शुरू नहीं हो सका",
   "startupFailedBody": "ऐप तैयार करते समय समस्या आ गई। डिवाइस में खाली स्टोरेज जांचें और फिर कोशिश करें। समस्या बनी रहे तो डिवाइस रीस्टार्ट करें।",
   "startupRetry": "फिर कोशिश करें",
@@ -1060,21 +754,16 @@
   "shiftAnnualLeave": "अवकाश",
   "onboardingBackupTitle": "बैकअप से डेटा वापस लाएं",
   "onboardingBackupDesc": "Download/ShiftBell की बैकअप फ़ाइल से शुरू करें।",
-  "helpOneTapTitle": "एक टैप अलार्म: सेव किए समय पर तुरंत अलार्म लगाएं",
-  "helpOneTapBody": "कैलेंडर के ऊपर एक टैप अलार्म बटन दबाएं। फिर + से समय और आवाज़ की सेटिंग सेव करें: आवाज़ + वाइब्रेशन, सिर्फ वाइब्रेशन या साइलेंट। एक बार में एक खाली जगह दिखती है। अधिकतम पांच विकल्प सेव कर सकते हैं।\n\nसेव किया समय चुनें, फिर आज या कल चुनें। अलार्म लगने पर पैनल बंद होगा और पुष्टि का छोटा संदेश दिखेगा। बीत चुके समय या पहले से किसी अलार्म के समय पर नया अलार्म नहीं लगेगा।\n\nविकल्पों की सूची खुली हो तो कैलेंडर पर टैप करके पैनल बंद करें। कोई विकल्प चुनने के बाद वापस जाने पर सूची दिखती है।\n\nविकल्प चुनने पर ‘बदलें’ और ‘हटाएं’ भी दिखते हैं। आगे के लिए अलार्म लगा हो तो उसे हटाने तक विकल्प बदल नहीं सकते। एक अलार्म हटाने के लिए उसकी तारीख खोलें और एक टैप अलार्म के पास × दबाएं। विकल्प हटाने से उससे लगे अलार्म भी हटेंगे। पुष्टि के संदेश में बताया जाता है कि शिफ्ट का अलार्म वापस लगेगा या नहीं।",
   "helpCalendarTextSizeTitle": "कैलेंडर के अक्षर और स्क्रीन का आकार",
   "helpCalendarTextSizeBody": "कैलेंडर के खाने फ़ोन, बाहरी स्क्रीन और खुली हुई फ़ोल्ड स्क्रीन की चौड़ाई के अनुसार ढलते हैं। लंबे शिफ्ट नाम और नोट जगह के अनुसार छोटे करके दिख सकते हैं। पूरा पाठ पढ़ने के लिए तारीख या नोट पर टैप करें। हर तारीख पर अधिकतम तीन नोट रख सकते हैं।\n\nसिंपल लाइन और सॉफ्ट कार्ड में शिफ्ट नाम सामान्य से बड़े दिखते हैं। तारीख, शिफ्ट और नोट को खाने में रखने के लिए कैलेंडर के अक्षर बढ़ाने की सीमा तय है।",
   "helpDiagnosticTitle": "समस्या बताने के लिए जांच की फ़ाइल कहां मिलेगी",
-  "helpDiagnosticBody": "अलार्म या बैकअप की समस्या हो तो फ़ाइल मैनेजर में Download/ShiftBell/log देखें। इसके लिए Android 10 या नया संस्करण चाहिए। समस्या जांच की फ़ाइलें डिवाइस पर ही सेव और अपडेट होती हैं।\n\nइनमें डिवाइस और Android के संस्करण, अनुमतियां, बैटरी सेटिंग तथा अलार्म और बैकअप प्रक्रिया के रिकॉर्ड होते हैं। नोट या निजी काम की सामग्री, शिफ्ट के नाम और दोस्तों के नाम शामिल नहीं होते। फ़ाइलें अपने आप नहीं भेजी जातीं। मदद के लिए संपर्क करते समय इन्हें संलग्न कर सकते हैं। ऐप हटाने के बाद भी ये रह सकती हैं; ज़रूरत न होने पर फ़ाइल मैनेजर से हटा दें।",
-  "helpCalendarLocaleTitle": "तारीखें, सप्ताहांत और सार्वजनिक छुट्टियां",
-  "helpCalendarLocaleBody": "हिंदी कैलेंडर में हफ़्ता रविवार से शुरू होता है। तारीख में महीने का नाम दिया जाता है, ताकि दिन और महीने के क्रम में भ्रम न हो।\n\nइस संस्करण के हिंदी कैलेंडर और विजेट में सार्वजनिक छुट्टियां शामिल नहीं हैं। लाल रविवार सप्ताहांत का संकेत है, सार्वजनिक छुट्टी का चिह्न नहीं। कोरियाई चंद्र कैलेंडर की तारीखें भी नहीं दिखतीं। शिफ्ट और अलार्म आपके अपने शेड्यूल के अनुसार चलते हैं।\n\nहफ़्ते के काम के घंटे हमेशा सोमवार से रविवार तक गिने जाते हैं। सार्वजनिक छुट्टी या सप्ताहांत होने से शिफ्ट अपने आप छुट्टी में नहीं बदलती।",
+  "helpDiagnosticBody": "अलार्म या बैकअप की समस्या हो तो फ़ाइल मैनेजर में Download/ShiftBell/log देखें। इसके लिए Android 10 या नया संस्करण चाहिए। समस्या जांच की फ़ाइलें डिवाइस पर ही सेव और अपडेट होती हैं।\n\nइनमें डिवाइस और Android के संस्करण, अनुमतियां, बैटरी सेटिंग तथा अलार्म और बैकअप प्रक्रिया के रिकॉर्ड होते हैं। नोट की सामग्री और शिफ्ट के नाम शामिल नहीं होते। फ़ाइलें अपने आप नहीं भेजी जातीं। मदद के लिए संपर्क करते समय इन्हें संलग्न कर सकते हैं। ऐप हटाने के बाद भी ये रह सकती हैं; ज़रूरत न होने पर फ़ाइल मैनेजर से हटा दें।",
+  "helpCalendarLocaleTitle": "तारीख और सप्ताह की शुरुआत",
+  "helpCalendarLocaleBody": "हिंदी कैलेंडर में हफ़्ता रविवार से शुरू होता है। तारीख में महीने का नाम दिया जाता है, ताकि दिन और महीने के क्रम में भ्रम न हो।\n\nलाल रविवार सप्ताहांत का संकेत है। शिफ्ट और अलार्म आपके अपने शेड्यूल के अनुसार चलते हैं।\n\nहफ़्ते के काम के घंटे हमेशा सोमवार से रविवार तक गिने जाते हैं। सप्ताहांत होने से शिफ्ट अपने आप छुट्टी में नहीं बदलती।",
   "alarmSnoozedLabel": "स्नूज़ किया गया",
   "alarmClockFirstOccurrence": "पहली बार",
   "alarmClockSecondOccurrence": "दूसरी बार",
   "shiftNameInUse": "इस्तेमाल हो रही शिफ्ट का सिर्फ नाम बदल सकते हैं।",
-  "scheduleOutsideTeamsConfirm": "चुनी गई स्थिति किसी टीम के मौजूदा शेड्यूल से मेल नहीं खाती। आगे बढ़ने पर सभी टीमों का शेड्यूल हट जाएगा और फिर बनाना होगा। अपना शेड्यूल बदलें?",
-  "scheduleMyTeam": "मेरी टीम",
-  "scheduleTeamsAtToday": "आज शिफ्ट चक्र में टीमों की स्थिति।",
   "scheduleTeamChanged": "आपका शेड्यूल टीम {from} से टीम {to} में बदल गया।",
   "@scheduleTeamChanged": {
     "placeholders": {
@@ -1097,7 +786,6 @@
   "teamRuleTitle": "शिफ्ट का क्रम सेट करें",
   "teamRuleLocked": "मेरे कैलेंडर से जुड़ा है · यहां बदलाव नहीं कर सकते",
   "teamRuleMissing": "इस टीम की शिफ्ट का क्रम सेट करें",
-  "teamRuleEdit": "सेट करें",
   "teamRulePatternHint": "दोहराने वाला चक्र बनाने के लिए शिफ्ट पर क्रम से टैप करें।\nचक्र से शिफ्ट हटाने के लिए उस पर टैप करें।",
   "teamRuleAllShiftsHint": "सेटिंग में जोड़ा गया कोई भी शिफ्ट नाम इस्तेमाल कर सकते हैं।",
   "teamRuleWeeklyHint": "शिफ्ट चुनें, फिर हफ़्ते के दिन पर टैप करके लगाएं।\nसातों दिनों की शिफ्ट चुनें।",
@@ -1107,7 +795,6 @@
   "teamRuleReviewHint": "सेव करने से पहले हर टीम की शिफ्ट जांचें। बाद में अपनी टीम बदल सकते हैं। किसी टीम का क्रम बदलने के लिए टीमों के शेड्यूल फिर बनाएं।",
   "teamRuleUnset": "तय नहीं है",
   "teamRuleResetCycle": "चक्र साफ़ करें",
-  "teamRuleChooseTeam": "जिस टीम में जाना है, उसे चुनें।",
   "teamRuleCurrentTeam": "मेरी मौजूदा टीम",
   "teamRuleWeeklyLabel": "सोम · मंगल · बुध · गुरु · शुक्र · शनि · रवि",
   "teamScheduleResetConfirm": "आपका शेड्यूल बदलेगा और शिफ्ट के अलार्म अपडेट होंगे। टीमों के शेड्यूल हट जाएंगे।\n\nटीमों के शेड्यूल रखते हुए अपनी टीम बदलने के लिए सभी टीमें → बदलें → मेरी टीम बदलें चुनें।",
@@ -1123,9 +810,9 @@
   "teamEditTitle": "सभी टीमों का शेड्यूल बदलें",
   "teamEditChangedQuestion": "क्या आपकी टीम बदल गई है?",
   "teamEditRecreateTitle": "सभी टीमों का शेड्यूल फिर बनाएं",
-  "teamEditRecreateHint": "टीमों की शुरुआती स्थिति गलत चुनी हो तो यह विकल्प लें।",
+  "teamEditRecreateHint": "टीमों की शुरुआती स्थिति, चक्र या साप्ताहिक शेड्यूल बदलने के लिए यह विकल्प लें।",
   "teamEditRecreateConfirm": "टीमों का मौजूदा शेड्यूल हटाकर फिर बनाएं?\nआपकी शिफ्ट और अलार्म वैसे ही रहेंगे।",
-  "teamEditPositionsOn": "{date} को टीमों की स्थिति",
+  "teamEditPositionsOn": "{date} को टीमों की शिफ्ट",
   "@teamEditPositionsOn": {
     "placeholders": {
       "date": {
@@ -1158,26 +845,6 @@
   "alarmSnoozeCollisionResult": "बंद हुआ: स्नूज़ के समय दूसरा अलार्म है",
   "alarmRefreshUnconfirmed": "अलार्म अपडेट होने की पुष्टि नहीं हुई। फिर जांचें।",
   "scheduleRefreshUnconfirmed": "शेड्यूल सेव हो गया, लेकिन अलार्म सेट होने की पुष्टि नहीं हुई।",
-  "oneTapDeleteNoAlarmConfirm": "इस समय कोई अलार्म नहीं बचेगा। एक टैप अलार्म हटाएं?",
-  "oneTapDeleteRestoreConfirm": "यह एक टैप अलार्म हटाकर {shift} का अलार्म वापस लगाएं?",
-  "@oneTapDeleteRestoreConfirm": {
-    "placeholders": {
-      "shift": {
-        "type": "String"
-      }
-    }
-  },
-  "oneTapDeleteNoAlarmDetail": "इस समय कोई अलार्म नहीं बचेगा।",
-  "oneTapDeleteRestoreDetail": "{shift} का अलार्म वापस लग जाएगा।",
-  "@oneTapDeleteRestoreDetail": {
-    "placeholders": {
-      "shift": {
-        "type": "String"
-      }
-    }
-  },
-  "oneTapDeletedRefreshRetry": "एक टैप अलार्म हट गया। शिफ्ट का अलार्म अभी वापस नहीं लग सका; अलार्म अपडेट करते समय ShiftBell फिर कोशिश करेगा।",
-  "oneTapDeletedFixedRestored": "एक टैप अलार्म हट गया। शिफ्ट का अलार्म वापस लग गया।",
   "teamEditChooseTeam": "जिस टीम में जाना है, उसे चुनें।",
   "durationCompactHours": "{hours} घं.",
   "@durationCompactHours": {
@@ -1194,5 +861,43 @@
         "type": "int"
       }
     }
-  }
+  },
+  "permissionFullScreen": "लॉक स्क्रीन पर अलार्म दिखाना",
+  "permissionFullScreenDesc": "फ़ोन लॉक होने पर अलार्म स्क्रीन दिखाता है। फ़ुल-स्क्रीन सूचनाओं की अनुमति दें।",
+  "permissionGranted": "अनुमति है",
+  "permissionNeedsSettings": "सेटिंग बदलनी है",
+  "permissionUnknown": "स्थिति जाँची नहीं जा सकी",
+  "permissionNotApplicable": "इस Android संस्करण में अलग सेटिंग की ज़रूरत नहीं है",
+  "permissionSettingsTitle": "अलार्म की अनुमतियाँ",
+  "permissionReturnGuide": "सेटिंग बदलने के बाद सिस्टम के वापस बटन से ShiftBell में लौटें। हम अनुमतियाँ फिर जाँचेंगे। नाम डिवाइस, सिस्टम संस्करण और सेटिंग की भाषा के अनुसार अलग हो सकते हैं।",
+  "permissionOpenFailed": "सेटिंग नहीं खुल सकी। फ़ोन की सेटिंग में जिस अनुमति को बदलना है, उसे खोजें और ShiftBell चुनें। सूचनाओं के लिए ऐप्स → ShiftBell → सूचनाएं भी खोल सकते हैं। नाम डिवाइस के अनुसार अलग हो सकते हैं।",
+  "permissionOverlayRouteGuide": "अगर ऐप्स की सूची खुले, तो ShiftBell चुनकर दूसरे ऐप्स के ऊपर दिखाने की अनुमति दें।",
+  "permissionAlarmChannelBlocked": "अलार्म नियंत्रित करने की सूचनाएँ बंद हैं",
+  "permissionAlarmChannelUnknown": "अलार्म नियंत्रण सूचना चैनल जाँचा नहीं जा सका",
+  "permissionLockScreenHelp": "लॉक स्क्रीन पर अलार्म नहीं दिख रहा?",
+  "permissionLockScreenHelpBody": "अलार्म की अनुमतियाँ, बैटरी और बैकग्राउंड की पाबंदियाँ जाँचें। परीक्षण के लिए कुछ मिनट बाद का शिफ्ट अलार्म सेट करें और फ़ोन लॉक करें। अनुमतियाँ होने पर भी हर डिवाइस पर स्क्रीन दिखने की गारंटी नहीं है।",
+  "permissionXiaomiTitle": "Xiaomi लॉक स्क्रीन अलार्म सेटिंग",
+  "permissionXiaomiBody": "Xiaomi पर लॉक स्क्रीन अलार्म दिखाने के लिए अतिरिक्त सेटिंग की ज़रूरत हो सकती है। अन्य अनुमतियाँ (Other permissions) में बैकग्राउंड में नई विंडो खोलना (Open new windows while running in the background) चुनें, फिर हमेशा अनुमति दें (Always allow) चुनें। ये नाम मार्गदर्शन के लिए हैं और अलग हो सकते हैं।",
+  "permissionOpenOemSettings": "अनुमति सेटिंग खोलें",
+  "permissionOpenFullScreenSettings": "फ़ुल-स्क्रीन सूचना सेटिंग खोलें",
+  "permissionStillDenied": "अभी अनुमति नहीं है",
+  "publicWebIntroBody": "आपकी शिफ्ट और अलार्म के लिए ऐप। शिफ्ट शेड्यूल, नोट और काम के घंटे एक जगह रखें।",
+  "publicWebShareTitle": "शेयर किया गया शिफ्ट कैलेंडर देखें",
+  "publicWebShareBody": "शेयर किया गया लिंक खोलकर नया शिफ्ट शेड्यूल देखें।",
+  "publicWebPrivacyBody": "ऐप के डेटा उपयोग, विज्ञापनों और इस्तेमाल के आंकड़ों के बारे में पढ़ें।",
+  "publicWebPrivacyAction": "निजता नीति देखें",
+  "publicWebStoreButton": "Google Play पर ShiftBell देखें",
+  "defaultSnoozeTitle": "डिफ़ॉल्ट स्नूज़ समय",
+  "defaultSnoozeDescription": "सभी अलार्म पर लागू होता है। अलार्म बजते समय −/+ से 5–30 मिनट चुन सकते हैं। यहाँ किया गया बदलाव बज रहे अलार्म पर भी तुरंत लागू होगा।",
+  "defaultSnoozeMinutes": "{minutes} मिनट",
+  "defaultSnoozeError": "सेटिंग लोड या सेव नहीं हो सकी। कृपया फिर से कोशिश करें।",
+  "defaultSnoozeRetry": "फिर कोशिश करें",
+  "@defaultSnoozeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmDefaultLabel": "अलार्म"
 }

@@ -1,3 +1,4 @@
+import '../widgets/unavailable_feature.dart';
 import '../widgets/adaptive_layout.dart';
 // screens/friend_list_screen.dart
 //
@@ -23,7 +24,15 @@ import 'my_share_code_screen.dart';
 import '../l10n/l10n_extensions.dart';
 import '../utils/friend_open_util.dart';
 
-class FriendListScreen extends ConsumerStatefulWidget {
+class FriendListScreen extends StatelessWidget {
+  const FriendListScreen({super.key, this.onSwipeToCalendar});
+  final VoidCallback? onSwipeToCalendar;
+  @override
+  Widget build(BuildContext context) => context.usesKoreanFeatures
+      ? _KoreanFriendListScreen(onSwipeToCalendar:onSwipeToCalendar) : const UnavailableFeature();
+}
+
+class _KoreanFriendListScreen extends ConsumerStatefulWidget {
   // ⭐ 2026-08-19 "달력탭으로 가는 스와이프는 항상 일방향" 규칙(next_alarm_tab.dart/
   // settings_tab.dart의 6번 기능 참고 - 달력탭 자체는 좌우 스와이프로 이전/다음달을
   // 넘기므로, 다른 탭에서 달력탭으로 "들어오는" 스와이프만 살려두고 반대 방향은 절대
@@ -31,13 +40,13 @@ class FriendListScreen extends ConsumerStatefulWidget {
   // 설정(3)이라 일정공유는 설정과 같은 쪽(달력보다 뒤)에 있으므로, 설정탭과 동일하게
   // 좌→우 스와이프 시 달력탭으로 이동.
   final VoidCallback? onSwipeToCalendar;
-  const FriendListScreen({super.key, this.onSwipeToCalendar});
+  const _KoreanFriendListScreen({ this.onSwipeToCalendar});
 
   @override
-  ConsumerState<FriendListScreen> createState() => _FriendListScreenState();
+  ConsumerState<_KoreanFriendListScreen> createState() => _FriendListScreenState();
 }
 
-class _FriendListScreenState extends ConsumerState<FriendListScreen> {
+class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
   @override
   void initState() {
     super.initState();
@@ -50,6 +59,7 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
     // 토스트 없이 끝내고, 새 데이터가 오면 ref.watch가 알아서 목록을 다시 그림
     // (이미 보이는 캐시 위에 조용히 최신값으로 갈아끼우는 방식).
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !context.usesKoreanFeatures) return;
       ref.read(friendProvider.notifier).refreshAll();
     });
   }
@@ -61,21 +71,22 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
     showDialog(
       context: context,
       builder: (context) {
+          if (!context.usesKoreanFeatures) return const UnavailableFeature();
         return AlertDialog(
-          title: Text(context.l10n.friendAdd,
+          title: Text(context.koOnly.friendAdd,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                  '${context.l10n.friendName} ${context.l10n.friendNameOptionalHint}',
+                  '${context.koOnly.friendName} ${context.koOnly.friendNameOptionalHint}',
                   style: TextStyle(fontSize: 12.sp)),
               SizedBox(height: 6.h),
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
-                  hintText: context.l10n.friendNameHintExample,
+                  hintText: context.koOnly.friendNameHintExample,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.r)),
                   contentPadding:
@@ -83,7 +94,7 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                 ),
               ),
               SizedBox(height: 14.h),
-              Text(context.l10n.friendShareCodeFromFriend,
+              Text(context.koOnly.friendShareCodeFromFriend,
                   style: TextStyle(fontSize: 12.sp)),
               SizedBox(height: 6.h),
               TextField(
@@ -115,8 +126,8 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text(ok
-                            ? context.l10n.friendAddedToast
-                            : context.l10n.friendInvalidCodeOrDuplicate)),
+                            ? context.koOnly.friendAddedToast
+                            : context.koOnly.friendInvalidCodeOrDuplicate)),
                   );
                 }
               },
@@ -138,6 +149,8 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final friends = ref.watch(friendProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -177,7 +190,7 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                             MaterialPageRoute(
                                 builder: (_) => const MyShareCodeScreen())),
                         icon: Icon(Icons.qr_code, size: 18.sp),
-                        label: Text(context.l10n.friendShareMyScheduleTitle,
+                        label: Text(context.koOnly.friendShareMyScheduleTitle,
                             style: TextStyle(
                                 fontSize: 14.sp, fontWeight: FontWeight.w600)),
                         style: OutlinedButton.styleFrom(
@@ -185,7 +198,7 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                       ),
                       SizedBox(height: 6.h),
                       Text(
-                        context.l10n.friendShareChannelsExplainer,
+                        context.koOnly.friendShareChannelsExplainer,
                         style: TextStyle(
                             fontSize: 12.5.sp,
                             color: colorScheme.onSurfaceVariant),
@@ -194,7 +207,7 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                       ElevatedButton.icon(
                         onPressed: () => _showAddFriendDialog(context, ref),
                         icon: Icon(Icons.person_add_alt, size: 18.sp),
-                        label: Text(context.l10n.friendAdd,
+                        label: Text(context.koOnly.friendAdd,
                             style: TextStyle(
                                 fontSize: 14.sp, fontWeight: FontWeight.w600)),
                         style: ElevatedButton.styleFrom(
@@ -202,7 +215,7 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                       ),
                       SizedBox(height: 6.h),
                       Text(
-                        context.l10n.friendEnterShareCode,
+                        context.koOnly.friendEnterShareCode,
                         style: TextStyle(
                             fontSize: 12.5.sp,
                             color: colorScheme.onSurfaceVariant),
@@ -217,7 +230,7 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
             Expanded(
               child: friends.isEmpty
                   ? Center(
-                      child: Text(context.l10n.friendNoneAddedYet,
+                      child: Text(context.koOnly.friendNoneAddedYet,
                           style: TextStyle(
                               fontSize: 14.sp, color: colorScheme.outline)),
                     )
@@ -249,10 +262,8 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                                       FriendAvailability.unconfirmed
                                   ? Text(
                                       friend.data == null
-                                          ? context
-                                              .l10n.friendLoadFailedCheckNetwork
-                                          : context
-                                              .l10n.friendShowingCachedSchedule,
+                                          ? context.koOnly.friendLoadFailedCheckNetwork
+                                          : context.koOnly.friendShowingCachedSchedule,
                                       style: TextStyle(
                                           fontSize: 11.5.sp,
                                           color: colorScheme.onSurfaceVariant),
@@ -272,10 +283,9 @@ class _FriendListScreenState extends ConsumerState<FriendListScreen> {
                                 onPressed: () async {
                                   final confirm = await showDialog<bool>(
                                     context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text(context.l10n.friendRemove),
-                                      content: Text(context.l10n
-                                          .friendRemoveConfirm(displayName)),
+                                    builder: (context) => !context.usesKoreanFeatures ? const UnavailableFeature() : AlertDialog(
+                                      title: Text(context.koOnly.friendRemove),
+                                      content: Text(context.koOnly.friendRemoveConfirm(displayName)),
                                       actions: [
                                         TextButton(
                                             onPressed: () =>

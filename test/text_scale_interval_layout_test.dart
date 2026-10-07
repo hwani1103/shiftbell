@@ -45,7 +45,7 @@ void main() {
                       title: Text(locale == 'ko' ? '2026년 10월' : 'September 2026',
                           key: const ValueKey('header-month'), style: const TextStyle(fontSize: 24)),
                       actions: CalendarHeaderActions(onToday: () {}, onAllShifts: () {},
-                        onFriends: () {}, onOneTap: () {}, isKorean: locale == 'ko', editorial: true))),
+                        onFriends: () {}, isKorean: locale == 'ko', editorial: true))),
                     TeamAssignmentGrid(
                       pattern: List.generate(40, (i) => locale == 'ko' ? '야간집중근무' : 'Late Night Shift'),
                       teamAtSlot: (i) => i < 6 ? '$i' : null,
@@ -59,7 +59,7 @@ void main() {
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull, reason: '$locale width=$width scale=$scale');
           final month = tester.getRect(find.byKey(const ValueKey('header-month')));
-          final alarm = tester.getRect(find.byKey(const ValueKey('one-tap-open')));
+          final alarm = tester.getRect(find.byType(TextButton).first);
           expect(month.center.dy, closeTo(alarm.center.dy, .01));
           expect(month.right, lessThan(alarm.left));
           for (final button in find.byType(TextButton).evaluate()) {

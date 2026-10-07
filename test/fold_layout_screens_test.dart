@@ -17,8 +17,6 @@ import 'package:shiftbell/constants/layout_limits.dart';
 import 'package:shiftbell/constants/platform_channel.dart';
 import 'package:shiftbell/l10n/generated/app_localizations.dart';
 import 'package:shiftbell/models/alarm.dart';
-import 'package:shiftbell/models/custom_alarm_preset.dart';
-import 'package:shiftbell/providers/custom_alarm_preset_provider.dart';
 import 'package:shiftbell/models/calendar_theme.dart';
 import 'package:shiftbell/models/shift_schedule.dart';
 import 'package:shiftbell/models/friend_schedule.dart';
@@ -603,79 +601,8 @@ void main() {
 
           if (entry.key.startsWith('calendar_') &&
               entry.key != 'calendar_unassigned') {
-            await tester.runAsync(() =>
-                container.read(customAlarmPresetsProvider.notifier).saveAll([
-                  const CustomAlarmPreset(time: '23:59'),
-                  ...List.filled(4, CustomAlarmPreset.empty)
-                ]));
-            await tester.pump();
-            final now = DateTime.now();
-            await tester.tap(find.byKey(const ValueKey('one-tap-open')));
-            await settlePopup();
-            expect(
-                find.byKey(const ValueKey('one-tap-slot-0')), findsOneWidget);
-            expect(
-                find.byKey(const ValueKey('one-tap-slot-1')), findsOneWidget);
-            var calendar =
-                tester.widget<TableCalendar>(find.byType(TableCalendar));
-            expect(calendar.availableGestures, AvailableGestures.none);
-            calendar.onDaySelected!(DateTime(now.year, now.month, 15), now);
-            await settlePopup();
-            expect(find.byKey(const ValueKey('one-tap-open')), findsOneWidget);
-            await tester.tap(find.byKey(const ValueKey('one-tap-open')));
-            await settlePopup();
-            expect(find.byKey(const ValueKey('one-tap-slot-2')), findsNothing);
-            await captureScreen('_panel');
-            await tester.tap(find.byKey(const ValueKey('one-tap-slot-0')));
-            await settlePopup();
-            expect(find.byKey(const ValueKey('one-tap-edit')), findsOneWidget);
-            expect(
-                find.byKey(const ValueKey('one-tap-delete')), findsOneWidget);
-            final highlights = tester
-                .widgetList<AnimatedContainer>(find.byType(AnimatedContainer))
-                .where((w) =>
-                    w.key is ValueKey<String> &&
-                    (w.key as ValueKey<String>)
-                        .value
-                        .startsWith('one-tap-day-'))
-                .where((w) =>
-                    (w.foregroundDecoration as BoxDecoration).border != null);
-            expect(highlights.length, 2,
-                reason: 'Only today and tomorrow can be assigned');
-            calendar = tester.widget<TableCalendar>(find.byType(TableCalendar));
-            calendar.onDaySelected!(DateTime(now.year, now.month, 15), now);
-            await settlePopup();
-            expect(find.byType(BottomSheet), findsNothing);
-            await captureScreen('_selected');
-            if (size == const Size(411, 891)) {
-              calendar.onDaySelected!(
-                  DateTime(now.year, now.month, now.day + 1), now);
-              await settlePopup();
-              expect(
-                  find.byKey(const ValueKey('one-tap-open')), findsOneWidget);
-              expect(find.byType(SnackBarAction), findsNothing);
-              expect(find.text('23:59에 소리+진동 알람이 예약됐어요.'), findsOneWidget);
-              await tester.pump(const Duration(seconds: 4));
-              await tester.pump(const Duration(milliseconds: 400));
-              expect(find.byType(SnackBar), findsNothing);
-              await tester.runAsync(() => container
-                  .read(alarmNotifierProvider.notifier)
-                  .deleteOneTapSlot(0));
-              await tester.tap(find.byKey(const ValueKey('one-tap-open')));
-              await settlePopup();
-              await tester.tap(find.byKey(const ValueKey('one-tap-slot-0')));
-              await settlePopup();
-            }
-            final navigator =
-                tester.state<NavigatorState>(find.byType(Navigator).first);
-            await navigator.maybePop();
-            await settlePopup();
-            expect(
-                find.byKey(const ValueKey('one-tap-slot-1')), findsOneWidget);
-            expect(find.byKey(const ValueKey('one-tap-edit')), findsNothing);
-            await navigator.maybePop();
-            await settlePopup();
-            expect(find.byKey(const ValueKey('one-tap-open')), findsOneWidget);
+            expect(find.byKey(const ValueKey('one-tap-open')), findsNothing);
+            expect(tester.widget<TableCalendar>(find.byType(TableCalendar)).availableGestures, AvailableGestures.all);
           }
 
           if (entry.key == 'calendar_mainWhite') {
@@ -687,16 +614,6 @@ void main() {
             expect(find.text('12월').hitTestable(), findsOneWidget);
             await captureScreen('_month');
             navigator.pop();
-            await settlePopup();
-            await tester.tap(find.byKey(const ValueKey('one-tap-open')));
-            await settlePopup();
-            await tester.tap(find.byKey(const ValueKey('one-tap-slot-1')));
-            await settlePopup();
-            expect(find.text('원터치 알람 설정'), findsOneWidget);
-            await captureScreen('_presets');
-            navigator.pop();
-            await settlePopup();
-            await tester.tap(find.byKey(const ValueKey('one-tap-back')));
             await settlePopup();
             final calendar =
                 tester.widget<TableCalendar>(find.byType(TableCalendar));

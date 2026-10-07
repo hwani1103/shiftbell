@@ -23,9 +23,9 @@ import '../models/alarm.dart';
 import '../models/alarm_template.dart';
 import '../models/shift_schedule.dart';
 import '../constants/alarm_day_offset.dart';
-import '../constants/alarm_limits.dart';
 import 'database_service.dart';
 import '../utils/alarm_wall_time.dart';
+import 'fixed_alarm_occurrence.dart';
 
 class PendingFixedAlarm {
   final DateTime dateTime;
@@ -33,6 +33,7 @@ class PendingFixedAlarm {
   final int alarmTypeId;
   final String shiftType;
   final int dayOffset;
+  final String? fixedSlotTime;
 
   PendingFixedAlarm({
     required this.dateTime,
@@ -40,6 +41,7 @@ class PendingFixedAlarm {
     required this.alarmTypeId,
     required this.shiftType,
     required this.dayOffset,
+    this.fixedSlotTime,
   });
 }
 
@@ -70,35 +72,6 @@ Future<Map<String, AlarmOverrideEntry>> readAlarmOverrides(DatabaseExecutor db) 
   };
 }
 
-/// 설정에서 고정 알람을 저장한 뒤, 현재 10일 창의 원터치 알람과 겹쳐 생략될 고정 알람 수.
-Future<List<DateTime>> listFixedConflictsWithCustom(DatabaseExecutor db, ShiftSchedule schedule, {DateTime? now}) async {
-  final effectiveNow = now ?? DateTime.now();
-  final templates = (await db.query('shift_alarm_templates')).map(AlarmTemplate.fromMap).toList();
-  final overrides = await readAlarmOverrides(db);
-  final customRows = await db.query('alarms', columns: ['date'], where: 'type = ?', whereArgs: ['custom']);
-  final conflicts = <DateTime>[];
-  for (final row in customRows) {
-    final customAt = tryParseAlarmDate(row['date'] as String?);
-    if (customAt == null || !customAt.isAfter(effectiveNow)) continue;
-    final daysAway = julianDayNumber(customAt.year, customAt.month, customAt.day) -
-        julianDayNumber(effectiveNow.year, effectiveNow.month, effectiveNow.day);
-    if (daysAway < 0 || daysAway >= kAlarmRefreshWindowDays) continue;
-    final desired = computeDesiredFixedAlarmsForDate(
-      date: customAt,
-      schedule: schedule,
-      allTemplates: templates,
-      now: effectiveNow,
-      overrides: overrides,
-    );
-    if (desired.any((alarm) => alarmSlotTime(alarm.dateTime) == alarmSlotTime(customAt))) conflicts.add(customAt);
-  }
-  conflicts.sort();
-  return conflicts;
-}
-
-Future<int> countFixedConflictsWithCustom(DatabaseExecutor db, ShiftSchedule schedule, {DateTime? now}) async =>
-    (await listFixedConflictsWithCustom(db, schedule, now: now)).length;
-
 /// 실제 날짜 [date]에 울려야 하는 고정 알람 목록을 계산함(과거 시각은 제외).
 /// [allTemplates]는 보통 DatabaseService.getAllAlarmTemplates()의 전체 목록을
 /// 그대로 넘기면 됨(호출부가 여러 날짜를 반복 계산할 때 매번 다시 쿼리하지
@@ -110,6 +83,7 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
   DateTime? now,
   Map<String, AlarmOverrideEntry> overrides = const {},
   DateTime Function(DateTime wall)? resolveTime,
+  Set<String> consumedOccurrences = const {},
 }) {
   final effectiveNow = now ?? DateTime.now();
   final dayBefore = DateTime(date.year, date.month, date.day - 1);
@@ -155,6 +129,7 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
         alarmTypeId: template.alarmTypeId,
         shiftType: shiftType,
         dayOffset: offset,
+        fixedSlotTime: alarmSlotTime(wallTime),
       );
     }
   }
@@ -168,6 +143,9 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
   // 되살아나지 않게), set_type이면 타입만 바꿈. AlarmRefreshEngine.computeDesiredAlarms와 같은 규칙.
   final result = <PendingFixedAlarm>[];
   for (final alarm in byTime.values) {
+    if (consumedOccurrences.contains(fixedOccurrenceKey(
+        alarm.fixedSlotTime ?? alarmSlotTime(alarm.dateTime),
+        alarm.shiftType, alarm.dayOffset))) continue;
     final override = overrides[alarmSlotKey(alarmSlotTime(alarm.dateTime), alarm.shiftType, alarm.dayOffset)];
     if (override == null) {
       result.add(alarm);
@@ -180,6 +158,7 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
         alarmTypeId: override.alarmTypeId!,
         shiftType: alarm.shiftType,
         dayOffset: alarm.dayOffset,
+        fixedSlotTime: alarm.fixedSlotTime,
       ));
     } else {
       result.add(alarm);
@@ -210,10 +189,7 @@ class ScheduledAlarmRef {
 class RegenerateAlarmsResult {
   final List<int> cancelIds;
   final List<ScheduledAlarmRef> scheduled;
-  final int skippedByCustom;
-  final List<DateTime> skippedSlots;
-  RegenerateAlarmsResult({required this.cancelIds, required this.scheduled,
-      this.skippedByCustom = 0, this.skippedSlots = const []});
+  RegenerateAlarmsResult({required this.cancelIds, required this.scheduled});
 }
 
 /// [dates]에 해당하는 실제 알람 날짜들의 고정 알람(type='fixed')을 다시 계산하고
@@ -233,14 +209,16 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
 }) async {
   final cancelIds = <int>[];
   final scheduled = <ScheduledAlarmRef>[];
-  var skippedByCustom = 0;
-  final skippedSlots = <DateTime>[];
   final now = nowOverride ?? DateTime.now();
 
   final templateMaps = await txn.query('shift_alarm_templates');
   final allTemplates = templateMaps.map((m) => AlarmTemplate.fromMap(m)).toList();
   // ⭐ 2026-09-14 (#31) - 개별 예외를 같은 트랜잭션에서 읽어 계산에 적용(Flutter 재생성도 사용자 변경을 원복하지 않게)
   final overrides = await readAlarmOverrides(txn);
+  final sortedDates = dates.toList()..sort();
+  final consumed = sortedDates.isEmpty ? <String>{} : await readConsumedFixedOccurrences(
+    txn, alarmSlotTime(DateTime(sortedDates.first.year, sortedDates.first.month, sortedDates.first.day)),
+    alarmSlotTime(DateTime(sortedDates.last.year, sortedDates.last.month, sortedDates.last.day + 1)));
 
   for (final date in dates) {
     final dateStr = date.toIso8601String().split('T')[0];
@@ -258,11 +236,10 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
       allTemplates: allTemplates,
       now: now,
       overrides: overrides,
+      consumedOccurrences: consumed,
     );
     final desired = calculated.where((alarm) => !occupiedTimes.contains(alarmSlotTime(alarm.dateTime))).toList();
-    skippedByCustom += calculated.length - desired.length;
-    skippedSlots.addAll(calculated.where((alarm) => occupiedTimes.contains(alarmSlotTime(alarm.dateTime)))
-        .map((alarm) => alarm.dateTime));
+
     String desiredKey(PendingFixedAlarm alarm) =>
         '${alarmSlotKey(alarmSlotTime(alarm.dateTime), alarm.shiftType, alarm.dayOffset)}|${alarm.alarmTypeId}';
     String existingKey(Alarm alarm) =>
@@ -298,6 +275,10 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
       if (alarm.date != null) {
         final matches = remainingDesired[existingKey(alarm)];
         if (matches != null && matches.isNotEmpty) {
+          if (row['fixed_slot_time'] != matches.first.fixedSlotTime) {
+            await txn.update('alarms', {'fixed_slot_time': matches.first.fixedSlotTime},
+                where: 'id = ?', whereArgs: [alarm.id]);
+          }
           if (alarm.time != matches.first.time) {
             await txn.update('alarms', {'time': matches.first.time},
                 where: 'id = ?', whereArgs: [alarm.id]);
@@ -332,6 +313,7 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
         alarmTypeId: item.alarmTypeId,
         shiftType: item.shiftType,
         dayOffset: item.dayOffset,
+        fixedSlotTime: item.fixedSlotTime,
       );
       final dbId = await txn.insert('alarms', alarm.toMap());
       await DatabaseService.instance.logAlarmCreation(txn, dbId, alarm, 'auto');
@@ -339,8 +321,7 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
     }
   }
 
-  return RegenerateAlarmsResult(cancelIds: cancelIds, scheduled: scheduled,
-      skippedByCustom: skippedByCustom, skippedSlots: skippedSlots);
+  return RegenerateAlarmsResult(cancelIds: cancelIds, scheduled: scheduled);
 }
 
 /// [regenerateFixedAlarmsForDatesTxn]을 새 트랜잭션 하나로 감싸서 실행하는

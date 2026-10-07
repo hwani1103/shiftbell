@@ -1,3 +1,4 @@
+import 'package:shiftbell/l10n/korean_only_copy.dart';
 import 'dart:io';
 import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
@@ -480,12 +481,11 @@ void main() {
                 expect(find.textContaining(lookupAppLocalizations(locale).alarmClockFirstOccurrence), findsWidgets);
               }
               if (entry.key == 'help') {
-                final strings = lookupAppLocalizations(locale);
                 for (final title in [
-                  strings.helpFriendSectionTitle,
-                  strings.helpSleepSectionTitle,
-                  strings.helpScheduleTabSectionTitle,
-                  strings.helpConditionSectionTitle
+                  KoreanOnlyCopy.forLocale('ko').helpFriendSectionTitle,
+                  KoreanOnlyCopy.forLocale('ko').helpSleepSectionTitle,
+                  KoreanOnlyCopy.forLocale('ko').helpScheduleTabSectionTitle,
+                  KoreanOnlyCopy.forLocale('ko').helpConditionSectionTitle
                 ]) {
                   expect(find.text(title), findsNothing);
                 }
@@ -532,7 +532,7 @@ void main() {
       });
     }
   }
-  testWidgets('switching to English releases one-tap calendar gesture lock', (tester) async {
+  testWidgets('removed one-tap controls leave calendar gestures enabled in both languages', (tester) async {
     SharedPreferences.setMockInitialValues({
       'welcome_popup_shown': true,
       'shift_assign_tutorial_shown': true,
@@ -562,10 +562,8 @@ void main() {
         await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 60)));
         await tester.pump(const Duration(milliseconds: 150));
       }
-      await tester.tap(find.byKey(const ValueKey('one-tap-open')));
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(tester.widget<TableCalendar>(find.byType(TableCalendar)).availableGestures,
-          AvailableGestures.none);
+      expect(find.byKey(const ValueKey('one-tap-open')), findsNothing);
+      expect(tester.widget<TableCalendar>(find.byType(TableCalendar)).availableGestures, AvailableGestures.all);
       await tester.pumpWidget(app(const Locale('en', 'US')));
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byKey(const ValueKey('one-tap-open')), findsNothing);

@@ -1,3 +1,4 @@
+import '../widgets/unavailable_feature.dart';
 // lib/widgets/disable_tab_button.dart
 //
 // ⭐ 2026-09-13 추가(사용자 요청) - 일정관리/컨디션 탭 각자의 스크롤 콘텐츠
@@ -17,13 +18,14 @@ Future<bool> setTabEnabledWithFeedback(
   BuildContext context,
   Future<void> Function() setEnabled,
 ) async {
+  if (!context.usesKoreanFeatures) return false;
   try {
     await setEnabled();
     return true;
   } on StateError {
-    if (context.mounted) {
+    if (context.mounted && context.usesKoreanFeatures) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.scheduleTabSyncFailed)),
+        SnackBar(content: Text(context.koOnly.scheduleTabSyncFailed)),
       );
     }
     return false;
@@ -65,10 +67,10 @@ class DisableTabButton extends ConsumerWidget {
     final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.disableTabButtonLabel(tabLabel)),
+      builder: (context) => !context.usesKoreanFeatures ? const UnavailableFeature() : AlertDialog(
+        title: Text(KoreanOnlyCopy.fromLocalizations(l10n).disableTabButtonLabel(tabLabel)),
         content: Text(
-          '${l10n.disableTabDialogBody}'
+          '${KoreanOnlyCopy.fromLocalizations(l10n).disableTabDialogBody}'
           '${extraNotice != null ? '\n$extraNotice' : ''}',
         ),
         actions: [
@@ -101,6 +103,7 @@ class DisableTabButton extends ConsumerWidget {
   // 옅은 빨강 배경(shade50) + 테두리(shade200) + 아이콘/텍스트(shade400)를 씀.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Padding(
       padding: EdgeInsets.only(top: topSpacing),
       child: Align(
@@ -125,7 +128,7 @@ class DisableTabButton extends ConsumerWidget {
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(
-                      context.l10n.disableTabButtonLabel(tabLabel),
+                      context.koOnly.disableTabButtonLabel(tabLabel),
                       softWrap: true,
                       style: TextStyle(
                         fontSize: 14,

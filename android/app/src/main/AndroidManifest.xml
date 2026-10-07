@@ -163,7 +163,7 @@
         </receiver>
         <receiver
             android:name=".SleepWidgetProvider"
-            android:enabled="true"
+            android:enabled="false"
             android:exported="true"
             android:label="@string/app_widget_sleep_label">
             <intent-filter>
@@ -223,6 +223,7 @@
     </application>
 
     <queries>
+        <package android:name="com.miui.securitycenter" />
         <intent>
             <action android:name="android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
         </intent>

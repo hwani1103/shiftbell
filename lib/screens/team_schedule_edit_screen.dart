@@ -108,11 +108,12 @@ class _TeamScheduleEditScreenState
       await DatabaseService.instance.saveTeamScheduleConfig(null);
       if (mounted) Navigator.pop(context, TeamScheduleEditResult.recreate);
     } catch (error) {
+      debugPrint('Team schedule reset failed: $error');
       if (!mounted) return;
       setState(() => _busy = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              context.l10n.settingsScheduleChangeFailedWithError('$error'))));
+              context.l10n.settingsScheduleChangeFailedWithError(context.localizedErrorDetail(error)))));
     }
   }
 

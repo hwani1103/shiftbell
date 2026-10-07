@@ -8,7 +8,6 @@ import '../models/calendar_theme.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
 import '../services/update_service.dart';
-import '../models/alarm.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
@@ -1091,65 +1090,27 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
     print('🔄 10일치 알람 생성 시작...');
 
-    // ⭐ alarm_generation_service.dart의 공용 계산 - 이 시점엔 _saveAlarmTemplates()가
-    // 이미 DB에 템플릿을 저장한 뒤라서(호출 순서는 _saveAndFinish() 참고) DB에서
-    // 다시 읽어옴. 날짜 D의 알람은 D 하루의 배정뿐 아니라 전날(D-1)/다음날(D+1)
-    // 배정의 "전날/다음날" 템플릿도 기여할 수 있으므로, 달력 탭/설정과 동일한
-    // computeDesiredFixedAlarmsForDate()를 그대로 재사용해야 함(달력 탭 규정과
-    // 어긋나면 안 됨 - 파일 상단 주석 참고).
-    final List<Alarm> alarms = [];
     final today = DateTime.now();
-    final allTemplates = await DatabaseService.instance.getAllAlarmTemplates();
-
-    for (var i = 0; i < kAlarmRefreshWindowDays; i++) {
-      // ⭐ DST 안전: Duration(days: i) 더하기는 "정확히 24*i시간 뒤"라서, 자정 근처
-      // 시각에 서머타임 전환이 겹치면 원래 의도한 달력 날짜와 다른 날로 넘어갈 수
-      // 있음. DateTime(y, m, d+i)는 달의 일수를 넘어가도 알아서 정규화되면서
-      // 해당 달력 날짜의 로컬 자정을 정확히 가리킴.
-      final date = DateTime(today.year, today.month, today.day + i);
-
-      final desired = computeDesiredFixedAlarmsForDate(
-        date: date,
-        schedule: schedule,
-        allTemplates: allTemplates,
+    final result = await regenerateFixedAlarmsForDates(
+      db: await DatabaseService.instance.database,
+      schedule: schedule,
+      dates: {
+        for (var i = 0; i < kAlarmRefreshWindowDays; i++)
+          DateTime(today.year, today.month, today.day + i),
+      },
+      nowOverride: today,
+    );
+    // Share the same transaction and consumed-slot policy as regeneration.
+    for (final id in result.cancelIds) {
+      await AlarmService().cancelAlarm(id);
+    }
+    for (final alarm in result.scheduled) {
+      await AlarmService().scheduleAlarm(
+        id: alarm.id, dateTime: alarm.dateTime, label: alarm.label,
+        soundType: 'loud',
       );
-
-      for (final item in desired) {
-        alarms.add(Alarm(
-          time: item.time,
-          date: item.dateTime,
-          type: 'fixed',
-          alarmTypeId: item.alarmTypeId,
-          shiftType: item.shiftType,
-          dayOffset: item.dayOffset,
-        ));
-      }
     }
-
-    if (alarms.isNotEmpty) {
-      // DB 저장
-      await DatabaseService.instance.insertAlarmsInBatch(alarms);
-
-      // ⭐ 변경: 저장된 알람 다시 읽어서 DB ID로 Native 등록
-      final savedAlarms = await DatabaseService.instance.getAllAlarms();
-      for (var alarm in savedAlarms) {
-        if (alarm.date != null && alarm.date!.isAfter(DateTime.now())) {
-          await AlarmService().scheduleAlarm(
-            id: alarm.id!, // ⭐ DB ID 사용
-            dateTime: alarm.date!,
-            label: alarm.shiftType ?? context.l10n.alarmTitle,
-            soundType: 'loud',
-          );
-        }
-      }
-
-      // ⭐ 삭제: refresh() 불필요
-      // if (mounted) {
-      //   ref.read(alarmNotifierProvider.notifier).refresh();
-      // }
-    }
-
-    print('✅ ${alarms.length}개 알람 생성 완료');
+    print('✅ ${result.scheduled.length}개 알람 생성 완료');
   }
 }
 

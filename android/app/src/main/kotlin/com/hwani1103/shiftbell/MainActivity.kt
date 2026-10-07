@@ -227,6 +227,8 @@ class MainActivity: FlutterActivity() {
     // ✅ 변경
 override fun onResume() {
     super.onResume()
+    SnoozeFeedback.consume(this)
+    NotificationLocale.refresh(this)
     InAppAlarmController.resume(this)
     ReleaseLocalePolicy.syncSleepWidget(this)
     // ⭐ CRITICAL FIX: triggerCheck()는 DB를 동기적으로(블로킹) 읽음. onResume()은
@@ -267,6 +269,12 @@ override fun onResume() {
 override fun onPause() {
     InAppAlarmController.pause(this)
     super.onPause()
+}
+
+override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+    super.onConfigurationChanged(newConfig)
+    NotificationLocale.refresh(this)
+    InAppAlarmController.changed()
 }
 
 override fun onNewIntent(intent: Intent) {
@@ -467,6 +475,23 @@ override fun onNewIntent(intent: Intent) {
                 "stopAlarm" -> {
                     AlarmPlayer.getInstance(applicationContext).stopAlarm()
                     result.success(null)
+                }
+                "permissionSnapshot" -> {
+                    result.success(PermissionSettings.snapshot(this))
+                }
+                "getDefaultSnoozeMinutes" -> result.success(SnoozeDefaults.read(this))
+                "setDefaultSnoozeMinutes" -> {
+                    val minutes = call.argument<Int>("minutes")
+                    when {
+                        minutes == null || !SnoozeDefaults.valid(minutes) ->
+                            result.error("INVALID_SNOOZE_DEFAULT", "Expected 5, 10 or 15 minutes", null)
+                        !RingSnoozeController.setDefault(this, minutes) ->
+                            result.error("SNOOZE_DEFAULT_SAVE_FAILED", "Could not save snooze default", null)
+                        else -> result.success(minutes)
+                    }
+                }
+                "openPermissionSettings" -> {
+                    result.success(PermissionSettings.open(this, call.argument<String>("kind") ?: ""))
                 }
                 "requestOverlayPermission" -> {
                     requestOverlayPermission()

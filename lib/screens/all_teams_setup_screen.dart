@@ -280,11 +280,12 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
       await DatabaseService.instance.saveTeamScheduleConfig(config);
       if (mounted) Navigator.pop(context, true);
     } catch (error) {
+      debugPrint('Team schedule save failed: $error');
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(
-              context.l10n.settingsScheduleChangeFailedWithError('$error'))));
+              context.l10n.settingsScheduleChangeFailedWithError(context.localizedErrorDetail(error)))));
     }
   }
 

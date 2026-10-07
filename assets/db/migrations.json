@@ -10,7 +10,7 @@
     "_onCreate(신규 설치)는 이 파일을 쓰지 않고 Dart 코드에 따로 있다 - 테스트에서 '마이그레이션 결과 == 신규 설치 결과'를 독립적으로 비교하기 위함."
   ],
   "format": 1,
-  "targetVersion": 26,
+  "targetVersion": 28,
   "migrations": [
     {
       "version": 2,
@@ -209,15 +209,40 @@
       "sql": [
         "CREATE TABLE IF NOT EXISTS team_schedule_config(id INTEGER PRIMARY KEY CHECK (id = 1), config TEXT)"
       ]
+    },
+    {
+      "version": 27,
+      "note": "Remove unreleased one-touch alarms; preserve ordinary alarms, histories and ID sequence",
+      "sql": [
+        "ALTER TABLE alarms ADD COLUMN preset_slot INTEGER",
+        "ALTER TABLE alarms ADD COLUMN assigned_day TEXT",
+        "INSERT INTO alarm_history(alarm_id,scheduled_time,scheduled_date,actual_ring_time,dismiss_type,snooze_count,shift_type,created_at,day_offset) SELECT id,time,COALESCE(date,''),strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),'cancelled_before_ring',0,shift_type,strftime('%Y-%m-%dT%H:%M:%S','now','localtime'),day_offset FROM alarms WHERE preset_slot IS NOT NULL AND type IN ('custom','snoozed')",
+        "CREATE TABLE alarms_v27(id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT NOT NULL, date TEXT, type TEXT NOT NULL, alarm_type_id INTEGER NOT NULL, shift_type TEXT, day_offset INTEGER NOT NULL DEFAULT 0, FOREIGN KEY (alarm_type_id) REFERENCES alarm_types(id))",
+        "INSERT INTO alarms_v27(id,time,date,type,alarm_type_id,shift_type,day_offset) SELECT id,time,date,type,alarm_type_id,shift_type,day_offset FROM alarms WHERE NOT (preset_slot IS NOT NULL AND type IN ('custom','snoozed'))",
+        "UPDATE sqlite_sequence SET seq = MAX(seq, COALESCE((SELECT seq FROM sqlite_sequence WHERE name = 'alarms'),0)) WHERE name = 'alarms_v27'",
+        "DROP TABLE alarms",
+        "ALTER TABLE alarms_v27 RENAME TO alarms"
+      ]
+    },
+    {
+      "version": 28,
+      "sql": [
+        "ALTER TABLE alarms ADD COLUMN fixed_slot_time TEXT",
+        "ALTER TABLE alarm_history ADD COLUMN fixed_slot_time TEXT",
+        "CREATE INDEX IF NOT EXISTS idx_alarm_history_fixed_slot ON alarm_history(fixed_slot_time)",
+        "CREATE INDEX IF NOT EXISTS idx_alarm_history_scheduled_date ON alarm_history(scheduled_date)",
+        "CREATE TABLE IF NOT EXISTS fixed_alarm_consumptions(id INTEGER PRIMARY KEY AUTOINCREMENT, slot_time TEXT NOT NULL, shift_type TEXT NOT NULL, day_offset INTEGER NOT NULL DEFAULT 0 CHECK (day_offset IN (-1, 0, 1)), recorded_at TEXT NOT NULL, UNIQUE(slot_time, shift_type, day_offset))",
+        "INSERT OR IGNORE INTO fixed_alarm_consumptions(slot_time,shift_type,day_offset,recorded_at) SELECT substr(h.scheduled_date,1,16)||':00',h.shift_type,h.day_offset,h.created_at FROM alarm_history h WHERE h.shift_type IS NOT NULL AND length(h.scheduled_date)>=19 AND h.dismiss_type IN ('swiped','timeout','snoozed','snooze_skipped_existing_alarm','superseded_by_next_alarm') AND EXISTS(SELECT 1 FROM alarm_creation_log c WHERE c.alarm_id=h.alarm_id AND c.source='auto' AND substr(c.scheduled_date,1,19)=substr(h.scheduled_date,1,19) AND c.scheduled_time=h.scheduled_time AND c.shift_type=h.shift_type AND c.day_offset=h.day_offset) AND NOT EXISTS(SELECT 1 FROM alarm_creation_log c WHERE c.alarm_id=h.alarm_id AND c.source!='auto' AND substr(c.scheduled_date,1,19)=substr(h.scheduled_date,1,19) AND c.scheduled_time=h.scheduled_time AND c.shift_type=h.shift_type AND c.day_offset=h.day_offset)"
+      ]
     }
   ],
   "repair": [
     "CREATE TABLE IF NOT EXISTS team_schedule_config(id INTEGER PRIMARY KEY CHECK (id = 1), config TEXT)",
     "CREATE TABLE IF NOT EXISTS alarm_types(id INTEGER PRIMARY KEY, name TEXT NOT NULL, emoji TEXT NOT NULL, sound_file TEXT NOT NULL, volume REAL NOT NULL, vibration_strength INTEGER DEFAULT 2, is_preset INTEGER NOT NULL, duration INTEGER DEFAULT 10)",
     "CREATE TABLE IF NOT EXISTS shift_schedule(id INTEGER PRIMARY KEY, is_regular INTEGER NOT NULL, pattern TEXT, today_index INTEGER, shift_types TEXT NOT NULL, active_shift_types TEXT, start_date TEXT, shift_colors TEXT, custom_shift_colors TEXT, assigned_dates TEXT, shift_durations TEXT)",
-    "CREATE TABLE IF NOT EXISTS alarms(id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT NOT NULL, date TEXT, type TEXT NOT NULL, alarm_type_id INTEGER NOT NULL, shift_type TEXT, day_offset INTEGER NOT NULL DEFAULT 0, preset_slot INTEGER, assigned_day TEXT, FOREIGN KEY (alarm_type_id) REFERENCES alarm_types(id))",
+    "CREATE TABLE IF NOT EXISTS alarms(id INTEGER PRIMARY KEY AUTOINCREMENT, time TEXT NOT NULL, date TEXT, type TEXT NOT NULL, alarm_type_id INTEGER NOT NULL, shift_type TEXT, day_offset INTEGER NOT NULL DEFAULT 0, fixed_slot_time TEXT, FOREIGN KEY (alarm_type_id) REFERENCES alarm_types(id))",
     "CREATE TABLE IF NOT EXISTS shift_alarm_templates(id INTEGER PRIMARY KEY AUTOINCREMENT, shift_type TEXT NOT NULL, time TEXT NOT NULL, alarm_type_id INTEGER NOT NULL, day_offset INTEGER NOT NULL DEFAULT 0)",
-    "CREATE TABLE IF NOT EXISTS alarm_history(id INTEGER PRIMARY KEY AUTOINCREMENT, alarm_id INTEGER NOT NULL, scheduled_time TEXT NOT NULL, scheduled_date TEXT NOT NULL, actual_ring_time TEXT NOT NULL, dismiss_type TEXT NOT NULL, snooze_count INTEGER DEFAULT 0, shift_type TEXT, created_at TEXT NOT NULL, day_offset INTEGER NOT NULL DEFAULT 0)",
+    "CREATE TABLE IF NOT EXISTS alarm_history(id INTEGER PRIMARY KEY AUTOINCREMENT, alarm_id INTEGER NOT NULL, scheduled_time TEXT NOT NULL, scheduled_date TEXT NOT NULL, actual_ring_time TEXT NOT NULL, dismiss_type TEXT NOT NULL, snooze_count INTEGER DEFAULT 0, shift_type TEXT, created_at TEXT NOT NULL, day_offset INTEGER NOT NULL DEFAULT 0, fixed_slot_time TEXT)",
     "CREATE TABLE IF NOT EXISTS date_memos(id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, memo_text TEXT NOT NULL, order_index INTEGER NOT NULL, created_at TEXT NOT NULL)",
     "CREATE TABLE IF NOT EXISTS date_schedules(id INTEGER PRIMARY KEY AUTOINCREMENT, date TEXT NOT NULL, content TEXT NOT NULL, start_minutes INTEGER NOT NULL, duration_minutes INTEGER NOT NULL, color_index INTEGER NOT NULL DEFAULT 0, icon_index INTEGER NOT NULL DEFAULT 0, style_index INTEGER NOT NULL DEFAULT 1, font_index INTEGER NOT NULL DEFAULT 1, predicted_category TEXT, is_user_corrected INTEGER NOT NULL DEFAULT 0, notify_enabled INTEGER NOT NULL DEFAULT 0, notify_offset_minutes INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT)",
     "CREATE TABLE IF NOT EXISTS alarm_creation_log(id INTEGER PRIMARY KEY AUTOINCREMENT, alarm_id INTEGER NOT NULL, scheduled_date TEXT NOT NULL, scheduled_time TEXT NOT NULL, shift_type TEXT, alarm_type_id INTEGER, source TEXT NOT NULL, created_at TEXT NOT NULL, day_offset INTEGER NOT NULL DEFAULT 0)",
@@ -227,6 +252,7 @@
     "CREATE TABLE IF NOT EXISTS sleep_records(id INTEGER PRIMARY KEY AUTOINCREMENT, start_time TEXT NOT NULL, end_time TEXT, source TEXT NOT NULL, status TEXT NOT NULL, confidence TEXT, created_at TEXT NOT NULL, updated_at TEXT)",
     "CREATE TABLE IF NOT EXISTS sleep_expected_bedtime(shift_key TEXT PRIMARY KEY, bedtime_minutes INTEGER NOT NULL, updated_at TEXT NOT NULL)",
     "CREATE TABLE IF NOT EXISTS alarm_overrides(id INTEGER PRIMARY KEY AUTOINCREMENT, slot_time TEXT NOT NULL, shift_type TEXT NOT NULL, day_offset INTEGER NOT NULL DEFAULT 0 CHECK (day_offset IN (-1, 0, 1)), action TEXT NOT NULL CHECK (action IN ('skip', 'set_type')), alarm_type_id INTEGER, origin_date TEXT NOT NULL, origin_shift TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE (slot_time, shift_type, day_offset), CHECK ((action = 'skip' AND alarm_type_id IS NULL) OR (action = 'set_type' AND alarm_type_id IS NOT NULL)))",
+    "CREATE TABLE IF NOT EXISTS fixed_alarm_consumptions(id INTEGER PRIMARY KEY AUTOINCREMENT, slot_time TEXT NOT NULL, shift_type TEXT NOT NULL, day_offset INTEGER NOT NULL DEFAULT 0 CHECK (day_offset IN (-1, 0, 1)), recorded_at TEXT NOT NULL, UNIQUE(slot_time, shift_type, day_offset))",
     "ALTER TABLE shift_schedule ADD COLUMN shift_colors TEXT",
     "ALTER TABLE shift_schedule ADD COLUMN assigned_dates TEXT",
     "ALTER TABLE shift_schedule ADD COLUMN active_shift_types TEXT",
@@ -236,8 +262,6 @@
     "ALTER TABLE alarm_types ADD COLUMN vibration_strength INTEGER DEFAULT 2",
     "ALTER TABLE shift_alarm_templates ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE alarms ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0",
-    "ALTER TABLE alarms ADD COLUMN preset_slot INTEGER",
-    "ALTER TABLE alarms ADD COLUMN assigned_day TEXT",
     "ALTER TABLE alarm_history ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE alarm_creation_log ADD COLUMN day_offset INTEGER NOT NULL DEFAULT 0",
     "ALTER TABLE date_schedules ADD COLUMN notify_enabled INTEGER NOT NULL DEFAULT 0",
@@ -250,6 +274,9 @@
     "CREATE INDEX IF NOT EXISTS idx_sleep_records_start ON sleep_records(start_time)",
     "CREATE INDEX IF NOT EXISTS idx_alarm_overrides_origin_date ON alarm_overrides(origin_date)",
     "CREATE INDEX IF NOT EXISTS idx_alarm_overrides_origin_shift ON alarm_overrides(origin_shift)",
-    "CREATE INDEX IF NOT EXISTS idx_alarms_preset_slot ON alarms(preset_slot, assigned_day)"
+    "ALTER TABLE alarms ADD COLUMN fixed_slot_time TEXT",
+    "ALTER TABLE alarm_history ADD COLUMN fixed_slot_time TEXT",
+    "CREATE INDEX IF NOT EXISTS idx_alarm_history_fixed_slot ON alarm_history(fixed_slot_time)",
+    "CREATE INDEX IF NOT EXISTS idx_alarm_history_scheduled_date ON alarm_history(scheduled_date)"
   ]
 }

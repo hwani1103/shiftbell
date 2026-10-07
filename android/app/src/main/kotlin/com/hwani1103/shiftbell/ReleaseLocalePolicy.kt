@@ -15,7 +15,7 @@ object ReleaseLocalePolicy {
 
     // Same regional defaults as lib/l10n/release_locale.dart.
     private val mondayRegions = setOf(
-        "GB", "IE", "AU", "NZ", "AT", "BE", "BG", "CH", "CY", "CZ", "DE",
+        "AE", "GB", "IE", "AU", "NZ", "AT", "BE", "BG", "CH", "CY", "CZ", "DE",
         "DK", "EE", "ES", "FI", "FR", "GR", "HR", "HU", "IS", "IT", "LI",
         "LT", "LU", "LV", "MC", "NL", "NO", "PL", "RO", "RS", "SE", "SI", "SK"
     )
@@ -31,21 +31,24 @@ object ReleaseLocalePolicy {
             (koreanFeatures(context) && CalendarWidgetHolidays.isHoliday(day, overrides))
 
     fun syncSleepWidget(context: Context) {
-        // Manifest enabled cannot vary by locale. Keep the shipped enabled
-        // default so updating Korean installs does not disable their widgets.
-        // Hide it outside Korean on app resume, locale change/package replacement.
+        // Start disabled so a fresh foreign install cannot advertise this widget
+        // before the first app launch. Enable for Korean on app resume, locale
+        // change or package replacement (including existing Korean installs).
         val manager = context.packageManager
         val component = ComponentName(context, SleepWidgetProvider::class.java)
         val target = if (koreanFeatures(context)) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
             else PackageManager.COMPONENT_ENABLED_STATE_DISABLED
         if (manager.getComponentEnabledSetting(component) != target) {
             manager.setComponentEnabledSetting(component, target, PackageManager.DONT_KILL_APP)
+            if (!koreanFeatures(context)) SleepWidgetProvider.requestUpdate(context)
         }
     }
 }
 
 class ReleaseLocaleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        NotificationLocale.refresh(context)
+        InAppAlarmController.changed()
         ReleaseLocalePolicy.syncSleepWidget(context)
         ScheduleNotificationScheduler.syncLocale(context)
         CalendarWidgetProvider.requestUpdate(context)

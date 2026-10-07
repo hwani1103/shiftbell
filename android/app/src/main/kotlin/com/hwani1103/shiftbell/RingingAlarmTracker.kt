@@ -60,6 +60,11 @@ object RingingAlarmTracker {
     data class ActiveRing(val alarmId: Int, val round: Long)
 
     private val lock = Any()
+    data class SnoozeSelection(val ring: ActiveRing, val minutes: Int, val revision: Long)
+    private const val KEY_SNOOZE_MINUTES = "ring_snooze_minutes"
+    private const val KEY_SNOOZE_REVISION = "ring_snooze_revision"
+    private var selectedMinutes = SnoozeText.DEFAULT_MINUTES
+    private var selectionRevision = 0L
     private var loaded = false
     private var counter = 0L
     private var active: ActiveRing? = null
@@ -95,6 +100,8 @@ object RingingAlarmTracker {
         counter = p.getLong(KEY_RING_COUNTER, 0L)
         val id = p.getInt(KEY_RINGING_ID, NONE)
         active = if (id == NONE) null else ActiveRing(id, p.getLong(KEY_RINGING_ROUND, LEGACY_ROUND))
+        selectedMinutes = try { p.getInt(KEY_SNOOZE_MINUTES, 5).takeIf(SnoozeText::valid) ?: 5 } catch (_: ClassCastException) { 5 }
+        selectionRevision = try { p.getLong(KEY_SNOOZE_REVISION, 0).coerceAtLeast(0) } catch (_: ClassCastException) { 0 }
         loaded = true
     }
 
@@ -121,13 +128,61 @@ object RingingAlarmTracker {
         val ring = ActiveRing(alarmId, counter)
         active = ring
         activeStartedHere = true
+        selectedMinutes = SnoozeDefaults.read(context)
+        selectionRevision = 0
         epoch++
         persist(context) {
             putLong(KEY_RING_COUNTER, ring.round)
             putInt(KEY_RINGING_ID, alarmId)
             putLong(KEY_RINGING_ROUND, ring.round)
+            putInt(KEY_SNOOZE_MINUTES, selectedMinutes)
+            putLong(KEY_SNOOZE_REVISION, selectionRevision)
         }
         ring
+    }
+
+    /** Keep a display-only refresh inside the same lock as ring replacement/end. */
+    fun runIfCurrent(context: Context, alarmId: Int, round: Long, block: () -> Unit): Boolean = synchronized(lock) {
+        ensureLoaded(context)
+        if (!activeStartedHere || active != ActiveRing(alarmId, round)) return@synchronized false
+        block()
+        true
+    }
+
+    fun selectionForLiveRing(context: Context, ring: ActiveRing): SnoozeSelection? = synchronized(lock) {
+        ensureLoaded(context)
+        if (activeStartedHere && active == ring) SnoozeSelection(ring, selectedMinutes, selectionRevision) else null
+    }
+
+    fun adjustSnooze(context: Context, ring: ActiveRing, steps: Int): SnoozeSelection? = synchronized(lock) {
+        ensureLoaded(context)
+        if (!activeStartedHere || active != ring || (steps != -1 && steps != 1)) return@synchronized null
+        val next = (selectedMinutes + steps * 5).coerceIn(5, 30)
+        if (next != selectedMinutes) {
+            selectedMinutes = next
+            selectionRevision++
+            persist(context) {
+                putInt(KEY_SNOOZE_MINUTES, selectedMinutes)
+                putLong(KEY_SNOOZE_REVISION, selectionRevision)
+            }
+        }
+        SnoozeSelection(ring, selectedMinutes, selectionRevision)
+    }
+
+    /** 지금 활성인 울림, 없으면 null. */
+    fun setLiveSnooze(context: Context, minutes: Int): SnoozeSelection? = synchronized(lock) {
+        ensureLoaded(context)
+        require(SnoozeText.valid(minutes))
+        val ring = active?.takeIf { activeStartedHere } ?: return@synchronized null
+        if (selectedMinutes != minutes) {
+            selectedMinutes = minutes
+            selectionRevision++
+            persist(context) {
+                putInt(KEY_SNOOZE_MINUTES, selectedMinutes)
+                putLong(KEY_SNOOZE_REVISION, selectionRevision)
+            }
+        }
+        SnoozeSelection(ring, selectedMinutes, selectionRevision)
     }
 
     /** 지금 활성인 울림, 없으면 null. */
@@ -158,6 +213,8 @@ object RingingAlarmTracker {
         persist(context) {
             remove(KEY_RINGING_ID)
             remove(KEY_RINGING_ROUND)
+            remove(KEY_SNOOZE_MINUTES)
+            remove(KEY_SNOOZE_REVISION)
         }
         true
     }
@@ -220,6 +277,10 @@ object RingingAlarmTracker {
 
     /** 테스트 전용 - 프로세스 재시작처럼 메모리 값을 버림(저장된 값은 유지). */
     internal fun resetMemoryForTest() = synchronized(lock) {
+        NotificationHelper.resetMemoryForTest()
+        RingSnoozeController.resetForTest()
+        selectedMinutes = 5
+        selectionRevision = 0
         RingTimeoutController.clear()
         loaded = false
         counter = 0L

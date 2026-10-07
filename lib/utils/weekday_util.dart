@@ -13,10 +13,9 @@
 // 배열은 절대 건드리지 말 것. 이 파일은 오직 "로케일에 따라 바뀌어야 하는" 요일
 // 표시(기존 _weekdayKr 자리)만 다룸.
 //
-// ⭐ 요일 시작 순서 결정: 한국(일요일 시작)과 영어권 중 미국(en-US, 일요일 시작
-// 관습)이 일치해서, 그대로 일요일(index 0) 시작 고정으로 둠. 영국/유럽식(월요일
-// 시작, ISO 8601)은 이번 영어 현지화 범위에서 다루지 않음 - 필요해지면
-// Localizations.localeOf(context).countryCode로 분기 추가 가능(보고서 2-4번 결정).
+// 배열 인덱스는 일=0으로 고정하지만 화면의 첫 요일은 별개다.
+// 달력은 MaterialLocalizations.firstDayOfWeekIndex를 사용한다.
+// release_locale.dart 및 regional_material_localizations.dart의 지역 정책을 따른다.
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 

@@ -54,13 +54,16 @@ Future<void> _showInfoPopupOnce(
   required String shownKey,
   required _PopupContent Function(BuildContext) content,
   bool Function()? canShow,
+  bool koreanOnly = false,
 }) async {
+  if (koreanOnly && !context.usesKoreanFeatures) return;
   final prefs = await SharedPreferences.getInstance();
   if (prefs.getBool(shownKey) ?? false) return;
 
   await Future<void>.delayed(kInfoPopupDelay);
 
   if (!context.mounted) return; // 기다리는 사이 탭을 옮겨 화면이 사라짐
+  if (koreanOnly && !context.usesKoreanFeatures) return;
   if (ModalRoute.of(context)?.isCurrent == false)
     return; // 다른 화면/대화상자가 이미 위에 있음
 
@@ -72,7 +75,12 @@ Future<void> _showInfoPopupOnce(
     barrierDismissible: false,
     // ⭐ 2026-09-22(영어화) - content(dialogContext)로 바뀌어서 각 _PopupContent가
     // context.l10n으로 로케일에 맞는 문구를 직접 고름(아래 WelcomePopupContent 등 참고).
-    builder: (dialogContext) => Dialog(
+    builder: (dialogContext) => koreanOnly && !dialogContext.usesKoreanFeatures
+        ? AlertDialog(actions: [TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(dialogContext.l10n.commonClose),
+          )])
+        : Dialog(
       backgroundColor: Colors.transparent,
       child: _InfoPopupCard(
         content: content(dialogContext),
@@ -109,6 +117,7 @@ Future<void> maybeShowConditionTabTutorial(BuildContext context) =>
     _showInfoPopupOnce(
       context,
       shownKey: _kConditionTabTutorialShownKey,
+      koreanOnly: true,
       content: ConditionTabTutorialContent.new,
     );
 
@@ -119,6 +128,7 @@ Future<void> maybeShowScheduleTabTutorial(BuildContext context) =>
     _showInfoPopupOnce(
       context,
       shownKey: _kScheduleTabTutorialShownKey,
+      koreanOnly: true,
       content: ScheduleTabTutorialContent.new,
     );
 
@@ -303,8 +313,8 @@ class ScheduleTabTutorialContent extends _PopupContent {
   ScheduleTabTutorialContent(BuildContext context)
       : super(
           emoji: '🗓️',
-          title: context.l10n.onboardingScheduleTabPopupTitle,
-          body: context.l10n.onboardingScheduleTabPopupBody,
+          title: context.koOnly.onboardingScheduleTabPopupTitle,
+          body: context.koOnly.onboardingScheduleTabPopupBody,
           buttonLabel: context.l10n.commonGotIt,
         );
 }
@@ -315,22 +325,3 @@ class ScheduleTabTutorialContent extends _PopupContent {
 // 탭을 배포 전 최종 점검 후 완전히 제거하면서 같이 정리함. 실제 팝업에 쓰이는
 // WelcomePopupContent/ShiftAssignTutorialContent/ConditionTabTutorialContent와
 // 그걸 띄우는 maybeShow* 함수들은 이 파일 위쪽에 그대로 남아있음(영향 없음).
-
-Future<void> maybeShowOneTouchAlarmTutorial(BuildContext context,
-        {bool Function()? canShow}) =>
-    _showInfoPopupOnce(
-      context,
-      shownKey: 'one_touch_alarm_tutorial_shown',
-      canShow: canShow,
-      content: (context) {
-        final ko = Localizations.localeOf(context).languageCode == 'ko';
-        return _PopupContent(
-          emoji: '⏰',
-          title: ko ? '원터치 알람이 추가됐어요' : 'Meet one-tap alarms',
-          body: ko
-              ? '자주 쓰는 시각과 울림 방식(소리·진동·무음)을 저장해 두세요. 필요할 때 오늘이나 내일에 빠르게 알람을 추가할 수 있어요.\n\n근무마다 반복되는 고정 알람 외에, 가끔 필요한 알람을 설정할 때 편리해요.\n\n같은 시각의 고정 알람이 있으면 중복으로 추가하지 않아요.'
-              : 'Save the times and sound settings you use often, then quickly add an alarm for today or tomorrow.\n\nUse these for occasional alarms alongside your regular shift alarms.\n\nIf a fixed alarm is already set for that time, no duplicate is added.',
-          buttonLabel: context.l10n.commonGotIt,
-        );
-      },
-    );

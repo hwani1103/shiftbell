@@ -7,12 +7,9 @@
     <!-- ⭐ 홈 화면 위젯 목록(길게 눌러 위젯 추가)에 노출되는 설명 문구 -->
     <string name="calendar_widget_description">전주/이번주/다음주 근무 일정을 홈 화면에서 바로 볼 수 있어요.</string>
     <!-- ⭐ 실제 수면 기록 위젯(캘린더 위젯과 별개) - 취침/기상 원터치 토글 -->
-    <string name="sleep_widget_description">버튼으로 취침/기상을 기록해요.</string>
-    <string name="sleep_widget_brand">교대시계</string>
 
     <!-- Korean labels override the English default for Korean device locales. -->
     <string name="app_widget_calendar_label">교대시계 달력</string>
-    <string name="app_widget_sleep_label">교대시계 수면기록</string>
 
     <!-- ⭐ 알람 울림 화면(activity_alarm.xml) - 스와이프 안내/버튼 아래 라벨.
          "09:30"/"주간" 같은 다른 TextView는 Kotlin이 실제 값으로 setText하는
@@ -20,12 +17,10 @@
     <string name="alarm_swipe_hint">위로 스와이프해서 끄기</string>
     <string name="alarm_snooze_label">5분 후</string>
     <string name="alarm_dismiss_label">끄기</string>
-    <string name="one_tap_alarm_label">원터치 알람</string>
 
     <!-- ⭐ 알림 채널 이름(설정 → 앱 → 알림 화면에 그대로 노출됨) -->
     <string name="channel_alarm_result">결과 알림</string>
     <string name="channel_alarm_guard">사전 알림</string>
-    <string name="channel_schedule_notify">일정 알림</string>
     <string name="channel_restore_notify">백업 복원 안내</string>
 
     <!-- ⭐ 알람 울림 중 제어 알림(7777) -->
@@ -48,12 +43,6 @@
     <string-array name="widget_weekday_labels">
         <item>일</item><item>월</item><item>화</item><item>수</item><item>목</item><item>금</item><item>토</item>
     </string-array>
-    <string name="sleep_widget_sleep">수면</string>
-    <string name="sleep_widget_wake">기상</string>
-    <string name="sleep_widget_no_shift">근무없음</string>
-    <string name="sleep_widget_not_set">미설정</string>
-    <string name="sleep_widget_unknown">정보 없음</string>
-    <string name="sleep_widget_tab_off">탭 꺼짐</string>
     <string name="widget_no_shift">없음</string>
     <string name="alarm_default_label">알람</string>
     <string name="channel_guard_description">20분 전 사전 알림</string>
@@ -71,4 +60,14 @@
     <string name="widget_weekday_6">토</string>
     <string name="alarm_clock_first">%1$s (첫 번째)</string>
     <string name="alarm_clock_second">%1$s (두 번째)</string>
+    <string name="alarm_snooze_minutes">%1$d분 후 다시 울리기</string>
+    <string name="alarm_snooze_selection">스누즈 %1$d분</string>
+    <string name="alarm_snooze_decrease">스누즈 시간 5분 줄이기</string>
+    <string name="alarm_snooze_increase">스누즈 시간 5분 늘리기</string>
+    <string name="snooze_failed_db">알람은 멈췄지만 다시 울림을 저장하지 못했습니다.</string>
+    <string name="snooze_failed_schedule">다시 울림 예약을 확인하지 못했습니다. 다음 알람을 확인해 주세요.</string>
+    <string name="snooze_controls_expired">이미 종료된 알람의 버튼입니다.</string>
+    <string name="snooze_superseded">알람이 변경되어 이 다시 울림은 예약하지 않았습니다.</string>
+    <string name="snooze_failed_execution">알람 중지와 다시 울림 처리를 완료하지 못했습니다.</string>
+    <string name="snooze_failure_title">다시 울림 확인 필요</string>
 </resources>

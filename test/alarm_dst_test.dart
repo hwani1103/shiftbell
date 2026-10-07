@@ -56,6 +56,16 @@ void main() {
         expect(alarms.single.dateTime.toUtc(), expected);
         expect(alarms.single.time, c['clock']);
         expect(alarms.single.dayOffset, offset);
+        expect(alarms.single.fixedSlotTime, '${c['wall'].substring(0, 16)}:00');
+        final consumed = computeDesiredFixedAlarmsForDate(
+          date: wall, schedule: schedule,
+          allTemplates: [AlarmTemplate(shiftType: 'Night',
+            time: c['wall'].substring(11, 16), alarmTypeId: 1, dayOffset: offset)],
+          now: local(expected.subtract(const Duration(hours: 8)).millisecondsSinceEpoch),
+          resolveTime: resolve,
+          consumedOccurrences: {'${alarms.single.fixedSlotTime}|Night|$offset'},
+        );
+        expect(consumed, isEmpty);
       }
     });
   }

@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../l10n/l10n_extensions.dart';
 import '../services/permission_service.dart';
+import 'permission_panel.dart';
 
 class PermissionWarningBanner extends StatefulWidget {
   const PermissionWarningBanner({super.key});
 
   @override
-  State<PermissionWarningBanner> createState() => _PermissionWarningBannerState();
+  State<PermissionWarningBanner> createState() =>
+      _PermissionWarningBannerState();
 }
 
-class _PermissionWarningBannerState extends State<PermissionWarningBanner> with WidgetsBindingObserver {
+class _PermissionWarningBannerState extends State<PermissionWarningBanner>
+    with WidgetsBindingObserver {
+  final _controller = PermissionController();
   bool _showBanner = false;
   List<String> _missingPermissions = [];
   Locale? _permissionLocale;
@@ -19,6 +23,7 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _controller.addListener(_updateBanner);
   }
 
   @override
@@ -34,6 +39,7 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _controller.dispose();
     super.dispose();
   }
 
@@ -45,30 +51,29 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
     }
   }
 
-  Future<void> _checkPermissions() async {
-    final permissions = await PermissionService().checkPermissions();
-    // ⭐ 2026-09-14 (출시전 감사 #13) - 정확한 알람은 허용/거부/확인 불가를 구분해서 표시
-    // (확인 불가를 허용으로 숨기지 않음)
-    final exactAlarm = await PermissionService().checkExactAlarmPermissionState();
+  Future<void> _checkPermissions() => _controller.refresh();
 
-    if (mounted) {
-      final missing = <String>[];
-      if (!permissions['notification']!) missing.add(context.l10n.permissionNotification);
-      if (!permissions['overlay']!) missing.add(context.l10n.permissionOverlay);
-      switch (exactAlarm) {
-        case ExactAlarmPermissionState.denied:
-          missing.add(context.l10n.permissionExactAlarm);
-        case ExactAlarmPermissionState.unknown:
-          missing.add(context.l10n.permissionStatusUnknown(context.l10n.permissionExactAlarm));
-        case ExactAlarmPermissionState.granted:
-          break;
+  void _updateBanner() {
+    if (!mounted) return;
+    final state = _controller.value;
+    final missing = <String>[];
+    for (final p in AppPermission.values) {
+      if (!permissionSatisfied(state[p])) {
+        final title = permissionTitle(context, p);
+        missing.add(state[p] == AppPermissionState.unknown
+            ? context.l10n.permissionStatusUnknown(title)
+            : title);
       }
-
-      setState(() {
-        _missingPermissions = missing;
-        _showBanner = missing.isNotEmpty;
-      });
     }
+    if (!permissionSatisfied(state.alarmChannel)) {
+      missing.add(state.alarmChannel == AppPermissionState.denied
+          ? context.l10n.permissionAlarmChannelBlocked
+          : context.l10n.permissionAlarmChannelUnknown);
+    }
+    setState(() {
+      _missingPermissions = missing;
+      _showBanner = missing.isNotEmpty;
+    });
   }
 
   @override
@@ -125,7 +130,8 @@ class _PermissionWarningBannerState extends State<PermissionWarningBanner> with 
           SizedBox(width: 8.w),
           TextButton(
             onPressed: () async {
-              await PermissionService().openSettings();
+              await showPermissionSettings(context);
+              _checkPermissions();
             },
             style: TextButton.styleFrom(
               backgroundColor: colorScheme.tertiary,

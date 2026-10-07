@@ -1,0 +1,250 @@
+{
+  "commonChange": "변경",
+  "commonRefresh": "새로고침",
+  "commonGetStarted": "시작하기",
+  "commonShare": "공유하기",
+  "commonCopy": "복사",
+  "navFriendShare": "일정공유",
+  "navScheduleManagement": "일정관리",
+  "disableTabButtonLabel": "{tab} 화면 사용하지 않기",
+  "@disableTabButtonLabel": {
+    "placeholders": {
+      "tab": {
+        "type": "String"
+      }
+    }
+  },
+  "disableTabDialogBody": "확인 버튼을 누르면 화면 하단의 목록에서 사라집니다.\n설정에서 다시 원복할 수 있습니다.",
+  "scheduleTabDisableExtraNotice": "예정된 일정 알림도 모두 취소됩니다.",
+  "settingsScheduleTabReenableTitle": "일정관리 화면 사용하기",
+  "settingsScheduleTabReenableSubtitle": "하단 탭에 일정관리 화면을 다시 표시합니다",
+  "shiftWork": "교대 근무",
+  "settingsPatternTodayMarker": "· 진한 칩이 오늘",
+  "shiftTeam": "조",
+  "shiftRegularPattern": "규칙적 근무",
+  "shiftIrregularPattern": "불규칙 근무",
+  "shiftWorkHours": "근무시간",
+  "shiftPayday": "급여 산정일",
+  "alarmNext": "다음 알람",
+  "alarmFixed": "고정 알람",
+  "alarmType": "알람 타입",
+  "alarmRemoved": "알람 제거",
+  "alarmSnooze5Min": "5분 연장",
+  "alarmCountAll": "전체",
+  "alarmCountFuture": "미래",
+  "alarmCountPast": "과거",
+  "calendarMemo": "메모",
+  "calendarFriendQuickAccessLabel": "친구",
+  "calendarTapDateToEnter": "(해당 날짜 탭하여 입력)",
+  "calendarMemoDetailTitle": "메모 상세",
+  "onboardingFixedPatternQuestion": "고정적으로 순환하는 교대 근무인가요?",
+  "onboardingYesRegular": "예 - 규칙적",
+  "onboardingNoIrregular": "아니요 - 불규칙",
+  "onboardingCheckShiftTypes": "근무 형태를 확인하세요",
+  "onboardingAddIfMissing": "없다면 추가 가능합니다",
+  "onboardingUsableEvenIfNotInPattern": "근무 패턴에 포함되지 않더라도 사용 가능해요.",
+  "onboardingSwitchToIrregularPrefix": "만약 교대 패턴이 규칙적이지 않다면, ",
+  "onboardingSwitchToIrregularLink": "여기",
+  "onboardingSwitchToIrregularSuffix": " 를 눌러주세요.",
+  "onboardingSelectAllInPattern": "실제 근무 패턴에 포함되는 근무를 모두 선택해주세요",
+  "onboardingShiftNameHint": "근무명 (최대 {chars}글자)",
+  "@onboardingShiftNameHint": {
+    "placeholders": {
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingAllSet": "설정 완료!",
+  "onboardingScheduleTabPopupTitle": "일정관리 탭, 이렇게 써보세요",
+  "onboardingScheduleTabPopupBody": "1. 일정 만들기\n오른쪽 아래 시계 아이콘을 탭하면 시간축 위에서 시각을 고를 수 있는 모드로 바뀌어요. 원하는 시각에서 한 번 더 탭하면 그 시각으로 새 일정을 만들 수 있어요.\n\n2. 지속시간 설정\n기본은 \"지속시간 없음\"(특정 시각 하나)이에요. \"+\"나 5분/30분/1시간 버튼을 누르면 종료 시각이 있는 일정으로 바뀌어요.\n\n3. 일정에 맞춰 알림받기\n알림받기 스위치를 켜면 원하는 시간에 휴대폰 알림을 받을 수 있어요. 알림 소리는 시스템 설정과 동일해요.",
+  "settingsFriendShareDesc": "공유 코드로 친구와 서로의 일정 확인",
+  "settingsEditShiftNameDesc": "근무 이름을 수정합니다",
+  "settingsDataBackupDesc": "지금 기기에 근무표·알람·메모 등을 백업해요",
+  "settingsDataBackupLastSavedAt": "마지막 백업: {date}",
+  "@settingsDataBackupLastSavedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "backupRestoreManualPickLink": "이전 백업 불러오기",
+  "onboardingHasBackupTitle": "기존에 쓰시던 분이라면",
+  "onboardingHasBackupLoadButton": "불러오기",
+  "backupRestoreManualPickHint": "Download/ShiftBell 폴더의 백업 파일로 쓰던 그대로 이어갈 수 있어요.",
+  "settingsScheduleChangedRedoAllTeamsHint": "스케줄 변경 시 전체 근무표도 다시 설정해주세요.",
+  "settingsResetScheduleSharingFailed": "스케줄은 초기화됐지만 이전 공유가 남아 있을 수 있어요. 앱 사용이 정상화되면 ‘일정공유 → 내 일정 공유하기’에서 ‘공유 중지’를 눌러 주세요.",
+  "workHoursEditDialogTitle": "\"{shift}\" 기본 근무시간",
+  "@workHoursEditDialogTitle": {
+    "placeholders": {
+      "shift": {
+        "type": "String"
+      }
+    }
+  },
+  "workHoursUnitHourLabel": "시간",
+  "workHoursUnitMinuteLabel": "분",
+  "friendShareMyScheduleTitle": "내 일정 공유하기",
+  "friendAdd": "친구 추가",
+  "friendNameOptionalHint": "(선택 - 비우면 코드에 담긴 이름 사용)",
+  "friendShareCodeFromFriend": "친구가 보내준 공유 코드",
+  "friendEnterShareCode": "친구가 보내준 공유 코드를 붙여넣으면 친구의 일정을 볼 수 있어요",
+  "friendCanCheckAnytime": "언제든 친구의 일정을 확인할 수 있습니다.",
+  "friendAddedToast": "친구를 추가했어요",
+  "friendInvalidCodeOrDuplicate": "코드가 올바르지 않거나 이미 추가된 친구예요",
+  "friendLoadFailedCheckNetwork": "근무표를 불러올 수 없어요. 네트워크 연결을 확인해주세요",
+  "friendShowingCachedSchedule": "최신 정보를 못 받아와서, 이전에 저장된 근무표를 보여드려요",
+  "friendNoneAddedYet": "아직 추가한 친구가 없어요",
+  "friendRemove": "친구 삭제",
+  "friendRemoveConfirm": "{name}님을 목록에서 삭제할까요?",
+  "@friendRemoveConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "friendDisplayNameTitle": "친구에게 보여줄 이름",
+  "friendEnterDisplayName": "친구에게 보여줄 이름을 입력하세요",
+  "friendShareIncludesSchedule": "내 근무 스케줄과 근무 변경 사항이 공유됩니다.",
+  "friendShareExcludesExtras": "메모, OT, 근무시간, 알람 설정은 공유되지 않습니다.",
+  "friendStartSharing": "공유 시작하기",
+  "friendStopSharing": "공유 중지",
+  "friendStopSharingConfirm": "공유를 중지하면 친구가 더 이상 내 근무표를 볼 수 없어요. 인터넷에 연결되지 않은 상태라면 연결된 뒤 서버에서 지워지고, 친구 기기에 이미 받아 둔 내용은 회수되지 않아요. 계속할까요?",
+  "friendRestartSharingHint": "(다시 공유하려면 이 화면에서 \"공유 시작하기\"를 다시 누르면 돼요. 기존 코드와 링크가 그대로 다시 동작해요)",
+  "friendMyShareCode": "앱을 쓰는 친구에게 (공유 코드)",
+  "friendShareCodeInstructions": "친구가 앱에서 \"친구 추가\"에 이 코드를 붙여넣으면 공유가 완료돼요.",
+  "friendShareWithoutApp": "앱이 없는 친구에게 (링크)",
+  "friendShareLinkHint": "이 링크를 열면 앱 설치 없이 바로 내 일정을 볼 수 있어요.",
+  "friendInstallShortcutHint": "주소창의 설치 버튼을 눌러 홈 화면에 바로가기를 추가할 수 있어요.",
+  "friendDisplayNameUpdated": "공유 이름을 변경했어요",
+  "friendDisplayNameUpdateFailed": "이름 변경에 실패했어요. 네트워크를 확인해주세요",
+  "friendEnterDisplayNameError": "친구에게 보일 내 이름을 입력해주세요",
+  "friendConnectionFailed": "연결에 실패했어요. 네트워크 연결을 확인하고 화면을 다시 열어주세요",
+  "friendInstallForHomeScreen": "홈 화면에서 바로 열려면 주소창의 설치 버튼을 눌러주세요.",
+  "friendServerNotReady": "아직 친구공유 서버 연결 전이에요. 잠시 후 다시 시도해주세요",
+  "friendScheduleNotSet": "아직 근무 스케줄이 설정되지 않았어요",
+  "friendStartSharingFailed": "공유 시작에 실패했어요. 네트워크 연결을 확인하고 다시 시도해주세요",
+  "friendSyncPendingBanner": "친구에게 보이는 근무표를 아직 반영하는 중이에요. 네트워크가 연결되면 자동으로 다시 보내요.",
+  "friendStopPendingBanner": "공유 중지를 서버에 보내는 중이에요. 확인되기 전까지는 친구에게 이전 근무표가 보일 수 있어요.",
+  "friendRetrySync": "지금 다시 보내기",
+  "friendSyncPendingToast": "아직 서버에 반영되지 않았어요. 연결되면 자동으로 다시 보내요",
+  "friendStopSharingAction": "중지",
+  "friendCodeCopied": "코드를 복사했어요",
+  "friendLinkCopied": "링크를 복사했어요",
+  "friendShareMessage": "{name}님의 교대 스케줄을 공유해요! 🗓️\n\n▶ 앱 없이 바로 보기: {link}\n\n▶ 교대시계 앱 사용 중이면 \"친구 추가\"에 아래 코드를 붙여넣어주세요.\n\n{code}",
+  "@friendShareMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "link": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "friendNameHintExample": "친구 이름 입력",
+  "friendShareChannelsExplainer": "앱이 없는 친구에게는 링크로, 앱을 쓰는 친구에게는 코드로 공유할 수 있어요.",
+  "statusDataLoadFailed": "데이터 로드 실패",
+  "statusShiftChangeFailed": "근무 변경 실패",
+  "scheduleTabSyncFailed": "화면 설정을 바꾸지 못했어요. 잠시 후 다시 시도해주세요.",
+  "allTeamsSetupOtherTeamsLabel": "다른 조",
+  "allTeamsSetupOtherTeamsHint": "우리 근무표에 실제로 쓰이는 다른 조를 모두 골라주세요.",
+  "allTeamsSetupPickMyTeamFirstHint": "먼저 내 조를 선택해주세요.",
+  "allTeamsSetupMinOtherTeamHint": "다른 조를 최소 1개 이상 선택해주세요.",
+  "themeInitialBadge": "컬러 뱃지",
+  "themeUnderline": "미니멀 언더라인",
+  "themeEventChip": "이벤트 캘린더",
+  "themeEditorial": "매거진",
+  "scheduleDeleteConfirmTitle": "일정을 삭제할까요?",
+  "helpScheduleTabSectionTitle": "일정관리 탭",
+  "helpScheduleTabWhatIsItTitle": "일정관리 탭은 무엇이 다른가",
+  "helpScheduleTabWhatIsItBody": "달력 탭의 \"메모\"가 하루 전체에 대한 메모라면, 일정관리 탭은 하루 내에 몇 시부터 몇 시까지 무엇을 할지 시간 단위로 관리할 수 있는 화면이에요. 출근 전 약속, 퇴근 후 일정처럼 구체적인 시각이 있는 일들을 정리할 때 씁니다.",
+  "helpScheduleTabCreateEditTitle": "일정 만들고 수정하는 법",
+  "helpScheduleTabCreateEditBody": "화면 오른쪽 아래의 시계 아이콘을 누르면 시각을 고르는 모드로 바뀌어요. 원하는 시각에서 한 번 더 누르면 일정 만들기 화면이 나와요.",
+  "helpScheduleTabAutoCategoryTitle": "일정에 맞는 아이콘이 붙는 방식",
+  "helpScheduleTabAutoCategoryBody": "앱이 일정 내용을 보고 알아서 관련 있는 아이콘을 붙여줍니다. 관련 있는 아이콘을 찾지 못한 경우에는 기본 도형 아이콘이 대신 붙습니다.",
+  "helpConditionSectionTitle": "수면·회복",
+  "helpConditionWhatIsItTitle": "수면·회복 탭은 무엇인가",
+  "helpConditionWhatIsItBody": "내 근무 일정과 실제 수면 기록을 연결해서, 지금 시각을 기준으로 \"확인된 사실\"(근무 사이 회복시간, 퇴근 후 실제 수면, 연속 야간·장시간 근무 등)과 \"추천 행동\"(몇 시까지 잠자리에 들기, 카페인을 끊을 시각, 퇴근길 주의 등)을 보여주는 화면입니다. 점수로 상태를 매기지 않고, 수면 기록이 없거나 출퇴근 시각이 비어 있으면 그 한계를 \"판단 범위\"로 따로 알려드려요. 건강 관련 기준과 조언은 수면의학·산업보건 분야의 연구 근거를 바탕으로 합니다.",
+  "helpConditionEvidenceListTitle": "수면·회복 안내 근거",
+  "helpConditionEvidenceListBody": "수면·회복 탭의 안내는 아래 14개 자료를 바탕으로 해요. 연속 근무일수나 내 평균과의 비교처럼 일부 기준은 이 앱이 직접 정한 값이라 따로 출처를 붙이지 않아요.\n\nEVIDENCE-001 · 교대 방향(정방향/역방향) — 정방향 교대(주간→오후→야간)가 역방향보다 적응하기 쉽다고 보고됨. (NIOSH)\n\nEVIDENCE-002 · 근무 사이 최소 회복시간 — 두 근무 사이 최소 11시간의 회복시간을 둘 것을 권장. (Knauth & Hornberger, NIOSH Module 5 인용)\n\nEVIDENCE-003 · 근무 사이 최소 회복시간(법제 기준) — 모든 근로자는 24시간마다 최소 11시간의 연속 휴식을 보장받아야 함. (EU 근로시간지침 제3조)\n\nEVIDENCE-004 · 장시간 근무와 사고·부상 위험 — 8시간 근무 대비 10시간 근무는 상대위험 약 +13%, 12시간 근무는 약 +27% 증가하는 것으로 모델링됨. (Folkard & Lombardi, 2006)\n\nEVIDENCE-005 · 연속 근무 후 휴식일 — 8시간 근무 5일 또는 10시간 근무 4일 연속 뒤에는 1~2일, 12시간 근무 3일 연속 뒤에는 2일의 휴식을 계획할 것을 권고. 며칠 몰아 일하고 몰아 쉬는 패턴은 피하라고도 함. (NIOSH)\n\nEVIDENCE-006 · 야간근무 후 수면 — 야간근무 후에는 수면을 확보하는 것을 우선할 것을 권고. (NIOSH)\n\nEVIDENCE-007 · 야간근무 전 낮잠 — 조건부로 도움이 될 수 있다고 보고되나, 가이드라인 스스로 근거 수준이 매우 낮다고 명시함. 낮잠 직후 졸림에 주의. (AASM, 2025)\n\nEVIDENCE-008 · 카페인과 수면 — 취침 6시간 전 카페인 섭취도 총 수면시간을 1시간 이상 유의하게 감소시킴. (Drake 외, 2013)\n\nEVIDENCE-009 · 야간근무 후 귀가길 빛 노출 — 강한 빛 노출을 줄이면 이후 수면에 도움이 될 수 있음(단, 졸음운전 위험이 있으면 안전 우선). (NIOSH)\n\nEVIDENCE-010 · 야간근무 중 식사 — 자정~새벽 6시 사이 식사량을 줄이고 가벼운 음식 위주로 할 것을 권고. (NIOSH)\n\nEVIDENCE-011 · 성인 권장 수면시간 — 만 18~64세 권장 수면시간은 7~9시간. (National Sleep Foundation, 2015)\n\nEVIDENCE-012 · 주간 최대 근무시간(법제 기준) — 평균 주간 근무시간(연장근무 포함)이 48시간을 넘지 않아야 함. (EU 근로시간지침 제6조)\n\nEVIDENCE-013 · 연속 야간근무 횟수와 사고 위험 — 야간근무가 연속될수록 사고·부상 상대위험이 누적됨(2일째 약 +6%, 3일째 약 +17%, 4일째 약 +36% — 낮/오후근무 연속보다 야간근무 연속에서 위험 증가가 더 가파름). (Folkard & Tucker, 2003)\n\nEVIDENCE-014 · 주간 누적 근무시간 상한 — 간호사 근무시간을 24시간 안에 12시간, 7일 안에 60시간을 넘지 않게 제한할 것을 권고. 2014년 체계적 검토는 주 40시간을 넘는 근무가 환자 안전 저하와 연관된다고 보고. (IOM, 2004 / NIOSH Module 5 인용)",
+  "helpConditionSetupNeededTitle": "오늘의 컨디션을 보려면 먼저 해야 할 설정",
+  "helpConditionSetupNeededBody": "이 기능을 쓰려면 설정 → 근무시간 및 OT 설정에서 최소 하나의 근무명에 대해 출퇴근 시각을 입력해둬야 해요. 하나도 입력돼 있지 않으면 오늘의 컨디션은 나오지 않고, 수면 기록만 남길 수 있어요. 전부 다 채울 필요는 없고, 지금 쓰고 있는 근무명 중 하나만 입력해도 동작해요.",
+  "helpSleepSectionTitle": "수면 기록",
+  "helpSleepWidgetTitle": "수면 기록 위젯이란",
+  "helpSleepWidgetBody": "홈 화면에 수면 위젯을 올려 두고, 자기 전에 \"수면\", 일어난 뒤에 \"기상\" 버튼을 눌러 간단히 기록해 보세요. 위젯에는 오늘의 근무명도 함께 보여요.\n\n기록한 수면은 수면·회복 탭에서 근무 일정과 함께 살펴보고, 지금 챙길 일을 안내받는 데 쓰여요.\n\n야간 근무 중에 잔 잠은 낮잠으로 구분하고, 자정이 지나도 그 근무가 시작된 날짜에 기록해요. 예를 들어 27일 19시~28일 07시 근무 중 28일 00~02시에 잤다면 27일 낮잠으로 표시돼요.",
+  "helpSleepAutoDetectTitle": "자동으로 수면을 추정해주는 기능",
+  "helpSleepAutoDetectBody": "위젯을 누르지 않아도, 근무 일정과 폰을 오래 만지지 않은 시간을 바탕으로 앱이 \"이때 주무셨을 것 같다\"고 추정해요. 퇴근 후 잠과 밤잠, 그리고 야간 근무 출근 전에 잔 낮잠까지 찾아요. 근무 중에 잔 잠은 자동으로 잡지 않아서 위젯으로 직접 기록해야 해요.\n\n추정한 기록은 항상 추정일 뿐이라, \"맞아요\"로 확인해야 정식 기록이 돼요.",
+  "helpSleepMiniCalendarTitle": "최근 수면 기록 확인/수정하기",
+  "helpSleepMiniCalendarBody": "수면·회복 탭의 \"최근 수면 기록\" 미니 달력에서 확정된 기록을 하루 단위로 볼 수 있어요. 칸을 탭하면 그 자리에서 기록을 만들거나 고치거나 지울 수 있어요. 더 예전 기록은 \"전체보기\"에서 월 단위로 넘기며 볼 수 있어요.\n\n그 아래 \"내 근무별 수면 패턴\"에서는 근무 유형별 평균 수면을 주 수면과 낮잠으로 나눠 볼 수 있어요.",
+  "helpFriendSectionTitle": "친구 공유",
+  "helpFriendWhatIsItTitle": "친구 공유란 무엇인가",
+  "helpFriendWhatIsItBody": "친구나 다른 사람이 내 근무표를 볼 수 있게 공유하거나, 반대로 다른 사람이 공유한 근무표를 내가 볼 수도 있는 기능이에요. 앱이 없는 사용자에게도 내 근무표를 간단하게 공유할 수 있어요.",
+  "helpFriendShareCodeTitle": "내 공유 코드 만들어서 알려주기",
+  "helpFriendShareCodeBody": "달력 탭의 \"친구\" 버튼으로 들어가 \"내 일정 공유하기\"를 누르면 코드가 발급됩니다. 이 코드를 상대방에게 알려주면, 상대방이 자기 앱에 그 코드를 등록해서 내 근무표를 볼 수 있어요.",
+  "helpFriendViewFriendTitle": "친구 코드로 친구 근무표 보기",
+  "helpFriendViewFriendBody": "반대로 친구에게 코드를 받았다면, 친구 목록 화면에서 코드를 입력해 친구를 추가하면 그 친구의 근무표를 내 앱에서 달력 형태로 볼 수 있어요.",
+  "helpFriendReinstallNoteTitle": "앱을 재설치하면 생기는 일",
+  "helpFriendReinstallNoteBody": "앱을 지웠다가 다시 설치하면 내부적으로 새로운 계정처럼 인식돼서, 이전에 맺어둔 친구 공유 연결이 끊깁니다. 다시 연결하려면 공유 코드를 새로 발급받아 상대방에게 다시 알려줘야 해요.\n\n이때 상대방 화면에는 에러가 뜨지 않고, 재설치 전 마지막으로 받아온 근무표가 그대로 남아있을 뿐이에요. 상대방이 스스로 알아차리기 어려우니, 재설치했다면 꼭 먼저 알려주세요.",
+  "helpTroubleshootFriendDisconnectedTitle": "친구 근무표가 며칠째 안 바뀌어요",
+  "helpTroubleshootFriendDisconnectedBody": "에러 없이 근무표만 그대로 멈춰 있다면, 대부분 친구가 앱을 재설치한 경우예요. 재설치하면 내부 계정이 새로 만들어져 기존 연결이 끊기는데, 이때는 화면에 아무 안내도 뜨지 않고 재설치 전 마지막 모습이 계속 보여요.\n\n친구 근무표 화면 위쪽의 \"마지막 동기화\" 시간이 계속 옛날 날짜인지 확인해 보세요. 그렇다면 친구에게 새 공유 코드를 받아서, 기존 항목을 지우고 새 코드로 다시 추가하면 돼요.",
+  "scheduleOutsideTeamsConfirm": "선택한 위치는 전체 근무표의 어느 조와도 일치하지 않습니다. 계속하면 전체 근무표가 삭제되어 다시 설정해야 합니다. 근무 스케줄을 변경할까요?",
+  "scheduleMyTeam": "내 조",
+  "scheduleTeamsAtToday": "오늘을 기준으로 각 조가 배정된 패턴 위치입니다.",
+  "teamRuleEdit": "설정",
+  "teamRuleChooseTeam": "변경하실 조를 선택해 주세요.",
+  "onboardingShiftLimitHint": "(최대 {max}개까지 추가 가능하며 {chars}글자로 제한됩니다.)",
+  "@onboardingShiftLimitHint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      },
+      "chars": {
+        "type": "int"
+      }
+    }
+  },
+  "workHoursDurationExcluded": "0시간 (근무시간 미포함)",
+  "friendName": "친구 이름",
+  "permissionAllow": "권한 허용하기",
+  "permissionRequired": "필수",
+  "permissionRecommended": "권장",
+  "scheduleNotifyRegisterFailed": "일정은 저장됐지만 알림을 예약하지 못했어요. 정확한 알람 권한을 확인한 뒤 일정을 다시 저장해 주세요.",
+  "scheduleDuplicateTimeSlot": "이미 같은 시간대의 일정이 있어요. 그 일정에 내용을 함께 적어주세요.",
+  "scheduleMaxPerSlot": "이 시간대에는 일정을 최대 {count}개까지만 만들 수 있어요",
+  "@scheduleMaxPerSlot": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleDeleteConfirmBody": "삭제한 일정은 되돌릴 수 없어요.",
+  "scheduleEditTitle": "일정 수정",
+  "scheduleNewTitle": "새 일정",
+  "scheduleContentFieldLabel": "내용",
+  "scheduleTimeSectionLabel": "시간",
+  "scheduleNotifySectionLabel": "알림",
+  "scheduleNotifyToggleLabel": "일정에 맞춰 알림 받기",
+  "scheduleNotifyDescription": "시스템 알림 설정(소리·진동·무음)을 그대로 따르는 알림 1건으로 알려드려요.",
+  "scheduleNotifyOffsetQuestion": "몇 분 전에 알려드릴까요?",
+  "scheduleNotifyOffsetOnTime": "정시",
+  "scheduleNotifyOffsetBefore": "{minutes}분 전",
+  "@scheduleNotifyOffsetBefore": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "scheduleNotifyPastTimeWarning": "이미 지난 시각이라 알림이 울리지 않아요. 시간을 바꿔주세요.",
+  "scheduleCreateButton": "생성",
+  "workHoursLegacyClockTimeHint": "기존 근무시간은 유지 중이에요. 출퇴근 시간을 입력해주세요.",
+  "helpBackupRestoreOldBackupFailTitle": "아주 오래된 백업은 복구가 안 될 수도 있어요",
+  "helpBackupRestoreOldBackupFailBody": "앱이 업데이트되면서 저장하는 데이터 형식이 가끔 바뀌어요. 백업을 만든 버전과 복구하는 버전의 차이가 크면(아주 오래전 백업을 한참 뒤에 최신 버전에서 복구하는 경우 등) 복구에 실패할 수 있고, 같은 파일로 다시 해도 같은 이유로 실패하기 쉬워요.\n\n기기를 바꾸거나 재설치하기 직전에 설정의 \"데이터 백업\"을 한 번 눌러 새 백업을 만들어 두면 안전해요. 자동 백업이 잘 되고 있어도, 중요한 순간 직전에는 직접 한 번 더 해 두는 게 좋아요."
+}

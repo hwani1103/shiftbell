@@ -274,9 +274,11 @@ class _FriendWebCalendarState extends State<FriendWebCalendar> {
                     firstDay: DateTime(_today.year - 3),
                     lastDay: DateTime(_today.year + 3, 12, 31),
                     focusedDay: _focusedDay,
-                    locale: Localizations.localeOf(context).languageCode == 'ko'
-                        ? 'ko_KR'
-                        : 'en_US',
+                    locale: Localizations.localeOf(context).toString(),
+                    startingDayOfWeek:
+                        MaterialLocalizations.of(context).firstDayOfWeekIndex == 1
+                            ? StartingDayOfWeek.monday
+                            : StartingDayOfWeek.sunday,
                     headerVisible: false,
                     // Vertical drags must reach the outer scroll view when
                     // larger text makes the PWA/footer content taller.

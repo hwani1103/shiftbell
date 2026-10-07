@@ -15,7 +15,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/database_service.dart';
 import 'onboarding_screen.dart';
 import 'all_alarms_history_view.dart';
-import '../services/alarm_generation_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/current_date_provider.dart';
@@ -23,12 +22,14 @@ import '../providers/alarm_provider.dart';
 import '../providers/calendar_theme_provider.dart';
 import '../models/calendar_theme.dart';
 import '../models/alarm_type.dart';
+import '../widgets/default_snooze_setting.dart';
 import '../constants/alarm_limits.dart';
 import '../models/shift_schedule.dart';
 import 'memo_list_view.dart';
 import 'work_hours_settings_screen.dart';
 import 'calendar_theme_picker_screen.dart';
 import 'help_screen.dart';
+import '../widgets/permission_panel.dart';
 import 'privacy_policy_screen.dart';
 import '../widgets/app_button.dart';
 import '../widgets/app_second_button.dart';
@@ -310,13 +311,14 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
 
       if (mounted) {
         final messenger = ScaffoldMessenger.of(context);
-        final sharingWarning = context.l10n.settingsResetScheduleSharingFailed;
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => OnboardingScreen()),
         );
-        if (!sharingStopSaved) {
+        if (!sharingStopSaved && context.usesKoreanFeatures) {
           messenger.showSnackBar(SnackBar(
-            content: Text(sharingWarning),
+            content: Builder(builder: (context) => context.usesKoreanFeatures
+                ? Text(context.koOnly.settingsResetScheduleSharingFailed)
+                : const SizedBox.shrink()),
             duration: const Duration(seconds: 8),
           ));
         }
@@ -364,7 +366,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
       body: scheduleAsync.when(
         loading: () => const SizedBox.shrink(), // ⭐ 로딩 인디케이터 제거
         error: (error, stack) =>
-            Center(child: Text('${context.l10n.statusErrorOccurred}: $error')),
+            Center(child: Text('${context.l10n.statusErrorOccurred}: ${context.localizedErrorDetail(error)}')),
         data: (schedule) {
           return AdaptiveSectionList(
             fullWidthFirst: true,
@@ -602,9 +604,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                   tileColor: Colors.white,
                   leading: Icon(Icons.event_note_outlined,
                       color: Theme.of(context).colorScheme.tertiary),
-                  title: Text(context.l10n.settingsScheduleTabReenableTitle),
+                  title: Text(context.koOnly.settingsScheduleTabReenableTitle),
                   subtitle:
-                      Text(context.l10n.settingsScheduleTabReenableSubtitle),
+                      Text(context.koOnly.settingsScheduleTabReenableSubtitle),
                   trailing: Icon(Icons.chevron_right),
                   // ⭐ 2026-09-13 - 숨기는 동안 취소됐던 일정 알림들을 원래
                   // 상태로 그대로 복원(main.dart의 DisableTabButton onConfirmed
@@ -816,7 +818,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text(
-                                  '❌ ${context.l10n.statusDeleteFailed}: $e')),
+                                  '❌ ${context.l10n.statusDeleteFailed}: ${context.localizedErrorDetail(e)}')),
                         );
                       }
                     }
@@ -830,6 +832,11 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
               SizedBox(height: 8.h),
 
               // 도움말
+              ListTile(
+                leading: const Icon(Icons.lock_clock),
+                title: Text(context.l10n.permissionSettingsTitle),
+                onTap: () => showPermissionSettings(context),
+              ),
               ListTile(
                 tileColor: Colors.white,
                 leading: Icon(Icons.help_outline,
@@ -1151,7 +1158,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
       print('❌ 근무명 변경 실패: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.statusErrorWithDetail('$e'))),
+          SnackBar(content: Text(context.l10n.statusErrorWithDetail(context.localizedErrorDetail(e)))),
         );
       }
       return;
@@ -1281,8 +1288,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
     final schedule = ref.read(scheduleProvider).value;
     if (schedule == null) return;
 
-    final db = await DatabaseService.instance.database;
-    final skippedSlots = await listFixedConflictsWithCustom(db, schedule);
 
     const platform = kAlarmChannel;
 
@@ -1318,11 +1323,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
         SnackBar(
           content: Text(!refreshCompleted
               ? context.l10n.alarmRefreshUnconfirmed
-              : skippedSlots.isNotEmpty
-                  ? '${context.l10n.fixedAlarmSkippedByOneTap} '
-                      '${skippedSlots.map((d) => '${d.month}/${d.day} '
-                          '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}').join(', ')}'
-                  : context.l10n.alarmUpdatedToast),
+                                : context.l10n.alarmUpdatedToast),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -1440,6 +1441,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           SizedBox(height: 16.h),
 
           // 타입 목록
+          const DefaultSnoozeSetting(),
           ..._types.map((type) => _buildTypeCard(type)).toList(),
 
           SizedBox(height: 20.h),

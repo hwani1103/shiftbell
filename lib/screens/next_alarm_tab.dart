@@ -13,7 +13,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/alarm.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/alarm_provider.dart';
-import '../services/custom_alarm_service.dart';
 import '../l10n/l10n_extensions.dart';
 import '../utils/weekday_util.dart';
 import '../constants/platform_channel.dart';
@@ -61,31 +60,6 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
   }
 
   Future<void> _dismissAlarm(int id, DateTime? date) async {
-    final alarms =
-        ref.read(alarmNotifierProvider).valueOrNull ?? const <Alarm>[];
-    final alarm = alarms.where((a) => a.id == id).firstOrNull;
-    if ((alarm?.type == 'custom' || alarm?.presetSlot != null) &&
-        date != null) {
-      final fixed =
-          await CustomAlarmService.instance.previewFixedReplacement(date);
-      if (!mounted) return;
-      final confirmed = await showDialog<bool>(
-          context: context,
-          builder: (dialogContext) => AlertDialog(
-                content: Text(fixed == null
-                    ? context.l10n.oneTapDeleteNoAlarmConfirm
-                    : context.l10n.oneTapDeleteRestoreConfirm(fixed.shiftType)),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(dialogContext, false),
-                      child: Text(context.l10n.commonCancel)),
-                  TextButton(
-                      onPressed: () => Navigator.pop(dialogContext, true),
-                      child: Text(context.l10n.commonDelete)),
-                ],
-              ));
-      if (confirmed != true) return;
-    }
     // ⭐ 2026-09-14 (출시전 감사 #14) - 여기서 먼저 'dismissOverlay'를 보내던 호출 제거. 울리는 중이면 deleteAlarm()이 Native 'stopRingingAlarm'으로 오버레이까지 닫음.
     // 먼저 보내면 오버레이가 울림을 끝낸 뒤라 삭제 이력이 'cancelled_before_ring'으로 잘못 남음.
     final deletion =
@@ -107,10 +81,8 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(deletion.reservationFailed
-              ? context.l10n.oneTapDeletedRefreshRetry
-              : deletion.fixedReplacement
-                  ? context.l10n.oneTapDeletedFixedRestored
-                  : context.l10n.alarmCanceledToast),
+              ? context.l10n.alarmRefreshUnconfirmed
+              : context.l10n.alarmCanceledToast),
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
@@ -410,9 +382,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
               children: [
           // 근무 타입
           // ⭐ 2026-09-23 (1.0.24 B) - 커스텀 알람은 근무명이 없으므로 "커스텀 알람"으로 표시
-          if (alarm.shiftType != null ||
-              alarm.type == 'custom' ||
-              alarm.presetSlot != null)
+          if (alarm.shiftType != null)
             Container(
               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
               decoration: BoxDecoration(
@@ -422,7 +392,7 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Text(
-                alarm.shiftType ?? context.l10n.customAlarmLabel,
+                alarm.shiftType ?? context.l10n.alarmDefaultLabel,
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
@@ -688,9 +658,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                             ? math.max(0, viewport.maxHeight - 60.h)
                             : 0),
                     child: AdaptiveHeroLayout(
-                      splitIndex: (alarm.shiftType != null ||
-                              alarm.type == 'custom' ||
-                              alarm.presetSlot != null)
+                      splitIndex: (alarm.shiftType != null)
                           ? 6
                           : 5,
                       children: [
@@ -785,9 +753,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
 
                         SizedBox(height: 16.h),
 
-                        if (alarm.shiftType != null ||
-                            alarm.type == 'custom' ||
-                            alarm.presetSlot != null)
+                        if (alarm.shiftType != null)
                           Container(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 14.w, vertical: 6.h),
@@ -796,7 +762,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                 borderRadius: BorderRadius.circular(20.r)),
                             child: Text(
                                 alarm.shiftType ??
-                                    context.l10n.customAlarmLabel,
+                                    context.l10n.alarmDefaultLabel,
                                 style: TextStyle(
                                     fontSize: 14.sp,
                                     color: kAppChipBorder,

@@ -13,6 +13,8 @@
 //  - 친구공유 소유권 7키·설치별 설정은 담지 않음(#25, backup_policy.dart).
 
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'snooze_settings_service.dart';
 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,6 +55,10 @@ class BackupService {
     final preferences = <String, dynamic>{};
     for (final key in prefs.getKeys()) {
       if (isBackupPreferenceKey(key)) preferences[key] = prefs.get(key);
+    }
+
+    if (Platform.isAndroid) {
+      preferences[SnoozeSettingsService.backupKey] = await SnoozeSettingsService.read();
     }
 
     String appVersionName = '';

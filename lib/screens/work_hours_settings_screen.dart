@@ -292,7 +292,7 @@ class _WorkHoursSettingsScreenState
               ],
             ],
           ),
-          if (needsClockTimeMigration) ...[
+          if (needsClockTimeMigration && context.usesKoreanFeatures) ...[
             SizedBox(height: 6.h),
             Row(
               key: ValueKey('legacy-shift-time-hint-$shift'),
@@ -302,7 +302,7 @@ class _WorkHoursSettingsScreenState
                 SizedBox(width: 5.w),
                 Expanded(
                   child: Text(
-                    context.l10n.workHoursLegacyClockTimeHint,
+                    context.koOnly.workHoursLegacyClockTimeHint,
                     style: TextStyle(
                       fontSize: 11.5.sp,
                       color: colorScheme.onSurfaceVariant,

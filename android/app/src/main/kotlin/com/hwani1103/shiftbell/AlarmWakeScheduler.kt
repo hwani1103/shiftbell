@@ -134,11 +134,10 @@ object AlarmWakeScheduler {
     }
 
     private fun lookup(context: Context, db: SQLiteDatabase, id: Int): Lookup {
-        db.query("alarms", arrayOf("date", "shift_type", "type", "preset_slot"), "id = ?", arrayOf(id.toString()), null, null, null).use { c ->
+        db.query("alarms", arrayOf("date", "shift_type", "type"), "id = ?", arrayOf(id.toString()), null, null, null).use { c ->
             if (!c.moveToFirst()) return Lookup(false, null)
             val timestamp = c.getString(0)?.let { parse(it) } ?: return Lookup(true, null)
-            val label = c.getString(1) ?: if (c.getString(2) == "custom" || !c.isNull(3))
-                context.getString(R.string.one_tap_alarm_label) else context.getString(R.string.alarm_default_label)
+            val label = c.getString(1) ?: context.getString(R.string.alarm_default_label)
             // Offset-bearing Dart/backup dates can retain fractional seconds.
             // Both DB comparisons and OS intents use the same second precision.
             return Lookup(true, WakeRow(id, normalize(timestamp), label))

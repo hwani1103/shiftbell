@@ -22,7 +22,9 @@ object InAppAlarmController {
     private val handler = Handler(Looper.getMainLooper())
     private var host = WeakReference<Activity>(null)
     private var dialog: Dialog? = null
+    private var snoozeBinding: SnoozeControlsBinding? = null
     private var shown: RingingAlarmTracker.ActiveRing? = null
+    private var shownLocale: String? = null
     val isHostVisible: Boolean get() = host.get()?.let { !it.isFinishing && !it.isDestroyed } == true
 
     fun resume(activity: Activity) {
@@ -40,9 +42,12 @@ object InAppAlarmController {
     fun changed() { handler.post { reconcile() } }
 
     private fun hide() {
+        snoozeBinding?.close()
+        snoozeBinding = null
         dialog?.dismiss()
         dialog = null
         shown = null
+        shownLocale = null
     }
 
     private fun reconcile() {
@@ -54,7 +59,11 @@ object InAppAlarmController {
             hide()
             return
         }
-        if (shown == current && dialog?.isShowing == true) return
+        val locale = activity.resources.configuration.locales.toLanguageTags()
+        if (shown == current && shownLocale == locale && dialog?.isShowing == true) {
+            snoozeBinding?.refresh()
+            return
+        }
         hide()
         val ui = AppTextScale.context(activity)
         val view = LayoutInflater.from(ui).inflate(R.layout.overlay_alarm, null)
@@ -62,13 +71,12 @@ object InAppAlarmController {
         view.findViewById<TextView>(R.id.shiftTypeText).setText(R.string.alarm_default_label)
         try {
             val db = DatabaseHelper.getInstance(activity).getReadableDatabaseWithRetry()
-            db?.query("alarms", arrayOf("time", "shift_type", "type", "preset_slot"),
+            db?.query("alarms", arrayOf("time", "shift_type", "type"),
                 "id = ?", arrayOf(current.alarmId.toString()), null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) {
                     view.findViewById<TextView>(R.id.timeText).text = cursor.getString(0) ?: ""
                     view.findViewById<TextView>(R.id.shiftTypeText).text = cursor.getString(1)
-                        ?: ui.getString(if (cursor.getString(2) == "custom" || !cursor.isNull(3))
-                            R.string.one_tap_alarm_label else R.string.alarm_default_label)
+                        ?: ui.getString(R.string.alarm_default_label)
                 }
             }
         } catch (e: Exception) {
@@ -86,9 +94,6 @@ object InAppAlarmController {
         view.findViewById<Button>(R.id.dismissButton).setOnClickListener {
             act(AlarmActionReceiver.ACTION_DISMISS_FROM_NOTIFICATION)
         }
-        view.findViewById<Button>(R.id.snoozeButton).setOnClickListener {
-            act(AlarmActionReceiver.ACTION_SNOOZE_FROM_NOTIFICATION)
-        }
         val card = Dialog(activity)
         card.requestWindowFeature(Window.FEATURE_NO_TITLE)
         card.setContentView(view)
@@ -97,7 +102,10 @@ object InAppAlarmController {
         card.window?.apply {
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-            addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            // Settings remain usable while ringing (including live snooze defaults).
+            // Outside taps reach Flutter without dismissing or ending this card.
+            addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL)
             setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
         }
         try { card.show() } catch (e: WindowManager.BadTokenException) {
@@ -113,5 +121,8 @@ object InAppAlarmController {
         }
         dialog = card
         shown = current
+        shownLocale = locale
+        snoozeBinding = SnoozeControlsBinding(view, current) { reconcile() }
+        NotificationHelper.markRingPresented(activity, current)
     }
 }

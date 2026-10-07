@@ -6,17 +6,12 @@
     <string name="alarm_type_silent_short">silencioso</string>
     <string name="snooze_collision_message">Já há outro alarme (%2$s) para %1$s. Este alarme foi encerrado sem adiar.</string>
     <string name="calendar_widget_description">Veja turnos e notas. Redimensione para três semanas ou um mês inteiro.</string>
-    <string name="sleep_widget_description">Registre quando dorme e acorda com um toque.</string>
-    <string name="sleep_widget_brand">Shift Bell</string>
     <string name="app_widget_calendar_label">Calendário ShiftBell</string>
-    <string name="app_widget_sleep_label">Sono ShiftBell</string>
     <string name="alarm_swipe_hint">Deslize para cima para desligar</string>
-    <string name="alarm_snooze_label">Adiar</string>
+    <string name="alarm_snooze_label">Adiar 5 min</string>
     <string name="alarm_dismiss_label">Desligar</string>
-    <string name="one_tap_alarm_label">Alarme rápido</string>
     <string name="channel_alarm_result">Alarmes adiados e não atendidos</string>
     <string name="channel_alarm_guard">Próximos alarmes</string>
-    <string name="channel_schedule_notify">Lembretes de compromissos</string>
     <string name="channel_restore_notify">Status da restauração</string>
     <string name="notif_ringing_content">Alarme tocando</string>
     <string name="notif_action_snooze">Adiar 5 min</string>
@@ -24,22 +19,16 @@
     <string name="notif_snoozed_title">Adiado para %1$s</string>
     <string name="notif_guard_title">Seu alarme vai tocar às %1$s</string>
     <string name="notif_restore_title">A restauração não foi concluída</string>
-    <string name="notif_restore_text">Os alarmes estão agendados com seus dados atuais. Abra o ShiftBell para concluir a restauração.</string>
+    <string name="notif_restore_text">Abra o ShiftBell para concluir a restauração e confira os próximos alarmes.</string>
     <string name="widget_setup_schedule_first">Configure sua escala no app primeiro</string>
     <string-array name="widget_weekday_labels">
         <item>Dom</item><item>Seg</item><item>Ter</item><item>Qua</item><item>Qui</item><item>Sex</item><item>Sáb</item>
     </string-array>
-    <string name="sleep_widget_sleep">Dormir</string>
-    <string name="sleep_widget_wake">Acordar</string>
-    <string name="sleep_widget_no_shift">Sem turno</string>
-    <string name="sleep_widget_not_set">Não definido</string>
-    <string name="sleep_widget_unknown">Desconhecido</string>
-    <string name="sleep_widget_tab_off">Aba oculta</string>
     <string name="widget_no_shift">Nenhum</string>
     <string name="alarm_default_label">Alarme</string>
     <string name="channel_guard_description">Lembrete 20 minutos antes de um alarme</string>
     <string name="channel_result_description">Notificações de alarmes adiados e não atendidos</string>
-    <string name="channel_ring_description">Notificações de alarmes de turno</string>
+    <string name="channel_ring_description">Notificações de alarmes</string>
     <string name="widget_preview_day">Dia</string>
     <string name="widget_preview_night">Noite</string>
     <string name="widget_preview_off">Folga</string>
@@ -52,4 +41,14 @@
     <string name="widget_weekday_6">Sáb</string>
     <string name="alarm_clock_first">%1$s (primeira vez)</string>
     <string name="alarm_clock_second">%1$s (segunda vez)</string>
+    <string name="alarm_snooze_minutes">Adiar por %1$d minutos</string>
+    <string name="alarm_snooze_selection">Adiar: %1$d min</string>
+    <string name="alarm_snooze_decrease">Reduzir o adiamento em 5 minutos</string>
+    <string name="alarm_snooze_increase">Aumentar o adiamento em 5 minutos</string>
+    <string name="snooze_failed_db">O alarme parou, mas não foi possível salvar o adiamento.</string>
+    <string name="snooze_failed_schedule">Não foi possível confirmar o alarme adiado. Confira o próximo alarme.</string>
+    <string name="snooze_controls_expired">Estes controles de alarme expiraram.</string>
+    <string name="snooze_superseded">O alarme foi alterado. Este adiamento não foi agendado.</string>
+    <string name="snooze_failed_execution">Não foi possível concluir a interrupção e o adiamento do alarme.</string>
+    <string name="snooze_failure_title">Confira o adiamento</string>
 </resources>

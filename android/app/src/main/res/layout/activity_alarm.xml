@@ -59,7 +59,7 @@
             android:id="@+id/shiftTypeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="주간"
+            android:text="@string/alarm_default_label"
             android:textSize="20sp"
             android:textColor="#3B2E7A"
             android:textStyle="bold"
@@ -98,105 +98,35 @@
             android:textColor="#803B2E7A"/>
     </LinearLayout>
 
-    <!-- 하단 버튼들 - 원형 버튼 + 아래 라벨. 순서: 스누즈 먼저, 끄기 나중
-         (왼쪽→오른쪽). Button은 findViewById<Button>(Kotlin)이 요구하는
-         타입이라 그대로 유지하되, 시각적으로는 투명하게 비우고 그 아래 진짜
-         원형+라벨 뷰를 겹쳐서 그림(Button = 탭 영역만 담당, 클릭 리스너/로직은
-         AlarmActivity.kt 그대로). -->
-    <LinearLayout
-        android:id="@+id/buttonContainer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginBottom="90dp">
-
-        <!-- 5분 후 -->
-        <FrameLayout
-            android:layout_width="88dp"
-            android:layout_height="104dp">
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="false"
-                android:focusable="false">
-                <TextView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:gravity="center"
-                    android:background="@drawable/alarm_snooze_circle"
-                    android:text="+5m"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#3B2E7A"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/alarm_snooze_label"
-                    android:textSize="16sp"
-                    android:textColor="#B33B2E7A"/>
-            </LinearLayout>
-            <Button
-                android:id="@+id/snoozeButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="0dp"
-                android:text=""
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:stateListAnimator="@null"
-                android:elevation="0dp"/>
-        </FrameLayout>
-
-        <Space android:layout_width="28dp" android:layout_height="1dp"/>
-
-        <!-- 끄기 -->
-        <FrameLayout
-            android:layout_width="88dp"
-            android:layout_height="104dp">
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:clickable="false"
-                android:focusable="false">
-                <ImageView
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:background="@drawable/alarm_dismiss_circle"
-                    android:src="@drawable/ic_close_white"
-                    android:scaleType="center"
-                    android:padding="19dp"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/alarm_dismiss_label"
-                    android:textSize="16sp"
-                    android:textColor="#B33B2E7A"/>
-            </LinearLayout>
-            <Button
-                android:id="@+id/dismissButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:padding="0dp"
-                android:text=""
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:stateListAnimator="@null"
-                android:elevation="0dp"/>
-        </FrameLayout>
+    <LinearLayout android:id="@+id/buttonContainer" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center"
+        android:layout_marginBottom="40dp" app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center">
+<Button android:id="@+id/snoozeDecreaseButton" android:layout_width="48dp" android:layout_height="64dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="−" android:textSize="24sp"
+    android:textColor="#3B2E7A" android:background="?android:attr/selectableItemBackgroundBorderless"
+    android:contentDescription="@string/alarm_snooze_decrease" /><FrameLayout android:layout_width="88dp" android:layout_height="64dp">
+    <TextView android:id="@+id/snoozeValueText" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:gravity="center" android:background="@drawable/alarm_snooze_circle" android:text="+5m"
+        android:textSize="18sp" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="12sp" android:autoSizeMaxTextSize="18sp" android:autoSizeStepGranularity="1sp"
+        android:textStyle="bold" android:textColor="#3B2E7A" android:importantForAccessibility="no" />
+    <Button android:id="@+id/snoozeButton" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text=""
+        android:background="?android:attr/selectableItemBackgroundBorderless" android:stateListAnimator="@null"
+        android:contentDescription="@string/alarm_snooze_label" />
+</FrameLayout><Button android:id="@+id/snoozeIncreaseButton" android:layout_width="48dp" android:layout_height="64dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="+" android:textSize="24sp"
+    android:textColor="#3B2E7A" android:background="?android:attr/selectableItemBackgroundBorderless"
+    android:contentDescription="@string/alarm_snooze_increase" />        </LinearLayout>
+        <TextView android:id="@+id/snoozeLabelText" android:layout_width="240dp" android:layout_height="wrap_content"
+            android:gravity="center" android:layout_marginTop="4dp" android:layout_marginBottom="12dp" android:textSize="16sp"
+            android:textColor="#3B2E7A" android:text="@string/alarm_snooze_label" android:importantForAccessibility="no" />
+<Button android:id="@+id/dismissButton" android:layout_width="64dp" android:layout_height="64dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="×" android:textSize="28sp"
+    android:textColor="#FFFFFF" android:background="@drawable/alarm_dismiss_circle" android:stateListAnimator="@null"
+    android:contentDescription="@string/alarm_dismiss_label" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center"
+            android:textSize="16sp" android:textColor="#3B2E7A" android:text="@string/alarm_dismiss_label" android:importantForAccessibility="no" />
     </LinearLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

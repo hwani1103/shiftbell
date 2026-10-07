@@ -1,11 +1,11 @@
 {
-    "name": "교대시계 - 일정 공유",
-    "short_name": "교대시계",
+    "name": "ShiftBell",
+    "short_name": "ShiftBell",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FFFFFF",
     "theme_color": "#FFFFFF",
-    "description": "친구의 교대 근무 일정을 앱 없이 바로 확인하는 웹 뷰어",
+    "description": "ShiftBell",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

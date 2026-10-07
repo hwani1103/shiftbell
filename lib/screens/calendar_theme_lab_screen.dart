@@ -217,7 +217,21 @@ class CalendarThemeLabScreen extends StatefulWidget {
 }
 
 class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
-  late final _pageController = PageController(initialPage: widget.initialPage);
+  PageController? _controller;
+  PageController get _pageController => _controller!;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final count = context.availableCalendarThemes.length;
+    if (_controller == null) {
+      _controller = PageController(initialPage: widget.initialPage >= 0 && widget.initialPage < count ? widget.initialPage : 0);
+    } else if (_pageController.hasClients && (_pageController.page ?? 0) >= count) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _pageController.hasClients) _pageController.jumpToPage(0);
+      });
+    }
+  }
 
   int _weekdayIndex(int column) => (column + MaterialLocalizations.of(context).firstDayOfWeekIndex) % 7;
   List<DateTime> get _days => _augustGridDays(MaterialLocalizations.of(context).firstDayOfWeekIndex);
@@ -239,7 +253,7 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
   // "1번/2번/.../메인 화이트/메인 다크" 라벨은 lib/models/calendar_theme.dart
   // 하나로 통합해서 정의함(여기서 다시 안 만듦 - 중복 방지).
   // ⭐ 2026-09-01 - 다이어리 신설로 9 → 10.
-  static const _themeCount = 10;
+  int get _themeCount => context.availableCalendarThemes.length;
 
   @override
   void dispose() {
@@ -274,6 +288,9 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
   // 테마를 보여줌). 2026-09-05 - "다이어리를 4~5번째로, 범례 필수인 언더라인/
   // 매거진을 맨 우측에 나란히" 요청으로 재배치.
   Widget _buildThemeBody(int index) {
+    if (!context.usesKoreanFeatures && index >= kEnglishCalendarThemeIds.length) {
+      return _themeMainWhite();
+    }
     switch (index) {
       case 0: return _themeMainWhite();
       case 1: return _themeMainDark();

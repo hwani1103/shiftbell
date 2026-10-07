@@ -73,7 +73,7 @@ object AlarmActionHelper {
             db.beginTransaction()
             try {
                 db.query(
-                    "alarms", arrayOf("time", "date", "shift_type", "day_offset"),
+                    "alarms", arrayOf("time", "date", "shift_type", "day_offset", "type", "fixed_slot_time"),
                     "id = ?", arrayOf(alarmId.toString()), null, null, null
                 ).use { cursor ->
                     if (cursor.moveToFirst()) {
@@ -83,7 +83,8 @@ object AlarmActionHelper {
                         val dayOffsetIdx = cursor.getColumnIndex("day_offset")
                         val dayOffset = if (dayOffsetIdx >= 0) cursor.getInt(dayOffsetIdx) else 0
                         if (time != null && date != null) {
-                            insertHistory(context, db, alarmId, date, time, shiftType, dayOffset, dismissType)
+                            insertHistory(context, db, alarmId, date, time, shiftType, dayOffset, dismissType,
+                                FixedAlarmOccurrence.fromRow(cursor))
                         }
                     } else {
                         Log.d(TAG, "⚠️ dismiss: DB에 알람 없음 (이미 삭제됨) id=$alarmId")
@@ -114,120 +115,100 @@ object AlarmActionHelper {
     }
 
     /** 알람을 N분 뒤로 미룸. 성공 시 새 시간 정보 반환, 실패(알람 없음 등)면 null */
+    /** Compatibility for older internal callers/tests. New user commands use the controller. */
+    @Deprecated("Use RingSnoozeController for UI, snoozeAt for DB/OS tests")
     fun snooze(context: Context, alarmId: Int, minutes: Int = 5): SnoozeResult? {
-        // ⭐ 2026-09-14 (교차 검토 X-04) - 스누즈 DB 반영이 끝났음을(성공·실패 무관) 복원 이월 판정에 알림
+        val target = RingSnoozeController.targetAt(System.currentTimeMillis(), minutes)
         try {
-            return snoozeInternal(context, alarmId, minutes)
-        } finally {
-            RingingAlarmTracker.finishTransition(alarmId)
-        }
+            return when (val result = snoozeAt(context, alarmId, target)) {
+                is SnoozeExecution.Scheduled -> SnoozeResult(result.timeText, result.shiftType)
+                is SnoozeExecution.Collision -> SnoozeResult(AlarmInstant.display(context, target), "", result.message)
+                else -> null
+            }
+        } finally { RingingAlarmTracker.finishTransition(alarmId) }
     }
 
-    private fun snoozeInternal(context: Context, alarmId: Int, minutes: Int): SnoozeResult? {
-        val dbHelper = DatabaseHelper.getInstance(context)
-        // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 - DatabaseHelper.kt 상세 주석 참고.
-        val db = dbHelper.getWritableDatabaseWithRetry() ?: run {
-            Log.e(TAG, "❌ snooze: DB 파일 없음 id=$alarmId")
-            return null
-        }
-        var result: SnoozeResult? = null
-
+    /** DB + OS only. The caller owns claim/stop/close/finally-finishTransition. */
+    internal fun snoozeAt(context: Context, alarmId: Int, targetAt: Long,
+        scheduleFn: ((Context, Int, Long, String) -> Unit)? = null,
+        beforeSchedule: (() -> Unit)? = null): SnoozeExecution {
+        val db = DatabaseHelper.getInstance(context).getWritableDatabaseWithRetry()
+            ?: return SnoozeExecution.DbFailed(alarmId)
+        var label = context.getString(R.string.alarm_default_label)
+        var collisionMessage: String? = null
         try {
-            var alarmTypeId = 1
-            var shiftType = context.getString(R.string.alarm_default_label)
-            var originalTime = ""
-            var originalDate = ""
-            var dayOffset = 0
-            var found = false
-
-            db.query("alarms", null, "id = ?", arrayOf(alarmId.toString()), null, null, null).use { cursor ->
-                if (cursor.moveToFirst()) {
-                    found = true
-                    alarmTypeId = cursor.getInt(cursor.getColumnIndexOrThrow("alarm_type_id"))
-                    shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
-                        ?: if (cursor.getString(cursor.getColumnIndexOrThrow("type")) == "custom" ||
-                            !cursor.isNull(cursor.getColumnIndexOrThrow("preset_slot")))
-                            context.getString(R.string.one_tap_alarm_label) else context.getString(R.string.alarm_default_label)
-                    originalTime = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
-                    originalDate = cursor.getString(cursor.getColumnIndexOrThrow("date")) ?: ""
-                    val dayOffsetIdx = cursor.getColumnIndex("day_offset")
-                    dayOffset = if (dayOffsetIdx >= 0) cursor.getInt(dayOffsetIdx) else 0
-                }
-            }
-
-            if (!found) {
-                Log.e(TAG, "❌ snooze: 알람 정보 없음 id=$alarmId")
-                return null
-            }
-
-            // 같은 실제 날짜·분에 다른 알람이 있으면 현재 알람만 종료한다. 시간을 임의로 미루지 않는다.
-            var newTimestamp = System.currentTimeMillis() + (minutes * 60 * 1000)
-            db.rawQuery(
-                "SELECT alarm_type_id, date FROM alarms WHERE id != ?",
-                arrayOf(alarmId.toString())
-            ).use { conflict ->
-                while (conflict.moveToNext()) {
-                    val otherAt = AlarmWakeScheduler.parse(conflict.getString(1) ?: continue) ?: continue
-                    if (otherAt / 60000 != newTimestamp / 60000) continue
-                    val typeName = when (conflict.getInt(0)) {
-                        2 -> context.getString(R.string.alarm_type_vibration_short)
-                        3 -> context.getString(R.string.alarm_type_silent_short)
-                        else -> context.getString(R.string.alarm_type_sound_vibration_short)
-                    }
-                    val timeText = AlarmInstant.display(context, newTimestamp)
-                    val message = context.getString(R.string.snooze_collision_message, timeText, typeName)
-                    dismissInternal(context, alarmId, "snooze_skipped_existing_alarm")
-                    Handler(Looper.getMainLooper()).post {
-                        Toast.makeText(context.applicationContext, message, Toast.LENGTH_LONG).show()
-                    }
-                    return SnoozeResult(timeText, shiftType, message)
-                }
-            }
-
-            // ⭐ 2026-09-14 (출시전 감사 #16/#27) - OS 예약은 DB 커밋 뒤로 옮김(아래). 새 시각은 초 단위로 맞춰
-            // DB 문자열·수신 시 예정 시각 대조와 정확히 일치하게 함
-            newTimestamp = AlarmWakeScheduler.normalize(newTimestamp)
-
-            val dateStr = AlarmInstant.format(newTimestamp)
-            val timeStr = SimpleDateFormat("HH:mm", Locale.US).format(Date(newTimestamp))
-
             db.beginTransaction()
             try {
-                val values = ContentValues().apply {
-                    put("date", dateStr)
-                    put("time", timeStr)
-                    put("type", "snoozed")  // 자동 갱신 diff 대상에서 제외되어 보호됨
+                var typeId = 1
+                var oldDate = ""
+                var oldTime = ""
+                var dayOffset = 0
+                var fixedSlotTime: String? = null
+                db.query("alarms", null, "id = ?", arrayOf(alarmId.toString()), null, null, null).use { row ->
+                    if (!row.moveToFirst()) return SnoozeExecution.Superseded(alarmId)
+                    typeId = row.getInt(row.getColumnIndexOrThrow("alarm_type_id"))
+                    label = row.getString(row.getColumnIndexOrThrow("shift_type"))
+                        ?: context.getString(R.string.alarm_default_label)
+                    oldDate = row.getString(row.getColumnIndexOrThrow("date")) ?: ""
+                    oldTime = row.getString(row.getColumnIndexOrThrow("time")) ?: ""
+                    dayOffset = row.getColumnIndex("day_offset").let { if (it >= 0) row.getInt(it) else 0 }
+                    fixedSlotTime = FixedAlarmOccurrence.fromRow(row)
                 }
-                // ⭐ 2026-09-14 (교차 검토 X-04) - 조회 뒤 행이 사라졌으면(백업 복원 교체 등) 스누즈 이력만 남기고 성공처럼 끝내지 않음
-                if (db.update("alarms", values, "id = ?", arrayOf(alarmId.toString())) == 0) {
-                    throw IllegalStateException("snooze target row missing: id=$alarmId")
+                data class Conflict(val id: Int, val at: Long, val type: Int)
+                val conflicts = mutableListOf<Conflict>()
+                db.rawQuery("SELECT id, date, alarm_type_id FROM alarms WHERE id != ?", arrayOf(alarmId.toString())).use { rows ->
+                    while (rows.moveToNext()) {
+                        val at = AlarmWakeScheduler.parse(rows.getString(1) ?: continue) ?: continue
+                        if (Math.floorDiv(at, 60_000L) == Math.floorDiv(targetAt, 60_000L))
+                            conflicts.add(Conflict(rows.getInt(0), at, rows.getInt(2)))
+                    }
                 }
-
-                if (originalTime.isNotEmpty() && originalDate.isNotEmpty()) {
-                    insertHistory(context, db, alarmId, originalDate, originalTime, shiftType, dayOffset, "snoozed")
+                val conflict = conflicts.minWithOrNull(compareBy<Conflict> { it.at }.thenBy { it.id })
+                if (conflict != null) {
+                    val typeName = context.getString(when (conflict.type) {
+                        2 -> R.string.alarm_type_vibration_short
+                        3 -> R.string.alarm_type_silent_short
+                        else -> R.string.alarm_type_sound_vibration_short
+                    })
+                    collisionMessage = context.getString(R.string.snooze_collision_message, AlarmInstant.display(context, targetAt), typeName)
+                    insertHistory(context, db, alarmId, oldDate, oldTime, label, dayOffset, "snooze_skipped_existing_alarm", fixedSlotTime)
+                    check(db.delete("alarms", "id = ?", arrayOf(alarmId.toString())) == 1)
+                } else {
+                    val date = AlarmInstant.format(targetAt)
+                    val time = SimpleDateFormat("HH:mm", Locale.US).format(Date(targetAt))
+                    val values = ContentValues().apply {
+                        put("date", date); put("time", time); put("type", "snoozed")
+                        put("fixed_slot_time", fixedSlotTime)
+                    }
+                    check(db.update("alarms", values, "id = ?", arrayOf(alarmId.toString())) == 1)
+                    insertHistory(context, db, alarmId, oldDate, oldTime, label, dayOffset, "snoozed", fixedSlotTime)
+                    insertCreationLog(db, alarmId, date, time, label, typeId, dayOffset, "snoozed")
                 }
-                // ⭐ 스누즈도 "새로 예약된 인스턴스"이므로 생성 이력 원장에 남김
-                insertCreationLog(db, alarmId, dateStr, timeStr, shiftType, alarmTypeId, dayOffset, "snoozed")
-
                 db.setTransactionSuccessful()
-            } finally {
-                db.endTransaction()
-            }
-
-            result = SnoozeResult(AlarmInstant.display(context, newTimestamp), shiftType)
-            // ⭐ #16 - 커밋 뒤 OS 반영(행 재확인). 실패하면 AlarmWakeScheduler가 기록해 다음 트리거에 재시도
-            if (AlarmWakeScheduler.scheduleIfCurrent(context, db, alarmId, newTimestamp, shiftType) ==
-                AlarmWakeScheduler.Outcome.FAILED) {
-                Log.e(TAG, "❌ 스누즈 OS 예약 실패(재시도 목록에 기록): alarmId=$alarmId")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "❌ snooze 실패: alarmId=$alarmId", e)
+            } finally { db.endTransaction() }
+        } catch (error: Exception) {
+            Log.e(TAG, "snooze transaction failed id=$alarmId", error)
+            return SnoozeExecution.DbFailed(alarmId)
         }
-        // ⭐ db.close() 제거 (dismiss()와 동일한 이유 - 위 주석 참고)
-
-        if (result != null) {
-            finishUp(context, alarmId)
+        val result: SnoozeExecution
+        if (collisionMessage != null) {
+            RestoreGate.clearRingSnapshot(context, alarmId)
+            AlarmWakeScheduler.cancelIfGone(context, db, alarmId)
+            result = SnoozeExecution.Collision(alarmId, targetAt, collisionMessage!!)
+        } else {
+            beforeSchedule?.invoke()
+            val outcome = if (scheduleFn == null) AlarmWakeScheduler.scheduleIfCurrent(context, db, alarmId, targetAt, label)
+                else AlarmWakeScheduler.scheduleIfCurrent(context, db, alarmId, targetAt, label, scheduleFn)
+            result = when (outcome) {
+                AlarmWakeScheduler.Outcome.SCHEDULED -> if (alarmId in AlarmWakeScheduler.failedIds(context))
+                    SnoozeExecution.Unverified(alarmId, targetAt)
+                    else SnoozeExecution.Scheduled(alarmId, targetAt, AlarmInstant.display(context, targetAt), label)
+                AlarmWakeScheduler.Outcome.SKIPPED_STALE -> SnoozeExecution.Superseded(alarmId)
+                else -> SnoozeExecution.OsFailed(alarmId, targetAt)
+            }
         }
+        // Classify OS verification before a guard retry can change the failure set.
+        try { finishUp(context, alarmId) } catch (error: Exception) { Log.w(TAG, "Post-snooze display refresh failed", error) }
         return result
     }
 
@@ -288,7 +269,8 @@ object AlarmActionHelper {
     }
 
     /** 화면 밖에서 울림을 끝냈을 때(종료 예약·앱 삭제) 떠 있는 잠금화면/오버레이/울림 알림을 닫음. */
-    fun closeRingUi(context: Context, alarmId: Int) {
+    fun closeRingUi(context: Context, alarmId: Int): Boolean {
+        var complete = true
         InAppAlarmController.changed()
         try {
             context.sendBroadcast(Intent("FINISH_ALARM_ACTIVITY").apply {
@@ -302,17 +284,20 @@ object AlarmActionHelper {
                 putExtra("completedRingOnly", true)
             })
         } catch (e: Exception) {
+            complete = false
             Log.e(TAG, "❌ 울림 화면 종료 신호 실패: id=$alarmId", e)
         }
         try {
             val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
             nm.cancel(alarmId)          // 알람 ID
             nm.cancel(alarmId + 100000) // Fallback notification
-            nm.cancel(7777)             // 제어
+            NotificationHelper.cancelRingControls(context, alarmId)             // 제어
             nm.cancel(8889)             // 스누즈/타임아웃
         } catch (e: Exception) {
+            complete = false
             Log.e(TAG, "❌ 울림 알림 정리 실패: id=$alarmId", e)
         }
+        return complete
     }
 
     /** 이 회차의 자동 종료를 예약. 같은 알람의 다른 회차 예약과는 data URI로 구분됨. */
@@ -376,7 +361,7 @@ object AlarmActionHelper {
         notifyFlutter(context)
     }
 
-    private fun insertHistory(context: Context, db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dayOffset: Int, dismissType: String) {
+    private fun insertHistory(context: Context, db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dayOffset: Int, dismissType: String, fixedSlotTime: String?) {
         val now = AlarmInstant.format(System.currentTimeMillis())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
@@ -384,12 +369,14 @@ object AlarmActionHelper {
             put("scheduled_date", date)
             put("actual_ring_time", now)
             put("dismiss_type", dismissType)
+            put("fixed_slot_time", fixedSlotTime)
             put("snooze_count", 0)
             put("shift_type", shiftType)
             put("created_at", now)
             put("day_offset", dayOffset)
         }
-        db.insert("alarm_history", null, values)
+        db.insertOrThrow("alarm_history", null, values)
+        FixedAlarmOccurrence.record(db, fixedSlotTime, shiftType, dayOffset, dismissType)
         DiagLog.log(context, "ALARM_END", "id" to alarmId, "type" to dismissType)
     }
 
@@ -405,7 +392,7 @@ object AlarmActionHelper {
             put("created_at", now)
             put("day_offset", dayOffset)
         }
-        db.insert("alarm_creation_log", null, values)
+        db.insertOrThrow("alarm_creation_log", null, values)
     }
 
     private fun notifyFlutter(context: Context) {

@@ -94,6 +94,15 @@ class SleepWidgetProvider : AppWidgetProvider() {
         }
 
         private fun buildRemoteViews(context: Context, widthDp: Int, heightDp: Int): RemoteViews {
+            // A previously pinned widget may receive updates after locale changes.
+            // Do not inflate its Korean-only layout in a foreign locale.
+            if (!ReleaseLocalePolicy.koreanFeatures(context)) {
+                return RemoteViews(context.packageName, R.layout.unavailable_feature_widget).apply {
+                    val open = Intent(context, MainActivity::class.java).putExtra("openTab", 2)
+                    setOnClickPendingIntent(R.id.unavailable_widget_title, PendingIntent.getActivity(
+                        context, 0, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+                }
+            }
             val views = RemoteViews(context.packageName, R.layout.sleep_widget)
 
             // The two rows and columns are equal. Leave 15% of the top cell

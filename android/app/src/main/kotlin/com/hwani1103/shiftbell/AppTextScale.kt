@@ -8,10 +8,11 @@ object AppTextScale {
     const val MAX_SCALE = 1.3f
 
     fun context(base: Context): Context {
-        // Override only fontScale so folding, density and locale still follow
-        // the underlying display configuration.
+        // Keep display dimensions/density inherited. Explicitly carry the
+        // parent's current locale when creating a fresh bounded-font context.
         val config = Configuration()
         config.fontScale = base.resources.configuration.fontScale.coerceAtMost(MAX_SCALE)
+        config.setLocales(base.resources.configuration.locales)
         return base.createConfigurationContext(config)
     }
 }

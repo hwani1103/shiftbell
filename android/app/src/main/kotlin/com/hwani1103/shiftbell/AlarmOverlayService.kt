@@ -34,7 +34,9 @@ class AlarmOverlayService : Service() {
         if (!isOverlayVisible) return
         // Reinflate from the new bounded font configuration; keep the active
         // ring and its original timeout untouched while the window changes.
-        if (view.resources.configuration.fontScale != newConfig.fontScale.coerceAtMost(AppTextScale.MAX_SCALE)) {
+        if (view.resources.configuration.fontScale != newConfig.fontScale.coerceAtMost(AppTextScale.MAX_SCALE) ||
+            overlayLocale != newConfig.locales.toLanguageTags()) {
+            loadAlarmInfo()
             removeOverlay()
             showOverlay()
             return
@@ -45,6 +47,15 @@ class AlarmOverlayService : Service() {
     }
 
     companion object {
+        private var instance: java.lang.ref.WeakReference<AlarmOverlayService>? = null
+        /** Transfer presentation only; the live round, player and independent deadline stay intact. */
+        internal fun yieldToActivity(ring: RingingAlarmTracker.ActiveRing) {
+            val service = instance?.get() ?: return
+            if (service.alarmId != ring.alarmId || service.ringRound != ring.round) return
+            service.cancelTimeoutTimer()
+            service.removeOverlay()
+            service.stopSelf()
+        }
         var visibleRing: RingingAlarmTracker.ActiveRing? = null
             private set
         const val ACTION_DISMISS_OVERLAY = "com.hwani1103.shiftbell.DISMISS_OVERLAY"
@@ -55,9 +66,10 @@ class AlarmOverlayService : Service() {
 
     private var windowManager: WindowManager? = null
     private var overlayView: android.view.View? = null
+    private var overlayLocale: String? = null
     private var alarmId: Int = 0
     private var alarmTimeStr: String = ""  // 알람 시간 저장
-    private var alarmLabel: String = "알람"  // 알람 라벨 저장
+    private var alarmLabel: String = ""  // loadAlarmInfo supplies the current locale's default.
     private var timeoutHandler: Handler? = null
     private var timeoutRunnable: Runnable? = null
     private var alarmDuration: Int = 3  // 기본 3분
@@ -97,6 +109,11 @@ class AlarmOverlayService : Service() {
     private var isReceiverRegistered = false
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    override fun onCreate() {
+        super.onCreate()
+        instance = java.lang.ref.WeakReference(this)
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val newAlarmId = intent?.getIntExtra("alarmId", 0) ?: 0
@@ -178,7 +195,7 @@ class AlarmOverlayService : Service() {
         if (AlarmActionHelper.claimCurrentRingOf(applicationContext, alarmId)) {
             AlarmPlayer.getInstance(applicationContext).stopAlarm()
             // ⭐ 2026-09-14 (#4) - 울리는 내내 떠 있던 제어 알림도 정리
-            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(NotificationHelper.RING_CONTROL_ID)
+            NotificationHelper.cancelRingControls(this, alarmId, ringRound)
         }
         removeOverlay()
         stopSelf()
@@ -192,7 +209,7 @@ class AlarmOverlayService : Service() {
         if (AlarmActionHelper.claimCurrentRingOf(applicationContext, alarmId)) {
             AlarmPlayer.getInstance(applicationContext).stopAlarm()
             // ⭐ 2026-09-14 (#4) - 울리는 내내 떠 있던 제어 알림도 정리
-            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(NotificationHelper.RING_CONTROL_ID)
+            NotificationHelper.cancelRingControls(this, alarmId, ringRound)
         }
         removeOverlay()
         stopSelf()
@@ -200,6 +217,8 @@ class AlarmOverlayService : Service() {
     }
 
     private fun loadAlarmInfo() {
+        // Clear a previous ring's label even when the next DB read fails.
+        alarmLabel = getString(R.string.alarm_default_label)
         var cursor: android.database.Cursor? = null
 
         try {
@@ -209,7 +228,7 @@ class AlarmOverlayService : Service() {
 
             cursor = database.query(
                 "alarms",
-                arrayOf("time", "shift_type", "type", "preset_slot"),
+                arrayOf("time", "shift_type", "type"),
                 "id = ?",
                 arrayOf(alarmId.toString()),
                 null, null, null
@@ -218,9 +237,7 @@ class AlarmOverlayService : Service() {
             if (cursor.moveToFirst()) {
                 alarmTimeStr = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
                 alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
-                    ?: if (cursor.getString(cursor.getColumnIndexOrThrow("type")) == "custom" ||
-                        !cursor.isNull(cursor.getColumnIndexOrThrow("preset_slot")))
-                        getString(R.string.one_tap_alarm_label) else getString(R.string.alarm_default_label)
+                    ?: getString(R.string.alarm_default_label)
             }
             // 지속시간은 onStartCommand에서 확정(AUD-03) - 여기서 DB로 다시 덮어쓰지 않음
 
@@ -280,7 +297,7 @@ class AlarmOverlayService : Service() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(alarmId)          // 알람 ID
         notificationManager.cancel(alarmId + 100000) // Fallback notification
-        notificationManager.cancel(7777)             // 제어
+        NotificationHelper.cancelRingControls(this, alarmId, ringRound)             // 제어
         notificationManager.cancel(8889)             // 스누즈/타임아웃
         Log.d("AlarmOverlay", "🗑️ Notification 삭제 (alarmId, alarmId+100000, 7777, 8889)")
 
@@ -313,6 +330,7 @@ class AlarmOverlayService : Service() {
 
             // Overlay View 생성
             overlayView = LayoutInflater.from(AppTextScale.context(this)).inflate(R.layout.overlay_alarm, null)
+            overlayLocale = resources.configuration.locales.toLanguageTags()
 
             // ⭐ 알람 설정 시간 표시 (현재 시간 아님!)
             val timeText = overlayView?.findViewById<TextView>(R.id.timeText)
@@ -342,6 +360,10 @@ class AlarmOverlayService : Service() {
 
     // ⭐ Overlay Window 표시 (windowManager에 추가)
     private fun showOverlayWindow() {
+        if (AlarmActivity.visibleRing == RingingAlarmTracker.ActiveRing(alarmId, ringRound)) {
+            yieldToActivity(AlarmActivity.visibleRing!!)
+            return
+        }
         Log.d("AlarmOverlay", "🔔 showOverlayWindow() 호출: isOverlayVisible=$isOverlayVisible, overlayView=${overlayView != null}")
 
         if (isOverlayVisible) {
@@ -394,7 +416,14 @@ class AlarmOverlayService : Service() {
             // 화면에 추가
             windowManager?.addView(overlayView, params)
             isOverlayVisible = true
+            snoozeBinding?.close()
+            snoozeBinding = SnoozeControlsBinding(overlayView!!, RingingAlarmTracker.ActiveRing(alarmId, ringRound)) {
+                cancelTimeoutTimer()
+                removeOverlay()
+                stopSelf()
+            }
             visibleRing = RingingAlarmTracker.ActiveRing(alarmId, ringRound)
+            NotificationHelper.markRingPresented(this, visibleRing!!)
             InAppAlarmController.changed()
 
             Log.d("AlarmOverlay", "✅ Overlay Window 표시 완료!")
@@ -429,7 +458,7 @@ class AlarmOverlayService : Service() {
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)          // 알람 ID
     notificationManager.cancel(alarmId + 100000) // Fallback notification
-    notificationManager.cancel(7777)             // 제어
+    NotificationHelper.cancelRingControls(this, alarmId, ringRound)             // 제어
     notificationManager.cancel(8889)             // 스누즈/타임아웃
     Log.d("AlarmOverlay", "🗑️ Notification 삭제 (alarmId, alarmId+100000, 7777, 8889)")
 
@@ -440,43 +469,12 @@ class AlarmOverlayService : Service() {
     stopSelf()
 }
     
-    private fun snoozeAlarm() {
-        cancelTimeoutTimer()
-
-        // ⭐ 2026-09-14 (#3) - 지난 회차 창의 버튼이면 다른 울림을 건드리지 않고 창만 닫음
-        if (!AlarmActionHelper.claimRingEnd(applicationContext, alarmId, ringRound)) {
-            removeOverlay()
-            stopSelf()
-            return
-        }
-
-        // 알람 소리 중지
-        AlarmPlayer.getInstance(applicationContext).stopAlarm()
-
-        // ⭐ 네이티브 알람 재등록 + DB 갱신 + 이력/생성로그 기록을 하나의 트랜잭션으로 (AlarmActionHelper)
-        // 끄기(dismissAlarm)와 동일하게, 앱을 강제로 앞으로 가져오지 않음 - 사용자가 보고 있던
-        // 화면(다른 앱 등)을 그대로 유지한 채 알람만 조용히 사라져야 함. Flutter UI는
-        // AlarmActionHelper.snooze 내부의 finishUp()이 브로드캐스트로 갱신 신호를 보내므로,
-        // 앱이 실행 중이면 포그라운드로 끌어오지 않아도 다음에 열었을 때 최신 상태로 보임.
-        val result = AlarmActionHelper.snooze(applicationContext, alarmId)
-        if (result != null && result.collisionMessage == null) {
-            NotificationHelper.showUpdatedNotification(applicationContext, result.newTimeStr, result.shiftType)
-        } else {
-            Log.e("AlarmOverlay", "❌ 알람 정보 없음: ID=$alarmId")
-        }
-
-        // ⭐ 2026-09-14 (출시전 감사 #4) - 제어 알림(7777)은 울리는 내내 떠 있으므로 스누즈에서도 정리
-        // (예전엔 오버레이 스누즈가 7777을 지우지 않았음 - 그땐 오버레이 상태에서 7777이 없었기 때문)
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(NotificationHelper.RING_CONTROL_ID)
-
-        // Overlay 제거
-        removeOverlay()
-
-        // 서비스 종료
-        stopSelf()
-    }
+    private var snoozeBinding: SnoozeControlsBinding? = null
+    private fun snoozeAlarm() { snoozeBinding?.execute() }
 
     private fun removeOverlay() {
+        snoozeBinding?.close()
+        snoozeBinding = null
         if (visibleRing == RingingAlarmTracker.ActiveRing(alarmId, ringRound)) {
             visibleRing = null
             InAppAlarmController.changed()
@@ -497,6 +495,7 @@ class AlarmOverlayService : Service() {
     }
 
     override fun onDestroy() {
+        if (instance?.get() === this) instance = null
         super.onDestroy()
         cancelTimeoutTimer()
 

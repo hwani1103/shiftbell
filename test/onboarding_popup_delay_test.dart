@@ -37,22 +37,6 @@ Future<BuildContext> _pumpHost(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('닫힌 원터치 패널은 안내를 띄우거나 읽음 처리하지 않는다', (tester) async {
-    SharedPreferences.setMockInitialValues({});
-    final ctx = await _pumpHost(tester);
-    var open = true;
-    final done = maybeShowOneTouchAlarmTutorial(ctx, canShow: () => open);
-    await tester.pump();
-    open = false;
-    await tester.pump(kInfoPopupDelay + const Duration(seconds: 1));
-    await done;
-    expect(_popup, findsNothing);
-    expect(
-        (await SharedPreferences.getInstance())
-            .getBool('one_touch_alarm_tutorial_shown'),
-        isNull);
-  });
-
   test('지연 시간은 "아주 약간"의 범위(0.4~1초)', () {
     expect(kInfoPopupDelay,
         greaterThanOrEqualTo(const Duration(milliseconds: 400)));
@@ -117,7 +101,7 @@ void main() {
     expect(_popup, findsNothing);
   });
 
-  testWidgets('다섯 가지 첫 사용 안내는 각각 처음 한 번만 표시된다', (tester) async {
+  testWidgets('네 가지 첫 사용 안내는 각각 처음 한 번만 표시된다', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final ctx = await _pumpHost(tester);
 
@@ -126,7 +110,6 @@ void main() {
       () => maybeShowShiftAssignTutorial(ctx, isRegular: false),
       () => maybeShowConditionTabTutorial(ctx),
       () => maybeShowScheduleTabTutorial(ctx),
-      () => maybeShowOneTouchAlarmTutorial(ctx),
     ];
 
     for (final show in popups) {
@@ -148,7 +131,6 @@ void main() {
       'shift_assign_tutorial_shown',
       'condition_tab_tutorial_shown',
       'schedule_tab_tutorial_shown',
-      'one_touch_alarm_tutorial_shown',
     ]) {
       expect(prefs.getBool(key), isTrue,
           reason: '$key should be recorded once');

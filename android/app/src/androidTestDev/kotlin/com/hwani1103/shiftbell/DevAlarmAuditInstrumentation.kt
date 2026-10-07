@@ -21,6 +21,11 @@ class DevAlarmAuditInstrumentation : Instrumentation() {
         val result = Bundle()
         try {
             check(targetContext.packageName == "com.hwani1103.shiftbell.dev")
+            if (arguments.getString("action") == "timezone_seed") {
+                result.putString("stream", DevTimezoneAudit.seed(this).toString() + "\n")
+                finish(Activity.RESULT_OK, result)
+                return
+            }
             if (arguments.getString("action") == "alarm_layout") {
                 result.putString("stream", DevAlarmLayoutAudit.run(this).toString() + "\n")
                 finish(Activity.RESULT_OK, result)

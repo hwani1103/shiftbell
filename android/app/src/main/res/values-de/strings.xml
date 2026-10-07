@@ -5,17 +5,12 @@
     <string name="alarm_type_silent_short">lautlos</string>
     <string name="snooze_collision_message">Um %1$s ist bereits ein anderer Wecker (%2$s) gestellt. Dieser Wecker wurde ohne Schlummerfunktion beendet.</string>
     <string name="calendar_widget_description">Schichten und Notizen im Blick. Passe die Größe an, um drei Wochen oder einen ganzen Monat zu sehen.</string>
-    <string name="sleep_widget_description">Schlafbeginn und Aufwachen mit einem Tippen erfassen.</string>
-    <string name="sleep_widget_brand">Shift Bell</string>
     <string name="app_widget_calendar_label">ShiftBell Kalender</string>
-    <string name="app_widget_sleep_label">ShiftBell Schlaf</string>
     <string name="alarm_swipe_hint">Zum Stoppen hochwischen</string>
-    <string name="alarm_snooze_label">Später</string>
+    <string name="alarm_snooze_label">5 Min. später</string>
     <string name="alarm_dismiss_label">Stoppen</string>
-    <string name="one_tap_alarm_label">Schnellwecker</string>
     <string name="channel_alarm_result">Verschobene und verpasste Wecker</string>
     <string name="channel_alarm_guard">Bevorstehende Wecker</string>
-    <string name="channel_schedule_notify">Terminerinnerungen</string>
     <string name="channel_restore_notify">Status der Wiederherstellung</string>
     <string name="notif_ringing_content">Wecker klingelt</string>
     <string name="notif_action_snooze">5 Min. später</string>
@@ -23,22 +18,16 @@
     <string name="notif_snoozed_title">Wecker auf %1$s verschoben</string>
     <string name="notif_guard_title">Dein Wecker klingelt um %1$s</string>
     <string name="notif_restore_title">Wiederherstellung nicht abgeschlossen</string>
-    <string name="notif_restore_text">Wecker sind anhand deiner aktuellen Daten gestellt. Öffne ShiftBell, um die Wiederherstellung abzuschließen.</string>
+    <string name="notif_restore_text">Öffne ShiftBell, um die Wiederherstellung abzuschließen, und prüfe danach deine kommenden Wecker.</string>
     <string name="widget_setup_schedule_first">Richte zuerst deinen Schichtplan in der App ein</string>
     <string-array name="widget_weekday_labels">
         <item>So</item><item>Mo</item><item>Di</item><item>Mi</item><item>Do</item><item>Fr</item><item>Sa</item>
     </string-array>
-    <string name="sleep_widget_sleep">Schlafen</string>
-    <string name="sleep_widget_wake">Wach</string>
-    <string name="sleep_widget_no_shift">Keine Schicht</string>
-    <string name="sleep_widget_not_set">Nicht festgelegt</string>
-    <string name="sleep_widget_unknown">Unbekannt</string>
-    <string name="sleep_widget_tab_off">Ansicht ausgeblendet</string>
     <string name="widget_no_shift">Keine</string>
     <string name="alarm_default_label">Wecker</string>
     <string name="channel_guard_description">Erinnerung 20 Minuten vor einem Wecker</string>
     <string name="channel_result_description">Hinweise zu verschobenen und verpassten Weckern</string>
-    <string name="channel_ring_description">Benachrichtigungen zu Schichtweckern</string>
+    <string name="channel_ring_description">Weckerbenachrichtigungen</string>
     <string name="widget_preview_day">Tag</string>
     <string name="widget_preview_night">Nacht</string>
     <string name="widget_preview_off">Frei</string>
@@ -51,4 +40,14 @@
     <string name="widget_weekday_6">Sa</string>
     <string name="alarm_clock_first">%1$s (erstes Mal)</string>
     <string name="alarm_clock_second">%1$s (zweites Mal)</string>
+    <string name="alarm_snooze_minutes">In %1$d Minuten erneut klingeln</string>
+    <string name="alarm_snooze_selection">Schlummerzeit: %1$d Min.</string>
+    <string name="alarm_snooze_decrease">Schlummerzeit um 5 Minuten verkürzen</string>
+    <string name="alarm_snooze_increase">Schlummerzeit um 5 Minuten verlängern</string>
+    <string name="snooze_failed_db">Der Alarm wurde gestoppt, aber die Schlummerzeit konnte nicht gespeichert werden.</string>
+    <string name="snooze_failed_schedule">Der Schlummeralarm konnte nicht bestätigt werden. Bitte den nächsten Alarm prüfen.</string>
+    <string name="snooze_controls_expired">Diese Alarmsteuerung ist nicht mehr gültig.</string>
+    <string name="snooze_superseded">Der Alarm wurde geändert. Dieser Schlummeralarm wurde nicht geplant.</string>
+    <string name="snooze_failed_execution">Das Stoppen und Verschieben des Alarms konnte nicht abgeschlossen werden.</string>
+    <string name="snooze_failure_title">Schlummeralarm prüfen</string>
 </resources>

@@ -4,6 +4,8 @@ import android.view.View
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -11,6 +13,16 @@ import kotlin.math.roundToInt
  * by AlarmActivity. Ordinary phone geometry is restored from the original XML. */
 internal object AlarmResponsiveLayout {
     fun install(root: ConstraintLayout) {
+        val baseLeft = root.paddingLeft
+        val baseTop = root.paddingTop
+        val baseRight = root.paddingRight
+        val baseBottom = root.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
+            view.setPadding(baseLeft + bars.left, baseTop + bars.top, baseRight + bars.right, baseBottom + bars.bottom)
+            insets
+        }
+        ViewCompat.requestApplyInsets(root)
         val original = ConstraintSet().apply { setForceId(false); clone(root) }
         val clock = root.findViewById<TextView>(R.id.timeText)
         val originalClockWidth = clock.layoutParams.width
@@ -19,8 +31,8 @@ internal object AlarmResponsiveLayout {
         val guideline = View.generateViewId()
         var lastSize = Pair(0, 0)
         root.addOnLayoutChangeListener { _, left, top, right, bottom, _, _, _, _ ->
-            val width = right - left
-            val height = bottom - top
+            val width = right - left - root.paddingLeft - root.paddingRight
+            val height = bottom - top - root.paddingTop - root.paddingBottom
             if (width <= 0 || height <= 0 || lastSize == Pair(width, height)) return@addOnLayoutChangeListener
             lastSize = Pair(width, height)
             val density = root.resources.displayMetrics.density
@@ -52,10 +64,18 @@ internal object AlarmResponsiveLayout {
                 set.setMargin(R.id.alarmCard, ConstraintSet.TOP, dp(16f))
                 set.setMargin(R.id.buttonContainer, ConstraintSet.BOTTOM, dp(28f))
             }
+            if (!wide) {
+                // Reserve the two rows of controls and localized description before decorative clock size.
+                circle = dp(min(w * 0.65f, h * 0.30f).coerceIn(100f, 250f))
+                text = originalClockText * (circle.toFloat() / originalClockWidth)
+                set.setMargin(R.id.alarmCard, ConstraintSet.TOP, dp(12f))
+                set.setMargin(R.id.buttonContainer, ConstraintSet.BOTTOM, dp(16f))
+                root.findViewById<View>(R.id.swipeHintContainer).visibility = if (h < 640) View.GONE else View.VISIBLE
+            }
             set.applyTo(root)
             clock.layoutParams = clock.layoutParams.apply {
                 this.width = circle
-                this.height = if (wide || shortCover) circle else originalClockHeight
+                this.height = circle
             }
             clock.setTextSize(android.util.TypedValue.COMPLEX_UNIT_PX, text)
         }

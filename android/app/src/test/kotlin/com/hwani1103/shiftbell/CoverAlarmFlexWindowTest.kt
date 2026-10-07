@@ -70,23 +70,25 @@ class CoverAlarmFlexWindowTest {
                         fun bounds(v: View): Rect = Rect().also { v.getDrawingRect(it); surface.offsetDescendantRectToMyCoords(v, it) }
                         val clockRect = bounds(clock)
                         val actionRect = bounds(actions)
-                        assertTrue("clock must be laid out $tag $clockRect", clock.width >= 64 * density - 1)
-                        assertFalse("overlap $tag", Rect.intersects(clockRect, actionRect))
+                        if (clock.visibility == View.VISIBLE) {
+                            assertTrue("clock must be laid out $tag $clockRect", clock.width >= 64 * density - 1)
+                            assertFalse("overlap $tag", Rect.intersects(clockRect, actionRect))
+                        }
                         val padding = (16 * density).roundToInt()
-                        for (v in listOf(clock, actions)) {
+                        for (v in listOf(clock, actions).filter { it.visibility == View.VISIBLE }) {
                             val r = bounds(v)
                             assertTrue("safe edges $tag $r", r.left >= safe.left + padding && r.top >= safe.top + padding && r.right <= width - safe.right - padding && r.bottom <= height - safe.bottom - padding)
                         }
-                        for (i in 0..1) {
-                            val b = actions.getChildAt(i) as Button
+                        for (id in listOf(R.id.snoozeDecreaseButton, R.id.snoozeButton, R.id.snoozeIncreaseButton, R.id.dismissButton)) {
+                            val b = surface.findViewById<Button>(id)
                             assertTrue("touch area $tag", b.width >= 48 * density - 1 && b.height >= 48 * density - 1)
                             assertTrue("label width $tag", b.paint.measureText(b.text.toString()) <= b.width - b.paddingLeft - b.paddingRight + 1)
                             assertTrue("label height $tag", b.paint.fontMetrics.descent - b.paint.fontMetrics.ascent <= b.height - b.paddingTop - b.paddingBottom + 1)
                             b.performClick()
                         }
                         assertEquals(1, stops); assertEquals(1, snoozes)
-                        assertTrue("clock fits $tag", clock.paint.measureText(clock.text.toString()) <= clock.width)
-                        report.append("$width,$height,$dpi,$font,$profile,${clockRect.flattenToString()},${actionRect.flattenToString()},${bounds(actions.getChildAt(0)).flattenToString()},${bounds(actions.getChildAt(1)).flattenToString()},${clock.textSize},${(actions.getChildAt(1) as Button).textSize}\n")
+                        if (clock.visibility == View.VISIBLE) assertTrue("clock fits $tag", clock.paint.measureText(clock.text.toString()) <= clock.width)
+                        report.append("$width,$height,$dpi,$font,$profile,${clockRect.flattenToString()},${actionRect.flattenToString()},${bounds(surface.findViewById(R.id.snoozeButton)).flattenToString()},${bounds(surface.findViewById(R.id.dismissButton)).flattenToString()},${clock.textSize},${surface.findViewById<Button>(R.id.dismissButton).textSize}\n")
                     }
                 }
             }

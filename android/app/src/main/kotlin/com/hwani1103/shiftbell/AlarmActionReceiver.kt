@@ -32,6 +32,27 @@ class AlarmActionReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        val acceptedWall = System.currentTimeMillis()
+        val acceptedElapsed = android.os.SystemClock.elapsedRealtime()
+        if (intent.action == RingControlNotification.ACTION_ADJUST || intent.action == RingControlNotification.ACTION_EXECUTE) {
+            val command = RingControlNotification.decode(context, intent) ?: run {
+                Log.w("RingSnooze", "Invalid v2 command rejected"); return
+            }
+            if (RingingAlarmTracker.selectionForLiveRing(context, command.selection.ring) == null) {
+                Log.w("RingSnooze", "Expired v2 command rejected: ${command.selection.ring}")
+                // Do not remove a newer round's 7777. A persisted, non-live round is inert.
+                if (RingingAlarmTracker.isCurrent(context, command.selection.ring.alarmId, command.selection.ring.round) &&
+                    !RingingAlarmTracker.isLiveRing(context)) {
+                    NotificationHelper.cancelRingControls(context, command.selection.ring.alarmId, command.selection.ring.round)
+                    android.widget.Toast.makeText(context, R.string.snooze_controls_expired, android.widget.Toast.LENGTH_LONG).show()
+                }
+                return
+            }
+            if (command.steps != null) RingSnoozeController.adjust(context, command.selection.ring, command.steps)
+            else RingSnoozeController.execute(context, RingSnoozeController.Click(command.selection, acceptedWall, acceptedElapsed))
+            return
+        }
+
         val alarmId = intent.getIntExtra(EXTRA_ALARM_ID, 0)
         // ⭐ 2026-09-14 (교차 검토 X-12) - 1.0.22 이하가 게시한 제어 알림(회차 없음)은 옛 버전이 남긴 같은 ID의 활성 울림에만 매핑
         val round = RingingAlarmTracker.normalizeRound(
@@ -66,18 +87,8 @@ class AlarmActionReceiver : BroadcastReceiver() {
             }
             // ⭐ 2026-09-14 (출시전 감사 #4) - 제어 알림 "5분 후"(예전 7777엔 끄기만 있었음)
             ACTION_SNOOZE_FROM_NOTIFICATION -> {
-                Log.d("AlarmAction", "🔔 Notification에서 5분 후: ID=$alarmId 회차=$round")
-                if (!AlarmActionHelper.claimRingEnd(context, alarmId, round)) {
-                    return
-                }
-                AlarmPlayer.getInstance(context).stopAlarm()
-                AlarmActionHelper.closeRingUi(context, alarmId)
-                val result = AlarmActionHelper.snooze(context, alarmId)
-                if (result != null && result.collisionMessage == null) {
-                    NotificationHelper.showUpdatedNotification(context, result.newTimeStr, result.shiftType)
-                } else {
-                    Log.e("AlarmAction", "❌ 알림에서 스누즈 실패(알람 정보 없음): ID=$alarmId")
-                }
+                val selected = RingingAlarmTracker.SnoozeSelection(RingingAlarmTracker.ActiveRing(alarmId, round), 5, 0)
+                RingSnoozeController.execute(context, RingSnoozeController.Click(selected, acceptedWall, acceptedElapsed), legacy = true)
             }
             // ⭐ 2026-09-14 (#3) - 울린 순간 CustomAlarmReceiver가 예약한 이 회차의 자동 종료
             ACTION_RING_TIMEOUT -> {

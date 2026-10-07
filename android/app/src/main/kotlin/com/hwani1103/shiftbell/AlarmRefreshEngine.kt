@@ -44,7 +44,7 @@ object AlarmRefreshEngine {
     // ⭐ 2026-09-14 (출시전 감사 #26 P1) - 생성 정책 버전. 불규칙 자동 생성·템플릿 0개 정리가 들어간 첫 버전 = 1.
     // alarm_state에 기록된 값이 이보다 낮으면 "오늘 이미 갱신함"과 무관하게 한 번 강제 갱신(AlarmRefreshUtil),
     // 기록은 갱신이 성공한 뒤에만(markRefreshed). 정책을 또 바꾸면 값을 올릴 것.
-    internal const val REFRESH_POLICY_VERSION = 2
+    internal const val REFRESH_POLICY_VERSION = 3
     internal const val KEY_REFRESH_POLICY_VERSION = "refresh_policy_version"
     private const val KEY_LAST_REFRESH_TIME_ZONE = "last_alarm_refresh_time_zone"
 
@@ -71,7 +71,8 @@ object AlarmRefreshEngine {
         val shiftType: String,
         val alarmTypeId: Int,
         val dayOffset: Int,
-        val timestamp: Long
+        val timestamp: Long,
+        val fixedSlotTime: String = dateStr
     ) {
         // ⭐ CRITICAL FIX: 날짜 "문자열"이 아니라 실제 시각(timestamp)으로 매칭해야 함.
         // Dart 쪽(onboarding/달력 팝업/설정)은 DateTime.toIso8601String()으로 date를 저장하는데
@@ -191,10 +192,16 @@ object AlarmRefreshEngine {
 
             val templates = readTemplates(db)
             val overrides = readOverrides(db)
-            // 먼저 저장된 원터치 알람이 같은 시각을 차지하면 고정 알람 행을 만들지 않는다.
+            val windowStart = Calendar.getInstance(Locale.US).apply { timeInMillis = nowMillis }
+            val windowEnd = windowStart.clone() as Calendar
+            windowEnd.add(Calendar.DAY_OF_MONTH, DAYS_AHEAD)
+            val dayFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            val consumed = FixedAlarmOccurrence.readConsumed(db,
+                dayFormat.format(windowStart.time), dayFormat.format(windowEnd.time))
+            // 기존 일반 단발 알람과 같은 분에 중복 기상 알람을 만들지 않는다.
             // 기존에 겹쳐 생성된 고정 행도 diff의 toRemove로 정리된다.
             val occupiedByCustom = readFutureCustomTimes(db, nowMillis)
-            val desired = computeDesiredAlarms(schedule, templates, overrides, nowMillis)
+            val desired = computeDesiredAlarms(schedule, templates, overrides, nowMillis, consumed)
                 .filterNot { it.timestamp in occupiedByCustom }
             val existing = readExistingFixedAlarms(db, nowMillis)
             val existingByKey = existing.associateBy { it.key() }
@@ -226,6 +233,7 @@ object AlarmRefreshEngine {
                     put("alarm_type_id", item.alarmTypeId)
                     put("shift_type", item.shiftType)
                     put("day_offset", item.dayOffset)
+                    put("fixed_slot_time", item.fixedSlotTime)
                 }
                 // A failed replacement must roll back removals in this same transaction.
                 val rowId = db.insertOrThrow("alarms", null, values)
@@ -243,6 +251,8 @@ object AlarmRefreshEngine {
             // AlarmManager 등록 자체는 DB를 안 건드리는 가벼운 작업이라 매번 다시 걸어도 무해함.
             for (item in desired) {
                 val existingId = existingByKey[item.key()]?.id ?: continue  // toAdd는 위에서 이미 넣음
+                db.execSQL("UPDATE alarms SET fixed_slot_time = ? WHERE id = ? AND (fixed_slot_time IS NULL OR fixed_slot_time != ?)",
+                    arrayOf<Any>(item.fixedSlotTime, existingId, item.fixedSlotTime))
                 if (existingByKey[item.key()]?.time != item.time) {
                     db.update("alarms", ContentValues().apply { put("time", item.time) },
                         "id = ?", arrayOf(existingId.toString()))
@@ -472,7 +482,8 @@ object AlarmRefreshEngine {
         schedule: ScheduleData,
         templates: Map<String, List<TemplateEntry>>,
         overrides: Map<String, OverrideEntry> = emptyMap(),
-        nowMillis: Long = System.currentTimeMillis()
+        nowMillis: Long = System.currentTimeMillis(),
+        consumedOccurrences: Set<String> = emptySet()
     ): List<DesiredAlarm> {
         val result = mutableListOf<DesiredAlarm>()
         val today = Calendar.getInstance(Locale.US).apply { timeInMillis = nowMillis }
@@ -529,7 +540,9 @@ object AlarmRefreshEngine {
                         shiftType = shiftType,
                         alarmTypeId = entry.alarmTypeId,
                         dayOffset = offset,
-                        timestamp = alarmCal.timeInMillis
+                        timestamp = alarmCal.timeInMillis,
+                        fixedSlotTime = String.format(Locale.US, "%sT%02d:%02d:00",
+                            dayKeyFormat.format(targetDate.time), timeParts[0].toInt(), timeParts[1].toInt())
                     )
                 }
             }
@@ -539,6 +552,7 @@ object AlarmRefreshEngine {
             addFrom(dayAfterContributor, OFFSET_AFTER)
 
             for (alarm in byTime.values) {
+                if (slotKey(alarm.fixedSlotTime, alarm.shiftType, alarm.dayOffset) in consumedOccurrences) continue
                 val override = overrides[slotKey(slotFormat.format(Date(alarm.timestamp)), alarm.shiftType, alarm.dayOffset)]
                 when {
                     override == null -> result.add(alarm)
@@ -601,13 +615,12 @@ object AlarmRefreshEngine {
     private fun readOtherFutureAlarms(context: Context, db: SQLiteDatabase, nowMillis: Long): List<AlarmWakeScheduler.WakeRow> {
         val now = SimpleDateFormat(DATE_FORMAT, Locale.US).format(Date(nowMillis))
         val result = mutableListOf<AlarmWakeScheduler.WakeRow>()
-        db.query("alarms", arrayOf("id", "date", "shift_type", "type", "preset_slot"), "type != ? AND (type = 'snoozed' OR date >= ?)", arrayOf("fixed", now.substring(0, 10)),
+        db.query("alarms", arrayOf("id", "date", "shift_type", "type"), "type != ? AND (type = 'snoozed' OR date >= ?)", arrayOf("fixed", now.substring(0, 10)),
             null, null, null).use { c ->
             while (c.moveToNext()) {
                 val timestamp = c.getString(1)?.let { parseStoredDate(it) } ?: continue
                 if (timestamp <= nowMillis) continue
-                val label = c.getString(2) ?: if (c.getString(3) == "custom" || !c.isNull(4))
-                    context.getString(R.string.one_tap_alarm_label) else context.getString(R.string.alarm_default_label)
+                val label = c.getString(2) ?: context.getString(R.string.alarm_default_label)
                 result += AlarmWakeScheduler.WakeRow(c.getInt(0), timestamp, label)
             }
         }

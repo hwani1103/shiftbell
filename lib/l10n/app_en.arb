@@ -11,15 +11,10 @@
   "commonNext": "Next",
   "commonClose": "Close",
   "commonReset": "Reset",
-  "commonChange": "Change",
   "commonContinue": "Continue",
   "commonNotNow": "Not Now",
   "commonGoToSettings": "Go to Settings",
-  "commonRefresh": "Refresh",
   "commonGoBack": "Go Back",
-  "commonGetStarted": "Get Started",
-  "commonShare": "Share",
-  "commonCopy": "Copy",
   "commonNotSet": "Not Set",
   "commonNone": "None",
   "commonDeletePermanently": "Delete Permanently",
@@ -38,24 +33,8 @@
   "commonUpdate": "Update",
   "navNextAlarm": "Next Alarm",
   "navCalendar": "Calendar",
-  "navFriendShare": "Sharing",
-  "navScheduleManagement": "Events",
-  "disableTabButtonLabel": "Hide {tab}",
-  "@disableTabButtonLabel": {
-    "placeholders": {
-      "tab": {
-        "type": "String"
-      }
-    }
-  },
-  "disableTabDialogBody": "This tab will be hidden from the bottom navigation. You can show it again in Settings.",
-  "scheduleTabDisableExtraNotice": "Reminders for your events will also be canceled.",
-  "settingsScheduleTabReenableTitle": "Show Schedule tab",
-  "settingsScheduleTabReenableSubtitle": "Add Schedule back to the bottom navigation",
   "navSettings": "Settings",
-  "shiftWork": "Shift Work",
   "shiftPattern": "Shift Pattern",
-  "settingsPatternTodayMarker": "· today is highlighted",
   "shiftName": "Shift Name",
   "shiftType": "Shift Type",
   "shiftDayOff": "Day Off",
@@ -66,24 +45,16 @@
   "shiftOnCall": "On-Call",
   "shiftOff": "Off",
   "shiftChange": "Shift Change",
-  "shiftTeam": "Team",
-  "shiftRegularPattern": "Repeating shift pattern",
-  "shiftIrregularPattern": "Non-repeating shifts",
   "shiftSchedule": "Schedule",
   "shiftFullSchedule": "All teams",
-  "shiftWorkHours": "Work Hours",
   "shiftOt": "OT",
   "shiftThisMonthOt": "Monthly Overtime",
   "shiftWeeklyWorkHours": "Weekly Work Hours",
-  "shiftPayday": "Cutoff date",
   "shiftChangeSchedule": "Change Schedule",
   "shiftResetSchedule": "Reset Schedule",
   "alarmTitle": "Alarm",
-  "alarmNext": "Next Alarm",
   "alarmUntil": "Time Until Alarm",
   "alarmRegistered": "Scheduled Alarms",
-  "alarmFixed": "Shift alarm",
-  "alarmType": "Alarm Type",
   "alarmSound": "Alarm Sound",
   "alarmSoundManage": "Sound & Vibration",
   "alarmSoundChoose": "Choose Alarm Sound",
@@ -96,8 +67,6 @@
   "alarmVolume": "Volume",
   "alarmHistory": "Alarm History",
   "alarmDismissed": "Dismissed",
-  "alarmRemoved": "Alarm Removed",
-  "alarmSnooze5Min": "Snooze 5 Minutes",
   "alarmNoResponse": "Missed",
   "alarmScheduleChanged": "Schedule Changed",
   "alarmTurnOffThis": "Turn Off This Alarm",
@@ -164,9 +133,6 @@
   "alarmDeletedToast": "Alarm Deleted",
   "alarmUpdatedToast": "Alarm Updated",
   "alarmCanceledToast": "Alarm Canceled",
-  "alarmCountAll": "All",
-  "alarmCountFuture": "Upcoming",
-  "alarmCountPast": "Past",
   "alarmDuration": "Ring duration",
   "alarmDurationMinutes": "{minutes, plural, =1{1 min} other{{minutes} min}}",
   "@alarmDurationMinutes": {
@@ -186,7 +152,6 @@
       }
     }
   },
-  "calendarMemo": "Note",
   "calendarMemoAll": "All Notes",
   "calendarMemoEnter": "Write a note",
   "calendarMemoContent": "Note",
@@ -210,8 +175,6 @@
     }
   },
   "calendarTapToAddMoreDates": "Tap to select more dates",
-  "calendarFriendQuickAccessLabel": "Friends",
-  "calendarTapDateToEnter": "Tap a date to add overtime",
   "calendarMonthlyOtTitle": "{month} overtime",
   "@calendarMonthlyOtTitle": {
     "placeholders": {
@@ -301,31 +264,9 @@
       }
     }
   },
-  "calendarMemoDetailTitle": "Note Details",
   "onboardingCreateSchedule": "Set up your shifts",
-  "onboardingFixedPatternQuestion": "Do your shifts follow a repeating pattern?",
-  "onboardingYesRegular": "Yes, they repeat",
-  "onboardingNoIrregular": "No, they vary",
-  "onboardingCheckShiftTypes": "Check your shift types",
-  "onboardingAddIfMissing": "You can add more if needed",
-  "onboardingShiftLimitHint": "Up to {max} shift types · {chars} characters per name",
-  "@onboardingShiftLimitHint": {
-    "placeholders": {
-      "max": {
-        "type": "int"
-      },
-      "chars": {
-        "type": "int"
-      }
-    }
-  },
-  "onboardingUsableEvenIfNotInPattern": "You can also use these outside your usual pattern.",
   "onboardingShiftNameTitle": "Add the shifts and days off you need",
   "onboardingShiftNameSubHint": "Include days off and leave. You can assign them to dates later.\n\nTap × to remove or + Add to create a name.",
-  "onboardingSwitchToIrregularPrefix": "Your shifts don't follow a repeating pattern? Tap ",
-  "onboardingSwitchToIrregularLink": "here",
-  "onboardingSwitchToIrregularSuffix": ".",
-  "onboardingSelectAllInPattern": "Choose the shifts in your repeating pattern",
   "onboardingTapToCompletePattern": "Build your shift pattern",
   "onboardingPatternHint": "(Up to 40 days · tap a shift in the pattern below to remove it.)",
   "onboardingPatternHowTo": "Tap shifts in the order they repeat.\nFor example: Day, Day, Off, Off, Night, Night, Off, Off.",
@@ -333,14 +274,6 @@
   "onboardingIrregularChoiceDescription": "Choose this if your shifts don't repeat",
   "onboardingNoPattern": "No Pattern",
   "onboardingAddShiftName": "Add Shift Name",
-  "onboardingShiftNameHint": "Shift Name ({chars} characters max)",
-  "@onboardingShiftNameHint": {
-    "placeholders": {
-      "chars": {
-        "type": "int"
-      }
-    }
-  },
   "onboardingSetFixedAlarmPerShift": "Set alarms for each shift",
   "onboardingMaxAlarmsPerShift": "Up to {max} per shift",
   "@onboardingMaxAlarmsPerShift": {
@@ -364,7 +297,6 @@
       }
     }
   },
-  "onboardingAllSet": "All Set!",
   "onboardingNeedAtLeastOneShift": "You need at least one shift type",
   "onboardingEnterShiftName": "Please enter a shift name",
   "onboardingCharLimitError": "Please enter {chars} characters or fewer",
@@ -399,8 +331,6 @@
   "onboardingWelcomePopupStartButton": "Get Started",
   "onboardingShiftAssignPopupTitle": "Adding shifts to your calendar",
   "onboardingShiftAssignPopupBody": "If your shifts don't repeat, assign them to dates on the calendar.\n\nTouch and hold a date, then tap any other dates you want to select. Tap a shift name at the bottom to assign it to those dates.\n\nYou can change an assigned shift the same way.",
-  "onboardingScheduleTabPopupTitle": "Using the Schedule tab",
-  "onboardingScheduleTabPopupBody": "1. Add an event\nTap the clock icon at the bottom right, then tap a time on the timeline to add an event.\n\n2. Set an end time\nEvents have no duration by default. Use + or the 5 min, 30 min and 1 hr buttons to set an end time.\n\n3. Add a reminder\nTurn on notifications and choose when to be reminded. The reminder uses your device’s notification sound settings.",
   "alarmAlreadyExistsAtTime": "An alarm already exists at {time}.",
   "@alarmAlreadyExistsAtTime": {
     "placeholders": {
@@ -419,7 +349,7 @@
   "settingsCalendarMonthBasis": "Calendar Month",
   "settingsCalendarMonthBasisDesc": "1st to last day of each month",
   "settingsPaydayBasis": "Custom monthly period",
-  "settingsPaydayBasisDesc": "Totaled monthly from a date you set",
+  "settingsPaydayBasisDesc": "Monthly totals based on a reference date you choose",
   "settingsPeriodStartBasis": "Period starts on",
   "settingsPeriodEndBasis": "Period ends on",
   "settingsPreviewThisMonth": "Preview: this month's period is {range}",
@@ -430,24 +360,13 @@
       }
     }
   },
-  "settingsFriendShareDesc": "Share schedules with friends using a code or link",
   "settingsRenameShiftDesc": "Edit, add, or delete shift names.",
-  "settingsEditShiftNameDesc": "Edit this shift's name",
   "settingsChangeAlarmTimeDesc": "Change the alarm time for each shift",
   "settingsChangeScheduleDesc": "Change your work schedule.",
   "settingsAlarmHistoryDesc": "View alarms and their status",
   "settingsMemoAllDesc": "View and search all notes",
   "settingsDeleteAllAlarmsDesc": "Delete all scheduled alarms",
   "settingsDataBackupTitle": "Back up data",
-  "settingsDataBackupDesc": "Back up your schedule, alarms, notes and more to this device",
-  "settingsDataBackupLastSavedAt": "Last backup: {date}",
-  "@settingsDataBackupLastSavedAt": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
   "settingsDataBackupNeverSaved": "No backup yet",
   "settingsDataBackupSlots": "Manual backup: {manual}\nAutomatic backup: {auto}",
   "@settingsDataBackupSlots": {
@@ -461,69 +380,6 @@
     }
   },
   "settingsDataBackupSlotNone": "None",
-  "customAlarmLabel": "One-tap alarm",
-  "customAlarmEditTooltip": "Edit one-tap alarms",
-  "customAlarmEditorTitle": "One-tap alarm settings",
-  "customAlarmEditorDesc": "Save up to 5 alarm presets, each with a time and sound setting. Use a preset for today or tomorrow, once per day. To edit a preset that is in use, delete its scheduled alarms first.",
-  "customAlarmSlotEmpty": "Empty",
-  "customAlarmSlotClear": "Clear",
-  "customAlarmAssignHint": "Tap a date to add a {time} alarm",
-  "@customAlarmAssignHint": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduledToday": "Alarm set for today at {time}",
-  "@customAlarmScheduledToday": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduledOn": "Alarm set for {date} at {time}",
-  "@customAlarmScheduledOn": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduledSoon": "Alarm will ring in {minutes} min",
-  "@customAlarmScheduledSoon": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
-  "customAlarmPast": "That time has already passed, so no alarm was added",
-  "customAlarmOutsideWindow": "One-tap alarms can be set only for today or tomorrow",
-  "customAlarmDuplicate": "There's already an alarm at {time} on that date",
-  "@customAlarmDuplicate": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "customAlarmScheduleFailed": "The alarm could not be scheduled on this device. Please try again shortly",
-  "customAlarmUndo": "Undo",
-  "customAlarmDeleted": "One-tap alarm deleted",
-  "customAlarmDeleteConfirm": "Delete the {time} one-tap alarm?",
-  "fixedAlarmSkippedByOneTap": "A one-tap alarm was set first at the same time, so the shift alarm was skipped",
-  "@customAlarmDeleteConfirm": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
   "settingsDataBackupInProgress": "Backing up...",
   "settingsDataBackupSuccessToast": "Backup saved to Download/ShiftBell. After reinstalling, choose this file on the first screen to restore it.",
   "settingsDataBackupFailedToast": "Couldn't save the backup. Android 10 or later is required. If your device supports backups, please try again.",
@@ -542,27 +398,23 @@
   "backupRestoreInProgress": "Restoring...",
   "backupRestoreFailedToast": "Restore failed. Please try again.",
   "backupRestoreEmptyToast": "This backup has no shift schedule. Start by setting up your shifts.",
-  "backupRestoreManualPickLink": "Choose a backup file",
-  "onboardingHasBackupTitle": "Used this app before?",
-  "onboardingHasBackupLoadButton": "Restore",
-  "backupRestoreManualPickHint": "Pick up where you left off with the backup file in Download/ShiftBell.",
   "backupRestoreManualPickInvalidToast": "Choose a ShiftBell backup file. Its name starts with ShiftBell_Backup_.",
   "backupRestoreInvalidToast": "This backup couldn't be verified. Nothing was restored, and your current data is unchanged.",
-  "backupRestoreIncompleteToast": "The restore couldn't finish. Alarms have been set again based on your current data. Open the app again to complete it.",
+  "backupRestoreIncompleteToast": "The restore could not finish. Alarm rescheduling may also be incomplete. Try again, then check your upcoming alarms.",
   "settingsRestoreFromBackupEmptyToast": "This backup has no shift schedule, so it wasn't loaded. Your current data is unchanged.",
   "restoreInterruptedTitle": "Restore interrupted",
-  "restoreInterruptedDesc": "An earlier restore did not finish. Continuing will replace your current data with that backup, including any changes made since the restore stopped.\n\nYou can continue restoring or keep your current data. Alarms will be scheduled using the data you choose.",
+  "restoreInterruptedDesc": "An earlier restore did not finish. Continue to finish its remaining steps, or keep your current data. Continuing may overwrite changes made since the restore stopped. Alarm history and creation records are merged; ringing or snoozed alarms are kept.\n\nBoth choices reschedule alarms using the resulting data. Check your upcoming alarms after the process finishes.",
   "restoreInterruptedResumeButton": "Continue restoring",
   "restoreInterruptedKeepButton": "Keep current data",
   "restoreInterruptedCopyLost": "The backup file is no longer available, so this restore cannot continue. Alarms will be scheduled again using your current data.",
   "restoreInterruptedInProgress": "Working...",
   "settingsRestoreFromBackupTitle": "Restore from backup",
-  "settingsRestoreFromBackupDesc": "Overwrite current data with a backup file",
+  "settingsRestoreFromBackupDesc": "Replace your schedule and other saved data with data from a backup",
   "settingsRestoreFromBackupWarningTitle": "Restore from backup",
-  "settingsRestoreFromBackupWarningBody": "Your current app data, including shifts, alarms, notes and overtime, will be replaced by the backup you choose. This cannot be undone.\n\nChoose a file in Download → ShiftBell.\n\nBackup names start with ShiftBell_Backup_manual_ or ShiftBell_Backup_auto_ and end with a date and time, for example ShiftBell_Backup_auto_260917_060412.json. Choose the most recent file, or the version you want to restore. You can review its saved time before continuing.",
+  "settingsRestoreFromBackupWarningBody": "Your shift schedule, notes, overtime and other saved data and settings will be replaced by the backup you choose. This cannot be undone. Alarm history and creation records will be merged with the backup. Alarms that are ringing or snoozed will be kept.\n\nChoose a file in Download → ShiftBell.\n\nBackup names start with ShiftBell_Backup_manual_ or ShiftBell_Backup_auto_ and end with a date and time, for example ShiftBell_Backup_auto_260917_060412.json. Choose the most recent file, or the version you want to restore. You can review its saved time before continuing.",
   "settingsRestoreFromBackupPickButton": "Choose file",
   "settingsRestoreFromBackupConfirmTitle": "Restore from this backup?",
-  "settingsRestoreFromBackupConfirmBody": "This backup was saved on {date}. Restoring will replace the app’s current data with this backup’s contents.",
+  "settingsRestoreFromBackupConfirmBody": "This backup was saved on {date}. It will replace your shift schedule, notes, overtime and other saved data and settings. Alarm history and creation records will be merged. Alarms that are ringing or snoozed will be kept.",
   "@settingsRestoreFromBackupConfirmBody": {
     "placeholders": {
       "date": {
@@ -585,7 +437,7 @@
   "settingsAlarmSoundSettings": "Sound & Vibration",
   "settingsAlarmSoundManageDesc": "Choose a sound, vibration or silent mode",
   "settingsIncludesVibration": "Includes Vibration",
-  "settingsAllAlarmsWillBeDeleted": "All scheduled alarms will be deleted.",
+  "settingsAllAlarmsWillBeDeleted": "All alarms and per-shift alarm settings will be deleted. Alarm history will be kept.",
   "settingsAllAlarmsDeletedToast": "All alarms have been permanently deleted",
   "statusDeleteFailed": "Failed to delete",
   "settingsScheduleChanging": "Changing schedule...",
@@ -627,23 +479,21 @@
     }
   },
   "settingsSelectTodayShiftFromPattern": "Select today's shift from the pattern",
-  "settingsScheduleChangeWarning": "Shift alarms for the next 10 days will follow your new schedule.\nOne-tap alarms and alarm history will be kept.",
-  "settingsScheduleChangedRedoAllTeamsHint": "If you use team schedules, set them up again after this change.",
-  "settingsResetScheduleSharingFailed": "Your schedule was reset, but your old shared schedule may still be visible. When the app is working again, go to Schedule Sharing → Share My Schedule → Stop Sharing.",
-  "settingsResetScheduleConfirm": "Reset your shift schedule and all alarms?\n\nAll team schedules, alarm history and creation records will also be deleted. Sharing your schedule will stop too. If offline, sharing stops after reconnecting; the previously shared schedule may remain visible until then.",
-  "privacyIntro": "Your shift and alarm data is stored on your device. ShiftBell also uses Google services for usage statistics and advertising. This policy explains those services, local files and data retained from features used before switching to English.",
+  "settingsScheduleChangeWarning": "Fixed alarms for the next 10 days will be updated for the new schedule. Snoozed alarms and alarm history will be kept.",
+  "settingsResetScheduleConfirm": "Reset your shift schedule and all alarms?\n\nAll team schedules, alarm history and alarm creation records will also be deleted.",
+  "privacyIntro": "Your shift and alarm data is stored on your device. ShiftBell also uses Google services for usage statistics and advertising. This policy explains those services and local files.",
   "privacyNoCollectionTitle": "Data stored on your device",
-  "privacyNoCollectionBody": "Your shifts, alarm settings and history, notes, work hours and overtime are stored in the app’s local database. These contents are not included in analytics events or advertising requests.\n\nThe Events tab, sleep tracking and schedule sharing are unavailable in English. Switching languages does not erase records you created while using those features in Korean. They may remain in the database and in backups. Automatic sleep estimation is disabled in English.\n\nOn Android 10 or later, diagnostic files are saved locally in Download/ShiftBell/log. They include device and Android versions, permission and battery settings, and alarm and backup processing records. Note or event contents, shift names and friend names are excluded. The app does not send these files automatically.",
+  "privacyNoCollectionBody": "Your shifts, alarm settings and history, notes, work hours and overtime are stored in the app’s local database. These contents are not included in analytics events or advertising requests.\n\nOn Android 10 or later, diagnostic files are saved locally in Download/ShiftBell/log. They include device and Android versions, permission and battery settings, and alarm and backup processing records. Note contents and shift names are excluded. The app does not send these files automatically.",
   "privacyAnalyticsTitle": "Usage statistics (Google Firebase Analytics)",
   "privacyAnalyticsBody": "Google Firebase Analytics collects usage and device information, such as app opens, screen views, app and operating-system versions, device model, approximate region and an installation identifier. ShiftBell also records feature-use events, such as dismissing or snoozing an alarm, saving a note or creating a backup.\n\nThese events do not include shift names, alarm times, note text or other schedule contents. Statistics are processed under Google’s privacy policy.",
-  "privacyFirebaseTitle": "Google services and previous sharing",
-  "privacyFirebaseBody": "Sharing is unavailable in English. If sharing was enabled before switching languages, ShiftBell stops new uploads and requests deletion of the previously shared schedule. If the device is offline, deletion is retried when the app can connect. Until the server confirms deletion, an old link may still show the previously shared schedule. Copies or screenshots held by other people cannot be recalled.\n\nPreviously shared data consists of the display name, shift pattern, start date, shift colors and date-specific shift changes. It does not include notes, overtime, alarm settings or sleep records. Sharing uses an anonymous Firebase identifier. Reinstalling can make data associated with a previous identifier inaccessible from the app.\n\nUpdate availability is checked through Google Play. Korean holiday updates use a public Firebase document when the app is in Korean; no shift or note contents are sent with that request.",
+  "privacyFirebaseTitle": "App updates",
+  "privacyFirebaseBody": "App update availability is checked through Google Play.",
   "privacyAdsTitle": "Advertising (Google AdMob)",
   "privacyAdsBody": "ShiftBell displays Google AdMob banner ads. The advertising SDK may process device identifiers, IP addresses, app interactions and diagnostics to provide and measure ads. ShiftBell does not include your shift schedule, alarm times or note contents in ad requests.\n\nWhere required by Google’s consent system, the app asks for your advertising choices. When available, use Ad Privacy Settings in Settings to review them. Google’s privacy policy describes how Google handles this information.",
   "privacyPermissionsTitle": "Permissions the app requests",
-  "privacyPermissionsBody": "• Notifications: show alarm status and pre-alarm reminders.\n• Display over other apps: show the alarm screen while you use other apps.\n• Exact alarms: schedule alarms for the time you set.\n\nYou can review these permissions in Android Settings. Declining them may limit alarm notifications or prevent alarms from working as expected.",
+  "privacyPermissionsBody": "• Notifications: show alarm status and pre-alarm reminders.\n• Display over other apps: show the alarm screen while you use other apps.\n• Exact alarms: schedule alarms for the time you set.\n\nYou can review these permissions in Android Settings. Declining them may limit alarm notifications or prevent alarms from working as expected.\n\n• Lock screen display: allow full-screen notifications to show the alarm screen while the phone is locked.",
   "privacyDataRetentionTitle": "Data retention and deletion",
-  "privacyDataRetentionBody": "Uninstalling removes the app’s local database. Backup and diagnostic files saved in Download/ShiftBell may remain; delete them with your file manager when they are no longer needed.\n\nBackups are not encrypted. They can contain your full local data, including records from features previously used in Korean. Keep them private. The app never uploads these files automatically. If you copy them to a cloud service or send them to someone, that service or recipient controls the copy.\n\nThe app keeps one manual backup and one automatic backup. A new file replaces the previous file of the same kind.\n\nPreviously shared data is handled as described in Google services and previous sharing. Google’s policies apply to retention of analytics and advertising data.",
+  "privacyDataRetentionBody": "Uninstalling removes the app’s local database. Backup and diagnostic files saved in Download/ShiftBell may remain; delete them with your file manager when they are no longer needed.\n\nBackups are not encrypted. They can contain your full local data. Keep them private. The app never uploads these files automatically. If you copy them to a cloud service or send them to someone, that service or recipient controls the copy.\n\nThe app keeps one manual backup and one automatic backup. A new file replaces the previous file of the same kind.\n\nGoogle’s policies apply to retention of analytics and advertising data.",
   "privacyChildrenTitle": "Not directed at children",
   "privacyChildrenBody": "This app is not directed at children under 14, and we do not knowingly collect personal information from children.",
   "privacyContactTitle": "Contact",
@@ -656,9 +506,7 @@
   "workHoursShiftTimeClockIn": "Start",
   "workHoursShiftTimeClockOut": "End",
   "workHoursResetShiftTime": "Clear start and end times",
-  "workHoursLegacyClockTimeHint": "Your previously saved hours are still in use. Add start and end times to update them.",
   "workHoursPeriodBasisDesc": "Choose which dates to include in each month’s work-hour total.",
-  "workHoursDurationExcluded": "0 hours (not counted as work time)",
   "workHoursDurationHoursOnly": "{h, plural, =1{1 hour} other{{h} hours}}",
   "@workHoursDurationHoursOnly": {
     "placeholders": {
@@ -678,31 +526,9 @@
       }
     }
   },
-  "workHoursEditDialogTitle": "Hours for {shift}",
-  "@workHoursEditDialogTitle": {
-    "placeholders": {
-      "shift": {
-        "type": "String"
-      }
-    }
-  },
-  "workHoursUnitHourLabel": "hours",
-  "workHoursUnitMinuteLabel": "minutes",
   "workHoursCutoffDayPrefix": "Day",
   "workHoursCutoffDaySuffix": "of every month",
   "friendShareTitle": "Schedule Sharing",
-  "friendShareMyScheduleTitle": "Share My Schedule",
-  "friendAdd": "Add Friend",
-  "friendName": "Friend's Name",
-  "friendNameOptionalHint": "Optional · leave blank to use the shared name",
-  "friendShareCodeFromFriend": "Friend's Share Code",
-  "friendEnterShareCode": "Paste the code your friend sent you to see their schedule",
-  "friendCanCheckAnytime": "You can check your friend's schedule anytime.",
-  "friendAddedToast": "Friend added",
-  "friendInvalidCodeOrDuplicate": "Invalid code or friend already added",
-  "friendLoadFailedCheckNetwork": "Couldn't load the schedule. Please check your connection",
-  "friendShowingCachedSchedule": "Couldn't get the latest info, showing a previously saved schedule",
-  "friendNoneAddedYet": "No friends added yet",
   "friendScheduleOf": "{name}'s Shift Schedule",
   "@friendScheduleOf": {
     "placeholders": {
@@ -711,37 +537,10 @@
       }
     }
   },
-  "friendRemove": "Remove Friend",
-  "friendRemoveConfirm": "Remove {name} from your list?",
-  "@friendRemoveConfirm": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "friendDisplayNameTitle": "Display Name",
-  "friendEnterDisplayName": "Enter the name your friends will see",
-  "friendShareIncludesSchedule": "Your shift schedule and shift changes are shared.",
-  "friendShareExcludesExtras": "Notes, overtime, work hours and alarm settings are not shared.",
-  "friendStartSharing": "Start Sharing",
-  "friendStopSharing": "Stop Sharing",
-  "friendStopSharingConfirm": "If you stop sharing, your friends can no longer see your schedule. If you're offline, it will be removed from the server once you're connected, and anything already downloaded to a friend's device can't be recalled. Continue?",
-  "friendRestartSharingHint": "(To share again, just tap \"Start Sharing\" here. Your existing code and link will work again)",
-  "friendMyShareCode": "Share code · for people with the app",
-  "friendShareCodeInstructions": "Your friend can view your schedule by pasting this code into Add Friend.",
-  "friendShareWithoutApp": "Share link · no app needed",
-  "friendShareLinkHint": "Opening this link lets them see your schedule right away, no install needed.",
-  "friendInstallShortcutHint": "Tap the install icon in the address bar to add a home-screen shortcut.",
-  "friendDisplayNameUpdated": "Display name updated",
-  "friendDisplayNameUpdateFailed": "Failed to update name. Please check your connection",
-  "friendEnterDisplayNameError": "Please enter the name your friends will see",
-  "friendConnectionFailed": "Connection failed. Please check your network and reopen this screen",
   "friendCouldNotLoad": "Couldn't Load",
   "friendLinkMissingCode": "The link is missing a share code.",
   "friendLoadFailedDetailed": "Couldn't load the schedule. The link may be outdated, the sharer may have stopped sharing, or there may be a connection issue.",
   "friendUnknownError": "An unknown error occurred.",
-  "friendInstallForHomeScreen": "Tap the install button in the address bar to use it right from your home screen.",
   "friendOpenInBrowserHint": "Open this in Chrome or another browser to install it. Tap the menu in the top right and choose \"Open in Browser.\"",
   "friendQuickInstallHint": "Add it to your home screen to open it faster next time",
   "friendQuickInstallButton": "Add Shortcut",
@@ -756,32 +555,6 @@
       }
     }
   },
-  "friendServerNotReady": "Not connected to the sharing server yet. Please try again in a moment",
-  "friendScheduleNotSet": "Your shift schedule hasn't been set up yet",
-  "friendStartSharingFailed": "Failed to start sharing. Please check your connection and try again",
-  "friendSyncPendingBanner": "Your latest schedule has not been shared yet. ShiftBell will try again automatically when you’re online.",
-  "friendStopPendingBanner": "Stopping sharing has not been confirmed yet. Your previously shared schedule may still be visible.",
-  "friendRetrySync": "Retry now",
-  "friendSyncPendingToast": "Sharing is not confirmed yet. ShiftBell will retry automatically when you’re online.",
-  "friendStopSharingAction": "Stop",
-  "friendCodeCopied": "Code copied",
-  "friendLinkCopied": "Link copied",
-  "friendShareMessage": "View {name}’s shift schedule 🗓️\n\nOpen this link: {link}\n\nOr paste this code into Add Friend in ShiftBell:\n\n{code}",
-  "@friendShareMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "link": {
-        "type": "String"
-      },
-      "code": {
-        "type": "String"
-      }
-    }
-  },
-  "friendNameHintExample": "Enter friend's name",
-  "friendShareChannelsExplainer": "Send a link to friends without the app, or a code to friends who have it.",
   "permissionGetStarted": "Get Started with ShiftBell",
   "permissionIntro": "Allow these permissions so your alarms can work reliably.",
   "permissionNotification": "Notifications",
@@ -790,22 +563,15 @@
   "permissionOverlayDesc": "Show the alarm screen while you use other apps",
   "permissionExactAlarm": "Exact Alarms",
   "permissionExactAlarmDesc": "Needed for the alarm to ring at the exact time you set",
-  "permissionAllow": "Allow Permissions",
-  "permissionRequired": "Required",
-  "permissionRecommended": "Recommended",
-  "permissionSomeDenied": "Some Permissions Were Denied",
+  "permissionSomeDenied": "Some permissions need attention",
   "permissionSomeDeniedDesc": "Some alarm features may not work as expected until you allow the relevant permissions.",
   "permissionCanAllowLater": "You can allow permissions anytime in Settings.",
-  "permissionRequiredNotGranted": "Required Permissions Not Granted",
-  "statusDataLoadFailed": "Failed to load data",
+  "permissionRequiredNotGranted": "Check alarm permissions",
   "statusNoSchedule": "No schedule found",
   "statusErrorOccurred": "An error occurred",
   "statusShiftAssigned": "Shift assigned",
   "statusShiftAssignFailed": "Failed to assign shift",
-  "statusShiftChangeFailed": "Failed to change shift",
   "alarmSchedulePartialFailed": "Shift saved, but {failed} of {total} alarms could not be set. Check the exact alarm permission and save the shift again.",
-  "scheduleNotifyRegisterFailed": "Event saved, but its reminder could not be set. Check the exact alarm permission, then save the event again.",
-  "scheduleTabSyncFailed": "Couldn't change the screen setting. Please try again shortly.",
   "permissionStatusUnknown": "{name} (status unknown)",
   "statusShiftNameUpdated": "Shift name updated",
   "statusShiftColorUpdated": "Shift color updated",
@@ -834,18 +600,14 @@
   "allTeamsSetupRosterHint": "Add the teams you want to see. Tap Edit to add, remove or rename a team.",
   "allTeamsSetupMyTeamLabel": "My Team",
   "allTeamsSetupMyTeamPickHint": "Pick which one is your team.",
-  "allTeamsSetupOtherTeamsLabel": "Other Teams",
-  "allTeamsSetupOtherTeamsHint": "Select the other teams to include.",
-  "allTeamsSetupPickMyTeamFirstHint": "Pick your team first.",
   "allTeamsSetupAssignSectionLabel": "Assign Shifts",
   "allTeamsSetupAssignHint": "Select a team, then choose its position in the shift pattern today.",
   "allTeamsSetupDuplicateNameError": "That team name is already used.",
-  "allTeamsSetupMinOtherTeamHint": "Select at least one other team.",
   "allTeamsSetupEditTooltip": "Edit team schedules",
   "alarmHistoryEmpty": "No Alarm History",
   "alarmHistoryDeleteAllTitle": "Delete All History",
   "alarmHistoryTestOnlyWarning": "⚠️ This will permanently delete every record shown here.",
-  "alarmHistoryDeleteAllDesc": "All alarm history will be deleted.",
+  "alarmHistoryDeleteAllDesc": "All alarm history and creation records will be deleted. This does not cancel scheduled alarms.",
   "alarmHistoryDeletedToast": "All alarm history deleted",
   "alarmHistoryDeleteFailed": "Failed to delete history: {error}",
   "@alarmHistoryDeleteFailed": {
@@ -860,10 +622,6 @@
   "themeMinimal": "Simple Line",
   "themeMaterialCard": "Soft Card",
   "themeBoldGrid": "Dark Grid",
-  "themeInitialBadge": "Color Badge",
-  "themeUnderline": "Minimal Underline",
-  "themeEventChip": "Event Calendar",
-  "themeEditorial": "Magazine",
   "themeDiary": "Diary",
   "themeSwipeToChoose": "Swipe left or right to choose",
   "themeCurrentlyApplied": "Current theme",
@@ -934,41 +692,11 @@
   "dismissSnoozed5Min": "Snoozed for 5 min",
   "dismissNoResponse": "Missed",
   "dismissAlarmRemoved": "Alarm Removed",
-  "scheduleDuplicateTimeSlot": "There is already an event at this time. Add your note to that event instead.",
-  "scheduleMaxPerSlot": "You can add up to {count} events at this time",
-  "@scheduleMaxPerSlot": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "scheduleDeleteConfirmTitle": "Delete this event?",
-  "scheduleDeleteConfirmBody": "This event will be permanently deleted.",
-  "scheduleEditTitle": "Edit Event",
-  "scheduleNewTitle": "New Event",
-  "scheduleContentFieldLabel": "Details",
-  "scheduleTimeSectionLabel": "Time",
-  "scheduleNotifySectionLabel": "Notification",
-  "scheduleNotifyToggleLabel": "Remind me",
-  "scheduleNotifyDescription": "You'll get one notification that follows your device's sound, vibrate, or silent setting.",
-  "scheduleNotifyOffsetQuestion": "When should we remind you?",
-  "scheduleNotifyOffsetOnTime": "At the start time",
-  "scheduleNotifyOffsetBefore": "{minutes} min before",
-  "@scheduleNotifyOffsetBefore": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
-  "scheduleNotifyPastTimeWarning": "The reminder time has already passed. Choose a later time to receive a notification.",
-  "scheduleCreateButton": "Create",
   "helpSearchHint": "Search help topics",
   "helpEmptySearchResult": "No results found",
   "helpStartSectionTitle": "Getting Started",
   "helpStartOnboardingTitle": "Setting up ShiftBell",
-  "helpStartOnboardingBody": "Allow notifications, exact alarms and display over other apps so ShiftBell can alert you reliably. Then choose whether your shifts repeat, add your shift names and set alarms for the shifts that need them. You can skip alarms and add them later in Settings.\n\nRemove unused shift names with × and add any missing names with + Add. If you have used ShiftBell before, choose Restore from backup to restore a backup file.",
+  "helpStartOnboardingBody": "Allow notifications, exact alarms and display over other apps so ShiftBell can alert you reliably. Then choose whether your shifts repeat, add your shift names and set alarms for the shifts that need them. You can skip alarms and add them later in Settings.\n\nRemove unused shift names with × and add any missing names with + Add. If you have used ShiftBell before, choose Restore from backup to restore a backup file.\n\nOpen Settings → Alarm permissions in ShiftBell to check each permission, including lock screen display. Return to the app after changing settings. During first setup, tap Next when you are ready.",
   "helpStartScheduleTypesTitle": "Repeating vs. irregular schedules",
   "helpStartScheduleTypesBody": "A repeating schedule follows a cycle, such as Day, Day, Night, Night, Off, Off. Build the cycle and select today’s position in it. ShiftBell fills in future dates automatically.\n\nFor a non-repeating schedule, assign shifts to dates yourself. Long-press a date, select any other dates you want, and choose a shift.",
   "helpShiftSectionTitle": "Managing Shifts",
@@ -986,11 +714,11 @@
   "helpAlarmTemplatesTitle": "Setting alarms for a shift",
   "helpAlarmTemplatesBody": "Add up to five alarms per shift in Settings. Each alarm has its own time and sound settings and can ring on the shift day, the day before or the day after.\n\nShiftBell prepares upcoming alarms automatically as your calendar moves forward. For a non-repeating schedule, assign your shifts ahead of time so their alarms can be scheduled.\n\nAlarm lists use a 24-hour display. The time editor follows your device’s 12- or 24-hour setting. In 12-hour mode, 12 AM is midnight and 12 PM is noon.\n\nShift alarms follow the device’s current time zone. When daylight saving time skips a clock time, the alarm moves forward by the clock change (for example, 02:30 becomes 03:30 for a one-hour jump). When a clock time occurs twice, it rings once at the second occurrence. Alarms that resolve to the same time are combined.",
   "helpAlarmSoundVolumeTitle": "Choosing an alarm sound and volume",
-  "helpAlarmSoundVolumeBody": "You can choose from 7 built-in alarm sounds or your device's own system alarm sounds. Speaker characteristics vary by device, so the app auto-corrects volume, but if it still feels off, try switching to a different sound in the alarm settings.",
+  "helpAlarmSoundVolumeBody": "You can choose from 7 built-in alarm sounds or your device's default alarm sound. Speaker characteristics vary by device, so the app auto-corrects volume, but if it still feels off, try switching to a different sound in the alarm settings.",
   "helpAlarmAlarmNotRingingTitle": "If an alarm doesn't go off",
-  "helpAlarmAlarmNotRingingBody": "Check that exact alarms are allowed for ShiftBell. Also check notification and display-over-other-apps permissions so you can see and control alarms, and review your phone’s battery restrictions.\n\nMake sure the date has a shift assigned and that the shift has an alarm. Check the alarm’s sound, volume and vibration settings as well.",
+  "helpAlarmAlarmNotRingingBody": "Check that exact alarms are allowed for ShiftBell. Also check notification and display-over-other-apps permissions so you can see and control alarms, and review your phone’s battery restrictions.\n\nMake sure the date has a shift assigned and that the shift has an alarm. Check the alarm’s sound, volume and vibration settings as well.\n\nOpen Settings → Alarm permissions in ShiftBell to check each permission, including lock screen display. Return to the app after changing settings. During first setup, tap Next when you are ready.",
   "helpAlarmAlarmHistoryTitle": "Viewing alarm history",
-  "helpAlarmAlarmHistoryBody": "You can see every alarm and its result under Settings → Alarm History.\n\nSnooze sets the alarm for five minutes after you tap it, even when the clocks change. During the repeated hour when clocks go back, “First occurrence” and “Second occurrence” distinguish the two times in upcoming alarms and alarm history.",
+  "helpAlarmAlarmHistoryBody": "You can see every alarm and its result under Settings → Alarm History.\n\nSnooze sets the alarm for five minutes after you tap it, even when the clocks change. During the repeated hour when clocks go back, “First occurrence” and “Second occurrence” distinguish the two times in upcoming alarms and alarm history.\n\nIf another alarm is already set for the snooze time, the current alarm is dismissed without snoozing. The other alarm is kept.",
   "helpCalendarSectionTitle": "Calendar & Home Widget",
   "helpCalendarThemesTitle": "Changing the calendar theme",
   "helpCalendarThemesBody": "Choose from six themes in Settings → Calendar Theme: Classic Light, Classic Dark, Simple Line, Soft Card, Diary and Dark Grid.\n\nThemes apply to the calendar inside the app. The home-screen widget keeps its light appearance.",
@@ -999,59 +727,25 @@
   "helpCalendarWorkHoursPayTitle": "Checking weekly and monthly work hours",
   "helpCalendarWorkHoursPayBody": "Enter the usual start and end times for each shift in Settings. ShiftBell uses these times and your overtime entries to calculate weekly and monthly hours.\n\nFor a repeating pattern, you can also include extra hours from shift changes in the overtime summary. Only the increase over the original shift counts, not the new shift’s full duration.",
   "helpCalendarHomeWidgetTitle": "Adding the home-screen widget",
-  "helpCalendarHomeWidgetBody": "Long-press your home screen, open Widgets and add ShiftBell Calendar. It shows shift names and up to three notes per date. Resize it to switch between a three-week view and a full month.\n\nWeekday order follows the same regional default as the app. Public holidays and lunar dates are not shown in English.",
-  "helpScheduleTabSectionTitle": "Schedule Tab",
-  "helpScheduleTabWhatIsItTitle": "How is the Schedule tab different?",
-  "helpScheduleTabWhatIsItBody": "Calendar notes apply to a whole day. Events in the Schedule tab have a specific time, with an optional end time and reminder. Use them for appointments, errands or plans before and after work.",
-  "helpScheduleTabCreateEditTitle": "Adding and editing events",
-  "helpScheduleTabCreateEditBody": "Tap the clock icon at the bottom right, then tap a time on the timeline to add an event.",
-  "helpScheduleTabAutoCategoryTitle": "How matching icons get picked",
-  "helpScheduleTabAutoCategoryBody": "The app reads what you typed and automatically attaches a matching icon. If it can't find a good match, a default shape icon is attached instead.",
-  "helpConditionSectionTitle": "Sleep & Recovery",
-  "helpConditionWhatIsItTitle": "What is the Sleep & Recovery tab?",
-  "helpConditionWhatIsItBody": "This screen lets you review detected sleep, add a sleep period, and see your confirmed records. It shows recorded times and durations without giving a health score or medical diagnosis. Review an automatic estimate before confirming it.",
-  "helpConditionEvidenceListTitle": "Sleep & Recovery evidence",
-  "helpConditionEvidenceListBody": "The Sleep & Recovery tab's guidance draws on the 14 sources below. A few thresholds, such as consecutive workdays or comparisons with your own average, are set by this app and don't carry a separate source.\n\nEVIDENCE-001 · Shift rotation direction — Forward rotation (day→evening→night) is reported to be easier to adapt to than backward rotation. (NIOSH)\n\nEVIDENCE-002 · Minimum rest between shifts — Recommends at least 11 hours of rest between two shifts. (Knauth & Hornberger, cited in NIOSH Module 5)\n\nEVIDENCE-003 · Minimum rest between shifts (legal standard) — Every worker must get at least 11 consecutive hours of rest per 24 hours. (EU Working Time Directive, Art. 3)\n\nEVIDENCE-004 · Long shifts and injury/accident risk — Relative risk is modeled at about +13% for a 10-hour shift and +27% for a 12-hour shift, versus an 8-hour shift. (Folkard & Lombardi, 2006)\n\nEVIDENCE-005 · Rest days after consecutive shifts — Recommends 1–2 rest days after 5 days of 8-hour shifts or 4 days of 10-hour shifts, and 2 rest days after 3 days of 12-hour shifts. It also advises against packing work into a few days and then taking several days off. (NIOSH)\n\nEVIDENCE-006 · Sleep after a night shift — Recommends prioritizing sleep after a night shift. (NIOSH)\n\nEVIDENCE-007 · Napping before a night shift — Conditionally helpful, but the guideline itself states the evidence level is very low. Watch for grogginess right after waking. (AASM, 2025)\n\nEVIDENCE-008 · Caffeine and sleep — Caffeine taken even 6 hours before bedtime significantly cuts total sleep time by over an hour. (Drake et al., 2013)\n\nEVIDENCE-009 · Light exposure on the commute home after a night shift — Reducing bright light exposure can help later sleep (but safety comes first if you're too drowsy to drive safely). (NIOSH)\n\nEVIDENCE-010 · Eating during a night shift — Recommends eating less between midnight and 6am and favoring light meals. (NIOSH)\n\nEVIDENCE-011 · Recommended sleep for adults — Adults aged 18–64 are recommended 7–9 hours of sleep. (National Sleep Foundation, 2015)\n\nEVIDENCE-012 · Maximum weekly working hours (legal standard) — Average weekly working time, including overtime, must not exceed 48 hours. (EU Working Time Directive, Art. 6)\n\nEVIDENCE-013 · Consecutive night shifts and accident risk — Relative risk of accidents/injuries accumulates with each successive night shift (about +6% on night 2, +17% on night 3, +36% on night 4 — the increase is steeper for consecutive night shifts than for consecutive day/evening shifts). (Folkard & Tucker, 2003)\n\nEVIDENCE-014 · Weekly cumulative working hours — Recommends limiting nurses' work to 12 hours in 24 and 60 hours in 7 days. A 2014 systematic review reported that working more than 40 hours a week is linked to lower patient safety. (IOM, 2004; cited in NIOSH Module 5)",
-  "helpConditionSetupNeededTitle": "Setup required before using this tab",
-  "helpConditionSetupNeededBody": "You need to enter start and end times for at least one shift name under Settings → Work Hours & Overtime first. Until you do, Today's Condition won't appear, but you can still log sleep. You don't need to fill in every shift — just one you're currently using is enough.",
-  "helpSleepSectionTitle": "Sleep Tracking",
-  "helpSleepWidgetTitle": "What is the sleep-tracking widget?",
-  "helpSleepWidgetBody": "Add the sleep widget to your home screen. Tap Sleep when you go to bed and Wake when you get up. The widget also shows today’s shift.\n\nYour sleep records appear in Sleep & Recovery alongside your work schedule.",
-  "helpSleepAutoDetectTitle": "Automatic sleep estimation",
-  "helpSleepAutoDetectBody": "ShiftBell estimates when you may have slept using your work schedule and periods when your phone’s screen was off. It looks for sleep after work, overnight sleep and naps before a night shift. Sleep during a shift is not estimated automatically; record it using the widget.\n\nEstimates are saved as confirmed sleep records only after you review and confirm them.",
-  "helpSleepMiniCalendarTitle": "Reviewing and editing recent sleep records",
-  "helpSleepMiniCalendarBody": "The \"Recent Sleep\" mini calendar on the Sleep & Recovery tab shows confirmed records day by day. Tap a slot to create, edit, or delete a record right there. For older records, use \"View All\" to browse month by month.\n\nBelow it, \"My sleep by shift\" breaks down your average sleep for each shift type into main sleep and naps.",
-  "helpFriendSectionTitle": "Friend Sharing",
-  "helpFriendWhatIsItTitle": "What is friend sharing?",
-  "helpFriendWhatIsItBody": "This lets you share your work schedule so a friend or someone else can view it — or view a schedule someone else shared with you. You can share your schedule easily even with people who don't have the app.",
-  "helpFriendShareCodeTitle": "Generating and sharing your code",
-  "helpFriendShareCodeBody": "Tap \"Friends\" on the Calendar tab, then \"Share My Schedule\" to get your code. Give it to the other person, and they can register it in their own app to view your schedule.",
-  "helpFriendViewFriendTitle": "Viewing a friend's schedule with their code",
-  "helpFriendViewFriendBody": "If you've received a friend's code, add them from the friend list screen by entering it — their schedule then shows up as a calendar inside your own app.",
-  "helpFriendReinstallNoteTitle": "What happens if you reinstall the app",
-  "helpFriendReinstallNoteBody": "After reinstalling ShiftBell, you will need to share a new code or link. Your old code does not connect to the new installation.\n\nSomeone using the old code may still see the schedule you shared before reinstalling, without an error message. Let them know and ask them to replace the old code with your new one.",
+  "helpCalendarHomeWidgetBody": "Long-press your home screen, open Widgets and add ShiftBell Calendar. It shows shift names and up to three notes per date. Resize it to switch between a three-week view and a full month.\n\nWeekday order follows the same regional default as the app.",
   "helpBackupSectionTitle": "Backup & Restore",
   "helpBackupDataStorageTitle": "Where is my data stored?",
-  "helpBackupDataStorageBody": "Your shifts, alarms, alarm history, notes and work-hour records are saved on your device. Backups are local files in Download/ShiftBell. They are not uploaded automatically.\n\nUsage statistics and advertising use Google services. See the Privacy Policy for what information they process. Data from features previously used in Korean can remain in local storage and backups even while those features are hidden in English.",
+  "helpBackupDataStorageBody": "Your shifts, alarms, alarm history, notes and work-hour records are saved on your device. Backups are local files in Download/ShiftBell. They are not uploaded automatically.\n\nUsage statistics and advertising use Google services. See the Privacy Policy for what information they process.",
   "helpBackupAutoBackupTitle": "When does automatic backup happen?",
   "helpBackupAutoBackupBody": "ShiftBell checks for changes when you open, return to or leave the app. If your data has changed, it saves an automatic backup to Download/ShiftBell on your device. You can also choose Back up data in Settings.\n\nIt keeps one manual backup and one automatic backup. A new backup replaces only the file of the same kind. Backups require Android 10 or later.",
   "helpBackupRestoreTitle": "Restoring after reinstalling or moving to a new device",
-  "helpBackupRestoreBody": "Choose Restore from backup on the first screen or in Settings, then select a backup file from Download/ShiftBell. Review its saved time before restoring: the backup replaces your current app data.\n\nTo move to another phone, copy the file to that phone first. After restoring, check your shifts, upcoming alarms and alarm permissions.",
+  "helpBackupRestoreBody": "Choose Restore from backup on the first screen or in Settings, then select a backup file from Download/ShiftBell. Review its saved time before restoring: it replaces your schedule, notes, overtime and other saved data and settings.\n\nAlarm history and creation records are merged with the backup. Alarms that are ringing or snoozed are kept.\n\nTo move to another phone, copy the file to that phone first. After restoring, check your shifts, upcoming alarms and alarm permissions.",
   "helpBackupRestoreManualTitle": "If automatic restore doesn't find your backup",
   "helpBackupRestoreManualBody": "After reinstalling, choose Restore from backup and select your previous backup using the file picker. Android may not let the new installation find files created by the old installation automatically.",
-  "helpBackupRestoreOldBackupFailTitle": "A very old backup may fail to restore",
-  "helpBackupRestoreOldBackupFailBody": "A backup from a much older version of ShiftBell may use a data format that can no longer be restored. Trying the same file again may not help.\n\nBefore changing phones or reinstalling, use Back up data in Settings to save a fresh backup. Copy it to a safe location if you are resetting or replacing your phone.",
   "helpTroubleshootSectionTitle": "Troubleshooting",
   "helpTroubleshootAlarmIssueTitle": "My alarm didn't go off",
-  "helpTroubleshootAlarmIssueBody": "Check exact alarm permission, notification and display-over-other-apps permissions, and your phone’s battery restrictions. Then check that the date has a shift assigned, that the shift has an alarm, and that sound or vibration is enabled.",
+  "helpTroubleshootAlarmIssueBody": "Check exact alarm permission, notification and display-over-other-apps permissions, and your phone’s battery restrictions. Then check that the date has a shift assigned, that the shift has an alarm, and that sound or vibration is enabled.\n\nOpen Settings → Alarm permissions in ShiftBell to check each permission, including lock screen display. Return to the app after changing settings. During first setup, tap Next when you are ready.",
   "helpTroubleshootForceStopTitle": "I force-stopped this app from phone settings",
   "helpTroubleshootForceStopBody": "Using Force stop in Android Settings → Apps cancels ShiftBell’s scheduled alarms. Open ShiftBell again before your next alarm so it can reschedule upcoming alarms. Alarms whose time has already passed will not ring retroactively.\n\nLeaving the app or removing it from Recent apps does not itself cancel alarms, although some phones apply additional background restrictions.",
   "helpTroubleshootWidgetIssueTitle": "The widget isn't updating",
   "helpTroubleshootWidgetIssueBody": "Try removing the widget and adding it again. If it still looks the same, open the app once, then go back to your home screen and check again.",
   "helpTroubleshootBackupFileMissingTitle": "I can't find my backup file",
   "helpTroubleshootBackupFileMissingBody": "Look in Download/ShiftBell using your phone’s file manager. If no backup is there, use Back up data in Settings to create one.",
-  "helpTroubleshootFriendDisconnectedTitle": "My friend's schedule hasn't changed in days",
-  "helpTroubleshootFriendDisconnectedBody": "Check the Last synced time on your friend’s schedule. An old timestamp can mean their changes have not synced or they have reinstalled ShiftBell.\n\nAsk them to open the app with an internet connection and check sharing. If they reinstalled it, ask for a new code, remove the old entry and add them again.",
   "startupFailedTitle": "Couldn't start the app",
   "startupFailedBody": "Something went wrong while getting the app ready. Make sure your device has enough free storage, then try again. If this keeps happening, try restarting your device.",
   "startupRetry": "Try again",
@@ -1060,21 +754,16 @@
   "shiftAnnualLeave": "Leave",
   "onboardingBackupTitle": "Restore from backup",
   "onboardingBackupDesc": "Start from a backup file in Download/ShiftBell.",
-  "helpOneTapTitle": "One-tap alarms: quickly add a saved time",
-  "helpOneTapBody": "Tap the one-tap alarm button above the calendar, then + to save a time and a sound setting (sound + vibration, vibration or silent). One empty slot appears at a time, up to five saved presets.\n\nChoose a saved time, then today or tomorrow. After scheduling, the panel closes and a short confirmation appears. Past times and times already occupied by another alarm are rejected.\n\nTap the calendar while viewing the preset list to close the panel. After selecting a preset, Back returns to the list.\n\nSelecting a preset also shows Edit and Delete. A preset assigned to a future date cannot be edited until its assigned alarms are removed. To remove an individual alarm, open its date and tap × next to the one-tap alarm. Deleting a preset also deletes its assigned alarms. The confirmation explains whether a shift alarm will be restored.",
   "helpCalendarTextSizeTitle": "Calendar text and screen sizes",
   "helpCalendarTextSizeBody": "Calendar cells adapt to phone, cover and unfolded screen widths. Long shift names and notes may be shortened to fit. Tap a date or note to read the full text. Each date supports up to three notes.\n\nSimple Line and Soft Card use a larger default shift label. Calendar text scaling is limited to keep dates, shifts and notes within their cells.",
   "helpDiagnosticTitle": "Find a diagnostic file for a problem report",
-  "helpDiagnosticBody": "For alarm or backup issues, check Download/ShiftBell/log in your file manager (Android 10 or later). Diagnostic files are saved and updated locally.\n\nThey include device and Android versions, permission and battery settings, and alarm and backup processing records. Note or event contents, shift names and friend names are excluded. Files are not sent automatically. You can attach them when contacting support. They may remain after uninstalling; remove them in your file manager when no longer needed.",
-  "helpCalendarLocaleTitle": "Dates, weekends and public holidays",
-  "helpCalendarLocaleBody": "The calendar uses Sunday first for US English and Monday first for UK English and supported European regional settings. English dates use month names to avoid confusion between day/month and month/day.\n\nPublic holidays are not included in the English calendar or widget in this release. A red Sunday is a weekend marker, not a public-holiday label. Korean lunar dates are also hidden. Your shifts and alarms still follow your own schedule.\n\nWeekly work-hour totals always use Monday–Sunday. A holiday or weekend does not automatically make a shift a day off.",
+  "helpDiagnosticBody": "For alarm or backup issues, check Download/ShiftBell/log in your file manager (Android 10 or later). Diagnostic files are saved and updated locally.\n\nThey include device and Android versions, permission and battery settings, and alarm and backup processing records. Note contents and shift names are excluded. Files are not sent automatically. You can attach them when contacting support. They may remain after uninstalling; remove them in your file manager when no longer needed.",
+  "helpCalendarLocaleTitle": "Dates and week start",
+  "helpCalendarLocaleBody": "The calendar uses Sunday first for US English and Monday first for UK English and supported European regional settings. English dates use month names to avoid confusion between day/month and month/day.\n\nA red Sunday marks the weekend. Your shifts and alarms follow your own schedule.\n\nWeekly work-hour totals always use Monday–Sunday. A weekend does not automatically make a shift a day off.",
   "alarmSnoozedLabel": "Snoozed",
   "alarmClockFirstOccurrence": "First occurrence",
   "alarmClockSecondOccurrence": "Second occurrence",
   "shiftNameInUse": "Shifts in use can only be renamed.",
-  "scheduleOutsideTeamsConfirm": "The selected position does not match any team in the full roster. Continuing will delete the full roster, and you will need to set it up again. Change your schedule?",
-  "scheduleMyTeam": "My team",
-  "scheduleTeamsAtToday": "Team positions in the cycle as of today.",
   "scheduleTeamChanged": "Your schedule changed from team {from} to team {to}.",
   "@scheduleTeamChanged": {
     "placeholders": {
@@ -1097,7 +786,6 @@
   "teamRuleTitle": "Set shift pattern",
   "teamRuleLocked": "Linked to my calendar · read only",
   "teamRuleMissing": "Set this team’s shift pattern",
-  "teamRuleEdit": "Set up",
   "teamRulePatternHint": "Tap shifts in order to build a repeating cycle.\nTap a shift in the cycle to remove it.",
   "teamRuleAllShiftsHint": "You can use any shift name added in Settings.",
   "teamRuleWeeklyHint": "Choose a shift, then tap a weekday to assign it.\nAssign all seven days.",
@@ -1107,7 +795,6 @@
   "teamRuleReviewHint": "Check each team’s shifts before saving. You can switch teams later. To change a team’s pattern, set up the team schedules again.",
   "teamRuleUnset": "Unassigned",
   "teamRuleResetCycle": "Clear cycle",
-  "teamRuleChooseTeam": "Select the team you want to change to.",
   "teamRuleCurrentTeam": "My current team",
   "teamRuleWeeklyLabel": "Mon · Tue · Wed · Thu · Fri · Sat · Sun",
   "teamScheduleResetConfirm": "Your schedule will change and shift alarms will be updated. The team schedules will be deleted.\n\nTo keep the team schedules and switch teams, use All teams → Edit → Change my team.",
@@ -1123,9 +810,9 @@
   "teamEditTitle": "Edit full team schedule",
   "teamEditChangedQuestion": "Has your team changed?",
   "teamEditRecreateTitle": "Recreate the full team schedule",
-  "teamEditRecreateHint": "Use this if team positions were set incorrectly.",
+  "teamEditRecreateHint": "Use this to change team positions, cycles or weekly schedules.",
   "teamEditRecreateConfirm": "Delete the current full team schedule and create it again?\nYour shifts and alarms will stay the same.",
-  "teamEditPositionsOn": "Team positions on {date}",
+  "teamEditPositionsOn": "Team shifts on {date}",
   "@teamEditPositionsOn": {
     "placeholders": {
       "date": {
@@ -1158,26 +845,6 @@
   "alarmSnoozeCollisionResult": "Dismissed: another alarm at snooze time",
   "alarmRefreshUnconfirmed": "Alarm refresh could not be confirmed. Please check again.",
   "scheduleRefreshUnconfirmed": "The schedule was saved, but alarm scheduling could not be confirmed.",
-  "oneTapDeleteNoAlarmConfirm": "No alarm will remain at this time. Delete the one-tap alarm?",
-  "oneTapDeleteRestoreConfirm": "Delete this one-tap alarm and restore the alarm for {shift}?",
-  "@oneTapDeleteRestoreConfirm": {
-    "placeholders": {
-      "shift": {
-        "type": "String"
-      }
-    }
-  },
-  "oneTapDeleteNoAlarmDetail": "No alarm will remain at this time.",
-  "oneTapDeleteRestoreDetail": "The alarm for {shift} will be restored.",
-  "@oneTapDeleteRestoreDetail": {
-    "placeholders": {
-      "shift": {
-        "type": "String"
-      }
-    }
-  },
-  "oneTapDeletedRefreshRetry": "One-tap alarm deleted. The shift alarm could not be restored yet; ShiftBell will retry when alarms are refreshed.",
-  "oneTapDeletedFixedRestored": "One-tap alarm deleted. Shift alarm restored.",
   "teamEditChooseTeam": "Select the team you want to change to.",
   "durationCompactHours": "{hours}h",
   "@durationCompactHours": {
@@ -1194,5 +861,43 @@
         "type": "int"
       }
     }
-  }
+  },
+  "permissionFullScreen": "Lock screen alarm display",
+  "permissionFullScreenDesc": "Displays the alarm screen while your phone is locked. Allow full-screen notifications.",
+  "permissionGranted": "Allowed",
+  "permissionNeedsSettings": "Setup needed",
+  "permissionUnknown": "Could not check",
+  "permissionNotApplicable": "No separate setting on this Android version",
+  "permissionSettingsTitle": "Alarm permissions",
+  "permissionReturnGuide": "After changing settings, use the system Back button to return to ShiftBell. We will check permissions again. Names may vary by device, OS version and settings language.",
+  "permissionOpenFailed": "Could not open settings. In your phone’s Settings, search for the permission you want to change and select ShiftBell. For notifications, open Apps → ShiftBell → Notifications. Names may vary by device.",
+  "permissionOverlayRouteGuide": "If an app list appears, select ShiftBell and allow display over other apps.",
+  "permissionAlarmChannelBlocked": "Alarm control notifications are blocked",
+  "permissionAlarmChannelUnknown": "Could not check the alarm control channel",
+  "permissionLockScreenHelp": "Alarm missing from the lock screen?",
+  "permissionLockScreenHelpBody": "Check alarm permissions and battery and background restrictions. To test, set a shift alarm a few minutes ahead and lock your phone. Allowed permissions do not guarantee display on every device.",
+  "permissionXiaomiTitle": "Xiaomi lock screen alarm settings",
+  "permissionXiaomiBody": "Xiaomi may need an additional setting to display lock screen alarms. Under Other permissions, select Open new windows while running in the background, then Always allow. Names may vary by device and OS version.",
+  "permissionOpenOemSettings": "Open permission settings",
+  "permissionOpenFullScreenSettings": "Open full-screen notification settings",
+  "permissionStillDenied": "Still not allowed",
+  "publicWebIntroBody": "An app for your shifts and alarms. Keep your shift schedule, notes and work hours together.",
+  "publicWebShareTitle": "View a shared shift calendar",
+  "publicWebShareBody": "Open a shared link to view the latest shift schedule.",
+  "publicWebPrivacyBody": "Read about the app’s data handling, advertising and analytics.",
+  "publicWebPrivacyAction": "View Privacy Policy",
+  "publicWebStoreButton": "View ShiftBell on Google Play",
+  "defaultSnoozeTitle": "Default snooze time",
+  "defaultSnoozeDescription": "Applies to all alarms. While an alarm rings, use −/+ to choose 5–30 minutes. Changes here also apply to the current ring immediately.",
+  "defaultSnoozeMinutes": "{minutes} min",
+  "defaultSnoozeError": "Could not load or save this setting. Please try again.",
+  "defaultSnoozeRetry": "Retry",
+  "@defaultSnoozeMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "alarmDefaultLabel": "Alarm"
 }

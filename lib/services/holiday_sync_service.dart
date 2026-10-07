@@ -30,11 +30,14 @@ class HolidaySyncService {
   static const retryInterval = Duration(days: 1);
 
   bool _checkInProgress = false;
+  bool get _koreanLanguage => WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'ko';
 
   /// Show the last verified result while offline or before the first check.
   Future<void> loadCached() async {
+    if (!_koreanLanguage) return;
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!_koreanLanguage) return;
       final raw = prefs.getString(cachePrefKey);
       if (raw == null) return;
       HolidayOverrides.current =
@@ -49,10 +52,11 @@ class HolidaySyncService {
   /// successful read the next one is 14 days later. Failures retry in 1-2 days.
   Future<void> refreshIfDue() async {
     if (kIsWeb || !firebaseReady || _checkInProgress ||
-        WidgetsBinding.instance.platformDispatcher.locale.languageCode != 'ko') return;
+        !_koreanLanguage) return;
     _checkInProgress = true;
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!_koreanLanguage) return;
       final nowMs = DateTime.now().millisecondsSinceEpoch;
       final dueMs = prefs.getInt(nextCheckPrefKey);
       if (dueMs == null) {
@@ -66,17 +70,20 @@ class HolidaySyncService {
       if (nowMs < dueMs) return;
 
       try {
+        if (!_koreanLanguage) return;
         // A server read is required here: an offline SDK cache must not mark
         // this installation as checked for another 14 days.
         final doc = await FirebaseFirestore.instance
             .doc(docPath)
             .get(const GetOptions(source: Source.server));
+        if (!_koreanLanguage) return;
         await apply(HolidayOverrides.fromJson(doc.data()));
         await prefs.setInt(
           nextCheckPrefKey,
           DateTime.now().millisecondsSinceEpoch + checkInterval.inMilliseconds,
         );
       } catch (e) {
+        if (!_koreanLanguage) return;
         await prefs.setInt(
           nextCheckPrefKey,
           DateTime.now().millisecondsSinceEpoch + retryInterval.inMilliseconds +
@@ -92,7 +99,9 @@ class HolidaySyncService {
   }
 
   Future<void> apply(HolidayOverrides overrides) async {
+    if (!_koreanLanguage) return;
     final prefs = await SharedPreferences.getInstance();
+    if (!_koreanLanguage) return;
     if (!await prefs.setString(cachePrefKey, jsonEncode(overrides.toJson()))) {
       throw StateError('Holiday override cache could not be saved');
     }
@@ -101,6 +110,7 @@ class HolidaySyncService {
   }
 
   Future<void> _applyToNative(HolidayOverrides overrides) async {
+    if (!_koreanLanguage) return;
     try {
       await kAlarmChannel.invokeMethod('setHolidayOverrides', {
         'add': overrides.add.keys.toList(),

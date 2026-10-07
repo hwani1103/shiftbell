@@ -267,6 +267,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         )
 
         val notification = NotificationCompat.Builder(context, TWENTY_MIN_CHANNEL_ID)
+            .addExtras(NotificationLocale.metadata(context, "guard", alarm.time))
             .setContentTitle(context.getString(R.string.notif_guard_title, alarm.time))
             .setContentText(alarm.shiftType)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -336,9 +337,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
-                    ?: if (cursor.getString(cursor.getColumnIndexOrThrow("type")) == "custom" ||
-                        !cursor.isNull(cursor.getColumnIndexOrThrow("preset_slot")))
-                        context.getString(R.string.one_tap_alarm_label) else context.getString(R.string.alarm_default_label)
+                    ?: context.getString(R.string.alarm_default_label)
 
                 val timestamp = AlarmWakeScheduler.parse(dateStr)
 

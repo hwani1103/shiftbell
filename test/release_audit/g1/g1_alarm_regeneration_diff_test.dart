@@ -111,7 +111,7 @@ void main() {
     expect(await rowCount('alarm_creation_log'), 0);
   });
 
-  test('먼저 저장한 원터치 시각에는 고정 알람을 생성하지 않는다', () async {
+  test('먼저 저장한 일반 단발 알람 시각에는 고정 알람을 생성하지 않는다', () async {
     final now = DateTime(2026, 9, 23, 6);
     final ringAt = DateTime(2026, 9, 23, 7);
     await db.insert('shift_alarm_templates', {
@@ -132,7 +132,6 @@ void main() {
     final result = await db.transaction((txn) => regenerateFixedAlarmsForDatesTxn(
       txn: txn, schedule: schedule, dates: {DateTime(2026, 9, 23)}, nowOverride: now,
     ));
-    expect(result.skippedByCustom, 1);
     expect(result.cancelIds, [staleFixedId]);
     expect(result.scheduled, isEmpty);
     expect((await db.query('alarms')).single['id'], customId);

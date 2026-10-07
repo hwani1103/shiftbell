@@ -12,6 +12,8 @@
 // import해서 쓸 수 있어야 하므로 public으로 유지).
 
 import 'package:flutter/material.dart';
+import '../l10n/l10n_extensions.dart';
+import 'unavailable_feature.dart';
 import '../services/condition/evidence_database.dart';
 
 /// "근거 자료" - Evidence Database 전체(12개)를 보여주는 접이식 섹션.
@@ -28,6 +30,7 @@ class _EvidenceLibrarySectionState extends State<EvidenceLibrarySection> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Column(

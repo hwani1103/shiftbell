@@ -16,20 +16,26 @@ class CoverAlarmNotificationTest {
         RingingAlarmTracker.resetMemoryForTest()
         val ring = RingingAlarmTracker.startRing(context, 901)
         val manager = context.getSystemService(NotificationManager::class.java)
-        NotificationHelper.showRingControlNotification(context, 901, ring.round, "주간", 3)
-        val initial = shadowOf(manager).getNotification(NotificationHelper.RING_CONTROL_ID)
+        NotificationHelper.postInitialRing(context, 901, ring.round, "주간", 3)
+        val initial = shadowOf(manager).allNotifications.first { it.extras.getString("shiftbell.copy.kind") == "ring" }
         assertNotNull(initial.fullScreenIntent)
-        NotificationHelper.showRingControlNotification(context, 901, ring.round, "주간", 3, coverVisible = true)
-        val quiet = shadowOf(manager).getNotification(NotificationHelper.RING_CONTROL_ID)
+        assertEquals(android.app.Notification.GROUP_ALERT_ALL, initial.groupAlertBehavior)
+        NotificationHelper.ensureRingControls(context, 901, ring.round, "주간", 3, NotificationHelper.RingNoticeReason.COVER_ENTER)
+        val quiet = shadowOf(manager).allNotifications.first { it.extras.getString("shiftbell.copy.kind") == "ring" }
         assertEquals(NotificationManager.IMPORTANCE_LOW, manager.getNotificationChannel(quiet.channelId).importance)
-        assertNull(quiet.fullScreenIntent)
+        assertTrue(shadowOf(quiet.fullScreenIntent).isCanceled)
         assertEquals(2, quiet.actions.size)
         assertNotNull(quiet.contentIntent)
-        NotificationHelper.showRingControlNotification(context, 901, ring.round, "주간", 3, launchFullScreen = false)
-        val restored = shadowOf(manager).getNotification(NotificationHelper.RING_CONTROL_ID)
+        NotificationHelper.ensureRingControls(context, 901, ring.round, "주간", 3, NotificationHelper.RingNoticeReason.COVER_EXIT)
+        val restored = shadowOf(manager).allNotifications.first { it.extras.getString("shiftbell.copy.kind") == "ring" }
         assertEquals(initial.channelId, restored.channelId)
         assertEquals(2, restored.actions.size)
-        assertNull(restored.fullScreenIntent)
+        assertTrue(shadowOf(restored.fullScreenIntent).isCanceled)
+        assertEquals(android.app.Notification.GROUP_ALERT_SUMMARY, restored.groupAlertBehavior)
+        RingSnoozeController.adjust(context, ring, 1)
+        val adjusted = manager.activeNotifications.single { it.id == NotificationHelper.RING_CONTROL_ID }.notification
+        assertEquals(restored.groupAlertBehavior, adjusted.groupAlertBehavior)
+        assertEquals(restored.channelId, adjusted.channelId)
     }
 
     @Test fun staleCoverCannotReplaceNewRingNotification() {
@@ -37,10 +43,10 @@ class CoverAlarmNotificationTest {
         RingingAlarmTracker.resetMemoryForTest()
         val old = RingingAlarmTracker.startRing(context, 901)
         val current = RingingAlarmTracker.startRing(context, 902)
-        NotificationHelper.showRingControlNotification(context, 902, current.round, "New", 3)
-        NotificationHelper.showRingControlNotification(context, 901, old.round, "Old", 3, coverVisible = true)
+        NotificationHelper.postInitialRing(context, 902, current.round, "New", 3)
+        NotificationHelper.ensureRingControls(context, 901, old.round, "Old", 3, NotificationHelper.RingNoticeReason.COVER_ENTER)
         val notification = shadowOf(context.getSystemService(NotificationManager::class.java))
-            .getNotification(NotificationHelper.RING_CONTROL_ID)
+            .allNotifications.first { it.extras.getString("shiftbell.copy.kind") == "ring" }
         assertEquals("New", notification.extras.getString("android.title"))
     }
 }

@@ -25,120 +25,36 @@
         app:bottomCornerRadius="24dp"
         app:topCornerRadius="24dp"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:elevation="8dp"
-        android:paddingHorizontal="22dp"
-        android:paddingTop="36dp"
-        android:paddingBottom="32dp">
-
-        <!-- 왼쪽: 시간 + 근무 뱃지 -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <!-- ⭐ 2026-08-25 - 파도 그라데이션 배경 위에서 짙은 보라(#3B2E7A)
-                 숫자가 시인성이 떨어진다는 피드백으로 흰색으로 변경(잠금화면은
-                 흰 원 배경 위라 그대로 두면 되지만, 여긴 배경이 그라데이션 자체라
-                 대비가 약했음). 그림자는 유지 - 그라데이션 밝은 구간(청록 쪽)에서도
-                 흰 글자가 묻히지 않게 하는 안전장치. -->
-            <TextView
-                android:id="@+id/timeText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="09:30"
-                android:textSize="50sp"
-                android:maxLines="1"
-                android:autoSizeTextType="uniform"
-                android:autoSizeMinTextSize="28sp"
-                android:autoSizeMaxTextSize="50sp"
-                android:autoSizeStepGranularity="1sp"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium"
-                android:shadowColor="#40000000"
-                android:shadowDx="0"
-                android:shadowDy="1"
-                android:shadowRadius="3"/>
-
-            <TextView
-                android:id="@+id/shiftTypeText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="주간"
-                android:textSize="16sp"
-                android:textColor="#3B2E7A"
-                android:textStyle="bold"
-                android:background="@drawable/overlay_shift_badge"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:gravity="center_vertical" android:elevation="8dp"
+        android:paddingHorizontal="22dp" android:paddingTop="20dp" android:paddingBottom="20dp">
+        <TextView android:id="@+id/timeText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="09:30" android:textSize="46sp" android:maxLines="1" android:textColor="#FFFFFF" android:textStyle="bold"
+            android:autoSizeTextType="uniform" android:autoSizeMinTextSize="28sp" android:autoSizeMaxTextSize="46sp"
+            android:autoSizeStepGranularity="1sp" android:shadowColor="#40000000" android:shadowDy="1" android:shadowRadius="3" />
+        <TextView android:id="@+id/shiftTypeText" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/alarm_default_label" android:textSize="16sp" android:textColor="#3B2E7A" android:textStyle="bold"
+            android:layout_marginBottom="12dp" android:background="@drawable/overlay_shift_badge" android:padding="8dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center">
+<Button android:id="@+id/snoozeDecreaseButton" android:layout_width="48dp" android:layout_height="64dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="−" android:textSize="24sp"
+    android:textColor="#3B2E7A" android:background="?android:attr/selectableItemBackgroundBorderless"
+    android:contentDescription="@string/alarm_snooze_decrease" /><FrameLayout android:layout_width="72dp" android:layout_height="64dp">
+    <TextView android:id="@+id/snoozeValueText" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:gravity="center" android:background="@drawable/alarm_snooze_circle" android:text="+5m"
+        android:textSize="18sp" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="12sp" android:autoSizeMaxTextSize="18sp" android:autoSizeStepGranularity="1sp"
+        android:textStyle="bold" android:textColor="#3B2E7A" android:importantForAccessibility="no" />
+    <Button android:id="@+id/snoozeButton" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text=""
+        android:background="?android:attr/selectableItemBackgroundBorderless" android:stateListAnimator="@null"
+        android:contentDescription="@string/alarm_snooze_label" />
+</FrameLayout><Button android:id="@+id/snoozeIncreaseButton" android:layout_width="48dp" android:layout_height="64dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="+" android:textSize="24sp"
+    android:textColor="#3B2E7A" android:background="?android:attr/selectableItemBackgroundBorderless"
+    android:contentDescription="@string/alarm_snooze_increase" /><Space android:layout_width="12dp" android:layout_height="1dp" /><Button android:id="@+id/dismissButton" android:layout_width="64dp" android:layout_height="64dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="×" android:textSize="28sp"
+    android:textColor="#FFFFFF" android:background="@drawable/alarm_dismiss_circle" android:stateListAnimator="@null"
+    android:contentDescription="@string/alarm_dismiss_label" />
         </LinearLayout>
-
-        <Space android:layout_width="10dp" android:layout_height="1dp"/>
-
-        <!-- 오른쪽: 스누즈 + 끄기 (작은 원, 라벨 없음) -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <FrameLayout
-                android:layout_width="68dp"
-                android:layout_height="68dp">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:background="@drawable/alarm_snooze_circle"
-                    android:text="+5m"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#3B2E7A"/>
-                <Button
-                    android:id="@+id/snoozeButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="0dp"
-                    android:text=""
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:stateListAnimator="@null"
-                    android:elevation="0dp"/>
-            </FrameLayout>
-
-            <Space android:layout_width="12dp" android:layout_height="1dp"/>
-
-            <FrameLayout
-                android:layout_width="68dp"
-                android:layout_height="68dp">
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/alarm_dismiss_circle"
-                    android:src="@drawable/ic_close_white"
-                    android:scaleType="center"
-                    android:padding="18dp"/>
-                <Button
-                    android:id="@+id/dismissButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:padding="0dp"
-                    android:text=""
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:stateListAnimator="@null"
-                    android:elevation="0dp"/>
-            </FrameLayout>
-        </LinearLayout>
-
     </LinearLayout>
 </FrameLayout>

@@ -7,10 +7,18 @@
 // (lib/l10n/generated/app_localizations.dart - 직접 수정 금지, arb 파일을 고칠 것).
 import 'package:flutter/widgets.dart';
 import 'generated/app_localizations.dart';
+import 'korean_only_copy.dart';
+export 'korean_only_copy.dart';
 
 extension AppLocalizationsX on BuildContext {
   AppLocalizations get l10n => AppLocalizations.of(this);
+  KoreanOnlyCopy get koOnly => KoreanOnlyCopy.forLocale(Localizations.localeOf(this).languageCode);
 
   /// Release scope follows the resolved app language, not the user's location.
   bool get usesKoreanFeatures => Localizations.localeOf(this).languageCode == 'ko';
+
+  /// Native/database exception messages may contain Korean implementation text.
+  /// Keep those details in diagnostics and Korean UI; use localized copy abroad.
+  String localizedErrorDetail(Object error) =>
+      usesKoreanFeatures ? error.toString() : l10n.statusErrorOccurred;
 }

@@ -57,36 +57,11 @@ abstract final class AnalyticsEvent {
   static const sleepEstimateRejected = 'sleep_estimate_rejected';
 
   /// 1.0.24 B - 커스텀 알람 프리셋을 날짜에 할당(파라미터 result = scheduled/past/duplicate/daily_limit/schedule_failed, 시각은 보내지 않음)
-  static const customAlarmAssigned = 'custom_alarm_assigned';
 
-  static const oneTapOpened = 'one_tap_opened';
-  static const oneTapClosed = 'one_tap_closed';
-  static const oneTapPresetEditorOpened = 'one_tap_preset_editor_opened';
-  static const oneTapPresetSaved = 'one_tap_preset_saved';
-  static const oneTapPresetUpdated = 'one_tap_preset_updated';
-  static const oneTapPresetDeleted = 'one_tap_preset_deleted';
-  static const oneTapPresetCancelled = 'one_tap_preset_cancelled';
-  static const oneTapPresetBlocked = 'one_tap_preset_blocked';
-  static const oneTapPresetSelected = 'one_tap_preset_selected';
-  static const oneTapAssigned = 'one_tap_assigned';
-  static const oneTapAssignRejected = 'one_tap_assign_rejected';
-  static const oneTapAlarmDeleted = 'one_tap_alarm_deleted';
 
   /// 대시보드 EVENT_META와 대조하는 전체 목록(테스트용).
   static const all = <String>[
 
-    oneTapOpened,
-    oneTapClosed,
-    oneTapPresetEditorOpened,
-    oneTapPresetSaved,
-    oneTapPresetUpdated,
-    oneTapPresetDeleted,
-    oneTapPresetCancelled,
-    oneTapPresetBlocked,
-    oneTapPresetSelected,
-    oneTapAssigned,
-    oneTapAssignRejected,
-    oneTapAlarmDeleted,
     onboardingComplete,
     backupCreated,
     backupRestored,
@@ -103,7 +78,6 @@ abstract final class AnalyticsEvent {
     friendShareStarted,
     friendAdded,
     helpOpened,
-    customAlarmAssigned,
     memoEdited,
     memoDeleted,
     scheduleEdited,

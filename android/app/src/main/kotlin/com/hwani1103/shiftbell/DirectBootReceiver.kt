@@ -154,8 +154,7 @@ class DirectBootReceiver : BroadcastReceiver() {
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
                 val time = cursor.getString(cursor.getColumnIndexOrThrow("time"))
                 val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
-                    ?: if (cursor.getString(cursor.getColumnIndexOrThrow("type")) == "custom")
-                        context.getString(R.string.one_tap_alarm_label) else context.getString(R.string.alarm_default_label)
+                    ?: context.getString(R.string.alarm_default_label)
 
                 val timestamp = AlarmWakeScheduler.parse(dateStr)
 

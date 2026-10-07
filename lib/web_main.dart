@@ -46,6 +46,9 @@ import 'screens/privacy_policy_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'l10n/l10n_extensions.dart';
+import 'l10n/release_locale.dart';
+import 'l10n/regional_material_localizations.dart';
+import 'widgets/public_web_load_failure.dart';
 
 const _kLastOwnerIdStorageKey = 'shiftbell_last_owner_id';
 late final Uri _initialWebUri;
@@ -189,8 +192,7 @@ void main() async {
   // 안 하면 intl이 LocaleDataException을 던짐. main.dart와 동일한 초기화 패턴.
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
-  await initializeDateFormatting('ko_KR', null);
-  await initializeDateFormatting('en_US', null);
+  await initializeDateFormatting(); // Includes every supported regional format.
   // ⭐ 이 웹뷰어는 Firestore에서 남의 스케줄을 읽기만 함 - DB/MethodChannel 없이도
   // Firebase만 초기화하면 됨. 플레이스홀더 상태면 조용히 실패하고 아래 라우터가
   // "동기화 실패" 화면을 보여줌 (firebase_bootstrap.dart 참고).
@@ -212,12 +214,14 @@ class ShiftBellWebViewApp extends StatelessWidget {
               '${context.l10n.appTitle} - ${context.l10n.friendShareTitle}',
           debugShowCheckedModeBanner: false,
           localizationsDelegates: const [
+            releaseRegionalMaterialDelegate,
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: AppLocalizations.supportedLocales,
+          supportedLocales: releaseSupportedLocales,
+          localeListResolutionCallback: resolveReleaseLocale,
           theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.indigo),
           builder: (context, child) => AppTextScale(child: child!),
           // Preserve the actual link in browser history as well as in memory.
@@ -284,7 +288,7 @@ class _DeveloperLandingPage extends StatelessWidget {
                 const Icon(Icons.access_time_filled_rounded,
                     color: Color(0xFF4662D6), size: 52),
                 const SizedBox(height: 20),
-                Text('교대시계',
+                Text(context.l10n.appTitle,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w800,
@@ -292,22 +296,22 @@ class _DeveloperLandingPage extends StatelessWidget {
                     )),
                 const SizedBox(height: 12),
                 Text(
-                  '교대근무자를 위한 일정 관리와 알람 앱입니다.\n근무 일정과 수면 리듬을 한곳에서 편하게 관리해 보세요.',
+                  context.l10n.publicWebIntroBody,
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyLarge?.copyWith(height: 1.55),
                 ),
                 const SizedBox(height: 32),
-                const _InfoCard(
+                _InfoCard(
                   icon: Icons.people_alt_outlined,
-                  title: '친구와 근무 일정 공유',
-                  body: '친구에게 받은 공유 링크는 그대로 열면 최신 근무 일정을 확인할 수 있습니다.',
+                  title: context.l10n.publicWebShareTitle,
+                  body: context.l10n.publicWebShareBody,
                 ),
                 const SizedBox(height: 14),
                 _InfoCard(
                   icon: Icons.privacy_tip_outlined,
-                  title: '개인정보처리방침',
-                  body: '앱의 데이터 처리와 광고·분석 이용 안내를 확인할 수 있습니다.',
-                  actionLabel: '개인정보처리방침 보기',
+                  title: context.l10n.settingsPrivacyPolicy,
+                  body: context.l10n.publicWebPrivacyBody,
+                  actionLabel: context.l10n.publicWebPrivacyAction,
                   onAction: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
                         builder: (_) => const PrivacyPolicyScreen()),
@@ -317,7 +321,7 @@ class _DeveloperLandingPage extends StatelessWidget {
                 FilledButton.icon(
                   onPressed: openPlayStore,
                   icon: const Icon(Icons.shop_outlined),
-                  label: const Text('Google Play에서 교대시계 보기'),
+                  label: Text(context.l10n.publicWebStoreButton),
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 15),
                     backgroundColor: const Color(0xFF4662D6),
@@ -448,12 +452,12 @@ class _WebViewRouterState extends State<_WebViewRouter> {
         }
       }
       if (ownerId == null)
-        return _LoadResult.invalidLink(context.l10n.friendLinkMissingCode);
+        return const _LoadResult.invalidLink(PublicWebLoadFailure.missingCode);
     }
 
     final data = await FriendSyncService.instance.fetchByOwnerId(ownerId);
     if (data == null) {
-      return _LoadResult.invalidLink(context.l10n.friendLoadFailedDetailed);
+      return const _LoadResult.invalidLink(PublicWebLoadFailure.unavailable);
     }
 
     try {
@@ -481,8 +485,8 @@ class _WebViewRouterState extends State<_WebViewRouter> {
         }
         final result = snapshot.data;
         if (result == null || result.data == null) {
-          return _InvalidLinkPage(
-              reason: result?.reason ?? context.l10n.friendUnknownError);
+          return PublicWebLoadFailurePage(
+              failure: result?.failure ?? PublicWebLoadFailure.unknown);
         }
         // ⭐ deferredInstallPrompt는 페이지 로드 후 비동기로 값이 채워질 수
         // 있어서(브라우저가 판단하는 타이밍), ValueListenableBuilder로 감싸서
@@ -490,7 +494,7 @@ class _WebViewRouterState extends State<_WebViewRouter> {
         return ValueListenableBuilder<Object?>(
           valueListenable: deferredInstallPrompt,
           builder: (context, promptEvent, _) {
-            return FriendCalendarView(
+            return FriendCalendarView(publicWebViewer: true,
               friendName: result.data!.ownerName,
               data: result.data!,
               showInstallPrompt: true,
@@ -508,40 +512,9 @@ class _WebViewRouterState extends State<_WebViewRouter> {
 
 class _LoadResult {
   final FriendScheduleData? data;
-  final String? reason;
-  const _LoadResult.success(FriendScheduleData this.data) : reason = null;
-  const _LoadResult.invalidLink(String this.reason) : data = null;
-}
-
-class _InvalidLinkPage extends StatelessWidget {
-  final String reason;
-  const _InvalidLinkPage({required this.reason});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.all(24.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.link_off, size: 48.sp, color: Colors.grey),
-              SizedBox(height: 16.h),
-              Text(context.l10n.friendCouldNotLoad,
-                  style:
-                      TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
-              SizedBox(height: 8.h),
-              Text(reason,
-                  textAlign: TextAlign.center,
-                  style:
-                      TextStyle(fontSize: 13.sp, color: Colors.grey.shade600)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  final PublicWebLoadFailure? failure;
+  const _LoadResult.success(FriendScheduleData this.data) : failure = null;
+  const _LoadResult.invalidLink(PublicWebLoadFailure this.failure) : data = null;
 }
 
 // ⭐ "앱 설치하고 실시간으로 보기" 버튼에서 쓸 스토어 링크. 실제 배포 후 이

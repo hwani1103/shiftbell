@@ -22,6 +22,7 @@ import '../models/shift_time_range.dart';
 import '../models/sleep_record.dart';
 import 'db_migration_runner.dart';
 import 'alarm_generation_service.dart' show alarmSlotTime;
+import 'fixed_alarm_occurrence.dart';
 
 class DatabaseService {
   static final DatabaseService instance = DatabaseService._internal();
@@ -96,12 +97,21 @@ class DatabaseService {
     // (main.dart의 시작 실패 화면에서 다시 시도) - 원본 없이 여는 경로는 두지 않음.
     final script = await DbMigrationScript.loadFromAssets();
 
+    var retiredAlarmIds = <int>[];
     return await openDatabase(
       path,
-      version: 26,  // v26: full roster and main schedule commit together.
+      version: 28,  // Preserve the original fixed occurrence through time-zone moves.
       onCreate: _onCreate,
-      onUpgrade: (db, oldVersion, newVersion) =>
-          DbMigrationRunner.migrate(db, script, oldVersion, newVersion),
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 27) {
+          final columns = await db.rawQuery('PRAGMA table_info(alarms)');
+          if (columns.any((column) => column['name'] == 'preset_slot')) {
+            retiredAlarmIds = (await db.rawQuery("SELECT id FROM alarms WHERE preset_slot IS NOT NULL AND type IN ('custom','snoozed')"))
+                .map((row) => row['id'] as int).toList();
+          }
+        }
+        await DbMigrationRunner.migrate(db, script, oldVersion, newVersion);
+      },
       // ⭐ 예전엔 onDowngrade가 없어서, 더 높은 버전 DB를 이 앱이 열면 sqflite가 버전을
       // 조용히 낮게 찍었음(Native가 그 뒤 과거 마이그레이션을 다시 실행할 위험). 개발 중
       // 구버전 APK를 덮어 설치하는 경우에만 생기며, 이제는 시작 실패 화면으로 드러남.
@@ -114,6 +124,14 @@ class DatabaseService {
       onOpen: (db) async {
         await DbMigrationRunner.repair(db, script);
         await _insertPresetAlarmTypesIfMissing(db);
+        // After the upgrade transaction commits, cancel only retired dev alarm IDs.
+        // A crash before cancellation is safe: the receiver rejects their missing rows.
+        if (_isAndroid) {
+          for (final id in retiredAlarmIds) {
+            try { await platform.invokeMethod('cancelNativeAlarm', {'id': id}); }
+            catch (error) { print('Retired alarm cancellation deferred: $id $error'); }
+          }
+        }
       },
     );
   }
@@ -186,8 +204,7 @@ class DatabaseService {
         alarm_type_id INTEGER NOT NULL,
         shift_type TEXT,
         day_offset INTEGER NOT NULL DEFAULT 0,
-        preset_slot INTEGER,
-        assigned_day TEXT,
+        fixed_slot_time TEXT,
         FOREIGN KEY (alarm_type_id) REFERENCES alarm_types(id)
       )
     ''');
@@ -201,7 +218,6 @@ class DatabaseService {
         day_offset INTEGER NOT NULL DEFAULT 0
       )
     ''');
-    await db.execute('CREATE INDEX IF NOT EXISTS idx_alarms_preset_slot ON alarms(preset_slot, assigned_day)');
 
     // ⭐ 신규: 알람 이력 테이블
   await db.execute('''
@@ -215,7 +231,8 @@ class DatabaseService {
       snooze_count INTEGER DEFAULT 0,
       shift_type TEXT,
       created_at TEXT NOT NULL,
-      day_offset INTEGER NOT NULL DEFAULT 0
+      day_offset INTEGER NOT NULL DEFAULT 0,
+      fixed_slot_time TEXT
     )
   ''');
 
@@ -519,8 +536,8 @@ class DatabaseService {
   // 재생 안 함" 방어도 이 경우엔 못 걸러냄, DB에 여전히 있으니까). 트랜잭션으로
   // 묶으면 크래시가 나도 SQLite가 전부 롤백해서 "취소 자체가 없었던 상태"로
   // 돌아가므로 이 모순이 원천적으로 안 생김.
-  // ⭐ 이력 기록 실패 시(드묾) 동작은 그대로 유지 - catch에서 삼키고 삭제는
-  // 트랜잭션 안에서 계속 진행함(기존과 동일한 fail-open, 새로운 실패 모드 없음).
+  // 고정 회차의 실제 종료는 소비 기록과 삭제가 함께 성공해야 한다(DB28).
+  // 이 기록이 실패하면 롤백한다. 그 외 기존 취소 경로의 이력 실패 처리는 유지한다.
   Future<int> deleteAlarm(int id, {String dismissType = 'cancelled_before_ring', bool createHistory = true}) async {
     final db = await database;
     late final int deletedCount;
@@ -528,6 +545,7 @@ class DatabaseService {
     await db.transaction((txn) async {
       // ⭐ 이력 기록: createHistory가 true일 때만
       if (createHistory) {
+        var mustCommitHistory = false;
         try {
           final alarmMaps = await txn.query(
             'alarms',
@@ -537,6 +555,9 @@ class DatabaseService {
 
           if (alarmMaps.isNotEmpty) {
             final alarmMap = alarmMaps.first;
+            mustCommitHistory = const {'swiped', 'timeout', 'snoozed',
+              'snooze_skipped_existing_alarm', 'superseded_by_next_alarm'}.contains(dismissType) &&
+                fixedSlotFromRow(alarmMap) != null;
             final scheduledDate = alarmMap['date'] as String?;
             final scheduledTime = alarmMap['time'] as String?;
             final shiftType = alarmMap['shift_type'] as String?;
@@ -554,12 +575,15 @@ class DatabaseService {
                 'shift_type': shiftType,
                 'created_at': alarmInstantForStorage(DateTime.now()),
                 'day_offset': dayOffset,
+                'fixed_slot_time': fixedSlotFromRow(alarmMap),
               });
+              await recordFixedConsumption(txn, alarmMap, dismissType);
               final historyText = dismissType == 'swiped' ? '알람 확인' : '알람 제거';
               print('✅ alarm_history에 "$historyText" 기록 추가: ID=$id');
             }
           }
         } catch (e) {
+          if (mustCommitHistory) rethrow;
           print('⚠️ 알람 이력 기록 실패: $e');
         }
       } else {
@@ -581,36 +605,6 @@ class DatabaseService {
     return deletedCount;
   }
 
-  /// 원터치 설정 칸 삭제: 연결된 미래 행과 삭제 이력을 한 트랜잭션에서 처리한다.
-  /// 울림이 시작된 행(date <= now)은 건드리지 않는다.
-  Future<List<Alarm>> deleteFutureOneTapSlot(int slot) async {
-    final db = await database;
-    final instant = DateTime.now();
-    final now = alarmInstantForStorage(instant);
-    return db.transaction((txn) async {
-      final rows = await txn.query('alarms',
-          where: "preset_slot = ? AND type IN ('custom', 'snoozed')",
-          whereArgs: [slot]);
-      final alarms = rows.map(Alarm.fromMap)
-          .where((alarm) => alarm.date?.isAfter(instant) ?? false).toList();
-      for (final alarm in alarms) {
-        await txn.insert('alarm_history', {
-          'alarm_id': alarm.id,
-          'scheduled_time': alarm.time,
-          'scheduled_date': alarm.toMap()['date'],
-          'actual_ring_time': now,
-          'dismiss_type': 'cancelled_before_ring',
-          'snooze_count': 0,
-          'shift_type': alarm.shiftType,
-          'created_at': now,
-          'day_offset': alarm.dayOffset,
-        });
-        await txn.delete('alarms', where: 'id = ?', whereArgs: [alarm.id]);
-      }
-      return alarms;
-    });
-  }
-  
   Future<int> saveShiftSchedule(ShiftSchedule schedule) async {
     final db = await database;
     // ⭐ 2026-09-14 (#31 D12) - 근무표 저장과 "근무가 바뀐 배정일의 개별 예외 삭제"를 한 트랜잭션으로
@@ -798,6 +792,7 @@ class DatabaseService {
         await txn.delete('alarm_overrides');
         await txn.delete('alarm_history');
         await txn.delete('alarm_creation_log');
+        await txn.delete('fixed_alarm_consumptions');
       }
       return toRemove.map((row) => row['id'] as int).toList();
     });
@@ -1022,7 +1017,7 @@ class DatabaseService {
     // Historical assignments and alarm references also protect a name. Color
     // and duration preferences alone are not uses and can be discarded.
     for (final table in ['alarms', 'shift_alarm_templates', 'alarm_history',
-      'alarm_creation_log', 'alarm_overrides']) {
+      'alarm_creation_log', 'alarm_overrides', 'fixed_alarm_consumptions']) {
       final rows = await db.query(table, columns: ['shift_type'], distinct: true);
       names.addAll(rows.map((r) => r['shift_type']).whereType<String>());
     }
@@ -1034,7 +1029,7 @@ class DatabaseService {
   /// 근무명을 참조하는 모든 테이블에서 [from] → [to]. renameShiftAtomic의 트랜잭션 안에서만 호출.
   Future<void> _renameShiftReferences(DatabaseExecutor txn, String from, String to) async {
     // 1~4. alarms / shift_alarm_templates / alarm_history / alarm_creation_log(영구 보존 로그도 함께)
-    for (final table in ['alarms', 'shift_alarm_templates', 'alarm_history', 'alarm_creation_log']) {
+    for (final table in ['alarms', 'shift_alarm_templates', 'alarm_history', 'alarm_creation_log', 'fixed_alarm_consumptions']) {
       await txn.update(table, {'shift_type': to}, where: 'shift_type = ?', whereArgs: [from]);
     }
 
@@ -1472,6 +1467,8 @@ Future<Map<String, int>> getOvertimeForRange(DateTime startDate, DateTime endDat
 Future<void> resetAllAlarmHistoryAndLog() async {
   final db = await database;
   await db.transaction((txn) async {
+    // Clearing visible history is not permission to replay consumed alarms.
+    await materializeConsumedHistory(txn);
     await txn.delete('alarm_history');
     await txn.delete('alarm_creation_log');
   });

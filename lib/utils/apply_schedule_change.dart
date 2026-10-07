@@ -7,7 +7,6 @@ import '../models/team_schedule_config.dart';
 import '../providers/schedule_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../services/database_service.dart';
-import '../services/alarm_generation_service.dart';
 import '../widgets/schedule_change_dialog.dart';
 
 Future<bool> applyScheduleChange(
@@ -75,9 +74,6 @@ Future<bool> applyScheduleChange(
         expectedTeams: teams,
         nextTeams: nextTeams);
     ref.read(scheduleProvider.notifier).applyExternallyPersisted(newSchedule);
-    final skippedSlots = await listFixedConflictsWithCustom(
-        await DatabaseService.instance.database, newSchedule);
-
     // 2. ⭐ Dart에서 직접 전체 삭제 후 재생성하지 않고 Native의 diff 기반
     // 갱신 엔진에 위임함. Dart가 직접 전체를 지우고 다시 만들면, 실제로는
     // 안 바뀐 알람까지도 "일정 변경"으로 이력에 잘못 찍히는 문제가 있었음
@@ -124,10 +120,7 @@ Future<bool> applyScheduleChange(
           content: Text(
             !refreshCompleted
                 ? context.l10n.scheduleRefreshUnconfirmed
-                : '$successMessage'
-                    '${skippedSlots.isEmpty ? '' : ' · ${context.l10n.fixedAlarmSkippedByOneTap} '
-                        '${skippedSlots.map((d) => '${d.month}/${d.day} '
-                            '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}').join(', ')}'}',
+                : successMessage,
           ),
           backgroundColor: refreshCompleted ? Colors.green : Colors.orange,
           behavior: SnackBarBehavior.floating,
@@ -143,7 +136,7 @@ Future<bool> applyScheduleChange(
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              '❌ ${context.l10n.settingsScheduleChangeFailedWithError(e.toString())}'),
+              '❌ ${context.l10n.settingsScheduleChangeFailedWithError(context.localizedErrorDetail(e))}'),
           backgroundColor: Colors.red,
         ),
       );

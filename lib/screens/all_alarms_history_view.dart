@@ -33,7 +33,6 @@ class AlarmWithHistory {
   final AlarmHistory? latestHistory;
   final bool isFuture;
   final int dayOffset;
-  final bool isOneTap;
 
   AlarmWithHistory({
     required this.date,
@@ -42,7 +41,6 @@ class AlarmWithHistory {
     this.latestHistory,
     required this.isFuture,
     this.dayOffset = 0,
-    this.isOneTap = false,
   });
 
 }
@@ -67,10 +65,6 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
 
       // 1. 생성 원장으로 출처를 먼저 확정. 스누즈도 같은 원본 ID를 유지한다.
       final creationLogs = await DatabaseService.instance.getAlarmCreationLog(limit: 5000);
-      final db = await DatabaseService.instance.database;
-      final oneTapIds = (await db.rawQuery(
-          "SELECT DISTINCT alarm_id FROM alarm_creation_log WHERE source = 'custom_preset'"))
-          .map((row) => row['alarm_id']).toSet();
       String keyFor(int id, DateTime date, String time) =>
           '${id}_${date.millisecondsSinceEpoch ~/ 1000}';
 
@@ -92,7 +86,6 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
             latestHistory: history,
             isFuture: history.scheduledDate.isAfter(DateTime(now.year, now.month, now.day)),
             dayOffset: history.dayOffset,
-            isOneTap: oneTapIds.contains(history.alarmId),
           );
         }
       }
@@ -114,17 +107,9 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
         final time = log['scheduled_time']?.toString() ?? '00:00';
         final alarmId = log['alarm_id'] as int;
         final key = keyFor(alarmId, date, time);
-        final oneTap = oneTapIds.contains(alarmId);
 
         // 이미 이력(결과)이 있으면 건너뛰기 (이력이 우선)
-        if (alarmMap.containsKey(key)) {
-          final existing = alarmMap[key]!;
-          if (oneTap && !existing.isOneTap) {
-            alarmMap[key] = AlarmWithHistory(date: existing.date, time: existing.time,
-                shiftType: existing.shiftType, latestHistory: existing.latestHistory,
-                isFuture: existing.isFuture, dayOffset: existing.dayOffset, isOneTap: true);
-          }
-        } else {
+        if (!alarmMap.containsKey(key)) {
           alarmMap[key] = AlarmWithHistory(
             date: date,
             time: time,
@@ -132,7 +117,6 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
             latestHistory: null,
             isFuture: date.isAfter(DateTime(now.year, now.month, now.day)),
             dayOffset: (log['day_offset'] as int?) ?? 0,
-            isOneTap: oneTap,
           );
         }
       }
@@ -279,7 +263,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.alarmHistoryDeleteFailed(e.toString()))),
+            SnackBar(content: Text(context.l10n.alarmHistoryDeleteFailed(context.localizedErrorDetail(e)))),
           );
         }
       }
@@ -413,7 +397,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                       child: Text(occurrence, style: TextStyle(
                                         fontSize: 12.sp, color: colorScheme.onSurfaceVariant)),
                                     ),
-                                  if (alarmWithHistory.shiftType != null || alarmWithHistory.isOneTap) ...[
+                                  if (alarmWithHistory.shiftType != null) ...[
                                     SizedBox(height: 4.h),
                                     // ⭐ 근무명 옆에 전날/당일/다음날 Chip - 같은 근무라도
                                     // 어느 오프셋으로 만든 알람이었는지 이력에서 구분되게 함.
@@ -422,9 +406,7 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                       children: [
                                         Flexible(
                                           child: Text(
-                                            alarmWithHistory.isOneTap
-                                                ? context.l10n.customAlarmLabel
-                                                : alarmWithHistory.shiftType!,
+                                            alarmWithHistory.shiftType!,
                                             style: TextStyle(
                                               fontSize: 12.sp,
                                               color: colorScheme.onSurfaceVariant,
@@ -434,7 +416,6 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                           ),
                                         ),
                                         SizedBox(width: 6.w),
-                                        if (!alarmWithHistory.isOneTap)
                                           DayOffsetBadge(dayOffset: alarmWithHistory.dayOffset),
                                       ],
                                     ),

@@ -24,6 +24,7 @@ import 'screens/condition_tab.dart';
 
 import 'screens/permission_intro_screen.dart';
 import 'widgets/permission_warning_banner.dart';
+import 'widgets/unavailable_feature.dart';
 import 'widgets/banner_ad_slot.dart';
 import 'widgets/app_content_frame.dart';
 import 'services/ad_service.dart';
@@ -36,6 +37,7 @@ import 'screens/restore_backup_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/release_locale.dart';
+import 'l10n/regional_material_localizations.dart';
 import '../models/shift_schedule.dart';
 import 'providers/alarm_provider.dart';
 import 'providers/schedule_provider.dart';
@@ -148,17 +150,13 @@ void main() async {
 Future<CalendarThemeId> _initializeApp() async {
   final startupWatch = Stopwatch()..start();
   // ── 필수 ──
-  // ⭐ 영어 현지화: 이제 기기 로케일에 따라 ko_KR 또는 en_US 포맷터를 쓸 수 있어야
-  // 하므로, 둘 다 미리 초기화해둠(하나만 초기화된 상태에서 다른 로케일 포맷터를
-  // 쓰면 intl이 LocaleDataException을 던짐).
-  await initializeDateFormatting('ko_KR', null);
-  await initializeDateFormatting('en_US', null);
-  await initializeDateFormatting('en_GB', null);
-  await initializeDateFormatting('de_DE', null);
-  await initializeDateFormatting('pt_BR', null);
-  await initializeDateFormatting('hi_IN', null);
+  // App language and English regional date formats share the bundled Intl data.
+  await initializeDateFormatting(); // Local Intl bundle loads all regional data.
   // DB 열기 + 마이그레이션(#1/#8 - 실패를 삼키지 않음). 실패 후 다시 부르면 새로 시도함.
   await DatabaseService.instance.database;
+  final retiredDevPrefs = await SharedPreferences.getInstance();
+  await retiredDevPrefs.remove('custom_alarm_presets');
+  await retiredDevPrefs.remove('one_touch_alarm_tutorial_shown');
   await AlarmService().initialize();
   await HolidaySyncService.instance.loadCached();
   // ── 선택 (없어도 알람/달력 핵심 기능은 동작) ──
@@ -359,12 +357,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 // 한국어 기기는 한국어, 그 외 기기는 영어로 선택한다.
                 // 영국 등 일부 지역은 영어권 날짜 형식과 월요일 시작을 적용한다.
                 localizationsDelegates: const [
+                  releaseRegionalMaterialDelegate,
                   AppLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
-                supportedLocales: const [Locale('ko'), Locale('en', 'US'), Locale('en', 'GB'), Locale('de', 'DE'), Locale('pt', 'BR'), Locale('hi', 'IN')],
+                supportedLocales: releaseSupportedLocales,
                 localeListResolutionCallback: resolveReleaseLocale,
                 theme: AppTheme.lightTheme,
                 // 모든 화면에 최대 너비 제한 적용
@@ -494,11 +493,16 @@ class _MainScreenState extends ConsumerState<MainScreen>
     super.didChangeDependencies();
     final languageCode = Localizations.localeOf(context).languageCode;
     if (_tabsLanguageCode == languageCode) return;
+    if (_tabsLanguageCode != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ScaffoldMessenger.maybeOf(context)?.clearSnackBars();
+      });
+    }
     _tabsLanguageCode = languageCode;
     _setupTabsAndPrewarm();
   }
 
-  // 한국어는 근무 연계 안내, 영어는 확인된 수면 기록 중심 화면을 사용한다.
+  // 수면·회복 및 개인 일정 탭은 한국어에서만 구성한다.
   void _setupTabsAndPrewarm() {
     // ⭐ 탭 생성 (callback 전달) - "달력테마" 탭은 제거함. 테마 실험은 다
     // 끝났고 실제 선택 UI가 설정 탭 안으로 들어갔으니(테마 캐러셀 화면),
@@ -590,7 +594,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
     // 앞당김. 사용자가 다른 탭을 보는 동안 백그라운드에서 미리 끝나 있을
     // 가능성이 높아짐(첫 진입 시 완전히 안 보인다는 보장은 아니지만 체감
     // 지연은 크게 줄어듦).
-    // 수면 기록은 영어 화면에서도 쓰고, 한국어 전용 판정은 한국어에서만 준비한다.
+    // 수면 기록 및 관련 판정은 한국어에서만 준비한다.
     if (context.usesKoreanFeatures) {
       ref.read(sleepRecordProvider);
       // ⭐ 2026-09-15 - 점수·건강 Tip 삭제 후: "오늘의 컨디션"이 쓰는 입력(판정·수면 기록·미니 달력)만 미리 로딩
@@ -774,7 +778,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
       case 1:
         return BottomNavigationBarItem(
             icon: const Icon(Icons.event_note_outlined),
-            label: context.l10n.navScheduleManagement);
+            label: context.koOnly.navScheduleManagement);
       case 2:
         return BottomNavigationBarItem(
             icon: const Icon(Icons.calendar_month),
@@ -1070,6 +1074,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Scaffold(
       appBar: AppBar(
         title: const Text('🔔 교대종 알람 테스트'),

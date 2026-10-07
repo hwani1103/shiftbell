@@ -20,8 +20,8 @@ void main() {
     await copyFixture('v12.db', dir, asName: 'shiftbell.db');
 
     final db = await DatabaseService.instance.database;
-    expect(await db.getVersion(), 26);
-    expect(diffExpectedData(await dumpTables(db), readJson('expected_v24/v12.json')), isEmpty);
-    expect(canonicalJson(await schemaSnapshot(db)), canonicalJson(readJson('v24_oncreate_schema.json')));
+    expect(await db.getVersion(), 28);
+    expect(diffExpectedData(await dumpTables(db), readJson('expected_v28/v12.json')), isEmpty);
+    expect(canonicalJson(await schemaSnapshot(db)), canonicalJson(readJson('v28_oncreate_schema.json')));
   });
 }

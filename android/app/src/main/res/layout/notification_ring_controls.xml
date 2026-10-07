@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+    <TextView android:id="@+id/ringNoticeTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Material.Notification.Title" android:maxLines="1" android:ellipsize="end" />
+    <TextView android:id="@+id/ringNoticeStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Material.Notification" android:maxLines="2" />
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
+        <Button android:id="@+id/snoozeDecreaseButton" android:layout_width="48dp" android:layout_height="48dp"
+            android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="−"
+            android:textAppearance="@android:style/TextAppearance.Material.Notification" />
+        <TextView android:id="@+id/snoozeValueText" android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:gravity="center" android:maxLines="2"
+            android:textAppearance="@android:style/TextAppearance.Material.Notification" />
+        <Button android:id="@+id/snoozeIncreaseButton" android:layout_width="48dp" android:layout_height="48dp"
+            android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="+"
+            android:textAppearance="@android:style/TextAppearance.Material.Notification" />
+    </LinearLayout>
+</LinearLayout>

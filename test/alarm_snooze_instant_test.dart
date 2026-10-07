@@ -4,7 +4,6 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:shiftbell/models/alarm.dart';
 import 'package:shiftbell/models/alarm_history.dart';
 import 'package:shiftbell/utils/alarm_wall_time.dart';
-import 'package:shiftbell/services/custom_alarm_service.dart';
 
 void main() {
   tzdata.initializeTimeZones();
@@ -65,15 +64,5 @@ void main() {
         alarmClockOccurrence(
             tz.TZDateTime(tz.getLocation('America/New_York'), 2026, 11, 1, 3)),
         0);
-  });
-  test('one-tap collision uses the actual minute, not the repeated clock label', () {
-    final zone = tz.getLocation('America/New_York');
-    final first = tz.TZDateTime.from(DateTime.parse('2026-11-01T01:04:00-04:00'), zone);
-    final second = first.add(const Duration(hours: 1));
-    final now = first.subtract(const Duration(minutes: 5));
-    expect(CustomAlarmService.validate(ringAt: second, now: now,
-        sameDay: [ExistingAlarmSlot(first, 'snoozed')]), isNull);
-    expect(CustomAlarmService.validate(ringAt: second, now: now,
-        sameDay: [ExistingAlarmSlot(second.toUtc(), 'snoozed')]), CustomAlarmAssignResult.duplicate);
   });
 }

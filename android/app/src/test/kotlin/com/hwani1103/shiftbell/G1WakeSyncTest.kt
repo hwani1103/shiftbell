@@ -29,6 +29,7 @@ import java.util.Date
 import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
+@org.robolectric.annotation.LooperMode(org.robolectric.annotation.LooperMode.Mode.PAUSED)
 class G1WakeSyncTest {
 
     private lateinit var context: Context

@@ -6,6 +6,7 @@
 
 import 'package:flutter/material.dart';
 import '../models/shift_schedule.dart';
+import '../utils/calendar_dates.dart';
 
 String dateKey(DateTime d) =>
     '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -21,9 +22,7 @@ int computeTotalWorkMinutes({
   required Map<String, int> otByDate,
 }) {
   int total = 0;
-  final startDay = DateTime(start.year, start.month, start.day);
-  final endDay = DateTime(end.year, end.month, end.day);
-  for (var d = startDay; !d.isAfter(endDay); d = d.add(const Duration(days: 1))) {
+  for (final d in calendarDaysInclusive(start, end)) {
     final shift = schedule.getShiftForDate(d);
     if (shift != '미설정') {
       total += schedule.getDurationMinutes(shift);
@@ -56,8 +55,8 @@ class WeekWorkSummary {
 // 그 달 1일이 속한 주의 월요일부터, 말일이 속한 주의 일요일까지 - 앞뒤로 다른
 // 달의 날짜가 며칠 포함되는 건 의도된 동작 (달력에 보이는 6번째 줄과 동일한 개념).
 List<DateTimeRange> weeksCoveringMonth(DateTime month) {
-  final firstDay = DateTime(month.year, month.month, 1);
-  final lastDay = DateTime(month.year, month.month + 1, 0);
+  final firstDay = DateTime.utc(month.year, month.month, 1);
+  final lastDay = DateTime.utc(month.year, month.month + 1, 0);
 
   // DateTime.weekday: 월=1 ... 일=7
   final firstMonday = firstDay.subtract(Duration(days: firstDay.weekday - 1));
@@ -67,7 +66,8 @@ List<DateTimeRange> weeksCoveringMonth(DateTime month) {
   var weekStart = firstMonday;
   while (!weekStart.isAfter(lastSunday)) {
     final weekEnd = weekStart.add(const Duration(days: 6));
-    weeks.add(DateTimeRange(start: weekStart, end: weekEnd));
+    weeks.add(DateTimeRange(
+        start: localCalendarDate(weekStart), end: localCalendarDate(weekEnd)));
     weekStart = weekStart.add(const Duration(days: 7));
   }
   return weeks;
@@ -84,7 +84,7 @@ WeekWorkSummary computeWeekSummary({
   int shiftMinutes = 0;
   int otMinutes = 0;
 
-  for (var d = weekStart; !d.isAfter(weekEnd); d = d.add(const Duration(days: 1))) {
+  for (final d in calendarDaysInclusive(weekStart, weekEnd)) {
     final shift = schedule.getShiftForDate(d);
     if (shift != '미설정') {
       counts[shift] = (counts[shift] ?? 0) + 1;
@@ -177,17 +177,14 @@ List<OtDisplayEntry> computeOtDisplayEntries({
   required bool countShiftChangeAsOt,
 }) {
   final result = <OtDisplayEntry>[];
-  final startDay = DateTime(start.year, start.month, start.day);
-  final endDay = DateTime(end.year, end.month, end.day);
-
-  for (var d = startDay; !d.isAfter(endDay); d = d.add(const Duration(days: 1))) {
+  for (final d in calendarDaysInclusive(start, end)) {
     final manual = manualOtByDate[dateKey(d)] ?? 0;
     final implied = countShiftChangeAsOt ? impliedOvertimeForDate(schedule, d) : null;
     final impliedMinutes = implied?.minutes ?? 0;
     if (manual <= 0 && impliedMinutes <= 0) continue;
 
     result.add(OtDisplayEntry(
-      date: d,
+      date: localCalendarDate(d),
       manualMinutes: manual,
       impliedMinutes: impliedMinutes,
       fromShift: implied?.fromShift,

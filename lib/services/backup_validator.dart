@@ -101,6 +101,21 @@ class BackupValidator {
       if (!typeIds.contains(row['alarm_type_id'])) issues.add('template alarm_type_id unknown ${row['alarm_type_id']}');
     }
 
+    final consumedKeys = <String>{};
+    for (final row in tables['fixed_alarm_consumptions'] ?? const <Map<String, dynamic>>[]) {
+      if (!_isDbDateTime(row['slot_time'], allowFraction: false) ||
+          !_isOffset(row['day_offset']) || row['shift_type'] is! String ||
+          (row['shift_type'] as String).isEmpty ||
+          !consumedKeys.add('${row['slot_time']}|${row['shift_type']}|${row['day_offset']}')) {
+        issues.add('invalid/duplicate consumed fixed slot');
+      }
+    }
+    for (final row in tables['alarm_history'] ?? const <Map<String, dynamic>>[]) {
+      if (row['fixed_slot_time'] != null &&
+          !_isDbDateTime(row['fixed_slot_time'], allowFraction: false)) {
+        issues.add('history fixed_slot_time invalid');
+      }
+    }
     final overrideKeys = <String>{};
     for (final row in tables['alarm_overrides'] ?? const <Map<String, dynamic>>[]) {
       final action = row['action'];
@@ -123,19 +138,11 @@ class BackupValidator {
 
     for (final row in tables[kBackupAlarmsTable] ?? const <Map<String, dynamic>>[]) {
       if (row['type'] != 'custom') issues.add('alarms row not custom (${row['type']})');
+      if (row['fixed_slot_time'] != null) issues.add('custom alarm cannot have a fixed origin');
       if (!_isDbDateTime(row['date'], allowFraction: true)) issues.add('alarms date invalid');
       if (!_isHm(row['time'])) issues.add('alarms time invalid');
       if (!typeIds.contains(row['alarm_type_id'])) issues.add('alarms alarm_type_id unknown');
       if (row['id'] is! int) issues.add('alarms id missing');
-      final slot = row['preset_slot'];
-      if (slot != null && (slot is! int || slot < 0 || slot >= 5)) {
-        issues.add('alarms preset_slot invalid');
-      }
-      final assignedDay = row['assigned_day'];
-      if (assignedDay != null && !_isDate(assignedDay)) {
-        issues.add('alarms assigned_day invalid');
-      }
-      if ((slot == null) != (assignedDay == null)) issues.add('alarms preset link incomplete');
     }
 
     for (final row in tables['sleep_records'] ?? const <Map<String, dynamic>>[]) {

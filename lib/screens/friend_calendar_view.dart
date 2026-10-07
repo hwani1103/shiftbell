@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../l10n/l10n_extensions.dart';
+import '../widgets/unavailable_feature.dart';
 import '../models/friend_schedule.dart';
 import '../widgets/friend_web_calendar.dart';
 import 'friend_list_screen.dart';
@@ -12,6 +13,7 @@ class FriendCalendarView extends StatelessWidget {
     required this.friendName,
     required this.data,
     this.showInstallPrompt = false,
+    this.publicWebViewer = false,
     this.showPwaAddressBarHint = true,
     this.showQuickInstallButton = false,
     this.onQuickInstallTap,
@@ -19,6 +21,7 @@ class FriendCalendarView extends StatelessWidget {
   });
 
   final String friendName;
+  final bool publicWebViewer;
   final FriendScheduleData data;
   final bool showInstallPrompt;
   final bool showPwaAddressBarHint;
@@ -27,7 +30,9 @@ class FriendCalendarView extends StatelessWidget {
   final VoidCallback? onInstallTap;
 
   @override
-  Widget build(BuildContext context) => FriendWebCalendar(
+  Widget build(BuildContext context) => !publicWebViewer && !context.usesKoreanFeatures
+      ? const UnavailableFeature()
+      : FriendWebCalendar(
         friendName: friendName,
         data: data,
         showInstallPrompt: showInstallPrompt,

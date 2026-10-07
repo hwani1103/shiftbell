@@ -32,7 +32,7 @@ void main() {
 
     final futureDb = await openDatabase(
       path,
-      version: 27,
+      version: 29,
       singleInstance: false,
       onCreate: (db, version) async {
         await db.execute('CREATE TABLE marker(id INTEGER PRIMARY KEY, value TEXT)');
@@ -65,7 +65,7 @@ void main() {
     );
     await guarded;
 
-    expect(awaitedError, isNotNull, reason: 'v27 → v26 다운그레이드는 호출자에게 실패해야 함');
+    expect(awaitedError, isNotNull, reason: 'v29 → v28 다운그레이드는 호출자에게 실패해야 함');
     expect(
       uncaughtErrors,
       isEmpty,

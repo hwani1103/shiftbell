@@ -1,3 +1,4 @@
+import 'package:shiftbell/l10n/korean_only_copy.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -95,8 +96,9 @@ void main() {
         expect(notifier.resetCalls, 1);
         expect(find.byType(OnboardingScreen), findsOneWidget);
         expect(find.byType(SettingsTab), findsNothing);
-        final message = find.text(labels.settingsResetScheduleSharingFailed);
-        expect(message, findsOneWidget);
+        final message = find.text(KoreanOnlyCopy.forLocale('ko').settingsResetScheduleSharingFailed);
+        expect(message, language == 'ko' ? findsOneWidget : findsNothing);
+        if (language == 'ko') {
         final paragraph = tester.renderObject<RenderParagraph>(message);
         expect(paragraph.didExceedMaxLines, isFalse);
         final rect = tester.getRect(message);
@@ -104,11 +106,12 @@ void main() {
         expect(rect.right, lessThanOrEqualTo(360));
         expect(rect.top, greaterThanOrEqualTo(0));
         expect(rect.bottom, lessThanOrEqualTo(800));
+        }
         expect(tester.takeException(), isNull);
         expect((await SharedPreferences.getInstance()).getStringList('all_teams_names'), isNull);
         await tester.pump(const Duration(seconds: 4));
         await tester.pumpAndSettle();
-        expect(message, findsOneWidget);
+        expect(message, language == 'ko' ? findsOneWidget : findsNothing);
         expect(find.byType(AlertDialog), findsNothing);
         final boundary = tester.renderObject<RenderRepaintBoundary>(find.byKey(captureKey));
         await tester.runAsync(() async {

@@ -48,12 +48,6 @@ import 'friend_list_screen.dart';
 import '../utils/friend_open_util.dart';
 import '../utils/blocking_progress.dart';
 import '../utils/lunar_calendar_util.dart';
-import '../providers/custom_alarm_preset_provider.dart';
-import '../services/custom_alarm_service.dart';
-import '../services/app_analytics.dart';
-import '../widgets/custom_alarm_widgets.dart';
-import '../widgets/custom_alarm_preset_panel.dart';
-import '../services/diag_log.dart';
 import '../widgets/wide_calendar_cell.dart';
 
 // ⭐ 공휴일 판정 로직은 utils/holiday_util.dart로 이동함 (friend_calendar_view.dart도
@@ -164,9 +158,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   // ⭐ 2026-09-23 (1.0.24 B) - 커스텀 알람 할당 모드. 헤더 5칸 중 하나를 누르면 그 칸 번호가 들어가고,
   // 이 동안 날짜 탭 = 그 날짜에 알람 추가(상세 팝업·길게 눌러 다중 선택은 잠시 끔). null이면 평소 동작.
-  int? _assignPresetIndex;
-  bool _alarmPanelOpen = false;
-  bool _assigningAlarm = false;
   // 커스텀 알람이 있는 날짜('yyyy-MM-dd') - 달력 칸 🔔 표시용. build()에서 alarmNotifierProvider로 갱신.
 
   // _loadSchedule() 메서드 삭제 (Provider가 자동으로 관리)
@@ -245,8 +236,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!context.usesKoreanFeatures) {
-      _alarmPanelOpen = false;
-      _assignPresetIndex = null;
     }
   }
 
@@ -294,9 +283,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // ⭐ 특정 달의 메모 미리 로드 (달력에 보이는 이전/다음 달 날짜 포함)
   void _loadMemosForMonth(DateTime month) {
     final firstDay =
-        DateTime(month.year, month.month, 1).subtract(Duration(days: 7));
+        DateTime(month.year, month.month, 1 - 7);
     final lastDay =
-        DateTime(month.year, month.month + 1, 0).add(Duration(days: 7));
+        DateTime(month.year, month.month + 1, 7);
     ref.read(memoProvider.notifier).loadMemosForDateRange(firstDay, lastDay);
     // ⭐ 같은 범위로 OT도 같이 로드 (달력에 보이는 달 전체 커버)
     ref.read(overtimeProvider.notifier).loadForRange(firstDay, lastDay);
@@ -304,7 +293,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   // ⭐ 4번 기능: 년/월 선택 다이얼로그
   void _showMonthYearPicker() {
-    if (_alarmPanelOpen) return;
     int selectedYear = _focusedDay.year;
 
     // ⭐ 달력 초기화 범위 확인 (3년 전후)
@@ -468,7 +456,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       error: (error, stack) => Scaffold(
         backgroundColor: scaffoldBg,
         body:
-            Center(child: Text('${context.l10n.statusErrorOccurred}: $error')),
+            Center(child: Text('${context.l10n.statusErrorOccurred}: ${context.localizedErrorDetail(error)}')),
       ),
       data: (schedule) {
         if (schedule == null) {
@@ -488,17 +476,13 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         }
 
         final theme = context.availableCalendarTheme(ref.watch(calendarThemeProvider));
-        // ⭐ 2026-09-23 (1.0.24 B) - 커스텀 알람이 있는 날짜(🔔 표시). 내용이 같으면 provider가 상태를 안 바꿔 불필요한 리빌드 없음.
-        final now = DateTime.now();
-        final assignmentCrossesMonth = _assignPresetIndex != null &&
-            DateTime(now.year, now.month, now.day + 1).month != now.month;
         final reclaimsSixthRow =
-            !assignmentCrossesMonth && _themeReclaimsSixthRow(theme);
+            _themeReclaimsSixthRow(theme);
         // ⭐ 2026-09-05 - 6번째 줄 마지막 3칸(목/금/토)에 일정공유/전체 조 근무표/
         // 오늘 버튼(다이어리 + 범례 없는 나머지 5개 테마, _themeReclaimsSixthRowButtons
         // 참고). 목(일정공유)은 친구 유무와 무관하게 항상 표시(_openFriendShare 참고).
         final reclaimsSixthRowButtons =
-            !assignmentCrossesMonth && _themeReclaimsSixthRowButtons(theme);
+            _themeReclaimsSixthRowButtons(theme);
 
         return Scaffold(
           // ⭐ 2026-08-24 - 앱 전역 배경을 파스텔톤(app_colors.dart의
@@ -559,7 +543,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(
                                         horizontal: 8.w, vertical: 4.h),
-                                    child: !_isMultiSelectMode && !_alarmPanelOpen &&
+                                    child: !_isMultiSelectMode &&
                                         (theme == CalendarThemeId.underline || theme == CalendarThemeId.editorial)
                                       ? CalendarTitleActionsRow(
                                           title: _buildThemedHeaderTitle(theme),
@@ -604,116 +588,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                                       _buildThemedHeaderTitle(
                                                           theme),
                                                 )),
-                                        if (!_isMultiSelectMode && context.usesKoreanFeatures)
-                                          Flexible(
-                                              flex: 7,
-                                              child: LayoutBuilder(
-                                                builder:
-                                                    (context, constraints) =>
-                                                        AnimatedSize(
-                                                  duration: const Duration(
-                                                      milliseconds: 300),
-                                                  curve: Curves.easeOutCubic,
-                                                  alignment:
-                                                      Alignment.centerRight,
-                                                  child: SizedBox(
-                                                    width: _alarmPanelOpen
-                                                        ? constraints.maxWidth
-                                                        : 48,
-                                                    child: AnimatedSwitcher(
-                                                      duration: const Duration(
-                                                          milliseconds: 300),
-                                                      reverseDuration:
-                                                          const Duration(
-                                                              milliseconds:
-                                                                  220),
-                                                      switchInCurve:
-                                                          Curves.easeOutCubic,
-                                                      switchOutCurve:
-                                                          Curves.easeInCubic,
-                                                      transitionBuilder: (child, animation) => ClipRect(
-                                                          child: SlideTransition(
-                                                              position: Tween(
-                                                                      begin: const Offset(
-                                                                          1, 0),
-                                                                      end: Offset
-                                                                          .zero)
-                                                                  .animate(
-                                                                      animation),
-                                                              child: FadeTransition(
-                                                                  opacity:
-                                                                      animation,
-                                                                  child:
-                                                                      child))),
-                                                      child: _alarmPanelOpen
-                                                          ? KeyedSubtree(
-                                                              key: const ValueKey(
-                                                                  'one-tap-panel'),
-                                                              child:
-                                                                  OverflowBox(
-                                                                      alignment:
-                                                                          Alignment
-                                                                              .centerRight,
-                                                                      minWidth:
-                                                                          constraints
-                                                                              .maxWidth,
-                                                                      maxWidth:
-                                                                          constraints
-                                                                              .maxWidth,
-                                                                      child:
-                                                                          CustomAlarmPresetPanel(
-                                                                        selectedIndex:
-                                                                            _assignPresetIndex,
-                                                                        onDarkHeader:
-                                                                            theme.isDark ||
-                                                                                theme == CalendarThemeId.boldGrid,
-                                                                        onBack:
-                                                                            _backFromAlarmPanel,
-                                                                        onSelect:
-                                                                            _selectAlarmPreset,
-                                                                        onEdit: () =>
-                                                                            _editAlarmPreset(delete: false),
-                                                                        onDelete:
-                                                                            () =>
-                                                                                _editAlarmPreset(delete: true),
-                                                                      )))
-                                                          : IconButton(
-                                                              key: const ValueKey(
-                                                                  'one-tap-open'),
-                                                              tooltip: context
-                                                                  .l10n
-                                                                  .customAlarmLabel,
-                                                              icon: Icon(
-                                                                  Icons
-                                                                      .alarm_add_rounded,
-                                                                  color: (theme
-                                                                              .isDark ||
-                                                                          theme ==
-                                                                              CalendarThemeId
-                                                                                  .boldGrid)
-                                                                      ? Colors
-                                                                          .white
-                                                                      : null),
-                                                              onPressed: () {
-                                                                setState(() =>
-                                                                    _alarmPanelOpen =
-                                                                        true);
-                                                                AppAnalytics.track(
-                                                                    AnalyticsEvent
-                                                                        .oneTapOpened);
-                                                                maybeShowOneTouchAlarmTutorial(
-                                                                    context,
-                                                                    canShow: () =>
-                                                                        mounted &&
-                                                                        _alarmPanelOpen);
-                                                              },
-                                                            ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              )),
                                         if (!_isMultiSelectMode &&
-                                            !_alarmPanelOpen &&
                                             !_usesWideCalendarCells &&
                                             (theme ==
                                                     CalendarThemeId.underline ||
@@ -751,9 +626,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                             horizontal: 6.w),
                                         child: SemanticsTableBoundary(child: TableCalendar(
                                           startingDayOfWeek: MaterialLocalizations.of(context).firstDayOfWeekIndex == 1 ? StartingDayOfWeek.monday : StartingDayOfWeek.sunday,
-                                          availableGestures: _alarmPanelOpen
-                                              ? AvailableGestures.none
-                                              : AvailableGestures.all,
+                                          availableGestures: AvailableGestures.all,
                                           shouldFillViewport: true,
                                           firstDay: DateTime(
                                               DateTime.now().year - 3, 1, 1),
@@ -963,16 +836,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
                                           onDaySelected:
                                               (selectedDay, focusedDay) {
-                                            if (_alarmPanelOpen) {
-                                              if (_assignPresetIndex != null &&
-                                                  _isAlarmAssignmentDay(
-                                                      selectedDay)) {
-                                                _assignCustomAlarm(selectedDay);
-                                              }
-                                              if (_assignPresetIndex == null)
-                                                _backFromAlarmPanel();
-                                              return;
-                                            }
                                             // ⭐ 이전/다음 달 날짜는 탭 무시
                                             if (selectedDay.month !=
                                                     _focusedDay.month ||
@@ -997,11 +860,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                               _focusedDay = focusedDay;
                                             });
 
-                                            if (_assignPresetIndex != null &&
-                                                !_isMultiSelectMode) {
-                                              _assignCustomAlarm(selectedDay);
-                                              return;
-                                            }
                                             if (_isMultiSelectMode) {
                                               _toggleDateSelection(selectedDay);
                                             } else {
@@ -1012,7 +870,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
                                           onDayLongPressed:
                                               (selectedDay, focusedDay) {
-                                            if (_alarmPanelOpen) return;
                                             // ⭐ 이전/다음 달 날짜는 길게 누르기 무시
                                             if (selectedDay.month !=
                                                     _focusedDay.month ||
@@ -1033,10 +890,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                               return;
                                             }
 
-                                            // 커스텀 알람 할당 중에는 다중 선택으로 넘어가지 않음
-                                            if (_assignPresetIndex != null) {
-                                              return;
-                                            }
                                             if (!_isMultiSelectMode) {
                                               _enterMultiSelectMode(
                                                   selectedDay);
@@ -1044,7 +897,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                           },
 
                                           onPageChanged: (focusedDay) {
-                                            if (_alarmPanelOpen) return;
                                             setState(() {
                                               _focusedDay = focusedDay;
                                             });
@@ -1054,15 +906,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                         )),
                                       ),
 
-                                      // ⭐ 2026-09-23 (1.0.24 B) - 할당 모드 안내줄. 요일 줄(28.h)을 잠시 덮음(요일 줄은 누를 곳이 없어 안전).
-                                      if (_assignPresetIndex != null)
-                                        Positioned(
-                                          top: 0,
-                                          left: 6.w,
-                                          right: 6.w,
-                                          height: 28.h,
-                                          child: _buildAssignModeBanner(),
-                                        ),
                                       // ⭐ 6번째 줄 화~토 (원래 빈 공간이었던 곳) - 이 자리를 재활용하는
                                       // 테마(메인·화이트/다크 = OT/주별근무시간 카드, 8/10번 = 범례)만
                                       // 그려줌. 나머지 7개 테마는 6번째 줄도 그냥 평범한 다음 달
@@ -1293,13 +1136,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         );
       },
     );
-    return PopScope(
-      canPop: !_alarmPanelOpen,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop && _alarmPanelOpen) _backFromAlarmPanel();
-      },
-      child: body,
-    );
+    return body;
   }
 
   // ⭐ 6번째 줄 빈 공간에 들어가는 카드 - 위 절반 "이번 달 OT" / 아래 절반
@@ -1514,7 +1351,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // ⭐ 이번 달 누적 OT 카드에서의 좌우 스와이프 → 달력 자체를 스와이프한 것과
   // 동일하게 월 이동 (onPageChanged와 동일한 처리)
   void _changeMonthBySwipe(int direction) {
-    if (_alarmPanelOpen) return;
     final newMonth =
         DateTime(_focusedDay.year, _focusedDay.month + direction, 1);
     setState(() {
@@ -2638,12 +2474,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           onToday: _jumpToToday,
           onAllShifts: showAllShifts ? _openAllShiftsView : null,
           onFriends: context.usesKoreanFeatures ? _openFriendShare : null,
-          onOneTap: context.usesKoreanFeatures ? () {
-            setState(() => _alarmPanelOpen = true);
-            AppAnalytics.track(AnalyticsEvent.oneTapOpened);
-            maybeShowOneTouchAlarmTutorial(context,
-              canShow: () => mounted && _alarmPanelOpen);
-          } : null,
         );
     }
   }
@@ -3349,172 +3179,14 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // 기준으로 첫 줄 여부(_isFirstRow)를 판정해서, 스와이프 도중 위쪽 여백이 있다/없다가
   // 뒤바뀌는 셀이 생겼던 것 - 스와이프가 끝나 상태가 갱신되면 다시 맞아 보여서 순간적인
   // "틀어짐"으로만 보였음. 이제 각 빌더 콜백의 focusedDay를 그대로 전달받아 씀.
-  Widget _buildThemedCell(DateTime day, bool isToday, bool isOutside,
-      ShiftSchedule schedule, DateTime focusedDay,
-      {bool isSelected = false}) {
-    if (_assignPresetIndex != null && _isAlarmAssignmentDay(day))
-      isOutside = false;
-    return KeyedSubtree(
-        key: ValueKey('calendar-cell-${_dayKey(day)}'),
-        child: _decorateCustomAlarmCell(
-            day,
-            isOutside,
-            _buildThemedCellCore(day, isToday, isOutside, schedule, focusedDay,
-                isSelected: isSelected)));
-  }
-
-  // ⭐ 2026-09-23 (1.0.24 B) - 모든 테마 셀 공통 장식: 커스텀 알람이 있는 날 🔔 작은 표시 + 헤더 칸을 끌어다
-  // 놓을 수 있는 자리(이번 달 날짜만). 셀 디자인 자체는 건드리지 않고 겉에서만 감쌈.
-  Widget _decorateCustomAlarmCell(DateTime day, bool isOutside, Widget cell) {
-    if (!context.usesKoreanFeatures) return cell;
-    if (!_alarmPanelOpen || _assignPresetIndex == null) return cell;
-    final active = _isAlarmAssignmentDay(day);
-    return AnimatedContainer(
-      key: ValueKey('one-tap-day-${_dayKey(day)}'),
-      duration: const Duration(milliseconds: 180),
-      foregroundDecoration: BoxDecoration(
-        color:
-            active ? Colors.transparent : Colors.black.withValues(alpha: 0.23),
-        border: active
-            ? Border.all(
-                color: Theme.of(context).colorScheme.primary, width: 2.5)
-            : null,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: cell,
-    );
-  }
-
-  bool _isAlarmAssignmentDay(DateTime day) {
-    final now = DateTime.now();
-    return isSameDay(day, now) ||
-        isSameDay(day, DateTime(now.year, now.month, now.day + 1));
-  }
-
-  void _backFromAlarmPanel() {
-    setState(() {
-      if (_assignPresetIndex != null) {
-        _assignPresetIndex = null;
-      } else {
-        _alarmPanelOpen = false;
-        AppAnalytics.track(AnalyticsEvent.oneTapClosed,
-            params: {'reason': 'back_or_calendar'});
-      }
-    });
-  }
-
-  Future<void> _selectAlarmPreset(int index) async {
-    final preset = ref.read(customAlarmPresetsProvider)[index];
-    if (preset.isEmpty) {
-      await showCustomAlarmPresetEditor(context, ref, slot: index);
-      return;
-    }
-    AppAnalytics.track(AnalyticsEvent.oneTapPresetSelected);
-    final now = DateTime.now();
-    // Six weeks always include tomorrow; release reclaimed outside cells at month end.
-    final focus = now;
-    setState(() {
-      _assignPresetIndex = index;
-      _focusedDay = focus;
-    });
-    _loadMemosForMonth(focus);
-  }
-
-  Future<void> _editAlarmPreset({required bool delete}) async {
-    final index = _assignPresetIndex;
-    if (index == null) return;
-    await showCustomAlarmPresetEditor(context, ref,
-        slot: index, delete: delete);
-    if (!mounted) return;
-    if (ref.read(customAlarmPresetsProvider)[index].isEmpty) {
-      setState(() => _assignPresetIndex = null);
-    }
-  }
-
   static String _dayKey(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
-  Widget _buildAssignModeBanner() {
-    final presets = ref.watch(customAlarmPresetsProvider);
-    final idx = _assignPresetIndex!;
-    final time = idx < presets.length ? (presets[idx].time ?? '') : '';
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w),
-      decoration: BoxDecoration(
-        color: scheme.primary,
-        borderRadius: BorderRadius.circular(6.r),
-      ),
-      child: Row(children: [
-        Icon(Icons.touch_app, size: 14.sp, color: scheme.onPrimary),
-        SizedBox(width: 6.w),
-        Expanded(
-          child: Text(context.l10n.customAlarmAssignHint(time),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                  fontSize: 12.sp,
-                  color: scheme.onPrimary,
-                  fontWeight: FontWeight.w600)),
-        ),
-      ]),
-    );
-  }
-
-  /// 커스텀 알람 할당(탭 할당 모드 또는 드래그). 결과는 스낵바로 안내, 성공이면 [되돌리기] 제공.
-  Future<void> _assignCustomAlarm(DateTime day, {int? presetIndex}) async {
-    if (!context.usesKoreanFeatures) return;
-    final idx = presetIndex ?? _assignPresetIndex;
-    if (idx == null || _assigningAlarm) return;
-    final presets = ref.read(customAlarmPresetsProvider);
-    if (idx >= presets.length) return;
-    _assigningAlarm = true;
-    late CustomAlarmAssignOutcome outcome;
-    try {
-      outcome =
-          await CustomAlarmService.instance.assign(day, presets[idx], idx);
-    } finally {
-      _assigningAlarm = false;
-    }
-    AppAnalytics.track(AnalyticsEvent.customAlarmAssigned, params: {
-      'result': switch (outcome.result) {
-        CustomAlarmAssignResult.scheduled => 'scheduled',
-        CustomAlarmAssignResult.past => 'past',
-        CustomAlarmAssignResult.outsideWindow => 'outside_window',
-        CustomAlarmAssignResult.duplicate => 'duplicate',
-        CustomAlarmAssignResult.alreadyAssigned => 'already_assigned',
-        CustomAlarmAssignResult.scheduleFailed => 'schedule_failed',
-        CustomAlarmAssignResult.emptyPreset => 'empty_preset',
-      },
-    });
-    DiagLog.log('CUSTOM_ALARM_ASSIGN',
-        {'result': outcome.result.name, 'id': outcome.alarmId});
-    AppAnalytics.track(
-        outcome.result == CustomAlarmAssignResult.scheduled
-            ? AnalyticsEvent.oneTapAssigned
-            : AnalyticsEvent.oneTapAssignRejected,
-        params: {'result': outcome.result.name});
-    if (outcome.result == CustomAlarmAssignResult.scheduled) {
-      await ref.read(alarmNotifierProvider.notifier).refresh();
-    }
-    if (!mounted) return;
-    if (outcome.result == CustomAlarmAssignResult.scheduled) {
-      setState(() {
-        _assignPresetIndex = null;
-        _alarmPanelOpen = false;
-      });
-      AppAnalytics.track(AnalyticsEvent.oneTapClosed,
-          params: {'reason': 'assigned'});
-    }
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
-    messenger.clearSnackBars();
-    messenger.showSnackBar(SnackBar(
-      content: Text(customAlarmOutcomeMessage(context, outcome,
-          alarmTypeId: presets[idx].alarmTypeId)),
-      duration: const Duration(seconds: 3),
-    ));
-  }
+  Widget _buildThemedCell(DateTime day, bool isToday, bool isOutside,
+      ShiftSchedule schedule, DateTime focusedDay, {bool isSelected = false}) =>
+    KeyedSubtree(key: ValueKey('calendar-cell-${_dayKey(day)}'),
+      child: _buildThemedCellCore(day, isToday, isOutside, schedule, focusedDay,
+        isSelected: isSelected));
 
   Widget _buildThemedCellCore(DateTime day, bool isToday, bool isOutside,
       ShiftSchedule schedule, DateTime focusedDay,
@@ -3589,7 +3261,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   bool get _isFoldCalendar => AppLayout.of(context).usesBoundedCalendar;
 
   Widget _fixedCalendarText(Widget child) {
-    child = IgnorePointer(ignoring: _alarmPanelOpen, child: child);
     if (!_isFoldCalendar) return child;
     final media = MediaQuery.of(context);
     return MediaQuery(
@@ -5772,7 +5443,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                           ),
 
                           // ⭐ 2026-09-23 (1.0.24 B) - 이 날짜의 커스텀 알람(있을 때만 표시, 삭제 가능)
-                          if (context.usesKoreanFeatures) CustomAlarmDayList(day: day),
 
                           SizedBox(height: 20.h),
 
@@ -6178,10 +5848,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // ⭐ 알람 삭제 확인 팝업
   Future<void> _showDeleteAlarmConfirmation(
       Alarm alarm, StateSetter parentSetState) async {
-    final replacement = (alarm.type == 'custom' || alarm.presetSlot != null) &&
-            alarm.date != null
-        ? await CustomAlarmService.instance.previewFixedReplacement(alarm.date!)
-        : null;
     if (!mounted) return;
     showDialog(
       context: context,
@@ -6192,8 +5858,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
           content: Text(
-            '${context.l10n.calendarDeleteAlarmConfirm(alarm.time)}'
-            '${(alarm.type == 'custom' || alarm.presetSlot != null) ? '\n${replacement == null ? context.l10n.oneTapDeleteNoAlarmDetail : context.l10n.oneTapDeleteRestoreDetail(replacement.shiftType)}' : ''}',
+            context.l10n.calendarDeleteAlarmConfirm(alarm.time),
             style: TextStyle(fontSize: 14.sp),
           ),
           actions: [
@@ -6249,7 +5914,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${context.l10n.calendarDeleteAlarmFailed}: $e'),
+            content: Text('${context.l10n.calendarDeleteAlarmFailed}: ${context.localizedErrorDetail(e)}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -6262,10 +5927,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(deletion.reservationFailed
-              ? context.l10n.oneTapDeletedRefreshRetry
-              : deletion.fixedReplacement
-                  ? context.l10n.oneTapDeletedFixedRestored
-                  : context.l10n.alarmDeletedToast),
+              ? context.l10n.alarmRefreshUnconfirmed
+              : context.l10n.alarmDeletedToast),
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
@@ -6338,7 +6001,6 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   void _enterMultiSelectMode(DateTime firstDate) {
     setState(() {
-      _assignPresetIndex = null;
       _isMultiSelectMode = true;
       _selectedDates.clear();
       _selectedDates.add(firstDate);
@@ -6511,25 +6173,17 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           partial
               ? SnackBar(
                   content: Text(
-                      '⚠️ ${context.l10n.alarmSchedulePartialFailed(alarmOutcome.failed, alarmOutcome.attempted)}'
-                      '${alarmOutcome.skippedSlots.isEmpty ? '' : ' · ${context.l10n.fixedAlarmSkippedByOneTap} '
-                          '${alarmOutcome.skippedSlots.map((d) => '${d.month}/${d.day} '
-                              '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}').join(', ')}'}'),
+                      '⚠️ ${context.l10n.alarmSchedulePartialFailed(alarmOutcome.failed, alarmOutcome.attempted)}'),
                   backgroundColor: Colors.orange,
                 )
-              : alarmOutcome != null && alarmOutcome.skippedByCustom > 0
-                  ? SnackBar(
-                      content: Text('${context.l10n.fixedAlarmSkippedByOneTap} '
-                          '${alarmOutcome.skippedSlots.map((d) => '${d.month}/${d.day} '
-                              '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}').join(', ')}'))
-                  : SnackBar(content: Text(context.l10n.statusShiftAssigned)),
+              : SnackBar(content: Text(context.l10n.statusShiftAssigned)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${context.l10n.statusShiftAssignFailed}: $e'),
+            content: Text('${context.l10n.statusShiftAssignFailed}: ${context.localizedErrorDetail(e)}'),
             backgroundColor: Colors.red,
           ),
         );

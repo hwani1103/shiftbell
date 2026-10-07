@@ -76,7 +76,7 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // 못 읽었음(C01). 이제 onUpgrade가 Flutter와 같은 SQL 원본(assets/db/migrations.json)을
         // DbMigrationRunner로 실행함. 이 값은 여전히 database_service.dart의 version:,
         // migrations.json의 targetVersion과 같아야 하고 checkDartKotlinSync가 빌드 때 검사함.
-        private const val DATABASE_VERSION = 26
+        private const val DATABASE_VERSION = 28
         private const val TAG = "DatabaseHelper"
 
         @Volatile
@@ -150,6 +150,23 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
             Log.w(TAG, "⚠️ 버전이 잠금 전후로 다름(v$oldVersion → v$current) - v$current 기준으로 진행")
         }
         Log.i(TAG, "🔧 Native 마이그레이션 시작 v$current → v$newVersion")
+        if (current < 27) {
+            val hasSlot = db.rawQuery("PRAGMA table_info(alarms)", null).use { c ->
+                var found = false
+                while (c.moveToNext()) if (c.getString(c.getColumnIndexOrThrow("name")) == "preset_slot") found = true
+                found
+            }
+            if (hasSlot) db.rawQuery("SELECT id FROM alarms WHERE preset_slot IS NOT NULL AND type IN ('custom','snoozed')", null).use { c ->
+                // Only retired dev IDs belong here. General wake retry IDs may be
+                // waiting for a DB write and must not be cancelled during open.
+                val prefs = appContext.getSharedPreferences("retired_dev_alarms", Context.MODE_PRIVATE)
+                val ids = prefs.getStringSet("ids", emptySet())!!.toMutableSet()
+                while (c.moveToNext()) ids.add(c.getInt(0).toString())
+                if (!prefs.edit().putStringSet("ids", ids).commit()) {
+                    throw DbMigrationException("Cannot persist retired alarm cancellation IDs")
+                }
+            }
+        }
         DbMigrationRunner.migrate(db, DbMigrationScript.load(appContext), current, newVersion)
         Log.i(TAG, "✅ Native 마이그레이션 완료 v$current → v$newVersion")
     }
@@ -182,6 +199,17 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
             return
         }
         DbMigrationRunner.repair(db, script)
+        // No recursive helper lookup while SQLiteOpenHelper is still opening.
+        val prefs = appContext.getSharedPreferences("retired_dev_alarms", Context.MODE_PRIVATE)
+        val pending = prefs.getStringSet("ids", emptySet())!!.toMutableSet()
+        for (key in pending.toList()) {
+            val id = key.toIntOrNull() ?: continue
+            val exists = db.rawQuery("SELECT 1 FROM alarms WHERE id = ?", arrayOf(id.toString())).use { it.moveToFirst() }
+            if (!exists && AlarmWakeScheduler.cancelIfGone(appContext, db, id) == AlarmWakeScheduler.Outcome.CANCELLED) {
+                pending.remove(key)
+            }
+        }
+        if (pending != prefs.getStringSet("ids", emptySet())) prefs.edit().putStringSet("ids", pending).commit()
     }
 
     // ⭐ CRITICAL FIX: DB 파일이 실제로 디스크에 있는지 확인. Flutter(sqflite)가 신규 설치

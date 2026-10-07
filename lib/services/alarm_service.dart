@@ -4,17 +4,13 @@ import '../constants/platform_channel.dart';
 /// 예전 판정 `failCount > 0 && scheduled.isEmpty`는 실패가 있으면 목록이 비어 있을 수 없어서
 /// 항상 거짓이었음(전부 실패해도 성공 안내). 판정을 이 한 곳에 둠.
 class AlarmScheduleOutcome {
-  const AlarmScheduleOutcome({required this.attempted, required this.failed,
-      this.skippedByCustom = 0, this.skippedSlots = const []});
+  const AlarmScheduleOutcome({required this.attempted, required this.failed});
 
   /// 등록을 시도한 알람 수
   final int attempted;
 
   /// 그중 등록에 실패한 수
   final int failed;
-  /// 같은 시각에 먼저 저장된 원터치 알람 때문에 만들지 않은 고정 알람 수.
-  final int skippedByCustom;
-  final List<DateTime> skippedSlots;
 
   bool get allFailed => attempted > 0 && failed == attempted;
   bool get partiallyFailed => failed > 0 && failed < attempted;

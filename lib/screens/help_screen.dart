@@ -1,4 +1,5 @@
 import '../widgets/adaptive_layout.dart';
+import '../widgets/permission_panel.dart';
 // lib/screens/help_screen.dart
 //
 // ⭐ 2026-09-03 - 설정 탭 "도움말"을 4항목짜리 AlertDialog에서 전면 재작성.
@@ -98,8 +99,6 @@ final List<HelpSection> _helpSections = [
     icon: Icons.alarm_outlined,
     titleKey: (l10n) => l10n.helpAlarmSectionTitle,
     topics: [
-      HelpTopic(koreanOnly: true, titleKey: (l10n) => l10n.helpOneTapTitle,
-        bodyKey: (l10n) => l10n.helpOneTapBody),
       HelpTopic(
         titleKey: (l10n) => l10n.helpAlarmTemplatesTitle,
         bodyKey: (l10n) => l10n.helpAlarmTemplatesBody,
@@ -146,20 +145,20 @@ final List<HelpSection> _helpSections = [
   ),
   HelpSection(
     icon: Icons.checklist_outlined,
-    titleKey: (l10n) => l10n.helpScheduleTabSectionTitle,
+    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabSectionTitle,
     koreanOnly: true,
     topics: [
       HelpTopic(
-        titleKey: (l10n) => l10n.helpScheduleTabWhatIsItTitle,
-        bodyKey: (l10n) => l10n.helpScheduleTabWhatIsItBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabWhatIsItTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabWhatIsItBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpScheduleTabCreateEditTitle,
-        bodyKey: (l10n) => l10n.helpScheduleTabCreateEditBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabCreateEditTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabCreateEditBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpScheduleTabAutoCategoryTitle,
-        bodyKey: (l10n) => l10n.helpScheduleTabAutoCategoryBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabAutoCategoryTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabAutoCategoryBody,
         // 자동분류 모델이 한국어 전용 - 영어에서는 분류 없이 기본 도형 아이콘만 순서대로 붙음
         koreanOnly: true,
       ),
@@ -167,64 +166,64 @@ final List<HelpSection> _helpSections = [
   ),
   HelpSection(
     icon: Icons.self_improvement_outlined,
-    titleKey: (l10n) => l10n.helpConditionSectionTitle,
+    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSectionTitle,
     koreanOnly: true,
     topics: [
       HelpTopic(
-        titleKey: (l10n) => l10n.helpConditionWhatIsItTitle,
-        bodyKey: (l10n) => l10n.helpConditionWhatIsItBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionWhatIsItTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionWhatIsItBody,
       ),
       // ⭐ 2026-09-04 v2 - 컨디션 판정 로직 개편(evidence 6종 판정 반영)에 맞춰
       // 근거자료 12개 전체를 도움말 한곳에서 볼 수 있게 신설(사용자 요청).
       HelpTopic(
-        titleKey: (l10n) => l10n.helpConditionEvidenceListTitle,
-        bodyKey: (l10n) => l10n.helpConditionEvidenceListBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionEvidenceListTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionEvidenceListBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpConditionSetupNeededTitle,
-        bodyKey: (l10n) => l10n.helpConditionSetupNeededBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSetupNeededTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSetupNeededBody,
       ),
     ],
   ),
   HelpSection(
     icon: Icons.bedtime_outlined,
-    titleKey: (l10n) => l10n.helpSleepSectionTitle,
+    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepSectionTitle,
     koreanOnly: true,
     topics: [
       HelpTopic(
-        titleKey: (l10n) => l10n.helpSleepWidgetTitle,
-        bodyKey: (l10n) => l10n.helpSleepWidgetBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepWidgetTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepWidgetBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpSleepAutoDetectTitle,
-        bodyKey: (l10n) => l10n.helpSleepAutoDetectBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepAutoDetectTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepAutoDetectBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpSleepMiniCalendarTitle,
-        bodyKey: (l10n) => l10n.helpSleepMiniCalendarBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepMiniCalendarTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepMiniCalendarBody,
       ),
     ],
   ),
   HelpSection(
     icon: Icons.group_outlined,
-    titleKey: (l10n) => l10n.helpFriendSectionTitle,
+    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendSectionTitle,
     koreanOnly: true,
     topics: [
       HelpTopic(
-        titleKey: (l10n) => l10n.helpFriendWhatIsItTitle,
-        bodyKey: (l10n) => l10n.helpFriendWhatIsItBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendWhatIsItTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendWhatIsItBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpFriendShareCodeTitle,
-        bodyKey: (l10n) => l10n.helpFriendShareCodeBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendShareCodeTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendShareCodeBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpFriendViewFriendTitle,
-        bodyKey: (l10n) => l10n.helpFriendViewFriendBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendViewFriendTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendViewFriendBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpFriendReinstallNoteTitle,
-        bodyKey: (l10n) => l10n.helpFriendReinstallNoteBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendReinstallNoteTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendReinstallNoteBody,
       ),
     ],
   ),
@@ -252,8 +251,9 @@ final List<HelpSection> _helpSections = [
       // 격리 없음) 항목은 코드 수정은 보류하기로 했지만, 예방 차원에서 사용자가
       // 알아두면 도움되는 내용이라 도움말에만 추가.
       HelpTopic(
-        titleKey: (l10n) => l10n.helpBackupRestoreOldBackupFailTitle,
-        bodyKey: (l10n) => l10n.helpBackupRestoreOldBackupFailBody,
+        koreanOnly: true,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpBackupRestoreOldBackupFailTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpBackupRestoreOldBackupFailBody,
       ),
     ],
   ),
@@ -287,8 +287,8 @@ final List<HelpSection> _helpSections = [
       ),
       HelpTopic(
         koreanOnly: true,
-        titleKey: (l10n) => l10n.helpTroubleshootFriendDisconnectedTitle,
-        bodyKey: (l10n) => l10n.helpTroubleshootFriendDisconnectedBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpTroubleshootFriendDisconnectedTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpTroubleshootFriendDisconnectedBody,
       ),
     ],
   ),
@@ -339,7 +339,8 @@ class _HelpScreenState extends State<HelpScreen> {
               final matched = s.topics
                   .where((t) => t.titleKey(l10n).toLowerCase().contains(query))
                   .toList();
-              return HelpSection(icon: s.icon, titleKey: s.titleKey, topics: matched);
+              return HelpSection(icon: s.icon, titleKey: s.titleKey,
+                  koreanOnly: s.koreanOnly, topics: matched);
             })
             .where((s) => s.topics.isNotEmpty)
             .toList();
@@ -348,6 +349,9 @@ class _HelpScreenState extends State<HelpScreen> {
       backgroundColor: kAppBackgroundPastel,
       appBar: AppBar(
         title: Text(l10n.settingsHelp),
+        actions: [IconButton(icon: const Icon(Icons.lock_clock),
+          tooltip: l10n.permissionSettingsTitle,
+          onPressed: () => showPermissionSettings(context))],
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0.5,
@@ -442,7 +446,7 @@ class _SectionBlock extends StatelessWidget {
             children: [
               for (var i = 0; i < section.topics.length; i++) ...[
                 if (i > 0) Divider(height: 1, indent: 16.w, endIndent: 16.w, color: Colors.grey.shade200),
-                _TopicTile(topic: section.topics[i]),
+                _TopicTile(topic: section.topics[i], koreanOnly: section.koreanOnly),
               ],
             ],
           ),
@@ -454,14 +458,16 @@ class _SectionBlock extends StatelessWidget {
 
 class _TopicTile extends StatelessWidget {
   final HelpTopic topic;
-  const _TopicTile({required this.topic});
+  final bool koreanOnly;
+  const _TopicTile({required this.topic, required this.koreanOnly});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return InkWell(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => HelpDetailScreen(topic: topic)),
+        MaterialPageRoute(builder: (_) => HelpDetailScreen(
+          topic: topic, koreanOnly: koreanOnly || topic.koreanOnly)),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -485,10 +491,15 @@ class _TopicTile extends StatelessWidget {
 /// 항목 하나의 상세 내용만 보여주는 화면 - 목차 화면에서 항목을 탭하면 옴.
 class HelpDetailScreen extends StatelessWidget {
   final HelpTopic topic;
-  const HelpDetailScreen({super.key, required this.topic});
+  final bool koreanOnly;
+  const HelpDetailScreen({super.key, required this.topic, this.koreanOnly = false});
 
   @override
   Widget build(BuildContext context) {
+    // A detail route can remain open while the device language changes.
+    if ((koreanOnly || topic.koreanOnly) && !context.usesKoreanFeatures) {
+      return const HelpScreen();
+    }
     final l10n = context.l10n;
     return Scaffold(
       backgroundColor: kAppBackgroundPastel,
