@@ -1,0 +1,13 @@
+00:00 +0: loading C:/Users/Administrator/Desktop/shiftbell/test/english_release_layout_test.dart
+00:00 +0: (setUpAll)
+⚠️ Android가 아님 - 일반 DB 경로 사용: C:\Users\ADMINI~1\AppData\Local\Temp\english_release_bd78d7c4\shiftbell.db
+✅ 데이터베이스 초기화 완료
+🛠️ DB 스키마 복구 3건 실행
+00:01 +0: en_US calendar_mainWhite release layout
+00:12 +1: en_US calendar_mainDark release layout
+00:22 +2: en_US calendar_minimal release layout
+00:29 +3: en_US calendar_materialCard release layout
+00:35 +4: en_US calendar_boldGrid release layout
+00:42 +5: en_US themes release layout
+00:54 +6: (tearDownAll)
+00:54 +6: All tests passed!

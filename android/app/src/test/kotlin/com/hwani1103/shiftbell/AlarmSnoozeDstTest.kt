@@ -15,6 +15,12 @@ import org.robolectric.annotation.Config
 import java.io.File
 import java.time.Instant
 import java.util.TimeZone
+import java.util.concurrent.Future
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.FutureTask
+import java.util.concurrent.ScheduledThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 @RunWith(RobolectricTestRunner::class)
 @Config(instrumentedPackages = ["com.hwani1103.shiftbell.AlarmActionHelper"])
@@ -91,6 +97,62 @@ class AlarmSnoozeDstTest {
     @Test fun londonClockBack() = verify("Europe/London", "2026-10-25T00:58:00Z", "2026-10-25T01:03:00Z")
     @Test fun springJump() = verify("America/New_York", "2026-03-08T06:58:00Z", "2026-03-08T03:03:00-04:00")
     @Test fun ordinarySeoul() = verify("Asia/Seoul", "2026-10-01T21:58:00Z", "2026-10-02T07:03:00+09:00")
+
+    @Test fun pendingDiagnosticsCannotReopenPreviousFixtureAfterDatabaseReset() {
+        prepare("Asia/Seoul", "2026-10-01T21:58:00Z")
+        DiagReport.scheduleRefresh(context)
+        val field = DiagReport::class.java.getDeclaredField("pendingRefresh").apply { isAccessible = true }
+        val pending = field.get(DiagReport) as Future<*>
+        DatabaseHelper.resetInstanceForTest()
+        // Wait for the scheduled reader if reset did not cancel it. This turns the
+        // otherwise timing-dependent fixture replacement race into a fixed order.
+        if (!pending.isCancelled) pending.get(10, TimeUnit.SECONDS)
+        val file = context.createDeviceProtectedStorageContext().getDatabasePath("shiftbell.db")
+        File(G0TestSupport.g0Dir, "fixtures_db/aux_h2_minimal_v24.db").copyTo(file, overwrite = true)
+        val db = DatabaseHelper.getInstance(context).writableDatabase
+        db.rawQuery("SELECT COUNT(*) FROM alarms", null).use {
+            assertTrue(it.moveToFirst())
+            assertEquals("New fixture must not reuse the previous diagnostic reader's DB", 0, it.getInt(0))
+        }
+        insert(7, "2026-10-02T07:03:00+09:00")
+    }
+
+    @Test fun runningDiagnosticReaderFinishesBeforeDatabaseReset() {
+        prepare("Asia/Seoul", "2026-10-01T21:58:00Z")
+        val field = DiagReport::class.java.getDeclaredField("refreshExecutor").apply { isAccessible = true }
+        val executor = field.get(DiagReport) as ScheduledThreadPoolExecutor
+        val entered = CountDownLatch(1)
+        val release = CountDownLatch(1)
+        val reader = executor.submit {
+            entered.countDown()
+            check(release.await(10, TimeUnit.SECONDS))
+            DiagReport.buildSnapshot(context)
+        }
+        assertTrue(entered.await(10, TimeUnit.SECONDS))
+        val resetting = FutureTask { DatabaseHelper.resetInstanceForTest() }
+        val resetThread = Thread(resetting, "fixture-db-reset")
+        resetThread.start()
+        try {
+            try {
+                resetting.get(200, TimeUnit.MILLISECONDS)
+                fail("Fixture reset must wait for the active diagnostic reader")
+            } catch (_: TimeoutException) {
+                // The DB must stay valid until the old reader has finished.
+            }
+        } finally {
+            release.countDown()
+            reader.get(10, TimeUnit.SECONDS)
+            resetting.get(10, TimeUnit.SECONDS)
+            resetThread.join(10_000)
+        }
+        val file = context.createDeviceProtectedStorageContext().getDatabasePath("shiftbell.db")
+        File(G0TestSupport.g0Dir, "fixtures_db/aux_h2_minimal_v24.db").copyTo(file, overwrite = true)
+        DatabaseHelper.getInstance(context).writableDatabase.rawQuery("SELECT COUNT(*) FROM alarms", null).use {
+            assertTrue(it.moveToFirst())
+            assertEquals(0, it.getInt(0))
+        }
+        insert(7, "2026-10-02T07:03:00+09:00")
+    }
 
     @Test fun sameClockDifferentOccurrenceDoesNotCollide() {
         prepare("America/New_York", "2026-11-01T04:59:00Z")

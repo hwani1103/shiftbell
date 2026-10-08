@@ -11,11 +11,51 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowAlarmManager
+import org.robolectric.shadows.ShadowSettings
 
 @RunWith(RobolectricTestRunner::class)
 class PermissionSettingsTest {
     private fun activity() = Robolectric.buildActivity(Activity::class.java).setup().get()
+
+    // Exercise the production observer against each Android framework version.
+    // These are host regressions, not evidence of a physical device permission flow.
+    @Test @Config(sdk = [31, 32, 33]) fun `exact alarm denial and recovery are reread without granting on settings launch`() {
+        val a = activity()
+        ShadowAlarmManager.setCanScheduleExactAlarms(false)
+        assertEquals("denied", PermissionSettings.snapshot(a)["exactAlarm"])
+        assertEquals("notApplicable", PermissionSettings.snapshot(a)["fullScreen"])
+        assertTrue(PermissionSettings.open(a, "exactAlarm"))
+        val opened = shadowOf(a).nextStartedActivity
+        assertEquals(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, opened.action)
+        assertEquals("package:${a.packageName}", opened.data.toString())
+        assertEquals("denied", PermissionSettings.snapshot(a)["exactAlarm"])
+        ShadowAlarmManager.setCanScheduleExactAlarms(true)
+        assertEquals("granted", PermissionSettings.snapshot(a)["exactAlarm"])
+        ShadowAlarmManager.setCanScheduleExactAlarms(false)
+        assertEquals("denied", PermissionSettings.snapshot(a)["exactAlarm"])
+        assertNull(shadowOf(a).nextStartedActivity)
+    }
+
+    @Test @Config(sdk = [30, 31, 32, 33, 34]) fun `app notification and overlay revocation remain independent of an allowed alarm channel`() {
+        val a = activity()
+        val nm = a.getSystemService(NotificationManager::class.java)
+        nm.createNotificationChannel(NotificationChannel(CustomAlarmReceiver.CHANNEL_ID, "alarm", NotificationManager.IMPORTANCE_HIGH))
+        shadowOf(nm).setNotificationsEnabled(false)
+        ShadowSettings.setCanDrawOverlays(false)
+        val denied = PermissionSettings.snapshot(a)
+        assertEquals("denied", denied["notification"])
+        assertEquals("denied", denied["overlay"])
+        assertEquals("granted", denied["alarmChannel"])
+        shadowOf(nm).setNotificationsEnabled(true)
+        ShadowSettings.setCanDrawOverlays(true)
+        val restored = PermissionSettings.snapshot(a)
+        assertEquals("granted", restored["notification"])
+        assertEquals("granted", restored["overlay"])
+        assertEquals("granted", restored["alarmChannel"])
+    }
 
     @Test @Config(sdk = [34]) fun `standard and OEM intents target the running flavor without task flags`() {
         val a = activity()

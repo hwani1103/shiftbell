@@ -1,0 +1,413 @@
+{
+  "languages": [
+    "ko",
+    "en",
+    "de",
+    "pt",
+    "hi"
+  ],
+  "changes": {
+    "ko": {
+      "privacyNoCollectionBody": {
+        "before": "근무 스케줄, 알람 설정과 알람 기록, 메모/일정, 근무시간·OT, 수면 기록, 친구 목록 등 앱에서 만드는 데이터는 사용자의 기기 안에 저장되며 개발자에게 전송되지 않습니다. 자동 수면 추정도 화면이 켜져 있는지, 충전 중인지만 기기 안에서 확인하고 그 결과를 밖으로 보내지 않습니다.\n\n다만 아래 '사용 통계', '일정공유', '광고' 항목에 적힌 범위의 정보는 Google 서비스로 전송됩니다.\n\n진단 파일은 Android 10 이상에서 기기 안의 Download/ShiftBell/log 폴더에 자동 저장·갱신됩니다. 이 파일에는 기기·Android 버전, 권한과 배터리 설정 상태, 알람 예약·울림 기록, 백업 기록이 들어가며 메모·일정 내용, 근무명, 친구 이름은 들어가지 않아요. 앱이 이 파일을 자동으로 전송하지 않으며, 필요할 때 사용자가 직접 찾아 보내실 수 있어요.",
+        "after": "근무 스케줄, 알람 설정과 알람 기록, 메모/일정, 근무시간·OT, 수면 기록, 친구 목록 등 앱에서 만드는 데이터는 사용자의 기기 안에 저장되며 개발자에게 전송되지 않습니다. 자동 수면 추정도 화면이 켜져 있는지, 충전 중인지만 기기 안에서 확인하고 그 결과를 밖으로 보내지 않습니다.\n\n다만 아래 '사용 통계', '일정공유', '광고' 항목에 적힌 범위의 정보는 Google 서비스로 전송됩니다.\n\n진단 파일은 Android 10 이상에서 기기 안의 Download/ShiftBell/log 폴더에 자동 저장·갱신됩니다. 이 파일에는 기기·Android 버전, 권한과 배터리 설정 상태, 알람 예약·울림 기록, 백업 기록이 들어가며 메모·일정 내용, 근무명, 친구 이름은 들어가지 않아요. 앱이 이 파일을 자동으로 전송하지 않으며, 필요할 때 사용자가 직접 찾아 보내실 수 있어요.\n\n설정 → 부가 기능 → 진단 로그 이메일로 보내기를 누르면 공유용 .txt 파일을 앱의 임시 폴더에 만듭니다. 전송은 사용자가 메일 앱에서 직접 완료합니다. 이메일로 보내면 로그 파일, 메일에 적은 내용과 발신자 이메일 주소가 개발자에게 전달됩니다. 교대시계는 이메일 계정 정보에 접근하거나 로그를 자동 전송하지 않습니다."
+      },
+      "privacyDataRetentionBody": {
+        "before": "기기 안의 데이터는 앱을 삭제하면 함께 삭제됩니다.\n\n단, '백업' 기능(자동 백업 포함)으로 만든 파일은 기기의 다운로드/ShiftBell 폴더에 남아 앱을 삭제해도 지워지지 않습니다. 이 파일은 암호화되지 않았고 근무표·알람 기록·메모/일정·OT·수면 기록·친구 목록 등이 들어 있으니 다른 사람에게 보내지 않도록 주의하고, 필요 없으면 파일 관리자에서 직접 삭제해 주세요. 백업 파일은 자동으로 외부에 전송되지 않지만, 클라우드 동기화 폴더 등으로 옮기면 그 서비스의 정책이 적용됩니다.\n\nDownload/ShiftBell/log의 진단 파일도 앱 삭제 후 남을 수 있습니다. 이 파일에는 기기 정보, 권한 상태, 알람·백업 기록이 들어 있으므로 필요 없으면 파일 관리자에서 직접 삭제해 주세요.\n\n백업은 Android 10 이상에서만 지원됩니다. 앱을 삭제하고 다시 설치하면 이전 백업을 자동으로 찾지 못하므로, 첫 화면의 '기존에 쓰시던 분이라면'에서 '불러오기'를 눌러 파일을 직접 골라야 합니다.\n\n일정공유 데이터의 삭제는 위 '일정공유' 안내를, 사용 통계·광고 데이터의 보관은 Google의 정책을 따릅니다.",
+        "after": "기기 안의 데이터는 앱을 삭제하면 함께 삭제됩니다.\n\n단, '백업' 기능(자동 백업 포함)으로 만든 파일은 기기의 다운로드/ShiftBell 폴더에 남아 앱을 삭제해도 지워지지 않습니다. 이 파일은 암호화되지 않았고 근무표·알람 기록·메모/일정·OT·수면 기록·친구 목록 등이 들어 있으니 다른 사람에게 보내지 않도록 주의하고, 필요 없으면 파일 관리자에서 직접 삭제해 주세요. 백업 파일은 자동으로 외부에 전송되지 않지만, 클라우드 동기화 폴더 등으로 옮기면 그 서비스의 정책이 적용됩니다.\n\nDownload/ShiftBell/log의 진단 파일도 앱 삭제 후 남을 수 있습니다. 이 파일에는 기기 정보, 권한 상태, 알람·백업 기록이 들어 있으므로 필요 없으면 파일 관리자에서 직접 삭제해 주세요.\n\n백업은 Android 10 이상에서만 지원됩니다. 앱을 삭제하고 다시 설치하면 이전 백업을 자동으로 찾지 못하므로, 첫 화면의 '기존에 쓰시던 분이라면'에서 '불러오기'를 눌러 파일을 직접 골라야 합니다.\n\n일정공유 데이터의 삭제는 위 '일정공유' 안내를, 사용 통계·광고 데이터의 보관은 Google의 정책을 따릅니다.\n\n공유용 진단 로그는 앱의 임시 폴더에 저장되며 앱을 삭제하면 함께 삭제됩니다. 사용자가 이메일이나 다른 앱으로 보낸 사본은 해당 서비스와 수신자가 보관합니다."
+      },
+      "privacyContactBody": {
+        "before": "앱 이용 중 궁금한 점이나 문의사항은 아래로 연락해 주세요.\n• 티스토리: lowvibe07.tistory.com\n• 카카오톡 오픈채팅: '교대시계 앱' 검색",
+        "after": "앱 이용 중 궁금한 점이나 문의사항은 아래로 연락해 주세요.\n• 티스토리: lowvibe07.tistory.com\n• 카카오톡 오픈채팅: '교대시계 앱' 검색\n• 개발자 이메일: lowvibe07@gmail.com"
+      },
+      "privacyEffectiveDate": {
+        "before": "이 개인정보처리방침은 2026년 9월 22일부터 적용됩니다. 내용이 바뀌면 이 화면과 앱 업데이트 안내를 통해 다시 고지합니다.",
+        "after": "최종 수정: 2026년 10월 8일."
+      },
+      "helpBackupAutoBackupBody": {
+        "before": "앱을 백그라운드로 전환할 때(홈 버튼을 누르거나 다른 앱으로 이동할 때), 그사이 실제로 데이터가 바뀐 경우에만 자동으로 백업돼요. 백업 파일은 기기 안 다운로드 폴더(Download/ShiftBell)에 저장되고, 클라우드나 다른 기기로는 자동으로 보내지 않아요. 설정의 \"데이터 백업\"에서 직접 백업할 수도 있어요.",
+        "after": "앱을 백그라운드로 전환할 때(홈 버튼을 누르거나 다른 앱으로 이동할 때), 그사이 실제로 데이터가 바뀐 경우에만 자동으로 백업돼요. 백업 파일은 기기 안 다운로드 폴더(Download/ShiftBell)에 저장되고, 클라우드나 다른 기기로는 자동으로 보내지 않아요. 설정 → 부가 기능 → 데이터 백업 → 백업 저장하기에서 직접 백업을 저장할 수도 있어요."
+      },
+      "helpTroubleshootAlarmIssueBody": {
+        "before": "가장 먼저 설정에서 이 앱의 알림·정확한 알람·다른 앱 위에 표시 권한이 켜져 있는지, 배터리 최적화 대상에서 제외돼 있는지 확인하세요. 그다음 그 날짜에 근무가 배정돼 있는지, 그 근무에 고정 알람이 등록돼 있는지도 확인해보세요.\n\n교대시계 앱의 설정 → 알람 권한 설정에서 잠금화면 표시를 포함한 각 권한을 확인해 주세요. 설정을 마친 뒤 앱으로 돌아오세요. 첫 설정 중에는 준비가 되면 다음을 눌러 주세요.",
+        "after": "1. 권한과 휴대폰 설정 확인\n설정 → 알람 권한 설정에서 알림, 정확한 알람, 잠금화면 표시, 다른 앱 위에 표시 권한을 확인해 주세요.\n\n휴대폰 설정 → 앱 → 교대시계 → 배터리에서 백그라운드 사용이 제한되어 있지 않은지도 확인해 주세요.\n\n2. 근무와 고정 알람 확인\n달력에서 해당 날짜에 근무가 배정되어 있는지 확인하세요. 설정 → 편집 → 고정 알람 수정에서 그 근무에 알람이 등록되어 있는지도 확인해 주세요. 근무만 배정하고 알람을 등록하지 않으면 알람은 울리지 않습니다.\n\n3. 제조사별 알람 동작\nSamsung, Motorola, OPPO, Xiaomi, Google Pixel, realme의 검증 기기에서는 필요한 권한을 설정한 환경에서 정상적인 알람 동작을 확인했습니다.\n\n그 외 제조사의 기기는 권한을 모두 허용해도 알람이 울리지 않거나 정확한 시간에 작동하지 않을 수 있습니다. 검증 제조사를 늘리고 알람 신뢰도를 높이는 작업을 계속하고 있습니다.\n\n4. 문제가 계속된다면\n기기명, Android 버전, 문제가 발생한 시간을 적어 개발자 이메일 lowvibe07@gmail.com으로 연락해 주세요. 설정 → 부가 기능 → 진단 로그 이메일로 보내기에서 로그 파일을 함께 보내면 원인 확인에 도움이 됩니다."
+      },
+      "helpTroubleshootBackupFileMissingBody": {
+        "before": "기기의 파일 관리 앱에서 Download/ShiftBell 폴더를 직접 확인해 보세요. 폴더가 없다면 아직 백업이 한 번도 만들어지지 않았다는 뜻이니, 설정의 \"데이터 백업\"을 눌러 하나 만들어 두세요.",
+        "after": "휴대폰 파일 관리자에서 Download/ShiftBell 폴더를 확인해 주세요. 백업이 없다면 설정 → 부가 기능 → 데이터 백업 → 백업 저장하기에서 새로 저장할 수 있어요."
+      },
+      "helpDiagnosticTitle": {
+        "before": "문제 신고용 진단 파일 찾기",
+        "after": "진단 로그 보내기"
+      },
+      "helpDiagnosticBody": {
+        "before": "알람이나 백업에 문제가 있었다면 파일 관리자에서 Download/ShiftBell/log 폴더를 확인해 주세요(Android 10 이상). 앱이 진단 파일을 기기 안에 자동으로 저장하고 갱신해요.\n\n기기·Android 버전, 권한·배터리 설정 상태, 알람 예약·울림과 백업 처리 기록이 들어 있어요. 메모·일정 내용이나 근무명·친구 이름은 포함하지 않아요. 자동으로 개발자에게 전송되지는 않으며, 문의할 때 필요하면 직접 첨부해 주세요. 앱을 삭제해도 파일이 남을 수 있으니 필요 없으면 파일 관리자에서 지워 주세요.",
+        "after": "설정 → 부가 기능 → 진단 로그 이메일로 보내기에서 문제 확인용 .txt 파일을 개발자에게 보낼 수 있어요. 메일 앱에서 보내는 계정을 선택한 뒤 전송을 완료해 주세요. 받는 주소는 lowvibe07@gmail.com입니다.\n\nAndroid 10 이상에서는 파일 관리자 → Download/ShiftBell/log에서도 자동 저장된 진단 파일을 찾을 수 있어요.\n\n기기·Android 버전, 권한·배터리 설정 상태, 알람 예약·울림과 백업 처리 기록이 들어 있어요. 메모·일정 내용이나 근무명·친구 이름은 포함하지 않아요. 자동으로 개발자에게 전송되지는 않으며, 문의할 때 필요하면 직접 첨부해 주세요. 앱을 삭제해도 파일이 남을 수 있으니 필요 없으면 파일 관리자에서 지워 주세요."
+      },
+      "diagnosticExportTitle": {
+        "before": null,
+        "after": "진단 로그 이메일로 보내기"
+      },
+      "diagnosticExportSubtitle": {
+        "before": null,
+        "after": "문제 확인용 로그 파일을 개발자 메일로 전송"
+      },
+      "diagnosticExportConfirm": {
+        "before": null,
+        "after": "진단 로그에는 기기 정보, 권한 상태와 알람·백업 동작 기록이 포함됩니다. 메일 앱에서 보내는 계정을 선택한 뒤 직접 전송해 주세요.\n\n받는 주소: lowvibe07@gmail.com"
+      },
+      "diagnosticSendAction": {
+        "before": null,
+        "after": "전송하기"
+      },
+      "diagnosticShareTitle": {
+        "before": null,
+        "after": "진단 로그 보내기"
+      },
+      "diagnosticSubject": {
+        "before": null,
+        "after": "교대시계 진단 로그"
+      },
+      "diagnosticBody": {
+        "before": null,
+        "after": "겪으신 문제와 발생 시간을 적어 주세요.\n\n문제 내용:\n발생 시간:"
+      },
+      "diagnosticExportFailed": {
+        "before": null,
+        "after": "로그를 전송할 메일 앱을 열지 못했습니다. 다른 앱을 선택하거나 다시 시도해 주세요."
+      },
+      "helpBackupRestoreBody": {
+        "before": "앱을 지웠다가 다시 설치했다면, 첫 화면의 \"기존에 쓰시던 분이라면\"에서 \"불러오기\"를 눌러 백업 파일을 직접 골라 주세요. 파일은 Download/ShiftBell 폴더에 있어요.\n\n다른 기기로 옮길 때는 이전 기기의 Download/ShiftBell 폴더에 있는 백업 파일을 새 기기로 먼저 복사해 두세요.\n\n백업 파일은 직접 백업(manual)과 자동 백업(auto) 두 개만 남아요. 새로 만들면 같은 종류의 파일만 바뀌어서, 자동 백업이 직접 백업을 지우지 않아요.\n\n복구가 끝나면 알림, 정확한 알람 같은 권한은 안전을 위해 다시 물어봐요.",
+        "after": "앱을 지웠다가 다시 설치했다면 첫 화면의 \"기존에 쓰시던 분이라면\"에서 \"불러오기\"를 눌러 백업 파일을 골라 주세요. 앱을 사용 중이라면 설정 → 부가 기능 → 데이터 백업 → 백업 불러오기에서도 복구할 수 있어요. 파일은 Download/ShiftBell 폴더에 있어요.\n\n다른 기기로 옮길 때는 이전 기기의 Download/ShiftBell 폴더에 있는 백업 파일을 새 기기로 먼저 복사해 두세요.\n\n백업 파일은 직접 백업(manual)과 자동 백업(auto) 두 개만 남아요. 새로 만들면 같은 종류의 파일만 바뀌어서, 자동 백업이 직접 백업을 지우지 않아요.\n\n복구가 끝나면 알림, 정확한 알람 같은 권한은 안전을 위해 다시 물어봐요."
+      }
+    },
+    "en": {
+      "settingsDataBackupTitle": {
+        "before": "Back up data",
+        "after": "Data backup"
+      },
+      "settingsEditShiftNameTitle": {
+        "before": "Edit Shift Name",
+        "after": "Manage Shift Names"
+      },
+      "settingsScheduleChangeWarning": {
+        "before": "Fixed alarms for the next 10 days will be updated for the new schedule. Snoozed alarms and alarm history will be kept.",
+        "after": "Fixed alarms for the next 10 days will be updated for the new schedule. The next ring of alarms you have already postponed and alarm history will be kept."
+      },
+      "privacyNoCollectionBody": {
+        "before": "Your shifts, alarm settings and history, notes, work hours and overtime are stored in the app’s local database. These contents are not included in analytics events or advertising requests.\n\nOn Android 10 or later, diagnostic files are saved locally in Download/ShiftBell/log. They include device and Android versions, permission and battery settings, and alarm and backup processing records. Note contents and shift names are excluded. The app does not send these files automatically.",
+        "after": "Your shifts, alarm settings and history, notes, work hours and overtime are stored in the app’s local database. These contents are not included in analytics events or advertising requests.\n\nOn Android 10 or later, diagnostic files are saved locally in Download/ShiftBell/log. They include device and Android versions, permission and battery settings, and alarm and backup processing records. Note contents and shift names are excluded. The app does not send these files automatically.\n\nSettings → Additional features → Email diagnostic log creates a .txt attachment in the app’s temporary folder. You complete sending in your email app. Sending an email gives the developer the log file, the message you write and your sender email address. ShiftBell does not access your email account information or send logs automatically."
+      },
+      "privacyDataRetentionBody": {
+        "before": "Uninstalling removes the app’s local database. Backup and diagnostic files saved in Download/ShiftBell may remain; delete them with your file manager when they are no longer needed.\n\nBackups are not encrypted. They can contain your full local data. Keep them private. The app never uploads these files automatically. If you copy them to a cloud service or send them to someone, that service or recipient controls the copy.\n\nThe app keeps one manual backup and one automatic backup. A new file replaces the previous file of the same kind.\n\nGoogle’s policies apply to retention of analytics and advertising data.",
+        "after": "Uninstalling removes the app’s local database. Backup and diagnostic files saved in Download/ShiftBell may remain; delete them with your file manager when they are no longer needed.\n\nBackups are not encrypted. They can contain your full local data. Keep them private. The app never uploads these files automatically. If you copy them to a cloud service or send them to someone, that service or recipient controls the copy.\n\nThe app keeps one manual backup and one automatic backup. A new file replaces the previous file of the same kind.\n\nGoogle’s policies apply to retention of analytics and advertising data.\n\nDiagnostic attachments in the app’s temporary folder are removed when the app is uninstalled. Copies you send through email or another app are retained by that service and the recipient."
+      },
+      "privacyEffectiveDate": {
+        "before": "Last updated: October 5, 2026.",
+        "after": "Last updated: October 8, 2026."
+      },
+      "helpBackupAutoBackupBody": {
+        "before": "ShiftBell checks for changes when you open, return to or leave the app. If your data has changed, it saves an automatic backup to Download/ShiftBell on your device. You can also choose Back up data in Settings.\n\nIt keeps one manual backup and one automatic backup. A new backup replaces only the file of the same kind. Backups require Android 10 or later.",
+        "after": "ShiftBell checks for changes when you open, return to or leave the app. If your data has changed, it saves an automatic backup to Download/ShiftBell on your device. You can also save a backup using Settings → Additional features → Data backup → Save backup.\n\nIt keeps one manual backup and one automatic backup. A new backup replaces only the file of the same kind. Backups require Android 10 or later."
+      },
+      "helpBackupRestoreBody": {
+        "before": "Choose Restore from backup on the first screen or in Settings, then select a backup file from Download/ShiftBell. Review its saved time before restoring: it replaces your schedule, notes, overtime and other saved data and settings.\n\nAlarm history and creation records are merged with the backup. Alarms that are ringing or snoozed are kept.\n\nTo move to another phone, copy the file to that phone first. After restoring, check your shifts, upcoming alarms and alarm permissions.",
+        "after": "On the first screen, choose Restore from backup. You can also use Settings → Additional features → Data backup → Restore from backup. Select a file from Download/ShiftBell and review its saved time: restoring replaces your schedule, notes, overtime and other saved data and settings.\n\nAlarm history and creation records are merged with the backup. Alarms that are ringing or snoozed are kept.\n\nTo move to another phone, copy the file to that phone first. After restoring, check your shifts, upcoming alarms and alarm permissions."
+      },
+      "helpTroubleshootAlarmIssueBody": {
+        "before": "Check exact alarm permission, notification and display-over-other-apps permissions, and your phone’s battery restrictions. Then check that the date has a shift assigned, that the shift has an alarm, and that sound or vibration is enabled.\n\nOpen Settings → Alarm permissions in ShiftBell to check each permission, including lock screen display. Return to the app after changing settings. During first setup, tap Next when you are ready.",
+        "after": "1. Check permissions and phone settings\nOpen Settings → Alarm permissions and check notifications, exact alarms, lock screen display and display over other apps.\n\nAlso check Phone settings → Apps → ShiftBell → Battery for restrictions on background use.\n\n2. Check shifts and shift alarms\nCheck that a shift is assigned to the date in the calendar. In Settings → Edit → Edit Shift Alarms, check that an alarm is set for that shift. Assigning a shift alone does not create an alarm if no shift alarm has been set.\n\n3. Alarm operation by manufacturer\nOn the Samsung, Motorola, OPPO, Xiaomi, Google Pixel and realme devices we checked, we confirmed normal alarm operation with the required permissions configured.\n\nOn devices from other manufacturers, alarms may fail to ring or may not run at the scheduled time even when permissions are allowed. We are expanding manufacturer verification and continuing to improve alarm reliability.\n\n4. If the problem continues\nContact the developer at lowvibe07@gmail.com with your device model, Android version and the time of the problem. You can also attach a log using Settings → Additional features → Email diagnostic log to help identify the cause."
+      },
+      "helpTroubleshootBackupFileMissingBody": {
+        "before": "Look in Download/ShiftBell using your phone’s file manager. If no backup is there, use Back up data in Settings to create one.",
+        "after": "Look in Download/ShiftBell using your phone’s file manager. If no backup is there, create one using Settings → Additional features → Data backup → Save backup."
+      },
+      "helpDiagnosticTitle": {
+        "before": "Find a diagnostic file for a problem report",
+        "after": "Send a diagnostic log"
+      },
+      "helpDiagnosticBody": {
+        "before": "For alarm or backup issues, check Download/ShiftBell/log in your file manager (Android 10 or later). Diagnostic files are saved and updated locally.\n\nThey include device and Android versions, permission and battery settings, and alarm and backup processing records. Note contents and shift names are excluded. Files are not sent automatically. You can attach them when contacting support. They may remain after uninstalling; remove them in your file manager when no longer needed.",
+        "after": "Use Settings → Additional features → Email diagnostic log to send a .txt file to the developer. Choose your sending account in your email app and complete sending there. The recipient is lowvibe07@gmail.com.\n\nOn Android 10 or later, you can also find automatically saved diagnostic files in Download/ShiftBell/log using your file manager.\n\nThey include device and Android versions, permission and battery settings, and alarm and backup processing records. Note contents and shift names are excluded. Files are not sent automatically. You can attach them when contacting support. They may remain after uninstalling; remove them in your file manager when no longer needed."
+      },
+      "diagnosticExportTitle": {
+        "before": null,
+        "after": "Email diagnostic log"
+      },
+      "diagnosticExportSubtitle": {
+        "before": null,
+        "after": "Send a log file to the developer to investigate a problem"
+      },
+      "diagnosticExportConfirm": {
+        "before": null,
+        "after": "The diagnostic log includes device information, permission status and alarm and backup processing records. Choose your sending account in your email app, then send the message yourself.\n\nTo: lowvibe07@gmail.com"
+      },
+      "diagnosticSendAction": {
+        "before": null,
+        "after": "Send"
+      },
+      "diagnosticShareTitle": {
+        "before": null,
+        "after": "Send diagnostic log"
+      },
+      "diagnosticSubject": {
+        "before": null,
+        "after": "ShiftBell diagnostic log"
+      },
+      "diagnosticBody": {
+        "before": null,
+        "after": "Describe the problem and when it happened.\n\nProblem:\nTime:"
+      },
+      "diagnosticExportFailed": {
+        "before": null,
+        "after": "Could not open an app to send the log. Choose another app or try again."
+      }
+    },
+    "de": {
+      "settingsDataBackupTitle": {
+        "before": "Daten sichern",
+        "after": "Datensicherung"
+      },
+      "settingsEditShiftNameTitle": {
+        "before": "Schichtname bearbeiten",
+        "after": "Schichtnamen verwalten"
+      },
+      "settingsScheduleChangeWarning": {
+        "before": "Feste Wecker für die nächsten 10 Tage werden an den neuen Dienstplan angepasst. Schlummeralarme und der Weckerverlauf bleiben erhalten.",
+        "after": "Feste Wecker für die nächsten 10 Tage werden an den neuen Dienstplan angepasst. Das nächste Klingeln bereits verschobener Wecker und der Weckerverlauf bleiben erhalten."
+      },
+      "privacyNoCollectionBody": {
+        "before": "Deine Schichten, Weckereinstellungen und der Weckerverlauf, Notizen, Arbeitszeiten und Überstunden werden in der lokalen Datenbank der App gespeichert. Diese Inhalte werden weder in Analyseereignisse noch in Werbeanfragen aufgenommen.\n\nAb Android 10 werden Diagnosedateien lokal in Download/ShiftBell/log gespeichert. Sie enthalten Geräte- und Android-Versionen, Berechtigungen, Akkueinstellungen sowie Verarbeitungsprotokolle für Wecker und Sicherungen. Notizinhalte und Schichtnamen sind ausgeschlossen. Die App versendet diese Dateien nicht automatisch.",
+        "after": "Deine Schichten, Weckereinstellungen und der Weckerverlauf, Notizen, Arbeitszeiten und Überstunden werden in der lokalen Datenbank der App gespeichert. Diese Inhalte werden weder in Analyseereignisse noch in Werbeanfragen aufgenommen.\n\nAb Android 10 werden Diagnosedateien lokal in Download/ShiftBell/log gespeichert. Sie enthalten Geräte- und Android-Versionen, Berechtigungen, Akkueinstellungen sowie Verarbeitungsprotokolle für Wecker und Sicherungen. Notizinhalte und Schichtnamen sind ausgeschlossen. Die App versendet diese Dateien nicht automatisch.\n\nEinstellungen → Zusätzliche Funktionen → Diagnoseprotokoll per E-Mail senden erstellt einen .txt-Anhang im temporären Ordner der App. Du sendest ihn selbst in deiner E-Mail-App. Dabei erhält der Entwickler die Protokolldatei, deine Nachricht und deine Absenderadresse. ShiftBell greift nicht auf deine E-Mail-Kontoinformationen zu und versendet Protokolle nicht automatisch."
+      },
+      "privacyDataRetentionBody": {
+        "before": "Beim Deinstallieren wird die lokale Datenbank der App entfernt. Sicherungen und Diagnosedateien in Download/ShiftBell können erhalten bleiben. Lösche sie mit deinem Dateimanager, wenn du sie nicht mehr brauchst.\n\nSicherungen sind nicht verschlüsselt. Sie können alle lokalen Daten enthalten. Bewahre sie vertraulich auf. Die App lädt diese Dateien niemals automatisch hoch. Wenn du sie in einen Cloud-Dienst kopierst oder an jemanden sendest, kontrolliert dieser Dienst oder Empfänger die Kopie.\n\nDie App behält je eine manuelle und eine automatische Sicherung. Eine neue Datei ersetzt die vorherige Datei derselben Art.\n\nFür Analyse- und Werbedaten gelten die Aufbewahrungsrichtlinien von Google.",
+        "after": "Beim Deinstallieren wird die lokale Datenbank der App entfernt. Sicherungen und Diagnosedateien in Download/ShiftBell können erhalten bleiben. Lösche sie mit deinem Dateimanager, wenn du sie nicht mehr brauchst.\n\nSicherungen sind nicht verschlüsselt. Sie können alle lokalen Daten enthalten. Bewahre sie vertraulich auf. Die App lädt diese Dateien niemals automatisch hoch. Wenn du sie in einen Cloud-Dienst kopierst oder an jemanden sendest, kontrolliert dieser Dienst oder Empfänger die Kopie.\n\nDie App behält je eine manuelle und eine automatische Sicherung. Eine neue Datei ersetzt die vorherige Datei derselben Art.\n\nFür Analyse- und Werbedaten gelten die Aufbewahrungsrichtlinien von Google.\n\nDiagnoseanhänge im temporären Ordner der App werden beim Deinstallieren gelöscht. Kopien, die du per E-Mail oder mit einer anderen App sendest, werden vom jeweiligen Dienst und Empfänger aufbewahrt."
+      },
+      "privacyEffectiveDate": {
+        "before": "Zuletzt aktualisiert: 5. Oktober 2026.",
+        "after": "Zuletzt aktualisiert: 8. Oktober 2026."
+      },
+      "helpBackupAutoBackupBody": {
+        "before": "ShiftBell prüft beim Öffnen, bei der Rückkehr zur App und beim Verlassen, ob sich Daten geändert haben. Falls ja, wird eine automatische Sicherung in Download/ShiftBell auf deinem Gerät gespeichert. Über Daten sichern in den Einstellungen kannst du auch selbst eine Sicherung erstellen.\n\nEs wird je eine manuelle und eine automatische Sicherung aufbewahrt. Eine neue Sicherung ersetzt nur die Datei derselben Art. Dafür ist mindestens Android 10 erforderlich.",
+        "after": "ShiftBell prüft beim Öffnen, bei der Rückkehr zur App und beim Verlassen, ob sich Daten geändert haben. Falls ja, wird eine automatische Sicherung in Download/ShiftBell auf deinem Gerät gespeichert. Unter Einstellungen → Zusätzliche Funktionen → Datensicherung → Sicherung speichern kannst du auch selbst eine Sicherung speichern.\n\nEs wird je eine manuelle und eine automatische Sicherung aufbewahrt. Eine neue Sicherung ersetzt nur die Datei derselben Art. Dafür ist mindestens Android 10 erforderlich."
+      },
+      "helpBackupRestoreBody": {
+        "before": "Wähle auf dem ersten Bildschirm oder in den Einstellungen Daten wiederherstellen und dann eine Datei aus Download/ShiftBell. Prüfe vorher den Speicherzeitpunkt: Die Sicherung ersetzt deinen Schichtplan, Notizen, Überstunden und weitere gespeicherte Daten und Einstellungen.\n\nWecker- und Erstellungsverlauf werden mit der Sicherung zusammengeführt. Klingelnde oder per Schlummerfunktion verschobene Wecker bleiben erhalten.\n\nFür einen Gerätewechsel kopierst du die Datei zuerst auf das neue Handy. Prüfe nach der Wiederherstellung Schichten, kommende Wecker und Weckerberechtigungen.",
+        "after": "Wähle auf dem ersten Bildschirm Daten wiederherstellen. Du kannst auch Einstellungen → Zusätzliche Funktionen → Datensicherung → Daten wiederherstellen öffnen. Wähle eine Datei aus Download/ShiftBell und prüfe den Speicherzeitpunkt: Die Sicherung ersetzt deinen Schichtplan, Notizen, Überstunden und weitere gespeicherte Daten und Einstellungen.\n\nWecker- und Erstellungsverlauf werden mit der Sicherung zusammengeführt. Klingelnde oder per Schlummerfunktion verschobene Wecker bleiben erhalten.\n\nFür einen Gerätewechsel kopierst du die Datei zuerst auf das neue Handy. Prüfe nach der Wiederherstellung Schichten, kommende Wecker und Weckerberechtigungen."
+      },
+      "helpTroubleshootAlarmIssueBody": {
+        "before": "Prüfe die Berechtigungen für genaue Alarme, Benachrichtigungen und das Einblenden über anderen Apps sowie die Akkubeschränkungen deines Handys. Dem Tag muss eine Schicht mit einem Wecker zugewiesen sein. Kontrolliere auch, ob Ton oder Vibration eingeschaltet ist.\n\nÖffne Einstellungen → Weckerberechtigungen in ShiftBell und prüfe jede Berechtigung, auch für den Sperrbildschirm. Kehre nach dem Einstellen zur App zurück. Tippe bei der ersten Einrichtung anschließend auf Weiter.",
+        "after": "1. Berechtigungen und Handyeinstellungen prüfen\nÖffne Einstellungen → Weckerberechtigungen und prüfe Benachrichtigungen, genaue Wecker, die Anzeige auf dem Sperrbildschirm und die Anzeige über anderen Apps.\n\nPrüfe außerdem unter Handyeinstellungen → Apps → ShiftBell → Akku, ob die Nutzung im Hintergrund eingeschränkt ist.\n\n2. Schichten und Schichtwecker prüfen\nPrüfe im Kalender, ob dem Datum eine Schicht zugeordnet ist. Unter Einstellungen → Bearbeiten → Schichtwecker bearbeiten kannst du prüfen, ob für diese Schicht ein Wecker eingerichtet ist. Eine zugeordnete Schicht allein löst ohne eingerichteten Schichtwecker keinen Wecker aus.\n\n3. Weckerfunktion je nach Hersteller\nAuf den von uns geprüften Geräten von Samsung, Motorola, OPPO, Xiaomi, Google Pixel und realme haben wir bei eingerichteten erforderlichen Berechtigungen eine normale Weckerfunktion bestätigt.\n\nBei Geräten anderer Hersteller kann ein Wecker trotz erlaubter Berechtigungen ausbleiben oder nicht zur geplanten Zeit ausgelöst werden. Wir erweitern die Herstellerprüfung und arbeiten weiter an der Zuverlässigkeit der Wecker.\n\n4. Wenn das Problem weiterhin auftritt\nSchreibe dem Entwickler an lowvibe07@gmail.com und nenne Gerätemodell, Android-Version und den Zeitpunkt des Problems. Unter Einstellungen → Zusätzliche Funktionen → Diagnoseprotokoll per E-Mail senden kannst du ein Protokoll anhängen, das bei der Ursachenklärung hilft."
+      },
+      "helpTroubleshootBackupFileMissingBody": {
+        "before": "Suche mit dem Dateimanager deines Handys im Ordner Download/ShiftBell. Wenn dort keine Sicherung liegt, kannst du über Daten sichern in den Einstellungen eine neue erstellen.",
+        "after": "Suche mit dem Dateimanager im Ordner Download/ShiftBell. Wenn dort keine Sicherung liegt, kannst du unter Einstellungen → Zusätzliche Funktionen → Datensicherung → Sicherung speichern eine neue erstellen."
+      },
+      "helpDiagnosticTitle": {
+        "before": "Diagnosedatei für eine Problemmeldung finden",
+        "after": "Diagnoseprotokoll senden"
+      },
+      "helpDiagnosticBody": {
+        "before": "Prüfe bei Wecker- oder Sicherungsproblemen im Dateimanager Download/ShiftBell/log (ab Android 10). Diagnosedateien werden lokal gespeichert und aktualisiert.\n\nSie enthalten Geräte- und Android-Versionen, Berechtigungen, Akkueinstellungen sowie Verarbeitungsprotokolle für Wecker und Sicherungen. Notizinhalte und Schichtnamen sind ausgeschlossen. Dateien werden nicht automatisch gesendet. Du kannst sie bei einer Supportanfrage anhängen. Nach dem Deinstallieren können sie erhalten bleiben; lösche sie im Dateimanager, wenn du sie nicht mehr brauchst.",
+        "after": "Unter Einstellungen → Zusätzliche Funktionen → Diagnoseprotokoll per E-Mail senden kannst du dem Entwickler eine .txt-Datei senden. Wähle in deiner E-Mail-App das Absenderkonto und sende die Nachricht dort. Die Empfängeradresse ist lowvibe07@gmail.com.\n\nAb Android 10 findest du automatisch gespeicherte Diagnosedateien auch mit dem Dateimanager unter Download/ShiftBell/log.\n\nSie enthalten Geräte- und Android-Versionen, Berechtigungen, Akkueinstellungen sowie Verarbeitungsprotokolle für Wecker und Sicherungen. Notizinhalte und Schichtnamen sind ausgeschlossen. Dateien werden nicht automatisch gesendet. Du kannst sie bei einer Supportanfrage anhängen. Nach dem Deinstallieren können sie erhalten bleiben; lösche sie im Dateimanager, wenn du sie nicht mehr brauchst."
+      },
+      "diagnosticExportTitle": {
+        "before": null,
+        "after": "Diagnoseprotokoll per E-Mail senden"
+      },
+      "diagnosticExportSubtitle": {
+        "before": null,
+        "after": "Protokolldatei zur Fehlerprüfung an den Entwickler senden"
+      },
+      "diagnosticExportConfirm": {
+        "before": null,
+        "after": "Das Diagnoseprotokoll enthält Geräteinformationen, den Berechtigungsstatus sowie Verarbeitungsprotokolle für Wecker und Sicherungen. Wähle in deiner E-Mail-App das Absenderkonto und sende die Nachricht selbst.\n\nAn: lowvibe07@gmail.com"
+      },
+      "diagnosticSendAction": {
+        "before": null,
+        "after": "Senden"
+      },
+      "diagnosticShareTitle": {
+        "before": null,
+        "after": "Diagnoseprotokoll senden"
+      },
+      "diagnosticSubject": {
+        "before": null,
+        "after": "ShiftBell-Diagnoseprotokoll"
+      },
+      "diagnosticBody": {
+        "before": null,
+        "after": "Beschreibe das Problem und wann es aufgetreten ist.\n\nProblem:\nZeitpunkt:"
+      },
+      "diagnosticExportFailed": {
+        "before": null,
+        "after": "Die App zum Senden des Protokolls konnte nicht geöffnet werden. Wähle eine andere App oder versuche es erneut."
+      }
+    },
+    "pt": {
+      "settingsDataBackupTitle": {
+        "before": "Fazer backup",
+        "after": "Backup de dados"
+      },
+      "settingsEditShiftNameTitle": {
+        "before": "Editar nome do turno",
+        "after": "Gerenciar nomes de turnos"
+      },
+      "settingsScheduleChangeWarning": {
+        "before": "Os alarmes fixos dos próximos 10 dias serão atualizados para a nova escala. As sonecas agendadas e o histórico de alarmes serão mantidos.",
+        "after": "Os alarmes fixos dos próximos 10 dias serão atualizados para a nova escala. O próximo toque dos alarmes já adiados e o histórico de alarmes serão mantidos."
+      },
+      "privacyNoCollectionBody": {
+        "before": "Seus turnos, configurações e histórico de alarmes, notas, horários de trabalho e horas extras ficam no banco de dados local do app. Esses conteúdos não são incluídos nos eventos de análise nem nas solicitações de anúncios.\n\nNo Android 10 ou superior, arquivos de diagnóstico são salvos localmente em Download/ShiftBell/log. Eles incluem versões do aparelho e do Android, permissões, configurações de bateria e registros do processamento de alarmes e backups. Conteúdo de notas e nomes de turnos não são incluídos. O app não envia esses arquivos automaticamente.",
+        "after": "Seus turnos, configurações e histórico de alarmes, notas, horários de trabalho e horas extras ficam no banco de dados local do app. Esses conteúdos não são incluídos nos eventos de análise nem nas solicitações de anúncios.\n\nNo Android 10 ou superior, arquivos de diagnóstico são salvos localmente em Download/ShiftBell/log. Eles incluem versões do aparelho e do Android, permissões, configurações de bateria e registros do processamento de alarmes e backups. Conteúdo de notas e nomes de turnos não são incluídos. O app não envia esses arquivos automaticamente.\n\nConfigurações → Recursos adicionais → Enviar log de diagnóstico por e-mail cria um anexo .txt na pasta temporária do app. Você conclui o envio no app de e-mail. Ao enviar, o desenvolvedor recebe o log, a mensagem que você escrever e seu endereço de e-mail remetente. O ShiftBell não acessa os dados da sua conta de e-mail nem envia logs automaticamente."
+      },
+      "privacyDataRetentionBody": {
+        "before": "Desinstalar o app remove seu banco de dados local. Arquivos de backup e diagnóstico salvos em Download/ShiftBell podem permanecer. Exclua-os pelo gerenciador de arquivos quando não forem mais necessários.\n\nOs backups não são criptografados. Eles podem conter todos os dados locais. Mantenha-os privados. O app nunca envia esses arquivos automaticamente. Se você os copiar para a nuvem ou enviar a alguém, o serviço ou destinatário controlará essa cópia.\n\nO app mantém um backup manual e um automático. Um novo arquivo substitui o anterior do mesmo tipo.\n\nAs políticas do Google se aplicam à retenção dos dados de análise e publicidade.",
+        "after": "Desinstalar o app remove seu banco de dados local. Arquivos de backup e diagnóstico salvos em Download/ShiftBell podem permanecer. Exclua-os pelo gerenciador de arquivos quando não forem mais necessários.\n\nOs backups não são criptografados. Eles podem conter todos os dados locais. Mantenha-os privados. O app nunca envia esses arquivos automaticamente. Se você os copiar para a nuvem ou enviar a alguém, o serviço ou destinatário controlará essa cópia.\n\nO app mantém um backup manual e um automático. Um novo arquivo substitui o anterior do mesmo tipo.\n\nAs políticas do Google se aplicam à retenção dos dados de análise e publicidade.\n\nOs anexos de diagnóstico na pasta temporária do app são removidos quando ele é desinstalado. Cópias enviadas por e-mail ou outro app ficam com o serviço e o destinatário."
+      },
+      "privacyEffectiveDate": {
+        "before": "Última atualização: 5 de outubro de 2026.",
+        "after": "Última atualização: 8 de outubro de 2026."
+      },
+      "helpBackupAutoBackupBody": {
+        "before": "O ShiftBell verifica se houve mudanças ao abrir, voltar ou sair do app. Se os dados mudaram, salva um backup automático em Download/ShiftBell, no seu aparelho. Você também pode tocar em Fazer backup nas Configurações.\n\nO app mantém um backup manual e um automático. Cada novo backup substitui apenas o anterior do mesmo tipo. É necessário Android 10 ou superior.",
+        "after": "O ShiftBell verifica se houve mudanças ao abrir, voltar ou sair do app. Se os dados mudaram, salva um backup automático em Download/ShiftBell, no seu aparelho. Você também pode salvar um backup em Configurações → Recursos adicionais → Backup de dados → Salvar backup.\n\nO app mantém um backup manual e um automático. Cada novo backup substitui apenas o anterior do mesmo tipo. É necessário Android 10 ou superior."
+      },
+      "helpBackupRestoreBody": {
+        "before": "Escolha Restaurar backup na primeira tela ou nas configurações e selecione um arquivo em Download/ShiftBell. Confira a data antes de restaurar: ele substitui sua escala, notas, horas extras e outros dados e configurações salvos.\n\nO histórico de alarmes e os registros de criação são mesclados com os do backup. Alarmes tocando ou adiados são mantidos.\n\nPara mudar de aparelho, copie o arquivo para o novo celular primeiro. Após restaurar, confira os turnos, próximos alarmes e permissões.",
+        "after": "Na primeira tela, escolha Restaurar backup. Você também pode acessar Configurações → Recursos adicionais → Backup de dados → Restaurar backup. Selecione um arquivo em Download/ShiftBell e confira a data: a restauração substitui sua escala, notas, horas extras e outros dados e configurações salvos.\n\nO histórico de alarmes e os registros de criação são mesclados com os do backup. Alarmes tocando ou adiados são mantidos.\n\nPara mudar de aparelho, copie o arquivo para o novo celular primeiro. Após restaurar, confira os turnos, próximos alarmes e permissões."
+      },
+      "helpTroubleshootAlarmIssueBody": {
+        "before": "Confira as permissões de alarmes exatos, notificações e exibição sobre outros apps, além das restrições de bateria do aparelho. Depois, verifique se a data tem um turno com alarme e se o som ou a vibração está ativado.\n\nAbra Configurações → Permissões do alarme no ShiftBell para conferir cada permissão, incluindo a tela de bloqueio. Volte ao app após configurar. Na primeira configuração, toque em Avançar quando terminar.",
+        "after": "1. Confira as permissões e configurações do celular\nAbra Configurações → Permissões do alarme e confira notificações, alarmes exatos, exibição na tela de bloqueio e sobre outros apps.\n\nConfira também se há restrições ao uso em segundo plano em Configurações do celular → Apps → ShiftBell → Bateria.\n\n2. Confira os turnos e alarmes\nVeja se há um turno atribuído à data no calendário. Em Configurações → Editar → Editar alarmes de turno, confira se há um alarme para esse turno. Atribuir um turno não faz o alarme tocar se nenhum alarme de turno estiver configurado.\n\n3. Funcionamento por fabricante\nNos aparelhos Samsung, Motorola, OPPO, Xiaomi, Google Pixel e realme que verificamos, confirmamos o funcionamento normal dos alarmes com as permissões necessárias configuradas.\n\nEm aparelhos de outros fabricantes, os alarmes podem não tocar ou não ser acionados no horário previsto, mesmo com as permissões concedidas. Continuamos ampliando a verificação de fabricantes e melhorando a confiabilidade dos alarmes.\n\n4. Se o problema continuar\nEntre em contato com o desenvolvedor pelo e-mail lowvibe07@gmail.com, informando modelo do aparelho, versão do Android e horário do problema. Você também pode anexar um log em Configurações → Recursos adicionais → Enviar log de diagnóstico por e-mail para ajudar a identificar a causa."
+      },
+      "helpTroubleshootBackupFileMissingBody": {
+        "before": "Procure na pasta Download/ShiftBell usando o gerenciador de arquivos do celular. Se não houver um backup, toque em Fazer backup nas Configurações para criar um.",
+        "after": "Procure a pasta Download/ShiftBell no gerenciador de arquivos do celular. Se não houver um backup, crie um em Configurações → Recursos adicionais → Backup de dados → Salvar backup."
+      },
+      "helpDiagnosticTitle": {
+        "before": "Encontrar um arquivo de diagnóstico",
+        "after": "Enviar um log de diagnóstico"
+      },
+      "helpDiagnosticBody": {
+        "before": "Para problemas com alarmes ou backups, confira Download/ShiftBell/log no gerenciador de arquivos (Android 10 ou superior). Os diagnósticos são salvos e atualizados localmente.\n\nEles incluem versões do aparelho e do Android, permissões, configurações de bateria e registros do processamento de alarmes e backups. Conteúdo de notas e nomes de turnos não são incluídos. Os arquivos não são enviados automaticamente. Você pode anexá-los ao entrar em contato com o suporte. Eles podem permanecer após desinstalar; remova-os pelo gerenciador de arquivos quando não precisar mais.",
+        "after": "Use Configurações → Recursos adicionais → Enviar log de diagnóstico por e-mail para enviar um arquivo .txt ao desenvolvedor. Escolha a conta remetente no app de e-mail e conclua o envio nele. O destinatário é lowvibe07@gmail.com.\n\nNo Android 10 ou superior, você também encontra os arquivos de diagnóstico salvos automaticamente em Download/ShiftBell/log pelo gerenciador de arquivos.\n\nEles incluem versões do aparelho e do Android, permissões, configurações de bateria e registros do processamento de alarmes e backups. Conteúdo de notas e nomes de turnos não são incluídos. Os arquivos não são enviados automaticamente. Você pode anexá-los ao entrar em contato com o suporte. Eles podem permanecer após desinstalar; remova-os pelo gerenciador de arquivos quando não precisar mais."
+      },
+      "diagnosticExportTitle": {
+        "before": null,
+        "after": "Enviar log de diagnóstico por e-mail"
+      },
+      "diagnosticExportSubtitle": {
+        "before": null,
+        "after": "Enviar um log ao desenvolvedor para investigar um problema"
+      },
+      "diagnosticExportConfirm": {
+        "before": null,
+        "after": "O log de diagnóstico inclui informações do aparelho, status das permissões e registros do processamento de alarmes e backups. Escolha a conta remetente no app de e-mail e envie a mensagem.\n\nPara: lowvibe07@gmail.com"
+      },
+      "diagnosticSendAction": {
+        "before": null,
+        "after": "Enviar"
+      },
+      "diagnosticShareTitle": {
+        "before": null,
+        "after": "Enviar log de diagnóstico"
+      },
+      "diagnosticSubject": {
+        "before": null,
+        "after": "Log de diagnóstico do ShiftBell"
+      },
+      "diagnosticBody": {
+        "before": null,
+        "after": "Descreva o problema e quando aconteceu.\n\nProblema:\nHorário:"
+      },
+      "diagnosticExportFailed": {
+        "before": null,
+        "after": "Não foi possível abrir um app para enviar o log. Escolha outro app ou tente novamente."
+      }
+    },
+    "hi": {
+      "settingsDataBackupTitle": {
+        "before": "डेटा का बैकअप लें",
+        "after": "डेटा बैकअप"
+      },
+      "settingsEditShiftNameTitle": {
+        "before": "शिफ्ट का नाम बदलें",
+        "after": "शिफ्ट के नाम प्रबंधित करें"
+      },
+      "settingsScheduleChangeWarning": {
+        "before": "अगले 10 दिनों के तय अलार्म नए शेड्यूल के अनुसार अपडेट होंगे। स्नूज़ किए गए अलार्म और अलार्म इतिहास बने रहेंगे।",
+        "after": "अगले 10 दिनों के तय अलार्म नए शेड्यूल के अनुसार अपडेट होंगे। पहले से टाले गए अलार्म की अगली घंटी और अलार्म इतिहास बने रहेंगे।"
+      },
+      "privacyNoCollectionBody": {
+        "before": "आपकी शिफ्ट, अलार्म सेटिंग और इतिहास, नोट, काम के घंटे और ओवरटाइम ऐप के स्थानीय डेटाबेस में सेव होते हैं। इनकी सामग्री इस्तेमाल के आंकड़ों या विज्ञापन अनुरोधों में शामिल नहीं की जाती।\n\nAndroid 10 या नए संस्करण पर समस्या जांचने की फ़ाइलें Download/ShiftBell/log में स्थानीय रूप से सेव होती हैं। इनमें डिवाइस और Android के संस्करण, अनुमतियां, बैटरी सेटिंग तथा अलार्म और बैकअप प्रक्रिया के रिकॉर्ड होते हैं। नोट की सामग्री और शिफ्ट के नाम शामिल नहीं होते। ऐप इन फ़ाइलों को अपने आप नहीं भेजता।",
+        "after": "आपकी शिफ्ट, अलार्म सेटिंग और इतिहास, नोट, काम के घंटे और ओवरटाइम ऐप के स्थानीय डेटाबेस में सेव होते हैं। इनकी सामग्री इस्तेमाल के आंकड़ों या विज्ञापन अनुरोधों में शामिल नहीं की जाती।\n\nAndroid 10 या नए संस्करण पर समस्या जांचने की फ़ाइलें Download/ShiftBell/log में स्थानीय रूप से सेव होती हैं। इनमें डिवाइस और Android के संस्करण, अनुमतियां, बैटरी सेटिंग तथा अलार्म और बैकअप प्रक्रिया के रिकॉर्ड होते हैं। नोट की सामग्री और शिफ्ट के नाम शामिल नहीं होते। ऐप इन फ़ाइलों को अपने आप नहीं भेजता।\n\nसेटिंग → अतिरिक्त सुविधाएँ → जांच का लॉग ईमेल से भेजें से ऐप के अस्थायी फ़ोल्डर में .txt संलग्नक बनता है। ईमेल ऐप में आप खुद संदेश भेजते हैं। ईमेल भेजने पर डेवलपर को लॉग फ़ाइल, आपका लिखा संदेश और भेजने वाला ईमेल पता मिलता है। ShiftBell आपके ईमेल खाते की जानकारी नहीं देखता और लॉग अपने आप नहीं भेजता।"
+      },
+      "privacyDataRetentionBody": {
+        "before": "ऐप अनइंस्टॉल करने पर उसका स्थानीय डेटाबेस हट जाता है। Download/ShiftBell में सेव बैकअप और समस्या जांच की फ़ाइलें रह सकती हैं। ज़रूरत न होने पर इन्हें फ़ाइल मैनेजर से हटाएं।\n\nबैकअप एन्क्रिप्टेड नहीं होते। इनमें आपका पूरा स्थानीय डेटा हो सकता है। इन्हें सुरक्षित रखें। ऐप इन फ़ाइलों को अपने आप अपलोड नहीं करता। अगर आप इन्हें किसी क्लाउड सेवा पर रखते हैं या किसी को भेजते हैं, तो उस कॉपी का नियंत्रण उस सेवा या व्यक्ति के पास होगा।\n\nऐप खुद लिया गया एक बैकअप और अपने आप लिया गया एक बैकअप रखता है। उसी प्रकार का नया बैकअप पुराने की जगह लेता है।\n\nइस्तेमाल के आंकड़ों और विज्ञापन डेटा को रखने पर Google की नीतियां लागू होती हैं।",
+        "after": "ऐप अनइंस्टॉल करने पर उसका स्थानीय डेटाबेस हट जाता है। Download/ShiftBell में सेव बैकअप और समस्या जांच की फ़ाइलें रह सकती हैं। ज़रूरत न होने पर इन्हें फ़ाइल मैनेजर से हटाएं।\n\nबैकअप एन्क्रिप्टेड नहीं होते। इनमें आपका पूरा स्थानीय डेटा हो सकता है। इन्हें सुरक्षित रखें। ऐप इन फ़ाइलों को अपने आप अपलोड नहीं करता। अगर आप इन्हें किसी क्लाउड सेवा पर रखते हैं या किसी को भेजते हैं, तो उस कॉपी का नियंत्रण उस सेवा या व्यक्ति के पास होगा।\n\nऐप खुद लिया गया एक बैकअप और अपने आप लिया गया एक बैकअप रखता है। उसी प्रकार का नया बैकअप पुराने की जगह लेता है।\n\nइस्तेमाल के आंकड़ों और विज्ञापन डेटा को रखने पर Google की नीतियां लागू होती हैं।\n\nऐप के अस्थायी फ़ोल्डर में मौजूद जांच के संलग्नक ऐप अनइंस्टॉल करने पर हट जाते हैं। ईमेल या दूसरे ऐप से भेजी गई कॉपी उस सेवा और प्राप्तकर्ता के पास रहती है।"
+      },
+      "privacyEffectiveDate": {
+        "before": "आखिरी अपडेट: 5 अक्टूबर 2026।",
+        "after": "अंतिम अपडेट: 8 अक्टूबर 2026।"
+      },
+      "helpBackupAutoBackupBody": {
+        "before": "ऐप खोलने, वापस आने या बाहर जाने पर ShiftBell डेटा में बदलाव जांचता है। बदलाव हो तो डिवाइस के Download/ShiftBell में अपने आप बैकअप सेव करता है। सेटिंग में ‘डेटा का बैकअप लें’ भी चुन सकते हैं।\n\nखुद लिया गया एक और अपने आप लिया गया एक बैकअप रखा जाता है। नया बैकअप सिर्फ उसी प्रकार की पुरानी फ़ाइल बदलता है। बैकअप के लिए Android 10 या नया संस्करण ज़रूरी है।",
+        "after": "ऐप खोलने, वापस आने या बाहर जाने पर ShiftBell डेटा में बदलाव जांचता है। बदलाव हो तो डिवाइस के Download/ShiftBell में अपने आप बैकअप सेव करता है। सेटिंग → अतिरिक्त सुविधाएँ → डेटा बैकअप → बैकअप सहेजें से खुद बैकअप भी सेव कर सकते हैं।\n\nखुद लिया गया एक और अपने आप लिया गया एक बैकअप रखा जाता है। नया बैकअप सिर्फ उसी प्रकार की पुरानी फ़ाइल बदलता है। बैकअप के लिए Android 10 या नया संस्करण ज़रूरी है।"
+      },
+      "helpBackupRestoreBody": {
+        "before": "पहली स्क्रीन या सेटिंग में ‘बैकअप से डेटा वापस लाएं’ चुनें। फिर Download/ShiftBell से बैकअप फ़ाइल चुनें। पहले उसके सेव होने का समय देखें: यह आपके शेड्यूल, नोट, ओवरटाइम और बाकी सेव किए गए डेटा व सेटिंग की जगह लेगा।\n\nअलार्म का इतिहास और अलार्म बनने के रिकॉर्ड बैकअप के रिकॉर्ड के साथ जोड़ दिए जाते हैं। अभी बज रहे या स्नूज़ किए गए अलार्म बने रहते हैं।\n\nदूसरे फ़ोन पर जाने के लिए पहले फ़ाइल उस फ़ोन पर कॉपी करें। डेटा वापस आने के बाद अपनी शिफ्ट, आने वाले अलार्म और अलार्म की अनुमतियां जांचें।",
+        "after": "पहली स्क्रीन पर ‘बैकअप से डेटा वापस लाएं’ चुनें। सेटिंग → अतिरिक्त सुविधाएँ → डेटा बैकअप → बैकअप से डेटा वापस लाएं से भी ऐसा कर सकते हैं। Download/ShiftBell से फ़ाइल चुनें और उसके सेव होने का समय देखें: यह आपके शेड्यूल, नोट, ओवरटाइम और बाकी सेव किए गए डेटा व सेटिंग की जगह लेगी।\n\nअलार्म का इतिहास और अलार्म बनने के रिकॉर्ड बैकअप के रिकॉर्ड के साथ जोड़ दिए जाते हैं। अभी बज रहे या स्नूज़ किए गए अलार्म बने रहते हैं।\n\nदूसरे फ़ोन पर जाने के लिए पहले फ़ाइल उस फ़ोन पर कॉपी करें। डेटा वापस आने के बाद अपनी शिफ्ट, आने वाले अलार्म और अलार्म की अनुमतियां जांचें।"
+      },
+      "helpTroubleshootAlarmIssueBody": {
+        "before": "सटीक अलार्म, सूचनाओं और दूसरे ऐप्स के ऊपर दिखाने की अनुमतियां तथा फ़ोन की बैटरी पाबंदियां जांचें। फिर देखें कि उस तारीख पर शिफ्ट लगी है, शिफ्ट के लिए अलार्म है और आवाज़ या वाइब्रेशन चालू है।\n\nShiftBell में सेटिंग → अलार्म की अनुमतियाँ खोलकर हर अनुमति जांचें, जिसमें लॉक स्क्रीन पर दिखाना भी शामिल है। सेटिंग बदलने के बाद ऐप में वापस आएं। पहली बार सेट करते समय तैयार होने पर आगे पर टैप करें।",
+        "after": "1. अनुमतियां और फ़ोन की सेटिंग जांचें\nसेटिंग → अलार्म की अनुमतियाँ में सूचनाएं, सटीक अलार्म, लॉक स्क्रीन पर दिखाना और दूसरे ऐप्स के ऊपर दिखाने की अनुमतियां जांचें।\n\nफ़ोन की सेटिंग → ऐप्स → ShiftBell → बैटरी में यह भी देखें कि बैकग्राउंड इस्तेमाल पर पाबंदी तो नहीं है।\n\n2. शिफ्ट और उसके अलार्म जांचें\nकैलेंडर में देखें कि उस तारीख पर शिफ्ट दर्ज है। सेटिंग → बदलें → शिफ्ट के अलार्म बदलें में उस शिफ्ट के लिए अलार्म जांचें। सिर्फ शिफ्ट दर्ज करने से अलार्म नहीं बजेगा, जब तक उसके लिए अलार्म सेट न हो।\n\n3. अलग-अलग निर्माताओं पर अलार्म\nहमने Samsung, Motorola, OPPO, Xiaomi, Google Pixel और realme के जिन डिवाइस की जांच की है, उन पर ज़रूरी अनुमतियां सेट होने पर अलार्म का सामान्य रूप से काम करना पाया है।\n\nदूसरे निर्माताओं के डिवाइस पर सभी अनुमतियां मिलने के बाद भी अलार्म नहीं बज सकता या तय समय पर नहीं चल सकता। हम और निर्माताओं के डिवाइस की जांच कर रहे हैं और अलार्म की भरोसेमंद कार्यप्रणाली सुधारते जा रहे हैं।\n\n4. समस्या बनी रहे तो\nडिवाइस मॉडल, Android संस्करण और समस्या का समय लिखकर डेवलपर को lowvibe07@gmail.com पर ईमेल करें। सेटिंग → अतिरिक्त सुविधाएँ → जांच का लॉग ईमेल से भेजें से लॉग फ़ाइल भी संलग्न कर सकते हैं, जिससे कारण पता लगाने में मदद मिलेगी."
+      },
+      "helpTroubleshootBackupFileMissingBody": {
+        "before": "फ़ोन के फ़ाइल मैनेजर में Download/ShiftBell देखें। बैकअप न मिले तो सेटिंग में ‘डेटा का बैकअप लें’ से नया बनाएं।",
+        "after": "फ़ोन के फ़ाइल मैनेजर में Download/ShiftBell देखें। बैकअप न हो तो सेटिंग → अतिरिक्त सुविधाएँ → डेटा बैकअप → बैकअप सहेजें से नया बनाएं।"
+      },
+      "helpDiagnosticTitle": {
+        "before": "समस्या बताने के लिए जांच की फ़ाइल कहां मिलेगी",
+        "after": "जांच का लॉग भेजें"
+      },
+      "helpDiagnosticBody": {
+        "before": "अलार्म या बैकअप की समस्या हो तो फ़ाइल मैनेजर में Download/ShiftBell/log देखें। इसके लिए Android 10 या नया संस्करण चाहिए। समस्या जांच की फ़ाइलें डिवाइस पर ही सेव और अपडेट होती हैं।\n\nइनमें डिवाइस और Android के संस्करण, अनुमतियां, बैटरी सेटिंग तथा अलार्म और बैकअप प्रक्रिया के रिकॉर्ड होते हैं। नोट की सामग्री और शिफ्ट के नाम शामिल नहीं होते। फ़ाइलें अपने आप नहीं भेजी जातीं। मदद के लिए संपर्क करते समय इन्हें संलग्न कर सकते हैं। ऐप हटाने के बाद भी ये रह सकती हैं; ज़रूरत न होने पर फ़ाइल मैनेजर से हटा दें।",
+        "after": "सेटिंग → अतिरिक्त सुविधाएँ → जांच का लॉग ईमेल से भेजें से डेवलपर को .txt फ़ाइल भेज सकते हैं। ईमेल ऐप में भेजने वाला खाता चुनें और वहीं संदेश भेजें। प्राप्तकर्ता lowvibe07@gmail.com है।\n\nAndroid 10 या नए संस्करण पर फ़ाइल मैनेजर में Download/ShiftBell/log से अपने आप सेव हुई जांच की फ़ाइलें भी मिलती हैं।\n\nइनमें डिवाइस और Android के संस्करण, अनुमतियां, बैटरी सेटिंग तथा अलार्म और बैकअप प्रक्रिया के रिकॉर्ड होते हैं। नोट की सामग्री और शिफ्ट के नाम शामिल नहीं होते। फ़ाइलें अपने आप नहीं भेजी जातीं। मदद के लिए संपर्क करते समय इन्हें संलग्न कर सकते हैं। ऐप हटाने के बाद भी ये रह सकती हैं; ज़रूरत न होने पर फ़ाइल मैनेजर से हटा दें।"
+      },
+      "diagnosticExportTitle": {
+        "before": null,
+        "after": "जांच का लॉग ईमेल से भेजें"
+      },
+      "diagnosticExportSubtitle": {
+        "before": null,
+        "after": "समस्या की जांच के लिए लॉग फ़ाइल डेवलपर को भेजें"
+      },
+      "diagnosticExportConfirm": {
+        "before": null,
+        "after": "जांच के लॉग में डिवाइस की जानकारी, अनुमतियों की स्थिति और अलार्म व बैकअप प्रक्रिया के रिकॉर्ड होते हैं। ईमेल ऐप में भेजने वाला खाता चुनें, फिर संदेश खुद भेजें।\n\nप्राप्तकर्ता: lowvibe07@gmail.com"
+      },
+      "diagnosticSendAction": {
+        "before": null,
+        "after": "भेजें"
+      },
+      "diagnosticShareTitle": {
+        "before": null,
+        "after": "जांच का लॉग भेजें"
+      },
+      "diagnosticSubject": {
+        "before": null,
+        "after": "ShiftBell जांच लॉग"
+      },
+      "diagnosticBody": {
+        "before": null,
+        "after": "समस्या और उसके होने का समय लिखें।\n\nसमस्या:\nसमय:"
+      },
+      "diagnosticExportFailed": {
+        "before": null,
+        "after": "लॉग भेजने के लिए ऐप नहीं खुल सका। दूसरा ऐप चुनें या फिर कोशिश करें।"
+      }
+    }
+  }
+}

@@ -26,6 +26,16 @@ enum SleepConfidence { low, medium, high }
 /// 닫힌다. Native와 Dart가 같은 행 기반 기한을 사용하며 별도 prefs에는 저장하지 않는다.
 const Duration maxAutoSleepCandidateDuration = Duration(hours: 9);
 
+/// Automatic estimates are offered only after five hours. Manual entries and
+/// already confirmed history are unaffected by this presentation threshold.
+const Duration minAutoSleepEstimateDuration = Duration(hours: 5);
+
+bool shouldOfferSleepEstimate(SleepRecord record, DateTime now) =>
+    record.status == SleepStatus.pendingConfirmation &&
+    (record.source != SleepSource.autoDetected ||
+        (record.end ?? now).difference(record.start) >=
+            minAutoSleepEstimateDuration);
+
 DateTime autoSleepCandidateDeadline(DateTime start) =>
     start.add(maxAutoSleepCandidateDuration);
 
@@ -69,7 +79,8 @@ SleepSource sleepSourceFromDb(String s) {
   }
 }
 
-String sleepStatusToDb(SleepStatus s) => s == SleepStatus.confirmed ? 'CONFIRMED' : 'PENDING_CONFIRMATION';
+String sleepStatusToDb(SleepStatus s) =>
+    s == SleepStatus.confirmed ? 'CONFIRMED' : 'PENDING_CONFIRMATION';
 
 SleepStatus sleepStatusFromDb(String s) =>
     s == 'CONFIRMED' ? SleepStatus.confirmed : SleepStatus.pendingConfirmation;
@@ -143,7 +154,9 @@ class SleepRecord {
   factory SleepRecord.fromMap(Map<String, dynamic> map) => SleepRecord(
         id: map['id'] as int?,
         start: DateTime.parse(map['start_time'] as String),
-        end: map['end_time'] != null ? DateTime.parse(map['end_time'] as String) : null,
+        end: map['end_time'] != null
+            ? DateTime.parse(map['end_time'] as String)
+            : null,
         source: sleepSourceFromDb(map['source'] as String),
         status: sleepStatusFromDb(map['status'] as String),
         confidence: sleepConfidenceFromDb(map['confidence'] as String?),

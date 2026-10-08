@@ -24,10 +24,10 @@ void main() {
     // 제품 경로: MethodChannel이 없는 테스트 환경이라 Device Protected 경로 조회는 실패하고
     // getDatabasesPath() 폴백 경로(= 위 임시 폴더)에 신규 생성됨.
     final db = await DatabaseService.instance.database;
-    expect(await db.getVersion(), 28);
+    expect(await db.getVersion(), 29);
 
     final snapshot = await schemaSnapshot(db);
-    final file = g0File('v28_oncreate_schema.json');
+    final file = g0File('v29_oncreate_schema.json');
     if (Platform.environment['G0_UPDATE_SNAPSHOT'] == '1') {
       file.writeAsStringSync(const JsonEncoder.withIndent(' ').convert(jsonDecode(canonicalJson(snapshot))));
     }

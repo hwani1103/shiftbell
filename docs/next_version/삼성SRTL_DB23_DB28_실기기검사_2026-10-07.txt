@@ -1,0 +1,67 @@
+삼성 SRTL 배포 DB23 → DB28 실기기 검사 (2026-10-07)
+상태: 핵심 실제 삼성 검사 PASS. 원복 확인 기록은 cleanup.json 참조. 증거: build/samsung_db28_srtl_2026-10-07/.
+기기: Galaxy S26+ SM-S947N, Android17 API37, localhost:43427.
+
+업데이트 환경
+- 사용자 확인 배포 APK prod1.0.23(25), 실제 DB23. DB27 배포를 가정하지 않음.
+- 같은 prod 패키지/같은 인증서/같은 UID10342에서 adb install -r 업데이트.
+- 최신 코드 prod debug를 기존 인증서로 서명. 제품 서명 설정 변경 및 release 빌드 없음.
+- 최종 시간대 수정 소스56개 해시 대조 일치. 최신 devdebug는 별도 참고 사본.
+- 배포 APK SHA256: 3ad9664cc88bca1a3d47692905231e35fea78f416c260c87c68892b49251d8f1
+- 검사 update APK SHA256: 9b4f97211f2d75d51c4238d0a3896b5e7d9af1c23daed9f45a9a6540d8707c7d
+- 실제 설치 APK의 기기상 해시 일치 확인.
+
+완료된 실제 검사
+1. 첫 실행 전 DB23 → 첫 실행 후 DB28, integrity_check ok.
+2. 기존13테이블 모든 원래 필드 보존, 기존 알람10개 ID/시각 보존, OS 정확예약10/10 일치.
+3. 무음 고정 알람 실제 OS 전달 및 화면 끄기, 종료 슬롯 소비 기록.
+4. 즉석 +/− 숫자만 변경, 실제 +5m 실행 후 클릭 시점부터5분 예약.
+5. 스누즈 대기 중 Seoul→Honolulu→Shanghai→Seoul 실제 기기 전체 시간대 변경.
+   종료 슬롯 재생성0, 스누즈 절대 재울림 시각/ID 보존, 모든 미래 DB/OS 예약 일치.
+6. 실제5분 뒤 재울림, 새 울림 선택값5분, 끄기 후 원래 고정 슬롯 보존.
+7. 선택값10분으로 변경만 한 상태에서 원래1분 자동종료 유지, 소비 기록 확인.
+8. 배포 APK/원본 DB23 복원 후 기존 UI에서 메모/OT1시간 저장 및 백업 확인.
+
+추가 완료된 실제 검사
+9. 원본 배포 APK의15:08 알람을 OS가 실제 전달(1791353280.025), 오버레이 X로 종료.
+   원본 DB23에 swiped 이력1 생성. UI 백업 및 raw DB 사본에서 확인.
+10. 실제 same-package 업데이트 재실행. 첫 실행 전 DB23/후28 확보.
+    메모/OT60분/원래 모든 필드/남은 알람ID2~10 보존. 구 종료 슬롯 소비1로 backfill.
+11. 이 구 종료 슬롯을 가지고 Honolulu→Shanghai→Seoul 왕복.
+    각각 미래예약8/9/9 DB/OS 일치, 종료15:08 재생성0, 메모/OT 보존.
+12. 앱 force-stop 후 다시 실행. 소비1 지속, 정상 미래예약9/9 일치, 종료 부활0.
+
+증거 연결
+- migration_preservation.json, migration_os_reservations.json: 최초 배포DB23→28 예약 보존.
+- first_stop_result.json, snooze_click_result.json, snooze_refire_result.json,
+  automatic_timeout_result.json: 실제 울림·끄기·즉석 조절·5분 재울림·자동종료.
+- snooze_honolulu/, snooze_shanghai/, snooze_return_seoul/: 진행 중 스누즈의 시간대 보호.
+- legacy_migration_preservation.json: 구 종료이력·메모·OT·남은 예약 비파괴 이관.
+- legacy_honolulu/, legacy_shanghai/, legacy_return_seoul/, legacy_process_restart/:
+  구 종료 슬롯 재생성 방지와 실제 OS 예약 비교(assertions.json).
+- cleanup.json: 원복. 모든 기기 명령은 SRTL localhost:43427만 대상.
+
+원복
+- 시작 당시 prod/dev 미설치였으므로 이번 테스트 prod 앱 제거. 사용자 개인 폰 조작 없음.
+- Asia/Seoul, 자동시간1, 자동시간대1, 충전 중 유지0으로 초기값 복원.
+- PC APK/DB/로그/UI/결과 사본 보존. 추가 빌드/검사 실행 없음.
+
+판정 범위와 한계
+- 자동 검사/에뮬레이터를 실기기 PASS로 합산하지 않음.
+- Play 배포/최종 최적화 release APK 검사가 아님. 동일 패키지/서명/DB의 실제 데이터 이관 검사.
+- PIN 잠금/재부팅/Doze/다른 OEM/모든 알림 UI 및 언어 전수검사는 이번 범위 아님.
+- 시간대 변경에 따른 정상 이동 창의 far-future 교체(superseded)는 종료 소비가 아님.
+- 원본 근거 없는 모호한 과거 이력은 자동 차단하지 않는 기존 한계 유지.
+- 백업 파일 (1) 접미사를 처음 누락한 호스트 파일 읽기 오류는 앱 백업 오류 아님.
+- snooze_count를 누적 횟수로 추정한 호스트 assert는 Native 저장 계약과 달랐음.
+  실제 재울림 회차/원래 슬롯/종료 행 삭제로 기능 판정하며 횟수1을 주장하지 않음.
+
+추가 범위 제한
+- 실제 데이터가 들어 있던 근무표/템플릿/알람/생성 로그/종료 이력/메모/OT를 비교했다.
+  이번 fixture에서 비어 있던 친구/수면/약속 등 모든 실제 사용자 조합을 검증했다는 의미는 아님.
+- 배포본에서 이미 진행 중이던 스누즈의 업데이트 및 Native-first 실제 migration은 별도 실기기 미검증.
+  이번 실제 스누즈는 DB28 업데이트 이후 생성한 것으로, 그 상태에서 시간대 변경과 재울림은 PASS.
+- 원본 배포 APK logcat에 ID1 receiver 수신2회(같은 초)가 관찰됐다. 원본 오버레이는
+  스크린샷으로 확인됐으나 uiautomator 노드에는 표시되지 않아 실제 이미지 좌표로 X를 눌렀다.
+  구 APK 관찰을 최신 코드의 단일 수신 PASS/FAIL로 섞지 않는다. 종료 이력은1개였다.
+- 제품 코드 수정 없이 검사했다. 자동/호스트 회귀는 기존 최종 결과를 참조하며 이번에 재실행했다고 주장하지 않는다.

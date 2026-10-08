@@ -14,13 +14,34 @@ Future<void> showPermissionSettings(BuildContext context) =>
         context: context,
         isScrollControlled: true,
         useSafeArea: true,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
         builder: (context) => FractionallySizedBox(
             heightFactor: .9,
             child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: EdgeInsets.fromLTRB(
+                    24, 24, 24, 24 + MediaQuery.viewPaddingOf(context).bottom),
                 child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Container(
+                      width: 36,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.outline,
+                          borderRadius: BorderRadius.circular(2))),
                   Text(context.l10n.permissionSettingsTitle,
-                      style: Theme.of(context).textTheme.titleLarge),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 8),
+                  Text(context.l10n.permissionSettingsDescription,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          height: 1.4)),
+                  const SizedBox(height: 20),
                   const PermissionPanel(),
                   TextButton(
                       onPressed: () => Navigator.pop(context),
@@ -119,10 +140,14 @@ class _PermissionPanelState extends State<PermissionPanel>
                                   Text(sheetContext
                                       .l10n.permissionLockScreenHelpBody),
                                 const SizedBox(height: 16),
-                                Text(sheetContext.l10n.permissionReturnGuide),
-                                const SizedBox(height: 16),
-                                Text(_state(controller
-                                    .value[AppPermission.fullScreen])),
+                                if (!troubleshooting) ...[
+                                  Text(sheetContext.l10n.permissionReturnGuide),
+                                  const SizedBox(height: 16),
+                                ],
+                                if (controller.value[AppPermission.fullScreen] !=
+                                    AppPermissionState.granted)
+                                  Text(_state(controller
+                                      .value[AppPermission.fullScreen])),
                                 if (controller
                                         .value[AppPermission.fullScreen] ==
                                     AppPermissionState.denied)
@@ -155,6 +180,7 @@ class _PermissionPanelState extends State<PermissionPanel>
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
+    final colors = Theme.of(context).colorScheme;
     final descriptions = [
       l.permissionNotificationDesc,
       l.permissionOverlayDesc,
@@ -169,21 +195,47 @@ class _PermissionPanelState extends State<PermissionPanel>
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       for (final p in AppPermission.values)
-        Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
+        Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+                color: Color.alphaBlend(
+                    colors.onSurface.withOpacity(0.025), colors.surface),
+                border: Border.all(color: colors.onSurface.withOpacity(0.15)),
+                borderRadius: BorderRadius.circular(12)),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Padding(
                   padding: const EdgeInsets.only(right: 16, top: 4),
-                  child: Icon(icons[p.index])),
+                  child: Icon(icons[p.index], color: colors.primary)),
               Expanded(
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                     Text(permissionTitle(context, p),
-                        style: Theme.of(context).textTheme.titleMedium),
-                    Text(_state(controller.value[p])),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 4),
+                    Text(descriptions[p.index],
+                        style: TextStyle(
+                            color: colors.onSurfaceVariant, height: 1.4)),
+                    const SizedBox(height: 8),
+                    Text(_state(controller.value[p]),
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: controller.value[p] ==
+                                    AppPermissionState.granted
+                                ? colors.primary
+                                : colors.onSurface)),
                     if (!permissionSatisfied(controller.value[p])) ...[
-                      Text(descriptions[p.index]),
+                      if (p == AppPermission.overlay) ...[
+                        const SizedBox(height: 8),
+                        Text(l.permissionOverlayRouteGuide,
+                            style: TextStyle(
+                                color: colors.onSurfaceVariant, height: 1.4)),
+                      ],
+                      const SizedBox(height: 8),
                       OutlinedButton(
                           key: ValueKey('permission-${p.name}'),
                           onPressed: busy
@@ -208,9 +260,9 @@ class _PermissionPanelState extends State<PermissionPanel>
             onPressed: busy ? null : () => _open('alarmChannel'),
             child: Text(l.navSettings)),
       ],
-      Text(l.permissionOverlayRouteGuide),
       const SizedBox(height: 12),
-      Text(l.permissionReturnGuide),
+      Text(l.permissionReturnGuide,
+          style: TextStyle(color: colors.onSurfaceVariant, height: 1.4)),
       TextButton(
           onPressed: () => _lockHelp(troubleshooting: true),
           child: Text(l.permissionLockScreenHelp)),

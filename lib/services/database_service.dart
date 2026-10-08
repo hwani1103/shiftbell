@@ -100,7 +100,7 @@ class DatabaseService {
     var retiredAlarmIds = <int>[];
     return await openDatabase(
       path,
-      version: 28,  // Preserve the original fixed occurrence through time-zone moves.
+      version: 29,  // Keep the executed snooze duration in permanent history.
       onCreate: _onCreate,
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 27) {
@@ -232,7 +232,8 @@ class DatabaseService {
       shift_type TEXT,
       created_at TEXT NOT NULL,
       day_offset INTEGER NOT NULL DEFAULT 0,
-      fixed_slot_time TEXT
+      fixed_slot_time TEXT,
+      snooze_minutes INTEGER CHECK (snooze_minutes IS NULL OR snooze_minutes IN (5,10,15,20,25,30))
     )
   ''');
 

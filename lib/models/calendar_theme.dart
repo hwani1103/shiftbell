@@ -90,7 +90,6 @@ const kEnglishCalendarThemeIds = [
   CalendarThemeId.mainDark,
   CalendarThemeId.minimal,
   CalendarThemeId.materialCard,
-  CalendarThemeId.diary,
   CalendarThemeId.boldGrid,
 ];
 

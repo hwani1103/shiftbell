@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-08",
+  "scope": "A09/A06 optional feature activation and diagnostic sharing",
+  "critical_log": "build/optional_flow_critical.log",
+  "critical_result": "PASS; dev debug and web; no release",
+  "flutter_feedback_tests": 3,
+  "compact_layout": {
+    "widths": [
+      320,
+      500,
+      501,
+      600
+    ],
+    "textScale": 1.5,
+    "result": "PASS"
+  },
+  "native_diagnostic": {
+    "tests": 2,
+    "apiLevels": [
+      28,
+      34
+    ],
+    "result": "PASS",
+    "limitation": "Windows host FileProvider path conversion shadowed; actual URI attachment checked using Gmail on USB Android16"
+  },
+  "usb": {
+    "serial": "R5KL20DHWAE",
+    "model": "SM-S948N",
+    "installedBeforeFinalHotReload": true,
+    "activationAndRestoreBothTabs": true,
+    "onceOnlyTutorialFlagsPreserved": true,
+    "gmailRecipientSubjectTxtAttachmentVerified": true,
+    "emailSent": false
+  },
+  "final_animation": {
+    "transitionWaitMs": 300,
+    "durationMs": 1000,
+    "baselineHoldMs": 150,
+    "growMs": 450,
+    "shrinkMs": 400,
+    "delivery": "Dart hot reload, no requested subsequent build",
+    "userVerificationPending": true
+  },
+  "scoped_copy_ledger": "settings_copy_changes_2026_10_08_optional.json"
+}

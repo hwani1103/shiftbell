@@ -1,21 +1,21 @@
 // admin_dashboard/public/assets/js/labels.js - 이벤트/분포 항목의 한국어 이름·아이콘·그룹.
-// 사용자 정의 이벤트 이름은 앱의 lib/services/app_analytics.dart(AppAnalytics)와 반드시 같아야 한다.
+// 현재 이벤트는 앱의 AnalyticsEvent.all과 일치한다. retired:true는 과거 데이터 표시용이다.
 
 /** group: 화면에서 묶어 보여 주는 분류. system=구글이 자동 수집하는 기본 이벤트 */
 export const EVENT_META = {
 
-  one_tap_opened: { label: '원터치 패널 열기', icon: '•', group: '알람', desc: '원터치 알람 버튼으로 패널을 연 횟수.' },
-  one_tap_closed: { label: '원터치 패널 닫기', icon: '•', group: '알람', desc: '뒤로가기·달력 탭·할당 완료로 패널을 닫은 횟수.' },
-  one_tap_preset_editor_opened: { label: '원터치 설정창 열기', icon: '•', group: '알람', desc: '추가 또는 수정 설정창을 연 횟수.' },
-  one_tap_preset_saved: { label: '원터치 설정 추가', icon: '•', group: '알람', desc: '새 원터치 시각·울림 설정 저장 완료 횟수. 실제 시각은 수집하지 않습니다.' },
-  one_tap_preset_updated: { label: '원터치 설정 수정', icon: '•', group: '알람', desc: '기존 원터치 설정 변경 저장 완료 횟수.' },
-  one_tap_preset_deleted: { label: '원터치 설정 삭제', icon: '•', group: '알람', desc: '원터치 설정 삭제 완료 횟수.' },
-  one_tap_preset_cancelled: { label: '원터치 설정 취소', icon: '•', group: '알람', desc: '설정창에서 저장 없이 나간 횟수.' },
-  one_tap_preset_blocked: { label: '원터치 수정 제한', icon: '•', group: '알람', desc: '미래 날짜에 이미 추가한 설정의 수정을 차단한 횟수.' },
-  one_tap_preset_selected: { label: '원터치 시각 선택', icon: '•', group: '알람', desc: '저장된 시각을 골라 날짜 선택으로 넘어간 횟수.' },
-  one_tap_assigned: { label: '원터치 예약 완료', icon: '•', group: '알람', desc: '실제 날짜에 예약 성공한 횟수. 예약 시도 전체와 구분됩니다.' },
-  one_tap_assign_rejected: { label: '원터치 예약 거부·실패', icon: '•', group: '알람', desc: '중복·지난 시각·예약 실패 등으로 추가하지 못한 횟수.' },
-  one_tap_alarm_deleted: { label: '원터치 날짜 알람 삭제', icon: '•', group: '알람', desc: '날짜에 추가된 원터치 알람의 삭제 완료 횟수.' },
+  one_tap_opened: { retired: true, label: '원터치 패널 열기', icon: '•', group: '알람', desc: '원터치 알람 버튼으로 패널을 연 횟수.' },
+  one_tap_closed: { retired: true, label: '원터치 패널 닫기', icon: '•', group: '알람', desc: '뒤로가기·달력 탭·할당 완료로 패널을 닫은 횟수.' },
+  one_tap_preset_editor_opened: { retired: true, label: '원터치 설정창 열기', icon: '•', group: '알람', desc: '추가 또는 수정 설정창을 연 횟수.' },
+  one_tap_preset_saved: { retired: true, label: '원터치 설정 추가', icon: '•', group: '알람', desc: '새 원터치 시각·울림 설정 저장 완료 횟수. 실제 시각은 수집하지 않습니다.' },
+  one_tap_preset_updated: { retired: true, label: '원터치 설정 수정', icon: '•', group: '알람', desc: '기존 원터치 설정 변경 저장 완료 횟수.' },
+  one_tap_preset_deleted: { retired: true, label: '원터치 설정 삭제', icon: '•', group: '알람', desc: '원터치 설정 삭제 완료 횟수.' },
+  one_tap_preset_cancelled: { retired: true, label: '원터치 설정 취소', icon: '•', group: '알람', desc: '설정창에서 저장 없이 나간 횟수.' },
+  one_tap_preset_blocked: { retired: true, label: '원터치 수정 제한', icon: '•', group: '알람', desc: '미래 날짜에 이미 추가한 설정의 수정을 차단한 횟수.' },
+  one_tap_preset_selected: { retired: true, label: '원터치 시각 선택', icon: '•', group: '알람', desc: '저장된 시각을 골라 날짜 선택으로 넘어간 횟수.' },
+  one_tap_assigned: { retired: true, label: '원터치 예약 완료', icon: '•', group: '알람', desc: '실제 날짜에 예약 성공한 횟수. 예약 시도 전체와 구분됩니다.' },
+  one_tap_assign_rejected: { retired: true, label: '원터치 예약 거부·실패', icon: '•', group: '알람', desc: '중복·지난 시각·예약 실패 등으로 추가하지 못한 횟수.' },
+  one_tap_alarm_deleted: { retired: true, label: '원터치 날짜 알람 삭제', icon: '•', group: '알람', desc: '날짜에 추가된 원터치 알람의 삭제 완료 횟수.' },
 
   // ── 기본(자동 수집) ──
   first_open: { label: '첫 실행(first_open)', icon: '📲', group: 'system', desc: 'GA4 첫 실행 이벤트. 재설치와 Analytics 도입 버전으로 업데이트한 기존 사용자도 포함될 수 있어 순수 신규 설치 수와 다릅니다.' },
@@ -36,9 +36,9 @@ export const EVENT_META = {
   backup_restored: { label: '백업 복원', icon: '♻️', group: '백업' },
   backup_created: { label: '백업 생성(직접)', icon: '💾', group: '백업' },
   alarm_template_saved: { label: '고정 알람 저장', icon: '⏰', group: '알람' },
-  custom_alarm_assigned: { label: '원터치 예약 시도 전체', icon: '🗓️', group: '알람', desc: '원터치 예약 시도 횟수(성공·거부 포함). 예약 완료와 거부 항목에서 결과를 따로 볼 수 있어요.' },
+  custom_alarm_assigned: { retired: true, label: '원터치 예약 시도 전체', icon: '🗓️', group: '알람', desc: '원터치 예약 시도 횟수(성공·거부 포함). 예약 완료와 거부 항목에서 결과를 따로 볼 수 있어요.' },
   alarm_dismissed: { label: '알람 끄기', icon: '🔕', group: '알람', desc: '울린 알람을 끈 횟수. 알람이 실제로 쓰이는 정도를 보여 줘요.' },
-  alarm_snoozed: { label: '알람 5분 연장', icon: '😴', group: '알람' },
+  alarm_snoozed: { label: '알람 연장', icon: '😴', group: '알람' },
   alarm_no_response: { label: '알람 무응답 종료', icon: '⌛', group: '알람', desc: '끄지 않아 자동 종료된 알람 횟수. 많으면 알람이 잘 안 들리거나 헛울림이 잦다는 신호예요.' },
   shift_assigned: { label: '근무 지정·변경', icon: '📅', group: '달력' },
   calendar_theme_changed: { label: '달력 테마 변경', icon: '🎨', group: '달력' },

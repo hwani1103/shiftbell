@@ -1,3 +1,4 @@
+import '../widgets/settings_appearance.dart';
 import '../widgets/adaptive_layout.dart';
 // lib/screens/work_hours_settings_screen.dart
 //
@@ -70,7 +71,10 @@ class _WorkHoursSettingsScreenState
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final schedule = ref.watch(scheduleProvider).value;
     final workSettings = ref.watch(workHoursSettingsProvider);
@@ -106,7 +110,7 @@ class _WorkHoursSettingsScreenState
                         child: Text(
                           context.l10n.workHoursShiftChangeOtTitle,
                           style: TextStyle(
-                              fontSize: 17.sp, fontWeight: FontWeight.bold),
+                              fontSize: 17.sp, fontWeight: FontWeight.w600),
                         ),
                       ),
                       Switch(
@@ -134,7 +138,7 @@ class _WorkHoursSettingsScreenState
                   Text(
                     context.l10n.settingsDefaultWorkHoursPerShift,
                     style:
-                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
+                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 4.h),
                   Text(
@@ -155,7 +159,7 @@ class _WorkHoursSettingsScreenState
                   Text(
                     context.l10n.settingsMonthlyPeriodBasis,
                     style:
-                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
+                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 4.h),
                   Text(
@@ -256,7 +260,7 @@ class _WorkHoursSettingsScreenState
                   maxLines: 1,
                   style: TextStyle(
                       fontSize: 12.5.sp,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       color: colorScheme.primary),
                 ),
               ),
@@ -571,7 +575,7 @@ class _WorkHoursSettingsScreenState
                     fontSize: 13.sp, color: colorScheme.onSurfaceVariant),
                 selectedTextStyle: TextStyle(
                     fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface),
                 decoration: BoxDecoration(
                   border: Border(
@@ -666,7 +670,8 @@ class _WorkHoursSettingsScreenState
   // 가능하게 함. 연도와 "기준" 접미사는 빼고 날짜만 짧게 보여줌.
   Widget _buildPeriodPreview(WorkHoursSettings settings) {
     final colorScheme = Theme.of(context).colorScheme;
-    final range = settings.periodRangeShort(DateTime.now(), locale: Localizations.localeOf(context).toString());
+    final range = settings.periodRangeShort(DateTime.now(),
+        locale: Localizations.localeOf(context).toString());
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(

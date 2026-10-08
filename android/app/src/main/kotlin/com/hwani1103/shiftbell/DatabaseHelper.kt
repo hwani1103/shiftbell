@@ -76,7 +76,7 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // 못 읽었음(C01). 이제 onUpgrade가 Flutter와 같은 SQL 원본(assets/db/migrations.json)을
         // DbMigrationRunner로 실행함. 이 값은 여전히 database_service.dart의 version:,
         // migrations.json의 targetVersion과 같아야 하고 checkDartKotlinSync가 빌드 때 검사함.
-        private const val DATABASE_VERSION = 28
+        private const val DATABASE_VERSION = 29
         private const val TAG = "DatabaseHelper"
 
         @Volatile
@@ -109,6 +109,9 @@ class DatabaseHelper private constructor(private val appContext: Context) : SQLi
         // 실제로 겪음). 프로덕션 코드 경로는 이 함수를 전혀 호출하지 않음 - 테스트의
         // @Before/@After에서만 호출해서 매 테스트마다 새 인스턴스로 시작하게 함.
         internal fun resetInstanceForTest() {
+            // DiagLog schedules a real executor outside Robolectric's looper. It
+            // can otherwise reopen this singleton while the next fixture is copied.
+            DiagReport.drainRefreshForTest()
             try {
                 INSTANCE?.close()
             } catch (e: Exception) {

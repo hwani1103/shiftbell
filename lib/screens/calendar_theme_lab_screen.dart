@@ -132,7 +132,8 @@ String _dateKey(DateTime d) =>
 bool _isOutsideAugust(DateTime d) => d.month != 8;
 bool _isSunday(DateTime d) => d.weekday == DateTime.sunday;
 bool _isHoliday(DateTime d) => _dateKey(d) == _mockHolidayKey;
-bool _isRedDay(BuildContext context, DateTime d) => _isSunday(d) || (context.usesKoreanFeatures && _isHoliday(d));
+bool _isRedDay(BuildContext context, DateTime d) =>
+    context.usesKoreanFeatures && (_isSunday(d) || _isHoliday(d));
 
 bool _isToday(DateTime d) {
   final now = DateTime.now();
@@ -210,7 +211,8 @@ class CalendarThemeLabScreen extends StatefulWidget {
   // 그대로 재사용해서 미리보기 카드를 만듦 - 코드를 새로 만들지 않고 특정
   // 테마 페이지에 바로 진입만 시키면 되므로 initialPage를 추가함.
   final int initialPage;
-  const CalendarThemeLabScreen({super.key, this.initialPage = 0});
+  final bool preview;
+  const CalendarThemeLabScreen({super.key, this.initialPage = 0, this.preview = false});
 
   @override
   State<CalendarThemeLabScreen> createState() => _CalendarThemeLabScreenState();
@@ -288,7 +290,8 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
   // 테마를 보여줌). 2026-09-05 - "다이어리를 4~5번째로, 범례 필수인 언더라인/
   // 매거진을 맨 우측에 나란히" 요청으로 재배치.
   Widget _buildThemeBody(int index) {
-    if (!context.usesKoreanFeatures && index >= kEnglishCalendarThemeIds.length) {
+    if (!context.usesKoreanFeatures &&
+        !context.availableCalendarThemes.contains(kAllCalendarThemeIds[index])) {
       return _themeMainWhite();
     }
     switch (index) {
@@ -326,7 +329,7 @@ class _CalendarThemeLabScreenState extends State<CalendarThemeLabScreen> {
   // 있고 여기서 안 건드렸으므로, 채택 후 실제 연결 시 그대로 재사용하면 됨.
   void _tapDay(DateTime day) {
     final shift = _mockShiftFor(context, day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
+    final memos = widget.preview ? <String>[] : _mockMemos[_dateKey(day)] ?? [];
     final ot = _mockOtMinutes[_dateKey(day)] ?? 0;
     final locale = Localizations.localeOf(context).toString();
     showModalBottomSheet(
@@ -389,6 +392,7 @@ extension _Theme1 on _CalendarThemeLabScreenState {
   Widget _theme1MinimalLine() {
     return Column(
       children: [
+            if (!widget.preview)
         Padding(
           padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
           child: Row(
@@ -412,7 +416,7 @@ extension _Theme1 on _CalendarThemeLabScreenState {
                   style: TextStyle(
                     fontSize: 10.5.sp,
                     fontWeight: FontWeight.w600,
-                    color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500,
+                    color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500,
                   ),
                 ),
               ),
@@ -444,7 +448,7 @@ extension _Theme1 on _CalendarThemeLabScreenState {
   Widget _theme1Cell(DateTime day, bool isSunCol, {bool isFirstRow = false}) {
     final outside = _isOutsideAugust(day);
     final shift = _mockShiftFor(context, day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
+    final memos = widget.preview ? <String>[] : _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(context, day);
     final numColor = outside
@@ -564,6 +568,7 @@ extension _Theme2 on _CalendarThemeLabScreenState {
       color: const Color(0xFFF7F7FA),
       child: Column(
         children: [
+            if (!widget.preview)
           Padding(
             padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
             child: Row(
@@ -598,7 +603,7 @@ extension _Theme2 on _CalendarThemeLabScreenState {
             child: Row(
               children: List.generate(7, (i) => Expanded(
                 child: Center(
-                  child: Text(weekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade700)),
+                  child: Text(weekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade700)),
                 ),
               )),
             ),
@@ -626,7 +631,7 @@ extension _Theme2 on _CalendarThemeLabScreenState {
   Widget _theme2Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
     final shift = _mockShiftFor(context, day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
+    final memos = widget.preview ? <String>[] : _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(context, day);
 
@@ -768,6 +773,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
   Widget _theme4BoldGrid() {
     return Column(
       children: [
+            if (!widget.preview)
         Container(
           color: const Color(0xFF263238),
           padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 10.h),
@@ -786,7 +792,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(vertical: 4.h),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.redAccent.shade100 : Colors.white70))),
+              child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.redAccent.shade100 : Colors.white70))),
             )),
           ),
         ),
@@ -818,7 +824,7 @@ extension _Theme4 on _CalendarThemeLabScreenState {
   Widget _theme4Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
     final shift = _mockShiftFor(context, day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
+    final memos = widget.preview ? <String>[] : _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(context, day);
 
@@ -909,6 +915,7 @@ extension _Theme5 on _CalendarThemeLabScreenState {
   Widget _theme5InitialBadge() {
     return Column(
       children: [
+            if (!widget.preview)
         Padding(
           padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 8.h),
           child: Row(
@@ -926,7 +933,7 @@ extension _Theme5 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 8.w),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(weekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
+              child: Center(child: Text(weekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
             )),
           ),
         ),
@@ -950,7 +957,7 @@ extension _Theme5 on _CalendarThemeLabScreenState {
   Widget _theme5Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
     final shift = _mockShiftFor(context, day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
+    final memos = widget.preview ? <String>[] : _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(context, day);
     final numColor = outside ? Colors.grey.shade300 : (red ? Colors.red.shade400 : Colors.black87);
@@ -1038,6 +1045,7 @@ extension _Theme8 on _CalendarThemeLabScreenState {
   Widget _theme8Underline() {
     return Column(
       children: [
+            if (!widget.preview)
         Padding(
           padding: EdgeInsets.fromLTRB(18.w, 14.h, 18.w, 4.h),
           child: Row(
@@ -1056,7 +1064,7 @@ extension _Theme8 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i), narrow: true), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade400))),
+              child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i), narrow: true), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w600, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade400))),
             )),
           ),
         ),
@@ -1103,7 +1111,7 @@ extension _Theme8 on _CalendarThemeLabScreenState {
   Widget _theme8Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
     final shift = _mockShiftFor(context, day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
+    final memos = widget.preview ? <String>[] : _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(context, day);
 
@@ -1208,6 +1216,7 @@ extension _Theme9 on _CalendarThemeLabScreenState {
   Widget _theme9EventChip() {
     return Column(
       children: [
+            if (!widget.preview)
         Padding(
           padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
           child: Row(
@@ -1226,7 +1235,7 @@ extension _Theme9 on _CalendarThemeLabScreenState {
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           child: Row(
             children: List.generate(7, (i) => Expanded(
-              child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
+              child: Center(child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade500))),
             )),
           ),
         ),
@@ -1250,7 +1259,7 @@ extension _Theme9 on _CalendarThemeLabScreenState {
   Widget _theme9Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
     final shift = _mockShiftFor(context, day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
+    final memos = widget.preview ? <String>[] : _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(context, day);
 
@@ -1339,6 +1348,7 @@ extension _Theme10 on _CalendarThemeLabScreenState {
   Widget _theme10Editorial() {
     return Column(
       children: [
+            if (!widget.preview)
         Padding(
           padding: EdgeInsets.fromLTRB(18.w, 14.h, 18.w, 6.h),
           child: Row(
@@ -1358,9 +1368,9 @@ extension _Theme10 on _CalendarThemeLabScreenState {
           children: List.generate(7, (i) => Expanded(
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 3.h),
-              color: _weekdayIndex(i) == 0 ? Colors.red.shade50 : (i == 6 ? Colors.blue.shade50 : Colors.grey.shade100),
+              color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade50 : (context.usesKoreanFeatures && i == 6 ? Colors.blue.shade50 : Colors.grey.shade100),
               alignment: Alignment.center,
-              child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade600)),
+              child: Text(calendarWeekdayLabel(context, _weekdayIndex(i)), style: TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? Colors.red.shade400 : Colors.grey.shade600)),
             ),
           )),
         ),
@@ -1403,7 +1413,7 @@ extension _Theme10 on _CalendarThemeLabScreenState {
   Widget _theme10Cell(DateTime day) {
     final outside = _isOutsideAugust(day);
     final shift = _mockShiftFor(context, day);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
+    final memos = widget.preview ? <String>[] : _mockMemos[_dateKey(day)] ?? [];
     final today = _isToday(day);
     final red = _isRedDay(context, day);
 
@@ -1598,6 +1608,7 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
         color: colorScheme.surface,
         child: Column(
           children: [
+            if (!widget.preview)
             Padding(
               padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 6.h),
               child: Row(
@@ -1782,10 +1793,10 @@ extension _ThemeMain on _CalendarThemeLabScreenState {
   // Provider 없는 정적 데이터용으로 옮겨본 적이 있어서 그 패턴을 그대로 씀.
   Widget _mainCell(DateTime day, bool isToday, bool isOutside, List<_MockShift> palette, ColorScheme colorScheme, bool isDark) {
     final shift = _mainShiftFor(day, palette);
-    final memos = _mockMemos[_dateKey(day)] ?? [];
-    final isSunday = day.weekday == DateTime.sunday;
+    final memos = widget.preview ? <String>[] : _mockMemos[_dateKey(day)] ?? [];
+    final isRedSunday = context.usesKoreanFeatures && day.weekday == DateTime.sunday;
     final holiday = _mockHolidayNameFor(context, day);
-    final red = isSunday || holiday != null;
+    final red = isRedSunday || holiday != null;
 
     final Color dateColor = red
         ? (isOutside ? Colors.red.withOpacity(0.3) : (isDark ? Colors.red.shade300 : Colors.red))
@@ -1892,6 +1903,7 @@ extension _ThemeDiary on _CalendarThemeLabScreenState {
   Widget _themeDiaryBody() {
     return Column(
       children: [
+            if (!widget.preview)
         Padding(
           padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 6.h),
           child: Row(
@@ -1913,7 +1925,7 @@ extension _ThemeDiary on _CalendarThemeLabScreenState {
               child: Center(
                 child: Text(
                   weekdayLabel(context, _weekdayIndex(i)),
-                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: _weekdayIndex(i) == 0 ? const Color(0xFFD9534F) : const Color(0xFF8A6F5C)),
+                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700, color: context.usesKoreanFeatures && _weekdayIndex(i) == 0 ? const Color(0xFFD9534F) : const Color(0xFF8A6F5C)),
                 ),
               ),
             )),

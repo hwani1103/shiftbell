@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-07",
+  "scope": "Offline source fixes, saved-device evidence audit, official and first-person troubleshooting research. No new device connection or device PASS. Current decisions are in dev_출시전_핵심코어_체크리스트.txt.",
+  "A01": {
+    "saved_evidence": "build/streaming_p0_2026-10-07/cause_analysis.json",
+    "last_rearm_lead_ms_and_delivery_delay_ms": {
+      "Pixel": [79, 4957], "Xiaomi": [67, 4946], "OPPO": [102, 4917], "Samsung": [786, 4226]
+    },
+    "interpretation": "Saved failures fit the OS minimum-futurity clamp after a near-target rearm. Pixel dump reports min_futurity=5s. No corresponding failure assigned to Motorola/realme.",
+    "change": "Move a periodic guard heartbeat that would land in the final 10 seconds before an alarm to target+1s. Preserve DB revalidation, failed scheduling retry, stale OS repair, restore gate and midnight/20-minute branches. Log GUARD_BOUNDARY_SHIFT and GUARD_REARM source/lead/target.",
+    "before_tests": "build/dev_offline_2026_10_07/guard_before_clock_fixed.log: two expected FAILs with instrumented virtual time. Earlier uninstrumented test-clock failure is not product evidence.",
+    "after_tests": "build/dev_offline_2026_10_07/guard_after.log: G1WakeSyncTest passed; includes stale PendingIntent repair and failed schedule retry.",
+    "limit": "Delayed delivery of a heartbeat or direct trigger/retry near the target still requires real-device observation. No claim of an OS-wide timing guarantee.",
+    "sources": [
+      "https://android.googlesource.com/platform/frameworks/base/+/cc76d06b5ef3c4040fdbad88fab29a4333f66c63/apex/jobscheduler/service/java/com/android/server/alarm/AlarmManagerService.java",
+      "https://developer.android.com/develop/background-work/services/alarms"
+    ]
+  },
+  "A02": {
+    "model": "Infinix NOTE50 Pro+ X6856 / Android 15 / XOS 15.1.2",
+    "observed": "hiber_app_root.txt: 17:48:33.473 freeze UID10294; .476 proxy same app alarm target1791366660000; saved delivery 213108ms late after wake. Awake control was 30ms. Standard DeviceIdle ACTIVE does not prove vendor Hiber inactive.",
+    "evidence_limit": "hiber_dump.txt is empty. recents_locked.png and recent_check_locked.png were visually reviewed; neither proves an active recent-app lock on ShiftBell. Existing battery settings must not be reported as a proven remedy.",
+    "next": "Confirm recent lock and all previously selected settings; cancel only test reservations, create a fresh foreground UI alarm, then lock without clock changes. If still held, use prepared dev-debug native receiver in separate alarm_clock/allow_idle rounds, record original epoch and Hiber evidence before waking.",
+    "probe": "android/app/src/debug/kotlin/com/hwani1103/shiftbell/DebugAlarmDeliveryProbe.kt; debug manifest only, dev package + debuggable gate, shell DUMP permission. Never writes app DB or controls real alarm audio.",
+    "external_evidence": "The Android 15/XOS developer report is unanswered; old XOS GitHub workarounds and Alarmy's general guidance are hypotheses, not proof for this ROM. No verified app-only fix found in reviewed sources.",
+    "sources": [
+      "https://stackoverflow.com/questions/79989753/android-background-alarm-issue-on-infinix-zero-40-android-15-xos",
+      "https://github.com/urbandroid-team/dont-kill-my-app/issues/529",
+      "https://github.com/urbandroid-team/dont-kill-my-app/issues/474",
+      "https://alarmy-android.zendesk.com/hc/en-us/articles/46701731923609--No-Ring-How-to-Fix-Alarm-Issues-on-Other-Brands-Infinix-Tecno-Sony-Sharp-etc"
+    ]
+  },
+  "manufacturer_other_findings": {
+    "Xiaomi": "Saved display_attempt.xml identifies android.miui screen_on_proximity_sensor Pocket mode. Official Xiaomi support confirms blocked touch with covered proximity sensor on a locked, lit screen. Remove that system obstruction before evaluating the app's X button; combine with corrected +5 round. Do not disable Android touch security globally.",
+    "Motorola": "No 5-second failure assigned. Actual UI CRUD and final offline DB/OS comparison remain; a VM-fixture test or failed shell comparator does not prove those UI flows.",
+    "OPPO": "Separate A01 delay from invalid keyguard-showing=false rounds and empty restart XML. Actual UI CRUD, fresh restart evidence and missing toggles remain. No speculative OEM-specific product patch.",
+    "realme": "Saved UI comparisons rechecked: registration10/10, change10/10, cancellation0/0. Existing core/natural5-minute PASS retained. Only overlay transitions and first natural midnight remain.",
+    "Pixel": "Saved UI comparisons rechecked: registration10/10, change10/10, cancellation0/0. Only A01 timing and overlay transitions remain.",
+    "Samsung": "A01 timing and long natural idle remain. Old SRTL cleanup evidence is an administrative gap, not a reason to repeat functional tests.",
+    "source": "https://www.mi.com/global/support/faq/details/KA-171035/"
+  },
+  "A03": {
+    "repro": "consent_before_cached.log: old banner was not disposed after privacy selection changed. After fix: disposal, allowed false/true, still-true choices, stable geometry and one SDK initialization checked.",
+    "change": "Observable privacy entry requirement, async query ordering, preservation on unknown/error, single-flight form, ad revision invalidation, mounted/generation-safe reload. Dev-debug opt-in geography and reset require hashed test identifiers.",
+    "device_conditions": "Read UMP hashed test device ID, then build dev debug with UMP_DEBUG_GEOGRAPHY=eea/regulated_us/other and UMP_TEST_DEVICE_IDS. UMP_RESET_CONSENT only for first-choice scenarios. Real message availability depends on configured AdMob App ID and published messages; current normal dev keeps Google sample app/banner IDs.",
+    "sources": ["https://developers.google.com/admob/flutter/privacy"]
+  },
+  "U02": {
+    "single_source": "data/national_holidays_2026_2028.json",
+    "generator": "tools/generate_national_holidays.py --check",
+    "country_rule": "Original device country; unsupported explicit region stays unsupported. Regionless de/pt/hi use DE/BR/IN. Korean screens retain existing KR data and overrides. English translation fallback never chooses a holiday country.",
+    "scope_notes": "GB common intersection; IN three national days; BR nine federal statutes, municipal Good Friday and optional days excluded. US statutory plus observed dates. Sunday color policy is unchanged and separate from public-holiday status.",
+    "pending": "PH2027 Eid, PH2028 annual/movable/additional days, AE2027-2028 Hijri and transferred dates require official announcements. No guessed lunar calendar. Sources and counts are recorded in the JSON, not duplicate date tables here.",
+    "UAE_2026_evidence": "Mar22 extension follows MoHRE conditional announcement plus Presidential Court's confirmation that Mar19 was Ramadan30. Aug28 government media-office statement is embedded by ARN and linked to the original X post (direct X fetch 403); Dubai official announcement corroborates date. Jun15 from MoHRE's official LinkedIn post. Do not use predicted Jun16/Aug25 dates.",
+    "PH_source_correction": "PCO's prose summary of Proclamation1006 has a Jan/Feb typo for Chinese New Year. The proclamation PDF specifies 17 February 2026, which is used. 2027 Proclamation1427 is already published on 2026-09-11.",
+    "KR": "Existing Korean data/remote override contract preserved; this patch does not claim a new verification of every existing Korean 2025-2029 entry."
+  },
+  "U03": {
+    "change": "STARTUP_PHASE duration/total logs and STARTUP_FIRST_APP_FRAME; no initialization reorder or DB behavior change.",
+    "known_boundaries": "Fixed pre-gate splash300ms; database and alarm initialization awaited; Firebase optional timeout10s; local ad geometry timeout500ms; consent/SDK warm-up already outside first-screen gate.",
+    "limit": "No saved Fold8 reproduction matching the reported production build. Need exact version, cold/warm, DB size and folded state before claiming a root cause or improvement."
+  }
+}

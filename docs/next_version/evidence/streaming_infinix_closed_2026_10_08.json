@@ -1,0 +1,254 @@
+{
+  "checked_at": "2026-10-08T02:34:59.503547+00:00",
+  "status": "Investigation closed with demonstrated limitation; I0 release FAIL, support decision pending",
+  "scope": "Infinix NOTE50 Pro+ X6856 / Android15 / X6856-15.1.2.136SP01(OP001PF001AZ), Google/Transsion Device Streaming, fixed dev debug APK",
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "session": {
+    "name": "infinix_paid2",
+    "project": "log-it-3d269",
+    "model": "transsion_lab_infinix-x6856/35",
+    "cap_seconds": 1080,
+    "requested_epoch": 1791426197.0381403,
+    "install_limit_seconds": 240,
+    "first_evidence_limit_seconds": 480,
+    "reservation": "3eymkg3kuwtsi",
+    "reserved_epoch": 1791426216.038833,
+    "serial": "localhost:14775",
+    "connected_epoch": 1791426243.7642412,
+    "release_reason": "requested return",
+    "released": true,
+    "finished_epoch": 1791426649.5960042,
+    "conservative_seconds": 452.55786395072937
+  },
+  "active_reservations_after": 0,
+  "estimated_session_usd": 1.1313946598768232,
+  "estimated_today_usd": 4.834868382811546,
+  "today_seconds": 1933.9473531246185,
+  "budget": {
+    "latest_hard_usd": 20,
+    "soft_target_usd": 10,
+    "more_sessions_planned": false
+  },
+  "settings": {
+    "notification": "Allow actual UI",
+    "overlay": "actual switch ON",
+    "app_battery": "Unrestricted selected; background enabled",
+    "battery_manager": "OFF",
+    "sleep_standby": "OFF",
+    "phone_master": "same approved terms accepted; protected app ON; App Launch ON/Allowed; lock cleanup OFF",
+    "recents": "Unlock menu proves lock ON",
+    "pin": "none; secure=false",
+    "clock": "unchanged, Asia/Shanghai"
+  },
+  "native_allow_idle90": {
+    "target_ms": 1791426552169,
+    "scheduled": {
+      "event": "scheduled",
+      "mode": "allow_idle",
+      "targetMs": 1791426552169,
+      "wallMs": 1791426462174,
+      "elapsedMs": 59333835,
+      "interactive": true,
+      "delayMs": -89995
+    },
+    "observed_until": "target+60 seconds before wake or app UID access",
+    "fired_count": 0,
+    "hiber_freeze": "10:27:46.677 UID10294",
+    "hiber_proxy": "10:27:46.684 exact matching target1791426552169",
+    "power": "Dozing",
+    "standard_doze": "mState=ACTIVE mLightState=ACTIVE",
+    "evidence_order": "dumpsys alarm/deviceidle/window/power and all logcat before probe/DE file read; no device queries during natural wait",
+    "isolation": "force-stop cleared active app alarms, then explicit shell broadcast. Application startup re-added Guard at1791475200000, over13h outside observation. No parallel alarm_clock probe.",
+    "limit": "Native90-second delivery diagnosis, not UI registration/PIN/fullscreen/audio/5-minute functional PASS"
+  },
+  "comparison": {
+    "actual_ui_paid1": "Full-settings fresh UI alarm missed until app foreground, evidence in paid1 JSON/ZIP",
+    "native_alarm_clock_paid1": "30-second native probe held, evidence in paid1 JSON/ZIP",
+    "native_allow_idle_paid2": "90-second native probe held",
+    "causal_claim": "Both accepted exact-alarm APIs were held by XOS vendor Hiber before receiver delivery under inspected settings. API switch alone has no demonstrated remedy.",
+    "limits": "Separate physical reservations; same model/ROM/settings, different delays. No claim of a perfectly matched same-session A/B or universal/permanent Infinix impossibility."
+  },
+  "closure": {
+    "I0": "FAIL; current tested model/ROM cannot receive release PASS",
+    "I1_I4": "BLOCKED by I0",
+    "I2_I3": "NOT_RUN remainder retained; no extra paid run after root delivery failure confirmed",
+    "solution": "No verified ordinary-user fix found. No speculative product code changes, FGS/wakelock/root Hiber workaround, or release build.",
+    "reopen_only_if": "Specific XOS vendor fix/ordinary-user exemption, materially changed ROM or other reproducible technical hypothesis. Do not reconnect just to repeat same conditions.",
+    "support_decision": "Keep this tested ROM outside confirmed support until resolved or user explicitly accepts a documented restriction. No Play exclusion or external communication performed."
+  },
+  "other_alarm_apps": {
+    "sources": [
+      "https://alarmy-android.zendesk.com/hc/en-us/articles/46701731923609--No-Ring-How-to-Fix-Alarm-Issues-on-Other-Brands-Infinix-Tecno-Sony-Sharp-etc",
+      "https://www.galarmapp.com/setup-infinix",
+      "https://stackoverflow.com/questions/79989753/android-background-alarm-issue-on-infinix-zero-40-android-15-xos"
+    ],
+    "finding": "Official Alarmy/Galarm guides prioritize auto-start, background/battery exemptions, overlay/notifications and Phone Master exceptions. Those candidate conditions failed here. Android15 XOS first-person Azan developer report also remained unresolved.",
+    "limit": "No third-party alarm app was installed/tested; published guides do not prove success on this exact ROM."
+  },
+  "cleanup": {
+    "uninstall": "Success"
+  },
+  "source_state_at_close": {
+    "manifest_total": 430,
+    "match": 400,
+    "differences": [
+      {
+        "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt",
+        "frozen_sha256": "7b7579cafb676f03d6625760e94bc5105c040981e0f202483a5e6a063c71dbe8",
+        "current_sha256": "a97811b1dd7997d52f5f6938fb11831a01f03818357908f2d4c9309bd99ab21c"
+      },
+      {
+        "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt",
+        "frozen_sha256": "6ba73aa5f8c54844063da29050be4c5eef3fb6a5c74e4e622e542483df2785a0",
+        "current_sha256": "7a59d11377a25e1f50ea84d938f038cbbc21e99af4d183bf025160db60e8710c"
+      },
+      {
+        "path": "lib/l10n/app_de.arb",
+        "frozen_sha256": "4c1c52af935e14c8ad64742392eb14672d36c30a138d38986672d013b2b4fbe2",
+        "current_sha256": "fcca380fc55b169d2c20bec1127588b8814a0b734c8cd97223bc6649a3cbdba1"
+      },
+      {
+        "path": "lib/l10n/app_en.arb",
+        "frozen_sha256": "a3814db13c3ab50617d5aaa6426a16a4b567ec4e9631ebd2406a3ef88d5d7df8",
+        "current_sha256": "fdc59169a6398aa4d7cd67e4cf4cdd98b5c207720b165a653712e15720ad6a15"
+      },
+      {
+        "path": "lib/l10n/app_hi.arb",
+        "frozen_sha256": "fb949a68e528071b5b4189c8308d609e9309177ad7fa26d6af3d6789b1821357",
+        "current_sha256": "a1495e5f64ea9c93a1459238ed32a527bb653c4fc3acc1e62ca2284c0c799b1e"
+      },
+      {
+        "path": "lib/l10n/app_ko.arb",
+        "frozen_sha256": "0ef341a9b0ce8c493e996979e72637c6c0ebb2b332d5816549d21761b6db5176",
+        "current_sha256": "fd09475f7f424d3f0048b80fd4af04aec41902e6dacfc9f7499a99f1da4ce27e"
+      },
+      {
+        "path": "lib/l10n/app_pt.arb",
+        "frozen_sha256": "c6f4eae42943f900b18b708b3c4daf554086a76167fa27deeb191cc65bd762d2",
+        "current_sha256": "64a8e1478f0043c9894100eea2f6e5455320dbd8257dbbe32f2a423913a9b4ff"
+      },
+      {
+        "path": "lib/l10n/generated/app_localizations.dart",
+        "frozen_sha256": "94d3ba80102b8e7256de4fb0cdd38bd1c071419fa2112112092c7788ac9831b6",
+        "current_sha256": "eeab56eec6f319cc0ade68a919d8c24c5264958cb686df9fb43a3456507ce93c"
+      },
+      {
+        "path": "lib/l10n/generated/app_localizations_de.dart",
+        "frozen_sha256": "6a6b89f070a4c1bd15633ddf05bac49572a17f70de589afe2cb196f9be62be43",
+        "current_sha256": "d5e52a81c2d11e51d0f742a6ba605e67d9fdee0a80c357a8872479607a0ca4ef"
+      },
+      {
+        "path": "lib/l10n/generated/app_localizations_en.dart",
+        "frozen_sha256": "ecfbc014844ea1bbbd284769704b00e57c8930fff7c538e7cbbc0c17d591c794",
+        "current_sha256": "f025cd973da8d33226e89cca86ce358705bbcb552b6a6fa9a99adeb02d342236"
+      },
+      {
+        "path": "lib/l10n/generated/app_localizations_hi.dart",
+        "frozen_sha256": "034a453f079623b93bb8990d70d3847a960c402a0e184d24062540958d42e46f",
+        "current_sha256": "c725ad6f84eb0b4f4494cc3852989387f90a9d8b479e0ccd4cba727c3b0d9320"
+      },
+      {
+        "path": "lib/l10n/generated/app_localizations_ko.dart",
+        "frozen_sha256": "be431ffcf71e2f4fbf06cb509aff65c1352b37c75e0efba4c9d30d5ae3870298",
+        "current_sha256": "490374a96f2a6e27094bf7f456dcdc46fa9ed84bc8a2c3d1afaaca671e5d2101"
+      },
+      {
+        "path": "lib/l10n/generated/app_localizations_pt.dart",
+        "frozen_sha256": "4b3af3c7c1187fbcac09b7362d62a93592797cc44d9d82e37e1b2470d6039a2a",
+        "current_sha256": "917e3d0800881451b95c0514bbf91558f7ddf0ff90608f50836d56ac9720553e"
+      },
+      {
+        "path": "lib/l10n/korean_only/messages_ko.json",
+        "frozen_sha256": "1b95d29d93f1eede5f725b4cf021885cdbf75d2acb71d36c85eda78290c23448",
+        "current_sha256": "0d4b967602aa5b989944df40be69c5000980fc2bfe121ca453a13cbd77111ecb"
+      },
+      {
+        "path": "lib/l10n/korean_only_copy.dart",
+        "frozen_sha256": "b15a020ecf6fc5f9f7e4de4431fe4c5c2006a2396101f1eb0e107e1eedbad284",
+        "current_sha256": "e223a09bb0db9d6d464ec6ebf27e1fcaafd0de5dcc07fd870f8b6c9270a431fb"
+      },
+      {
+        "path": "lib/main.dart",
+        "frozen_sha256": "d4f89b28945d166b07650391dffb4484060c3669971e3cffd1ec0e2f75688583",
+        "current_sha256": "22e1ff861a06b990c476a88ee8fe549b2ff92e167513cd23613c0dae1ef0461c"
+      },
+      {
+        "path": "lib/models/sleep_record.dart",
+        "frozen_sha256": "9be206f8efd0c496cac3752cc7f8a1b23548690ec68d033dec300cb8789ff6a8",
+        "current_sha256": "594d109b3a94a8906f7d4fe3ee128e31af5d443e046e91d8376065b64ab6af43"
+      },
+      {
+        "path": "lib/providers/sleep_record_provider.dart",
+        "frozen_sha256": "d36ce6d56a02e4477a959d33e66fd5f53f4da88af45d73af3ccd3bcf5058dffd",
+        "current_sha256": "8ab5f568c3eab9e8171479e7fbc8c64d7dfed1dda0dd73835c742b5d942a20e0"
+      },
+      {
+        "path": "lib/providers/tab_visibility_provider.dart",
+        "frozen_sha256": "8b74d08741dfecd57cbba30e5ea2035a8930a242b7ca3bed7a0e9cfa337da155",
+        "current_sha256": "b2e2fac75925e79cac895b30eec9dd69fc550b3567eb0e4598daf816218eba52"
+      },
+      {
+        "path": "lib/screens/all_teams_setup_screen.dart",
+        "frozen_sha256": "93621897078da3e1169633b6ec68a83d9633818bd855e1f9d63434a312777a09",
+        "current_sha256": "655427bbe503e8341b344f41f7ff4d4d06857e2c8d07c69dda5645f4ea99876f"
+      },
+      {
+        "path": "lib/screens/friend_list_screen.dart",
+        "frozen_sha256": "1502d56ed5cdbbf618504834c073d8420c84442a8fbe3e61fd65358ffee3619c",
+        "current_sha256": "f85629b5538a4f63de6b2227904c9023fabbe271431203e2bdd10dc7923353d5"
+      },
+      {
+        "path": "lib/screens/my_share_code_screen.dart",
+        "frozen_sha256": "eff2e119474b798e95c17c026fda9b920fa8def10c15a7cbb8bbe7a285d308ca",
+        "current_sha256": "27532f426722ea88907a1005aacfffac51d53cf276ad555dc5b3aad200d1f228"
+      },
+      {
+        "path": "lib/screens/settings_tab.dart",
+        "frozen_sha256": "345933cb1cc5cc55d1781d26d90962c2577258911f5fd77d4c277e591f8ead0d",
+        "current_sha256": "252153b57e5d8d73bf3435eb69ee6d3d85c95c387a16bbc592fed15aa842c65b"
+      },
+      {
+        "path": "lib/screens/team_rule_editor_screen.dart",
+        "frozen_sha256": "82780d369b567818e3ccd8132e35b86ffc4636fa2975c94463f24f4d9c823f8d",
+        "current_sha256": "3713996259911ca425f5b8c10edbe00fdfa4bd2513e3da9e43fbf1160eb4eda7"
+      },
+      {
+        "path": "lib/screens/team_schedule_edit_screen.dart",
+        "frozen_sha256": "3b87299486bb7492a592080bf2b3fc108bbc46f89d823499212f027ccecf6ec9",
+        "current_sha256": "7a34c2f9ed076fcdc1672c0adcca6a3913f10d7720cef60bebb1862733e644b8"
+      },
+      {
+        "path": "lib/screens/work_hours_settings_screen.dart",
+        "frozen_sha256": "21f19d51459734f44599df55006b276aa4a51d3cd9ba253385f875b5c5718235",
+        "current_sha256": "6df480ca3dd09ac6e210d77bf5bbcd7f2beb3c12ebc084605c60507fe2192432"
+      },
+      {
+        "path": "lib/widgets/schedule_change_dialog.dart",
+        "frozen_sha256": "1a8d34c023bf6e93e880a70f583d3b472421b67e09a4894c765799eba00a2151",
+        "current_sha256": "91e3b293dbbdb3751b115b81a9a7d042d97925a78aec959aee7a5380b2718b69"
+      },
+      {
+        "path": "lib/widgets/shift_editor_dialog.dart",
+        "frozen_sha256": "6cb7ac3b3154fba4939a4bc7b180a1cc45d9a8baac71df43e6dad9c28fadeebe",
+        "current_sha256": "07d50062e9cd649925528a3cf6f749c939c8c592b61e5465b8dfc45f123839c1"
+      },
+      {
+        "path": "lib/widgets/shift_names_dialog.dart",
+        "frozen_sha256": "be9cbe222b84bc25a3131b84c3cae54316f4100db6188458e9e7a0ca4537ee34",
+        "current_sha256": "1d1a28a380cb230934443abdd4dda2487c57de268d5d98ff163637161424b1dd"
+      },
+      {
+        "path": "tools/check_critical_release.ps1",
+        "frozen_sha256": "52dc3d8419a137381f1a8558516de96b8dd782cfdfd17d2d86dfe6ce70c3ef1a",
+        "current_sha256": "2ee7231d4d913a52f85cde5dac469f20081037e7693b37fe26587f24ea059a02"
+      }
+    ],
+    "meaning": "Do not transfer this fixed-APK result to current workspace unconditionally; preserved unrelated/concurrent edits."
+  },
+  "archive": "artifacts\\streaming_free_2026_10_08\\infinix_paid2_evidence.zip",
+  "archive_sha256": "01ba753ac784db9c3b361d796afe5dd8b2f2da9b9d404a887dd83a3fd381c5c9",
+  "latest_user_proposal": {
+    "request": "Prefer help guidance over withholding release by manufacturer; list tested representatives, explain unverified/known-limited models, ongoing improvements and lowvibe07@gmail.com contact. No code changes; asked for opinion.",
+    "status": "Discussion recorded in core; wording and implementation not approved or implemented. Device FAIL/NOT_RUN facts preserved; no unilateral release block or acceptance."
+  }
+}

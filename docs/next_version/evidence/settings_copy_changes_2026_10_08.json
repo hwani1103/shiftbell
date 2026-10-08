@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-08",
+  "reason": "Explicit user request: optional feature names and descriptions",
+  "changes": {
+    "settingsScheduleTabReenableTitle": {
+      "before": "일정관리 화면 사용하기",
+      "after": "일정관리 기능"
+    },
+    "settingsScheduleTabReenableSubtitle": {
+      "before": "하단 탭에 일정관리 화면을 다시 표시합니다",
+      "after": "하루의 중요 일정 기록 및 예정시간 알림"
+    },
+    "settingsConditionFeatureTitle": {
+      "before": null,
+      "after": "수면회복 컨디션 기능"
+    },
+    "settingsConditionFeatureSubtitle": {
+      "before": null,
+      "after": "근무·수면시간 기반 컨디션 예측"
+    },
+    "helpSleepAutoDetectBody": {
+      "before": "위젯을 누르지 않아도, 근무 일정과 폰을 오래 만지지 않은 시간을 바탕으로 앱이 \"이때 주무셨을 것 같다\"고 추정해요. 퇴근 후 잠과 밤잠, 그리고 야간 근무 출근 전에 잔 낮잠까지 찾아요. 근무 중에 잔 잠은 자동으로 잡지 않아서 위젯으로 직접 기록해야 해요.\n\n추정한 기록은 항상 추정일 뿐이라, \"맞아요\"로 확인해야 정식 기록이 돼요.",
+      "after": "위젯을 누르지 않아도, 근무 일정과 폰을 오래 만지지 않은 시간을 바탕으로 앱이 \"이때 주무셨을 것 같다\"고 추정해요. 수면 시간대에 최소 5시간 이상 폰을 사용하지 않았을 때만 추정 기록을 보여줘요. 짧은 낮잠이나 근무 중에 잔 잠은 위젯이나 수면 기록 화면에서 직접 기록해주세요.\n\n추정한 기록은 항상 추정일 뿐이라, \"맞아요\"로 확인해야 정식 기록이 돼요."
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import '../widgets/settings_appearance.dart';
 import '../widgets/team_assignment_grid.dart';
 import '../widgets/semantics_table_boundary.dart';
 import '../widgets/adaptive_layout.dart';
@@ -15,6 +16,7 @@ import '../l10n/l10n_extensions.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_shift_chip.dart';
 import '../widgets/app_second_button.dart';
+import '../widgets/app_button.dart';
 
 /// Stable identity used by selection and assignments even when names change.
 class _RosterEntry {
@@ -284,8 +286,8 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
       if (!mounted) return;
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              context.l10n.settingsScheduleChangeFailedWithError(context.localizedErrorDetail(error)))));
+          content: Text(context.l10n.settingsScheduleChangeFailedWithError(
+              context.localizedErrorDetail(error)))));
     }
   }
 
@@ -317,7 +319,8 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                         const SizedBox(height: 16),
                         SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                            child: SemanticsTableBoundary(child: DataTable(
+                            child: SemanticsTableBoundary(
+                                child: DataTable(
                               columnSpacing: 16,
                               horizontalMargin: 8,
                               columns: [
@@ -356,11 +359,14 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
   Widget _sectionLabel(String text, {required Color color}) => Text(
         text,
         style: TextStyle(
-            fontSize: 16.sp, fontWeight: FontWeight.bold, color: color),
+            fontSize: 16.sp, fontWeight: FontWeight.w600, color: color),
       );
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     // ⭐ 2026-09-05(3차) - 여기도 저장 로직과 같은 이유로 Set 순서 대신 로스터
     // 순서를 따름(트레이 칩이 탭한 순서대로 뒤섞여 보이지 않게).
@@ -369,12 +375,12 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
         .toList();
 
     return Scaffold(
-      backgroundColor: kAppBackgroundPastel,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(context.l10n.statusFullTeamScheduleTitle),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
-        elevation: 0.5,
+        elevation: 0,
       ),
       body: AdaptiveFormBody(
           child: SafeArea(
@@ -400,7 +406,7 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                         // 톤으로 이미 쓰이고 있어서(app_second_button.dart) 그대로
                         // 재사용 - 조 이름을 확정 짓는 이 버튼과 잘 맞음.
                         AppSecondButton(
-                          variant: AppSecondButtonVariant.success,
+                          variant: AppSecondButtonVariant.neutral,
                           compact: true,
                           onPressed: _saving ? null : _openRosterEditor,
                           child: Row(
@@ -557,7 +563,7 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                       const SizedBox(height: 24),
                       Text(context.l10n.teamRuleTitle,
                           style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                               fontSize: 16,
                               color: kAppMainAccent)),
                       const SizedBox(height: 6),
@@ -596,8 +602,7 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: AppSecondButton(
-                      variant: AppSecondButtonVariant.primary,
+                    child: AppButton(
                       onPressed: _canSave ? _save : null,
                       child: Text(context.l10n.commonSave),
                     ),
@@ -701,7 +706,7 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
               textAlign: TextAlign.center,
               textCapitalization: TextCapitalization.characters,
               onChanged: (_) => setState(() {}),
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp),
               decoration: const InputDecoration(
                 counterText: '',
                 isCollapsed: true,
@@ -743,7 +748,7 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
               textCapitalization: TextCapitalization.characters,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _add(),
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15.sp),
               decoration: const InputDecoration(
                 counterText: '',
                 isCollapsed: true,
@@ -765,7 +770,10 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     return Padding(
       // ⭐ 키보드가 뜨면 그만큼 시트를 밀어올림.
       padding:
@@ -796,7 +804,7 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
                 context.l10n.allTeamsSetupRosterLabel,
                 style: TextStyle(
                     fontSize: 18.sp,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w600,
                     color: kAppChipBorder),
               ),
               SizedBox(height: 16.h),
@@ -811,8 +819,7 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
               SizedBox(height: 20.h),
               SizedBox(
                 width: double.infinity,
-                child: AppSecondButton(
-                  variant: AppSecondButtonVariant.success,
+                child: AppButton(
                   onPressed: _done,
                   child: Text(context.l10n.commonDone),
                 ),

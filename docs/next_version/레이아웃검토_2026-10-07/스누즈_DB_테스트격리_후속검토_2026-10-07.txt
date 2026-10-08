@@ -1,0 +1,44 @@
+﻿스누즈 DB 테스트 격리 오류 후속 검토 (2026-10-07)
+
+발견 경위
+- 알람 설정/잠금화면 도움말 UI 검토의 필수 검사에서 native 111개 중
+  AlarmSnoozeDstTest.ordinarySeoul의 테스트 준비 insert(7)이 UNIQUE alarms.id로 실패했다.
+- 기존 초기 UI 원장의 최초 실패/재실행 이력을 보존한다. 실패한 한 건은 단독 실행에서 통과했다.
+- 원본 aux_h2_minimal_v24.db는 alarms=[]이고 integrity_check=ok임을 읽기 전용으로 확인했다.
+
+재현과 원인
+- DiagLog.log는 DiagReport.scheduleRefresh로 실제 ScheduledThreadPoolExecutor에
+  1초 지연 진단 파일 생성을 예약한다. buildSnapshot은 DatabaseHelper 싱글턴으로 DB를 읽는다.
+- 기존 resetInstanceForTest는 DB helper만 닫았고 예약/실행 중인 진단 작업을 정리하지 않았다.
+  Robolectric looper 밖의 작업이 초기화 뒤 이전 Context/DB로 싱글턴을 다시 열 수 있다.
+  테스트 fixture 파일 교체와 이 DB 읽기가 경합하며 Windows에서 열린 파일의 교체도 실패한다.
+- pendingDiagnosticsCannotReopenPreviousFixtureAfterDatabaseReset 검사에서 순서를 고정했다.
+  수정 전 단독 실행은 열린 fixture DB를 교체하지 못해 FileAlreadyExistsException으로 실패했다.
+  로그/실패 XML: snooze_db_race_before_fix.log, snooze_db_race_before_fix.xml.
+  이는 최초 UNIQUE 실패와 증상은 다르지만 이전 DB가 테스트 초기화 이후 재개방되는 경합을 직접 재현한다.
+
+수정 범위
+- DiagReport.drainRefreshForTest: 미실행 예약을 cancel(false)로 취소하고,
+  단일 executor의 barrier로 이미 실행 중인 진단 읽기를 기다린다. SQLite 읽기를 강제 interrupt하지 않는다.
+- DatabaseHelper.resetInstanceForTest가 위 정리를 먼저 완료한 뒤 기존 helper를 닫는다.
+- 앱 실행 경로에서는 두 test hook을 호출하지 않는다. 실제 스누즈/진단 파일 생성 동작은 유지한다.
+- 예약된 읽기 및 이미 시작한 읽기의 두 경합을 확인하는 회귀 검사를 추가했다.
+
+검증
+- 수정 전 재현 검사 1건 FAIL, 수정 후 같은 재현 검사 PASS.
+- AlarmSnoozeDstTest 9, RingSnoozeTest 14, SnoozeDefaultsTest 4, DiagLogTest 2:
+  29개 묶음 PASS (snooze_db_race_after_fix.log 및 각 클래스 after_fix.xml).
+- 이후 실행 중인 reader 검사까지 추가하고 전체 필수 검사를 critical_snooze_db_isolation_fixed.log로 재확인 중.
+- dev debug 호스트/Robolectric 검사이며 실기기 잠금 알람 PASS로 기록하지 않는다.
+  사용 중인 USB 앱의 APK 재설치나 release 빌드를 하지 않는다.
+
+기존 검토 원장 및 알람설정_UI_후속검토_2026-10-07.txt에 연결되는 별도 후속 원장이다.
+
+최종 검증
+- tools/check_critical_release.ps1 전체 재실행 exit 0: P0 automated checks passed.
+  로그: build/layout_review_2026_10_07/critical_snooze_db_isolation_fixed.log.
+- Flutter 108+67개 PASS, 두 결정적 재현 검사를 포함한 native 113개 PASS(실패/오류 0),
+  후속 DB 마이그레이션 검사도 PASS.
+- 대기 중인 진단 작업 취소 및 실행 중인 진단 reader 완료 대기 두 경로를 검증했다.
+  XML: build/layout_review_2026_10_07/AlarmSnoozeDstTest_full_fixed.xml.
+- 수정은 test hook 경로에만 적용된다. 실제 앱의 스누즈 동작을 변경하거나 실제 잠금 알람 PASS로 기록하지 않는다.

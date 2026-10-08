@@ -8,11 +8,13 @@ import 'package:shiftbell/widgets/memo_detail_sheet.dart';
 void main() {
   Future<void> open(WidgetTester tester,
       {String language = 'ko',
+      bool dark = false,
       required Future<void> Function(String) save,
       required Future<void> Function() delete}) async {
     await tester.pumpWidget(ScreenUtilInit(
       designSize: const Size(360, 780),
       builder: (_, __) => MaterialApp(
+        theme: dark ? ThemeData.dark() : ThemeData.light(),
         locale: Locale(language),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
@@ -32,6 +34,23 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
   }
+
+  testWidgets('dark memo sheet and editor use the actual surface foreground',
+      (t) async {
+    await open(t, dark: true, save: (_) async {}, delete: () async {});
+    final body = find.text('original memo');
+    final colors = Theme.of(t.element(body)).colorScheme;
+    expect(t.widget<Text>(body).style!.color, colors.onSurface);
+    await t.tap(find.byKey(const ValueKey('memo-detail-content')));
+    await t.pumpAndSettle();
+    expect(
+        t
+            .widget<TextField>(find.byKey(const ValueKey('memo-detail-editor')))
+            .style!
+            .color,
+        colors.onSurface);
+    expect(t.takeException(), isNull);
+  });
 
   final content = find.byKey(const ValueKey('memo-detail-content'));
   final editor = find.byKey(const ValueKey('memo-detail-editor'));

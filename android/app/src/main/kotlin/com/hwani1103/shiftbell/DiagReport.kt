@@ -44,6 +44,17 @@ object DiagReport {
         pendingRefresh = refreshExecutor.schedule({ export(appContext) }, 1, TimeUnit.SECONDS)
     }
 
+    /** Test teardown must finish old readers before closing/replacing the fixture DB. */
+    internal fun drainRefreshForTest() {
+        synchronized(this) {
+            pendingRefresh?.cancel(false)
+            pendingRefresh = null
+        }
+        // cancel(false) does not stop an export that has already started. A barrier
+        // on the single executor waits for that reader without interrupting SQLite.
+        refreshExecutor.submit {}.get(10, TimeUnit.SECONDS)
+    }
+
     private fun prefix(context: Context) =
         if (context.packageName.endsWith(".dev")) "ShiftBell_Diag_dev_" else "ShiftBell_Diag_"
 

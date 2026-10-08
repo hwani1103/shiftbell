@@ -1,8 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-/// App-owned UI follows fractional system sizes up to the supported maximum.
-/// Keep the incoming (potentially nonlinear) scaler rather than rounding it.
-const double kAppMaxTextScale = 1.3;
+/// App typography follows the available window, independent of OS font size.
+const double kAppMaxTextScale = 1.0;
 
 class AppTextScale extends StatelessWidget {
   const AppTextScale({super.key, required this.child});
@@ -13,7 +12,7 @@ class AppTextScale extends StatelessWidget {
     final media = MediaQuery.of(context);
     return MediaQuery(
       data: media.copyWith(
-        textScaler: media.textScaler.clamp(maxScaleFactor: kAppMaxTextScale),
+        textScaler: TextScaler.noScaling,
       ),
       child: child,
     );

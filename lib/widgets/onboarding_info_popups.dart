@@ -76,17 +76,19 @@ Future<void> _showInfoPopupOnce(
     // ⭐ 2026-09-22(영어화) - content(dialogContext)로 바뀌어서 각 _PopupContent가
     // context.l10n으로 로케일에 맞는 문구를 직접 고름(아래 WelcomePopupContent 등 참고).
     builder: (dialogContext) => koreanOnly && !dialogContext.usesKoreanFeatures
-        ? AlertDialog(actions: [TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(dialogContext.l10n.commonClose),
-          )])
+        ? AlertDialog(actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(dialogContext.l10n.commonClose),
+            )
+          ])
         : Dialog(
-      backgroundColor: Colors.transparent,
-      child: _InfoPopupCard(
-        content: content(dialogContext),
-        onConfirm: () => Navigator.of(dialogContext).pop(),
-      ),
-    ),
+            backgroundColor: Colors.transparent,
+            child: _InfoPopupCard(
+              content: content(dialogContext),
+              onConfirm: () => Navigator.of(dialogContext).pop(),
+            ),
+          ),
   );
 }
 
@@ -113,10 +115,12 @@ Future<void> maybeShowShiftAssignTutorial(BuildContext context,
 /// 컨디션 탭(condition_tab.dart) `_ConditionBodyState`가 최초 build 시 부르는
 /// 함수 - 이미 봤으면 아무 것도 안 함. setupNeeded 여부와 무관하게 항상 뜸(설정이
 /// 안 돼 있으면 그 자체가 이 안내의 1번 내용이므로).
-Future<void> maybeShowConditionTabTutorial(BuildContext context) =>
+Future<void> maybeShowConditionTabTutorial(BuildContext context,
+        {bool Function()? canShow}) =>
     _showInfoPopupOnce(
       context,
       shownKey: _kConditionTabTutorialShownKey,
+      canShow: canShow,
       koreanOnly: true,
       content: ConditionTabTutorialContent.new,
     );
@@ -124,10 +128,12 @@ Future<void> maybeShowConditionTabTutorial(BuildContext context) =>
 /// 일정관리 탭(schedule_management_tab.dart)이 최초 build 시 부르는 함수 -
 /// 이미 봤으면 아무 것도 안 함. 컨디션 탭의 maybeShowConditionTabTutorial과
 /// 완전히 동일한 패턴(같은 카드/버튼 디자인, 평생 1회).
-Future<void> maybeShowScheduleTabTutorial(BuildContext context) =>
+Future<void> maybeShowScheduleTabTutorial(BuildContext context,
+        {bool Function()? canShow}) =>
     _showInfoPopupOnce(
       context,
       shownKey: _kScheduleTabTutorialShownKey,
+      canShow: canShow,
       koreanOnly: true,
       content: ScheduleTabTutorialContent.new,
     );

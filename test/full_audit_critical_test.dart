@@ -112,6 +112,52 @@ void main() {
       tables: {'alarm_types': await db.query('alarm_types'), 'alarms': alarms},
       preferences: preferences);
 
+  test('HIST-01 selected duration survives export, old/new merge and repeated restore', () async {
+    final history = <String, dynamic>{
+      'alarm_id': 7, 'scheduled_date': '2026-10-07T09:00:00',
+      'scheduled_time': '09:00', 'actual_ring_time': '2026-10-07T09:00:03',
+      'created_at': '2026-10-07T09:00:03', 'dismiss_type': 'snoozed',
+      'snooze_minutes': 15,
+    };
+    await db.insert('alarm_history', history);
+    final exported = await BackupService.instance.exportAll();
+    expect(exported.tables['alarm_history']!.single['snooze_minutes'], 15);
+    await db.update('alarm_history', {'snooze_minutes': null});
+    await restore.start(exported, overwrite: true);
+    expect((await db.query('alarm_history')).single['snooze_minutes'], 15);
+    await restore.start(exported, overwrite: true);
+    expect(await db.query('alarm_history'), hasLength(1));
+    final old = await payload();
+    old.tables['alarm_history'] = [Map<String, dynamic>.from(history)..remove('snooze_minutes')];
+    await restore.start(old, overwrite: true);
+    expect((await db.query('alarm_history')).single['snooze_minutes'], 15,
+        reason: 'An old backup must not erase the known executed duration');
+    await db.delete('alarm_history');
+    await restore.start(old, overwrite: true);
+    expect((await db.query('alarm_history')).single['snooze_minutes'], isNull,
+        reason: 'Do not invent a duration for an unrecorded historical action');
+  });
+
+  test('HIST-02 invalid duration is rejected before restore and by SQLite', () async {
+    for (final value in [0, 6, 35, '15']) {
+      final backup = await payload();
+      backup.tables['alarm_history'] = [{
+        'alarm_id': 7, 'scheduled_date': '2026-10-07T09:00:00',
+        'scheduled_time': '09:00', 'actual_ring_time': '2026-10-07T09:00:03',
+        'created_at': '2026-10-07T09:00:03', 'dismiss_type': 'snoozed',
+        'snooze_minutes': value,
+      }];
+      expect(await BackupValidator.validate(backup, db), isNotEmpty);
+    }
+    await expectLater(db.insert('alarm_history', {
+      'alarm_id': 7, 'scheduled_date': '2026-10-07T09:00:00',
+      'scheduled_time': '09:00', 'actual_ring_time': '2026-10-07T09:00:03',
+      'created_at': '2026-10-07T09:00:03', 'dismiss_type': 'snoozed',
+      'snooze_minutes': 6,
+    }), throwsA(anything));
+    expect(await db.query('alarm_history'), isEmpty);
+  });
+
   test('AUD-A01 all-alarm deletion cancels fixed custom snoozed and keeps history', () async {
     for (final item in [(1, 'fixed'), (2, 'custom'), (3, 'snoozed')]) {
       await service.insertAlarm(Alarm.fromMap(row(item.$1, item.$2, DateTime.now().add(const Duration(days: 1)))));

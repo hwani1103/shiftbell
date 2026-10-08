@@ -1,0 +1,66 @@
+알람 권한 설정 UI 후속 검토 (2026-10-07)
+
+요청 범위
+- 설정의 다른 목록 항목과 레이아웃을 맞추고, 권한 화면의 목적과 안내 문구를 점검한다.
+- 한국어 권한 안내의 ShiftBell 표기를 교대시계 앱으로 변경한다.
+- 권한 판정, 시스템 설정 이동, 설정 복귀 및 알람 기능 로직은 변경하지 않는다.
+
+존재 목적과 위치 판단
+- settings_tab.dart의 항목은 showPermissionSettings → PermissionPanel을 연다.
+- PermissionController가 알림, 다른 앱 위에 표시, 정확한 알람, 잠금화면 표시 상태를 조회한다.
+  초기 안내에서 빠진 권한이나 나중에 변경된 권한을 다시 확인·설정하는 진입점이다.
+- 앱 전체 알림/알람 채널 차단 안내와 잠금화면 문제 해결 도움말도 연결되어 있다.
+- 설정에서 제거하지 않고 기존 도움말 그룹의 첫 항목에 유지한다. 설정 복구·문제 해결 목적과 맞는다.
+  맨 위 알람음 관리/근무시간 항목의 기존 위치도 유지한다.
+
+기존 안내의 문제
+- 권한이 허용되면 각 권한 설명이 숨겨져 화면 전체의 목적을 이해하기 어려웠다.
+- 다른 앱 위에 표시의 앱 선택 안내가 전체 화면 하단에 항상 나와 특정 권한 전용 화면처럼 보였다.
+- 설정 목록 항목에는 주변 항목과 달리 목적 설명과 이동 화살표가 없었다.
+
+변경
+- 설정 목록에 테마 대응 아이콘 색, 목적 설명, 이동 화살표를 추가했다.
+- 시트에 제목/설명/핸들을 추가하고 네 권한을 같은 카드 구조로 정리했다.
+  허용 여부와 관계없이 각 권한의 용도를 표시하고, 상태는 별도 줄에 유지한다.
+- 다른 앱 위에 표시의 앱 선택 안내는 해당 권한에 설정이 필요할 때 그 카드 안에서만 표시한다.
+- 하단에는 모든 권한에 공통인 시스템 설정에서 앱으로 돌아오는 안내를 둔다.
+- 한국어 권한 안내와 연결 도움말의 앱 표기를 교대시계 앱으로 바꿨다.
+  Download/ShiftBell 같은 실제 파일 경로와 백업 파일명은 유지한다.
+- 잠금화면 설명은 사용 목적을 설명하는 문장으로 바꿔 이미 허용된 상태에서 허용을 재촉하지 않는다.
+- 공통 목적 설명 키는 ko/en/de/pt/hi 다섯 ARB에 추가하고 생성기로 갱신했다.
+  한국어 전용 기능 리소스와 common 리소스의 구조/기능 범위는 유지했다.
+
+기능 보존
+- PermissionService/PermissionController/native 권한 코드는 변경하지 않았다.
+- granted/denied/unknown/notApplicable 구분, 알람 채널 차단 구분, 중복 설정 열기 방지,
+  resume 후 상태 재조회와 OEM 도움말 버튼의 동작을 유지한다.
+- USB에서는 권한 목록만 열어 확인했으며 시스템 권한 변경 버튼은 누르지 않았다.
+
+검증
+- USB dev debug 핫리로드 완료. APK/웹 재빌드나 앱 재설치는 하지 않았다.
+- 권한 안내 레이아웃 48개 조합 통과: permission_ui_layout_final_test.log.
+  기존 검사가 전체 TextButton을 1개로 가정했으나 패널의 문제 해결 버튼도 존재했다.
+  온보딩 다음/나중에 버튼을 번역 문구로 정확히 찾도록 기존 검사를 보정했다.
+- 설정 목록/권한 카드/한국어 앱 표기를 실기기에서 확인했다.
+  캡처: permission_settings_row_verified.png, permission_panel_final_display.png,
+  permission_panel_footer_verified.png (build/layout_review_2026_10_07).
+- AGENTS.md 필수 지침에 따라 tools/check_critical_release.ps1을 -Build 없이 실행했다.
+  common/web 리소스 및 Flutter 기능 검사를 통과했으나 native 111개 중 아래 2개가 실패했다.
+  AlarmSnoozeDstTest.sameClockDifferentOccurrenceDoesNotCollide
+  RingSnoozeTest.mismatchedProtocolAndStaleRoundCannotStopNextAlarm
+  두 실패는 테스트 준비 중 alarms.id의 UNIQUE constraint 위반이다.
+  권한 UI 변경과 분리하여 기존 두 클래스를 단독 재실행해 확인한다.
+  전체 P0 PASS나 실기기 잠금 알람 PASS로 기록하지 않는다.
+- 로그: critical_permission_ui.log, permission_ui_snooze_isolated.log.
+- 후속 단독 실행: 위 스누즈 두 클래스 통과 (BUILD SUCCESSFUL).
+  최종 문구 리소스 감사 errors=[] 및 웹 언어 검사 8개 통과.
+  필수 전체 검사 묶음은 critical_permission_ui_retry.log로 재확인한다.
+
+기존 1·2·3차 검토와 다른 작업 원장은 보존하며 이 후속 원장으로 연결한다.
+
+최종 재확인
+- tools/check_critical_release.ps1 재실행 exit 0: P0 automated checks passed.
+  로그: build/layout_review_2026_10_07/critical_permission_ui_retry.log.
+- 최신 문구를 포함한 Flutter 기능/리소스 검사, native 전체 묶음 및 DB 마이그레이션 검사 통과.
+- 첫 실행의 스누즈 DB 충돌 실패는 이력으로 보존한다. 스누즈 및 권한 기능 코드는 변경하지 않았다.
+- 자동 검사 성공을 실기기 잠금 알람/제조사 설정 PASS로 기록하지 않는다.

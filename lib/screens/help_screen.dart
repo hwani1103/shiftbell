@@ -52,11 +52,15 @@ class HelpSection {
 
 // ⭐ 순서 = 사용자가 앱을 처음 접했을 때 흐름(시작하기 → 근무 관리 → 알람 →
 // 달력/위젯 → 일정관리 → 컨디션 → 수면 → 친구공유 → 백업 → 문제해결)을 그대로 따름.
-final List<HelpSection> _helpSections = [
+List<HelpSection> get _helpSections => [
   HelpSection(
     icon: Icons.rocket_launch_outlined,
     titleKey: (l10n) => l10n.helpStartSectionTitle,
     topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpTroubleshootAlarmIssueTitle,
+        bodyKey: (l10n) => l10n.helpTroubleshootAlarmIssueBody,
+      ),
       HelpTopic(
         titleKey: (l10n) => l10n.helpStartOnboardingTitle,
         bodyKey: (l10n) => l10n.helpStartOnboardingBody,
@@ -79,8 +83,6 @@ final List<HelpSection> _helpSections = [
         titleKey: (l10n) => l10n.helpShiftChangeShiftTitle,
         bodyKey: (l10n) => l10n.helpShiftChangeShiftBody,
       ),
-      HelpTopic(titleKey: (l10n) => l10n.helpCalendarTextSizeTitle,
-        bodyKey: (l10n) => l10n.helpCalendarTextSizeBody),
       HelpTopic(
         titleKey: (l10n) => l10n.helpShiftShiftColorsTitle,
         bodyKey: (l10n) => l10n.helpShiftShiftColorsBody,
@@ -108,10 +110,6 @@ final List<HelpSection> _helpSections = [
         bodyKey: (l10n) => l10n.helpAlarmSoundVolumeBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpAlarmAlarmNotRingingTitle,
-        bodyKey: (l10n) => l10n.helpAlarmAlarmNotRingingBody,
-      ),
-      HelpTopic(
         titleKey: (l10n) => l10n.helpAlarmAlarmHistoryTitle,
         bodyKey: (l10n) => l10n.helpAlarmAlarmHistoryBody,
       ),
@@ -124,7 +122,6 @@ final List<HelpSection> _helpSections = [
     icon: Icons.calendar_month_outlined,
     titleKey: (l10n) => l10n.helpCalendarSectionTitle,
     topics: [
-      HelpTopic(titleKey: (l10n) => l10n.helpCalendarLocaleTitle, bodyKey: (l10n) => l10n.helpCalendarLocaleBody),
       HelpTopic(
         titleKey: (l10n) => l10n.helpCalendarThemesTitle,
         bodyKey: (l10n) => l10n.helpCalendarThemesBody,
@@ -263,10 +260,6 @@ final List<HelpSection> _helpSections = [
     topics: [
       HelpTopic(titleKey: (l10n) => l10n.helpDiagnosticTitle,
         bodyKey: (l10n) => l10n.helpDiagnosticBody),
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpTroubleshootAlarmIssueTitle,
-        bodyKey: (l10n) => l10n.helpTroubleshootAlarmIssueBody,
-      ),
       // ⭐ 2026-09-13 - 강제 종료 시 알람이 취소되는 OS 동작 + 그 이후 "다시
       // 실행하기 전에 시각이 지난 알람은 복원 안 됨"이라는 타이밍 리스크를
       // 정확히 안내(실기기/에뮬레이터 양쪽에서 실측 확인된 내용 - 세션 기록
@@ -513,8 +506,8 @@ class HelpDetailScreen extends StatelessWidget {
         foregroundColor: Colors.black87,
         elevation: 0.5,
       ),
-      body: AdaptiveFormBody(child: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
+      body: SafeArea(top: false, child: AdaptiveFormBody(child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(20.w, 20.w, 20.w, 20.w + 16.h),
         child: Container(
           width: double.infinity,
           padding: EdgeInsets.all(20.w),
@@ -537,7 +530,7 @@ class HelpDetailScreen extends StatelessWidget {
             ],
           ),
         ),
-      )),
+      ))),
     );
   }
 }

@@ -90,7 +90,7 @@ object RingSnoozeController {
             try { if (!(closeForTest?.invoke(context, ring.alarmId) ?: AlarmActionHelper.closeRingUi(context, ring.alarmId))) failedStage = "closeUi" }
             catch (error: Exception) { failedStage = "closeUi"; Log.e("RingSnooze", "UI cleanup failed", error) }
             if (failedStage != null) SnoozeExecution.ExecutionFailed(ring.alarmId, failedStage!!)
-            else AlarmActionHelper.snoozeAt(context, ring.alarmId, target)
+            else AlarmActionHelper.snoozeAt(context, ring.alarmId, target, selectedMinutes = minutes)
         } catch (error: Exception) {
             Log.e("RingSnooze", "Snooze execution failed", error)
             SnoozeExecution.ExecutionFailed(ring.alarmId, "execute")

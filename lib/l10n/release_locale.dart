@@ -7,7 +7,8 @@ const releaseSupportedLocales = [
 ];
 
 /// Release languages and regional Material date/time picker defaults.
-/// Portuguese copy is Brazilian. Public holidays remain Korean-only.
+/// Portuguese copy is Brazilian. Holiday country is resolved separately from
+/// the original device region, so a translation fallback cannot invent a country.
 Locale resolveReleaseLocale(List<Locale>? locales, Iterable<Locale> supported) {
   final device = locales?.firstOrNull ?? const Locale('en', 'US');
   if (device.languageCode == 'ko') return const Locale('ko');

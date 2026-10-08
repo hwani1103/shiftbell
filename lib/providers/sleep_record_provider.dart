@@ -219,6 +219,6 @@ class SleepRecordNotifier extends StateNotifier<AsyncValue<List<SleepRecord>>> {
 final pendingSleepRecordsProvider = Provider<List<SleepRecord>>((ref) {
   final records = ref.watch(sleepRecordProvider).value ?? const [];
   return records
-      .where((r) => r.status == SleepStatus.pendingConfirmation)
+      .where((r) => shouldOfferSleepEstimate(r, DateTime.now()))
       .toList();
 });

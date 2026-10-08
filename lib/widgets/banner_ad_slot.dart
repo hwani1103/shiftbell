@@ -43,6 +43,25 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
   Orientation? _orientation;
   Timer? _resizeTimer;
 
+  @override
+  void initState() {
+    super.initState();
+    AdConsentService.adRequestRevision.addListener(_onConsentChanged);
+  }
+
+  void _onConsentChanged() {
+    if (!mounted) return;
+    final generation = ++_generation;
+    _resizeTimer?.cancel();
+    final width = _width;
+    final orientation = _orientation;
+    if (width != null && orientation != null) {
+      // Remove the old ad immediately and query UMP even at the same size.
+      // _loadAd preserves the measured slot height and rejects stale requests.
+      unawaited(_loadAd(width, orientation, generation));
+    }
+  }
+
   void _scheduleSize(int width, Orientation orientation) {
     if (_width == width && _orientation == orientation) return;
     _width = width;
@@ -113,6 +132,7 @@ class _BannerAdSlotState extends State<BannerAdSlot> {
 
   @override
   void dispose() {
+    AdConsentService.adRequestRevision.removeListener(_onConsentChanged);
     ++_generation;
     _resizeTimer?.cancel();
     _bannerAd?.dispose();

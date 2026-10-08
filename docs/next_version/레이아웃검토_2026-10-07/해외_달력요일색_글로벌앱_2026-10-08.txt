@@ -1,0 +1,44 @@
+해외 달력 요일 색: 글로벌 앱 조사 및 적용 (2026-10-08)
+범위: 후속 사용자 지시에 따라 국가별 인쇄 달력 상세 조사는 중단. Google Calendar / Apple Calendar 공식 자료 기준. 한국어 제외.
+
+확인
+- Google 공식 App Store 8지역(US/GB/DE/AE/ZA/IN/PH/BR)의 월간 홍보 화면: 일요일에 고정 빨강 없음, 일반 날짜 색 사용. 오늘은 파란색 강조.
+- 지역 스토어 홍보 화면은 실제 지역 설정의 시험 결과가 아니다. 홍보 화면의 요일 순서를 국가별 기본값으로 채택하지 않았다.
+- Apple 공식 iPhone 월간 안내 화면: 토·일 날짜/요일은 회색, 평일은 검정, 오늘은 빨간 원. 일요일 고정 빨강 아님. 국가별 Apple 실기기 시험은 하지 않았다.
+- Google Android는 Start of the week, Apple iPhone은 Start Week On 설정 제공. Apple 공휴일 달력은 기기 지역 기반, 다른 지역 구독 및 색상 변경 가능. Google도 공휴일을 별도 달력으로 제공하며 색상 변경 가능.
+- 일요일 빨강은 두 글로벌 앱의 공통 규칙이 아니다. 실제 인쇄 달력의 일부 사례에서 쓰이므로 거부감이 크다고 단정할 근거도 없음. 현지인의 선호 조사 결과로 주장하지 않는다.
+
+적용
+- 해외 8국 및 기타 비한국어 UI: 일요일 숫자/요일의 고정 빨강 제거, 각 테마의 일반 날짜/요일 색 사용. Google의 중립적인 요일 표시를 참고한 제품 판단. Apple의 회색 주말까지 복제하지 않는다.
+- 한국어 일요일/공휴일 표시 및 글자 크기·여백·반응형 구조 보존.
+- 국가별 공휴일의 기존 빨간 숫자/상세 이름 유지. Google/Apple의 공휴일 이벤트 UI를 그대로 복제했다는 뜻 아님.
+- 주 시작 요일, 휴일 데이터/기간, 근무일 계산/알람/OT/DB/언어별 기능 범위·리소스 구조 변경 없음.
+- 달력탭 10테마의 요일/날짜, 해외 테마 미리보기, FriendWebCalendar 앱/공개 웹 소스, 기존 native 달력 위젯에 연결.
+- APK 새 빌드·설치, 핫리로드 및 운영 웹 배포 없음. 설치본은 이전 후보이며 Flutter 변경과 native 위젯 변경은 다음 앱 반영 때 포함해야 한다.
+
+영어 테마 튜닝 질문
+- AppTextScale의 TextScaler.noScaling 및 화면 크기 적응형 구조는 모든 언어에 적용.
+- 한국어 테마별 세부 크기/여백/6글자 폭 확보는 _reviewedKoreanTheme 조건이 있어 영어에 전부 동일하게 적용된 상태는 아님. 영어 일부는 기존 크기·여백·ellipsis 경로 사용. 이번 변경에서 글꼴 튜닝을 확대하지 않았다.
+
+공식 출처
+https://support.google.com/calendar/answer/6084644?hl=en&co=GENIE.Platform%3DAndroid
+https://support.google.com/a/users/answer/9323423?hl=en
+https://support.google.com/calendar/answer/13748345?hl=en
+https://apps.apple.com/us/app/google-calendar-get-organized/id909319292
+https://itunes.apple.com/lookup?id=909319292&country=us (country=gb/de/ae/za/in/ph/br 함께 조회)
+https://support.apple.com/guide/iphone/change-how-you-view-events-iphfd1054569/ios
+https://support.apple.com/guide/iphone/change-calendar-settings-iphc37be2016/ios
+https://support.apple.com/guide/iphone/use-the-holidays-calendar-iph80d93ac49/ios
+
+시각 근거: artifacts/calendar_red_days_2026_10_08/google_store_regions.json, google_regions_month.png, apple_month.png.
+후속 USB 반영: 사용자 요청에 따라 실행 중 dev 앱에 Flutter attach 및 핫리로드 성공(Reloaded 6 of 2141 libraries). 기기 R5KL20DHWAE, 시스템 en-US/앱 언어 override 없음. 새 APK 설치/데이터 초기화 없음. Flutter 화면 변경은 반영했으며 native 위젯 변경은 다음 빌드 때 반영. 실기기 최종 디자인 승인은 사용자 확인대기.
+이전 인쇄 달력 자료는 보존하되 이번 채택 규칙의 근거와 구분한다.
+검증: 기존 Flutter 공휴일 표시 검사 1건 PASS(해외 일반 일요일 기본색/공휴일 빨강·이름 팝업 유지). 처음에는 오늘과 겹친 시험 날짜 때문에 기대 색 불일치, 일반 일요일로 날짜 수정 후 PASS. Dart 대상 3파일 오류0, warning/info129건. Native NationalHolidaysTest 1건 PASS(8국 일반 일요일 기본색, 한국어 일요일 빨강, 기존 국가별 공휴일 판정 유지). Native 검사의 dev debug 클래스/테스트 컴파일만 수행, APK assemble/release/설치 없음. 결과 사본: evidence/calendar_weekday_color_2026_10_08/.
+
+
+2026-10-08 해외 테마 후속 적용
+- 위 영어 테마 서식 답변은 당시 조사 상태. 후속 사용자 요청으로 해외 다이어리만 선택 제외하고5개 테마에 한국어 튜닝의 근무명 칩/오늘 표시/메모·근무명 크기/간격/폭 측정을 공유하도록 수정. Latin/Hindi 폭 기준, 기존 반응형 구조·시스템 글자배율 무시 유지. 음력/공휴일명 셀 줄은 추가하지 않음. 한국어 다이어리 및 저장 테마 enum/값 보존.
+- 해외 미리보기도 실제 달력 렌더러 사용, 샘플 근무명은 각 언어로 표시. 4개 외국어 도움말의 테마 목록5개로 갱신·생성.
+- 이전6/2141 핫리로드 로그만으로 실제 달력 소스 교체를 확정한 것은 불충분했다. 당시 VM 실행 소스에서 해외 일요일 빨강의 옛 조건을 확인. 이번14/2141 및 최종78/2141 핫리로드 뒤 VM en_US/5테마/공통 튜닝 경로/일요일 검정 확인, 폰 미리보기의 일요일 숫자·요일 일반색 확인.
+- 필수 gate(-Build 없음) 전체 PASS·영어5테마/선택 화면 기존 렌더6건 PASS·다국어 리소스 누락0. 처음 렌더의 도구 경합 실패와 순차 재실행을 구분. APK 빌드/설치/데이터 초기화/웹 배포 없음, native 위젯 변경은 다음 APK에 포함해야 함.
+- 근거: ../evidence/global_theme_tuning_2026_10_08.json 및 동일 이름의 로그 사본 폴더.

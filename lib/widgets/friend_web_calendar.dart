@@ -10,6 +10,7 @@ import '../constants/layout_limits.dart';
 import '../models/friend_schedule.dart';
 import '../models/shift_schedule.dart';
 import '../utils/holiday_util.dart';
+import '../utils/national_holiday.dart';
 
 /// Shared read-only main-white calendar for web links and native friend views.
 /// Browser controls, folds and the optional install row can change the viewport
@@ -388,9 +389,13 @@ class _FriendWebCalendarState extends State<FriendWebCalendar> {
     final hasShift = shift.isNotEmpty && shift != kUnsetShiftSentinel;
     final pattern = widget.data.getPatternShiftForDate(day);
     final modified = hasShift && pattern.isNotEmpty && pattern != shift;
-    final holiday = getHolidayName(day,
-        isKorean: Localizations.localeOf(context).languageCode == 'ko');
-    final red = holiday != null || day.weekday == DateTime.sunday;
+    final isKorean = Localizations.localeOf(context).languageCode == 'ko';
+    final countryHoliday = getHolidayName(day, isKorean: isKorean,
+        countryCode: deviceHolidayCountry(),
+        languageCode: Localizations.localeOf(context).languageCode);
+    final holiday = isKorean ? countryHoliday : null;
+    final red = countryHoliday != null ||
+        (isKorean && day.weekday == DateTime.sunday);
     final ink = red ? Colors.red.shade600 : const Color(0xFF202124);
     final shiftColor = Color(widget.data.shiftColors[shift] ?? 0xFFE0E0E0);
     final key = DateFormat('yyyy-MM-dd').format(day);
@@ -398,7 +403,17 @@ class _FriendWebCalendarState extends State<FriendWebCalendar> {
     final shortCover = AppLayout.of(context).isShortCover;
     final horizontal =
         shortCover || (window.width > 500 && window.aspectRatio >= 1.25);
-    return Padding(
+    return InkWell(
+      onTap: !isKorean && countryHoliday != null ? () => showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(day)),
+          content: Text(countryHoliday),
+          actions: [TextButton(onPressed: () => Navigator.pop(context),
+            child: Text(MaterialLocalizations.of(context).closeButtonLabel))],
+        ),
+      ) : null,
+      child: Padding(
       key: ValueKey('friend-cell-$key'),
       padding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -482,6 +497,6 @@ class _FriendWebCalendarState extends State<FriendWebCalendar> {
                   )))),
         ])),
       ]),
-    );
+    ));
   }
 }

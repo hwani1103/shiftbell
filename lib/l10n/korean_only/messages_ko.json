@@ -16,8 +16,8 @@
   },
   "disableTabDialogBody": "확인 버튼을 누르면 화면 하단의 목록에서 사라집니다.\n설정에서 다시 원복할 수 있습니다.",
   "scheduleTabDisableExtraNotice": "예정된 일정 알림도 모두 취소됩니다.",
-  "settingsScheduleTabReenableTitle": "일정관리 화면 사용하기",
-  "settingsScheduleTabReenableSubtitle": "하단 탭에 일정관리 화면을 다시 표시합니다",
+  "settingsScheduleTabReenableTitle": "일정관리 기능",
+  "settingsScheduleTabReenableSubtitle": "하루의 중요 일정 기록 및 예정시간 알림",
   "shiftWork": "교대 근무",
   "settingsPatternTodayMarker": "· 진한 칩이 오늘",
   "shiftTeam": "조",
@@ -177,9 +177,9 @@
   "helpConditionSetupNeededBody": "이 기능을 쓰려면 설정 → 근무시간 및 OT 설정에서 최소 하나의 근무명에 대해 출퇴근 시각을 입력해둬야 해요. 하나도 입력돼 있지 않으면 오늘의 컨디션은 나오지 않고, 수면 기록만 남길 수 있어요. 전부 다 채울 필요는 없고, 지금 쓰고 있는 근무명 중 하나만 입력해도 동작해요.",
   "helpSleepSectionTitle": "수면 기록",
   "helpSleepWidgetTitle": "수면 기록 위젯이란",
-  "helpSleepWidgetBody": "홈 화면에 수면 위젯을 올려 두고, 자기 전에 \"수면\", 일어난 뒤에 \"기상\" 버튼을 눌러 간단히 기록해 보세요. 위젯에는 오늘의 근무명도 함께 보여요.\n\n기록한 수면은 수면·회복 탭에서 근무 일정과 함께 살펴보고, 지금 챙길 일을 안내받는 데 쓰여요.\n\n야간 근무 중에 잔 잠은 낮잠으로 구분하고, 자정이 지나도 그 근무가 시작된 날짜에 기록해요. 예를 들어 27일 19시~28일 07시 근무 중 28일 00~02시에 잤다면 27일 낮잠으로 표시돼요.",
+  "helpSleepWidgetBody": "홈 화면에 수면 위젯을 올려 두고, 자기 전에 \"수면\", 일어난 뒤에 \"기상\" 버튼을 눌러 간단히 기록해 보세요. 위젯에는 오늘의 근무명도 함께 보여요.\n\n기록한 수면은 수면·회복 탭에서 근무 일정과 함께 살펴보고, 지금 챙길 일을 안내받는 데 쓰여요.",
   "helpSleepAutoDetectTitle": "자동으로 수면을 추정해주는 기능",
-  "helpSleepAutoDetectBody": "위젯을 누르지 않아도, 근무 일정과 폰을 오래 만지지 않은 시간을 바탕으로 앱이 \"이때 주무셨을 것 같다\"고 추정해요. 퇴근 후 잠과 밤잠, 그리고 야간 근무 출근 전에 잔 낮잠까지 찾아요. 근무 중에 잔 잠은 자동으로 잡지 않아서 위젯으로 직접 기록해야 해요.\n\n추정한 기록은 항상 추정일 뿐이라, \"맞아요\"로 확인해야 정식 기록이 돼요.",
+  "helpSleepAutoDetectBody": "위젯을 누르지 않아도, 근무 일정과 폰을 오래 만지지 않은 시간을 바탕으로 앱이 \"이때 주무셨을 것 같다\"고 추정해요. 수면 시간대에 최소 5시간 이상 폰을 사용하지 않았을 때만 추정 기록을 보여줘요. 짧은 낮잠이나 근무 중에 잔 잠은 위젯이나 수면 기록 화면에서 직접 기록해주세요.\n\n추정한 기록은 항상 추정일 뿐이라, \"맞아요\"로 확인해야 정식 기록이 돼요.",
   "helpSleepMiniCalendarTitle": "최근 수면 기록 확인/수정하기",
   "helpSleepMiniCalendarBody": "수면·회복 탭의 \"최근 수면 기록\" 미니 달력에서 확정된 기록을 하루 단위로 볼 수 있어요. 칸을 탭하면 그 자리에서 기록을 만들거나 고치거나 지울 수 있어요. 더 예전 기록은 \"전체보기\"에서 월 단위로 넘기며 볼 수 있어요.\n\n그 아래 \"내 근무별 수면 패턴\"에서는 근무 유형별 평균 수면을 주 수면과 낮잠으로 나눠 볼 수 있어요.",
   "helpFriendSectionTitle": "친구 공유",
@@ -246,5 +246,27 @@
   "scheduleCreateButton": "생성",
   "workHoursLegacyClockTimeHint": "기존 근무시간은 유지 중이에요. 출퇴근 시간을 입력해주세요.",
   "helpBackupRestoreOldBackupFailTitle": "아주 오래된 백업은 복구가 안 될 수도 있어요",
-  "helpBackupRestoreOldBackupFailBody": "앱이 업데이트되면서 저장하는 데이터 형식이 가끔 바뀌어요. 백업을 만든 버전과 복구하는 버전의 차이가 크면(아주 오래전 백업을 한참 뒤에 최신 버전에서 복구하는 경우 등) 복구에 실패할 수 있고, 같은 파일로 다시 해도 같은 이유로 실패하기 쉬워요.\n\n기기를 바꾸거나 재설치하기 직전에 설정의 \"데이터 백업\"을 한 번 눌러 새 백업을 만들어 두면 안전해요. 자동 백업이 잘 되고 있어도, 중요한 순간 직전에는 직접 한 번 더 해 두는 게 좋아요."
+  "helpBackupRestoreOldBackupFailBody": "앱이 업데이트되면서 저장하는 데이터 형식이 가끔 바뀌어요. 백업을 만든 버전과 복구하는 버전의 차이가 크면(아주 오래전 백업을 한참 뒤에 최신 버전에서 복구하는 경우 등) 복구에 실패할 수 있고, 같은 파일로 다시 해도 같은 이유로 실패하기 쉬워요.\n\n기기를 바꾸거나 재설치하기 직전에 설정의 \"데이터 백업\"을 한 번 눌러 새 백업을 만들어 두면 안전해요. 자동 백업이 잘 되고 있어도, 중요한 순간 직전에는 직접 한 번 더 해 두는 게 좋아요.",
+  "settingsConditionFeatureTitle": "수면회복 컨디션 기능",
+  "settingsConditionFeatureSubtitle": "근무·수면시간 기반 컨디션 예측",
+  "settingsEnableFeatureConfirm": "메인 탭에 추가하여 {feature} 기능을 사용하시겠습니까?\n\n(탭 하단에서 다시 숨길 수 있습니다.)",
+  "@settingsEnableFeatureConfirm": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsEnableFeatureAction": "추가하여 사용하기",
+  "settingsEnablingFeature": "메인 탭에 추가하는 중…",
+  "settingsEnableFeatureFailed": "기능을 켜지 못했습니다. 다시 시도해 주세요.",
+  "settingsDiagnosticExportTitle": "진단 로그 이메일로 보내기",
+  "settingsDiagnosticExportSubtitle": "문제 확인용 로그 파일을 개발자 메일로 전송",
+  "settingsDiagnosticExportConfirm": "진단 로그에는 기기 정보, 권한 상태와 알람·백업 동작 기록이 포함됩니다. 메일 앱에서 보내는 계정을 선택한 뒤 직접 전송해 주세요.\n\n받는 주소: lowvibe07@gmail.com",
+  "settingsDiagnosticShareTitle": "진단 로그 보내기",
+  "settingsDiagnosticSubject": "교대시계 진단 로그",
+  "settingsDiagnosticBody": "겪으신 문제와 발생 시간을 적어 주세요.\n\n문제 내용:\n발생 시간:",
+  "settingsDiagnosticExportFailed": "로그를 전송할 메일 앱을 열지 못했습니다. 다른 앱을 선택하거나 다시 시도해 주세요.",
+  "settingsDiagnosticSendAction": "전송하기",
+  "helpAlarmTroubleshootMergedBody": "1. 권한과 휴대폰 설정 확인\n설정 → 알람 권한 설정에서 알림, 정확한 알람, 잠금화면 표시, 다른 앱 위에 표시 권한을 확인해 주세요.\n\n휴대폰 설정 → 앱 → 교대시계 → 배터리에서 백그라운드 사용이 제한되어 있지 않은지도 확인해 주세요.\n\n2. 근무와 고정 알람 확인\n달력에서 해당 날짜에 근무가 배정되어 있는지 확인하세요. 설정 → 편집 → 고정 알람 수정에서 그 근무에 알람이 등록되어 있는지도 확인해 주세요. 근무만 배정하고 알람을 등록하지 않으면 알람은 울리지 않습니다.\n\n3. 제조사별 알람 동작\nSamsung, Motorola, OPPO, Xiaomi, Google Pixel, realme의 검증 기기에서는 필요한 권한을 설정한 환경에서 정상적인 알람 동작을 확인했습니다.\n\n그 외 제조사의 기기는 권한을 모두 허용해도 알람이 울리지 않거나 정확한 시간에 작동하지 않을 수 있습니다. 검증 제조사를 늘리고 알람 신뢰도를 높이는 작업을 계속하고 있습니다.\n\n4. 문제가 계속된다면\n기기명, Android 버전, 문제가 발생한 시간을 적어 개발자 이메일 lowvibe07@gmail.com으로 연락해 주세요. 설정 → 부가 기능 → 진단 로그 이메일로 보내기에서 로그 파일을 함께 보내면 원인 확인에 도움이 됩니다."
 }

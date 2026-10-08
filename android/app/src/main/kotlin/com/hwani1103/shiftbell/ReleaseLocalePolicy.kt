@@ -27,8 +27,23 @@ object ReleaseLocalePolicy {
 
     fun isCalendarRedDay(context: Context, day: Calendar,
         overrides: CalendarWidgetHolidays.Overrides = CalendarWidgetHolidays.Overrides.EMPTY): Boolean =
-        day.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY ||
-            (koreanFeatures(context) && CalendarWidgetHolidays.isHoliday(day, overrides))
+        if (koreanFeatures(context)) {
+            day.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY ||
+                CalendarWidgetHolidays.isHoliday(day, overrides)
+        } else nationalHoliday(context, day)
+
+    private fun nationalHoliday(context: Context, day: Calendar): Boolean {
+        val locale = locale(context)
+        val country = if (locale.country.isNotEmpty()) locale.country else when (locale.language) {
+            "de" -> "DE"
+            "pt" -> "BR"
+            "hi" -> "IN"
+            else -> ""
+        }
+        val date = String.format(Locale.US, "%04d-%02d-%02d", day.get(Calendar.YEAR),
+            day.get(Calendar.MONTH) + 1, day.get(Calendar.DAY_OF_MONTH))
+        return NationalHolidayDates.dates[country]?.contains(date) == true
+    }
 
     fun syncSleepWidget(context: Context) {
         // Start disabled so a fresh foreign install cannot advertise this widget

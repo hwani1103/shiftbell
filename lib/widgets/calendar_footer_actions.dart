@@ -7,9 +7,11 @@ class CalendarFooterActions extends StatelessWidget {
       required this.monthly,
       required this.weekly,
       required this.onMonthly,
-      required this.onWeekly});
+      required this.onWeekly,
+      this.minimumHeight = 48});
   final Widget monthly, weekly;
   final VoidCallback onMonthly, onWeekly;
+  final double minimumHeight;
 
   @override
   Widget build(BuildContext context) => Row(children: [
@@ -31,7 +33,7 @@ class CalendarFooterActions extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             onTap: onTap,
             child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 48),
+                constraints: BoxConstraints(minHeight: minimumHeight),
                 child: Align(alignment: alignment, child: label)),
           ));
 }

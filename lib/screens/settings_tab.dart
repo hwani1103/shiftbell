@@ -1,3 +1,6 @@
+import '../widgets/shift_editor_dialog.dart';
+import '../widgets/settings_appearance.dart';
+import 'dart:async';
 import '../utils/apply_schedule_change.dart';
 import '../widgets/shift_names_dialog.dart';
 import '../widgets/schedule_change_dialog.dart';
@@ -43,7 +46,6 @@ import '../models/backup_payload.dart';
 import '../providers/tab_visibility_provider.dart';
 import '../services/schedule_notification_service.dart';
 import '../services/widget_refresh_service.dart';
-import '../widgets/disable_tab_button.dart';
 import '../services/backup_validator.dart';
 import 'restore_progress_screen.dart';
 import '../services/app_analytics.dart';
@@ -51,26 +53,32 @@ import '../services/ad_consent_service.dart';
 
 /// Existing reset confirmation, shared with its narrow-screen regression test.
 Widget buildScheduleResetConfirmation(BuildContext context) => AlertDialog(
-        title: Text(context.l10n.shiftResetSchedule),
-        content: Text(context.l10n.settingsResetScheduleConfirm),
-        actions: [
-          AppSecondButton(
-            variant: AppSecondButtonVariant.neutral,
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(context.l10n.commonCancel),
-          ),
-          AppSecondButton(
-            variant: AppSecondButtonVariant.danger,
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(context.l10n.commonReset),
-          ),
-        ],
-      );
+      title: Text(context.l10n.shiftResetSchedule),
+      content: Text(context.l10n.settingsResetScheduleConfirm),
+      actions: [
+        AppSecondButton(
+          variant: AppSecondButtonVariant.neutral,
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(context.l10n.commonCancel),
+        ),
+        AppSecondButton(
+          variant: AppSecondButtonVariant.danger,
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(context.l10n.commonReset),
+        ),
+      ],
+    );
 
 class SettingsTab extends ConsumerStatefulWidget {
   final VoidCallback? onSwipeToCalendar; // ⭐ 6번 기능: 스와이프 callback
 
-  const SettingsTab({super.key, this.onSwipeToCalendar});
+  const SettingsTab(
+      {super.key,
+      this.onSwipeToCalendar,
+      this.additionalFeatures = false,
+      this.backupOnly = false});
+  final bool additionalFeatures;
+  final bool backupOnly;
 
   @override
   ConsumerState<SettingsTab> createState() => _SettingsTabState();
@@ -88,18 +96,24 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
   DateTime? _lastAutoBackupAt;
   bool _isRestoringFromBackup = false;
 
-  // ⭐ 2026-09-22 - UMP 동의(EEA/영국/스위스)를 받은 사용자에게만 "광고 개인정보
-  // 설정" 진입점을 보여줌 - ad_consent_service.dart 참고. 한국 등 그 외 지역은
-  // 이 값이 항상 false라 진입점 자체가 안 보임(기존 화면에 아무 변화 없음).
+  // UMP decides whether an entry is required for the published regional message.
+  // Late initial responses and changed choices must update the open tab too.
   bool _showAdPrivacyOption = false;
+
+  void _syncAdPrivacyOption() {
+    if (mounted) {
+      setState(() =>
+          _showAdPrivacyOption = AdConsentService.privacyOptionsRequired.value);
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _loadLastBackupAt();
-    AdConsentService.isPrivacyOptionsRequired().then((required) {
-      if (mounted) setState(() => _showAdPrivacyOption = required);
-    });
+    AdConsentService.privacyOptionsRequired.addListener(_syncAdPrivacyOption);
+    _showAdPrivacyOption = AdConsentService.privacyOptionsRequired.value;
+    unawaited(AdConsentService.isPrivacyOptionsRequired());
     // ⭐ 2026-09-11(사용자 신고 - "자동백업이 안 되고 있는 것 같다") - 이 화면은
     // MainScreen이 `_tabs[_currentIndex]`로 탭을 매번 새로 만드는 구조라(main.dart
     // 참고) 다른 탭으로 갔다가 다시 오면 initState가 새로 돌아 항상 최신값을
@@ -113,6 +127,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
 
   @override
   void dispose() {
+    AdConsentService.privacyOptionsRequired
+        .removeListener(_syncAdPrivacyOption);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -121,6 +137,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
       _loadLastBackupAt();
+      unawaited(AdConsentService.isPrivacyOptionsRequired());
     }
   }
 
@@ -316,9 +333,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
         );
         if (!sharingStopSaved && context.usesKoreanFeatures) {
           messenger.showSnackBar(SnackBar(
-            content: Builder(builder: (context) => context.usesKoreanFeatures
-                ? Text(context.koOnly.settingsResetScheduleSharingFailed)
-                : const SizedBox.shrink()),
+            content: Builder(
+                builder: (context) => context.usesKoreanFeatures
+                    ? Text(context.koOnly.settingsResetScheduleSharingFailed)
+                    : const SizedBox.shrink()),
             duration: const Duration(seconds: 8),
           ));
         }
@@ -331,23 +349,23 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
 
     if (!mounted) return;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => AdaptiveScrollableSheet(
-          child: _AlarmTypeSettingsSheet(
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => _AlarmTypeSettingsSheet(
         alarmTypes: alarmTypes,
         onUpdate: () {
-          setState(() {});
+          if (mounted) setState(() {});
         },
-      )),
-    );
+      ),
+    ));
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
+    if (widget.additionalFeatures || widget.backupOnly)
+      return _buildAdditionalFeatures(context);
     final scheduleAsync = ref.watch(scheduleProvider);
 
     // ⭐ 2026-08-28 - 좌우 스와이프로 달력탭 이동하는 기능 제거(안 써서).
@@ -365,8 +383,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
       ),
       body: scheduleAsync.when(
         loading: () => const SizedBox.shrink(), // ⭐ 로딩 인디케이터 제거
-        error: (error, stack) =>
-            Center(child: Text('${context.l10n.statusErrorOccurred}: ${context.localizedErrorDetail(error)}')),
+        error: (error, stack) => Center(
+            child: Text(
+                '${context.l10n.statusErrorOccurred}: ${context.localizedErrorDetail(error)}')),
         data: (schedule) {
           return AdaptiveSectionList(
             fullWidthFirst: true,
@@ -409,7 +428,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                             context.l10n.settingsShiftManagement,
                             style: TextStyle(
                               fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                               color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           )),
@@ -530,118 +549,73 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
               // 화면(all_shifts_view.dart) 자체의 년월 표시줄 편집(✏️) 아이콘으로
               // 이동함(2026-09-05, 편집까지 지원하는 화면으로 개편되면서 정리).
 
-              // 알람음 관리
-              ListTile(
-                tileColor: Colors.white,
-                leading: Icon(Icons.notifications_active,
-                    color: Theme.of(context).colorScheme.tertiary),
-                title: Text(context.l10n.alarmSoundManage),
-                subtitle: Text(context.l10n.settingsAlarmSoundManageDesc),
-                trailing: Icon(Icons.chevron_right),
-                onTap: _showAlarmTypeDialog,
-              ),
+              SettingsGroup(children: [
+                // 알람 설정
+                ListTile(
+                  tileColor: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.surface
+                      : Colors.white,
+                  leading: Icon(Icons.notifications_active,
+                      color: Theme.of(context).colorScheme.primary),
+                  title: Text(context.l10n.alarmSoundManage),
+                  subtitle: Text(context.l10n.settingsAlarmSoundManageDesc),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: _showAlarmTypeDialog,
+                ),
 
-              // ⭐ "근로"를 전부 "근무"로 통일 (탭 제목/부제 포함).
-              ListTile(
-                tileColor: Colors.white,
-                leading: Icon(Icons.work_history_outlined,
-                    color: Theme.of(context).colorScheme.tertiary),
-                title: Text(context.l10n.settingsWorkHoursAndOt),
-                subtitle: Text(context.l10n.settingsWorkHoursAndOtDesc),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const WorkHoursSettingsScreen()),
-                  );
-                },
-              ),
-
-              // ⭐ "달력 테마랑 친구 공유 순서를 바꿔서 달력 테마를 3번으로"
-              // 요청으로 순서 교체(달력 테마가 이제 3번째, 친구 공유가 4번째).
-              // ⭐ 다크모드 토글 삭제됨 - "다크모드"라는 전역 개념 자체가
-              // 없어지고 아래 "달력 테마" 선택(캐러셀)으로 완전히 흡수됨.
-              // 여러 테마 중 하나(메인·다크)를 고르면 그게 곧 다크 테마임(정확한
-              // 개수는 calendar_theme.dart의 CalendarThemeId 참고 - 여기서
-              // 숫자를 하드코딩하면 테마 추가할 때마다 또 어긋남).
-              // ⭐ "근무명 색상 변경"도 여기로 흡수됨 - 색상은 더 이상 개별
-              // 지정이 아니라 테마 선택 하나로 전부 결정됨.
-              ListTile(
-                tileColor: Colors.white,
-                leading: Icon(Icons.palette_outlined,
-                    color: Theme.of(context).colorScheme.primary),
-                title: Text(context.l10n.calendarTheme),
-                subtitle: Text(context
-                    .availableCalendarTheme(ref.watch(calendarThemeProvider))
-                    .label(context)),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
+                // ⭐ "근로"를 전부 "근무"로 통일 (탭 제목/부제 포함).
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(Icons.work_history_outlined,
+                      color: Theme.of(context).colorScheme.tertiary),
+                  title: Text(context.l10n.settingsWorkHoursAndOt),
+                  subtitle: Text(context.l10n.settingsWorkHoursAndOtDesc),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => CalendarThemePickerScreen(
-                            onApplied: widget.onSwipeToCalendar),
-                      ));
-                },
-              ),
-
-              // ⭐ 2026-09-05 - "설정에도 뭐가 너무 많은 게 좋은 건 아니다"는
-              // 요청으로 이 진입점을 없앰. 일정 공유(친구 공유)는 이제 달력
-              // 탭 헤더의 기존 "default" 친구 아이콘(모든 테마 공통,
-              // calendar_tab.dart의 _buildThemedHeaderButtons 참고) +
-              // 언더라인/매거진 테마의 6번째 줄 "일정 공유" 버튼으로 충분히
-              // 접근 가능 - 설정 탭에 중복 진입점을 두지 않음.
-
-              // ⭐ 2026-09-13 추가(사용자 요청) - 일정관리/컨디션 탭을 각 탭의
-              // "OO 화면 사용하지 않기" 버튼으로 껐을 때만 여기 나타나는 복원
-              // 진입점. 네비게이션에 이미 그 탭이 있으면(꺼져있지 않으면) 이
-              // 항목 자체가 안 보임 - "사용하기" 버튼과 실제 탭이 동시에
-              // 존재하지 않도록 하는 규칙(두 UI가 서로 배타적).
-              if (context.usesKoreanFeatures &&
-                  !ref.watch(scheduleTabEnabledProvider))
-                ListTile(
-                  tileColor: Colors.white,
-                  leading: Icon(Icons.event_note_outlined,
-                      color: Theme.of(context).colorScheme.tertiary),
-                  title: Text(context.koOnly.settingsScheduleTabReenableTitle),
-                  subtitle:
-                      Text(context.koOnly.settingsScheduleTabReenableSubtitle),
-                  trailing: Icon(Icons.chevron_right),
-                  // ⭐ 2026-09-13 - 숨기는 동안 취소됐던 일정 알림들을 원래
-                  // 상태로 그대로 복원(main.dart의 DisableTabButton onConfirmed
-                  // 주석 참고 - 대칭 동작).
-                  onTap: () async {
-                    final changed = await setTabEnabledWithFeedback(
-                      context,
-                      () => ref
-                          .read(scheduleTabEnabledProvider.notifier)
-                          .setEnabled(true),
+                          builder: (context) =>
+                              const WorkHoursSettingsScreen()),
                     );
-                    if (!changed) return;
-                    await ScheduleNotificationService.restoreAllForTabEnable();
-                  },
-                ),
-              // 수면·회복 탭은 한국어에서만 존재 - 끈 뒤 기기 언어를 영어로 바꾸면 한글 항목이 남던 것 방지
-              if (Localizations.localeOf(context).languageCode == 'ko' &&
-                  !ref.watch(conditionTabEnabledProvider))
-                ListTile(
-                  tileColor: Colors.white,
-                  leading: Icon(Icons.self_improvement,
-                      color: Theme.of(context).colorScheme.tertiary),
-                  title: const Text('수면·회복 화면 사용하기'),
-                  subtitle: const Text('하단 탭에 수면·회복 화면을 다시 표시합니다'),
-                  trailing: Icon(Icons.chevron_right),
-                  // ⭐ 2026-09-13 - 수면 위젯이 즉시 정상(비회색) 표시로
-                  // 돌아오도록 깨움 - 대칭 동작.
-                  onTap: () async {
-                    await ref
-                        .read(conditionTabEnabledProvider.notifier)
-                        .setEnabled(true);
-                    await WidgetRefreshService.refresh();
                   },
                 ),
 
+                // ⭐ "달력 테마랑 친구 공유 순서를 바꿔서 달력 테마를 3번으로"
+                // 요청으로 순서 교체(달력 테마가 이제 3번째, 친구 공유가 4번째).
+                // ⭐ 다크모드 토글 삭제됨 - "다크모드"라는 전역 개념 자체가
+                // 없어지고 아래 "달력 테마" 선택(캐러셀)으로 완전히 흡수됨.
+                // 여러 테마 중 하나(메인·다크)를 고르면 그게 곧 다크 테마임(정확한
+                // 개수는 calendar_theme.dart의 CalendarThemeId 참고 - 여기서
+                // 숫자를 하드코딩하면 테마 추가할 때마다 또 어긋남).
+                // ⭐ "근무명 색상 변경"도 여기로 흡수됨 - 색상은 더 이상 개별
+                // 지정이 아니라 테마 선택 하나로 전부 결정됨.
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(Icons.palette_outlined,
+                      color: Theme.of(context).colorScheme.primary),
+                  title: Text(context.l10n.calendarTheme),
+                  subtitle: Text(context
+                      .availableCalendarTheme(ref.watch(calendarThemeProvider))
+                      .label(context)),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => CalendarThemePickerScreen(
+                              onApplied: widget.onSwipeToCalendar),
+                        ));
+                  },
+                ),
+
+                // ⭐ 2026-09-05 - "설정에도 뭐가 너무 많은 게 좋은 건 아니다"는
+                // 요청으로 이 진입점을 없앰. 일정 공유(친구 공유)는 이제 달력
+                // 탭 헤더의 기존 "default" 친구 아이콘(모든 테마 공통,
+                // calendar_tab.dart의 _buildThemedHeaderButtons 참고) +
+                // 언더라인/매거진 테마의 6번째 줄 "일정 공유" 버튼으로 충분히
+                // 접근 가능 - 설정 탭에 중복 진입점을 두지 않음.
+              ]),
               // ⭐ 2026-09-05 - 항목 그룹 재정리("알람음 관리"/"근무시간 및 OT
               // 설정"은 맨 위 고정 요청대로 위치 그대로, 그 아래부터 의미별로
               // 묶음): 기록 보기(알람 이력/메모 모아보기 - 둘 다 과거 데이터를
@@ -649,236 +623,427 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
               // 위험 구역(되돌릴 수 없는 파괴적 작업이라 백업과 분리된 자기
               // 구역) → 도움말/정보. 그룹마다 구분선 하나씩.
               // ⭐ 구분선 - "기록 보기" 섹션
-              SizedBox(height: 24.h),
-              Divider(),
+              SizedBox(height: 20.h),
 
-              // 알람 이력
-              ListTile(
-                tileColor: Colors.white,
-                leading: Icon(Icons.alarm_on,
-                    color: Theme.of(context).colorScheme.primary),
-                title: Text(context.l10n.alarmHistory),
-                subtitle: Text(context.l10n.settingsAlarmHistoryDesc),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AllAlarmsHistoryView()),
-                  );
-                },
-              ),
-
-              // 메모 모아보기
-              ListTile(
-                tileColor: Colors.white,
-                leading:
-                    Icon(Icons.note_outlined, color: Colors.amber.shade700),
-                title: Text(context.l10n.calendarMemoAll),
-                subtitle: Text(context.l10n.settingsMemoAllDesc),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => MemoListView()),
-                  );
-                },
-              ),
-
-              // ⭐ 구분선 - "데이터 백업" 섹션(백업/복원 한 쌍)
-              SizedBox(height: 24.h),
-              Divider(),
-
-              // ⭐ 사용자 데이터 백업("A번 요구사항") - 누르면 "직접 백업" 슬롯에 저장.
-              // ⭐ 2026-09-23 (1.0.24 A) - 자동 백업(BackupWatcher)은 별도의 "자동 백업" 슬롯에
-              // 쓰므로 서로 덮어쓰지 않음. 아래 설명줄에 두 슬롯의 마지막 저장 시각을 따로 보여줌.
-              ListTile(
-                tileColor: Colors.white,
-                leading: Icon(Icons.backup_outlined,
-                    color: Theme.of(context).colorScheme.primary),
-                title: Text(context.l10n.settingsDataBackupTitle),
-                subtitle: Text(
-                  _isBackingUp
-                      ? context.l10n.settingsDataBackupInProgress
-                      : (_lastManualBackupAt == null &&
-                              _lastAutoBackupAt == null
-                          ? context.l10n.settingsDataBackupNeverSaved
-                          : context.l10n.settingsDataBackupSlots(
-                              _lastManualBackupAt != null
-                                  ? _formatBackupDate(_lastManualBackupAt!)
-                                  : context.l10n.settingsDataBackupSlotNone,
-                              _lastAutoBackupAt != null
-                                  ? _formatBackupDate(_lastAutoBackupAt!)
-                                  : context.l10n.settingsDataBackupSlotNone)),
-                ),
-                trailing: _isBackingUp
-                    ? SizedBox(
-                        width: 20.w,
-                        height: 20.w,
-                        child: const CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(Icons.chevron_right),
-                onTap: _isBackingUp ? null : _backupNow,
-              ),
-
-              // ⭐ 2026-09-01 - "백업 데이터 불러오기" - 위 "데이터 백업"과 반대
-              // 방향(다른 백업 파일로 지금 데이터를 덮어씀). _restoreFromBackup()
-              // 주석 참고.
-              ListTile(
-                tileColor: Colors.white,
-                leading: Icon(Icons.settings_backup_restore,
-                    color: Theme.of(context).colorScheme.primary),
-                title: Text(context.l10n.settingsRestoreFromBackupTitle),
-                subtitle: Text(
-                  _isRestoringFromBackup
-                      ? context.l10n.settingsRestoreFromBackupInProgress
-                      : context.l10n.settingsRestoreFromBackupDesc,
-                ),
-                trailing: _isRestoringFromBackup
-                    ? SizedBox(
-                        width: 20.w,
-                        height: 20.w,
-                        child: const CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(Icons.chevron_right),
-                onTap: _isRestoringFromBackup ? null : _restoreFromBackup,
-              ),
-
-              // ⭐ 구분선 - "위험 구역"(되돌릴 수 없는 파괴적 작업이라 위
-              // 백업/복원 그룹과 분리된 자기 구역으로 뺌)
-              SizedBox(height: 24.h),
-              Divider(),
-
-              // 모든 알람 완전 삭제
-              ListTile(
-                tileColor: Colors.white,
-                leading: Icon(Icons.delete_forever,
-                    color: Theme.of(context).colorScheme.error),
-                title: Text(
-                  context.l10n.alarmDeleteAllPermanently,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-                subtitle: Text(context.l10n.settingsDeleteAllAlarmsDesc),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () async {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text(context.l10n.alarmDeleteAllPermanently),
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.settingsActionCannotBeUndone,
-                            style: TextStyle(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                          ),
-                          SizedBox(height: 12.h),
-                          Text(context.l10n.settingsAllAlarmsWillBeDeleted),
-                          SizedBox(height: 8.h),
-                          Text(context.l10n.settingsMustRecreateAlarms),
-                        ],
-                      ),
-                      actions: [
-                        AppSecondButton(
-                          variant: AppSecondButtonVariant.neutral,
-                          onPressed: () => Navigator.pop(context, false),
-                          child: Text(context.l10n.commonCancel),
-                        ),
-                        AppSecondButton(
-                          variant: AppSecondButtonVariant.danger,
-                          onPressed: () => Navigator.pop(context, true),
-                          child: Text(context.l10n.commonDeletePermanently),
-                        ),
-                      ],
-                    ),
-                  );
-
-                  if (confirm == true) {
-                    try {
-                      await ref
-                          .read(alarmNotifierProvider.notifier)
-                          .deleteAllAlarmsCompletely();
-
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                '🗑️ ${context.l10n.settingsAllAlarmsDeletedToast}'),
-                            backgroundColor: Colors.red.shade700,
-                          ),
-                        );
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  '❌ ${context.l10n.statusDeleteFailed}: ${context.localizedErrorDetail(e)}')),
-                        );
-                      }
-                    }
-                  }
-                },
-              ),
-
-              // ⭐ 구분선 (도움말 섹션)
-              SizedBox(height: 24.h),
-              Divider(),
-              SizedBox(height: 8.h),
-
-              // 도움말
-              ListTile(
-                leading: const Icon(Icons.lock_clock),
-                title: Text(context.l10n.permissionSettingsTitle),
-                onTap: () => showPermissionSettings(context),
-              ),
-              ListTile(
-                tileColor: Colors.white,
-                leading: Icon(Icons.help_outline,
-                    color: Theme.of(context).colorScheme.secondary),
-                title: Text(context.l10n.settingsHelp),
-                subtitle: Text(context.l10n.settingsHelpDesc),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () {
-                  AppAnalytics.track(AnalyticsEvent.helpOpened);
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const HelpScreen()),
-                  );
-                },
-              ),
-
-              // 개인정보처리방침
-              ListTile(
-                tileColor: Colors.white,
-                leading: Icon(Icons.privacy_tip_outlined, color: Colors.teal),
-                title: Text(context.l10n.settingsPrivacyPolicy),
-                trailing: Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => const PrivacyPolicyScreen())),
-              ),
-
-              // ⭐ 2026-09-22 - EEA/영국/스위스 UMP 동의를 받은 사용자만(그 외
-              // 지역은 _showAdPrivacyOption이 항상 false) 동의 폼을 다시 열어
-              // 선택을 바꾸거나 철회할 수 있는 진입점.
-              if (_showAdPrivacyOption)
+              SettingsGroup(children: [
+                // 메모 모아보기
                 ListTile(
                   tileColor: Colors.white,
-                  leading: Icon(Icons.ads_click, color: Colors.teal),
-                  title: Text(context.l10n.settingsAdPrivacy),
+                  leading: Icon(Icons.note_outlined,
+                      color: Theme.of(context).colorScheme.primary),
+                  title: Text(context.l10n.calendarMemoAll),
+                  subtitle: Text(context.l10n.settingsMemoAllDesc),
                   trailing: Icon(Icons.chevron_right),
-                  onTap: () => AdConsentService.showPrivacyOptionsForm(),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MemoListView()),
+                    );
+                  },
                 ),
+
+                // 알람 이력
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(Icons.alarm_on,
+                      color: Theme.of(context).colorScheme.primary),
+                  title: Text(context.l10n.alarmHistory),
+                  subtitle: Text(context.l10n.settingsAlarmHistoryDesc),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => AllAlarmsHistoryView()),
+                    );
+                  },
+                ),
+
+                // ⭐ 구분선 - "위험 구역"(되돌릴 수 없는 파괴적 작업이라 위
+                // 백업/복원 그룹과 분리된 자기 구역으로 뺌)
+
+                // 모든 알람 완전 삭제
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(Icons.delete_forever,
+                      color: Theme.of(context).colorScheme.error),
+                  title: Text(
+                    context.l10n.alarmDeleteAllPermanently,
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.error),
+                  ),
+                  subtitle: Text(context.l10n.settingsDeleteAllAlarmsDesc),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(context.l10n.alarmDeleteAllPermanently),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.l10n.settingsActionCannotBeUndone,
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                            SizedBox(height: 12.h),
+                            Text(context.l10n.settingsAllAlarmsWillBeDeleted),
+                            SizedBox(height: 8.h),
+                            Text(context.l10n.settingsMustRecreateAlarms),
+                          ],
+                        ),
+                        actions: [
+                          AppSecondButton(
+                            variant: AppSecondButtonVariant.neutral,
+                            onPressed: () => Navigator.pop(context, false),
+                            child: Text(context.l10n.commonCancel),
+                          ),
+                          AppSecondButton(
+                            variant: AppSecondButtonVariant.danger,
+                            onPressed: () => Navigator.pop(context, true),
+                            child: Text(context.l10n.commonDeletePermanently),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirm == true) {
+                      try {
+                        await ref
+                            .read(alarmNotifierProvider.notifier)
+                            .deleteAllAlarmsCompletely();
+
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                  '🗑️ ${context.l10n.settingsAllAlarmsDeletedToast}'),
+                              backgroundColor: Colors.red.shade700,
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text(
+                                    '❌ ${context.l10n.statusDeleteFailed}: ${context.localizedErrorDetail(e)}')),
+                          );
+                        }
+                      }
+                    }
+                  },
+                ),
+
+                ListTile(
+                  leading: Icon(Icons.widgets_outlined,
+                      color: Theme.of(context).colorScheme.primary),
+                  title: Text(context.l10n.settingsAdditionalFeaturesTitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) =>
+                          const SettingsTab(additionalFeatures: true))),
+                ),
+              ]),
+              // ⭐ 구분선 (도움말 섹션)
+              SizedBox(height: 20.h),
+
+              SettingsGroup(children: [
+                // 도움말
+                ListTile(
+                  tileColor: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.surface
+                      : Colors.white,
+                  leading: Icon(Icons.lock_clock_outlined,
+                      color: Theme.of(context).colorScheme.primary),
+                  title: Text(context.l10n.permissionSettingsTitle),
+                  subtitle: Text(context.l10n.permissionSettingsDescription),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => showPermissionSettings(context),
+                ),
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(Icons.help_outline,
+                      color: Theme.of(context).colorScheme.secondary),
+                  title: Text(context.l10n.settingsHelp),
+                  subtitle: Text(context.l10n.settingsHelpDesc),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () {
+                    AppAnalytics.track(AnalyticsEvent.helpOpened);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const HelpScreen()),
+                    );
+                  },
+                ),
+
+                // 개인정보처리방침
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: Icon(Icons.privacy_tip_outlined,
+                      color: Theme.of(context).colorScheme.primary),
+                  title: Text(context.l10n.settingsPrivacyPolicy),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                      builder: (_) => const PrivacyPolicyScreen())),
+                ),
+
+                // UMP가 현재 게시 메시지/지역에 따라 재선택 진입이 필요하다고
+                // 판단한 경우 동의 폼을 다시 열어
+                // 선택을 바꾸거나 철회할 수 있는 진입점.
+                if (_showAdPrivacyOption)
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: Icon(Icons.ads_click,
+                        color: Theme.of(context).colorScheme.primary),
+                    title: Text(context.l10n.settingsAdPrivacy),
+                    trailing: Icon(Icons.chevron_right),
+                    onTap: () => AdConsentService.showPrivacyOptionsForm(),
+                  ),
+              ]),
             ],
           );
         },
       ),
     );
   }
+
+  bool _isEnablingFeature = false;
+  bool _isSharingDiagnostics = false;
+
+  Future<void> _shareDiagnostics() async {
+    if (_isSharingDiagnostics) return;
+    _isSharingDiagnostics = true;
+    try {
+      final copy = context.l10n;
+      final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+                  title: Text(copy.diagnosticExportTitle),
+                  content: Text(copy.diagnosticExportConfirm),
+                  actions: [
+                    TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text(context.l10n.commonCancel)),
+                    AppButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: Text(copy.diagnosticSendAction)),
+                  ]));
+      if (confirmed != true || !mounted) return;
+      await kAlarmChannel.invokeMethod('shareDiagnosticLog', {
+        'chooserTitle': copy.diagnosticShareTitle,
+        'subject': copy.diagnosticSubject,
+        'body': copy.diagnosticBody,
+      });
+    } catch (_) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.diagnosticExportFailed)));
+    } finally {
+      _isSharingDiagnostics = false;
+    }
+  }
+
+  Future<void> _enableOptionalFeature(int tab) async {
+    if (_isEnablingFeature) return;
+    _isEnablingFeature = true;
+    final copy = context.koOnly;
+    final feature = tab == 1
+        ? copy.navScheduleManagement
+        : copy.settingsConditionFeatureTitle.replaceFirst(RegExp(r' 기능$'), '');
+    final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+                title: Text(tab == 1
+                    ? copy.settingsScheduleTabReenableTitle
+                    : copy.settingsConditionFeatureTitle),
+                content: Text(copy.settingsEnableFeatureConfirm(feature)),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: Text(context.l10n.commonCancel)),
+                  AppButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: Text(copy.settingsEnableFeatureAction)),
+                ]));
+    if (confirmed != true || !mounted) {
+      _isEnablingFeature = false;
+      return;
+    }
+    final navigator = Navigator.of(context, rootNavigator: true);
+    final loadingRoute = DialogRoute<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => PopScope(
+            canPop: false,
+            child: AlertDialog(
+                content: Row(children: [
+              const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2)),
+              const SizedBox(width: 16),
+              Expanded(child: Text(copy.settingsEnablingFeature))
+            ]))));
+    navigator.push(loadingRoute);
+    var enabled = false;
+    try {
+      await Future<void>.delayed(const Duration(milliseconds: 350));
+      if (!mounted) return;
+      await ref
+          .read((tab == 1
+                  ? scheduleTabEnabledProvider
+                  : conditionTabEnabledProvider)
+              .notifier)
+          .setEnabled(true);
+      enabled = true;
+      if (tab == 1) {
+        await ScheduleNotificationService.restoreAllForTabEnable();
+      } else {
+        await WidgetRefreshService.refresh();
+      }
+    } catch (_) {
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(copy.settingsEnableFeatureFailed)));
+    } finally {
+      if (loadingRoute.isActive) navigator.removeRoute(loadingRoute);
+      _isEnablingFeature = false;
+    }
+    if (mounted && enabled) {
+      ref.read(optionalTabActivationProvider.notifier).state = tab;
+    }
+  }
+
+  Widget _buildAdditionalFeatures(BuildContext context) => Scaffold(
+        appBar: AppBar(
+            title: Text(widget.backupOnly
+                ? context.l10n.settingsDataBackupTitle
+                : context.l10n.settingsAdditionalFeaturesTitle)),
+        body: AdaptiveSectionList(
+            fullWidthFirst: true,
+            padding: EdgeInsets.all(16.w),
+            children: [
+              SettingsGroup(children: [
+                if (widget.backupOnly) ...[
+                  // ⭐ 사용자 데이터 백업("A번 요구사항") - 누르면 "직접 백업" 슬롯에 저장.
+                  // ⭐ 2026-09-23 (1.0.24 A) - 자동 백업(BackupWatcher)은 별도의 "자동 백업" 슬롯에
+                  // 쓰므로 서로 덮어쓰지 않음. 아래 설명줄에 두 슬롯의 마지막 저장 시각을 따로 보여줌.
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: Icon(Icons.backup_outlined,
+                        color: Theme.of(context).colorScheme.primary),
+                    title: Text(context.l10n.settingsDataBackupSaveTitle),
+                    subtitle: Text(
+                      _isBackingUp
+                          ? context.l10n.settingsDataBackupInProgress
+                          : (_lastManualBackupAt == null &&
+                                  _lastAutoBackupAt == null
+                              ? context.l10n.settingsDataBackupNeverSaved
+                              : context.l10n.settingsDataBackupSlots(
+                                  _lastManualBackupAt != null
+                                      ? _formatBackupDate(_lastManualBackupAt!)
+                                      : context.l10n.settingsDataBackupSlotNone,
+                                  _lastAutoBackupAt != null
+                                      ? _formatBackupDate(_lastAutoBackupAt!)
+                                      : context
+                                          .l10n.settingsDataBackupSlotNone)),
+                    ),
+                    trailing: _isBackingUp
+                        ? SizedBox(
+                            width: 20.w,
+                            height: 20.w,
+                            child:
+                                const CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(Icons.chevron_right),
+                    onTap: _isBackingUp ? null : _backupNow,
+                  ),
+
+                  // ⭐ 2026-09-01 - "백업 데이터 불러오기" - 위 "데이터 백업"과 반대
+                  // 방향(다른 백업 파일로 지금 데이터를 덮어씀). _restoreFromBackup()
+                  // 주석 참고.
+                  ListTile(
+                    tileColor: Colors.white,
+                    leading: Icon(Icons.settings_backup_restore,
+                        color: Theme.of(context).colorScheme.primary),
+                    title: Text(context.l10n.settingsRestoreFromBackupTitle),
+                    subtitle: Text(
+                      _isRestoringFromBackup
+                          ? context.l10n.settingsRestoreFromBackupInProgress
+                          : context.l10n.settingsRestoreFromBackupDesc,
+                    ),
+                    trailing: _isRestoringFromBackup
+                        ? SizedBox(
+                            width: 20.w,
+                            height: 20.w,
+                            child:
+                                const CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(Icons.chevron_right),
+                    onTap: _isRestoringFromBackup ? null : _restoreFromBackup,
+                  ),
+                ] else ...[
+                  ListTile(
+                    leading: Icon(Icons.backup_outlined,
+                        color: Theme.of(context).colorScheme.primary),
+                    title: Text(context.l10n.settingsDataBackupTitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                        builder: (_) => const SettingsTab(backupOnly: true))),
+                  ),
+                  // ⭐ 2026-09-13 추가(사용자 요청) - 일정관리/컨디션 탭을 각 탭의
+                  // "OO 화면 사용하지 않기" 버튼으로 껐을 때만 여기 나타나는 복원
+                  // 진입점. 네비게이션에 이미 그 탭이 있으면(꺼져있지 않으면) 이
+                  // 항목 자체가 안 보임 - "사용하기" 버튼과 실제 탭이 동시에
+                  // 존재하지 않도록 하는 규칙(두 UI가 서로 배타적).
+                  if (context.usesKoreanFeatures &&
+                      !ref.watch(scheduleTabEnabledProvider))
+                    ListTile(
+                      tileColor: Colors.white,
+                      leading: Icon(Icons.event_note_outlined,
+                          color: Theme.of(context).colorScheme.tertiary),
+                      title:
+                          Text(context.koOnly.settingsScheduleTabReenableTitle),
+                      subtitle: Text(
+                          context.koOnly.settingsScheduleTabReenableSubtitle),
+                      trailing: Icon(Icons.chevron_right),
+                      // ⭐ 2026-09-13 - 숨기는 동안 취소됐던 일정 알림들을 원래
+                      // 상태로 그대로 복원(main.dart의 DisableTabButton onConfirmed
+                      // 주석 참고 - 대칭 동작).
+                      onTap: () => _enableOptionalFeature(1),
+                    ),
+                  // 수면·회복 탭은 한국어에서만 존재 - 끈 뒤 기기 언어를 영어로 바꾸면 한글 항목이 남던 것 방지
+                  if (Localizations.localeOf(context).languageCode == 'ko' &&
+                      !ref.watch(conditionTabEnabledProvider))
+                    ListTile(
+                      tileColor: Colors.white,
+                      leading: Icon(Icons.self_improvement,
+                          color: Theme.of(context).colorScheme.tertiary),
+                      title: Text(context.koOnly.settingsConditionFeatureTitle),
+                      subtitle:
+                          Text(context.koOnly.settingsConditionFeatureSubtitle),
+                      trailing: Icon(Icons.chevron_right),
+                      // ⭐ 2026-09-13 - 수면 위젯이 즉시 정상(비회색) 표시로
+                      // 돌아오도록 깨움 - 대칭 동작.
+                      onTap: () => _enableOptionalFeature(3),
+                    ),
+                  ListTile(
+                    leading: Icon(Icons.mail_outline,
+                        color: Theme.of(context).colorScheme.primary),
+                    title: Text(context.l10n.diagnosticExportTitle),
+                    subtitle: Text(context.l10n.diagnosticExportSubtitle),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: _shareDiagnostics,
+                  ),
+                ],
+              ]),
+            ]),
+      );
 
   // 교대 패턴 표시 (규칙적)
   //
@@ -983,7 +1148,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
               if (schedule.isRegular && schedule.pattern != null)
                 ListTile(
                   tileColor: Colors.white,
-                  leading: Icon(Icons.swap_horiz, color: Colors.teal.shade600),
+                  leading: Icon(Icons.swap_horiz,
+                      color: Theme.of(context).colorScheme.primary),
                   title: Text(context.l10n.shiftChangeSchedule),
                   subtitle: Text(context.l10n.settingsChangeScheduleDesc),
                   onTap: () {
@@ -1011,7 +1177,8 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
               Divider(height: 1),
               ListTile(
                 tileColor: Colors.white,
-                leading: Icon(Icons.palette, color: Colors.purple.shade400),
+                leading: Icon(Icons.palette,
+                    color: Theme.of(context).colorScheme.primary),
                 title: Text(context.l10n.settingsEditShiftColorTitle),
                 subtitle: Text(context.l10n.settingsEditShiftColorDesc),
                 onTap: () {
@@ -1158,7 +1325,9 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
       print('❌ 근무명 변경 실패: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.statusErrorWithDetail(context.localizedErrorDetail(e)))),
+          SnackBar(
+              content: Text(context.l10n
+                  .statusErrorWithDetail(context.localizedErrorDetail(e)))),
         );
       }
       return;
@@ -1288,7 +1457,6 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
     final schedule = ref.read(scheduleProvider).value;
     if (schedule == null) return;
 
-
     const platform = kAlarmChannel;
 
     // 1. Native diff 갱신 트리거
@@ -1323,7 +1491,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
         SnackBar(
           content: Text(!refreshCompleted
               ? context.l10n.alarmRefreshUnconfirmed
-                                : context.l10n.alarmUpdatedToast),
+              : context.l10n.alarmUpdatedToast),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -1408,45 +1576,46 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
     widget.onUpdate();
   }
 
+  ColorScheme get _colors => Theme.of(context).colorScheme;
+
+  BoxDecoration _choiceDecoration(bool selected) => BoxDecoration(
+        color: selected ? _colors.primaryContainer : _colors.surface,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(
+            color: selected
+                ? _colors.primary
+                : _colors.onSurface.withValues(alpha: .18)),
+      );
+
+  TextStyle _choiceTextStyle(bool selected) => TextStyle(
+        fontSize: 13.sp,
+        fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+        color: selected ? _colors.onPrimaryContainer : _colors.onSurface,
+      );
+
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      padding: EdgeInsets.all(20.w),
-      child: SingleChildScrollView(
-          child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 헤더
-          Row(
-            children: [
-              Expanded(
-                  child: Text(
-                context.l10n.settingsAlarmSoundSettings,
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              )),
-              IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          SizedBox(height: 16.h),
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
 
-          // 타입 목록
-          const DefaultSnoozeSetting(),
-          ..._types.map((type) => _buildTypeCard(type)).toList(),
+  Widget _buildStyled(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(context.l10n.settingsAlarmSoundSettings)),
+      body: SafeArea(
+          top: false,
+          child: AdaptiveFormBody(
+            child: SingleChildScrollView(
+                padding: EdgeInsets.all(16.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 타입 목록
+                    const DefaultSnoozeSetting(),
+                    ..._types.map((type) => _buildTypeCard(type)).toList(),
 
-          SizedBox(height: 20.h),
-        ],
-      )),
+                    SizedBox(height: 20.h),
+                  ],
+                )),
+          )),
     );
   }
 
@@ -1455,9 +1624,10 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Color.alphaBlend(
+            _colors.onSurface.withValues(alpha: .025), _colors.surface),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Theme.of(context).colorScheme.outline),
+        border: Border.all(color: _colors.onSurface.withValues(alpha: .15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1465,7 +1635,12 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           // 타입 헤더 (이모지 + 이름)
           Row(
             children: [
-              Text(type.emoji, style: TextStyle(fontSize: 28.sp)),
+              Container(
+                  padding: EdgeInsets.all(9.w),
+                  decoration: BoxDecoration(
+                      color: _colors.primary.withValues(alpha: .07),
+                      borderRadius: BorderRadius.circular(12.r)),
+                  child: Text(type.emoji, style: TextStyle(fontSize: 22.sp))),
               SizedBox(width: 12.w),
               Expanded(
                   child: Text.rich(TextSpan(
@@ -1474,7 +1649,10 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                     : type.isVibrate
                         ? context.l10n.alarmVibration
                         : context.l10n.alarmSilent,
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: _colors.onSurface),
                 children: [
                   // Other locales already name vibration in the heading.
                   if (type.isSound && context.usesKoreanFeatures)
@@ -1534,29 +1712,15 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
   }
 
   Widget _buildAlarmControlRow(String label, List<Widget> controls) {
-    final style = TextStyle(
-        fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurfaceVariant);
-    final painter = TextPainter(
-        text: TextSpan(text: label, style: style),
-        textDirection: Directionality.of(context),
-        textScaler: MediaQuery.textScalerOf(context))
-      ..layout();
-    final labelWidth = painter.width + 12.w;
-    painter.dispose();
-    return LayoutBuilder(builder: (context, constraints) {
-      final title = Text(label, style: style);
-      if (constraints.maxWidth < labelWidth + 180.w) {
-        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          title,
-          SizedBox(height: 6.h),
-          Row(children: controls),
-        ]);
-      }
-      return Row(children: [
-        SizedBox(width: labelWidth, child: title),
-        ...controls,
-      ]);
-    });
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text(label,
+          style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w500,
+              color: _colors.onSurfaceVariant)),
+      SizedBox(height: 8.h),
+      Row(children: controls),
+    ]);
   }
 
   Widget _buildSliderRow({
@@ -1567,17 +1731,27 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
   }) {
     return _buildAlarmControlRow(label, [
       Expanded(
-        child: Slider(
-          value: value,
-          min: 0.0,
-          max: 1.0,
-          divisions: 10,
-          onChanged: onChanged,
-        ),
+        child: SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+                activeTrackColor: _colors.primary,
+                thumbColor: _colors.primary,
+                inactiveTrackColor: _colors.primary.withValues(alpha: .12),
+                trackHeight: 4),
+            child: Slider(
+              value: value,
+              min: 0.0,
+              max: 1.0,
+              divisions: 10,
+              onChanged: onChanged,
+            )),
       ),
       SizedBox(
         width: 45.w,
-        child: Text(suffix, style: TextStyle(fontSize: 13.sp)),
+        child: Text(suffix,
+            style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: _colors.primary)),
       ),
     ]);
   }
@@ -1647,13 +1821,12 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(8.r),
                     border: Border.all(
-                        color: Theme.of(context).colorScheme.outline),
+                        color: _colors.onSurface.withValues(alpha: .18)),
                   ),
                   child: Row(
                     children: [
                       Icon(Icons.music_note,
-                          size: 18.sp,
-                          color: Theme.of(context).colorScheme.tertiary),
+                          size: 18.sp, color: _colors.primary),
                       SizedBox(width: 8.w),
                       Expanded(
                         child: Text(
@@ -1681,23 +1854,20 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                 }
               },
               child: Container(
-                padding: EdgeInsets.all(8.w),
+                padding: EdgeInsets.all(12.w),
                 decoration: BoxDecoration(
                   color: _isPlaying
-                      ? (Theme.of(context).brightness == Brightness.dark
-                          ? Colors.red.shade900.withOpacity(0.2)
-                          : Colors.red.shade50)
-                      : (Theme.of(context).brightness == Brightness.dark
-                          ? Colors.blue.shade900.withOpacity(0.2)
-                          : Colors.blue.shade50),
-                  borderRadius: BorderRadius.circular(8.r),
+                      ? _colors.errorContainer
+                      : _colors.primaryContainer,
+                  borderRadius: BorderRadius.circular(10.r),
                   border: Border.all(
-                    color: _isPlaying ? Colors.red : Colors.blue,
-                  ),
+                      color: _isPlaying ? _colors.error : _colors.primary),
                 ),
                 child: Icon(
                   _isPlaying ? Icons.stop : Icons.play_arrow,
-                  color: _isPlaying ? Colors.red : Colors.blue,
+                  color: _isPlaying
+                      ? _colors.onErrorContainer
+                      : _colors.onPrimaryContainer,
                   size: 20.sp,
                 ),
               ),
@@ -1741,7 +1911,7 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                       Text(
                         context.l10n.alarmSoundChoose,
                         style: TextStyle(
-                            fontSize: 16.sp, fontWeight: FontWeight.bold),
+                            fontSize: 16.sp, fontWeight: FontWeight.w600),
                       ),
                       Spacer(),
                       IconButton(
@@ -1765,16 +1935,18 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
                           isSelected
                               ? Icons.check_circle
                               : Icons.circle_outlined,
-                          color: isSelected ? Colors.orange : Colors.grey,
+                          color: isSelected
+                              ? _colors.primary
+                              : _colors.onSurfaceVariant,
                         ),
                         title: Text(
                           _getSoundName(context, sound['id']!),
                           style: TextStyle(
                             fontWeight: isSelected
-                                ? FontWeight.bold
+                                ? FontWeight.w600
                                 : FontWeight.normal,
                             color: isSelected
-                                ? Colors.orange.shade800
+                                ? _colors.primary
                                 : Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
@@ -1844,33 +2016,12 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           _testVibration(strength);
         },
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8.h),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? (Theme.of(context).brightness == Brightness.dark
-                    ? Colors.orange.shade800 // 다크모드: 진한 주황 (대비율 6.74:1)
-                    : Colors.orange.shade700) // 화이트모드: 진한 주황 (대비율 5.73:1)
-                : Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.tertiary
-                  : Theme.of(context).colorScheme.outline,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
+          padding: EdgeInsets.symmetric(vertical: 11.h),
+          decoration: _choiceDecoration(isSelected),
           child: Center(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected
-                    ? Colors.white
-                    : Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant, // 선택 시 흰색으로 통일
-              ),
+              style: _choiceTextStyle(isSelected),
             ),
           ),
         ),
@@ -1909,31 +2060,12 @@ class _AlarmTypeSettingsSheetState extends State<_AlarmTypeSettingsSheet> {
           duration: minutes,
         )),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8.h),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? (Theme.of(context).brightness == Brightness.dark
-                    ? Theme.of(context).colorScheme.secondary.withOpacity(0.25)
-                    : Colors.blue.shade100)
-                : Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(
-              color: isSelected ? Colors.blue : Colors.grey.shade300,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
+          padding: EdgeInsets.symmetric(vertical: 11.h),
+          decoration: _choiceDecoration(isSelected),
           child: Center(
             child: Text(
               context.l10n.alarmDurationMinutes(minutes),
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected
-                    ? (Theme.of(context).brightness == Brightness.dark
-                        ? Theme.of(context).colorScheme.secondary
-                        : Colors.blue.shade800)
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+              style: _choiceTextStyle(isSelected),
             ),
           ),
         ),
@@ -2041,18 +2173,12 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Icon(Icons.alarm, color: colorScheme.tertiary, size: 24.sp),
-            SizedBox(width: 8.w),
-            Expanded(child: Text(context.l10n.settingsEditFixedAlarmTitle)),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: Text(context.l10n.settingsEditFixedAlarmTitle)),
       // ⭐ 2026-08-25 - "저장" 버튼을 카드 바로 아래(스크롤 콘텐츠 안)가 아니라
       // 화면 맨 아래에 고정하고, 색상만 다른 ElevatedButton 대신 앱 공용 메인
       // 버튼(AppButton)으로 교체 - 온보딩의 "다음"/"완료" 버튼과 같은 위치·같은
@@ -2071,7 +2197,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                             Text(
                               context.l10n.onboardingSetFixedAlarmPerShift,
                               style: TextStyle(
-                                  fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                  fontSize: 18.sp, fontWeight: FontWeight.w600),
                             ),
                             Text(
                               context.l10n.onboardingMaxAlarmsPerShift(
@@ -2163,7 +2289,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                 softWrap: false,
                 style: TextStyle(
                   fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -2354,7 +2480,10 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
   double _listMaxHeight() => (_cardHeightEstimate * 3).h;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     return AlertDialog(
       title: Text(context.l10n.settingsShiftFixedAlarmTitle(widget.shift)),
       content: SizedBox(
@@ -2414,7 +2543,7 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                                         '${alarm.time.hour.toString().padLeft(2, '0')}:${alarm.time.minute.toString().padLeft(2, '0')}',
                                         style: TextStyle(
                                             fontSize: 18.sp,
-                                            fontWeight: FontWeight.bold),
+                                            fontWeight: FontWeight.w600),
                                       ),
                                     ],
                                   ),
@@ -2470,7 +2599,9 @@ class _ShiftAlarmEditDialogState extends State<_ShiftAlarmEditDialog> {
                   children: [
                     Icon(Icons.add, size: 16.sp),
                     SizedBox(width: 4.w),
-                    Flexible(child: Text(context.l10n.alarmAdd, textAlign: TextAlign.center)),
+                    Flexible(
+                        child: Text(context.l10n.alarmAdd,
+                            textAlign: TextAlign.center)),
                   ],
                 ),
               ),
@@ -2673,22 +2804,17 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Row(
-        children: [
-          Icon(Icons.palette, color: Colors.purple.shade400),
-          SizedBox(width: 8.w),
-          Expanded(child: Text(context.l10n.settingsEditShiftColorTitle)),
-        ],
-      ),
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
+    return ShiftEditorDialog(
+      title: Text(context.l10n.settingsEditShiftColorTitle),
       content: SizedBox(
         width: double.maxFinite,
-        child: ListView.separated(
-          shrinkWrap: true,
-          itemCount: widget.shiftTypes.length,
-          separatorBuilder: (context, index) => Divider(height: 1),
-          itemBuilder: (context, index) {
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: List.generate(widget.shiftTypes.length, (index) {
             final shift = widget.shiftTypes[index];
             final colorValue = _previewColors[shift] ?? 0xFFCCCCCC;
             final bgColor = Color(colorValue);
@@ -2711,7 +2837,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
                     style: TextStyle(
                       fontSize: 9.sp,
                       color: textColor,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -2725,7 +2851,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
               trailing: Icon(Icons.chevron_right, size: 20.sp),
               onTap: () => _showColorPicker(shift),
             );
-          },
+          }),
         ),
       ),
       actions: [
@@ -2734,8 +2860,7 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(context.l10n.commonCancel),
         ),
-        AppSecondButton(
-          variant: AppSecondButtonVariant.success,
+        AppButton(
           onPressed: () {
             widget.onSave(_customColors);
             Navigator.pop(context);
@@ -2783,7 +2908,10 @@ class _ColorPickerDialog extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     // 팔레트(테마 디폴트 색 포함, ShiftSchedule.shiftPalette 참고) + 빨강(휴무용)
     final colors = [
       ...ShiftSchedule.shiftPalette,
@@ -2854,7 +2982,7 @@ class _ColorPickerDialog extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 9.sp,
                             color: textColor,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/team_schedule_config.dart';
 import 'app_second_button.dart';
+import 'app_button.dart';
 import 'app_shift_chip.dart';
 import 'shift_editor_dialog.dart';
 import 'shift_label_layout.dart';
@@ -67,52 +68,46 @@ class _ScheduleChangeDialogState extends State<ScheduleChangeDialog> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(context.l10n.onboardingTodayShiftQuestion(
-                  context.usesKoreanFeatures
-                      ? '${widget.date.month}/${widget.date.day}'
-                      : DateFormat.MMMd(Localizations.localeOf(context).toString())
-                          .format(widget.date))),
+              Text(context.l10n.onboardingTodayShiftQuestion(context
+                      .usesKoreanFeatures
+                  ? '${widget.date.month}/${widget.date.day}'
+                  : DateFormat.MMMd(Localizations.localeOf(context).toString())
+                      .format(widget.date))),
               const SizedBox(height: 8),
               Text(context.l10n.settingsSelectTodayShiftFromPattern),
               const SizedBox(height: 16),
               // One full cycle, with team markers directly below their current slot.
-              SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (var i = 0; i < widget.pattern.length; i++)
-                          SizedBox(
-                              width: metrics.width,
-                              child: Padding(
-                                  padding: const EdgeInsets.all(1.3),
-                                  child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text('${i + 1}'),
-                                        const SizedBox(height: 4),
-                                        SizedBox(
-                                            height: metrics.height,
-                                            width: double.infinity,
-                                            child: AppShiftChip(
-                                                key: ValueKey(
-                                                    'schedule-slot-$i'),
-                                                label: widget.pattern[i],
-                                                dense: true,
-                                                selected: _index == i,
-                                                strongSelected: true,
-                                                cellTextStyle: style.copyWith(
-                                                    color: _index == i
-                                                        ? Colors.white
-                                                        : Theme.of(context)
-                                                            .colorScheme
-                                                            .onSurface),
-                                                onTap: () => setState(() {
-                                                      _index = i;
-                                                    }))),
-                                        const SizedBox(height: 6),
-                                      ]))),
-                      ])),
+              Wrap(spacing: 4, runSpacing: 8, children: [
+                for (var i = 0; i < widget.pattern.length; i++)
+                  SizedBox(
+                      width: metrics.width,
+                      child: Padding(
+                          padding: const EdgeInsets.all(1.3),
+                          child:
+                              Column(mainAxisSize: MainAxisSize.min, children: [
+                            Text('${i + 1}'),
+                            const SizedBox(height: 4),
+                            SizedBox(
+                                height: metrics.height,
+                                width: double.infinity,
+                                child: AppShiftChip(
+                                    key: ValueKey('schedule-slot-$i'),
+                                    label: widget.pattern[i],
+                                    dense: true,
+                                    selected: _index == i,
+                                    strongSelected: true,
+                                    cellTextStyle: style.copyWith(
+                                        color: _index == i
+                                            ? Colors.white
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .onSurface),
+                                    onTap: () => setState(() {
+                                          _index = i;
+                                        }))),
+                            const SizedBox(height: 6),
+                          ]))),
+              ]),
               if (widget.teams != null) ...[
                 const SizedBox(height: 16),
                 Text(context.l10n.teamScheduleResetConfirm,
@@ -125,8 +120,7 @@ class _ScheduleChangeDialogState extends State<ScheduleChangeDialog> {
           AppSecondButton(
               onPressed: () => Navigator.pop(context),
               child: Text(context.l10n.commonCancel)),
-          AppSecondButton(
-              variant: AppSecondButtonVariant.success,
+          AppButton(
               onPressed: _index == null || _confirming ? null : _save,
               child: Text(context.l10n.commonSave)),
         ]);

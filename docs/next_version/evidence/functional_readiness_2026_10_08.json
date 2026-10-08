@@ -1,0 +1,208 @@
+{
+  "audit_date_kst": "2026-10-08",
+  "kind": "Read-only product audit with checklist reconciliation; not a new test run",
+  "verdict": "No newly confirmed blocking implementation defect found in the reviewed scope. Functional release verification remains incomplete.",
+  "scope": [
+    "Current core checklist against preserved functional, manufacturer, locale and release records",
+    "Current source differences from the frozen October 7 dev candidate and October 8 settings candidate",
+    "Latest settings, optional tabs, automatic sleep threshold, diagnostic sharing and help implementation",
+    "Relevant prior user requests and reminders"
+  ],
+  "actions": {
+    "product_code_changed": false,
+    "tests_executed": false,
+    "builds_executed": false,
+    "device_actions": false,
+    "paid_connections": false,
+    "deployment": false,
+    "new_device_passes": 0,
+    "documents_updated": true
+  },
+  "existing_evidence_reused": [
+    "docs/next_version/evidence/dev_offline_2026_10_07_validation.json",
+    "docs/next_version/evidence/settings_layout_2026_10_08.json",
+    "docs/next_version/evidence/optional_features_2026_10_08.json",
+    "build/optional_flow_critical.log",
+    "A01/A04 and manufacturer result links in the core checklist"
+  ],
+  "existing_gate": {
+    "log": "build/optional_flow_critical.log",
+    "flutter_test_groups": [
+      38,
+      108,
+      99,
+      67,
+      11
+    ],
+    "flutter_total": 323,
+    "result": "Existing log ends with P0 automated checks passed; native tasks and dev debug/web builds succeeded",
+    "limit": "Later help/copy/animation hot reload edits are not certified as included in this APK. Host checks do not certify physical devices."
+  },
+  "functional_open_items": [
+    {
+      "id": "A03",
+      "remaining": "Actual UMP published form: accept, reject, revise/withdraw, return to app and refresh ads",
+      "done": "Consent state and banner refresh fixes with mocks; debug geography preparation",
+      "condition": "Published message/App ID/test-device configuration is needed; Google test App ID may not return the intended form"
+    },
+    {
+      "id": "A05",
+      "remaining": "Older API permission denial/recovery and unverified rapid return/resume boundaries",
+      "minimum": "Reuse API34+ OEM evidence. Cover API30 N/A, API31/32 exact denial/recovery, API33 notification denial/recovery where evidence is missing.",
+      "priority": "P0 permission boundary; do not treat opening Settings as granting permission"
+    },
+    {
+      "id": "A06",
+      "remaining": "Fresh-install behavior, foreign-locale pinned sleep widget transitions and locale changes while reservations/share state are active",
+      "done": "Default/choice preservation automatic checks, existing Samsung hidden choices, representative no-alarm language transitions",
+      "minimum": "New defaults hidden; existing/restored choices retained; locale changes preserve alarm epochs/deadlines and sharing stop intent"
+    },
+    {
+      "id": "A07",
+      "remaining": "Representative date picker/native widget, time-format target preservation, Korean remote holiday cache and failure retry",
+      "done": "Date/DST calculations and representative headers; BR holiday app/widget display",
+      "minimum": "Do not repeat the full DST month/device matrix when calculation code is unchanged"
+    },
+    {
+      "id": "A08 / M-S.S2",
+      "remaining": "Natural long idle on a user-owned device; uncovered physical sound/vibration, cover controls and accessibility conditions",
+      "minimum": "Reuse matching prod audio evidence. Cover button functions can be checked with later cover layout work. No paid overnight Streaming.",
+      "limit": "Forced idle/maintenance, silent logs and remote video are not natural overnight or physical hearing/touch evidence"
+    },
+    {
+      "id": "A10",
+      "remaining": "Current public shared-calendar web/holiday assets and real link behavior; existing installed PWA update/cache",
+      "stage": "Functional service item that can close with deployment finalization",
+      "limit": "Local web build success does not prove deployment; no live production read or deployment was performed in this audit"
+    }
+  ],
+  "scope_findings": [
+    {
+      "id": "A02",
+      "finding": "The current user wants to proceed with finalized manufacturer help, without reopening Streaming research",
+      "handling": "Preserve Infinix remote FAIL and untested scope; no automatic re-test or inferred PASS",
+      "implementation": "Help/manufacturer guidance is managed by the other active editing session; use its final result."
+    },
+    {
+      "id": "U05",
+      "finding": "New manufacturer help and diagnostic send action are Korean-only. EN/DE/PT/HI retain the existing alarm help and diagnostic file-location guidance.",
+      "source": [
+        "lib/screens/help_screen.dart",
+        "lib/l10n/korean_only/messages_ko.json",
+        "lib/screens/settings_tab.dart",
+        "lib/l10n/app_en.arb",
+        "lib/l10n/app_de.arb",
+        "lib/l10n/app_pt.arb",
+        "lib/l10n/app_hi.arb"
+      ],
+      "handling": "The user clarified that these edits are in progress in another session. The observed locale split is a transient snapshot, not an assigned release gap.",
+      "status": "IN_PROGRESS_ELSEWHERE / EXCLUDED_FROM_THIS_AUDIT_VERDICT"
+    },
+    {
+      "id": "R04",
+      "finding": "Concurrent help/diagnostic edits do not yet constitute a frozen final source snapshot.",
+      "handling": "Use the other session's completion evidence at final integration; do not add these edits as functional blockers in this audit."
+    }
+  ],
+  "not_reopened": [
+    "A01 corrected common snooze timing and completed manufacturer scenarios",
+    "A04 DB29, real backup/restore/interruption and DB23-to-29 migration",
+    "U03 verified nonblocking ad startup defense; reporter's original prod condition remains unconfirmed",
+    "U02 official holiday dates recorded on October 7; unpublished/future data is an ongoing data-update item",
+    "Accepted legacy damaged-DB/share/journal limitations and canceled product/analytics work",
+    "Manual/widget sleep timing; the user requested only automatic estimates to require five hours"
+  ],
+  "user_reminders_preserved": {
+    "U01": "One-row/three-row widgets, intentionally deferred to layout stage",
+    "R01": "Detailed Korean release note, version changes and old-prod latestVersionCode decision",
+    "U04": "Dashboard optimization; user's separate note location/content is not available in the reviewed project material",
+    "U05_A09": "Global-release additions, weekend color and foreign-theme decisions",
+    "R03": "Play countries, localized listings and screenshots",
+    "R04": "Final Play update/new install, real advertising/UMP, data and alarm verification",
+    "R05": "User's final personal checklist; not inferred complete"
+  },
+  "related_chats_reviewed": [
+    {
+      "id": "01a11939-e4e1-7d01-88a1-0cacf43be969",
+      "title": "레이아웃과 로직 변경 기록"
+    },
+    {
+      "id": "01a1165e-d0be-76c3-942a-f5b87d864c65",
+      "title": "통합 출시 전 체크리스트 작성"
+    },
+    {
+      "id": "01a11625-70c1-7d71-9cf2-948c6fbedd2d",
+      "title": "기능 출시 준비사항 점검"
+    }
+  ],
+  "limits": [
+    "This is an evidence/source comparison, not exhaustive new dynamic testing or a production compliance assessment.",
+    "Old audit checkboxes are interpreted through the current checklist and subsequent evidence, not automatically reopened.",
+    "No additional unrecorded mandatory user promise was found in the reviewed related chats/documents; unshared personal notes remain outside scope."
+  ],
+  "latest_user_scope_correction": "Manufacturer guidance, diagnostic sharing and help are being edited in another session. Exclude them from this audit's missing-function/blocker list and do not duplicate their work.",
+  "source_comparison": {
+    "baseline_manifest": "docs/next_version/evidence/dev_offline_2026_10_07_sources.json",
+    "baseline_files": 430,
+    "byte_identical": 394,
+    "line_endings_only": [
+      "android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt"
+    ],
+    "content_changed": [
+      "android/app/src/main/AndroidManifest.xml",
+      "android/app/src/main/kotlin/com/hwani1103/shiftbell/MainActivity.kt",
+      "android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt",
+      "lib/l10n/app_de.arb",
+      "lib/l10n/app_en.arb",
+      "lib/l10n/app_hi.arb",
+      "lib/l10n/app_ko.arb",
+      "lib/l10n/app_pt.arb",
+      "lib/l10n/generated/app_localizations.dart",
+      "lib/l10n/generated/app_localizations_de.dart",
+      "lib/l10n/generated/app_localizations_en.dart",
+      "lib/l10n/generated/app_localizations_hi.dart",
+      "lib/l10n/generated/app_localizations_ko.dart",
+      "lib/l10n/generated/app_localizations_pt.dart",
+      "lib/l10n/korean_only/messages_ko.json",
+      "lib/l10n/korean_only_copy.dart",
+      "lib/main.dart",
+      "lib/models/sleep_record.dart",
+      "lib/providers/sleep_record_provider.dart",
+      "lib/providers/tab_visibility_provider.dart",
+      "lib/screens/all_teams_setup_screen.dart",
+      "lib/screens/condition_tab.dart",
+      "lib/screens/friend_list_screen.dart",
+      "lib/screens/help_screen.dart",
+      "lib/screens/my_share_code_screen.dart",
+      "lib/screens/schedule_management_tab.dart",
+      "lib/screens/settings_tab.dart",
+      "lib/screens/team_rule_editor_screen.dart",
+      "lib/screens/team_schedule_edit_screen.dart",
+      "lib/screens/work_hours_settings_screen.dart",
+      "lib/widgets/onboarding_info_popups.dart",
+      "lib/widgets/schedule_change_dialog.dart",
+      "lib/widgets/shift_editor_dialog.dart",
+      "lib/widgets/shift_names_dialog.dart",
+      "tools/check_critical_release.ps1"
+    ],
+    "core_files_identical_to_baseline": {
+      "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmGuardReceiver.kt": true,
+      "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActionHelper.kt": true,
+      "android/app/src/main/kotlin/com/hwani1103/shiftbell/RingSnoozeController.kt": true,
+      "android/app/src/main/kotlin/com/hwani1103/shiftbell/DatabaseHelper.kt": true,
+      "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmOverlayService.kt": true,
+      "lib/services/database_service.dart": true,
+      "lib/services/backup_validator.dart": true,
+      "lib/services/restore_coordinator.dart": true,
+      "lib/services/ad_consent_service.dart": true,
+      "lib/widgets/banner_ad_slot.dart": true
+    },
+    "limitation": "Snapshot only; another session is editing help and diagnostics. This is not a frozen candidate or a new runtime PASS."
+  },
+  "evidence_file_hashes": {
+    "docs/next_version/evidence/dev_offline_2026_10_07_validation.json": "5aef7ceb4616e507ae418952bff48d37ed8c13c9fa4e5cf26aa6ed8819a64119",
+    "docs/next_version/evidence/settings_layout_2026_10_08.json": "c3e20101a610cb7d7f63c291f40096c76844152ee5a35feac4aec0001f173018",
+    "docs/next_version/evidence/optional_features_2026_10_08.json": "162fe449f4746d0bde827394976ed02353abd3e2d7479ef7a2d38ead157d5b54",
+    "build/optional_flow_critical.log": "6e01e3e5b7709e1e758d39a50f1a7efd7ccefcc8e8b13b140ecfa9ca6592e3f6"
+  }
+}

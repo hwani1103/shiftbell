@@ -1,0 +1,205 @@
+﻿[현행 작업판 이관: 2026-10-07]
+현행 작업 선택·상태 갱신·재검사 범위·최종 판정은 같은 폴더의 dev_출시전_핵심코어_체크리스트.txt만 사용한다.
+아래 본문은 당시 구현/검증 보고·증거 원문으로 보존한다. 아래 ‘본 문서 갱신/NEXT에서 시작’ 규칙은 코어 문서로 이관됐으며, 두 작업판을 병행 갱신하지 않는다.
+
+dev 핵심기능 출시 준비 보고서
+기준: 2026-10-07 / 현재 dev 작업 트리 / 레이아웃 제외
+목적: 출시 기능 준비를 100% 완료하기 위해, 확인한 수정·근거·리스크·남은 조건을 한 곳에서 관리한다.
+
+0. 판정 및 사용 규칙
+- 현재 판정: 이번 진행 중이던 FIX-01~03 구현과 필수 자동 회귀/빌드는 완료했다. 기능 출시 100% 준비 완료를 선언하지 않는다. 새 수정/추가 테스트는 진행하지 않고 NEXT 목록으로 남긴다. 실제 파일 복원·광고 동의 후보·최종 Play/웹 운영 조건이 미검증이다.
+- 본 문서는 교대시계_최신문서.txt의 제품 결정과 연결되는 dev 핵심기능 검증 보고서다. 날짜별 새 보고서를 계속 만들지 않고 이 파일을 갱신한다.
+- 이번 사용자 최종 범위: 진행 중인 스누즈 이력/이벤트 목록 수정만 마무리. 새로 발견한 다른 수정은 목록으로만 남긴다. 레이아웃 튜닝·추가 OEM 세션·release 빌드·Play 제출·Hosting/규칙 배포를 실행하지 않는다.
+- 실기기는 사용자가 이 세션 전용으로 허용한 USB Samsung SM-S948N(R5KL20DHWAE)만 사용한다. localhost:5315 등 다른 세션의 원격 기기는 조작하지 않는다.
+- dev debug가 기본. tools/check_critical_release.ps1 -Build는 debug+웹이며, release는 별도 명시 요청이 필요하다.
+- '코드 수정 완료', '호스트/Robolectric PASS', '실기기 PASS', '최종 Play 후보 PASS'는 다른 상태다. 숫자를 합쳐 출시 완료율로 만들지 않는다.
+- 소스가 같고 동일 경계·조건의 근거가 있으면 재사용한다. 코드 변경/다른 조건/이전 FAIL/증거 누락이 있는 경우에만 해당 경계를 검사한다.
+- 변경한 구현·리소스·DB·실행기 및 테스트 목록/해시와 로그를 build/functional_release_audit_2026-10-07/에 보존한다. 기존 미커밋 작업과 1·2·3차 원장, DB28 기대값·역사 SQL은 보존한다.
+
+1. 조사 범위와 판단 근거
+1-1. 문서
+- README.md, AGENTS.md, CLAUDE.md, 최신 문서 A~G 및 출시 절, release_audit 계약/결정/작업판, G0~G6 handoff·검토·검증·실패 주입 계약을 대조했다.
+- 의미 1차/자연스러움 2차/독립 3차, 후속재점검/최종튜닝/국가관습/지역시간/FSI/전역스누즈/원터치 제거/DB28 문서와 원장·명세·검증 로그를 검색해 현재 결정에 연결했다.
+- 현존 문서·증거 텍스트 376파일, 212,352줄의 목록/해시/미결 후보 검색을 보존했다(document_inventory.csv, document_pending_candidates.txt). 모든 로그 줄을 사람이 의미 판정했다거나 화면을 전수 확인했다는 뜻은 아니다.
+- 원본 기능_상태전이.csv 202행은 수정하지 않았다. 기존 '151완료/조건대기5'는 당시 관리 범위 집계이며 DB29 최종 출시 완료율이 아니다.
+- 옛 문서의 미수정/서버규칙 미채택/원터치 구현/외국어 수면 제공/항상5분 계획은 현재 코드·최신 결정과 다르면 역사 상태로 분류했다. 이미 해결한 옛 감사 번호를 새 미결로 중복 등록하지 않는다.
+1-2. 코드와 테스트
+- 앱 시작/권한 복귀, Dart·Native 알람 생성·소비·종료·스누즈, DB 이관, 백업 검증·이력 병합, 근무/조/OT, 언어 기능 게이트, 공개 웹, 공유 상태, 업데이트 안내, 광고 동의·계측을 경로별로 대조했다.
+- lib와 Native 파일 목록은 component_inventory.json에 기록한다. 전체 파일 목록 조사와 모든 코드 줄의 무결함 보장은 구분한다.
+- 최초 자동 회귀는 86파일에서 790 PASS/1 FAIL. 1 FAIL은 삭제된 원터치 이벤트와 관리자 라벨의 목록 불일치. 선택에 일부 기존 화면 테스트의 크기 조건이 포함됐지만 레이아웃 품질 판정·캡처 감사로 계산하지 않는다. 이후 전체 반복 대신 변경 경계와 필수 실행기를 사용한다.
+- 스누즈 이력은 별도 수정 전 재현에서 15분을 입력해도 '5분 연장'으로 보여 FAIL. snooze_history_before.log 보존.
+- 새 회귀의 최초 실행은 테스트 호출 인자 누락 및 DB버전 기대값 보완 필요로 실패했다. 제품 결함과 시험 코드 준비 실패를 구분하며 실패 로그를 삭제하지 않는다.
+
+2. 이번 수정: 변경 이유·효과·영향·리스크
+
+FIX-01. 가변 스누즈의 실제 선택 분 저장 및 이력 표시
+상태: 구현 완료, 필수 검증 결과는 3절에 확정 기록한다.
+문제/재현:
+- 전역 기본5/10/15와 회차 임시5~30이 실제 예약에 적용되는데 AlarmHistory.dismissLabel은 dismissSnoozed5Min을 항상 사용했다.
+- Native 이력에는 snooze_count만 있고 선택한 분이 없어 앱 이력·백업에서 당시 선택을 복구할 수 없었다. 현재 기본값을 읽어 과거 표시를 바꾸는 것도 잘못이다.
+수정:
+- DB29: alarm_history.snooze_minutes nullable INTEGER. null 또는5/10/15/20/25/30만 허용한다. migrations.json에 v29만 추가하고 repair/신규 설치 구조와 Dart version/Native DATABASE_VERSION을29로 맞췄다. 과거 migrations 및 v28 기대 파일은 보존했다.
+- RingSnoozeController는 버튼이 갖고 있던 immutable snapshot의 minutes를 snoozeAt에 전달한다. legacy snooze(minutes)도 전달한다. snoozeAt 직접 호출의 기존 DB/OS 시험은 전달 없는 null을 허용한다.
+- 예약 갱신과 이력 insert는 기존 동일 transaction에서 이루어진다. 소모 상태·알람 ID·타입·target epoch·DB commit 후 OS 반영 순서는 유지한다.
+- AlarmHistory는 저장된 분을 표시한다. ko/en/de/pt/hi 공통 문자열 dismissSnoozedMinutes(minutes)와 dismissSnoozedUnknown을 추가했다. 기존 공통 dismissSnoozed5Min은 삭제하지 않았다.
+- 옛 기록에 없는 값을 추정하지 않는다. null은 일반 '연장/Snoozed/…'로 표시한다. 정식 구버전은5분이었지만 가변 스누즈 dev 기록도 섞일 수 있어 모두5분으로 역산하지 않았다.
+효과:
+- +15를 실행한 이력은 현재 기본값을5/10/15로 바꿔도15분으로 유지된다. 오래된 버튼 snapshot이15이고 현재 화면이30인 경우에도 실행값15를 기록한다.
+- 실행되지 않은 충돌은 기존 충돌 결과로 남아 성공 스누즈 분으로 오인하지 않는다. OS 예약 실패/미검증의 기존 분류는 그대로다.
+주요 파일:
+- assets/db/migrations.json
+- lib/services/database_service.dart, lib/models/alarm_history.dart
+- android/app/src/main/kotlin/com/hwani1103/shiftbell/{DatabaseHelper,AlarmActionHelper,RingSnoozeController}.kt
+- lib/l10n/app_{ko,en,de,pt,hi}.arb (생성 파일은 생성기 소유)
+리스크/한계:
+- 영향은 작다고 단정하지 않는다. 새 DB 컬럼은 시작·Native 먼저 열기·백업/복원·잠금 알람의 공통 저장 경로에 걸린다. 변경 위험은 중간으로 관리한다.
+- DB29 설치 후 DB28 APK만 덮어쓰는 롤백은 금지한다. 새 데이터가 있으면 백업하고 비파괴 후속 수정으로 처리한다. 원본 데이터 없는 초기화를 해결책으로 쓰지 않는다.
+- null인 과거 선택 분은 복구할 정보가 없으며 일반 표시가 의도된 호환 동작이다.
+- snooze_count는 기존 회차 누적값 계약을 유지한다. 이번 수정은 카운트 계산, 스누즈 시간 산식, 전역값, 권한/FSI/OEM 정책을 다시 설계하지 않는다.
+필요한 증거:
+- 신규 설치=구버전 이관 구조, v28→29 원본 보존·중간 실패 rollback·반복 open·미래 버전 거부.
+- snapshot15/현재30에서 실제 DB 기록15, 이력1·OS예약1·target 일치 및 stale 액션 무시.
+-5언어15분 표시와 null 과거 표시.
+
+FIX-02. 스누즈 분의 구·신 백업 호환과 이력 병합
+상태: 구현 완료, 검증 결과는 3절.
+문제:
+- 새 컬럼을 추가하는 것만으로는 잘못된 백업 분값이 들어오거나, 같은 이력의 기존 null 행이 최신 백업15분을 무시할 수 있다.
+수정/효과:
+- BackupValidator가 non-null 분값의 정수/허용 범위를 사전에 검증한다. 잘못된 값은 OS 취소·DB 교체 전에 거부한다.
+- export의 기존 테이블 자동 수집이 분값을 포함한다. 새 전용 백업 형식을 만들지 않는다.
+- RestoreCoordinator의 기존 이력 자연키 병합을 유지하고, 같은 이력에서 기존 snooze_minutes가null이며 새 백업에 값이 있으면 보강한다.
+- 기존 known15를 구 백업의 누락/null이 덮지 않는다. 반복 복원은 이력 중복을 만들지 않는다. 구 백업·구 이력에는 값이 없을 수 있다.
+- 소비 상태 JSON tuple 키 및 fixed_slot_time 보강 정책은 그대로다.
+리스크/한계:
+- 같은 자연키의 두 known 값이 다르면 기존 이력 값을 유지한다. 이력이 실제 사실이므로 값이 있는 행을 백업이 임의로 덮지 않는다.
+- 신 백업은 구 앱의 컬럼 검증에서 거부될 수 있다. 새 앱에서 구 백업 복원은 지원하지만 DB29 자료를 구 APK에 맞춰 되돌리는 호환은 제공하지 않는다.
+- 호스트 실제 SQLite+플랫폼 채널 mock 검사는 OS 파일 선택기·MediaStore·실제 process kill/resume의 전부를 대신하지 않는다. 새 실기기 복원 UI/중단 재개는 NEXT-04에 남긴다.
+주요 파일/검사:
+- lib/services/backup_validator.dart, restore_coordinator.dart
+- test/full_audit_critical_test.dart HIST-01/HIST-02: export, null→15 보강, 반복 복원, old→known 보존, old 단독null, 범위/자료형 거부 및 SQLite CHECK.
+- G0 신규 v29 기대값/구조·runner_rule_cases_v29.json. v28 원장은 무변경.
+
+FIX-03. 원터치 제거 후 계측 계약과 관리자 과거 데이터 정합성
+상태: 구현 완료, 검증 결과는 3절.
+문제:
+- AnalyticsEvent.all에서 원터치가 제거됐지만 대시보드 EVENT_META에는 원터치/관련custom 이벤트13개가 남아 엄격한 동일 목록 회귀가 실패했다.
+수정/효과:
+- 과거 집계 라벨은 보존하고13개에 retired:true를 명시한다. 현재 이벤트만 앱 목록과 같아야 한다는 테스트로 구분했다.
+- alarm_snoozed의 관리자 표시 이름도 '알람 5분 연장'에서 '알람 연장'으로 맞췄다. 이벤트 ID·집계·개인정보 파라미터는 바꾸지 않았다.
+- 과거 서버 통계 문서를 삭제하거나 앱의 원터치 기능을 되살리지 않는다.
+리스크:
+- 관리자 화면은 APK에 포함되지 않는다. 로컬 수정과 운영 Hosting 반영은 별개다. 다음 관리자 배포 때 라벨을 반영한다.
+- retired 메타데이터는 기존 데이터 표시 호환용이며 신규 이벤트 발송을 허용하는 플래그가 아니다. 원터치 이벤트가 앱에 다시 추가되면 현재 목록 비교가 실패해야 한다.
+파일/근거:
+- admin_dashboard/public/assets/js/labels.js, test/app_analytics_test.dart
+- 수정 전 flutter_functional.log의 목록 불일치, 수정 후 필수 실행기의 해당 회귀.
+
+3. 검증 결과 원장 (완료·실패·미실행을 구분한다)
+RUN-01 최초 선택 자동 회귀: 86파일, 790 PASS/1 FAIL, 약8분54초. 수정 전 작업 트리. 로그 flutter_functional.log.
+RUN-02 스누즈 이력 수정 전: 15분→5분 표시 FAIL. snooze_history_before.log.
+RUN-03 필수 실행기 첫 실행: 권한/언어108 PASS 후 새 회귀의 compile/setup·미래 버전 기대값 실패. critical_debug_web.log. 전체 FAIL로 보존.
+RUN-04 최종 tools/check_critical_release.ps1 -Build: PASS. Dart 108+95+67=270 PASS, Native 권한/언어/알람 회귀 및 G0 이관 두 Gradle 작업 BUILD SUCCESSFUL, dev debug APK·웹 빌드 PASS. critical_debug_web_final.log 마지막 완료 메시지 보존. release 실행 없음. 웹 wasm dry-run 비호환/아이콘 폰트 경고는 JS 웹 빌드 성공과 구분하며 wasm 전환을 새 필수 작업으로 추가하지 않는다.
+RUN-05 추가5언어 새 이력 표시: PASS 5. snooze_history_five_locales_final.log. RUN-04에서 파일 확장 전 로드한 한글1건과 구별해 ko/en/de/pt/hi의 known15·unknown 일반 문구를 현재 파일로 확인했다.
+RUN-06 변경 소스/테스트 정적 분석: error0/warning0, 기존 avoid_print info20으로 엄격 실행 exit1(완전 clean PASS로 기록하지 않음). changed_analysis.log. 이번 기능 수정에서 새 print를 추가하지 않았다. git diff --check exit0, whitespace_check.log. 관리자 기존 변환 검사12 PASS, admin_transform.log.
+DEV-01 USB 기준 보존: PASS. dev 설치 APK SHA256 f34c4774ac6f2c9cd21ee0b18e47cbee523da411836b637667c244d5c3ce920c, DB28 integrity_check=ok,17테이블/알람0. dev CP/DP tar·APK·권한·OS예약·시간대Asia/Seoul 보존. 제품/정식prod 데이터에 합성 자료를 넣지 않는다.
+DEV-02 USB DB28→29 업데이트·원본 보존: PASS. 같은 debug 인증서 SHA256 bdfac5c4e06bd0bc219f6e2e05b89e6e4300b3e808818beb0653c9e3320583db, adb install -r 성공. 새 APK SHA256 188f6cd916cfb8b78db1cf4834606ca8beae4d3a7c5984ec8d39600dabb2c349. integrity_check=ok/version29,17테이블의 기존 행 전부 동일(새 nullable snooze_minutes만 제외),58개 기존 이력 분null·알람0·소비상태2 보존. device/migrated_comparison.json·migrated_tables.json·기준 tar 연결.
+DEV-03 USB 실제 스누즈15 실행·DB/OS/이력 표시: NOT_RUN. 디버그 연결 준비 중 Service has disappeared/연결 끊김 발생. 시험 fixture 삽입 전 실패했고, 사용자 리스트만 지시 재확인에 따라 추가 연결/검사를 중단했다. 실제 버튼·저장·화면·15분 자연 재수신 PASS 없음. 필요 시 NEXT-04의 대표 검증에 이번 변경 경계 한 건만 결합한다.
+DEV-04 시험 자료 원복: N/A(DEV-03 fixture/기본값 변경이 실행되지 않음; fixture 결과 파일 없음). dev 앱 재시작/디버그 attach·detach만 진행. 검증한 DB29 dev debug APK는 설치 상태로 유지한다. 기존 CP/DP 자료·옛 APK 보존. DB29→28 단독 APK 복귀 금지. 시험용 알람·이력/생성 로그·Download 백업을 만들지 않았고 prod/원격 기기를 조작하지 않았다.
+증거 색인: validation_summary.json(실행 결과), final_source_hashes.json(변경 소스/테스트와 검증 dev APK 해시). 이번 APK는 dev 검증본이며 최종 prod 출시 APK/AAB가 아니다.
+
+4. 영역별 기능 판정과 이미 닫힌 항목
+AREA-01 시작/DB: 첫 초기화 retry·DP 경로·버전 게이트·v1~23 이관·실패 rollback·DB28 소비 상태가 기존 회귀에 있다. 이번29 변경은 G0 및 DEV-02로 닫는다. START-002 제보 환경은 일반 시험으로 새 원인 확정하지 않는다.
+AREA-02 근무/조/메모/OT: pattern math, 이름 rename/맞교환·참조, 원자 team save/stale 편집 거부, 내 조 변경, 초기화 범위, 메모 저장, DST 월·주·급여 기간/OT 날짜 및 캐시 검사가 기존 선택 회귀에서 통과했다. 현재 변경이 계산/저장 경로를 수정하지 않아 전수 UI를 다시 반복하지 않는다.
+AREA-03 고정 알람/스누즈: 전날·당일·다음날,10일 창, 중복 우선순위, override, 소비된 원본 재생성 방지, target 초 올림, stale/충돌/DB·OS 실패는 필수 Dart/Native 회귀와 기존 DB28 사건 수정 근거를 연결한다. 제조사 전달/FSI 결과와 구분한다.
+AREA-04 권한/FSI: unknown/denied/N/A·앱 전체/채널 구분·복귀·stale/연타는 필수 회귀 대상이다. 이번 기능 저장 수정으로 권한 UI·FSI 토큰을 바꾸지 않았다. 다른 세션의 제조사 결과는 해당 APK/조건으로만 연결한다.
+AREA-05 백업/복원: 자동·수동2슬롯, fingerprint/single-flight, 검증 선행·이력 자연키 병합·carry/stale epoch·중단 safeEnd는 호스트/Native 및 과거 원장의 근거가 있다.29 실제 파일/복원 UI는 NEXT-04.
+AREA-06 한국어 전용 기능: 수면 자동 후보/야간 귀속/겹침/미확정 제외·일정 알림·수면 위젯·친구 공유는 한국어 범위다. 해외 출시를 위해 의료 문구/수면 기능을 새로 번역·공개할 필요는 없다.
+AREA-07 출시 언어/지역: common/ko-only 분리,5언어 ICU/누락, 외국어6테마/한국10테마, 원문 데이터 보존·fallback·요일/주 시작·DST 날짜는 기존+필수 회귀로 관리한다. 런처/앱·OS 언어 불일치/언어 변경은 NEXT-02.
+AREA-08 공유/공개 웹: v2 stop_pending/generation/revision·늦은 ACK·오프라인·캐시 보존·중지 tombstone은 기존 실제SDK22/규칙 배포 및 호스트 회귀로 연결한다. 옛 서버 미채택 문제를 다시 신규 결함으로 세지 않는다. 최신 지역/metadata/manifest 실제 배포·기존PWA는 NEXT-03.
+AREA-09 업데이트/광고/계측: 현재 Play API 성공 확인6시간·버전별 안내, dev Analytics OFF, prod ID 빌드 가드가 구현돼 있다. 실제 Play 제공/UMP·prod SDK는 NEXT-01/05/06. FIX-03은 로컬 관리자 라벨 정합성을 닫는다.
+AREA-10 외부 운영/콘텐츠: 코드와 문구/수집 범위/최종 AAB 일치는 NEXT-06/07. 스토어 이미지 제작·레이아웃은 이번 기능 판정에서 제외한다.
+
+5. 남은 수정·검사 목록 — 다음 작업에 착수하지 않은 상태
+현재 상태 요약: FIX-01~03 구현/자동회귀 완료, 실제15분 버튼 변경 경계는 미검증. NEXT-01 재현 전 코드 후보; NEXT-02/03/04/08 대표 기능 검증; NEXT-05 제품 결정; NEXT-06/07 최종 배포·운영 대조; NEXT-09 다른 세션; NEXT-10 조건부/수용 한계. 다음 항목들을 전부 확정 코드 결함으로 해석하지 않는다.
+우선순위: 필수=해당 출시 범위를 유지할 때 후보 승인 전 닫아야 함. 조건부=실제 재현/지원 범위/사용자 결정에 따라 닫음. 개선=이번 출시 필수 아님.
+확정 제품 결함이 아닌 '후보'는 검증 없이 대규모 수정하지 않는다.
+
+NEXT-01 광고 동의 완료/선택 변경 후 앱 상태 갱신 (필수 기능 확인, 코드 수정 후보)
+근거: settings_tab.dart는 initState에서 isPrivacyOptionsRequired를 한 번 읽는다. ad_consent_service.dart의 showPrivacyOptionsForm은 completer만 완료하며 설정/배너에 변경 통지를 하지 않는다. banner_ad_slot.dart는 크기·방향이 같으면 재로드하지 않는다.
+가능한 영향: 설정을 동의 완료 전에 열면 필요한 진입점이 같은 탭에서 늦게 나타나지 않을 수 있다. 선택 변경 후 기존 광고/다음 요청이 새 consent 상태와 일치하는지 미확인이다. canRequestAds=true를 개인화 동의로 해석하지 않는다.
+최소 검사: delayed consent 동안 설정 탭 유지→privacy required 도착, 기존 광고→privacy form 변경→같은 창 유지, canRequestAds false/true 및 폼 오류. 플랫폼 채널 mock으로 먼저 재현하고 UK/DE 내부 트랙에서 실제 폼·선택 재설정·광고 가능 여부만 대표 확인.
+수정 기준: 재현되면 consent 변경 통지/설정 재조회/기존 광고 disposal·새 요청 반영을 해당 범위만 추가한다. 광고 동의/네트워크가 알람·앱 첫 화면을 막아서는 안 된다. 이번엔 수정하지 않았다.
+출처: Google UMP Flutter 공식 문서 https://developers.google.com/admob/flutter/privacy (동의정보 갱신·privacy options·canRequestAds/중복 요청 설명). 운영 메시지 게시 여부는 이번에 확인하지 않았다.
+
+NEXT-02 실제 언어 변경의 기능 게이트·런처/위젯 (필수, 대표 검사)
+근거: D5 잔여. Flutter resolveReleaseLocale는 첫 우선 언어를 처리하지만 Android resource locale의 차선 언어 선택은 실제 OS 조건이다. SleepWidgetProvider 초기disabled와 ReleaseLocalePolicy sync/neutral update는 호스트로만 모두 보증할 수 없다.
+최소 검사: 한 dev 설치에서 pt→de→en→hi→ko 변경, 미지원 우선언어+ko 차선1회. 앱/OS 언어 불일치에서 탭·도움말·권한·native 알림·앱 이름을 확인. 외국어 첫 실행 전/후 수면 위젯 미노출, 기존 pinned 위젯 중립 갱신, ko 복귀 활성 확인.
+완료: 외국어 한국어전용 기능 진입0, 기존 근무·메모·OT·알람 삭제0, locale 변경만으로 예약 epoch/deadline 변경0. 공유는 외국어 전환 후 중지 의도와 ko 복귀 자동 재공유 없음.
+다른 화면/배율/테마를 전부 재촬영하는 계획은 레이아웃 범위라 제외한다. 출시 언어 문구 원어민 이해도는 기능 검사와 별도로 기록한다.
+
+NEXT-03 최신 공개 웹 배포 및 기존 설치 PWA (필수 웹 기능 + 기존PWA 조건부)
+근거: 지역/locale_bootstrap/metadata/manifest 후속은 로컬 빌드 성공이며 운영 반영 완료 증거와 동일하지 않다. FRIEND-025는 식별 가능한 기존 설치본 환경 대기.
+최소 검사: 현행 Hosting 산출물/해시 비교→필요한 웹 변경만 요청된 배포. 실제 SB2 링크1개로 active→stopped→retry/code 유지,5언어 요일/주 시작/문구/metadata/manifest, 사용자 공유내용 원문 보존. 실제 서비스워커/설치 이름 갱신은 같은 설치본에서 확인.
+완료: 링크와 code 유지, revoked/cache 판단 정확, 현재 웹 코드의 언어·지역 기능 반영. 새 Chrome 페이지 이름을 기존PWA 업데이트 PASS로 대신하지 않는다.
+한계: 이번 공개 URL/외부 방침의 web 도구 접근이 실패했으므로 실제 운영 상태를 재조회했다고 기록하지 않는다. 배포하지 않았다.
+
+NEXT-04 DB29 실제 백업 복원/중단 사용자 흐름 (필수 변경 경계, 대표 검사)
+근거: 이번 이력 컬럼/병합 변경. 호스트 HIST-01/02와 G0는 실제 SQLite지만 native restore lock, OS scheduler, 파일 선택기는 mock 경계가 있다.
+최소 검사: 운영 알람 없는 dev 시험환경에서 known15 이력+현재 근무/메모 백업→파일로 읽기·복원→이력15 및 원본 보존. 구 공식 백업1개 또는 동일 형식 fixture의 분 누락null 호환. 필요하면 같은 작업에 복원 중 process kill 뒤 '이어서 복원/현재 데이터로 계속' 한 분기씩 결합.
+울림 중/carry 재생 설정·ID/스누즈 epoch는 기존 근거를 우선 확인하고 변경된 경계 또는 근거 없는 분기만 추가한다. 전체 모든 버전×기기×복원 조합은 반복하지 않는다.
+완료: DB/OS reservation·lock·pending job·shared preferences 일치, 실패 시 기존 자료 보존, 사용자가 선택한 재개/종료 결과 정확. 시험 자료·백업 파일 원복 근거 확보.
+새 백업 쓰기는 자동/직접 슬롯을 교체하므로 시험 전에 기존 Download 자료를 보존한다. 이번 dev 검증을 이유로 prod 자료를 덮지 않는다.
+
+NEXT-05 업데이트 후 안내의 제품 결정/문서 불일치 (결정/문서, 즉시 코드 수정 아님)
+확인 사실: 조사 시작 때 최신 문서 E1은 _releaseNoteVersion 빈값/OFF라고 적었지만 현재 update_service.dart:36~37은 '2026-09-schedule-sleep-recovery-release'로 ON이고 update_release_note_test.dart도 기존 사용자1회/신규 온보딩 제외를 검사한다.
+효과/조건: 설치별 기준선에 따라 기존 사용자에게 안내가 뜰 수 있다. 한국어 본문은 일정·수면·백업 소개, 외국어는 실제 제공 범위의 일반 문구다. 앱 버전 bump 자체가 이 ID를 바꾸지는 않는다.
+문서 E1은 현재 ON 사실로 정정 완료. 다음: ON을 유지할지/OFF로 돌아갈지 새 출시 문구·전역 스누즈 설명과 함께 확정. ON 유지라면 현재 코드로 문서 정합성을 맞추고, 새로운 공지를 원하면 새ID·본문·신규/기존1회 회귀만 변경. 이번에 임의로 OFF/새ID로 바꾸지 않았다.
+
+NEXT-06 최종 prod 후보/Play 내부 설치·업데이트/광고 (필수 배포 기능)
+근거: dev debug 패키지·서명/설정·AAB split·Play API 제공은 prod와 다르다. DEV2-005는 실제 낮은→높은 버전 제공 대기.
+다음: pubspec와 Android versionName/versionCode를 같은 새 값으로 확정(현재1.0.23+25; 다음1.0.24+26은 계획값). 변경 동결/hash 기록→명시 release 요청→실제 ID를 저장소 밖으로 주입한 prod AAB→내부 트랙 기존25→새code 업데이트/신규 설치.
+최소 검사: 근무/메모/OT·기존 미래 알람/타입/백업/새 이력 보존, 앱 미실행 업데이트 후 native migration/실제 수신, Play 안내 제공·명시버튼별1회, 실제 광고ID/UMP/test표시 없음·dev Analytics 제외.
+완료: 검사한 source/DB/APK/AAB/서명/Play설치 버전 연결. prod checkProdAdIds 차단은 보호이며 우회하지 않는다. 빌드/콘솔·제출 권한/실제값이 없으면 NOT_RUN으로 남긴다.
+이번에는 release 빌드, 버전 bump, 커밋/태그/푸시/Play 제출을 하지 않았다.
+
+NEXT-07 외부 개인정보·Play 신고와 후보 코드 일치 (필수 운영 대조, 법적 판정과 구분)
+범위: 로컬 진단 파일/자동 외부 업로드 없음, 삭제 후 Download 파일 잔존·평문 백업, 한국어 공유·외국어 비노출, Analytics·AdMob·Google Play 조회·문의 주소·언어별 안내.
+최소 작업: 실제 공개 방침·Play 데이터보안/광고/정확 알람/FSI/FGS 신고를 최종 후보의 SDK·Manifest·전송 경로와 대조. DE/PT/HI 공개 언어 범위를 정리하고 실제 AdMob 메시지 게시 및 철회 진입점을 연결한다.
+완료: 코드의 '앱 데이터 전체 로컬'을 Firebase/광고 자동 수집 없음으로 과장하지 않는 일치 기록. 콘솔의 옛 '조치됨13개'를 새 후보 전송 감사로 계산하지 않는다.
+운영 법규 적합성을 코드 테스트 PASS만으로 보증하지 않는다. 이번 코드 수정은 데이터 내용 계측 파라미터를 추가하지 않았다.
+
+NEXT-08 실제 지역 표시/공휴일 네트워크 (대표 서비스 확인, 자동 계산 전수 재검사 불필요)
+근거: DST 계산과 지역 weekday는 자동 회귀로 확보. 실제 날짜 선택기/native widget en-ZA/IN/AE/PH 및 한국어 원격공휴일 네트워크는 D5에 남음.
+최소 검사: 지역1회씩 header/date picker/native widget 형식과 주 시작, due일 전후 server조회·캐시/실패 retry·언어전환의 읽기 여부를 로그로 비교. 0~7일 분산/성공14일/실패1~2일 정책은 시각 조작 대신 시험 prefs/서비스 경계로 준비 가능하다.
+완료: 한국어에서만 원격 목록 적용, 공개 웹은 빌드 목록 사용, 기존 합계/예약 불변. 모든 672월을 실기기에서 다시 계산할 필요는 없다.
+
+NEXT-09 제조사/P0/장기 환경 (다른 세션 범위, 여기서 미실행)
+연결: Streaming_4제조사_P0_재검사_2026-10-07.txt, 삼성USB_PIN_재부팅_권한_P0_검사, 삼성SRTL_DB23_DB28 원장.
+이번 보고서가 Infinix 정시 지연/기타 OEM 잔여/장시간 deep Doze/실제 커버/오디오 체감을 해결했다는 뜻은 아니다. 다른 세션의 최신 판정을 합칠 때 설치 APK·DB버전·변경 영향·시험 조건을 유지한다.
+현재29의 변경은 이력 저장/DB migration이며 FSI/OEM UI·시간 산식/재생 로직 변경이 없다. 기존28의 FSI 관찰을 현재29 전체 PASS로 바꾸지 말고 공통 변경 경계의 G0/스누즈/설치 근거를 연결한다. 재검사 필요는 실패조건·변경 영향으로 결정한다.
+
+NEXT-10 조건부 잔여/수용된 한계 (새 필수 기능 확장 아님)
+- START-002: 실제 느린 설치본 제보 환경을 확보한 때 재현·원인분리. 일반 debug 시간/에뮬레이터로 정식 앱의 원인을 만들지 않는다.
+- HUMAN-001/RING-020: 동일 기기/OS/오디오 조건의 prod 청각·촉감 증거는 재사용. 새 오디오 변경·관련 제보·새 조건만 추가. 무음 로그로 물리 체감 PASS를 쓰지 않는다.
+- REPAIR-REJECT: 잘못된 버전으로 찍힌 과거 oldfriends DB에 대한 기존 사용자 수용 결정A는 보존. 손상 DB를 정상 최신 DB라고 표시하거나 파괴적 migration 재실행으로 숨기지 않는다.
+- legacy 공유는 v2 전환 전 구버전 쓰기·삭제 호환 때문에 삭제 후 부활 한계가 있다. 현재 v2 tombstone/generation 보호와 구분하며 legacy 전체 강제이관을 새 출시 필수로 자동 추가하지 않는다.
+- claim/stop 후 DB commit 전 process death를 모두 원자 보장하는 영속 journal은 없다. DB/prefs/AlarmManager는 별개 저장소다. 이를 없애기 위한 큰 설계 변경은 이번 범위 아님.
+- 현지 근무자 의미/OS·SDK 용어 감수는 번역 품질·국가 출시 범위에 따른 별도 결정. 이미 숨긴 수면 의료 문구 재번역, 각국법정수당·해외공휴일·Wear/원터치 부활은 이번 출시 필수 아님.
+
+6. 반복을 줄이는 완료/재검사 규칙
+- 다음 세션은 본 문서 NEXT ID 중 필요한 하나를 고르고 코드/실제 근거를 먼저 확인한다. 이미 완료한 과거 감사 번호나 모든 기능 전수 시험을 자동으로 재시작하지 않는다.
+- 각 ID에 source hashes, 변경파일, APK/AAB SHA256·DBversion, 환경, 기대/실제값, 증거경로, PASS/FAIL/NOT_RUN/DEFERRED/ACCEPTED_RISK/N/A, 원복과 한계를 기록한다.
+- 기존 근거 재사용: 구현/데이터 계약 동일 + 같은 실패경계/환경 + 증거 확인 가능. 단순 '몇백 테스트 PASS'만으로 다른 단계의 검사 생략을 정당화하지 않는다.
+- 신규 코드/리소스/P0 변경: 영향 회귀→필수 critical→필요시 -Build(debug+웹). 수정 없는 문서 조사에서는 빌드를 반복할 이유가 없다.
+- 이번 새 이력/DB/백업/계측 검사를 필수 실행기에 넣었다. 다음 작업에서 잊거나 여러 별도 계획 문서에 흩어 놓지 않는다.
+- 제조사·레이아웃은 별도 작업에서 닫는다. 기능 보고서에서 레이아웃 항목을 다시 소환하지 않는다.
+
+7. 출시 기능 준비 100%의 완료 기준
+① 이번 FIX-01~03과 RUN/DEV 결과가 실제 근거로 확정, 실패/중단 기록 보존.
+② NEXT-01~08의 필요한 기능/배포 조건을 닫거나 제품 범위에 따른 명시적 제외/수용 근거를 남김. 후보를 검증 없이 결함으로 확정하지 않음.
+③ 다른 세션 제조사 필수 실패/미검증을 연결해 종합 판단. 이 보고서만으로 제외한 OEM·레이아웃까지 PASS로 선언하지 않음.
+④ 최종 source·버전·DB·prod AAB/서명·Play 설치·공개웹/정책의 일치 확인.
+⑤ 위 항목이 닫히기 전 '그대로 출시 가능', '100% 완료', '자동 테스트=실기기 PASS'로 기록하지 않음.
+
+보고서 마감: 2026-10-07. 현재 추가 수정·테스트 중단, 문서/후속 목록만 확정. 다음 작업은 이 파일의 NEXT ID를 기준으로 별도 진행한다. final_source_hashes.json과 validation_summary.json은 이번 결과의 증거 색인이다. 해시는 빌드 후 기록이며 병행 작업 트리를 최종 동결 출시 후보로 보증하지 않는다.

@@ -1,0 +1,697 @@
+{
+  "recorded_at": "2026-10-08T01:43:35.774466+09:00",
+  "scope": "User-authorized SRTL Fold8 original prod startup investigation + DB23->29 direct update; then stop. No paid Streaming, release build, product change or layout completion.",
+  "device": {
+    "model": "SM-F971N",
+    "fingerprint": "samsung/h8qksx/h8q:17/CP2A.260605.016/F971NKSU3AZI5_OKR3AZI5:user/release-keys",
+    "sdk": "37",
+    "packages": "",
+    "time": "2026-10-08T00:58:21+0900",
+    "zone": "Asia/Seoul",
+    "auto_time": "1",
+    "auto_zone": "1",
+    "stay": "0",
+    "timeout": "300000",
+    "font": "1.08",
+    "locale": "ko-KR",
+    "format": "12",
+    "volume": "11",
+    "policy": "saved",
+    "fold": "Committed state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\n----------------------\r\nBase state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\nOverride state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}",
+    "display": "Physical size: 1248x1972",
+    "user": "uid=2000(shell) gid=2000(shell) groups=2000(shell),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats),3009(readproc),3011(uhid),3012(readtracefs) context=u:r:shell:s0"
+  },
+  "candidate": {
+    "same_certificate": true,
+    "cert_sha256": {
+      "old": "261bb69dbaa0bbc4f0ab3acc5a94c1d0567ca5374bfcc7d5fa0bb38cabfa4a1d",
+      "new": "261bb69dbaa0bbc4f0ab3acc5a94c1d0567ca5374bfcc7d5fa0bb38cabfa4a1d"
+    },
+    "old_apk_sha256": "3ad9664cc88bca1a3d47692905231e35fea78f416c260c87c68892b49251d8f1",
+    "new_apk_sha256": "31ada3350cb233991b00f9ecf62508f463a0e561ee08243a8bf9ee49949fedd9",
+    "mode": "Current source prod debug, re-signed for same-package DB23->29 SRTL update. No release build."
+  },
+  "source_connection": {
+    "frozen_source_manifest": "docs/next_version/evidence/dev_offline_2026_10_07_sources.json",
+    "verified_count": 430,
+    "changed": [],
+    "product_source_modified_this_srtl_run": false,
+    "mandatory_checks_reused": "dev_offline_2026_10_07_validation.json; unchanged P0/locale product source, no redundant full rerun"
+  },
+  "migration": {
+    "status": "PASS for tested direct-update data and reservation paths",
+    "app_launch_path": {
+      "pass": true,
+      "before": "after_install_before_launch",
+      "after": "after_launch_db29",
+      "versions": [
+        23,
+        29
+      ],
+      "all_original_columns_preserved": true,
+      "original_table_counts": {
+        "android_metadata": 1,
+        "alarm_types": 3,
+        "shift_schedule": 1,
+        "alarms": 10,
+        "shift_alarm_templates": 1,
+        "alarm_history": 1,
+        "date_memos": 1,
+        "date_schedules": 0,
+        "alarm_creation_log": 20,
+        "date_overtime": 1,
+        "friends": 0,
+        "condition_shift_times": 0,
+        "sleep_records": 1,
+        "sleep_expected_bedtime": 0
+      },
+      "legacy_minutes_null": true,
+      "memo_ot_preserved": true,
+      "backfilled_consumptions": [
+        {
+          "id": 1,
+          "slot_time": "2026-10-07T15:08:00",
+          "shift_type": "주간",
+          "day_offset": 0,
+          "recorded_at": "2026-10-07T15:08:56"
+        }
+      ],
+      "old_alarm_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ]
+    },
+    "native_first_path": {
+      "pass": true,
+      "path": "actual Android MY_PACKAGE_REPLACED after original prod had run, HOME then install -r, no new MainActivity launch",
+      "native_pid": "11007",
+      "native_migration": "23->29",
+      "native_migration_ms": 16,
+      "same_uid": 10340,
+      "db_integrity": "ok",
+      "all_17_final_tables_match_app_first_result": true,
+      "future_db_os_count": 10,
+      "main_activity_or_flutter_started_before_snapshot": false,
+      "fixture_note": "Pristine raw DB23 restored under stopped debug UID, old original prod reinstalled and run, then actual same-package/cert current debug update. Transient AUTO_DETECTED PENDING_CONFIRMATION sleep row was removed during wake; preserved migration and stable-data assertions are distinguished."
+    },
+    "final_db_os": {
+      "pass": true,
+      "zone": "Asia/Seoul",
+      "count": 10,
+      "actual": {
+        "1": 1791439680000,
+        "2": 1791526080000,
+        "3": 1791612480000,
+        "4": 1791698880000,
+        "5": 1791785280000,
+        "6": 1791871680000,
+        "7": 1791958080000,
+        "8": 1792044480000,
+        "9": 1792130880000,
+        "10": 1792217280000
+      },
+      "history_count": 1,
+      "consumed_count": 1
+    },
+    "same_package_and_certificate": true,
+    "same_uid": 10340,
+    "new_history_minutes_for_legacy_row": null,
+    "first_path_note": "Snapshot immediately after install was raw23; after first MainActivity startup raw29. Does not assert Dart rather than native won the first-open race.",
+    "transient_sleep_note": "Closing fold produced AUTO_DETECTED PENDING_CONFIRMATION sleep row. Immediate migration preserved it; later awake runtime removes short candidates (SleepDetectionReceiver minimum duration rule). All 17 stable final tables match between both paths.",
+    "limits": [
+      "Not a Play/AAB delivery test",
+      "No actual future alarm firing performed in this Fold8 update batch",
+      "No old-prod active snooze during upgrade",
+      "Fixture has memo, OT, schedule, template, alarm types, 10 future alarms, creation logs and 1 old terminal history; empty tables do not cover every real user dataset"
+    ]
+  },
+  "startup": {
+    "status": "Natural reported delay not reproduced; isolated legacy ad-wait mechanism and current defense verified on real device",
+    "old_prod_reference": "Stored prod1.0.23(code25) DB23 release APK, no release build performed",
+    "original_apk_ad_observation": "Contains public test banner ID; screenshots also show test ad. Exact reporter Play/ads/network environment unconfirmed.",
+    "natural_findings": "Fresh install, populated closed/opened cold starts and opened HOT resume did not expose a ten-second initialization wait. Original Activity first frame is not usable calendar timing.",
+    "diagnostic_apk_sha256": "2947f01d93b29d029fe7c40da476414d3d50c2670bc3673af93df0544f491f2c",
+    "diagnostic_method": "One dev debug APK from isolated copied lib; 12-second delay at beginning of AdService SDK warmup in both modes; a fixture-only shared preference restores legacy ten-second awaited startup step. Product lib and frozen candidate unchanged.",
+    "measurements": [
+      {
+        "name": "prod_first_install",
+        "core_ready_ms": null,
+        "activity_first_frame_ms": 1026,
+        "phases": [],
+        "events_epoch_ms": {},
+        "host_timing": "prod_first_install_timing.json"
+      },
+      {
+        "name": "prod_data_closed_cold1",
+        "core_ready_ms": null,
+        "activity_first_frame_ms": 526,
+        "phases": [],
+        "events_epoch_ms": {},
+        "host_timing": "prod_data_closed_cold1_timing.json"
+      },
+      {
+        "name": "prod_data_opened_cold1",
+        "core_ready_ms": null,
+        "activity_first_frame_ms": 524,
+        "phases": [],
+        "events_epoch_ms": {},
+        "host_timing": "prod_data_opened_cold1_timing.json"
+      },
+      {
+        "name": "db29_closed_awake_cold1",
+        "core_ready_ms": 308,
+        "activity_first_frame_ms": 1063,
+        "phases": [
+          {
+            "phase": "date_formats",
+            "duration_ms": 155,
+            "total_ms": 155,
+            "log_epoch_ms": 1791389890262
+          },
+          {
+            "phase": "database",
+            "duration_ms": 96,
+            "total_ms": 251,
+            "log_epoch_ms": 1791389890358
+          },
+          {
+            "phase": "preferences",
+            "duration_ms": 2,
+            "total_ms": 253,
+            "log_epoch_ms": 1791389890360
+          },
+          {
+            "phase": "alarm_service",
+            "duration_ms": 0,
+            "total_ms": 253,
+            "log_epoch_ms": 1791389890360
+          },
+          {
+            "phase": "holiday_cache",
+            "duration_ms": 0,
+            "total_ms": 253,
+            "log_epoch_ms": 1791389890360
+          },
+          {
+            "phase": "firebase_and_background_launch",
+            "duration_ms": 49,
+            "total_ms": 302,
+            "log_epoch_ms": 1791389890409
+          },
+          {
+            "phase": "ad_layout",
+            "duration_ms": 6,
+            "total_ms": 308,
+            "log_epoch_ms": 1791389890414
+          },
+          {
+            "phase": "theme",
+            "duration_ms": 0,
+            "total_ms": 308,
+            "log_epoch_ms": 1791389890415
+          }
+        ],
+        "events_epoch_ms": {
+          "STARTUP_FIRST_APP_FRAME": 1791389890458
+        },
+        "host_timing": "db29_closed_awake_cold1_timing.json"
+      },
+      {
+        "name": "db29_opened_after_native_update",
+        "core_ready_ms": 302,
+        "activity_first_frame_ms": 1366,
+        "phases": [
+          {
+            "phase": "date_formats",
+            "duration_ms": 156,
+            "total_ms": 156,
+            "log_epoch_ms": 1791390708487
+          },
+          {
+            "phase": "database",
+            "duration_ms": 99,
+            "total_ms": 255,
+            "log_epoch_ms": 1791390708585
+          },
+          {
+            "phase": "preferences",
+            "duration_ms": 2,
+            "total_ms": 257,
+            "log_epoch_ms": 1791390708588
+          },
+          {
+            "phase": "alarm_service",
+            "duration_ms": 1,
+            "total_ms": 258,
+            "log_epoch_ms": 1791390708588
+          },
+          {
+            "phase": "holiday_cache",
+            "duration_ms": 0,
+            "total_ms": 258,
+            "log_epoch_ms": 1791390708588
+          },
+          {
+            "phase": "firebase_and_background_launch",
+            "duration_ms": 40,
+            "total_ms": 298,
+            "log_epoch_ms": 1791390708628
+          },
+          {
+            "phase": "ad_layout",
+            "duration_ms": 4,
+            "total_ms": 302,
+            "log_epoch_ms": 1791390708632
+          },
+          {
+            "phase": "theme",
+            "duration_ms": 0,
+            "total_ms": 302,
+            "log_epoch_ms": 1791390708632
+          }
+        ],
+        "events_epoch_ms": {
+          "STARTUP_FIRST_APP_FRAME": 1791390708681
+        },
+        "host_timing": "db29_opened_after_native_update_timing.json"
+      },
+      {
+        "name": "diag_current_closed_cold1",
+        "core_ready_ms": 405,
+        "activity_first_frame_ms": 1212,
+        "phases": [
+          {
+            "phase": "date_formats",
+            "duration_ms": 154,
+            "total_ms": 154,
+            "log_epoch_ms": 1791390342773
+          },
+          {
+            "phase": "database",
+            "duration_ms": 149,
+            "total_ms": 303,
+            "log_epoch_ms": 1791390342922
+          },
+          {
+            "phase": "preferences",
+            "duration_ms": 6,
+            "total_ms": 309,
+            "log_epoch_ms": 1791390342928
+          },
+          {
+            "phase": "alarm_service",
+            "duration_ms": 1,
+            "total_ms": 310,
+            "log_epoch_ms": 1791390342928
+          },
+          {
+            "phase": "holiday_cache",
+            "duration_ms": 1,
+            "total_ms": 311,
+            "log_epoch_ms": 1791390342929
+          },
+          {
+            "phase": "firebase_and_background_launch",
+            "duration_ms": 42,
+            "total_ms": 353,
+            "log_epoch_ms": 1791390342972
+          },
+          {
+            "phase": "ad_layout",
+            "duration_ms": 52,
+            "total_ms": 405,
+            "log_epoch_ms": 1791390343023
+          },
+          {
+            "phase": "theme",
+            "duration_ms": 0,
+            "total_ms": 405,
+            "log_epoch_ms": 1791390343023
+          }
+        ],
+        "events_epoch_ms": {
+          "STARTUP_FIRST_APP_FRAME": 1791390343059,
+          "AUDIT_AD_DELAY_BEGIN": 1791390343060,
+          "AUDIT_AD_DELAY_END": 1791390355063
+        },
+        "host_timing": "diag_current_closed_cold1_timing.json"
+      },
+      {
+        "name": "diag_current_closed_cold2",
+        "core_ready_ms": 292,
+        "activity_first_frame_ms": 994,
+        "phases": [
+          {
+            "phase": "date_formats",
+            "duration_ms": 154,
+            "total_ms": 154,
+            "log_epoch_ms": 1791390519079
+          },
+          {
+            "phase": "database",
+            "duration_ms": 99,
+            "total_ms": 253,
+            "log_epoch_ms": 1791390519177
+          },
+          {
+            "phase": "preferences",
+            "duration_ms": 2,
+            "total_ms": 255,
+            "log_epoch_ms": 1791390519179
+          },
+          {
+            "phase": "alarm_service",
+            "duration_ms": 0,
+            "total_ms": 255,
+            "log_epoch_ms": 1791390519179
+          },
+          {
+            "phase": "holiday_cache",
+            "duration_ms": 1,
+            "total_ms": 256,
+            "log_epoch_ms": 1791390519179
+          },
+          {
+            "phase": "firebase_and_background_launch",
+            "duration_ms": 31,
+            "total_ms": 287,
+            "log_epoch_ms": 1791390519211
+          },
+          {
+            "phase": "ad_layout",
+            "duration_ms": 4,
+            "total_ms": 291,
+            "log_epoch_ms": 1791390519215
+          },
+          {
+            "phase": "theme",
+            "duration_ms": 1,
+            "total_ms": 292,
+            "log_epoch_ms": 1791390519215
+          }
+        ],
+        "events_epoch_ms": {
+          "STARTUP_FIRST_APP_FRAME": 1791390519267,
+          "AUDIT_AD_DELAY_BEGIN": 1791390519268,
+          "AUDIT_AD_DELAY_END": 1791390531270
+        },
+        "host_timing": "diag_current_closed_cold2_timing.json"
+      },
+      {
+        "name": "diag_current_opened_cold1",
+        "core_ready_ms": 287,
+        "activity_first_frame_ms": 1039,
+        "phases": [
+          {
+            "phase": "date_formats",
+            "duration_ms": 157,
+            "total_ms": 157,
+            "log_epoch_ms": 1791390575808
+          },
+          {
+            "phase": "database",
+            "duration_ms": 96,
+            "total_ms": 253,
+            "log_epoch_ms": 1791390575903
+          },
+          {
+            "phase": "preferences",
+            "duration_ms": 2,
+            "total_ms": 255,
+            "log_epoch_ms": 1791390575905
+          },
+          {
+            "phase": "alarm_service",
+            "duration_ms": 0,
+            "total_ms": 255,
+            "log_epoch_ms": 1791390575905
+          },
+          {
+            "phase": "holiday_cache",
+            "duration_ms": 0,
+            "total_ms": 255,
+            "log_epoch_ms": 1791390575906
+          },
+          {
+            "phase": "firebase_and_background_launch",
+            "duration_ms": 28,
+            "total_ms": 283,
+            "log_epoch_ms": 1791390575933
+          },
+          {
+            "phase": "ad_layout",
+            "duration_ms": 4,
+            "total_ms": 287,
+            "log_epoch_ms": 1791390575937
+          },
+          {
+            "phase": "theme",
+            "duration_ms": 0,
+            "total_ms": 287,
+            "log_epoch_ms": 1791390575938
+          }
+        ],
+        "events_epoch_ms": {
+          "STARTUP_FIRST_APP_FRAME": 1791390576037,
+          "AUDIT_AD_DELAY_BEGIN": 1791390576038,
+          "AUDIT_AD_DELAY_END": 1791390588040
+        },
+        "host_timing": "diag_current_opened_cold1_timing.json"
+      },
+      {
+        "name": "diag_legacy_closed_cold1",
+        "core_ready_ms": 10301,
+        "activity_first_frame_ms": 1024,
+        "phases": [
+          {
+            "phase": "date_formats",
+            "duration_ms": 153,
+            "total_ms": 153,
+            "log_epoch_ms": 1791390440327
+          },
+          {
+            "phase": "database",
+            "duration_ms": 97,
+            "total_ms": 250,
+            "log_epoch_ms": 1791390440423
+          },
+          {
+            "phase": "preferences",
+            "duration_ms": 3,
+            "total_ms": 253,
+            "log_epoch_ms": 1791390440426
+          },
+          {
+            "phase": "alarm_service",
+            "duration_ms": 0,
+            "total_ms": 253,
+            "log_epoch_ms": 1791390440426
+          },
+          {
+            "phase": "holiday_cache",
+            "duration_ms": 1,
+            "total_ms": 254,
+            "log_epoch_ms": 1791390440426
+          },
+          {
+            "phase": "firebase_and_background_launch",
+            "duration_ms": 30,
+            "total_ms": 284,
+            "log_epoch_ms": 1791390440457
+          },
+          {
+            "phase": "audit_legacy_admob_wait",
+            "duration_ms": 10009,
+            "total_ms": 10293,
+            "log_epoch_ms": 1791390450466
+          },
+          {
+            "phase": "ad_layout",
+            "duration_ms": 8,
+            "total_ms": 10301,
+            "log_epoch_ms": 1791390450473
+          },
+          {
+            "phase": "theme",
+            "duration_ms": 0,
+            "total_ms": 10301,
+            "log_epoch_ms": 1791390450474
+          }
+        ],
+        "events_epoch_ms": {
+          "AUDIT_AD_DELAY_BEGIN": 1791390440458,
+          "STARTUP_FIRST_APP_FRAME": 1791390450534,
+          "AUDIT_AD_DELAY_END": 1791390452460
+        },
+        "host_timing": "diag_legacy_closed_cold1_timing.json"
+      },
+      {
+        "name": "diag_legacy_opened_cold1",
+        "core_ready_ms": 10320,
+        "activity_first_frame_ms": 1032,
+        "phases": [
+          {
+            "phase": "date_formats",
+            "duration_ms": 155,
+            "total_ms": 155,
+            "log_epoch_ms": 1791390659055
+          },
+          {
+            "phase": "database",
+            "duration_ms": 103,
+            "total_ms": 258,
+            "log_epoch_ms": 1791390659158
+          },
+          {
+            "phase": "preferences",
+            "duration_ms": 3,
+            "total_ms": 261,
+            "log_epoch_ms": 1791390659160
+          },
+          {
+            "phase": "alarm_service",
+            "duration_ms": 0,
+            "total_ms": 261,
+            "log_epoch_ms": 1791390659160
+          },
+          {
+            "phase": "holiday_cache",
+            "duration_ms": 0,
+            "total_ms": 261,
+            "log_epoch_ms": 1791390659160
+          },
+          {
+            "phase": "firebase_and_background_launch",
+            "duration_ms": 49,
+            "total_ms": 310,
+            "log_epoch_ms": 1791390659209
+          },
+          {
+            "phase": "audit_legacy_admob_wait",
+            "duration_ms": 10004,
+            "total_ms": 10314,
+            "log_epoch_ms": 1791390669213
+          },
+          {
+            "phase": "ad_layout",
+            "duration_ms": 6,
+            "total_ms": 10320,
+            "log_epoch_ms": 1791390669219
+          },
+          {
+            "phase": "theme",
+            "duration_ms": 0,
+            "total_ms": 10320,
+            "log_epoch_ms": 1791390669219
+          }
+        ],
+        "events_epoch_ms": {
+          "AUDIT_AD_DELAY_BEGIN": 1791390659209,
+          "STARTUP_FIRST_APP_FRAME": 1791390669282,
+          "AUDIT_AD_DELAY_END": 1791390671210
+        },
+        "host_timing": "diag_legacy_opened_cold1_timing.json"
+      }
+    ],
+    "core_ready_definition": "Stopwatch from _initializeApp entry to core initialization complete; excludes process launch and 300ms pre-runApp wait. STARTUP_FIRST_APP_FRAME and screenshots recorded separately.",
+    "ab_current_core_ms": [
+      405,
+      292,
+      287
+    ],
+    "ab_legacy_core_ms": [
+      10301,
+      10320
+    ],
+    "normal_current_core_ms": [
+      308,
+      302
+    ],
+    "limits": [
+      "Controlled injected SDK delay proves blocking mechanism; it does not prove root cause in the reporting user device",
+      "Current Firebase optional startup step retains 10-second upper bound; measured normally 40-49ms, no causal evidence to change it",
+      "Initial update screenshot run occurred with device Dozing after fold reset: DB/core logs retained, black screenshots excluded from visible startup verdict",
+      "Remote screenshot transfer/ADB elapsed times are not app latency",
+      "SRTL Android17 and test ad environment differ from unidentified reporter OS/data/production ad setup",
+      "No final fold layout approval"
+    ]
+  },
+  "tool_incidents": [
+    "A VM fixture-toggle attempt failed because no expression compilation service was attached; switched to offline diagnostic-only SharedPreferences edit and verified mode logs. No product failure."
+  ],
+  "cleanup": {
+    "pass": true,
+    "packages": "",
+    "all_compared_settings_restored": {
+      "zone": "Asia/Seoul",
+      "auto_time": "1",
+      "auto_zone": "1",
+      "stay": "0",
+      "timeout": "300000",
+      "font": "1.08",
+      "locale": "ko-KR",
+      "format": "12",
+      "volume": "11"
+    },
+    "fold": "Committed state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\n----------------------\r\nBase state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\nOverride state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}",
+    "active_alarm_count": 0,
+    "pending_intents_count": 0,
+    "removed_owned_downloads": [
+      {
+        "path": "/sdcard/Download/ShiftBell/Fold8_DB23_known_original.json",
+        "sha256": "6e918c22fec89dc535b382916641fafa91eb49e23f324648e10e4e12630e4f27",
+        "bytes": 4513
+      },
+      {
+        "path": "/sdcard/Download/ShiftBell/ShiftBell_Backup_auto_261008_011725.json",
+        "sha256": "88e8dbed9b6984761e544b475188322003cf6766e24e0b68e7df2a5cc6da2a1d",
+        "bytes": 5931
+      },
+      {
+        "path": "/sdcard/Download/ShiftBell/ShiftBell_Backup_com.hwani1103.shiftbell_261008.json",
+        "sha256": "1a3a210e5003f5e17d307d6c9afec3509463c53e3658b51363e294b4d37fa1eb",
+        "bytes": 6429
+      },
+      {
+        "path": "/sdcard/Download/ShiftBell/log/ShiftBell_Diag_261008_013150.txt",
+        "sha256": "5e31f3e9ecb7f42db79c99c3427cee5dff7c4f865500b103beecb3acf8b7913f",
+        "bytes": 16739
+      },
+      {
+        "path": "/sdcard/Download/ShiftBell/log/ShiftBell_Diag_dev_261008_013149.txt",
+        "sha256": "60c5b6e19557e652bfc9ec182675c9ed93841c037518bc173565d7bdc293be5d",
+        "bytes": 3850
+      }
+    ],
+    "original_download_files_not_bulk_deleted": true,
+    "s26_touched": false,
+    "paid_streaming_connected": false,
+    "srtl_reservation_not_ended_by_script": true
+  },
+  "build_output_restore": {
+    "pass": true,
+    "restored_from": "artifacts\\dev_offline_2026_10_07\\tested-dev-debug.apk",
+    "sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+    "outputs": [
+      "build\\app\\outputs\\flutter-apk\\app-dev-debug.apk",
+      "build\\app\\outputs\\apk\\dev\\debug\\app-dev-debug.apk"
+    ],
+    "diagnostic_apk_only_at": "build/fold8_startup_db29_2026_10_08/startup-ab-dev-debug.apk and evidence archive"
+  },
+  "next": "User returns -> paid OEM Streaming remaining IDs only; A03 actual consent and other environmental/operational residuals remain in core document.",
+  "archive": {
+    "path": "artifacts/fold8_srtl_startup_db29_2026_10_08/evidence.zip",
+    "sha256": "cfc4aaf4c7a3d8a34c30bce623a9395a38fc2826197c3656a0682ae55d2c2985",
+    "bytes": 276642065,
+    "files": 433,
+    "note": "Includes tested prod update APK, isolated A/B debug APK, original stored prod release APK, source-copy/diffs, raw DB/log/screenshots, scripts and cleanup. Frozen product source archive remains dev_offline_2026_10_07."
+  }
+}

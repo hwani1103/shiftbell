@@ -111,6 +111,11 @@ class BackupValidator {
       }
     }
     for (final row in tables['alarm_history'] ?? const <Map<String, dynamic>>[]) {
+      final minutes = row['snooze_minutes'];
+      if (minutes != null &&
+          (minutes is! int || !const {5, 10, 15, 20, 25, 30}.contains(minutes))) {
+        issues.add('history snooze_minutes invalid');
+      }
       if (row['fixed_slot_time'] != null &&
           !_isDbDateTime(row['fixed_slot_time'], allowFraction: false)) {
         issues.add('history fixed_slot_time invalid');

@@ -21,7 +21,7 @@ void main() {
   late Map<String, dynamic> referenceSchema;
   setUp(() async {
     tmp = await Directory.systemTemp.createTemp('g0_dart_mig_');
-    referenceSchema = readJson('v28_oncreate_schema.json');
+    referenceSchema = readJson('v29_oncreate_schema.json');
   });
 
   DbMigrationScript mutated(Map<String, dynamic> mutation) =>
@@ -41,9 +41,9 @@ void main() {
         await db.close();
 
         final problems = <String>[
-          if (version != 28) 'user_version=$version',
-          ...diffExpectedData(data, readJson('expected_v28/${fx['expected']}')),
-          if (canonicalJson(schema) != canonicalJson(referenceSchema)) 'schema != v28_oncreate_schema.json: ${_schemaDiff(schema, referenceSchema)}',
+          if (version != 29) 'user_version=$version',
+          ...diffExpectedData(data, readJson('expected_v29/${fx['expected']}')),
+          if (canonicalJson(schema) != canonicalJson(referenceSchema)) 'schema != v29_oncreate_schema.json: ${_schemaDiff(schema, referenceSchema)}',
         ];
 
         db = await openLikeProduct(path, script);
@@ -82,13 +82,46 @@ void main() {
     await raw.close();
 
     final db = await openLikeProduct(path, script);
-    expect(await db.getVersion(), 28);
+    expect(await db.getVersion(), 29);
     expect(canonicalJson(await schemaSnapshot(db)), canonicalJson(referenceSchema));
-    expect(diffExpectedData(await dumpTables(db), readJson('expected_v28/v23.json')), isEmpty);
+    expect(diffExpectedData(await dumpTables(db), readJson('expected_v29/v23.json')), isEmpty);
     final columns = (await db.rawQuery('PRAGMA table_info(alarms)'))
         .map((column) => column['name']).toSet();
     expect(columns.intersection({'preset_slot', 'assigned_day'}), isEmpty);
     await db.close();
+  });
+
+  test('HIST-M01 v28 to v29 preserves data, rolls back failure and rejects invalid minutes', () async {
+    final path = await copyFixture('v23.db', tmp);
+    final oldJson = loadRepoScriptJson();
+    oldJson['targetVersion'] = 28;
+    (oldJson['migrations'] as List).removeWhere((m) => (m['version'] as int) > 28);
+    final oldScript = DbMigrationScript.parse(jsonEncode(oldJson));
+    var raw = await openRaw(path);
+    await raw.transaction((txn) => DbMigrationRunner.migrate(txn, oldScript, 23, 28));
+    await raw.setVersion(28);
+    final beforeData = await dumpTables(raw);
+    final beforeSchema = await schemaSnapshot(raw);
+    await raw.close();
+    final broken = mutated({'migration_append': {'version': 29, 'sql': 'CREATE TABLE alarms(x INTEGER)'}});
+    await expectLater(openLikeProduct(path, broken), throwsA(anything));
+    raw = await openRaw(path);
+    expect(await raw.getVersion(), 28);
+    expect(canonicalJson(await dumpTables(raw)), canonicalJson(beforeData));
+    expect(canonicalJson(await schemaSnapshot(raw)), canonicalJson(beforeSchema));
+    await raw.close();
+    final migrated = await openLikeProduct(path, loadRepoScript());
+    expect(await migrated.getVersion(), 29);
+    final afterData = await dumpTables(migrated);
+    for (final row in afterData['alarm_history']!) {
+      expect((row as Map)['snooze_minutes'], isNull);
+      row.remove('snooze_minutes');
+    }
+    expect(canonicalJson(afterData), canonicalJson(beforeData));
+    await migrated.execute('UPDATE alarm_history SET snooze_minutes = 15');
+    await expectLater(migrated.execute('UPDATE alarm_history SET snooze_minutes = 6'), throwsA(anything));
+    expect((await migrated.query('alarm_history')).single['snooze_minutes'], 15);
+    await migrated.close();
   });
 
   test('음성 대조: fixture가 23개이고, 비교기가 틀린 기대값·다른 구조를 실제로 잡아냄', () async {
@@ -99,11 +132,11 @@ void main() {
     final schema = await schemaSnapshot(db);
     await db.close();
 
-    final wrong = readJson('expected_v28/v18.json');
+    final wrong = readJson('expected_v29/v18.json');
     ((wrong['tables'] as Map<String, dynamic>)['alarm_types'] as List).first['volume'] = 0.99;
     expect(diffExpectedData(data, wrong), isNotEmpty, reason: '값 하나를 바꾼 기대값을 통과시키면 안 됨');
 
-    final wrongFriends = readJson('expected_v28/v18.json');
+    final wrongFriends = readJson('expected_v29/v18.json');
     ((wrongFriends['tables'] as Map<String, dynamic>)['friends'] as List).removeLast();
     expect(diffExpectedData(data, wrongFriends), isNotEmpty, reason: '행 하나 누락을 통과시키면 안 됨');
 
@@ -158,7 +191,7 @@ void main() {
     expect(canonicalJson(await schemaSnapshot(raw)), beforeSchema);
     await raw.close();
     final migrated = await openLikeProduct(path, script);
-    expect(await migrated.getVersion(), 28);
+    expect(await migrated.getVersion(), 29);
     expect(await migrated.query('alarm_history'), hasLength(4));
     final consumed = await migrated.query('fixed_alarm_consumptions');
     expect(consumed, hasLength(1));
@@ -188,8 +221,8 @@ void main() {
     await raw.close();
 
     final db = await openLikeProduct(path, loadRepoScript());
-    expect(await db.getVersion(), 28);
-    expect(diffExpectedData(await dumpTables(db), readJson('expected_v28/v12.json')), isEmpty);
+    expect(await db.getVersion(), 29);
+    expect(diffExpectedData(await dumpTables(db), readJson('expected_v29/v12.json')), isEmpty);
     await db.close();
   });
 
@@ -213,9 +246,9 @@ void main() {
   test('MISSING-COLUMN: 버전만 24로 선행하고 컬럼·인덱스·테이블이 빠진 DB를 repair가 채우고 데이터 보존', () async {
     final path = await copyFixture('variant_v23_stamped24_missing.db', tmp);
     final db = await openLikeProduct(path, loadRepoScript());
-    expect(await db.getVersion(), 28);
+    expect(await db.getVersion(), 29);
     expect(canonicalJson(await schemaSnapshot(db)), canonicalJson(referenceSchema));
-    expect(diffExpectedData(await dumpTables(db), readJson('expected_v28/variant_v23_stamped24_missing.json')), isEmpty);
+    expect(diffExpectedData(await dumpTables(db), readJson('expected_v29/variant_v23_stamped24_missing.json')), isEmpty);
     await db.close();
   });
 
@@ -248,17 +281,17 @@ void main() {
     await raw.close();
   });
 
-  test('FUTURE-VERSION: user_version 29 DB는 다운그레이드 거부, 버전·데이터 무변경', () async {
+  test('FUTURE-VERSION: user_version 30 DB는 다운그레이드 거부, 버전·데이터 무변경', () async {
     final path = await copyFixture('variant_v23_stamped25.db', tmp);
     var raw = await openRaw(path);
-    await raw.execute('PRAGMA user_version = 29');
+    await raw.execute('PRAGMA user_version = 30');
     final before = canonicalJson(await dumpTables(raw));
     await raw.close();
 
     await expectLater(openLikeProduct(path, loadRepoScript()), throwsA(isA<DbMigrationException>()));
 
     raw = await openRaw(path);
-    expect(await raw.getVersion(), 29);
+    expect(await raw.getVersion(), 30);
     expect(canonicalJson(await dumpTables(raw)), before);
     await raw.close();
   });
@@ -289,8 +322,8 @@ void main() {
     }
   });
 
-  group('파싱 규칙 케이스 (runner_rule_cases.json, Kotlin과 공유)', () {
-    final cases = (readJson('runner_rule_cases.json')['cases'] as List).cast<Map<String, dynamic>>();
+  group('파싱 규칙 케이스 (runner_rule_cases_v29.json, Kotlin과 공유)', () {
+    final cases = (readJson('runner_rule_cases_v29.json')['cases'] as List).cast<Map<String, dynamic>>();
     for (final c in cases) {
       test('${c['name']} → ${c['expect']}', () {
         final json = jsonEncode(applyMutation(loadRepoScriptJson(), c['mutation'] as Map<String, dynamic>));

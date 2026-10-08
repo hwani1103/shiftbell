@@ -1,0 +1,91 @@
+{
+  "checked_at_utc": "2026-10-08T01:25:30.978156+00:00",
+  "scope": "Infinix missing recent-app lock proof and partial native delivery diagnostic only; no I0 solution or functional PASS",
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "session": {
+    "name": "infinix5",
+    "project": "shiftbell-streaming-1008-c",
+    "model": "transsion_lab_infinix-x6856/35",
+    "cap_seconds": 799.5159194469452,
+    "requested_epoch": 1791421648.9870965,
+    "install_limit_seconds": 240,
+    "first_evidence_limit_seconds": 480,
+    "requested_id": "shiftbell-infinix5-1791421648",
+    "reservation_resource": "projects/shiftbell-streaming-1008-c/deviceSessions/session-3e46439uas2p0",
+    "reservation": "3e46439uas2p0",
+    "reserved_epoch": 1791421658.3332584,
+    "serial": "localhost:11012",
+    "connected_epoch": 1791421685.5205646,
+    "release_reason": "requested return",
+    "released": true,
+    "finished_epoch": 1791422422.1734364,
+    "conservative_seconds": 773.1863398551941
+  },
+  "model": "Infinix X6856 / Android15 API35 / XOS15.1.2.136",
+  "settings": {
+    "notifications": "allowed",
+    "overlay": "actual ON checked=true",
+    "full_screen": "setup page Allowed; no toggle verdict",
+    "exact_alarm": "setup page Allowed",
+    "battery": "Unrestricted actual radio selected; background allowed",
+    "battery_manager": "actual OFF",
+    "sleep_standby_optimization": "actual OFF",
+    "recent_app_lock": "actual menu Lock clicked; reopened menu Unlock observed",
+    "phone_master": "Separate User Agreement/Privacy Policy shown, Cancel clicked; not accepted or configured; approval requested",
+    "pin": "not configured; secure=false",
+    "user_schedule_and_alarm": "onboarding incomplete; no actual UI alarm registration performed"
+  },
+  "native_alarm_clock": {
+    "target_ms": 1791422297935,
+    "delay_ms": 90000,
+    "probe_before": "scheduled only",
+    "prewake_after_target_plus60": "scheduled only; no received event",
+    "power": "Dozing",
+    "standard_device_idle": "ACTIVE / light ACTIVE",
+    "current_uid_from_log": 10294,
+    "vendor_evidence": "09:16:53.942 freeze UID10294; 09:16:53.945 proxyAlarms original target1791422297935",
+    "collection_order": "OS alarm/deviceidle/policy/power/all logcat before app UID probe/DE access",
+    "interference_limit": "Future guard target1791475200000 was also proxied; outside probe observation window. Onboarding app background action present; this is partial-condition diagnosis, not completed pure A/B."
+  },
+  "allow_idle": "NOT_RUN; new full free session required",
+  "I0": "NOT_SOLVED: recent-app lock proof obtained, partial native alarm_clock still vendor-blocked; full Phone Master + foreground actual UI registration combination remains untested",
+  "I1_I4": "GATED, no PASS",
+  "I2_I3": "NOT_RUN",
+  "cleanup": {
+    "database_alarms": 0,
+    "uninstalled": true,
+    "reservation_cancelled": true,
+    "service_reservations": 0,
+    "test_pin_created": false,
+    "global_oem_settings": "battery manager and sleep standby changed on disposable remote device; return-and-erase used, not manual restoration"
+  },
+  "paid_usd_today": 0,
+  "artifact": "artifacts/streaming_free_2026_10_08/infinix_partial_native_evidence.zip",
+  "artifact_sha256": "b7147c8d16b3cc8da5db7f1d47c0141b5f94e9fa2114d602250fa39a41c23212",
+  "next": "Existing paid log-it fallback approved USD20 today after E/F/G creation failures. First session capped25min, Phone Master autostart/cleanup exception + actual UI alarm, native A/B if held. No product changes.",
+  "followup_project": {
+    "id": "shiftbell-streaming-1008-f",
+    "firebase_plan": "Spark",
+    "gemini": false,
+    "analytics": false,
+    "device_streaming_api": "enabled button verified",
+    "transsion": "success toast and checked switch",
+    "reservation_created": false,
+    "free_minutes_unused": 2,
+    "failure": "REST create FAILED_PRECONDITION; quota UI28/30, no device session. Google60s bootstrap also resource exhausted. No paid usage."
+  },
+  "frozen_source_match_count": 430,
+  "phone_master_user_approval": {
+    "approved": true,
+    "user_reply": "동의할게",
+    "date": "2026-10-08"
+  },
+  "g_followup": {
+    "project": "shiftbell-streaming-1008-g",
+    "plan": "Spark",
+    "gemini": false,
+    "analytics": false,
+    "api_enabled": true,
+    "google_bootstrap": "300s request FAILED_PRECONDITION, no reservation; general-device-first hypothesis not validated"
+  }
+}

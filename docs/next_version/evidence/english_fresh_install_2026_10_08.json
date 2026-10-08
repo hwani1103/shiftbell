@@ -1,0 +1,163 @@
+{
+  "date": "2026-10-08T13:34:34.278606+09:00",
+  "user_request": "English dev debug fresh installation; old app data deletion authorized",
+  "device": {
+    "serial": "R5KL20DHWAE",
+    "model": "SM-S948N",
+    "system_locale": "en-US",
+    "timezone": "Asia/Seoul",
+    "app_locale_override": "Locales for com.hwani1103.shiftbell.dev for user 0 are []"
+  },
+  "package": "com.hwani1103.shiftbell.dev",
+  "apk": {
+    "path": "build\\app\\outputs\\flutter-apk\\app-dev-debug.apk",
+    "sha256": "b740a493067a917159d38bf57ab325998eacfd54095dbdc177b32bc702d12bd9",
+    "modified": "2026-10-08T13:33:08.734548+09:00"
+  },
+  "first_screen_texts": [],
+  "installation": [
+    {
+      "args": [
+        "shell",
+        "cmd",
+        "locale",
+        "set-device-locale",
+        "en-US"
+      ],
+      "output": ""
+    },
+    {
+      "args": [
+        "shell",
+        "cmd",
+        "locale",
+        "get-device-locale"
+      ],
+      "output": "en-US"
+    },
+    {
+      "args": [
+        "uninstall",
+        "com.hwani1103.shiftbell.dev"
+      ],
+      "output": "Success"
+    },
+    {
+      "args": [
+        "install",
+        "C:\\Users\\Administrator\\Desktop\\shiftbell\\build\\app\\outputs\\flutter-apk\\app-dev-debug.apk"
+      ],
+      "output": "Performing Streamed Install\r\nSuccess"
+    },
+    {
+      "args": [
+        "shell",
+        "pm",
+        "clear",
+        "com.hwani1103.shiftbell.dev"
+      ],
+      "output": "Success"
+    },
+    {
+      "args": [
+        "shell",
+        "cmd",
+        "locale",
+        "set-app-locales",
+        "com.hwani1103.shiftbell.dev"
+      ],
+      "output": ""
+    },
+    {
+      "args": [
+        "shell",
+        "cmd",
+        "locale",
+        "get-app-locales",
+        "com.hwani1103.shiftbell.dev"
+      ],
+      "output": "Locales for com.hwani1103.shiftbell.dev for user 0 are []"
+    },
+    {
+      "args": [
+        "shell",
+        "input",
+        "keyevent",
+        "KEYCODE_WAKEUP"
+      ],
+      "output": ""
+    },
+    {
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.MainActivity"
+      ],
+      "output": "Starting: Intent { cmp=com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.MainActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.MainActivity\r\nTotalTime: 1260\r\nWaitTime: 1261\r\nComplete"
+    },
+    {
+      "args": [
+        "shell",
+        "uiautomator",
+        "dump",
+        "/sdcard/shiftbell_english_fresh.xml"
+      ],
+      "output": "UI hierchary dumped to: /sdcard/shiftbell_english_fresh.xml"
+    },
+    {
+      "args": [
+        "shell",
+        "cat",
+        "/sdcard/shiftbell_english_fresh.xml"
+      ],
+      "output": "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?><hierarchy rotation=\"0\"><node index=\"0\" text=\"\" resource-id=\"\" class=\"android.widget.FrameLayout\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"false\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[0,0][1080,2340]\" drawing-order=\"0\" hint=\"\"><node index=\"0\" text=\"\" resource-id=\"\" class=\"android.widget.LinearLayout\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"false\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[0,0][1080,2340]\" drawing-order=\"1\" hint=\"\"><node index=\"0\" text=\"\" resource-id=\"android:id/content\" class=\"android.widget.FrameLayout\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"false\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[0,0][1080,2340]\" drawing-order=\"2\" hint=\"\"><node index=\"0\" text=\"\" resource-id=\"\" class=\"android.widget.FrameLayout\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[0,0][1080,2340]\" drawing-order=\"1\" hint=\"\"><node index=\"0\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"false\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[0,0][1080,2340]\" drawing-order=\"0\" hint=\"\"><node index=\"0\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"false\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[0,0][1080,2340]\" drawing-order=\"0\" hint=\"\"><node index=\"0\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"false\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[0,0][1080,2340]\" drawing-order=\"0\" hint=\"\"><node index=\"0\" text=\"\" resource-id=\"\" class=\"android.widget.ScrollView\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"true\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[0,105][1080,2214]\" drawing-order=\"0\" hint=\"\"><node index=\"0\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Get Started with ShiftBell\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[63,210][879,305]\" drawing-order=\"0\" hint=\"\" /><node index=\"1\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Allow these permissions so your alarms can work reliably.\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[63,336][1017,441]\" drawing-order=\"0\" hint=\"\" /><node index=\"2\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Notifications\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,549][460,612]\" drawing-order=\"0\" hint=\"\" /><node index=\"3\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Show alarm notifications and reminders\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,622][888,675]\" drawing-order=\"0\" hint=\"\" /><node index=\"4\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Setup needed\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,696][447,748]\" drawing-order=\"0\" hint=\"\" /><node index=\"5\" text=\"\" resource-id=\"\" class=\"android.widget.Button\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Settings\" checkable=\"false\" checked=\"false\" clickable=\"true\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,769][477,895]\" drawing-order=\"0\" hint=\"\" /><node index=\"6\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Display Over Other Apps\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,1016][679,1079]\" drawing-order=\"0\" hint=\"\" /><node index=\"7\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Show the alarm screen while you use other apps\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,1089][972,1194]\" drawing-order=\"0\" hint=\"\" /><node index=\"8\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Setup needed\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,1215][447,1268]\" drawing-order=\"0\" hint=\"\" /><node index=\"9\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"If an app list appears, select ShiftBell and allow display over other apps.\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,1289][972,1394]\" drawing-order=\"0\" hint=\"\" /><node index=\"10\" text=\"\" resource-id=\"\" class=\"android.widget.Button\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Settings\" checkable=\"false\" checked=\"false\" clickable=\"true\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,1415][477,1541]\" drawing-order=\"0\" hint=\"\" /><node index=\"11\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Exact Alarms\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,1662][466,1725]\" drawing-order=\"0\" hint=\"\" /><node index=\"12\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Needed for the alarm to ring at the exact time you set\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,1735][972,1840]\" drawing-order=\"0\" hint=\"\" /><node index=\"13\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Allowed\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,1861][349,1914]\" drawing-order=\"0\" hint=\"\" /><node index=\"14\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Lock screen alarm display\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,2034][713,2097]\" drawing-order=\"0\" hint=\"\" /><node index=\"15\" text=\"\" resource-id=\"\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"Displays the alarm screen while your phone is locked. Allow full-screen notifications.\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"true\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[213,2108][972,2213]\" drawing-order=\"0\" hint=\"\" /></node></node></node></node></node></node></node><node index=\"1\" text=\"\" resource-id=\"android:id/navigationBarBackground\" class=\"android.view.View\" package=\"com.hwani1103.shiftbell.dev\" content-desc=\"\" checkable=\"false\" checked=\"false\" clickable=\"false\" enabled=\"true\" focusable=\"false\" focused=\"false\" scrollable=\"false\" long-clickable=\"false\" password=\"false\" selected=\"false\" bounds=\"[0,2214][1080,2340]\" drawing-order=\"2\" hint=\"\" /></node></hierarchy>"
+    },
+    {
+      "args": [
+        "shell",
+        "rm",
+        "/sdcard/shiftbell_english_fresh.xml"
+      ],
+      "output": ""
+    },
+    {
+      "args": [
+        "shell",
+        "getprop",
+        "persist.sys.timezone"
+      ],
+      "output": "Asia/Seoul"
+    }
+  ],
+  "scope": "Only dev app uninstalled/reinstalled/cleared. No backup restored, no onboarding choices or permissions approved, no timezone or account changes.",
+  "checks": {
+    "initial_gate": "First two Flutter groups and resource checks passed; third group had a 30-second DB migration timeout. Original failed run preserved.",
+    "continuation": "Same third group rerun sequentially; remaining original gate checks and dev debug/web builds continued.",
+    "logs": [
+      "build/english_fresh_install_critical_2026_10_08.log",
+      "build/english_fresh_install_remaining_2026_10_08.log"
+    ],
+    "result": "All required automated check groups passed across original run and serial continuation; dev debug APK and web builds passed. Initial full gate run remains failed due to DB timeout.",
+    "preserved_logs": [
+      "artifacts/english_fresh_install_2026_10_08/english_fresh_install_critical_2026_10_08.log",
+      "artifacts/english_fresh_install_2026_10_08/english_fresh_install_remaining_2026_10_08.log"
+    ]
+  },
+  "visual_review": {
+    "result": "English first-run permission introduction displayed on USB phone",
+    "observed_texts": [
+      "Get Started with ShiftBell",
+      "Notifications",
+      "Display Over Other Apps",
+      "Exact Alarms",
+      "Lock screen alarm display"
+    ],
+    "screenshot": "artifacts/english_fresh_install_2026_10_08/first_launch.png",
+    "uiautomator_limitation": "Flutter text was not exposed in XML; screenshot inspected directly",
+    "onboarding_completed": false,
+    "permissions_manually_granted": false
+  }
+}

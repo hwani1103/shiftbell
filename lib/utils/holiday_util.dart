@@ -1,4 +1,5 @@
 // lib/utils/holiday_util.dart
+import 'national_holiday.dart';
 //
 // ⭐ 공휴일 판정 - 원래 calendar_tab.dart 안에 있던 걸 그대로 옮김. friend_calendar_view.dart
 // (친구 달력 보기 - 앱 내/웹 둘 다)도 똑같은 공휴일 표시가 필요해져서 공용 파일로 뺌 -
@@ -91,18 +92,13 @@ const Map<String, String> lunarHolidays = {
   '2029-09-24': '대체공휴일',
 };
 
-// 공휴일 여부 확인
-//
-// ⭐ 영어 현지화 결정(교대시계_영어화_현지화_보고서_영문판.md 2-6번 참고): 이 파일의
-// 공휴일 데이터는 전부 한국 고유 공휴일이고(신정~지방선거, 매년 손으로 갱신) 다른
-// 나라 공휴일 데이터셋은 없음. "번역"으로 해결 안 되는 항목이라 다국가 데이터셋을
-// 새로 구축하는 대신(작업량 큼 + 매년 유지보수 필요) 가장 간단하고 정직한 선택지
-// (보고서의 옵션 a)를 택함: 영어 로케일(ko가 아닌 모든 로케일)에서는 공휴일 표시
-// 기능 자체를 끔 - 한국 공휴일이 남의 달력에 빨갛게 뜨는 이상한 경험을 피함.
-// isKorean=false면 무조건 null을 반환해서, 호출부(calendar_tab.dart,
-// friend_calendar_view.dart)가 별도 분기 없이 그대로 써도 안전하게 함.
-String? getHolidayName(DateTime date, {required bool isKorean}) {
-  if (!isKorean) return null;
+// 한국 목록/원격 변경분은 한국어 화면만 사용한다. 해외는 별도 국가 데이터
+// (2026~2028)에서 조회하며 미지원 국가·미발표 날짜를 한국 목록으로 대체하지 않는다.
+String? getHolidayName(DateTime date, {required bool isKorean,
+    String? countryCode, String languageCode = 'en'}) {
+  if (!isKorean) {
+    return nationalHolidayName(date, countryCode, languageCode: languageCode);
+  }
 
   // 0. ⭐ 2026-09-23 (1.0.24 D) - Firebase에서 받은 원격 변경분이 우선(추가·이름 변경 → remove보다 먼저, 삭제 → 없음)
   final dateKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';

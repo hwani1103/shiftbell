@@ -3,6 +3,7 @@ import '../constants/shift_name_limits.dart';
 import '../models/shift_schedule.dart';
 import '../l10n/l10n_extensions.dart';
 import 'app_second_button.dart';
+import 'app_button.dart';
 import 'app_shift_chip.dart';
 import 'shift_editor_dialog.dart';
 import 'shift_name_text_field.dart';
@@ -145,10 +146,7 @@ class _ShiftNamesDialogState extends State<ShiftNamesDialog> {
               variant: AppSecondButtonVariant.neutral,
               onPressed: () => Navigator.pop(context),
               child: Text(context.l10n.commonCancel)),
-          AppSecondButton(
-              variant: AppSecondButtonVariant.success,
-              onPressed: _save,
-              child: Text(context.l10n.commonSave)),
+          AppButton(onPressed: _save, child: Text(context.l10n.commonSave)),
         ]);
   }
 }

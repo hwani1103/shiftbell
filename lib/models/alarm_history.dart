@@ -10,6 +10,8 @@ class AlarmHistory {
   final DateTime actualRingTime;
   final String dismissType;  // 'swiped', 'snoozed', 'timeout', 'ringing'
   final int snoozeCount;
+  /// Null means the historical record did not retain the selected duration.
+  final int? snoozeMinutes;
   final String? shiftType;
   final DateTime createdAt;
 
@@ -25,6 +27,7 @@ class AlarmHistory {
     required this.actualRingTime,
     required this.dismissType,
     required this.snoozeCount,
+    this.snoozeMinutes,
     this.shiftType,
     required this.createdAt,
     this.dayOffset = 0,
@@ -50,6 +53,7 @@ class AlarmHistory {
       actualRingTime: _parseDate(map['actual_ring_time']),
       dismissType: map['dismiss_type'] ?? 'unknown',
       snoozeCount: map['snooze_count'] ?? 0,
+      snoozeMinutes: map['snooze_minutes'] as int?,
       shiftType: map['shift_type'],
       createdAt: _parseDate(map['created_at']),
       dayOffset: map['day_offset'] ?? 0,
@@ -64,7 +68,9 @@ class AlarmHistory {
       case 'swiped':
         return l10n.dismissAlarmConfirmed;
       case 'snoozed':
-        return l10n.dismissSnoozed5Min;
+        return snoozeMinutes == null
+            ? l10n.dismissSnoozedUnknown
+            : l10n.dismissSnoozedMinutes(snoozeMinutes!);
       case 'timeout':
         return l10n.dismissNoResponse;
       case 'cancelled_before_ring':

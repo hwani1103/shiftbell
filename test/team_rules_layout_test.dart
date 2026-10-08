@@ -9,7 +9,7 @@ import 'package:shiftbell/models/team_rule.dart';
 import 'package:shiftbell/models/team_schedule_config.dart';
 import 'package:shiftbell/screens/team_rule_editor_screen.dart';
 import 'package:shiftbell/screens/team_schedule_edit_screen.dart';
-import 'package:shiftbell/widgets/app_second_button.dart';
+import 'package:shiftbell/widgets/app_button.dart';
 import 'package:shiftbell/widgets/team_rule_card.dart';
 
 void main() {
@@ -47,14 +47,14 @@ void main() {
             shiftTypes:shifts,date:date),size,Locale(lang),scale);
           final mode = find.byKey(const ValueKey('rule-mode-2'));
           await reveal(tester, mode); await tester.tap(mode); await tester.pumpAndSettle();
-          expect(tester.widget<AppSecondButton>(find.byKey(const ValueKey('rule-save'))).onPressed,isNull);
+          expect(tester.widget<AppButton>(find.byKey(const ValueKey('rule-save'))).onPressed,isNull);
           final pick = find.byKey(const ValueKey('rule-shift-Office Work'));
           await reveal(tester, pick); await tester.tap(pick); await tester.pumpAndSettle();
           for(var i=0;i<7;i++) {
             final day=find.byKey(ValueKey('rule-weekday-$i'));
             await reveal(tester, day); await tester.tap(day); await tester.pumpAndSettle();
           }
-          expect(tester.widget<AppSecondButton>(find.byKey(const ValueKey('rule-save'))).onPressed,isNotNull);
+          expect(tester.widget<AppButton>(find.byKey(const ValueKey('rule-save'))).onPressed,isNotNull);
           expect(tester.takeException(),isNull);
         });
       }
@@ -64,12 +64,12 @@ void main() {
   testWidgets('40-day cycle remains scrollable and editing clears stale reference index', (tester) async {
     await mount(tester, TeamRuleEditorScreen(team:'B',basePattern:shifts,shiftTypes:shifts,date:date,
       initial:TeamRule.cycle(List.generate(40,(i)=>shifts[i%4]),date,39)),const Size(320,568),const Locale('en'),2);
-    expect(tester.widget<AppSecondButton>(find.byKey(const ValueKey('rule-save'))).onPressed,isNotNull);
+    expect(tester.widget<AppButton>(find.byKey(const ValueKey('rule-save'))).onPressed,isNotNull);
     final last=find.byKey(const ValueKey('rule-position-39'));
     await reveal(tester, last); await tester.tap(last); await tester.pumpAndSettle();
     final remove=find.byKey(const ValueKey('rule-cycle-remove-3'));
     await reveal(tester, remove); await tester.tap(remove); await tester.pumpAndSettle();
-    expect(tester.widget<AppSecondButton>(find.byKey(const ValueKey('rule-save'))).onPressed,isNull);
+    expect(tester.widget<AppButton>(find.byKey(const ValueKey('rule-save'))).onPressed,isNull);
     expect(find.byKey(const ValueKey('rule-position-39')),findsNothing);
     expect(tester.takeException(),isNull);
   });

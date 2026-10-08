@@ -1,0 +1,72 @@
+﻿해외 8개국 달력·시간 규칙 사전 조사
+기준: 2026-10-07 / d40741e 및 현재 저장소 / 한국어 UI 확정 이후 외국어 작업의 준비 자료
+대상: 미국 US, 영국 GB, 남아프리카 ZA, 인도 IN, UAE AE, 필리핀 PH, 독일 DE, 브라질 BR.
+힌디어와 인도 영어는 같은 국가 IN이며 8개국을 셀 때 별도 국가로 중복하지 않는다.
+
+1. 주 시작일 / 시각 형식
+Unicode CLDR 48의 지역 기본값과 현재 앱 delegate/테스트를 대조했다.
+국가       주 시작   CLDR 선호 시각   현재 앱
+US         일요일    12시간          en_US, 일요일 기본
+GB         월요일    24시간          en_GB, 월요일 기본
+ZA         일요일    24시간          en_ZA, 일요일. 날짜 입력 도움말만 별도 보정
+IN         일요일    12시간          en_IN / hi_IN, 일요일
+AE         월요일    12시간          en_AE 지역 delegate로 월요일 보정
+PH         일요일    12시간          en_PH, 일요일
+DE         월요일    24시간          de_DE, 월요일
+BR         일요일    24시간          pt_BR, 일요일
+원자료:
+https://raw.githubusercontent.com/unicode-org/cldr-json/main/cldr-json/cldr-core/supplemental/weekData.json
+https://raw.githubusercontent.com/unicode-org/cldr-json/main/cldr-json/cldr-core/supplemental/timeData.json
+현재 코드: lib/l10n/release_locale.dart, regional_material_localizations.dart, utils/weekday_util.dart.
+검사: test/regional_release_test.dart. 한국어 일요일 시작, 주별 근무시간 합계는 별도 월~일 기준.
+12/24시간은 지역 선호와 사용자가 기기에 설정한 형식을 구분한다.
+앱의 알람 시간 편집기는 Android DateFormat.is24HourFormat 값을 조회해 기기 설정을 우선한다.
+저장된 알람 시간은 24시간 값이고, 표시 형식 변경으로 알람 실제 시각을 바꾸지 않는다.
+
+2. 서머타임
+미국: 지역에 따라 적용. 하와이와 애리조나 대부분 등의 예외를 국가 단일 플래그로 덮지 않는다.
+영국/독일: 서머타임 적용. 독일은 3월/10월 마지막 일요일 규칙이며 영국 정부도 같은 달의 전환을 안내한다.
+남아프리카/인도/UAE/필리핀: 현재 대표 IANA 시간대에 계절별 DST 규칙이 없다.
+브라질: 2019년 폐지, 현재 IANA 데이터에서도 종료된 규칙이다.
+근거:
+https://www.nist.gov/pml/time-and-frequency-division/popular-links/daylight-saving-time-dst
+https://www.gov.uk/when-do-the-clocks-change
+https://www.ptb.de/cms/en/ptb/fachabteilungen/abt4/fb-44/fragenzurzeit/fragenzurzeit03.html
+https://www.gov.br/mme/pt-br/assuntos/noticias/horario-de-verao-e-suspenso-em-todo-o-pa-1
+https://data.iana.org/time-zones/tzdb/asia
+https://data.iana.org/time-zones/tzdb/africa
+https://data.iana.org/time-zones/tzdb/southamerica
+국가/앱 언어로 DST 시간을 수동 가산하지 않는다. 기기의 IANA 지역 시간대를 사용한다.
+현재 native AlarmWallTime은 ZoneId.systemDefault()와 LocalDateTime.atZone을 사용한다.
+AlarmGuardReceiver는 시간/시간대 변경을 받아 알람 재계산 경로를 실행한다.
+기존 alarm_dst/timezone_consumed_alarm 및 native DST·snooze 검사는 별도의 P0 실행기로 확인한다.
+이 검사가 통과해도 해외 시간대 실기기 알람 PASS라고 기록하지 않는다.
+
+3. '빨간날'을 그대로 나라별로 복사하면 안 되는 이유
+주말, 법정 공휴일, 달력에서 빨간 글자를 쓰는 디자인은 서로 다른 속성이다.
+CLDR에는 주 시작·주말 데이터가 있지만 '모든 주말 날짜는 빨강' 같은 색 규칙은 없다.
+8개국의 모든 달력이 토·일을 모두 빨갛게 표시한다는 근거를 확보하지 못했으며, 그렇게 단정하지 않는다.
+CLDR 기본 주말은 대부분 토~일이고, IN은 일요일만이다. 이는 로케일 기본 데이터이지 모든 직장의 휴무 규칙이 아니다.
+UAE 연방정부는 2022년부터 토·일 및 금요일 반일 주말을 안내한다. 실제 근무표의 휴무와 공휴일은 별도다.
+https://fahr.gov.ae/Portal/Userfiles/Assets/Documents/be4b436e.pdf
+한국 현재 코드도 토요일은 일반 날짜이며, 일요일 또는 공휴일만 빨강이다. '토·일 모두 빨강'이 현재 구현이라는 전제는 맞지 않는다.
+해외 단계의 제품 규칙 제안: 일반 주말을 법정 공휴일로 오인시키지 않도록 주말 색과 공휴일 빨강을 분리한다.
+사용자 명시 요구에 따라 실제 외국 공휴일은 날짜 숫자만 빨강, 이름은 셀 팝업의 한국 음력 위치에 빨강으로 표시한다.
+공휴일 이름/음력 고정 줄은 외국 셀에 배정하지 않고, 그 높이를 근무명·메모 영역으로 되돌린다.
+이번 한국어 단계에서는 국가별 공휴일 데이터와 새 외국어 테마를 추가하지 않는다. 지시한 후속 3단계에서 시행한다.
+
+4. 외국 공휴일 표시를 위한 후속 구조
+UI 언어와 공휴일 국가를 분리한다. 현재 de→DE, pt→BR, hi→IN 해석은 언어 선택 정책이며 여행 중 실제 지역을 뜻하지 않는다.
+공휴일 데이터 레코드: 국가 ISO 코드 + 현지 YYYY-MM-DD + 해당 UI 언어의 표시명 + 국가공통 여부.
+시/주별 공휴일은 후속 범위에서 제외한다. 앱 달력 지원 범위는 현재 연도-3부터 연도+3의 1/1~12/31이다.
+국가별 실제 날짜는 다음 단계 조사 후 입력하고, 지금 임의의 실제 공휴일 데이터를 제품에 넣지 않는다.
+날짜 빨강 판정과 셀 보조 정보 이름 조회를 분리해야 공휴일 이름을 셀에서 숨겨도 날짜가 빨강으로 유지된다.
+팝업에는 국가별 이름을 사용하며 한국어 fallback이나 빈 번역으로 해결하지 않는다.
+새 공휴일 데이터와 표현 정책은 앱 달력/친구 달력/공개 다국어 웹 뷰어를 함께 검토한다.
+common ARB 키 삭제, Korean-only 리소스 병합, 언어별 빈 문자열 삽입은 하지 않는다.
+외국어 테마 2개 및 총 6~7개 목록은 한국어 UI와 기능 확정 후 영어부터 설계하고 독일어·pt_BR·힌디어를 검증한다.
+현재 공개 웹의 locale 자산·폰트·공휴일 의존성 검사는 P0 -Build의 웹 검사 및 빌드에 연결한다.
+
+5. 다음 순서
+한국어 실기기 달력 승인 → 설정/온보딩/전체근무표 및 팝업 검토 → 기능 최종 검증 → 외국어 테마·공휴일 → SRTL 한국어/영어 → 나머지 언어.
+이 문서의 사전 설계는 외국어 UI 최종 승인 또는 국가별 공휴일 데이터 검증 완료를 뜻하지 않는다.

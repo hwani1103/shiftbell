@@ -15,7 +15,7 @@ Future<void> showMemoDetailSheet({
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -77,6 +77,11 @@ class _MemoDetailSheetState extends State<_MemoDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final fieldBackground =
+        Color.alphaBlend(colors.onSurface.withOpacity(0.07), colors.surface);
+    final fieldBorder = OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10.r),
+        borderSide: BorderSide(color: colors.onSurface.withOpacity(0.3)));
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: SafeArea(
@@ -120,17 +125,18 @@ class _MemoDetailSheetState extends State<_MemoDetailSheet> {
                     if (!_edited) setState(() => _edited = true);
                   },
                   decoration: InputDecoration(
+                    filled: true,
+                    fillColor: fieldBackground,
                     hintText: context.l10n.calendarMemoContent,
                     contentPadding: EdgeInsets.all(12.w),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                        borderSide: BorderSide(color: colors.outline)),
+                    border: fieldBorder,
+                    enabledBorder: fieldBorder,
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.r),
                         borderSide:
                             BorderSide(color: colors.primary, width: 2)),
                   ),
-                  style: TextStyle(fontSize: 14.sp),
+                  style: TextStyle(fontSize: 14.sp, color: colors.onSurface),
                 )
               else
                 InkWell(
@@ -140,8 +146,12 @@ class _MemoDetailSheetState extends State<_MemoDetailSheet> {
                   child: Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(14.w),
+                    foregroundDecoration: BoxDecoration(
+                        border: Border.all(
+                            color: colors.onSurface.withOpacity(0.3)),
+                        borderRadius: BorderRadius.circular(10.r)),
                     decoration: BoxDecoration(
-                        color: colors.surface,
+                        color: fieldBackground,
                         borderRadius: BorderRadius.circular(10.r)),
                     child: Text(widget.text,
                         style: TextStyle(

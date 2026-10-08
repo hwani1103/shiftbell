@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftbell/widgets/app_text_scale.dart';
 
 void main() {
-  testWidgets('fractional scales and runtime changes reach routes and dialogs',
+  testWidgets('system font changes leave routes and dialogs at fixed scale',
       (tester) async {
     var requested = 1.0;
     late StateSetter update;
@@ -29,10 +29,21 @@ void main() {
         context: tester.element(find.text('route')),
         builder: (_) => AlertDialog(content: probe('dialog')));
     await tester.pumpAndSettle();
-    for (final scale in [1.0, 1.09, 1.25, 1.28, 1.3, 1.31, 1.6, 2.0, 1.09]) {
+    for (final scale in [
+      0.8,
+      1.0,
+      1.09,
+      1.25,
+      1.28,
+      1.3,
+      1.31,
+      1.6,
+      2.0,
+      1.09
+    ]) {
       update(() => requested = scale);
       await tester.pumpAndSettle();
-      final expected = scale > 1.3 ? 1.3 : scale;
+      const expected = 1.0;
       expect(observed['route'], closeTo(expected, 1e-9));
       expect(observed['dialog'], closeTo(expected, 1e-9));
       expect(tester.takeException(), isNull);

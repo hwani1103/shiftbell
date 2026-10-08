@@ -120,7 +120,7 @@ object AlarmActionHelper {
     fun snooze(context: Context, alarmId: Int, minutes: Int = 5): SnoozeResult? {
         val target = RingSnoozeController.targetAt(System.currentTimeMillis(), minutes)
         try {
-            return when (val result = snoozeAt(context, alarmId, target)) {
+            return when (val result = snoozeAt(context, alarmId, target, selectedMinutes = minutes)) {
                 is SnoozeExecution.Scheduled -> SnoozeResult(result.timeText, result.shiftType)
                 is SnoozeExecution.Collision -> SnoozeResult(AlarmInstant.display(context, target), "", result.message)
                 else -> null
@@ -131,7 +131,8 @@ object AlarmActionHelper {
     /** DB + OS only. The caller owns claim/stop/close/finally-finishTransition. */
     internal fun snoozeAt(context: Context, alarmId: Int, targetAt: Long,
         scheduleFn: ((Context, Int, Long, String) -> Unit)? = null,
-        beforeSchedule: (() -> Unit)? = null): SnoozeExecution {
+        beforeSchedule: (() -> Unit)? = null, selectedMinutes: Int? = null): SnoozeExecution {
+        require(selectedMinutes == null || SnoozeText.valid(selectedMinutes))
         val db = DatabaseHelper.getInstance(context).getWritableDatabaseWithRetry()
             ?: return SnoozeExecution.DbFailed(alarmId)
         var label = context.getString(R.string.alarm_default_label)
@@ -181,7 +182,7 @@ object AlarmActionHelper {
                         put("fixed_slot_time", fixedSlotTime)
                     }
                     check(db.update("alarms", values, "id = ?", arrayOf(alarmId.toString())) == 1)
-                    insertHistory(context, db, alarmId, oldDate, oldTime, label, dayOffset, "snoozed", fixedSlotTime)
+                    insertHistory(context, db, alarmId, oldDate, oldTime, label, dayOffset, "snoozed", fixedSlotTime, selectedMinutes)
                     insertCreationLog(db, alarmId, date, time, label, typeId, dayOffset, "snoozed")
                 }
                 db.setTransactionSuccessful()
@@ -361,7 +362,7 @@ object AlarmActionHelper {
         notifyFlutter(context)
     }
 
-    private fun insertHistory(context: Context, db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dayOffset: Int, dismissType: String, fixedSlotTime: String?) {
+    private fun insertHistory(context: Context, db: android.database.sqlite.SQLiteDatabase, alarmId: Int, date: String, time: String, shiftType: String, dayOffset: Int, dismissType: String, fixedSlotTime: String?, snoozeMinutes: Int? = null) {
         val now = AlarmInstant.format(System.currentTimeMillis())
         val values = ContentValues().apply {
             put("alarm_id", alarmId)
@@ -371,6 +372,7 @@ object AlarmActionHelper {
             put("dismiss_type", dismissType)
             put("fixed_slot_time", fixedSlotTime)
             put("snooze_count", 0)
+            if (snoozeMinutes != null) put("snooze_minutes", snoozeMinutes)
             put("shift_type", shiftType)
             put("created_at", now)
             put("day_offset", dayOffset)

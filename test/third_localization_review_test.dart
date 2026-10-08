@@ -128,7 +128,8 @@ void main() {
         return const SizedBox.shrink();
       })));
       await tester.pumpAndSettle();
-      expect(available, hasLength(6));
+      expect(available, hasLength(5));
+      expect(available, isNot(contains(CalendarThemeId.diary)));
       expect(available, isNot(contains(CalendarThemeId.editorial)));
       expect(available, isNot(contains(CalendarThemeId.initialBadge)));
       expect(available, isNot(contains(CalendarThemeId.eventChip)));

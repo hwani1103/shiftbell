@@ -146,7 +146,7 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
     if (!_tutorialChecked) {
       _tutorialChecked = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) maybeShowConditionTabTutorial(context);
+        if (mounted && ref.read(optionalTabActivationProvider) == null) maybeShowConditionTabTutorial(context);
       });
     }
 

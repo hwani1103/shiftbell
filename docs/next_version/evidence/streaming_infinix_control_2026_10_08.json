@@ -1,0 +1,157 @@
+{
+  "date": "2026-10-08",
+  "id": "A02/M-I/I0",
+  "status": "REMOTE_DEVICE_FAIL; THIRD_PARTY_CONTROL_FAIL; RETAIL_AND_LAB_EFFECT_UNSEPARATED",
+  "user_request": "Install a third-party alarm, inspect its structure and determine whether a useful mechanism can be applied to ShiftBell; later raised possible Streaming/Transsion lab effect.",
+  "session": {
+    "name": "infinix_control1",
+    "project": "log-it-3d269",
+    "model": "transsion_lab_infinix-x6856/35",
+    "cap_seconds": 1200,
+    "requested_epoch": 1791428149.960117,
+    "install_limit_seconds": 240,
+    "first_evidence_limit_seconds": 480,
+    "reservation": "1h7e03um4s3q9",
+    "reserved_epoch": 1791428159.221388,
+    "serial": "localhost:2325",
+    "connected_epoch": 1791428179.4468927,
+    "release_reason": "requested return",
+    "released": true,
+    "finished_epoch": 1791429065.1262434,
+    "conservative_seconds": 915.1661262512207
+  },
+  "third_party": {
+    "package": "com.urbandroid.sleep",
+    "sha256": "ba91403018082d52c48088f7e2cb12d259cc414f9d3dfe09127165a7f3496173",
+    "bytes": 49727766,
+    "official_url": "https://sleep.urbandroid.org/wp-content/uploads/release/Sleep-20260923-prod-release.apk",
+    "signature_verified": true,
+    "version_name": "20260923",
+    "version_code": 2311711,
+    "certificate_sha256": "2f84fb3c3a39caf201a11154037b50d32c05a4c118b8f139f9c79c15fbd55482"
+  },
+  "device": {
+    "model": "Infinix X6856 (NOTE 50 Pro+)",
+    "api": 35,
+    "rom": "X6856-15.1.2.136SP01(OP001PF001AZ)",
+    "build_type": "user",
+    "build_tags": "release-keys",
+    "verified_boot": "green",
+    "debuggable": 0,
+    "meaning": "These properties do not establish retail-equivalent configuration or rule out remote lab policy."
+  },
+  "setup": {
+    "ordinary_alarm_only": true,
+    "sleep_tracking_started": false,
+    "shiftbell_installed_or_armed": false,
+    "secure_pin": false,
+    "timezone": "+0800",
+    "time_changed": false,
+    "actual_oem_settings": [
+      "Unrestricted",
+      "Battery Manager OFF",
+      "Sleep Standby Optimization OFF",
+      "Phone Master Protected Apps ON",
+      "App Launch Allowed",
+      "Lock screen cleanup OFF",
+      "Recents menu Unlock proves locked"
+    ],
+    "notifications_exact_fsi_overlay": "Actual UI and package/appops/OS evidence present",
+    "premium": "App displayed automatic 4-day trial; no purchase/payment registration performed",
+    "sound": "silent requested via public Intent, but post-open app log resolved default ringtone; no audible/silent claim"
+  },
+  "observation": {
+    "target_ms": 1791428880000,
+    "target_local": "2026-10-08 11:08:00 +0800",
+    "freeze_local": "11:06:50.099",
+    "both_proxy_local": "11:06:50.105",
+    "natural_wait": "HOME/SLEEP then no device queries until target+60; OS/logs collected before manually waking",
+    "deadline_state": "Dozing; standard DeviceIdle ACTIVE/light ACTIVE; no AlarmKlaxon or alarm receive through target+60",
+    "manual_wake_only": "Launcher",
+    "explicit_open_unfreeze_local": "11:10:35.069",
+    "alarm_service_receive_local": "11:10:35.127",
+    "alarm_receiver_receive_local": "11:10:35.167",
+    "delay_service_ms": 155127,
+    "delay_receiver_ms": 155167,
+    "ui": "Actual alarm screen with P0-Infinix-Control, Dismiss and Snooze after explicit open"
+  },
+  "structure_comparison": {
+    "shiftbell_frozen_source": {
+      "archive": "artifacts/dev_offline_2026_10_07/candidate-source.zip",
+      "file": "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmWakeScheduler.kt",
+      "source_sha256": "4f31c83ffcf7935b173e387f525b27e1bd32412ed5bf7b6df2e666c164591568",
+      "ordinary_alarm": "setAlarmClock with getBroadcast to CustomAlarmReceiver; SecurityException fallback is inexact",
+      "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e"
+    },
+    "sleep_observed": {
+      "registration": "Two exact RTC_WAKEUP Alarm clock entries at identical target; startForegroundService and broadcastIntent",
+      "permission": "USE_EXACT_ALARM granted=true; POST_NOTIFICATIONS granted=true; actual FSI and overlay allowed",
+      "alarm_service": "AlarmKlaxon; foreground types=0x402 after explicit launch and delayed delivery",
+      "before_and_after_deadline_service": "No AlarmKlaxon in either service dump; no sleep tracking enabled",
+      "failure": "Hiber proxies both operations before delivery"
+    },
+    "port_decision": "No demonstrated Infinix fix to port; adding the observed second path has no success evidence in this environment. No product-code modification or full source decompilation/copy performed.",
+    "environment_scope": "One third-party app, one session, same model/ROM but independent reservation. Cannot separate OEM retail firmware behavior from lab configuration/management; not a universal manufacturer failure verdict."
+  },
+  "cleanup": {
+    "uninstall": "Success",
+    "active_app_os_alarm_headers": 0,
+    "rotation_restored": {
+      "accelerometer_rotation": "1",
+      "user_rotation": "0"
+    },
+    "service_reservations": 0,
+    "returned": true
+  },
+  "cost": {
+    "additional_conservative_seconds": 915.1661262512207,
+    "additional_estimated_usd": 2.2879153156280516,
+    "today_conservative_seconds": 2849.1134793758392,
+    "today_estimated_usd": 7.122783698439598,
+    "authorized_usd": 20,
+    "soft_target_usd": 10,
+    "basis": "Request-to-return conservative usage estimate, not confirmed billing invoice"
+  },
+  "limits": [
+    "One comparator/one round in OEM remote lab; no retail Infinix control",
+    "No same-ROM lab-on/lab-off experiment",
+    "No secure PIN, long natural Doze, auditory or product +5-minute PASS",
+    "No proof of intentional provider alarm block; vendor Hiber block observed but policy origin unresolved",
+    "Existing manufacturer PASS unchanged; earlier 30 workspace/source-manifest differences preserved"
+  ],
+  "next": "For causal separation use a retail device (prefer same model/ROM) with both apps separately, screen off and ADB disconnected, or obtain official lab/OEM policy explanation. No further identical paid session planned. Help wording discussion remains; user prohibited help-code implementation.",
+  "source_code_changed": false,
+  "builds_or_critical_release_retests": "Not run: no product code change or affected completed PASS",
+  "sources": [
+    {
+      "url": "https://sleep.urbandroid.org/more/download/",
+      "finding": "Developer official direct APK source; version 20260923 downloaded and signature verified."
+    },
+    {
+      "url": "https://sleep.urbandroid.org/docs/faqs/alarms_not_ringing.html",
+      "finding": "Developer documents missed/delayed alarms and battery management; does not prove this ROM works."
+    },
+    {
+      "url": "https://developer.android.com/studio/run/android-device-streaming",
+      "finding": "Physical remote devices and OEM-operated labs. No explicit blanket alarm block found in reviewed documentation; absence of documentation does not exclude lab influence."
+    },
+    {
+      "url": "https://play.google.com/store/apps/details?hl=ar&id=com.urbandroid.sleep",
+      "finding": "2023-08-31 first-person review by Hussain IQ reports alarms not ringing at set time after moving from Samsung A520 to Infinix Note 30; developer asks for bug report. Anecdotal, older/different model, no verified Hiber cause."
+    },
+    {
+      "url": "https://sleep.urbandroid.org/docs/sleep/sleep_tracking.html",
+      "finding": "Sleep tracking has distinct sensor and periodic wake behavior. This session tested ordinary alarms without tracking; cannot generalize to all operating modes."
+    },
+    {
+      "url": "https://developer.android.com/reference/android/provider/AlarmClock",
+      "finding": "Public ACTION_SET_ALARM used with UI confirmation, hour/minute/message; actual Save and OS target checked."
+    }
+  ],
+  "archive": {
+    "path": "artifacts/streaming_free_2026_10_08/infinix_control1_evidence.zip",
+    "bytes": 8656513,
+    "sha256": "9cfcf4ddc00cbb002017bd679b975c3f902cc72a46d66c1a59f44a1c475a4f2e",
+    "testzip": "PASS"
+  }
+}

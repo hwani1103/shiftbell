@@ -346,7 +346,7 @@ class _ScheduleManagementTabState extends ConsumerState<_KoreanScheduleManagemen
     if (!_tutorialChecked) {
       _tutorialChecked = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) maybeShowScheduleTabTutorial(context);
+        if (mounted && ref.read(optionalTabActivationProvider) == null) maybeShowScheduleTabTutorial(context);
       });
     }
 

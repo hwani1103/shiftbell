@@ -12,7 +12,7 @@ Set<String> _dashboardCustomEvents() {
   final re = RegExp(r"^\s+([a-z][a-z0-9_]*): \{[^\n]*group: '([^']+)'", multiLine: true);
   return {
     for (final m in re.allMatches(src))
-      if (m.group(2) != 'system') m.group(1)!,
+      if (m.group(2) != 'system' && !m.group(0)!.contains('retired: true')) m.group(1)!,
   };
 }
 

@@ -50,8 +50,22 @@ def audit(root):
     snapshot = root / 'docs/next_version/후속재점검_2026-10-05/시작_자료.json'
     if snapshot.exists():
         original = json.loads(snapshot.read_text('utf-8'))['arbs']['ko']
+        # Preserve the original review snapshot. Later user-requested edits have
+        # an exact before/after ledger, rather than disabling copy preservation.
+        changes = {}
+        for copy_ledger in sorted((root / 'docs/next_version/evidence').glob('settings_copy_changes_2026_10_08*.json')):
+            for key, change in json.loads(copy_ledger.read_text('utf-8'))['changes'].items():
+                if key in changes:
+                    if change['before'] != changes[key]['after']:
+                        report['errors'].append([key, 'Korean copy follow-up ledger mismatch'])
+                    changes[key] = {'before': changes[key]['before'], 'after': change['after']}
+                else:
+                    changes[key] = change
+        for key, change in changes.items():
+            if key not in scoped_keys or change['before'] != original.get(key) or change['after'] != korean_only.get(key):
+                report['errors'].append([key, 'Korean copy change ledger mismatch'])
         for key in scoped_keys:
-            if original.get(key) != korean_only[key]:
+            if original.get(key) != korean_only[key] and key not in changes:
                 report['errors'].append([key, 'Korean scoped text changed'])
         report['korean_preserved_scoped_messages'] = len(scoped_keys)
     report['native_korean_only_messages'] = len(native_scoped)

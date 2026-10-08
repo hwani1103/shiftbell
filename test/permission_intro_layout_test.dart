@@ -65,9 +65,12 @@ void main() {
 
           expect(tester.takeException(), isNull);
           final screen = Offset.zero & size;
+          final l = lookupAppLocalizations(locale);
+          // The shared permission panel also has a troubleshooting TextButton.
+          // Exercise the onboarding actions rather than counting every button.
           for (final button in [
-            find.byType(ElevatedButton),
-            find.byType(TextButton)
+            find.widgetWithText(ElevatedButton, l.commonNext),
+            find.widgetWithText(TextButton, l.commonNotNow)
           ]) {
             expect(button, findsOneWidget);
             await tester.ensureVisible(button);
@@ -80,11 +83,10 @@ void main() {
                 reason: '버튼이 화면 밖으로 밀려남: $rect');
           }
           // The actual warning dialog was missing from the older layout matrix.
-          await tester.tap(find.byType(TextButton));
+          await tester.tap(find.widgetWithText(TextButton, l.commonNotNow));
           await tester.pumpAndSettle();
           expect(find.byType(AlertDialog), findsOneWidget);
           expect(tester.takeException(), isNull);
-          final l = lookupAppLocalizations(locale);
           final next = find.widgetWithText(TextButton, l.commonContinue);
           await tester.ensureVisible(next);
           expect(next.hitTestable(), findsOneWidget);

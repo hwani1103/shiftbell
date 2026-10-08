@@ -32,9 +32,9 @@ class AlarmOverlayService : Service() {
         super.onConfigurationChanged(newConfig)
         val view = overlayView ?: return
         if (!isOverlayVisible) return
-        // Reinflate from the new bounded font configuration; keep the active
+        // Reinflate from the fixed font configuration; keep the active
         // ring and its original timeout untouched while the window changes.
-        if (view.resources.configuration.fontScale != newConfig.fontScale.coerceAtMost(AppTextScale.MAX_SCALE) ||
+        if (view.resources.configuration.fontScale != AppTextScale.MAX_SCALE ||
             overlayLocale != newConfig.locales.toLanguageTags()) {
             loadAlarmInfo()
             removeOverlay()

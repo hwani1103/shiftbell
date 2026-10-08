@@ -1,0 +1,293 @@
+{
+  "date_kst": "2026-10-08",
+  "model": "realme C53/RE58C2/RMX3760 Android15",
+  "project": "logit-e63e1",
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "charged_usd": 0,
+  "product_source_changed": false,
+  "R1": "PASS actual overlay ON/granted ->Back app ->OFF/denied ->Back app",
+  "R2": {
+    "status": "PASS",
+    "fixture": "DB schedule/templates plus assigned holiday, skip and type override. Not new UI registration proof.",
+    "before_count": 7,
+    "after_count": 8,
+    "first_midnight_guard_delay_ms": 30,
+    "refresh_complete_delay_ms": 295,
+    "kept_existing_ids_and_epochs": true,
+    "device_asleep": true,
+    "app_inactive": true,
+    "no_clock_change_during_boundary_wait": true,
+    "verdict": {
+      "midnight_before": {
+        "count": 7,
+        "expected": [
+          {
+            "date": "2026-10-08",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-11",
+            "time": "09:00",
+            "type": 9081009
+          },
+          {
+            "date": "2026-10-12",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-13",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-14",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-15",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-16",
+            "time": "09:00",
+            "type": 3
+          }
+        ],
+        "matches": true,
+        "exceptions_preserved": true
+      },
+      "midnight_after": {
+        "count": 8,
+        "expected": [
+          {
+            "date": "2026-10-08",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-11",
+            "time": "09:00",
+            "type": 9081009
+          },
+          {
+            "date": "2026-10-12",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-13",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-14",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-15",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-16",
+            "time": "09:00",
+            "type": 3
+          },
+          {
+            "date": "2026-10-17",
+            "time": "09:00",
+            "type": 3
+          }
+        ],
+        "matches": true,
+        "exceptions_preserved": true
+      },
+      "existing_rows_preserved": true
+    }
+  },
+  "clock_original": {
+    "epoch": 1791417966,
+    "monotonic": 89326.421,
+    "timezone": "America/Los_Angeles",
+    "auto_time": "1",
+    "auto_time_zone": "1",
+    "target_ms": 1791442680000
+  },
+  "clock_restored": {
+    "epoch": 1791418222,
+    "expected": 1791418211344,
+    "auto_time": "1",
+    "timezone": "America/Los_Angeles"
+  },
+  "comparisons": {
+    "midnight_before": {
+      "label": "midnight_before",
+      "timezone": "America/Los_Angeles",
+      "rows": [
+        {
+          "id": 1,
+          "epoch": 1791475200000,
+          "time": "09:00"
+        },
+        {
+          "id": 2,
+          "epoch": 1791734400000,
+          "time": "09:00"
+        },
+        {
+          "id": 3,
+          "epoch": 1791820800000,
+          "time": "09:00"
+        },
+        {
+          "id": 4,
+          "epoch": 1791907200000,
+          "time": "09:00"
+        },
+        {
+          "id": 5,
+          "epoch": 1791993600000,
+          "time": "09:00"
+        },
+        {
+          "id": 6,
+          "epoch": 1792080000000,
+          "time": "09:00"
+        },
+        {
+          "id": 7,
+          "epoch": 1792166400000,
+          "time": "09:00"
+        }
+      ],
+      "expected": [
+        1791475200000,
+        1791734400000,
+        1791820800000,
+        1791907200000,
+        1791993600000,
+        1792080000000,
+        1792166400000
+      ],
+      "actual": [
+        1791475200000,
+        1791734400000,
+        1791820800000,
+        1791907200000,
+        1791993600000,
+        1792080000000,
+        1792166400000
+      ],
+      "match": true
+    },
+    "midnight_after": {
+      "label": "midnight_after",
+      "timezone": "America/Los_Angeles",
+      "rows": [
+        {
+          "id": 1,
+          "epoch": 1791475200000,
+          "time": "09:00"
+        },
+        {
+          "id": 2,
+          "epoch": 1791734400000,
+          "time": "09:00"
+        },
+        {
+          "id": 3,
+          "epoch": 1791820800000,
+          "time": "09:00"
+        },
+        {
+          "id": 4,
+          "epoch": 1791907200000,
+          "time": "09:00"
+        },
+        {
+          "id": 5,
+          "epoch": 1791993600000,
+          "time": "09:00"
+        },
+        {
+          "id": 6,
+          "epoch": 1792080000000,
+          "time": "09:00"
+        },
+        {
+          "id": 7,
+          "epoch": 1792166400000,
+          "time": "09:00"
+        },
+        {
+          "id": 8,
+          "epoch": 1792252800000,
+          "time": "09:00"
+        }
+      ],
+      "expected": [
+        1791475200000,
+        1791734400000,
+        1791820800000,
+        1791907200000,
+        1791993600000,
+        1792080000000,
+        1792166400000,
+        1792252800000
+      ],
+      "actual": [
+        1791475200000,
+        1791734400000,
+        1791820800000,
+        1791907200000,
+        1791993600000,
+        1792080000000,
+        1792166400000,
+        1792252800000
+      ],
+      "match": true,
+      "previous_target_overlap": [
+        1791475200000,
+        1791734400000,
+        1791820800000,
+        1791907200000,
+        1791993600000,
+        1792080000000,
+        1792166400000
+      ]
+    }
+  },
+  "session": {
+    "name": "realme",
+    "project": "logit-e63e1",
+    "model": "RE58C2/35",
+    "cap_seconds": 840,
+    "requested_epoch": 1791417549.3390121,
+    "install_limit_seconds": 240,
+    "first_evidence_limit_seconds": 480,
+    "reservation": "e0uys0ix9g7ea",
+    "reserved_epoch": 1791417559.4604738,
+    "serial": "localhost:9294",
+    "connected_epoch": 1791417591.7489147,
+    "release_reason": "requested return",
+    "released": true,
+    "finished_epoch": 1791418241.3890889,
+    "conservative_seconds": 692.0500767230988
+  },
+  "cleanup": {
+    "alarm_rows": 0,
+    "active_os_custom_alarm_count": 0,
+    "uninstalled": true,
+    "test_pin_retained": false,
+    "screen_timeout_restored": false
+  },
+  "service_reservations_after_return": 0,
+  "zip": "artifacts/streaming_free_2026_10_08/realme_evidence.zip",
+  "sha256": "df48c7dff101b2e459edcf3c64b1c56c36f34699091adcbd126c3352356aef14",
+  "limits": "Previous complete core retained. Only overlay and first natural midnight were tested. Synthetic schedule/exception fixture, real natural midnight under screen OFF; no prolonged Doze claim. Cleanup VM timed out while asleep, DB still8 verified; awake cleanup succeeded before restoring clock and uninstall."
+}

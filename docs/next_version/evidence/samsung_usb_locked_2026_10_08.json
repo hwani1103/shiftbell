@@ -1,0 +1,181 @@
+{
+  "date": "2026-10-08 KST",
+  "device": "SM-S948N / Android16 API36 / USB",
+  "package": "com.hwani1103.shiftbell.dev",
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "database_version": 29,
+  "source_files_unchanged": 430,
+  "release_built": false,
+  "product_code_changed": false,
+  "S1_A01": {
+    "id": "M-S.S1 / A01",
+    "status": "PASS representative USB natural +5",
+    "date": "2026-10-08 KST",
+    "alarm_id": 218,
+    "round": 89,
+    "target_ms": 1791386254000,
+    "receiver_delay_ms": 16,
+    "target_to_presented_ms": 479,
+    "receiver_to_presented_ms": 463,
+    "fired_log": "2026-10-08T00:17:34.016+0900 | ALARM_FIRED | id=218 delayMs=16 decision=RING screenOn=false",
+    "presented_log": "10-08 00:17:34.479 24523 24523 I AlarmActivity: RING_PRESENTED id=218 round=89 display=0 locked=true",
+    "actual_button_minutes": 5,
+    "initial_registration": "VM fixture, not UI registration proof",
+    "charging": true,
+    "secure": true,
+    "showing": true,
+    "screen_on_at_receive": false,
+    "sleep_state_before": "Dozing (AOD), not natural deep Doze",
+    "audio": "silent; no audio/haptic subjective assertion",
+    "guard_boundary_shift": true,
+    "source_image": "s1_natural_fired.png",
+    "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e"
+  },
+  "A04_natural15": {
+    "id": "A04 natural+15",
+    "status": "PASS",
+    "alarm_id": 218,
+    "round": 90,
+    "actual_selection_minutes": 15,
+    "actual_ui_select_plus_taps": 2,
+    "db_history_15_rows": 1,
+    "target_ms": 1791387259000,
+    "os_target_ms": 1791387259000,
+    "receiver_delay_ms": 18,
+    "target_to_presented_ms": 499,
+    "receiver_to_presented_ms": 481,
+    "locked": true,
+    "screen_on_at_receive": false,
+    "actual_x_dismiss": true,
+    "db_dismiss_type": "swiped",
+    "fired_log": "2026-10-08T00:34:19.018+0900 | ALARM_FIRED | id=218 delayMs=18 decision=RING screenOn=false",
+    "presented_log": "10-08 00:34:19.499 24523 24523 I AlarmActivity: RING_PRESENTED id=218 round=90 display=0 locked=true",
+    "no_product_alarm_rows_after_dismiss": true,
+    "default_change_and_file_restore": "PASS in subsequent evidence"
+  },
+  "A04_history_default_change": "Actual history UI 5/15 labels; default UI changed to10, process restart, default10 persisted and history15 retained. Default restored to5 before backup.",
+  "A04_known15_actual_SAF_restore": {
+    "all_17_tables_identical": true,
+    "known15_count": 1,
+    "total_history": 62,
+    "duplicate_added": 0,
+    "main_route_pending_screenshot": false
+  },
+  "A04_interrupted_resume": {
+    "actual_process_kill_phase": "osCleared",
+    "actual_resume_button": true,
+    "all17_tables_equal": true,
+    "history15_once": true,
+    "gate_empty": true,
+    "job_and_copy_removed": true
+  },
+  "A04_interrupted_keep_current": {
+    "actual_process_kill_phase": "osCleared",
+    "actual_keep_current_button": true,
+    "all17_tables_equal": true,
+    "history15_once": true,
+    "gate_empty": true,
+    "job_and_copy_removed": true
+  },
+  "interrupt_method": "Real UI SAF restore paused at osCleared via debugger breakpoint, durable job/gate captured, actual am force-stop then launch, actual respective recovery button. No product code or return values modified. No live alarms during restore.",
+  "A02_probe_tool_smoke": [
+    {
+      "mode": "alarm_clock",
+      "scheduled": {
+        "event": "scheduled",
+        "mode": "alarm_clock",
+        "targetMs": 1791387345509,
+        "wallMs": 1791387315511,
+        "elapsedMs": 27670153,
+        "interactive": true,
+        "delayMs": -29998
+      },
+      "fired": [
+        {
+          "event": "fired",
+          "mode": "alarm_clock",
+          "targetMs": 1791387345509,
+          "wallMs": 1791387345532,
+          "elapsedMs": 27700174,
+          "interactive": false,
+          "delayMs": 23
+        }
+      ],
+      "scope": "USB diagnostic tool smoke only; not XOS diagnosis, Doze or production alarm PASS"
+    },
+    {
+      "mode": "allow_idle",
+      "scheduled": {
+        "event": "scheduled",
+        "mode": "allow_idle",
+        "targetMs": 1791387415616,
+        "wallMs": 1791387385621,
+        "elapsedMs": 27740263,
+        "interactive": false,
+        "delayMs": -29995
+      },
+      "fired": [
+        {
+          "event": "fired",
+          "mode": "allow_idle",
+          "targetMs": 1791387415616,
+          "wallMs": 1791387415632,
+          "elapsedMs": 27770274,
+          "interactive": false,
+          "delayMs": 16
+        }
+      ],
+      "scope": "USB diagnostic tool smoke only; not XOS diagnosis, Doze or production alarm PASS"
+    }
+  ],
+  "cleanup": {
+    "all17_tables_equal_to_original": true,
+    "history": 58,
+    "memos": 15,
+    "test_alarms_remaining": 0,
+    "native_product_or_probe_reservations": 0,
+    "default_snooze_restored": 5,
+    "system_settings_equal": [
+      "locale",
+      "system_locale",
+      "time_format",
+      "stay",
+      "timeout",
+      "zone",
+      "auto_time",
+      "auto_zone",
+      "volume"
+    ],
+    "backups": [
+      {
+        "kind": "manual",
+        "file": "ShiftBell_Backup_dev_manual_261008_005353.json",
+        "sha256": "f187375771f3aaec2f436cef540c1e5643c4f8d86cbdda116d6974a1f589df9f",
+        "all_exported_tables_equal_baseline": true
+      },
+      {
+        "kind": "auto",
+        "file": "ShiftBell_Backup_dev_auto_261008_005353.json",
+        "sha256": "771cd2be1a2c7f89639df7a015173ea927a83610b32bda90b20ef8fae2a30623",
+        "all_exported_tables_equal_baseline": true
+      }
+    ],
+    "synthetic_known15_backup_removed_by_manual_slot_rotation": true
+  },
+  "tool_limitations": [
+    "First fixture217 timed out while UIAutomator could not dump animated locked alarm UI. Preserved as harness failure; successful actual +5 used218. Screenshots/native evidence used thereafter.",
+    "Animated locked alarm XML unavailable; screenshots, native ring state, same ID/target receiver/presentation logs jointly prove display.",
+    "Dismiss X is stored as swiped by current contract; initial harness expected dismissed and was corrected, not a product failure.",
+    "SAF search result sometimes needed a second fresh-row tap. One owned current manual/auto slot was verified; older preexisting unowned backup files were preserved.",
+    "USB charging/AOD, silent fixture; not subjective sound/vibration, natural deep Doze, or manufacturer-wide proof."
+  ],
+  "remaining": "Core A03 real UMP, A05 old APIs/boundaries, A06 active/pinned/fresh edges, A07 regional/DST/remote holiday edges, A08 natural overnight/human/cover and other OEM rows remain. SRTL prod loading and direct DB23->29 added by user for this session.",
+  "baseline_archive": "artifacts/samsung_usb_unlocked_2026_10_07/evidence.zip",
+  "evidence_archive": {
+    "path": "artifacts/samsung_usb_locked_2026_10_08/evidence.zip",
+    "sha256": "5c8767bc0722c741685fe14398a8502d7c395e054c0e5eb818c4872dc2e41af2",
+    "bytes": 8119703,
+    "files": 260,
+    "kind": "delta from preserved unlocked archive; both archives required"
+  }
+}

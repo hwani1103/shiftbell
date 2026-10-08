@@ -5,7 +5,8 @@
 //
 // ⭐ 미리보기는 "그냥 이미지처럼" 보여주면 된다는 요청대로 반응형 상호작용은
 // 다 꺼두지만(IgnorePointer), 실제 그림 자체는 새로 그리지 않고
-// CalendarThemeLabScreen(=calendar_theme_lab_screen.dart, 9개 테마를 이미
+// 한국어 튜닝 테마는 실제 CalendarTab을 격리된 테마 상태로 미리 보여주며,
+// 나머지는 CalendarThemeLabScreen(=calendar_theme_lab_screen.dart, 9개 테마를 이미
 // 전부 구현해둔 그 화면)을 initialPage로 원하는 테마에 바로 진입시켜서 그대로
 // 재사용함 - "코드를 가져다 써, 새로 만들지 마라"는 원칙 그대로 지킴.
 // FittedBox로 실제 기기 크기 그대로 그려진 화면을 카드 크기에 맞게 축소해서
@@ -20,6 +21,8 @@ import '../models/shift_schedule.dart';
 import '../providers/calendar_theme_provider.dart';
 import '../providers/schedule_provider.dart';
 import 'calendar_theme_lab_screen.dart';
+import 'calendar_tab.dart';
+import '../theme/app_theme.dart';
 import '../widgets/fold_calendar_text_scale.dart';
 
 class CalendarThemePickerScreen extends ConsumerStatefulWidget {
@@ -32,10 +35,12 @@ class CalendarThemePickerScreen extends ConsumerStatefulWidget {
   const CalendarThemePickerScreen({super.key, this.onApplied});
 
   @override
-  ConsumerState<CalendarThemePickerScreen> createState() => _CalendarThemePickerScreenState();
+  ConsumerState<CalendarThemePickerScreen> createState() =>
+      _CalendarThemePickerScreenState();
 }
 
-class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerScreen> {
+class _CalendarThemePickerScreenState
+    extends ConsumerState<CalendarThemePickerScreen> {
   // ⭐ viewportFraction < 1이라 좌우 카드가 살짝 보임 - 그 여백에 AnimatedBuilder로
   // 스케일/높이를 계산해서 "가운데 크게, 양옆 작고 살짝 위로 뜬" 원근감을 냄.
   late final PageController _pageController;
@@ -50,14 +55,17 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
     final language = Localizations.localeOf(context).languageCode;
     if (_controllerReady && language == _language) return;
     _language = language;
-    final current = context.availableCalendarTheme(ref.read(calendarThemeProvider));
+    final current =
+        context.availableCalendarTheme(ref.read(calendarThemeProvider));
     _previewIndex = _themes.indexOf(current);
     if (!_controllerReady) {
       _controllerReady = true;
-      _pageController = PageController(viewportFraction: 0.62, initialPage: _previewIndex);
+      _pageController =
+          PageController(viewportFraction: 0.62, initialPage: _previewIndex);
     } else {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _pageController.hasClients) _pageController.jumpToPage(_previewIndex);
+        if (mounted && _pageController.hasClients)
+          _pageController.jumpToPage(_previewIndex);
       });
     }
   }
@@ -70,116 +78,132 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
 
   @override
   Widget build(BuildContext context) {
-    final selected = context.availableCalendarTheme(ref.watch(calendarThemeProvider));
+    final selected =
+        context.availableCalendarTheme(ref.watch(calendarThemeProvider));
     final deviceSize = MediaQuery.sizeOf(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.calendarTheme, style: TextStyle(fontSize: 18.sp))),
+      appBar: AppBar(
+          title: Text(context.l10n.calendarTheme,
+              style: TextStyle(fontSize: 18.sp))),
       // ⭐ "적용 버튼이 SafeArea를 안 받아서 제스처 네비게이션 바에 가깝다"는
       // 피드백 - body 전체를 SafeArea로 감싸서 하단 버튼이 항상 안전영역
       // 안쪽에 오게 함.
       body: SafeArea(
         child: Column(
-        children: [
-          SizedBox(height: 12.h),
-          Text(
-            _themes[_previewIndex].label(context),
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            context.l10n.themeSwipeToChoose,
-            style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          ),
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: _themes.length,
-              onPageChanged: (i) => setState(() => _previewIndex = i),
-              itemBuilder: (context, index) {
-                return AnimatedBuilder(
-                  animation: _pageController,
-                  builder: (context, child) {
-                    // ⭐ 현재 페이지와의 거리로 원근감 계산 - 아직 컨트롤러가
-                    // 레이아웃 전이면(page가 null) initialPage 기준으로 계산.
-                    double page = _pageController.hasClients && _pageController.page != null
-                        ? _pageController.page!
-                        : _pageController.initialPage.toDouble();
-                    final distance = (page - index).clamp(-1.0, 1.0).abs();
-                    final scale = 1.0 - distance * 0.22; // 가운데 1.0 → 양옆 0.78
-                    final lift = distance * 26.h; // 양옆일수록 아래로(=가운데가 위로 뜸)
-                    return Transform.translate(
-                      offset: Offset(0, lift),
-                      child: Transform.scale(scale: scale, child: child),
-                    );
-                  },
-                  child: _themeCard(index, deviceSize, isSelected: _themes[index] == selected),
-                );
-              },
+          children: [
+            SizedBox(height: 12.h),
+            Text(
+              _themes[_previewIndex].label(context),
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
-          ),
-          SizedBox(height: 12.h),
-          Padding(
-            padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 20.h),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-                  final themeId = _themes[_previewIndex];
-                  await ref.read(calendarThemeProvider.notifier).setTheme(themeId);
-                  // ⭐ 위젯(Native)은 여전히 DB의 shift_colors 컬럼을 직접 읽으므로
-                  // (android/.../CalendarWidgetScheduleResolver.kt - 이 부분은 아직
-                  // 안 건드림, 네이티브 쪽까지 테마별로 다시 그리는 건 후속 작업),
-                  // 테마를 바꿀 때마다 새 팔레트로 계산한 색을 그 컬럼에도 그대로
-                  // 다시 써줘서 위젯과 실제 앱이 서로 다른 색을 보여주는 걸 막음.
-                  // updateSchedule()이 이미 DB 저장 + 위젯 갱신 신호까지 다 해주는
-                  // 기존 경로라 그대로 재사용함.
-                  final schedule = ref.read(scheduleProvider).value;
-                  if (schedule != null) {
-                    // ⭐ 테마별 전용 팔레트/로테이션(assignShiftColorsForTheme)을
-                    // 위젯 캐시에도 동일하게 반영 - 라이트/다크 두 팔레트만 있던
-                    // 시절의 assignShiftColors(isDark:)를 그대로 쓰면 위젯이
-                    // 실제 앱과 다른(구버전) 색을 보여주게 됨.
-                    // ⭐ 2026-08-19 "근무명 색상 변경" 기능 복원 - 예전엔 여기서
-                    // 테마 디폴트로 shiftColors를 통째로 덮어써서, 사용자가 직접
-                    // 지정한 색까지 테마를 바꿀 때마다 사라졌음. 이제
-                    // effectiveShiftColors()로 "테마 디폴트 위에 사용자 오버라이드
-                    // (customShiftColors)만 유지해서 합친" 값을 캐시에 써서, 사용자가
-                    // 지정한 근무만 테마가 바뀌어도 그 색 그대로 남게 함.
-                    final newColors = effectiveShiftColors(schedule.shiftTypes, themeId, schedule.customShiftColors)
-                        .map((name, color) => MapEntry(name, color.value));
-                    await ref.read(scheduleProvider.notifier).updateSchedule(ShiftSchedule(
-                      id: schedule.id,
-                      isRegular: schedule.isRegular,
-                      pattern: schedule.pattern,
-                      todayIndex: schedule.todayIndex,
-                      shiftTypes: schedule.shiftTypes,
-                      activeShiftTypes: schedule.activeShiftTypes,
-                      startDate: schedule.startDate,
-                      shiftColors: newColors,
-                      customShiftColors: schedule.customShiftColors,
-                      assignedDates: schedule.assignedDates,
-                      shiftDurations: schedule.shiftDurations,
-                    ));
-                  }
-                  if (!context.mounted) return;
-                  // ⭐ "적용 누르면 바로 메인 달력탭으로 넘어가게" 요청 - 스낵바로
-                  // 안내만 하고 이 화면에 계속 머무르는 대신, 설정 화면까지
-                  // 통째로 pop한 뒤 곧장 달력 탭으로 전환함.
-                  Navigator.pop(context);
-                  widget.onApplied?.call();
+            SizedBox(height: 4.h),
+            Text(
+              context.l10n.themeSwipeToChoose,
+              style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant),
+            ),
+            Expanded(
+              child: PageView.builder(
+                controller: _pageController,
+                itemCount: _themes.length,
+                onPageChanged: (i) => setState(() => _previewIndex = i),
+                itemBuilder: (context, index) {
+                  return AnimatedBuilder(
+                    animation: _pageController,
+                    builder: (context, child) {
+                      // ⭐ 현재 페이지와의 거리로 원근감 계산 - 아직 컨트롤러가
+                      // 레이아웃 전이면(page가 null) initialPage 기준으로 계산.
+                      double page = _pageController.hasClients &&
+                              _pageController.page != null
+                          ? _pageController.page!
+                          : _pageController.initialPage.toDouble();
+                      final distance = (page - index).clamp(-1.0, 1.0).abs();
+                      final scale = 1.0 - distance * 0.22; // 가운데 1.0 → 양옆 0.78
+                      final lift = distance * 26.h; // 양옆일수록 아래로(=가운데가 위로 뜸)
+                      return Transform.translate(
+                        offset: Offset(0, lift),
+                        child: Transform.scale(scale: scale, child: child),
+                      );
+                    },
+                    child: _themeCard(index, deviceSize,
+                        isSelected: _themes[index] == selected),
+                  );
                 },
-                style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14.h)),
-                child: Text(
-                  _themes[_previewIndex] == selected
-                      ? context.l10n.themeCurrentlyApplied
-                      : context.l10n.themeApplyThis,
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Padding(
+              padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 20.h),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final themeId = _themes[_previewIndex];
+                    await ref
+                        .read(calendarThemeProvider.notifier)
+                        .setTheme(themeId);
+                    // ⭐ 위젯(Native)은 여전히 DB의 shift_colors 컬럼을 직접 읽으므로
+                    // (android/.../CalendarWidgetScheduleResolver.kt - 이 부분은 아직
+                    // 안 건드림, 네이티브 쪽까지 테마별로 다시 그리는 건 후속 작업),
+                    // 테마를 바꿀 때마다 새 팔레트로 계산한 색을 그 컬럼에도 그대로
+                    // 다시 써줘서 위젯과 실제 앱이 서로 다른 색을 보여주는 걸 막음.
+                    // updateSchedule()이 이미 DB 저장 + 위젯 갱신 신호까지 다 해주는
+                    // 기존 경로라 그대로 재사용함.
+                    final schedule = ref.read(scheduleProvider).value;
+                    if (schedule != null) {
+                      // ⭐ 테마별 전용 팔레트/로테이션(assignShiftColorsForTheme)을
+                      // 위젯 캐시에도 동일하게 반영 - 라이트/다크 두 팔레트만 있던
+                      // 시절의 assignShiftColors(isDark:)를 그대로 쓰면 위젯이
+                      // 실제 앱과 다른(구버전) 색을 보여주게 됨.
+                      // ⭐ 2026-08-19 "근무명 색상 변경" 기능 복원 - 예전엔 여기서
+                      // 테마 디폴트로 shiftColors를 통째로 덮어써서, 사용자가 직접
+                      // 지정한 색까지 테마를 바꿀 때마다 사라졌음. 이제
+                      // effectiveShiftColors()로 "테마 디폴트 위에 사용자 오버라이드
+                      // (customShiftColors)만 유지해서 합친" 값을 캐시에 써서, 사용자가
+                      // 지정한 근무만 테마가 바뀌어도 그 색 그대로 남게 함.
+                      final newColors = effectiveShiftColors(
+                              schedule.shiftTypes,
+                              themeId,
+                              schedule.customShiftColors)
+                          .map((name, color) => MapEntry(name, color.value));
+                      await ref
+                          .read(scheduleProvider.notifier)
+                          .updateSchedule(ShiftSchedule(
+                            id: schedule.id,
+                            isRegular: schedule.isRegular,
+                            pattern: schedule.pattern,
+                            todayIndex: schedule.todayIndex,
+                            shiftTypes: schedule.shiftTypes,
+                            activeShiftTypes: schedule.activeShiftTypes,
+                            startDate: schedule.startDate,
+                            shiftColors: newColors,
+                            customShiftColors: schedule.customShiftColors,
+                            assignedDates: schedule.assignedDates,
+                            shiftDurations: schedule.shiftDurations,
+                          ));
+                    }
+                    if (!context.mounted) return;
+                    // ⭐ "적용 누르면 바로 메인 달력탭으로 넘어가게" 요청 - 스낵바로
+                    // 안내만 하고 이 화면에 계속 머무르는 대신, 설정 화면까지
+                    // 통째로 pop한 뒤 곧장 달력 탭으로 전환함.
+                    Navigator.pop(context);
+                    widget.onApplied?.call();
+                  },
+                  style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 14.h)),
+                  child: Text(
+                    _themes[_previewIndex] == selected
+                        ? context.l10n.themeCurrentlyApplied
+                        : context.l10n.themeApplyThis,
+                    style:
+                        TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
         ),
       ),
     );
@@ -199,7 +223,8 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
     // 실제로 적용되게 만드는 것" - Center로 한 번 감싸서 AspectRatio에게
     // loose 제약을 주면, 그제서야 진짜로 지정한 비율만큼만 스스로 크기를
     // 정하고 나머지 남는 세로 공간은 카드 밖(위/아래 여백)으로 자연스럽게 빠짐.
-    final navBarHeight = kBottomNavigationBarHeight + MediaQuery.paddingOf(context).bottom;
+    final navBarHeight =
+        kBottomNavigationBarHeight + MediaQuery.paddingOf(context).bottom;
     final bodyHeight = deviceSize.height - navBarHeight;
     // ⭐ "달력 이미지가 카드 테두리의 border radius를 침범한다"는 지적 -
     // 내용이 카드의 진짜 사각형 경계에 완전히 딱 붙어서 그려지면, 둥근 모서리
@@ -219,35 +244,61 @@ class _CalendarThemePickerScreenState extends ConsumerState<CalendarThemePickerS
         child: AspectRatio(
           aspectRatio: aspectRatio,
           child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(
-              color: isSelected ? Theme.of(context).colorScheme.primary : Colors.grey.shade300,
-              width: isSelected ? 2.5 : 1,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey.shade300,
+                width: isSelected ? 2.5 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4))
+              ],
             ),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.15), blurRadius: 10, offset: const Offset(0, 4))],
-          ),
-          clipBehavior: Clip.antiAlias,
-          // ⭐ 선택 표시는 우측 상단 체크 배지 대신(테마마다 헤더 버튼이 하필
-          // 그 자리에 있어서 겹쳐 가려지는 문제가 있었음) 카드 테두리 색/두께
-          // 차이 + 아래 "현재 적용된 테마" 버튼 문구만으로 충분히 구분되므로
-          // 배지 자체를 없앰 - 어떤 테마 헤더 디자인과도 절대 안 겹침.
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: bufferW, vertical: bufferH),
-            child: IgnorePointer(
-              child: FittedBox(
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-                child: SizedBox(
-                  width: deviceSize.width,
-                  height: bodyHeight,
-                  child: FoldCalendarTextScale(
-                    child: CalendarThemeLabScreen(initialPage: kAllCalendarThemeIds.indexOf(_themes[index]))),
+            clipBehavior: Clip.antiAlias,
+            // ⭐ 선택 표시는 우측 상단 체크 배지 대신(테마마다 헤더 버튼이 하필
+            // 그 자리에 있어서 겹쳐 가려지는 문제가 있었음) 카드 테두리 색/두께
+            // 차이 + 아래 "현재 적용된 테마" 버튼 문구만으로 충분히 구분되므로
+            // 배지 자체를 없앰 - 어떤 테마 헤더 디자인과도 절대 안 겹침.
+            child: Padding(
+              padding:
+                  EdgeInsets.symmetric(horizontal: bufferW, vertical: bufferH),
+              child: IgnorePointer(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: deviceSize.width,
+                    height: bodyHeight,
+                    child: FoldCalendarTextScale(
+                        child: !{
+                      CalendarThemeId.underline,
+                      CalendarThemeId.editorial,
+                    }.contains(_themes[index])
+                            ? ProviderScope(
+                                overrides: [
+                                    calendarThemeProvider.overrideWith((ref) =>
+                                        CalendarThemeNotifier.withInitial(
+                                            _themes[index]))
+                                  ],
+                                child: Theme(
+                                    data: _themes[index].isDark
+                                        ? AppTheme.darkTheme
+                                        : AppTheme.lightTheme,
+                                    child: const CalendarTab(preview: true)))
+                            : CalendarThemeLabScreen(
+                                preview: true,
+                                initialPage: kAllCalendarThemeIds
+                                    .indexOf(_themes[index]))),
+                  ),
                 ),
               ),
             ),
-          ),
           ),
         ),
       ),

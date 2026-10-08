@@ -1,3 +1,6 @@
+import '../widgets/app_button.dart';
+import '../widgets/app_second_button.dart';
+import '../widgets/settings_appearance.dart';
 import '../widgets/unavailable_feature.dart';
 import '../widgets/adaptive_layout.dart';
 // screens/my_share_code_screen.dart
@@ -30,14 +33,16 @@ class MyShareCodeScreen extends StatelessWidget {
   const MyShareCodeScreen({super.key});
   @override
   Widget build(BuildContext context) => context.usesKoreanFeatures
-      ? const _KoreanMyShareCodeScreen() : const UnavailableFeature();
+      ? const _KoreanMyShareCodeScreen()
+      : const UnavailableFeature();
 }
 
 class _KoreanMyShareCodeScreen extends ConsumerStatefulWidget {
   const _KoreanMyShareCodeScreen();
 
   @override
-  ConsumerState<_KoreanMyShareCodeScreen> createState() => _MyShareCodeScreenState();
+  ConsumerState<_KoreanMyShareCodeScreen> createState() =>
+      _MyShareCodeScreenState();
 }
 
 class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
@@ -69,7 +74,8 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
     final enabled = shareState.isActive;
     final savedName = await FriendSyncService.instance.savedMyName();
     if (!mounted || !context.usesKoreanFeatures) return;
-    final ownerId = enabled ? await FriendSyncService.instance.getOrCreateOwnerId() : null;
+    final ownerId =
+        enabled ? await FriendSyncService.instance.getOrCreateOwnerId() : null;
     if (!mounted || !context.usesKoreanFeatures) return;
     setState(() {
       _shareState = shareState;
@@ -98,7 +104,8 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
     if (name.isEmpty || name == _savedName) return;
     final schedule = ref.read(scheduleProvider).value;
     if (schedule == null) return;
-    final ok = await FriendSyncService.instance.updateMyName(newName: name, schedule: schedule);
+    final ok = await FriendSyncService.instance
+        .updateMyName(newName: name, schedule: schedule);
     final after = await FriendSyncService.instance.getShareState();
     if (!mounted || !context.usesKoreanFeatures) return;
     setState(() => _shareState = after);
@@ -146,7 +153,8 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
 
     setState(() => _working = true);
     try {
-      final ownerId = await FriendSyncService.instance.startSharing(schedule: schedule, ownerName: name);
+      final ownerId = await FriendSyncService.instance
+          .startSharing(schedule: schedule, ownerName: name);
       if (!mounted || !context.usesKoreanFeatures) return;
       if (ownerId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -172,16 +180,22 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
     if (!context.usesKoreanFeatures) return;
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => !context.usesKoreanFeatures ? const UnavailableFeature() : AlertDialog(
-        title: Text(context.koOnly.friendStopSharing),
-        content: Text(
-          '${context.koOnly.friendStopSharingConfirm}\n\n${context.koOnly.friendRestartSharingHint}',
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.commonCancel)),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.koOnly.friendStopSharingAction)),
-        ],
-      ),
+      builder: (context) => !context.usesKoreanFeatures
+          ? const UnavailableFeature()
+          : AlertDialog(
+              title: Text(context.koOnly.friendStopSharing),
+              content: Text(
+                '${context.koOnly.friendStopSharingConfirm}\n\n${context.koOnly.friendRestartSharingHint}',
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: Text(context.l10n.commonCancel)),
+                TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(context.koOnly.friendStopSharingAction)),
+              ],
+            ),
     );
     if (confirm != true) return;
 
@@ -206,11 +220,13 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
     if (!context.usesKoreanFeatures) return;
     setState(() => _working = true);
     try {
-      await FriendSyncService.instance.retryPending(ref.read(scheduleProvider).value);
+      await FriendSyncService.instance
+          .retryPending(ref.read(scheduleProvider).value);
       final after = await FriendSyncService.instance.getShareState();
       if (!mounted || !context.usesKoreanFeatures) return;
       setState(() => _shareState = after);
-      if ((after.isActive && after.dirty) || after.intent == FriendShareIntent.stopPending) {
+      if ((after.isActive && after.dirty) ||
+          after.intent == FriendShareIntent.stopPending) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.koOnly.friendSyncPendingToast)),
         );
@@ -246,10 +262,14 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.sync, size: 18.sp, color: colorScheme.onSecondaryContainer),
+              Icon(Icons.sync,
+                  size: 18.sp, color: colorScheme.onSecondaryContainer),
               SizedBox(width: 8.w),
               Expanded(
-                child: Text(message, style: TextStyle(fontSize: 12.5.sp, color: colorScheme.onSecondaryContainer)),
+                child: Text(message,
+                    style: TextStyle(
+                        fontSize: 12.5.sp,
+                        color: colorScheme.onSecondaryContainer)),
               ),
             ],
           ),
@@ -267,7 +287,8 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
 
   void _copy(String text, String message) {
     Clipboard.setData(ClipboardData(text: text));
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   String get _code => FriendShareService.encodeOwnerId(_ownerId!);
@@ -283,7 +304,8 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
   // 것으로 확인됨(실사용자 테스트로 재현: 카톡에서 탭하면 열리지만, 그 링크를
   // 복사해서 다른 브라우저에 붙여넣으면 "https://.../"까지만 남고 code 자체가
   // 사라짐). Uri.encodeQueryComponent로 콜론을 %3A로 이스케이프해서 원천 차단.
-  String get _webViewLink => '$kWebViewBaseUrl/?code=${Uri.encodeQueryComponent(_code)}';
+  String get _webViewLink =>
+      '$kWebViewBaseUrl/?code=${Uri.encodeQueryComponent(_code)}';
 
   void _shareCode() {
     final name = _nameController.text.trim();
@@ -291,137 +313,179 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     if (!context.usesKoreanFeatures) return const UnavailableFeature();
     if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(title: Text(context.koOnly.friendShareMyScheduleTitle, style: TextStyle(fontSize: 18.sp))),
-      body: AdaptiveFormBody(child: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ⭐ 순서 개편(2026-08-17): 뭐가 공유되는지 설명이 먼저 나오고,
-                  // 그 다음에 "친구에게 보여줄 이름" 섹션(다른 섹션들 - 내 공유
-                  // 코드/앱 설치 없이 공유하기 - 과 똑같이 굵은 제목 + 내용 구조로
-                  // 통일)이 오도록 재배치함. 예전엔 필드가 맨 위에 있고 설명이 그
-                  // 아래, 제목 없이 placeholder만 있었음.
-                  Text(
-                    '${context.koOnly.friendShareIncludesSchedule}\n${context.koOnly.friendShareExcludesExtras}',
-                    style: TextStyle(fontSize: 12.sp, color: colorScheme.onSurfaceVariant),
-                  ),
-                  SizedBox(height: 20.h),
-                  Text(context.koOnly.friendDisplayNameTitle, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                  SizedBox(height: 8.h),
-                  // ⭐ 예전엔 공유 시작 후 이 필드가 비활성화돼서 이름을 못 바꿨음 -
-                  // 이제 언제든 편집 가능하고, 포커스를 빠져나가면(_maybeSaveName)
-                  // 공유 중일 땐 바로 Firestore에도 반영됨.
-                  TextField(
-                    controller: _nameController,
-                    focusNode: _nameFocusNode,
-                    // ⭐ 2026-09-14 (교차 검토 X-11) - 공유 문서의 이름 길이 제한과 같게
-                    maxLength: FriendScheduleData.maxOwnerNameLength,
-                    decoration: InputDecoration(
-                      hintText: context.koOnly.friendEnterDisplayName,
-                      counterText: '',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                    ),
-                    style: TextStyle(fontSize: 14.sp),
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _maybeSaveName(),
-                  ),
-                  SizedBox(height: 24.h),
-                  if (_pendingBanner(colorScheme) case final banner?) banner,
-                  if (!_sharingEnabled)
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _working ? null : _startSharing,
-                        style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14.h)),
-                        child: _working
-                            ? SizedBox(width: 18.w, height: 18.w, child: const CircularProgressIndicator(strokeWidth: 2))
-                            : Text(context.koOnly.friendStartSharing, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+      appBar: AppBar(
+          title: Text(context.koOnly.friendShareMyScheduleTitle,
+              style: TextStyle(fontSize: 18.sp))),
+      body: AdaptiveFormBody(
+          child: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  padding: EdgeInsets.all(20.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ⭐ 순서 개편(2026-08-17): 뭐가 공유되는지 설명이 먼저 나오고,
+                      // 그 다음에 "친구에게 보여줄 이름" 섹션(다른 섹션들 - 내 공유
+                      // 코드/앱 설치 없이 공유하기 - 과 똑같이 굵은 제목 + 내용 구조로
+                      // 통일)이 오도록 재배치함. 예전엔 필드가 맨 위에 있고 설명이 그
+                      // 아래, 제목 없이 placeholder만 있었음.
+                      Text(
+                        '${context.koOnly.friendShareIncludesSchedule}\n${context.koOnly.friendShareExcludesExtras}',
+                        style: TextStyle(
+                            fontSize: 12.sp,
+                            color: colorScheme.onSurfaceVariant),
                       ),
-                    )
-                  else if (_ownerId == null)
-                    // ⭐ 공유는 켜져 있는데 이번 로드에서 익명 로그인이 실패한 경우
-                    // (오프라인 등) - _ownerId!를 그대로 쓰면 크래시라 별도 안내로 방어.
-                    Container(
-                      padding: EdgeInsets.all(12.w),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.errorContainer,
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.sync_problem, size: 18.sp, color: Theme.of(context).colorScheme.onErrorContainer),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: Text(
-                              context.koOnly.friendConnectionFailed,
-                              style: TextStyle(fontSize: 12.5.sp, color: Theme.of(context).colorScheme.onErrorContainer),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  else ...[
-                    Text(context.koOnly.friendMyShareCode, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                    SizedBox(height: 8.h),
-                    _CopyBox(text: _code, monospace: true, onCopy: () => _copy(_code, context.koOnly.friendCodeCopied)),
-                    SizedBox(height: 6.h),
-                    Text(
-                      context.koOnly.friendShareCodeInstructions,
-                      style: TextStyle(fontSize: 11.5.sp, color: colorScheme.onSurfaceVariant),
-                    ),
-                    SizedBox(height: 16.h),
-                    Text(context.koOnly.friendShareWithoutApp, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),
-                    SizedBox(height: 8.h),
-                    _CopyBox(text: _webViewLink, onCopy: () => _copy(_webViewLink, context.koOnly.friendLinkCopied)),
-                    SizedBox(height: 6.h),
-                    // ⭐ 설치 유도 문구(friendInstallShortcutHint)는 삭제 - 이제 웹
-                    // 링크 자체에서(카톡 등 인앱 브라우저면 삼성 인터넷으로 자동 이동
-                    // + 그 화면에서 안내) 보여주므로 여기서 중복 설명할 필요 없음.
-                    Text(
-                      context.koOnly.friendShareLinkHint,
-                      style: TextStyle(fontSize: 11.5.sp, color: colorScheme.onSurfaceVariant),
-                    ),
-                    SizedBox(height: 20.h),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: _shareCode,
-                        icon: Icon(Icons.share, size: 18.sp),
-                        label: Text(context.koOnly.commonShare, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
-                        style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 14.h)),
-                      ),
-                    ),
-                    // ⭐ "공유 중지"를 공유하기 버튼과 더 떨어뜨리고(실수 클릭 방지),
-                    // 텍스트 링크가 아니라 빨간 배경의 진짜 버튼으로(공유하기와 같은
-                    // border radius) - "너무 밋밋해서 눈에 안 띈다"는 피드백.
-                    SizedBox(height: 20.h),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: ElevatedButton(
-                        onPressed: _working ? null : _stopSharing,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colorScheme.errorContainer,
-                          foregroundColor: colorScheme.onErrorContainer,
-                          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-                          elevation: 0,
+                      SizedBox(height: 20.h),
+                      Text(context.koOnly.friendDisplayNameTitle,
+                          style: TextStyle(
+                              fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                      SizedBox(height: 8.h),
+                      // ⭐ 예전엔 공유 시작 후 이 필드가 비활성화돼서 이름을 못 바꿨음 -
+                      // 이제 언제든 편집 가능하고, 포커스를 빠져나가면(_maybeSaveName)
+                      // 공유 중일 땐 바로 Firestore에도 반영됨.
+                      TextField(
+                        controller: _nameController,
+                        focusNode: _nameFocusNode,
+                        // ⭐ 2026-09-14 (교차 검토 X-11) - 공유 문서의 이름 길이 제한과 같게
+                        maxLength: FriendScheduleData.maxOwnerNameLength,
+                        decoration: InputDecoration(
+                          hintText: context.koOnly.friendEnterDisplayName,
+                          counterText: '',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8.r)),
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 12.w, vertical: 10.h),
                         ),
-                        child: Text(context.koOnly.friendStopSharing, style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600)),
+                        style: TextStyle(fontSize: 14.sp),
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _maybeSaveName(),
                       ),
-                    ),
-                  ],
-                ],
-              ),
-            )),
+                      SizedBox(height: 24.h),
+                      if (_pendingBanner(colorScheme) case final banner?)
+                        banner,
+                      if (!_sharingEnabled)
+                        SizedBox(
+                          width: double.infinity,
+                          child: AppButton(
+                            onPressed: _working ? null : _startSharing,
+                            child: _working
+                                ? SizedBox(
+                                    width: 18.w,
+                                    height: 18.w,
+                                    child: const CircularProgressIndicator(
+                                        strokeWidth: 2))
+                                : Text(context.koOnly.friendStartSharing,
+                                    style: TextStyle(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.w600)),
+                          ),
+                        )
+                      else if (_ownerId == null)
+                        // ⭐ 공유는 켜져 있는데 이번 로드에서 익명 로그인이 실패한 경우
+                        // (오프라인 등) - _ownerId!를 그대로 쓰면 크래시라 별도 안내로 방어.
+                        Container(
+                          padding: EdgeInsets.all(12.w),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.errorContainer,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.sync_problem,
+                                  size: 18.sp,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onErrorContainer),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: Text(
+                                  context.koOnly.friendConnectionFailed,
+                                  style: TextStyle(
+                                      fontSize: 12.5.sp,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onErrorContainer),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else ...[
+                        Text(context.koOnly.friendMyShareCode,
+                            style: TextStyle(
+                                fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                        SizedBox(height: 8.h),
+                        _CopyBox(
+                            text: _code,
+                            monospace: true,
+                            onCopy: () =>
+                                _copy(_code, context.koOnly.friendCodeCopied)),
+                        SizedBox(height: 6.h),
+                        Text(
+                          context.koOnly.friendShareCodeInstructions,
+                          style: TextStyle(
+                              fontSize: 11.5.sp,
+                              color: colorScheme.onSurfaceVariant),
+                        ),
+                        SizedBox(height: 16.h),
+                        Text(context.koOnly.friendShareWithoutApp,
+                            style: TextStyle(
+                                fontSize: 14.sp, fontWeight: FontWeight.w600)),
+                        SizedBox(height: 8.h),
+                        _CopyBox(
+                            text: _webViewLink,
+                            onCopy: () => _copy(
+                                _webViewLink, context.koOnly.friendLinkCopied)),
+                        SizedBox(height: 6.h),
+                        // ⭐ 설치 유도 문구(friendInstallShortcutHint)는 삭제 - 이제 웹
+                        // 링크 자체에서(카톡 등 인앱 브라우저면 삼성 인터넷으로 자동 이동
+                        // + 그 화면에서 안내) 보여주므로 여기서 중복 설명할 필요 없음.
+                        Text(
+                          context.koOnly.friendShareLinkHint,
+                          style: TextStyle(
+                              fontSize: 11.5.sp,
+                              color: colorScheme.onSurfaceVariant),
+                        ),
+                        SizedBox(height: 20.h),
+                        SizedBox(
+                          width: double.infinity,
+                          child: AppButton(
+                            onPressed: _shareCode,
+                            child:
+                                Row(mainAxisSize: MainAxisSize.min, children: [
+                              Icon(Icons.share, size: 18.sp),
+                              SizedBox(width: 8.w),
+                              Flexible(child: Text(context.koOnly.commonShare)),
+                            ]),
+                          ),
+                        ),
+                        // ⭐ "공유 중지"를 공유하기 버튼과 더 떨어뜨리고(실수 클릭 방지),
+                        // 텍스트 링크가 아니라 빨간 배경의 진짜 버튼으로(공유하기와 같은
+                        // border radius) - "너무 밋밋해서 눈에 안 띈다"는 피드백.
+                        SizedBox(height: 20.h),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: AppSecondButton(
+                            variant: AppSecondButtonVariant.danger,
+                            onPressed: _working ? null : _stopSharing,
+                            child: Text(context.koOnly.friendStopSharing,
+                                style: TextStyle(
+                                    fontSize: 12.5.sp,
+                                    fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                )),
     );
   }
 }
@@ -430,10 +494,14 @@ class _CopyBox extends StatelessWidget {
   final String text;
   final bool monospace;
   final VoidCallback onCopy;
-  const _CopyBox({required this.text, required this.onCopy, this.monospace = false});
+  const _CopyBox(
+      {required this.text, required this.onCopy, this.monospace = false});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -448,7 +516,9 @@ class _CopyBox extends StatelessWidget {
             ),
             child: SelectableText(
               text,
-              style: TextStyle(fontSize: 11.5.sp, fontFamily: monospace ? 'monospace' : null),
+              style: TextStyle(
+                  fontSize: 11.5.sp,
+                  fontFamily: monospace ? 'monospace' : null),
             ),
           ),
         ),

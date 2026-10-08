@@ -18,10 +18,31 @@ import '../services/schedule_notification_service.dart';
 
 const _kScheduleTabEnabledKey = 'schedule_tab_enabled';
 const _kConditionTabEnabledKey = 'condition_tab_enabled';
+final _initialVisibility = <String, bool>{};
+
+/// Called after opening the DB and before building the app. Missing preferences
+/// on an existing schedule mean the old visible default; a fresh install starts
+/// with the optional tabs hidden. Stored choices (including restored ones) win.
+Future<void> initializeTabVisibilityDefaults(
+    {required bool hasExistingSchedule}) async {
+  final prefs = await SharedPreferences.getInstance();
+  final existingUser =
+      hasExistingSchedule || prefs.get('permissions_requested') == true;
+  for (final key in [_kScheduleTabEnabledKey, _kConditionTabEnabledKey]) {
+    if (!prefs.containsKey(key)) {
+      if (!await prefs.setBool(key, existingUser)) {
+        throw StateError('탭 기본 설정 저장 실패: $key');
+      }
+    }
+    final value = prefs.get(key);
+    _initialVisibility[key] = value is bool ? value : true;
+  }
+}
 
 class TabEnabledNotifier extends StateNotifier<bool> {
   final String _prefsKey;
-  TabEnabledNotifier(this._prefsKey) : super(true) {
+  TabEnabledNotifier(this._prefsKey)
+      : super(_initialVisibility[_prefsKey] ?? true) {
     _load();
   }
 
@@ -39,7 +60,8 @@ class TabEnabledNotifier extends StateNotifier<bool> {
   Future<void> setEnabled(bool enabled) async {
     final previous = state;
     if (_prefsKey == _kScheduleTabEnabledKey) {
-      final synced = await ScheduleNotificationService.syncTabEnabledToNative(enabled);
+      final synced =
+          await ScheduleNotificationService.syncTabEnabledToNative(enabled);
       if (!synced) throw StateError('일정관리 탭 Native 동기화 실패');
     }
     final prefs = await SharedPreferences.getInstance();
@@ -55,7 +77,12 @@ class TabEnabledNotifier extends StateNotifier<bool> {
 }
 
 final scheduleTabEnabledProvider =
-    StateNotifierProvider<TabEnabledNotifier, bool>((ref) => TabEnabledNotifier(_kScheduleTabEnabledKey));
+    StateNotifierProvider<TabEnabledNotifier, bool>(
+        (ref) => TabEnabledNotifier(_kScheduleTabEnabledKey));
 
 final conditionTabEnabledProvider =
-    StateNotifierProvider<TabEnabledNotifier, bool>((ref) => TabEnabledNotifier(_kConditionTabEnabledKey));
+    StateNotifierProvider<TabEnabledNotifier, bool>(
+        (ref) => TabEnabledNotifier(_kConditionTabEnabledKey));
+
+/// One-shot UI handoff; kept pending until the destination tutorial closes.
+final optionalTabActivationProvider = StateProvider<int?>((ref) => null);

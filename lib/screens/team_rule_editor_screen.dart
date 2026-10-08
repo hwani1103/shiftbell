@@ -1,3 +1,5 @@
+import '../widgets/settings_appearance.dart';
+import '../widgets/app_button.dart';
 import 'package:flutter/material.dart';
 import '../l10n/l10n_extensions.dart';
 import '../models/team_rule.dart';
@@ -67,7 +69,10 @@ class _TeamRuleEditorScreenState extends State<TeamRuleEditorScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     final l = context.l10n;
     final weekdays = [
       l.teamRuleMonday,
@@ -81,7 +86,7 @@ class _TeamRuleEditorScreenState extends State<TeamRuleEditorScreen> {
     final pattern = _mode == 0 ? widget.basePattern : _cycle;
     final selected = _mode == 0 ? _baseIndex : _cycleIndex;
     return Scaffold(
-      backgroundColor: kAppBackgroundPastel,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(title: Text('${widget.team} · ${l.teamRuleTitle}')),
       body: AdaptiveFormBody(
           child: SafeArea(
@@ -181,7 +186,7 @@ class _TeamRuleEditorScreenState extends State<TeamRuleEditorScreen> {
                                   child: Column(children: [
                                     Text(weekdays[i],
                                         style: const TextStyle(
-                                            fontWeight: FontWeight.bold)),
+                                            fontWeight: FontWeight.w600)),
                                     const SizedBox(height: 8),
                                     Text(_week[i] ?? l.teamRuleUnset,
                                         textAlign: TextAlign.center)
@@ -217,9 +222,8 @@ class _TeamRuleEditorScreenState extends State<TeamRuleEditorScreen> {
                       child: Text(l.commonCancel))),
               const SizedBox(width: 12),
               Expanded(
-                  child: AppSecondButton(
+                  child: AppButton(
                       key: const ValueKey('rule-save'),
-                      variant: AppSecondButtonVariant.success,
                       onPressed: _complete ? _save : null,
                       child: Text(l.teamRuleComplete))),
             ])),

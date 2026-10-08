@@ -23,6 +23,8 @@ import 'screens/schedule_management_tab.dart';
 import 'screens/condition_tab.dart';
 
 import 'screens/permission_intro_screen.dart';
+import 'widgets/onboarding_info_popups.dart';
+import 'widgets/nav_icon_emphasis.dart';
 import 'widgets/permission_warning_banner.dart';
 import 'widgets/unavailable_feature.dart';
 import 'widgets/banner_ad_slot.dart';
@@ -149,16 +151,29 @@ void main() async {
 // 다시 시도 시 이 함수 전체가 다시 불리므로 각 단계는 여러 번 불려도 안전해야 함.
 Future<CalendarThemeId> _initializeApp() async {
   final startupWatch = Stopwatch()..start();
+  var previousStartupMs = 0;
+  void recordStartupPhase(String phase) {
+    final elapsed = startupWatch.elapsedMilliseconds;
+    debugPrint('STARTUP_PHASE phase=$phase durationMs=${elapsed - previousStartupMs} totalMs=$elapsed');
+    previousStartupMs = elapsed;
+  }
   // ── 필수 ──
   // App language and English regional date formats share the bundled Intl data.
   await initializeDateFormatting(); // Local Intl bundle loads all regional data.
+  recordStartupPhase('date_formats');
   // DB 열기 + 마이그레이션(#1/#8 - 실패를 삼키지 않음). 실패 후 다시 부르면 새로 시도함.
   await DatabaseService.instance.database;
+  recordStartupPhase('database');
   final retiredDevPrefs = await SharedPreferences.getInstance();
+  await initializeTabVisibilityDefaults(
+      hasExistingSchedule: await DatabaseService.instance.getShiftSchedule() != null);
   await retiredDevPrefs.remove('custom_alarm_presets');
   await retiredDevPrefs.remove('one_touch_alarm_tutorial_shown');
+  recordStartupPhase('preferences');
   await AlarmService().initialize();
+  recordStartupPhase('alarm_service');
   await HolidaySyncService.instance.loadCached();
+  recordStartupPhase('holiday_cache');
   // ── 선택 (없어도 알람/달력 핵심 기능은 동작) ──
   // ⭐ Phase 4 - 메모/일정 카테고리 자동분류 모델(~2.2MB JSON) 미리 로드.
   // await 안 함 - 첫 프레임을 이걸로 막을 이유가 없고, 실제 분류 시점(일정
@@ -186,11 +201,13 @@ Future<CalendarThemeId> _initializeApp() async {
   // 조용히 실패하고 친구공유 기능만 비활성화됨 (firebase_bootstrap.dart 참고).
   // 다시 시도로 이 함수가 또 불려도 이미 성공했으면 중복 초기화하지 않음.
   if (!firebaseReady) await _optionalStartupStep('Firebase', initFirebase);
+  recordStartupPhase('firebase_and_background_launch');
 
   // Measure local SDK geometry before showing the calendar, but do not wait
   // for network consent or SDK initialization (previously up to ten seconds).
   await _optionalStartupStep('AdMob layout', AdService.prepareLayout,
       timeout: const Duration(milliseconds: 500));
+  recordStartupPhase('ad_layout');
 
   // ⭐ 앱 시작 전에 달력 테마 미리 로드 (깜빡임 방지) - 예전엔 "다크모드
   // on/off"를 미리 읽었는데, 이제는 9개 달력 테마 중 뭐가 선택돼 있는지를
@@ -198,6 +215,7 @@ Future<CalendarThemeId> _initializeApp() async {
   // 탭 자체가 어떤 테마로 그려질지 (2) 시스템 상태표시줄 아이콘 밝기에만 씀.
   // (실패하면 내부에서 기본 테마로 대체함 - calendar_theme_provider.dart)
   final initialTheme = await CalendarThemeNotifier.loadInitial();
+  recordStartupPhase('theme');
   debugPrint('Startup core ready: ${startupWatch.elapsedMilliseconds}ms');
   return initialTheme;
 }
@@ -269,6 +287,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // data_version이 그대로면 즉시 반환하는 가벼운 함수라(백업_watcher.dart
     // 참고) 매 콜드 스타트마다 불러도 비용이 거의 없음.
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('STARTUP_FIRST_APP_FRAME');
       unawaited(BackupWatcher.instance.backupNow());
       unawaited(AdService.warmUp());
     });
@@ -422,6 +441,8 @@ class MainScreen extends ConsumerStatefulWidget {
 // update_service.dart에 쿨다운을 둬서 Play Core 호출 자체도 너무 잦지 않게 함.
 class _MainScreenState extends ConsumerState<MainScreen>
     with WidgetsBindingObserver {
+  int? _emphasizedTab;
+  int _emphasisSequence = 0;
   late int _currentIndex; // ⭐ nullable 제거
   static const platform = kAlarmChannel;
 
@@ -777,7 +798,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
             icon: const Icon(Icons.alarm), label: context.l10n.navNextAlarm);
       case 1:
         return BottomNavigationBarItem(
-            icon: const Icon(Icons.event_note_outlined),
+            icon: NavIconEmphasis(icon: Icons.event_note_outlined, sequence: _emphasizedTab == 1 ? _emphasisSequence : 0),
             label: context.koOnly.navScheduleManagement);
       case 2:
         return BottomNavigationBarItem(
@@ -785,7 +806,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
             label: context.l10n.navCalendar);
       case 3:
         return BottomNavigationBarItem(
-            icon: const Icon(Icons.self_improvement),
+            icon: NavIconEmphasis(icon: Icons.self_improvement, sequence: _emphasizedTab == 3 ? _emphasisSequence : 0),
             label: Localizations.localeOf(context).languageCode == 'ko'
                 ? '수면·회복'
                 : 'Sleep');
@@ -800,6 +821,28 @@ class _MainScreenState extends ConsumerState<MainScreen>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int?>(optionalTabActivationProvider, (previous, tab) {
+      if (tab == null) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        setState(() => _currentIndex = tab);
+        await WidgetsBinding.instance.endOfFrame;
+        if (!mounted) return;
+        if (tab == 1) {
+          await maybeShowScheduleTabTutorial(context, canShow: () => mounted && _currentIndex == tab);
+        } else {
+          await maybeShowConditionTabTutorial(context, canShow: () => mounted && _currentIndex == tab);
+        }
+        // The modal/page reverse transition must finish before the icon grows.
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+        ref.read(optionalTabActivationProvider.notifier).state = null;
+        if (_currentIndex == tab) {
+          setState(() { _emphasizedTab = tab; _emphasisSequence++; });
+        }
+      });
+    });
     final visibleTabIndices = _visibleTabIndices;
     // ⭐ 방금 이 탭이 꺼졌는데(다른 경로로, 혹은 아직 반영 전 프레임에) 지금
     // 하필 그 탭을 보고 있었다면 안전한 탭(달력)으로 옮김 - DisableTabButton의

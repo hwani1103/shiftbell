@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:shiftbell/providers/tab_visibility_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +23,7 @@ import 'package:shiftbell/models/calendar_theme.dart';
 import 'package:shiftbell/models/shift_schedule.dart';
 import 'package:shiftbell/models/friend_schedule.dart';
 import 'package:shiftbell/providers/alarm_provider.dart';
+import 'package:shiftbell/providers/memo_provider.dart';
 import 'package:shiftbell/providers/calendar_theme_provider.dart';
 import 'package:shiftbell/screens/calendar_tab.dart';
 import 'package:shiftbell/screens/next_alarm_tab.dart';
@@ -58,7 +61,11 @@ void main() {
   const scaleSweep = bool.fromEnvironment('LAYOUT_SCALE_SWEEP');
   const ultraOnly = bool.fromEnvironment('LAYOUT_ULTRA_ONLY');
   const flipAudit = bool.fromEnvironment('LAYOUT_FLIP_AUDIT');
-  final auditMonth = DateTime.now();
+  const reviewMonth = int.fromEnvironment('LAYOUT_REVIEW_MONTH');
+  final auditMonth = reviewMonth == 0
+      ? DateTime.now()
+      : DateTime(int.fromEnvironment('LAYOUT_REVIEW_YEAR', defaultValue: 2027),
+          reviewMonth, 13);
   final auditDays = <int, int>{};
   if (flipAudit) {
     final days = List.generate(28, (i) => i + 1);
@@ -79,8 +86,13 @@ void main() {
       }
     }
   }
+  if (reviewMonth == 5) auditDays[13] = 3;
   const longShiftNames = bool.fromEnvironment('LAYOUT_LONG_SHIFT_NAMES');
-  const shifts = longShiftNames ? ['주간근무', '야간근무', '휴무'] : ['주간', '야간', '휴무'];
+  const shifts = reviewMonth != 0
+      ? ['주간', '야간근무', '휴무휴무휴무']
+      : longShiftNames
+          ? ['주간근무', '야간근무', '휴무']
+          : ['주간', '야간', '휴무'];
   final requestedTextScale = double.parse(
       const String.fromEnvironment('LAYOUT_TEXT_SCALE', defaultValue: '1.0'));
   final captureKey = GlobalKey();
@@ -123,7 +135,7 @@ void main() {
         todayIndex: 0,
         shiftTypes: shifts,
         startDate: DateTime(2026, 9, 1)));
-    final today = DateTime.now();
+    final today = auditMonth;
     for (var hour = 7; hour < 12; hour++) {
       await DatabaseService.instance.insertAlarm(Alarm(
           time: '${hour.toString().padLeft(2, '0')}:30',
@@ -132,21 +144,37 @@ void main() {
           alarmTypeId: hour % 3 + 1,
           shiftType: shifts.first));
     }
+    if (reviewMonth != 0) {
+      for (final day in auditDays.keys) {
+        for (var i = 0; i < auditDays[day]!; i++) {
+          await DatabaseService.instance.createMemo(
+              '${auditMonth.year}-${auditMonth.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}',
+              ['첫째메모여섯', '둘째메모여섯', '셋째메모여섯'][i]);
+        }
+      }
+    }
     if (!flipAudit) {
       await DatabaseService.instance.createMemo(
           '${today.year}-${today.month.toString().padLeft(2, '0')}-22',
           '첫째메모가길어져도글자크기는같아야합니다');
     }
-    for (final day in flipAudit ? auditDays.keys : {today.day, 23, 24, 25}) {
+    for (final day in reviewMonth != 0
+        ? <int>[]
+        : flipAudit
+            ? auditDays.keys
+            : {today.day, 23, 24, 25}) {
       final date =
           '${today.year}-${today.month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
-      for (final memo in ['첫째', '둘째', '셋째'].take(flipAudit
-          ? auditDays[day]!
-          : day == 23
-              ? 1
-              : day == 24
-                  ? 2
-                  : 3)) {
+      for (final memo in (reviewMonth == 0
+              ? ['첫째', '둘째', '셋째']
+              : ['첫째메모여섯', '둘째메모여섯', '셋째메모여섯'])
+          .take(flipAudit
+              ? auditDays[day]!
+              : day == 23
+                  ? 1
+                  : day == 24
+                      ? 2
+                      : 3)) {
         await DatabaseService.instance.createMemo(date, memo);
       }
     }
@@ -160,6 +188,8 @@ void main() {
   final screens = <String, Widget Function()>{
     'next': () => const NextAlarmTab(),
     'settings': () => SettingsTab(),
+    'settings_features': () => const SettingsTab(additionalFeatures: true),
+    'settings_backup': () => const SettingsTab(backupOnly: true),
     'condition': () =>
         ConditionTab(onDisabled: () {}, onConfirmed: () async {}),
     'english_sleep': () =>
@@ -222,6 +252,8 @@ void main() {
           'all_teams_names': <String>['A', 'B', 'C', 'D'],
           'all_teams_offsets': '{"A":0,"B":1,"C":2,"D":0}',
           'all_teams_my_team': 'A',
+          'schedule_tab_enabled': !entry.key.startsWith('settings'),
+          'condition_tab_enabled': !entry.key.startsWith('settings'),
         });
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.resetDevicePixelRatio);
@@ -384,6 +416,17 @@ void main() {
                 () => Future<void>.delayed(const Duration(milliseconds: 80)));
             await tester.pump(const Duration(milliseconds: 100));
           }
+          if (reviewMonth != 0 && entry.key.startsWith('calendar_')) {
+            tester
+                .widget<TableCalendar>(find.byType(TableCalendar).first)
+                .onPageChanged!(auditMonth);
+            await tester.runAsync(() => container
+                .read(memoProvider.notifier)
+                .loadMemosForDateRange(
+                    DateTime(auditMonth.year, auditMonth.month),
+                    DateTime(auditMonth.year, auditMonth.month + 1, 0)));
+            await tester.pumpAndSettle();
+          }
           expect(tester.takeException(), isNull, reason: '${entry.key} $size');
           if (ultraOnly && entry.key == 'next') {
             for (final scroll
@@ -411,10 +454,22 @@ void main() {
           }
 
           await captureScreen();
+          if (entry.key == 'settings_features') {
+            for (final title in ['일정관리 기능', '수면회복 컨디션 기능', '진단 로그 이메일로 보내기']) {
+              await tester.ensureVisible(find.text(title));
+              await tester.tap(find.text(title));
+              await tester.pumpAndSettle();
+              expect(find.byType(AlertDialog), findsOneWidget);
+              expect(tester.takeException(), isNull);
+              await tester.tap(find.text('취소').last);
+              await tester.pumpAndSettle();
+              expect(container.read(optionalTabActivationProvider), isNull);
+            }
+          }
           if (srtlWindow &&
               entry.key.startsWith('calendar_') &&
               entry.key != 'calendar_unassigned') {
-            final now = DateTime.now();
+            final now = auditMonth;
             Rect paintedRect(Finder finder) {
               final box = tester.renderObject<RenderBox>(finder);
               return MatrixUtils.transformRect(
@@ -494,14 +549,61 @@ void main() {
                     isFalse,
                     reason: '$theme $size holiday overlaps date');
               }
+              if (reviewMonth != 0) {
+                Rect? badgeRect = badge.evaluate().isNotEmpty
+                    ? paintedRect(badge.first)
+                    : null;
+                final renderedShift = badgeText.evaluate().isNotEmpty
+                    ? tester.widget<Text>(badgeText.first)
+                    : null;
+                print('REVIEW_METRICS ${jsonEncode({
+                      'theme': theme.name,
+                      'windowWidth': size.width,
+                      'windowHeight': size.height,
+                      'day': day,
+                      'cellWidth': cellRect.width,
+                      'cellHeight': cellRect.height,
+                      'dateWidth': dateRect.width,
+                      'dateHeight': dateRect.height,
+                      'dateTop': dateRect.top - cellRect.top,
+                      'dateLeft': dateRect.left - cellRect.left,
+                      'badgeWidth': badgeRect?.width,
+                      'badgeHeight': badgeRect?.height,
+                      'shift': renderedShift?.data,
+                      'shiftFont': renderedShift?.style?.fontSize,
+                    })}');
+                if (day == 13 &&
+                    theme != CalendarThemeId.boldGrid &&
+                    ![CalendarThemeId.underline, CalendarThemeId.editorial]
+                        .contains(theme)) {
+                  expect(
+                      find.descendant(of: cell, matching: find.text('부처님오신날')),
+                      findsOneWidget,
+                      reason: 'Six-character holiday must remain complete');
+                }
+              }
+              if (reviewMonth == 5 &&
+                  day == 13 &&
+                  theme == CalendarThemeId.boldGrid) {
+                expect(
+                    find.descendant(
+                        of: cell,
+                        matching: find.byWidgetPredicate((w) =>
+                            w is Text &&
+                            (w.data?.startsWith('부처님오신') ?? false))),
+                    findsOneWidget);
+              }
               Rect? previous;
-              for (final memo in ['첫째', '둘째', '셋째'].take(flipAudit
-                  ? auditDays[day]!
-                  : day == 23
-                      ? 1
-                      : day == 24
-                          ? 2
-                          : 3)) {
+              for (final memo in (reviewMonth == 0
+                      ? ['첫째', '둘째', '셋째']
+                      : ['첫째메모여섯', '둘째메모여섯', '셋째메모여섯'])
+                  .take(flipAudit
+                      ? auditDays[day]!
+                      : day == 23
+                          ? 1
+                          : day == 24
+                              ? 2
+                              : 3)) {
                 final label = memo;
                 final text = find.descendant(
                     of: cell,
@@ -540,7 +642,34 @@ void main() {
                       tester.widget<Text>(text).style!.fontSize,
                       reason: 'Memo length must never reduce font size');
                 }
+                if (reviewMonth != 0 &&
+                    size.width <= 500 &&
+                    ![CalendarThemeId.underline, CalendarThemeId.editorial]
+                        .contains(theme)) {
+                  expect(tester.widget<Text>(text).data, memo,
+                      reason: 'All six Korean memo characters must fit');
+                }
                 final rect = paintedRect(text);
+                if (reviewMonth != 0) {
+                  print('REVIEW_MEMO_METRICS ${jsonEncode({
+                        'theme': theme.name,
+                        'windowWidth': size.width,
+                        'windowHeight': size.height,
+                        'day': day,
+                        'memoIndex': previous == null ? 0 : 1,
+                        'cellWidth': cellRect.width,
+                        'cellHeight': cellRect.height,
+                        'memoHeight': rect.height,
+                        'memoWidth': rect.width,
+                        'memoFontCode':
+                            tester.widget<Text>(text).style!.fontSize,
+                        'gapFromDate': rect.top - dateRect.bottom,
+                        'gapFromPrevious': previous == null
+                            ? null
+                            : rect.top - previous.bottom,
+                        'gapToCellBottom': cellRect.bottom - rect.bottom,
+                      })}');
+                }
                 if (scaleSweep && day == now.day && memo == '첫째') {
                   print(
                       'CELL_METRICS ${theme.name} scale=$textScale width=${size.width} '
@@ -602,13 +731,17 @@ void main() {
           if (entry.key.startsWith('calendar_') &&
               entry.key != 'calendar_unassigned') {
             expect(find.byKey(const ValueKey('one-tap-open')), findsNothing);
-            expect(tester.widget<TableCalendar>(find.byType(TableCalendar)).availableGestures, AvailableGestures.all);
+            expect(
+                tester
+                    .widget<TableCalendar>(find.byType(TableCalendar))
+                    .availableGestures,
+                AvailableGestures.all);
           }
 
           if (entry.key == 'calendar_mainWhite') {
             final navigator =
                 tester.state<NavigatorState>(find.byType(Navigator).first);
-            final now = DateTime.now();
+            final now = auditMonth;
             await tester.tap(find.text('${now.year}년 ${now.month}월'));
             await settlePopup();
             expect(find.text('12월').hitTestable(), findsOneWidget);
@@ -644,7 +777,7 @@ void main() {
             await settlePopup();
           }
           if (entry.key == 'calendar_mainWhite') {
-            final now = DateTime.now();
+            final now = auditMonth;
             await tester.runAsync(() => DatabaseService.instance.insertAlarm(
                 Alarm(
                     time: '12:34',
@@ -680,7 +813,7 @@ void main() {
           if (entry.key == 'sleep_calendar') {
             final navigator =
                 tester.state<NavigatorState>(find.byType(Navigator).first);
-            final now = DateTime.now();
+            final now = auditMonth;
             showSleepSlotEditDialog(
                 tester.element(find.byType(SleepCalendarFullScreen)),
                 initialStart: now.subtract(const Duration(hours: 8)),
@@ -717,6 +850,7 @@ void main() {
               await settlePanel();
               await tester.tap(find.text(title));
               await settlePanel();
+              await captureScreen('_${title == l.shiftChangeSchedule ? 'schedule' : title == l.settingsEditShiftNameTitle ? 'names' : title == l.settingsEditShiftColorTitle ? 'colors' : 'fixed'}');
               if (title == l.settingsEditShiftColorTitle) {
                 await tester.tap(find.widgetWithText(ListTile, '주간').first);
                 await settlePanel();
@@ -738,7 +872,7 @@ void main() {
             for (final title in [
               l.alarmSoundManage,
               l.alarmDeleteAllPermanently,
-              l.settingsRestoreFromBackupTitle
+              l.settingsAdditionalFeaturesTitle
             ]) {
               await tester.scrollUntilVisible(find.text(title), 250,
                   scrollable: find.byType(Scrollable).first, maxScrolls: 30);
@@ -748,6 +882,18 @@ void main() {
               expect(find.text(title).hitTestable(), findsOneWidget);
               await tester.tap(find.text(title));
               await settlePanel();
+              await captureScreen('_${title == l.alarmSoundManage ? 'alarm_settings' : title == l.settingsAdditionalFeaturesTitle ? 'features' : 'delete'}');
+              if (title == l.settingsAdditionalFeaturesTitle) {
+                await tester.tap(find.text(l.settingsDataBackupTitle));
+                await settlePanel();
+                await captureScreen('_backup');
+                await tester.tap(find.text(l.settingsRestoreFromBackupTitle));
+                await settlePanel();
+                navigator.pop();
+                await settlePanel();
+                navigator.pop();
+                await settlePanel();
+              }
               navigator.pop();
               await settlePanel();
             }

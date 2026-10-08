@@ -220,9 +220,21 @@
             android:name="firebase_analytics_collection_enabled"
             android:value="${analyticsCollectionEnabled}"/>
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.diagnostics"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/diagnostic_share_paths" />
+        </provider>
     </application>
 
     <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
         <package android:name="com.miui.securitycenter" />
         <intent>
             <action android:name="android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>

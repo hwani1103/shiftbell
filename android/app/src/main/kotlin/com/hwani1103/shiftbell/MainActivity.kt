@@ -691,6 +691,26 @@ override fun onNewIntent(intent: Intent) {
                     )
                     result.success(null)
                 }
+                "shareDiagnosticLog" -> {
+                    val title = call.argument<String>("chooserTitle") ?: ""
+                    val subject = call.argument<String>("subject") ?: ""
+                    val body = call.argument<String>("body") ?: ""
+                    Thread {
+                        try {
+                            val intent = DiagnosticShare.prepare(applicationContext, title, subject, body)
+                            runOnUiThread {
+                                try {
+                                    startActivity(intent)
+                                    result.success(true)
+                                } catch (e: Exception) {
+                                    result.error("DIAGNOSTIC_SHARE", e.javaClass.simpleName, null)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            runOnUiThread { result.error("DIAGNOSTIC_EXPORT", e.javaClass.simpleName, null) }
+                        }
+                    }.start()
+                }
                 "diagLog" -> {
                     val event = call.argument<String>("event") ?: "DART"
                     val fields = (call.argument<Map<String, Any?>>("fields") ?: emptyMap()).entries.map { it.key to it.value }

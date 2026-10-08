@@ -1,3 +1,5 @@
+import '../widgets/settings_appearance.dart';
+import '../widgets/app_button.dart';
 import '../widgets/team_assignment_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,7 +72,8 @@ class _TeamScheduleEditScreenState
     final team = _selected;
     if (_busy || team == null || team == widget.teams.myTeam) return;
     setState(() => _busy = true);
-    final accepted = await _confirm(context.l10n.teamEditSwitchConfirm(widget.teams.myTeam, team));
+    final accepted = await _confirm(
+        context.l10n.teamEditSwitchConfirm(widget.teams.myTeam, team));
     if (!mounted) return;
     if (!accepted) {
       setState(() => _busy = false);
@@ -96,9 +99,8 @@ class _TeamScheduleEditScreenState
   Future<void> _recreate() async {
     if (_busy) return;
     setState(() => _busy = true);
-    final accepted = await _confirm(
-        context.l10n.teamEditRecreateConfirm,
-        destructive: true);
+    final accepted =
+        await _confirm(context.l10n.teamEditRecreateConfirm, destructive: true);
     if (!mounted) return;
     if (!accepted) {
       setState(() => _busy = false);
@@ -112,8 +114,8 @@ class _TeamScheduleEditScreenState
       if (!mounted) return;
       setState(() => _busy = false);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              context.l10n.settingsScheduleChangeFailedWithError(context.localizedErrorDetail(error)))));
+          content: Text(context.l10n.settingsScheduleChangeFailedWithError(
+              context.localizedErrorDetail(error)))));
     }
   }
 
@@ -130,12 +132,12 @@ class _TeamScheduleEditScreenState
     return Card(
         clipBehavior: Clip.antiAlias,
         child: ListTile(
-      key: const ValueKey('team-edit-recreate'),
-      title: Text(title),
-      subtitle: Text(context.l10n.teamEditRecreateHint),
-      trailing: const Icon(Icons.restart_alt),
-      onTap: _busy ? null : _recreate,
-    ));
+          key: const ValueKey('team-edit-recreate'),
+          title: Text(title),
+          subtitle: Text(context.l10n.teamEditRecreateHint),
+          trailing: const Icon(Icons.restart_alt),
+          onTap: _busy ? null : _recreate,
+        ));
   }
 
   String? _teamAt(int index) {
@@ -147,12 +149,14 @@ class _TeamScheduleEditScreenState
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     return PopScope(
         canPop: !_busy,
         child: Scaffold(
-          appBar:
-              AppBar(title: Text(context.l10n.teamEditTitle)),
+          appBar: AppBar(title: Text(context.l10n.teamEditTitle)),
           body: AdaptiveFormBody(
               child: SafeArea(
                   child: Column(children: [
@@ -164,21 +168,22 @@ class _TeamScheduleEditScreenState
               Card(
                   clipBehavior: Clip.antiAlias,
                   child: ListTile(
-                key: const ValueKey('team-edit-switch'),
-                title: Text(context.l10n.teamSwitchAction),
-                subtitle: Text(
-                    _ko ? 'A조 → C조, B조 → D조 등' : 'A → C, B → D'),
-                trailing:
-                    Icon(_showTeams ? Icons.expand_less : Icons.expand_more),
-                onTap: _busy
-                    ? null
-                    : () => setState(() => _showTeams = !_showTeams),
-              )),
+                    key: const ValueKey('team-edit-switch'),
+                    title: Text(context.l10n.teamSwitchAction),
+                    subtitle: Text(_ko ? 'A조 → C조, B조 → D조 등' : 'A → C, B → D'),
+                    trailing: Icon(
+                        _showTeams ? Icons.expand_less : Icons.expand_more),
+                    onTap: _busy
+                        ? null
+                        : () => setState(() => _showTeams = !_showTeams),
+                  )),
               if (_showTeams) ...[
                 const SizedBox(height: 20),
                 Text(context.l10n.teamEditPositionsOn(_ko
                     ? '${widget.date.month}/${widget.date.day}'
-                    : DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(widget.date))),
+                    : DateFormat.yMMMd(
+                            Localizations.localeOf(context).toString())
+                        .format(widget.date))),
                 const SizedBox(height: 12),
                 if (widget.teams.individual) ...[
                   for (final team in widget.teams.names)
@@ -212,9 +217,10 @@ class _TeamScheduleEditScreenState
                 if (_selected != null) ...[
                   const SizedBox(height: 12),
                   Text(
-                      context.l10n.teamEditSwitchPreview(widget.teams.myTeam, _selected!),
-                      style: const TextStyle(
-                          color: Colors.indigo,
+                      context.l10n.teamEditSwitchPreview(
+                          widget.teams.myTeam, _selected!),
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w600,
                           height: 1.5)),
                 ],
@@ -240,8 +246,7 @@ class _TeamScheduleEditScreenState
                           child: Text(context.l10n.commonCancel))),
                   const SizedBox(width: 12),
                   Expanded(
-                      child: AppSecondButton(
-                          variant: AppSecondButtonVariant.success,
+                      child: AppButton(
                           onPressed: _busy || !_showTeams || _selected == null
                               ? null
                               : _save,

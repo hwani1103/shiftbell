@@ -415,6 +415,11 @@ class RestoreCoordinator {
                 where: '${keyCols.map((c) => '$c = ?').join(' AND ')} AND fixed_slot_time IS NULL',
                 whereArgs: keyCols.map((c) => row[c]).toList());
           }
+          if (entry.key == 'alarm_history' && row['snooze_minutes'] != null) {
+            await txn.update(entry.key, {'snooze_minutes': row['snooze_minutes']},
+                where: '${keyCols.map((c) => '$c = ?').join(' AND ')} AND snooze_minutes IS NULL',
+                whereArgs: keyCols.map((c) => row[c]).toList());
+          }
           continue;
         }
         final copy = Map<String, dynamic>.from(row)..remove('id');

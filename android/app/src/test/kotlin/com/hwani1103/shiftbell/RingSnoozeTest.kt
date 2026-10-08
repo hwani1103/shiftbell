@@ -122,6 +122,9 @@ class RingSnoozeTest {
         assertTrue(RingingAlarmTracker.carryState(context).endingIds.isEmpty())
         assertEquals(SnoozeExecution.IgnoredStale, RingSnoozeController.execute(context, click))
         assertEquals(1, historyCount())
+        db.rawQuery("SELECT snooze_minutes FROM alarm_history WHERE alarm_id=7 AND dismiss_type='snoozed'", null).use {
+            assertTrue(it.moveToFirst()); assertEquals(15, it.getInt(0))
+        }
         val wake = shadowOf(context.getSystemService(AlarmManager::class.java)).scheduledAlarms.filter {
             it.operation?.let { pi -> shadowOf(pi).savedIntent.dataString } == "shiftbell://alarm/7"
         }
