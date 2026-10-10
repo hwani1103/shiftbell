@@ -126,9 +126,9 @@ export function usersCard(view, visible) {
     <div id="ch-users" style="min-height:230px"></div></section>`;
 }
 
-export function installsCard(view) {
+export function installsCard(view, span = 'span-4') {
   const inst = sum(view.cur('installs')); const rem = sum(view.cur('uninstalls'));
-  return `<section class="card span-4"><div class="card-h"><div><h2>첫 실행 · 삭제</h2><p>하루 단위 · GA4 자동 이벤트</p></div></div>
+  return `<section class="card ${span}"><div class="card-h"><div><h2>첫 실행 · 삭제</h2><p>하루 단위 · GA4 자동 이벤트</p></div></div>
     <div id="ch-installs" style="min-height:200px"></div>
     <div class="stats"><div class="stat"><b>${fmtInt(inst)}</b><span>첫 실행</span></div><div class="stat"><b>${fmtInt(rem)}</b><span>감지된 삭제</span></div></div>
     <p class="sub" style="margin:10px 0 0">첫 실행에는 Analytics 도입 업데이트가 포함될 수 있어 신규 설치와 다릅니다. 삭제는 실제보다 적을 수 있어요.</p></section>`;
@@ -265,7 +265,7 @@ export function mountCharts(root, docs, view, ui, usersView = view, onUserSelect
 
   if ($('#ch-users')) {
     charts.push(lineChart($('#ch-users'), {
-      title: '활성 사용자 추이', onSelect: onUserSelect, selectedDate: onUserSelect ? ui.dailyDate : null, dates: usersView.dates, height: 240, valueFmt: (v) => `${fmtInt(v)}명`,
+      title: '활성 사용자 추이', onSelect: onUserSelect,  dates: usersView.dates, height: 240, valueFmt: (v) => `${fmtInt(v)}명`,
       series: [
         { key: 'mau', label: 'MAU', color: COLORS.mau, values: usersView.cur('mau'), visible: ui.visible.mau },
         { key: 'dau', label: 'DAU', color: COLORS.dau, values: usersView.cur('dau'), visible: ui.visible.dau, area: true },

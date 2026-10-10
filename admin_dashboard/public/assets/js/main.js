@@ -133,7 +133,7 @@ function renderApp() {
   const section = ui.section;
   let body = '';
   const recent = dailyView(docs);
-  if (section === 'overview') body = dailyOverviewCard(docs, recent, ui) + businessKpis(docs, view) + installsCard(view) + adoptionCard(docs, view) + reliabilityCard(docs, view) + revenueCard(docs, view) + collectionCard(docs, view);
+  if (section === 'overview') body = dailyOverviewCard(docs, recent, ui) + businessKpis(docs, view) + installsCard(view, 'span-12') + adoptionCard(docs, view) + reliabilityCard(docs, view) + revenueCard(docs, view) + collectionCard(docs, view);
   if (section === 'growth') body = businessKpis(docs, view) + countryCard(docs, view, ui) + usersCard(view, ui.visible) + installsCard(view) + retentionCard(docs) + engagementCard(view);
   if (section === 'product') body = adoptionCard(docs, view) + behaviorCard(docs, view, ui) + distCard(docs, ui, 'span-12') + revenueCard(docs, view);
   if (section === 'quality') body = reliabilityCard(docs, view) + manufacturerCard(docs, view) + permissionCard(docs, view) + distCard(docs, ui, 'span-12') + collectionCard(docs, view);

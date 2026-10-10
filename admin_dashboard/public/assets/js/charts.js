@@ -91,7 +91,7 @@ function placeTip(tip, host, x) {
 export function lineChart(el, opt) {
   let o = opt;
   let first = true;
-  let selectedDate = o.selectedDate ?? null;
+  let selectedDate = null;
   const clearSelection = () => {
     selectedDate = null;
     el.querySelectorAll(".xh, .pt").forEach((node) => { node.style.display = "none"; });
