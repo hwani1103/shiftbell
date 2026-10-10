@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 const source = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public');
-const output = path.resolve(source, '../../build/admin_dashboard');
+const output = path.resolve(source, '../build');
 async function files(dir, prefix = '') {
   const result = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {

@@ -1,7 +1,7 @@
 {
   "hosting": {
     "site": "shiftbell-ops-29f31",
-    "public": "../build/admin_dashboard",
+    "public": "build",
     "ignore": [
       "firebase.json",
       "**/.*",

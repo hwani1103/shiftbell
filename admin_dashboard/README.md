@@ -147,4 +147,4 @@ OperationsSnapshot은 이미 남는 로컬 진단 로그를 앱 재개 시 백�
     node tools/build.mjs
     firebase deploy --only hosting --project shiftbell-29f31
 
-빌드는 JavaScript 구문을 확인하고 public/을 build/admin_dashboard/에 복사하며 build-info.json의 버전과 파일 해시를 생성합니다. Firebase Hosting site는 shiftbell-ops-29f31만 배포합니다.
+빌드는 JavaScript 구문을 확인하고 public/을 admin_dashboard/build/에 복사하며 build-info.json의 버전과 파일 해시를 생성합니다. Firebase Hosting site는 shiftbell-ops-29f31만 배포합니다.
