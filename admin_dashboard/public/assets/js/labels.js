@@ -102,7 +102,7 @@ const NAMES = {
   country: { India: '인도', Brazil: '브라질', 'United Arab Emirates': '아랍에미리트', 'South Africa': '남아프리카공화국', 'South Korea': '대한민국', 'United States': '미국', Japan: '일본', Canada: '캐나다', Australia: '호주', China: '중국', Vietnam: '베트남', Thailand: '태국', Philippines: '필리핀', Germany: '독일', 'United Kingdom': '영국', Taiwan: '대만' },
 };
 export function localizeName(dim, name) {
-  return NAMES[dim]?.[name] ?? name;
+  return name === '(not set)' ? '확인 불가' : NAMES[dim]?.[name] ?? name;
 }
 export const osLabel = (v) => (/^\d/.test(v) ? `Android ${v}` : v);
 

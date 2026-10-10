@@ -20,7 +20,7 @@ export function eventData(docs, view, name) {
 function change(current, previous) {
   if (current == null || previous == null) return tag('비교 자료 없음');
   const d = deltaInfo(current, previous);
-  if (d.dir === 'new') return tag('직전 기간 0명');
+  if (d.dir === 'new') return tag('직전 기간 관측 없음');
   if (d.pct == null) return tag('변화 없음');
   return tag((d.pct >= 0 ? '+' : '') + (d.pct * 100).toFixed(1) + '%', d.pct > 0 ? 'positive' : d.pct < 0 ? 'warning' : '');
 }
@@ -85,9 +85,15 @@ export function reliabilityCard(docs, view) {
 export function manufacturerCard(docs, view) {
   const period = periodData(docs, view); const rows = period?.manufacturers;
   const event = (r, name, field = 'count') => r.events == null ? null : (r.events[name]?.[field] ?? null);
-  const html = (rows ?? []).map((r) => '<tr><th>' + esc(r.name === 'Google' ? 'Google (Pixel)' : r.name) + '</th><td>' + number(r.activeUsers) + '</td><td>' + number(event(r, 'alarm_schedule_failed')) + '</td><td>' + number(event(r, 'alarm_fired')) + '</td><td>' + number(event(r, 'alarm_refresh_failed')) + '</td><td>' + number(event(r, 'ops_battery_restricted', 'users')) + '</td><td>' + number(event(r, 'ops_exact_denied', 'users')) + '</td></tr>').join('');
+  const html = (rows ?? []).map((r) => '<tr><th>' + esc(r.name === 'Google' ? 'Google (Pixel)' : r.name === '(not set)' ? '확인 불가' : r.name) + '</th><td>' + number(r.activeUsers) + '</td><td>' + number(event(r, 'alarm_schedule_failed')) + '</td><td>' + number(event(r, 'alarm_fired')) + '</td><td>' + number(event(r, 'alarm_refresh_failed')) + '</td><td>' + number(event(r, 'ops_battery_restricted', 'users')) + '</td><td>' + number(event(r, 'ops_exact_denied', 'users')) + '</td></tr>').join('');
   return card('제조사별 알람·제한 상태', 'GA4 기기 브랜드 기준 · 선택 기간 내 관측 · 실패율 비교에는 표본과 재시도를 함께 확인', rows ? '<div class="table-scroll"><table class="ops-table"><thead><tr><th>제조사</th><th>활성 사용자</th><th>예약 실패</th><th>울림 진입</th><th>갱신 실패</th><th>배터리 제한 사용자</th><th>정확 알람 거부 사용자</th></tr></thead><tbody>' + html + '</tbody></table></div>' : empty('제조사별 운영 집계가 아직 연결되지 않았습니다.'));
 }
+export function permissionCard(docs, view) {
+  const states = [['ops_daily_ready', '권한 허용 상태'], ['ops_daily_restricted', '미허용 권한 있음'], ['ops_daily_unknown', '권한 확인 불가'], ['ops_battery_restricted', '배터리 최적화 적용'], ['ops_exact_denied', '정확 알람 미허용'], ['ops_notification_blocked', '앱 알림 차단'], ['ops_channel_blocked', '알람 채널 차단'], ['ops_fullscreen_denied', '전체화면 미허용']];
+  const rows = states.map(([name, title]) => { const data = eventData(docs, view, name); return '<tr><th>' + title + '</th><td>' + (data.observed ? number(data.users, '명') : tag('미관측')) + '</td></tr>'; }).join('');
+  return card('권한·배터리 상태의 도달 범위', '앱 실행 시 기기 날짜별 하루 1회 OS 상태 관측 · 선택 기간의 중복 제거 사용자', '<div class="table-scroll"><table class="ops-table"><thead><tr><th>관측 상태</th><th>사용자</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="sub">기간 중 권한이 바뀐 사용자는 여러 상태에 포함됩니다. 따라서 합계나 허용률로 계산하지 않습니다. 미관측은 새 계측이 아직 보고되지 않았다는 뜻이며, 확인 불가와 미허용은 별도 상태입니다.</p>');
+}
+
 export function collectionCard(docs, view) {
   const p = periodData(docs, view); const reports = { ...(docs.summary.coverage ?? {}), ...(p?.coverage ?? {}) };
   const names = { core: '활성·신규·세션', ads: '광고 수익', cohort: '재방문 코호트', eventsDaily: '일별 행동', current: '기간 이용자', countries: '국가 운영 지표', countryEvents: '국가별 기능', manufacturers: '제조사 운영 지표', manufacturerEvents: '제조사별 알람', countryDaily: '국가 일별 추이' };
