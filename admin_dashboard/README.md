@@ -148,3 +148,6 @@ OperationsSnapshot은 이미 남는 로컬 진단 로그를 앱 재개 시 백�
     firebase deploy --only hosting --project shiftbell-29f31
 
 빌드는 JavaScript 구문을 확인하고 public/을 admin_dashboard/build/에 복사하며 build-info.json의 버전과 파일 해시를 생성합니다. Firebase Hosting site는 shiftbell-ops-29f31만 배포합니다.
+
+
+2026-10-11 후속: 운영 요약의 첫 카드는 어제 DAU/어제 기준 MAU와 최근 10일 고정 추이다. 차트/날짜 버튼으로 하루씩 확인하고, 다른 조회 기간은 아래 기간 지표에 적용된다. 어제 집계가 없으면 대기로 표시하며 과거 값을 어제로 바꾸지 않는다. 핵심 기능 표는 선택 기간 이용 횟수 내림차순, 미관측은 마지막이다. 고정 질문 제목은 제거했다. 친구 공유 웹·Auth/Firestore 규칙은 수정하지 않았다.

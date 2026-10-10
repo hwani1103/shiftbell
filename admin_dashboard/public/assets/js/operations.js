@@ -1,5 +1,5 @@
 import { lineChart, sparkline } from './charts.js';
-import { fmtInt, fmtPct, fmtMoney, fmtDur, fmtMD, esc, sum, avg, deltaInfo } from './format.js';
+import { fmtInt, fmtPct, fmtMoney, fmtDur, fmtMD, fmtLong, todayKst, esc, sum, avg, deltaInfo } from './format.js';
 import { eventMeta, localizeName, COLORS } from './labels.js';
 
 export const SECTIONS = [['overview', '운영 요약'], ['growth', '성장·국가'], ['product', '기능 활용'], ['quality', '알람·기기']];
@@ -36,21 +36,33 @@ export function businessKpis(docs, view) {
     metric('7일 재방문율', retained?.days?.[7] == null ? '—' : fmtPct(retained.days[7], 1), retained ? '첫 세션 코호트 ' + fmtInt(retained.size) + '명 · 별도 기준 기간' : '코호트 자료 없음', retained && retained.size < 30 ? tag('작은 표본', 'warning') : '') +
     metric('28일 활성 사용자', number(view.last('mau'), '명'), '기준일 직전 28일 · MAU', '', sparkline(view.cur('mau'), COLORS.mau)) + '</section>';
 }
-export function operatingBrief(docs, view) {
-  const period = periodData(docs, view); const notes = [];
-  const current = period?.current?.activeUsers; const previous = period?.previous?.activeUsers;
-  if (current != null && previous > 0) {
-    const ratio = (current - previous) / previous;
-    notes.push({ tone: ratio < -.2 && previous >= 30 ? 'warning' : '', title: '사용자 기반', body: '동일 기간 활성 사용자 ' + fmtInt(current) + '명, 직전 ' + fmtInt(previous) + '명 (' + (ratio >= 0 ? '+' : '') + (ratio * 100).toFixed(1) + '%).' });
-  } else notes.push({ title: '비교 기준 확보', body: '기간별 중복 제거 이용자 집계가 연결되면 성장과 감소를 비교할 수 있습니다.' });
-  const failures = eventData(docs, view, 'alarm_schedule_failed');
-  if (failures.count > 0) notes.push({ tone: 'warning', title: '예약 실패 관측', body: fmtInt(failures.count) + '회의 예약 API 실패가 보고되었습니다. 알람·기기에서 제조사별 관측을 확인하세요. 실제 미울림 횟수와 같지 않습니다.' });
-  const teams = eventData(docs, view, 'team_roster_created');
-  if (!teams.observed) notes.push({ title: '전체교대조 계측', body: '생성·수정·삭제 이벤트를 연결했습니다. 새 계측 앱이 출시되고 사용된 이후부터 데이터가 들어옵니다.' });
-  const age = Date.now() - Date.parse(docs.summary.updatedAt);
-  if (age > 36 * 3600000) notes.unshift({ tone: 'warning', title: '집계 지연', body: '마지막 성공 집계가 36시간 이상 지났습니다. 데이터 수집 상태에서 확인하세요.' });
-  return '<section class="ops-brief span-12"><div class="eyebrow">SERVICE OPERATIONS</div><h1>서비스가 성장하고, 제대로 쓰이고 있는가</h1><p class="brief-sub">' + esc(view.dates[0]) + ' — ' + esc(view.dates.at(-1)) + ' · 완료된 날짜 기준 · 출시 앱</p><div class="brief-grid">' + notes.slice(0, 3).map((n) => '<article class="brief-item ' + (n.tone ?? '') + '"><b>' + n.title + '</b><p>' + esc(n.body) + '</p></article>').join('') + '</div></section>';
+export function dailyView(docs, yesterday = new Date(Date.parse(todayKst()) - 86400000).toISOString().slice(0, 10)) {
+  const cutoff = new Date(Date.parse(yesterday) - 9 * 86400000).toISOString().slice(0, 10);
+  const indices = docs.series.dates.flatMap((date, i) => date >= cutoff && date <= yesterday ? [i] : []);
+  const yesterdayIndex = docs.series.dates.indexOf(yesterday);
+  return { yesterday, dates: indices.map((i) => docs.series.dates[i]),
+    cur: (key) => indices.map((i) => docs.series[key]?.[i]),
+    yesterdayValue: (key) => yesterdayIndex < 0 ? null : docs.series[key]?.[yesterdayIndex] ?? null };
 }
+export function dailyReadout(view, date) {
+  const index = view.dates.indexOf(date);
+  if (index < 0) return '선택할 날짜의 자료가 아직 없습니다.';
+  return fmtLong(date) + ' · DAU ' + number(view.cur('dau')[index], '명') + ' · MAU ' + number(view.cur('mau')[index], '명');
+}
+export function dailyOverviewCard(docs, view, ui) {
+  const selected = view.dates.includes(ui.dailyDate) ? ui.dailyDate : view.dates.at(-1);
+  const waiting = view.yesterdayValue('dau') == null;
+  const buttons = view.dates.map((date) => '<button class="chip" data-action="daily-day" data-date="' + date + '" aria-label="' + esc(fmtLong(date)) + ' DAU MAU 확인" aria-pressed="' + (date === selected) + '">' + fmtMD(date) + '</button>').join('');
+  return '<section class="card span-12 daily-overview"><div class="card-h"><div><h1>DAU · MAU</h1><p>어제 ' + esc(fmtLong(view.yesterday)) + ' 기준 · 출시 앱</p></div></div><div class="daily-kpis">' +
+    '<article><span>어제 DAU</span><b>' + number(view.yesterdayValue('dau'), '명') + '</b><small>하루 동안 앱을 쓴 사용자</small></article>' +
+    '<article><span>어제 기준 MAU</span><b>' + number(view.yesterdayValue('mau'), '명') + '</b><small>직전 28일 동안 앱을 쓴 사용자</small></article></div>' +
+    (waiting ? '<p class="notice">어제 자료는 아직 집계되지 않았습니다. 아래 차트는 최근 10일 중 집계된 날짜만 보여줍니다.</p>' : '') +
+    '<div class="daily-chart-head"><h2>최근 10일 추이</h2><span class="sub">차트나 날짜를 눌러 하루씩 확인</span></div>' +
+    '<div class="daily-legend"><button class="chip" data-action="legend" data-key="dau" aria-pressed="' + ui.visible.dau + '"><i style="background:' + COLORS.dau + '"></i>DAU 일간</button><button class="chip" data-action="legend" data-key="mau" aria-pressed="' + ui.visible.mau + '"><i style="background:' + COLORS.mau + '"></i>MAU 월간</button></div>' +
+    (view.dates.length ? '<div id="ch-users" style="min-height:240px"></div><div class="daily-days" aria-label="일별 사용자 확인">' + buttons + '</div>' : empty('최근 10일의 집계 자료가 아직 없습니다.')) +
+    '<p id="daily-readout" class="daily-readout" aria-live="polite">' + esc(dailyReadout(view, selected)) + '</p></section>';
+}
+
 const FEATURES = [
   ['onboarding_complete', '시작 완료'], ['team_roster_created', '전체교대조 생성'], ['all_shifts_opened', '전체근무표 열람'],
   ['shift_assigned', '근무 변경'], ['alarm_template_saved', '알람 설정'], ['alarm_dismissed', '알람 끄기'],
@@ -59,12 +71,13 @@ const FEATURES = [
 ];
 export function adoptionCard(docs, view) {
   const totalUsers = periodData(docs, view)?.current?.totalUsers;
-  const rows = FEATURES.map(([name, label]) => {
-    const data = eventData(docs, view, name);
+  const ranked = FEATURES.map(([name, label], order) => ({ name, label, order, data: eventData(docs, view, name) }))
+    .sort((a, b) => Number(b.data.observed) - Number(a.data.observed) || (b.data.count ?? -1) - (a.data.count ?? -1) || a.order - b.order);
+  const rows = ranked.map(({ name, label, data }) => {
     const share = data.observed && data.users != null && totalUsers > 0 && data.users <= totalUsers ? data.users / totalUsers : null;
     return '<tr data-action="event" data-event="' + name + '" tabindex="0" role="button" aria-label="' + label + ' 상세"><th>' + label + '</th><td>' + (data.observed ? number(data.users, '명') : tag('미관측')) + '</td><td>' + (share == null ? '—' : '<div class="adoption"><i style="width:' + (share * 100) + '%"></i><span>' + fmtPct(share, 1) + '</span></div>') + '</td><td>' + (data.observed ? number(data.count, '회') : '—') + '</td></tr>';
   }).join('');
-  return card('핵심 기능의 도달과 활용', '선택 기간 내 기능별 사용자 수와 이용 횟수. 기능 간 사용자는 중복되며 전환 퍼널이 아닙니다.', '<div class="table-scroll"><table class="ops-table"><thead><tr><th>기능</th><th>사용자</th><th>기간 이용자 대비</th><th>이용 횟수</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="sub">기능 사용률의 분모는 같은 기간의 전체 이용자(totalUsers)입니다. 미관측은 미사용·구버전·수집 누락을 구분할 자료가 아직 없다는 뜻입니다.</p>');
+  return card('핵심 기능의 도달과 활용', '선택 기간 이용 횟수 내림차순 · 기능별 사용자 수와 도달률 · 미관측은 맨 아래', '<div class="table-scroll"><table class="ops-table"><thead><tr><th>기능</th><th>사용자</th><th>기간 이용자 대비</th><th>이용 횟수</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="sub">기능 사용률의 분모는 같은 기간의 전체 이용자(totalUsers)입니다. 미관측은 미사용·구버전·수집 누락을 구분할 자료가 아직 없다는 뜻입니다.</p>');
 }
 export function countryCard(docs, view, ui) {
   const period = periodData(docs, view); const rows = period?.countries;

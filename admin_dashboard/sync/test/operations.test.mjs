@@ -4,7 +4,7 @@ import { Ga4, DEFAULTS } from '../lib/ga4.mjs';
 import { reportState, periodStats, segmentStats, countryTrend } from '../lib/operations.mjs';
 import { buildMockDocs } from '../../public/assets/js/mock.js';
 import { computeView } from '../../public/assets/js/views.js';
-import { periodData, eventData, adoptionCard, revenueCard, reliabilityCard } from '../../public/assets/js/operations.js';
+import { periodData, eventData, adoptionCard, revenueCard, reliabilityCard, dailyView, dailyOverviewCard } from '../../public/assets/js/operations.js';
 const report = (metrics, rows, metadata = {}) => ({metricHeaders: metrics.map(name => ({name})), rows: rows.map(([dims, vals]) => ({dimensionValues: dims.map(value => ({value})), metricValues: vals.map(value => ({value: String(value)}))})), metadata});
 test('all business queries use production stream and completed dates', () => {
   const ga = new Ga4({auth: null});
@@ -52,3 +52,7 @@ test('unknown revenue and unobserved alarm telemetry do not assert success', () 
 });
 
 test('unobserved feature does not imply a zero adoption rate', () => {const docs=buildMockDocs();const view=computeView(docs,30);delete docs.events.series.team_roster_created;docs.summary.eventsByRange[30].events=docs.summary.eventsByRange[30].events.filter(e=>e.name!=='team_roster_created');const row=adoptionCard(docs,view).match(/<tr[^>]*data-event="team_roster_created"[\s\S]*?<\/tr>/)[0];assert.match(row,/미관측/);assert.equal(row.includes('adoption'),false);assert.match(row,/>—<\/td>/);});
+
+test('overview daily chart uses ten calendar days ending yesterday', () => { const docs=buildMockDocs();const recent=dailyView(docs,'2026-09-21');assert.equal(recent.dates.length,10);assert.equal(recent.dates.at(-1),'2026-09-21');assert.equal(recent.dates[0],'2026-09-12');assert.equal(recent.yesterdayValue('dau'),docs.series.dau.at(-1));for(const range of [7,30,100,365]){const html=dailyOverviewCard(docs,recent,{range,visible:{dau:true,mau:true}});assert.equal((html.match(/data-action="daily-day"/g)??[]).length,10);assert.equal(html.includes('서비스가 성장하고'),false);}});
+test('missing yesterday remains pending instead of relabeling old DAU', () => {const docs=buildMockDocs();const recent=dailyView(docs,'2026-09-22');assert.equal(recent.yesterdayValue('dau'),null);assert.equal(recent.yesterdayValue('mau'),null);assert.equal(recent.dates.length,9);assert.match(dailyOverviewCard(docs,recent,{visible:{dau:true,mau:true}}),/어제 자료는 아직 집계되지/);});
+test('feature adoption is sorted by period usage with unknowns last', () => {const docs=buildMockDocs();const view=computeView(docs,30);delete docs.events.series.team_roster_created;docs.summary.eventsByRange[30].events=docs.summary.eventsByRange[30].events.filter(e=>e.name!=='team_roster_created');const names=[...adoptionCard(docs,view).matchAll(/data-event="([a-z_]+)"/g)].map(m=>m[1]);assert.equal(names.at(-1),'team_roster_created');const counts=names.slice(0,-1).map(name=>eventData(docs,view,name).count);assert.deepEqual(counts,[...counts].sort((a,b)=>b-a));});

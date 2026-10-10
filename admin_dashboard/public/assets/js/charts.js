@@ -91,7 +91,7 @@ function placeTip(tip, host, x) {
 export function lineChart(el, opt) {
   let o = opt;
   let first = true;
-  let selectedDate = null;
+  let selectedDate = o.selectedDate ?? null;
   const clearSelection = () => {
     selectedDate = null;
     el.querySelectorAll(".xh, .pt").forEach((node) => { node.style.display = "none"; });
@@ -175,6 +175,7 @@ export function lineChart(el, opt) {
       });
       tip.innerHTML = `<div class="td">${esc(fmtLong(o.dates[i]))}</div>${rows}`;
       placeTip(tip, el, x);
+      o.onSelect?.(selectedDate, i);
     };
     const show = (ev) => {
       const r = el.getBoundingClientRect();
@@ -201,6 +202,7 @@ export function lineChart(el, opt) {
   ro.observe(el);
   draw();
   return {
+    selectDate(date) { if (!o.dates.includes(date)) return; selectedDate = date; first = false; draw(); },
     update(next) { o = { ...o, ...next }; first = false; draw(); },
     destroy() { ro.disconnect(); document.removeEventListener("pointerdown", outsidePress, true); document.removeEventListener("keydown", escape); clearSelection(); },
   };

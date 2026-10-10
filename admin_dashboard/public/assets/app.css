@@ -317,3 +317,16 @@ main { padding-top: 16px; display: grid; gap: 14px; }
 @media(max-width:650px) { .ops-brief { padding:22px 18px; }.brief-grid { grid-template-columns:1fr; gap:18px; }.health-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.coverage-grid { grid-template-columns:1fr; gap:20px; }.ops-nav button { padding:8px 11px; font-size:12px; }.ops-table th,.ops-table td { padding:12px 10px; } }
 
 @media(max-width:650px) { .ops-layout .kpi .kfoot { display:block; }.ops-layout .kpi .spark { display:block; margin-top:8px; max-width:100%; }.ops-layout .kpi .note { overflow-wrap:normal; word-break:keep-all; } }
+
+.daily-overview h1 { margin:0; font-size:22px; letter-spacing:-.03em; }
+.daily-kpis { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:18px 0 26px; }
+.daily-kpis article { padding:18px 22px; border-radius:14px; background:var(--surface-2); }
+.daily-kpis span,.daily-kpis small { display:block; color:var(--muted); font-size:12px; }
+.daily-kpis b { display:block; font-size:38px; letter-spacing:-.04em; margin:7px 0; }
+.daily-kpis article:first-child b { color:var(--accent); }
+.daily-chart-head { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:8px; }
+.daily-chart-head h2 { margin:0; font-size:16px; }.daily-legend { display:flex; gap:8px; margin:12px 0; }
+.daily-days { display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:6px; margin-top:14px; }.daily-days .chip { justify-content:center; padding:9px 4px; font-variant-numeric:tabular-nums; }
+.daily-days .chip[aria-pressed=true] { color:var(--accent); background:var(--accent-soft); border-color:var(--accent); }
+.daily-readout { padding:13px 16px; border-radius:10px; background:var(--surface-2); font-size:13px; font-weight:600; margin:14px 0 0; }
+@media(max-width:650px) { .daily-kpis { gap:10px; }.daily-kpis article { padding:15px 12px; }.daily-kpis b { font-size:30px; }.daily-days { grid-template-columns:repeat(5,minmax(0,1fr)); }.daily-readout { font-size:12px; padding:12px; } }

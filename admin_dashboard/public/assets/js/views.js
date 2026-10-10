@@ -258,17 +258,17 @@ export function skeleton() {
 // ───────────────────────── 차트 붙이기 ─────────────────────────
 
 /** HTML을 넣은 뒤 호출. 만든 차트를 배열로 돌려줘서 다음 렌더 전에 destroy할 수 있게 한다. */
-export function mountCharts(root, docs, view, ui) {
+export function mountCharts(root, docs, view, ui, usersView = view, onUserSelect) {
   const charts = [];
   const $ = (id) => root.querySelector(id);
   const money = docs.summary.currency ?? 'USD';
 
   if ($('#ch-users')) {
     charts.push(lineChart($('#ch-users'), {
-      title: '활성 사용자 추이', dates: view.dates, height: 240, valueFmt: (v) => `${fmtInt(v)}명`,
+      title: '활성 사용자 추이', onSelect: onUserSelect, selectedDate: onUserSelect ? ui.dailyDate : null, dates: usersView.dates, height: 240, valueFmt: (v) => `${fmtInt(v)}명`,
       series: [
-        { key: 'mau', label: 'MAU', color: COLORS.mau, values: view.cur('mau'), visible: ui.visible.mau },
-        { key: 'dau', label: 'DAU', color: COLORS.dau, values: view.cur('dau'), visible: ui.visible.dau, area: true },
+        { key: 'mau', label: 'MAU', color: COLORS.mau, values: usersView.cur('mau'), visible: ui.visible.mau },
+        { key: 'dau', label: 'DAU', color: COLORS.dau, values: usersView.cur('dau'), visible: ui.visible.dau, area: true },
       ],
     }));
   }
