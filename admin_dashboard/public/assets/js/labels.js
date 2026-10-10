@@ -1,29 +1,38 @@
 // admin_dashboard/public/assets/js/labels.js - 이벤트/분포 항목의 한국어 이름·아이콘·그룹.
-// 사용자 정의 이벤트 이름은 앱의 lib/services/app_analytics.dart(AppAnalytics)와 반드시 같아야 한다.
+// 현재 이벤트는 앱의 AnalyticsEvent.all과 일치한다. retired:true는 과거 데이터 표시용이다.
 
 /** group: 화면에서 묶어 보여 주는 분류. system=구글이 자동 수집하는 기본 이벤트 */
 export const EVENT_META = {
-  pattern_transfer_opened: { label: '패턴 코드 화면 열기', icon: '•', group: '근무패턴', desc: '설정·온보딩·친구 공유에서 패턴 코드 화면을 연 횟수.' },
-  pattern_code_generated: { label: '패턴 코드 생성', icon: '•', group: '근무패턴', desc: '코드 생성에 성공한 횟수. 코드 내용은 수집하지 않습니다.' },
-  pattern_share_opened: { label: '패턴 공유창 열기', icon: '•', group: '근무패턴', desc: '공유 버튼을 누른 횟수. 상대방에게 전달 완료된 횟수가 아닙니다.' },
-  pattern_share_selected: { label: '패턴 공유 대상 선택', icon: '•', group: '근무패턴', desc: 'OS가 공유 대상 선택 성공을 알려준 횟수. 실제 메시지 전달은 확인하지 않습니다.' },
-  pattern_share_dismissed: { label: '패턴 공유창 닫기', icon: '•', group: '근무패턴', desc: 'OS가 공유 취소를 확인한 횟수. 결과를 제공하지 않는 기기는 포함되지 않습니다.' },
-  pattern_import_invalid: { label: '패턴 코드 형식 오류', icon: '•', group: '근무패턴', desc: '적용 버튼을 눌렀으나 코드 검사에서 거부된 횟수.' },
-  pattern_import_cancelled: { label: '패턴 적용 취소', icon: '•', group: '근무패턴', desc: '적용 확인창에서 취소하거나 닫은 횟수.' },
-  pattern_import_applied: { label: '패턴 적용 완료', icon: '•', group: '근무패턴', desc: '새 패턴의 DB 저장이 완료된 횟수.' },
-  pattern_import_failed: { label: '패턴 적용 실패', icon: '•', group: '근무패턴', desc: '패턴을 저장하지 못한 횟수.' },
-  one_tap_opened: { label: '원터치 패널 열기', icon: '•', group: '알람', desc: '원터치 알람 버튼으로 패널을 연 횟수.' },
-  one_tap_closed: { label: '원터치 패널 닫기', icon: '•', group: '알람', desc: '뒤로가기·달력 탭·할당 완료로 패널을 닫은 횟수.' },
-  one_tap_preset_editor_opened: { label: '원터치 설정창 열기', icon: '•', group: '알람', desc: '추가 또는 수정 설정창을 연 횟수.' },
-  one_tap_preset_saved: { label: '원터치 설정 추가', icon: '•', group: '알람', desc: '새 원터치 시각·울림 설정 저장 완료 횟수. 실제 시각은 수집하지 않습니다.' },
-  one_tap_preset_updated: { label: '원터치 설정 수정', icon: '•', group: '알람', desc: '기존 원터치 설정 변경 저장 완료 횟수.' },
-  one_tap_preset_deleted: { label: '원터치 설정 삭제', icon: '•', group: '알람', desc: '원터치 설정 삭제 완료 횟수.' },
-  one_tap_preset_cancelled: { label: '원터치 설정 취소', icon: '•', group: '알람', desc: '설정창에서 저장 없이 나간 횟수.' },
-  one_tap_preset_blocked: { label: '원터치 수정 제한', icon: '•', group: '알람', desc: '미래 날짜에 이미 추가한 설정의 수정을 차단한 횟수.' },
-  one_tap_preset_selected: { label: '원터치 시각 선택', icon: '•', group: '알람', desc: '저장된 시각을 골라 날짜 선택으로 넘어간 횟수.' },
-  one_tap_assigned: { label: '원터치 예약 완료', icon: '•', group: '알람', desc: '실제 날짜에 예약 성공한 횟수. 예약 시도 전체와 구분됩니다.' },
-  one_tap_assign_rejected: { label: '원터치 예약 거부·실패', icon: '•', group: '알람', desc: '중복·지난 시각·예약 실패 등으로 추가하지 못한 횟수.' },
-  one_tap_alarm_deleted: { label: '원터치 날짜 알람 삭제', icon: '•', group: '알람', desc: '날짜에 추가된 원터치 알람의 삭제 완료 횟수.' },
+  team_roster_created: { label: '전체교대조 생성', icon: '•', group: '달력', desc: '전체교대조 근무표 저장 완료. 근무명·조 이름·패턴 내용은 전송하지 않습니다.' },
+  team_roster_changed: { label: '전체교대조 변경', icon: '•', group: '달력', desc: '저장 완료된 조 변경. 근무표 내용은 전송하지 않습니다.' },
+  team_roster_deleted: { label: '전체교대조 삭제', icon: '•', group: '달력', desc: '전체교대조 설정 삭제 완료.' },
+  alarm_schedule_ok: { label: '예약 API 완료', icon: '•', group: '알람', desc: '로컬 진단에서 관측된 예약 API 완료. 반복 예약/재시도 포함, 실제 울림 성공과 다릅니다.' },
+  alarm_schedule_failed: { label: '예약 API 실패', icon: '•', group: '알람', desc: '예약 API 실패 관측. 이후 재시도 성공 여부와 실제 미울림을 뜻하지 않습니다.' },
+  alarm_fired: { label: '알람 울림 진입', icon: '•', group: '알람', desc: '현재 회차 수신이 확인되어 울림 경로에 진입한 관측. 청취 성공을 뜻하지 않습니다.' },
+  alarm_refresh_completed: { label: '알람 갱신 완료', icon: '•', group: '알람', desc: '네이티브 재예약 갱신 완료 관측. 부팅 이후만을 뜻하지 않습니다.' },
+  alarm_refresh_failed: { label: '알람 갱신 실패', icon: '•', group: '알람', desc: '네이티브 갱신 실패 관측.' },
+  device_boot_seen: { label: '부팅 신호 관측', icon: '•', group: '알람', desc: 'BOOT/LOCKED_BOOT 신호 관측. 동일 부팅에서 여러 신호가 올 수 있습니다.' },
+  ops_daily_ready: { label: '권한 상태 정상 관측', icon: '•', group: '알람', desc: '하루 1회 관측한 필수 권한 상태. 실제 울림 성공을 보장하지 않습니다.' },
+  ops_daily_restricted: { label: '권한 제한 관측', icon: '•', group: '알람', desc: '하루 1회 필수 권한 미허용 관측.' },
+  ops_daily_unknown: { label: '권한 상태 확인 불가', icon: '•', group: '알람', desc: '하루 1회 권한 상태 확인 불가 관측.' },
+  ops_battery_restricted: { label: '배터리 최적화 적용 관측', icon: '•', group: '알람', desc: '하루 1회 OS 최적화 적용 상태. 제조사 제한이나 실패 원인으로 확정하지 않습니다.' },
+  ops_exact_denied: { label: '정확 알람 미허용 관측', icon: '•', group: '알람', desc: '하루 1회 정확 알람 미허용 관측.' },
+  ops_notification_blocked: { label: '앱 알림 차단 관측', icon: '•', group: '알람', desc: '하루 1회 앱 알림 차단 관측.' },
+  ops_channel_blocked: { label: '알람 채널 차단 관측', icon: '•', group: '알람', desc: '하루 1회 알람 채널 차단 관측.' },
+  ops_fullscreen_denied: { label: '전체화면 미허용 관측', icon: '•', group: '알람', desc: '하루 1회 전체화면 알림 미허용 관측.' },
+
+  one_tap_opened: { retired: true, label: '원터치 패널 열기', icon: '•', group: '알람', desc: '원터치 알람 버튼으로 패널을 연 횟수.' },
+  one_tap_closed: { retired: true, label: '원터치 패널 닫기', icon: '•', group: '알람', desc: '뒤로가기·달력 탭·할당 완료로 패널을 닫은 횟수.' },
+  one_tap_preset_editor_opened: { retired: true, label: '원터치 설정창 열기', icon: '•', group: '알람', desc: '추가 또는 수정 설정창을 연 횟수.' },
+  one_tap_preset_saved: { retired: true, label: '원터치 설정 추가', icon: '•', group: '알람', desc: '새 원터치 시각·울림 설정 저장 완료 횟수. 실제 시각은 수집하지 않습니다.' },
+  one_tap_preset_updated: { retired: true, label: '원터치 설정 수정', icon: '•', group: '알람', desc: '기존 원터치 설정 변경 저장 완료 횟수.' },
+  one_tap_preset_deleted: { retired: true, label: '원터치 설정 삭제', icon: '•', group: '알람', desc: '원터치 설정 삭제 완료 횟수.' },
+  one_tap_preset_cancelled: { retired: true, label: '원터치 설정 취소', icon: '•', group: '알람', desc: '설정창에서 저장 없이 나간 횟수.' },
+  one_tap_preset_blocked: { retired: true, label: '원터치 수정 제한', icon: '•', group: '알람', desc: '미래 날짜에 이미 추가한 설정의 수정을 차단한 횟수.' },
+  one_tap_preset_selected: { retired: true, label: '원터치 시각 선택', icon: '•', group: '알람', desc: '저장된 시각을 골라 날짜 선택으로 넘어간 횟수.' },
+  one_tap_assigned: { retired: true, label: '원터치 예약 완료', icon: '•', group: '알람', desc: '실제 날짜에 예약 성공한 횟수. 예약 시도 전체와 구분됩니다.' },
+  one_tap_assign_rejected: { retired: true, label: '원터치 예약 거부·실패', icon: '•', group: '알람', desc: '중복·지난 시각·예약 실패 등으로 추가하지 못한 횟수.' },
+  one_tap_alarm_deleted: { retired: true, label: '원터치 날짜 알람 삭제', icon: '•', group: '알람', desc: '날짜에 추가된 원터치 알람의 삭제 완료 횟수.' },
 
   // ── 기본(자동 수집) ──
   first_open: { label: '첫 실행(first_open)', icon: '📲', group: 'system', desc: 'GA4 첫 실행 이벤트. 재설치와 Analytics 도입 버전으로 업데이트한 기존 사용자도 포함될 수 있어 순수 신규 설치 수와 다릅니다.' },
@@ -44,9 +53,9 @@ export const EVENT_META = {
   backup_restored: { label: '백업 복원', icon: '♻️', group: '백업' },
   backup_created: { label: '백업 생성(직접)', icon: '💾', group: '백업' },
   alarm_template_saved: { label: '고정 알람 저장', icon: '⏰', group: '알람' },
-  custom_alarm_assigned: { label: '원터치 예약 시도 전체', icon: '🗓️', group: '알람', desc: '원터치 예약 시도 횟수(성공·거부 포함). 예약 완료와 거부 항목에서 결과를 따로 볼 수 있어요.' },
+  custom_alarm_assigned: { retired: true, label: '원터치 예약 시도 전체', icon: '🗓️', group: '알람', desc: '원터치 예약 시도 횟수(성공·거부 포함). 예약 완료와 거부 항목에서 결과를 따로 볼 수 있어요.' },
   alarm_dismissed: { label: '알람 끄기', icon: '🔕', group: '알람', desc: '울린 알람을 끈 횟수. 알람이 실제로 쓰이는 정도를 보여 줘요.' },
-  alarm_snoozed: { label: '알람 5분 연장', icon: '😴', group: '알람' },
+  alarm_snoozed: { label: '알람 연장', icon: '😴', group: '알람' },
   alarm_no_response: { label: '알람 무응답 종료', icon: '⌛', group: '알람', desc: '끄지 않아 자동 종료된 알람 횟수. 많으면 알람이 잘 안 들리거나 헛울림이 잦다는 신호예요.' },
   shift_assigned: { label: '근무 지정·변경', icon: '📅', group: '달력' },
   calendar_theme_changed: { label: '달력 테마 변경', icon: '🎨', group: '달력' },
@@ -83,13 +92,14 @@ export const BREAKDOWNS = [
   { key: 'appVersion', label: '앱 버전', unit: '명' },
   { key: 'os', label: 'Android', unit: '명' },
   { key: 'device', label: '기기', unit: '명' },
+  { key: 'manufacturer', label: '제조사', unit: '명' },
   { key: 'language', label: '언어', unit: '명' },
   { key: 'country', label: '국가', unit: '명' },
 ];
 
 const NAMES = {
   language: { Korean: '한국어', English: '영어', Japanese: '일본어', Chinese: '중국어', Spanish: '스페인어', Vietnamese: '베트남어', Thai: '태국어', Indonesian: '인도네시아어', German: '독일어', French: '프랑스어' },
-  country: { 'South Korea': '대한민국', 'United States': '미국', Japan: '일본', Canada: '캐나다', Australia: '호주', China: '중국', Vietnam: '베트남', Thailand: '태국', Philippines: '필리핀', Germany: '독일', 'United Kingdom': '영국', Taiwan: '대만' },
+  country: { India: '인도', Brazil: '브라질', 'United Arab Emirates': '아랍에미리트', 'South Africa': '남아프리카공화국', 'South Korea': '대한민국', 'United States': '미국', Japan: '일본', Canada: '캐나다', Australia: '호주', China: '중국', Vietnam: '베트남', Thailand: '태국', Philippines: '필리핀', Germany: '독일', 'United Kingdom': '영국', Taiwan: '대만' },
 };
 export function localizeName(dim, name) {
   return NAMES[dim]?.[name] ?? name;

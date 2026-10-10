@@ -23,5 +23,5 @@ for (const u of [{ ...ADMIN, emailVerified: true }, { ...OTHER, emailVerified: t
   }
 }
 const docs = buildMockDocs();
-await Promise.all(['summary', 'series', 'events'].map((id) => db.collection('dashboard').doc(id).set(docs[id])));
+await Promise.all(['summary', 'series', 'events', 'operations'].map((id) => db.collection('dashboard').doc(id).set(docs[id])));
 console.log('✅ 에뮬레이터 시드 완료 - 관리자', ADMIN.email, '/', ADMIN.password);

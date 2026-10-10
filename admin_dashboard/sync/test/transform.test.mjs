@@ -162,7 +162,7 @@ test('출시 앱만 집계: 모든 리포트에 streamId 필터가 걸린다(dev
     assert.deepEqual(r.dimensionFilter, streamFilter('15763725797'));
   }
   for (const r of reports.slice(0, 3)) {
-    assert.equal(r.dateRanges[0].endDate, 'today', '3시간 동기화에 오늘 잠정치를 포함한다');
+    assert.equal(r.dateRanges[0].endDate, 'yesterday', '매일 집계에는 완료된 날짜만 포함한다');
   }
   assert.deepEqual(reports[3].dateRanges, [{ startDate: '2026-08-23', endDate: '2026-09-21' }]);
   assert.equal(DEFAULTS.streamId, '15763725797');

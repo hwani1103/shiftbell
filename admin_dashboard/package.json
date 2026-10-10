@@ -1,0 +1,9 @@
+{
+  "name": "shiftbell-operations-dashboard",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "test": "node --test sync/test/*.test.mjs"
+  }
+}

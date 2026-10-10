@@ -1,11 +1,16 @@
-# 관리자 대시보드용 GA4 -> Firestore 동기화 (3시간마다).
+# 관리자 대시보드용 GA4 -> Firestore 동기화 (매일 한국 시간 12:17).
 # 설정 방법은 admin_dashboard/README.md 의 "1회 설정" 참고. 시크릿 이름: GA4_SERVICE_ACCOUNT_JSON
 name: dashboard-sync
 
 on:
   schedule:
-    - cron: '17 */3 * * *'
-  workflow_dispatch: {}
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: '운영자가 요청한 추가 집계 (하루 1회 제한 예외)'
+        type: boolean
+        default: false
 
 concurrency:
   group: dashboard-sync
@@ -40,4 +45,8 @@ jobs:
             echo "::error::GA4_SERVICE_ACCOUNT_JSON 시크릿이 없어 대시보드를 동기화할 수 없습니다."
             exit 1
           fi
-          node sync.mjs
+          if [ '${{ inputs.force }}' = 'true' ]; then
+            node sync.mjs --force
+          else
+            node sync.mjs
+          fi

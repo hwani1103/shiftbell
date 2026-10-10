@@ -1,8 +1,8 @@
 // admin_dashboard/public/assets/js/views.js
 // 화면 조각을 만드는 곳. HTML 문자열을 돌려주는 함수와, 붙인 뒤 차트를 그리는 mountCharts()로 나뉜다.
 
-import { lineChart, barChart, sparkline, donut, hbarList } from './charts.js';
-import { fmtInt, fmtCompact, fmtPct, fmtDur, fmtMoney, fmtMD, fmtLong, relTime, deltaInfo, sum, avg, bucketize, esc, dataCutoffLabel } from './format.js';
+import { lineChart, sparkline, donut, hbarList } from './charts.js';
+import { fmtInt, fmtCompact, fmtPct, fmtDur, fmtMoney, fmtMD, fmtLong, relTime, deltaInfo, sum, avg, esc, dataCutoffLabel } from './format.js';
 import { eventMeta, isSystemEvent, BREAKDOWNS, localizeName, osLabel, COLORS } from './labels.js';
 
 export const RANGES = [7, 30, 100, 365];
@@ -27,9 +27,9 @@ export function computeView(docs, range) {
     n, len, from,
     hasPrev: pf >= 0,
     dates: series.dates.slice(from),
-    cur: (k) => series[k].slice(from),
-    prev: (k) => (pf >= 0 ? series[k].slice(pf, from) : []),
-    last: (k) => series[k][n - 1] ?? 0,
+    cur: (k) => (series[k] ?? []).slice(from),
+    prev: (k) => (pf >= 0 ? (series[k] ?? []).slice(pf, from) : []),
+    last: (k) => series[k]?.[n - 1] ?? 0,
   };
 }
 
@@ -121,18 +121,14 @@ function legendChips(items, visible) {
 }
 
 export function usersCard(view, visible) {
-  return `<section class="card span-8"><div class="card-h"><div><h2>활성 사용자 추이</h2><p>하루·7일·28일 동안 한 번이라도 앱을 쓴 사용자 수</p></div></div>
-    ${legendChips([{ key: 'dau', label: 'DAU 일간', color: COLORS.dau }, { key: 'wau', label: 'WAU 주간', color: COLORS.wau }, { key: 'mau', label: 'MAU 월간', color: COLORS.mau }], visible)}
+  return `<section class="card span-8"><div class="card-h"><div><h2>활성 사용자 추이</h2><p>하루·28일 동안 한 번이라도 앱을 쓴 사용자 수</p></div></div>
+    ${legendChips([{ key: 'dau', label: 'DAU 일간', color: COLORS.dau }, { key: 'mau', label: 'MAU 월간', color: COLORS.mau }], visible)}
     <div id="ch-users" style="min-height:230px"></div></section>`;
 }
 
-/** 막대 묶음 크기: 짧은 기간은 하루 단위, 긴 기간은 주 단위. */
-const bucketSize = (len) => (len <= 30 ? 1 : 7);
-
 export function installsCard(view) {
   const inst = sum(view.cur('installs')); const rem = sum(view.cur('uninstalls'));
-  const b = bucketSize(view.len);
-  return `<section class="card span-4"><div class="card-h"><div><h2>첫 실행 · 삭제</h2><p>${b === 1 ? '하루 단위' : '주 단위 합계'} · GA4 자동 이벤트</p></div></div>
+  return `<section class="card span-4"><div class="card-h"><div><h2>첫 실행 · 삭제</h2><p>하루 단위 · GA4 자동 이벤트</p></div></div>
     <div id="ch-installs" style="min-height:200px"></div>
     <div class="stats"><div class="stat"><b>${fmtInt(inst)}</b><span>첫 실행</span></div><div class="stat"><b>${fmtInt(rem)}</b><span>감지된 삭제</span></div></div>
     <p class="sub" style="margin:10px 0 0">첫 실행에는 Analytics 도입 업데이트가 포함될 수 있어 신규 설치와 다릅니다. 삭제는 실제보다 적을 수 있어요.</p></section>`;
@@ -241,16 +237,16 @@ export function distCard(docs, ui) {
     body = `<div class="dist">${donut(colored, { top: fmtInt(total), bottom: '최근 28일' })}
       <ul class="dlegend">${colored.map((c) => `<li><i style="background:${c.color}"></i><span class="n">${esc(c.label)}</span><span class="v">${fmtInt(c.value)}</span><span class="p">${fmtPct(total ? c.value / total : 0, 0)}</span></li>`).join('')}</ul></div>`;
   }
-  return `<section class="card span-5"><div class="card-h"><div><h2>사용자 분포</h2><p>최근 28일 활성 사용자 기준</p></div></div>${tabs}${body}</section>`;
+  return `<section class="card span-5"><div class="card-h"><div><h2>사용자 분포</h2><p>최근 28일 · 표시된 상위 항목 내 비율 (전체 점유율 아님)</p></div></div>${tabs}${body}</section>`;
 }
 
 export function footerNote(docs) {
   const s = docs.summary;
   return `<div class="foot span-12">데이터 기준: Google Analytics 4 · 플레이 스토어 <b>출시 버전만</b> 집계(개발용 앱 제외) · 스트림 ${esc(s.streamId ?? '-')}<br>
     마지막 동기화 ${esc(relTime(s.updatedAt))} (${esc(s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : '-')}) · 데이터 기준일 ${esc(s.latest ? fmtLong(s.latest) : '-')} · ${dataCutoffLabel(s.latest)}<br>
-    서버 집계: 매일 한국 시간 00:17·03:17·06:17·09:17·12:17·15:17·18:17·21:17 예약(실행 지연 가능).<br>
+    서버 집계: 매일 한국 시간 12:17에 한 번 예약(실행 지연 가능).<br>
     화면: 열어 둔 동안 약 10~11분마다 재조회하며, 새로고침 버튼은 저장된 최신 집계를 다시 읽습니다.<br>
-    오늘 수치는 잠정치입니다. GA4 처리에 보통 2~6시간이 걸리고 최근 24~48시간 값은 보정될 수 있어요.${s.source === 'mock' ? '<br><b>※ 지금 보이는 건 데모(모의) 데이터입니다.</b>' : ''}</div>`;
+    집계는 어제까지의 완료된 날짜 기준입니다. GA4 처리와 최근 24~48시간 보정에 따라 값이 달라질 수 있습니다.${s.source === 'mock' ? '<br><b>※ 지금 보이는 건 데모(모의) 데이터입니다.</b>' : ''}</div>`;
 }
 
 export function skeleton() {
@@ -272,20 +268,15 @@ export function mountCharts(root, docs, view, ui) {
       title: '활성 사용자 추이', dates: view.dates, height: 240, valueFmt: (v) => `${fmtInt(v)}명`,
       series: [
         { key: 'mau', label: 'MAU', color: COLORS.mau, values: view.cur('mau'), visible: ui.visible.mau },
-        { key: 'wau', label: 'WAU', color: COLORS.wau, values: view.cur('wau'), visible: ui.visible.wau },
         { key: 'dau', label: 'DAU', color: COLORS.dau, values: view.cur('dau'), visible: ui.visible.dau, area: true },
       ],
     }));
   }
   if ($('#ch-installs')) {
-    const b = bucketSize(view.len);
-    const inst = bucketize(view.dates, view.cur('installs'), b, 'sum');
-    const rem = bucketize(view.dates, view.cur('uninstalls'), b, 'sum');
-    charts.push(barChart($('#ch-installs'), {
-      title: '첫 실행과 삭제', height: 206,
-      labels: inst.dates.map((d) => fmtMD(d)),
-      tips: inst.spans.map(([a, z]) => (a === z ? fmtLong(a) : `${fmtMD(a)} ~ ${fmtMD(z)}`)),
-      groups: [{ key: 'i', label: '첫 실행', color: COLORS.install, values: inst.values }, { key: 'u', label: '삭제', color: COLORS.uninstall, values: rem.values }],
+    charts.push(lineChart($('#ch-installs'), {
+      title: '첫 실행 · 삭제', dates: view.dates, height: 208,
+      series: [{ key: 'i', label: '첫 실행', color: COLORS.install, values: view.cur('installs') },
+        { key: 'u', label: '삭제', color: COLORS.uninstall, values: view.cur('uninstalls') }],
       valueFmt: (v) => `${fmtInt(v)}건`,
     }));
   }

@@ -5,15 +5,15 @@ Firebase Hosting + Auth + Firestore 무료 한도 안에서 동작하고, **앱 
 (`pubspec.yaml`의 assets에도 없고 `android/`·`lib/`와도 무관한 웹 전용 폴더).
 
 ```
-앱(prod) ─ Firebase Analytics ─▶ GA4 ─(Data API, 3시간마다 조회)─▶ sync.mjs ─▶ Firestore dashboard/* ─▶ 이 사이트(로그인 후 읽기)
+앱(prod) ─ Firebase Analytics ─▶ GA4 ─(Data API, 매일 한국 시간 12:17에 조회)─▶ sync.mjs ─▶ Firestore dashboard/* ─▶ 이 사이트(로그인 후 읽기)
 
 앱 사용 지표는 출시 앱 스트림만 쓴다. 친구 웹 뷰어 성공 열람은 웹 스트림에서 따로 조회해 최근 30일 요약으로만 표시한다. 웹 방문을 앱 DAU에 합치지 않는다.
 ```
 
 ## 무엇이 보이나
 
-- **핵심 지표**: DAU / WAU / MAU, 끈끈이(DAU÷MAU), GA4 첫 실행, 감지된 삭제, 세션, 평균 사용 시간, 광고 노출·수익. 첫 실행은 Analytics 도입 업데이트도 포함될 수 있으므로 순수 신규 설치 수로 해석하지 않는다.
-- **기준일**: 핵심·광고·일별 행동은 오늘 잠정치까지 조회한다. 버전/기기 등 분포는 어제까지의 최근 28일이다. 오늘 수치와 완료된 하루의 수치를 구분해서 읽는다.
+- **핵심 지표**: 기간 활성/신규 사용자, D7 재방문, MAU, GA4 첫 실행, 감지된 삭제, 세션, 평균 사용 시간, 광고 노출·수익. 첫 실행은 Analytics 도입 업데이트도 포함될 수 있으므로 순수 신규 설치 수로 해석하지 않는다.
+- **기준일**: 핵심·광고·일별 행동은 어제까지의 완료된 날짜를 조회한다. 버전/기기 등 분포는 어제까지의 최근 28일이다. 같은 기간의 중복 제거 사용자 수와 일별 횟수를 구분해서 읽는다.
 - **추세**: 7 / 30 / 100 / 365일 전환, 전 기간 대비 증감, 일별 표(그대로 복사·확인 가능)
 - **사용자 행동**: 온보딩 완료, 알람 저장·끄기·5분 연장·무응답, 근무 지정, 메모, 일정, OT, 수면 기록, 백업, 친구 공유, 탭 이동 등
 - **유지율**(코호트), 앱 버전/국가/기기 분포
@@ -40,7 +40,7 @@ Firebase Hosting + Auth + Firestore 무료 한도 안에서 동작하고, **앱 
 | `tools/` | 로컬 에뮬레이터 실행·스크린샷/동작 검증(`start-emulators.mjs`, `shots.mjs`) — 배포 대상 아님 |
 | `firebase.json` | 호스팅 전용 설정(사이트 `shiftbell-ops-29f31`, 보안 헤더·CSP·noindex) |
 | `../firestore.rules` | `dashboard/{doc}` 읽기 규칙을 추가함(아래 "보안") |
-| `../.github/workflows/dashboard-sync.yml` | 한국 시간 00:17부터 3시간마다 자동 동기화(시크릿이 없으면 실패로 표시, 예약 실행 지연 가능) |
+| `../.github/workflows/dashboard-sync.yml` | 한국 시간 12:17 매일 자동 동기화(시크릿이 없으면 실패로 표시, 예약 실행 지연 가능) |
 
 기존 친구 공유 웹(`build/web`, 루트 `firebase.json`, `shiftbell-29f31.web.app`)은 **건드리지 않습니다.**
 이 대시보드는 같은 Firebase 프로젝트의 **별도 호스팅 사이트**입니다.
@@ -50,7 +50,7 @@ Firebase Hosting + Auth + Firestore 무료 한도 안에서 동작하고, **앱 
 - 로그인은 Firebase 이메일/비밀번호 인증. 규칙(`firestore.rules`)이 **`rlaworms0905@naver.com` + `email_verified == true`** 인 사용자만
   `dashboard/*`를 `get`으로 읽게 합니다(list·write는 전부 거부).
 - 관리자 계정은 **반드시 `admin-user.mjs`(Admin SDK)로 만들 것** — `emailVerified:true`로 만들어지므로,
-  누군가 같은 이메일로 먼저 가입해 선점하는 공격이 막힙니다. 그래서 콘솔에서 **"사용자 가입" 허용은 끄세요.**
+  누군가 같은 이메일로 먼저 가입해 선점하는 공격이 막힙니다. 공유 기능의 익명 가입을 위해 사용자 생성 허용은 유지합니다(아래 설정 기준).
 - Firebase 인증은 비밀번호가 **6자 이상**이어야 해서 `1234`는 만들 수 없습니다. 임시 비밀번호로 만든 뒤 사이트 안의
   **"비밀번호 변경"** 버튼으로 바꾸세요(현재 비밀번호 재확인 후 변경).
 - 로그인 유지: 체크하면 브라우저에 유지(LOCAL), 안 하면 탭을 닫을 때까지(SESSION).
@@ -78,8 +78,8 @@ Firebase Hosting + Auth + Firestore 무료 한도 안에서 동작하고, **앱 
    SERVICE_ACCOUNT_JSON="$(cat 키파일.json)" ADMIN_EMAIL=rlaworms0905@naver.com ADMIN_PASSWORD='임시비밀번호(6자 이상)' npm run admin-user
    ```
 6. **첫 동기화**: `SERVICE_ACCOUNT_JSON="$(cat 키파일.json)" npm run sync`
-   (이후 자동: GitHub 저장소 Settings → Secrets → `GA4_SERVICE_ACCOUNT_JSON`에 키 JSON 전체를 넣으면 Actions가 3시간마다 실행)
-7. **배포**: `cd admin_dashboard && firebase deploy --only hosting` → `https://shiftbell-ops-29f31.web.app`
+   (이후 자동: GitHub 저장소 Settings → Secrets → `GA4_SERVICE_ACCOUNT_JSON`에 키 JSON 전체를 넣으면 Actions가 매일 한국 시간 12:17에 실행)
+7. **배포**: `cd admin_dashboard && node tools/build.mjs && firebase deploy --only hosting --project shiftbell-29f31` → `https://shiftbell-ops-29f31.web.app`
 8. **AdMob ↔ Firebase 연결**(광고 수익·노출을 보려면): AdMob 앱 설정에서 Firebase 연결. 안 하면 광고 카드는 비어 있고 나머지는 정상
 9. 휴대폰에서 접속 → 로그인 → 홈 화면에 추가(PWA)
 
@@ -113,14 +113,38 @@ Dart 쪽 이벤트 이름과 이 사이트의 이벤트 목록(`public/assets/js
 | Actions가 아무 것도 안 함 | Secret `GA4_SERVICE_ACCOUNT_JSON`이 비어 있으면 일부러 건너뜀 |
 
 
-## 갱신 주기 (2026-09-29)
+## 운영 집계 (2026-10-11)
 
-- 서버: `17 */3 * * *` UTC → 한국 시간 00:17 / 03:17 / 06:17 / 09:17 / 12:17 / 15:17 / 18:17 / 21:17 예약.
-- GitHub Actions 예약은 정시 실행 보장이 아니다. 실행이 늦거나 건너뛰어질 수 있으므로 summary.updatedAt과 Actions 실행 이력을 기준으로 확인한다. 화면은 6시간 이상 갱신이 없으면 오래된 상태로 표시한다.
-- GA4 Standard intraday 처리: 통상 2~6시간, 최근 데이터는 24~48시간 동안 보정 가능. 이는 서버의 3시간 재조회 주기와 별개다. 행동 발생부터 표시까지의 최대 지연은 보장할 수 없다.
-- 화면: 최초 진입·수동 새로고침 때 서버 문서를 조회. 보이는 동안 1분마다 확인해 직전 조회 후 10분 초과이면 재조회하므로 약 10~11분 간격. 탭으로 돌아왔을 때도 10분 초과이면 재조회한다. 화면 새로고침이 GA4 집계를 실행하지는 않는다.
-- 알람 끄기/연장/무응답 이벤트는 다음 앱 실행·재개 때 이력에서 전송된다. 최초 기준선, 72시간 범위, 회당 종류별 40건 제한 때문에 알람 원장 전체와 같지 않다.
-- dev의 신규 기능도 계측 코드는 포함하지만 dev 수집은 계속 꺼져 있다. 실제 prod 배포 후 사용된 데이터부터 운영 대시보드에 나타난다.
-- 공유 대상 선택 이벤트는 메시지 전달 완료가 아니다. 설정 저장·실제 날짜 예약·거부도 별도 항목으로 센다. 전체 시도와 결과 항목을 합산하면 중복이므로 합계 이용 횟수로 해석하지 않는다.
+- 서버는 매일 한국 시간 12:17 한 번 예약합니다(UTC cron 17 3 * * *). 예약 실행은 지연될 수 있습니다.
+- sync.mjs는 같은 한국 날짜에 이미 pipelineVersion 2 집계가 있으면 API를 다시 호출하지 않습니다. 관리자가 의도적으로 재집계할 때만 --force를 씁니다.
+- 조회는 어제까지입니다. GA4 최근 24~48시간 값은 이후 집계에서 보정될 수 있습니다. 화면이 36시간 이상 갱신되지 않으면 집계 지연으로 표시합니다.
+- 화면 새로고침은 저장된 문서를 다시 읽습니다. 약 10~11분 재조회는 서버 집계를 실행하지 않습니다.
+- summary/series/events/operations 문서는 하나의 Firestore batch로 저장합니다. 중요 리포트 실패 시 기존 집계를 보존합니다. 부가 리포트 실패·빈 값·비공개 임계값/표본/행 제한은 화면에서 구분합니다.
 
-공식 처리 지연 안내: https://support.google.com/analytics/answer/11198161
+## 사업 운영 화면
+
+- 운영 요약: 같은 기간의 중복 제거 활성/신규 사용자, 재방문, 기능 도달, 알람 관측, 광고 수익, 수집 상태.
+- 성장·국가: 국가별 활성·신규·온보딩·전체조 생성·알람 활용, 직전 동일 기간 대비, 국가별 최근 최대 100일 추이.
+- 기능 활용: 사용자 수/같은 기간 totalUsers 기준 도달률/이용 횟수. 여러 기능 사용자를 더해 합계 이용자로 만들지 않으며 기간별 기능 도달을 전환 퍼널로 부르지 않습니다.
+- 알람·기기: 제조사별 예약 API 실패·울림 진입·갱신 실패·배터리 최적화 적용·정확 알람 미허용 관측. 예약 완료와 실제 울림, 무응답을 동일 단계로 계산하지 않습니다.
+- 기존 스트림 분리는 유지합니다. 앱은 prod Android만, 웹 친구 열람은 별도 요약이며 dev Analytics는 OFF입니다.
+- H선은 차트 탭/드래그 후 유지하고 다른 영역 터치나 Escape에 해제합니다. 차트 교체 때 전역 listener를 제거합니다.
+
+## 새 앱 계측과 한계
+
+전체교대조 생성·조 변경·삭제는 저장 성공 뒤에 기록합니다. 근무표 내용/근무명/조 이름을 보내지 않습니다.
+OperationsSnapshot은 이미 남는 로컬 진단 로그를 앱 재개 시 백그라운드에서 읽습니다. 알람 예약·울림·부팅 경로에는 네트워크나 Firebase 호출을 추가하지 않습니다.
+최근 72시간, 최근 최대 1,000개 관측, 종류별 회당 40건 상한이며 첫 실행은 기존 로그를 제외하는 기준선만 만듭니다. 보고 날짜는 실제 사건 날짜가 아니라 앱을 연 날짜입니다. OS 권한/배터리 상태는 기기 날짜별 하루 1회 보고합니다.
+새 운영 이벤트는 새 계측 앱이 prod로 출시된 이후부터 들어옵니다. 과거 데이터는 소급 복원하지 않습니다. 예약/재시도 횟수를 알람 수신율로 계산할 수 없고, 무응답을 미울림으로 판정할 수 없습니다.
+강제종료 후 미울림·배터리 제한이 직접 유발한 실패·Crashlytics 오류율은 별도 검증 근거가 없으며 성공이나 0% 장애로 표시하지 않습니다. Crashlytics SDK를 새로 넣지 않았습니다.
+광고 수익 미연결은 수익 0원이 아닙니다. 결제·광고 비용·운영 원가를 연결하지 않아 순이익/ROI를 계산하지 않습니다.
+
+## 웹 빌드와 배포
+
+이 사이트는 Flutter 공유 웹과 별개인 정적 웹입니다.
+
+    cd admin_dashboard
+    node tools/build.mjs
+    firebase deploy --only hosting --project shiftbell-29f31
+
+빌드는 JavaScript 구문을 확인하고 public/을 build/admin_dashboard/에 복사하며 build-info.json의 버전과 파일 해시를 생성합니다. Firebase Hosting site는 shiftbell-ops-29f31만 배포합니다.

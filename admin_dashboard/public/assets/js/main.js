@@ -1,3 +1,4 @@
+import { SECTIONS, businessKpis, operatingBrief, adoptionCard, countryCard, reliabilityCard, manufacturerCard, collectionCard, revenueCard, mountCountryChart } from './operations.js';
 // admin_dashboard/public/assets/js/main.js - 로그인/대시보드 화면 전환과 이벤트 처리.
 
 import {
@@ -22,7 +23,8 @@ const store = {
 
 const ui = {
   range: RANGES.includes(Number(store.get('range'))) ? Number(store.get('range')) : 30,
-  visible: { dau: true, wau: true, mau: true },
+  visible: { dau: true, mau: true },
+  section: 'overview', country: null, marketSort: 'activeUsers',
   dist: 'appVersion', evGroup: 'all', evSystem: false, evExpanded: false,
 };
 let docs = null; let user = null; let charts = []; let loading = false; let error = null; let loadedAt = 0; let sheetChart = null;
@@ -93,14 +95,15 @@ function destroyCharts() { charts.forEach((c) => c.destroy()); charts = []; }
 
 function headerHtml(view) {
   const s = docs?.summary;
-  const stale = s ? Date.now() - Date.parse(s.updatedAt) > 6 * 3600 * 1000 : false;
+  const stale = s ? Date.now() - Date.parse(s.updatedAt) > 36 * 3600 * 1000 : false;
   const latest = s?.latest ? fmtLong(s.latest) : '-';
   return `<header class="topbar"><div class="wrap">
-    <div class="bar1">${brandMark}<div class="titles"><b>교대시계 관리자</b><small>Play 출시 버전 · ${esc(latest)}까지 집계 · ${dataCutoffLabel(s?.latest)}</small></div>
+    <div class="bar1">${brandMark}<div class="titles"><b>교대시계 운영</b><small>Play 출시 버전 · ${esc(latest)}까지 집계 · ${dataCutoffLabel(s?.latest)}</small></div>
       <button class="icon-btn${loading ? ' spinning' : ''}" data-action="refresh" aria-label="새로고침">${ICONS.refresh}</button>
       <button class="avatar" data-action="menu" aria-label="계정 메뉴">${esc(initialOf(user?.email))}</button></div>
     <div class="bar2"><div class="seg" role="group" aria-label="조회 기간">${RANGES.map((r) => `<button data-action="range" data-key="${r}" aria-pressed="${ui.range === r}">${r}일</button>`).join('')}</div>
       <span class="pill${stale ? ' warn' : ''}" title="마지막 동기화"><span class="dot"></span>${s ? esc(relTime(s.updatedAt)) : '-'}</span></div>
+    <nav class="ops-nav" aria-label="운영 영역">${SECTIONS.map(([key, label]) => `<button data-action="section" data-key="${key}" aria-pressed="${ui.section === key}">${label}</button>`).join('')}</nav>
   </div></header>`;
 }
 
@@ -127,13 +130,16 @@ function renderApp() {
     root.innerHTML = headerHtml(view) + emptyState('🌱', '아직 집계된 날짜가 없어요', '출시 앱의 통계가 GA4에서 처리되고 다음 서버 집계가 완료되면 표시돼요.');
     return;
   }
-  root.innerHTML = headerHtml(view) + `<main class="wrap">
-    ${insightCard(docs, view)}${kpiGrid(docs, view).replace('<section class="kpis"', '<section class="kpis span-12"')}
-    ${usersCard(view, ui.visible)}${installsCard(view)}
-    ${behaviorCard(docs, view, ui)}${distCard(docs, ui)}
-    ${engagementCard(view)}${retentionCard(docs)}
-    ${adsCard(docs, view)}${footerNote(docs)}</main>`;
+  const section = ui.section;
+  let body = '';
+  if (section === 'overview') body = operatingBrief(docs, view) + businessKpis(docs, view) + usersCard(view, ui.visible) + installsCard(view) + adoptionCard(docs, view) + reliabilityCard(docs, view) + revenueCard(docs, view) + collectionCard(docs, view);
+  if (section === 'growth') body = businessKpis(docs, view) + countryCard(docs, view, ui) + usersCard(view, ui.visible) + installsCard(view) + retentionCard(docs) + engagementCard(view);
+  if (section === 'product') body = adoptionCard(docs, view) + behaviorCard(docs, view, ui) + distCard(docs, ui) + revenueCard(docs, view);
+  if (section === 'quality') body = reliabilityCard(docs, view) + manufacturerCard(docs, view) + distCard(docs, ui) + collectionCard(docs, view);
+  root.innerHTML = headerHtml(view) + '<main class="wrap ops-layout">' + body + footerNote(docs) + '</main>';
   charts = mountCharts(root, docs, view, ui);
+  const countryChart = mountCountryChart(root, docs, view, ui);
+  if (countryChart) charts.push(countryChart);
   window.scrollTo(0, y);
 }
 
@@ -199,6 +205,9 @@ function openPassword() {
 // ───────────────────────── 이벤트 위임 ─────────────────────────
 function handle(action, el) {
   switch (action) {
+    case 'section': ui.section = el.dataset.key; renderApp(); window.scrollTo(0, 0); break;
+    case 'country': ui.country = el.dataset.key; renderApp(); break;
+    case 'market-sort': ui.marketSort = el.dataset.key; renderApp(); break;
     case 'range': ui.range = Number(el.dataset.key); store.set('range', String(ui.range)); renderApp(); break;
     case 'legend': {
       const k = el.dataset.key;
@@ -236,7 +245,7 @@ function onActivate(e) {
 root.addEventListener('click', onActivate);
 layer.addEventListener('click', onActivate);
 root.addEventListener('keydown', (e) => {
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-action="event"]')) { e.preventDefault(); onActivate(e); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-action="event"], [data-action="country"]')) { e.preventDefault(); onActivate(e); }
 });
 
 // 화면으로 돌아왔을 때 10분 넘게 지났으면 자동으로 다시 불러온다.
