@@ -50,3 +50,5 @@ test('unknown revenue and unobserved alarm telemetry do not assert success', () 
   assert.match(reliabilityCard(docs,view),/미관측/);
   assert.match(reliabilityCard(docs,view),/울림 성공률로 계산하지 않습니다/);
 });
+
+test('unobserved feature does not imply a zero adoption rate', () => {const docs=buildMockDocs();const view=computeView(docs,30);delete docs.events.series.team_roster_created;docs.summary.eventsByRange[30].events=docs.summary.eventsByRange[30].events.filter(e=>e.name!=='team_roster_created');const row=adoptionCard(docs,view).match(/<tr[^>]*data-event="team_roster_created"[\s\S]*?<\/tr>/)[0];assert.match(row,/미관측/);assert.equal(row.includes('adoption'),false);assert.match(row,/>—<\/td>/);});

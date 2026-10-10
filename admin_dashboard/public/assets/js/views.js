@@ -222,7 +222,7 @@ export function behaviorCard(docs, view, ui) {
 
 // ───────────────────────── 분포 ─────────────────────────
 
-export function distCard(docs, ui) {
+export function distCard(docs, ui, span = 'span-5') {
   const tabs = `<div class="tabs" role="group" aria-label="분포 기준">${BREAKDOWNS.map((b) =>
     `<button class="tab" data-action="dist" data-key="${b.key}" aria-pressed="${ui.dist === b.key}">${b.label}</button>`).join('')}</div>`;
   const raw = docs.summary.breakdowns?.[ui.dist] ?? [];
@@ -237,7 +237,7 @@ export function distCard(docs, ui) {
     body = `<div class="dist">${donut(colored, { top: fmtInt(total), bottom: '최근 28일' })}
       <ul class="dlegend">${colored.map((c) => `<li><i style="background:${c.color}"></i><span class="n">${esc(c.label)}</span><span class="v">${fmtInt(c.value)}</span><span class="p">${fmtPct(total ? c.value / total : 0, 0)}</span></li>`).join('')}</ul></div>`;
   }
-  return `<section class="card span-5"><div class="card-h"><div><h2>사용자 분포</h2><p>최근 28일 · 표시된 상위 항목 내 비율 (전체 점유율 아님)</p></div></div>${tabs}${body}</section>`;
+  return `<section class="card ${span}"><div class="card-h"><div><h2>사용자 분포</h2><p>최근 28일 · 표시된 상위 항목 내 비율 (전체 점유율 아님)</p></div></div>${tabs}${body}</section>`;
 }
 
 export function footerNote(docs) {

@@ -61,7 +61,7 @@ export function adoptionCard(docs, view) {
   const totalUsers = periodData(docs, view)?.current?.totalUsers;
   const rows = FEATURES.map(([name, label]) => {
     const data = eventData(docs, view, name);
-    const share = data.users != null && totalUsers > 0 && data.users <= totalUsers ? data.users / totalUsers : null;
+    const share = data.observed && data.users != null && totalUsers > 0 && data.users <= totalUsers ? data.users / totalUsers : null;
     return '<tr data-action="event" data-event="' + name + '" tabindex="0" role="button" aria-label="' + label + ' 상세"><th>' + label + '</th><td>' + (data.observed ? number(data.users, '명') : tag('미관측')) + '</td><td>' + (share == null ? '—' : '<div class="adoption"><i style="width:' + (share * 100) + '%"></i><span>' + fmtPct(share, 1) + '</span></div>') + '</td><td>' + (data.observed ? number(data.count, '회') : '—') + '</td></tr>';
   }).join('');
   return card('핵심 기능의 도달과 활용', '선택 기간 내 기능별 사용자 수와 이용 횟수. 기능 간 사용자는 중복되며 전환 퍼널이 아닙니다.', '<div class="table-scroll"><table class="ops-table"><thead><tr><th>기능</th><th>사용자</th><th>기간 이용자 대비</th><th>이용 횟수</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="sub">기능 사용률의 분모는 같은 기간의 전체 이용자(totalUsers)입니다. 미관측은 미사용·구버전·수집 누락을 구분할 자료가 아직 없다는 뜻입니다.</p>');

@@ -134,8 +134,8 @@ function renderApp() {
   let body = '';
   if (section === 'overview') body = operatingBrief(docs, view) + businessKpis(docs, view) + usersCard(view, ui.visible) + installsCard(view) + adoptionCard(docs, view) + reliabilityCard(docs, view) + revenueCard(docs, view) + collectionCard(docs, view);
   if (section === 'growth') body = businessKpis(docs, view) + countryCard(docs, view, ui) + usersCard(view, ui.visible) + installsCard(view) + retentionCard(docs) + engagementCard(view);
-  if (section === 'product') body = adoptionCard(docs, view) + behaviorCard(docs, view, ui) + distCard(docs, ui) + revenueCard(docs, view);
-  if (section === 'quality') body = reliabilityCard(docs, view) + manufacturerCard(docs, view) + permissionCard(docs, view) + distCard(docs, ui) + collectionCard(docs, view);
+  if (section === 'product') body = adoptionCard(docs, view) + behaviorCard(docs, view, ui) + distCard(docs, ui, 'span-12') + revenueCard(docs, view);
+  if (section === 'quality') body = reliabilityCard(docs, view) + manufacturerCard(docs, view) + permissionCard(docs, view) + distCard(docs, ui, 'span-12') + collectionCard(docs, view);
   root.innerHTML = headerHtml(view) + '<main class="wrap ops-layout">' + body + footerNote(docs) + '</main>';
   charts = mountCharts(root, docs, view, ui);
   const countryChart = mountCountryChart(root, docs, view, ui);
