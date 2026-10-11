@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-09",
+  "reason": "사용자 요청: 한국어 부가기능 활성화 확인에 짧은 기능 설명과 탭 아이콘 추가, 숨기기 안내 별도 유지.",
+  "changes": {
+    "settingsEnableFeatureConfirm": {
+      "before": "메인 탭에 추가하여 {feature} 기능을 사용하시겠습니까?\n\n(탭 하단에서 다시 숨길 수 있습니다.)",
+      "after": "메인 탭에 추가하여 {feature} 기능을 사용하시겠습니까?"
+    },
+    "settingsEnableFeatureHideHint": {
+      "before": null,
+      "after": "탭 하단에서 다시 숨길 수 있습니다."
+    },
+    "settingsScheduleFeatureDescription": {
+      "before": null,
+      "after": "시간별 일정을 간편하게 관리하고, 일정에 맞춰 알림을 받을 수 있습니다."
+    },
+    "settingsConditionFeatureDescription": {
+      "before": null,
+      "after": "직접 입력하거나 자동 추정된 수면 기록으로 평균 수면시간을 확인하고, 근무시간과 함께 회복 상태와 컨디션을 살펴볼 수 있습니다."
+    }
+  }
+}

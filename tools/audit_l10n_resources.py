@@ -53,7 +53,7 @@ def audit(root):
         # Preserve the original review snapshot. Later user-requested edits have
         # an exact before/after ledger, rather than disabling copy preservation.
         changes = {}
-        for copy_ledger in sorted((root / 'docs/next_version/evidence').glob('settings_copy_changes_2026_10_08*.json')):
+        for copy_ledger in sorted((root / 'docs/next_version/evidence').glob('settings_copy_changes_*.json')):
             for key, change in json.loads(copy_ledger.read_text('utf-8'))['changes'].items():
                 if key in changes:
                     if change['before'] != changes[key]['after']:

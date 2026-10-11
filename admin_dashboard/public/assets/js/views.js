@@ -27,9 +27,9 @@ export function computeView(docs, range) {
     n, len, from,
     hasPrev: pf >= 0,
     dates: series.dates.slice(from),
-    cur: (k) => series[k].slice(from),
-    prev: (k) => (pf >= 0 ? series[k].slice(pf, from) : []),
-    last: (k) => series[k][n - 1] ?? 0,
+    cur: (k) => (series[k] ?? []).slice(from),
+    prev: (k) => (pf >= 0 ? (series[k] ?? []).slice(pf, from) : []),
+    last: (k) => series[k]?.[n - 1] ?? 0,
   };
 }
 
@@ -126,9 +126,9 @@ export function usersCard(view, visible) {
     <div id="ch-users" style="min-height:230px"></div></section>`;
 }
 
-export function installsCard(view) {
+export function installsCard(view, span = 'span-4') {
   const inst = sum(view.cur('installs')); const rem = sum(view.cur('uninstalls'));
-  return `<section class="card span-4"><div class="card-h"><div><h2>첫 실행 · 삭제</h2><p>하루 단위 · GA4 자동 이벤트</p></div></div>
+  return `<section class="card ${span}"><div class="card-h"><div><h2>첫 실행 · 삭제</h2><p>하루 단위 · GA4 자동 이벤트</p></div></div>
     <div id="ch-installs" style="min-height:200px"></div>
     <div class="stats"><div class="stat"><b>${fmtInt(inst)}</b><span>첫 실행</span></div><div class="stat"><b>${fmtInt(rem)}</b><span>감지된 삭제</span></div></div>
     <p class="sub" style="margin:10px 0 0">첫 실행에는 Analytics 도입 업데이트가 포함될 수 있어 신규 설치와 다릅니다. 삭제는 실제보다 적을 수 있어요.</p></section>`;
@@ -222,7 +222,7 @@ export function behaviorCard(docs, view, ui) {
 
 // ───────────────────────── 분포 ─────────────────────────
 
-export function distCard(docs, ui) {
+export function distCard(docs, ui, span = 'span-5') {
   const tabs = `<div class="tabs" role="group" aria-label="분포 기준">${BREAKDOWNS.map((b) =>
     `<button class="tab" data-action="dist" data-key="${b.key}" aria-pressed="${ui.dist === b.key}">${b.label}</button>`).join('')}</div>`;
   const raw = docs.summary.breakdowns?.[ui.dist] ?? [];
@@ -237,16 +237,16 @@ export function distCard(docs, ui) {
     body = `<div class="dist">${donut(colored, { top: fmtInt(total), bottom: '최근 28일' })}
       <ul class="dlegend">${colored.map((c) => `<li><i style="background:${c.color}"></i><span class="n">${esc(c.label)}</span><span class="v">${fmtInt(c.value)}</span><span class="p">${fmtPct(total ? c.value / total : 0, 0)}</span></li>`).join('')}</ul></div>`;
   }
-  return `<section class="card span-5"><div class="card-h"><div><h2>사용자 분포</h2><p>최근 28일 활성 사용자 기준</p></div></div>${tabs}${body}</section>`;
+  return `<section class="card ${span}"><div class="card-h"><div><h2>사용자 분포</h2><p>최근 28일 · 표시된 상위 항목 내 비율 (전체 점유율 아님)</p></div></div>${tabs}${body}</section>`;
 }
 
 export function footerNote(docs) {
   const s = docs.summary;
   return `<div class="foot span-12">데이터 기준: Google Analytics 4 · 플레이 스토어 <b>출시 버전만</b> 집계(개발용 앱 제외) · 스트림 ${esc(s.streamId ?? '-')}<br>
     마지막 동기화 ${esc(relTime(s.updatedAt))} (${esc(s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : '-')}) · 데이터 기준일 ${esc(s.latest ? fmtLong(s.latest) : '-')} · ${dataCutoffLabel(s.latest)}<br>
-    서버 집계: 매일 한국 시간 00:17·03:17·06:17·09:17·12:17·15:17·18:17·21:17 예약(실행 지연 가능).<br>
+    서버 집계: 매일 한국 시간 12:17에 한 번 예약(실행 지연 가능).<br>
     화면: 열어 둔 동안 약 10~11분마다 재조회하며, 새로고침 버튼은 저장된 최신 집계를 다시 읽습니다.<br>
-    오늘 수치는 잠정치입니다. GA4 처리에 보통 2~6시간이 걸리고 최근 24~48시간 값은 보정될 수 있어요.${s.source === 'mock' ? '<br><b>※ 지금 보이는 건 데모(모의) 데이터입니다.</b>' : ''}</div>`;
+    집계는 어제까지의 완료된 날짜 기준입니다. GA4 처리와 최근 24~48시간 보정에 따라 값이 달라질 수 있습니다.${s.source === 'mock' ? '<br><b>※ 지금 보이는 건 데모(모의) 데이터입니다.</b>' : ''}</div>`;
 }
 
 export function skeleton() {
@@ -258,17 +258,17 @@ export function skeleton() {
 // ───────────────────────── 차트 붙이기 ─────────────────────────
 
 /** HTML을 넣은 뒤 호출. 만든 차트를 배열로 돌려줘서 다음 렌더 전에 destroy할 수 있게 한다. */
-export function mountCharts(root, docs, view, ui) {
+export function mountCharts(root, docs, view, ui, usersView = view, onUserSelect) {
   const charts = [];
   const $ = (id) => root.querySelector(id);
   const money = docs.summary.currency ?? 'USD';
 
   if ($('#ch-users')) {
     charts.push(lineChart($('#ch-users'), {
-      title: '활성 사용자 추이', dates: view.dates, height: 240, valueFmt: (v) => `${fmtInt(v)}명`,
+      title: '활성 사용자 추이', onSelect: onUserSelect,  dates: usersView.dates, height: 240, valueFmt: (v) => `${fmtInt(v)}명`,
       series: [
-        { key: 'mau', label: 'MAU', color: COLORS.mau, values: view.cur('mau'), visible: ui.visible.mau },
-        { key: 'dau', label: 'DAU', color: COLORS.dau, values: view.cur('dau'), visible: ui.visible.dau, area: true },
+        { key: 'mau', label: 'MAU', color: COLORS.mau, values: usersView.cur('mau'), visible: ui.visible.mau },
+        { key: 'dau', label: 'DAU', color: COLORS.dau, values: usersView.cur('dau'), visible: ui.visible.dau, area: true },
       ],
     }));
   }

@@ -1,0 +1,17 @@
+달력 위젯 요일 높이 조정 — 2026-10-09
+이전 원장: 달력위젯_디자인3차_2026-10-09.txt / evidence/calendar_widget_design_v3_2026_10_09.json. 이전 기록 보존.
+
+변경
+- 1주 위젯 고정: 생성 레이아웃 바이트 동일(SHA256 5c51fe949933e94226106f9f6a73d0ecc6e7769cf2a9b25143e59450abfa42a0). 1주 높이 계산 및 글자 설정 유지.
+- 3주 위젯 요일 행 높이 14→23dp, 요일 글자 10→13dp.
+- 전체 위젯 높이 증가 없이 전주/이번주/다음주의 각 높이를 동일하게3dp 줄여 총9dp를 요일 행에 배분.
+- 3주 실제 가용 높이 계산도 9dp 추가 헤더에 맞춰 갱신. 기존 높이별 메모 안전 축소 규칙 유지.
+- 근무 칩, 메모 최대 크기/간격, 날짜 숫자, 월 헤더, 풍경 및 국가별 주 시작일 유지.
+
+검증 범위
+- 사용자 요청에 따라 기능 테스트 및 렌더 실행 생략. dev debug APK 빌드만 진행, 설치 미실행.
+- 실기기/런처/시각 승인 후속. 과거 PASS는 이번 변경의 재검증 PASS로 취급하지 않음.
+- 빌드: PASS (exit 0). 로그: artifacts/calendar_widget_design_v4/build.log
+- APK: artifacts/calendar_widget_design_v4/shiftbell-widget-dev-debug.apk
+- applicationId: com.hwani1103.shiftbell.dev / version: 1.0.23-dev (25)
+- 크기: 215871261 bytes / SHA256: e034986e6c7c1549934cc339433979b07867f58400780ce0160ae3e7a3d29a42

@@ -225,15 +225,15 @@ override fun onReceive(context: Context, intent: Intent) {
     
     Log.e("CustomAlarmReceiver", "잠금 상태: ${if (isLocked) "잠금" else "해제"}")
     
-    Handler(Looper.getMainLooper()).postDelayed({
+    fun presentRing(allowMissingRetry: Boolean) {
         // ⭐ 2026-09-14 (#3) - 이 0.5초 사이에 울림이 끝났거나(앱에서 삭제 등) 다음 울림에 넘어갔으면 화면을 안 띄움
         if (!RingingAlarmTracker.isCurrent(context, id, ring.round)) {
             Log.w("CustomAlarmReceiver", "⚠️ 표시 전에 회차가 끝남 - 화면 생략: id=$id 회차=${ring.round}")
-            return@postDelayed
+            return
         }
         // FSI (or a notification tap) may already have displayed this round,
         // including while unlocked. Do not layer an overlay over that Activity.
-        if (AlarmActivity.visibleRing == ring) return@postDelayed
+        if (AlarmActivity.visibleRing == ring) return
         if (keyguardManager.isKeyguardLocked) {
             Log.e("CustomAlarmReceiver", "✅ 잠금 상태 - AlarmActivity 표시")
             // ⭐ 잠금화면 AlarmActivity 표시. 제어 알림의 전체화면 인텐트가 이미 이 회차 화면을 띄웠으면
@@ -247,14 +247,24 @@ override fun onReceive(context: Context, intent: Intent) {
             if (InAppAlarmController.isHostVisible) {
                 InAppAlarmController.changed()
             } else if (canDrawOverlays(context)) {
-                Log.e("CustomAlarmReceiver", "✅ 잠금 해제 - Overlay 표시")
-                showOverlayWindow(context, id, label, ring.round, durationMinutes)
+                // Only an otherwise usable but missing post gets one extra 500 ms.
+                // Every retry rechecks the round, lock state, visible UI and overlay permission.
+                val control = RingControlPresence.observe(context, ring)
+                Log.i("CustomAlarmReceiver", "Unlocked ring controls: id=$id round=${ring.round} notification=$control")
+                if (control == RingControlPresence.Result.ABSENT && allowMissingRetry) {
+                    Log.i("CustomAlarmReceiver", "Current 7777 absent; recheck once in 500ms: id=$id round=${ring.round}")
+                    Handler(Looper.getMainLooper()).postDelayed({ presentRing(false) }, 500)
+                } else if (control != RingControlPresence.Result.PRESENT) {
+                    Log.e("CustomAlarmReceiver", "✅ 잠금 해제 - Overlay 표시")
+                    showOverlayWindow(context, id, label, ring.round, durationMinutes)
+                }
             } else {
                 // ⭐ 2026-09-14 (#4) - 예전 폴백 알림(끄기 버튼 없음) 대신 이미 게시된 제어 알림(7777)으로 제어
                 Log.e("CustomAlarmReceiver", "⚠️ Overlay 권한 없음 - 제어 알림(7777)으로 제어")
             }
         }
-    }, 500)
+    }
+    Handler(Looper.getMainLooper()).postDelayed({ presentRing(true) }, 500)
     Handler(Looper.getMainLooper()).postDelayed({
         if (RingingAlarmTracker.isCurrent(context, id, ring.round)) {
             CoverAlarmDisplay.followRing(context, id, ring.round, durationMinutes)

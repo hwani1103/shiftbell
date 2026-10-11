@@ -80,41 +80,43 @@ class _FriendListScreenState extends ConsumerState<_KoreanFriendListScreen> {
         return AlertDialog(
           title: Text(context.koOnly.friendAdd,
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                  '${context.koOnly.friendName} ${context.koOnly.friendNameOptionalHint}',
-                  style: TextStyle(fontSize: 12.sp)),
-              SizedBox(height: 6.h),
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  hintText: context.koOnly.friendNameHintExample,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.r)),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                    '${context.koOnly.friendName} ${context.koOnly.friendNameOptionalHint}',
+                    style: TextStyle(fontSize: 12.sp)),
+                SizedBox(height: 6.h),
+                TextField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    hintText: context.koOnly.friendNameHintExample,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r)),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                  ),
                 ),
-              ),
-              SizedBox(height: 14.h),
-              Text(context.koOnly.friendShareCodeFromFriend,
-                  style: TextStyle(fontSize: 12.sp)),
-              SizedBox(height: 6.h),
-              TextField(
-                controller: codeController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: 'SB2:...',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.r)),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                SizedBox(height: 14.h),
+                Text(context.koOnly.friendShareCodeFromFriend,
+                    style: TextStyle(fontSize: 12.sp)),
+                SizedBox(height: 6.h),
+                TextField(
+                  controller: codeController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: 'SB2:...',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r)),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                  ),
+                  style: TextStyle(fontSize: 11.sp, fontFamily: 'monospace'),
                 ),
-                style: TextStyle(fontSize: 11.sp, fontFamily: 'monospace'),
-              ),
-            ],
+              ],
+            ),
           ),
           actions: [
             TextButton(

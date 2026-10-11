@@ -494,13 +494,38 @@ class HelpDetailScreen extends StatelessWidget {
       return const HelpScreen();
     }
     final l10n = context.l10n;
+    final title = topic.titleKey(l10n);
+    final titleStyle = (Theme.of(context).appBarTheme.titleTextStyle ??
+            const TextStyle(fontSize: 18, fontWeight: FontWeight.w600))
+        .copyWith(color: Colors.black87);
+    // Match the centered toolbar's leading width and title spacing so long
+    // localized titles can wrap without clipping at larger system font sizes.
+    final titlePainter = TextPainter(
+      text: TextSpan(text: title, style: titleStyle),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(
+        maxWidth: (MediaQuery.sizeOf(context).width - 144)
+            .clamp(1.0, double.infinity),
+      );
+    final toolbarHeight = (titlePainter.height + 16)
+        .clamp(kToolbarHeight, double.infinity);
+    final titleLines = titlePainter.computeLineMetrics().length;
+    titlePainter.dispose();
     return Scaffold(
       backgroundColor: kAppBackgroundPastel,
       appBar: AppBar(
+        toolbarHeight: toolbarHeight,
+        leadingWidth: 56,
+        titleSpacing: 16,
+        centerTitle: true,
         title: Text(
-          topic.titleKey(l10n),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          title,
+          textAlign: TextAlign.center,
+          style: titleStyle,
+          maxLines: titleLines,
+          softWrap: true,
+          overflow: TextOverflow.visible,
         ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,

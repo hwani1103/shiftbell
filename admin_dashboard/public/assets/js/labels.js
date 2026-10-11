@@ -3,6 +3,23 @@
 
 /** group: 화면에서 묶어 보여 주는 분류. system=구글이 자동 수집하는 기본 이벤트 */
 export const EVENT_META = {
+  team_roster_created: { label: '전체교대조 생성', icon: '•', group: '달력', desc: '전체교대조 근무표 저장 완료. 근무명·조 이름·패턴 내용은 전송하지 않습니다.' },
+  team_roster_changed: { label: '전체교대조 변경', icon: '•', group: '달력', desc: '저장 완료된 조 변경. 근무표 내용은 전송하지 않습니다.' },
+  team_roster_deleted: { label: '전체교대조 삭제', icon: '•', group: '달력', desc: '전체교대조 설정 삭제 완료.' },
+  alarm_schedule_ok: { label: '예약 API 완료', icon: '•', group: '알람', desc: '로컬 진단에서 관측된 예약 API 완료. 반복 예약/재시도 포함, 실제 울림 성공과 다릅니다.' },
+  alarm_schedule_failed: { label: '예약 API 실패', icon: '•', group: '알람', desc: '예약 API 실패 관측. 이후 재시도 성공 여부와 실제 미울림을 뜻하지 않습니다.' },
+  alarm_fired: { label: '알람 울림 진입', icon: '•', group: '알람', desc: '현재 회차 수신이 확인되어 울림 경로에 진입한 관측. 청취 성공을 뜻하지 않습니다.' },
+  alarm_refresh_completed: { label: '알람 갱신 완료', icon: '•', group: '알람', desc: '네이티브 재예약 갱신 완료 관측. 부팅 이후만을 뜻하지 않습니다.' },
+  alarm_refresh_failed: { label: '알람 갱신 실패', icon: '•', group: '알람', desc: '네이티브 갱신 실패 관측.' },
+  device_boot_seen: { label: '부팅 신호 관측', icon: '•', group: '알람', desc: 'BOOT/LOCKED_BOOT 신호 관측. 동일 부팅에서 여러 신호가 올 수 있습니다.' },
+  ops_daily_ready: { label: '권한 상태 정상 관측', icon: '•', group: '알람', desc: '하루 1회 관측한 필수 권한 상태. 실제 울림 성공을 보장하지 않습니다.' },
+  ops_daily_restricted: { label: '권한 제한 관측', icon: '•', group: '알람', desc: '하루 1회 필수 권한 미허용 관측.' },
+  ops_daily_unknown: { label: '권한 상태 확인 불가', icon: '•', group: '알람', desc: '하루 1회 권한 상태 확인 불가 관측.' },
+  ops_battery_restricted: { label: '배터리 최적화 적용 관측', icon: '•', group: '알람', desc: '하루 1회 OS 최적화 적용 상태. 제조사 제한이나 실패 원인으로 확정하지 않습니다.' },
+  ops_exact_denied: { label: '정확 알람 미허용 관측', icon: '•', group: '알람', desc: '하루 1회 정확 알람 미허용 관측.' },
+  ops_notification_blocked: { label: '앱 알림 차단 관측', icon: '•', group: '알람', desc: '하루 1회 앱 알림 차단 관측.' },
+  ops_channel_blocked: { label: '알람 채널 차단 관측', icon: '•', group: '알람', desc: '하루 1회 알람 채널 차단 관측.' },
+  ops_fullscreen_denied: { label: '전체화면 미허용 관측', icon: '•', group: '알람', desc: '하루 1회 전체화면 알림 미허용 관측.' },
 
   one_tap_opened: { retired: true, label: '원터치 패널 열기', icon: '•', group: '알람', desc: '원터치 알람 버튼으로 패널을 연 횟수.' },
   one_tap_closed: { retired: true, label: '원터치 패널 닫기', icon: '•', group: '알람', desc: '뒤로가기·달력 탭·할당 완료로 패널을 닫은 횟수.' },
@@ -75,16 +92,17 @@ export const BREAKDOWNS = [
   { key: 'appVersion', label: '앱 버전', unit: '명' },
   { key: 'os', label: 'Android', unit: '명' },
   { key: 'device', label: '기기', unit: '명' },
+  { key: 'manufacturer', label: '제조사', unit: '명' },
   { key: 'language', label: '언어', unit: '명' },
   { key: 'country', label: '국가', unit: '명' },
 ];
 
 const NAMES = {
   language: { Korean: '한국어', English: '영어', Japanese: '일본어', Chinese: '중국어', Spanish: '스페인어', Vietnamese: '베트남어', Thai: '태국어', Indonesian: '인도네시아어', German: '독일어', French: '프랑스어' },
-  country: { 'South Korea': '대한민국', 'United States': '미국', Japan: '일본', Canada: '캐나다', Australia: '호주', China: '중국', Vietnam: '베트남', Thailand: '태국', Philippines: '필리핀', Germany: '독일', 'United Kingdom': '영국', Taiwan: '대만' },
+  country: { India: '인도', Brazil: '브라질', 'United Arab Emirates': '아랍에미리트', 'South Africa': '남아프리카공화국', 'South Korea': '대한민국', 'United States': '미국', Japan: '일본', Canada: '캐나다', Australia: '호주', China: '중국', Vietnam: '베트남', Thailand: '태국', Philippines: '필리핀', Germany: '독일', 'United Kingdom': '영국', Taiwan: '대만' },
 };
 export function localizeName(dim, name) {
-  return NAMES[dim]?.[name] ?? name;
+  return name === '(not set)' ? '확인 불가' : NAMES[dim]?.[name] ?? name;
 }
 export const osLabel = (v) => (/^\d/.test(v) ? `Android ${v}` : v);
 

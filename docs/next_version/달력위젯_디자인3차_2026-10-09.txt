@@ -1,0 +1,19 @@
+달력 위젯 디자인 3차 — 2026-10-09
+이전 기록: 달력위젯_디자인2차_2026-10-09.txt / evidence/calendar_widget_design_v2_2026_10_09.json. 기존 검토 원장 및 미커밋 작업 보존.
+
+사용자 요청 반영
+- 1주 위젯은 가로 크기 조절만 지원. minHeight보다 컸던 minResizeHeight(92dp)와 maxResizeHeight 제거. 기본 4×1 및 minHeight64dp 유지.
+- 이미 세로로 늘린 위젯의 칸수는 런처가 보존하므로 삭제 후 재추가 필요.
+- 3주 위젯에도 국가별 주 시작일에 맞춘 요일 행 추가. 연도·월 헤더 유지.
+- 근무명 최대 글자 크기 10→12dp. 칩 색상·전체 근무명 축소·동일 셀 간격 유지.
+- 메모 최대 글자 크기 8→9.5dp. 실제 셀 높이에 맞춰 메모 줄 높이와 위쪽 간격(최대3dp)을 배분해 칩-메모 및 메모 간 간격 확보. 작은 크기는 가용 높이에 맞춰 축소.
+- 주별 흰 배경 불투명도 A8→F2로 높여 배경 그림이 메모 읽기에 미치는 영향 감소. 풍경·낮밤 색상 유지.
+- 날짜→근무명칩→최대3메모, 다른달 숫자 흐림, 빨간날/오늘 칩 및 메모 완성글자 표시 유지.
+
+검증
+- 사용자 명시 요청으로 테스트 및 렌더 실행 생략. dev debug APK 빌드만 진행.
+- 필수 회귀 검사/웹/release 빌드/실기기 설치 미실행. 이전 PASS는 해당 당시 증거이며 이번 변경의 회귀 PASS가 아님.
+- 빌드: PASS (exit 0). 로그: artifacts/calendar_widget_design_v3/build.log
+- APK: artifacts/calendar_widget_design_v3/shiftbell-widget-dev-debug.apk
+- applicationId: com.hwani1103.shiftbell.dev / version: 1.0.23-dev (25)
+- 크기: 215871427 bytes / SHA256: d5d6b791407156d9f052f1c966328bdb4e59b68c444b4a37844b5b6a6ea8c92e

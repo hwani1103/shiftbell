@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-08",
+  "scope": "A09/U05 Fold8 native theme capture review",
+  "status": "34 native captures complete; visual design approval pending; Korean fixture restored for user review",
+  "serial": "localhost:40628",
+  "apk_sha256": "b36c99b763b215f697eee78e86f078d4cc0075417d44b9982ff53c323e73632c",
+  "changes": "Only new global concepts use existing size-based wide split layout; phone/cover existing layout preserved. No existing Korean renderer edits this task.",
+  "verification": {
+    "unit_tests": "5 PASS; concepts retain three memos and switch/revert layout across real window constraints",
+    "analyzer": "GlobalConceptCalendarCell: no issues",
+    "native_captures": "34 unique valid PNGs; hashes and 1248x1972 closed/2448x1848 open dimensions verified; visual overview checked, major examples inspected full size",
+    "limits": "Not a release/P0 test or approval of all typography. Other manufacturers remain untested."
+  },
+  "artifacts": "artifacts\\fold8_theme_review_2026_10_08",
+  "manifest": "captures/manifest.json",
+  "restoration": "ko-KR, mainWhite, October Korean pattern and 1/2/3 memos restored; Fold8 open; debug attach remains available",
+  "history": "Connection interruptions and obscuring first-use dialogs caused initial attempts to be replaced. Only manifest-verified final images are included in galleries."
+}

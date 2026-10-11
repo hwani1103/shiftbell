@@ -23,6 +23,23 @@ import 'firebase_bootstrap.dart' show analytics;
 
 /// 사용자 정의 이벤트 이름(GA4 규칙: 영문 소문자·숫자·밑줄, 40자 이하).
 abstract final class AnalyticsEvent {
+  static const teamRosterCreated = 'team_roster_created';
+  static const teamRosterChanged = 'team_roster_changed';
+  static const teamRosterDeleted = 'team_roster_deleted';
+  static const alarmScheduleOk = 'alarm_schedule_ok';
+  static const alarmScheduleFailed = 'alarm_schedule_failed';
+  static const alarmFired = 'alarm_fired';
+  static const alarmRefreshCompleted = 'alarm_refresh_completed';
+  static const alarmRefreshFailed = 'alarm_refresh_failed';
+  static const deviceBootSeen = 'device_boot_seen';
+  static const opsDailyReady = 'ops_daily_ready';
+  static const opsDailyRestricted = 'ops_daily_restricted';
+  static const opsDailyUnknown = 'ops_daily_unknown';
+  static const opsBatteryRestricted = 'ops_battery_restricted';
+  static const opsExactDenied = 'ops_exact_denied';
+  static const opsNotificationBlocked = 'ops_notification_blocked';
+  static const opsChannelBlocked = 'ops_channel_blocked';
+  static const opsFullscreenDenied = 'ops_fullscreen_denied';
 
   static const onboardingComplete = 'onboarding_complete';
   static const backupCreated = 'backup_created';
@@ -58,10 +75,25 @@ abstract final class AnalyticsEvent {
 
   /// 1.0.24 B - 커스텀 알람 프리셋을 날짜에 할당(파라미터 result = scheduled/past/duplicate/daily_limit/schedule_failed, 시각은 보내지 않음)
 
-
   /// 대시보드 EVENT_META와 대조하는 전체 목록(테스트용).
   static const all = <String>[
-
+    teamRosterCreated,
+    teamRosterChanged,
+    teamRosterDeleted,
+    alarmScheduleOk,
+    alarmScheduleFailed,
+    alarmFired,
+    alarmRefreshCompleted,
+    alarmRefreshFailed,
+    deviceBootSeen,
+    opsDailyReady,
+    opsDailyRestricted,
+    opsDailyUnknown,
+    opsBatteryRestricted,
+    opsExactDenied,
+    opsNotificationBlocked,
+    opsChannelBlocked,
+    opsFullscreenDenied,
     onboardingComplete,
     backupCreated,
     backupRestored,

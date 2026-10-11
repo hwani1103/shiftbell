@@ -1,3 +1,4 @@
+import 'services/operations_analytics.dart';
 import 'services/holiday_sync_service.dart';
 import 'services/friend_sync_service.dart';
 import 'services/restore_coordinator.dart';
@@ -25,7 +26,6 @@ import 'screens/condition_tab.dart';
 import 'screens/permission_intro_screen.dart';
 import 'widgets/onboarding_info_popups.dart';
 import 'widgets/nav_icon_emphasis.dart';
-import 'widgets/permission_warning_banner.dart';
 import 'widgets/unavailable_feature.dart';
 import 'widgets/banner_ad_slot.dart';
 import 'widgets/app_content_frame.dart';
@@ -154,9 +154,11 @@ Future<CalendarThemeId> _initializeApp() async {
   var previousStartupMs = 0;
   void recordStartupPhase(String phase) {
     final elapsed = startupWatch.elapsedMilliseconds;
-    debugPrint('STARTUP_PHASE phase=$phase durationMs=${elapsed - previousStartupMs} totalMs=$elapsed');
+    debugPrint(
+        'STARTUP_PHASE phase=$phase durationMs=${elapsed - previousStartupMs} totalMs=$elapsed');
     previousStartupMs = elapsed;
   }
+
   // ── 필수 ──
   // App language and English regional date formats share the bundled Intl data.
   await initializeDateFormatting(); // Local Intl bundle loads all regional data.
@@ -166,7 +168,8 @@ Future<CalendarThemeId> _initializeApp() async {
   recordStartupPhase('database');
   final retiredDevPrefs = await SharedPreferences.getInstance();
   await initializeTabVisibilityDefaults(
-      hasExistingSchedule: await DatabaseService.instance.getShiftSchedule() != null);
+      hasExistingSchedule:
+          await DatabaseService.instance.getShiftSchedule() != null);
   await retiredDevPrefs.remove('custom_alarm_presets');
   await retiredDevPrefs.remove('one_touch_alarm_tutorial_shown');
   recordStartupPhase('preferences');
@@ -499,13 +502,11 @@ class _MainScreenState extends ConsumerState<MainScreen>
     // ⭐ 업데이트 체크 (2초 후 - UI 로딩 완료 후)
     Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
-      // 이번 업데이트로 막 올라온 사용자에게 한 번만 보여주는 안내가 있으면 먼저 표시
-      await UpdateService.checkAndShowReleaseNote(context);
-      if (!mounted) return;
       UpdateService.checkForUpdate(context);
       unawaited(HolidaySyncService.instance.refreshIfDue());
       // 알람 사용량(끄기/연장/무응답)은 앱을 열 때 새로 쌓인 이력만 이벤트로 보낸다 - AlarmUsageAnalytics 참고
       AlarmUsageAnalytics.reportNew();
+      OperationsAnalytics.report();
     });
   }
 
@@ -558,15 +559,19 @@ class _MainScreenState extends ConsumerState<MainScreen>
       // 콘텐츠 맨 아래로 옮기면서(사용자 요청) main.dart가 더 이상 이 버튼을
       // 고정 위치에 그리지 않음 - 대신 그 자리에서 쓰던 콜백을 그대로
       // 생성자로 내려줌(아래 build()의 옛 DisableTabButton 자리 주석 참고).
-      context.usesKoreanFeatures ? ScheduleManagementTab(
-        onDisabled: () => setState(() => _currentIndex = kCalendarTabIndex),
-        onConfirmed: ScheduleNotificationService.cancelAllForTabDisable,
-      ) : const SizedBox.shrink(),
+      context.usesKoreanFeatures
+          ? ScheduleManagementTab(
+              onDisabled: () =>
+                  setState(() => _currentIndex = kCalendarTabIndex),
+              onConfirmed: ScheduleNotificationService.cancelAllForTabDisable,
+            )
+          : const SizedBox.shrink(),
       Consumer(
         builder: (context, ref, _) {
-          final isDark = context.availableCalendarTheme(ref.watch(calendarThemeProvider)).isDark;
+          final calendarTheme =
+              context.availableCalendarTheme(ref.watch(calendarThemeProvider));
           return Theme(
-            data: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
+            data: AppTheme.forCalendar(calendarTheme),
             child: CalendarTab(),
           );
         },
@@ -576,11 +581,13 @@ class _MainScreenState extends ConsumerState<MainScreen>
       // 끼워 넣음.
       // 탭 인덱스는 두 언어에서 동일하게 유지한다. 사용자 숨김 설정은
       // _visibleTabIndices에서 처리한다.
-      context.usesKoreanFeatures ? ConditionTab(
+      context.usesKoreanFeatures
+          ? ConditionTab(
               onDisabled: () =>
                   setState(() => _currentIndex = kCalendarTabIndex),
               onConfirmed: WidgetRefreshService.refresh,
-            ) : const SizedBox.shrink(),
+            )
+          : const SizedBox.shrink(),
       // ⭐ 2026-09-01 후속13 - "컨디션 팁 실험실" 임시 개발용 탭(후속8에서 추가,
       // 컨디션 매니저 추천 로직 리팩토링 전 검토용)은 검토 끝나서 삭제함
       // (condition_tip_lab_screen.dart 파일 자체도 삭제).
@@ -633,15 +640,14 @@ class _MainScreenState extends ConsumerState<MainScreen>
 
   // ⭐ 클래스 선언부 주석 참고 - 앱을 백그라운드에서 포그라운드로 복귀할 때마다
   // 업데이트 여부를 다시 체크함(콜드 스타트 1회로는 배포 직후 전파 지연 구간을
-  // 영영 놓칠 수 있어서). 릴리즈 노트는 여기서 다시 안 부름 - 그건 "버전당 1회"
-  // 정책이라 이미 봤으면 checkAndShowReleaseNote 내부에서 알아서 스킵하지만,
-  // 굳이 앱을 복귀할 때마다 또 체크할 필요는 없어서 콜드 스타트 경로에만 남겨둠.
+  // 영영 놓칠 수 있어서). 업데이트 내용은 Play 스토어에서 안내한다.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
       UpdateService.checkForUpdate(context);
       unawaited(HolidaySyncService.instance.refreshIfDue());
       AlarmUsageAnalytics.reportNew();
+      OperationsAnalytics.report();
       // 한국어 화면은 자체 lifecycle observer가 새 기록을 읽는다. 영어 화면도
       // 네이티브 수면 감지가 앱 밖에서 쓴 기록을 복귀 시 반영해야 한다.
       if (context.usesKoreanFeatures) {
@@ -750,7 +756,8 @@ class _MainScreenState extends ConsumerState<MainScreen>
             // ⭐ 2026-09-07 - 컨디션 탭은 항상 "달력 바로 다음"에 위치함.
             // 사용자가 설정에서 꺼놨으면(conditionTabEnabledProvider) 그 탭 자체가 네비게이션에
             // 없으니 다음알람 탭(0)으로 안전하게 대체.
-            final conditionVisible = context.usesKoreanFeatures && ref.read(conditionTabEnabledProvider);
+            final conditionVisible = context.usesKoreanFeatures &&
+                ref.read(conditionTabEnabledProvider);
             _currentIndex = conditionVisible ? kCalendarTabIndex + 1 : 0;
           } else {
             _currentIndex = tabIndex;
@@ -780,8 +787,10 @@ class _MainScreenState extends ConsumerState<MainScreen>
   // (scheduleTabEnabledProvider/conditionTabEnabledProvider)을 여기서
   // 합쳐진다.
   List<int> get _visibleTabIndices {
-    final scheduleVisible = context.usesKoreanFeatures && ref.watch(scheduleTabEnabledProvider);
-    final conditionVisible = context.usesKoreanFeatures && ref.watch(conditionTabEnabledProvider);
+    final scheduleVisible =
+        context.usesKoreanFeatures && ref.watch(scheduleTabEnabledProvider);
+    final conditionVisible =
+        context.usesKoreanFeatures && ref.watch(conditionTabEnabledProvider);
     return [
       0,
       if (scheduleVisible) kScheduleManagementTabIndex,
@@ -798,7 +807,9 @@ class _MainScreenState extends ConsumerState<MainScreen>
             icon: const Icon(Icons.alarm), label: context.l10n.navNextAlarm);
       case 1:
         return BottomNavigationBarItem(
-            icon: NavIconEmphasis(icon: Icons.event_note_outlined, sequence: _emphasizedTab == 1 ? _emphasisSequence : 0),
+            icon: NavIconEmphasis(
+                icon: Icons.event_note_outlined,
+                sequence: _emphasizedTab == 1 ? _emphasisSequence : 0),
             label: context.koOnly.navScheduleManagement);
       case 2:
         return BottomNavigationBarItem(
@@ -806,7 +817,9 @@ class _MainScreenState extends ConsumerState<MainScreen>
             label: context.l10n.navCalendar);
       case 3:
         return BottomNavigationBarItem(
-            icon: NavIconEmphasis(icon: Icons.self_improvement, sequence: _emphasizedTab == 3 ? _emphasisSequence : 0),
+            icon: NavIconEmphasis(
+                icon: Icons.self_improvement,
+                sequence: _emphasizedTab == 3 ? _emphasisSequence : 0),
             label: Localizations.localeOf(context).languageCode == 'ko'
                 ? '수면·회복'
                 : 'Sleep');
@@ -830,16 +843,21 @@ class _MainScreenState extends ConsumerState<MainScreen>
         await WidgetsBinding.instance.endOfFrame;
         if (!mounted) return;
         if (tab == 1) {
-          await maybeShowScheduleTabTutorial(context, canShow: () => mounted && _currentIndex == tab);
+          await maybeShowScheduleTabTutorial(context,
+              canShow: () => mounted && _currentIndex == tab);
         } else {
-          await maybeShowConditionTabTutorial(context, canShow: () => mounted && _currentIndex == tab);
+          await maybeShowConditionTabTutorial(context,
+              canShow: () => mounted && _currentIndex == tab);
         }
         // The modal/page reverse transition must finish before the icon grows.
         await Future<void>.delayed(const Duration(milliseconds: 300));
         if (!mounted) return;
         ref.read(optionalTabActivationProvider.notifier).state = null;
         if (_currentIndex == tab) {
-          setState(() { _emphasizedTab = tab; _emphasisSequence++; });
+          setState(() {
+            _emphasizedTab = tab;
+            _emphasisSequence++;
+          });
         }
       });
     });
@@ -885,9 +903,6 @@ class _MainScreenState extends ConsumerState<MainScreen>
         body: Column(
           children: [
             Expanded(child: _tabs[_currentIndex]),
-            // Reserve the warning's actual height so fixed actions and the
-            // last calendar row remain reachable when permissions are missing.
-            const PermissionWarningBanner(),
             // ⭐ 2026-08-25 - 일정관리 탭뿐 아니라 달력 탭에서도 항상 자리를
             // 차지하도록 확장 - "일정관리도 광고를 고정으로 보여주자" 요청.
             // 2026-09-01 후속14 - 컨디션 탭(index 3)도 동일하게 추가(사용자 요청 -

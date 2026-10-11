@@ -108,7 +108,7 @@ void main() {
     expect((await SharedPreferences.getInstance()).getBool('schedule_tab_tutorial_shown'), isNot(true));
   });
 
-  testWidgets('an open common welcome popup changes to each current language', (tester) async {
+  testWidgets('an open common shift-assignment popup changes to each current language', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final language = ValueNotifier(const Locale('ko'));
     addTearDown(language.dispose);
@@ -118,7 +118,7 @@ void main() {
       return const Scaffold();
     })));
     await tester.pumpAndSettle();
-    final pending = maybeShowWelcomePopup(screen);
+    final pending = maybeShowShiftAssignTutorial(screen, isRegular: false);
     await tester.pump();
     await tester.pump(kInfoPopupDelay + const Duration(milliseconds: 1));
     await tester.pumpAndSettle();
@@ -127,10 +127,10 @@ void main() {
       await tester.pumpAndSettle();
       final text = tester.widgetList<RichText>(find.byType(RichText))
           .map((w) => w.text.toPlainText()).join(' ').replaceAll(RegExp(r'\s+'), ' ');
-      expect(text, contains(lookupAppLocalizations(locale).onboardingWelcomePopupTitle));
+      expect(text, contains(lookupAppLocalizations(locale).onboardingShiftAssignPopupTitle));
       expect(text, isNot(matches(RegExp('[가-힣]'))));
     }
-    await tester.tap(find.text(lookupAppLocalizations(language.value).onboardingWelcomePopupStartButton));
+    await tester.tap(find.text(lookupAppLocalizations(language.value).commonGotIt));
     await tester.pumpAndSettle();
     await pending;
   });

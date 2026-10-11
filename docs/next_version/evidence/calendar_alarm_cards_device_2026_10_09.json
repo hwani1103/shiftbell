@@ -1,0 +1,35 @@
+{
+  "status": "PAUSED_FOR_USER_DUPLICATE_UI_QUESTION",
+  "apk_sha256": "7bfb362d5e5090c0538c9a553c45ad39b39599046e7cb45a099b7d6f05753830",
+  "build": {
+    "critical_exit": 0,
+    "flutter": 324,
+    "native_functional": "PASS",
+    "native_db": "PASS",
+    "dev_debug": "PASS",
+    "web": "PASS",
+    "release": false
+  },
+  "device": {
+    "model": "SM-S948N",
+    "installed": true,
+    "checks_passed": [
+      "Update preserves all 17 DB tables",
+      "Fixed card rendering and horizontal scrolling to later cards",
+      "Actual foreground silent alarm id11 round5; actual +5m action; same open day sheet displayed 19:33 snooze card without reopening"
+    ],
+    "not_run": [
+      "Fixed card type change/delete via actual UI",
+      "Snooze card read-only tap and app resume",
+      "Controlled next-day fixture displayed on next date"
+    ],
+    "cleanup": "All CC09 rows/reservations/history/overrides removed; 17 tables exactly equal; no current ring"
+  },
+  "observed_duplicate": {
+    "user_report": "Overlay alarm and 7777 popup appeared together",
+    "evidence": "19:28:05.035 control notification posted; app calendar sheet was foreground; CustomAlarmReceiver host-visible branch calls InAppAlarmController before RingControlPresence check; controller uses overlay_alarm resource and has no 7777 suppression",
+    "scope": "Existing foreground in-app card plus heads-up; prior notification-first suppression applies only to external overlay branch",
+    "code_changed_for_duplicate": false
+  },
+  "artifacts": "artifacts/calendar_alarm_cards_device_2026_10_09/"
+}

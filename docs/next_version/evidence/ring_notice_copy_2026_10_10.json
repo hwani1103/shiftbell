@@ -1,0 +1,156 @@
+{
+  "date": "2026-10-10",
+  "scope": "A11/A09 7777 notification copy only",
+  "userDecision": {
+    "appName": "Keep 교대시계 (테스트) unchanged",
+    "layout": "Keep notification layout XML, element sizes and relationships; no device UI reinspection requested"
+  },
+  "implementation": {
+    "collapsed": "Non-breaking space for title, content and subtext; display timestamp disabled, original publication timestamp preserved",
+    "expandedKorean": "스누즈 %1$d분 → 알람연장 %1$d분",
+    "otherLanguages": "Existing Snooze/Schlummerzeit/Adiar/स्नूज़ labels retained",
+    "buttons": "Existing +/- duration adjustment and +Nm/dismiss actions retained"
+  },
+  "verification": {
+    "previewRemoval": "13 tests / No issues found",
+    "requiredGate": "Completed across original tools/check_critical_release.ps1 -Build and checkpoint resume",
+    "flutter": "338 PASS",
+    "nativeFirst": "149 PASS / 1 obsolete collapsed-title assertion FAIL; all 150 tests completed; first XML/log preserved",
+    "nativeRetry": "CoverAlarmNotificationTest 2 PASS; current alarm identity and expanded title preserved",
+    "nativeDb": "15 PASS",
+    "nativeFinalCoverage": "150 ring/permission/locale cases + 15 native DB cases PASS across runs",
+    "apkBuild": "PASS / dev debug",
+    "webBuild": "PASS / JavaScript; existing Wasm dry-run and font warnings retained in log",
+    "androidRelease": "NOT_RUN",
+    "install": "NOT_RUN",
+    "deviceCapture": "NOT_RUN",
+    "workerStop": "No process stopped: identity guard found worker already exited",
+    "sourceHashVerification": "4 owned files unchanged after build"
+  },
+  "sourceHashes": {
+    "android/app/src/main/kotlin/com/hwani1103/shiftbell/RingControlNotification.kt": "5f6525ad4f4e9d40c0dcd374fa60ad552993fd3b6beb86e24f9961812ca903bb",
+    "android/app/src/main/res/values-ko/strings.xml": "26aa30099219a4d4358c808a84ffe5da7e1a2199f400751c28cc3543802cfa4f",
+    "android/app/src/test/kotlin/com/hwani1103/shiftbell/RingSnoozeTest.kt": "a041f07d3a9357b748aa475a0b04aeac24935ef47df334e12293a68a41af63a2",
+    "android/app/src/test/kotlin/com/hwani1103/shiftbell/CoverAlarmNotificationTest.kt": "46b104af7d2b555a83072eba5f303618e9b747d3f5937dd67df1c705acf7063c"
+  },
+  "unchangedXmlHash": "92fc8c0b66723dc4bfe745dc03f9c3cc5052a9861211fe56d0826f9f7a051528",
+  "otherLanguageHashes": {
+    "android/app/src/main/res/values/strings.xml": "8a88a92dfaaeed03cc3bf70ec03af97748f2fe6a4b11614f47b680995bd655ca",
+    "android/app/src/main/res/values-de/strings.xml": "918647039a50668940c73c5aecfb55d7932ec5fe3494aef8671778ec07b45a96",
+    "android/app/src/main/res/values-pt/strings.xml": "514323b23bd5797d555c886e55cf204255112dc38f6ecb330774b45f7a1ccd67",
+    "android/app/src/main/res/values-hi/strings.xml": "d6d7bc8013673be3d9eb9f218fbd1ba019e475cfd882a49fc2bfcc2c794f1168"
+  },
+  "investigationSources": [
+    "https://developer.android.com/about/versions/12/behavior-changes-12",
+    "https://developer.android.com/develop/ui/views/notifications/live-update"
+  ],
+  "nativeFirstStats": [
+    {
+      "name": "com.hwani1103.shiftbell.AlarmDstTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.AlarmRefreshEngineH2Test",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.AlarmSnoozeDstTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.CoverAlarmNotificationTest",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.DebugAlarmDeliveryProbeTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.EnglishReleaseTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.G1RingRoundTest",
+      "tests": 46,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.G1WakeSyncTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.G6CrossReviewTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.G6RecheckTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.NationalHolidaysTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.NotificationLocaleTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.PermissionSettingsTest",
+      "tests": 17,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.ReleaseLanguagesTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.RingSnoozeTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.SnoozeDefaultsTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0
+    },
+    {
+      "name": "com.hwani1103.shiftbell.TimezoneConsumedAlarmTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0
+    }
+  ],
+  "apk": {
+    "path": "artifacts/ring_notice_copy_2026_10_10/shiftbell-copy-dev-debug.apk",
+    "bytes": 215863163,
+    "sha256": "971917d61b5fc75153de73eeef52103660ce3b2de07abe1649d57932c73b250c"
+  }
+}

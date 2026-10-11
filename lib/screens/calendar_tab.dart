@@ -1,4 +1,8 @@
+import '../widgets/alarm_mode_label.dart';
+import '../widgets/global_concept_calendar_cell.dart';
 import '../widgets/calendar_footer_actions.dart';
+import '../widgets/calendar_snoozed_alarms.dart';
+import '../widgets/calendar_alarm_cards.dart';
 import '../widgets/memo_detail_sheet.dart';
 import '../widgets/calendar_header_actions.dart';
 import '../widgets/semantics_table_boundary.dart';
@@ -468,7 +472,13 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     // 아니면 흰색을 쓰게 통일함.
     final isDarkTheme =
         context.availableCalendarTheme(ref.watch(calendarThemeProvider)).isDark;
-    final scaffoldBg = isDarkTheme ? const Color(0xFF1A1F2E) : Colors.white;
+    final currentTheme =
+        context.availableCalendarTheme(ref.watch(calendarThemeProvider));
+    final scaffoldBg = currentTheme == CalendarThemeId.periwinkle
+        ? periwinkleBackground
+        : isDarkTheme
+            ? const Color(0xFF1A1F2E)
+            : Colors.white;
 
     final body = scheduleAsync.when(
       // ⭐ 로딩/에러/스케줄없음 상태도 달력 탭 배경 예외(위 build() 안쪽 Scaffold
@@ -1183,7 +1193,15 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         );
       },
     );
-    return body;
+    return PopScope(
+      canPop: !_isMultiSelectMode,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && _isMultiSelectMode) {
+          _exitMultiSelectMode();
+        }
+      },
+      child: body,
+    );
   }
 
   // ⭐ 6번째 줄 빈 공간에 들어가는 카드 - 위 절반 "이번 달 OT" / 아래 절반
@@ -2146,7 +2164,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       t == CalendarThemeId.materialCard ||
       t == CalendarThemeId.boldGrid ||
       t == CalendarThemeId.initialBadge ||
-      t == CalendarThemeId.eventChip;
+      t == CalendarThemeId.eventChip ||
+      t == CalendarThemeId.periwinkle ||
+      t == CalendarThemeId.softMosaic;
 
   // ⭐ 위 두 "6번째 줄 재활용" 방식(_themeReclaimsSixthRow의 5칸 카드/범례,
   // _themeReclaimsSixthRowButtons의 목/금/토 3칸 버튼)은 테마별로 서로 배타적이지만,
@@ -2403,6 +2423,39 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     letterSpacing: 1)),
           ]),
         );
+      case CalendarThemeId.periwinkle:
+      case CalendarThemeId.softMosaic:
+        return GestureDetector(
+            onTap: _showMonthYearPicker,
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Flexible(
+                  child: Text(calendarMonthName(context, _focusedDay),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontSize: 23.sp,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -.5,
+                          color: conceptInk))),
+              SizedBox(width: 9.w),
+              Container(
+                  padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+                  decoration: theme == CalendarThemeId.periwinkle
+                      ? BoxDecoration(
+                          color: Colors.white.withValues(alpha: .48),
+                          borderRadius: BorderRadius.circular(7.r))
+                      : const BoxDecoration(
+                          border: Border(
+                              left: BorderSide(
+                                  color: Color(0xFFC4CEDD), width: 1.5))),
+                  child: Text('$y',
+                      style: TextStyle(
+                          fontSize: 12.5.sp,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF536684)))),
+              SizedBox(width: 3.w),
+              Icon(Icons.expand_more_rounded, size: 16.sp, color: conceptInk),
+            ]));
       case CalendarThemeId.eventChip:
         return GestureDetector(
             onTap: _showMonthYearPicker,
@@ -2517,6 +2570,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       case CalendarThemeId.materialCard:
       case CalendarThemeId.boldGrid:
       case CalendarThemeId.initialBadge:
+      case CalendarThemeId.periwinkle:
+      case CalendarThemeId.softMosaic:
       case CalendarThemeId.eventChip:
       case CalendarThemeId.mainWhite:
       case CalendarThemeId.mainDark:
@@ -2713,6 +2768,13 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         border = null;
         radius = 16.r; // 원형 뱃지 모티프 - 다른 테마보다 더 둥글게
         break;
+      case CalendarThemeId.periwinkle:
+      case CalendarThemeId.softMosaic:
+        bg = const Color(0xFFEAF0FC);
+        fg = conceptInk;
+        border = null;
+        radius = 10.r;
+        break;
       case CalendarThemeId.eventChip:
         bg = Colors.teal.shade50;
         fg = Colors.teal.shade700;
@@ -2853,6 +2915,14 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     color: redSunday
                         ? Colors.red.shade400
                         : Colors.grey.shade400)));
+      case CalendarThemeId.periwinkle:
+      case CalendarThemeId.softMosaic:
+        return Center(
+            child: Text(calendarWeekdayLabel(context, i),
+                style: TextStyle(
+                    fontSize: 11.5.sp,
+                    fontWeight: FontWeight.w700,
+                    color: conceptInk)));
       case CalendarThemeId.eventChip:
         return Center(
             child: Text(calendarWeekdayLabel(context, i),
@@ -2949,6 +3019,9 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           ));
     }
     switch (theme) {
+      case CalendarThemeId.periwinkle:
+      case CalendarThemeId.softMosaic:
+        return _themeOtBar(summary, otText, compact: true);
       case CalendarThemeId.minimal:
       case CalendarThemeId.initialBadge:
       case CalendarThemeId.eventChip:
@@ -3011,19 +3084,40 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
 
   // ⭐ 1/5/9번이 공유하던 lab의 _theme1OtBar() 그대로.
   Widget _themeOtBar(
-      ({int totalMinutes, DateTimeRange period}) summary, String otText) {
+      ({int totalMinutes, DateTimeRange period}) summary, String otText,
+      {bool compact = false}) {
     final primary = Theme.of(context).colorScheme.primary;
     return Container(
       margin: EdgeInsets.fromLTRB(
-          16.w, (_isFoldCalendar ? 4 : 6).h, 16.w, (_isFoldCalendar ? 4 : 6).h),
+          16.w,
+          (compact
+                  ? 3
+                  : _isFoldCalendar
+                      ? 4
+                      : 6)
+              .h,
+          16.w,
+          (compact
+                  ? 3
+                  : _isFoldCalendar
+                      ? 4
+                      : 6)
+              .h),
       padding: EdgeInsets.symmetric(
-          horizontal: 12.w, vertical: (_isFoldCalendar ? 5 : 8).h),
+          horizontal: 12.w,
+          vertical: (compact
+                  ? 2
+                  : _isFoldCalendar
+                      ? 5
+                      : 8)
+              .h),
       decoration: BoxDecoration(
           color: Colors.grey.shade50, borderRadius: BorderRadius.circular(8.r)),
       child: CalendarFooterActions(
+        minimumHeight: compact ? 30 : 48,
         onMonthly: () => _showMonthlyOvertimeSheet(summary.period),
         onWeekly: _showWeeklyWorkHoursSheet,
-        monthly: Row(children: [
+        monthly: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.access_time, size: 13.sp, color: primary.withOpacity(0.6)),
           SizedBox(width: 5.w),
           Flexible(
@@ -3084,11 +3178,16 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label,
-                  style: TextStyle(
-                      fontSize: 9.sp,
-                      color: color.shade400,
-                      fontWeight: FontWeight.w600)),
+              FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(label,
+                      maxLines: context.usesKoreanFeatures ? null : 1,
+                      softWrap: context.usesKoreanFeatures,
+                      style: TextStyle(
+                          fontSize: 9.sp,
+                          color: color.shade400,
+                          fontWeight: FontWeight.w600))),
               Text(value,
                   style: TextStyle(
                       fontSize: 12.sp,
@@ -3309,6 +3408,31 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
       {bool isSelected = false}) {
     final theme =
         context.availableCalendarTheme(ref.watch(calendarThemeProvider));
+    if (theme == CalendarThemeId.periwinkle ||
+        theme == CalendarThemeId.softMosaic) {
+      final d = _themedCellData(day, schedule);
+      final run = calendarShiftRun(
+          day,
+          MaterialLocalizations.of(context).firstDayOfWeekIndex == 1 ? 1 : 7,
+          (candidate) => _isSixthRowButtonCell(candidate, focusedDay,
+                  includeAllShiftsCol: schedule.isRegular)
+              ? ''
+              : schedule.getShiftForDate(candidate));
+      return GlobalConceptCalendarCell(
+          coverMemoSize: 9.3.sp,
+          theme: theme,
+          date: day,
+          shift: d.hasShift ? d.shiftText : '',
+          shiftColor: d.shiftColor,
+          shiftTextColor: d.shiftTextColor,
+          memos: d.memos,
+          today: isToday,
+          outside: isOutside,
+          red: d.red,
+          selected: isSelected,
+          runIndex: run.index,
+          runLength: run.length);
+    }
     if (WideCalendarCell.appliesTo(MediaQuery.sizeOf(context))) {
       final d = _themedCellData(day, schedule);
       return WideCalendarCell(
@@ -3350,6 +3474,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
         _theme10Cell(day, isToday, isOutside, schedule),
       CalendarThemeId.diary =>
         _themeDiaryCell(day, isToday, isOutside, schedule),
+      CalendarThemeId.periwinkle ||
+      CalendarThemeId.softMosaic ||
       CalendarThemeId.mainWhite ||
       CalendarThemeId.mainDark =>
         throw StateError('unreachable'),
@@ -3385,6 +3511,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             textScaler: media.textScaler.clamp(maxScaleFactor: 1)),
         child: child);
   }
+
+  bool get _koreanCompactCalendar =>
+      context.usesKoreanFeatures && _isFoldCalendar && !_usesWideCalendarCells;
+
+  bool get _globalCompactCalendar =>
+      !context.usesKoreanFeatures && _isFoldCalendar && !_usesWideCalendarCells;
 
   double get _mainBadgeHeight => _shiftBadgeHeight(
       TextStyle(fontSize: 11.sp, height: 1.15), _isFoldCalendar ? 15.h : 18.h);
@@ -3464,6 +3596,11 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   Widget _memoText(int count, String text, TextStyle style,
       {TextAlign textAlign = TextAlign.center, double? scaleOverride}) {
     style = style.copyWith(fontWeight: FontWeight.normal);
+    if (_globalCompactCalendar || _koreanCompactCalendar) {
+      return _sixCharacterText(
+          text, style.copyWith(fontSize: 9.3.sp, height: 1.0),
+          textAlign: textAlign, memo: true);
+    }
     if (_reviewedTheme) {
       return _sixCharacterText(text, style, textAlign: textAlign, memo: true);
     }
@@ -3617,12 +3754,15 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
           5.h +
           3 * line(7.5, 1),
       CalendarThemeId.underline => 10.h + line(12) + red(6) + 3 * line(7.8) + 2,
-      CalendarThemeId.eventChip => 2.4.h +
-          _calendarMarkerSize(18) +
-          2.h +
-          4 * _themeChipHeight() +
-          _themeChipHeight(isShift: true) +
-          3.2.h,
+      CalendarThemeId.periwinkle ||
+      CalendarThemeId.softMosaic ||
+      CalendarThemeId.eventChip =>
+        2.4.h +
+            _calendarMarkerSize(18) +
+            2.h +
+            4 * _themeChipHeight() +
+            _themeChipHeight(isShift: true) +
+            3.2.h,
       CalendarThemeId.editorial =>
         _editorialAnnotationTop + red(7.5) + 3.h + 3 * line(7.3) + 2.4.h + 2.h,
       CalendarThemeId.diary => 2.w +
@@ -3652,7 +3792,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 line(11.7) +
                 red(8, 1) +
                 3.5.h +
-                3 * line(8, 1) +
+                3 * line(_koreanCompactCalendar ? 9.3 : 8, 1) +
                 3.h,
             CalendarThemeId.initialBadge => 3.w +
                 2.8 +
@@ -3663,12 +3803,15 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                 red(8, 1) +
                 1.8.h +
                 1.2.h +
-                3 * line(8, 1),
-            CalendarThemeId.eventChip => 2.4.h +
-                _calendarMarkerSize(18) +
-                1.2.h +
-                _themeChipHeight(isShift: true) +
-                4 * (line(8, 1.1) + 0.6.h),
+                3 * line(_koreanCompactCalendar ? 9.3 : 8, 1),
+            CalendarThemeId.periwinkle ||
+            CalendarThemeId.softMosaic ||
+            CalendarThemeId.eventChip =>
+              2.4.h +
+                  _calendarMarkerSize(18) +
+                  1.2.h +
+                  _themeChipHeight(isShift: true) +
+                  4 * (line(_koreanCompactCalendar ? 9.3 : 8, 1.1) + 0.6.h),
             _ => legacyMinimumHeight,
           }
         : legacyMinimumHeight;
@@ -3780,6 +3923,33 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // 내려간다. 글자 배율을 반영하되 기존 테마의 최소 높이는 유지한다.
   // Symmetric leading and a centered line box, including fitted four-letter names.
   Widget _shiftBadgeLabel(String text, TextStyle style) {
+    // Phone global themes: use the joined Periwinkle label's 15/19 cap.
+    // Korean and fold renderers retain their reviewed sizing.
+    if ((!context.usesKoreanFeatures && !_isFoldCalendar) ||
+        (_koreanCompactCalendar &&
+            ref.read(calendarThemeProvider) == CalendarThemeId.diary)) {
+      return LayoutBuilder(builder: (context, bounds) {
+        return Center(
+          key: const ValueKey('shift-badge-content'),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              text,
+              key: const ValueKey('shift-badge-text'),
+              maxLines: 1,
+              textScaler: TextScaler.noScaling,
+              textAlign: TextAlign.center,
+              style: style.copyWith(
+                inherit: false,
+                fontSize: bounds.maxHeight * 15 / 19,
+                height: 1.05,
+                leadingDistribution: TextLeadingDistribution.proportional,
+              ),
+            ),
+          ),
+        );
+      });
+    }
     if (_reviewedTheme) {
       final theme =
           context.availableCalendarTheme(ref.read(calendarThemeProvider));
@@ -3976,7 +4146,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     final badgeStyle = TextStyle(
         fontSize: 9.5.sp, fontWeight: FontWeight.bold, color: d.shiftTextColor);
     final badgeHeight =
-        _shiftBadgeHeight(badgeStyle, 11.h) + (_reviewedTheme ? 0.5.h : 0);
+        (_shiftBadgeHeight(badgeStyle, 11.h) + (_reviewedTheme ? 0.5.h : 0)) *
+            (!context.usesKoreanFeatures && !_isFoldCalendar ? 0.93 : 1.0);
     final numColor = isOutside
         ? colorScheme.onSurfaceVariant.withOpacity(0.5)
         : (d.red ? Colors.red.shade400 : colorScheme.onSurface);
@@ -4107,7 +4278,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
     final joinedToday = isToday && _reviewedTheme;
     return ClipRect(
       child: Padding(
-        padding: EdgeInsets.all(2.w),
+        padding: EdgeInsets.all(
+            !context.usesKoreanFeatures && !_isFoldCalendar ? 1.5.w : 2.w),
         // ⭐ 2026-09-01 버그 수정 - "근무가 할당 안 된 날은 카드 배경이 1일이면
         // 좁은 세로줄, 10일이면 좀 더 넓은 세로줄처럼 내용 크기만큼만 그려진다.
         // 근무가 있으면 100% 폭이 유지된다"는 지적의 원인 - _theme1Cell의 같은
@@ -4330,7 +4502,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
             // 여백은 margin vertical: 1.h. ⭐ 2026-09-23 - 예전엔 근무 없는 날 이
             // 자리를 아예 안 그려서 그날만 메모가 위로 올라붙었음 - 이제 보이지만
             // 않을 뿐 같은 높이를 차지함(Visibility maintainSize).
-            SizedBox(height: _isFoldCalendar ? 1.5.h : 0),
+            SizedBox(
+                height: _globalCompactCalendar
+                    ? 0.7.h
+                    : _isFoldCalendar
+                        ? 1.5.h
+                        : 0),
             Visibility(
               visible: d.hasShift,
               maintainSize: true,
@@ -4341,15 +4518,19 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                         TextStyle(
                             fontSize: 9.5.sp, fontWeight: FontWeight.bold),
                         textScaler: _shiftTextScaler) +
-                    0.4.h,
+                    (_globalCompactCalendar ? 1.2.h : 0.4.h),
                 margin: EdgeInsets.symmetric(vertical: 0.2.h),
-                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 0.2.h),
+                padding: EdgeInsets.symmetric(
+                    horizontal: 2.w,
+                    vertical: !context.usesKoreanFeatures && !_isFoldCalendar
+                        ? 0
+                        : 0.2.h),
                 width: double.infinity,
                 decoration: BoxDecoration(color: d.shiftColor),
                 child: _shiftBadgeLabel(
                     d.shiftText,
                     TextStyle(
-                        fontSize: 9.5.sp,
+                        fontSize: 9.5.sp * (_globalCompactCalendar ? 1.06 : 1),
                         fontWeight: FontWeight.bold,
                         color: d.shiftTextColor)),
               ),
@@ -4771,8 +4952,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
   // 칩 하나가 차지하는 전체 높이(글자 줄 + 위아래 padding + 아래 margin).
   double _themeChipHeight({bool isShift = false}) {
     final textH = _lineHeightOf(
-        _themeChipTextStyle(Colors.black)
-            .copyWith(fontSize: isShift ? 8.5.sp : null),
+        _themeChipTextStyle(Colors.black).copyWith(
+            fontSize: isShift
+                ? 8.5.sp
+                : _koreanCompactCalendar
+                    ? 7.56.sp
+                    : null),
         textScaler: isShift ? _shiftTextScaler : null);
     final lunarH = _lineHeightOf(_lunarCellTextStyle(
         TextStyle(fontSize: 7.sp, fontWeight: FontWeight.w600)));
@@ -4793,7 +4978,12 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
               text, _themeChipTextStyle(fg).copyWith(fontSize: 8.5.sp))
           : memoCount != null
               ? _memoText(memoCount, text, _themeChipTextStyle(fg))
-              : _fitText(text, _themeChipTextStyle(fg),
+              : _fitText(
+                  text,
+                  _themeChipTextStyle(fg).copyWith(
+                      fontSize: annotation && _koreanCompactCalendar
+                          ? 7.56.sp
+                          : null),
                   textScaler: annotation ? TextScaler.noScaling : null),
     );
   }
@@ -5050,7 +5240,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                   : Colors.white,
                           alignment: Alignment.center,
                           padding: EdgeInsets.symmetric(
-                              vertical: 2.h, horizontal: 1.w),
+                              vertical: _koreanCompactCalendar ? 1.h : 2.h,
+                              horizontal: 1.w),
                           child: d.hasShift
                               ? _shiftBadgeLabel(
                                   d.shiftText,
@@ -5470,186 +5661,210 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     ? _themedCellData(day, schedule).lunarText
                     : null;
 
-                return Stack(
-                  children: [
-                    // 🔧 빨간날(공휴일) 이름 - 위치: 셀 맨 위 고정(top: context.usesKoreanFeatures ? 1.2.h : 0, 날짜
-                    // 숫자와 무관 - Stack 안에서 독립적으로 배치되므로 날짜 폰트
-                    // 크기를 바꿔도 안 따라옴). 크기: height: 11.h(이 줄 자체
-                    // 높이) / fontSize: 9.sp인데 FittedBox(fit: scaleDown)로
-                    // 감싸져 있어서 글자가 길면 이 11.h 줄 안에 맞게 자동으로
-                    // 더 작게 줄어듦(9.sp는 "최대" 크기) - 아래로 옮기려면 top
-                    // 값을 늘리거나 이 Positioned 앞에 별도 여백을 추가.
-                    if (context.usesKoreanFeatures &&
-                        _getHolidayName(day, context) != null)
-                      Positioned(
-                        top: context.usesKoreanFeatures ? 1.2.h : 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 11.h,
-                          padding: EdgeInsets.symmetric(horizontal: 1.w),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              _getHolidayName(day, context)!,
-                              textScaler: TextScaler.noScaling,
-                              style: TextStyle(
-                                fontSize: 9.3.sp,
-                                fontWeight: FontWeight.w600,
-                                color: isOutside
-                                    ? (isDarkMode
-                                        ? Colors.red.shade300.withOpacity(0.5)
-                                        : Colors.red.withOpacity(0.3))
-                                    : (isDarkMode
-                                        ? Colors.red.shade300
-                                        : Colors.red),
-                              ),
-                            ),
-                          ),
-                        ),
-                      )
-                    // ⭐ 2026-09-22 음력 - 빨간날 자리와 완전히 같은 위치(top:0)에,
-                    // 공휴일이 없을 때만 표기. 폰트는 이 테마 전용이 아니라 모든
-                    // 테마 공용 스타일(_lunarCellTextStyle).
-                    else if (lunarText != null)
-                      Positioned(
-                        top: context.usesKoreanFeatures ? 1.2.h : 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 11.h,
-                          padding: EdgeInsets.symmetric(horizontal: 1.w),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              lunarText,
-                              textScaler: TextScaler.noScaling,
-                              style: _lunarCellTextStyle(TextStyle(
-                                  fontSize: 9.sp, fontWeight: FontWeight.w600)),
-                            ),
-                          ),
-                        ),
-                      ),
-                    // 🔧 날짜 숫자 - 크기: fontSize: 16.sp. 위치: 기본은 셀
-                    // 정중앙(Align.center)인데, 메모가 3개 꽉 찬 날만 Padding
-                    // (bottom: 20.h)으로 그만큼 위로 밀어서 메모 3줄과 안 겹치게
-                    // 함(memoCount >= 3 조건) - 이 20.h가 메모 한 줄 높이×3에
-                    // 맞춰진 값이라, 메모 폰트/줄간격을 바꾸면 이 숫자도 같이
-                    // 맞춰야 함. 오늘 날짜는 배경 pill(패딩 6.w/2.h + 둥근
-                    // 모서리 4.r)이 추가로 덧씌워짐. 색 조합(라이트/다크 각각):
-                    // 오늘+빨간날 = 라임/amber 배경 + 빨간텍스트
-                    // 오늘+일반날 = 인디고배경 + 흰텍스트
-                    // 오늘아님+빨간날 = 빨간텍스트만(배경 없음)
-                    // 오늘아님+일반날 = 검정텍스트(다크는 onSurface)
-                    Align(
-                      alignment: Alignment.center,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                            bottom: (memoCount >= 3 ||
-                                    (memoCount > 0 &&
-                                        CalendarMemoSizing.appliesTo(
-                                            MediaQuery.sizeOf(context))))
-                                ? (_isFoldCalendar
-                                    ? 2 * _mainDateLift +
-                                        (MediaQuery.textScalerOf(context)
-                                                    .scale(1) -
-                                                1) *
-                                            30.h
-                                    : 20.h)
-                                : 0),
-                        child: Container(
-                          padding: shouldHighlightToday
-                              ? EdgeInsets.symmetric(
-                                  horizontal: 6.w,
-                                  vertical: _isFoldCalendar ? 1.h : 2.h)
-                              : EdgeInsets.zero,
-                          decoration: shouldHighlightToday
-                              ? BoxDecoration(
-                                  // ⭐ 다크모드 오늘 날짜 배경: 더 밝게
-                                  color: (isRedSunday || isHoliday)
-                                      ? (isDarkMode
-                                          ? Colors.amber.shade300
-                                          : Colors
-                                              .lime.shade300) // 다크모드: 밝은 amber
-                                      : (isDarkMode
-                                          ? Color(0xFFB4BFFF)
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .primary), // 다크모드: 더 밝은 인디고
-                                  borderRadius: BorderRadius.circular(4.r),
-                                )
-                              : null,
-                          child: Text(
-                            '${day.day}',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              // ⭐ 다크모드 오늘 날짜 텍스트: 명확한 대비
-                              color: shouldHighlightToday
-                                  ? (isRedSunday || isHoliday)
-                                      ? (isDarkMode
-                                          ? Colors.red.shade900
-                                          : Colors.red) // 다크모드: 진한 빨강
-                                      : (isDarkMode
-                                          ? Colors.white
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .onPrimary) // 다크모드: 순백
-                                  : dateColor,
-                              height: 1.0,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // 🔧 메모 - 위치: 셀 맨 아래 고정(bottom: 1.5.h, "메모가
-                    // 위/아래 중 어디서 시작하는가"의 답 = 아래에서부터, 날짜
-                    // 숫자와 무관하게 독립 배치). 최대 3개(take(3)), 글자 크기:
-                    // fontSize: 8.sp. 메모끼리 세로 간격 = 각 메모 Container의
-                    // margin bottom: _mainMemoGap. 메모 3개 꽉 찰 때만 위 날짜 숫자가
-                    // 20.h 위로 밀리는 로직과 세트(바로 위 Align 블록 참고) -
-                    // 메모 폰트/패딩을 키우면 그 20.h도 같이 늘려야 겹침이 없음.
-                    if (memos.isNotEmpty)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 1.5.h, // ⭐ 바닥에서 살짝 띄움
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: memos.take(3).map((memo) {
-                            return Container(
-                              width: double.infinity,
-                              margin: EdgeInsets.only(bottom: _mainMemoGap),
-                              padding: EdgeInsets.symmetric(
-                                  vertical: _mainMemoVerticalPadding),
-                              decoration: BoxDecoration(
-                                color: isDarkMode
-                                    ? colorScheme.primary.withOpacity(0.3)
-                                    : colorScheme.surfaceVariant,
-                                border: Border.all(
-                                    color: isDarkMode
-                                        ? colorScheme.primary.withOpacity(0.5)
-                                        : colorScheme.outline,
-                                    width: 0.5),
-                                borderRadius: BorderRadius.circular(2.r),
-                              ),
-                              child: _memoText(
-                                memoCount,
-                                memo.memoText,
-                                TextStyle(
+                return LayoutBuilder(builder: (context, bodyBounds) {
+                  final coverDatePadding =
+                      CalendarMemoSizing.mainDateBottomPadding(
+                          count: memoCount,
+                          bodyHeight: bodyBounds.maxHeight,
+                          dateHeight:
+                              _lineHeightOf(
+                                      TextStyle(
+                                          fontSize: 16.sp,
+                                          height: 1,
+                                          fontWeight: FontWeight.w600)) +
+                                  2.h,
+                          memoRowHeight: _lineHeightOf(
+                                  TextStyle(fontSize: 9.3.sp, height: 1)) +
+                              2 * _mainMemoVerticalPadding +
+                              _mainMemoGap +
+                              1,
+                          bottomInset: 1.5.h,
+                          gap: 1.h);
+                  return Stack(
+                    children: [
+                      // 🔧 빨간날(공휴일) 이름 - 위치: 셀 맨 위 고정(top: context.usesKoreanFeatures ? 1.2.h : 0, 날짜
+                      // 숫자와 무관 - Stack 안에서 독립적으로 배치되므로 날짜 폰트
+                      // 크기를 바꿔도 안 따라옴). 크기: height: 11.h(이 줄 자체
+                      // 높이) / fontSize: 9.sp인데 FittedBox(fit: scaleDown)로
+                      // 감싸져 있어서 글자가 길면 이 11.h 줄 안에 맞게 자동으로
+                      // 더 작게 줄어듦(9.sp는 "최대" 크기) - 아래로 옮기려면 top
+                      // 값을 늘리거나 이 Positioned 앞에 별도 여백을 추가.
+                      if (context.usesKoreanFeatures &&
+                          _getHolidayName(day, context) != null)
+                        Positioned(
+                          top: context.usesKoreanFeatures ? 1.2.h : 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: 11.h,
+                            padding: EdgeInsets.symmetric(horizontal: 1.w),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                _getHolidayName(day, context)!,
+                                textScaler: TextScaler.noScaling,
+                                style: TextStyle(
                                   fontSize: 9.3.sp,
-                                  color: colorScheme.onSurface,
-                                  fontWeight: FontWeight.w500,
-                                  height: 1.0,
+                                  fontWeight: FontWeight.w600,
+                                  color: isOutside
+                                      ? (isDarkMode
+                                          ? Colors.red.shade300.withOpacity(0.5)
+                                          : Colors.red.withOpacity(0.3))
+                                      : (isDarkMode
+                                          ? Colors.red.shade300
+                                          : Colors.red),
                                 ),
                               ),
-                            );
-                          }).toList(),
+                            ),
+                          ),
+                        )
+                      // ⭐ 2026-09-22 음력 - 빨간날 자리와 완전히 같은 위치(top:0)에,
+                      // 공휴일이 없을 때만 표기. 폰트는 이 테마 전용이 아니라 모든
+                      // 테마 공용 스타일(_lunarCellTextStyle).
+                      else if (lunarText != null)
+                        Positioned(
+                          top: context.usesKoreanFeatures ? 1.2.h : 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            height: 11.h,
+                            padding: EdgeInsets.symmetric(horizontal: 1.w),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                lunarText,
+                                textScaler: TextScaler.noScaling,
+                                style: _lunarCellTextStyle(TextStyle(
+                                    fontSize: 9.sp,
+                                    fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      // 🔧 날짜 숫자 - 크기: fontSize: 16.sp. 위치: 기본은 셀
+                      // 정중앙(Align.center)인데, 메모가 3개 꽉 찬 날만 Padding
+                      // (bottom: 20.h)으로 그만큼 위로 밀어서 메모 3줄과 안 겹치게
+                      // 함(memoCount >= 3 조건) - 이 20.h가 메모 한 줄 높이×3에
+                      // 맞춰진 값이라, 메모 폰트/줄간격을 바꾸면 이 숫자도 같이
+                      // 맞춰야 함. 오늘 날짜는 배경 pill(패딩 6.w/2.h + 둥근
+                      // 모서리 4.r)이 추가로 덧씌워짐. 색 조합(라이트/다크 각각):
+                      // 오늘+빨간날 = 라임/amber 배경 + 빨간텍스트
+                      // 오늘+일반날 = 인디고배경 + 흰텍스트
+                      // 오늘아님+빨간날 = 빨간텍스트만(배경 없음)
+                      // 오늘아님+일반날 = 검정텍스트(다크는 onSurface)
+                      Align(
+                        alignment: Alignment.center,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                              bottom: (_koreanCompactCalendar ||
+                                      _globalCompactCalendar)
+                                  ? coverDatePadding
+                                  : (memoCount >= 3 ||
+                                          (memoCount > 0 &&
+                                              CalendarMemoSizing.appliesTo(
+                                                  MediaQuery.sizeOf(context))))
+                                      ? (_isFoldCalendar
+                                          ? 2 * _mainDateLift +
+                                              (MediaQuery.textScalerOf(context)
+                                                          .scale(1) -
+                                                      1) *
+                                                  30.h
+                                          : 20.h)
+                                      : 0),
+                          child: Container(
+                            padding: shouldHighlightToday
+                                ? EdgeInsets.symmetric(
+                                    horizontal: 6.w,
+                                    vertical: _isFoldCalendar ? 1.h : 2.h)
+                                : EdgeInsets.zero,
+                            decoration: shouldHighlightToday
+                                ? BoxDecoration(
+                                    // ⭐ 다크모드 오늘 날짜 배경: 더 밝게
+                                    color: (isRedSunday || isHoliday)
+                                        ? (isDarkMode
+                                            ? Colors.amber.shade300
+                                            : Colors.lime
+                                                .shade300) // 다크모드: 밝은 amber
+                                        : (isDarkMode
+                                            ? Color(0xFFB4BFFF)
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .primary), // 다크모드: 더 밝은 인디고
+                                    borderRadius: BorderRadius.circular(4.r),
+                                  )
+                                : null,
+                            child: Text(
+                              '${day.day}',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                // ⭐ 다크모드 오늘 날짜 텍스트: 명확한 대비
+                                color: shouldHighlightToday
+                                    ? (isRedSunday || isHoliday)
+                                        ? (isDarkMode
+                                            ? Colors.red.shade900
+                                            : Colors.red) // 다크모드: 진한 빨강
+                                        : (isDarkMode
+                                            ? Colors.white
+                                            : Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary) // 다크모드: 순백
+                                    : dateColor,
+                                height: 1.0,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                  ],
-                );
+                      // 🔧 메모 - 위치: 셀 맨 아래 고정(bottom: 1.5.h, "메모가
+                      // 위/아래 중 어디서 시작하는가"의 답 = 아래에서부터, 날짜
+                      // 숫자와 무관하게 독립 배치). 최대 3개(take(3)), 글자 크기:
+                      // fontSize: 8.sp. 메모끼리 세로 간격 = 각 메모 Container의
+                      // margin bottom: _mainMemoGap. 메모 3개 꽉 찰 때만 위 날짜 숫자가
+                      // 20.h 위로 밀리는 로직과 세트(바로 위 Align 블록 참고) -
+                      // 메모 폰트/패딩을 키우면 그 20.h도 같이 늘려야 겹침이 없음.
+                      if (memos.isNotEmpty)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 1.5.h, // ⭐ 바닥에서 살짝 띄움
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: memos.take(3).map((memo) {
+                              return Container(
+                                width: double.infinity,
+                                margin: EdgeInsets.only(bottom: _mainMemoGap),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: _mainMemoVerticalPadding),
+                                decoration: BoxDecoration(
+                                  color: isDarkMode
+                                      ? colorScheme.primary.withOpacity(0.3)
+                                      : colorScheme.surfaceVariant,
+                                  border: Border.all(
+                                      color: isDarkMode
+                                          ? colorScheme.primary.withOpacity(0.5)
+                                          : colorScheme.outline,
+                                      width: 0.5),
+                                  borderRadius: BorderRadius.circular(2.r),
+                                ),
+                                child: _memoText(
+                                  memoCount,
+                                  memo.memoText,
+                                  TextStyle(
+                                    fontSize: 9.3.sp,
+                                    color: colorScheme.onSurface,
+                                    fontWeight: FontWeight.w500,
+                                    height: 1.0,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                    ],
+                  );
+                });
               },
             ),
           ),
@@ -5819,7 +6034,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                             fontSize: 14.sp,
                                             color: Theme.of(context)
                                                 .colorScheme
-                                                .onSurfaceVariant),
+                                                .onSurface,
+                                            fontWeight: FontWeight.w500),
                                       ),
                                     ),
                                 ],
@@ -5994,87 +6210,20 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                                     final sortedAlarms = [
                                       ...fixedAlarms
                                     ]..sort((a, b) => a.time.compareTo(b.time));
-                                    return SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        children: sortedAlarms.map((alarm) {
-                                          final typeInfo = _getAlarmTypeInfo(
-                                              alarm.alarmTypeId);
-                                          return GestureDetector(
-                                            onTap: () =>
-                                                _showAlarmTypeSelectionPopup(
-                                                    alarm, setState),
-                                            child: Container(
-                                              width: 110.w,
-                                              margin: EdgeInsets.only(
-                                                  right:
-                                                      alarm != sortedAlarms.last
-                                                          ? 8.w
-                                                          : 0),
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 8.w,
-                                                  vertical: 6.h),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .secondaryContainer,
-                                                borderRadius:
-                                                    BorderRadius.circular(8.r),
-                                                border: Border.all(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .secondary
-                                                        .withOpacity(0.3)),
-                                              ),
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Text(typeInfo['emoji']!,
-                                                          style: TextStyle(
-                                                              fontSize: 14.sp)),
-                                                      SizedBox(width: 4.w),
-                                                      Flexible(
-                                                          child: Text(
-                                                              alarm.time,
-                                                              maxLines: 1,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                              style: TextStyle(
-                                                                  fontSize:
-                                                                      14.sp,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .colorScheme
-                                                                      .onSecondaryContainer))),
-                                                    ],
-                                                  ),
-                                                  SizedBox(height: 4.h),
-                                                  Text(
-                                                    typeInfo['label']!,
-                                                    style: TextStyle(
-                                                        fontSize: 10.sp,
-                                                        color: Theme.of(context)
-                                                            .colorScheme
-                                                            .onSecondaryContainer),
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        }).toList(),
-                                      ),
+                                    return CalendarAlarmCardStrip(
+                                      cards: sortedAlarms.map((alarm) {
+                                        final typeInfo = _getAlarmTypeInfo(
+                                            alarm.alarmTypeId);
+                                        return CalendarAlarmCard(
+                                          key: ValueKey('calendar-fixed-${alarm.id}'),
+                                          time: alarm.time,
+                                          label: typeInfo['label']!,
+                                          leading: Text(typeInfo['emoji']!,
+                                              style: const TextStyle(fontSize: 14)),
+                                          onTap: () => _showAlarmTypeSelectionPopup(
+                                              alarm, setState),
+                                        );
+                                      }).toList(),
                                     );
                                   }
 
@@ -6136,7 +6285,20 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                             },
                           ),
 
-                          // ⭐ 2026-09-23 (1.0.24 B) - 이 날짜의 커스텀 알람(있을 때만 표시, 삭제 가능)
+                          // Snoozes use their actual retry date and are read-only.
+                          // Watch the same provider as fixed alarms so native
+                          // refresh/resume and cancellation update an open sheet.
+                          Consumer(
+                            builder: (context, ref, child) => ref
+                                .watch(alarmNotifierProvider)
+                                .maybeWhen(
+                                  data: (alarms) => CalendarSnoozedAlarms(
+                                    day: day,
+                                    alarms: alarms,
+                                  ),
+                                  orElse: () => const SizedBox.shrink(),
+                                ),
+                          ),
 
                           SizedBox(height: 20.h),
 
@@ -6693,7 +6855,7 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               SizedBox(height: 4.h),
-              Text(
+              AlarmModeLabel(
                 label,
                 style: TextStyle(
                   fontSize: 11.sp,

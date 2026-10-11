@@ -1,0 +1,49 @@
+플립8 SRTL 작업 보고 — 2026-10-10
+
+요청 원본138장 완료·해시 검증 완료. 커버 디스플레이 알람 캡처와 실제 제어 검증 완료.
+전체 UI 전수 검사는 일부 상세 분기와 반환 손실 화면이 남아 100%로 기록하지 않는다. 사용자 캡처 디자인 검수·Fold8/Ultra 후속·Flip4는 별도다. 기존 원장과 확정 Fold8 한국어/영어 달력 코드는 보존했다.
+16:38 KST 무렵 SRTL 예약 '< 1 min' 확인 후 ADB device not found로 연결 종료 확인. 종료 전 기기 정리를 마쳤으며 이후 실기기 검사는 중단했다.
+
+실기기 및 캡처
+- SM-F776B Galaxy Z Flip8 / Android SDK37 / localhost:45652. 펼침1080×2520, 커버948×1048. 펼침360×840dp, 커버 하단 카메라 영역을 제외한 안전 영역에서 제어 버튼을 확인했다.
+- 공통17종×5언어85장, 달력 한국어10+외국어7×4=38장, 한국어10분 제어3장·실제 공유 웹/친구2장, 커버 기본/10분×5언어10장. 합계138장. gallery.html에서 언어·자세·종류 필터로 원본을 확인할 수 있다.
+- 5언어 실제 온보딩 칩8회 입력 후 패턴 즉시 표시/불규칙 링크 확인. 실제 알림 및 overlay 두 권한 미허용 상태의 온보딩·다음 알람·고정 알람 배너 촬영. 설정 화면 진입을 허용으로 간주하지 않았다.
+- 잠금 알람, 실제 채널 차단 조건의 외부 overlay, 자연7777 알림, 내부 버튼→제어창→접기/Back 유지→복원→X 종료를 실기기 확인했다. −/+ 조절과5/10분 스누즈 이력, dismiss 이력,1분 자연 timeout 놓침 이력 확인. 사용자 지시에 따라5/10분 재울림 대기는 생략했다.
+- 실제 삼성 홈1주/3주 위젯 두 패널을 같은 페이지에 배치, 기본 축약 근무명·메모1/2/3개를5언어 촬영/검토했다. OEM 목록 크기 정렬로 수면 위젯이 먼저 나오는 것은 앱 등록 순서 결함으로 기록하지 않는다.
+
+커버 실제 기능 및 수정
+- 처음에는 커버 알람 위에 삼성 알람 배너가 중복 표시됐다. 커버 Activity가 제어를 맡는 동안 알림에 fullScreenIntent를 넣지 않도록 NotificationHelper를 수정했다. independent body tap·main FSI·action 정책은 유지한다.
+- 수정 후보로5언어 커버10장을 다시 촬영했다. 이전10장은 before_cover_fix에 당시 증거로 보존했다.
+- 각 언어 −/+10→5 조절,10분 스누즈 이력, X 종료 이력, 펼침→접힘 동일 alarm ID/round 인계와 중복 배너 소멸 확인. 버튼 최소48dp 및 커버 카메라 안전 영역 안 배치 확인.
+- CoverAlarmNotificationTest에 quiet fullScreenIntent=null·초기 token 취소·시간 변경 후 quiet 유지 회귀를 보강했다. tools/check_critical_release.ps1 -Build exit0, Flutter338/native 기능·DB이관·리소스·dev debug/웹 빌드 PASS. release 미실행.
+
+UI 검사 및 추가 수정
+- 설정·하위 메뉴·입력/키보드·확인창·온보딩·근무표를 실기기 Flutter 레이어로 메모리 시각 검사하고 TSV 측정 원장을 남겼다. 사용자가 요청하지 않은 상세 화면의 개별 PNG는 저장하지 않았다. 실제 OS keyboard viewInsets를 유지했으며 몽타주에 OS 키보드 그림 자체는 포함되지 않는다.
+- 한국어 기본/extras/remaining 및 한국어 전용 일정·수면·컨디션·공유·친구 분기와 영어 기본/extras/remaining 확인. 독일어 기본/remaining 확인. 포르투갈어·힌디어 기본/extras 확인. 조 변경 편집/확인은 최종 후보5언어 재검토했다.
+- 도움말은 한국어38·외국어 각23개를 실기기 실행/측정했다. 최종 시각 완료 그룹과 반환 실패는 visual_review_final.json을 기준으로 구분한다.
+- 도움말5언어130주제의 실제 시각 확인 완료. 원장597상태(ko175/en120/de123/pt90/hi89)는 상단/하단/키보드/분기 측정 수이며 독립 화면 수나 완료율이 아니다.
+- 한국어 설정 권한 설명·조 기준 위치 안내·이력 삭제 경고의 한 글자 고립 줄바꿈3곳을 짧은 동등 문구로 수정했다. common 키/변수·한국어 전용 분리는 유지, 생성기 갱신. 필수 -Build exit0 및 수정 후보 설치 후 영향을 받는 실제 화면 재확인.
+- 독일어 조 변경 화면의 Nacht 칩에 실제 RenderFlex overflow가 발생했다. TeamAssignmentGrid의 선택 테두리 양쪽5px를 단어 폭/텍스트 높이 계산에 포함하도록 수정했다. 기기 이름 조건이나 달력 렌더링 변경은 없다. 기존 레이아웃/팀 편집99검사 PASS, dev debug 빌드/설치 PASS, 조 변경5언어 실제 재검사에서 넘침 소멸 확인. 포르투갈어·힌디어 생성/조 규칙 분기도 수정 후보로 확인했다.
+- 독일어·포르투갈어 개인정보 하단의 빈 화면은 검사 도구 jumpTo(maxScrollExtent)의 lazy ListView 추정값 과도 이동이었다. 실제 ADB 스와이프로 하단 연락처/갱신일을 재확인했다. 제품 결함이나 처음 빈 화면 PASS로 기록하지 않는다.
+
+Firebase 및 정리
+- 합성 이름 SRTL 플립8 촬영용으로 실제 Firebase 일정 게시 및 실제 친구 추가, 한국어 친구 달력과 실제 공개 HTTPS 웹을 촬영했다. 공개 웹은 own-source Android SystemWebView 테스트 앱이며 Chrome 캡처로 표현하지 않는다. Hosting 배포 없음.
+- 공유 중지 후 로컬 off/active=false/dirty=false 및 서버 fetch revoked/조회 불가 확인. 시험 WebView 앱 제거 Success.
+- 종료 전 시험 알람0·템플릿0·활성 울림 키 없음, 친구 캐시 삭제 확인. 알림/알람 채널/overlay/정확한 알람/전체화면 권한은 모두 실제 granted 재조회.
+- 화면 꺼짐300000ms·stay-on0·애니메이션3개1·기기 전역 로캘en-US 복원 실조회. 기존 앱이 없었던 fresh dev 설치이며 합성 근무표/메모/위젯 일부는 검토용으로 남는다. 초기화했다고 표현하지 않는다.
+- 현재 요청에 컴퓨터 종료 지시가 없어 종료하지 않았다. 사용자 SRTL 예약 연장/취소는 수행하지 않았다.
+
+APK 증거
+- 최초촬영781ddbe46db37461f23c88a1d13024a2562e768d5d004aefc565256b186f62d2.
+- 커버 수정00f95573b2b6240cde94d4eda33d49a0044aed997c75db4f5a9bb755ccc94e87. 최초 후보와 Flutter asset51개 byte-identical 확인.
+- 한국어 문구 수정4a9d9e68a6753fe42127250970d1bacb12034de88801b0a586e508871fc77706. 한국어 공통10장은 이 후보로 재촬영했다.
+- 최종 조 칩 수정/실제 설치cb50c114872fe388665ed0ac86061bde994edb465e11b7799e8d4185d4cc7781. 설치 base.apk hash 실제 일치. 문구 후보→조 칩 후보 및 커버 후보→문구 후보 native DEX/res998개 모두 동일. 이전 원본을 새 APK 촬영으로 바꿔 기록하지 않는다.
+
+남은 작업
+- 포르투갈어/힌디어 remaining 상세17분기 중 조 변경 편집/확인을 제외한16분기씩. 달력 상세/일괄 근무/메모 편집/진단 확인/복구 진행·시작 상태 등. 요청 원본과 기존 검사에 겹치는 부분은 보존한다.
+- 독일어 extras35상태는 실행/측정 성공했지만 첫 도구 출력 반환 손실로 시각 PASS 제외. 종료 전 복구3분기·도움말 입력·이력 삭제/초기화 확인10상태를 회수/시각 확인했다. 나머지25상태(알람 편집/시간 선택, 근무명·메모 입력, 조 생성/규칙)는 시각 결과 회수가 필요하다. 최종 조 변경 편집 화면은 별도5언어 재검토 완료. 마지막 알람 편집 재검토 시도는 연결 종료로 실행 전 실패했으므로 PASS에 포함하지 않았다.
+- 한국어 도움말 강제 종료 제목(helpTroubleshootForceStopTitle)의 카드 끝에 '요' 한 글자 고립 줄바꿈을 확인했다. 본문 기능/스크롤은 정상이며 이 제목의 문구/폭 개선 및 재검토는 남는다.
+- 사용자138장 디자인 검수, Fold8/Ultra 잔여 및 Flip4 커버 실측은 별도. 자동/호스트/빌드 PASS를 미실시 실제 화면의 PASS로 확대하지 않는다.
+
+자료: artifacts/flip8_requested_captures_2026_10_10/gallery.html, manifest.json, capture_validation.json, layout_audit/coverage.json, visual_review_final.json, device_cleanup_verified.json, final_restore_readback.json, live_share_cleanup.json.
+기계 원장: docs/next_version/evidence/flip8_srtl_final_2026_10_10.json.

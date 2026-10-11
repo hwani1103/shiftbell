@@ -1,0 +1,175 @@
+{
+  "time": "2026-10-10T17:12:59.762Z",
+  "status": "COVER_COMPLETE_MAIN_PARTIAL_CONNECTION_ENDED",
+  "source": {
+    "candidate": "normal-glyph-dev-debug.apk",
+    "sha256": "be976ced5d7b2df61b4878d0377329dded7c984dda322dc129ed267bd026a490",
+    "criticalBuildExit": 0,
+    "layoutTests": "PASS_3_OF_3",
+    "releaseBuilt": false,
+    "rendering": "Native white button glyphs; diagnostic/raster/software/additional Canvas removed"
+  },
+  "session2": {
+    "model": "SM-F721B",
+    "serial": "localhost:38339",
+    "status": "CLOSED_WITH_PARTIAL_EVIDENCE",
+    "coverEn": {
+      "snooze10History": "PASS",
+      "first5mX": "PASS",
+      "after250ms10mX": "PRESENT_IN_ORIGINAL_PNG_EARLIER_FAIL_RETRACTED",
+      "settled10mX": "8_OF_8_FRAMES_PASS",
+      "srtlLiveX": "PRESENT"
+    },
+    "otherLocales": "NOT_COMPLETED",
+    "finalCleanup": "UNCONFIRMED"
+  },
+  "session3": {
+    "model": "SM-F721U",
+    "serial": "localhost:48066",
+    "api": 34,
+    "cover": {
+      "width": 512,
+      "height": 260,
+      "displayId": 1
+    },
+    "initialPackage": "ABSENT",
+    "status": "COVER_COMPLETE_MAIN_PARTIAL_CONNECTION_ENDED",
+    "coverKo": {
+      "snooze10History": "PASS",
+      "visual": "PASS_ORIGINALS"
+    },
+    "coverEn": {
+      "snooze10History": "PASS",
+      "visual": "PASS_ORIGINALS",
+      "earlyUnlockedAttempt": "EXCLUDED_WRONG_FIXTURE_TIMING"
+    },
+    "results": {
+      "time": "2026-10-10T17:01:40.383Z",
+      "status": "COVER_COMPLETE_MAIN_PARTIAL_CONNECTION_ENDED",
+      "coverApk": "be976ced5d7b2df61b4878d0377329dded7c984dda322dc129ed267bd026a490",
+      "model": "SM-F721U",
+      "api": 34,
+      "originalCaptureCount": 10,
+      "coverLanguages": {
+        "ko": {
+          "captures": "PASS_5_AND_10_MIN_ORIGINALS",
+          "snooze10History": "PASS",
+          "minimum5": "PASS",
+          "maximum30": "PASS",
+          "unfoldRefoldSameRoundAndSelection": "PASS",
+          "stopHistory": "PASS",
+          "alarmId": 9
+        },
+        "en": {
+          "captures": "PASS_5_AND_10_MIN_ORIGINALS",
+          "snooze10History": "PASS",
+          "minimum5": "PASS",
+          "maximum30": "PASS",
+          "unfoldRefoldSameRoundAndSelection": "PASS",
+          "stopHistory": "PASS",
+          "alarmId": 10
+        },
+        "de": {
+          "captures": "PASS_5_AND_10_MIN_ORIGINALS",
+          "snooze10History": "PASS",
+          "minimum5": "PASS",
+          "maximum30": "PASS",
+          "unfoldRefoldSameRoundAndSelection": "PASS",
+          "stopHistory": "PASS",
+          "alarmId": 11
+        },
+        "pt": {
+          "captures": "PASS_5_AND_10_MIN_ORIGINALS",
+          "snooze10History": "PASS",
+          "minimum5": "PASS",
+          "maximum30": "PASS",
+          "unfoldRefoldSameRoundAndSelection": "PASS",
+          "stopHistory": "PASS",
+          "alarmId": 12
+        },
+        "hi": {
+          "captures": "PASS_5_AND_10_MIN_ORIGINALS",
+          "snooze10History": "PASS",
+          "minimum5": "PASS",
+          "maximum30": "PASS",
+          "unfoldRefoldSameRoundAndSelection": "PASS",
+          "stopHistory": "PASS",
+          "alarmId": 13
+        }
+      },
+      "permissions": {
+        "notification": "granted",
+        "overlay": "granted",
+        "exactAlarm": "granted",
+        "fullScreen": "granted",
+        "alarmChannel": "granted",
+        "xiaomi": false,
+        "sdk": 34
+      },
+      "main": {
+        "reviewedActualStates": 27,
+        "layoutPassStates": 26,
+        "typographyFinding": "ko_open_additional: subtitle last character orphan; source shortened, post-fix device NOT_RUN",
+        "excludedWrongScreen": "ko_open_permissions",
+        "permissionsCorrectedRoute": "NOT_RUN_RPC_TIMEOUT",
+        "extras": "NOT_RUN",
+        "remaining": "NOT_RUN",
+        "helpBodies": "NOT_RUN",
+        "foreignLanguages": "NOT_RUN"
+      },
+      "host": {
+        "criticalBuildExit": 0,
+        "layoutTests": {
+          "tests": 3,
+          "failures": 0
+        },
+        "releaseBuilt": false
+      },
+      "postCopyBuild": "PASS_EXIT_0_DEVICE_NOT_INSTALLED",
+      "finalCleanup": "UNCONFIRMED_CONNECTION_ENDED",
+      "connection": {
+        "reservationPage": "Getting ready to restart",
+        "clientPage": "All ongoing tests have ended",
+        "adbDevices": [],
+        "recoveryActions": [
+          "app restart",
+          "Flutter attach",
+          "current-reservation RDB reconnect/restart",
+          "webclient reload"
+        ],
+        "endCause": "UNESTABLISHED"
+      },
+      "verdictCorrection": "All 40 old original PNGs retain X; missing-X FAIL judgments retracted. Unnecessary raster/software/Canvas/diagnostic implementations removed.",
+      "flip8AfterCoverChange": "NOT_RUN",
+      "default5Minutes": "PASS",
+      "naturalOneMinuteTimeout": "PASS_HISTORY_AND_RING_CLEARED",
+      "quietCover": {
+        "at51936ms": "NORMAL_CONTROLS_NO_SYSTEM_UI_BANNER_IN_ORIGINAL",
+        "at72824ms": "BLACK_AFTER_NATURAL_TIMEOUT",
+        "history": "natural_timeout.json"
+      }
+    }
+  },
+  "flip8AfterCoverChange": "NOT_RUN",
+  "mainFiveLocaleAudit": "PARTIAL_KO_27_ACTUAL_STATES_OTHER_FOUR_NOT_RUN",
+  "verdictCorrection": {
+    "status": "EARLIER_MISSING_X_FAIL_VERDICTS_RETRACTED",
+    "reason": "All 40 original cover PNGs retain white X pixels; enlarged native View/compositor comparison confirms cross shape.",
+    "evidence": "artifacts/flip4_cover_requested_captures_2026_10_10/x_original_pixel_reaudit_2026_10_11.json"
+  },
+  "latestSourceCandidate": {
+    "time": "2026-10-10T17:09:04.182Z",
+    "file": "C:/Users/Administrator/Desktop/shiftbell/artifacts/flip4_cover_requested_captures_2026_10_10/diagnostic-copy-dev-debug.apk",
+    "sha256": "ff56ce81fbd02c51fc464a413bb5089429db44ef5da5899f7aa6c56448841c82",
+    "bytes": 215877950,
+    "installedOnDevice": false,
+    "actualCoverCapturesApk": "be976ced5d7b2df61b4878d0377329dded7c984dda322dc129ed267bd026a490",
+    "change": "Korean diagnosticExportSubtitle shortened; cover rendering unchanged from recorded final candidate",
+    "release": false,
+    "criticalGate": "PASS_EXIT_0",
+    "flutterTests": 338,
+    "webBuild": "PASS_JS_167_2_SECONDS",
+    "nativeFunctionalAndMigration": "PASS",
+    "hostCleanup": "Idle Gradle daemon PID21176 terminated after successful build; outer executor exit0 confirmed"
+  }
+}

@@ -58,7 +58,9 @@ void main() {
   const capture = bool.fromEnvironment('CAPTURE_ENGLISH');
   const newLocales = bool.fromEnvironment('AUDIT_NEW_LOCALES');
   const windows = [
-    if (bool.fromEnvironment('AUDIT_COMPACT_LAYOUT')) ...[
+    if (bool.fromEnvironment('AUDIT_FOLD8_ONLY')) ...[
+      Size(475.43, 751.24), Size(932.57, 704),
+    ] else if (bool.fromEnvironment('AUDIT_COMPACT_LAYOUT')) ...[
       Size(320, 640), Size(500, 800), Size(501, 800), Size(600, 800),
     ] else ...[
     Size(411, 891), // Existing S26 Ultra DEV reference, not a new device claim.
@@ -68,15 +70,19 @@ void main() {
     Size(704, 932.57), Size(932.57, 704), // Fold8 inner / landscape.
     ],
   ];
-  const locales = newLocales
-      ? [Locale('de', 'DE'), Locale('pt', 'BR')]
+  const locales = bool.fromEnvironment('AUDIT_HINDI_ONLY')
+      ? [Locale('hi', 'IN')]
+      : newLocales
+      ? [Locale('de', 'DE'), Locale('pt', 'BR'), Locale('hi', 'IN')]
       : [Locale('en', 'US'), Locale('en', 'GB')];
   setUpAll(() async {
     await initializeDateFormatting();
     // Actual glyph metrics instead of the square test font. Screenshots remain
     // local previews, not Samsung screenshots.
     final body = await File(Platform.isWindows
-            ? 'C:/Windows/Fonts/segoeui.ttf'
+            ? (const bool.fromEnvironment('AUDIT_HINDI_ONLY')
+                ? 'C:/Windows/Fonts/Nirmala.ttf'
+                : 'C:/Windows/Fonts/segoeui.ttf')
             : 'test/fixtures/layout_fonts/Quicksand-Bold.ttf')
         .readAsBytes();
     await (FontLoader('EnglishPreview')
@@ -206,6 +212,7 @@ void main() {
         body: AlarmTimePicker(
             shiftName: 'Night duty',
             initialTime: const TimeOfDay(hour: 23, minute: 55),
+            alarmTypeId: 1, onTypeChanged: (_) {},
             onTimeSelected: (_, offset) {})),
     'navigation': () => const MainScreen(initialIndex: 1),
   };
@@ -394,7 +401,12 @@ void main() {
                     expect(fixedCard, findsOneWidget);
                     expect(tester.takeException(), isNull,
                         reason: '$locale fixed cards $size scale=$scale');
-                    if (entry.key == 'settings_fixed_dialog') await tapLabel(shifts[1]);
+                    if (entry.key == 'settings_fixed_dialog') {
+                      await tapLabel(shifts[1]);
+                      await tapLabel(l.alarmAdd);
+                      await tapLabel(l.commonOk);
+                      expect(find.byType(AlarmTypeButton), findsNWidgets(3));
+                    }
                   }
                 }
               }
@@ -404,6 +416,26 @@ void main() {
                 await tester.pumpAndSettle();
                 expect(tester.takeException(), isNull,
                     reason: '$locale ${entry.key} $size scale=$scale');
+              }
+              if (entry.key == 'settings') {
+                final l = lookupAppLocalizations(locale);
+                final label = find.text(l.shiftResetSchedule);
+                await tester.ensureVisible(label);
+                await tester.pumpAndSettle();
+                final action = find.ancestor(of: label,
+                    matching: find.byType(InkWell)).first;
+                final icon = find.descendant(of: action,
+                    matching: find.byIcon(Icons.refresh));
+                final paragraph = tester.renderObject<RenderParagraph>(label);
+                final firstGlyph = paragraph.getBoxesForSelection(
+                    TextSelection(baseOffset: 0,
+                        extentOffset: l.shiftResetSchedule.length)).first;
+                final glyphLeft = paragraph.localToGlobal(
+                    Offset(firstGlyph.left, firstGlyph.top)).dx;
+                final gap = glyphLeft - tester.getRect(icon).right;
+                expect(gap, greaterThanOrEqualTo(0));
+                expect(gap, lessThanOrEqualTo(9.w),
+                    reason: '$locale reset icon must stay beside its text at $size / $scale');
               }
               if (entry.key.startsWith('onboarding_')) {
                 final l = lookupAppLocalizations(locale);
@@ -435,6 +467,9 @@ void main() {
                     await tapLabel(l.commonNext);
                     if (entry.key == 'onboarding_alarm_dialog') {
                       await tapLabel(l.shiftDay);
+                      await tapLabel(l.alarmAdd);
+                      await tapLabel(l.commonOk);
+                      expect(find.byType(AlarmTypeButton), findsNWidgets(3));
                     }
                   }
                 }
@@ -509,7 +544,10 @@ void main() {
                   final image = await boundary.toImage();
                   final bytes =
                       await image.toByteData(format: ui.ImageByteFormat.png);
-                  final directory = Directory(const bool.fromEnvironment('CAPTURE_COPY_REVIEW')
+                  const captureDirectory = String.fromEnvironment('LAYOUT_CAPTURE_DIR');
+                  final directory = Directory(captureDirectory.isNotEmpty
+                      ? '$captureDirectory/$locale/$scale'
+                      : const bool.fromEnvironment('CAPTURE_COPY_REVIEW')
                       ? 'build/localization_copy_2026-10-05/previews/$locale/$scale'
                       : newLocales
                       ? 'build/localized_release_previews/$locale/$scale' : 'build/english_release_previews');

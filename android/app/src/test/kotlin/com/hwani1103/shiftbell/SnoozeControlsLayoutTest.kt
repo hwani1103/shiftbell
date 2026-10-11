@@ -38,9 +38,10 @@ class SnoozeControlsLayoutTest {
                     val ring = RingingAlarmTracker.startRing(c, 7)
                     repeat(minutes / 5 - 1) { RingingAlarmTracker.adjustSnooze(c, ring, 1) }
                     val binding = SnoozeControlsBinding(root, ring)
-                    if (root is ConstraintLayout) {
-                        AlarmResponsiveLayout.install(root)
-                        androidx.core.view.ViewCompat.dispatchApplyWindowInsets(root,
+                    val content = root.findViewById<View>(R.id.rootLayout)
+                    if (content is ConstraintLayout) {
+                        AlarmResponsiveLayout.install(content)
+                        androidx.core.view.ViewCompat.dispatchApplyWindowInsets(content,
                             androidx.core.view.WindowInsetsCompat.Builder().setInsets(
                                 androidx.core.view.WindowInsetsCompat.Type.systemBars(),
                                 androidx.core.graphics.Insets.of(0, (24*d).roundToInt(), 0, (48*d).roundToInt())).build())
@@ -67,7 +68,28 @@ class SnoozeControlsLayoutTest {
                         bounds.add(r)
                     }
                     val text = root.findViewById<TextView>(R.id.snoozeValueText)
-                    assertEquals(SnoozeText.compact(minutes), text.text.toString())
+                    val minus = root.findViewById<View>(R.id.snoozeDecreaseButton)
+                    val plus = root.findViewById<View>(R.id.snoozeIncreaseButton)
+                    val stop = root.findViewById<View>(R.id.dismissButton)
+                    val pill = root.findViewById<View>(R.id.snoozeButton)
+                    assertEquals("round side", minus.width, minus.height)
+                    assertEquals("equal sides", minus.width, plus.width)
+                    assertEquals("round dismissal", stop.width, stop.height)
+                    assertEquals("64:80", minus.width * 1.25, stop.width.toDouble(), 1.5)
+                    if (layout == R.layout.activity_alarm) {
+                        assertEquals("80:200", stop.width * 2.5, pill.width.toDouble(), 3.0)
+                        assertEquals("200:88 pill", pill.width * .44, pill.height.toDouble(), 2.0)
+                    } else {
+                        assertEquals("original compact row height", 64*d, pill.height.toFloat(), 1f)
+                        assertTrue("single row", kotlin.math.abs(bounds[0].centerY() - bounds[3].centerY()) <= 1)
+                    }
+                    assertEquals(c.getString(R.string.alarm_snooze_duration, minutes), text.text.toString())
+                    run {
+                        val title = root.findViewById<TextView>(R.id.lockSnoozeTitle)
+                        assertEquals(c.getString(R.string.alarm_snooze_title), title.text.toString())
+                        assertTrue("title fits $tag/$scale/$width", title.layout.getEllipsisCount(0) == 0 &&
+                            title.paint.measureText(title.text.toString()) <= title.width - title.paddingLeft - title.paddingRight + 1)
+                    }
                     assertTrue("value fits $tag/$scale/$width", text.paint.measureText(text.text.toString()) <= text.width + 1)
                     assertEquals(SnoozeText.description(c, minutes), root.findViewById<View>(R.id.snoozeButton).contentDescription)
                     binding.close()

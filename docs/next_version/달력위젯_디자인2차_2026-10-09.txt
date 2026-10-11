@@ -1,0 +1,26 @@
+달력 위젯 디자인 2차 — 2026-10-09
+이전 원장: 달력위젯_1주3주_2026-10-09.txt / evidence/calendar_widgets_2026_10_09.json. 당시 검증 결과는 보존하며 이번 변경의 기능 재검증 결과로 취급하지 않는다.
+
+사용자 최종 지시
+- 1주/3주 모두 날짜 → 근무명 칩 → 메모 최대 3개. 날짜와 근무명 기준선 고정.
+- 이번 디자인 변경은 기능 테스트 생략, 렌더링 및 dev debug APK 빌드만. 설치는 사용자 수행.
+
+변경
+- 독립적인 민트 낮/인디고 밤 그라데이션, 반투명 주별 카드, 낮의 구름·해·언덕 / 밤의 달·별·언덕 및 잎 장식.
+- 3주 헤더는 로케일별 연도·월. 다른 달 날짜 숫자는 흐리게 표시.
+- 동일 셀 간격, 원래 근무 텍스트/칩 색상, 빨간날/오늘 칩 유지. 긴 근무명은 전체 표시하도록 축소.
+- 메모는 완성된 grapheme 경계까지 표시하고 말줄임표 없음. 높이에 맞춰 날짜·메모 크기 조정.
+- 전체 할당 면적을 채우는 반응형 패널로 불필요한 외부 투명 여백 제거. 기본 3주 4×2 / 1주 4×1. 3주는 높이가 커져도 최대 3주.
+- 기존 홈 위젯의 점유 칸수는 런처가 유지하므로 사용자가 세로 조절 또는 재추가해야 함. 실제 칸수는 런처별 결정.
+- 기존 DB 직접 읽기/갱신 트리거와 9개 지역 정책, 한국어 전용 수면 위젯 범위는 유지.
+
+검증 범위
+- CalendarWidgetDesignRender.renderOnly: assertion 없는 실제 RemoteViews 렌더 전용 실행. Gradle unitTest task를 이미지 생성 실행기로만 사용; 기능 회귀 테스트 미실행.
+- 한국어/독일어/힌디어 × 낮/밤 × 1주 102dp 및 3주 200/228/300dp = 24 PNG 생성.
+- 최종 한국어 최소 높이/밤, 독일어, 힌디어 1주 이미지를 육안 확인. 실제 런처/폴더블/기기 기능 PASS 아님.
+- 렌더 로그: artifacts/calendar_widget_design_v2/render_order_final.log
+- dev debug APK: PASS (exit 0, 443.4초). artifacts/calendar_widget_design_v2/shiftbell-widget-design-dev-debug.apk
+  applicationId: com.hwani1103.shiftbell.dev, version: 1.0.23-dev (25)
+  크기: 215872368 bytes / SHA256: a9974d01a1c998bcd1dbb2f38aadebc61ac20f31f294492f3028bc963f26e8ae
+  빌드 로그: artifacts/calendar_widget_design_v2/build.log
+- 필수 회귀 검사/웹/release 빌드/실기기 설치는 이번 사용자 지시에 따라 미실행.

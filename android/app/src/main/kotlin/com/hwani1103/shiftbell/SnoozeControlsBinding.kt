@@ -25,9 +25,11 @@ internal class SnoozeControlsBinding(private val root: View, private val ring: R
         bound = selection
         val button = root.findViewById<Button>(R.id.snoozeButton)
         val value = root.findViewById<TextView>(R.id.snoozeValueText)
-        if (value != null) value.text = SnoozeText.compact(selection.minutes) else button.text = SnoozeText.compact(selection.minutes)
+        val lockTitle = root.findViewById<TextView>(R.id.lockSnoozeTitle)
+        if (value != null) value.text = if (lockTitle != null) root.context.getString(R.string.alarm_snooze_duration, selection.minutes)
+            else SnoozeText.compact(selection.minutes)
+        else button.text = SnoozeText.compact(selection.minutes)
         button.contentDescription = SnoozeText.description(root.context, selection.minutes)
-        root.findViewById<TextView>(R.id.snoozeLabelText)?.text = SnoozeText.description(root.context, selection.minutes)
         root.findViewById<View>(R.id.snoozeDecreaseButton).apply {
             isEnabled = selection.minutes > 5
             contentDescription = root.context.getString(R.string.alarm_snooze_decrease)

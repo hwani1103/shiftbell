@@ -1,0 +1,146 @@
+{
+  "date": "2026-10-08T21:08:00+09:00",
+  "status": "captures complete; broader audit deferred by user until reconnect",
+  "store_captures": [
+    {
+      "locale": "ko-KR",
+      "file": "C:\\Users\\Administrator\\Desktop\\PlayStore 등록정보 Folder\\Korean_ko-KR\\Korea_Fold8_Folded_Calendar_SimpleLine.png",
+      "state": "ko|475.42857142857144x751.2380952380952|memos=0",
+      "names": [
+        "주간",
+        "야간",
+        "오후근무",
+        "휴무"
+      ],
+      "pattern": [
+        "주간",
+        "주간",
+        "휴무",
+        "휴무",
+        "야간",
+        "야간",
+        "휴무",
+        "휴무",
+        "오후근무",
+        "오후근무",
+        "휴무",
+        "휴무"
+      ],
+      "sha256": "b1c0f2f6a546951c74e6b462da13d48a488d5bcac4236e0b69b1ec9fd64d28bb"
+    },
+    {
+      "locale": "en-US",
+      "file": "C:\\Users\\Administrator\\Desktop\\PlayStore 등록정보 Folder\\English_en-US\\English_Fold8_Folded_Calendar_Periwinkle.png",
+      "state": "en_US|475.42857142857144x751.2380952380952|memos=0",
+      "names": [
+        "D",
+        "Night",
+        "Afternoon Shift",
+        "Off"
+      ],
+      "pattern": [
+        "D",
+        "D",
+        "Off",
+        "Off",
+        "Night",
+        "Night",
+        "Off",
+        "Off",
+        "Afternoon Shift",
+        "Afternoon Shift",
+        "Off",
+        "Off"
+      ],
+      "sha256": "7f7e4ecf3effc63b66cb3a5258b638c4ca3b256755ef6e0836d9785ecd3e2bd7"
+    },
+    {
+      "locale": "pt-BR",
+      "file": "C:\\Users\\Administrator\\Desktop\\PlayStore 등록정보 Folder\\Portuguese_Brazil_pt-BR\\Brazil_Fold8_Folded_Calendar_Periwinkle.png",
+      "state": "pt_BR|475.42857142857144x751.2380952380952|memos=0",
+      "names": [
+        "Dia",
+        "Noite",
+        "Turno da tarde",
+        "Folga"
+      ],
+      "pattern": [
+        "Dia",
+        "Dia",
+        "Folga",
+        "Folga",
+        "Noite",
+        "Noite",
+        "Folga",
+        "Folga",
+        "Turno da tarde",
+        "Turno da tarde",
+        "Folga",
+        "Folga"
+      ],
+      "sha256": "f8536c24d01dbf816a9512ad836b7a1320baf198e9e15ab89869912d8e3dbae5"
+    },
+    {
+      "locale": "hi-IN",
+      "file": "C:\\Users\\Administrator\\Desktop\\PlayStore 등록정보 Folder\\Hindi_hi-IN\\Hindi_Fold8_Folded_Calendar_Periwinkle.png",
+      "state": "hi_IN|475.42857142857144x751.2380952380952|memos=0",
+      "names": [
+        "दिन",
+        "रात्रि",
+        "दोपहर की पाली",
+        "छुट्टी"
+      ],
+      "pattern": [
+        "दिन",
+        "दिन",
+        "छुट्टी",
+        "छुट्टी",
+        "रात्रि",
+        "रात्रि",
+        "छुट्टी",
+        "छुट्टी",
+        "दोपहर की पाली",
+        "दोपहर की पाली",
+        "छुट्टी",
+        "छुट्टी"
+      ],
+      "sha256": "c4e4784686ccfd2c640061c2a60eb898c4f8ae93d7de330439e56c9e037c3730"
+    },
+    {
+      "locale": "de-DE",
+      "file": "C:\\Users\\Administrator\\Desktop\\PlayStore 등록정보 Folder\\German_de-DE\\Germany_Fold8_Folded_Calendar_Periwinkle.png",
+      "state": "de_DE|475.42857142857144x751.2380952380952|memos=0",
+      "names": [
+        "Tag",
+        "Nacht",
+        "Spätschicht",
+        "Frei"
+      ],
+      "pattern": [
+        "Tag",
+        "Tag",
+        "Frei",
+        "Frei",
+        "Nacht",
+        "Nacht",
+        "Frei",
+        "Frei",
+        "Spätschicht",
+        "Spätschicht",
+        "Frei",
+        "Frei"
+      ],
+      "sha256": "11b976329ce5a4796a804663cbb8f87d0c4f7adf929639cec30336dbf38815f3"
+    }
+  ],
+  "footer_tests": "3 PASS",
+  "device_verified": "Periwinkle folded en-US,pt-BR,hi-IN,de-DE; Korean SimpleLine folded",
+  "pending": [
+    "all global themes folded/unfolded final footer verification",
+    "four language onboarding/settings/common screen audit",
+    "Hindi shift glyph vertical bounds review"
+  ],
+  "resume_document": "artifacts\\fold8_global_ui_final_2026_10_08\\재연결_진행상황.txt",
+  "build": "none; dev hot restart only",
+  "restored": "ko SimpleLine folded, memos0"
+}

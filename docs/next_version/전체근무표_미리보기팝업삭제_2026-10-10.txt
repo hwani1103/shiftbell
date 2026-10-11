@@ -1,0 +1,8 @@
+전체근무표 작성 미리보기 팝업 삭제 — 2026-10-10
+
+A09: 작성 화면 저장 시 별도 14일 미리보기/재확인 없이 기존 DB 저장 후 복귀. 공통/개별 설정 모두 같은 저장 경로.
+삭제: _review/_previewRow 및 전용 import. 저장 조건·설정 materialize·DB 저장·실패 처리 유지.
+기존 미커밋 작업 보존, 변경 전 소스/검사 사본은 artifacts/team_preview_removed_2026_10_10/.
+기존 조 편집/저장 흐름13 PASS, 변경2파일 정적 검사 No issues found. 실제 설치/새 캡처 미실시.
+언어 리소스 키/구조 변경 없음. 후속 7777 문구 수정과 함께 필수 -Build 단계를 완료했고 이번 dev debug APK에 포함. 설치 미실시. 별도 원장: 7777알림_문구수정_2026-10-10.txt.
+증거: evidence/team_preview_removed_2026_10_10.json

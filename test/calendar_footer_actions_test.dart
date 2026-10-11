@@ -26,8 +26,8 @@ void main() {
       final left = find.byKey(const ValueKey('calendar-monthly-summary'));
       final right = find.byKey(const ValueKey('calendar-weekly-summary'));
       final l = tester.getRect(left), r = tester.getRect(right);
-      expect(r.right - l.left, width);
-      expect(r.left - l.right, 16);
+      expect(r.right - l.left, closeTo(width, .001));
+      expect(r.left - l.right, closeTo(16, .001));
       expect(l.height, greaterThanOrEqualTo(48));
       expect(r.height, greaterThanOrEqualTo(48));
       await tester.tap(left);

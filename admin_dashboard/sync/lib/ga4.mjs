@@ -85,7 +85,7 @@ export class Ga4 {
   /** 일별 핵심 지표(활성 사용자 1/7/28일, 신규, 세션, 참여시간). */
   coreDaily(days) {
     return {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'yesterday' }],
       dimensions: [{ name: 'date' }],
       metrics: [
         { name: 'active1DayUsers' },
@@ -105,7 +105,7 @@ export class Ga4 {
   /** 일별 광고 지표. AdMob이 GA4에 연결돼 있지 않으면 값이 0이거나 오류가 난다(그땐 null 처리). */
   adsDaily(days) {
     return {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'yesterday' }],
       dimensions: [{ name: 'date' }],
       metrics: [{ name: 'publisherAdImpressions' }, { name: 'publisherAdClicks' }, { name: 'totalAdRevenue' }],
       dimensionFilter: streamFilter(this.streamId),
@@ -118,7 +118,7 @@ export class Ga4 {
   /** 일별 × 이벤트별 횟수(설치=first_open, 삭제=app_remove, 사용자 행동 이벤트 전부). */
   eventsDaily(days) {
     return {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'today' }],
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: 'yesterday' }],
       dimensions: [{ name: 'date' }, { name: 'eventName' }],
       metrics: [{ name: 'eventCount' }],
       dimensionFilter: streamFilter(this.streamId),
@@ -142,7 +142,7 @@ export class Ga4 {
   /** 웹 뷰어 성공 열람만. 앱 DAU/기능 순위와 섞지 않는다. */
   webFriendViews() {
     return {
-      dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }],
+      dateRanges: [{ startDate: '30daysAgo', endDate: 'yesterday' }],
       dimensions: [{ name: 'eventName' }],
       metrics: [{ name: 'eventCount' }, { name: 'totalUsers' }],
       dimensionFilter: withStream(this.streamId, {
@@ -161,6 +161,50 @@ export class Ga4 {
       dimensionFilter: streamFilter(this.streamId),
       orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
       limit: String(limit),
+    };
+  }
+
+  /** Same-period distinct users; never sum daily users to claim unique users. */
+  periodSummary(startDate, endDate) {
+    return {
+      dateRanges: [{ startDate, endDate }],
+      metrics: ['activeUsers', 'totalUsers', 'newUsers', 'sessions', 'userEngagementDuration'].map((name) => ({ name })),
+      dimensionFilter: streamFilter(this.streamId),
+    };
+  }
+
+  segmentSummary(dimension, startDate, endDate) {
+    return {
+      ...this.periodSummary(startDate, endDate), dimensions: [{ name: dimension }],
+      orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }], limit: '300',
+    };
+  }
+
+  segmentEvents(dimension, startDate, endDate) {
+    return {
+      dateRanges: [{ startDate, endDate }], dimensions: [{ name: dimension }, { name: 'eventName' }],
+      metrics: [{ name: 'eventCount' }, { name: 'totalUsers' }],
+      dimensionFilter: withStream(this.streamId, { filter: {
+        fieldName: 'eventName', inListFilter: { values: [
+          'first_open', 'app_remove', 'onboarding_complete', 'team_roster_created', 'all_shifts_opened',
+          'shift_assigned', 'alarm_template_saved', 'alarm_dismissed', 'alarm_snoozed', 'alarm_no_response',
+          'alarm_schedule_ok', 'alarm_schedule_failed', 'alarm_fired', 'alarm_refresh_completed',
+          'alarm_refresh_failed', 'device_boot_seen', 'ops_daily_ready', 'ops_daily_restricted',
+          'ops_daily_unknown', 'ops_battery_restricted', 'ops_exact_denied', 'ops_notification_blocked',
+          'ops_channel_blocked', 'ops_fullscreen_denied', 'app_exception',
+        ] },
+      } }),
+      limit: '30000',
+    };
+  }
+
+  countryDaily(days = 100) {
+    return {
+      dateRanges: [{ startDate: String(days) + 'daysAgo', endDate: 'yesterday' }],
+      dimensions: [{ name: 'date' }, { name: 'country' }],
+      metrics: [{ name: 'activeUsers' }, { name: 'newUsers' }, { name: 'sessions' }],
+      dimensionFilter: streamFilter(this.streamId),
+      orderBys: [{ dimension: { dimensionName: 'date' } }], limit: '100000',
     };
   }
 

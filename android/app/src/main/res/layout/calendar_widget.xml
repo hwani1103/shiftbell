@@ -1,2240 +1,433 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    ⭐ 홈 화면 캘린더 위젯 레이아웃 - "컴팩트" 버전 (기본 크기).
-    - 요일 헤더 1줄 + 주(週) 3줄(전주/이번주/다음주), 항상 7열
-    - 각 셀 = [근무색 알약(pill)] + [날짜 숫자] 세로 스택
-    - 배경/오늘강조 색은 CalendarWidgetProvider.kt에서 라이트/다크 모드에 맞춰 런타임에 지정
-    - 전체를 탭하면 앱(달력 탭)이 열림 - onClickPendingIntent가 widget_panel에 걸림
-    - 위젯을 충분히 키우면 calendar_widget_full.xml(달력 월 전체, 6줄)로 자동 전환됨
-
-    ⭐ 2026-09-04 - 이 파일은 calendar_widget_info.xml의 android:previewLayout으로도
-    쓰임(런처의 "위젯 추가" 미리보기 화면). previewLayout은 RemoteViews로 값을 채우지
-    않고 이 XML을 있는 그대로 정적 렌더링하는데, hdr_N/num_R_C/pill_R_C/pillbg_R_C가
-    전부 android:text/android:background 없이 비어 있어서 미리보기가 빈 격자 칸만
-    보이는 문제가 있었음(수면 위젯(sleep_widget.xml)은 애초에 정적 기본값이 박혀 있어
-    문제없었음 - 그 패턴을 그대로 따름). 아래 각 요소에 채워 넣은 값(요일/날짜/근무
-    라벨·색)은 순수 미리보기용 가짜 데이터일 뿐 - onUpdate() 시점에 RemoteViews가
-    전부 실제 값으로 덮어써서 앱 실행 중에는 절대 안 보임. 메모 배지(memo1/2/3)는
-    기존처럼 visibility="gone" 그대로 둬서 미리보기에도 메모 없는 버전으로 나옴.
-
-    ⭐ 2026-09-04 후속 - 1차 버전은 pillbg_R_C 배경(인디고/퍼플/빨강 - 서로 톤이
-    비슷하고 전부 어두움)에 pill_R_C 텍스트 색을 안 채워서 어두운 배경에 어두운
-    기본 텍스트가 겹쳐 글씨가 안 보이는 문제가 있었음(사용자 리포트로 발견).
-    CalendarWidgetProvider.kt가 실제로 쓰는 색을 그대로 재사용해서 고침:
-    배경 3색은 앱 기본 테마(mainWhite)의 kMainLightPalette 실제 값(블루 #4771D1/
-    다크골드 #6B6524/고정빨강 #EF5350 - 서로 뚜렷이 다른 색상환대라 헷갈리지
-    않음), pill 텍스트는 위젯 런타임의 자동대비 공식(PILL_TEXT_DARK/LIGHT,
-    luminance 200 기준)대로 셋 다 흰색, 요일/날짜 숫자 텍스트는 위젯이 실제로
-    쓰는 검정(LIGHT_HEADER_TEXT/LIGHT_TEXT_NORMAL)으로 명시함 - "실제 앱에서
-    보일 색과 다른 미리보기"가 되지 않도록 전부 실제 상수값을 그대로 가져옴.
-
-    ⚠️ 2026-09-04 재후속(중요) - pillbg_R_C는 ImageView이고, 실제 런타임
-    (CalendarWidgetProvider.kt)은 이 자리에 색상 + 둥근 모서리를 직접 그린
-    비트맵을 `views.setImageViewBitmap(cellPillBgIds[r][c], bitmap)`로
-    앉힌다 - 이건 android:src 슬롯이지 android:background 슬롯이 아니다.
-    위 미리보기 색을 처음엔 실수로 android:background에 넣었는데,
-    RemoteViews는 지정 안 한 속성을 안 지우므로 실제 위젯에서도 그 배경이
-    "둥근 비트맵 뒤에 그대로 깔린 채" 같이 보여서 모서리가 안 둥글어 보이고
-    겹쳐 보이는 버그가 생겼음(사용자 리포트로 발견) - android:src로 바꿔서
-    해결함(런타임에 setImageViewBitmap이 이 자리를 정확히 덮어써서 미리보기
-    색은 앱 실행 중엔 안 보이고, 실제 둥근 비트맵만 보임). **이 파일을 다시
-    건드릴 땐 pillbg_R_C에 절대 android:background를 쓰지 말 것.**
--->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widget_panel"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp">
-    <!-- ⭐ 스케줄 미설정 등 표시할 게 없을 때만 보임 (평소엔 GONE) -->
-    <TextView
-        android:id="@+id/empty_message"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:textSize="12sp"
-        android:visibility="gone"
-        android:text="@string/widget_setup_schedule_first"/>
-    <LinearLayout
-        android:id="@+id/widget_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-        <!-- 요일 헤더 - 주(週) 3줄보다 비중을 살짝 더 줘서 눈에 잘 띄게 함 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.75"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingBottom="2dp">
-            <TextView
-                android:id="@+id/hdr_0"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="@dimen/calendar_widget_weekday_size"
-                android:text="@string/widget_weekday_0"
-                android:textColor="#FF000000"
-                android:textStyle="bold"/>
-            <TextView
-                android:id="@+id/hdr_1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="@dimen/calendar_widget_weekday_size"
-                android:text="@string/widget_weekday_1"
-                android:textColor="#FF000000"
-                android:textStyle="bold"/>
-            <TextView
-                android:id="@+id/hdr_2"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="@dimen/calendar_widget_weekday_size"
-                android:text="@string/widget_weekday_2"
-                android:textColor="#FF000000"
-                android:textStyle="bold"/>
-            <TextView
-                android:id="@+id/hdr_3"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="@dimen/calendar_widget_weekday_size"
-                android:text="@string/widget_weekday_3"
-                android:textColor="#FF000000"
-                android:textStyle="bold"/>
-            <TextView
-                android:id="@+id/hdr_4"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="@dimen/calendar_widget_weekday_size"
-                android:text="@string/widget_weekday_4"
-                android:textColor="#FF000000"
-                android:textStyle="bold"/>
-            <TextView
-                android:id="@+id/hdr_5"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="@dimen/calendar_widget_weekday_size"
-                android:text="@string/widget_weekday_5"
-                android:textColor="#FF000000"
-                android:textStyle="bold"/>
-            <TextView
-                android:id="@+id/hdr_6"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:textSize="@dimen/calendar_widget_weekday_size"
-                android:text="@string/widget_weekday_6"
-                android:textColor="#FF000000"
-                android:textStyle="bold"/>
-        </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_0_0"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF4771D1"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_0_0"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_day"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_0_0"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_0_0"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="1"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_0_0"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_0_0"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_0_0"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_0_1"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF6B6524"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_0_1"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_night"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_0_1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_0_1"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="2"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_0_1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_0_1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_0_1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_0_2"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FFEF5350"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_0_2"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_off"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_0_2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_0_2"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="3"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_0_2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_0_2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_0_2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_0_3"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF4771D1"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_0_3"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_day"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_0_3"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_0_3"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="4"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_0_3"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_0_3"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_0_3"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_0_4"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF6B6524"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_0_4"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_night"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_0_4"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_0_4"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="5"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_0_4"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_0_4"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_0_4"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_0_5"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FFEF5350"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_0_5"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_off"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_0_5"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_0_5"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="6"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_0_5"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_0_5"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_0_5"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_0_6"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF4771D1"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_0_6"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_day"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_0_6"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_0_6"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="7"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_0_6"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_0_6"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_0_6"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_1_0"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF6B6524"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_1_0"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_night"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_1_0"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_1_0"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="8"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_1_0"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_1_0"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_1_0"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_1_1"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FFEF5350"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_1_1"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_off"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_1_1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_1_1"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="9"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_1_1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_1_1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_1_1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_1_2"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF4771D1"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_1_2"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_day"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_1_2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_1_2"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="10"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_1_2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_1_2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_1_2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_1_3"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF6B6524"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_1_3"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_night"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_1_3"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_1_3"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="11"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_1_3"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_1_3"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_1_3"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_1_4"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FFEF5350"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_1_4"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_off"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_1_4"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_1_4"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="12"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_1_4"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_1_4"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_1_4"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_1_5"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF4771D1"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_1_5"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_day"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_1_5"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_1_5"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="13"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_1_5"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_1_5"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_1_5"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_1_6"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF6B6524"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_1_6"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_night"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_1_6"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_1_6"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="14"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_1_6"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_1_6"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_1_6"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_2_0"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FFEF5350"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_2_0"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_off"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_2_0"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_2_0"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="15"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_2_0"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_2_0"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_2_0"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_2_1"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF4771D1"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_2_1"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_day"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_2_1"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_2_1"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="16"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_2_1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_2_1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_2_1"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_2_2"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF6B6524"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_2_2"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_night"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_2_2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_2_2"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="17"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_2_2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_2_2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_2_2"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_2_3"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FFEF5350"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_2_3"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_off"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_2_3"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_2_3"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="18"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_2_3"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_2_3"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_2_3"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_2_4"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF4771D1"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_2_4"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_day"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_2_4"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_2_4"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="19"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_2_4"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_2_4"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_2_4"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_2_5"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FF6B6524"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_2_5"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_night"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_2_5"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_2_5"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="20"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_2_5"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_2_5"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_2_5"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginLeft="1.5dp"
-                    android:layout_marginRight="1.5dp"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="16dp"
-                        android:layout_marginBottom="2dp">
-                        <ImageView
-                            android:id="@+id/pillbg_2_6"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="#FFEF5350"
-                            android:scaleType="fitXY"/>
-                        <TextView
-                            android:id="@+id/pill_2_6"
-                            style="@style/CalendarWidgetShiftLabel"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:textSize="9sp"
-                            android:textStyle="bold"
-                            android:maxLines="1"
-                            android:includeFontPadding="false"
-                            android:text="@string/widget_preview_off"
-                            android:textColor="#FFFFFFFF"
-                            android:ellipsize="end"/>
-                    </FrameLayout>
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1">
-                            <LinearLayout
-                                android:id="@+id/numwrap_2_6"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center"
-                                android:orientation="vertical">
-                                    <TextView
-                                        android:id="@+id/num_2_6"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:gravity="center"
-                                        android:textSize="17sp"
-                                        android:includeFontPadding="false"
-                                        android:paddingLeft="5dp"
-                                        android:paddingRight="5dp"
-                                        android:paddingTop="2dp"
-                                        android:text="21"
-                                        android:textColor="#FF000000"
-                                        android:paddingBottom="2dp"/>
-                                </LinearLayout>
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="bottom"
-                                android:orientation="vertical">
-                                <TextView
-                                    android:id="@+id/memo1_2_6"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo2_2_6"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="0.5dp"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                                <TextView
-                                    android:id="@+id/memo3_2_6"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/widget_memo_bg_light"
-                                    android:gravity="center"
-                                    android:textSize="9sp"
-                                    android:includeFontPadding="false"
-                                    android:maxLines="1"
-                                    android:ellipsize="end"
-                                    android:visibility="gone"/>
-                            </LinearLayout>
-                        </FrameLayout>
-                </LinearLayout>
-            </LinearLayout>
-    </LinearLayout>
-</LinearLayout>
+<!-- Generated by tools/generate_calendar_widget_layouts.py. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/widget_panel" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/calendar_widget_day" android:clipToOutline="true" android:layoutDirection="ltr">
+  <ImageView android:id="@+id/widget_garden" android:layout_margin="8dp" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/widget_garden_day" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+  <TextView android:id="@+id/empty_message" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:textSize="12sp" android:textColor="#294E48" android:visibility="gone" android:text="@string/widget_setup_schedule_first"/>
+  <LinearLayout android:id="@+id/widget_content" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingLeft="7dp" android:paddingRight="7dp" android:paddingTop="4dp" android:paddingBottom="4dp" android:orientation="vertical"><FrameLayout android:layout_width="match_parent" android:layout_height="30dp">
+          <ImageView android:id="@+id/widget_day_period" android:layout_width="100dp" android:layout_height="30dp" android:layout_gravity="right" android:scaleType="fitXY" android:src="@drawable/widget_landscape_day" android:contentDescription="@string/widget_daytime"/>
+          <TextView android:id="@+id/widget_date_header" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginRight="100dp"
+            android:paddingLeft="5dp" android:gravity="center_vertical" android:textSize="19dp" android:textStyle="bold" android:fontFamily="sans-serif-medium"
+            android:textColor="#294E48" android:includeFontPadding="false" android:maxLines="1" android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="12dp" android:autoSizeMaxTextSize="19dp" android:text="@string/app_widget_calendar_label"/>
+        </FrameLayout><LinearLayout android:layout_width="match_parent" android:layout_height="23dp" android:orientation="horizontal"><TextView android:id="@+id/hdr_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_0"/><TextView android:id="@+id/hdr_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_1"/><TextView android:id="@+id/hdr_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_2"/><TextView android:id="@+id/hdr_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_3"/><TextView android:id="@+id/hdr_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_4"/><TextView android:id="@+id/hdr_5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_5"/><TextView android:id="@+id/hdr_6" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_6"/></LinearLayout><LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="1dp" android:layout_marginBottom="1dp" android:background="@drawable/widget_week_surface" android:orientation="horizontal"><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_0_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_0_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="1"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_0_0" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_0_0" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_day"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_0_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_0_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="2"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_0_1" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_0_1" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_night"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_0_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_0_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="3"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_0_2" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_0_2" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_off"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_0_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_0_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="4"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_0_3" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_0_3" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_day"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_0_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_0_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="5"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_0_4" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_0_4" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_night"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_0_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_0_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="6"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_0_5" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_0_5" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_off"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_0_6" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_0_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="7"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_0_6" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_0_6" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_day"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout></LinearLayout><LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="1dp" android:layout_marginBottom="1dp" android:background="@drawable/widget_week_surface" android:orientation="horizontal"><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_1_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_1_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="8"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_1_0" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_1_0" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_day"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_1_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_1_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="9"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_1_1" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_1_1" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_night"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_1_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_1_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="10"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_1_2" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_1_2" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_off"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_1_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_1_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="11"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_1_3" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_1_3" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_day"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_1_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_1_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="12"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_1_4" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_1_4" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_night"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_1_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_1_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="13"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_1_5" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_1_5" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_off"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_1_6" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_1_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="14"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_1_6" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_1_6" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_day"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout></LinearLayout><LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="1dp" android:layout_marginBottom="1dp" android:background="@drawable/widget_week_surface" android:orientation="horizontal"><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_2_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_2_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="15"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_2_0" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_2_0" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_day"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_2_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_2_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="16"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_2_1" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_2_1" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_night"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_2_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_2_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="17"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_2_2" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_2_2" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_off"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_2_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_2_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="18"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_2_3" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_2_3" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_day"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_2_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_2_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="19"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_2_4" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_2_4" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_night"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_2_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_2_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="20"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_2_5" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_2_5" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_off"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+      android:layout_marginLeft="1dp" android:layout_marginRight="1dp" android:orientation="vertical">
+      <LinearLayout android:id="@+id/numwrap_2_6" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+        <TextView android:id="@+id/num_2_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+          android:gravity="center" android:paddingLeft="3dp" android:paddingRight="3dp" android:textSize="14dp" android:textStyle="bold"
+          android:includeFontPadding="false" android:textColor="#263F3E" android:text="21"/>
+      </LinearLayout>
+      <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+        <ImageView android:id="@+id/pillbg_2_6" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+        <TextView android:id="@+id/pill_2_6" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+          android:fontFamily="sans-serif" android:textSize="12dp" android:textStyle="bold" android:textColor="#FFFFFF"
+          android:paddingLeft="1dp" android:paddingRight="1dp" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_preview_day"/>
+      </FrameLayout>
+      <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+      android:gravity="center" android:textSize="9.5dp" android:textColor="#465A59" android:includeFontPadding="false"
+      android:maxLines="1" android:visibility="gone"/></LinearLayout>
+    </LinearLayout></LinearLayout></LinearLayout>
+</FrameLayout>

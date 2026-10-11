@@ -1,0 +1,22 @@
+달력 위젯 1주 비율 / 목록 순서 — 2026-10-09
+이전 원장: 달력위젯_요일높이조정_2026-10-09.txt / evidence/calendar_widget_design_v4_2026_10_09.json. 이전 원장과 기존 미커밋 작업 보존.
+
+변경
+- 1주 요일 글자10→12dp, 행높이14→16dp. 날짜 숫자 최대14→12dp, 높이최대16→14dp. 전체 위젯 높이 유지, 날짜에서2dp를 요일에 배분.
+- 3주 셀 및 요일의 크기 유지. 두 달력의 기존 component 이름 유지.
+- manifest 위젯 provider 선언을1주→3주→수면으로 배치.
+- 이름 기반 정렬에 맞춰 한국어 목록 표시명을1주 달력/3주 달력/수면 기록으로 정리. 공통5언어 달력 표시명도 숫자1/3으로 시작하도록 현지화. common 키 및 한국어 전용 리소스 분리 유지.
+- 위젯 선택기의 최종 순서는 런처가 결정. 이름순 런처에 대응했으나 크기순 등 자체 정렬 런처는 순서를 강제할 수 없음. 순서 변경을 위해 수면 위젯 크기를 변경하지 않음. 실제 사용자의 런처에서 확인 필요.
+- 글로벌 수면 위젯 비노출 정책과 동작 유지.
+
+근거
+- Android 위젯 표시 이름: https://developer.android.com/develop/ui/compose/glance/enhance
+- Launcher3 위젯 목록 정렬: https://android.googlesource.com/platform/packages/apps/Launcher3/%2B/4991a1fd63/src_shortcuts_overrides/com/android/launcher3/model/WidgetsModel.java
+
+검증
+- 기존 사용자 요청에 따라 테스트·렌더 생략, dev debug APK 빌드만. 웹/release 및 설치 미실행.
+- 런처 목록 순서 및 시각 승인 미실시. 기존 PASS를 이번 변경의 회귀 PASS로 취급하지 않음.
+- 빌드: PASS (exit 0, 270.3초). 로그: artifacts/calendar_widget_design_v5/build.log
+- APK: artifacts/calendar_widget_design_v5/shiftbell-widget-dev-debug.apk
+- applicationId: com.hwani1103.shiftbell.dev / version: 1.0.23-dev (25)
+- 크기: 215864333 bytes / SHA256: 3992b58b083959b4e00c0e8c992e996749700bc279e5811008ba41a909b9bf61

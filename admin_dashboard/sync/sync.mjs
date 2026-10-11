@@ -25,6 +25,7 @@ import { buildDocs, table, ymd } from './lib/transform.mjs';
 const { values: args } = parseArgs({
   options: {
     mock: { type: 'boolean', default: false },
+    force: { type: 'boolean', default: false },
     out: { type: 'string' },
     days: { type: 'string', default: '400' },
   },
@@ -60,18 +61,38 @@ async function fetchReal() {
     return [range, { from, to, report }];
   })));
   // 나머지는 실패해도 대시보드 일부만 비워 두고 계속한다
-  const [ads, appVersion, os, language, country, device, cohort, webFriendViews] = await Promise.all([
+  const [ads, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily] = await Promise.all([
     ga.tryReport('광고', ga.adsDaily(days)),
     ga.tryReport('앱 버전 분포', ga.breakdown('appVersion')),
     ga.tryReport('OS 분포', ga.breakdown('operatingSystemVersion')),
     ga.tryReport('언어 분포', ga.breakdown('language')),
     ga.tryReport('국가 분포', ga.breakdown('country')),
     ga.tryReport('기기 분포', ga.breakdown('deviceModel')),
+    ga.tryReport('제조사 분포', ga.breakdown('mobileDeviceBranding', 30)),
     ga.tryReport('리텐션', ga.cohort({ ...cohortRange, endOffset: 14 })),
     webGa.tryReport('웹 친구 근무표 열람', webGa.webFriendViews()),
+    ga.tryReport('국가 일별 추이', ga.countryDaily(100)),
   ]);
+  const operationsByRange = {};
+  // Limit concurrency: eight optional reports at a time, not every range at once.
+  for (const range of eventRanges) {
+    const from = dates[Math.max(0, dates.length - range)]; const to = dates.at(-1);
+    if (!from || !to) continue;
+    const previousTo = iso(new Date(Date.parse(from) - 86400000));
+    const previousFrom = iso(new Date(Date.parse(from) - Math.min(range, dates.length) * 86400000));
+    const [current, previous, countries, previousCountries, countryEvents, manufacturers, manufacturerEvents] = await Promise.all([
+      ga.tryReport('기간 이용자', ga.periodSummary(from, to)),
+      ga.tryReport('직전 기간 이용자', ga.periodSummary(previousFrom, previousTo)),
+      ga.tryReport('국가 운영 지표', ga.segmentSummary('country', from, to)),
+      ga.tryReport('직전 국가 운영 지표', ga.segmentSummary('country', previousFrom, previousTo)),
+      ga.tryReport('국가 기능 활용', ga.segmentEvents('country', from, to)),
+      ga.tryReport('제조사 이용자', ga.segmentSummary('mobileDeviceBranding', from, to)),
+      ga.tryReport('제조사 알람 관측', ga.segmentEvents('mobileDeviceBranding', from, to)),
+    ]);
+    operationsByRange[range] = { from, to, current, previous, countries, previousCountries, countryEvents, manufacturers, manufacturerEvents };
+  }
   const docs = buildDocs({
-    raw: { core, ads, eventsDaily, eventsByRange, appVersion, os, language, country, device, cohort, webFriendViews },
+    raw: { core, ads, eventsDaily, eventsByRange, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, operationsByRange },
     meta: { now: new Date(), propertyId, streamId, cohortRange, source: 'ga4' },
   });
   docs.summary.currency = core?.metadata?.currencyCode || 'USD';
@@ -96,11 +117,12 @@ async function storedDays(db) {
 
 async function writeFirestore(db, docs) {
   const col = db.collection('dashboard');
-  await Promise.all([
-    col.doc('summary').set(docs.summary),
-    col.doc('series').set(docs.series),
-    col.doc('events').set(docs.events),
-  ]);
+  const batch = db.batch();
+  for (const [name, doc] of Object.entries(docs)) {
+    if (Buffer.byteLength(JSON.stringify(doc)) > 900000) throw new Error('Dashboard document exceeds safe size: ' + name);
+    batch.set(col.doc(name), doc);
+  }
+  await batch.commit();
 }
 
 async function writeFiles(docs, dir) {
@@ -112,6 +134,16 @@ async function writeFiles(docs, dir) {
 
 const started = Date.now();
 try {
+  if (args.mock && !args.out && !env.FIRESTORE_EMULATOR_HOST) throw new Error('Mock data may only be written to files or an emulator.');
+  const db = args.out ? null : await openFirestore();
+  const syncDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
+  if (db && !args.mock && !args.force) {
+    const previous = await db.collection('dashboard').doc('summary').get();
+    if (previous.data()?.pipelineVersion === 2 && previous.data()?.syncPolicy?.day === syncDay) {
+      console.log('Already synchronized today; preserving one daily update.');
+      process.exit(0);
+    }
+  }
   const docs = args.mock ? buildMockDocs() : await fetchReal();
   const n = docs.series.dates.length;
   // ⭐ 2026-09-23 - GA4 조회는 성공했는데 0건인 경우(권한 문제면 runReport가 403으로 먼저 던짐):
@@ -122,7 +154,7 @@ try {
     if (!args.mock && n === 0) throw new Error('GA4에서 받은 일별 데이터가 0건입니다. 스트림 ID/속성 접근 권한을 확인하세요.');
     await writeFiles(docs, args.out);
   } else {
-    const db = await openFirestore();
+    // db opened before querying so the daily guard can avoid duplicate API calls.
     if (!args.mock && n === 0) {
       const prev = await storedDays(db);
       if (prev > 0) throw new Error(`GA4에서 받은 일별 데이터가 0건인데 기존 문서에는 ${prev}일치가 있어 덮어쓰지 않았습니다. 스트림 ID/속성 접근 권한을 확인하세요.`);

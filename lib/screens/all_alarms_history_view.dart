@@ -411,8 +411,6 @@ class _AllAlarmsHistoryViewState extends State<AllAlarmsHistoryView> {
                                               fontSize: 12.sp,
                                               color: colorScheme.onSurfaceVariant,
                                             ),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                         SizedBox(width: 6.w),

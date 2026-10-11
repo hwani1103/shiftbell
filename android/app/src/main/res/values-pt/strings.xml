@@ -5,8 +5,8 @@
     <string name="alarm_type_vibration_short">vibração</string>
     <string name="alarm_type_silent_short">silencioso</string>
     <string name="snooze_collision_message">Já há outro alarme (%2$s) para %1$s. Este alarme foi encerrado sem adiar.</string>
-    <string name="calendar_widget_description">Veja turnos e notas. Redimensione para três semanas ou um mês inteiro.</string>
-    <string name="app_widget_calendar_label">Calendário ShiftBell</string>
+    <string name="calendar_widget_description">Turnos e notas da semana passada, desta semana e da próxima.</string>
+    <string name="app_widget_calendar_label">3 semanas — calendário</string>
     <string name="alarm_swipe_hint">Deslize para cima para desligar</string>
     <string name="alarm_snooze_label">Adiar 5 min</string>
     <string name="alarm_dismiss_label">Desligar</string>
@@ -51,4 +51,13 @@
     <string name="snooze_superseded">O alarme foi alterado. Este adiamento não foi agendado.</string>
     <string name="snooze_failed_execution">Não foi possível concluir a interrupção e o adiamento do alarme.</string>
     <string name="snooze_failure_title">Confira o adiamento</string>
+    <string name="alarm_snooze_title">Adiar</string>
+    <string name="alarm_snooze_duration">Por %1$d min</string>
+    <string name="in_app_alarm_open">Alarme tocando. Abrir controles</string>
+    <string name="in_app_alarm_collapse">Recolher controles do alarme</string>
+
+    <string name="app_widget_calendar_week_label">1 semana — calendário</string>
+    <string name="calendar_widget_week_description">Turnos e até três notas por dia nesta semana.</string>
+    <string name="widget_daytime">Dia</string>
+    <string name="widget_nighttime">Noite</string>
 </resources>

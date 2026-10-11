@@ -1,0 +1,76 @@
+관리자 대시보드 운영 개편 및 폴더블 설정 원인 조사 — 2026-10-11
+
+사용자 직접 요구를 기준으로 사업 운영용 대시보드를 개편하고 운영 웹과 서버 집계를 배포했다.
+원본 미커밋 작업과 기존 1·2·3차 검토 원장을 보존했다. 이번 변경의 원본 스냅샷은 artifacts/dashboard_operations_2026_10_10/before에 따로 저장했다.
+
+배포 결과
+- 운영 주소: https://shiftbell-ops-29f31.web.app
+- Firebase 프로젝트 shiftbell-29f31의 별도 site shiftbell-ops-29f31만 Hosting 배포. 공개 친구 근무표 웹 site는 배포하지 않았다.
+- 최종 소스 커밋: c6141f9 (격리 worktree에서 대시보드/워크플로 파일만 main에 반영, 현재 dev 작업 트리와 앱 미커밋 변경은 보존).
+- 정적 웹 빌드: admin_dashboard/tools/build.mjs → admin_dashboard/build.
+- 운영 파일 검증: artifacts/dashboard_operations_2026_10_10/hosting-verification.json. 최종 버전 2b60661e94c319ab, 전체 14개 소스 파일 해시 일치.
+- 첫 새 파이프라인 집계: https://github.com/hwani1103/shiftbell/actions/runs/38062977719 성공.
+  2026-10-11 00:17 KST 집계, 2026-09-23~2026-10-10 18일치, 마지막 DAU 106 / 28일 MAU 348.
+- 하루 1회 제한 검증: https://github.com/hwani1103/shiftbell/actions/runs/38063460790 성공.
+  Already synchronized today; preserving one daily update. 실제 추가 집계 없음.
+
+운영 화면 및 판단 기준
+1) 운영 요약: 같은 기간의 중복 제거 활성·신규 사용자와 직전 기간 비교, D7 첫 세션 코호트 재방문, 28일 MAU, 기능 도달, 광고 수익, 알람 관측, 집계 상태.
+2) 성장·국가: GA4 활동 국가별 활성·신규·시작 완료·전체교대조 생성·알람 끄기 사용자, 직전 동일 기간 대비, 국가 선택 및 최대 최근 100일 추이.
+   국가별 사용자 합계를 전체 이용자 수로 쓰지 않는다. 국가 변경 사용자는 여러 국가에 포함될 수 있다.
+3) 기능 활용: 기능별 사용자 수/이용 횟수/같은 기간 totalUsers 대비 도달률. 기능 사용자 합산·전환 퍼널로 해석하지 않는다. 미관측 기능에 0%를 표시하지 않는다.
+4) 알람·기기: 기기 브랜드별 예약 실패·울림 진입·갱신 실패·배터리 제한·정확 알람 미허용, 별도 권한 상태 관측 표.
+   앱 알림 차단, 개별 알람 채널 차단, 전체화면·정확 알람 미허용, 확인 불가를 구분해 표시한다.
+   예약 API 완료를 울림 성공률로 계산하지 않는다. 무응답 종료는 미울림을 입증하지 않는다.
+5) 표시된 상위 버전/OS/기기 분포는 해당 상위 항목 내 비율이라고 명시한다. 실제 국가별 운영 표는 기간별 별도 전체 조회를 사용한다.
+6) 광고는 GA4 보고 수익이며 결제·광고비·운영 원가가 없으므로 순이익/국가별 ROI를 만들지 않았다.
+7) 조회 실패, 빈 결과, 임계값/표본/행 제한, 집계 지연을 구분한다. 미연결은 0으로 표시하지 않는다.
+
+갱신과 데이터 저장
+- 기존 UTC 3시간 cron을 UTC 03:17 하루 1회(한국 12:17)로 변경했다. GitHub 예약 실행은 지연될 수 있다.
+- pipelineVersion 2의 같은 한국 날짜 성공 집계가 있으면 다시 GA4를 호출하지 않는다.
+- 최초 배포 검증은 사용자 요청에 따른 명시적 --force 수동 집계. 정기 갱신은 하루 1회 제한을 따른다.
+- 핵심·광고·행동은 어제까지 조회한다. GA4 최근 24~48시간 값은 이후 보정될 수 있다.
+- 화면 자동 재조회/새로고침은 저장된 집계를 읽는다. 서버 집계를 추가 실행하지 않는다.
+- summary/series/events/operations를 하나의 batch로 저장, 같은 updatedAt 세대를 확인해 화면에 표시한다.
+- 실제 prod 문서의 날짜 축은 연속이며 네 문서의 세대가 일치했다. 국가/제조사/기간/행동/광고 조회 실패 없음.
+
+전체근무표 및 새 앱 계측
+- 원인: AllTeamsSetupScreen._save에서 전체교대조 저장 성공 뒤 통계 이벤트가 없었다.
+- team_roster_created / changed / deleted를 저장·변경 성공 경로에 추가했다. 실제 근무명·조 이름·패턴 내용은 보내지 않는다.
+- OperationsSnapshot은 앱 재개 때 기존 진단 로그를 백그라운드에서 읽는 어댑터다. 알람 예약/울림/부팅의 실행 경로에는 Firebase나 네트워크 호출을 넣지 않았다.
+- 예약 API 완료/실패, 유효 ALARM_FIRED, 갱신 완료/실패, 부팅 신호만 허용한다. 부팅 신호와 갱신의 인과관계를 성공으로 단정하지 않는다.
+- 제조사 분류, OS 권한/배터리 상태는 앱 사용 기기의 하루 1회 관측. 브랜드별 운영 집계는 GA4 기본 mobileDeviceBranding 사용.
+- 관측은 최근 72시간·최대 1,000건·종류별 회당 40건 제한, 첫 실행은 기존 로그의 기준선만 저장한다. 다음 앱 실행/재개 때 최선 노력으로 보고하므로 보고 날짜가 사건 발생 날짜와 다를 수 있으며 전체 장애 건수를 보장하지 않는다.
+- 로컬 토큰, 원시 로그, 알람 ID·시각·근무명은 전송하지 않는다. 통계 커서는 기기별 설정으로 백업 제외.
+- dev 플래버는 새 통계 보고도 제외한다.
+- 강제종료 후 실제 동작/미울림은 직접 검출 근거가 없다. 배터리 제한은 상태이며 실패 원인이 확정된 오류가 아니다. Crashlytics SDK나 오류율 수집을 새로 추가하지 않았다.
+- 새 앱 계측 소스는 현재 dev 작업 트리에 준비됨. 앱 prod 출시·release 빌드·실기기 설치는 이번 요청 범위에서 실행하지 않았다. 따라서 지금 운영 웹에 새 계측이 미관측인 것은 정상이며 다음 prod 앱 업데이트 이후부터 수집된다. 과거 데이터 소급 복원 불가.
+
+검증
+- Node 집계/운영 의미 검사 18 PASS.
+- Dart 통계/이벤트 이름/커서·하루 1회·72시간·상한·예외·백업 검사 14 PASS, 전체교대조 기존 저장·편집·취소 흐름 13 PASS (통합 실행 27 PASS).
+- Native OperationsSnapshotTest 2 PASS, :app:testDevDebugUnitTest 실행 및 dev debug Kotlin/Flutter 컴파일 성공.
+- 실제 집계 문서를 넣은 로컬 UI: 360/752/1440 폭의 네 탭, 국가 선택/정렬, 365일 선택, 다크, 가로 화면 넘침 없음/실행 오류 없음.
+- 차트: 탭 유지, 드래그, 크기 변경 유지, 다른 영역 터치 후 H선/툴팁 해제 PASS.
+- 운영 URL에서 로그인 화면 표시, ?demo로 모의 대시보드 우회 불가 PASS.
+- UI 자료: artifacts/dashboard_operations_2026_10_10/ui, browser-qa.json. 운영 집계 검증: production-docs.json (계정/토큰은 저장하지 않음).
+- P0 동작/알림 채널/권한 복귀 흐름/출시 언어 리소스는 변경하지 않은 읽기 전용 계측이다. 이번 변경에 전체 critical_release 게이트 및 실기기 잠금 알람 재검사는 적용하지 않았다. 호스트 검사·컴파일을 실기기 PASS로 쓰지 않는다.
+- 특정 기존 노트 원본은 위치를 확보하지 못했다. 기존 코드·워크플로와 이번 사용자 직접 요구를 확인해 국가·하루 1회·전체근무표 계측을 반영했으며, 확인하지 못한 노트 전체를 대조했다고 기록하지 않는다.
+
+폴드 설정 빈 공간 — 원인만 조사, 수정 없음
+- 확인 이미지: artifacts/fold8ultra_requested_captures_2026_10_10/ko_open_settings.png 및 artifacts/fold8_requested_captures_2026_10_09/ko_open_settings.png.
+- SettingsTab은 개별 ListTile 대신 SettingsGroup을 AdaptiveSectionList에 전달한다.
+  lib/screens/settings_tab.dart:557: 첫 그룹 알람 설정/근무시간 OT/달력 테마 3개.
+  :633: 두 번째 그룹 메모/알람 이력/모든 알람 삭제/부가 기능 4개.
+  :761: 세 번째 그룹 권한/도움말/개인정보, UMP 조건부 광고 개인정보 항목.
+- lib/widgets/adaptive_layout.dart:49에서 넓은 화면의 유효 폭 656 이상이면 2칸, :63 Wrap에서 그룹 단위로 배치한다.
+- 첫 그룹 3개와 두 번째 그룹 4개가 옆으로 놓인다. 왼쪽 그룹이 먼저 끝나므로 부가 기능 왼쪽은 비어 보인다.
+- Wrap의 다음 줄은 같은 줄에서 더 높은 오른쪽 4개짜리 그룹 아래에서 시작한다. 세 번째 그룹만 왼쪽에 있으므로 권한 오른쪽은 비어 있다.
+- 이는 메뉴 누락/숨김 조건 때문이 아니라 그룹 단위 순서·높이를 보존하는 2칸 Wrap 배치다. 일반 바형 좁은 화면은 ListView 순서대로 보여 공백이 없다.
+- Fold8도 캡처에서 동일한 첫 그룹/두 번째 그룹의 높이 차이가 확인됨. 도움말/개인정보는 코드상 세 번째 왼쪽 그룹에서 권한 아래다. 제공된 이미지에서 하단 실화면은 직접 확인하지 않았다.
+
+출처 기준
+GA4 정의: https://developers.google.com/analytics/devguides/reporting/data/v1/api-schema
+Android 알람 제한: https://developer.android.com/develop/background-work/services/alarms
+Crashlytics 관측: https://firebase.google.com/docs/crashlytics/android/customize-crash-reports

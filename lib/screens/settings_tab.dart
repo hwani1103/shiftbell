@@ -7,6 +7,9 @@ import '../widgets/schedule_change_dialog.dart';
 import 'package:intl/intl.dart';
 import '../widgets/alarm_time_editor.dart';
 import '../widgets/adaptive_layout.dart';
+import '../widgets/settings_menu_list.dart';
+import '../widgets/shift_label_layout.dart';
+import '../widgets/permission_warning_banner.dart';
 import '../constants/layout_limits.dart';
 import '../providers/data_revision_provider.dart';
 import '../providers/condition_shift_time_provider.dart';
@@ -387,7 +390,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
             child: Text(
                 '${context.l10n.statusErrorOccurred}: ${context.localizedErrorDetail(error)}')),
         data: (schedule) {
-          return AdaptiveSectionList(
+          return SettingsMenuList(
             fullWidthFirst: true,
             padding: EdgeInsets.all(16.w),
             children: [
@@ -471,8 +474,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                                 bottomLeft: Radius.circular(10.r),
                               ),
                               child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 12.h),
-                                child: Row(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 12.h, horizontal: 8.w),
+                                child: Center(child: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.edit,
@@ -485,7 +490,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                                         child: Text(
                                       context.l10n
                                           .settingsShiftManagementEditButton,
-                                      textAlign: TextAlign.center,
+                                      textAlign: TextAlign.start,
                                       style: TextStyle(
                                         color: Theme.of(context)
                                             .colorScheme
@@ -495,7 +500,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                                       ),
                                     )),
                                   ],
-                                ),
+                                )),
                               ),
                             ),
                           ),
@@ -511,8 +516,10 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                                 bottomRight: Radius.circular(10.r),
                               ),
                               child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 12.h),
-                                child: Row(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 12.h, horizontal: 8.w),
+                                child: Center(child: Row(
+                                  mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.refresh,
@@ -523,7 +530,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                                     Flexible(
                                         child: Text(
                                       context.l10n.shiftResetSchedule,
-                                      textAlign: TextAlign.center,
+                                      textAlign: TextAlign.start,
                                       style: TextStyle(
                                         color:
                                             Theme.of(context).colorScheme.error,
@@ -532,7 +539,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
                                       ),
                                     )),
                                   ],
-                                ),
+                                )),
                               ),
                             ),
                           ),
@@ -858,10 +865,28 @@ class _SettingsTabState extends ConsumerState<SettingsTab>
     final confirmed = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-                title: Text(tab == 1
-                    ? copy.settingsScheduleTabReenableTitle
-                    : copy.settingsConditionFeatureTitle),
-                content: Text(copy.settingsEnableFeatureConfirm(feature)),
+                title: Row(children: [
+                  Expanded(child: Text(tab == 1
+                      ? copy.settingsScheduleTabReenableTitle
+                      : copy.settingsConditionFeatureTitle)),
+                  const SizedBox(width: 8),
+                  Icon(tab == 1 ? Icons.event_note_outlined : Icons.self_improvement),
+                ]),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(copy.settingsEnableFeatureConfirm(feature)),
+                      const SizedBox(height: 16),
+                      Text(tab == 1
+                          ? copy.settingsScheduleFeatureDescription
+                          : copy.settingsConditionFeatureDescription),
+                      const SizedBox(height: 16),
+                      Text(copy.settingsEnableFeatureHideHint),
+                    ],
+                  ),
+                ),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
@@ -2235,6 +2260,7 @@ class _EditFixedAlarmsScreenState extends State<_EditFixedAlarmsScreen> {
                         ),
                       ),
                     ),
+                    const PermissionWarningBanner(),
                     Padding(
                       padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w,
                           MediaQuery.of(context).padding.bottom + 16.h),
@@ -2823,24 +2849,23 @@ class _EditShiftColorsDialogState extends State<_EditShiftColorsDialog> {
             return ListTile(
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-              // 왼쪽: 현재 색상으로 미리보기 (달력 셀과 동일)
+              // 긴 근무명도 두 줄 안에서 전체 이름을 보여주는 색상 미리보기.
               leading: Container(
                 width: 60.w,
-                height: 18.h,
+                height: 32.h,
                 decoration: BoxDecoration(
                   color: bgColor,
                   borderRadius: BorderRadius.circular(3.r),
                 ),
-                child: Center(
-                  child: Text(
-                    shift,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 2.h),
+                  child: ShiftLabel(
+                    label: shift,
                     style: TextStyle(
                       fontSize: 9.sp,
                       color: textColor,
                       fontWeight: FontWeight.w600,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
@@ -2976,16 +3001,18 @@ class _ColorPickerDialog extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
-                      Center(
-                        child: Text(
-                          shiftName,
-                          style: TextStyle(
-                            fontSize: 9.sp,
-                            color: textColor,
-                            fontWeight: FontWeight.w600,
+                      Positioned.fill(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 4.w, vertical: 3.h),
+                          child: ShiftLabel(
+                            label: shiftName,
+                            style: TextStyle(
+                              fontSize: 9.sp,
+                              color: textColor,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       // 사용 중이면 X 아이콘 표시

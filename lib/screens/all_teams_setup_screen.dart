@@ -1,13 +1,12 @@
+import '../services/app_analytics.dart';
 import '../widgets/settings_appearance.dart';
 import '../widgets/team_assignment_grid.dart';
-import '../widgets/semantics_table_boundary.dart';
 import '../widgets/adaptive_layout.dart';
 // Initial roster creation: names, my team, then all remaining positions.
 import '../models/team_rule.dart';
 import '../models/team_schedule_config.dart';
 import '../services/database_service.dart';
 import '../widgets/team_rule_card.dart';
-import '../widgets/shift_editor_dialog.dart';
 import 'team_rule_editor_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -273,13 +272,11 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                         widget.pattern, _referenceDate, _assignments[e]!),
         }).materialize(widget.pattern);
     try {
-      final accepted = await _review(config);
-      if (!mounted) return;
-      if (!accepted) {
-        setState(() => _saving = false);
-        return;
-      }
       await DatabaseService.instance.saveTeamScheduleConfig(config);
+      AppAnalytics.track(AnalyticsEvent.teamRosterCreated, params: {
+        "team_count": config.names.length,
+        "setup_mode": config.individual ? "individual" : "cycle",
+      });
       if (mounted) Navigator.pop(context, true);
     } catch (error) {
       debugPrint('Team schedule save failed: $error');
@@ -303,57 +300,6 @@ class _AllTeamsSetupScreenState extends State<AllTeamsSetupScreen> {
                 date: _referenceDate,
                 initial: _rules[entry])));
     if (rule != null && mounted) setState(() => _rules[entry] = rule);
-  }
-
-  Future<bool> _review(TeamScheduleConfig config) async =>
-      await showDialog<bool>(
-          context: context,
-          builder: (context) => ShiftEditorDialog(
-                  title: Text(context.l10n.teamRuleReview),
-                  content: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(context.l10n.teamRuleReviewHint,
-                            style: const TextStyle(height: 1.5)),
-                        const SizedBox(height: 16),
-                        SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: SemanticsTableBoundary(
-                                child: DataTable(
-                              columnSpacing: 16,
-                              horizontalMargin: 8,
-                              columns: [
-                                const DataColumn(label: Text('')),
-                                for (final name in config.names)
-                                  DataColumn(label: Text(name))
-                              ],
-                              rows: [
-                                for (var day = 0; day < 14; day++)
-                                  _previewRow(config, day)
-                              ],
-                            ))),
-                      ]),
-                  actions: [
-                    AppSecondButton(
-                        onPressed: () => Navigator.pop(context, false),
-                        child: Text(context.l10n.commonCancel)),
-                    AppSecondButton(
-                        key: const ValueKey('team-review-save'),
-                        variant: AppSecondButtonVariant.success,
-                        onPressed: () => Navigator.pop(context, true),
-                        child: Text(context.l10n.commonSave)),
-                  ])) ??
-      false;
-
-  DataRow _previewRow(TeamScheduleConfig config, int day) {
-    final date = DateTime(
-        _referenceDate.year, _referenceDate.month, _referenceDate.day + day);
-    return DataRow(cells: [
-      DataCell(Text('${date.month}/${date.day}')),
-      for (final name in config.names)
-        DataCell(Text(config.rules[name]!.shiftOn(date)))
-    ]);
   }
 
   Widget _sectionLabel(String text, {required Color color}) => Text(
@@ -710,6 +656,7 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
               decoration: const InputDecoration(
                 counterText: '',
                 isCollapsed: true,
+                contentPadding: EdgeInsets.zero,
                 border: InputBorder.none,
               ),
             ),
@@ -752,6 +699,7 @@ class _RosterEditorSheetState extends State<_RosterEditorSheet> {
               decoration: const InputDecoration(
                 counterText: '',
                 isCollapsed: true,
+                contentPadding: EdgeInsets.zero,
                 border: InputBorder.none,
               ),
             ),

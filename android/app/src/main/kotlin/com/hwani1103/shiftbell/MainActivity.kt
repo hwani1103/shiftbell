@@ -26,6 +26,7 @@ import androidx.core.app.NotificationCompat
 class MainActivity: FlutterActivity() {
     private val CHANNEL = "com.hwani1103.shiftbell/alarm"
     private var methodChannel: MethodChannel? = null
+    private val notificationPermissionRequest = NotificationPermissionRequest()
 
     companion object {
         // ⭐ 2026-09-12 - 일정 알림(ScheduleNotificationReceiver.kt)이 알림을
@@ -210,7 +211,18 @@ class MainActivity: FlutterActivity() {
         null
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+    ) {
+        // Our notification request must finish even for empty cancellation results.
+        // Other plugins retain their existing callback dispatch.
+        if (!notificationPermissionRequest.onResult(requestCode)) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+
     override fun onDestroy() {
+        notificationPermissionRequest.dispose()
         InAppAlarmController.pause(this)
         // ⭐ 2026-09-15 (전체 코드 점검 Q-03) - 미리듣기 중 앱이 종료되면 50%로 바꾼 시스템 알람
         // 볼륨이 복원되지 않고 남았음(다른 시계 앱 알람 음량까지 바뀜).
@@ -479,6 +491,9 @@ override fun onNewIntent(intent: Intent) {
                 "permissionSnapshot" -> {
                     result.success(PermissionSettings.snapshot(this))
                 }
+                "requestNotificationPermission" -> {
+                    notificationPermissionRequest.launch(this) { result.success(it) }
+                }
                 "getDefaultSnoozeMinutes" -> result.success(SnoozeDefaults.read(this))
                 "setDefaultSnoozeMinutes" -> {
                     val minutes = call.argument<Int>("minutes")
@@ -708,6 +723,17 @@ override fun onNewIntent(intent: Intent) {
                             }
                         } catch (e: Exception) {
                             runOnUiThread { result.error("DIAGNOSTIC_EXPORT", e.javaClass.simpleName, null) }
+                        }
+                    }.start()
+                }
+                "operationsSnapshot" -> {
+                    val observedPermissions = PermissionSettings.snapshot(this)
+                    Thread {
+                        try {
+                            val snapshot = OperationsSnapshot.read(applicationContext, observedPermissions)
+                            runOnUiThread { result.success(snapshot) }
+                        } catch (_: Exception) {
+                            runOnUiThread { result.success(null) }
                         }
                     }.start()
                 }

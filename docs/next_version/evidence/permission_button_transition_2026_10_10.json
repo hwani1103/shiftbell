@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-10",
+  "scope": [
+    "A05",
+    "A09"
+  ],
+  "button": "Fixed enabled/disabled colors; transparent overlay; NoSplash; Duration.zero",
+  "transitionDelayMs": 350,
+  "checksBeforeNext": [
+    "Fresh permission snapshot",
+    "Previous permission granted",
+    "Current request generation",
+    "Active route and resumed app",
+    "No busy operation or help dialog"
+  ],
+  "cancellation": [
+    "Manual request",
+    "Background lifecycle",
+    "Help",
+    "Dispose"
+  ],
+  "build": {
+    "command": "flutter build apk --debug --flavor dev --no-pub",
+    "exitCode": 0,
+    "gradleSeconds": 94.8,
+    "apk": {
+      "path": "artifacts/permission_button_transition_2026_10_10/shiftbell-permission-smooth-dev-debug.apk",
+      "bytes": 215864025,
+      "sha256": "e3accafe225efbca81f3e4a96c7ab8be6599d25941ff4124ddf1dc2d44e8ab69"
+    }
+  },
+  "sourceChangedDuringBuild": [],
+  "tests": "Not run per user instruction",
+  "deviceUi": "Not checked",
+  "installation": "Not performed"
+}

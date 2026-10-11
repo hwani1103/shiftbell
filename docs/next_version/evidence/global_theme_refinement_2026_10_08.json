@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-08",
+  "previous": "global_theme_concepts_2026_10_08.json",
+  "scope": "A09/U05: two existing global theme refinements, popup holiday text contrast, fixed font scale for startup gate",
+  "changes": [
+    "Concept footer minimum action height 48 -> 30 logical pixels, vertical padding 8h -> 2h, outside margins 6h -> 3h; recovered height goes to calendar rows. Other theme footers unchanged.",
+    "Weekdays 10.5sp grey -> 11.5sp dark ink; day numbers 15 -> 16.5 scaled pixels.",
+    "Periwinkle memo outer inset 3 -> 2 units; joined shift end inset 2 -> 1.5 units. Mosaic cell outer inset 3 -> 2 units; its internal memo-to-cell gap remains 3 units.",
+    "Concept memo content inset 3 -> 1.5 units; grapheme-safe helper inset 2 -> .75 pixels for these themes only.",
+    "Mosaic weekday variants replaced with consistent shift-hue badge at 80% shift colour over white vs 33% cell tint; black/white text picks greater contrast.",
+    "Localized abbreviated month heading (Oct in en_US) with year capsule for Periwinkle and year divider for Mosaic.",
+    "User clarified Columbus Day means cell-popup holiday NAME, not date number: changed name from onSurfaceVariant to onSurface + medium weight. Date/holiday semantics unchanged.",
+    "Existing MaterialApp AppContentFrame/AppTextScale fixes routes/sheets/dialogs at 1.0; native alarm activity/in-app alarm/overlay already use fontScale1. StartupGate separate MaterialApp was missing wrapper and now also uses AppTextScale."
+  ],
+  "research": {
+    "google_holiday_colour": "https://support.google.com/calendar/answer/13748345?hl=en",
+    "apple_holidays": "https://support.apple.com/en-euro/guide/iphone/iph80d93ac49/ios",
+    "google_month_reference": "https://workspaceupdates.googleblog.com/2015/04/month-view-added-to-google-calendar-app_8.html",
+    "apple_month_views": "https://support.apple.com/guide/iphone/change-how-you-view-events-iphfd1054569/ios",
+    "decision": "Google holiday calendar colour is user-selectable, not evidence for a mandatory red holiday title. Neutral on-surface popup name chosen for readability, separate from unchanged red holiday date."
+  },
+  "checks": {
+    "layout_and_scale": "6 PASS: run boundaries, 3-memo selected small cells, fixed route/dialog scaling, both themes over 7 existing phone/fold/landscape sizes",
+    "compact": "2 PASS: both themes 320/500/501/600",
+    "supporting": "19 PASS: startup scale/failure/retry, footer tap separation, complete grapheme memo fitting",
+    "critical_scope": "No alarm permissions/settings-return/native alarm implementation or released language feature availability/resource structure changes. Prior critical gate remains evidence; scoped layout/startup tests and direct dev debug build only.",
+    "analysis": "No analyzer errors; existing warnings/info retained."
+  },
+  "status": "Completed: dev debug built, USB update installed, both themes and cell-popup holiday name visually verified; Periwinkle persists after process restart.",
+  "deferred": "Help and release copy remain deferred until user theme approval. Prior four Mosaic badge options superseded by user decision for one shift-hue badge.",
+  "device": {
+    "serial": "R5KL20DHWAE",
+    "model": "SM_S948N",
+    "package": "com.hwani1103.shiftbell.dev",
+    "install": "adb install -r Success; no uninstall/data clear",
+    "restart": "process termination and launch; Periwinkle retained",
+    "data": "All seven schedule/memo/overtime-related table fingerprints identical before/after: 9 memos, 1 shift schedule.",
+    "screenshots": [
+      "soft_mosaic.png",
+      "columbus_popup.png",
+      "periwinkle.png",
+      "restarted.png"
+    ],
+    "artifact_root": "artifacts/global_theme_refinement_2026_10_08",
+    "other_session": "No SRTL/Flip8 device targeted."
+  },
+  "apk": {
+    "path": "build/app/outputs/flutter-apk/app-dev-debug.apk",
+    "sha256": "7efa6b9b791331fdf9451235a9a68eb58ad8bd2dcb5c7c8cbe7f119a0142a6f5",
+    "build": "dev debug only; exit 0"
+  }
+}

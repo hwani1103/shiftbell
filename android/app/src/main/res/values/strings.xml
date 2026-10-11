@@ -6,9 +6,9 @@
     <string name="snooze_collision_message">Another alarm (%2$s) is set for %1$s. This alarm was dismissed without snoozing.</string>
     <!-- Native fallback is English for every non-Korean device locale.
          Common keys match values-ko/strings.xml. Korean-only features use korean_only.xml. -->
-    <string name="calendar_widget_description">See your shifts and notes. Resize the widget to show three weeks or a full month.</string>
+    <string name="calendar_widget_description">Your shifts and notes for last week, this week and next week.</string>
 
-    <string name="app_widget_calendar_label">ShiftBell Calendar</string>
+    <string name="app_widget_calendar_label">3-week calendar</string>
 
     <string name="alarm_swipe_hint">Swipe up to dismiss</string>
     <string name="alarm_snooze_label">Snooze 5 min</string>
@@ -59,4 +59,13 @@
     <string name="snooze_superseded">The alarm changed. This snooze was not scheduled.</string>
     <string name="snooze_failed_execution">Could not complete stopping and snoozing the alarm.</string>
     <string name="snooze_failure_title">Snooze needs attention</string>
+    <string name="alarm_snooze_title">Snooze</string>
+    <string name="alarm_snooze_duration">%1$d min</string>
+    <string name="in_app_alarm_open">Alarm ringing. Open controls</string>
+    <string name="in_app_alarm_collapse">Collapse alarm controls</string>
+
+    <string name="app_widget_calendar_week_label">1-week calendar</string>
+    <string name="calendar_widget_week_description">Your shifts and up to three notes per day for this week.</string>
+    <string name="widget_daytime">Daytime</string>
+    <string name="widget_nighttime">Nighttime</string>
 </resources>

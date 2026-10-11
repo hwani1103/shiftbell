@@ -23,9 +23,15 @@ class CoverAlarmNotificationTest {
         NotificationHelper.ensureRingControls(context, 901, ring.round, "주간", 3, NotificationHelper.RingNoticeReason.COVER_ENTER)
         val quiet = shadowOf(manager).allNotifications.first { it.extras.getString("shiftbell.copy.kind") == "ring" }
         assertEquals(NotificationManager.IMPORTANCE_LOW, manager.getNotificationChannel(quiet.channelId).importance)
-        assertTrue(shadowOf(quiet.fullScreenIntent).isCanceled)
+        assertNull(quiet.fullScreenIntent)
+        assertTrue(shadowOf(initial.fullScreenIntent).isCanceled)
         assertEquals(2, quiet.actions.size)
         assertNotNull(quiet.contentIntent)
+        RingSnoozeController.adjust(context, ring, 1)
+        val selected = manager.activeNotifications.single { it.id == NotificationHelper.RING_CONTROL_ID }.notification
+        assertNull(selected.fullScreenIntent)
+        assertEquals(quiet.channelId, selected.channelId)
+        assertEquals(10, selected.extras.getInt(RingControlNotification.MINUTES))
         NotificationHelper.ensureRingControls(context, 901, ring.round, "주간", 3, NotificationHelper.RingNoticeReason.COVER_EXIT)
         val restored = shadowOf(manager).allNotifications.first { it.extras.getString("shiftbell.copy.kind") == "ring" }
         assertEquals(initial.channelId, restored.channelId)
@@ -48,5 +54,9 @@ class CoverAlarmNotificationTest {
         val notification = shadowOf(context.getSystemService(NotificationManager::class.java))
             .allNotifications.first { it.extras.getString("shiftbell.copy.kind") == "ring" }
         assertEquals("New", notification.extras.getString("android.title"))
+        assertEquals(current.alarmId, notification.extras.getInt("shiftbell.copy.alarm"))
+        assertEquals(current.round, notification.extras.getLong("shiftbell.copy.round"))
+        val expanded = notification.bigContentView.apply(context, android.widget.FrameLayout(context))
+        assertEquals("New", expanded.findViewById<android.widget.TextView>(R.id.ringNoticeTitle).text.toString())
     }
 }

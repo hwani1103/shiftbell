@@ -1,0 +1,13 @@
+{
+  "apk": "artifacts\\calendar_autofit_2026_10_08\\shiftbell-calendar-autofit-dev-debug.apk",
+  "apk_sha256": "5b6f36925d4c96e1774af436426a7d8f0a7f890e38b7f41d3de4850d8165e63c",
+  "apk_bytes": 215872562,
+  "source_sha256": {
+    "lib/widgets/calendar_cell_fit.dart": "c2cc439baf0f54bb5bd524777da07911fe00385fe01fe5ea51cf3a03d3a14b6e",
+    "lib/widgets/adaptive_calendar_cell.dart": "ff9be10526630c4f42c23aa9068d40b21d816e5d29a2c360ad9a048e5e4d46b6",
+    "lib/widgets/global_concept_calendar_cell.dart": "ec7b643bf04904a87d0645eda0a4b9ec8c3df7c8a2b7baf94fa0be502c61b0df",
+    "lib/widgets/wide_calendar_cell.dart": "fedb89da5200c9ad091499214bb580ef375aceb37a6680fc2a6cfe17b65c6780",
+    "lib/screens/calendar_tab.dart": "037975c40b02ed5574e8ca1b9aed704b3fe015b182102c06915161f284c5e71d"
+  },
+  "all_sources_older_than_apk": true
+}

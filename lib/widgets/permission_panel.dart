@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../l10n/l10n_extensions.dart';
 import '../services/permission_service.dart';
@@ -49,7 +51,18 @@ Future<void> showPermissionSettings(BuildContext context) =>
                 ]))));
 
 class PermissionPanel extends StatefulWidget {
-  const PermissionPanel({super.key});
+  const PermissionPanel({
+    super.key,
+    this.actionRequiredOnly = false,
+    this.continueAfterGrant = false,
+    this.onChanged,
+  });
+
+  final bool actionRequiredOnly;
+
+  /// Onboarding only: continue after verifying the selected permission on return.
+  final bool continueAfterGrant;
+  final ValueChanged<PermissionSnapshot>? onChanged;
   @override
   State<PermissionPanel> createState() => _PermissionPanelState();
 }
@@ -60,6 +73,10 @@ class _PermissionPanelState extends State<PermissionPanel>
   final busyState = ValueNotifier(false);
   bool get busy => busyState.value;
   bool _helpOpen = false;
+  String? _pendingPermission;
+  bool _returnedFromSettings = false;
+  int _requestGeneration = 0;
+  Timer? _nextPermissionTimer;
   @override
   void initState() {
     super.initState();
@@ -69,16 +86,30 @@ class _PermissionPanelState extends State<PermissionPanel>
   }
 
   void _changed() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {});
+    widget.onChanged?.call(controller.value);
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) controller.refresh();
+    if (state != AppLifecycleState.resumed) {
+      _cancelNextPermission();
+    }
+    if (state == AppLifecycleState.resumed) {
+      _returnedFromSettings = true;
+      final generation = _requestGeneration;
+      controller.refresh().then((_) {
+        if (mounted && !busy && generation == _requestGeneration) {
+          _continueAfterVerifiedGrant();
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
+    _cancelNextPermission();
     WidgetsBinding.instance.removeObserver(this);
     controller.dispose();
     busyState.dispose();
@@ -87,14 +118,87 @@ class _PermissionPanelState extends State<PermissionPanel>
 
   Future<void> _open(String kind) async {
     if (busy) return;
+    _cancelNextPermission();
+    _requestGeneration++;
+    _pendingPermission = widget.continueAfterGrant &&
+            !_helpOpen &&
+            (kind == 'alarmChannel' ||
+                AppPermission.values.any((p) => p.name == kind))
+        ? kind
+        : null;
+    _returnedFromSettings = false;
     setState(() => busyState.value = true);
-    final opened = await PermissionService().openPermission(kind);
-    await controller.refresh();
+    var opened = false;
+    try {
+      final result = await PermissionService().openPermissionRoute(kind);
+      opened = result.opened;
+      if (result.interactionCompleted) _returnedFromSettings = true;
+      await controller.refresh();
+    } finally {
+      if (mounted) setState(() => busyState.value = false);
+    }
     if (!mounted) return;
-    setState(() => busyState.value = false);
-    if (!opened)
+    if (!opened) {
+      _pendingPermission = null;
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.l10n.permissionOpenFailed)));
+    } else {
+      // Runtime dialogs finish on their callback; settings activities finish on
+      // resume. A successful launch is never evidence that permission was given.
+      _continueAfterVerifiedGrant();
+    }
+  }
+
+  AppPermissionState _permissionState(String kind) => kind == 'alarmChannel'
+      ? controller.value.alarmChannel
+      : controller
+          .value[AppPermission.values.firstWhere((p) => p.name == kind)];
+
+  void _continueAfterVerifiedGrant() {
+    final kind = _pendingPermission;
+    if (kind == null) return;
+    final lifecycle = WidgetsBinding.instance.lifecycleState;
+    if (lifecycle != null && lifecycle != AppLifecycleState.resumed) return;
+    final state = _permissionState(kind);
+    if (state != AppPermissionState.granted && !_returnedFromSettings) return;
+    _pendingPermission = null;
+    if (state != AppPermissionState.granted ||
+        _helpOpen ||
+        ModalRoute.of(context)?.isCurrent != true) return;
+    final generation = _requestGeneration;
+    _cancelNextPermission();
+    // Let the app settle after returning from the previous system settings page.
+    late final Timer timer;
+    timer = Timer(const Duration(milliseconds: 350), () async {
+      await controller.refresh();
+      if (!mounted ||
+          _nextPermissionTimer != timer ||
+          generation != _requestGeneration) return;
+      _nextPermissionTimer = null;
+      final lifecycle = WidgetsBinding.instance.lifecycleState;
+      if (busy ||
+          _helpOpen ||
+          !widget.continueAfterGrant ||
+          (lifecycle != null && lifecycle != AppLifecycleState.resumed) ||
+          ModalRoute.of(context)?.isCurrent != true ||
+          _permissionState(kind) != AppPermissionState.granted) return;
+      final remaining = [
+        ...AppPermission.values.map((p) => p.name),
+        'alarmChannel',
+      ].where((p) => !permissionSatisfied(_permissionState(p)));
+      if (remaining.isEmpty) return;
+      final next = remaining.first;
+      // Unknown observations require a manual retry, rather than another launch.
+      if (_permissionState(next) == AppPermissionState.denied) {
+        _open(next);
+      }
+    });
+    _nextPermissionTimer = timer;
+  }
+
+  void _cancelNextPermission() {
+    _nextPermissionTimer?.cancel();
+    _nextPermissionTimer = null;
   }
 
   String _state(AppPermissionState state) => switch (state) {
@@ -106,6 +210,7 @@ class _PermissionPanelState extends State<PermissionPanel>
       };
   Future<void> _lockHelp({bool troubleshooting = false}) async {
     if (_helpOpen || busy) return;
+    _cancelNextPermission();
     _helpOpen = true;
     try {
       final xiaomi = controller.value.xiaomi;
@@ -144,7 +249,8 @@ class _PermissionPanelState extends State<PermissionPanel>
                                   Text(sheetContext.l10n.permissionReturnGuide),
                                   const SizedBox(height: 16),
                                 ],
-                                if (controller.value[AppPermission.fullScreen] !=
+                                if (controller
+                                        .value[AppPermission.fullScreen] !=
                                     AppPermissionState.granted)
                                   Text(_state(controller
                                       .value[AppPermission.fullScreen])),
@@ -174,6 +280,7 @@ class _PermissionPanelState extends State<PermissionPanel>
                               ])))));
     } finally {
       _helpOpen = false;
+      if (mounted) await controller.refresh();
     }
   }
 
@@ -194,10 +301,12 @@ class _PermissionPanelState extends State<PermissionPanel>
       Icons.lock_clock
     ];
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      for (final p in AppPermission.values)
+      for (final p in AppPermission.values.where((p) =>
+          !widget.actionRequiredOnly ||
+          !permissionSatisfied(controller.value[p])))
         Container(
             margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(widget.actionRequiredOnly ? 12 : 16),
             decoration: BoxDecoration(
                 color: Color.alphaBlend(
                     colors.onSurface.withOpacity(0.025), colors.surface),
@@ -205,8 +314,11 @@ class _PermissionPanelState extends State<PermissionPanel>
                 borderRadius: BorderRadius.circular(12)),
             child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Padding(
-                  padding: const EdgeInsets.only(right: 16, top: 4),
-                  child: Icon(icons[p.index], color: colors.primary)),
+                  padding: EdgeInsets.only(
+                      right: widget.actionRequiredOnly ? 10 : 16, top: 4),
+                  child: Icon(icons[p.index],
+                      color: colors.primary,
+                      size: widget.actionRequiredOnly ? 20 : 24)),
               Expanded(
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,36 +331,51 @@ class _PermissionPanelState extends State<PermissionPanel>
                     const SizedBox(height: 4),
                     Text(descriptions[p.index],
                         style: TextStyle(
-                            color: colors.onSurfaceVariant, height: 1.4)),
-                    const SizedBox(height: 8),
-                    Text(_state(controller.value[p]),
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: controller.value[p] ==
-                                    AppPermissionState.granted
-                                ? colors.primary
-                                : colors.onSurface)),
-                    if (!permissionSatisfied(controller.value[p])) ...[
-                      if (p == AppPermission.overlay) ...[
-                        const SizedBox(height: 8),
-                        Text(l.permissionOverlayRouteGuide,
-                            style: TextStyle(
-                                color: colors.onSurfaceVariant, height: 1.4)),
-                      ],
+                            fontSize: widget.actionRequiredOnly ? 13 : null,
+                            color: colors.onSurfaceVariant,
+                            height: 1.4)),
+                    if (widget.actionRequiredOnly)
+                      Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(_state(controller.value[p]),
+                                style: const TextStyle(
+                                    fontSize: 13, fontWeight: FontWeight.w600)),
+                            _settingsButton(p),
+                          ])
+                    else ...[
                       const SizedBox(height: 8),
-                      OutlinedButton(
-                          key: ValueKey('permission-${p.name}'),
-                          onPressed: busy
-                              ? null
-                              : () async {
-                                  if (p == AppPermission.fullScreen &&
-                                      controller.value.xiaomi) {
-                                    await _lockHelp();
-                                  } else {
-                                    await _open(p.name);
-                                  }
-                                },
-                          child: Text(l.navSettings)),
+                      Text(_state(controller.value[p]),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: controller.value[p] ==
+                                      AppPermissionState.granted
+                                  ? colors.primary
+                                  : colors.onSurface)),
+                      if (!permissionSatisfied(controller.value[p])) ...[
+                        if (p == AppPermission.overlay) ...[
+                          const SizedBox(height: 8),
+                          Text(l.permissionOverlayRouteGuide,
+                              style: TextStyle(
+                                  color: colors.onSurfaceVariant, height: 1.4)),
+                        ],
+                        const SizedBox(height: 8),
+                        OutlinedButton(
+                            key: ValueKey('permission-${p.name}'),
+                            onPressed: busy
+                                ? null
+                                : () async {
+                                    if (p == AppPermission.fullScreen &&
+                                        controller.value.xiaomi) {
+                                      await _lockHelp();
+                                    } else {
+                                      await _open(p.name);
+                                    }
+                                  },
+                            child: Text(l.navSettings)),
+                      ],
                     ],
                   ])),
             ])),
@@ -260,12 +387,37 @@ class _PermissionPanelState extends State<PermissionPanel>
             onPressed: busy ? null : () => _open('alarmChannel'),
             child: Text(l.navSettings)),
       ],
-      const SizedBox(height: 12),
-      Text(l.permissionReturnGuide,
-          style: TextStyle(color: colors.onSurfaceVariant, height: 1.4)),
-      TextButton(
-          onPressed: () => _lockHelp(troubleshooting: true),
-          child: Text(l.permissionLockScreenHelp)),
     ]);
   }
+
+  Widget _settingsButton(AppPermission p) => OutlinedButton(
+      key: ValueKey('permission-${p.name}'),
+      style: OutlinedButton.styleFrom(
+          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+          disabledBackgroundColor:
+              Theme.of(context).colorScheme.primaryContainer,
+          disabledForegroundColor:
+              Theme.of(context).colorScheme.onPrimaryContainer,
+          overlayColor: Colors.transparent,
+          splashFactory: NoSplash.splashFactory,
+          animationDuration: Duration.zero,
+          side: BorderSide(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
+              width: 1.25),
+          textStyle: Theme.of(context)
+              .textTheme
+              .labelLarge
+              ?.copyWith(fontWeight: FontWeight.w700),
+          padding: const EdgeInsets.symmetric(horizontal: 12)),
+      onPressed: busy
+          ? null
+          : () async {
+              if (p == AppPermission.fullScreen && controller.value.xiaomi) {
+                await _lockHelp();
+              } else {
+                await _open(p.name);
+              }
+            },
+      child: Text(context.l10n.navSettings));
 }

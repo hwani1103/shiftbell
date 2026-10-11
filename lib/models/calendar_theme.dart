@@ -36,6 +36,8 @@ enum CalendarThemeId {
   // 살짝 얹어 이름을 다이어리로 바꿈 - 그래서 실사용 전이라 부담 없이 enum
   // 값 자체를 diary 하나로 정리함(이전 nordic 값은 없음).
   diary, // 날짜|근무명 절반씩 나눈 상단 박스 + 아이보리 톤의 절제된 캘린더
+  periwinkle,
+  softMosaic,
 }
 
 extension CalendarThemeIdX on CalendarThemeId {
@@ -45,11 +47,16 @@ extension CalendarThemeIdX on CalendarThemeId {
   // 메서드로 바꿈 - 호출부(settings_tab.dart, calendar_theme_picker_screen.dart)도
   // 함께 갱신함.
   String label(BuildContext context) {
-    if (!context.usesKoreanFeatures && !kEnglishCalendarThemeIds.contains(this)) {
-      return kDefaultCalendarThemeId.label(context);
+    if (!context.usesKoreanFeatures &&
+        !kEnglishCalendarThemeIds.contains(this)) {
+      return context.defaultCalendarTheme.label(context);
     }
     final l10n = context.l10n;
     switch (this) {
+      case CalendarThemeId.periwinkle:
+        return 'Periwinkle';
+      case CalendarThemeId.softMosaic:
+        return 'Soft Mosaic';
       case CalendarThemeId.mainWhite:
         return l10n.themeMainWhite;
       case CalendarThemeId.mainDark:
@@ -84,8 +91,16 @@ extension CalendarThemeIdX on CalendarThemeId {
 }
 
 const kDefaultCalendarThemeId = CalendarThemeId.mainWhite;
+const kDefaultGlobalCalendarThemeId = CalendarThemeId.periwinkle;
+
+CalendarThemeId defaultCalendarThemeForLocale(Locale locale) =>
+    locale.languageCode == 'ko'
+        ? kDefaultCalendarThemeId
+        : kDefaultGlobalCalendarThemeId;
 
 const kEnglishCalendarThemeIds = [
+  CalendarThemeId.periwinkle,
+  CalendarThemeId.softMosaic,
   CalendarThemeId.mainWhite,
   CalendarThemeId.mainDark,
   CalendarThemeId.minimal,
@@ -94,12 +109,15 @@ const kEnglishCalendarThemeIds = [
 ];
 
 extension CalendarThemeLocale on BuildContext {
+  CalendarThemeId get defaultCalendarTheme =>
+      defaultCalendarThemeForLocale(Localizations.localeOf(this));
+
   List<CalendarThemeId> get availableCalendarThemes =>
       usesKoreanFeatures ? kAllCalendarThemeIds : kEnglishCalendarThemeIds;
 
   // Keep the saved Korean choice intact when switching app languages.
   CalendarThemeId availableCalendarTheme(CalendarThemeId saved) =>
-      availableCalendarThemes.contains(saved) ? saved : kDefaultCalendarThemeId;
+      availableCalendarThemes.contains(saved) ? saved : defaultCalendarTheme;
 }
 
 // ⭐ 캐러셀/위젯 등에서 순서대로 순회할 때 쓰는 고정 목록. 2026-09-05 이전엔
@@ -156,22 +174,58 @@ List<String> mockShiftNames(BuildContext context) {
     ];
   }
   if (Localizations.localeOf(context).languageCode == 'de') {
-    return const ['Tag', 'Nacht', 'Früh', 'Spät', 'Frei', 'Bereitschaft',
-      'Extra', 'Reserve', 'Homeoffice', 'Dienstreise', 'Schulung', 'Sonderdienst'];
+    return const [
+      'Tag',
+      'Nacht',
+      'Früh',
+      'Spät',
+      'Frei',
+      'Bereitschaft',
+      'Extra',
+      'Reserve',
+      'Homeoffice',
+      'Dienstreise',
+      'Schulung',
+      'Sonderdienst'
+    ];
   }
   if (Localizations.localeOf(context).languageCode == 'pt') {
-    return const ['Dia', 'Noite', 'Manhã', 'Tarde', 'Folga', 'Plantão',
-      'Extra', 'Sobreaviso', 'Remoto', 'Viagem', 'Treinamento', 'Especial'];
+    return const [
+      'Dia',
+      'Noite',
+      'Manhã',
+      'Tarde',
+      'Folga',
+      'Plantão',
+      'Extra',
+      'Sobreaviso',
+      'Remoto',
+      'Viagem',
+      'Treinamento',
+      'Especial'
+    ];
   }
   if (Localizations.localeOf(context).languageCode == 'hi') {
-    return const ['दिन', 'रात', 'सुबह', 'दोपहर', 'छुट्टी', 'ऑन-कॉल',
-      'अतिरिक्त', 'स्टैंडबाय', 'घर से काम', 'दौरा', 'ट्रेनिंग', 'विशेष'];
+    return const [
+      'दिन',
+      'रात',
+      'सुबह',
+      'दोपहर',
+      'छुट्टी',
+      'ऑन-कॉल',
+      'अतिरिक्त',
+      'स्टैंडबाय',
+      'घर से काम',
+      'दौरा',
+      'ट्रेनिंग',
+      'विशेष'
+    ];
   }
   return const [
     'Day',
     'Night',
-    'Morning',
-    'Afternoon',
+    'Early',
+    'Late',
     'Off',
     'On-Call',
     'Extra',
@@ -184,6 +238,24 @@ List<String> mockShiftNames(BuildContext context) {
 }
 
 const kMainRestColor = Color(0xFFEF5350); // 휴무 고정 - 라이트/다크 공통
+
+// Muted colours against Periwinkle's blue surface; neighbouring shift types
+// use distinct hues. Rest days and leave share a soft rose accent.
+const kPeriwinkleRestColor = Color(0xFFB9566D);
+const kPeriwinklePalette = [
+  Color(0xFF5576B7), // Day: cornflower blue
+  Color(0xFF7960A5), // Night: muted violet
+  Color(0xFFA16B2A), // Morning: warm amber
+  Color(0xFF2F8078), // Afternoon: teal
+  kPeriwinkleRestColor,
+  Color(0xFF5F7F45), // Sage
+  Color(0xFFA75489), // Mauve
+  Color(0xFF39788E), // Ocean
+  Color(0xFF996140), // Terracotta
+  Color(0xFF626894), // Slate lavender
+  Color(0xFF77762E), // Olive
+  Color(0xFF486D61), // Eucalyptus
+];
 
 // ⭐ 2026-08-17 재설계 - (1차 시도 실패) 색상환을 40°~300° 구간에서 "촘촘하게"
 // 순서대로 채웠더니, 인접한 색끼리 25~30°밖에 안 떨어져 있어서 로테이션
@@ -326,6 +398,10 @@ Map<String, Color> assignShiftColors(List<String> shiftTypes,
 Map<String, Color> assignShiftColorsForTheme(
     List<String> shiftTypes, CalendarThemeId theme) {
   switch (theme) {
+    case CalendarThemeId.periwinkle:
+      return _assignFromPalette(shiftTypes, kPeriwinklePalette, 0,
+          restColor: kPeriwinkleRestColor);
+    case CalendarThemeId.softMosaic:
     case CalendarThemeId.mainWhite:
       return _assignFromPalette(shiftTypes, kMainLightPalette, 0);
     case CalendarThemeId.mainDark:
@@ -375,7 +451,8 @@ Map<String, Color> effectiveShiftColors(
 }
 
 Map<String, Color> _assignFromPalette(
-    List<String> shiftTypes, List<Color> palette, int rotation) {
+    List<String> shiftTypes, List<Color> palette, int rotation,
+    {Color restColor = kMainRestColor}) {
   final colors = <String, Color>{};
 
   // ⭐ 영어 현지화: 이 함수가 실제 사용자 스케줄(assignShiftColors/
@@ -383,7 +460,7 @@ Map<String, Color> _assignFromPalette(
   // '휴' 하드코딩만 남겨두면 영어로 "Off"/"Day Off" 등으로 입력한 근무명이
   // 고정 빨강을 못 받는 실제 버그가 됨 - isRestShiftName()으로 교체.
   for (final shift in shiftTypes) {
-    if (isRestShiftName(shift)) colors[shift] = kMainRestColor;
+    if (isRestShiftName(shift)) colors[shift] = restColor;
   }
 
   final nonRestShifts = shiftTypes.where((s) => !isRestShiftName(s)).toList();
@@ -391,7 +468,7 @@ Map<String, Color> _assignFromPalette(
   // 배열이라, 나머지 근무에 순서대로 배정할 땐 그 빨강 슬롯을 건너뛰어야 함 -
   // 안 그러면 근무 하나가 우연히 빨강을 받을 수 있음. rotation은 이 11칸짜리
   // 목록 안에서 시작 위치만 밀어주는 것 - 팔레트 자체(색상 구성)는 그대로.
-  final nonRestPalette = palette.where((c) => c != kMainRestColor).toList();
+  final nonRestPalette = palette.where((c) => c != restColor).toList();
   for (int i = 0; i < nonRestShifts.length; i++) {
     colors[nonRestShifts[i]] =
         nonRestPalette[(i + rotation) % nonRestPalette.length];

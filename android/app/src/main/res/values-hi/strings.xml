@@ -4,8 +4,8 @@
     <string name="alarm_type_vibration_short">वाइब्रेशन</string>
     <string name="alarm_type_silent_short">साइलेंट</string>
     <string name="snooze_collision_message">%1$s पर दूसरा अलार्म (%2$s) है। यह अलार्म स्नूज़ किए बिना बंद कर दिया गया।</string>
-    <string name="calendar_widget_description">अपनी शिफ्ट और नोट देखें। आकार बदलकर तीन हफ़्ते या पूरा महीना दिखाएं।</string>
-    <string name="app_widget_calendar_label">ShiftBell कैलेंडर</string>
+    <string name="calendar_widget_description">पिछले, इस और अगले हफ़्ते की शिफ्ट और नोट देखें।</string>
+    <string name="app_widget_calendar_label">3 हफ़्तों का कैलेंडर</string>
     <string name="alarm_swipe_hint">बंद करने के लिए ऊपर स्वाइप करें</string>
     <string name="alarm_snooze_label">5 मिनट बाद</string>
     <string name="alarm_dismiss_label">बंद करें</string>
@@ -50,4 +50,13 @@
     <string name="snooze_superseded">अलार्म बदल गया है। यह स्नूज़ सेट नहीं किया गया।</string>
     <string name="snooze_failed_execution">अलार्म बंद करने और स्नूज़ करने की प्रक्रिया पूरी नहीं हो सकी।</string>
     <string name="snooze_failure_title">स्नूज़ की जांच करें</string>
+    <string name="alarm_snooze_title">स्नूज़</string>
+    <string name="alarm_snooze_duration">%1$d मिनट बाद</string>
+    <string name="in_app_alarm_open">अलार्म बज रहा है। नियंत्रण खोलें</string>
+    <string name="in_app_alarm_collapse">अलार्म नियंत्रण समेटें</string>
+
+    <string name="app_widget_calendar_week_label">1 हफ़्ते का कैलेंडर</string>
+    <string name="calendar_widget_week_description">इस हफ़्ते की शिफ्ट और हर दिन के अधिकतम तीन नोट देखें।</string>
+    <string name="widget_daytime">दिन</string>
+    <string name="widget_nighttime">रात</string>
 </resources>

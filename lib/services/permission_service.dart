@@ -39,6 +39,14 @@ class PermissionSnapshot {
   }
 }
 
+class PermissionOpenResult {
+  const PermissionOpenResult(this.opened, {this.interactionCompleted = false});
+  final bool opened;
+  // A runtime prompt callback completes the interaction. Starting an external
+  // settings activity does not; the UI must wait for the app to resume.
+  final bool interactionCompleted;
+}
+
 class PermissionService {
   static final PermissionService _instance = PermissionService._internal();
   factory PermissionService() => _instance;
@@ -57,15 +65,18 @@ class PermissionService {
   }
 
   /// Return value reports an attempted/opened settings route, never a grant.
-  Future<bool> openPermission(String kind) async {
-    if (_opening) return false;
+  Future<bool> openPermission(String kind) async =>
+      (await openPermissionRoute(kind)).opened;
+
+  Future<PermissionOpenResult> openPermissionRoute(String kind) async {
+    if (_opening) return const PermissionOpenResult(false);
     _opening = true;
     try {
       final current = await snapshot();
       final permission =
           AppPermission.values.where((p) => p.name == kind).firstOrNull;
       if (permission != null && permissionSatisfied(current[permission]))
-        return true;
+        return const PermissionOpenResult(true, interactionCompleted: true);
       if (kind == 'notification' && current.sdk >= 33) {
         final status = await Permission.notification.status;
         final prefs = await SharedPreferences.getInstance();
@@ -73,15 +84,21 @@ class PermissionService {
             !await Permission.notification.shouldShowRequestRationale &&
             !(prefs.getBool('notification_request_attempted') ?? false)) {
           await prefs.setBool('notification_request_attempted', true);
-          await Permission.notification.request();
-          return true;
+          // Android may return empty results when the prompt is dismissed with
+          // Back. Complete that native callback too; approval is reread below
+          // by the caller rather than inferred from request completion.
+          final opened = await _platform
+                  .invokeMethod<bool>('requestNotificationPermission') ==
+              true;
+          return PermissionOpenResult(opened, interactionCompleted: true);
         }
       }
-      return await _platform
+      final opened = await _platform
               .invokeMethod<bool>('openPermissionSettings', {'kind': kind}) ==
           true;
+      return PermissionOpenResult(opened);
     } catch (_) {
-      return false;
+      return const PermissionOpenResult(false);
     } finally {
       _opening = false;
     }

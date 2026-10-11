@@ -29,6 +29,23 @@ export function weekdayOf(ymd) {
 
 /** 사용자 정의 이벤트: 활성 사용자 1명당 하루 평균 발생 횟수(모의용). 이름은 앱 코드(AppAnalytics)와 같아야 한다. */
 const CUSTOM_RATES = {
+  team_roster_created: 0.025,
+  team_roster_changed: 0.008,
+  team_roster_deleted: 0.003,
+  alarm_schedule_ok: 2.8,
+  alarm_schedule_failed: 0.015,
+  alarm_fired: 1.3,
+  alarm_refresh_completed: 0.3,
+  alarm_refresh_failed: 0.007,
+  device_boot_seen: 0.03,
+  ops_daily_ready: 0.6,
+  ops_daily_restricted: 0.15,
+  ops_daily_unknown: 0.015,
+  ops_battery_restricted: 0.4,
+  ops_exact_denied: 0.06,
+  ops_notification_blocked: 0.05,
+  ops_channel_blocked: 0.01,
+  ops_fullscreen_denied: 0.09,
   alarm_dismissed: 1.05,
   alarm_snoozed: 0.22,
   alarm_no_response: 0.04,
@@ -183,5 +200,19 @@ export function buildMockDocs({ today = '2026-09-22', days = 400, seed = 2026092
     webFriendViews: { count: Math.round(dau[n - 1] * 0.13), users: Math.round(dau[n - 1] * 0.07) },
     flags: { ads: true, customEvents: true },
   };
-  return { summary, series, events };
+  const countries = [['South Korea', .54], ['India', .16], ['Brazil', .11], ['Germany', .07], ['United States', .06], ['Philippines', .06]];
+  const brands = [['Samsung', .54], ['Xiaomi', .14], ['OPPO', .09], ['vivo', .08], ['Google', .06], ['Motorola', .05], ['honor', .04]];
+  const status = { status: 'available', thresholded: false, sampled: false, otherRowLoss: false, truncated: false };
+  const operations = { schema: 2, updatedAt: summary.updatedAt, byRange: {}, coverage: { countryDaily: status }, countryTrend: { dates: dates.slice(-100), series: {} } };
+  for (const range of [7, 30, 100, 365]) {
+    const start = Math.max(0, n - range); const users = Math.round(mau[n - 1] * (range <= 7 ? .65 : range <= 30 ? 1 : range / 30 * .45));
+    const current = { activeUsers: users, totalUsers: Math.round(users * 1.03), newUsers: sum(newUsers, start), sessions: sum(sessions, start), engagementSec: sum(engagementSec, start) };
+    const eventMap = (share) => Object.fromEntries(eventsByRange[range].events.map((e) => [e.name, { count: Math.round(e.count * share), users: Math.min(Math.round(users * share), Math.round(e.users * share)) }]));
+    const segments = (pairs) => pairs.map(([name, share]) => ({ name, activeUsers: Math.round(users * share), totalUsers: Math.round(current.totalUsers * share), newUsers: Math.round(current.newUsers * share), sessions: Math.round(current.sessions * share), engagementSec: Math.round(current.engagementSec * share), events: eventMap(share) }));
+    operations.byRange[range] = { from: dates[start], to: dates[n - 1], current, previous: { ...current, activeUsers: Math.round(users * .82), newUsers: Math.round(current.newUsers * .84) }, countries: segments(countries), previousCountries: segments(countries).map((r) => ({ ...r, activeUsers: Math.round(r.activeUsers * .82) })), manufacturers: segments(brands), coverage: Object.fromEntries(['current', 'previous', 'countries', 'previousCountries', 'countryEvents', 'manufacturers', 'manufacturerEvents'].map((key) => [key, status])) };
+  }
+  for (const [name, share] of countries) operations.countryTrend.series[name] = { dau: dau.slice(-100).map((v) => Math.round(v * share)), newUsers: newUsers.slice(-100).map((v) => Math.round(v * share)), sessions: sessions.slice(-100).map((v) => Math.round(v * share)) };
+  summary.coverage = Object.fromEntries(['core', 'ads', 'eventsDaily', 'cohort'].map((name) => [name, status]));
+  summary.pipelineVersion = 2; summary.syncPolicy = { frequency: 'daily', timezone: 'Asia/Seoul', scheduledAt: '12:17' };
+  return { summary, series, events, operations };
 }

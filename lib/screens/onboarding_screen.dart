@@ -1,5 +1,6 @@
 import '../widgets/shift_editor_dialog.dart';
 import '../widgets/adaptive_layout.dart';
+import '../widgets/permission_warning_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -7,9 +8,9 @@ import '../models/shift_schedule.dart';
 import '../models/calendar_theme.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
-import '../services/update_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/schedule_provider.dart';
+import '../providers/calendar_theme_provider.dart';
 import '../providers/alarm_provider.dart';
 import '../main.dart'; // ⭐ MainScreen import
 import '../constants/alarm_limits.dart';
@@ -24,7 +25,6 @@ import '../widgets/app_second_button.dart';
 import '../widgets/app_third_button.dart';
 import '../widgets/alarm_time_editor.dart';
 import '../widgets/day_offset_chip.dart';
-import '../widgets/onboarding_info_popups.dart';
 import '../constants/alarm_day_offset.dart';
 import '../services/alarm_generation_service.dart';
 import '../models/backup_payload.dart';
@@ -86,11 +86,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return _pattern.toSet().toList();
   }
 
-  // ⭐ 2026-09-05 - "앱을 처음 설치했을 때만" 1회 웰컴 팝업(사용자 요청).
-  // SharedPreferences 플래그로 평생 1회만 관리(onboarding_info_popups.dart 참고) -
-  // 이 화면 자체는 "설정 → 초기화" 후에도 다시 지나가지만, 그 초기화 로직이
-  // 이 플래그를 안 건드리므로 재설치 전까지는 다시 안 뜸.
-  bool _welcomePopupChecked = false;
+  final _patternPreviewController = ScrollController();
+
+  @override
+  void dispose() {
+    _patternPreviewController.dispose();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
@@ -107,13 +109,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         context.l10n.shiftDayOff,
         context.l10n.shiftAnnualLeave,
       ];
-    }
-
-    if (!_welcomePopupChecked) {
-      _welcomePopupChecked = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) maybeShowWelcomePopup(context);
-      });
     }
   }
 
@@ -344,6 +339,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                     ),
                   ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    context.l10n.onboardingShortNamesHint,
+                    style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
                   SizedBox(height: 24.h),
                   Wrap(
                     spacing: 8.w,
@@ -421,48 +423,88 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.onboardingTapToCompletePattern,
-                    style:
-                        TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 6.h),
-                  Text(
-                    context.l10n.onboardingPatternHowTo,
-                    style: TextStyle(
-                        fontSize: 14.sp,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  ),
-                  SizedBox(height: 12.h),
-                  Wrap(
-                    spacing: 8.w,
-                    runSpacing: 8.h,
-                    children: _allShiftTypes
-                        .map((name) => AppShiftChip(
-                              label: name,
-                              enabled: _pattern.length < 40,
-                              onTap: () => _addToPattern(name),
-                            ))
-                        .toList(),
-                  ),
-                  SizedBox(height: 12.h),
-                  _buildIrregularChoiceCard(),
-                  SizedBox(height: 16.h),
-                  Text(
-                    context.l10n.onboardingPatternHint,
-                    style: TextStyle(
-                        fontSize: 13.sp,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  ),
-                  SizedBox(height: 8.h),
-                  _buildPatternGrid(isSelectable: false, shrinkWrap: true),
-                ],
-              ),
-            ),
+            child: LayoutBuilder(
+                builder: (context, box) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Flexible(
+                          child: SingleChildScrollView(
+                            key: const ValueKey('onboarding-shift-choices'),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  context.l10n.onboardingTapToCompletePattern,
+                                  style: TextStyle(
+                                      fontSize: 20.sp,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 6.h),
+                                Text(
+                                  context.l10n.onboardingPatternHowTo,
+                                  style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant),
+                                ),
+                                SizedBox(height: 12.h),
+                                Wrap(
+                                  spacing: 8.w,
+                                  runSpacing: 8.h,
+                                  children: _allShiftTypes
+                                      .map((name) => AppShiftChip(
+                                            label: name,
+                                            enabled: _pattern.length < 40,
+                                            onTap: () => _addToPattern(name),
+                                          ))
+                                      .toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        Container(
+                          key: const ValueKey('onboarding-pattern-preview'),
+                          width: double.infinity,
+                          padding: EdgeInsets.all(8.w),
+                          decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerLow,
+                              borderRadius: BorderRadius.circular(10.r)),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                                minHeight: 36.h,
+                                maxHeight:
+                                    (box.maxHeight * .28).clamp(56.h, 140.h)),
+                            child: _pattern.isEmpty
+                                ? SizedBox(
+                                    height: 56.h,
+                                    child: _buildPatternGrid(
+                                        isSelectable: false, shrinkWrap: true),
+                                  )
+                                : SingleChildScrollView(
+                                    controller: _patternPreviewController,
+                                    child: _buildPatternGrid(
+                                        isSelectable: false, shrinkWrap: true),
+                                  ),
+                          ),
+                        ),
+                        SizedBox(height: 6.h),
+                        Text(
+                          context.l10n.onboardingPatternHint,
+                          style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
+                        ),
+                        SizedBox(height: 16.h),
+                        _buildIrregularChoiceLink(),
+                      ],
+                    )),
           ),
           SizedBox(height: 16.h),
           SizedBox(
@@ -481,80 +523,35 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     );
   }
 
-  Widget _buildIrregularChoiceCard() {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Semantics(
-      button: true,
-      label: context.l10n.onboardingIrregularChoiceTitle,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            setState(() {
-              _isRegular = false;
-              _selectedShifts = List.from(_allShiftTypes);
-              _step = 2;
-            });
-          },
-          borderRadius: BorderRadius.circular(12.r),
-          // ⭐ 2026-09-15 (사용자 요청) - 카드가 너무 크고 아이콘·화살표가 작다는 피드백: 패딩을 줄이고 문구를 짧게,
-          // 아이콘은 원형 배경으로 키우고 화살표도 키움. 한국어가 글자 단위로 끊기지 않게 wordSafeSpans 사용.
-          child: Ink(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: colorScheme.outline),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(7.w),
-                  decoration: BoxDecoration(
-                    color: kAppMainAccent.withOpacity(0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.calendar_month_outlined,
-                      color: kAppMainAccent, size: 26.sp),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text.rich(
-                        TextSpan(
-                          children: wordSafeSpans(
-                            context.l10n.onboardingIrregularChoiceTitle,
-                            TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w700,
-                                color: colorScheme.onSurface),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 2.h),
-                      Text.rich(
-                        TextSpan(
-                          children: wordSafeSpans(
-                            context.l10n.onboardingIrregularChoiceDescription,
-                            TextStyle(
-                                fontSize: 12.sp,
-                                color: colorScheme.onSurfaceVariant),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 4.w),
-                Icon(Icons.chevron_right_rounded,
-                    color: kAppMainAccent, size: 30.sp),
-              ],
-            ),
+  Widget _buildIrregularChoiceLink() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(context.l10n.onboardingIrregularChoiceDescription,
+            style: TextStyle(
+                fontSize: 12.sp,
+                color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        Semantics(
+          button: true,
+          label: context.l10n.onboardingIrregularChoiceTitle,
+          child: TextButton.icon(
+            style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                foregroundColor: kAppMainAccent,
+                alignment: Alignment.centerLeft),
+            onPressed: () {
+              setState(() {
+                _isRegular = false;
+                _selectedShifts = List.from(_allShiftTypes);
+                _step = 2;
+              });
+            },
+            icon: Icon(Icons.calendar_month_outlined, size: 17.sp),
+            label: Text(context.l10n.onboardingIrregularChoiceTitle,
+                style: TextStyle(fontSize: 13.sp), softWrap: true),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -564,8 +561,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       return Center(
         child: Text(
           context.l10n.onboardingNoPattern,
+          textAlign: TextAlign.center,
           style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 13.sp,
               color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       );
@@ -586,14 +584,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
         return Column(children: [
           Text('${index + 1}', style: TextStyle(fontSize: 10.sp)),
-          Expanded(child: SizedBox(width: double.infinity, child: AppShiftChip(
-            label: _pattern[index], dense: true,
-            selected: isSelected, strongSelected: true,
-            cellTextStyle: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface),
-            onTap: isSelectable ? () => setState(() => _todayIndex = index)
-                : () => _removeFromPattern(index),
-          ))),
+          Expanded(
+              child: SizedBox(
+                  width: double.infinity,
+                  child: AppShiftChip(
+                    label: _pattern[index],
+                    dense: true,
+                    selected: isSelected,
+                    strongSelected: true,
+                    cellTextStyle: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: isSelected
+                            ? Colors.white
+                            : Theme.of(context).colorScheme.onSurface),
+                    onTap: isSelectable
+                        ? () => setState(() => _todayIndex = index)
+                        : () => _removeFromPattern(index),
+                  ))),
         ]);
       },
     );
@@ -671,6 +679,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void _addToPattern(String shift) {
     if (_pattern.length < 40) {
       setState(() => _pattern.add(shift));
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _patternPreviewController.hasClients) {
+          _patternPreviewController.animateTo(
+              _patternPreviewController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 160),
+              curve: Curves.easeOut);
+        }
+      });
     }
   }
 
@@ -696,7 +712,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                Text.rich(TextSpan(children: wordSafeSpans(
+                Text.rich(TextSpan(
+                    children: wordSafeSpans(
                   context.l10n.onboardingSetFixedAlarmPerShift,
                   TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
                 ))),
@@ -779,6 +796,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   },
                 ),
               ]))),
+          const PermissionWarningBanner(),
           SizedBox(height: 16.h),
           SizedBox(
             width: double.infinity,
@@ -861,7 +879,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                                     fit: BoxFit.scaleDown,
                                     child: Wrap(
                                       alignment: WrapAlignment.center,
-                                      crossAxisAlignment: WrapCrossAlignment.center,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
                                       spacing: 4.w,
                                       children: [
                                         Text(
@@ -965,8 +984,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   // 순서는 shiftTypes(=_allShiftTypes, 아래서 그대로 넘김) 기준 - calendar_tab.dart도
   // 항상 이 순서로 계산하므로 이렇게 맞춰야 이후 색이 안 어긋남.
   Map<String, int> _generateShiftColors() {
-    return effectiveShiftColors(_allShiftTypes, kDefaultCalendarThemeId, null)
-        .map((name, color) => MapEntry(name, color.value));
+    final theme =
+        context.availableCalendarTheme(ref.read(calendarThemeProvider));
+    return effectiveShiftColors(_allShiftTypes, theme, null)
+        .map((name, color) => MapEntry(name, color.toARGB32()));
   }
 
   Future<void> _saveAlarmTemplates() async {
@@ -1065,11 +1086,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       }
     }
 
-    // ⭐ "업데이트 후 첫 실행 안내가 기존 유저에게 안 뜬다" 버그 수정의 일부
-    // (update_service.dart의 markOnboardingBaselineVersion 주석 참고) - 지금
-    // 온보딩을 마치는 사람은 "방금 이 버전으로 막 시작한" 사람이니, 이 버전을
-    // 기준선으로 남겨서 나중에 릴리즈 노트가 신규 유저에게 잘못 뜨지 않게 함.
-    await UpdateService.markOnboardingBaselineVersion();
     // 분류값(규칙적/불규칙)만 보낸다 - 근무표 내용은 보내지 않음
     AppAnalytics.track(AnalyticsEvent.onboardingComplete,
         params: {'schedule_type': _isRegular! ? 'regular' : 'irregular'});
@@ -1106,7 +1122,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
     for (final alarm in result.scheduled) {
       await AlarmService().scheduleAlarm(
-        id: alarm.id, dateTime: alarm.dateTime, label: alarm.label,
+        id: alarm.id,
+        dateTime: alarm.dateTime,
+        label: alarm.label,
         soundType: 'loud',
       );
     }
@@ -1274,7 +1292,9 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
                   children: [
                     Icon(Icons.add, size: 16.sp),
                     SizedBox(width: 4.w),
-                    Flexible(child: Text(context.l10n.alarmAdd, textAlign: TextAlign.center)),
+                    Flexible(
+                        child: Text(context.l10n.alarmAdd,
+                            textAlign: TextAlign.center)),
                   ],
                 ),
               ),
@@ -1324,51 +1344,14 @@ class _AlarmTimeDialogState extends State<_AlarmTimeDialog> {
 
   // 알람 타입 선택 버튼
   Widget _buildTypeButton(int index, int typeId, String emoji, String label) {
-    final isSelected = _alarms[index].alarmTypeId == typeId;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            _alarms[index] = _alarms[index].copyWith(alarmTypeId: typeId);
-          });
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 8.h),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? (Theme.of(context).brightness == Brightness.dark
-                    ? Colors.orange.shade800 // 다크모드: 진한 주황 (대비율 6.74:1)
-                    : Colors.orange.shade700) // 화이트모드: 진한 주황 (대비율 5.73:1)
-                : Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.tertiary
-                  : Theme.of(context).colorScheme.outline,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: Column(
-            children: [
-              Text(emoji, style: TextStyle(fontSize: 16.sp)),
-              SizedBox(height: 2.h),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  color: isSelected
-                      ? Colors.white
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurfaceVariant, // 선택 시 흰색으로 통일
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    return AlarmTypeButton(
+        value: _alarms[index].alarmTypeId,
+        typeId: typeId,
+        emoji: emoji,
+        label: label,
+        onChanged: (value) => setState(() {
+              _alarms[index] = _alarms[index].copyWith(alarmTypeId: value);
+            }));
   }
 
   // ⭐ 알람 시간 수정

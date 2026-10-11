@@ -56,7 +56,9 @@ class KoreanOnlyCopy {
   String onboardingShiftNameHint(int chars) => '근무명 (최대 ${chars}글자)';
   String get onboardingAllSet => '설정 완료!';
   String get onboardingScheduleTabPopupTitle => '일정관리 탭, 이렇게 써보세요';
-  String get onboardingScheduleTabPopupBody => '1. 일정 만들기\n오른쪽 아래 시계 아이콘을 탭하면 시간축 위에서 시각을 고를 수 있는 모드로 바뀌어요. 원하는 시각에서 한 번 더 탭하면 그 시각으로 새 일정을 만들 수 있어요.\n\n2. 지속시간 설정\n기본은 "지속시간 없음"(특정 시각 하나)이에요. "+"나 5분/30분/1시간 버튼을 누르면 종료 시각이 있는 일정으로 바뀌어요.\n\n3. 일정에 맞춰 알림받기\n알림받기 스위치를 켜면 원하는 시간에 휴대폰 알림을 받을 수 있어요. 알림 소리는 시스템 설정과 동일해요.';
+  String get onboardingScheduleTabPopupBody => '교대시계 아이콘 버튼을 눌러 일정관리를 시작해 보세요! 정해진 시간에 알림을 받아 일정을 쉽게 관리할 수 있어요.';
+  String get onboardingConditionTabPopupBody => '수면·회복 탭에서 수면을 기록해 보세요! 근무시간을 설정하면 내 근무와 수면 기록을 바탕으로 회복 상태와 쉬기 좋은 시간을 확인할 수 있어요.';
+  String get onboardingConditionTabPopupTitle => '수면·회복 탭, 이렇게 써보세요';
   String get settingsFriendShareDesc => '공유 코드로 친구와 서로의 일정 확인';
   String get settingsEditShiftNameDesc => '근무 이름을 수정합니다';
   String get settingsDataBackupDesc => '지금 기기에 근무표·알람·메모 등을 백업해요';
@@ -190,7 +192,7 @@ class KoreanOnlyCopy {
   String get helpBackupRestoreOldBackupFailBody => '앱이 업데이트되면서 저장하는 데이터 형식이 가끔 바뀌어요. 백업을 만든 버전과 복구하는 버전의 차이가 크면(아주 오래전 백업을 한참 뒤에 최신 버전에서 복구하는 경우 등) 복구에 실패할 수 있고, 같은 파일로 다시 해도 같은 이유로 실패하기 쉬워요.\n\n기기를 바꾸거나 재설치하기 직전에 설정의 "데이터 백업"을 한 번 눌러 새 백업을 만들어 두면 안전해요. 자동 백업이 잘 되고 있어도, 중요한 순간 직전에는 직접 한 번 더 해 두는 게 좋아요.';
   String get settingsConditionFeatureTitle => '수면회복 컨디션 기능';
   String get settingsConditionFeatureSubtitle => '근무·수면시간 기반 컨디션 예측';
-  String settingsEnableFeatureConfirm(String feature) => '메인 탭에 추가하여 ${feature} 기능을 사용하시겠습니까?\n\n(탭 하단에서 다시 숨길 수 있습니다.)';
+  String settingsEnableFeatureConfirm(String feature) => '메인 탭에 추가하여 ${feature} 기능을 사용하시겠습니까?';
   String get settingsEnableFeatureAction => '추가하여 사용하기';
   String get settingsEnablingFeature => '메인 탭에 추가하는 중…';
   String get settingsEnableFeatureFailed => '기능을 켜지 못했습니다. 다시 시도해 주세요.';
@@ -203,4 +205,7 @@ class KoreanOnlyCopy {
   String get settingsDiagnosticExportFailed => '로그를 전송할 메일 앱을 열지 못했습니다. 다른 앱을 선택하거나 다시 시도해 주세요.';
   String get settingsDiagnosticSendAction => '전송하기';
   String get helpAlarmTroubleshootMergedBody => '1. 권한과 휴대폰 설정 확인\n설정 → 알람 권한 설정에서 알림, 정확한 알람, 잠금화면 표시, 다른 앱 위에 표시 권한을 확인해 주세요.\n\n휴대폰 설정 → 앱 → 교대시계 → 배터리에서 백그라운드 사용이 제한되어 있지 않은지도 확인해 주세요.\n\n2. 근무와 고정 알람 확인\n달력에서 해당 날짜에 근무가 배정되어 있는지 확인하세요. 설정 → 편집 → 고정 알람 수정에서 그 근무에 알람이 등록되어 있는지도 확인해 주세요. 근무만 배정하고 알람을 등록하지 않으면 알람은 울리지 않습니다.\n\n3. 제조사별 알람 동작\nSamsung, Motorola, OPPO, Xiaomi, Google Pixel, realme의 검증 기기에서는 필요한 권한을 설정한 환경에서 정상적인 알람 동작을 확인했습니다.\n\n그 외 제조사의 기기는 권한을 모두 허용해도 알람이 울리지 않거나 정확한 시간에 작동하지 않을 수 있습니다. 검증 제조사를 늘리고 알람 신뢰도를 높이는 작업을 계속하고 있습니다.\n\n4. 문제가 계속된다면\n기기명, Android 버전, 문제가 발생한 시간을 적어 개발자 이메일 lowvibe07@gmail.com으로 연락해 주세요. 설정 → 부가 기능 → 진단 로그 이메일로 보내기에서 로그 파일을 함께 보내면 원인 확인에 도움이 됩니다.';
+  String get settingsEnableFeatureHideHint => '탭 하단에서 다시 숨길 수 있습니다.';
+  String get settingsScheduleFeatureDescription => '시간별 일정을 간편하게 관리하고, 일정에 맞춰 알림을 받을 수 있습니다.';
+  String get settingsConditionFeatureDescription => '직접 입력하거나 자동 추정된 수면 기록으로 평균 수면시간을 확인하고, 근무시간과 함께 회복 상태와 컨디션을 살펴볼 수 있습니다.';
 }

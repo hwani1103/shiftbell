@@ -1,3 +1,4 @@
+import { buildOperations, reportState } from './operations.mjs';
 // admin_dashboard/sync/lib/transform.mjs
 //
 // GA4 Data API 응답 → 대시보드가 읽는 Firestore 문서 3개(summary / series / events)로 바꾸는 순수 함수 모음.
@@ -188,6 +189,9 @@ export function buildDocs({ raw, meta }) {
   const summary = {
     schema: SCHEMA,
     updatedAt: meta.now.toISOString(),
+    pipelineVersion: 2,
+    syncPolicy: { frequency: "daily", timezone: "Asia/Seoul", scheduledAt: "12:17", day: new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(meta.now), endDate: "yesterday" },
+    coverage: Object.fromEntries(Object.entries(raw).filter(([, value]) => !value || value.metricHeaders || value.rows).map(([key, value]) => [key, reportState(value)])),
     propertyId: meta.propertyId,
     streamId: meta.streamId,
     source: meta.source ?? 'ga4',
@@ -201,6 +205,7 @@ export function buildDocs({ raw, meta }) {
       language: buildBreakdown(raw.language),
       country: buildBreakdown(raw.country),
       device: buildBreakdown(raw.device),
+      manufacturer: buildBreakdown(raw.manufacturer),
     },
     events: eventSummary,
     eventsByRange,
@@ -210,5 +215,7 @@ export function buildDocs({ raw, meta }) {
     },
     flags: { ads: adsAvailable, customEvents: hasCustomEvents },
   };
-  return { summary, series, events };
+  series.updatedAt = summary.updatedAt;
+  events.updatedAt = summary.updatedAt;
+  return { summary, series, events, operations: buildOperations(raw, meta) };
 }

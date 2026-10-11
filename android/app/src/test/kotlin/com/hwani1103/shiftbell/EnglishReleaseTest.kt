@@ -60,25 +60,20 @@ class EnglishReleaseTest {
             ko.packageManager.getComponentEnabledSetting(ComponentName(ko, CalendarWidgetProvider::class.java)))
     }
 
-    @Test fun calendarWidgetPreviewsUseEnglishAndBoundedShiftText() {
-        for (scale in listOf(1f, 1.3f)) {
-            val ctx = context("en-GB", scale)
-            for (layout in listOf(R.layout.calendar_widget, R.layout.calendar_widget_full)) {
-                val root = LayoutInflater.from(ctx).inflate(layout, null)
-                val density = ctx.resources.displayMetrics.density
-                for (width in listOf(280, 380, 700)) {
-                    root.findViewById<TextView>(R.id.pill_0_0).text = "Afternoon"
-                    root.measure(View.MeasureSpec.makeMeasureSpec((width * density).toInt(), View.MeasureSpec.EXACTLY),
-                        View.MeasureSpec.makeMeasureSpec((400 * density).toInt(), View.MeasureSpec.EXACTLY))
-                    root.layout(0, 0, root.measuredWidth, root.measuredHeight)
-                    val shift = root.findViewById<TextView>(R.id.pill_0_0)
-                    assertTrue(shift.width > 0)
-                    assertEquals(1, shift.maxLines)
-                    assertEquals(TextView.AUTO_SIZE_TEXT_TYPE_UNIFORM, shift.autoSizeTextType)
-                    assertEquals("Mon", root.findViewById<TextView>(R.id.hdr_0).text.toString())
-                    assertTrue(shift.textSize <= 9 * ctx.resources.displayMetrics.scaledDensity + .1f)
-                }
-            }
+    @Test fun calendarWidgetsUseEnglishAndFullShiftText() {
+        val ctx = context("en-GB")
+        val now = Calendar.getInstance()
+        val schedule = CalendarWidgetScheduleResolver.ResolvedSchedule(true,
+            listOf("Afternoon"), 0, now.timeInMillis, emptyMap(), emptyMap())
+        for (single in listOf(false, true)) {
+            val root = CalendarWidgetProvider.buildRemoteViews(ctx, single, now, schedule, emptyMap())
+                .apply(ctx, android.widget.FrameLayout(ctx))
+            val shift = root.findViewById<TextView>(R.id.pill_0_0)
+            assertEquals("Afternoon", shift.text.toString())
+            assertEquals(1, shift.maxLines)
+            assertNull(shift.ellipsize)
+            if (single) assertEquals("Mon", root.findViewById<TextView>(R.id.hdr_0).text.toString())
+            else assertNull(root.findViewById<View>(R.id.hdr_0))
         }
     }
 }

@@ -2,15 +2,15 @@ import { chromium } from 'playwright-core';
 import { mkdir } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
-const out = '../../build/dashboard_chart_check';
+const out = '../../artifacts/dashboard_operations_2026_10_10/ui';
 await mkdir(out, { recursive: true });
 try {
-  for (const width of [360, 752]) {
+  for (const width of [360, 752, 1440]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } });
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.route('**/__/firebase/**', route => route.fulfill({ body: '', contentType: 'text/javascript' }));
-    await page.goto('http://127.0.0.1:8767/?demo');
+    await page.goto(process.env.DASHBOARD_URL || 'http://127.0.0.1:8793/?demo');
     await page.locator('#ch-users .hit').waitFor();
     assert.equal(await page.getByRole('button', { name: 'WAU 주간' }).count(), 0);
     assert.equal(await page.locator('#ch-installs path.line').count(), 2);
@@ -35,6 +35,14 @@ try {
     assert.equal(await page.locator('#ch-users .tip .td').textContent(), selected);
     assert.equal(await page.locator('#ch-users .xh').evaluate(e => e.style.display), '');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    await page.locator('h1').click();
+    assert.equal(await page.locator('#ch-users .xh').evaluate(e => e.style.display), 'none');
+    assert.equal(await page.locator('#ch-users .tip').evaluate(e => e.hidden), true);
+    for (const key of ['growth','product','quality','overview']) {
+      await page.locator('[data-action="section"][data-key="'+key+'"]').click();
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+      await page.screenshot({path:out+'/'+key+'-'+width+'.png',fullPage:true});
+    }
     await page.screenshot({ path: `${out}/chart-${width}.png`, fullPage: true });
     assert.deepEqual(errors, []);
     console.log(`PASS ${width}: no WAU, line series, persistent selection, drag, resize, no overflow`);

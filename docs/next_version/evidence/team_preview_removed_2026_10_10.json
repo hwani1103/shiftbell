@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-10",
+  "scope": "A09 whole-team creation save preview removal",
+  "behavior": "Creator Save persists immediately; no second preview/confirmation step",
+  "files": [
+    "lib/screens/all_teams_setup_screen.dart",
+    "test/team_schedule_edit_flow_test.dart"
+  ],
+  "verification": {
+    "flowTests": "13 PASS",
+    "analysis": "No issues found",
+    "device": "NOT_RUN",
+    "integratedDevBuild": "PASS; included in ring_notice_copy_2026_10_10 dev debug APK; not installed"
+  },
+  "sourceHashes": {
+    "lib/screens/all_teams_setup_screen.dart": "f29ec2a841e73702a245ab05f7f8e01272869cbec9d8da95e425b9d10700fe47",
+    "test/team_schedule_edit_flow_test.dart": "5c8c2d396803cd02ba3822ca6768903c053784653a4252a7e600f9ede520da7a"
+  }
+}

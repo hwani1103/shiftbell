@@ -34,14 +34,33 @@ class TeamAssignmentGrid extends StatelessWidget {
           borderRadius: BorderRadius.circular(14.r),
           border: Border.all(color: colors.outlineVariant)),
       child: LayoutBuilder(builder: (context, constraints) {
-        // The original roster creator uses six cells per row. Keep that
-        // geometry in the editor too; longer cycles add rows and scroll.
-        final minimum = 40.w * math.max(1.0, MediaQuery.textScalerOf(context).scale(12) / 12);
-        final columns = ((constraints.maxWidth + 6.w) / (minimum + 6.w)).floor().clamp(1, 6);
-        final width = (constraints.maxWidth - (columns - 1) * 6.w) / columns;
+        // Names never change the grid geometry. Ordinary text uses five
+        // wider cells; enlarged accessibility text can reduce that count.
         final scaler = MediaQuery.textScalerOf(context);
-        final height = math.max(width / 0.82,
-            scaler.scale(12.sp) * 1.3 + scaler.scale(9.5.sp) * 1.3 + 30.h);
+        final baseStyle = DefaultTextStyle.of(context).style;
+        final minimum = 48.w * math.max(1.0, scaler.scale(12) / 12);
+        final columns = ((constraints.maxWidth + 6.w) / (minimum + 6.w))
+            .floor()
+            .clamp(1, 5);
+        final width = (constraints.maxWidth - (columns - 1) * 6.w) / columns;
+        double lineHeight(TextStyle style) {
+          final painter = TextPainter(
+            text: TextSpan(text: 'Ag근म', style: baseStyle.merge(style)),
+            textDirection: Directionality.of(context),
+            textScaler: scaler,
+            locale: Localizations.maybeLocaleOf(context),
+            maxLines: 1,
+          )..layout();
+          final height = painter.height;
+          painter.dispose();
+          return height;
+        }
+
+        final shiftHeight =
+            lineHeight(TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700));
+        final badgeHeight = lineHeight(
+            TextStyle(fontSize: 9.5.sp, fontWeight: FontWeight.bold));
+        final height = math.max(width / 0.82, shiftHeight + badgeHeight + 30.h);
         return GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -138,14 +157,16 @@ class TeamAssignmentChip extends StatelessWidget {
                   padding: EdgeInsets.fromLTRB(3.w, 8.h, 3.w, 4.h),
                   child: Center(
                       child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Text(shift,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w700,
-                            color: colors.onSurface)),
+                    FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(shift,
+                            textAlign: TextAlign.center,
+                            maxLines: 1,
+                            softWrap: false,
+                            style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w700,
+                                color: colors.onSurface))),
                     if (team != null) ...[
                       SizedBox(height: 4.h),
                       Container(

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_widget_sleep_label">교대시계 수면기록</string>
+    <string name="app_widget_sleep_label">수면 기록</string>
     <string name="channel_schedule_notify">일정 알림</string>
     <string name="sleep_widget_brand">교대시계</string>
     <string name="sleep_widget_description">버튼으로 취침/기상을 기록해요.</string>

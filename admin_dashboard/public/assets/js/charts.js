@@ -92,6 +92,18 @@ export function lineChart(el, opt) {
   let o = opt;
   let first = true;
   let selectedDate = null;
+  const clearSelection = () => {
+    selectedDate = null;
+    el.querySelectorAll(".xh, .pt").forEach((node) => { node.style.display = "none"; });
+    const tip = el.querySelector(".tip");
+    if (tip) tip.hidden = true;
+  };
+  const outsidePress = (event) => {
+    if (!el.querySelector(".hit")?.contains(event.target)) clearSelection();
+  };
+  const escape = (event) => { if (event.key === "Escape") clearSelection(); };
+  document.addEventListener("pointerdown", outsidePress, true);
+  document.addEventListener("keydown", escape);
   el.classList.add('chart');
 
   function draw() {
@@ -163,6 +175,7 @@ export function lineChart(el, opt) {
       });
       tip.innerHTML = `<div class="td">${esc(fmtLong(o.dates[i]))}</div>${rows}`;
       placeTip(tip, el, x);
+      o.onSelect?.(selectedDate, i);
     };
     const show = (ev) => {
       const r = el.getBoundingClientRect();
@@ -189,8 +202,9 @@ export function lineChart(el, opt) {
   ro.observe(el);
   draw();
   return {
+    selectDate(date) { if (!o.dates.includes(date)) return; selectedDate = date; first = false; draw(); },
     update(next) { o = { ...o, ...next }; first = false; draw(); },
-    destroy() { ro.disconnect(); },
+    destroy() { ro.disconnect(); document.removeEventListener("pointerdown", outsidePress, true); document.removeEventListener("keydown", escape); clearSelection(); },
   };
 }
 

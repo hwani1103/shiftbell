@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftbell/widgets/app_text_scale.dart';
+import 'package:shiftbell/screens/startup_gate.dart';
 
 void main() {
+  testWidgets('startup failure screen also ignores the system text scale', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.pumpWidget(StartupGate<int>(
+      initialize: () => Future<int>.error(StateError('startup scale test')),
+      builder: (_) => const SizedBox.shrink(),
+    ));
+    await tester.pumpAndSettle();
+    final context = tester.element(find.byType(StartupStatusScreen));
+    expect(MediaQuery.textScalerOf(context).scale(20), 20);
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('system font changes leave routes and dialogs at fixed scale',
       (tester) async {
     var requested = 1.0;

@@ -1,18 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- ⭐ 2026-08-25 5차 수정 - 배경을 WaveGradientView(파도치는 그라데이션
-     애니메이션)로 교체. 카드 아래쪽 모서리만 둥근 모양은 유지해야 해서
-     bottomCornerRadius=24dp로 지정(예전 overlay_card_gradient.xml과 같은 값).
-     FrameLayout으로 감싸서 WaveGradientView(배경, match_parent)와 실제 콘텐츠
-     LinearLayout(그 위, wrap_content 높이 그대로)을 겹침 - wrap_content
-     부모 안에서 match_parent 자식은 형제가 확정한 최종 크기를 그대로 따라가는
-     표준 안드로이드 동작이라 별도 계산 없이 카드 크기에 맞춰짐.
-     뷰 ID(timeText/shiftTypeText/dismissButton/snoozeButton)는 그대로 -
-     AlarmOverlayService.kt의 findViewById 참조는 안 건드림.
-
-     ⭐ 2026-09-13(사용자 요청 - "카톡 메시지 온 것 같은 카드 형태로") - 위쪽
-     모서리도 24dp로 둥글게(topCornerRadius 추가) - 전체가 하나의 둥근 카드로
-     보이게 함. 색상/버튼 등 내용물은 전혀 안 바꿈 - 카드 4면 모서리와(아래
-     AlarmOverlayService.kt의) 화면상 위치만 조정. -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -33,28 +19,41 @@
             android:autoSizeTextType="uniform" android:autoSizeMinTextSize="28sp" android:autoSizeMaxTextSize="46sp"
             android:autoSizeStepGranularity="1sp" android:shadowColor="#40000000" android:shadowDy="1" android:shadowRadius="3" />
         <TextView android:id="@+id/shiftTypeText" android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="@string/alarm_default_label" android:textSize="16sp" android:textColor="#3B2E7A" android:textStyle="bold"
+            android:gravity="center" android:text="@string/alarm_default_label" android:textSize="16sp" android:textColor="#3B2E7A" android:textStyle="bold"
             android:layout_marginBottom="12dp" android:background="@drawable/overlay_shift_badge" android:padding="8dp" />
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center">
-<Button android:id="@+id/snoozeDecreaseButton" android:layout_width="48dp" android:layout_height="64dp"
-    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="−" android:textSize="24sp"
-    android:textColor="#3B2E7A" android:background="?android:attr/selectableItemBackgroundBorderless"
-    android:contentDescription="@string/alarm_snooze_decrease" /><FrameLayout android:layout_width="72dp" android:layout_height="64dp">
-    <TextView android:id="@+id/snoozeValueText" android:layout_width="match_parent" android:layout_height="match_parent"
-        android:gravity="center" android:background="@drawable/alarm_snooze_circle" android:text="+5m"
-        android:textSize="18sp" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="12sp" android:autoSizeMaxTextSize="18sp" android:autoSizeStepGranularity="1sp"
-        android:textStyle="bold" android:textColor="#3B2E7A" android:importantForAccessibility="no" />
+<LinearLayout android:id="@+id/buttonContainer" android:layout_width="match_parent" android:layout_height="64dp" android:gravity="center">
+<Button android:id="@+id/snoozeDecreaseButton" android:layout_width="48dp" android:layout_height="48dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="−" android:textSize="30sp"
+    android:includeFontPadding="false" android:gravity="center" android:stateListAnimator="@null" android:backgroundTint="@null"
+    android:textColor="#FFFFFF" android:background="@drawable/alarm_lock_control"
+    android:contentDescription="@string/alarm_snooze_decrease" />
+<FrameLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="64dp"
+    android:layout_marginHorizontal="8dp" android:background="@drawable/alarm_lock_snooze">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:gravity="center" android:paddingHorizontal="6dp" android:paddingVertical="6dp"
+        android:importantForAccessibility="noHideDescendants">
+        <TextView android:id="@+id/lockSnoozeTitle" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+            android:gravity="center" android:text="@string/alarm_snooze_title" android:textSize="16sp"
+            android:textColor="#302746" android:textStyle="bold" android:maxLines="1"
+            android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="16sp" android:autoSizeStepGranularity="1sp" />
+        <TextView android:id="@+id/snoozeValueText" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+            android:gravity="center" android:text="" android:textSize="18sp"
+            android:textColor="#302746" android:textStyle="bold" android:maxLines="1"
+            android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="18sp" android:autoSizeStepGranularity="1sp" />
+    </LinearLayout>
     <Button android:id="@+id/snoozeButton" android:layout_width="match_parent" android:layout_height="match_parent"
         android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text=""
-        android:background="?android:attr/selectableItemBackgroundBorderless" android:stateListAnimator="@null"
+        android:background="@drawable/alarm_lock_snooze_ripple" android:backgroundTint="@null" android:stateListAnimator="@null"
         android:contentDescription="@string/alarm_snooze_label" />
-</FrameLayout><Button android:id="@+id/snoozeIncreaseButton" android:layout_width="48dp" android:layout_height="64dp"
-    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="+" android:textSize="24sp"
-    android:textColor="#3B2E7A" android:background="?android:attr/selectableItemBackgroundBorderless"
-    android:contentDescription="@string/alarm_snooze_increase" /><Space android:layout_width="12dp" android:layout_height="1dp" /><Button android:id="@+id/dismissButton" android:layout_width="64dp" android:layout_height="64dp"
-    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="×" android:textSize="28sp"
-    android:textColor="#FFFFFF" android:background="@drawable/alarm_dismiss_circle" android:stateListAnimator="@null"
+</FrameLayout><Button android:id="@+id/snoozeIncreaseButton" android:layout_width="48dp" android:layout_height="48dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="+" android:textSize="30sp"
+    android:includeFontPadding="false" android:gravity="center" android:stateListAnimator="@null" android:backgroundTint="@null"
+    android:textColor="#FFFFFF" android:background="@drawable/alarm_lock_control"
+    android:contentDescription="@string/alarm_snooze_increase" /><Button android:id="@+id/dismissButton" android:layout_width="60dp" android:layout_height="60dp" android:layout_marginStart="8dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="×" android:textSize="38sp"
+    android:includeFontPadding="false" android:gravity="center" android:backgroundTint="@null"
+    android:textColor="#FFFFFF" android:background="@drawable/alarm_lock_control" android:stateListAnimator="@null"
     android:contentDescription="@string/alarm_dismiss_label" />
-        </LinearLayout>
+</LinearLayout>
     </LinearLayout>
 </FrameLayout>

@@ -24,11 +24,17 @@ void main() {
     const Size(752, 834.67),
     const Size(834.67, 752),
   ]) {
-    for (final locale in [const Locale('ko'), const Locale('en')]) {
+    for (final locale in [
+      const Locale('ko'),
+      const Locale('en'),
+      const Locale('de'),
+      const Locale('pt'),
+      const Locale('hi'),
+    ]) {
       testWidgets(
           '온보딩 패턴 단계 ${size.width}x${size.height} ${locale.languageCode}: 스크롤되고 버튼이 보인다',
           (tester) async {
-        SharedPreferences.setMockInitialValues({'welcome_popup_shown': true});
+        SharedPreferences.setMockInitialValues({});
         tester.view.physicalSize = size;
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.resetPhysicalSize);
@@ -69,7 +75,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        final nextText = locale.languageCode == 'ko' ? '다음' : 'Next';
+        await tester.pump(const Duration(seconds: 1));
+        expect(find.byType(Dialog), findsNothing,
+            reason: 'Fresh onboarding must start without a welcome popup');
+        final l =
+            AppLocalizations.of(tester.element(find.byType(OnboardingScreen)));
+        expect(find.text(l.onboardingShortNamesHint), findsOneWidget);
+        final nextText = l.commonNext;
         await tester.tap(find.text(nextText));
         await tester.pumpAndSettle();
 
@@ -79,14 +91,26 @@ void main() {
         final next = tester.getRect(find.text(nextText));
         expect(next.bottom <= size.height, isTrue,
             reason: '패턴 단계의 다음 버튼이 화면 아래로 밀림: $next');
-        final l =
-            AppLocalizations.of(tester.element(find.byType(OnboardingScreen)));
         for (final shift in [
-          l.shiftDay, l.shiftNight, l.shiftMorning, l.shiftAfternoon,
+          l.shiftDay,
+          l.shiftNight,
+          l.shiftMorning,
+          l.shiftAfternoon,
         ]) {
           await tester.ensureVisible(find.text(shift));
           await tester.tap(find.text(shift));
-          await tester.pump();
+          await tester.pumpAndSettle();
+          final preview =
+              find.byKey(const ValueKey('onboarding-pattern-preview'));
+          final previewBox = tester.getRect(preview);
+          final added =
+              find.descendant(of: preview, matching: find.text(shift));
+          final addedBox = tester.getRect(added);
+          expect(addedBox.top, greaterThanOrEqualTo(previewBox.top));
+          expect(addedBox.bottom, lessThanOrEqualTo(previewBox.bottom));
+          expect(added.hitTestable(), findsOneWidget,
+              reason: 'The added shift must be visible without scrolling');
+          expect(previewBox.bottom, lessThan(next.top));
         }
         await tester.tap(find.text(nextText));
         await tester.pumpAndSettle();
@@ -103,10 +127,12 @@ void main() {
         final paragraph = tester.renderObject<RenderParagraph>(label);
         expect(
           paragraph.getBoxesForSelection(TextSelection(
-            baseOffset: 0, extentOffset: l.shiftAfternoon.length,
+            baseOffset: 0,
+            extentOffset: l.shiftAfternoon.length,
           )),
           hasLength(1),
-          reason: 'A shift name must not strand its last letter on a second line',
+          reason:
+              'A shift name must not strand its last letter on a second line',
         );
       });
     }

@@ -1,3 +1,4 @@
+import '../services/app_analytics.dart';
 import '../widgets/settings_appearance.dart';
 import '../widgets/app_button.dart';
 import '../widgets/team_assignment_grid.dart';
@@ -88,6 +89,7 @@ class _TeamScheduleEditScreenState
             team),
         widget.date,
         widget.teams);
+    if (saved) AppAnalytics.track(AnalyticsEvent.teamRosterChanged);
     if (!mounted) return;
     if (saved) {
       Navigator.pop(context, TeamScheduleEditResult.changed);
@@ -108,6 +110,7 @@ class _TeamScheduleEditScreenState
     }
     try {
       await DatabaseService.instance.saveTeamScheduleConfig(null);
+      AppAnalytics.track(AnalyticsEvent.teamRosterDeleted);
       if (mounted) Navigator.pop(context, TeamScheduleEditResult.recreate);
     } catch (error) {
       debugPrint('Team schedule reset failed: $error');

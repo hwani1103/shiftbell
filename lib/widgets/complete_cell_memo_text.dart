@@ -7,18 +7,20 @@ class CompleteCellMemoText extends StatelessWidget {
       {super.key,
       required this.style,
       this.textAlign = TextAlign.center,
-      this.textScaler});
+      this.textScaler,
+      this.horizontalInset = 2});
 
   final String text;
   final TextStyle style;
   final TextAlign textAlign;
   final TextScaler? textScaler;
+  final double horizontalInset;
 
   @override
   Widget build(BuildContext context) => Padding(
       // Keep glyph ink away from the cell/card edge, even at fractional pixels.
       // Measure after padding so the last character is omitted, never clipped.
-      padding: const EdgeInsets.symmetric(horizontal: 2),
+      padding: EdgeInsets.symmetric(horizontal: horizontalInset),
       child: LayoutBuilder(
         builder: (context, bounds) {
           final width = bounds.maxWidth;

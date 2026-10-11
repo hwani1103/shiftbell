@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-09",
+  "scope": "U01 widget design follow-up",
+  "previousEvidence": "calendar_widgets_2026_10_09.json",
+  "cellOrder": [
+    "date",
+    "shift",
+    "memo1",
+    "memo2",
+    "memo3"
+  ],
+  "render": {
+    "status": "PASS",
+    "method": "CalendarWidgetDesignRender.renderOnly (no assertions)",
+    "count": 24,
+    "files": [
+      "de-DE-three-12-200.png",
+      "de-DE-three-12-228.png",
+      "de-DE-three-12-300.png",
+      "de-DE-three-22-200.png",
+      "de-DE-three-22-228.png",
+      "de-DE-three-22-300.png",
+      "de-DE-week-12-102.png",
+      "de-DE-week-22-102.png",
+      "hi-IN-three-12-200.png",
+      "hi-IN-three-12-228.png",
+      "hi-IN-three-12-300.png",
+      "hi-IN-three-22-200.png",
+      "hi-IN-three-22-228.png",
+      "hi-IN-three-22-300.png",
+      "hi-IN-week-12-102.png",
+      "hi-IN-week-22-102.png",
+      "ko-KR-three-12-200.png",
+      "ko-KR-three-12-228.png",
+      "ko-KR-three-12-300.png",
+      "ko-KR-three-22-200.png",
+      "ko-KR-three-22-228.png",
+      "ko-KR-three-22-300.png",
+      "ko-KR-week-12-102.png",
+      "ko-KR-week-22-102.png"
+    ],
+    "log": "artifacts/calendar_widget_design_v2/render_order_final.log"
+  },
+  "build": {
+    "status": "PASS",
+    "flavor": "dev",
+    "mode": "debug",
+    "apk": "artifacts/calendar_widget_design_v2/shiftbell-widget-design-dev-debug.apk",
+    "bytes": 215872368,
+    "sha256": "a9974d01a1c998bcd1dbb2f38aadebc61ac20f31f294492f3028bc963f26e8ae",
+    "applicationId": "com.hwani1103.shiftbell.dev",
+    "version": "1.0.23-dev (25)",
+    "log": "artifacts/calendar_widget_design_v2/build.log"
+  },
+  "functionalRegression": "NOT_RUN: user explicitly requested rendering/build only",
+  "install": "NOT_RUN: user installs",
+  "realLauncher": "NOT_RUN",
+  "releaseBuild": "NOT_RUN",
+  "webBuild": "NOT_RUN"
+}

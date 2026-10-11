@@ -4,10 +4,9 @@
      shiftTypeText/dismissButton/snoozeButton/rootLayout)는 전부 그대로 -
      AlarmActivity.kt의 findViewById 참조·클릭 리스너·스와이프 제스처 로직은
      하나도 안 건드림, 순수 시각 요소만 교체. -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -16,6 +15,11 @@
     <com.hwani1103.shiftbell.WaveGradientView
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/rootLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <!-- 알람 라벨 + 원형 시계 + 근무 뱃지 -->
     <LinearLayout
@@ -98,35 +102,10 @@
             android:textColor="#803B2E7A"/>
     </LinearLayout>
 
-    <LinearLayout android:id="@+id/buttonContainer" android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center"
-        android:layout_marginBottom="40dp" app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
-        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center">
-<Button android:id="@+id/snoozeDecreaseButton" android:layout_width="48dp" android:layout_height="64dp"
-    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="−" android:textSize="24sp"
-    android:textColor="#3B2E7A" android:background="?android:attr/selectableItemBackgroundBorderless"
-    android:contentDescription="@string/alarm_snooze_decrease" /><FrameLayout android:layout_width="88dp" android:layout_height="64dp">
-    <TextView android:id="@+id/snoozeValueText" android:layout_width="match_parent" android:layout_height="match_parent"
-        android:gravity="center" android:background="@drawable/alarm_snooze_circle" android:text="+5m"
-        android:textSize="18sp" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="12sp" android:autoSizeMaxTextSize="18sp" android:autoSizeStepGranularity="1sp"
-        android:textStyle="bold" android:textColor="#3B2E7A" android:importantForAccessibility="no" />
-    <Button android:id="@+id/snoozeButton" android:layout_width="match_parent" android:layout_height="match_parent"
-        android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text=""
-        android:background="?android:attr/selectableItemBackgroundBorderless" android:stateListAnimator="@null"
-        android:contentDescription="@string/alarm_snooze_label" />
-</FrameLayout><Button android:id="@+id/snoozeIncreaseButton" android:layout_width="48dp" android:layout_height="64dp"
-    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="+" android:textSize="24sp"
-    android:textColor="#3B2E7A" android:background="?android:attr/selectableItemBackgroundBorderless"
-    android:contentDescription="@string/alarm_snooze_increase" />        </LinearLayout>
-        <TextView android:id="@+id/snoozeLabelText" android:layout_width="240dp" android:layout_height="wrap_content"
-            android:gravity="center" android:layout_marginTop="4dp" android:layout_marginBottom="12dp" android:textSize="16sp"
-            android:textColor="#3B2E7A" android:text="@string/alarm_snooze_label" android:importantForAccessibility="no" />
-<Button android:id="@+id/dismissButton" android:layout_width="64dp" android:layout_height="64dp"
-    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="×" android:textSize="28sp"
-    android:textColor="#FFFFFF" android:background="@drawable/alarm_dismiss_circle" android:stateListAnimator="@null"
-    android:contentDescription="@string/alarm_dismiss_label" />
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center"
-            android:textSize="16sp" android:textColor="#3B2E7A" android:text="@string/alarm_dismiss_label" android:importantForAccessibility="no" />
-    </LinearLayout>
+    <include layout="@layout/alarm_controls" android:id="@+id/buttonContainer"
+        android:layout_width="0dp" android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp" android:layout_marginBottom="16dp"
+        app:layout_constraintWidth_max="352dp" app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>

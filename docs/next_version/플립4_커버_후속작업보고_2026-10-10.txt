@@ -1,0 +1,74 @@
+최신 결론: 2026-10-11 커버5언어10장/제어·인계·자연 종료 완료. 본화면27상태 부분 검토/최종 정리 미확인. 아래 [최종 결과]가 과거 중간 기록보다 우선한다.
+
+플립4 커버 후속 작업 보고
+기준: 2026-10-10 KST
+시작 근거: 폴더블_잔여작업_인수인계_2026-10-10.txt / dev_출시전_핵심코어_체크리스트.txt A09·U05
+증거 루트: artifacts/flip4_cover_requested_captures_2026_10_10
+
+1. 승인 범위와 사전 준비
+사용자가 플립4 연결 후 작업 진행을 지시했고 잠금화면·오버레이 관련 권한을 모두 허용했다.
+커버 5언어 기본/10분 선택 10장, 실제 조절·5/10분 스누즈·X 이력, 같은 ID/회차 인계, 1분 자연 놓침을 검사한다.
+메인 화면은 시험 등록·권한 상태·이력/정리에 필요한 최소 범위로만 진입한다.
+기존 미커밋 변경과 원본 보고서/증거를 보존한다. 기기명 기반 제품 렌더링 분기를 추가하지 않는다.
+
+연결 실측: SM-F721U / Android14 API34 / One UI6.1 / F721USQS5FXE5.
+신규 ADB 연결: localhost:39318. SDK/기기/자세 상태와 설정 원본은 device_preflight.json.
+실제 커버: Android displayId1 / physicalId4630946183746106243 / 512×260. 가용 영역·실제 앱 밀도는 알람 표시 뒤 추가 확인한다.
+지원 상태 실제 조회: CLOSE0 / TENT1 / HALF_FOLDED2 / OPEN3 / DUAL4. 시작 override CLOSE0, base OPEN3.
+기존 dev 앱 없음. 시스템 ko-KR, Asia/Ho_Chi_Minh, 12시간제, fontScale1.0, screen_off_timeout300000, stay_on_while_plugged_in0.
+이 실제 설정을 시험 시계/장시간 Doze 근거로 확대하지 않는다.
+
+사전 문구 수정: helpTroubleshootForceStopTitle의 '휴대폰 설정에서 이 앱을 강제 종료했어요'를 '설정에서 앱을 강제 종료했어요'로 축약.
+의미를 유지하고 고립된 마지막 '요' 줄을 줄이기 위한 수정이다. 생성기로 갱신한다.
+Flip4 커버에는 도움말을 배정하지 않는다. Flip8 실제 제목 재확인, Fold8/Ultra 예정 한국어 도움말 확인은 후속으로 유지한다.
+최초 후보는 한국어 제목 한 곳을 수정했다. 이후 실제 커버 결함을 발견해 아래 공통 커버 수정 후보를 추가했다.
+
+2. 실행 상태 (진행 중 기록)
+필수 tools/check_critical_release.ps1 -Build PASS / exit0. Flutter338, Android 기능·DB 이관, common/한국어 전용·공개 웹 리소스, dev debug·JS 웹 빌드 완료. release 없음.
+최초 sandbox 실행은 Flutter SDK lockfile 쓰기 제한으로 실패했다. 캐시 쓰기를 허용한 재실행으로 검사를 진행한다.
+내부 완료 후 이번 실행의 Gradle 데몬이 출력 파이프를 유지했다. 해당 소유 데몬만 종료한 뒤 외부 실행기 exit0까지 확인했다. 호스트 실행 정리이며 제품 변경은 아니다.
+후보: tested-dev-debug.apk / 215870076 bytes / SHA256 c14c2c3d203a77e7089e90974a187dcf5faa422d6c94638d76552b9b1f0ce413.
+빌드 로그: preflight_critical_build.log / 종료 코드: preflight_critical_build.exit.txt. 소스 근거: source_inputs_after_title_generation.json.
+초기 ADB streamed install은 전송 지연/90초 도구 제한으로 미완료. 재시도는 시험 소유 adb 프로세스만 종료했다.
+Samsung 웹 APK 업로드는 자동 승인 검토가 특정 파일 외부 전송 승인을 요구했다. 사용자가 이 후보의 Samsung RTL 업로드·설치를 명시 허용했다.
+웹 경로는 Chrome 확장의 file URL 접근 설정 때문에 업로드하지 못했다. 이 설정을 임의로 확대하지 않았다.
+승인된 동일 파일을 ADB push -z zstd로 전송 후 pm install -r로 설치했다. 설치 base.apk의 SHA256이 c14c2c3d…와 일치했다.
+권한 native snapshot에서 notification/overlay/exactAlarm/fullScreen/alarmChannel 모두 granted를 확인했다. 설정 진입을 허용으로 처리하지 않았다.
+초기 후보의 한국어·영어·독일어 기본5분/선택10분 총6장을 촬영했다. 한국어 최소5/최대30, 세 언어 실제 −/+와10분 스누즈 이력을 확인했다.
+영어·독일어 기본5분 최초 화면에서 X가 보이지 않고 선택을 바꾼 후 나타났다. 독일어는 조작 없이 재촬영해도 X가 없었다. 제품 결함이며 PASS로 처리하지 않는다.
+수정 전 APK와6장 manifest/PNG 및 독일어 재확인 화면은 before_symbol_fix에 보존한다.
+CoverAlarmLayout.kt의 기호 autosize를 끄고 초기 글자 크기를 명시했으며 종료 버튼 최초 레이아웃을48×48dp로 지정했다. 실제 영역에 따른 최종 크기·배치 규칙은 유지했다.
+새 최초 traversal 회귀 검사를 추가했고 tools/check_critical_release.ps1 -Build 재실행 중이다. 수정 후 실기기 결과는 아직 NOT_RUN.
+플립8도 이 공통 커버 경로를 사용한다. 수정 후 플립8 커버 재검증 필요/NOT_RUN을 폴더블 인수인계에 추가했다. Fold8/Ultra의 일반 알람 레이아웃은 이 수정의 직접 대상이 아니다.
+첫 빌드 뒤 lib/widgets/team_assignment_grid.dart에 다른 작업의 변경이 들어왔다. 당시 소스 비교 기록을 남겼고 덮어쓰지 않았다. 수정 후보는 현재 소스로 다시 빌드한다.
+본 항목은 종료 시 설치 해시·실측·정리 결과와 새 기계 원장으로 갱신한다.
+
+
+[2026-10-11 00:45 KST 판정 정정]
+인수인계10절이 위 중간 후보의 X 누락 판단을 대체한다. X 누락으로 보고한 원본들의 실제 X 픽셀과 확대 교차선은 모두 존재했다. 작은 반환 이미지에 대한 잘못된 시각 판독으로 불필요한 수정/재설치가 반복됐다. 재감사40장과 진단 내부/실제 화면 비교 근거를 x_original_pixel_reaudit_2026_10_11.json 및 session_3_SM_F721U/draw_probe_comparison에 보존했다. 최종 후보be976ced…는 native 흰 버튼 기호로 복원하고 래스터/소프트웨어/추가Canvas/진단을 제거했다. 설치·필수회귀·5언어 최종검증 진행 중. 이전 FAIL 판단은 이 정정에 따라 읽고, 최종 전체 기능/정리 상태는 후속 결과로 확정한다.
+
+
+[최종 결과: 2026-10-11]
+실기기: SM-F721U/API34/One UI6.1, 커버512×260/displayId1. 검증 설치본: normal-glyph-dev-debug.apk, SHA256 be976ced5d7b2df61b4878d0377329dded7c984dda322dc129ed267bd026a490.
+공통 native 흰 기호 버튼으로 복원했고 불필요한 래스터/소프트웨어/추가 Canvas/진단 코드를 제거했다. 최초 측정 전에 버튼 크기를 정하는 규칙 및 회귀 검사는 남겼다. X 누락 수정 성공이라는 주장으로 읽지 않는다.
+
+커버 완료/PASS: ko/en/de/pt/hi 각각 기본5분·선택10분 원본 총10장, 원본 확대/실제 X 픽셀 확인, −/+ 최소5·최대30 제한, 실제10분 스누즈 이력,5언어 펼침→재접힘 동일 alarmId/round 및30분 유지·X 종료 이력. 한국어 기본5분 실제 스누즈 및1분 자연 timeout 이력/활성 울림 종료도 확인했다.
+알림/오버레이/정확한 알람/전체화면/알람 채널은 native 실제 조회5항목 granted. 거절/철회/구 API/OEM 전수나 장시간 Doze 검증으로 확대하지 않는다.
+원본/갤러리: artifacts/flip4_cover_requested_captures_2026_10_10/session_3_SM_F721U/manifest.json, gallery.html, cover_gallery_originals_and_x_zoom.png. 기능: functional_checkpoint.json, 각언어_handover.json, default_5m_snooze.json, natural_timeout.json, final_native_permission_snapshot.json.
+최종 커버 후보의 필수 -Build exit0 및 별도 CoverAlarmLayoutTest3/3 PASS. dev debug·웹만 빌드했고 release는 실행하지 않았다. normal_glyph_critical_build.log 및 normal_glyph_layout_test.log.
+
+본화면 부분 완료: 한국어 주요/설정/대화상자28측정 행 중 잘못 진입한 권한 행1개를 제외한27상태 실제 픽셀 검토. 그 중26상태 레이아웃 PASS, 부가기능 진단 설명1곳의 마지막 “송” 한 글자 고립은 실제 발견했다. 권한 Intro를 직접 열면 이미 허용/근무표 보유 상태에서 달력으로 자동 복귀하는 정상 흐름이므로 그 달력 화면은 권한 UI PASS에서 제외했다. 올바른 PermissionPanel 재검사는 검사 VM 응답 중단으로 NOT_RUN.
+한국어 extras/remaining·도움말 본문과 en/de/pt/hi 본화면은 NOT_RUN. 한국어 도움말 색인에서 축약한 강제종료 제목은 실제 확인했으나 본문 전체 검토 완료로 기록하지 않는다.
+한국어 diagnosticExportSubtitle을 “진단 로그를 개발자 메일로 보냅니다”로 축약했다. common ARB의 기존 키/언어 범위를 유지했으며 이 마지막 문구 수정 뒤 실기기 설치/확인은 NOT_RUN. 별도 diagnostic_copy_critical_build 결과는 후속 보고서/기계 원장을 따른다. 커버10장은 위 be976ced 후보의 당시 자료로 보존한다.
+
+연결/정리: 마지막 VM getVM/evaluate가 응답하지 않아 앱 재시작·attach·현재 예약 RDB 재연결/재시작·웹클라이언트 새로고침으로 복구를 시도했다. 이 복구 과정 뒤 예약 페이지 “Getting ready to restart”, 웹클라이언트 “All ongoing tests have ended”, ADB 기기0을 확인했다. 예약 종료 원인이나 예정 시각을 추정해 단정하지 않는다.
+커버 소유 알람은 각 검사 뒤 삭제했고 본화면 fixture 직전 DB의 alarms=[]/silent duration=3이 저장됐다. 그러나 본화면에 넣은 시험 근무표/템플릿·메모의 최종 복원, 시험 이력 삭제/16테이블 기준선 재대조, 임시 설정/파일 정리는 연결 종료로 UNCONFIRMED. 사용자 데이터 삭제나 타 기기 성공으로 채우지 않는다. 복원용 당시 DB/prefs는 main_fixture_database_before.json/main_fixture_preferences_before.json. 다른 신규 기기에 이 스냅샷을 덮어쓰지 않는다.
+앞선 첫·두 번째 연결의 최종 정리도 각각 UNCONFIRMED를 유지한다. 세 번째 기기와 혼동하지 않는다.
+
+잔여: Flip4 본화면 미실시 범위/문구 수정 확인·정리, Flip8 공통 초기 크기/측정 규칙 변경 후 커버5언어 재확인, Fold8/Ultra/Flip8 한국어 도움말 제목 및 진단 설명의 해당 화면 확인. 다른 기기의 원래 잔여/사용자 디자인 승인은 보존한다.
+최종 기계 원장: docs/next_version/evidence/flip4_cover_followup_2026_10_10.json 및 session_3_SM_F721U/final_review.json, final_cleanup.json.
+
+[마지막 한국어 문구 수정 후보 / 호스트 결과]
+후보 diagnostic-copy-dev-debug.apk / SHA256 ff56ce81fbd02c51fc464a413bb5089429db44ef5da5899f7aa6c56448841c82 / 215877950 bytes.
+필수 diagnostic_copy_critical_build -Build exit0: Flutter338/native 기능·DB이관/리소스 검사/dev debug/JS웹167.2초 PASS. release 없음. 내부 빌드 완료 뒤 출력 파이프를 붙잡은 유휴 Gradle daemon PID21176만 정리하고 외부 실행기 exit0까지 확인했다.
+이 후보는 실기기 미설치/진단 설명 수정 후 실제 확인 NOT_RUN이다. 커버10장의 be976ced 검증본과 구분하며 기존 커버 native 렌더링은 마지막 문구 수정으로 바꾸지 않았다. 후보/로그/해시는 artifacts/flip4_cover_requested_captures_2026_10_10/diagnostic_copy_candidate.json 및 diagnostic_copy_critical_build.log/.exit.txt.

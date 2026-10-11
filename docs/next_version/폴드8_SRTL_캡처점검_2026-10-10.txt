@@ -1,0 +1,60 @@
+[역사 원장:아래 내용은 당시 부분 진행 상태이다. 후속 승인·재연결 결과는 폴드8_SRTL_최종작업보고_2026-10-10.txt 참조.]
+
+폴드8 SRTL 요청 캡처·후속 화면 점검 — 2026-10-10
+
+상태: 캡처/검사 범위별 부분 완료. 최종 디자인 승인은 사용자 검토 전이다.
+종료 기록: {"status": "stopped_connection_unavailable", "checkedAt": "2026-10-09T19:37:40.164Z", "adb": "device localhost:33115 not found", "expectedLeaseEnd": "2026-10-10T01:24:57+09:00", "lastSavedGeometryAt": "2026-10-09T16:04:13.596Z", "actualDisconnectionAt": "unknown", "stopInstruction": "SRTL no longer responding; stop and report", "cleanup": {"lastCustomAlarmCleanup": "cleanup_custom.vm.json", "missedDurationRestoredTo3Minutes": "previous session observation; final device recheck unavailable", "finalScheduledAlarmRemoval": "NOT_VERIFIED_AFTER_DISCONNECT", "notificationOverlayPermissions": "last verified denied; no grants made", "liveSharing": "no Firebase publish performed", "hostRuntime": "previous Node runtime and Flutter attach process no longer present"}}
+진행률 참고: Fold8 요구사항 약70~75%로 추정. 정식 전체 상태 수를 분모로 한 수치는 아니다. 캡처 개수만으로 전수 완료율을 계산하지 않았다.
+SRTL 최종 예약 정리는 연결 종료 후 재검증할 수 없었다. 마지막 custom 알람 정리 근거와 최종 정리 미확인을 구분한다.
+
+실행 범위
+- docs/next_version/dev_출시전_핵심코어_체크리스트.txt의 A09/U01/U05 후속.
+- SM-F971N Fold8 / Android17 SDK37 / localhost:33115 / com.hwani1103.shiftbell.dev.
+- 기존 ShiftBell 패키지가 없던 SRTL 기기에 현재 dev debug를 새로 설치했다. 사용자 원본 DB는 없었다.
+- 설치 APK와 보존 APK SHA256 일치: 5a48c7d32147906f7bcab9c3a5f63c5a0cebb92402292d4debe9fdb2323999dc.
+- 제품 코드 수정 없음. 기존 미커밋 작업/확정 Fold8 달력은 변경하지 않았다.
+- 한국어/영어 달력 6장 비교는 사용자 추가 지시로 전부 생략했다.
+- 권한 승인 거부 안내를 제외하면 중간 보고 없이 진행했고, 자동 잠금 해제는 승인된 이 SRTL 기기에서만 wake + dismiss-keyguard로 처리했다. PIN 변경/입력 없음.
+- release 빌드/운영 웹 배포/진단 이메일 전송 없음. 제품 P0를 변경하지 않아 필수 회귀 실행기를 이번 캡처 작업에서 새로 전수 반복하지 않았다.
+
+검토 자료
+- artifacts/fold8_requested_captures_2026_10_09/폴드8_캡처검토.html
+- 원본 PNG 145장, manifest.json의 언어/접힘·펼침/해시와 연결.
+- 요청 앱 화면 100장: 온보딩 1~4단계·2단계 빈/실제 칩 탭 패턴, 권한 소개, 다음 알람·설정·고정 알람의 두 권한 미허용 상태, 전체 근무표. 5언어 × 접힘/펼침.
+- 앱 내부 알람 31장: 활성 버튼/제어창/접기 후 복귀 30장, 실제 10분 선택 제어창 1장.
+- 실제 삼성 홈 위젯 10장: 5언어 × 접힘/펼침에 1주와 3주 위젯을 함께 실제 배치. 기본 짧은 근무명과 같은 주의 메모 1/2/3개를 표시. 정적 위젯 선택기 미리보기를 실제 배치 증거로 쓰지 않았다.
+- 한국어 친구 달력 4장: 앱 production widget 2장, 실제 Fold8 Chrome의 새로 빌드한 로컬 production-widget 웹 2장. 외부 게시가 거부되어 로컬 합성 자료임을 갤러리에 표시했다. 실제 친구 추가/운영 공유 성공의 증거가 아니다.
+- 초기 로컬 fixture 변경 뒤 provider가 이전 근무명을 유지하던 캡처는 provider refresh 후 설정/고정 알람/근무표를 다시 촬영했다. 제품 번역 결함으로 판정하지 않았다.
+- 온보딩은 저장하지 않은 draft 화면도 포함한다. 칩은 실제 터치로 추가했고, 2/4의 생성 패턴과 불규칙 링크가 스크롤 없이 보이는 범위를 확인했다. 온보딩 전체 저장 흐름 PASS로 확장하지 않는다.
+
+짧은 알람 기능 시험
+- 실제 OS 예약·자연 전달 후 앱 내부 버튼을 직접 탭해 제어창 진입.
+- 접기 버튼/Android Back은 알람을 끝내지 않고 활성 버튼으로 복귀. 최종 X 종료 후 swiped 이력/울림 종료 확인.
+- 5개 언어 및 접힘/펼침의 실제 버튼 위치/제어창을 촬영했다. 일부 알람 뒤편의 근무명은 이전 로컬 fixture 언어를 유지했다. native 버튼/제어 문구와 배경 자료의 언어를 구분하며 최종 캡처 승인 전에 재촬영할 후보이다. 이력은 evidence JSON과 개별 VM 로그에 연결한다.
+- 실제 −/+ 선택으로 5→10→5→10분을 확인, 10분 스누즈 후 snoozed 이력과 새 목표 예약을 확인했다. 5/10분 재울림 대기는 사용자 지시대로 하지 않았다.
+- 타입3 무음 지속시간을 시험 중 1분으로 바꾸어 자연 종료를 관찰했다. alarm83: 예약 00:18:39.933837 → timeout 이력 00:19:40. 실제 1분 놓침 이력이다. 타입3 기본 3분으로 복구했다.
+- 충전 중 무음 시험이며 물리 소리/진동·장시간 Doze/다른 ROM의 PASS가 아니다.
+
+후속 레이아웃 검사
+- 종료 전 추가 키보드/팀 규칙/복원 경고 및 한국어 선택 기능 세부 점검은 실행하지 못했다. 준비된 스크립트는 실행 결과로 세지 않는다.
+- 실제 기기 route/dialog 텍스트 측정 309개 상태(초기/스크롤 끝/키보드 등). 언어·접힘별 수: {"ko_closed": 31, "ko_open": 30, "en_closed": 31, "en_open": 31, "de_closed": 31, "de_open": 31, "pt_closed": 31, "pt_open": 31, "hi_closed": 31, "hi_open": 31}.
+- 설정 루트, 다음 알람, 근무시간/OT, 테마 선택, 전체 근무표, 이력, 메모, 도움말, 개인정보, 백업, 부가기능, 권한 소개, 스케줄 메뉴/변경·이름/색상·알람음/고정 알람 화면을 순차 열었다.
+- 도움말 상세 항목 실제 측정: {"de_closed_help_details": 23, "de_open_help_details": 23, "en_closed_help_details": 23, "en_open_help_details": 23, "hi_closed_help_details": 23, "hi_open_help_details": 23, "ko_closed_help_details": 38, "ko_open_help_details": 38, "pt_closed_help_details": 23, "pt_open_help_details": 23}. 측정과 각 상세 본문별 시각 검토 완료는 구분한다.
+- 설정 하위 화면의 PNG는 검토 목록에 추가하지 않고 실제 화면 시각 확인과 layout_audit/*.tsv/coverage.json만 남겼다.
+- 측정 didExceedMaxLines 후보 0개, 계측 오류 0개. 후보/오류는 evidence JSON에 그대로 보존했다. 오류를 실기기 제품 FAIL이나 PASS로 바꾸지 않는다.
+- 영어 전체 근무표의 Day Off 2줄은 두 단어가 모두 보이는 정상 표시임을 원본 캡처로 확인했다. 짧은 마지막 줄 탐지는 후보 신호이며 그 자체를 잘림으로 판정하지 않는다.
+- 긴 문구/다수 카드의 초기 화면에서 일부 다음 카드가 보이고 세로 스크롤로 이어지는 경우를 화면 전체 요소가 한 번에 보인 것으로 기록하지 않는다.
+- 모든 오류 상태·복원 진행/실제 복원·광고 동의 조건·실제 클라우드 공유까지 포함한 앱 전체 상태 전수 완료는 아니다. 완료한 구체 화면/상태는 coverage 원장이 기준이다.
+
+자동 승인 검토에 따른 미완료
+- 알림·다른 앱 위 표시 임시 허용이 거부되어 두 권한은 실제 denied를 유지했다. 설정을 열었다는 이유로 허용 처리하지 않았다.
+- 잠금 알람/외부 오버레이/7777 팝업 3종은 미촬영. 잠금 시험 alarm62는 OS 전달/울림 상태는 생겼으나 알림 미허용으로 AlarmActivity가 표시되지 않았고 화면은 asleep이었다. 검정 진단 이미지는 검토용 캡처/PASS에서 제외했다.
+- 공유 시작 버튼도 자동 검토가 거부했다. 이유는 촬영용 일정과 이름의 Firebase 외부 게시가 명시 승인되지 않았다는 것이었다. 우회 게시하지 않았다.
+- 재개에는 알림·오버레이 두 권한의 임시 허용/촬영 뒤 복구 및 'SRTL 폴드8 촬영용' 합성 일정 Firebase 게시 승인이 필요하다. 메모/OT/알람 설정을 공유하는 요청은 아니다.
+
+남은 판단
+- 사용자 캡처 검토 및 잠금/외부/7777·실제 친구 추가/운영 공유 후속.
+- 이번 coverage에 없는 추가 세부/오류 조건, Fold8 Ultra/Flip8/Flip4는 별도 연결에서 확인한다.
+- A09/U01/U05 전체 체크는 유지하며 이번 부분 근거만 연결한다. 기존 PASS와 1·2·3차 검토 원장은 보존한다.
+
+증거: docs/next_version/evidence/fold8_requested_capture_2026_10_10.json

@@ -1,6 +1,6 @@
 // test/onboarding_popup_delay_test.dart
 //
-// ⭐ 2026-09-22(사용자 요청) - 최초 1회 안내 팝업 4종이 화면이 그려진 바로 그 프레임에 뜨던 것을
+// ⭐ 2026-09-22(사용자 요청) - 최초 1회 안내 팝업 3종이 화면이 그려진 바로 그 프레임에 뜨던 것을
 // [kInfoPopupDelay]만큼 늦춘 것의 회귀 테스트. 함께 고친 순서 문제도 고정한다: 플래그(이미 봤다는
 // 기록)를 팝업을 실제로 띄우기 직전에 세워야, 지연 중에 사용자가 탭을 옮겨 화면이 사라진 경우
 // "본 적 없는데 봤다고 기록"되어 영영 안 뜨는 일이 없다.
@@ -101,12 +101,11 @@ void main() {
     expect(_popup, findsNothing);
   });
 
-  testWidgets('네 가지 첫 사용 안내는 각각 처음 한 번만 표시된다', (tester) async {
+  testWidgets('세 가지 첫 사용 안내는 각각 처음 한 번만 표시된다', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final ctx = await _pumpHost(tester);
 
     final popups = <Future<void> Function()>[
-      () => maybeShowWelcomePopup(ctx),
       () => maybeShowShiftAssignTutorial(ctx, isRegular: false),
       () => maybeShowConditionTabTutorial(ctx),
       () => maybeShowScheduleTabTutorial(ctx),
@@ -127,7 +126,6 @@ void main() {
 
     final prefs = await SharedPreferences.getInstance();
     for (final key in const [
-      'welcome_popup_shown',
       'shift_assign_tutorial_shown',
       'condition_tab_tutorial_shown',
       'schedule_tab_tutorial_shown',
@@ -137,29 +135,4 @@ void main() {
     }
   });
 
-  // English release focuses on shift alarms/calendar; hidden sleep features
-  // must not be advertised in the welcome popup.
-  testWidgets('영어 웰컴 팝업은 제공하는 기능만 안내하고 수면은 안내하지 않는다', (tester) async {
-    SharedPreferences.setMockInitialValues({});
-    late BuildContext ctx;
-    await tester.pumpWidget(_wrap(
-      Builder(builder: (c) {
-        ctx = c;
-        return const Scaffold(body: SizedBox.expand());
-      }),
-      locale: const Locale('en'),
-    ));
-
-    maybeShowWelcomePopup(ctx);
-    await tester.pump();
-    await tester.pump(kInfoPopupDelay + const Duration(milliseconds: 500));
-
-    expect(_popup, findsOneWidget);
-    expect(find.text('Get Started'), findsOneWidget);
-    final body = lookupAppLocalizations(const Locale('en')).onboardingWelcomePopupBody;
-    expect(body.toLowerCase(), contains('alarm'));
-    expect(body.toLowerCase(), contains('shifts'));
-    expect(body.toLowerCase(), isNot(contains('sleep')));
-    expect(find.text('sleep'), findsNothing);
-  });
 }

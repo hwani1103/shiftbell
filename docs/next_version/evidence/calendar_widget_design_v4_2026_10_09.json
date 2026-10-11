@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-09",
+  "scope": "U01 three-week weekday height adjustment",
+  "previousEvidence": "calendar_widget_design_v3_2026_10_09.json",
+  "oneWeekLayoutUnchanged": true,
+  "oneWeekLayoutSha256": "5c51fe949933e94226106f9f6a73d0ecc6e7769cf2a9b25143e59450abfa42a0",
+  "threeWeek": {
+    "weekdayHeightDp": 23,
+    "weekdayFontDp": 13,
+    "eachWeekHeightReductionDp": 3,
+    "overallSizeUnchanged": true
+  },
+  "build": {
+    "status": "PASS",
+    "flavor": "dev",
+    "mode": "debug",
+    "apk": "artifacts/calendar_widget_design_v4/shiftbell-widget-dev-debug.apk",
+    "bytes": 215871261,
+    "sha256": "e034986e6c7c1549934cc339433979b07867f58400780ce0160ae3e7a3d29a42",
+    "applicationId": "com.hwani1103.shiftbell.dev",
+    "version": "1.0.23-dev",
+    "versionCode": 25,
+    "log": "artifacts/calendar_widget_design_v4/build.log"
+  },
+  "tests": "NOT_RUN: user requested build only",
+  "render": "NOT_RUN: user requested build only",
+  "install": "NOT_RUN: user installs",
+  "realLauncher": "NOT_RUN"
+}

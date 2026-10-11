@@ -1,0 +1,596 @@
+{
+  "date": "2026-10-11",
+  "scope": "User-authorized Fold8 layout/localization finish and five unfolded-calendar store raws; no calendar design edits or repeated Firebase/locked-alarm functional suite",
+  "status": "FOLD8_REQUESTED_UI_SCOPE_COMPLETE",
+  "device": {
+    "serial": "localhost:32023",
+    "model": "SM-F971N",
+    "sdk": 37,
+    "devPackageInitiallyPresent": false,
+    "deviceState": 0,
+    "fontScale": "1.08",
+    "screenOffTimeout": "300000",
+    "stayOn": "0",
+    "startedAtKst": "2026-10-11T07:26:43.5180617+09:00"
+  },
+  "apk": {
+    "local": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e",
+    "installed": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e",
+    "match": true,
+    "remote": "/data/app/~~ItxjxiIAFH_GbTX87AMh6Q==/com.hwani1103.shiftbell.dev-NWtymDwg0v7FargYa2jsHg==/base.apk",
+    "bytes": 215879659,
+    "build": "dev debug from mandatory -Build; no release; no hot reload for final verification"
+  },
+  "sourceChanges": {
+    "compared": 829,
+    "changed": [
+      {
+        "path": "lib\\screens\\work_hours_settings_screen.dart",
+        "before": "6df480ca3dd09ac6e210d77bf5bbcd7f2beb3c12ebc084605c60507fe2192432",
+        "after": "23c1b5f04416119c0eb1ab3818c2c483f2797e93615416bf79097725c3ef1782"
+      },
+      {
+        "path": "lib\\screens\\settings_tab.dart",
+        "before": "616a359bed091afcf4ce97dd396f27adfe6cb0a8e01123a6ec8083a52b2b3854",
+        "after": "cb943207fa563964a958fc97d23953491c76186ef91139aa5fd26e5bbfb69e28"
+      },
+      {
+        "path": "lib\\screens\\help_screen.dart",
+        "before": "7fff531e370451ba54f22cc72e4c9e67282257b7cfbdc430a84361e5b16d1fd3",
+        "after": "8a9a1d891e9d06300be653e30f19d0e21f9a445511a913f271bab908870fcf1e"
+      },
+      {
+        "path": "lib\\screens\\all_alarms_history_view.dart",
+        "before": "e0ca00483fc1c98151a00a8ae300b41dce26b5241dd1cf9126f309cb94b98b00",
+        "after": "60dee0228fe87f2bec64a4000492d8de3d15fe60c96b66a9b14d3ffd0fa15984"
+      },
+      {
+        "path": "lib\\l10n\\app_pt.arb",
+        "before": "86b87848496e06404aeaf8078e96c063ef5bcf0877cec63bb879c1c6e3f2ef28",
+        "after": "6e06df3ab77777b84103af5b6ef0c0ed9bcd8704625526719c8fb496b5b0e9f1"
+      },
+      {
+        "path": "lib\\l10n\\app_ko.arb",
+        "before": "f8c16d29be933d694bc7fa80fbde1c156699e84fdabf173d56f16fa2f901eba4",
+        "after": "64fe130e056074c095b0ebc4985c6d1e845f59185c2c60bed3ef7907895a81fa"
+      },
+      {
+        "path": "lib\\l10n\\app_hi.arb",
+        "before": "57d7760ff74d7a0013264b92d7bb66746645671018a0ad7fc4a75a2711823a66",
+        "after": "6de6053241a9213e797b46a4790fc4d8decd0f4e5093d3f04955a7e8d755b546"
+      },
+      {
+        "path": "lib\\l10n\\app_en.arb",
+        "before": "c297fc93568637c8500e5b9a97d009cbd04c4cc6bd74b22eaae9683af03e1cf8",
+        "after": "0a7fb39de75cd882723cf6e99166027b406ea98cc73fdf0b11f8fc37b6145ddd"
+      },
+      {
+        "path": "lib\\l10n\\app_de.arb",
+        "before": "c74cab7100933483f1a3fca79ba2498d4d0d4fe389262e1291facf39ca14cdfe",
+        "after": "59b32502fd68a992831839fc94f8e853a15a0548ae9e85d62ad71e4b32314a95"
+      },
+      {
+        "path": "lib\\constants\\ad_config.dart",
+        "before": "26699827edd5cd4dc92bc8d02ac6de9fe58fbd4a492244138f0d233defd8091e",
+        "after": "1cbaa3901d0be7d4412c3a3735e6eee1c8e13547582535c58520faa7d3910a3a"
+      }
+    ]
+  },
+  "ui": {
+    "reviewSummary": {
+      "time": "2026-10-11T00:12:55.468116+00:00",
+      "totalCaptures": 1036,
+      "statuses": {
+        "PASS": 884,
+        "EARLIER_HELP_SUPERSEDED_BY_FINAL_APK": 52,
+        "SUPERSEDED_BY_VERIFIED_LABEL_FIX": 51,
+        "INTERIM_HELP_TITLE_SUPERSEDED": 49
+      },
+      "pending": [],
+      "scope": "Pixel layout and localized presentation only; synthetic UI fixtures are not functional or locked-alarm PASS"
+    },
+    "helpTopicsByLanguagePosture": {
+      "ko_closed": 38,
+      "ko_open": 38,
+      "en_closed": 23,
+      "en_open": 23,
+      "de_closed": 23,
+      "de_open": 23,
+      "pt_closed": 23,
+      "pt_open": 23,
+      "hi_closed": 23,
+      "hi_open": 23
+    },
+    "helpTopicTotal": 260,
+    "finalHelpChangedAndLongTitleTopics": [
+      {
+        "code": "ko",
+        "posture": "closed",
+        "topics": [
+          1,
+          9,
+          20,
+          32
+        ],
+        "exit": 0,
+        "time": "2026-10-11T00:03:28.339019+00:00",
+        "fontScale": 1.08,
+        "evidenceMode": "Installed final APK",
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "ko",
+        "posture": "open",
+        "topics": [
+          1,
+          9,
+          20,
+          32
+        ],
+        "exit": 0,
+        "time": "2026-10-11T00:03:52.471606+00:00",
+        "fontScale": 1.08,
+        "evidenceMode": "Installed final APK",
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "en",
+        "posture": "closed",
+        "topics": [
+          1,
+          9,
+          17,
+          18
+        ],
+        "exit": 0,
+        "time": "2026-10-11T00:04:21.185355+00:00",
+        "fontScale": 1.08,
+        "evidenceMode": "Installed final APK",
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "en",
+        "posture": "open",
+        "topics": [
+          1,
+          9,
+          17,
+          18
+        ],
+        "exit": 0,
+        "time": "2026-10-11T00:04:44.986477+00:00",
+        "fontScale": 1.08,
+        "evidenceMode": "Installed final APK",
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "de",
+        "posture": "closed",
+        "topics": [
+          1,
+          9,
+          17,
+          18
+        ],
+        "exit": 0,
+        "time": "2026-10-11T00:05:13.675033+00:00",
+        "fontScale": 1.08,
+        "evidenceMode": "Installed final APK",
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "de",
+        "posture": "open",
+        "topics": [
+          1,
+          9,
+          17,
+          18
+        ],
+        "exit": 0,
+        "time": "2026-10-11T00:05:37.470185+00:00",
+        "fontScale": 1.08,
+        "evidenceMode": "Installed final APK",
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "pt",
+        "posture": "closed",
+        "topics": [
+          1,
+          9,
+          17,
+          18
+        ],
+        "exit": 0,
+        "time": "2026-10-11T00:06:06.795472+00:00",
+        "fontScale": 1.08,
+        "evidenceMode": "Installed final APK",
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "pt",
+        "posture": "open",
+        "topics": [
+          1,
+          9,
+          17,
+          18
+        ],
+        "exit": 0,
+        "time": "2026-10-11T00:06:30.896108+00:00",
+        "fontScale": 1.08,
+        "evidenceMode": "Installed final APK",
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "hi",
+        "posture": "closed",
+        "topics": [
+          1,
+          9,
+          17,
+          20
+        ],
+        "exit": 0,
+        "time": "2026-10-11T00:07:00.124068+00:00",
+        "fontScale": 1.08,
+        "evidenceMode": "Installed final APK",
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "hi",
+        "posture": "open",
+        "topics": [
+          1,
+          9,
+          17,
+          20
+        ],
+        "exit": 0,
+        "time": "2026-10-11T00:07:24.268618+00:00",
+        "fontScale": 1.08,
+        "evidenceMode": "Installed final APK",
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      }
+    ],
+    "finalOriginalFontLongLabels": [
+      {
+        "code": "ko",
+        "posture": "closed",
+        "exit": 0,
+        "time": "2026-10-11T00:08:18.939507+00:00",
+        "fontScale": 1.08,
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "de",
+        "posture": "closed",
+        "exit": 0,
+        "time": "2026-10-11T00:08:53.237925+00:00",
+        "fontScale": 1.08,
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      },
+      {
+        "code": "ko",
+        "posture": "open",
+        "exit": 0,
+        "time": "2026-10-11T00:09:24.641482+00:00",
+        "fontScale": 1.08,
+        "apkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e"
+      }
+    ],
+    "realNavigation": {
+      "started": "2026-10-11T00:10:56.591Z",
+      "captures": [
+        {
+          "label": "final_real_settings_closed",
+          "file": "final_real_settings_closed.png",
+          "sha256": "ffbf11632301140115b2f1fae23058b370307afb54d89b5580be226a4f9c3cdd",
+          "time": "2026-10-11T00:11:02.492Z"
+        },
+        {
+          "label": "final_real_settings_open",
+          "file": "final_real_settings_open.png",
+          "sha256": "59586160510266167e1e75932fb2f876e846bee5f9fa7e45660feaba714c0bee",
+          "time": "2026-10-11T00:11:04.445Z"
+        },
+        {
+          "label": "final_real_permissions_closed",
+          "file": "final_real_permissions_closed.png",
+          "sha256": "4309fe83da5e84dea646318c8ed468756cb06837c0158a9b8066b31d47592aa5",
+          "time": "2026-10-11T00:11:08.095Z"
+        },
+        {
+          "label": "final_real_settings_return",
+          "file": "final_real_settings_return.png",
+          "sha256": "d658af88b2393914a6084dd8d54d4cdc1c4ade2338aa1e0a5fe8fde9c36dd290",
+          "time": "2026-10-11T00:11:09.232Z"
+        }
+      ],
+      "permissionSnapshot": {
+        "notification": "granted",
+        "overlay": "granted",
+        "exactAlarm": "granted",
+        "fullScreen": "granted",
+        "alarmChannel": "granted",
+        "xiaomi": false,
+        "sdk": 37
+      },
+      "runtimeErrors": [],
+      "scope": "Actual settings navigation tap, physical fold and Flutter permission-panel/back only; no alarm-delivery or native-settings chain PASS",
+      "visualReview": {
+        "status": "PASS",
+        "reviewedAt": "2026-10-11T00:17:51.416195+00:00",
+        "scope": "Four actual tap/fold/permission-panel/back captures viewed; Korean shift names are intentionally retained user-entered long-name fixtures after switching app locale, not translated UI resources; scrolled permission content remains accessible."
+      }
+    },
+    "initialBroadAuditFontScale": 1.0,
+    "finalAuditFontScale": 1.08,
+    "languageBodyCheck": {
+      "en": {
+        "files": [
+          "en_closed_helpfix_help_bodies.txt",
+          "en_closed_help_bodies.txt",
+          "en_closed_scrollfix_help_bodies.txt",
+          "en_open_helpfix_help_bodies.txt",
+          "en_open_help_bodies.txt",
+          "en_closed_impact_privacy_body.txt",
+          "en_open_impact_privacy_body.txt",
+          "en_closed_helpfinal_help_bodies.txt",
+          "en_open_helpfinal_help_bodies.txt"
+        ],
+        "hangulHits": [],
+        "scope": "Captured actual localized help/privacy strings; Latin brand/technical names are allowed. Visual checks recorded separately.",
+        "finalInstalledApkHelpHangulHits": []
+      },
+      "de": {
+        "files": [
+          "de_closed_helpfix_help_bodies.txt",
+          "de_closed_help_bodies.txt",
+          "de_open_helpfix_help_bodies.txt",
+          "de_open_help_bodies.txt",
+          "de_closed_impact_privacy_body.txt",
+          "de_open_impact_privacy_body.txt",
+          "de_closed_helpfinal_help_bodies.txt",
+          "de_open_helpfinal_help_bodies.txt"
+        ],
+        "hangulHits": [],
+        "scope": "Captured actual localized help/privacy strings; Latin brand/technical names are allowed. Visual checks recorded separately.",
+        "finalInstalledApkHelpHangulHits": []
+      },
+      "pt": {
+        "files": [
+          "pt_closed_helpfix_help_bodies.txt",
+          "pt_closed_help_bodies.txt",
+          "pt_open_helpfix_help_bodies.txt",
+          "pt_open_help_bodies.txt",
+          "pt_closed_impact_privacy_body.txt",
+          "pt_open_impact_privacy_body.txt",
+          "pt_closed_helpfinal_help_bodies.txt",
+          "pt_open_helpfinal_help_bodies.txt"
+        ],
+        "hangulHits": [],
+        "scope": "Captured actual localized help/privacy strings; Latin brand/technical names are allowed. Visual checks recorded separately.",
+        "finalInstalledApkHelpHangulHits": []
+      },
+      "hi": {
+        "files": [
+          "hi_closed_helpfix_help_bodies.txt",
+          "hi_closed_help_bodies.txt",
+          "hi_open_helpfix_help_bodies.txt",
+          "hi_open_help_bodies.txt",
+          "hi_closed_impact_privacy_body.txt",
+          "hi_open_impact_privacy_body.txt",
+          "hi_closed_helpfinal_help_bodies.txt",
+          "hi_open_helpfinal_help_bodies.txt"
+        ],
+        "hangulHits": [],
+        "scope": "Captured actual localized help/privacy strings; Latin brand/technical names are allowed. Visual checks recorded separately.",
+        "finalInstalledApkHelpHangulHits": []
+      }
+    },
+    "scopeLimits": "Synthetic UI history is not an alarm delivery PASS. Samsung OS slow-charging Korean toast in one Hindi capture is outside app strings. KO SimpleLine existing English date/month header preserved under no-calendar-edit instruction."
+  },
+  "checks": {
+    "mandatoryCommand": "tools/check_critical_release.ps1 -Build",
+    "exit": 0,
+    "log": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\fold8_ui_store_followup_2026_10_11\\help_fix_critical_build.log",
+    "flutterSuiteCounts": [
+      38,
+      123,
+      99,
+      67,
+      11
+    ],
+    "flutterTestsPassed": 338,
+    "devDebugAndJsWebBuilt": true,
+    "releaseBuilt": false,
+    "targetedAnalyze": {
+      "exit": 1,
+      "infoCount": 84,
+      "errors": 0,
+      "warnings": 0,
+      "log": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\fold8_ui_store_followup_2026_10_11\\long_labels_analyze.log"
+    },
+    "buildWarnings": [
+      "Wasm dry-run incompatibilities; JS web build succeeded",
+      "CupertinoIcons font reference warning",
+      "Gradle deprecation notices"
+    ]
+  },
+  "store": {
+    "device": "SM-F971N / Fold8 SRTL",
+    "imageSet": "Screen 05 of five screens plus one promotional image per language",
+    "captures": [
+      {
+        "label": "05_fold8_unfolded_calendar_ko",
+        "file": "05_fold8_unfolded_calendar_ko.png",
+        "sha256": "0527626600bfde500585a1206fee122d8b2398b2702350a1f1d5662f3b43bcca",
+        "time": "2026-10-10T22:39:28.585Z",
+        "locale": "ko",
+        "theme": "minimal",
+        "kind": "store_raw",
+        "adHandling": "Test ad disposed in dev VM; slot height unchanged; AD_SLOT_DEBUG_TINT=false",
+        "destination": "C:\\Users\\Administrator\\Desktop\\PlayStore 등록정보 Folder\\Korean_ko-KR\\05_Fold8_unfolded_calendar_2026-10-11.png",
+        "pixels": [
+          2448,
+          1848
+        ],
+        "apkSha256": "7deda1007806edf1fda7461f0f4c32504af23aac99110a512dbeac24421edfbe",
+        "review": "Actual raw pixels visually reviewed; five localized short memos; no raster edits",
+        "themeStatus": "user specified"
+      },
+      {
+        "label": "05_fold8_unfolded_calendar_en",
+        "file": "05_fold8_unfolded_calendar_en.png",
+        "sha256": "3e16135b9b2429ba4dffb50514790b298dac9dadd694a19432821f1eaa9c9c12",
+        "time": "2026-10-10T22:39:43.060Z",
+        "locale": "en",
+        "theme": "periwinkle",
+        "kind": "store_raw",
+        "adHandling": "Test ad disposed in dev VM; slot height unchanged; AD_SLOT_DEBUG_TINT=false",
+        "destination": "C:\\Users\\Administrator\\Desktop\\PlayStore 등록정보 Folder\\English_en-US\\05_Fold8_unfolded_calendar_2026-10-11.png",
+        "pixels": [
+          2448,
+          1848
+        ],
+        "apkSha256": "7deda1007806edf1fda7461f0f4c32504af23aac99110a512dbeac24421edfbe",
+        "review": "Actual raw pixels visually reviewed; five localized short memos; no raster edits",
+        "themeStatus": "user specified"
+      },
+      {
+        "label": "05_fold8_unfolded_calendar_hi",
+        "file": "05_fold8_unfolded_calendar_hi.png",
+        "sha256": "0d012882a3da16111b6414bf6ee4e6fdb0618f48cb00d5854fcd7bf34c033b8a",
+        "time": "2026-10-10T23:48:46.904Z",
+        "locale": "hi",
+        "theme": "periwinkle",
+        "kind": "store_raw",
+        "adHandling": "Test ad disposed in dev VM; slot height unchanged; AD_SLOT_DEBUG_TINT=false",
+        "destination": "C:\\Users\\Administrator\\Desktop\\PlayStore 등록정보 Folder\\Hindi_hi-IN\\05_Fold8_unfolded_calendar_2026-10-11.png",
+        "pixels": [
+          2448,
+          1848
+        ],
+        "apkSha256": "3b6534da4357f7f4a345e0e20d4a76598d85ff5f7d00987c506f12f68c3e72bd",
+        "review": "Actual raw pixels visually reviewed; five localized short memos; no raster edits",
+        "themeStatus": "Periwinkle assumed; user preference pending"
+      },
+      {
+        "label": "05_fold8_unfolded_calendar_pt",
+        "file": "05_fold8_unfolded_calendar_pt.png",
+        "sha256": "76f38f8a4ef520578af05edc5b8f54cc3844d6a3731e45a43917f878d6889fdf",
+        "time": "2026-10-10T22:40:20.577Z",
+        "locale": "pt",
+        "theme": "periwinkle",
+        "kind": "store_raw",
+        "adHandling": "Test ad disposed in dev VM; slot height unchanged; AD_SLOT_DEBUG_TINT=false",
+        "destination": "C:\\Users\\Administrator\\Desktop\\PlayStore 등록정보 Folder\\Portuguese_Brazil_pt-BR\\05_Fold8_unfolded_calendar_2026-10-11.png",
+        "pixels": [
+          2448,
+          1848
+        ],
+        "apkSha256": "7deda1007806edf1fda7461f0f4c32504af23aac99110a512dbeac24421edfbe",
+        "review": "Actual raw pixels visually reviewed; five localized short memos; no raster edits",
+        "themeStatus": "Periwinkle assumed; user preference pending"
+      },
+      {
+        "label": "05_fold8_unfolded_calendar_de",
+        "file": "05_fold8_unfolded_calendar_de.png",
+        "sha256": "433a0282af37c8918381b96954b64722ef24d50622778d33c65db82956e7081d",
+        "time": "2026-10-10T22:40:41.306Z",
+        "locale": "de",
+        "theme": "periwinkle",
+        "kind": "store_raw",
+        "adHandling": "Test ad disposed in dev VM; slot height unchanged; AD_SLOT_DEBUG_TINT=false",
+        "destination": "C:\\Users\\Administrator\\Desktop\\PlayStore 등록정보 Folder\\German_de-DE\\05_Fold8_unfolded_calendar_2026-10-11.png",
+        "pixels": [
+          2448,
+          1848
+        ],
+        "apkSha256": "7deda1007806edf1fda7461f0f4c32504af23aac99110a512dbeac24421edfbe",
+        "review": "Actual raw pixels visually reviewed; five localized short memos; no raster edits",
+        "themeStatus": "Periwinkle assumed; user preference pending"
+      }
+    ],
+    "remaining": [
+      "S26 lock alarm",
+      "S26 all-teams roster",
+      "S26 main calendar (theme pending)",
+      "S26 OT + weekly-hours composite (ask user before capturing)",
+      "Main promo after screen originals"
+    ],
+    "calendarCodeChanged": false,
+    "osBars": "Original status/navigation/taskbar preserved",
+    "oldHindiCapture": "Preserved in repository before_memo_shortening; not exported"
+  },
+  "cleanup": {
+    "fixture": {
+      "time": "2026-10-11T00:12:27.577Z",
+      "databaseTablesEqual": true,
+      "preferencesEqual": true,
+      "scope": "Fresh dev installation only; native permission grants retained as authorized; file/device-setting cleanup follows"
+    },
+    "deviceAndSharedFiles": {
+      "time": "2026-10-11T00:14:08.047350+00:00",
+      "files": [
+        {
+          "path": "/sdcard/Download/ShiftBell/ShiftBell_Backup_dev_auto_261011_091057.json",
+          "owner": "u0_a321",
+          "currentAppOwner": "u0_a338",
+          "ownershipEvidence": "Current-session date/name plus dev-package/model or exact owned fixture content; shared-file uid differs from current package uid",
+          "sha256": "0c0df2846b271317a5e322a7fd81b72c8a2ab671aa0cd302af0d8fae041c70e4",
+          "archive": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\fold8_ui_store_followup_2026_10_11\\shared_file_archive\\ShiftBell_Backup_dev_auto_261011_091057.json",
+          "removed": true
+        },
+        {
+          "path": "/sdcard/Download/ShiftBell/log/ShiftBell_Diag_dev_261011_091222.txt",
+          "owner": "u0_a321",
+          "currentAppOwner": "u0_a338",
+          "ownershipEvidence": "Current-session date/name plus dev-package/model or exact owned fixture content; shared-file uid differs from current package uid",
+          "sha256": "6faad81ff29d847bc6231eee68289e2434b9e449f8c0fde21218aa9477aafa6e",
+          "archive": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\fold8_ui_store_followup_2026_10_11\\shared_file_archive\\ShiftBell_Diag_dev_261011_091222.txt",
+          "removed": true
+        }
+      ],
+      "settings": {
+        "font_scale": "1.08",
+        "stay_on_while_plugged_in": "0",
+        "screen_off_timeout": "300000"
+      },
+      "deviceState": "Committed state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\n----------------------\r\nBase state: DeviceState{identifier=3, name='OPENED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\nOverride state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}",
+      "appLocales": "Locales for com.hwani1103.shiftbell.dev for user 0 are []",
+      "verified": true,
+      "scope": "This fresh dev package only; test fixtures restored; authorized native grants and installed empty dev application retained; no files from other sessions/devices removed"
+    },
+    "osAlarmReadback": {
+      "pendingOrInflightPackageMatches": 0,
+      "evidence": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\fold8_ui_store_followup_2026_10_11\\cleanup_os_alarm_dump.txt",
+      "scope": "Readback after force-stop; package appears in historical guard/sleep removals, not current pending/inflight alarms. No alarm-delivery PASS."
+    },
+    "nativePermissions": {
+      "notification": "granted",
+      "overlay": "granted",
+      "exactAlarm": "granted",
+      "fullScreen": "granted",
+      "alarmChannel": "granted",
+      "xiaomi": false,
+      "sdk": 37
+    },
+    "scopeLimits": "Fresh dev package remains installed empty with authorized native grants. Previous Flip4 sessions cleanup UNCONFIRMED remains. Shared-file UID differed; exact current-session fixture/dev-package contents and dates verified before hash-archived exact-path removal.",
+    "toolingCorrections": [
+      "Final attach compiler service enabled before evaluation",
+      "Cleanup comparison deep-canonicalized; Android SQLite locale returned from en_US to baseline ko_KR before equality PASS",
+      "Android API37 package dump appId parsed; shared UID mismatch resolved using fixture/content ownership evidence"
+    ],
+    "diagnosticNote": "Archived diagnostic channelImportance=missing is not a channel functional PASS; separate native permissionSnapshot reported granted. No actual alarm was scheduled in this UI session."
+  },
+  "remaining": {
+    "Fold8Ultra": "2h; outstanding locale/posture branches plus current fixes/settings expansion impact",
+    "Flip8": "2h; missing branches/current fixes and mandatory cover revalidation",
+    "Flip4": "Main-screen full audit excluded by user; historical cover evidence and cleanup limitations preserved",
+    "store": "S26 four screens and promo pending; ask user immediately before OT/weekly capture",
+    "userVisualApproval": "Not implied by automated or agent visual review"
+  }
+}

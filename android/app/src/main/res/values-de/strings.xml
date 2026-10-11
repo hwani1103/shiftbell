@@ -4,8 +4,8 @@
     <string name="alarm_type_vibration_short">Vibration</string>
     <string name="alarm_type_silent_short">lautlos</string>
     <string name="snooze_collision_message">Um %1$s ist bereits ein anderer Wecker (%2$s) gestellt. Dieser Wecker wurde ohne Schlummerfunktion beendet.</string>
-    <string name="calendar_widget_description">Schichten und Notizen im Blick. Passe die Größe an, um drei Wochen oder einen ganzen Monat zu sehen.</string>
-    <string name="app_widget_calendar_label">ShiftBell Kalender</string>
+    <string name="calendar_widget_description">Schichten und Notizen für die letzte, diese und nächste Woche.</string>
+    <string name="app_widget_calendar_label">3-Wochen-Kalender</string>
     <string name="alarm_swipe_hint">Zum Stoppen hochwischen</string>
     <string name="alarm_snooze_label">5 Min. später</string>
     <string name="alarm_dismiss_label">Stoppen</string>
@@ -50,4 +50,13 @@
     <string name="snooze_superseded">Der Alarm wurde geändert. Dieser Schlummeralarm wurde nicht geplant.</string>
     <string name="snooze_failed_execution">Das Stoppen und Verschieben des Alarms konnte nicht abgeschlossen werden.</string>
     <string name="snooze_failure_title">Schlummeralarm prüfen</string>
+    <string name="alarm_snooze_title">Schlummern</string>
+    <string name="alarm_snooze_duration">In %1$d Min.</string>
+    <string name="in_app_alarm_open">Wecker klingelt. Steuerung öffnen</string>
+    <string name="in_app_alarm_collapse">Weckersteuerung einklappen</string>
+
+    <string name="app_widget_calendar_week_label">1-Wochen-Kalender</string>
+    <string name="calendar_widget_week_description">Schichten und bis zu drei Notizen pro Tag für diese Woche.</string>
+    <string name="widget_daytime">Tagsüber</string>
+    <string name="widget_nighttime">Nachts</string>
 </resources>

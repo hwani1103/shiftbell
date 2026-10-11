@@ -1,0 +1,83 @@
+{
+  "date": "2026-10-09",
+  "status": "PASS within stated scope",
+  "policy": "Initial 500ms; one extra 500ms only when current 7777 is absent and posting channel usable; recheck current ring and presentation guards",
+  "automatic": {
+    "result": "PASS",
+    "gate": "tools/check_critical_release.ps1 -Build",
+    "exit_code": 0,
+    "flutter_batches": [
+      38,
+      109,
+      99,
+      67,
+      11
+    ],
+    "flutter_total": 324,
+    "native_functional": "PASS (includes six new retry/race cases in G1RingRoundTest)",
+    "native_migration": "PASS",
+    "dev_debug_build": "PASS",
+    "web_build": "PASS",
+    "release_build": false,
+    "apk_sha256": "39df3e0b8943d918a54e8a9e54c7d2b1ba4301c462b5b18c797cbf302f741f2a",
+    "owned_source_unchanged": true
+  },
+  "device": {
+    "model": "SM-S948N",
+    "android": 16,
+    "api": 36,
+    "package": "com.hwani1103.shiftbell.dev",
+    "installed_sha256": "39df3e0b8943d918a54e8a9e54c7d2b1ba4301c462b5b18c797cbf302f741f2a",
+    "installed_hash_matches": true,
+    "cases": [
+      {
+        "id": "R1_allowed",
+        "result": "PASS",
+        "alarm_id": 9,
+        "round": 3,
+        "evidence": "notification=PRESENT at initial decision; actual system popup without overlay; real +5m action persisted snoozed row and 5-minute history; future trial canceled before re-ring"
+      },
+      {
+        "id": "R2_denied",
+        "result": "PASS",
+        "alarm_id": 10,
+        "round": 4,
+        "evidence": "actual POST_NOTIFICATIONS revoke; cold alarm receiver BLOCKED at initial decision, overlay without extra retry; real X dismissal, swiped history and no current ring"
+      }
+    ],
+    "ui": {
+      "permissions": "footer guide/link absent; Close visible and tapped",
+      "condition": "actual entry dialog, matching nav icon and copy fit; canceled",
+      "schedule": "already enabled at baseline; actual dialog invoked through VM preview without changing tab preference; icon/copy fit; canceled"
+    },
+    "restoration": {
+      "notification": "granted",
+      "overlay": "granted",
+      "exactAlarm": "granted",
+      "fullScreen": "granted",
+      "alarmChannel": "granted",
+      "original_17_tables_equal": true,
+      "active_trial_alarms": 0,
+      "trial_history_removed": true,
+      "schedule_tab_enabled": true,
+      "condition_tab_enabled": false,
+      "awake": true,
+      "powered": true,
+      "stayOn": true,
+      "keyguard_showing": false,
+      "debugger_detached": true
+    }
+  },
+  "calendar": {
+    "investigation_only": true,
+    "cause": "Calendar fixed-only filter excludes snoozed rows; same row is retained/rescheduled with type=snoozed",
+    "code_changed": false
+  },
+  "limits": [
+    "500-1000ms delayed notification and narrow race transitions verified by host time-controlled tests, not naturally induced on device",
+    "No new locked-device test, manufacturer Streaming, release build or deployment",
+    "Notification presence does not guarantee heads-up visibility; posts after retry or query failures may still overlap with overlay"
+  ],
+  "artifacts": "artifacts/notification_retry_2026_10_09/",
+  "source_hashes": "artifacts/notification_retry_2026_10_09/source_hashes.json"
+}

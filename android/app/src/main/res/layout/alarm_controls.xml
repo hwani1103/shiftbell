@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shared by the full-screen alarm, external overlay and in-app alarm card. -->
+<com.hwani1103.shiftbell.AlarmControlLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/buttonContainer" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+        <LinearLayout android:id="@+id/lockSnoozeRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center">
+<Button android:id="@+id/snoozeDecreaseButton" android:layout_width="64dp" android:layout_height="64dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="−" android:textSize="36sp"
+    android:includeFontPadding="false" android:gravity="center" android:stateListAnimator="@null" android:backgroundTint="@null"
+    android:textColor="#FFFFFF" android:background="@drawable/alarm_lock_control"
+    android:contentDescription="@string/alarm_snooze_decrease" />
+<FrameLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="88dp"
+    android:layout_marginHorizontal="12dp" android:background="@drawable/alarm_lock_snooze">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+        android:orientation="vertical" android:gravity="center" android:paddingHorizontal="14dp" android:paddingVertical="10dp"
+        android:importantForAccessibility="noHideDescendants">
+        <TextView android:id="@+id/lockSnoozeTitle" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+            android:gravity="center" android:text="@string/alarm_snooze_title" android:textSize="20sp"
+            android:textColor="#302746" android:textStyle="bold" android:maxLines="1"
+            android:autoSizeTextType="uniform" android:autoSizeMinTextSize="10sp" android:autoSizeMaxTextSize="20sp" android:autoSizeStepGranularity="1sp" />
+        <TextView android:id="@+id/snoozeValueText" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+            android:gravity="center" android:text="" android:textSize="24sp"
+            android:textColor="#302746" android:textStyle="bold" android:maxLines="1"
+            android:autoSizeTextType="uniform" android:autoSizeMinTextSize="10sp" android:autoSizeMaxTextSize="24sp" android:autoSizeStepGranularity="1sp" />
+    </LinearLayout>
+    <Button android:id="@+id/snoozeButton" android:layout_width="match_parent" android:layout_height="match_parent"
+        android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text=""
+        android:background="@drawable/alarm_lock_snooze_ripple" android:backgroundTint="@null" android:stateListAnimator="@null"
+        android:contentDescription="@string/alarm_snooze_label" />
+</FrameLayout><Button android:id="@+id/snoozeIncreaseButton" android:layout_width="64dp" android:layout_height="64dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="+" android:textSize="36sp"
+    android:includeFontPadding="false" android:gravity="center" android:stateListAnimator="@null" android:backgroundTint="@null"
+    android:textColor="#FFFFFF" android:background="@drawable/alarm_lock_control"
+    android:contentDescription="@string/alarm_snooze_increase" />        </LinearLayout>
+<Button android:id="@+id/dismissButton" android:layout_width="80dp" android:layout_height="80dp" android:layout_marginTop="24dp"
+    android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="×" android:textSize="46sp"
+    android:includeFontPadding="false" android:gravity="center" android:backgroundTint="@null"
+    android:textColor="#FFFFFF" android:background="@drawable/alarm_lock_control" android:stateListAnimator="@null"
+    android:contentDescription="@string/alarm_dismiss_label" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center"
+            android:layout_marginTop="8dp" android:textSize="16sp" android:textColor="#3B2E7A" android:text="@string/alarm_dismiss_label" android:importantForAccessibility="no" />
+    </com.hwani1103.shiftbell.AlarmControlLayout>

@@ -8,6 +8,7 @@ import 'day_offset_chip.dart';
 import 'tappable_number_picker.dart';
 import 'app_second_button.dart';
 import 'word_safe_spans.dart';
+import 'alarm_mode_label.dart';
 
 class AlarmTimePicker extends StatefulWidget {
   final String shiftName; // ⭐ 제목 왼쪽에 "{근무명} - 시간 선택"으로 표시
@@ -49,7 +50,8 @@ class AlarmTimePickerState extends State<AlarmTimePicker>
   // Read the current preference on entry/resume without changing the time value.
   Future<void> _refreshClockFormat() async {
     try {
-      final value = await kAlarmChannel.invokeMethod<bool>('getUse24HourFormat');
+      final value =
+          await kAlarmChannel.invokeMethod<bool>('getUse24HourFormat');
       if (mounted && value != null && value != _systemUse24) {
         setState(() => _systemUse24 = value);
       }
@@ -108,8 +110,9 @@ class AlarmTimePickerState extends State<AlarmTimePicker>
             SizedBox(height: 16.h),
 
             if (widget.description != null) ...[
-              Text.rich(TextSpan(children: wordSafeSpans(widget.description!,
-                  TextStyle(fontSize: 12.sp, height: 1.4)))),
+              Text.rich(TextSpan(
+                  children: wordSafeSpans(widget.description!,
+                      TextStyle(fontSize: 12.sp, height: 1.4)))),
               SizedBox(height: 12.h),
             ],
             // ⭐ 전날/당일/다음날 - 시간 선택 바로 아래, AM/PM+시간 선택 위
@@ -366,7 +369,7 @@ class AlarmTypeButton extends StatelessWidget {
             children: [
               Text(emoji, style: TextStyle(fontSize: 16.sp)),
               SizedBox(height: 2.h),
-              Text(
+              AlarmModeLabel(
                 label,
                 style: TextStyle(
                   fontSize: 10.sp,

@@ -21,34 +21,67 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> {
   bool _isNavigating = false;
   bool _checking = false;
   bool _warningOpen = false;
+  bool _allSatisfied = false;
+
+  void _permissionsChanged(PermissionSnapshot state) {
+    if (!mounted) return;
+    setState(() => _allSatisfied = state.allSatisfied);
+    if (!state.allSatisfied) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted &&
+          _allSatisfied &&
+          ModalRoute.of(context)?.isCurrent == true) {
+        _continue();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
       body: AdaptiveFormBody(
           child: SafeArea(
-              child: SingleChildScrollView(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(context.l10n.permissionGetStarted,
-                            style: Theme.of(context).textTheme.headlineMedium),
-                        const SizedBox(height: 12),
-                        Text(context.l10n.permissionIntro),
-                        const SizedBox(height: 24),
-                        const PermissionPanel(),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                                onPressed: _checking ? null : _continue,
-                                child: Text(context.l10n.commonNext))),
-                        SizedBox(
-                            width: double.infinity,
-                            child: TextButton(
-                                onPressed: _checking ? null : _skipPermissions,
-                                child: Text(context.l10n.commonNotNow))),
-                      ])))));
+              child: LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                      child: ConstrainedBox(
+                          constraints:
+                              BoxConstraints(minHeight: constraints.maxHeight),
+                          child: Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(24, 40, 24, 16),
+                              child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                              context.l10n.permissionGetStarted,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headlineMedium),
+                                          const SizedBox(height: 12),
+                                          Text(context.l10n.permissionIntro),
+                                          const SizedBox(height: 24),
+                                          PermissionPanel(
+                                              actionRequiredOnly: true,
+                                              continueAfterGrant: true,
+                                              onChanged: _permissionsChanged),
+                                        ]),
+                                    if (!_allSatisfied)
+                                      Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 24),
+                                          child: TextButton(
+                                              onPressed: _checking
+                                                  ? null
+                                                  : _skipPermissions,
+                                              child: Text(
+                                                  context.l10n.commonNotNow))),
+                                  ]))))))));
 
   Future<void> _continue() async {
     if (_checking || _isNavigating || _warningOpen) return;
@@ -57,7 +90,10 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('permissions_requested', true);
     if (!mounted) return;
-    setState(() => _checking = false);
+    setState(() {
+      _checking = false;
+      _allSatisfied = state.allSatisfied;
+    });
     if (state.allSatisfied) {
       await _navigateToOnboarding();
     } else {
@@ -136,7 +172,10 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> {
           ),
         ],
       ),
-    ).whenComplete(() => _warningOpen = false);
+    ).whenComplete(() {
+      _warningOpen = false;
+      if (mounted && _allSatisfied) _continue();
+    });
   }
 
   // ⭐ 2026-09-01 - "백업 복구했는데 온보딩 어디에도 그 화면이 안 나온다" 버그

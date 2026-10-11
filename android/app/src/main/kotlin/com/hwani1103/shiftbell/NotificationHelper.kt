@@ -317,7 +317,9 @@ object NotificationHelper {
             .setCategory(if (coverVisible) NotificationCompat.CATEGORY_STATUS else NotificationCompat.CATEGORY_CALL)
             // Keep alarm classification stable. This ONE_SHOT capability is cancelled on
             // presentation and never recreated by an update; the independent body tap remains usable.
-            .apply { state.fullScreenToken?.let { setFullScreenIntent(it, !coverVisible) } }
+            // Samsung's cover UI treats even a cancelled FSI token as an alarm banner.
+            // The cover Activity already owns the controls; retain only the independent body tap.
+            .apply { if (!coverVisible) state.fullScreenToken?.let { setFullScreenIntent(it, true) } }
             .setContentIntent(screenPendingIntent)
             // 알림을 치우는 것도 "알람 확인"(끄기)으로 취급 - 기존 7777과 같은 규칙
             .setDeleteIntent(dismissPendingIntent)

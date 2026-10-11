@@ -4,6 +4,7 @@ import 'english_calendar_label.dart';
 import '../models/calendar_theme.dart';
 import 'fold_calendar_text_scale.dart';
 import 'complete_cell_memo_text.dart';
+import '../l10n/l10n_extensions.dart';
 
 /// Fold inner cells: keep typography responsive without stacking every
 /// field vertically. Cover screens never enter this renderer.
@@ -42,6 +43,7 @@ class WideCalendarCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final wrapAnnotations = usesWrappedAnnotations(media.size);
+    final korean = context.usesKoreanFeatures;
     final scaler = media.textScaler.clamp(maxScaleFactor: 1.3);
     final shiftScaler = calendarShiftTextScaler(theme, scaler);
     final colors = Theme.of(context).colorScheme;
@@ -87,23 +89,30 @@ class WideCalendarCell extends StatelessWidget {
             bool fixed = false,
             int maxLines = 1}) =>
         key == const ValueKey('shift-badge-text')
-        ? EnglishCalendarLabel(value, style: TextStyle(fontSize: size, height: 1.15, color: color, fontWeight: weight), textScaler: shiftScaler, textKey: key)
-        : Text(value,
-            key: key,
-            maxLines: maxLines,
-            overflow: TextOverflow.ellipsis,
-            textAlign: align,
-            textScaler: fixed
-                ? TextScaler.noScaling
-                : key == const ValueKey('shift-badge-text')
-                    ? shiftScaler
-                    : scaler,
-            style: TextStyle(
-                fontSize: size,
-                height: 1.15,
-                color: color,
-                fontWeight: weight,
-                leadingDistribution: TextLeadingDistribution.even));
+            ? EnglishCalendarLabel(value,
+                style: TextStyle(
+                    fontSize: size,
+                    height: 1.15,
+                    color: color,
+                    fontWeight: weight),
+                textScaler: shiftScaler,
+                textKey: key)
+            : Text(value,
+                key: key,
+                maxLines: maxLines,
+                overflow: TextOverflow.ellipsis,
+                textAlign: align,
+                textScaler: fixed
+                    ? TextScaler.noScaling
+                    : key == const ValueKey('shift-badge-text')
+                        ? shiftScaler
+                        : scaler,
+                style: TextStyle(
+                    fontSize: size,
+                    height: 1.15,
+                    color: color,
+                    fontWeight: weight,
+                    leadingDistribution: TextLeadingDistribution.even));
 
     return MediaQuery(
       data: media.copyWith(textScaler: scaler),
@@ -173,8 +182,12 @@ class WideCalendarCell extends StatelessWidget {
                 .join('\n');
           }
         }
-        var shiftSize = 13.5;
-        var dateSize = 14.0;
+        final mainTheme = theme == CalendarThemeId.mainWhite || dark;
+        final trimBand =
+            (mainTheme || plain || card || (korean && (pill || initial)));
+        final bandScale = trimBand ? .96 : 1.0;
+        var shiftSize = 13.5 * bandScale;
+        var dateSize = !korean && (plain || card) ? 15.0 : 14.0;
         var memoThreeSize = 8.4;
         // A height-only fit handles unusually short windows. Never shrink a
         // memo because its text is long: the right column shows complete glyphs.
@@ -182,7 +195,7 @@ class WideCalendarCell extends StatelessWidget {
         double headerHeight() => diary
             ? math.max(lineHeight(shiftSize, shift: true) + 3,
                 lineHeight(dateSize, fixed: wrapAnnotations) + 2)
-            : lineHeight(shiftSize, shift: true) + 3;
+            : lineHeight(shiftSize, shift: true) + 3 * bandScale;
         double requiredHeight() =>
             topInset +
             headerHeight() +
@@ -201,25 +214,25 @@ class WideCalendarCell extends StatelessWidget {
             memoThreeSize *= .97;
           }
         }
+        // Use the same compact band in these Korean themes, even when their
+        // surrounding calendar rows have different heights.
+        if ((mainTheme || plain || card || (korean && pill))) {
+          final targetBand = math.min(18.0, headerHeight());
+          final targetLine = math.max(1.0, targetBand - 3 * bandScale);
+          shiftSize *= targetLine / lineHeight(shiftSize, shift: true);
+        }
         final bandHeight = headerHeight();
-        final bodyHeight = math.max(1.0, height - topInset - bandHeight - 4);
+        final bodyInset = .5;
+        final bodyHeight =
+            math.max(1.0, height - topInset - bandHeight - 2 * bodyInset);
         final visibleMemos = memos.take(3).toList();
-        final count = visibleMemos.length;
-        var memoSize = wrapAnnotations && count <= 2
-            ? 10.5
-            : count == 1
-                ? 11.5
-                : count == 2
-                    ? 10.5
-                    : memoThreeSize;
+        var memoSize = korean ? 9.45 : 10.5;
         // On short wide cells the shift band may need to shrink. Memos must
         // never become more prominent than the shift name in that case.
-        memoSize = math.min(memoSize, shiftSize);
+        if (korean) memoSize = math.min(memoSize, shiftSize);
         for (var i = 0;
             i < 30 &&
-                lineHeight(memoSize, fixed: wrapAnnotations) *
-                        math.max(1, count) >
-                    bodyHeight;
+                lineHeight(memoSize, fixed: wrapAnnotations) * 3 > bodyHeight;
             i++) {
           memoSize *= .97;
         }
@@ -304,7 +317,8 @@ class WideCalendarCell extends StatelessWidget {
             width: underline ? dateDiameter : null,
             height: underline ? dateDiameter : null,
             alignment: underline ? Alignment.center : null,
-            padding: EdgeInsets.symmetric(horizontal: underline ? 0 : 3, vertical: 1),
+            padding: EdgeInsets.symmetric(
+                horizontal: underline ? 0 : 3, vertical: 1),
             decoration: isToday && !initial
                 ? BoxDecoration(
                     color: solidToday ? todayColor : null,
@@ -313,7 +327,8 @@ class WideCalendarCell extends StatelessWidget {
             foregroundDecoration: isToday && !initial
                 ? BoxDecoration(
                     shape: underline ? BoxShape.circle : BoxShape.rectangle,
-                    borderRadius: underline ? null : BorderRadius.circular(bold ? 2 : 20),
+                    borderRadius:
+                        underline ? null : BorderRadius.circular(bold ? 2 : 20),
                     border: underline
                         ? Border.all(color: todayColor, width: 1.4)
                         : solidToday
@@ -384,15 +399,16 @@ class WideCalendarCell extends StatelessWidget {
               band,
             Expanded(
                 child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
+              padding: EdgeInsets.symmetric(vertical: bodyInset),
               child: Row(children: [
                 Expanded(
-                    flex: 4,
+                    flex: korean ? 4 : 3,
                     child: diary ? Center(child: annotationLabel) : dateColumn),
                 Expanded(
-                    flex: 6,
+                    flex: korean ? 6 : 7,
                     child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: underline ? 5 : 3),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: underline ? 5 : 3),
                         child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: visibleMemos
@@ -414,13 +430,15 @@ class WideCalendarCell extends StatelessWidget {
                                                   color: muted,
                                                   fontWeight: FontWeight.w600,
                                                   leadingDistribution:
-                                                      TextLeadingDistribution.even),
+                                                      TextLeadingDistribution
+                                                          .even),
                                               textScaler: wrapAnnotations
                                                   ? TextScaler.noScaling
                                                   : scaler,
-                                              textAlign: diary || bold || editorial
-                                                  ? TextAlign.left
-                                                  : TextAlign.center)),
+                                              textAlign:
+                                                  diary || bold || editorial
+                                                      ? TextAlign.left
+                                                      : TextAlign.center)),
                                     )))
                                 .toList()))),
               ]),

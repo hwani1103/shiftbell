@@ -1,10 +1,93 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shiftbell/models/calendar_theme.dart';
 import 'package:shiftbell/widgets/wide_calendar_cell.dart';
 import 'package:shiftbell/widgets/complete_cell_memo_text.dart';
 
 void main() {
+  testWidgets(
+      'Korean wide memo font stays constant for one, two and three lines',
+      (tester) async {
+    for (final theme in kAllCalendarThemeIds) {
+      double? size;
+      for (final count in [1, 2, 3]) {
+        await tester.pumpWidget(MaterialApp(
+            locale: const Locale('ko'),
+            supportedLocales: const [Locale('ko')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: MediaQuery(
+                data: const MediaQueryData(size: Size(933, 704)),
+                child: Center(
+                    child: SizedBox(
+                        width: 131,
+                        height: 57,
+                        child: WideCalendarCell(
+                            theme: theme,
+                            day: 9,
+                            shift: '야간지원근무',
+                            shiftColor: Colors.blue,
+                            shiftTextColor: Colors.white,
+                            memos: List.filled(count, '병원 진료 예약과 가족 저녁 모임'),
+                            isToday: false,
+                            isOutside: false,
+                            isRed: true,
+                            annotation: '한글날',
+                            isHoliday: true))))));
+        await tester.pump();
+        expect(tester.takeException(), isNull, reason: '$theme/$count');
+        final labels = tester.widgetList<CompleteCellMemoText>(
+            find.byType(CompleteCellMemoText));
+        size ??= labels.first.style.fontSize;
+        expect(labels, hasLength(count));
+        for (final label in labels) {
+          expect(label.style.fontSize, size, reason: '$theme/$count');
+        }
+      }
+    }
+  });
+
+  testWidgets(
+      'Global wide memo font stays constant for one, two and three lines',
+      (tester) async {
+    for (final theme in kAllCalendarThemeIds) {
+      double? size;
+      for (final count in [1, 2, 3]) {
+        await tester.pumpWidget(MaterialApp(
+            locale: const Locale('en'),
+            supportedLocales: const [Locale('en')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: MediaQuery(
+                data: const MediaQueryData(size: Size(933, 704)),
+                child: Center(
+                    child: SizedBox(
+                        width: 131,
+                        height: 57,
+                        child: WideCalendarCell(
+                            theme: theme,
+                            day: 9,
+                            shift: '야간지원근무',
+                            shiftColor: Colors.blue,
+                            shiftTextColor: Colors.white,
+                            memos: List.filled(count, '병원 진료 예약과 가족 저녁 모임'),
+                            isToday: false,
+                            isOutside: false,
+                            isRed: true,
+                            annotation: null,
+                            isHoliday: false))))));
+        await tester.pump();
+        expect(tester.takeException(), isNull, reason: '$theme/$count');
+        final labels = tester.widgetList<CompleteCellMemoText>(
+            find.byType(CompleteCellMemoText));
+        size ??= labels.first.style.fontSize;
+        expect(labels, hasLength(count));
+        for (final label in labels) {
+          expect(label.style.fontSize, size, reason: '$theme/$count');
+        }
+      }
+    }
+  });
+
   test('Fold inner windows use split cells; covers retain original renderers',
       () {
     expect(WideCalendarCell.appliesTo(const Size(932.57, 704)), isTrue);
@@ -30,28 +113,33 @@ void main() {
       for (final scale in [1.0, 1.08, 1.3, 1.6, 2.0]) {
         for (final count in [1, 2, 3]) {
           await tester.pumpWidget(MaterialApp(
+              locale: const Locale('ko'),
+              supportedLocales: const [Locale('ko')],
+              localizationsDelegates: GlobalMaterialLocalizations.delegates,
               home: Scaffold(
                   body: MediaQuery(
-            data: MediaQueryData(textScaler: TextScaler.linear(scale)),
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                  width: 130,
-                  height: 57,
-                  child: WideCalendarCell(
-                      theme: theme,
-                      day: 29,
-                      shift: '야간근무추가',
-                      shiftColor: Colors.indigo,
-                      shiftTextColor: Colors.white,
-                      memos: ['첫번째메모가매우긴경우에도', '둘째', '셋째'].take(count).toList(),
-                      isToday: true,
-                      isOutside: false,
-                      isRed: true,
-                      annotation: '대체공휴일',
-                      isHoliday: true)),
-            ),
-          ))));
+                data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: SizedBox(
+                      width: 130,
+                      height: 57,
+                      child: WideCalendarCell(
+                          theme: theme,
+                          day: 29,
+                          shift: '야간근무추가',
+                          shiftColor: Colors.indigo,
+                          shiftTextColor: Colors.white,
+                          memos: ['첫번째메모가매우긴경우에도', '둘째', '셋째']
+                              .take(count)
+                              .toList(),
+                          isToday: true,
+                          isOutside: false,
+                          isRed: true,
+                          annotation: '대체공휴일',
+                          isHoliday: true)),
+                ),
+              ))));
           await tester.pump();
           expect(tester.takeException(), isNull,
               reason: '$theme scale=$scale count=$count');
@@ -64,7 +152,9 @@ void main() {
             final marker = find.byKey(const ValueKey('wide-date-label'));
             final rect = tester.getRect(marker);
             expect(rect.width, closeTo(rect.height, .01));
-            final decoration = tester.widget<Container>(marker).foregroundDecoration! as BoxDecoration;
+            final decoration = tester
+                .widget<Container>(marker)
+                .foregroundDecoration! as BoxDecoration;
             expect(decoration.shape, BoxShape.circle);
             expect((decoration.border! as Border).isUniform, isTrue);
             expect(dateRect.center.dx, closeTo(rect.center.dx, .01));
@@ -72,10 +162,10 @@ void main() {
           }
           expect(dateRect.overlaps(annotationRect), isFalse);
           expect(dateRect.right, lessThanOrEqualTo(52));
-          final memo = find.byWidgetPredicate((w) =>
-              w is CompleteCellMemoText && w.text == '첫번째메모가매우긴경우에도');
-          final renderedMemo = find.descendant(
-              of: memo, matching: find.byType(Text));
+          final memo = find.byWidgetPredicate(
+              (w) => w is CompleteCellMemoText && w.text == '첫번째메모가매우긴경우에도');
+          final renderedMemo =
+              find.descendant(of: memo, matching: find.byType(Text));
           expect(tester.getRect(memo).left, greaterThanOrEqualTo(52));
           expect(tester.getRect(memo).bottom, lessThanOrEqualTo(57));
           final shift = find.byKey(const ValueKey('shift-badge-text'));
@@ -95,7 +185,8 @@ void main() {
             expect(corner.width, corner.height);
           }
           if (theme == CalendarThemeId.diary) {
-            expect(tester.widget<Text>(renderedMemo).data, isNot(startsWith('· ')));
+            expect(tester.widget<Text>(renderedMemo).data,
+                isNot(startsWith('· ')));
             final decoration =
                 tester.widget<Container>(band).decoration! as BoxDecoration;
             expect(decoration.borderRadius,

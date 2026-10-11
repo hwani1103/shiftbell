@@ -1,3 +1,4 @@
+import '../widgets/permission_warning_banner.dart';
 import '../utils/alarm_clock_label.dart';
 import 'package:intl/intl.dart';
 import '../widgets/adaptive_layout.dart';
@@ -116,19 +117,29 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
       // 슬롯처럼 보였다는 피드백의 원인).
       body: SizedBox.expand(
         child: _WaveGradientBackground(
-          child: nextAlarmAsync.when(
-            loading: () => const SizedBox.shrink(), // ⭐ 로딩 인디케이터 제거
-            error: (error, stack) => _buildEmptyState(),
-            data: (nextAlarm) {
-              if (nextAlarm == null) {
-                return _buildEmptyState();
-              }
-              return _AlarmDisplayWidget(
-                alarm: nextAlarm,
-                onDismiss: () => _dismissAlarm(nextAlarm.id!, nextAlarm.date),
-                onShowAllAlarms: () => _showAllAlarmsSheet(context),
-              );
-            },
+          child: SafeArea(
+            child: Column(
+              children: [
+                const PermissionWarningBanner(),
+                Expanded(
+                  child: nextAlarmAsync.when(
+                    loading: () => const SizedBox.shrink(), // ⭐ 로딩 인디케이터 제거
+                    error: (error, stack) => _buildEmptyState(),
+                    data: (nextAlarm) {
+                      if (nextAlarm == null) {
+                        return _buildEmptyState();
+                      }
+                      return _AlarmDisplayWidget(
+                        alarm: nextAlarm,
+                        onDismiss: () =>
+                            _dismissAlarm(nextAlarm.id!, nextAlarm.date),
+                        onShowAllAlarms: () => _showAllAlarmsSheet(context),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -140,41 +151,44 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
 
     return SafeArea(
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 120.w,
-              height: 120.w,
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant,
-                shape: BoxShape.circle,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 120.w,
+                height: 120.w,
+                decoration: BoxDecoration(
+                  color: colorScheme.surfaceVariant,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.alarm_off_rounded,
+                  size: 60.sp,
+                  color: colorScheme.outline,
+                ),
               ),
-              child: Icon(
-                Icons.alarm_off_rounded,
-                size: 60.sp,
-                color: colorScheme.outline,
+              SizedBox(height: 24.h),
+              Text(
+                context.l10n.alarmNoneUpcoming,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-            SizedBox(height: 24.h),
-            Text(
-              context.l10n.alarmNoneUpcoming,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w500,
-                color: colorScheme.onSurfaceVariant,
+              SizedBox(height: 8.h),
+              Text(
+                context.l10n.alarmEmptyStateHint,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              context.l10n.alarmEmptyStateHint,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -320,8 +334,10 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
     // 시각적 변화(점 구분자)가 새로 생기는 회귀였음. 순수 숫자 M/d 표기는 두
     // 언어 다 같은 순서(월/일)라 로케일 분기 없이 고정 "8/15" 형식으로 통일함
     // (work_hours_settings_provider.dart의 periodRangeShort와 동일한 판단).
-    final dateStr =
-        context.usesKoreanFeatures ? '${date.month}/${date.day} (${weekdayLabel(context, weekdayIndexOf(date))})' : DateFormat.MMMEd(Localizations.localeOf(context).toString()).format(date);
+    final dateStr = context.usesKoreanFeatures
+        ? '${date.month}/${date.day} (${weekdayLabel(context, weekdayIndexOf(date))})'
+        : DateFormat.MMMEd(Localizations.localeOf(context).toString())
+            .format(date);
     final timeStr =
         '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
 
@@ -345,9 +361,11 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
           Container(
             width: 75.w,
             child: Text(
-              [dateStr,
+              [
+                dateStr,
                 if (alarm.type == 'snoozed') context.l10n.alarmSnoozedLabel,
-                if (alarmClockLabel(context, date) case final String label) label,
+                if (alarmClockLabel(context, date) case final String label)
+                  label,
               ].join('\n'),
               style: TextStyle(
                 fontSize: 13.sp,
@@ -380,64 +398,71 @@ class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
               spacing: 8.w,
               runSpacing: 6.h,
               children: [
-          // 근무 타입
-          // ⭐ 2026-09-23 (1.0.24 B) - 커스텀 알람은 근무명이 없으므로 "커스텀 알람"으로 표시
-          if (alarm.shiftType != null)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: isNext
-                    ? colorScheme.primary.withOpacity(0.2)
-                    : colorScheme.surfaceVariant,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Text(
-                alarm.shiftType ?? context.l10n.alarmDefaultLabel,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
-                  color: isNext
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-
-          // 알람 타입 표시 (소리/진동/무음)
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-            decoration: BoxDecoration(
-              color: isNext ? colorScheme.primary : colorScheme.outline,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  alarm.alarmTypeId == 1
-                      ? Icons.volume_up
-                      : alarm.alarmTypeId == 2
-                          ? Icons.vibration
-                          : Icons.volume_off,
-                  size: 14.sp,
-                  color: isNext ? colorScheme.surface : colorScheme.onSurface,
-                ),
-                SizedBox(width: 5.w),
-                Flexible(child: Text(
-                  alarm.alarmTypeId == 1
-                      ? context.l10n.alarmSoundShort
-                      : alarm.alarmTypeId == 2
-                          ? context.l10n.alarmVibration
-                          : context.l10n.alarmSilent,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.bold,
-                    color: isNext ? colorScheme.surface : colorScheme.onSurface,
+                // 근무 타입
+                // ⭐ 2026-09-23 (1.0.24 B) - 커스텀 알람은 근무명이 없으므로 "커스텀 알람"으로 표시
+                if (alarm.shiftType != null)
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: isNext
+                          ? colorScheme.primary.withOpacity(0.2)
+                          : colorScheme.surfaceVariant,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      alarm.shiftType ?? context.l10n.alarmDefaultLabel,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: isNext
+                            ? colorScheme.primary
+                            : colorScheme.onSurfaceVariant,
+                      ),
+                    ),
                   ),
-                )),
-              ],
-            ),
-          ),
+
+                // 알람 타입 표시 (소리/진동/무음)
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                  decoration: BoxDecoration(
+                    color: isNext ? colorScheme.primary : colorScheme.outline,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        alarm.alarmTypeId == 1
+                            ? Icons.volume_up
+                            : alarm.alarmTypeId == 2
+                                ? Icons.vibration
+                                : Icons.volume_off,
+                        size: 14.sp,
+                        color: isNext
+                            ? colorScheme.surface
+                            : colorScheme.onSurface,
+                      ),
+                      SizedBox(width: 5.w),
+                      Flexible(
+                          child: Text(
+                        alarm.alarmTypeId == 1
+                            ? context.l10n.alarmSoundShort
+                            : alarm.alarmTypeId == 2
+                                ? context.l10n.alarmVibration
+                                : context.l10n.alarmSilent,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                          color: isNext
+                              ? colorScheme.surface
+                              : colorScheme.onSurface,
+                        ),
+                      )),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -580,7 +605,10 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
       return context.l10n.commonTomorrow;
     } else {
       // ⭐ 위 _buildAlarmListItem과 동일한 이유로 고정 숫자 M/d 형식 사용.
-      return context.usesKoreanFeatures ? '${alarmDate.month}/${alarmDate.day} (${weekdayLabel(context, weekdayIndexOf(alarmDate))})' : DateFormat.MMMEd(Localizations.localeOf(context).toString()).format(alarmDate);
+      return context.usesKoreanFeatures
+          ? '${alarmDate.month}/${alarmDate.day} (${weekdayLabel(context, weekdayIndexOf(alarmDate))})'
+          : DateFormat.MMMEd(Localizations.localeOf(context).toString())
+              .format(alarmDate);
     }
   }
 
@@ -602,8 +630,10 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
       if (alarm.type == 'snoozed') context.l10n.alarmSnoozedLabel,
       if (alarmClockLabel(context, alarm.date!) case final String label) label,
     ].join(' · ');
-    final dateLabel = [_getDateLabel(context, alarm.date!),
-      if (statusLabel.isNotEmpty) statusLabel].join('\n');
+    final dateLabel = [
+      _getDateLabel(context, alarm.date!),
+      if (statusLabel.isNotEmpty) statusLabel
+    ].join('\n');
 
     // ⭐ 2026-08-25 4차 수정 - (1) 링 색은 "임박" 여부와 무관하게 항상
     // kAppRingAccent 고정(전엔 임박 시 tertiary(주황)로 바뀌게 했는데, 이건
@@ -658,9 +688,7 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                             ? math.max(0, viewport.maxHeight - 60.h)
                             : 0),
                     child: AdaptiveHeroLayout(
-                      splitIndex: (alarm.shiftType != null)
-                          ? 6
-                          : 5,
+                      splitIndex: (alarm.shiftType != null) ? 6 : 5,
                       children: [
                         Row(
                           children: [
@@ -729,7 +757,8 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                                   borderRadius:
                                                       BorderRadius.circular(
                                                           20.r)),
-                                              child: Text(dateLabel, textAlign: TextAlign.center,
+                                              child: Text(dateLabel,
+                                                  textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                       fontSize: 12.sp,
                                                       color:
@@ -891,7 +920,8 @@ class _AlarmDisplayWidgetState extends ConsumerState<_AlarmDisplayWidget> {
                                 const Icon(Icons.list_rounded, size: 18),
                                 SizedBox(width: 7.w),
                                 Flexible(
-                                  child: Text(context.l10n.alarmViewAllRegistered,
+                                  child: Text(
+                                      context.l10n.alarmViewAllRegistered,
                                       textAlign: TextAlign.center),
                                 ),
                               ],

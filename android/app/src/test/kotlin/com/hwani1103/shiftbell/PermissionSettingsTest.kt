@@ -20,6 +20,36 @@ import org.robolectric.shadows.ShadowSettings
 class PermissionSettingsTest {
     private fun activity() = Robolectric.buildActivity(Activity::class.java).setup().get()
 
+    @Test @Config(sdk = [33, 34]) fun `notification cancellation completes once and releases request guard`() {
+        val a = activity()
+        val request = NotificationPermissionRequest()
+        val completed = mutableListOf<Boolean>()
+        request.launch(a) { completed.add(it) }
+        assertTrue(completed.isEmpty())
+        request.launch(a) { completed.add(it) }
+        assertEquals(listOf(false), completed) // No second permission prompt.
+        assertFalse(request.onResult(9081)) // Do not consume other plugin results.
+        // MainActivity forwards this code regardless of empty/denied/granted arrays.
+        assertTrue(request.onResult(NotificationPermissionRequest.REQUEST_CODE))
+        assertEquals(listOf(false, true), completed)
+        request.onResult(NotificationPermissionRequest.REQUEST_CODE)
+        assertEquals(2, completed.size)
+        request.launch(a) { completed.add(it) }
+        assertEquals(2, completed.size)
+        request.dispose()
+        request.dispose()
+        assertEquals(listOf(false, true, false), completed)
+    }
+
+    @Test @Config(sdk = [32]) fun `older Android notification request has no runtime prompt`() {
+        val completed = mutableListOf<Boolean>()
+        val request = NotificationPermissionRequest()
+        request.launch(activity()) { completed.add(it) }
+        assertEquals(listOf(true), completed)
+        request.dispose()
+        assertEquals(1, completed.size)
+    }
+
     // Exercise the production observer against each Android framework version.
     // These are host regressions, not evidence of a physical device permission flow.
     @Test @Config(sdk = [31, 32, 33]) fun `exact alarm denial and recovery are reread without granting on settings launch`() {

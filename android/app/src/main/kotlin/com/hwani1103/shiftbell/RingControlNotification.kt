@@ -10,6 +10,8 @@ import androidx.core.app.NotificationCompat
 
 /** Immutable v2 commands: extras alone must never retarget a previously displayed button. */
 object RingControlNotification {
+    // A non-breaking space blanks only the collapsed snooze-description row.
+    const val COLLAPSED_BLANK = "\u00A0"
     const val VERSION = "ringControlVersion"
     const val MINUTES = "selectedMinutes"
     const val REVISION = "selectionRevision"
@@ -72,7 +74,7 @@ object RingControlNotification {
         builder.addExtras(Bundle().apply {
             putInt(VERSION, 2); putInt(MINUTES, selection.minutes); putLong(REVISION, selection.revision)
             putString(SURFACE, if (cover) "cover" else "standard"); putLong(INITIAL_WHEN, initialWhen)
-        }).setContentText(content).setSubText(context.getString(R.string.notif_ringing_content))
+        }).setContentText(COLLAPSED_BLANK).setSubText(context.getString(R.string.notif_ringing_content))
             .setStyle(NotificationCompat.DecoratedCustomViewStyle()).setCustomBigContentView(views)
             .addAction(android.R.drawable.ic_lock_idle_alarm, SnoozeText.compact(selection.minutes), pending(context, selection))
             .addAction(android.R.drawable.ic_delete, context.getString(R.string.notif_action_dismiss), dismiss)

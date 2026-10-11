@@ -306,7 +306,28 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
                               SizedBox(
                                 width: 76.w,
                                 child: Center(
-                                  child: GestureDetector(
+                                  // Global labels vary too much for this fixed
+                                  // header slot. Keep the action language-neutral
+                                  // and expose its full name via the tooltip.
+                                  child: !context.usesKoreanFeatures
+                                      ? IconButton(
+                                          tooltip: context.l10n
+                                              .allTeamsThisMonthButton,
+                                          onPressed: _jumpToCurrentMonth,
+                                          style: IconButton.styleFrom(
+                                            backgroundColor:
+                                                colorScheme.surfaceVariant,
+                                            foregroundColor:
+                                                colorScheme.primary,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(16.r),
+                                            ),
+                                          ),
+                                          icon: Icon(Icons.today_outlined,
+                                              size: 20.sp),
+                                        )
+                                      : GestureDetector(
                                     onTap: _jumpToCurrentMonth,
                                     child: Container(
                                       padding: EdgeInsets.symmetric(
@@ -319,9 +340,7 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
                                       child: FittedBox(
                                         fit: BoxFit.scaleDown,
                                         child: Text(
-                                        !context.usesKoreanFeatures
-                                            ? context.l10n.allTeamsThisMonthButton.replaceFirst(' ', '\n')
-                                            : context.l10n.allTeamsThisMonthButton,
+                                        context.l10n.allTeamsThisMonthButton,
                                         style: TextStyle(
                                             fontSize: 13.sp,
                                             fontWeight: FontWeight.bold,

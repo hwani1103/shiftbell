@@ -18,6 +18,27 @@ import kotlin.math.roundToInt
 
 @RunWith(RobolectricTestRunner::class)
 class CoverAlarmLayoutTest {
+    @Test fun firstTraversalKeepsDismissGlyphInsideItsTargetWidth() {
+        val base = ApplicationProvider.getApplicationContext<Context>()
+        for (tag in listOf("ko", "en", "de", "pt-BR", "hi")) for ((w,h) in listOf(192 to 98,512 to 260)) {
+            val context = base.createConfigurationContext(Configuration(base.resources.configuration).apply {
+                densityDpi = 160; fontScale = 1f; setLocale(java.util.Locale.forLanguageTag(tag))
+            })
+            val surface = CoverAlarmLayout.create(context,"07:00",{}, {}) as FrameLayout
+            surface.removeViewAt(0)
+            // Check initial text bounds without repeating the layout traversal.
+            surface.measure(View.MeasureSpec.makeMeasureSpec(w,View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(h,View.MeasureSpec.EXACTLY))
+            surface.layout(0,0,w,h)
+            val stop = surface.findViewById<Button>(R.id.dismissButton)
+            val textLayout = requireNotNull(stop.layout)
+            val available = stop.layoutParams.width-stop.paddingLeft-stop.paddingRight
+            assertEquals("×",textLayout.text.toString())
+            assertTrue("initial text layout $tag/$w: ${textLayout.width} > $available",textLayout.width <= available)
+            assertTrue("initial glyph right $tag/$w",textLayout.getLineRight(0) <= available)
+        }
+    }
+
     @Test fun selectedValuesAndLocalizedLabelsFitTinyCovers() {
         val base = ApplicationProvider.getApplicationContext<Context>()
         val controller = Robolectric.buildActivity(Activity::class.java).setup()
@@ -45,7 +66,10 @@ class CoverAlarmLayoutTest {
                 assertTrue("text $tag/$minutes/$scale/$w", b.paint.measureText(b.text.toString()) <= b.width-b.paddingLeft-b.paddingRight+1)
                 assertFalse(b.contentDescription.isNullOrEmpty())
             }
-            assertEquals("+${minutes}m", surface.findViewById<Button>(R.id.snoozeButton).text.toString())
+            assertEquals(context.getString(R.string.alarm_snooze_duration, minutes),
+                surface.findViewById<android.widget.TextView>(R.id.snoozeValueText).text.toString())
+            assertEquals(context.getString(R.string.alarm_snooze_title),
+                surface.findViewById<android.widget.TextView>(R.id.lockSnoozeTitle).text.toString())
             binding.close(); RingingAlarmTracker.endIfCurrent(context, ring.alarmId, ring.round)
         }
         controller.pause().stop().destroy()

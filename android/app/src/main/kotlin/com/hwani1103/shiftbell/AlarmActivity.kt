@@ -95,6 +95,11 @@ class AlarmActivity : AppCompatActivity() {
         // DB에서 알람 정보 로드
         loadAlarmInfo()
 
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+        @Suppress("DEPRECATION")
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= 29) window.isStatusBarContrastEnforced = false
+
         val onCover = CoverAlarmDisplay.supported(this) &&
             windowManager.defaultDisplay.displayId != android.view.Display.DEFAULT_DISPLAY
         if (onCover) {
@@ -106,7 +111,6 @@ class AlarmActivity : AppCompatActivity() {
                 NotificationHelper.RingNoticeReason.COVER_ENTER, this)
             Log.i("CoverAlarm", "AlarmActivity on cover display=${windowManager.defaultDisplay.displayId}")
         } else {
-            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
             setContentView(R.layout.activity_alarm)
             setupUI()
             AlarmResponsiveLayout.install(findViewById(R.id.rootLayout))

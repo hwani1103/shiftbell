@@ -1,0 +1,114 @@
+{
+  "date": "2026-10-09",
+  "report": "온보딩_글로벌테마_권한연결_통합_2026-10-09.txt",
+  "requirements": {
+    "onboardingFeedback": "PASS_HOST",
+    "emptyCardCenter": "PASS_HOST",
+    "resetIconSpacing": "PASS_HOST",
+    "naturalCompactNames": "PASS",
+    "welcomePopup": "REMOVED",
+    "scheduleSleepPopups": "RETAINED_CONCISE",
+    "releaseNote": "RETAINED",
+    "irregularTutorial": "RETAINED",
+    "playUpdatePrompt": "RETAINED",
+    "globalFirstTheme": "PERIWINKLE",
+    "softMosaic": "VERIFIED_NO_PRODUCT_CHANGE",
+    "onboardingNextPermission": "VERIFIED_GRANT_ONLY"
+  },
+  "permissionSequence": {
+    "onboardingOnly": true,
+    "selectedFirst": true,
+    "grantObservationRequired": true,
+    "stopOn": [
+      "denied",
+      "unknown",
+      "notApplicable",
+      "failedLaunch",
+      "cancel"
+    ],
+    "independentAlarmChannel": true,
+    "runtimeCallbackIsNotGrant": true,
+    "nativeChangesForSequence": false,
+    "tests": {
+      "count": 26,
+      "status": "PASS",
+      "log": "artifacts/onboarding_theme_2026_10_09/onboarding_permission_sequence_final.log"
+    },
+    "device": "NOT_RUN"
+  },
+  "host": {
+    "largeText": {
+      "locales": 5,
+      "sizes": 10,
+      "textScale": 1.3,
+      "count": 50,
+      "status": "PASS"
+    },
+    "feedbackThemeContrastPopup": {
+      "count": 22,
+      "status": "PASS"
+    },
+    "captures": "artifacts/onboarding_theme_2026_10_09/host",
+    "scope": "HOST_RENDER_ONLY"
+  },
+  "widgets": {
+    "sourceThread": "01a12077-cb03-7ef1-84eb-016c8e51921a",
+    "sourceTitle": "개선하고 주간 위젯 추가",
+    "threeWeekFinalResizeMode": "horizontal",
+    "threeWeekMinResizeHeight": "REMOVED",
+    "threeWeekMaxResizeHeight": "REMOVED",
+    "latestReport": "달력위젯_3주세로조절제거_2026-10-09.txt",
+    "device": "NOT_RUN"
+  },
+  "analyze": {
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 0,
+    "infos": 38
+  },
+  "build": {
+    "status": "PASS",
+    "command": "tools/check_critical_release.ps1 -Build",
+    "flavor": "dev",
+    "mode": "debug",
+    "release": "NOT_RUN",
+    "install": "NOT_RUN",
+    "hotReload": "NOT_RUN_FINAL_REQUEST_BUILD_ONLY",
+    "log": "artifacts/onboarding_theme_2026_10_09/critical_release_final.log",
+    "exitCode": 0,
+    "web": "PASS",
+    "nativePermissionAlarm": "PASS",
+    "nativeDatabaseMigration": "PASS",
+    "flutterRegressionGroups": [
+      38,
+      123,
+      99,
+      67,
+      11
+    ],
+    "flutterRegressionTotal": 338,
+    "apk": "artifacts/onboarding_theme_2026_10_09/shiftbell-integrated-dev-debug.apk",
+    "bytes": 215873186,
+    "sha256": "c5f548cc851c53eb2a756632ab83b4ca0c2f023c8940cbedf36903dc9ee21f7f",
+    "applicationId": "com.hwani1103.shiftbell.dev",
+    "versionName": "1.0.23-dev",
+    "versionCode": 25,
+    "widgetCompiledResourceChecks": {
+      "three_week": {
+        "horizontalOnly": true,
+        "noVerticalResizeHeight": true
+      },
+      "one_week": {
+        "horizontalOnly": true,
+        "noVerticalResizeHeight": true
+      }
+    },
+    "sourceManifest": {
+      "before": "artifacts/onboarding_theme_2026_10_09/source_hashes_final_before_build.json",
+      "after": "artifacts/onboarding_theme_2026_10_09/source_hashes_final_after_build.json",
+      "files": 419,
+      "changedDuringBuild": []
+    }
+  },
+  "previousEvidencePreserved": true
+}

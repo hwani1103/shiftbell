@@ -54,6 +54,8 @@ const Set<String> kDeviceLocalPreferenceKeys = {
   // 사용 통계 - 이 기기 alarm_history의 어디까지 보냈는지(AlarmUsageAnalytics.cursorKey). 다른 기기로 옮겨지면 그 기기의
   // 이력 ID와 맞지 않아 통계가 조용히 빠지므로 설치별로 둔다(2026-09-22).
   'analytics_alarm_history_cursor',
+  'analytics_ops_seen_tokens',
+  'analytics_ops_snapshot_day',
 };
 
 /// 백업 import/export 대상 설정 키인지. 친구공유 소유권·회차 7키는 G2 계약(#25)대로 항상 제외.

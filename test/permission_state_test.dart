@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shiftbell/constants/platform_channel.dart';
 import 'package:shiftbell/l10n/generated/app_localizations.dart';
 import 'package:shiftbell/services/permission_service.dart';
@@ -26,6 +27,64 @@ void main() {
   final messenger =
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
   tearDown(() => messenger.setMockMethodCallHandler(kAlarmChannel, null));
+
+  testWidgets('cancelled notification prompt releases both onboarding buttons',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    const plugin = MethodChannel('flutter.baseflow.com/permissions/methods');
+    messenger.setMockMethodCallHandler(plugin, (call) async {
+      if (call.method == 'checkPermissionStatus') return 0;
+      if (call.method == 'shouldShowRequestPermissionRationale') return false;
+      throw StateError('Runtime request must use the cancellation-safe bridge');
+    });
+    addTearDown(() => messenger.setMockMethodCallHandler(plugin, null));
+    final prompt = Completer<bool>();
+    var prompts = 0;
+    final routes = <String>[];
+    final data = states(fullScreen: 'granted')
+      ..['notification'] = 'denied'
+      ..['overlay'] = 'denied';
+    messenger.setMockMethodCallHandler(kAlarmChannel, (call) async {
+      if (call.method == 'permissionSnapshot') return data;
+      if (call.method == 'requestNotificationPermission') {
+        prompts++;
+        return prompt.future;
+      }
+      if (call.method == 'openPermissionSettings') {
+        routes.add(call.arguments['kind'] as String);
+        return true;
+      }
+      return null;
+    });
+    await tester.pumpWidget(MaterialApp(
+        locale: const Locale('ko'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(body: PermissionPanel(actionRequiredOnly: true))));
+    await tester.pumpAndSettle();
+    final notification = find.byKey(const ValueKey('permission-notification'));
+    final overlay = find.byKey(const ValueKey('permission-overlay'));
+    await tester.tap(notification);
+    await tester.pumpAndSettle();
+    expect(prompts, 1);
+    expect(tester.widget<OutlinedButton>(notification).onPressed, isNull);
+    expect(tester.widget<OutlinedButton>(overlay).onPressed, isNull);
+    // Resume alone does not allow overlapping permission requests.
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(tester.widget<OutlinedButton>(overlay).onPressed, isNull);
+    prompt.complete(true); // Back: request finished, permission still denied.
+    await tester.pumpAndSettle();
+    expect(tester.widget<OutlinedButton>(notification).onPressed, isNotNull);
+    expect(tester.widget<OutlinedButton>(overlay).onPressed, isNotNull);
+    expect((await PermissionService().snapshot()).allSatisfied, isFalse);
+    await tester.tap(overlay);
+    await tester.pumpAndSettle();
+    await tester.tap(notification);
+    await tester.pumpAndSettle();
+    expect(routes, ['overlay', 'notification']);
+    expect(prompts, 1); // Retry uses settings; no automatic prompt loop.
+  });
 
   test('missing and malformed observations never satisfy permissions', () {
     expect(PermissionSnapshot.parse({}).allSatisfied, isFalse);
@@ -138,9 +197,54 @@ void main() {
       await tester.pumpAndSettle();
       expect(button, findsNothing);
       expect(find.byType(PermissionPanel), findsOneWidget);
+      // Settings/help still shows the granted permission for troubleshooting.
+      expect(find.text(l.permissionFullScreen), findsOneWidget);
       expect(opened, ['fullScreen']);
     });
   }
+
+  testWidgets('onboarding shows only unresolved permissions and refreshes them',
+      (tester) async {
+    var data = states(fullScreen: 'unknown')
+      ..['exactAlarm'] = 'notApplicable'
+      ..['alarmChannel'] = 'denied';
+    messenger.setMockMethodCallHandler(kAlarmChannel, (call) async {
+      if (call.method == 'permissionSnapshot') return data;
+      return null;
+    });
+    await tester.pumpWidget(MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const Scaffold(
+            body: SingleChildScrollView(
+                child: PermissionPanel(actionRequiredOnly: true)))));
+    await tester.pumpAndSettle();
+    final l = lookupAppLocalizations(const Locale('en'));
+    expect(find.text(l.permissionNotification), findsNothing);
+    expect(find.text(l.permissionOverlay), findsNothing);
+    expect(find.text(l.permissionExactAlarm), findsNothing);
+    expect(find.text(l.permissionFullScreen), findsOneWidget);
+    expect(find.text(l.permissionUnknown), findsOneWidget);
+    expect(find.text(l.permissionAlarmChannelBlocked), findsOneWidget);
+    expect(find.text(l.permissionReturnGuide), findsNothing);
+    expect(find.text(l.permissionLockScreenHelp), findsNothing);
+    expect(find.text(l.permissionOverlayRouteGuide), findsNothing);
+
+    data = states(fullScreen: 'granted');
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(find.text(l.permissionFullScreen), findsNothing);
+    expect(find.text(l.permissionAlarmChannelBlocked), findsNothing);
+    expect(find.byType(OutlinedButton), findsNothing);
+
+    data = states(fullScreen: 'granted')..['overlay'] = 'denied';
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(find.text(l.permissionOverlay), findsOneWidget);
+    expect(find.byKey(const ValueKey('permission-overlay')), findsOneWidget);
+    expect(find.text(l.permissionNotification), findsNothing);
+  });
 
   testWidgets(
       'Xiaomi sheet refreshes but never completes by reading instructions',

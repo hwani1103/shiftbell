@@ -100,13 +100,13 @@ void main() {
         await tester.tap(slot);
         await tester.pumpAndSettle();
       }
-      await tester.tap(find.text('저장'));
-      await tester.pumpAndSettle();
       await tester.runAsync(() async {
-        await tester.tap(find.byKey(const ValueKey('team-review-save')));
+        await tester.tap(find.text('저장'));
         await Future<void>.delayed(const Duration(milliseconds:100));
       });
       await tester.pumpAndSettle();
+      expect(find.text('전체근무표 미리보기'), findsNothing);
+      expect(find.byKey(const ValueKey('team-review-save')), findsNothing);
       final saved = (await tester.runAsync(() => DatabaseService.instance.getTeamScheduleConfig()))!;
       expect(saved.names, names);
       expect(saved.myTeam, names.last);
@@ -207,12 +207,12 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('team-edit-switch')));
     await tester.pumpAndSettle();
     final first = tester.getRect(find.byKey(const ValueKey('team-switch-slot-0')));
+    final fifth = tester.getRect(find.byKey(const ValueKey('team-switch-slot-4')));
     final sixth = tester.getRect(find.byKey(const ValueKey('team-switch-slot-5')));
-    final seventh = tester.getRect(find.byKey(const ValueKey('team-switch-slot-6')));
     expect(first.width, closeTo(creator.width, 0.01));
     expect(first.height, closeTo(creator.height, 0.01));
-    expect(sixth.top, first.top);
-    expect(seventh.top, greaterThan(first.bottom));
+    expect(fifth.top, first.top);
+    expect(sixth.top, greaterThan(first.bottom));
     await tester.ensureVisible(find.byKey(const ValueKey('team-switch-slot-31')));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);

@@ -1,0 +1,18 @@
+온보딩 알림 권한 뒤로 취소 — 2026-10-09
+상태: 수정·대상 Flutter14·필수 회귀/빌드·대표 USB PASS / dev debug 설치 완료
+
+사용자 실제 재현: 첫 알림 권한 팝업을 뒤로 닫은 후 알림/overlay 설정 버튼 모두 비활성. 수정 전 USB XML에서도 두 설정 enabled=false.
+원인: permission_handler_android12.1.0 PermissionManager.onRequestPermissionsResult가 permissions/grantResults 모두 빈 경우 callback 없이 return false. 실기기20:22:53 로그에 동일 빈 결과 기록. Dart Permission.notification.request()가 완료되지 않아 PermissionService._opening과 PermissionPanel.busy가 유지됨. 단순 resume에서 busy를 지우면 진행 중 요청과 중복될 수 있어 채택하지 않음.
+수정: 최초 Android33+ 알림 런타임 요청만 앱 소유 NotificationPermissionRequest(9082)로 처리. MainActivity가 해당 request code의 빈 결과/거부/허용 모두 요청 완료로 전달. 반환 bool은 승인 여부가 아니라 요청 완료이며 기존 permissionSnapshot 재조회만 권한 판정. 다른 플러그인 callback은 기존 super 경로 유지. 중복 요청 방지·완료 한번·Activity 종료 시 정리, API32 이하는 런타임 요청 없음. Flutter UI busy 해제는 finally로 보장. 최초 요청 시도 이후 재탭은 기존 앱 알림 설정 경로 유지하며 자동 설정 연쇄 없음.
+위험/범위: 잠금/7777/overlay 표시·예약·소리·DB·번역은 변경하지 않음. Android 알림 요청 callback 연결을 바꾸므로 P0 native/Flutter 회귀와 실제 Back·거부·허용·설정 복귀 확인 필요. 일반 제조사 알람 전수 Streaming 재시험으로 확대하지 않음. 기존 미커밋 작업 보존.
+증거: artifacts/permission_back_cancel_2026_10_09/.
+
+최종 검증
+- tools/check_critical_release.ps1 -Build: Flutter325, native 기능/권한 및 DB, dev debug·JS웹 모두 성공. 로그 마지막 P0 automated checks passed 확인. 외부 PowerShell 리다이렉션 실행은 Wasm stderr 경고로 exit1을 반환했으나 내부 단계는 전부 통과하고 두 빌드 산출물이 생성됨. wrapper exit0으로 기록하지 않음. 제품/검사 실패는 없음.
+- 대상 Flutter14: 취소 완료 전 중복 요청 차단, 취소 후 두 버튼 활성·미허용 유지, 후속 overlay/notification 설정 각각 열기 및 자동 진행 기존 검사. Native PermissionSettingsTest에 API33/34 취소 완료·중복/다른 request code/중복 callback/재요청/Activity 종료 및 API32 비요청 회귀 추가(필수 실행기에 포함).
+- S26 SM-S948N/API36: 수정 전 실제 빈 callback 경고+두 설정 enabled=false 확인. 수정 후 실제 시스템 알림 팝업→Back→두 버튼 enabled=true, notification/overlay denied 유지, 온보딩 유지 PASS.
+- 실제 overlay 설정 목록 열기→변경 없이 Back, 알림 재탭→앱 알림 설정 열기→변경 없이 Back 모두 PASS. 최초 알림 요청만 재준비해 실제 허용 버튼→알림 카드 제거/overlay 카드 유지. 실제 시스템 목록에서 테스트 앱 overlay 허용→복귀 시 교대근무 스케줄 생성1/4로 자동 이동, 모든 permissionSnapshot granted 확인. 실제 거부 버튼 별도 실측·모든 제조사/구버전 물리 시험은 이번 범위에 포함하지 않음.
+- 설치 후 권한 화면 대신 스케줄 온보딩이 보였고 permissions_requested=true였다. 자동 허용으로 해석하지 않고 실제 snapshot 두 권한 denied 확인. DB 삭제 없이 기존 PermissionIntroScreen을 VM으로 열어 위 실제 OS 입력을 수행.
+- APK SHA256 62e62876941c036f1fccdfc98c1ec8fec3b15893e0dba3c559fda4c13decd652. 설치 base.apk 해시 동일. 소유6파일 검사 전후 해시 변화0.17테이블 원본 완전 일치.
+- 마지막: 시험에서 허용한 notification/overlay는 원래 미허용으로 복구. 사용자가 최초 요청부터 재시험하도록 notification_request_attempted/permissions_requested만 초기화해 첫 권한 온보딩을 열어둠. 기타 설정과 DB 보존, debugger detach. prod/Release/Streaming 조작 없음.
+구조화 근거: evidence/permission_back_cancel_2026_10_09.json.

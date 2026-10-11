@@ -191,7 +191,14 @@ class RingSnoozeTest {
             assertEquals("+30m", fresh.actions[0].title.toString())
             assertEquals(token, fresh.actions[0].actionIntent)
             assertNotNull(fresh.bigContentView); assertTrue(shadowOf(fresh.fullScreenIntent).isCanceled)
-            assertEquals(SnoozeText.selection(translated, 30), fresh.extras.getString("android.text"))
+            assertEquals("User title", fresh.extras.getString("android.title"))
+            assertEquals(RingControlNotification.COLLAPSED_BLANK, fresh.extras.getString("android.text"))
+            assertEquals(translated.getString(R.string.notif_ringing_content), fresh.extras.getString("android.subText"))
+            assertTrue(fresh.extras.getBoolean("android.showWhen"))
+            val expanded = fresh.bigContentView.apply(translated, android.widget.FrameLayout(translated))
+            assertEquals(SnoozeText.selection(translated, 30),
+                expanded.findViewById<android.widget.TextView>(R.id.snoozeValueText).text.toString())
+            assertEquals("User title", expanded.findViewById<android.widget.TextView>(R.id.ringNoticeTitle).text.toString())
         }
     }
 

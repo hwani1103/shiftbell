@@ -325,7 +325,7 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
           title: Text(context.koOnly.friendShareMyScheduleTitle,
               style: TextStyle(fontSize: 18.sp))),
       body: AdaptiveFormBody(
-          child: _loading
+          child: SafeArea(top: false, child: _loading
               ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
                   padding: EdgeInsets.all(20.w),
@@ -485,7 +485,7 @@ class _MyShareCodeScreenState extends ConsumerState<_KoreanMyShareCodeScreen> {
                       ],
                     ],
                   ),
-                )),
+                ))),
     );
   }
 }

@@ -287,9 +287,7 @@ class _CalendarThemePickerScreenState
                                             _themes[index]))
                                   ],
                                 child: Theme(
-                                    data: _themes[index].isDark
-                                        ? AppTheme.darkTheme
-                                        : AppTheme.lightTheme,
+                                    data: AppTheme.forCalendar(_themes[index]),
                                     child: const CalendarTab(preview: true)))
                             : CalendarThemeLabScreen(
                                 preview: true,

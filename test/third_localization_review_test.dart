@@ -128,13 +128,14 @@ void main() {
         return const SizedBox.shrink();
       })));
       await tester.pumpAndSettle();
-      expect(available, hasLength(5));
+      expect(available, hasLength(7));
+      expect(available.take(2), [CalendarThemeId.periwinkle, CalendarThemeId.softMosaic]);
       expect(available, isNot(contains(CalendarThemeId.diary)));
       expect(available, isNot(contains(CalendarThemeId.editorial)));
       expect(available, isNot(contains(CalendarThemeId.initialBadge)));
       expect(available, isNot(contains(CalendarThemeId.eventChip)));
       expect(available, isNot(contains(CalendarThemeId.underline)));
-      expect(fallback, CalendarThemeId.mainWhite);
+      expect(fallback, CalendarThemeId.periwinkle);
     });
   }
 }

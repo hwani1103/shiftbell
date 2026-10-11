@@ -708,11 +708,15 @@ void main() {
               }
               if (theme == CalendarThemeId.diary &&
                   !WideCalendarCell.appliesTo(size)) {
+                final today = DateTime.now();
+                final isToday = now.year == today.year &&
+                    now.month == today.month &&
+                    day == today.day;
                 expect(
                     find.descendant(
                         of: cell, matching: find.byType(VerticalDivider)),
-                    findsOneWidget,
-                    reason: 'Diary must retain its split date/shift header');
+                    isToday ? findsNothing : findsOneWidget,
+                    reason: 'Diary today outline replaces the header divider');
               }
             }
           }
@@ -850,7 +854,8 @@ void main() {
               await settlePanel();
               await tester.tap(find.text(title));
               await settlePanel();
-              await captureScreen('_${title == l.shiftChangeSchedule ? 'schedule' : title == l.settingsEditShiftNameTitle ? 'names' : title == l.settingsEditShiftColorTitle ? 'colors' : 'fixed'}');
+              await captureScreen(
+                  '_${title == l.shiftChangeSchedule ? 'schedule' : title == l.settingsEditShiftNameTitle ? 'names' : title == l.settingsEditShiftColorTitle ? 'colors' : 'fixed'}');
               if (title == l.settingsEditShiftColorTitle) {
                 await tester.tap(find.widgetWithText(ListTile, '주간').first);
                 await settlePanel();
@@ -882,7 +887,8 @@ void main() {
               expect(find.text(title).hitTestable(), findsOneWidget);
               await tester.tap(find.text(title));
               await settlePanel();
-              await captureScreen('_${title == l.alarmSoundManage ? 'alarm_settings' : title == l.settingsAdditionalFeaturesTitle ? 'features' : 'delete'}');
+              await captureScreen(
+                  '_${title == l.alarmSoundManage ? 'alarm_settings' : title == l.settingsAdditionalFeaturesTitle ? 'features' : 'delete'}');
               if (title == l.settingsAdditionalFeaturesTitle) {
                 await tester.tap(find.text(l.settingsDataBackupTitle));
                 await settlePanel();

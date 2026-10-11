@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-09",
+  "scope": "U01 widget design follow-up 3",
+  "previousEvidence": "calendar_widget_design_v2_2026_10_09.json",
+  "changes": [
+    "one-week horizontal resize only, remove vertical resize constraints",
+    "weekday headings for three-week widget",
+    "shift max12dp, memo max9.5dp, height-aware memo spacing up to3dp",
+    "weekly surface alpha F2"
+  ],
+  "build": {
+    "status": "PASS",
+    "flavor": "dev",
+    "mode": "debug",
+    "apk": "artifacts/calendar_widget_design_v3/shiftbell-widget-dev-debug.apk",
+    "bytes": 215871427,
+    "sha256": "d5d6b791407156d9f052f1c966328bdb4e59b68c444b4a37844b5b6a6ea8c92e",
+    "applicationId": "com.hwani1103.shiftbell.dev",
+    "version": "1.0.23-dev",
+    "versionCode": 25,
+    "log": "artifacts/calendar_widget_design_v3/build.log"
+  },
+  "tests": "NOT_RUN: explicit user instruction to build only",
+  "render": "NOT_RUN: explicit user instruction to build only",
+  "install": "NOT_RUN: user installs",
+  "realLauncher": "NOT_RUN",
+  "releaseBuild": "NOT_RUN",
+  "webBuild": "NOT_RUN"
+}

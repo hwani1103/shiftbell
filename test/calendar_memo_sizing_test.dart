@@ -3,6 +3,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftbell/widgets/calendar_memo_sizing.dart';
 
 void main() {
+  test('compact main dates use only two baselines based on two-memo clearance',
+      () {
+    List<double> paddings(double bodyHeight) => List.generate(
+        4,
+        (count) => CalendarMemoSizing.mainDateBottomPadding(
+            count: count,
+            bodyHeight: bodyHeight,
+            dateHeight: 20,
+            memoRowHeight: 10,
+            bottomInset: 2,
+            gap: 1));
+    final roomy = paddings(68);
+    expect(roomy.take(3), everyElement(0));
+    expect(roomy[3], greaterThan(0));
+    final compact = paddings(60);
+    expect(compact.take(2), everyElement(0));
+    expect(compact[2], greaterThan(0));
+    expect(compact[2], compact[3]);
+  });
+
   test(
       'shift-size cap targets balanced inner windows, not previous Fold tuning',
       () {
@@ -19,10 +39,7 @@ void main() {
     }
   });
   test('wide proportions share the same three-line budget by count', () {
-    for (final size in [
-      const Size(932.57, 704),
-      const Size(900, 760)
-    ]) {
+    for (final size in [const Size(932.57, 704), const Size(900, 760)]) {
       expect(CalendarMemoSizing.scaleFor(size, 1) / 3, .75);
       expect(CalendarMemoSizing.scaleFor(size, 2) * 2 / 3, 1);
       expect(CalendarMemoSizing.scaleFor(size, 3), 1);

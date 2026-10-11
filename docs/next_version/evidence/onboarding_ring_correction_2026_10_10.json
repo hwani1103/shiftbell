@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-10",
+  "scope": [
+    "A05",
+    "A09",
+    "A11"
+  ],
+  "changes": {
+    "notificationCollapsed": "Only snooze description blank (NBSP); original title/status/timestamp restored",
+    "notificationExpanded": "Korean 알람연장 N분 retained; foreign language strings unchanged",
+    "onboarding": "Next button removed; Not now at safe-area bottom; Settings button accented"
+  },
+  "build": {
+    "command": "flutter build apk --debug --flavor dev --no-pub",
+    "exitCode": 0,
+    "elapsedGradleSeconds": 328.3,
+    "apk": {
+      "path": "artifacts/onboarding_ring_correction_2026_10_10/shiftbell-onboarding-ring-dev-debug.apk",
+      "bytes": 215862855,
+      "sha256": "eee02cb88085e805f7eb4b94de492a764af6cc9db587bee40d8fc41a6f62b350"
+    }
+  },
+  "tests": "Not run per explicit user instruction",
+  "installation": "Not performed",
+  "hotReload": "Not performed; replaced by requested APK rebuild",
+  "layoutCapture": "Not performed",
+  "sourceChangedDuringBuild": [],
+  "historicWrongCandidate": "artifacts/ring_notice_copy_2026_10_10/shiftbell-copy-dev-debug.apk"
+}
