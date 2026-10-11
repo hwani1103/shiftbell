@@ -1,0 +1,85 @@
+{
+  "date": "2026-10-11",
+  "scope": "S26 store capture and Material Card memo contrast",
+  "device": {
+    "model": "SM-S948N",
+    "api": 36,
+    "pixels": [
+      1080,
+      2340
+    ]
+  },
+  "sourceChange": "lib/screens/calendar_tab.dart: materialCard memo ink interpolated 35% toward onSurface; no size/font/layout/P0/resource changes",
+  "build": {
+    "command": [
+      "build",
+      "apk",
+      "--debug",
+      "--flavor",
+      "dev",
+      "--dart-define=AD_SLOT_DEBUG_TINT=false"
+    ],
+    "exit": 0,
+    "bytes": 215871796,
+    "sha256": "258359f73d146d4d050d90f2bccdc3a2155a7a39ccacd67dd377224b86f821bf",
+    "sourceSha256": "8026870f0548ffaff68186a35cebb2c4c1fde1054419e1cee8149d728fb0bbc1"
+  },
+  "installedMatchesBuild": true,
+  "store": {
+    "count": 25,
+    "screensPerLanguage": 5,
+    "languages": [
+      "ko-KR",
+      "en-US",
+      "de-DE",
+      "pt-BR",
+      "hi-IN"
+    ],
+    "screenKinds": [
+      "calendar",
+      "allTeams",
+      "lockAlarm",
+      "monthlyOT",
+      "weeklyHours"
+    ],
+    "koreanTheme": "materialCard",
+    "otherCalendarTheme": "softMosaic",
+    "nativeAlarmTheme": "nativeAlarmGradient",
+    "rawUnedited": true,
+    "manualVisualReviewCount": 25,
+    "exportHashVerificationPassed": true,
+    "existingFold8RawPreserved": true,
+    "promoCreated": false
+  },
+  "restoration": {
+    "databaseTables": 17,
+    "databaseMatchesOriginal": true,
+    "originalUserPreferencesMatchExceptAutomaticBackupTimestamp": true,
+    "originalDeviceSettingsMatch": true,
+    "ownedCaptureAlarmsRemoved": true,
+    "ringingEnded": true,
+    "normalAppAlarmGuardRetained": true
+  },
+  "permissionStates": {
+    "notification": "granted",
+    "overlay": "granted",
+    "exactAlarm": "granted",
+    "fullScreen": "granted",
+    "alarmChannel": "granted"
+  },
+  "interaction": "Actual day tap, actual memo save and Back; test rows removed; final restored calendar and Back visually verified",
+  "debugDisplayIssue": {
+    "observed": true,
+    "error": "InheritedElement.notifyClients descendant assertion building UnmanagedRestorationScope",
+    "initialToolFault": "Duplicate MainScreen pushed by route helper during locale transition; corrected to real root",
+    "secondOccurrence": "After actual memo Save and Back; precise origin UNCONFIRMED. Screenshot current_recovered.png retained. No blanket zero-runtime-error claim.",
+    "toolProbeChange": "Removed dependency-registering ModalRoute.of/MediaQuery.*Of calls from target inspection; use nondependent MediaQuery lookup",
+    "repeatResult": "After fresh process and corrected probe, actual memo Save/Back, normal day tap/Back, and final restored day tap/Back displayed correctly; assertions were not disabled",
+    "productFixClaimed": false,
+    "releaseTestPerformed": false,
+    "reference": "https://api.flutter.dev/flutter/widgets/InheritedElement/notifyClients.html"
+  },
+  "verification": "Dev debug build succeeded and actual S26 targeted display/interaction. Critical gate not repeated: product edit is one memo text color; P0 and release-language resource/function scope unchanged.",
+  "localDetailedEvidence": "artifacts/s26_store_2026_10_11 (ignored; includes raw images, manifests, restoration snapshots and detailed report)",
+  "publicationScope": "Aggregate verification only; no device serial, user DB/prefs values, shift/memo data, native history rows or raw images in this versioned record"
+}

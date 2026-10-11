@@ -1,0 +1,19 @@
+S26 스토어25장·메모 대비 조정 결과 (2026-10-11)
+
+S26 Ultra SM-S948N/API36 USB에서5언어×5화면25장1080×2340 원본 촬영을 완료했다. 메인 달력/전체 조 근무표/잠금 알람/이번 달 OT/주별 근무시간 각1장이다. 사용자 지정 PlayStore 등록정보 Folder의 언어별 폴더에 저장하고25개 파일 원본/내보내기 SHA256 일치를 확인했다. 기존 Fold8 펼침 원본은 보존했다. 홍보 합성은 이번 촬영 요청에 포함하지 않는다.
+
+제품 변경은 lib/screens/calendar_tab.dart의 Material Card 메모 색 한 곳을 onSurface 방향으로35% 진하게 한 것이다. 글꼴·크기·셀/달력 디자인·큰 화면 렌더러·알람/권한·언어 리소스는 변경하지 않았다. dev debug 빌드/설치본 해시 일치와 실제S26 대상 표시 확인 완료. release 빌드 없음. P0/언어 구조 변경이 없어 필수 전체 회귀 대신 이번 빌드와S26 대상 표시/조작을 확인했다.
+
+한국어는 사용자의 Material Card, 외국어는 Soft Mosaic를 사용했다. 기존 근무표/사용자 배정 변경/OT/근무시간 설정/메모 날짜와ID를 유지하고 외국어의 근무명·메모 문구만 촬영용으로 번역했다. 근무 칩3색 조화를 확인하고 메모는 온전히 보이는 짧은 노트로 준비했다. 촬영용4팀도 같은 패턴으로 준비한 후 원복했다.25장 수동 시각 확인에서 앱 언어 혼입·깨진 글리프·주요 아이콘/문구 오정렬을 발견하지 않았다. OS 상태 표시와 시스템 핸들은 원본 그대로다. 개발 광고는 촬영 실행 중만 감췄고 원본 이미지를 편집하지 않았다.
+
+5언어 잠금 알람은 실제 예약으로 자연 발생했다. keyguard showing=true/실제 AlarmActivity focus와 native 권한 granted를 확인했다. 수동 Activity 시작/PIN 우회 없음. 한국어는 접근성 XML 미확보 후 자기 알람을 앱API로 정리했으며 실제X 조작 PASS로 확대하지 않는다. 나머지4언어는 실제X/swiped 이력을 확인했다. 장시간Doze/모든 제조사 설정 전수 재검사로 확대하지 않는다.
+
+디버그 표시 오류가 촬영 중 발생했다. 처음 helper의 MainScreen 중복 push를 수정한 뒤에도 메모 Save/Back에서 InheritedElement.notifyClients descendant assertion(UnmanagedRestorationScope)이1회 재발했다. 두 번째 정확한 원인은 미확정이며 도구 문제라고 단정한 설명을 철회한다. assertions나 오류 표시를 끄지 않았다. 도구의 dependency 등록 조회를 제거하고 새 프로세스에서 실제 메모 Save/Back, 일반 날짜 Back, 원래 데이터 복구 후 날짜 Back은 정상 표시했다. 이 결과는 해당 재확인 범위이며 기존 현상의 근본 해결이나 release 안전성으로 확정하지 않는다. 실패 원본/로그는 로컬에 보존하고 최종25장과 구분했다. 프레임워크 근거: https://api.flutter.dev/flutter/widgets/InheritedElement/notifyClients.html.
+
+촬영 전후DB17테이블 값 일치, 사용자 설정은 자동 백업 시각만 갱신됐다. 원래 locale/font/화면 유지/timeout 일치. 자기 시험 메모·알람·생성 이력 제거, 울림 및 자기 AlarmReceiver 예약0. 정상 앱 AlarmGuardReceiver는 유지했다. 마지막 한국어 달력과 날짜→Back 정상 표시 확인 후 디버거와 자기USB 전달 포트만 분리했다. 다른 세션의 대시보드/최종 코드검토 미커밋 작업은 보존했다.
+
+Fold8·Fold8 Ultra·Flip8은 당시 요청한 UI/커버 범위 완료. Flip4 본화면 전수 제외 결정과 과거 정리 UNCONFIRMED를 보존한다. 모든 기기의 모든UI 무조건 PASS라는 의미로 확대하지 않는다.
+
+버전 관리 증거: evidence/s26_store_capture_2026_10_11.json (집계만)
+상세 개인 데이터/기기 식별자/원본/복구 자료/목록/상세 원장: artifacts/s26_store_2026_10_11 (Git 제외)
+스토어 원본과 최종 목록: 사용자 지정 PlayStore 등록정보 Folder (Git 제외)

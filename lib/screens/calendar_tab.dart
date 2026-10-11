@@ -4380,7 +4380,8 @@ class _CalendarTabState extends ConsumerState<_CalendarTabBody> {
                         e.value,
                         TextStyle(
                             fontSize: 8.sp,
-                            color: colorScheme.onSurfaceVariant,
+                            color: Color.lerp(colorScheme.onSurfaceVariant,
+                                colorScheme.onSurface, 0.35),
                             fontWeight: FontWeight.w600,
                             height: 1.0)),
                   )),
