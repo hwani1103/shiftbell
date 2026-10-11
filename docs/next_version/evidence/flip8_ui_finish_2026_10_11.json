@@ -1,0 +1,1987 @@
+{
+  "time": "2026-10-11T11:33:33.842320+09:00",
+  "status": "COMPLETE_FOR_CURRENT_FLIP8_SRTL_SCOPE",
+  "device": {
+    "serial": "localhost:32023",
+    "model": "SM-F776B",
+    "sdk": 37,
+    "devPackageInitiallyPresent": false,
+    "fontScale": "1.0",
+    "stayOn": "0",
+    "screenOffTimeout": "300000",
+    "stateText": "Committed state: DeviceState{identifier=0, name='CLOSED', app_accessible=false, cancel_when_requester_not_on_top=false}\r\n----------------------\r\nBase state: DeviceState{identifier=3, name='OPENED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\nOverride state: DeviceState{identifier=0, name='CLOSED', app_accessible=false, cancel_when_requester_not_on_top=false}",
+    "appLocales": "Unknown package com.hwani1103.shiftbell.dev for userId 0",
+    "initialPackagePath": "",
+    "startedAtKst": "2026-10-11T10:56:56.974127+09:00",
+    "gitCommit": "9a29d911786affcc358524bae48a8188a83c2a34",
+    "deviceState": 0
+  },
+  "apk": {
+    "sha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e",
+    "installedSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e",
+    "match": true,
+    "path": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\fold8_ui_store_followup_2026_10_11\\fold8-ui-final-dev-debug.apk",
+    "bytes": 215879659,
+    "gitCommit": "9a29d911786affcc358524bae48a8188a83c2a34",
+    "kind": "Existing validated dev debug APK; no release/no hot reload"
+  },
+  "sourceProof": {
+    "time": "2026-10-11T02:33:30.988209+00:00",
+    "files": [
+      {
+        "path": "lib\\screens\\work_hours_settings_screen.dart",
+        "finalFold8Sha256": "23c1b5f04416119c0eb1ab3818c2c483f2797e93615416bf79097725c3ef1782",
+        "currentSha256": "23c1b5f04416119c0eb1ab3818c2c483f2797e93615416bf79097725c3ef1782",
+        "match": true
+      },
+      {
+        "path": "lib\\screens\\settings_tab.dart",
+        "finalFold8Sha256": "cb943207fa563964a958fc97d23953491c76186ef91139aa5fd26e5bbfb69e28",
+        "currentSha256": "cb943207fa563964a958fc97d23953491c76186ef91139aa5fd26e5bbfb69e28",
+        "match": true
+      },
+      {
+        "path": "lib\\screens\\help_screen.dart",
+        "finalFold8Sha256": "8a9a1d891e9d06300be653e30f19d0e21f9a445511a913f271bab908870fcf1e",
+        "currentSha256": "8a9a1d891e9d06300be653e30f19d0e21f9a445511a913f271bab908870fcf1e",
+        "match": true
+      },
+      {
+        "path": "lib\\screens\\all_alarms_history_view.dart",
+        "finalFold8Sha256": "60dee0228fe87f2bec64a4000492d8de3d15fe60c96b66a9b14d3ffd0fa15984",
+        "currentSha256": "60dee0228fe87f2bec64a4000492d8de3d15fe60c96b66a9b14d3ffd0fa15984",
+        "match": true
+      },
+      {
+        "path": "lib\\l10n\\app_pt.arb",
+        "finalFold8Sha256": "6e06df3ab77777b84103af5b6ef0c0ed9bcd8704625526719c8fb496b5b0e9f1",
+        "currentSha256": "6e06df3ab77777b84103af5b6ef0c0ed9bcd8704625526719c8fb496b5b0e9f1",
+        "match": true
+      },
+      {
+        "path": "lib\\l10n\\app_ko.arb",
+        "finalFold8Sha256": "64fe130e056074c095b0ebc4985c6d1e845f59185c2c60bed3ef7907895a81fa",
+        "currentSha256": "64fe130e056074c095b0ebc4985c6d1e845f59185c2c60bed3ef7907895a81fa",
+        "match": true
+      },
+      {
+        "path": "lib\\l10n\\app_hi.arb",
+        "finalFold8Sha256": "6de6053241a9213e797b46a4790fc4d8decd0f4e5093d3f04955a7e8d755b546",
+        "currentSha256": "6de6053241a9213e797b46a4790fc4d8decd0f4e5093d3f04955a7e8d755b546",
+        "match": true
+      },
+      {
+        "path": "lib\\l10n\\app_en.arb",
+        "finalFold8Sha256": "0a7fb39de75cd882723cf6e99166027b406ea98cc73fdf0b11f8fc37b6145ddd",
+        "currentSha256": "0a7fb39de75cd882723cf6e99166027b406ea98cc73fdf0b11f8fc37b6145ddd",
+        "match": true
+      },
+      {
+        "path": "lib\\l10n\\app_de.arb",
+        "finalFold8Sha256": "59b32502fd68a992831839fc94f8e853a15a0548ae9e85d62ad71e4b32314a95",
+        "currentSha256": "59b32502fd68a992831839fc94f8e853a15a0548ae9e85d62ad71e4b32314a95",
+        "match": true
+      },
+      {
+        "path": "lib\\constants\\ad_config.dart",
+        "finalFold8Sha256": "1cbaa3901d0be7d4412c3a3735e6eee1c8e13547582535c58520faa7d3910a3a",
+        "currentSha256": "1cbaa3901d0be7d4412c3a3735e6eee1c8e13547582535c58520faa7d3910a3a",
+        "match": true
+      },
+      {
+        "path": "android/app/src\\main\\kotlin\\com\\hwani1103\\shiftbell\\CoverAlarmLayout.kt",
+        "finalFold8Sha256": "e68c66545933c47b940bcaee3f06bc8943fee154208f335a4367cfe51bb5b72f",
+        "currentSha256": "e68c66545933c47b940bcaee3f06bc8943fee154208f335a4367cfe51bb5b72f",
+        "match": true,
+        "origin": "Preparation gate; unchanged native file in final Fold8 source inventory"
+      },
+      {
+        "path": "android/app/src\\main\\kotlin\\com\\hwani1103\\shiftbell\\CoverAlarmDisplay.kt",
+        "finalFold8Sha256": "64aae588643386336f21ca8900eb9d7b3533eb24b389ce6121f192d35417f4be",
+        "currentSha256": "64aae588643386336f21ca8900eb9d7b3533eb24b389ce6121f192d35417f4be",
+        "match": true,
+        "origin": "Preparation gate; unchanged native file in final Fold8 source inventory"
+      },
+      {
+        "path": "android/app/src\\main\\kotlin\\com\\hwani1103\\shiftbell\\NotificationHelper.kt",
+        "finalFold8Sha256": "8688290271ff4013392a7ba1c5d4330eed41a74b5e2d4792d9732a0f22ec9ec3",
+        "currentSha256": "8688290271ff4013392a7ba1c5d4330eed41a74b5e2d4792d9732a0f22ec9ec3",
+        "match": true,
+        "origin": "Preparation gate; unchanged native file in final Fold8 source inventory"
+      },
+      {
+        "path": "android/app/src\\main\\kotlin\\com\\hwani1103\\shiftbell\\AlarmActivity.kt",
+        "finalFold8Sha256": "bc183784ed895e689c72daca7ad3781fb042c4b9086053b2c1c118469ddd1c47",
+        "currentSha256": "bc183784ed895e689c72daca7ad3781fb042c4b9086053b2c1c118469ddd1c47",
+        "match": true,
+        "origin": "Preparation gate; unchanged native file in final Fold8 source inventory"
+      }
+    ],
+    "expectedApkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e",
+    "scope": "Previously changed UI/localization files match the validated bbae dev debug candidate; no Ultra product-source changes"
+  },
+  "review": {
+    "time": "2026-10-11T02:32:41.566299+00:00",
+    "latestCaptures": 252,
+    "reviewedLatest": 252,
+    "pending": [],
+    "changedHelpTopics": {
+      "ko": [
+        1,
+        9,
+        11,
+        20,
+        32,
+        33,
+        34
+      ],
+      "en": [
+        1,
+        9,
+        11,
+        17,
+        18,
+        19,
+        20
+      ],
+      "de": [
+        1,
+        9,
+        11,
+        17,
+        18,
+        19,
+        20
+      ],
+      "pt": [
+        1,
+        9,
+        11,
+        17,
+        18,
+        19,
+        20
+      ],
+      "hi": [
+        1,
+        9,
+        11,
+        17,
+        18,
+        19,
+        20
+      ]
+    },
+    "changedHelpTopicVisits": 35,
+    "coverRawCaptures": 26,
+    "coverLanguages": 5,
+    "actualUiCaptures": 3,
+    "historicalOsToastCaptures": 1,
+    "scope": "Flip8 opened inner UI and native cover. Captures include scroll/keyboard variants, not independent screen count. Synthetic denied/history/restore/startup/sharing layouts are not functional PASS."
+  },
+  "coverResults": [
+    {
+      "code": "ko",
+      "time": "2026-10-11T02:04:42.459Z",
+      "initial": {
+        "schedule_tab_last_effective": "false",
+        "currently_ringing_round": "1",
+        "ring_snooze_minutes": "5",
+        "last_alarm_refresh": "1791684138391",
+        "ring_snooze_revision": "0",
+        "last_checked_boot_time": "0",
+        "schedule_tab_enabled": "false",
+        "refresh_policy_version": "3",
+        "ring_counter": "1",
+        "currently_ringing_alarm_id": "1"
+      },
+      "controls": {
+        "snoozeDecreaseButton": {
+          "index": "0",
+          "text": "−",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeDecreaseButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "스누즈 시간 5분 줄이기",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "false",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            56,
+            316,
+            208,
+            468
+          ],
+          "drawing-order": "1",
+          "hint": ""
+        },
+        "snoozeButton": {
+          "index": "0",
+          "text": "",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "5분 후 다시 울리기",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            237,
+            288,
+            711,
+            497
+          ],
+          "drawing-order": "2",
+          "hint": ""
+        },
+        "snoozeIncreaseButton": {
+          "index": "2",
+          "text": "+",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeIncreaseButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "스누즈 시간 5분 늘리기",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            740,
+            316,
+            892,
+            468
+          ],
+          "drawing-order": "3",
+          "hint": ""
+        },
+        "dismissButton": {
+          "index": "0",
+          "text": "×",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/dismissButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "끄기",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            379,
+            554,
+            569,
+            744
+          ],
+          "drawing-order": "1",
+          "hint": ""
+        }
+      },
+      "snooze10": {
+        "alarmId": 1,
+        "history": [
+          {
+            "id": 1,
+            "alarm_id": 1,
+            "scheduled_time": "11:03",
+            "scheduled_date": "2026-10-11T11:03:51.299949",
+            "actual_ring_time": "2026-10-11T11:04:00+09:00",
+            "dismiss_type": "snoozed",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI ko 10m",
+            "created_at": "2026-10-11T11:04:00+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": 10
+          }
+        ]
+      },
+      "handover": {
+        "alarmId": 2,
+        "before": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "2",
+          "ring_snooze_minutes": "5",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "0",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "2",
+          "currently_ringing_alarm_id": "2"
+        },
+        "opened": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "2",
+          "ring_snooze_minutes": "30",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "5",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "2",
+          "currently_ringing_alarm_id": "2"
+        },
+        "returned": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "2",
+          "ring_snooze_minutes": "30",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "5",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "2",
+          "currently_ringing_alarm_id": "2"
+        },
+        "history": [
+          {
+            "id": 3,
+            "alarm_id": 2,
+            "scheduled_time": "11:04",
+            "scheduled_date": "2026-10-11T11:04:24.326280",
+            "actual_ring_time": "2026-10-11T11:04:37+09:00",
+            "dismiss_type": "swiped",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI ko handover",
+            "created_at": "2026-10-11T11:04:37+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": null
+          }
+        ]
+      },
+      "nativeControlResult": "PASS",
+      "visualReview": "PASS",
+      "visualReviewedAt": "2026-10-11T02:12:27.376748+00:00",
+      "reviewedCaptures": [
+        {
+          "file": "ko_cover_5m.png",
+          "sha256": "112a782cd9849649e91de12e23685758d5d9740bfff7de8cdd4ba2134a7aad41"
+        },
+        {
+          "file": "ko_cover_10m.png",
+          "sha256": "e1f7239cd24077c99503fd1766f465fd6a75aa7b928cab71e4e72d6568cd98cd"
+        },
+        {
+          "file": "ko_cover_30m.png",
+          "sha256": "b3796b78583087226cf1a251ca30a6e812265a4bc1efd4390979609f30cc0c62"
+        },
+        {
+          "file": "ko_handover_open.png",
+          "sha256": "f84f2c971601603052051db6ebdf649abd2d7415b5d72cbe28825e010379198c"
+        },
+        {
+          "file": "ko_handover_return.png",
+          "sha256": "041d47c10892295fada42b8ad6646aa0219125fb962bc38e23bfc0852dd4c048"
+        },
+        {
+          "file": "ko_cover_timeout_late.png",
+          "sha256": "14b5756ec9deb3d7e3e257e552458649788ce8db23897a95d3badf32f4b87d87"
+        }
+      ]
+    },
+    {
+      "code": "en",
+      "time": "2026-10-11T02:06:37.558Z",
+      "initial": {
+        "schedule_tab_last_effective": "false",
+        "currently_ringing_round": "3",
+        "ring_snooze_minutes": "5",
+        "last_alarm_refresh": "1791684138391",
+        "ring_snooze_revision": "0",
+        "last_checked_boot_time": "0",
+        "schedule_tab_enabled": "false",
+        "refresh_policy_version": "3",
+        "ring_counter": "3",
+        "currently_ringing_alarm_id": "3"
+      },
+      "controls": {
+        "snoozeDecreaseButton": {
+          "index": "0",
+          "text": "−",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeDecreaseButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Decrease snooze by 5 minutes",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "false",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            56,
+            316,
+            208,
+            468
+          ],
+          "drawing-order": "1",
+          "hint": ""
+        },
+        "snoozeButton": {
+          "index": "0",
+          "text": "",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Snooze for 5 minutes",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            237,
+            288,
+            711,
+            497
+          ],
+          "drawing-order": "2",
+          "hint": ""
+        },
+        "snoozeIncreaseButton": {
+          "index": "2",
+          "text": "+",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeIncreaseButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Increase snooze by 5 minutes",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            740,
+            316,
+            892,
+            468
+          ],
+          "drawing-order": "3",
+          "hint": ""
+        },
+        "dismissButton": {
+          "index": "0",
+          "text": "×",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/dismissButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Dismiss",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            379,
+            554,
+            569,
+            744
+          ],
+          "drawing-order": "1",
+          "hint": ""
+        }
+      },
+      "snooze10": {
+        "alarmId": 3,
+        "history": [
+          {
+            "id": 4,
+            "alarm_id": 3,
+            "scheduled_time": "11:05",
+            "scheduled_date": "2026-10-11T11:05:47.611918",
+            "actual_ring_time": "2026-10-11T11:05:55+09:00",
+            "dismiss_type": "snoozed",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI en 10m",
+            "created_at": "2026-10-11T11:05:55+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": 10
+          }
+        ]
+      },
+      "handover": {
+        "alarmId": 4,
+        "before": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "4",
+          "ring_snooze_minutes": "5",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "0",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "4",
+          "currently_ringing_alarm_id": "4"
+        },
+        "opened": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "4",
+          "ring_snooze_minutes": "30",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "5",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "4",
+          "currently_ringing_alarm_id": "4"
+        },
+        "returned": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "4",
+          "ring_snooze_minutes": "30",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "5",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "4",
+          "currently_ringing_alarm_id": "4"
+        },
+        "history": [
+          {
+            "id": 6,
+            "alarm_id": 4,
+            "scheduled_time": "11:06",
+            "scheduled_date": "2026-10-11T11:06:19.298614",
+            "actual_ring_time": "2026-10-11T11:06:32+09:00",
+            "dismiss_type": "swiped",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI en handover",
+            "created_at": "2026-10-11T11:06:32+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": null
+          }
+        ]
+      },
+      "nativeControlResult": "PASS",
+      "visualReview": "PASS",
+      "visualReviewedAt": "2026-10-11T02:12:27.376748+00:00",
+      "reviewedCaptures": [
+        {
+          "file": "en_cover_5m.png",
+          "sha256": "9a334da2d0c8f1953c0094747008a000b104a23efff0a0ecb832b7554f985355"
+        },
+        {
+          "file": "en_cover_10m.png",
+          "sha256": "464800d94480260577ebfff141a7f32a6dcf639d85d242f13fdf55b6450cda25"
+        },
+        {
+          "file": "en_cover_30m.png",
+          "sha256": "eef2bc7d4cedafd4083e66392051322c35cb0cff2148e9b5c6ce63d9c230805c"
+        },
+        {
+          "file": "en_handover_open.png",
+          "sha256": "18d590f79dc1618ec7209c9fabcbce0ac7d84b25bb75ce078b69723138c5d589"
+        },
+        {
+          "file": "en_handover_return.png",
+          "sha256": "d63352d02d4d7222080d2d38cb85213fcf12e24a597e6a31608f8867e9ece22f"
+        }
+      ]
+    },
+    {
+      "code": "de",
+      "time": "2026-10-11T02:07:48.664Z",
+      "initial": {
+        "schedule_tab_last_effective": "false",
+        "currently_ringing_round": "5",
+        "ring_snooze_minutes": "5",
+        "last_alarm_refresh": "1791684138391",
+        "ring_snooze_revision": "0",
+        "last_checked_boot_time": "0",
+        "schedule_tab_enabled": "false",
+        "refresh_policy_version": "3",
+        "ring_counter": "5",
+        "currently_ringing_alarm_id": "5"
+      },
+      "controls": {
+        "snoozeDecreaseButton": {
+          "index": "0",
+          "text": "−",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeDecreaseButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Schlummerzeit um 5 Minuten verkürzen",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "false",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            56,
+            316,
+            208,
+            468
+          ],
+          "drawing-order": "1",
+          "hint": ""
+        },
+        "snoozeButton": {
+          "index": "0",
+          "text": "",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "In 5 Minuten erneut klingeln",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            237,
+            288,
+            711,
+            497
+          ],
+          "drawing-order": "2",
+          "hint": ""
+        },
+        "snoozeIncreaseButton": {
+          "index": "2",
+          "text": "+",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeIncreaseButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Schlummerzeit um 5 Minuten verlängern",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            740,
+            316,
+            892,
+            468
+          ],
+          "drawing-order": "3",
+          "hint": ""
+        },
+        "dismissButton": {
+          "index": "0",
+          "text": "×",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/dismissButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Stoppen",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            379,
+            554,
+            569,
+            744
+          ],
+          "drawing-order": "1",
+          "hint": ""
+        }
+      },
+      "snooze10": {
+        "alarmId": 5,
+        "history": [
+          {
+            "id": 7,
+            "alarm_id": 5,
+            "scheduled_time": "11:06",
+            "scheduled_date": "2026-10-11T11:06:59.133436",
+            "actual_ring_time": "2026-10-11T11:07:06+09:00",
+            "dismiss_type": "snoozed",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI de 10m",
+            "created_at": "2026-10-11T11:07:06+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": 10
+          }
+        ]
+      },
+      "handover": {
+        "alarmId": 6,
+        "before": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "6",
+          "ring_snooze_minutes": "5",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "0",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "6",
+          "currently_ringing_alarm_id": "6"
+        },
+        "opened": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "6",
+          "ring_snooze_minutes": "30",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "5",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "6",
+          "currently_ringing_alarm_id": "6"
+        },
+        "returned": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "6",
+          "ring_snooze_minutes": "30",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "5",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "6",
+          "currently_ringing_alarm_id": "6"
+        },
+        "history": [
+          {
+            "id": 9,
+            "alarm_id": 6,
+            "scheduled_time": "11:07",
+            "scheduled_date": "2026-10-11T11:07:30.990377",
+            "actual_ring_time": "2026-10-11T11:07:44+09:00",
+            "dismiss_type": "swiped",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI de handover",
+            "created_at": "2026-10-11T11:07:44+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": null
+          }
+        ]
+      },
+      "nativeControlResult": "PASS",
+      "visualReview": "PASS",
+      "visualReviewedAt": "2026-10-11T02:12:27.376748+00:00",
+      "reviewedCaptures": [
+        {
+          "file": "de_cover_5m.png",
+          "sha256": "cb2a8c2c5c51f06dc6baeea104c5cc50f45653228e69d3e3c40866fdcfd7d780"
+        },
+        {
+          "file": "de_cover_10m.png",
+          "sha256": "6817c6afb060d4d00689fa7591f7f2b84dc1cc2e807e44dca3213ea5010d9868"
+        },
+        {
+          "file": "de_cover_30m.png",
+          "sha256": "b44839bf56d126b22af5fd0f389cb55c401a473ad3f5b855c609f4bc53b32c52"
+        },
+        {
+          "file": "de_handover_open.png",
+          "sha256": "574443afc2143b13a3e98cb0980aa96d65f37ea3e8c72ecffaaafb65e553c484"
+        },
+        {
+          "file": "de_handover_return.png",
+          "sha256": "dffa6b4c3ba9b24116190d256926adc1b9cde81de03f7624fb872f5148541700"
+        }
+      ]
+    },
+    {
+      "code": "pt",
+      "time": "2026-10-11T02:09:00.044Z",
+      "initial": {
+        "schedule_tab_last_effective": "false",
+        "currently_ringing_round": "7",
+        "ring_snooze_minutes": "5",
+        "last_alarm_refresh": "1791684138391",
+        "ring_snooze_revision": "0",
+        "last_checked_boot_time": "0",
+        "schedule_tab_enabled": "false",
+        "refresh_policy_version": "3",
+        "ring_counter": "7",
+        "currently_ringing_alarm_id": "7"
+      },
+      "controls": {
+        "snoozeDecreaseButton": {
+          "index": "0",
+          "text": "−",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeDecreaseButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Reduzir o adiamento em 5 minutos",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "false",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            56,
+            316,
+            208,
+            468
+          ],
+          "drawing-order": "1",
+          "hint": ""
+        },
+        "snoozeButton": {
+          "index": "0",
+          "text": "",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Adiar por 5 minutos",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            237,
+            288,
+            711,
+            497
+          ],
+          "drawing-order": "2",
+          "hint": ""
+        },
+        "snoozeIncreaseButton": {
+          "index": "2",
+          "text": "+",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeIncreaseButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Aumentar o adiamento em 5 minutos",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            740,
+            316,
+            892,
+            468
+          ],
+          "drawing-order": "3",
+          "hint": ""
+        },
+        "dismissButton": {
+          "index": "0",
+          "text": "×",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/dismissButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "Desligar",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            379,
+            554,
+            569,
+            744
+          ],
+          "drawing-order": "1",
+          "hint": ""
+        }
+      },
+      "snooze10": {
+        "alarmId": 7,
+        "history": [
+          {
+            "id": 10,
+            "alarm_id": 7,
+            "scheduled_time": "11:08",
+            "scheduled_date": "2026-10-11T11:08:10.044096",
+            "actual_ring_time": "2026-10-11T11:08:17+09:00",
+            "dismiss_type": "snoozed",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI pt 10m",
+            "created_at": "2026-10-11T11:08:17+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": 10
+          }
+        ]
+      },
+      "handover": {
+        "alarmId": 8,
+        "before": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "8",
+          "ring_snooze_minutes": "5",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "0",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "8",
+          "currently_ringing_alarm_id": "8"
+        },
+        "opened": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "8",
+          "ring_snooze_minutes": "30",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "5",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "8",
+          "currently_ringing_alarm_id": "8"
+        },
+        "returned": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "8",
+          "ring_snooze_minutes": "30",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "5",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "8",
+          "currently_ringing_alarm_id": "8"
+        },
+        "history": [
+          {
+            "id": 12,
+            "alarm_id": 8,
+            "scheduled_time": "11:08",
+            "scheduled_date": "2026-10-11T11:08:41.754416",
+            "actual_ring_time": "2026-10-11T11:08:55+09:00",
+            "dismiss_type": "swiped",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI pt handover",
+            "created_at": "2026-10-11T11:08:55+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": null
+          }
+        ]
+      },
+      "nativeControlResult": "PASS",
+      "visualReview": "PASS",
+      "visualReviewedAt": "2026-10-11T02:12:27.376748+00:00",
+      "reviewedCaptures": [
+        {
+          "file": "pt_cover_5m.png",
+          "sha256": "fd0e78fd364c209bc57b92319458aafc1dba2d03992db201566e1d43928a0f1e"
+        },
+        {
+          "file": "pt_cover_10m.png",
+          "sha256": "6add1a97de529100053cdca64f296f71e585d48da30c7d1b8b95062b41fe198e"
+        },
+        {
+          "file": "pt_cover_30m.png",
+          "sha256": "ab47eec4b608b19ab29cefec0b84bd98bfc29718549be6d7c14887a4d258b9c9"
+        },
+        {
+          "file": "pt_handover_open.png",
+          "sha256": "26a13bf7731f78756ed64bd44889e207a265939cc4940748f70a11a0fef6b199"
+        },
+        {
+          "file": "pt_handover_return.png",
+          "sha256": "70f8609403aa4d0038094b4212fed80de328ce855a706087f7ba3fb08106c117"
+        }
+      ]
+    },
+    {
+      "code": "hi",
+      "time": "2026-10-11T02:10:10.432Z",
+      "initial": {
+        "schedule_tab_last_effective": "false",
+        "currently_ringing_round": "9",
+        "ring_snooze_minutes": "5",
+        "last_alarm_refresh": "1791684138391",
+        "ring_snooze_revision": "0",
+        "last_checked_boot_time": "0",
+        "schedule_tab_enabled": "false",
+        "refresh_policy_version": "3",
+        "ring_counter": "9",
+        "currently_ringing_alarm_id": "9"
+      },
+      "controls": {
+        "snoozeDecreaseButton": {
+          "index": "0",
+          "text": "−",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeDecreaseButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "स्नूज़ का समय 5 मिनट घटाएं",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "false",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            56,
+            316,
+            208,
+            468
+          ],
+          "drawing-order": "1",
+          "hint": ""
+        },
+        "snoozeButton": {
+          "index": "0",
+          "text": "",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "5 मिनट बाद फिर बजाएं",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            237,
+            288,
+            711,
+            497
+          ],
+          "drawing-order": "2",
+          "hint": ""
+        },
+        "snoozeIncreaseButton": {
+          "index": "2",
+          "text": "+",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/snoozeIncreaseButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "स्नूज़ का समय 5 मिनट बढ़ाएं",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            740,
+            316,
+            892,
+            468
+          ],
+          "drawing-order": "3",
+          "hint": ""
+        },
+        "dismissButton": {
+          "index": "0",
+          "text": "×",
+          "resource-id": "com.hwani1103.shiftbell.dev:id/dismissButton",
+          "class": "android.widget.Button",
+          "package": "com.hwani1103.shiftbell.dev",
+          "content-desc": "बंद करें",
+          "checkable": "false",
+          "checked": "false",
+          "clickable": "true",
+          "enabled": "true",
+          "focusable": "true",
+          "focused": "false",
+          "scrollable": "false",
+          "long-clickable": "false",
+          "password": "false",
+          "selected": "false",
+          "bounds": [
+            379,
+            554,
+            569,
+            744
+          ],
+          "drawing-order": "1",
+          "hint": ""
+        }
+      },
+      "snooze10": {
+        "alarmId": 9,
+        "history": [
+          {
+            "id": 13,
+            "alarm_id": 9,
+            "scheduled_time": "11:09",
+            "scheduled_date": "2026-10-11T11:09:21.456558",
+            "actual_ring_time": "2026-10-11T11:09:29+09:00",
+            "dismiss_type": "snoozed",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI hi 10m",
+            "created_at": "2026-10-11T11:09:29+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": 10
+          }
+        ]
+      },
+      "handover": {
+        "alarmId": 10,
+        "before": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "10",
+          "ring_snooze_minutes": "5",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "0",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "10",
+          "currently_ringing_alarm_id": "10"
+        },
+        "opened": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "10",
+          "ring_snooze_minutes": "30",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "5",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "10",
+          "currently_ringing_alarm_id": "10"
+        },
+        "returned": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "10",
+          "ring_snooze_minutes": "30",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "5",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "10",
+          "currently_ringing_alarm_id": "10"
+        },
+        "history": [
+          {
+            "id": 15,
+            "alarm_id": 10,
+            "scheduled_time": "11:09",
+            "scheduled_date": "2026-10-11T11:09:52.927885",
+            "actual_ring_time": "2026-10-11T11:10:05+09:00",
+            "dismiss_type": "swiped",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI hi handover",
+            "created_at": "2026-10-11T11:10:05+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": null
+          }
+        ]
+      },
+      "nativeControlResult": "PASS",
+      "visualReview": "PASS",
+      "visualReviewedAt": "2026-10-11T02:12:27.376748+00:00",
+      "reviewedCaptures": [
+        {
+          "file": "hi_cover_5m.png",
+          "sha256": "fdfce3c78ff8f53dea51d478b4dc141abba24ce0d0912eded06717f64a2f0260"
+        },
+        {
+          "file": "hi_cover_10m.png",
+          "sha256": "4f7940aca83d9aed0f879b60779a5c3c20dad0849d9880cf3e46342b502ca737"
+        },
+        {
+          "file": "hi_cover_30m.png",
+          "sha256": "692551f527fdd204ba6f4ac6c748f57aecbc5c434b9adce36d1ebf4403807ab5"
+        },
+        {
+          "file": "hi_handover_open.png",
+          "sha256": "a0be4ce13f00acd9c8e3cf94ff36103df81ff6e814836765cfb9bc9d7bd8d012"
+        },
+        {
+          "file": "hi_handover_return.png",
+          "sha256": "58215c4332114818e8e0e5aac0204754b039a0e0c2602f8bd29bf60963af78b9"
+        }
+      ]
+    },
+    {
+      "code": "special",
+      "time": "2026-10-11T02:12:06.172Z",
+      "default5": {
+        "alarmId": 11,
+        "first": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "11",
+          "ring_snooze_minutes": "5",
+          "last_alarm_refresh": "1791684138391",
+          "ring_snooze_revision": "0",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "11",
+          "currently_ringing_alarm_id": "11"
+        },
+        "history": [
+          {
+            "id": 16,
+            "alarm_id": 11,
+            "scheduled_time": "11:10",
+            "scheduled_date": "2026-10-11T11:10:31.862342",
+            "actual_ring_time": "2026-10-11T11:10:34+09:00",
+            "dismiss_type": "snoozed",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI ko 5m",
+            "created_at": "2026-10-11T11:10:34+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": 5
+          }
+        ]
+      },
+      "naturalTimeout": {
+        "alarmId": 12,
+        "started": {
+          "schedule_tab_last_effective": "false",
+          "currently_ringing_round": "12",
+          "ring_snooze_minutes": "5",
+          "last_alarm_refresh": "1791684638756",
+          "ring_snooze_revision": "0",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "12",
+          "currently_ringing_alarm_id": "12"
+        },
+        "ended": {
+          "schedule_tab_last_effective": "false",
+          "last_alarm_refresh": "1791684638756",
+          "last_checked_boot_time": "0",
+          "schedule_tab_enabled": "false",
+          "refresh_policy_version": "3",
+          "ring_counter": "12"
+        },
+        "elapsedMs": 62811,
+        "history": [
+          {
+            "id": 18,
+            "alarm_id": 12,
+            "scheduled_time": "11:10",
+            "scheduled_date": "2026-10-11T11:10:59.363083",
+            "actual_ring_time": "2026-10-11T11:11:59+09:00",
+            "dismiss_type": "timeout",
+            "snooze_count": 0,
+            "shift_type": "Flip8 UI ko timeout",
+            "created_at": "2026-10-11T11:11:59+09:00",
+            "day_offset": 0,
+            "fixed_slot_time": null,
+            "snooze_minutes": null
+          }
+        ]
+      },
+      "nativeControlResult": "PASS",
+      "visualReview": "PASS",
+      "visualReviewedAt": "2026-10-11T02:12:27.376748+00:00",
+      "reviewedCaptures": [
+        {
+          "file": "ko_cover_timeout_late.png",
+          "sha256": "14b5756ec9deb3d7e3e257e552458649788ce8db23897a95d3badf32f4b87d87"
+        }
+      ]
+    }
+  ],
+  "coverManifest": [
+    {
+      "label": "ko_cover_5m",
+      "file": "ko_cover_5m.png",
+      "code": "ko",
+      "alarmId": 1,
+      "round": "1",
+      "selectedMinutes": 5,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:03:54.903Z",
+      "sha256": "112a782cd9849649e91de12e23685758d5d9740bfff7de8cdd4ba2134a7aad41"
+    },
+    {
+      "label": "ko_cover_10m",
+      "file": "ko_cover_10m.png",
+      "code": "ko",
+      "alarmId": 1,
+      "round": "1",
+      "selectedMinutes": 10,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:04:00.213Z",
+      "sha256": "e1f7239cd24077c99503fd1766f465fd6a75aa7b928cab71e4e72d6568cd98cd"
+    },
+    {
+      "label": "ko_cover_30m",
+      "file": "ko_cover_30m.png",
+      "code": "ko",
+      "alarmId": 2,
+      "round": "2",
+      "selectedMinutes": 30,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:04:31.781Z",
+      "sha256": "b3796b78583087226cf1a251ca30a6e812265a4bc1efd4390979609f30cc0c62"
+    },
+    {
+      "label": "ko_handover_open",
+      "file": "ko_handover_open.png",
+      "code": "ko",
+      "alarmId": 2,
+      "width": 1080,
+      "height": 2520,
+      "physicalDisplayId": "4633128672291735937",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:04:34.316Z",
+      "sha256": "f84f2c971601603052051db6ebdf649abd2d7415b5d72cbe28825e010379198c"
+    },
+    {
+      "label": "ko_handover_return",
+      "file": "ko_handover_return.png",
+      "code": "ko",
+      "alarmId": 2,
+      "selectedMinutes": 30,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:04:36.433Z",
+      "sha256": "041d47c10892295fada42b8ad6646aa0219125fb962bc38e23bfc0852dd4c048"
+    },
+    {
+      "label": "en_cover_5m",
+      "file": "en_cover_5m.png",
+      "code": "en",
+      "alarmId": 3,
+      "round": "3",
+      "selectedMinutes": 5,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:05:50.845Z",
+      "sha256": "9a334da2d0c8f1953c0094747008a000b104a23efff0a0ecb832b7554f985355"
+    },
+    {
+      "label": "en_cover_10m",
+      "file": "en_cover_10m.png",
+      "code": "en",
+      "alarmId": 3,
+      "round": "3",
+      "selectedMinutes": 10,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:05:55.319Z",
+      "sha256": "464800d94480260577ebfff141a7f32a6dcf639d85d242f13fdf55b6450cda25"
+    },
+    {
+      "label": "en_cover_30m",
+      "file": "en_cover_30m.png",
+      "code": "en",
+      "alarmId": 4,
+      "round": "4",
+      "selectedMinutes": 30,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:06:26.754Z",
+      "sha256": "eef2bc7d4cedafd4083e66392051322c35cb0cff2148e9b5c6ce63d9c230805c"
+    },
+    {
+      "label": "en_handover_open",
+      "file": "en_handover_open.png",
+      "code": "en",
+      "alarmId": 4,
+      "width": 1080,
+      "height": 2520,
+      "physicalDisplayId": "4633128672291735937",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:06:29.161Z",
+      "sha256": "18d590f79dc1618ec7209c9fabcbce0ac7d84b25bb75ce078b69723138c5d589"
+    },
+    {
+      "label": "en_handover_return",
+      "file": "en_handover_return.png",
+      "code": "en",
+      "alarmId": 4,
+      "selectedMinutes": 30,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:06:31.438Z",
+      "sha256": "d63352d02d4d7222080d2d38cb85213fcf12e24a597e6a31608f8867e9ece22f"
+    },
+    {
+      "label": "de_cover_5m",
+      "file": "de_cover_5m.png",
+      "code": "de",
+      "alarmId": 5,
+      "round": "5",
+      "selectedMinutes": 5,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:07:02.026Z",
+      "sha256": "cb2a8c2c5c51f06dc6baeea104c5cc50f45653228e69d3e3c40866fdcfd7d780"
+    },
+    {
+      "label": "de_cover_10m",
+      "file": "de_cover_10m.png",
+      "code": "de",
+      "alarmId": 5,
+      "round": "5",
+      "selectedMinutes": 10,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:07:06.617Z",
+      "sha256": "6817c6afb060d4d00689fa7591f7f2b84dc1cc2e807e44dca3213ea5010d9868"
+    },
+    {
+      "label": "de_cover_30m",
+      "file": "de_cover_30m.png",
+      "code": "de",
+      "alarmId": 6,
+      "round": "6",
+      "selectedMinutes": 30,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:07:37.929Z",
+      "sha256": "b44839bf56d126b22af5fd0f389cb55c401a473ad3f5b855c609f4bc53b32c52"
+    },
+    {
+      "label": "de_handover_open",
+      "file": "de_handover_open.png",
+      "code": "de",
+      "alarmId": 6,
+      "width": 1080,
+      "height": 2520,
+      "physicalDisplayId": "4633128672291735937",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:07:40.542Z",
+      "sha256": "574443afc2143b13a3e98cb0980aa96d65f37ea3e8c72ecffaaafb65e553c484"
+    },
+    {
+      "label": "de_handover_return",
+      "file": "de_handover_return.png",
+      "code": "de",
+      "alarmId": 6,
+      "selectedMinutes": 30,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:07:42.640Z",
+      "sha256": "dffa6b4c3ba9b24116190d256926adc1b9cde81de03f7624fb872f5148541700"
+    },
+    {
+      "label": "pt_cover_5m",
+      "file": "pt_cover_5m.png",
+      "code": "pt",
+      "alarmId": 7,
+      "round": "7",
+      "selectedMinutes": 5,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:08:13.076Z",
+      "sha256": "fd0e78fd364c209bc57b92319458aafc1dba2d03992db201566e1d43928a0f1e"
+    },
+    {
+      "label": "pt_cover_10m",
+      "file": "pt_cover_10m.png",
+      "code": "pt",
+      "alarmId": 7,
+      "round": "7",
+      "selectedMinutes": 10,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:08:17.436Z",
+      "sha256": "6add1a97de529100053cdca64f296f71e585d48da30c7d1b8b95062b41fe198e"
+    },
+    {
+      "label": "pt_cover_30m",
+      "file": "pt_cover_30m.png",
+      "code": "pt",
+      "alarmId": 8,
+      "round": "8",
+      "selectedMinutes": 30,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:08:49.198Z",
+      "sha256": "ab47eec4b608b19ab29cefec0b84bd98bfc29718549be6d7c14887a4d258b9c9"
+    },
+    {
+      "label": "pt_handover_open",
+      "file": "pt_handover_open.png",
+      "code": "pt",
+      "alarmId": 8,
+      "width": 1080,
+      "height": 2520,
+      "physicalDisplayId": "4633128672291735937",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:08:51.719Z",
+      "sha256": "26a13bf7731f78756ed64bd44889e207a265939cc4940748f70a11a0fef6b199"
+    },
+    {
+      "label": "pt_handover_return",
+      "file": "pt_handover_return.png",
+      "code": "pt",
+      "alarmId": 8,
+      "selectedMinutes": 30,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:08:53.944Z",
+      "sha256": "70f8609403aa4d0038094b4212fed80de328ce855a706087f7ba3fb08106c117"
+    },
+    {
+      "label": "hi_cover_5m",
+      "file": "hi_cover_5m.png",
+      "code": "hi",
+      "alarmId": 9,
+      "round": "9",
+      "selectedMinutes": 5,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:09:24.439Z",
+      "sha256": "fdfce3c78ff8f53dea51d478b4dc141abba24ce0d0912eded06717f64a2f0260"
+    },
+    {
+      "label": "hi_cover_10m",
+      "file": "hi_cover_10m.png",
+      "code": "hi",
+      "alarmId": 9,
+      "round": "9",
+      "selectedMinutes": 10,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:09:28.908Z",
+      "sha256": "4f7940aca83d9aed0f879b60779a5c3c20dad0849d9880cf3e46342b502ca737"
+    },
+    {
+      "label": "hi_cover_30m",
+      "file": "hi_cover_30m.png",
+      "code": "hi",
+      "alarmId": 10,
+      "round": "10",
+      "selectedMinutes": 30,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:09:59.639Z",
+      "sha256": "692551f527fdd204ba6f4ac6c748f57aecbc5c434b9adce36d1ebf4403807ab5"
+    },
+    {
+      "label": "hi_handover_open",
+      "file": "hi_handover_open.png",
+      "code": "hi",
+      "alarmId": 10,
+      "width": 1080,
+      "height": 2520,
+      "physicalDisplayId": "4633128672291735937",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:10:02.151Z",
+      "sha256": "a0be4ce13f00acd9c8e3cf94ff36103df81ff6e814836765cfb9bc9d7bd8d012"
+    },
+    {
+      "label": "hi_handover_return",
+      "file": "hi_handover_return.png",
+      "code": "hi",
+      "alarmId": 10,
+      "selectedMinutes": 30,
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:10:04.395Z",
+      "sha256": "58215c4332114818e8e0e5aac0204754b039a0e0c2602f8bd29bf60963af78b9"
+    },
+    {
+      "label": "ko_cover_timeout_late",
+      "file": "ko_cover_timeout_late.png",
+      "code": "ko",
+      "alarmId": 12,
+      "scope": "late round check for unwanted duplicate Samsung banner",
+      "width": 948,
+      "height": 1048,
+      "physicalDisplayId": "4633128672291735938",
+      "source": "actual device display; naturally scheduled alarm",
+      "time": "2026-10-11T02:11:46.385Z",
+      "sha256": "14b5756ec9deb3d7e3e257e552458649788ce8db23897a95d3badf32f4b87d87"
+    }
+  ],
+  "actualUi": {
+    "time": "2026-10-11T02:31:52.705Z",
+    "captures": [
+      {
+        "label": "final_actual_settings",
+        "file": "final_actual_settings.png",
+        "sha256": "d0fb7b3a9b8ac0913cd9248ba686917352268e7a1322f589a90601838ab3a72d",
+        "time": "2026-10-11T02:31:43.076Z"
+      },
+      {
+        "label": "final_actual_permission",
+        "file": "final_actual_permission.png",
+        "sha256": "5d7129f27b2baf1470040f82cf25017b617b1cbe90f0dd7ea5a5b1cfac6f0816",
+        "time": "2026-10-11T02:31:46.833Z"
+      },
+      {
+        "label": "final_actual_settings_return",
+        "file": "final_actual_settings_return.png",
+        "sha256": "20eba408c684546096862b9c2302a5ac291fd0f8a932d994796985eeb19158b1",
+        "time": "2026-10-11T02:31:51.812Z"
+      }
+    ],
+    "permissionSnapshot": {
+      "notification": "granted",
+      "overlay": "granted",
+      "exactAlarm": "granted",
+      "fullScreen": "granted",
+      "alarmChannel": "granted",
+      "xiaomi": false,
+      "sdk": 37
+    },
+    "runtimeErrors": [],
+    "scope": "Actual settings icon tap, permission menu tap, panel scroll and Back; cover transitions separately in cover_results; no P0 permission grant inference from settings open",
+    "visualReview": "PASS",
+    "reviewedAt": "2026-10-11T02:32:31.477431+00:00",
+    "reviewScope": "Manually viewed raw actual settings/permission/Back images and replacement Portuguese privacy top. Scroll variant confirms close control accessible; layout only."
+  },
+  "koPriorFix": {
+    "time": "2026-10-11T02:31:35.292Z",
+    "captures": [
+      "ko_open_priorfix_friend_add",
+      "ko_open_priorfix_friend_add_keyboard",
+      "ko_open_priorfix_share_active"
+    ],
+    "errors": [],
+    "scope": "Friend-add keyboard and active-sharing SafeArea layout only; unsaved UI state; no Firebase publication or friend creation."
+  },
+  "osToastFollowup": {
+    "time": "2026-10-11T02:31:17.636Z",
+    "original": {
+      "name": "pt_open_finalfix_privacy",
+      "bottom": false,
+      "capture": {
+        "label": "layout_audit/pt_open_finalfix_privacy",
+        "file": "layout_audit/pt_open_finalfix_privacy.png",
+        "sha256": "b34d51b70e60e0dd5876318552a2686d37a4a3f388fecc79c77f43ca0c4e2e15",
+        "time": "2026-10-11T02:25:19.128Z"
+      },
+      "review": "PENDING_VISUAL_REVIEW",
+      "visibleTextCount": 4,
+      "exceeded": 0
+    },
+    "replacement": {
+      "name": "pt_open_finalfix_privacy",
+      "bottom": false,
+      "capture": {
+        "label": "layout_audit/pt_open_finalfix_privacy",
+        "file": "layout_audit/pt_open_finalfix_privacy.png",
+        "sha256": "c98bc2373498567fa68e6ae04b5b0c96ac2315341e3436193d498aca558b2c21",
+        "time": "2026-10-11T02:31:17.630Z"
+      },
+      "review": "PENDING_VISUAL_REVIEW",
+      "visibleTextCount": 4,
+      "exceeded": 0
+    },
+    "archive": "os_toast_original",
+    "visualReview": "PASS",
+    "scope": "Only OS-obscured Portuguese privacy top frame recaptured; no product change or new functional PASS",
+    "reviewedAt": "2026-10-11T02:32:31.477431+00:00",
+    "reviewScope": "Manually viewed raw actual settings/permission/Back images and replacement Portuguese privacy top. Scroll variant confirms close control accessible; layout only."
+  },
+  "textTriage": {
+    "time": "2026-10-11T02:32:37.833534+00:00",
+    "captures": 252,
+    "foreignHangul": [
+      {
+        "name": "pt_open_remaining_calendar_month",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_day",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_day_keyboard",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_bulk",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_ot",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_week",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_week_bottom",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_month",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_day",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_day_keyboard",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_bulk",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_ot",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_week",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_week_bottom",
+        "text": "광고 영역 56dp"
+      }
+    ],
+    "renderTextExceedsForManualTriage": [],
+    "foreignFeatureScopeForManualTriage": [],
+    "scope": "Captured Flutter text only; OS keyboard/tutorial/toasts excluded. Automated triage does not establish visual or functional PASS."
+  },
+  "cleanupFixture": {
+    "time": "2026-10-11T02:32:58.736Z",
+    "databaseTablesEqual": true,
+    "preferencesEqual": true,
+    "scope": "Fresh dev installation only; native permission grants retained as authorized; file/device-setting cleanup follows"
+  },
+  "cleanup": {
+    "time": "2026-10-11T02:33:21.873371+00:00",
+    "files": [
+      {
+        "path": "/sdcard/Download/ShiftBell/ShiftBell_Backup_dev_auto_261011_113252.json",
+        "owner": "u0_a334",
+        "currentAppOwner": "u0_a352",
+        "ownershipEvidence": "Current-session date/name plus dev-package/model or exact owned fixture content; shared-file uid differs from current package uid",
+        "sha256": "479abb5b1e4388b791bb966fa5f92d475873c7f36aeae9ca8221a9515d6de9bf",
+        "archive": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\flip8_ui_finish_2026_10_11\\shared_file_archive\\ShiftBell_Backup_dev_auto_261011_113252.json",
+        "removed": true
+      },
+      {
+        "path": "/sdcard/Download/ShiftBell/log/ShiftBell_Diag_dev_261011_113253.txt",
+        "owner": "u0_a334",
+        "currentAppOwner": "u0_a352",
+        "ownershipEvidence": "Current-session date/name plus dev-package/model or exact owned fixture content; shared-file uid differs from current package uid",
+        "sha256": "d37719ee790ba7e843fc232087f7438f604491d6bd1e459265a581fa00588130",
+        "archive": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\flip8_ui_finish_2026_10_11\\shared_file_archive\\ShiftBell_Diag_dev_261011_113253.txt",
+        "removed": true
+      }
+    ],
+    "settings": {
+      "font_scale": "1.0",
+      "stay_on_while_plugged_in": "0",
+      "screen_off_timeout": "300000"
+    },
+    "deviceState": "Committed state: DeviceState{identifier=0, name='CLOSED', app_accessible=false, cancel_when_requester_not_on_top=false}\r\n----------------------\r\nBase state: DeviceState{identifier=3, name='OPENED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\nOverride state: DeviceState{identifier=0, name='CLOSED', app_accessible=false, cancel_when_requester_not_on_top=false}",
+    "appLocales": "Locales for com.hwani1103.shiftbell.dev for user 0 are []",
+    "verified": true,
+    "scope": "This fresh dev package only; test fixtures restored; authorized native grants and installed empty dev application retained; no files from other sessions/devices removed"
+  },
+  "finalDeviceProof": {
+    "time": "2026-10-11T02:33:30.988209+00:00",
+    "serial": "localhost:32023",
+    "model": "SM-F776B",
+    "installedApkPath": "/data/app/~~kWXevDN3HUXABLbGbVNAvA==/com.hwani1103.shiftbell.dev-Us5QvKTWEQqS4txe8awrKA==/base.apk",
+    "installedSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e",
+    "installedHashMatches": true,
+    "currentPendingDevAlarms": 0,
+    "alarmDumpEvidence": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\flip8_ui_finish_2026_10_11\\cleanup_os_alarm_dump.txt",
+    "scope": "Current pending/inflight dump before Removal history, after owned cleanup and force-stop; not alarm delivery PASS. USB device untouched."
+  },
+  "priorBuild": {
+    "session": "fold8_ui_store_followup_2026_10_11",
+    "log": "help_fix_critical_build.log",
+    "exit": 0,
+    "kind": "Previously validated immutable dev debug APK; no product edit or release build in Flip8 session"
+  },
+  "boundaries": [
+    "Opened inner Flutter UI plus actual native cover on this Flip8 SRTL; SRTL state changes are not physical hinge tests",
+    "Synthetic denied permissions/history/restore/startup/sharing displays are presentation-only",
+    "Natural cover alarms, snooze/dismiss/timeout verified here; no secure PIN/Doze/all-OEM guarantee",
+    "Original fontScale 1.0; USB device untouched",
+    "Flip4 full inner review excluded by user; original historical cleanup UNCONFIRMED remains",
+    "Fold8 store raw five languages done previously; S26 and promotional composites await user data/themes; ask before OT/weekly capture"
+  ],
+  "artifactHashes": [
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/layout_audit/coverage_final.json",
+      "sha256": "668f4c7dfac2dcc910071c6f467585ce27e681a35c22f532e6f40ecfc9c439a4"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/layout_audit/visual_reviews.json",
+      "sha256": "aa192829f7d5f97210cb67fa786d95f315870d96d64ad94346688f539b15d14e"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/ui_queue_results.json",
+      "sha256": "9dc12102b88a3e713c4207f729f22495dd7595f99afcdbb127a121a2b477c007"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/cover_results.json",
+      "sha256": "24613ef8a7cd93e2e58f554d7b097acc23e27c93853d7241cdbaa02322345fad"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/cover_manifest.json",
+      "sha256": "777eb80aba87d0a2b77f700949e0580cfd31b0df29ebeed8b2b8caf4587b6194"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/cover_owned_ids.json",
+      "sha256": "ae406a70ca8d4d8f9d6e469e4076c28561e00e87721904f099167a1378763663"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/final_real_ui.json",
+      "sha256": "8ac9408240fecbf992c78bccbfdf3c67e1d34dfb760fbfc21142c7caf8cbb468"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/os_toast_followup.json",
+      "sha256": "71d5e1796b3aa588ad1130f56151114d16ef8e9c584d48f3accb195fd9d472e5"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/cleanup_database_after.json",
+      "sha256": "40b03b044b8a13c6addb8760a30b6af5a963b23111ab12eb6384045d871c9241"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/cleanup_preferences_after.json",
+      "sha256": "cae5fe18cc530329ccd426a592e653ac4c7098dd6cb9cdfcbbb6498771c60358"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/cleanup_final.json",
+      "sha256": "56ea3ea5cc9d35d851e4a33c33ed8222f64c1144f93f07bc161ab196855aac5d"
+    },
+    {
+      "path": "artifacts/flip8_ui_finish_2026_10_11/final_device_proof.json",
+      "sha256": "0925785ceef345b7a0aefd8f7532ea3c1cf3b5688ca33fb263a2350b2741c7b5"
+    }
+  ],
+  "artifactRoot": "artifacts/flip8_ui_finish_2026_10_11"
+}
