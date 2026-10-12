@@ -41,20 +41,25 @@ class _ShiftNamesDialogState extends State<ShiftNamesDialog> {
   }
 
   void _save() {
-    final names = [
-      ..._original.entries
-          .where((e) => !_deleted.contains(e.key))
-          .map((e) => e.value.text.trim()),
-      ..._added.map((c) => c.text.trim())
+    final entries = [
+      ..._original.entries.where((e) => !_deleted.contains(e.key)).map((e) =>
+          (name: e.value.text.trim(), unchanged: e.key == e.value.text.trim())),
+      ..._added.map((c) => (name: c.text.trim(), unchanged: false))
     ];
-    for (final name in names) {
-      final issue = validateShiftName(name) ??
+    final names = entries.map((e) => e.name).toList();
+    for (final entry in entries) {
+      final name = entry.name;
+      var issue = validateShiftName(name);
+      // Existing names can exceed today's limit. An unrelated edit must not
+      // force the user to rename or delete that saved name first.
+      if (entry.unchanged && issue == ShiftNameIssue.tooLong) issue = null;
+      issue = issue ??
           (names.where((s) => s == name).length > 1
               ? ShiftNameIssue.duplicate
               : null);
       if (issue != null) {
         final l = context.l10n;
-        setState(() => _error = switch (issue) {
+        setState(() => _error = switch (issue!) {
               ShiftNameIssue.empty => l.onboardingEnterShiftName,
               ShiftNameIssue.tooLong =>
                 l.onboardingCharLimitError(shiftNameLengthLimit(name)),

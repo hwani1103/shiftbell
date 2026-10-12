@@ -3590,6 +3590,10 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
   // 이미 쓰던 도형 10종 순환 배정(_nextEtcIconIndex)만 바로 적용한다. 한국어는
   // 기존 동작 그대로.
   Future<void> _handleSave() async {
+    if (_autoClassifying) return;
+    // Keep the sheet over the underlying tab for the whole rapid-tap window.
+    // Otherwise a second Save tap can land on navigation after Navigator.pop.
+    final tapShield = Future<void>.delayed(const Duration(milliseconds: 700));
     var iconIndex = 0;
     String? predictedCategory;
     if (!mounted || !context.usesKoreanFeatures) return;
@@ -3615,6 +3619,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
       iconIndex = await _nextEtcIconIndex();
       debugPrint('⚠️ 카테고리 자동분류 실패(기타 아이콘으로 저장): $e');
     } finally {
+      await tapShield;
       if (mounted) setState(() => _autoClassifying = false);
     }
     if (!mounted) return;

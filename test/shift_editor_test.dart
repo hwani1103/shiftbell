@@ -43,6 +43,47 @@ void main() {
     }
   });
 
+  testWidgets('a saved long Korean name does not block an unrelated rename',
+      (tester) async {
+    ShiftNameEdits? result;
+    await tester.pumpWidget(ScreenUtilInit(
+        designSize: const Size(360, 780),
+        builder: (context, _) {
+          ScreenUtil.configure(
+              data: appContentMediaQuery(
+                  MediaQueryData.fromView(View.of(context))),
+              designSize: const Size(360, 780));
+          return MaterialApp(
+            locale: const Locale('ko'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: Builder(
+                builder: (context) => Scaffold(
+                    body: TextButton(
+                        child: const Text('open'),
+                        onPressed: () async {
+                          result = await showDialog<ShiftNameEdits>(
+                              context: context,
+                              builder: (_) => const ShiftNamesDialog(
+                                  names: ['주간근무지원반', '휴무'], used: {}));
+                        }))),
+          );
+        }));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField).at(1), '연차');
+    await tester
+        .tap(find.text(lookupAppLocalizations(const Locale('ko')).commonSave));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(result!.renamed, {'휴무': '연차'});
+  });
+
   for (final locale in [const Locale('ko'), const Locale('en')]) {
     for (final size in [
       const Size(320, 568),

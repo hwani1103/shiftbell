@@ -1,0 +1,238 @@
+Google Ads / 앱 캠페인(UAC) 출시 준비 검토
+검토일: 2026-10-11 KST
+연결 항목: 핵심 코어 체크리스트 R02 / R04, 바탕화면 최종 출시 준비문서 5번
+범위: 1~10절은 검토와 문서화만 수행한 최초 기록. 사용자 후속 요청으로 수행한 콘솔 설정 변경과 최신 상태는11절을 따른다.
+
+1. 목표와 결론
+
+사용자 목표: 설치 후 실제 사용을 확대하고 자연 유입으로 이어지는 선순환을 만든다.
+권장 측정 흐름: 신규 유입 → 온보딩 완료 → 재방문·실사용 유지 → 자연 유입 추이.
+
+- 기존 Firebase Analytics로 설치 후 행동 전환을 구성할 수 있다. Google Ads를 시작하기 위해 별도 광고주 SDK/MMP를 추가해야 한다는 근거는 이번 검토에서 발견하지 못했다.[S1/S2]
+- 초기 전환 후보는 onboarding_complete다. 다만 초기 설정 완료의 대리 지표이며, 계속 사용하거나 실제 알람이 정상 작동했다는 뜻은 아니다. 최종 성과는 신규 유입 집단의 D1/D7 재방문과 어제 DAU를 함께 본다.
+- 코드에 이벤트가 있다는 사실과 Google Ads에서 그 이벤트로 최적화할 준비가 끝났다는 사실은 다르다. 계정 연결·prod 이벤트 수신·전환 가져오기·캠페인 목표는 실제 콘솔 확인이 남아 있다.
+- 가장 먼저 확인할 것은 AdMob 동의 모드의 광고용/분석용 두 설정 및 Firebase 반영이다. UMP가 이를 자동 전달할 수 있으므로 setConsent 직접 호출이 없다는 이유만으로 구현 누락으로 판정하지 않는다.[S3/S4]
+- 현재 증거로 확정한 '광고 때문에 무조건 앱 코드를 추가해야 하는 결함'은 없다. 다만 동의 모드와 기본값/초기 수집 정책을 확인하기 전에는 '재업데이트 없이 모든 준비 완료'로 확정할 수 없다.
+
+2. 코드에서 확인한 준비 상태
+
+2-1. SDK와 초기화
+- pubspec.lock: firebase_core 4.13.0, firebase_analytics 12.4.6, google_mobile_ads 9.1.0.
+- 설치된 Flutter 플러그인의 Android 의존성 정의: Firebase BoM 34.17.0, Google Mobile Ads 25.4.0, UMP 4.0.0.
+- 이 값은 잠금 파일과 로컬 플러그인 Gradle 정의를 읽은 결과다. 이번에 의존성을 다시 해결하거나 최종 AAB를 빌드한 결과가 아니다.
+- prod v1.0.23도 위 세 Flutter 패키지 버전이 같다. 이 광고 측정 기반은 이번 dev에서 처음 생기는 기능이 아니다.
+- main.dart 정상 초기화 경로에서 Firebase 초기화를 먼저 시도하고, 첫 화면 이후 BannerAdSlot → AdService.warmUp → UMP 동의 수집 → Mobile Ads 초기화로 진행한다. 공식 UMP 자동 연동의 정상 순서와 맞는다.[S3]
+- 선택 초기화 실패/시간 초과까지 포함한 모든 실기기 상황의 신호 순서를 이번 정적 검토로 확정하지는 않았다.
+
+2-2. prod/dev/공유 웹 분리
+- Android prod 패키지와 dev(.dev) 패키지가 분리되어 있다. google-services.json에 둘 다 등록되어 있고 Firebase 옵션의 프로젝트도 일치한다.
+- dev는 Manifest 기본값부터 Analytics 수집 false이고 Dart 초기화에서도 false로 유지한다. prod는 true다.
+- AppAnalytics는 웹에서 앱 행동 이벤트를 보내지 않는다. 공유 웹은 별도 web Firebase 옵션과 friend_view_web 이벤트를 사용한다.
+- 관리자 대시보드 GA4 쿼리는 prod Android streamId를 필터로 사용한다. 웹 성공 열람은 별도 웹 스트림 쿼리다.
+- 주의: 대시보드 필터가 Google Ads의 전환 설정까지 자동으로 제한해 주지는 않는다. Ads/GA4에서 반드시 prod Android 앱/스트림 이벤트를 선택한다. prod debug도 Analytics는 수집하므로 개발 검증은 기존 지침대로 dev debug를 유지한다.
+
+2-3. 이미 존재하는 이벤트
+- prod 정의 17개 → 현행 dev 정의 48개. 16개 유지, 32개 추가, 기존 tab_selected 제거. 자동 수집 이벤트(first_open 등)는 이 수에 포함하지 않는다.
+- onboarding_complete, alarm_template_saved, shift_assigned, calendar_theme_changed, schedule_created, sleep_record_saved 등은 기존 prod에도 선언되어 있다. 운영 수신 여부와 수집량은 별도 확인 대상이다.
+- 이번 dev에는 전체 조 근무표, 변경/삭제 행동, 알람 운영 상태 관측 등이 추가되어 있다. 출시 전 dev에서만 발생한 이벤트가 prod 보고서에 없는 것은 정상이다.
+- AppAnalytics는 비동기 전송이며 Analytics 객체가 없거나 전송 호출이 실패하면 앱 기능을 막지 않는다. SDK에 넘기기 전 실패한 이벤트를 앱 자체에서 영구 보관·재전송하지 않으므로 회계 장부처럼 100% 완전한 기록으로 보지 않는다.
+
+3. 목표별 이벤트 선택안 — 추천안이며 콘솔에 적용하지 않음
+
+첫 실행: first_open
+- Firebase 자동 수집. 설치 후 최초 실행을 뜻하며 Google Play 다운로드 자체와 다르다.[S1]
+- Play 설치 전환과 Firebase 첫 실행 전환을 동시에 핵심 목표로 써서 같은 유입을 중복 평가하지 않도록 캠페인 목표를 확인한다.
+
+초기 활성화: onboarding_complete — 초기 주목표 후보
+- 근무 형태/근무표와 알람 템플릿 저장 후, 초기 알람 생성 시도·갱신 다음에 전송한다.
+- regular/irregular 분류만 포함한다. 언어별로 공통 사용할 수 있다.
+- 알람이 0개일 수도 있고 권한/실제 울림의 성공 증명이 아니다. 초기화 후 온보딩 재수행에서도 다시 발생할 수 있어 이벤트 횟수를 신규 사용자 수로 해석하면 안 된다.
+- 신규 첫 실행 집단 중 실제 온보딩 완료자의 비율을 본다. 서로 다른 기간의 전체 이벤트 수끼리 나눠 전환율로 만들지 않는다.
+
+추가 기능 정착: 보조 관측
+- shift_assigned: 근무 배정 저장 후 전송. 일괄 배정은 이벤트 1회와 count=날짜 수를 보낸다. 이벤트 횟수는 배정 날짜 수가 아니다.
+- alarm_template_saved: 설정 화면에서 변경된 알람 템플릿 저장을 완료했을 때 전송. 온보딩에서 설정한 모든 사용자를 포함하는 지표가 아니며 알람 0개로 비우는 변경도 포함할 수 있다.
+- all_shifts_opened / team_roster_created: 전체 조 기능의 사용 관측. 규칙적 근무 등 해당 기능을 쓰는 사용자 특성을 고려한다.
+- calendar_theme_changed: 테마가 다른 값으로 변경될 때 기록하며 영구 저장 완료보다 앞선다. 개인화 관심의 보조 지표로 적절하고 핵심 실사용 전환으로는 약하다.
+- schedule_created: 일정 DB 저장 후 기록. 알림 예약 성공 여부와는 별개다. dev 일정/수면/친구 공유 등은 한국어 기능 범위이므로 모든 국가 공통 전환으로 선택하지 않는다. 기준은 사용자 UI 언어이며 국적과 같지 않다.
+
+알람 끄기/연장: 제품 사용의 참고 지표
+- alarm_dismissed / alarm_snoozed는 Native 이력을 다음 앱 실행/복귀 때 읽어 전송한다. 최대 72시간 이내 이력, 유형당 최대 40회 등 제한이 있고 수집 최초에는 기준선만 저장한다.
+- 따라서 실제 울림 당일 즉시 수집되는 이벤트가 아니며, 앱을 다시 열지 않으면 누락되거나 늦어진다. 첫 광고 캠페인의 주목표로 추천하지 않는다.
+- alarm_no_response, alarm_fired, 자동 갱신/예약 성공/실패는 사용자의 만족·의도적인 사용 완료를 직접 뜻하지 않는다. 광고가 이 수를 늘리도록 최적화하지 않는다.
+
+재방문: D1/D7 및 DAU
+- 기존 Firebase 측정과 GA4 리텐션/코호트 보고서로 관측할 수 있어, 기본 재방문 지표를 위해 새 앱 이벤트가 필수는 아니다.[S7]
+- 현 대시보드에도 prod 스트림의 firstSessionDate 기반 코호트와 일별 DAU 쿼리가 있다. 다만 유입 캠페인별 활성화/재방문 비교 쿼리는 현재 작성되어 있지 않다. 우선 GA4에서 출처·국가·신규 집단을 나눠 보고, 필요하면 출시 후 대시보드에 추가할 수 있다.
+- 교대근무 앱은 쉬는 날 앱을 열지 않거나 알람만 이용할 수 있다. D1 하나로 실패 판정하지 말고 D7과 주간 재방문도 함께 본다. 앱 DAU는 알람만 계속 쓰는 모든 사용자를 완전히 세는 지표가 아니다.
+
+4. 광고 집행 방향
+
+- 신규 사용자를 모으면서 앱 안 행동까지 유도하는 것은 App installs(ACi) 캠페인의 인앱 행동 최적화로 가능하다. '실제 사용 확대'라는 목표만으로 기존 사용자 재참여용 App engagement(ACe)를 먼저 도입할 필요는 없다.[S5]
+- 데이터가 충분해지면 onboarding_complete 한 가지를 주목표 후보로 평가한다. 여러 이질적인 이벤트를 한 목표에 합쳐 클릭·테마변경·실사용을 같은 가치로 취급하지 않는다.[S5]
+- Google 권고는 캠페인에서 하루 10명 이상의 서로 다른 사용자가 수행하는 인앱 행동을 고르는 것이다. 이는 이벤트 10회와 다르고, 앱 전체 자연 유입까지 합친 10명과도 다르다.[S6]
+- 실제 수집량과 캠페인 규모를 확인하지 않았으므로 현재 즉시 인앱 행동 입찰이 적절하다고 확정하지 않는다. 표본이 부족하면 설치 확보 단계에서 온보딩/재방문을 관측한 뒤 전환한다. 예산이나 광고 집행은 이번에 정하거나 실행하지 않았다.
+
+5. 동의 모드 — 출시 전 확인이 필요한 가장 큰 미확인 항목
+
+확인된 사실
+- UMP 4.0.0 선언은 공식 자동 연동 최소 Android 3.2.0 이상 조건을 만족한다.[S3]
+- 이전 Flip8 실기기에서는 EEA 동의창, 거부→허용→철회, 재실행 후 선택 유지, 배너 교체가 검증되어 있다. 이 A03 PASS는 보존한다.
+- 당시 증거는 dev 앱이며 Analytics 수집은 차단되어 있다. 저장된 PurposeConsents 변화와 canRequestAds만으로 Firebase의 네 가지 동의 신호까지 검증했다고 확장하지 않는다.
+- 앱 소유 코드에는 Firebase setConsent 직접 호출 및 네 가지 google_analytics_default_allow_* 기본값이 없다. prod 수집은 초기부터 켜져 있다.
+- 기본값 명시가 없다는 사실만으로 위반이나 버그로 판정하지 않는다. Google은 기본값 설정을 선택 사항으로 설명하고 있으며, UMP 자동 연동과 선택한 모드/지역 동작을 함께 확인해야 한다.[S3/S8]
+
+콘솔에서 우선 확인할 항목
+1) AdMob → Privacy & messaging → European regulations → Settings.
+2) 광고 목적 동의 모드(광고 저장/개인화/광고 사용자 데이터) 설정 상태.
+3) 분석 목적 동의 모드(analytics storage) 설정 상태. 광고용과 별도 체크 항목이다.[S4]
+4) 실제 prod 앱에 연결된 메시지의 게시·대상 지역·언어와 정책 링크.
+5) 첫 실행 선택 전/허용/거부/철회/재실행에서 Firebase의 ad_storage, analytics_storage, ad_user_data, ad_personalization 신호가 선택과 일치하는지. personalization은 _npa 로그 등으로 검증할 수 있다.[S9]
+
+결과에 따른 해결 방향
+- 지원 SDK + 적절한 UMP 설정 + 실제 신호 반영이 확인되면 직접 setConsent 연결 코드를 중복 추가할 이유가 없다.
+- 콘솔 설정만 빠졌고 현재 UMP로 정상 반영된다면 콘솔 설정으로 해결 가능한 범위다. 단, 설정은 같은 계정의 다른 EU 메시지에도 영향을 줄 수 있으므로 적용 대상을 확인한다.[S4]
+- 동의 전 수집을 완전히 막는 Basic 모드를 선택한다면 현재 prod 수집 true 구조를 그대로 완료 처리할 수 없다. 수집 시작/중지와 첫 실행 순서의 코드 변경·검증이 필요하다.[S8]
+- 별도의 지역 기본값이나 자동 연동이 반영되지 않는 경로가 필요하면 그 부분만 최소 수정 후보로 삼는다. 무조건 전체 분석을 켜거나 canRequestAds=true를 모든 동의 허용으로 바꾸지 않는다.
+- 실제 계정 설정과 최종 prod 신호를 이번에 읽거나 변경하지 않았으므로 R02/R04는 미완료다. 독일 등 EEA 대상 광고를 시작하기 전에 이 확인을 마쳐야 한다.[S8]
+
+6. 자연 유입으로 이어지는지 확인하는 방법
+
+- 광고로 들어온 신규 사용자의 온보딩·D7 재방문이 좋아지는지 먼저 확인한다. 광고 전후 전체 DAU만 비교하면 광고 규모와 기존 사용자의 변화가 섞인다.
+- 자연 유입 추이는 Play의 유입 출처와 실제 획득 지표를 별도로 기록하고, 국가·스토어 등록정보·기간·광고 집행량과 함께 비교한다.
+- 공식 2026년 문서는 스토어 등록정보 보고서의 클릭/CTR와 완료된 사용자 획득을 구분한다. 클릭 증가를 실제 설치 증가로 기록하지 않는다.[S10]
+- Play 개요의 Paid and direct에는 광고뿐 아니라 추천·앱 이름 검색이 함께 들어갈 수 있다. 이를 전부 유료 유입으로 간주하거나 전체 설치에서 Ads 전환을 뺀 나머지를 정확한 자연 유입으로 계산하지 않는다.[S10]
+- 앱 재사용 증가와 자연 유입 증가가 함께 보이면 좋은 징후다. 광고가 검색 순위를 올렸다는 인과관계까지 자동으로 증명되는 것은 아니다. 국가/기간/광고량을 맞춘 비교로 평가한다.
+- 이를 위해 당장 추천인 코드·로그인·새 분석 SDK를 출시 전에 추가할 필요는 없다. 기본 측정부터 사용한다.
+
+7. 남은 작업의 순서와 앱 수정 필요 여부
+
+출시 후보/AAB 확정 전에
+[완료: 검토] 기존 SDK·이벤트·prod/dev/web 분리 및 사용자 목표 대조.
+[미확인] AdMob 광고용/분석용 동의 모드와 초기 수집 정책 확인 → 코드가 필요한지 최종 결정.
+[미확인] 실제 광고 ID·prod 앱/메시지 연결, 공개 개인정보처리방침 및 Play 데이터 보안과 실제 측정 범위 일치. 기존 R02/R04 유지.
+
+광고 집행 전에 — 통상 콘솔에서 가능한 작업
+[미확인] 올바른 Firebase/GA4와 Google Ads 계정 연결, prod Android 앱 이벤트 선택.
+[미확인] first_open / onboarding_complete 등 실제 prod 수신 상태와 국가·버전·일별 사용자 수 확인.
+[미확인] 전환 가져오기, 주목표/보조 관측 설정, 동일 설치에 대한 중복 목표 방지.
+[미확인] 국가/언어별 광고 소재가 실제 제공 기능 및 스토어 등록정보와 일치하는지.
+- Google Play 계정 연결은 자동 인앱 구매 전환 등의 조건을 구분한다. 단순 Play 설치 측정 자체에 모든 연결이 항상 필수라고 단정하지 않는다.[S2]
+
+출시/광고 이후
+[운영] DAU, 유입별 온보딩 완료, D1/D7 재방문, 실제 기능 사용, Play 자연 유입 추이 점검.
+[선택] 캠페인별 활성화/잔존율을 관리자 대시보드에 추가. 새 앱 이벤트가 필요한 전용 '장기 실사용 전환'은 데이터가 쌓인 뒤 정의한다.
+
+8. 검증 범위와 보존
+
+- 시작 기준 dev c17c203. 검토 종료 HEAD f721993는 동시 세션의 커밋으로 이동했으나, 관측 대상 제품/빌드 설정 623파일 SHA256 비교에서 내용 변경 0.
+- prod 비교 기준 v1.0.23(2e8d4ea). 사용자의 F01/C01 이번 출시 미수정 수용은 그대로 유지하며 이번 광고 검토로 다시 열지 않는다.
+- 이번 결과는 소스·잠금 파일·설치 플러그인 정의·기존 실기기 증거·Google 공식 문서 대조다. 자동테스트/빌드/새 실기기/계정 연결 검증을 새로 실행하지 않았다. 기존 145검사를 이번 광고 연동 PASS로 인용하지 않는다.
+- 제품 코드 변경이 없어 P0 회귀 실행기를 재실행하지 않았다. 추후 실제 코드 변경 시 그 범위에 맞게 검증하고 기본 Android 기능 검증은 dev debug로 한다. 최종 prod release 빌드는 사용자 명시 요청 뒤에만 진행한다.
+- 다른 세션의 S26 캡처/미커밋 작업/기존 원장은 보존했다. 리뷰 문서와 현행 체크리스트의 관련 상태만 최신화한다.
+- 상세 증거: evidence/google_ads_readiness_2026_10_11.json
+- 파일 해시/이벤트 목록: artifacts/google_ads_readiness_2026_10_11/
+
+9. 공식 근거 — 2026-10-11 열람
+
+[S1] Google Ads, About mobile app conversion tracking
+https://support.google.com/google-ads/answer/6100665
+[S2] Google Ads, Set up mobile app conversion tracking
+https://support.google.com/google-ads/answer/16056245
+[S3] Google AdMob Flutter, Interpret consent mode values
+https://developers.google.com/admob/flutter/privacy/consent-mode
+[S4] Google AdMob, Manage consent mode settings
+https://support.google.com/admob/answer/16053245
+[S5] Google Ads, Choose a bid strategy for your App campaign
+https://support.google.com/google-ads/answer/12073727
+[S6] Google Ads, Set up App campaigns differently depending on your goal
+https://support.google.com/google-ads/answer/6167156
+[S7] Google Analytics, Retention overview report
+https://support.google.com/analytics/answer/11004084
+[S8] Google Ads, Set up a consent banner and consent mode for your App ads
+https://support.google.com/google-ads/answer/15629487
+보충: Android 기본값/Basic·Advanced 동작
+https://developers.google.com/tag-platform/security/guides/app-consent?platform=android
+[S9] Google Ads, Validate consent mode set up for App ads
+https://support.google.com/google-ads/answer/15629267
+[S10] Google Play Console, Understand and grow your app's user base
+https://support.google.com/googleplay/android-developer/answer/9859173
+
+10. 주요 코드/기존 증거 위치
+
+- lib/services/firebase_bootstrap.dart, lib/firebase_options.dart
+- android/app/build.gradle.kts, android/app/src/main/AndroidManifest.xml
+- pubspec.lock 및 해당 로컬 Flutter 플러그인의 android/build.gradle / gradle.properties
+- lib/main.dart:206, lib/widgets/banner_ad_slot.dart:94, lib/services/ad_service.dart:73
+- lib/services/ad_consent_service.dart
+- lib/services/app_analytics.dart:139 / :156
+- lib/screens/onboarding_screen.dart:1035, lib/screens/settings_tab.dart:2405
+- lib/providers/schedule_provider.dart:192 / :208, lib/providers/date_schedule_provider.dart:39
+- lib/providers/calendar_theme_provider.dart:25, lib/web_main.dart:469
+- lib/l10n/l10n_extensions.dart, lib/main.dart:789
+- admin_dashboard/sync/lib/ga4.mjs:31 / :130 / :215
+- docs/next_version/evidence/flip8_functional_2026_10_08.json의 A03
+
+11. 후속 콘솔 확인 및 사용자 승인 설정 — 2026-10-11
+
+이 절이 계정 설정의 최신 상태다. 1~10절은 먼저 완료한 읽기 전용 코드 검토의 당시 증거로 보존한다.
+후속 사용자 요청: Google Ads 가입·Firebase/GA4 연결·측정 환경 준비. 최종 사용 계정은 worms0905@gmail.com. AdMob 수익 계정은 lowvibe07@gmail.com에 유지한다. 결제정보 등록과 실제 캠페인 집행은 사용자가 나중에 직접 한다.
+
+11-1. 확인된 기존 상태
+- Firebase shiftbell-29f31 / GA4 속성553838010. prod Android 스트림15763725797, 패키지com.hwani1103.shiftbell이 코드/대시보드와 일치한다.
+- AdMob의 prod 앱은 Firebase에 이미 연결됨. dev 앱은 연결하지 않는다.
+- prod 앱의 최근48시간 트래픽과 onboarding_complete의 실제 prod 수신을 확인했다. first_open도 실제 활동이 있다. 이는 최종 출시 후보의 모든 상황 검사와 다르다.
+- dev 스트림에도 최근48시간 트래픽이 표시되었으나 어느 설치본에서 발생했는지는 미확인. 현행 dev 비수집 코드와 구분하고 Ads 전환은 반드시 prod 앱을 선택한다.
+- 기존 Google Ads 연결은0개였다. 사용자가 Ads 가입을 아직 하지 않았다고 설명했으므로 연결 실패나 앱 결함으로 판정하지 않는다.
+- Firebase의 Play 통합에는 '일치하는 Play 앱을 찾을 수 없음'이 표시된다. 반면 Ads 앱 검색에서 공개 prod 앱을 찾았다. 계정 접근 권한을 확인할 항목이며 앱 미게시·패키지 오류로 단정하지 않는다.
+- AdMob GDPR 메시지1개 게시 중. EEA/영국/스위스 대상, 언어는 영어(en). 이름: ShiftBell - EEA/UK/CH GDPR Consent. 메시지 문구/언어/대상은 이번에 변경하지 않았다.
+- 변경 전 AdMob 광고 목적 동의 모드는 꺼짐. 이를 켠 뒤 나타난 분석 목적 옵션도 꺼져 있었다.
+- GA4 동의 진단은 상단 '좋음'이지만 prod 상세의 analytics_storage/ad_storage/ad_user_data/ad_personalization은 모두 비활성으로 표시됐다. 상단 표시만으로4신호 PASS라 하지 않는다.
+- prod SDK 기본 동의 설정은 '자동으로 동의를 얻은 데이터로 표시하지 않음'이었다. 그대로 유지했다.
+
+11-2. 실제 완료한 변경
+[x] worms0905@gmail.com으로 Ads 가입 진행, 고객번호296-370-8513 발급. 한국/한국 시간(GMT+09:00)/KRW를 선택하고 '계정만 설정' 경로를 사용했다.
+[x] GA4 onboarding_complete를 주요 이벤트로 지정하고 체크 상태1을 확인했다.
+[x] AdMob 광고 목적 동의 모드와 분석 목적 동의 모드를 켜고 저장했다. 두 체크 상태1·저장 버튼 비활성으로 저장 완료를 확인했다.
+- 결제 프로필/카드가 가입 화면에 자동 표시됐지만 결제 제출/약관 동의는 하지 않았다. 구체적인 주소·카드·결제 프로필 정보는 기록하지 않는다.
+- 광고 캠페인·예산·광고비 지출을 생성하지 않았다. 앱 코드/빌드/기기/USB/SRTL 작업도 하지 않았다.
+
+11-3. 연결 준비 및 남은 제한
+[완료] 사용자 실행 시점 승인 후 GA4→Ads 296-370-8513 연결 제출·성공 확인. 개인 맞춤 광고ON, 자동 태그ON, Ads 내 GA4 수정 기능OFF. GA4 완료된 링크1개와 Firebase 연결된 Ads 계정1개를 확인했다.
+[완료] GA4 전환 관리에서 prod Android onboarding_complete를 Ads 전환으로 생성. 전환ID7836673879, 카테고리 참여, 보조 전환. 개발용·웹은 선택하지 않았다.
+[완료] 온보딩 전환 집계는 광고 클릭/상호작용당1회, 전환 가치는 사용하지 않음(0)으로 저장하고 재열어 확인했다. 실제 매출이 없는 온보딩에 임의1원 가치를 부여하지 않는다. 사용자 생애1회 집계라는 뜻은 아니다.
+[기본값 유지] 클릭 후90일·설치 후90일·조회 충족1일·조회 후1일·데이터 기반/Google 유료 채널. 실제 캠페인의 목적과 전환 지연에 따라 집행 전에 재검토한다.
+[잔여] 설치/first_open Ads 전환의 생성·활성 상태 및 주목표는 결제 등록 후 Ads에서 확인한다. GA4 전환 생성 후보에서 first_open은 비활성 웹 항목만 보였으므로 선택하지 않았다. 앱의 GA4 첫 실행 수신과 Ads 전환 등록 완료를 구분한다. 자동 생성 여부도 아직 확정하지 않는다.
+[잔여] 보조→기본 액션 변경은 GA4 UI에서 비활성이고 Ads에서만 가능하다고 표시된다. 전환 상세의 Ads 링크도 결제 가입 화면으로 이동하여 이번에는 변경하지 않았다.
+[사용자 후속] Google Ads 가입 마지막 결제정보·약관 제출. 직접 관리 개요에 접근해도 signup/payment로 돌아가므로 현재 Ads 관리 UI 설정에는 제약이 있다. 등록된 기존 결제수단을 자동으로 연결하지 않았다.
+[집행 전] 필요 시 광고주 인증, 국가·언어·예산·광고 소재·전환 목표 확정. 아직 '결제만 하면 모든 준비 완료'라고 표시할 수 없다.
+[측정 검증 잔여] 동의 모드 변경 후 진단은48~72시간 걸릴 수 있다. 최종 prod에서 허용/거부/철회/재실행4신호를 별도 확인한다. 콘솔 설정 저장을 실기기 PASS로 확대하지 않는다.
+- first_open/Play 설치는 중복 주목표를 피한다. onboarding_complete는 초기 설정의 대리 지표이며 반복 발생 가능. 최적화 목표는 실제 수집량에 맞춰 집행 시 결정한다.
+- 기존 출시 체크리스트 R02/R04의 공개 정책·Play 데이터 보안·최종 prod 확인은 그대로 남는다.
+
+11-4. 증거 및 후속 운영
+- evidence/google_ads_console_2026_10_11.json
+- artifacts/google_ads_console_2026_10_11/ga4_onboarding_key_event.jpg
+- artifacts/google_ads_console_2026_10_11/admob_consent_mode_enabled.jpg
+- artifacts/google_ads_console_2026_10_11/ga4_ads_link_review.jpg (승인 전)
+- artifacts/google_ads_console_2026_10_11/ga4_ads_link_completed.jpg
+- artifacts/google_ads_console_2026_10_11/firebase_ads_connected.jpg
+- artifacts/google_ads_console_2026_10_11/prod_onboarding_ads_conversion.jpg
+- artifacts/google_ads_console_2026_10_11/prod_onboarding_conversion_settings.jpg
+- 기존 읽기 전용 검토와 별도로 후속 콘솔 변경을 기록했다. 동시 세션의 기존 코드/문서 변경은 보존했다.
+- 공식 가입 안내: https://support.google.com/google-ads/answer/6366720
+- GA4 연결: https://support.google.com/analytics/answer/9379420
+- GA4에서 전환 만들기: https://support.google.com/analytics/answer/14710559
+- 동의 진단 반영 지연: https://support.google.com/analytics/answer/14275483
+
+11-5. 나중에 실제 UAC 시작할 때 진행 순서
+1) worms0905@gmail.com으로 Ads296-370-8513에 로그인한다. 한국/KRW/한국 시간을 확인하고 본인 결제정보·필요 약관을 직접 완료한다. 기존 Google 결제수단이 미리 선택되어 있을 수 있으므로 제출 전 확인한다.
+2) 계정에서 요청하는 광고주 인증이 있다면 실제 운영·비용 부담 주체에 맞게 완료한다.
+3) 목표 → 전환 요약/모든 전환에서 com.hwani1103.shiftbell의 설치/first_open을 확인한다. 필요하면 앱 → Google 애널리틱스(GA4)/Firebase에서 prod first_open을 가져오거나 Google Play 설치를 사용한다. 같은 유입의 두 설치 지표를 동시에 주목표로 삼지 않는다.
+4) 이미 만든 onboarding_complete 전환(7836673879)은 다시 만들지 않는다. 집계1회/가치 없음/보조 상태를 확인한다. 관측은 '모든 전환'을 보고, 추후 충분한 캠페인 데이터로 인앱 행동 최적화를 선택할 때 해당 전환을 기본 액션으로 바꾸고 캠페인 목표에 지정한다.
+5) 신규 사용자 확보용 앱 캠페인(ACi)을 생성한다. 출시된 prod 앱·국가/언어·소재·일예산·입찰 목표를 정한다. 캠페인에서 하루10명 이상이 수행하는 인앱 행동 표본이 부족하면 설치 확보부터 시작하며 온보딩/재방문을 같이 관찰한다.
+6) 공개 스토어/소재와 실제 언어별 기능을 대조하고 집행한다. 앱의 일정/수면 등 한국어 전용 기능을 모든 국가 광고에 공통 사용하지 않는다.
+7) 연결 데이터는 최대24시간, 새 전환 보고서는 최대2일 지연 안내가 있었다. 등록 이전의 과거 전환이 모두 소급되는 것으로 보지 않는다. 광고 유입·자연 유입별 온보딩 사용자와 D1/D7·어제 DAU를 함께 본다.
+8) EEA 대상 광고 전에 동의 진단의 후속 상태와 최종 prod 신호를 확인한다. 콘솔에서 ON으로 바꾼 것만으로 거부/철회까지 런타임 검증한 것은 아니다.
+
+최종 판정: 결제 전 가능한 GA4/Firebase 연결·동의 모드·prod 온보딩 전환 준비는 완료. Ads 관리 UI 제한 때문에 설치 전환 확인과 입찰 주목표는 결제 후 남는다. 결제정보·약관·실제 광고 집행은 사용자가 직접 수행하도록 보류했다.

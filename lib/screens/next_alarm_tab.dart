@@ -20,6 +20,7 @@ import '../constants/platform_channel.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_second_button.dart';
 import '../widgets/app_third_button.dart';
+import '../utils/alarm_dismiss_gate.dart';
 
 class NextAlarmTab extends ConsumerStatefulWidget {
   const NextAlarmTab({super.key});
@@ -29,67 +30,41 @@ class NextAlarmTab extends ConsumerStatefulWidget {
 }
 
 class _NextAlarmTabState extends ConsumerState<NextAlarmTab> {
-  Timer? _syncTimer;
+  final _dismissGate = AlarmDismissGate();
   static const platform = kAlarmChannel;
 
-  @override
-  void initState() {
-    super.initState();
-    // ⭐ 2026-08-25 - 예전엔 여기 60초마다 setState()해서 탭 전체(_WaveGradientBackground
-    // 포함)를 다시 그리는 _countdownTimer가 따로 있었음 - 근데 "남은 시간" 텍스트는
-    // _AlarmDisplayWidgetState가, 카운트다운 링은 _CountdownRing이 이미 각자 자기
-    // 타이머로 알아서 갱신하고 있어서 완전히 중복이었고, 오히려 이 탭 레벨
-    // setState()가 매분 파도 배경까지 통째로 재구성시키는(=깜빡임 재보고의
-    // 유력한 원인) 부작용만 있었음. 그래서 제거 - "남은 시간"류 텍스트 갱신은
-    // 전부 그 텍스트를 실제로 그리는 좁은 범위의 위젯이 알아서 책임지도록 함.
-    // ⭐ 오버레이/잠금화면에서 알람을 끄기/스누즈하면 Native가 브로드캐스트로
-    // Flutter에 갱신 신호를 보내긴 하는데, 그 경로(브로드캐스트 → MethodChannel →
-    // Provider)가 여러 단계를 거치다 보니 타이밍에 따라 이 탭이 바로 못 따라갈 수
-    // 있음. 이 탭이 떠 있는 동안 짧은 주기로 직접 재조회해서, 브로드캐스트가
-    // 어떤 이유로 늦거나 씹혀도 몇 초 안에 실제 알람 상태(꺼짐/스누즈)와 항상
-    // 일치하게 만듦. alarm_provider.dart의 값 비교(listEquals) 덕분에 실제로
-    // 아무것도 안 바뀐 대부분의 호출은 이제 화면을 다시 그리지 않고 조용히 끝남.
-    _syncTimer = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (mounted) ref.read(alarmNotifierProvider.notifier).refresh();
-    });
-  }
-
-  @override
-  void dispose() {
-    _syncTimer?.cancel();
-    super.dispose();
-  }
-
   Future<void> _dismissAlarm(int id, DateTime? date) async {
-    // ⭐ 2026-09-14 (출시전 감사 #14) - 여기서 먼저 'dismissOverlay'를 보내던 호출 제거. 울리는 중이면 deleteAlarm()이 Native 'stopRingingAlarm'으로 오버레이까지 닫음.
-    // 먼저 보내면 오버레이가 울림을 끝낸 뒤라 삭제 이력이 'cancelled_before_ring'으로 잘못 남음.
-    final deletion =
-        await ref.read(alarmNotifierProvider.notifier).deleteAlarm(id, date);
+    await _dismissGate.run(() async {
+      // Keep the captured ID through the entire action. A rapid second tap on
+      // the same spot must not act on the card that replaces this one.
+      final deletion =
+          await ref.read(alarmNotifierProvider.notifier).deleteAlarm(id, date);
 
-    try {
-      await platform.invokeMethod('cancelNotification');
-    } catch (e) {
-      print('⚠️ Notification 삭제 실패: $e');
-    }
+      try {
+        await platform.invokeMethod('cancelNotification');
+      } catch (e) {
+        print('⚠️ Notification 삭제 실패: $e');
+      }
 
-    try {
-      await platform.invokeMethod('triggerGuardCheck');
-    } catch (e) {
-      print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
-    }
+      try {
+        await platform.invokeMethod('triggerGuardCheck');
+      } catch (e) {
+        print('⚠️ AlarmGuardReceiver 트리거 실패: $e');
+      }
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(deletion.reservationFailed
-              ? context.l10n.alarmRefreshUnconfirmed
-              : context.l10n.alarmCanceledToast),
-          behavior: SnackBarBehavior.floating,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-        ),
-      );
-    }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(deletion.reservationFailed
+                ? context.l10n.alarmRefreshUnconfirmed
+                : context.l10n.alarmCanceledToast),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r)),
+          ),
+        );
+      }
+    });
   }
 
   @override

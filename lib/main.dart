@@ -29,6 +29,7 @@ import 'widgets/nav_icon_emphasis.dart';
 import 'widgets/unavailable_feature.dart';
 import 'widgets/banner_ad_slot.dart';
 import 'widgets/app_content_frame.dart';
+import 'widgets/tablet_keyboard_viewport.dart';
 import 'services/ad_service.dart';
 import 'services/backup_watcher.dart';
 import 'services/schedule_notification_service.dart';
@@ -266,9 +267,18 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  bool _tabletLayout = false;
+
   @override
   void initState() {
     super.initState();
+
+    // Only the platform-confirmed tablet path changes design-unit scaling.
+    unawaited(isTabletLayoutDevice().then((tablet) {
+      if (mounted && tablet != _tabletLayout) {
+        setState(() => _tabletLayout = tablet);
+      }
+    }));
 
     // ⭐ 앱 라이프사이클 감지
     WidgetsBinding.instance.addObserver(this);
@@ -353,7 +363,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       builder: (context, child) {
         // Full window layout and bounded design-unit scaling are independent.
         ScreenUtil.configure(
-          data: appContentMediaQuery(MediaQueryData.fromView(View.of(context))),
+          data: appContentMediaQuery(MediaQueryData.fromView(View.of(context)),
+              tablet: _tabletLayout),
           designSize: const Size(360, 780),
           minTextAdapt: true,
           splitScreenMode: true,
@@ -444,6 +455,8 @@ class MainScreen extends ConsumerStatefulWidget {
 // update_service.dart에 쿨다운을 둬서 Play Core 호출 자체도 너무 잦지 않게 함.
 class _MainScreenState extends ConsumerState<MainScreen>
     with WidgetsBindingObserver {
+  Timer? _alarmUiSyncTimer;
+  bool _alarmUiSyncForeground = true;
   int? _emphasizedTab;
   int _emphasisSequence = 0;
   late int _currentIndex; // ⭐ nullable 제거
@@ -462,6 +475,15 @@ class _MainScreenState extends ConsumerState<MainScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Native can finish a ring while Settings or Calendar is selected. Keep
+    // the shared provider current on every foreground tab; NextAlarmTab's old
+    // timer only ran while that tab was mounted. Native refresh signals still
+    // provide the faster path, and AlarmNotifier coalesces overlapping reads.
+    _alarmUiSyncTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (mounted && _alarmUiSyncForeground) {
+        unawaited(ref.read(alarmNotifierProvider.notifier).refresh());
+      }
+    });
 
     // ⭐ 초기 탭 설정 (InitialRouter에서 결정한 값)
     _currentIndex = widget.initialIndex;
@@ -634,6 +656,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
 
   @override
   void dispose() {
+    _alarmUiSyncTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -643,6 +666,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
   // 영영 놓칠 수 있어서). 업데이트 내용은 Play 스토어에서 안내한다.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _alarmUiSyncForeground = state == AppLifecycleState.resumed;
     if (state == AppLifecycleState.resumed && mounted) {
       UpdateService.checkForUpdate(context);
       unawaited(HolidaySyncService.instance.refreshIfDue());

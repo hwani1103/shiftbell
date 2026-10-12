@@ -1,6 +1,6 @@
 import { lineChart, sparkline } from './charts.js';
 import { fmtInt, fmtPct, fmtMoney, fmtDur, fmtMD, fmtLong, todayKst, esc, sum, avg, deltaInfo } from './format.js';
-import { eventMeta, localizeName, COLORS } from './labels.js';
+import { EVENT_META, eventMeta, localizeName, COLORS } from './labels.js';
 
 export const SECTIONS = [['overview', '운영 요약'], ['growth', '성장·국가'], ['product', '기능 활용'], ['quality', '알람·기기']];
 const number = (v, unit = '') => v == null ? '—' : fmtInt(v) + unit;
@@ -14,7 +14,7 @@ export function eventData(docs, view, name) {
   const selected = Object.values(docs.summary.eventsByRange ?? {}).find((v) => v.from === view.dates[0] && v.to === view.dates.at(-1));
   const row = selected?.events?.find((v) => v.name === name);
   const values = docs.events.series?.[name];
-  return { count: values ? sum(values.slice(view.from)) : (selected ? 0 : null), users: selected ? (row?.users ?? 0) : null,
+  return { count: values ? sum(values.slice(view.from)) : (row?.count ?? (selected ? 0 : null)), users: selected ? (row?.users ?? 0) : null,
     observed: !!row || !!values, values: values ? values.slice(view.from) : [] };
 }
 function change(current, previous) {
@@ -44,40 +44,68 @@ export function dailyView(docs, yesterday = new Date(Date.parse(todayKst()) - 86
     cur: (key) => indices.map((i) => docs.series[key]?.[i]),
     yesterdayValue: (key) => yesterdayIndex < 0 ? null : docs.series[key]?.[yesterdayIndex] ?? null };
 }
+export function dailySelection(view, date) {
+  const index = view.dates.indexOf(date);
+  return { label: date === view.yesterday ? '어제 DAU' : '선택일 DAU', date: fmtLong(date),
+    value: number(index < 0 ? null : view.cur('dau')[index], '명') };
+}
 export function dailyReadout(view, date) {
   const index = view.dates.indexOf(date);
-  if (index < 0) return '선택할 날짜의 자료가 아직 없습니다.';
-  return fmtLong(date) + ' · DAU ' + number(view.cur('dau')[index], '명') + ' · MAU ' + number(view.cur('mau')[index], '명');
+  if (index < 0) return fmtLong(date) + ' · 아직 집계되지 않았습니다.';
+  return fmtLong(date) + ' · DAU ' + number(view.cur('dau')[index], '명') + ' · MAU ' + number(view.cur('mau')[index], '명') + ' (해당일 기준 직전 28일)';
+}
+export function weekdayDauAverages(docs, range, yesterday) {
+  const days = [7, 30, 100, 365].includes(Number(range)) ? Number(range) : 30;
+  const cutoff = new Date(Date.parse(yesterday) - (days - 1) * 86400000).toISOString().slice(0, 10);
+  const buckets = ['월', '화', '수', '목', '금', '토', '일'].map((label) => ({ label, total: 0, count: 0 }));
+  for (const [i, date] of docs.series.dates.entries()) {
+    const value = docs.series.dau?.[i];
+    if (date < cutoff || date > yesterday || typeof value !== 'number' || !Number.isFinite(value) || value < 0) continue;
+    const weekday = (new Date(date + 'T00:00:00Z').getUTCDay() + 6) % 7;
+    buckets[weekday].total += value;
+    buckets[weekday].count++;
+  }
+  return buckets.map(({ label, total, count }) => ({ label, count, average: count ? total / count : null }));
+}
+function weekdayDauCard(docs, ui, yesterday) {
+  const range = [7, 30, 100, 365].includes(Number(ui.range)) ? Number(ui.range) : 30;
+  const rows = weekdayDauAverages(docs, range, yesterday);
+  const max = Math.max(0, ...rows.map((row) => row.average ?? 0));
+  return '<div class="weekday-dau" aria-label="DAU 요일별 평균"><div class="daily-chart-head"><h2>요일별 평균 DAU</h2><span class="sub">어제까지 최근 ' + range + '일 · 한국 시간</span></div><div class="weekday-dau-grid">' + rows.map((row) => '<article><span>' + row.label + '요일</span><b>' + (row.average == null ? '—' : row.average.toLocaleString('ko-KR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '<small>명</small>') + '</b><div class="weekday-dau-track" aria-hidden="true"><i style="width:' + (max ? (row.average ?? 0) / max * 100 : 0) + '%"></i></div><small>' + (row.count ? row.count + '일 평균' : '집계 없음') + '</small></article>').join('') + '</div><p class="sub">집계된 날짜만 평균에 포함합니다. DAU 0명인 날은 포함하고, 미집계 날짜는 제외합니다.</p></div>';
 }
 export function dailyOverviewCard(docs, view, ui) {
-  const selected = view.dates.includes(ui.dailyDate) ? ui.dailyDate : view.dates.at(-1);
+  const selected = view.dates.includes(ui.dailyDate) ? ui.dailyDate : view.yesterday;
+  const hero = dailySelection(view, selected);
   const waiting = view.yesterdayValue('dau') == null;
-  const buttons = view.dates.map((date) => '<button class="chip" data-action="daily-day" data-date="' + date + '" aria-label="' + esc(fmtLong(date)) + ' DAU MAU 확인" aria-pressed="' + (date === selected) + '">' + fmtMD(date) + '</button>').join('');
-  return '<section class="card span-12 daily-overview"><div class="card-h"><div><h1>DAU · MAU</h1><p>어제 ' + esc(fmtLong(view.yesterday)) + ' 기준 · 출시 앱</p></div></div><div class="daily-kpis">' +
-    '<article><span>어제 DAU</span><b>' + number(view.yesterdayValue('dau'), '명') + '</b><small>하루 동안 앱을 쓴 사용자</small></article>' +
-    '<article><span>어제 기준 MAU</span><b>' + number(view.yesterdayValue('mau'), '명') + '</b><small>직전 28일 동안 앱을 쓴 사용자</small></article></div>' +
+  return '<section class="card span-12 daily-overview"><div class="card-h"><div><h1>일간 활성 사용자 · DAU</h1><p>출시 앱 · 하루 동안 앱을 쓴 사용자</p></div></div><div class="daily-kpis">' +
+    '<article class="daily-dau" aria-live="polite"><span id="daily-dau-label">' + hero.label + '</span><strong id="daily-dau-date">' + esc(hero.date) + '</strong><b id="daily-dau-value">' + hero.value + '</b><small>날짜를 선택하면 해당일 DAU를 확인할 수 있습니다.</small></article>' +
+    '<article class="daily-mau"><span>MAU · 직전 28일</span><b>' + number(view.yesterdayValue('mau'), '명') + '</b><small>어제 ' + esc(fmtLong(view.yesterday)) + ' 기준</small></article></div>' +
     (waiting ? '<p class="notice">어제 자료는 아직 집계되지 않았습니다. 아래 차트는 최근 10일 중 집계된 날짜만 보여줍니다.</p>' : '') +
-    '<div class="daily-chart-head"><h2>최근 10일 추이</h2><span class="sub">차트나 날짜를 눌러 하루씩 확인</span></div>' +
-    '<div class="daily-legend"><button class="chip" data-action="legend" data-key="dau" aria-pressed="' + ui.visible.dau + '"><i style="background:' + COLORS.dau + '"></i>DAU 일간</button><button class="chip" data-action="legend" data-key="mau" aria-pressed="' + ui.visible.mau + '"><i style="background:' + COLORS.mau + '"></i>MAU 월간</button></div>' +
-    (view.dates.length ? '<div id="ch-users" style="min-height:240px"></div><div class="daily-days" aria-label="일별 사용자 확인">' + buttons + '</div>' : empty('최근 10일의 집계 자료가 아직 없습니다.')) +
+    '<div class="daily-chart-head"><h2>최근 10일 DAU 추이</h2><span class="sub">차트의 날짜를 눌러 확인</span></div>' +
+    '<div class="daily-legend"><button class="chip" data-action="legend" data-key="dau" aria-pressed="' + ui.visible.dau + '"><i style="background:' + COLORS.dau + '"></i>DAU 일간</button><button class="chip" data-action="legend" data-key="mau" aria-pressed="' + ui.visible.mau + '"><i style="background:' + COLORS.mau + '"></i>MAU 직전 28일</button></div>' +
+    (view.dates.length ? '<div id="ch-users" style="min-height:240px"></div>' : empty('최근 10일의 집계 자료가 아직 없습니다.')) +
+    weekdayDauCard(docs, ui, view.yesterday) +
     '<p id="daily-readout" class="daily-readout" aria-live="polite">' + esc(dailyReadout(view, selected)) + '</p></section>';
 }
 
-const FEATURES = [
-  ['onboarding_complete', '시작 완료'], ['team_roster_created', '전체교대조 생성'], ['all_shifts_opened', '전체근무표 열람'],
-  ['shift_assigned', '근무 변경'], ['alarm_template_saved', '알람 설정'], ['alarm_dismissed', '알람 끄기'],
-  ['memo_saved', '메모'], ['ot_saved', 'OT·특근'], ['sleep_record_saved', '수면 기록'], ['friend_share_started', '친구 공유 시작'],
-  ['backup_created', '직접 백업'], ['help_opened', '도움말'],
-];
+// 사용자 행동은 공통 이벤트 정의에서 가져와 표시 목록의 수동 누락을 방지한다.
+// 자동 작업 및 OS/예약 진단은 기능 사용 순위에서 제외한다.
+const FEATURES = Object.entries(EVENT_META)
+  .filter(([name, meta]) => !meta.retired && meta.group !== 'system' &&
+    !/^(ops_|alarm_schedule_|alarm_refresh_|device_boot_)/.test(name) &&
+    !['alarm_fired', 'auto_backup_created'].includes(name))
+  .map(([name, meta]) => [name, meta.label]);
 export function adoptionCard(docs, view) {
-  const totalUsers = periodData(docs, view)?.current?.totalUsers;
   const ranked = FEATURES.map(([name, label], order) => ({ name, label, order, data: eventData(docs, view, name) }))
-    .sort((a, b) => Number(b.data.observed) - Number(a.data.observed) || (b.data.count ?? -1) - (a.data.count ?? -1) || a.order - b.order);
-  const rows = ranked.map(({ name, label, data }) => {
-    const share = data.observed && data.users != null && totalUsers > 0 && data.users <= totalUsers ? data.users / totalUsers : null;
-    return '<tr data-action="event" data-event="' + name + '" tabindex="0" role="button" aria-label="' + label + ' 상세"><th>' + label + '</th><td>' + (data.observed ? number(data.users, '명') : tag('미관측')) + '</td><td>' + (share == null ? '—' : '<div class="adoption"><i style="width:' + (share * 100) + '%"></i><span>' + fmtPct(share, 1) + '</span></div>') + '</td><td>' + (data.observed ? number(data.count, '회') : '—') + '</td></tr>';
+    .sort((a, b) => (b.data.count ?? -1) - (a.data.count ?? -1) || Number(b.data.observed) - Number(a.data.observed) || a.order - b.order);
+  const max = ranked[0]?.data.count ?? 0;
+  const rows = ranked.map(({ name, label, data }, index) => {
+    const color = index < 5 && data.count > 0 ? COLORS.palette[index] : 'var(--muted)';
+    const marker = '<span class="feature-rank" style="color:' + color + '">' + (index + 1) + '</span><i class="feature-dot" style="background:' + color + '"></i>';
+    const usage = data.observed ? '<div class="feature-usage"><b>' + number(data.count, '회') + '</b><div class="feature-track"><i style="background:' + color + ';width:' + (max > 0 ? data.count / max * 100 : 0) + '%"></i></div></div>' : '—';
+    return '<tr data-action="event" data-event="' + name + '" tabindex="0" role="button" aria-label="' + label + ' 상세"><th><span class="feature-label">' + marker + label + '</span></th><td>' + (data.observed ? number(data.users, '명') : tag('미관측')) + '</td><td>' + usage + '</td></tr>';
   }).join('');
-  return card('핵심 기능의 도달과 활용', '선택 기간 이용 횟수 내림차순 · 기능별 사용자 수와 도달률 · 미관측은 맨 아래', '<div class="table-scroll"><table class="ops-table"><thead><tr><th>기능</th><th>사용자</th><th>기간 이용자 대비</th><th>이용 횟수</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="sub">기능 사용률의 분모는 같은 기간의 전체 이용자(totalUsers)입니다. 미관측은 미사용·구버전·수집 누락을 구분할 자료가 아직 없다는 뜻입니다.</p>');
+  return card('핵심 기능 활용', '선택 기간 이용 횟수 내림차순 · 상위 5개 기능 색상 표시', '<div class="table-scroll"><table class="ops-table feature-table"><thead><tr><th>기능</th><th>사용자 수</th><th>이용 횟수</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="sub">사용자 수는 선택 기간의 중복 제거 인원입니다. 미관측은 미사용·구버전·수집 누락을 구분할 자료가 아직 없다는 뜻입니다.</p>');
 }
 export function countryCard(docs, view, ui) {
   const period = periodData(docs, view); const rows = period?.countries;
@@ -111,7 +139,7 @@ export function collectionCard(docs, view) {
   const p = periodData(docs, view); const reports = { ...(docs.summary.coverage ?? {}), ...(p?.coverage ?? {}) };
   const names = { core: '활성·신규·세션', ads: '광고 수익', cohort: '재방문 코호트', eventsDaily: '일별 행동', current: '기간 이용자', countries: '국가 운영 지표', countryEvents: '국가별 기능', manufacturers: '제조사 운영 지표', manufacturerEvents: '제조사별 알람', countryDaily: '국가 일별 추이' };
   const statuses = Object.entries(names).map(([key, title]) => { const data = reports[key] ?? docs.operations?.coverage?.[key]; const limited = data?.thresholded || data?.sampled || data?.otherRowLoss || data?.truncated; const label = !data || data.status === 'unavailable' ? '미연결/조회 실패' : data.status === 'empty' ? '조회 성공 · 자료 없음' : limited ? '집계 제한 있음' : '집계 완료'; return '<li><span>' + title + '</span>' + tag(label, !data || data.status === 'unavailable' || limited ? 'warning' : '') + '</li>'; }).join('');
-  return card('데이터 수집 상태와 판단 범위', '미연결을 0으로 표시하지 않고, 관측 범위를 함께 확인합니다.', '<div class="coverage-grid"><ul class="coverage-list">' + statuses + '</ul><div class="coverage-notes"><h3>운영자가 알아야 할 한계</h3><p>전체교대조 및 새 운영 이벤트: 다음 계측 앱 출시 후 수집. 과거 데이터 소급 복원 불가.</p><p>알람 진단: 앱 재개 후 전송, 최근 72시간·종류별 회당 40건·로컬 기록 최대 1,000건 상한, 첫 실행은 기존 기록을 제외하는 기준선만 저장.</p><p>배터리 제한: 하루 1회 OS 상태 관측이며 알람 실패 원인이 확인된 오류는 아닙니다.</p><p>강제종료 후 동작·실제 미울림·Crashlytics 오류율: 현재 직접 판정할 수집 근거가 없습니다. 성공으로 표시하지 않습니다.</p><p>매일 한국 시간 12:17 집계. 새로고침은 저장된 집계를 읽으며 서버 집계를 다시 실행하지 않습니다.</p></div></div>');
+  return card('데이터 수집 상태와 판단 범위', '미연결을 0으로 표시하지 않고, 관측 범위를 함께 확인합니다.', '<div class="coverage-grid"><ul class="coverage-list">' + statuses + '</ul><div class="coverage-notes"><h3>운영자가 알아야 할 한계</h3><p>전체교대조 및 새 운영 이벤트: 다음 계측 앱 출시 후 수집. 과거 데이터 소급 복원 불가.</p><p>알람 진단: 앱 재개 후 전송, 최근 72시간·종류별 회당 40건·로컬 기록 최대 1,000건 상한, 첫 실행은 기존 기록을 제외하는 기준선만 저장.</p><p>배터리 제한: 하루 1회 OS 상태 관측이며 알람 실패 원인이 확인된 오류는 아닙니다.</p><p>강제종료 후 동작·실제 미울림·Crashlytics 오류율: 현재 직접 판정할 수집 근거가 없습니다. 성공으로 표시하지 않습니다.</p><p>한국 시간 12:17을 포함해 3시간마다 재집계. 새로고침은 저장된 집계를 읽으며 서버 집계를 다시 실행하지 않습니다.</p></div></div>');
 }
 export function revenueCard(docs, view) {
   const data = docs.summary.coverage?.ads; const available = data?.status === 'available' || data?.status === 'empty';

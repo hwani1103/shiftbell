@@ -21,6 +21,7 @@ import path from 'node:path';
 import { buildMockDocs } from '../public/assets/js/mock.js';
 import { Ga4, DEFAULTS, makeAuthClient } from './lib/ga4.mjs';
 import { buildDocs, table, ymd } from './lib/transform.mjs';
+import { alreadySyncedInSlot, syncPolicy } from './lib/sync-policy.mjs';
 
 const { values: args } = parseArgs({
   options: {
@@ -136,15 +137,16 @@ const started = Date.now();
 try {
   if (args.mock && !args.out && !env.FIRESTORE_EMULATOR_HOST) throw new Error('Mock data may only be written to files or an emulator.');
   const db = args.out ? null : await openFirestore();
-  const syncDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date());
+  const refreshStartedAt = new Date();
   if (db && !args.mock && !args.force) {
     const previous = await db.collection('dashboard').doc('summary').get();
-    if (previous.data()?.pipelineVersion === 2 && previous.data()?.syncPolicy?.day === syncDay) {
-      console.log('Already synchronized today; preserving one daily update.');
+    if (alreadySyncedInSlot(previous.data(), refreshStartedAt)) {
+      console.log('Already synchronized in this 3-hour slot; preserving the latest successful update.');
       process.exit(0);
     }
   }
   const docs = args.mock ? buildMockDocs() : await fetchReal();
+  docs.summary.syncPolicy = syncPolicy(refreshStartedAt);
   const n = docs.series.dates.length;
   // ⭐ 2026-09-23 - GA4 조회는 성공했는데 0건인 경우(권한 문제면 runReport가 403으로 먼저 던짐):
   //  - 이미 쌓인 데이터가 있으면 빈 값으로 덮어쓰지 않고 실패 처리(스트림 ID 오설정 등 이상 신호)
@@ -154,7 +156,7 @@ try {
     if (!args.mock && n === 0) throw new Error('GA4에서 받은 일별 데이터가 0건입니다. 스트림 ID/속성 접근 권한을 확인하세요.');
     await writeFiles(docs, args.out);
   } else {
-    // db opened before querying so the daily guard can avoid duplicate API calls.
+    // db opened before querying so the 3-hour slot guard can avoid duplicate API calls.
     if (!args.mock && n === 0) {
       const prev = await storedDays(db);
       if (prev > 0) throw new Error(`GA4에서 받은 일별 데이터가 0건인데 기존 문서에는 ${prev}일치가 있어 덮어쓰지 않았습니다. 스트림 ID/속성 접근 권한을 확인하세요.`);

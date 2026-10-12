@@ -1,3 +1,4 @@
+import { syncPolicy } from './sync-policy.mjs';
 import { buildOperations, reportState } from './operations.mjs';
 // admin_dashboard/sync/lib/transform.mjs
 //
@@ -190,7 +191,7 @@ export function buildDocs({ raw, meta }) {
     schema: SCHEMA,
     updatedAt: meta.now.toISOString(),
     pipelineVersion: 2,
-    syncPolicy: { frequency: "daily", timezone: "Asia/Seoul", scheduledAt: "12:17", day: new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(meta.now), endDate: "yesterday" },
+    syncPolicy: syncPolicy(meta.now),
     coverage: Object.fromEntries(Object.entries(raw).filter(([, value]) => !value || value.metricHeaders || value.rows).map(([key, value]) => [key, reportState(value)])),
     propertyId: meta.propertyId,
     streamId: meta.streamId,

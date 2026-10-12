@@ -7,10 +7,13 @@ const double kAppMaxContentWidth = 500.0;
 
 /// ScreenUtil scale only; UI MediaQuery keeps the actual window dimensions.
 /// Ordinary phone size, textScaler and insets are preserved.
-MediaQueryData appContentMediaQuery(MediaQueryData window) => window.copyWith(
+MediaQueryData appContentMediaQuery(MediaQueryData window,
+        {bool tablet = false}) =>
+    window.copyWith(
       size: window.size.width <= kAppMaxContentWidth
           ? window.size
-          : Size(400, math.min(window.size.height, 850)),
+          : Size(tablet ? 480 : 400,
+              math.min(window.size.height, tablet ? 1040 : 850)),
     );
 
 enum AppLayoutKind { phone, shortCover, widePortrait, wideSquare }

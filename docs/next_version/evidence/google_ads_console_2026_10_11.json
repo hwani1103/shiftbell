@@ -1,0 +1,97 @@
+{
+  "date": "2026-10-11",
+  "task": "Google Ads/UAC 준비 — 결제 등록 및 실제 집행 제외",
+  "authorized_account": "worms0905@gmail.com",
+  "admob_account": "lowvibe07@gmail.com",
+  "google_ads": {
+    "customer_id": "296-370-8513",
+    "billing_country": "KR",
+    "currency": "KRW",
+    "timezone": "Asia/Seoul",
+    "status": "signup_pending_billing",
+    "payment_submitted": false,
+    "terms_accepted": false,
+    "campaign_created": false,
+    "management_ui": "overview redirects to signup/payment"
+  },
+  "ga4": {
+    "property_id": "553838010",
+    "firebase_project": "shiftbell-29f31",
+    "prod_stream_id": "15763725797",
+    "prod_package": "com.hwani1103.shiftbell",
+    "prod_traffic_within_48h": true,
+    "onboarding_complete_received_in_prod": true,
+    "onboarding_complete_key_event": true,
+    "ads_link_status": "connected",
+    "link_settings_prepared": {
+      "personalized_ads": true,
+      "auto_tagging": true,
+      "ads_can_modify_analytics": false
+    },
+    "conversions_imported": true,
+    "link_action_time_approved": true,
+    "firebase_console_ads_link_count": 1,
+    "conversions": [
+      {
+        "event": "onboarding_complete",
+        "name": "shiftbell-29f31 - com.hwani1103.shiftbell (Android) onboarding_complete",
+        "conversion_id": "7836673879",
+        "stream": "shiftbell (android)",
+        "category": "engagement",
+        "optimization": "secondary",
+        "count": "one_per_ad_click_or_interaction",
+        "value": "not_used",
+        "click_window_days": 90,
+        "post_install_window_days": 90,
+        "engaged_view_window_days": 1,
+        "view_window_days": 1,
+        "attribution": "data_driven_google_paid_channels",
+        "saved_and_reopened": true
+      }
+    ],
+    "first_open_ads_conversion": "not verified / not created in this task; GA4 creation UI offered only inactive all-websites first_open, which was not selected"
+  },
+  "admob": {
+    "prod_firebase_link": "existing_connected",
+    "dev_linked": false,
+    "advertising_consent_mode_before": false,
+    "advertising_consent_mode_after": true,
+    "analytics_consent_mode_before": "not visible while advertising parent off; false after enabling parent",
+    "analytics_consent_mode_after": true,
+    "message": {
+      "name": "ShiftBell - EEA/UK/CH GDPR Consent",
+      "published": true,
+      "regions": [
+        "EEA",
+        "UK",
+        "CH"
+      ],
+      "languages": [
+        "en"
+      ]
+    }
+  },
+  "unchanged": {
+    "app_code": true,
+    "billing_details": true,
+    "devices": true,
+    "srtl": true,
+    "ga4_default_consent": "do not automatically mark as consented"
+  },
+  "remaining": [
+    "Google Ads payment/terms completion by user",
+    "After billing: verify prod install/first_open conversion and primary campaign goal without duplicate installation optimization",
+    "Advertiser verification if requested",
+    "Final campaign countries/languages/assets/budget and launch by user",
+    "48-72h consent diagnostics propagation and final prod runtime signal verification"
+  ],
+  "proof": [
+    "artifacts/google_ads_console_2026_10_11/ga4_onboarding_key_event.jpg",
+    "artifacts/google_ads_console_2026_10_11/admob_consent_mode_enabled.jpg",
+    "artifacts/google_ads_console_2026_10_11/ga4_ads_link_review.jpg",
+    "artifacts/google_ads_console_2026_10_11/ga4_ads_link_completed.jpg",
+    "artifacts/google_ads_console_2026_10_11/firebase_ads_connected.jpg",
+    "artifacts/google_ads_console_2026_10_11/prod_onboarding_ads_conversion.jpg",
+    "artifacts/google_ads_console_2026_10_11/prod_onboarding_conversion_settings.jpg"
+  ]
+}

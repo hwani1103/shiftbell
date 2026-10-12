@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "reviewDate": "2026-10-11",
+  "scope": "READ_ONLY_PRODUCT_REVIEW_AND_DOCUMENTATION",
+  "goal": "설치 후 실제 사용 확대 및 자연 유입 선순환",
+  "startHead": "c17c203da739a3631b3e5083df437e7726ea599a",
+  "endHead": "f72199337871d9ca2a13bb11b5098cb255b6f746",
+  "sourcePreservation": {
+    "comparedFiles": 623,
+    "changed": [],
+    "evidence": "artifacts/google_ads_readiness_2026_10_11/source_preservation.json"
+  },
+  "actions": {
+    "productCodeChanged": false,
+    "testsRun": false,
+    "buildsRun": false,
+    "devicesTouched": false,
+    "consoleRead": false,
+    "consoleChanged": false,
+    "campaignCreated": false,
+    "releaseApprovalGranted": false
+  },
+  "sdk": {
+    "firebase_core": "4.13.0",
+    "firebase_analytics": "12.4.6",
+    "google_mobile_ads": "9.1.0",
+    "google_ump_declared": "4.0.0",
+    "google_mobile_ads_android_declared": "25.4.0",
+    "firebase_bom_declared": "34.17.0"
+  },
+  "events": {
+    "prodCount": 17,
+    "currentCount": 48,
+    "addedCount": 32,
+    "removed": [
+      "tab_selected"
+    ],
+    "inventory": "artifacts/google_ads_readiness_2026_10_11/analytics_inventory.json"
+  },
+  "findings": [
+    {
+      "id": "ADS01",
+      "status": "STATIC_READY",
+      "finding": "기존 Firebase Analytics로 최초 실행 및 앱 내 행동 전환 구성 가능; 추가 광고주 SDK 필요 근거 미발견"
+    },
+    {
+      "id": "ADS02",
+      "status": "RECOMMENDATION_NOT_APPLIED",
+      "finding": "onboarding_complete 초기 활성화 후보; 신규 코호트 D1/D7 및 DAU로 재사용 확인; 자연 유입 별도 측정"
+    },
+    {
+      "id": "ADS03",
+      "status": "CONSOLE_AND_RUNTIME_UNVERIFIED",
+      "finding": "UMP 자동 consent mode 지원 SDK; AdMob 광고용/분석용 설정과 Firebase 네 신호 확인 필요. 직접 setConsent 부재만으로 누락 판정하지 않음. Basic 선택 등에는 코드 변경 가능"
+    },
+    {
+      "id": "ADS04",
+      "status": "CONSOLE_UNVERIFIED",
+      "finding": "Ads/GA4 연결·prod 수신·전환 가져오기·목표·실 광고 ID·정책 일치 미확인"
+    },
+    {
+      "id": "ADS05",
+      "status": "OBSERVATION_LIMIT",
+      "finding": "Native 알람 사용 이력은 다음 앱 실행 이후 지연·제한된 관측; 실시간 주전환으로 부적절"
+    }
+  ],
+  "priorEvidence": {
+    "admobUi": "docs/next_version/evidence/flip8_functional_2026_10_08.json A03 preserved; not Firebase consent-signal PASS",
+    "waivedIssues": "F01/C01 accepted for this release without fix; not reopened"
+  },
+  "report": "docs/next_version/GoogleAds_UAC_출시준비_검토_2026-10-11.txt",
+  "sources": [
+    [
+      "S1",
+      "https://support.google.com/google-ads/answer/6100665"
+    ],
+    [
+      "S2",
+      "https://support.google.com/google-ads/answer/16056245"
+    ],
+    [
+      "S3",
+      "https://developers.google.com/admob/flutter/privacy/consent-mode"
+    ],
+    [
+      "S4",
+      "https://support.google.com/admob/answer/16053245"
+    ],
+    [
+      "S5",
+      "https://support.google.com/google-ads/answer/12073727"
+    ],
+    [
+      "S6",
+      "https://support.google.com/google-ads/answer/6167156"
+    ],
+    [
+      "S7",
+      "https://support.google.com/analytics/answer/11004084"
+    ],
+    [
+      "S8",
+      "https://support.google.com/google-ads/answer/15629487"
+    ],
+    [
+      "S9",
+      "https://support.google.com/google-ads/answer/15629267"
+    ],
+    [
+      "S10",
+      "https://support.google.com/googleplay/android-developer/answer/9859173"
+    ]
+  ]
+}

@@ -1,0 +1,84 @@
+태블릿 레이아웃·기본 알람 실기·관리 대시보드 후속 결과
+2026-10-11 KST
+
+태블릿 레이아웃 최적화와 요청한 잠금 해제 상태의 기본 알람 실기를 완료했다. 기능 검사는 전 항목 PASS로 묶지 않는다. 자동 종료 후 Flutter 상태 동기화 실패를 재현했고, 빠른 연속 터치가 다음 대상까지 처리하는 동작도 관측했다. 사용자 지시에 따라 앱 기능은 수정하지 않고 아래에 기록한다. 관리자 웹은 빌드·배포 완료했다.
+
+1. 대상과 변경 범위
+- Samsung Galaxy Tab S10 Lite Wi-Fi SM-X400 / R54Y800G39V / Android16(API36), 1320×2112px, density240. 세로880×1408dp·가로1408×880dp.
+- 충전 중 화면 유지 stay_on_while_plugged_in=15, mStayOn=true, powered=true/PlugType2, Awake. 전원 버튼·화면 OFF·잠금·재부팅·PIN 조작은 하지 않았다. 최종 keyguard showing=false.
+- 최종 실제 설치: com.hwani1103.shiftbell.dev / 1.0.23-dev(code25), DB29. SHA256 0594440b1b2e982432c86a76e540e79856fd003ee5e61344423b0cdafec2314a. 설치 base.apk와 고정 dev debug APK 해시 일치.
+- 앱 소유 변경은 lib/main.dart, lib/constants/layout_limits.dart 두 파일의 태블릿 배율뿐이다. 기존 Android isTabletLayoutDevice 응답이 true인 경우에만 ScreenUtil 설계 단위를 400/850에서 480/1040으로 조정했다. 실제 창 크기·기존 콘텐츠/팝업 폭 규칙은 유지했다. 폰·폴더블·웹·검출 실패의 기존 경로는 400/850 그대로다.
+- 앱 알람·DB·권한·Native·번역·기능 범위 코드는 수정하지 않았다. 기존 미커밋 ARB/대시보드 작업과 과거 1·2·3차 검토 원장은 보존했다. 웹 변경은 별도 요청에 따른 관리자 웹 코드와 검사/README다.
+
+2. 레이아웃 확인 범위 — A09
+- 한글10테마와 영어7테마, 세로·가로. 달력과 테마별 월/연 선택, 날짜 팝업·키보드, 일괄 근무 변경, 월 OT·주별 근무 시간, 고정 알람 타입/삭제 창까지 확인.
+- 독일어·포르투갈어·힌디어는 영어와 같은 공통 태블릿 배율·레이아웃을 적용하고 제공7테마·전체 화면·설정/팝업/도움말을 두 자세에서 확인했다. 한국어 전용 기능 제한은 그대로이며 외국어 미제공 화면은 실제 미제공 안내를 확인했다.
+- 다음 알람, 일정관리/생성·편집/알림 설정, 달력·메모·전체 메모, 전체 조 근무표/설정·편집, 수면·회복/기록, 메인·백업·부가 기능 설정, 근무명·색상·근무시간/정산 기준, 알람 소리·기본 다시 알림·고정 알람, 이력, 권한 안내, 친구/공유, 개인정보, 도움말의 각 주제/하단 내용을 확인했다.
+- 권한 상태별 안내·복원 진행/경고 같은 일부 상태는 실제 위젯에 시험 상태를 주입하여 표시했다. 이는 실제 권한 거부/허용이나 파일 복원 실기 PASS가 아니다.
+- 글자 배율1.15, 한글·영어1.3과 긴 문자열/많은 입력의 키보드 상태 추가 확인. 원본 캡처1710개 중 변경 전 비교16개를 제외한 최종1694개 수동 검토, constrained maxLines 초과0. 레이아웃 코드 변경 뒤 추가 잘림/넘침은 발견하지 않았다. 실제 예약·고정/연장 카드·알람 이력과 Native 제어창은 별도 실기 캡처로 추가 확인했다.
+- 전체 조 표는 가로 스크롤을 유지하는 화면이다. 실제 스와이프로 offset48→0 변경과 첫 날짜 노출을 확인했다. 시험4조는 화면에 임시 표시했고, 화면 조회로 생긴 id1/config:null 기본 행도 원본0행으로 정리했다.
+- 자동 검사: tools/check_critical_release.ps1 -Build exit0. Flutter338, Native 기능/Robolectric 및 DB이관 Gradle 두 단계 성공, dev debug APK 및 공용 Flutter 웹 빌드. release는 실행하지 않았다. Analyzer 오류/경고0, 기존 info29. 자동 검사·빌드는 실기기 결과와 별개다.
+
+3. 기본 알람 실기 — A01/A04/A11
+실제 설치 후보에서 원래 시계를 유지한 채 자연 예약을 기다렸다. 알람 시험 생성은 실제 mounted AlarmNotifier의 addAlarm 경로를 사용했고, 고정 알람/일정은 실제 편집 창과 물리 생성·저장·삭제 버튼을 사용했다. 예약·타입 변경·취소·연장/X는 실제 UI 터치로 확인했다. 시험 DB 상태, mounted Flutter provider, Android AlarmManager/PendingIntent, 현재 Native id/round, 알림/로그/화면을 기록했다.
+
+PASS 범위:
+- 다음 알람·일정관리·달력·수면/회복·설정, 열린 날짜 팝업, 키보드가 열린 도움말, 근무시간 설정의8상태에서 자연 발생과 Native X 종료. 한글/영어·세로/가로 Native 제어창 확인. 접기/Back은 같은 회차를 유지하고 X는 종료했다.
+- 실제 +5분 연장(id13)→예약1건/이력1건→20:14:25 자연 재울림(새 round)→X 종료. 미래 예약 취소는 원래 시각 경과 후 수신되지 않았고 다른 연장 예약은 보존됐다.
+- 선택5..30분/5분 단위, 30상한 버튼 비활성 및5하한 비활성, 기본값10·15 변경이 현재 울림에 반영. 실제15분 연장은 단일 예약/이력 및 취소까지 확인했으며 자연15분 경과는 검사하지 않았다. 기본값5 복구.
+- 같은 목표 분에 기존 알람이 있으면 연장 대상만 snooze_skipped_existing_alarm로 종료, 기존 예약 보존. Native 연장/X의 빠른 반복 터치에서 같은 id/round 이력은1건이었다.
+- 두 번째 알람 자연 발생 시 이전 알람이 superseded_by_next_alarm 이력1건으로 종료되고 새 회차가 유지됐다. 독립 재검사 id54→55 PASS. 울리는 다른 ID를 유지한 채 미래 ID를 취소하는 범위도 확인.
+- 1분 자연 자동 종료: Native 울림·DB 행·OS 예약 제거 및 timeout 이력1건은 PASS. Flutter 화면 동기화는 아래 실패와 분리한다. 무음 프리셋 길이는 원래3분으로 복구했다.
+- 실제 고정 편집기 저장2회에서 템플릿1/6개 발생 예약, 변경 없는 저장에서 ID 유지. 달력 id31 타입3→2 변경/override1 유지·Native 재생성 후 ID/타입 유지. 20:47 자연 발생 뒤5분 연장, 열린 날짜 팝업이 고정 카드→다시 알림 카드로 자동 변경. 다시 알림 카드는 누른 뒤에도 편집되지 않았다.
+- 고정 시각 수정과 dayOffset -1/0/+1 예약16개 생성. 달력 id37 삭제 확인의 반복 터치는 해당 ID만 제거/이력1건/skip override, 재생성 후 부활하지 않았다. 시험 템플릿3개를 실제 편집기에서 제거하면 파생 예약도 모두 제거됐다.
+- 잠금 없는 삼성 홈에서 실제 알림창 +5m(id56), 앱 복귀 후 미래 취소, 새 알림창 끄기(id57) PASS. 현재 알림이 존재할 때 외부 overlay를 생략하는 경로를 관측했다. 알림 차단 상태의 외부 fallback은 이번에 다시 검사하지 않았다.
+- 일정 알림은 별도의 일반 알림이다. 실제 생성2회→DB1행/id1, 같은 ID로 내용 수정·알림 OFF(예약0)→ON(예약1), 21:05:00.073에 수정된 내용/21:05–21:35 표시. 실제 알림 본문 탭이 10/11 일정 화면/id1로 복귀, 실제 삭제 후 DB·Flutter·OS 예약0.
+- 단일 Next 취소는 id58만 제거하고 id59를 보존했다. 대상 ID/회차의 이력 중복 및 DB/OS 누락은 관측하지 않았다. 아래 연속 터치의 대상 전환은 별도 문제다.
+
+교차 검사의 경계:
+- 완성된 DB/OS 스냅샷85개에서 미래 DB ID·epoch당 정확 예약1건 및 DB 없는 추가 CustomAlarmReceiver 예약0을 확인했다. Android 과거 수신 통계의 태그를 현재 예약으로 세지 않았다.
+- Flutter 스냅샷5개는 DB와 불일치: timeout_ended, timeout_verify_after_deadline, native_ko_landscape_controls, home_notification_snoozed, home_notification_dismissed. 앞3개는 foreground Native 전환 뒤 상태 갱신 문제와 연결되며, 홈2개는 앱이 background인 순간이다. 앱 복귀/Next 재조회 및 최종 정리 후 일치는 별도로 확인했다. DB·Flutter·OS 전체가 항상 동시 원자적으로 일치한다고 결론내리지 않는다.
+- 기기에 hasVibrator=false/vibratorIds=[]: 물리 진동은 해당 없음. 기본 알람음은 Native 플레이어/음량70% 재생 로그와 Android audio 상태만 확인했으며 사람이 들은 소리 크기 PASS가 아니다.
+- 화면 OFF·PIN·잠금 FSI/잠금 알림 액션·Doze·재부팅·DND/BT/헤드폰·권한 철회/설정 왕복은 미실시. 일반 UI 시험과 합쳐 잠금/제조사 전수 PASS로 확대하지 않는다.
+
+4. 발견 사항 — 앱 기능 수정 없음
+TABLET11-SYNC / 재현된 동기화 실패:
+- 한국어 Settings의 id30 자동 종료 후 DB0/Native 울림0인데 Flutter provider가7초 뒤에도 이전 행을 유지했다.
+- 새 id53/영어 Settings로 재검사: 20:55:50 자동 종료(timeout 이력1건/예약0/활성 회차0) 뒤20:56:55까지 약65초 이상 이전 Flutter 행을 유지했다. 다음 알람 탭으로 이동+5초 후 DB/Flutter0으로 회복.
+- 알람 인계 직후 한글 가로 제어창에서도 이전 id54가 Flutter에 남은 스냅샷이 있다. Native X 뒤에는 수렴했다. 정확한 신호 누락 원인은 확정하지 않았다.
+- 근거: functional/timeout_sync_observation.json, timeout_sync_retest_result.json, timeout_verify_before_navigation_tables.json, timeout_ended_tables.json, timeout_assert_tables.json, native_ko_landscape_controls_tables.json. 예약 누락/울림 실패와 UI 수렴 실패를 분리한다.
+
+TABLET11-NEXT-TAPS / 연속 터치의 대상 전환 위험:
+- 다음 알람의 ‘이 알람 끄기’를 같은 좌표에서 빠르게2회 누르면 id31 연장 알람 다음 id32 고정 알람까지 취소됐다. 각각 cancelled_before_ring 이력1건이고 DB·예약은 일치했다. 같은 회차가 이중 처리된 것과는 다르지만, 한 대상의 반복 터치가 다음 대상 취소로 이어진다.
+- 실제 한 번씩 누른 별도 검사에서는 id58만 삭제/id59 보존을 확인했다.
+- 일정 수정 창의 저장2회 터치도 DB는1행으로 정상 저장됐지만 창 닫힘 후 수면·회복 탭으로 이동했다. 두 번째 터치가 화면 전환 후 다른 제어에 전달된 것으로 보이며 정확한 원인 확정은 아니다.
+- 근거: next_two_pending_before_double_tables.json, next_two_pending_after_double_tables.json, next_two_pending_cancel_double_touch.json, next_single_target_result.json, schedule_actual_update_off_double_touch.json, schedule_notify_disabled.png, schedule_edit_reopen_state.png.
+
+A09 기존 debug 복귀 문제 / 근본 원인 미확정 보존:
+- 초기 계측 레이아웃 순회 중 InheritedElement descendant/GlobalKey assertion을 보존했다. 임의 Element에서 ModalRoute 조회하던 수집 경로를 정리하고 다시 검사했다. 원인이 앱인지 계측 개입인지 확정하지 않는다.
+- 현재 설치 APK를 새 프로세스로 실행하여 물리 메모 입력·Save/Back과 날짜 선택 Back에서 assertion은 재발하지 않았다. 추가 Back은 잠금 없는 홈으로 정상 이탈했고 앱 복귀도 확인했다. 잠금에는 진입하지 않았다. release 검증은 아니다.
+- instrumented_ui_failure.txt/prior_progress 등 원본과 기존 S26 A09 미확정 이력은 유지한다. 현재 APK의 정상 결과로 과거 문제를 해결 완료 처리하지 않는다.
+
+수집 도구 종료 코드:
+- Samsung uiautomator가 XML 생성 성공을 알린 뒤 exit137로 종료한 사례가 있다. 달력 종료/고정 변경 없는 저장/인계 스크립트의 FAIL 원본은 보존했다. 실제 종료 행/이력/Native 상태와 OS 예약을 별도 확인하거나 재실행해 최종 기능 판정을 구분했다. 고정 작업은 후속 실제 UI 검사로 완료했다. 기능 실패나 PASS로 자동 치환하지 않았다.
+- 예외 처리 파일 수정은 자동 승인 검토에서 레이아웃 외 코드 수정으로 거부되어 적용하지 않았다. 전체 고정 알람 삭제도 처음 거부됐으며, 작업 전 원본0건·현재3개가 시험 생성임을 확인한 뒤 정확한 시험3개만 제거하여 승인/완료했다. 거부된 경로를 우회하지 않았다.
+
+5. 최종 자료·기기 복구
+- 원본17개 논리 테이블의 모든 행 일치. 기존 메모3·수면6·근무 패턴/색상/일정 보존. 시험 예약/고정 템플릿/날짜 일정/이력/creation/override/consumption 정리. SQLite 자동 증가 sequence는 초기화하지 않았다.
+- DB alarms0/Flutter0, 현재 Native id/round 없음, 실패 ID 없음, 실제 CustomAlarmReceiver 예약0/ScheduleNotificationReceiver 예약0. Guard·수면 감지 및 prod 패키지의 일반 예약은 정리 대상으로 삼지 않았다.
+- 기존 사용자 preferences는 자동 백업 시각1키만 갱신됐다. 원본 DB로 자동 백업을 다시 썼으며 수동 백업 슬롯은 건드리지 않았다. 시험 자료가 들어간 자동 백업을 최종 상태로 남기지 않았다.
+- notification/overlay/exactAlarm/fullScreen/alarmChannel 실제 granted 확인. 앱 기본 다시 알림5. 앱 locale[]/한국어, font_scale1.15, 자동 회전1/user_rotation0 복구. 기본 mainWhite와 원래 달력으로 복귀.
+- 충전 중 화면 켜짐15는 사용자 요청대로 유지한다. 최종 Awake/충전/mStayOn=true/keyguard showing=false. 첫 디버그 연결은 d로 해제했다. 마지막 연결은 비대화식 stdin이 닫혀 작업 host attach PID18448만 확인 후 종료했다(Android q/종료 명령 없음). 이후 앱 MainActivity foreground/Awake를 재확인했다. PC 종료 요청은 이번에 없으므로 종료하지 않는다.
+
+6. 관리자 DAU 웹 — U04
+- https://shiftbell-ops-29f31.web.app / version6f8637cb511f03f7. 관리자 Hosting만 빌드·배포. 공개 친구 공유 Flutter 웹·Auth/Firestore 규칙은 배포/수정하지 않았다.
+- DAU 차트 위10개 날짜 칩 제거, 해당 공간으로 차트가 올라왔으며 차트 바로 아래 월~일7개 요일 평균 추가. 차트에서 날짜 선택은 유지.
+- 선택7/30/100/365일, 어제까지 완성된 KST 날짜의 DAU를 요일별 산술 평균. 관측0은 포함, 누락/잘못된 값/미래·오늘은 제외. 평균 소수1자리·집계 일수·기간/막대·표본없음 대기로 표시.
+- Node29검사 PASS. 평균 계산/0/누락/미래 제외·칩0·차트 아래 순서 검사를 포함. Edge fixture 브라우저360/752/1440폭에서7요일/넘침 없음/오류 없음. 실제 인증 사용자 데이터 화면은 자동 fixture 검사와 구분한다.
+- 운영 URL HTTP200와 배포 build-info/14자산 SHA 일치 확인. 웹 배포 권한은 사용자 명시 요청에 따른 것이다.
+
+7. 근거 연결과 후속 상태
+- docs/next_version/evidence/tablet_layout_core_2026_10_11.json 및 artifacts/tablet_layout_core_2026_10_11/.
+- A09 태블릿 레이아웃 범위는 완료, 사용자 최종 시각 승인·기존 Fold/Flip/Ultra/S26 미확정/최종 prod/Play/R01/R02/R04 상태는 보존.
+- A01/A04/A11 이번 잠금 해제 기본 기능의 위 PASS 근거를 추가하되 TABLET11-SYNC와 NEXT-TAPS를 별도 후속 판단으로 남긴다. 앱 기능 수정은0이며 기능 보완 작업을 자동 승인한 기록이 아니다.
+- U04 이번 DAU 배치는 운영 반영 완료. 앞선 재집계·대시보드/번역 원장과 과거 배포 해시는 덮어쓰지 않는다.
