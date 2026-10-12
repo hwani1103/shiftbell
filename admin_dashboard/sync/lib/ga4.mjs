@@ -156,7 +156,7 @@ export class Ga4 {
   breakdown(dimension, limit = 8) {
     return {
       dateRanges: [{ startDate: '28daysAgo', endDate: 'yesterday' }],
-      dimensions: [{ name: dimension }],
+      dimensions: (Array.isArray(dimension) ? dimension : [dimension]).map(name => ({ name })),
       metrics: [{ name: 'activeUsers' }],
       dimensionFilter: streamFilter(this.streamId),
       orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }],
@@ -175,14 +175,14 @@ export class Ga4 {
 
   segmentSummary(dimension, startDate, endDate) {
     return {
-      ...this.periodSummary(startDate, endDate), dimensions: [{ name: dimension }],
+      ...this.periodSummary(startDate, endDate), dimensions: (Array.isArray(dimension) ? dimension : [dimension]).map(name => ({ name })),
       orderBys: [{ metric: { metricName: 'activeUsers' }, desc: true }], limit: '300',
     };
   }
 
   segmentEvents(dimension, startDate, endDate) {
     return {
-      dateRanges: [{ startDate, endDate }], dimensions: [{ name: dimension }, { name: 'eventName' }],
+      dateRanges: [{ startDate, endDate }], dimensions: [...(Array.isArray(dimension) ? dimension : [dimension]).map(name => ({ name })), { name: 'eventName' }],
       metrics: [{ name: 'eventCount' }, { name: 'totalUsers' }],
       dimensionFilter: withStream(this.streamId, { filter: {
         fieldName: 'eventName', inListFilter: { values: [
@@ -199,11 +199,11 @@ export class Ga4 {
   }
 
   countryDaily(days = 100) { return this.segmentDaily('country', days); }
-  languageDaily(days = 100) { return this.segmentDaily('language', days); }
+  countryLanguageDaily(days = 100) { return this.segmentDaily(['country', 'language'], days); }
   segmentDaily(dimension, days = 100) {
     return {
       dateRanges: [{ startDate: String(days) + 'daysAgo', endDate: 'yesterday' }],
-      dimensions: [{ name: 'date' }, { name: dimension }],
+      dimensions: [{ name: 'date' }, ...(Array.isArray(dimension) ? dimension : [dimension]).map(name => ({ name }))],
       metrics: [{ name: 'activeUsers' }, { name: 'newUsers' }, { name: 'sessions' }],
       dimensionFilter: streamFilter(this.streamId),
       orderBys: [{ dimension: { dimensionName: 'date' } }], limit: '100000',

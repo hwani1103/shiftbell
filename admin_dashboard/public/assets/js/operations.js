@@ -2,7 +2,7 @@ import { lineChart, sparkline } from './charts.js';
 import { fmtInt, fmtPct, fmtMoney, fmtDur, fmtMD, fmtLong, todayKst, esc, sum, avg, deltaInfo } from './format.js';
 import { EVENT_META, eventMeta, localizeName, COLORS } from './labels.js';
 
-export const SECTIONS = [['overview', '운영 요약'], ['growth', '성장·국가·언어'], ['product', '기능 활용'], ['quality', '알람·기기']];
+export const SECTIONS = [['overview', '운영 요약'], ['growth', '성장·국가'], ['product', '기능 활용'], ['quality', '알람·기기']];
 const number = (v, unit = '') => v == null ? '—' : fmtInt(v) + unit;
 const tag = (label, tone = '') => '<span class="status-tag ' + tone + '">' + esc(label) + '</span>';
 const card = (title, sub, body, cls = 'span-12') => '<section class="card ' + cls + '"><div class="card-h"><div><h2>' + title + '</h2><p>' + sub + '</p></div></div>' + body + '</section>';
@@ -108,23 +108,17 @@ export function adoptionCard(docs, view) {
   }).join('');
   return card('핵심 기능 활용', '선택 기간 이용 횟수 내림차순 · 상위 5개 기능 색상 표시', '<div class="table-scroll"><table class="ops-table feature-table"><thead><tr><th>기능</th><th>사용자 수</th><th>이용 횟수</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="sub">사용자 수는 선택 기간의 중복 제거 인원입니다. 미관측은 미사용·구버전·수집 누락을 구분할 자료가 아직 없다는 뜻입니다.</p>');
 }
-export const countryCard = (docs, view, ui) => segmentCard(docs, view, ui, 'country');
-export const languageCard = (docs, view, ui) => segmentCard(docs, view, ui, 'language');
-function segmentCard(docs, view, ui, dimension) {
-  const language = dimension === 'language';
-  const title = language ? '언어별 성장과 기능 활용' : '국가별 성장과 기능 활용';
-  const label = language ? '언어' : '국가';
-  const period = periodData(docs, view);
-  const rows = language ? period?.languages : period?.countries;
-  if (!rows) return card(title, language ? 'GA4 기기 언어 기준 · 앱에서 선택한 표시 언어와 다를 수 있습니다.' : 'GA4의 실제 활동 국가 기준', empty(label + ' 운영 집계가 아직 연결되지 않았습니다. 다음 집계부터 표시됩니다.'));
-  const previous = new Map(((language ? period.previousLanguages : period.previousCountries) ?? []).map((r) => [r.name, r]));
-  const sort = language ? ui.languageSort : ui.marketSort;
-  const sorted = [...rows].sort((a, b) => sort === 'newUsers' ? b.newUsers - a.newUsers : b.activeUsers - a.activeUsers);
-  const selected = sorted.some((r) => r.name === ui[dimension]) ? ui[dimension] : sorted[0]?.name;
-  const metric = (r, name) => r.events == null ? '—' : number(r.events[name]?.users ?? null, '명');
-  const html = sorted.map((r) => '<tr class="' + (selected === r.name ? 'selected' : '') + '" data-action="' + dimension + '" data-key="' + esc(r.name) + '" tabindex="0" role="button" aria-label="' + esc(localizeName(dimension, r.name)) + ' 추이"><th>' + esc(localizeName(dimension, r.name)) + '</th><td>' + number(r.activeUsers) + '</td><td>' + change(r.activeUsers, previous.get(r.name)?.activeUsers) + '</td><td>' + number(r.newUsers) + '</td><td>' + metric(r, 'onboarding_complete') + '</td><td>' + metric(r, 'team_roster_created') + '</td><td>' + metric(r, 'alarm_template_saved') + '</td><td>' + metric(r, 'alarm_dismissed') + '</td></tr>').join('');
-  const action = language ? 'language-sort' : 'market-sort';
-  return card(title, '같은 ' + view.len + '일 기준 · 활성/신규/핵심 기능의 사용자 수', '<div class="tabs" role="group" aria-label="' + label + ' 정렬"><button class="tab" data-action="' + action + '" data-key="activeUsers" aria-pressed="' + (sort !== 'newUsers') + '">활성 사용자 순</button><button class="tab" data-action="' + action + '" data-key="newUsers" aria-pressed="' + (sort === 'newUsers') + '">신규 사용자 순</button></div><div class="table-scroll"><table class="ops-table market-table"><thead><tr><th>' + label + '</th><th>활성</th><th>직전 대비</th><th>신규</th><th>시작 완료</th><th>전체조 생성</th><th>알람 생성</th><th>알람 끄기</th></tr></thead><tbody>' + html + '</tbody></table></div><div class="market-chart-head"><b>' + esc(localizeName(dimension, selected ?? label + ' 선택')) + ' · 일간 활성 추이</b><span class="sub">최근 최대 100일 · 행을 눌러 ' + label + ' 선택</span></div><div id="ch-' + dimension + '" style="min-height:200px"></div><p class="sub">' + (language ? 'GA4 기기 언어 기준이며 앱에서 선택한 표시 언어와 다를 수 있습니다. 언어가 바뀐 사용자는 여러 언어에 포함될 수 있습니다.' : '국가를 이동한 사용자는 여러 국가에 포함될 수 있어 국가별 합계는 전체 이용자 수와 다를 수 있습니다.') + ' 알람 생성은 고정 알람 저장 기록 기준이며 생성·수정 저장이 포함됩니다. 신규·시작 완료는 동일 사용자의 전환율을 뜻하지 않습니다.</p>');
+const marketLabel = row => localizeName('country', row.country) + ' / ' + localizeName('language', row.language);
+export function countryCard(docs, view, ui) {
+  const period = periodData(docs, view); const rows = period?.countryLanguages;
+  if (!rows) return card('국가별 성장과 기능 활용', '국가 안에서 사용된 언어까지 함께 확인', empty('국가·언어 교차 집계가 아직 연결되지 않았습니다. 다음 집계부터 표시됩니다.'));
+  const previous = new Map((period.previousCountryLanguages ?? []).map(r => [r.name,r]));
+  const sorted = [...rows].sort((a,b) => ui.marketSort === 'newUsers' ? b.newUsers-a.newUsers : b.activeUsers-a.activeUsers);
+  const selected = sorted.some(r=>r.name===ui.country) ? ui.country : sorted[0]?.name;
+  const chosen = sorted.find(r=>r.name===selected);
+  const metric = (r,name) => r.events == null ? '—' : number(r.events[name]?.users ?? null,'명');
+  const html = sorted.map(r => '<tr class="' + (selected===r.name?'selected':'') + '" data-action="country" data-key="' + esc(r.name) + '" tabindex="0" role="button" aria-label="' + esc(marketLabel(r)) + ' 추이"><th>' + esc(localizeName('country',r.country)) + '</th><td>' + esc(localizeName('language',r.language)) + '</td><td>' + number(r.activeUsers) + '</td><td>' + change(r.activeUsers,previous.get(r.name)?.activeUsers) + '</td><td>' + number(r.newUsers) + '</td><td>' + metric(r,'onboarding_complete') + '</td><td>' + metric(r,'team_roster_created') + '</td><td>' + metric(r,'alarm_template_saved') + '</td><td>' + metric(r,'alarm_dismissed') + '</td></tr>').join('');
+  return card('국가별 성장과 기능 활용', '국가 × 언어 · 같은 ' + view.len + '일 기준 사용자 수', '<div class="tabs" role="group" aria-label="국가 정렬"><button class="tab" data-action="market-sort" data-key="activeUsers" aria-pressed="' + (ui.marketSort!=='newUsers') + '">활성 사용자 순</button><button class="tab" data-action="market-sort" data-key="newUsers" aria-pressed="' + (ui.marketSort==='newUsers') + '">신규 사용자 순</button></div><div class="table-scroll"><table class="ops-table market-table"><thead><tr><th>국가</th><th>언어</th><th>활성</th><th>직전 대비</th><th>신규</th><th>시작 완료</th><th>전체조 생성</th><th>알람 생성</th><th>알람 끄기</th></tr></thead><tbody>' + html + '</tbody></table></div><div class="market-chart-head"><b>' + esc(chosen ? marketLabel(chosen) : '국가·언어 선택') + ' · 일간 활성 추이</b><span class="sub">최근 최대 100일 · 행을 눌러 국가·언어 선택</span></div><div id="ch-country" style="min-height:200px"></div><p class="sub">언어는 GA4 기기 언어 기준이며 앱에서 선택한 표시 언어와 다를 수 있습니다. 국가나 언어가 바뀐 사용자는 여러 조합에 포함될 수 있어 합계는 전체 이용자 수와 다를 수 있습니다. 알람 생성은 고정 알람 생성·수정 저장 기록 기준입니다. 표는 좌우로 밀어 모든 지표를 확인할 수 있습니다.</p>');
 }
 const HEALTH_EVENTS = [['alarm_schedule_ok', '예약 API 완료'], ['alarm_schedule_failed', '예약 API 실패'], ['alarm_fired', '실제 수신·울림 진입'], ['device_boot_seen', '부팅 신호 관측'], ['alarm_refresh_completed', '재등록 갱신 완료'], ['alarm_refresh_failed', '재등록 갱신 실패']];
 export function reliabilityCard(docs, view) {
@@ -146,7 +140,7 @@ export function permissionCard(docs, view) {
 
 export function collectionCard(docs, view) {
   const p = periodData(docs, view); const reports = { ...(docs.summary.coverage ?? {}), ...(p?.coverage ?? {}) };
-  const names = { core: '활성·신규·세션', ads: '광고 수익', cohort: '재방문 코호트', eventsDaily: '일별 행동', current: '기간 이용자', countries: '국가 운영 지표', countryEvents: '국가별 기능', manufacturers: '제조사 운영 지표', manufacturerEvents: '제조사별 알람', countryDaily: '국가 일별 추이', languages: '언어 운영 지표', languageEvents: '언어별 기능', languageDaily: '언어 일별 추이' };
+  const names = { core: '활성·신규·세션', ads: '광고 수익', cohort: '재방문 코호트', eventsDaily: '일별 행동', current: '기간 이용자', countries: '국가 운영 지표', countryEvents: '국가별 기능', manufacturers: '제조사 운영 지표', manufacturerEvents: '제조사별 알람', countryDaily: '국가 일별 추이', countryLanguages: '국가·언어 운영 지표', countryLanguageEvents: '국가·언어별 기능', countryLanguageDaily: '국가·언어 일별 추이' };
   const statuses = Object.entries(names).map(([key, title]) => { const data = reports[key] ?? docs.operations?.coverage?.[key]; const limited = data?.thresholded || data?.sampled || data?.otherRowLoss || data?.truncated; const label = !data || data.status === 'unavailable' ? '미연결/조회 실패' : data.status === 'empty' ? '조회 성공 · 자료 없음' : limited ? '집계 제한 있음' : '집계 완료'; return '<li><span>' + title + '</span>' + tag(label, !data || data.status === 'unavailable' || limited ? 'warning' : '') + '</li>'; }).join('');
   return card('데이터 수집 상태와 판단 범위', '미연결을 0으로 표시하지 않고, 관측 범위를 함께 확인합니다.', '<div class="coverage-grid"><ul class="coverage-list">' + statuses + '</ul><div class="coverage-notes"><h3>운영자가 알아야 할 한계</h3><p>전체교대조 및 새 운영 이벤트: 다음 계측 앱 출시 후 수집. 과거 데이터 소급 복원 불가.</p><p>알람 진단: 앱 재개 후 전송, 최근 72시간·종류별 회당 40건·로컬 기록 최대 1,000건 상한, 첫 실행은 기존 기록을 제외하는 기준선만 저장.</p><p>배터리 제한: 하루 1회 OS 상태 관측이며 알람 실패 원인이 확인된 오류는 아닙니다.</p><p>강제종료 후 동작·실제 미울림·Crashlytics 오류율: 현재 직접 판정할 수집 근거가 없습니다. 성공으로 표시하지 않습니다.</p><p>한국 시간 12:17을 포함해 3시간마다 재집계. 새로고침은 저장된 집계를 읽으며 서버 집계를 다시 실행하지 않습니다.</p></div></div>');
 }
@@ -156,19 +150,15 @@ export function revenueCard(docs, view) {
   const current = periodData(docs, view)?.current;
   return card('수익과 사용 가치', '실제 집계된 광고 수익만 사용 · 매출/원가의 전체 사업 손익과 다릅니다.', '<div class="stats"><div class="stat"><b>' + (revenue == null ? '—' : fmtMoney(revenue, docs.summary.currency ?? 'USD')) + '</b><span>기간 광고 수익</span></div><div class="stat"><b>' + (revenue == null || impressions <= 0 ? '—' : fmtMoney(revenue / impressions * 1000, docs.summary.currency ?? 'USD')) + '</b><span>광고 1,000회당 수익</span></div><div class="stat"><b>' + number(impressions) + '</b><span>광고 노출</span></div><div class="stat"><b>' + (current?.activeUsers > 0 ? fmtDur(current.engagementSec / current.activeUsers) : '—') + '</b><span>기간 활성 사용자당 참여시간</span></div></div><p class="sub">광고 수익 미연결은 수익 0원이 아닙니다. 광고 비용·서버비·결제 매출은 연결되지 않아 순이익이나 국가별 ROI를 계산하지 않습니다.</p>');
 }
-export const mountCountryChart = (root, docs, view, ui) => mountSegmentChart(root, docs, view, ui, 'country');
-export const mountLanguageChart = (root, docs, view, ui) => mountSegmentChart(root, docs, view, ui, 'language');
-function mountSegmentChart(root, docs, view, ui, dimension) {
-  const host = root.querySelector('#ch-' + dimension); if (!host) return null;
-  const language = dimension === 'language';
-  const trend = language ? docs.operations?.languageTrend : docs.operations?.countryTrend;
-  const period = periodData(docs, view);
-  const sort = language ? ui.languageSort : ui.marketSort;
-  const rows = [...((language ? period?.languages : period?.countries) ?? [])].sort((a, b) => sort === 'newUsers' ? b.newUsers - a.newUsers : b.activeUsers - a.activeUsers);
-  const name = rows.some((r) => r.name === ui[dimension]) ? ui[dimension] : rows[0]?.name;
-  const item = trend?.series?.[name];
-  if (!item) { host.innerHTML = empty('선택 ' + (language ? '언어' : '국가') + '의 일별 추이가 아직 없습니다.'); return null; }
-  const cutoff = view.dates[0]; const first = trend.dates.findIndex((d) => d >= cutoff); const start = first < 0 ? trend.dates.length : first;
-  return lineChart(host, { dates: trend.dates.slice(start), title: localizeName(dimension, name) + ' 일간 활성 사용자', height: 210,
-    series: [{ key: dimension, label: localizeName(dimension, name), color: COLORS.dau, values: item.dau.slice(start), area: true }], valueFmt: (v) => fmtInt(v) + '명' });
+export function mountCountryChart(root, docs, view, ui) {
+  const host = root.querySelector('#ch-country'); if (!host) return null;
+  const trend = docs.operations?.countryLanguageTrend;
+  const rows = [...(periodData(docs,view)?.countryLanguages ?? [])].sort((a,b)=>ui.marketSort==='newUsers'?b.newUsers-a.newUsers:b.activeUsers-a.activeUsers);
+  const selected = rows.find(r=>r.name===ui.country) ?? rows[0];
+  const item = trend?.series?.[selected?.name];
+  if (!item) {host.innerHTML=empty('선택 국가·언어의 일별 추이가 아직 없습니다.');return null;}
+  const first = trend.dates.findIndex(d=>d>=view.dates[0]); const start=first<0?trend.dates.length:first;
+  const label = marketLabel(selected);
+  return lineChart(host,{dates:trend.dates.slice(start),title:label+' 일간 활성 사용자',height:210,
+    series:[{key:'countryLanguage',label,color:COLORS.dau,values:item.dau.slice(start),area:true}],valueFmt:v=>fmtInt(v)+'명'});
 }

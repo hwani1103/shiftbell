@@ -1,4 +1,4 @@
-import { SECTIONS, businessKpis, dailyView, dailyOverviewCard, dailyReadout, dailySelection, adoptionCard, countryCard, languageCard, reliabilityCard, manufacturerCard, permissionCard, collectionCard, revenueCard, mountCountryChart, mountLanguageChart } from './operations.js';
+import { SECTIONS, businessKpis, dailyView, dailyOverviewCard, dailyReadout, dailySelection, adoptionCard, countryCard, reliabilityCard, manufacturerCard, permissionCard, collectionCard, revenueCard, mountCountryChart } from './operations.js';
 // admin_dashboard/public/assets/js/main.js - 로그인/대시보드 화면 전환과 이벤트 처리.
 
 import {
@@ -24,7 +24,7 @@ const store = {
 const ui = {
   range: RANGES.includes(Number(store.get('range'))) ? Number(store.get('range')) : 30,
   visible: { dau: true, mau: false },
-  section: 'overview', country: null, marketSort: 'activeUsers', language: null, languageSort: 'activeUsers', dailyDate: null,
+  section: 'overview', country: null, marketSort: 'activeUsers', dailyDate: null,
   dist: 'appVersion', evGroup: 'all', evSystem: false, evExpanded: false,
 };
 let dailyChart = null; let docs = null; let user = null; let charts = []; let loading = false; let error = null; let loadedAt = 0; let sheetChart = null;
@@ -134,7 +134,7 @@ function renderApp() {
   let body = '';
   const recent = dailyView(docs, undefined, ui.range);
   if (section === 'overview') body = dailyOverviewCard(docs, recent, ui) + businessKpis(docs, view) + installsCard(view, 'span-12') + adoptionCard(docs, view) + reliabilityCard(docs, view) + revenueCard(docs, view) + collectionCard(docs, view);
-  if (section === 'growth') body = businessKpis(docs, view) + countryCard(docs, view, ui) + languageCard(docs, view, ui) + usersCard(view, ui.visible) + installsCard(view) + retentionCard(docs) + engagementCard(view);
+  if (section === 'growth') body = businessKpis(docs, view) + countryCard(docs, view, ui) + usersCard(view, ui.visible) + installsCard(view) + retentionCard(docs) + engagementCard(view);
   if (section === 'product') body = adoptionCard(docs, view) + behaviorCard(docs, view, ui) + distCard(docs, ui, 'span-12') + revenueCard(docs, view);
   if (section === 'quality') body = reliabilityCard(docs, view) + manufacturerCard(docs, view) + permissionCard(docs, view) + distCard(docs, ui, 'span-12') + collectionCard(docs, view);
   root.innerHTML = headerHtml(view) + '<main class="wrap ops-layout">' + body + footerNote(docs) + '</main>';
@@ -154,8 +154,6 @@ function renderApp() {
   }
   const countryChart = mountCountryChart(root, docs, view, ui);
   if (countryChart) charts.push(countryChart);
-  const languageChart = mountLanguageChart(root, docs, view, ui);
-  if (languageChart) charts.push(languageChart);
   window.scrollTo(0, y);
 }
 
@@ -224,8 +222,6 @@ function handle(action, el) {
     case 'section': ui.section = el.dataset.key; renderApp(); window.scrollTo(0, 0); break;
     case 'country': ui.country = el.dataset.key; renderApp(); break;
     case 'market-sort': ui.marketSort = el.dataset.key; renderApp(); break;
-    case 'language': ui.language = el.dataset.key; renderApp(); break;
-    case 'language-sort': ui.languageSort = el.dataset.key; renderApp(); break;
     case 'range': ui.range = Number(el.dataset.key); store.set('range', String(ui.range)); renderApp(); break;
     case 'legend': {
       const k = el.dataset.key;
@@ -263,7 +259,7 @@ function onActivate(e) {
 root.addEventListener('click', onActivate);
 layer.addEventListener('click', onActivate);
 root.addEventListener('keydown', (e) => {
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-action="event"], [data-action="country"], [data-action="language"]')) { e.preventDefault(); onActivate(e); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-action="event"], [data-action="country"]')) { e.preventDefault(); onActivate(e); }
 });
 
 // 화면으로 돌아왔을 때 10분 넘게 지났으면 자동으로 다시 불러온다.
