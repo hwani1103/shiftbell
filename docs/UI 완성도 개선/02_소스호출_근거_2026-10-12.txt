@@ -1,0 +1,2793 @@
+교대시계 UI 조사 — 소스 호출 근거
+조사일 2026-10-12 / dev 969e815b4f7236152b0471ef050fb1e5a87dede1 + 미커밋 작업
+정적 조사이며 실제 실행·실기기 표시 증거가 아니다. 행 번호는 조사 시점 기준.
+
+1. Flutter 모달·선택기 직접 호출 (60곳, 모두 ID 연결)
+
+[LEGACY-03] lib/main.dart:1067 / showDatePicker
+1064:   }
+1065: 
+1066:   Future<void> _selectDateTime() async {
+1067:     final date = await showDatePicker(
+1068:       context: context,
+1069:       initialDate: selectedDateTime,
+1070:       firstDate: DateTime.now(),
+1071:       lastDate: DateTime.now().add(const Duration(days: 30)),
+1072:     );
+1073: 
+1074:     if (date == null) return;
+1075: 
+1076:     final time = await showTimePicker(
+1077:       context: context,
+1078:       initialTime: TimeOfDay.fromDateTime(selectedDateTime),
+1079:     );
+1080: 
+1081:     if (time == null) return;
+1082: 
+1083:     setState(() {
+1084:       selectedDateTime = DateTime(
+1085:         date.year,
+1086:         date.month,
+
+[LEGACY-04] lib/main.dart:1076 / showTimePicker
+1073: 
+1074:     if (date == null) return;
+1075: 
+1076:     final time = await showTimePicker(
+1077:       context: context,
+1078:       initialTime: TimeOfDay.fromDateTime(selectedDateTime),
+1079:     );
+1080: 
+1081:     if (time == null) return;
+1082: 
+1083:     setState(() {
+1084:       selectedDateTime = DateTime(
+1085:         date.year,
+1086:         date.month,
+1087:         date.day,
+1088:         time.hour,
+1089:         time.minute,
+1090:       );
+1091:     });
+1092:   }
+1093: 
+1094:   Future<void> _scheduleAlarm() async {
+1095:     if (!permissionsGranted) {
+
+[SET-16] lib/screens/all_alarms_history_view.dart:209 / showDialog
+206: 
+207:   Future<void> _deleteAllHistory() async {
+208:     final colorScheme = Theme.of(context).colorScheme;
+209:     final confirm = await showDialog<bool>(
+210:       context: context,
+211:       builder: (context) => AlertDialog(
+212:         title: Text(context.l10n.alarmHistoryDeleteAllTitle),
+213:         content: Column(
+214:           mainAxisSize: MainAxisSize.min,
+215:           crossAxisAlignment: CrossAxisAlignment.start,
+216:           children: [
+217:             Text(
+218:               context.l10n.alarmHistoryTestOnlyWarning,
+219:               style: TextStyle(
+220:                 fontSize: 15.sp,
+221:                 fontWeight: FontWeight.bold,
+222:                 color: colorScheme.error,
+223:               ),
+224:             ),
+225:             SizedBox(height: 12.h),
+226:             Text(context.l10n.alarmHistoryDeleteAllDesc),
+227:             SizedBox(height: 8.h),
+228:             Text(context.l10n.settingsActionCannotBeUndone),
+
+[CAL-11] lib/screens/all_shifts_view.dart:120 / showDialog
+117:   Future<void> _recoverLegacyTeams() async {
+118:     final config = _legacyRecovery;
+119:     if (config == null) return;
+120:     final accepted = await showDialog<bool>(context: context, builder: (context) =>
+121:       AlertDialog(title: Text(context.l10n.teamLegacyRecoverAction),
+122:         content: Text(context.l10n.teamLegacyRecoverBody), actions: [
+123:           TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.commonCancel)),
+124:           TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.backupRestoreButton)),
+125:         ]));
+126:     if (accepted != true || !mounted) return;
+127:     // Only the roster row is restored. Main schedule, memos and alarms are kept.
+128:     await DatabaseService.instance.saveTeamScheduleConfig(config);
+129:     await _loadTeamData();
+130:   }
+131: 
+132:   // ⭐ 2026-09-05 - 월 이동 버튼 3종 - 위쪽 헤더와 두 블록 사이 보조 내비게이션
+133:   // 바가 공유해서 씀(중복 코드 방지). PageView의 스와이프 제스처는 껐지만
+134:   // (위 physics 주석 참고) 이 프로그램적 페이지 이동은 physics와 무관하게 계속 동작함.
+135:   void _goToPreviousMonth() {
+136:     _pageController.previousPage(
+137:         duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+138:   }
+139: 
+
+[CAL-12] lib/screens/all_shifts_view.dart:163 / showDialog
+160:         schedule.todayIndex == null ||
+161:         schedule.startDate == null) {
+162:       if (!mounted) return;
+163:       showDialog(
+164:         context: context,
+165:         builder: (context) => AlertDialog(
+166:           title: Text(context.l10n.statusFullTeamScheduleTitle),
+167:           content: Text(context.l10n.settingsAllTeamsRegularOnly),
+168:           actions: [
+169:             TextButton(
+170:               onPressed: () => Navigator.pop(context),
+171:               child: Text(context.l10n.commonOk),
+172:             ),
+173:           ],
+174:         ),
+175:       );
+176:       return;
+177:     }
+178: 
+179:     if (!mounted) return;
+180: 
+181:     if (_isConfigured) {
+182:       final result = await Navigator.of(context).push<TeamScheduleEditResult>(
+
+[TEAM-01] lib/screens/all_teams_setup_screen.dart:163 / showModalBottomSheet
+160:     final originals = {for (final e in _rosterEntries) _RosterEntry(e.name): e};
+161:     final draft = originals.keys.toList();
+162:     final removedDrafts = <_RosterEntry>[];
+163:     final completed = await showModalBottomSheet<bool>(
+164:       context: context,
+165:       isScrollControlled: true,
+166:       backgroundColor: Colors.white,
+167:       shape: RoundedRectangleBorder(
+168:           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
+169:       builder: (_) => _RosterEditorSheet(
+170:         entries: draft,
+171:         onRemoveCascade: removedDrafts.add,
+172:       ),
+173:     );
+174:     if (!mounted) {
+175:       for (final e in [...draft, ...removedDrafts]) {
+176:         e.dispose();
+177:       }
+178:       return;
+179:     }
+180:     // Keep controllers alive until the sheet's closing animation unmounts its
+181:     // TextFields. They are disposed with this page, never during a remove tap.
+182:     _retiredEntries.addAll([...draft, ...removedDrafts]);
+
+[CAL-05] lib/screens/calendar_tab.dart:331 / showDialog
+328:     final monthFormat =
+329:         DateFormat.MMM(Localizations.localeOf(context).toString());
+330: 
+331:     showDialog(
+332:       context: context,
+333:       builder: (context) {
+334:         return StatefulBuilder(
+335:           builder: (context, setState) {
+336:             return AlertDialog(
+337:               // ⭐ 타이틀에 X 버튼 추가
+338:               title: Row(
+339:                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+340:                 children: [
+341:                   Text(context.l10n.calendarSelectDate,
+342:                       style: TextStyle(
+343:                           fontSize: 20.sp, fontWeight: FontWeight.bold)),
+344:                   IconButton(
+345:                     icon: Icon(Icons.close, size: 24.sp),
+346:                     onPressed: () => Navigator.pop(context),
+347:                     padding: EdgeInsets.zero,
+348:                     constraints: BoxConstraints(),
+349:                   ),
+350:                 ],
+
+[CAL-06] lib/screens/calendar_tab.dart:1467 / showModalBottomSheet
+1464:     // 팝업을 열기 전에 그 기간을 명시적으로 로드해 캐시 누락을 방지함
+1465:     ref.read(overtimeProvider.notifier).loadForRange(period.start, period.end);
+1466: 
+1467:     showModalBottomSheet(
+1468:       context: context,
+1469:       isScrollControlled: true,
+1470:       shape: RoundedRectangleBorder(
+1471:         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+1472:       ),
+1473:       builder: (context) {
+1474:         return Consumer(
+1475:           builder: (context, ref, child) {
+1476:             final otByDate = ref.watch(overtimeProvider);
+1477:             final schedule = ref.watch(scheduleProvider).value;
+1478:             final workSettings = ref.watch(workHoursSettingsProvider);
+1479:             // ⭐ "이번 달 OT" 목록/합계 = 수동 OT + (설정 켜져 있으면) 근무변경으로
+1480:             // 늘어난 시간. "총 근무(예정) 시간 합산"(아래)은 이 값과 무관하게 항상
+1481:             // 그대로(중복 합산 없음).
+1482:             final entries = schedule == null
+1483:                 ? <OtDisplayEntry>[]
+1484:                 : computeOtDisplayEntries(
+1485:                     schedule: schedule,
+1486:                     start: period.start,
+
+[CAL-07] lib/screens/calendar_tab.dart:1712 / showModalBottomSheet
+1709:     // ⭐ 이 시트가 보여주는 범위(월 앞뒤로 걸친 주 포함)를 명시적으로 로드
+1710:     ref.read(overtimeProvider.notifier).loadForRange(rangeStart, rangeEnd);
+1711: 
+1712:     showModalBottomSheet(
+1713:       context: context,
+1714:       isScrollControlled: true,
+1715:       shape: RoundedRectangleBorder(
+1716:         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+1717:       ),
+1718:       builder: (context) {
+1719:         return Consumer(
+1720:           builder: (context, ref, child) {
+1721:             final otByDate = ref.watch(overtimeProvider);
+1722:             final schedule = ref.watch(scheduleProvider).value;
+1723:             final colorScheme = Theme.of(context).colorScheme;
+1724: 
+1725:             final summaries = schedule == null
+1726:                 ? <WeekWorkSummary>[]
+1727:                 : weeks
+1728:                     .map((w) => computeWeekSummary(
+1729:                           schedule: schedule,
+1730:                           weekStart: w.start,
+1731:                           weekEnd: w.end,
+
+[CAL-02] lib/screens/calendar_tab.dart:5906 / showModalBottomSheet
+5903:     final memoController = TextEditingController();
+5904:     TransitionRoute<dynamic>? detailRoute;
+5905: 
+5906:     showModalBottomSheet(
+5907:       context: context,
+5908:       isScrollControlled: true,
+5909:       builder: (context) {
+5910:         detailRoute = ModalRoute.of(context);
+5911:         return StatefulBuilder(
+5912:           builder: (context, setState) {
+5913:             final popupColors = Theme.of(context).colorScheme;
+5914:             final memoFieldBorder = OutlineInputBorder(
+5915:                 borderRadius: BorderRadius.circular(8.r),
+5916:                 borderSide:
+5917:                     BorderSide(color: popupColors.onSurface.withOpacity(0.3)));
+5918:             final popupLayout = AppLayout.of(context);
+5919:             final adaptivePopup = popupLayout.usesBoundedCalendar;
+5920:             final basePopupHeight = adaptivePopup
+5921:                 ? MediaQuery.sizeOf(context).height *
+5922:                     (popupLayout.isShortCover ? 0.86 : 0.76)
+5923:                 : originalPopupHeight;
+5924:             final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+5925:             final isKeyboardVisible = keyboardHeight > 50; // 키보드 감지 임계값
+
+[CAL-03] lib/screens/calendar_tab.dart:6605 / showDialog
+6602:   void _showAlarmTypeSelectionPopup(Alarm alarm, StateSetter parentSetState) {
+6603:     print(
+6604:         '🔍 알람 타입 선택 팝업 열림 - alarm.id: ${alarm.id}, alarmTypeId: ${alarm.alarmTypeId}');
+6605:     showDialog(
+6606:       context: context,
+6607:       builder: (context) {
+6608:         print('🏗️ AlertDialog 빌드 시작');
+6609:         return AlertDialog(
+6610:           title: Text(
+6611:             context.l10n.calendarSelectAlarmType,
+6612:             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+6613:           ),
+6614:           content: SizedBox(
+6615:             width: double.maxFinite, // ⭐ 명시적 width 지정
+6616:             child: Column(
+6617:               mainAxisSize: MainAxisSize.min,
+6618:               children: [
+6619:                 // ⭐ "{time} 알람" 앞에 근무명 + 전날/당일/다음날 Chip을 추가 -
+6620:                 // "09:00 알람"만으로는 어느 근무의 알람인지, 언제 배정된 근무 기준인지
+6621:                 // 알 수 없었음.
+6622:                 // Keep readable labels together when they fit; English shift
+6623:                 // names and day-offset labels need wrapping on narrow screens.
+6624:                 Wrap(
+
+[CAL-04] lib/screens/calendar_tab.dart:6725 / showDialog
+6722:   Future<void> _showDeleteAlarmConfirmation(
+6723:       Alarm alarm, StateSetter parentSetState) async {
+6724:     if (!mounted) return;
+6725:     showDialog(
+6726:       context: context,
+6727:       builder: (context) {
+6728:         return AlertDialog(
+6729:           title: Text(
+6730:             context.l10n.calendarDeleteAlarmTitle,
+6731:             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+6732:           ),
+6733:           content: Text(
+6734:             context.l10n.calendarDeleteAlarmConfirm(alarm.time),
+6735:             style: TextStyle(fontSize: 14.sp),
+6736:           ),
+6737:           actions: [
+6738:             TextButton(
+6739:               onPressed: () => Navigator.pop(context),
+6740:               child: Text(context.l10n.commonCancel),
+6741:             ),
+6742:             ElevatedButton(
+6743:               onPressed: () async {
+6744:                 Navigator.pop(context); // 확인 팝업 닫기
+
+[CAL-08] lib/screens/calendar_tab.dart:6916 / showModalBottomSheet
+6913: 
+6914:     final screenHeight = MediaQuery.of(context).size.height;
+6915: 
+6916:     showModalBottomSheet(
+6917:       context: context,
+6918:       isScrollControlled: true,
+6919:       builder: (context) => Container(
+6920:         height: screenHeight * 0.4,
+6921:         padding: EdgeInsets.all(24.w),
+6922:         child: Column(
+6923:           mainAxisSize: MainAxisSize.min,
+6924:           children: [
+6925:             // ⭐ 제목 텍스트 - 센터 정렬
+6926:             Center(
+6927:               child: Text(
+6928:                 context.l10n
+6929:                     .calendarBulkChangeShiftTitle(_selectedDates.length),
+6930:                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
+6931:               ),
+6932:             ),
+6933:             SizedBox(height: 24.h),
+6934: 
+6935:             // ⭐ 버튼들 - 세로 센터 정렬
+
+[LEGACY-06] lib/screens/calendar_theme_lab_screen.dart:335 / showModalBottomSheet
+332:     final memos = widget.preview ? <String>[] : _mockMemos[_dateKey(day)] ?? [];
+333:     final ot = _mockOtMinutes[_dateKey(day)] ?? 0;
+334:     final locale = Localizations.localeOf(context).toString();
+335:     showModalBottomSheet(
+336:       context: context,
+337:       shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
+338:       builder: (context) {
+339:         return Padding(
+340:           padding: EdgeInsets.all(20.w),
+341:           child: Column(
+342:             mainAxisSize: MainAxisSize.min,
+343:             crossAxisAlignment: CrossAxisAlignment.start,
+344:             children: [
+345:               Text(
+346:                 context.l10n.themeLabPreviewSheetTitle(
+347:                   DateFormat.MMMd(locale).format(day),
+348:                   weekdayLabel(context, day.weekday % 7),
+349:                 ),
+350:                 style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+351:               ),
+352:               SizedBox(height: 10.h),
+353:               Row(children: [
+354:                 Container(width: 10.w, height: 10.w, decoration: BoxDecoration(color: shift.color, shape: BoxShape.circle)),
+
+[LEGACY-07] lib/screens/calendar_theme_lab_screen.dart:1551 / showModalBottomSheet
+1548: 
+1549: // ⭐ 여러 테마가 공유하는 "주별 근무시간" 간단 리스트 시트
+1550: void _showWeekSummarySheet(BuildContext context, List<_WeekSummary> weeks) {
+1551:   showModalBottomSheet(
+1552:     context: context,
+1553:     shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
+1554:     builder: (context) {
+1555:       return Padding(
+1556:         padding: EdgeInsets.all(20.w),
+1557:         child: Column(
+1558:           mainAxisSize: MainAxisSize.min,
+1559:           crossAxisAlignment: CrossAxisAlignment.start,
+1560:           children: [
+1561:             Text(context.l10n.shiftWeeklyWorkHours, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+1562:             SizedBox(height: 10.h),
+1563:             ...weeks.map((w) => Padding(
+1564:               padding: EdgeInsets.symmetric(vertical: 4.h),
+1565:               child: Row(
+1566:                 children: [
+1567:                   Text('${w.start.month}/${w.start.day} ~ ${w.end.month}/${w.end.day}', style: TextStyle(fontSize: 13.sp)),
+1568:                   const Spacer(),
+1569:                   Text(formatOvertimeMinutes(context, w.totalMinutes), style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: Colors.indigo)),
+1570:                 ],
+
+[SHARE-02] lib/screens/friend_list_screen.dart:76 / showDialog
+73:     final nameController = TextEditingController();
+74:     final codeController = TextEditingController();
+75: 
+76:     showDialog(
+77:       context: context,
+78:       builder: (context) {
+79:         if (!context.usesKoreanFeatures) return const UnavailableFeature();
+80:         return AlertDialog(
+81:           title: Text(context.koOnly.friendAdd,
+82:               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600)),
+83:           content: SingleChildScrollView(
+84:             child: Column(
+85:               mainAxisSize: MainAxisSize.min,
+86:               crossAxisAlignment: CrossAxisAlignment.start,
+87:               children: [
+88:                 Text(
+89:                     '${context.koOnly.friendName} ${context.koOnly.friendNameOptionalHint}',
+90:                     style: TextStyle(fontSize: 12.sp)),
+91:                 SizedBox(height: 6.h),
+92:                 TextField(
+93:                   controller: nameController,
+94:                   decoration: InputDecoration(
+95:                     hintText: context.koOnly.friendNameHintExample,
+
+[SHARE-03] lib/screens/friend_list_screen.dart:304 / showDialog
+301:                                     icon: Icon(Icons.delete_outline,
+302:                                         color: colorScheme.error),
+303:                                     onPressed: () async {
+304:                                       final confirm = await showDialog<bool>(
+305:                                         context: context,
+306:                                         builder: (context) => !context
+307:                                                 .usesKoreanFeatures
+308:                                             ? const UnavailableFeature()
+309:                                             : AlertDialog(
+310:                                                 title: Text(context
+311:                                                     .koOnly.friendRemove),
+312:                                                 content: Text(context.koOnly
+313:                                                     .friendRemoveConfirm(
+314:                                                         displayName)),
+315:                                                 actions: [
+316:                                                   TextButton(
+317:                                                       onPressed: () =>
+318:                                                           Navigator.pop(
+319:                                                               context, false),
+320:                                                       child: Text(context
+321:                                                           .l10n.commonCancel)),
+322:                                                   TextButton(
+323:                                                       onPressed: () =>
+
+[SHARE-05] lib/screens/my_share_code_screen.dart:181 / showDialog
+178: 
+179:   Future<void> _stopSharing() async {
+180:     if (!context.usesKoreanFeatures) return;
+181:     final confirm = await showDialog<bool>(
+182:       context: context,
+183:       builder: (context) => !context.usesKoreanFeatures
+184:           ? const UnavailableFeature()
+185:           : AlertDialog(
+186:               title: Text(context.koOnly.friendStopSharing),
+187:               content: Text(
+188:                 '${context.koOnly.friendStopSharingConfirm}\n\n${context.koOnly.friendRestartSharingHint}',
+189:               ),
+190:               actions: [
+191:                 TextButton(
+192:                     onPressed: () => Navigator.pop(context, false),
+193:                     child: Text(context.l10n.commonCancel)),
+194:                 TextButton(
+195:                     onPressed: () => Navigator.pop(context, true),
+196:                     child: Text(context.koOnly.friendStopSharingAction)),
+197:               ],
+198:             ),
+199:     );
+200:     if (confirm != true) return;
+
+[NEXT-02] lib/screens/next_alarm_tab.dart:182 / showModalBottomSheet
+179:   void _showAllAlarmsSheet(BuildContext context) {
+180:     if (!mounted) return;
+181: 
+182:     showModalBottomSheet(
+183:       context: context,
+184:       isScrollControlled: true,
+185:       shape: RoundedRectangleBorder(
+186:         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+187:       ),
+188:       builder: (context) {
+189:         // ⭐ 여기서 refresh - 안전한 context에서 호출
+190:         WidgetsBinding.instance.addPostFrameCallback((_) {
+191:           ref.read(alarmNotifierProvider.notifier).refresh();
+192:         });
+193: 
+194:         return DraggableScrollableSheet(
+195:           initialChildSize: 0.6,
+196:           minChildSize: 0.4,
+197:           maxChildSize: 0.85,
+198:           expand: false,
+199:           builder: (context, scrollController) {
+200:             return Consumer(
+201:               builder: (context, ref, child) {
+
+[ONB-05] lib/screens/onboarding_screen.dart:632 / showDialog
+629:   void _showAddCustomDialog() {
+630:     final controller = TextEditingController();
+631: 
+632:     showDialog(
+633:       context: context,
+634:       builder: (context) => ShiftEditorDialog(
+635:         title: Text(context.l10n.onboardingAddShiftName),
+636:         content: SingleChildScrollView(
+637:           child: ShiftNameTextField(
+638:             controller: controller,
+639:             autofocus: true,
+640:             decoration: InputDecoration(
+641:               labelText: context.l10n.shiftName,
+642:             ),
+643:           ),
+644:         ),
+645:         actions: [
+646:           AppSecondButton(
+647:             variant: AppSecondButtonVariant.neutral,
+648:             onPressed: () => Navigator.pop(context),
+649:             child: Text(context.l10n.commonCancel),
+650:           ),
+651:           AppSecondButton(
+
+[ONB-06] lib/screens/onboarding_screen.dart:929 / showDialog
+926:   }
+927: 
+928:   void _showAlarmTimeDialog(String shift) {
+929:     showDialog(
+930:       context: context,
+931:       builder: (context) => _AlarmTimeDialog(
+932:         shift: shift,
+933:         initialAlarms: _shiftAlarms[shift] ?? [],
+934:         onSave: (alarms) {
+935:           setState(() {
+936:             _shiftAlarms[shift] = alarms;
+937:           });
+938:         },
+939:       ),
+940:     );
+941:   }
+942: 
+943:   Widget _buildTodayIndexInput() {
+944:     final today = DateTime.now();
+945:     final locale = Localizations.localeOf(context).toString();
+946:     final dateText = DateFormat.MMMd(locale).format(today);
+947: 
+948:     return Padding(
+
+[CMP-01] lib/screens/onboarding_screen.dart:1360 / showDialog
+1357:   // ⭐ 알람 시간 수정
+1358:   Future<void> _editAlarmTime(int index) async {
+1359:     final currentAlarm = _alarms[index];
+1360:     await showDialog(
+1361:       context: context,
+1362:       builder: (context) => AlarmTimePicker(
+1363:         shiftName: widget.shift,
+1364:         initialTime: currentAlarm.time,
+1365:         initialDayOffset: currentAlarm.dayOffset,
+1366:         onTimeSelected: (time, dayOffset) async {
+1367:           // ⭐ 중복 체크 (자기 자신 제외) - 같은 시각이어도 전날/당일/다음날이 다르면
+1368:           // 서로 다른 실제 날짜에 울리는 별개의 알람이라 중복이 아님.
+1369:           final isDuplicate = _alarms.asMap().entries.any((entry) {
+1370:             return entry.key != index &&
+1371:                 entry.value.time.hour == time.hour &&
+1372:                 entry.value.time.minute == time.minute &&
+1373:                 entry.value.dayOffset == dayOffset;
+1374:           });
+1375: 
+1376:           if (isDuplicate) {
+1377:             await showDialog(
+1378:               context: context,
+1379:               builder: (context) => AlertDialog(
+
+[CMP-02] lib/screens/onboarding_screen.dart:1377 / showDialog
+1374:           });
+1375: 
+1376:           if (isDuplicate) {
+1377:             await showDialog(
+1378:               context: context,
+1379:               builder: (context) => AlertDialog(
+1380:                 title: Row(
+1381:                   children: [
+1382:                     Icon(Icons.warning_amber_rounded,
+1383:                         color: Theme.of(context).colorScheme.tertiary,
+1384:                         size: 28),
+1385:                     SizedBox(width: 8),
+1386:                     Text(context.l10n.alarmDuplicate),
+1387:                   ],
+1388:                 ),
+1389:                 content: Text(
+1390:                   context.l10n.alarmAlreadyExistsAtTime(
+1391:                     '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+1392:                   ),
+1393:                   style: TextStyle(fontSize: 16),
+1394:                 ),
+1395:                 actions: [
+1396:                   TextButton(
+
+[CMP-01] lib/screens/onboarding_screen.dart:1417 / showDialog
+1414:   }
+1415: 
+1416:   Future<void> _addAlarm() async {
+1417:     await showDialog(
+1418:       context: context,
+1419:       builder: (context) => AlarmTimePicker(
+1420:         shiftName: widget.shift,
+1421:         onTimeSelected: (time, dayOffset) async {
+1422:           // ⭐ 중복 체크 (시각 + 전날/당일/다음날이 모두 같을 때만 중복)
+1423:           final isDuplicate = _alarms.any((alarm) =>
+1424:               alarm.time.hour == time.hour &&
+1425:               alarm.time.minute == time.minute &&
+1426:               alarm.dayOffset == dayOffset);
+1427: 
+1428:           if (isDuplicate) {
+1429:             await showDialog(
+1430:               context: context,
+1431:               builder: (context) => AlertDialog(
+1432:                 title: Row(
+1433:                   children: [
+1434:                     Icon(Icons.warning_amber_rounded,
+1435:                         color: Theme.of(context).colorScheme.tertiary,
+1436:                         size: 28),
+
+[CMP-02] lib/screens/onboarding_screen.dart:1429 / showDialog
+1426:               alarm.dayOffset == dayOffset);
+1427: 
+1428:           if (isDuplicate) {
+1429:             await showDialog(
+1430:               context: context,
+1431:               builder: (context) => AlertDialog(
+1432:                 title: Row(
+1433:                   children: [
+1434:                     Icon(Icons.warning_amber_rounded,
+1435:                         color: Theme.of(context).colorScheme.tertiary,
+1436:                         size: 28),
+1437:                     SizedBox(width: 8),
+1438:                     Text(context.l10n.alarmDuplicate),
+1439:                   ],
+1440:                 ),
+1441:                 content: Text(
+1442:                   context.l10n.alarmAlreadyExistsAtTime(
+1443:                     '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
+1444:                   ),
+1445:                   style: TextStyle(fontSize: 16),
+1446:                 ),
+1447:                 actions: [
+1448:                   TextButton(
+
+[START-06] lib/screens/permission_intro_screen.dart:120 / showDialog
+117:     if (_warningOpen || !mounted) return;
+118:     _warningOpen = true;
+119:     final colorScheme = Theme.of(context).colorScheme;
+120:     showDialog(
+121:       context: context,
+122:       barrierDismissible: false,
+123:       builder: (context) => ShiftEditorDialog(
+124:         title: Row(
+125:           children: [
+126:             Icon(Icons.warning_amber_rounded,
+127:                 color: colorScheme.tertiary, size: 28.0),
+128:             SizedBox(width: 8.0),
+129:             Flexible(
+130:               child: Text(
+131:                 context.l10n.permissionSomeDenied,
+132:                 style: TextStyle(fontSize: 16.0),
+133:               ),
+134:             ),
+135:           ],
+136:         ),
+137:         content: Column(
+138:           mainAxisSize: MainAxisSize.min,
+139:           crossAxisAlignment: CrossAxisAlignment.start,
+
+[SCHED-02, SCHED-03] lib/screens/schedule_management_tab.dart:3240 / showGeneralDialog
+3237: }) async {
+3238:   final tablet = await isTabletLayoutDevice();
+3239:   if (!context.mounted) return null;
+3240:   return showGeneralDialog<T>(
+3241:     context: context,
+3242:     barrierDismissible: true,
+3243:     barrierLabel: 'dismiss',
+3244:     barrierColor: Colors.black54,
+3245:     transitionDuration: const Duration(milliseconds: 220),
+3246:     pageBuilder: (dialogContext, animation, secondaryAnimation) {
+3247:       return TabletKeyboardViewport(
+3248:         enabled: tablet,
+3249:         child: Builder(
+3250:             builder: (sheetContext) => Align(
+3251:                   alignment: Alignment.bottomCenter,
+3252:                   child: Material(
+3253:                     type: MaterialType.transparency,
+3254:                     child: SizedBox(
+3255:                       width: AppLayout.of(dialogContext).isWide
+3256:                           ? AppLayout.of(dialogContext).sheetWidth
+3257:                           : double.infinity,
+3258:                       child: builder(sheetContext),
+3259:                     ),
+
+[SET-04] lib/screens/settings_tab.dart:203 / showDialog
+200:   Future<void> _restoreFromBackup() async {
+201:     if (_isRestoringFromBackup) return;
+202: 
+203:     final proceed = await showDialog<bool>(
+204:       context: context,
+205:       builder: (context) => AlertDialog(
+206:         title: Text(context.l10n.settingsRestoreFromBackupWarningTitle),
+207:         content: SingleChildScrollView(
+208:           child: Text(
+209:             context.l10n.settingsRestoreFromBackupWarningBody,
+210:             style: const TextStyle(height: 1.5),
+211:           ),
+212:         ),
+213:         actions: [
+214:           AppSecondButton(
+215:             variant: AppSecondButtonVariant.neutral,
+216:             onPressed: () => Navigator.pop(context, false),
+217:             child: Text(context.l10n.commonCancel),
+218:           ),
+219:           AppSecondButton(
+220:             variant: AppSecondButtonVariant.danger,
+221:             onPressed: () => Navigator.pop(context, true),
+222:             child: Text(context.l10n.settingsRestoreFromBackupPickButton),
+
+[SET-05] lib/screens/settings_tab.dart:255 / showDialog
+252:       return;
+253:     }
+254: 
+255:     final confirmed = await showDialog<bool>(
+256:       context: context,
+257:       builder: (context) => AlertDialog(
+258:         title: Text(context.l10n.settingsRestoreFromBackupConfirmTitle),
+259:         content: Text(
+260:           context.l10n.settingsRestoreFromBackupConfirmBody(
+261:             _formatBackupDate(payload!.exportedAt),
+262:           ),
+263:         ),
+264:         actions: [
+265:           AppSecondButton(
+266:             variant: AppSecondButtonVariant.neutral,
+267:             onPressed: () => Navigator.pop(context, false),
+268:             child: Text(context.l10n.commonCancel),
+269:           ),
+270:           AppSecondButton(
+271:             variant: AppSecondButtonVariant.danger,
+272:             onPressed: () => Navigator.pop(context, true),
+273:             child: Text(context.l10n.settingsRestoreFromBackupConfirmButton),
+274:           ),
+
+[SET-06] lib/screens/settings_tab.dart:311 / showDialog
+308:   }
+309: 
+310:   Future<void> _resetSchedule() async {
+311:     final confirm = await showDialog<bool>(
+312:       context: context,
+313:       builder: buildScheduleResetConfirmation,
+314:     );
+315: 
+316:     if (confirm == true) {
+317:       final sharingStopSaved =
+318:           await ref.read(scheduleProvider.notifier).resetSchedule();
+319: 
+320:       // ⭐ 전체 교대조 근무표 데이터 초기화
+321:       // ⭐ 2026-09-05 - 'all_teams_indices'는 어디서도 안 쓰는 죽은 키였음(실제
+322:       // 저장 키는 all_teams_offsets) - 지워도 orphan으로 안 남게 실제 키로 교체.
+323:       try {
+324:         final prefs = await SharedPreferences.getInstance();
+325:         await prefs.remove('all_teams_names');
+326:         await prefs.remove('all_teams_offsets');
+327:         await prefs.remove('all_teams_my_team');
+328:       } catch (_) {
+329:         // The authoritative roster was already cleared in the DB transaction.
+330:       }
+
+[SET-17] lib/screens/settings_tab.dart:685 / showDialog
+682:                   subtitle: Text(context.l10n.settingsDeleteAllAlarmsDesc),
+683:                   trailing: Icon(Icons.chevron_right),
+684:                   onTap: () async {
+685:                     final confirm = await showDialog<bool>(
+686:                       context: context,
+687:                       builder: (context) => AlertDialog(
+688:                         title: Text(context.l10n.alarmDeleteAllPermanently),
+689:                         content: Column(
+690:                           mainAxisSize: MainAxisSize.min,
+691:                           crossAxisAlignment: CrossAxisAlignment.start,
+692:                           children: [
+693:                             Text(
+694:                               context.l10n.settingsActionCannotBeUndone,
+695:                               style: TextStyle(
+696:                                 fontSize: 15.sp,
+697:                                 fontWeight: FontWeight.w600,
+698:                                 color: Theme.of(context).colorScheme.error,
+699:                               ),
+700:                             ),
+701:                             SizedBox(height: 12.h),
+702:                             Text(context.l10n.settingsAllAlarmsWillBeDeleted),
+703:                             SizedBox(height: 8.h),
+704:                             Text(context.l10n.settingsMustRecreateAlarms),
+
+[SET-21] lib/screens/settings_tab.dart:830 / showDialog
+827:     _isSharingDiagnostics = true;
+828:     try {
+829:       final copy = context.l10n;
+830:       final confirmed = await showDialog<bool>(
+831:           context: context,
+832:           builder: (ctx) => AlertDialog(
+833:                   title: Text(copy.diagnosticExportTitle),
+834:                   content: Text(copy.diagnosticExportConfirm),
+835:                   actions: [
+836:                     TextButton(
+837:                         onPressed: () => Navigator.pop(ctx, false),
+838:                         child: Text(context.l10n.commonCancel)),
+839:                     AppButton(
+840:                         onPressed: () => Navigator.pop(ctx, true),
+841:                         child: Text(copy.diagnosticSendAction)),
+842:                   ]));
+843:       if (confirmed != true || !mounted) return;
+844:       await kAlarmChannel.invokeMethod('shareDiagnosticLog', {
+845:         'chooserTitle': copy.diagnosticShareTitle,
+846:         'subject': copy.diagnosticSubject,
+847:         'body': copy.diagnosticBody,
+848:       });
+849:     } catch (_) {
+
+[SET-22] lib/screens/settings_tab.dart:865 / showDialog
+862:     final feature = tab == 1
+863:         ? copy.navScheduleManagement
+864:         : copy.settingsConditionFeatureTitle.replaceFirst(RegExp(r' 기능$'), '');
+865:     final confirmed = await showDialog<bool>(
+866:         context: context,
+867:         builder: (ctx) => AlertDialog(
+868:                 title: Row(children: [
+869:                   Expanded(child: Text(tab == 1
+870:                       ? copy.settingsScheduleTabReenableTitle
+871:                       : copy.settingsConditionFeatureTitle)),
+872:                   const SizedBox(width: 8),
+873:                   Icon(tab == 1 ? Icons.event_note_outlined : Icons.self_improvement),
+874:                 ]),
+875:                 content: SingleChildScrollView(
+876:                   child: Column(
+877:                     mainAxisSize: MainAxisSize.min,
+878:                     crossAxisAlignment: CrossAxisAlignment.start,
+879:                     children: [
+880:                       Text(copy.settingsEnableFeatureConfirm(feature)),
+881:                       const SizedBox(height: 16),
+882:                       Text(tab == 1
+883:                           ? copy.settingsScheduleFeatureDescription
+884:                           : copy.settingsConditionFeatureDescription),
+
+[SET-23] lib/screens/settings_tab.dart:903 / DialogRoute
+900:       return;
+901:     }
+902:     final navigator = Navigator.of(context, rootNavigator: true);
+903:     final loadingRoute = DialogRoute<void>(
+904:         context: context,
+905:         barrierDismissible: false,
+906:         builder: (_) => PopScope(
+907:             canPop: false,
+908:             child: AlertDialog(
+909:                 content: Row(children: [
+910:               const SizedBox(
+911:                   width: 24,
+912:                   height: 24,
+913:                   child: CircularProgressIndicator(strokeWidth: 2)),
+914:               const SizedBox(width: 16),
+915:               Expanded(child: Text(copy.settingsEnablingFeature))
+916:             ]))));
+917:     navigator.push(loadingRoute);
+918:     var enabled = false;
+919:     try {
+920:       await Future<void>.delayed(const Duration(milliseconds: 350));
+921:       if (!mounted) return;
+922:       await ref
+
+[SET-07] lib/screens/settings_tab.dart:1146 / showModalBottomSheet
+1143:     final schedule = ref.read(scheduleProvider).value;
+1144:     if (schedule == null) return;
+1145: 
+1146:     showModalBottomSheet(
+1147:       context: context,
+1148:       // ⭐ 2026-08-25 - backgroundColor 미지정 시 기본값이 colorScheme.surface
+1149:       // (연보라 kAppSurface)라 안의 ListTile들은 흰색으로 바꿔도 그 위/아래
+1150:       // 여백(드래그 핸들 위, 마지막 항목 아래)은 계속 연보라로 보였음 - 시트
+1151:       // 자체 배경을 흰색으로 지정해서 해결.
+1152:       backgroundColor: Colors.white,
+1153:       shape: RoundedRectangleBorder(
+1154:         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+1155:       ),
+1156:       builder: (context) => SafeArea(
+1157:           child: SingleChildScrollView(
+1158:         child: Padding(
+1159:           padding: EdgeInsets.symmetric(vertical: 16.h),
+1160:           child: Column(
+1161:             mainAxisSize: MainAxisSize.min,
+1162:             children: [
+1163:               Container(
+1164:                 width: 40.w,
+1165:                 height: 4.h,
+
+[SET-10] lib/screens/settings_tab.dart:1242 / showDialog
+1239:     final teams = await DatabaseService.instance.getTeamScheduleConfig();
+1240:     final date = DateTime.now();
+1241:     if (!mounted) return;
+1242:     final selection = await showDialog<ScheduleChangeSelection>(
+1243:       context: context,
+1244:       builder: (_) => ScheduleChangeDialog(
+1245:           pattern: schedule.pattern!, date: date, teams: teams),
+1246:     );
+1247:     if (selection != null && mounted) {
+1248:       await applyScheduleChange(context, ref, selection, date, teams);
+1249:     }
+1250:   }
+1251: 
+1252:   // ⭐ 근무명 수정 다이얼로그
+1253:   Future<void> _showEditShiftNamesDialog() async {
+1254:     final schedule = ref.read(scheduleProvider).value;
+1255:     if (schedule == null) return;
+1256:     final used = await DatabaseService.instance.referencedShiftNames(schedule);
+1257:     if (!mounted) return;
+1258:     final edits = await showDialog<ShiftNameEdits>(
+1259:       context: context,
+1260:       builder: (_) => ShiftNamesDialog(names: schedule.shiftTypes, used: used),
+1261:     );
+
+[SET-12] lib/screens/settings_tab.dart:1258 / showDialog
+1255:     if (schedule == null) return;
+1256:     final used = await DatabaseService.instance.referencedShiftNames(schedule);
+1257:     if (!mounted) return;
+1258:     final edits = await showDialog<ShiftNameEdits>(
+1259:       context: context,
+1260:       builder: (_) => ShiftNamesDialog(names: schedule.shiftTypes, used: used),
+1261:     );
+1262:     if (edits != null && mounted) await _applyShiftNameChanges(schedule, edits);
+1263:   }
+1264: 
+1265:   Future<void> _applyShiftNameChanges(
+1266:       ShiftSchedule schedule, ShiftNameEdits edits) async {
+1267:     final renamedShifts = edits.renamed;
+1268:     if (renamedShifts.isEmpty && edits.deleted.isEmpty && edits.added.isEmpty)
+1269:       return;
+1270: 
+1271:     // 1. shiftTypes 업데이트
+1272:     final newShiftTypes =
+1273:         schedule.shiftTypes.where((s) => !edits.deleted.contains(s)).map((s) {
+1274:       return renamedShifts[s] ?? s;
+1275:     }).toList();
+1276: 
+1277:     newShiftTypes.addAll(edits.added);
+
+[SET-13] lib/screens/settings_tab.dart:1397 / showDialog
+1394:             .map((name, color) => MapEntry(name, color.value));
+1395:     final customColors = schedule.customShiftColors ?? {};
+1396: 
+1397:     showDialog(
+1398:       context: context,
+1399:       builder: (context) => _EditShiftColorsDialog(
+1400:         shiftTypes: activeShifts,
+1401:         effectiveColors: effectiveColors,
+1402:         customColors: customColors,
+1403:         onSave: (newCustomColors) => _applyShiftColorChanges(newCustomColors),
+1404:       ),
+1405:     );
+1406:   }
+1407: 
+1408:   // ⭐ 근무명 색상 변경 적용. newCustomColors는 사용자가 이번 다이얼로그에서
+1409:   // 실제로 지정한 오버라이드만 담김(안 건드린 근무는 안 들어있음) - 그래서 이후
+1410:   // 테마를 바꿔도 여기 없는 근무는 계속 테마 디폴트를 따라감.
+1411:   Future<void> _applyShiftColorChanges(Map<String, int> newCustomColors) async {
+1412:     final schedule = ref.read(scheduleProvider).value;
+1413:     if (schedule == null) return;
+1414: 
+1415:     final theme = ref.read(calendarThemeProvider);
+1416:     // shiftColors(위젯/전체근무표용 캐시)는 테마 디폴트 + 방금 저장한
+
+[SET-20] lib/screens/settings_tab.dart:1913 / showModalBottomSheet
+1910:   }
+1911: 
+1912:   void _showSoundPicker(AlarmType type) {
+1913:     showModalBottomSheet(
+1914:       context: context,
+1915:       backgroundColor: Colors.transparent,
+1916:       isScrollControlled: true, // 스크롤 가능하게
+1917:       builder: (context) => StatefulBuilder(
+1918:         builder: (context, setModalState) => Container(
+1919:           constraints: BoxConstraints(
+1920:             maxHeight: MediaQuery.of(context).size.height * 0.5, // 화면의 50% 높이
+1921:           ),
+1922:           decoration: BoxDecoration(
+1923:             color: Theme.of(context).colorScheme.surface,
+1924:             borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
+1925:           ),
+1926:           child: SafeArea(
+1927:             child: Column(
+1928:               mainAxisSize: MainAxisSize.min,
+1929:               children: [
+1930:                 // 헤더
+1931:                 Padding(
+1932:                   padding:
+
+[SET-09] lib/screens/settings_tab.dart:2391 / showDialog
+2388:   }
+2389: 
+2390:   void _showAlarmEditDialog(String shift) {
+2391:     showDialog(
+2392:       context: context,
+2393:       builder: (context) => _ShiftAlarmEditDialog(
+2394:         shift: shift,
+2395:         initialAlarms: _shiftAlarms[shift] ?? [],
+2396:         onSave: (alarms) {
+2397:           setState(() {
+2398:             _shiftAlarms[shift] = alarms;
+2399:           });
+2400:         },
+2401:       ),
+2402:     );
+2403:   }
+2404: 
+2405:   Future<void> _saveAndExit() async {
+2406:     // ⭐ 2026-08-31 - 저장 버튼 연타 방지. 이미 저장 진행 중이면 완전히 무시 -
+2407:     // 버튼도 저장 중엔 비활성화되지만(build() 참고), 그 사이에 들어온 탭
+2408:     // 이벤트가 큐에 남아있다가 뒤늦게 도착하는 경우까지 이중 안전장치로 막음.
+2409:     if (_isSaving) return;
+2410: 
+
+[CMP-01] lib/screens/settings_tab.dart:2683 / showDialog
+2680:   // ⭐ 알람 시간 수정
+2681:   Future<void> _editAlarmTime(int index) async {
+2682:     final currentAlarm = _alarms[index];
+2683:     await showDialog(
+2684:       context: context,
+2685:       builder: (context) => AlarmTimePicker(
+2686:         shiftName: widget.shift,
+2687:         initialTime: currentAlarm.time,
+2688:         initialDayOffset: currentAlarm.dayOffset,
+2689:         onTimeSelected: (time, dayOffset) async {
+2690:           // ⭐ 중복 체크 (자기 자신 제외) - 같은 시각이어도 전날/당일/다음날이 다르면
+2691:           // 서로 다른 실제 날짜에 울리는 별개의 알람이라 중복이 아님.
+2692:           final isDuplicate = _alarms.asMap().entries.any((entry) {
+2693:             return entry.key != index &&
+2694:                 entry.value.time.hour == time.hour &&
+2695:                 entry.value.time.minute == time.minute &&
+2696:                 entry.value.dayOffset == dayOffset;
+2697:           });
+2698: 
+2699:           if (isDuplicate) {
+2700:             await showDialog(
+2701:               context: context,
+2702:               builder: (context) => AlertDialog(
+
+[CMP-02] lib/screens/settings_tab.dart:2700 / showDialog
+2697:           });
+2698: 
+2699:           if (isDuplicate) {
+2700:             await showDialog(
+2701:               context: context,
+2702:               builder: (context) => AlertDialog(
+2703:                 title: Row(
+2704:                   children: [
+2705:                     Icon(Icons.warning_amber_rounded,
+2706:                         color: Theme.of(context).colorScheme.tertiary,
+2707:                         size: 28),
+2708:                     SizedBox(width: 8),
+2709:                     Text(context.l10n.alarmDuplicate),
+2710:                   ],
+2711:                 ),
+2712:                 content: Text(
+2713:                   context.l10n.alarmAlreadyExistsAtTime(
+2714:                       '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'),
+2715:                   style: TextStyle(fontSize: 16),
+2716:                 ),
+2717:                 actions: [
+2718:                   TextButton(
+2719:                     onPressed: () => Navigator.pop(context),
+
+[CMP-01] lib/screens/settings_tab.dart:2739 / showDialog
+2736:   }
+2737: 
+2738:   Future<void> _addAlarm() async {
+2739:     await showDialog(
+2740:       context: context,
+2741:       builder: (context) => AlarmTimePicker(
+2742:         shiftName: widget.shift,
+2743:         onTimeSelected: (time, dayOffset) async {
+2744:           // ⭐ 중복 체크 (시각 + 전날/당일/다음날이 모두 같을 때만 중복)
+2745:           final isDuplicate = _alarms.any((alarm) =>
+2746:               alarm.time.hour == time.hour &&
+2747:               alarm.time.minute == time.minute &&
+2748:               alarm.dayOffset == dayOffset);
+2749: 
+2750:           if (isDuplicate) {
+2751:             await showDialog(
+2752:               context: context,
+2753:               builder: (context) => AlertDialog(
+2754:                 title: Row(
+2755:                   children: [
+2756:                     Icon(Icons.warning_amber_rounded,
+2757:                         color: Theme.of(context).colorScheme.tertiary,
+2758:                         size: 28),
+
+[CMP-02] lib/screens/settings_tab.dart:2751 / showDialog
+2748:               alarm.dayOffset == dayOffset);
+2749: 
+2750:           if (isDuplicate) {
+2751:             await showDialog(
+2752:               context: context,
+2753:               builder: (context) => AlertDialog(
+2754:                 title: Row(
+2755:                   children: [
+2756:                     Icon(Icons.warning_amber_rounded,
+2757:                         color: Theme.of(context).colorScheme.tertiary,
+2758:                         size: 28),
+2759:                     SizedBox(width: 8),
+2760:                     Text(context.l10n.alarmDuplicate),
+2761:                   ],
+2762:                 ),
+2763:                 content: Text(
+2764:                   context.l10n.alarmAlreadyExistsAtTime(
+2765:                       '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}'),
+2766:                   style: TextStyle(fontSize: 16),
+2767:                 ),
+2768:                 actions: [
+2769:                   TextButton(
+2770:                     onPressed: () => Navigator.pop(context),
+
+[SET-18] lib/screens/settings_tab.dart:2906 / showDialog
+2903:         .map((entry) => entry.value)
+2904:         .toSet();
+2905: 
+2906:     final result = await showDialog<int>(
+2907:       context: context,
+2908:       builder: (context) => _ColorPickerDialog(
+2909:         shiftName: shift,
+2910:         usedColors: usedColors,
+2911:       ),
+2912:     );
+2913: 
+2914:     if (result != null) {
+2915:       setState(() {
+2916:         _previewColors[shift] = result;
+2917:         _customColors[shift] = result; // ⭐ 사용자가 직접 고른 순간 이 근무는 "고정"됨
+2918:       });
+2919:     }
+2920:   }
+2921: }
+2922: 
+2923: // ============================================================
+2924: // ⭐ 색상 팔레트 선택 다이얼로그
+2925: // ============================================================
+
+[TEAM-04, TEAM-05] lib/screens/team_schedule_edit_screen.dart:44 / showDialog
+41:   bool get _ko => Localizations.localeOf(context).languageCode == 'ko';
+42: 
+43:   Future<bool> _confirm(String message, {bool destructive = false}) async {
+44:     return await showDialog<bool>(
+45:             context: context,
+46:             builder: (context) => ShiftEditorDialog(
+47:                     title: Text(context.l10n.teamEditTitle),
+48:                     content: Column(
+49:                         mainAxisSize: MainAxisSize.min,
+50:                         crossAxisAlignment: CrossAxisAlignment.start,
+51:                         children: [
+52:                           for (final paragraph in message.split('\n\n'))
+53:                             Padding(
+54:                                 padding: const EdgeInsets.only(bottom: 12),
+55:                                 child: Text(paragraph,
+56:                                     style: const TextStyle(height: 1.5)))
+57:                         ]),
+58:                     actions: [
+59:                       AppSecondButton(
+60:                           onPressed: () => Navigator.pop(context, false),
+61:                           child: Text(context.l10n.commonCancel)),
+62:                       AppSecondButton(
+63:                           variant: destructive
+
+[SET-25] lib/screens/work_hours_settings_screen.dart:387 / showTimePicker
+384:             : (_pendingEndOnlyMinutes[shift] ?? 18 * 60));
+385:     final initial = TimeOfDay(
+386:         hour: (currentMinutes ~/ 60) % 24, minute: currentMinutes % 60);
+387:     final picked = await showTimePicker(
+388:       context: context,
+389:       initialTime: initial,
+390:       // 시간 피커 안에서도 어느 근무의 어느 시각을 고르는지 놓치지 않게 한다.
+391:       helpText:
+392:           '$shift · ${isStart ? context.l10n.workHoursShiftTimeClockIn : context.l10n.workHoursShiftTimeClockOut}',
+393:     );
+394:     if (picked == null) return;
+395: 
+396:     final newMinutes = picked.hour * 60 + picked.minute;
+397:     final startMinutes = isStart
+398:         ? newMinutes
+399:         : (range?.startMinutes ?? _pendingStartOnlyMinutes[shift]);
+400:     final endMinutes = isStart
+401:         ? (range?.endMinutes ?? _pendingEndOnlyMinutes[shift])
+402:         : newMinutes;
+403: 
+404:     if (startMinutes == null || endMinutes == null) {
+405:       // ⭐ 아직 한쪽만 입력됨 - "기록하지 않기" 원칙과 동일하게, 나머지 한쪽을
+406:       // 마저 입력하기 전까지는 DB에 아무 것도 저장하지 않고 화면에만 반영한다
+
+[INFO-03] lib/services/update_service.dart:84 / showDialog
+81:   static Future<bool?> _showUpdateDialog(BuildContext context) async {
+82:     final colorScheme = Theme.of(context).colorScheme;
+83: 
+84:     return await showDialog<bool?>(
+85:       context: context,
+86:       barrierDismissible: true, // 바깥 터치로 닫기 가능 (null 반환)
+87:       builder: (context) => AlertDialog(
+88:         // ⭐ 2026-09-22 - 큰 글자·작은 화면에서 세로로 넘치지 않게 스크롤 허용(출시 직후 기존 사용자 전원이 보는 대화상자)
+89:         scrollable: true,
+90:         backgroundColor: colorScheme.surface,
+91:         shape: RoundedRectangleBorder(
+92:           borderRadius: BorderRadius.circular(16.r),
+93:         ),
+94:         contentPadding: EdgeInsets.all(24.w),
+95:         content: Column(
+96:           mainAxisSize: MainAxisSize.min,
+97:           children: [
+98:             // 타이틀 - 영어·큰 글자에서 가로로 넘치지 않게 Flexible(짧으면 지금처럼 가운데)
+99:             Row(
+100:               mainAxisAlignment: MainAxisAlignment.center,
+101:               children: [
+102:                 Icon(
+103:                   Icons.celebration,
+
+[CMP-10] lib/utils/blocking_progress.dart:16 / DialogRoute
+13: /// [task]의 결과를 돌려주고 예외는 그대로 다시 던진다.
+14: Future<T> runWithBlockingProgress<T>(BuildContext context, Future<T> Function() task) async {
+15:   final navigator = Navigator.of(context, rootNavigator: true);
+16:   final route = DialogRoute<void>(
+17:     context: context,
+18:     barrierDismissible: false,
+19:     builder: (_) => const PopScope(
+20:       canPop: false,
+21:       child: Center(child: CircularProgressIndicator()),
+22:     ),
+23:   );
+24:   unawaited(navigator.push(route));
+25:   try {
+26:     return await task();
+27:   } finally {
+28:     if (navigator.mounted && route.isActive) {
+29:       navigator.removeRoute(route);
+30:     }
+31:   }
+32: }
+33: 
+
+[CMP-12] lib/widgets/disable_tab_button.dart:68 / showDialog
+65: 
+66:   Future<void> _confirm(BuildContext context, WidgetRef ref) async {
+67:     final l10n = context.l10n;
+68:     final confirmed = await showDialog<bool>(
+69:       context: context,
+70:       builder: (context) => !context.usesKoreanFeatures ? const UnavailableFeature() : AlertDialog(
+71:         title: Text(KoreanOnlyCopy.fromLocalizations(l10n).disableTabButtonLabel(tabLabel)),
+72:         content: Text(
+73:           '${KoreanOnlyCopy.fromLocalizations(l10n).disableTabDialogBody}'
+74:           '${extraNotice != null ? '\n$extraNotice' : ''}',
+75:         ),
+76:         actions: [
+77:           TextButton(
+78:             onPressed: () => Navigator.of(context).pop(false),
+79:             child: Text(l10n.commonCancel),
+80:           ),
+81:           TextButton(
+82:             onPressed: () => Navigator.of(context).pop(true),
+83:             child: Text(l10n.commonOk),
+84:           ),
+85:         ],
+86:       ),
+87:     );
+
+[WEB-05] lib/widgets/friend_web_calendar.dart:407 / showDialog
+404:     final horizontal =
+405:         shortCover || (window.width > 500 && window.aspectRatio >= 1.25);
+406:     return InkWell(
+407:       onTap: !isKorean && countryHoliday != null ? () => showDialog<void>(
+408:         context: context,
+409:         builder: (context) => AlertDialog(
+410:           title: Text(DateFormat.yMMMd(Localizations.localeOf(context).toString()).format(day)),
+411:           content: Text(countryHoliday),
+412:           actions: [TextButton(onPressed: () => Navigator.pop(context),
+413:             child: Text(MaterialLocalizations.of(context).closeButtonLabel))],
+414:         ),
+415:       ) : null,
+416:       child: Padding(
+417:       key: ValueKey('friend-cell-$key'),
+418:       padding: const EdgeInsets.fromLTRB(2, 2, 2, 2),
+419:       child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+420:         Container(
+421:           key: ValueKey('friend-shift-band-$key'),
+422:           height: bandHeight,
+423:           alignment: Alignment.center,
+424:           padding: const EdgeInsets.symmetric(horizontal: 2),
+425:           decoration: hasShift
+426:               ? BoxDecoration(
+
+[CMP-03] lib/widgets/memo_detail_sheet.dart:15 / showModalBottomSheet
+12:   required Future<void> Function(String) onSave,
+13:   required Future<void> Function() onDelete,
+14: }) =>
+15:     showModalBottomSheet<void>(
+16:       context: context,
+17:       isScrollControlled: true,
+18:       backgroundColor: Theme.of(context).colorScheme.surface,
+19:       shape: RoundedRectangleBorder(
+20:         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+21:       ),
+22:       builder: (_) => _MemoDetailSheet(
+23:           dateLabel: dateLabel, text: text, onSave: onSave, onDelete: onDelete),
+24:     );
+25: 
+26: class _MemoDetailSheet extends StatefulWidget {
+27:   const _MemoDetailSheet(
+28:       {required this.dateLabel,
+29:       required this.text,
+30:       required this.onSave,
+31:       required this.onDelete});
+32:   final String dateLabel;
+33:   final String text;
+34:   final Future<void> Function(String) onSave;
+
+[CMP-07, CMP-08, CMP-09] lib/widgets/onboarding_info_popups.dart:51 / showSoftInfoDialog
+48:   if ((prefs.getBool(shownKey) ?? false) || canShow?.call() == false) return;
+49:   await prefs.setBool(shownKey, true);
+50:   if (!context.mounted) return;
+51:   await showSoftInfoDialog(
+52:     context: context,
+53:     barrierDismissible: false,
+54:     // ⭐ 2026-09-22(영어화) - content(dialogContext)로 바뀌어서 각 _PopupContent가
+55:     // context.l10n으로 로케일에 맞는 문구를 직접 고름(아래 WelcomePopupContent 등 참고).
+56:     builder: (dialogContext) => koreanOnly && !dialogContext.usesKoreanFeatures
+57:         ? AlertDialog(actions: [
+58:             TextButton(
+59:               onPressed: () => Navigator.of(dialogContext).pop(),
+60:               child: Text(dialogContext.l10n.commonClose),
+61:             )
+62:           ])
+63:         : Dialog(
+64:             backgroundColor: Colors.transparent,
+65:             child: _InfoPopupCard(
+66:               content: content(dialogContext),
+67:               onConfirm: () => Navigator.of(dialogContext).pop(),
+68:             ),
+69:           ),
+70:   );
+
+[PERM-01] lib/widgets/permission_panel.dart:15 / showModalBottomSheet
+12:     };
+13: 
+14: Future<void> showPermissionSettings(BuildContext context) =>
+15:     showModalBottomSheet<void>(
+16:         context: context,
+17:         isScrollControlled: true,
+18:         useSafeArea: true,
+19:         backgroundColor: Theme.of(context).colorScheme.surface,
+20:         shape: const RoundedRectangleBorder(
+21:             borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+22:         builder: (context) => FractionallySizedBox(
+23:             heightFactor: .9,
+24:             child: SingleChildScrollView(
+25:                 padding: EdgeInsets.fromLTRB(
+26:                     24, 24, 24, 24 + MediaQuery.viewPaddingOf(context).bottom),
+27:                 child: Column(mainAxisSize: MainAxisSize.min, children: [
+28:                   Container(
+29:                       width: 36,
+30:                       height: 4,
+31:                       margin: const EdgeInsets.only(bottom: 20),
+32:                       decoration: BoxDecoration(
+33:                           color: Theme.of(context).colorScheme.outline,
+34:                           borderRadius: BorderRadius.circular(2))),
+
+[PERM-02] lib/widgets/permission_panel.dart:217 / showModalBottomSheet
+214:     _helpOpen = true;
+215:     try {
+216:       final xiaomi = controller.value.xiaomi;
+217:       await showModalBottomSheet<void>(
+218:           context: context,
+219:           isScrollControlled: true,
+220:           useSafeArea: true,
+221:           builder: (sheetContext) => FractionallySizedBox(
+222:               heightFactor: .8,
+223:               child: SingleChildScrollView(
+224:                   padding: const EdgeInsets.all(24),
+225:                   child: AnimatedBuilder(
+226:                       animation: Listenable.merge([controller, busyState]),
+227:                       builder: (_, __) => Column(
+228:                               crossAxisAlignment: CrossAxisAlignment.start,
+229:                               children: [
+230:                                 Text(
+231:                                     xiaomi
+232:                                         ? sheetContext
+233:                                             .l10n.permissionXiaomiTitle
+234:                                         : sheetContext
+235:                                             .l10n.permissionLockScreenHelp,
+236:                                     style: Theme.of(sheetContext)
+
+[SET-11] lib/widgets/schedule_change_dialog.dart:36 / showDialog
+33:     if (_index == null || _confirming) return;
+34:     if (widget.teams != null) {
+35:       setState(() => _confirming = true);
+36:       final accepted = await showDialog<bool>(
+37:           context: context,
+38:           builder: (context) => ShiftEditorDialog(
+39:                   title: Text(context.l10n.shiftChangeSchedule),
+40:                   content: Text(context.l10n.teamScheduleResetConfirm,
+41:                       style: const TextStyle(height: 1.5)),
+42:                   actions: [
+43:                     AppSecondButton(
+44:                         onPressed: () => Navigator.pop(context, false),
+45:                         child: Text(context.l10n.commonCancel)),
+46:                     AppSecondButton(
+47:                         variant: AppSecondButtonVariant.danger,
+48:                         onPressed: () => Navigator.pop(context, true),
+49:                         child: Text(context.l10n.commonOk)),
+50:                   ]));
+51:       if (!mounted) return;
+52:       setState(() => _confirming = false);
+53:       if (accepted != true) return;
+54:     }
+55:     if (mounted) Navigator.pop(context, ScheduleChangeSelection(_index!, null));
+
+[CMP-05] lib/widgets/sleep_edit_dialog.dart:52 / showDatePicker
+49:   var end = initialEnd;
+50: 
+51:   Future<DateTime?> pick(BuildContext sheetContext, DateTime initial) async {
+52:     final date = await showDatePicker(
+53:       context: sheetContext,
+54:       initialDate: initial,
+55:       // 전체보기에서는 오래된 달도 탐색할 수 있으므로 편집 날짜도 같은 범위를 허용한다.
+56:       firstDate: DateTime(2000),
+57:       lastDate: DateTime.now().add(const Duration(days: 1)),
+58:     );
+59:     if (date == null) return null;
+60:     if (!sheetContext.mounted) return null;
+61:     final time = await showTimePicker(
+62:         context: sheetContext, initialTime: TimeOfDay.fromDateTime(initial));
+63:     if (time == null) return null;
+64:     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+65:   }
+66: 
+67:   return showModalBottomSheet<SleepSlotEditResult>(
+68:     context: context,
+69:     isScrollControlled: true,
+70:     backgroundColor: Colors.white,
+71:     shape: const RoundedRectangleBorder(
+
+[CMP-06] lib/widgets/sleep_edit_dialog.dart:61 / showTimePicker
+58:     );
+59:     if (date == null) return null;
+60:     if (!sheetContext.mounted) return null;
+61:     final time = await showTimePicker(
+62:         context: sheetContext, initialTime: TimeOfDay.fromDateTime(initial));
+63:     if (time == null) return null;
+64:     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+65:   }
+66: 
+67:   return showModalBottomSheet<SleepSlotEditResult>(
+68:     context: context,
+69:     isScrollControlled: true,
+70:     backgroundColor: Colors.white,
+71:     shape: const RoundedRectangleBorder(
+72:         borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+73:     builder: (sheetContext) {
+74:           if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
+75:       return StatefulBuilder(
+76:         builder: (sheetContext, setState) {
+77:           if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
+78:           // ⭐ 2026-09-01 후속7 - "미래 시각은 입력할 수 없어야 한다"는 요청
+79:           // (예: 지금 낮 12시인데 오늘 밤 22시~다음날 06시를 미리 저장하는 건
+80:           // 말이 안 됨 - 아직 안 일어난 일이므로). end.isAfter(start) 검증에
+
+[CMP-04] lib/widgets/sleep_edit_dialog.dart:67 / showModalBottomSheet
+64:     return DateTime(date.year, date.month, date.day, time.hour, time.minute);
+65:   }
+66: 
+67:   return showModalBottomSheet<SleepSlotEditResult>(
+68:     context: context,
+69:     isScrollControlled: true,
+70:     backgroundColor: Colors.white,
+71:     shape: const RoundedRectangleBorder(
+72:         borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+73:     builder: (sheetContext) {
+74:           if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
+75:       return StatefulBuilder(
+76:         builder: (sheetContext, setState) {
+77:           if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
+78:           // ⭐ 2026-09-01 후속7 - "미래 시각은 입력할 수 없어야 한다"는 요청
+79:           // (예: 지금 낮 12시인데 오늘 밤 22시~다음날 06시를 미리 저장하는 건
+80:           // 말이 안 됨 - 아직 안 일어난 일이므로). end.isAfter(start) 검증에
+81:           // "취침/기상 둘 다 지금 시각을 넘지 않아야 한다"는 조건을 추가.
+82:           final now = DateTime.now();
+83:           final isFuture = start.isAfter(now) || end.isAfter(now);
+84:           final valid = end.isAfter(start) && !isFuture;
+85:           final String message;
+86:           if (!end.isAfter(start)) {
+
+[CMP-07, CMP-08, CMP-09] lib/widgets/soft_info_dialog.dart:10 / showGeneralDialog
+7:   bool barrierDismissible = false,
+8: }) {
+9:   final reduceMotion = MediaQuery.disableAnimationsOf(context);
+10:   return showGeneralDialog<T>(
+11:     context: context,
+12:     barrierDismissible: barrierDismissible,
+13:     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+14:     barrierColor: Colors.black54,
+15:     transitionDuration: Duration(milliseconds: reduceMotion ? 0 : 320),
+16:     pageBuilder: (context, animation, secondaryAnimation) =>
+17:         SafeArea(child: builder(context)),
+18:     transitionBuilder: (context, animation, secondaryAnimation, child) {
+19:       final eased =
+20:           CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+21:       return FadeTransition(
+22:         opacity: eased,
+23:         child: SlideTransition(
+24:           position: Tween(begin: const Offset(0, .025), end: Offset.zero)
+25:               .animate(eased),
+26:           child: ScaleTransition(
+27:             scale: Tween(begin: .97, end: 1.0).animate(eased),
+28:             child: child,
+29:           ),
+
+2. Flutter 페이지 이동·공통 창·외부 흐름·인라인 선택·피드백
+
+lib/main.dart
+870:           await maybeShowScheduleTabTutorial(context,
+873:           await maybeShowConditionTabTutorial(context,
+899:     return PopScope(
+951:               child: const BannerAdSlot(),
+1029:       ScaffoldMessenger.of(context).showSnackBar(
+1030:         const SnackBar(content: Text('✅ 모든 권한 허용 완료')),
+1033:       ScaffoldMessenger.of(context).showSnackBar(
+1034:         const SnackBar(
+1040:       ScaffoldMessenger.of(context).showSnackBar(
+1041:         SnackBar(
+1055:     ScaffoldMessenger.of(context).showSnackBar(
+1056:       const SnackBar(
+1096:       ScaffoldMessenger.of(context).showSnackBar(
+1097:         const SnackBar(content: Text('⚠️ 먼저 권한을 허용해주세요')),
+1110:       ScaffoldMessenger.of(context).showSnackBar(
+1111:         SnackBar(
+1117:       ScaffoldMessenger.of(context).showSnackBar(
+1118:         SnackBar(content: Text('❌ 알람 등록 실패: $e')),
+1125:       ScaffoldMessenger.of(context).showSnackBar(
+1126:         const SnackBar(content: Text('⚠️ 먼저 권한을 허용해주세요')),
+1136:     ScaffoldMessenger.of(context).showSnackBar(
+1137:       SnackBar(
+1148:     ScaffoldMessenger.of(context).showSnackBar(
+1149:       const SnackBar(content: Text('🗑️ 알람 취소됨')),
+1159:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+1340:             .pushReplacement(_instantRoute(const RestoreInterruptedScreen()));
+1369:             .pushReplacement(_instantRoute(const PermissionIntroScreen()));
+1390:         Navigator.of(context).pushReplacement(
+1394:             .pushReplacement(_instantRoute(const OnboardingScreen()));
+1399:         Navigator.of(context).pushReplacement(
+1411:     return PageRouteBuilder<void>(
+
+lib/screens/all_alarms_history_view.dart
+259:           ScaffoldMessenger.of(context).showSnackBar(
+260:             SnackBar(content: Text(context.l10n.alarmHistoryDeletedToast)),
+265:           ScaffoldMessenger.of(context).showSnackBar(
+266:             SnackBar(content: Text(context.l10n.alarmHistoryDeleteFailed(context.localizedErrorDetail(e)))),
+
+lib/screens/all_shifts_view.dart
+183:         MaterialPageRoute(builder: (_) => TeamScheduleEditScreen(
+208:       MaterialPageRoute(
+
+lib/screens/all_teams_setup_screen.dart
+285:       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+294:         MaterialPageRoute(
+589:         .showSnackBar(SnackBar(content: Text(message)));
+
+lib/screens/calendar_tab.dart
+509:               maybeShowShiftAssignTutorial(context,
+1196:     return PopScope(
+2295:           context, MaterialPageRoute(builder: (_) => const FriendListScreen()));
+2306:       MaterialPageRoute(
+5947:             return WillPopScope(
+6788:         ScaffoldMessenger.of(context).showSnackBar(
+6789:           SnackBar(
+6801:       ScaffoldMessenger.of(context).showSnackBar(
+6802:         SnackBar(
+7046:         ScaffoldMessenger.of(context).showSnackBar(
+7048:               ? SnackBar(
+7053:               : SnackBar(content: Text(context.l10n.statusShiftAssigned)),
+7058:         ScaffoldMessenger.of(context).showSnackBar(
+7059:           SnackBar(
+7074:     showMemoDetailSheet(
+
+lib/screens/calendar_theme_lab_screen.dart
+314:     Navigator.push(context, MaterialPageRoute(builder: (_) => const AllShiftsView()));
+319:     ScaffoldMessenger.of(context).showSnackBar(
+320:       SnackBar(
+1696:                                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+1697:                                       SnackBar(content: Text(context.l10n.themeLabOtDetailNotice)),
+
+lib/screens/condition_tab.dart
+60:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+91:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+145:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+149:         if (mounted && ref.read(optionalTabActivationProvider) == null) maybeShowConditionTabTutorial(context);
+177:                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+237:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+261:                   MaterialPageRoute(
+290:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+396:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+423:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+438:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+474:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+512:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+528:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+563:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+605:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+632:     final result = await showSleepSlotEditDialog(
+650:     ScaffoldMessenger.of(context).showSnackBar(
+651:       SnackBar(content: Text(sleepOverlapMessage(conflict))),
+657:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+751:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+771:                     MaterialPageRoute(
+824:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+951:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+993:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+1062:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+1125:     return handleSleepSlotTap(
+1136:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+1203:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+1231:           if (!context.usesKoreanFeatures) return const UnavailableFeature();
+
+lib/screens/english_condition_tab.dart
+11:   Widget build(BuildContext context) => const UnavailableFeature();
+
+lib/screens/friend_calendar_view.dart
+34:       ? const UnavailableFeature()
+51:                       MaterialPageRoute(
+
+lib/screens/friend_list_screen.dart
+36:       : const UnavailableFeature();
+79:         if (!context.usesKoreanFeatures) return const UnavailableFeature();
+133:                   ScaffoldMessenger.of(context).showSnackBar(
+134:                     SnackBar(
+162:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+163:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+203:                                 MaterialPageRoute(
+308:                                             ? const UnavailableFeature()
+
+lib/screens/help_screen.dart
+347:           onPressed: () => showPermissionSettings(context))],
+462:         MaterialPageRoute(builder: (_) => HelpDetailScreen(
+
+lib/screens/memo_list_view.dart
+463:     showMemoDetailSheet(
+
+lib/screens/my_share_code_screen.dart
+37:       : const UnavailableFeature();
+114:       ScaffoldMessenger.of(context).showSnackBar(
+115:         SnackBar(content: Text(context.koOnly.friendDisplayNameUpdated)),
+120:       ScaffoldMessenger.of(context).showSnackBar(
+121:         SnackBar(content: Text(context.koOnly.friendSyncPendingToast)),
+124:       ScaffoldMessenger.of(context).showSnackBar(
+125:         SnackBar(content: Text(context.koOnly.friendDisplayNameUpdateFailed)),
+134:       ScaffoldMessenger.of(context).showSnackBar(
+135:         SnackBar(content: Text(context.koOnly.friendEnterDisplayNameError)),
+140:       ScaffoldMessenger.of(context).showSnackBar(
+141:         SnackBar(content: Text(context.koOnly.friendServerNotReady)),
+148:       ScaffoldMessenger.of(context).showSnackBar(
+149:         SnackBar(content: Text(context.koOnly.friendScheduleNotSet)),
+160:         ScaffoldMessenger.of(context).showSnackBar(
+161:           SnackBar(content: Text(context.koOnly.friendStartSharingFailed)),
+184:           ? const UnavailableFeature()
+230:         ScaffoldMessenger.of(context).showSnackBar(
+231:           SnackBar(content: Text(context.koOnly.friendSyncPendingToast)),
+291:         .showSnackBar(SnackBar(content: Text(message)));
+312:     Share.share(context.koOnly.friendShareMessage(name, _webViewLink, _code));
+320:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+321:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+505:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+
+lib/screens/next_alarm_tab.dart
+56:         ScaffoldMessenger.of(context).showSnackBar(
+57:           SnackBar(
+98:                 const PermissionWarningBanner(),
+
+lib/screens/onboarding_screen.dart
+117:     return PopScope(
+261:       ScaffoldMessenger.of(context).showSnackBar(
+262:         SnackBar(
+269:       MaterialPageRoute(
+616:       ScaffoldMessenger.of(context).showSnackBar(
+617:         SnackBar(content: Text(context.l10n.onboardingNeedAtLeastOneShift)),
+658:                 ScaffoldMessenger.of(context).showSnackBar(
+659:                   SnackBar(
+799:           const PermissionWarningBanner(),
+1028:         ScaffoldMessenger.of(context).showSnackBar(
+1029:           SnackBar(content: Text(context.l10n.onboardingSaveFailed)),
+1095:       Navigator.of(context).pushReplacement(
+1096:         MaterialPageRoute(
+
+lib/screens/permission_intro_screen.dart
+122:       barrierDismissible: false,
+159:               if (context.mounted) await showPermissionSettings(context);
+205:       Navigator.of(context).pushReplacement(
+206:         MaterialPageRoute(
+228:       Navigator.of(context).pushReplacement(
+229:         MaterialPageRoute(
+233:       Navigator.of(context).pushReplacementNamed('/onboarding');
+
+lib/screens/restore_backup_screen.dart
+76:         ScaffoldMessenger.of(context).showSnackBar(
+77:           SnackBar(content: Text(context.l10n.backupRestoreEmptyToast)),
+83:             MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+105:         ScaffoldMessenger.of(context).showSnackBar(
+106:           SnackBar(content: Text(context.l10n.backupRestoreEmptyToast)),
+112:             MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+146:           MaterialPageRoute(builder: (_) => const PermissionIntroScreen()),
+153:         MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: kCalendarTabIndex)), // 달력탭
+159:       ScaffoldMessenger.of(context).showSnackBar(
+160:         SnackBar(content: Text(context.l10n.backupRestoreInvalidToast)),
+166:         MaterialPageRoute(builder: (_) => const RestoreInterruptedScreen()),
+186:           MaterialPageRoute(builder: (_) => const PermissionIntroScreen()),
+192:       ScaffoldMessenger.of(context).showSnackBar(
+193:         SnackBar(content: Text(context.l10n.backupRestoreFailedToast)),
+204:       MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+219:     return PopScope(
+
+lib/screens/restore_interrupted_screen.dart
+44:     ScaffoldMessenger.of(context).showSnackBar(
+45:       SnackBar(content: Text(context.l10n.backupRestoreIncompleteToast)),
+80:     return PopScope(
+
+lib/screens/restore_progress_screen.dart
+69:     return PopScope(
+
+lib/screens/schedule_management_tab.dart
+153:       ? _KoreanScheduleManagementTab(onDisabled:onDisabled,onConfirmed:onConfirmed) : const UnavailableFeature();
+345:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+349:         if (mounted && ref.read(optionalTabActivationProvider) == null) maybeShowScheduleTabTutorial(context);
+660:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+683:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+1667:     final raw = await _showFixedBottomSheet<DateSchedule>(
+1674:       ScaffoldMessenger.of(context).showSnackBar(
+1675:         SnackBar(content: Text(context.koOnly.scheduleDuplicateTimeSlot)),
+1686:       ScaffoldMessenger.of(context).showSnackBar(
+1687:         SnackBar(
+1716:       ScaffoldMessenger.of(context).showSnackBar(
+1717:         SnackBar(content: Text(context.koOnly.scheduleNotifyRegisterFailed)),
+1724:     ScaffoldMessenger.of(context).showSnackBar(
+1725:       SnackBar(content: Text(context.l10n.commonSaveFailed)),
+1734:     final result = await _showFixedBottomSheet<Object>(
+1745:       ScaffoldMessenger.of(context).showSnackBar(
+1746:         SnackBar(content: Text(context.koOnly.scheduleDuplicateTimeSlot)),
+1774:         ScaffoldMessenger.of(context).showSnackBar(
+1775:           SnackBar(content: Text(context.koOnly.scheduleNotifyRegisterFailed)),
+2006:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+2361:           if (!context.usesKoreanFeatures) return const UnavailableFeature();
+2541:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+3234: Future<T?> _showFixedBottomSheet<T>(
+3242:     barrierDismissible: true,
+3663:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+3884:                         Switch(
+4070:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+4144:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+4215:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+4249:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+
+lib/screens/settings_tab.dart
+167:     ScaffoldMessenger.of(context).showSnackBar(
+168:       SnackBar(
+240:       ScaffoldMessenger.of(context).showSnackBar(
+241:         SnackBar(
+248:       ScaffoldMessenger.of(context).showSnackBar(
+249:         SnackBar(
+289:       MaterialPageRoute(
+298:         ScaffoldMessenger.of(context).showSnackBar(
+299:           SnackBar(content: Text(context.l10n.backupRestoreInvalidToast)),
+303:         ScaffoldMessenger.of(context).showSnackBar(
+304:           SnackBar(
+334:         Navigator.of(context).pushReplacement(
+335:           MaterialPageRoute(builder: (context) => OnboardingScreen()),
+338:           messenger.showSnackBar(SnackBar(
+355:     Navigator.of(context).push(MaterialPageRoute(
+584:                       MaterialPageRoute(
+612:                         MaterialPageRoute(
+647:                       MaterialPageRoute(builder: (context) => MemoListView()),
+663:                       MaterialPageRoute(
+729:                           ScaffoldMessenger.of(context).showSnackBar(
+730:                             SnackBar(
+739:                           ScaffoldMessenger.of(context).showSnackBar(
+740:                             SnackBar(
+755:                   onTap: () => Navigator.of(context).push(MaterialPageRoute(
+774:                   onTap: () => showPermissionSettings(context),
+786:                       MaterialPageRoute(builder: (_) => const HelpScreen()),
+798:                   onTap: () => Navigator.of(context).push(MaterialPageRoute(
+851:         ScaffoldMessenger.of(context).showSnackBar(
+852:             SnackBar(content: Text(context.l10n.diagnosticExportFailed)));
+905:         barrierDismissible: false,
+906:         builder: (_) => PopScope(
+936:         ScaffoldMessenger.of(context).showSnackBar(
+937:             SnackBar(content: Text(copy.settingsEnableFeatureFailed)));
+1021:                     onTap: () => Navigator.of(context).push(MaterialPageRoute(
+1352:         ScaffoldMessenger.of(context).showSnackBar(
+1353:           SnackBar(
+1370:       ScaffoldMessenger.of(context).showSnackBar(
+1371:         SnackBar(
+1443:       ScaffoldMessenger.of(context).showSnackBar(
+1444:         SnackBar(
+1466:       MaterialPageRoute(
+1515:       ScaffoldMessenger.of(context).showSnackBar(
+1516:         SnackBar(
+1765:             child: Slider(
+1807:         ScaffoldMessenger.of(context).showSnackBar(
+1808:           SnackBar(content: Text(context.l10n.soundFileNotFound)),
+2263:                     const PermissionWarningBanner(),
+2457:         ScaffoldMessenger.of(context).showSnackBar(
+2458:           SnackBar(content: Text(context.l10n.commonSaveFailed)),
+2977:                   ScaffoldMessenger.of(context).showSnackBar(
+2978:                     SnackBar(
+
+lib/screens/sleep_calendar_full_screen.dart
+35:       ? const _KoreanSleepCalendarFullScreen() : const UnavailableFeature();
+77:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+142:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+204:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+242:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+290:                       await handleSleepSlotTap(
+347:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+383:           if (!context.usesKoreanFeatures) return const UnavailableFeature();
+
+lib/screens/splash_screen.dart
+70:       Navigator.of(context).pushReplacementNamed(nextRoute);
+
+lib/screens/team_schedule_edit_screen.dart
+119:       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+159:     return PopScope(
+
+lib/screens/work_hours_settings_screen.dart
+116:                       Switch(
+565:               child: TappableNumberPicker(
+
+lib/services/ad_consent_service.dart
+49:         await ConsentForm.loadAndShowConsentFormIfRequired((error) {
+90:       await ConsentForm.showPrivacyOptionsForm((error) {
+
+lib/services/update_service.dart
+86:       barrierDismissible: true, // 바깥 터치로 닫기 가능 (null 반환)
+205:       await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+lib/utils/apply_schedule_change.dart
+23:     ScaffoldMessenger.of(context).showSnackBar(
+24:       SnackBar(
+117:       ScaffoldMessenger.of(context).hideCurrentSnackBar();
+118:       ScaffoldMessenger.of(context).showSnackBar(
+119:         SnackBar(
+135:       ScaffoldMessenger.of(context).hideCurrentSnackBar();
+136:       ScaffoldMessenger.of(context).showSnackBar(
+137:         SnackBar(
+
+lib/utils/blocking_progress.dart
+18:     barrierDismissible: false,
+19:     builder: (_) => const PopScope(
+
+lib/utils/friend_open_util.dart
+37:     ScaffoldMessenger.of(context).showSnackBar(
+38:       SnackBar(content: Text(context.l10n.friendLoadFailedDetailed)),
+46:     ScaffoldMessenger.of(context).showSnackBar(
+47:       SnackBar(content: Text(context.koOnly.friendLoadFailedCheckNetwork)),
+52:     ScaffoldMessenger.of(context).showSnackBar(
+53:       SnackBar(content: Text(context.koOnly.friendShowingCachedSchedule)),
+68:     PageRouteBuilder(
+
+lib/web_main.dart
+173: Future<void> triggerInstallPrompt() async {
+231:             MaterialPageRoute<void>(
+316:                     MaterialPageRoute<void>(
+503:               onQuickInstallTap: triggerInstallPrompt,
+528:     await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+lib/widgets/alarm_time_editor.dart
+195:                 TappableNumberPicker(
+233:                 TappableNumberPicker(
+
+lib/widgets/banner_ad_slot.dart
+31:   const BannerAdSlot({super.key});
+
+lib/widgets/disable_tab_button.dart
+27:       ScaffoldMessenger.of(context).showSnackBar(
+28:         SnackBar(content: Text(context.koOnly.scheduleTabSyncFailed)),
+70:       builder: (context) => !context.usesKoreanFeatures ? const UnavailableFeature() : AlertDialog(
+106:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+
+lib/widgets/evidence_library_section.dart
+33:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+
+lib/widgets/memo_detail_sheet.dart
+8: Future<void> showMemoDetailSheet({
+70:       ScaffoldMessenger.of(context).showSnackBar(
+71:           SnackBar(content: Text(context.l10n.statusEnterMemoContent)));
+
+lib/widgets/onboarding_info_popups.dart
+53:     barrierDismissible: false,
+75: Future<void> maybeShowShiftAssignTutorial(BuildContext context,
+88: Future<void> maybeShowConditionTabTutorial(BuildContext context,
+101: Future<void> maybeShowScheduleTabTutorial(BuildContext context,
+
+lib/widgets/permission_panel.dart
+14: Future<void> showPermissionSettings(BuildContext context) =>
+143:       ScaffoldMessenger.of(context).showSnackBar(
+144:           SnackBar(content: Text(context.l10n.permissionOpenFailed)));
+
+lib/widgets/permission_warning_banner.dart
+8:   const PermissionWarningBanner({super.key});
+133:               await showPermissionSettings(context);
+
+lib/widgets/sleep_edit_dialog.dart
+40: Future<SleepSlotEditResult?> showSleepSlotEditDialog(
+74:           if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
+77:           if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
+251:     if (!context.usesKoreanFeatures) return const UnavailableFeature();
+283: Future<void> handleSleepSlotTap(
+298:     final result = await showSleepSlotEditDialog(
+321:     ScaffoldMessenger.of(context).showSnackBar(
+322:       SnackBar(content: Text(sleepOverlapMessage(conflict))),
+
+lib/widgets/soft_info_dialog.dart
+7:   bool barrierDismissible = false,
+12:     barrierDismissible: barrierDismissible,
+
+lib/widgets/tappable_number_picker.dart
+28:   const TappableNumberPicker({
+
+lib/widgets/unavailable_feature.dart
+7:   const UnavailableFeature({super.key});
+
+
+3. Native 생성·외부 intent·알림/위젯 진입·종료
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActionReceiver.kt
+47:                     android.widget.Toast.makeText(context, R.string.snooze_controls_expired, android.widget.Toast.LENGTH_LONG).show()
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt
+108:             setContentView(CoverAlarmLayout.create(this, alarmTimeStr, ::dismissAlarm, ::snoozeAlarm))
+114:             setContentView(R.layout.activity_alarm)
+370:         startActivity(homeIntent)
+386:     override fun onUserLeaveHint() {
+387:         super.onUserLeaveHint()
+409:     override fun onBackPressed() {
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmGuardReceiver.kt
+281:             putExtra("openTab", 0)
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmOverlayService.kt
+332:             overlayView = LayoutInflater.from(AppTextScale.context(this)).inflate(R.layout.overlay_alarm, null)
+417:             windowManager?.addView(overlayView, params)
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmWakeScheduler.kt
+65:             putExtra("openTab", 0)
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/BackupFileReader.kt
+10:  * 일부러 모든 파일 형식을 열어 두었으므로(MainActivity "pickBackupFile" 주석), 동영상처럼 큰 파일을 잘못 고르면
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CalendarWidgetProvider.kt
+88:                     RemoteViews(sizes.associateWith { buildRemoteViews(context, single, widthDp = it.width, heightDp = it.height, bitmapCache = bitmaps) })
+89:                 } else RemoteViews(buildRemoteViews(context, single, widthDp = maxWidth.toFloat(), heightDp = minHeight.toFloat(), bitmapCache = bitmaps),
+90:                     buildRemoteViews(context, single, widthDp = minWidth.toFloat(), heightDp = maxHeight.toFloat(), bitmapCache = bitmaps))
+98:         internal fun buildRemoteViews(context: Context, single: Boolean,
+104:             val views = RemoteViews(context.packageName,
+113:                 putExtra("openTab", 2)
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmDisplay.kt
+85:                             app.startActivity(intent, ActivityOptions.makeBasic().setLaunchDisplayId(target).toBundle())
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt
+80:             addView(title,LinearLayout.LayoutParams(-1,0,1f)); addView(value,LinearLayout.LayoutParams(-1,0,1f))
+84:             addView(pillText,FrameLayout.LayoutParams(-1,-1))
+85:             addView(later,FrameLayout.LayoutParams(-1,-1))
+95:             addView(stop,LinearLayout.LayoutParams(dp(48),dp(48)))
+96:             addView(stopLabel,LinearLayout.LayoutParams(-1,dp(24)))
+103:         choice.addView(minus, LinearLayout.LayoutParams(dp(48), dp(48)))
+104:         choice.addView(pill, LinearLayout.LayoutParams(0, dp(48), 1f))
+105:         choice.addView(plus, LinearLayout.LayoutParams(dp(48), dp(48)))
+106:         actions.addView(choice); actions.addView(stopGroup)
+107:         root.addView(clock); root.addView(actions)
+165:             addView(WaveGradientView(context).apply { importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO }, FrameLayout.LayoutParams(-1, -1))
+166:             addView(root, FrameLayout.LayoutParams(-1, -1))
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CustomAlarmReceiver.kt
+314:         context.startActivity(activityIntent)
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DiagnosticShare.kt
+21:         val send = Intent(Intent.ACTION_SEND).apply {
+32:         val mail = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:"))
+37:         return Intent.createChooser(send, title).apply {
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/InAppAlarmController.kt
+129:         button.addView(icon, FrameLayout.LayoutParams(dp(activity, 42), dp(activity, 42), Gravity.CENTER))
+130:         button.addView(View(ui).apply {
+147:         val entry = Dialog(activity)
+149:         entry.setContentView(button)
+150:         entry.setCancelable(false)
+186:         val view = LayoutInflater.from(ui).inflate(R.layout.overlay_alarm, null)
+217:         (view as FrameLayout).addView(ImageButton(ui).apply {
+232:         val card = Dialog(activity)
+234:         card.setContentView(view)
+235:         card.setCancelable(true)
+236:         card.setCanceledOnTouchOutside(false)
+237:         card.setOnCancelListener { if (dialog === card) collapse(activity, current) }
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/MainActivity.kt
+35:         const val EXTRA_OPEN_SCHEDULE_DATE = "openDateSchedule_date"
+36:         const val EXTRA_OPEN_SCHEDULE_START_MINUTES = "openDateSchedule_startMinutes"
+311:         if (intent?.hasExtra("openTab") != true) return
+312:         val tabIndex = intent.getIntExtra("openTab", -1)
+314:             MethodChannel(messenger, CHANNEL).invokeMethod("openTab", tabIndex)
+334:                 "openDateSchedule",
+494:                 "requestNotificationPermission" -> {
+508:                 "openPermissionSettings" -> {
+709:                 "shareDiagnosticLog" -> {
+718:                                     startActivity(intent)
+819:                 "pickBackupFile" -> {
+833:                     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+1226:                 startActivity(intent)
+1257:                 startActivity(intent)
+1326:                 if (restartIntent != null) applicationContext.startActivity(restartIntent)
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/NotificationHelper.kt
+159:             putExtra("openTab", 0)
+322:             .apply { if (!coverVisible) state.fullScreenToken?.let { setFullScreenIntent(it, true) } }
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/NotificationLocale.kt
+33:             .setOnlyAlertOnce(true).setSilent(true).setFullScreenIntent(null, false)
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/NotificationPermissionRequest.kt
+19:             activity.requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_CODE)
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/PermissionSettings.kt
+53:             "notification" -> if (Build.VERSION.SDK_INT >= 26) Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+54:                 .putExtra(Settings.EXTRA_APP_PACKAGE, activity.packageName) else Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri)
+55:             "alarmChannel" -> if (Build.VERSION.SDK_INT >= 26) Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+64:             "app" -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, uri)
+71:         return launchWithFallback(target, Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+72:             Uri.parse("package:${activity.packageName}"))) { activity.startActivity(it) }
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RingControlNotification.kt
+63:         val views = RemoteViews(context.packageName, R.layout.notification_ring_controls).apply {
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt
+62:             android.widget.Toast.makeText(context, "백업 복원 중이에요. 잠시 후 다시 눌러주세요.", android.widget.Toast.LENGTH_SHORT).show()
+145:             Toast.makeText(context, "너무 짧아서 기록하지 않았어요", Toast.LENGTH_SHORT).show()
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt
+75:                         manager.updateAppWidget(id, buildRemoteViews(context, widgetWidthDp(options), widgetHeightDp(options)))
+96:         private fun buildRemoteViews(context: Context, widthDp: Int, heightDp: Int): RemoteViews {
+100:                 return RemoteViews(context.packageName, R.layout.unavailable_feature_widget).apply {
+101:                     val open = Intent(context, MainActivity::class.java).putExtra("openTab", 2)
+106:             val views = RemoteViews(context.packageName, R.layout.sleep_widget)
+210:                 putExtra("openTab", -2) // kOpenConditionTabSentinel(Dart main.dart)과 반드시 같은 값
+406:                     id, buildRemoteViews(context,
+428:                 buildRemoteViews(context, widgetWidthDp(newOptions), widgetHeightDp(newOptions)))
+
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SnoozeFeedback.kt
+22:                 Toast.makeText(context, result.message, Toast.LENGTH_LONG).show()
+34:         Toast.makeText(context, message(context, code), Toast.LENGTH_LONG).show()
+41:         Toast.makeText(context, message(context, code), Toast.LENGTH_LONG).show()
+
+
+4. Native 레이아웃/위젯·런치 리소스
+
+android/app/src/main/res/drawable/launch_background.xml
+3: <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+5:     <item>
+6:         <shape android:shape="rectangle">
+7:             <solid android:color="#FFFFFFFF" />
+
+android/app/src/main/res/drawable-v21/launch_background.xml
+3: <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+5:     <item>
+6:         <shape android:shape="rectangle">
+7:             <solid android:color="#FFFFFFFF" />
+
+android/app/src/main/res/layout/activity_alarm.xml
+7: <FrameLayout
+10:     android:layout_width="match_parent"
+11:     android:layout_height="match_parent">
+15:     <com.hwani1103.shiftbell.WaveGradientView
+16:         android:layout_width="match_parent"
+17:         android:layout_height="match_parent"/>
+19:     <androidx.constraintlayout.widget.ConstraintLayout
+21:         android:layout_width="match_parent"
+22:         android:layout_height="match_parent">
+25:     <LinearLayout
+27:         android:layout_width="0dp"
+28:         android:layout_height="wrap_content"
+47:         <TextView
+49:             android:layout_width="276dp"
+50:             android:layout_height="276dp"
+62:         <TextView
+64:             android:layout_width="wrap_content"
+65:             android:layout_height="wrap_content"
+78:     <LinearLayout
+80:         android:layout_width="wrap_content"
+81:         android:layout_height="wrap_content"
+90:         <ImageView
+91:             android:layout_width="26dp"
+92:             android:layout_height="26dp"
+95:         <TextView
+97:             android:layout_width="wrap_content"
+98:             android:layout_height="wrap_content"
+105:     <include layout="@layout/alarm_controls" android:id="@+id/buttonContainer"
+106:         android:layout_width="0dp" android:layout_height="wrap_content"
+
+android/app/src/main/res/layout/alarm_controls.xml
+3: <com.hwani1103.shiftbell.AlarmControlLayout xmlns:android="http://schemas.android.com/apk/res/android"
+4:     android:id="@+id/buttonContainer" android:layout_width="match_parent"
+5:     android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center">
+6:         <LinearLayout android:id="@+id/lockSnoozeRow" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center">
+7: <Button android:id="@+id/snoozeDecreaseButton" android:layout_width="64dp" android:layout_height="64dp"
+8:     android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="−" android:textSize="36sp"
+12: <FrameLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="88dp"
+14:     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+17:         <TextView android:id="@+id/lockSnoozeTitle" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+21:         <TextView android:id="@+id/snoozeValueText" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+26:     <Button android:id="@+id/snoozeButton" android:layout_width="match_parent" android:layout_height="match_parent"
+27:         android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text=""
+30: </FrameLayout><Button android:id="@+id/snoozeIncreaseButton" android:layout_width="64dp" android:layout_height="64dp"
+31:     android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="+" android:textSize="36sp"
+35: <Button android:id="@+id/dismissButton" android:layout_width="80dp" android:layout_height="80dp" android:layout_marginTop="24dp"
+36:     android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="×" android:textSize="46sp"
+40:         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center"
+
+android/app/src/main/res/layout/calendar_widget.xml
+3: <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/widget_panel" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/calendar_widget_day" android:clipToOutline="true" android:layoutDirection="ltr">
+4:   <ImageView android:id="@+id/widget_garden" android:layout_margin="8dp" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/widget_garden_day" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+5:   <TextView android:id="@+id/empty_message" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:textSize="12sp" android:textColor="#294E48" android:visibility="gone" android:text="@string/widget_setup_schedule_first"/>
+6:   <LinearLayout android:id="@+id/widget_content" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingLeft="7dp" android:paddingRight="7dp" android:paddingTop="4dp" android:paddingBottom="4dp" android:orientation="vertical"><FrameLayout android:layout_width="match_parent" android:layout_height="30dp">
+7:           <ImageView android:id="@+id/widget_day_period" android:layout_width="100dp" android:layout_height="30dp" android:layout_gravity="right" android:scaleType="fitXY" android:src="@drawable/widget_landscape_day" android:contentDescription="@string/widget_daytime"/>
+8:           <TextView android:id="@+id/widget_date_header" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_marginRight="100dp"
+12:         </FrameLayout><LinearLayout android:layout_width="match_parent" android:layout_height="23dp" android:orientation="horizontal"><TextView android:id="@+id/hdr_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_0"/><TextView android:id="@+id/hdr_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_1"/><TextView android:id="@+id/hdr_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_2"/><TextView android:id="@+id/hdr_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_3"/><TextView android:id="@+id/hdr_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_4"/><TextView android:id="@+id/hdr_5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_5"/><TextView android:id="@+id/hdr_6" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="13dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_6"/></LinearLayout><LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="1dp" android:layout_marginBottom="1dp" android:background="@drawable/widget_week_surface" android:orientation="horizontal"><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+14:       <LinearLayout android:id="@+id/numwrap_0_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+15:         <TextView android:id="@+id/num_0_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+19:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+20:         <ImageView android:id="@+id/pillbg_0_0" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+21:         <TextView android:id="@+id/pill_0_0" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+25:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+27:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+29:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+32:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+34:       <LinearLayout android:id="@+id/numwrap_0_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+35:         <TextView android:id="@+id/num_0_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+39:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+40:         <ImageView android:id="@+id/pillbg_0_1" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+41:         <TextView android:id="@+id/pill_0_1" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+45:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+47:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+49:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+52:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+54:       <LinearLayout android:id="@+id/numwrap_0_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+55:         <TextView android:id="@+id/num_0_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+59:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+60:         <ImageView android:id="@+id/pillbg_0_2" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+61:         <TextView android:id="@+id/pill_0_2" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+65:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+67:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+69:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+72:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+74:       <LinearLayout android:id="@+id/numwrap_0_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+75:         <TextView android:id="@+id/num_0_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+79:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+80:         <ImageView android:id="@+id/pillbg_0_3" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+81:         <TextView android:id="@+id/pill_0_3" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+85:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+87:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+89:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+92:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+94:       <LinearLayout android:id="@+id/numwrap_0_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+95:         <TextView android:id="@+id/num_0_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+99:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+100:         <ImageView android:id="@+id/pillbg_0_4" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+101:         <TextView android:id="@+id/pill_0_4" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+105:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+107:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+109:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+112:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+114:       <LinearLayout android:id="@+id/numwrap_0_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+115:         <TextView android:id="@+id/num_0_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+119:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+120:         <ImageView android:id="@+id/pillbg_0_5" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+121:         <TextView android:id="@+id/pill_0_5" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+125:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+127:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+129:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+132:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+134:       <LinearLayout android:id="@+id/numwrap_0_6" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+135:         <TextView android:id="@+id/num_0_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+139:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+140:         <ImageView android:id="@+id/pillbg_0_6" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+141:         <TextView android:id="@+id/pill_0_6" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+145:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+147:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+149:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+152:     </LinearLayout></LinearLayout><LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="1dp" android:layout_marginBottom="1dp" android:background="@drawable/widget_week_surface" android:orientation="horizontal"><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+154:       <LinearLayout android:id="@+id/numwrap_1_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+155:         <TextView android:id="@+id/num_1_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+159:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+160:         <ImageView android:id="@+id/pillbg_1_0" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+161:         <TextView android:id="@+id/pill_1_0" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+165:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+167:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+169:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+172:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+174:       <LinearLayout android:id="@+id/numwrap_1_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+175:         <TextView android:id="@+id/num_1_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+179:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+180:         <ImageView android:id="@+id/pillbg_1_1" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+181:         <TextView android:id="@+id/pill_1_1" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+185:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+187:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+189:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+192:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+194:       <LinearLayout android:id="@+id/numwrap_1_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+195:         <TextView android:id="@+id/num_1_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+199:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+200:         <ImageView android:id="@+id/pillbg_1_2" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+201:         <TextView android:id="@+id/pill_1_2" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+205:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+207:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+209:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+212:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+214:       <LinearLayout android:id="@+id/numwrap_1_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+215:         <TextView android:id="@+id/num_1_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+219:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+220:         <ImageView android:id="@+id/pillbg_1_3" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+221:         <TextView android:id="@+id/pill_1_3" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+225:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+227:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+229:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+232:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+234:       <LinearLayout android:id="@+id/numwrap_1_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+235:         <TextView android:id="@+id/num_1_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+239:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+240:         <ImageView android:id="@+id/pillbg_1_4" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+241:         <TextView android:id="@+id/pill_1_4" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+245:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+247:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+249:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+252:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+254:       <LinearLayout android:id="@+id/numwrap_1_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+255:         <TextView android:id="@+id/num_1_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+259:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+260:         <ImageView android:id="@+id/pillbg_1_5" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+261:         <TextView android:id="@+id/pill_1_5" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+265:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+267:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+269:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+272:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+274:       <LinearLayout android:id="@+id/numwrap_1_6" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+275:         <TextView android:id="@+id/num_1_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+279:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+280:         <ImageView android:id="@+id/pillbg_1_6" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+281:         <TextView android:id="@+id/pill_1_6" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+285:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_1_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+287:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_1_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+289:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_1_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+292:     </LinearLayout></LinearLayout><LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="1dp" android:layout_marginBottom="1dp" android:background="@drawable/widget_week_surface" android:orientation="horizontal"><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+294:       <LinearLayout android:id="@+id/numwrap_2_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+295:         <TextView android:id="@+id/num_2_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+299:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+300:         <ImageView android:id="@+id/pillbg_2_0" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+301:         <TextView android:id="@+id/pill_2_0" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+305:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+307:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+309:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+312:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+314:       <LinearLayout android:id="@+id/numwrap_2_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+315:         <TextView android:id="@+id/num_2_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+319:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+320:         <ImageView android:id="@+id/pillbg_2_1" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+321:         <TextView android:id="@+id/pill_2_1" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+325:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+327:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+329:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+332:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+334:       <LinearLayout android:id="@+id/numwrap_2_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+335:         <TextView android:id="@+id/num_2_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+339:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+340:         <ImageView android:id="@+id/pillbg_2_2" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+341:         <TextView android:id="@+id/pill_2_2" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+345:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+347:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+349:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+352:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+354:       <LinearLayout android:id="@+id/numwrap_2_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+355:         <TextView android:id="@+id/num_2_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+359:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+360:         <ImageView android:id="@+id/pillbg_2_3" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+361:         <TextView android:id="@+id/pill_2_3" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+365:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+367:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+369:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+372:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+374:       <LinearLayout android:id="@+id/numwrap_2_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+375:         <TextView android:id="@+id/num_2_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+379:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+380:         <ImageView android:id="@+id/pillbg_2_4" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+381:         <TextView android:id="@+id/pill_2_4" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+385:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+387:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+389:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+392:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+394:       <LinearLayout android:id="@+id/numwrap_2_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+395:         <TextView android:id="@+id/num_2_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+399:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+400:         <ImageView android:id="@+id/pillbg_2_5" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+401:         <TextView android:id="@+id/pill_2_5" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+405:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+407:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+409:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+412:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+414:       <LinearLayout android:id="@+id/numwrap_2_6" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+415:         <TextView android:id="@+id/num_2_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+419:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+420:         <ImageView android:id="@+id/pillbg_2_6" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+421:         <TextView android:id="@+id/pill_2_6" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+425:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_2_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+427:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_2_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+429:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_2_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+
+android/app/src/main/res/layout/calendar_widget_week.xml
+3: <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/widget_panel" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@drawable/calendar_widget_day" android:clipToOutline="true" android:layoutDirection="ltr">
+4:   <ImageView android:id="@+id/widget_garden" android:layout_margin="8dp" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/widget_garden_day" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+5:   <TextView android:id="@+id/empty_message" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:textSize="12sp" android:textColor="#294E48" android:visibility="gone" android:text="@string/widget_setup_schedule_first"/>
+6:   <LinearLayout android:id="@+id/widget_content" android:layout_width="match_parent" android:layout_height="match_parent" android:paddingLeft="7dp" android:paddingRight="7dp" android:paddingTop="4dp" android:paddingBottom="4dp" android:orientation="vertical"><LinearLayout android:layout_width="match_parent" android:layout_height="16dp" android:orientation="horizontal"><TextView android:id="@+id/hdr_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="12dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_0"/><TextView android:id="@+id/hdr_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="12dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_1"/><TextView android:id="@+id/hdr_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="12dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_2"/><TextView android:id="@+id/hdr_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="12dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_3"/><TextView android:id="@+id/hdr_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="12dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_4"/><TextView android:id="@+id/hdr_5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="12dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_5"/><TextView android:id="@+id/hdr_6" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:gravity="center" android:textSize="12dp" android:textStyle="bold" android:textColor="#355B54" android:includeFontPadding="false" android:maxLines="1" android:text="@string/widget_weekday_6"/></LinearLayout><LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:layout_marginTop="1dp" android:layout_marginBottom="1dp" android:background="@drawable/widget_week_surface" android:orientation="horizontal"><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+8:       <LinearLayout android:id="@+id/numwrap_0_0" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+9:         <TextView android:id="@+id/num_0_0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+13:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+14:         <ImageView android:id="@+id/pillbg_0_0" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+15:         <TextView android:id="@+id/pill_0_0" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+19:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+21:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+23:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_0" android:layout_width="match_parent" android:layout_height="wrap_content"
+26:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+28:       <LinearLayout android:id="@+id/numwrap_0_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+29:         <TextView android:id="@+id/num_0_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+33:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+34:         <ImageView android:id="@+id/pillbg_0_1" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+35:         <TextView android:id="@+id/pill_0_1" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+39:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+41:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+43:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+46:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+48:       <LinearLayout android:id="@+id/numwrap_0_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+49:         <TextView android:id="@+id/num_0_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+53:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+54:         <ImageView android:id="@+id/pillbg_0_2" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+55:         <TextView android:id="@+id/pill_0_2" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+59:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+61:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+63:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+66:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+68:       <LinearLayout android:id="@+id/numwrap_0_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+69:         <TextView android:id="@+id/num_0_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+73:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+74:         <ImageView android:id="@+id/pillbg_0_3" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+75:         <TextView android:id="@+id/pill_0_3" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+79:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+81:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+83:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+86:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+88:       <LinearLayout android:id="@+id/numwrap_0_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+89:         <TextView android:id="@+id/num_0_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+93:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+94:         <ImageView android:id="@+id/pillbg_0_4" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#6B6524" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+95:         <TextView android:id="@+id/pill_0_4" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+99:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+101:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+103:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_4" android:layout_width="match_parent" android:layout_height="wrap_content"
+106:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+108:       <LinearLayout android:id="@+id/numwrap_0_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+109:         <TextView android:id="@+id/num_0_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+113:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+114:         <ImageView android:id="@+id/pillbg_0_5" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#EF5350" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+115:         <TextView android:id="@+id/pill_0_5" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+119:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+121:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+123:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_5" android:layout_width="match_parent" android:layout_height="wrap_content"
+126:     </LinearLayout><LinearLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1"
+128:       <LinearLayout android:id="@+id/numwrap_0_6" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="vertical">
+129:         <TextView android:id="@+id/num_0_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minWidth="23dp"
+133:       <FrameLayout android:layout_width="match_parent" android:layout_height="18dp">
+134:         <ImageView android:id="@+id/pillbg_0_6" android:layout_width="match_parent" android:layout_height="match_parent" android:src="#4771D1" android:scaleType="fitXY" android:importantForAccessibility="no"/>
+135:         <TextView android:id="@+id/pill_0_6" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center"
+139:       <LinearLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:gravity="top" android:orientation="vertical"><TextView android:id="@+id/memo1_0_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+141:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo2_0_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+143:       android:maxLines="1" android:visibility="gone"/><TextView android:id="@+id/memo3_0_6" android:layout_width="match_parent" android:layout_height="wrap_content"
+
+android/app/src/main/res/layout/notification_ring_controls.xml
+2: <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+3:     android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+4:     <TextView android:id="@+id/ringNoticeTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
+6:     <TextView android:id="@+id/ringNoticeStatus" android:layout_width="match_parent" android:layout_height="wrap_content"
+8:     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
+9:         <Button android:id="@+id/snoozeDecreaseButton" android:layout_width="48dp" android:layout_height="48dp"
+10:             android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="−"
+12:         <TextView android:id="@+id/snoozeValueText" android:layout_width="0dp" android:layout_height="wrap_content"
+15:         <Button android:id="@+id/snoozeIncreaseButton" android:layout_width="48dp" android:layout_height="48dp"
+16:             android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="+"
+
+android/app/src/main/res/layout/overlay_alarm.xml
+2: <FrameLayout
+5:     android:layout_width="match_parent"
+6:     android:layout_height="wrap_content">
+8:     <com.hwani1103.shiftbell.WaveGradientView
+9:         android:layout_width="match_parent"
+10:         android:layout_height="match_parent"
+14:     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+17:         <TextView android:id="@+id/timeText" android:layout_width="match_parent" android:layout_height="wrap_content"
+21:         <TextView android:id="@+id/shiftTypeText" android:layout_width="match_parent" android:layout_height="wrap_content"
+24: <LinearLayout android:id="@+id/buttonContainer" android:layout_width="match_parent" android:layout_height="64dp" android:gravity="center">
+25: <Button android:id="@+id/snoozeDecreaseButton" android:layout_width="48dp" android:layout_height="48dp"
+26:     android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="−" android:textSize="30sp"
+30: <FrameLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="64dp"
+32:     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent"
+35:         <TextView android:id="@+id/lockSnoozeTitle" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+39:         <TextView android:id="@+id/snoozeValueText" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+44:     <Button android:id="@+id/snoozeButton" android:layout_width="match_parent" android:layout_height="match_parent"
+45:         android:minWidth="0dp" android:minHeight="0dp" android:padding="0dp" android:text=""
+48: </FrameLayout><Button android:id="@+id/snoozeIncreaseButton" android:layout_width="48dp" android:layout_height="48dp"
+49:     android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="+" android:textSize="30sp"
+52:     android:contentDescription="@string/alarm_snooze_increase" /><Button android:id="@+id/dismissButton" android:layout_width="60dp" android:layout_height="60dp" android:layout_marginStart="8dp"
+53:     android:minWidth="0dp" android:minHeight="48dp" android:padding="0dp" android:text="×" android:textSize="38sp"
+
+android/app/src/main/res/layout/sleep_widget.xml
+3: <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+5:     android:layout_width="match_parent"
+6:     android:layout_height="match_parent"
+14:     <LinearLayout
+15:         android:layout_width="match_parent"
+16:         android:layout_height="0dp"
+21:         <FrameLayout
+22:             android:layout_width="0dp"
+23:             android:layout_height="match_parent"
+27:             <ImageView
+29:                 android:layout_width="match_parent"
+30:                 android:layout_height="match_parent"
+39:         <FrameLayout
+40:             android:layout_width="0dp"
+41:             android:layout_height="match_parent"
+45:             <TextView
+47:                 android:layout_width="match_parent"
+48:                 android:layout_height="match_parent"
+60:             <ImageView
+62:                 android:layout_width="match_parent"
+63:                 android:layout_height="match_parent"
+71:     <LinearLayout
+73:         android:layout_width="match_parent"
+74:         android:layout_height="0dp"
+79:         <TextView
+81:             android:layout_width="0dp"
+82:             android:layout_height="match_parent"
+99:         <TextView
+101:             android:layout_width="0dp"
+102:             android:layout_height="match_parent"
+
+android/app/src/main/res/layout/unavailable_feature_widget.xml
+2: <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+4:     android:layout_width="match_parent" android:layout_height="match_parent"
+
+android/app/src/main/res/values/styles.xml
+2: <resources>
+4:     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+7:         <item name="android:windowBackground">@drawable/launch_background</item>
+15:     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+16:         <item name="android:windowBackground">?android:colorBackground</item>
+
+android/app/src/main/res/values-night/styles.xml
+2: <resources>
+4:     <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+7:         <item name="android:windowBackground">@drawable/launch_background</item>
+15:     <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+16:         <item name="android:windowBackground">?android:colorBackground</item>
+
+android/app/src/main/res/xml/calendar_widget_info.xml
+2: <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+3:     android:minWidth="250dp" android:minResizeWidth="250dp"
+4:     android:minHeight="200dp"
+7:     android:initialLayout="@layout/calendar_widget"
+8:     android:resizeMode="horizontal" android:widgetCategory="home_screen"
+
+android/app/src/main/res/xml/sleep_widget_info.xml
+12: <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+13:     android:minWidth="110dp"
+14:     android:minHeight="40dp"
+18:     android:initialLayout="@layout/sleep_widget"
+19:     android:resizeMode="none"
+
+
+5. 조사 소스 범위
+lib/constants/ad_config.dart
+lib/constants/alarm_day_offset.dart
+lib/constants/alarm_limits.dart
+lib/constants/layout_limits.dart
+lib/constants/platform_channel.dart
+lib/constants/shift_name_limits.dart
+lib/firebase_options.dart
+lib/generated/national_holidays.dart
+lib/main.dart
+lib/models/alarm.dart
+lib/models/alarm_history.dart
+lib/models/alarm_template.dart
+lib/models/alarm_type.dart
+lib/models/backup_payload.dart
+lib/models/calendar_theme.dart
+lib/models/date_memo.dart
+lib/models/date_overtime.dart
+lib/models/date_schedule.dart
+lib/models/friend_schedule.dart
+lib/models/schedule_work_hours_band.dart
+lib/models/shift_schedule.dart
+lib/models/shift_time_range.dart
+lib/models/sleep_record.dart
+lib/models/team_rule.dart
+lib/models/team_schedule_config.dart
+lib/providers/alarm_provider.dart
+lib/providers/calendar_theme_provider.dart
+lib/providers/condition_provider.dart
+lib/providers/condition_shift_time_provider.dart
+lib/providers/current_date_provider.dart
+lib/providers/data_revision_provider.dart
+lib/providers/date_schedule_provider.dart
+lib/providers/friend_provider.dart
+lib/providers/memo_provider.dart
+lib/providers/overtime_provider.dart
+lib/providers/schedule_provider.dart
+lib/providers/sleep_condition_provider.dart
+lib/providers/sleep_record_provider.dart
+lib/providers/tab_visibility_provider.dart
+lib/providers/work_hours_settings_provider.dart
+lib/screens/all_alarms_history_view.dart
+lib/screens/all_shifts_view.dart
+lib/screens/all_teams_setup_screen.dart
+lib/screens/calendar_tab.dart
+lib/screens/calendar_theme_lab_screen.dart
+lib/screens/calendar_theme_picker_screen.dart
+lib/screens/condition_tab.dart
+lib/screens/english_condition_tab.dart
+lib/screens/friend_calendar_view.dart
+lib/screens/friend_list_screen.dart
+lib/screens/help_screen.dart
+lib/screens/memo_list_view.dart
+lib/screens/my_share_code_screen.dart
+lib/screens/next_alarm_tab.dart
+lib/screens/onboarding_screen.dart
+lib/screens/permission_intro_screen.dart
+lib/screens/privacy_policy_screen.dart
+lib/screens/restore_backup_screen.dart
+lib/screens/restore_interrupted_screen.dart
+lib/screens/restore_progress_screen.dart
+lib/screens/schedule_management_tab.dart
+lib/screens/settings_tab.dart
+lib/screens/sleep_calendar_full_screen.dart
+lib/screens/splash_screen.dart
+lib/screens/startup_gate.dart
+lib/screens/team_rule_editor_screen.dart
+lib/screens/team_schedule_edit_screen.dart
+lib/screens/work_hours_settings_screen.dart
+lib/services/ad_consent_service.dart
+lib/services/ad_service.dart
+lib/services/alarm_generation_service.dart
+lib/services/alarm_refresh_service.dart
+lib/services/alarm_service.dart
+lib/services/app_analytics.dart
+lib/services/app_restart.dart
+lib/services/backup_policy.dart
+lib/services/backup_service.dart
+lib/services/backup_storage_service.dart
+lib/services/backup_validator.dart
+lib/services/backup_watcher.dart
+lib/services/condition/condition_rule_engine.dart
+lib/services/condition/english_recovery_summary.dart
+lib/services/condition/english_sleep_copy.dart
+lib/services/condition/evidence_database.dart
+lib/services/condition/recovery_briefing_engine.dart
+lib/services/condition/shift_pattern_analyzer.dart
+lib/services/condition/shift_time_category.dart
+lib/services/condition/sleep_by_category_stats.dart
+lib/services/condition/sleep_day_slots.dart
+lib/services/condition/sleep_history.dart
+lib/services/condition/sleep_opportunity.dart
+lib/services/condition/sleep_overlap.dart
+lib/services/condition/sleep_shift_relation.dart
+lib/services/condition/sleep_stats.dart
+lib/services/database_service.dart
+lib/services/db_migration_runner.dart
+lib/services/diag_log.dart
+lib/services/firebase_bootstrap.dart
+lib/services/fixed_alarm_occurrence.dart
+lib/services/friend_share_protocol.dart
+lib/services/friend_share_service.dart
+lib/services/friend_sync_service.dart
+lib/services/holiday_sync_service.dart
+lib/services/memo_category_classifier.dart
+lib/services/operations_analytics.dart
+lib/services/permission_service.dart
+lib/services/restore_coordinator.dart
+lib/services/schedule_notification_service.dart
+lib/services/schedule_work_hours_band_resolver.dart
+lib/services/snooze_settings_service.dart
+lib/services/update_service.dart
+lib/services/widget_refresh_service.dart
+lib/services/work_hours_calculator.dart
+lib/theme/app_colors.dart
+lib/theme/app_theme.dart
+lib/utils/alarm_clock_label.dart
+lib/utils/alarm_dismiss_gate.dart
+lib/utils/alarm_wall_time.dart
+lib/utils/apply_schedule_change.dart
+lib/utils/blocking_progress.dart
+lib/utils/calendar_dates.dart
+lib/utils/friend_open_util.dart
+lib/utils/holiday_util.dart
+lib/utils/lunar_calendar_data.dart
+lib/utils/lunar_calendar_util.dart
+lib/utils/national_holiday.dart
+lib/utils/schedule_focus_request.dart
+lib/utils/shift_name_util.dart
+lib/utils/sleep_format_util.dart
+lib/utils/weekday_util.dart
+lib/web_main.dart
+lib/widgets/adaptive_layout.dart
+lib/widgets/alarm_mode_label.dart
+lib/widgets/alarm_time_editor.dart
+lib/widgets/app_button.dart
+lib/widgets/app_content_frame.dart
+lib/widgets/app_second_button.dart
+lib/widgets/app_shift_chip.dart
+lib/widgets/app_text_scale.dart
+lib/widgets/app_third_button.dart
+lib/widgets/banner_ad_slot.dart
+lib/widgets/calendar_alarm_cards.dart
+lib/widgets/calendar_footer_actions.dart
+lib/widgets/calendar_header_actions.dart
+lib/widgets/calendar_memo_sizing.dart
+lib/widgets/calendar_snoozed_alarms.dart
+lib/widgets/complete_cell_memo_text.dart
+lib/widgets/day_offset_chip.dart
+lib/widgets/default_snooze_setting.dart
+lib/widgets/disable_tab_button.dart
+lib/widgets/english_calendar_label.dart
+lib/widgets/evidence_library_section.dart
+lib/widgets/fold_calendar_text_scale.dart
+lib/widgets/friend_web_calendar.dart
+lib/widgets/global_concept_calendar_cell.dart
+lib/widgets/memo_detail_sheet.dart
+lib/widgets/nav_icon_emphasis.dart
+lib/widgets/onboarding_info_popups.dart
+lib/widgets/permission_panel.dart
+lib/widgets/permission_warning_banner.dart
+lib/widgets/public_web_load_failure.dart
+lib/widgets/schedule_change_dialog.dart
+lib/widgets/semantics_table_boundary.dart
+lib/widgets/settings_appearance.dart
+lib/widgets/settings_menu_list.dart
+lib/widgets/shift_editor_dialog.dart
+lib/widgets/shift_label_layout.dart
+lib/widgets/shift_names_dialog.dart
+lib/widgets/shift_name_text_field.dart
+lib/widgets/sleep_edit_dialog.dart
+lib/widgets/soft_info_dialog.dart
+lib/widgets/tablet_keyboard_viewport.dart
+lib/widgets/tappable_number_picker.dart
+lib/widgets/team_assignment_grid.dart
+lib/widgets/team_label.dart
+lib/widgets/team_rule_card.dart
+lib/widgets/unavailable_feature.dart
+lib/widgets/wide_calendar_cell.dart
+lib/widgets/word_safe_spans.dart
+android/app/src/main/AndroidManifest.xml
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActionHelper.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActionReceiver.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmControlLayout.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmGuardReceiver.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmInstant.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmOverlayService.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmPlayer.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmRefreshEngine.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmRefreshReceiver.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmRefreshUtil.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmResponsiveLayout.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmStreamVolume.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmWakeScheduler.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmWallTime.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AppTextScale.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/BackupFileNaming.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/BackupFileReader.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CalendarWidgetHolidays.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CalendarWidgetProvider.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CalendarWidgetScheduleResolver.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmDisplay.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CustomAlarmReceiver.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DatabaseHelper.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DbMigrationRunner.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DiagLog.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DiagnosticShare.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DiagReport.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DirectBootReceiver.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/FixedAlarmOccurrence.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/InAppAlarmController.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/MainActivity.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/NationalHolidayDates.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/NotificationHelper.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/NotificationLocale.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/NotificationPermissionRequest.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/OperationsSnapshot.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/PermissionSettings.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RefreshLockManager.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ReleaseLocalePolicy.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RestoreGate.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RestoreOs.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RingControlNotification.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RingControlPresence.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RingingAlarmTracker.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RingSnoozeController.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RingTimeoutController.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ScheduleNotificationReceiver.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ScheduleNotificationScheduler.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionScheduler.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepScheduleResolver.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SnoozeControlsBinding.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SnoozeDefaults.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SnoozeFeedback.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SnoozeText.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/VolumeCalibration.kt
+android/app/src/main/kotlin/com/hwani1103/shiftbell/WaveGradientView.kt
+android/app/src/main/res/drawable/alarm_dismiss_circle.xml
+android/app/src/main/res/drawable/alarm_lock_control.xml
+android/app/src/main/res/drawable/alarm_lock_snooze.xml
+android/app/src/main/res/drawable/alarm_lock_snooze_ripple.xml
+android/app/src/main/res/drawable/alarm_shift_badge.xml
+android/app/src/main/res/drawable/alarm_snooze_circle.xml
+android/app/src/main/res/drawable/alarm_time_circle.xml
+android/app/src/main/res/drawable/calendar_widget_day.xml
+android/app/src/main/res/drawable/calendar_widget_memo.xml
+android/app/src/main/res/drawable/calendar_widget_night.xml
+android/app/src/main/res/drawable/ic_alarm_collapse.xml
+android/app/src/main/res/drawable/ic_close_white.xml
+android/app/src/main/res/drawable/ic_double_arrow_up.xml
+android/app/src/main/res/drawable/ic_launcher_background.xml
+android/app/src/main/res/drawable/ic_launcher_foreground.xml
+android/app/src/main/res/drawable/ic_stat_schedule_notify.xml
+android/app/src/main/res/drawable/ic_widget_day.xml
+android/app/src/main/res/drawable/ic_widget_night.xml
+android/app/src/main/res/drawable/launch_background.xml
+android/app/src/main/res/drawable/launch_icon_indigo.xml
+android/app/src/main/res/drawable/overlay_shift_badge.xml
+android/app/src/main/res/drawable/sleep_widget_button_bg.xml
+android/app/src/main/res/drawable/sleep_widget_button_bg_inactive.xml
+android/app/src/main/res/drawable/sleep_widget_panel.xml
+android/app/src/main/res/drawable/splash_icon.xml
+android/app/src/main/res/drawable/widget_garden_day.xml
+android/app/src/main/res/drawable/widget_garden_night.xml
+android/app/src/main/res/drawable/widget_landscape_day.xml
+android/app/src/main/res/drawable/widget_landscape_night.xml
+android/app/src/main/res/drawable/widget_memo_bg_dark.xml
+android/app/src/main/res/drawable/widget_memo_bg_light.xml
+android/app/src/main/res/drawable/widget_panel_dark.xml
+android/app/src/main/res/drawable/widget_panel_light.xml
+android/app/src/main/res/drawable/widget_today_holiday_dark.xml
+android/app/src/main/res/drawable/widget_today_holiday_light.xml
+android/app/src/main/res/drawable/widget_today_normal_dark.xml
+android/app/src/main/res/drawable/widget_today_normal_light.xml
+android/app/src/main/res/drawable/widget_week_surface.xml
+android/app/src/main/res/drawable-v21/launch_background.xml
+android/app/src/main/res/layout/activity_alarm.xml
+android/app/src/main/res/layout/alarm_controls.xml
+android/app/src/main/res/layout/calendar_widget.xml
+android/app/src/main/res/layout/calendar_widget_week.xml
+android/app/src/main/res/layout/notification_ring_controls.xml
+android/app/src/main/res/layout/overlay_alarm.xml
+android/app/src/main/res/layout/sleep_widget.xml
+android/app/src/main/res/layout/unavailable_feature_widget.xml
+android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+android/app/src/main/res/values/attrs.xml
+android/app/src/main/res/values/calendar_typography.xml
+android/app/src/main/res/values/colors.xml
+android/app/src/main/res/values/in_app_alarm_ids.xml
+android/app/src/main/res/values/korean_only.xml
+android/app/src/main/res/values/strings.xml
+android/app/src/main/res/values/styles.xml
+android/app/src/main/res/values-de/strings.xml
+android/app/src/main/res/values-en/calendar_typography.xml
+android/app/src/main/res/values-en-rGB/calendar_preview.xml
+android/app/src/main/res/values-hi/strings.xml
+android/app/src/main/res/values-ko/strings.xml
+android/app/src/main/res/values-night/styles.xml
+android/app/src/main/res/values-pt/strings.xml
+android/app/src/main/res/xml/calendar_widget_info.xml
+android/app/src/main/res/xml/calendar_widget_week_info.xml
+android/app/src/main/res/xml/diagnostic_share_paths.xml
+android/app/src/main/res/xml/sleep_widget_info.xml
+web/flutter_bootstrap.js
+web/index.html
+web/locale_bootstrap.js
+web/manifest.json
+web/manifest_de.json
+web/manifest_en.json
+web/manifest_hi.json
+web/manifest_ko.json
+web/manifest_pt.json
