@@ -58,11 +58,13 @@ export function buildOperations(raw, meta) {
       current: periodStats(data.current), previous: periodStats(data.previous),
       countries: segmentStats(data.countries, data.countryEvents),
       previousCountries: segmentStats(data.previousCountries, null),
+      languages: segmentStats(data.languages, data.languageEvents),
+      previousLanguages: segmentStats(data.previousLanguages, null),
       manufacturers: segmentStats(data.manufacturers, data.manufacturerEvents),
-      coverage: Object.fromEntries(['current', 'previous', 'countries', 'countryEvents', 'previousCountries', 'manufacturers', 'manufacturerEvents']
+      coverage: Object.fromEntries(['current', 'previous', 'countries', 'countryEvents', 'previousCountries', 'languages', 'previousLanguages', 'languageEvents', 'manufacturers', 'manufacturerEvents']
         .map((name) => [name, reportState(data[name])])),
     };
   }
-  return { schema: 2, updatedAt: meta.now.toISOString(), byRange, countryTrend: countryTrend(raw.countryDaily),
-    coverage: { countryDaily: reportState(raw.countryDaily) } };
+  return { schema: 3, updatedAt: meta.now.toISOString(), byRange, countryTrend: countryTrend(raw.countryDaily), languageTrend: countryTrend(raw.languageDaily),
+    coverage: { countryDaily: reportState(raw.countryDaily), languageDaily: reportState(raw.languageDaily) } };
 }

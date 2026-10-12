@@ -98,7 +98,7 @@ export const BREAKDOWNS = [
 ];
 
 const NAMES = {
-  language: { Korean: '한국어', English: '영어', Japanese: '일본어', Chinese: '중국어', Spanish: '스페인어', Vietnamese: '베트남어', Thai: '태국어', Indonesian: '인도네시아어', German: '독일어', French: '프랑스어' },
+  language: { Korean: '한국어', English: '영어', Japanese: '일본어', Chinese: '중국어', Spanish: '스페인어', Vietnamese: '베트남어', Thai: '태국어', Indonesian: '인도네시아어', German: '독일어', French: '프랑스어', Portuguese: '포르투갈어', Hindi: '힌디어' },
   country: { India: '인도', Brazil: '브라질', 'United Arab Emirates': '아랍에미리트', 'South Africa': '남아프리카공화국', 'South Korea': '대한민국', 'United States': '미국', Japan: '일본', Canada: '캐나다', Australia: '호주', China: '중국', Vietnam: '베트남', Thailand: '태국', Philippines: '필리핀', Germany: '독일', 'United Kingdom': '영국', Taiwan: '대만' },
 };
 export function localizeName(dim, name) {

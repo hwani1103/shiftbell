@@ -201,17 +201,19 @@ export function buildMockDocs({ today = '2026-09-22', days = 400, seed = 2026092
     flags: { ads: true, customEvents: true },
   };
   const countries = [['South Korea', .54], ['India', .16], ['Brazil', .11], ['Germany', .07], ['United States', .06], ['Philippines', .06]];
+  const languages = [['Korean', .52], ['Hindi', .18], ['Portuguese', .13], ['German', .08], ['English', .09]];
   const brands = [['Samsung', .54], ['Xiaomi', .14], ['OPPO', .09], ['vivo', .08], ['Google', .06], ['Motorola', .05], ['honor', .04]];
   const status = { status: 'available', thresholded: false, sampled: false, otherRowLoss: false, truncated: false };
-  const operations = { schema: 2, updatedAt: summary.updatedAt, byRange: {}, coverage: { countryDaily: status }, countryTrend: { dates: dates.slice(-100), series: {} } };
+  const operations = { schema: 3, updatedAt: summary.updatedAt, byRange: {}, coverage: { countryDaily: status, languageDaily: status }, countryTrend: { dates: dates.slice(-100), series: {} }, languageTrend: { dates: dates.slice(-100), series: {} } };
   for (const range of [7, 30, 100, 365]) {
     const start = Math.max(0, n - range); const users = Math.round(mau[n - 1] * (range <= 7 ? .65 : range <= 30 ? 1 : range / 30 * .45));
     const current = { activeUsers: users, totalUsers: Math.round(users * 1.03), newUsers: sum(newUsers, start), sessions: sum(sessions, start), engagementSec: sum(engagementSec, start) };
     const eventMap = (share) => Object.fromEntries(eventsByRange[range].events.map((e) => [e.name, { count: Math.round(e.count * share), users: Math.min(Math.round(users * share), Math.round(e.users * share)) }]));
     const segments = (pairs) => pairs.map(([name, share]) => ({ name, activeUsers: Math.round(users * share), totalUsers: Math.round(current.totalUsers * share), newUsers: Math.round(current.newUsers * share), sessions: Math.round(current.sessions * share), engagementSec: Math.round(current.engagementSec * share), events: eventMap(share) }));
-    operations.byRange[range] = { from: dates[start], to: dates[n - 1], current, previous: { ...current, activeUsers: Math.round(users * .82), newUsers: Math.round(current.newUsers * .84) }, countries: segments(countries), previousCountries: segments(countries).map((r) => ({ ...r, activeUsers: Math.round(r.activeUsers * .82) })), manufacturers: segments(brands), coverage: Object.fromEntries(['current', 'previous', 'countries', 'previousCountries', 'countryEvents', 'manufacturers', 'manufacturerEvents'].map((key) => [key, status])) };
+    operations.byRange[range] = { from: dates[start], to: dates[n - 1], current, previous: { ...current, activeUsers: Math.round(users * .82), newUsers: Math.round(current.newUsers * .84) }, countries: segments(countries), previousCountries: segments(countries).map((r) => ({ ...r, activeUsers: Math.round(r.activeUsers * .82) })), languages: segments(languages), previousLanguages: segments(languages).map((r) => ({ ...r, activeUsers: Math.round(r.activeUsers * .82) })), manufacturers: segments(brands), coverage: Object.fromEntries(['current', 'previous', 'countries', 'previousCountries', 'countryEvents', 'languages', 'previousLanguages', 'languageEvents', 'manufacturers', 'manufacturerEvents'].map((key) => [key, status])) };
   }
   for (const [name, share] of countries) operations.countryTrend.series[name] = { dau: dau.slice(-100).map((v) => Math.round(v * share)), newUsers: newUsers.slice(-100).map((v) => Math.round(v * share)), sessions: sessions.slice(-100).map((v) => Math.round(v * share)) };
+  for (const [name, share] of languages) operations.languageTrend.series[name] = { dau: dau.slice(-100).map((v) => Math.round(v * share)), newUsers: newUsers.slice(-100).map((v) => Math.round(v * share)), sessions: sessions.slice(-100).map((v) => Math.round(v * share)) };
   summary.coverage = Object.fromEntries(['core', 'ads', 'eventsDaily', 'cohort'].map((name) => [name, status]));
   summary.pipelineVersion = 2; summary.syncPolicy = { frequency: 'every-3-hours', timezone: 'Asia/Seoul', intervalHours: 3, scheduledAt: ['00:17', '03:17', '06:17', '09:17', '12:17', '15:17', '18:17', '21:17'] };
   return { summary, series, events, operations };

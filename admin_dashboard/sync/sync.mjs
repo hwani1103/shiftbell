@@ -62,7 +62,7 @@ async function fetchReal() {
     return [range, { from, to, report }];
   })));
   // 나머지는 실패해도 대시보드 일부만 비워 두고 계속한다
-  const [ads, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily] = await Promise.all([
+  const [ads, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, languageDaily] = await Promise.all([
     ga.tryReport('광고', ga.adsDaily(days)),
     ga.tryReport('앱 버전 분포', ga.breakdown('appVersion')),
     ga.tryReport('OS 분포', ga.breakdown('operatingSystemVersion')),
@@ -73,27 +73,31 @@ async function fetchReal() {
     ga.tryReport('리텐션', ga.cohort({ ...cohortRange, endOffset: 14 })),
     webGa.tryReport('웹 친구 근무표 열람', webGa.webFriendViews()),
     ga.tryReport('국가 일별 추이', ga.countryDaily(100)),
+    ga.tryReport('언어 일별 추이', ga.languageDaily(100)),
   ]);
   const operationsByRange = {};
-  // Limit concurrency: eight optional reports at a time, not every range at once.
+  // Query one range at a time; ten optional reports per range.
   for (const range of eventRanges) {
     const from = dates[Math.max(0, dates.length - range)]; const to = dates.at(-1);
     if (!from || !to) continue;
     const previousTo = iso(new Date(Date.parse(from) - 86400000));
     const previousFrom = iso(new Date(Date.parse(from) - Math.min(range, dates.length) * 86400000));
-    const [current, previous, countries, previousCountries, countryEvents, manufacturers, manufacturerEvents] = await Promise.all([
+    const [current, previous, countries, previousCountries, countryEvents, languages, previousLanguages, languageEvents, manufacturers, manufacturerEvents] = await Promise.all([
       ga.tryReport('기간 이용자', ga.periodSummary(from, to)),
       ga.tryReport('직전 기간 이용자', ga.periodSummary(previousFrom, previousTo)),
       ga.tryReport('국가 운영 지표', ga.segmentSummary('country', from, to)),
       ga.tryReport('직전 국가 운영 지표', ga.segmentSummary('country', previousFrom, previousTo)),
       ga.tryReport('국가 기능 활용', ga.segmentEvents('country', from, to)),
+      ga.tryReport('언어 운영 지표', ga.segmentSummary('language', from, to)),
+      ga.tryReport('직전 언어 운영 지표', ga.segmentSummary('language', previousFrom, previousTo)),
+      ga.tryReport('언어 기능 활용', ga.segmentEvents('language', from, to)),
       ga.tryReport('제조사 이용자', ga.segmentSummary('mobileDeviceBranding', from, to)),
       ga.tryReport('제조사 알람 관측', ga.segmentEvents('mobileDeviceBranding', from, to)),
     ]);
-    operationsByRange[range] = { from, to, current, previous, countries, previousCountries, countryEvents, manufacturers, manufacturerEvents };
+    operationsByRange[range] = { from, to, current, previous, countries, previousCountries, countryEvents, languages, previousLanguages, languageEvents, manufacturers, manufacturerEvents };
   }
   const docs = buildDocs({
-    raw: { core, ads, eventsDaily, eventsByRange, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, operationsByRange },
+    raw: { core, ads, eventsDaily, eventsByRange, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, languageDaily, operationsByRange },
     meta: { now: new Date(), propertyId, streamId, cohortRange, source: 'ga4' },
   });
   docs.summary.currency = core?.metadata?.currencyCode || 'USD';

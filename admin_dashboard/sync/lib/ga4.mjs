@@ -198,10 +198,12 @@ export class Ga4 {
     };
   }
 
-  countryDaily(days = 100) {
+  countryDaily(days = 100) { return this.segmentDaily('country', days); }
+  languageDaily(days = 100) { return this.segmentDaily('language', days); }
+  segmentDaily(dimension, days = 100) {
     return {
       dateRanges: [{ startDate: String(days) + 'daysAgo', endDate: 'yesterday' }],
-      dimensions: [{ name: 'date' }, { name: 'country' }],
+      dimensions: [{ name: 'date' }, { name: dimension }],
       metrics: [{ name: 'activeUsers' }, { name: 'newUsers' }, { name: 'sessions' }],
       dimensionFilter: streamFilter(this.streamId),
       orderBys: [{ dimension: { dimensionName: 'date' } }], limit: '100000',
