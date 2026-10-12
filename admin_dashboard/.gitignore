@@ -1,1 +1,6 @@
 /build/
+/sync/node_modules/
+/tools/node_modules/
+/tools/shots/
+/.emulator.firebase.json
+/.emulator.rules

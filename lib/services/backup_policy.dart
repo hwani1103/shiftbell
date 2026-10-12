@@ -20,14 +20,27 @@ const Set<String> kBackupSystemTables = {'android_metadata', 'sqlite_sequence'};
 const String kBackupAlarmsTable = 'alarms';
 
 /// 영구 보존 이력 - 복원 시 비우고 교체하지 않고 자연키 기준 중복 제외 병합(#19, 이력 영구 보존 규칙).
-const Set<String> kBackupHistoryTables = {'alarm_history', 'alarm_creation_log'};
+const Set<String> kBackupHistoryTables = {
+  'alarm_history', 'alarm_creation_log', 'fixed_alarm_consumptions',
+};
 
 /// 이 기기(설치)에만 의미 있는 설정 - export하지 않고, 옛 백업에 들어 있어도 import하지 않음.
 const Set<String> kDeviceLocalPreferenceKeys = {
+  // Removed, unreleased development preferences are neither exported nor restored.
+  'custom_alarm_presets',
+  'one_touch_alarm_tutorial_shown',
   // 자동백업 상태(설치별)
   'backup_last_data_version',
   'backup_last_saved_at',
   'backup_last_content_hash',
+  // 1.0.24 A - 직접/자동 슬롯별 마지막 저장 시각, 두 슬롯 형식 전환 여부
+  'backup_last_saved_at_auto',
+  'backup_last_saved_at_manual',
+  'backup_slot_format_v2',
+  // 공휴일 원격 캐시와 기기별 분산 조회 시각은 복원 대상이 아님.
+  'holiday_overrides_json',
+  'holiday_next_check_at_ms',
+  'holiday_next_check_v2_at_ms',
   // OS 권한은 설치마다 다시 받아야 함(복원 후 권한 화면 판단은 복원 흐름이 직접 함)
   'permissions_requested',
   // 업데이트 안내 dedupe - 설치·버전별
@@ -35,11 +48,14 @@ const Set<String> kDeviceLocalPreferenceKeys = {
   'release_note_last_seen_app_version',
   'release_note_seen_version',
   'update_check_last_checked_at',
+  'play_update_last_checked_at',
   // 웹 뷰어 전용
   'shiftbell_last_owner_id',
   // 사용 통계 - 이 기기 alarm_history의 어디까지 보냈는지(AlarmUsageAnalytics.cursorKey). 다른 기기로 옮겨지면 그 기기의
   // 이력 ID와 맞지 않아 통계가 조용히 빠지므로 설치별로 둔다(2026-09-22).
   'analytics_alarm_history_cursor',
+  'analytics_ops_seen_tokens',
+  'analytics_ops_snapshot_day',
 };
 
 /// 백업 import/export 대상 설정 키인지. 친구공유 소유권·회차 7키는 G2 계약(#25)대로 항상 제외.
@@ -53,6 +69,7 @@ bool isBackupPreferenceKey(String key) =>
 enum BackupPrefType { boolean, integer, real, string, stringList }
 
 const Map<String, BackupPrefType> kBackupPreferenceTypes = {
+  'default_snooze_minutes': BackupPrefType.integer,
   'schedule_tab_enabled': BackupPrefType.boolean,
   'condition_tab_enabled': BackupPrefType.boolean,
   'calendar_theme_id': BackupPrefType.string,
@@ -110,7 +127,9 @@ Map<String, dynamic> _sortedMap(Map<String, dynamic> map) {
 /// 변경 감지용 64비트 FNV-1a(UTF-8) + 길이. 암호학적 용도 아님 - "같은 내용인지"만 판단.
 String contentFingerprint(String content) {
   final bytes = utf8.encode(content);
-  var hash = -3750763034362895579; // 0xcbf29ce484222325 (64비트 부호 있는 표현)
+  // 모바일 전용 계산이지만 공유 웹의 간접 import에도 파싱된다.
+  // JS가 표현할 수 없는 정수 리터럴 때문에 웹 빌드까지 실패하지 않게 한다.
+  var hash = int.parse('-3750763034362895579'); // 0xcbf29ce484222325
   const prime = 1099511628211; // 0x100000001b3
   for (final b in bytes) {
     hash ^= b;

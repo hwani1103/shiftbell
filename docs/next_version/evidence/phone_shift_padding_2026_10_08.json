@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-08",
+  "scope": "A09/U05: global phone shift labels only; Korean and existing bounded/wide paths unchanged",
+  "reference": {
+    "image": "artifacts/global_theme_refinement_2026_10_08/periwinkle.png",
+    "rule": "Joined Periwinkle: font 15 per 19 chip-height units, line height 1.05; line-box leading 1.625 units per side. Text inherits no unrelated Material typography metrics. Width overflow scales down, never above cap.",
+    "physical_day_ink_rows": "Reference joined Periwinkle and final Soft Mosaic both y404..435 in 1080x2340 screenshots (32px). Before Soft Mosaic y408..433 (26px).",
+    "window": "USB R5KL20DHWAE reports MediaQuery 411.4 x 891.4; existing size classification selects phone path."
+  },
+  "changes": [
+    "Periwinkle single-day cap now matches joined cap",
+    "Soft Mosaic maximum 12 -> 15 units; long labels still shrink to available width",
+    "Classic White/Dark, Minimal, Soft Card, Bold Grid global phone labels bypass character-count buckets; chip height sets 15/19 cap, actual rendered string fits remaining width",
+    "Soft Card outer padding 2w -> 1.5w on global phone path only",
+    "No date/memo/chip-height or fold layout changes"
+  ],
+  "device": {
+    "method": "flutter attach + hot reload; no APK build/install",
+    "visual_checked": "Soft Mosaic final physical-device screenshot; Periwinkle prior USB reference",
+    "session": "interactive attach 41237 remains active for follow-up",
+    "restart": "Dev app reopened once to recover VM service discovery; user data preserved. Hot reload changes require a future build to survive process restart."
+  },
+  "verification": {
+    "analysis": "No errors/warnings in touched files; existing info diagnostics retained",
+    "artifacts": "artifacts/phone_shift_padding_2026_10_08",
+    "final_tests": "10 PASS: three concept/run/memo tests plus seven English calendar theme layout tests. final_tests.log"
+  },
+  "deferred": "Theme help/release copy; fold tuning and other device visual review remain later.",
+  "followup": {
+    "request": "Dark Grid extra vertical space; Simple Line slightly lower chip",
+    "changes": [
+      "Global phone Dark Grid: removed internal vertical 0.2h padding per side; chip outer height unchanged",
+      "Global phone Simple Line: chip height x0.96; font follows existing 15/19 cap",
+      "All other themes, Korean and bounded/wide paths unchanged"
+    ],
+    "verification": "2 PASS (en_US calendar_minimal and calendar_boldGrid); diff check PASS; hot reload 1 library succeeded",
+    "logs": "artifacts/phone_shift_padding_2026_10_08/followup/tests.log",
+    "device_capture": "Current device was displaying Classic Dark; after.png documents reload state, not a Dark Grid visual approval."
+  },
+  "simple_line_second_tuning": {
+    "height_factor": 0.93,
+    "previous_height_factor": 0.96,
+    "scope": "Global phone Simple Line only; font follows chip height",
+    "verification": "Hot reload succeeded, 1 library. No additional tests for this constant-only tuning."
+  }
+}

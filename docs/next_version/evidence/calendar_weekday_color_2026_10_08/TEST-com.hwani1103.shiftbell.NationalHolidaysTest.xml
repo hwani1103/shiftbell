@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.hwani1103.shiftbell.NationalHolidaysTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-08T05:07:30" hostname="TZJIRTGG0A8S7A6" time="19.512">
+  <properties/>
+  <testcase name="existing calendar widget uses national dates and limits red Sundays to Korean" classname="com.hwani1103.shiftbell.NationalHolidaysTest" time="19.512"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

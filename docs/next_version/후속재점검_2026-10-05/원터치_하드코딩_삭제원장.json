@@ -1,0 +1,146 @@
+[
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko ? '무음' : 'silent'",
+    "after": "'무음'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko ? '진동' : 'vibration'",
+    "after": "'진동'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko ? '소리+진동' : 'sound + vibration'",
+    "after": "'소리+진동'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n          ? '${_hm(at)}에 $type 알람이 예약됐어요.'\n          : '$type alarm scheduled for ${_hm(at)}.'",
+    "after": "'${_hm(at)}에 $type 알람이 예약됐어요.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko ? '고정 알람' : 'fixed alarm'",
+    "after": "'고정 알람'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko ? '원터치 알람' : 'one-tap alarm'",
+    "after": "'원터치 알람'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko ? '알람' : 'alarm'",
+    "after": "'알람'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n          ? '${at.month}/${at.day} ${_hm(at)}에 이미 $source이 있어 원터치 알람을 추가하지 않았어요.'\n          : 'A $source is already set for ${at.month}/${at.day} ${_hm(at)}. No one-tap alarm was added.'",
+    "after": "'${at.month}/${at.day} ${_hm(at)}에 이미 $source이 있어 원터치 알람을 추가하지 않았어요.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n              ? '이미 날짜에 추가한 알람이에요. 수정하려면 먼저 해당 알람을 삭제해 주세요.'\n              : 'Remove assigned alarms before editing this preset.'",
+    "after": "'이미 날짜에 추가한 알람이에요. 수정하려면 먼저 해당 알람을 삭제해 주세요.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko ? '원터치 알람 설정' : 'One-tap alarm settings'",
+    "after": "'원터치 알람 설정'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n                  ? '시각과 울림 방식을 저장해 주세요. 저장한 원터치 알람은 오늘과 내일에만 추가할 수 있어요.\\n(근무별 고정 알람과 같은 시각이면 알람은 하나만 저장돼요.)'\n                  : 'Save a time and sound setting to add an alarm for today or tomorrow. Only one alarm is saved if a fixed alarm has the same time.'",
+    "after": "'시각과 울림 방식을 저장해 주세요. 저장한 원터치 알람은 오늘과 내일에만 추가할 수 있어요.\\n(근무별 고정 알람과 같은 시각이면 알람은 하나만 저장돼요.)'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n                    ? '$dates에 이미 할당되어 있어 수정할 수 없습니다.'\n                    : 'Already assigned on $dates. Delete the preset before changing it.'",
+    "after": "'$dates에 이미 할당되어 있어 수정할 수 없습니다.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko ? '대체 알람 없음' : 'no replacement'",
+    "after": "'대체 알람 없음'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko ? '${fixed.shiftType} 고정 알람 재예약' : '${fixed.shiftType} fixed alarm restored'",
+    "after": "'${fixed.shiftType} 고정 알람 재예약'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko ? '원터치 알람 설정 삭제' : 'Delete one-tap alarm settings'",
+    "after": "'원터치 알람 설정 삭제'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n                      ? '$dates에 원터치 알람이 등록되어 있습니다. 설정을 삭제하면 해당 날짜의 알람도 삭제됩니다.\\n${replacementLines.join('\\n')}'\n                      : 'One-tap alarms are assigned on $dates. Deleting these settings also deletes those alarms.\\n${replacementLines.join('\\n')}'",
+    "after": "'$dates에 원터치 알람이 등록되어 있습니다. 설정을 삭제하면 해당 날짜의 알람도 삭제됩니다.\\n${replacementLines.join('\\n')}'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n                      ? '원터치 알람 삭제 후 일부 고정 알람 예약에 실패했습니다. 갱신을 다시 시도합니다.'\n                      : 'Some fixed alarms could not be scheduled. A refresh will retry them.'",
+    "after": "'원터치 알람 삭제 후 일부 고정 알람 예약에 실패했습니다. 갱신을 다시 시도합니다.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n                      ? '원터치 알람과 연결된 날짜를 삭제하고 고정 알람을 재계산했습니다.'\n                      : 'One-tap assignments deleted and fixed alarms recalculated.'",
+    "after": "'원터치 알람과 연결된 날짜를 삭제하고 고정 알람을 재계산했습니다.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n                              ? '삭제하면 이 시각에는 알람이 남지 않습니다.'\n                              : 'No alarm will remain at this time.'",
+    "after": "'삭제하면 이 시각에는 알람이 남지 않습니다.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n                              ? '삭제 후 ${preview.shiftType} 고정 알람을 다시 예약합니다.'\n                              : 'The ${preview.shiftType} fixed alarm will be scheduled after deletion.'",
+    "after": "'삭제 후 ${preview.shiftType} 고정 알람을 다시 예약합니다.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n                          ? '원터치 알람은 삭제됐지만 고정 알람 예약에 실패했습니다. 갱신을 다시 시도합니다.'\n                          : 'One-tap alarm deleted, but fixed alarm scheduling failed. A refresh will retry it.'",
+    "after": "'원터치 알람은 삭제됐지만 고정 알람 예약에 실패했습니다. 갱신을 다시 시도합니다.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/custom_alarm_widgets.dart",
+    "before": "ko\n                              ? '원터치 알람을 삭제하고 고정 알람을 예약했습니다.'\n                              : 'One-tap alarm deleted and fixed alarm scheduled.'",
+    "after": "'원터치 알람을 삭제하고 고정 알람을 예약했습니다.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/onboarding_info_popups.dart",
+    "before": "ko ? '원터치 알람이 추가됐어요' : 'Meet one-tap alarms'",
+    "after": "'원터치 알람이 추가됐어요'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  },
+  {
+    "file": "lib/widgets/onboarding_info_popups.dart",
+    "before": "ko\n              ? '자주 쓰는 시각과 울림 방식(소리·진동·무음)을 저장해 두세요. 필요할 때 오늘이나 내일에 빠르게 알람을 추가할 수 있어요.\\n\\n근무마다 반복되는 고정 알람 외에, 가끔 필요한 알람을 설정할 때 편리해요.\\n\\n같은 시각의 고정 알람이 있으면 중복으로 추가하지 않아요.'\n              : 'Save the times and sound settings you use often, then quickly add an alarm for today or tomorrow.\\n\\nUse these for occasional alarms alongside your regular shift alarms.\\n\\nIf a fixed alarm is already set for that time, no duplicate is added.'",
+    "after": "'자주 쓰는 시각과 울림 방식(소리·진동·무음)을 저장해 두세요. 필요할 때 오늘이나 내일에 빠르게 알람을 추가할 수 있어요.\\n\\n근무마다 반복되는 고정 알람 외에, 가끔 필요한 알람을 설정할 때 편리해요.\\n\\n같은 시각의 고정 알람이 있으면 중복으로 추가하지 않아요.'",
+    "reason": "Korean-only UI, guarded entry and rebuilt modal; foreign first install cannot create this feature"
+  }
+]

@@ -122,10 +122,10 @@ test('사용자 행동의 사용자 수는 횟수와 동일한 날짜 범위에�
   const ui = { evGroup: 'all', evSystem: false, evExpanded: false };
   const seven = behaviorCard(docs, computeView(docs, 7), ui);
   assert.match(seven, /7일 동안/);
-  assert.match(seven, /같은 기간 3명이 사용/);
+  assert.match(seven, /선택 기간 3명이 사용/);
   assert.doesNotMatch(seven, /9명이 사용/);
   const thirty = behaviorCard(docs, computeView(docs, 30), ui);
-  assert.match(thirty, /같은 기간 9명이 사용/);
+  assert.match(thirty, /선택 기간 9명이 사용/);
   docs.summary.eventsByRange[30].events[0].count = 8;
   assert.doesNotMatch(behaviorCard(docs, computeView(docs, 30), ui), /명이 사용/);
   docs.summary.eventsByRange[30].events[0].count = 30;

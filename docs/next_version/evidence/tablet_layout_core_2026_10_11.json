@@ -1,0 +1,439 @@
+{
+  "date": "2026-10-11",
+  "device": {
+    "model": "SM-X400",
+    "serial": "R54Y800G39V",
+    "android": 16,
+    "sdk": 36,
+    "physicalPortrait": [
+      1320,
+      2112
+    ],
+    "density": 240,
+    "charging": true,
+    "stayAwake": 15,
+    "awake": true,
+    "stayOn": true,
+    "keyguardShowing": false
+  },
+  "apk": {
+    "sha256": "0594440b1b2e982432c86a76e540e79856fd003ee5e61344423b0cdafec2314a",
+    "at": "2026-10-11T11:05:34.080Z"
+  },
+  "build": {
+    "criticalGateExit": 0,
+    "flutterTests": 338,
+    "nativeFunctionalAndDbMigration": "PASS",
+    "devDebug": true,
+    "release": false,
+    "analyzer": {
+      "errors": 0,
+      "warnings": 0,
+      "existingInfo": 29
+    }
+  },
+  "layout": {
+    "sourceFiles": [
+      "lib/main.dart",
+      "lib/constants/layout_limits.dart"
+    ],
+    "tabletDesignUnits": [
+      480,
+      1040
+    ],
+    "otherDeviceDesignUnits": [
+      400,
+      850
+    ],
+    "languages": [
+      "ko",
+      "en",
+      "de",
+      "pt",
+      "hi"
+    ],
+    "orientations": [
+      "portrait",
+      "landscape"
+    ],
+    "koThemes": 10,
+    "foreignThemes": 7,
+    "allCaptured": 1710,
+    "finalReviewed": 1694,
+    "baselineExcluded": 16,
+    "maxLinesExceeded": 0,
+    "fontScales": [
+      1.15,
+      1.3
+    ],
+    "extraRealFilledCardsAndNativeControlsReviewed": true,
+    "permissionsInjectedOnlyForLayout": true
+  },
+  "functional": {
+    "package": "com.hwani1103.shiftbell.dev",
+    "naturalClockUnmodified": true,
+    "screenCases": [
+      {
+        "case": "next_sound",
+        "status": "PASS",
+        "id": 15,
+        "type": 1,
+        "round": 17
+      },
+      {
+        "case": "schedule_vibration",
+        "status": "PASS",
+        "id": 16,
+        "type": 2,
+        "round": 18
+      },
+      {
+        "case": "calendar_silent",
+        "status": "FAIL",
+        "id": 17,
+        "error": "Error: Command failed: C:/Users/Administrator/AppData/Local/Android/sdk/platform-tools/adb.exe -s R54Y800G39V shell uiautomator dump /sdcard/tablet_audit_ui.xml\n"
+      },
+      {
+        "case": "condition_silent",
+        "status": "PASS",
+        "id": 18,
+        "type": 3,
+        "round": 20
+      },
+      {
+        "case": "settings_silent",
+        "status": "PASS",
+        "id": 19,
+        "type": 3,
+        "round": 21
+      },
+      {
+        "case": "date_popup",
+        "status": "PASS",
+        "id": 20,
+        "type": 3,
+        "round": 22
+      },
+      {
+        "case": "help_keyboard",
+        "status": "PASS",
+        "id": 21,
+        "type": 3,
+        "round": 23
+      },
+      {
+        "case": "settings_child",
+        "status": "PASS",
+        "id": 22,
+        "type": 3,
+        "round": 24
+      }
+    ],
+    "calendar137AdjudicatedPass": {
+      "id": 17,
+      "historyOnce": true,
+      "dbEmpty": true,
+      "flutterEmpty": true,
+      "nativeActiveEmpty": true,
+      "osReservationEmpty": true
+    },
+    "defaultSnooze": [
+      {
+        "status": "PASS",
+        "id": 23,
+        "bounds": "5..30 step 5",
+        "liveDefaults": [
+          10,
+          15
+        ],
+        "snooze15Reservation": true,
+        "natural15": false,
+        "doubleTap": true,
+        "cancel": true
+      }
+    ],
+    "atomicOriginal": [
+      {
+        "case": "snooze_collision",
+        "status": "PASS"
+      },
+      {
+        "case": "next_alarm_supersession",
+        "status": "FAIL",
+        "error": "Error: Command failed: C:/Users/Administrator/AppData/Local/Android/sdk/platform-tools/adb.exe -s R54Y800G39V shell uiautomator dump /sdcard/tablet_audit_ui.xml\n"
+      },
+      {
+        "case": "delete_different_id_while_ringing",
+        "status": "PASS"
+      },
+      {
+        "case": "natural_timeout",
+        "status": "PASS"
+      }
+    ],
+    "supersessionRetry": {
+      "status": "PASS",
+      "first": {
+        "id": 54,
+        "target": 1791719871000,
+        "label": "TABLET11 supersession_retry_first",
+        "type": 3
+      },
+      "second": {
+        "id": 55,
+        "target": 1791719892000,
+        "label": "TABLET11 supersession_retry_second",
+        "type": 3
+      },
+      "history": [
+        {
+          "id": 62,
+          "alarm_id": 54,
+          "scheduled_time": "20:57",
+          "scheduled_date": "2026-10-11T20:57:51.000",
+          "actual_ring_time": "2026-10-11T20:58:12+09:00",
+          "dismiss_type": "superseded_by_next_alarm",
+          "snooze_count": 0,
+          "shift_type": "TABLET11 supersession_retry_first",
+          "created_at": "2026-10-11T20:58:12+09:00",
+          "day_offset": 0,
+          "fixed_slot_time": null,
+          "snooze_minutes": null
+        },
+        {
+          "id": 63,
+          "alarm_id": 55,
+          "scheduled_time": "20:58",
+          "scheduled_date": "2026-10-11T20:58:12.000",
+          "actual_ring_time": "2026-10-11T20:58:41+09:00",
+          "dismiss_type": "swiped",
+          "snooze_count": 0,
+          "shift_type": "TABLET11 supersession_retry_second",
+          "created_at": "2026-10-11T20:58:41+09:00",
+          "day_offset": 0,
+          "fixed_slot_time": null,
+          "snooze_minutes": null
+        }
+      ],
+      "active": null,
+      "touch": {
+        "field": "resource-id",
+        "value": "com.hwani1103.shiftbell.dev:id/dismissButton",
+        "count": 2,
+        "x": 1518,
+        "y": 308,
+        "bounds": "[1473,263][1563,353]"
+      }
+    },
+    "home": {
+      "status": "PASS",
+      "snoozeID": 56,
+      "dismissID": 57,
+      "active": null
+    },
+    "scheduleNotification": {
+      "status": "PASS",
+      "id": 1,
+      "naturalReceivedAt": "2026-10-11 21:05:00.073 +09:00",
+      "createdTwicePhysicalTouches": true,
+      "updatedSameId": true,
+      "notificationOffRemovedOSReservation": true,
+      "notificationOnOneOSReservation": true,
+      "bodyOpenedDate": "2026-10-11",
+      "bodyOpenedId": 1,
+      "flutterBefore": "1|TABLET11 일정 알림 수정|1265|true",
+      "flutterAfter": ""
+    },
+    "singleNextCancel": {
+      "status": "PASS",
+      "first": 58,
+      "second": 59,
+      "rapidDoubleDifferentTargetObserved": {
+        "beforeIDs": [
+          31,
+          32
+        ],
+        "removedIDs": [
+          31,
+          32
+        ],
+        "eachHistoryOnce": true
+      },
+      "functionalCodeModified": false
+    },
+    "naturalFiveMinuteSnooze": "PASS id13 20:14:25",
+    "fixedSnooze": "PASS id31 20:47 natural received, one snoozed reservation",
+    "fixedEditor": "PASS actual save/double save/unchanged IDs/-1/0/+1 offsets/template removal",
+    "calendarFixedUpdateAndCancel": "PASS id31 type3→2+native refresh; id37 skip survives refresh; only target removed",
+    "nativeControls": [
+      "ko portrait",
+      "ko landscape",
+      "en portrait",
+      "en landscape"
+    ],
+    "physicalSoundAudibility": "NOT_RUN",
+    "vibratorHardware": "NOT_APPLICABLE hasVibrator=false; vibratorIds=[]",
+    "lockedScreen": "NOT_RUN per user",
+    "permissionRevocationOrSettingsRoundtrip": "NOT_RUN not changed",
+    "externalOverlayFallback": "NOT_RUN current allowed notifications used",
+    "foregroundSync": "FAIL reproduced id30 and id53",
+    "freshSaveBack": {
+      "normal": true,
+      "secondBackExitedToUnlockedHome": true,
+      "oldDebugAssertionRootCauseUnconfirmed": true
+    },
+    "crossAudit": {
+      "snapshots": 85,
+      "dbOsFutureMatches": 85,
+      "flutterSnapshotMismatches": [
+        "home_notification_dismissed",
+        "home_notification_snoozed",
+        "native_ko_landscape_controls",
+        "timeout_ended",
+        "timeout_verify_after_deadline"
+      ],
+      "detailFile": "artifacts/tablet_layout_core_2026_10_11/functional/reservation_cross_audit.json"
+    }
+  },
+  "findings": [
+    {
+      "id": "TABLET11-SYNC",
+      "status": "FAIL_REPRODUCED",
+      "detail": "After natural timeout while Settings visible: DB row and native ring removed but mounted Flutter alarm provider retained old row. id53 retained at least65s; Next tab navigation+5s recovered. No functional code changes."
+    },
+    {
+      "id": "TABLET11-NEXT-TAPS",
+      "status": "OBSERVED_TARGET_CHANGE_RISK",
+      "detail": "Two fast physical taps at Next cancel coordinates removed id31 snoozed and next id32 fixed. One terminal history per ID, DB/OS/Flutter consistent. A single tap removed only id58 and preserved id59. Schedule double-save also navigated to Condition after sheet close, DB saved once."
+    },
+    {
+      "id": "A09-DEBUG-EXISTING",
+      "status": "UNRESOLVED_PRESERVED",
+      "detail": "Initial instrumented keyboard/Back assertion recorded; current installed fresh process physical Memo Save/Back and date Back normal. Root cause not proven; release not run."
+    }
+  ],
+  "restore": {
+    "exact17": true,
+    "memoCount": 3,
+    "sleepCount": 6,
+    "alarms": 0,
+    "templates": 0,
+    "dateSchedules": 0,
+    "defaultSnooze": 5,
+    "prefsChangedKeys": [
+      "backup_last_saved_at_auto"
+    ],
+    "autoBackupOriginalData": "rewritten; only automatic timestamp changed; manual slot untouched",
+    "sqliteSequence": "not reset; logical table rows verified",
+    "activeRingPresent": false,
+    "customReservationCount": 0,
+    "scheduleReservationCount": 0,
+    "permissions": {
+      "notification": "granted",
+      "overlay": "granted",
+      "exactAlarm": "granted",
+      "fullScreen": "granted",
+      "alarmChannel": "granted",
+      "xiaomi": false,
+      "sdk": 36
+    },
+    "fontScale": 1.15,
+    "autoRotation": 1,
+    "userRotation": 0,
+    "appLocales": [],
+    "nativeFailedIdsEntries": [],
+    "debugger": {
+      "firstAttach": "d detach",
+      "finalAttach": "noninteractive stdin closed; verified task host dart PID18448 only closed, no Android q/stop command",
+      "androidFocus": "  mCurrentFocus=Window{419b7c6 u0 com.hwani1103.shiftbell.dev/com.hwani1103.shiftbell.MainActivity}\r"
+    }
+  },
+  "web": {
+    "url": "https://shiftbell-ops-29f31.web.app",
+    "deployed": {
+      "status": 200,
+      "at": "2026-10-11T10:21:41.386Z",
+      "build": {
+        "version": "6f8637cb511f03f7",
+        "builtAt": "2026-10-11T10:08:57.503Z",
+        "files": {
+          "assets/app.css": "2c4c6037e98cfc026d8c01ac2163c7e8eeabce2ac974d1c3a6efab97e8ef4d12",
+          "assets/js/auth.js": "bcf5d615bba740ca1c9de0674608916ff9c28375f9362062ba2ebfa62e66fdf4",
+          "assets/js/charts.js": "b666cf05b34c83c0dbbbf7ca1f64d2e6e5dde90d4f1ef10eb2a3a7c1b44b9e08",
+          "assets/js/format.js": "56e6c1a898d741792ed0897e3cf1f3cbc86dfb90f4420f35828710a537e0c81e",
+          "assets/js/labels.js": "d612da0ba7cbeb5bdc3bb82c330b9d080f4a6b534c7df80f57cffe63b4e625ee",
+          "assets/js/main.js": "b4af51756fec7bff81a2e169dd6d90c3427119283c8ebe6985a3f54627733674",
+          "assets/js/mock.js": "95086104acc41b48a296a6bda904570eb82f6e1871a1accdcc8d87208b4e24b9",
+          "assets/js/operations.js": "f027df406ee98043db99b668ce058bd081463b00cab1f3736b0166f4d74523c4",
+          "assets/js/store.js": "ad3e80e6d79fbd03df5adb9eb61cb8c3a6354ac958f1b9c1d6ababeaf236e9b6",
+          "assets/js/views.js": "ac2a94c2ed1ff7802f1400ca7231efade8b636cf40be1180384faca9a6d9b67a",
+          "icon.svg": "bf601121021983ba2536c61cdd88aef81d7910e7bf83b97c072376e6911af11b",
+          "index.html": "ff1df429c1e97cd2ae657cfecfb9721aea297fa5afa7ed7c374d69d1223ebfc3",
+          "manifest.webmanifest": "71699ffbd3d8598ca361fa4e26dba01ac0afd5639a38d5cf43c92d46663a3db1",
+          "robots.txt": "a8f31103361fca68bef71fc69cff844b7c23bd3d64d2b872d74690cbda656bfc"
+        }
+      }
+    },
+    "nodeTests": 29,
+    "browserFixture": [
+      {
+        "width": 360,
+        "weekdayAverage": true,
+        "descending": true,
+        "noOverflow": true,
+        "errors": []
+      },
+      {
+        "width": 752,
+        "weekdayAverage": true,
+        "descending": true,
+        "noOverflow": true,
+        "errors": []
+      },
+      {
+        "width": 1440,
+        "weekdayAverage": true,
+        "descending": true,
+        "noOverflow": true,
+        "errors": []
+      }
+    ],
+    "scope": "admin hosting only; production HTTP/hash checked, browser visual checks used fixture data; real authenticated dashboard data not inspected",
+    "dateChips": 0,
+    "weekdayAverageCards": 7,
+    "periods": [
+      7,
+      30,
+      100,
+      365
+    ],
+    "completeKstDaysOnly": true,
+    "zeroIncluded": true,
+    "missingExcluded": true
+  },
+  "sourceHashes": {
+    "lib/main.dart": "b7b078455b441e9475e81761d871924ae8e95bdb61c97fcf8f983202296ad674",
+    "lib/constants/layout_limits.dart": "dc515779e6c677b25e513ca650cc7e1fc39f5f30c468e9660dfbc309436b9266",
+    "admin_dashboard/public/assets/js/operations.js": "f027df406ee98043db99b668ce058bd081463b00cab1f3736b0166f4d74523c4",
+    "admin_dashboard/public/assets/js/main.js": "b4af51756fec7bff81a2e169dd6d90c3427119283c8ebe6985a3f54627733674",
+    "admin_dashboard/public/assets/app.css": "2c4c6037e98cfc026d8c01ac2163c7e8eeabce2ac974d1c3a6efab97e8ef4d12",
+    "admin_dashboard/sync/test/operations.test.mjs": "64e7b818ad7b463ba62ea2322902e2ca84ae60c671ee5d6145f295b8835231ae",
+    "admin_dashboard/README.md": "62bd22f1b3d8efdac747c1a6141ab08e9d983345f021d016614f01a3613dbd83"
+  },
+  "approvalReviews": [
+    {
+      "action": "collector exception handling file patch",
+      "decision": "rejected",
+      "applied": false,
+      "resolution": "existing collector reruns/read-only adjudication; no patch bypassed"
+    },
+    {
+      "action": "empty entire fixed editor",
+      "decision": "rejected",
+      "applied": false,
+      "resolution": "baseline0/current UI-created fixture proof; only three exact test slots removed, approval succeeded"
+    }
+  ],
+  "evidenceRoot": "artifacts/tablet_layout_core_2026_10_11",
+  "finishedAt": "2026-10-11T12:29:40.023Z"
+}

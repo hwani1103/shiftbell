@@ -1,0 +1,41 @@
+운영 동의 4신호 실기기 후속 (2026-10-12 KST)
+
+목적: 영국·독일 출시와 관련된 허용/거부/철회가 UMP 화면뿐 아니라 실제 Firebase SDK의 동의 상태에 전달되는지 확인.
+
+검사 조건
+- Samsung SM-S948N/API36/R5KL20DHWAE. 기존 dev 앱/CE·DE 자료를 보관하고 원래 데이터와 설치본을 종료 후 복원.
+- 현재 후보 소스를 artifacts/consent_signals_2026_10_12/workspace에481파일 동결. 제품 소스 수정 없이 기존 tools/build_ump_debug_candidate.py 사용.
+- 운영 AdMob App ID에 게시된 실제 메시지 + 이 기기의 SDK 검증 해시 + dev debug EEA geography. 광고 단위는 Google sample, dev 분석 수집은 계속 OFF.
+- 진단 APK SHA256 7662193079b9b180dcbb69124b2a42eea0c3c683747f2151fcd0d0db1863b35b. 프로덕션 설치본/스토어 AAB 미변경.
+- AdMob 운영 설정의 광고/분석 동의 모드 둘 다 ON 및 유럽 게시 메시지1개 확인. 계정 설정 변경 없음.
+
+실측 결과: UMP 및 실제 Firebase SDK 상태 전달 PASS
+- 첫 동의 미결 UMP0000, gdprApplies1, 동의창 표시.
+- 직접 거부: UMP2222. Firebase 로그 ad_storage/analytics_storage denied, ad_user_data denied, non_personalized_ads1.
+- 앱 설정의 광고 개인정보 설정에서 허용: UMP1111. Firebase 로그 storage2종 granted, ad_user_data granted, non_personalized_ads0. 저장 G111/dma -20:1/npa false.
+- force-stop 재실행:1111/G111/dma -20:1/npa false 유지, 불필요한 재선택 창 없음.
+- 앱 설정에서 철회:2222/G100/dma -20:0/npa true. Firebase 로그도 denied/denied/denied/npa1로 실제 변경.
+- 철회 후 force-stop 재실행:2222/G100/dma -20:0/npa true 유지.
+- ad_storage, analytics_storage, ad_user_data, ad_personalization4종을 UMP 목적 값과 Firebase 수신 로그/저장 상태로 대조. 실제 SDK 상태를 호스트 mock으로 대체하지 않음.
+
+경계
+- 분석 수집 OFF이어도 SDK의 동의 상태 수신/저장은 확인 가능했음. 앞선 'dev라 신호 자체를 확인할 수 없음'으로 읽힐 수 있는 설명은 이 결과로 정정.
+- dev에서 운영 DAU/전환 이벤트를 보내지 않음. 동일 Play release의 실제 EEA 네트워크 이벤트, 초기 동의 미결 시점의 운영 수집 동작, 유료 광고 수익 검증까지 PASS로 확대하지 않음.
+- 현재 Play release 한국 지역 응답3333/광고 ID/실제 업데이트·자료 보존 PASS는 최종후보_내부테스트_실기기_2026-10-12.txt의 별도 근거 유지.
+- 사용자 문구 번역/권한/알람/기능/SDK 버전 변경0. 기존 필수 gate와 release 후보 보존. 운영 기본값·전체 수집 정책을 이번 검사에서 새로 바꾸지 않음.
+
+검사 종료 원복
+- 원래 dev APK ab1751a4436debc137837166915d0ffa0a0733a51d53d7b9212a4422cf0093c0 재설치 및 기기 SHA 일치.
+- 시험 전후 제품 DB17표 모든 행 동일. CE SDK 동의 preference3파일을 원본으로 복원. 임시 debug.firebase.analytics.app/log.tag.FA/log.tag.FA-SVC3값 모두 원래 빈 값 복원.
+- 근거: artifacts/consent_signals_2026_10_12/result.json, source_manifest.json, ump-eea-retain.json/log, eea_* signals.json/XML/PNG/log, dev_before/after_de.tar 및 원래 APK/CE백업. 개인 원문은 ignored artifacts로만 보관.
+
+미국 관련 정정
+- 운영 계정의 미국 메시지가 없다는 사실만으로 '설정 보완 필수/출시 차단'이라고 단정한 것은 잘못. 미국 출시 여부만으로 의무를 판단하지 않고 실제 적용 조건과 기존 운영 결정을 구분한다.
+- 사용자가 이전에 불필요하다고 판단하여 만들지 않았음을 지적. 기존 기록에서 그 구체적인 법적/규모 판단 근거는 찾지 못했으므로 이전 사유를 확인했다고 쓰지 않음. 미국 메시지/미국 검사를 새 출시 필수 잔여로 추가하지 않음. 모든 미국 주 법률 준수 확정도 아님.
+- 확인 중 Google 기본 영어 메시지를 운영 앱1개/지원하는 미국 주 대상의 'ShiftBell - US State Privacy Choices' 미게시 초안으로 저장했으나 게시하지 않음. 이 초안은 운영 동작에 적용되지 않음. us_unpublished_draft.jpg에 당시 상태 보존. 사용자 지적 후 미국 작업 중단.
+
+공식 근거
+https://developers.google.com/funding-choices/fc-sdks (UMP4자리 의미 및 SDK 연동)
+https://developers.google.com/admob/flutter/privacy (시험 기기/EEA geography)
+https://support.google.com/admob/answer/10860309 (미국 메시지 구성)
+https://oag.ca.gov/privacy/ccpa (캘리포니아 적용 조건; 미국 전체로 확대하지 않음)

@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application android:debuggable="true">
+        <receiver android:name=".DebugAlarmDeliveryProbe"
+            android:exported="true" android:permission="android.permission.DUMP" />
     </application>
 </manifest>

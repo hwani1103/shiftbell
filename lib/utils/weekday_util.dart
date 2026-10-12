@@ -13,11 +13,11 @@
 // 배열은 절대 건드리지 말 것. 이 파일은 오직 "로케일에 따라 바뀌어야 하는" 요일
 // 표시(기존 _weekdayKr 자리)만 다룸.
 //
-// ⭐ 요일 시작 순서 결정: 한국(일요일 시작)과 영어권 중 미국(en-US, 일요일 시작
-// 관습)이 일치해서, 그대로 일요일(index 0) 시작 고정으로 둠. 영국/유럽식(월요일
-// 시작, ISO 8601)은 이번 영어 현지화 범위에서 다루지 않음 - 필요해지면
-// Localizations.localeOf(context).countryCode로 분기 추가 가능(보고서 2-4번 결정).
+// 배열 인덱스는 일=0으로 고정하지만 화면의 첫 요일은 별개다.
+// 달력은 MaterialLocalizations.firstDayOfWeekIndex를 사용한다.
+// release_locale.dart 및 regional_material_localizations.dart의 지역 정책을 따른다.
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 // index: 0=일/Sun, 1=월/Mon, 2=화/Tue, 3=수/Wed, 4=목/Thu, 5=금/Fri, 6=토/Sat
 // (date.weekday % 7 과 정렬 맞음: DateTime.weekday는 월=1~일=7이라 7%7=0)
@@ -29,9 +29,34 @@ const List<String> kWeekdayEnNarrow = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 /// 대체). [narrow]=true면 영어 로케일에서 한 글자로 줄임(한국어는 원래 한 글자라
 /// narrow 여부와 무관하게 항상 한 글자).
 String weekdayLabel(BuildContext context, int index, {bool narrow = false}) {
-  final isKorean = Localizations.localeOf(context).languageCode == 'ko';
-  if (isKorean) return kWeekdayKo[index];
+  final language = Localizations.localeOf(context).languageCode;
+  if (language == 'ko') return kWeekdayKo[index];
+  if (language == 'de') {
+    return narrow ? const ['S', 'M', 'D', 'M', 'D', 'F', 'S'][index]
+        : const ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][index];
+  }
+  if (language == 'pt') {
+    return narrow ? const ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'][index]
+        : const ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][index];
+  }
+  if (language == 'hi') {
+    // Keep a complete, recognizable abbreviation; do not split a conjunct.
+    return const ['रवि', 'सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि'][index];
+  }
   return narrow ? kWeekdayEnNarrow[index] : kWeekdayEnShort[index];
+}
+
+/// Preserve the existing Korean themes' decorative English, while new release
+/// languages use their own day and month labels.
+String calendarWeekdayLabel(BuildContext context, int index, {bool narrow = false}) =>
+    Localizations.localeOf(context).languageCode == 'ko'
+        ? (narrow ? kWeekdayEnNarrow[index] : kWeekdayEnShort[index])
+        : weekdayLabel(context, index, narrow: narrow);
+
+String calendarMonthName(BuildContext context, DateTime date, {bool full = false}) {
+  final locale = Localizations.localeOf(context);
+  final code = locale.languageCode == 'ko' ? 'en' : locale.toString();
+  return (full ? DateFormat.MMMM(code) : DateFormat.MMM(code)).format(date);
 }
 
 /// DateTime.weekday(월=1~일=7)를 위 배열 인덱스(일=0~토=6)로 변환.

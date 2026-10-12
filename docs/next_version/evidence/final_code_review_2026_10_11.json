@@ -1,0 +1,182 @@
+{
+  "date": "2026-10-11",
+  "report": "docs/next_version/dev_prod_최종코드검토_2026-10-11.txt",
+  "task": "Read-only final dev versus prod source review and document update",
+  "baseline": {
+    "tag": "v1.0.23",
+    "commit": "2e8d4eae5addbed95f7069f5e6b71a75a423e521",
+    "db": 24
+  },
+  "current": {
+    "commit": "c17c203da739a3631b3e5083df437e7726ea599a",
+    "db": 29,
+    "version": "1.0.23+25",
+    "uncommitted_app_change": "Material Card memo text color only",
+    "app_changed_files": 246,
+    "concurrent_source_changes": [],
+    "final_source_changes": []
+  },
+  "actions": {
+    "product_code_changed": false,
+    "tests_executed": true,
+    "builds": false,
+    "release_build": false,
+    "device_actions": false,
+    "deployment": false,
+    "new_device_passes": 0
+  },
+  "findings": [
+    {
+      "id": "F01",
+      "severity": "P2",
+      "status": "HOST_FAULT_INJECTION_REPRODUCED",
+      "summary": "Native stop/cancel failure after schedule reset DB commit leaves stale provider and skips remaining cleanup",
+      "probe_cases": 2,
+      "device_incidence": "not measured",
+      "same_pattern_static": "AlarmNotifier.deleteAllAlarmsCompletely",
+      "fix_applied": false
+    },
+    {
+      "id": "C01",
+      "severity": "conditional P2 residual",
+      "status": "STATIC_AND_TIMEZONE_ARITHMETIC_ONLY",
+      "summary": "Sleep day grouping uses elapsed 24 hours for local calendar day navigation",
+      "prod_present": true,
+      "dev_scope_expanded": true,
+      "device_reproduced": false,
+      "fix_applied": false
+    }
+  ],
+  "validation": {
+    "targeted": {
+      "file_count": 18,
+      "test_count": 145,
+      "exit_code": 0,
+      "log": "artifacts/final_code_review_2026_10_11/targeted_tests.utf8.log"
+    },
+    "fault_probe": {
+      "test_count": 2,
+      "exit_code": 0,
+      "meaning": "assertions confirm the defect, not a fix",
+      "log": "artifacts/final_code_review_2026_10_11/reset_probe.utf8.log"
+    },
+    "dst_arithmetic": {
+      "exit_code": 0,
+      "product_runtime": false,
+      "log": "artifacts/final_code_review_2026_10_11/dst_calendar_arithmetic.log"
+    }
+  },
+  "manufacturer_comparison": {
+    "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+    "baseline_manifest": "docs/next_version/evidence/dev_offline_2026_10_07_sources.json",
+    "counts": {
+      "identical": 338,
+      "content_changed": 89,
+      "line_endings_only": 2,
+      "removed": 1
+    },
+    "added_app_files": 32,
+    "identical_core": [
+      {
+        "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmRefreshEngine.kt",
+        "baseline": "73cd4a0faa2a073d9dda393fce706a4d8a1a302f20047e95106c803132d2a28e",
+        "current": "73cd4a0faa2a073d9dda393fce706a4d8a1a302f20047e95106c803132d2a28e",
+        "identical": true
+      },
+      {
+        "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmWakeScheduler.kt",
+        "baseline": "4f31c83ffcf7935b173e387f525b27e1bd32412ed5bf7b6df2e666c164591568",
+        "current": "4f31c83ffcf7935b173e387f525b27e1bd32412ed5bf7b6df2e666c164591568",
+        "identical": true
+      },
+      {
+        "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/RingSnoozeController.kt",
+        "baseline": "ffdc992d70ecff1da12b8792d212149ebd7d7e6d1c924e313b054d5b84e49485",
+        "current": "ffdc992d70ecff1da12b8792d212149ebd7d7e6d1c924e313b054d5b84e49485",
+        "identical": true
+      },
+      {
+        "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActionHelper.kt",
+        "baseline": "54ea9bc5f3ca9230e7841743ffa11203cfb291c8435e594902311d163275b1d4",
+        "current": "54ea9bc5f3ca9230e7841743ffa11203cfb291c8435e594902311d163275b1d4",
+        "identical": true
+      },
+      {
+        "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/DatabaseHelper.kt",
+        "baseline": "b456d1662397dd59b65dc7a8bdeced14556b02a952181e8097f16871157be732",
+        "current": "b456d1662397dd59b65dc7a8bdeced14556b02a952181e8097f16871157be732",
+        "identical": true
+      },
+      {
+        "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmGuardReceiver.kt",
+        "baseline": "4e85302f5ace35ed6fcbdf36209867a3857147d2dfe8dbb281b1c3542ea91c66",
+        "current": "4e85302f5ace35ed6fcbdf36209867a3857147d2dfe8dbb281b1c3542ea91c66",
+        "identical": true
+      },
+      {
+        "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/PermissionSettings.kt",
+        "baseline": "7362a3a4e89302c9af4266758b7930d7817b7d61ff9e5a4873d736847b716adf",
+        "current": "7362a3a4e89302c9af4266758b7930d7817b7d61ff9e5a4873d736847b716adf",
+        "identical": true
+      },
+      {
+        "path": "android/app/src/main/kotlin/com/hwani1103/shiftbell/BackupFileNaming.kt",
+        "baseline": "8d266f5ecaca0a591d671562142322ab819f2a9783f32a7fbed69c90cbfe7ad2",
+        "current": "8d266f5ecaca0a591d671562142322ab819f2a9783f32a7fbed69c90cbfe7ad2",
+        "identical": true
+      }
+    ],
+    "evidence": "artifacts/final_code_review_2026_10_11/manufacturer_source_comparison.json"
+  },
+  "limits": [
+    "No new device test, layout review, release build or deployment",
+    "Reviewed critical state transitions plus complete changed-file inventory; not every line equally deeply",
+    "Existing OEM passes remain scoped to their APK/conditions",
+    "Original cold-start report not reproduced; Firebase and mandatory local startup waits remain",
+    "C01 is not an Android reproduction",
+    "Final Play/UMP/version and release decision remain separate"
+  ],
+  "desktop_update": {
+    "path": "C:/Users/Administrator/Desktop/최종 출시 준비문서.txt",
+    "before_sha256": "0cc21391688f20932e51f0c76f97ddb59b7e118080605eed273333264007623d",
+    "staged_path": "artifacts/final_code_review_2026_10_11/desktop_release_prep_updated.txt",
+    "expected_sha256": "abacbf6566c452c006231a462a84c5ca207ca7940dba57e95a04807367ca632d",
+    "written": true,
+    "verified_sha256": "abacbf6566c452c006231a462a84c5ca207ca7940dba57e95a04807367ca632d"
+  },
+  "likelihood_followup": {
+    "date": "2026-10-11",
+    "scale": "0 ship as is; 10 release impossible without fix",
+    "measured_incidence_available": false,
+    "findings": [
+      {
+        "id": "F01",
+        "necessity_score": 2,
+        "natural_reproduction": false,
+        "trigger": "Explicit reset/delete with nonempty removed IDs, committed DB deletion, then an exception escaping Native defenses to Flutter",
+        "correction": "Normal DB open/query and OS cancellation failures are handled as null/Outcome.FAILED inside Native; failure injection is not evidence of natural frequency"
+      },
+      {
+        "id": "C01",
+        "necessity_score": 3,
+        "app_reproduction": false,
+        "trigger": "Korean sleep feature in DST local zone, relevant records and attribution or displayed range crossing an offset change",
+        "scope": "Can affect subsequent days within a lookback/month range, not just the transition instant"
+      }
+    ],
+    "release_blocking": false,
+    "product_changes": false
+  },
+  "user_disposition": {
+    "date": "2026-10-11",
+    "findings": [
+      "F01",
+      "C01"
+    ],
+    "status": "ACCEPTED_FOR_THIS_RELEASE_WITHOUT_FIX",
+    "resolved": false,
+    "retest_authorized": false,
+    "auto_reopen": false,
+    "quote": "오케이.그럼 그 두가지는 그냥 패스할게. 다음으로 지금 해볼만한건?"
+  }
+}

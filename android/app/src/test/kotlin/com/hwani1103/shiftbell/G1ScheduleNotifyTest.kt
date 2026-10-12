@@ -13,7 +13,10 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.content.ContentValues
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
+import android.content.SharedPreferences
+import android.os.UserManager
 import androidx.test.core.app.ApplicationProvider
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -23,6 +26,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowAlarmManager
 import java.io.File
@@ -31,6 +36,7 @@ import java.util.Calendar
 import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "ko-rKR") // Schedule notifications are a Korean release feature.
 class G1ScheduleNotifyTest {
 
     private lateinit var context: Context
@@ -102,6 +108,25 @@ class G1ScheduleNotifyTest {
         return shadowOf(am).scheduledAlarms
             .filter { it.operation?.let { pi -> shadowOf(pi).savedIntent.data?.toString() } == "shiftbell://alarm/$id" }
             .map { it.triggerAtMs }
+    }
+
+    @Test
+    fun `locked boot continues to schedule notifications without credential preferences`() {
+        val date = dayKey(1)
+        insertSchedule(71, date, 600, "잠금 해제 전 복구")
+        val lockedContext = object : ContextWrapper(context) {
+            override fun getSharedPreferences(name: String, mode: Int): SharedPreferences {
+                error("Credential encrypted storage is locked")
+            }
+        }
+        val user = shadowOf(context.getSystemService(UserManager::class.java))
+        user.setUserUnlocked(false)
+        try {
+            DirectBootReceiver().onReceive(lockedContext, Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED))
+            assertEquals(listOf(trigger(date, 600)), scheduleTimes(71))
+        } finally {
+            user.setUserUnlocked(true)
+        }
     }
 
     // ───────────────────────────── #5 수신 판정
@@ -183,6 +208,28 @@ class G1ScheduleNotifyTest {
 
         ScheduleNotificationScheduler.syncTabEnabled(context, true)
         assertEquals(listOf(trigger(date, 600)), scheduleTimes(6))
+    }
+
+    @Test
+    fun `언어를 한국어 영어 한국어로 바꾸면 일정 예약을 취소하고 복원한다`() {
+        val date = dayKey(2)
+        insertSchedule(61, date, 600, "언어 전환")
+        assertTrue(ReleaseLocalePolicy.koreanFeatures(context))
+        ScheduleNotificationScheduler.syncTabEnabled(context, true)
+        assertTrue(ScheduleNotificationScheduler.schedule(context, 61, trigger(date, 600), date, 600, "언어 전환", 30))
+        assertEquals(1, scheduleTimes(61).size)
+
+        try {
+            RuntimeEnvironment.setQualifiers("en-rUS")
+            assertTrue(!ReleaseLocalePolicy.koreanFeatures(context))
+            ScheduleNotificationScheduler.syncLocale(context)
+            assertTrue(scheduleTimes(61).isEmpty())
+            RuntimeEnvironment.setQualifiers("ko-rKR")
+            ScheduleNotificationScheduler.syncLocale(context)
+            assertEquals(listOf(trigger(date, 600)), scheduleTimes(61))
+        } finally {
+            RuntimeEnvironment.setQualifiers("ko-rKR")
+        }
     }
 
     // ───────────────────────────── #10 시간대 변경

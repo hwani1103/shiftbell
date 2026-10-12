@@ -44,7 +44,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // 다음 알람 체크 + 8888 상태 갱신
             val instance = AlarmGuardReceiver()
             val nextAlarm = instance.getNextAlarmFromDB(context)
-            instance.updateTwentyMinuteNotification(context, nextAlarm)
+            instance.updateTwentyMinuteNotification(context, nextAlarm, "triggerCheck")
 
             // 다음 Wakeup 예약
             instance.scheduleNextWakeup(context)
@@ -93,7 +93,10 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             // (diff 엔진의 "안 바뀐 알람도 재등록" 로직이 새 시간대 기준으로 다시
             // 계산된 절대 시각으로 OS 알람을 고쳐 씀).
             Log.d("AlarmGuardReceiver", "🌐 시계/시간대 변경 감지 - 강제 전체 갱신")
-            AlarmRefreshEngine.refresh(context)
+            AlarmRefreshEngine.refresh(
+                context,
+                cancelPastFixedOnZoneChange = intent.action == Intent.ACTION_TIMEZONE_CHANGED
+            )
             // ⭐ 2026-09-14 (출시전 감사 #10) - 일정 알림도 절대 시각(epoch ms)으로 예약돼 있어 시간대가 바뀌면 옛 시각에 울렸음.
             // DB 기준으로 다시 계산해 걸고, 지난 일정의 옛 예약은 지움(탭 숨김 상태면 걸지 않음 - #5)
             ScheduleNotificationScheduler.rescheduleAllFromDb(context)
@@ -107,7 +110,11 @@ class AlarmGuardReceiver : BroadcastReceiver() {
 
         // 다음 알람 체크 + 8888 상태 갱신 (20분 이내면 표시, 아니면 정리)
         val nextAlarm = getNextAlarmFromDB(context)
-        updateTwentyMinuteNotification(context, nextAlarm)
+        updateTwentyMinuteNotification(context, nextAlarm, when (intent.action) {
+            Intent.ACTION_TIME_CHANGED -> "timeChanged"
+            Intent.ACTION_TIMEZONE_CHANGED -> "timezoneChanged"
+            else -> "heartbeat"
+        })
 
         // 다음 Wakeup 예약
         scheduleNextWakeup(context)
@@ -136,8 +143,21 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         val wakeupTime = nextAlarm.timestamp - (20 * 60 * 1000)
         
         if (wakeupTime <= now) {
-            Log.d("AlarmGuardReceiver", "⚠️ 이미 20분 이내 - 5분 후 재체크")
-            scheduleWakeup(context, alarmManager, now + 5 * 60 * 1000)
+            val regularCheck = now + 5 * 60 * 1000L
+            // Snooze rounds its target up to a whole second, while this
+            // heartbeat retains milliseconds. Re-arming a valid setAlarmClock
+            // just before it rings pushes delivery to AlarmManager's minimum
+            // futurity (observed as ~5s on four ROMs). Move only this competing
+            // heartbeat; keep DB/OS repair, midnight and 20-minute checks intact.
+            val gap = nextAlarm.timestamp - regularCheck
+            val nextCheck = if (gap in 0L..10_000L) {
+                (nextAlarm.timestamp + 1_000L).also {
+                    DiagLog.log(context, "GUARD_BOUNDARY_SHIFT",
+                        "id" to nextAlarm.id, "targetMs" to nextAlarm.timestamp,
+                        "fromMs" to regularCheck, "toMs" to it)
+                }
+            } else regularCheck
+            scheduleWakeup(context, alarmManager, nextCheck)
         } else if (midnight < wakeupTime) {
             Log.d("AlarmGuardReceiver", "⏰ 자정 체크 예약: ${Date(midnight)}")
             scheduleWakeup(context, alarmManager, midnight)
@@ -196,7 +216,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     // 리마인더였던 경우 B의 리마인더가 통째로 사라지고 다시 안 뜨는 버그가 있었음
     // (shownNotifications에 B가 이미 있다고 기록되어 있어서 재표시도 안 됐음).
     // 이제 "지울지 말지"까지 이 함수가 매번 최신 상태 기준으로 다시 결정함.
-    private fun updateTwentyMinuteNotification(context: Context, alarm: AlarmData?) {
+    private fun updateTwentyMinuteNotification(context: Context, alarm: AlarmData?, source: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (alarm == null) {
@@ -218,7 +238,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         // ⭐ 2026-09-14 (출시전 감사 #27 3번) - 예전엔 FLAG_NO_CREATE로 PendingIntent "존재"만 보고 재등록 여부를
         // 정했는데, 존재해도 옛 시각의 예약일 수 있었음. 20분 이내 다음 알람은 판정 없이 DB 시각으로 항상 다시 걺
         // (같은 PendingIntent라 덮어쓰기 - 추가 복구 수단)
-        reScheduleAlarm(context, alarm)
+        reScheduleAlarm(context, alarm, source)
 
         if (shownNotifications.contains(alarm.id)) {
             Log.d("AlarmGuardReceiver", "⏭️ Notification 스킵 (이미 표시함)")
@@ -232,10 +252,14 @@ class AlarmGuardReceiver : BroadcastReceiver() {
     // ⭐ 2026-09-14 (출시전 교차 검토 X-05) - 예전엔 scheduleRaw로 무조건 다시 걸어서 (1) 백업 복원이 취소한 옛 예약을
     // 복원 도중에 되살리거나 (2) 방금 읽은 뒤 스누즈·시각 변경으로 DB가 바뀐 경우 옛 시각으로 덮어쓸 수 있었음.
     // 이제 복원 잠금이면 미루고(복원 owner가 마지막에 재조정), 반영 직전 DB 시각을 다시 확인하는 경로(scheduleIfCurrent)로만 건다.
-    private fun reScheduleAlarm(context: Context, alarm: AlarmData) {
+    private fun reScheduleAlarm(context: Context, alarm: AlarmData, source: String) {
         if (RestoreGate.shouldDefer(context, "guardRearm")) return
         try {
             val db = DatabaseHelper.getInstance(context).getReadableDatabaseWithRetry()
+            DiagLog.log(context, "GUARD_REARM", "id" to alarm.id,
+                "targetMs" to alarm.timestamp,
+                "leadMs" to (alarm.timestamp - System.currentTimeMillis()),
+                "source" to source)
             val outcome = AlarmWakeScheduler.scheduleIfCurrent(context, db, alarm.id, alarm.timestamp, alarm.shiftType)
             Log.d("AlarmGuardReceiver", "✅ 알람 재등록 확인: ID=${alarm.id} 결과=$outcome")
         } catch (e: Exception) {
@@ -264,6 +288,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
         )
 
         val notification = NotificationCompat.Builder(context, TWENTY_MIN_CHANNEL_ID)
+            .addExtras(NotificationLocale.metadata(context, "guard", alarm.time))
             .setContentTitle(context.getString(R.string.notif_guard_title, alarm.time))
             .setContentText(alarm.shiftType)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -294,7 +319,7 @@ class AlarmGuardReceiver : BroadcastReceiver() {
                 context.getString(R.string.channel_alarm_guard),  // ⭐ "알람" 키워드 제거 (삼성 시스템 스누즈 방지)
                 NotificationManager.IMPORTANCE_LOW  // 소리/진동 없음
             ).apply {
-                description = "20분 전 사전 알림"
+                description = context.getString(R.string.channel_guard_description)
                 enableVibration(false)
                 setSound(null, null)
                 setShowBadge(true)
@@ -311,36 +336,35 @@ class AlarmGuardReceiver : BroadcastReceiver() {
             val dbHelper = DatabaseHelper.getInstance(context)
             db = dbHelper.getReadableDatabaseWithRetry() ?: return null  // ⭐ 재시도 로직 사용
 
+            val nowMillis = System.currentTimeMillis()
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
                 Locale.US
-            ).format(Date())
+            ).format(Date(nowMillis))
 
             cursor = db.query(
                 "alarms",
                 null,
-                "date > ?",
-                arrayOf(now),
+                "(type = 'snoozed' OR date >= ?)",
+                arrayOf(now.substring(0, 10)),
                 null,
                 null,
-                "date ASC, id ASC",  // ⭐ 동일 시각일 때 낮은 ID 우선
-                "1"
+                "date ASC, id ASC"
             )
 
             var alarm: AlarmData? = null
 
-            if (cursor.moveToFirst()) {
+            while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
-                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+                    ?: context.getString(R.string.alarm_default_label)
 
-                val timestamp = SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ss",
-                    Locale.US
-                ).parse(dateStr)?.time
+                val timestamp = AlarmWakeScheduler.parse(dateStr)
 
-                if (timestamp != null) {
-                    val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
+                if (timestamp != null && timestamp > nowMillis &&
+                    (alarm == null || timestamp < alarm.timestamp)) {
+                    val time = AlarmInstant.display(context, timestamp)
                     alarm = AlarmData(id, timestamp, time, shiftType)
                 }
             }

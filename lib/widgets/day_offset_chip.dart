@@ -52,8 +52,9 @@ class DayOffsetSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    return Wrap(
+      alignment: WrapAlignment.center,
+      runSpacing: 8.h,
       children: kAlarmDayOffsets.map((offset) {
         final isLast = offset == kAlarmDayOffsets.last;
         return Padding(

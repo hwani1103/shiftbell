@@ -14,21 +14,31 @@ import '../models/backup_payload.dart';
 import 'backup_validator.dart';
 import 'database_service.dart';
 
+/// ⭐ 2026-09-23 (1.0.24 A) - 백업 파일 슬롯. 직접(설정의 "데이터 백업")과 자동이 각각 1개씩만 남고,
+/// 새로 만들면 **같은 종류만** 교체됨(네이티브 BackupFileNaming.kt).
+enum BackupKind {
+  manual('manual'),
+  auto('auto');
+
+  const BackupKind(this.channelArg);
+  final String channelArg;
+}
+
 class BackupStorageService {
   BackupStorageService._();
   static final BackupStorageService instance = BackupStorageService._();
 
   static const _channel = kAlarmChannel;
 
-  /// 자동 탐지에서 최신순으로 확인할 최대 후보 수(네이티브는 최신 + 직전 정상본을 남기지만, 옛 설치의 잔여 파일까지 고려).
+  /// 자동 탐지에서 최신순으로 확인할 최대 후보 수(네이티브는 직접·자동 슬롯 2개를 남기지만, 1.0.23 이하 옛 형식 파일까지 고려).
   static const _maxCandidates = 5;
 
-  /// 백업 JSON 문자열을 기기 저장소에 씀. 성공하면 네이티브가 최신 + 직전 백업 1개만 남기고 정리함.
+  /// 백업 JSON 문자열을 [kind] 슬롯에 씀. 네이티브가 공개 전에 다시 읽어 확인하고, 성공하면 같은 종류의 옛 파일만 정리함.
   /// Android 10(Q) 미만 기기에서는 지원 안 함 - false 반환.
-  Future<bool> write(String jsonContent) async {
+  Future<bool> write(String jsonContent, {required BackupKind kind}) async {
     try {
-      final result = await _channel
-          .invokeMethod<bool>('writeBackupFile', {'content': jsonContent});
+      final result = await _channel.invokeMethod<bool>(
+          'writeBackupFile', {'content': jsonContent, 'kind': kind.channelArg});
       return result ?? false;
     } catch (e) {
       return false;
@@ -68,7 +78,7 @@ class BackupStorageService {
   /// ⭐ 2026-09-01 - [read]의 자동 탐지(MediaStore 쿼리)가 실기기에서 실패하는 것이 확인돼 추가한
   /// 수동 대안. 시스템 파일 선택기(SAF)를 띄워 사용자가 Download/ShiftBell/의 백업 파일을 직접
   /// 고르게 함 - 사용자가 명시적으로 고른 파일은 그 자리에서 접근 권한을 받으므로 소유권 메타데이터와
-  /// 무관하게 항상 동작함. 사용자가 취소하거나 읽기 실패하면 null.
+  /// 무관하게 항상 동작함. 취소는 null, 읽기 실패는 검증 오류 안내용 빈 문자열.
   ///
   /// ⭐ 2026-09-17 정정 - 자동 탐지가 실패하는 진짜 이유는 그동안 적어 둔 "삼성 OEM 버그"가 아니라,
   /// 앱을 삭제하면 MediaStore가 그 앱이 만든 행의 owner_package_name을 비우기 때문이다(파일은 남음).
@@ -79,7 +89,7 @@ class BackupStorageService {
     try {
       return await _channel.invokeMethod<String>('pickBackupFile');
     } catch (e) {
-      return null;
+      return '';
     }
   }
 }

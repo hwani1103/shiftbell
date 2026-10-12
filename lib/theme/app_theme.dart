@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
+import '../models/calendar_theme.dart';
 
 class AppTheme {
+  static ThemeData forCalendar(CalendarThemeId id) {
+    if (id.isDark) return darkTheme;
+    if (id != CalendarThemeId.periwinkle && id != CalendarThemeId.softMosaic) {
+      return lightTheme;
+    }
+    return lightTheme.copyWith(colorScheme: lightTheme.colorScheme.copyWith(
+      primary: const Color(0xFF526BAB),
+      surface: const Color(0xFFF8FAFF),
+      surfaceVariant: const Color(0xFFE5ECF8),
+      onSurface: const Color(0xFF273653),
+      onSurfaceVariant: const Color(0xFF52627E),
+    ));
+  }
   // ========================================
   // 라이트 테마 (기본) - 앱 전체 톤. 새 색이 필요하면 app_colors.dart에 먼저
   // 추가하고 여기서 가져다 쓸 것. 달력 탭은 여기 안 따름(calendar_tab.dart의

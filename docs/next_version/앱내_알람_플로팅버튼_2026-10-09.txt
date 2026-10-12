@@ -1,0 +1,35 @@
+앱 내부 울림 플로팅 버튼 — 2026-10-09
+상태: 구현·필수 -Build·S26 USB 변경 범위 PASS / dev debug 설치 완료
+
+승인된 정책
+앱이 전면일 때 현재 live alarm ID/round가 있으면7777 존재/알림·overlay 권한과 무관하게 공통 앱 아이콘 버튼을 표시한다. 알람 카드 자동 표시는 제거하고 버튼을 실제 탭했을 때만 기존 overlay_alarm 제어 UI를 연다. 외부 overlay 분기·7777 게시·잠금 AlarmActivity·커버·예약/울림/DB 로직은 변경하지 않는다.
+
+구현
+InAppAlarmController의 앱 소유 Dialog를 collapsed/expanded 상태로 구분. 접힌 상태는56dp 터치 영역,42dp 앱 아이콘·빨간 배지, TOP|END에서12dp 여백. 기본 앱 창 프레임 내에 배치하고 화면 폭 변경 시 다시 정렬한다. FLAG_NOT_FOCUSABLE/NOT_TOUCH_MODAL로 Flutter 탭/route/바텀시트/키보드의 포커스·바깥 터치를 유지한다. 시스템 overlay 권한이나 새 OS 서비스는 요구하지 않는다. 시스템 알림창/다른 앱/잠금 위에 버튼을 올리는 기능이 아니다.
+아이콘만1→1.12배900ms 왕복하며 터치 영역은 움직이지 않는다. 시스템 애니메이션 비활성 또는 터치 탐색 접근성 활성 시 애니메이션 없이 배지만 유지. 숨김 시 animator와 SnoozeControlsBinding 해제.
+확장 제어창의 X는 알람 종료 유지. 시간 줄 우측에 별도 접기 버튼 추가(외부overlay XML은 수정 없음), Back도 접기로 처리. 접어도 울림/선택 분/timeout은 유지. pause 시 창·확장 선택 해제, resume 시 현재 live 회차의 버튼부터 표시. 종료·스누즈·새 회차·다른 전체화면/외부overlay 표시 시 기존 검사로 정리. 오래된 버튼 탭은 새 회차를 열지 않는다.
+앱 내부 알람이 실제 표시됐을 때 호출하던 markRingPresented는 실제 버튼 표시 완료 후 유지해 기존 foreground FSI 토큰·언어 갱신 처리를 보존한다. 알림 조회 성공을 화면 표시로 가장하지 않는다.
+접근성 열기/접기 문구2개를 native ko/en/de/pt/hi에 추가. 한국어 전용 scope/common ARB 변경 없음.
+
+trade-off 및 경계
+- 알람 제어에 추가 탭1회가 필요하며 자동 큰 카드보다 놓치기 쉽다. 아이콘/배지/작은 맥동으로 보완하지만 시인성은 실제 화면 승인 대상이다.
+- 사용자가 제어창을 직접 열면7777 팝업과 잠시 겹칠 수 있다. 자동 중복 카드 억제가 목적이며 시스템 팝업 가시성/중복0 보장이 아니다.
+- 시스템 notification shade나 외부 OS 설정 화면에서는 app-owned 버튼을 보장하지 않는다. 앱 복귀 시 복구한다.
+- 모든 제조사/실물 Fold·Flip 화면 PASS로 확대하지 않는다. 이번 변경의 공통 계층/폭·언어/회차는 호스트, 실제 앱 UI 접근성·제어는 연결 S26으로 범위를 잡는다.
+
+자동·실기기 증거
+G1RingRoundTest46/0 failures/0 errors. 기존 dismiss/snooze/locale/resize 검사를 실제 버튼 클릭 후 제어창으로 수정했고, collapse/back·7777 유지·오래된 탭·회차 종료·5언어/폭 전환을 추가했다.
+필수 tools/check_critical_release.ps1 -Build exit0 PASS. Flutter324·native 기능/DB 회귀·dev debug·JS웹 빌드 완료. release/배포/Streaming 없음.
+S26 SM-S948N/API36, 충전 중 Awake/stayOn·잠금해제, 기존 CE/DE 및17테이블 백업. FA09 접두어 시험 자료만 만들고 종료 후 기존 자료 대조.
+이전 달력 카드 USB 잔여(고정 타입 변경, 읽기 전용 스누즈, 날짜 구분)는 가능한 범위에서 이번 검증과 결합하되 별도 결과로 기록한다.
+증거 폴더: artifacts/in_app_alarm_button_2026_10_09/
+
+최종 실기기 결과 — 2026-10-09 20:04 KST
+후보 APK SHA256 13c3c8060afa6802b78d7ee5054894893f8ca931b62e1219fc0888bc40a3874e. 설치 base.apk 일치. 소유9파일 gate 전후 해시 변화0.
+F1: 두 권한 허용, 실제 무음 알람18/회차6. 달력 날짜 팝업·키보드 상태에서 전체 내부 카드 자동 표시 없이 버튼 표시. 7777 heads-up은 기존대로 표시되며 버튼 일부를 잠시 가릴 수 있었다. 시스템 heads-up을 위로 접은 뒤 버튼/키보드 공존 확인. 버튼 탭→공유 제어창→명시적 접기, 홈 이탈/앱 복귀 및 설정·일정관리·다음알람·달력 탭에서 버튼 유지. 실제 다시 알림5분 액션→20:02:41 예약/스누즈 이력·버튼 제거·열린 날짜 팝업에20:02 읽기 전용 카드 반영 PASS.
+F2: POST_NOTIFICATIONS 실제 revoke, SYSTEM_ALERT_WINDOW deny, permissionSnapshot 두 항목 denied 확인. 실제 무음 알람30/회차7→앱 버튼→탭으로 제어창→Back으로 접기(울림 유지)→HOME/앱 복귀 버튼→실제X 종료. swiped 이력·현재 울림 제거·버튼 제거 PASS. 팝업/외부 overlay가 없어도 제어 가능.
+달력 보완: 실제 스누즈 카드 탭은 편집창을 열지 않음. 기존 provider로 예약 취소하자 열린 날짜 팝업에서 섹션 제거. 고정5개 표시 자료의 타입3→1 실제 탭/DB override 확인 및 가로 스크롤 끝 카드 확인. 기존 선택 UI는 타입 선택 즉시 반영하므로 뒤이은 확인 탭 시도는 대상 없음으로 종료됐고 변경 결과는 DB/화면으로 확인했다. 다음날00:03 스누즈 표시 자료는10/10에00:03으로 표시(원본23:58과 구분). 이 자료는 자연 자정 시험이 아니다.
+시험 절차 메모: F1 접기 뒤 두 번 Back으로 홈까지 나갔다가 복귀했으며 F1_calendar_button.png는 홈 화면이다. F2_button/controls/back 초기 캡처는 예정 시각 전이라 PASS 근거가 아니다. 실제 회차 시작 후 F2_live_*로 다시 확인했다. UI 오류로 기록하지 않는다.
+정리: FA09 시험 예약/이력/override만 제거. 기존17테이블 전체 원본과 정확히 일치, 현재 울림 없음. notification/overlay/exact/fullScreen/alarmChannel 원래 granted 복구. 충전/Awake/stayOn=true, keyguard showing=false.
+판정: 이번 앱 내부 표시 변경에는 필수 자동 회귀와 대표 USB 검증으로 충분하다고 판단하며 기존 제조사 Streaming PASS를 전수 재실행하지 않는다. 잠금·외부 표시 정책은 이번에 수정하지 않았다. 전체 제조사/접힘 하드웨어/모든 앱 화면을 새로 실측 PASS로 확장하지 않는다. 시스템 heads-up은 버튼을 가릴 수 있고, 사용자가 제어창을 직접 열면 heads-up과 잠시 겹칠 수 있다. 자동 큰 내부 카드 중복은 제거했지만 시스템 UI 중복0 보장은 아니다.
+구조화 증거: evidence/in_app_alarm_button_2026_10_09.json.

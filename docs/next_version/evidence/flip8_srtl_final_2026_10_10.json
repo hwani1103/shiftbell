@@ -1,0 +1,246 @@
+{
+  "time": "2026-10-10T07:41:02.712737+00:00",
+  "device": {
+    "model": "SM-F776B",
+    "name": "Galaxy Z Flip8",
+    "sdk": 37,
+    "serial": "localhost:45652"
+  },
+  "status": "PARTIAL_UI_AUDIT",
+  "requestedCaptures": {
+    "expected": 138,
+    "captured": 138,
+    "validated": 138,
+    "cover": 10,
+    "common": 85,
+    "calendar": 38,
+    "koreanExtras": 5
+  },
+  "coverActualFunctions": {
+    "locales": [
+      "ko",
+      "en",
+      "de",
+      "pt",
+      "hi"
+    ],
+    "minusPlus": "PASS",
+    "snoozeHistory10Minutes": "PASS",
+    "dismissHistory": "PASS",
+    "sameIdAndRoundOpenToClosed": "PASS",
+    "safeButtonsAndNoDuplicateBanner": "PASS"
+  },
+  "mainActualFunctions": {
+    "lockedOverlayInternal7777": "PASS",
+    "snooze5And10History": "PASS",
+    "collapseBackKeepsRing": "PASS",
+    "dismissHistory": "PASS",
+    "naturalOneMinuteTimeout": "PASS",
+    "wait5Or10Minutes": "SKIPPED_BY_USER"
+  },
+  "uiMeasurementStates": {
+    "states": 597,
+    "byLocale": {
+      "ko": 175,
+      "en": 120,
+      "de": 123,
+      "pt": 90,
+      "hi": 89
+    },
+    "flags": 82
+  },
+  "visualReview": {
+    "requestedOriginals": {
+      "count": 138,
+      "visualReviewed": true,
+      "hashValidated": true
+    },
+    "help": {
+      "ko": {
+        "topics": 38,
+        "visualReviewed": true
+      },
+      "en": {
+        "topics": 23,
+        "visualReviewed": true
+      },
+      "de": {
+        "topics": 23,
+        "visualReviewed": true
+      },
+      "pt": {
+        "topics": 23,
+        "visualReviewed": true
+      },
+      "hi": {
+        "topics": 23,
+        "visualReviewed": true
+      }
+    },
+    "layoutGroups": {
+      "ko": {
+        "common": "visual reviewed",
+        "extras": "visual reviewed",
+        "remaining": "visual reviewed",
+        "koreanOnly": "visual reviewed"
+      },
+      "en": {
+        "common": "visual reviewed",
+        "extras": "visual reviewed",
+        "remaining": "visual reviewed"
+      },
+      "de": {
+        "common": "visual reviewed",
+        "extras": "10/35 states visual reviewed; 25 measured states pending due lost tool return",
+        "remaining": "visual reviewed"
+      },
+      "pt": {
+        "common": "visual reviewed",
+        "extras": "visual reviewed",
+        "remaining": "team edit/expanded/confirmation only; other 16 branches NOT_RUN"
+      },
+      "hi": {
+        "common": "visual reviewed",
+        "extras": "visual reviewed",
+        "remaining": "team edit/expanded/confirmation only; other 16 branches NOT_RUN"
+      }
+    },
+    "deExtraPendingNames": [
+      "de_open_extra_alarm_edit",
+      "de_open_extra_alarm_edit_bottom",
+      "de_open_extra_alarm_time",
+      "de_open_extra_alarm_time_bottom",
+      "de_open_extra_shift_name_keyboard",
+      "de_open_extra_shift_name_keyboard_bottom",
+      "de_open_extra_notes_keyboard",
+      "de_open_extra_notes_keyboard_bottom",
+      "de_open_extra_team_setup",
+      "de_open_extra_team_shared",
+      "de_open_extra_team_shared_bottom",
+      "de_open_extra_team_individual",
+      "de_open_extra_team_individual_bottom",
+      "de_open_extra_team_roster_editor",
+      "de_open_extra_team_roster_editor_bottom",
+      "de_open_extra_team_roster_editor_keyboard",
+      "de_open_extra_team_roster_editor_keyboard_bottom",
+      "de_open_extra_team_rule_0",
+      "de_open_extra_team_rule_1",
+      "de_open_extra_team_rule_1_filled",
+      "de_open_extra_team_rule_1_filled_bottom",
+      "de_open_extra_team_rule_2",
+      "de_open_extra_team_rule_2_bottom",
+      "de_open_extra_team_rule_2_filled",
+      "de_open_extra_team_rule_2_filled_bottom"
+    ],
+    "finalTeamGridActualReview": {
+      "locales": [
+        "ko",
+        "en",
+        "de",
+        "pt",
+        "hi"
+      ],
+      "overflowObservedBefore": true,
+      "overflowAbsentAfter": true
+    },
+    "knownRemainingCopyIssue": {
+      "key": "helpTroubleshootForceStopTitle",
+      "locale": "ko",
+      "issue": "card heading wraps final 요 to a lone line",
+      "status": "NOT_FIXED"
+    },
+    "measurementFlags": {
+      "flaggedStates": 82,
+      "didExceedMaxLinesFlags": 0,
+      "limitations": "Orphan heuristics include background routes, complete words and old candidate measurements. RenderFlex overflow requires visual review; zero text max-line flags is not blanket layout PASS."
+    }
+  },
+  "tests": {
+    "coverCritical": "artifacts/flip8_cover_fsi_critical_2026_10_10.log: exit0 -Build",
+    "copyCritical": "artifacts/flip8_copy_wrap_critical_2026_10_10.log: exit0 -Build",
+    "teamGrid": "artifacts/flip8_team_grid_layout_2026_10_10.log: 99 PASS",
+    "teamGridBuild": "artifacts/flip8_team_grid_build_2026_10_10.log: dev debug PASS",
+    "release": "NOT_RUN"
+  },
+  "installedApkSha256": "cb50c114872fe388665ed0ac86061bde994edb465e11b7799e8d4185d4cc7781",
+  "nativeParity": {
+    "nativeFilesCompared": 998,
+    "nativeIdentical": true,
+    "changedNativeFiles": [],
+    "DartChangeScope": "TeamAssignmentGrid border-aware word width and text height measurement only; calendar rendering unchanged"
+  },
+  "sharingCleanup": {
+    "intent": "off",
+    "active": false,
+    "dirty": false,
+    "serverFetch": "revoked",
+    "serverConfirmedUnavailable": true,
+    "time": "2026-10-10T06:45:39.908Z"
+  },
+  "deviceCleanup": {
+    "time": "2026-10-10T07:33:08.519Z",
+    "permissions": {
+      "notification": "granted",
+      "overlay": "granted",
+      "exactAlarm": "granted",
+      "fullScreen": "granted",
+      "alarmChannel": "granted",
+      "xiaomi": false,
+      "sdk": 37
+    },
+    "sharing": {
+      "intent": "off",
+      "active": false,
+      "dirty": false
+    },
+    "screenTimeout": "300000",
+    "stayOn": "0",
+    "ring": {
+      "schedule_tab_last_effective": "false",
+      "last_alarm_refresh": "1791617487380",
+      "last_checked_boot_time": "0",
+      "schedule_tab_enabled": "false",
+      "refresh_policy_version": "3",
+      "ring_counter": "41"
+    },
+    "ownedAlarmCleanup": "final_owned_alarm_cleanup.vm.json",
+    "friendCacheDeleted": 1
+  },
+  "restoreReadback": {
+    "time": "2026-10-10T07:34:12.7528877Z",
+    "installedApkSha256": "cb50c114872fe388665ed0ac86061bde994edb465e11b7799e8d4185d4cc7781",
+    "webHarnessUninstalled": true,
+    "window_animation_scale": "1",
+    "transition_animation_scale": "1",
+    "animator_duration_scale": "1",
+    "stay_on_while_plugged_in": "0",
+    "screen_off_timeout": "300000",
+    "deviceLocale": "en-US"
+  },
+  "postAuditAlarmCounts": {
+    "alarms": 0,
+    "templates": 0,
+    "evidence": "post_audit_alarm_readback.vm.json"
+  },
+  "sessionEnd": {
+    "timeKst": "2026-10-10 16:38",
+    "rtlLastState": "< 1 min",
+    "adb": "device localhost:45652 not found",
+    "cleanupVerifiedBeforeDisconnect": true,
+    "reservationExtended": false
+  },
+  "remaining": [
+    "pt/hi remaining branches except team edit: 16 each",
+    "de extras visual return missing: 25 states listed in visual_review_final.json",
+    "ko force-stop help title lone final character",
+    "user design review; Fold8/Ultra/Flip4 followup separate"
+  ],
+  "calendarRenderingChanged": false,
+  "computerShutdown": false,
+  "sourcesChangedThisRun": [
+    "NotificationHelper.kt quiet cover FSI token omission",
+    "CoverAlarmNotificationTest.kt quiet notification regression",
+    "app_ko.arb three copy values + generator",
+    "team_assignment_grid.dart border-aware width/height measurement"
+  ]
+}

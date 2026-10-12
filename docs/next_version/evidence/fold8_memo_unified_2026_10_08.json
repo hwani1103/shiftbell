@@ -1,0 +1,15 @@
+{
+  "scope": "한글/글로벌 Fold8 메모 크기 공통화",
+  "reference": "한글 메인 화이트, 글로벌 클래식 화이트/다크",
+  "priority": "특정 문자열 절단 강제 없이 비슷한 크기와 여백/overflow 방지",
+  "delivery": "dev hot reload, APK build not run",
+  "screenshots": 34,
+  "gallery": "artifacts\\fold8_memo_unified_2026_10_08\\화면비교.html",
+  "validation": {
+    "calendar_regression": "25 PASS (한국어11 + en_US7 + en_GB7)",
+    "final_unit": "20 PASS, 새 테마의 메모 실제 표시 검사 포함",
+    "hashes_and_galleries": "34 verified"
+  },
+  "device": "Korean main white restored",
+  "approval": "사용자 시각 검토 대기"
+}

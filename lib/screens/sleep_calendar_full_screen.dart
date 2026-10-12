@@ -1,3 +1,5 @@
+import '../l10n/l10n_extensions.dart';
+import '../widgets/unavailable_feature.dart';
 // lib/screens/sleep_calendar_full_screen.dart
 //
 // ⭐ 2026-09-01 - "최근 수면 기록" 미니 달력 카드(condition_tab.dart)에서 가로
@@ -26,16 +28,23 @@ import '../theme/app_colors.dart';
 import '../utils/sleep_format_util.dart';
 import '../widgets/sleep_edit_dialog.dart';
 
-class SleepCalendarFullScreen extends ConsumerStatefulWidget {
+class SleepCalendarFullScreen extends StatelessWidget {
   const SleepCalendarFullScreen({super.key});
+  @override
+  Widget build(BuildContext context) => context.usesKoreanFeatures
+      ? const _KoreanSleepCalendarFullScreen() : const UnavailableFeature();
+}
+
+class _KoreanSleepCalendarFullScreen extends ConsumerStatefulWidget {
+  const _KoreanSleepCalendarFullScreen();
 
   @override
-  ConsumerState<SleepCalendarFullScreen> createState() =>
+  ConsumerState<_KoreanSleepCalendarFullScreen> createState() =>
       _SleepCalendarFullScreenState();
 }
 
 class _SleepCalendarFullScreenState
-    extends ConsumerState<SleepCalendarFullScreen> {
+    extends ConsumerState<_KoreanSleepCalendarFullScreen> {
   late DateTime _month; // 보고 있는 달의 1일
   late Future<List<SleepRecord>> _recordsFuture;
 
@@ -65,6 +74,7 @@ class _SleepCalendarFullScreenState
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final analyzer = ref.watch(conditionAnalyzerProvider);
     final schedule = analyzer?.schedule;
 
@@ -129,6 +139,7 @@ class _MonthNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
@@ -190,6 +201,7 @@ class _SleepMonthListState extends State<_SleepMonthList> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     // ⭐ 2026-09-01 후속5 - "맨 아래 항목이 잘 안 보인다"는 피드백 - 이 리스트가
     // Scaffold body에 그대로 얹혀서 하단 시스템 제스처 영역을 안 피했었음.
     // MediaQuery.padding.bottom(제스처 내비게이션 바 등 하단 안전영역)을 기존
@@ -227,6 +239,7 @@ class _SleepDayListRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -331,6 +344,7 @@ class _SlotChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final r = record;
     return InkWell(
       borderRadius: BorderRadius.circular(8),
@@ -366,6 +380,7 @@ class _SlotChip extends StatelessWidget {
                       fontWeight: FontWeight.w500))
             else ...[
               Builder(builder: (context) {
+          if (!context.usesKoreanFeatures) return const UnavailableFeature();
                 // ⭐ 2026-09-13(사용자 요청) - condition_tab.dart의 _SleepSlotCell과
                 // 동일한 이유(야간 근무 회복수면은 카드 날짜와 실제 취침 날짜가
                 // 다를 수 있음) - 다르면 "M/D " 접두어를 붙임.

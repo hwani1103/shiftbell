@@ -93,6 +93,6 @@ class G1GenerationFixtureTest {
                 compared++
             }
         }
-        assertEquals("비교한 케이스 수(기존 5 + T11 보강 2)", 7, compared)
+        assertEquals("비교한 케이스 수(기존 5 + T11 보강 2 + 경계 1)", 8, compared)
     }
 }

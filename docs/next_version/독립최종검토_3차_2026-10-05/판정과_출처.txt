@@ -1,0 +1,51 @@
+3차 판정과 출처 — 2026-10-05
+
+독립성
+검증현황·2차 인계·1차 C01~C16 의미카드/용어 기준을 읽은 뒤 pt-BR → de-DE → en → hi 순서로 현재 ARB와 Android 리소스를 전수 독해했다.
+문제 후보 T01~T07을 독립_후보.txt에 먼저 기록한 다음 1·2차 상세 원장/판정 이유와 대조했다.
+의미카드와 현황 자체에 이전 판정 요약이 있으므로 완전 블라인드/다른 현지인의 독립 감수라고 부르지 않는다.
+현재 원장 2,944행을 만드는 스크립트는 이미 수행한 독해의 결정·변경전후를 직렬화한다. 자동 스크립트가 문장 의미를 검토했다고 계산하지 않는다.
+
+T01 숨김 수면 도움말 누락: 유지/별도 범위
+KO의 야간 근무 중 수면 낮잠 분류·근무 시작일 귀속 문단이 네 외국어에 없음.
+이 기능은 네 언어 미제공이라는 사용자 확인에 따라 외국어 도움말을 활성화하거나 자세한 수면 설명을 보완하지 않는다.
+현 출시 노출 문구의 확정 차단 사유는 아니며, 기능을 번역 출시할 때 별도 의미·근거 검토가 필요하다.
+
+T02 복수형: 5건 채택
+pt/de statusPatternDayCycle의 days=1은 도달 가능하므로 단수 분기 추가.
+pt/de/hi alarmSchedulePartialFailed의 failed=1은 도달 가능하므로 술어 단수 분기 추가.
+AlarmScheduleOutcome.partiallyFailed는 failed>0 && failed<attempted. total=1일 때는 이 문구가 호출되지 않으므로 EN의 total에 걸리는 alarms는 유지.
+statusMemoLimit와 scheduleMaxPerSlot의 호출값은 3이므로 단수 분기를 추가하지 않는다.
+근거: onboarding_screen.dart 패턴 비어 있음 검사; alarm_service.dart partiallyFailed; calendar_tab.dart 부분 실패/메모 상한; schedule_management_tab.dart 일정 상한.
+
+T03 복원 제목/버튼: 유지
+도움말의 Restore from backup/Restaurar backup 등은 실제 onboardingBackupTitle을 가리키므로 복원 버튼의 짧은 동사와 완전히 동일할 필요가 없다. 기능 진입과 결과가 일치하고 단순 취향 교체는 하지 않는다.
+1차의 데이터 교체/이력 병합/울림·스누즈 보존 및 2차의 복원 대체 구문을 보존.
+
+T04 날짜별 팀 근무 제목: 4건 채택
+team_schedule_edit_screen.dart는 주기 위치뿐 아니라 개별 요일 규칙의 근무를 보여준다. Team positions/Teampositionen/Posições/स्थिति를 해당 날짜 팀들의 근무라는 제목으로 수정. date 변수를 보존.
+
+T05 네이티브/도움말 종료·스누즈 표현: 유지
+1차 S06/S07/S13과 2차 DE04/PT02/HI04/EN05의 실제 조작/결과 구별을 보존한다.
+독일어 Stoppen/Ausschalten, pt Adiar/Desligar는 해당 문맥의 조작 의미를 따른다. 힌디어 실제 버튼 5 मिनट बाद를 도움말에서 유지.
+
+T06 스누즈 충돌: 4건 채택
+AlarmActionHelper.kt의 동일 시각 충돌 처리에서 현재 알람 종료, 다른 알람 유지라는 결과를 도움말에 추가.
+원장의 출처는 구현의 동작이며 Android 제조사별 실제 재생 시험을 했다는 뜻은 아니다.
+
+T07 외국어 제공 기능만 안내: 52건 채택 및 코드 분기 수정
+13키 × 4언어. 기존 한국어 사용·공유·수면·개인 일정·원터치·한국 공휴일/음력 설명을 상시 노출 문구에서 제거.
+출처: 사용자의 최종 첫 출시/예외 없음 지시; l10n_extensions.dart usesKoreanFeatures; main.dart/CalendarTab/SettingsTab/HelpScreen; ReleaseLocalePolicy; ScheduleNotificationScheduler; HolidaySyncService; UpdateService.
+기존 1차 C11/S12의 완전한 데이터 의미 설명과 2차 유지 판정을 제품 범위에 맞춰 재결정했다. 외국어 사용자에게 관련 없는 기능을 설명하는 방식은 채택하지 않는다.
+공유·수면 등 숨김 리소스는 ARB 키 대칭을 위해 남길 수 있다. 리소스 존재와 사용자 화면 노출은 별도로 판정한다.
+
+출처 범위
+이 작업에서 새로 읽은 판단 근거는 저장소 코드·한글 원문·1차 의미카드·2차 용어 기준·이전 원장 및 사용자 지시다.
+1·2차의 외부 출처 링크는 이전 검토 기록으로 대조했으며 이번에 원문 사이트를 새로 열람했다고 기록하지 않는다.
+네 언어의 어법은 문맥에 따른 텍스트 검토이며 원어민 사용자 시험이 아니다.
+개인정보 문구는 실제 제공 기능 설명 범위를 정리했다. 분석/광고의 데이터 항목·비암호화 파일·수동 전송 등 기존 고지를 축소하지 않았으며 법률 적합성 승인이나 네트워크 실측을 수행한 것은 아니다.
+
+보존한 기존 작업
+시작 기준은 HEAD 080ca5913dbe9787c15fa7d60baca95b805075ed + 1·2차의 미커밋 변경이다.
+기존 Android 문자열·이전 테스트 수정·schedule_change_dialog.dart·기타 사용자의 미커밋 파일을 되돌리지 않았다.
+이번에는 커밋·배포·기기 설치·웹 게시를 하지 않았다.

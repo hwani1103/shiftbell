@@ -1,0 +1,86 @@
+{
+  "created": "2026-10-08T14:47:26.006433+09:00",
+  "scope": "Global calendar five-theme layout tuning; Korean Diary preserved; foreign Sunday neutral; localized display-only preview examples",
+  "changes": [
+    "Foreign Diary selection removed; enum and stored preference retained",
+    "Five global themes share reviewed Korean shift chips, date/today, memo/font spacing and responsive fitting",
+    "Foreign glyph measurement uses Latin/Hindi samples; no lunar or holiday-name rows added",
+    "Foreign theme previews use the live CalendarTab renderer with localized sample shift names",
+    "en/de/pt/hi help lists five themes; common ARB keys preserved"
+  ],
+  "checks": {
+    "critical_release": {
+      "command": "tools/check_critical_release.ps1 (no -Build)",
+      "exit_code": 0,
+      "flutter_tests": 323,
+      "result": "PASS",
+      "evidence": "global_theme_tuning_2026_10_08/critical_result.txt"
+    },
+    "existing_english_layout": {
+      "command": "flutter test test/english_release_layout_test.dart --no-pub --dart-define=AUDIT_COMPACT_LAYOUT=true --name \"en_US (calendar_|themes)\"",
+      "result": "PASS",
+      "tests": 6,
+      "windows": [
+        "320x640",
+        "500x800",
+        "501x800",
+        "600x800"
+      ],
+      "scope": "Five English theme renderers and picker; final sample-name localization was subsequently verified by hot reload/device display",
+      "evidence": "global_theme_tuning_2026_10_08/english_layout_result.txt"
+    },
+    "resources": {
+      "result": "PASS",
+      "errors": [],
+      "common_keys_per_language": 523,
+      "korean_only_keys": 191,
+      "generation": [
+        "flutter gen-l10n",
+        "python tools/generate_web_locale_assets.py"
+      ]
+    },
+    "device_runtime": {
+      "pid": 3163,
+      "checks": {
+        "Localizations.localeOf(context).toString()": "en_US",
+        "context.usesKoreanFeatures": "false",
+        "context.availableCalendarThemes.length": "5",
+        "context.availableCalendarThemes.toString()": "[CalendarThemeId.mainWhite, CalendarThemeId.mainDark, CalendarThemeId.minimal, CalendarThemeId.materialCard, CalendarThemeId.bol",
+        "_reviewedTheme": "true",
+        "((_buildThemedDowCore(CalendarThemeId.mainWhite, DateTime(2026,10,11)) as Center).child as Text).style!.color.toString()": "Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB)"
+      }
+    },
+    "hot_reload": [
+      "14/2141 libraries",
+      "78/2141 libraries",
+      "78/2141 libraries, 3441ms final preview localization"
+    ]
+  },
+  "initial_attempts": {
+    "layout": "First attempt failed before product tests: parallel Flutter native asset copy hit sqlite3.dll PathExistsException. Sequential retry passed. A sandbox SDK lockfile access failure preceded the authorized retry.",
+    "prior_reload_evidence_correction": "Previous successful reload log alone did not prove calendar replacement: runtime source still had foreign Sunday red before this follow-up."
+  },
+  "not_performed": [
+    "APK build/install",
+    "Android release build",
+    "data reset",
+    "new locked-alarm/device-manufacturer certification",
+    "native-widget deployment",
+    "web deployment"
+  ],
+  "limitations": [
+    "Native widget Sunday-color source change requires a future APK build to reach the installed widget.",
+    "Korean theme tuning remains preserved; host layout checks are not Fold hardware PASS."
+  ],
+  "local_artifacts": "artifacts/global_theme_tuning_2026_10_08/",
+  "source_sha256": {
+    "lib/models/calendar_theme.dart": "dbd6317a8a6c1c8005dbbc8170318dfadbca3c32bbc46067d0542656935f55a0",
+    "lib/screens/calendar_tab.dart": "8fc6afeaf190a89f73e734a9a1bb745ad9c3833595814fc02450197601b08631",
+    "lib/screens/calendar_theme_picker_screen.dart": "a59a73c0dec37b578c5f4b2f818bd390cc12c7cbb42ca1c7c9ae56a4b663da7e",
+    "lib/screens/calendar_theme_lab_screen.dart": "8211397f5fccf187de583104f3a465626f705a20b83c217615d73b9a3fd8564b",
+    "lib/l10n/app_en.arb": "6089021c6c0e50e024f1de6614df87782c0bed09ff613db58fe2cb1eaae6cadd",
+    "lib/l10n/app_de.arb": "c1aa78babb567feafac85f9d3031af9682411a985ba95ad173df7c4369a586a8",
+    "lib/l10n/app_pt.arb": "39bb776ca31f0e5b8b9bdce383017db40d1193e73fe0daa92310a28e81c218a8",
+    "lib/l10n/app_hi.arb": "e90bd80606f8fd1b68b3655b2ef7d705dbeabf0f4b58ed739dd1ba0f02af21c7"
+  }
+}

@@ -4,6 +4,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shiftbell/models/friend_schedule.dart';
 import 'package:shiftbell/providers/friend_provider.dart';
 import 'package:shiftbell/services/database_service.dart';
@@ -60,9 +61,11 @@ void main() {
   });
 
   setUp(() async {
+    TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher.localeTestValue = const Locale('ko');
     firebaseReady = false;
     await db.delete('friends');
   });
+  tearDown(() => TestWidgetsFlutterBinding.ensureInitialized().platformDispatcher.clearLocaleTestValue());
 
   test('F-P01 확인 불가(unavailable) 새로고침은 친구·캐시를 지우지 않고 unconfirmed로 표시 (#21)', () async {
     final id = await insertFriend('ownerA', dataJson: cached.encodeToJsonString());

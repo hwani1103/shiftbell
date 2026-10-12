@@ -1,0 +1,30 @@
+전체근무표 이관 긴급 후속 — 진행 중 / 출시 HOLD
+
+사용자 신고: Play release26 업데이트 후 전체근무표 화면에서 등록된 조가 표시되지 않음.
+사용자 확인: 기존 설정 화면에서 내 조 칩 선택은 필수, 본인의 조는 C.
+기존 25 백업과 26 백업: A/B/C/D 이름, 문자열 offset 0/2/4/6 보존. all_teams_my_team 빈 문자열도 동일. 앞선 원본 필드 보존 PASS는 전체근무표 실제 표시 PASS를 포함하지 않았으며 이 발견으로 출시 판정 보류.
+구버전 소스 5fdbc88의 생성 흐름: 내 조 선택 필수, all_teams_my_team 저장. 백업 export는 읽기 전용. 빈 값이 된 시점·경로는 아직 미확정. 사용자가 선택하지 않았다고 해석하지 않음.
+현재 로딩: TeamScheduleConfig.read가 내 조 값이 조 이름에 없으면 null -> getTeamScheduleConfig가 null marker 기록 -> 화면 미설정. 이관 과정에서 옛 유효 로스터를 읽지 못한 재현 경로.
+검토 중 수정: 기존 내 조 값이 있으면 그대로 유지. 값이 없을 때만 현재 내 근무표의 절대 기준일 패턴 위치와 옛 조 offset을 대조하여 유일한 조를 복원. 실제 사용자 자료는 C만 일치. 임의 첫 조 지정 금지/중복·불일치 추정 금지. 조별 날짜·주기 위치·현재 내 근무표 변경 없음.
+이미 null marker가 기록된 설치는 자동 재생하지 않고 전체근무표 화면에서 이전 자료 복구 버튼과 확인창 제공. 전체 백업 복원이 아니라 로스터 행만 저장. 명시 초기화 후 자동 되살림 금지.
+검증·빌드·실기기 결과는 완료 후 별도로 덧붙임. 중간 수정안은 아직 출시 후보 아님.
+
+이번 앞선 요청 완료 사항: AdMob EEA 게시 메시지에 독일어 추가 게시(영어 외1개/10월12일/게시됨). 내부 테스트 트랙 일시중지 및 본인 계정 참여 종료. 관리자 DAU7/30/100/365 기간 반영·MAU28일 유지, Node13검사/fixture와 실제 인증 운영7/30 화면 확인, hosting7343516a97c234e5 배포 및 자산 해시 일치. 운영 실제 어제DAU122/MAU352 유지. 공유 웹·프로덕션 공개·Firestore 공개 버전 미변경.
+증거: artifacts/release_finish_2026_10_12/. 현재 release AAB 빌드는 사용자 데이터 신고 후 중단. 기존 Play26 원본은 previous_uploaded_26.aab에 보존.
+
+중간 검증: 대상 조 규칙/이관12검사 및 기존 조 적용·편집27검사 통과. 최신 추가 모호성 검사 포함 조 규칙12검사 통과. 필수 check_critical_release.ps1 -Build exit0(Flutter338/native 기능·DB/dev debug27/공유 웹 빌드). Dev 실기기 fresh legacy 자료에서 전체4조 정상 표시. v26 null marker fixture: 복구 확인 취소 시 모든17표 그대로, 복구 시 team_schedule_config1표만 변경·내 조 C/team-2·절대 offset0/2/4/6 보존, 내 근무표/알람/메모 등 다른16표 동일. 실제 Play25→27 및26→27 경로는 진행 중, 최종PASS 아님. artifacts/release_finish_2026_10_12/{critical_gate.log,roster_tests.log,dev27_before_recovery.json,dev27_recovery_cancelled.json,dev27_recovered.json,dev27_recovered_screen.png}.
+사용자 후속 승인: 내부 테스트 다시 사용/구버전 재설치 요청, 데이터 초기화 허용(가급적보존), 혼자 계속 진행. 15:32 최신 직접백업 prod_latest_before_reset.json 및 기기 백업85개/Play26의5 APK분할파일 보존. 최초 구버전25의 기존2APK 설치는 required split 누락으로 실패. Play 앱은 이전 테스터 상태를 캐시하여26이 재설치됨. 공식 콘솔 서명25 범용 APK 확보를 진행 중. Dev 원래 APK/CE·DE백업을 보존하고 회귀 fixture에서만 변경.
+
+
+[2026-10-12 16:40 최종 후속 — 수정27 검증 완료]
+판정: 전체근무표 이관/복구 발견의 출시 HOLD 해제, 이번 변경 범위 PASS. 공개 출시 자체는 후순위로 남겨 둠.
+실제 사용자 SM-S948N/API36: Google Play 공개25 재설치 후 원래25 사용자 자료 복원, Play 내부27 업데이트. installer=com.android.vending, 최초 설치16:07:21/업데이트16:20:13. 기존14표 모든 원래 필드·원래 preferences 동일. 전체 A/B/C/D 표시와 내 조 C(team-2), 절대 기준 index0/2/4/6 확인.
+이후 최신15:32 사용자 백업(null marker 포함)을 실제27에서 복원, ‘이전 전체근무표 복구’ 확인창으로 C/4조 복구. 강제 종료·재실행 후 유지. 최종 메모36/일정10/수면17 등 사용자 표·preferences 동일(다크테마 유지). 백업 복원으로 이력 surrogate id만 재부여되고 생성 로그10행 추가; 원래 이력 내용 모두 보존. 이 복원 차이를 순수 업데이트 차이와 구분. Dev 원래 APK/CE·DE 복원, 원래17표 전체행 정확히 동일.
+내 조 빈 문자열 생성 시점은 미확정. 칩 선택 필수·사용자 C 선택 사실 유지. 백업 삭제 탓으로 단정하지 않음. 유일 위치가 확인되는 경우만 이관; 중복/불일치 추정 금지, 명시 초기화의 null marker는 자동 복원 금지.
+최종 prod1.0.24+27 AAB: artifacts/release_finish_2026_10_12/ShiftBell_1.0.24_27_prod_release.aab
+bytes72770896 / SHA2569a9191133bfe695803be640eaa976eec138bdf26ae8ff6f19b61926b52531b6f.
+같은 원본으로 Play27 검증, 최종 재해시 일치. production/nondebug/운영 광고ID/라이선스/16KB LOAD 정렬 확인. 원래 gate -Build exit0와 대상검사 근거 보존, 변경 없는 P0 전수 재검사 미실시. ARM64 실제16KB·수용한 기존 미실시 범위를 새 PASS로 확대하지 않음.
+내부 테스트 임시 재개·본인1명 검증 완료 후 트랙 다시 일시중지(비활성), 참여 종료 확인. 사용자 휴대폰에는 Play27과 복구한 최신 데이터 유지.
+독일어 AdMob 동의 메시지 게시 완료. 관리자 DAU 선택7/30/100/365 반영·MAU직전28일 유지, 웹 hosting7343516a97c234e5 배포 완료.
+프로덕션 공개/메타데이터19개 게시/Firestore 공개버전 갱신은 사용자 지정 후순위 유지.
+증거: final_result.json, prod27_after25_update_comparison.json, prod27_user_final_comparison.json, prod27_final_roster_persisted.png, internal27_final_stopped.jpg, aab_verification.json, critical_gate.log.

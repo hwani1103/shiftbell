@@ -1,0 +1,867 @@
+{
+  "time": "2026-10-11T10:42:26.526245+09:00",
+  "status": "COMPLETE_FOR_CURRENT_ULTRA_UI_SCOPE",
+  "device": {
+    "serial": "localhost:32023",
+    "model": "SM-F976U",
+    "sdk": 37,
+    "devPackageInitiallyPresent": false,
+    "fontScale": "1.0",
+    "stayOn": "0",
+    "screenOffTimeout": "300000",
+    "stateText": "Committed state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\n----------------------\r\nBase state: DeviceState{identifier=2, name='HALF_OPENED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\nOverride state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}",
+    "appLocales": "Unknown package com.hwani1103.shiftbell.dev for userId 0",
+    "initialPackagePath": "",
+    "startedAtKst": "2026-10-11T09:21:31.220979+09:00",
+    "gitCommit": "917b249d727f7b5c566382b3afdc28c45c72229d",
+    "deviceState": 0
+  },
+  "apk": {
+    "sha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e",
+    "installedSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e",
+    "match": true,
+    "path": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\fold8_ui_store_followup_2026_10_11\\fold8-ui-final-dev-debug.apk",
+    "bytes": 215879659,
+    "gitCommit": "917b249d727f7b5c566382b3afdc28c45c72229d",
+    "kind": "Existing validated dev debug APK; no release/no hot reload"
+  },
+  "sourceProof": {
+    "time": "2026-10-11T01:42:14.320192+00:00",
+    "files": [
+      {
+        "path": "lib\\screens\\work_hours_settings_screen.dart",
+        "finalFold8Sha256": "23c1b5f04416119c0eb1ab3818c2c483f2797e93615416bf79097725c3ef1782",
+        "currentSha256": "23c1b5f04416119c0eb1ab3818c2c483f2797e93615416bf79097725c3ef1782",
+        "match": true
+      },
+      {
+        "path": "lib\\screens\\settings_tab.dart",
+        "finalFold8Sha256": "cb943207fa563964a958fc97d23953491c76186ef91139aa5fd26e5bbfb69e28",
+        "currentSha256": "cb943207fa563964a958fc97d23953491c76186ef91139aa5fd26e5bbfb69e28",
+        "match": true
+      },
+      {
+        "path": "lib\\screens\\help_screen.dart",
+        "finalFold8Sha256": "8a9a1d891e9d06300be653e30f19d0e21f9a445511a913f271bab908870fcf1e",
+        "currentSha256": "8a9a1d891e9d06300be653e30f19d0e21f9a445511a913f271bab908870fcf1e",
+        "match": true
+      },
+      {
+        "path": "lib\\screens\\all_alarms_history_view.dart",
+        "finalFold8Sha256": "60dee0228fe87f2bec64a4000492d8de3d15fe60c96b66a9b14d3ffd0fa15984",
+        "currentSha256": "60dee0228fe87f2bec64a4000492d8de3d15fe60c96b66a9b14d3ffd0fa15984",
+        "match": true
+      },
+      {
+        "path": "lib\\l10n\\app_pt.arb",
+        "finalFold8Sha256": "6e06df3ab77777b84103af5b6ef0c0ed9bcd8704625526719c8fb496b5b0e9f1",
+        "currentSha256": "6e06df3ab77777b84103af5b6ef0c0ed9bcd8704625526719c8fb496b5b0e9f1",
+        "match": true
+      },
+      {
+        "path": "lib\\l10n\\app_ko.arb",
+        "finalFold8Sha256": "64fe130e056074c095b0ebc4985c6d1e845f59185c2c60bed3ef7907895a81fa",
+        "currentSha256": "64fe130e056074c095b0ebc4985c6d1e845f59185c2c60bed3ef7907895a81fa",
+        "match": true
+      },
+      {
+        "path": "lib\\l10n\\app_hi.arb",
+        "finalFold8Sha256": "6de6053241a9213e797b46a4790fc4d8decd0f4e5093d3f04955a7e8d755b546",
+        "currentSha256": "6de6053241a9213e797b46a4790fc4d8decd0f4e5093d3f04955a7e8d755b546",
+        "match": true
+      },
+      {
+        "path": "lib\\l10n\\app_en.arb",
+        "finalFold8Sha256": "0a7fb39de75cd882723cf6e99166027b406ea98cc73fdf0b11f8fc37b6145ddd",
+        "currentSha256": "0a7fb39de75cd882723cf6e99166027b406ea98cc73fdf0b11f8fc37b6145ddd",
+        "match": true
+      },
+      {
+        "path": "lib\\l10n\\app_de.arb",
+        "finalFold8Sha256": "59b32502fd68a992831839fc94f8e853a15a0548ae9e85d62ad71e4b32314a95",
+        "currentSha256": "59b32502fd68a992831839fc94f8e853a15a0548ae9e85d62ad71e4b32314a95",
+        "match": true
+      },
+      {
+        "path": "lib\\constants\\ad_config.dart",
+        "finalFold8Sha256": "1cbaa3901d0be7d4412c3a3735e6eee1c8e13547582535c58520faa7d3910a3a",
+        "currentSha256": "1cbaa3901d0be7d4412c3a3735e6eee1c8e13547582535c58520faa7d3910a3a",
+        "match": true
+      }
+    ],
+    "expectedApkSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e",
+    "scope": "Previously changed UI/localization files match the validated bbae dev debug candidate; no Ultra product-source changes"
+  },
+  "review": {
+    "time": "2026-10-11T01:41:05.003301+00:00",
+    "latestCaptures": 1024,
+    "reviewedLatest": 1024,
+    "pending": [],
+    "helpTopicsByGroup": {
+      "en_closed": [
+        1,
+        9,
+        11,
+        17,
+        18,
+        19,
+        20
+      ],
+      "en_open": [
+        1,
+        9,
+        11,
+        17,
+        18,
+        19,
+        20
+      ],
+      "de_open": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "pt_closed": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "pt_open": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "hi_closed": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "hi_open": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "de_closed": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "ko_closed": [
+        1,
+        9,
+        11,
+        20,
+        32,
+        33,
+        34
+      ],
+      "ko_open": [
+        1,
+        9,
+        11,
+        20,
+        32,
+        33,
+        34
+      ]
+    },
+    "foreignNewHelpTopicVisits": 138,
+    "changedKoEnHelpTopicVisits": 28,
+    "originalOsAffectedJob": {
+      "index": 4,
+      "exit": 1,
+      "resolvedBy": "retry_selected_results.json and visually reviewed replacement captures"
+    },
+    "historicalOsTooltipCaptures": 28,
+    "scope": "Pixel layout and localized presentation only. Synthetic UI states, tests and permission snapshots are not locked-alarm or Firebase functional PASS."
+  },
+  "actualUi": {
+    "started": "2026-10-11T01:40:16.060Z",
+    "captures": [
+      {
+        "label": "final_real_settings_closed",
+        "file": "final_real_settings_closed.png",
+        "sha256": "0423a5b4165e055026baf591af0641cba256c223c9297c1c63a7aacca78be3ab",
+        "time": "2026-10-11T01:40:22.148Z"
+      },
+      {
+        "label": "final_real_settings_open",
+        "file": "final_real_settings_open.png",
+        "sha256": "79afed5e390138f069df00b22ede0d9348c31f7e27e1ded85d26f015bd5e2b80",
+        "time": "2026-10-11T01:40:24.089Z"
+      },
+      {
+        "label": "final_real_permissions_closed",
+        "file": "final_real_permissions_closed.png",
+        "sha256": "a26bf05b83a1ab16503a7a9e76d8f7b6d2a3e7940f00446d5508893858664f94",
+        "time": "2026-10-11T01:40:29.322Z"
+      },
+      {
+        "label": "final_real_settings_return",
+        "file": "final_real_settings_return.png",
+        "sha256": "93159d63d8533b24b36e81dfabd0e2066f885f996faa50fd47157be9ccf9f245",
+        "time": "2026-10-11T01:40:30.532Z"
+      }
+    ],
+    "permissionSnapshot": {
+      "notification": "granted",
+      "overlay": "granted",
+      "exactAlarm": "granted",
+      "fullScreen": "granted",
+      "alarmChannel": "granted",
+      "xiaomi": false,
+      "sdk": 37
+    },
+    "runtimeErrors": [],
+    "scope": "Actual settings navigation tap, SRTL device-state fold transition and Flutter permission-panel/back only; no alarm-delivery or native-settings chain PASS",
+    "visualReview": "PASS",
+    "visualReviewedAt": "2026-10-11T01:41:21.473917+00:00",
+    "visualScope": "Four actual settings/fold/permission-panel/back screenshots viewed. Hindi shift labels retained as intentional user-entered fixture names after locale switch. Scrolled permission content verified in finalfix captures."
+  },
+  "keyboardFollowup": [
+    {
+      "code": "en",
+      "posture": "closed",
+      "exit": 0,
+      "time": "2026-10-11T01:37:14.164987+00:00"
+    },
+    {
+      "code": "en",
+      "posture": "open",
+      "exit": 0,
+      "time": "2026-10-11T01:37:35.650649+00:00"
+    },
+    {
+      "code": "de",
+      "posture": "closed",
+      "exit": 0,
+      "time": "2026-10-11T01:37:57.122759+00:00"
+    },
+    {
+      "code": "de",
+      "posture": "open",
+      "exit": 0,
+      "time": "2026-10-11T01:38:18.457532+00:00"
+    },
+    {
+      "code": "pt",
+      "posture": "closed",
+      "exit": 0,
+      "time": "2026-10-11T01:38:39.557254+00:00"
+    },
+    {
+      "code": "pt",
+      "posture": "open",
+      "exit": 0,
+      "time": "2026-10-11T01:39:00.899699+00:00"
+    },
+    {
+      "code": "hi",
+      "posture": "closed",
+      "exit": 0,
+      "time": "2026-10-11T01:39:21.993626+00:00"
+    },
+    {
+      "code": "hi",
+      "posture": "open",
+      "exit": 0,
+      "time": "2026-10-11T01:39:43.402335+00:00"
+    }
+  ],
+  "koPriorFix": {
+    "time": "2026-10-11T01:40:15.316Z",
+    "captures": [
+      "ko_closed_priorfix_friend_add",
+      "ko_closed_priorfix_friend_add_keyboard",
+      "ko_closed_priorfix_share_active",
+      "ko_open_priorfix_friend_add",
+      "ko_open_priorfix_friend_add_keyboard",
+      "ko_open_priorfix_share_active"
+    ],
+    "errors": [],
+    "scope": "Friend-add keyboard and active-sharing SafeArea layout only; unsaved UI state; no Firebase publication or friend creation."
+  },
+  "textTriage": {
+    "time": "2026-10-11T01:40:51.853101+00:00",
+    "captures": 1024,
+    "foreignHangul": [
+      {
+        "name": "en_closed_remaining_calendar_month",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_closed_remaining_calendar_day",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_closed_remaining_calendar_day_keyboard",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_closed_remaining_calendar_bulk",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_closed_remaining_calendar_ot",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_closed_remaining_calendar_week",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_closed_remaining_calendar_week_bottom",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_open_remaining_calendar_month",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "en_open_remaining_calendar_day",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "en_open_remaining_calendar_day_keyboard",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "en_open_remaining_calendar_bulk",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "en_open_remaining_calendar_ot",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "en_open_remaining_calendar_week",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "en_open_remaining_calendar_week_bottom",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_open_remaining_calendar_month",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_open_remaining_calendar_day",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_open_remaining_calendar_day_keyboard",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_open_remaining_calendar_bulk",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_open_remaining_calendar_ot",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_open_remaining_calendar_week",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_open_remaining_calendar_week_bottom",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_closed_remaining_calendar_month",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_closed_remaining_calendar_day",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_closed_remaining_calendar_day_keyboard",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_closed_remaining_calendar_bulk",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_closed_remaining_calendar_ot",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_closed_remaining_calendar_week",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_closed_remaining_calendar_week_bottom",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_month",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_day",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_day_keyboard",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_bulk",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_ot",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_week",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_open_remaining_calendar_week_bottom",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_closed_remaining_calendar_month",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_closed_remaining_calendar_day",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_closed_remaining_calendar_day_keyboard",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_closed_remaining_calendar_bulk",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_closed_remaining_calendar_ot",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_closed_remaining_calendar_week",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_closed_remaining_calendar_week_bottom",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_month",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_day",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_day_keyboard",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_bulk",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_ot",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_week",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_open_remaining_calendar_week_bottom",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_closed_remaining_calendar_month",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "de_closed_remaining_calendar_day",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "de_closed_remaining_calendar_day_keyboard",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "de_closed_remaining_calendar_bulk",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "de_closed_remaining_calendar_ot",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "de_closed_remaining_calendar_week",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "de_closed_remaining_calendar_week_bottom",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_closed_keyboard_followup_remaining_calendar_day",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_closed_keyboard_followup_remaining_calendar_day_keyboard",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_closed_keyboard_followup_remaining_calendar_day_keyboard_header_top",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_closed_keyboard_followup_remaining_calendar_day_keyboard_closed_header",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "en_open_keyboard_followup_remaining_calendar_day",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "en_open_keyboard_followup_remaining_calendar_day_keyboard",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "en_open_keyboard_followup_remaining_calendar_day_keyboard_header_top",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "en_open_keyboard_followup_remaining_calendar_day_keyboard_closed_header",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_closed_keyboard_followup_remaining_calendar_day",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "de_closed_keyboard_followup_remaining_calendar_day_keyboard",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "de_closed_keyboard_followup_remaining_calendar_day_keyboard_header_top",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "de_closed_keyboard_followup_remaining_calendar_day_keyboard_closed_header",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "de_open_keyboard_followup_remaining_calendar_day",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_open_keyboard_followup_remaining_calendar_day_keyboard",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_open_keyboard_followup_remaining_calendar_day_keyboard_header_top",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "de_open_keyboard_followup_remaining_calendar_day_keyboard_closed_header",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_closed_keyboard_followup_remaining_calendar_day",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_closed_keyboard_followup_remaining_calendar_day_keyboard",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_closed_keyboard_followup_remaining_calendar_day_keyboard_header_top",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_closed_keyboard_followup_remaining_calendar_day_keyboard_closed_header",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "pt_open_keyboard_followup_remaining_calendar_day",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_open_keyboard_followup_remaining_calendar_day_keyboard",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_open_keyboard_followup_remaining_calendar_day_keyboard_header_top",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "pt_open_keyboard_followup_remaining_calendar_day_keyboard_closed_header",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_closed_keyboard_followup_remaining_calendar_day",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_closed_keyboard_followup_remaining_calendar_day_keyboard",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_closed_keyboard_followup_remaining_calendar_day_keyboard_header_top",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_closed_keyboard_followup_remaining_calendar_day_keyboard_closed_header",
+        "text": "광고 영역 56dp"
+      },
+      {
+        "name": "hi_open_keyboard_followup_remaining_calendar_day",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_open_keyboard_followup_remaining_calendar_day_keyboard",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_open_keyboard_followup_remaining_calendar_day_keyboard_header_top",
+        "text": "광고 영역 90dp"
+      },
+      {
+        "name": "hi_open_keyboard_followup_remaining_calendar_day_keyboard_closed_header",
+        "text": "광고 영역 90dp"
+      }
+    ],
+    "renderTextExceedsForManualTriage": [],
+    "foreignFeatureScopeForManualTriage": [],
+    "scope": "Captured Flutter text only; OS keyboard/tutorial/toasts excluded. Automated triage does not establish visual or functional PASS."
+  },
+  "cleanupFixture": {
+    "time": "2026-10-11T01:41:33.008Z",
+    "databaseTablesEqual": true,
+    "preferencesEqual": true,
+    "scope": "Fresh dev installation only; native permission grants retained as authorized; file/device-setting cleanup follows"
+  },
+  "cleanup": {
+    "time": "2026-10-11T01:42:02.797377+00:00",
+    "files": [
+      {
+        "path": "/sdcard/Download/ShiftBell/ShiftBell_Backup_dev_auto_261011_103908.json",
+        "owner": "u0_a323",
+        "currentAppOwner": "u0_a341",
+        "ownershipEvidence": "Current-session date/name plus dev-package/model or exact owned fixture content; shared-file uid differs from current package uid",
+        "sha256": "78a35d31409d9d1c49c426a92c7e60fb7a662edd10715e838f66262a882d82c9",
+        "archive": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\fold8ultra_ui_finish_2026_10_11\\shared_file_archive\\ShiftBell_Backup_dev_auto_261011_103908.json",
+        "removed": true
+      },
+      {
+        "path": "/sdcard/Download/ShiftBell/log/ShiftBell_Diag_dev_261011_104127.txt",
+        "owner": "u0_a323",
+        "currentAppOwner": "u0_a341",
+        "ownershipEvidence": "Current-session date/name plus dev-package/model or exact owned fixture content; shared-file uid differs from current package uid",
+        "sha256": "93a0d1a4fc13864bba771950020849c7860f9775cfcc17fc889e217003418a18",
+        "archive": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\fold8ultra_ui_finish_2026_10_11\\shared_file_archive\\ShiftBell_Diag_dev_261011_104127.txt",
+        "removed": true
+      }
+    ],
+    "settings": {
+      "font_scale": "1.0",
+      "stay_on_while_plugged_in": "0",
+      "screen_off_timeout": "300000"
+    },
+    "deviceState": "Committed state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\n----------------------\r\nBase state: DeviceState{identifier=2, name='HALF_OPENED', app_accessible=true, cancel_when_requester_not_on_top=false}\r\nOverride state: DeviceState{identifier=0, name='CLOSED', app_accessible=true, cancel_when_requester_not_on_top=false}",
+    "appLocales": "Locales for com.hwani1103.shiftbell.dev for user 0 are []",
+    "verified": true,
+    "scope": "This fresh dev package only; test fixtures restored; authorized native grants and installed empty dev application retained; no files from other sessions/devices removed"
+  },
+  "finalDeviceProof": {
+    "time": "2026-10-11T01:42:14.320192+00:00",
+    "serial": "localhost:32023",
+    "model": "SM-F976U",
+    "installedApkPath": "/data/app/~~FDalcfaMyZtANIYbfTKPmQ==/com.hwani1103.shiftbell.dev-zpE9WZSnUpFse6b-hxMOSg==/base.apk",
+    "installedSha256": "bbae9dc6c99acd948c7605404ee138ac9fcf7d522d79f24add6d4eb1d004ca0e",
+    "installedHashMatches": true,
+    "currentPendingDevAlarms": 0,
+    "alarmDumpEvidence": "C:\\Users\\Administrator\\Desktop\\shiftbell\\artifacts\\fold8ultra_ui_finish_2026_10_11\\cleanup_os_alarm_dump.txt",
+    "scope": "Current pending/inflight dump before Removal history, after owned cleanup and force-stop; not alarm delivery PASS. USB device untouched."
+  },
+  "priorBuild": {
+    "session": "fold8_ui_store_followup_2026_10_11",
+    "log": "help_fix_critical_build.log",
+    "exit": 0,
+    "kind": "Previously validated immutable dev debug APK; no new product edits, build or release in Ultra session"
+  },
+  "boundaries": [
+    "UI presentation only; synthetic denied permission, history, restore and startup states are not functional PASS",
+    "SRTL device-state transitions are not physical hinge tests",
+    "Original fontScale 1.0; no all-font/OEM guarantee",
+    "USB physical device left untouched",
+    "Flip8 cover followup remains; Flip4 historical cleanup UNCONFIRMED preserved",
+    "S26 store captures and promotional composites pending user preparation; ask before OT/weekly capture"
+  ],
+  "artifactHashes": [
+    {
+      "path": "artifacts/fold8ultra_ui_finish_2026_10_11/layout_audit/coverage_final.json",
+      "sha256": "f78be9791a538c5a66b98dd76766532b627040e1b75e44dcc1a3d00843edae2c"
+    },
+    {
+      "path": "artifacts/fold8ultra_ui_finish_2026_10_11/layout_audit/visual_reviews.json",
+      "sha256": "36a8bcda244ab3331dfebff553b4c6bbfd58c1d414659835e55d69546204d7ce"
+    },
+    {
+      "path": "artifacts/fold8ultra_ui_finish_2026_10_11/queue_finish_results.json",
+      "sha256": "8c4535b92e1bb7c2440c5b5e6415fffee2ba478252c50057073b5424131b19a6"
+    },
+    {
+      "path": "artifacts/fold8ultra_ui_finish_2026_10_11/retry_selected_results.json",
+      "sha256": "b9814b9d6d309f3e2ef485e7ed0712c20172e666c3d95a0caff44e4ee6784076"
+    },
+    {
+      "path": "artifacts/fold8ultra_ui_finish_2026_10_11/final_real_ui.json",
+      "sha256": "570de3205f7ff3fdd17688b6232399deedbaf30eac09de36f9a75b992efec777"
+    },
+    {
+      "path": "artifacts/fold8ultra_ui_finish_2026_10_11/cleanup_database_after.json",
+      "sha256": "40b03b044b8a13c6addb8760a30b6af5a963b23111ab12eb6384045d871c9241"
+    },
+    {
+      "path": "artifacts/fold8ultra_ui_finish_2026_10_11/cleanup_preferences_after.json",
+      "sha256": "cae5fe18cc530329ccd426a592e653ac4c7098dd6cb9cdfcbbb6498771c60358"
+    },
+    {
+      "path": "artifacts/fold8ultra_ui_finish_2026_10_11/cleanup_final.json",
+      "sha256": "ee317c132253b5f2049cb8b5fea27bf9d78607fca2e0e2521d8656c6589fdf97"
+    },
+    {
+      "path": "artifacts/fold8ultra_ui_finish_2026_10_11/final_device_proof.json",
+      "sha256": "823590add4b1934de7a71bc7b2e4123bb38004568a499893802afa9f5b9d32cd"
+    }
+  ],
+  "artifactRoot": "artifacts/fold8ultra_ui_finish_2026_10_11"
+}

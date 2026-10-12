@@ -1,4 +1,5 @@
 // lib/utils/holiday_util.dart
+import 'national_holiday.dart';
 //
 // ⭐ 공휴일 판정 - 원래 calendar_tab.dart 안에 있던 걸 그대로 옮김. friend_calendar_view.dart
 // (친구 달력 보기 - 앱 내/웹 둘 다)도 똑같은 공휴일 표시가 필요해져서 공용 파일로 뺌 -
@@ -19,16 +20,21 @@ const Map<String, String> fixedHolidays = {
 // ⭐ 음력/변동 공휴일 (연도별 하드코딩 - YYYY-MM-DD)
 const Map<String, String> lunarHolidays = {
   // 2025년
+  '2025-01-27': '임시공휴일',
   '2025-01-28': '설날',
   '2025-01-29': '설날',
   '2025-01-30': '설날',
   '2025-03-03': '대체공휴일',
   '2025-05-06': '대체공휴일',
+  '2025-06-03': '대통령선거',
   '2025-10-05': '추석',
   '2025-10-06': '추석',
   '2025-10-07': '추석',
   '2025-10-08': '대체공휴일',
   // 2026년
+  // 인사혁신처 2026-04-29 개정 발표. 시행 이전 연도에 소급하지 않는다.
+  '2026-05-01': '노동절',
+  '2026-07-17': '제헌절',
   '2026-02-16': '설날',
   '2026-02-17': '설날',
   '2026-02-18': '설날',
@@ -42,6 +48,11 @@ const Map<String, String> lunarHolidays = {
   '2026-09-26': '추석',
   '2026-10-05': '대체공휴일',
   // 2027년
+  // 우주항공청 2026-06-29 발표 2027년도 월력요항.
+  '2027-05-01': '노동절',
+  '2027-05-03': '대체공휴일',
+  '2027-07-17': '제헌절',
+  '2027-07-19': '대체공휴일',
   '2027-02-06': '설날',
   '2027-02-07': '설날',
   '2027-02-08': '설날',
@@ -55,6 +66,9 @@ const Map<String, String> lunarHolidays = {
   '2027-10-11': '대체공휴일',
   '2027-12-27': '대체공휴일',
   // 2028년
+  '2028-04-12': '국회의원선거',
+  '2028-05-01': '노동절',
+  '2028-07-17': '제헌절',
   '2028-01-26': '설날',
   '2028-01-27': '설날',
   '2028-01-28': '설날',
@@ -64,6 +78,8 @@ const Map<String, String> lunarHolidays = {
   '2028-10-04': '추석',
   '2028-10-05': '대체공휴일',
   // 2029년
+  '2029-05-01': '노동절',
+  '2029-07-17': '제헌절',
   '2029-02-12': '설날',
   '2029-02-13': '설날',
   '2029-02-14': '설날',
@@ -76,18 +92,19 @@ const Map<String, String> lunarHolidays = {
   '2029-09-24': '대체공휴일',
 };
 
-// 공휴일 여부 확인
-//
-// ⭐ 영어 현지화 결정(교대시계_영어화_현지화_보고서_영문판.md 2-6번 참고): 이 파일의
-// 공휴일 데이터는 전부 한국 고유 공휴일이고(신정~지방선거, 매년 손으로 갱신) 다른
-// 나라 공휴일 데이터셋은 없음. "번역"으로 해결 안 되는 항목이라 다국가 데이터셋을
-// 새로 구축하는 대신(작업량 큼 + 매년 유지보수 필요) 가장 간단하고 정직한 선택지
-// (보고서의 옵션 a)를 택함: 영어 로케일(ko가 아닌 모든 로케일)에서는 공휴일 표시
-// 기능 자체를 끔 - 한국 공휴일이 남의 달력에 빨갛게 뜨는 이상한 경험을 피함.
-// isKorean=false면 무조건 null을 반환해서, 호출부(calendar_tab.dart,
-// friend_calendar_view.dart)가 별도 분기 없이 그대로 써도 안전하게 함.
-String? getHolidayName(DateTime date, {required bool isKorean}) {
-  if (!isKorean) return null;
+// 한국 목록/원격 변경분은 한국어 화면만 사용한다. 해외는 별도 국가 데이터
+// (2026~2028)에서 조회하며 미지원 국가·미발표 날짜를 한국 목록으로 대체하지 않는다.
+String? getHolidayName(DateTime date, {required bool isKorean,
+    String? countryCode, String languageCode = 'en'}) {
+  if (!isKorean) {
+    return nationalHolidayName(date, countryCode, languageCode: languageCode);
+  }
+
+  // 0. ⭐ 2026-09-23 (1.0.24 D) - Firebase에서 받은 원격 변경분이 우선(추가·이름 변경 → remove보다 먼저, 삭제 → 없음)
+  final dateKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  final remoteName = HolidayOverrides.current.add[dateKey];
+  if (remoteName != null) return remoteName;
+  if (HolidayOverrides.current.remove.contains(dateKey)) return null;
 
   // 1. 고정 공휴일 체크 (매년 동일)
   final fixedKey = '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -98,4 +115,56 @@ String? getHolidayName(DateTime date, {required bool isKorean}) {
   // 2. 음력/변동 공휴일 체크 (연도별)
   final lunarKey = '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   return lunarHolidays[lunarKey];
+}
+
+
+/// ⭐ 2026-09-23 (1.0.24 D) - 공휴일 원격 변경분. Firestore `app_config/holidays_kr` 문서
+/// `{version: 3, add: {"2027-06-03": "지방선거"}, remove: ["2026-06-03"]}`를 받아 둔 것(holiday_sync_service.dart).
+/// 하드코딩 목록은 안전망으로 그대로 두고 그 위에 add/remove를 덮어씀 - 앱 업데이트 없이 대체·임시공휴일 대응.
+class HolidayOverrides {
+  final int version;
+  final Map<String, String> add;
+  final Set<String> remove;
+
+  const HolidayOverrides({this.version = 0, this.add = const {}, this.remove = const {}});
+
+  static const empty = HolidayOverrides();
+
+  /// 앱 전체가 보는 현재 값(달력·친구 달력·웹 뷰어). 시작 시 캐시에서, 새 버전을 받으면 교체.
+  static HolidayOverrides current = empty;
+
+  static final _dateKey = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+
+  static bool _validDate(String k) {
+    if (!_dateKey.hasMatch(k)) return false;
+    final d = DateTime.tryParse(k);
+    return d != null &&
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}' == k;
+  }
+
+  /// Firestore·캐시 JSON → 값. 형식이 틀린 항목은 버리고(앱이 절대 죽지 않게) 나머지만 씀.
+  static HolidayOverrides fromJson(Map<String, dynamic>? json) {
+    if (json == null) return empty;
+    final rawVersion = json['version'];
+    final version = rawVersion is num ? rawVersion.toInt() : 0;
+    final add = <String, String>{};
+    final rawAdd = json['add'];
+    if (rawAdd is Map) {
+      rawAdd.forEach((k, v) {
+        if (k is String && _validDate(k) && v is String && v.trim().isNotEmpty) {
+          add[k] = v.trim().length > 20 ? v.trim().substring(0, 20) : v.trim();
+        }
+      });
+    }
+    final remove = <String>{};
+    final rawRemove = json['remove'];
+    if (rawRemove is List) {
+      for (final k in rawRemove) {
+        if (k is String && _validDate(k)) remove.add(k);
+      }
+    }
+    return HolidayOverrides(version: version, add: add, remove: remove);
+  }
+
+  Map<String, dynamic> toJson() => {'version': version, 'add': add, 'remove': remove.toList()..sort()};
 }

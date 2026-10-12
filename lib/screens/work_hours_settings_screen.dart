@@ -1,3 +1,5 @@
+import '../widgets/settings_appearance.dart';
+import '../widgets/adaptive_layout.dart';
 // lib/screens/work_hours_settings_screen.dart
 //
 // ⭐ 근무시간 및 OT 관련 설정 화면
@@ -69,7 +71,10 @@ class _WorkHoursSettingsScreenState
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      SettingsAppearance(builder: _buildStyled);
+
+  Widget _buildStyled(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final schedule = ref.watch(scheduleProvider).value;
     final workSettings = ref.watch(workHoursSettingsProvider);
@@ -93,7 +98,7 @@ class _WorkHoursSettingsScreenState
           // ⭐ 하단 콘텐츠(급여 산정일 기준 펼쳤을 때)가 기기 네비게이션 바에
           // 가려지는 문제 방지 - SafeArea로 감싸고 리스트 맨 아래 여백도 추가.
           : SafeArea(
-              child: ListView(
+              child: AdaptiveSectionList(
                 controller: _scrollController,
                 padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 40.h),
                 children: [
@@ -105,7 +110,7 @@ class _WorkHoursSettingsScreenState
                         child: Text(
                           context.l10n.workHoursShiftChangeOtTitle,
                           style: TextStyle(
-                              fontSize: 17.sp, fontWeight: FontWeight.bold),
+                              fontSize: 17.sp, fontWeight: FontWeight.w600),
                         ),
                       ),
                       Switch(
@@ -133,7 +138,7 @@ class _WorkHoursSettingsScreenState
                   Text(
                     context.l10n.settingsDefaultWorkHoursPerShift,
                     style:
-                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
+                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 4.h),
                   Text(
@@ -154,7 +159,7 @@ class _WorkHoursSettingsScreenState
                   Text(
                     context.l10n.settingsMonthlyPeriodBasis,
                     style:
-                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold),
+                        TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 4.h),
                   Text(
@@ -227,8 +232,6 @@ class _WorkHoursSettingsScreenState
               Expanded(
                 child: Text(
                   shift,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
@@ -255,7 +258,7 @@ class _WorkHoursSettingsScreenState
                   maxLines: 1,
                   style: TextStyle(
                       fontSize: 12.5.sp,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       color: colorScheme.primary),
                 ),
               ),
@@ -291,7 +294,7 @@ class _WorkHoursSettingsScreenState
               ],
             ],
           ),
-          if (needsClockTimeMigration) ...[
+          if (needsClockTimeMigration && context.usesKoreanFeatures) ...[
             SizedBox(height: 6.h),
             Row(
               key: ValueKey('legacy-shift-time-hint-$shift'),
@@ -301,7 +304,7 @@ class _WorkHoursSettingsScreenState
                 SizedBox(width: 5.w),
                 Expanded(
                   child: Text(
-                    context.l10n.workHoursLegacyClockTimeHint,
+                    context.koOnly.workHoursLegacyClockTimeHint,
                     style: TextStyle(
                       fontSize: 11.5.sp,
                       color: colorScheme.onSurfaceVariant,
@@ -570,7 +573,7 @@ class _WorkHoursSettingsScreenState
                     fontSize: 13.sp, color: colorScheme.onSurfaceVariant),
                 selectedTextStyle: TextStyle(
                     fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface),
                 decoration: BoxDecoration(
                   border: Border(
@@ -665,7 +668,8 @@ class _WorkHoursSettingsScreenState
   // 가능하게 함. 연도와 "기준" 접미사는 빼고 날짜만 짧게 보여줌.
   Widget _buildPeriodPreview(WorkHoursSettings settings) {
     final colorScheme = Theme.of(context).colorScheme;
-    final range = settings.periodRangeShort(DateTime.now());
+    final range = settings.periodRangeShort(DateTime.now(),
+        locale: Localizations.localeOf(context).toString());
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(

@@ -1,0 +1,91 @@
+[동일 날짜 후속 반영]
+현재 정책은 첫500ms에 현재7777 미게시이고 채널 사용 가능일 때만 추가500ms 한 번 재확인한다. 아래는 최초 A11 판단 당시 이력이다. 후속 구현·호스트/USB 검증·장점과 trade-off는 알림재확인_부가기능안내_2026-10-09.txt 및 evidence/notification_retry_2026_10_09.json을 따른다.
+
+알림 7777 확인에 따른 외부 오버레이 표시 정책 — A11 변경·판단 원장
+기준: 2026-10-09 KST / dev debug / 출시 승인과 별개
+
+1. 요청과 구현 범위
+잠금해제 상태에서 외부 오버레이 위에 7777의 시스템 팝업까지 겹치는 문제를 줄인다.
+팝업이 실제로 그려졌는지는 판단하지 않는다. 시스템에 현재 울림의 7777이 등록돼 있고 앱 알림과 실제 게시 채널이 사용 가능함을 확인한 경우에만 외부 오버레이를 생략한다.
+현재 알람 = alarmId와 round. 숫자 7777만 발견하거나 권한만 허용된 것은 성공 조건이 아니다.
+
+제품 변경은 CustomAlarmReceiver.kt의 잠금해제·앱 외부 표시 분기 및 새 RingControlPresence.kt에 한정한다.
+NotificationHelper의 최초 게시/FSI·그룹·silent 설정, 채널 생성·선택, 잠금 AlarmActivity 진입, 커버 인계, 알람 예약·소리·종료·스누즈·DB는 바꾸지 않는다.
+앱을 직접 열었을 때의 InAppAlarmController도 유지한다. 앱 내부 카드와 알림의 공존까지 제거하는 변경은 이번 범위가 아니다.
+
+2. 선택한 판단
+기존 최초 게시 후 500ms 지연 시점에서, 잠금해제·외부 overlay 권한 있음일 때만 관찰한다.
+- PRESENT: 앱 알림 허용, 활성 알림의 id=7777/tag=shiftbell:ring:<id>:<round>/extra의 alarmId·round 일치, 실제 게시 채널 허용, 그룹이 있으면 그룹 차단 없음 → 외부 overlay 생략.
+- ABSENT: 현재 회차 알림을 찾지 못함 → 기존 overlay 유지.
+- BLOCKED: 앱 알림 또는 실제 채널/그룹 차단 확인 → 기존 overlay 유지.
+- UNKNOWN: 조회 예외, 존재해야 할 채널/그룹 누락 또는 중요도 확인 불가 → 기존 overlay 유지.
+API24/25는 채널 없음이 정상이다. API26+에서는 실제 게시 채널을 조회하므로 alarm_control legacy fallback도 판단 대상이다.
+API28+의 채널 그룹 차단도 구분한다. HIGH를 필수로 요구하지 않으므로 LOW/MIN의 알림창 제어도 허용한다.
+외부 overlay 권한이 없으면 기존처럼 게시된 알림 및 사용자가 앱을 열었을 때의 내부 제어 경로를 유지한다.
+잠금 상태 또는 이미 AlarmActivity가 표시된 경우에는 이 새 관찰로 경로를 대체하지 않는다.
+
+3. 이 방식으로 결정한 이유와 대안
+과거 7777은 알람을 끄지 않고 홈으로 나왔을 때 남기는 제어 수단이었다. 15a48ad(2026-09-14)는 울리는 즉시 유지형 제어 알림을 게시하도록 넓혔다.
+9331959(2026-10-07)에 포함된 제조사 FSI 수정은 최초 알림의 silent/group 동작과 최초/갱신 토큰을 정리했다. 9/14를 현재 팝업이 처음 실기기에 나타난 날짜라고 단정하지 않는다.
+현 코드에는 강화된 알림 경로와 기존 잠금해제 overlay 경로가 함께 남아 있었다. 둘이 같은 alarmId/round를 제어하며, 팝업과 알림창 7777도 같은 알림의 표현이다.
+7777이 다른 수정 때문에 완전히 불필요해진 잔재라는 근거는 없다. 현재도 FSI 진입 및 화면 이탈 후 제어를 맡는다.
+
+검토한 대안:
+- 7777을 조용하게 바꾸기: 원하는 overlay+알림창 UX에 가깝지만, 제조사에서 검증한 최초 알림/FSI 구성을 다시 바꾸는 위험이 있다.
+- 7777을 원래 홈 이탈 때만 게시: 최초 FSI와 실패 시 제어를 함께 건드려 범위가 더 커진다.
+- 팝업을 작은 떠다니는 아이콘으로 바꾸기: OS 헤드업 알림을 자유로운 앱 아이콘 창처럼 바꿀 수 없으며 별도 UI와 생명주기 설계가 필요하다.
+- 외부 overlay 무조건 삭제: 알림 차단·게시 실패 때 자동으로 보이는 제어 수단도 잃는다.
+- 앱 알림 권한만 보고 overlay 생략: 채널 차단이나 실제 게시 실패를 놓칠 수 있다.
+- 채택: 실제 현재 회차 7777과 게시 채널을 확인하고 외부 overlay만 조건부 생략. 제조사에서 검증한 7777/FSI를 유지하는 데 중점을 둔다.
+
+4. 장점과 수용하는 trade-off
+장점: 정상 게시 때 두 외부 제어창이 겹치지 않는다. 알림 차단·부재·확인 실패에는 기존 overlay를 남긴다. 기존 잠금/커버/예약/스누즈 경로의 변경을 피한다. 로그로 PRESENT/ABSENT/BLOCKED/UNKNOWN을 구분할 수 있다.
+trade-off:
+- 활성 알림 등록은 팝업 표시 또는 알림창에서의 가시성 보장이 아니다. 팝업이 억제되면 사용자가 알림창을 내려 제어해야 할 수 있다. 방해금지 등 표시 제한도 남는다.
+- 한 시점의 확인이다. 이후 알림 삭제·권한 철회를 계속 감시하거나 overlay를 자동 재생성하지 않는다.
+- 게시가 기존 500ms보다 늦거나 확인에 실패하면 안전하게 overlay를 남긴다. 이후 알림이 표시되면 중복이 생길 가능성을 완전히 없애지는 않는다. 중복 회피보다 제어 수단 보존을 우선한 경계다.
+- 앱 내부 카드/커버는 기존 정책이며 전 화면에서 알림과 제어 UI가 하나만 남는 설계가 아니다.
+- 사용자 예상 '잠금해제 중 95% 이상 팝업 표시'는 실측 통계가 아니다. 설계·출시 보장 수치로 쓰지 않는다.
+
+5. 검사 후보와 자동 검사
+APK: artifacts/notification_priority_2026_10_09/tested-dev-debug.apk
+SHA256: 79dd5045235344026fe43a90ab4906109c408c015ee2de671dee3a3d2646a2c4
+com.hwani1103.shiftbell.dev / 1.0.23-dev(code25) / DB29 / debug. release 빌드·게시·운영 웹 배포 없음.
+G1RingRoundTest에 현재 회차 확인, 미게시, 늦은 게시, 앱/채널 차단·legacy, 잘못된 tag/metadata, 조회 예외, 종료 경합, 잠금 경로 보존을 추가했다. API24/33/34의 정상 게시 분기도 확인했다.
+집중 실행: G1RingRoundTest 37 + CoverAlarmNotificationTest 2 = 39 PASS, 실패0.
+필수 tools/check_critical_release.ps1 -Build 전체 PASS: Flutter 324(38/109/99/67/11), native 기능 묶음·DB 이관15, dev debug APK·JS 웹 빌드 성공.
+첫 sandbox 실행은 Gradle 캐시 경로 접근으로 제품 검사 시작 전 실패했다. 허용된 환경에서 집중 검사와 필수 전체 실행을 완료했다. 웹 wasm dry-run/Cupertino font 경고는 JS 빌드 실패가 아니다.
+원본: artifacts/notification_priority_2026_10_09/focused.log, critical.log, automated.json, change_hashes.json.
+
+6. 실기기 결과와 검증 경계
+기기: Samsung SM-X400 / Android16(API36) / USB R54Y800G39V / 한국어 / 충전 중 무음 시험.
+첫 조치: svc power stayon true, mStayOn=true·Awake·USB 충전 확인. 기존 값도15였으며 timeout1800000·PIN·보안 정책은 변경하지 않았다.
+기존 dev 데이터 원본을 PC에 보존한 뒤 adb install -r로 새 후보 설치. 정식 앱 변경·데이터 초기화 없음.
+시험 알람은 VM에서 제품 AlarmNotifier 경로로 등록한 NP09 임시 custom 알람이다. 실제 UI 신규 등록 시험이나 음향/진동 체감·자연 밤샘/5분 재울림 검사로 기록하지 않는다.
+
+PASS N1: 알림/overlay 모두 허용 → 현재7777 PRESENT, 시스템 팝업 직접 확인, 외부 overlay 없음. 알림창 +5m 실제 터치 → snoozed 이력5·미래 DB 예약·현재 울림 종료. 재울림 예약은 시험 뒤 취소.
+PASS N2: POST_NOTIFICATIONS 실제 거부 + overlay 허용 → BLOCKED, 외부 카드만 표시. 화면의 X 실제 터치 → swiped 이력·종료.
+PASS N3: 알림/overlay 모두 거부 → 홈에 외부 제어창 없음, 앱을 열면 내부 카드 표시. 내부 X 실제 터치 → 종료.
+PASS N4: 알림 허용 + overlay 거부 → 알림 단독 제어. 알림창 '알람 끄기' 실제 터치 → swiped 이력·종료.
+PASS 범위 N5: 실제 secure keyguard 상태의 전체화면 알람 표시(RING_PRESENTED locked=true), HOME 이탈 후 같은 회차7777 유지·재게시 확인. 이후 기존3분 timeout으로 종료됨을 확인.
+당시 대기 경위: 수동 잠금 검사에서 보안 잠금이 걸려 사용자 직접 해제를 요청했다. PIN 수집/추측/보안 우회 없음. N5 회차는 timeout으로 끝났으므로 아래 N6를 동일 회차로 합쳐 기록하지 않는다.
+N5 보완: 잠금이 남은 상태에서도 HOME 이탈 후 알림창에서 7777과 스누즈/끄기 버튼이 보인다. 실제 끄기 터치는 시스템 인증 요구로 보류되므로 성공 제어로 세지 않는다.
+PASS N6(사용자 직접 해제 후 04:44~04:46 KST): 새 무음 알람 ID12/round14, 알림 본문 실제 탭으로 AlarmActivity 표시→HOME 실제 삼성 launcher(showing=false)→같은7777 유지→알림을 펼쳐 실제 '알람 끄기' 터치.04:46:27 swiped 이력1, DB알람0·현재 울림 해제·7777 제거 확인. 화면을 다시 끄거나 잠그지 않았다.
+N6 첫 버튼 탐색은 알림이 접혀 있어 찾지 못했고, 펼침 요소의 부모/자식 XML bounds 중복은 관찰한 버튼 위치의 실제 터치로 보완했다. 알림 펼침 후 실제 끄기와 이력/상태 확인을 최종 근거로 쓴다.
+
+도구상 시행착오: POST_NOTIFICATION appop 변경만으로는 이 기기의 실제 권한이 거부되지 않았다(granted/allow 유지). 이 준비 회차를 차단 시험 PASS로 세지 않고 실제 runtime 권한 거부로 N2를 다시 검사했다. overlay는 접근성 XML에 안 나와 PNG 위치와 실제 native 클릭/종료 로그로 확인했다. 보안 잠금 화면의 XML 수집 실패는 화면/OS 로그와 구분한다.
+이번 변경에서 제품 결함은 관찰되지 않았다. 변경된 잠금해제4조합과 실제 제어, 유지된 잠금 진입/이탈 확인 및 N6 홈 제어까지 완료해 영향 범위 검증을 마감한다. N5 잠금 구간과 N6 해제 구간은 별도 회차이며 동일 알람의 PIN 해제까지 연속 실측한 것은 아니다. 모든 OS/제조사/장시간 조건의 전체 PASS로 확대하지 않는다.
+기존 제조사 Streaming 결과는 당시 후보·조건의 근거로 보존하며 이번에 새 제조사 PASS를 추가하지 않았다. 신규 Streaming 연결0. 변경 경계가 커지면 영향을 받은 시나리오를 다시 판단한다.
+
+7. 종료·후속
+시험 권한은 notification/overlay/exact/fullScreen/alarmChannel 모두 원래 granted로 복구했다. 충전 중 화면 유지 설정은 사용자 요청대로 유지한다.
+시험 알람0, NP09 시험 이력/생성 로그 정리 후 기존17테이블의 모든 행이 설치 전과 완전히 일치함을 확인했다. 설치된 APK SHA256도 위 검사 후보와 일치한다. 자료 원본은 PC의 무시 대상 artifacts 안에 보존하며 개인 배경/알림이 포함된 화면을 공개 게시하지 않는다.
+시험 알람·이력·기존 자료 정합 및 최종 상태는 evidence/notification_priority_2026_10_09.json과 artifacts 원본을 따른다.
+사용자 요청: 구현/검증/변경 문서화 후 코어 문서 전체 정독·최신화, 마지막 컴퓨터 종료. 사용자 직접 잠금 해제 후 N6 제어 보완과 시험 정리까지 완료했다. 최종17테이블 원본 일치, Awake/충전/화면 유지, keyguard showing=false를 재확인했다. 종료 명령 상태는 증거 JSON과 로컬 종료 로그에 남긴다.
+이 원장은 변경 근거이며 별도의 최신 작업 계획서가 아니다. 현재 할 일은 dev_출시전_핵심코어_체크리스트.txt를 사용한다.
+코어 문서483줄 전체 정독·정리를 완료했다. 현 작업 A11과 실제 출시 잔여를 위로 올리고, 완료 PASS/조건부 보류/대체된 계획을 분리해 아래로 옮겼다. 정리 전 원문은 evidence/core_checklist_before_2026_10_09.txt에 바이트 그대로 보존했다. 사용자 해제 후 N6 보완으로 A11 상태를 마감하고, 분리 회차의 검증 경계도 상단에 남겼다.
+
+공식 의미 확인(앞선 검토):
+https://developer.android.com/reference/android/app/NotificationManager#getActiveNotifications()
+https://developer.android.com/reference/android/app/Notification.Builder#setFullScreenIntent(android.app.PendingIntent,%20boolean)
+https://developer.android.com/reference/android/app/NotificationManager.Policy#SUPPRESSED_EFFECT_NOTIFICATION_LIST

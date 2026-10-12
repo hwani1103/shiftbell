@@ -1,0 +1,97 @@
+{
+  "date": "2026-10-09",
+  "status": "PASS within changed app-owned presentation scope",
+  "package": "com.hwani1103.shiftbell.dev",
+  "apkSha256": "13c3c8060afa6802b78d7ee5054894893f8ca931b62e1219fc0888bc40a3874e",
+  "installedHashMatches": true,
+  "device": {
+    "model": "SM-S948N",
+    "sdk": 36,
+    "locale": "ko"
+  },
+  "automated": {
+    "criticalCommand": "tools/check_critical_release.ps1 -Build",
+    "exitCode": 0,
+    "flutterTests": 324,
+    "g1": {
+      "tests": 46,
+      "failures": 0,
+      "errors": 0
+    },
+    "nativeFunctional": "PASS",
+    "nativeDatabase": "PASS",
+    "devDebug": "PASS",
+    "javascriptWeb": "PASS",
+    "releaseBuilt": false,
+    "ownedSourceHashesUnchanged": true
+  },
+  "usb": {
+    "F1": {
+      "permissions": "notification/overlay granted",
+      "alarmId": 18,
+      "round": 6,
+      "result": "PASS",
+      "checks": [
+        "button over calendar date sheet and keyboard",
+        "no automatic expanded card",
+        "explicit expand/collapse",
+        "home/resume",
+        "four enabled tabs",
+        "actual 5-minute snooze; controls removed"
+      ],
+      "snoozeTarget": "2026-10-09T20:02:41+09:00"
+    },
+    "F2": {
+      "permissions": "notification/overlay denied",
+      "alarmId": 30,
+      "round": 7,
+      "result": "PASS",
+      "checks": [
+        "button without either permission",
+        "tap controls",
+        "Back collapse preserves ring",
+        "home/resume",
+        "actual X dismissal; no live ring/button"
+      ]
+    },
+    "calendar": {
+      "result": "PASS",
+      "checks": [
+        "read-only live snooze card",
+        "cancel updates open popup",
+        "fixed type changed 3 to 1 with override",
+        "five fixed cards scroll",
+        "next-day 00:03 fixture under next date"
+      ],
+      "nextDayFixtureNotNaturalMidnight": true
+    }
+  },
+  "cleanup": {
+    "tables": 17,
+    "exactOriginalMatch": true,
+    "activeRing": false,
+    "testAlarms": 0,
+    "permissionsRestored": true,
+    "awake": true,
+    "chargingStayOn": true
+  },
+  "limits": [
+    "system heads-up can cover button temporarily",
+    "explicit opening can coexist with system heads-up",
+    "fold widths/locales and stale round races are host checks, not all foldable USB checks",
+    "no manufacturer Streaming rerun",
+    "initial F2 captures precede actual alarm; use F2_live_*"
+  ],
+  "artifacts": "artifacts/in_app_alarm_button_2026_10_09",
+  "sourceHashes": {
+    "android/app/src/main/kotlin/com/hwani1103/shiftbell/InAppAlarmController.kt": "d10ef4a515f97168902272a346417ccba49999ec84873f76197d35519c2a0e55",
+    "android/app/src/main/res/values/in_app_alarm_ids.xml": "c34c970ed57db619005ee7895bcd252928da080f0f84f0f2e1b80bb0aa43f888",
+    "android/app/src/main/res/drawable/ic_alarm_collapse.xml": "d4d2e845cb1608d17a18a3d22ccdee4665bc39911f66c451d6e1726e6f0d5a14",
+    "android/app/src/test/kotlin/com/hwani1103/shiftbell/G1RingRoundTest.kt": "d9571d7d842988e4f918f23cc4c8137c4f22844e918bd4138b7ed4c52d55e289",
+    "android/app/src/main/res/values/strings.xml": "45874baf499e123ddbb7b7dc0e63e870bc418a2374ddd6d61cec4bb14f76a7b5",
+    "android/app/src/main/res/values-ko/strings.xml": "a1c5ab930d910918cc9c3b4d5a3414c8fb46d03aad27cf5161c592db7a3d060c",
+    "android/app/src/main/res/values-de/strings.xml": "6a9a096abc587bc225c5dc39ed2666e48e45d2f90cd6ca2cc290e3087421373d",
+    "android/app/src/main/res/values-pt/strings.xml": "c27397e415add0da517b97336d56445d9e97e22a9f398e8d46cb23a15035f230",
+    "android/app/src/main/res/values-hi/strings.xml": "64ab9a7750b15ccb0c823916530169cef2549c1b720bef4becc51c0b72293c46"
+  }
+}

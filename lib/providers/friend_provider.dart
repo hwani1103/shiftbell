@@ -6,6 +6,7 @@
 // 둘 다 네트워크에 의존하고, 실패해도(오프라인 등) 친구 자체는 등록/유지되고 캐시된
 // 마지막 데이터를 보여줌.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/widgets.dart';
 import '../models/friend_schedule.dart';
 import '../services/database_service.dart';
 import '../services/friend_share_service.dart';
@@ -37,6 +38,7 @@ class FriendEntry {
 }
 
 class FriendNotifier extends StateNotifier<List<FriendEntry>> {
+  bool get _koreanLanguage => WidgetsBinding.instance.platformDispatcher.locale.languageCode == 'ko';
   FriendNotifier() : super([]) {
     _initialLoad = load();
   }
@@ -57,6 +59,7 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
 
   Future<void> load() async {
     final rows = await _db.getAllFriends();
+    if (!mounted) return;
     state = rows.map((row) {
       final rawJson = row['data_json'] as String?;
       return FriendEntry(
@@ -77,14 +80,17 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
   // 않아요/이미 추가된 친구예요" 안내). Firestore 조회 자체가 실패해도(오프라인 등)
   // 친구는 일단 등록됨 - 데이터는 나중에 "새로고침"으로 다시 받을 수 있음.
   Future<bool> addFriend({required String displayName, required String code}) async {
+    if (!_koreanLanguage) return false;
     final ownerId = FriendShareService.decodeOwnerId(code);
     if (ownerId == null) return false;
 
     final existing = await _db.getAllFriends();
+    if (!_koreanLanguage) return false;
     if (existing.any((row) => row['owner_id'] == ownerId)) return false;
 
     final fetch =
         await FriendSyncService.instance.fetchByOwnerIdDetailed(ownerId);
+    if (!_koreanLanguage) return false;
     if (fetch.serverConfirmedUnavailable ||
         fetch.status == FriendFetchStatus.invalid) {
       return false;
@@ -113,8 +119,10 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
 
   Future<FriendRefreshResult> _refreshWithoutLoad(
       int id, String ownerId) async {
+    if (!_koreanLanguage) return FriendRefreshResult.unavailable;
     final fetch =
         await FriendSyncService.instance.fetchByOwnerIdDetailed(ownerId);
+    if (!_koreanLanguage) return FriendRefreshResult.unavailable;
     switch (fetch.status) {
       case FriendFetchStatus.found:
         await _db.updateFriendData(
@@ -157,9 +165,11 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
   /// - [force]=true(pull-to-refresh 등 사용자가 명시적으로 당겼을 때): 스로틀
   ///   무시하고 무조건 새로 받아옴.
   Future<void> refreshAll({bool force = false}) async {
+    if (!_koreanLanguage) return;
     // 화면 첫 frame의 자동 새로고침이 SQLite 초기 load보다 먼저 빈 state를 보는
     // 경합을 막는다.
     await _initialLoad;
+    if (!mounted || !_koreanLanguage) return;
     if (!force && _lastRefreshAllAt != null &&
         DateTime.now().difference(_lastRefreshAllAt!) < _refreshAllThrottle) {
       return;
@@ -167,8 +177,10 @@ class FriendNotifier extends StateNotifier<List<FriendEntry>> {
     _lastRefreshAllAt = DateTime.now();
     final snapshot = List<FriendEntry>.from(state);
     for (final friend in snapshot) {
+      if (!mounted) return;
       await _refreshWithoutLoad(friend.id, friend.ownerId);
     }
+    if (!mounted) return;
     // 친구마다 전체 SQLite 목록을 다시 읽지 않고 모든 fetch/update 뒤 한 번만 읽는다.
     await load();
   }

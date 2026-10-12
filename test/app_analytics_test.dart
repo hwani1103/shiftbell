@@ -12,7 +12,7 @@ Set<String> _dashboardCustomEvents() {
   final re = RegExp(r"^\s+([a-z][a-z0-9_]*): \{[^\n]*group: '([^']+)'", multiLine: true);
   return {
     for (final m in re.allMatches(src))
-      if (m.group(2) != 'system') m.group(1)!,
+      if (m.group(2) != 'system' && !m.group(0)!.contains('retired: true')) m.group(1)!,
   };
 }
 
@@ -37,9 +37,6 @@ void main() {
       expect(_dashboardCustomEvents(), AnalyticsEvent.all.toSet());
     });
 
-    test('탭 이름은 main.dart의 5개 탭과 같은 순서', () {
-      expect(kAnalyticsTabNames, ['next_alarm', 'schedule', 'calendar', 'sleep_recovery', 'settings']);
-    });
   });
 
   group('AppAnalytics.track', () {

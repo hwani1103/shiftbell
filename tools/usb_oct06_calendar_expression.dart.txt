@@ -1,0 +1,45 @@
+(() {
+  void check(bool value,String message){if(!value)throw StateError(message);}
+  var months=0;var boundaries=0;
+  for(final year in [2024,2026,2027,2028]) {
+    for(var month=1;month<=12;month++) {
+      final count=DateTime.utc(year,month+1,0).day;
+      final assigned=<String,String>{};final ot=<String,int>{};var expected=0;
+      for(var day=1;day<=count;day++) {
+        final key=dateKey(DateTime.utc(year,month,day));
+        if(day%7!=0){assigned[key]=day%3==0?'Off':'Day';expected+=day%3==0?0:480;}
+        if(day%2==0){ot[key]=day;expected+=day;}
+      }
+      final s=ShiftSchedule(isRegular:false,shiftTypes:const ['Day','Off'],assignedDates:assigned,shiftDurations:const {'Day':480,'Off':0});
+      final start=DateTime(year,month,1);final end=DateTime(year,month,count);
+      check(computeTotalWorkMinutes(schedule:s,start:start,end:end,otByDate:ot)==expected,'monthly total $year-$month');
+      final sum=computeWeekSummary(schedule:s,weekStart:start,weekEnd:end,otByDate:ot);
+      check(sum.totalMinutes==expected,'summary $year-$month');
+      check(sum.shiftDayCounts.values.fold<int>(0,(a,b)=>a+b)==assigned.length,'day count');
+      final entries=computeOtDisplayEntries(schedule:s,start:start,end:end,manualOtByDate:ot,countShiftChangeAsOt:true);
+      check(entries.map((e)=>dateKey(e.date)).join(',')==ot.keys.join(','),'OT dates');
+      check(computeOtDisplayTotal(entries)==ot.values.fold<int>(0,(a,b)=>a+b),'OT total');
+      final weeks=weeksCoveringMonth(start);final days=<String>[];
+      for(final w in weeks){check(w.start.weekday==1 && w.end.weekday==7,'week endpoints');
+        final a=DateTime.utc(w.start.year,w.start.month,w.start.day);final b=DateTime.utc(w.end.year,w.end.month,w.end.day);
+        check(b.difference(a).inDays==6,'seven dates');
+        for(var i=0;i<7;i++){days.add(dateKey(a.add(Duration(days:i))));}}
+      check(days.toSet().length==days.length,'week duplicate');
+      for(var day=1;day<=count;day++){check(days.contains(dateKey(DateTime.utc(year,month,day))),'missing covered date');}
+      months++;
+    }
+  }
+  final details=<String>[];
+  for(final pair in [[3,7],[3,28],[10,24],[10,31],[4,4],[10,3]]) {
+    final start=DateTime(2026,pair[0],pair[1]);final end=DateTime(2026,pair[0],pair[1]+2);
+    final assigned=<String,String>{};final ot=<String,int>{};
+    for(var i=0;i<3;i++){final k=dateKey(DateTime.utc(2026,pair[0],pair[1]+i));assigned[k]='Day';ot[k]=(i+1)*10;}
+    final s=ShiftSchedule(isRegular:false,shiftTypes:const ['Day'],assignedDates:assigned,shiftDurations:const {'Day':480});
+    final sum=computeWeekSummary(schedule:s,weekStart:start,weekEnd:end,otByDate:ot);
+    check(sum.totalMinutes==1500 && sum.shiftDayCounts['Day']==3,'boundary ${pair}');
+    final entries=computeOtDisplayEntries(schedule:s,start:start,end:end,manualOtByDate:ot,countShiftChangeAsOt:true);
+    check(entries.map((e)=>dateKey(e.date)).join(',')==ot.keys.join(','),'boundary OT');
+    if(start.timeZoneOffset!=end.timeZoneOffset){boundaries++;details.add('${dateKey(start)}:${start.timeZoneOffset.inMinutes}->${end.timeZoneOffset.inMinutes}');}
+  }
+  return 'PASS months=$months DST_boundaries=$boundaries details=$details janOffset=${DateTime(2026,1,1).timeZoneOffset.inMinutes} julOffset=${DateTime(2026,7,1).timeZoneOffset.inMinutes}';
+})()

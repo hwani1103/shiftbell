@@ -7,9 +7,8 @@
      다른 행 수로 해석해 런처마다 다른 크기가 보였다. 그래서 min 값과 target 값을 항상 같은 칸 수로
      맞춘다.
 
-     ⭐ 2026-09-22 - 3x1(180x40) → **2x1(110x40)**. 보이는 것이 근무명/수면/기상 세 가지뿐이라
-     한 줄에 다 들어간다(sleep_widget.xml 참고). 좁은 화면에서 겹치지 않는 것은 이 파일이 아니라
-     레이아웃이 책임진다 - 칩 폭은 Kotlin이 런처가 알려준 실제 폭으로 계산한다. -->
+     ⭐ 2x1(110x40) 유지. 윗줄에 앱 아이콘·근무명, 아랫줄에 수면·기상 버튼을 배치한다.
+     좁은 화면에서의 칩 폭과 글자 크기는 SleepWidgetProvider가 실제 위젯 폭에 맞춰 계산한다. -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="110dp"
     android:minHeight="40dp"

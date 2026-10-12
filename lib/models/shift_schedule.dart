@@ -34,7 +34,7 @@ enum ShiftNameIssue { empty, tooLong, comma, reserved, duplicate }
 ShiftNameIssue? validateShiftName(String name, {Iterable<String> otherNames = const []}) {
   final trimmed = name.trim();
   if (trimmed.isEmpty) return ShiftNameIssue.empty;
-  if (trimmed.length > kMaxShiftNameLength) return ShiftNameIssue.tooLong;
+  if (trimmed.characters.length > shiftNameLengthLimit(trimmed)) return ShiftNameIssue.tooLong;
   if (trimmed.contains(',')) return ShiftNameIssue.comma;
   if (kReservedShiftNames.contains(trimmed)) return ShiftNameIssue.reserved;
   if (otherNames.contains(trimmed)) return ShiftNameIssue.duplicate;

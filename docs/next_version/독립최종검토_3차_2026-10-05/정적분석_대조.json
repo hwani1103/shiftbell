@@ -1,0 +1,499 @@
+[
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 11,
+    "code": "unnecessary_import",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 146,
+    "code": "use_build_context_synchronously",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 149,
+    "code": "use_build_context_synchronously",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 150,
+    "code": "use_build_context_synchronously",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 160,
+    "code": "curly_braces_in_flow_control_structures",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 315,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 538,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 549,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 576,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 608,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 632,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 651,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 660,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 665,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 677,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 681,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 688,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 718,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 741,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 748,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 760,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 806,
+    "code": "use_build_context_synchronously",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 809,
+    "code": "use_build_context_synchronously",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 816,
+    "code": "use_build_context_synchronously",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 819,
+    "code": "use_build_context_synchronously",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 829,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 839,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 851,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 853,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 864,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 866,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 988,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1004,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1015,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1039,
+    "code": "curly_braces_in_flow_control_structures",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1070,
+    "code": "curly_braces_in_flow_control_structures",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1107,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1151,
+    "code": "avoid_print",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1193,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1219,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1296,
+    "code": "avoid_print",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1303,
+    "code": "avoid_print",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1313,
+    "code": "avoid_print",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1435,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1443,
+    "code": "unnecessary_to_list_in_spreads",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1456,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1686,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1689,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1744,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1746,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1752,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 1914,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2060,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2060,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2087,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2144,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2384,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2430,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2549,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2556,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2562,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2600,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2607,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2613,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2688,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2816,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2826,
+    "code": "prefer_const_constructors",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/screens/settings_tab.dart",
+    "line": 2830,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/widgets/onboarding_info_popups.dart",
+    "line": 68,
+    "code": "curly_braces_in_flow_control_structures",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/widgets/onboarding_info_popups.dart",
+    "line": 168,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  },
+  {
+    "severity": "info",
+    "path": "lib/widgets/onboarding_info_popups.dart",
+    "line": 205,
+    "code": "deprecated_member_use",
+    "unchanged_source_line": true
+  }
+]

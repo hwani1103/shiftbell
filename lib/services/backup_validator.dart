@@ -9,6 +9,8 @@
 // 무해한 상태라 거부하지 않는다.
 
 import 'package:sqflite/sqflite.dart';
+import 'dart:convert';
+import '../models/team_schedule_config.dart';
 
 import '../models/backup_payload.dart';
 import '../models/shift_schedule.dart';
@@ -68,6 +70,28 @@ class BackupValidator {
     }
 
     _checkShiftSchedule(tables['shift_schedule'] ?? const [], issues);
+    final rosters = tables['team_schedule_config'] ?? const [];
+    if (rosters.length > 1) issues.add('Multiple team rosters');
+    for (final row in rosters) {
+      if (row['id'] != 1) issues.add('Invalid roster row');
+      if (row['config'] == null) continue;
+      try {
+        final config = TeamScheduleConfig.fromJson(jsonDecode(row['config'] as String) as Map<String, dynamic>);
+        final schedules = tables['shift_schedule'] ?? const [];
+        if (schedules.length != 1) throw const FormatException('Missing main schedule');
+        final schedule = ShiftSchedule.fromMap(schedules.single);
+        if (!schedule.shiftTypes.toSet().containsAll(config.referencedShifts)) {
+          throw const FormatException('Unknown roster shift');
+        }
+        final mine = config.rules[config.myTeam]!;
+        if (jsonEncode(mine.shifts) != jsonEncode(schedule.pattern) ||
+            mine.indexOn(TeamScheduleConfig.baseDate) != schedule.getPatternIndexForDate(TeamScheduleConfig.baseDate)) {
+          throw const FormatException('Roster/main schedule mismatch');
+        }
+      } catch (_) {
+        issues.add('Invalid team roster');
+      }
+    }
 
     for (final row in tables['shift_alarm_templates'] ?? const <Map<String, dynamic>>[]) {
       final shift = row['shift_type'];
@@ -77,6 +101,26 @@ class BackupValidator {
       if (!typeIds.contains(row['alarm_type_id'])) issues.add('template alarm_type_id unknown ${row['alarm_type_id']}');
     }
 
+    final consumedKeys = <String>{};
+    for (final row in tables['fixed_alarm_consumptions'] ?? const <Map<String, dynamic>>[]) {
+      if (!_isDbDateTime(row['slot_time'], allowFraction: false) ||
+          !_isOffset(row['day_offset']) || row['shift_type'] is! String ||
+          (row['shift_type'] as String).isEmpty ||
+          !consumedKeys.add('${row['slot_time']}|${row['shift_type']}|${row['day_offset']}')) {
+        issues.add('invalid/duplicate consumed fixed slot');
+      }
+    }
+    for (final row in tables['alarm_history'] ?? const <Map<String, dynamic>>[]) {
+      final minutes = row['snooze_minutes'];
+      if (minutes != null &&
+          (minutes is! int || !const {5, 10, 15, 20, 25, 30}.contains(minutes))) {
+        issues.add('history snooze_minutes invalid');
+      }
+      if (row['fixed_slot_time'] != null &&
+          !_isDbDateTime(row['fixed_slot_time'], allowFraction: false)) {
+        issues.add('history fixed_slot_time invalid');
+      }
+    }
     final overrideKeys = <String>{};
     for (final row in tables['alarm_overrides'] ?? const <Map<String, dynamic>>[]) {
       final action = row['action'];
@@ -99,6 +143,7 @@ class BackupValidator {
 
     for (final row in tables[kBackupAlarmsTable] ?? const <Map<String, dynamic>>[]) {
       if (row['type'] != 'custom') issues.add('alarms row not custom (${row['type']})');
+      if (row['fixed_slot_time'] != null) issues.add('custom alarm cannot have a fixed origin');
       if (!_isDbDateTime(row['date'], allowFraction: true)) issues.add('alarms date invalid');
       if (!_isHm(row['time'])) issues.add('alarms time invalid');
       if (!typeIds.contains(row['alarm_type_id'])) issues.add('alarms alarm_type_id unknown');
@@ -224,8 +269,18 @@ class BackupValidator {
   // 알람 date는 Dart toIso8601String의 밀리초가 붙을 수 있어 허용, 예외 slot_time은 초 단위 고정.
   static final _dbDateTime = RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$');
   static final _dbDateTimeFraction = RegExp(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?$');
-  static bool _isDbDateTime(Object? v, {required bool allowFraction}) =>
-      v is String && (allowFraction ? _dbDateTimeFraction : _dbDateTime).hasMatch(v) && DateTime.tryParse(v) != null;
+  static bool _isDbDateTime(Object? v, {required bool allowFraction}) {
+    if (v is! String ||
+        !(allowFraction ? _dbDateTimeFraction : _dbDateTime).hasMatch(v)) {
+      return false;
+    }
+    // DateTime.parse normalizes Feb 30, month 13, 24:00 and minute/second 60.
+    // Validate the wall-clock fields in UTC so the host's DST gap does not
+    // reject a legitimate local time that the alarm engine resolves later.
+    final wall = v.substring(0, 19);
+    final parsed = DateTime.tryParse('${wall}Z');
+    return parsed != null && parsed.toIso8601String().startsWith(wall);
+  }
   static bool _isDate(Object? v) {
     if (v is! String || !_dateKey.hasMatch(v)) return false;
     final parsed = DateTime.tryParse(v);

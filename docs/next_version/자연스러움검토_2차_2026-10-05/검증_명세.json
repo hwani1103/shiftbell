@@ -1,0 +1,77 @@
+{
+  "base_commit": "080ca5913dbe9787c15fa7d60baca95b805075ed",
+  "state": "미커밋 작업 트리",
+  "reviewed": 2944,
+  "changes": 12,
+  "resources": {
+    "lib\\l10n\\app_pt.arb": {
+      "before_sha256": "ff6dcb576c3350140d8d91caeba19e3839a7dc0a438166181bb15a8d5782c2c4",
+      "after_sha256": "ff6dcb576c3350140d8d91caeba19e3839a7dc0a438166181bb15a8d5782c2c4"
+    },
+    "lib\\l10n\\app_de.arb": {
+      "before_sha256": "df9031f4c2ec3b094b0eeeee6dd0b42f137bc10ac34c43fd50b00f331fc805c6",
+      "after_sha256": "5e752811149d3dcd273337d5dac4e3351e44dd556057224dc3225797a23a13b3"
+    },
+    "lib\\l10n\\app_en.arb": {
+      "before_sha256": "755cbd9b19c2591df37e17293ebc4a03723a5a51ba1167374b2b1ec4b489e6ba",
+      "after_sha256": "5ad58366bf44fe9a64d2f906295071e971d35670bdd88b99a955373167c78589"
+    },
+    "lib\\l10n\\app_hi.arb": {
+      "before_sha256": "98ae90bb250cdfe7cec51427ac354dd1ce0be1ce1097f4e388f628a1bb3aff2c",
+      "after_sha256": "53d5ac7a4dbfd64b6c90ba579c2fb5c864b1a2f33f9cecee6797fc3a1e7807a9"
+    },
+    "android\\app\\src\\main\\res\\values-pt\\strings.xml": {
+      "before_sha256": "30aafeb1f9012822ea6cfa50d37502b7a0256e0bf5bdc7e483e9c776359bffdd",
+      "after_sha256": "30aafeb1f9012822ea6cfa50d37502b7a0256e0bf5bdc7e483e9c776359bffdd"
+    },
+    "android\\app\\src\\main\\res\\values-de\\strings.xml": {
+      "before_sha256": "330b9345bd7990f9ed5686a4bc85926b567669b1d24f593219fd0cc8dd082b41",
+      "after_sha256": "330b9345bd7990f9ed5686a4bc85926b567669b1d24f593219fd0cc8dd082b41"
+    },
+    "android\\app\\src\\main\\res\\values\\strings.xml": {
+      "before_sha256": "965320912befff4543a8994ef7a5f24a340d349b58e8ceb8bd119aac326b7833",
+      "after_sha256": "965320912befff4543a8994ef7a5f24a340d349b58e8ceb8bd119aac326b7833"
+    },
+    "android\\app\\src\\main\\res\\values-hi\\strings.xml": {
+      "before_sha256": "72ea77d7019343fcbf857b791d3c7fc7a80881dd446c39aec71548511424270f",
+      "after_sha256": "72ea77d7019343fcbf857b791d3c7fc7a80881dd446c39aec71548511424270f"
+    }
+  },
+  "layout": "미수행",
+  "third_review": "미수행",
+  "checks": {
+    "resource_errors": 0,
+    "exact_delta_vs_start": 12,
+    "unchanged_android_files": 4,
+    "pt_unchanged": true,
+    "ledger_rows": 2944,
+    "ledger_matches_resources": true,
+    "flutter_gen_l10n": "passed",
+    "flutter_tests": 12,
+    "native_tests": "not rerun; native resources unchanged in second pass"
+  },
+  "per_language": {
+    "pt-BR": {
+      "reviewed": 736,
+      "changed": 0,
+      "retained": 736
+    },
+    "de-DE": {
+      "reviewed": 736,
+      "changed": 2,
+      "retained": 734
+    },
+    "en-US/en-GB": {
+      "reviewed": 736,
+      "changed": 3,
+      "retained": 733
+    },
+    "hi-IN": {
+      "reviewed": 736,
+      "changed": 7,
+      "retained": 729
+    }
+  },
+  "unseen_ui_arb_keys_per_language": 70,
+  "native_speaker_validation": "not performed"
+}

@@ -24,6 +24,8 @@ import '../models/alarm_template.dart';
 import '../models/shift_schedule.dart';
 import '../constants/alarm_day_offset.dart';
 import 'database_service.dart';
+import '../utils/alarm_wall_time.dart';
+import 'fixed_alarm_occurrence.dart';
 
 class PendingFixedAlarm {
   final DateTime dateTime;
@@ -31,6 +33,7 @@ class PendingFixedAlarm {
   final int alarmTypeId;
   final String shiftType;
   final int dayOffset;
+  final String? fixedSlotTime;
 
   PendingFixedAlarm({
     required this.dateTime,
@@ -38,6 +41,7 @@ class PendingFixedAlarm {
     required this.alarmTypeId,
     required this.shiftType,
     required this.dayOffset,
+    this.fixedSlotTime,
   });
 }
 
@@ -78,6 +82,8 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
   required List<AlarmTemplate> allTemplates,
   DateTime? now,
   Map<String, AlarmOverrideEntry> overrides = const {},
+  DateTime Function(DateTime wall)? resolveTime,
+  Set<String> consumedOccurrences = const {},
 }) {
   final effectiveNow = now ?? DateTime.now();
   final dayBefore = DateTime(date.year, date.month, date.day - 1);
@@ -93,17 +99,19 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
     if (shiftType == kUnsetShiftSentinel) return;
     for (final template in allTemplates) {
       if (template.shiftType != shiftType || template.dayOffset != offset) continue;
-      if (byTime.containsKey(template.time)) continue; // ⭐ 이미 다른 근무가 이 시각을 선점
 
       final timeParts = template.time.split(':');
       if (timeParts.length < 2) continue;
-      final alarmTime = DateTime(
+      final wallTime = DateTime.utc(
         date.year,
         date.month,
         date.day,
         int.parse(timeParts[0]),
         int.parse(timeParts[1]),
       );
+      final alarmTime = (resolveTime ?? resolveAlarmWallTime)(wallTime);
+      final resolvedTime = '${_two(alarmTime.hour)}:${_two(alarmTime.minute)}';
+      if (byTime.containsKey(resolvedTime)) continue;
 
       // ⭐ 2026-08-25 - 예전엔 "now - 1분"까지 봐주는 유예가 있었는데, 이 함수가
       // (규모가 커진 regenerateFixedAlarmsForDatesTxn을 통해) 실제 delete 쿼리와
@@ -115,12 +123,13 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
       // 쿼리의 "date > ?" 경계와 반드시 같은 now를 써야 함).
       if (!alarmTime.isAfter(effectiveNow)) continue;
 
-      byTime[template.time] = PendingFixedAlarm(
+      byTime[resolvedTime] = PendingFixedAlarm(
         dateTime: alarmTime,
-        time: template.time,
+        time: resolvedTime,
         alarmTypeId: template.alarmTypeId,
         shiftType: shiftType,
         dayOffset: offset,
+        fixedSlotTime: alarmSlotTime(wallTime),
       );
     }
   }
@@ -134,6 +143,9 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
   // 되살아나지 않게), set_type이면 타입만 바꿈. AlarmRefreshEngine.computeDesiredAlarms와 같은 규칙.
   final result = <PendingFixedAlarm>[];
   for (final alarm in byTime.values) {
+    if (consumedOccurrences.contains(fixedOccurrenceKey(
+        alarm.fixedSlotTime ?? alarmSlotTime(alarm.dateTime),
+        alarm.shiftType, alarm.dayOffset))) continue;
     final override = overrides[alarmSlotKey(alarmSlotTime(alarm.dateTime), alarm.shiftType, alarm.dayOffset)];
     if (override == null) {
       result.add(alarm);
@@ -146,6 +158,7 @@ List<PendingFixedAlarm> computeDesiredFixedAlarmsForDate({
         alarmTypeId: override.alarmTypeId!,
         shiftType: alarm.shiftType,
         dayOffset: alarm.dayOffset,
+        fixedSlotTime: alarm.fixedSlotTime,
       ));
     } else {
       result.add(alarm);
@@ -202,17 +215,31 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
   final allTemplates = templateMaps.map((m) => AlarmTemplate.fromMap(m)).toList();
   // ⭐ 2026-09-14 (#31) - 개별 예외를 같은 트랜잭션에서 읽어 계산에 적용(Flutter 재생성도 사용자 변경을 원복하지 않게)
   final overrides = await readAlarmOverrides(txn);
+  final sortedDates = dates.toList()..sort();
+  final consumed = sortedDates.isEmpty ? <String>{} : await readConsumedFixedOccurrences(
+    txn, alarmSlotTime(DateTime(sortedDates.first.year, sortedDates.first.month, sortedDates.first.day)),
+    alarmSlotTime(DateTime(sortedDates.last.year, sortedDates.last.month, sortedDates.last.day + 1)));
 
   for (final date in dates) {
     final dateStr = date.toIso8601String().split('T')[0];
 
-    final desired = computeDesiredFixedAlarmsForDate(
+    final customRows = await txn.query('alarms',
+        columns: ['date'], where: 'type = ? AND date LIKE ?', whereArgs: ['custom', '$dateStr%']);
+    final occupiedTimes = customRows
+        .map((row) => tryParseAlarmDate(row['date'] as String?))
+        .whereType<DateTime>()
+        .map(alarmSlotTime)
+        .toSet();
+    final calculated = computeDesiredFixedAlarmsForDate(
       date: date,
       schedule: schedule,
       allTemplates: allTemplates,
       now: now,
       overrides: overrides,
+      consumedOccurrences: consumed,
     );
+    final desired = calculated.where((alarm) => !occupiedTimes.contains(alarmSlotTime(alarm.dateTime))).toList();
+
     String desiredKey(PendingFixedAlarm alarm) =>
         '${alarmSlotKey(alarmSlotTime(alarm.dateTime), alarm.shiftType, alarm.dayOffset)}|${alarm.alarmTypeId}';
     String existingKey(Alarm alarm) =>
@@ -223,7 +250,9 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
     }
 
     // 1단계: 같은 슬롯은 보존하고, 새 계산에 없는 기존 고정 알람만 삭제 + 이력 기록.
-    // ⭐ 2026-08-25 - CRITICAL FIX: "AND date > ?"(now)를 반드시 추가해야 함.
+    // Only future instants may be replaced. The check below uses parsed
+    // timestamps, since local SQL text order is not chronological at DST overlap.
+    // ⭐ 2026-08-25 - 기존 SQL "AND date > ?"가 보호하던 울리는 행도 그대로 보호한다.
     // 예전(이 함수 이전의 단일 날짜 버전들)엔 이 시간 경계가 없어서, 지금 막
     // 울리고 있는(또는 방금 지나간) 알람도 "이 날짜의 알람"으로 걸려서 그냥
     // 지워졌음. 아래 computeDesiredFixedAlarmsForDate()는 과거 시각을 절대 다시
@@ -237,14 +266,23 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
     // 책임지므로 여기서 손댈 필요도 없음.
     final existingRows = await txn.query(
       'alarms',
-      where: 'date LIKE ? AND type = ? AND date > ?',
-      whereArgs: ['$dateStr%', 'fixed', now.toIso8601String()],
+      where: 'date LIKE ? AND type = ?',
+      whereArgs: ['$dateStr%', 'fixed'],
     );
     for (final row in existingRows) {
       final alarm = Alarm.fromMap(row);
+      if (alarm.date != null && !alarm.date!.isAfter(now)) continue;
       if (alarm.date != null) {
         final matches = remainingDesired[existingKey(alarm)];
         if (matches != null && matches.isNotEmpty) {
+          if (row['fixed_slot_time'] != matches.first.fixedSlotTime) {
+            await txn.update('alarms', {'fixed_slot_time': matches.first.fixedSlotTime},
+                where: 'id = ?', whereArgs: [alarm.id]);
+          }
+          if (alarm.time != matches.first.time) {
+            await txn.update('alarms', {'time': matches.first.time},
+                where: 'id = ?', whereArgs: [alarm.id]);
+          }
           matches.removeAt(0);
           continue;
         }
@@ -275,6 +313,7 @@ Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
         alarmTypeId: item.alarmTypeId,
         shiftType: item.shiftType,
         dayOffset: item.dayOffset,
+        fixedSlotTime: item.fixedSlotTime,
       );
       final dbId = await txn.insert('alarms', alarm.toMap());
       await DatabaseService.instance.logAlarmCreation(txn, dbId, alarm, 'auto');

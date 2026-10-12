@@ -1,0 +1,18 @@
+온보딩 설정 버튼 색 유지 / 설정 복귀 전환 간격 — 2026-10-10
+
+A05/A09 변경 영향
+- 온보딩 설정 버튼은 처리 중 비활성화되어도 글자/배경/테두리 색 유지. 눌림 overlay/잉크 splash/버튼 상태 애니메이션 제거. 중복 탭 방지는 유지.
+- 실제 권한 허용을 확인한 뒤 다음 설정을 열기 전에 350ms 대기. 대기 후 snapshot 재조회하고 요청 세대, 화면 활성, 앱 resumed, 도움말/처리 상태, 방금 허용한 권한을 다시 확인.
+- 다른 버튼 수동 선택/앱이 foreground를 벗어남/도움말 열기/dispose 시 대기 취소. 거부/확인 불가/해당 없음은 자동 다음으로 처리하지 않음.
+- 권한 설정을 열었다는 사실을 허용으로 판단하지 않는다. 이전 7777 정정 및 온보딩 버튼 배치 유지.
+
+검증
+- 기존 사용자 테스트 미실행 지시 유지: 테스트/정적 분석/P0 전체 실행 미실시. 이번 변경의 실기기 PASS를 주장하지 않음.
+- dev debug APK 빌드 성공(exit0, assembleDevDebug 94.8초). release/웹 빌드/기기 설치/핫리로드 미실시.
+- 변경 전 permission_panel.dart 및 빌드 전 대상 소스 해시 보존. 기존 미커밋 작업·보고서·APK 증거 보존.
+- 로그: artifacts/permission_button_transition_2026_10_10/dev_debug_build.log
+
+APK: artifacts/permission_button_transition_2026_10_10/shiftbell-permission-smooth-dev-debug.apk
+SHA256: e3accafe225efbca81f3e4a96c7ab8be6599d25941ff4124ddf1dc2d44e8ab69
+빌드 중 대상4파일 변경: 없음
+증거: evidence/permission_button_transition_2026_10_10.json

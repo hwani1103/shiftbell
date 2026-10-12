@@ -1,0 +1,956 @@
+﻿파일,진입점수,진입점,주의
+lib/screens/all_alarms_history_view.dart,6,"60: Future<void> _loadData() async {
+225: Future<void> _deleteAllHistory() async {
+227: final confirm = await showDialog<bool>(
+252: onPressed: () => Navigator.pop(context, false),
+257: onPressed: () => Navigator.pop(context, true),
+325: onPressed: _alarmsWithHistory.isEmpty ? null : _deleteAllHistory,",정적 목록화는 동작 통과 판정이 아님
+lib/screens/all_shifts_view.dart,10,"90: Future<void> _loadTeamData() async {
+148: Future<void> _openAllTeamsSetupScreen() async {
+159: showDialog(
+166: onPressed: () => Navigator.pop(context),
+267: onPressed: () => _openAllTeamsSetupScreen(),
+280: onPressed: () => Navigator.pop(context),
+315: onTap: _jumpToCurrentMonth,
+368: onTap: () =>
+705: onPressed: widget.onPrevMonth,
+710: onPressed: widget.onNextMonth,",정적 목록화는 동작 통과 판정이 아님
+lib/screens/all_teams_setup_screen.dart,13,"181: Future<void> _openRosterEditor() async {
+182: await showModalBottomSheet<void>(
+253: Future<void> _save() async {
+325: onPressed: _openRosterEditor,
+362: onTap: () => _selectMyTeam(e),
+387: onTap: () => _toggleOtherTeam(e),
+415: onTap: () => _pickForAssignment(e),
+445: onPressed: () => Navigator.pop(context),
+453: onPressed: _canSave ? _save : null,
+536: onTap: () => onTapSlot(index),
+704: onTap: () => _remove(entry),
+745: onTap: _add,
+801: onPressed: _done,",정적 목록화는 동작 통과 판정이 아님
+lib/screens/calendar_tab.dart,89,"337: showDialog(
+352: onPressed: () => Navigator.pop(context),
+369: onPressed: selectedYear > minYear
+384: onPressed: selectedYear < maxYear
+411: onTap: () {
+591: onPressed:
+710: onPressed: () {
+1178: onTap:
+1192: onTap: _openFriendShare,
+1202: onTap: _jumpToToday,
+1281: onPressed: () => _showBulkAssignSheet(schedule),
+1389: onTap: () => _showMonthlyOvertimeSheet(period),
+1438: onTap: _showWeeklyWorkHoursSheet,
+1498: onTap: _openAllShiftsView,
+1506: onTap: _openFriendShare,
+1513: onTap: _jumpToToday,
+1576: showModalBottomSheet(
+1821: showModalBottomSheet(
+2063: onTap: () => notifier.adjust(dateStr, -60),
+2071: onTap: () => notifier.adjust(dateStr, 60),
+2085: onTap: () => notifier.adjust(dateStr, -30),
+2093: onTap: () => notifier.adjust(dateStr, 30),
+2114: onTap: enabled ? onTap : null,
+2466: onTap: _showMonthYearPicker,
+2474: onTap: _showMonthYearPicker,
+2494: onTap: _showMonthYearPicker,
+2503: onTap: _showMonthYearPicker,
+2511: onTap: _showMonthYearPicker,
+2530: onTap: _showMonthYearPicker,
+2538: onTap: _showMonthYearPicker,
+2565: onTap: _showMonthYearPicker,
+2586: onTap: _showMonthYearPicker,
+2649: onTap: _jumpToToday,
+2658: onTap: _openFriendShare,
+2668: onTap: _openAllShiftsView,
+2679: onTap: _openFriendShare,
+2688: onTap: _openAllShiftsView,
+2697: onTap: _jumpToToday,
+2730: _diaryRowSixButtonCore(icon: icon, label: label, onTap: onTap));
+2739: onTap: onTap,
+2791: onTap: onTap,
+2817: return _diaryRowSixButton(icon: icon, label: label, onTap: onTap);
+2818: return _themedRowSixButton(theme, icon: icon, label: label, onTap: onTap);
+2832: icon: icon, label: label, onTap: onTap));
+2912: onTap: onTap,
+3109: onTap: () => _showMonthlyOvertimeSheet(summary.period),
+3118: onTap: _showWeeklyWorkHoursSheet,
+3146: onTap: () => _showMonthlyOvertimeSheet(summary.period),
+3152: onTap: _showWeeklyWorkHoursSheet,
+3201: onTap: onTap,
+3236: onTap: () => _showMonthlyOvertimeSheet(summary.period),
+3245: onTap: _showWeeklyWorkHoursSheet,
+3265: onTap: () => _showMonthlyOvertimeSheet(summary.period),
+3276: onTap: _showWeeklyWorkHoursSheet,
+3297: onTap: () => _showMonthlyOvertimeSheet(summary.period),
+3315: onTap: _showWeeklyWorkHoursSheet,
+3341: onTap: _openFriendShare)),
+3347: onTap: _openAllShiftsView)),
+3352: onTap: _jumpToToday)),
+3500: Future<void> _selectAlarmPreset(int index) async {
+3517: Future<void> _editAlarmPreset({required bool delete}) async {
+3559: Future<void> _assignCustomAlarm(DateTime day, {int? presetIndex}) async {
+5430: showModalBottomSheet(
+5724: onTap: () =>
+5963: onPressed: isFull
+6012: onTap: () {
+6079: onTap: () async {
+6147: showDialog(
+6201: onTap: () async {
+6215: onTap: () async {
+6229: onTap: () async {
+6248: onPressed: () =>
+6254: onPressed: () => Navigator.pop(context),
+6264: Future<void> _showDeleteAlarmConfirmation(
+6272: showDialog(
+6287: onPressed: () => Navigator.pop(context),
+6291: onPressed: () async {
+6311: Future<void> _deleteAlarm(Alarm alarm) async {
+6387: onTap: onTap,
+6470: showModalBottomSheet(
+6511: onPressed: () {
+6553: Future<void> _bulkAssignShift(
+6561: // ⭐ 2026-09-15 (AUD-01) - 예전엔 showDialog(barrierDismissible: false) + 끝에서 Navigator.pop(context)였음.
+6645: showModalBottomSheet(
+6737: onPressed: () {
+6750: onPressed: () async {
+6778: onPressed: () async {
+6792: onPressed: () {
+6825: Future<bool> _checkHasUpcomingAlarmTemplate(",정적 목록화는 동작 통과 판정이 아님
+lib/screens/calendar_theme_lab_screen.dart,29,"315: showModalBottomSheet(
+438: onTap: () => _tapDay(day),
+524: onTap: () => _showWeekSummarySheet(context, _weeks),
+534: onTap: onTap,
+617: onTap: () => _tapDay(day),
+706: _otChip(context.l10n.shiftWeeklyWorkHours, context.l10n.commonView, Colors.teal, onTap: () => _showWeekSummarySheet(context, _weeks)),
+729: child: onTap == null ? chip : GestureDetector(onTap: onTap, child: chip),
+735: onTap: onTap,
+791: onTap: () => _showWeekSummarySheet(context, _weeks),
+809: onTap: () => _tapDay(day),
+868: onTap: onTap,
+942: onTap: () => _tapDay(day),
+1002: onTap: onTap,
+1032: GestureDetector(onTap: _tapToday, child: Text('TODAY', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54, letterSpacing: 0.5))),
+1034: GestureDetector(onTap: _openAllShifts, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.black54))),
+1078: GestureDetector(onTap: () => _showWeekSummarySheet(context, _weeks), child: Text(context.l10n.shiftWeeklyWorkHours, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.black87))),
+1094: onTap: () => _tapDay(day),
+1241: onTap: () => _tapDay(day),
+1332: GestureDetector(onTap: _openAllShifts, child: Text(context.l10n.shiftFullSchedule, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+1334: GestureDetector(onTap: _tapToday, child: Text(context.l10n.commonToday, style: TextStyle(fontSize: 11.sp, color: Colors.brown.shade400, decoration: TextDecoration.underline))),
+1374: onTap: () => _showWeekSummarySheet(context, _weeks),
+1392: onTap: () => _tapDay(day),
+1522: showModalBottomSheet(
+1667: onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+1685: onTap: () => _showWeekSummarySheet(context, _weeks),
+1733: onTap: onTap,
+1919: onTap: onTap,
+1940: onTap: () => _tapDay(day),
+2013: onTap: () => _showWeekSummarySheet(context, _weeks),",정적 목록화는 동작 통과 판정이 아님
+lib/screens/calendar_theme_picker_screen.dart,1,127: onPressed: () async {,정적 목록화는 동작 통과 판정이 아님
+lib/screens/condition_tab.dart,11,"165: onPressed: () async {
+254: onPressed: () => Navigator.of(context).push(
+366: onPressed: () => setState(() => _showEvidence = !_showEvidence),
+616: Future<void> _edit(BuildContext context, WidgetRef ref) async {
+688: onPressed: () => ref
+694: onPressed: () => _edit(context, ref),
+698: onPressed: () async {
+753: onPressed: () => Navigator.of(context).push(
+1102: Future<void> _handleTap(
+1152: onTap: () => _handleTap(context, ref, category),
+1184: onTap: onTap,",정적 목록화는 동작 통과 판정이 아님
+lib/screens/english_condition_tab.dart,15,"38: Future<DateTime?> _pickDateTime(
+54: Future<void> _addSleep(BuildContext context, WidgetRef ref) async {
+80: Future<void> _confirm(
+93: Future<void> _editPending(
+117: Future<void> _discard(
+127: Future<void> _editConfirmed(
+155: Future<void> _deleteConfirmed(
+158: final confirmed = await showDialog<bool>(
+165: onPressed: () => Navigator.pop(dialogContext, false),
+168: onPressed: () => Navigator.pop(dialogContext, true),
+193: onPressed: () => ref.read(sleepRecordProvider.notifier).refresh(),
+296: onPressed: () => _addSleep(context, ref),
+324: onPressed: record.end == null
+330: onPressed: record.end == null
+337: onPressed: record.id == null",정적 목록화는 동작 통과 판정이 아님
+lib/screens/friend_calendar_view.dart,1,44: onPressed: () => Navigator.push(,정적 목록화는 동작 통과 판정이 아님
+lib/screens/friend_list_screen.dart,11,"61: showDialog(
+105: onPressed: () => Navigator.pop(context),
+108: onPressed: () async {
+135: Future<void> _openFriend(
+175: onPressed: () => Navigator.push(
+195: onPressed: () => _showAddFriendDialog(context, ref),
+272: onPressed: () async {
+273: final confirm = await showDialog<bool>(
+281: onPressed: () =>
+286: onPressed: () =>
+300: onTap: () => _openFriend(context, ref, friend),",정적 목록화는 동작 통과 판정이 아님
+lib/screens/help_screen.dart,2,"373: onPressed: () => setState(() {
+465: onTap: () => Navigator.of(context).push(",정적 목록화는 동작 통과 판정이 아님
+lib/screens/memo_list_view.dart,8,"48: Future<void> _loadAllMemos() async {
+174: onPressed: () {
+330: onTap: () => _showMemoActionSheet(context, date, dateStr, memo),
+408: showModalBottomSheet(
+489: onPressed: () {
+502: onPressed: () async {
+524: onPressed: () async {
+535: onPressed: () {",정적 목록화는 동작 통과 판정이 아님
+lib/screens/my_share_code_screen.dart,13,"58: Future<void> _load() async {
+84: Future<void> _maybeSaveName() async {
+112: Future<void> _startSharing() async {
+159: Future<void> _stopSharing() async {
+160: final confirm = await showDialog<bool>(
+168: TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.commonCancel)),
+169: TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.friendStopSharingAction)),
+192: Future<void> _retryPending() async {
+245: onPressed: _working ? null : _retryPending,
+327: onPressed: _working ? null : _startSharing,
+381: onPressed: _shareCode,
+394: onPressed: _working ? null : _stopSharing,
+439: IconButton(onPressed: onCopy, icon: Icon(Icons.copy, size: 18.sp)),",정적 목록화는 동작 통과 판정이 아님
+lib/screens/next_alarm_tab.dart,9,"63: Future<void> _dismissAlarm(int id, DateTime? date) async {
+73: final confirmed = await showDialog<bool>(
+85: onPressed: () => Navigator.pop(dialogContext, false),
+88: onPressed: () => Navigator.pop(dialogContext, true),
+230: showModalBottomSheet(
+878: onTap: () => _onTypeSelected(
+930: onPressed: widget.onShowAllAlarms,
+949: onPressed: widget.onDismiss,
+971: Future<void> _onTypeSelected(int alarmId, int typeId) async {",정적 목록화는 동작 통과 판정이 아님
+lib/screens/onboarding_screen.dart,34,"161: onPressed: _goBack,
+253: Future<void> _pickBackupManually() async {
+316: onTap: onTap,
+358: onPressed:
+406: onPressed: () {
+455: onTap: () => _addToPattern(name),
+478: onPressed: _pattern.isEmpty
+499: onTap: () {
+601: onTap: isSelectable
+688: showDialog(
+707: onPressed: () => Navigator.pop(context),
+712: onPressed: () {
+852: onPressed: _finishing ? null : _saveAndFinish,
+877: onTap: () => _showAlarmTimeDialog(shift),
+968: showDialog(
+1004: onPressed: _todayIndex == null
+1030: Future<void> _saveAlarmTemplates() async {
+1056: Future<void> _saveAndFinish() async {
+1072: Future<void> _saveAndFinishOnce() async {
+1148: Future<void> _generate10DaysAlarms(ShiftSchedule schedule) async {
+1295: onTap: () => _editAlarmTime(entry.key),
+1321: onPressed: () {
+1365: onPressed: _alarms.length < kMaxAlarmTemplatesPerShift
+1390: onPressed: () => Navigator.pop(context),
+1405: onPressed: () {
+1430: onTap: () {
+1475: Future<void> _editAlarmTime(int index) async {
+1477: await showDialog(
+1494: await showDialog(
+1514: onPressed: () => Navigator.pop(context),
+1533: Future<void> _addAlarm() async {
+1534: await showDialog(
+1546: await showDialog(
+1566: onPressed: () => Navigator.pop(context),",정적 목록화는 동작 통과 판정이 아님
+lib/screens/permission_intro_screen.dart,9,"43: Future<void> _checkPermissionsAndNavigate() async {
+131: onPressed: _requestPermissions,
+153: onPressed: _skipPermissions,
+270: Future<void> _requestPermissions() async {
+289: Future<void> _skipPermissions() async {
+300: showDialog(
+336: onPressed: () async {
+343: onPressed: () {
+371: Future<void> _navigateToOnboarding() async {",정적 목록화는 동작 통과 판정이 아님
+lib/screens/privacy_policy_screen.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/screens/restore_backup_screen.dart,3,"62: Future<void> _restore() async {
+274: onPressed: _restore,
+279: onPressed: _skip,",정적 목록화는 동작 통과 판정이 아님
+lib/screens/restore_interrupted_screen.dart,6,"35: Future<void> _restartApp() async {
+49: Future<void> _resume() async {
+65: Future<void> _keepCurrent() async {
+123: onPressed: _keepCurrent,
+128: onPressed: _resume,
+133: onPressed: _keepCurrent,",정적 목록화는 동작 통과 판정이 아님
+lib/screens/restore_progress_screen.dart,1,44: Future<void> _run() async {,정적 목록화는 동작 통과 판정이 아님
+lib/screens/schedule_management_tab.dart,40,"502: onTap: () => _shiftMonth(-1)),
+527: onTap: () => _shiftMonth(1)),
+557: onTap: () => setState(() => _selectedDate = date),
+592: onTap: () {
+653: onTap: onTap,
+1508: onTap: isDraggingThisSlot ? null : () => _openEditSheet(block),
+1510: onIconTap:
+1652: Future<void> _openCreateSheet(int startMinutes) async {
+1719: Future<void> _openEditSheet(DateSchedule block) async {
+1979: Future<void> _onFabTap() async {
+2405: onTap: _onFabTap,
+2526: onTap: onTap,
+2883: onTap: onTap,
+2935: onTap: onTap,
+2999: onTap: onIconTap,
+3031: onTap: onTap,
+3129: Future<int> _nextEtcIconIndex() async {
+3208: // 조금씩 움직였음. 원인: `showModalBottomSheet`가 내부적으로(Flutter 프레임워크
+3212: // _CreateBlockSheet 안에서 뭘 하든 피할 수 없었다. 그래서 `showModalBottomSheet`
+3298: // ⭐ 2026-09-03(2차) - 처음엔 showDialog(AlertDialog)로 만들었다가, ""텍스트필드
+3302: // 원인: showDialog는 새 Route(=새 FocusScope)를 Navigator에 push하는데, 이
+3570: Future<void> _handleSave() async {
+3752: onTap: () => _selectCard(_TimeCardSlot.start),
+3795: onTap: () => _selectCard(_TimeCardSlot.end),
+3806: onTap: () => setState(() => _adjustDown = true),
+3812: onTap: () => setState(() => _adjustDown = false),
+3817: onTap: () => _adjustActiveCard(5)),
+3828: onTap: () => _adjustActiveCard(30)),
+3833: onTap: () => _adjustActiveCard(60)),
+3897: onTap: () =>
+3944: onPressed: () => setState(() => _confirmingDelete = true),
+3968: onPressed: () =>
+3977: onPressed: () {
+3996: onPressed: () => Navigator.pop(context),
+4004: onPressed:
+4052: onTap: enabled ? onTap : null,
+4129: onTap: onTapNoDuration,
+4157: onTap: onTapSuggested,
+4195: onTap: onTap,
+4228: onTap: onTap,",정적 목록화는 동작 통과 판정이 아님
+lib/screens/schedule_text_transfer_screen.dart,7,"51: Future<void> _import() async {
+63: final confirmed = await showDialog<bool>(
+71: onPressed: () => Navigator.pop(dialogContext, false),
+74: onPressed: () => Navigator.pop(dialogContext, true),
+187: onPressed: _busy ? null : () => _generate(schedule!),
+210: onPressed: _busy
+255: onPressed: _busy ? null : _import,",정적 목록화는 동작 통과 판정이 아님
+lib/screens/settings_tab.dart,88,"106: Future<void> _loadLastBackupAt() async {
+116: Future<void> _backupNow() async {
+156: Future<void> _restoreFromBackup() async {
+159: final proceed = await showDialog<bool>(
+172: onPressed: () => Navigator.pop(context, false),
+177: onPressed: () => Navigator.pop(context, true),
+211: final confirmed = await showDialog<bool>(
+223: onPressed: () => Navigator.pop(context, false),
+228: onPressed: () => Navigator.pop(context, true),
+266: Future<void> _resetSchedule() async {
+267: final confirm = await showDialog<bool>(
+275: onPressed: () => Navigator.pop(context, false),
+280: onPressed: () => Navigator.pop(context, true),
+306: Future<void> _showAlarmTypeDialog() async {
+311: showModalBottomSheet(
+425: onTap: () => _showScheduleSettingsMenu(),
+463: onTap: _resetSchedule,
+512: onTap: _showAlarmTypeDialog,
+523: onTap: () {
+548: onTap: () {
+582: onTap: () async {
+605: onTap: () async {
+631: onTap: () {
+648: onTap: () {
+689: onTap: _isBackingUp ? null : _backupNow,
+712: onTap: _isRestoringFromBackup ? null : _restoreFromBackup,
+722: onTap: () => Navigator.of(context).push(MaterialPageRoute(
+742: onTap: () async {
+743: final confirm = await showDialog<bool>(
+768: onPressed: () => Navigator.pop(context, false),
+773: onPressed: () => Navigator.pop(context, true),
+821: onTap: () {
+835: onTap: () => Navigator.of(context).push(MaterialPageRoute(
+848: onTap: () => AdConsentService.showPrivacyOptionsForm(),
+930: showModalBottomSheet(
+963: onTap: () {
+976: onTap: () {
+991: onTap: () {
+1003: onTap: () {
+1020: showDialog(
+1032: Future<void> _applyScheduleChange(int selectedIndex) async {
+1168: showDialog(
+1181: Future<void> _applyShiftNameChanges(Map<String, String> renamedShifts) async {
+1299: showDialog(
+1313: Future<void> _applyShiftColorChanges(Map<String, int> newCustomColors) async {
+1383: Future<void> _regenerateAllAlarms() async {
+1484: Future<void> _initPresets() async {
+1494: Future<void> _updateType(AlarmType type) async {
+1541: onPressed: () => Navigator.pop(context),
+1681: Future<void> _playSound(String soundId, double volume) async {
+1699: Future<void> _stopSound() async {
+1709: Future<void> _testVibration(int strength) async {
+1733: onTap: () => _showSoundPicker(type),
+1767: onTap: () {
+1810: showModalBottomSheet(
+1841: onPressed: () => Navigator.pop(context),
+1873: onTap: () {
+1940: onTap: () {
+2024: onTap: () => _updateType(AlarmType(
+2144: onPressed: () => Navigator.pop(context),
+2149: onPressed: () {
+2232: Future<void> _loadCurrentTemplates() async {
+2359: onPressed: _isSaving ? null : _saveAndExit,
+2381: onTap: () => _showAlarmEditDialog(shift),
+2471: showDialog(
+2485: Future<void> _saveAndExit() async {
+2631: onTap: () => _editAlarmTime(entry.key),
+2657: onPressed: () {
+2695: onPressed: _alarms.length < kMaxAlarmTemplatesPerShift
+2717: onPressed: () => Navigator.pop(context),
+2723: onPressed: () {
+2755: Future<void> _editAlarmTime(int index) async {
+2757: await showDialog(
+2774: await showDialog(
+2793: onPressed: () => Navigator.pop(context),
+2812: Future<void> _addAlarm() async {
+2813: await showDialog(
+2825: await showDialog(
+2844: onPressed: () => Navigator.pop(context),
+2934: onTap: () {
+3035: onPressed: () => Navigator.pop(context),
+3040: onPressed: _selectedIndex == null
+3140: onTap: () => _showColorPicker(shift),
+3148: onPressed: () => Navigator.pop(context),
+3153: onPressed: () {
+3170: final result = await showDialog<int>(
+3235: onTap: () {
+3299: onPressed: () => Navigator.pop(context),",정적 목록화는 동작 통과 판정이 아님
+lib/screens/sleep_calendar_full_screen.dart,4,"137: IconButton(onPressed: onPrev, icon: const Icon(Icons.chevron_left)),
+146: onPressed: canGoNext ? onNext : null,
+276: onTap: () async {
+337: onTap: onTap,",정적 목록화는 동작 통과 판정이 아님
+lib/screens/splash_screen.dart,1,42: Future<void> _navigateToNextScreen() async {,정적 목록화는 동작 통과 판정이 아님
+lib/screens/startup_gate.dart,3,"99: Future<T>.sync(widget.initialize).then(
+195: onPressed: onRetry,
+224: onPressed: onRetry,",정적 목록화는 동작 통과 판정이 아님
+lib/screens/work_hours_settings_screen.dart,10,"283: onTap: () => _resetShiftTime(schedule, shift),
+321: onPressed: () =>
+333: onPressed: () =>
+369: Future<void> _pickShiftTime(
+431: Future<void> _persistShiftTime(String shift, ShiftTimeRange? range) async {
+452: Future<void> _resetShiftTime(ShiftSchedule schedule, String shift) async {
+490: onTap: () async {
+604: onTap: () => ref
+614: onTap: () => ref
+636: onTap: onTap,",정적 목록화는 동작 통과 판정이 아님
+lib/providers/alarm_provider.dart,9,"38: Future<void> _loadAlarms() async {
+75: Future<void> addAlarm(Alarm alarm) async {
+103: Future<AlarmDeletionOutcome> deleteAlarm(int id, DateTime? date) async {
+196: Future<AlarmDeletionOutcome> deleteOneTapSlot(int slot) async {
+246: Future<AlarmScheduleOutcome> regenerateAlarmsAroundDate(DateTime date, ShiftSchedule schedule) {
+254: Future<AlarmScheduleOutcome> regenerateAlarmsAroundDates(Iterable<DateTime> originDates, ShiftSchedule schedule) async {
+331: Future<void> deleteAllAlarmsCompletely() async {
+378: Future<void> updateAlarmType(int alarmId, int newTypeId) async {
+393: Future<void> refresh() async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/calendar_theme_provider.dart,2,"18: Future<void> setTheme(CalendarThemeId id) async {
+32: static Future<CalendarThemeId> loadInitial() async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/condition_provider.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/providers/condition_shift_time_provider.dart,4,"30: Future<void> _load() async {
+40: Future<void> refresh() => _load();
+42: Future<void> save(String shiftName, int startMinutes, int endMinutes) async {
+72: Future<void> remove(String shiftName) async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/current_date_provider.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/providers/custom_alarm_preset_provider.dart,2,"17: Future<void> _load() async {
+24: Future<void> saveAll(List<CustomAlarmPreset> presets) async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/data_revision_provider.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/providers/date_schedule_provider.dart,5,"27: Future<void> loadForDate(String date) async {
+32: Future<void> forceReloadForDate(String date) async {
+39: Future<({DateSchedule saved, bool notifyScheduled})> create(
+60: Future<bool> update(DateSchedule schedule) async {
+85: Future<void> delete(DateSchedule schedule) async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/friend_provider.dart,7,"58: Future<void> load() async {
+80: Future<bool> addFriend({required String displayName, required String code}) async {
+115: Future<FriendRefreshResult> _refreshWithoutLoad(
+141: Future<FriendRefreshResult> refreshFriend(int id, String ownerId) async {
+160: Future<void> refreshAll({bool force = false}) async {
+180: Future<void> removeFriend(int id) async {
+189: Future<void> renameFriend(int id, String name) async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/memo_provider.dart,6,"16: Future<void> loadMemosForDate(String date) async {
+22: Future<void> loadMemosForDateRange(DateTime startDate, DateTime endDate) async {
+28: Future<bool> createMemo(String date, String memoText) async {
+47: Future<void> updateMemo(int id, String date, String memoText) async {
+61: Future<void> deleteMemo(int id, String date) async {
+70: Future<void> reorderMemos(String date, List<int> memoIds) async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/overtime_provider.dart,2,"21: Future<void> loadForRange(DateTime startDate, DateTime endDate) async {
+35: Future<int> adjust(String date, int deltaMinutes) async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/schedule_provider.dart,8,"41: Future<void> _loadSchedule() async {
+60: Future<void> saveSchedule(ShiftSchedule schedule) async {
+106: Future<void> updateSchedule(ShiftSchedule schedule) async {
+159: Future<void> changeShift(DateTime date, String newShiftType) async {
+195: Future<void> bulkAssignShift(List<DateTime> dates, String shiftType) async {
+211: Future<void> resetSchedule() async {
+268: Future<void> refresh() async {
+277: Future<void> changeShiftWithAlarms(DateTime date, String newShiftType) async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/sleep_condition_provider.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/providers/sleep_record_provider.dart,10,"26: Future<void> _notifyAutoRejection(SleepRecord record) async {
+56: Future<void> _load() async {
+87: Future<void> refresh() => _load();
+92: Future<SleepRecord?> findOverlap(DateTime start, DateTime end,
+101: Future<void> addManual(
+120: Future<SleepRecord?> confirmPending(SleepRecord record,
+154: Future<int> confirmAllPending(List<SleepRecord> records) async {
+180: Future<void> discardPending(SleepRecord record) async {
+190: Future<void> updateTimes(SleepRecord record,
+200: Future<void> deleteRecord(int id) async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/tab_visibility_provider.dart,2,"28: Future<void> _load() async {
+39: Future<void> setEnabled(bool enabled) async {",정적 목록화는 동작 통과 판정이 아님
+lib/providers/work_hours_settings_provider.dart,5,"154: Future<void> _load() async {
+182: Future<void> setPeriodMode(MonthlyPeriodMode mode) async {
+189: Future<void> setPaydayCutoffDay(int day) async {
+196: Future<void> setCutoffAnchor(PaydayCutoffAnchor anchor) async {
+203: Future<void> setShiftChangeCountsAsOt(bool value) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/ad_consent_service.dart,4,"33: static Future<void> gatherConsent() async {
+82: static Future<bool> canRequestAds() {
+89: static Future<bool> isPrivacyOptionsRequired() async {
+100: static Future<void> showPrivacyOptionsForm() {",정적 목록화는 동작 통과 판정이 아님
+lib/services/ad_service.dart,4,"51: static Future<AdSize?> sizeForSlot(int width, Orientation orientation) async {
+73: static Future<void> warmUp() => _warmUpFuture ??= _initializeSdk();
+75: static Future<void> _initializeSdk() async {
+94: static Future<void> prepareLayout() async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/alarm_generation_service.dart,5,"64: Future<Map<String, AlarmOverrideEntry>> readAlarmOverrides(DatabaseExecutor db) async {
+74: Future<List<DateTime>> listFixedConflictsWithCustom(DatabaseExecutor db, ShiftSchedule schedule, {DateTime? now}) async {
+99: Future<int> countFixedConflictsWithCustom(DatabaseExecutor db, ShiftSchedule schedule, {DateTime? now}) async =>
+228: Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDatesTxn({
+348: Future<RegenerateAlarmsResult> regenerateFixedAlarmsForDates({",정적 목록화는 동작 통과 판정이 아님
+lib/services/alarm_refresh_service.dart,2,"22: Future<void> refreshIfNeeded() async {
+31: Future<void> forceRefresh() async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/alarm_service.dart,7,"32: Future<void> initialize() async {
+37: Future<void> scheduleAlarm({
+61: Future<void> cancelAlarm(int id) async {
+72: Future<void> stopAlarm() async {
+82: Future<void> scheduleTestAlarm({
+96: Future<void> requestOverlayPermission() async {
+106: Future<bool> checkOverlayPermission() async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/app_analytics.dart,6,"153: static Future<void> _send(String name, Map<String, Object>? params) async {
+188: static Future<void> reportNew({
+190: Future<List<Map<String, Object?>>> Function(int afterId)? rowsSince,
+191: Future<int> Function()? maxId,
+226: static Future<int> _maxId() async {
+232: static Future<List<Map<String, Object?>>> _rowsSince(int afterId) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/app_restart.dart,2,"16: Future<void> restartAppWhenNoAlarmRinging({void Function()? onWaiting}) async {
+33: Future<bool> _alarmRingingLive() async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/backup_policy.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/backup_service.dart,2,"44: Future<BackupPayload> exportAll() async {
+89: static Future<Map<String, List<Map<String, dynamic>>>> readBackupTables(DatabaseExecutor executor) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/backup_storage_service.dart,4,"38: Future<bool> write(String jsonContent, {required BackupKind kind}) async {
+53: Future<String?> read() async {
+67: Future<bool> _isRestorable(String content) async {
+88: Future<String?> pickAndRead() async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/backup_validator.dart,2,"38: static Future<List<String>> validate(BackupPayload payload, DatabaseExecutor db) async {
+211: static Future<Map<String, Map<String, _Column>>> _readSchema(DatabaseExecutor db) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/backup_watcher.dart,5,"71: Future<bool> backupNow({bool manual = false}) {
+80: Future<bool> _start(bool manual) async {
+110: Future<bool> _run(bool manual) async {
+169: Future<bool> _restoreInProgress() async {
+179: Future<({DateTime? manual, DateTime? auto})> lastSavedAtBySlot() async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/condition_rule_engine.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/english_recovery_summary.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/english_sleep_copy.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/evidence_database.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/recovery_briefing_engine.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/shift_pattern_analyzer.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/shift_time_category.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/sleep_by_category_stats.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/sleep_day_slots.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/sleep_history.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/sleep_opportunity.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/sleep_overlap.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/sleep_shift_relation.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/condition/sleep_stats.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/custom_alarm_service.dart,4,"77: static Future<List<ExistingAlarmSlot>> _readSameDay(DatabaseExecutor db, DateTime day) async {
+90: Future<CustomAlarmAssignOutcome> assign(DateTime day, CustomAlarmPreset preset, int slot, {DateTime? now}) async {
+150: Future<List<Alarm>> futureAssignments(int slot, {DateTime? now}) async {
+162: Future<PendingFixedAlarm?> previewFixedReplacement(DateTime at) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/database_service.dart,70,"71: Future<Database> _initDatabase() async {
+123: Future<void> _insertPresetAlarmTypesIfMissing(Database db) async {
+146: Future<void> _onCreate(Database db, int version) async {
+392: Future<List<AlarmType>> getAllAlarmTypes() async {
+398: Future<AlarmType?> getAlarmType(int id) async {
+409: Future<int> insertAlarmType(AlarmType type) async {
+414: Future<int> deleteAlarmType(int id) async {
+423: Future<int> insertAlarm(Alarm alarm, {String source = 'manual'}) async {
+435: Future<void> logAlarmCreation(DatabaseExecutor txn, int alarmId, Alarm alarm, String source) async {
+451: Future<List<Map<String, dynamic>>> getAlarmCreationLog({int limit = 200}) async {
+456: Future<List<Map<String, dynamic>>> getCreationLogForAlarm(int alarmId) async {
+465: Future<List<Alarm>> getAllAlarms() async {
+471: Future<List<Alarm>> getAlarmsByDate(DateTime date) async {
+484: Future<List<Alarm>> getNextAlarms({int limit = 10}) async {
+497: Future<int> updateAlarm(Alarm alarm) async {
+520: Future<int> deleteAlarm(int id, {String dismissType = 'cancelled_before_ring', bool createHistory = true}) async {
+582: Future<List<Alarm>> deleteFutureOneTapSlot(int slot) async {
+610: Future<int> saveShiftSchedule(ShiftSchedule schedule) async {
+625: Future<ShiftSchedule?> getShiftSchedule() async {
+632: Future<int> updateShiftSchedule(ShiftSchedule schedule) async {
+648: Future<void> insertAlarmsInBatch(List<Alarm> alarms, {String source = 'auto'}) async {
+678: Future<List<int>> deleteAllAlarms({
+721: Future<void> deleteAllAlarmsOnly() async {
+753: Future<void> deleteAllAlarmTemplates() async {
+763: Future<int> insertAlarmTemplate({
+789: Future<void> replaceAllAlarmTemplates(List<Map<String, dynamic>> templates) async {
+803: Future<List<AlarmTemplate>> getAlarmTemplates(String shiftType) async {
+813: Future<List<AlarmTemplate>> getAllAlarmTemplates() async {
+819: Future<int> deleteAlarmTemplate(int id) async {
+838: Future<void> renameShiftAtomic({
+885: Future<void> _renameShiftReferences(DatabaseExecutor txn, String from, String to) async {
+922: Future<void> _recordOverrideForUserChange(DatabaseExecutor txn, int alarmId,
+954: Future<void> updateAlarmTypeWithOverride(int alarmId, int newTypeId) async {
+965: Future<void> deleteOverridesForChangedAssignments(
+984: Future<ShiftSchedule?> _readScheduleForUpdate(DatabaseExecutor txn, int? id) async {
+1007: Future<void> _deleteFutureOverrides(DatabaseExecutor txn, {String? shift}) async {
+1020: Future<void> _deleteFutureOverridesForShifts(DatabaseExecutor txn, Set<String> shifts) async {
+1028: Future<List<AlarmHistory>> getAlarmHistory({int limit = 50}) async {
+1039: Future<List<AlarmHistory>> getAlarmHistoryByDate(DateTime date) async {
+1052: Future<List<AlarmHistory>> getAlarmHistoryByAlarmId(int alarmId) async {
+1065: Future<List<AlarmHistory>> getAllAlarmHistory() async {
+1076: Future<Map<String, dynamic>> getAlarmStatistics() async {
+1111: Future<int?> createMemo(String date, String memoText) async {
+1147: Future<List<DateMemo>> getMemosForDate(String date) async {
+1159: Future<Map<String, List<DateMemo>>> getMemosForDateRange(
+1188: Future<int> updateMemo(int id, String memoText) async {
+1199: Future<void> deleteMemo(int id) async {
+1233: Future<void> reorderMemos(String date, List<int> memoIds) async {
+1257: Future<int> adjustOvertime(String date, int deltaMinutes) async {
+1291: Future<int> getOvertimeForDate(String date) async {
+1299: Future<Map<String, int>> getOvertimeForRange(DateTime startDate, DateTime endDate) async {
+1322: Future<void> resetAllAlarmHistoryAndLog() async {
+1336: Future<int> insertFriend({required String name, required String ownerId, String? dataJson}) async {
+1348: Future<List<Map<String, dynamic>>> getAllFriends() async {
+1353: Future<int> deleteFriend(int id) async {
+1359: Future<int> updateFriendData(int id, {required String dataJson}) async {
+1372: Future<int> renameFriend(int id, String name) async {
+1381: Future<DateSchedule> createSchedule(DateSchedule schedule) async {
+1389: Future<List<DateSchedule>> getSchedulesForDate(String date) async {
+1400: Future<int> updateSchedule(DateSchedule schedule) async {
+1414: Future<int> deleteSchedule(int id) async {
+1423: Future<Map<String, ShiftTimeRange>> getConditionShiftTimes() async {
+1434: Future<void> upsertConditionShiftTime(ShiftTimeRange range) async {
+1446: Future<void> deleteConditionShiftTime(String shiftName) async {
+1456: Future<ShiftSchedule?> saveShiftTimeRange(String shiftName, ShiftTimeRange? range) async {
+1501: Future<List<SleepRecord>> getSleepRecords({DateTime? since}) async {
+1515: Future<List<SleepRecord>> getPendingSleepRecords() async {
+1526: Future<int> insertSleepRecord(SleepRecord record) async {
+1536: Future<void> updateSleepRecord(SleepRecord record) async {
+1550: Future<void> deleteSleepRecord(int id) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/db_migration_runner.dart,6,"57: static Future<DbMigrationScript> loadFromAssets([AssetBundle? bundle]) async {
+171: static Future<void> migrate(
+196: static Future<List<String>> pendingRepairs(DatabaseExecutor db, DbMigrationScript script) async {
+226: static Future<void> repair(Database db, DbMigrationScript script) async {
+238: static Future<bool> _schemaObjectExists(DatabaseExecutor db, String type, String name) async {
+246: static Future<bool> _columnExists(DatabaseExecutor db, String table, String column) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/diag_log.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/firebase_bootstrap.dart,1,24: Future<void> initFirebase() async {,정적 목록화는 동작 통과 판정이 아님
+lib/services/friend_share_service.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/friend_sync_service.dart,25,"91: Future<void> _serialTail = Future<void>.value();
+97: Future<T> _enqueue<T>(Future<T> Function() action) {
+109: Future<void> _requireWrite(Future<bool> write, String key) async {
+140: Future<FriendShareState> getShareState() async {
+167: Future<String?> getOrCreateOwnerId() async {
+187: Future<bool> isSharingEnabled() async => (await getShareState()).isActive;
+189: Future<String?> savedMyName() async {
+236: Future<void> _markDesired(
+246: Future<void> _confirmActive(int generation, String fingerprint) async {
+260: Future<void> _confirmStopped(int generation) async {
+274: Future<FriendSyncOutcome> _observeWrite(
+276: Future<void> Function() onConfirmed,
+297: Future<FriendSyncOutcome> _submitActive(
+342: Future<String?> startSharing({
+375: Future<void> syncIfEnabled(ShiftSchedule? schedule) async {
+410: Future<bool> updateMyName({
+433: Future<void> stopSharing() async {
+445: Future<FriendSyncOutcome> _submitStop(int generation) {
+461: Future<void> retryPending(ShiftSchedule? currentSchedule) async {
+476: Future<void> onAppStarted(ShiftSchedule? currentSchedule) =>
+478: Future<void> onAppResumed(ShiftSchedule? currentSchedule) =>
+480: Future<void> onNetworkReconnected(ShiftSchedule? currentSchedule) =>
+484: Future<void> onRestoreCompleted(ShiftSchedule? restoredSchedule) async {
+494: Future<FriendFetchResult> fetchByOwnerIdDetailed(String ownerId) async {
+534: Future<FriendScheduleData?> fetchByOwnerId(String ownerId) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/holiday_sync_service.dart,4,"35: Future<void> loadCached() async {
+50: Future<void> refreshIfDue() async {
+94: Future<void> apply(HolidayOverrides overrides) async {
+103: Future<void> _applyToNative(HolidayOverrides overrides) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/memo_category_classifier.dart,2,"71: Future<void> ensureLoaded() {
+76: Future<void> _load() async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/permission_service.dart,9,"12: Future<bool> requestAllPermissions() async {
+40: Future<bool> _requestNotification() async {
+47: Future<bool> _requestSystemAlertWindow() async {
+54: Future<bool> _requestExactAlarm() async {
+71: Future<ExactAlarmPermissionState> checkExactAlarmPermissionState() async {
+86: Future<bool> checkExactAlarmPermission() async =>
+90: Future<void> requestExactAlarmPermission() async {
+99: Future<Map<String, bool>> checkPermissions() async {
+108: Future<void> openSettings() async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/restore_coordinator.dart,25,"130: Future<void> start(BackupPayload payload, {required bool overwrite}) async {
+171: Future<bool> hasPendingJob() async {
+180: Future<RestoreJob?> loadPendingJob() async {
+200: Future<bool> consumeInterruptedFlag() async {
+209: Future<void> resume() async {
+222: Future<void> safeEnd() async {
+248: Future<void> _run(RestoreJob job, BackupPayload payload) async {
+292: Future<void> _advance(RestoreJob job, RestorePhase target, Future<void> Function() step) async {
+305: Future<_Carry> _prepareCarry(String token) async {
+313: Future<int> _ringEpoch() async {
+319: Future<void> _applyDb(RestoreJob job, BackupPayload payload, String token) async {
+336: Future<void> _extendIdMap(DatabaseExecutor db, RestoreJob job, BackupPayload payload, Set<int> nativeCarryIds) async {
+359: Future<Set<int>> _carryIds(DatabaseExecutor db, Set<int> nativeCarryIds) async {
+372: Future<void> _replaceInTxn(Transaction txn, RestoreJob job, BackupPayload payload, _Carry prepared) async {
+426: Future<void> _applyPrefs(BackupPayload payload) async {
+457: Future<void> _reconcile(String token) async {
+469: Future<void> _afterUnlock() async {
+488: Future<Directory> _workDir() async {
+495: Future<File> _jobFile() async => File(p.join((await _workDir()).path, _jobFileName));
+497: Future<void> _saveJob(RestoreJob job) async {
+504: Future<void> _deleteJobFile() async {
+509: Future<void> _deleteJob(RestoreJob? job) async {
+526: Future<BackupPayload?> _readCopy(RestoreJob job) async {
+539: Future<bool> _acquire(String token) async =>
+542: Future<void> _release(String token) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/schedule_notification_service.dart,6,"48: static Future<bool> syncForSchedule(DateSchedule schedule) async {
+85: static Future<void> cancelForSchedule(int id) => _cancel(id);
+87: static Future<void> _cancel(int id) async {
+99: static Future<void> cancelAllForTabDisable() async {
+110: static Future<void> restoreAllForTabEnable() async {
+120: static Future<bool> syncTabEnabledToNative(bool enabled) async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/schedule_transfer_codec.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/schedule_transfer_service.dart,1,19: static Future<ScheduleTransferResult> importText(,정적 목록화는 동작 통과 판정이 아님
+lib/services/schedule_work_hours_band_resolver.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/services/update_service.dart,10,"62: static Future<void> markOnboardingBaselineVersion() async {
+72: static Future<void> checkAndShowReleaseNote(BuildContext context) async {
+99: static Future<void> _showReleaseNoteDialog(BuildContext context) async {
+151: onPressed: () => Navigator.pop(context),
+182: static Future<void> checkForUpdate(BuildContext context) async {
+231: static Future<bool?> _showUpdateDialog(BuildContext context) async {
+234: return await showDialog<bool?>(
+302: onPressed: () => Navigator.pop(context, false),
+324: onPressed: () => Navigator.pop(context, true),
+352: static Future<void> _openPlayStore() async {",정적 목록화는 동작 통과 판정이 아님
+lib/services/widget_refresh_service.dart,1,25: static Future<void> refresh() async {,정적 목록화는 동작 통과 판정이 아님
+lib/services/work_hours_calculator.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/widgets/adaptive_layout.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/widgets/alarm_time_editor.dart,6,"49: Future<void> _refreshClockFormat() async {
+129: onTap: () {
+159: onTap: () {
+275: onPressed: () => Navigator.pop(context),
+281: onPressed: () async {
+343: onTap: () {",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/app_button.dart,1,"116: onTap: onPressed,",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/app_content_frame.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/widgets/app_second_button.dart,1,"124: onTap: onPressed,",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/app_shift_chip.dart,3,"62: /// false면 탭 비활성 + 흐리게 표시(기존 ElevatedButton의 onPressed:null과
+148: onTap: enabled ? onTap : null,
+168: onTap: onDelete,",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/app_third_button.dart,1,"57: onTap: onPressed,",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/banner_ad_slot.dart,1,"57: Future<void> _loadAd(int width, Orientation orientation, int generation) async {",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/calendar_memo_sizing.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/widgets/custom_alarm_preset_panel.dart,2,"39: onPressed: callback,
+55: onTap: () => onSelect(i),",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/custom_alarm_widgets.dart,8,"75: Future<void> showCustomAlarmPresetEditor(BuildContext context, WidgetRef ref,
+107: await showDialog<void>(
+168: final confirmed = await showDialog<bool>(
+178: onPressed: () => Navigator.pop(dialogContext, false),
+181: onPressed: () => Navigator.pop(dialogContext, true),
+256: final ok = await showDialog<bool>(
+273: onPressed: () => Navigator.pop(c, false),
+276: onPressed: () => Navigator.pop(c, true),",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/day_offset_chip.dart,1,"65: onTap: () => onChanged(offset),",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/disable_tab_button.dart,7,"16: Future<bool> setTabEnabledWithFeedback(
+18: Future<void> Function() setEnabled,
+64: Future<void> _confirm(BuildContext context, WidgetRef ref) async {
+66: final confirmed = await showDialog<bool>(
+76: onPressed: () => Navigator.of(context).pop(false),
+80: onPressed: () => Navigator.of(context).pop(true),
+111: onTap: () => _confirm(context, ref),",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/english_calendar_label.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/widgets/evidence_library_section.dart,1,"37: onTap: () => setState(() => _expanded = !_expanded),",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/fold_calendar_text_scale.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/widgets/friend_web_calendar.dart,4,"210: onPressed: widget.onQuickInstallTap,
+239: onPressed: () => _changeMonth(-1),
+254: onPressed: () => _changeMonth(1),
+345: onPressed: widget.onInstallTap,",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/onboarding_info_popups.dart,7,"52: Future<void> _showInfoPopupOnce(
+87: Future<void> maybeShowWelcomePopup(BuildContext context) => _showInfoPopupOnce(
+95: Future<void> maybeShowShiftAssignTutorial(BuildContext context,
+108: Future<void> maybeShowConditionTabTutorial(BuildContext context) =>
+118: Future<void> maybeShowScheduleTabTutorial(BuildContext context) =>
+207: onPressed: onConfirm, child: Text(content.buttonLabel)),
+319: Future<void> maybeShowOneTouchAlarmTutorial(BuildContext context,",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/permission_warning_banner.dart,2,"38: Future<void> _checkPermissions() async {
+117: onPressed: () async {",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/sleep_edit_dialog.dart,10,"38: Future<SleepSlotEditResult?> showSleepSlotEditDialog(
+48: Future<DateTime?> pick(BuildContext sheetContext, DateTime initial) async {
+64: return showModalBottomSheet<SleepSlotEditResult>(
+128: onTap: () async {
+137: onTap: () async {
+197: onPressed: () => Navigator.of(sheetContext)
+206: onPressed: () => Navigator.of(sheetContext).pop(),
+214: onPressed: valid
+248: onTap: onTap,
+277: Future<void> handleSleepSlotTap(",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/soft_info_dialog.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/widgets/tappable_number_picker.dart,1,"161: onTap: () => _handleTap(value),",정적 목록화는 동작 통과 판정이 아님
+lib/widgets/wide_calendar_cell.dart,0,,정적 목록화는 동작 통과 판정이 아님
+lib/widgets/word_safe_spans.dart,0,,정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActionHelper.kt,10,"41: fun dismiss(context: Context, alarmId: Int, dismissType: String) {
+117: fun snooze(context: Context, alarmId: Int, minutes: Int = 5): SnoozeResult? {
+234: fun timeout(context: Context, alarmId: Int) = dismiss(context, alarmId, ""timeout"")
+241: fun supersede(context: Context, alarmId: Int) = dismiss(context, alarmId, ""superseded_by_next_alarm"")
+259: fun claimRingEnd(context: Context, alarmId: Int, round: Long): Boolean {
+266: fun claimCurrentRingOf(context: Context, alarmId: Int): Boolean {
+273: fun isAlarmRinging(context: Context, alarmId: Int): Boolean =
+281: fun stopRingingAlarm(context: Context, alarmId: Int): Boolean {
+289: fun closeRingUi(context: Context, alarmId: Int) {
+315: fun scheduleRingTimeout(context: Context, ring: RingingAlarmTracker.ActiveRing, durationMinutes: Int) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActionReceiver.kt,1,"34: override fun onReceive(context: Context, intent: Intent) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt,6,"57: override fun onReceive(context: Context, intent: Intent) {
+66: override fun onCreate(savedInstanceState: Bundle?) {
+288: override fun onFling(
+400: override fun onUserLeaveHint() {
+422: override fun onBackPressed() {
+427: override fun onDestroy() {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmGuardReceiver.kt,4,"22: fun removeShownNotification(alarmId: Int) {
+28: fun clearAllShownNotifications() {
+34: fun triggerCheck(context: Context) {
+78: override fun onReceive(context: Context, intent: Intent) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmInstant.kt,4,"14: fun hasOffset(value: String) = offsetSuffix.containsMatchIn(value)
+15: fun parse(value: String): Long = OffsetDateTime.parse(value).toInstant().toEpochMilli()
+16: fun format(millis: Long): String = stored.format(Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()))
+17: fun display(context: Context, millis: Long): String {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmOverlayService.kt,5,"31: override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+61: override fun onReceive(context: Context, intent: Intent) {
+88: override fun onBind(intent: Intent?): IBinder? = null
+90: override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+481: override fun onDestroy() {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmPlayer.kt,5,"24: fun getInstance(context: Context): AlarmPlayer {
+34: fun playAlarm(soundType: String) {
+39: fun playAlarmWithSettings(soundFile: String, volume: Float, vibrationStrength: Int) {
+97: fun playAlarmFromDB(alarmId: Int) {
+383: fun stopAlarm() {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmRefreshEngine.kt,5,"83: fun key() = ""$timestamp|$shiftType|$dayOffset|$alarmTypeId""
+95: fun key() = ""$timestamp|$shiftType|$dayOffset|$alarmTypeId""
+108: fun refresh(context: Context, ownerToken: String? = null): Boolean {
+444: fun dateAt(base: Calendar, dayDelta: Int): Calendar = Calendar.getInstance(Locale.US).apply {
+461: fun addFrom(shiftType: String, offset: Int) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmRefreshReceiver.kt,1,"12: override fun onReceive(context: Context, intent: Intent) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmRefreshUtil.kt,1,18: fun checkAndTriggerRefresh(context: Context) {,정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmResponsiveLayout.kt,2,"13: fun install(root: ConstraintLayout) {
+31: fun dp(value: Float) = (value * density).roundToInt()",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmStreamVolume.kt,2,"28: fun acquire(context: Context, holder: String) = synchronized(lock) {
+45: fun release(context: Context, holder: String) = synchronized(lock) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmWakeScheduler.kt,9,"53: fun normalize(timestamp: Long): Long = timestamp - Math.floorMod(timestamp, 1000L)
+87: fun scheduleRaw(context: Context, id: Int, timestamp: Long, label: String) {
+119: fun cancelRaw(context: Context, id: Int) {
+151: fun scheduleIfCurrent(
+222: fun cancelIfGone(context: Context, db: SQLiteDatabase?, id: Int): Outcome {
+262: fun decideOnReceive(context: Context, id: Int, expectedAt: Long?): ReceiveDecision {
+290: fun failedIds(context: Context): Set<Int> =
+294: fun recordFailure(context: Context, id: Int) {
+309: fun retryFailed(context: Context) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmWallTime.kt,1,"8: fun resolve(year: Int, month: Int, day: Int, hour: Int, minute: Int,",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/BackupFileNaming.kt,4,"26: fun fromChannelArg(arg: String?): Kind = if (arg == MANUAL.token) MANUAL else AUTO
+30: fun displayName(prefix: String, kind: Kind, now: Date = Date()): String {
+41: fun classify(prefix: String, name: String): Kind? {
+60: fun idsToDelete(prefix: String, written: Kind, newId: Long, files: List<Pair<Long, String>>): List<Long> =",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/BackupFileReader.kt,1,"21: fun readBoundedUtf8(input: InputStream, maxBytes: Long = MAX_BACKUP_BYTES): String? {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CalendarWidgetHolidays.kt,3,"53: fun saveOverrides(context: Context, add: Collection<String>, remove: Collection<String>) {
+60: fun overrides(context: Context): Overrides = try {
+67: fun isHoliday(cal: Calendar, overrides: Overrides = Overrides.EMPTY): Boolean {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CalendarWidgetProvider.kt,3,"74: fun requestUpdate(context: Context) {
+394: override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+404: override fun onAppWidgetOptionsChanged(",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CalendarWidgetScheduleResolver.kt,3,"35: fun readSchedule(context: Context): ResolvedSchedule? {
+99: fun shiftForDate(schedule: ResolvedSchedule, cal: Calendar): String {
+113: fun readMemos(context: Context, startKey: String, endKey: String): Map<String, List<String>> {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmDisplay.kt,4,"24: fun matches(it: Display) =
+42: fun supported(context: Context): Boolean {
+55: fun followRing(context: Context, id: Int, round: Long, duration: Int) {
+62: override fun run() {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt,3,"21: fun create(context: Context, time: String, dismiss: () -> Unit, snooze: () -> Unit): View {
+23: fun dp(n: Float) = (n * density).roundToInt()
+40: fun button(label: String, primary: Boolean, action: () -> Unit) = Button(context).apply {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/CustomAlarmReceiver.kt,2,"32: fun ringDurationMinutes(context: Context, alarmId: Int): Int {
+86: override fun onReceive(context: Context, intent: Intent) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DatabaseHelper.kt,10,"89: fun getInstance(context: Context): DatabaseHelper {
+128: override fun onCreate(db: SQLiteDatabase) {
+137: override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+159: override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+164: override fun onConfigure(db: SQLiteDatabase) {
+176: override fun onOpen(db: SQLiteDatabase) {
+198: fun databaseFileExists(): Boolean {
+255: fun getReadableDatabaseWithRetry(maxRetries: Int = 3): SQLiteDatabase? {
+273: fun getWritableDatabaseWithRetry(maxRetries: Int = 3): SQLiteDatabase? {
+299: fun isTimeConflict(db: SQLiteDatabase, targetTimestamp: Long, excludeId: Int? = null): Boolean {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DbMigrationRunner.kt,5,"41: fun load(context: Context): DbMigrationScript {
+48: fun parse(jsonText: String): DbMigrationScript {
+117: fun migrate(db: SQLiteDatabase, script: DbMigrationScript, fromVersion: Int, toVersion: Int) {
+135: fun pendingRepairs(db: SQLiteDatabase, script: DbMigrationScript): List<String> {
+166: fun repair(db: SQLiteDatabase, script: DbMigrationScript) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DiagLog.kt,3,"47: fun format(at: Long, event: String, fields: List<Pair<String, Any?>>): String {
+53: fun log(context: Context, event: String, vararg fields: Pair<String, Any?>) {
+75: fun readAll(context: Context): String = try {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DiagReport.kt,4,"54: fun buildSnapshot(context: Context): String {
+56: fun line(k: String, v: () -> Any?) {
+186: fun isRegistered(context: Context, id: Int): Boolean {
+196: fun export(context: Context): Uri? {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/DirectBootReceiver.kt,1,"17: override fun onReceive(context: Context, intent: Intent) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/MainActivity.kt,7,"134: override fun onReceive(context: Context, intent: Intent) {
+141: override fun onCreate(savedInstanceState: Bundle?) {
+167: override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+211: override fun onDestroy() {
+225: override fun onResume() {
+257: override fun onNewIntent(intent: Intent) {
+335: override fun configureFlutterEngine(flutterEngine: FlutterEngine) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/NotificationHelper.kt,2,"40: fun showUpdatedNotification(
+120: fun showRingControlNotification(context: Context, alarmId: Int, round: Long, label: String, durationMinutes: Int,",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RefreshLockManager.kt,3,"40: fun tryAcquire(context: Context, owner: String, ttlMs: Long = 30_000L): Boolean {
+62: fun release(context: Context, owner: String) {
+78: fun forceClear(context: Context) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ReleaseLocalePolicy.kt,6,"13: fun locale(context: Context): Locale = context.resources.configuration.locales[0]
+14: fun koreanFeatures(context: Context): Boolean = locale(context).language == ""ko""
+22: fun firstDayOfWeek(context: Context): Int =
+26: fun isCalendarRedDay(context: Context, day: Calendar,
+31: fun syncSleepWidget(context: Context) {
+43: override fun onReceive(context: Context, intent: Intent) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RestoreGate.kt,10,"51: fun acquire(context: Context, token: String): Boolean = synchronized(lock) {
+68: fun release(context: Context, token: String): Boolean = synchronized(lock) {
+77: fun isOwner(context: Context, token: String?): Boolean = synchronized(lock) {
+85: fun shouldDefer(context: Context, writer: String, ownerToken: String? = null): Boolean = synchronized(lock) {
+104: fun isLocked(context: Context): Boolean = shouldDefer(context, ""query"")
+107: fun consumeInterrupted(context: Context): Boolean {
+148: fun saveRingSnapshotIfAbsent(context: Context, alarmId: Int, snapshot: RingSnapshot): Boolean {
+160: fun ringSnapshot(context: Context, alarmId: Int): RingSnapshot? = try {
+175: fun clearRingSnapshot(context: Context, alarmId: Int) {
+182: fun cleanupSnapshots(context: Context, liveIds: Set<Int>) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RestoreOs.kt,4,"43: fun prepareCarryOver(context: Context, token: String?): Map<String, Any?> {
+85: fun clearOs(context: Context, token: String?, keepIds: Set<Int>) {
+106: fun reconcileOs(context: Context, token: String?, scheduleTabEnabled: Boolean): Map<String, Any?> {
+144: fun cleanupSnapshots(context: Context) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/RingingAlarmTracker.kt,11,"118: fun startRing(context: Context, alarmId: Int): ActiveRing = synchronized(lock) {
+134: fun current(context: Context): ActiveRing? = synchronized(lock) {
+140: fun getRingingAlarmId(context: Context): Int? = current(context)?.alarmId
+142: fun isCurrent(context: Context, alarmId: Int, round: Long): Boolean = synchronized(lock) {
+148: fun endIfCurrent(context: Context, alarmId: Int, round: Long): Boolean = synchronized(lock) {
+169: fun endCurrentOf(context: Context, alarmId: Int): ActiveRing? = synchronized(lock) {
+176: fun finishTransition(alarmId: Int) {
+186: fun carryState(context: Context): CarryState = synchronized(lock) {
+194: fun isLiveRing(context: Context): Boolean = synchronized(lock) {
+203: fun runIfNoLiveRing(context: Context, block: () -> Unit): Boolean = synchronized(lock) {
+215: fun normalizeRound(context: Context, alarmId: Int, round: Long): Long = synchronized(lock) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ScheduleNotificationReceiver.kt,2,"67: fun formatTimeHeadline(startMinutes: Int, durationMinutes: Int): String {
+73: override fun onReceive(context: Context, intent: Intent) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/ScheduleNotificationScheduler.kt,7,"56: fun isTabEnabled(context: Context): Boolean =
+59: fun setTabEnabled(context: Context, enabled: Boolean) {
+64: fun syncTabEnabled(context: Context, enabled: Boolean) {
+72: fun schedule(
+109: fun cancel(context: Context, id: Int) {
+138: fun rescheduleAllFromDb(context: Context, ownerToken: String? = null): Boolean {
+214: fun cancelAllFromDb(context: Context) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionReceiver.kt,3,"41: override fun onReceive(context: Context, intent: Intent) {
+84: fun recordRejection(context: Context, startMillis: Long) {
+160: fun checkNow(context: Context) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionScheduler.kt,3,"36: fun isSleepDetectionEnabled(context: Context): Boolean {
+42: fun ensureScheduled(context: Context) {
+93: fun cancel(context: Context) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepScheduleResolver.kt,2,"71: fun isRestShiftName(name: String): Boolean {
+85: fun computeWindowForNow(context: Context, nowMillis: Long): OpportunityWindow? {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetActionReceiver.kt,1,"58: override fun onReceive(context: Context, intent: Intent) {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt,4,"67: fun requestUpdate(context: Context) {
+359: fun currentSleepingState(context: Context): SleepingState {
+393: override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+411: override fun onAppWidgetOptionsChanged(",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/VolumeCalibration.kt,2,"24: fun linearGain(sliderVolume: Float): Float {
+29: fun boostMillibels(sliderVolume: Float): Int {",정적 목록화는 동작 통과 판정이 아님
+android/app/src/main/kotlin/com/hwani1103/shiftbell/WaveGradientView.kt,4,"81: override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+87: override fun onAttachedToWindow() {
+108: override fun onDetachedFromWindow() {
+114: override fun onDraw(canvas: Canvas) {",정적 목록화는 동작 통과 판정이 아님

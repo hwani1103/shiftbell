@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-08",
+  "checklist_ids": [
+    "A09",
+    "U05",
+    "R04"
+  ],
+  "status": "Design candidates; user approval pending",
+  "scope": "English version means ALL global release locales (en/de/pt/hi), not English only. Existing Korean theme list and saved choices preserved.",
+  "themes": {
+    "periwinkle": "First global picker candidate: pale indigo/sky background through status area; solid shift runs within week; ordered peach/sage/lilac translucent raised memo cards.",
+    "softMosaic": "Second global picker candidate: white page, softly raised shift-coloured cells; Thursday pearl, Friday mist pill, Saturday slate, Sunday cream shift-label samples."
+  },
+  "deferred_until_theme_approval": [
+    "Help copy/theme counts and walkthroughs",
+    "Store screenshots and release descriptions",
+    "Choose one final Soft Mosaic shift chip treatment",
+    "Final global default/migration decision (existing choices not overwritten)"
+  ],
+  "concurrent_session": "Other Codex session SRTL Flip8 functional tests; do not control its device or processes.",
+  "validation": {
+    "compact_calendar": "PASS: both themes at 320/500/501/600 widths",
+    "run_and_short_cell_tests": "PASS in final 5-test run: week start, cross-month runs, empty/hidden button slots, selected short cells with 3 visible memo lines",
+    "critical_gate": {
+      "command": "tools/check_critical_release.ps1 -Build",
+      "checks": "PASS: 323 Flutter tests, both native test batches, dev debug APK and web build; P0 success marker reached",
+      "wrapper_exit_code": 1,
+      "wrapper_note": "Windows PowerShell outer redirection reported NativeCommandError for Flutter WebAssembly dry-run warnings. Inner checked commands completed and printed both build success and P0 success; no test/check failure. Preserve this wrapper distinction.",
+      "evidence": "global_theme_concepts_2026_10_08/critical_build.log"
+    },
+    "device": "USB SM_S948N installed APK / restart screenshot PASS; no real foldable hardware PASS claim",
+    "fold_layout": "PASS: 5 tests; en_US both themes at 411x891,360x840,752x834.67,834.67x752,475.43x751.24,704x932.57,932.57x704; plus selected short cells and shift-run boundaries",
+    "analyze": "0 errors; existing warning/info diagnostics remain",
+    "data_preservation": {
+      "result": "PASS",
+      "compared_tables": 7,
+      "all_hashes_identical": true,
+      "date_memos": 9,
+      "shift_schedule": 1,
+      "saved_theme_after_restart": "softMosaic",
+      "evidence": "artifacts/global_theme_concepts_2026_10_08/{before_install,after_install}/fingerprint.json"
+    },
+    "no_build_gate": "PASS: P0 success marker and both native batches before explicit APK request"
+  },
+  "delivery": "dev debug APK built and adb install -r succeeded on USB R5KL20DHWAE (SM_S948N). Applied Soft Mosaic through real Settings > Calendar Theme > Apply theme. Killed/reopened app process without hot reload, visually confirmed retained theme and English UI.",
+  "limitations": [
+    "Runs stop at week boundary and reclaimed button slots; same-week month transitions may join.",
+    "Real foldable and other locale device review pending."
+  ],
+  "initial_attempts": [
+    "Critical gate first run: four locale tests expected old five-theme count; updated to seven and first-two order, rerun PASS.",
+    "Short-cell tests exposed hidden memo text; fixed font height within card, final tests PASS.",
+    "Intermediate hot reload syntax error corrected before final five-test PASS."
+  ],
+  "apk": {
+    "path": "build/app/outputs/flutter-apk/app-dev-debug.apk",
+    "sha256": "eba3608f2458ec64a02d83ab3d9f5a87d89c0316a3487216c0f40993810a8dc7",
+    "release_build": false,
+    "install": "adb -s R5KL20DHWAE install -r: Success"
+  },
+  "screenshots": [
+    "artifacts/global_theme_concepts_2026_10_08/periwinkle.png",
+    "artifacts/global_theme_concepts_2026_10_08/installed_after_restart.png"
+  ],
+  "source_sha256": {
+    "lib\\widgets\\global_concept_calendar_cell.dart": "94a449a6f5d006a3b3d10393c957429a3bddbe961e57a803dcea8acbce0613e8",
+    "lib\\models\\calendar_theme.dart": "631b2b92fc292f4c5d826393ec3667cd0c1b009fc659620c94eb1adeb87a3c0f",
+    "lib\\screens\\calendar_tab.dart": "6ea89f32d17adb8b50f214e503483c109411bd81d31eb2df8be8c027eae51fc2",
+    "lib\\screens\\calendar_theme_picker_screen.dart": "329cbd7baaf72a6fc40ea065c523c792c6ec5843dc8d703f73795ad508f047b6",
+    "lib\\theme\\app_theme.dart": "9c88fc5118ee93b8aa92d1a5cc2e6746f3ba6c66b26aab888442da3ee56018e3",
+    "lib\\main.dart": "22c5ad4c8e960428eef06c7d9bba1236a409871b2db9601c649f5b2973da1489"
+  }
+}

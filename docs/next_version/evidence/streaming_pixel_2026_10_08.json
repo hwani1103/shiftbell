@@ -1,0 +1,63 @@
+{
+  "date_kst": "2026-10-08",
+  "project": "logit-e63e1",
+  "plan": "Spark",
+  "charged_usd": 0,
+  "model": "Pixel 8a",
+  "sdk": 35,
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "P1": {
+    "status": "PASS",
+    "initial": "native silent fixture; no claim of actual UI registration",
+    "actual_plus5": true,
+    "target_ms": 1791411736000,
+    "db_os_match": true,
+    "receiver_delay_ms": 163,
+    "locked_presentation_delay_ms": 803,
+    "receiver_screen_on": false,
+    "secure": true,
+    "showing": true,
+    "guard_boundary_shift": true,
+    "clock_changed": false,
+    "screen_or_permission_change_during_wait": false
+  },
+  "P2": {
+    "status": "PASS",
+    "on": "granted",
+    "off": "denied",
+    "actual_settings_toggled": true,
+    "back_to_app": true
+  },
+  "cleanup": {
+    "db_alarms": 0,
+    "apk_uninstalled": true,
+    "os_custom_alarm_remaining": 0,
+    "returned": true,
+    "remote_list_empty": true
+  },
+  "session": {
+    "name": "pixel",
+    "project": "logit-e63e1",
+    "model": "akita/35",
+    "cap_seconds": 840,
+    "requested_epoch": 1791410998.8981478,
+    "install_limit_seconds": 240,
+    "first_evidence_limit_seconds": 480,
+    "reservation": "crpzhqqoekvga",
+    "reserved_epoch": 1791411009.5573134,
+    "serial": "localhost:3116",
+    "connected_epoch": 1791411038.747477,
+    "release_reason": "requested return",
+    "released": true,
+    "finished_epoch": 1791411819.2743888,
+    "conservative_seconds": 820.3762409687042
+  },
+  "limitations": [
+    "Silent fixture; not audio or haptic test",
+    "Fresh device onboarding incomplete; UI registration was already PASS and was not repeated",
+    "Native animated screen XML dump failed; actual PNG and RING_PRESENTED/policy used",
+    "Synthetic lock set and secure true; helper success-text assertion was false negative, no user PIN involved; returned device erased by service"
+  ],
+  "evidence_zip": "artifacts\\streaming_free_2026_10_08\\pixel_evidence.zip",
+  "evidence_sha256": "4f89993377292e292677a476dbdb195dce5a75916448c6c5088b818db4474dab"
+}

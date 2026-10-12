@@ -1,0 +1,87 @@
+온보딩 / 글로벌 첫 테마 / 1회 안내 / 권한 연결 통합 — 2026-10-09
+
+범위와 사용자 최종 결정
+- 최초 요청의 7항목 및 후속 온보딩 2/4 문구·정렬, 권한 허용 후 다음 권한 연결을 구현.
+- 마지막 요청에 따라 핫 리로드 대신 모든 변경을 함께 dev debug로 빌드. 실기기 설치·권한 변경은 하지 않는다.
+- 기존 미커밋 변경 및 과거 1·2·3차 검토, 원본 보고서, 실기기 PASS 범위를 보존.
+
+구현
+1. 패턴 만들기 2/4
+   입력 근무 칩 바로 아래에 생성 패턴을 고정 배치. 입력 영역만 별도 스크롤하고 결과 카드가 화면 안에 남는다.
+   패턴이 늘면 결과 카드 내부를 최신 칩까지 자동 스크롤. 40일 제한·삭제·다음 및 오늘 근무 선택 유지.
+   빈 카드: '탭하면 이곳에 패턴이 생성됩니다.' / 가로·세로 가운데 정렬.
+   카드 아래: '최대 40일까지 지정 가능합니다.\n패턴의 근무 칩을 누르면 삭제돼요.'
+   간격을 둔 뒤: '반복되는 패턴이 없는 교대 근무라면?' 및 기존 '날짜별로 직접 지정할게요' 링크.
+   5언어에 동등하게 반영. 불규칙 할당 기능 및 마지막 알람 단계 유지.
+2. 설정 초기화 버튼
+   스케줄 수정/초기화 버튼의 아이콘+문구를 하나의 가운데 행으로 구성.
+   긴 문구는 왼쪽 정렬로 줄바꿈하고 아이콘이 글자에 붙도록 유지. 파괴적 초기화 로직은 변경하지 않음.
+3. 외국어 기본 근무명
+   en: Day / Night / Early / Late / Day Off / Leave
+   de: Tag / Nacht / Früh / Spät / Frei / Urlaub
+   pt: Dia / Noite / Manhã / Tarde / Folga / Férias
+   hi: दिन / रात / सुबह / दोपहर / छुट्टी / अवकाश
+   ko: 기존 주간 / 야간 / 오전 / 오후 / 휴무 / 연차 유지.
+   5~8자 안팎의 읽기 쉬운 단어를 우선. 독일어·포르투갈어·힌디어는 이미 자연스럽고 짧아 유지.
+   AM/PM, Aft., AL 등 억지 축약은 채택하지 않음. 기존 사용자 근무명/색상 저장 데이터는 변경하지 않음.
+   '삭제/추가' 설명 아래 짧고 익숙한 이름 사용 및 달력 시인성/설정에서 편집 안내를 5언어로 추가.
+   Early/Late 근거: NHS 교대 분류가 Early/Morning, Late/Afternoon으로 명시.
+   https://archive.datadictionary.nhs.uk/DD%20Release%20November%202020/data_elements/position_shift_type.html
+   https://www.nhsprofessionals.nhs.uk/Nightingale/-/media/C57E0D10E0E94574B97DA875B25F2B8F.ashx
+4. 안내 팝업 조사·정리
+   온보딩 welcome_popup_shown: 호출·함수·콘텐츠 제거. 과거 백업 키와 공통 번역 키는 호환성 때문에 유지.
+   일정관리 schedule_tab_tutorial_shown: 유지, 요청한 2문장으로 축약.
+   수면·회복 condition_tab_tutorial_shown: 유지, 수면 기록 및 근무시간 설정/회복 상태 안내 2문장으로 축약.
+   불규칙 shift_assign_tutorial_shown: 유지. 5언어 공통, 최초 실제 진입에만 표시.
+   업데이트 내용 release_note_*: 기존 공지 ID/본문/기준선·한 번 표시 동작 유지.
+   새 버전 설치 notified_update_version 및 Play 조회/설치 안내: 모두 유지.
+   retired one_touch_alarm_tutorial_shown은 기존 삭제 처리 유지. 권한 경고·복구 확인 등 행동 확인창은 1회 튜토리얼 대상과 구분.
+   700ms 지연 후 실제 표시 가능/현재 라우트/한국어 기능 범위 재확인과 표시 키 중복 방어 유지.
+   한국어 전용 문구는 messages_ko.json과 생성기로 관리. 정확한 문구 변경 원장:
+   evidence/settings_copy_changes_2026_10_09_onboarding_popups.json
+5. 해외 최초 테마
+   기기 출시 로케일로 최초 기본값을 결정: 한국어 mainWhite, 해외 및 미지원 언어 fallback은 periwinkle.
+   저장한 테마가 있으면 유지. 해외에서 제공하지 않는 한국어 테마의 표시 fallback도 Periwinkle.
+   Periwinkle에 블루/바이올렛/앰버/틸/로즈 등의 전용 12색 팔레트. 휴무·연차는 로즈.
+   온보딩 저장 색상도 실제 선택 가능한 테마를 기준으로 생성. 사용자 지정 색상 override 보존.
+6. Soft Mosaic 확인만
+   셀의 연한 배경과 근무 칩의 실제 배경을 혼동하지 않음.
+   실제 렌더된 칩 배경과 텍스트 색을 읽어 독립 WCAG 계산으로 검증.
+   모든 기본 팔레트, 경계 회색/강한 색/흑백, 폰·펼친 화면에서 더 높은 대비의 흑백을 선택, 대비 4.5 이상.
+   잘못된 외부 shiftTextColor를 넣어도 칩 자체 대비 선택이 올바른지 확인. 제품 코드는 유지.
+7. 온보딩 권한 연결
+   미허용/확인 불가 카드만 보여주고 개별 설정 버튼을 유지. 누른 카드부터 설정.
+   실제 granted를 다시 읽었을 때만 다음 denied 권한으로 이어짐. 우선순위는 알림→오버레이→정확한 알람→전체화면→별도 알람 채널.
+   설정 이동 성공이나 요청 콜백만으로 허용 판정하지 않음. 거절·취소·확인 불가·해당 없음은 그 요청의 자동 연결을 중단.
+   runtime 알림 요청은 사용자 응답 콜백을, 외부 설정은 앱 resumed를 기준으로 완료 후 재조회.
+   백그라운드에서는 다음 설정을 열지 않음. 중복 요청/늦은 읽기/숨겨진 라우트/폐기된 화면은 방어.
+   일반 설정·도움말은 수동 개별 설정 유지. Xiaomi 제조사 안내는 읽기만으로 완료 판정하지 않음.
+   10/9 후속 사용자 요청이 과거 '연쇄 실행하지 않음' 정책을 온보딩의 실제 허용 확인 성공에 한해 변경함.
+   P0 실행기에 새 권한 연결·온보딩 복귀 회귀 테스트 포함.
+
+다른 세션 위젯 통합
+- '개선하고 주간 위젯 추가' 세션의 마지막 완료 내용을 직접 확인.
+- 1주 요일10→12dp / 날짜 최대14→12dp와 행 높이 배분, 위젯 목록 등록·이름 1주→3주→수면 반영.
+- 최종 미빌드 변경: 3주 calendar_widget_info.xml의 resizeMode=horizontal, minResizeHeight/maxResizeHeight 제거.
+- 1주와 3주 모두 가로만 조절. 기존 기본 높이(64/200dp) 유지.
+- 원본 위젯 보고서는 당시 증거로 보존. 이번 통합 빌드가 최종 3주 세로 조절 제거를 포함하는 근거.
+- 실제 런처의 목록 순서/세로 조절 표시와 새 권한 연결의 실기기·OEM 검증은 NOT_RUN.
+
+검증과 산출물
+- 새 권한 연결12 + 기존 권한13 + 온보딩 복귀1 = 26 tests PASS.
+- 최종 5언어×10화면×큰 글자(1.3) = 50 tests PASS.
+- 최종 호스트 이미지 16개 생성. 빈 카드 가운데 정렬/직접 지정 링크/패턴 생성·삭제/40일 한계 확인.
+- 최종 피드백6 + 글로벌 최초 테마9 + 실제 Mosaic 대비1 + 유지 팝업6 = 22 tests PASS.
+- Fold8 크기 de/pt/hi 설정·불규칙·Periwinkle 2화면×2글자 크기: 총36 화면. 8 test PASS와 Hindi 설정 계측 수정 후1 test PASS.
+  Hindi 문자1개 선택은 합성 글자 경계로 빈 영역을 반환할 수 있어 문구 전체 영역으로 계측 수정. 제품 결함 아님.
+- 분석 exit0: error/warning 없음, 기존 스타일·deprecated info 38건.
+- 공통 리소스 audit errors=[], 각 언어 common525개, 한국어 전용196개. 웹·휴일 생성/검사 포함.
+- 필수 tools/check_critical_release.ps1 -Build: PASS / exit0. Flutter338 tests, Android 권한·알람 및 DB migration, dev debug APK와 웹 빌드 통과. release는 실행하지 않음.
+- 이전 실행은 한국어 문구 원장 누락/과거 mainWhite fallback 기대 테스트를 수정하고 재실행. 이후 실행은 사용자 요청으로 중단.
+- 이번 통합 최종 실행: artifacts/onboarding_theme_2026_10_09/critical_release_final.log
+- 제품 소스419파일 사전 해시: artifacts/onboarding_theme_2026_10_09/source_hashes_final_before_build.json
+- APK: artifacts/onboarding_theme_2026_10_09/shiftbell-integrated-dev-debug.apk / com.hwani1103.shiftbell.dev / 1.0.23-dev (25)
+- 크기: 215873186 bytes / SHA256: c5f548cc851c53eb2a756632ab83b4ca0c2f023c8940cbedf36903dc9ee21f7f
+- APK의 컴파일된1주·3주 provider XML 모두 resizeMode=0x1(horizontal), 세로 resizeHeight 없음 확인. 1주 레이아웃 요일/날짜12dp 포함 확인.
+- 소스419파일 빌드 전·후 해시 동일. 빌드 중 제품 소스 변경0건.
+- 기기 설치/핫 리로드/실기기 PASS: 이번 최종 요청에 따라 미실행. 호스트 이미지를 Fold8 실기기 촬영본으로 표시하지 않음.

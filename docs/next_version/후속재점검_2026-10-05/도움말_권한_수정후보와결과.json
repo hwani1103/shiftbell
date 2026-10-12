@@ -1,0 +1,268 @@
+[
+  {
+    "language": "pt",
+    "key": "privacyPermissionsBody",
+    "before": "• Notificações: mostrar o estado dos alarmes e lembretes antes de tocarem.\n• Exibir sobre outros apps: mostrar a tela de alarme durante o uso de outros apps.\n• Alarmes exatos: agendar alarmes para o horário definido.\n\nVocê pode revisar essas permissões nas configurações do Android. Negá-las pode limitar as notificações ou impedir que os alarmes funcionem como esperado.",
+    "after": "• Notificações: mostrar o estado dos alarmes e lembretes antes de tocarem.\n• Exibir sobre outros apps: mostrar a tela de alarme durante o uso de outros apps.\n• Alarmes exatos: agendar alarmes para o horário definido.\n\nVocê pode revisar essas permissões nas configurações do Android. Negá-las pode limitar as notificações ou impedir que os alarmes funcionem como esperado.\n\n• Tela de bloqueio: permitir notificações em tela cheia para mostrar a tela do alarme com o celular bloqueado.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "pt",
+    "key": "permissionSomeDenied",
+    "before": "Algumas permissões foram negadas",
+    "after": "Algumas permissões precisam de atenção",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "pt",
+    "key": "permissionRequiredNotGranted",
+    "before": "Permissões necessárias não concedidas",
+    "after": "Confira as permissões do alarme",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "pt",
+    "key": "helpStartOnboardingBody",
+    "before": "Permita notificações, alarmes exatos e exibição sobre outros apps para que o ShiftBell possa alertar você de forma confiável. Depois, escolha se seus turnos seguem um ciclo, adicione os nomes e defina os alarmes necessários. Você pode pular os alarmes e adicioná-los depois nas configurações.\n\nRemova nomes que não usa com × e adicione os que faltam com + Adicionar. Se já usou o ShiftBell, escolha Restaurar backup para restaurar um arquivo.",
+    "after": "Permita notificações, alarmes exatos e exibição sobre outros apps para que o ShiftBell possa alertar você de forma confiável. Depois, escolha se seus turnos seguem um ciclo, adicione os nomes e defina os alarmes necessários. Você pode pular os alarmes e adicioná-los depois nas configurações.\n\nRemova nomes que não usa com × e adicione os que faltam com + Adicionar. Se já usou o ShiftBell, escolha Restaurar backup para restaurar um arquivo.\n\nAbra Configurações → Permissões do alarme no ShiftBell para conferir cada permissão, incluindo a tela de bloqueio. Volte ao app após configurar. Na primeira configuração, toque em Avançar quando terminar.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "pt",
+    "key": "helpAlarmAlarmNotRingingBody",
+    "before": "Confira se a permissão de alarmes exatos está ativada para o ShiftBell. Verifique também as permissões de notificações e de exibição sobre outros apps, que permitem ver e controlar os alarmes. Confira as restrições de bateria do aparelho.\n\nA data precisa ter um turno definido, e esse turno precisa ter um alarme. Verifique também o som, o volume e a vibração.",
+    "after": "Confira se a permissão de alarmes exatos está ativada para o ShiftBell. Verifique também as permissões de notificações e de exibição sobre outros apps, que permitem ver e controlar os alarmes. Confira as restrições de bateria do aparelho.\n\nA data precisa ter um turno definido, e esse turno precisa ter um alarme. Verifique também o som, o volume e a vibração.\n\nAbra Configurações → Permissões do alarme no ShiftBell para conferir cada permissão, incluindo a tela de bloqueio. Volte ao app após configurar. Na primeira configuração, toque em Avançar quando terminar.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "pt",
+    "key": "helpTroubleshootAlarmIssueBody",
+    "before": "Confira as permissões de alarmes exatos, notificações e exibição sobre outros apps, além das restrições de bateria do aparelho. Depois, verifique se a data tem um turno com alarme e se o som ou a vibração está ativado.",
+    "after": "Confira as permissões de alarmes exatos, notificações e exibição sobre outros apps, além das restrições de bateria do aparelho. Depois, verifique se a data tem um turno com alarme e se o som ou a vibração está ativado.\n\nAbra Configurações → Permissões do alarme no ShiftBell para conferir cada permissão, incluindo a tela de bloqueio. Volte ao app após configurar. Na primeira configuração, toque em Avançar quando terminar.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "pt",
+    "key": "helpCalendarLocaleTitle",
+    "before": "Datas, fins de semana e feriados",
+    "after": "Datas e início da semana",
+    "reason": "Foreign calendar has no public holiday function; remove unrelated description"
+  },
+  {
+    "language": "pt",
+    "key": "helpCalendarLocaleBody",
+    "before": "Na versão em português do Brasil, a semana no calendário começa no domingo, e as datas seguem o formato brasileiro.\n\nO domingo em vermelho indica o fim de semana. Seus turnos e alarmes seguem sua escala.\n\nO cálculo das horas semanais sempre considera segunda a domingo. Feriados e fins de semana não transformam um turno em folga automaticamente.",
+    "after": "Na versão em português do Brasil, a semana no calendário começa no domingo, e as datas seguem o formato brasileiro.\n\nO domingo em vermelho indica o fim de semana. Seus turnos e alarmes seguem sua escala.\n\nO cálculo das horas semanais sempre considera segunda a domingo. O fim de semana não transforma um turno em folga automaticamente.",
+    "reason": "Foreign calendar has no public holiday function; remove unrelated description"
+  },
+  {
+    "language": "de",
+    "key": "privacyPermissionsBody",
+    "before": "• Benachrichtigungen: Weckerstatus und Erinnerungen vor Weckern anzeigen.\n• Über anderen Apps einblenden: die Weckeransicht während der Nutzung anderer Apps anzeigen.\n• Genaue Alarme: Wecker zur eingestellten Uhrzeit planen.\n\nDu kannst diese Berechtigungen in den Android-Einstellungen prüfen. Wenn du sie ablehnst, können Weckerbenachrichtigungen eingeschränkt sein oder Wecker nicht wie erwartet funktionieren.",
+    "after": "• Benachrichtigungen: Weckerstatus und Erinnerungen vor Weckern anzeigen.\n• Über anderen Apps einblenden: die Weckeransicht während der Nutzung anderer Apps anzeigen.\n• Genaue Alarme: Wecker zur eingestellten Uhrzeit planen.\n\nDu kannst diese Berechtigungen in den Android-Einstellungen prüfen. Wenn du sie ablehnst, können Weckerbenachrichtigungen eingeschränkt sein oder Wecker nicht wie erwartet funktionieren.\n\n• Sperrbildschirm: Vollbildbenachrichtigungen erlauben, um den Wecker bei gesperrtem Telefon anzuzeigen.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "de",
+    "key": "permissionSomeDenied",
+    "before": "Einige Berechtigungen fehlen",
+    "after": "Einige Berechtigungen müssen geprüft werden",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "de",
+    "key": "permissionRequiredNotGranted",
+    "before": "Erforderliche Berechtigungen fehlen",
+    "after": "Weckerberechtigungen prüfen",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "de",
+    "key": "helpStartOnboardingBody",
+    "before": "Erlaube Benachrichtigungen, genaue Alarme und das Einblenden über anderen Apps, damit ShiftBell dich zuverlässig wecken kann. Wähle dann, ob sich deine Schichten wiederholen, ergänze ihre Namen und richte die benötigten Wecker ein. Du kannst Wecker überspringen und später in den Einstellungen hinzufügen.\n\nEntferne ungenutzte Schichtnamen mit × und ergänze fehlende Namen mit + Hinzufügen. Wenn du ShiftBell schon verwendet hast, kannst du unter Daten wiederherstellen eine Sicherungsdatei wiederherstellen.",
+    "after": "Erlaube Benachrichtigungen, genaue Alarme und das Einblenden über anderen Apps, damit ShiftBell dich zuverlässig wecken kann. Wähle dann, ob sich deine Schichten wiederholen, ergänze ihre Namen und richte die benötigten Wecker ein. Du kannst Wecker überspringen und später in den Einstellungen hinzufügen.\n\nEntferne ungenutzte Schichtnamen mit × und ergänze fehlende Namen mit + Hinzufügen. Wenn du ShiftBell schon verwendet hast, kannst du unter Daten wiederherstellen eine Sicherungsdatei wiederherstellen.\n\nÖffne Einstellungen → Weckerberechtigungen in ShiftBell und prüfe jede Berechtigung, auch für den Sperrbildschirm. Kehre nach dem Einstellen zur App zurück. Tippe bei der ersten Einrichtung anschließend auf Weiter.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "de",
+    "key": "helpAlarmAlarmNotRingingBody",
+    "before": "Prüfe zuerst, ob genaue Alarme für ShiftBell erlaubt sind. Benachrichtigungen und das Einblenden über anderen Apps helfen dir, Wecker zu sehen und zu bedienen. Prüfe auch die Akkubeschränkungen deines Handys.\n\nDem betreffenden Tag muss eine Schicht mit einem eingerichteten Wecker zugewiesen sein. Kontrolliere außerdem Ton, Lautstärke und Vibration.",
+    "after": "Prüfe zuerst, ob genaue Alarme für ShiftBell erlaubt sind. Benachrichtigungen und das Einblenden über anderen Apps helfen dir, Wecker zu sehen und zu bedienen. Prüfe auch die Akkubeschränkungen deines Handys.\n\nDem betreffenden Tag muss eine Schicht mit einem eingerichteten Wecker zugewiesen sein. Kontrolliere außerdem Ton, Lautstärke und Vibration.\n\nÖffne Einstellungen → Weckerberechtigungen in ShiftBell und prüfe jede Berechtigung, auch für den Sperrbildschirm. Kehre nach dem Einstellen zur App zurück. Tippe bei der ersten Einrichtung anschließend auf Weiter.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "de",
+    "key": "helpTroubleshootAlarmIssueBody",
+    "before": "Prüfe die Berechtigungen für genaue Alarme, Benachrichtigungen und das Einblenden über anderen Apps sowie die Akkubeschränkungen deines Handys. Dem Tag muss eine Schicht mit einem Wecker zugewiesen sein. Kontrolliere auch, ob Ton oder Vibration eingeschaltet ist.",
+    "after": "Prüfe die Berechtigungen für genaue Alarme, Benachrichtigungen und das Einblenden über anderen Apps sowie die Akkubeschränkungen deines Handys. Dem Tag muss eine Schicht mit einem Wecker zugewiesen sein. Kontrolliere auch, ob Ton oder Vibration eingeschaltet ist.\n\nÖffne Einstellungen → Weckerberechtigungen in ShiftBell und prüfe jede Berechtigung, auch für den Sperrbildschirm. Kehre nach dem Einstellen zur App zurück. Tippe bei der ersten Einrichtung anschließend auf Weiter.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "de",
+    "key": "helpCalendarLocaleTitle",
+    "before": "Datum, Wochenenden und Feiertage",
+    "after": "Datum und Wochenbeginn",
+    "reason": "Foreign calendar has no public holiday function; remove unrelated description"
+  },
+  {
+    "language": "de",
+    "key": "helpCalendarLocaleBody",
+    "before": "In der deutschen Sprachversion beginnt die Kalenderwoche am Montag. Datumsangaben folgen dem deutschen Format.\n\nRote Sonntage kennzeichnen das Wochenende. Deine Schichten und Wecker richten sich nach deinem Plan.\n\nDie wöchentliche Arbeitszeit wird immer von Montag bis Sonntag berechnet. Ein Feiertag oder Wochenende macht eine eingetragene Schicht nicht automatisch zu einem freien Tag.",
+    "after": "In der deutschen Sprachversion beginnt die Kalenderwoche am Montag. Datumsangaben folgen dem deutschen Format.\n\nRote Sonntage kennzeichnen das Wochenende. Deine Schichten und Wecker richten sich nach deinem Plan.\n\nDie wöchentliche Arbeitszeit wird immer von Montag bis Sonntag berechnet. Ein Wochenende macht eine eingetragene Schicht nicht automatisch zu einem freien Tag.",
+    "reason": "Foreign calendar has no public holiday function; remove unrelated description"
+  },
+  {
+    "language": "en",
+    "key": "privacyPermissionsBody",
+    "before": "• Notifications: show alarm status and pre-alarm reminders.\n• Display over other apps: show the alarm screen while you use other apps.\n• Exact alarms: schedule alarms for the time you set.\n\nYou can review these permissions in Android Settings. Declining them may limit alarm notifications or prevent alarms from working as expected.",
+    "after": "• Notifications: show alarm status and pre-alarm reminders.\n• Display over other apps: show the alarm screen while you use other apps.\n• Exact alarms: schedule alarms for the time you set.\n\nYou can review these permissions in Android Settings. Declining them may limit alarm notifications or prevent alarms from working as expected.\n\n• Lock screen display: allow full-screen notifications to show the alarm screen while the phone is locked.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "en",
+    "key": "permissionSomeDenied",
+    "before": "Some Permissions Were Denied",
+    "after": "Some permissions need attention",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "en",
+    "key": "permissionRequiredNotGranted",
+    "before": "Required Permissions Not Granted",
+    "after": "Check alarm permissions",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "en",
+    "key": "helpStartOnboardingBody",
+    "before": "Allow notifications, exact alarms and display over other apps so ShiftBell can alert you reliably. Then choose whether your shifts repeat, add your shift names and set alarms for the shifts that need them. You can skip alarms and add them later in Settings.\n\nRemove unused shift names with × and add any missing names with + Add. If you have used ShiftBell before, choose Restore from backup to restore a backup file.",
+    "after": "Allow notifications, exact alarms and display over other apps so ShiftBell can alert you reliably. Then choose whether your shifts repeat, add your shift names and set alarms for the shifts that need them. You can skip alarms and add them later in Settings.\n\nRemove unused shift names with × and add any missing names with + Add. If you have used ShiftBell before, choose Restore from backup to restore a backup file.\n\nOpen Settings → Alarm permissions in ShiftBell to check each permission, including lock screen display. Return to the app after changing settings. During first setup, tap Next when you are ready.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "en",
+    "key": "helpAlarmAlarmNotRingingBody",
+    "before": "Check that exact alarms are allowed for ShiftBell. Also check notification and display-over-other-apps permissions so you can see and control alarms, and review your phone’s battery restrictions.\n\nMake sure the date has a shift assigned and that the shift has an alarm. Check the alarm’s sound, volume and vibration settings as well.",
+    "after": "Check that exact alarms are allowed for ShiftBell. Also check notification and display-over-other-apps permissions so you can see and control alarms, and review your phone’s battery restrictions.\n\nMake sure the date has a shift assigned and that the shift has an alarm. Check the alarm’s sound, volume and vibration settings as well.\n\nOpen Settings → Alarm permissions in ShiftBell to check each permission, including lock screen display. Return to the app after changing settings. During first setup, tap Next when you are ready.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "en",
+    "key": "helpTroubleshootAlarmIssueBody",
+    "before": "Check exact alarm permission, notification and display-over-other-apps permissions, and your phone’s battery restrictions. Then check that the date has a shift assigned, that the shift has an alarm, and that sound or vibration is enabled.",
+    "after": "Check exact alarm permission, notification and display-over-other-apps permissions, and your phone’s battery restrictions. Then check that the date has a shift assigned, that the shift has an alarm, and that sound or vibration is enabled.\n\nOpen Settings → Alarm permissions in ShiftBell to check each permission, including lock screen display. Return to the app after changing settings. During first setup, tap Next when you are ready.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "en",
+    "key": "helpCalendarLocaleTitle",
+    "before": "Dates, weekends and public holidays",
+    "after": "Dates and week start",
+    "reason": "Foreign calendar has no public holiday function; remove unrelated description"
+  },
+  {
+    "language": "en",
+    "key": "helpCalendarLocaleBody",
+    "before": "The calendar uses Sunday first for US English and Monday first for UK English and supported European regional settings. English dates use month names to avoid confusion between day/month and month/day.\n\nA red Sunday marks the weekend. Your shifts and alarms follow your own schedule.\n\nWeekly work-hour totals always use Monday–Sunday. A holiday or weekend does not automatically make a shift a day off.",
+    "after": "The calendar uses Sunday first for US English and Monday first for UK English and supported European regional settings. English dates use month names to avoid confusion between day/month and month/day.\n\nA red Sunday marks the weekend. Your shifts and alarms follow your own schedule.\n\nWeekly work-hour totals always use Monday–Sunday. A weekend does not automatically make a shift a day off.",
+    "reason": "Foreign calendar has no public holiday function; remove unrelated description"
+  },
+  {
+    "language": "hi",
+    "key": "privacyPermissionsBody",
+    "before": "• सूचनाएं: अलार्म की स्थिति और पहले से याद दिलाने वाली सूचना दिखाने के लिए।\n• दूसरे ऐप्स के ऊपर दिखाना: दूसरे ऐप इस्तेमाल करते समय अलार्म स्क्रीन दिखाने के लिए।\n• सटीक अलार्म: तय समय पर अलार्म बजाने के लिए।\n\nAndroid की सेटिंग में ये अनुमतियां देख सकते हैं। अनुमति न देने पर अलार्म की सूचनाएं सीमित हो सकती हैं या अलार्म अपेक्षा के अनुसार काम नहीं कर सकते।",
+    "after": "• सूचनाएं: अलार्म की स्थिति और पहले से याद दिलाने वाली सूचना दिखाने के लिए।\n• दूसरे ऐप्स के ऊपर दिखाना: दूसरे ऐप इस्तेमाल करते समय अलार्म स्क्रीन दिखाने के लिए।\n• सटीक अलार्म: तय समय पर अलार्म बजाने के लिए।\n\nAndroid की सेटिंग में ये अनुमतियां देख सकते हैं। अनुमति न देने पर अलार्म की सूचनाएं सीमित हो सकती हैं या अलार्म अपेक्षा के अनुसार काम नहीं कर सकते।\n\n• लॉक स्क्रीन: फ़ोन लॉक होने पर अलार्म स्क्रीन दिखाने के लिए फ़ुल-स्क्रीन सूचनाओं की अनुमति।",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "hi",
+    "key": "permissionSomeDenied",
+    "before": "कुछ अनुमतियां नहीं मिलीं",
+    "after": "कुछ अनुमतियों की जांच करनी है",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "hi",
+    "key": "permissionRequiredNotGranted",
+    "before": "ज़रूरी अनुमतियां नहीं मिलीं",
+    "after": "अलार्म की अनुमतियां जांचें",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "hi",
+    "key": "helpStartOnboardingBody",
+    "before": "अलार्म ठीक से काम करें, इसके लिए सूचनाओं, सटीक अलार्म और दूसरे ऐप्स के ऊपर दिखाने की अनुमति दें। फिर चुनें कि आपकी शिफ्ट एक तय क्रम में दोहराई जाती हैं या नहीं। शिफ्ट के नाम जोड़ें और ज़रूरत के अनुसार अलार्म सेट करें। अलार्म अभी छोड़कर बाद में सेटिंग से भी जोड़ सकते हैं।\n\nजिन शिफ्ट नामों की ज़रूरत नहीं है, उन्हें × से हटाएं। नए नाम + जोड़ें से बनाएं। पहले ShiftBell इस्तेमाल किया है तो ‘बैकअप से डेटा वापस लाएं’ चुनकर अपनी बैकअप फ़ाइल खोलें।",
+    "after": "अलार्म ठीक से काम करें, इसके लिए सूचनाओं, सटीक अलार्म और दूसरे ऐप्स के ऊपर दिखाने की अनुमति दें। फिर चुनें कि आपकी शिफ्ट एक तय क्रम में दोहराई जाती हैं या नहीं। शिफ्ट के नाम जोड़ें और ज़रूरत के अनुसार अलार्म सेट करें। अलार्म अभी छोड़कर बाद में सेटिंग से भी जोड़ सकते हैं।\n\nजिन शिफ्ट नामों की ज़रूरत नहीं है, उन्हें × से हटाएं। नए नाम + जोड़ें से बनाएं। पहले ShiftBell इस्तेमाल किया है तो ‘बैकअप से डेटा वापस लाएं’ चुनकर अपनी बैकअप फ़ाइल खोलें।\n\nShiftBell में सेटिंग → अलार्म की अनुमतियाँ खोलकर हर अनुमति जांचें, जिसमें लॉक स्क्रीन पर दिखाना भी शामिल है। सेटिंग बदलने के बाद ऐप में वापस आएं। पहली बार सेट करते समय तैयार होने पर आगे पर टैप करें।",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "hi",
+    "key": "helpAlarmAlarmNotRingingBody",
+    "before": "जांचें कि ShiftBell को सटीक अलार्म की अनुमति मिली है। अलार्म देखने और नियंत्रित करने के लिए सूचनाओं तथा दूसरे ऐप्स के ऊपर दिखाने की अनुमति भी जांचें। फ़ोन की बैटरी पाबंदियां भी देखें।\n\nउस तारीख पर शिफ्ट और उस शिफ्ट के लिए अलार्म होना चाहिए। अलार्म की आवाज़, वॉल्यूम और वाइब्रेशन सेटिंग भी जांचें।",
+    "after": "जांचें कि ShiftBell को सटीक अलार्म की अनुमति मिली है। अलार्म देखने और नियंत्रित करने के लिए सूचनाओं तथा दूसरे ऐप्स के ऊपर दिखाने की अनुमति भी जांचें। फ़ोन की बैटरी पाबंदियां भी देखें।\n\nउस तारीख पर शिफ्ट और उस शिफ्ट के लिए अलार्म होना चाहिए। अलार्म की आवाज़, वॉल्यूम और वाइब्रेशन सेटिंग भी जांचें।\n\nShiftBell में सेटिंग → अलार्म की अनुमतियाँ खोलकर हर अनुमति जांचें, जिसमें लॉक स्क्रीन पर दिखाना भी शामिल है। सेटिंग बदलने के बाद ऐप में वापस आएं। पहली बार सेट करते समय तैयार होने पर आगे पर टैप करें।",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "hi",
+    "key": "helpTroubleshootAlarmIssueBody",
+    "before": "सटीक अलार्म, सूचनाओं और दूसरे ऐप्स के ऊपर दिखाने की अनुमतियां तथा फ़ोन की बैटरी पाबंदियां जांचें। फिर देखें कि उस तारीख पर शिफ्ट लगी है, शिफ्ट के लिए अलार्म है और आवाज़ या वाइब्रेशन चालू है।",
+    "after": "सटीक अलार्म, सूचनाओं और दूसरे ऐप्स के ऊपर दिखाने की अनुमतियां तथा फ़ोन की बैटरी पाबंदियां जांचें। फिर देखें कि उस तारीख पर शिफ्ट लगी है, शिफ्ट के लिए अलार्म है और आवाज़ या वाइब्रेशन चालू है।\n\nShiftBell में सेटिंग → अलार्म की अनुमतियाँ खोलकर हर अनुमति जांचें, जिसमें लॉक स्क्रीन पर दिखाना भी शामिल है। सेटिंग बदलने के बाद ऐप में वापस आएं। पहली बार सेट करते समय तैयार होने पर आगे पर टैप करें।",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "hi",
+    "key": "helpCalendarLocaleTitle",
+    "before": "तारीखें, सप्ताहांत और सार्वजनिक छुट्टियां",
+    "after": "तारीख और सप्ताह की शुरुआत",
+    "reason": "Foreign calendar has no public holiday function; remove unrelated description"
+  },
+  {
+    "language": "hi",
+    "key": "helpCalendarLocaleBody",
+    "before": "हिंदी कैलेंडर में हफ़्ता रविवार से शुरू होता है। तारीख में महीने का नाम दिया जाता है, ताकि दिन और महीने के क्रम में भ्रम न हो।\n\nलाल रविवार सप्ताहांत का संकेत है। शिफ्ट और अलार्म आपके अपने शेड्यूल के अनुसार चलते हैं।\n\nहफ़्ते के काम के घंटे हमेशा सोमवार से रविवार तक गिने जाते हैं। सार्वजनिक छुट्टी या सप्ताहांत होने से शिफ्ट अपने आप छुट्टी में नहीं बदलती।",
+    "after": "हिंदी कैलेंडर में हफ़्ता रविवार से शुरू होता है। तारीख में महीने का नाम दिया जाता है, ताकि दिन और महीने के क्रम में भ्रम न हो।\n\nलाल रविवार सप्ताहांत का संकेत है। शिफ्ट और अलार्म आपके अपने शेड्यूल के अनुसार चलते हैं।\n\nहफ़्ते के काम के घंटे हमेशा सोमवार से रविवार तक गिने जाते हैं। सप्ताहांत होने से शिफ्ट अपने आप छुट्टी में नहीं बदलती।",
+    "reason": "Foreign calendar has no public holiday function; remove unrelated description"
+  },
+  {
+    "language": "ko",
+    "key": "privacyPermissionsBody",
+    "before": "• 알림: 알람 사전 안내, 알람 상태 표시, 일정 알림\n• 다른 앱 위에 표시: 다른 앱 사용 중에도 알람 화면을 띄우기 위함\n• 정확한 알람: 설정한 시각에 오차 없이 알람이 울리게 하기 위함\n\n권한을 허용하지 않아도 앱은 계속 쓸 수 있지만, 위 기능 중 일부가 제한될 수 있습니다.",
+    "after": "• 알림: 알람 사전 안내, 알람 상태 표시, 일정 알림\n• 다른 앱 위에 표시: 다른 앱 사용 중에도 알람 화면을 띄우기 위함\n• 정확한 알람: 설정한 시각에 오차 없이 알람이 울리게 하기 위함\n\n권한을 허용하지 않아도 앱은 계속 쓸 수 있지만, 위 기능 중 일부가 제한될 수 있습니다.\n\n• 잠금화면 알람 표시: 휴대전화가 잠겼을 때 알람 화면을 표시하기 위한 전체 화면 알림 권한입니다.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "ko",
+    "key": "permissionSomeDenied",
+    "before": "일부 권한이 거부되었어요",
+    "after": "일부 권한을 확인해 주세요",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "ko",
+    "key": "permissionRequiredNotGranted",
+    "before": "필수 권한 미허용",
+    "after": "알람 권한 확인 필요",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "ko",
+    "key": "helpStartOnboardingBody",
+    "before": "앱을 처음 열면 알림, 정확한 알람, 다른 앱 위에 표시 같은 권한을 차례로 안내해요. 잠금 화면에서도 알람이 정해진 시각에 울리려면 꼭 필요한 권한이라, 하나라도 거부하면 알람이 늦게 울리거나 아예 울리지 않을 수 있어요.\n\n권한을 허용하고 나면 근무 스케줄을 만드는 화면으로 넘어가요.\n\n기본 근무명은 주간·야간·오전·오후·휴무·연차예요. 쓰지 않는 이름은 ×로 지우고 + 추가로 새 이름을 만들 수 있어요. 첫 화면 아래에서 백업 데이터를 불러올 수도 있어요.",
+    "after": "앱을 처음 열면 알림, 정확한 알람, 다른 앱 위에 표시 같은 권한을 차례로 안내해요. 잠금 화면에서도 알람이 정해진 시각에 울리려면 꼭 필요한 권한이라, 하나라도 거부하면 알람이 늦게 울리거나 아예 울리지 않을 수 있어요.\n\n권한을 허용하고 나면 근무 스케줄을 만드는 화면으로 넘어가요.\n\n기본 근무명은 주간·야간·오전·오후·휴무·연차예요. 쓰지 않는 이름은 ×로 지우고 + 추가로 새 이름을 만들 수 있어요. 첫 화면 아래에서 백업 데이터를 불러올 수도 있어요.\n\nShiftBell의 설정 → 알람 권한 설정에서 잠금화면 표시를 포함한 각 권한을 확인해 주세요. 설정을 마친 뒤 앱으로 돌아오세요. 첫 설정 중에는 준비가 되면 다음을 눌러 주세요.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "ko",
+    "key": "helpAlarmAlarmNotRingingBody",
+    "before": "가장 흔한 원인은 권한이에요. 설정에서 이 앱의 \"정확한 알람\", \"알림\", \"다른 앱 위에 표시\" 권한이 켜져 있는지, 배터리 최적화 대상에서 이 앱이 빠져 있는지 확인해 보세요.\n\n그다음으로 흔한 원인은 근무나 알람 설정이에요. 그날 근무가 실제로 배정돼 있는지, 그 근무에 고정 알람이 등록돼 있는지 확인해 보세요. 근무만 배정하고 고정 알람을 만들지 않으면 알람은 울리지 않아요.",
+    "after": "가장 흔한 원인은 권한이에요. 설정에서 이 앱의 \"정확한 알람\", \"알림\", \"다른 앱 위에 표시\" 권한이 켜져 있는지, 배터리 최적화 대상에서 이 앱이 빠져 있는지 확인해 보세요.\n\n그다음으로 흔한 원인은 근무나 알람 설정이에요. 그날 근무가 실제로 배정돼 있는지, 그 근무에 고정 알람이 등록돼 있는지 확인해 보세요. 근무만 배정하고 고정 알람을 만들지 않으면 알람은 울리지 않아요.\n\nShiftBell의 설정 → 알람 권한 설정에서 잠금화면 표시를 포함한 각 권한을 확인해 주세요. 설정을 마친 뒤 앱으로 돌아오세요. 첫 설정 중에는 준비가 되면 다음을 눌러 주세요.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  },
+  {
+    "language": "ko",
+    "key": "helpTroubleshootAlarmIssueBody",
+    "before": "가장 먼저 설정에서 이 앱의 알림·정확한 알람·다른 앱 위에 표시 권한이 켜져 있는지, 배터리 최적화 대상에서 제외돼 있는지 확인하세요. 그다음 그 날짜에 근무가 배정돼 있는지, 그 근무에 고정 알람이 등록돼 있는지도 확인해보세요.",
+    "after": "가장 먼저 설정에서 이 앱의 알림·정확한 알람·다른 앱 위에 표시 권한이 켜져 있는지, 배터리 최적화 대상에서 제외돼 있는지 확인하세요. 그다음 그 날짜에 근무가 배정돼 있는지, 그 근무에 고정 알람이 등록돼 있는지도 확인해보세요.\n\nShiftBell의 설정 → 알람 권한 설정에서 잠금화면 표시를 포함한 각 권한을 확인해 주세요. 설정을 마친 뒤 앱으로 돌아오세요. 첫 설정 중에는 준비가 되면 다음을 눌러 주세요.",
+    "reason": "AK fourth permission and individual settings flow; unknown is not denied"
+  }
+]

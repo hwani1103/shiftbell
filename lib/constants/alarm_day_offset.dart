@@ -8,9 +8,8 @@
 //
 // DB에는 shift_alarm_templates.day_offset / alarms.day_offset / alarm_history.day_offset /
 // alarm_creation_log.day_offset 정수 컬럼(-1/0/1)으로 그대로 저장됨. Kotlin
-// AlarmRefreshEngine.kt도 동일한 -1/0/1 정수를 씀 - 이름 있는 상수가 아니라 순수
-// 정수값 자체가 프로토콜이라, DB_스키마_변경_가이드.md의 "Dart/Kotlin 상수 동기화"
-// 대상(checkPair)에는 해당 안 함(값이 바뀔 일이 없는 -1/0/1 세 값).
+// AlarmRefreshEngine.kt도 같은 값을 쓴다. 세 값은 checkDartKotlinSync에서
+// 빌드 전에 비교한다.
 
 const int kAlarmDayBefore = -1;
 const int kAlarmDaySame = 0;

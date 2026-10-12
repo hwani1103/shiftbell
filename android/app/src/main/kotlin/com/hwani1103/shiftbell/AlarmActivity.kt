@@ -26,6 +26,10 @@ import androidx.core.app.NotificationCompat
 import kotlin.math.abs
 
 class AlarmActivity : AppCompatActivity() {
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(AppTextScale.context(newBase))
+    }
+
     companion object {
         /**
          * ⭐ 2026-09-14 (출시전 감사 #4) - 지금 화면에 떠 있는 울림 회차. 제어 알림의 전체화면 인텐트가 먼저
@@ -38,7 +42,7 @@ class AlarmActivity : AppCompatActivity() {
     private var alarmId: Int = 0
     private var alarmDuration: Int = 3  // 기본 3분
     private var alarmTimeStr: String = ""  // 알람 시간 저장
-    private var alarmLabel: String = "알람"  // 알람 라벨 저장
+    private var alarmLabel: String = ""  // loadAlarmInfo supplies the current locale's default.
     private lateinit var gestureDetector: GestureDetectorCompat
     private var timeoutHandler: Handler? = null
     private var timeoutRunnable: Runnable? = null
@@ -50,12 +54,15 @@ class AlarmActivity : AppCompatActivity() {
 
     // ⭐ 의도적 종료 플래그 (timeout/dismiss/snooze 중에는 7777 생성 방지)
     private var isIntentionalExit: Boolean = false
+    private var quietCoverControls: Boolean = false
+    private var snoozeBinding: SnoozeControlsBinding? = null
 
     // ⭐ Notification에서 Activity 종료 신호 수신
     private val finishReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val targetAlarmId = intent.getIntExtra("alarmId", -1)
-            if (targetAlarmId == alarmId) {
+            if (targetAlarmId == alarmId &&
+                !RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) {
                 Log.d("AlarmActivity", "📡 종료 신호 수신 → Activity 종료")
                 finish()
             }
@@ -74,7 +81,8 @@ class AlarmActivity : AppCompatActivity() {
         )
 
         // ⭐ 2026-09-14 (#3) - 이미 끝난 회차의 화면 요청(예: 울림이 끝난 뒤 남은 알림 탭)이면 바로 닫음
-        if (!RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) {
+        if (!RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound) ||
+            (ringRound > 0 && !RingingAlarmTracker.isLiveRing(applicationContext))) {
             Log.w("AlarmActivity", "⚠️ 지난 회차 화면 요청 - 표시 안 함: id=$alarmId 회차=$ringRound")
             isIntentionalExit = true
             finish()
@@ -87,14 +95,32 @@ class AlarmActivity : AppCompatActivity() {
         // DB에서 알람 정보 로드
         loadAlarmInfo()
 
-        setContentView(R.layout.activity_alarm)
-        setupUI()
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, false)
+        @Suppress("DEPRECATION")
+        window.statusBarColor = android.graphics.Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= 29) window.isStatusBarContrastEnforced = false
 
-        gestureDetector = GestureDetectorCompat(this, SwipeGestureListener())
+        val onCover = CoverAlarmDisplay.supported(this) &&
+            windowManager.defaultDisplay.displayId != android.view.Display.DEFAULT_DISPLAY
+        if (onCover) {
+            requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            setContentView(CoverAlarmLayout.create(this, alarmTimeStr, ::dismissAlarm, ::snoozeAlarm))
+            quietCoverControls = true
+            NotificationHelper.ensureRingControls(this, alarmId, ringRound, alarmLabel, alarmDuration,
+                NotificationHelper.RingNoticeReason.COVER_ENTER, this)
+            Log.i("CoverAlarm", "AlarmActivity on cover display=${windowManager.defaultDisplay.displayId}")
+        } else {
+            setContentView(R.layout.activity_alarm)
+            setupUI()
+            AlarmResponsiveLayout.install(findViewById(R.id.rootLayout))
 
-        findViewById<ConstraintLayout>(R.id.rootLayout).setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
-            true
+            gestureDetector = GestureDetectorCompat(this, SwipeGestureListener())
+
+            findViewById<ConstraintLayout>(R.id.rootLayout).setOnTouchListener { _, event ->
+                gestureDetector.onTouchEvent(event)
+                true
+            }
         }
 
         // ⭐ 종료 신호 리시버 등록
@@ -105,10 +131,17 @@ class AlarmActivity : AppCompatActivity() {
             registerReceiver(finishReceiver, filter)
         }
 
+        snoozeBinding = SnoozeControlsBinding(window.decorView, RingingAlarmTracker.ActiveRing(alarmId, ringRound)) {
+            isIntentionalExit = true
+            cancelTimeoutTimer()
+            finish()
+        }
         startTimeoutTimer()
     }
 
     private fun loadAlarmInfo() {
+        // DB unavailable/missing row still has a usable localized alarm label.
+        alarmLabel = getString(R.string.alarm_default_label)
         var cursor: android.database.Cursor? = null
         var db: android.database.sqlite.SQLiteDatabase? = null
 
@@ -120,7 +153,7 @@ class AlarmActivity : AppCompatActivity() {
 
             cursor = database.query(
                 "alarms",
-                arrayOf("time", "shift_type"),
+                arrayOf("time", "shift_type", "type"),
                 "id = ?",
                 arrayOf(alarmId.toString()),
                 null, null, null
@@ -128,7 +161,8 @@ class AlarmActivity : AppCompatActivity() {
 
             if (cursor.moveToFirst()) {
                 alarmTimeStr = cursor.getString(cursor.getColumnIndexOrThrow("time")) ?: ""
-                alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                alarmLabel = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+                    ?: getString(R.string.alarm_default_label)
             }
 
             Log.d("AlarmActivity", "✅ 알람 정보 로드: time=$alarmTimeStr, label=$alarmLabel")
@@ -149,7 +183,8 @@ class AlarmActivity : AppCompatActivity() {
             timeoutAlarm()
         }
         
-        timeoutHandler?.postDelayed(timeoutRunnable!!, (alarmDuration * 60 * 1000).toLong())
+        val remaining = RingTimeoutController.remaining(RingingAlarmTracker.ActiveRing(alarmId, ringRound)) ?: return
+        timeoutHandler?.postDelayed(timeoutRunnable!!, remaining)
         
         Log.d("AlarmActivity", "⏱️ 타임아웃 타이머 시작: ${alarmDuration}분")
     }
@@ -184,7 +219,7 @@ private fun timeoutAlarm() {
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)          // 알람 ID
     notificationManager.cancel(alarmId + 100000) // Fallback notification
-    notificationManager.cancel(7777)             // 제어
+    NotificationHelper.cancelRingControls(this, alarmId, ringRound)             // 제어
     notificationManager.cancel(8889)             // 스누즈/타임아웃
     Log.d("AlarmActivity", "🗑️ Notification 삭제 (alarmId, alarmId+100000, 7777, 8889)")
 
@@ -317,7 +352,7 @@ private fun dismissAlarm() {
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.cancel(alarmId)          // 알람 ID
     notificationManager.cancel(alarmId + 100000) // Fallback notification
-    notificationManager.cancel(7777)             // 제어
+    NotificationHelper.cancelRingControls(this, alarmId, ringRound)             // 제어
     notificationManager.cancel(8889)             // 스누즈/타임아웃
     Log.d("AlarmActivity", "🗑️ Notification 삭제 (alarmId, alarmId+100000, 7777, 8889)")
 
@@ -325,39 +360,7 @@ private fun dismissAlarm() {
     finish()
 }
     
-    private fun snoozeAlarm() {
-        cancelTimeoutTimer()
-
-        // ⭐ 의도적 종료 플래그 설정 (onUserLeaveHint에서 7777 생성 방지)
-        isIntentionalExit = true
-
-        // ⭐ 2026-09-14 (#3) - 지난 회차 화면의 조작이면 다른 울림을 건드리지 않고 닫기만 함
-        if (!AlarmActionHelper.claimRingEnd(applicationContext, alarmId, ringRound)) {
-            finish()
-            return
-        }
-
-        AlarmPlayer.getInstance(applicationContext).stopAlarm()
-
-        // ⭐ Overlay 서비스도 종료
-        stopOverlayService()
-
-        // ⭐ 네이티브 알람 재등록 + DB 갱신 + 이력/생성로그 기록을 하나의 트랜잭션으로 (AlarmActionHelper)
-        val result = AlarmActionHelper.snooze(applicationContext, alarmId)
-        if (result != null) {
-            // ⭐ 연장 Notification 표시
-            NotificationHelper.showUpdatedNotification(applicationContext, result.newTimeStr, result.shiftType)
-        } else {
-            Log.e("AlarmActivity", "❌ 알람 정보 없음: ID=$alarmId")
-        }
-
-        // ⭐ 7777만 삭제 (8888은 삭제하면 안 됨! triggerCheck()가 새로 표시한 것)
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(7777)              // 알람 울림중
-
-        // ⭐ finish()만 호출하면 잠금 화면으로 돌아감
-        finish()
-    }
+    private fun snoozeAlarm() { snoozeBinding?.execute() }
 
     private fun goToHomeScreen() {
         val homeIntent = Intent(Intent.ACTION_MAIN).apply {
@@ -399,7 +402,8 @@ private fun dismissAlarm() {
 
     // ⭐ 2026-09-14 (출시전 감사 #4) - 제어 알림 내용은 울리는 순간 게시하는 것과 똑같아야 해서 한 곳으로 모음
     private fun showAlarmControlNotification() {
-        NotificationHelper.showRingControlNotification(this, alarmId, ringRound, alarmLabel, alarmDuration)
+        NotificationHelper.ensureRingControls(this, alarmId, ringRound, alarmLabel, alarmDuration,
+            NotificationHelper.RingNoticeReason.USER_LEAVE)
     }
 
     override fun onBackPressed() {
@@ -407,9 +411,34 @@ private fun dismissAlarm() {
         // 아무 동작도 하지 않음
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onResume() {
+        super.onResume()
+        if (RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) {
+            visibleRing = RingingAlarmTracker.ActiveRing(alarmId, ringRound)
+            AlarmOverlayService.yieldToActivity(visibleRing!!)
+            NotificationHelper.markRingPresented(this, visibleRing!!)
+            Log.i("AlarmActivity", "RING_PRESENTED id=$alarmId round=$ringRound display=${windowManager.defaultDisplay.displayId} locked=${(getSystemService(Context.KEYGUARD_SERVICE) as android.app.KeyguardManager).isKeyguardLocked}")
+        }
+        InAppAlarmController.changed()
+    }
+
+    override fun onPause() {
         if (visibleRing == RingingAlarmTracker.ActiveRing(alarmId, ringRound)) visibleRing = null
+        InAppAlarmController.changed()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        snoozeBinding?.close()
+        snoozeBinding = null
+        super.onDestroy()
+        if (quietCoverControls && !isIntentionalExit &&
+            RingingAlarmTracker.isCurrent(applicationContext, alarmId, ringRound)) {
+            NotificationHelper.ensureRingControls(applicationContext, alarmId, ringRound, alarmLabel, alarmDuration,
+                NotificationHelper.RingNoticeReason.COVER_EXIT, this)
+        }
+        if (visibleRing == RingingAlarmTracker.ActiveRing(alarmId, ringRound)) visibleRing = null
+        InAppAlarmController.changed()
         cancelTimeoutTimer()
         swipeHintAnimator?.cancel()
         swipeHintAnimator = null
@@ -434,5 +463,16 @@ private fun dismissAlarm() {
             timeoutHandler?.removeCallbacks(it)
         }
         Log.d("AlarmActivity", "⏱️ 타임아웃 타이머 취소")
+    }
+
+    override fun onNewIntent(newIntent: Intent) {
+        super.onNewIntent(newIntent)
+        val id = newIntent.getIntExtra("alarmId", 0)
+        val round = RingingAlarmTracker.normalizeRound(this, id,
+            newIntent.getLongExtra(AlarmActionReceiver.EXTRA_RING_ROUND, RingingAlarmTracker.NO_ROUND))
+        if (!RingingAlarmTracker.isCurrent(this, id, round)) return
+        if (id == alarmId && round == ringRound) return // Keep views and the original deadline.
+        setIntent(newIntent)
+        recreate() // Bind the new live round; never starts playback or a new deadline.
     }
 }

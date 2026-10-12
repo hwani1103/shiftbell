@@ -1,0 +1,32 @@
+ M android/app/src/main/AndroidManifest.xml
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/MainActivity.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/ReleaseLocalePolicy.kt
+ M android/app/src/main/res/values-de/strings.xml
+ M android/app/src/main/res/values-hi/strings.xml
+ M android/app/src/main/res/values-pt/strings.xml
+ M android/app/src/main/res/values/strings.xml
+ M android/app/src/test/kotlin/com/hwani1103/shiftbell/ReleaseLanguagesTest.kt
+ M docs/next_version/교대시계_최신문서.txt
+ M docs/next_version/다국어_제작_검증현황.txt
+ M lib/l10n/app_de.arb
+ M lib/l10n/app_en.arb
+ M lib/l10n/app_hi.arb
+ M lib/l10n/app_pt.arb
+ M lib/main.dart
+ M lib/screens/friend_calendar_view.dart
+ M lib/screens/friend_list_screen.dart
+ M lib/screens/help_screen.dart
+ M lib/screens/my_share_code_screen.dart
+ M lib/screens/settings_tab.dart
+ M lib/widgets/onboarding_info_popups.dart
+ M lib/widgets/schedule_change_dialog.dart
+?? android/app/src/main/kotlin/com/hwani1103/shiftbell/PermissionSettings.kt
+?? docs/next_version/독립최종검토_3차_2026-10-05/
+?? docs/next_version/의미검토_1차_2026-10-05/
+?? docs/next_version/자연스러움검토_2차_2026-10-05/
+?? docs/next_version/후속재점검_2026-10-05/
+?? lib/widgets/unavailable_feature.dart
+?? test/third_localization_review_test.dart
+?? tools/audit_l10n_resources.py
+?? tools/build_third_localization_review.py
+?? tools/followup_inventory.py

@@ -1,0 +1,64 @@
+{
+  "date": "2026-10-10",
+  "scope": "A09 common team assignment chips only",
+  "implementation": {
+    "columns": "maximum 5; fewer only when available width/system text scale needs it",
+    "geometry": "independent of shift name and pattern length",
+    "shiftFont": "12.sp maximum, one line, FittedBox.scaleDown, no ellipsis",
+    "consumers": [
+      "AllTeamsSetupScreen",
+      "TeamScheduleEditScreen",
+      "TeamRuleEditorScreen"
+    ]
+  },
+  "checks": {
+    "targetSuite": {
+      "files": [
+        "test/team_assignment_label_layout_test.dart",
+        "test/team_schedule_edit_flow_test.dart",
+        "test/team_rules_layout_test.dart",
+        "test/text_scale_interval_layout_test.dart"
+      ],
+      "firstRun": "109 pass / 1 outdated row-boundary assertion failed; preserved in target_tests_first_attempt.log",
+      "followup": "5th/6th positions corrected to indices 4/5; full team edit flow 13 pass",
+      "finalStatus": "PASS across target files"
+    },
+    "staticAnalysis": "PASS / No issues found",
+    "apkBuild": "NOT_RUN",
+    "deviceInstall": "NOT_RUN",
+    "srtl": "NOT_RUN; concurrent session left alone",
+    "criticalReleaseGate": "NOT_RUN; P0 permission/alarm paths and language feature/resource structure unchanged"
+  },
+  "arrowReview": {
+    "image": "Exact team-edit screen PNG not found in searched artifacts/evidence captures",
+    "metrics": [
+      "artifacts/fold8_requested_captures_2026_10_09/layout_audit/ko_closed_remaining_team_edit.tsv",
+      "artifacts/fold8_requested_captures_2026_10_09/layout_audit/en_closed_remaining_team_edit.tsv"
+    ],
+    "finding": "Subtitle is a single Text with a Unicode arrow; glyph offset not provable from text-box metrics",
+    "proposal": "Separate the two examples and arrow icons into a small common subtitle component; align to a common visual center; preserve Korean copy and wrap by example",
+    "userDecision": "Keep unchanged; no implementation requested"
+  },
+  "calendarProposal": {
+    "implemented": false,
+    "entry": "CalendarTab._shiftBadgeLabel early branch before length-based sizing",
+    "condition": "context.usesKoreanFeatures && !AppLayout.of(context).usesBoundedCalendar",
+    "sizing": "Use per-theme approved maximum; shrink only for actual full name width/height",
+    "preserve": [
+      "existing excluded branches",
+      "WideCalendarCell",
+      "EnglishCalendarLabel",
+      "GlobalConceptCalendarCell",
+      "calendarShiftTextScaler",
+      "date/memo geometry",
+      "badge sizes/padding",
+      "initial-badge first-character behavior"
+    ],
+    "userDecision": "Keep unchanged; proposal withdrawn from active scope"
+  },
+  "sourceHashes": {
+    "lib/widgets/team_assignment_grid.dart": "3040c98fb96c238da046015547b0e172e065f937ef264a8621f83645e44939e4",
+    "test/team_assignment_label_layout_test.dart": "385d5a15a99f8758ca2e69f62d1c733983900ac2c1c6e2b4337cc96e51ebcc72",
+    "test/team_schedule_edit_flow_test.dart": "f04fe7ba1a54f83cd7341962d2dfe062bb1dc6056d11c741e166d45d90a1a2c3"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-09 KST",
+  "reason": "User requested concise first-use schedule and sleep/recovery introductions; retain both once-only dialogs.",
+  "source": "lib/l10n/korean_only/messages_ko.json",
+  "changes": {
+    "onboardingScheduleTabPopupBody": {
+      "before": "1. 일정 만들기\n오른쪽 아래 시계 아이콘을 탭하면 시간축 위에서 시각을 고를 수 있는 모드로 바뀌어요. 원하는 시각에서 한 번 더 탭하면 그 시각으로 새 일정을 만들 수 있어요.\n\n2. 지속시간 설정\n기본은 \"지속시간 없음\"(특정 시각 하나)이에요. \"+\"나 5분/30분/1시간 버튼을 누르면 종료 시각이 있는 일정으로 바뀌어요.\n\n3. 일정에 맞춰 알림받기\n알림받기 스위치를 켜면 원하는 시간에 휴대폰 알림을 받을 수 있어요. 알림 소리는 시스템 설정과 동일해요.",
+      "after": "교대시계 아이콘 버튼을 눌러 일정관리를 시작해 보세요! 정해진 시간에 알림을 받아 일정을 쉽게 관리할 수 있어요."
+    },
+    "onboardingConditionTabPopupTitle": {
+      "before": null,
+      "after": "수면·회복 탭, 이렇게 써보세요"
+    },
+    "onboardingConditionTabPopupBody": {
+      "before": null,
+      "after": "수면·회복 탭에서 수면을 기록해 보세요! 근무시간을 설정하면 내 근무와 수면 기록을 바탕으로 회복 상태와 쉬기 좋은 시간을 확인할 수 있어요."
+    }
+  }
+}

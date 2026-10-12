@@ -87,7 +87,7 @@ override fun onReceive(context: Context, intent: Intent) {
     Log.e("CustomAlarmReceiver", "========== 알람 수신! ==========")
 
     val soundType = intent.getStringExtra(EXTRA_SOUND_TYPE) ?: "loud"
-    val label = intent.getStringExtra(EXTRA_LABEL) ?: "알람"
+    val label = intent.getStringExtra(EXTRA_LABEL) ?: context.getString(R.string.alarm_default_label)
     val id = intent.getIntExtra(EXTRA_ID, 0)
 
     Log.e("CustomAlarmReceiver", "ID: $id, Label: $label")
@@ -105,7 +105,16 @@ override fun onReceive(context: Context, intent: Intent) {
     } else {
         null
     }
-    when (AlarmWakeScheduler.decideOnReceive(context, id, expectedAt)) {
+    val decision = AlarmWakeScheduler.decideOnReceive(context, id, expectedAt)
+    val screenOn = try {
+        (context.getSystemService(Context.POWER_SERVICE) as android.os.PowerManager).isInteractive
+    } catch (e: Exception) { null }
+    DiagLog.log(context, if (decision == AlarmWakeScheduler.ReceiveDecision.RING) "ALARM_FIRED" else "ALARM_STALE_IGNORED",
+        "id" to id,
+        "delayMs" to (expectedAt?.let { System.currentTimeMillis() - it }),
+        "decision" to decision.name,
+        "screenOn" to screenOn)
+    when (decision) {
         AlarmWakeScheduler.ReceiveDecision.SKIP_NO_ROW -> {
             Log.e("CustomAlarmReceiver", "⚠️ DB에 없는 알람(id=$id) - 재생 건너뜀 (이미 취소/수정됨)")
             return
@@ -143,7 +152,7 @@ override fun onReceive(context: Context, intent: Intent) {
             val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             nm.cancel(previousRingingId)
             nm.cancel(previousRingingId + 100000)
-            nm.cancel(7777)
+            NotificationHelper.cancelRingControls(context, previousRing.alarmId, previousRing.round)
             nm.cancel(8889)
         } catch (e: Exception) {
             Log.e("CustomAlarmReceiver", "⚠️ 이전 알람 notification 정리 실패", e)
@@ -176,6 +185,7 @@ override fun onReceive(context: Context, intent: Intent) {
             // 없어서 그냥 무시되니 항상 보내도 안전함.
             val dismissOverlayIntent = Intent(AlarmOverlayService.ACTION_DISMISS_OVERLAY).apply {
                 putExtra(AlarmOverlayService.EXTRA_ALARM_ID, previousRingingId)
+                putExtra("completedRingOnly", true)
                 setPackage(context.packageName)
             }
             context.sendBroadcast(dismissOverlayIntent)
@@ -204,7 +214,7 @@ override fun onReceive(context: Context, intent: Intent) {
 
     // ⭐ 2026-09-14 (출시전 감사 #4) - 화면/오버레이보다 먼저 제어 알림(끄기·5분 후·전체화면)을 올림.
     // 화면 실행이 조용히 막히거나 오버레이 권한이 없어도 끌 수단이 남음(NotificationHelper 주석 참고).
-    NotificationHelper.showRingControlNotification(context, id, ring.round, label, durationMinutes)
+    NotificationHelper.postInitialRing(context, id, ring.round, label, durationMinutes)
     
     // 화면 강제로 깨우기
     wakeUpScreen(context)
@@ -215,13 +225,16 @@ override fun onReceive(context: Context, intent: Intent) {
     
     Log.e("CustomAlarmReceiver", "잠금 상태: ${if (isLocked) "잠금" else "해제"}")
     
-    Handler(Looper.getMainLooper()).postDelayed({
+    fun presentRing(allowMissingRetry: Boolean) {
         // ⭐ 2026-09-14 (#3) - 이 0.5초 사이에 울림이 끝났거나(앱에서 삭제 등) 다음 울림에 넘어갔으면 화면을 안 띄움
         if (!RingingAlarmTracker.isCurrent(context, id, ring.round)) {
             Log.w("CustomAlarmReceiver", "⚠️ 표시 전에 회차가 끝남 - 화면 생략: id=$id 회차=${ring.round}")
-            return@postDelayed
+            return
         }
-        if (isLocked) {
+        // FSI (or a notification tap) may already have displayed this round,
+        // including while unlocked. Do not layer an overlay over that Activity.
+        if (AlarmActivity.visibleRing == ring) return
+        if (keyguardManager.isKeyguardLocked) {
             Log.e("CustomAlarmReceiver", "✅ 잠금 상태 - AlarmActivity 표시")
             // ⭐ 잠금화면 AlarmActivity 표시. 제어 알림의 전체화면 인텐트가 이미 이 회차 화면을 띄웠으면
             // 다시 띄우지 않음(CLEAR_TASK로 재생성되며 깜빡이는 것 방지) - 2026-09-14 #4
@@ -231,15 +244,32 @@ override fun onReceive(context: Context, intent: Intent) {
                 showAlarmActivity(context, id, label, ring.round, durationMinutes)
             }
         } else {
-            if (canDrawOverlays(context)) {
-                Log.e("CustomAlarmReceiver", "✅ 잠금 해제 - Overlay 표시")
-                showOverlayWindow(context, id, label, ring.round, durationMinutes)
+            if (InAppAlarmController.isHostVisible) {
+                InAppAlarmController.changed()
+            } else if (canDrawOverlays(context)) {
+                // Only an otherwise usable but missing post gets one extra 500 ms.
+                // Every retry rechecks the round, lock state, visible UI and overlay permission.
+                val control = RingControlPresence.observe(context, ring)
+                Log.i("CustomAlarmReceiver", "Unlocked ring controls: id=$id round=${ring.round} notification=$control")
+                if (control == RingControlPresence.Result.ABSENT && allowMissingRetry) {
+                    Log.i("CustomAlarmReceiver", "Current 7777 absent; recheck once in 500ms: id=$id round=${ring.round}")
+                    Handler(Looper.getMainLooper()).postDelayed({ presentRing(false) }, 500)
+                } else if (control != RingControlPresence.Result.PRESENT) {
+                    Log.e("CustomAlarmReceiver", "✅ 잠금 해제 - Overlay 표시")
+                    showOverlayWindow(context, id, label, ring.round, durationMinutes)
+                }
             } else {
                 // ⭐ 2026-09-14 (#4) - 예전 폴백 알림(끄기 버튼 없음) 대신 이미 게시된 제어 알림(7777)으로 제어
                 Log.e("CustomAlarmReceiver", "⚠️ Overlay 권한 없음 - 제어 알림(7777)으로 제어")
             }
         }
-    }, 500)
+    }
+    Handler(Looper.getMainLooper()).postDelayed({ presentRing(true) }, 500)
+    Handler(Looper.getMainLooper()).postDelayed({
+        if (RingingAlarmTracker.isCurrent(context, id, ring.round)) {
+            CoverAlarmDisplay.followRing(context, id, ring.round, durationMinutes)
+        }
+    }, 650)
 }
     
     // ⭐ 2026-09-14 (#27) - alarmExistsInDb()는 AlarmWakeScheduler.decideOnReceive()로 대체됨
@@ -272,7 +302,7 @@ override fun onReceive(context: Context, intent: Intent) {
     private fun showAlarmActivity(context: Context, id: Int, label: String, round: Long, duration: Int) {
     val activityIntent = Intent(context, AlarmActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                Intent.FLAG_ACTIVITY_CLEAR_TASK or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or
                 Intent.FLAG_ACTIVITY_NO_USER_ACTION
         putExtra("alarmId", id)
         putExtra("label", label)
@@ -282,7 +312,7 @@ override fun onReceive(context: Context, intent: Intent) {
 
     try {
         context.startActivity(activityIntent)
-        Log.e("CustomAlarmReceiver", "✅ AlarmActivity 시작 (duration=${duration}분)")
+        Log.i("CustomAlarmReceiver", "AlarmActivity launch requested (duration=${duration}분); display is confirmed by onResume")
     } catch (e: Exception) {
         // ⭐ 2026-09-14 (#4) - 제어 알림(7777)이 이미 게시돼 있어 따로 폴백 알림을 만들지 않음
         Log.e("CustomAlarmReceiver", "❌ AlarmActivity 시작 실패 - 제어 알림(7777)으로 제어", e)

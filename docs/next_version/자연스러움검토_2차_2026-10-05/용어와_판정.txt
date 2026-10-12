@@ -1,0 +1,45 @@
+네 언어 2차 현지 자연스러움 — 용어 기준과 판정
+날짜: 2026-10-05
+검토 순서: pt-BR → de-DE → en-US/en-GB → hi-IN. 부족한 출처는 이 순서의 최초 독해 후 추가 확인했다.
+이 문서는 기능 의미 카드 C01~C16을 전제로 한 편집 검토다. 요청된 1차 결과 요약을 먼저 읽었으므로 이전 사유를 보지 않은 독립 판단이라고 하지 않는다. 3차 독립 최종 검토는 수행하지 않았다.
+출처의 실제 용례와 편집자의 판단을 구분한다. 출처가 이 앱 문장 자체를 검수한 것은 아니다. Google 도움말에는 AI 번역 가능성 고지가 있으므로 단독으로 현지인 자연스러움이나 정확성을 보증하는 자료로 쓰지 않는다.
+
+pt-BR
+- você/명령형, 짧은 동사 버튼(Salvar, Excluir, Restaurar), 문장형 설명 유지. 유럽 포르투갈어의 ecrã/ficheiro로 바꾸지 않는다.
+- turno=개별 근무, escala=근무표, ciclo=반복 순서. Dia/Noite/Manhã/Tarde는 칩에서 짧게, 설명은 turno와 함께 사용한다. Folga와 Férias는 각각 휴무/휴가 이름으로 유지한다. PT1~PT3의 현장·근로자 안내 용례와 대조했다.
+- R2-PT01 유지: Plantão를 Sobreaviso로 일괄 치환하지 않는다. 병원 자료가 plantão de sobreaviso를 구체적으로 명명하며, 당직 전반과 호출 대기는 동일하지 않다. shiftOnCall은 사용자에게 법적 대기근무 유형을 설정하는 기능이 아니라 이름 리소스다. 한국어 당직과 C01 범위를 보존한다. 다른 직종에서의 적합성은 현지 사용자 과제로 남긴다.
+- R2-PT02 유지: Adiar/Adiado/Desligar/Excluir. PT4는 soneca와 adiar를 함께 사용한다. 앱의 동작형 Adiar도 자연스러우며 Soneca로 바꿀 우월한 근거가 없다. Flutter 5분 설명, Android Adiar 5 min, 알림의 Adiado를 함께 읽었다. Google의 기본 10분은 가져오지 않는다.
+- R2-PT03 유지: backup/restaurar/mesclar/substituir. PT5의 앱 용어와 맞으며, C08의 교체·이력 병합·진행 알람 유지가 긴 경고에서 구별된다. 긴 문장을 줄이기 위해 이 예외를 삭제하지 않는다.
+- R2-PT04 유지: 온보딩 Onde está no ciclo hoje는 앞선 순환 선택 문맥에서 이해 가능하다. você 삽입은 취향 차이 수준. 736항목에서 이번 회차의 확실한 수정 대상 없음.
+
+de-DE
+- du/dein 소문자, 설명은 직접 명령형, 버튼은 Speichern/Löschen/Wiederherstellen 같은 부정사형 유지. Google 도움말의 Sie/du 혼용을 앱에 가져오지 않는다.
+- Schicht/Schichtplan/Schichtfolge 또는 Zyklus, Tag/Nacht/Früh/Spät, Frei/Urlaub, Überstunden 유지. DE1은 고정 주기 안에서도 교대가 일어나는 용례를 제공한다. 짧은 기본 이름을 모두 Frühschicht 등으로 늘리지 않는다.
+- R2-DE01 채택: helpStartScheduleTypesTitle의 Fester Zyklus oder wechselnde Schichten → Schichten mit oder ohne festen Zyklus. wechselnde는 고정 주기 안에서 바뀌는 교대도 포함하므로 두 선택지를 정확히 나누지 못한다. C02 및 기존 설명/온보딩의 festen Zyklus와 맞춘다. 1차 의미 판정을 뒤집는 기능 변경이 아니다.
+- R2-DE02 채택: settingsRestoreFromBackupDesc의 Schichtplan und weitere gespeicherte Daten aus einer Sicherung ersetzen → Schichtplan und weitere gespeicherte Daten durch eine Sicherung ersetzen. aus einer Sicherung이 교체 대상 데이터에 붙어 읽히는 것을 피하고 대체 수단을 durch로 명확히 한다. S04의 교체 범위와 상세 경고는 그대로 둔다. DE3의 복원 용례는 보조이며 전치사 수정은 해당 문장과 연결 경고의 편집 판단이다.
+- R2-DE03 유지: Bereitschaft를 Rufbereitschaft로 좁히지 않는다. DE2는 의료 현장에서 Bereitschaftsdienst/Rufbereitschaft를 구별한다. 앱은 두 제도의 보수·장소·시간을 모델링하지 않는다.
+- R2-DE04 유지: 5 Min. später를 Schlummern으로 바꾸는 안은 기각. 현재 버튼은 실제 지연 시간을 바로 알려 주며, 도움말 Schlummerfunktion 및 알림 verschoben이 결과를 보완한다. DE4는 Schlummern을 뒷받침하지만 현행을 틀렸다고 만들지는 않는다. Stoppen/Ausschalten도 현재 알람 종료와 영구 Löschen을 구별한다.
+
+en-US/en-GB
+- 기존 철자(color, canceled)와 문구별 대소문자 유지. 전체 문장형 대소문자 통일은 취향 변경으로 보아 하지 않는다. 지역별 날짜 처리는 기존 로케일 코드를 따른다.
+- shift / shift pattern / schedule, Day/Night/Morning/Afternoon, Off/Day Off 및 Leave 유지. EN1의 미국 현장 교육 용례와 EN2의 영국 rota/on-call 용례를 대조했다. rota를 공통 UI 전체에 강제하지 않으며 PTO처럼 유급 제도를 암시하는 약어로 바꾸지 않는다. OT는 도움말에서 overtime으로 풀어 쓴다.
+- R2-EN01 채택: settingsRestoreFromBackupDesc의 Replace your schedule and other saved data from a backup → Replace your schedule and other saved data with data from a backup. 교체되는 대상과 공급 원본을 구별하는 영어 구문으로 정리. S04의 제한된 교체 범위는 보존하고 경고의 이력 병합/울림·스누즈 유지 예외도 유지한다. EN4의 restore/back up 용례와 내부 경고를 함께 대조했다.
+- R2-EN02 채택: settingsResetScheduleSharingFailed의 stopping your old share / stopping the share를 stop sharing your previous schedule / stop sharing it으로 변경. share라는 불명확한 명사 대신 기존 버튼 Stop Sharing과 같은 동작을 쓴다. 재설정 완료→인터넷 연결→다시 열기 조건과 이전 공유가 보일 수 있다는 S03 의미를 모두 보존한다. 외부 공유 기능의 동작을 가져오는 수정이 아니라 이 앱 내 동사 일관성 근거다.
+- R2-EN03 채택: scheduleOutsideTeamsConfirm의 full roster → full team schedule(두 곳). EN2의 rota/roster 관련 현장 어휘를 부정하지 않는다. 이 앱 연결 화면의 teamEditTitle/teamEditRecreateTitle/teamEditRecreateConfirm/teamRuleReview와 같은 대상을 같은 이름으로 부른다. 직접 호출 미발견 키라는 1차 표시를 유지한다.
+- R2-EN04 유지: On-Call은 EN2의 업무 용례가 있다. 모든 당직이 영국 의료 on-call과 같은 제도라는 뜻은 아니다. 특정 업종의 standby/resident/non-resident를 새 기본값으로 강제하지 않는다.
+- R2-EN05 유지: Snooze/Dismiss/Turn Off/Delete는 조작·상태·영구 삭제 문맥에 따라 다르다. EN3의 용례와 5분 실제 동작을 대조했고 일괄 단어 통일은 하지 않는다.
+
+hi-IN
+- करें/चुनें/देखें 형태의 존대 지시, 일상적인 शिफ्ट/अलार्म/सेव/बैकअप/ओवरटाइम 유지. 모든 영어계 어휘를 पाली/कार्यसूची/पुनर्स्थापना 등 행정용어로 바꾸지 않는다. HI1·HI2는 शिफ्ट ड्यूटी의 실제 병원·방송 근무 문맥, HI3·HI4는 앱 문맥이다.
+- R2-HI01 유지: दिन/रात/सुबह/दोपहर의 짧은 근무명. 휴무 छुट्टी, 휴가 अवकाश는 기존 저장값과 C01 의미를 보존한다. HI1에서는 अवकाश/छुट्टी가 겹쳐 쓰이고 HI2에서는 साप्ताहिक छुट्टी/आकस्मिक अवकाश처럼 수식어가 구별을 돕는다. 두 단어가 인도 전체에서 엄격히 배타적인 범주라는 주장은 하지 않는다. साप्ताहिक를 기본 휴무명에 붙이는 안은 임의 날짜 휴무를 주휴로 좁히므로 기각한다. 현지인의 두 이름 구별 과제는 별도 미수행으로 남긴다.
+- R2-HI02 채택: onboardingFixedPatternQuestion, onboardingPatternHowTo, helpStartOnboardingBody, helpStartScheduleTypesBody의 शिफ्ट … दोहराती हैं → शिफ्ट … दोहराई जाती हैं. 근무가 무언가를 반복한다는 타동 표현을 근무 순서가 반복된다는 수동 표현으로 교정한다. HI5의 일정 반복 표현, HI3의 दोहराए जाने वाले 용례와 C02를 대조. 예시 순서·오늘 위치·자동 생성 기능은 바꾸지 않는다.
+- R2-HI03 채택: helpStartScheduleTypesTitle → तय क्रम वाली और बिना तय क्रम वाली शिफ्ट. helpShiftChangeShiftBody 첫 부분 → शिफ्ट का तय क्रम हो या न हो. 단순히 바뀌는 근무와 고정 주기 없는 근무를 혼동하지 않게 기존 온보딩의 तय क्रम 기준을 사용한다. 근무 이름을 하루마다 반드시 다르게 하라는 뜻이 아니다.
+- R2-HI04 채택: helpAlarmAlarmHistoryBody의 स्नूज़ पर टैप करने를 ‘5 मिनट बाद’ (स्नूज़) पर टैप करने로 교정. HI3에서 स्नूज़와 다시 울림을 연결하지만, 실제 Android 화면 버튼에는 5 मिनट बाद가 표시된다. 설명에서 실제 버튼을 식별할 수 있도록 연결한다. S06/S07의 5분과 해당 알람 재울림 의미 유지. 길이가 다른 알림 액션의 5 मिनट बाद फिर बजाएं도 그대로 둔다.
+- R2-HI05 유지: 데이터 복원은 डेटा वापस लाएं로 표현. HI4도 वापस पाना/वापस लाना와 रीस्टोर를 함께 쓴다. 현행의 쉬운 동사를 유지하고 복원 경고의 병합·진행 중 알람 예외를 줄이지 않는다. ऑन-कॉल을 रात्रि ड्यूटी로 바꾸는 안은 주간 당직을 배제하므로 기각한다. 힌디어 ऑन-कॉल의 업종별 선호를 보증할 현지인 과제는 미수행.
+
+공통 범위 및 한계
+- ARB 각 681개, Android 문자열 48개+요일 7개를 실제로 읽었다. 출력이 잘린 구간은 분할 재독해했다. 과거 검토의 완료 실적을 이번 검토로 복사하지 않았다.
+- 원장의 유지 사유는 언어·기능군의 기준과 키별 문구를 연결한다. 외부 출처는 용어와 어투 참고이며 2,944문장 각각이 외부에서 실증됐다는 뜻은 아니다.
+- 숨김 공유/개인 일정/수면 리소스도 텍스트를 읽었으나 화면을 보았거나 해당 기능이 네 언어에 제공된다고 하지 않는다. 1차의 직접 호출 미발견 표시는 유지한다.
+- 의료·법적 수면 근거 14개에 대해서는 표현만 읽었고 원문 타당성/최신성 검증은 하지 않았다. 법률·의료 검증 완료 표시 금지. Android/Google 백업 문서의 클라우드·암호화·기본 알람 시간 등은 ShiftBell 동작에 가져오지 않는다.
+- 현지 교대근무자 참여 검증, 업종별 당직명 선호, 힌디어 휴무/휴가 구별 과제, 실제 기기 글자 잘림/결합 문자/배율은 미수행. 3차 독립 최종 및 레이아웃 검증은 별도 대기다.

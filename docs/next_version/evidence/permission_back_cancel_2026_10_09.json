@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-09",
+  "status": "PASS: notification Back cancellation fix",
+  "cause": "permission_handler_android 12.1.0 drops empty result without completing callback",
+  "apkSha256": "62e62876941c036f1fccdfc98c1ec8fec3b15893e0dba3c559fda4c13decd652",
+  "installedHashMatches": true,
+  "automated": {
+    "targetFlutter": 14,
+    "criticalFlutter": 325,
+    "nativeFunctional": "PASS",
+    "nativeDatabase": "PASS",
+    "devDebug": "PASS",
+    "javascriptWeb": "PASS",
+    "criticalSuccessMarker": true,
+    "outerPowershellExit": 1,
+    "outerExitNote": "NativeCommandError from redirected Wasm warning; all internal stages and final success marker completed"
+  },
+  "usb": {
+    "device": "SM-S948N API36",
+    "before": "empty callback log, both Settings enabled=false",
+    "after": [
+      "native notification prompt Back -> both enabled=true",
+      "denied states preserved",
+      "overlay settings open and unchanged return",
+      "notification retry opens settings, unchanged return",
+      "native Allow removes notification card only",
+      "actual overlay grant and return automatically reaches schedule onboarding"
+    ],
+    "denyButtonSeparatelyTested": false
+  },
+  "cleanup": {
+    "tables": 17,
+    "exactOriginalMatch": true,
+    "notification": "denied",
+    "overlay": "denied",
+    "permissionOnboardingResetForUserRetest": true,
+    "otherPreferencesPreserved": true
+  },
+  "sourceHashes": {
+    "lib/services/permission_service.dart": "4670dc0fc863423d689a244daddbc7661e7340e1c5cde2153db07c388e4ded9d",
+    "lib/widgets/permission_panel.dart": "4ec717e20030700b2521ae82f4f12cd8f0b652a0013dd2b1e63ab8531b6f85cd",
+    "android/app/src/main/kotlin/com/hwani1103/shiftbell/MainActivity.kt": "1ead476d7c7aeb33a2c54c3d8f641ef7fe9d2a40724962abb6d22c8e32cc076e",
+    "android/app/src/main/kotlin/com/hwani1103/shiftbell/NotificationPermissionRequest.kt": "42bd8da2ca7a0b7226b5d3631a715395194f2f7e796eed3b8e7cc0ac8bccec8f",
+    "android/app/src/test/kotlin/com/hwani1103/shiftbell/PermissionSettingsTest.kt": "3217d7eaaf668790af0f5b63300f48a475472ff62cceb78ca84d577b6e7b98f9",
+    "test/permission_state_test.dart": "cfe379d93f4aa76feb5d750039f75e0e9a5f14c18b966d7160be73e1d266188e"
+  },
+  "artifacts": "artifacts/permission_back_cancel_2026_10_09"
+}

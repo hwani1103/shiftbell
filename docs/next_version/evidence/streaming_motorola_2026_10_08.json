@@ -1,0 +1,281 @@
+{
+  "date_kst": "2026-10-08",
+  "model": "Motorola moto g34/fogos Android14",
+  "project": "shiftbell-streaming-1008-c",
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "charged_usd": 0,
+  "product_source_changed": false,
+  "M1": "PASS actual UI silent Day09:00 ->09:01 ->delete; DB/OS9/9 ->9/9 ->0/0; old target overlap0",
+  "M2": "PASS all epochs and ID rows preserved on changed restart; deleted restart DB/OS0/0; shift schedule preserved",
+  "M3": "PASS actual FSI OFF/ON and overlay ON/OFF with Back and native denied/granted status",
+  "comparisons": {
+    "ui_registered": {
+      "label": "ui_registered",
+      "timezone": "America/Los_Angeles",
+      "rows": [
+        {
+          "id": 1,
+          "epoch": 1791475200000,
+          "time": "09:00"
+        },
+        {
+          "id": 2,
+          "epoch": 1791561600000,
+          "time": "09:00"
+        },
+        {
+          "id": 3,
+          "epoch": 1791648000000,
+          "time": "09:00"
+        },
+        {
+          "id": 4,
+          "epoch": 1791734400000,
+          "time": "09:00"
+        },
+        {
+          "id": 5,
+          "epoch": 1791820800000,
+          "time": "09:00"
+        },
+        {
+          "id": 6,
+          "epoch": 1791907200000,
+          "time": "09:00"
+        },
+        {
+          "id": 7,
+          "epoch": 1791993600000,
+          "time": "09:00"
+        },
+        {
+          "id": 8,
+          "epoch": 1792080000000,
+          "time": "09:00"
+        },
+        {
+          "id": 9,
+          "epoch": 1792166400000,
+          "time": "09:00"
+        }
+      ],
+      "expected": [
+        1791475200000,
+        1791561600000,
+        1791648000000,
+        1791734400000,
+        1791820800000,
+        1791907200000,
+        1791993600000,
+        1792080000000,
+        1792166400000
+      ],
+      "actual": [
+        1791475200000,
+        1791561600000,
+        1791648000000,
+        1791734400000,
+        1791820800000,
+        1791907200000,
+        1791993600000,
+        1792080000000,
+        1792166400000
+      ],
+      "match": true
+    },
+    "ui_changed": {
+      "label": "ui_changed",
+      "timezone": "America/Los_Angeles",
+      "rows": [
+        {
+          "id": 10,
+          "epoch": 1791475260000,
+          "time": "09:01"
+        },
+        {
+          "id": 11,
+          "epoch": 1791561660000,
+          "time": "09:01"
+        },
+        {
+          "id": 12,
+          "epoch": 1791648060000,
+          "time": "09:01"
+        },
+        {
+          "id": 13,
+          "epoch": 1791734460000,
+          "time": "09:01"
+        },
+        {
+          "id": 14,
+          "epoch": 1791820860000,
+          "time": "09:01"
+        },
+        {
+          "id": 15,
+          "epoch": 1791907260000,
+          "time": "09:01"
+        },
+        {
+          "id": 16,
+          "epoch": 1791993660000,
+          "time": "09:01"
+        },
+        {
+          "id": 17,
+          "epoch": 1792080060000,
+          "time": "09:01"
+        },
+        {
+          "id": 18,
+          "epoch": 1792166460000,
+          "time": "09:01"
+        }
+      ],
+      "expected": [
+        1791475260000,
+        1791561660000,
+        1791648060000,
+        1791734460000,
+        1791820860000,
+        1791907260000,
+        1791993660000,
+        1792080060000,
+        1792166460000
+      ],
+      "actual": [
+        1791475260000,
+        1791561660000,
+        1791648060000,
+        1791734460000,
+        1791820860000,
+        1791907260000,
+        1791993660000,
+        1792080060000,
+        1792166460000
+      ],
+      "match": true,
+      "previous_target_overlap": []
+    },
+    "changed_restarted": {
+      "label": "changed_restarted",
+      "timezone": "America/Los_Angeles",
+      "rows": [
+        {
+          "id": 10,
+          "epoch": 1791475260000,
+          "time": "09:01"
+        },
+        {
+          "id": 11,
+          "epoch": 1791561660000,
+          "time": "09:01"
+        },
+        {
+          "id": 12,
+          "epoch": 1791648060000,
+          "time": "09:01"
+        },
+        {
+          "id": 13,
+          "epoch": 1791734460000,
+          "time": "09:01"
+        },
+        {
+          "id": 14,
+          "epoch": 1791820860000,
+          "time": "09:01"
+        },
+        {
+          "id": 15,
+          "epoch": 1791907260000,
+          "time": "09:01"
+        },
+        {
+          "id": 16,
+          "epoch": 1791993660000,
+          "time": "09:01"
+        },
+        {
+          "id": 17,
+          "epoch": 1792080060000,
+          "time": "09:01"
+        },
+        {
+          "id": 18,
+          "epoch": 1792166460000,
+          "time": "09:01"
+        }
+      ],
+      "expected": [
+        1791475260000,
+        1791561660000,
+        1791648060000,
+        1791734460000,
+        1791820860000,
+        1791907260000,
+        1791993660000,
+        1792080060000,
+        1792166460000
+      ],
+      "actual": [
+        1791475260000,
+        1791561660000,
+        1791648060000,
+        1791734460000,
+        1791820860000,
+        1791907260000,
+        1791993660000,
+        1792080060000,
+        1792166460000
+      ],
+      "match": true
+    },
+    "ui_deleted": {
+      "label": "ui_deleted",
+      "timezone": "America/Los_Angeles",
+      "rows": [],
+      "expected": [],
+      "actual": [],
+      "match": true,
+      "previous_target_overlap": []
+    },
+    "deleted_restarted": {
+      "label": "deleted_restarted",
+      "timezone": "America/Los_Angeles",
+      "rows": [],
+      "expected": [],
+      "actual": [],
+      "match": true
+    }
+  },
+  "session": {
+    "name": "motorola",
+    "project": "shiftbell-streaming-1008-c",
+    "model": "fogos/34",
+    "cap_seconds": 1380,
+    "requested_epoch": 1791415033.5837386,
+    "install_limit_seconds": 240,
+    "first_evidence_limit_seconds": 480,
+    "reservation": "tdet98pmobuua",
+    "reserved_epoch": 1791415043.959993,
+    "serial": "localhost:6587",
+    "connected_epoch": 1791415077.4540973,
+    "release_reason": "requested return",
+    "released": true,
+    "finished_epoch": 1791415854.067819,
+    "conservative_seconds": 820.4840805530548
+  },
+  "cleanup": {
+    "alarm_rows": 0,
+    "active_os_custom_alarm_count": 0,
+    "uninstalled": true,
+    "test_pin_retained": false,
+    "screen_timeout_restored": false
+  },
+  "service_reservations_after_return": 0,
+  "zip": "artifacts/streaming_free_2026_10_08/motorola_evidence.zip",
+  "sha256": "1b9f94257f7f100ee4fd1de918f2b6328ec8ac458e40f039627fd863dc70f2b8",
+  "limits": "No repeated PIN/natural5 core tests; previous proofs retained. Actual nine future slots because current day09:00 already past."
+}

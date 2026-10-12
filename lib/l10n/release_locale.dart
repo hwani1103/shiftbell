@@ -1,0 +1,63 @@
+import 'package:flutter/widgets.dart';
+
+const releaseSupportedLocales = [
+  Locale('ko'), Locale('en', 'US'), Locale('en', 'GB'),
+  Locale('en', 'ZA'), Locale('en', 'IN'), Locale('en', 'AE'), Locale('en', 'PH'),
+  Locale('de', 'DE'), Locale('pt', 'BR'), Locale('hi', 'IN'),
+];
+
+/// Release languages and regional Material date/time picker defaults.
+/// Portuguese copy is Brazilian. Holiday country is resolved separately from
+/// the original device region, so a translation fallback cannot invent a country.
+Locale resolveReleaseLocale(List<Locale>? locales, Iterable<Locale> supported) {
+  final device = locales?.firstOrNull ?? const Locale('en', 'US');
+  if (device.languageCode == 'ko') return const Locale('ko');
+  if (device.languageCode == 'de') return const Locale('de', 'DE');
+  if (device.languageCode == 'pt') return const Locale('pt', 'BR');
+  if (device.languageCode == 'hi') return const Locale('hi', 'IN');
+  // Share English copy without losing the release country's date conventions.
+  // This also applies when an unsupported primary language falls back to English.
+  const englishRegions = {'US', 'GB', 'ZA', 'IN', 'AE', 'PH'};
+  if (englishRegions.contains(device.countryCode)) {
+    return Locale('en', device.countryCode);
+  }
+  const mondayRegions = {
+    'GB',
+    'IE',
+    'AU',
+    'NZ',
+    'AT',
+    'BE',
+    'BG',
+    'CH',
+    'CY',
+    'CZ',
+    'DE',
+    'DK',
+    'EE',
+    'ES',
+    'FI',
+    'FR',
+    'GR',
+    'HR',
+    'HU',
+    'IS',
+    'IT',
+    'LI',
+    'LT',
+    'LU',
+    'LV',
+    'MC',
+    'NL',
+    'NO',
+    'PL',
+    'RO',
+    'RS',
+    'SE',
+    'SI',
+    'SK',
+  };
+  return mondayRegions.contains(device.countryCode)
+      ? const Locale('en', 'GB')
+      : const Locale('en', 'US');
+}

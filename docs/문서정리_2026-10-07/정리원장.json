@@ -1,0 +1,3622 @@
+{
+  "date": "2026-10-07",
+  "scope": "문서 통합·정리만; 제품 코드/기능 검사/빌드/기기 조작 없음",
+  "before_document_count": 255,
+  "deleted_count": 14,
+  "deleted": [
+    {
+      "path": "docs/next_version/dev_전체작업목록_2026-10-06.txt",
+      "reason": "중복 전체 dev 요약, DB27/시간대 미수정 상태 대체",
+      "transfer": "A/B/C/D/E",
+      "original_sha256": "1a09ddb8af794245da7c5eb855a2dd72c6f3a524634ba005f819265313bdf73c"
+    },
+    {
+      "path": "docs/next_version/다국어_제작_검증현황.txt",
+      "reason": "누적 언어 현황/과거 인계와 중복 요약 통합",
+      "transfer": "B4/C4/C6/D5/D6",
+      "original_sha256": "d6dfdaa3b8fe5f0219167eb44a1861144fae872b4389c9cdb30d581794a42027"
+    },
+    {
+      "path": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "reason": "DB28 수정 완료로 대체된 착수 계획",
+      "transfer": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_sha256": "6a784e515aee1514f2f5fe9aba002f4446c98beb48ac1cdaa6ee359afb6da78d"
+    },
+    {
+      "path": "docs/next_version/다음작업_원터치알람_기능제거_2026-10-06.md",
+      "reason": "D2 제거 완료로 대체된 계획",
+      "transfer": "A3/B3/C2",
+      "original_sha256": "753e280c124dbc1b2804bf8181294ebdba51480d8df908313daf55733c8b6262"
+    },
+    {
+      "path": "docs/next_version/다음작업_전역기본스누즈_2026-10-06.md",
+      "reason": "기본값6종/현재 회차 미반영은 최종3종/live 계약으로 대체",
+      "transfer": "A2/B1/C2/D2",
+      "original_sha256": "0b52ac044ea753a72903ed281b83ee75409fe4f016b26d619927dd208551168c"
+    },
+    {
+      "path": "docs/next_version/삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "reason": "A/B/C 검사 종료, 검사표의 유효 경계 이관",
+      "transfer": "B1/C3/D1/D2; A/B APK 및 상세 결과 원장 보존",
+      "original_sha256": "c903d775dafcc39b5037f21ebd3952722079204e07a0668d88bc58d86b8770d7"
+    },
+    {
+      "path": "docs/next_version/삼성_FSI_즉석스누즈_이어하기_2026-10-06.md",
+      "reason": "실측/원복 종료 뒤 예약·PID·좌표 인계는 만료",
+      "transfer": "C3/D2; B/C 결과·natural_cases·원복 증거 보존",
+      "original_sha256": "ae8df4bb86d4de6ebf86babadbfc5e60b71ba357fc885f22c6f64f1766c4a208"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "reason": "후속·튜닝·지역 결과를 중복 연결하는 완료 인계",
+      "transfer": "B4/C4/D1/D5/E1/F",
+      "original_sha256": "c1a5d508b40359643d53b9372e7588d6e18fa135a97b2df35d06118b5c9b073e"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "reason": "C01~C03 수정 완료 뒤 중복 인계",
+      "transfer": "B4/C4/D1/D5/E1/F",
+      "original_sha256": "363fcbd99c4144c9f504ee06808efbda6ad7e06f6217a001bd121a6c8e50a2c5"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/다음_시작점.txt",
+      "reason": "자동 검사·정책·기기 잔여를 단일 기준에 통합",
+      "transfer": "B4/C4/D5; 한국 비교 fixture/기준 코드 보존",
+      "original_sha256": "3f4becb77576b332a4d7f5a25cfac5ded94c0709542266426f49d1eb9ca54030"
+    },
+    {
+      "path": "docs/snooze_interval_review.md",
+      "reason": "선택5종/고정 회차 전역 설정 계획은 A~D2로 대체",
+      "transfer": "A2/B1/D2/D7; 이력 분 저장 미구현은 별도 명시",
+      "original_sha256": "cd02521836092fd55ebad632605250606787f9a2a15b9ee507fcdf0a8456793c"
+    },
+    {
+      "path": "docs/watch_flip_alarm_review_2026-09-30.md",
+      "reason": "철회된 Wear 실험 및 대체된 커버 착수 계획",
+      "transfer": "B5/C6/D2; 당시 build/watch_review 증거 유지",
+      "original_sha256": "b46a741565b203599f38697155aadb16c9b3144f98fb7025a1d40615c5d80576"
+    },
+    {
+      "path": "docs/release_audit/handoff_release_2026_09_21.md",
+      "reason": "옛 버전 출시 인계/위젯3x2/Firestore 업데이트 절차 대체",
+      "transfer": "B5/D7/E1; 개인 기준선/팝업 정책 이관",
+      "original_sha256": "704fb6242f4ac4ab4e143ee5d62a130020de3ae90dd7131569ee3a64be3cba8c"
+    },
+    {
+      "path": "docs/release_audit/g6/release_gate.md",
+      "reason": "실제 판정 없는 빈 T26 서식",
+      "transfer": "D 판정 종류/E1 최종 출시 기준; 최종 승인 미완료",
+      "original_sha256": "d6cf1670042c1b9ddc18cd1e9e544e1a76bada861826a239a5d2b2959baca54f"
+    }
+  ],
+  "inventory": [
+    {
+      "path": "docs/next_version/FSI_즉석스누즈_구현_2026-10-06.md",
+      "before_sha256": "0ca5f7373008598076fe7a9659e37664b861dd7fefacf597fdf20737c52e5023",
+      "action": "update",
+      "reason": "전후 수정/실측 결과·APK 해시·검증/롤백 경계 또는 사용 중 매뉴얼",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a53f603cea50a8b57e3abf094fe286524228418e74102a012b6b94ed5947f11a"
+    },
+    {
+      "path": "docs/next_version/FSI_즉석스누즈_구현설계_2026-10-06.md",
+      "before_sha256": "d2b1d6244648d1cbe21804f895ff6df0dffb5206e7c2db4909a958dc895574ea",
+      "action": "update",
+      "reason": "현재 snapshot/Intent/실패/예약/회차 계약 포함; C/D/DB28에서 대체된 부분은 최신 문서 우선",
+      "transfer": "원 경로 보존",
+      "after_sha256": "4cefa2c429db148c4c5d88ab5d505a6d428e6b8a8263d2abec3f9df0979b4c20"
+    },
+    {
+      "path": "docs/next_version/dev_전체작업목록_2026-10-06.txt",
+      "before_sha256": "1a09ddb8af794245da7c5eb855a2dd72c6f3a524634ba005f819265313bdf73c",
+      "action": "delete",
+      "reason": "중복 전체 dev 요약, DB27/시간대 미수정 상태 대체",
+      "transfer": "A/B/C/D/E",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/next_version/교대시계_최신문서.txt",
+      "before_sha256": "2a2ea581e0dc4ad4ba7c615b37d1251cd98dc69ebd1b47fb8cf3ccc2bcb8926a",
+      "action": "update",
+      "reason": "현재 상태 단일 기준으로 통합 갱신",
+      "transfer": "원 경로 보존",
+      "after_sha256": "efda2ea49cf1ff77b2c9b4f6c408445d141d8b8de41fd2340127e545903ec050"
+    },
+    {
+      "path": "docs/next_version/국가관습_재점검_2026-10-06/country_audit_test.dart",
+      "before_sha256": "e1e19b6d4e475fa1309059caf0699d18eb342c5e8b3720d7b6f7411b0ad05304",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "e1e19b6d4e475fa1309059caf0699d18eb342c5e8b3720d7b6f7411b0ad05304"
+    },
+    {
+      "path": "docs/next_version/국가관습_재점검_2026-10-06/검증_명세.json",
+      "before_sha256": "486fe03f8e558f686390e94f8ab2b87e2ce3a59d19025316c2e5d26504645e86",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "486fe03f8e558f686390e94f8ab2b87e2ce3a59d19025316c2e5d26504645e86"
+    },
+    {
+      "path": "docs/next_version/국가관습_재점검_2026-10-06/검증로그/TEST-com.hwani1103.shiftbell.AlarmDstTest.xml",
+      "before_sha256": "efbfc25faa510830a0dd7fbe9e26e1264a83d0fd773d8ab014f20599a4101ddb",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "efbfc25faa510830a0dd7fbe9e26e1264a83d0fd773d8ab014f20599a4101ddb"
+    },
+    {
+      "path": "docs/next_version/국가관습_재점검_2026-10-06/검증로그/TEST-com.hwani1103.shiftbell.AlarmSnoozeDstTest.xml",
+      "before_sha256": "32234d3361d9316beed9069abcb2d228e2b58d23fcc5cf20c3c95c3201d3fc93",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "32234d3361d9316beed9069abcb2d228e2b58d23fcc5cf20c3c95c3201d3fc93"
+    },
+    {
+      "path": "docs/next_version/국가관습_재점검_2026-10-06/검증로그/country_clock_format.log",
+      "before_sha256": "2f90ea3e0ce4e5e8c83f2e23d5222a65b82c6539e53a38085aba5f2558da3316",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "2f90ea3e0ce4e5e8c83f2e23d5222a65b82c6539e53a38085aba5f2558da3316"
+    },
+    {
+      "path": "docs/next_version/국가관습_재점검_2026-10-06/검증로그/country_conventions_audit.log",
+      "before_sha256": "b45be5a96d3f26befb12e41f79cb7f553c678bfb603804c80b175f0744c91d6f",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "b45be5a96d3f26befb12e41f79cb7f553c678bfb603804c80b175f0744c91d6f"
+    },
+    {
+      "path": "docs/next_version/국가관습_재점검_2026-10-06/검증로그/country_conventions_probe_final.log",
+      "before_sha256": "954e652916cbf1260d6ff60f640f51f5774118f7533e9d3b998b007549c89f3b",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "954e652916cbf1260d6ff60f640f51f5774118f7533e9d3b998b007549c89f3b"
+    },
+    {
+      "path": "docs/next_version/국가관습_재점검_2026-10-06/검증로그/country_native_dst.log",
+      "before_sha256": "f6f6d39d373f6661205b8c17d430afafacff1e663c110ceaffd5f21d0cff5266",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "f6f6d39d373f6661205b8c17d430afafacff1e663c110ceaffd5f21d0cff5266"
+    },
+    {
+      "path": "docs/next_version/국가관습_재점검_2026-10-06/검토결과.txt",
+      "before_sha256": "b8d091876a5fef1266f17ff82c15155f6521369a9d98ba634e5df6deeb66bdcd",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "b8d091876a5fef1266f17ff82c15155f6521369a9d98ba634e5df6deeb66bdcd"
+    },
+    {
+      "path": "docs/next_version/국가관습_재점검_2026-10-06/출처.txt",
+      "before_sha256": "0fa65322ee44fe3142000490934bd34a845369469a02c8723be4a152e50ebe69",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "0fa65322ee44fe3142000490934bd34a845369469a02c8723be4a152e50ebe69"
+    },
+    {
+      "path": "docs/next_version/다국어_제작_검증현황.txt",
+      "before_sha256": "d6dfdaa3b8fe5f0219167eb44a1861144fae872b4389c9cdb30d581794a42027",
+      "action": "delete",
+      "reason": "누적 언어 현황/과거 인계와 중복 요약 통합",
+      "transfer": "B4/C4/C6/D5/D6",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "before_sha256": "6a784e515aee1514f2f5fe9aba002f4446c98beb48ac1cdaa6ee359afb6da78d",
+      "action": "delete",
+      "reason": "DB28 수정 완료로 대체된 착수 계획",
+      "transfer": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/next_version/다음작업_원터치알람_기능제거_2026-10-06.md",
+      "before_sha256": "753e280c124dbc1b2804bf8181294ebdba51480d8df908313daf55733c8b6262",
+      "action": "delete",
+      "reason": "D2 제거 완료로 대체된 계획",
+      "transfer": "A3/B3/C2",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/next_version/다음작업_전역기본스누즈_2026-10-06.md",
+      "before_sha256": "0b52ac044ea753a72903ed281b83ee75409fe4f016b26d619927dd208551168c",
+      "action": "delete",
+      "reason": "기본값6종/현재 회차 미반영은 최종3종/live 계약으로 대체",
+      "transfer": "A2/B1/C2/D2",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/analyze.log",
+      "before_sha256": "6b7f05e4a58a2239eb7a6b0d96ca7802705540201811d38c8b45948bfcf05103",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "6b7f05e4a58a2239eb7a6b0d96ca7802705540201811d38c8b45948bfcf05103"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/android_exit_check.log",
+      "before_sha256": "4d74fe05c89451a2da86ea19ad7914606f206d164830979d7ac81c095a7adea7",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "4d74fe05c89451a2da86ea19ad7914606f206d164830979d7ac81c095a7adea7"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/android_test_results.xml",
+      "before_sha256": "04dfdade803ac7401d888687676d297b70b109f6fc891ad1b9ec4c3a31c003e0",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "04dfdade803ac7401d888687676d297b70b109f6fc891ad1b9ec4c3a31c003e0"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/android_tests.log",
+      "before_sha256": "95aa7c0270bd4075335291be3b272a7b770c0c65cacf4f86eb7471ad63855854",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "95aa7c0270bd4075335291be3b272a7b770c0c65cacf4f86eb7471ad63855854"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/copy_and_exposure_tests.log",
+      "before_sha256": "5a131e4b27f3fffa74f9fb20791f5963e95eba0fcf7d06f6220626f7b13d81ae",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "5a131e4b27f3fffa74f9fb20791f5963e95eba0fcf7d06f6220626f7b13d81ae"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/gen_l10n.log",
+      "before_sha256": "a033fa40bfb822a0c25b5014b79d220dafedf3e44cf34eed7c652becd543b619",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a033fa40bfb822a0c25b5014b79d220dafedf3e44cf34eed7c652becd543b619"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/검증_명세.json",
+      "before_sha256": "b3e58ee1aed58ca93dd30cce4f447eafd94eac1724f5a591fd7e421cc8e5a9cc",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "b3e58ee1aed58ca93dd30cce4f447eafd94eac1724f5a591fd7e421cc8e5a9cc"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/검토결과.txt",
+      "before_sha256": "7875fbbf47a58e0c7f8cb8a9aef34307ccc354bbe9c2010d875ec26fbb58a04c",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "7875fbbf47a58e0c7f8cb8a9aef34307ccc354bbe9c2010d875ec26fbb58a04c"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/노출_검색키.json",
+      "before_sha256": "3a8a16cd0775acb2a0e06f50a4ef04ba4898fe7afcf3b3ff14afeaa999e8cb87",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "3a8a16cd0775acb2a0e06f50a4ef04ba4898fe7afcf3b3ff14afeaa999e8cb87"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/노출_검토원장.csv",
+      "before_sha256": "1fa42841d47c2dd218dec754fd23207ef0b6897ff07881a558c80286c4fbc089",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "1fa42841d47c2dd218dec754fd23207ef0b6897ff07881a558c80286c4fbc089"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/다음_시작점.txt",
+      "before_sha256": "f32a18f0b64fb01d43d3297302cae9fe8c9a5345ccbb7a5d85dd477b34f9ec99",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "f32a18f0b64fb01d43d3297302cae9fe8c9a5345ccbb7a5d85dd477b34f9ec99"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/다음세션_시작문구_전체.txt",
+      "before_sha256": "abf7620183f71bcdc731c45066d9b55768a553d88a25c12dc1328d82495101f1",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "abf7620183f71bcdc731c45066d9b55768a553d88a25c12dc1328d82495101f1"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/독립_후보.txt",
+      "before_sha256": "d9fa063dcc29de5e8a508cb20192f4aec0f9dd855b94233bcbfe4ab28883405a",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "d9fa063dcc29de5e8a508cb20192f4aec0f9dd855b94233bcbfe4ab28883405a"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/리소스_검사.json",
+      "before_sha256": "47bdda5e36fb365bbdf0257846a511360e735f9261a32450b9daf6d268e917ec",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "47bdda5e36fb365bbdf0257846a511360e735f9261a32450b9daf6d268e917ec"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/문구_변경원장.csv",
+      "before_sha256": "7b3c18f92bf4936de2718cac0589bc112ef6d8cb1366338927c74e93cd15fe52",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "7b3c18f92bf4936de2718cac0589bc112ef6d8cb1366338927c74e93cd15fe52"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/미제공_기능과_노출검증.txt",
+      "before_sha256": "8acca47bace38a01d9304762d59691d5243e28a32c865626934645e309a847eb",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "8acca47bace38a01d9304762d59691d5243e28a32c865626934645e309a847eb"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/시작_리소스.json",
+      "before_sha256": "2aa922bb719a0d6946f829fdcc41d1a3fad6bb6d45a5692edf5a5a87fbfbe3ee",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "2aa922bb719a0d6946f829fdcc41d1a3fad6bb6d45a5692edf5a5a87fbfbe3ee"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/전수_검토원장.csv",
+      "before_sha256": "a68116060727bea8772d91ebf70f19872e6f53f26eb35cb662bddc9d0ba804b7",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a68116060727bea8772d91ebf70f19872e6f53f26eb35cb662bddc9d0ba804b7"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/정적분석_대조.json",
+      "before_sha256": "c66b880cdedf5752cd358edaa10666ddd55fee15d6079646f05fe9368d4ff255",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "c66b880cdedf5752cd358edaa10666ddd55fee15d6079646f05fe9368d4ff255"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/직접호출_미발견.csv",
+      "before_sha256": "192cdcb668959b57f2e778b7baaa506b1651f183506f1499033ccaa2bd1cf663",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "192cdcb668959b57f2e778b7baaa506b1651f183506f1499033ccaa2bd1cf663"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/채택_변경.json",
+      "before_sha256": "84af1ed9fb73114bab8a02e8cf9d31b547597d16e486de76263ed711251deff4",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "84af1ed9fb73114bab8a02e8cf9d31b547597d16e486de76263ed711251deff4"
+    },
+    {
+      "path": "docs/next_version/독립최종검토_3차_2026-10-05/판정과_출처.txt",
+      "before_sha256": "d68b08583cb9b7473ad0757c0990ad21c3d701690d95c293d18fc4f3fa8d5b4a",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "d68b08583cb9b7473ad0757c0990ad21c3d701690d95c293d18fc4f3fa8d5b4a"
+    },
+    {
+      "path": "docs/next_version/삼성_FSI_즉석스누즈_C수정_2026-10-06.md",
+      "before_sha256": "4f3418858f29b44708022477132f2c6f83340116c7a5e5e82abcaf90e24b0061",
+      "action": "update",
+      "reason": "전후 수정/실측 결과·APK 해시·검증/롤백 경계 또는 사용 중 매뉴얼",
+      "transfer": "원 경로 보존",
+      "after_sha256": "692a093a677ebbf268498c1134b7ffe234cc5b59e88bf4513c3bafad8eb701cc"
+    },
+    {
+      "path": "docs/next_version/삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "before_sha256": "c903d775dafcc39b5037f21ebd3952722079204e07a0668d88bc58d86b8770d7",
+      "action": "delete",
+      "reason": "A/B/C 검사 종료, 검사표의 유효 경계 이관",
+      "transfer": "B1/C3/D1/D2; A/B APK 및 상세 결과 원장 보존",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/next_version/삼성_FSI_즉석스누즈_실기기검증_2026-10-06.md",
+      "before_sha256": "cf0b275f61a045c416e3192692ceaad38734033791186c7b1b4654964cecd539",
+      "action": "update",
+      "reason": "전후 수정/실측 결과·APK 해시·검증/롤백 경계 또는 사용 중 매뉴얼",
+      "transfer": "원 경로 보존",
+      "after_sha256": "854662132044ab7e280aac2cf6df75453cf34decfa31ab8f14463ae21e4e3a74"
+    },
+    {
+      "path": "docs/next_version/삼성_FSI_즉석스누즈_이어하기_2026-10-06.md",
+      "before_sha256": "ae8df4bb86d4de6ebf86babadbfc5e60b71ba357fc885f22c6f64f1766c4a208",
+      "action": "delete",
+      "reason": "실측/원복 종료 뒤 예약·PID·좌표 인계는 만료",
+      "transfer": "C3/D2; B/C 결과·natural_cases·원복 증거 보존",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/next_version/시간대_종료알람재생성_수정결과_2026-10-07.md",
+      "before_sha256": "29afb9a385d85136dcc1965f087fa3840b8520bc41732b62329aab7d5a2a1ef7",
+      "action": "update",
+      "reason": "전후 수정/실측 결과·APK 해시·검증/롤백 경계 또는 사용 중 매뉴얼",
+      "transfer": "원 경로 보존",
+      "after_sha256": "1679745e3dfd0523b59bbf490069ab34d4d6f7092573a52b754b70f4ad8f93da"
+    },
+    {
+      "path": "docs/next_version/시간대_종료알람재생성_수정진행_2026-10-07.md",
+      "before_sha256": "2a02422a6c2583654342b3d454839157f155ede067c9961482be17bbeb9bda65",
+      "action": "preserve",
+      "reason": "전후 수정/실측 결과·APK 해시·검증/롤백 경계 또는 사용 중 매뉴얼",
+      "transfer": "원 경로 보존",
+      "after_sha256": "2a02422a6c2583654342b3d454839157f155ede067c9961482be17bbeb9bda65"
+    },
+    {
+      "path": "docs/next_version/의미검토_1차_2026-10-05/검증_명세.json",
+      "before_sha256": "2b931d40d388cbfda0330e83ad0cca9d2839674156b4059075586ec9d83fbf59",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "2b931d40d388cbfda0330e83ad0cca9d2839674156b4059075586ec9d83fbf59"
+    },
+    {
+      "path": "docs/next_version/의미검토_1차_2026-10-05/검토결과.txt",
+      "before_sha256": "31c5adc7a10f7836e5b5d7945196df6911a2fbd4aac67bf0f56b7158bb9db990",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "31c5adc7a10f7836e5b5d7945196df6911a2fbd4aac67bf0f56b7158bb9db990"
+    },
+    {
+      "path": "docs/next_version/의미검토_1차_2026-10-05/독립_첫판단.txt",
+      "before_sha256": "25bc784dd918c14d14cb112202f354e81e6f9e1279c172caa6f8da7dce9a41ce",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "25bc784dd918c14d14cb112202f354e81e6f9e1279c172caa6f8da7dce9a41ce"
+    },
+    {
+      "path": "docs/next_version/의미검토_1차_2026-10-05/문구_변경원장.csv",
+      "before_sha256": "a977f64a01281faf13f398c395ce418bb4456b3bb202ac2cee3cb7f79b833689",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a977f64a01281faf13f398c395ce418bb4456b3bb202ac2cee3cb7f79b833689"
+    },
+    {
+      "path": "docs/next_version/의미검토_1차_2026-10-05/의미카드.txt",
+      "before_sha256": "a9f222f020096d58c7d23cd0ec095c9fc3ad3bcd9c7b151a62bdeead166f3e88",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a9f222f020096d58c7d23cd0ec095c9fc3ad3bcd9c7b151a62bdeead166f3e88"
+    },
+    {
+      "path": "docs/next_version/의미검토_1차_2026-10-05/전수_검토원장.csv",
+      "before_sha256": "5eacf9465d29b4a7720d3da2785edbc6cc06f170a168e0291b9c8a1c70680d9a",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "5eacf9465d29b4a7720d3da2785edbc6cc06f170a168e0291b9c8a1c70680d9a"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/copy_tests.log",
+      "before_sha256": "347614c783129888f7918ba0d1c4a437585bfc5e79c7e17fe90e5822335e64ec",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "347614c783129888f7918ba0d1c4a437585bfc5e79c7e17fe90e5822335e64ec"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/gen_l10n.log",
+      "before_sha256": "a033fa40bfb822a0c25b5014b79d220dafedf3e44cf34eed7c652becd543b619",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a033fa40bfb822a0c25b5014b79d220dafedf3e44cf34eed7c652becd543b619"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/검증_명세.json",
+      "before_sha256": "8e9c3775c24044e43c830ba08047dd5092dddf648b3d7d6c2c6ab922e3f75572",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "8e9c3775c24044e43c830ba08047dd5092dddf648b3d7d6c2c6ab922e3f75572"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/검토결과.txt",
+      "before_sha256": "251f0a2ddfd524f7125f43db6b6a4d08765674ed3b253726504186a4149ec2fb",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "251f0a2ddfd524f7125f43db6b6a4d08765674ed3b253726504186a4149ec2fb"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/다음_시작점.txt",
+      "before_sha256": "c4b4aedaba93a49ea65bf5251103f737fb30fb7908d60a0081cf36f788c181c3",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "c4b4aedaba93a49ea65bf5251103f737fb30fb7908d60a0081cf36f788c181c3"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/리소스_검사.json",
+      "before_sha256": "8d116a2211de86e55f783baa6466d2b4b5eef069245cb3ff255810351d18bde5",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "8d116a2211de86e55f783baa6466d2b4b5eef069245cb3ff255810351d18bde5"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/문구_변경원장.csv",
+      "before_sha256": "40d0301e364ccd53529fe92cb9501f0a418a320d2d181282a4ba2e383e18e675",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "40d0301e364ccd53529fe92cb9501f0a418a320d2d181282a4ba2e383e18e675"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/시작_리소스.json",
+      "before_sha256": "7836d60c5da954096a6782595cf2e67d1a886e6a65d71682b001e2ee193fdfe9",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "7836d60c5da954096a6782595cf2e67d1a886e6a65d71682b001e2ee193fdfe9"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/용어와_판정.txt",
+      "before_sha256": "4ddc3196ca6e9de35b8401f1604fa8d7c9b5c8900970cb53165d7bb566fe4ed9",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "4ddc3196ca6e9de35b8401f1604fa8d7c9b5c8900970cb53165d7bb566fe4ed9"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/전수_검토원장.csv",
+      "before_sha256": "8a926a606136b22b6e28543f0e6b2261a610bce3eda6caa75fbf2cd28deeed39",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "8a926a606136b22b6e28543f0e6b2261a610bce3eda6caa75fbf2cd28deeed39"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/출처_미확인.txt",
+      "before_sha256": "001c86430a537e3aadb84ff530cd1e43c8c1f756fcabab497bfccddb9ff09add",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "001c86430a537e3aadb84ff530cd1e43c8c1f756fcabab497bfccddb9ff09add"
+    },
+    {
+      "path": "docs/next_version/자연스러움검토_2차_2026-10-05/출처원장.csv",
+      "before_sha256": "7c5c851cdfe402a4aabc10743efb27b6d64c6c36855d3c976218847d4b029c01",
+      "action": "preserve",
+      "reason": "1·2·3차 독립 판단/변경 사유/출처·해시·검증 원본 전체 보존",
+      "transfer": "원 경로 보존",
+      "after_sha256": "7c5c851cdfe402a4aabc10743efb27b6d64c6c36855d3c976218847d4b029c01"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/USB_20261001_locale_fix_build.json",
+      "before_sha256": "a3cbc7904ca552dcc898863a2438bb242fe9fb83729ea8b8de6e27cc58bb8dd1",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a3cbc7904ca552dcc898863a2438bb242fe9fb83729ea8b8de6e27cc58bb8dd1"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/USB_20261001_수정빌드.json",
+      "before_sha256": "d8f3bc5f66d618a860530d19a59d24136343bda12da81846411cd22d6ef75e37",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "d8f3bc5f66d618a860530d19a59d24136343bda12da81846411cd22d6ef75e37"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/USB_중단_상태.json",
+      "before_sha256": "09a3c18ff60f5f73c0485d293c7544511d232e541d4f1b6756a31d185962a21b",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "09a3c18ff60f5f73c0485d293c7544511d232e541d4f1b6756a31d185962a21b"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/USB_추가_자동검사_로그.zip",
+      "before_sha256": "dd57b1d67eb683283897b294446aa757971a096a8df35ecb714de698129df68e",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "dd57b1d67eb683283897b294446aa757971a096a8df35ecb714de698129df68e"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/검증빌드_해시.json",
+      "before_sha256": "a65b1f59ef86e2530465b4775940a605bc061d1de3f7e07286fe18d5cdad864e",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a65b1f59ef86e2530465b4775940a605bc061d1de3f7e07286fe18d5cdad864e"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/기능_상태전이.csv",
+      "before_sha256": "604e5b9174b8e4565ea245ab644e0befe12c2e5e00242d0b8bd59e2208f2e3b8",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "604e5b9174b8e4565ea245ab644e0befe12c2e5e00242d0b8bd59e2208f2e3b8"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/기존_실기기_이관.csv",
+      "before_sha256": "53d7b180b6e51727e28c193531741c1d410430851d57f8e5b7cf06238f56901e",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "53d7b180b6e51727e28c193531741c1d410430851d57f8e5b7cf06238f56901e"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/변경기능_검증연결.csv",
+      "before_sha256": "29ca69a4cf06d5bbd3b92b68d673b2b13fd08b63a3a7de5d3549c9e07188fc8e",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "29ca69a4cf06d5bbd3b92b68d673b2b13fd08b63a3a7de5d3549c9e07188fc8e"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/소스_진입점.csv",
+      "before_sha256": "e5f067a04d28b5631e2612f7b12736c067a2f668259b2c33d538e009d9710185",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "e5f067a04d28b5631e2612f7b12736c067a2f668259b2c33d538e009d9710185"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/실기기_잔여_2026-10-04.json",
+      "before_sha256": "9a254f98b1b1547fce648ad02f497e14ed33d49bc4d419dd5e47e561053251da",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9a254f98b1b1547fce648ad02f497e14ed33d49bc4d419dd5e47e561053251da"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/실행로그.zip",
+      "before_sha256": "c5eee63ea062fbe5d51f110f1ae7594a596129c406f3416efefccbb1881659a9",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "c5eee63ea062fbe5d51f110f1ae7594a596129c406f3416efefccbb1881659a9"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/알람_음향_diff_2026-10-04.json",
+      "before_sha256": "9d48e2382ad800dfbbd342354d182ec807aadd6a19ce63f3edc2650fdce756cb",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9d48e2382ad800dfbbd342354d182ec807aadd6a19ce63f3edc2650fdce756cb"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/자동검증_실행결과.csv",
+      "before_sha256": "658b9209a878481800e2b398ab9cfd477d0ae9aaa09d17c23a7faca3705f4d8c",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "658b9209a878481800e2b398ab9cfd477d0ae9aaa09d17c23a7faca3705f4d8c"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/집계.json",
+      "before_sha256": "612c756a43f1f47d54f63da1d161b3c142ab4bc70f4a3f1c25ab2ae7bb8c30a2",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "612c756a43f1f47d54f63da1d161b3c142ab4bc70f4a3f1c25ab2ae7bb8c30a2"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/현지화_문구검토_2026-10-05.csv",
+      "before_sha256": "c6493c5e9929462cc42b5abc7142c9554e9f68d1bad7f75cf008ac96688492c2",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "c6493c5e9929462cc42b5abc7142c9554e9f68d1bad7f75cf008ac96688492c2"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/현지화_용어근거_2026-10-05.csv",
+      "before_sha256": "784e7de1b9084765f1f47fa3b725f69b7b5b3af79081014bb2263ee58a84648e",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "784e7de1b9084765f1f47fa3b725f69b7b5b3af79081014bb2263ee58a84648e"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/화면_체크리스트.csv",
+      "before_sha256": "2b04ea7935615021fc0d8db3c12bec0029691f597a6db3c24314dcc63533ca21",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "2b04ea7935615021fc0d8db3c12bec0029691f597a6db3c24314dcc63533ca21"
+    },
+    {
+      "path": "docs/next_version/전수검증_자료_2026-09-30/힌디어_문구원장_2026-10-05.csv",
+      "before_sha256": "a30c6cb4fe7fef159f01767e8e4ae4aff5d4f1a74cc47177fd3fbd8fda358b71",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a30c6cb4fe7fef159f01767e8e4ae4aff5d4f1a74cc47177fd3fbd8fda358b71"
+    },
+    {
+      "path": "docs/next_version/전역스누즈_원터치제거_2026-10-06.md",
+      "before_sha256": "64c184003acf97511f7a476401cac551e15dd834f8a977fbee5a18e15f1375ce",
+      "action": "update",
+      "reason": "전후 수정/실측 결과·APK 해시·검증/롤백 경계 또는 사용 중 매뉴얼",
+      "transfer": "원 경로 보존",
+      "after_sha256": "058875391d2211dd073d68746d53738d8ecd323c6a935317ed48ff3836d1f466"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/korean_parity_test.dart",
+      "before_sha256": "e00d2271c180c7f054ab58d05dbffb756b0dd1bfa5773dca635e1d024e1aaa3a",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "e00d2271c180c7f054ab58d05dbffb756b0dd1bfa5773dca635e1d024e1aaa3a"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/work_hours_before_reference.dart",
+      "before_sha256": "a93695e5b709dfd0ff3b3250c9c991ccd82bb2d79d899a19fa7eed1c5d9e7386",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a93695e5b709dfd0ff3b3250c9c991ccd82bb2d79d899a19fa7eed1c5d9e7386"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증_명세.json",
+      "before_sha256": "5b0d8a2323f16a51c20b0a1ffacf2241a187459416b90c235ac1b3ff6024c1a6",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "5b0d8a2323f16a51c20b0a1ffacf2241a187459416b90c235ac1b3ff6024c1a6"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/critical_resource_audit.json",
+      "before_sha256": "5b2110b896d93f50a6c56886c1c40999159fa1fbeefbf108b9ca7c2ee102514e",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "5b2110b896d93f50a6c56886c1c40999159fa1fbeefbf108b9ca7c2ee102514e"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/native/TEST-com.hwani1103.shiftbell.AlarmDstTest.xml",
+      "before_sha256": "39da3218941b2319719661527328df06936921bc4a057389313394786cae481f",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "39da3218941b2319719661527328df06936921bc4a057389313394786cae481f"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/native/TEST-com.hwani1103.shiftbell.AlarmSnoozeDstTest.xml",
+      "before_sha256": "6e69b6a36516838048ad9bd72894d3e3decbae81abed63a336d36ccd5f6e7007",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "6e69b6a36516838048ad9bd72894d3e3decbae81abed63a336d36ccd5f6e7007"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/native/TEST-com.hwani1103.shiftbell.CoverAlarmNotificationTest.xml",
+      "before_sha256": "9346cd4a576e5fbf0591ee13de60efcc858cd01f6231e062f419a3fa7ac25c80",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9346cd4a576e5fbf0591ee13de60efcc858cd01f6231e062f419a3fa7ac25c80"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/native/TEST-com.hwani1103.shiftbell.EnglishReleaseTest.xml",
+      "before_sha256": "ebeb00aa4d24a7c0fab67e8993aea2140da226c66443676ea268775334e90ef4",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "ebeb00aa4d24a7c0fab67e8993aea2140da226c66443676ea268775334e90ef4"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/native/TEST-com.hwani1103.shiftbell.G1RingRoundTest.xml",
+      "before_sha256": "33832ff425d9e662df0fa18d23211d8da754fe877d13ed9804c1bef382b26083",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "33832ff425d9e662df0fa18d23211d8da754fe877d13ed9804c1bef382b26083"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/native/TEST-com.hwani1103.shiftbell.NotificationLocaleTest.xml",
+      "before_sha256": "ad1cad4666e65f9cc40460a20a4cbdb2c9a12067d387988fa0c6dd4637e3da1e",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "ad1cad4666e65f9cc40460a20a4cbdb2c9a12067d387988fa0c6dd4637e3da1e"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/native/TEST-com.hwani1103.shiftbell.PermissionSettingsTest.xml",
+      "before_sha256": "182a198841441256b0059ccfb7810f86f7b356e709d61279a12356f98080b93d",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "182a198841441256b0059ccfb7810f86f7b356e709d61279a12356f98080b93d"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/native/TEST-com.hwani1103.shiftbell.ReleaseLanguagesTest.xml",
+      "before_sha256": "7eed78ca2325be1967521392707eceb80a3c54853cc0cae8cf5d348c1ec77278",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "7eed78ca2325be1967521392707eceb80a3c54853cc0cae8cf5d348c1ec77278"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/regional_fix_analyze.log",
+      "before_sha256": "f48e7e34bb17fa69e207a8be9a7f607cbe0f12dbfc5d7200105423ab5e21866d",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "f48e7e34bb17fa69e207a8be9a7f607cbe0f12dbfc5d7200105423ab5e21866d"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/regional_fix_before.log",
+      "before_sha256": "7e4c4b995559e6a34427053f34af813b74779a12f89a8ba03f988bcd05d48aeb",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "7e4c4b995559e6a34427053f34af813b74779a12f89a8ba03f988bcd05d48aeb"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/regional_fix_critical.log",
+      "before_sha256": "d62db58786d347aaf7dbe363ecbbf4767181b2b863efd51f3f8b6e3971a1c039",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "d62db58786d347aaf7dbe363ecbbf4767181b2b863efd51f3f8b6e3971a1c039"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/regional_fix_targeted.log",
+      "before_sha256": "56d60bbf534fa54d8627cf51839fee6ae3197d384b75b5851a3f0aba7d4b93f6",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "56d60bbf534fa54d8627cf51839fee6ae3197d384b75b5851a3f0aba7d4b93f6"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/regional_fix_targeted_final.log",
+      "before_sha256": "29dbe695d6ac376698655de313c1494dcf3411b81759e65c84f50edf58bbe791",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "29dbe695d6ac376698655de313c1494dcf3411b81759e65c84f50edf58bbe791"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검증로그/regional_locale_final.log",
+      "before_sha256": "b8a4b5d760dbe783ee83604e9bd42dbe362a6ec0482d415f3995871ebc2d38e7",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "b8a4b5d760dbe783ee83604e9bd42dbe362a6ec0482d415f3995871ebc2d38e7"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/검토결과.txt",
+      "before_sha256": "548706cc7c138d5fad62026227751c7a750ce3b5c755d610349b7000aae22712",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "548706cc7c138d5fad62026227751c7a750ce3b5c755d610349b7000aae22712"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/다음_시작점.txt",
+      "before_sha256": "3f4becb77576b332a4d7f5a25cfac5ded94c0709542266426f49d1eb9ca54030",
+      "action": "delete",
+      "reason": "자동 검사·정책·기기 잔여를 단일 기준에 통합",
+      "transfer": "B4/C4/D5; 한국 비교 fixture/기준 코드 보존",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/수정후보.txt",
+      "before_sha256": "2525dfd71f5c396fb6ff30398d3c62fa880f4774640383cc7a99d5c0623b5fd4",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "2525dfd71f5c396fb6ff30398d3c62fa880f4774640383cc7a99d5c0623b5fd4"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/시작_git_status.txt",
+      "before_sha256": "5fc97c2a7095d36e14f91cb03062e66b0d0477249ed352a1d07ef66dbf6572c3",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "5fc97c2a7095d36e14f91cb03062e66b0d0477249ed352a1d07ef66dbf6572c3"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/시작_해시.json",
+      "before_sha256": "970e08a489c1b8164b89b739350966b56b579350930bff29d87a241acde1ef87",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "970e08a489c1b8164b89b739350966b56b579350930bff29d87a241acde1ef87"
+    },
+    {
+      "path": "docs/next_version/지역시간_수정_2026-10-06/후속_수정원장.csv",
+      "before_sha256": "343630f3ddf97b5de281e6b4473a4f2126a1685f4a804a229e6edfc298ffb4d3",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "343630f3ddf97b5de281e6b4473a4f2126a1685f4a804a229e6edfc298ffb4d3"
+    },
+    {
+      "path": "docs/next_version/지역시간_실기기_2026-10-06/prod_조기울림_조사.txt",
+      "before_sha256": "a6c3972a89bc1f6f1afdbdfd628849f661719ad2de7c022c2f90e610202178eb",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a6c3972a89bc1f6f1afdbdfd628849f661719ad2de7c022c2f90e610202178eb"
+    },
+    {
+      "path": "docs/next_version/지역시간_실기기_2026-10-06/중단기록.txt",
+      "before_sha256": "3a67c4a6ad9d3914dd50307bb95db023ca55b29274e44761766c2cf4661dbb26",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "3a67c4a6ad9d3914dd50307bb95db023ca55b29274e44761766c2cf4661dbb26"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증_명세.json",
+      "before_sha256": "e0195cd650897aa7b16a439e39a9bef64cfe3f2a15e625d9000770729765db1b",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "e0195cd650897aa7b16a439e39a9bef64cfe3f2a15e625d9000770729765db1b"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/TEST-com.hwani1103.shiftbell.CoverAlarmNotificationTest.xml",
+      "before_sha256": "0993eaf56f4d2596e30c127456aee61642fa71e223b8ad0bb6b191471bb172cc",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "0993eaf56f4d2596e30c127456aee61642fa71e223b8ad0bb6b191471bb172cc"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/TEST-com.hwani1103.shiftbell.G1RingRoundTest.xml",
+      "before_sha256": "beab15b50e369dcfcbe5cc70a6f794383bca29d7dd2dc78e6397122d64d5ef3c",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "beab15b50e369dcfcbe5cc70a6f794383bca29d7dd2dc78e6397122d64d5ef3c"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/TEST-com.hwani1103.shiftbell.NotificationLocaleTest.xml",
+      "before_sha256": "e447765e38ef3c0990abe86cfbd53d14e6a7f50b825e55eaf5a1bfb6de3e6df5",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "e447765e38ef3c0990abe86cfbd53d14e6a7f50b825e55eaf5a1bfb6de3e6df5"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/TEST-com.hwani1103.shiftbell.PermissionSettingsTest.xml",
+      "before_sha256": "b86d19605a688b20fc148b8705d30330e370ec44c6cc6c07586fafab955eff04",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "b86d19605a688b20fc148b8705d30330e370ec44c6cc6c07586fafab955eff04"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/TEST-com.hwani1103.shiftbell.ReleaseLanguagesTest.xml",
+      "before_sha256": "9a3997d0c2a4414977f5b89c84434a184d4f8990c81712e3cb8802a921fbfceb",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9a3997d0c2a4414977f5b89c84434a184d4f8990c81712e3cb8802a921fbfceb"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/critical_resource_audit.json",
+      "before_sha256": "0ad9e9b700505b040e1d08127d8a97c4a5e28f0c91652ae15bb23f40c94fffdd",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "0ad9e9b700505b040e1d08127d8a97c4a5e28f0c91652ae15bb23f40c94fffdd"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/english_literal_candidates.txt",
+      "before_sha256": "56eb1e503862abd6ad1cdf8b61b4b0dbbf19bb38829206773826da26a9df86cc",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "56eb1e503862abd6ad1cdf8b61b4b0dbbf19bb38829206773826da26a9df86cc"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/final_tuning_analyze.log",
+      "before_sha256": "a76cdff9c7f5f2e7d10d750109c7e6987924cebc6c3b736871fd169c69767c55",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a76cdff9c7f5f2e7d10d750109c7e6987924cebc6c3b736871fd169c69767c55"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/final_tuning_before_accessibility_test_fix.log",
+      "before_sha256": "771719ffe931562dcabac81cd7ea410790216fa132de285cec91f4173bc20fbb",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "771719ffe931562dcabac81cd7ea410790216fa132de285cec91f4173bc20fbb"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/final_tuning_before_parent_locale_fix.log",
+      "before_sha256": "02246ebfe76e87425efc45178cde1462d5e22ff15f205da3927c59531bbf076e",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "02246ebfe76e87425efc45178cde1462d5e22ff15f205da3927c59531bbf076e"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/final_tuning_critical_20261006.log",
+      "before_sha256": "301e2a8a07926bf957f9c576b2298300a396f7d8889a6ed7be1fe11855e66942",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "301e2a8a07926bf957f9c576b2298300a396f7d8889a6ed7be1fe11855e66942"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/final_tuning_verified_20261006.log",
+      "before_sha256": "653bec718ad70f1e2d45efecd7a0e289923e767e2740c78de9c1aa9ce7523c09",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "653bec718ad70f1e2d45efecd7a0e289923e767e2740c78de9c1aa9ce7523c09"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/git_diff_check.txt",
+      "before_sha256": "5b2ec78e9772463403dd942611f564022169f4473791f42869c58873df4b2d25",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "5b2ec78e9772463403dd942611f564022169f4473791f42869c58873df4b2d25"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/l10n_untranslated.json",
+      "before_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검증로그/native_open_locale_targeted.log",
+      "before_sha256": "eb9062c8922e8977644acbacba7a68c1463417605eaeb3887de3e4c4dba411bd",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "eb9062c8922e8977644acbacba7a68c1463417605eaeb3887de3e4c4dba411bd"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/검토결과.txt",
+      "before_sha256": "c5ae6d00abdd2c2a24f718a14904abfa8cb19488899956c2ba85d6bf3629261b",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "c5ae6d00abdd2c2a24f718a14904abfa8cb19488899956c2ba85d6bf3629261b"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "before_sha256": "363fcbd99c4144c9f504ee06808efbda6ad7e06f6217a001bd121a6c8e50a2c5",
+      "action": "delete",
+      "reason": "C01~C03 수정 완료 뒤 중복 인계",
+      "transfer": "B4/C4/D1/D5/E1/F",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/별도_리소스원장.csv",
+      "before_sha256": "c4480ce40cca6adb24723f029da1bb6e3d03c0a1a5e6ad88a1952eba1948a48c",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "c4480ce40cca6adb24723f029da1bb6e3d03c0a1a5e6ad88a1952eba1948a48c"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/시작_git_status.txt",
+      "before_sha256": "1eabe066c9fb1de5de93a722c049765986e74827c5663e95faf66385c4c83623",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "1eabe066c9fb1de5de93a722c049765986e74827c5663e95faf66385c4c83623"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/시작_자료.json",
+      "before_sha256": "9703d81fbba67f9fb66eb791c6fcffe8bbaf13b3ffeea64bbfc8455e751330f8",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9703d81fbba67f9fb66eb791c6fcffe8bbaf13b3ffeea64bbfc8455e751330f8"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/언어혼입_도달검증.txt",
+      "before_sha256": "dc2ddc3f396180aee8f8e2ce1381ae1149b5bb562551e0bc2274b9d8f8b8407e",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "dc2ddc3f396180aee8f8e2ce1381ae1149b5bb562551e0bc2274b9d8f8b8407e"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/역번역_선기록.txt",
+      "before_sha256": "275b0b25f7bfc9e6f11b6b4b88eff1c783d2f727df489899e7b740958293310a",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "275b0b25f7bfc9e6f11b6b4b88eff1c783d2f727df489899e7b740958293310a"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/이전판정_전체연결.json",
+      "before_sha256": "1a6a39b54521927ebd7c59c1f79c443761097ec3dea893631cc6f362153f1b92",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "1a6a39b54521927ebd7c59c1f79c443761097ec3dea893631cc6f362153f1b92"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/집계와_보존검사.json",
+      "before_sha256": "a7b49ed68da34682b0997d1db1a37e851deb9bc853ebd4d7d14bd81e5fb5f6f4",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a7b49ed68da34682b0997d1db1a37e851deb9bc853ebd4d7d14bd81e5fb5f6f4"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/최종_소스리소스_해시.json",
+      "before_sha256": "705848b7d2afde07dc1c278951c961ea8726569c75968c4f7e4e8d367e40f7e6",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "705848b7d2afde07dc1c278951c961ea8726569c75968c4f7e4e8d367e40f7e6"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/코드_변경원장.csv",
+      "before_sha256": "abfb546ea381b42d145621554576b998dada80b1b6cb09da670223c4116ed1f3",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "abfb546ea381b42d145621554576b998dada80b1b6cb09da670223c4116ed1f3"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/하드코딩_UI검색.txt",
+      "before_sha256": "671c42743f90c9d42ece8316615426a2dc00b21d6c44774de53bc62de44dee0c",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "671c42743f90c9d42ece8316615426a2dc00b21d6c44774de53bc62de44dee0c"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/하드코딩_현재검색목록.csv",
+      "before_sha256": "0cfc017a4b2f3edb92b835f5e3a8c699f0631186ea4118d1c9c5552d85d34cd1",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "0cfc017a4b2f3edb92b835f5e3a8c699f0631186ea4118d1c9c5552d85d34cd1"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/한국어_분리보존원장.csv",
+      "before_sha256": "ae888e2ad939416175703f42e9a154823cb59a2979aea2fce30f633ad6cc3c58",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "ae888e2ad939416175703f42e9a154823cb59a2979aea2fce30f633ad6cc3c58"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/후보_판정.txt",
+      "before_sha256": "8b3b3f20133acc7e59dffd62ccb2b2e21f5878fa8e9f63b68833e1bfd667c0f9",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "8b3b3f20133acc7e59dffd62ccb2b2e21f5878fa8e9f63b68833e1bfd667c0f9"
+    },
+    {
+      "path": "docs/next_version/최종튜닝_2026-10-06/후속_문구원장.csv",
+      "before_sha256": "092d5802cad3b4a179a74459238be32a29fbbcc6c221a0ac328a034acd71fda9",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "092d5802cad3b4a179a74459238be32a29fbbcc6c221a0ac328a034acd71fda9"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/Android_전용범위.json",
+      "before_sha256": "466856a5e2626eab7b97d95842cada41b3dceb9f1e19e2a0fc1a0414dca4b17b",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "466856a5e2626eab7b97d95842cada41b3dceb9f1e19e2a0fc1a0414dca4b17b"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/검증_명세.json",
+      "before_sha256": "3347822038af8357131239ed79c1db84e3834edf10a65d523bad3c0f54da34cc",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "3347822038af8357131239ed79c1db84e3834edf10a65d523bad3c0f54da34cc"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/검증로그/TEST-com.hwani1103.shiftbell.PermissionSettingsTest.xml",
+      "before_sha256": "f23d7e43de949324110261cacf6762c22991ad2915ac635f1cb3afc579e64546",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "f23d7e43de949324110261cacf6762c22991ad2915ac635f1cb3afc579e64546"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/검증로그/TEST-com.hwani1103.shiftbell.ReleaseLanguagesTest.xml",
+      "before_sha256": "f978f3b75954525c5c8a66c05214eda39c5a92fd4e639c247ac758b2ac80d941",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "f978f3b75954525c5c8a66c05214eda39c5a92fd4e639c247ac758b2ac80d941"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/검증로그/followup_analyze_final.log",
+      "before_sha256": "33852245164ca01fae7bac1c2da5c8236b7275b083ae240e1dd85c4265b88ea6",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "33852245164ca01fae7bac1c2da5c8236b7275b083ae240e1dd85c4265b88ea6"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/검증로그/followup_critical_final.log",
+      "before_sha256": "5f1192fcf4e2f724cb28ac6270a36f79adde1bc728fd3caf40f1f5fe6a3c1a99",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "5f1192fcf4e2f724cb28ac6270a36f79adde1bc728fd3caf40f1f5fe6a3c1a99"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/검증로그/followup_dev_release.log",
+      "before_sha256": "bb689773cb23b4f34605626121ad59bdc809d48efe4e402110d8da40241dc368",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "bb689773cb23b4f34605626121ad59bdc809d48efe4e402110d8da40241dc368"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/검증로그/followup_diff_check.log",
+      "before_sha256": "171a565a495fd2bf70b67edbf643960090df2e142c922ba27daeb385d9b0ac0b",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "171a565a495fd2bf70b67edbf643960090df2e142c922ba27daeb385d9b0ac0b"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/검증로그/followup_native_final.log",
+      "before_sha256": "5c6a6d7501a6fba3c5fb8776f30bf5b5ed0794d4b22b8938c4304131f45913a1",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "5c6a6d7501a6fba3c5fb8776f30bf5b5ed0794d4b22b8938c4304131f45913a1"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/검증로그/followup_prod_release.log",
+      "before_sha256": "c7657c290128e68573880c7bce80bed9f7689fe134e51d9bddcee2b7894eb94c",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "c7657c290128e68573880c7bce80bed9f7689fe134e51d9bddcee2b7894eb94c"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/검토결과.txt",
+      "before_sha256": "d539b384bcce5d81fc7ed3a999164498163e6914dbf20721716860b1579b156c",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "d539b384bcce5d81fc7ed3a999164498163e6914dbf20721716860b1579b156c"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/권한_P0_회귀기준.txt",
+      "before_sha256": "9570e6168e7591e0d7ecf0f8699a3e239a6dd3ca757ff63112c837a9bc80381a",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9570e6168e7591e0d7ecf0f8699a3e239a6dd3ca757ff63112c837a9bc80381a"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/권한검토_무료연결시도_2026-10-06.txt",
+      "before_sha256": "40ef0a8e4bc244b82b5b610feb180ae552b424092638170e657422be8dda52b0",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "40ef0a8e4bc244b82b5b610feb180ae552b424092638170e657422be8dda52b0"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/기능_도달경로.txt",
+      "before_sha256": "3984535e3b0f67579124ae29600d4eca40e18fa32c4712a617cb69e66521e671",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "3984535e3b0f67579124ae29600d4eca40e18fa32c4712a617cb69e66521e671"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "before_sha256": "c1a5d508b40359643d53b9372e7588d6e18fa135a97b2df35d06118b5c9b073e",
+      "action": "delete",
+      "reason": "후속·튜닝·지역 결과를 중복 연결하는 완료 인계",
+      "transfer": "B4/C4/D1/D5/E1/F",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/도움말_권한_수정후보와결과.json",
+      "before_sha256": "28675ebe3f5fd8d922479c8031db707827d98e4c3d51e5782cc6f4a1c0f556b8",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "28675ebe3f5fd8d922479c8031db707827d98e4c3d51e5782cc6f4a1c0f556b8"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/리소스_자동검사.json",
+      "before_sha256": "71b84c82285c4b57b22ad26c303efb6d95f6f0de1545927458ab0ea8595c37c2",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "71b84c82285c4b57b22ad26c303efb6d95f6f0de1545927458ab0ea8595c37c2"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/미사용_영어수면화면_철회.json",
+      "before_sha256": "feb793500e8ed83082e127fef05a269610017e83df714fd3cd34874556529845",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "feb793500e8ed83082e127fef05a269610017e83df714fd3cd34874556529845"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/분리_후보.json",
+      "before_sha256": "e29387fbf5d47a1deff51e457b7e43b34b8bf5f67380949b0c27e235482b84ad",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "e29387fbf5d47a1deff51e457b7e43b34b8bf5f67380949b0c27e235482b84ad"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/수정후보_첫판단.csv",
+      "before_sha256": "c3dd7299c26ac9c5fa9fed1875ac3df85d30ff373a6efb64d8432be9a6d615eb",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "c3dd7299c26ac9c5fa9fed1875ac3df85d30ff373a6efb64d8432be9a6d615eb"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/시작_git_status.txt",
+      "before_sha256": "dad89b1ff63eed8bd0efedb63b3abe57f606299555906da5f7daf065a84617cc",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "dad89b1ff63eed8bd0efedb63b3abe57f606299555906da5f7daf065a84617cc"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/시작_자료.json",
+      "before_sha256": "5ea1ae9a3684f8c1decb6f0ca814ed899add17aecccd07a2307bc5c24f3f8783",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "5ea1ae9a3684f8c1decb6f0ca814ed899add17aecccd07a2307bc5c24f3f8783"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/원터치_하드코딩_삭제원장.json",
+      "before_sha256": "3c0fe44c502277cd0fdb4cfd15279413d6ac32e9b2f23d75c82e84d764c99285",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "3c0fe44c502277cd0fdb4cfd15279413d6ac32e9b2f23d75c82e84d764c99285"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/유료실기기_진행원장_2026-10-06.txt",
+      "before_sha256": "62d9e75b67fcff8bb6fedbbee2d3f7370f7cef454a4d28c4d5cd1238b8d4b5a4",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "62d9e75b67fcff8bb6fedbbee2d3f7370f7cef454a4d28c4d5cd1238b8d4b5a4"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/유료실기기_최종검토_2026-10-06.txt",
+      "before_sha256": "d590bcd0fa8c08a501abb785472364e20bacf9970defa1b60f346a3a4dc5f40e",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "d590bcd0fa8c08a501abb785472364e20bacf9970defa1b60f346a3a4dc5f40e"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/제조사별_핵심기능_최종테스트계획_2026-10-06.txt",
+      "before_sha256": "24964c668dd031cc1f503889687d7aba24017f7a4abd3f5c8f496a06c36eb3c9",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "24964c668dd031cc1f503889687d7aba24017f7a4abd3f5c8f496a06c36eb3c9"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/집계.json",
+      "before_sha256": "b753e9932a4fb1bab16cf723425a47a8b0868c4275b35290d0c1f1d8768233c6",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "b753e9932a4fb1bab16cf723425a47a8b0868c4275b35290d0c1f1d8768233c6"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/최종_git_status.txt",
+      "before_sha256": "928da5683ded08288e6db2136664b3b474b4633b468db6def70456393a7471f7",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "928da5683ded08288e6db2136664b3b474b4633b468db6def70456393a7471f7"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/최종_소스리소스_해시.json",
+      "before_sha256": "7ccf2478ced102399d42177af44231ba86b53617cc62216be8fc5f8408b33ec8",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "7ccf2478ced102399d42177af44231ba86b53617cc62216be8fc5f8408b33ec8"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/최종_알람fallback_추가후보.json",
+      "before_sha256": "431d2ed8ab4138bed6aad89824db26366045c953c4594c921415233b0559f705",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "431d2ed8ab4138bed6aad89824db26366045c953c4594c921415233b0559f705"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/추가_분리판정.json",
+      "before_sha256": "6429ecd38f0658bb68704461940bcdb79c8859b9f14689dba69a9c0767813906",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "6429ecd38f0658bb68704461940bcdb79c8859b9f14689dba69a9c0767813906"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/출시국가_최소기기선정_2026-10-06.txt",
+      "before_sha256": "26f6995d30b15c3cdc94932dc30e0c0a1ed852b2dc71e8456a695ceeb914228d",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "26f6995d30b15c3cdc94932dc30e0c0a1ed852b2dc71e8456a695ceeb914228d"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/컴퓨터_종료예약.json",
+      "before_sha256": "09f6d3426ca213912d3a39f89ade744ce770a9cc264437320573cc42ac4c6a37",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "09f6d3426ca213912d3a39f89ade744ce770a9cc264437320573cc42ac4c6a37"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/하드코딩_도달판정.csv",
+      "before_sha256": "39242baf767231030ba7c1f74dfa90596281a342b22c5bc54decd2ed3fdd34d6",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "39242baf767231030ba7c1f74dfa90596281a342b22c5bc54decd2ed3fdd34d6"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/하드코딩_전수검색목록.csv",
+      "before_sha256": "0a32ab13f8398a72ecd4d4ce7b1348a091285e0e2dc79dc1e15b7e4284d69d00",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "0a32ab13f8398a72ecd4d4ce7b1348a091285e0e2dc79dc1e15b7e4284d69d00"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/한국어_분리보존원장.csv",
+      "before_sha256": "498f54a38c17767d9b68aecfefa7f57e41762f3c8f8b35687d66639a853b1b97",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "498f54a38c17767d9b68aecfefa7f57e41762f3c8f8b35687d66639a853b1b97"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/후속_문구원장.csv",
+      "before_sha256": "f32021d5fc54df3c4cbfd0fb3617719e1a90efa46c30aea5e2b443b1a5f509d0",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "f32021d5fc54df3c4cbfd0fb3617719e1a90efa46c30aea5e2b443b1a5f509d0"
+    },
+    {
+      "path": "docs/next_version/후속재점검_2026-10-05/후속_코드원장.csv",
+      "before_sha256": "9cda5271d4c2830a2a344fd2c01bae4d5710404b2cd8e481acb39621b67ba8f5",
+      "action": "preserve",
+      "reason": "후속 판단/출처·원장·검증 명세/해시·로그/시험 코드·사건/중단·기기 선정/검사 계약의 원본 증거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9cda5271d4c2830a2a344fd2c01bae4d5710404b2cd8e481acb39621b67ba8f5"
+    },
+    {
+      "path": "docs/release_audit/README.md",
+      "before_sha256": "d1263b7c1430cc6ca823fdcb0edffd554351b50c97830914c6d978ac5198625d",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "d1263b7c1430cc6ca823fdcb0edffd554351b50c97830914c6d978ac5198625d"
+    },
+    {
+      "path": "docs/release_audit/contracts.md",
+      "before_sha256": "4d483e7339e681242fd2d92ef39cc135e83c9e4e89094bef700d1ba88d352934",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "4d483e7339e681242fd2d92ef39cc135e83c9e4e89094bef700d1ba88d352934"
+    },
+    {
+      "path": "docs/release_audit/decisions_delegated_2026-09-14.md",
+      "before_sha256": "4d283b247d56ea7664c5ec1fb88f3157ad600c681664ed62829b735fffdca314",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "4d283b247d56ea7664c5ec1fb88f3157ad600c681664ed62829b735fffdca314"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/README.md",
+      "before_sha256": "9655940f42983ae0c171c07bc1880b3e6a1f259df86698398156b27fa369b702",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9655940f42983ae0c171c07bc1880b3e6a1f259df86698398156b27fa369b702"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/expected.md",
+      "before_sha256": "24cc69740858df2336f549d82ffcbb2a91dd401b3de80c94d324c61c9bb79abc",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "24cc69740858df2336f549d82ffcbb2a91dd401b3de80c94d324c61c9bb79abc"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/manifest.json",
+      "before_sha256": "9f563a761d799bc16a400d8c664e1e42cbf33d6a2ff5a4f5bace39c1c89d3622",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9f563a761d799bc16a400d8c664e1e42cbf33d6a2ff5a4f5bace39c1c89d3622"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v01.sql",
+      "before_sha256": "76d576647864e55edffd7e2f92e73cb2be28d63b17d5b849acbd3be81d047f0f",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "76d576647864e55edffd7e2f92e73cb2be28d63b17d5b849acbd3be81d047f0f"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v02.sql",
+      "before_sha256": "394402cdb8aee955c25d78ff76508f9c2b30bd4a11fe72993973d357f0b59916",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "394402cdb8aee955c25d78ff76508f9c2b30bd4a11fe72993973d357f0b59916"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v03.sql",
+      "before_sha256": "3ce3af932395dcd8ab86becdf927d69f2c036ac1b05d0f96b7dca4dfbe7f0c6b",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "3ce3af932395dcd8ab86becdf927d69f2c036ac1b05d0f96b7dca4dfbe7f0c6b"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v04.sql",
+      "before_sha256": "12d0d936256c93f9110e1b00aad85199c8473d0fdd795e6f7f680c1e24b0e2cd",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "12d0d936256c93f9110e1b00aad85199c8473d0fdd795e6f7f680c1e24b0e2cd"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v05.sql",
+      "before_sha256": "48e89820caeadbc53854fc999d5033e0ccdeeb25d3ea0f92dda8e919e54cd0a2",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "48e89820caeadbc53854fc999d5033e0ccdeeb25d3ea0f92dda8e919e54cd0a2"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v06.sql",
+      "before_sha256": "0603fcdc67cd5ebf94bfa5722c68c4afce40ce9ce0b3c949f82262d2cf67fa49",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "0603fcdc67cd5ebf94bfa5722c68c4afce40ce9ce0b3c949f82262d2cf67fa49"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v07.sql",
+      "before_sha256": "35c889a7ab9e8f397037af8b49da92b39619309837b7ff74a3e47e9ec53455e2",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "35c889a7ab9e8f397037af8b49da92b39619309837b7ff74a3e47e9ec53455e2"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v08.sql",
+      "before_sha256": "40bcd9f08522529efabb99b880cb0d42fd167f00ced8104a63701bef7113a348",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "40bcd9f08522529efabb99b880cb0d42fd167f00ced8104a63701bef7113a348"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v09.sql",
+      "before_sha256": "486ee30b985f7d6e521900d2307f04d43a3280c02634ef65c1b5dc892bc1dce6",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "486ee30b985f7d6e521900d2307f04d43a3280c02634ef65c1b5dc892bc1dce6"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v10.sql",
+      "before_sha256": "0d6fc3d889e800745b3db6ae95f88a13e92270ab4c9bce5c3419d23b10f0dcf8",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "0d6fc3d889e800745b3db6ae95f88a13e92270ab4c9bce5c3419d23b10f0dcf8"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v11.sql",
+      "before_sha256": "3d68608a8fd4bd0c35686508e6567264a49d6599b1e3da19c2d1ea89380b1a1e",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "3d68608a8fd4bd0c35686508e6567264a49d6599b1e3da19c2d1ea89380b1a1e"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v12.sql",
+      "before_sha256": "2b393fad2b8edd189c926208c80d464c5b47c3ac1fe67f85913cdfc539fc572b",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "2b393fad2b8edd189c926208c80d464c5b47c3ac1fe67f85913cdfc539fc572b"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v13.sql",
+      "before_sha256": "10db33f510fe8b69152a5edac2c65ad68f947836c0822d7fce1b6612e2011484",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "10db33f510fe8b69152a5edac2c65ad68f947836c0822d7fce1b6612e2011484"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v14.sql",
+      "before_sha256": "e734e32fa9c28a9d4bdde6554c5e88abd832bea631f6e3445810e8a640425e07",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "e734e32fa9c28a9d4bdde6554c5e88abd832bea631f6e3445810e8a640425e07"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v15.sql",
+      "before_sha256": "b85fa75b4f22ad25e1f1430b9044ef46ccf8d14e7e01cd23c66588fb9e0fcddb",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "b85fa75b4f22ad25e1f1430b9044ef46ccf8d14e7e01cd23c66588fb9e0fcddb"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v16.sql",
+      "before_sha256": "f49b8a5c5655b9f2c04893df414fb6a1fda048b3255f37e7605f4e4299221789",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "f49b8a5c5655b9f2c04893df414fb6a1fda048b3255f37e7605f4e4299221789"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v17.sql",
+      "before_sha256": "7f6d9ee4e15e8c0373dfc1e92b7c511e1e9fafaad66a47199d96e74fad385dec",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "7f6d9ee4e15e8c0373dfc1e92b7c511e1e9fafaad66a47199d96e74fad385dec"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v18.sql",
+      "before_sha256": "74b9a488a4a7748629e60bbf7102f557552fccfb6804ba425e40c91eab08df61",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "74b9a488a4a7748629e60bbf7102f557552fccfb6804ba425e40c91eab08df61"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v19.sql",
+      "before_sha256": "25d4f18ce739df68c693b369f23e782924229f56559cd86baa9b680bbd397594",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "25d4f18ce739df68c693b369f23e782924229f56559cd86baa9b680bbd397594"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v20.sql",
+      "before_sha256": "1e0e334329fd0a32c2b03b9c1056a98ef22784e5808f267ac27bde07961bbfb9",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "1e0e334329fd0a32c2b03b9c1056a98ef22784e5808f267ac27bde07961bbfb9"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v21.sql",
+      "before_sha256": "34c31a1f4523fa1c5f42396c7a2ba357d43e017449fe2e2bf81e68e0c46b493a",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "34c31a1f4523fa1c5f42396c7a2ba357d43e017449fe2e2bf81e68e0c46b493a"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v22.sql",
+      "before_sha256": "37339848e875248f4fd5be196a8c4c7afccb82e487ac4a99d77e74644aa5b102",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "37339848e875248f4fd5be196a8c4c7afccb82e487ac4a99d77e74644aa5b102"
+    },
+    {
+      "path": "docs/release_audit/g0/fixtures_draft/v23.sql",
+      "before_sha256": "b237c88046b6727daf40e2c3a37bd6b7fd906fc434a3bdf770d9512ecc5550c3",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "b237c88046b6727daf40e2c3a37bd6b7fd906fc434a3bdf770d9512ecc5550c3"
+    },
+    {
+      "path": "docs/release_audit/g0/handoff.md",
+      "before_sha256": "8da85f2f27061d46a3c3fdd1b834fca39a70d282b1dc8d41e1a7b641a1fb3b04",
+      "action": "preserve",
+      "reason": "제품 코드/테스트·공통 계약에서 참조하는 API·키·writer·제약 및 원래 구현 근거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "8da85f2f27061d46a3c3fdd1b834fca39a70d282b1dc8d41e1a7b641a1fb3b04"
+    },
+    {
+      "path": "docs/release_audit/g0/integration_requests.md",
+      "before_sha256": "9c722ce517f7e16560f49aa6faaf3aa63a9e1da763a7a9797b071d9010151941",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9c722ce517f7e16560f49aa6faaf3aa63a9e1da763a7a9797b071d9010151941"
+    },
+    {
+      "path": "docs/release_audit/g0/r0_repro_tests/README.md",
+      "before_sha256": "2f6f0187ce006da5276f7b7351fd02003fa1d7682adefcb3ecf9fe273a246748",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "2f6f0187ce006da5276f7b7351fd02003fa1d7682adefcb3ecf9fe273a246748"
+    },
+    {
+      "path": "docs/release_audit/g0/r0_repro_tests/r0_01_device_protected_path_test.dart",
+      "before_sha256": "a5953c36326c74dec99b400d0e35bc143576e8160905c3b08371166ed3ee522c",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a5953c36326c74dec99b400d0e35bc143576e8160905c3b08371166ed3ee522c"
+    },
+    {
+      "path": "docs/release_audit/g0/r0_repro_tests/r0_02_startup_timeout_test.dart",
+      "before_sha256": "8d046fbc3b49a505911f363ccce30047b47a2d19adcd736f1ac75e4e345d23bd",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "8d046fbc3b49a505911f363ccce30047b47a2d19adcd736f1ac75e4e345d23bd"
+    },
+    {
+      "path": "docs/release_audit/g0/r0_repro_tests/r0_03_preset_repair_test.dart",
+      "before_sha256": "b0f9b73f21c9242b2ec08b6ec2b219279bacaa2a99158fd251bee3173193fbec",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "b0f9b73f21c9242b2ec08b6ec2b219279bacaa2a99158fd251bee3173193fbec"
+    },
+    {
+      "path": "docs/release_audit/g0/r0_repro_tests/r0_04_database_init_error_test.dart",
+      "before_sha256": "0751c3982cb2622f8fff7410cd2ae881b37ee0269732db516105e6e39de0bad3",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "0751c3982cb2622f8fff7410cd2ae881b37ee0269732db516105e6e39de0bad3"
+    },
+    {
+      "path": "docs/release_audit/g0/review_codex.md",
+      "before_sha256": "8c8f59f82948edfa46c10d270ef8936f26e2c4aebaa37cb271faf4f2760697c9",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "8c8f59f82948edfa46c10d270ef8936f26e2c4aebaa37cb271faf4f2760697c9"
+    },
+    {
+      "path": "docs/release_audit/g0/t04_s1_device_procedure.md",
+      "before_sha256": "727091a20a7bd3155b53e813203ca188aa1c1332b3d869dc096ac73e0a685a31",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "727091a20a7bd3155b53e813203ca188aa1c1332b3d869dc096ac73e0a685a31"
+    },
+    {
+      "path": "docs/release_audit/g0/test_results.md",
+      "before_sha256": "3f878503bb2fec2de309d21d21b33bcdfc546913470d247c8d0f0b2c0e445e42",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "3f878503bb2fec2de309d21d21b33bcdfc546913470d247c8d0f0b2c0e445e42"
+    },
+    {
+      "path": "docs/release_audit/g1/fixtures_draft_p1/README.md",
+      "before_sha256": "b5b077a6e5f418b9f121cb78b9451be94355ed309b5abacf3cc918dc7fad6a9a",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "b5b077a6e5f418b9f121cb78b9451be94355ed309b5abacf3cc918dc7fad6a9a"
+    },
+    {
+      "path": "docs/release_audit/g1/fixtures_draft_p1/generation_cases.json",
+      "before_sha256": "2717e89c587d6e2c85b40c4c352960214876870da4f8f26756a84b77fd75e104",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "2717e89c587d6e2c85b40c4c352960214876870da4f8f26756a84b77fd75e104"
+    },
+    {
+      "path": "docs/release_audit/g1/fixtures_draft_p1/state_change_cases.json",
+      "before_sha256": "472ba2964ac4f38f97ae4da95fb94cb019b47ca75f626240964bb83e3b2fc640",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "472ba2964ac4f38f97ae4da95fb94cb019b47ca75f626240964bb83e3b2fc640"
+    },
+    {
+      "path": "docs/release_audit/g1/handoff.md",
+      "before_sha256": "264249524f690caf10e7974c59036deb491bb5e6a6850f7c77d161f8c5b8cd46",
+      "action": "preserve",
+      "reason": "제품 코드/테스트·공통 계약에서 참조하는 API·키·writer·제약 및 원래 구현 근거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "264249524f690caf10e7974c59036deb491bb5e6a6850f7c77d161f8c5b8cd46"
+    },
+    {
+      "path": "docs/release_audit/g1/integration_requests.md",
+      "before_sha256": "9c518b8f3141487a7a392727d5385a38981cda480c2823ac34a436cc309c6bae",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9c518b8f3141487a7a392727d5385a38981cda480c2823ac34a436cc309c6bae"
+    },
+    {
+      "path": "docs/release_audit/g1/review.md",
+      "before_sha256": "92ac8751a7d60539ffbd900356d2b6d058a774d40cebc200f0a80e411330d7d2",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "92ac8751a7d60539ffbd900356d2b6d058a774d40cebc200f0a80e411330d7d2"
+    },
+    {
+      "path": "docs/release_audit/g1/review_fixture_additions.json",
+      "before_sha256": "f2933c5aea4f3bd21755105616c97fba854d48468998760322a2760b79588d8c",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "f2933c5aea4f3bd21755105616c97fba854d48468998760322a2760b79588d8c"
+    },
+    {
+      "path": "docs/release_audit/g1/test_results.md",
+      "before_sha256": "2968d5d85b6d9c038f5bbceeb7e5402626eca6e66a0244344b76a1efc66bef31",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "2968d5d85b6d9c038f5bbceeb7e5402626eca6e66a0244344b76a1efc66bef31"
+    },
+    {
+      "path": "docs/release_audit/g2/handoff.md",
+      "before_sha256": "ec201d6e14d635a59adbe764d67d2f5cac373784331daccf65ad5e451421849f",
+      "action": "preserve",
+      "reason": "제품 코드/테스트·공통 계약에서 참조하는 API·키·writer·제약 및 원래 구현 근거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "ec201d6e14d635a59adbe764d67d2f5cac373784331daccf65ad5e451421849f"
+    },
+    {
+      "path": "docs/release_audit/g2/integration_requests.md",
+      "before_sha256": "90565a7841aaeeb7f62b6cd63ec37bcf78389d43bf606b893a777028fd64e919",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "90565a7841aaeeb7f62b6cd63ec37bcf78389d43bf606b893a777028fd64e919"
+    },
+    {
+      "path": "docs/release_audit/g2/test_results.md",
+      "before_sha256": "858701bb61b1d73adb92c8dd89b83b91cc9141fca1f8b6a216d8280b815eeb50",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "858701bb61b1d73adb92c8dd89b83b91cc9141fca1f8b6a216d8280b815eeb50"
+    },
+    {
+      "path": "docs/release_audit/g3/handoff.md",
+      "before_sha256": "7271f805b34bf06ff1f0b20c4475860e8d248764e4aee6a8d8c4b7648babd500",
+      "action": "preserve",
+      "reason": "제품 코드/테스트·공통 계약에서 참조하는 API·키·writer·제약 및 원래 구현 근거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "7271f805b34bf06ff1f0b20c4475860e8d248764e4aee6a8d8c4b7648babd500"
+    },
+    {
+      "path": "docs/release_audit/g3/integration_requests.md",
+      "before_sha256": "0a15ad6de68b3c38acc6ccc2087c730ccb0d525b4de6d28033906c39bf0ebdc0",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "0a15ad6de68b3c38acc6ccc2087c730ccb0d525b4de6d28033906c39bf0ebdc0"
+    },
+    {
+      "path": "docs/release_audit/g3/test_results.md",
+      "before_sha256": "f017b73aaebf182f95b3d134db3dc19134424cdd98fe86d6b8f492fde48d4ff8",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "f017b73aaebf182f95b3d134db3dc19134424cdd98fe86d6b8f492fde48d4ff8"
+    },
+    {
+      "path": "docs/release_audit/g4/handoff.md",
+      "before_sha256": "e7d2cc2263f2d400f77cd65814d12ffdff189698da5212f55c1c3baf861465d4",
+      "action": "preserve",
+      "reason": "제품 코드/테스트·공통 계약에서 참조하는 API·키·writer·제약 및 원래 구현 근거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "e7d2cc2263f2d400f77cd65814d12ffdff189698da5212f55c1c3baf861465d4"
+    },
+    {
+      "path": "docs/release_audit/g4/integration_requests.md",
+      "before_sha256": "d1de458c476cbd20560cf9e53f214d9aaca69ed1fd88337db2400948be4007d9",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "d1de458c476cbd20560cf9e53f214d9aaca69ed1fd88337db2400948be4007d9"
+    },
+    {
+      "path": "docs/release_audit/g4/prep_s17_failure_injection.md",
+      "before_sha256": "3527c498af19482e08bd3d9545a169b6e13285d8e323581f9ff5dcfa14dd24a8",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "3527c498af19482e08bd3d9545a169b6e13285d8e323581f9ff5dcfa14dd24a8"
+    },
+    {
+      "path": "docs/release_audit/g4/prep_writer_inventory.md",
+      "before_sha256": "6f4332527966c672edc8f454eca1405255457d4c17071365288c882b2bd48832",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "6f4332527966c672edc8f454eca1405255457d4c17071365288c882b2bd48832"
+    },
+    {
+      "path": "docs/release_audit/g4/test_results.md",
+      "before_sha256": "262203976182ed9e8b7e7367456d411e5aa3356872556469c3da37e952e4fa36",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "262203976182ed9e8b7e7367456d411e5aa3356872556469c3da37e952e4fa36"
+    },
+    {
+      "path": "docs/release_audit/g5/handoff.md",
+      "before_sha256": "216fb83c70184b964707b615fd03f17bf881b8e2eea1af10b07f79ec18b4c236",
+      "action": "preserve",
+      "reason": "제품 코드/테스트·공통 계약에서 참조하는 API·키·writer·제약 및 원래 구현 근거",
+      "transfer": "원 경로 보존",
+      "after_sha256": "216fb83c70184b964707b615fd03f17bf881b8e2eea1af10b07f79ec18b4c236"
+    },
+    {
+      "path": "docs/release_audit/g5/integration_requests.md",
+      "before_sha256": "9ea8c14a0bdeee03c0102a62542f267719129b10e2db8636b3c10f40b9d0f454",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "9ea8c14a0bdeee03c0102a62542f267719129b10e2db8636b3c10f40b9d0f454"
+    },
+    {
+      "path": "docs/release_audit/g5/prep_data_collection.md",
+      "before_sha256": "ff0c748aebfb5b200a52373ad796a1eeb8de7acfaba124a9c257e6e49b153327",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "ff0c748aebfb5b200a52373ad796a1eeb8de7acfaba124a9c257e6e49b153327"
+    },
+    {
+      "path": "docs/release_audit/g5/test_results.md",
+      "before_sha256": "439afc26f47031b68f3cb4793d4690db633507fb7adcc441099eb84b6bce0a8d",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "439afc26f47031b68f3cb4793d4690db633507fb7adcc441099eb84b6bce0a8d"
+    },
+    {
+      "path": "docs/release_audit/g6/claude_prerelease_diff_review.md",
+      "before_sha256": "ee6a04dae3cd7c8ba157dc4dba01698b92371998ea9b3a24bdd35bc6b8bfce28",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "ee6a04dae3cd7c8ba157dc4dba01698b92371998ea9b3a24bdd35bc6b8bfce28"
+    },
+    {
+      "path": "docs/release_audit/g6/codex_prerelease_diff_review.md",
+      "before_sha256": "38a64e7626d352433157db4e40a3fbea06124e4f9a058631eeab08b6e247377e",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "38a64e7626d352433157db4e40a3fbea06124e4f9a058631eeab08b6e247377e"
+    },
+    {
+      "path": "docs/release_audit/g6/device_test_plan.md",
+      "before_sha256": "fccdd4cef4443e44ce8191ecbab979f92b522d21996ab9afaa51e646c1660d80",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "fccdd4cef4443e44ce8191ecbab979f92b522d21996ab9afaa51e646c1660d80"
+    },
+    {
+      "path": "docs/release_audit/g6/full_code_quality_review.md",
+      "before_sha256": "a64a96176f85b73ceab0e570eedec84f29a8e6be2a7a05e45b1b7c153c3d2d95",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "a64a96176f85b73ceab0e570eedec84f29a8e6be2a7a05e45b1b7c153c3d2d95"
+    },
+    {
+      "path": "docs/release_audit/g6/recheck_2026_09_15/fix_record.md",
+      "before_sha256": "03c49b8244c5e6e154d5dd6126fb4ff4aebe885e24c6cc62d0a3aefc20af06db",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "03c49b8244c5e6e154d5dd6126fb4ff4aebe885e24c6cc62d0a3aefc20af06db"
+    },
+    {
+      "path": "docs/release_audit/g6/recheck_2026_09_15/observed_behavior_test.dart",
+      "before_sha256": "1a28c87bde303349dd0d41a77dfa9aada1f9ea962f4835e13c4cead91e98cfbc",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "1a28c87bde303349dd0d41a77dfa9aada1f9ea962f4835e13c4cead91e98cfbc"
+    },
+    {
+      "path": "docs/release_audit/g6/recheck_2026_09_15/release_readiness_review.md",
+      "before_sha256": "031a29bb101e9e5f0586f17a103fc15c85b5fad4fb119ac65ee738f2170319e3",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "031a29bb101e9e5f0586f17a103fc15c85b5fad4fb119ac65ee738f2170319e3"
+    },
+    {
+      "path": "docs/release_audit/g6/release_gate.md",
+      "before_sha256": "d6cf1670042c1b9ddc18cd1e9e544e1a76bada861826a239a5d2b2959baca54f",
+      "action": "delete",
+      "reason": "실제 판정 없는 빈 T26 서식",
+      "transfer": "D 판정 종류/E1 최종 출시 기준; 최종 승인 미완료",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/release_audit/handoff_release_2026_09_21.md",
+      "before_sha256": "704fb6242f4ac4ab4e143ee5d62a130020de3ae90dd7131569ee3a64be3cba8c",
+      "action": "delete",
+      "reason": "옛 버전 출시 인계/위젯3x2/Firestore 업데이트 절차 대체",
+      "transfer": "B5/D7/E1; 개인 기준선/팝업 정책 이관",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/release_audit/task_board.md",
+      "before_sha256": "537ad4c16ef14f07f7d7c2be8a6948a49412743f12615f0c6aee304df93de552",
+      "action": "preserve",
+      "reason": "감사 판단·연결 계약·독립 fixture/expected·재현/실행 결과·검사 기준 원본",
+      "transfer": "원 경로 보존",
+      "after_sha256": "537ad4c16ef14f07f7d7c2be8a6948a49412743f12615f0c6aee304df93de552"
+    },
+    {
+      "path": "docs/share_web_incident_2026-09-30.md",
+      "before_sha256": "3cc23a47f1dae179c1bfc7c8d667823865b5356ca87d371de87771bdfc55ca93",
+      "action": "preserve",
+      "reason": "전후 수정/실측 결과·APK 해시·검증/롤백 경계 또는 사용 중 매뉴얼",
+      "transfer": "원 경로 보존",
+      "after_sha256": "3cc23a47f1dae179c1bfc7c8d667823865b5356ca87d371de87771bdfc55ca93"
+    },
+    {
+      "path": "docs/snooze_interval_review.md",
+      "before_sha256": "cd02521836092fd55ebad632605250606787f9a2a15b9ee507fcdf0a8456793c",
+      "action": "delete",
+      "reason": "선택5종/고정 회차 전역 설정 계획은 A~D2로 대체",
+      "transfer": "A2/B1/D2/D7; 이력 분 저장 미구현은 별도 명시",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/watch_flip_alarm_review_2026-09-30.md",
+      "before_sha256": "b46a741565b203599f38697155aadb16c9b3144f98fb7025a1d40615c5d80576",
+      "action": "delete",
+      "reason": "철회된 Wear 실험 및 대체된 커버 착수 계획",
+      "transfer": "B5/C6/D2; 당시 build/watch_review 증거 유지",
+      "after_sha256": null
+    },
+    {
+      "path": "docs/진단로그_해석_매뉴얼.md",
+      "before_sha256": "e19d1b956ffb0e14109592ce18b398900737cac9e6a0f758b59c04fc226194d5",
+      "action": "preserve",
+      "reason": "전후 수정/실측 결과·APK 해시·검증/롤백 경계 또는 사용 중 매뉴얼",
+      "transfer": "원 경로 보존",
+      "after_sha256": "e19d1b956ffb0e14109592ce18b398900737cac9e6a0f758b59c04fc226194d5"
+    }
+  ],
+  "references_before": [
+    {
+      "source": "CLAUDE.md",
+      "line": 13,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "현재 입구/요약: 갱신",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "> 예외: 2026-10-05 사용자 명시 요청으로 [다국어 제작·검증 현황](docs/next_version/다국어_제작_검증현황.txt)을 추가했습니다. 언어·기기별 잔여 검증은 해당 문서에 기록합니다."
+    },
+    {
+      "source": "docs/next_version/FSI_즉석스누즈_구현_2026-10-06.md",
+      "line": 11,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "- 다음 작업: [시간대 변경 후 종료 알람 재생성 방지](다음작업_시간대_종료알람재생성_2026-10-06.md). 이번 변경에 혼합하지 않는다."
+    },
+    {
+      "source": "docs/next_version/FSI_즉석스누즈_구현_2026-10-06.md",
+      "line": 23,
+      "target": "docs/next_version/삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B1/C3/D1/D2; A/B APK 및 상세 결과 원장 보존",
+      "original_text": "- 실기기 NOT_RUN. 사용자 연결 후 [삼성 검사 준비](삼성_FSI_즉석스누즈_검사준비_2026-10-06.md)를 따른다."
+    },
+    {
+      "source": "docs/next_version/FSI_즉석스누즈_구현_2026-10-06.md",
+      "line": 77,
+      "target": "docs/next_version/삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B1/C3/D1/D2; A/B APK 및 상세 결과 원장 보존",
+      "original_text": "- [삼성 검사표](삼성_FSI_즉석스누즈_검사준비_2026-10-06.md)와 `tools/capture_fsi_snooze_case.py` 준비 완료. 현재 **기기 연결·조회·설치·조작 0회, 실기기 전 항목 NOT_RUN**. 사용자가 연결했다고 알린 뒤 해당 단말만 검사한다."
+    },
+    {
+      "source": "docs/next_version/FSI_즉석스누즈_구현_2026-10-06.md",
+      "line": 87,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "- 시간대 변경 후 종료 알람 재생성은 [다음 작업](다음작업_시간대_종료알람재생성_2026-10-06.md)으로 남겨 두었다. 이번 범위에서 `AlarmRefreshEngine`, `AlarmWakeScheduler`, `AlarmInstant`를 추가 변경하지 않았다."
+    },
+    {
+      "source": "docs/next_version/FSI_즉석스누즈_구현설계_2026-10-06.md",
+      "line": 8,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "후속 연결: 위 상태는 설계 작성 시점 기록이다. 이후 사용자 승인으로 시작한 구현·검사는 [구현 원장](FSI_즉석스누즈_구현_2026-10-06.md), 기기 연결 후 시작점은 [삼성 검사 준비](삼성_FSI_즉석스누즈_검사준비_2026-10-06.md), 그 다음 개발 항목은 [시간대 종료 알람 재생성 방지](다음작업_시간대_종료알람재생성_2026-10-06.md)를 따른다."
+    },
+    {
+      "source": "docs/next_version/FSI_즉석스누즈_구현설계_2026-10-06.md",
+      "line": 8,
+      "target": "docs/next_version/삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B1/C3/D1/D2; A/B APK 및 상세 결과 원장 보존",
+      "original_text": "후속 연결: 위 상태는 설계 작성 시점 기록이다. 이후 사용자 승인으로 시작한 구현·검사는 [구현 원장](FSI_즉석스누즈_구현_2026-10-06.md), 기기 연결 후 시작점은 [삼성 검사 준비](삼성_FSI_즉석스누즈_검사준비_2026-10-06.md), 그 다음 개발 항목은 [시간대 종료 알람 재생성 방지](다음작업_시간대_종료알람재생성_2026-10-06.md)를 따른다."
+    },
+    {
+      "source": "docs/next_version/dev_전체작업목록_2026-10-06.txt",
+      "line": 73,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "- 전체 맥락: docs/next_version/교대시계_최신문서.txt, 다국어_제작_검증현황.txt 및 각 검토/지역시간/전수검증 원장."
+    },
+    {
+      "source": "docs/next_version/dev_전체작업목록_2026-10-06.txt",
+      "line": 75,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "- 다음 결함: 다음작업_시간대_종료알람재생성_2026-10-06.md."
+    },
+    {
+      "source": "docs/next_version/교대시계_최신문서.txt",
+      "line": 21,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "현재 입구/요약: 갱신",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "- 다음 수정 우선순위: 시간대 변경 시 이미 종료한 알람 재생성. 아직 미수정. 다음작업_시간대_종료알람재생성_2026-10-06.md 참고."
+    },
+    {
+      "source": "docs/next_version/교대시계_최신문서.txt",
+      "line": 23,
+      "target": "docs/next_version/dev_전체작업목록_2026-10-06.txt",
+      "classification": "현재 입구/요약: 갱신",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A/B/C/D/E",
+      "original_text": "- 전체 dev 목록: dev_전체작업목록_2026-10-06.txt. 사용자의 이번 명시 요청에 따라 바탕화면 텍스트 복사본도 저장한다. 아래 과거의 단일 문서/바탕화면 복제 금지 지침보다 이 요청이 우선한다. 기존 미커밋 작업·검토 원장 보존, 커밋/푸시/출시하지 않음."
+    },
+    {
+      "source": "docs/next_version/교대시계_최신문서.txt",
+      "line": 28,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "현재 입구/요약: 갱신",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "- 최신 번역 진행 방식: 한 세션에서 네 언어의 같은 차수를 검토한다. 세션1 의미 정확성 → 세션2 현지 자연스러움 → 세션3 독립 최종 검토. 네 언어가 해당 차수를 모두 마쳐야 다음 차수로 넘어가며, 미완료면 다음 세션에서 같은 차수를 이어간다. 다음 시작점은 네 언어 전체 1차이며 다국어_제작_검증현황.txt 6절의 요청문을 사용한다."
+    },
+    {
+      "source": "docs/next_version/교대시계_최신문서.txt",
+      "line": 31,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "현재 입구/요약: 갱신",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "- SRTL 연결 실제 화면으로 확인하고 캡처 생성·저장 없이 텍스트로 결과를 기록한다. 현재 새 레이아웃 검증은 전부 대기. 상세 기준 및 현황은 다국어_제작_검증현황.txt 7절을 따른다."
+    },
+    {
+      "source": "docs/next_version/교대시계_최신문서.txt",
+      "line": 37,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "현재 입구/요약: 갱신",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "- 사용자 요청 별도 문서 다국어_제작_검증현황.txt 및 힌디어 문구 원장 CSV에 완료/잔여·기기 목록 기록."
+    },
+    {
+      "source": "docs/next_version/교대시계_최신문서.txt",
+      "line": 39,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "현재 입구/요약: 갱신",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "[현지화 별도 문서] 사용자 요청으로 다국어_제작_검증현황.txt 추가. 언어별 잔여 검증 및 4테마 하단 버튼 수정 후 기기별 확인 목록은 해당 문서 참고."
+    },
+    {
+      "source": "docs/next_version/교대시계_최신문서.txt",
+      "line": 2325,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "현재 입구/요약: 갱신",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "상세: 독립최종검토_3차_2026-10-05/검토결과.txt 및 다음_시작점.txt, 다국어_제작_검증현황.txt 10절."
+    },
+    {
+      "source": "docs/next_version/다국어_제작_검증현황.txt",
+      "line": 198,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "“docs/next_version/다국어_제작_검증현황.txt를 읽고 네 언어 전체 3차 독립 최종 검토를 진행해줘. 의미검토_1차_2026-10-05/의미카드.txt와 자연스러움검토_2차_2026-10-05/다음_시작점.txt에 있는 기능·용어 기준으로 현재 리소스의 문제 후보를 먼저 기록한 뒤, 1·2차 상세 변경 사유와 대조해줘. 기존 기능 의미를 보존하고 취향 차이만으로 변경하지 마. 변경 전후·출처·채택 또는 유지 이유와 미해결 범위를 원장에 남겨줘. 미검토 범위를 완료로 표시하지 말고 종료 때 검증현황과 다음 시작점을 갱신해줘. 레이아웃 검증은 이번 3차 텍스트 검토와 구분해 대기로 남겨줘.”"
+    },
+    {
+      "source": "docs/next_version/독립최종검토_3차_2026-10-05/다음_시작점.txt",
+      "line": 3,
+      "target": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "이 문서의 작업 전 요청은 후속 재점검에서 수행했다. 현재 시작점은 ../후속재점검_2026-10-05/다음_시작점.txt와 검토결과.txt, 검증_명세.json이다."
+    },
+    {
+      "source": "docs/next_version/독립최종검토_3차_2026-10-05/다음세션_시작문구_전체.txt",
+      "line": 1,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "docs/next_version/다국어_제작_검증현황.txt와 docs/next_version/독립최종검토_3차_2026-10-05/다음_시작점.txt를 읽고, 영어·브라질 포르투갈어·독일어·힌디어의 1·2·3차 수정 결과를 최종 재점검해. 실제 조사·수정·삭제·검증까지 수행해."
+    },
+    {
+      "source": "docs/next_version/삼성_FSI_즉석스누즈_C수정_2026-10-06.md",
+      "line": 72,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "후속 작업은 (1) 설정에서 기본 스누즈5~30분 선택 + 회차 내± 유지, (2) [시간대 변경 시 종료 알람 재생성](다음작업_시간대_종료알람재생성_2026-10-06.md), (3) 사용자가 제거하기로 한 원터치 알람 기능 정리다. 이번 C 수정에 섞지 않았다."
+    },
+    {
+      "source": "docs/next_version/삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "line": 82,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "다음 작업인 [시간대 종료 알람 재생성 결함](다음작업_시간대_종료알람재생성_2026-10-06.md)은 이 검사와 분리한다."
+    },
+    {
+      "source": "docs/next_version/삼성_FSI_즉석스누즈_실기기검증_2026-10-06.md",
+      "line": 51,
+      "target": "docs/next_version/삼성_FSI_즉석스누즈_이어하기_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "C3/D2; B/C 결과·natural_cases·원복 증거 보존",
+      "original_text": "- 사용자 크레딧 소진 우려에 따라 [이어하기 문서](삼성_FSI_즉석스누즈_이어하기_2026-10-06.md)를 생성했다. 시험 중단/재개 시 먼저 읽는다. `natural_cases.json`에 예약을 기록하고 `natural_observations/`에는 읽기 전용 관찰기가 재울림 이미지/상태/로그를 저장한다. 자동 캡처만으로 PASS 처리하지 않는다."
+    },
+    {
+      "source": "docs/next_version/삼성_FSI_즉석스누즈_실기기검증_2026-10-06.md",
+      "line": 148,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "- 후속은 [전역 기본 스누즈](다음작업_전역기본스누즈_2026-10-06.md), [종료 알람 시간대 재생성](다음작업_시간대_종료알람재생성_2026-10-06.md), [원터치 기능 제거](다음작업_원터치알람_기능제거_2026-10-06.md)에 보존했다. 이번 완료는 이 세 후속 기능의 구현 완료를 뜻하지 않는다."
+    },
+    {
+      "source": "docs/next_version/삼성_FSI_즉석스누즈_실기기검증_2026-10-06.md",
+      "line": 148,
+      "target": "docs/next_version/다음작업_원터치알람_기능제거_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A3/B3/C2",
+      "original_text": "- 후속은 [전역 기본 스누즈](다음작업_전역기본스누즈_2026-10-06.md), [종료 알람 시간대 재생성](다음작업_시간대_종료알람재생성_2026-10-06.md), [원터치 기능 제거](다음작업_원터치알람_기능제거_2026-10-06.md)에 보존했다. 이번 완료는 이 세 후속 기능의 구현 완료를 뜻하지 않는다."
+    },
+    {
+      "source": "docs/next_version/삼성_FSI_즉석스누즈_실기기검증_2026-10-06.md",
+      "line": 148,
+      "target": "docs/next_version/다음작업_전역기본스누즈_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A2/B1/C2/D2",
+      "original_text": "- 후속은 [전역 기본 스누즈](다음작업_전역기본스누즈_2026-10-06.md), [종료 알람 시간대 재생성](다음작업_시간대_종료알람재생성_2026-10-06.md), [원터치 기능 제거](다음작업_원터치알람_기능제거_2026-10-06.md)에 보존했다. 이번 완료는 이 세 후속 기능의 구현 완료를 뜻하지 않는다."
+    },
+    {
+      "source": "docs/next_version/삼성_FSI_즉석스누즈_이어하기_2026-10-06.md",
+      "line": 36,
+      "target": "docs/next_version/삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B1/C3/D1/D2; A/B APK 및 상세 결과 원장 보존",
+      "original_text": "- 상세 결과: [실기기 검증 원장](삼성_FSI_즉석스누즈_실기기검증_2026-10-06.md). 준비/전체 체크리스트: [검사준비](삼성_FSI_즉석스누즈_검사준비_2026-10-06.md)."
+    },
+    {
+      "source": "docs/next_version/삼성_FSI_즉석스누즈_이어하기_2026-10-06.md",
+      "line": 79,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "현 검사 B를 종료하고 별도 변경·검증 경계로 구현한다. 새/재울림 값, 프로세스 재생성/잠금·앱 미실행, 5언어 문구, migration 기본5, 표시분=실제분, 회차 중 설정 변경을 집중 회귀. P0 경로 변경 시 AGENTS의 critical -Build 준수. 기존 [시간대 종료 알람 재생성 후속 작업](다음작업_시간대_종료알람재생성_2026-10-06.md)도 소실시키지 않는다. 두 후속 작업의 착수 순서는 사용자 최신 지시 확인."
+    },
+    {
+      "source": "docs/next_version/시간대_종료알람재생성_수정결과_2026-10-07.md",
+      "line": 6,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "- [단계별 재개 원장](시간대_종료알람재생성_수정진행_2026-10-07.md), [최초 조사](다음작업_시간대_종료알람재생성_2026-10-06.md)."
+    },
+    {
+      "source": "docs/next_version/시간대_종료알람재생성_수정진행_2026-10-07.md",
+      "line": 20,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "- 이전 조사: `다음작업_시간대_종료알람재생성_2026-10-06.md`, `지역시간_실기기_2026-10-06/prod_조기울림_조사.txt`."
+    },
+    {
+      "source": "docs/next_version/의미검토_1차_2026-10-05/검토결과.txt",
+      "line": 10,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "- 시작 시 사용자가 수정해 둔 문서: 교대시계_최신문서.txt, 다국어_제작_검증현황.txt. 기존 수정은 보존하고 이번 상태는 다국어 문서에 추가했다."
+    },
+    {
+      "source": "docs/next_version/전역스누즈_원터치제거_2026-10-06.md",
+      "line": 99,
+      "target": "docs/next_version/다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A4/B2/C1/D3; 사건·수정 결과/진행 원장 보존",
+      "original_text": "- 다음 제품 수정 우선순위는 [시간대 종료 알람 재생성](다음작업_시간대_종료알람재생성_2026-10-06.md). 이번 작업에서 고치지 않았다. 전역 설정 버튼 위치의 최종 조정도 사용자 결정 후 진행한다."
+    },
+    {
+      "source": "docs/next_version/전역스누즈_원터치제거_2026-10-06.md",
+      "line": 100,
+      "target": "docs/next_version/dev_전체작업목록_2026-10-06.txt",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "A/B/C/D/E",
+      "original_text": "- dev 전체 작업 목록은 `dev_전체작업목록_2026-10-06.txt`와 사용자가 요청한 바탕화면 텍스트 파일로 전달한다. 기존1·2·3차/후속 검토 원장 및 C 검사 증거를 보존한다. 커밋/푸시/배포는 하지 않았다."
+    },
+    {
+      "source": "docs/next_version/지역시간_수정_2026-10-06/시작_git_status.txt",
+      "line": 44,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": " M docs/next_version/다국어_제작_검증현황.txt"
+    },
+    {
+      "source": "docs/next_version/지역시간_수정_2026-10-06/시작_해시.json",
+      "line": 920,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "  \"docs/next_version/다국어_제작_검증현황.txt\": \"9ea8ad166c0709921631a110023b256456b43fb3d1988e20b6dabe02ed7b3637\","
+    },
+    {
+      "source": "docs/next_version/지역시간_수정_2026-10-06/시작_해시.json",
+      "line": 932,
+      "target": "docs/next_version/지역시간_수정_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D5; 한국 비교 fixture/기준 코드 보존",
+      "original_text": "  \"docs/next_version/독립최종검토_3차_2026-10-05/다음_시작점.txt\": \"f32a18f0b64fb01d43d3297302cae9fe8c9a5345ccbb7a5d85dd477b34f9ec99\","
+    },
+    {
+      "source": "docs/next_version/지역시간_수정_2026-10-06/시작_해시.json",
+      "line": 952,
+      "target": "docs/next_version/지역시간_수정_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D5; 한국 비교 fixture/기준 코드 보존",
+      "original_text": "  \"docs/next_version/자연스러움검토_2차_2026-10-05/다음_시작점.txt\": \"c4b4aedaba93a49ea65bf5251103f737fb30fb7908d60a0081cf36f788c181c3\","
+    },
+    {
+      "source": "docs/next_version/지역시간_수정_2026-10-06/시작_해시.json",
+      "line": 978,
+      "target": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "  \"docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt\": \"8810fa5083741e02512da79ab2c27c1179f4953db3e6bf4a7b2c870f7f6aacb2\","
+    },
+    {
+      "source": "docs/next_version/지역시간_수정_2026-10-06/시작_해시.json",
+      "line": 978,
+      "target": "docs/next_version/지역시간_수정_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D5; 한국 비교 fixture/기준 코드 보존",
+      "original_text": "  \"docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt\": \"8810fa5083741e02512da79ab2c27c1179f4953db3e6bf4a7b2c870f7f6aacb2\","
+    },
+    {
+      "source": "docs/next_version/지역시간_수정_2026-10-06/시작_해시.json",
+      "line": 1008,
+      "target": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "  \"docs/next_version/후속재점검_2026-10-05/다음_시작점.txt\": \"b2ebf83ecf37dda003e966352402b113cffea78f7e6aa103feb744065fa83775\","
+    },
+    {
+      "source": "docs/next_version/지역시간_수정_2026-10-06/시작_해시.json",
+      "line": 1008,
+      "target": "docs/next_version/지역시간_수정_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D5; 한국 비교 fixture/기준 코드 보존",
+      "original_text": "  \"docs/next_version/후속재점검_2026-10-05/다음_시작점.txt\": \"b2ebf83ecf37dda003e966352402b113cffea78f7e6aa103feb744065fa83775\","
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "line": 1,
+      "target": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "2026-10-06 C01~C03 수정 후 최신 시작점: ../지역시간_수정_2026-10-06/다음_시작점.txt."
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "line": 1,
+      "target": "docs/next_version/지역시간_수정_2026-10-06/다음_시작점.txt",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D5; 한국 비교 fixture/기준 코드 보존",
+      "original_text": "2026-10-06 C01~C03 수정 후 최신 시작점: ../지역시간_수정_2026-10-06/다음_시작점.txt."
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/시작_git_status.txt",
+      "line": 42,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": " M docs/next_version/다국어_제작_검증현황.txt"
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/시작_자료.json",
+      "line": 892,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "    \"docs/next_version/다국어_제작_검증현황.txt\": \"84f997f38921f9af9c149087effa2f2fa00c79ece7dcf421a18b0eda8a00d4f6\","
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/시작_자료.json",
+      "line": 898,
+      "target": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "    \"docs/next_version/독립최종검토_3차_2026-10-05/다음_시작점.txt\": \"f32a18f0b64fb01d43d3297302cae9fe8c9a5345ccbb7a5d85dd477b34f9ec99\","
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/시작_자료.json",
+      "line": 918,
+      "target": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "    \"docs/next_version/자연스러움검토_2차_2026-10-05/다음_시작점.txt\": \"c4b4aedaba93a49ea65bf5251103f737fb30fb7908d60a0081cf36f788c181c3\","
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/시작_자료.json",
+      "line": 947,
+      "target": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "    \"docs/next_version/후속재점검_2026-10-05/다음_시작점.txt\": \"4b8346cc29b22d98c53440f2d352c055c1782e78f606d74050b5b26b63d2ddc3\","
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/시작_자료.json",
+      "line": 947,
+      "target": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "    \"docs/next_version/후속재점검_2026-10-05/다음_시작점.txt\": \"4b8346cc29b22d98c53440f2d352c055c1782e78f606d74050b5b26b63d2ddc3\","
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/집계와_보존검사.json",
+      "line": 26,
+      "target": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "    \"docs/next_version/독립최종검토_3차_2026-10-05/다음_시작점.txt\": \"f32a18f0b64fb01d43d3297302cae9fe8c9a5345ccbb7a5d85dd477b34f9ec99\","
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/집계와_보존검사.json",
+      "line": 46,
+      "target": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "    \"docs/next_version/자연스러움검토_2차_2026-10-05/다음_시작점.txt\": \"c4b4aedaba93a49ea65bf5251103f737fb30fb7908d60a0081cf36f788c181c3\","
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/집계와_보존검사.json",
+      "line": 100,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "    \"docs/next_version/다국어_제작_검증현황.txt\","
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/집계와_보존검사.json",
+      "line": 101,
+      "target": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "    \"docs/next_version/후속재점검_2026-10-05/다음_시작점.txt\""
+    },
+    {
+      "source": "docs/next_version/최종튜닝_2026-10-06/집계와_보존검사.json",
+      "line": 101,
+      "target": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "    \"docs/next_version/후속재점검_2026-10-05/다음_시작점.txt\""
+    },
+    {
+      "source": "docs/next_version/후속재점검_2026-10-05/검토결과.txt",
+      "line": 62,
+      "target": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "집계.json, 리소스_자동검사.json, 최종_소스리소스_해시.json, 검증_명세.json, 검증로그/, 다음_시작점.txt."
+    },
+    {
+      "source": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "line": 1,
+      "target": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "2026-10-06 C01~C03 수정 후 최신 시작점: ../지역시간_수정_2026-10-06/다음_시작점.txt."
+    },
+    {
+      "source": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "line": 1,
+      "target": "docs/next_version/지역시간_수정_2026-10-06/다음_시작점.txt",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D5; 한국 비교 fixture/기준 코드 보존",
+      "original_text": "2026-10-06 C01~C03 수정 후 최신 시작점: ../지역시간_수정_2026-10-06/다음_시작점.txt."
+    },
+    {
+      "source": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "line": 7,
+      "target": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "2026-10-06 후속 결과 연결: ../최종튜닝_2026-10-06/다음_시작점.txt 및 검토결과.txt를 우선한다."
+    },
+    {
+      "source": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "line": 7,
+      "target": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "classification": "삭제 대상 내부 참조",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "2026-10-06 후속 결과 연결: ../최종튜닝_2026-10-06/다음_시작점.txt 및 검토결과.txt를 우선한다."
+    },
+    {
+      "source": "docs/next_version/후속재점검_2026-10-05/시작_git_status.txt",
+      "line": 10,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": " M docs/next_version/다국어_제작_검증현황.txt"
+    },
+    {
+      "source": "docs/next_version/후속재점검_2026-10-05/최종_git_status.txt",
+      "line": 42,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "역사 원장/해시/증거의 경로 표기: 원문 보존, 대체 위치 연결",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": " M docs/next_version/다국어_제작_검증현황.txt"
+    },
+    {
+      "source": "docs/release_audit/g6/recheck_2026_09_15/release_readiness_review.md",
+      "line": 40,
+      "target": "docs/release_audit/g6/release_gate.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "D 판정 종류/E1 최종 출시 기준; 최종 승인 미완료",
+      "original_text": "- 기존 검토 문서의 PASS 표기를 이번 실행 결과로 재사용하지 않았다. `g6/release_gate.md`도 아직 최종 판정이 비어 있다."
+    },
+    {
+      "source": "docs/release_audit/task_board.md",
+      "line": 6,
+      "target": "docs/release_audit/g6/release_gate.md",
+      "classification": "문서 Markdown 링크 갱신 또는 역사 서술 보존",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "D 판정 종류/E1 최종 출시 기준; 최종 승인 미완료",
+      "original_text": "**Claude 이어서 할 작업:** 2026-09-15 출시 적합성 재검토(`g6/recheck_2026_09_15/`) AUD-01·02·03·05·06·07·08 코드 수정 + 회귀 테스트 완료(작업 트리, 커밋 전 - `fix_record.md`). AUD-04(백그라운드 울림 지속)는 실기기 게이트. 남은 것은 사용자 실기기(바탕화면 테스트 1~15, `g6/device_test_plan.md`)·Play 내부 테스트·Console, G6 판정(`g6/release_gate.md` 비어 있음)"
+    },
+    {
+      "source": "tools/finalize_followup_evidence.py",
+      "line": 72,
+      "target": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "classification": "날짜별 역사 재작성 도구: 현재 무검토 재실행 금지",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "                 'docs/next_version/후속재점검_2026-10-05/다음_시작점.txt',"
+    },
+    {
+      "source": "tools/finalize_followup_evidence.py",
+      "line": 73,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "날짜별 역사 재작성 도구: 현재 무검토 재실행 금지",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "                 'docs/next_version/다국어_제작_검증현황.txt',"
+    },
+    {
+      "source": "tools/record_release_tuning_checks_20261006.py",
+      "line": 87,
+      "target": "docs/next_version/다국어_제작_검증현황.txt",
+      "classification": "날짜별 역사 재작성 도구: 현재 무검토 재실행 금지",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/C6/D5/D6",
+      "original_text": "status = ROOT/'docs/next_version/다국어_제작_검증현황.txt'"
+    },
+    {
+      "source": "tools/record_release_tuning_checks_20261006.py",
+      "line": 90,
+      "target": "docs/next_version/후속재점검_2026-10-05/다음_시작점.txt",
+      "classification": "날짜별 역사 재작성 도구: 현재 무검토 재실행 금지",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "next_path = ROOT/'docs/next_version/후속재점검_2026-10-05/다음_시작점.txt'"
+    },
+    {
+      "source": "tools/record_release_tuning_checks_20261006.py",
+      "line": 91,
+      "target": "docs/next_version/최종튜닝_2026-10-06/다음_시작점.txt",
+      "classification": "날짜별 역사 재작성 도구: 현재 무검토 재실행 금지",
+      "replacement": "docs/next_version/교대시계_최신문서.txt",
+      "sections": "B4/C4/D1/D5/E1/F",
+      "original_text": "prefix = '2026-10-06 후속 결과 연결: ../최종튜닝_2026-10-06/다음_시작점.txt 및 검토결과.txt를 우선한다.\\n아래는 2026-10-05 종료 당시 시작점 원문 보존이다. 새 원장·미검증 범위는 최신 폴더 참조.\\n\\n'"
+    }
+  ],
+  "markdown_reference_updates": [
+    {
+      "file": "docs/next_version/FSI_즉석스누즈_구현_2026-10-06.md",
+      "old_target": "다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/FSI_즉석스누즈_구현_2026-10-06.md",
+      "old_target": "삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/FSI_즉석스누즈_구현_2026-10-06.md",
+      "old_target": "삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/FSI_즉석스누즈_구현_2026-10-06.md",
+      "old_target": "다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/FSI_즉석스누즈_구현설계_2026-10-06.md",
+      "old_target": "삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/FSI_즉석스누즈_구현설계_2026-10-06.md",
+      "old_target": "다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/삼성_FSI_즉석스누즈_C수정_2026-10-06.md",
+      "old_target": "다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/삼성_FSI_즉석스누즈_실기기검증_2026-10-06.md",
+      "old_target": "삼성_FSI_즉석스누즈_이어하기_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/삼성_FSI_즉석스누즈_실기기검증_2026-10-06.md",
+      "old_target": "다음작업_전역기본스누즈_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/삼성_FSI_즉석스누즈_실기기검증_2026-10-06.md",
+      "old_target": "다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/삼성_FSI_즉석스누즈_실기기검증_2026-10-06.md",
+      "old_target": "다음작업_원터치알람_기능제거_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/시간대_종료알람재생성_수정결과_2026-10-07.md",
+      "old_target": "다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    },
+    {
+      "file": "docs/next_version/전역스누즈_원터치제거_2026-10-06.md",
+      "old_target": "다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "new_target": "교대시계_최신문서.txt"
+    }
+  ],
+  "master_section_mapping": {
+    "A/B": "A/B/C/D",
+    "C/E/AI/AL": "E/AI",
+    "D/G/V": "C6/D/D6",
+    "H": "정리 원장 prior_cleanup_record",
+    "I~AB/AD~AJ": "C5/C6/정리 원장 prior_evidence_references",
+    "AK/AM/AN/AO/AP": "B4/C4/C5/D1/D4/D5"
+  },
+  "integration_coverage": [
+    {
+      "source": "dev_전체작업목록_2026-10-06.txt",
+      "transfer_topics_checked": [
+        "전역 기본",
+        "원터치",
+        "수면",
+        "공개 웹",
+        "PWA",
+        "START-002",
+        "과거 OT"
+      ],
+      "missing": []
+    },
+    {
+      "source": "다국어_제작_검증현황.txt",
+      "transfer_topics_checked": [
+        "1차/2차/3차",
+        "2,944",
+        "힌디어",
+        "Fold8 Ultra",
+        "Flip8 내부",
+        "시스템1.0/1.3",
+        "이미지 캡처 생성·저장 없이",
+        "현지인 감수"
+      ],
+      "missing": []
+    },
+    {
+      "source": "다음작업_시간대_종료알람재생성_2026-10-06.md",
+      "transfer_topics_checked": [
+        "ID43",
+        "ID53",
+        "fixed_slot_time",
+        "superseded",
+        "정상 미처리 알람",
+        "DB28"
+      ],
+      "missing": []
+    },
+    {
+      "source": "다음작업_원터치알람_기능제거_2026-10-06.md",
+      "transfer_topics_checked": [
+        "preset_slot",
+        "ID 누적값",
+        "정식 출시 백업"
+      ],
+      "missing": []
+    },
+    {
+      "source": "다음작업_전역기본스누즈_2026-10-06.md",
+      "transfer_topics_checked": [
+        "5·10·15분",
+        "5~30분",
+        "현재 울림에도",
+        "default_minutes",
+        "저장 실패",
+        "구 백업"
+      ],
+      "missing": []
+    },
+    {
+      "source": "삼성_FSI_즉석스누즈_검사준비_2026-10-06.md",
+      "transfer_topics_checked": [
+        "86fd84",
+        "262deb",
+        "같은 P0 조건",
+        "snapshot",
+        "5/30 경계",
+        "TalkBack",
+        "채널",
+        "표준 액션",
+        "ceilSecond",
+        "5초",
+        "서명 불일치",
+        "PIN은 사용자가"
+      ],
+      "missing": []
+    },
+    {
+      "source": "삼성_FSI_즉석스누즈_이어하기_2026-10-06.md",
+      "transfer_topics_checked": [
+        "5·10·30",
+        "C_final_restoration",
+        "예약198",
+        "prod예약7",
+        "추가잠금 없음"
+      ],
+      "missing": []
+    },
+    {
+      "source": "후속재점검_2026-10-05/다음_시작점.txt",
+      "transfer_topics_checked": [
+        "API30/33/34+",
+        "unknown",
+        "OEM/표준/fallback",
+        "위젯",
+        "checkProdAdIds",
+        "일회성"
+      ],
+      "missing": []
+    },
+    {
+      "source": "최종튜닝_2026-10-06/다음_시작점.txt",
+      "transfer_topics_checked": [
+        "미지원 우선 언어+ko 차선",
+        "metadata/manifest",
+        "SDK·파일 선택기",
+        "서비스워커"
+      ],
+      "missing": []
+    },
+    {
+      "source": "지역시간_수정_2026-10-06/다음_시작점.txt",
+      "transfer_topics_checked": [
+        "korean_parity_test.dart",
+        "work_hours_before_reference.dart",
+        "Berlin/London/NewYork",
+        "en-ZA/IN/AE/PH",
+        "총시간 이중 가산"
+      ],
+      "missing": []
+    },
+    {
+      "source": "snooze_interval_review.md",
+      "transfer_topics_checked": [
+        "snooze_minutes",
+        "dismissSnoozed5Min",
+        "구 이력5분",
+        "AlarmGuardReceiver 재확인",
+        "일괄 치환하지"
+      ],
+      "missing": []
+    },
+    {
+      "source": "watch_flip_alarm_review_2026-09-30.md",
+      "transfer_topics_checked": [
+        "Wear",
+        "7778",
+        "워치 APK",
+        "커버",
+        "별도앱 없이"
+      ],
+      "missing": []
+    },
+    {
+      "source": "handoff_release_2026_09_21.md",
+      "transfer_topics_checked": [
+        "개인 기준선",
+        "1회성 팝업",
+        "2x1",
+        "_releaseNoteVersion",
+        "app_config/android.latestVersionCode",
+        "UMP",
+        "임계값"
+      ],
+      "missing": []
+    },
+    {
+      "source": "release_gate.md",
+      "transfer_topics_checked": [
+        "PASS/FAIL/NOT_RUN/DEFERRED/ACCEPTED_RISK/N/A",
+        "출시 순서"
+      ],
+      "missing": []
+    }
+  ],
+  "prior_cleanup_record": "[H. 문서 통합·삭제 기록]\n\n루트와 docs/next_version의 과거 계획·인계·감사·중복 가이드 47개를 통합한 뒤 삭제했다. next_version의 설명 문서는 이 파일 1개이며 루트에는 README.md와 CLAUDE.md만 남겼다.\n삭제 전 원본 바이트와 SHA256은 artifacts/document_cleanup_2026-10-04/original_documents.zip 및 manifest.json에 보존한다. 압축파일은 읽기 전용 과거 증거이며 새로 관리할 문서가 아니다.\nREADME/CLAUDE의 삭제 전 원본도 같은 ZIP에 있다. Git 미커밋 문서도 복원 가능하며 코드·테스트·기기자료는 삭제하지 않는다.\n과거 tools/*의 일회성 보고서 생성기를 재실행해 삭제한 인계 파일들을 다시 만들지 않는다. 특히 reconcile_oct04_handoff.py는 고정 시점 원장 생성기다.\n바탕화면의 날짜별 인계 TXT는 과거 사본이며 이번 정리 범위(루트/next_version) 밖이다. 후속 작업은 이 문서만 읽는다.\n통합 원본 목록:\n- docs/next_version/1.0.24_구현계획.md\n- docs/next_version/1.0.24_통계_개인정보_점검.md\n- docs/next_version/Astra_재검토_후보_2026-10-02.txt\n- docs/next_version/dev_전체변경과_남은작업_SRTL_정리_2026-10-03.txt\n- docs/next_version/SRTL_Fold8Ultra_1시간_추가검증_2026-10-03.txt\n- docs/next_version/SRTL_Fold8Ultra_45분_마무리_2026-10-03.txt\n- docs/next_version/SRTL_Fold8Ultra_재연결검증_2026-10-03.txt\n- docs/next_version/SRTL_Fold8Ultra_최종상태와_잔여검증_2026-10-03.txt\n- docs/next_version/SRTL_다음기기_레이아웃검증_운영기준_2026-10-03.txt\n- docs/next_version/SRTL_재연결_대기_2026-10-03.txt\n- docs/next_version/SRTL_재연결_화면번호와_최종UI_2026-10-03.txt\n- docs/next_version/SRTL_최신dev_진행기록_2026-10-03.txt\n- docs/next_version/USB_재검증_2026-10-02.txt\n- docs/next_version/공휴일_공식자료_점검_2026-10-03.txt\n- docs/next_version/교대시계_dev_실기기_테스트.txt\n- docs/next_version/근무명_UI_변경결과_2026-10-01.txt\n- docs/next_version/근무명_길이_조사_2026-10-02.txt\n- docs/next_version/남은작업_간단정리_2026-09-30.md\n- docs/next_version/남은작업_간단정리_2026-10-02.txt\n- docs/next_version/스누즈_DST_보완_2026-09-30.md\n- docs/next_version/시간대_고정예약_실기기검증_2026-10-03.txt\n- docs/next_version/시간표시_DST_검증_2026-09-30.md\n- docs/next_version/에뮬레이터_DST_검증_2026-10-02.txt\n- docs/next_version/영어_출시범위_및_검증_2026-09-30.md\n- docs/next_version/운영대시보드_차트수정_2026-10-04.txt\n- docs/next_version/잔여검증_실행기록_2026-10-03.txt\n- docs/next_version/전수검증_2026-09-30.md\n- docs/next_version/조변경_전체근무표_수정결과_2026-10-01.txt\n- docs/next_version/조별근무규칙_설계와검증_2026-10-03.txt\n- docs/next_version/최종인계_기능원장_SRTL_레이아웃_2026-10-04.txt\n- docs/next_version/최종인계_본문_2026-10-04.txt\n- 업데이트_가이드.md\n- 업데이트_가이드.txt\n- 출시전_수정작업_그룹별_실행계획_및_세션인계_2026-09-14.md\n- 출시전_코드감사_2026-09-13.md\n- 출시전_코드감사_검토결과_v4_2026-09-13.md\n- 폴드8_SRTL_수정검증_2026-09-28.md\n- 폴드8_레이아웃_로컬검토.md\n- 폴드8_반응형_레이아웃_구현계획.md\n- 폴드8_원터치패널_검증_2026-09-28.md\n- 폴드8_작업진행_및_재개.md\n- 폴드8_전체화면_대응_목록.md\n- 폴드8_테마복원_글자배율_2026-09-28.md\n- 폴드8_펼침_4대6_셀배치_2026-09-29.md\n- 폴드8울트라_4대6_두줄공휴일_2026-09-29.md\n- 폴드8울트라_레이아웃_검증_2026-09-28.md\n- 폴드_레이아웃_울트라_인계.md\n",
+  "prior_evidence_references": [
+    {
+      "line": 8,
+      "text": "- 상세: 시간대_종료알람재생성_수정결과_2026-10-07.md / 시간대_종료알람재생성_수정진행_2026-10-07.md / build/timezone_consumed_alarm_2026-10-07/validation_summary.json."
+    },
+    {
+      "line": 22,
+      "text": "- 상세 결과/증거: 전역스누즈_원터치제거_2026-10-06.md, build/default_snooze_remove_onetouch_2026-10-06/critical_D2.log 및 tablet/."
+    },
+    {
+      "line": 61,
+      "text": "- 증거: build/srtl_languages_2026-10-05_fold8/fold_final_proof.json, build/tablet_basic_2026-10-05/basic_proof.json 및 해당 로그/문자열/기하 JSON. 화면은 메모리에서만 확인하여 새 PNG/캡처 갤러리 파일0개. 최종 APK SHA256 265B341FF15FBB84734A9D554D27977B5AF351B30DE2C4072AB8B0EABB8BF5FB. 태블릿에 새로 설치한 dev의 합성 데이터와 이번 시험 자동백업만 정리했고 최신 dev APK는 남겼다. 원래 글씨1.15·자동회전 설정을 복구하고 화면을 꺼 Asleep을 확인했다(cleanup.json). 운영 앱 데이터는 건드리지 않았다. 커밋·푸시·배포 없음."
+    },
+    {
+      "line": 71,
+      "text": "- 근거: build/localization_copy_2026-10-05의 validation 로그·review_counts.json·device/final_proof.json·database_comparison.json·언어/배율별 png 및 locale_scale.txt. 전수 문구 변경/유지 목록과 용어 출처는 전수검증_자료_2026-09-30/현지화_문구검토_2026-10-05.csv 및 현지화_용어근거_2026-10-05.csv."
+    },
+    {
+      "line": 77,
+      "text": "- 증거: build/ring_lock_final_2026-10-05/final_proof.json, lock_home_reentry.log 및 잠금화면/앱 제어/종료 png·xml·native.log. 실제 클릭, DB, OS 알림을 대조했으며 코드 수정은 필요하지 않았다. 앞선 최종 debug/release 빌드 해시는 그대로다."
+    },
+    {
+      "line": 82,
+      "text": "- 근거 폴더: build/ring_remaining_2026-10-05. 작업 시작 시 현재 CE/DE와 설정을 새로 백업했다. 앞선 세션 백업으로 되돌리지 않았다. 모든 실기기 알람은 무음·진동 없음으로 진행했다."
+    },
+    {
+      "line": 97,
+      "text": "- 현재 증거: build/ring_localization_2026-10-05에 원본 CE/DE tar와 설정 백업, 무음 실기기 로그/캡처가 있다. 초기 1분 UI 없는 종료, 앱 재진입 시 원래 마감 유지, 앱/알림 끄기 동기화, 외부 팝업 중복 억제, 화면 잠금 중 3분 종료를 확인했다. 별도 테스트 APK에서 OS 종료 예약·알람 UI를 제거한 실제 무음 MediaPlayer 시험은 60,068ms, 강제 deep Doze는 60,044ms에 종료하고 재생기/부분 WakeLock 해제·원래 음량 복원을 확인했다. 잠금→홈→앱 상세 조작은 보안 잠금으로 미완료다."
+    },
+    {
+      "line": 99,
+      "text": "- 레이아웃: 새 언어 32개 화면/상세 상태 × 2언어 × 4크기(320/500/501/600dp) × 2글씨배율(1.0/1.3), 그리고 지역/전환 검사까지 66개 테스트 통과. 긴 하단 버튼은 OverflowBar, 달력 하단 안내는 Wrap, 테마 미리보기 월 제목은 가변 폭으로 보완했다. 추가 7종 폰/폴더블 크기 × 2배율도 66개 테스트 통과했고, 설정 상세 5종·실제 글꼴의 작은 화면 편집창도 추가 통과했다. Android 렌더러의 2언어 × 2폭 × 2배율 × 2알람 레이아웃 16조합도 최종 APK에서 통과했다(화면 밖 렌더링이며 직접 조작 검사는 아니다). 독일어 버튼은 Später/Stoppen, 잠금 힌트는 Zum Stoppen hochwischen으로 줄였다. 캡처는 build/localized_release_previews, 실기기 캡처와 구분한다."
+    },
+    {
+      "line": 103,
+      "text": "- 자동검증: 네이티브 전체 138개 통과(build/ring_native_all_final.log), 후속 언어/manifest 대상 검사 통과. Flutter 광범위 회귀는 687개 중 683개 통과·4개 실패 후, 한국어 기존 표현 복구와 테스트 prefs mock 수정으로 영향 대상 30개 재검사 전부 통과했다. 단일 전체 재실행이 모두 녹색이었다고 기록하지 않는다. analyze는 오류 0·경고 0·info 659개다. compact/wide 및 추가 설정/편집창 검사는 별도 로그 보존."
+    },
+    {
+      "line": 104,
+      "text": "- 빌드: dev debug와 축소 적용 dev release 최종 빌드 성공(build/ring_locale_final_artifacts.log). 최종 debug SHA256 448F8EAE09807D5C82AB713D526752FA1220DB46D74E0699F0DDD386FC44D5EF, dev release 301AE8E970472984B66083F314B5CAD3098E315BC12D09EFF2342037A3CFB28D. 실기기는 debug만 데이터 보존 설치. 기존 AGP/Kotlin 조합의 R8 metadata 경고는 남으며 도구 버전 업그레이드는 미수행. prod 빌드/Play 업로드 증거는 아니다."
+    },
+    {
+      "line": 189,
+      "text": "- 근거: test/release_audit/g2/firestore_rules/t13_rules.test.mjs. 기존 실행 근거는 build/local_audit_2026-10-03 및 보존한 검증 로그다."
+    },
+    {
+      "line": 196,
+      "text": "- 근거: build/srtl_2026-10-03_ultra/team_atomic_rollback.log, team_atomic_verify.log 및 로컬 회귀."
+    },
+    {
+      "line": 205,
+      "text": "- 재현 근거: build/emulator_audit_2026-10-02/snooze_zone_Europe_London_os.json, zone_repeat_refresh_os.json 및 tools/emulator_oct02_fixed_dst.py. emulator_oct02_timezone_followup.py의 시험 행 정리는 제품 수정이 아니다."
+    },
+    {
+      "line": 316,
+      "text": "경로: build/app/outputs/flutter-apk/app-dev-debug.apk (205790906 bytes)"
+    },
+    {
+      "line": 317,
+      "text": "연필 제거 및 아래 5가지 달력 수정을 포함한다. artifacts/srtl_2026-10-04/preparation.json 참조."
+    },
+    {
+      "line": 324,
+      "text": "운영 관리자 웹: https://shiftbell-ops-29f31.web.app"
+    },
+    {
+      "line": 378,
+      "text": "번호 원본: artifacts/srtl_2026-10-03/capture_catalog.csv 및 .json (001~056, 삭제/재번호 금지)"
+    },
+    {
+      "line": 379,
+      "text": "현재 사용자 갤러리: artifacts/srtl_2026-10-03/Fold8Ultra/화면비교.html"
+    },
+    {
+      "line": 473,
+      "text": "- adb -s <새serial> install -r build/app/outputs/flutter-apk/app-dev-debug.apk"
+    },
+    {
+      "line": 483,
+      "text": "- 새 출력: artifacts/srtl_2026-10-04/<기기>/numbered_1.0, diagnostic_1.3, fixes_1.0, fixes_1.3 등."
+    },
+    {
+      "line": 488,
+      "text": "- 2026-10-04 도구 준비 완료: SRTL_CAPTURE_ROOT=artifacts/srtl_2026-10-04, SRTL_CAPTURE_SCALE_PREFIX=fixes_, SRTL_CAPTURE_SCALES=1.0,1.3으로 새 출력 지정 가능. 기존 번호표는 10/03 원본을 읽는다."
+    },
+    {
+      "line": 590,
+      "text": "  증거: build/srtl_2026-10-03_ultra/native_overlap_timeout_verified.log"
+    },
+    {
+      "line": 593,
+      "text": "  증거: build/srtl_2026-10-03_ultra/snooze_rounds.log"
+    },
+    {
+      "line": 596,
+      "text": "  증거: build/srtl_2026-10-03_ultra/ring_matrix_final.log"
+    },
+    {
+      "line": 599,
+      "text": "  증거: build/srtl_2026-10-03_ultra/overlay_race.log"
+    },
+    {
+      "line": 602,
+      "text": "  증거: build/srtl_2026-10-03_ultra/snooze_rounds.log"
+    },
+    {
+      "line": 605,
+      "text": "  증거: build/srtl_2026-10-03_ultra/native_overlap_timeout_verified.log"
+    },
+    {
+      "line": 608,
+      "text": "  증거: build/srtl_2026-10-03_ultra_final/active_delete_reset_final.log"
+    },
+    {
+      "line": 611,
+      "text": "  증거: build/srtl_2026-10-03_ultra_final/active_delete_reset_final.log"
+    },
+    {
+      "line": 614,
+      "text": "  증거: build/srtl_2026-10-03_ultra/native_refresh_remaining.log"
+    },
+    {
+      "line": 617,
+      "text": "  증거: build/srtl_2026-10-03_ultra/native_refresh_remaining.log"
+    },
+    {
+      "line": 620,
+      "text": "  증거: build/srtl_2026-10-03_ultra/native_refresh_remaining.log"
+    },
+    {
+      "line": 623,
+      "text": "  증거: build/srtl_2026-10-03_ultra/native_refresh_remaining.log"
+    },
+    {
+      "line": 626,
+      "text": "  증거: build/srtl_2026-10-03_ultra_final/active_delete_reset_final.log"
+    },
+    {
+      "line": 629,
+      "text": "  증거: build/srtl_2026-10-03_ultra/native_refresh_remaining.log"
+    },
+    {
+      "line": 632,
+      "text": "  증거: build/srtl_2026-10-03_ultra/native_refresh_remaining.log"
+    },
+    {
+      "line": 635,
+      "text": "  증거: build/srtl_2026-10-03_ultra/native_refresh_remaining.log"
+    },
+    {
+      "line": 638,
+      "text": "  증거: build/srtl_2026-10-03_ultra/native_refresh_remaining.log"
+    },
+    {
+      "line": 642,
+      "text": "  build/srtl_2026-10-03_ultra/team_create.log"
+    },
+    {
+      "line": 644,
+      "text": "  build/srtl_2026-10-03_ultra/team_common_flow_verified.log"
+    },
+    {
+      "line": 646,
+      "text": "  build/srtl_2026-10-03_ultra/team_atomic_rollback.log"
+    },
+    {
+      "line": 648,
+      "text": "  build/srtl_2026-10-03_ultra/team_atomic_verify.log"
+    },
+    {
+      "line": 650,
+      "text": "  build/srtl_2026-10-03_ultra_final/active_delete_reset_final.log"
+    },
+    {
+      "line": 652,
+      "text": "  build/srtl_2026-10-03_ultra/team_switch_B.log"
+    },
+    {
+      "line": 654,
+      "text": "  build/srtl_2026-10-03_ultra/team_switch_E.log"
+    },
+    {
+      "line": 656,
+      "text": "  build/srtl_2026-10-03_ultra/team_switch_D.log"
+    },
+    {
+      "line": 658,
+      "text": "  build/srtl_2026-10-03_ultra/team_switch_A.log"
+    },
+    {
+      "line": 909,
+      "text": "- 현재 dev의 핵심 Flutter 회귀13파일140검사는 build/prod_dev_review_targeted.log에서 전체 통과를 확인했다. 개별140개 실행 결과를 자동검증_실행결과.csv의 prod_dev_review_targeted 실행으로 추가했다. 기존 실행과 겹치므로 고유 검사140개가 새로 생겼다는 뜻이 아니며, 집계.json과 이전 빌드 해시는 해당 시점의 스냅샷으로 보존한다."
+    },
+    {
+      "line": 911,
+      "text": "- 초기화와 공유 실패 분리(사용자 확정): 공유 중지 기록 저장/읽기가 실패해도 스케줄·알람 초기화와 새 스케줄 설정 화면 이동은 진행한다. 그 경우에만 8초 하단 토스트형 안내로 이전 공유가 남을 수 있음을 알리고 앱 정상화 후 일정공유 → 내 일정 공유하기 → 공유 중지를 누르도록 안내한다. 오프라인 전송 대기는 기존 재시도를 유지하며 이 실패 안내 대상이 아니다. SharedPreferences 저장 실패 뒤 메모리 캐시는 다음 접근에서 다시 읽는다. 저장 실패 false/예외·읽기 실패에도 초기화 완료 및 복구 후 수동 공유 중지를 자동 검증했고 공유/초기화 회귀 5파일61검사가 통과했다. UI는 한영×100/130/200% 글자 360dp에서 화면 전환 후 안내 표시·잘림 없음·자동 종료를 검증했다(build/reset_persistence_review.log; build/reset_failure_ui_test.log; build/reset_failure_ui/*.png). 실기기 저장소 장애 재현은 필수 검사로 두지 않는다."
+    },
+    {
+      "line": 990,
+      "text": "2. [Firebase 콘솔](https://console.firebase.google.com/)에서 프로젝트 **`shiftbell-29f31`**을 선택한다. **Firestore Database → 데이터**에서 컬렉션 `app_config`, 문서 `holidays_kr`를 차례로 연다. `app_config/android`는 **업데이트 안내용 옛 문서**이므로 공휴일 작업 때 건드리지 않는다."
+    },
+    {
+      "line": 1020,
+      "text": "4. 같은 터미널에서 웹을 빌드한다. 이 명령이 수정된 Dart 목록을 `build/web`의 웹 파일로 만든다. **빌드만으로 공개 사이트는 바뀌지 않는다.**"
+    },
+    {
+      "line": 1026,
+      "text": "5. 빌드가 성공하면 같은 프로젝트 루트에서 아래 명령으로 **친구 공유 웹사이트**에 배포한다. Firebase CLI 로그인이 필요하다고 나오면 `firebase login`을 한 번 실행하고 배포 명령을 다시 실행한다. 루트 `firebase.json`의 Hosting 공개 폴더는 `build/web`이다. `admin_dashboard/` 사이트는 별도다."
+    },
+    {
+      "line": 1032,
+      "text": "6. `https://shiftbell-29f31.web.app`에서 친구 달력 링크를 열고 바뀐 날짜·이름과 앞뒤 날짜를 확인한다. 오래 열어 둔 탭은 새로고침하고, 필요하면 새 브라우저에서도 본다. 정적 파일 캐시 때문에 일부 방문자는 약 하루 동안 이전 웹 파일을 볼 수 있다."
+    },
+    {
+      "line": 1097,
+      "text": "https://www.mpm.go.kr/mpm/comm/noti/mpmNotice/?boardId=bbs_0000000000000205&category=&cntId=904&mode=view&pageIdx=3"
+    },
+    {
+      "line": 1099,
+      "text": "https://www.nec.go.kr/vt/main.do"
+    },
+    {
+      "line": 1101,
+      "text": "https://www.mpm.go.kr/mpm/comm/newsPress/newsPressRelease/?boardId=bbs_0000000000000029&cntId=4250&mode=view&pageIdx=1"
+    },
+    {
+      "line": 1103,
+      "text": "https://www.kasa.go.kr/prog/plcyBrf/brief/kor/sub01_01_04/view.do?plcyBrfNo=431"
+    },
+    {
+      "line": 1105,
+      "text": "https://astro.kasi.re.kr/life/post/calendarData"
+    },
+    {
+      "line": 1107,
+      "text": "https://nec.go.kr/common/board/Download.do?bcIdx=162688&cbIdx=1132&streFileNm=e33062c3-d733-4f50-a81c-17a1dcf8fdf0.pdf"
+    },
+    {
+      "line": 1174,
+      "text": "삭제 전 원본 바이트와 SHA256은 artifacts/document_cleanup_2026-10-04/original_documents.zip 및 manifest.json에 보존한다. 압축파일은 읽기 전용 과거 증거이며 새로 관리할 문서가 아니다."
+    },
+    {
+      "line": 1234,
+      "text": "- 최신 APK 05959FB1A55624EAE78E29471D5947905C61E6C24A7A79ECDE705DE4A1D31A55 데이터 유지 설치. 설치 전 dev CE/DE tar, 설치 후 전체 원본 테이블/설정/예약 비교는 build/usb_audit_2026-10-04에 비공개 보존."
+    },
+    {
+      "line": 1253,
+      "text": "- 증거: build/usb_audit_2026-10-04의 캡처/VM 기록과 해당 Flutter attach 출력. 당시 미확정 관찰이며 후속 원인 분리·수정·debug 재검증은 J절에 기록했다. release 영향은 별도다."
+    },
+    {
+      "line": 1296,
+      "text": "- 필드·타입 제한 및 map/list 전체 멤버 타입 제한의 한계: https://firebase.google.com/docs/firestore/security/rules-fields"
+    },
+    {
+      "line": 1297,
+      "text": "- 기존/변경 후 문서 대조: https://firebase.google.com/docs/rules/data-validation"
+    },
+    {
+      "line": 1298,
+      "text": "- 트랜잭션과 오프라인 실패: https://firebase.google.com/docs/firestore/manage-data/transactions"
+    },
+    {
+      "line": 1321,
+      "text": "  증거: build/usb_audit_2026-10-04/ five_custom_assigned.json; five_custom_plus_fixed.json"
+    },
+    {
+      "line": 1323,
+      "text": "  증거: build/usb_audit_2026-10-04/ fixed_first.json; fixed_first_rejected.json"
+    },
+    {
+      "line": 1325,
+      "text": "  증거: build/usb_audit_2026-10-04/ custom_first.json; custom_first_fixed_saved_clean.json; custom_first_fixed_skip_message_clean.vm.json"
+    },
+    {
+      "line": 1327,
+      "text": "  증거: build/usb_audit_2026-10-04/ individual_replacement_before.json; individual_replacement_after.json"
+    },
+    {
+      "line": 1329,
+      "text": "  증거: build/usb_audit_2026-10-04/ ring_delete_actual_delivery.vm.json; ring_delete_after_ui.json; ring_delete_stopped.vm.json"
+    },
+    {
+      "line": 1331,
+      "text": "  증거: build/usb_audit_2026-10-04/ guard_ui_inside.json; guard_ui_moved_outside.json; guard_ui_moved_inside.json; guard_ui_deleted.json; guard_ui_deleted_state.json"
+    },
+    {
+      "line": 1333,
+      "text": "  증거: build/usb_audit_2026-10-04/ rename_fixed_ui_saved.json; rename_fixed_work_hours_ui.png; rename_fixed_work_hours_reopen.png"
+    },
+    {
+      "line": 1335,
+      "text": "  증거: build/usb_audit_2026-10-04/ bulk_race_before.json; bulk_race_after.json; bulk_native_worker.json"
+    },
+    {
+      "line": 1337,
+      "text": "  증거: build/usb_audit_2026-10-04/ friend_refresh_ui_result.json; friend_fetch_calls.json; friend_stage_b_visible.png"
+    },
+    {
+      "line": 1339,
+      "text": "  증거: build/usb_audit_2026-10-04/ widget_english_colored.png; widget_english_colored.xml; widget_long_label_detail.png; widgets_restored.txt"
+    },
+    {
+      "line": 1341,
+      "text": "  증거: build/usb_audit_2026-10-04/ sleep_reject_after_0.xml; sleep_reject_after_1.xml; sleep_reject_restored_native.xml; oct04_final_tables.json"
+    },
+    {
+      "line": 1358,
+      "text": "- FRIEND-023/024 배포 준비 확인: firebase.json의 hosting.public은 build/web이다."
+    },
+    {
+      "line": 1359,
+      "text": "- build/web/main.dart.js는 2026-09-25 산출물이고, 수정 검증용 build/web_oct02/main.dart.js는 2026-10-02 산출물이다. 현재 설정으로 deploy만 실행하면 수정 검증용 디렉터리가 배포되지 않는다."
+    },
+    {
+      "line": 1360,
+      "text": "- lib/web_main.dart의 onGenerateInitialRoutes에 query/fragment 보존 코드가 있는 것을 확인했다. 다음 짧은 단위는 해당 진입점으로 최신 웹 빌드를 만드는 작업이다: flutter build web --release --target lib/web_main.dart --no-pub (기본 출력 build/web). 이후 로컬 URL 유지/오류 복구 확인 및 산출물 해시 기록이 필요하다."
+    },
+    {
+      "line": 1364,
+      "text": "- flutter build web --release --target lib/web_main.dart --no-pub 성공(컴파일119.8초). 현재 Hosting 출력 경로 build/web에 최신 산출물을 생성했다."
+    },
+    {
+      "line": 1367,
+      "text": "- 빌드 로그: build/usb_audit_2026-10-04/web_release_build.log. 관리자 대시보드 변환 테스트도 12개 PASS."
+    },
+    {
+      "line": 1368,
+      "text": "- GitHub dev 보존 범위: 누적 소스·테스트·최신 문서 및 원장. build/.tmp/artifacts와 기기 진단 ZIP은 로컬 보존하고 커밋에서 제외한다. 원장 CSV 원문에 포함된 CR/공백 관련 diff-check 경고는 실행 실패와 구분하고 증거 원문은 유지한다."
+    },
+    {
+      "line": 1373,
+      "text": "- https://shiftbell-29f31.web.app 운영 main.dart.js SHA256 FC9A342E0817DD11ED4ED4E57233125223DBBD83999F3E510556751EC8578191. main.dart.js/bootstrap/index의 운영 응답이 로컬 검증 빌드와 바이트까지 일치, /privacy rewrite 200/index 일치."
+    },
+    {
+      "line": 1388,
+      "text": "  근거: build/usb_audit_2026-10-04/permission_before_fix/*; permission_failure_result.json; permission_failure_*; one_tap_rollback_test.log"
+    },
+    {
+      "line": 1390,
+      "text": "  근거: build/usb_audit_2026-10-04/replacement_failure_result.json; replacement_failure_message.png; replacement_recovered*"
+    },
+    {
+      "line": 1392,
+      "text": "  근거: build/usb_audit_2026-10-04/permission_mixed_result.json; permission_mixed_*; exact_switch_*.xml"
+    },
+    {
+      "line": 1394,
+      "text": "  근거: build/usb_audit_2026-10-04/startup_db_failure_retry/result.json; startup_db_failure_retry/device.log; startup_db_failure_retry/*.png"
+    },
+    {
+      "line": 1399,
+      "text": "  근거: build/usb_audit_2026-10-04/native_partial_result.json; native_partial_instrumentation.log; native_partial*_alarmmanager.txt"
+    },
+    {
+      "line": 1401,
+      "text": "  근거: build/usb_audit_2026-10-04/native_backup_storage_result.json; native_backup_storage.log"
+    },
+    {
+      "line": 1409,
+      "text": "  근거: build/usb_audit_2026-10-04/sender_A.json; sender_B.json; sender_A_again.json; sender_before_dedupe.json; sender_after_dedupe.json; sender_receiver_A*; sender_receiver_B*"
+    },
+    {
+      "line": 1411,
+      "text": "  근거: build/usb_audit_2026-10-04/sender_restored.json; sender_actual_backup_restore*; sender_restored_os*; sender_receiver_restored*"
+    },
+    {
+      "line": 1413,
+      "text": "  근거: build/usb_audit_2026-10-04/sender_upload_waiting.png; sender_stop_waiting.png; sender_ack_stopped.json; sender_receiver_stopped*"
+    },
+    {
+      "line": 1415,
+      "text": "  근거: build/usb_audit_2026-10-04/sender_ack_old_start*; sender_ack_latest_start*; sender_ack_restarted.json; sender_receiver_restarted*"
+    },
+    {
+      "line": 1427,
+      "text": "- 증거: build/usb_auth_audit_2026-10-04/scope_stop_auth_check.vm.json 및 scope_stop_cleanup.json. 원본 복구 증거는 M절과 최종 대조를 따른다."
+    },
+    {
+      "line": 1433,
+      "text": "- 증거: build/usb_audit_2026-10-04/representative_startup_result.json, representative_fresh_install_prior.log, representative_cold_start*, representative_warm_start*, english_input_result.json, english_input_*.png."
+    },
+    {
+      "line": 1447,
+      "text": "- SRTL SM-F976U에서 기존 문제 번호 002/017/025/026/033/037을 한국어·배율1.0으로 다시 확인하고 동일 번호의 기존 파일 6개를 교체했다. artifacts/srtl_2026-10-03/Fold8Ultra/화면비교.html 및 번호표 manifest의 파일 해시·reviewed_pass 상태를 갱신했다. 전체 갤러리 192개 경로는 유지했고 다른 번호의 새 캡처는 만들지 않았다."
+    },
+    {
+      "line": 1448,
+      "text": "- 원래 6장 교체 후 추가 촬영 없이 달력 테마를 접힘/펼침×배율1.0/1.3×한국어10/영어 지원6 = 64조합으로 점검했다. 영어에서 한국 공휴일 이름 노출 없음, RenderFlex overflow 로그 없음. 화면 밖으로 측정된 일부 근무명은 PageView 인접 페이지도 탐색하는 계측 특성 때문에 이 수치만으로 실제 화면 결함이나 전체 육안 합격으로 단정하지 않는다. 증거: build/srtl_2026-10-04_fold8ultra/fold_layout_1_0_1_3_geometry.json 및 fold_layout_runtime.log."
+    },
+    {
+      "line": 1451,
+      "text": "- 최종 APK의 SRTL 선별 런타임 검증 5장면(접힌 KO 1.0 mainWhite/1.3 boldGrid, 펼친 KO 1.3 mainWhite, 펼친 EN 1.0 mainWhite/1.3 diary)에서 각각 메모 10개가 표시되고, 축약되는 문자열은 완전한 글자 묶음의 접두부이며 '...'는 없음을 확인했다. 추가 스크린샷 0개. 증거: build/srtl_2026-10-04_fold8ultra/memo_selective_postbuild.json."
+    },
+    {
+      "line": 1457,
+      "text": "- RING-001 PASS: 기존 잠금 소리+진동(kind1) 실제 UI 종료 증거에 이번 Fold8 Ultra 접힌 잠금 화면의 진동(kind2)·무음(kind3) 실제 OS 울림→Native UI 끄기→각 DB 행0/이력1을 추가했다. USB S26 화면은 잠그지 않았다. build/srtl_2026-10-04_fold8ultra/locked_kind_2_3_no_capture.json."
+    },
+    {
+      "line": 1458,
+      "text": "- RING-002 PASS: Fold8 Ultra 잠금 상태에서 실제 알람→Native +5분 스누즈→OS의 약5분 예약→299.5초 후 실제 재울림→두 번째 잠금 Native UI에서 끄기. 최종 DB 행0/이력2, 캡처0. 첫 자동 입력 시도는 화면 준비 이전이라 수락되지 않고 3분 타임아웃했으므로 PASS 증거에 섞지 않는다. 준비 확인 후 별도 ID4로 다시 실행한 완전한 동선만 판정했다. build/srtl_2026-10-04_fold8ultra/locked_remaining_no_capture.json."
+    },
+    {
+      "line": 1469,
+      "text": "- 현재 artifacts/srtl_2026-10-03/Fold8Ultra/화면비교.html, numbered_v3/manifest.json, scale_1.3/manifest.json, 루트 manifest.json. 96개 reviewed_pass, N/A8슬롯/배율, 원본 SHA256·크기·링크 확인. web_bottom 2개 링크도 정상. 갤러리는1.0/1.3만 표시한다."
+    },
+    {
+      "line": 1486,
+      "text": "- 증거: build/srtl_2026-10-04_main_spacing/verified_*.json(8개), replacement_summary.json, staged/Fold8Ultra/1.0.jpg 및1.3.jpg. 새 dev debug APK 빌드 성공, 별도 광범위 회귀시험을 재실행한 것으로 가산하지 않는다."
+    },
+    {
+      "line": 1516,
+      "text": "- 참고 원본: artifacts/srtl_2026-10-03/Fold8Ultra/화면비교.html. 전체 재촬영 증거 build/srtl_2026-10-04_recapture, 마지막 메인 여백8장 증거 build/srtl_2026-10-04_main_spacing. 기존 .tmp 스크립트는 경로·기기·건수 가정이 있으므로 무검토 재실행 금지."
+    },
+    {
+      "line": 1525,
+      "text": "- 재연결 후 새 serial/VM 주소로 이어갈 것. 출력 예정 artifacts/srtl_2026-10-04/Fold8, 원시 증거 build/srtl_2026-10-04_fold8. 현재 dev HEAD6c3f47f이며 기존 사용자 문서 삭제는 그대로 보존한다. 당시 Fold8 미검증 상태는 이후 W절에서 완료했다."
+    },
+    {
+      "line": 1534,
+      "text": "- 갤러리: artifacts/srtl_2026-10-04/Fold8/화면비교.html. numbered_v3는1.0, scale_1.3은1.3, web_bottom2장, supplemental8장. 루트 manifest.json에96장+추가10장 SHA256/치수/검토 상태와 N/A16슬롯을 모았다. 모든 PNG 해시와 실제 크기를 대조했다. 기존 Fold8 Ultra 승인96+2장 및 다른 기기 자료는 변경하지 않았다."
+    },
+    {
+      "line": 1536,
+      "text": "- 검증: complete_cell_memo_text/wide_calendar_cell/ultra_calendar_cell27개와 calendar_memo_sizing4개, 총31개 테스트 통과. 원시 증거 build/srtl_2026-10-04_fold8/verified_*.json64개, extra_checks.json, remaining_capture.log, followup.log. 수정 전 diary_1_3_diagnostic.png와 수정 후 diary_candidate2.png를 보존했다."
+    },
+    {
+      "line": 1545,
+      "text": "- 증거: build/srtl_2026-10-04_diary_balance/diary_balance_checks.json 및 before_*/balance_* 원본. 갤러리의 접힘 Diary037/039×두 배율4장 교체, 다른 주요92장 유지. 중간1.1/1.2 Diary 한영4장도 검사·검토 후 새 조정본으로 교체했다(diary_balance_checks_intermediate.json). 기존 승인 Ultra 자료는 유지."
+    },
+    {
+      "line": 1553,
+      "text": "- 펼침 달력 한글10/영어 지원6 테마×1.0/1.3, 친구 공유 웹, 공통/개별 전체근무표 순으로 검사한다. 메모1~3개 크기·완전한 끝 글자·헤더4버튼·긴 영어 근무명·키보드 열린 팝업의 좁은 폭을 우선 확인한다. 결과는 artifacts/srtl_2026-10-04/Flip8, 원시 증거는 build/srtl_2026-10-04_flip8에 기록한다. Flip4는 아직 미연결·미검증이다."
+    },
+    {
+      "line": 1558,
+      "text": "- 갤러리 artifacts/srtl_2026-10-04/Flip8/화면비교.html, 루트 및 배율별 manifest. 모든 주요 원본1080×2520px, 파일 SHA256 대조. 네이티브40장의 실제 APK0956477DB8A552EB582C615D4C59192E9244893302742ED6BFC7363C4AFE387E 및 웹8장의 빌드 해시를 보존했다. 커버의 일반 화면56슬롯은 최신 사용자 지시에 따른 out_of_scope, 영어 미제공 테마8슬롯만 N/A이며 PASS로 합산하지 않는다."
+    },
+    {
+      "line": 1567,
+      "text": "- 출력 artifacts/srtl_2026-10-04/Flip4, 원시 증거 build/srtl_2026-10-04_flip4. 기존 다른 기기 원본과 사용자 문서 삭제는 보존한다."
+    },
+    {
+      "line": 1574,
+      "text": "- 최종 갤러리 artifacts/srtl_2026-10-04/Flip4/화면비교.html: 주요 펼침48장+추가 펼침12장+선택 커버4장=64장. 루트/배율별 manifest에 실제 치수·SHA256·reviewed_pass 기록, 전체64장 해시/치수와 갤러리 링크 대조 통과. 네이티브40장은 APK0956477DB8A552EB582C615D4C59192E9244893302742ED6BFC7363C4AFE387E, 웹8장은 별도 빌드 해시 보존. 일반 커버56슬롯은 사용자 범위 제외이며 영어 미제공8슬롯만 N/A로 구분했다."
+    },
+    {
+      "line": 1575,
+      "text": "- 원시 증거 build/srtl_2026-10-04_flip4: verified_*.json32개 실패0, followup_checks.json, calendar_capture.log/roster_capture.log/web_1.0.log/web_1.3.log/web_bottom.log/followup.log, cover_alarm_*.json 및 PNG, final_alarm_state.json/final_alarm_os.json. flutter_runtime.log 수집 시 RenderFlex overflow/프레임워크 예외/Unhandled Exception0. 앱 코드 변경·재빌드 없이 동일 APK로 검증했다. 현재 기능 관리 잔여는 문서 첫머리를 따른다."
+    },
+    {
+      "line": 1588,
+      "text": "- 검증: G2 공유·G6 백업·초기화·확인창 등 Flutter 회귀100/100, 로컬 demo Firestore 규칙23/23, dev debug APK 빌드 성공. 로그: build/share_protocol_regression.log, share_protocol_rules.log, share_protocol_build.log. 주요 새 증거: friend_share_protocol_test.dart, schedule_reset_confirmation_test.dart, full_audit_critical_test.dart의 AUD-A01b."
+    },
+    {
+      "line": 1592,
+      "text": "- 대상 shiftbell-29f31의 cloud.firestore 기본 DB 규칙만 배포했다. 이전 게시본과 변경본을 대조해 친구 공유 외 app_config/dashboard 접근 동작은 동일함을 확인했다. 배포 전 규칙·release 정보는 build/a2_production_2026-10-04/before.rules 및 before.release.json에 백업했다."
+    },
+    {
+      "line": 1597,
+      "text": "- smoke_result.json success=true/22개, smoke.log의 PERMISSION_DENIED는 의도적으로 거부돼야 하는 요청의 성공 근거다. 현재 A2와 FRIEND-004 완료, 기능 관리 잔여는 조건대기5개. Firebase 배포 방법 참고: https://firebase.google.com/docs/rules/manage-deploy ."
+    },
+    {
+      "line": 1602,
+      "text": "- 추가 확인: Android EnglishReleaseTest 3/3 통과(언어별 알림 문자열·주 시작일·영어 기능 제한·위젯). Flutter 로케일 선택1검사 통과. 확인 로그: build/english_locale_verification.log, build/english_resource_verification.log. 이는 소스/테스트 확인이며 Play 국가 추가·스토어 게시 완료를 뜻하지 않는다. 별도 사용자 문서 삭제는 기존 변경으로 보존한다."
+    },
+    {
+      "line": 1615,
+      "text": "- 최종 원복: 원본 DB 모든 테이블/공유 설정 동일, 기존 익명 계정 유지, 시험 공유 문서만 삭제. 시험 메모/알람/이력 제거, DB0/OS0, 한국어/배율1.0/3버튼/충전 중 화면유지15 복구. name_server_cleanup.json, final_restore_result.json. 원시 증거 build/device_remaining_2026-10-04. 검사 도구의 잘못된 화면 전제/모달 진입 실패·연결 중단은 제품 판정과 구분."
+    },
+    {
+      "line": 1626,
+      "text": "- 사용자 지시: 이번 세션 변경분 전부 커밋 후 origin/dev에 푸시하고 다음 세션은 최신 문서 하나를 읽고 진행할 수 있게 정리한다. 이번 저장 범위에는 기존 삭제 상태였던 docs/이거읽고진행해.txt도 포함한다. 로컬 .tools/android-cli/android.exe는 기기 실행 도구이므로 파일은 유지하고 Git 제외 경로만 추가했다. build/artifacts/.tmp의 원시 로그·기기 캡처는 기존 제외 정책에 따라 로컬 보존한다."
+    },
+    {
+      "line": 1639,
+      "text": "- 알림·오버레이 동시 거부 추가 시험은 로컬 SQLite WAL 미반영으로 ID90 fixture가 저장되지 않아 무효. both_denied_result.json의 false를 앱 실패로 읽지 않는다. 재부팅/장시간 Doze/홈 위젯 갱신은 이번 시간 내 미검증. 원시 증거 build/motorola_streaming_2026-10-05, 판정 원장 assessment.json, natural_first_checks.json, snoozed.json/snooze_rering.log, locked_ring.png/locked_manual_dismiss.json/.log."
+    },
+    {
+      "line": 1644,
+      "text": "- vivo 실기기 예약·접속·앱 검증은 시작하지 못했다. 사용0분, 앱 소스 수정 및 USB 기기 조작 없음. 다른 제조사를 대신 시험하지 않았다. 증거 build/vivo_streaming_2026-10-05/assessment.json 및 catalog.txt/reservations.txt. 무료 프로젝트는 준비되었으며 실제 vivo 카탈로그가 제공되어야 후속 검증 가능하다."
+    },
+    {
+      "line": 1656,
+      "text": "- 원시 증거와 판정: build/oppo_streaming_2026-10-05/assessment.json, build/pixel_streaming_2026-10-05/assessment.json 및 각 natural_first_checks.json/snoozed.json/snooze_rering.log/overlay_dismiss.json/both_denied_result.json/locked_result.json/위젯 캡처/reboot_result.json/session.json/cli_remove.log. vivo 증거는 AE절 경로에 보존. 날짜별 중복 인계 문서는 만들지 않았다."
+    },
+    {
+      "line": 1668,
+      "text": "- 원시 증거 build/xiaomi_recheck_2026-10-05:assessment.json,natural_first_checks.json,both_denied_result.json,in_app_card.png,app_snoozed.json,app_snooze_rering.log,in_app_reentry.png/.log,app_dismiss.json,independent_watchdog_result.json,clock_back_result.json,locked_full_log.txt/locked_appops.txt,doze_precondition.txt,session.json/cli_remove.log. Play 배포·커밋·푸시 없음."
+    },
+    {
+      "line": 1679,
+      "text": "- 원시 증거 build/xiaomi_permissions_2026-10-05/assessment.json, session.json/cli_remove.log, fresh_*permissions, onboarding_completed_permissions, settings_fsi.png/.xml, other_permissions_second_nodes.png/.xml, background_permission_dialog.png/.xml, background_ui_allowed_permissions, onboarding_only_locked_ended.log, background_allowed_locked_ring.png, locked_controls_retry_ended.log, final_before_dismiss.png. 표준 근거 https://developer.android.com/about/versions/14/behavior-changes-14#secure-fsi / https://source.android.com/docs/core/permissions/fsi-limits, Xiaomi https://www.mi.com/uk/support/faq/details/KA-497760/ ."
+    },
+    {
+      "line": 1694,
+      "text": "- 2026-10-05 사용자 지시로 Chrome에서 https://testit.miui.com/ 실제 홈페이지 확인. Remote real machine hire/Remote Debug 및 하루30회 무료 디버깅 안내가 현재 표시된다. Google Device Streaming과 별도 Xiaomi 서비스다. 이 문구가 계정별 실제 한도·세션 시간·모든 기능 무료·ADB 제공을 보장하는 증거는 아니다."
+    },
+    {
+      "line": 1699,
+      "text": "- 해당 화면이 공식 연결한 해외 GetApps https://global.developer.mi.com/home 도 Chrome에서 읽었다. 앱 배포/등록/심사 안내는 확인했지만 공개 첫 화면에서 TestIt 원격 실기기 이용 경로는 확인되지 않았다. 해외 GetApps 개발자 가입만 하면 중국 TestIt을 쓸 수 있다고 보장하지 않는다. 중국 플랫폼의 최신 인증 안내(pId=1145)는 중국 대륙 Xiaomi 계정과 조직/신원 인증 및 심사를 설명한다. 현재 사용자에게 바로 무료 실기기를 제공할 수 있는 경로로 확인된 상태는 아니다."
+    },
+    {
+      "line": 1727,
+      "text": "- 스토어 설정: 앱 유형 앱, 카테고리 맞춤설정, 태그 Calendar/시계/알람 및 타이머. 지원 이메일 lowvibe07@gmail.com, 전화번호 없음, 웹사이트 https://shiftbell-29f31.web.app, 외부 마케팅 체크됨. 현행 웹사이트는 근무표 공유 웹이라 비한국어 일반 문의 사이트로 적합한지는 별도 선택한다. 이메일만으로 문의 가능한 경로는 이미 있다."
+    },
+    {
+      "line": 1731,
+      "text": "- Play 등록 개인정보 URL은 https://hwani1103.github.io/shiftbell-privacy/ . 실제 공개 페이지가 열리며 한국어·영어가 있고 적용일2026-09-22. 앱 후보의 로컬 진단 파일/언어 변경 후 이전 공유 처리/광고 개인정보 선택/Google Play 업데이트 확인/이메일 문의 설명과 아직 차이가 있다. 독일어·pt-BR 공개 페이지는 현재 페이지에서 확인되지 않는다."
+    },
+    {
+      "line": 1745,
+      "text": "- 영국/독일: lib/services/ad_consent_service.dart에 UMP 정보 갱신/필요시 동의 폼/광고 가능 여부/선택 재설정 코드가 있다. AdMob에 실제 게시된 메시지·등록 앱 ID·운영 설치본의 표시/철회는 이번 Play 확인으로 검증되지 않았다. 최종 내부 트랙에서 확인한다. Google 공식 구현 근거 https://developers.google.com/admob/flutter/privacy/gdpr 및 https://developers.google.com/admob/flutter/privacy ."
+    },
+    {
+      "line": 1755,
+      "text": "- 공식 근거 https://support.google.com/googleplay/android-developer/answer/9844778?hl=en / https://support.google.com/googleplay/android-developer/answer/9867158?hl=en ."
+    },
+    {
+      "line": 1766,
+      "text": "- 공식 필드 제한 https://support.google.com/googleplay/android-developer/answer/9859152?hl=en-GB / 메타데이터 https://support.google.com/googleplay/android-developer/answer/9898842?hl=en ."
+    },
+    {
+      "line": 1767,
+      "text": "- 출시 노트500자/언어 및 언어 태그 형식 근거 https://support.google.com/googleplay/android-developer/answer/9859348?hl=en-EN ."
+    },
+    {
+      "line": 2082,
+      "text": "- 규격 근거 https://support.google.com/googleplay/android-developer/answer/9866151?hl=en . 콘솔 현행 휴대전화2~8장, 네 장 이상1080×1920은 특정 추천 형식 자격과 관련한 가이드이므로5장 계획이 적절하다.5장을 만들었다고 추천 노출이 보장되지는 않는다."
+    },
+    {
+      "line": 2150,
+      "text": "원문은 Play Console 화면에서 읽은 값이며 DOM 스냅샷에서 줄바꿈이 공백으로 정규화됐다. 원시 증거: build/play_store_prep_2026-10-05/*snapshot.txt. 초안 구조/글자 수 원장: drafts.json, character_counts.json. 설명 문서는 이 파일 하나에만 통합했다."
+    },
+    {
+      "line": 2156,
+      "text": "- 사용자 요청은 권한 네 가지의 상태 검사/설정 이동 경로 검토다. 앱 소스 수정·Flutter/Gradle 빌드는 하지 않았다. 다른 세션의 USB 삼성 기기도 조작하지 않았다. 독립적인 조사용 작은 Android 앱과 조사 스크립트만 build/permission_routes_2026-10-05에 준비했다."
+    },
+    {
+      "line": 2169,
+      "text": "- 증거: build/permission_routes_2026-10-05/pixel_remaining/session.json, fsi_initial.xml/png, fsi_initial_probe.log. 이 조사용 앱에서의 호출 성공은 실제 ShiftBell 온보딩 버튼 구현 완료를 뜻하지 않는다."
+    },
+    {
+      "line": 2173,
+      "text": "  https://dev.mi.com/docs/appsmarket/technical_docs/adaptation_FAQ/ (FAQ 9/10)"
+    },
+    {
+      "line": 2175,
+      "text": "  https://github.com/DrKLO/Telegram/blob/master/TMessagesProj/src/main/java/org/telegram/messenger/XiaomiUtilities.java"
+    },
+    {
+      "line": 2177,
+      "text": "  https://www.mi.com/global/support/faq/details/KA-497760/"
+    },
+    {
+      "line": 2190,
+      "text": "  https://developer.android.com/about/versions/14/behavior-changes-14#secure-fsi"
+    },
+    {
+      "line": 2191,
+      "text": "  https://developer.android.com/reference/android/provider/Settings#ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT"
+    },
+    {
+      "line": 2192,
+      "text": "  https://developer.android.com/about/versions/11/privacy/permissions#system-alert-window"
+    },
+    {
+      "line": 2196,
+      "text": "  https://docs.cloud.google.com/developer-device-platform/device-catalog"
+    },
+    {
+      "line": 2199,
+      "text": "  https://firebase.google.com/docs/test-lab/usage-quotas-pricing"
+    },
+    {
+      "line": 2304,
+      "text": "- 기존 Xiaomi 실제 관찰: 본 문서 AH절, build/xiaomi_permissions_2026-10-05의 캡처/로그. 추가 Pixel 경로 실측과 무료 예약 오류: AJ절."
+    },
+    {
+      "line": 2305,
+      "text": "- Xiaomi 공식 앱 권한 관리 Intent: https://dev.mi.com/docs/appsmarket/technical_docs/adaptation_FAQ/"
+    },
+    {
+      "line": 2306,
+      "text": "- Redmi 13C 5G 공식 추가 권한 목록/경로: https://www.mi.com/global/support/faq/details/KA-497760/"
+    },
+    {
+      "line": 2307,
+      "text": "- Android14 FSI 검사/설정: https://developer.android.com/about/versions/14/behavior-changes-14#secure-fsi"
+    },
+    {
+      "line": 2308,
+      "text": "- Android11 오버레이 설정 이동 차이: https://developer.android.com/about/versions/11/privacy/permissions#system-alert-window"
+    },
+    {
+      "line": 2319,
+      "text": "- 최신 입력용 문구와 ChatGPT 절차는 위 바탕화면 파일을 사용한다. 작성/글자 수 원시 증거는 build/play_store_prep_2026-10-05/export_desktop_guide.py, desktop_guide_copy.json, desktop_guide_counts.json 및 동일 텍스트 사본이다."
+    },
+    {
+      "line": 2358,
+      "text": "- 사용자 승인/제공 이름으로 Transsion 약관 수락·기기실 활성화 성공. 증거 build/paid_devices_2026-10-06/transsion_enabled.jpg. vivo/HONOR는 이번 실행 제외/미검증."
+    }
+  ],
+  "store_draft_source": "build/play_store_prep_2026-10-05/ShiftBell_해외출시_등록정보와_ChatGPT이미지제작.txt",
+  "store_draft_changes": {
+    "• 다음 알람과 예정 알람 확인, 20분 전 사전 알림과 5분 스누즈": "• 다음 알람과 예정 알람 확인, 20분 전 사전 알림\n• 기본 스누즈5·10·15분 선택, 울림 중5~30분 조절",
+    "• 오늘·내일에 필요할 때 사용하는 원터치 알람\n": "",
+    "• 오늘·내일에 사용하는 원터치 알람 추가": "• 기본 스누즈 설정과 울림 중 시간 조절",
+    "• Choose sound, vibration or silent mode, with a 5-minute snooze and a pre-alarm reminder.": "• Choose sound, vibration or silent mode, with a pre-alarm reminder. Set a default snooze of 5, 10 or 15 minutes and adjust it from 5 to 30 minutes while the alarm rings.",
+    "• Escolha som, vibração ou modo silencioso, com opção de adiar por 5 minutos e aviso antes do alarme.": "• Escolha som, vibração ou modo silencioso e receba um aviso antes do alarme. Defina 5, 10 ou 15 minutos como padrão para adiar e ajuste de 5 a 30 minutos enquanto o alarme toca.",
+    "• Wähle Ton, Vibration oder einen lautlosen Modus. Dazu kommen 5 Minuten Schlummerzeit und eine Erinnerung vor dem Wecker.": "• Wähle Ton, Vibration oder einen lautlosen Modus und eine Erinnerung vor dem Wecker. Stelle 5, 10 oder 15 Minuten als Schlummerzeit ein und passe sie während des Klingelns auf 5 bis 30 Minuten an.",
+    "• आवाज़, कंपन या साइलेंट मोड चुनें। 5 मिनट बाद दोबारा बजाने और अलार्म से पहले याद दिलाने के विकल्प भी हैं।": "• आवाज़, कंपन या साइलेंट मोड चुनें और अलार्म से पहले याद दिलाने का विकल्प इस्तेमाल करें। दोबारा बजने का डिफ़ॉल्ट समय 5, 10 या 15 मिनट रखें और अलार्म बजते समय इसे 5 से 30 मिनट तक बदलें।"
+  },
+  "validation": {
+    "state": "complete",
+    "protected_docs_hash_unchanged": 234,
+    "outside_docs_non_document_files_hash_unchanged": 942,
+    "outside_document_edits": [
+      "CLAUDE.md",
+      "README.md"
+    ],
+    "deleted_all_absent": true,
+    "deleted_markdown_targets_remaining": [],
+    "source_values_read_only": {
+      "app_version": "1.0.23+25",
+      "dart_native_migration_db": "28/28/28"
+    },
+    "build_device_actions": 0,
+    "function_tests_executed": false,
+    "recovery_archive_sha256": "b99c3f9e8f8fd27f3f980c01945c7bd7500718fd94fac79cf0bd4864f6dc168f",
+    "master_final_sha256": "efda2ea49cf1ff77b2c9b4f6c408445d141d8b8de41fd2340127e545903ec050",
+    "after_document_count_including_ledger": 242
+  },
+  "outside_document_changes": {
+    "README.md": "현재 문서 입구/원장 연결, dev debug 기본·release 명시 요청 조건, 한국어 개요와 dev 후보 언어 범위 구분",
+    "CLAUDE.md": "삭제된 다국어 현황의 입구를 최신 문서 C4/D5/D6으로 연결"
+  },
+  "outside_document_after_sha256": {
+    "README.md": "3b8b9af2e54b3b459fe50b3361691549ced5d6f4618b8e6054c64b036d5feb7e",
+    "CLAUDE.md": "058bff6d3e879d53d4cfdfa472c2729b4a7618dd69d4e3162a6f53d6f7f89f9f"
+  }
+}

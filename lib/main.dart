@@ -1,3 +1,5 @@
+import 'services/operations_analytics.dart';
+import 'services/holiday_sync_service.dart';
 import 'services/friend_sync_service.dart';
 import 'services/restore_coordinator.dart';
 import 'screens/restore_interrupted_screen.dart';
@@ -20,9 +22,14 @@ import 'screens/onboarding_screen.dart';
 import 'screens/settings_tab.dart';
 import 'screens/schedule_management_tab.dart';
 import 'screens/condition_tab.dart';
+
 import 'screens/permission_intro_screen.dart';
-import 'widgets/permission_warning_banner.dart';
+import 'widgets/onboarding_info_popups.dart';
+import 'widgets/nav_icon_emphasis.dart';
+import 'widgets/unavailable_feature.dart';
 import 'widgets/banner_ad_slot.dart';
+import 'widgets/app_content_frame.dart';
+import 'widgets/tablet_keyboard_viewport.dart';
 import 'services/ad_service.dart';
 import 'services/backup_watcher.dart';
 import 'services/schedule_notification_service.dart';
@@ -32,6 +39,8 @@ import 'models/backup_payload.dart';
 import 'screens/restore_backup_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'l10n/release_locale.dart';
+import 'l10n/regional_material_localizations.dart';
 import '../models/shift_schedule.dart';
 import 'providers/alarm_provider.dart';
 import 'providers/schedule_provider.dart';
@@ -69,8 +78,8 @@ const int kScheduleManagementTabIndex = 1;
 
 // ⭐ 2026-09-07 - 수면 위젯(SleepWidgetProvider.kt) 탭(수면/기상 버튼 이외
 // 영역) → 컨디션 탭으로 바로 열기 위한 Native→Dart 요청 센티널. 컨디션 탭은
-// 한국어 로케일에서만 _tabs에 실제로 존재해서(_showConditionTab) 그 인덱스를
-// Kotlin이 고정 숫자로 알 수 없다 - 그래서 실제 인덱스 대신 이 음수 값을
+// 사용자가 숨길 수 있어 Kotlin이 인덱스만으로 노출 여부를 알 수 없다.
+// 그래서 실제 인덱스 대신 이 음수 값을
 // 보내고, Dart(_MyAppState의 openTab 핸들러)가 런타임에 진짜 인덱스로
 // 변환한다(MainActivity.kt의 handleOpenTabIntent가 음수도 그대로 전달하도록
 // 이미 고쳐둠). 인덱스 값(0/2)과 안 겹치게 음수로 둠.
@@ -142,16 +151,33 @@ void main() async {
 // (StartupGate가 시작 실패 화면으로 처리), 선택 단계는 실패/지연돼도 앱을 시작함.
 // 다시 시도 시 이 함수 전체가 다시 불리므로 각 단계는 여러 번 불려도 안전해야 함.
 Future<CalendarThemeId> _initializeApp() async {
+  final startupWatch = Stopwatch()..start();
+  var previousStartupMs = 0;
+  void recordStartupPhase(String phase) {
+    final elapsed = startupWatch.elapsedMilliseconds;
+    debugPrint(
+        'STARTUP_PHASE phase=$phase durationMs=${elapsed - previousStartupMs} totalMs=$elapsed');
+    previousStartupMs = elapsed;
+  }
+
   // ── 필수 ──
-  // ⭐ 영어 현지화: 이제 기기 로케일에 따라 ko_KR 또는 en_US 포맷터를 쓸 수 있어야
-  // 하므로, 둘 다 미리 초기화해둠(하나만 초기화된 상태에서 다른 로케일 포맷터를
-  // 쓰면 intl이 LocaleDataException을 던짐).
-  await initializeDateFormatting('ko_KR', null);
-  await initializeDateFormatting('en_US', null);
+  // App language and English regional date formats share the bundled Intl data.
+  await initializeDateFormatting(); // Local Intl bundle loads all regional data.
+  recordStartupPhase('date_formats');
   // DB 열기 + 마이그레이션(#1/#8 - 실패를 삼키지 않음). 실패 후 다시 부르면 새로 시도함.
   await DatabaseService.instance.database;
+  recordStartupPhase('database');
+  final retiredDevPrefs = await SharedPreferences.getInstance();
+  await initializeTabVisibilityDefaults(
+      hasExistingSchedule:
+          await DatabaseService.instance.getShiftSchedule() != null);
+  await retiredDevPrefs.remove('custom_alarm_presets');
+  await retiredDevPrefs.remove('one_touch_alarm_tutorial_shown');
+  recordStartupPhase('preferences');
   await AlarmService().initialize();
-
+  recordStartupPhase('alarm_service');
+  await HolidaySyncService.instance.loadCached();
+  recordStartupPhase('holiday_cache');
   // ── 선택 (없어도 알람/달력 핵심 기능은 동작) ──
   // ⭐ Phase 4 - 메모/일정 카테고리 자동분류 모델(~2.2MB JSON) 미리 로드.
   // await 안 함 - 첫 프레임을 이걸로 막을 이유가 없고, 실제 분류 시점(일정
@@ -179,19 +205,23 @@ Future<CalendarThemeId> _initializeApp() async {
   // 조용히 실패하고 친구공유 기능만 비활성화됨 (firebase_bootstrap.dart 참고).
   // 다시 시도로 이 함수가 또 불려도 이미 성공했으면 중복 초기화하지 않음.
   if (!firebaseReady) await _optionalStartupStep('Firebase', initFirebase);
+  recordStartupPhase('firebase_and_background_launch');
 
-  // ⭐ 광고 SDK 초기화 + 배너가 차지할 높이를 첫 프레임 전에 미리 확정해둠.
-  // 화면을 그리는 중에 높이를 구하면 "높이 모르는 프레임 → 아는 프레임"으로 한 번
-  // 튀는데, 그 튐을 막는 게 이 슬롯의 목적이라 여기서 미리 함.
-  // 실패해도 예외를 던지지 않고 fallback 높이로 넘어감 (ad_service.dart 참고).
-  await _optionalStartupStep('AdMob', AdService.warmUp);
+  // Measure local SDK geometry before showing the calendar, but do not wait
+  // for network consent or SDK initialization (previously up to ten seconds).
+  await _optionalStartupStep('AdMob layout', AdService.prepareLayout,
+      timeout: const Duration(milliseconds: 500));
+  recordStartupPhase('ad_layout');
 
   // ⭐ 앱 시작 전에 달력 테마 미리 로드 (깜빡임 방지) - 예전엔 "다크모드
   // on/off"를 미리 읽었는데, 이제는 9개 달력 테마 중 뭐가 선택돼 있는지를
   // 미리 읽음. 앱 전체 밝기는 항상 라이트 고정이고, 이 값은 오직 (1) 달력
   // 탭 자체가 어떤 테마로 그려질지 (2) 시스템 상태표시줄 아이콘 밝기에만 씀.
   // (실패하면 내부에서 기본 테마로 대체함 - calendar_theme_provider.dart)
-  return CalendarThemeNotifier.loadInitial();
+  final initialTheme = await CalendarThemeNotifier.loadInitial();
+  recordStartupPhase('theme');
+  debugPrint('Startup core ready: ${startupWatch.elapsedMilliseconds}ms');
+  return initialTheme;
 }
 
 // ⭐ 2026-09-14 (G0, V4) - 없어도 앱 핵심(알람/달력)이 동작하는 초기화 단계. 예외는 로그만
@@ -237,11 +267,18 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  static const platform = kAlarmChannel;
+  bool _tabletLayout = false;
 
   @override
   void initState() {
     super.initState();
+
+    // Only the platform-confirmed tablet path changes design-unit scaling.
+    unawaited(isTabletLayoutDevice().then((tablet) {
+      if (mounted && tablet != _tabletLayout) {
+        setState(() => _tabletLayout = tablet);
+      }
+    }));
 
     // ⭐ 앱 라이프사이클 감지
     WidgetsBinding.instance.addObserver(this);
@@ -263,7 +300,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // data_version이 그대로면 즉시 반환하는 가벼운 함수라(백업_watcher.dart
     // 참고) 매 콜드 스타트마다 불러도 비용이 거의 없음.
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('STARTUP_FIRST_APP_FRAME');
       unawaited(BackupWatcher.instance.backupNow());
+      unawaited(AdService.warmUp());
     });
   }
 
@@ -315,9 +354,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
-  // 6.5인치 기준 최대 너비 (Fold 7 펼친 상태 대응)
-  static const double maxContentWidth = kAppMaxContentWidth;
-
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -325,6 +361,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
+        // Full window layout and bounded design-unit scaling are independent.
+        ScreenUtil.configure(
+          data: appContentMediaQuery(MediaQueryData.fromView(View.of(context)),
+              tablet: _tabletLayout),
+          designSize: const Size(360, 780),
+          minTextAdapt: true,
+          splitScreenMode: true,
+        );
         // ⭐ MaterialApp만 Consumer로 감싸기 (MyApp rebuild 방지)
         return Consumer(
           builder: (context, ref, _) {
@@ -343,16 +387,17 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 onGenerateTitle: (context) => context.l10n.appTitle,
                 // ⭐ 영어 현지화 인프라 - flutter_localizations(SDK) + 이 앱의
                 // AppLocalizations(lib/l10n/app_ko.arb, app_en.arb에서 생성).
-                // 기본은 기기 로케일을 그대로 따름(localeResolutionCallback 없음
-                // → Flutter가 supportedLocales 중 기기 로케일과 가장 잘 맞는 걸
-                // 자동 선택하고, 지원 안 하는 로케일이면 첫 번째=ko로 폴백).
+                // 한국어 기기는 한국어, 그 외 기기는 영어로 선택한다.
+                // 영국 등 일부 지역은 영어권 날짜 형식과 월요일 시작을 적용한다.
                 localizationsDelegates: const [
+                  releaseRegionalMaterialDelegate,
                   AppLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
-                supportedLocales: AppLocalizations.supportedLocales,
+                supportedLocales: releaseSupportedLocales,
+                localeListResolutionCallback: resolveReleaseLocale,
                 theme: AppTheme.lightTheme,
                 // 모든 화면에 최대 너비 제한 적용
                 // ⭐ 2026-08-24 - 컨텐츠 영역 배경을 단색(Colors.white)에서 앱
@@ -372,19 +417,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 // 여전히 보인다는 피드백을 받아서, 아예 같은 흰색으로 통일해
                 // 이 깜빡임의 근본 원인 자체를 없앰.
                 builder: (context, child) {
-                  return Container(
-                    color: Colors.grey.shade200, // 넓은 화면에서 양옆 배경색 - 항상 라이트
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints:
-                            const BoxConstraints(maxWidth: maxContentWidth),
-                        child: Container(
-                          color: Colors.white, // 컨텐츠 영역 배경 - 항상 라이트
-                          child: child,
-                        ),
-                      ),
-                    ),
-                  );
+                  return AppContentFrame(child: child!);
                 },
                 home: const InitialRouter(),
                 routes: {
@@ -422,24 +455,35 @@ class MainScreen extends ConsumerStatefulWidget {
 // update_service.dart에 쿨다운을 둬서 Play Core 호출 자체도 너무 잦지 않게 함.
 class _MainScreenState extends ConsumerState<MainScreen>
     with WidgetsBindingObserver {
+  Timer? _alarmUiSyncTimer;
+  bool _alarmUiSyncForeground = true;
+  int? _emphasizedTab;
+  int _emphasisSequence = 0;
   late int _currentIndex; // ⭐ nullable 제거
   static const platform = kAlarmChannel;
 
   late List<Widget> _tabs;
 
-  // ⭐ 2026-09-03 - "컨디션 탭은 아직 한국어 전용(문구/문장 생성 로직까지
-  // 전부 한국어)이라, 영어 사용자에게는 아예 안 보이게 해달라"는 요청.
+  // English release keeps only alarms, calendar and settings; stable native tab IDs remain.
   // Localizations.localeOf(context)는 initState()에서 못 씀(InheritedWidget
   // 구독이라 아직 안전하지 않음 - Flutter가 assert로 막음) - 그래서 탭 목록
   // 구성 자체를 initState에서 didChangeDependencies로 옮김(로케일이 확정된
-  // 뒤 딱 한 번만 실행되도록 _tabsInitialized로 가드).
-  bool _tabsInitialized = false;
-  bool _showConditionTab = true;
+  // 뒤 로케일이 확정되면 만들고, 기기 언어가 바뀌면 해당 화면을 다시 선택한다.
+  String? _tabsLanguageCode;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Native can finish a ring while Settings or Calendar is selected. Keep
+    // the shared provider current on every foreground tab; NextAlarmTab's old
+    // timer only ran while that tab was mounted. Native refresh signals still
+    // provide the faster path, and AlarmNotifier coalesces overlapping reads.
+    _alarmUiSyncTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+      if (mounted && _alarmUiSyncForeground) {
+        unawaited(ref.read(alarmNotifierProvider.notifier).refresh());
+      }
+    });
 
     // ⭐ 초기 탭 설정 (InitialRouter에서 결정한 값)
     _currentIndex = widget.initialIndex;
@@ -480,32 +524,30 @@ class _MainScreenState extends ConsumerState<MainScreen>
     // ⭐ 업데이트 체크 (2초 후 - UI 로딩 완료 후)
     Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
-      // 이번 업데이트로 막 올라온 사용자에게 한 번만 보여주는 안내가 있으면 먼저 표시
-      await UpdateService.checkAndShowReleaseNote(context);
-      if (!mounted) return;
       UpdateService.checkForUpdate(context);
+      unawaited(HolidaySyncService.instance.refreshIfDue());
       // 알람 사용량(끄기/연장/무응답)은 앱을 열 때 새로 쌓인 이력만 이벤트로 보낸다 - AlarmUsageAnalytics 참고
       AlarmUsageAnalytics.reportNew();
+      OperationsAnalytics.report();
     });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_tabsInitialized) return; // ⭐ 최초 1회만 - 기존 late final 캐시 의도 유지
-    _tabsInitialized = true;
+    final languageCode = Localizations.localeOf(context).languageCode;
+    if (_tabsLanguageCode == languageCode) return;
+    if (_tabsLanguageCode != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) ScaffoldMessenger.maybeOf(context)?.clearSnackBars();
+      });
+    }
+    _tabsLanguageCode = languageCode;
     _setupTabsAndPrewarm();
   }
 
-  // ⭐ 2026-09-03 - "컨디션 탭은 영어 버전에서 아예 안 보이게 해달라"는 요청
-  // (컨디션 매니저 UI/문구 생성 로직 전체가 아직 한국어 전용이라, 어설프게
-  // 반쯤 번역된 화면을 보여주는 것보다 나은 선택이라고 판단 - 사용자도 동의).
-  // Native(Kotlin)에서 openTab으로 보내는 인덱스는 0(다음알람)/kCalendarTabIndex(달력)
-  // 뿐이고, 온보딩/백업 화면의 MainScreen(initialIndex:) 호출도 전부 그 둘만 써서
-  // 컨디션 탭을 빼도 그 경로들은 전혀 영향받지 않음.
+  // 수면·회복 및 개인 일정 탭은 한국어에서만 구성한다.
   void _setupTabsAndPrewarm() {
-    _showConditionTab = Localizations.localeOf(context).languageCode == 'ko';
-
     // ⭐ 탭 생성 (callback 전달) - "달력테마" 탭은 제거함. 테마 실험은 다
     // 끝났고 실제 선택 UI가 설정 탭 안으로 들어갔으니(테마 캐러셀 화면),
     // 메인 탭 구성이 원래대로 3개로 되돌아옴.
@@ -539,15 +581,19 @@ class _MainScreenState extends ConsumerState<MainScreen>
       // 콘텐츠 맨 아래로 옮기면서(사용자 요청) main.dart가 더 이상 이 버튼을
       // 고정 위치에 그리지 않음 - 대신 그 자리에서 쓰던 콜백을 그대로
       // 생성자로 내려줌(아래 build()의 옛 DisableTabButton 자리 주석 참고).
-      ScheduleManagementTab(
-        onDisabled: () => setState(() => _currentIndex = kCalendarTabIndex),
-        onConfirmed: ScheduleNotificationService.cancelAllForTabDisable,
-      ),
+      context.usesKoreanFeatures
+          ? ScheduleManagementTab(
+              onDisabled: () =>
+                  setState(() => _currentIndex = kCalendarTabIndex),
+              onConfirmed: ScheduleNotificationService.cancelAllForTabDisable,
+            )
+          : const SizedBox.shrink(),
       Consumer(
         builder: (context, ref, _) {
-          final isDark = ref.watch(calendarThemeProvider).isDark;
+          final calendarTheme =
+              context.availableCalendarTheme(ref.watch(calendarThemeProvider));
           return Theme(
-            data: isDark ? AppTheme.darkTheme : AppTheme.lightTheme,
+            data: AppTheme.forCalendar(calendarTheme),
             child: CalendarTab(),
           );
         },
@@ -555,29 +601,19 @@ class _MainScreenState extends ConsumerState<MainScreen>
       // ⭐ 2026-08-31 - 컨디션 매니저 1차 버전(컨디션매니저_설계.md 참고).
       // "일정관리 옆에 독립 탭으로" 요청대로 여기(달력 다음, 설정 이전)에
       // 끼워 넣음.
-      // ⭐ 2026-09-13 - 예전엔 "영어 로케일이면 이 탭 자체를 목록에서 뺌"이라고
-      // 여기서 배열 길이 자체를 바꿨는데(_showConditionTab), 그러면 사용자가
-      // 탭을 껐다 켰다 하는 기능(scheduleTabEnabledProvider/
-      // conditionTabEnabledProvider)까지 더해질 때 이 배열의 길이/인덱스가
-      // 두 가지 서로 다른 이유로 흔들려서 kScheduleManagementTabIndex/
-      // kCalendarTabIndex 같은 고정 상수들이 깨지기 쉬워짐. _tabs 배열
-      // 자체는 이제 로케일/사용자 설정과 무관하게 항상 고정 5칸으로 유지하고,
-      // "실제로 보여줄지"는 build()의 _visibleTabIndices가 네비게이션 레벨
-      // 에서만 필터링함(이 위젯은 만들어지긴 하지만 그 탭으로 이동하지 않는
-      // 한 실제로 build되지 않음 - 이 화면이 IndexedStack이 아니라
-      // `_tabs[_currentIndex]` 하나만 트리에 올리는 구조이기 때문).
-      ConditionTab(
-        onDisabled: () => setState(() => _currentIndex = kCalendarTabIndex),
-        onConfirmed: WidgetRefreshService.refresh,
-      ),
+      // 탭 인덱스는 두 언어에서 동일하게 유지한다. 사용자 숨김 설정은
+      // _visibleTabIndices에서 처리한다.
+      context.usesKoreanFeatures
+          ? ConditionTab(
+              onDisabled: () =>
+                  setState(() => _currentIndex = kCalendarTabIndex),
+              onConfirmed: WidgetRefreshService.refresh,
+            )
+          : const SizedBox.shrink(),
       // ⭐ 2026-09-01 후속13 - "컨디션 팁 실험실" 임시 개발용 탭(후속8에서 추가,
       // 컨디션 매니저 추천 로직 리팩토링 전 검토용)은 검토 끝나서 삭제함
       // (condition_tip_lab_screen.dart 파일 자체도 삭제).
       SettingsTab(onSwipeToCalendar: () => _goToCalendar()),
-      // ⭐ 2026-08-25 - 아이콘 색상이 최종 확정되어(2번 변형: 인디고·오로라
-      // 그라데이션·코랄) 임시 아이콘 픽커 탭 제거함. ui_theme_lab_screen.dart
-      // 파일 자체는 나중에 다시 후보를 검토할 일이 생기면 재사용할 수 있어
-      // 지우지 않고 남겨둠 - 필요하면 이 자리에 다시 추가하면 됨.
       // ⭐ 2026-09-05 - 웰컴/근무배정 팝업 확인용 임시 lab 탭(사용자 요청)은
       // 2026-09-07 확인 끝나서 제거, 2026-09-12에 "테스트알림" 탭으로 잠깐
       // 다시 추가했다가 배포 전 최종 점검을 마치고 이번에 완전히 제거함
@@ -608,33 +644,39 @@ class _MainScreenState extends ConsumerState<MainScreen>
     // 앞당김. 사용자가 다른 탭을 보는 동안 백그라운드에서 미리 끝나 있을
     // 가능성이 높아짐(첫 진입 시 완전히 안 보인다는 보장은 아니지만 체감
     // 지연은 크게 줄어듦).
-    // ⭐ 2026-09-03 - 영어 로케일(탭 자체가 안 보임)이면 이 프리웜도 그냥
-    // 낭비(불필요한 DB 읽기 + Firestore 네트워크 호출)라 같이 건너뜀.
-    if (_showConditionTab) {
+    // 수면 기록 및 관련 판정은 한국어에서만 준비한다.
+    if (context.usesKoreanFeatures) {
+      ref.read(sleepRecordProvider);
       // ⭐ 2026-09-15 - 점수·건강 Tip 삭제 후: "오늘의 컨디션"이 쓰는 입력(판정·수면 기록·미니 달력)만 미리 로딩
       // (recoveryBriefingProvider 자체는 1분 시계를 쓰는 autoDispose라 화면이 볼 때만 만든다)
       ref.read(todayConditionResultProvider);
-      ref.read(sleepRecordProvider);
       ref.read(recentSleepDaySlotsProvider);
     }
   }
 
   @override
   void dispose() {
+    _alarmUiSyncTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   // ⭐ 클래스 선언부 주석 참고 - 앱을 백그라운드에서 포그라운드로 복귀할 때마다
   // 업데이트 여부를 다시 체크함(콜드 스타트 1회로는 배포 직후 전파 지연 구간을
-  // 영영 놓칠 수 있어서). 릴리즈 노트는 여기서 다시 안 부름 - 그건 "버전당 1회"
-  // 정책이라 이미 봤으면 checkAndShowReleaseNote 내부에서 알아서 스킵하지만,
-  // 굳이 앱을 복귀할 때마다 또 체크할 필요는 없어서 콜드 스타트 경로에만 남겨둠.
+  // 영영 놓칠 수 있어서). 업데이트 내용은 Play 스토어에서 안내한다.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    _alarmUiSyncForeground = state == AppLifecycleState.resumed;
     if (state == AppLifecycleState.resumed && mounted) {
       UpdateService.checkForUpdate(context);
+      unawaited(HolidaySyncService.instance.refreshIfDue());
       AlarmUsageAnalytics.reportNew();
+      OperationsAnalytics.report();
+      // 한국어 화면은 자체 lifecycle observer가 새 기록을 읽는다. 영어 화면도
+      // 네이티브 수면 감지가 앱 밖에서 쓴 기록을 복귀 시 반영해야 한다.
+      if (context.usesKoreanFeatures) {
+        ref.read(sleepRecordProvider.notifier).refresh();
+      }
       // ⭐ 2026-09-14 (T10 연결, G2-01) - 재개될 때마다 친구공유 대기 작업(dirty/stop_pending) 재시도
       _runFriendSync(
           'onAppResumed',
@@ -675,6 +717,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
   // schedule_focus_request.dart에 요청을 채워서, 그 탭이 마운트/재빌드될 때
   // 날짜/시간축을 그 일정 위치로 맞추게 함.
   void _applyOpenDateSchedule(Map? args) {
+    if (!mounted || !context.usesKoreanFeatures) return;
     if (args != null) {
       final date = args['date'] as String?;
       final startMinutes = args['startMinutes'] as int?;
@@ -735,11 +778,10 @@ class _MainScreenState extends ConsumerState<MainScreen>
         setState(() {
           if (tabIndex == kOpenConditionTabSentinel) {
             // ⭐ 2026-09-07 - 컨디션 탭은 항상 "달력 바로 다음"에 위치함.
-            // ⭐ 2026-09-13 - 영어 로케일이거나(_showConditionTab) 사용자가 설정에서
-            // 꺼놨으면(conditionTabEnabledProvider) 그 탭 자체가 네비게이션에
+            // 사용자가 설정에서 꺼놨으면(conditionTabEnabledProvider) 그 탭 자체가 네비게이션에
             // 없으니 다음알람 탭(0)으로 안전하게 대체.
-            final conditionVisible =
-                _showConditionTab && ref.read(conditionTabEnabledProvider);
+            final conditionVisible = context.usesKoreanFeatures &&
+                ref.read(conditionTabEnabledProvider);
             _currentIndex = conditionVisible ? kCalendarTabIndex + 1 : 0;
           } else {
             _currentIndex = tabIndex;
@@ -765,13 +807,14 @@ class _MainScreenState extends ConsumerState<MainScreen>
   // 순서 유지, 0(다음알람)/kCalendarTabIndex(달력)/4(설정)는 끌 수 없어 항상
   // 포함됨). _tabs 배열 자체는 항상 고정 5칸이고(위 _setupTabsAndPrewarm
   // 주석 참고), 여기서만 "실제로 네비게이션에 노출할지"를 결정함 - 로케일
-  // 조건(_showConditionTab)과 사용자가 설정/각 탭에서 끈 값
-  // (scheduleTabEnabledProvider/conditionTabEnabledProvider) 둘 다 여기서
+  // 사용자가 설정/각 탭에서 끈 값
+  // (scheduleTabEnabledProvider/conditionTabEnabledProvider)을 여기서
   // 합쳐진다.
   List<int> get _visibleTabIndices {
-    final scheduleVisible = ref.watch(scheduleTabEnabledProvider);
+    final scheduleVisible =
+        context.usesKoreanFeatures && ref.watch(scheduleTabEnabledProvider);
     final conditionVisible =
-        _showConditionTab && ref.watch(conditionTabEnabledProvider);
+        context.usesKoreanFeatures && ref.watch(conditionTabEnabledProvider);
     return [
       0,
       if (scheduleVisible) kScheduleManagementTabIndex,
@@ -788,15 +831,22 @@ class _MainScreenState extends ConsumerState<MainScreen>
             icon: const Icon(Icons.alarm), label: context.l10n.navNextAlarm);
       case 1:
         return BottomNavigationBarItem(
-            icon: const Icon(Icons.event_note_outlined),
-            label: context.l10n.navScheduleManagement);
+            icon: NavIconEmphasis(
+                icon: Icons.event_note_outlined,
+                sequence: _emphasizedTab == 1 ? _emphasisSequence : 0),
+            label: context.koOnly.navScheduleManagement);
       case 2:
         return BottomNavigationBarItem(
             icon: const Icon(Icons.calendar_month),
             label: context.l10n.navCalendar);
       case 3:
-        return const BottomNavigationBarItem(
-            icon: Icon(Icons.self_improvement), label: '수면·회복');
+        return BottomNavigationBarItem(
+            icon: NavIconEmphasis(
+                icon: Icons.self_improvement,
+                sequence: _emphasizedTab == 3 ? _emphasisSequence : 0),
+            label: Localizations.localeOf(context).languageCode == 'ko'
+                ? '수면·회복'
+                : 'Sleep');
       case 4:
         return BottomNavigationBarItem(
             icon: const Icon(Icons.settings), label: context.l10n.navSettings);
@@ -808,6 +858,33 @@ class _MainScreenState extends ConsumerState<MainScreen>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int?>(optionalTabActivationProvider, (previous, tab) {
+      if (tab == null) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        setState(() => _currentIndex = tab);
+        await WidgetsBinding.instance.endOfFrame;
+        if (!mounted) return;
+        if (tab == 1) {
+          await maybeShowScheduleTabTutorial(context,
+              canShow: () => mounted && _currentIndex == tab);
+        } else {
+          await maybeShowConditionTabTutorial(context,
+              canShow: () => mounted && _currentIndex == tab);
+        }
+        // The modal/page reverse transition must finish before the icon grows.
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        if (!mounted) return;
+        ref.read(optionalTabActivationProvider.notifier).state = null;
+        if (_currentIndex == tab) {
+          setState(() {
+            _emphasizedTab = tab;
+            _emphasisSequence++;
+          });
+        }
+      });
+    });
     final visibleTabIndices = _visibleTabIndices;
     // ⭐ 방금 이 탭이 꺼졌는데(다른 경로로, 혹은 아직 반영 전 프레임에) 지금
     // 하필 그 탭을 보고 있었다면 안전한 탭(달력)으로 옮김 - DisableTabButton의
@@ -846,23 +923,10 @@ class _MainScreenState extends ConsumerState<MainScreen>
         // 뷰가 살아있음) 화면에서 크기·렌더링만 뺀다 - 그래서 탭을 몇 번을 오가도
         // 광고는 앱 시작 시 딱 한 번만 로드되고, 달력 탭으로 돌아오면 다시
         // "짠" 나타나기만 함(재생성 없음).
+        resizeToAvoidBottomInset: false,
         body: Column(
           children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  // 탭 화면
-                  _tabs[_currentIndex],
-                  // ⭐ 권한 경고 배너 (하단에 오버레이)
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: const PermissionWarningBanner(),
-                  ),
-                ],
-              ),
-            ),
+            Expanded(child: _tabs[_currentIndex]),
             // ⭐ 2026-08-25 - 일정관리 탭뿐 아니라 달력 탭에서도 항상 자리를
             // 차지하도록 확장 - "일정관리도 광고를 고정으로 보여주자" 요청.
             // 2026-09-01 후속14 - 컨디션 탭(index 3)도 동일하게 추가(사용자 요청 -
@@ -871,10 +935,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
             // 바꾸면서 일정관리·달력의 인덱스가 서로 맞바뀌었을 뿐(1,2 두 값은
             // 그대로) 이 조건식 자체는 안 바뀜 - kCalendarTabIndex(=2)와 일정관리
             // 인덱스(=1)를 그대로 씀.
-            // ⭐ 2026-09-03 - 영어 로케일이면 컨디션 탭이 빠져서 index 3이
-            // 설정 탭 자리가 됨 - 그 상태에서 index 3을 그대로 광고 대상에
-            // 넣으면 설정 탭에도 광고가 뜨는 버그가 생겨서 _showConditionTab을
-            // 반영해 조건을 분기함.
+            // 사용자 설정으로 숨긴 탭은 _visibleTabIndices에서 빠진다.
             // ⭐ 2026-09-13(2차) - "OO 화면 사용하지 않기" 버튼을 여기(광고
             // 바로 위, 항상 고정 위치)에서 각 탭 자신의 스크롤 콘텐츠 맨
             // 아래로 옮김(사용자 요청 - "진짜 필요할 때만 누르는 버튼이니
@@ -886,7 +947,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
             Offstage(
               offstage: _currentIndex != 1 &&
                   _currentIndex != kCalendarTabIndex &&
-                  !(_showConditionTab && _currentIndex == 3),
+                  _currentIndex != 3,
               child: const BannerAdSlot(),
             ),
           ],
@@ -906,10 +967,6 @@ class _MainScreenState extends ConsumerState<MainScreen>
           }(),
           onTap: (visibleIndex) {
             final tab = visibleTabIndices[visibleIndex];
-            if (tab != _currentIndex && tab < kAnalyticsTabNames.length) {
-              AppAnalytics.track(AnalyticsEvent.tabSelected,
-                  params: {'tab': kAnalyticsTabNames[tab]});
-            }
             setState(() => _currentIndex = tab);
           },
           items: [for (final i in visibleTabIndices) _navItemFor(i, context)],
@@ -1099,6 +1156,7 @@ class _AlarmTestScreenState extends State<AlarmTestScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Scaffold(
       appBar: AppBar(
         title: const Text('🔔 교대종 알람 테스트'),

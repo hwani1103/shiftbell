@@ -1,0 +1,276 @@
+{
+  "id": "A11",
+  "updated_at": "2026-10-09T04:50:01.977732+09:00",
+  "status": "TARGETED_VALIDATION_COMPLETE_WITH_RECORDED_LIMITS",
+  "policy": {
+    "suppression": "Unlocked external overlay only, when current 7777 id/tag/alarmId/round is active and app/actual channel/group are enabled",
+    "fallback": [
+      "ABSENT",
+      "BLOCKED",
+      "UNKNOWN"
+    ],
+    "heads_up_visibility_checked": false,
+    "observation_delay_ms": 500,
+    "continuous_monitoring": false,
+    "unchanged": [
+      "initial notification/FSI/group/silent/channel behavior",
+      "locked AlarmActivity",
+      "cover",
+      "in-app card",
+      "scheduler",
+      "snooze",
+      "audio",
+      "DB"
+    ]
+  },
+  "candidate": {
+    "package": "com.hwani1103.shiftbell.dev",
+    "version": "1.0.23-dev",
+    "version_code": 25,
+    "database_version": 29,
+    "artifact": "artifacts/notification_priority_2026_10_09/tested-dev-debug.apk",
+    "installed": "79dd5045235344026fe43a90ab4906109c408c015ee2de671dee3a3d2646a2c4",
+    "candidate": "79dd5045235344026fe43a90ab4906109c408c015ee2de671dee3a3d2646a2c4",
+    "match": true
+  },
+  "automated": {
+    "focused": {
+      "result": "PASS",
+      "tests": 39,
+      "G1RingRoundTest": 37,
+      "CoverAlarmNotificationTest": 2,
+      "failures": 0,
+      "log": "artifacts/notification_priority_2026_10_09/focused.log"
+    },
+    "mandatory": {
+      "command": "tools/check_critical_release.ps1 -Build",
+      "result": "PASS",
+      "exit_code": 0,
+      "flutter_batches": [
+        38,
+        109,
+        99,
+        67,
+        11
+      ],
+      "flutter_total": 324,
+      "native_functional": "PASS",
+      "native_migration_tests": 15,
+      "dev_debug_build": "PASS",
+      "web_JS_build": "PASS",
+      "log": "artifacts/notification_priority_2026_10_09/critical.log"
+    },
+    "first_attempt": "Sandbox Gradle cache access failure before product tests; retried in approved environment.",
+    "release_builds": 0
+  },
+  "device": {
+    "manufacturer": "Samsung",
+    "model": "SM-X400",
+    "serial": "R54Y800G39V",
+    "android": 16,
+    "sdk": 36,
+    "language": "Korean",
+    "install": "adb install -r; no data clear",
+    "fixture": "Silent NP09 custom alarms registered via real Dart AlarmNotifier from VM; not UI registration",
+    "original_stay_on_while_plugged_in": 15,
+    "requested_stay_awake_enabled_first": true
+  },
+  "cases": [
+    {
+      "id": "N1",
+      "result": "PASS",
+      "notification": "granted",
+      "overlay": "granted",
+      "alarm_id": 5,
+      "round": 7,
+      "observed": "Current7777 PRESENT; actual heads-up, no external overlay; real shade +5m tap ended ring and created future snoozed reservation/history5. Future test snooze canceled.",
+      "evidence": [
+        "artifacts/notification_priority_2026_10_09/N1_both_allowed.png",
+        "artifacts/notification_priority_2026_10_09/N1_both_allowed_state.json",
+        "artifacts/notification_priority_2026_10_09/N1_both_allowed_notification.txt",
+        "artifacts/notification_priority_2026_10_09/N1_both_allowed_logcat.txt",
+        "artifacts/notification_priority_2026_10_09/N1_snooze_tap.json",
+        "artifacts/notification_priority_2026_10_09/N1_snoozed.json"
+      ]
+    },
+    {
+      "id": "N2",
+      "result": "PASS",
+      "notification": "denied via actual runtime permission revoke",
+      "overlay": "granted",
+      "alarm_id": 7,
+      "round": 9,
+      "observed": "BLOCKED; external overlay only. Actual X from observed screenshot coordinates ended ring/swiped. Revocation killed app process; cold delivery preserved.",
+      "evidence": [
+        "artifacts/notification_priority_2026_10_09/N2_denied.png",
+        "artifacts/notification_priority_2026_10_09/N2_denied_state.json",
+        "artifacts/notification_priority_2026_10_09/N2_denied_notification.txt",
+        "artifacts/notification_priority_2026_10_09/N2_denied_logcat.txt",
+        "artifacts/notification_priority_2026_10_09/tables_after_controls.json"
+      ]
+    },
+    {
+      "id": "N3",
+      "result": "PASS",
+      "notification": "denied",
+      "overlay": "denied",
+      "alarm_id": 8,
+      "round": 10,
+      "observed": "No external controls at home. Opening app showed in-app card; real X ended ring/swiped.",
+      "evidence": [
+        "artifacts/notification_priority_2026_10_09/N3_home.png",
+        "artifacts/notification_priority_2026_10_09/N3_in_app.png",
+        "artifacts/notification_priority_2026_10_09/N3_in_app_state.json",
+        "artifacts/notification_priority_2026_10_09/N3_dismiss_tap.json",
+        "artifacts/notification_priority_2026_10_09/tables_after_controls.json"
+      ]
+    },
+    {
+      "id": "N4",
+      "result": "PASS",
+      "notification": "granted",
+      "overlay": "denied",
+      "alarm_id": 9,
+      "round": 11,
+      "observed": "Notification only; actual shade Dismiss ended ring/swiped.",
+      "evidence": [
+        "artifacts/notification_priority_2026_10_09/N4_notification_only.png",
+        "artifacts/notification_priority_2026_10_09/N4_notification_only_state.json",
+        "artifacts/notification_priority_2026_10_09/N4_dismiss_tap.json",
+        "artifacts/notification_priority_2026_10_09/tables_after_controls.json"
+      ]
+    },
+    {
+      "id": "N5",
+      "result": "PARTIAL",
+      "notification": "granted",
+      "overlay": "granted",
+      "alarm_id": 10,
+      "round": 12,
+      "observed": "Secure locked AlarmActivity RING_PRESENTED; HOME onUserLeaveHint reposted and retained same-round7777. Natural 3min timeout ended ring.",
+      "not_verified": "User authenticates PIN, reaches unlocked launcher, then uses7777 to end same alarm. Awaiting user unlock; no PIN collection/guessing/security changes.",
+      "evidence": [
+        "artifacts/notification_priority_2026_10_09/N5_locked.png",
+        "artifacts/notification_priority_2026_10_09/N5_after_home_state.json",
+        "artifacts/notification_priority_2026_10_09/N5_after_home_notification.txt",
+        "artifacts/notification_priority_2026_10_09/N5_after_home_logcat.txt",
+        "artifacts/notification_priority_2026_10_09/tables_before_cleanup.json"
+      ]
+    },
+    {
+      "id": "N5_locked_shade_followup",
+      "result": "AUTHENTICATION_REQUIRED_NOT_ACTION_PASS",
+      "alarm_id": 11,
+      "round": 13,
+      "observed": "7777 and buttons visible in locked shade; actual Dismiss tap required system authentication and did not end ringing. Later timeout.",
+      "evidence": [
+        "artifacts/notification_priority_2026_10_09/N5_home_controls_state.json",
+        "artifacts/notification_priority_2026_10_09/N5_expanded.png",
+        "artifacts/notification_priority_2026_10_09/N5_home_dismiss_tap.json",
+        "artifacts/notification_priority_2026_10_09/tables_before_cleanup.json"
+      ]
+    },
+    {
+      "id": "N6_after_user_unlock",
+      "result": "PASS",
+      "alarm_id": 12,
+      "round": 14,
+      "notification": "granted",
+      "overlay": "granted",
+      "observed": "Unlocked popup only; actual notification-body tap opened AlarmActivity; HOME reached unlocked Samsung launcher; same7777 persisted; expanded shade and actual Dismiss tap ended ring at04:46:27, history swiped, DB alarms0, current ring and7777 removed. No screen sleep/lock command.",
+      "coverage_boundary": "N5 proves secure locked entry and notification retention; N6 separately proves authenticated Activity-to-home and actual action. Not a single same-alarm lock-to-PIN-unlock end-to-end run.",
+      "evidence": [
+        "artifacts/notification_priority_2026_10_09/N6_popup.png",
+        "artifacts/notification_priority_2026_10_09/N6_popup_logcat.txt",
+        "artifacts/notification_priority_2026_10_09/N6_fullscreen.png",
+        "artifacts/notification_priority_2026_10_09/N6_fullscreen_window.txt",
+        "artifacts/notification_priority_2026_10_09/N6_fullscreen_state.json",
+        "artifacts/notification_priority_2026_10_09/N6_after_home.png",
+        "artifacts/notification_priority_2026_10_09/N6_after_home_window.txt",
+        "artifacts/notification_priority_2026_10_09/N6_after_home_policy.txt",
+        "artifacts/notification_priority_2026_10_09/N6_after_home_notification.txt",
+        "artifacts/notification_priority_2026_10_09/N6_after_home_state.json",
+        "artifacts/notification_priority_2026_10_09/N6_dismiss_expanded_tap.json",
+        "artifacts/notification_priority_2026_10_09/N6_ended_state.json",
+        "artifacts/notification_priority_2026_10_09/N6_ended_notification.txt",
+        "artifacts/notification_priority_2026_10_09/N6_results.json"
+      ]
+    }
+  ],
+  "setup_failures": [
+    {
+      "case": "N2_notification_blocked",
+      "classification": "INVALID_DENIAL_PRECONDITION",
+      "reason": "POST_NOTIFICATION appop ignore restored allow; permissionSnapshot still granted. Not counted as blocked case. Retried as N2 with pm revoke."
+    },
+    {
+      "classification": "HARNESS",
+      "reason": "VM compilation service required Flutter attach; secure-screen accessibility dump failures and background VM timeouts separately recorded. Not product FAIL/PASS evidence."
+    }
+  ],
+  "cleanup": {
+    "data": {
+      "table_count": 17,
+      "all_equal": true,
+      "different": [],
+      "alarms": 0
+    },
+    "restored_permissions": {
+      "notification": "granted",
+      "overlay": "granted",
+      "exactAlarm": "granted",
+      "fullScreen": "granted",
+      "alarmChannel": "granted",
+      "xiaomi": false,
+      "sdk": 36
+    },
+    "stay_awake_kept": true,
+    "test_alarms_remaining": 0,
+    "test_history_creation_logs_removed": "NP09 fixture labels only",
+    "original_data_backups": [
+      "artifacts/notification_priority_2026_10_09/user_before.tar",
+      "artifacts/notification_priority_2026_10_09/user_de_before.tar"
+    ],
+    "production_app_modified": false,
+    "final_state_evidence": "artifacts/notification_priority_2026_10_09/final_device_after_unlock.json",
+    "active_ring_present": false,
+    "debugger_detached": true,
+    "device_awake_charging_stay_on": true,
+    "data_evidence": "artifacts/notification_priority_2026_10_09/data_preservation_after_unlock.json",
+    "keyguard_showing": false
+  },
+  "limits": [
+    "Active7777 is not a guarantee of popup or notification shade visibility.",
+    "No measured 95% rate.",
+    "No physical sound/vibration/DND/BT/headphone/night-long Doze/new cover layout verification.",
+    "No new Streaming sessions/manufacturer PASS; earlier evidence retains original candidate/model/ROM scope.",
+    "Late posting beyond500ms or UNKNOWN retains overlay; later popup may overlap.",
+    "No continuous control recreation after later permission removal.",
+    "App-foreground internal card policy is unchanged."
+  ],
+  "documentation": {
+    "decision_ledger": "docs/next_version/알림우선_오버레이_표시정책_2026-10-09.txt",
+    "current_board": "docs/next_version/dev_출시전_핵심코어_체크리스트.txt",
+    "core_review": {
+      "reviewed_lines": 483,
+      "archive": "docs/next_version/evidence/core_checklist_before_2026_10_09.txt",
+      "sha256": "40383fa998840e95685b4bc039ef67afa367b4a5de1bfb496f22c9764510f090",
+      "archived_at": "2026-10-09T00:58:40.340746+09:00"
+    },
+    "review_completed": true,
+    "original_reports_preserved": true
+  },
+  "shutdown": {
+    "requested_by_user": true,
+    "status": "WINDOWS_ACCEPTED_SHUTDOWN_NOT_POWER_OFF_CONFIRMED",
+    "command_issued": true,
+    "command": "shutdown.exe /s /t 0",
+    "forced": false,
+    "requested_at": "2026-10-09T04:51:23.4887837+09:00",
+    "exit_code": 0
+  },
+  "privacy": "Raw local captures include device wallpaper/notification data and remain ignored under artifacts; do not publish these as store images.",
+  "source_manifest": "artifacts/notification_priority_2026_10_09/source_manifest.json",
+  "owned_hashes": "artifacts/notification_priority_2026_10_09/change_hashes.json",
+  "closure_rationale": "The changed unlocked branch passed all4 permission combinations and real controls. Unchanged locked entry/HOME retention was tested inN5; after human unlock, the shared Activity/HOME/notification-action continuation passed inN6. Targeted work closes with the split-run boundary recorded; no additional locking or manufacturer rerun."
+}

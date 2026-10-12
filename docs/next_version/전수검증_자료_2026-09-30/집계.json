@@ -1,0 +1,69 @@
+{
+  "기능": 202,
+  "화면": 55,
+  "기존실기기": 42,
+  "소스": 154,
+  "주의": "누적 실행은 재검증을 포함하며 고유 테스트 수가 아님. 최초 FAIL의 해결은 본문 실행 결과 참조.",
+  "누적실행": {
+    "PASS": 1152,
+    "FAIL": 11
+  },
+  "실행별": {
+    "alarm_list_layout_final": {
+      "PASS": 2
+    },
+    "button_popups_final": {
+      "PASS": 25
+    },
+    "compact": {
+      "PASS": 72,
+      "FAIL": 4
+    },
+    "compact_button_final": {
+      "PASS": 11
+    },
+    "critical_final": {
+      "PASS": 108
+    },
+    "dashboard": {
+      "PASS": 12
+    },
+    "delete_all_regression": {
+      "PASS": 38
+    },
+    "english_calendar_alignment_layout": {
+      "PASS": 12
+    },
+    "english_label_alignment": {
+      "PASS": 1
+    },
+    "firestore": {
+      "PASS": 16
+    },
+    "flutter": {
+      "PASS": 670,
+      "FAIL": 7
+    },
+    "friend_density_safe_area": {
+      "PASS": 4
+    },
+    "native_final": {
+      "PASS": 112
+    },
+    "overtime_settings_layout": {
+      "PASS": 4
+    },
+    "r2_date_alarm_popup_layout": {
+      "PASS": 2
+    },
+    "r3_native_results": {
+      "PASS": 12
+    },
+    "restore_resume_regression": {
+      "PASS": 44
+    },
+    "time_format_resume": {
+      "PASS": 7
+    }
+  }
+}

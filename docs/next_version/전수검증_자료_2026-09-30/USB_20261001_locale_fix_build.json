@@ -1,0 +1,8 @@
+{
+  "build/app/outputs/apk/dev/debug/app-dev-debug.apk": "4491e6c918e0c296fc010d786a3c85261e9bca917748f4337177886768802e4a",
+  "android/app/src/main/kotlin/com/hwani1103/shiftbell/ScheduleNotificationScheduler.kt": "be65cf8c893339b291807d2dd91e151849b8631cb707a1d97660350c5e50b56b",
+  "android/app/src/main/kotlin/com/hwani1103/shiftbell/ReleaseLocalePolicy.kt": "db80907d01a8a27bf8bd5275981f19e08a4e8c0e957cedbbe0a44a6b22e50658",
+  "android/app/src/test/kotlin/com/hwani1103/shiftbell/G1ScheduleNotifyTest.kt": "e77fbe997ae24d25e37019fa1d466a9337358a7c2e5c1389919b223ab61310ac",
+  "device_package": "com.hwani1103.shiftbell.dev",
+  "validation": "G1ScheduleNotifyTest 10/10 PASS; S26 KO schedule reservation 1 -> EN 0 -> KO 1 -> delete 0, DB row preserved through locale switches"
+}

@@ -60,7 +60,7 @@ class AppButton extends StatelessWidget {
 
   bool get _enabled => onPressed != null;
 
-  static const double _ringWidth = 3.0;  // ⭐ 3.0→4.0, "링을 아주 살짝만 더 두껍게"
+  static const double _ringWidth = 3.0; // ⭐ 3.0→4.0, "링을 아주 살짝만 더 두껍게"
   static const _outerRadius = BorderRadius.all(Radius.circular(14));
   static const _innerRadius = BorderRadius.all(Radius.circular(11));
 
@@ -117,22 +117,29 @@ class AppButton extends StatelessWidget {
               splashColor: Colors.white.withValues(alpha: 0.18),
               highlightColor: Colors.white.withValues(alpha: 0.1),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    DefaultTextStyle.merge(
+                    Flexible(
+                        child: DefaultTextStyle.merge(
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: _enabled ? Colors.white : const Color(0xFF6B7280),
+                        color:
+                            _enabled ? Colors.white : const Color(0xFF6B7280),
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
                       child: IconTheme.merge(
-                        data: IconThemeData(color: _enabled ? Colors.white : const Color(0xFF6B7280)),
+                        data: IconThemeData(
+                            color: _enabled
+                                ? Colors.white
+                                : const Color(0xFF6B7280)),
                         child: child,
                       ),
-                    ),
+                    )),
                   ],
                 ),
               ),

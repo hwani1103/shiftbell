@@ -4,19 +4,28 @@
 // 대체함. "다크모드"라는 전역 토글은 이제 없고, 9개 테마 중 하나를 고르는
 // 것뿐이라 상태 타입 자체가 ThemeMode가 아니라 CalendarThemeId임.
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/calendar_theme.dart';
+import '../l10n/release_locale.dart';
 import '../services/app_analytics.dart';
 
 class CalendarThemeNotifier extends StateNotifier<CalendarThemeId> {
-  CalendarThemeNotifier() : super(kDefaultCalendarThemeId);
+  CalendarThemeNotifier() : super(_deviceDefault());
 
   CalendarThemeNotifier.withInitial(CalendarThemeId initial) : super(initial);
 
   static const _prefsKey = 'calendar_theme_id';
 
+  static CalendarThemeId _deviceDefault() =>
+      defaultCalendarThemeForLocale(resolveReleaseLocale(
+          WidgetsBinding.instance.platformDispatcher.locales,
+          releaseSupportedLocales));
+
   Future<void> setTheme(CalendarThemeId id) async {
-    if (state != id) AppAnalytics.track(AnalyticsEvent.calendarThemeChanged, params: {'theme': id.name});
+    if (state != id)
+      AppAnalytics.track(AnalyticsEvent.calendarThemeChanged,
+          params: {'theme': id.name});
     state = id;
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -33,18 +42,19 @@ class CalendarThemeNotifier extends StateNotifier<CalendarThemeId> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final saved = prefs.getString(_prefsKey);
-      if (saved == null) return kDefaultCalendarThemeId;
+      if (saved == null) return _deviceDefault();
       return CalendarThemeId.values.firstWhere(
         (e) => e.name == saved,
-        orElse: () => kDefaultCalendarThemeId,
+        orElse: _deviceDefault,
       );
     } catch (e) {
       print('❌ 달력 테마 로드 실패: $e');
-      return kDefaultCalendarThemeId;
+      return _deviceDefault();
     }
   }
 }
 
-final calendarThemeProvider = StateNotifierProvider<CalendarThemeNotifier, CalendarThemeId>((ref) {
+final calendarThemeProvider =
+    StateNotifierProvider<CalendarThemeNotifier, CalendarThemeId>((ref) {
   return CalendarThemeNotifier();
 });

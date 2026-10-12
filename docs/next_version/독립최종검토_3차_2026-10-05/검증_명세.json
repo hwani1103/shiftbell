@@ -1,0 +1,50 @@
+{
+  "baseline_commit": "080ca5913dbe9787c15fa7d60baca95b805075ed",
+  "reviewed": 2944,
+  "changed": 65,
+  "kept": 2879,
+  "changed_by_language": {
+    "pt-BR": 17,
+    "de-DE": 17,
+    "en-US/en-GB": 15,
+    "hi-IN": 16
+  },
+  "exposure_key_count": 180,
+  "no_direct_reference_count": 69,
+  "resources": {
+    "lib\\l10n\\app_pt.arb": {
+      "start_sha256": "ff6dcb576c3350140d8d91caeba19e3839a7dc0a438166181bb15a8d5782c2c4",
+      "final_sha256": "8b446993a6b6aa15f77a1bf003467a64b714f2d44341c9aefa30a781f45e01c7"
+    },
+    "lib\\l10n\\app_de.arb": {
+      "start_sha256": "5e752811149d3dcd273337d5dac4e3351e44dd556057224dc3225797a23a13b3",
+      "final_sha256": "b6d16a4e23d6280c1ace7a16a9e077d3660120a2653fe89d6a327da7ef0dc58b"
+    },
+    "lib\\l10n\\app_en.arb": {
+      "start_sha256": "5ad58366bf44fe9a64d2f906295071e971d35670bdd88b99a955373167c78589",
+      "final_sha256": "39c800cfd15ba8c261480089e413d07e70805fe0ae1c5000478be558c4c38ea4"
+    },
+    "lib\\l10n\\app_hi.arb": {
+      "start_sha256": "53d5ac7a4dbfd64b6c90ba579c2fb5c864b1a2f33f9cecee6797fc3a1e7807a9",
+      "final_sha256": "ece02316d8b0fd6b202011f19d6a93c16144f81fa2c952498b6cbfa50bb7dca4"
+    },
+    "android\\app\\src\\main\\res\\values-pt\\strings.xml": {
+      "start_sha256": "30aafeb1f9012822ea6cfa50d37502b7a0256e0bf5bdc7e483e9c776359bffdd",
+      "final_sha256": "30aafeb1f9012822ea6cfa50d37502b7a0256e0bf5bdc7e483e9c776359bffdd"
+    },
+    "android\\app\\src\\main\\res\\values-de\\strings.xml": {
+      "start_sha256": "330b9345bd7990f9ed5686a4bc85926b567669b1d24f593219fd0cc8dd082b41",
+      "final_sha256": "330b9345bd7990f9ed5686a4bc85926b567669b1d24f593219fd0cc8dd082b41"
+    },
+    "android\\app\\src\\main\\res\\values\\strings.xml": {
+      "start_sha256": "965320912befff4543a8994ef7a5f24a340d349b58e8ceb8bd119aac326b7833",
+      "final_sha256": "965320912befff4543a8994ef7a5f24a340d349b58e8ceb8bd119aac326b7833"
+    },
+    "android\\app\\src\\main\\res\\values-hi\\strings.xml": {
+      "start_sha256": "72ea77d7019343fcbf857b791d3c7fc7a80881dd446c39aec71548511424270f",
+      "final_sha256": "72ea77d7019343fcbf857b791d3c7fc7a80881dd446c39aec71548511424270f"
+    }
+  },
+  "layout_tested": false,
+  "physical_device_tested": false
+}

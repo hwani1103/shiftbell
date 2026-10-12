@@ -1,0 +1,18 @@
+{
+  "foreign_original_entries": 2944,
+  "decisions": {
+    "유지": 2072,
+    "삭제": 840,
+    "수정": 32,
+    "신규": 100
+  },
+  "foreign_current_common_entries": 2204,
+  "korean_arb_moved_unchanged": 199,
+  "korean_native_moved": 11,
+  "foreign_hardcoded_one_tap_removed": 25,
+  "foreign_hardcoded_personal_schedule_removed": 5,
+  "new_common_per_language": 25,
+  "new_permission_keys_per_language": 19,
+  "new_public_web_keys_per_language": 6,
+  "scope": "Counts are resource entries per language, not file counts; hardcoded removals are separate."
+}

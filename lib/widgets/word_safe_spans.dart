@@ -34,7 +34,9 @@ List<InlineSpan> wordSafeSpans(String text, TextStyle? style) {
       else
         WidgetSpan(
           alignment: PlaceholderAlignment.middle,
-          child: Text(token, style: style),
+          // Text.rich scales WidgetSpan placeholders itself. Inheriting the
+          // system scaler here applies it twice (1.6 becomes 2.56).
+          child: Text(token, style: style, textScaler: TextScaler.noScaling),
         ),
   ];
 }

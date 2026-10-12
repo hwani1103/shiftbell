@@ -1,0 +1,205 @@
+ShiftBell 유료 실기기 검토 — 2026-10-06 KST
+상태: 유료 검사 종료. 이번 5개 세션 모두 반환 성공 및 Cloud API FINISHED 확인. 활성 예약 없음.
+요약: 네 제조사의 새 전체화면 설정 경로/허용 복귀 확인. 공통 잠금 전체화면 P0 문제 발견.
+Infinix 백그라운드 재울림은 정상 확인 실패/원인 미확정. 전체 계획 전 항목 PASS는 아니다.
+
+1. 실행 범위와 판정 원칙
+사용자 승인: log-it-3d269, 최대 USD20, Xiaomi / Motorola / OPPO / Infinix.
+제품 코드 수정 및 새 APK 빌드 없음. USB Samsung 조작 없음. 레이아웃 검사 제외.
+모든 adb는 해당 세션의 localhost:<port>를 명시했다. 반환 성공 후 다음 기기를 예약했다.
+약 120분의 보수적 총 시간 보호 상한(기본 단가 산술 USD18)으로 USD20 여유를 뒀다.
+이번 APK: build/paid_devices_2026-10-06/tested-dev-release.apk
+패키지 com.hwani1103.shiftbell.dev / 1.0.23-dev / release / 85,078,340 bytes.
+SHA256 d4d99b11ec120de36961585551928e97f070f146b54e020f58f510d586130cf6.
+다른 세션의 최신 편집/후속 빌드를 이 APK의 PASS로 취급하지 않는다.
+정적 분석/호스트 테스트/빌드 성공을 실기기 PASS로 기록하지 않는다.
+PASS는 기록된 모델·OS·권한·잠금 조건에 한정한다. 브랜드의 모든 모델/ROM 통과라는 의미가 아니다.
+재생 로그 및 MediaPlayer/진동 API 확인은 실제 스피커 청취·진동 촉감 측정과 구분한다.
+울림/5분 대기 도중 시계를 바꾸지 않았다. 울림 전 시각 준비와 실제 자연 대기를 구분했다.
+설정 진입만으로 허용 처리하지 않고 OS 및 앱 복귀 상태를 비교했다.
+
+2. 가장 중요한 발견 — 권한 flow 성공과 실제 알람 표시를 분리해야 한다
+P0: 전체화면 허용 + 정확 알람 허용 + 알림 허용 + 오버레이 거부, PIN 잠금 조건에서
+Motorola G34/Android14, OPPO A38/Android14 모두 알람 수신/재생은 실행되지만 전체화면 AlarmActivity가 표시되지 않았다.
+OS 직접 화면 실행: BAL_BLOCK / result code=102.
+제어 알림 7777: 채널 중요도4, fullScreen PendingIntent 있음, groupAlertBehavior=1.
+SystemUI의 명시적 경고:
+NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR: GroupAlertBehavior will prevent HUN.
+Xiaomi14/Android15에서도 OEM10021 및 FSI 허용 / 오버레이 거부에서 직접 실행 BAL_BLOCK 및 전체화면 미표시 관찰.
+Xiaomi에서 같은 SystemUI 경고 문구 자체는 이번 기록으로 확정하지 않는다.
+Xiaomi의 Pocket mode/근접 센서 안내는 별도 환경 제한이며, 볼륨 올리기 해제 후에도 위 거부 조건은 전체화면이 없었다.
+
+코드상 원인 후보: android/app/src/main/kotlin/com/hwani1103/shiftbell/NotificationHelper.kt
+220~231 부근: HIGH priority/FSI 설정 뒤 setSilent(true), setGroup("shiftbell_notifications"), setGroupSummary(false).
+검사 시 이 파일의 SHA256은 frozen artifact의 source_hashes와 일치했다.
+f1d737a8e07532d55d193117d28374029de7bbbd998e3f59ec471e86c3aed268.
+OS 경고와 해당 구성이 연결되는 강한 단서다. setSilent 한 줄만이 유일한 원인이라고 아직 단정하지 않는다.
+오버레이 허용일 때는 OPPO/Xiaomi의 직접 실행이 성공해 문제가 가려진다.
+권한 안내를 더 추가하는 것으로 이 조건의 알림 동작 문제가 해결됐다고 볼 수 없다.
+개선 구현은 다른 세션에서 수행하고, 수정 후 P0 실행기 및 동일 조건의 실제 잠금 재검사를 해야 한다.
+
+3. 새 전체화면 권한 설정 flow — 실제 앱 버튼 기준
+Xiaomi14 / Android15 / houji
+- 최초 첫 실행 후 FSI ignore. 앱 재진입 후 Setup needed로 갱신.
+- 앱 Settings -> Xiaomi lock screen alarm settings 안내 -> Open permission settings.
+- 앱 전용 편집기 -> Other permissions -> Open new windows while running in the background -> Always allow.
+- 실제 항목명과 현재 영어 앱 안내가 일치. OEM10021 및 USE_FULL_SCREEN_INTENT allow 전환.
+- 시스템 Back 3회 -> 앱 안내 Allowed 갱신 PASS.
+- 변경 없는 복귀에서 Still not allowed 유지 PASS(첫 세션 기록).
+- 이 모델은 한 번 탭으로 허용 완료되는 직접 토글 경로가 아니다. 안내 시트 뒤 사용자가 목록/항목/Always allow를 선택한다.
+- 오버레이: 앱 버튼 -> Display over other apps 목록 -> ShiftBell(Test) -> Allow display over other apps -> Back2 -> Allowed PASS.
+- 설정 진입/설명 읽기를 허용으로 오인하지 않았으며 자동으로 여러 설정을 연쇄 실행하지 않았다.
+
+Motorola G34 / Android14 / fogos
+- 최초 Allowed. 실제 OS off -> 앱 Setup needed.
+- 앱 버튼 -> 앱별 Full screen notifications.
+- 변경 없는 Back -> 미허용 유지, 토글 on + Back -> Allowed. PASS.
+
+OPPO A38 / Android14 / OP5759L1
+- 실제 OS 제목 Send full-screen notifications.
+- 앱 버튼 -> 앱별 스위치, 변경 없는 복귀/실제 허용 복귀 PASS.
+- 오버레이는 앱 목록 -> ShiftBell 선택 -> 허용 -> Back2 -> Allowed PASS.
+
+Infinix NOTE50 Pro+ / Android15 / Infinix X6856 / XOS15.1.2
+- Transsion China 제휴 실험실. 사용자 직접 승인 및 제공 이름으로 약관 수락, 실제 enabled 성공 확인.
+- 활성화 증거 build/paid_devices_2026-10-06/transsion_enabled.jpg.
+- 전체화면 실제 OS 제목 Show full screen notifications.
+- off -> 앱 미허용, 실제 앱 버튼 -> 앱별 설정, 변경 없는 복귀 -> 미허용 유지, on -> 앱 Allowed. PASS.
+- Xiaomi 전용 안내가 나오지 않음.
+- 오버레이 앱 목록의 Search applications -> ShiftBell(Test) -> Allow display over other apps.
+- 실제 OS 스위치 checked=true, 앱에 완전히 돌아온 뒤 Allowed. PASS.
+- 정확 알람은 USE_EXACT_ALARM으로 설치 시 granted=true. 거부를 강제로 만들지 않았다.
+
+4. 핵심 알람 새 검사 결과
+Motorola
+- 오버레이 거부/알림·FSI 허용에서 실제 09시 수신/재생.
+- 09:00:00.050 -> 09:03:00.161 중지/.171 소리 중지: 자연 3분 독립 종료 PASS.
+- 앱 내 울림 카드 표시, 실제 +5m -> 즉시 중지/5분 예약 PASS.
+- 시계 변경 없이 09:06:05.011 자연 재수신 -> 실제 X -> 09:06:06.708 중지/.722 소리 중지 PASS.
+- 잠금 전체화면은 위 P0 문제 조건에서 FAIL. 과거 정상 조건의 잠금 Dismiss/자정 검사는 이전 근거로 보존.
+
+OPPO
+- 오버레이 거부/알림·FSI 허용: PIN 위 전체화면 FAIL, 제어 알림 표시.
+- PIN 해제 없이 알림 펼치기 -> Dismiss alarm -> 09:00:56.931 중지/.944 소리 중지 PASS.
+- 네 권한 모두 허용: PIN 잠금 위 AlarmActivity 표시 PASS. screenshot + window focus + keyguard showing/occluded 확인.
+- 실제 잠금 +5m -> 09:00:59.056 중지 -> 09:05:59 자연 재수신 -> 잠금 X -> 09:06:05.039 중지/.064 소리 중지 PASS.
+- 알림/오버레이 모두 외부 철회: 앱 재진입 시 울림 카드 PASS.
+- HOME으로 나간 뒤 09:03:00.106 중지/.119 소리 중지: 자연 3분 독립 종료 PASS.
+
+Xiaomi
+- 자연 자정: 00:00:00.046 Wakeup, .130 diff +1 재등록9 실패0 관찰. 해당 짧은 경계 갱신 PASS.
+- 오버레이 거부/FSI 허용: 실제 09시 수신/재생, 전체화면 미표시. 독립3분 종료 PASS.
+- 09:00:00.019 -> 09:03:00.052 중지/.076 소리 중지. 울림 중 시계 변경 없음.
+- 오버레이 허용 후 홈 위 Overlay/X 실제 종료 PASS(로그상 잠금 해제 회차).
+- 별도 PIN 잠금 true 확인 회차: 09:00:00.041 수신, .700 BAL_ALLOW_SAW_PERMISSION -> AlarmActivity 표시 성공.
+- screenshot + focus AlarmActivity + isKeyguardShowing=true: 정상 조건의 잠금 전체화면 표시 PASS.
+- 원격 잠금 터치(X/알림 펼치기/swipe)가 반응하지 않아 잠금 Dismiss/+5m/자연 재울림은 환경 제한/미완료.
+- 실제 손가락 버튼도 고장이라는 결론을 내리지 않는다. 이 제한을 PASS로 대체하지 않는다.
+
+Infinix
+- 실제 온보딩 Day/매일09시 알람 등록 및 정확 OS 예약 PASS.
+- 실제 Turn Off This Alarm -> Alarm Canceled -> 다음 알람 Tomorrow09:00, OS 다음 예약 이동 관찰.
+- 시간 조정 후 앱 비활성 자연 자정/첫 잠금 알람은 정상 PASS 불가.
+- OS nowRTC=10/7 09:00:47인데 원래10/7 09시 예약의 requester/whenElapsed가 약23시간58분 뒤로 남음.
+- XOS BroadcastQueue가 앱 UID10294의 TIME_SET을 Hiber/broadcast restricted로 기록. 앱 native 로그가 비었고 울림/알림이 없음.
+- OEM/제휴 시험 환경에서 시계 변경 및 백그라운드 방송이 제한된 단서다. 이 결과만으로 일반 실기기 전체의 정시 알람 실패를 확정하지 않는다.
+- 최종 시각 고정 후 앱 재진입: 밀린 ID2 처리 및 현재 ID3의 09:00:00.024 수신/재생 확인.
+- 실제 +5m -> 09:00:19.293 중지/.294 소리 중지 -> 09:05:19 정확 OS 예약. 즉시 종료/예약 변경 PASS.
+- PIN 잠금 true 확인 후 시계 변경 없이 자연 대기했으나 09:05:19 정시 재울림/잠금 화면을 확인하지 못함.
+- 09:05:32 OS 덤프: nowRTC/elapsed는 진행했으며 cached Next wake from idle에 지난 예약이 남음. 실제 대기 배치와 cached 항목을 동일시하지 않는다.
+- 해당 시점 제어 알림7777 없음(사전/결과 알림8888/8889는 존재), 잠금 캡처 검정, 수신 관찰기에서도 재수신 없음.
+- 프로세스14226은 존재하며 cached=false/isFrozen=false. 프로세스 종료 또는 Android cached-app freezer가 원인이라는 단정은 근거 없음.
+- TIME_SET 제한은 앞선 회차의 직접 증거다. 시계를 변경하지 않은 스누즈 실패의 유일한 원인이라고 확정하지 않는다.
+- 앱 재진입 후 XML에 09:05/Day/+5m/dismissButton native 카드가 나타남. PNG는 그보다 먼저 찍혀 다음 알람 화면을 보여줌.
+- 이 XML로 카드 존재는 확인되지만 지연된 MediaPlayer 재생 시작 시각/실제 종료 버튼 결과는 새 로그로 확정하지 못함.
+- 추가 환경 단서: PNG 상태표시줄08:04와 앞선 ADB RTC09:05 부근이 불일치하고, 다음 알람의 남은 시간이 2days1hour로 표시됨.
+  XOS/제휴 클라우드의 시계 적용과 앱/시스템 시각 불일치 가능성을 먼저 분리해야 한다. 일반 판매 기기의 동일 실패로 일반화하지 않는다.
+- 등록 후 알림/오버레이 철회 준비에서 pm revoke POST_NOTIFICATIONS를 사용. OS 프로세스 종료가 개입할 수 있으므로 소리 중지를 독립 타이머 성공으로 계산하지 않음.
+- 두 권한 거부 후 실제 카드 제어 및 자연3분 자동 종료는 NOT_RUN. 첫3분 예약 로그만으로 자동 종료 PASS를 만들지 않는다.
+- 결과: 해제 상태 수신/재생/+5m 즉시 종료·예약은 PASS, PIN 자연 재울림은 관찰 실패/원인 미확정, 잠금 Dismiss와 독립 종료는 미검증.
+
+5. 과거 결과 유지 및 남은 검사의 범위
+기존 계획의 AG/AH(Xiaomi), AD(Motorola), AF(OPPO/Pixel), AJ(Pixel 표준 경로)는 이전 APK의 근거로 그대로 유지한다.
+새 APK의 PASS와 합산해 모든 기능이 최신 APK에서 재검증됐다고 쓰지 않는다.
+Samsung 사용자 PIN 표시/보강 OK는 사용자 실측 근거로 별도 보존한다.
+vivo/HONOR는 이번 네 제조사 승인 범위에서 제외됐으며 실제 앱 검증 없음.
+Redmi/POCO/TECNO/itel/realme/OnePlus의 모든 ROM은 대표 모델 결과로 자동 PASS 처리하지 않는다.
+P01/P02: 위 실측 완료 부분과 exact의 설치 허용을 구분. 미허용 exact 경로는 이번 조건에 해당하지 않음.
+P03: 앱 알림 허용 상태에서 개별 알람 채널 차단/복구 — NOT_RUN.
+Infinix에서 CHANNEL_NOTIFICATION_SETTINGS + PACKAGE + CHANNEL_ID=shiftbell_alarm_v3로 채널 화면을 열어 읽기 확인.
+OS 제목 Shiftbell, 하위 설명 Alarm notifications, 앱 ShiftBell(Test), 스위치 Allow Notifications.
+자동 승인 검토가 이 스위치를 앱 전체 알림 차단으로 해석해 토글 실행을 거부했다. 토글/복귀 검사는 실행되지 않았고 우회하지 않았다.
+차단 사유는 시험 대상 불일치 및 알림 전체 차단 위험. 채널 진입 성공을 차단 구분/복구 PASS로 기록하지 않음.
+P04: 변경 없는 복귀/허용 복귀/기존 자료 유지 일부 확인. 설정 도중 앱 종료/연타/백업 복구/OS-앱 언어 불일치 전체는 NOT_RUN.
+A01/A02/A03: 제조사 및 권한 조건별 위 상세 결과 참조. 모든 조건의 모든 제어를 완료한 것이 아님.
+R01: Infinix 실제 취소/다음 예약 변경 확인. 모든 근무 변경 조합/DB 직접 추출은 미수행.
+R02: Xiaomi 짧은 자연 자정 PASS + 기존 제조사 이전 근거 유지. Infinix 시계 조정/백그라운드 제한은 미해결.
+R03: 실제 재부팅/앱 미실행 복원 및 Direct Boot NOT_RUN.
+R04: 장시간 절전/제조사 자동시작 NOT_RUN. power의 Dozing(화면 상태)을 deviceidle IDLE PASS로 취급하지 않음.
+W01: 신규 Infinix 위젯 실제 추가/갱신 NOT_RUN. 기존 OPPO 등 이전 결과 유지.
+소리 청취/진동 촉감, 여러 언어 OS 설정명의 정확한 실측, API30/33 및 Xiaomi API34 미만은 별도 보완.
+
+6. 결론과 다음 작업
+새 전체화면 온보딩의 주요 경로는 네 제조사에서 확인됐지만, 전체 핵심 기능이 100% 정상이라는 결론은 낼 수 없다.
+출시 전 우선순위: 오버레이 없이도 전체화면 FSI가 실제 표시되는 공통 알림 구성을 보강하고 동일 PIN 조건을 재검사.
+Xiaomi 잠금 실제 터치 제어는 입력이 가능한 실기기/스트리밍에서 확인해야 한다.
+Infinix는 시계 조정 시험 환경의 불일치와 백그라운드 전달을 분리해 재검사해야 한다.
+다음에는 기기·앱·OS 시각을 먼저 일치 확인한 후 가까운 미래 알람을 실제 UI에서 등록하고 시계 변경 없이 잠금 대기한다.
+그 조건에서 실패하면 OEM 자동시작/배터리 제한 설정을 비교하고 AlarmManager·BroadcastQueue·실제 재생 로그를 함께 수집한다.
+현재 미관찰한 XOS 설정 이름/직접 경로를 온보딩에 임의 추가하지 않는다. 가능하면 출시국 판매 ROM 보유 기기로 비교한다.
+추가 제조사 연결보다 위 공통 P0 문제와 미완료 P0 조건의 해결을 우선한다.
+제품 변경 후 tools/check_critical_release.ps1 실행, 빌드가 필요하면 -Build. 그 성공과 실제 기기 결과는 각각 기록.
+
+실제 로그/PNG/XML/예약/포커스: build/paid_devices_2026-10-06/{xiaomi,motorola,oppo,xiaomi_retry,infinix}/
+세션 시간/반환 기록: build/paid_devices_2026-10-06/budget.json 및 각 session.json.
+진행 원장: 같은 폴더의 유료실기기_진행원장_2026-10-06.txt.
+
+7. 최종 시간·비용·반환 확인
+연결 요청 시작~반환 확인을 포함하는 보수적 시간이며 Google 최종 청구 device-minutes와 구분한다.
+Xiaomi 첫 회차        776.368초   12분56초
+Motorola             1490.476초   24분50초
+OPPO                 1318.444초   21분58초
+Xiaomi 재검사        1512.466초   25분12초
+Infinix              1690.500초   28분11초
+합계                 6788.254초   113분08초(각 행 반올림 합계와 차이 가능)
+분당 USD0.15를 전 시간에 적용하면 약 USD16.97. 세션별 분 단위 올림을 가정한 보수적 115분 산술은 USD17.25.
+사용자 최대USD20 및 내부120분 보호 범위 안에서 종료. 무료 잔여 차감/실제 청구 집계/세금/환전 확정값은 아님.
+공식 Android Device Streaming 가격 확인 2026-10-06: 월 프로젝트30분 무료, Blaze 추가분 분당15센트.
+https://firebase.google.com/docs/test-lab/usage-quotas-pricing (일반 Test Lab 시간당5달러 항목과 혼동하지 않음)
+최종 read-only devicestreaming.googleapis.com 목록에서 이번5개 모두 FINISHED, 기존 세션 포함 활성 세션 없음.
+API 확인 원본: build/permission_recheck_2026-10-06/log-it-3d269_state.json.
+Infinix는 보호 상한 도달 후 반환 확인, 이후 기기 명령은 실행되지 않음. 추가 연결 없음.
+
+8. 계획 항목별 최종 대조 — 새 APK 기준
+부분 PASS는 해당 세부 동작만 뜻하며 아래 항목 전체를 통과했다고 계산하지 않는다.
+P01: 네 제조사 FSI 거부 반영/실제 앱 버튼/변경 없는 복귀/허용 복귀 PASS.
+     알림은 실제 허용 요청 관찰, exact는 설치 허용. 오버레이 실제 허용 복귀 X/O/Infinix PASS.
+     각 권한의 모든 거부/복귀 조합 및 API30/33 조건은 NOT_RUN.
+P02: Xiaomi 영어 OEM 경로/문구/실제 Always allow/복귀 PASS. 다른3대 Xiaomi 분기 없음 확인.
+     OEM 실패 fallback, OS/앱 언어 불일치, ko/de/pt/hi 실제 OS 항목명은 NOT_RUN.
+P03: 이번4제조사 채널 차단/복구 완료 증거 없음. Infinix 토글 자동 승인 차단. NOT_RUN.
+P04: 무변경/허용 복귀 및 등록 후 외부 철회 일부 PASS. 설정 중 종료/연타/복구 데이터 전수 NOT_RUN.
+A01: OPPO 네 권한 허용 PIN 표시/끄기 PASS, 거부 조건 알림 Dismiss PASS.
+     Xiaomi 네 권한 허용 PIN 표시 PASS, 원격 잠금 터치 제한으로 잠금 끄기 미완료; 해제 overlay X PASS.
+     Motorola 오버레이 거부 PIN 전체화면 FAIL, 앱 내 X PASS. Infinix 해제 수신/재생 PASS, PIN 정시 울림 정상 확인 실패.
+A02: OPPO PIN +5m/자연5분 재울림/잠금X PASS. Motorola 앱 내 +5m/자연5분 재울림/X PASS(잠금 제어 전체 PASS 아님).
+     Xiaomi 새 APK 잠금 +5m/재울림 NOT_RUN. Infinix +5m 중지/정확 예약 PASS, 잠금 자연 재울림 관찰 실패/원인 미확정.
+A03: OPPO 두 권한 거부 앱 내 표시/자연3분 독립 종료 PASS. 카드의 +5m/X 모든 조합·DB 직접 추출·지정1분 조건은 미수행.
+     M/X 오버레이 거부 자연3분 독립 종료 PASS, 두 권한 거부 전체 조합 NOT_RUN. Infinix 자연 자동 종료 NOT_RUN.
+R01: Infinix 실제 취소/다음 예약 변경 일부 PASS. 원래 취소 시각 울림 미관찰 기록 있으나 소리 연속 관찰/DB 추출 미확보.
+     새 APK 모든 근무 변경 조합은 NOT_RUN. 기존 제조사 이전 근거는 보존.
+R02: Xiaomi 짧은 자연 자정 수신/재등록 PASS. skip/타입 예외 전체·미래 DB 직접 대조까지 완료한 것은 아님.
+     Infinix 자정/시간 변경 백그라운드 정상 확인 실패, 미해결. M/O는 과거 근거 유지/이번 반복 NOT_RUN.
+R03: 이번 실제 reboot/앱 미실행 복원/Direct Boot NOT_RUN.
+R04: 짧은 HOME/PIN 대기는 시행. 실제 deviceidle IDLE 및 장시간 자동시작/절전 조건 NOT_RUN.
+W01: 새 Infinix 실제 런처 위젯 추가/갱신 NOT_RUN. 다른 제조사 과거 위젯 근거 유지.
+
+9. 출시 판단과 다른 구현 세션 인계
+1순위: 공통 FSI notification의 silent/group suppression 및 직접 BAL 우회 의존을 검토·수정.
+        전체화면/알림/정확 허용 + overlay거부 + PIN에서 실제 AlarmActivity와 끄기/+5m를 재검사.
+2순위: XOS 시각 불일치 제거 후 실제 UI 등록 -> 백그라운드 잠금 정시 알람/자연5분 스누즈 재울림 비교.
+3순위: Xiaomi 입력 가능한 실기기로 잠금 끄기/스누즈, 개별 알람 채널 차단/복구, 외부 철회 안전 제어 보완.
+장시간 절전/재부팅/소리 청취는 USB 또는 판매 ROM 보유 테스터로 보완해 유료 대기 시간을 줄인다.
+이번 발견만으로 모든 제조사 실패나 앱 전체 출시 불가를 단정하지 않지만, 위 P0를 해결 전 최종 출시 안전성100% 보장은 불가.
+이번 세션이 수정한 것은 검사 보조 파일과 문서뿐. 제품 코드·리소스·APK 빌드는 변경하지 않았다.
+다른 세션의 최신 튜닝 APK와 이번 동결 APK의 차이를 비교한 후 재검사 범위를 결정한다.

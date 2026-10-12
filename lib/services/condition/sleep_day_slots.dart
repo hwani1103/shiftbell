@@ -110,7 +110,7 @@ bool _isMainSleep(SleepRecord r, ShiftPatternAnalyzer? analyzer) {
         // 경우)까지 같이 낮잠으로 오분류됐다. 어제가 야간근무였고 그 종료 직후
         // (_attributedDay와 동일한 회복window 이내) 시작한 수면이면 이 규칙에서
         // 제외해 길이 기준(아래)으로 정상 판단하게 한다.
-        !_isRecoverySleepFromYesterdayNightShift(r, analyzer)) {
+        !_belongsToPreviousSleepDay(r, analyzer)) {
       return false; // 오늘 예정된 야간 근무 출근 전에 끝난 잠 - 길이와 무관하게 낮잠
     }
   }
@@ -127,27 +127,33 @@ bool _isMainSleep(SleepRecord r, ShiftPatternAnalyzer? analyzer) {
   return minutes >= kMainSleepSlotThresholdMinutes;
 }
 
-/// M7에서 씀 - [r]이 "어제 야간근무가 끝난 직후 시작한 회복수면"인지(즉, 오늘
-/// 예정된 야간근무 때문에 강제로 낮잠 취급되면 안 되는 케이스인지).
+/// 오늘 야간 출근 전 수면을 낮잠으로 보내기 전에, 이 잠이 이미 전날의 밤잠으로
+/// 귀속되는지 확인한다. 전날 야간 회복수면과 주간·휴무 뒤 자정 넘긴 밤잠을 포함한다.
 ///
 /// ⭐ 2026-09-06 재설계 - [_attributedDay]가 내리는 결론과 정확히 같은 질문이다
 /// ("이 수면이 어제 칸으로 재귀속되는가?"). 예전엔 이 함수가 같은 규칙을
 /// 독자적으로 다시 구현하고 있어서(16시간 비교를 두 곳에 따로 두는 바람에
 /// truncate 버그도 한쪽만 고쳐질 위험이 있었음) 두 곳이 어긋날 여지가 있었다 -
 /// 이제 [_attributedDay] 하나에만 규칙을 두고 여기선 그 결과만 재사용한다.
-bool _isRecoverySleepFromYesterdayNightShift(SleepRecord r, ShiftPatternAnalyzer analyzer) {
+bool _belongsToPreviousSleepDay(SleepRecord r, ShiftPatternAnalyzer analyzer) {
   return _attributedDay(r, analyzer) != _dayOnly(r.start);
 }
 
 DateTime _dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
-/// 이 수면 기록을 "며칠 칸"에 보여줄지. 기본은 시작한 날짜 그대로지만,
+/// 화면 슬롯과 수면 이력/통계가 공유하는 수면 귀속 날짜.
+DateTime attributedSleepDay(SleepRecord record, ShiftPatternAnalyzer? analyzer) =>
+    _attributedDay(record, analyzer);
+
+/// 이 수면 기록을 "며칠 칸"에 보여줄지. 주간·휴무 뒤 00~05시의 밤잠은
+/// 전날로 귀속한다. 어제가 야간 근무였다면 자정 이후 근무 중 수면과 퇴근 후
+/// 회복수면을 모두 그 야간 근무일로 귀속한다(근무 중 수면의 슬롯은 낮잠).
 /// **어제가 야간 근무였고 그 근무 종료 직후 시작해서 아직 오늘 자신의 평소
 /// 취침시각(21시)을 넘기지 않은 수면이면 어제(야간 근무 당일)로 귀속시킨다** -
 /// 예: 21일이 야간 근무(19시~다음날 07시)이고 22일 07시~13시에 잤다면, 이
 /// 수면은 날짜상 22일에 시작했지만 "21일 야간 근무의 회복 수면"이므로 21일
-/// 칸에 표시돼야 한다는 요청 반영. [analyzer]가 없으면(근무시간 미설정) 판단
-/// 불가하니 그냥 시작 날짜를 그대로 씀.
+/// 칸에 표시돼야 한다는 요청 반영. [analyzer]가 없으면 야간 회복수면 여부는
+/// 판단할 수 없지만 자정 뒤 일반 밤잠은 전날로 묶는다.
 ///
 /// ⭐ 2026-09-06 재설계(사용자 논의) - "야간 근무 퇴근~21시 이내" 구간에
 /// 시작하는 수면 = 어제(야간 근무일)의 회복수면, "21시 이후" = 오늘 자신의
@@ -164,12 +170,16 @@ DateTime _dayOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 /// 아래 본문 주석 참고). 오늘이 휴무면 21시 앵커 그대로.
 DateTime _attributedDay(SleepRecord r, ShiftPatternAnalyzer? analyzer) {
   final startDay = _dayOnly(r.start);
-  if (analyzer == null) return startDay;
-
   final prevDay = startDay.subtract(const Duration(days: 1));
+  // 21시부터 시작하는 통상 밤잠 창은 자정을 넘어 새벽 6시에 닫힌다.
+  // 주간/휴무 뒤 00~05시에 잠들어도 전날의 밤잠으로 표시한다.
+  // 전날 야간 근무였다면 아래 퇴근 후 회복수면 규칙이 우선한다.
+  final afterMidnightBedtime = r.start.hour < kFlatSleepStartHour + kSleepTrackingWindowMaxHours - 24;
+  if (analyzer == null) return afterMidnightBedtime ? prevDay : startDay;
+
   final prevInst = analyzer.instanceForDate(prevDay);
   if (!prevInst.isWorkDay || prevInst.category != ShiftTimeCategory.night || prevInst.end == null) {
-    return startDay;
+    return afterMidnightBedtime ? prevDay : startDay;
   }
   // ⭐ 2026-09-05 버그 수정(사용자 신고) - "어제 야간 퇴근하고 오늘 아침에 잔
   // 수면이 어제가 아니라 오늘 주 수면으로 잡힌다". 원인: 여기서 실제 퇴근
@@ -177,10 +187,10 @@ DateTime _attributedDay(SleepRecord r, ShiftPatternAnalyzer? analyzer) {
   // 퇴근은 설정보다 조금(자동 감지 창이 이미 허용하는 오차만큼) 이를 수 있다 -
   // graceAdjustedShiftEnd 참고(sleep_shift_relation.dart의 classifySleepRelation도
   // 동일한 값을 써서 "근무 중이었는지" 판정이 여기와 어긋나지 않게 함).
-  // 근무 종료(유예 적용) 이후 시작하는 수면이어야 함(더 이전에 시작한 건
-  // 진짜 근무 중 수면 - workShiftOverlap이 별도로 처리).
+  // 근무 중 시작한 수면도 전날 야간근무 날짜에 둔다. 주 수면/낮잠 분류는
+  // _isMainSleep의 근무 겹침 판정이 맡는다.
   final effectiveEnd = graceAdjustedShiftEnd(prevInst);
-  if (r.start.isBefore(effectiveEnd)) return startDay;
+  if (r.start.isBefore(effectiveEnd)) return prevDay;
 
   // 오늘(=수면이 시작한 날) 자신의 평소 취침시각 앵커 - 자동 감지 창의
   // kFlatSleepStartHour(sleep_opportunity.dart)와 동일 값을 재사용한다.

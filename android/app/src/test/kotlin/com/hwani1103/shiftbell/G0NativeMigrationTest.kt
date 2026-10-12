@@ -1,7 +1,7 @@
 // android/app/src/test/kotlin/com/hwani1103/shiftbell/G0NativeMigrationTest.kt
 //
 // G0(T03) Native(DatabaseHelper + DbMigrationRunner) 마이그레이션 검증 - Robolectric 실제 SQLite.
-// 케이스 이름은 T01 expected.md 표를 따르고, 구조 기준은 Dart _onCreate로 만든 v24_oncreate_schema.json.
+// 케이스 이름은 T01 expected.md 표를 따르고, 구조 기준은 Dart _onCreate로 만든 현재 스냅샷(v25)이다.
 // 제품과 같은 진입점(DatabaseHelper.getWritableDatabaseWithRetry → 게이트 → SQLiteOpenHelper open)을 쓴다.
 // Robolectric엔 flutter_assets가 없으므로 SQL 원본은 저장소 assets/db/migrations.json을 overrideForTest로 주입.
 package com.hwani1103.shiftbell
@@ -29,7 +29,7 @@ class G0NativeMigrationTest {
 
     private lateinit var context: Context
     private lateinit var dbFile: File
-    private val reference: JSONObject by lazy { JSONObject(G0TestSupport.readG0("v24_oncreate_schema.json")) }
+    private val reference: JSONObject by lazy { JSONObject(G0TestSupport.readG0("v29_oncreate_schema.json")) }
 
     @Before
     fun setUp() {
@@ -80,7 +80,87 @@ class G0NativeMigrationTest {
 
     private fun schemaCanonical(db: SQLiteDatabase) = G0TestSupport.canonical(G0TestSupport.schemaSnapshot(db))
     private fun dataCanonical(db: SQLiteDatabase) = G0TestSupport.canonical(G0TestSupport.dumpTables(db))
-    private fun expected(name: String) = JSONObject(G0TestSupport.readG0("expected_v24/$name"))
+    private fun expected(name: String) = JSONObject(G0TestSupport.readG0("expected_v29/$name"))
+
+    @Test fun v27CompletedHistoryBackfillsOnceAndFailedV28UpgradeRollsBack() {
+        installFixture("v23.db")
+        withRaw { db ->
+            val oldScript = JSONObject(G0TestSupport.repoScriptJson()).apply {
+                put("targetVersion", 27)
+                val migrations = getJSONArray("migrations")
+                for (i in migrations.length() - 1 downTo 0)
+                    if (migrations.getJSONObject(i).getInt("version") > 27) migrations.remove(i)
+            }
+            DbMigrationRunner.migrate(db, DbMigrationScript.parse(oldScript.toString()), 23, 27)
+            db.version = 27
+            db.execSQL("DELETE FROM alarm_history")
+            db.execSQL("DELETE FROM alarm_creation_log")
+            for (id in listOf(43, 44, 45)) {
+                db.execSQL("INSERT INTO alarm_history(alarm_id,scheduled_date,scheduled_time,actual_ring_time,created_at,shift_type,day_offset,dismiss_type) VALUES(?,'2026-10-05T16:40:00','16:40','2026-10-05T16:40:34','2026-10-05T16:40:34','Night',0,?)",
+                    arrayOf<Any>(id, if (id == 44) "superseded" else "swiped"))
+                db.execSQL("INSERT INTO alarm_creation_log(alarm_id,scheduled_date,scheduled_time,created_at,shift_type,day_offset,source,alarm_type_id) VALUES(?,'2026-10-05T16:40:00','16:40','2026-10-01T00:00:00','Night',0,?,1)",
+                    arrayOf<Any>(id, if (id == 45) "manual" else "auto"))
+            }
+            db.execSQL("INSERT INTO alarm_history(alarm_id,scheduled_date,scheduled_time,actual_ring_time,created_at,shift_type,day_offset,dismiss_type) VALUES(46,'2026-10-05T16:40:00','16:40','2026-10-05T16:40:34','2026-10-05T16:40:34','Ambiguous',0,'swiped')")
+            for (source in listOf("auto", "custom_preset")) {
+                db.execSQL("INSERT INTO alarm_creation_log(alarm_id,scheduled_date,scheduled_time,created_at,shift_type,day_offset,source,alarm_type_id) VALUES(46,'2026-10-05T16:40:00','16:40','2026-10-01T00:00:00','Ambiguous',0,?,1)", arrayOf(source))
+            }
+        }
+        val before = withRaw { dataCanonical(it) to schemaCanonical(it) }
+        useScript(mutatedScript("""{"migration_append":{"version":28,"sql":"CREATE TABLE alarms(x INTEGER)"}}"""))
+        assertNull(helper().getWritableDatabaseWithRetry())
+        withRaw { db ->
+            assertEquals(27, db.version)
+            assertEquals(before.first, dataCanonical(db))
+            assertEquals(before.second, schemaCanonical(db))
+        }
+        useScript(G0TestSupport.repoScriptJson())
+        val db = helper().writableDatabase
+        assertEquals(29, db.version)
+        db.rawQuery("SELECT slot_time,shift_type,day_offset FROM fixed_alarm_consumptions", null).use { c ->
+            assertEquals(1, c.count); assertTrue(c.moveToFirst())
+            assertEquals("2026-10-05T16:40:00", c.getString(0))
+            assertEquals("Night", c.getString(1)); assertEquals(0, c.getInt(2))
+        }
+        val after = dataCanonical(db)
+        DatabaseHelper.resetInstanceForTest()
+        assertEquals(after, dataCanonical(helper().writableDatabase))
+    }
+
+    @Test
+    fun retiredDevAlarms_cancelOnlyRetiredIds_afterNativeUpgrade() {
+        installFixture("aux_h2_minimal_v24.db")
+        withRaw { db ->
+            val oldScript = JSONObject(G0TestSupport.repoScriptJson()).apply {
+                put("targetVersion", 26)
+                val migrations = getJSONArray("migrations")
+                for (i in migrations.length() - 1 downTo 0) if (migrations.getJSONObject(i).getInt("version") > 26) migrations.remove(i)
+            }
+            DbMigrationRunner.migrate(db, DbMigrationScript.parse(oldScript.toString()), 24, 26)
+            db.version = 26
+            db.execSQL("DELETE FROM alarms")
+            db.execSQL("INSERT INTO alarms(id,time,date,type,alarm_type_id,shift_type,day_offset,preset_slot) VALUES(98,'07:00','2030-01-01T07:00:00','custom',1,'Dev',0,0)")
+            db.execSQL("INSERT INTO alarms(id,time,date,type,alarm_type_id,shift_type,day_offset) VALUES(99,'08:00','2030-01-01T08:00:00','fixed',1,'Day',0)")
+        }
+        val at = System.currentTimeMillis() + 3_600_000L
+        // Robolectric keeps AlarmManager shadows per Context. Use the exact DPS
+        // Context that DatabaseHelper uses for OS cancellation.
+        val nativeContext = org.robolectric.util.ReflectionHelpers.getField<Context>(helper(), "appContext")
+        AlarmWakeScheduler.scheduleRaw(nativeContext, 98, at, "Dev")
+        AlarmWakeScheduler.scheduleRaw(nativeContext, 99, at, "Day")
+        AlarmWakeScheduler.scheduleIfCurrent(nativeContext, null, 61, at, "DB pending")
+        val db = helper().writableDatabase
+        assertEquals(29, db.version)
+        assertFalse(db.rawQuery("SELECT 1 FROM alarms WHERE id=98", null).use { it.moveToFirst() })
+        assertTrue(db.rawQuery("SELECT 1 FROM alarms WHERE id=99", null).use { it.moveToFirst() })
+        val scheduled = org.robolectric.Shadows.shadowOf(nativeContext.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager)
+            .scheduledAlarms.mapNotNull { it.operation?.let { p -> org.robolectric.Shadows.shadowOf(p).savedIntent.data?.toString() } }
+        assertFalse("shiftbell://alarm/98" in scheduled)
+        assertTrue("shiftbell://alarm/99" in scheduled)
+        assertTrue("shiftbell://alarm/61" in scheduled)
+        assertTrue(61 in AlarmWakeScheduler.failedIds(context))
+        assertTrue(nativeContext.getSharedPreferences("retired_dev_alarms", Context.MODE_PRIVATE).getStringSet("ids", emptySet())!!.isEmpty())
+    }
 
     @Test
     fun migAll_reopen_v1toV23_matchExpectedDataAndReferenceSchema() {
@@ -97,11 +177,11 @@ class G0NativeMigrationTest {
                     continue
                 }
                 val problems = ArrayList<String>()
-                if (db.version != 24) problems.add("user_version=${db.version}")
+                if (db.version != 29) problems.add("user_version=${db.version}")
                 val data = G0TestSupport.dumpTables(db)
                 problems += G0TestSupport.diffExpectedData(data, expected(fx.getString("expected")))
                 if (schemaCanonical(db) != G0TestSupport.canonical(reference)) {
-                    problems.add("schema != v24_oncreate_schema.json\n    actual: ${schemaCanonical(db)}")
+                    problems.add("schema != v29_oncreate_schema.json\n    actual: ${schemaCanonical(db)}")
                 }
                 expectOverridesConstraints(db)
 
@@ -136,7 +216,7 @@ class G0NativeMigrationTest {
         useScript(G0TestSupport.repoScriptJson())
         val db = helper().getWritableDatabaseWithRetry()
         assertNotNull(db)
-        assertEquals(24, db!!.version)
+        assertEquals(29, db!!.version)
         assertEquals(emptyList<String>(), G0TestSupport.diffExpectedData(G0TestSupport.dumpTables(db), expected("v12.json")))
     }
 
@@ -158,7 +238,7 @@ class G0NativeMigrationTest {
         installFixture("variant_v23_stamped24_missing.db")
         val db = helper().getWritableDatabaseWithRetry()
         assertNotNull(db)
-        assertEquals(24, db!!.version)
+        assertEquals(29, db!!.version)
         assertEquals(G0TestSupport.canonical(reference), schemaCanonical(db))
         assertEquals(
             emptyList<String>(),
@@ -178,7 +258,7 @@ class G0NativeMigrationTest {
                 "실패한 repair 트랜잭션의 CREATE TABLE도 롤백돼야 함",
                 G0TestSupport.query(raw, "SELECT name FROM sqlite_master WHERE type='table' AND name='alarm_overrides'").isEmpty()
             )
-            assertEquals(24, raw.version)
+            assertEquals(29, raw.version)
         }
     }
 
@@ -191,8 +271,9 @@ class G0NativeMigrationTest {
     }
 
     @Test
-    fun futureVersion_25_gateSkips_andOnDowngradeThrows_versionAndDataUnchanged() {
+    fun futureVersion_30_gateSkips_andOnDowngradeThrows_versionAndDataUnchanged() {
         installFixture("variant_v23_stamped25.db")
+        withRaw { it.version = 30 }
         val before = withRaw { dataCanonical(it) }
         assertNull(helper().getWritableDatabaseWithRetry())
         try {
@@ -202,7 +283,7 @@ class G0NativeMigrationTest {
             // 기대
         }
         withRaw {
-            assertEquals(25, it.version)
+            assertEquals(30, it.version)
             assertEquals(before, dataCanonical(it))
         }
     }
@@ -249,7 +330,7 @@ class G0NativeMigrationTest {
         installFixture("v18.db")
         val db = helper().getWritableDatabaseWithRetry()
         assertNotNull("자산 원본으로 v18 → v24", db)
-        assertEquals(24, db!!.version)
+        assertEquals(29, db!!.version)
         assertEquals(emptyList<String>(), G0TestSupport.diffExpectedData(G0TestSupport.dumpTables(db), expected("v18.json")))
         println("G0 Robolectric sqlite_version=" + G0TestSupport.query(db, "SELECT sqlite_version() AS v").first()["v"])
     }
@@ -262,19 +343,19 @@ class G0NativeMigrationTest {
         // SQLiteOpenHelper가 잠금 밖에서 v18을 읽었지만, 잠금을 잡은 시점엔 이미 Flutter가 v24로 올린 상황
         db.beginTransaction()
         try {
-            helper().onUpgrade(db, 18, 24)
+            helper().onUpgrade(db, 18, 29)
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()
         }
         assertEquals(before, dataCanonical(db))
-        assertEquals(24, db.version)
+        assertEquals(29, db.version)
 
-        db.version = 25
+        db.version = 30
         try {
             db.beginTransaction()
             try {
-                helper().onUpgrade(db, 18, 24)
+                helper().onUpgrade(db, 18, 29)
                 fail("잠금 후 버전이 더 높으면 예외")
             } finally {
                 db.endTransaction()
@@ -302,7 +383,7 @@ class G0NativeMigrationTest {
 
     @Test
     fun ruleCases_sharedWithDart() {
-        val cases = JSONObject(G0TestSupport.readG0("runner_rule_cases.json")).getJSONArray("cases")
+        val cases = JSONObject(G0TestSupport.readG0("runner_rule_cases_v29.json")).getJSONArray("cases")
         val failures = ArrayList<String>()
         for (i in 0 until cases.length()) {
             val c = cases.getJSONObject(i)

@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-07",
+  "variant": "devDebug",
+  "version": "1.0.23+25",
+  "database_version": 29,
+  "android_package": "com.hwani1103.shiftbell.dev",
+  "android_version_name": "1.0.23-dev",
+  "android_version_code": "25",
+  "release_built": false,
+  "deployed": false,
+  "new_device_passes": 0,
+  "critical_command": "tools/check_critical_release.ps1 -Build",
+  "critical_result": "PASS",
+  "flutter_tests": 285,
+  "flutter_groups": [
+    108,
+    99,
+    67,
+    11
+  ],
+  "native_function_tests": {
+    "tests": 119,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "native_migration_tests": 15,
+  "analyzer": {
+    "errors": 0,
+    "warnings": 0,
+    "infos": 199,
+    "note": "Existing deprecated APIs/style infos remain; analyzer exits nonzero for infos."
+  },
+  "apk": {
+    "path": "artifacts/dev_offline_2026_10_07/tested-dev-debug.apk",
+    "sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+    "bytes": 215532273
+  },
+  "normal_candidate_ump": "No debug-geography/test-device/reset defines were passed to this build.",
+  "source_manifest": "docs/next_version/evidence/dev_offline_2026_10_07_sources.json",
+  "source_file_count": 430,
+  "archives": {
+    "before-source-files.zip": {
+      "path": "artifacts/dev_offline_2026_10_07/before-source-files.zip",
+      "sha256": "e8801244309f56bd7eb463c259da92c0b40d5a2e63f964bbb9e416e892731b97",
+      "bytes": 612085
+    },
+    "candidate-source.zip": {
+      "path": "artifacts/dev_offline_2026_10_07/candidate-source.zip",
+      "sha256": "cebb10dc83de83f6f808f17418691550836930770147b2c364484d8f2e5bce9b",
+      "bytes": 9084147
+    },
+    "reviewed_device_evidence.zip": {
+      "path": "artifacts/dev_offline_2026_10_07/reviewed_device_evidence.zip",
+      "sha256": "4a7fe6328b809287f0390c13faab7382b91415f4320aa23708e6eb0e2d6178b4",
+      "bytes": 776102
+    },
+    "validation-logs.zip": {
+      "path": "artifacts/dev_offline_2026_10_07/validation-logs.zip",
+      "sha256": "8bdd3a805b7ff938686f908a3e12a4a6ad6c969475b08c1f81202677e83ec2fd",
+      "bytes": 82356
+    },
+    "web-dist.zip": {
+      "path": "artifacts/dev_offline_2026_10_07/web-dist.zip",
+      "sha256": "840ec88bba255a0aeb6cf6be131f5635cfafdce1ccc7892a04493acb72e2dd04",
+      "bytes": 14350374
+    }
+  },
+  "earlier_failures": "critical_build.log stopped at new diagnostic receiver referencing unavailable BuildConfig; replaced by debuggable/package gate and targeted native tests passed. Final complete runner passed.",
+  "next": "User-connected Samsung: corrected natural snooze, DB29 actual history/backup, representative permissions/locales/UMP and startup metrics. Then OEM streaming residuals; Infinix remains unresolved until real device evidence."
+}

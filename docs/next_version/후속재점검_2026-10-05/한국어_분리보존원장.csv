@@ -1,0 +1,357 @@
+﻿키,변경 전,보존 문구,새 위치,호출 위치,보존 근거
+commonChange,변경,변경,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+commonRefresh,새로고침,새로고침,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+commonGetStarted,시작하기,시작하기,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+commonShare,공유하기,공유하기,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:399 | label: Text(context.koOnly.commonShare, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+commonCopy,복사,복사,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:457 | tooltip: context.koOnly.commonCopy,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+navFriendShare,일정공유,일정공유,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+navScheduleManagement,일정관리,일정관리,lib/l10n/korean_only/messages_ko.json,"lib/main.dart:783 | label: context.koOnly.navScheduleManagement);
+lib/screens/schedule_management_tab.dart:2390 | tabLabel: context.koOnly.navScheduleManagement,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+disableTabButtonLabel,{tab} 화면 사용하지 않기,{tab} 화면 사용하지 않기,lib/l10n/korean_only/messages_ko.json,"lib/widgets/disable_tab_button.dart:71 | title: Text(KoreanOnlyCopy.fromLocalizations(l10n).disableTabButtonLabel(tabLabel)),
+lib/widgets/disable_tab_button.dart:131 | context.koOnly.disableTabButtonLabel(tabLabel),",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+disableTabDialogBody,"확인 버튼을 누르면 화면 하단의 목록에서 사라집니다.
+설정에서 다시 원복할 수 있습니다.","확인 버튼을 누르면 화면 하단의 목록에서 사라집니다.
+설정에서 다시 원복할 수 있습니다.",lib/l10n/korean_only/messages_ko.json,lib/widgets/disable_tab_button.dart:73 | '${KoreanOnlyCopy.fromLocalizations(l10n).disableTabDialogBody}',F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleTabDisableExtraNotice,예정된 일정 알림도 모두 취소됩니다.,예정된 일정 알림도 모두 취소됩니다.,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:2393 | context.koOnly.scheduleTabDisableExtraNotice,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+settingsScheduleTabReenableTitle,일정관리 화면 사용하기,일정관리 화면 사용하기,lib/l10n/korean_only/messages_ko.json,"lib/screens/settings_tab.dart:607 | title: Text(context.koOnly.settingsScheduleTabReenableTitle),",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+settingsScheduleTabReenableSubtitle,하단 탭에 일정관리 화면을 다시 표시합니다,하단 탭에 일정관리 화면을 다시 표시합니다,lib/l10n/korean_only/messages_ko.json,"lib/screens/settings_tab.dart:609 | Text(context.koOnly.settingsScheduleTabReenableSubtitle),",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+shiftWork,교대 근무,교대 근무,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+settingsPatternTodayMarker,· 진한 칩이 오늘,· 진한 칩이 오늘,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+shiftTeam,조,조,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+shiftRegularPattern,규칙적 근무,규칙적 근무,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+shiftIrregularPattern,불규칙 근무,불규칙 근무,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+shiftWorkHours,근무시간,근무시간,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+shiftPayday,급여 산정일,급여 산정일,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+alarmNext,다음 알람,다음 알람,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+alarmFixed,고정 알람,고정 알람,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+alarmType,알람 타입,알람 타입,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+alarmRemoved,알람 제거,알람 제거,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+alarmSnooze5Min,5분 연장,5분 연장,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+alarmCountAll,전체,전체,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+alarmCountFuture,미래,미래,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+alarmCountPast,과거,과거,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+calendarMemo,메모,메모,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+calendarFriendQuickAccessLabel,친구,친구,lib/l10n/korean_only/messages_ko.json,,F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+calendarTapDateToEnter,(해당 날짜 탭하여 입력),(해당 날짜 탭하여 입력),lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+calendarMemoDetailTitle,메모 상세,메모 상세,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingFixedPatternQuestion,고정적으로 순환하는 교대 근무인가요?,고정적으로 순환하는 교대 근무인가요?,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingYesRegular,예 - 규칙적,예 - 규칙적,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingNoIrregular,아니요 - 불규칙,아니요 - 불규칙,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingCheckShiftTypes,근무 형태를 확인하세요,근무 형태를 확인하세요,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingAddIfMissing,없다면 추가 가능합니다,없다면 추가 가능합니다,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingUsableEvenIfNotInPattern,근무 패턴에 포함되지 않더라도 사용 가능해요.,근무 패턴에 포함되지 않더라도 사용 가능해요.,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingSwitchToIrregularPrefix,"만약 교대 패턴이 규칙적이지 않다면, ","만약 교대 패턴이 규칙적이지 않다면, ",lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingSwitchToIrregularLink,여기,여기,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingSwitchToIrregularSuffix, 를 눌러주세요., 를 눌러주세요.,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingSelectAllInPattern,실제 근무 패턴에 포함되는 근무를 모두 선택해주세요,실제 근무 패턴에 포함되는 근무를 모두 선택해주세요,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingShiftNameHint,근무명 (최대 {chars}글자),근무명 (최대 {chars}글자),lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingAllSet,설정 완료!,설정 완료!,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingScheduleTabPopupTitle,"일정관리 탭, 이렇게 써보세요","일정관리 탭, 이렇게 써보세요",lib/l10n/korean_only/messages_ko.json,"lib/widgets/onboarding_info_popups.dart:316 | title: context.koOnly.onboardingScheduleTabPopupTitle,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+onboardingScheduleTabPopupBody,"1. 일정 만들기
+오른쪽 아래 시계 아이콘을 탭하면 시간축 위에서 시각을 고를 수 있는 모드로 바뀌어요. 원하는 시각에서 한 번 더 탭하면 그 시각으로 새 일정을 만들 수 있어요.
+
+2. 지속시간 설정
+기본은 ""지속시간 없음""(특정 시각 하나)이에요. ""+""나 5분/30분/1시간 버튼을 누르면 종료 시각이 있는 일정으로 바뀌어요.
+
+3. 일정에 맞춰 알림받기
+알림받기 스위치를 켜면 원하는 시간에 휴대폰 알림을 받을 수 있어요. 알림 소리는 시스템 설정과 동일해요.","1. 일정 만들기
+오른쪽 아래 시계 아이콘을 탭하면 시간축 위에서 시각을 고를 수 있는 모드로 바뀌어요. 원하는 시각에서 한 번 더 탭하면 그 시각으로 새 일정을 만들 수 있어요.
+
+2. 지속시간 설정
+기본은 ""지속시간 없음""(특정 시각 하나)이에요. ""+""나 5분/30분/1시간 버튼을 누르면 종료 시각이 있는 일정으로 바뀌어요.
+
+3. 일정에 맞춰 알림받기
+알림받기 스위치를 켜면 원하는 시간에 휴대폰 알림을 받을 수 있어요. 알림 소리는 시스템 설정과 동일해요.",lib/l10n/korean_only/messages_ko.json,"lib/widgets/onboarding_info_popups.dart:317 | body: context.koOnly.onboardingScheduleTabPopupBody,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+settingsFriendShareDesc,공유 코드로 친구와 서로의 일정 확인,공유 코드로 친구와 서로의 일정 확인,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+settingsEditShiftNameDesc,근무 이름을 수정합니다,근무 이름을 수정합니다,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+settingsDataBackupDesc,지금 기기에 근무표·알람·메모 등을 백업해요,지금 기기에 근무표·알람·메모 등을 백업해요,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+settingsDataBackupLastSavedAt,마지막 백업: {date},마지막 백업: {date},lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+customAlarmLabel,원터치 알람,원터치 알람,lib/l10n/korean_only/messages_ko.json,"lib/screens/all_alarms_history_view.dart:426 | ? context.koOnly.customAlarmLabel
+lib/screens/calendar_tab.dart:684 | .koOnly.customAlarmLabel,
+lib/screens/next_alarm_tab.dart:427 | alarm.shiftType ?? context.koOnly.customAlarmLabel,
+lib/screens/next_alarm_tab.dart:801 | context.koOnly.customAlarmLabel,
+lib/widgets/calendar_header_actions.dart:71 | tooltip: context.koOnly.customAlarmLabel,
+lib/widgets/custom_alarm_widgets.dart:222 | Text(context.koOnly.customAlarmLabel,",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmEditTooltip,원터치 알람 편집,원터치 알람 편집,lib/l10n/korean_only/messages_ko.json,"lib/widgets/custom_alarm_preset_panel.dart:135 | action(Icons.edit_outlined, context.koOnly.customAlarmEditTooltip, onEdit,",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmEditorTitle,원터치 알람 설정,원터치 알람 설정,lib/l10n/korean_only/messages_ko.json,,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmEditorDesc,"시각과 울림 방식을 5칸까지 저장하세요. 오늘·내일에만 할당할 수 있고, 한 칸은 같은 날짜에 한 번만 할당됩니다. 할당된 칸은 날짜별 알람을 삭제하기 전까지 수정할 수 없습니다.","시각과 울림 방식을 5칸까지 저장하세요. 오늘·내일에만 할당할 수 있고, 한 칸은 같은 날짜에 한 번만 할당됩니다. 할당된 칸은 날짜별 알람을 삭제하기 전까지 수정할 수 없습니다.",lib/l10n/korean_only/messages_ko.json,,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmSlotEmpty,비어 있음,비어 있음,lib/l10n/korean_only/messages_ko.json,lib/widgets/custom_alarm_widgets.dart:64 | return KoreanOnlyCopy.fromLocalizations(l10n).customAlarmSlotEmpty;,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmSlotClear,비우기,비우기,lib/l10n/korean_only/messages_ko.json,,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmAssignHint,날짜를 누르면 {time} 알람이 추가돼요,날짜를 누르면 {time} 알람이 추가돼요,lib/l10n/korean_only/messages_ko.json,"lib/screens/calendar_tab.dart:3451 | child: Text(context.koOnly.customAlarmAssignHint(time),",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmScheduledToday,오늘 {time}에 알람이 예약됐어요,오늘 {time}에 알람이 예약됐어요,lib/l10n/korean_only/messages_ko.json,,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmScheduledOn,{date} {time}에 알람이 예약됐어요,{date} {time}에 알람이 예약됐어요,lib/l10n/korean_only/messages_ko.json,,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmScheduledSoon,{minutes}분 후에 알람이 울려요,{minutes}분 후에 알람이 울려요,lib/l10n/korean_only/messages_ko.json,,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmPast,이미 지난 시각이라 알람을 만들지 않았어요,이미 지난 시각이라 알람을 만들지 않았어요,lib/l10n/korean_only/messages_ko.json,lib/widgets/custom_alarm_widgets.dart:49 | return KoreanOnlyCopy.fromLocalizations(l10n).customAlarmPast;,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmOutsideWindow,원터치 알람은 오늘과 내일에만 만들 수 있어요,원터치 알람은 오늘과 내일에만 만들 수 있어요,lib/l10n/korean_only/messages_ko.json,lib/widgets/custom_alarm_widgets.dart:51 | return KoreanOnlyCopy.fromLocalizations(l10n).customAlarmOutsideWindow;,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmDuplicate,그 날짜 {time}에 이미 알람이 있어요,그 날짜 {time}에 이미 알람이 있어요,lib/l10n/korean_only/messages_ko.json,,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmScheduleFailed,알람을 실제 기기에 예약하지 못했어요. 잠시 뒤 다시 시도해 주세요,알람을 실제 기기에 예약하지 못했어요. 잠시 뒤 다시 시도해 주세요,lib/l10n/korean_only/messages_ko.json,lib/widgets/custom_alarm_widgets.dart:62 | return KoreanOnlyCopy.fromLocalizations(l10n).customAlarmScheduleFailed;,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmUndo,되돌리기,되돌리기,lib/l10n/korean_only/messages_ko.json,,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmDeleted,원터치 알람을 삭제했어요,원터치 알람을 삭제했어요,lib/l10n/korean_only/messages_ko.json,lib/widgets/custom_alarm_widgets.dart:267 | : context.koOnly.customAlarmDeleted;,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+customAlarmDeleteConfirm,{time} 원터치 알람을 삭제할까요?,{time} 원터치 알람을 삭제할까요?,lib/l10n/korean_only/messages_ko.json,lib/widgets/custom_alarm_widgets.dart:246 | return '${context.koOnly.customAlarmDeleteConfirm(a.time)}\n$replacementText';,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+fixedAlarmSkippedByOneTap,같은 시각의 원터치 알람이 먼저 설정돼 있어 고정 알람은 만들지 않았어요,같은 시각의 원터치 알람이 먼저 설정돼 있어 고정 알람은 만들지 않았어요,lib/l10n/korean_only/messages_ko.json,"lib/screens/calendar_tab.dart:6516 | '${(alarmOutcome.skippedSlots.isEmpty || !context.usesKoreanFeatures) ? '' : ' · ${context.koOnly.fixedAlarmSkippedByOneTap} '
+lib/screens/calendar_tab.dart:6523 | content: Text('${context.koOnly.fixedAlarmSkippedByOneTap} '
+lib/screens/settings_tab.dart:1329 | ? '${context.koOnly.fixedAlarmSkippedByOneTap} '
+lib/utils/apply_schedule_change.dart:128 | '${(skippedSlots.isEmpty || !context.usesKoreanFeatures) ? '' : ' · ${context.koOnly.fixedAlarmSkippedByOneTap} '",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+backupRestoreManualPickLink,이전 백업 불러오기,이전 백업 불러오기,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingHasBackupTitle,기존에 쓰시던 분이라면,기존에 쓰시던 분이라면,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+onboardingHasBackupLoadButton,불러오기,불러오기,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+backupRestoreManualPickHint,Download/ShiftBell 폴더의 백업 파일로 쓰던 그대로 이어갈 수 있어요.,Download/ShiftBell 폴더의 백업 파일로 쓰던 그대로 이어갈 수 있어요.,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+settingsScheduleChangedRedoAllTeamsHint,스케줄 변경 시 전체 근무표도 다시 설정해주세요.,스케줄 변경 시 전체 근무표도 다시 설정해주세요.,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+settingsResetScheduleSharingFailed,스케줄은 초기화됐지만 이전 공유가 남아 있을 수 있어요. 앱 사용이 정상화되면 ‘일정공유 → 내 일정 공유하기’에서 ‘공유 중지’를 눌러 주세요.,스케줄은 초기화됐지만 이전 공유가 남아 있을 수 있어요. 앱 사용이 정상화되면 ‘일정공유 → 내 일정 공유하기’에서 ‘공유 중지’를 눌러 주세요.,lib/l10n/korean_only/messages_ko.json,lib/screens/settings_tab.dart:320 | ? Text(context.koOnly.settingsResetScheduleSharingFailed),F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+workHoursEditDialogTitle,"""{shift}"" 기본 근무시간","""{shift}"" 기본 근무시간",lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+workHoursUnitHourLabel,시간,시간,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+workHoursUnitMinuteLabel,분,분,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+friendShareMyScheduleTitle,내 일정 공유하기,내 일정 공유하기,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:193 | label: Text(context.koOnly.friendShareMyScheduleTitle,
+lib/screens/my_share_code_screen.dart:299 | appBar: AppBar(title: Text(context.koOnly.friendShareMyScheduleTitle, style: TextStyle(fontSize: 18.sp))),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendAdd,친구 추가,친구 추가,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:76 | title: Text(context.koOnly.friendAdd,
+lib/screens/friend_list_screen.dart:210 | label: Text(context.koOnly.friendAdd,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendNameOptionalHint,(선택 - 비우면 코드에 담긴 이름 사용),(선택 - 비우면 코드에 담긴 이름 사용),lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:83 | '${context.koOnly.friendName} ${context.koOnly.friendNameOptionalHint}',",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendShareCodeFromFriend,친구가 보내준 공유 코드,친구가 보내준 공유 코드,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:97 | Text(context.koOnly.friendShareCodeFromFriend,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendEnterShareCode,친구가 보내준 공유 코드를 붙여넣으면 친구의 일정을 볼 수 있어요,친구가 보내준 공유 코드를 붙여넣으면 친구의 일정을 볼 수 있어요,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:218 | context.koOnly.friendEnterShareCode,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendCanCheckAnytime,언제든 친구의 일정을 확인할 수 있습니다.,언제든 친구의 일정을 확인할 수 있습니다.,lib/l10n/korean_only/messages_ko.json,,F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendAddedToast,친구를 추가했어요,친구를 추가했어요,lib/l10n/korean_only/messages_ko.json,lib/screens/friend_list_screen.dart:129 | ? context.koOnly.friendAddedToast,F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendInvalidCodeOrDuplicate,코드가 올바르지 않거나 이미 추가된 친구예요,코드가 올바르지 않거나 이미 추가된 친구예요,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:130 | : context.koOnly.friendInvalidCodeOrDuplicate)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendLoadFailedCheckNetwork,근무표를 불러올 수 없어요. 네트워크 연결을 확인해주세요,근무표를 불러올 수 없어요. 네트워크 연결을 확인해주세요,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:265 | ? context.koOnly.friendLoadFailedCheckNetwork
+lib/utils/friend_open_util.dart:47 | SnackBar(content: Text(context.koOnly.friendLoadFailedCheckNetwork)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendShowingCachedSchedule,"최신 정보를 못 받아와서, 이전에 저장된 근무표를 보여드려요","최신 정보를 못 받아와서, 이전에 저장된 근무표를 보여드려요",lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:266 | : context.koOnly.friendShowingCachedSchedule,
+lib/utils/friend_open_util.dart:53 | SnackBar(content: Text(context.koOnly.friendShowingCachedSchedule)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendNoneAddedYet,아직 추가한 친구가 없어요,아직 추가한 친구가 없어요,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:233 | child: Text(context.koOnly.friendNoneAddedYet,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendRemove,친구 삭제,친구 삭제,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:287 | title: Text(context.koOnly.friendRemove),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendRemoveConfirm,{name}님을 목록에서 삭제할까요?,{name}님을 목록에서 삭제할까요?,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:288 | content: Text(context.koOnly.friendRemoveConfirm(displayName)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendDisplayNameTitle,친구에게 보여줄 이름,친구에게 보여줄 이름,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:317 | Text(context.koOnly.friendDisplayNameTitle, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendEnterDisplayName,친구에게 보여줄 이름을 입력하세요,친구에게 보여줄 이름을 입력하세요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:328 | hintText: context.koOnly.friendEnterDisplayName,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendShareIncludesSchedule,내 근무 스케줄과 근무 변경 사항이 공유됩니다.,내 근무 스케줄과 근무 변경 사항이 공유됩니다.,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:313 | '${context.koOnly.friendShareIncludesSchedule}\n${context.koOnly.friendShareExcludesExtras}',",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendShareExcludesExtras,"메모, OT, 근무시간, 알람 설정은 공유되지 않습니다.","메모, OT, 근무시간, 알람 설정은 공유되지 않습니다.",lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:313 | '${context.koOnly.friendShareIncludesSchedule}\n${context.koOnly.friendShareExcludesExtras}',",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendStartSharing,공유 시작하기,공유 시작하기,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:347 | : Text(context.koOnly.friendStartSharing, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendStopSharing,공유 중지,공유 중지,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:176 | title: Text(context.koOnly.friendStopSharing),
+lib/screens/my_share_code_screen.dart:418 | child: Text(context.koOnly.friendStopSharing, style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w600)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendStopSharingConfirm,"공유를 중지하면 친구가 더 이상 내 근무표를 볼 수 없어요. 인터넷에 연결되지 않은 상태라면 연결된 뒤 서버에서 지워지고, 친구 기기에 이미 받아 둔 내용은 회수되지 않아요. 계속할까요?","공유를 중지하면 친구가 더 이상 내 근무표를 볼 수 없어요. 인터넷에 연결되지 않은 상태라면 연결된 뒤 서버에서 지워지고, 친구 기기에 이미 받아 둔 내용은 회수되지 않아요. 계속할까요?",lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:178 | '${context.koOnly.friendStopSharingConfirm}\n\n${context.koOnly.friendRestartSharingHint}',",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendRestartSharingHint,"(다시 공유하려면 이 화면에서 ""공유 시작하기""를 다시 누르면 돼요. 기존 코드와 링크가 그대로 다시 동작해요)","(다시 공유하려면 이 화면에서 ""공유 시작하기""를 다시 누르면 돼요. 기존 코드와 링크가 그대로 다시 동작해요)",lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:178 | '${context.koOnly.friendStopSharingConfirm}\n\n${context.koOnly.friendRestartSharingHint}',",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendMyShareCode,앱을 쓰는 친구에게 (공유 코드),앱을 쓰는 친구에게 (공유 코드),lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:373 | Text(context.koOnly.friendMyShareCode, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendShareCodeInstructions,"친구가 앱에서 ""친구 추가""에 이 코드를 붙여넣으면 공유가 완료돼요.","친구가 앱에서 ""친구 추가""에 이 코드를 붙여넣으면 공유가 완료돼요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:378 | context.koOnly.friendShareCodeInstructions,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendShareWithoutApp,앱이 없는 친구에게 (링크),앱이 없는 친구에게 (링크),lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:382 | Text(context.koOnly.friendShareWithoutApp, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendShareLinkHint,이 링크를 열면 앱 설치 없이 바로 내 일정을 볼 수 있어요.,이 링크를 열면 앱 설치 없이 바로 내 일정을 볼 수 있어요.,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:390 | context.koOnly.friendShareLinkHint,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendInstallShortcutHint,주소창의 설치 버튼을 눌러 홈 화면에 바로가기를 추가할 수 있어요.,주소창의 설치 버튼을 눌러 홈 화면에 바로가기를 추가할 수 있어요.,lib/l10n/korean_only/messages_ko.json,,F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendDisplayNameUpdated,공유 이름을 변경했어요,공유 이름을 변경했어요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:108 | SnackBar(content: Text(context.koOnly.friendDisplayNameUpdated)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendDisplayNameUpdateFailed,이름 변경에 실패했어요. 네트워크를 확인해주세요,이름 변경에 실패했어요. 네트워크를 확인해주세요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:118 | SnackBar(content: Text(context.koOnly.friendDisplayNameUpdateFailed)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendEnterDisplayNameError,친구에게 보일 내 이름을 입력해주세요,친구에게 보일 내 이름을 입력해주세요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:128 | SnackBar(content: Text(context.koOnly.friendEnterDisplayNameError)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendConnectionFailed,연결에 실패했어요. 네트워크 연결을 확인하고 화면을 다시 열어주세요,연결에 실패했어요. 네트워크 연결을 확인하고 화면을 다시 열어주세요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:365 | context.koOnly.friendConnectionFailed,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendInstallForHomeScreen,홈 화면에서 바로 열려면 주소창의 설치 버튼을 눌러주세요.,홈 화면에서 바로 열려면 주소창의 설치 버튼을 눌러주세요.,lib/l10n/korean_only/messages_ko.json,,F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendServerNotReady,아직 친구공유 서버 연결 전이에요. 잠시 후 다시 시도해주세요,아직 친구공유 서버 연결 전이에요. 잠시 후 다시 시도해주세요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:134 | SnackBar(content: Text(context.koOnly.friendServerNotReady)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendScheduleNotSet,아직 근무 스케줄이 설정되지 않았어요,아직 근무 스케줄이 설정되지 않았어요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:142 | SnackBar(content: Text(context.koOnly.friendScheduleNotSet)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendStartSharingFailed,공유 시작에 실패했어요. 네트워크 연결을 확인하고 다시 시도해주세요,공유 시작에 실패했어요. 네트워크 연결을 확인하고 다시 시도해주세요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:153 | SnackBar(content: Text(context.koOnly.friendStartSharingFailed)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendSyncPendingBanner,친구에게 보이는 근무표를 아직 반영하는 중이에요. 네트워크가 연결되면 자동으로 다시 보내요.,친구에게 보이는 근무표를 아직 반영하는 중이에요. 네트워크가 연결되면 자동으로 다시 보내요.,lib/l10n/korean_only/messages_ko.json,lib/screens/my_share_code_screen.dart:231 | message = context.koOnly.friendSyncPendingBanner;,F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendStopPendingBanner,공유 중지를 서버에 보내는 중이에요. 확인되기 전까지는 친구에게 이전 근무표가 보일 수 있어요.,공유 중지를 서버에 보내는 중이에요. 확인되기 전까지는 친구에게 이전 근무표가 보일 수 있어요.,lib/l10n/korean_only/messages_ko.json,lib/screens/my_share_code_screen.dart:229 | message = context.koOnly.friendStopPendingBanner;,F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendRetrySync,지금 다시 보내기,지금 다시 보내기,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:260 | child: Text(context.koOnly.friendRetrySync),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendSyncPendingToast,아직 서버에 반영되지 않았어요. 연결되면 자동으로 다시 보내요,아직 서버에 반영되지 않았어요. 연결되면 자동으로 다시 보내요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:114 | SnackBar(content: Text(context.koOnly.friendSyncPendingToast)),
+lib/screens/my_share_code_screen.dart:215 | SnackBar(content: Text(context.koOnly.friendSyncPendingToast)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendStopSharingAction,중지,중지,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:182 | TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.koOnly.friendStopSharingAction)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendCodeCopied,코드를 복사했어요,코드를 복사했어요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:375 | _CopyBox(text: _code, monospace: true, onCopy: () => _copy(_code, context.koOnly.friendCodeCopied)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendLinkCopied,링크를 복사했어요,링크를 복사했어요,lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:384 | _CopyBox(text: _webViewLink, onCopy: () => _copy(_webViewLink, context.koOnly.friendLinkCopied)),",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendShareMessage,"{name}님의 교대 스케줄을 공유해요! 🗓️
+
+▶ 앱 없이 바로 보기: {link}
+
+▶ 교대시계 앱 사용 중이면 ""친구 추가""에 아래 코드를 붙여넣어주세요.
+
+{code}","{name}님의 교대 스케줄을 공유해요! 🗓️
+
+▶ 앱 없이 바로 보기: {link}
+
+▶ 교대시계 앱 사용 중이면 ""친구 추가""에 아래 코드를 붙여넣어주세요.
+
+{code}",lib/l10n/korean_only/messages_ko.json,"lib/screens/my_share_code_screen.dart:290 | Share.share(context.koOnly.friendShareMessage(name, _webViewLink, _code));",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendNameHintExample,친구 이름 입력,친구 이름 입력,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:89 | hintText: context.koOnly.friendNameHintExample,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+friendShareChannelsExplainer,"앱이 없는 친구에게는 링크로, 앱을 쓰는 친구에게는 코드로 공유할 수 있어요.","앱이 없는 친구에게는 링크로, 앱을 쓰는 친구에게는 코드로 공유할 수 있어요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_list_screen.dart:201 | context.koOnly.friendShareChannelsExplainer,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+statusDataLoadFailed,데이터 로드 실패,데이터 로드 실패,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+statusShiftChangeFailed,근무 변경 실패,근무 변경 실패,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+scheduleTabSyncFailed,화면 설정을 바꾸지 못했어요. 잠시 후 다시 시도해주세요.,화면 설정을 바꾸지 못했어요. 잠시 후 다시 시도해주세요.,lib/l10n/korean_only/messages_ko.json,"lib/widgets/disable_tab_button.dart:28 | SnackBar(content: Text(context.koOnly.scheduleTabSyncFailed)),",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+allTeamsSetupOtherTeamsLabel,다른 조,다른 조,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+allTeamsSetupOtherTeamsHint,우리 근무표에 실제로 쓰이는 다른 조를 모두 골라주세요.,우리 근무표에 실제로 쓰이는 다른 조를 모두 골라주세요.,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+allTeamsSetupPickMyTeamFirstHint,먼저 내 조를 선택해주세요.,먼저 내 조를 선택해주세요.,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+allTeamsSetupMinOtherTeamHint,다른 조를 최소 1개 이상 선택해주세요.,다른 조를 최소 1개 이상 선택해주세요.,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+themeInitialBadge,컬러 뱃지,컬러 뱃지,lib/l10n/korean_only/messages_ko.json,lib/models/calendar_theme.dart:64 | return KoreanOnlyCopy.fromLocalizations(l10n).themeInitialBadge;,F06 한국어 전용 4종/외국어 6종; 선택·직접 미리보기·언어 변경 제한
+themeUnderline,미니멀 언더라인,미니멀 언더라인,lib/l10n/korean_only/messages_ko.json,lib/models/calendar_theme.dart:66 | return KoreanOnlyCopy.fromLocalizations(l10n).themeUnderline;,F06 한국어 전용 4종/외국어 6종; 선택·직접 미리보기·언어 변경 제한
+themeEventChip,이벤트 캘린더,이벤트 캘린더,lib/l10n/korean_only/messages_ko.json,lib/models/calendar_theme.dart:68 | return KoreanOnlyCopy.fromLocalizations(l10n).themeEventChip;,F06 한국어 전용 4종/외국어 6종; 선택·직접 미리보기·언어 변경 제한
+themeEditorial,매거진,매거진,lib/l10n/korean_only/messages_ko.json,lib/models/calendar_theme.dart:70 | return KoreanOnlyCopy.fromLocalizations(l10n).themeEditorial;,F06 한국어 전용 4종/외국어 6종; 선택·직접 미리보기·언어 변경 제한
+scheduleDeleteConfirmTitle,일정을 삭제할까요?,일정을 삭제할까요?,lib/l10n/korean_only/messages_ko.json,,F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+helpScheduleTabSectionTitle,일정관리 탭,일정관리 탭,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:150 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabSectionTitle,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+helpScheduleTabWhatIsItTitle,일정관리 탭은 무엇이 다른가,일정관리 탭은 무엇이 다른가,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:154 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabWhatIsItTitle,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+helpScheduleTabWhatIsItBody,"달력 탭의 ""메모""가 하루 전체에 대한 메모라면, 일정관리 탭은 하루 내에 몇 시부터 몇 시까지 무엇을 할지 시간 단위로 관리할 수 있는 화면이에요. 출근 전 약속, 퇴근 후 일정처럼 구체적인 시각이 있는 일들을 정리할 때 씁니다.","달력 탭의 ""메모""가 하루 전체에 대한 메모라면, 일정관리 탭은 하루 내에 몇 시부터 몇 시까지 무엇을 할지 시간 단위로 관리할 수 있는 화면이에요. 출근 전 약속, 퇴근 후 일정처럼 구체적인 시각이 있는 일들을 정리할 때 씁니다.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:155 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabWhatIsItBody,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+helpScheduleTabCreateEditTitle,일정 만들고 수정하는 법,일정 만들고 수정하는 법,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:158 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabCreateEditTitle,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+helpScheduleTabCreateEditBody,화면 오른쪽 아래의 시계 아이콘을 누르면 시각을 고르는 모드로 바뀌어요. 원하는 시각에서 한 번 더 누르면 일정 만들기 화면이 나와요.,화면 오른쪽 아래의 시계 아이콘을 누르면 시각을 고르는 모드로 바뀌어요. 원하는 시각에서 한 번 더 누르면 일정 만들기 화면이 나와요.,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:159 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabCreateEditBody,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+helpScheduleTabAutoCategoryTitle,일정에 맞는 아이콘이 붙는 방식,일정에 맞는 아이콘이 붙는 방식,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:162 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabAutoCategoryTitle,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+helpScheduleTabAutoCategoryBody,앱이 일정 내용을 보고 알아서 관련 있는 아이콘을 붙여줍니다. 관련 있는 아이콘을 찾지 못한 경우에는 기본 도형 아이콘이 대신 붙습니다.,앱이 일정 내용을 보고 알아서 관련 있는 아이콘을 붙여줍니다. 관련 있는 아이콘을 찾지 못한 경우에는 기본 도형 아이콘이 대신 붙습니다.,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:163 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabAutoCategoryBody,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+helpConditionSectionTitle,수면·회복,수면·회복,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:171 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSectionTitle,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpConditionWhatIsItTitle,수면·회복 탭은 무엇인가,수면·회복 탭은 무엇인가,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:175 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionWhatIsItTitle,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpConditionWhatIsItBody,"내 근무 일정과 실제 수면 기록을 연결해서, 지금 시각을 기준으로 ""확인된 사실""(근무 사이 회복시간, 퇴근 후 실제 수면, 연속 야간·장시간 근무 등)과 ""추천 행동""(몇 시까지 잠자리에 들기, 카페인을 끊을 시각, 퇴근길 주의 등)을 보여주는 화면입니다. 점수로 상태를 매기지 않고, 수면 기록이 없거나 출퇴근 시각이 비어 있으면 그 한계를 ""판단 범위""로 따로 알려드려요. 건강 관련 기준과 조언은 수면의학·산업보건 분야의 연구 근거를 바탕으로 합니다.","내 근무 일정과 실제 수면 기록을 연결해서, 지금 시각을 기준으로 ""확인된 사실""(근무 사이 회복시간, 퇴근 후 실제 수면, 연속 야간·장시간 근무 등)과 ""추천 행동""(몇 시까지 잠자리에 들기, 카페인을 끊을 시각, 퇴근길 주의 등)을 보여주는 화면입니다. 점수로 상태를 매기지 않고, 수면 기록이 없거나 출퇴근 시각이 비어 있으면 그 한계를 ""판단 범위""로 따로 알려드려요. 건강 관련 기준과 조언은 수면의학·산업보건 분야의 연구 근거를 바탕으로 합니다.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:176 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionWhatIsItBody,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpConditionEvidenceListTitle,수면·회복 안내 근거,수면·회복 안내 근거,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:181 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionEvidenceListTitle,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpConditionEvidenceListBody,"수면·회복 탭의 안내는 아래 14개 자료를 바탕으로 해요. 연속 근무일수나 내 평균과의 비교처럼 일부 기준은 이 앱이 직접 정한 값이라 따로 출처를 붙이지 않아요.
+
+EVIDENCE-001 · 교대 방향(정방향/역방향) — 정방향 교대(주간→오후→야간)가 역방향보다 적응하기 쉽다고 보고됨. (NIOSH)
+
+EVIDENCE-002 · 근무 사이 최소 회복시간 — 두 근무 사이 최소 11시간의 회복시간을 둘 것을 권장. (Knauth & Hornberger, NIOSH Module 5 인용)
+
+EVIDENCE-003 · 근무 사이 최소 회복시간(법제 기준) — 모든 근로자는 24시간마다 최소 11시간의 연속 휴식을 보장받아야 함. (EU 근로시간지침 제3조)
+
+EVIDENCE-004 · 장시간 근무와 사고·부상 위험 — 8시간 근무 대비 10시간 근무는 상대위험 약 +13%, 12시간 근무는 약 +27% 증가하는 것으로 모델링됨. (Folkard & Lombardi, 2006)
+
+EVIDENCE-005 · 연속 근무 후 휴식일 — 8시간 근무 5일 또는 10시간 근무 4일 연속 뒤에는 1~2일, 12시간 근무 3일 연속 뒤에는 2일의 휴식을 계획할 것을 권고. 며칠 몰아 일하고 몰아 쉬는 패턴은 피하라고도 함. (NIOSH)
+
+EVIDENCE-006 · 야간근무 후 수면 — 야간근무 후에는 수면을 확보하는 것을 우선할 것을 권고. (NIOSH)
+
+EVIDENCE-007 · 야간근무 전 낮잠 — 조건부로 도움이 될 수 있다고 보고되나, 가이드라인 스스로 근거 수준이 매우 낮다고 명시함. 낮잠 직후 졸림에 주의. (AASM, 2025)
+
+EVIDENCE-008 · 카페인과 수면 — 취침 6시간 전 카페인 섭취도 총 수면시간을 1시간 이상 유의하게 감소시킴. (Drake 외, 2013)
+
+EVIDENCE-009 · 야간근무 후 귀가길 빛 노출 — 강한 빛 노출을 줄이면 이후 수면에 도움이 될 수 있음(단, 졸음운전 위험이 있으면 안전 우선). (NIOSH)
+
+EVIDENCE-010 · 야간근무 중 식사 — 자정~새벽 6시 사이 식사량을 줄이고 가벼운 음식 위주로 할 것을 권고. (NIOSH)
+
+EVIDENCE-011 · 성인 권장 수면시간 — 만 18~64세 권장 수면시간은 7~9시간. (National Sleep Foundation, 2015)
+
+EVIDENCE-012 · 주간 최대 근무시간(법제 기준) — 평균 주간 근무시간(연장근무 포함)이 48시간을 넘지 않아야 함. (EU 근로시간지침 제6조)
+
+EVIDENCE-013 · 연속 야간근무 횟수와 사고 위험 — 야간근무가 연속될수록 사고·부상 상대위험이 누적됨(2일째 약 +6%, 3일째 약 +17%, 4일째 약 +36% — 낮/오후근무 연속보다 야간근무 연속에서 위험 증가가 더 가파름). (Folkard & Tucker, 2003)
+
+EVIDENCE-014 · 주간 누적 근무시간 상한 — 간호사 근무시간을 24시간 안에 12시간, 7일 안에 60시간을 넘지 않게 제한할 것을 권고. 2014년 체계적 검토는 주 40시간을 넘는 근무가 환자 안전 저하와 연관된다고 보고. (IOM, 2004 / NIOSH Module 5 인용)","수면·회복 탭의 안내는 아래 14개 자료를 바탕으로 해요. 연속 근무일수나 내 평균과의 비교처럼 일부 기준은 이 앱이 직접 정한 값이라 따로 출처를 붙이지 않아요.
+
+EVIDENCE-001 · 교대 방향(정방향/역방향) — 정방향 교대(주간→오후→야간)가 역방향보다 적응하기 쉽다고 보고됨. (NIOSH)
+
+EVIDENCE-002 · 근무 사이 최소 회복시간 — 두 근무 사이 최소 11시간의 회복시간을 둘 것을 권장. (Knauth & Hornberger, NIOSH Module 5 인용)
+
+EVIDENCE-003 · 근무 사이 최소 회복시간(법제 기준) — 모든 근로자는 24시간마다 최소 11시간의 연속 휴식을 보장받아야 함. (EU 근로시간지침 제3조)
+
+EVIDENCE-004 · 장시간 근무와 사고·부상 위험 — 8시간 근무 대비 10시간 근무는 상대위험 약 +13%, 12시간 근무는 약 +27% 증가하는 것으로 모델링됨. (Folkard & Lombardi, 2006)
+
+EVIDENCE-005 · 연속 근무 후 휴식일 — 8시간 근무 5일 또는 10시간 근무 4일 연속 뒤에는 1~2일, 12시간 근무 3일 연속 뒤에는 2일의 휴식을 계획할 것을 권고. 며칠 몰아 일하고 몰아 쉬는 패턴은 피하라고도 함. (NIOSH)
+
+EVIDENCE-006 · 야간근무 후 수면 — 야간근무 후에는 수면을 확보하는 것을 우선할 것을 권고. (NIOSH)
+
+EVIDENCE-007 · 야간근무 전 낮잠 — 조건부로 도움이 될 수 있다고 보고되나, 가이드라인 스스로 근거 수준이 매우 낮다고 명시함. 낮잠 직후 졸림에 주의. (AASM, 2025)
+
+EVIDENCE-008 · 카페인과 수면 — 취침 6시간 전 카페인 섭취도 총 수면시간을 1시간 이상 유의하게 감소시킴. (Drake 외, 2013)
+
+EVIDENCE-009 · 야간근무 후 귀가길 빛 노출 — 강한 빛 노출을 줄이면 이후 수면에 도움이 될 수 있음(단, 졸음운전 위험이 있으면 안전 우선). (NIOSH)
+
+EVIDENCE-010 · 야간근무 중 식사 — 자정~새벽 6시 사이 식사량을 줄이고 가벼운 음식 위주로 할 것을 권고. (NIOSH)
+
+EVIDENCE-011 · 성인 권장 수면시간 — 만 18~64세 권장 수면시간은 7~9시간. (National Sleep Foundation, 2015)
+
+EVIDENCE-012 · 주간 최대 근무시간(법제 기준) — 평균 주간 근무시간(연장근무 포함)이 48시간을 넘지 않아야 함. (EU 근로시간지침 제6조)
+
+EVIDENCE-013 · 연속 야간근무 횟수와 사고 위험 — 야간근무가 연속될수록 사고·부상 상대위험이 누적됨(2일째 약 +6%, 3일째 약 +17%, 4일째 약 +36% — 낮/오후근무 연속보다 야간근무 연속에서 위험 증가가 더 가파름). (Folkard & Tucker, 2003)
+
+EVIDENCE-014 · 주간 누적 근무시간 상한 — 간호사 근무시간을 24시간 안에 12시간, 7일 안에 60시간을 넘지 않게 제한할 것을 권고. 2014년 체계적 검토는 주 40시간을 넘는 근무가 환자 안전 저하와 연관된다고 보고. (IOM, 2004 / NIOSH Module 5 인용)",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:182 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionEvidenceListBody,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpConditionSetupNeededTitle,오늘의 컨디션을 보려면 먼저 해야 할 설정,오늘의 컨디션을 보려면 먼저 해야 할 설정,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:185 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSetupNeededTitle,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpConditionSetupNeededBody,"이 기능을 쓰려면 설정 → 근무시간 및 OT 설정에서 최소 하나의 근무명에 대해 출퇴근 시각을 입력해둬야 해요. 하나도 입력돼 있지 않으면 오늘의 컨디션은 나오지 않고, 수면 기록만 남길 수 있어요. 전부 다 채울 필요는 없고, 지금 쓰고 있는 근무명 중 하나만 입력해도 동작해요.","이 기능을 쓰려면 설정 → 근무시간 및 OT 설정에서 최소 하나의 근무명에 대해 출퇴근 시각을 입력해둬야 해요. 하나도 입력돼 있지 않으면 오늘의 컨디션은 나오지 않고, 수면 기록만 남길 수 있어요. 전부 다 채울 필요는 없고, 지금 쓰고 있는 근무명 중 하나만 입력해도 동작해요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:186 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSetupNeededBody,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpSleepSectionTitle,수면 기록,수면 기록,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:192 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepSectionTitle,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpSleepWidgetTitle,수면 기록 위젯이란,수면 기록 위젯이란,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:196 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepWidgetTitle,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpSleepWidgetBody,"홈 화면에 수면 위젯을 올려 두고, 자기 전에 ""수면"", 일어난 뒤에 ""기상"" 버튼을 눌러 간단히 기록해 보세요. 위젯에는 오늘의 근무명도 함께 보여요.
+
+기록한 수면은 수면·회복 탭에서 근무 일정과 함께 살펴보고, 지금 챙길 일을 안내받는 데 쓰여요.
+
+야간 근무 중에 잔 잠은 낮잠으로 구분하고, 자정이 지나도 그 근무가 시작된 날짜에 기록해요. 예를 들어 27일 19시~28일 07시 근무 중 28일 00~02시에 잤다면 27일 낮잠으로 표시돼요.","홈 화면에 수면 위젯을 올려 두고, 자기 전에 ""수면"", 일어난 뒤에 ""기상"" 버튼을 눌러 간단히 기록해 보세요. 위젯에는 오늘의 근무명도 함께 보여요.
+
+기록한 수면은 수면·회복 탭에서 근무 일정과 함께 살펴보고, 지금 챙길 일을 안내받는 데 쓰여요.
+
+야간 근무 중에 잔 잠은 낮잠으로 구분하고, 자정이 지나도 그 근무가 시작된 날짜에 기록해요. 예를 들어 27일 19시~28일 07시 근무 중 28일 00~02시에 잤다면 27일 낮잠으로 표시돼요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:197 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepWidgetBody,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpSleepAutoDetectTitle,자동으로 수면을 추정해주는 기능,자동으로 수면을 추정해주는 기능,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:200 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepAutoDetectTitle,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpSleepAutoDetectBody,"위젯을 누르지 않아도, 근무 일정과 폰을 오래 만지지 않은 시간을 바탕으로 앱이 ""이때 주무셨을 것 같다""고 추정해요. 퇴근 후 잠과 밤잠, 그리고 야간 근무 출근 전에 잔 낮잠까지 찾아요. 근무 중에 잔 잠은 자동으로 잡지 않아서 위젯으로 직접 기록해야 해요.
+
+추정한 기록은 항상 추정일 뿐이라, ""맞아요""로 확인해야 정식 기록이 돼요.","위젯을 누르지 않아도, 근무 일정과 폰을 오래 만지지 않은 시간을 바탕으로 앱이 ""이때 주무셨을 것 같다""고 추정해요. 퇴근 후 잠과 밤잠, 그리고 야간 근무 출근 전에 잔 낮잠까지 찾아요. 근무 중에 잔 잠은 자동으로 잡지 않아서 위젯으로 직접 기록해야 해요.
+
+추정한 기록은 항상 추정일 뿐이라, ""맞아요""로 확인해야 정식 기록이 돼요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:201 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepAutoDetectBody,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpSleepMiniCalendarTitle,최근 수면 기록 확인/수정하기,최근 수면 기록 확인/수정하기,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:204 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepMiniCalendarTitle,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpSleepMiniCalendarBody,"수면·회복 탭의 ""최근 수면 기록"" 미니 달력에서 확정된 기록을 하루 단위로 볼 수 있어요. 칸을 탭하면 그 자리에서 기록을 만들거나 고치거나 지울 수 있어요. 더 예전 기록은 ""전체보기""에서 월 단위로 넘기며 볼 수 있어요.
+
+그 아래 ""내 근무별 수면 패턴""에서는 근무 유형별 평균 수면을 주 수면과 낮잠으로 나눠 볼 수 있어요.","수면·회복 탭의 ""최근 수면 기록"" 미니 달력에서 확정된 기록을 하루 단위로 볼 수 있어요. 칸을 탭하면 그 자리에서 기록을 만들거나 고치거나 지울 수 있어요. 더 예전 기록은 ""전체보기""에서 월 단위로 넘기며 볼 수 있어요.
+
+그 아래 ""내 근무별 수면 패턴""에서는 근무 유형별 평균 수면을 주 수면과 낮잠으로 나눠 볼 수 있어요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:205 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepMiniCalendarBody,",F02 수면·회복: 한국어 탭·전체보기·입력; 네이티브 위젯/수신기/자동감지 조건
+helpFriendSectionTitle,친구 공유,친구 공유,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:211 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendSectionTitle,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+helpFriendWhatIsItTitle,친구 공유란 무엇인가,친구 공유란 무엇인가,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:215 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendWhatIsItTitle,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+helpFriendWhatIsItBody,"친구나 다른 사람이 내 근무표를 볼 수 있게 공유하거나, 반대로 다른 사람이 공유한 근무표를 내가 볼 수도 있는 기능이에요. 앱이 없는 사용자에게도 내 근무표를 간단하게 공유할 수 있어요.","친구나 다른 사람이 내 근무표를 볼 수 있게 공유하거나, 반대로 다른 사람이 공유한 근무표를 내가 볼 수도 있는 기능이에요. 앱이 없는 사용자에게도 내 근무표를 간단하게 공유할 수 있어요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:216 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendWhatIsItBody,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+helpFriendShareCodeTitle,내 공유 코드 만들어서 알려주기,내 공유 코드 만들어서 알려주기,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:219 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendShareCodeTitle,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+helpFriendShareCodeBody,"달력 탭의 ""친구"" 버튼으로 들어가 ""내 일정 공유하기""를 누르면 코드가 발급됩니다. 이 코드를 상대방에게 알려주면, 상대방이 자기 앱에 그 코드를 등록해서 내 근무표를 볼 수 있어요.","달력 탭의 ""친구"" 버튼으로 들어가 ""내 일정 공유하기""를 누르면 코드가 발급됩니다. 이 코드를 상대방에게 알려주면, 상대방이 자기 앱에 그 코드를 등록해서 내 근무표를 볼 수 있어요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:220 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendShareCodeBody,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+helpFriendViewFriendTitle,친구 코드로 친구 근무표 보기,친구 코드로 친구 근무표 보기,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:223 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendViewFriendTitle,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+helpFriendViewFriendBody,"반대로 친구에게 코드를 받았다면, 친구 목록 화면에서 코드를 입력해 친구를 추가하면 그 친구의 근무표를 내 앱에서 달력 형태로 볼 수 있어요.","반대로 친구에게 코드를 받았다면, 친구 목록 화면에서 코드를 입력해 친구를 추가하면 그 친구의 근무표를 내 앱에서 달력 형태로 볼 수 있어요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:224 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendViewFriendBody,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+helpFriendReinstallNoteTitle,앱을 재설치하면 생기는 일,앱을 재설치하면 생기는 일,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:227 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendReinstallNoteTitle,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+helpFriendReinstallNoteBody,"앱을 지웠다가 다시 설치하면 내부적으로 새로운 계정처럼 인식돼서, 이전에 맺어둔 친구 공유 연결이 끊깁니다. 다시 연결하려면 공유 코드를 새로 발급받아 상대방에게 다시 알려줘야 해요.
+
+이때 상대방 화면에는 에러가 뜨지 않고, 재설치 전 마지막으로 받아온 근무표가 그대로 남아있을 뿐이에요. 상대방이 스스로 알아차리기 어려우니, 재설치했다면 꼭 먼저 알려주세요.","앱을 지웠다가 다시 설치하면 내부적으로 새로운 계정처럼 인식돼서, 이전에 맺어둔 친구 공유 연결이 끊깁니다. 다시 연결하려면 공유 코드를 새로 발급받아 상대방에게 다시 알려줘야 해요.
+
+이때 상대방 화면에는 에러가 뜨지 않고, 재설치 전 마지막으로 받아온 근무표가 그대로 남아있을 뿐이에요. 상대방이 스스로 알아차리기 어려우니, 재설치했다면 꼭 먼저 알려주세요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:228 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendReinstallNoteBody,",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+helpTroubleshootFriendDisconnectedTitle,친구 근무표가 며칠째 안 바뀌어요,친구 근무표가 며칠째 안 바뀌어요,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:291 | titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpTroubleshootFriendDisconnectedTitle,",F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+helpTroubleshootFriendDisconnectedBody,"에러 없이 근무표만 그대로 멈춰 있다면, 대부분 친구가 앱을 재설치한 경우예요. 재설치하면 내부 계정이 새로 만들어져 기존 연결이 끊기는데, 이때는 화면에 아무 안내도 뜨지 않고 재설치 전 마지막 모습이 계속 보여요.
+
+친구 근무표 화면 위쪽의 ""마지막 동기화"" 시간이 계속 옛날 날짜인지 확인해 보세요. 그렇다면 친구에게 새 공유 코드를 받아서, 기존 항목을 지우고 새 코드로 다시 추가하면 돼요.","에러 없이 근무표만 그대로 멈춰 있다면, 대부분 친구가 앱을 재설치한 경우예요. 재설치하면 내부 계정이 새로 만들어져 기존 연결이 끊기는데, 이때는 화면에 아무 안내도 뜨지 않고 재설치 전 마지막 모습이 계속 보여요.
+
+친구 근무표 화면 위쪽의 ""마지막 동기화"" 시간이 계속 옛날 날짜인지 확인해 보세요. 그렇다면 친구에게 새 공유 코드를 받아서, 기존 항목을 지우고 새 코드로 다시 추가하면 돼요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:292 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpTroubleshootFriendDisconnectedBody,",F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+helpOneTapTitle,원터치 알람: 자주 쓰는 시각을 빠르게 추가하기,원터치 알람: 자주 쓰는 시각을 빠르게 추가하기,lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:102 | HelpTopic(koreanOnly: true, titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpOneTapTitle,",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+helpOneTapBody,"달력 위의 원터치 알람 버튼을 누르고 +로 시각과 울림 방식(소리+진동·진동·무음)을 저장해 주세요. 처음에는 한 칸만 보이고, 저장할 때마다 다음 추가 칸이 나타나요. 최대 5개까지 저장할 수 있어요.
+
+저장된 시각을 누른 뒤 오늘 또는 내일을 선택하면 알람이 예약되고 원터치 화면이 닫혀요. 예약 결과는 화면 아래에 잠깐 표시돼요. 이미 지난 시각이나 다른 알람과 같은 시각에는 추가하지 않아요.
+
+목록을 보고 있을 때 달력을 누르면 원터치 화면이 닫혀요. 시각을 고른 상태에서는 뒤로가기로 목록에 돌아갈 수 있어요.
+
+시각을 선택하면 수정·삭제 버튼이 나타나요. 미래 날짜에 이미 추가한 설정은 먼저 해당 알람을 삭제해야 수정할 수 있어요. 날짜의 알람만 지우려면 달력에서 그 날짜를 열고 원터치 알람 옆 ×를 누르세요. 설정을 통째로 지우면 연결된 알람도 삭제돼요. 삭제 후 고정 알람이 다시 예약될 수 있으며 확인창에서 안내해요.","달력 위의 원터치 알람 버튼을 누르고 +로 시각과 울림 방식(소리+진동·진동·무음)을 저장해 주세요. 처음에는 한 칸만 보이고, 저장할 때마다 다음 추가 칸이 나타나요. 최대 5개까지 저장할 수 있어요.
+
+저장된 시각을 누른 뒤 오늘 또는 내일을 선택하면 알람이 예약되고 원터치 화면이 닫혀요. 예약 결과는 화면 아래에 잠깐 표시돼요. 이미 지난 시각이나 다른 알람과 같은 시각에는 추가하지 않아요.
+
+목록을 보고 있을 때 달력을 누르면 원터치 화면이 닫혀요. 시각을 고른 상태에서는 뒤로가기로 목록에 돌아갈 수 있어요.
+
+시각을 선택하면 수정·삭제 버튼이 나타나요. 미래 날짜에 이미 추가한 설정은 먼저 해당 알람을 삭제해야 수정할 수 있어요. 날짜의 알람만 지우려면 달력에서 그 날짜를 열고 원터치 알람 옆 ×를 누르세요. 설정을 통째로 지우면 연결된 알람도 삭제돼요. 삭제 후 고정 알람이 다시 예약될 수 있으며 확인창에서 안내해요.",lib/l10n/korean_only/messages_ko.json,"lib/screens/help_screen.dart:103 | bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpOneTapBody),",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+scheduleOutsideTeamsConfirm,선택한 위치는 전체 근무표의 어느 조와도 일치하지 않습니다. 계속하면 전체 근무표가 삭제되어 다시 설정해야 합니다. 근무 스케줄을 변경할까요?,선택한 위치는 전체 근무표의 어느 조와도 일치하지 않습니다. 계속하면 전체 근무표가 삭제되어 다시 설정해야 합니다. 근무 스케줄을 변경할까요?,lib/l10n/korean_only/messages_ko.json,,F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleMyTeam,내 조,내 조,lib/l10n/korean_only/messages_ko.json,,F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleTeamsAtToday,오늘을 기준으로 각 조가 배정된 패턴 위치입니다.,오늘을 기준으로 각 조가 배정된 패턴 위치입니다.,lib/l10n/korean_only/messages_ko.json,,F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+teamRuleEdit,설정,설정,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+teamRuleChooseTeam,변경하실 조를 선택해 주세요.,변경하실 조를 선택해 주세요.,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+oneTapDeleteNoAlarmConfirm,원터치 알람을 삭제하면 이 시각에 알람이 남지 않습니다. 삭제할까요?,원터치 알람을 삭제하면 이 시각에 알람이 남지 않습니다. 삭제할까요?,lib/l10n/korean_only/messages_ko.json,lib/screens/next_alarm_tab.dart:76 | ? context.koOnly.oneTapDeleteNoAlarmConfirm,F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+oneTapDeleteRestoreConfirm,원터치 알람을 삭제하면 {shift} 고정 알람을 다시 예약합니다. 삭제할까요?,원터치 알람을 삭제하면 {shift} 고정 알람을 다시 예약합니다. 삭제할까요?,lib/l10n/korean_only/messages_ko.json,"lib/screens/next_alarm_tab.dart:77 | : context.koOnly.oneTapDeleteRestoreConfirm(fixed.shiftType)),",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+oneTapDeleteNoAlarmDetail,삭제하면 이 시각에 알람이 남지 않습니다.,삭제하면 이 시각에 알람이 남지 않습니다.,lib/l10n/korean_only/messages_ko.json,"lib/screens/calendar_tab.dart:6195 | '${context.usesKoreanFeatures && (alarm.type == 'custom' || alarm.presetSlot != null) ? '\n${replacement == null ? context.koOnly.oneTapDeleteNoAlarmDetail : context.koOnly.oneTapDeleteRestoreDetail(replacement.shiftType)}' : ''}',",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+oneTapDeleteRestoreDetail,삭제 후 {shift} 고정 알람을 다시 예약합니다.,삭제 후 {shift} 고정 알람을 다시 예약합니다.,lib/l10n/korean_only/messages_ko.json,"lib/screens/calendar_tab.dart:6195 | '${context.usesKoreanFeatures && (alarm.type == 'custom' || alarm.presetSlot != null) ? '\n${replacement == null ? context.koOnly.oneTapDeleteNoAlarmDetail : context.koOnly.oneTapDeleteRestoreDetail(replacement.shiftType)}' : ''}',",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+oneTapDeletedRefreshRetry,원터치 알람은 삭제됐지만 고정 알람 예약에 실패했습니다. 다시 갱신합니다.,원터치 알람은 삭제됐지만 고정 알람 예약에 실패했습니다. 다시 갱신합니다.,lib/l10n/korean_only/messages_ko.json,"lib/screens/calendar_tab.dart:6265 | ? context.koOnly.oneTapDeletedRefreshRetry
+lib/screens/next_alarm_tab.dart:111 | ? context.koOnly.oneTapDeletedRefreshRetry",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+oneTapDeletedFixedRestored,원터치 알람을 삭제하고 고정 알람을 예약했습니다.,원터치 알람을 삭제하고 고정 알람을 예약했습니다.,lib/l10n/korean_only/messages_ko.json,"lib/screens/calendar_tab.dart:6268 | ? context.koOnly.oneTapDeletedFixedRestored
+lib/screens/next_alarm_tab.dart:114 | ? context.koOnly.oneTapDeletedFixedRestored",F04 원터치: custom/preset 생성은 한국어 UI; 외국어 신규 설치에는 충돌 조건 없음; 추가 언어 가드
+onboardingShiftLimitHint,(최대 {max}개까지 추가 가능하며 {chars}글자로 제한됩니다.),(최대 {max}개까지 추가 가능하며 {chars}글자로 제한됩니다.),lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+workHoursDurationExcluded,0시간 (근무시간 미포함),0시간 (근무시간 미포함),lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+friendName,친구 이름,친구 이름,lib/l10n/korean_only/messages_ko.json,"lib/screens/friend_calendar_view.dart:13 | required this.friendName,
+lib/screens/friend_list_screen.dart:83 | '${context.koOnly.friendName} ${context.koOnly.friendNameOptionalHint}',
+lib/widgets/friend_web_calendar.dart:20 | required this.friendName,
+lib/widgets/friend_web_calendar.dart:91 | final name = widget.friendName.isEmpty
+lib/widgets/friend_web_calendar.dart:93 | : widget.friendName;",F03 앱 친구 공유: 한국어 진입 전 래퍼 및 비동기 검사. 공개 웹 13키는 공통에 별도로 유지
+permissionAllow,권한 허용하기,권한 허용하기,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+permissionRequired,필수,필수,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+permissionRecommended,권장,권장,lib/l10n/korean_only/messages_ko.json,,F00 현재 사용처 제거/미사용: 현재 Flutter 소스에 공통 생성 API/동적 ARB 접근 없음; 한국어 원본만 보존
+scheduleNotifyRegisterFailed,일정은 저장됐지만 알림을 예약하지 못했어요. 정확한 알람 권한을 확인한 뒤 일정을 다시 저장해 주세요.,일정은 저장됐지만 알림을 예약하지 못했어요. 정확한 알람 권한을 확인한 뒤 일정을 다시 저장해 주세요.,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:1717 | SnackBar(content: Text(context.koOnly.scheduleNotifyRegisterFailed)),
+lib/screens/schedule_management_tab.dart:1775 | SnackBar(content: Text(context.koOnly.scheduleNotifyRegisterFailed)),",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleDuplicateTimeSlot,이미 같은 시간대의 일정이 있어요. 그 일정에 내용을 함께 적어주세요.,이미 같은 시간대의 일정이 있어요. 그 일정에 내용을 함께 적어주세요.,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:1675 | SnackBar(content: Text(context.koOnly.scheduleDuplicateTimeSlot)),
+lib/screens/schedule_management_tab.dart:1746 | SnackBar(content: Text(context.koOnly.scheduleDuplicateTimeSlot)),",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleMaxPerSlot,이 시간대에는 일정을 최대 {count}개까지만 만들 수 있어요,이 시간대에는 일정을 최대 {count}개까지만 만들 수 있어요,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:1689 | Text(context.koOnly.scheduleMaxPerSlot(_maxSchedulesPerSlot))),",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleDeleteConfirmBody,삭제한 일정은 되돌릴 수 없어요.,삭제한 일정은 되돌릴 수 없어요.,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:3974 | Text(context.koOnly.scheduleDeleteConfirmBody,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleEditTitle,일정 수정,일정 수정,lib/l10n/korean_only/messages_ko.json,lib/screens/schedule_management_tab.dart:3712 | ? context.koOnly.scheduleEditTitle,F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleNewTitle,새 일정,새 일정,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:3713 | : context.koOnly.scheduleNewTitle,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleContentFieldLabel,내용,내용,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:3733 | labelText: context.koOnly.scheduleContentFieldLabel,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleTimeSectionLabel,시간,시간,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:3746 | Text(context.koOnly.scheduleTimeSectionLabel,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleNotifySectionLabel,알림,알림,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:3862 | Text(context.koOnly.scheduleNotifySectionLabel,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleNotifyToggleLabel,일정에 맞춰 알림 받기,일정에 맞춰 알림 받기,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:3872 | context.koOnly.scheduleNotifyToggleLabel,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleNotifyDescription,시스템 알림 설정(소리·진동·무음)을 그대로 따르는 알림 1건으로 알려드려요.,시스템 알림 설정(소리·진동·무음)을 그대로 따르는 알림 1건으로 알려드려요.,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:3892 | Text(context.koOnly.scheduleNotifyDescription,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleNotifyOffsetQuestion,몇 분 전에 알려드릴까요?,몇 분 전에 알려드릴까요?,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:3897 | Text(context.koOnly.scheduleNotifyOffsetQuestion,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleNotifyOffsetOnTime,정시,정시,lib/l10n/korean_only/messages_ko.json,lib/screens/schedule_management_tab.dart:3907 | ? context.koOnly.scheduleNotifyOffsetOnTime,F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleNotifyOffsetBefore,{minutes}분 전,{minutes}분 전,lib/l10n/korean_only/messages_ko.json,lib/screens/schedule_management_tab.dart:3908 | : context.koOnly.scheduleNotifyOffsetBefore(minutes);,F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleNotifyPastTimeWarning,이미 지난 시각이라 알림이 울리지 않아요. 시간을 바꿔주세요.,이미 지난 시각이라 알림이 울리지 않아요. 시간을 바꿔주세요.,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:3931 | context.koOnly.scheduleNotifyPastTimeWarning,",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+scheduleCreateButton,생성,생성,lib/l10n/korean_only/messages_ko.json,"lib/screens/schedule_management_tab.dart:4031 | : context.koOnly.scheduleCreateButton),",F01 개인 일정: 한국어 진입 전 래퍼·도움말·알림·지연 팝업 조건
+app_widget_sleep_label,교대시계 수면기록,교대시계 수면기록,android/app/src/main/res/values/korean_only.xml,"android/app/src/main/AndroidManifest.xml:168 | android:label=""@string/app_widget_sleep_label"">",한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용
+channel_schedule_notify,일정 알림,일정 알림,android/app/src/main/res/values/korean_only.xml,"android/app/src/main/kotlin/com/hwani1103/shiftbell/ScheduleNotificationReceiver.kt:110 | CHANNEL_ID, context.getString(R.string.channel_schedule_notify), NotificationManager.IMPORTANCE_HIGH",한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용
+one_tap_alarm_label,원터치 알람,원터치 알람,android/app/src/main/res/values/korean_only.xml,android/app/src/main/kotlin/com/hwani1103/shiftbell/KoreanFeatureStrings.kt:8 | if (ReleaseLocalePolicy.koreanFeatures(context)) R.string.one_tap_alarm_label,한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용
+sleep_widget_brand,교대시계,교대시계,android/app/src/main/res/values/korean_only.xml,"android/app/src/main/res/layout/sleep_widget.xml:36 | android:contentDescription=""@string/sleep_widget_brand""/>",한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용
+sleep_widget_description,버튼으로 취침/기상을 기록해요.,버튼으로 취침/기상을 기록해요.,android/app/src/main/res/values/korean_only.xml,"android/app/src/main/res/xml/sleep_widget_info.xml:21 | android:description=""@string/sleep_widget_description""",한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용
+sleep_widget_no_shift,근무없음,근무없음,android/app/src/main/res/values/korean_only.xml,android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt:236 | if (name == UNSET_SENTINEL) return context.getString(R.string.sleep_widget_no_shift) to NEUTRAL_CHIP_COLOR,한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용
+sleep_widget_not_set,미설정,미설정,android/app/src/main/res/values/korean_only.xml,android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt:233 | val schedule = CalendarWidgetScheduleResolver.readSchedule(context) ?: return context.getString(R.string.sleep_widget_not_set) to NEUTRAL_CHIP_COLOR,한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용
+sleep_widget_sleep,수면,수면,android/app/src/main/res/values/korean_only.xml,"android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt:333 | val sleepText = context.getString(R.string.sleep_widget_sleep)
+android/app/src/main/res/layout/sleep_widget.xml:90 | android:text=""@string/sleep_widget_sleep""",한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용
+sleep_widget_tab_off,탭 꺼짐,탭 꺼짐,android/app/src/main/res/values/korean_only.xml,"android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt:195 | views.setTextViewText(R.id.sleep_shift_label, context.getString(R.string.sleep_widget_tab_off))",한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용
+sleep_widget_unknown,정보 없음,정보 없음,android/app/src/main/res/values/korean_only.xml,android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt:241 | context.getString(R.string.sleep_widget_unknown) to NEUTRAL_CHIP_COLOR,한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용
+sleep_widget_wake,기상,기상,android/app/src/main/res/values/korean_only.xml,"android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt:334 | val wakeText = context.getString(R.string.sleep_widget_wake)
+android/app/src/main/res/layout/sleep_widget.xml:110 | android:text=""@string/sleep_widget_wake""",한국어 기능 전용; 공유 native 화면은 KoreanFeatureStrings로 외국어 기본 라벨 사용

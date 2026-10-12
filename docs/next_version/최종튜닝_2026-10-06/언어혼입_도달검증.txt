@@ -1,0 +1,145 @@
+언어 혼입·실제 호출 대조 — 2026-10-06
+
+판정 단위
+지원 언어의 앱 제작 UI 문구를 대상으로 pt-BR→de→en→hi 순서로 검토했다.
+사용자 근무명·메모·팀명·공유 소유자명과 공유받은 근무표는 원문 데이터다.
+그 안의 한국어/다른 언어를 강제 번역하거나 삭제하지 않는다. 진단 파일의 내부
+로그는 사용자 도움말과 다르며 로그 자체의 현지화 완료를 주장하지 않는다.
+호스트에서 확인한 경로의 무혼입과 모든 실제 기기에서의 절대 0%는 구별한다.
+
+1. 리소스와 생성
+common ARB는 5언어 같은 504키. Android common은 37문구+요일 배열7항목.
+한국어 전용은 ARB202+native11=213개이고 원문 일치 검사를 수행한다.
+외국어의 누락/빈 번역/한글/치환문자/ICU 변수/Android 포맷 인자 차이를 검사한다.
+gen-l10n의 untranslated={} 및 생성된 common API에 전용 키가 없는지 확인한다.
+KoreanOnlyCopy는 외국어 접근 시 StateError이므로 한국어 자동 fallback이 아니다.
+키 동등성·변수 검사는 자동 검사이고 번역 의미 판정은 별도 선독해·역번역·코드
+대조다. 같은 라틴 문자를 쓰는 PT/DE/EN 혼입은 한글 정규식만으로 판정하지 않았다.
+
+영어와 동일한 전체 문자열의 허용 근거
+appTitle/splashTitle: 브랜드 ShiftBell. commonAm/commonPm: 12시간 형식 기호.
+themeLabPreviewSheetTitle: 숫자/날짜 변수와 기호. PT commonPrevious: 화살표.
+PT commonOk / DE commonOk: 현지에서 쓰는 OK. PT alarmVolume: 포르투갈어 Volume.
+PT calendarOtTotal: 포르투갈어 Total. PT alarmDurationMinutes: 공통 단위 min.
+DE alarmVibration: 독일어 Vibration. 이 항목들은 미번역 영어 문장을 방치한 것이 아니다.
+본문의 Android/Google Play/ShiftBell/Xiaomi/MIUI/HyperOS/AM/PM, 실제 파일 경로
+Download/ShiftBell 및 ShiftBell_Backup_ 이름은 식별에 필요한 고유명/실제 경로다.
+Xiaomi 영어 OS 설정명 병기는 사용자가 해당 설정을 찾기 위한 기존 의도다.
+네이티브 원형 제어의 +5m는 compact 기호이며 Activity의 alarm_snooze_label과
+제어 알림에는 각 언어의 5분 후 문구가 있다. 한국어 문장이 새어 나오는 경로가 아니다.
+
+2. Flutter 제공 경로
+main MyApp→releaseSupportedLocales/resolveReleaseLocale: 첫 시스템 언어 기준,
+PT는 브라질어, DE/HI 해당 언어, 미지원/없음은 EN. 한국어 기본 첫 항목에 맡기지 않음.
+StartupGate도 같은 정책. 한국어 디버그 예외 화면은 kReleaseMode에서 아이콘으로
+대체되며 상세 예외/스택을 제품 release에 표시하지 않는다.
+main didChangeDependencies→_setupTabsAndPrewarm: 언어 변경 시 탭 재구성과 기존
+SnackBar 제거. 앱에 별도 언어 저장 UI를 새로 만들거나 데이터를 이관하지 않았다.
+온보딩의 초기 근무명은 l10n에서 생성. 그 뒤 사용자가 저장한 이름은 사용자 데이터.
+날짜·요일은 현재 locale의 intl/Material 또는 현지화 요일 util을 사용한다.
+한국어 '미설정'/'없음'은 내부 식별자와 구별하고 UI에서는 localized 값/빈 상태.
+
+한국어 전용 도달 제한을 현재 코드에서 재대조한 파일군
+개인 일정: main / ScheduleManagementTab 래퍼 / 편집 시트 / DisableTabButton /
+ScheduleNotificationScheduler·Receiver. 수면: ConditionTab / SleepCalendarFullScreen /
+sleep_edit_dialog / SleepDetectionScheduler / SleepWidgetProvider·ActionReceiver.
+친구: FriendListScreen / MyShareCodeScreen / FriendCalendarView / friend_provider /
+FriendSyncService. 공개 web=true는 이 앱 내부 제한과 별도이다.
+원터치: calendar_tab / CustomAlarmPresetPanel / custom_alarm_widgets /
+CustomAlarmDayList / fixedAlarmSkippedByOneTap의 4개 표시 지점.
+한국 공휴일·음력: holiday_util / HolidaySyncService의 await 전후 조건 /
+CalendarWidgetHolidays / ReleaseLocalePolicy.isCalendarRedDay.
+테마: CalendarThemePickerScreen→availableCalendarThemes 6종, ThemeLab의
+_buildThemeBody에서 외국어 index>=6 차단. AUGUST/TODAY 하드코딩은 index6
+한국어 전용 initialBadge에만 있어 외국어에 도달하지 않는다. 테마 레이아웃 미검사.
+한국어 문의 채널은 ko 조건 유지; 외국어 이메일 안내만 제공.
+각 분기의 이전 근거는 후속재점검_2026-10-05/기능_도달경로.txt와 연결한다.
+이전의 blanket 공개 웹 차단이나 '이전에 한국어를 썼다면' 예외 안내를 복원하지 않았다.
+
+3. 열린 화면·지연·실패
+onboarding_info_popups._showInfoPopupOnce는 호출 전/지연 후/표시 시 언어 확인.
+ko에서 예약 후 hi로 변경하면 개인 일정 안내가 뜨지 않고 표시완료 prefs도 안 씀.
+공통 welcome popup은 열린 상태에서 네 언어 변경 시 현재 언어를 표시하는 호스트 검사.
+HelpScreen은 검색/목차의 koreanOnly를 상세 route에 전달하며 build에서 재검사.
+새로 분리한 구형 백업 항목은 한국어 검색·상세 유지, 외국어 검색 제외 및 열린
+한국어 상세의 외국어 전환을 검사. 검색창에 사용자가 입력한 한국어는 보존한다.
+WorkHoursSettingsScreen의 구형 시간 안내만 koOnly로 분리. 한국어→4외국어→한국어
+전환으로 문구 노출 범위와 저장된 480분 불변을 실제 임시 DB로 검사한다.
+Calendar/settings/history/all_shifts/apply_schedule_change의 오류 변수는
+localizedErrorDetail을 사용. 이번에 빠져 있던 팀표 저장/재생성 2곳도 적용했다.
+원인 예외를 화면에 그대로 넣는 대신 외국어 공통 오류 의미를 표시한다. 로그 보존.
+PermissionPanel은 current context의 문구 사용, open 성공을 허용으로 바꾸지 않음.
+RestoreCoordinator의 사본 소실 safeEnd 성공/재예약 실패를 구별하고 해당 안내 유지.
+
+4. 공개 웹
+web_main _WebEntryRouter→루트/개인정보/코드 링크/standalone 분기 모두 점검.
+_WebViewRouter._load의 결과는 이제 번역 문자열이 아닌 실패 enum.
+PublicWebLoadFailurePage가 build에서 현재 l10n을 해석하므로 로딩 도중 또는 오류
+표시 후 언어 변경에서 이전 한국어/다른 언어 reason이 남지 않는다. 실패3종 검사.
+FriendCalendarView(publicWebViewer:true)와 FriendWebCalendar는 계속 공개 제공.
+공유 데이터 내용을 번역하지 않음. 실제 서버 조회/인증·네트워크 실측은 NOT_RUN.
+index.html/기본 manifest의 초기 고정 한국어를 중립 브랜드로 변경. synchronous
+locale_bootstrap이 Flutter보다 먼저 title/description/OG/설치 manifest를 선택.
+5개 manifest와 script는 tools/generate_web_locale_assets.py로 생성한다.
+한국어 metadata는 별도 JSON에 원문 보존. JS 미실행 링크 봇은 브랜드만 표시한다.
+Node VM에서 primary locale8종·차선ko·languagechange를 검사했다. 실제 브라우저
+설치 UI/서비스워커 캐시/언어 변경 이벤트 전달 실측을 한 것으로 계산하지 않는다.
+
+5. Android
+알람 Activity/Overlay/InAppAlarmController의 초기 라벨 및 비어 있는 라벨은
+alarm_default_label 사용. NotificationHelper/AlarmGuard/RestoreGate의 문구는
+현재 Context 리소스. DB label은 사용자 데이터. 복원·알람 동작은 변경하지 않음.
+CalendarWidgetProvider 요일은 현지화 배열, 월/일은 locale formatter, '없음'은
+widget_no_shift. preview layout은 지역별 widget_preview_* 리소스 사용.
+SleepWidgetActionReceiver의 한국어 Toast는 koreanFeatures 조건 이후에만 실행.
+수면 위젯은 최초 disabled; 외국어 고정 위젯 갱신은 중립 XML. 실제 런처 캐시 미검증.
+app_name은 각 flavor의 en/pt/de/hi에 명시. 한국어 이름/기존 설치 데이터는 보존.
+Robolectric에서 supported primary+차선ko의 제어/요일/앱 이름을 검사했다.
+미지원ja+차선ko 호스트는 영어 default를 선택했으나 Android 공식 문서는 차선
+지원언어 선택을 설명한다. 이 호스트 결과를 실제 OS의 영어 강제 보장으로 쓰지 않는다.
+실기기에서는 앱 활성 locale/위젯/알림/런처 이름을 함께 기록해야 한다.
+https://developer.android.com/guide/topics/resources/multilingual-support
+
+네이티브 지연/열린 표시 추가 보완(U14)
+ReleaseLocaleReceiver 및 MainActivity onResume/onConfigurationChanged에서
+NotificationLocale.refresh를 호출한다. 새로 게시하는 guard/snooze/restore/ring
+알림에 종류·시각·locale metadata를 보관하며 이미 존재하는 알림의 제작 문구만
+현재 리소스로 교체한다. 사용자 label·내용·content/delete/action PendingIntent,
+원래 when·ongoing·채널을 유지한다. 재표시는 silent/onlyAlertOnce이고 전체화면
+Intent를 재실행하지 않는다. 없어진 알림을 생성하지 않으며 제어 알림은 같은 live
+울림 회차 lock 안에서만 갱신한다. 스누즈의 기존 30초 삭제 예약도 다시 만들지 않음.
+존재하는 공통 채널만 이름/설명을 갱신하며 새 채널 생성·차단 해제·중요도 변경 없음.
+앱 안 알람 창은 shownLocale을 기억해 같은 회차라도 언어가 다르면 다시 표시한다.
+외부 overlay는 locale 변경도 감지한다. 원래 ring timeout은 그대로 유지.
+AppTextScale.context는 부모의 현재 locale 목록을 명시하여 bounded font용 새
+Context에서 다른 언어를 택하지 않도록 한다. 밀도/화면 크기 상속과 폰트 정책 불변.
+NotificationLocaleTest와 G1RingRoundTest의 기능 검사를 추가하고 기존 회차/스누즈/
+자동종료/커버 알림 회귀도 같이 실행한다. 실제 기기 표시·알림 캐싱 검증은 NOT_RUN.
+metadata가 없는 과거 버전의 이미 게시된 알림/외부 SDK 알림은 임의로 해석하지 않는다.
+외국어 첫 출시의 새 게시 경로는 전부 metadata를 기록한다.
+U15: Activity/overlay의 투명 snooze/dismiss Button에 각 언어의 접근성 이름을
+연결했다. InApp도 동일 XML을 사용하므로 열린 창의 언어 변경에서 두 접근성
+이름과 같은 울림 회차·원래 종료시각 보존을 함께 검사한다. 시각 배치는 불변.
+
+6. 검색 범위와 남은 경계
+앱/웹의 원본 아이콘 PNG는 시계·종 그림이며 한글/외국어 문장이 박힌 이미지가
+아님을 확인했다. SVG text 요소 검색과 native 위젯 previewLayout 연결도 확인.
+이는 리소스 안의 언어 확인이며 앱 화면 캡처·레이아웃·배율 검증은 아니다.
+영어 문장형 리터럴을 lib/native main 전체에서 추가 검색했다. 영어 수면 설명
+EnglishSleepCopy는 제품 import/호출이 없고 옛 단위 테스트만 참조하여 외국어
+UI에 도달하지 않는다. 이를 수면 기능 제공 근거로 되살리거나 재번역하지 않았다.
+backup_validator/shift_schedule의 영어 issues는 내부 검증 정보이며
+BackupValidationException을 잡는 restore_backup/restore_progress는 공통
+현지화 실패 문구를 표시한다. Firebase 미지원 플랫폼 예외/SQL/로그/시각 포맷도
+UI 영어 안내로 오인해 삭제하지 않았다. 추가 원시 검색은 검증로그 참조.
+하드코딩_현재검색목록.csv는 lib 및 android/app/src 전체 Dart/Kotlin/XML,
+web HTML/JS에서 한글 리터럴 후보를 모은 것이다. 개발 로그/주석/테스트/리소스도
+포함하므로 행 수가 제품 노출 결함 수는 아니다. UI 직접 리터럴·간접 오류 변수·
+native setContent/Toast/label·외부 Intent를 별도로 대조했다.
+이전 검색은 android main 중심이었고 이번에는 flavor/test/web까지 넓혀서 후보
+수 증가 자체를 회귀로 판정하지 않는다. 보존된 과거 원장의 개별 사유도 연결한다.
+광고 소재/동의 SDK, Google Play, OS 권한·파일 선택기·키보드는 외부 표시 주체다.
+실기기 잠금 알람/권한 P0, 제조사·복수 locale, 위젯 캐시, 공개 웹 실서버와 실제
+브라우저 설치는 NOT_RUN. 사용자 요청에 따라 레이아웃 검증은 수행하지 않았다.
+현재 정적·호스트 범위에서 발견한 제작 문구 혼입은 수정했지만 100%/0.001% 같은
+확률이나 모든 환경에서 한 글자도 다른 언어가 없다는 보증은 측정하지 않았다.

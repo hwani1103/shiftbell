@@ -1,0 +1,53 @@
+{
+  "date_kst": "2026-10-08",
+  "scope": "Independent review of latest multilingual help, additional features and in-app privacy text",
+  "status": "PASS_SOURCE_AND_RESOURCE_REVIEW",
+  "changed_message_comparison": {
+    "count": 98,
+    "per_language": {
+      "ko": 18,
+      "en": 20,
+      "de": 20,
+      "pt": 20,
+      "hi": 20
+    },
+    "issues": []
+  },
+  "resource_audit": "build/multilingual_optional_review_resource_audit.json",
+  "resource_audit_errors": [],
+  "web_locale_check": "node tools/check_web_locale_assets.cjs: PASS, 8 cases",
+  "source_review": [
+    "Diagnostic sharing uses common l10n on every visible step and the existing native share bridge",
+    "Foreign additional-features screen exposes backup and diagnostics; schedule and sleep entries retain Korean guards",
+    "Merged alarm guidance uses common locale resources; manufacturer limitation and contact address are translated",
+    "Korean-only help sections and items are filtered before search; open Korean-only detail routes recheck locale",
+    "Menu labels in translated troubleshooting/backup guides match the current localized destinations",
+    "Manual sending, sender email and attachment storage text matches the reviewed code; no email-account access or automatic send introduced"
+  ],
+  "source_sha256": {
+    "lib/l10n/app_ko.arb": "e9a60871db0a04385c6d20dbc33d00e1d69ac772a8d4172a21db1cfd19b4f71b",
+    "lib/l10n/generated/app_localizations_ko.dart": "7b783e0ed9f2f566493771109a97db69309590128531bca896d80590220c5406",
+    "lib/l10n/app_en.arb": "f5db90d0b2babd5aa876348deec30636a7532a3af37394c47f24f5d78ff86301",
+    "lib/l10n/generated/app_localizations_en.dart": "a1ff785ce6129f1001d1ee3ccd92ab8d3c454dc4c3192125baaae74b6009c383",
+    "lib/l10n/app_de.arb": "a82691c36f6ef24ca8268a331fc2fc046c930fc8859004c75427d1a74bf9dd4e",
+    "lib/l10n/generated/app_localizations_de.dart": "28d3f76932fbe97d9bbedc7c59ff5c7f0e62252e09393d0a70d0d79f458b183b",
+    "lib/l10n/app_pt.arb": "a3bc63fb5f0ed929f588e5b8513e98bd0abfbc96c26cce7b64492d1002e7d88a",
+    "lib/l10n/generated/app_localizations_pt.dart": "02431c1817080a65e5a527af15647eed0ee8b7c15d0ee319162827755beb2e99",
+    "lib/l10n/app_hi.arb": "1e0ec70658d7ec6a4671f713ebdfd696205a8241787706985b6993167852c1de",
+    "lib/l10n/generated/app_localizations_hi.dart": "2a8ab54fb61135fdb568da3ec9fc49df62da12e17eec5e082a79e9dfc0d2798f",
+    "lib/screens/settings_tab.dart": "feab794b85c69f3e1c4f521a0d25820628a53e02aac88d4e63126abae8818886",
+    "lib/screens/help_screen.dart": "7fff531e370451ba54f22cc72e4c9e67282257b7cfbdc430a84361e5b16d1fd3",
+    "lib/screens/privacy_policy_screen.dart": "1ae82b44cdca1b515ef18ff11bdc2eefbee417584b571ac6fa4f8780c5eb8608",
+    "android/app/src/main/kotlin/com/hwani1103/shiftbell/DiagnosticShare.kt": "9e15f4cecf82ad7d8111b4138c62706f8722d5d36317fb89bca633d9906725d6",
+    "android/app/src/main/res/xml/diagnostic_share_paths.xml": "e4f4cc6988e2ac0e80bc2b8ec6d26cb3fbb95b9aae978ab3fbc30f9143623f65",
+    "lib/l10n/korean_only/messages_ko.json": "e78eb4cf10e3f765b03bde9aa4e4fcc97351794fa3c13877bdee7100a722c256"
+  },
+  "limitations": [
+    "No new APK/web build or full critical test suite",
+    "No new physical-device, mail-client or layout validation",
+    "In-app privacy copy consistency reviewed; external policy and Play disclosures not audited",
+    "Translations reviewed for meaning and consistency, not certified by native-language users"
+  ],
+  "product_source_changed": false,
+  "predecessor_evidence": "docs/next_version/evidence/multilingual_optional_features_2026_10_08.json"
+}

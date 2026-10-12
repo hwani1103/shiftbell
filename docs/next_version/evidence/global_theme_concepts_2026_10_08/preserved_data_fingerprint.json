@@ -1,0 +1,30 @@
+{
+  "team_schedule_config": {
+    "count": 0,
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "shift_schedule": {
+    "count": 1,
+    "sha256": "c28e7a4041b00ac832d3b9909e2d8392f335aa103cf1fdaadaba779a504ce382"
+  },
+  "shift_alarm_templates": {
+    "count": 0,
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "date_memos": {
+    "count": 9,
+    "sha256": "817ac664927c2d86cd4266afa4264ed80edacf910c75153f267b9244ec063d27"
+  },
+  "date_schedules": {
+    "count": 0,
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "date_overtime": {
+    "count": 0,
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "condition_shift_times": {
+    "count": 0,
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  }
+}

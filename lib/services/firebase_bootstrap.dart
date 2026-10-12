@@ -22,6 +22,7 @@ bool firebaseReady = false;
 FirebaseAnalytics? analytics;
 
 Future<void> initFirebase() async {
+  final isDevFlavor = !kIsWeb && appFlavor == 'dev';
   // ⭐ 2026-08-14: Firebase Hosting(실 네트워크 지연) 환경에서만 재현된 레이스 컨디션 -
   // Firebase.initializeApp()이 웹 플랫폼 채널(FirebaseCoreHostApi)이 아직 등록되기 전에
   // 호출되면 "channel-error"로 실패함. localhost(지연 거의 0)에서는 항상 성공하고 실 배포
@@ -34,15 +35,12 @@ Future<void> initFirebase() async {
       // Analytics 수집을 끔 → 테스트 설치가 운영 앱의 DAU/MAU·이벤트 통계에 섞이지 않음.
       // Firebase 프로젝트 자체는 prod와 같음(분리하려면 Console 작업이 필요해 이번 출시 범위 밖) - dev 친구공유 테스트는
       // 같은 Firestore에 문서를 씀.
-      final isDevFlavor = !kIsWeb && appFlavor == 'dev';
       await Firebase.initializeApp(
         options: isDevFlavor ? DefaultFirebaseOptions.androidDev : DefaultFirebaseOptions.currentPlatform,
       );
       firebaseReady = true;
-      analytics = FirebaseAnalytics.instance;
-      await analytics!.setAnalyticsCollectionEnabled(!isDevFlavor);
       print('✅ Firebase 초기화 완료 (시도 $attempt번째)');
-      return;
+      break;
     } catch (e) {
       if (attempt == 3) {
         firebaseReady = false;
@@ -51,5 +49,16 @@ Future<void> initFirebase() async {
       }
       await Future.delayed(Duration(milliseconds: 300 * attempt));
     }
+  }
+
+  // 통계 플러그인 누락·차단은 Firestore 초기화 실패가 아니다.
+  // Analytics 오류 때문에 정상 연결된 친구공유까지 비활성화하지 않는다.
+  analytics = null;
+  try {
+    final tracker = FirebaseAnalytics.instance;
+    await tracker.setAnalyticsCollectionEnabled(!isDevFlavor);
+    analytics = tracker;
+  } catch (e) {
+    print('⚠️ Analytics 초기화 실패 - 친구공유는 계속 사용 가능: $e');
   }
 }

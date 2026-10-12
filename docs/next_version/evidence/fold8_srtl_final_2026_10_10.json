@@ -1,0 +1,58 @@
+{
+  "time": "2026-10-09T21:36:39.435457+00:00",
+  "scope": "Fold8 SRTL only",
+  "overallComplete": false,
+  "requestedCaptures": {
+    "completed": 177,
+    "expected": 177,
+    "sha256Mismatch": [],
+    "validation": "capture_validation.json"
+  },
+  "rawLayoutStates": 840,
+  "instrumentationErrors": [],
+  "remaining": [
+    "외국어 상세 분기: en 펼침, de/pt/hi 접힘·펼침 remainingBatch 17분기 (총7그룹)",
+    "도움말 각 상세 주제의 실제 화면 전수 시각 확인: 한국어38·외국어 각23, 접힘·펼침. 과거 빈 본문 측정은 PASS 근거에서 제외.",
+    "다른 폴더블의 실기기 영향 검사와 사용자 디자인 검토는 해당 기기 연결/검토 때 진행."
+  ],
+  "testsPassed": 104,
+  "releaseBuilt": false,
+  "calendarComparison": "skipped per user",
+  "cloudCleanup": {
+    "intent": "off",
+    "active": false,
+    "dirty": false,
+    "serverFetch": "revoked",
+    "serverConfirmedUnavailable": true,
+    "time": "2026-10-09T20:42:49.790Z"
+  },
+  "report": "폴드8_SRTL_최종작업보고_2026-10-10.txt",
+  "endState": {
+    "status": "stopped_srtl_reservation_ended",
+    "checkedAt": "2026-10-09T21:37:39.991675+00:00",
+    "browser": "All ongoing tests have ended.",
+    "adb": "localhost:30414 not found; one known endpoint reconnect attempted",
+    "capturesComplete": true,
+    "overallComplete": false,
+    "cleanup": {
+      "cloudSharing": "off, active false, dirty false, server fetch revoked verified before disconnection",
+      "lastCustomAlarmCleanup": "resume 7777 final dismiss and cleanup_custom completed",
+      "finalAllAlarmRemoval": "NOT_EXECUTED: expression compile error before mutation; subsequent connection expired",
+      "finalPermissionSnapshot": "last five permissions granted; final recheck unavailable",
+      "screenOffTimeout": "temporarily 600000; restoring300000 attempted after disconnect and failed",
+      "finalLocale": "last en closed from cold layout check",
+      "hostFlutterAttach": "lost connection; process exited"
+    },
+    "installedApk": "final_apk.json",
+    "remaining": "docs/next_version/폴드8_SRTL_최종작업보고_2026-10-10.txt"
+  },
+  "installedApk": {
+    "sha256": "08578866544544bcd775fcabd5cb248453676202c455a976905ddcb5beb7a537",
+    "installedMatch": true,
+    "installedPath": "/data/app/~~4A3TnlAojS-Rg02VO-qmOQ==/com.hwani1103.shiftbell.dev-x_U_St_HkwOcCYx1oM025A==/base.apk",
+    "installedAt": "2026-10-09T21:33:55.767Z",
+    "attachSession": 51563,
+    "vmUri": "ws://127.0.0.1:58208/NGMvpIoc85U=/ws",
+    "screenTimeoutBefore": "300000"
+  }
+}

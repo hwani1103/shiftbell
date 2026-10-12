@@ -1,0 +1,71 @@
+{
+  "date_kst": "2026-10-08",
+  "scope": "Read-only check of existing projects requested by the user; no reservation, connection, API enablement, billing change, or account permission change.",
+  "method": "Authenticated Chrome UI: Cloud Testing API quotas, monthly device streaming for Spark plan customers. Firebase plan/account/project identity also observed for Logit and Shiftbell. Device Streaming API product page checked for Logit.",
+  "projects": [
+    {
+      "name": "ShiftBell Device Test A",
+      "project_id": "shiftbell-devicecheck-a-7f2k5",
+      "spark_monthly_limit_minutes": 30,
+      "spark_current_usage_minutes": 30,
+      "spark_usage_percent": "100%",
+      "calculated_remaining_minutes": 0,
+      "source": "https://console.cloud.google.com/apis/api/testing.googleapis.com/quotas?project=shiftbell-devicecheck-a-7f2k5&authuser=0"
+    },
+    {
+      "name": "ShiftBell Device Test B",
+      "project_id": "shiftbell-devicecheck-b-9r4m2",
+      "spark_monthly_limit_minutes": 30,
+      "spark_current_usage_minutes": 30,
+      "spark_usage_percent": "100%",
+      "calculated_remaining_minutes": 0,
+      "source": "https://console.cloud.google.com/apis/api/testing.googleapis.com/quotas?project=shiftbell-devicecheck-b-9r4m2&authuser=0"
+    },
+    {
+      "name": "ShiftBell Device Test C",
+      "project_id": "shiftbell-device-test-c",
+      "observed_firebase_plan": "Spark",
+      "spark_monthly_limit_minutes": 30,
+      "spark_current_usage_minutes": 30,
+      "spark_usage_percent": "100%",
+      "calculated_remaining_minutes": 0,
+      "source": "https://console.cloud.google.com/apis/api/testing.googleapis.com/quotas?project=shiftbell-device-test-c&authuser=0"
+    },
+    {
+      "name": "Logit",
+      "project_id": "logit-e63e1",
+      "observed_account": "lowvibe07@gmail.com",
+      "observed_firebase_plan": "Spark",
+      "spark_monthly_limit_minutes": 30,
+      "spark_current_usage_minutes": 0,
+      "spark_usage_percent": "0%",
+      "calculated_remaining_minutes": 30,
+      "testing_api": "enabled",
+      "device_streaming_api": "not enabled; API enable button visible; not clicked",
+      "connection_verification": "NOT_RUN",
+      "source": "https://console.cloud.google.com/apis/api/testing.googleapis.com/quotas?project=logit-e63e1&authuser=1",
+      "api_source": "https://console.cloud.google.com/apis/api/devicestreaming.googleapis.com/overview?project=logit-e63e1&authuser=1",
+      "distinction": "Different project from the previous paid testing project log-it-3d269. Current Android CLI project list did not include logit-e63e1; the appropriate account authentication must be prepared before later use."
+    },
+    {
+      "name": "Shiftbell",
+      "project_id": "shiftbell-29f31",
+      "observed_account": "lowvibe07@gmail.com",
+      "observed_firebase_plan": "Spark",
+      "spark_monthly_limit_minutes": 30,
+      "spark_current_usage_minutes": 29,
+      "spark_usage_percent": "96.67%",
+      "calculated_remaining_minutes": 1,
+      "source": "https://console.cloud.google.com/apis/api/testing.googleapis.com/quotas?project=shiftbell-29f31&authuser=1",
+      "distinction": "Same project ID also visible in the existing CLI project list. Signing in with another account does not create a separate project quota."
+    }
+  ],
+  "interpretation": {
+    "useful_free_candidate": "Logit logit-e63e1: 30 minutes indicated, actual connection not yet verified and Device Streaming API must first be enabled.",
+    "shiftbell_one_minute": "Not included in practical device test budget because setup and evidence collection cannot fit in one minute.",
+    "conditional_savings_usd": 4.5,
+    "conditional_paid_cost_for_70_to_105_total_minutes_usd": [6, 11.25],
+    "conditional_paid_cost_for_90_to_130_total_minutes_usd": [9, 15],
+    "limits": "Savings assume all 30 indicated Logit minutes can actually be used. Quota usage is the UI-reported value, not proof that every consumed minute was a successful test. No new device reservations were used to test availability."
+  }
+}

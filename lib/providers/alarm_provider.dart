@@ -2,16 +2,22 @@
 
 import 'dart:async';
 import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/widgets.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../l10n/release_locale.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/alarm.dart';
 import '../models/shift_schedule.dart';
 import '../services/database_service.dart';
 import '../services/alarm_service.dart';
 import '../services/alarm_generation_service.dart';
-import 'package:flutter/services.dart';
 import '../constants/alarm_limits.dart';
 import '../constants/platform_channel.dart';
 
+class AlarmDeletionOutcome {
+  final bool reservationFailed;
+  const AlarmDeletionOutcome({this.reservationFailed = false});
+}
 
 // ⭐ 알람 관리 Provider (StateNotifier)
 class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
@@ -75,7 +81,9 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
         await AlarmService().scheduleAlarm(
           id: dbId,
           dateTime: alarm.date!,
-          label: alarm.shiftType ?? '알람',
+          label: alarm.shiftType ?? lookupAppLocalizations(resolveReleaseLocale(
+            WidgetsBinding.instance.platformDispatcher.locales,
+            AppLocalizations.supportedLocales)).alarmTitle,
           soundType: 'loud',
         );
       }
@@ -95,7 +103,7 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
     }
   }
 
-  Future<void> deleteAlarm(int id, DateTime? date) async {
+  Future<AlarmDeletionOutcome> deleteAlarm(int id, DateTime? date) async {
     try {
       // ⭐ 알람이 울리는 중이면 먼저 울림을 끝냄
       // ⭐ 2026-09-14 (출시전 감사 #14) - 예전엔 'isAlarmRinging'(Native 재생기 전역 상태)을 보고
@@ -119,8 +127,13 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
       } else {
         await DatabaseService.instance.deleteAlarm(id, dismissType: 'cancelled_before_ring', createHistory: true);
       }
-      await AlarmService().cancelAlarm(id);
-
+      var reservationFailed = false;
+      try {
+        await AlarmService().cancelAlarm(id);
+      } catch (e) {
+        reservationFailed = true;
+        print('⚠️ 삭제한 알람의 OS 예약 취소 실패: $e');
+      }
       // ⭐ Notification 삭제 (7777, 8888, 8889)
       try {
         await _platform.invokeMethod('cancelNotification');
@@ -139,11 +152,13 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
 
       await _loadAlarms();
       print('✅ 알람 삭제 완료 (ID: $id, 울림 중: $isRinging)');
+      return AlarmDeletionOutcome(reservationFailed: reservationFailed);
     } catch (e) {
       print('❌ 알람 삭제 실패: $e');
       rethrow;
     }
   }
+
 
   // ⭐ 고정 알람 재생성 - 근무가 배정된 날짜 하나가 바뀌면, "전날/당일/다음날"
   // 오프셋 알람이 있을 수 있어서 영향을 받는 실제 알람 날짜는 [date-1, date, date+1]
@@ -220,7 +235,8 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
 
       // ⭐ 2026-09-14 (#13) - 예전 조건 `failCount > 0 && result.scheduled.isEmpty`는 항상 거짓이었음
       // (AlarmScheduleOutcome 주석 참고)
-      final outcome = AlarmScheduleOutcome(attempted: result.scheduled.length, failed: failCount);
+      final outcome = AlarmScheduleOutcome(
+          attempted: result.scheduled.length, failed: failCount);
       if (outcome.allFailed) {
         // ⭐ 영어 현지화: 이 메시지는 UI에 그대로 노출된 적 없음(호출부가 항상
         // catch해서 자체 에러 문구를 보여줌) - 그래도 로그/크래시 리포트에서 읽는
@@ -237,25 +253,20 @@ class AlarmNotifier extends StateNotifier<AsyncValue<List<Alarm>>> {
   // ⭐ Production용: 모든 알람 완전 삭제 (템플릿 포함)
   Future<void> deleteAllAlarmsCompletely() async {
     try {
-      // 1. 모든 알람 가져오기
-      final alarms = await DatabaseService.instance.getAllAlarms();
-
-      // 2. Native 알람 모두 취소
-      for (var alarm in alarms) {
-        if (alarm.id != null) {
-          await AlarmService().cancelAlarm(alarm.id!);
-          print('✅ Native 알람 취소: DB ID ${alarm.id}');
-        }
+      // Commit rows, templates and history together before cancelling OS alarms.
+      // cancelIfGone deliberately re-schedules a row that still exists, so
+      // cancelling before this transaction leaves orphan OS reservations.
+      final removedIds = await DatabaseService.instance.deleteAllAlarms(
+        dismissType: 'cancelled_before_ring',
+        clearTemplates: true,
+      );
+      for (final id in removedIds) {
+        // Cancelling a reservation does not stop an already delivered ring.
+        // Target only deleted IDs so a different active alarm stays untouched.
+        await _platform.invokeMethod<bool>('stopRingingAlarm', {'alarmId': id});
+        await AlarmService().cancelAlarm(id);
+        print('✅ Native 알람 취소: DB ID $id');
       }
-
-      // 3. DB에서 모든 알람 삭제
-      // ⭐ 대체 스케줄 없이 그냥 지우는 것이므로 이력에 "일정 변경"이 아니라
-      // "알람 제거"로 남도록 dismissType을 명시함 (database_service.dart
-      // deleteAllAlarms() 주석 참고).
-      await DatabaseService.instance.deleteAllAlarms(dismissType: 'cancelled_before_ring');
-
-      // 4. ⭐ 모든 알람 템플릿 삭제 (갱신 방지)
-      await DatabaseService.instance.deleteAllAlarmTemplates();
 
       // 5. Notification 모두 삭제
       try {

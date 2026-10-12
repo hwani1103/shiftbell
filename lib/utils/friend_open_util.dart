@@ -9,6 +9,7 @@
 // (alarm_generation_service.dart 등)와 동일한 이유.
 
 import 'package:flutter/material.dart';
+import '../services/app_analytics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/l10n_extensions.dart';
 import '../providers/friend_provider.dart';
@@ -19,14 +20,18 @@ import 'blocking_progress.dart';
 /// 다시 받아옴("구독처럼" 볼 때마다 최신을 보장). 로딩 중엔 잠깐 스피너만
 /// 띄우고(별도 화면 전환 없음), 끝나면 최신 데이터로 달력을 염 - 실패해도
 /// 캐시가 있으면 캐시로 열고, 캐시도 없으면 안내만 하고 끝냄(빈 화면 방지).
-Future<void> openFriendCalendar(BuildContext context, WidgetRef ref, FriendEntry friend) async {
+Future<void> openFriendCalendar(
+    BuildContext context, WidgetRef ref, FriendEntry friend) async {
+  if (!context.usesKoreanFeatures) return;
   // ⭐ 2026-09-15 (출시 적합성 재검토 AUD-01과 같은 패턴) - 예전엔 showDialog + Navigator.pop(context)라서
   // 로딩 중 뒤로가기로 스피너가 먼저 닫히면 이 pop이 친구 목록·달력 화면을 대신 닫았음.
   final refreshResult = await runWithBlockingProgress(
     context,
-    () => ref.read(friendProvider.notifier).refreshFriend(friend.id, friend.ownerId),
+    () => ref
+        .read(friendProvider.notifier)
+        .refreshFriend(friend.id, friend.ownerId),
   );
-  if (!context.mounted) return;
+  if (!context.mounted || !context.usesKoreanFeatures) return;
 
   if (refreshResult == FriendRefreshResult.serverRemoved) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -39,17 +44,18 @@ Future<void> openFriendCalendar(BuildContext context, WidgetRef ref, FriendEntry
   final latest = updatedList.isEmpty ? friend : updatedList.first;
   if (latest.data == null) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.friendLoadFailedCheckNetwork)),
+      SnackBar(content: Text(context.koOnly.friendLoadFailedCheckNetwork)),
     );
     return;
   }
   if (refreshResult != FriendRefreshResult.refreshed) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.friendShowingCachedSchedule)),
+      SnackBar(content: Text(context.koOnly.friendShowingCachedSchedule)),
     );
   }
-  if (!context.mounted) return;
-  final displayName = latest.name.isEmpty ? context.l10n.friendDefaultDisplayName : latest.name;
+  if (!context.mounted || !context.usesKoreanFeatures) return;
+  final displayName =
+      latest.name.isEmpty ? context.l10n.friendDefaultDisplayName : latest.name;
   // ⭐ 2026-09-11(사용자 요청) - 로딩은 이미 위 스피너 다이얼로그가 다 떠안고
   // 있으니(Firestore 갱신까지 끝난 뒤에야 여기 도달), 정작 이 화면 전환은
   // MaterialPageRoute 기본 애니메이션(Android는 확대+페이드로 서서히
@@ -60,9 +66,11 @@ Future<void> openFriendCalendar(BuildContext context, WidgetRef ref, FriendEntry
   Navigator.push(
     context,
     PageRouteBuilder(
-      pageBuilder: (_, __, ___) => FriendCalendarView(friendName: displayName, data: latest.data!),
+      pageBuilder: (_, __, ___) =>
+          FriendCalendarView(friendName: displayName, data: latest.data!),
       transitionDuration: Duration.zero,
       reverseTransitionDuration: Duration.zero,
     ),
   );
+  AppAnalytics.track(AnalyticsEvent.friendCalendarOpened);
 }

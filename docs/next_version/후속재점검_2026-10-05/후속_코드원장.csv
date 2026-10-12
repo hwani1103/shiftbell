@@ -1,0 +1,18 @@
+﻿언어,키/기능,코드 위치,변경 전,변경 후,호출/도달 근거·이전 판정 차이
+ko/foreign,fixedAlarmSkippedByOneTap,calendar_tab 2/settings_tab/apply_schedule_change,custom 충돌 조건만; 표시 자체 언어 차단 없음,한국어 전용 Copy + 각 표시 언어 가드,3차 다른 알람 일반화 4건 철회; 신규 foreign custom 생성 도달 불가
+ko/foreign,oneTapDeletedRefreshRetry,next_alarm_tab/calendar_tab,foreign 제거 후 실패를 성공 토스트로 삼킬 가능성,ko 상세 / foreign alarmRefreshUnconfirmed,서비스 예약 실패는 공통 결과라 누락 금지
+ko/foreign,friend/sleep/schedule entry,friend_list/my_share/sleep_full/schedule_management,build만 제한하여 State 초기화는 실행됨,외부 래퍼가 locale 확인 후 내부 State 구성,신규 도달 검사 실제 실패 4건→수정 뒤 통과
+foreign/web,publicWebViewer,friend_calendar_view/web_main,3차 blanket guard로 foreign web 달력도 차단,app 전용 제한과 publicWebViewer=true 분리,공개 web의 기존 다국어 의존성 유지
+all,permissions,PermissionSettings/MainActivity/PermissionService/PermissionPanel,"세 권한, 한꺼번에 요청, FSI 조회 없음",네 실제 상태 + 별도 채널 + 한 설정 + resume 재확인,최신문서 AK/AJ 공식 근거
+all,permission banner/help,permission_warning_banner/settings/help,FSI/unknown/공유 진입 누락,공통 설정 시트 재사용; unknown≠denied; help/privacy 갱신,P0 검사에 고정
+foreign,Firebase holiday,holiday_sync_service,처음 진입 locale만 검사; cached native 갱신 가능,cache/요청 직전/응답 적용 전 locale 확인,Korean data/cache 삭제 없음
+foreign,native fallback,KoreanFeatureStrings/SleepWidgetProvider/ReleaseLocalePolicy,default Korean resource 선택 위험,단일 KoreanOnly XML; shared alarm label generic; sleep neutral XML,삭제 키 Korean fallback 방지
+foreign,UI failure details,l10n_extensions + settings/calendar/all_shifts/history/apply_schedule,localized prefix 뒤 raw exception Korean 포함 가능,localizedErrorDetail; 원인은 원래 로그에 유지,실패 결과 설명 유지
+foreign,public web root,web_main/publicWeb*,root 소개/정책/스토어 Korean hardcoded,"6 ARB 키 5언어, 해외 소개는 실제 제공 기능",Korean 원문 보존
+foreign,shared header,calendar_header_actions,"Teams/TODAY/Share hardcoded, caller 전달 시 공유 가능",existing l10n + 해결 locale로 friends/oneTap 차단,콜백 직접 전달 회귀 검사
+ko/foreign,obsolete sleep screen,english_condition_tab,"production 호출 없음, 영어 수면 설명/편집 잔존","영어 전용 UI 철회, compatibility exit 타입",Korean ConditionTab/storage untouched
+ko/foreign,30 foreign hardcodes,custom_alarm_widgets/onboarding_info_popups/schedule_management,unavailable oneTap/personal schedule 영어 분기,"KO 원문 보존, 외국어 설명 분기 제거",25+5; template h/m는 Korean에서도 사용하므로 유지
+all,native alarm XML,activity_alarm.xml/overlay_alarm.xml,preview label 주간 하드코딩,@string/alarm_default_label,실제 사용자 shift label 설정은 그대로
+all,language switch snack,main.dart,기존 locale로 만들어진 일시 안내 잔류,locale 변경에서 clearSnackBars,저장 데이터·사용자 설명 변경 없음
+all,native DB failure label,AlarmActivity.kt/AlarmOverlayService.kt,"한국어 알람 필드 초기값; DB 조회 없음/실패에서 그대로 노출, service 재사용 시 이전 label","loadAlarmInfo 시작에서 해당 언어 alarm_default_label, 실제 shift_type 성공값 보존",최종_알람fallback_추가후보.json; 조회/화면·알림 사용 흐름; native 최종 빌드로 검증
+ko/foreign,holiday late async boundary,holiday_sync_service.dart,캐시·prefs await 뒤 언어 변경 또는 직접 apply에서 native 갱신 가능,await 뒤/apply 및 native 직전 ko 재검사,외국어 직접 apply는 prefs/override 변경 없음·한국어 캐시/native apply 기능 검사 보강

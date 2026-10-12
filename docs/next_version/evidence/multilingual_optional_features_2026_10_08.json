@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-08",
+  "scope": [
+    "A06",
+    "A09"
+  ],
+  "languages": [
+    "ko",
+    "en",
+    "de",
+    "pt-BR",
+    "hi-IN"
+  ],
+  "englishRegions": [
+    "US",
+    "GB",
+    "ZA",
+    "IN",
+    "AE",
+    "PH"
+  ],
+  "initialFindings": [
+    "Diagnostic share was visible only in Korean",
+    "New merged alarm guide was available only in Korean",
+    "Foreign shift-name title and schedule-change warning retained old wording",
+    "Backup help referenced the old direct settings location",
+    "Privacy did not yet explain manual diagnostic attachment sharing"
+  ],
+  "fixed": {
+    "foreignAdditionalFeatures": [
+      "Data backup -> Save backup / Restore from backup",
+      "Email diagnostic log"
+    ],
+    "diagnosticTranslationKeys": 8,
+    "guideAndPolicyTranslated": true,
+    "teamChangeGuide": "Foreign versions already described changing teams; preserved"
+  },
+  "omissionsConfirmed": {
+    "foreignOptionalScheduleAndSleepEntries": true,
+    "helpSectionsHidden": [
+      "schedule management",
+      "sleep/recovery",
+      "sleep records",
+      "friend sharing"
+    ],
+    "foreignPrivacyMentionsNoUnavailableFeatures": true,
+    "koreanOnlyItemsHiddenInSearchAndOpenDetails": true
+  },
+  "resourceAudit": {
+    "path": "build/multilingual_optional_resource_audit.json",
+    "errors": [],
+    "commonMessages": 523,
+    "koreanOnlyMessages": 191,
+    "untranslatedReport": {}
+  },
+  "verification": "Source and translation review, generators and resource-scope audit only; no new test suite, APK/web build or country device matrix",
+  "delivery": "USB Dart hot reload",
+  "copyLedger": "multilingual_optional_features_2026_10_08_copy.json",
+  "releaseReadiness": "User final review/build still pending"
+}

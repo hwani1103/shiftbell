@@ -1,3 +1,4 @@
+import '../widgets/adaptive_layout.dart';
 // lib/screens/restore_progress_screen.dart
 //
 // ⭐ 2026-09-14 (출시전 교차 검토 X-02/X-03) - 설정 탭 "백업 데이터 불러오기"(덮어쓰기 복원) 실행 화면.
@@ -69,7 +70,7 @@ class _RestoreProgressScreenState extends State<RestoreProgressScreen> {
       canPop: false,
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: SafeArea(
+        body: AdaptiveFormBody(child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -104,7 +105,7 @@ class _RestoreProgressScreenState extends State<RestoreProgressScreen> {
               ),
             ),
           ),
-        ),
+        )),
       ),
     );
   }

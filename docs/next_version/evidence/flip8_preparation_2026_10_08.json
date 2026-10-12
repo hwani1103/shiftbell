@@ -1,0 +1,194 @@
+{
+  "created": "2026-10-08T13:57:45.235089+09:00",
+  "status": "PREPARATION_PASS; device execution is a separate ledger",
+  "scope": {
+    "primary": "Flip8 SRTL: remaining functional boundaries, cover last",
+    "secondary": "Flip4 SRTL: cover only, no repetition of unrelated tests",
+    "usb_device": "Do not operate R5KL20DHWAE; reserved for user layout work",
+    "console_country_language": "Deferred by user until functional scope is fixed; no AdMob/Play settings changes",
+    "language_test": "Representative app locale transition for alarm/data preservation only; full language/layout review deferred",
+    "release_build": false
+  },
+  "baseline": {
+    "directory": "artifacts\\flip8_functional_2026_10_08",
+    "workspace": "workspace",
+    "source_manifest": "source_manifest.json",
+    "gate": "tools/check_critical_release.ps1 -Build",
+    "gate_log": "critical_complete.log",
+    "status": "PASS"
+  },
+  "changes": {
+    "product_code": [],
+    "regression": [
+      "PermissionSettingsTest: API31/32/33 exact denial->settings opened without grant->grant->revoke; API30/31/32/33/34 app notifications/overlay independent from allowed alarm channel"
+    ],
+    "runner": "Same mandatory DB assertions and timeouts, concurrency=1 for DB-containing Flutter group due to prior repeated aggregate timeouts",
+    "tool": "tools/build_ump_debug_candidate.py"
+  },
+  "admob_readonly": {
+    "permission": "User explicitly approved read-only console lookup after initial auto-review rejection",
+    "app_id": "ca-app-pub-4221257132708373~5831097474",
+    "app_package": "com.hwani1103.shiftbell",
+    "gdpr_message": "ShiftBell - EEA/UK/CH GDPR Consent",
+    "status": "Published",
+    "languages": [
+      "en"
+    ],
+    "last_modified": "2026-09-22",
+    "console_modified": false,
+    "language_followup": "R02/R03 release wrap-up, not prerequisite for current functional tests",
+    "official_setup": "https://developers.google.com/admob/flutter/privacy"
+  },
+  "ump_preparation": {
+    "builder": "tools/build_ump_debug_candidate.py",
+    "geography": "eea",
+    "reset_variant": "First-choice accept/reject; resets every process start",
+    "retain_variant": "Reopen/privacy options/change choice/restart persistence; reset=false",
+    "ads": "Google sample banner units even with the configured UMP application ID",
+    "pending": "Read selected Flip8 UMP 32-hex test-device ID from SDK log, build diagnostic reset/retain variants in frozen workspace",
+    "app_id_override": "Temporary devDebug manifest in frozen workspace only, removed after build",
+    "preflight": "CHECK_ONLY passed with synthetic 32-hex ID; not a real device registration or UMP test"
+  },
+  "device_matrix": [
+    {
+      "id": "A03",
+      "checks": [
+        "Existing English EEA form accept/reject",
+        "Privacy options changes invalidate previous banner and request a new one even when canRequestAds stays true",
+        "Restart persistence using reset=false",
+        "Form/update failure does not block main screen"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A05",
+      "checks": [
+        "Current-OS permissions denied/granted and settings return",
+        "Global notification and alarm channel distinction",
+        "App restart/rapid resume stale observation"
+      ],
+      "status": "NOT_RUN",
+      "old_api": "Host version regression only, never recorded as old-device PASS"
+    },
+    {
+      "id": "A06",
+      "checks": [
+        "Fresh install defaults",
+        "Representative foreign<->Korean change with active regular/snoozed target and deadline unchanged",
+        "Pinned sleep widget neutral/restore",
+        "Share stop intent/no automatic re-sharing"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A07",
+      "checks": [
+        "12/24 display changes preserve actual alarm target",
+        "Representative calendar/picker/widget region",
+        "KR holiday successful fetch/cache/failure retry via controlled service boundary"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A10",
+      "checks": [
+        "Local current web vs public version",
+        "Actual SB2 active/stopped/retry link",
+        "PWA install/update/cache under available baseline"
+      ],
+      "status": "NOT_RUN",
+      "limits": "No automatic public deployment; absent genuine old PWA baseline is not claimed as original-install PASS"
+    },
+    {
+      "id": "A08-Flip8-cover",
+      "order": "Last on Flip8",
+      "checks": [
+        "Minus/plus 5..30 boundaries",
+        "Displayed selected minutes = executed minutes = DB/OS target",
+        "Selection survives fold/unfold handoff",
+        "Adjustment does not extend ring deadline or relaunch full-screen intent",
+        "Actual cover snooze then natural 5-minute re-ring and dismiss"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "A08-Flip4-cover",
+      "order": "After Flip8, cover only",
+      "checks": [
+        "Cover control availability/touch",
+        "Minus/plus boundaries and selection",
+        "Snooze result and fold/unfold handoff"
+      ],
+      "status": "NOT_RUN"
+    }
+  ],
+  "limits": [
+    "Natural unplugged 6-8h idle and physical audio/vibration are separate own-phone evidence",
+    "No new manufacturer-wide rerun",
+    "No release or production deployment",
+    "Preparation does not mean functional release PASS"
+  ],
+  "automated_checks": {
+    "flutter_groups": [
+      38,
+      108,
+      99,
+      67,
+      11
+    ],
+    "flutter_total": 323,
+    "native_function_tests": 127,
+    "native_db_tests": 15,
+    "native_failures": 0,
+    "native_skipped": 0,
+    "permission_version_tests": 14,
+    "new_version_executions": 8,
+    "device_equivalence": false
+  },
+  "apk": {
+    "path": "artifacts/flip8_functional_2026_10_08/tested-dev-debug.apk",
+    "sha256": "bb9083bdc7e3da302764f376523e785fced67051ccdbfe7ea316e47c5f1871aa",
+    "bytes": 187546268,
+    "package": "com.hwani1103.shiftbell.dev",
+    "version": "1.0.23-dev",
+    "version_code": 25,
+    "db": 29,
+    "debuggable": true,
+    "signature_verified": true,
+    "signing_certificate_sha256": "bdfac5c4e06bd0bc219f6e2e05b89e6e4300b3e808818beb0653c9e3320583db",
+    "google_sample_admob_app_id": true,
+    "analytics_enabled": false,
+    "ump_override": false
+  },
+  "source_manifest_sha256": "690eb179b46d4712d73292ecf05cacd97e0e5e23b592842c86e2d9eaefabd86e",
+  "helpers": {
+    "tools/build_ump_debug_candidate.py": "bba231469e962aae4421b05a1ae9bbc2b2db7ca5e58839ce0bd6dd160a5afe2f",
+    "tools/collect_srtl_preflight.py": "9c50a39ba1bd7ba15f82ee05643901ccda5d174a574d71f1e0c32a156b1ac03b"
+  },
+  "helper_validation": [
+    "Python compilation succeeds",
+    "Synthetic UMP config CHECK_ONLY passes after APK build; not an actual UMP/device test",
+    "USB serial refused before any adb command",
+    "Synthetic all-zero ID refused for a real UMP APK build"
+  ],
+  "updated": "2026-10-08T14:36:02.484836+09:00",
+  "web": {
+    "path": "artifacts/flip8_functional_2026_10_08/tested-web.zip",
+    "sha256": "32eb9cf0d8cc808b42d955ab36ebe1c2771b0d51a0853c483d69775456c335a6",
+    "result": "JavaScript web build PASS",
+    "deployed": false,
+    "warnings": [
+      "Existing wasm dry-run incompatibilities with dart:html/js",
+      "Cupertino font family warning; MaterialIcons font present"
+    ]
+  },
+  "logs": {
+    "critical.log": "6e464b6fe282115c2d4652a306fa4d24fc57a0689e5de9a3ca959275f6484776",
+    "critical_complete.log": "72059a6d48661d006408438e32dd6607cb7e2f6bf517d0faf69e1c4622ebdfc6",
+    "apk_badging.txt": "85ff1c1e9edd5abeb7945f7ad4c400c67d6ceb8e3aac2dbc13d37d67e2514e13",
+    "apk_signature.txt": "d86096b06edab146e05cf043773e9051e69b6b9f4e0ba1652b55872b2a618aab",
+    "apk_manifest.txt": "22cb410a563f5db8e3d9f9483c9463ee6674649681152420f359fab10177df31"
+  },
+  "initial_failure": "First frozen-copy gate lacked admin_dashboard/public/assets/js/labels.js used by analytics test; copied dependency and reran the entire gate successfully. No product logic fix.",
+  "completed": "2026-10-08T14:38:45.208144+09:00"
+}

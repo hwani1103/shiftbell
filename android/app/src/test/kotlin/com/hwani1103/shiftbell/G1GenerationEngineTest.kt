@@ -143,6 +143,40 @@ class G1GenerationEngineTest {
         .getSharedPreferences("alarm_state", Context.MODE_PRIVATE)
         .getInt(AlarmRefreshEngine.KEY_REFRESH_POLICY_VERSION, 0)
 
+    private fun assertRefreshWriteFailureRollsBack(table: String) {
+        val c = case("generation_cases.json", "IDEMPOTENT_EXACT_EXISTING")
+        seedSchedule(c.getJSONObject("schedule"))
+        seedTemplates(c)
+        seedRows(c)
+        val beforeIds = ids("alarms")
+        val beforeSlots = slots()
+        db.execSQL("UPDATE shift_alarm_templates SET time = '23:42'")
+        db.execSQL("CREATE TRIGGER audit_write_failure BEFORE INSERT ON $table BEGIN SELECT RAISE(ABORT, 'test write failure'); END")
+        var scheduled = 0
+        val schedule: (Context, Int, Long, String) -> Unit = { _, _, _, _ -> scheduled++ }
+        try {
+            assertThrows(Exception::class.java) {
+                AlarmRefreshEngine.doRefresh(context, schedule, millis(c.getString("now")))
+            }
+            assertEquals(beforeIds, ids("alarms"))
+            assertEquals(beforeSlots, slots())
+            assertEquals(0, count("alarm_history"))
+            assertEquals(0, count("alarm_creation_log"))
+            assertEquals(0, scheduled)
+            assertEquals(0, policyVersion())
+        } finally {
+            db.execSQL("DROP TRIGGER audit_write_failure")
+        }
+        AlarmRefreshEngine.doRefresh(context, schedule, millis(c.getString("now")))
+        assertTrue(slots().isNotEmpty())
+        assertTrue(slots().all { it.contains("T23:42:00|") })
+        assertTrue(scheduled > 0)
+    }
+
+    @Test fun alarmInsertFailureRollsBackRefresh() = assertRefreshWriteFailureRollsBack("alarms")
+    @Test fun historyInsertFailureRollsBackRefresh() = assertRefreshWriteFailureRollsBack("alarm_history")
+    @Test fun creationLogInsertFailureRollsBackRefresh() = assertRefreshWriteFailureRollsBack("alarm_creation_log")
+
     @Test
     fun `#26 템플릿 0개면 옛 fixed만 정리하고 custom·snoozed·울리는 알람은 보존한다`() {
         val c = case("generation_cases.json", "EMPTY_TEMPLATES_CLEAN_FIXED")
@@ -276,6 +310,57 @@ class G1GenerationEngineTest {
             AlarmRefreshUtil.checkAndTriggerRefresh(context)
             assertFalse("기록 뒤에는 오늘 다시 강제 갱신하지 않음",
                 shadowOf(app).broadcastIntents.any { it.action == "com.hwani1103.shiftbell.REFRESH_ALARMS" })
+        }
+    }
+
+    @Test
+    fun `DST repeated hour preserves existing IDs and reschedules future local alarms`() {
+        TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
+        for (table in listOf("alarms", "shift_schedule", "shift_alarm_templates", "alarm_overrides")) {
+            db.delete(table, null, null)
+        }
+        db.insertOrThrow("shift_schedule", null, ContentValues().apply {
+            put("is_regular", 1); put("pattern", "Night"); put("today_index", 0)
+            put("start_date", "2026-10-31T00:00:00")
+        })
+        db.insertOrThrow("shift_alarm_templates", null, ContentValues().apply {
+            put("shift_type", "Night"); put("time", "01:30"); put("alarm_type_id", 1); put("day_offset", 0)
+        })
+        for ((id, time, type) in listOf(Triple(41, "01:30", "fixed"), Triple(42, "01:35", "custom"))) {
+            db.insertOrThrow("alarms", null, ContentValues().apply {
+                put("id", id); put("date", "2026-11-01T$time:00"); put("time", time)
+                put("type", type); put("shift_type", "Night"); put("alarm_type_id", 1); put("day_offset", 0)
+            })
+        }
+        val calls = mutableMapOf<Int, Long>()
+        val schedule: (Context, Int, Long, String) -> Unit = { _, id, at, _ -> calls[id] = at }
+        val first0145 = java.time.Instant.parse("2026-11-01T05:45:00Z").toEpochMilli()
+        repeat(2) { AlarmRefreshEngine.doRefresh(context, schedule, first0145) }
+        assertEquals(java.time.Instant.parse("2026-11-01T06:30:00Z").toEpochMilli(), calls[41])
+        assertEquals(java.time.Instant.parse("2026-11-01T06:35:00Z").toEpochMilli(), calls[42])
+        db.rawQuery("SELECT id FROM alarms WHERE date LIKE '2026-11-01%' AND type='fixed'", null).use {
+            assertEquals(1, it.count); assertTrue(it.moveToFirst()); assertEquals(41, it.getInt(0))
+        }
+        // Same stored local clocks are re-resolved after a device zone change.
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/London"))
+        calls.clear()
+        AlarmRefreshEngine.doRefresh(context, schedule,
+            java.time.Instant.parse("2026-11-01T00:45:00Z").toEpochMilli())
+        assertEquals(java.time.Instant.parse("2026-11-01T01:30:00Z").toEpochMilli(), calls[41])
+        assertEquals(java.time.Instant.parse("2026-11-01T01:35:00Z").toEpochMilli(), calls[42])
+        // Repair the display time of pre-update spring-gap rows without changing IDs.
+        TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
+        db.delete("alarms", null, null)
+        db.update("shift_schedule", ContentValues().apply { put("start_date", "2026-03-07T00:00:00") }, null, null)
+        db.update("shift_alarm_templates", ContentValues().apply { put("time", "02:30") }, null, null)
+        db.insertOrThrow("alarms", null, ContentValues().apply {
+            put("id", 41); put("date", "2026-03-08T03:30:00"); put("time", "02:30")
+            put("type", "fixed"); put("shift_type", "Night"); put("alarm_type_id", 1); put("day_offset", 0)
+        })
+        AlarmRefreshEngine.doRefresh(context, schedule,
+            java.time.Instant.parse("2026-03-08T05:00:00Z").toEpochMilli())
+        db.rawQuery("SELECT time FROM alarms WHERE id=41", null).use {
+            assertTrue(it.moveToFirst()); assertEquals("03:30", it.getString(0))
         }
     }
 }

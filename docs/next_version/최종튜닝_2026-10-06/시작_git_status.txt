@@ -1,0 +1,127 @@
+ M android/app/src/main/AndroidManifest.xml
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActionHelper.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActionReceiver.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmActivity.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmGuardReceiver.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmInstant.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmOverlayService.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmRefreshEngine.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmResponsiveLayout.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmWakeScheduler.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AlarmWallTime.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/AppTextScale.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/BackupFileNaming.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/BackupFileReader.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/CalendarWidgetHolidays.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/CalendarWidgetProvider.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmDisplay.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/CoverAlarmLayout.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/CustomAlarmReceiver.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/DiagLog.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/DiagReport.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/DirectBootReceiver.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/InAppAlarmController.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/MainActivity.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/NotificationHelper.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/ReleaseLocalePolicy.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/RingTimeoutController.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/RingingAlarmTracker.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/ScheduleNotificationScheduler.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepDetectionScheduler.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepScheduleResolver.kt
+ M android/app/src/main/kotlin/com/hwani1103/shiftbell/SleepWidgetProvider.kt
+ M android/app/src/main/res/layout/activity_alarm.xml
+ M android/app/src/main/res/layout/overlay_alarm.xml
+ M android/app/src/main/res/values-de/strings.xml
+ M android/app/src/main/res/values-hi/strings.xml
+ M android/app/src/main/res/values-ko/strings.xml
+ M android/app/src/main/res/values-pt/strings.xml
+ M android/app/src/main/res/values/strings.xml
+ M android/app/src/test/kotlin/com/hwani1103/shiftbell/ReleaseLanguagesTest.kt
+ M docs/next_version/교대시계_최신문서.txt
+ M docs/next_version/다국어_제작_검증현황.txt
+ M l10n.yaml
+ M lib/l10n/app_de.arb
+ M lib/l10n/app_en.arb
+ M lib/l10n/app_hi.arb
+ M lib/l10n/app_ko.arb
+ M lib/l10n/app_pt.arb
+ M lib/l10n/l10n_extensions.dart
+ M lib/l10n/release_locale.dart
+ M lib/main.dart
+ M lib/models/calendar_theme.dart
+ M lib/providers/alarm_provider.dart
+ M lib/providers/friend_provider.dart
+ M lib/screens/all_alarms_history_view.dart
+ M lib/screens/all_shifts_view.dart
+ M lib/screens/calendar_tab.dart
+ M lib/screens/calendar_theme_lab_screen.dart
+ M lib/screens/condition_tab.dart
+ M lib/screens/english_condition_tab.dart
+ M lib/screens/friend_calendar_view.dart
+ M lib/screens/friend_list_screen.dart
+ M lib/screens/help_screen.dart
+ M lib/screens/my_share_code_screen.dart
+ M lib/screens/next_alarm_tab.dart
+ M lib/screens/permission_intro_screen.dart
+ M lib/screens/restore_backup_screen.dart
+ M lib/screens/schedule_management_tab.dart
+ M lib/screens/settings_tab.dart
+ M lib/screens/sleep_calendar_full_screen.dart
+ M lib/services/holiday_sync_service.dart
+ M lib/services/permission_service.dart
+ M lib/utils/apply_schedule_change.dart
+ M lib/utils/friend_open_util.dart
+ M lib/web_main.dart
+ M lib/widgets/calendar_header_actions.dart
+ M lib/widgets/custom_alarm_preset_panel.dart
+ M lib/widgets/custom_alarm_widgets.dart
+ M lib/widgets/disable_tab_button.dart
+ M lib/widgets/evidence_library_section.dart
+ M lib/widgets/onboarding_info_popups.dart
+ M lib/widgets/permission_warning_banner.dart
+ M lib/widgets/schedule_change_dialog.dart
+ M lib/widgets/sleep_edit_dialog.dart
+ M test/english_release_layout_test.dart
+ M test/hindi_localization_test.dart
+ M test/release_audit/g2/friend_provider_cache_test.dart
+ M test/release_audit/g2/my_share_code_pending_banner_test.dart
+ M test/schedule_reset_failure_ui_test.dart
+?? AGENTS.md
+?? android/app/src/main/kotlin/com/hwani1103/shiftbell/KoreanFeatureStrings.kt
+?? android/app/src/main/kotlin/com/hwani1103/shiftbell/PermissionSettings.kt
+?? android/app/src/main/res/layout/unavailable_feature_widget.xml
+?? android/app/src/main/res/values/korean_only.xml
+?? android/app/src/test/kotlin/com/hwani1103/shiftbell/PermissionSettingsTest.kt
+?? docs/next_version/독립최종검토_3차_2026-10-05/
+?? docs/next_version/의미검토_1차_2026-10-05/
+?? docs/next_version/자연스러움검토_2차_2026-10-05/
+?? docs/next_version/최종튜닝_2026-10-06/
+?? docs/next_version/후속재점검_2026-10-05/
+?? lib/l10n/korean_only/
+?? lib/l10n/korean_only_copy.dart
+?? lib/widgets/permission_panel.dart
+?? lib/widgets/unavailable_feature.dart
+?? test/followup_resource_scope_test.dart
+?? test/permission_state_test.dart
+?? test/schedule_reset_scope_test.dart
+?? test/third_localization_review_test.dart
+?? tools/add_permission_copy.py
+?? tools/add_public_web_copy.py
+?? tools/audit_l10n_resources.py
+?? tools/build_followup_review.py
+?? tools/build_third_localization_review.py
+?? tools/check_critical_release.ps1
+?? tools/extend_scoped_resources.py
+?? tools/finalize_followup_evidence.py
+?? tools/followup_inventory.py
+?? tools/generate_korean_only_copy.py
+?? tools/guard_korean_paths.py
+?? tools/implement_permission_ui.py
+?? tools/plan_resource_split.py
+?? tools/read_review_resources.py
+?? tools/remove_unreachable_english_copy.py
+?? tools/review_release_20261006.py
+?? tools/split_korean_only_resources.py
+?? tools/split_native_resources.py
+?? tools/update_permission_help_copy.py

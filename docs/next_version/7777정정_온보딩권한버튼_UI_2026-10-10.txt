@@ -1,0 +1,23 @@
+7777 알림 정정 및 온보딩 권한 버튼 UI — 2026-10-10
+
+A11/A09 정정
+- 사용자 정정: 접힌 알림은 스누즈 N분 본문만 NBSP로 공백 처리. 근무명 제목, 알람 울림 중 subtext, 게시 시각은 원래 바인딩으로 복원. 교대시계 (테스트) 앱 이름 유지.
+- 펼친 알림은 한국어 알람연장 N분 유지. 외국어 기존 문구, 액션, 알림 레이아웃 XML 유지.
+- 앞선 7777알림_문구수정_2026-10-10.txt와 ring_notice_copy APK는 오해한 전체 공백 후보 당시의 증거다. 이번 정정 결과를 대표하지 않으며 원본은 보존.
+
+A05/A09 온보딩 UI
+- 다음 버튼 제거. 기존 실제 권한 확인 후 자동 진행 흐름 유지.
+- 화면 높이를 채워 나중에 하기 버튼을 안전 영역 하단에 배치. 내용이 실제 화면을 초과하는 경우 기존 스크롤 수단은 유지.
+- 설정 필요 옆 설정 버튼에 primaryContainer 배경/primary 테두리/굵은 글씨 적용. 권한 확인·설정 복귀 로직 변경 없음.
+
+검증/빌드 범위
+- 사용자의 테스트 미실행 지시 유지. 테스트·정적 분석·check_critical_release 전체 실행·실기기 UI 촬영/설치·핫리로드 미실시. 따라서 기존 PASS를 이번 변경의 검증으로 확대하지 않음.
+- 이후 사용자 명시 요청에 따라 dev debug APK만 재빌드. release/웹 빌드 미실시.
+- dev debug APK 빌드 성공(exit0, assembleDevDebug 328.3초). 로그: artifacts/onboarding_ring_correction_2026_10_10/dev_debug_build.log
+- 소스 해시: artifacts/onboarding_ring_correction_2026_10_10/source_hashes_before_build.json
+
+APK: artifacts/onboarding_ring_correction_2026_10_10/shiftbell-onboarding-ring-dev-debug.apk
+SHA256: eee02cb88085e805f7eb4b94de492a764af6cc9db587bee40d8fc41a6f62b350
+크기: 215862855 bytes
+빌드 중 대상6파일 소스 변경: 없음
+증거: evidence/onboarding_ring_correction_2026_10_10.json

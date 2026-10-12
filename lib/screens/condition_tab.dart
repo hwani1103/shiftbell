@@ -1,3 +1,7 @@
+import '../l10n/l10n_extensions.dart';
+import '../widgets/unavailable_feature.dart';
+import '../widgets/adaptive_layout.dart';
+import '../constants/layout_limits.dart';
 // lib/screens/condition_tab.dart
 //
 // ⭐ 수면·회복 탭(구 "컨디션" 탭). 하단 탭·앱바 이름만 바뀌었고 클래스·provider·저장 키(condition_tab_enabled)는
@@ -10,8 +14,8 @@
 //    날짜 시드 문구 조합(today_forecast_engine.dart)
 //  - 근무시간을 아직 안 넣었어도 수면 기록은 남길 수 있게 함(예전엔 안내 문구와 Tip만 보였음)
 //
-// ⭐ 1차 버전이라 l10n 키를 새로 안 만들고 한국어 문자열을 직접 씀(영어 로케일에서는 이 탭 자체가 안 보임 - main.dart
-// _showConditionTab). 이 화면은 사용자를 겁주지 않는 방향 - 점수·진단 없이 "무엇이 확인됐고, 무엇을 하면 되는지".
+// 한국어 화면의 문장은 한국어 전용이다. 외국어에는 수면·회복 기능을 제공하지 않는다.
+// 이 화면은 점수·진단 없이 "무엇이 확인됐고, 무엇을 하면 되는지" 보여준다.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,6 +57,7 @@ class ConditionTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final scheduleAsync = ref.watch(scheduleProvider);
 
     return Scaffold(
@@ -83,6 +88,7 @@ class _NoScheduleNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return const Center(
       child: Padding(
         padding: EdgeInsets.all(24),
@@ -136,17 +142,18 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     if (!_tutorialChecked) {
       _tutorialChecked = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) maybeShowConditionTabTutorial(context);
+        if (mounted && ref.read(optionalTabActivationProvider) == null) maybeShowConditionTabTutorial(context);
       });
     }
 
     final setupNeeded = ref.watch(conditionSetupNeededProvider);
     final pending = ref.watch(pendingSleepRecordsProvider);
 
-    return ListView(
+    return AdaptiveSectionList(
       // ⭐ 2026-09-13(3차) - 아래 여백은 일정관리 탭과 같은 12.h(사용하지 않기 버튼과 광고 영역 사이 거리)
       padding: EdgeInsets.fromLTRB(16, 16, 16, 12.h),
       children: [
@@ -193,8 +200,14 @@ class _ConditionBodyState extends ConsumerState<_ConditionBody>
         // 화면에는 설정 안내만 떠서 그 기록에 대해 한마디도 안 했음. 근무 일정 없이도 말할 수 있는 것
         // (어제 수면·최근 7일 평균)만 추려서 위에 먼저 보여준다.
         if (setupNeeded) ...[
-          const _SleepOnlySummaryCard(),
-          const _SetupNeededCard(),
+          if (AppLayout.of(context).isWide)
+            const Column(mainAxisSize: MainAxisSize.min, children: [
+              _SleepOnlySummaryCard(), _SetupNeededCard(),
+            ])
+          else ...[
+            const _SleepOnlySummaryCard(),
+            const _SetupNeededCard(),
+          ],
         ] else
           const _TodayConditionCard(),
         const SizedBox(height: 16),
@@ -221,6 +234,7 @@ class _SetupNeededCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -273,6 +287,7 @@ class _TodayConditionCardState extends ConsumerState<_TodayConditionCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final briefing = ref.watch(recoveryBriefingProvider);
     if (briefing == null) return const SizedBox.shrink();
     final evidenceIds = briefing.evidenceIds;
@@ -378,6 +393,7 @@ class _LevelChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     // 3단계 판정은 근무 일정 기반(ConditionRuleEngine) - 수면 기록 유무로 바뀌지 않는다
     final (String label, Color color) = switch (level) {
       ConditionLevel.normal => ('근무 부담 보통', const Color(0xFF2E7D32)),
@@ -404,6 +420,7 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Text(text,
         style: const TextStyle(
             fontSize: 12.5,
@@ -418,6 +435,7 @@ class _FactRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final Widget icon = switch (fact.tone) {
       BriefingTone.caution =>
         const Icon(Icons.error_outline, size: 16, color: Color(0xFFE08A00)),
@@ -453,6 +471,7 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -490,6 +509,7 @@ class _GeneralGuidanceNote extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return const Text(
       '수면·교대근무 연구를 참고한 일반적인 안내예요(의학적 진단이 아니에요).',
       style: TextStyle(fontSize: 11, height: 1.3, color: Colors.black38),
@@ -505,6 +525,7 @@ class _SleepOnlySummaryCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final briefing = ref.watch(recoveryBriefingProvider);
     if (briefing == null) return const SizedBox.shrink();
     final facts = briefing.facts
@@ -539,6 +560,7 @@ class _LimitationBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(10),
@@ -580,6 +602,7 @@ class _EvidenceLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     Evidence? evidence;
     for (final e in kEvidenceDatabase) {
       if (e.id == id) {
@@ -631,6 +654,7 @@ class _PendingSleepConfirmationCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final end = record.end;
     final durationText = end != null
         ? fmtSleepDuration(end.difference(record.start), record.source)
@@ -724,6 +748,7 @@ class _SleepMiniCalendarCardState
     extends ConsumerState<_SleepMiniCalendarCard> {
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final days = ref.watch(recentSleepDaySlotsProvider);
     final analyzer = ref.watch(conditionAnalyzerProvider);
     final reversedDays = days.reversed.toList();
@@ -759,7 +784,9 @@ class _SleepMiniCalendarCardState
             ),
             const SizedBox(height: 10),
             SizedBox(
-              height: 208,
+              // Three sleep slots must retain their label, time and duration
+              // lines when accessibility text grows.
+              height: 208 * (MediaQuery.textScalerOf(context).scale(11) / 11).clamp(1.0, double.infinity),
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 reverse: true,
@@ -794,6 +821,7 @@ class _SleepCategoryAveragesCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final stats = ref.watch(sleepCategoryStatsProvider);
     final averages = stats.averages;
     final pendingCategories = stats.categories
@@ -920,6 +948,7 @@ class _SleepCategoryLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     // ⭐ 글꼴 배율을 키운 기기에서 한 줄에 안 들어갈 수 있어 Wrap으로 감쌈(항목별로는
     // 색칩과 라벨이 떨어지면 안 되므로 각 쌍을 Row로 묶어서 넣는다).
     return Wrap(
@@ -961,6 +990,7 @@ class _SleepCategoryAverageRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final total = average.averageMinutes;
     final low = total < ConditionRuleEngine.recommendedSleepMinMinutes;
     final hasNap = average.averageNapMinutes > 0;
@@ -1029,6 +1059,7 @@ class _SleepStackedBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     const height = 10.0;
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1102,6 +1133,7 @@ class _SleepDayTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Container(
       width: 128,
       padding: const EdgeInsets.all(8),
@@ -1168,6 +1200,7 @@ class _SleepSlotCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final r = record;
     return InkWell(
       borderRadius: BorderRadius.circular(6),
@@ -1195,6 +1228,7 @@ class _SleepSlotCell extends StatelessWidget {
                       fontWeight: FontWeight.w500))
             else ...[
               Builder(builder: (context) {
+          if (!context.usesKoreanFeatures) return const UnavailableFeature();
                 // ⭐ 2026-09-13 - 야간 근무 회복수면처럼 실제 취침일이 카드 날짜와 다르면 시각 앞에 "M/D "를 붙임.
                 final timeText = r.end != null
                     ? '${fmtTimeOnly(r.start)}-${fmtTimeOnly(r.end!)}'

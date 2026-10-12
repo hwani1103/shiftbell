@@ -1,3 +1,5 @@
+import '../l10n/l10n_extensions.dart';
+import '../widgets/unavailable_feature.dart';
 // lib/widgets/sleep_edit_dialog.dart
 //
 // ⭐ 실제 수면 기록(취침/기상 시각) 입력·수정 공용 UI. 원래 condition_tab.dart
@@ -42,6 +44,7 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
   bool showDeleteButton = false,
   String title = '수면 시각 입력',
 }) async {
+  if (!context.usesKoreanFeatures) return null;
   var start = initialStart;
   var end = initialEnd;
 
@@ -68,8 +71,10 @@ Future<SleepSlotEditResult?> showSleepSlotEditDialog(
     shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
     builder: (sheetContext) {
+          if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
       return StatefulBuilder(
         builder: (sheetContext, setState) {
+          if (!sheetContext.usesKoreanFeatures) return const UnavailableFeature();
           // ⭐ 2026-09-01 후속7 - "미래 시각은 입력할 수 없어야 한다"는 요청
           // (예: 지금 낮 12시인데 오늘 밤 22시~다음날 06시를 미리 저장하는 건
           // 말이 안 됨 - 아직 안 일어난 일이므로). end.isAfter(start) 검증에
@@ -243,6 +248,7 @@ class _TimeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,

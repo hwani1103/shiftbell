@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-08",
+  "scope": "Fold8 global calendar first visual review",
+  "delivery": "dev hot reload; no APK build",
+  "gallery": "artifacts/fold8_en_tuning_2026_10_08/영어_화면비교.html",
+  "manifest": "artifacts/fold8_en_tuning_2026_10_08/captures/manifest.json",
+  "captures": 14,
+  "validation": {
+    "unit": "25 PASS",
+    "English seven themes across window profiles": "7 PASS",
+    "final Dark Grid retest": "1 PASS",
+    "analysis": "0 errors/warnings",
+    "image_checks": "14 hashes, en_US geometry, gallery references verified"
+  },
+  "device_restored": "Korean main white, Korean October fixtures",
+  "visual_approval": "pending user review"
+}

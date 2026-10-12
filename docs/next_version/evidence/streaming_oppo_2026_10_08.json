@@ -1,0 +1,285 @@
+{
+  "date_kst": "2026-10-08",
+  "model": "OPPO A38/OP5759L1 Android14",
+  "project": "shiftbell-streaming-1008-d",
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "charged_usd": 0,
+  "product_source_changed": false,
+  "O1": "PASS actual UI09:00 ->09:01 ->delete; all DB/OS9/9 ->9/9 ->0/0; old target overlap0",
+  "O2": "PASS actual notificationOFF ->force-stop in Settings ->actualON ->COLD restart5748ms; same main calendar PNG, DB schedule/templates/ID+epochs and native permission granted",
+  "O3": {
+    "status": "PASS",
+    "actual_snooze_minutes": 5,
+    "target_ms": 1791417446000,
+    "diag_fired_delay_ms": 70,
+    "receiver_entry_delay_ms": 37,
+    "locked_ring_presented_delay_ms": 882,
+    "screen_on_at_fired": false,
+    "pin_secure_showing": true,
+    "guard_target_plus_one": true,
+    "initial_native_fixture_delay_ms": 86
+  },
+  "O4": "PASS actual FSI OFF/ON and overlay ON/OFF, Back return and native state confirmation",
+  "comparisons": {
+    "ui_registered": {
+      "label": "ui_registered",
+      "timezone": "America/Los_Angeles",
+      "rows": [
+        {
+          "id": 1,
+          "epoch": 1791475200000,
+          "time": "09:00"
+        },
+        {
+          "id": 2,
+          "epoch": 1791561600000,
+          "time": "09:00"
+        },
+        {
+          "id": 3,
+          "epoch": 1791648000000,
+          "time": "09:00"
+        },
+        {
+          "id": 4,
+          "epoch": 1791734400000,
+          "time": "09:00"
+        },
+        {
+          "id": 5,
+          "epoch": 1791820800000,
+          "time": "09:00"
+        },
+        {
+          "id": 6,
+          "epoch": 1791907200000,
+          "time": "09:00"
+        },
+        {
+          "id": 7,
+          "epoch": 1791993600000,
+          "time": "09:00"
+        },
+        {
+          "id": 8,
+          "epoch": 1792080000000,
+          "time": "09:00"
+        },
+        {
+          "id": 9,
+          "epoch": 1792166400000,
+          "time": "09:00"
+        }
+      ],
+      "expected": [
+        1791475200000,
+        1791561600000,
+        1791648000000,
+        1791734400000,
+        1791820800000,
+        1791907200000,
+        1791993600000,
+        1792080000000,
+        1792166400000
+      ],
+      "actual": [
+        1791475200000,
+        1791561600000,
+        1791648000000,
+        1791734400000,
+        1791820800000,
+        1791907200000,
+        1791993600000,
+        1792080000000,
+        1792166400000
+      ],
+      "match": true
+    },
+    "ui_changed": {
+      "label": "ui_changed",
+      "timezone": "America/Los_Angeles",
+      "rows": [
+        {
+          "id": 10,
+          "epoch": 1791475260000,
+          "time": "09:01"
+        },
+        {
+          "id": 11,
+          "epoch": 1791561660000,
+          "time": "09:01"
+        },
+        {
+          "id": 12,
+          "epoch": 1791648060000,
+          "time": "09:01"
+        },
+        {
+          "id": 13,
+          "epoch": 1791734460000,
+          "time": "09:01"
+        },
+        {
+          "id": 14,
+          "epoch": 1791820860000,
+          "time": "09:01"
+        },
+        {
+          "id": 15,
+          "epoch": 1791907260000,
+          "time": "09:01"
+        },
+        {
+          "id": 16,
+          "epoch": 1791993660000,
+          "time": "09:01"
+        },
+        {
+          "id": 17,
+          "epoch": 1792080060000,
+          "time": "09:01"
+        },
+        {
+          "id": 18,
+          "epoch": 1792166460000,
+          "time": "09:01"
+        }
+      ],
+      "expected": [
+        1791475260000,
+        1791561660000,
+        1791648060000,
+        1791734460000,
+        1791820860000,
+        1791907260000,
+        1791993660000,
+        1792080060000,
+        1792166460000
+      ],
+      "actual": [
+        1791475260000,
+        1791561660000,
+        1791648060000,
+        1791734460000,
+        1791820860000,
+        1791907260000,
+        1791993660000,
+        1792080060000,
+        1792166460000
+      ],
+      "match": true,
+      "previous_target_overlap": []
+    },
+    "ui_deleted": {
+      "label": "ui_deleted",
+      "timezone": "America/Los_Angeles",
+      "rows": [],
+      "expected": [],
+      "actual": [],
+      "match": true,
+      "previous_target_overlap": []
+    },
+    "o2_restarted": {
+      "label": "o2_restarted",
+      "timezone": "America/Los_Angeles",
+      "rows": [
+        {
+          "id": 10,
+          "epoch": 1791475260000,
+          "time": "09:01"
+        },
+        {
+          "id": 11,
+          "epoch": 1791561660000,
+          "time": "09:01"
+        },
+        {
+          "id": 12,
+          "epoch": 1791648060000,
+          "time": "09:01"
+        },
+        {
+          "id": 13,
+          "epoch": 1791734460000,
+          "time": "09:01"
+        },
+        {
+          "id": 14,
+          "epoch": 1791820860000,
+          "time": "09:01"
+        },
+        {
+          "id": 15,
+          "epoch": 1791907260000,
+          "time": "09:01"
+        },
+        {
+          "id": 16,
+          "epoch": 1791993660000,
+          "time": "09:01"
+        },
+        {
+          "id": 17,
+          "epoch": 1792080060000,
+          "time": "09:01"
+        },
+        {
+          "id": 18,
+          "epoch": 1792166460000,
+          "time": "09:01"
+        }
+      ],
+      "expected": [
+        1791475260000,
+        1791561660000,
+        1791648060000,
+        1791734460000,
+        1791820860000,
+        1791907260000,
+        1791993660000,
+        1792080060000,
+        1792166460000
+      ],
+      "actual": [
+        1791475260000,
+        1791561660000,
+        1791648060000,
+        1791734460000,
+        1791820860000,
+        1791907260000,
+        1791993660000,
+        1792080060000,
+        1792166460000
+      ],
+      "match": true
+    }
+  },
+  "session": {
+    "name": "oppo",
+    "project": "shiftbell-streaming-1008-d",
+    "model": "OP5759L1/34",
+    "cap_seconds": 1680,
+    "requested_epoch": 1791415941.483837,
+    "install_limit_seconds": 240,
+    "first_evidence_limit_seconds": 480,
+    "reservation": "1sxzirmcz59x9",
+    "reserved_epoch": 1791415952.379127,
+    "serial": "localhost:7624",
+    "connected_epoch": 1791415984.5541425,
+    "release_reason": "requested return",
+    "released": true,
+    "finished_epoch": 1791417523.0760105,
+    "conservative_seconds": 1581.592173576355
+  },
+  "cleanup": {
+    "alarm_rows": 0,
+    "active_os_custom_alarm_count": 0,
+    "uninstalled": true,
+    "test_pin_retained": false,
+    "screen_timeout_restored": true
+  },
+  "service_reservations_after_return": 0,
+  "zip": "artifacts/streaming_free_2026_10_08/oppo_evidence.zip",
+  "sha256": "64b4009254cc622c9630ea89fa7060feffa9b684571edd4c62418239ff794495",
+  "limits": "Representative silent dev-debug PIN locked screen, no prolonged Doze or audio/vibration assertion; initial fixture is not actual UI registration proof. UI automation blank/exit137 and ColorOS dump formatting handled as tooling, no product changes."
+}

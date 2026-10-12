@@ -1,0 +1,37 @@
+AK 권한 구현 — P0(출시 전 필수) 회귀 기준
+
+재사용 실행기: tools/check_critical_release.ps1 [-FlutterSdk C:\tools\flutter] [-Build]
+권한·언어 리소스 변경 후 반드시 실행한다. 검사가 실패하면 출시 준비 완료로 판정하지 않는다. 레이아웃 검사는 포함하지 않는다.
+
+구현
+PermissionSettings.kt와 MainActivity MethodChannel: 실제 notification/overlay/exactAlarm/fullScreen 상태와 독립 alarmChannel을 조회한다.
+granted/denied/unknown/notApplicable은 구분한다. API34 미만 FSI·API31 미만 exact를 허용으로 추정하지 않고 개별 설정 대상 아님으로 표시한다.
+onboarding/배너/설정/도움말은 같은 PermissionSnapshot·공유 PermissionPanel을 사용한다. 설정 이동 성공은 권한 허용이 아니다.
+앱 복귀마다 읽고 오래된 비동기 읽기를 버린다. 여러 설정을 연쇄 실행하지 않는다. 중복 설정 버튼/설명 시트/온보딩 경고·이동을 막는다.
+Xiaomi/Redmi/POCO 정규화와 securitycenter 존재 조건. PackageManager 가시성 queries 추가. OEM 실패는 앱 정보로 대체한다.
+실행 packageName/UID를 사용한다. 고정 flavor 패키지/Activity 클래스/extra_permission=10021/새 task flag는 없다.
+이미 허용이면 다시 요청하지 않는다. 안내 읽기는 완료 처리하지 않는다. 알림 채널 차단은 POST_NOTIFICATIONS 거절과 별개다.
+최초 '다음' 및 '나중에'의 기존 백업 발견/복구/이미 근무표가 있는 사용자 이동 분기는 유지한다.
+4번째 권한 및 새 상태·설정·Xiaomi 안내 19개 키는 한국어 포함 5언어에서 제공한다. 정책/온보딩/알람 문제 도움말도 새 흐름에 맞춘다.
+
+자동 검사(P0)
+test/permission_state_test.dart: 5언어 설정→변경 없음/허용 복귀, 확인 실패, 중복 설정 호출, 오래된 읽기/연속 resume, 별도 채널, Xiaomi 시트와 재조회.
+PermissionSettingsTest: API30/33/34 경로·해당 없음, package URI/현재 flavor/OEM extra·flags, 경로 실패·이중 실패, 제조사 정규화, 채널 차단·legacy 실제 제어 경로.
+ReleaseLanguagesTest: 네 언어 실제 native 제어 문자열/요일과 한국어 전용 라벨 fallback 차단.
+scope/초기화/한국어 원터치·공유 검사와 common/전용 리소스 생성·누락 보고를 묶어 실행한다.
+
+실기기 수동 검사(P0, 이번 미수행)
+1. Samsung API34+ 전체화면 토글 off/on 후 앱 복귀 상태와 실제 잠금 알람 화면. 울림·끄기·5분 후·자동 종료 제어를 같이 확인한다.
+2. API30, API33, API34+ 첫 설치에서 알림 런타임 요청/거절 후 설정, exact/overlay 상태·설정·기기 목록 경로를 확인한다.
+3. Xiaomi 확보 가능한 모델에서 OEM 설정/표준 설정·fallback·Always allow 전후 상태와 실제 잠금 알람. 한 모델의 성공을 모든 ROM으로 일반화하지 않는다.
+4. API34 미만 Xiaomi도 '잠금화면에 알람이 안 보이나요?' 도움말을 확인한다. OEM 추가 권한의 별도 허용을 표준 API로 읽었다고 주장하지 않는다.
+5. 설정 도중 앱 종료/재시작, 외부 권한 취소, 연타/연속 resume, 복구 뒤 기존 근무표 사용자의 권한→메인 분기.
+6. 기기/OS 설정 언어가 앱 언어와 다른 경우. ko/de/pt/hi Xiaomi 설정명의 정확한 실기기 문자열은 아직 확정하지 않는다.
+수동 검사는 자동 검사와 구분하여 PASS/FAIL/NOT_RUN을 남긴다. 소리 발생만으로 잠금 화면 표시 성공을 판정하지 않는다.
+사용자 요청으로 레이아웃 검증을 하지 않는다. AK 원문에서 좁은 화면/큰 글자 확인을 요구한 부분은 이번 완료 범위로 계산하지 않는다.
+
+공식 근거(2026-10-05 조회)
+https://developer.android.com/about/versions/14/behavior-changes-14#secure-fsi
+https://developer.android.com/reference/android/provider/Settings#ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT
+https://dev.mi.com/docs/appsmarket/technical_docs/adaptation_FAQ/
+교대시계_최신문서.txt AK/AJ/AH의 기존 실측은 과거 근거다. 이번 새 코드의 기기 실측을 대신하지 않는다.

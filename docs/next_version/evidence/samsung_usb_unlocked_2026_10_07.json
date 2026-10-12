@@ -1,0 +1,255 @@
+{
+  "date": "2026-10-07 KST",
+  "scope": "Samsung USB unlocked checks only; screen lock/PIN/reboot deferred at user request",
+  "device": {
+    "serial": "R5KL20DHWAE",
+    "model": "SM-S948N",
+    "android": "16",
+    "sdk": 36
+  },
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "package": "com.hwani1103.shiftbell.dev",
+  "version": "1.0.23-dev+25",
+  "database_version": 29,
+  "product_source_changed": false,
+  "hot_reload_performed": false,
+  "release_built": false,
+  "paid_streaming_or_srtl_connected": false,
+  "pass": {
+    "installation_data_preservation": "All 17 tables identical to baseline after candidate install.",
+    "A04_current_backup": "Actual settings backup button -> Download file readback equal baseline -> actual SAF file selection/restore -> all 17 tables identical, 58 histories, no duplicates, existing main restored.",
+    "A04_legacy_shape": "Same current backup with snooze_minutes field removed, actual SAF restoration. All 58 null values preserved, no invented 5 minutes, no duplicates. This is a fixture, not an original prod backup.",
+    "A06_locales": [
+      {
+        "locale": "de-DE",
+        "header": [
+          "Oktober 2026",
+          "Mo",
+          "Di",
+          "Mi",
+          "Do",
+          "Fr",
+          "Sa",
+          "So"
+        ],
+        "tabs": [
+          "Nächster Wecker\nTab 1 von 3",
+          "Kalender\nTab 2 von 3",
+          "Einstellungen\nTab 3 von 3"
+        ],
+        "sleepDisabled": true,
+        "sleepEnabled": false
+      },
+      {
+        "locale": "en-AE",
+        "header": [
+          "October 2026",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+          "Sun"
+        ],
+        "tabs": [
+          "Next Alarm\nTab 1 of 3",
+          "Calendar\nTab 2 of 3",
+          "Settings\nTab 3 of 3"
+        ],
+        "sleepDisabled": true,
+        "sleepEnabled": false
+      },
+      {
+        "locale": "en-GB",
+        "header": [
+          "October 2026",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+          "Sun"
+        ],
+        "tabs": [
+          "Next Alarm\nTab 1 of 3",
+          "Calendar\nTab 2 of 3",
+          "Settings\nTab 3 of 3"
+        ],
+        "sleepDisabled": true,
+        "sleepEnabled": false
+      },
+      {
+        "locale": "en-IN",
+        "header": [
+          "October 2026",
+          "Sun",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat"
+        ],
+        "tabs": [
+          "Next Alarm\nTab 1 of 3",
+          "Calendar\nTab 2 of 3",
+          "Settings\nTab 3 of 3"
+        ],
+        "sleepDisabled": true,
+        "sleepEnabled": false
+      },
+      {
+        "locale": "en-PH",
+        "header": [
+          "October 2026",
+          "Sun",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat"
+        ],
+        "tabs": [
+          "Next Alarm\nTab 1 of 3",
+          "Calendar\nTab 2 of 3",
+          "Settings\nTab 3 of 3"
+        ],
+        "sleepDisabled": true,
+        "sleepEnabled": false
+      },
+      {
+        "locale": "en-ZA",
+        "header": [
+          "October 2026",
+          "Sun",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat"
+        ],
+        "tabs": [
+          "Next Alarm\nTab 1 of 3",
+          "Calendar\nTab 2 of 3",
+          "Settings\nTab 3 of 3"
+        ],
+        "sleepDisabled": true,
+        "sleepEnabled": false
+      },
+      {
+        "locale": "fr-FR,ko-KR",
+        "header": [
+          "October 2026",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat",
+          "Sun"
+        ],
+        "tabs": [
+          "Next Alarm\nTab 1 of 3",
+          "Calendar\nTab 2 of 3",
+          "Settings\nTab 3 of 3"
+        ],
+        "sleepDisabled": true,
+        "sleepEnabled": false
+      },
+      {
+        "locale": "hi-IN",
+        "header": [
+          "अक्तूबर 2026",
+          "रवि",
+          "सोम",
+          "मंगल",
+          "बुध",
+          "गुरु",
+          "शुक्र",
+          "शनि"
+        ],
+        "tabs": [
+          "अगला अलार्म\n3 का टैब 1",
+          "कैलेंडर\n3 का टैब 2",
+          "सेटिंग\n3 का टैब 3"
+        ],
+        "sleepDisabled": true,
+        "sleepEnabled": false
+      },
+      {
+        "locale": "ko-KR",
+        "header": [
+          "2026. 10",
+          "Sun",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thu",
+          "Fri",
+          "Sat"
+        ],
+        "tabs": [
+          "다음알람\n탭 5개 중 1번째",
+          "일정관리\n탭 5개 중 2번째",
+          "달력\n탭 5개 중 3번째",
+          "수면·회복\n탭 5개 중 4번째",
+          "설정\n탭 5개 중 5번째"
+        ],
+        "sleepDisabled": false,
+        "sleepEnabled": true
+      }
+    ],
+    "A06_pt_BR": "Portuguese UI, 3 tabs, Korean-only tabs absent; original user shift names/memos retained. Region popup checked.",
+    "A06_unsupported_primary": "fr-FR,ko-KR resolved to English/Monday/3 tabs and disabled sleep provider, matching primary-language-only policy; no Korean fallback.",
+    "A05_A06_permission_smoke": "Open permission panel KO -> DE; app DE/OS KO. Actual OS FSI page opened, allowed unchanged, Back and two HOME/resume cycles show four allowed states. No new denial/FSI ringing claim.",
+    "A07_clock_display": "Original system 12h: select unsaved 9 PM, change system to 24h and resume shows 21:00; back to 12h shows 9 PM. Cancelled dialogs without saving. Existing pending alarm epoch preservation was not tested because there are zero alarms.",
+    "A07_week_start": "DE/GB/AE Monday; PT/HI/ZA/IN/PH/KO Sunday, real calendar headers. October/adjacent-month cells visible; DST real-time transitions not newly tested.",
+    "U02_holiday": "pt-BR October 12 red numeral and Nossa Senhora Aparecida detail popup; actual pinned dev calendar widget updates to Portuguese with Oct 12 red. Prod widget encountered separately and excluded from dev proof.",
+    "data_and_setting_restoration": {
+      "17_tables_equal_to_baseline": true,
+      "history": 58,
+      "memos": 15,
+      "alarms": 0,
+      "native_custom_alarm_count": 0,
+      "settings_restored": [
+        "locale",
+        "system_locale",
+        "time_format",
+        "stay",
+        "timeout",
+        "zone",
+        "auto_time",
+        "auto_zone",
+        "volume"
+      ],
+      "installed_apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+      "baseline_download_files_preserved_on_pc": 54,
+      "new_backup_file": "ShiftBell_Backup_dev_manual_261007_234044.json",
+      "synthetic_legacy_file_removed": true,
+      "test_alarm_registered": false,
+      "lock_or_reboot_performed": false
+    }
+  },
+  "not_run_or_partial": {
+    "S1_A01": "No new locked natural +5 timing test; user deferred lock/PIN tests.",
+    "A04": "Actual +15 selection/history, natural 15 minutes, known15 file roundtrip and selected/default minutes distinction pending. Restore-kill/resume/safe-end untested branches remain.",
+    "A05": "Old API30/31/32/33 permission conditions require other OS. Denial race/rapid settings double-entry not newly proven.",
+    "A06": "Fresh foreign install pre-first-launch widget exposure, already-pinned sleep widget neutralization and active alarm epoch/deadline comparison remain. No sleep widget was added/deleted for this run.",
+    "A07": "Korean remote holiday forced fetch/cache/error-retry and remaining regional picker/DST displays remain per core. No time/date/timezone manipulation.",
+    "A03": "No actual consent form shown. UMP hashed device ID captured locally in final_app_log.txt for later explicitly configured dev debug test; no geography/reset defines in candidate.",
+    "U03": "S26 startup-phase logs only; not Fold8 complaint reproduction or prod performance proof.",
+    "A08_S2": "No audio/vibration subjective result or overnight natural Doze; screen stay-on/charging unchanged."
+  },
+  "tool_limitations": "Early diagnostic expression used multiline compiler input and an obsolete getRingingAlarm method; corrected read-only expression passed. File picker search needed wait for fresh result. These are harness issues, not product FAIL. No test fixture alarm was armed.",
+  "cleanup": "Synthetic legacy file deleted; no test alarms, no PIN entry or lock/reboot, app language ko-KR and system time_12_24=12 restored. Actual manual backup slot updated by backup test; 54 baseline Download files preserved on PC.",
+  "next": "If user does not respond to lock-test availability question, stop and report. On return S1 natural+5 -> A04 actual+15/known15 backup -> affected remaining USB boundaries -> Streaming/SRTL; original core remains sole checklist.",
+  "evidence_archive": {
+    "path": "artifacts/samsung_usb_unlocked_2026_10_07/evidence.zip",
+    "sha256": "7bad297ebe634b29cee8e42e67f4ad2c7651fd646da2d90545f7a6562098b7f8",
+    "bytes": 184269157
+  }
+}

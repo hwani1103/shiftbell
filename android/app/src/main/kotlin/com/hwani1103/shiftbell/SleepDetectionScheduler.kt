@@ -4,6 +4,8 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.os.UserManager
 import android.util.Log
 import java.util.Calendar
 import java.util.Date
@@ -32,9 +34,13 @@ object SleepDetectionScheduler {
     // 배터리를 쓰고 데이터를 쌓고 있었던 것(개인정보처리방침에도 없는 상태로 수집되는 셈). 로케일이
     // 한국어가 아니거나 탭이 꺼져 있으면 예약하지 않고, 이미 잡혀 있던 다음 체크도 취소한다.
     // SleepWidgetProvider.isConditionTabEnabled와 같은 파일/키를 읽음(Flutter shared_preferences
-    // 플러그인 - DP 아닌 일반 prefs, 잠금 해제 전이라 아직 못 읽으면 기본값 true로 안전하게 폴백).
+    // 플러그인 - DP 아닌 일반 prefs). 최초 잠금 해제 전에는 설정을 읽을 수 없으므로
+    // 감지를 보류한다. BOOT_COMPLETED에서 실제 설정으로 다시 예약한다. 기본값 true로
+    // 우회하면 사용자가 탭을 꺼 둔 경우에도 수면을 수집할 수 있으므로 추측하지 않는다.
     fun isSleepDetectionEnabled(context: Context): Boolean {
-        if (Locale.getDefault().language != "ko") return false
+        if (!ReleaseLocalePolicy.koreanFeatures(context)) return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N &&
+            !context.getSystemService(UserManager::class.java).isUserUnlocked) return false
         val prefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
         return prefs.getBoolean("flutter.condition_tab_enabled", true)
     }

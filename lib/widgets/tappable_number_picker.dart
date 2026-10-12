@@ -48,6 +48,7 @@ class TappableNumberPicker extends StatefulWidget {
 
 class _TappableNumberPickerState extends State<TappableNumberPicker> {
   late FixedExtentScrollController _controller;
+  bool _syncingController = false;
   static const int _infiniteOffset = 5000;
 
   @override
@@ -67,7 +68,12 @@ class _TappableNumberPickerState extends State<TappableNumberPicker> {
       final currentValue = _indexToValue(currentIndex);
       if (currentValue != widget.value) {
         final targetIndex = _valueToIndex(widget.value);
-        _controller.jumpToItem(targetIndex);
+        _syncingController = true;
+        try {
+          _controller.jumpToItem(targetIndex);
+        } finally {
+          _syncingController = false;
+        }
       }
     }
   }
@@ -100,7 +106,13 @@ class _TappableNumberPickerState extends State<TappableNumberPicker> {
 
   void _handleTap(int targetValue) {
     final targetIndex = _valueToIndex(targetValue);
-    _controller.jumpToItem(targetIndex);  // ⭐ 즉시 점프 (애니메이션 없음)
+    _syncingController = true;
+    try {
+      _controller.jumpToItem(targetIndex);
+    } finally {
+      _syncingController = false;
+    }
+    if (targetValue == widget.value) return;
     HapticFeedback.selectionClick();
     widget.onChanged(targetValue);
   }
@@ -125,6 +137,7 @@ class _TappableNumberPickerState extends State<TappableNumberPicker> {
       squeeze: 1.0,
       onSelectedItemChanged: (index) {
         final value = _indexToValue(index);
+        if (_syncingController || value == widget.value) return;
         HapticFeedback.selectionClick();
         widget.onChanged(value);
       },

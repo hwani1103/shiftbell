@@ -1,0 +1,39 @@
+{
+  "checked_at_utc": "2026-10-08T00:58:23.356593+00:00",
+  "project": "shiftbell-streaming-1008-e",
+  "plan": "Spark",
+  "free_seconds_used": 0,
+  "paid_usd_used_today": 0,
+  "reservation_created": false,
+  "service_reservations_after_failed_create": 0,
+  "requested_model": "transsion_lab_infinix-x6856/35",
+  "cli_error": "INVALID_ARGUMENT: model not available despite present in catalog",
+  "console_finding": "User approved terms and supplied legal name. Transsion enabled successfully after one transient console retry; checked switch and success toast observed.",
+  "console_url": "https://console.cloud.google.com/omnilab/partner-lab?project=shiftbell-streaming-1008-e&authuser=1",
+  "next_action": "F free project preparation; do not repeat failed CLI creates for Transsion.",
+  "honor": "Partner lab card present and disabled; no concrete device model found in current CLI catalog; no test/availability claim",
+  "vivo": "No matching current catalog device or partner-lab card",
+  "product_sources_unchanged": 430,
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "activation_completed": true,
+  "reservation_attempts_after_activation": [
+    {
+      "case": "infinix2",
+      "error": "FAILED_PRECONDITION",
+      "reservation_created": false
+    },
+    {
+      "case": "infinix3",
+      "error": "FAILED_PRECONDITION",
+      "reservation_created": false
+    },
+    {
+      "case": "infinix4",
+      "error": "RESOURCE_EXHAUSTED: Insufficient device quota remaining",
+      "reservation_created": false
+    }
+  ],
+  "service_quota_used_minutes": 30,
+  "free_usage_note": "E: no successful reservation or connection, but UI30/30 used after failed CLI creates. Allocation quota is distinct from connected usage; E blocked in local controller.",
+  "connection_workaround": "C with Transsion enabled: official REST create succeeded, first short probe immediately canceled, then infinix5 connected via CLI daemon-connect and returned."
+}

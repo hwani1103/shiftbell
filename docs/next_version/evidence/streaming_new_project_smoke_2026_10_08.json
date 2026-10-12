@@ -1,0 +1,26 @@
+{
+  "project": "shiftbell-streaming-check-1008",
+  "model": "akita/35",
+  "cap_seconds": 180,
+  "created_epoch": 1791410446.4100745,
+  "reservation": "1o1qdxnib9ijg",
+  "reserved_epoch": 1791410461.6155455,
+  "serial": "localhost:2881",
+  "connected_epoch": 1791410488.878847,
+  "error": "connector exited",
+  "released": true,
+  "finished_epoch": 1791410554.9224904,
+  "reserved_seconds": 93.30694484710693,
+  "ended_epoch": 1791410554.926491,
+  "connection_verified": true,
+  "returned_no_reservations": true,
+  "billing": "Spark no billing",
+  "gemini": false,
+  "analytics": false,
+  "quota_post_smoke_display": {
+    "limit": 30,
+    "used": 0,
+    "note": "usage reporting may lag; local 93.31sec deducted"
+  },
+  "apk_tested": false
+}

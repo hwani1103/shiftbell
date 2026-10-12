@@ -1,86 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-    ⭐ 실제 수면 기록 위젯(캘린더 위젯과 완전 별개) - 2x1. 한 줄에 [오늘 근무명] [수면] [기상].
-    SleepWidgetProvider.kt / 수면기록_자동추정_설계.md 6장 참고.
-
-    ⭐ 2026-09-22(사용자 요청) - 3x1 → 2x1. "오늘 근무" 라벨을 없애고 근무명 칩 자체만 둔다.
-    폭이 110dp(2칸 공식 최소)까지 줄어도 겹치지 않게 만든 규칙:
-      - 칩은 wrap_content이고 최대 폭을 Kotlin이 실제 위젯 폭에서 계산해 비트맵에 반영한다.
-      - 수면/기상 버튼은 남은 폭을 weight 1:1로 나눠 쓰고, 글자는 autoSize로 알아서 줄어든다
-        (API 26 미만은 autoSize가 무시되므로 textSize 11sp를 같이 둔다).
-      - 세로 padding을 작게 잡아 글꼴 배율을 키운 기기에서도 40dp 높이 안에 들어온다.
-    sleep_shift_label은 "탭 꺼짐" 상태에서만 Kotlin이 보이게 한다(평소엔 gone).
--->
+<!-- 2x1(최소 110x40dp): 위는 앱 아이콘·오늘 근무, 아래는 수면·기상 버튼. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/sleep_widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_panel_light"
-    android:orientation="horizontal"
-    android:paddingStart="6dp"
-    android:paddingEnd="6dp"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp"
-    android:gravity="center_vertical">
+    android:background="@drawable/sleep_widget_panel"
+    android:orientation="vertical"
+    android:paddingStart="2dp"
+    android:paddingEnd="2dp"
+    android:paddingTop="2dp"
+    android:paddingBottom="2dp">
 
-    <TextView
-        android:id="@+id/sleep_shift_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:maxLines="1"
-        android:text=""
-        android:textColor="#FF424242"
-        android:textStyle="bold"
-        android:textSize="10sp"
-        android:visibility="gone"/>
-
-    <!-- 배경 알약 + 글자를 SleepWidgetProvider.kt의 roundedChipBitmap()이 한 비트맵에 같이
-         그려서 넣음(텍스트를 별도 TextView로 겹치면 기기마다 정렬이 어긋났던 전례가 있음).
-         wrap_content로 비트맵 실제 크기 그대로 표시 - scaleType 없음. -->
-    <ImageView
-        android:id="@+id/sleep_shift_chip_bg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <TextView
-        android:id="@+id/sleep_button_sleep"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="3dp"
-        android:background="@drawable/sleep_widget_button_bg"
-        android:gravity="center"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp"
-        android:maxLines="1"
-        android:text="@string/sleep_widget_sleep"
-        android:textColor="#FFFFFFFF"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        android:autoSizeTextType="uniform"
-        android:autoSizeMinTextSize="8sp"
-        android:autoSizeMaxTextSize="12sp"
-        android:autoSizeStepGranularity="0.5sp"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-    <TextView
-        android:id="@+id/sleep_button_wake"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="1dp">
+
+            <ImageView
+                android:id="@+id/sleep_brand_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:paddingVertical="3dp"
+                android:paddingHorizontal="8dp"
+                android:scaleType="fitCenter"
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="@string/sleep_widget_brand"/>
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="1dp">
+
+            <TextView
+                android:id="@+id/sleep_shift_label"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:maxLines="1"
+                android:includeFontPadding="false"
+                android:text=""
+                android:textColor="#FF424242"
+                android:textStyle="bold"
+                android:textSize="10sp"
+                android:visibility="gone"/>
+
+            <!-- 배경과 글자를 하나의 비트맵으로 그려 기기별 정렬 오차를 막는다. -->
+            <ImageView
+                android:id="@+id/sleep_shift_chip_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:paddingVertical="3dp"
+                android:paddingHorizontal="6dp"
+                android:scaleType="fitCenter"/>
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/sleep_action_row"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@drawable/sleep_widget_button_bg_inactive"
-        android:gravity="center"
-        android:paddingTop="6dp"
-        android:paddingBottom="6dp"
-        android:maxLines="1"
-        android:text="@string/sleep_widget_wake"
-        android:textColor="#FFFFFFFF"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        android:autoSizeTextType="uniform"
-        android:autoSizeMinTextSize="8sp"
-        android:autoSizeMaxTextSize="12sp"
-        android:autoSizeStepGranularity="0.5sp"/>
+        android:layout_marginTop="1dp"
+        android:orientation="horizontal">
 
+        <TextView
+            android:id="@+id/sleep_button_sleep"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="1dp"
+            android:background="@drawable/sleep_widget_button_bg"
+            android:padding="0dp"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@string/sleep_widget_sleep"
+            android:textColor="#FFFFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="7sp"
+            android:autoSizeMaxTextSize="20sp"
+            android:autoSizeStepGranularity="0.5sp"/>
+
+        <TextView
+            android:id="@+id/sleep_button_wake"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="1dp"
+            android:background="@drawable/sleep_widget_button_bg_inactive"
+            android:padding="0dp"
+            android:gravity="center"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:text="@string/sleep_widget_wake"
+            android:textColor="#FFFFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="7sp"
+            android:autoSizeMaxTextSize="20sp"
+            android:autoSizeStepGranularity="0.5sp"/>
+    </LinearLayout>
 </LinearLayout>

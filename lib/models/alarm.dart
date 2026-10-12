@@ -1,3 +1,5 @@
+import '../utils/alarm_wall_time.dart';
+
 class Alarm {
   final int? id;
   final String time; // HH:mm
@@ -11,6 +13,8 @@ class Alarm {
   /// 반영된 값) - dayOffset은 "근무일 대비 표시용" 정보로 별도 보관함.
   /// alarm_day_offset.dart 참고.
   final int dayOffset;
+  /// Original template wall slot, preserved when date becomes a snooze instant.
+  final String? fixedSlotTime;
 
   Alarm({
     this.id,
@@ -20,6 +24,7 @@ class Alarm {
     required this.alarmTypeId,
     this.shiftType,
     this.dayOffset = 0,
+    this.fixedSlotTime,
   });
 
   factory Alarm.fromMap(Map<String, dynamic> map) {
@@ -27,21 +32,25 @@ class Alarm {
   DateTime? parseDate(dynamic value) {
     if (value == null) return null;
     try {
-      return DateTime.parse(value.toString());
+      return parseAlarmDate(value.toString());
     } catch (e) {
       print('⚠️ 알람 날짜 파싱 실패: $value');
       return null;
     }
   }
 
+  final date = parseDate(map['date']);
   return Alarm(
     id: map['id'],
-    time: map['time'],
-    date: parseDate(map['date']),  // ⭐ 변경
+    time: map['type'] == 'snoozed' && date != null
+        ? '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}'
+        : map['time'],
+    date: date,
     type: map['type'],
     alarmTypeId: map['alarm_type_id'],
     shiftType: map['shift_type'],
     dayOffset: map['day_offset'] ?? 0,
+    fixedSlotTime: map['fixed_slot_time'],
   );
 }
 
@@ -49,11 +58,13 @@ class Alarm {
     return {
       'id': id,
       'time': time,
-      'date': date?.toIso8601String(),
+      'date': date == null ? null : type == 'snoozed'
+          ? alarmInstantForStorage(date!) : date!.toIso8601String(),
       'type': type,
       'alarm_type_id': alarmTypeId,
       'shift_type': shiftType,
       'day_offset': dayOffset,
+      if (fixedSlotTime != null) 'fixed_slot_time': fixedSlotTime,
     };
   }
 
@@ -79,9 +90,10 @@ class Alarm {
         other.type == type &&
         other.alarmTypeId == alarmTypeId &&
         other.shiftType == shiftType &&
-        other.dayOffset == dayOffset;
+        other.dayOffset == dayOffset &&
+        other.fixedSlotTime == fixedSlotTime;
   }
 
   @override
-  int get hashCode => Object.hash(id, time, date, type, alarmTypeId, shiftType, dayOffset);
+  int get hashCode => Object.hash(id, time, date, type, alarmTypeId, shiftType, dayOffset, fixedSlotTime);
 }

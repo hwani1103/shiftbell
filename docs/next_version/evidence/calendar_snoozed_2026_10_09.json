@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-09",
+  "status": "IMPLEMENTED_AUTOMATED_PASS_DEVICE_DEFERRED_BY_USER",
+  "changes": [
+    "lib/screens/calendar_tab.dart",
+    "lib/widgets/calendar_snoozed_alarms.dart",
+    "lib/l10n/app_ko.arb",
+    "lib/l10n/app_en.arb",
+    "lib/l10n/app_de.arb",
+    "lib/l10n/app_pt.arb",
+    "lib/l10n/app_hi.arb"
+  ],
+  "scope": "Read-only snoozed reservations in calendar day popup; actual local retry date/time; live existing provider; fixed alarm edits unchanged",
+  "tests": {
+    "targeted_widget": 8,
+    "analyze": "No issues found",
+    "critical_command": "tools/check_critical_release.ps1",
+    "critical_exit": 0,
+    "flutter": 324,
+    "native_functional": "PASS",
+    "native_db_migration": "PASS",
+    "resource_audit": "PASS"
+  },
+  "apk_build": false,
+  "web_build": false,
+  "device_test": false,
+  "device_install": false,
+  "streaming": false,
+  "previous_installed_candidate_includes_change": false,
+  "source_hashes": {
+    "lib/screens/calendar_tab.dart": "8b2f7cedd9e9ee85d0a0ca7c18ab61a4a3012f1702890fd48f98e7604d5fdabd",
+    "lib/widgets/calendar_snoozed_alarms.dart": "284c0136ec8a27c2a0aa3e21f26240b893b8f277691b73c1dd3f395f46059807",
+    "test/calendar_snoozed_alarms_test.dart": "998226660a93253ab5e248125f3dcec5b52cb726b383863619a3c8687fdd6cf6",
+    "lib/l10n/app_ko.arb": "521f202abcb463e03998aa6d444e86ebe35634b7238733e355723f0a41a443a0",
+    "lib/l10n/app_en.arb": "b9913f1c87d0034eaf6da34e56e314d0032850396da60418d1e2162d6047beae",
+    "lib/l10n/app_de.arb": "efe3180387fa43dd175a04b087542ce9e70cad3e1d765d270fa41e44f5acb662",
+    "lib/l10n/app_pt.arb": "a62d4ba5481289aa404df524cfdf8854a283a8dc60e5ac695fc9462846b03242",
+    "lib/l10n/app_hi.arb": "214f83415d8881255064ead109faacfbcea4e1d97ccadb84a6220d068dcff231"
+  },
+  "initial_test_failure": "Test-only SemanticsHandle teardown timing; fixed and all 8 passed",
+  "limits": "Widget/list updates and source wiring checked; actual native-to-open-popup delivery and final visual approval await later real device test",
+  "artifacts": "artifacts/calendar_snoozed_2026_10_09/"
+}

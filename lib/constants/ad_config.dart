@@ -41,7 +41,10 @@ String get kBannerAdUnitId => isProductionAdBuild ? _kBannerAdUnitIdRelease : kB
 /// 광고 영역을 눈에 보이게 색으로 표시할지 여부 - debug 빌드에서만.
 ///
 /// ⭐ 이 값을 켜고 끄는 것은 **높이에 전혀 영향을 주지 않음.** 색과 테두리는 확보된 높이 "안에" 그려짐.
-const bool kAdSlotDebugTint = kDebugMode;
+// Store screenshots may hide this diagnostic without changing the slot size.
+// The default keeps the existing debug behavior; release always hides it.
+const bool kAdSlotDebugTint = kDebugMode &&
+    bool.fromEnvironment('AD_SLOT_DEBUG_TINT', defaultValue: true);
 
 /// 적응형 배너 높이 계산에 실패했을 때 쓸 대체 높이(dp) - 표준 고정 배너(320×50)의 높이.
 const double kBannerAdFallbackHeight = 50.0;

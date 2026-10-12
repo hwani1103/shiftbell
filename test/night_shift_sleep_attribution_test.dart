@@ -21,6 +21,8 @@ import 'package:shiftbell/services/condition/condition_rule_engine.dart';
 import 'package:shiftbell/services/condition/recovery_briefing_engine.dart';
 import 'package:shiftbell/services/condition/shift_pattern_analyzer.dart';
 import 'package:shiftbell/services/condition/sleep_day_slots.dart';
+import 'package:shiftbell/services/condition/sleep_history.dart';
+import 'package:shiftbell/services/condition/sleep_stats.dart';
 
 const _kNight = '야간';
 const _kDay = '주간';
@@ -69,6 +71,103 @@ void main() {
   // 야간1 = 9/16, 야간2 = 9/17 (둘 다 19~07시)
   ShiftPatternAnalyzer consecutiveNights() =>
       _analyzer(const [_kNight, _kNight, _kOff, _kOff, _kOff, _kOff, _kOff], 1);
+
+  group('9/27~29 연속 야간: 근무 중 수면의 날짜와 슬롯', () {
+    final first = DateTime(2026, 9, 27);
+    final second = DateTime(2026, 9, 28);
+    final third = DateTime(2026, 9, 29);
+    final analyzer = ShiftPatternAnalyzer(
+      schedule: ShiftSchedule(
+        isRegular: true,
+        pattern: const [_kNight, _kNight, _kNight, _kOff],
+        todayIndex: 0,
+        startDate: first,
+        shiftTypes: const [_kNight, _kOff],
+      ),
+      shiftTimes: const {_kNight: _nightRange},
+    );
+
+    test('9/27 22시~9/28 01시는 9/27 낮잠, 퇴근 후 수면은 9/27 주 수면', () {
+      final inShift = _sleep(DateTime(2026, 9, 27, 22), 3 * 60);
+      final recovery = _sleep(DateTime(2026, 9, 28, 8), 5 * 60);
+      final slots = buildSleepDaySlots(
+        records: [inShift, recovery], from: first, to: second, analyzer: analyzer);
+
+      expect(slots[0].nap1?.start, inShift.start);
+      expect(slots[0].mainSleep?.start, recovery.start);
+      expect(slots[1].isEmpty, isTrue);
+    });
+
+    test('9/29 00~02시 수면은 9/28 야간근무의 낮잠', () {
+      final afterMidnight = _sleep(DateTime(2026, 9, 29), 2 * 60);
+      final slots = buildSleepDaySlots(
+        records: [afterMidnight], from: second, to: third, analyzer: analyzer);
+
+      expect(slots[0].nap1?.start, afterMidnight.start);
+      expect(slots[0].mainSleep, isNull);
+      expect(slots[1].isEmpty, isTrue);
+    });
+
+    test('수면 이력도 연속 야간의 출근 전 낮잠을 다음 근무일에 한 번만 합산한다', () {
+      final firstShiftNap = _sleep(DateTime(2026, 9, 27, 22), 3 * 60);
+      final firstRecovery = _sleep(DateTime(2026, 9, 28, 8), 5 * 60);
+      final secondPreShiftNap = _sleep(DateTime(2026, 9, 28, 14), 3 * 60);
+      final secondShiftNap = _sleep(DateTime(2026, 9, 29), 2 * 60);
+      final nights = collectRecentWorkNights(
+        analyzer: analyzer,
+        records: [firstShiftNap, firstRecovery, secondPreShiftNap, secondShiftNap],
+        referenceDate: third,
+        daysBack: 3,
+      );
+
+      expect(nights.firstWhere((n) => n.date == first).sleepMinutes, 8 * 60);
+      expect(nights.firstWhere((n) => n.date == second).sleepMinutes, 5 * 60);
+      expect(nights.firstWhere((n) => n.date == third).sleepMinutes, isNull);
+    });
+
+    test('퇴근 후 수면 통계가 다음 야간의 출근 전 낮잠을 훔쳐오지 않는다', () {
+      final secondPreShiftNap = _sleep(DateTime(2026, 9, 28, 14), 3 * 60);
+      final stat = computePostInstanceSleepStat(
+        analyzer: analyzer,
+        records: [secondPreShiftNap],
+        referenceDate: first,
+        matches: isNightShiftInstance,
+        lookbackDays: 1,
+      );
+
+      expect(stat.sampleCount, 0);
+    });
+  });
+
+  group('주간·휴무 뒤 자정 넘긴 밤잠', () {
+    for (final previous in [_kDay, _kOff]) {
+      test('$previous 다음날이 야간이어도 00:30 취침은 전날 주 수면', () {
+        final a = _analyzer([previous, _kNight, _kOff, _kOff, _kOff, _kOff, _kOff], 1);
+        final lateBedtime = _sleep(DateTime(2026, 9, 17, 0, 30), 7 * 60);
+        final preShiftNap = _sleep(DateTime(2026, 9, 17, 14), 2 * 60);
+        final slots = buildSleepDaySlots(
+          records: [lateBedtime, preShiftNap], from: yesterday, to: today, analyzer: a);
+        expect(slots[0].mainSleep?.start, lateBedtime.start);
+        expect(slots[1].nap1?.start, preShiftNap.start);
+        expect(slots[1].mainSleep, null);
+      });
+    }
+
+    test('새벽 6시 이후 시작한 잠은 당일에 둔다', () {
+      final a = _analyzer(const [_kOff, _kDay, _kOff, _kOff, _kOff, _kOff, _kOff], 1);
+      final morning = _sleep(DateTime(2026, 9, 17, 6), 3 * 60);
+      final slots = buildSleepDaySlots(records: [morning], from: yesterday, to: today, analyzer: a);
+      expect(slots[0].mainSleep, null);
+      expect(slots[1].nap1?.start, morning.start, reason: '주간 근무와 겹쳐 낮잠이지만 날짜는 당일');
+    });
+
+    test('근무시간 정보가 없어도 새벽 취침은 전날 밤잠으로 묶는다', () {
+      final lateBedtime = _sleep(DateTime(2026, 9, 17, 2), 6 * 60);
+      final slots = buildSleepDaySlots(records: [lateBedtime], from: yesterday, to: today);
+      expect(slots[0].mainSleep?.start, lateBedtime.start);
+      expect(slots[1].mainSleep, null);
+    });
+  });
 
   group('연속 야간 - 아침 회복수면과 출근 전 수면의 분리(사용자 신고 항목 5)', () {
     // 야간1 퇴근(9/17 07시) 뒤 아침에 자고, 그날 오후에 야간2 출근 전 낮잠을 또 잔 경우.

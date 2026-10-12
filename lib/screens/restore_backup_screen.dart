@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+import '../widgets/adaptive_layout.dart';
 // lib/screens/restore_backup_screen.dart
 //
 // ⭐ 사용자 데이터 백업("A번 요구사항") - 복구 UX(Layer 3). InitialRouter가
@@ -27,7 +29,6 @@ import '../services/backup_validator.dart';
 import '../services/restore_coordinator.dart';
 import '../services/database_service.dart';
 import '../services/permission_service.dart';
-import '../services/update_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_button.dart';
 import 'onboarding_screen.dart';
@@ -115,19 +116,6 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
         return;
       }
 
-      // ⭐ 2026-09-08 - "완전 새로 설치하고 백업으로 복구했는데, 메인화면에
-      // 들어가자마자 '이번 업데이트는 꼭 확인해주세요'(업데이트 후 첫 실행
-      // 안내) 팝업이 떴다"는 신고로 발견한 버그 수정. 이 안내는
-      // markOnboardingBaselineVersion()으로 "방금 이 버전으로 막 시작한
-      // 사람"이라는 기준선을 남겨야 신규 설치자에게 안 뜨는데, 그 호출이
-      // onboarding_screen.dart(근무 설정 마법사를 끝까지 마치는 경로)에만
-      // 있었고 이 백업 복구 경로엔 빠져 있었음 - 복구도 "이 기기에서는 방금
-      // 막 시작한 것"과 똑같은 의미라 여기도 반드시 남겨야 함. 이후 화면이
-      // 곧장 MainScreen으로 가든(아래) PermissionIntroScreen을 한 번 거쳐서
-      // 가든(permission_intro_screen.dart의 _navigateToOnboarding, schedule
-      // != null 분기) 상관없이 SharedPreferences에 이미 기록된 값이라 적용됨.
-      await UpdateService.markOnboardingBaselineVersion();
-
       // ⭐ 위 import 주석 참고 - 네이티브의 "하루 1번" 갱신 쿨다운을 무시하고
       // 지금 막 바뀐 shift_schedule/shift_alarm_templates 기준으로 alarms
       // 테이블·실제 OS 알람을 즉시 재생성시킴.
@@ -146,7 +134,7 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
       // 권한 화면을 타게 함.
       final permissions = await PermissionService().checkPermissions();
       final osPermissionsGranted =
-          permissions['notification']! && permissions['overlay']! && permissions['exactAlarm']!;
+          permissions.values.every((granted) => granted);
 
       if (!mounted) return;
 
@@ -219,6 +207,7 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
   }
 
   String _formatDate(DateTime dt) {
+    if (!context.usesKoreanFeatures) return DateFormat.yMMMd(Localizations.localeOf(context).toString()).add_Hm().format(dt);
     final h = dt.hour.toString().padLeft(2, '0');
     final m = dt.minute.toString().padLeft(2, '0');
     return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')} $h:$m';
@@ -231,7 +220,7 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
       canPop: !_restoring,
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: SafeArea(
+        body: AdaptiveFormBody(child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -280,7 +269,7 @@ class _RestoreBackupScreenState extends State<RestoreBackupScreen> {
               ],
             ),
           ),
-        ),
+        )),
       ),
     );
   }

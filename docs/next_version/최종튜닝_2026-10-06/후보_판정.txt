@@ -1,0 +1,121 @@
+수정 전 판정 — 2026-10-06
+
+U01 기각/유지: RestoreCoordinator.resume은 사본이 없을 때 safeEnd를 await하고
+성공한 뒤에만 RestoreCopyLostException을 던진다(208~239행). 재예약 실패는
+RestoreIncompleteException→backupRestoreIncompleteToast로 분리된다.
+1차 S04/S05의 '미완료에서 완료 단정 금지'와 충돌하지 않는다. 역번역만으로 고치지 않는다.
+
+U02 채택: permissionOpenFailed 5언어. 공통 실패가 notification/overlay/exactAlarm/
+fullScreen/alarmChannel/xiaomi에 모두 사용되지만 종전 수동 경로는 일반 권한 또는
+알림만 가리킨다. Android 공식 Special app access 설명/Settings API 및 AK-5와 대조.
+시스템 설정에서 해당 권한을 검색해 ShiftBell을 선택하도록 안내하고 알림의 앱별 경로도
+남긴다. 설정명 차이 안내 포함. OS 허용 상태/설정 Intent/복귀 흐름 변경 없음.
+전차 후속 신규 permissionOpenFailed의 AK 취지를 보완하며 허용으로 추정하지 않는다.
+근거: https://developer.android.com/training/permissions/requesting-special
+https://source.android.com/docs/core/permissions/fsi-limits
+(2026-10-06 재열람). 기기별 실제 이름을 확정하는 근거는 아님.
+
+U03 채택: workHoursLegacyClockTimeHint 한국어 전용 분리, 외국어 4번역 삭제.
+WorkHoursSettingsScreen은 range==null && 기존 duration>0이면 안내한다. 현행 저장은
+DatabaseService.saveShiftTimeAndDuration에서 시각과 분을 한 트랜잭션으로 저장/초기화.
+외국어 첫 출시가 만들지 않는 구형 형식의 안내를 계속 번역할 필요가 없다.
+후속 F00/F01~F07에서 놓친 이전 형식 예외다. 한국어 원문 그대로 전용 JSON 보존.
+계산 분/DB/백업/누락 시각/사용자 입력은 그대로 유지하고 안내 표시만 한국어에 한정.
+외국어 common에서만 지워 KO 자동 대체시키지 않고 5언어 common에서 함께 제거.
+
+U04 유지: helpStartOnboardingBody에 네 번째 권한과 앱 내 설정 경로가 명시되어 있다.
+도입부를 네 항목 열거로 다시 쓰는 것은 현재 문장 전체의 의미 오류 교정이 아니다.
+후속 AK 보강 및 2차 HI02의 수동 반복 표현을 유지한다.
+
+U05 유지: 도움말은 '최초 설정 중에는'이라는 조건을 명시해 설정 시트에 Next가
+있다고 단정하지 않는다. 문장 재배치/삭제는 취향 개선 수준이므로 동결.
+
+U06 유지: Hindi नया는 이 공유 링크 문맥에서 새로 갱신된 내용을 읽는 뜻으로도
+쓰인다. 새 근무표를 생성하라는 명령이 아니며 링크를 여는 동작은 맞다.
+순전히 역번역 '새/최신' 차이를 수정 근거로 삼지 않는다.
+
+U07 PT만 채택: permissionNotApplicable의 별도(separada) 설정 범위를 명시.
+HI는 이미 अलग, DE/EN도 separate 의미를 갖는다. API34 미만 Xiaomi의 추가 권한
+도움말을 동일 시트에 표시하므로 '이 버전은 설정이 불필요'라는 포괄적 해석을 줄임.
+표준 FSI 해당 없음/제조사 추가 설정의 차이이며 상태 로직은 유지.
+
+U08 EN/HI 채택, PT/DE 유지: settingsPaydayBasisDesc는 시작일/종료일 선택 위 공통 부제.
+WorkHoursSettings.periodForMonth는 기본 periodEnd 및 periodStart 모두 지원.
+from/से로 시작일만 암시하지 않고 '선택한 기준일에 따라 월간 합계 계산'으로 변경.
+1차 S16은 현재 미참조 shiftPayday의 종료일 한정을 고친 판단이었다. 이번에는 실제
+호출되는 부제의 시작일 한정을 발견한 것이며 이전 선택을 되돌리는 수정이 아니다.
+
+U09 후속 코드 조사에서 추가/채택: web_main._load가 _LoadResult.reason에 번역된
+오류 문자열을 저장한다. 완료 뒤 언어 변경 시 제목만 바뀌고 reason은 이전 언어가
+남으며, await 뒤 context 접근도 발생한다. 실패 종류만 저장하고 표시 위젯에서
+현재 locale로 해석한다. 공개 웹 의존성 보존, 사용자 공유 내용/네트워크 호출 불변.
+후속 F03/리소스 fallback의 공개 경로 보존 판정을 유지하면서 열린 오류 화면 보완.
+연결 검사: 웹 오류 종류별 ko→pt→de→en→hi 전환, 비동기 오류 결과 뒤 언어 전환.
+
+추가 확인 중: Android 우선 언어가 미지원이고 두 번째가 한국어인 복수 언어 설정.
+단일 locale 테스트만으로 '모든 fallback PASS'라고 주장하지 않는다.
+U10 추가 사용자 요청에 따라 혼입 검증 확대: 앱 제작 문구/SDK·OS UI/사용자 입력을
+구분한다. Android 우선 외국어+차선 한국어의 실제 리소스 선택과 flavor app_name,
+웹 index/manifest 초기 로딩, 열려 있는 대화상자/비동기 완료 문구까지 검사한다.
+
+U11 추가 후보→채택(변경 전 기록): helpBackupRestoreOldBackupFailTitle/Body.
+외국어만 먼저 읽은 역번역 선기록에도 '매우 오래된 형식' 의미를 기록했다.
+후속 원장의 일반 유지 사유는 '실제 제공 기능/공개 웹 의존성이 있어 유지'다.
+실제 호출은 HelpScreen의 오래된 앱 버전 전용 항목이며 웹 의존성은 없다.
+외국어 첫 출시에는 그 오래된 버전 이력이 없으므로 제목/본문을 한국어 전용으로
+분리한다. 백업/복원 기능 자체와 재설치·기기 교체·파일 선택 안내는 계속 제공한다.
+원문 2개 보존, 5언어 common에서 함께 제거, 외국어 8번역 삭제. 한국어 검색/상세
+경로 보존, 외국어 검색 제외, 열린 한국어 상세→외국어 전환 guard를 기존 방식 적용.
+이전 유지 판정을 구체적인 호출·첫 출시 범위 근거로 갱신하며 철회된 옛 결정을
+되살리는 것이 아니다. 손상 파일/복원 중단 안내는 첫 출시에도 발생하므로 유지.
+
+U12 추가 후보→채택(변경 전 기록): AllTeamsSetupScreen._save와
+TeamScheduleEditScreen._recreate의 DB 실패 catch가 '$error'를 그대로 번역 변수에
+넣는다. 다른 실패 화면과 달리 내부 한국어/영어 예외 문장을 외국어 UI에 노출할 수
+있다. 기존 localizedErrorDetail을 적용하고 원래 원인은 debugPrint에 보존한다.
+후속 'native/DB 예외 분리' 판단은 맞지만 이 두 실제 호출이 누락됐다.
+팀표 저장/삭제 동작과 한국어 상세 원인은 보존. 외국어는 현재 언어의 실패 안내.
+
+U13 확인 후 기각: alarmSchedulePartialFailed의 EN alarms / PT alarmes / DE
+Weckern은 total=1에서 복수형 오류처럼 보인다. 3차 상세 사유 및 현재
+calendar_tab._bulkAssignShift→alarmOutcome.partiallyFailed→alarm_provider를
+대조하면 0 < failed < attempted에서만 호출한다. 전부 실패는 예외 경로다.
+그러므로 total>=2이고 기존 복수형이 맞다. PT/DE/HI의 failed=1 술어 분기와
+EN 문구를 유지한다. 3차 판정을 '더 정밀한 튜닝' 명목으로 되돌리지 않는다.
+
+U10 최종 채택: web/index.html 및 manifest.json의 초기 한국어 제목·설명을 중립
+브랜드로 바꾸고 Flutter 시작 전 활성 언어의 ARB로 title/description/OG/install
+metadata를 생성한다. 한국어 원문은 web/l10n/metadata_ko.json에 그대로 보존.
+JS를 실행하지 않는 링크 미리보기는 언어 판별 불가하므로 ShiftBell 브랜드만 사용.
+언어별 manifest 5개는 생성기 소유. 앱 전용 공유 제한은 공개 웹을 막지 않는다.
+Native의 dev/prod app_name은 PT/DE/HI 명시 리소스가 없었다. 호스트 locale-list
+검사에서는 영어 default가 선택되었지만 차선 한국어 선택에 의존하지 않도록 각
+flavor에 동일 브랜드 리소스 6개를 명시한다. 한국어 앱 이름은 그대로 유지.
+Android 다중 언어 선택은 호스트와 실제 OS가 다를 수 있으므로 특히 미지원 우선
+언어+한국어 차선은 실기기 NOT_RUN. 호스트 통과를 절대 혼입 0%로 확대하지 않는다.
+
+U14 추가 후보→채택(변경 전 기록): ReleaseLocaleReceiver는 위젯/개인 일정만
+갱신하며, 이미 게시한 공통 알림의 title/text/action과 채널 설명은 번역된 문자열로
+남는다. InAppAlarmController는 같은 울림이면 재사용하며 MainActivity는 locale
+configChanges를 직접 처리한다. AlarmOverlayService도 fontScale만 비교한다.
+따라서 시스템 언어 변경 후 기존 네이티브 알람 문구가 이전 언어에 남을 수 있다.
+새로 게시하는 4종 공통 알림에 표시용 종류/시각/언어 metadata를 넣고 언어 변경 시
+이미 존재하는 알림만 같은 ID로 문구를 교체한다. 사용자 label/PendingIntent/채널/
+삭제 예약은 보존, fullScreenIntent 재실행과 새 울림은 금지. 존재하는 채널의 이름/
+설명만 갱신, 신규 채널 생성·허용 변경 없음. 활성 제어 UI는 locale 변화에 재표시.
+알람 예약·DB·울림 회차·원래 타임아웃은 바꾸지 않는 것을 P0 host 검사로 확인한다.
+
+U15 추가 후보→채택(변경 전 기록): native Activity/overlay의 snoozeButton과
+dismissButton은 의도적으로 text=""인 투명 탭 영역인데 contentDescription도 없다.
+시각 문구는 아래 TextView/아이콘에 있고 InApp도 같은 overlay XML을 사용한다.
+기존 alarm_snooze_label/alarm_dismiss_label을 접근성 이름으로 연결한다. 화면의
+배치·시각 텍스트·크기를 변경하지 않으며 새 번역 키도 만들지 않는다. 언어 전환
+회귀 검사는 빈 Button.text가 아니라 실제 현재 locale의 contentDescription을 본다.
+
+U14 후속 확인: 새 native 언어 전환 검사는 부모 Activity 리소스가 PT여도
+AppTextScale.context가 만든 표시 Context의 접근성 문구가 EN인 호스트 재현을
+발견했다. 단일 Resources 수정 대신 시스템 qualifier 변경으로도 동일했다.
+fontScale만 넣는 Configuration에 부모의 현재 locale 목록도 명시해서 전달한다.
+밀도·화면 크기 등 다른 구성은 계속 상속하며 폰트 크기 정책은 바꾸지 않는다.
+실제 기기 재현을 주장하지 않지만, 표시 Context가 부모 언어를 명시적으로 따르게
+하여 자동 영어 대체에 의존하지 않도록 보완한다. 열린 창 교체와 종료시각 보존 재검사.

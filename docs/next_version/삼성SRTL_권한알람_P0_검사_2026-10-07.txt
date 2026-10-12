@@ -1,0 +1,57 @@
+삼성 SRTL 권한·알람 P0 추가 검사 — 2026-10-07
+상태: 진행 중. 재부팅 이후 실측 및 원복 확인 대기.
+
+기존 검사와의 관계
+삼성SRTL_DB23_DB28_실기기검사_2026-10-07.txt의 업데이트/시간대 통과를 반복하지 않고, 사용자가 제시한 4번 권한 잔여 보완과 후속재점검_2026-10-05/권한_P0_회귀기준.txt의 실제 설정 복귀·외부 철회·설정 중 종료·삼성 잠금 알람을 검사했다. PIN 가능 여부 확인은 사용자 추가 요청으로 시행한 준비 단계이며 새로운 제품 기능 검사 항목이 아니다.
+
+환경·범위
+SRTL Galaxy S26+ SM-S947N / Android17 API37 / CP2A.260605.016.S947NKSU4BZI6.
+원격 serial localhost:43427, dev package com.hwani1103.shiftbell.dev. USB 레이아웃 작업용 실기기는 조작하지 않았다.
+설치 APK build/samsung_db28_srtl_2026-10-07/apks/app-dev-debug.apk.
+SHA256 8fcad15476a9bc09b66b3d988adcec7120388e6efbacea1c35803790504c10c7.
+제품 코드 수정·빌드·release 빌드 없음. Flutter attach는 검사 예약 fixture를 등록하는 VM 컴파일 연결에만 사용했다.
+시각·시간대 변경 없음. 무음/volume0/진동0, 자동종료3분. 소리·촉감 체감 검증 아님.
+초기 prod/dev 미설치 상태에서 dev를 새 설치했다. 근무표 없는 온보딩 환경이다.
+시험 예약은 Dart VM에서 실제 AlarmNotifier.addAlarm을 호출한 P0SRTL custom fixture다. 실제 UI 등록 통과로 주장하지 않는다. 제어·권한 변경은 기기의 실제 버튼을 터치했다.
+증거: build/samsung_p0_srtl_2026-10-07/ (PNG/XML/VM 상태/DB 사본/OS 예약/logcat).
+
+PASS — 이번 실제 삼성 조건에서
+1. 최초 알림 런타임 요청 실제 거절 → 앱 미허용. 앱 설정 버튼 → 해당 dev 앱 알림 설정. 변경 없이 복귀해도 미허용, 실제 허용 뒤 복귀하면 허용.
+   증거 notification_request/notification_denied/notification_settings/notification_nochange_return/notification_granted_return.
+2. FSI 실제 off → fullScreen denied·설정 필요. 앱의 해당 버튼으로 dev FSI 설정 진입, 변경 없이 돌아와도 denied, 실제 on 뒤 granted·허용.
+   증거 fsi_denied/fsi_app_button/fsi_nochange/fsi_allowed_return 및 *_app.
+3. 개별 shiftbell_alarm_v3 채널 off → notification granted / alarmChannel denied. 별도 차단 안내·채널 설정 이동. 변경 없이 돌아오면 차단 유지, 실제 on 뒤 복구.
+   증거 channel_visible/channel_denied/channel_denied_app/channel_app_button/channel_nochange/channel_restored.
+4. 알림·FSI·정확 알람 허용/overlay denied, 화면 끄기·스와이프 잠금에서 자연 수신 및 실제 AlarmActivity 표시.
+   id1 15:39:59.055 수신, 실제 +5분 버튼 15:40:47.574 → 15:45:48 예약. DB/OS epoch1791355548000 일치. 시각 변경 없이 15:45:48.214 자연 재수신, 실제 끄기 15:46:32. alarms0/history2.
+   증거 screenoff_ring/screenoff_snoozed/natural_snooze_os/natural_rering_actual/natural_rering_dismissed.
+   자연 재울림 직전 15:45:29 캡처 natural_rering는 사전 상태이며 수신 성공 증거가 아니다. Android17 XML이 AOD/기저 온보딩을 반환한 경우 실제 화면·window focus·onResume·수신 로그로 교차 확인했다.
+5. 외부 앱 전체 알림 off 뒤 앱 프로세스 재생성·복귀: 알림·overlay 미허용 각각 표시. 채널 단독 차단과 구분.
+   알림·overlay 둘 다 denied인 전경 앱에서 id2 15:52:44 수신 후 안전 제어 카드 실제 X → 15:53:12 종료·swiped 이력·예약 제거.
+   id3 15:54:13.977 수신 후 카드 확인, HOME 복귀, 버튼 미조작. 15:57:14.029 최초 3분 deadline 만료 → timeout 이력·alarms0. 예정 시각15:54:12 대비 약1.98초 수신 지연을 기록한다.
+   증거 app_notification_before_revoke/two_denied_before_alarm/denied_control_actual/denied_control_dismissed/denied_timeout_actual/denied_timeout_ended.
+   도구 재연결 중 초기 denied fixture 등록 두 차례는 컴파일 서비스 부재로 실패했다. 실제 예약되지 않은 준비 실패이며 실기기 알람 실패로 판정하지 않는다.
+6. 알림 설정에서 실제 on 후 설정 화면이 열린 동안 dev force-stop, Back 및 재실행: 알림 허용·overlay 미허용·정확 알람/FSI 허용 재조회. history4/alarms0 보존.
+   증거 notification_restore/setting_killed_restarted/setting_killed_restored.
+
+부분 검사·미검사
+PIN: 화면 잠금 및 생체 인식 설정 항목 enabled=false, 현재 드래그. 변경 불가로 NOT_RUN. PIN을 생성·수집하지 않았고 스와이프 잠금을 PIN 통과로 전용하지 않는다.
+overlay: 앱 버튼→시스템 목록·해당 dev 항목 사용 안 함 확인. 허용 전환/복구 전체 회귀는 NOT_RUN. 이번 알람은 overlay denied 조건.
+정확 알람: 설치 허용 상태만 확인. 거절/재허용 토글은 NOT_RUN.
+설정 종료·재시작은 신규 온보딩에서 통과. 기존 근무표/백업 복구 사용자의 메인 분기·연타·연속 resume 전체는 NOT_RUN.
+깊은 Doze/장시간 절전/전원 종료/보안 PIN 첫 해제 전 DirectBoot/타 제조사/다국어/최종 배포 APK는 NOT_RUN.
+
+재부팅 검사 — 진행 중
+미래 custom id4 epoch1791356590000(16:03:10), id5 epoch1791356654000(16:04:14) 두 건 등록. 직전 DB2/OS2 epoch일치.
+알림/channel/FSI/exact granted, overlay denied. HOME 후 15:59:42경 실제 adb reboot.
+재부팅 뒤 ADB 연결 offline 및 SRTL 영상3:59 동결. 웹 재접속 과정에서 삼성 로그인 필요. 실제 부팅 완료·새 boot_id·앱 미실행 예약 복구·자연 수신은 아직 확인 불가. 성공/제품 실패로 단정하지 않는다.
+재부팅 전 boot_id8719f885-3e72-416f-8e10-7ad3c5956a2e, uptime8845.48.
+원격 RDB 기존 프로세스를 재시작했다. 이전 다른 세션 포워딩을 임의 삭제하지 않는다.
+
+원복 — 진행 중
+초기 설치 앱 없음 상태로 복원하기 위해 dev 앱 제거 및 시스템 예약 제거를 연결 복구 뒤 확인해야 한다. 아직 완료로 기록하지 않는다.
+
+
+[후속 연결 — 2026-10-07 삼성 USB 검사/원복 완료]
+삼성USB_PIN_재부팅_권한_P0_검사_2026-10-07.txt 참고. 별도 사용자 SM-S948N Android16 / 기존 dev debug APK에서 PIN 잠금·스누즈·절전 재울림·첫 PIN 해제 전 실제 재부팅 두 예약·자동 종료, overlay 거절/허용 및 기존 근무표 설정 종료/재시작, 실제 UI 등록/변경/취소를 확인했다. 기존18테이블 전수 보존 및 시험 예약/설정 원복 완료.
+이 근거는 다른 기기·OS·APK의 후속 확인이다. 위 원격 SRTL 재부팅 뒤 수신 및 앱 제거/원복은 여전히 확인 불가이며 USB 통과로 PASS 변경하지 않는다. 정확 권한 실제 거절 및 장시간 자연 Doze 등 후속 미수행은 USB 원장에 명시한다.

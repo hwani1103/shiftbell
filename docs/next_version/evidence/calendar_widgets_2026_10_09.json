@@ -1,0 +1,134 @@
+{
+  "id": "U01",
+  "date": "2026-10-09",
+  "scope": "Calendar widgets only; existing unrelated uncommitted work preserved",
+  "requirements": {
+    "weekRows": [
+      1,
+      3
+    ],
+    "sixWeekMode": false,
+    "uniformCellMarginsDp": 1,
+    "shiftNames": "full text, measured font size; no ellipsis or fixed minimum",
+    "memoSlots": 3,
+    "cardHeightDp": {
+      "threeWeek": 262,
+      "oneWeek": 102
+    },
+    "targetCellWidth": 4,
+    "resize": "horizontal",
+    "regions": [
+      "KR",
+      "US",
+      "GB",
+      "ZA",
+      "AE",
+      "PH",
+      "BR",
+      "DE",
+      "IN"
+    ],
+    "languages": [
+      "ko",
+      "en",
+      "de",
+      "pt",
+      "hi"
+    ],
+    "daytime": "device local time 06:00 through 17:59; existing refresh cadence",
+    "sleepWidget": "unchanged: Korean locale enabled, foreign locales disabled"
+  },
+  "verification": {
+    "widgetLayout": {
+      "status": "PASS",
+      "cases": 144,
+      "widthsDp": [
+        250,
+        320,
+        400,
+        700
+      ],
+      "fontScales": [
+        1,
+        2
+      ],
+      "regions": 9,
+      "widgetVariants": 2,
+      "checks": [
+        "full shift text fits",
+        "equal gutters",
+        "zero to three notes do not overlap dates",
+        "memo text painted in output bitmap"
+      ],
+      "evidence": "artifacts/calendar_widgets_2026_10_09/widget_verified.log",
+      "note": "This run had one separate DB fixture failure; layout class passed all four tests. Fixture corrected and DB test subsequently passed."
+    },
+    "refresh": {
+      "status": "PASS",
+      "checks": [
+        "week-only installation updates",
+        "both providers read renamed schedule",
+        "saved memos appear",
+        "deleted memos disappear",
+        "wide/tall options preserve week variant"
+      ],
+      "evidence": "artifacts/calendar_widgets_2026_10_09/refresh_preview.log"
+    },
+    "preview": {
+      "status": "PASS",
+      "images": 20,
+      "languages": 5,
+      "periods": [
+        "day",
+        "night"
+      ],
+      "variants": 2,
+      "oversizedHostHeightDp": 600,
+      "graphics": "Robolectric native graphics; not physical launcher screenshots"
+    },
+    "resourceAudit": {
+      "status": "PASS",
+      "errors": 0,
+      "evidence": "artifacts/calendar_widgets_2026_10_09/resource_audit_prebuild.json"
+    },
+    "criticalGate": {
+      "status": "PASS",
+      "command": "tools/check_critical_release.ps1 -Build",
+      "exitCode": 0,
+      "flutterTests": 325,
+      "nativeFunctional": "PASS",
+      "nativeMigration": "PASS",
+      "devDebugApk": "PASS",
+      "jsWebBuild": "PASS",
+      "androidRelease": false,
+      "webDeployment": false,
+      "evidence": "artifacts/calendar_widgets_2026_10_09/critical_build.log",
+      "warnings": "Existing Java deprecation/unchecked and Wasm dry-run warnings; requested JS web build succeeded."
+    },
+    "physicalDevice": {
+      "status": "NOT_RUN",
+      "note": "No installation, launcher/foldable sizing, actual clock rollover or manufacturer behavior claimed."
+    },
+    "sourceHashCheck": {
+      "status": "PASS",
+      "files": 25,
+      "drift": []
+    }
+  },
+  "sourceHashes": "artifacts/calendar_widgets_2026_10_09/source_hashes.json",
+  "deleted": [
+    "android/app/src/main/res/layout/calendar_widget_full.xml"
+  ],
+  "ledger": "docs/next_version/달력위젯_1주3주_2026-10-09.txt",
+  "apk": {
+    "path": "artifacts/calendar_widgets_2026_10_09/shiftbell-calendar-dev-debug.apk",
+    "sha256": "39f21ad1c56b22447225c7ab69e12b55ed3549555fd2b51ae24735292a2a7be8",
+    "bytes": 215872093,
+    "flavor": "dev",
+    "buildType": "debug",
+    "applicationId": "com.hwani1103.shiftbell.dev",
+    "versionName": "1.0.23-dev",
+    "versionCode": 25,
+    "sourceDrift": []
+  }
+}

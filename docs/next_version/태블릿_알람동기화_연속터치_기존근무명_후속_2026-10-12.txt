@@ -1,0 +1,46 @@
+태블릿 발견 3건 후속 — 2026-10-12 KST
+
+범위: TABLET11-SYNC, TABLET11-NEXT-TAPS(일정 저장의 다음 탭 터치 포함), U06-NAME.
+U06-SLEEP-WIDGET은 사용자 요청으로 기능 수정·이번 실측 대상에서 보류한다. 원본 태블릿 실기 원장과 바탕화면 최종 출시 준비문서, 1·2·3차 검토 원장 및 기존 미커밋 작업은 보존한다.
+
+변경:
+- lib/main.dart: Next 탭에서만 수행하던 4초 AlarmNotifier 재조회를 MainScreen의 foreground 범위로 옮겼다. Native 신호는 그대로 사용하며 background에서는 타이머가 조회하지 않는다. 알람 DB/OS·권한 코드는 수정하지 않았다.
+- lib/screens/next_alarm_tab.dart, lib/utils/alarm_dismiss_gate.dart: Next 취소의 실행 중 및 완료 뒤 700ms 동안 같은 탭의 새 취소를 막는다. 카드가 다음 ID로 바뀐 직후의 반복 터치만 막고, 이후 의도적인 취소는 허용한다.
+- lib/screens/schedule_management_tab.dart: 일정 저장 시트가 최소 700ms 동안 입력을 가려 저장 직후 같은 좌표의 두 번째 터치가 아래 탭에 닿지 않게 했다. 저장 DB/알림 서비스는 수정하지 않았다.
+- lib/widgets/shift_names_dialog.dart: 변경 없는 저장된 긴 근무명의 길이 오류만 허용한다. 실제 수정/추가 이름의 새 길이 제한, 중복·예약어·쉼표 검사는 유지한다.
+
+리스크와 검증 경계:
+- 이름 변경은 국소 UI 검증이며 긴 기존 이름의 참조·알람은 그대로 유지해야 한다.
+- Next/일정 입력 차단은 700ms 이내 의도적인 두 번째 조작을 늦춘다. 빠른 반복 터치가 다른 ID나 탭에 닿는 문제를 막는 범위이며 OS 예약 처리는 변경하지 않는다.
+- MainScreen의 4초 재조회는 다른 foreground 탭에서 DB 읽기를 추가한다. AlarmNotifier가 겹친 읽기와 동일 값을 병합하지만 실제 장치의 성능·표시 수렴은 SRTL에서 확인해야 한다. Native foreground 전환/알림 경로의 즉시 수렴을 호스트 검사로 단정하지 않는다.
+
+SRTL 실측 예정(dev debug, 연결/설치 가능한 경우):
+1. 기존 7~10자 한글 근무명과 다른 이름을 둔 fixture에서 다른 이름만 편집·저장, 기존 이름/근무표/고정 알람 참조 보존; 새 긴 이름 거절 확인.
+2. 미래 알람 2개를 둔 Next에서 같은 좌표 빠른 2회: 첫 ID만 취소, 다음 ID와 OS 예약 보존, 첫 이력 1건. 700ms 이후 의도한 두 번째 취소는 정상. 일정 저장 빠른 2회는 일정 1행이며 다른 탭으로 이동하지 않아야 한다.
+3. Settings·Calendar·Next에서 자연 발생/1분 자동 종료와 인계/알림창 연장·끄기: DB·OS·Native 종료와 Flutter 표시가 전경에서 4초 재조회 다음 주기 내 수렴. 화면 밖/복귀도 별도로 확인한다.
+4. 시험 fixture·권한·기기 설정을 사전/사후 대조하고 원본 자료 보존. 이 검사는 잠금·Doze·제조사 전체/최종 prod 업데이트 PASS가 아니다.
+
+자동 검사(10/12):
+- flutter test test/alarm_dismiss_gate_test.dart test/shift_editor_test.dart: 10개 PASS. 최초 이름 검증 코드의 nullable switch 컴파일 오류는 수정한 뒤 재실행하여 PASS했다. 최초 실패를 최종 성공으로 덮어쓰지 않는다.
+- tools/check_critical_release.ps1 -Build: exit 0. 한국어 전용 생성·웹 언어/공휴일 검사, Flutter 기능·DB 이관, Native 기능·DB 이관, dev debug APK, 공용 Flutter 웹 빌드 PASS. release는 실행하지 않았다.
+- dart analyze 대상 7파일: exit 0, 오류/경고 0, info 52건. git diff --check exit 0.
+- 고정 APK: artifacts/tablet_followup_2026_10_12/tested-dev-debug.apk, SHA256 AE66D08B848CE6CD9F5F63EAA8EB0AE24CE5AF0B4A412F9824C3482EFAF63363, 215876777바이트. 설치·SRTL 검사는 아직 NOT_RUN이다.
+
+SRTL 결과는 연결 뒤 이 파일에 이어 기록한다. release 빌드는 사용자의 명시 요청 전까지 실행하지 않는다.
+
+SRTL 후속 실측 (2026-10-12, 아래 기록이 위의 NOT_RUN 예정 상태를 대체):
+- 장치: Samsung SM-S948U / Android API36, swipe만 있는 잠금 화면, SRTL ADB localhost:50335. 이전 태블릿은 SM-X400이므로 이 결과를 그 태블릿 자체의 잠금 실측으로 쓰지 않는다. dev debug 설치 APK의 기기 base.apk SHA256은 위 고정 APK와 일치했다. release/Play 설치본은 시험하지 않았다.
+- TABLET11-NEXT-TAPS PASS: 미래 알람 id1/id2를 두고 Next 같은 좌표를 약 257ms 간격으로 두 번 터치했다. id1만 cancelled_before_ring 이력 1건으로 끝났고 id2의 DB/Flutter/OS 정확한 예약은 보존됐다. 700ms가 지난 의도적 다음 터치에서는 id2가 정상 취소됐다. 일정 생성 시트의 생성 버튼 빠른 2회도 날짜 일정 1행만 만들고 다른 탭으로 이동하지 않았다. 근거: artifacts/tablet_followup_2026_10_12/의 block_double*.json/png, block_sheet.png 및 전후 DB/provider 기록.
+- U06-NAME PASS: 기존 한글 7자 이름 ‘주간근무지원반’을 근무표·활성 이름·타입에 둔 상태에서 별개의 오후→교육 편집/실제 저장을 수행했다. 기존 긴 이름과 패턴은 유지됐다. 새 7자 이름 ‘교육지원근무반’은 실제 저장이 거절되고 DB는 바뀌지 않았다. 시험 후 원래 주간/야간/휴무, 오후 목록으로 복원했다. 근거: name_fixture/name_saved/name_rejected*.json/png, pre_reboot_cleanup_result.json.
+- TABLET11-SYNC PASS (이번 Samsung 전화/dev debug 한정): 실제 1분 자연 자동 종료 후 Settings id3 3095ms, Calendar id10 3220ms, Next id18 2419ms에 Flutter 조회/표시가 빈 DB와 수렴했다. 각 종료 이력 timeout 1건, Native/DB/OS 예약 종료를 확인했다. 홈 background id11은 조회를 멈췄고 앱 복귀 뒤 3102ms에 수렴했다. 근거: settings_timeout_result.json, calendar_timeout_result.json, next_timeout_result.json, background_timeout_result.json. 초기 Calendar/Next 계측에서 파일 라벨을 잘못 쓴 도구 실수는 수정하고 각각 별도 신규 fixture로 다시 측정했다. 원시 파일 next_timeout_mislabeled_raw.json은 보존했다.
+
+태블릿 회차에서 빠졌던 잠금 조건의 이번 대표 실측:
+- 화면 OFF/잠금에서 실제 소리 알람 id5 수신→잠금 위 Native AlarmActivity 표시→X 종료, DB0/이력 swiped 1건. 무음 id6은 잠금 중 자연 1분 timeout, DB0/이력 timeout 1건. 근거: lock_sound_x_* 및 lock_natural_timeout_result.json/PNG. 원격 캡처는 물리 음량·진동의 체감 증거가 아니다.
+- FSI를 실제 OS 설정에서 끄고 앱 snapshot denied를 확인한 뒤 잠금 알람 id7을 울렸다. 이 장치에서는 직접 잠금 fallback으로 AlarmActivity가 표시됐다. +5분 버튼으로 같은 id7 스누즈/OS 재예약과 자연 재울림을 확인하고, 잠금 해제 후 알림창의 ‘알람 끄기’ 실제 터치로 종료했다. 재울림 도구의 lockedBefore 단일 값은 잠금 전환 직후 너무 일찍 읽혀 FAIL이지만 울림 시 keyguard=true와 동일 id/round 및 후속 종료는 별도 확인됐다. 후속 잠금 시험에서는 잠금 전 대기 검사를 보완했다. 근거: fsi_off_ring_lock_result.json, snooze_rering_result.json, snooze_rering_notification_dismiss.json, 관련 PNG.
+- 별도 무음 id8에서는 lockedBefore=true/Dozing 확인 뒤 잠금 알림창의 ‘알람 끄기’를 실제 터치해 DB0/이력 swiped 1건을 확인했다. 근거: lock_notification_x_lock_result.json, locked_notification_action_ended.json.
+- FSI와 overlay를 각각 OS 화면에서 거절→앱 snapshot denied→앱의 해당 설정 경로 열기→OS 허용→앱 snapshot granted 순서로 검증했다. 앱 전체 알림 차단은 notification denied와 alarmChannel granted를, 알람 채널 단독 차단은 notification granted와 alarmChannel denied를 구분했다. 두 차단 각각 잠금 무음 알람을 울리고 이 장치의 직접 fallback 및 X 종료를 확인한 뒤 허용으로 되돌렸다. 설정을 연 사실만으로 허용으로 판정하지 않았다. 근거: fsi_off_snapshot/fsi_restored, overlay_off_open, notification_off_snapshot/notification_restored, channel_off_snapshot/channel_restored, notification_blocked_lock_lock_result.json, channel_blocked_lock_lock_result.json, permissions_restored 관련 기록.
+- 정확한 알람 denied 왕복은 NOT_RUN: 현 설치본에는 SCHEDULE_EXACT_ALARM 외에 허용된 USE_EXACT_ALARM이 있어 OS 스위치만으로 실제 canScheduleExactAlarms를 거절 상태로 만들 수 없었다. 현재 granted 및 OS 예약은 확인했다.
+- 실제 Doze IDLE 시험은 NOT_RUN: cmd deviceidle force-idle deep가 반복해서 exit255 / ‘Unable to go deep idle; stopped at INACTIVE’를 반환했다. 단계 진행도 INACTIVE에 머물렀다. 시험 id는 취소하고 deviceidle unforce/battery reset을 수행했다. 충전 해제·6~8시간 자연 Doze, DND/BT/헤드폰의 물리 소리, 진동 모터는 이번 원격 연결에서 검증하지 못했다. 근거: synthetic_doze_result.json 및 관련 명령 기록.
+- 재부팅 시험은 NOT_RUN(결과 확인 불가): 시험자료 20개 이력/일정 1행과 이름 fixture를 정리하고 id20 무음 예약을 09:57:55 KST에 생성, 무음 지속시간을 임시 1분으로 설정한 뒤 약 09:55:20 KST에 reboot 명령을 보냈다. ADB가 offline으로 바뀌었고 Samsung RTL Web Client가 ‘Device SM-S948U_KR1 session has expired / All ongoing tests have ended’라고 표시했다. 부팅 후 OS 예약·울림·DB·시험 id20 정리·무음 지속시간 1→3분 복원을 확인할 수 없었다. 재부팅 전 stay_on은 원래 값 0으로, deviceidle과 battery는 복원했다. 세션이 종료되었으므로 같은 장치에 다시 접근할 수 있다고 가정하지 않는다. 근거: pre_reboot_cleanup_result.json, reboot_armed.json, reboot_fixture.json 및 10/12 10시경 RTL 웹 클라이언트 상태. 미확인 결과를 PASS로 쓰지 않는다.
+
+판정: 세 수정은 이 Samsung SRTL/dev debug 범위에서 실제 재현 회귀 PASS. 앞선 태블릿 SM-X400의 잠금 시험, 실제 Doze, 재부팅 후 복구 및 위 물리 조건은 별도 잔여다. 이것만으로 전체 출시 또는 R01/R02/R04/R05 PASS를 선언하지 않는다.

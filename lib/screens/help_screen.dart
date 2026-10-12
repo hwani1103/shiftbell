@@ -1,3 +1,5 @@
+import '../widgets/adaptive_layout.dart';
+import '../widgets/permission_panel.dart';
 // lib/screens/help_screen.dart
 //
 // ⭐ 2026-09-03 - 설정 탭 "도움말"을 4항목짜리 AlertDialog에서 전면 재작성.
@@ -50,11 +52,15 @@ class HelpSection {
 
 // ⭐ 순서 = 사용자가 앱을 처음 접했을 때 흐름(시작하기 → 근무 관리 → 알람 →
 // 달력/위젯 → 일정관리 → 컨디션 → 수면 → 친구공유 → 백업 → 문제해결)을 그대로 따름.
-final List<HelpSection> _helpSections = [
+List<HelpSection> get _helpSections => [
   HelpSection(
     icon: Icons.rocket_launch_outlined,
     titleKey: (l10n) => l10n.helpStartSectionTitle,
     topics: [
+      HelpTopic(
+        titleKey: (l10n) => l10n.helpTroubleshootAlarmIssueTitle,
+        bodyKey: (l10n) => l10n.helpTroubleshootAlarmIssueBody,
+      ),
       HelpTopic(
         titleKey: (l10n) => l10n.helpStartOnboardingTitle,
         bodyKey: (l10n) => l10n.helpStartOnboardingBody,
@@ -104,10 +110,6 @@ final List<HelpSection> _helpSections = [
         bodyKey: (l10n) => l10n.helpAlarmSoundVolumeBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpAlarmAlarmNotRingingTitle,
-        bodyKey: (l10n) => l10n.helpAlarmAlarmNotRingingBody,
-      ),
-      HelpTopic(
         titleKey: (l10n) => l10n.helpAlarmAlarmHistoryTitle,
         bodyKey: (l10n) => l10n.helpAlarmAlarmHistoryBody,
       ),
@@ -140,19 +142,20 @@ final List<HelpSection> _helpSections = [
   ),
   HelpSection(
     icon: Icons.checklist_outlined,
-    titleKey: (l10n) => l10n.helpScheduleTabSectionTitle,
+    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabSectionTitle,
+    koreanOnly: true,
     topics: [
       HelpTopic(
-        titleKey: (l10n) => l10n.helpScheduleTabWhatIsItTitle,
-        bodyKey: (l10n) => l10n.helpScheduleTabWhatIsItBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabWhatIsItTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabWhatIsItBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpScheduleTabCreateEditTitle,
-        bodyKey: (l10n) => l10n.helpScheduleTabCreateEditBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabCreateEditTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabCreateEditBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpScheduleTabAutoCategoryTitle,
-        bodyKey: (l10n) => l10n.helpScheduleTabAutoCategoryBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabAutoCategoryTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpScheduleTabAutoCategoryBody,
         // 자동분류 모델이 한국어 전용 - 영어에서는 분류 없이 기본 도형 아이콘만 순서대로 붙음
         koreanOnly: true,
       ),
@@ -160,63 +163,64 @@ final List<HelpSection> _helpSections = [
   ),
   HelpSection(
     icon: Icons.self_improvement_outlined,
-    titleKey: (l10n) => l10n.helpConditionSectionTitle,
+    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSectionTitle,
     koreanOnly: true,
     topics: [
       HelpTopic(
-        titleKey: (l10n) => l10n.helpConditionWhatIsItTitle,
-        bodyKey: (l10n) => l10n.helpConditionWhatIsItBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionWhatIsItTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionWhatIsItBody,
       ),
       // ⭐ 2026-09-04 v2 - 컨디션 판정 로직 개편(evidence 6종 판정 반영)에 맞춰
       // 근거자료 12개 전체를 도움말 한곳에서 볼 수 있게 신설(사용자 요청).
       HelpTopic(
-        titleKey: (l10n) => l10n.helpConditionEvidenceListTitle,
-        bodyKey: (l10n) => l10n.helpConditionEvidenceListBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionEvidenceListTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionEvidenceListBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpConditionSetupNeededTitle,
-        bodyKey: (l10n) => l10n.helpConditionSetupNeededBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSetupNeededTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpConditionSetupNeededBody,
       ),
     ],
   ),
   HelpSection(
     icon: Icons.bedtime_outlined,
-    titleKey: (l10n) => l10n.helpSleepSectionTitle,
+    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepSectionTitle,
     koreanOnly: true,
     topics: [
       HelpTopic(
-        titleKey: (l10n) => l10n.helpSleepWidgetTitle,
-        bodyKey: (l10n) => l10n.helpSleepWidgetBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepWidgetTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepWidgetBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpSleepAutoDetectTitle,
-        bodyKey: (l10n) => l10n.helpSleepAutoDetectBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepAutoDetectTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepAutoDetectBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpSleepMiniCalendarTitle,
-        bodyKey: (l10n) => l10n.helpSleepMiniCalendarBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepMiniCalendarTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpSleepMiniCalendarBody,
       ),
     ],
   ),
   HelpSection(
     icon: Icons.group_outlined,
-    titleKey: (l10n) => l10n.helpFriendSectionTitle,
+    titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendSectionTitle,
+    koreanOnly: true,
     topics: [
       HelpTopic(
-        titleKey: (l10n) => l10n.helpFriendWhatIsItTitle,
-        bodyKey: (l10n) => l10n.helpFriendWhatIsItBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendWhatIsItTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendWhatIsItBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpFriendShareCodeTitle,
-        bodyKey: (l10n) => l10n.helpFriendShareCodeBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendShareCodeTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendShareCodeBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpFriendViewFriendTitle,
-        bodyKey: (l10n) => l10n.helpFriendViewFriendBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendViewFriendTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendViewFriendBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpFriendReinstallNoteTitle,
-        bodyKey: (l10n) => l10n.helpFriendReinstallNoteBody,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendReinstallNoteTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpFriendReinstallNoteBody,
       ),
     ],
   ),
@@ -244,8 +248,9 @@ final List<HelpSection> _helpSections = [
       // 격리 없음) 항목은 코드 수정은 보류하기로 했지만, 예방 차원에서 사용자가
       // 알아두면 도움되는 내용이라 도움말에만 추가.
       HelpTopic(
-        titleKey: (l10n) => l10n.helpBackupRestoreOldBackupFailTitle,
-        bodyKey: (l10n) => l10n.helpBackupRestoreOldBackupFailBody,
+        koreanOnly: true,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpBackupRestoreOldBackupFailTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpBackupRestoreOldBackupFailBody,
       ),
     ],
   ),
@@ -253,10 +258,8 @@ final List<HelpSection> _helpSections = [
     icon: Icons.help_outline,
     titleKey: (l10n) => l10n.helpTroubleshootSectionTitle,
     topics: [
-      HelpTopic(
-        titleKey: (l10n) => l10n.helpTroubleshootAlarmIssueTitle,
-        bodyKey: (l10n) => l10n.helpTroubleshootAlarmIssueBody,
-      ),
+      HelpTopic(titleKey: (l10n) => l10n.helpDiagnosticTitle,
+        bodyKey: (l10n) => l10n.helpDiagnosticBody),
       // ⭐ 2026-09-13 - 강제 종료 시 알람이 취소되는 OS 동작 + 그 이후 "다시
       // 실행하기 전에 시각이 지난 알람은 복원 안 됨"이라는 타이밍 리스크를
       // 정확히 안내(실기기/에뮬레이터 양쪽에서 실측 확인된 내용 - 세션 기록
@@ -276,8 +279,9 @@ final List<HelpSection> _helpSections = [
         bodyKey: (l10n) => l10n.helpTroubleshootBackupFileMissingBody,
       ),
       HelpTopic(
-        titleKey: (l10n) => l10n.helpTroubleshootFriendDisconnectedTitle,
-        bodyKey: (l10n) => l10n.helpTroubleshootFriendDisconnectedBody,
+        koreanOnly: true,
+        titleKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpTroubleshootFriendDisconnectedTitle,
+        bodyKey: (l10n) => KoreanOnlyCopy.fromLocalizations(l10n).helpTroubleshootFriendDisconnectedBody,
       ),
     ],
   ),
@@ -328,7 +332,8 @@ class _HelpScreenState extends State<HelpScreen> {
               final matched = s.topics
                   .where((t) => t.titleKey(l10n).toLowerCase().contains(query))
                   .toList();
-              return HelpSection(icon: s.icon, titleKey: s.titleKey, topics: matched);
+              return HelpSection(icon: s.icon, titleKey: s.titleKey,
+                  koreanOnly: s.koreanOnly, topics: matched);
             })
             .where((s) => s.topics.isNotEmpty)
             .toList();
@@ -337,11 +342,14 @@ class _HelpScreenState extends State<HelpScreen> {
       backgroundColor: kAppBackgroundPastel,
       appBar: AppBar(
         title: Text(l10n.settingsHelp),
+        actions: [IconButton(icon: const Icon(Icons.lock_clock),
+          tooltip: l10n.permissionSettingsTitle,
+          onPressed: () => showPermissionSettings(context))],
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0.5,
       ),
-      body: SafeArea(
+      body: AdaptiveFormBody(child: SafeArea(
         top: false,
         child: Column(
           children: [
@@ -388,7 +396,7 @@ class _HelpScreenState extends State<HelpScreen> {
             ),
           ],
         ),
-      ),
+      )),
     );
   }
 }
@@ -431,7 +439,7 @@ class _SectionBlock extends StatelessWidget {
             children: [
               for (var i = 0; i < section.topics.length; i++) ...[
                 if (i > 0) Divider(height: 1, indent: 16.w, endIndent: 16.w, color: Colors.grey.shade200),
-                _TopicTile(topic: section.topics[i]),
+                _TopicTile(topic: section.topics[i], koreanOnly: section.koreanOnly),
               ],
             ],
           ),
@@ -443,14 +451,16 @@ class _SectionBlock extends StatelessWidget {
 
 class _TopicTile extends StatelessWidget {
   final HelpTopic topic;
-  const _TopicTile({required this.topic});
+  final bool koreanOnly;
+  const _TopicTile({required this.topic, required this.koreanOnly});
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return InkWell(
       onTap: () => Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => HelpDetailScreen(topic: topic)),
+        MaterialPageRoute(builder: (_) => HelpDetailScreen(
+          topic: topic, koreanOnly: koreanOnly || topic.koreanOnly)),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -474,25 +484,55 @@ class _TopicTile extends StatelessWidget {
 /// 항목 하나의 상세 내용만 보여주는 화면 - 목차 화면에서 항목을 탭하면 옴.
 class HelpDetailScreen extends StatelessWidget {
   final HelpTopic topic;
-  const HelpDetailScreen({super.key, required this.topic});
+  final bool koreanOnly;
+  const HelpDetailScreen({super.key, required this.topic, this.koreanOnly = false});
 
   @override
   Widget build(BuildContext context) {
+    // A detail route can remain open while the device language changes.
+    if ((koreanOnly || topic.koreanOnly) && !context.usesKoreanFeatures) {
+      return const HelpScreen();
+    }
     final l10n = context.l10n;
+    final title = topic.titleKey(l10n);
+    final titleStyle = (Theme.of(context).appBarTheme.titleTextStyle ??
+            const TextStyle(fontSize: 18, fontWeight: FontWeight.w600))
+        .copyWith(color: Colors.black87);
+    // Match the centered toolbar's leading width and title spacing so long
+    // localized titles can wrap without clipping at larger system font sizes.
+    final titlePainter = TextPainter(
+      text: TextSpan(text: title, style: titleStyle),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout(
+        maxWidth: (MediaQuery.sizeOf(context).width - 144)
+            .clamp(1.0, double.infinity),
+      );
+    final toolbarHeight = (titlePainter.height + 16)
+        .clamp(kToolbarHeight, double.infinity);
+    final titleLines = titlePainter.computeLineMetrics().length;
+    titlePainter.dispose();
     return Scaffold(
       backgroundColor: kAppBackgroundPastel,
       appBar: AppBar(
+        toolbarHeight: toolbarHeight,
+        leadingWidth: 56,
+        titleSpacing: 16,
+        centerTitle: true,
         title: Text(
-          topic.titleKey(l10n),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          title,
+          textAlign: TextAlign.center,
+          style: titleStyle,
+          maxLines: titleLines,
+          softWrap: true,
+          overflow: TextOverflow.visible,
         ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0.5,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
+      body: SafeArea(top: false, child: AdaptiveFormBody(child: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(20.w, 20.w, 20.w, 20.w + 16.h),
         child: Container(
           width: double.infinity,
           padding: EdgeInsets.all(20.w),
@@ -515,7 +555,7 @@ class HelpDetailScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
+      ))),
     );
   }
 }

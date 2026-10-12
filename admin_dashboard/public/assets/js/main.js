@@ -1,4 +1,4 @@
-import { SECTIONS, businessKpis, dailyView, dailyOverviewCard, dailyReadout, adoptionCard, countryCard, reliabilityCard, manufacturerCard, permissionCard, collectionCard, revenueCard, mountCountryChart } from './operations.js';
+import { SECTIONS, businessKpis, dailyView, dailyOverviewCard, dailyReadout, dailySelection, adoptionCard, countryCard, reliabilityCard, manufacturerCard, permissionCard, collectionCard, revenueCard, mountCountryChart } from './operations.js';
 // admin_dashboard/public/assets/js/main.js - 로그인/대시보드 화면 전환과 이벤트 처리.
 
 import {
@@ -23,7 +23,7 @@ const store = {
 
 const ui = {
   range: RANGES.includes(Number(store.get('range'))) ? Number(store.get('range')) : 30,
-  visible: { dau: true, mau: true },
+  visible: { dau: true, mau: false },
   section: 'overview', country: null, marketSort: 'activeUsers', dailyDate: null,
   dist: 'appVersion', evGroup: 'all', evSystem: false, evExpanded: false,
 };
@@ -132,7 +132,7 @@ function renderApp() {
   }
   const section = ui.section;
   let body = '';
-  const recent = dailyView(docs);
+  const recent = dailyView(docs, undefined, ui.range);
   if (section === 'overview') body = dailyOverviewCard(docs, recent, ui) + businessKpis(docs, view) + installsCard(view, 'span-12') + adoptionCard(docs, view) + reliabilityCard(docs, view) + revenueCard(docs, view) + collectionCard(docs, view);
   if (section === 'growth') body = businessKpis(docs, view) + countryCard(docs, view, ui) + usersCard(view, ui.visible) + installsCard(view) + retentionCard(docs) + engagementCard(view);
   if (section === 'product') body = adoptionCard(docs, view) + behaviorCard(docs, view, ui) + distCard(docs, ui, 'span-12') + revenueCard(docs, view);
@@ -140,12 +140,18 @@ function renderApp() {
   root.innerHTML = headerHtml(view) + '<main class="wrap ops-layout">' + body + footerNote(docs) + '</main>';
   const onDailySelect = (date) => {
     ui.dailyDate = date;
-    root.querySelectorAll('[data-action="daily-day"]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.date === date)));
     const readout = root.querySelector('#daily-readout');
     if (readout) readout.textContent = dailyReadout(recent, date);
+    const hero = dailySelection(recent, date);
+    for (const [id, value] of [['daily-dau-label', hero.label], ['daily-dau-date', hero.date], ['daily-dau-value', hero.value]]) {
+      const node = root.querySelector('#' + id); if (node) node.textContent = value;
+    }
   };
   charts = mountCharts(root, docs, view, ui, section === 'overview' ? recent : view, section === 'overview' ? onDailySelect : undefined);
-  if (section === 'overview') dailyChart = charts[0] ?? null;
+  if (section === 'overview') {
+    dailyChart = charts[0] ?? null;
+    dailyChart?.selectDate(recent.dates.includes(ui.dailyDate) ? ui.dailyDate : recent.yesterday);
+  }
   const countryChart = mountCountryChart(root, docs, view, ui);
   if (countryChart) charts.push(countryChart);
   window.scrollTo(0, y);
@@ -214,7 +220,6 @@ function openPassword() {
 function handle(action, el) {
   switch (action) {
     case 'section': ui.section = el.dataset.key; renderApp(); window.scrollTo(0, 0); break;
-    case 'daily-day': dailyChart?.selectDate(el.dataset.date); break;
     case 'country': ui.country = el.dataset.key; renderApp(); break;
     case 'market-sort': ui.marketSort = el.dataset.key; renderApp(); break;
     case 'range': ui.range = Number(el.dataset.key); store.set('range', String(ui.range)); renderApp(); break;

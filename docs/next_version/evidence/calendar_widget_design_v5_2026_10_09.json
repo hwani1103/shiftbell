@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-09",
+  "scope": "U01 one-week proportions and picker ordering",
+  "previousEvidence": "calendar_widget_design_v4_2026_10_09.json",
+  "oneWeek": {
+    "weekdayFontDp": 12,
+    "weekdayHeightDp": 16,
+    "dateMaxFontDp": 12,
+    "dateMaxHeightDp": 14,
+    "overallSizeUnchanged": true
+  },
+  "picker": {
+    "declarationOrder": [
+      "WeekCalendarWidgetProvider",
+      "CalendarWidgetProvider",
+      "SleepWidgetProvider"
+    ],
+    "koreanLabels": [
+      "1주 달력",
+      "3주 달력",
+      "수면 기록"
+    ],
+    "limit": "Final ordering belongs to launcher; size-sorting launchers may still show sleep first",
+    "actualLauncher": "NOT_RUN"
+  },
+  "build": {
+    "status": "PASS",
+    "flavor": "dev",
+    "mode": "debug",
+    "apk": "artifacts/calendar_widget_design_v5/shiftbell-widget-dev-debug.apk",
+    "bytes": 215864333,
+    "sha256": "3992b58b083959b4e00c0e8c992e996749700bc279e5811008ba41a909b9bf61",
+    "applicationId": "com.hwani1103.shiftbell.dev",
+    "version": "1.0.23-dev",
+    "versionCode": 25,
+    "log": "artifacts/calendar_widget_design_v5/build.log"
+  },
+  "tests": "NOT_RUN: user requested build only",
+  "render": "NOT_RUN: user requested build only",
+  "install": "NOT_RUN: user installs"
+}

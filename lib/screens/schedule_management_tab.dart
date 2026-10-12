@@ -1,3 +1,7 @@
+import '../widgets/unavailable_feature.dart';
+import '../constants/layout_limits.dart';
+import '../widgets/adaptive_layout.dart';
+import '../widgets/tablet_keyboard_viewport.dart';
 // lib/screens/schedule_management_tab.dart
 //
 // ⭐ 2026-08-25 추가, 같은 날 다섯 번째 재작업 - "일정관리" 탭.
@@ -140,7 +144,16 @@ BoxDecoration _scheduleChipDecoration(_ScheduleColorScheme scheme) {
   );
 }
 
-class ScheduleManagementTab extends ConsumerStatefulWidget {
+class ScheduleManagementTab extends StatelessWidget {
+  const ScheduleManagementTab({super.key, required this.onDisabled, required this.onConfirmed});
+  final VoidCallback onDisabled;
+  final Future<void> Function() onConfirmed;
+  @override
+  Widget build(BuildContext context) => context.usesKoreanFeatures
+      ? _KoreanScheduleManagementTab(onDisabled:onDisabled,onConfirmed:onConfirmed) : const UnavailableFeature();
+}
+
+class _KoreanScheduleManagementTab extends ConsumerStatefulWidget {
   // ⭐ 2026-09-13 - "OO 화면 사용하지 않기" 버튼을 main.dart의 고정 위치(광고
   // 바로 위, 항상 보임)에서 이 탭 자신의 세로 시간축 맨 아래(마지막 "00"보다
   // 더 아래로 스크롤해야 보이는 위치)로 옮김(사용자 요청 - "진짜 필요할 때만
@@ -149,15 +162,15 @@ class ScheduleManagementTab extends ConsumerStatefulWidget {
   final VoidCallback onDisabled;
   final Future<void> Function() onConfirmed;
 
-  const ScheduleManagementTab(
-      {super.key, required this.onDisabled, required this.onConfirmed});
+  const _KoreanScheduleManagementTab(
+      { required this.onDisabled, required this.onConfirmed});
 
   @override
-  ConsumerState<ScheduleManagementTab> createState() =>
+  ConsumerState<_KoreanScheduleManagementTab> createState() =>
       _ScheduleManagementTabState();
 }
 
-class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
+class _ScheduleManagementTabState extends ConsumerState<_KoreanScheduleManagementTab> {
   late DateTime _selectedDate;
   final ScrollController _dateStripController = ScrollController();
 
@@ -329,10 +342,11 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     if (!_tutorialChecked) {
       _tutorialChecked = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) maybeShowScheduleTabTutorial(context);
+        if (mounted && ref.read(optionalTabActivationProvider) == null) maybeShowScheduleTabTutorial(context);
       });
     }
 
@@ -419,33 +433,32 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
             },
       child: Scaffold(
         backgroundColor: scheme.mainBg,
-        body: Column(
-          children: [
-            _buildHeader(dateLabel, selectedShiftName, selectedHasShift,
-                selectedShiftColor, scheme),
-            _buildDateStrip(daysInMonth, scheme),
-            Container(height: 1, color: kAppChipBorder.withValues(alpha: 0.08)),
-            Expanded(
-                child: _TimeAxisPicker(
-                    // ⭐ 2026-09-12 - _focusNonce를 키에 섞어서, 같은 날짜에
-                    // 대한 새 포커스 요청이 와도(예: 방금 그 날짜를 보고 있는
-                    // 채로 그 날짜의 다른 일정 알림을 또 탭한 경우) 이 위젯을
-                    // 강제로 새로 마운트해 초기 스크롤 로직을 다시 태움 - 원래
-                    // ValueKey(dateKey)만으로는 날짜가 안 바뀌면 재마운트가
-                    // 안 일어나서 두 번째 포커스가 무시됐음.
-                    key: ValueKey('${dateKey}_$_focusNonce'),
-                    dateKey: dateKey,
-                    hasShiftToday: selectedHasShift,
-                    focusMinutes: focusMinutes,
-                    workHoursBands: workHoursBands,
-                    onSelectionModeChanged: (active) {
-                      if (_childSelectionModeActive != active) {
-                        setState(() => _childSelectionModeActive = active);
-                      }
-                    },
-                    onTabDisabled: widget.onDisabled,
-                    onTabDisableConfirmed: widget.onConfirmed)),
-          ],
+        body: AdaptiveScheduleFrame(
+          header: _buildHeader(dateLabel, selectedShiftName, selectedHasShift,
+              selectedShiftColor, scheme),
+          dateStrip: _buildDateStrip(daysInMonth, scheme),
+          dateGrid: _buildDateGrid(daysInMonth, scheme),
+          divider: Container(
+              height: 1, color: kAppChipBorder.withValues(alpha: 0.08)),
+          timeline: _TimeAxisPicker(
+              // ⭐ 2026-09-12 - _focusNonce를 키에 섞어서, 같은 날짜에
+              // 대한 새 포커스 요청이 와도(예: 방금 그 날짜를 보고 있는
+              // 채로 그 날짜의 다른 일정 알림을 또 탭한 경우) 이 위젯을
+              // 강제로 새로 마운트해 초기 스크롤 로직을 다시 태움 - 원래
+              // ValueKey(dateKey)만으로는 날짜가 안 바뀌면 재마운트가
+              // 안 일어나서 두 번째 포커스가 무시됐음.
+              key: ValueKey('${dateKey}_$_focusNonce'),
+              dateKey: dateKey,
+              hasShiftToday: selectedHasShift,
+              focusMinutes: focusMinutes,
+              workHoursBands: workHoursBands,
+              onSelectionModeChanged: (active) {
+                if (_childSelectionModeActive != active) {
+                  setState(() => _childSelectionModeActive = active);
+                }
+              },
+              onTabDisabled: widget.onDisabled,
+              onTabDisableConfirmed: widget.onConfirmed),
         ),
       ),
     );
@@ -470,8 +483,9 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
   Widget _buildHeader(String dateLabel, String shiftName, bool hasShift,
       Color? shiftColor, _ScheduleColorScheme scheme) {
     final useGradient = hasShift && shiftColor != null;
-    final headerTextColor =
-        useGradient ? _ScheduleColorScheme.of(shiftColor).headerText : scheme.headerText;
+    final headerTextColor = useGradient
+        ? _ScheduleColorScheme.of(shiftColor).headerText
+        : scheme.headerText;
     return Column(
       children: [
         Container(
@@ -489,7 +503,9 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
                   ),
                 )
               : BoxDecoration(color: scheme.headerBg),
-          padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 10.h),
+          padding: EdgeInsets.symmetric(
+              horizontal: 4.w,
+              vertical: AppLayout.of(context).isShortCover ? 5.h : 10.h),
           child: Row(
             children: [
               _MonthNavButton(
@@ -532,6 +548,37 @@ class _ScheduleManagementTabState extends ConsumerState<ScheduleManagementTab> {
   // ⭐ 2026-09-22 - 배경색 선택 기능 자체를 없애면서(요청 - 흰색 고정), 그
   // 진입점이었던 우측 설정(톱니바퀴) 칩도 함께 제거함. 날짜 목록이 다시
   // 전체 폭을 그대로 씀.
+  Widget _buildDateGrid(int daysInMonth, _ScheduleColorScheme scheme) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(8),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          mainAxisExtent: 48,
+          crossAxisSpacing: 4,
+          mainAxisSpacing: 6),
+      itemCount: daysInMonth,
+      itemBuilder: (context, index) {
+        final date =
+            DateTime(_selectedDate.year, _selectedDate.month, index + 1);
+        final selected = date.day == _selectedDate.day;
+        return Material(
+          color: selected ? kAppMainAccent : scheme.headerBg,
+          borderRadius: BorderRadius.circular(10),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () => setState(() => _selectedDate = date),
+            child: Center(
+                child: Text('${index + 1}',
+                    style: TextStyle(
+                        color: selected ? Colors.white : scheme.headerText,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600))),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildDateStrip(int daysInMonth, _ScheduleColorScheme scheme) {
     final chipDecoration = _scheduleChipDecoration(scheme);
     return Container(
@@ -610,6 +657,7 @@ class _MonthNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Material(
       color: Colors.transparent,
       shape: const CircleBorder(),
@@ -632,6 +680,7 @@ class _ShiftPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
@@ -707,7 +756,7 @@ class _TimeAxisPicker extends ConsumerStatefulWidget {
   final int? focusMinutes;
   // ⭐ 2026-09-13 - "일정관리 화면 사용하지 않기" 버튼을 이 축의 스크롤
   // 콘텐츠 맨 아래(마지막 "00"보다 더 아래로 스크롤해야 보이는 위치)에
-  // 그리기 위해 부모(ScheduleManagementTab)로부터 그대로 내려받은 콜백.
+  // 그리기 위해 부모(_KoreanScheduleManagementTab)로부터 그대로 내려받은 콜백.
   final VoidCallback onTabDisabled;
   final Future<void> Function() onTabDisableConfirmed;
   // ⭐ 2026-09-22 - "지금 근무 중인 시간대" 반투명 영역(디자인 실험실에서
@@ -751,7 +800,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   // 전부 `.w`로, 원형/두께처럼 가로세로 구분이 없는 값은 `.r`로 통일함 -
   // 절대 섞지 말 것.
   static const int _slotCount = 48; // 하루 = 30분 슬롯 48개
-  static double get _baseSlotHeight => (30 * 7 / 8).h; // 일정이 없을 때 슬롯 높이
+  double get _baseSlotHeight => AppLayout.of(context).isWide ? 36 : (30 * 7 / 8).h;
 
   // ⭐ 텍스트를 전반적으로 키우면서(요청) 한 줄 안에 다 들어가도록 같이 키움
   // (44→56 / 30→36→40) - "어차피 긴 글은 안 쓸 것 같다"는 전제라 아이콘도
@@ -766,7 +815,8 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   // 🔧 튜닝 포인트 1: 세로축(선+숫자열) 전체를 좌우로 옮기려면 이 숫자(58)를
   // 줄이면 왼쪽으로, 늘리면 오른쪽으로 감 - _axisX가 이 값 그대로임(아래
   // build()의 `_axisX = _axisLeftMargin;`).
-  static double get _axisLeftMargin => (48 * 7 / 8).w;
+  double get _axisLeftMargin =>
+      AppLayout.of(context).isWide ? 76 : (48 * 7 / 8).w;
 
   // ⭐ 2026-09-03 - 일정 카드의 실제 가로 위치/폭 - 원래
   // _buildScheduleRowWidgets(rowLeft 매개변수)/build()에만 흩어져 있던 계산을
@@ -774,7 +824,8 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   // 카드가 실제로 그려질 때와 정확히 같은 폭을 알아야 하기 때문 - build()가
   // 넘겨주는 rowLeft와 반드시 같은 값이어야 함(아래 rowLeft 계산과 동일 공식).
   static double get _rowRightMargin => (16 * 7 / 8).w;
-  double get _rowLeft => _axisX + (18 * 7 / 8).w;
+  double get _rowLeft =>
+      _axisX + (AppLayout.of(context).isWide ? 30 : (18 * 7 / 8).w);
   // 내용 텍스트가 실제로 그려지는 폭 = 카드 전체 폭 - (아이콘+간격만큼의
   // 왼쪽 들여쓰기) - (세로 막대 폭 + 막대~텍스트 간격) - _ScheduleRow._buildBody()의
   // Padding/Container 치수와 정확히 같은 값을 써야 함.
@@ -805,12 +856,14 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
   // "선보다 약간 위"를 가리키는 것처럼 보인 원인). 30분 눈금처럼 높이를
   // 고정해서 -H/2로 계산하면 텍스트 실제 높이와 무관하게 항상 정확히
   // slotTop이 중앙이 됨.
-  static double get _hourTickBoxHeight => (24 * 7 / 8).h;
+  double get _hourFontSize => AppLayout.of(context).isWide ? 22 : 17.sp;
+  double get _hourTickBoxHeight => math.max(
+      (24 * 7 / 8).h, MediaQuery.textScalerOf(context).scale(_hourFontSize) * 1.6 + 4);
   // ⭐ 2026-08-27(5차) - 축 시간 숫자를 "한 글자 = 고정 폭 칸"으로 그리기
   // 위한 칸 폭(00 정렬 버그 수정, 아래 for(hour...) 루프 참고) - 지금
   // 폰트 크기(17.sp) 기준으로 숫자 하나가 넉넉히 들어갈 정도로 여유 있게
   // 잡음(칸이 좀 넓어도 가운데 정렬이라 다른 숫자와의 정렬엔 영향 없음).
-  static double get _hourDigitCellWidth => (13 * 7 / 8).w;
+  double get _hourDigitCellWidth => AppLayout.of(context).isWide ? 19 : (13 * 7 / 8).w;
   // ⭐ 2026-08-28 - "일정생성 flow 개선" - 시간 선택 배지(축 숫자를 감싸는
   // 사각형 + 그 우측의 "08:00 AM" 사각형) 크기/간격. 왼쪽 배지는 축 숫자
   // 칸(_hourDigitCellWidth 2개)을 넉넉히 감싸는 정도, 높이는 정각 눈금
@@ -1171,9 +1224,12 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
       front.content,
       _contentTextWidth,
       textScaler: _textScaler,
+      fontScale: AppLayout.of(context).isWide ? 1.2 : 1,
     );
     return (
-      height: _ScheduleRow.heightForLines(twoLines ? 2 : 1),
+      height: math.max(_ScheduleRow.heightForLines(twoLines ? 2 : 1),
+          _iconDiameter * 1.5 + _textScaler.scale(15.sp *
+              (AppLayout.of(context).isWide ? 1.2 : 1)) * 1.5 * (twoLines ? 2 : 1) + 12),
       twoLines: twoLines
     );
   }
@@ -1265,10 +1321,12 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
           left: 0,
           right: 0,
           top: _yForMinutes(band.startMinutes),
-          height: _yForMinutes(band.endMinutes) - _yForMinutes(band.startMinutes),
+          height:
+              _yForMinutes(band.endMinutes) - _yForMinutes(band.startMinutes),
           child: IgnorePointer(
             child: DecoratedBox(
-              decoration: BoxDecoration(color: band.color.withValues(alpha: 0.12)),
+              decoration:
+                  BoxDecoration(color: band.color.withValues(alpha: 0.12)),
             ),
           ),
         ),
@@ -1448,6 +1506,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
             right: rightMargin,
             height: h,
             child: _ScheduleRow(
+              fontScale: AppLayout.of(context).isWide ? 1.2 : 1,
               block: block,
               timeLabel: _timeRangeLabel(block),
               iconDiameter: _iconDiameter,
@@ -1613,7 +1672,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     if (!mounted || raw == null) return;
     if (_hasDuplicateRange(raw.startMinutes, raw.durationMinutes)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.scheduleDuplicateTimeSlot)),
+        SnackBar(content: Text(context.koOnly.scheduleDuplicateTimeSlot)),
       );
       return;
     }
@@ -1627,7 +1686,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
             content:
-                Text(context.l10n.scheduleMaxPerSlot(_maxSchedulesPerSlot))),
+                Text(context.koOnly.scheduleMaxPerSlot(_maxSchedulesPerSlot))),
       );
       return;
     }
@@ -1655,7 +1714,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
     // ⭐ 2026-09-14 (출시전 감사 #13) - 일정은 저장됐는데 알림 예약이 실패하면 조용히 넘어가지 않고 안내
     if (!created.notifyScheduled && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.scheduleNotifyRegisterFailed)),
+        SnackBar(content: Text(context.koOnly.scheduleNotifyRegisterFailed)),
       );
     }
   }
@@ -1684,7 +1743,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
         _hasDuplicateRange(result.startMinutes, result.durationMinutes,
             exclude: block)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.scheduleDuplicateTimeSlot)),
+        SnackBar(content: Text(context.koOnly.scheduleDuplicateTimeSlot)),
       );
       return;
     }
@@ -1713,7 +1772,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
       // ⭐ 2026-09-14 (#13) - 알림 예약 실패 안내 (create와 동일)
       if (!notifyScheduled && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.scheduleNotifyRegisterFailed)),
+          SnackBar(content: Text(context.koOnly.scheduleNotifyRegisterFailed)),
         );
       }
     }
@@ -1944,6 +2003,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final providerState = ref.watch(dateScheduleProvider);
     // ⭐ 2026-08-27 - DB 로드는 비동기라, initState 시점엔 이 날짜 데이터가
     // 아직 없음(빈 리스트와 "아직 안 불러옴"을 구분해야 함 - 안 그러면
@@ -1984,7 +2044,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
           // 일정을 새로 만들 때 "움직인" 인디케이터와 겹치는 건 상관없음
           // (요청), 가만히 있는 기본 위치와만 안 겹치면 됨. 평소 인디케이터가
           // 작아진 만큼(44→36) 간격도 줄임 - 다만 너무 붙지는 않게(요청) 58→46.
-          final rowLeft = _axisX + (18 * 7 / 8).w;
+          final rowLeft = _rowLeft;
           // ⭐ 2026-09-03(4차) - "선택모드일 때 화면 전체를 옅은 반투명 검정으로
           // 가리되, 선택 중인 아이콘 쪽은 가려지면 안 된다"는 요청 - 한 번의
           // 계산으로 두 세트를 같이 얻어서(.normal = 평소처럼 그리는 전체,
@@ -2194,7 +2254,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
                                       digit,
                                       textAlign: TextAlign.center,
                                       style: GoogleFonts.quicksand(
-                                          fontSize: 17.sp,
+                                          fontSize: _hourFontSize,
                                           fontWeight: FontWeight.w700,
                                           color: scheme.timeText),
                                     ),
@@ -2298,6 +2358,7 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
                                     horizontal: (10 * 7 / 8).w),
                                 child: Center(
                                   child: Builder(builder: (context) {
+          if (!context.usesKoreanFeatures) return const UnavailableFeature();
                                     final (hhmm, period) =
                                         _to12Hour(_selectedSlot! * 30);
                                     return Text('$hhmm $period',
@@ -2326,9 +2387,10 @@ class _TimeAxisPickerState extends ConsumerState<_TimeAxisPicker>
                           right: 16.w,
                           top: _edgePadding + _slotTops[_slotCount] + 28.h,
                           child: DisableTabButton(
-                            tabLabel: context.l10n.navScheduleManagement,
+                            tabLabel: context.koOnly.navScheduleManagement,
                             provider: scheduleTabEnabledProvider,
-                            extraNotice: context.l10n.scheduleTabDisableExtraNotice,
+                            extraNotice:
+                                context.koOnly.scheduleTabDisableExtraNotice,
                             onConfirmed: widget.onTabDisableConfirmed,
                             onDisabled: widget.onTabDisabled,
                           ),
@@ -2476,6 +2538,7 @@ class _ScheduleFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return GestureDetector(
       onTap: onTap,
       child: SizedBox(
@@ -2560,6 +2623,7 @@ class _ScheduleRow extends StatelessWidget {
   // 텍스트/내용 줄에서만 걸리도록 아래 build()에서 개별로 감쌈(요청: "카드를
   // 탭했을 때만 상세 팝업 - 아이콘에서는 안 열리게").
   const _ScheduleRow({
+    this.fontScale = 1,
     required this.block,
     required this.timeLabel,
     required this.iconDiameter,
@@ -2571,6 +2635,8 @@ class _ScheduleRow extends StatelessWidget {
     this.iconUniformSmall = false,
     this.iconIsPreview = false,
   });
+
+  final double fontScale;
 
   // ⭐ 2026-08-27 - 렌더링 스타일 3번(밑줄 강조)으로 확정, 나머지 7종은
   // 코드째로 삭제(요청: "팝업에서 선택하는 거 다 삭제, 코드상으로도 삭제").
@@ -2602,17 +2668,18 @@ class _ScheduleRow extends StatelessWidget {
   // 안 들어가는지(=두 번째 줄이 필요한지) 실측함. _buildBody()가 실제로
   // 그리는 것과 정확히 같은 폰트/크기/자간(_measureStyle, _contentStyle과
   // 동일)을 써야 정확함 - 색상만 측정에 안 씀(줄바꿈에 영향 없음).
-  static TextStyle _measureStyle() => GoogleFonts.jua(
-      fontSize: 15.sp, fontWeight: FontWeight.w400, letterSpacing: 0.4);
+  static TextStyle _measureStyle(double fontScale) => GoogleFonts.jua(
+      fontSize: 15.sp * fontScale, fontWeight: FontWeight.w400, letterSpacing: 0.4);
 
   static bool needsTwoLines(
     String content,
     double availableWidth, {
     TextScaler textScaler = TextScaler.noScaling,
+    double fontScale = 1,
   }) {
     if (availableWidth <= 0) return false;
     final painter = TextPainter(
-      text: TextSpan(text: content, style: _measureStyle()),
+      text: TextSpan(text: content, style: _measureStyle(fontScale)),
       maxLines: 1,
       textDirection: TextDirection.ltr,
       textScaler: textScaler,
@@ -2786,7 +2853,7 @@ class _ScheduleRow extends StatelessWidget {
   // "진한" 느낌은 충분함. 혹시 몰라 요청대로 크기도 살짝 키우고(14→15)
   // letterSpacing도 아주 조금 더 줌(0→0.4) - 이중 안전장치.
   TextStyle _contentStyle({double size = 15, Color? color}) => GoogleFonts.jua(
-      fontSize: size.sp,
+      fontSize: size.sp * fontScale,
       fontWeight: FontWeight.w400,
       letterSpacing: 0.4,
       color: color ?? contentTextColor);
@@ -2799,7 +2866,7 @@ class _ScheduleRow extends StatelessWidget {
   // timeTextColor(배경색에 따라 유동)로. tabularFigures도 축 숫자와
   // 동일하게 적용(같은 스타일 통일 요청 연장선).
   TextStyle get _timeTextStyle => GoogleFonts.quicksand(
-      fontSize: 14.sp,
+      fontSize: 14.sp * fontScale,
       fontWeight: FontWeight.w700,
       fontFeatures: const [FontFeature.tabularFigures()],
       color: timeTextColor);
@@ -3167,7 +3234,9 @@ String _scheduleTimeLabel(int startMinutes, int? durationMinutes) {
 Future<T?> _showFixedBottomSheet<T>(
   BuildContext context, {
   required WidgetBuilder builder,
-}) {
+}) async {
+  final tablet = await isTabletLayoutDevice();
+  if (!context.mounted) return null;
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: true,
@@ -3175,12 +3244,21 @@ Future<T?> _showFixedBottomSheet<T>(
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 220),
     pageBuilder: (dialogContext, animation, secondaryAnimation) {
-      return Align(
-        alignment: Alignment.bottomCenter,
-        child: Material(
-          type: MaterialType.transparency,
-          child: builder(dialogContext),
-        ),
+      return TabletKeyboardViewport(
+        enabled: tablet,
+        child: Builder(
+            builder: (sheetContext) => Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: SizedBox(
+                      width: AppLayout.of(dialogContext).isWide
+                          ? AppLayout.of(dialogContext).sheetWidth
+                          : double.infinity,
+                      child: builder(sheetContext),
+                    ),
+                  ),
+                )),
       );
     },
     transitionBuilder: (dialogContext, animation, secondaryAnimation, child) {
@@ -3411,7 +3489,6 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
 
   // ⭐ 2026-09-03 - 영어 로케일 분기용. 소요시간 표시(_durationKoreanLabel vs
   // _durationPresetLabel)와 자동분류 스킵 여부 둘 다에 씀.
-  bool get _isKorean => Localizations.localeOf(context).languageCode == 'ko';
 
   // ⭐ 2026-09-01 후속8 - "키보드가 뜨고 내려갈 때마다 시트가 미세하게
   // 위아래로 움직인다"는 재확인 피드백. 근본 원인은 이 앱의
@@ -3513,15 +3590,13 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
   // 이미 쓰던 도형 10종 순환 배정(_nextEtcIconIndex)만 바로 적용한다. 한국어는
   // 기존 동작 그대로.
   Future<void> _handleSave() async {
+    if (_autoClassifying) return;
+    // Keep the sheet over the underlying tab for the whole rapid-tap window.
+    // Otherwise a second Save tap can land on navigation after Navigator.pop.
+    final tapShield = Future<void>.delayed(const Duration(milliseconds: 700));
     var iconIndex = 0;
     String? predictedCategory;
-    if (!_isKorean) {
-      predictedCategory = 'etc';
-      iconIndex = await _nextEtcIconIndex();
-      if (!mounted) return;
-      _finishSave(iconIndex, predictedCategory);
-      return;
-    }
+    if (!mounted || !context.usesKoreanFeatures) return;
     setState(() => _autoClassifying = true);
     try {
       await MemoCategoryClassifier.instance.ensureLoaded();
@@ -3544,6 +3619,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
       iconIndex = await _nextEtcIconIndex();
       debugPrint('⚠️ 카테고리 자동분류 실패(기타 아이콘으로 저장): $e');
     } finally {
+      await tapShield;
       if (mounted) setState(() => _autoClassifying = false);
     }
     if (!mounted) return;
@@ -3584,6 +3660,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     // ⭐ 2026-09-01 후속8 - adjustResize 때문에 이 값 자체는 키보드가 뜨면
     // 실제로 작아짐(위 _contentFocusNode 주석 참고) - 이제 캐시하지 않고
     // 매번 그대로 반영하되, 그 변화를 AnimatedContainer로 부드럽게 감쌈.
@@ -3637,8 +3714,8 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                     // 있게 함(아래 취소/저장 Row 바로 위 참고).
                     Text(
                       _isEditing
-                          ? context.l10n.scheduleEditTitle
-                          : context.l10n.scheduleNewTitle,
+                          ? context.koOnly.scheduleEditTitle
+                          : context.koOnly.scheduleNewTitle,
                       style: TextStyle(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w800,
@@ -3658,7 +3735,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                         if (_isValid && !_autoClassifying) _handleSave();
                       },
                       decoration: InputDecoration(
-                        labelText: context.l10n.scheduleContentFieldLabel,
+                        labelText: context.koOnly.scheduleContentFieldLabel,
                         filled: true,
                         fillColor: const Color(0xFFF4F6FC),
                         border: OutlineInputBorder(
@@ -3671,7 +3748,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                           fontSize: 15.sp, fontWeight: FontWeight.w600),
                     ),
                     SizedBox(height: 22.h),
-                    Text(context.l10n.scheduleTimeSectionLabel,
+                    Text(context.koOnly.scheduleTimeSectionLabel,
                         style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w700,
@@ -3734,7 +3811,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                                   // 있어서 "2시간 30분"처럼 한글로 풀어 씀(요청). ⭐ 2026-09-03 -
                                   // 영어 로케일은 _durationPresetLabel("1h 30m")로 대체.
                                   sublabel:
-                                      '(${_isKorean ? _durationKoreanLabel(_displayDurationMinutes!) : _durationPresetLabel(_displayDurationMinutes!)})',
+                                      '(${_durationKoreanLabel(_displayDurationMinutes!)})',
                                   active: _activeCard == _TimeCardSlot.end,
                                   enabled: true,
                                   onTap: () => _selectCard(_TimeCardSlot.end),
@@ -3758,7 +3835,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                         ),
                         SizedBox(width: 10.w),
                         _StepChip(
-                            label: _isKorean ? '5분' : _durationPresetLabel(5),
+                            label: '5분',
                             onTap: () => _adjustActiveCard(5)),
                         // ⭐ 종료 카드가 활성일 때만 30분/1시간 스텝도 같이 보여줌
                         // (요청: "우측 카드를 셀렉트하면 −+5분은 그대로 있고 거기에
@@ -3769,12 +3846,12 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                           SizedBox(width: 6.w),
                           _StepChip(
                               label:
-                                  _isKorean ? '30분' : _durationPresetLabel(30),
+                                  '30분',
                               onTap: () => _adjustActiveCard(30)),
                           SizedBox(width: 6.w),
                           _StepChip(
                               label:
-                                  _isKorean ? '1시간' : _durationPresetLabel(60),
+                                  '1시간',
                               onTap: () => _adjustActiveCard(60)),
                         ],
                       ],
@@ -3787,7 +3864,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                     // ⭐ 2026-09-05 - 일정 알림 UI 껍데기. work_hours_settings_screen.dart의
                     // Switch(온/오프 전용)와 day_offset_chip.dart의 AppShiftChip 토글
                     // 그룹(하나 고르기)을 그대로 재사용 - 이 화면만의 새 부품을 안 만듦.
-                    Text(context.l10n.scheduleNotifySectionLabel,
+                    Text(context.koOnly.scheduleNotifySectionLabel,
                         style: TextStyle(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w700,
@@ -3797,7 +3874,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                       children: [
                         Expanded(
                           child: Text(
-                            context.l10n.scheduleNotifyToggleLabel,
+                            context.koOnly.scheduleNotifyToggleLabel,
                             style: TextStyle(
                                 fontSize: 14.5.sp,
                                 fontWeight: FontWeight.w600,
@@ -3817,12 +3894,12 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                       // 잠금화면)과 이게 왜 다른지 사용자가 헷갈리지 않도록, 시스템
                       // 알림 설정(소리/진동/무음)을 그대로 따르는 가벼운 알림 1건이라는
                       // 걸 여기서 미리 알려줌.
-                      Text(context.l10n.scheduleNotifyDescription,
+                      Text(context.koOnly.scheduleNotifyDescription,
                           style: TextStyle(
                               fontSize: 11.5.sp,
                               color: kAppChipBorder.withValues(alpha: 0.5))),
                       SizedBox(height: 10.h),
-                      Text(context.l10n.scheduleNotifyOffsetQuestion,
+                      Text(context.koOnly.scheduleNotifyOffsetQuestion,
                           style: TextStyle(
                               fontSize: 12.5.sp,
                               color: kAppChipBorder.withValues(alpha: 0.6))),
@@ -3832,9 +3909,8 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                         runSpacing: 8.h,
                         children: _kNotifyOffsetOptions.map((minutes) {
                           final label = minutes == 0
-                              ? context.l10n.scheduleNotifyOffsetOnTime
-                              : context.l10n
-                                  .scheduleNotifyOffsetBefore(minutes);
+                              ? context.koOnly.scheduleNotifyOffsetOnTime
+                              : context.koOnly.scheduleNotifyOffsetBefore(minutes);
                           return AppShiftChip(
                             label: label,
                             dense: true,
@@ -3857,7 +3933,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                             SizedBox(width: 4.w),
                             Expanded(
                               child: Text(
-                                context.l10n.scheduleNotifyPastTimeWarning,
+                                context.koOnly.scheduleNotifyPastTimeWarning,
                                 style: const TextStyle(
                                     fontSize: 11.5, color: Color(0xFFD64545)),
                               ),
@@ -3900,7 +3976,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
             // "경고 문구 + 취소/삭제" 버튼으로 바꿔치기함 - 위 클래스 docstring
             // 참고(스크림/오버레이 방식의 두 문제를 이 방식으로 없앰).
             if (_confirmingDelete) ...[
-              Text(context.l10n.scheduleDeleteConfirmBody,
+              Text(context.koOnly.scheduleDeleteConfirmBody,
                   style: TextStyle(
                       fontSize: 12.sp,
                       color: kAppChipBorder.withValues(alpha: 0.6))),
@@ -3957,7 +4033,7 @@ class _CreateBlockSheetState extends State<_CreateBlockSheet> {
                             )
                           : Text(_isEditing
                               ? context.l10n.commonSave
-                              : context.l10n.scheduleCreateButton),
+                              : context.koOnly.scheduleCreateButton),
                     ),
                   ),
                 ],
@@ -3991,6 +4067,7 @@ class _TimeCardButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     final color =
         active ? kAppMainAccent : kAppChipBorder.withValues(alpha: 0.55);
     return GestureDetector(
@@ -4064,6 +4141,7 @@ class _TimeCardSplitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.r)),
@@ -4085,9 +4163,7 @@ class _TimeCardSplitButton extends StatelessWidget {
                 ),
               ),
               child: Text(
-                Localizations.localeOf(context).languageCode == 'ko'
-                    ? '지속시간 없음'
-                    : 'No duration',
+                '지속시간 없음',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 13.sp,
@@ -4136,6 +4212,7 @@ class _StepChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -4169,6 +4246,7 @@ class _FineAdjustToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!context.usesKoreanFeatures) return const UnavailableFeature();
     return GestureDetector(
       onTap: onTap,
       child: Container(

@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-08",
+  "scope": "Fold8 multilingual final layout follow-up",
+  "status": "code fixes and host checks completed for alarm chips; full device audit incomplete due repeated RDB/ADB timeouts",
+  "changes": [
+    "balanced two-line global alarm mode labels, consistent heights and centered text",
+    "onboarding uses same AlarmTypeButton as settings",
+    "calendar type popup uses same label"
+  ],
+  "host_checks": {
+    "initial_alarm_tests": 12,
+    "full_de_pt_hi": {
+      "passed": 125,
+      "failed": 3,
+      "failures": "onboarding used duplicated UI; fixed and all 3 targeted reruns passed"
+    },
+    "hindi_Nirmala_full_final": 44,
+    "analysis_errors": 0,
+    "analysis_warnings": 0,
+    "analysis_info": 132
+  },
+  "device_verified": [
+    "German folded settings alarm edit chip",
+    "German folded alarm time picker chip"
+  ],
+  "device_remaining": "Full all-language folded/unfolded screen and theme review; onboarding latest change not yet applied on device",
+  "resume": "artifacts/fold8_release_layout_2026_10_08/재연결_진행상황.txt",
+  "rdb": {
+    "last_serial": "localhost:36273",
+    "isolated_adb_server": 5041,
+    "dedicated_vm_forward": 58198,
+    "root_cause": "Shared VM forward collision observed; additional RDB command timeout cause unresolved"
+  },
+  "apk": "existing dev debug installed; no new build/release",
+  "personal_usb_device_operations": 0,
+  "store_images": "previous 5 source captures preserved"
+}

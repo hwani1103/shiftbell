@@ -1,0 +1,184 @@
+{
+  "status": "FLIP8_DEVICE_SCOPE_COMPLETE",
+  "updated": "2026-10-08T16:14:16.101342+09:00",
+  "device": {
+    "serial": "localhost:40628",
+    "model": "SM-F776B",
+    "sdk": 37,
+    "android": "17",
+    "one_ui": "9.0",
+    "usb_operated": false
+  },
+  "baseline_sha256": "bb9083bdc7e3da302764f376523e785fced67051ccdbfe7ea316e47c5f1871aa",
+  "artifacts": "artifacts/flip8_functional_2026_10_08",
+  "completed_boundaries": {
+    "A05": [
+      "actual initial notification denial; Settings open without grant stays denied; actual toggle restores",
+      "overlay Settings list, unchanged return denied, actual toggle restores",
+      "FSI external revoke, unchanged return denied, actual toggle restores",
+      "channel-only denial distinguished from granted app notification; actual app Settings route/unchanged return/restore",
+      "three rapid home/resume cycles: final native snapshot all granted",
+      "actual OS-delivered ring displayed AlarmActivity on main display after KEYCODE_SLEEP",
+      "Actual external FSI switch revoke -> force-stop/restart -> existing calendar preserved, only Lock screen alarm display setup-needed -> actual app Settings route and switch grant -> panel/native snapshot all granted."
+    ],
+    "A06": [
+      "fresh English install: optional tabs persisted false before permission completion",
+      "fresh English onboarding to main: three tabs",
+      "actual snoozed row and normal future row unchanged on English to Korean; both OS targets match DB",
+      "Active normal and actual snoozed rows/history unchanged across en -> ko -> de -> ko -> en; each OS target matched DB.",
+      "Synthetic live share became off on normal resume in German and stayed off on Korean return. ADB locale switch while continuously foreground did not immediately trigger resume; not recorded as instant shutdown.",
+      "Pinned sleep widget disappeared after foreign locale and required manual re-add on Korean return: accepted trade-off, not PASS; all experimental preservation product code withdrawn."
+    ],
+    "A03": [
+      "Real published Google UMP EEA form physically shown on English Flip8; actual reject -> accept via Settings -> withdraw via Settings.",
+      "PurposeConsents 00000000000 -> 11111111111 -> 00000000000. Both accepted and withdrawn choices persisted across process restart using non-reset dev test variant.",
+      "After rechoice canRequestAds stayed true but ad revision 1 -> 2, banner generation 2 -> 3 and loaded ad identity 480466714 -> 616321088. This is request eligibility, not proof of personalized-ad consent.",
+      "Baseline non-EEA startup had no required privacy entry; forced EEA made the Settings entry present. Console countries/languages deferred by user. Baseline APK restored after test."
+    ],
+    "A07": [
+      "12/24-hour setting changes preserved alarm epochs/history and 2 OS reservations; original null time format restored.",
+      "Actual Korean holiday remote fetch succeeded and scheduled 14-day check; Firestore SDK network disabled caused failure preserving cache and scheduling retry about 1.28 days later; network restored and next successful fetch scheduled 14 days. No physical network/timezone/clock changes."
+    ],
+    "A08": [
+      "Actual OS initial ring ID3 round2 after fold=0 and KEYCODE_SLEEP. Primary display OFF, cover ON; AlarmActivity automatically transferred to display1, locked=true. Initial receiver +24ms.",
+      "Real display1 touch plus: 5->10, revision0->1; minus:10->5, revision1->2. Fresh UI text/disabled minimum and native active-round preferences agree.",
+      "Real cover snooze touch at15:48:59 stored snooze_minutes5 history and target15:54:00. OS reservation exact1791442440000. No clock/settings/foreground/fold changes while awaiting actual5-minute re-ring.",
+      "Same ID3 actual OS receiver15:54:00.053 (+53ms), round3; locked=true; cover RING_PRESENTED15:54:01.765. Screenshot confirms visible cover controls. Real cover Dismiss touch -> history swiped, alarms table empty.",
+      "First cover screenshot transiently black; later same initial ring screenshot and fresh hierarchy show controls. Black image not used as UI PASS evidence. Physical sound/vibration, natural overnight Doze, and Flip4 not claimed."
+    ],
+    "A10": [
+      "Frozen candidate web served locally through explicit SRTL ADB reverse, using real Firebase synthetic sharing owner; no public deployment.",
+      "Actual Flip8 Chrome shows active shared Day schedule. Chrome Add to home flow creates local standalone WebappActivity with correct Korean app name; pm lists no WebAPK. This is new local standalone install/shortcut, not an existing production WebAPK update.",
+      "Same home shortcut retains code after process restart: active -> sharing off confirmed -> unavailable screen -> sharing reactivated -> same shortcut relaunch recovers latest schedule without re-entering code. Final sharing off confirmed.",
+      "Stopped screen currently provides no in-page retry button; verified retry was app/browser relaunch, not an in-page button. Review web retry UX later without misreporting this as button verification."
+    ]
+  },
+  "pending": [
+    "Flip4 cover touch confirmation deferred by user to layout session on 2026-10-08; no standalone Flip4 functional session now",
+    "A10 assess only common changes affecting existing Korean sharing; deploy/retest production PWA only if needed. Public viewer multilingual expansion is not a global-app release requirement.",
+    "A08 existing natural long Doze/physical audio conditions remain explicitly unverified, not closed by remote input tests",
+    "R04 final integration including concurrent layout changes, followed by release only on explicit user request",
+    "User question about limited-ad revenue: follow up later per user instruction; read-only account Programmatic limited ads setting not yet verified"
+  ],
+  "evidence_caveats": [
+    "Old capture helper can retain stale uiautomator XML when ring animation prevents idle. main_os_ring*.xml are not UI evidence; PNG/native state and Activity dump confirm actual ring. Local driver now uses a unique filename and requires successful dump output.",
+    "An evaluation while Settings remained foreground timed out; repeated after actual return to app passed. This is a diagnostic harness limitation, not an app failure.",
+    "MissingPluginException cancel on Firestore transaction stream appeared in Flutter debugger logs after successful server-confirmed transactions. No failed share operation or user-visible crash observed; retain warning for later bounded review instead of silently discarding it."
+  ],
+  "cleanup": {
+    "status": "COMPLETE",
+    "dev_app_removed": true,
+    "pending_package_alarms": 0,
+    "synthetic_share": "off, dirty=false; no public active fixture",
+    "home_shortcut_removed": true,
+    "created_chrome_tabs_closed": true,
+    "test_owned_downloads_deleted": true,
+    "xml_files_deleted": true,
+    "device_state_restored": 0,
+    "timeout_restored": 300000,
+    "time_format_restored": "null",
+    "stay_awake_unchanged": 0,
+    "system_locale_unchanged": "ko-KR",
+    "timezone_unchanged": "Asia/Seoul",
+    "usb_operated": false,
+    "pin_changed": false,
+    "rebooted": false,
+    "own_adb_forwards_and_reverse_removed": true,
+    "local_server_stopped": true,
+    "evidence": "device/cleanup_final.json",
+    "note": "Chrome first-run completed signed out and notification onboarding skipped for browser test; no account added, no Chrome-wide data clear. Temporary local browser cache/history may remain; introduced visible tab/shortcut removed."
+  },
+  "accepted_limitations": [
+    {
+      "id": "A06-pinned-widget-locale",
+      "status": "ACCEPTED_TRADE_OFF",
+      "observed": "Korean pinned sleep widget id=7 was deleted by Android when app locale changed to German; Korean return does not restore the old widget. Re-add manually. Alarm rows unchanged.",
+      "user_decision": "2026-10-08 user prefers re-adding this rarely affected widget over more complex provider/metadata lifecycle code.",
+      "code_change": "Experimental preservation patch withdrawn before compilation or installation; frozen baseline source hashes restored.",
+      "evidence": [
+        "device/pinned_widget_de.png",
+        "device/appwidgets_de.txt",
+        "device/pinned_widget_ko_return.png"
+      ]
+    }
+  ],
+  "ump": {
+    "reset_sha256": "f08860a2c8c6b64f5388f64c8a5f82d17d31b2548e74baffbc7598a54c484a9e",
+    "retain_sha256": "0aed5581f7aeb85bd1b351806f53e05d2dda20efc1673382c04c0c6f32fb92c2",
+    "geography": "eea",
+    "test_device": "D195C198ADD4B4C2CA1A64D507C372F5",
+    "ad_units": "Google test units",
+    "console_writes": false,
+    "evidence": [
+      "device/ump_form_loaded.png",
+      "device/ump_banner_before_rechoice.vm.json",
+      "device/ump_banner_after_accept.vm.json",
+      "device/ump_retain_restart.png",
+      "device/ump_withdrawn_restart_main.png",
+      "device/ump_accepted_com.hwani1103.shiftbell.dev_preferences.xml",
+      "device/ump_retained_com.hwani1103.shiftbell.dev_preferences.xml",
+      "device/ump_withdrawn_restart_com.hwani1103.shiftbell.dev_preferences.xml"
+    ]
+  },
+  "cover": {
+    "alarm_id": 3,
+    "initial_round": 2,
+    "rering_round": 3,
+    "selected_minutes": [
+      5,
+      10,
+      5
+    ],
+    "scheduled_rering_epoch": 1791442440000,
+    "receiver_delay_ms": 53,
+    "cover_presented": "2026-10-08T15:54:01.765+09:00",
+    "evidence": [
+      "device/cover_first_ring_second.png",
+      "device/cover_first_ring_ui.xml",
+      "device/cover_plus_state.xml",
+      "device/cover_plus_ui.xml",
+      "device/cover_minus_state.xml",
+      "device/cover_minus_ui.xml",
+      "device/cover_snoozed_alarmmanager.txt",
+      "device/cover_rering.log",
+      "device/cover_rering.png",
+      "device/cover_final_rows.json"
+    ]
+  },
+  "deferred_ads_question": {
+    "user_concern": "Do not consent should allow limited ads; what signals decide serving and could revenue be lost?",
+    "current_evidence": "Real rejection preserves canRequestAds=true and requests/loads Google test banner. No app-side deny-all-ads branch was seen. Production fill/eCPM not tested.",
+    "official_reference": "https://support.google.com/admob/answer/10105530?hl=en",
+    "official_checked_2026_10_08": "Current English AdMob docs say programmatic limited ads enabled by default; TCF special-purpose transparency and disclosed Google vendor determine eligible LTD path. Do not repeat outdated blanket purpose2/7/9/10 LI requirement as current rule. Account toggle still unverified.",
+    "status": "DEFERRED_BY_USER_UNTIL_DEVICE_WORK_DONE"
+  },
+  "followup_decisions_2026_10_08": {
+    "flip4": "User will show actual cover alarm for layout anyway; combine button checks then. Do not request immediate connection.",
+    "remaining_functional_work": [
+      "Verify account limited-ad setting and explain rejection signals; final prod request integration at release stage",
+      "Assess common changes affecting Korean sharing; multilingual public-viewer rollout excluded from mandatory global launch scope",
+      "Natural unplugged 6-8 hour idle / missing physical audio conditions remain unverified, not newly required before layout",
+      "Final integration/Play-installed differences after layout; no release build without explicit request"
+    ],
+    "optional_candidates": [
+      "In-page web retry button; relaunch recovery already passed",
+      "Bounded review of successful-share transaction-stream cancel debugger warnings"
+    ],
+    "not_reopened": [
+      "A03 UI/persistence/banner tests",
+      "A05 agreed host supplementation and current-OS physical tests",
+      "A06 accepted manual widget re-add",
+      "A07 tested calculation/remote retry boundaries",
+      "Manufacturer investigations accepted for help disclosure"
+    ]
+  },
+  "scope_correction_global_sharing_2026_10_08": {
+    "user_clarification": "Global app excludes schedule sharing.",
+    "source_verified": [
+      "FriendSyncService._sharingAvailable requires locale languageCode ko",
+      "CalendarTab shared schedule entry/route gated by usesKoreanFeatures"
+    ],
+    "correction": "Earlier answer incorrectly promoted multilingual public-viewer deployment to mandatory global launch remainder. Exclude it; retain only impact-based Korean sharing verification.",
+    "preserved": "Existing public-viewer translations/common resource dependencies and prior device evidence. No product changes or deployment."
+  }
+}

@@ -10,6 +10,7 @@ import '../../models/sleep_record.dart';
 import 'shift_pattern_analyzer.dart';
 import 'shift_time_category.dart';
 import 'sleep_opportunity.dart';
+import 'sleep_day_slots.dart';
 import 'sleep_shift_relation.dart';
 
 class ShiftSleepStat {
@@ -61,6 +62,7 @@ ShiftSleepStat computePostInstanceSleepStat({
       // ⭐ 2026-09-06 - .inHours truncate 버그 수정(sleep_day_slots.dart/
       // sleep_history.dart와 동일 이유) - Duration 직접 비교로 교체.
       if (r.start.difference(inst.end!) > Duration(hours: searchAheadHours)) continue;
+      if (attributedSleepDay(r, analyzer) != inst.date) continue;
       if (classifySleepRelation(r, analyzer) != SleepRelation.mainSleep) continue;
       if (nearest == null || r.start.isBefore(nearest.start)) nearest = r;
     }

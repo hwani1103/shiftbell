@@ -1,0 +1,103 @@
+{
+  "date_kst": "2026-10-08",
+  "project": "shiftbell-streaming-check-1008",
+  "plan": "X1-X4 residual complete on frozen dev debug; existing unrelated PASS retained",
+  "charged_usd": 0,
+  "model": "Xiaomi 14 Android15",
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "X4": "PASS actual overlay ON/granted, OFF/denied, app returns",
+  "X3": {
+    "status": "PASS",
+    "channel_off_unchanged_back": "session1 reused",
+    "channel_on_restart": "actual ON then force-stop in settings, COLD launch existing main, schedule1 preserved, notification/alarmChannel granted",
+    "global_off_overlay_denied": "native actual denied/denied; alarmChannel granted",
+    "in_app_x": "actual X, id2 ALARM_END swiped; alarm rows0",
+    "home_timeout": "id3 fired25ms; target1791414832000; timeout1791414892065; app not reopened; active state cleared"
+  },
+  "X1": {
+    "status": "PASS",
+    "input_blocker": "ScreenOnProximitySensorGuide focus, cleared using Volume Up120ms",
+    "actual_x": "ALARM_END swiped; alarm rows0; secure/showing true"
+  },
+  "X2": {
+    "status": "PASS",
+    "target_ms": 1791414479000,
+    "delay_ms": 68,
+    "fullscreen_ms": 744,
+    "actual_snooze_minutes": 5,
+    "screen_on_at_receive": false,
+    "db_os_match": true,
+    "no_device_interactions_during_natural_wait": true
+  },
+  "precondition_evidence": {
+    "initial_receiver_delay_ms": 73,
+    "locked_fullscreen": true,
+    "synthetic_pin_secure": true,
+    "oem_background_windows": "Always allow actual checked",
+    "fsi": "granted"
+  },
+  "tool_findings": [
+    "Xiaomi instantaneous tap and wake key had no effect; stationary swipe 120ms and keyevent --duration 120 worked",
+    "Next initial alarm: set test screen timeout before registration and verify AlarmActivity current input window; tap promptly before screen sleeps; handle Pocket mode only if observed",
+    "am start without launcher/back while Settings task remained delivered to Settings; Back then MAIN+LAUNCHER COLD start succeeded",
+    "After new process Flutter attach file synchronization took 40sec; compile expression query was attempted before service ready. Wait for attach ready offline/harness, not product failure"
+  ],
+  "cleanup": {
+    "test_pin_cleared": true,
+    "screen_timeout_restored": true,
+    "app_removed": true,
+    "db_alarms": 0,
+    "os_custom_reservations": 0,
+    "returned": true,
+    "remote_list_empty": true
+  },
+  "session": {
+    "name": "xiaomi",
+    "project": "shiftbell-streaming-check-1008",
+    "model": "houji/35",
+    "cap_seconds": 1500,
+    "requested_epoch": 1791411881.9653718,
+    "install_limit_seconds": 240,
+    "first_evidence_limit_seconds": 480,
+    "reservation": "10icvx7gbtdgj",
+    "reserved_epoch": 1791411893.8702521,
+    "serial": "localhost:3866",
+    "connected_epoch": 1791411926.1416266,
+    "release_reason": "requested return",
+    "released": true,
+    "finished_epoch": 1791413315.985307,
+    "conservative_seconds": 1434.019935131073
+  },
+  "zip": "artifacts\\streaming_free_2026_10_08\\xiaomi_session1_evidence.zip",
+  "sha256": "34d7c3c5d2c2bbaba6b82782197074b1c2e8ccc141e1d0e83c911b84f6587378",
+  "session2": {
+    "session": {
+      "name": "xiaomi2",
+      "project": "shiftbell-streaming-1008-b",
+      "model": "houji/35",
+      "cap_seconds": 1680,
+      "requested_epoch": 1791413752.494465,
+      "install_limit_seconds": 240,
+      "first_evidence_limit_seconds": 480,
+      "reservation": "1r7km9uiowdfg",
+      "reserved_epoch": 1791413763.6442273,
+      "serial": "localhost:5397",
+      "connected_epoch": 1791413797.815827,
+      "release_reason": "requested return",
+      "released": true,
+      "finished_epoch": 1791414948.4520526,
+      "conservative_seconds": 1195.957587480545
+    },
+    "cleanup": {
+      "alarm_rows": 0,
+      "active_os_custom_alarm_count": 0,
+      "uninstalled": true,
+      "test_pin_retained": false,
+      "screen_timeout_restored": true
+    },
+    "service_reservations_after_return": 0,
+    "zip": "artifacts/streaming_free_2026_10_08/xiaomi_session2_evidence.zip",
+    "sha256": "193e286233b52a1d081e88f58e97d95452b7360b0dba1b879ea70d81c3f5ab0e"
+  },
+  "product_source_changed": false
+}

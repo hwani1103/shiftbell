@@ -51,6 +51,7 @@ class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
     }
 
     await _db.updateMemo(id, memoText.trim());
+    AppAnalytics.track(AnalyticsEvent.memoEdited);
     // 상태 갱신
     await loadMemosForDate(date);
     WidgetRefreshService.refresh();
@@ -59,6 +60,7 @@ class MemoNotifier extends StateNotifier<Map<String, List<DateMemo>>> {
   // ⭐ 메모 삭제
   Future<void> deleteMemo(int id, String date) async {
     await _db.deleteMemo(id);
+    AppAnalytics.track(AnalyticsEvent.memoDeleted);
     // 상태 갱신
     await loadMemosForDate(date);
     WidgetRefreshService.refresh();

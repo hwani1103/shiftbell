@@ -208,7 +208,7 @@ export function behaviorCard(docs, view, ui) {
   const list = rows.length
     ? hbarList(shownRows.map((r, i) => ({
       label: r.meta.label, icon: r.meta.icon, value: r.total, display: `${fmtInt(r.total)}회`,
-      sub: `하루 평균 ${r.perDay < 10 ? r.perDay.toFixed(1) : fmtInt(r.perDay)}회${r.users != null ? ` · 같은 기간 ${fmtInt(r.users)}명이 사용` : ''}`,
+      sub: r.users != null ? `선택 기간 ${fmtInt(r.users)}명이 사용` : '선택 기간 사용자 수 집계 없음',
       color: COLORS.palette[i % COLORS.palette.length], attrs: `data-action="event" data-event="${esc(r.name)}" tabindex="0" role="button" aria-label="${esc(r.meta.label)} 자세히"`,
     })), { max })
     : `<div class="empty"><div class="em">🧭</div><b>이 기간에 기록된 이벤트가 없어요</b><p>다른 기간이나 분류를 골라 보세요.</p></div>`;
@@ -244,9 +244,9 @@ export function footerNote(docs) {
   const s = docs.summary;
   return `<div class="foot span-12">데이터 기준: Google Analytics 4 · 플레이 스토어 <b>출시 버전만</b> 집계(개발용 앱 제외) · 스트림 ${esc(s.streamId ?? '-')}<br>
     마지막 동기화 ${esc(relTime(s.updatedAt))} (${esc(s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : '-')}) · 데이터 기준일 ${esc(s.latest ? fmtLong(s.latest) : '-')} · ${dataCutoffLabel(s.latest)}<br>
-    서버 집계: 매일 한국 시간 12:17에 한 번 예약(실행 지연 가능).<br>
+    서버 집계: 한국 시간 00:17·03:17·06:17·09:17·12:17·15:17·18:17·21:17 예약(실행 지연 가능).<br>
     화면: 열어 둔 동안 약 10~11분마다 재조회하며, 새로고침 버튼은 저장된 최신 집계를 다시 읽습니다.<br>
-    집계는 어제까지의 완료된 날짜 기준입니다. GA4 처리와 최근 24~48시간 보정에 따라 값이 달라질 수 있습니다.${s.source === 'mock' ? '<br><b>※ 지금 보이는 건 데모(모의) 데이터입니다.</b>' : ''}</div>`;
+    집계는 어제까지의 날짜를 매번 다시 조회합니다. 어제 수치는 확정값이 아닙니다. GA4 처리와 최근 24~48시간 보정에 따라 값이 달라질 수 있습니다.${s.source === 'mock' ? '<br><b>※ 지금 보이는 건 데모(모의) 데이터입니다.</b>' : ''}</div>`;
 }
 
 export function skeleton() {

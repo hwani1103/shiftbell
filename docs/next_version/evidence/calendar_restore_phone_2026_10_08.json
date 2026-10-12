@@ -1,0 +1,21 @@
+{
+  "date": "2026-10-08",
+  "id": "A09/U05",
+  "status": "Restored source to completed USB English theme refinement baseline at user request.",
+  "baseline": "global_theme_refinement_2026_10_08.json",
+  "removed": [
+    "Rejected automatic chip/text fitting integration and its added files/tests",
+    "Subsequent new-theme wide split layout experiment"
+  ],
+  "preserved": [
+    "Earlier Periwinkle and Soft Mosaic phone refinements, popup holiday text and font-scale changes",
+    "Other sessions and unrelated uncommitted changes",
+    "Historical candidate evidence, explicitly marked reverted"
+  ],
+  "verification": {
+    "cell_tests": "3 PASS",
+    "logs": "artifacts/calendar_restore_phone_2026_10_08",
+    "build_install_device": "Not performed. Existing automatic-fit build APK does not represent restored code."
+  },
+  "next": "Tune user phone first; fold layout later using actual returned window dimensions."
+}

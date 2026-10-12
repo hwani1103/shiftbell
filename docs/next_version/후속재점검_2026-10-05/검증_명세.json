@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-05",
+  "flutter_functional_tests": {
+    "PASS": 101
+  },
+  "native_robolectric_tests": {
+    "PermissionSettingsTest": 6,
+    "ReleaseLanguagesTest": 6
+  },
+  "dart_analysis_lib_test": {
+    "error": 0,
+    "warning": 0,
+    "info": 654
+  },
+  "resource_errors": 0,
+  "generated_untranslated": {},
+  "builds": {
+    "dev_debug_apk": "PASS",
+    "dev_release_apk_optimized": "PASS",
+    "public_web_javascript": "PASS",
+    "prod_release": "BLOCKED_BY_EXISTING_CHECK_PROD_AD_IDS_MISSING_BANNER_ID"
+  },
+  "artifacts": {
+    "build/app/outputs/flutter-apk/app-dev-debug.apk": {
+      "bytes": 215532964,
+      "modified_utc": "2026-10-05T09:51:04.460975+00:00",
+      "sha256": "ad094090b3e4f303d164105577797f8a9655f378856d079d70dfe1ffc02153c7"
+    },
+    "build/app/outputs/flutter-apk/app-dev-release.apk": {
+      "bytes": 85078340,
+      "modified_utc": "2026-10-05T10:00:03.476122+00:00",
+      "sha256": "16d710a45ed60c03ceaef3fe950391f3325ed71057766e8931a08f139ef7135e"
+    },
+    "build/web/main.dart.js": {
+      "bytes": 2787345,
+      "modified_utc": "2026-10-05T10:01:52.734258+00:00",
+      "sha256": "ae425588ff0b0e0fb67f22a78e317a1a0d1bc45182f6a2abff3b608f978cbe4c"
+    }
+  },
+  "device_locked_alarm_oem_process_restart_launcher_widget": "NOT_RUN",
+  "live_firestore_public_web_server_network": "NOT_RUN",
+  "localized_oem_setting_names_native_speaker_review": "NOT_RUN",
+  "layout": "EXCLUDED; initial accidental legacy reset layout/capture test execution recorded in review, not counted as verification",
+  "web_wasm_and_cupertino_font_warning": "JS build passed; Wasm/actual icon display not verified",
+  "scope": "Selected functional regression suite; not all repository tests. Prior AH/AJ observations are not current device PASS.",
+  "evidence_logs": "검증로그/",
+  "korean_native_originals": {
+    "count": 11,
+    "unchanged": true,
+    "source": "HEAD values-ko/strings.xml; this Korean file had no preexisting modification"
+  },
+  "final_source_hashes_match": 399,
+  "foreign_ledger_rows_checked": 3044
+}

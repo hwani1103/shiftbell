@@ -14,6 +14,7 @@ import '../../models/sleep_record.dart';
 import 'shift_pattern_analyzer.dart';
 import 'shift_time_category.dart';
 import 'sleep_opportunity.dart';
+import 'sleep_day_slots.dart';
 import 'sleep_shift_relation.dart';
 
 /// 근무 하루치(끝난 근무)와 그 뒤에 실제로 잔 수면을 짝지은 1건. 2026-09-01
@@ -84,10 +85,9 @@ class SleepHistoryNight {
 /// [_collectFlatNight] 참고) - 자동 감지 창(라이브 추적)과 이 값을 공유해서
 /// 두 로직이 "언제를 주 수면 시간대로 보는가"에 대해 서로 어긋나지 않게 함.
 ///
-/// 출퇴근 시각이 알려진 근무일의 매칭 규칙(근무 종료 후 [searchAheadHours]
-/// 이내 시작, 그 어떤 근무와도 안 겹침)은 기존과 완전히 동일하게 유지함(이미
-/// 검증된 로직이라 건드리지 않음) - sleep_stats.dart의
-/// computePostInstanceSleepStat과 매칭 조건이 같다. **매칭되는 모든 수면을
+/// 출퇴근 시각이 알려진 근무일은 근무 종료 후 [searchAheadHours] 이내에 시작하고
+/// 근무와 겹치지 않으며 그 근무일로 귀속된 수면만 매칭한다. sleep_stats.dart의
+/// computePostInstanceSleepStat과 같은 날짜 귀속 규칙을 쓴다. **매칭되는 모든 수면을
 /// 합산**한다(후속12 - 낮잠+메인수면처럼 그 근무 뒤 여러 번 나눠 잔 경우도
 /// 총 수면시간이 정확히 반영되도록).
 ///
@@ -153,6 +153,7 @@ List<SleepHistoryNight> collectRecentWorkNights({
       // searchAheadHours 상한을 truncate만큼 더 넓게 오판정했다(sleep_day_slots.dart와
       // 동일 버그). Duration 직접 비교로 수정.
       if (r.start.difference(inst.end!) > Duration(hours: searchAheadHours)) continue;
+      if (attributedSleepDay(r, analyzer) != inst.date) continue;
       // ⭐ 2026-09-01 후속4 - 원래는 SleepRelation.mainSleep(3시간 이상)만
       // 인정했는데, 그러면 "근무 후 진짜로 짧게(2~3시간) 잔" 기록이 nap으로
       // 분류돼 여기서 통째로 빠지면서 "데이터 없음"과 구분이 안 됐음 - 정작
@@ -179,25 +180,18 @@ List<SleepHistoryNight> collectRecentWorkNights({
     // 때만, 오늘 자정~출근 시각 사이에 끝나는 수면을 낮잠 가산(총 수면엔
     // 포함, sleep/latestSleep엔 미포함 - 위 "근무 중 가산"과 동일한 취급,
     // 이유도 동일: 이건 "퇴근 후 진짜 주 수면"의 시각 패턴을 대표하면 안 됨).
-    // ⚠️ 안전장치: 어제도 야간 근무였다면(연속 야간) 이 루프를 아예 안 돈다 -
-    // 그 경우엔 어제 몫의 "근무 종료 후 검색"(위 루프, 최대 searchAheadHours)이
-    // 이미 오늘 낮 시간대까지 먼저 훑고 지나갈 수 있어서, 같은 수면 기록을
-    // 이 루프가 또 세면 이중 합산이 될 위험이 있음 - 어제가 야간이 아닐
-    // 때만(휴무/주간/오후/미배정 등) 안전하게 겹칠 일이 없음을 보장할 수
-    // 있어서 그 경우로만 한정함.
+    // 연속 야간도 같은 귀속 날짜로 검사한다. 전날 회복수면과 오늘 출근 전
+    // 낮잠은 sleep_day_slots.dart의 날짜 경계로 나뉘므로 이중 합산되지 않는다.
     if (inst.category == ShiftTimeCategory.night) {
-      final prevInst = analyzer.instanceForDate(day.subtract(const Duration(days: 1)));
-      final prevIsNight = prevInst.isWorkDay && prevInst.category == ShiftTimeCategory.night && prevInst.end != null;
-      if (!prevIsNight) {
-        final dayStart = DateTime(day.year, day.month, day.day);
-        for (final r in confirmedRecords) {
-          final duration = r.durationMinutes;
-          if (duration == null) continue;
-          if (r.start.isBefore(dayStart)) continue; // 오늘 시작한 것만(어제 몫과 안 겹치게)
-          if (r.end!.isAfter(inst.start!)) continue; // 출근 시각 전에 끝난 것만(겹치면 위 "근무 중 가산" 담당)
-          if (classifySleepRelation(r, analyzer) == SleepRelation.workShiftOverlap) continue;
-          totalMinutes += duration;
-        }
+      final dayStart = DateTime(day.year, day.month, day.day);
+      for (final r in confirmedRecords) {
+        final duration = r.durationMinutes;
+        if (duration == null) continue;
+        if (r.start.isBefore(dayStart)) continue; // 오늘 시작한 것만
+        if (r.end!.isAfter(inst.start!)) continue; // 출근 시각 전에 끝난 것만
+        if (attributedSleepDay(r, analyzer) != inst.date) continue;
+        if (classifySleepRelation(r, analyzer) == SleepRelation.workShiftOverlap) continue;
+        totalMinutes += duration;
       }
     }
 

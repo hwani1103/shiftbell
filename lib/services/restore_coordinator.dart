@@ -42,8 +42,12 @@ import 'package:sqflite/sqflite.dart';
 
 import '../constants/platform_channel.dart';
 import '../models/backup_payload.dart';
+import '../utils/alarm_wall_time.dart';
 import 'backup_policy.dart';
+import 'snooze_settings_service.dart';
+import 'fixed_alarm_occurrence.dart';
 import 'backup_validator.dart';
+import 'diag_log.dart';
 import 'database_service.dart';
 import 'friend_sync_service.dart';
 import 'widget_refresh_service.dart';
@@ -115,6 +119,7 @@ class RestoreCoordinator {
   static const _maxCarryAttempts = 5;
   static const _snoozeCarryLookback = Duration(hours: 1);
   static const _historyKeys = {
+    'fixed_alarm_consumptions': ['slot_time', 'shift_type', 'day_offset'],
     'alarm_history': ['alarm_id', 'scheduled_date', 'scheduled_time', 'actual_ring_time', 'dismiss_type'],
     'alarm_creation_log': ['alarm_id', 'scheduled_date', 'scheduled_time', 'source', 'created_at'],
   };
@@ -247,6 +252,9 @@ class RestoreCoordinator {
     if (_running) throw StateError('restore already running');
     _running = true;
     final token = _newToken();
+    // A failed DB step reconciles the old DB before releasing the lock. Those
+    // recreated reservations must be cleared again before a resumed DB replace.
+    final reclearBeforeDbReplace = job.phase == RestorePhase.osCleared;
     try {
       if (!await _acquire(token)) throw StateError('restore lock not acquired');
       try {
@@ -255,7 +263,14 @@ class RestoreCoordinator {
           final carry = await _prepareCarry(token);
           await _channel.invokeMethod('restoreClearOs', {'token': token, 'keepIds': carry.carryIds.toList()});
         });
-        await _advance(job, RestorePhase.dbApplied, () => _applyDb(job, payload, token));
+        await _advance(job, RestorePhase.dbApplied, () async {
+          if (reclearBeforeDbReplace) {
+            final carry = await _prepareCarry(token);
+            await _channel.invokeMethod('restoreClearOs',
+                {'token': token, 'keepIds': carry.carryIds.toList()});
+          }
+          await _applyDb(job, payload, token);
+        });
         await _advance(job, RestorePhase.prefsApplied, () => _applyPrefs(payload));
         await _advance(job, RestorePhase.osReconciled, () => _reconcile(token));
       } catch (e, st) {
@@ -279,9 +294,15 @@ class RestoreCoordinator {
 
   Future<void> _advance(RestoreJob job, RestorePhase target, Future<void> Function() step) async {
     if (job.phase.index >= target.index) return;
-    await step();
+    try {
+      await step();
+    } catch (e) {
+      DiagLog.log('RESTORE_STEP', {'step': target.name, 'result': 'fail', 'error': e.runtimeType.toString()});
+      rethrow;
+    }
     job.phase = target;
     await _saveJob(job);
+    DiagLog.log('RESTORE_STEP', {'step': target.name, 'result': 'ok'});
   }
 
   Future<_Carry> _prepareCarry(String token) async {
@@ -342,10 +363,13 @@ class RestoreCoordinator {
     final ids = nativeCarryIds.toList();
     final idClause = ids.isEmpty ? '' : ' OR id IN (${List.filled(ids.length, '?').join(',')})';
     final rows = await db.rawQuery(
-      "SELECT id FROM alarms WHERE (type = 'snoozed' AND date > ?)$idClause",
-      [_dbString(DateTime.now().subtract(_snoozeCarryLookback)), ...ids],
+      "SELECT id, date FROM alarms WHERE type = 'snoozed'$idClause",
+      ids,
     );
-    return rows.map((r) => r['id'] as int).toSet();
+    final cutoff = DateTime.now().subtract(_snoozeCarryLookback);
+    return rows.where((r) => nativeCarryIds.contains(r['id']) ||
+        (tryParseAlarmDate(r['date'] as String?)?.isAfter(cutoff) ?? false))
+        .map((r) => r['id'] as int).toSet();
   }
 
   Future<void> _replaceInTxn(Transaction txn, RestoreJob job, BackupPayload payload, _Carry prepared) async {
@@ -374,15 +398,37 @@ class RestoreCoordinator {
     for (final entry in _historyKeys.entries) {
       if (!known.contains(entry.key)) continue;
       final keyCols = entry.value;
+      // A signed offset must not merge into a shift-name suffix (Night- / +1
+      // versus Night / -1). Preserve the legacy keys for other history tables.
+      String naturalKey(Map<String, Object?> row) =>
+          entry.key == 'fixed_alarm_consumptions'
+              ? jsonEncode(keyCols.map((c) => row[c]).toList())
+              : keyCols.map((c) => '${row[c]}').join('');
       final existing = await txn.query(entry.key, columns: keyCols);
-      final seen = existing.map((r) => keyCols.map((c) => '${r[c]}').join('')).toSet();
+      final seen = existing.map(naturalKey).toSet();
       for (final row in payload.tables[entry.key] ?? const <Map<String, dynamic>>[]) {
-        final key = keyCols.map((c) => '${row[c]}').join('');
-        if (!seen.add(key)) continue;
+        final key = naturalKey(row);
+        if (!seen.add(key)) {
+          // A newer backup may know the nominal slot missing from an old copy.
+          if (entry.key == 'alarm_history' && row['fixed_slot_time'] != null) {
+            await txn.update(entry.key, {'fixed_slot_time': row['fixed_slot_time']},
+                where: '${keyCols.map((c) => '$c = ?').join(' AND ')} AND fixed_slot_time IS NULL',
+                whereArgs: keyCols.map((c) => row[c]).toList());
+          }
+          if (entry.key == 'alarm_history' && row['snooze_minutes'] != null) {
+            await txn.update(entry.key, {'snooze_minutes': row['snooze_minutes']},
+                where: '${keyCols.map((c) => '$c = ?').join(' AND ')} AND snooze_minutes IS NULL',
+                whereArgs: keyCols.map((c) => row[c]).toList());
+          }
+          continue;
+        }
         final copy = Map<String, dynamic>.from(row)..remove('id');
         await txn.insert(entry.key, copy);
       }
     }
+
+    // Older backups have history but no durable consumption ledger.
+    await materializeConsumedHistory(txn);
 
     // alarms: 진행 중 행은 원래 ID 그대로 이월, 백업의 미래 custom은 (필요하면 매핑된) ID로 삽입
     await txn.delete('alarms');
@@ -411,7 +457,7 @@ class RestoreCoordinator {
       if (!await prefs.remove(key)) throw StateError('preference remove failed: $key');
     }
     for (final entry in payload.preferences.entries) {
-      if (!isBackupPreferenceKey(entry.key)) continue;
+      if (!isBackupPreferenceKey(entry.key) || entry.key == SnoozeSettingsService.backupKey) continue;
       final value = entry.value;
       final bool ok;
       if (value is bool) {
@@ -428,6 +474,10 @@ class RestoreCoordinator {
         continue;
       }
       if (!ok) throw StateError('preference write failed: ${entry.key}');
+    }
+    if (Platform.isAndroid) {
+      final raw = payload.preferences[SnoozeSettingsService.backupKey];
+      await SnoozeSettingsService.save(raw is int && SnoozeSettingsService.choices.contains(raw) ? raw : 5);
     }
   }
 

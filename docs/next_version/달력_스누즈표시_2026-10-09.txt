@@ -1,0 +1,26 @@
+달력 날짜 팝업의 스누즈 예약 표시 — 2026-10-09
+상태: 코드 구현·대상 위젯8검사·필수 자동 회귀 PASS / 실기기 검증은 사용자 요청으로 후속
+
+범위
+- 기존 고정 알람 카드와 타입 변경·삭제 동작은 유지한다.
+- 현재 alarmNotifierProvider 목록에서 type=snoozed이며 실제 재울림 날짜가 선택 날짜와 같은 예약만 별도 영역에 표시한다. 근무일/dayOffset/원래 고정 시각으로 배정하지 않는다.
+- 고정 카드와 같은 폭110.w·둥근 모서리8.r, 중립 배경/테두리·스누즈 아이콘·실제 HH:mm·다시 알림 라벨. 여러 개면 실제 시각순 가로 스크롤. 라벨은 여러 줄 허용, 고정 높이 없음. DST 중복 시각은 기존 alarmClockLabel 사용.
+- 스누즈 카드에는 탭/편집/삭제/예약 변경 동작이 없다. 빈 목록이면 제목·여백도 추가하지 않는다. 울림 시각을 지났다는 이유로 별도 타이머로 숨기지 않고 실제 예약 목록 제거를 따른다.
+- 팝업을 열 때의 기존 provider 재조회, native refreshAlarms, 앱 resumed의 기존 갱신 경로를 구독한다. 새 DB/예약/권한/알림/overlay 동작 없음.
+- 새 common ARB 키 calendarSnoozedAlarmLabel을 ko/en/de/pt/hi 모두 채우고 flutter gen-l10n으로 생성. 기존 번역·한국어 전용 범위 변경 없음.
+
+검증
+- 대상8검사: 자정 이후 다음 날짜 표시와 fixed/custom/null 제외, 스누즈 시각 변경·예약 제거 반영, 실제 시각순/비대화형 접근성·탭해도 편집창 없음, 5개 언어 좁은 화면·다중 카드 가로 스크롤.
+- 첫 대상 실행의 1실패는 테스트 접근성 핸들을 teardown보다 먼저 해제해야 하는 문제. 테스트 핸들 정리 후8PASS, 제품 동작 실패 아님.
+- 다국어 리소스 추가에 따른 tools/check_critical_release.ps1 실행(-Build 없음). APK/웹 산출물 빌드·설치·실기기 조작은 요청대로 실시하지 않는다.
+- 기존 A11의 기기 PASS를 이번 표시 기능 PASS로 전용하지 않는다. 실기기에서는 팝업 열린 상태/앱 복귀 시 갱신과 시각 디자인 확인이 남는다. 제조사 전달/FSI 경로 변경은 없다.
+
+증거 위치: artifacts/calendar_snoozed_2026_10_09/
+기존 미커밋 calendar_tab.dart와 ARB 원문을 위 경로에 저장한 뒤 이번 삽입만 수행했다.
+
+최종 자동 결과
+- 대상 위젯8검사 PASS, 추가 위젯/테스트 정적 분석 No issues found.
+- tools/check_critical_release.ps1 exit0(-Build 없음): 번역 생성/누락·범위 검사, Flutter324, native 기능/DB이관 PASS.
+- 소유 소스8파일의 검사 중 해시 변화 없음. 기존 calendar_tab.dart 대비 이번 변경은 import1줄 및 스누즈 Consumer 삽입이며 기존 고정 알람 영역은 그대로다. ARB는 언어별 새 키1개만 추가.
+- 앱 산출물/APK·웹 빌드, 설치, 실기기, Streaming 미실시. 이전 설치 APK는 이번 소스를 포함하지 않는다.
+구조화 증거: evidence/calendar_snoozed_2026_10_09.json.

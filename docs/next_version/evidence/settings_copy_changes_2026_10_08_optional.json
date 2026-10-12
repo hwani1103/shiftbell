@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-08",
+  "reason": "User requested diagnostic attachment sharing and optional tab activation confirmation",
+  "changes": {
+    "settingsEnableFeatureConfirm": {
+      "before": null,
+      "after": "메인 탭에 추가하여 {feature} 기능을 사용하시겠습니까?\n\n(탭 하단에서 다시 숨길 수 있습니다.)"
+    },
+    "settingsEnableFeatureAction": {
+      "before": null,
+      "after": "추가하여 사용하기"
+    },
+    "settingsEnablingFeature": {
+      "before": null,
+      "after": "메인 탭에 추가하는 중…"
+    },
+    "settingsEnableFeatureFailed": {
+      "before": null,
+      "after": "기능을 켜지 못했습니다. 다시 시도해 주세요."
+    },
+    "settingsDiagnosticExportTitle": {
+      "before": null,
+      "after": "진단 로그 이메일로 보내기"
+    },
+    "settingsDiagnosticExportSubtitle": {
+      "before": null,
+      "after": "문제 확인용 로그 파일 첨부 및 공유"
+    },
+    "settingsDiagnosticExportConfirm": {
+      "before": null,
+      "after": "진단 로그에는 기기 정보, 권한 상태와 알람·백업 동작 기록이 포함됩니다. 메일 앱에서 보내는 계정을 선택한 뒤 직접 전송해 주세요.\n\n받는 주소: lowvibe07@gmail.com"
+    },
+    "settingsDiagnosticShareTitle": {
+      "before": null,
+      "after": "진단 로그 보내기"
+    },
+    "settingsDiagnosticSubject": {
+      "before": null,
+      "after": "교대시계 진단 로그"
+    },
+    "settingsDiagnosticBody": {
+      "before": null,
+      "after": "겪으신 문제와 발생 시간을 적어 주세요.\n\n문제 내용:\n발생 시간:"
+    },
+    "settingsDiagnosticExportFailed": {
+      "before": null,
+      "after": "로그를 공유하지 못했습니다. 메일 앱 설치 여부를 확인하거나 다시 시도해 주세요."
+    }
+  }
+}

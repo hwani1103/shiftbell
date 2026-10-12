@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-06",
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/check_critical_release.ps1 -Build",
+  "critical_exit_code": 0,
+  "flutter_functional_tests": {
+    "PASS": 112
+  },
+  "native_robolectric_tests": {
+    "PermissionSettingsTest": 6,
+    "ReleaseLanguagesTest": 8,
+    "NotificationLocaleTest": 3,
+    "G1RingRoundTest": 25,
+    "CoverAlarmNotificationTest": 2
+  },
+  "web_node_locale_cases": 8,
+  "resource_errors": 0,
+  "generated_untranslated": {},
+  "dart_analysis_lib_test": {
+    "error": 0,
+    "warning": 0,
+    "info": 654
+  },
+  "git_diff_check": "PASS",
+  "builds": {
+    "dev_debug_apk": "PASS",
+    "dev_release_apk_optimized": "PASS",
+    "public_web_javascript": "PASS",
+    "prod_release": "NOT_RUN_THIS_SESSION; prior check blocked by missing real banner ID; dev is not prod"
+  },
+  "artifacts": {
+    "build/app/outputs/flutter-apk/app-dev-debug.apk": {
+      "sha256": "707386af011b53a39b7a35060ae21de03d7f7cfd768009bffcded83d3ea89eb8",
+      "bytes": 215534802,
+      "modified_utc": "2026-10-05T22:39:02.376980+00:00"
+    },
+    "build/app/outputs/flutter-apk/app-dev-release.apk": {
+      "sha256": "f8678c29e67c94e22d3bc5b5508e86e5b396d8db13341fa25fc22603ee4c5a7b",
+      "bytes": 85078452,
+      "modified_utc": "2026-10-05T22:50:29.185313+00:00"
+    },
+    "build/web/main.dart.js": {
+      "sha256": "d1e67c8cbd83928339b4270bde52494688e4efb5dd18430d510e152b366895da",
+      "bytes": 2787522,
+      "modified_utc": "2026-10-05T22:53:07.715853+00:00"
+    },
+    "build/web/locale_bootstrap.js": {
+      "sha256": "8045fcb836403d077983e66b65d0f5db51cdc809080a6fc02438d9310ea94c3e",
+      "bytes": 2462,
+      "modified_utc": "2026-10-05T22:35:09.917306+00:00"
+    }
+  },
+  "device_locked_alarm_oem_process_restart_launcher_widget": "NOT_RUN",
+  "live_firestore_public_web_server_browser_install": "NOT_RUN",
+  "third_party_sdk_os_ui_language": "NOT_RUN",
+  "native_speaker": "NOT_RUN",
+  "layout": "EXCLUDED_BY_USER; no layout/golden/screenshot tests",
+  "adb_inventory": "Restricted invocation could not start ADB daemon; not evidence that no device exists. No installation performed.",
+  "warnings": "Existing Gradle/Kotlin deprecations and Web Wasm dry-run/Cupertino font warnings; JS build success is not Wasm/icon visual PASS.",
+  "scope": "Selected functional suite, not every repository test. Prior device observations are not current device PASS.",
+  "evidence": "검증로그/; 최종_소스리소스_해시.json; 집계와_보존검사.json"
+}

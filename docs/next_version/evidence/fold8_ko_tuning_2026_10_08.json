@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-08",
+  "scope": "한국어 폴더블 접힘/펼침 사용자 1차 튜닝",
+  "delivery": "SRTL Fold8 dev hot reload; APK build not run",
+  "gallery": "artifacts\\fold8_ko_tuning_2026_10_08\\한글_화면비교.html",
+  "captures": 20,
+  "capture_manifest": "artifacts\\fold8_ko_tuning_2026_10_08\\captures\\manifest.json",
+  "tests": {
+    "unit_before_final_band_cap": "31 passed",
+    "final_korean_memo_and_calendar_regression": "12 passed",
+    "analysis": "0 errors, 0 warnings, 106 existing info diagnostics",
+    "diff_check": "passed"
+  },
+  "test_adjustment": "Diary today cell intentionally omits header divider; stale expectation corrected to existing behavior.",
+  "unchanged_scope": [
+    "global theme logic",
+    "Korean bar phone rendering",
+    "P0 permission/alarm logic"
+  ],
+  "status": "implemented and captured; user visual approval pending",
+  "device_left": "ko-KR diary opened"
+}

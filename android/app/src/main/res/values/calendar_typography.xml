@@ -1,0 +1,4 @@
+<resources>
+    <style name="CalendarWidgetShiftLabel" />
+    <dimen name="calendar_widget_weekday_size">13sp</dimen>
+</resources>

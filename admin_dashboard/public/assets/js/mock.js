@@ -213,6 +213,6 @@ export function buildMockDocs({ today = '2026-09-22', days = 400, seed = 2026092
   }
   for (const [name, share] of countries) operations.countryTrend.series[name] = { dau: dau.slice(-100).map((v) => Math.round(v * share)), newUsers: newUsers.slice(-100).map((v) => Math.round(v * share)), sessions: sessions.slice(-100).map((v) => Math.round(v * share)) };
   summary.coverage = Object.fromEntries(['core', 'ads', 'eventsDaily', 'cohort'].map((name) => [name, status]));
-  summary.pipelineVersion = 2; summary.syncPolicy = { frequency: 'daily', timezone: 'Asia/Seoul', scheduledAt: '12:17' };
+  summary.pipelineVersion = 2; summary.syncPolicy = { frequency: 'every-3-hours', timezone: 'Asia/Seoul', intervalHours: 3, scheduledAt: ['00:17', '03:17', '06:17', '09:17', '12:17', '15:17', '18:17', '21:17'] };
   return { summary, series, events, operations };
 }

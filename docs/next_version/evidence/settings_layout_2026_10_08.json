@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-08",
+  "scope": "Settings, four shift editors, team schedule setup/edit, schedule sharing",
+  "apk": "artifacts/settings_layout_2026_10_08/tested-dev-debug.apk",
+  "apk_sha256": "3c004f0201612798dc63d90c5d754a55ec64f2ad5d0b3edb8e2785df24826a25",
+  "installed_package": "com.hwani1103.shiftbell.dev",
+  "usb_model": "SM-S948N",
+  "usb_serial": "R5KL20DHWAE",
+  "installed_sha256_matches": true,
+  "tab_preferences_preserved": true,
+  "critical_gate": "tools/check_critical_release.ps1 -Build: PASS (dev debug + web; no release build)",
+  "flutter_critical_tests": 323,
+  "targeted_tests": 70,
+  "settings_editors_layout": "PASS: 12 phone/fold/ultra window sizes, text scale 1.0",
+  "compact_layout": "PASS: 7 screens x 4 windows (320/500/501/600dp), text scale 1.5; includes settings subdialogs",
+  "final_team_rules_tests": 26,
+  "final_team_setup_layout": "PASS: 4 compact windows, text scale 1.5",
+  "usb_layout": "Settings, additional features, backup save/load entries displayed; root Settings left open",
+  "sleep_policy": "Automatic pending cards and completed automatic candidates require 5 hours. Manual/widget input and SleepWidgetProvider unchanged.",
+  "midnight_review": "Flat window before 06:00 anchors previous day 21:00; sleep attribution also looks at previous shift day. Existing logic retained.",
+  "diagnostic_review": {
+    "status": "Reviewed only; no share/export button added",
+    "file_type": "UTF-8 .txt, text/plain",
+    "current_export": "DiagReport.export: Android 10+ Download/ShiftBell/log; lower Android versions require a separate export fallback",
+    "recommended": "Email attachment to lowvibe07@gmail.com plus standard Android share chooser. Kakao/SMS availability depends on installed receiving app MIME/attachment support.",
+    "source": "https://developer.android.com/develop/ui/compose/sharing/send"
+  },
+  "limits": "Host renders do not mean physical Fold/Ultra PASS. No new locked alarm or real-duration sleep test. Final visual approval remains with user.",
+  "evidence_directory": "artifacts/settings_layout_2026_10_08",
+  "source_count": 435,
+  "source_manifest_sha256": "026e5f1ced779f008782da79c63089e00964dec0dd6be47dbacf3d6e8b4962c0",
+  "analysis": {
+    "exit_code": 0,
+    "errors": 0,
+    "warnings": 0,
+    "info_count": 80
+  }
+}

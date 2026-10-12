@@ -96,6 +96,40 @@ void main() {
     expect(find.text('ready 1'), findsNothing);
   });
 
+  testWidgets('retry success survives an old attempt error and pending resize', (tester) async {
+    final old = Completer<int>();
+    var calls = 0;
+    await tester.pumpWidget(StartupGate<int>(
+      initialize: () => ++calls == 1 ? old.future : Future.value(9),
+      slowThreshold: const Duration(seconds: 1),
+      stallThreshold: const Duration(seconds: 3),
+      builder: (value) => MaterialApp(home: Text('ready $value')),
+    ));
+    tester.view.physicalSize = const Size(360, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pump(const Duration(seconds: 4));
+    expect(calls, 1);
+    await tester.ensureVisible(find.byType(ElevatedButton));
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+    old.completeError(StateError('late DB open error'));
+    await tester.pumpAndSettle();
+    expect(find.text('ready 9'), findsOneWidget);
+    expect(calls, 2);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('disposed startup consumes a late failure without setState', (tester) async {
+    final pending = Completer<int>();
+    await tester.pumpWidget(app(() => pending.future));
+    await tester.pumpWidget(const SizedBox.shrink());
+    pending.completeError(StateError('DB completed after disposal'));
+    await tester.pump(const Duration(seconds: 40));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('실패가 여러 번 이어져도 다시 시도할 때마다 한 번씩만 실행', (tester) async {
     var calls = 0;
     await tester.pumpWidget(app(() async {

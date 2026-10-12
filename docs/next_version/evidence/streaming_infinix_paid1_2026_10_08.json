@@ -1,0 +1,74 @@
+{
+  "checked_at": "2026-10-08T02:12:44.693092+00:00",
+  "scope": "Full OEM-settings combination + actual UI foreground registration, screen-off delivery; independent alarm_clock native probe. No functional PASS.",
+  "session": {
+    "name": "infinix_paid1",
+    "project": "log-it-3d269",
+    "model": "transsion_lab_infinix-x6856/35",
+    "cap_seconds": 1500,
+    "requested_epoch": 1791423952.88018,
+    "install_limit_seconds": 240,
+    "first_evidence_limit_seconds": 480,
+    "reservation": "125lko3l3363j",
+    "reserved_epoch": 1791423963.6846125,
+    "serial": "localhost:12507",
+    "connected_epoch": 1791423987.3827555,
+    "release_reason": "requested return",
+    "released": true,
+    "finished_epoch": 1791425434.269669,
+    "conservative_seconds": 1481.3894891738892
+  },
+  "service_active_reservations": 0,
+  "estimated_paid_usd": 3.7034737229347225,
+  "apk_sha256": "6407fd2e54e6381e2143d07ff230283e6ce32f8fb148fc9f2b2cc748f361099e",
+  "source_hashes_unchanged": 430,
+  "model": "Infinix X6856 / Android15 / XOS15.1.2.136",
+  "settings": {
+    "notifications": "allowed",
+    "overlay": "actual checked=true",
+    "exact_fsi": "setup Allowed; not a toggle verdict",
+    "app_battery": "unrestricted selected, background enabled",
+    "battery_manager": "OFF",
+    "sleep_standby": "OFF",
+    "phone_master_terms": "explicit user approval, agreed this round",
+    "phone_master_version": "6.1.3.15034",
+    "protected_apps": "OFF to ON actual checked=true",
+    "app_launch": "Allowed already, checked=true",
+    "lock_screen_cleanup": "OFF, 0 apps cleaned",
+    "recents": "Unlock menu proves currently locked; Protected Apps selection preceded this observation",
+    "pin": "none; secure=false; screen-off failure diagnosis, not PIN FSI PASS"
+  },
+  "actual_ui": {
+    "registration": "onboarding Day pattern, actual picker10:02 same-day silent, Save and Finish setup",
+    "db_os": "10 future rows; firstID1 target1791424920000 matches OS",
+    "target_ms": 1791424920000,
+    "until_target_plus60": "no receiver/AlarmActivity; Dozing, standard DeviceIdle ACTIVE",
+    "vendor": "10:00:48.895 freeze UID10294; .897 proxy same original target1791424920000",
+    "delayed_after_foreground": "10:04:10.692 activity unfreezes UID; subsequent screen shows overdue10:02 AlarmActivity. No claim that mere wake always releases it.",
+    "dismiss_limit": "helper regex Dismiss missed visible text ×; following force-stop ended test. Not counted as user-X PASS"
+  },
+  "native_clock30": {
+    "isolation": "force-stop cancelled active OS app reservations, explicit include-stopped broadcast scheduled only native diagnostic",
+    "target_ms": 1791425328398,
+    "probe": "scheduled only, no fired through target+60",
+    "vendor": "10:08:22.684 freeze UID10294; .686 proxy original target1791425328398",
+    "limit": "30-second diagnostic, no product DB/UI/FGS/wakelock; not a natural5-minute functional test"
+  },
+  "allow_idle": "NOT_RUN: both workflow safe-time guards rejected start; no B alarm was scheduled",
+  "tool_limits": "Flutter attach VM announcement missing until restart; subsequent compiler temp app.dill error prevented VM cleanup. Native round isolated with force-stop instead. No product-code change.",
+  "cleanup": {
+    "uninstalled": true,
+    "test_pin_created": false,
+    "clock_changed": false,
+    "rounds": "alarm_clock30 observed until target+60; allow_idle NOT_RUN because safety deadline rejected start",
+    "global_settings": "disposable-device erase on return"
+  },
+  "artifact": "artifacts\\streaming_free_2026_10_08\\infinix_paid1_evidence.zip",
+  "artifact_sha256": "fd182e9f1f437bdde28cdcb1b412648b7abdfa66b6fd1a7bac122365e095406b",
+  "sources": [
+    "https://www.galarmapp.com/setup-infinix",
+    "https://alarmy-android.zendesk.com/hc/en-us/articles/46701731923609--No-Ring-How-to-Fix-Alarm-Issues-on-Other-Brands-Infinix-Tecno-Sony-Sharp-etc",
+    "https://stackoverflow.com/questions/79989753/android-background-alarm-issue-on-infinix-zero-40-android-15-xos"
+  ],
+  "next": "Offline prepare state-checked OEM setup automation and native allow_idle round first; no UI clock-probe replay without impact. I2/I3 independent remainder, I1/I4 gated."
+}

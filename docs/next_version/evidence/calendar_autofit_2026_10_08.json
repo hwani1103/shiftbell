@@ -1,0 +1,121 @@
+{
+  "date": "2026-10-08",
+  "id": "A09/U05",
+  "status": "REVERTED by user request on 2026-10-08. Historical tests, previews and uninstalled APK below describe the rejected candidate, not current code.",
+  "design_source": "../레이아웃검토_2026-10-07/달력_칩_자동맞춤_설계기준_2026-10-08.txt",
+  "scope": [
+    "S26 Ultra bar aspect: global only; Korean portrait and landscape retain original renderer",
+    "Flip8 unfolded: Korean and global",
+    "Fold8 cover/inner: Korean and global",
+    "Fold8 Ultra cover/inner: Korean and global"
+  ],
+  "window_references": {
+    "s26_bar": [
+      411,
+      891
+    ],
+    "flip_unfolded": [
+      360,
+      880
+    ],
+    "fold_cover": [
+      475.43,
+      751.24
+    ],
+    "fold_inner": [
+      704,
+      932.57
+    ],
+    "fold_inner_landscape": [
+      932.57,
+      704
+    ],
+    "ultra_cover": [
+      360,
+      840
+    ],
+    "ultra_inner": [
+      752,
+      834.67
+    ],
+    "ultra_inner_landscape": [
+      834.67,
+      752
+    ]
+  },
+  "window_caveat": "Reference host dp sizes from existing harness/documents. Flip 360x880 is a narrow/tall reference, not a newly measured model resolution. Re-measure actual model/OS/dp/density and supported display states on SRTL.",
+  "implementation": [
+    "CalendarTextFit/CalendarShiftLabel measure actual string width and normal line metrics with matching resolved style, locale, direction, weight and fixed text scaler. Height establishes common cap; only overflow reduces actual font. No name-length buckets.",
+    "Periwinkle uses the same height cap for a single cell and a joined weekly run; length affects width only. Existing week boundaries, run slicing and date touch targets remain.",
+    "CalendarCellMetrics reserves maximum three memo rows, date and Korean annotation before choosing chip height. Width growth is gentle, maximum 1.35 for stacked cells; split wide shift-band growth is separately capped at 1.15 after host visual review to avoid tall bands.",
+    "App-only AdaptiveCalendarCell preserves per-theme ordering/anchors: main central-date/bottom-memo stack, diary 35:65 header, grid date/annotation row, top soft-card group, initial circle and event four auxiliary slots. Old Korean bar functions retained byte-for-byte in this task.",
+    "Existing wide 40:60 date/annotation vs memo columns and Ultra two-line holiday annotations preserved. Global cells reserve no holiday/lunar slot, while Korean blanks retain one. Global holiday dates/detail-popup policy unchanged.",
+    "Memo sizes derive from common height cap, not the current shift name. Stacked and wide profiles use fixed sizes for 0..3 memos; long memos show complete grapheme prefixes without ellipsis or per-string font reduction.",
+    "Height/width fitting replaces layered whole-cell scaling on new paths. Existing Korean bar and excluded underline/editorial paths keep their previous behavior.",
+    "Metrics cache keys include actual cell size/theme/style/locale/Korean/wide/annotation lines; font-loading notifications invalidate cache. No model-name conditionals or old folded-width cache.",
+    "No public shared-web policy expansion; no language resource, P0/native alarm or release feature scope changes."
+  ],
+  "profiles": {
+    "base_cell_width": 56,
+    "width_growth_slope": 0.4,
+    "stacked_growth_cap": 1.35,
+    "wide_shift_growth_cap": 1.15,
+    "chip_base_heights": {
+      "main": 20,
+      "minimal": 18,
+      "materialCard": 19,
+      "boldGrid": 16,
+      "eventChip": 16,
+      "diary": 20,
+      "initialBadge": 20,
+      "global_concepts": 19
+    },
+    "memo_to_reference": {
+      "default": 0.75,
+      "eventChip": 0.8,
+      "global_concepts": 0.84
+    },
+    "approval": "Tuning candidates, not user-approved measurements"
+  },
+  "verification": {
+    "unit_final": "54 PASS across auto-fit, run merging, wide, Ultra annotations, grapheme memos and footer touch tests. Final wide-only height cap subsequently revalidated by all 25 wide/Ultra tests.",
+    "wide_final": "25 PASS on final 1.15 wide shift-band cap; subset of the 54 tests, not counted twice.",
+    "korean_final": "11 PASS: 10 Korean themes plus unassigned calendar across 8 host windows, including protected S26 reference and requested fold/Flip ratios; final captures regenerated after wide cap.",
+    "english_final": "7 PASS: all released global calendar themes across 8 host windows; final source including wide cap.",
+    "analysis": "0 errors. Existing calendar_tab warnings/info remain; new sizing/cell files have no analyzer issues.",
+    "build": "dev debug assemble success, exit 0; no release build or installation.",
+    "diff_check": "PASS; existing CRLF conversion warnings only.",
+    "initial_failure": "Initial Korean full-screen checks found duplicate shift-badge-content measurement keys in wide label wrappers. Fixed the duplicate, then complete final suites PASS.",
+    "font_evidence": "Host real fonts (Segoe UI/Malgun/Nirmala plus existing theme fixtures), mixed Latin accents/Korean/Hindi. These are host previews, not claims about Samsung font rendering.",
+    "measurement_samples": 156,
+    "below_8dp_review_samples": 27,
+    "primary_preview_count": 144,
+    "preview_index": "artifacts/calendar_autofit_2026_10_08/preview_index.html",
+    "critical_gate_scope": "No P0 alarm/permission/settings-return or release-language feature/resource changes in this task; scoped UI tests and dev debug build. Earlier critical evidence preserved, no new native/P0 device PASS claimed."
+  },
+  "artifacts": "artifacts/calendar_autofit_2026_10_08",
+  "limits": [
+    "No USB/SRTL operation, installation or new physical-device PASS this turn.",
+    "Real-font host fit is not visual approval on Samsung fonts.",
+    "Full long shift names can fall below 8dp in narrow cells; review warnings exported, no forced minimum/ellipsis/abbreviation/input-limit change.",
+    "Theme help/release copy deferred until approval. Settings/onboarding/all-shifts/popups final visual review remains after calendar tuning."
+  ],
+  "prior_evidence": [
+    "global_theme_refinement_2026_10_08.json",
+    "global_theme_concepts_2026_10_08.json"
+  ],
+  "apk": {
+    "apk": "artifacts\\calendar_autofit_2026_10_08\\shiftbell-calendar-autofit-dev-debug.apk",
+    "apk_sha256": "5b6f36925d4c96e1774af436426a7d8f0a7f890e38b7f41d3de4850d8165e63c",
+    "apk_bytes": 215872562,
+    "source_sha256": {
+      "lib/widgets/calendar_cell_fit.dart": "c2cc439baf0f54bb5bd524777da07911fe00385fe01fe5ea51cf3a03d3a14b6e",
+      "lib/widgets/adaptive_calendar_cell.dart": "ff9be10526630c4f42c23aa9068d40b21d816e5d29a2c360ad9a048e5e4d46b6",
+      "lib/widgets/global_concept_calendar_cell.dart": "ec7b643bf04904a87d0645eda0a4b9ec8c3df7c8a2b7baf94fa0be502c61b0df",
+      "lib/widgets/wide_calendar_cell.dart": "fedb89da5200c9ad091499214bb580ef375aceb37a6680fc2a6cfe17b65c6780",
+      "lib/screens/calendar_tab.dart": "037975c40b02ed5574e8ca1b9aed704b3fe015b182102c06915161f284c5e71d"
+    },
+    "all_sources_older_than_apk": true
+  },
+  "superseded_by": "calendar_restore_phone_2026_10_08.json"
+}

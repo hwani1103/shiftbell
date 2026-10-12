@@ -1,0 +1,23 @@
+7777 알림 문구 수정 — 2026-10-10
+
+A11/A09 사용자 최종 범위
+- 상태창의 교대시계 (테스트)는 사용자 요청으로 유지. app_name/앱 라벨 변경 없음.
+- 접힌 알림의 근무명/알람 울림 중/시각/스누즈 안내를 표시하지 않음. 제목·본문·subtext에는 줄을 제거하지 않도록 NBSP를 넣고 showWhen=false. 원래 게시 시각과 회차 메타데이터는 유지. 공통 바인딩이므로 모든 언어 적용.
+- 펼친 알림의 한국어 선택 문구만 스누즈 %1$d분 → 알람연장 %1$d분. SnoozeText.selection의 생산 호출은 RingControlNotification뿐. 외국어4종 기존 문구 유지.
+- +Nm/알람 끄기와 −/선택 시간/+의 액션·PendingIntent·ID/회차/선택revision·예약/채널/FSI 정책 유지. 알림 레이아웃 XML·글자 크기·간격·요소 위치 설정은 수정하지 않음.
+
+검증
+- tools/check_critical_release.ps1 -Build 실행. 리소스/웹 locale 검사 및 Flutter338 PASS. 네이티브150개 중149 PASS/접힌 제목을 New로 기대하던 기존 검사1 FAIL. 첫 로그·XML 보존.
+- 해당 검사를 공백 제목 + 현재 알람 ID/회차 + 펼친 New 제목 기준으로 수정. 수정 후 Cover2 PASS.
+- 이미 통과한 검사 보존 후 같은 실행기의 남은 네이티브 DB/빌드 단계를 artifacts/ring_notice_copy_2026_10_10/resume_native_build.ps1로 재개. Native DB15 PASS, dev debug APK·JS웹 빌드 PASS, 마지막 실행 exit0. 최초 실행 전체 exit0으로 기록하지 않음.
+- DB 잠금 경고와 느린 출력 갱신을 조사했으나 워커는 중단 전에 종료했고 PID 신원 guard가 실제 중단을 막음. 다른 세션/기기 프로세스 중단 없음. 진단 로그 보존.
+- 웹의 기존 Wasm dry-run/dart:html 및 폰트 경고는 로그에 보존. 이번 JS웹 빌드는 성공.
+- Android release 빌드/기기 설치/새 UI 촬영 미실시. 호스트 결과를 실기기 PASS로 확대하지 않음.
+- 변경 전4파일과 첫 실패/재개 로그, 최종 소스 해시를 artifacts/ring_notice_copy_2026_10_10에 보존. 기존 미커밋 작업/원장 유지.
+
+APK: artifacts/ring_notice_copy_2026_10_10/shiftbell-copy-dev-debug.apk
+SHA256: 971917d61b5fc75153de73eeef52103660ce3b2de07abe1649d57932c73b250c
+증거: evidence/ring_notice_copy_2026_10_10.json
+앞선 작성 흐름 미리보기 삭제: 전체근무표_미리보기팝업삭제_2026-10-10.txt / evidence/team_preview_removed_2026_10_10.json. 이번 APK에 해당 변경 포함.
+
+후속 사용자 정정: 이 보고서는 전체 공백 처리한 당시 후보의 증거로 보존한다. 현재 계약은 스누즈 N분 줄만 공백, 근무명/울림 상태/시각 복원이다. 후속: 7777정정_온보딩권한버튼_UI_2026-10-10.txt

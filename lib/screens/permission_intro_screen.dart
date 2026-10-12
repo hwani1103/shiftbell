@@ -1,9 +1,11 @@
+import '../widgets/adaptive_layout.dart';
+import '../widgets/permission_panel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../widgets/shift_editor_dialog.dart';
 import '../services/permission_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/l10n_extensions.dart';
-import '../main.dart'; // ⭐ MainScreen import(onboarding_screen.dart와 동일 패턴)
+import '../main.dart';
 import '../models/backup_payload.dart';
 import '../services/backup_storage_service.dart';
 import '../services/database_service.dart';
@@ -11,303 +13,123 @@ import 'restore_backup_screen.dart';
 
 class PermissionIntroScreen extends StatefulWidget {
   const PermissionIntroScreen({super.key});
-
   @override
   State<PermissionIntroScreen> createState() => _PermissionIntroScreenState();
 }
 
-class _PermissionIntroScreenState extends State<PermissionIntroScreen> with WidgetsBindingObserver {
-  bool _isNavigating = false; // 중복 navigate 방지
+class _PermissionIntroScreenState extends State<PermissionIntroScreen> {
+  bool _isNavigating = false;
+  bool _checking = false;
+  bool _warningOpen = false;
+  bool _allSatisfied = false;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // 앱이 포그라운드로 돌아올 때 권한 확인
-    if (state == AppLifecycleState.resumed && !_isNavigating) {
-      _checkPermissionsAndNavigate();
-    }
-  }
-
-  Future<void> _checkPermissionsAndNavigate() async {
-    if (_isNavigating) return; // 이미 이동 중이면 무시
-
-    final permissions = await PermissionService().checkPermissions();
-    final allGranted = permissions['notification']! && permissions['overlay']! && permissions['exactAlarm']!;
-
-    if (allGranted && mounted) {
-      _navigateToOnboarding();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 40.h),
-          // ⭐ 2026-09-22 - 예전엔 스크롤 없는 Column + Spacer라 작은 화면·큰 글자에서 넘치면 release에서
-          // 맨 아래 "허용" 버튼이 잘려 첫 화면에서 앞으로 갈 수 없었음. 설명은 스크롤, 버튼은 항상 하단 고정.
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // 헤더
-                      Text(
-                        context.l10n.permissionGetStarted,
-                        style: TextStyle(
-                          fontSize: 28.sp,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        context.l10n.permissionIntro,
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: colorScheme.onSurfaceVariant,
-                          height: 1.5,
-                        ),
-                      ),
-                      SizedBox(height: 48.h),
-
-                      // 필수 권한 목록
-                      _buildPermissionItem(
-                        context: context,
-                        icon: Icons.notifications_active,
-                        iconColor: colorScheme.tertiary,
-                        title: context.l10n.permissionNotification,
-                        description: context.l10n.permissionNotificationDesc,
-                        required: true,
-                      ),
-                      SizedBox(height: 24.h),
-                      _buildPermissionItem(
-                        context: context,
-                        icon: Icons.phone_android,
-                        iconColor: Colors.green,
-                        title: context.l10n.permissionOverlay,
-                        description: context.l10n.permissionOverlayDesc,
-                        required: true,
-                      ),
-                      SizedBox(height: 24.h),
-                      _buildPermissionItem(
-                        context: context,
-                        icon: Icons.alarm_on,
-                        iconColor: Colors.orange,
-                        title: context.l10n.permissionExactAlarm,
-                        description: context.l10n.permissionExactAlarmDesc,
-                        required: true,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.h),
-
-              // 하단 버튼
-              // 높이를 고정하지 않고 최소 높이만 둠 - 큰 글자에서 버튼 글자가 잘리지 않게(2026-09-22)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _requestPermissions,
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: Size.fromHeight(56.h),
-                    backgroundColor: colorScheme.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
-                  child: Text(
-                    context.l10n.permissionAllow,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onPrimary,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 12.h),
-              SizedBox(
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: _skipPermissions,
-                  style: TextButton.styleFrom(minimumSize: Size.fromHeight(56.h)),
-                  child: Text(
-                    context.l10n.commonNotNow,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
-              // ⭐ 2026-09-01 - 백업 불러오기 진입점은 온보딩 화면(근무명 지정
-              // 단계, "다음" 버튼 위)으로 옮김 - 여기 있으면 권한 허용 전에
-              // 눈에 안 띄게 묻혀서, 실제로 근무 데이터를 입력하려는 시점에
-              // 더 자연스럽게 물어보는 게 낫다는 판단. onboarding_screen.dart
-              // _buildShiftTypeCreation() 참고.
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPermissionItem({
-    required BuildContext context,
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String description,
-    required bool required,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        Container(
-          width: 56.w,
-          height: 56.w,
-          decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          child: Icon(
-            icon,
-            size: 32.sp,
-            color: iconColor,
-          ),
-        ),
-        SizedBox(width: 16.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // 영어·큰 글자에서 "필수" 칩과 같이 가로로 넘치지 않게(2026-09-22)
-                  Flexible(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  if (required) ...[
-                    SizedBox(width: 6.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                      decoration: BoxDecoration(
-                        color: colorScheme.errorContainer,
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Text(
-                        context.l10n.permissionRequired,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onErrorContainer,
-                        ),
-                      ),
-                    ),
-                  ] else ...[
-                    SizedBox(width: 6.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                      decoration: BoxDecoration(
-                        color: colorScheme.surfaceVariant,
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Text(
-                        context.l10n.permissionRecommended,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _requestPermissions() async {
-    // 권한 요청
-    final allGranted = await PermissionService().requestAllPermissions();
-
+  void _permissionsChanged(PermissionSnapshot state) {
     if (!mounted) return;
+    setState(() => _allSatisfied = state.allSatisfied);
+    if (!state.allSatisfied) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted &&
+          _allSatisfied &&
+          ModalRoute.of(context)?.isCurrent == true) {
+        _continue();
+      }
+    });
+  }
 
-    // 권한 상태 저장
+  @override
+  Widget build(BuildContext context) => Scaffold(
+      body: AdaptiveFormBody(
+          child: SafeArea(
+              child: LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                      child: ConstrainedBox(
+                          constraints:
+                              BoxConstraints(minHeight: constraints.maxHeight),
+                          child: Padding(
+                              padding:
+                                  const EdgeInsets.fromLTRB(24, 40, 24, 16),
+                              child: Column(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                              context.l10n.permissionGetStarted,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .headlineMedium),
+                                          const SizedBox(height: 12),
+                                          Text(context.l10n.permissionIntro),
+                                          const SizedBox(height: 24),
+                                          PermissionPanel(
+                                              actionRequiredOnly: true,
+                                              continueAfterGrant: true,
+                                              onChanged: _permissionsChanged),
+                                        ]),
+                                    if (!_allSatisfied)
+                                      Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 24),
+                                          child: TextButton(
+                                              onPressed: _checking
+                                                  ? null
+                                                  : _skipPermissions,
+                                              child: Text(
+                                                  context.l10n.commonNotNow))),
+                                  ]))))))));
+
+  Future<void> _continue() async {
+    if (_checking || _isNavigating || _warningOpen) return;
+    setState(() => _checking = true);
+    final state = await PermissionService().snapshot();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('permissions_requested', true);
-
-    if (allGranted) {
-      // 모두 허용 → 온보딩으로
-      _navigateToOnboarding();
+    if (!mounted) return;
+    setState(() {
+      _checking = false;
+      _allSatisfied = state.allSatisfied;
+    });
+    if (state.allSatisfied) {
+      await _navigateToOnboarding();
     } else {
-      // 일부 거부 → 경고 다이얼로그 표시
       _showPermissionWarning();
     }
   }
 
   Future<void> _skipPermissions() async {
+    if (_checking || _isNavigating || _warningOpen) return;
+    setState(() => _checking = true);
     // 나중에 하기 → 경고 다이얼로그 표시
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('permissions_requested', true);
 
     if (!mounted) return;
+    setState(() => _checking = false);
     _showPermissionWarning();
   }
 
   void _showPermissionWarning() {
+    if (_warningOpen || !mounted) return;
+    _warningOpen = true;
     final colorScheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (context) => ShiftEditorDialog(
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: colorScheme.tertiary, size: 28.sp),
-            SizedBox(width: 8.w),
+            Icon(Icons.warning_amber_rounded,
+                color: colorScheme.tertiary, size: 28.0),
+            SizedBox(width: 8.0),
             Flexible(
               child: Text(
                 context.l10n.permissionSomeDenied,
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(fontSize: 16.0),
               ),
             ),
           ],
@@ -318,13 +140,13 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
           children: [
             Text(
               context.l10n.permissionSomeDeniedDesc,
-              style: TextStyle(fontSize: 14.sp, height: 1.5),
+              style: TextStyle(fontSize: 14.0, height: 1.5),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 16.0),
             Text(
               context.l10n.permissionCanAllowLater,
               style: TextStyle(
-                fontSize: 13.sp,
+                fontSize: 13.0,
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
@@ -334,7 +156,7 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              await PermissionService().openSettings();
+              if (context.mounted) await showPermissionSettings(context);
             },
             child: Text(context.l10n.commonGoToSettings),
           ),
@@ -350,7 +172,10 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
           ),
         ],
       ),
-    );
+    ).whenComplete(() {
+      _warningOpen = false;
+      if (mounted && _allSatisfied) _continue();
+    });
   }
 
   // ⭐ 2026-09-01 - "백업 복구했는데 온보딩 어디에도 그 화면이 안 나온다" 버그
@@ -378,7 +203,9 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
       // 다시 태울 이유가 없으므로 곧장 메인 화면으로.
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const MainScreen(initialIndex: kCalendarTabIndex)), // 달력탭
+        MaterialPageRoute(
+            builder: (context) =>
+                const MainScreen(initialIndex: kCalendarTabIndex)), // 달력탭
       );
       return;
     }
@@ -399,7 +226,8 @@ class _PermissionIntroScreenState extends State<PermissionIntroScreen> with Widg
     if (!mounted) return;
     if (payload != null) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => RestoreBackupScreen(payload: payload!)),
+        MaterialPageRoute(
+            builder: (context) => RestoreBackupScreen(payload: payload!)),
       );
     } else {
       Navigator.of(context).pushReplacementNamed('/onboarding');

@@ -29,6 +29,7 @@ import java.util.Date
 import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
+@org.robolectric.annotation.LooperMode(org.robolectric.annotation.LooperMode.Mode.PAUSED)
 class G1WakeSyncTest {
 
     private lateinit var context: Context
@@ -95,6 +96,79 @@ class G1WakeSyncTest {
     }
 
     // ───────────────────────────── 수신 시 예정 시각 대조
+
+    private fun guardWakeTime(): Long {
+        val method = AlarmGuardReceiver::class.java.getDeclaredMethod(
+            "scheduleNextWakeup", Context::class.java
+        ).apply { isAccessible = true }
+        method.invoke(AlarmGuardReceiver(), context)
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        return shadowOf(manager).scheduledAlarms.single {
+            it.operation?.let { operation -> shadowOf(operation).savedIntent }
+                ?.component?.className == AlarmGuardReceiver::class.java.name
+        }.triggerAtMs
+    }
+
+    @Test
+    @org.robolectric.annotation.Config(instrumentedPackages = ["com.hwani1103.shiftbell.AlarmGuardReceiver"])
+    fun `five minute heartbeat runs after the rounded snooze instead of just before it`() {
+        // Same fractional-second alignment as the saved Pixel/Xiaomi/OPPO failures.
+        val now = 1_791_280_000_702L
+        assertTrue(android.os.SystemClock.setCurrentTimeMillis(now))
+        val target = 1_791_280_301_000L
+        insertAlarm(71, target)
+        AlarmWakeScheduler.scheduleRaw(context, 71, target, "test")
+
+        assertEquals(target + 1_000L, guardWakeTime())
+        assertEquals(listOf(target), wakeTimes(71))
+    }
+
+    @Test
+    @org.robolectric.annotation.Config(instrumentedPackages = ["com.hwani1103.shiftbell.AlarmGuardReceiver"])
+    fun `heartbeat avoids the final ten seconds but keeps ordinary cadence`() {
+        val now = 1_791_280_000_000L
+        assertTrue(android.os.SystemClock.setCurrentTimeMillis(now))
+        insertAlarm(72, now + 310_000L)
+        assertEquals(now + 311_000L, guardWakeTime())
+
+        dbHelper.writableDatabase.delete("alarms", "id=?", arrayOf("72"))
+        insertAlarm(73, now + 311_000L)
+        assertEquals(now + 300_000L, guardWakeTime())
+
+        dbHelper.writableDatabase.delete("alarms", "id=?", arrayOf("73"))
+        insertAlarm(74, now + 120_000L)
+        assertEquals(now + 300_000L, guardWakeTime())
+    }
+
+    @Test
+    fun `guard still repairs an existing pending intent with an obsolete OS time`() {
+        val target = at(60_000L)
+        insertAlarm(75, target)
+        AlarmWakeScheduler.scheduleRaw(context, 75, target + 60_000L, "old")
+
+        AlarmGuardReceiver.triggerCheck(context)
+
+        assertEquals(listOf(target), wakeTimes(75))
+    }
+
+    @Test
+    fun `offset timestamp fractions use the same second for DB and OS`() {
+        val timestamp = at(60_000) + 868
+        insertAlarm(97, timestamp)
+        dbHelper.writableDatabase.update("alarms", ContentValues().apply {
+            put("type", "snoozed")
+            put("date", java.time.Instant.ofEpochMilli(timestamp).toString())
+        }, "id=?", arrayOf("97"))
+        assertEquals(AlarmWakeScheduler.Outcome.SCHEDULED,
+            AlarmWakeScheduler.scheduleIfCurrent(context, dbHelper.writableDatabase,
+                97, timestamp, "Night"))
+        assertEquals(AlarmWakeScheduler.ReceiveDecision.RING,
+            AlarmWakeScheduler.decideOnReceive(context, 97,
+                AlarmWakeScheduler.normalize(timestamp)))
+        assertEquals(AlarmWakeScheduler.ReceiveDecision.SKIP_RESCHEDULED,
+            AlarmWakeScheduler.decideOnReceive(context, 97,
+                AlarmWakeScheduler.normalize(timestamp) - 1000))
+    }
 
     @Test
     fun `#27 수신 - DB에 행이 없으면 울리지 않는다`() {

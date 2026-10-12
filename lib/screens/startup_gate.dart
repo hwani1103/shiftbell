@@ -24,6 +24,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/l10n_extensions.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_text_scale.dart';
 
 class StartupGate<T> extends StatefulWidget {
   const StartupGate({
@@ -133,6 +134,7 @@ class _StartupGateState<T> extends State<StartupGate<T>> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      builder: (context, child) => AppTextScale(child: child!),
       theme: AppTheme.lightTheme,
       localizationsDelegates: const [
         AppLocalizations.delegate,

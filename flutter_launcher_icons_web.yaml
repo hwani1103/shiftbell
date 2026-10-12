@@ -1,0 +1,10 @@
+# Reuse the production app artwork; generate web assets only.
+flutter_launcher_icons:
+  android: false
+  ios: false
+  image_path: assets/icon/app_icon.png
+  web:
+    generate: true
+    image_path: assets/icon/app_icon.png
+    background_color: '#FFFFFF'
+    theme_color: '#FFFFFF'

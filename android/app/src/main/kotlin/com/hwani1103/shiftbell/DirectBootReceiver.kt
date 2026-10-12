@@ -16,6 +16,7 @@ class DirectBootReceiver : BroadcastReceiver() {
     
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action
+        DiagLog.log(context, "SYSTEM_EVENT", "action" to action?.substringAfterLast('.'))
         // ⭐ 2026-09-14 (출시전 감사 V6, G1) - 예전엔 LOCKED_BOOT_COMPLETED만 처리했음:
         //  - BOOT_COMPLETED: LOCKED_BOOT가 안 오는 기기/경로(파일 기반 암호화 없음 등)에서 재부팅 후 재예약이 빠질 수 있음
         //  - MY_PACKAGE_REPLACED: 업데이트 직후 앱을 열기 전까지 새 정책(#26 등)으로 갱신·재예약이 안 됨
@@ -128,43 +129,40 @@ class DirectBootReceiver : BroadcastReceiver() {
             // ⭐ DB 파일이 없으면 Native가 만들면 안 됨 (DatabaseHelper.kt 상세 주석 참고).
             db = dbHelper.getReadableDatabaseWithRetry() ?: return null
 
+            val nowMillis = System.currentTimeMillis()
             val now = SimpleDateFormat(
                 "yyyy-MM-dd'T'HH:mm:ss",
                 Locale.US
-            ).format(Date())
+            ).format(Date(nowMillis))
 
             Log.d("DirectBoot", "현재 시각: $now")
 
             cursor = db.query(
                 "alarms",
                 null,
-                "date > ?",
-                arrayOf(now),
+                "(type = 'snoozed' OR date >= ?)",
+                arrayOf(now.substring(0, 10)),
                 null,
                 null,
-                "date ASC",
-                "1"
+                "date ASC, id ASC"
             )
 
             var alarm: AlarmData? = null
 
-            if (cursor.moveToFirst()) {
+            while (cursor.moveToNext()) {
                 val id = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                 val dateStr = cursor.getString(cursor.getColumnIndexOrThrow("date"))
                 val time = cursor.getString(cursor.getColumnIndexOrThrow("time"))
-                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type")) ?: "알람"
+                val shiftType = cursor.getString(cursor.getColumnIndexOrThrow("shift_type"))
+                    ?: context.getString(R.string.alarm_default_label)
 
-                val timestamp = SimpleDateFormat(
-                    "yyyy-MM-dd'T'HH:mm:ss",
-                    Locale.US
-                ).parse(dateStr)?.time
+                val timestamp = AlarmWakeScheduler.parse(dateStr)
 
-                if (timestamp != null) {
+                if (timestamp != null && timestamp > nowMillis &&
+                    (alarm == null || timestamp < alarm.timestamp)) {
                     alarm = AlarmData(id, timestamp, time, shiftType)
                     Log.d("DirectBoot", "✅ 다음 알람 조회: $time ($shiftType)")
                 }
-            } else {
-                Log.d("DirectBoot", "⚠️ DB에 알람 없음")
             }
 
             alarm

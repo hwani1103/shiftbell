@@ -1,0 +1,45 @@
+{
+  "checked_at_utc": "2026-10-07T23:39:09.389218+00:00",
+  "command": "android device remote models --project=shiftbell-streaming-1008-d",
+  "model_api_rows": 132,
+  "vivo_matches": [],
+  "honor_matches": [],
+  "raw": "build/streaming_free_2026_10_08/models_2026_10_08.txt",
+  "sha256": "baf10d0379e5eca12817e71f49cc5495acf0ce387d7663b766ed266a4702f4c9",
+  "status": "Neither brand listed in current CLI catalog; no connection/PASS claim; recheck during remaining work",
+  "rechecks": [
+    {
+      "stage": "before realme",
+      "time_utc": "2026-10-07T23:58:30Z",
+      "vivo": [],
+      "honor": [],
+      "raw": "artifacts/streaming_free_2026_10_08/models_before_realme.txt",
+      "sha256": "baf10d0379e5eca12817e71f49cc5495acf0ce387d7663b766ed266a4702f4c9"
+    },
+    {
+      "stage": "before infinix",
+      "time_utc": "2026-10-08T00:08:55Z",
+      "vivo": [],
+      "honor": [],
+      "raw": "artifacts/streaming_free_2026_10_08/models_before_infinix.txt",
+      "sha256": "baf10d0379e5eca12817e71f49cc5495acf0ce387d7663b766ed266a4702f4c9"
+    }
+  ],
+  "partner_lab_console": {
+    "project": "shiftbell-streaming-1008-e",
+    "cards": [
+      "Transsion",
+      "HONOR"
+    ],
+    "honor_enabled": false,
+    "vivo_card_present": false,
+    "concrete_honor_device_found": false,
+    "url": "https://console.cloud.google.com/omnilab/partner-lab?project=shiftbell-streaming-1008-e&authuser=1"
+  },
+  "after_transsion_activation": {
+    "source": "build/streaming_free_2026_10_08/models_after_transsion_enabled.txt",
+    "vivo_models": 0,
+    "honor_models": 0,
+    "console_honor_card": "present but OFF; not a concrete model"
+  }
+}

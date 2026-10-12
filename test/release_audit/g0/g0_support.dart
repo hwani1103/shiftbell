@@ -118,7 +118,7 @@ String canonicalJson(Object? value) {
   throw ArgumentError('정규화할 수 없는 값: $value (${value.runtimeType})');
 }
 
-/// 기대 데이터(expected_v24/*.json)와 실제 DB의 테이블별 불일치 목록. 비어 있으면 일치.
+/// 기대 데이터(expected_v29/*.json)와 실제 DB의 테이블별 불일치 목록. 비어 있으면 일치.
 List<String> diffExpectedData(Map<String, List<Object?>> actual, Map<String, dynamic> expected) {
   final problems = <String>[];
   final expTables = (expected['tables'] as Map<String, dynamic>);
@@ -143,7 +143,7 @@ List<String> diffExpectedData(Map<String, List<Object?>> actual, Map<String, dyn
 Future<Database> openLikeProduct(String path, DbMigrationScript script) {
   return openDatabase(
     path,
-    version: 24,
+    version: script.targetVersion,
     singleInstance: false,
     onCreate: (db, version) async => throw StateError('fixture는 onCreate에 도달하면 안 됨'),
     onUpgrade: (db, oldVersion, newVersion) => DbMigrationRunner.migrate(db, script, oldVersion, newVersion),
