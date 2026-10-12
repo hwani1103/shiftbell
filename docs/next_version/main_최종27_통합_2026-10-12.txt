@@ -1,0 +1,29 @@
+main 최종27 통합 기록
+작성일: 2026-10-12
+
+사용자 요청: 별도 대시보드 이력까지 합쳐 main을 현재 최종27 버전 기준으로 확정.
+
+병합 기준
+main 기존 원격: 4d87bca2e020b3d02bcab6f5710bcbcf23d10b06
+게시 앱 소스 기준: a5ea3916cc983196326f3e27d635668c827cdb28 / v1.0.24+27
+UI 준비 dev: 4888006 (조사문서·디자인시안만 추가, 제품 코드 동일)
+
+결과/충돌 판단
+main은 origin/main의 8개 별도 커밋 이력을 보존한 정상 두 부모 병합으로27 기준을 통합한다. 강제 푸시·기존 태그 이동 없음.
+충돌16파일은 대시보드와 dashboard-sync 워크플로에 한정. CRLF/LF 차이 및 별도 최신 UI 보완이 원인.
+3시간 집계의 workflow/ga4/transform/sync/sync-policy는 두 기준의 CRLF 제외 내용 동일 확인.
+27 기준 대시보드의 DAU7/30/100/365·MAU28일·요일평균·기능목록/순위·미관측/집계 안내를 보존.
+충돌 해결 뒤 staged tree는 기존27 태그와 차이0. 앱·native·언어·공개웹·대시보드 파일을 새로 구현하거나 정책 변경한 것이 아니다.
+이번 기록 파일만27 태그 대비 새 문서로 추가. UI 조사/시안 커밋4888006은 main에 포함하지 않고 dev에 유지.
+
+검증
+admin_dashboard/sync/test 전체3파일:29 tests pass/0 fail.
+node admin_dashboard/tools/build.mjs (cwd admin_dashboard):14 assets, version3076b05ffd0844a0.
+릴리스 baseline 대비 구현 파일 차이0 확인. 기존 P0/출시언어 필수 -Build 및27 AAB·실기기 근거는 전체근무표_이관_긴급후속_2026-10-12.txt에 보존. 이번은 이력 통합이므로 새 기능 변경·Android 빌드·release 빌드·기기 PASS 없음.
+과거 문서/CSV/라이선스에 존재하던 trailing whitespace·CRLF 경고는 원문 보존하며 일괄 수정하지 않았다.
+
+운영 관계
+main: 현재 최종27 제품 및 최신 대시보드 기준.
+dev: main 통합 이력을 받아 기존 UI 문서/시안을 보존하고 이후 UI 완성도 개선 진행.
+v1.0.24+27: 기존 게시 소스 커밋에 고정, 이동하지 않음. 이후 업데이트에는 새 버전 태그 사용.
+main 푸시는 Git 소스 기준 정리이며 이 세션에서 Play/웹 재배포나 Firestore/AdMob 운영 설정을 실행하지 않는다. 기존 GitHub 예약 동기화 workflow 내용도27 기준 그대로다.
