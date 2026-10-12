@@ -108,17 +108,29 @@ export function adoptionCard(docs, view) {
   }).join('');
   return card('핵심 기능 활용', '선택 기간 이용 횟수 내림차순 · 상위 5개 기능 색상 표시', '<div class="table-scroll"><table class="ops-table feature-table"><thead><tr><th>기능</th><th>사용자 수</th><th>이용 횟수</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="sub">사용자 수는 선택 기간의 중복 제거 인원입니다. 미관측은 미사용·구버전·수집 누락을 구분할 자료가 아직 없다는 뜻입니다.</p>');
 }
+export function groupedCountryRows(period, sort = 'activeUsers') {
+  const metric = sort === 'newUsers' ? 'newUsers' : 'activeUsers';
+  const totals = new Map((period?.countries ?? []).map(row => [row.name, row[metric]]));
+  const groups = new Map();
+  for (const row of period?.countryLanguages ?? []) {
+    if(!groups.has(row.country)) groups.set(row.country, []);
+    groups.get(row.country).push(row);
+  }
+  const score = (country, rows) => totals.get(country) ?? Math.max(0, ...rows.map(row => row[metric] ?? 0));
+  return [...groups].sort((a,b) => score(b[0],b[1]) - score(a[0],a[1]) || a[0].localeCompare(b[0]))
+    .flatMap(([,rows]) => [...rows].sort((a,b) => b[metric] - a[metric] || a.language.localeCompare(b.language)));
+}
 const marketLabel = row => localizeName('country', row.country) + ' / ' + localizeName('language', row.language);
 export function countryCard(docs, view, ui) {
   const period = periodData(docs, view); const rows = period?.countryLanguages;
   if (!rows) return card('국가별 성장과 기능 활용', '국가 안에서 사용된 언어까지 함께 확인', empty('국가·언어 교차 집계가 아직 연결되지 않았습니다. 다음 집계부터 표시됩니다.'));
   const previous = new Map((period.previousCountryLanguages ?? []).map(r => [r.name,r]));
-  const sorted = [...rows].sort((a,b) => ui.marketSort === 'newUsers' ? b.newUsers-a.newUsers : b.activeUsers-a.activeUsers);
+  const sorted = groupedCountryRows(period, ui.marketSort);
   const selected = sorted.some(r=>r.name===ui.country) ? ui.country : sorted[0]?.name;
   const chosen = sorted.find(r=>r.name===selected);
   const metric = (r,name) => r.events == null ? '—' : number(r.events[name]?.users ?? null,'명');
-  const html = sorted.map(r => '<tr class="' + (selected===r.name?'selected':'') + '" data-action="country" data-key="' + esc(r.name) + '" tabindex="0" role="button" aria-label="' + esc(marketLabel(r)) + ' 추이"><th>' + esc(localizeName('country',r.country)) + '</th><td>' + esc(localizeName('language',r.language)) + '</td><td>' + number(r.activeUsers) + '</td><td>' + change(r.activeUsers,previous.get(r.name)?.activeUsers) + '</td><td>' + number(r.newUsers) + '</td><td>' + metric(r,'onboarding_complete') + '</td><td>' + metric(r,'team_roster_created') + '</td><td>' + metric(r,'alarm_template_saved') + '</td><td>' + metric(r,'alarm_dismissed') + '</td></tr>').join('');
-  return card('국가별 성장과 기능 활용', '국가 × 언어 · 같은 ' + view.len + '일 기준 사용자 수', '<div class="tabs" role="group" aria-label="국가 정렬"><button class="tab" data-action="market-sort" data-key="activeUsers" aria-pressed="' + (ui.marketSort!=='newUsers') + '">활성 사용자 순</button><button class="tab" data-action="market-sort" data-key="newUsers" aria-pressed="' + (ui.marketSort==='newUsers') + '">신규 사용자 순</button></div><div class="table-scroll"><table class="ops-table market-table"><thead><tr><th>국가</th><th>언어</th><th>활성</th><th>직전 대비</th><th>신규</th><th>시작 완료</th><th>전체조 생성</th><th>알람 생성</th><th>알람 끄기</th></tr></thead><tbody>' + html + '</tbody></table></div><div class="market-chart-head"><b>' + esc(chosen ? marketLabel(chosen) : '국가·언어 선택') + ' · 일간 활성 추이</b><span class="sub">최근 최대 100일 · 행을 눌러 국가·언어 선택</span></div><div id="ch-country" style="min-height:200px"></div><p class="sub">언어는 GA4 기기 언어 기준이며 앱에서 선택한 표시 언어와 다를 수 있습니다. 국가나 언어가 바뀐 사용자는 여러 조합에 포함될 수 있어 합계는 전체 이용자 수와 다를 수 있습니다. 알람 생성은 고정 알람 생성·수정 저장 기록 기준입니다. 표는 좌우로 밀어 모든 지표를 확인할 수 있습니다.</p>');
+  const html = sorted.map((r,i) => '<tr class="' + (i===0 || sorted[i-1].country!==r.country ? 'country-group-start ' : '') + (selected===r.name?'selected':'') + '" data-action="country" data-key="' + esc(r.name) + '" tabindex="0" role="button" aria-label="' + esc(marketLabel(r)) + ' 추이"><th>' + esc(localizeName('country',r.country)) + '</th><td>' + esc(localizeName('language',r.language)) + '</td><td>' + number(r.activeUsers) + '</td><td>' + change(r.activeUsers,previous.get(r.name)?.activeUsers) + '</td><td>' + number(r.newUsers) + '</td><td>' + metric(r,'onboarding_complete') + '</td><td>' + metric(r,'team_roster_created') + '</td><td>' + metric(r,'alarm_template_saved') + '</td><td>' + metric(r,'alarm_dismissed') + '</td></tr>').join('');
+  return card('국가별 성장과 기능 활용', '국가 전체 규모 순 · 국가 안에서 언어별 표시 · 같은 ' + view.len + '일 기준 사용자 수', '<div class="tabs" role="group" aria-label="국가 정렬"><button class="tab" data-action="market-sort" data-key="activeUsers" aria-pressed="' + (ui.marketSort!=='newUsers') + '">활성 사용자 순</button><button class="tab" data-action="market-sort" data-key="newUsers" aria-pressed="' + (ui.marketSort==='newUsers') + '">신규 사용자 순</button></div><div class="table-scroll"><table class="ops-table market-table"><thead><tr><th>국가</th><th>언어</th><th>활성</th><th>직전 대비</th><th>신규</th><th>시작 완료</th><th>전체조 생성</th><th>알람 생성</th><th>알람 끄기</th></tr></thead><tbody>' + html + '</tbody></table></div><div class="market-chart-head"><b>' + esc(chosen ? marketLabel(chosen) : '국가·언어 선택') + ' · 일간 활성 추이</b><span class="sub">최근 최대 100일 · 행을 눌러 국가·언어 선택</span></div><div id="ch-country" style="min-height:200px"></div><p class="sub">언어는 GA4 기기 언어 기준이며 앱에서 선택한 표시 언어와 다를 수 있습니다. 국가나 언어가 바뀐 사용자는 여러 조합에 포함될 수 있어 합계는 전체 이용자 수와 다를 수 있습니다. 알람 생성은 고정 알람 생성·수정 저장 기록 기준입니다. 표는 좌우로 밀어 모든 지표를 확인할 수 있습니다.</p>');
 }
 const HEALTH_EVENTS = [['alarm_schedule_ok', '예약 API 완료'], ['alarm_schedule_failed', '예약 API 실패'], ['alarm_fired', '실제 수신·울림 진입'], ['device_boot_seen', '부팅 신호 관측'], ['alarm_refresh_completed', '재등록 갱신 완료'], ['alarm_refresh_failed', '재등록 갱신 실패']];
 export function reliabilityCard(docs, view) {
@@ -153,7 +165,7 @@ export function revenueCard(docs, view) {
 export function mountCountryChart(root, docs, view, ui) {
   const host = root.querySelector('#ch-country'); if (!host) return null;
   const trend = docs.operations?.countryLanguageTrend;
-  const rows = [...(periodData(docs,view)?.countryLanguages ?? [])].sort((a,b)=>ui.marketSort==='newUsers'?b.newUsers-a.newUsers:b.activeUsers-a.activeUsers);
+  const rows = groupedCountryRows(periodData(docs,view), ui.marketSort);
   const selected = rows.find(r=>r.name===ui.country) ?? rows[0];
   const item = trend?.series?.[selected?.name];
   if (!item) {host.innerHTML=empty('선택 국가·언어의 일별 추이가 아직 없습니다.');return null;}

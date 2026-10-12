@@ -4,7 +4,7 @@ import { Ga4, DEFAULTS } from '../lib/ga4.mjs';
 import { reportState, periodStats, segmentStats, countryTrend } from '../lib/operations.mjs';
 import { buildMockDocs } from '../../public/assets/js/mock.js';
 import { computeView } from '../../public/assets/js/views.js';
-import { periodData, eventData, adoptionCard, revenueCard, reliabilityCard, dailyView, dailyOverviewCard, dailySelection, weekdayDauAverages, countryCard } from '../../public/assets/js/operations.js';
+import { periodData, eventData, adoptionCard, revenueCard, reliabilityCard, dailyView, dailyOverviewCard, dailySelection, weekdayDauAverages, countryCard, groupedCountryRows } from '../../public/assets/js/operations.js';
 const report = (metrics, rows, metadata = {}) => ({metricHeaders: metrics.map(name => ({name})), rows: rows.map(([dims, vals]) => ({dimensionValues: dims.map(value => ({value})), metricValues: vals.map(value => ({value: String(value)}))})), metadata});
 test('all business queries use production stream and completed dates', () => {
   const ga = new Ga4({auth: null});
@@ -111,4 +111,14 @@ test('country-language metrics and events use joint dimensions, never join separ
   const trend=countryTrend(daily,100,2);
   assert.deepEqual(trend.series[JSON.stringify(['United States','Korean'])].dau,[3]);
   assert.deepEqual(trend.series[JSON.stringify(['United States','English'])].dau,[9]);
+});
+
+
+test('country total ranks groups, keeping small language rows above the next country', () => {
+  const period={countries:[{name:'South Korea',activeUsers:100,newUsers:12},{name:'United States',activeUsers:50,newUsers:5}],countryLanguages:[
+    {country:'United States',language:'English',activeUsers:50,newUsers:5},
+    {country:'South Korea',language:'English',activeUsers:1,newUsers:1},
+    {country:'South Korea',language:'Korean',activeUsers:99,newUsers:11}]};
+  assert.deepEqual(groupedCountryRows(period).map(r=>[r.country,r.language]),[['South Korea','Korean'],['South Korea','English'],['United States','English']]);
+  assert.deepEqual(groupedCountryRows(period,'newUsers').map(r=>r.country),['South Korea','South Korea','United States']);
 });

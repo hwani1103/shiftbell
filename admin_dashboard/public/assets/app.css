@@ -340,3 +340,6 @@ main { padding-top: 16px; display: grid; gap: 14px; }
 .weekday-dau-grid small { font-size:11px; color:var(--muted); }.weekday-dau-grid b small { margin-left:3px; font-weight:400; }
 .weekday-dau-track { height:4px; background:var(--line); border-radius:4px; overflow:hidden; margin-bottom:8px; }.weekday-dau-track i { display:block; height:100%; background:var(--accent); }
 @media(max-width:650px) { .weekday-dau-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }.weekday-dau-grid article { padding:12px 8px; }.weekday-dau-grid b { font-size:18px; } }
+
+/* Country languages stay together; a stronger divider begins each country. */
+.market-table tr.country-group-start:not(:first-child) > * { border-top-width: 2px; }

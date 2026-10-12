@@ -32,6 +32,11 @@ try {
     assert.equal(await page.locator('#ch-language').count(), 0);
     assert.equal(await page.locator('[data-action="language"]').count(), 0);
     assert.equal(await page.locator('.market-table thead th').nth(1).textContent(), '언어');
+    const initialCountries = await page.locator('[data-action="country"] th').allTextContents();
+    assert.deepEqual(initialCountries.slice(0,2), ['대한민국','대한민국']);
+    const seen = new Set(); let last;
+    for(const country of initialCountries){if(country!==last){assert.ok(!seen.has(country));seen.add(country);last=country;}}
+
     const usKorean = page.locator('[data-action="country"]').filter({hasText:'미국'}).filter({hasText:'한국어'});
     const usEnglish = page.locator('[data-action="country"]').filter({hasText:'미국'}).filter({hasText:'영어'});
     const southAfrica = page.locator('[data-action="country"]').filter({hasText:'남아프리카공화국'}).filter({hasText:'영어'});
