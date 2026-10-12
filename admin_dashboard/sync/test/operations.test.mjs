@@ -53,8 +53,22 @@ test('unknown revenue and unobserved alarm telemetry do not assert success', () 
 
 test('unobserved feature does not imply a zero adoption rate', () => {const docs=buildMockDocs();const view=computeView(docs,30);delete docs.events.series.team_roster_created;docs.summary.eventsByRange[30].events=docs.summary.eventsByRange[30].events.filter(e=>e.name!=='team_roster_created');const row=adoptionCard(docs,view).match(/<tr[^>]*data-event="team_roster_created"[\s\S]*?<\/tr>/)[0];assert.match(row,/미관측/);assert.equal(row.includes('adoption'),false);assert.match(row,/>—<\/td>/);});
 
-test('overview daily chart uses ten calendar days ending yesterday', () => { const docs=buildMockDocs();const recent=dailyView(docs,'2026-09-21');assert.equal(recent.dates.length,10);assert.equal(recent.dates.at(-1),'2026-09-21');assert.equal(recent.dates[0],'2026-09-12');assert.equal(recent.yesterdayValue('dau'),docs.series.dau.at(-1));for(const range of [7,30,100,365]){const html=dailyOverviewCard(docs,recent,{range,visible:{dau:true,mau:true}});assert.equal((html.match(/data-action="daily-day"/g)??[]).length,0);assert.equal(html.includes('서비스가 성장하고'),false);}});
-test('missing yesterday remains pending instead of relabeling old DAU', () => {const docs=buildMockDocs();const recent=dailyView(docs,'2026-09-22');assert.equal(recent.yesterdayValue('dau'),null);assert.equal(recent.yesterdayValue('mau'),null);assert.equal(recent.dates.length,9);assert.match(dailyOverviewCard(docs,recent,{visible:{dau:true,mau:true}}),/어제 자료는 아직 집계되지/);});
+test('overview DAU follows selected periods while MAU keeps its 28-day value', () => {
+  const docs=buildMockDocs();
+  const expectedMau=docs.series.mau.at(-1).toLocaleString('en-US')+'명';
+  for(const range of [7,30,100,365]) {
+    const recent=dailyView(docs,'2026-09-21',range);
+    assert.equal(recent.dates.length,range);
+    assert.equal(recent.dates.at(-1),'2026-09-21');
+    assert.equal(recent.yesterdayValue('dau'),docs.series.dau.at(-1));
+    const html=dailyOverviewCard(docs,recent,{range,visible:{dau:true,mau:true}});
+    assert.ok(html.includes('최근 '+range+'일 DAU 추이'));
+    assert.equal(recent.yesterdayValue('mau'),docs.series.mau.at(-1));
+    assert.ok(html.includes(expectedMau));
+    assert.equal((html.match(/data-action="daily-day"/g)??[]).length,0);
+  }
+});
+test('missing yesterday remains pending instead of relabeling old DAU', () => {const docs=buildMockDocs();const recent=dailyView(docs,'2026-09-22');assert.equal(recent.yesterdayValue('dau'),null);assert.equal(recent.yesterdayValue('mau'),null);assert.equal(recent.dates.length,29);assert.match(dailyOverviewCard(docs,recent,{visible:{dau:true,mau:true}}),/어제 자료는 아직 집계되지/);});
 test('feature adoption is sorted by period usage with unknowns last', () => {const docs=buildMockDocs();const view=computeView(docs,30);delete docs.events.series.team_roster_created;docs.summary.eventsByRange[30].events=docs.summary.eventsByRange[30].events.filter(e=>e.name!=='team_roster_created');const names=[...adoptionCard(docs,view).matchAll(/data-event="([a-z_]+)"/g)].map(m=>m[1]);const unknownIndex=names.indexOf('team_roster_created');assert.ok(unknownIndex>=0);assert.ok(names.slice(unknownIndex).every(name=>!eventData(docs,view,name).observed));const counts=names.map(name=>eventData(docs,view,name).count);assert.deepEqual(counts,[...counts].sort((a,b)=>b-a));});
 
 test('schedule summary counts appear in usage ranking without a percentage column', () => {const docs=buildMockDocs();const view=computeView(docs,30);delete docs.events.series.schedule_created;docs.summary.eventsByRange[30].events=docs.summary.eventsByRange[30].events.filter(e=>e.name!=='schedule_created');docs.summary.eventsByRange[30].events.push({name:'schedule_created',count:999999,users:17});assert.equal(eventData(docs,view,'schedule_created').count,999999);const html=adoptionCard(docs,view);assert.equal([...html.matchAll(/data-event="([a-z_]+)"/g)][0][1],'schedule_created');assert.match(html,/일정 생성/);assert.match(html,/17명/);assert.equal(html.includes('기간 이용자 대비'),false);assert.equal((html.match(/<thead>[\s\S]*?<\/thead>/)[0].match(/<th>/g)||[]).length,3);});

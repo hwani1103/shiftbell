@@ -123,3 +123,8 @@ SvgPicture.asset(
 렌더링해 보여주는 임시 확인용 화면). 어디에도 라우팅은 안 돼 있어서 확인하려면
 `main.dart`의 `home:`을 잠깐 `MemoCategoryIconLabScreen()`으로 바꿔서 실행하면 됨
 (확인 후 반드시 되돌릴 것).
+
+## 배포 라이선스 고지 (2026-10-12)
+이 디렉터리의 LICENSE-Lucide.txt는 Lucide ISC 및 Feather 유래 아이콘의 MIT 고지 전문을 포함합니다. LICENSE-Tabler.txt는 Tabler MIT 고지 전문입니다. 두 파일은 이 디렉터리의 Flutter 자산 등록을 통해 앱에 포함됩니다. 위 매핑과 변형 기록은 그대로 유지합니다.
+공식 원문: https://github.com/lucide-icons/lucide/blob/main/LICENSE / https://github.com/tabler/tabler-icons/blob/main/LICENSE (2026-10-12 조회).
+기존 SVG의 도입 당시 커밋은 기록되어 있지 않습니다. 최신 공식 고지 전문을 보완했으며 기존 SVG나 출처·변형 기록을 변경하지 않았습니다.

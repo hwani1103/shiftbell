@@ -1,0 +1,55 @@
+최종 후보 내부 테스트·실기기 후속 (2026-10-12)
+
+사용자 승인: 재부팅 알람 복구 사용자 확인 OK. 실기기 검사/필요한 수정, 사용자 백업 완료. 1.0.24+26 release AAB 빌드/Play 내부 테스트 명시 승인. 최종 정정한 테스터는 worms0905@gmail.com 한 명. 프로덕션 공개는 이번 범위가 아님.
+
+완료: SM-S948N/API36 USB dev 메모 후속
+- 실제 메모 새 저장/수정 저장/키보드 열린 상태 저장 후 Android Back·재열기 정상.
+- Flutter VM 연결, 위젯 평가, dependency 등록 조회를 전혀 하지 않은 새 프로세스로 검사. 과거 도구 영향이 의심되지만 두 번째 assertion의 단일 원인을 확정하지 않음.
+- 시험 메모2개 UI 삭제 후 DB29 사용자17테이블 전체 행 동일. notifyClients/assertion/Unhandled Exception/FATAL 로그 없음. 제품 수정 없이 이번 범위 PASS.
+- 설치 APK SHA256 ab1751a4436debc137837166915d0ffa0a0733a51d53d7b9212a4422cf0093c0 일치. DE 백업은 APK 교체 후 첫 실행 전에 취득했으므로 교체 전 DB 비교로 확대하지 않음.
+- 근거: artifacts/final_device_checks_2026_10_12/dev_result.json 및 memo_* PNG/XML/log, before_launch_de.tar, after_memo_de.tar.
+
+진행 중: 최종 prod
+- pubspec.yaml/android/app/build.gradle.kts 버전1.0.24+26. 기존 미커밋 작업 보존.
+- 기존 Play prod1.0.23+25의 사용자12:55 백업 확보(schema2/14테이블/14설정, 메모36/일정10/수면17/근무표1/알람0). 개인 원문은 Git 제외 artifacts에만 보관.
+- 기존 운영 광고 ID를 확인하여 동일 값으로 release AAB 빌드 시작. 서명/광고 guard 유지.
+- 내부 테스트는 기존23인 목록 미선택, 출시검증_본인_20261012(1명)만 선택·저장. 버전 초안/5언어 내부 검증 노트 작성.
+- 기존 메타데이터19개는 게시 준비됨 확인. 관리형 게시 유지/공개 없음.
+- 실기기 PAGE_SIZE=4096. 공식 Android15 google_apis_ps16k x86_64 이미지 설치 및 전용 AVD 준비. 동시 실행 시 RAM 부족으로 자기 emulator-5580만 종료, 빌드 후 실행 예정.
+- 최종 AAB/Play 업데이트/16KB 실행/운영 동의 신호는 아직 완료 아님. 후속 증거를 아래에 연결한다.
+
+후속 완료: 1.0.24+26 최종 후보와 실제 Play 업데이트
+- 위 진행 중 기록은 당시 상태. prod release AAB 빌드 exit0, 72,765,110 bytes, SHA256 4c27996e9a2244b8c634e1f22b56359961519f74c099d33abf581ce2b9e455f9.
+- 경로 build/app/outputs/bundle/prodRelease/app-prod-release.aab. prod 패키지/비디버그/target36/min24 및 운영 AdMob 앱·배너 ID 확인. Lucide/Tabler 전문 자산 원본 일치.
+- AAB PAGE_ALIGNMENT_16K, 64bit native8개 LOAD 정렬 PASS. bundletool1.18.3으로 같은 AAB에서 만든 universal APK의 zipalign -c -P 16 4 exit0. 이 검사는 실제 16KB 실행 PASS를 뜻하지 않음. 일부 GNU_RELRO 끝주소 조건은 별도 런타임 후속 대상.
+- Play 내부 트랙4701621927577479087에26(1.0.24) 저장·출시, '내부 테스터에게 제공됨' 확인. 선택된 테스터 목록은 본인1명만. 사용자 최종 정정 이메일로 참여 완료.
+- SM-S948N/API36 실제 Play 스토어에서25→26 업데이트. installer=com.android.vending, firstInstallTime=2026-08-12 유지, lastUpdateTime=2026-10-12 13:38:58. adb sideload로 대체하지 않음.
+- 기존 백업14표의 모든 원래 필드·원래 설정 값 유지. 메모36/일정10/수면17/근무표1 유지. alarm_history의 fixed_slot_time/snooze_minutes 열, 새 team_schedule_config0행/fixed_alarm_consumptions2행, 기본 snooze5 설정은 새 버전 이관 차이로 구분.
+- 실제 release에서 키보드 열린 메모 저장→Android Back→날짜 재열기 정상, 시험 메모 RELEASE_CHECK_26 UI 삭제. 최종 직접 백업에서도 원래 데이터 동일. notifyClients/assertion/Unhandled/FATAL 오류 패턴0. 과거 debug 도구의 영향 가능성은 있으나 단일 원인 확정 또는 모든 상황 해결로 확대하지 않음. 이번 메모 경로 수정 불필요/PASS.
+- 테스트 종료 후 Firebase debug 앱/log.tag.FA/log.tag.FA-SVC 임시 속성3개를 원래 빈 값으로 복원. cold start 정상(440ms Activity 시작 수치이며 전체 데이터/광고 로딩 완료 시간은 아님).
+- 사용자 백업은 로컬 ignored artifacts에 보존. 새 버전의 직접/자동 백업 슬롯 정책으로 휴대폰의 기존 prod 백업 파일은 새 슬롯 파일로 교체됨. 원래 데이터 보존과 옛 백업 파일 이름 보존을 혼동하지 않음.
+- 진행 중 일반/스누즈 알람은 업데이트 전0개였으므로 활성 예약의 Play 업데이트 연속성은 이번 증거에 포함하지 않음. 이전 dev/native 이관 PASS와 사용자 재부팅 확인 근거 유지.
+- 증거: artifacts/final_device_checks_2026_10_12/aab_verification.json, prod_aab_build.log, internal_released.jpg, prod_device_final.json, prod_data_result.json, prod_backup_final.json, prod_memo_*.png/xml, prod_final.log.
+
+운영 광고·동의 확인 범위
+- 최종 운영 광고 ID 포함 및 한국 실기기 배너 표시 확인. 화면에는 '테스트 광고'로 표시되어 실제 유료 광고 충전율/매출 검증이 아님. 광고 클릭 없음.
+- UMP 실제 응답 IABTCF_gdprApplies=0, UMP_consentModeValues=3333 관측. 이 한국 지역 실행에서는 EEA 동의창이 요구되지 않음.
+- Firebase 측정 활성화 로그 확인. 최종 release의 EEA 허용/거부/철회 각각에 대한 광고·분석4신호 검증은 NOT_RUN. 기존 dev의 EEA UI PASS와 구분. 운영 계정 전체의 동의 정책이나 지역을 변경하여 억지로 시험하지 않음.
+- R02의 Ads 전환 가져오기 등 운영 설정 잔여도 유지. 이번 앱 호환성/업데이트 PASS를 광고 운영 설정 전부 완료로 확대하지 않음.
+
+공개 상태
+- 기본/맞춤 등록정보19개 변경은 게시 준비됨, 관리형 게시 ON. 이번에는 내부 테스트만 배포했으며 프로덕션 앱/19개 변경의 공개 게시를 수행하지 않음.
+- 버전 외 앱 기능 수정 없음. 앞선 개인정보·라이선스 보완의 필수 -Build 전체 PASS 근거 유지. 이번 버전 증분에 대해 기존338/native 기능·DB 검사를 이유 없이 전수 반복하지 않음.
+
+16KB 후속 최종 판정: 한정 범위 PASS
+- 공식 Android16 google_apis_ps16k x86_64 이미지(BE2A.250530.026.F3/13894323), sys.boot_completed=1, PAGE_SIZE=16384 확인.
+- bionic.linker.16kb.app_compat.enabled=false / pm.16kb.app_compat.disabled=true 실제 읽기 확인. 호환 모드 없이 같은 최종 AAB에서 bundletool로 생성한 universal APK 설치 Success.
+- universal APK는 에뮬레이터용 debug 서명이며 코드/리소스는 최종 prod release AAB에서 생성. 실제 휴대폰에는 이 APK를 설치하지 않고 Play 서명 업데이트를 사용함.
+- 앱 Flutter 엔진 로딩 성공, 영어 첫 설정4단계에서 Day 패턴 생성·저장, 달력 표시, force-stop 후 재실행에서 같은 패턴 유지 확인. DB29 integrity_check=ok, shift_schedule1행/알람0행 확인.
+- 근거: emulator36_runtime.json, emulator36_db_result.json, emulator36_main.png, emulator36_final.png, emulator36_first_process.log/emulator36_app.log. 전용 에뮬레이터 프로세스만 종료하여 검사 종료.
+- 제한: 첫 API35 이미지는 앱 설치 전 system_server의 PackageManager 내부 SIGSEGV로 부팅 실패하여 앱 FAIL로 처리하지 않음. API36은 저사양 호스트에서 매우 느렸고 System UI ANR/시스템 Bluetooth SIGABRT 및 앱 초기 SQLite journal 모드 변경 잠금·재시도 로그가 있었음. 이후 앱 설정 저장/재실행/DB무결성 성공, 앱 프로세스 FATAL 또는 라이브러리 로딩 실패 없음. 전체 로그 무오류/성능 PASS로 확대하지 않음.
+- 일부 GNU_RELRO 끝주소 정렬 경고가 남지만 이 x86_64 실제 실행에서는 로딩 실패가 재현되지 않음. 실제 ARM64 16KB 기기·모든 native 코드 경로·알람 정시성까지 이 에뮬레이터 결과로 보장하지 않음. 현 단계에서 광범위 SDK/NDK 교체는 보류, 확인된 신규 앱 결함 없음.
+
+마감
+- 이번 완료: dev/실제 Play release 메모 경로, Play25→26 업데이트·원래 데이터 보존, 최종 산출물·운영 광고 ID·라이선스, 위 범위16KB 실행.
+- 잔여: 최종 release의 실제 EEA 동의4신호·Ads 운영 설정, 이번 업데이트 시점에 존재하지 않았던 활성 스누즈 연속성, 기존 수용한 장시간/물리 조건 및 수면 위젯 보류. '모든 출시 항목 전부 PASS'로 기록하지 않음.

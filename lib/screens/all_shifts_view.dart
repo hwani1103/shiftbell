@@ -47,6 +47,7 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
   bool _isLoading = true;
   bool _isConfigured = false; // ⭐ 전체 교대조 근무표 설정 여부
   TeamScheduleConfig? _config;
+  TeamScheduleConfig? _legacyRecovery;
   String _myTeam = ''; // ⭐ 2026-09-05 - 편집 화면 프리필용("내 조" 자동인식)
 
   // ⭐ PageView용 초기 인덱스 (과거 100년 ~ 미래 100년)
@@ -96,6 +97,8 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
     try {
       final config = await DatabaseService.instance.getTeamScheduleConfig();
       _config = config;
+      _legacyRecovery = config == null
+          ? await DatabaseService.instance.getRecoverableLegacyTeams() : null;
       _isConfigured = config != null;
       _teams = config?.names ?? [];
       _teamOffsets = config?.offsets ?? {};
@@ -109,6 +112,21 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
         });
       }
     }
+  }
+
+  Future<void> _recoverLegacyTeams() async {
+    final config = _legacyRecovery;
+    if (config == null) return;
+    final accepted = await showDialog<bool>(context: context, builder: (context) =>
+      AlertDialog(title: Text(context.l10n.teamLegacyRecoverAction),
+        content: Text(context.l10n.teamLegacyRecoverBody), actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.commonCancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.backupRestoreButton)),
+        ]));
+    if (accepted != true || !mounted) return;
+    // Only the roster row is restored. Main schedule, memos and alarms are kept.
+    await DatabaseService.instance.saveTeamScheduleConfig(config);
+    await _loadTeamData();
   }
 
   // ⭐ 2026-09-05 - 월 이동 버튼 3종 - 위쪽 헤더와 두 블록 사이 보조 내비게이션
@@ -257,6 +275,11 @@ class _AllShiftsViewState extends ConsumerState<_AllShiftsBody> {
                           ),
                         ),
                         SizedBox(height: 32.h),
+                        if (_legacyRecovery != null) ...[
+                          OutlinedButton(onPressed: _recoverLegacyTeams,
+                            child: Text(context.l10n.teamLegacyRecoverAction)),
+                          SizedBox(height: 16.h),
+                        ],
                         // ⭐ 전체 교대조 근무표 만들기 버튼
                         ElevatedButton.icon(
                           onPressed: () => _openAllTeamsSetupScreen(),

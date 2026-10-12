@@ -124,12 +124,12 @@ class TeamScheduleConfig {
   }
   static final baseDate = DateTime(2024, 1, 1);
 
-  static TeamScheduleConfig? read(SharedPreferences prefs) {
+  static TeamScheduleConfig? read(SharedPreferences prefs, {ShiftSchedule? schedule}) {
     final names = prefs.getStringList('all_teams_names');
-    final mine = prefs.getString('all_teams_my_team');
+    var mine = prefs.getString('all_teams_my_team');
     if (names == null ||
         names.length < 2 ||
-        !names.contains(mine) ||
+        (mine != null && mine.isNotEmpty && !names.contains(mine)) ||
         names.any((n) => n.trim().isEmpty) ||
         names.toSet().length != names.length) {
       return null;
@@ -139,7 +139,17 @@ class TeamScheduleConfig {
           as Map<String, dynamic>;
       final offsets = raw.map((k, v) => MapEntry(k, int.parse('$v')));
       if (names.any((n) => !offsets.containsKey(n))) return null;
-      return TeamScheduleConfig(names: names, offsets: offsets, myTeam: mine!);
+      if (mine == null || mine.isEmpty) {
+        if (schedule?.isRegular != true || schedule?.pattern?.isNotEmpty != true ||
+            schedule?.startDate == null || schedule?.todayIndex == null) return null;
+        final length = schedule!.pattern!.length;
+        final index = schedule.getPatternIndexForDate(baseDate);
+        final matches = names.where((name) => ((offsets[name]! % length) + length) % length == index).toList();
+        // Never guess identity when multiple teams share the same position.
+        if (matches.length != 1) return null;
+        mine = matches.single;
+      }
+      return TeamScheduleConfig(names: names, offsets: offsets, myTeam: mine);
     } catch (_) {
       return null;
     }

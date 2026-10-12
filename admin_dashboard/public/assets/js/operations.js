@@ -36,11 +36,12 @@ export function businessKpis(docs, view) {
     metric('7일 재방문율', retained?.days?.[7] == null ? '—' : fmtPct(retained.days[7], 1), retained ? '첫 세션 코호트 ' + fmtInt(retained.size) + '명 · 별도 기준 기간' : '코호트 자료 없음', retained && retained.size < 30 ? tag('작은 표본', 'warning') : '') +
     metric('28일 활성 사용자', number(view.last('mau'), '명'), '기준일 직전 28일 · MAU', '', sparkline(view.cur('mau'), COLORS.mau)) + '</section>';
 }
-export function dailyView(docs, yesterday = new Date(Date.parse(todayKst()) - 86400000).toISOString().slice(0, 10)) {
-  const cutoff = new Date(Date.parse(yesterday) - 9 * 86400000).toISOString().slice(0, 10);
+export function dailyView(docs, yesterday = new Date(Date.parse(todayKst()) - 86400000).toISOString().slice(0, 10), range = 30) {
+  const days = [7, 30, 100, 365].includes(Number(range)) ? Number(range) : 30;
+  const cutoff = new Date(Date.parse(yesterday) - (days - 1) * 86400000).toISOString().slice(0, 10);
   const indices = docs.series.dates.flatMap((date, i) => date >= cutoff && date <= yesterday ? [i] : []);
   const yesterdayIndex = docs.series.dates.indexOf(yesterday);
-  return { yesterday, dates: indices.map((i) => docs.series.dates[i]),
+  return { yesterday, range: days, dates: indices.map((i) => docs.series.dates[i]),
     cur: (key) => indices.map((i) => docs.series[key]?.[i]),
     yesterdayValue: (key) => yesterdayIndex < 0 ? null : docs.series[key]?.[yesterdayIndex] ?? null };
 }
@@ -80,10 +81,10 @@ export function dailyOverviewCard(docs, view, ui) {
   return '<section class="card span-12 daily-overview"><div class="card-h"><div><h1>일간 활성 사용자 · DAU</h1><p>출시 앱 · 하루 동안 앱을 쓴 사용자</p></div></div><div class="daily-kpis">' +
     '<article class="daily-dau" aria-live="polite"><span id="daily-dau-label">' + hero.label + '</span><strong id="daily-dau-date">' + esc(hero.date) + '</strong><b id="daily-dau-value">' + hero.value + '</b><small>날짜를 선택하면 해당일 DAU를 확인할 수 있습니다.</small></article>' +
     '<article class="daily-mau"><span>MAU · 직전 28일</span><b>' + number(view.yesterdayValue('mau'), '명') + '</b><small>어제 ' + esc(fmtLong(view.yesterday)) + ' 기준</small></article></div>' +
-    (waiting ? '<p class="notice">어제 자료는 아직 집계되지 않았습니다. 아래 차트는 최근 10일 중 집계된 날짜만 보여줍니다.</p>' : '') +
-    '<div class="daily-chart-head"><h2>최근 10일 DAU 추이</h2><span class="sub">차트의 날짜를 눌러 확인</span></div>' +
+    (waiting ? '<p class="notice">어제 자료는 아직 집계되지 않았습니다. 아래 차트는 최근 ' + view.range + '일 중 집계된 날짜만 보여줍니다.</p>' : '') +
+    '<div class="daily-chart-head"><h2>최근 ' + view.range + '일 DAU 추이</h2><span class="sub">차트의 날짜를 눌러 확인</span></div>' +
     '<div class="daily-legend"><button class="chip" data-action="legend" data-key="dau" aria-pressed="' + ui.visible.dau + '"><i style="background:' + COLORS.dau + '"></i>DAU 일간</button><button class="chip" data-action="legend" data-key="mau" aria-pressed="' + ui.visible.mau + '"><i style="background:' + COLORS.mau + '"></i>MAU 직전 28일</button></div>' +
-    (view.dates.length ? '<div id="ch-users" style="min-height:240px"></div>' : empty('최근 10일의 집계 자료가 아직 없습니다.')) +
+    (view.dates.length ? '<div id="ch-users" style="min-height:240px"></div>' : empty('최근 ' + view.range + '일의 집계 자료가 아직 없습니다.')) +
     weekdayDauCard(docs, ui, view.yesterday) +
     '<p id="daily-readout" class="daily-readout" aria-live="polite">' + esc(dailyReadout(view, selected)) + '</p></section>';
 }

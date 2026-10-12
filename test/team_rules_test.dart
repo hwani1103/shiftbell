@@ -101,6 +101,49 @@ void main() {
     expect((await service.getTeamScheduleConfig())!.toJson(), saved.toJson());
   });
 
+  for (final mine in ['', null]) {
+    test('legacy missing identity $mine recovers unique C without moving any date', () async {
+      await service.saveShiftSchedule(ShiftSchedule(id:1, isRegular:true,
+        pattern:['Day','Day','Off','Off','Night','Night','Off','Off'],
+        todayIndex:6, startDate:DateTime(2026,8,12,13,53),
+        shiftTypes:['Day','Night','Off'], activeShiftTypes:['Day','Night','Off']));
+      SharedPreferences.setMockInitialValues({'all_teams_names':['A','B','C','D'],
+        'all_teams_offsets':jsonEncode({'A':'0','B':'2','C':'4','D':'6'}),
+        if (mine != null) 'all_teams_my_team':mine});
+      final before = (await service.getShiftSchedule())!.toMap();
+      final saved = (await service.getTeamScheduleConfig())!;
+      expect(saved.myTeam, 'C');
+      expect(saved.names, ['A','B','C','D']);
+      final roundTrip = TeamScheduleConfig.fromJson(saved.toJson());
+      expect(roundTrip.myTeam, 'C');
+      for (var d = -400; d <= 400; d++) {
+        final day = DateTime(2026,10,3+d);
+        for (var i = 0; i < saved.names.length; i++) {
+          expect(roundTrip.rules[saved.names[i]]!.indexOn(day),
+            ((day.difference(TeamScheduleConfig.baseDate).inDays + i*2)%8+8)%8);
+        }
+      }
+      expect((await service.getShiftSchedule())!.toMap(), before);
+      await service.saveTeamScheduleConfig(null);
+      expect(await service.getTeamScheduleConfig(), isNull,
+        reason:'never automatically resurrect an intentional reset');
+      final recovery = (await service.getRecoverableLegacyTeams())!;
+      await service.saveTeamScheduleConfig(recovery);
+      expect((await service.getTeamScheduleConfig())!.toJson(), saved.toJson());
+      expect((await service.getShiftSchedule())!.toMap(), before);
+    });
+  }
+
+  test('missing identity is never guessed for duplicate or unmatched positions', () async {
+    final schedule = (await service.getShiftSchedule())!;
+    final index = schedule.getPatternIndexForDate(TeamScheduleConfig.baseDate)!;
+    for (final positions in [ {'A':index,'B':index}, {'A':(index+1)%8,'B':(index+2)%8} ]) {
+      SharedPreferences.setMockInitialValues({'all_teams_names':['A','B'],
+        'all_teams_offsets':jsonEncode(positions),'all_teams_my_team':''});
+      expect(TeamScheduleConfig.read(await SharedPreferences.getInstance(), schedule:schedule), isNull);
+    }
+  });
+
   test('switch A to E to C keeps every roster rule and can return to A', () async {
     var config = roster();
     await service.saveTeamScheduleConfig(config);

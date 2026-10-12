@@ -629,7 +629,7 @@ class DatabaseService {
       final rows = await txn.query('team_schedule_config');
       if (rows.isNotEmpty) return _decodeTeams(rows.first['config']);
       final schedule = await _readScheduleForUpdate(txn, null);
-      final old = TeamScheduleConfig.read(prefs);
+      final old = TeamScheduleConfig.read(prefs, schedule: schedule);
       final migrated = old != null && schedule?.pattern?.isNotEmpty == true
           ? old.materialize(schedule!.pattern!) : null;
       await _writeTeams(txn, migrated);
@@ -639,6 +639,18 @@ class DatabaseService {
 
   TeamScheduleConfig? _decodeTeams(Object? raw) => raw == null ? null :
       TeamScheduleConfig.fromJson(jsonDecode(raw as String) as Map<String, dynamic>);
+
+  /// Release 26 wrote a null row when the legacy roster had no selected team.
+  /// Recovery is explicit because null also represents an intentional reset.
+  Future<TeamScheduleConfig?> getRecoverableLegacyTeams() async {
+    final prefs = await SharedPreferences.getInstance();
+    if ((prefs.getString('all_teams_my_team') ?? '').isNotEmpty) return null;
+    final schedule = await getShiftSchedule();
+    if (schedule?.isRegular != true || schedule?.pattern?.isNotEmpty != true) return null;
+    final old = TeamScheduleConfig.read(prefs, schedule: schedule);
+    if (old == null) return null;
+    return old.materialize(schedule!.pattern!);
+  }
 
   Future<void> _writeTeams(DatabaseExecutor db, TeamScheduleConfig? config) async {
     if (config != null) TeamScheduleConfig.fromJson(config.toJson());

@@ -50,8 +50,8 @@ android {
         applicationId = "com.hwani1103.shiftbell"
         minSdk = flutter.minSdkVersion
         targetSdk = 36
-        versionCode = 25
-        versionName = "1.0.23"
+        versionCode = 27
+        versionName = "1.0.24"
         // ⭐ 2026-09-14 (출시전 감사 G5 #6, D2) - AdMob 앱 ID. prod는 Gradle 속성 ADMOB_APP_ID로 최종 배포 직전에 주입,
         // 없으면 구글 공개 테스트 앱 ID(dev는 아래 flavor에서 항상 테스트 ID). lib/constants/ad_config.dart 참고.
         manifestPlaceholders["admobAppId"] =

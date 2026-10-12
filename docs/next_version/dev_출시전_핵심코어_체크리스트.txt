@@ -219,3 +219,32 @@
 [x] 위 수정 후보의 Samsung SM-S948U/API36 SRTL dev debug 실측: Next 같은 좌표 257ms 2회는 첫 ID만 취소/다음 ID와 정확한 OS 예약 보존, 700ms 뒤 의도한 취소 정상. 일정 저장 2회는 1행/탭 유지. 기존 7자 근무명은 다른 이름 편집·저장 후 보존, 새 7자 이름 거절. Settings/Calendar/Next의 실제 1분 종료와 Flutter 수렴 3095/3220/2419ms, 홈 복귀 3102ms. 고정 APK 기기 SHA 일치. 근거: 태블릿_알람동기화_연속터치_기존근무명_후속_2026-10-12.txt 및 artifacts/tablet_followup_2026_10_12/. 이전 태블릿 SM-X400 자체의 이번 수정/잠금 PASS는 아님. U06-SLEEP-WIDGET은 사용자 요청으로 이번 수정/실측 보류; 기존 정적 위험 상태 보존. R01/R02/R04/R05 및 기존 PASS 경계 유지.
 [x] A04/A05/A11 대표 잠금 회귀(SM-S948U/dev debug): 화면OFF 잠금에서 소리 알람 X, 무음 1분 자연 종료, FSI 거절 상태의 직접 fallback/+5분 같은 ID 재울림·알림창 종료, 잠금 알림창 무음 종료를 실제 확인. FSI/overlay 거절→앱 인식→설정 복귀→허용, 앱 알림 차단과 채널 단독 차단의 서로 다른 snapshot 및 잠금 fallback 확인 후 복원. 근거는 위 후속 원장/개별 JSON·PNG. 물리 음량·진동, 정확한 알람 denied 왕복, DND/BT/헤드폰, 기존 SM-X400 잠금 시험까지 확장하지 않음.
 [ ] A04/A11 재부팅 예약 복구: 시험 id20을 10/12 09:57:55 KST에 예약하고 재부팅했으나 SRTL ADB가 offline, Samsung RTL Web Client가 session expired / all ongoing tests ended를 표시. 부팅 후 전달/DB/OS/시험 id20 정리와 임시 무음 지속시간 1분→3분 복원은 확인 불가. 같은 기기 재접근을 가정하지 않음. 실제 Doze IDLE은 기기가 force-idle을 INACTIVE에서 거부하여 NOT_RUN, 자연 장시간 Doze도 미실시. A08의 기존 물리 조건 잔여와 구분. 원장/reboot_armed.json/synthetic_doze_result.json.
+
+[2026-10-12 Play Console 등록정보 후속]
+[x] R03 스토어 메타데이터 검토 제출: 기본 5언어 문구/30이미지, 검색용 맞춤 ko/en 동일 교체, DE/BR/IN 추가로 총9개국 설정 저장. 이번19개 변경 전송 후 콘솔 '검토 중인 변경사항' 확인(빠른 검사 진행 중). 관리형 게시 ON, 실제 공개/AAB 업로드 없음. 앱 콘텐츠 주의 필요0/조치됨13 확인. 기본 ko-KR 유지. 앱 기능/언어 리소스 변경0, 기존 R01/R02/R04 잔여 보존. 상세: PlayConsole_등록정보_검토제출_2026-10-12.txt. 증거: artifacts/play_store_submission_2026_10_12/review_submitted.jpg 및 upload_manifest.json.
+
+[2026-10-12 개인정보·라이선스 후속]
+[x] R02 공개/앱 고지 보완:5언어 기존 privacy23문구 교정, 사용자가 선택한 문의 해결 후30일/삭제 요청 지체 없이 처리 기준 반영. 제한 운영 통계·공유 중지 메타데이터·진단/광고/이전 데이터 설명 정합화. 공개 GitHub Pages d12ae34 배포built 및 실제5언어 확인. 앱 내부는 다음 업데이트 반영. 최종 prod 동의4신호 등 R02 나머지 잔여 유지.
+[x] X01 아이콘 고지: Lucide ISC+Feather MIT / Tabler MIT 전문 배포 자산 추가, 기존 SVG/README 이력 보존. 필수 -Build 전체 PASS(Flutter338/native 기능·DB/dev debug·JS웹). APK 라이선스2파일 원본 바이트 일치/수정문구23개 포함 확인. 실기기 신규PASS 아님. 상세: 개인정보_아이콘라이선스_보완_2026-10-12.txt / artifacts/privacy_release_2026_10_12/verification.json.
+
+[2026-10-12 사용자 재부팅 확인 후속]
+[x] A04/A11 재부팅 후 알람 복구: 사용자가 남은 항목 1번에 대해 '1번은 ok됐고'라고 직접 확인. 사용자 실기기 확인 OK로 마감. 기기/설치본/로그 상세는 제공되지 않았으므로 에이전트 계측 PASS 또는 최종 prod 후보 PASS로 확대하지 않는다. 기존 SRTL 세션 종료 당시 확인 불가·시험 자료 정리 미확인 이력과 Doze 미실시는 그대로 보존한다.
+
+[2026-10-12 최종 release·본인 내부 테스트 후속]
+[x] R01/R04 후보 고정·Play 실제 업데이트: 사용자 명시 승인으로1.0.24+26 prod AAB 빌드/내부 트랙 출시. SHA256 4c27996e9a2244b8c634e1f22b56359961519f74c099d33abf581ce2b9e455f9. 최종 정정 계정1명만 테스터 목록 선택. SM-S948N/API36 실제 Play25→26, 기존 최초 설치일 유지/installer=com.android.vending. 기본14표의 원래 모든 필드 및 원래 설정 유지, 새 스키마/기본 snooze5 차이 구분. 진행 중 알람0개여서 활성 스누즈 업데이트 연속성까지 PASS 아님. 프로덕션 공개 미실행.
+[x] A09 메모 Back 후속: 계측 VM 연결 없는 dev 새/수정/키보드 열린 저장3경로 정상, 시험 메모 제거 후17표 전체 행 동일. Play release26의 키보드 열린 저장/Back/재열기도 정상, 시험 메모 제거 후 원래36메모 보존. 오류 패턴0. 현재 검사 경로 PASS·제품 수정 불필요. 과거 도구 영향 가능성과 미확정 원인을 보존하며 모든 상황 해결로 확대하지 않음.
+[x] R02/X01 최종 AAB의 운영 광고 ID·라이선스 확인. 한국 prod UMP gdprApplies=0/consentModeValues=3333 및 배너 표시/측정 활성화 관측. 테스트 광고 표시는 실제 수익 검증 아님. 최종 release EEA 허용·거부·철회4신호와 Ads 전환 설정 잔여 유지. 실기기 임시 Firebase debug/log속성3개 원복.
+[x] R03 메타데이터19개 게시 준비됨 확인. 관리형 게시 ON·공개 게시 미실행. 내부 테스트 release는 제공됨.
+상세·증거: 최종후보_내부테스트_실기기_2026-10-12.txt / artifacts/final_device_checks_2026_10_12/{aab_verification,prod_device_final,prod_data_result,dev_result}.json 및 internal_released.jpg. 16KB 실행은 별도 후속 판정, 기존 PASS/수면위젯 보류/수용한 미실시 항목 유지.
+[x] R04 16KB 후속: 공식 API36 x86_64에서 PAGE_SIZE16384/호환모드OFF 확인, 같은 최종 AAB 기반 universal release 코드 APK 설치·Flutter 실행·근무 설정 저장·force-stop 재실행 유지·DB29 integrity_check=ok. 한정 호환성 PASS. API35 시스템 부팅 실패/호스트 성능 저하·API36 시스템 경고와 초기 DB잠금 재시도는 원장에 보존; 앱 FATAL/로딩 실패 없음. ARM64 실제16KB·전체 알람 경로/성능 검사로 확대하지 않음. emulator36_runtime.json/emulator36_db_result.json/PNG/log. 광범위 SDK 교체 보류.
+[x] R02/A03 실제 SDK4신호 후속: SM-S948N/dev debug/운영 게시 메시지/해당 기기 EEA 옵션에서 거부2222→허용1111→철회2222, 허용/철회 각각 재실행 상태 유지. 실제 Firebase storage2종/ad_user_data/npa 로그·저장 상태 일치. 제품 소스/운영 설정 변경0, 분석 수집OFF 유지·이벤트 전송 검사로 확대하지 않음. 원래 dev APK/SDK동의prefs3개/debug속성3개 복원·DB17표 전체행 동일. 실제 Play EEA 초기/네트워크 이벤트와 Ads 전환 설정 잔여는 별도. 상세 운영동의_4신호_실기기후속_2026-10-12.txt / artifacts/consent_signals_2026_10_12/result.json.
+미국 정정: 메시지 미등록만으로 보완 필수라고 판정하지 않음. 사용자 기존 불필요 판단 유지/새 출시 차단 항목 추가 없음. 만들었던 US 메시지는 미게시 초안으로만 보존, 운영 적용0.
+
+[2026-10-12 전체근무표 사용자 신고 긴급 후속]
+[ ] R01/A09 출시 HOLD: release26 실제 업데이트 후 전체근무표 미표시 신고. 원래 조 이름·offset 보존이나 내 조 빈 값으로 새 로딩 검증 탈락; 원래 칩 선택은 필수이며 빈 값 생성 경로는 미확정. 사용자 C조와 절대 패턴 위치 일치. 유일 조 이관 보완/기존 null marker 명시 복구 진행. 사용자 승인으로 내부 테스트 재개 및 구버전→수정27 업데이트 검사 예정. 앞선 데이터 필드 보존 PASS를 실제 로스터 표시 PASS로 확대하지 않음. 후속 원장: 전체근무표_이관_긴급후속_2026-10-12.txt.
+
+
+[2026-10-12 수정27 실제 Play 최종 후속]
+[x] R01/A09 전체근무표 HOLD 해제(이번 수정 범위): 실제 Play25→27 기존14표 원래 필드/preferences 동일, 4조/C 표시. 실제27 최신 사용자 null marker 백업의 명시 복구·재실행 유지. 원래 데이터/다크테마 복원; 백업복원 이력 ID 재부여/추가 로그와 순수 업데이트 차이 구분. Dev 원래APK/17표 exact 복원. 상세: 전체근무표_이관_긴급후속_2026-10-12.txt / artifacts/release_finish_2026_10_12/final_result.json.
+[x] R01/R04 최종1.0.24+27 prod AAB 고정·Play 동일본 검증: SHA2569a9191133bfe695803be640eaa976eec138bdf26ae8ff6f19b61926b52531b6f. 필수 -Build exit0·운영ID/라이선스/64bit LOAD 정렬 근거 확인. 이전25→26 판정 당시 미검사 로스터 범위를 이번 검사로 보완. ARM64 실제16KB 신규PASS 아님.
+[x] U04 관리자 DAU 선택기간7/30/100/365·MAU28일 유지 배포7343516a97c234e5. R02 독일어 운영동의 메시지 추가 게시. 내부 트랙은 검증 후 다시중지/본인 참여 종료. 사용자 Play27 설치 유지. 프로덕션 공개/공개버전 갱신/메타데이터19개 게시 후순위 유지.

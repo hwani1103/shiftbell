@@ -1,0 +1,28 @@
+출시 국가·기기·후속 Google Ads/UAC 최종 확인 — 2026-10-12 KST
+
+사용자 요청: 출시 국가/제조사 설정 필요 여부, 현재27 게시 후 추후 UAC 집행 가능 여부 확인. 읽기 전용 검토. 앱 소스·운영 설정·결제·캠페인 변경 없음.
+
+현재 Play Console 직접 확인
+- 프로덕션27 임시 출시의 미리보기 화면: 새 bundle27(1.0.24) 단독, 5개 언어 출시 노트, 출시율100.0%, '모든 대상 국가에서 제공' 선택. 저장/심사제출/게시 버튼은 누르지 않았다.
+- 프로덕션 국가: 한국·미국·영국·필리핀·남아공·UAE·독일·브라질·인도, 타겟팅9개 확인. '모든 대상 국가'는 이 설정 목록이며 전 세계라는 뜻이 아니다.
+- 27 지원 변경: 휴대전화12344/태블릿6774, 지원 중단0/새 지원0. 전체 기기 카탈로그 지원모델19216, 제외모델0. 제외규칙0/Android Go 제외하지 않음. 제조사를 별도로 허용해야 하는 상태나 수동 제외 없음.
+- Play 설치 가능과 제조사별 실제 알람 동작 PASS는 다르다. 기존 원격 Infinix 보류·미확보 vivo/HONOR·물리 조건 등의 수용 범위를 변경하지 않는다.
+
+Google Ads/UAC
+- 현재 worms0905 계정의 Ads296-370-8513에 로그인하여 '계정 및 결제 설정 확인', 한국/KST 단계 확인. 아직 관리 UI/설치 전환 최종 상태를 확인할 수 없음. 결제 제출/약관/광고 집행 없음. 광고 차단기 안내는 해제하지 않음.
+- 기존 검토의 최신11절 및 evidence/google_ads_console_2026_10_11.json: GA4/Firebase→Ads 연결완료, 실제prod 온보딩 수신·주요 이벤트 지정·전환7836673879(보조/1회/가치없음) 등록·저장 확인. 재생성하지 않음. 이번에 연결을 새로 수정하거나 관리 UI에서 모두 재확인한 결과라고 쓰지 않음.
+- 최종27 manifest에 Firebase Analytics 수집true 및 Analytics registrar/measurement service 포함. 현재 prod/dev 초기화 분리, UMP 자동 동의 연동 및 게시된 독일어 메시지 유지. 10/12 실제SDK 허용/거부/철회4신호·재실행 유지 증거는 dev 범위로 재사용. Play27 실제 EEA 최초/네트워크 이벤트까지 PASS로 확대하지 않음.
+- 판정: UAC 준비를 위해 출시 전에 추가 SDK/앱 수정·새 AAB가 필요한 결함은 확인되지 않음. 27 앱 게시 진행 가능. 결제 미완료는 앱 공개의 차단 항목이 아님.
+- 광고 집행 전: 본인 결제·약관/요구 시 광고주 인증, prod 설치/first_open 중 주목표 확인, 대상국가/언어·예산·소재·입찰 지정. EEA 실제운영 동의진단 후속 확인. 현재 '결제만 하면 즉시 모든 UAC 측정 준비 완료'라는 판정은 아님. 위 콘솔 확인 자체 때문에 재업데이트 필요하다고 판정하지 않음.
+
+공식 근거
+https://support.google.com/googleplay/android-developer/answer/7550024
+https://support.google.com/googleplay/android-developer/answer/7353455
+https://support.google.com/google-ads/answer/6255257
+https://support.google.com/google-ads/answer/6167168
+https://developers.google.com/admob/flutter/privacy/consent-mode
+
+기존 완료/후속 연결
+GoogleAds_UAC_출시준비_검토_2026-10-11.txt 11절
+운영동의_4신호_실기기후속_2026-10-12.txt
+전체근무표_이관_긴급후속_2026-10-12.txt
