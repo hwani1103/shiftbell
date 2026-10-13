@@ -188,6 +188,7 @@ export class Ga4 {
         fieldName: 'eventName', inListFilter: { values: [
           'first_open', 'app_remove', 'onboarding_complete', 'team_roster_created', 'all_shifts_opened',
           'shift_assigned', 'alarm_template_saved', 'alarm_dismissed', 'alarm_snoozed', 'alarm_no_response',
+          'ot_saved', 'work_hours_settings_saved', 'calendar_theme_changed', 'memo_saved', 'shift_name_changed',
           'alarm_schedule_ok', 'alarm_schedule_failed', 'alarm_fired', 'alarm_refresh_completed',
           'alarm_refresh_failed', 'device_boot_seen', 'ops_daily_ready', 'ops_daily_restricted',
           'ops_daily_unknown', 'ops_battery_restricted', 'ops_exact_denied', 'ops_notification_blocked',
@@ -196,6 +197,12 @@ export class Ga4 {
       } }),
       limit: '30000',
     };
+  }
+
+  // EmptyFilter combines GA4 '(not set)' and empty values before distinct-user aggregation.
+  unknownCountries(body) {
+    return {...body,dimensions:(body.dimensions ?? []).filter(d=>d.name!=='country'),
+      dimensionFilter:{andGroup:{expressions:[body.dimensionFilter,{filter:{fieldName:'country',emptyFilter:{}}}]}}};
   }
 
   countryDaily(days = 100) { return this.segmentDaily('country', days); }

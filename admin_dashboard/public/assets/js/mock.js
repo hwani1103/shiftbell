@@ -59,6 +59,7 @@ const CUSTOM_RATES = {
   alarm_template_saved: 0.05,
   custom_alarm_assigned: 0.06,
   ot_saved: 0.045,
+  work_hours_settings_saved: 0.012,
   calendar_theme_changed: 0.03,
   help_opened: 0.02,
   backup_created: 0.018,

@@ -23,6 +23,7 @@ import { Ga4, DEFAULTS, makeAuthClient } from './lib/ga4.mjs';
 import { buildDocs, table, ymd } from './lib/transform.mjs';
 import { alreadySyncedInSlot, syncPolicy } from './lib/sync-policy.mjs';
 import { emptyDimensions, assertNonemptyFields } from './lib/report-values.mjs';
+import { hasUnknownCountry, mergeUnknownCountryReport } from './lib/unknown-countries.mjs';
 
 const { values: args } = parseArgs({
   options: {
@@ -63,7 +64,7 @@ async function fetchReal() {
     return [range, { from, to, report }];
   })));
   // 나머지는 실패해도 대시보드 일부만 비워 두고 계속한다
-  const [ads, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, countryLanguageDaily] = await Promise.all([
+  let [ads, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, countryLanguageDaily] = await Promise.all([
     ga.tryReport('광고', ga.adsDaily(days)),
     ga.tryReport('앱 버전 분포', ga.breakdown('appVersion')),
     ga.tryReport('OS 분포', ga.breakdown('operatingSystemVersion')),
@@ -76,6 +77,14 @@ async function fetchReal() {
     ga.tryReport('국가 일별 추이', ga.countryDaily(100)),
     ga.tryReport('국가·언어 일별 추이', ga.countryLanguageDaily(100)),
   ]);
+  if(hasUnknownCountry(countryDaily,1) || hasUnknownCountry(countryLanguageDaily,1)) {
+    const [unknownDaily,unknownLanguageDaily]=await Promise.all([
+      ga.tryReport('확인불가 국가 일별 통합',ga.unknownCountries(ga.countryDaily(100))),
+      ga.tryReport('확인불가 국가·언어 일별 통합',ga.unknownCountries(ga.countryLanguageDaily(100))),
+    ]);
+    countryDaily=mergeUnknownCountryReport(countryDaily,unknownDaily,1);
+    countryLanguageDaily=mergeUnknownCountryReport(countryLanguageDaily,unknownLanguageDaily,1);
+  }
   const operationsByRange = {};
   // Query one range at a time; ten optional reports per range.
   for (const range of eventRanges) {
@@ -95,7 +104,28 @@ async function fetchReal() {
       ga.tryReport('제조사 이용자', ga.segmentSummary('mobileDeviceBranding', from, to)),
       ga.tryReport('제조사 알람 관측', ga.segmentEvents('mobileDeviceBranding', from, to)),
     ]);
-    operationsByRange[range] = { from, to, current, previous, countries, previousCountries, countryEvents, countryLanguages, previousCountryLanguages, countryLanguageEvents, manufacturers, manufacturerEvents };
+    const data = { from, to, current, previous, countries, previousCountries, countryEvents, countryLanguages, previousCountryLanguages, countryLanguageEvents, manufacturers, manufacturerEvents };
+    if(hasUnknownCountry(countries) || hasUnknownCountry(countryLanguages)) {
+      const [unknown,unknownLanguages,unknownEvents]=await Promise.all([
+        ga.tryReport('확인불가 국가 기간 통합',ga.unknownCountries(ga.segmentSummary('country',from,to))),
+        ga.tryReport('확인불가 국가 언어 통합',ga.unknownCountries(ga.segmentSummary(['country','language'],from,to))),
+        ga.tryReport('확인불가 국가 기능 통합',ga.unknownCountries(ga.segmentEvents(['country','language'],from,to))),
+      ]);
+      data.countries=mergeUnknownCountryReport(countries,unknown);
+      if(unknownLanguages && unknownEvents) {
+        data.countryLanguages=mergeUnknownCountryReport(countryLanguages,unknownLanguages);
+        data.countryLanguageEvents=mergeUnknownCountryReport(countryLanguageEvents,unknownEvents);
+      }
+    }
+    if(hasUnknownCountry(previousCountries) || hasUnknownCountry(previousCountryLanguages)) {
+      const [unknown,unknownLanguages]=await Promise.all([
+        ga.tryReport('직전 확인불가 국가 통합',ga.unknownCountries(ga.segmentSummary('country',previousFrom,previousTo))),
+        ga.tryReport('직전 확인불가 국가 언어 통합',ga.unknownCountries(ga.segmentSummary(['country','language'],previousFrom,previousTo))),
+      ]);
+      data.previousCountries=mergeUnknownCountryReport(previousCountries,unknown);
+      data.previousCountryLanguages=mergeUnknownCountryReport(previousCountryLanguages,unknownLanguages);
+    }
+    operationsByRange[range] = data;
   }
   const raw = { core, ads, eventsDaily, eventsByRange, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, countryLanguageDaily, operationsByRange };
   const findings = emptyDimensions(raw);

@@ -60,6 +60,7 @@ export const EVENT_META = {
   shift_assigned: { label: '근무 지정·변경', icon: '📅', group: '달력' },
   calendar_theme_changed: { label: '달력 테마 변경', icon: '🎨', group: '달력' },
   memo_saved: { label: '메모 저장', icon: '📝', group: '달력' },
+  work_hours_settings_saved: { label: '근무시간 설정', icon: '⏱️', group: '설정', desc: '근무시간 및 OT 계산 기준 설정을 저장한 기록. 계측이 포함된 앱 버전부터 집계합니다.' },
   ot_saved: { label: 'OT·특근 기록', icon: '⏱️', group: '달력' },
   schedule_created: { label: '일정 생성', icon: '🗓️', group: '일정' },
   sleep_record_saved: { label: '수면 기록 저장', icon: '🌙', group: '수면' },
@@ -102,7 +103,7 @@ const NAMES = {
   country: { India: '인도', Brazil: '브라질', 'United Arab Emirates': '아랍에미리트', 'South Africa': '남아프리카공화국', 'South Korea': '대한민국', 'United States': '미국', Japan: '일본', Canada: '캐나다', Australia: '호주', China: '중국', Vietnam: '베트남', Thailand: '태국', Philippines: '필리핀', Germany: '독일', 'United Kingdom': '영국', Taiwan: '대만' },
 };
 export function localizeName(dim, name) {
-  return name === '(missing)' ? '미제공' : name === '(not set)' ? '확인 불가' : NAMES[dim]?.[name] ?? name;
+  return dim === 'country' && (name === '(missing)' || !name) ? '확인 불가' : name === '(missing)' ? '미제공' : name === '(not set)' ? '확인 불가' : NAMES[dim]?.[name] ?? name;
 }
 export const osLabel = (v) => (/^\d/.test(v) ? `Android ${v}` : v);
 

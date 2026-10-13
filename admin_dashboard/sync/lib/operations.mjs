@@ -10,7 +10,7 @@ export function reportState(report) {
     thresholded: report.metadata?.subjectToThresholding === true,
     otherRowLoss: report.metadata?.dataLossFromOtherRow === true,
     sampled: (report.metadata?.samplingMetadatas?.length ?? 0) > 0,
-    truncated: Number(report.rowCount ?? 0) > (report.rows?.length ?? 0),
+    truncated: report.metadata?.sourceTruncated === true || Number(report.rowCount ?? 0) > (report.rows?.length ?? 0),
   };
 }
 export function periodStats(report) {
