@@ -95,14 +95,14 @@ function destroyCharts() { charts.forEach((c) => c.destroy()); charts = []; dail
 
 function headerHtml(view) {
   const s = docs?.summary;
-  const stale = s ? Date.now() - Date.parse(s.updatedAt) > 36 * 3600 * 1000 : false;
+  const stale = s ? Date.now() - Date.parse(s.updatedAt) > 6 * 3600 * 1000 : false;
   const latest = s?.latest ? fmtLong(s.latest) : '-';
   return `<header class="topbar"><div class="wrap">
     <div class="bar1">${brandMark}<div class="titles"><b>교대시계 운영</b><small>Play 출시 버전 · ${esc(latest)}까지 집계 · ${dataCutoffLabel(s?.latest)}</small></div>
       <button class="icon-btn${loading ? ' spinning' : ''}" data-action="refresh" aria-label="새로고침">${ICONS.refresh}</button>
       <button class="avatar" data-action="menu" aria-label="계정 메뉴">${esc(initialOf(user?.email))}</button></div>
     <div class="bar2"><div class="seg" role="group" aria-label="조회 기간">${RANGES.map((r) => `<button data-action="range" data-key="${r}" aria-pressed="${ui.range === r}">${r}일</button>`).join('')}</div>
-      <span class="pill${stale ? ' warn' : ''}" title="마지막 동기화"><span class="dot"></span>${s ? esc(relTime(s.updatedAt)) : '-'}</span></div>
+      <span class="pill${stale ? ' warn' : ''}" title="${stale ? '서버 집계가 6시간 이상 갱신되지 않았습니다' : '마지막 동기화'}"><span class="dot"></span>${stale ? '집계 지연 · ' : ''}${s ? esc(relTime(s.updatedAt)) : '-'}</span></div>
     <nav class="ops-nav" aria-label="운영 영역">${SECTIONS.map(([key, label]) => `<button data-action="section" data-key="${key}" aria-pressed="${ui.section === key}">${label}</button>`).join('')}</nav>
   </div></header>`;
 }

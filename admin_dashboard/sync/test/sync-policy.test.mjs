@@ -22,3 +22,12 @@ test('all eight slots including midnight are distinct and use the KST calendar d
 test('scheduler delay keeps one refresh per slot instead of adding a sliding 3-hour cooldown', () => {
   assert.equal(alreadySyncedInSlot(saved('2026-10-11T03:50:00Z'),at('2026-10-11T06:20:00Z')),false);
 });
+
+test('hourly catch-up retries a missed slot but skips a successful slot', () => {
+  const old=saved('2026-10-11T00:18:00Z');
+  assert.equal(alreadySyncedInSlot(old,at('2026-10-11T04:17:00Z')),false);
+  assert.equal(alreadySyncedInSlot(old,at('2026-10-11T05:17:00Z')),false);
+  const recovered=saved('2026-10-11T04:18:00Z');
+  assert.equal(alreadySyncedInSlot(recovered,at('2026-10-11T05:17:00Z')),true);
+  assert.equal(alreadySyncedInSlot(recovered,at('2026-10-11T06:17:00Z')),false);
+});

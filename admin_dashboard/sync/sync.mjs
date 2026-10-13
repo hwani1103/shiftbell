@@ -22,6 +22,7 @@ import { buildMockDocs } from '../public/assets/js/mock.js';
 import { Ga4, DEFAULTS, makeAuthClient } from './lib/ga4.mjs';
 import { buildDocs, table, ymd } from './lib/transform.mjs';
 import { alreadySyncedInSlot, syncPolicy } from './lib/sync-policy.mjs';
+import { emptyDimensions, assertNonemptyFields } from './lib/report-values.mjs';
 
 const { values: args } = parseArgs({
   options: {
@@ -96,11 +97,15 @@ async function fetchReal() {
     ]);
     operationsByRange[range] = { from, to, current, previous, countries, previousCountries, countryEvents, countryLanguages, previousCountryLanguages, countryLanguageEvents, manufacturers, manufacturerEvents };
   }
+  const raw = { core, ads, eventsDaily, eventsByRange, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, countryLanguageDaily, operationsByRange };
+  const findings = emptyDimensions(raw);
+  for (const finding of findings) console.warn('Empty GA4 dimension:', JSON.stringify(finding));
   const docs = buildDocs({
-    raw: { core, ads, eventsDaily, eventsByRange, appVersion, os, language, country, device, manufacturer, cohort, webFriendViews, countryDaily, countryLanguageDaily, operationsByRange },
+    raw,
     meta: { now: new Date(), propertyId, streamId, cohortRange, source: 'ga4' },
   });
   docs.summary.currency = core?.metadata?.currencyCode || 'USD';
+  docs.summary.dataQuality = { emptyDimensions: findings };
   return docs;
 }
 
@@ -125,6 +130,7 @@ async function writeFirestore(db, docs) {
   const batch = db.batch();
   for (const [name, doc] of Object.entries(docs)) {
     if (Buffer.byteLength(JSON.stringify(doc)) > 900000) throw new Error('Dashboard document exceeds safe size: ' + name);
+    assertNonemptyFields(doc, name);
     batch.set(col.doc(name), doc);
   }
   await batch.commit();

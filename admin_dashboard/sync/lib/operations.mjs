@@ -1,3 +1,4 @@
+import { dimensionLabel, eventName } from './report-values.mjs';
 const table = (report) => (report?.rows ?? []).map((row) => ({ d: (row.dimensionValues ?? []).map((d) => d.value), m: (row.metricValues ?? []).map((m) => Number(m.value) || 0) }));
 const ymd = (s) => String(s).length === 8 ? String(s).slice(0, 4) + '-' + String(s).slice(4, 6) + '-' + String(s).slice(6, 8) : String(s);
 
@@ -24,14 +25,16 @@ export function segmentStats(report, eventReport, dimensionCount = 1) {
   const idx = metrics(report);
   const grouped = new Map();
   for (const row of table(eventReport)) {
-    const name = dimensionCount === 1 ? row.d[0] || '(not set)' : JSON.stringify(row.d.slice(0, dimensionCount));
+    const name = dimensionCount === 1 ? dimensionLabel(row.d[0]) : JSON.stringify(row.d.slice(0, dimensionCount).map(dimensionLabel));
+    const event = eventName(row.d[dimensionCount]);
+    if (event == null) continue;
     if (!grouped.has(name)) grouped.set(name, {});
-    grouped.get(name)[row.d[dimensionCount]] = { count: row.m[0], users: row.m[1] ?? null };
+    grouped.get(name)[event] = { count: row.m[0], users: row.m[1] ?? null };
   }
   return table(report).map((row) => {
-    const name = dimensionCount === 1 ? row.d[0] || '(not set)' : JSON.stringify(row.d.slice(0, dimensionCount));
+    const name = dimensionCount === 1 ? dimensionLabel(row.d[0]) : JSON.stringify(row.d.slice(0, dimensionCount).map(dimensionLabel));
     const get = (metric) => row.m[idx[metric]] ?? 0;
-    return { name, ...(dimensionCount === 2 ? {country: row.d[0], language: row.d[1]} : {}), activeUsers: get('activeUsers'), totalUsers: get('totalUsers'), newUsers: get('newUsers'),
+    return { name, ...(dimensionCount === 2 ? {country: dimensionLabel(row.d[0]), language: dimensionLabel(row.d[1])} : {}), activeUsers: get('activeUsers'), totalUsers: get('totalUsers'), newUsers: get('newUsers'),
       sessions: get('sessions'), engagementSec: get('userEngagementDuration'),
       events: eventReport == null ? null : (grouped.get(name) ?? {}) };
   });
@@ -39,7 +42,7 @@ export function segmentStats(report, eventReport, dimensionCount = 1) {
 export function countryTrend(report, maxCountries = 50, dimensionCount = 1) {
   if (!report) return null;
   const rows = table(report); const totals = new Map();
-  const key = row => dimensionCount === 1 ? row.d[1] : JSON.stringify(row.d.slice(1, dimensionCount + 1));
+  const key = row => dimensionCount === 1 ? dimensionLabel(row.d[1]) : JSON.stringify(row.d.slice(1, dimensionCount + 1).map(dimensionLabel));
   for (const row of rows) totals.set(key(row), (totals.get(key(row)) ?? 0) + row.m[0]);
   const names = [...totals].sort((a, b) => b[1] - a[1]).slice(0, maxCountries).map(([name]) => name);
   const dates = [...new Set(rows.map((row) => ymd(row.d[0])))].sort();
