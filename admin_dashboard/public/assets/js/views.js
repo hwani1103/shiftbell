@@ -244,7 +244,7 @@ export function footerNote(docs) {
   const s = docs.summary;
   return `<div class="foot span-12">데이터 기준: Google Analytics 4 · 플레이 스토어 <b>출시 버전만</b> 집계(개발용 앱 제외) · 스트림 ${esc(s.streamId ?? '-')}<br>
     마지막 동기화 ${esc(relTime(s.updatedAt))} (${esc(s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : '-')}) · 데이터 기준일 ${esc(s.latest ? fmtLong(s.latest) : '-')} · ${dataCutoffLabel(s.latest)}<br>
-    서버 집계: 한국 시간 00:17·03:17·06:17·09:17·12:17·15:17·18:17·21:17 예약(실행 지연 가능).<br>
+    서버 집계: 3시간 구간마다 재집계하고 매시간 17분에 누락·실패를 다시 확인합니다(예약 실행 지연·누락 가능).<br>
     화면: 열어 둔 동안 약 10~11분마다 재조회하며, 새로고침 버튼은 저장된 최신 집계를 다시 읽습니다.<br>
     집계는 어제까지의 날짜를 매번 다시 조회합니다. 어제 수치는 확정값이 아닙니다. GA4 처리와 최근 24~48시간 보정에 따라 값이 달라질 수 있습니다.${s.source === 'mock' ? '<br><b>※ 지금 보이는 건 데모(모의) 데이터입니다.</b>' : ''}</div>`;
 }
