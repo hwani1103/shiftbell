@@ -8,15 +8,16 @@ const report = (dims, rows) => ({ dimensionHeaders: dims.map(name => ({name})), 
 
 test('missing country labels preserve totals and serialize with the real Firestore SDK', () => {
   const trend=countryTrend(report(['date','country'],[[['20261011',''],[3,1,4]],[['20261011','(not set)'],[2,0,2]]]));
-  assert.deepEqual(trend.series['(not set)'].dau,[5]);
-  assert.equal(trend.availableCountries,1);
+  assert.deepEqual(trend.series['(missing)'].dau,[3]);
+  assert.deepEqual(trend.series['(not set)'].dau,[2]);
+  assert.equal(trend.availableCountries,2);
   const segments=segmentStats(report(['country'],[[[''],[5]]]),report(['country','eventName'],[[['','alarm_template_saved'],[2,1]],[['',''],[9,1]]]));
-  assert.equal(segments[0].name,'(not set)');
+  assert.equal(segments[0].name,'(missing)');
   assert.equal(segments[0].events.alarm_template_saved.count,2);
   assert.equal(Object.hasOwn(segments[0].events,''),false);
   const joint=segmentStats(report(['country','language'],[[['',''],[5]]]),null,2);
-  assert.equal(joint[0].country,'(not set)');
-  assert.equal(joint[0].language,'(not set)');
+  assert.equal(joint[0].country,'(missing)');
+  assert.equal(joint[0].language,'(missing)');
   const db=new Firestore({projectId:'offline-diagnostic'});
   // batch.set performs the production SDK's field validation without any network/commit.
   assert.doesNotThrow(()=>db.batch().set(db.doc('diagnostic/empty-country'),{trend,segments,joint}));

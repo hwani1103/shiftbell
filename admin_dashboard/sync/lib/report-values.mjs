@@ -1,6 +1,7 @@
-// Missing segment labels retain their metrics in GA4's unknown bucket.
+// Missing labels retain metrics in a separate bucket. Never merge their distinct
+// users with GA4's existing '(not set)' group.
 // Missing event names must never be presented as a real feature.
-export const dimensionLabel = value => typeof value === 'string' && value.trim() ? value : '(not set)';
+export const dimensionLabel = value => typeof value === 'string' && value.trim() ? value : '(missing)';
 export const eventName = value => typeof value === 'string' && value.trim() ? value : null;
 
 /** Report empty dimensions by report/column only; never log credentials or user data. */

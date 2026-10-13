@@ -141,7 +141,7 @@ export function reliabilityCard(docs, view) {
 export function manufacturerCard(docs, view) {
   const period = periodData(docs, view); const rows = period?.manufacturers;
   const event = (r, name, field = 'count') => r.events == null ? null : (r.events[name]?.[field] ?? null);
-  const html = (rows ?? []).map((r) => '<tr><th>' + esc(r.name === 'Google' ? 'Google (Pixel)' : r.name === '(not set)' ? '확인 불가' : r.name) + '</th><td>' + number(r.activeUsers) + '</td><td>' + number(event(r, 'alarm_schedule_failed')) + '</td><td>' + number(event(r, 'alarm_fired')) + '</td><td>' + number(event(r, 'alarm_refresh_failed')) + '</td><td>' + number(event(r, 'ops_battery_restricted', 'users')) + '</td><td>' + number(event(r, 'ops_exact_denied', 'users')) + '</td></tr>').join('');
+  const html = (rows ?? []).map((r) => '<tr><th>' + esc(r.name === 'Google' ? 'Google (Pixel)' : localizeName('manufacturer', r.name)) + '</th><td>' + number(r.activeUsers) + '</td><td>' + number(event(r, 'alarm_schedule_failed')) + '</td><td>' + number(event(r, 'alarm_fired')) + '</td><td>' + number(event(r, 'alarm_refresh_failed')) + '</td><td>' + number(event(r, 'ops_battery_restricted', 'users')) + '</td><td>' + number(event(r, 'ops_exact_denied', 'users')) + '</td></tr>').join('');
   return card('제조사별 알람·제한 상태', 'GA4 기기 브랜드 기준 · 선택 기간 내 관측 · 실패율 비교에는 표본과 재시도를 함께 확인', rows ? '<div class="table-scroll"><table class="ops-table"><thead><tr><th>제조사</th><th>활성 사용자</th><th>예약 실패</th><th>울림 진입</th><th>갱신 실패</th><th>배터리 제한 사용자</th><th>정확 알람 거부 사용자</th></tr></thead><tbody>' + html + '</tbody></table></div>' : empty('제조사별 운영 집계가 아직 연결되지 않았습니다.'));
 }
 export function permissionCard(docs, view) {
