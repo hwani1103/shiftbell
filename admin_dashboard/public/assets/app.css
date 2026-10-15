@@ -368,3 +368,6 @@ main { padding-top: 16px; display: grid; gap: 14px; }
 .dashboard-details>.ops-layout { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; }
 
 .dashboard-details>.ops-layout>* { grid-column:1/-1; }
+
+.growth-split>* { min-width:0; }.growth-split .table-scroll { max-width:100%; overflow-x:auto; }
+@media(max-width:650px) { .growth-split { grid-template-columns:minmax(0,1fr); } }
