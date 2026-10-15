@@ -8,6 +8,7 @@ import {
 import * as auth from './auth.js';
 import { loadDocs } from './store.js';
 import { esc, relTime, fmtLong, dataCutoffLabel } from './format.js';
+import { growthCard, acquisitionCard, activationCard, growthCountries, campaignCard, asoCard, disclosure, mountAcquisition, validStoreComparison, asoComparison } from './growth.js';
 
 const root = document.getElementById('app');
 const layer = document.getElementById('layer');
@@ -26,7 +27,9 @@ const ui = {
   visible: { dau: true, mau: false },
   section: 'overview', country: null, marketSort: 'activeUsers', dailyDate: null,
   dist: 'appVersion', evGroup: 'all', evSystem: false, evExpanded: false,
+  traffic: 'all', asoDate: store.get('aso-published-date', ''), storeComparison: null,
 };
+try { ui.storeComparison = JSON.parse(store.get('aso-store-comparison', 'null')); } catch { /* malformed old local record */ }
 let dailyChart = null; let docs = null; let user = null; let charts = []; let loading = false; let error = null; let loadedAt = 0; let sheetChart = null;
 
 // ───────────────────────── 테마 ─────────────────────────
@@ -133,10 +136,9 @@ function renderApp() {
   const section = ui.section;
   let body = '';
   const recent = dailyView(docs, undefined, ui.range);
-  if (section === 'overview') body = dailyOverviewCard(docs, recent, ui) + businessKpis(docs, view) + installsCard(view, 'span-12') + adoptionCard(docs, view) + reliabilityCard(docs, view) + revenueCard(docs, view) + collectionCard(docs, view);
-  if (section === 'growth') body = businessKpis(docs, view) + countryCard(docs, view, ui) + usersCard(view, ui.visible) + installsCard(view) + retentionCard(docs) + engagementCard(view);
-  if (section === 'product') body = adoptionCard(docs, view) + behaviorCard(docs, view, ui) + distCard(docs, ui, 'span-12') + revenueCard(docs, view);
-  if (section === 'quality') body = reliabilityCard(docs, view) + manufacturerCard(docs, view) + permissionCard(docs, view) + distCard(docs, ui, 'span-12') + collectionCard(docs, view);
+  if (section === 'overview') body = dailyOverviewCard(docs, recent, ui) + adoptionCard(docs, view, 5) + revenueCard(docs, view);
+  if (section === 'growth') body = growthCard(docs, ui) + acquisitionCard(docs, ui) + activationCard(docs, ui) + growthCountries(docs, ui) + asoCard(docs, ui) + disclosure('Google Ads 캠페인 보기', campaignCard(docs, ui)) + disclosure('국가·언어별 기능 사용 상세', countryCard(docs, view, ui));
+  if (section === 'quality') body = disclosure('기능 사용 전체', adoptionCard(docs, view) + behaviorCard(docs, view, ui)) + reliabilityCard(docs, view) + disclosure('제조사·권한 상세', manufacturerCard(docs, view) + permissionCard(docs, view)) + disclosure('버전·기기 분포', distCard(docs, ui, 'span-12')) + disclosure('데이터 수집 상태', collectionCard(docs, view));
   root.innerHTML = headerHtml(view) + '<main class="wrap ops-layout">' + body + footerNote(docs) + '</main>';
   const onDailySelect = (date) => {
     ui.dailyDate = date;
@@ -154,6 +156,8 @@ function renderApp() {
   }
   const countryChart = mountCountryChart(root, docs, view, ui);
   if (countryChart) charts.push(countryChart);
+  const acquisition = mountAcquisition(root, docs, ui);
+  if (acquisition) charts.push(acquisition);
   window.scrollTo(0, y);
 }
 
@@ -219,6 +223,7 @@ function openPassword() {
 // ───────────────────────── 이벤트 위임 ─────────────────────────
 function handle(action, el) {
   switch (action) {
+    case 'traffic': ui.traffic = el.dataset.key; renderApp(); break;
     case 'section': ui.section = el.dataset.key; renderApp(); window.scrollTo(0, 0); break;
     case 'country': ui.country = el.dataset.key; renderApp(); break;
     case 'market-sort': ui.marketSort = el.dataset.key; renderApp(); break;
@@ -257,6 +262,19 @@ function onActivate(e) {
   handle(el.dataset.action, el);
 }
 root.addEventListener('click', onActivate);
+root.addEventListener('submit', (e) => {
+  if (!['aso-date', 'aso-store'].includes(e.target.id)) return;
+  e.preventDefault();
+  const values = Object.fromEntries(new FormData(e.target));
+  if (e.target.id === 'aso-date') {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(values.date)) return;
+    ui.asoDate = values.date; store.set('aso-published-date', values.date); renderApp(); toast('게시일을 이 브라우저에 기록했어요');
+  } else {
+    if (asoComparison(docs.growth, ui.asoDate).status !== 'ready') { root.querySelector('#aso-form-message').textContent = '실제 게시일을 기록하고 게시 후 7일 집계가 끝난 뒤 입력하세요.'; return; }
+    if (!validStoreComparison(values) || !values.scope?.trim()) { root.querySelector('#aso-form-message').textContent = '방문자·획득은 0 이상의 정수이며, 획득 수가 방문자 수보다 많을 수 없습니다. 비교 범위도 입력하세요.'; return; }
+    ui.storeComparison = { ...values, date: ui.asoDate }; store.set('aso-store-comparison', JSON.stringify(ui.storeComparison)); renderApp(); toast('스토어 전환 수치를 기록했어요');
+  }
+});
 layer.addEventListener('click', onActivate);
 root.addEventListener('keydown', (e) => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches?.('[data-action="event"], [data-action="country"]')) { e.preventDefault(); onActivate(e); }

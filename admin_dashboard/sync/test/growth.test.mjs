@@ -40,3 +40,16 @@ test('retention uses cohort total, hides rates with zero or limited denominator'
   r.metadata={subjectToThresholding:true};
   assert.equal(parseRetention(r,'2026-10-14',7).rate,null);
 });
+test('live funnel duplicated headers preserve populated values', () => {
+ const r={funnelTable:report(['funnelStepName'],['activeUsers','completion','abandoned','rate','activeUsers','completion','abandoned','rate'],[[['1. First open'],[41,.4146,24,.5854]],[['2. Schedule ready'],[17,1,0,0]]])};
+ assert.equal(parseFunnel(r,'2026-10-08','2026-10-14').entrants,41);
+ assert.equal(parseFunnel(r,'2026-10-08','2026-10-14').rate,17/41);
+});
+test('ASO compares complete equal windows, excludes publish day, and rejects impossible counts', async () => {
+ const {asoComparison,validStoreComparison}=await import('../../public/assets/js/growth.js');
+ const g={latest:'2026-10-14',daily:[{date:'20261001',firstUserDefaultChannelGroup:'Organic Search',newUsers:4},{date:'20261007',firstUserDefaultChannelGroup:'Organic Search',newUsers:99},{date:'20261008',firstUserDefaultChannelGroup:'Organic Search',newUsers:6},{date:'20261008',firstUserDefaultChannelGroup:'Direct',newUsers:50}],coverage:{}};
+ const c=asoComparison(g,'2026-10-07'); assert.equal(c.before.users,4);assert.equal(c.after.users,6);assert.equal(c.delta,.5);
+ assert.equal(asoComparison(g,'2026-10-08').status,'waiting');
+ assert.equal(validStoreComparison({beforeVisitors:5,beforeInstalls:6,afterVisitors:5,afterInstalls:1}),false);
+ assert.equal(validStoreComparison({beforeVisitors:0,beforeInstalls:0,afterVisitors:5,afterInstalls:1}),true);
+});

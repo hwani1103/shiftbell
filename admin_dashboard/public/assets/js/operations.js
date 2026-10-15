@@ -2,7 +2,7 @@ import { lineChart, sparkline } from './charts.js';
 import { fmtInt, fmtPct, fmtMoney, fmtDur, fmtMD, fmtLong, todayKst, esc, sum, avg, deltaInfo } from './format.js';
 import { EVENT_META, eventMeta, localizeName, COLORS } from './labels.js';
 
-export const SECTIONS = [['overview', '운영 요약'], ['growth', '성장·국가'], ['product', '기능 활용'], ['quality', '알람·기기']];
+export const SECTIONS = [['overview', '운영 요약'], ['growth', '유입·성장'], ['quality', '상세 진단']];
 const number = (v, unit = '') => v == null ? '—' : fmtInt(v) + unit;
 const tag = (label, tone = '') => '<span class="status-tag ' + tone + '">' + esc(label) + '</span>';
 const card = (title, sub, body, cls = 'span-12') => '<section class="card ' + cls + '"><div class="card-h"><div><h2>' + title + '</h2><p>' + sub + '</p></div></div>' + body + '</section>';
@@ -85,7 +85,7 @@ export function dailyOverviewCard(docs, view, ui) {
     '<div class="daily-chart-head"><h2>최근 ' + view.range + '일 DAU 추이</h2><span class="sub">차트의 날짜를 눌러 확인</span></div>' +
     '<div class="daily-legend"><button class="chip" data-action="legend" data-key="dau" aria-pressed="' + ui.visible.dau + '"><i style="background:' + COLORS.dau + '"></i>DAU 일간</button><button class="chip" data-action="legend" data-key="mau" aria-pressed="' + ui.visible.mau + '"><i style="background:' + COLORS.mau + '"></i>MAU 직전 28일</button></div>' +
     (view.dates.length ? '<div id="ch-users" style="min-height:240px"></div>' : empty('최근 ' + view.range + '일의 집계 자료가 아직 없습니다.')) +
-    weekdayDauCard(docs, ui, view.yesterday) +
+    '<details class="growth-help"><summary>요일별 평균 보기</summary>' + weekdayDauCard(docs, ui, view.yesterday) + '</details>' +
     '<p id="daily-readout" class="daily-readout" aria-live="polite">' + esc(dailyReadout(view, selected)) + '</p></section>';
 }
 
@@ -96,11 +96,11 @@ const FEATURES = Object.entries(EVENT_META)
     !/^(ops_|alarm_schedule_|alarm_refresh_|device_boot_)/.test(name) &&
     !['alarm_fired', 'auto_backup_created'].includes(name))
   .map(([name, meta]) => [name, meta.label]);
-export function adoptionCard(docs, view) {
+export function adoptionCard(docs, view, limit = Infinity) {
   const ranked = FEATURES.map(([name, label], order) => ({ name, label, order, data: eventData(docs, view, name) }))
     .sort((a, b) => (b.data.count ?? -1) - (a.data.count ?? -1) || Number(b.data.observed) - Number(a.data.observed) || a.order - b.order);
   const max = ranked[0]?.data.count ?? 0;
-  const rows = ranked.map(({ name, label, data }, index) => {
+  const rows = ranked.slice(0, limit).map(({ name, label, data }, index) => {
     const color = index < 5 && data.count > 0 ? COLORS.palette[index] : 'var(--muted)';
     const marker = '<span class="feature-rank" style="color:' + color + '">' + (index + 1) + '</span><i class="feature-dot" style="background:' + color + '"></i>';
     const usage = data.observed ? '<div class="feature-usage"><b>' + number(data.count, '회') + '</b><div class="feature-track"><i style="background:' + color + ';width:' + (max > 0 ? data.count / max * 100 : 0) + '%"></i></div></div>' : '—';
@@ -110,7 +110,7 @@ export function adoptionCard(docs, view) {
 }
 const countryGroupKey = country => !country || country === '(missing)' || country === '(not set)' ? '(not set)' : country;
 export const COUNTRY_FEATURES = [
-  ['onboarding_complete','시작 완료'],['team_roster_created','전체조 생성'],['alarm_template_saved','알람 생성'],
+  ['onboarding_complete','시작 완료'],['team_roster_created','전체조 생성'],['alarm_template_saved','고정 알람 저장'],
   ['ot_saved','OT·특근 기록'],['work_hours_settings_saved','근무시간 설정'],['calendar_theme_changed','테마 변경'],
   ['shift_assigned','근무 지정·변경'],['memo_saved','메모 저장'],['shift_name_changed','근무명 변경'],
 ];
@@ -147,7 +147,7 @@ export function countryCard(docs, view, ui) {
     const country=first ? '<th scope="rowgroup" rowspan="'+sizes.get(group)+'">'+esc(localizeName('country',group))+'</th>' : '';
     return '<tr class="'+(first?'country-group-start ':'')+(selected===r.name?'selected':'')+'" data-action="country" data-key="'+esc(r.name)+'" tabindex="0" role="button" aria-label="'+esc(marketLabel(r))+' 추이">'+country+'<td>'+esc(localizeName('language',r.language))+'</td><td>'+number(r.activeUsers)+'</td><td>'+change(r.activeUsers,previous.get(r.name)?.activeUsers)+'</td><td>'+number(r.newUsers)+'</td>'+COUNTRY_FEATURES.map(([name])=>'<td>'+metric(r,name)+'</td>').join('')+'</tr>';
   }).join('');
-  return card('국가별 성장과 기능 활용', '국가 전체 규모 순 · 국가 안에서 언어별 표시 · 같은 '+view.len+'일 기준 사용자 수', '<div class="tabs" role="group" aria-label="국가 정렬"><button class="tab" data-action="market-sort" data-key="activeUsers" aria-pressed="'+(ui.marketSort!=='newUsers')+'">활성 사용자 순</button><button class="tab" data-action="market-sort" data-key="newUsers" aria-pressed="'+(ui.marketSort==='newUsers')+'">신규 사용자 순</button></div><div class="table-scroll"><table class="ops-table market-table"><thead><tr><th>국가</th><th>언어</th><th>활성</th><th>직전 대비</th><th>신규 사용자</th>'+COUNTRY_FEATURES.map(([,label])=>'<th>'+label+'</th>').join('')+'</tr></thead><tbody>'+html+'</tbody></table></div><div class="market-chart-head"><b>'+esc(chosen?marketLabel(chosen):'국가·언어 선택')+' · 일간 활성 추이</b><span class="sub">최근 최대 100일 · 행을 눌러 국가·언어 선택</span></div><div id="ch-country" style="min-height:200px"></div><p class="sub">신규 사용자는 GA4 신규 사용자이며 스토어 신규 설치 수와 다릅니다. 시작 완료는 온보딩 완료입니다. 언어는 GA4 기기 언어 기준이며 앱 표시 언어와 다를 수 있습니다. 국가·언어가 바뀐 사용자는 여러 조합에 포함될 수 있어 합계는 전체 이용자 수와 다를 수 있습니다. 알람 생성은 고정 알람 생성·수정 저장, 테마 변경은 달력 테마 변경 기준입니다. 근무시간 설정은 계측이 포함된 앱 버전부터 집계됩니다. 표는 좌우로 밀어 모든 지표를 확인할 수 있습니다.</p>');
+  return card('국가별 성장과 기능 활용', '국가 전체 규모 순 · 국가 안에서 언어별 표시 · 같은 '+view.len+'일 기준 사용자 수', '<div class="tabs" role="group" aria-label="국가 정렬"><button class="tab" data-action="market-sort" data-key="activeUsers" aria-pressed="'+(ui.marketSort!=='newUsers')+'">활성 사용자 순</button><button class="tab" data-action="market-sort" data-key="newUsers" aria-pressed="'+(ui.marketSort==='newUsers')+'">신규 사용자 순</button></div><div class="table-scroll"><table class="ops-table market-table"><thead><tr><th>국가</th><th>언어</th><th>활성</th><th>직전 대비</th><th>신규 사용자</th>'+COUNTRY_FEATURES.map(([,label])=>'<th>'+label+'</th>').join('')+'</tr></thead><tbody>'+html+'</tbody></table></div><div class="market-chart-head"><b>'+esc(chosen?marketLabel(chosen):'국가·언어 선택')+' · 일간 활성 추이</b><span class="sub">최근 최대 100일 · 행을 눌러 국가·언어 선택</span></div><div id="ch-country" style="min-height:200px"></div><p class="sub">신규 사용자는 GA4 신규 사용자이며 스토어 신규 설치 수와 다릅니다. 시작 완료는 온보딩 완료입니다. 언어는 GA4 기기 언어 기준이며 앱 표시 언어와 다를 수 있습니다. 국가·언어가 바뀐 사용자는 여러 조합에 포함될 수 있어 합계는 전체 이용자 수와 다를 수 있습니다. 고정 알람 저장은 온보딩 기본 알람을 제외한 고정 알람 생성·수정 저장, 테마 변경은 달력 테마 변경 기준입니다. 근무시간 설정은 계측이 포함된 앱 버전부터 집계됩니다. 표는 좌우로 밀어 모든 지표를 확인할 수 있습니다.</p>');
 }
 const HEALTH_EVENTS = [['alarm_schedule_ok', '예약 API 완료'], ['alarm_schedule_failed', '예약 API 실패'], ['alarm_fired', '실제 수신·울림 진입'], ['device_boot_seen', '부팅 신호 관측'], ['alarm_refresh_completed', '재등록 갱신 완료'], ['alarm_refresh_failed', '재등록 갱신 실패']];
 export function reliabilityCard(docs, view) {

@@ -14,7 +14,7 @@ export function reportRows(report) {
   const metrics = report?.metricHeaders?.map(h => h.name) ?? [];
   return (report?.rows ?? []).map(r => Object.fromEntries([
     ...dimensions.map((name, i) => [name, r.dimensionValues?.[i]?.value ?? '']),
-    ...metrics.map((name, i) => [name, Number(r.metricValues?.[i]?.value) || 0]),
+    ...metrics.flatMap((name, i) => i < (r.metricValues?.length ?? 0) && metrics.indexOf(name) === i ? [[name, Number(r.metricValues[i].value) || 0]] : []),
   ]));
 }
 export function acquisitionQuery(streamId, from, to, mode = 'channels') {
@@ -98,7 +98,6 @@ export async function fetchGrowth(ga, latest, now, log = console) {
     const funnels = {};
     for (const scope of TRAFFIC_SCOPES) {
       const raw = await optional('activation/' + scope, () => ga.runFunnelReport(activationQuery(ga.streamId, from, latest, scope)), log);
-      if (range === 7 && scope === 'all') log.log('Growth funnel schema: ' + JSON.stringify(raw?.funnelTable));
       funnels[scope] = parseFunnel(raw, from, latest);
     }
     result.byRange[range] = { from, to: latest, channels: channelTotals(reports.channels),

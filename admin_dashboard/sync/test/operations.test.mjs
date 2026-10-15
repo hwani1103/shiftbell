@@ -89,7 +89,7 @@ test('one country table separates languages within the same country', () => {
     assert.equal(html.includes('ch-language'),false);
     assert.match(html,/미국 \/ 한국어/);
     assert.match(html,/남아프리카공화국/);
-    assert.match(html,/<th>알람 생성<\/th>/);
+    assert.match(html,/<th>고정 알람 저장<\/th>/);
     assert.match(html,/id="ch-country"/);
   }
   docs.operations.byRange[30].countryLanguages=null;
