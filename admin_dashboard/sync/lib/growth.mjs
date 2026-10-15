@@ -98,6 +98,7 @@ export async function fetchGrowth(ga, latest, now, log = console) {
     const funnels = {};
     for (const scope of TRAFFIC_SCOPES) {
       const raw = await optional('activation/' + scope, () => ga.runFunnelReport(activationQuery(ga.streamId, from, latest, scope)), log);
+      if (range === 7 && scope === 'all') log.log('Growth funnel schema: ' + JSON.stringify(raw?.funnelTable));
       funnels[scope] = parseFunnel(raw, from, latest);
     }
     result.byRange[range] = { from, to: latest, channels: channelTotals(reports.channels),
