@@ -15,7 +15,7 @@ test('all acquisition and cohort requests restrict the production stream', () =>
   assert.deepEqual(r.cohortSpec.cohorts[0].dateRange,{startDate:'2026-10-01',endDate:'2026-10-07'});
   assert.match(JSON.stringify(r.dimensionFilter),/prod/);
   assert.match(JSON.stringify(r.dimensionFilter),/Google Ads/);
-  assert.equal(r.cohortSpec.cohortsRange.startOffset,7);
+  assert.equal(r.cohortSpec.cohortsRange.startOffset,0);
 });
 test('activation is closed, first-open based, with 24-hour observation beyond last entrant date', () => {
   const r=activationQuery('prod','2026-10-08','2026-10-14');
@@ -52,4 +52,8 @@ test('ASO compares complete equal windows, excludes publish day, and rejects imp
  assert.equal(asoComparison(g,'2026-10-08').status,'waiting');
  assert.equal(validStoreComparison({beforeVisitors:5,beforeInstalls:6,afterVisitors:5,afterInstalls:1}),false);
  assert.equal(validStoreComparison({beforeVisitors:0,beforeInstalls:0,afterVisitors:5,afterInstalls:1}),true);
+});
+test('retention selects requested day rather than day-zero row', () => {
+ const r=report(['cohort','cohortNthDay'],['cohortActiveUsers','cohortTotalUsers'],[[['recent','0000'],[41,41]],[['recent','0001'],[17,41]]]);
+ assert.equal(parseRetention(r,'2026-10-14',1).rate,17/41);
 });

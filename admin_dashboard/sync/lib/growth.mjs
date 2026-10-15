@@ -48,7 +48,7 @@ export function retentionQuery(streamId, latest, day, scope = 'all', byCountry =
   return { dimensions: ['cohort', 'cohortNthDay', ...(byCountry ? ['country'] : [])].map(name => ({ name })),
     metrics: [{ name: 'cohortActiveUsers' }, { name: 'cohortTotalUsers' }],
     cohortSpec: { cohorts: [{ name: 'recent', dimension: 'firstSessionDate', dateRange: { startDate: from, endDate: to } }],
-      cohortsRange: { granularity: 'DAILY', startOffset: day, endOffset: day } },
+      cohortsRange: { granularity: 'DAILY', startOffset: 0, endOffset: day } },
     dimensionFilter: withStream(streamId, trafficFilter(scope)), limit: '1000' };
 }
 export function trafficKey(row) {
@@ -78,9 +78,10 @@ export function parseFunnel(report, from, to) {
 }
 export function parseRetention(report, latest, day) {
   const to = shiftDate(latest, -day); const from = shiftDate(to, -6);
-  const row = reportRows(report)[0];
+  const rows = reportRows(report);
+  const row = rows.find(r => Number(r.cohortNthDay) === day);
   const state = reportState(report);
-  const size = report == null ? null : row?.cohortTotalUsers ?? 0;
+  const size = report == null ? null : row?.cohortTotalUsers ?? rows.find(r => Number(r.cohortNthDay) === 0)?.cohortTotalUsers ?? 0;
   const returned = report == null ? null : row?.cohortActiveUsers ?? 0;
   const limited = state.thresholded || state.sampled || state.truncated || state.otherRowLoss;
   return { ...state, from, to, day, size, returned,
@@ -111,6 +112,7 @@ export async function fetchGrowth(ga, latest, now, log = console) {
     for (const day of [1, 7]) {
       const raw = await optional('retention/' + scope + '/' + day, () => ga.runReport(retentionQuery(ga.streamId, latest, day, scope)), log);
       result.retention[scope][day] = parseRetention(raw, latest, day);
+      log.log('Growth retention ' + scope + '/' + day + ': ' + JSON.stringify(result.retention[scope][day]));
     }
   }
   const trend = await optional('daily', () => ga.runReport(acquisitionQuery(ga.streamId, shiftDate(latest, -99), latest, 'daily')), log);

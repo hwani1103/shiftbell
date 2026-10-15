@@ -366,3 +366,5 @@ main { padding-top: 16px; display: grid; gap: 14px; }
 .market-table th[scope="rowgroup"] { vertical-align: middle; min-width: 90px; white-space: normal; }
 
 .dashboard-details>.ops-layout { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:16px; }
+
+.dashboard-details>.ops-layout>* { grid-column:1/-1; }
