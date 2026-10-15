@@ -134,6 +134,9 @@ async function fetchReal() {
     raw,
     meta: { now: new Date(), propertyId, streamId, cohortRange, source: 'ga4' },
   });
+  const { fetchGrowth } = await import('./lib/growth.mjs');
+  docs.growth = await fetchGrowth(ga, dates.at(-1), new Date(docs.summary.updatedAt));
+  docs.summary.pipelineVersion = 3;
   docs.summary.currency = core?.metadata?.currencyCode || 'USD';
   docs.summary.dataQuality = { emptyDimensions: findings };
   return docs;

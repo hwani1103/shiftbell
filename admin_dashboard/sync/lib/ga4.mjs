@@ -70,6 +70,16 @@ export class Ga4 {
     return JSON.parse(text);
   }
 
+  async runFunnelReport(body) {
+    const token = await this._token();
+    const res = await (this.fetch ?? fetch)(`https://analyticsdata.googleapis.com/v1alpha/properties/${this.propertyId}:runFunnelReport`, {
+      method: 'POST', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+    const text = await res.text();
+    if (!res.ok) throw new Error(`GA4 funnel ${res.status}: ${text.slice(0, 400)}`);
+    return JSON.parse(text);
+  }
+
   /** 실패해도 대시보드 전체를 막지 않는 부가 리포트용(광고·리텐션 등). 실패하면 null. */
   async tryReport(label, body, log = console) {
     try {
