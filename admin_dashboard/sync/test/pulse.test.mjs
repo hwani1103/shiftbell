@@ -39,13 +39,12 @@ test('D7 rolling cohorts are mature, isolate rows and retain source limitations'
 });
 test('feature comparison sorts by two-day total and separates unseen from observed zero',()=>{
   const docs={pulse:{today:'2026-10-16',events:[{date:'2026-10-14',name:'memo_saved',count:2},{date:'2026-10-15',name:'schedule_created',count:4},{date:'2026-10-16',name:'sleep_record_saved',count:7}],coverage:{events:{status:'available'}}}};
-  const m=comparisonRows(docs);assert.equal(m.rows[0].name,'sleep_record_saved');
-  assert.deepEqual(m.rows.find(r=>r.name==='memo_saved').values,[0,0]);
+  const m=comparisonRows(docs);assert.equal(m.rows[0].name,'schedule_created');
+  assert.deepEqual(m.rows.find(r=>r.name==='memo_saved').values,[2,0]);
   assert.deepEqual(m.rows.find(r=>r.name==='all_shifts_opened').values,[null,null]);
-  assert.deepEqual(comparisonRows(docs,'closed').dates,['2026-10-14','2026-10-15']);
+  assert.deepEqual(m.dates,['2026-10-14','2026-10-15']);
   docs.pulse.events=docs.pulse.events.filter(r=>r.date!=='2026-10-16');
-  assert.equal(comparisonRows(docs).pendingToday,true);
-  assert.equal(comparisonRows(docs).rows.find(r=>r.name==='schedule_created').values[1],null);
+  assert.deepEqual(comparisonRows(docs).rows.find(r=>r.name==='schedule_created').values,[0,4]);
   docs.pulse.events=null;assert.equal(comparisonRows(docs).available,false);
 });
 test('optional API failure preserves unavailable states and includes current KST date',async()=>{
@@ -58,6 +57,11 @@ test('views handle old docs, unavailable reports, all features and escaped count
   const docs=buildMockDocs({today:'2026-10-16'}),ui={range:30};
   assert.match(pulseHero(docs,ui),/온보딩 완료율/);
   assert.match(featureComparison(docs,{...ui,featureAll:true}),/수면 기록/);
+  assert.ok(!featureComparison(docs,ui).includes('어제 / 오늘'));
+  const defaultDay=newcomerCard(docs,ui);
+  assert.ok(!defaultDay.includes('<select'));
+  assert.match(defaultDay,/aria-label="하루 다음" disabled/);
+  assert.match(newcomerCard(docs,{newcomerDate:docs.pulse.from}),/aria-label="하루 이전" disabled/);
   docs.pulse.newcomers[0].country='<script>alert(1)</script>';
   assert.ok(!newcomerCard(docs,{newcomerDate:docs.pulse.newcomers[0].date}).includes('<script>'));
   delete docs.pulse;assert.doesNotThrow(()=>pulseHero(docs,ui));

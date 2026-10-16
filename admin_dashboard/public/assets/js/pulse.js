@@ -10,12 +10,10 @@ const range = r => r ? `${esc(fmtMD(r.from))}–${esc(fmtMD(r.to))}` : '—';
 export function pulseHero(docs, ui) {
   const p = docs.pulse, yesterday = p?.today ? dayShift(p.today, -1) : docs.summary.latest;
   const daily = p?.daily?.find(r => r.date === yesterday);
-  const today = p?.daily?.find(r => r.date === p.today);
-  const todayText = today?.dau > 0 ? `${count(today.dau)}명 · 잠정` : '집계 대기';
   const ret = docs.growth?.retention?.all?.[7];
   const funnel = docs.growth?.byRange?.[ui.range]?.activation?.all;
   const tiles = [
-    ['DAU · 최근 완료일', count(daily?.dau ?? (docs.summary.latest === yesterday ? docs.summary.kpi?.dau : null)), `${esc(fmtMD(yesterday))} · ${p?.today ? esc(fmtMD(p.today)) : '오늘'} ${todayText}`],
+    ['DAU · 최근 완료일', count(daily?.dau ?? (docs.summary.latest === yesterday ? docs.summary.kpi?.dau : null)), `${esc(fmtMD(yesterday))} 기준`],
     ['D7 재방문율', rate(ret?.rate), `${count(ret?.returned)} / ${count(ret?.size)}명 · ${range(ret)} 첫 세션`],
     ['온보딩 완료율', rate(funnel?.rate), `${count(funnel?.completed)} / ${count(funnel?.entrants)}명 · ${range(funnel)} 첫 실행`],
   ];
@@ -28,24 +26,24 @@ export function pulseHero(docs, ui) {
 }
 
 export function featureComparison(docs, ui) {
-  const model = comparisonRows(docs, ui.featureMode), all = ui.featureAll;
+  const model = comparisonRows(docs), all = ui.featureAll;
   if (!model.dates.length) return panel('기능 사용량 · 날짜별 비교', '일정 생성 · 수면 기록 · 전체근무표 · 메모 등', note('새 일별 집계를 준비 중입니다.'));
   const rows = all ? model.rows : model.rows.slice(0,15);
   const max = Math.max(1,...model.rows.flatMap(r=>r.values.map(v=>v??0)));
-  const controls = `<div class="pulse-controls"><div class="seg" role="group" aria-label="기능 비교 날짜"><button data-action="feature-mode" data-key="live" aria-pressed="${ui.featureMode !== 'closed'}">어제 / 오늘</button><button data-action="feature-mode" data-key="closed" aria-pressed="${ui.featureMode === 'closed'}">그제 / 어제</button></div><button class="btn ghost sm" data-action="feature-all">${all ? '상위 15개만' : `전체 ${model.rows.length}개 보기`}</button></div>`;
-  const legend = `<div class="pulse-legend"><span><i class="pulse-before"></i>${esc(fmtMD(model.dates[0]))}</span><span><i class="pulse-after"></i>${esc(fmtMD(model.dates[1]))}${ui.featureMode === 'closed' ? '' : ' · 잠정'}</span><span>실행 횟수 · 두 날짜 합계순</span></div>`;
-  const chart = rows.map((r,i) => `<div class="pulse-feature"><button class="pulse-feature-name" data-action="event" data-event="${esc(r.name)}"><span>${i+1}</span>${esc(r.label)}</button><div class="pulse-bars">${r.values.map((v,j)=>`<div class="pulse-bar-row"><div class="pulse-bar-track"><i class="${j?'pulse-after':'pulse-before'}" style="width:${v == null ? 0 : v/max*100}%"></i></div><b>${v == null ? (j===1 && model.pendingToday ? '집계 대기' : '미관측') : count(v)}</b></div>`).join('')}</div></div>`).join('');
+  const controls = `<div class="pulse-controls"><b>그제 / 어제</b><button class="btn ghost sm" data-action="feature-all">${all ? '상위 15개만' : `전체 ${model.rows.length}개 보기`}</button></div>`;
+  const legend = `<div class="pulse-legend"><span><i class="pulse-before"></i>그제 ${esc(fmtMD(model.dates[0]))}</span><span><i class="pulse-after"></i>어제 ${esc(fmtMD(model.dates[1]))}</span><span>실행 횟수 · 두 날짜 합계순</span></div>`;
+  const chart = rows.map((r,i) => `<div class="pulse-feature"><button class="pulse-feature-name" data-action="event" data-event="${esc(r.name)}"><span>${i+1}</span>${esc(r.label)}</button><div class="pulse-bars">${r.values.map((v,j)=>`<div class="pulse-bar-row"><div class="pulse-bar-track"><i class="${j?'pulse-after':'pulse-before'}" style="width:${v == null ? 0 : v/max*100}%"></i></div><b>${v == null ? '미관측' : count(v)}</b></div>`).join('')}</div></div>`).join('');
   return panel('어떤 기능을 얼마나 사용하나요?', '일정 생성 · 수면 기록 · 전체근무표 확인 · 메모 저장 등', controls + legend +
     (model.available ? `<div class="pulse-features">${chart}</div>` : note('기능 집계를 가져오지 못했습니다. 0회로 해석하지 마세요.')) +
-    note(`오늘은 하루가 끝나지 않았고 GA4 처리 지연도 있어 전일 대비 감소율을 표시하지 않습니다. 공정한 비교는 ‘그제 / 어제’를 선택하세요. 최근 30일 동안 수집되지 않은 기능은 ‘미관측’입니다.${model.limited ? ' 현재 보고서에 집계 제한이 있습니다.' : ''}`));
+    note(`그제와 어제의 하루 사용량을 비교합니다. GA4 처리 지연에 따라 최근 날짜의 값은 보완될 수 있습니다. 최근 30일 동안 수집되지 않은 기능은 ‘미관측’입니다.${model.limited ? ' 현재 보고서에 집계 제한이 있습니다.' : ''}`));
 }
 
 export function newcomerCard(docs, ui) {
   const p = docs.pulse;
   if (!p) return panel('날짜별 신규 설치 현황', 'GA4 첫 실행 기준', note('새 일별 집계를 준비 중입니다.'));
-  const date = ui.newcomerDate && ui.newcomerDate >= p.from && ui.newcomerDate <= p.today ? ui.newcomerDate : dayShift(p.today,-1);
-  const days = Array.from({length:30},(_,i)=>dayShift(p.today,-i));
-  const controls = `<div class="pulse-controls"><label class="pulse-date">첫 실행일 <select id="newcomer-date" aria-label="신규 설치 조회 날짜">${days.map(d=>`<option value="${d}"${d===date?' selected':''}>${esc(fmtMD(d))}${d===p.today?' · 오늘(잠정)':''}</option>`).join('')}</select></label><span>${date===p.today?'오늘은 집계 중입니다':'최근 30일 조회'}</span></div>`;
+  const yesterday = dayShift(p.today,-1);
+  const date = ui.newcomerDate && ui.newcomerDate >= p.from && ui.newcomerDate <= yesterday ? ui.newcomerDate : yesterday;
+  const controls = `<div class="pulse-controls"><div class="pulse-date" role="group" aria-label="신규 설치 조회 날짜"><button class="btn ghost sm" data-action="newcomer-day" data-date="${dayShift(date,-1)}" aria-label="하루 이전"${date<=p.from?' disabled':''}>&lt;</button><b aria-live="polite">${esc(fmtMD(date))}${date===yesterday?' · 어제':''}</b><button class="btn ghost sm" data-action="newcomer-day" data-date="${dayShift(date,1)}" aria-label="하루 다음"${date>=yesterday?' disabled':''}>&gt;</button></div><span>${esc(fmtMD(p.from))}–${esc(fmtMD(yesterday))} 조회</span></div>`;
   if (p.newcomers == null) return panel('날짜별 신규 설치 현황', 'GA4 첫 실행 기준',controls+note('국가·언어별 신규 집계를 확인 중입니다. 조회 실패는 0명으로 표시하지 않습니다.'));
   const rows = p.newcomers.filter(r=>r.date===date).sort((a,b)=>b.firstOpens-a.firstOpens);
   const total = rows.reduce((n,r)=>n+r.firstOpens,0);

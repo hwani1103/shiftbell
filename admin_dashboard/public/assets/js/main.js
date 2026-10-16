@@ -7,6 +7,7 @@ import {
 } from './views.js';
 import * as auth from './auth.js';
 import { pulseHero, featureComparison, newcomerCard } from './pulse.js';
+import { dayShift } from './pulse-model.js';
 import { rememberDisclosures, restoreDisclosures } from './disclosures.js';
 import { loadDocs } from './store.js';
 import { esc, relTime, fmtLong, dataCutoffLabel } from './format.js';
@@ -31,7 +32,7 @@ const ui = {
   section: 'overview', country: null, marketSort: 'activeUsers', dailyDate: null,
   dist: 'appVersion', evGroup: 'all', evSystem: false, evExpanded: false,
   traffic: 'all', asoDate: store.get('aso-published-date', ''), storeComparison: null,
-  featureMode: 'live', featureAll: false, newcomerDate: null,
+  featureAll: false, newcomerDate: null,
 };
 try { ui.storeComparison = JSON.parse(store.get('aso-store-comparison', 'null')); } catch { /* malformed old local record */ }
 let dailyChart = null; let docs = null; let user = null; let charts = []; let loading = false; let error = null; let loadedAt = 0; let sheetChart = null;
@@ -105,7 +106,7 @@ function headerHtml(view) {
   const stale = s ? Date.now() - Date.parse(s.updatedAt) > 6 * 3600 * 1000 : false;
   const latest = s?.latest ? fmtLong(s.latest) : '-';
   return `<header class="topbar"><div class="wrap">
-    <div class="bar1">${brandMark}<div class="titles"><b>교대시계 운영</b><small>Play 출시 버전 · 기본 지표 ${esc(latest)}까지 · ${docs?.pulse ? '일별 비교는 당일 잠정치 포함' : dataCutoffLabel(s?.latest)}</small></div>
+    <div class="bar1">${brandMark}<div class="titles"><b>교대시계 운영</b><small>Play 출시 버전 · 기본 지표 ${esc(latest)}까지 · ${docs?.pulse ? '기능 비교는 그제·어제 기준' : dataCutoffLabel(s?.latest)}</small></div>
       <button class="icon-btn${loading ? ' spinning' : ''}" data-action="refresh" aria-label="새로고침">${ICONS.refresh}</button>
       <button class="avatar" data-action="menu" aria-label="계정 메뉴">${esc(initialOf(user?.email))}</button></div>
     <div class="bar2"><div class="seg" role="group" aria-label="조회 기간">${RANGES.map((r) => `<button data-action="range" data-key="${r}" aria-pressed="${ui.range === r}">${r}일</button>`).join('')}</div>
@@ -141,7 +142,7 @@ function renderApp() {
   const section = ui.section;
   let body = '';
   const recent = dailyView(docs, undefined, ui.range);
-  if (section === 'overview') body = pulseHero(docs, ui) + dailyOverviewCard(docs, recent, ui) + featureComparison(docs, ui) + newcomerCard(docs, ui) + adoptionCard(docs, view, 5) + revenueCard(docs, view);
+  if (section === 'overview') body = dailyOverviewCard(docs, recent, ui) + pulseHero(docs, ui) + featureComparison(docs, ui) + newcomerCard(docs, ui) + adoptionCard(docs, view, 5) + revenueCard(docs, view);
   if (section === 'growth') body = growthCard(docs, ui) + acquisitionCard(docs, ui) + activationCard(docs, ui) + growthCountries(docs, ui) + asoCard(docs, ui) + disclosure('Google Ads 캠페인 보기', campaignCard(docs, ui)) + disclosure('국가·언어별 기능 사용 상세', countryCard(docs, view, ui));
   if (section === 'quality') body = disclosure('기능 사용 전체', adoptionCard(docs, view) + behaviorCard(docs, view, ui)) + reliabilityCard(docs, view) + disclosure('제조사·권한 상세', manufacturerCard(docs, view) + permissionCard(docs, view)) + disclosure('버전·기기 분포', distCard(docs, ui, 'span-12')) + disclosure('데이터 수집 상태', collectionCard(docs, view));
   root.innerHTML = headerHtml(view) + '<main class="wrap ops-layout">' + body + footerNote(docs) + '</main>';
@@ -229,7 +230,13 @@ function openPassword() {
 // ───────────────────────── 이벤트 위임 ─────────────────────────
 function handle(action, el) {
   switch (action) {
-    case 'feature-mode': ui.featureMode = el.dataset.key; renderApp(); break;
+    case 'newcomer-day': {
+      const date = el.dataset.date, p = docs?.pulse;
+      if (!el.disabled && p && date >= p.from && date <= dayShift(p.today, -1)) {
+        ui.newcomerDate = date; renderApp();
+      }
+      break;
+    }
     case 'feature-all': ui.featureAll = !ui.featureAll; renderApp(); break;
     case 'traffic': ui.traffic = el.dataset.key; renderApp(); break;
     case 'section': ui.section = el.dataset.key; renderApp(); window.scrollTo(0, 0); break;
@@ -270,9 +277,6 @@ function onActivate(e) {
   handle(el.dataset.action, el);
 }
 root.addEventListener('click', onActivate);
-root.addEventListener('change', e => {
-  if (e.target.id === 'newcomer-date') { ui.newcomerDate = e.target.value; renderApp(); }
-});
 root.addEventListener('submit', (e) => {
   if (!['aso-date', 'aso-store'].includes(e.target.id)) return;
   e.preventDefault();
