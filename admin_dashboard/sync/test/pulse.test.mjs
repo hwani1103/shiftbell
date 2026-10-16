@@ -29,12 +29,13 @@ test('newcomer completion and feature people are cohort activities, not unrelate
 });
 test('D7 rolling cohorts are mature, isolate rows and retain source limitations',()=>{
   const q=retentionTrendQuery('prod','2026-10-15');
-  assert.equal(q.cohortSpec.cohorts.length,8);
-  assert.deepEqual(q.cohortSpec.cohorts.at(-1).dateRange,{startDate:'2026-10-02',endDate:'2026-10-08'});
-  const r=report(['cohort','cohortNthDay'],['cohortActiveUsers','cohortTotalUsers'],[[['d20261015','0007'],[3,10]],[['d20261014','0007'],[1,20]]]);
-  assert.equal(retentionTrend(r,'2026-10-15').at(-1).rate,.3);
-  assert.equal(retentionTrend(r,'2026-10-15').at(-2).rate,.05);
-  r.rowCount=20;assert.equal(retentionTrend(r,'2026-10-15').at(-1).rate,null);
+  assert.equal(q.length,8);
+  for(const r of q) assert.equal(r.query.cohortSpec.cohorts.length,1);
+  assert.deepEqual(q.at(-1).query.cohortSpec.cohorts[0].dateRange,{startDate:'2026-10-02',endDate:'2026-10-08'});
+  const r=report(['cohort','cohortNthDay'],['cohortActiveUsers','cohortTotalUsers'],[[['recent','0007'],[3,10]]]);
+  const reports=[{date:'2026-10-15',report:r}];
+  assert.equal(retentionTrend(reports)[0].rate,.3);
+  r.rowCount=20;assert.equal(retentionTrend(reports)[0].rate,null);
 });
 test('feature comparison sorts by two-day total and separates unseen from observed zero',()=>{
   const docs={pulse:{today:'2026-10-16',events:[{date:'2026-10-14',name:'memo_saved',count:2},{date:'2026-10-15',name:'schedule_created',count:4},{date:'2026-10-16',name:'sleep_record_saved',count:7}],coverage:{events:{status:'available'}}}};
@@ -48,7 +49,7 @@ test('optional API failure preserves unavailable states and includes current KST
   const calls=[];const ga={streamId:'prod',coreDaily:()=>({}),eventsDaily:()=>({}),tryReport:async(name,q)=>{calls.push(q);return null;}};
   const p=await fetchPulse(ga,new Date('2026-10-15T16:00:00Z'),'2026-10-15',{log(){}});
   assert.equal(p.today,'2026-10-16');assert.equal(p.daily,null);assert.equal(p.newcomers,null);
-  assert.equal(p.coverage.events.status,'unavailable');assert.equal(calls.length,4);
+  assert.equal(p.coverage.events.status,'unavailable');assert.equal(calls.length,11);
 });
 test('views handle old docs, unavailable reports, all features and escaped country labels',()=>{
   const docs=buildMockDocs({today:'2026-10-16'}),ui={range:30};

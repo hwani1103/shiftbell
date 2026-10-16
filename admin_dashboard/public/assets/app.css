@@ -400,4 +400,5 @@ main { padding-top: 16px; display: grid; gap: 14px; }
 .pulse-trend-track { height:100px; display:flex; align-items:flex-end; justify-content:center; margin:8px 0; background:var(--surface-2); border-radius:6px; }
 .pulse-trend-track i { width:65%; background:var(--accent); border-radius:5px 5px 0 0; }
 .pulse-controls .seg button { white-space:nowrap; }
+@media(max-width:360px) { .bar2 { flex-wrap:wrap; } .bar2 .seg { flex:1 0 100%; } .bar2 .seg button { white-space:nowrap; } }
 @media(max-width:550px) { .pulse-feature { grid-template-columns:1fr; gap:6px; } .pulse-bars { padding-left:30px; } .pulse-controls .seg { flex:1 0 100%; } }
