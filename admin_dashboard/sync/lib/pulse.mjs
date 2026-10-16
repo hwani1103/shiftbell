@@ -6,11 +6,13 @@ import { FEATURE_NAMES } from '../../public/assets/js/pulse-model.js';
 const dims = names => names.map(name => ({ name }));
 const ymd = raw => /^\d{8}$/.test(raw) ? `${raw.slice(0,4)}-${raw.slice(4,6)}-${raw.slice(6)}` : raw;
 export function newcomersQuery(streamId, from, to) {
+  const firstDates = [];
+  for (let date = from; date <= to; date = shiftDate(date, 1)) firstDates.push(date.replaceAll('-', ''));
   return { dateRanges: [{ startDate: from, endDate: to }],
     dimensions: dims(['firstSessionDate', 'country', 'language', 'eventName']),
     metrics: dims(['totalUsers', 'eventCount']),
     dimensionFilter: withStream(streamId, { andGroup: { expressions: [
-      { filter: { fieldName: 'firstSessionDate', betweenFilter: { fromValue: { int64Value: from.replaceAll('-', '') }, toValue: { int64Value: to.replaceAll('-', '') } } } },
+      { filter: { fieldName: 'firstSessionDate', inListFilter: { values: firstDates } } },
       { filter: { fieldName: 'eventName', inListFilter: { values: ['first_open', 'onboarding_complete', ...FEATURE_NAMES] } } },
     ] } }), limit: '10000',
   };

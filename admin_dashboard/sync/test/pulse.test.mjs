@@ -10,6 +10,10 @@ test('newcomers are restricted to prod, first-session window and named activitie
   assert.deepEqual(q.dimensions.map(x=>x.name),['firstSessionDate','country','language','eventName']);
   assert.match(JSON.stringify(q.dimensionFilter),/prod/);
   assert.match(JSON.stringify(q.dimensionFilter),/20260917/);
+  const dates=q.dimensionFilter.andGroup.expressions[1].andGroup.expressions[0].filter;
+  assert.equal(dates.inListFilter.values.length,30);
+  assert.equal(dates.inListFilter.values.at(-1),'20261016');
+  assert.equal(dates.betweenFilter,undefined);
   for (const name of ['schedule_created','sleep_record_saved','all_shifts_opened','memo_saved']) assert.ok(FEATURE_NAMES.includes(name));
   assert.ok(!FEATURE_NAMES.includes('alarm_fired'));
 });

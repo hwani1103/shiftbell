@@ -17,7 +17,7 @@ export function comparisonRows(docs, mode = 'live') {
   const rows = FEATURE_NAMES.map(name => {
     const values = dates.map(date => {
       const r = pulse.events?.find(r => r.date === date && r.name === name);
-      return r ? r.count : available && seen.has(name) ? 0 : null;
+      return r ? r.count : available && !constrained(pulse.coverage?.events) && seen.has(name) ? 0 : null;
     });
     return { name, label: EVENT_META[name].label, values, score: (values[0] ?? 0) + (values[1] ?? 0), observed: seen.has(name) };
   }).sort((a,b) => b.score - a.score || Number(b.observed) - Number(a.observed) || a.label.localeCompare(b.label,'ko'));
