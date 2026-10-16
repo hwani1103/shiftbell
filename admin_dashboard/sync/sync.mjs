@@ -136,7 +136,9 @@ async function fetchReal() {
   });
   const { fetchGrowth } = await import('./lib/growth.mjs');
   docs.growth = await fetchGrowth(ga, dates.at(-1), new Date(docs.summary.updatedAt));
-  docs.summary.pipelineVersion = 3;
+  const { fetchPulse } = await import('./lib/pulse.mjs');
+  docs.pulse = await fetchPulse(ga, new Date(docs.summary.updatedAt), dates.at(-1));
+  docs.summary.pipelineVersion = 4;
   docs.summary.currency = core?.metadata?.currencyCode || 'USD';
   docs.summary.dataQuality = { emptyDimensions: findings };
   return docs;

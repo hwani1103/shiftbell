@@ -5,6 +5,7 @@
 //  - Node: sync.mjs --mock 이 Firestore 에뮬레이터에 같은 문서를 채울 때 쓴다.
 // 결정적(seed 고정)이라 스크린샷·테스트가 매번 같은 결과를 낸다. 스키마는 sync/lib/transform.mjs와 동일(schema: 1).
 
+import { FEATURE_NAMES } from './pulse-model.js';
 const SCHEMA = 1;
 
 function mulberry32(a) {
@@ -217,5 +218,13 @@ export function buildMockDocs({ today = '2026-09-22', days = 400, seed = 2026092
   for (const [country, language, share] of countryLanguages) operations.countryLanguageTrend.series[JSON.stringify([country,language])] = { dau: dau.slice(-100).map((v) => Math.round(v * share)), newUsers: newUsers.slice(-100).map((v) => Math.round(v * share)), sessions: sessions.slice(-100).map((v) => Math.round(v * share)) };
   summary.coverage = Object.fromEntries(['core', 'ads', 'eventsDaily', 'cohort'].map((name) => [name, status]));
   summary.pipelineVersion = 2; summary.syncPolicy = { frequency: 'every-3-hours', timezone: 'Asia/Seoul', intervalHours: 3, scheduledAt: ['00:17', '03:17', '06:17', '09:17', '12:17', '15:17', '18:17', '21:17'] };
-  return { summary, series, events, operations };
+  const retention = Array.from({length:8},(_,i)=>({date:addDays(latest,i-7),from:addDays(latest,i-20),to:addDays(latest,i-14),status:'available',size:100,returned:20+i,rate:(20+i)/100}));
+  const growth = {updatedAt:summary.updatedAt,latest,byRange:{},retention:{all:{7:retention.at(-1)}},coverage:{}};
+  for (const r of [7,30,100,365]) growth.byRange[r] = {from:addDays(latest,1-r),to:latest,channels:{ads:10,organic:35,otherPaid:0,unknown:15,other:0},countries:[],campaigns:[],activation:{all:{status:'available',from:addDays(latest,1-r),to:addDays(latest,-1),entrants:60,completed:32,rate:32/60}}};
+  const pulse = {updatedAt:summary.updatedAt,today,from:addDays(today,-29),timezone:'Asia/Seoul',coverage:Object.fromEntries(['core','events','newcomers','retention'].map(k=>[k,status])),retention,
+    daily:[{date:latest,dau:dau.at(-1)},{date:today,dau:Math.round(dau.at(-1)*.6)}],
+    events:[-2,-1,0].flatMap(d=>FEATURE_NAMES.slice(0,-1).map((name,i)=>({date:addDays(today,d),name,count:Math.round((FEATURE_NAMES.length-i)*8*(d===0?.6:d===-1?1:.8)),users:10}))),
+    newcomers:[-2,-1,0].flatMap(d=>countryLanguages.map(([country,language],i)=>({date:addDays(today,d),country,language,firstOpens:i<2?7:2,completed:i<2?4:1,features:{schedule_created:1,sleep_record_saved:1,memo_saved:1}})))};
+  summary.pipelineVersion = 4;
+  return { summary, series, events, operations, growth, pulse };
 }

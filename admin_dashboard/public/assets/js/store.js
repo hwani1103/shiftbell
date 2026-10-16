@@ -20,7 +20,13 @@ export async function loadDocs({ demo = false, retry = true } = {}) {
     if (retry) return loadDocs({ retry: false });
     throw new Error('성장 지표가 갱신 중입니다. 잠시 후 다시 불러오세요.');
   }
+  const pulse = s.data().pipelineVersion >= 4 ? await col.doc('pulse').get({ source: 'server' }) : null;
+  if (s.data().pipelineVersion >= 4 && (!pulse?.exists || pulse.data().updatedAt !== s.data().updatedAt)) {
+    if (retry) return loadDocs({ retry: false });
+    throw new Error('일별 지표가 갱신 중입니다. 잠시 후 다시 불러오세요.');
+  }
   return {
+    pulse: pulse?.exists ? pulse.data() : null,
     growth: growth?.exists ? growth.data() : null,
     summary: s.data(),
     operations: ops.exists ? ops.data() : null,
